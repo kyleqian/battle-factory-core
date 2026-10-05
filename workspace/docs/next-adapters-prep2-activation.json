@@ -1,0 +1,1469 @@
+{
+ "schema": "next-adapters-prep2-activation/v1",
+ "method": "tools/integration/issue142ActivationProbe.py <scenario> <out> (fresh direct mGBA, Scene ON); interval end = first inactive frame",
+ "fixtures": {
+  "aromatherapy-opponent-vileplume-player-onix": {
+   "scenario": "tools/battle-lab/mechanic-aromatherapy-opponent-vileplume-player-onix.json",
+   "windows": {
+    "denseWindow": {
+     "startFrame": 79,
+     "endFrame": 474,
+     "frameCount": 396
+    },
+    "appStage": {
+     "oracleFrame": 79,
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     312,
+     79,
+     474
+    ],
+    [
+     33,
+     623,
+     664
+    ]
+   ]
+  },
+  "aromatherapy-player-vileplume-opponent-onix": {
+   "scenario": "tools/battle-lab/mechanic-aromatherapy-player-vileplume-opponent-onix.json",
+   "windows": {
+    "denseWindow": {
+     "startFrame": 75,
+     "endFrame": 474,
+     "frameCount": 400
+    },
+    "appStage": {
+     "oracleFrame": 75,
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     312,
+     75,
+     474
+    ],
+    [
+     33,
+     627,
+     668
+    ]
+   ]
+  },
+  "baton-pass-opponent-aipom-player-onix": {
+   "scenario": "tools/battle-lab/mechanic-baton-pass-opponent-aipom-player-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 73,
+     "endFrame": 125,
+     "frameCount": 53
+    }
+   },
+   "intervals": [
+    [
+     226,
+     73,
+     125
+    ],
+    [
+     33,
+     327,
+     368
+    ]
+   ]
+  },
+  "baton-pass-player-aipom-opponent-onix": {
+   "scenario": "tools/battle-lab/mechanic-baton-pass-player-aipom-opponent-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 69,
+     "endFrame": 121,
+     "frameCount": 53
+    }
+   },
+   "intervals": [
+    [
+     226,
+     69,
+     121
+    ]
+   ]
+  },
+  "cosmic-power-opponent-lunatone-player-onix": {
+   "scenario": "tools/battle-lab/mechanic-cosmic-power-opponent-lunatone-player-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 294,
+     "endFrame": 534,
+     "frameCount": 241
+    }
+   },
+   "intervals": [
+    [
+     33,
+     68,
+     109
+    ],
+    [
+     322,
+     294,
+     534
+    ],
+    [
+     0,
+     538,
+     613
+    ]
+   ]
+  },
+  "cosmic-power-player-lunatone-opponent-onix": {
+   "scenario": "tools/battle-lab/mechanic-cosmic-power-player-lunatone-opponent-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 294,
+     "endFrame": 534,
+     "frameCount": 241
+    }
+   },
+   "intervals": [
+    [
+     33,
+     72,
+     113
+    ],
+    [
+     322,
+     294,
+     534
+    ],
+    [
+     0,
+     538,
+     613
+    ]
+   ]
+  },
+  "dragon-rage-opponent-charmeleon-player-onix": {
+   "scenario": "tools/battle-lab/mechanic-dragon-rage-onix-charmeleon.json",
+   "windows": {
+    "denseWindow": {
+     "startFrame": 93,
+     "endFrame": 242
+    },
+    "appStage": {
+     "firstFramePresentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     82,
+     86,
+     263
+    ],
+    [
+     150,
+     381,
+     496
+    ]
+   ]
+  },
+  "dragon-rage-player-charmeleon-opponent-onix": {
+   "scenario": "tools/battle-lab/mechanic-dragon-rage-charmeleon-onix.json",
+   "windows": {
+    "denseWindow": {
+     "startFrame": 89,
+     "endFrame": 238
+    },
+    "appStage": {
+     "firstFramePresentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     82,
+     82,
+     259
+    ],
+    [
+     150,
+     381,
+     496
+    ]
+   ]
+  },
+  "explosion-opponent-glalie-player-shuckle": {
+   "scenario": "tools/battle-lab/mechanic-explosion-opponent-glalie-player-shuckle.json",
+   "windows": {
+    "denseWindow": {
+     "startFrame": 80,
+     "endFrame": 291
+    },
+    "appStage": {
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     153,
+     76,
+     292
+    ]
+   ]
+  },
+  "explosion-player-glalie-opponent-shuckle": {
+   "scenario": "tools/battle-lab/mechanic-explosion-player-glalie-opponent-shuckle.json",
+   "windows": {
+    "denseWindow": {
+     "startFrame": 76,
+     "endFrame": 287
+    },
+    "appStage": {
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     153,
+     72,
+     288
+    ]
+   ]
+  },
+  "extreme-speed-arcanine-dugtrio": {
+   "scenario": "tools/battle-lab/mechanic-extreme-speed-arcanine-dugtrio.json",
+   "windows": {
+    "denseWindow": {
+     "startFrame": 91,
+     "endFrame": 393
+    },
+    "appStage": {
+     "oracleFrame": 91,
+     "presentationAge": 52
+    }
+   },
+   "intervals": [
+    [
+     245,
+     82,
+     402
+    ]
+   ]
+  },
+  "extreme-speed-player-arcanine-dugtrio": {
+   "scenario": "tools/battle-lab/mechanic-extreme-speed-player-arcanine-dugtrio.json",
+   "windows": {
+    "denseWindow": {
+     "startFrame": 87,
+     "endFrame": 389
+    },
+    "appStage": {
+     "oracleFrame": 87,
+     "presentationAge": 48
+    }
+   },
+   "intervals": [
+    [
+     245,
+     78,
+     398
+    ]
+   ]
+  },
+  "fake-out-opponent-makuhita-player-shuckle": {
+   "scenario": "tools/battle-lab/mechanic-fake-out-opponent-makuhita-player-shuckle.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 82,
+     "endFrame": 167,
+     "frameCount": 86
+    }
+   },
+   "intervals": [
+    [
+     252,
+     82,
+     167
+    ]
+   ]
+  },
+  "fake-out-player-makuhita-opponent-shuckle": {
+   "scenario": "tools/battle-lab/mechanic-fake-out-player-makuhita-opponent-shuckle.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 78,
+     "endFrame": 163,
+     "frameCount": 86
+    }
+   },
+   "intervals": [
+    [
+     252,
+     78,
+     163
+    ]
+   ]
+  },
+  "follow-me-opponent-togetic-player-onix": {
+   "scenario": "tools/battle-lab/mechanic-follow-me-opponent-togetic-player-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 73,
+     "endFrame": 257,
+     "frameCount": 185
+    },
+    "appStage": {
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     266,
+     73,
+     257
+    ],
+    [
+     157,
+     410,
+     null
+    ]
+   ]
+  },
+  "follow-me-player-togetic-opponent-onix": {
+   "scenario": "tools/battle-lab/mechanic-follow-me-player-togetic-opponent-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 69,
+     "endFrame": 253,
+     "frameCount": 185
+    },
+    "appStage": {
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     266,
+     69,
+     253
+    ],
+    [
+     225,
+     408,
+     500
+    ]
+   ]
+  },
+  "future-sight-opponent-kadabra-player-onix": {
+   "scenario": "tools/battle-lab/mechanic-future-sight-opponent-kadabra-player-onix.json",
+   "windows": {
+    "denseWindow": {
+     "startFrame": 81,
+     "endFrame": 194
+    },
+    "appStage": {
+     "oracleFrame": 81,
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     248,
+     76,
+     192
+    ],
+    [
+     33,
+     327,
+     368
+    ]
+   ]
+  },
+  "future-sight-player-kadabra-opponent-onix": {
+   "scenario": "tools/battle-lab/mechanic-future-sight-kadabra-onix.json",
+   "windows": {
+    "denseWindow": {
+     "startFrame": 77,
+     "endFrame": 190
+    },
+    "appStage": {
+     "oracleFrame": 77,
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     248,
+     72,
+     188
+    ],
+    [
+     33,
+     323,
+     364
+    ]
+   ]
+  },
+  "knock-off-opponent-onix-player-plusle": {
+   "scenario": "tools/battle-lab/mechanic-knock-off-opponent-shuppet-player-onix.json",
+   "windows": {
+    "denseWindow": {
+     "startFrame": 74,
+     "endFrame": 132
+    },
+    "appStage": {
+     "firstFramePresentationAge": -11
+    }
+   },
+   "intervals": [
+    [
+     282,
+     79,
+     128
+    ],
+    [
+     33,
+     225,
+     266
+    ]
+   ]
+  },
+  "knock-off-player-shuppet-opponent-onix": {
+   "scenario": "tools/battle-lab/mechanic-knock-off-shuppet-onix.json",
+   "windows": {
+    "denseWindow": {
+     "startFrame": 70,
+     "endFrame": 128
+    },
+    "appStage": {
+     "firstFramePresentationAge": -11
+    }
+   },
+   "intervals": [
+    [
+     282,
+     75,
+     124
+    ],
+    [
+     33,
+     226,
+     267
+    ]
+   ]
+  },
+  "leaf-blade-opponent-sceptile-player-onix": {
+   "scenario": "tools/battle-lab/mechanic-leaf-blade-opponent-sceptile-player-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 80,
+     "endFrame": 303,
+     "frameCount": 224
+    }
+   },
+   "intervals": [
+    [
+     348,
+     80,
+     303
+    ]
+   ]
+  },
+  "leaf-blade-player-sceptile-opponent-onix": {
+   "scenario": "tools/battle-lab/mechanic-leaf-blade-player-sceptile-opponent-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 76,
+     "endFrame": 299,
+     "frameCount": 224
+    }
+   },
+   "intervals": [
+    [
+     348,
+     76,
+     299
+    ]
+   ]
+  },
+  "meteor-mash-opponent-metang-player-onix": {
+   "scenario": "tools/battle-lab/mechanic-meteor-mash-opponent-metang-player-onix.json",
+   "windows": {
+    "denseWindow": {
+     "startFrame": 231,
+     "endFrame": 445,
+     "frameCount": 215
+    }
+   },
+   "intervals": [
+    [
+     309,
+     231,
+     445
+    ]
+   ]
+  },
+  "meteor-mash-player-metang-opponent-onix": {
+   "scenario": "tools/battle-lab/mechanic-meteor-mash-player-metang-opponent-onix.json",
+   "windows": {
+    "denseWindow": {
+     "startFrame": 298,
+     "endFrame": 511,
+     "frameCount": 214
+    }
+   },
+   "intervals": [
+    [
+     33,
+     72,
+     113
+    ],
+    [
+     309,
+     298,
+     511
+    ]
+   ]
+  },
+  "metronome-opponent-chansey-player-onix": {
+   "scenario": "tools/battle-lab/mechanic-metronome-opponent-chansey-player-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 244,
+     "endFrame": 370,
+     "frameCount": 127
+    },
+    "appStage": {
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     33,
+     68,
+     109
+    ],
+    [
+     118,
+     244,
+     370
+    ],
+    [
+     240,
+     410,
+     null
+    ]
+   ]
+  },
+  "metronome-player-chansey-opponent-onix": {
+   "scenario": "tools/battle-lab/mechanic-metronome-player-chansey-opponent-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 245,
+     "endFrame": 371,
+     "frameCount": 127
+    },
+    "appStage": {
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     33,
+     72,
+     113
+    ],
+    [
+     118,
+     245,
+     371
+    ],
+    [
+     66,
+     414,
+     null
+    ]
+   ]
+  },
+  "mist-ball-opponent-latias-player-registeel": {
+   "scenario": "tools/battle-lab/mechanic-mist-ball-opponent-latias-player-registeel.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 79,
+     "endFrame": 291,
+     "frameCount": 213
+    },
+    "appStage": {
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     296,
+     79,
+     291
+    ],
+    [
+     33,
+     486,
+     527
+    ],
+    [
+     0,
+     603,
+     null
+    ]
+   ]
+  },
+  "mist-ball-player-latias-opponent-registeel": {
+   "scenario": "tools/battle-lab/mechanic-mist-ball-player-latias-opponent-registeel.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 75,
+     "endFrame": 287,
+     "frameCount": 213
+    },
+    "appStage": {
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     296,
+     75,
+     287
+    ],
+    [
+     33,
+     487,
+     528
+    ],
+    [
+     0,
+     604,
+     null
+    ]
+   ]
+  },
+  "muddy-water-opponent-marshtomp-player-onix": {
+   "scenario": "tools/battle-lab/mechanic-muddy-water-opponent-marshtomp-player-onix.json",
+   "windows": {
+    "activeSourceScriptWindow": {
+     "startFrame": 84,
+     "endFrame": 226,
+     "frameCount": 143
+    },
+    "sourceOwnedComponentWindow": {
+     "startFrame": 84,
+     "endFrame": 227,
+     "frameCount": 144
+    }
+   },
+   "intervals": [
+    [
+     330,
+     84,
+     227
+    ]
+   ]
+  },
+  "muddy-water-player-marshtomp-opponent-onix": {
+   "scenario": "tools/battle-lab/mechanic-muddy-water-player-marshtomp-opponent-onix.json",
+   "windows": {
+    "activeSourceScriptWindow": {
+     "startFrame": 80,
+     "endFrame": 222,
+     "frameCount": 143
+    },
+    "sourceOwnedComponentWindow": {
+     "startFrame": 80,
+     "endFrame": 223,
+     "frameCount": 144
+    }
+   },
+   "intervals": [
+    [
+     330,
+     80,
+     223
+    ]
+   ]
+  },
+  "perish-song-opponent-murkrow-player-onix": {
+   "scenario": "tools/battle-lab/mechanic-perish-song-opponent-murkrow-player-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 75,
+     "endFrame": 333,
+     "frameCount": 259
+    }
+   },
+   "intervals": [
+    [
+     195,
+     75,
+     333
+    ]
+   ]
+  },
+  "perish-song-player-murkrow-opponent-onix": {
+   "scenario": "tools/battle-lab/mechanic-perish-song-player-murkrow-opponent-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 71,
+     "endFrame": 329,
+     "frameCount": 259
+    }
+   },
+   "intervals": [
+    [
+     195,
+     71,
+     329
+    ],
+    [
+     33,
+     491,
+     532
+    ]
+   ]
+  },
+  "roar-opponent-houndour-player-onix": {
+   "scenario": "tools/battle-lab/mechanic-roar-opponent-houndour-player-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 219,
+     "endFrame": 322,
+     "frameCount": 104
+    },
+    "appStage": {
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     33,
+     68,
+     109
+    ],
+    [
+     46,
+     219,
+     322
+    ]
+   ]
+  },
+  "roar-player-houndour-opponent-onix": {
+   "scenario": "tools/battle-lab/mechanic-roar-player-houndour-opponent-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 252,
+     "endFrame": 350,
+     "frameCount": 99
+    },
+    "appStage": {
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     33,
+     104,
+     145
+    ],
+    [
+     46,
+     252,
+     350
+    ]
+   ]
+  },
+  "self-destruct-opponent-sudowoodo-player-shuckle": {
+   "scenario": "tools/battle-lab/mechanic-self-destruct-opponent-sudowoodo-player-shuckle.json",
+   "windows": {
+    "denseWindow": {
+     "startFrame": 86,
+     "endFrame": 198
+    },
+    "appStage": {
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     120,
+     82,
+     208
+    ]
+   ]
+  },
+  "self-destruct-player-sudowoodo-opponent-shuckle": {
+   "scenario": "tools/battle-lab/mechanic-self-destruct-player-sudowoodo-opponent-shuckle.json",
+   "windows": {
+    "denseWindow": {
+     "startFrame": 82,
+     "endFrame": 194
+    },
+    "appStage": {
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     120,
+     78,
+     204
+    ]
+   ]
+  },
+  "sleep-talk-opponent-seaking-player-onix": {
+   "scenario": "tools/battle-lab/mechanic-sleep-talk-opponent-seaking-player-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 4570,
+     "endFrame": 4758,
+     "frameCount": 189
+    }
+   },
+   "intervals": [
+    [
+     33,
+     68,
+     109
+    ],
+    [
+     156,
+     331,
+     440
+    ],
+    [
+     33,
+     902,
+     943
+    ],
+    [
+     0,
+     1102,
+     1198
+    ],
+    [
+     0,
+     1951,
+     2047
+    ],
+    [
+     33,
+     2816,
+     2857
+    ],
+    [
+     33,
+     3404,
+     3445
+    ],
+    [
+     156,
+     3667,
+     3776
+    ],
+    [
+     33,
+     4238,
+     4279
+    ],
+    [
+     0,
+     4438,
+     4534
+    ],
+    [
+     214,
+     4570,
+     4758
+    ],
+    [
+     224,
+     4801,
+     4977
+    ]
+   ]
+  },
+  "sleep-talk-player-seaking-opponent-onix": {
+   "scenario": "tools/battle-lab/mechanic-sleep-talk-player-seaking-opponent-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 1356,
+     "endFrame": 1541,
+     "frameCount": 186
+    }
+   },
+   "intervals": [
+    [
+     33,
+     76,
+     117
+    ],
+    [
+     156,
+     331,
+     440
+    ],
+    [
+     0,
+     1228,
+     1324
+    ],
+    [
+     214,
+     1356,
+     1541
+    ]
+   ]
+  },
+  "spark-opponent-minun-player-shuckle": {
+   "scenario": "tools/battle-lab/mechanic-spark-opponent-minun-player-shuckle.json",
+   "windows": {
+    "denseWindow": {
+     "startFrame": 83,
+     "endFrame": 197
+    },
+    "appStage": {
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     209,
+     74,
+     199
+    ],
+    [
+     33,
+     397,
+     438
+    ]
+   ]
+  },
+  "spark-player-minun-opponent-shuckle": {
+   "scenario": "tools/battle-lab/mechanic-spark-player-minun-opponent-shuckle.json",
+   "windows": {
+    "denseWindow": {
+     "startFrame": 79,
+     "endFrame": 193
+    },
+    "appStage": {
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     209,
+     70,
+     195
+    ],
+    [
+     33,
+     301,
+     342
+    ]
+   ]
+  },
+  "substitute-opponent-golem-player-onix": {
+   "scenario": "tools/battle-lab/mechanic-substitute-opponent-golem-player-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 311,
+     "endFrame": 397,
+     "frameCount": 87
+    }
+   },
+   "intervals": [
+    [
+     150,
+     62,
+     177
+    ],
+    [
+     164,
+     311,
+     397
+    ]
+   ]
+  },
+  "substitute-player-golem-opponent-onix": {
+   "scenario": "tools/battle-lab/mechanic-substitute-player-golem-opponent-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 291,
+     "endFrame": 377,
+     "frameCount": 87
+    }
+   },
+   "intervals": [
+    [
+     33,
+     72,
+     113
+    ],
+    [
+     164,
+     291,
+     377
+    ]
+   ]
+  },
+  "surf-wave-opponent-wartortle-player-shuckle": {
+   "scenario": "tools/battle-lab/mechanic-surf-opponent-wartortle-player-shuckle.json",
+   "windows": {
+    "activeSourceScriptWindow": {
+     "startFrame": 76,
+     "endFrame": 218,
+     "frameCount": 143
+    },
+    "sourceOwnedComponentWindow": {
+     "startFrame": 76,
+     "endFrame": 219,
+     "frameCount": 144
+    }
+   },
+   "intervals": [
+    [
+     57,
+     76,
+     219
+    ]
+   ]
+  },
+  "surf-wave-player-wartortle-opponent-shuckle": {
+   "scenario": "tools/battle-lab/mechanic-surf-player-wartortle-opponent-shuckle.json",
+   "windows": {
+    "activeSourceScriptWindow": {
+     "startFrame": 72,
+     "endFrame": 214,
+     "frameCount": 143
+    },
+    "sourceOwnedComponentWindow": {
+     "startFrame": 72,
+     "endFrame": 215,
+     "frameCount": 144
+    }
+   },
+   "intervals": [
+    [
+     57,
+     72,
+     215
+    ]
+   ]
+  },
+  "taunt-opponent-murkrow-player-shuckle": {
+   "scenario": "tools/battle-lab/mechanic-taunt-opponent-murkrow-player-shuckle.json",
+   "windows": {
+    "denseWindow": {
+     "startFrame": 80,
+     "endFrame": 204
+    },
+    "appStage": {
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     269,
+     70,
+     204
+    ],
+    [
+     33,
+     339,
+     380
+    ]
+   ]
+  },
+  "taunt-player-murkrow-opponent-shuckle": {
+   "scenario": "tools/battle-lab/mechanic-taunt-player-murkrow-opponent-shuckle.json",
+   "windows": {
+    "denseWindow": {
+     "startFrame": 76,
+     "endFrame": 200
+    },
+    "appStage": {
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     269,
+     66,
+     200
+    ],
+    [
+     33,
+     343,
+     384
+    ]
+   ]
+  },
+  "whirlwind-opponent-butterfree-player-onix": {
+   "scenario": "tools/battle-lab/mechanic-whirlwind-opponent-butterfree-player-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 316,
+     "endFrame": 398,
+     "frameCount": 83
+    }
+   },
+   "intervals": [
+    [
+     33,
+     68,
+     109
+    ],
+    [
+     18,
+     316,
+     398
+    ]
+   ]
+  },
+  "whirlwind-player-butterfree-opponent-onix": {
+   "scenario": "tools/battle-lab/mechanic-whirlwind-player-butterfree-opponent-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 222,
+     "endFrame": 304,
+     "frameCount": 83
+    }
+   },
+   "intervals": [
+    [
+     33,
+     72,
+     113
+    ],
+    [
+     18,
+     222,
+     304
+    ]
+   ]
+  },
+  "wish-opponent-illumise-player-onix": {
+   "scenario": "tools/battle-lab/mechanic-wish-opponent-illumise-player-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 69,
+     "endFrame": 339,
+     "frameCount": 271
+    },
+    "appStage": {
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     273,
+     69,
+     339
+    ],
+    [
+     33,
+     378,
+     419
+    ]
+   ]
+  },
+  "wish-player-illumise-opponent-onix": {
+   "scenario": "tools/battle-lab/mechanic-wish-player-illumise-opponent-onix.json",
+   "windows": {
+    "sourceWindow": {
+     "startFrame": 65,
+     "endFrame": 335,
+     "frameCount": 271
+    },
+    "appStage": {
+     "presentationAge": 0
+    }
+   },
+   "intervals": [
+    [
+     273,
+     65,
+     335
+    ],
+    [
+     33,
+     378,
+     419
+    ]
+   ]
+  }
+ },
+ "extraScenarios": {
+  "mechanic-swallow-opponent-pelipper-one-stockpile.json": [
+   [
+    64,
+    70,
+    100
+   ],
+   [
+    254,
+    302,
+    400
+   ],
+   [
+    64,
+    1004,
+    1034
+   ],
+   [
+    256,
+    1140,
+    1300
+   ],
+   [
+    64,
+    1938,
+    1968
+   ],
+   [
+    64,
+    2872,
+    2902
+   ],
+   [
+    254,
+    3106,
+    3204
+   ],
+   [
+    64,
+    3806,
+    3836
+   ],
+   [
+    254,
+    3941,
+    4039
+   ],
+   [
+    0,
+    4142,
+    4353
+   ]
+  ],
+  "mechanic-blizzard-player-pelipper-opponent-onix.json": [
+   [
+    33,
+    72,
+    113
+   ],
+   [
+    59,
+    214,
+    585
+   ]
+  ],
+  "mechanic-icy-wind-opponent-swinub-player-onix.json": [
+   [
+    33,
+    68,
+    109
+   ],
+   [
+    196,
+    220,
+    506
+   ],
+   [
+    0,
+    725,
+    800
+   ],
+   [
+    0,
+    891,
+    1102
+   ]
+  ],
+  "mechanic-belly-drum-player-poliwrath-opponent-onix.json": [
+   [
+    187,
+    231,
+    340
+   ]
+  ],
+  "mechanic-heal-bell-player-chimecho-opponent-onix.json": [
+   [
+    33,
+    72,
+    113
+   ],
+   [
+    215,
+    209,
+    469
+   ]
+  ],
+  "mechanic-pain-split-opponent-misdreavus-player-gengar.json": [
+   [
+    101,
+    75,
+    302
+   ],
+   [
+    220,
+    446,
+    526
+   ]
+  ],
+  "mechanic-memento-opponent-weezing-player-onix.json": [
+   [
+    262,
+    74,
+    248
+   ],
+   [
+    0,
+    253,
+    342
+   ]
+  ],
+  "mechanic-swallow-player-pelipper-one-stockpile.json": [
+   [
+    290,
+    84,
+    185
+   ],
+   [
+    254,
+    317,
+    415
+   ],
+   [
+    290,
+    1010,
+    1111
+   ],
+   [
+    256,
+    1247,
+    1409
+   ]
+  ],
+  "mechanic-blizzard-opponent-pelipper-player-onix.json": [
+   [
+    33,
+    68,
+    109
+   ],
+   [
+    59,
+    213,
+    573
+   ]
+  ],
+  "mechanic-pain-split-player-misdreavus-opponent-gengar.json": [
+   [
+    101,
+    79,
+    305
+   ],
+   [
+    220,
+    445,
+    525
+   ]
+  ],
+  "mechanic-rock-tomb-player-grimer-opponent-onix.json": [
+   [
+    33,
+    72,
+    113
+   ],
+   [
+    317,
+    217,
+    390
+   ],
+   [
+    0,
+    531,
+    606
+   ]
+  ],
+  "mechanic-icy-wind-player-swinub-opponent-onix.json": [
+   [
+    33,
+    72,
+    113
+   ],
+   [
+    196,
+    220,
+    506
+   ],
+   [
+    0,
+    722,
+    797
+   ],
+   [
+    0,
+    892,
+    1103
+   ]
+  ],
+  "mechanic-heal-bell-opponent-chimecho-player-onix.json": [
+   [
+    33,
+    68,
+    109
+   ],
+   [
+    215,
+    210,
+    470
+   ]
+  ],
+  "mechanic-belly-drum-opponent-poliwrath-player-onix.json": [
+   [
+    33,
+    68,
+    109
+   ],
+   [
+    187,
+    211,
+    320
+   ]
+  ],
+  "mechanic-memento-player-weezing-opponent-onix.json": [
+   [
+    262,
+    70,
+    247
+   ],
+   [
+    0,
+    252,
+    341
+   ]
+  ],
+  "mechanic-rock-tomb-opponent-grimer-player-onix.json": [
+   [
+    317,
+    229,
+    402
+   ],
+   [
+    0,
+    544,
+    619
+   ]
+  ]
+ }
+}
