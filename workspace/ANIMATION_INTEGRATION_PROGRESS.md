@@ -1,5 +1,19 @@
 # Animation integration progress
 
+## 2026-10-05 (wind-down) — CASTFORM fix + order table 445 bodies
+
+- CASTFORM normal-form Y placement fixed (`55d1ef1dd`, ISSUES #143 trimmed to weather
+  forms): player back delta from `sCastformBackSpriteYCoords` (0), elevation from
+  `sCastformElevations` (13, via the extractor). Supervisor: retained ROM runs 237/237
+  exact both sides; MINUN controls zero residual. Receipt `castform-fix-receipt.json`.
+- Production order table 381 -> 445 bodies (`d9195447f`): Endeavor/Fake Tears
+  relative-y rows + 60 REL-Y-confirmed rows. Corpus 1,044 -> 1,101 known (all exact);
+  strict real-route 3 -> 10 known per trace (all exact). Supervisor: 54 sprite-order
+  tests green; later-body consumer routes PASS. Receipt `order-table-rows-receipt.json`.
+- `implementedCount` corrected 191 -> 198 (a batch had not bumped it) and pinned by
+  `tests/liveStatusImplementedCount.test.ts`.
+- Final supervisor gates on `d9195447f`: typecheck, 1,509 files / 12,176 tests, build 851.
+
 ## 2026-10-05 — final batch folded: 198 live adapters; session gates
 
 - Folded worker `3b64e52e9` as `09b92c56d`: Giga Drain, Sunny Day, Mega Drain,

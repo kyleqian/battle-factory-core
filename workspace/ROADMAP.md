@@ -2205,13 +2205,13 @@ framebuffer exactness is claimed.
 Next (2026-10-05): 198 live adapters (master after the 2026-10-04 night session).
 New production infrastructure: the free-slot sprite-order provider with
 event-driven cross-body tracking (`src/engine/liveSpriteOrderHost.ts`, generated
-381-body table `src/engine/spriteOrderProductionPlans.ts`); order consumers and
+445-body table `src/engine/spriteOrderProductionPlans.ts`); order consumers and
 allocator-plan-v2 moves render only while the tracked order is lent (known-entry
 occupancy). Resume points, in order:
-1. Order coverage: merge the 83 REL-Y rows (`docs/sprite-order-rely-confirmation.md`,
-   weighted plan coverage 68% -> 81%) and the policy-gaps proposal A-C (Endeavor /
-   Fake Tears rows, Intimidate seed; `docs/sprite-order-policy-gaps.md`) into the
-   production table/host.
+1. Order coverage: the Endeavor/Fake Tears rows and the 60 REL-Y-confirmed rows are
+   in the production table (445 bodies). Remaining: the Intimidate battle-start seed
+   (`docs/sprite-order-policy-gaps.md` proposal C) and the 23 abs-invariant REL-Y rows
+   (need a second geometry; `docs/sprite-order-rely-confirmation.md`).
 2. Post-knock-out lends: every order-/allocator-gated adapter falls back after the
    first faint/switch because battler slots and the affine baseline change
    (`docs/sprite-order-uncovered-units.md`: unit transforms 36/36 exact); needs
