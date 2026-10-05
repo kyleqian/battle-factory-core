@@ -32,6 +32,10 @@ export const SCENARIOS: Record<string, Step[]> = {
   "postko-doubleteam-swift-gigadrain": [...TURN1, P, C, edge("202:opponent"), body(202, "opponent"), HIT, edge("104:player"), body(104, "player"),
     edge("stat:player"), { kind: "stat-animation", argument: 21 }, P, C, edge("202:opponent"), body(202, "opponent"), HIT, edge("129:player"),
     body(129, "player"), HIT],
+  // turn 2: player Double Team (faster; first body after the send-out), +1 evasion stat animation, SLOWBRO Swift -> player;
+  // turn 3: player Swift -> SLOWBRO, SLOWBRO Swift.
+  "postko-doubleteam-swift": [...TURN1, P, C, edge("104:player"), body(104, "player"), edge("stat:player"), { kind: "stat-animation", argument: 21 },
+    edge("129:opponent"), body(129, "opponent"), HIT, P, C, edge("129:player"), body(129, "player"), HIT, edge("129:opponent"), body(129, "opponent"), HIT],
 };
 
 const SUMMARY = decodeSpriteOrderPlan(UNIT_PLANS.summary), SENDOUT = decodeSpriteOrderPlan(UNIT_PLANS.nextSendOut);
