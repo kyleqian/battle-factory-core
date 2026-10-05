@@ -1,0 +1,5904 @@
+{
+ "schema": "sprite-order-rely-verdicts/v1",
+ "counts": {
+  "INCONCLUSIVE": 50,
+  "CONFIRMED": 47,
+  "NEEDS-KEYS": 24
+ },
+ "cells": [
+  {
+   "cell": "58:opponent",
+   "move": 58,
+   "name": "ICE_BEAM",
+   "side": "opponent",
+   "weight": 0.009901147959183672,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "d7916ba4ba254f08",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "10a0e2a302aa9fe6",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "58:player",
+   "move": 58,
+   "name": "ICE_BEAM",
+   "side": "player",
+   "weight": 0.009901147959183672,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "112bab1524a04f10",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "004a5f9126bc8a3e",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "85:player",
+   "move": 85,
+   "name": "THUNDERBOLT",
+   "side": "player",
+   "weight": 0.008088860544217692,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     46,
+     44,
+     32,
+     28,
+     26,
+     23,
+     15,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "59ae77ca26a9ffae",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "82e1a586eda0dd69",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "188:opponent",
+   "move": 188,
+   "name": "SLUDGE_BOMB",
+   "side": "opponent",
+   "weight": 0.007281037414965992,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     46,
+     37,
+     7,
+     0
+    ],
+    [
+     45,
+     29,
+     8,
+     0
+    ],
+    [
+     48,
+     25,
+     18,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "67ea1d67fb6c487c",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "f6d26c7a9d7440cf",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "188:player",
+   "move": 188,
+   "name": "SLUDGE_BOMB",
+   "side": "player",
+   "weight": 0.007281037414965992,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     46,
+     37,
+     7,
+     0
+    ],
+    [
+     45,
+     29,
+     8,
+     0
+    ],
+    [
+     48,
+     25,
+     18,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "aae84f71a7ee87a8",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "509dc56a89e6ddca",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "46:opponent",
+   "move": 46,
+   "name": "ROAR",
+   "side": "opponent",
+   "weight": 0.0059187216553288026,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     81,
+     41,
+     0
+    ],
+    [
+     81,
+     41,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "6248557338ce8526",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "ff93e991ab946568",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "46:player",
+   "move": 46,
+   "name": "ROAR",
+   "side": "player",
+   "weight": 0.0059187216553288026,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     81,
+     41,
+     0
+    ],
+    [
+     81,
+     41,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "5df4b5a18c67ac35",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "a1d05aa83ac8d376",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "242:opponent",
+   "move": 242,
+   "name": "CRUNCH",
+   "side": "opponent",
+   "weight": 0.005307539682539686,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     57,
+     0
+    ],
+    [
+     57,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "387802f1b0c22060",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "8e5bc1cf3f166015",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "242:player",
+   "move": 242,
+   "name": "CRUNCH",
+   "side": "player",
+   "weight": 0.005307539682539686,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     57,
+     0
+    ],
+    [
+     57,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "edabf6277be80a76",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "62f8144f447575dd",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "44:opponent",
+   "move": 44,
+   "name": "BITE",
+   "side": "opponent",
+   "weight": 0.004552862811791385,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     57,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "dce0315d31da8ea0",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "80cbfffe99ead1b9",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "44:player",
+   "move": 44,
+   "name": "BITE",
+   "side": "player",
+   "weight": 0.004552862811791385,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     57,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "574a98e37956307b",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "a18c409ef0b013dc",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "240:opponent",
+   "move": 240,
+   "name": "RAIN_DANCE",
+   "side": "opponent",
+   "weight": 0.004191468253968256,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     46,
+     0
+    ],
+    [
+     18,
+     0
+    ],
+    [
+     14,
+     0
+    ],
+    [
+     43,
+     0
+    ],
+    [
+     28,
+     0
+    ],
+    [
+     34,
+     0
+    ],
+    [
+     20,
+     0
+    ],
+    [
+     13,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     20,
+     0
+    ],
+    [
+     27,
+     0
+    ],
+    [
+     26,
+     0
+    ],
+    [
+     34,
+     0
+    ],
+    [
+     9,
+     0
+    ],
+    [
+     24,
+     0
+    ],
+    [
+     12,
+     0
+    ],
+    [
+     30,
+     0
+    ],
+    [
+     34,
+     0
+    ],
+    [
+     49,
+     0
+    ],
+    [
+     27,
+     0
+    ],
+    [
+     14,
+     0
+    ],
+    [
+     49,
+     0
+    ],
+    [
+     53,
+     0
+    ],
+    [
+     13,
+     0
+    ],
+    [
+     45,
+     0
+    ],
+    [
+     32,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     30,
+     0
+    ],
+    [
+     11,
+     0
+    ],
+    [
+     62,
+     0
+    ],
+    [
+     29,
+     0
+    ],
+    [
+     41,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     49,
+     0
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     23,
+     0
+    ],
+    [
+     11,
+     0
+    ],
+    [
+     23,
+     0
+    ],
+    [
+     25,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "683ef03f2f80aeda",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "488a599905500bc7",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 3,
+   "distinctRelativeYVectors": 3,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "plan differs across geometries (3 distinct plans)"
+  },
+  {
+   "cell": "240:player",
+   "move": 240,
+   "name": "RAIN_DANCE",
+   "side": "player",
+   "weight": 0.004191468253968256,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     69,
+     0
+    ],
+    [
+     13,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     17,
+     0
+    ],
+    [
+     10,
+     0
+    ],
+    [
+     11,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     13,
+     0
+    ],
+    [
+     15,
+     0
+    ],
+    [
+     5,
+     0
+    ],
+    [
+     18,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     37,
+     0
+    ],
+    [
+     60,
+     0
+    ],
+    [
+     33,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     23,
+     0
+    ],
+    [
+     16,
+     0
+    ],
+    [
+     28,
+     0
+    ],
+    [
+     40,
+     0
+    ],
+    [
+     8,
+     0
+    ],
+    [
+     26,
+     0
+    ],
+    [
+     23,
+     0
+    ],
+    [
+     8,
+     0
+    ],
+    [
+     22,
+     0
+    ],
+    [
+     22,
+     0
+    ],
+    [
+     9,
+     0
+    ],
+    [
+     19,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     20,
+     0
+    ],
+    [
+     11,
+     0
+    ],
+    [
+     37,
+     0
+    ],
+    [
+     62,
+     0
+    ],
+    [
+     19,
+     0
+    ],
+    [
+     30,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "66bdeba0a605662f",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "908261ac0dd6c17a",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 3,
+   "distinctRelativeYVectors": 3,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "plan differs across geometries (3 distinct plans)"
+  },
+  {
+   "cell": "315:opponent",
+   "move": 315,
+   "name": "OVERHEAT",
+   "side": "opponent",
+   "weight": 0.00384247448979592,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     126,
+     105,
+     105,
+     63,
+     63,
+     18,
+     18,
+     0
+    ],
+    [
+     126,
+     105,
+     105,
+     63,
+     63,
+     18,
+     18,
+     0
+    ],
+    [
+     126,
+     105,
+     105,
+     63,
+     63,
+     18,
+     18,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "8073f9da3fdde232",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "49d96a61828c0ba0",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 3 absolute geometries"
+  },
+  {
+   "cell": "315:player",
+   "move": 315,
+   "name": "OVERHEAT",
+   "side": "player",
+   "weight": 0.00384247448979592,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     126,
+     105,
+     105,
+     63,
+     63,
+     18,
+     18,
+     0
+    ],
+    [
+     126,
+     105,
+     105,
+     63,
+     63,
+     18,
+     18,
+     0
+    ],
+    [
+     126,
+     105,
+     105,
+     63,
+     63,
+     18,
+     18,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "e01963f25b3ada43",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "0b66701ff937d79d",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 2,
+   "distinctRelativeYVectors": 2,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "plan differs across geometries (2 distinct plans)"
+  },
+  {
+   "cell": "7:opponent",
+   "move": 7,
+   "name": "FIRE_PUNCH",
+   "side": "opponent",
+   "weight": 0.00334467120181406,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     3,
+     2,
+     1,
+     0
+    ],
+    [
+     62,
+     52,
+     32,
+     20,
+     7,
+     5,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "b919d03c2afe40d1",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "ff03392f7d490b87",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "7:player",
+   "move": 7,
+   "name": "FIRE_PUNCH",
+   "side": "player",
+   "weight": 0.00334467120181406,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     3,
+     2,
+     1,
+     0
+    ],
+    [
+     62,
+     52,
+     32,
+     20,
+     7,
+     5,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "c35061a361da5c3d",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "7a60069885301147",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "126:opponent",
+   "move": 126,
+   "name": "FIRE_BLAST",
+   "side": "opponent",
+   "weight": 0.0029602465986394563,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     52,
+     37,
+     29,
+     5,
+     0
+    ],
+    [
+     52,
+     37,
+     29,
+     5,
+     0
+    ],
+    [
+     52,
+     37,
+     29,
+     5,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "ee44fe21040a55b0",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "9c20737950fba394",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "126:player",
+   "move": 126,
+   "name": "FIRE_BLAST",
+   "side": "player",
+   "weight": 0.0029602465986394563,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     52,
+     37,
+     29,
+     5,
+     0
+    ],
+    [
+     52,
+     37,
+     29,
+     5,
+     0
+    ],
+    [
+     52,
+     37,
+     29,
+     5,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "7a6d97595e2d250f",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "078c6582c6814177",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "263:opponent",
+   "move": 263,
+   "name": "FACADE",
+   "side": "opponent",
+   "weight": 0.002738803854875284,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "99c0d21272f44420",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "1e26c7cc99dc1461",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "263:player",
+   "move": 263,
+   "name": "FACADE",
+   "side": "player",
+   "weight": 0.002738803854875284,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "5d823b909d29a40b",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "74da9c5852fefa3a",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "189:opponent",
+   "move": 189,
+   "name": "MUD_SLAP",
+   "side": "opponent",
+   "weight": 0.0026962868480725627,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     21,
+     13,
+     13,
+     8,
+     0
+    ],
+    [
+     17,
+     14,
+     12,
+     3,
+     0
+    ],
+    [
+     14,
+     8,
+     2,
+     2,
+     0
+    ],
+    [
+     21,
+     19,
+     6,
+     2,
+     0
+    ],
+    [
+     30,
+     24,
+     22,
+     20,
+     0
+    ],
+    [
+     15,
+     9,
+     4,
+     4,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "1490337abdb1243f",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "ceddf93bd613dc83",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 2,
+   "distinctRelativeYVectors": 3,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "KEYS group not of the equal-word/different-y kind: observed order contradicts key/creation rule"
+  },
+  {
+   "cell": "108:opponent",
+   "move": 108,
+   "name": "SMOKESCREEN",
+   "side": "opponent",
+   "weight": 0.0023756377551020415,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     16,
+     16,
+     0,
+     0
+    ],
+    [
+     30,
+     30,
+     24,
+     24,
+     18,
+     18,
+     12,
+     12,
+     6,
+     6,
+     0,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "cdb670247d45a280",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "23044458dd539c86",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "108:player",
+   "move": 108,
+   "name": "SMOKESCREEN",
+   "side": "player",
+   "weight": 0.0023756377551020415,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     16,
+     16,
+     0,
+     0
+    ],
+    [
+     30,
+     30,
+     24,
+     24,
+     18,
+     18,
+     12,
+     12,
+     6,
+     6,
+     0,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "df9b215a073d427d",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "88f05a0ccefd2ce0",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "352:opponent",
+   "move": 352,
+   "name": "WATER_PULSE",
+   "side": "opponent",
+   "weight": 0.002352607709750567,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     47,
+     0
+    ],
+    [
+     20,
+     45,
+     0
+    ],
+    [
+     21,
+     47,
+     0
+    ],
+    [
+     57,
+     0
+    ],
+    [
+     59,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "d95a27660b45d6af",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "d4fb5d0c27bebda0",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 3,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "relative-y vectors differ across geometries: [[43, 0], [29, 47, 0], [27, 43, 0], [59, 0], [59, 0]] vs [[45, 0], [20, 45, 0], [20, 45, 0], [57, 0], [57, 0]] vs [[47, 0], [20, 45, 0], [21, 47, 0], [57, 0], [59, 0]]"
+  },
+  {
+   "cell": "352:player",
+   "move": 352,
+   "name": "WATER_PULSE",
+   "side": "player",
+   "weight": 0.002352607709750567,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     43,
+     0
+    ],
+    [
+     84,
+     39,
+     0
+    ],
+    [
+     84,
+     39,
+     0
+    ],
+    [
+     59,
+     0
+    ],
+    [
+     57,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "8e84ac7d93c53b3c",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "e0a349c764f866da",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 3,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "relative-y vectors differ across geometries: [[43, 0], [84, 39, 0], [84, 39, 0], [59, 0], [57, 0]] vs [[45, 0], [76, 29, 0], [74, 31, 0], [57, 0], [57, 0]] vs [[47, 0], [84, 39, 0], [83, 40, 0], [59, 0], [57, 0]]"
+  },
+  {
+   "cell": "28:player",
+   "move": 28,
+   "name": "SAND_ATTACK",
+   "side": "player",
+   "weight": 0.002028415532879819,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     20,
+     11,
+     11,
+     8,
+     0
+    ],
+    [
+     18,
+     15,
+     11,
+     3,
+     0
+    ],
+    [
+     15,
+     8,
+     3,
+     1,
+     0
+    ],
+    [
+     22,
+     18,
+     7,
+     2,
+     0
+    ],
+    [
+     30,
+     23,
+     22,
+     20,
+     0
+    ],
+    [
+     15,
+     10,
+     3,
+     3,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "0d6240b673807ac4",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "d43651f80e9342b7",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 3,
+   "distinctRelativeYVectors": 3,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "KEYS group not of the equal-word/different-y kind: observed order contradicts key/creation rule"
+  },
+  {
+   "cell": "349:opponent",
+   "move": 349,
+   "name": "DRAGON_DANCE",
+   "side": "opponent",
+   "weight": 0.001998299319727891,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     227,
+     224,
+     146,
+     81,
+     5,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "92e2ac9f63d7787a",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "292b853a85e9a4c3",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 2,
+   "distinctRelativeYVectors": 2,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "plan differs across geometries (2 distinct plans)"
+  },
+  {
+   "cell": "349:player",
+   "move": 349,
+   "name": "DRAGON_DANCE",
+   "side": "player",
+   "weight": 0.001998299319727891,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     178,
+     113,
+     37,
+     32,
+     3,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "ff6c6adc43d6f6b1",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "dbefd2b7231fc9ef",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "306:opponent",
+   "move": 306,
+   "name": "CRUSH_CLAW",
+   "side": "opponent",
+   "weight": 0.0019345238095238096,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     20,
+     0
+    ],
+    [
+     20,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "c24ecf94a7acd90e",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "a696d5d963fe4059",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "306:player",
+   "move": 306,
+   "name": "CRUSH_CLAW",
+   "side": "player",
+   "weight": 0.0019345238095238096,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     20,
+     0
+    ],
+    [
+     20,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "71cb6073890776f7",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "f1cc3e9008361120",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "78:opponent",
+   "move": 78,
+   "name": "STUN_SPORE",
+   "side": "opponent",
+   "weight": 0.0018176020408163266,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     14,
+     0,
+     0
+    ],
+    [
+     19,
+     12,
+     5,
+     0
+    ],
+    [
+     14,
+     7,
+     4,
+     0
+    ],
+    [
+     14,
+     4,
+     0,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "b6166fa4ddcad3be",
+     "bodies": 0
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "f8ac1fd02f3865a1",
+     "bodies": 0
+    }
+   },
+   "verdict": "INCONCLUSIVE",
+   "why": "no complete identical new body ({\"dragonair-chansey\": 0, \"diglett-chansey\": 0})"
+  },
+  {
+   "cell": "78:player",
+   "move": 78,
+   "name": "STUN_SPORE",
+   "side": "player",
+   "weight": 0.0018176020408163266,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     14,
+     0,
+     0
+    ],
+    [
+     19,
+     12,
+     5,
+     0
+    ],
+    [
+     14,
+     7,
+     4,
+     0
+    ],
+    [
+     14,
+     4,
+     0,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "2c436aecc10d4236",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "7fb88ff3010e2e72",
+     "bodies": 0
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 1,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "90:opponent",
+   "move": 90,
+   "name": "FISSURE",
+   "side": "opponent",
+   "weight": 0.0016741071428571428,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     36,
+     21,
+     4,
+     0
+    ],
+    [
+     18,
+     13,
+     1,
+     0
+    ],
+    [
+     36,
+     21,
+     4,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "cfc665e43046255c",
+     "bodies": 0
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "fae8772ae139bbef",
+     "bodies": 0
+    }
+   },
+   "verdict": "INCONCLUSIVE",
+   "why": "no complete identical new body ({\"dragonair-chansey\": 0, \"diglett-chansey\": 0})"
+  },
+  {
+   "cell": "90:player",
+   "move": 90,
+   "name": "FISSURE",
+   "side": "player",
+   "weight": 0.0016741071428571428,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     36,
+     21,
+     4,
+     0
+    ],
+    [
+     18,
+     13,
+     1,
+     0
+    ],
+    [
+     36,
+     21,
+     4,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "81df3d857c8b4c71",
+     "bodies": 0
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "ec48839f1592c573",
+     "bodies": 0
+    }
+   },
+   "verdict": "INCONCLUSIVE",
+   "why": "no complete identical new body ({\"dragonair-chansey\": 0, \"diglett-chansey\": 0})"
+  },
+  {
+   "cell": "337:opponent",
+   "move": 337,
+   "name": "DRAGON_CLAW",
+   "side": "opponent",
+   "weight": 0.0016741071428571428,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     20,
+     0
+    ],
+    [
+     80,
+     60,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "a9fc98beaf4bbbc6",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "390bafbcae87ab80",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 2,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "relative-y vectors differ across geometries: [[20, 0], [80, 60, 0]] vs [[20, 0], [91, 71, 0]]"
+  },
+  {
+   "cell": "337:player",
+   "move": 337,
+   "name": "DRAGON_CLAW",
+   "side": "player",
+   "weight": 0.0016741071428571428,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     20,
+     0
+    ],
+    [
+     26,
+     20,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "0d2eaf7a9310a043",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "1c8a5fdc5b9a4862",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 2,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "relative-y vectors differ across geometries: [[20, 0], [19, 20, 0]] vs [[20, 0], [26, 20, 0]]"
+  },
+  {
+   "cell": "345:opponent",
+   "move": 345,
+   "name": "MAGICAL_LEAF",
+   "side": "opponent",
+   "weight": 0.001651077097505669,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     8,
+     0
+    ],
+    [
+     35,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "756e44adab9798d0",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "56d34c51a725cccc",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 3 absolute geometries"
+  },
+  {
+   "cell": "345:player",
+   "move": 345,
+   "name": "MAGICAL_LEAF",
+   "side": "player",
+   "weight": 0.001651077097505669,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     8,
+     0
+    ],
+    [
+     39,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "73db75e3d05e5dcd",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "c39c6107c1cc0c78",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 3 absolute geometries"
+  },
+  {
+   "cell": "161:opponent",
+   "move": 161,
+   "name": "TRI_ATTACK",
+   "side": "opponent",
+   "weight": 0.0014721513605442176,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     29,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "393ba0a277d60ebf",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "4fb4f19ac0969519",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "161:player",
+   "move": 161,
+   "name": "TRI_ATTACK",
+   "side": "player",
+   "weight": 0.0014721513605442176,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     29,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "95055f30f683ddfd",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "7242e2757f96ec86",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "261:opponent",
+   "move": 261,
+   "name": "WILL_O_WISP",
+   "side": "opponent",
+   "weight": 0.0014562074829931972,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     31,
+     29,
+     14,
+     18,
+     2,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "70aef8f8273e216b",
+     "bodies": 0
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "36f00bc8c573e7a1",
+     "bodies": 0
+    }
+   },
+   "verdict": "INCONCLUSIVE",
+   "why": "no complete identical new body ({\"dragonair-chansey\": 0, \"diglett-chansey\": 0})"
+  },
+  {
+   "cell": "261:player",
+   "move": 261,
+   "name": "WILL_O_WISP",
+   "side": "player",
+   "weight": 0.0014562074829931972,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     31,
+     29,
+     14,
+     18,
+     2,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "e897b31d3654fb70",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "cdda499ff52e7a5d",
+     "bodies": 0
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 1,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "209:opponent",
+   "move": 209,
+   "name": "SPARK",
+   "side": "opponent",
+   "weight": 0.0013197987528344671,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     49,
+     45,
+     40,
+     26,
+     23,
+     9,
+     4,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "0c477dd7a5450d76",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "2e0d93f21fc14989",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 3 absolute geometries"
+  },
+  {
+   "cell": "209:player",
+   "move": 209,
+   "name": "SPARK",
+   "side": "player",
+   "weight": 0.0013197987528344671,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     49,
+     45,
+     40,
+     26,
+     23,
+     9,
+     4,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "6a2abbc06e7c3462",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "109af377c800c497",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 3 absolute geometries"
+  },
+  {
+   "cell": "258:opponent",
+   "move": 258,
+   "name": "HAIL",
+   "side": "opponent",
+   "weight": 0.0012790532879818595,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     64,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "abf2fe7992b647ec",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "bb1f2cc22861faa6",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 3,
+   "distinctRelativeYVectors": 3,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "plan differs across geometries (3 distinct plans)"
+  },
+  {
+   "cell": "258:player",
+   "move": 258,
+   "name": "HAIL",
+   "side": "player",
+   "weight": 0.0012790532879818595,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     64,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "cfe06846e31cd00c",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "0d96257a7e1da0c8",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 3,
+   "distinctRelativeYVectors": 3,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "plan differs across geometries (3 distinct plans)"
+  },
+  {
+   "cell": "80:opponent",
+   "move": 80,
+   "name": "PETAL_DANCE",
+   "side": "opponent",
+   "weight": 0.001263109410430839,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     2,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "27337f04495bd065",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "7c58b18387fc56b3",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 3 absolute geometries"
+  },
+  {
+   "cell": "80:player",
+   "move": 80,
+   "name": "PETAL_DANCE",
+   "side": "player",
+   "weight": 0.001263109410430839,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     2,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "518ee294c77b8014",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "ada3db710f56fa5d",
+     "bodies": 2
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 3,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 3 absolute geometries"
+  },
+  {
+   "cell": "232:opponent",
+   "move": 232,
+   "name": "METAL_CLAW",
+   "side": "opponent",
+   "weight": 0.001263109410430839,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     20,
+     0
+    ],
+    [
+     20,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "dbfcf75bb361f0de",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "0ebc16b822a9f5c1",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "232:player",
+   "move": 232,
+   "name": "METAL_CLAW",
+   "side": "player",
+   "weight": 0.001263109410430839,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     20,
+     0
+    ],
+    [
+     20,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "4a47087f6e417536",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "f458e6bbe2cf6978",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "69:opponent",
+   "move": 69,
+   "name": "SEISMIC_TOSS",
+   "side": "opponent",
+   "weight": 0.0012383078231292517,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     25,
+     22,
+     12,
+     0
+    ],
+    [
+     21,
+     18,
+     11,
+     0
+    ],
+    [
+     25,
+     22,
+     12,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "b2143af2317105eb",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "6fda94040856d537",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "69:player",
+   "move": 69,
+   "name": "SEISMIC_TOSS",
+   "side": "player",
+   "weight": 0.0012383078231292517,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     25,
+     22,
+     12,
+     0
+    ],
+    [
+     21,
+     18,
+     11,
+     0
+    ],
+    [
+     25,
+     22,
+     12,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "dccd1477079dfa56",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "d6255c6c9eedea8b",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "283:opponent",
+   "move": 283,
+   "name": "ENDEAVOR",
+   "side": "opponent",
+   "weight": 0.0011054421768707484,
+   "oldScenarios": 2,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "2d4347183ecffdbc",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "892284be76557c7a",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "283:player",
+   "move": 283,
+   "name": "ENDEAVOR",
+   "side": "player",
+   "weight": 0.0011054421768707484,
+   "oldScenarios": 3,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "61b8c06143647aaf",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "758449ba4f7035ad",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "309:opponent",
+   "move": 309,
+   "name": "METEOR_MASH",
+   "side": "opponent",
+   "weight": 0.0011001275510204081,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     39,
+     0
+    ],
+    [
+     40,
+     0
+    ],
+    [
+     32,
+     0
+    ],
+    [
+     33,
+     0
+    ],
+    [
+     47,
+     0
+    ],
+    [
+     33,
+     0
+    ],
+    [
+     40,
+     0
+    ],
+    [
+     32,
+     0
+    ],
+    [
+     40,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "8ccc8a3d1b74912c",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "a048434938656e95",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 3,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "relative-y vectors differ across geometries: [[39, 0], [35, 0], [46, 0], [37, 0], [40, 0], [28, 0], [47, 0], [34, 0], [46, 0]] vs [[39, 0], [40, 0], [32, 0], [33, 0], [47, 0], [33, 0], [40, 0], [32, 0], [40, 0]] vs [[44, 0], [29, 0], [41, 0], [40, 0], [31, 0], [36, 0], [38, 0], [40, 0], [45, 0]]"
+  },
+  {
+   "cell": "309:player",
+   "move": 309,
+   "name": "METEOR_MASH",
+   "side": "player",
+   "weight": 0.0011001275510204081,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     29,
+     0
+    ],
+    [
+     37,
+     0
+    ],
+    [
+     39,
+     0
+    ],
+    [
+     40,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     38,
+     0
+    ],
+    [
+     29,
+     0
+    ],
+    [
+     44,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "f3ea859e1c43481d",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "6ae23c0aaff6c2f9",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 3,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "relative-y vectors differ across geometries: [[29, 0], [37, 0], [39, 0], [40, 0], [31, 0], [31, 0], [38, 0], [29, 0], [44, 0]] vs [[31, 0], [39, 0], [41, 0], [31, 0], [34, 0], [46, 0], [33, 0], [41, 0], [31, 0]] vs [[36, 0], [28, 0], [40, 0], [28, 0], [41, 0], [40, 0], [45, 0], [37, 0], [35, 0]]"
+  },
+  {
+   "cell": "230:opponent",
+   "move": 230,
+   "name": "SWEET_SCENT",
+   "side": "opponent",
+   "weight": 0.0009229733560090703,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     15,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "e29e1dfca277fb7d",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "e441fcf1e6de5346",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "230:player",
+   "move": 230,
+   "name": "SWEET_SCENT",
+   "side": "player",
+   "weight": 0.0009229733560090703,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     15,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "76b45a261f21e2b7",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "dc42b005faf8df6a",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "324:opponent",
+   "move": 324,
+   "name": "SIGNAL_BEAM",
+   "side": "opponent",
+   "weight": 0.0009229733560090703,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     31,
+     0
+    ],
+    [
+     29,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     17,
+     0
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     11,
+     0
+    ],
+    [
+     15,
+     0
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     29,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     17,
+     0
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     5,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "d5f9069fa8e99b63",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "b5ba67a1e98fbeff",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "324:player",
+   "move": 324,
+   "name": "SIGNAL_BEAM",
+   "side": "player",
+   "weight": 0.0009229733560090703,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     31,
+     0
+    ],
+    [
+     29,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     17,
+     0
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     11,
+     0
+    ],
+    [
+     15,
+     0
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     29,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     17,
+     0
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     5,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "3495de38d8f995c5",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "b7ebec3d46311a6e",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "135:opponent",
+   "move": 135,
+   "name": "SOFT_BOILED",
+   "side": "opponent",
+   "weight": 0.0009141156462585034,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     18,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "08a2ba8c741275af",
+     "bodies": 0
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "eadc902847309715",
+     "bodies": 0
+    }
+   },
+   "verdict": "INCONCLUSIVE",
+   "why": "no complete identical new body ({\"dragonair-chansey\": 0, \"diglett-chansey\": 0})"
+  },
+  {
+   "cell": "135:player",
+   "move": 135,
+   "name": "SOFT_BOILED",
+   "side": "player",
+   "weight": 0.0009141156462585034,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     18,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "1db894c656f28daf",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "6cb6306b85b86fcb",
+     "bodies": 0
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 1,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "75:opponent",
+   "move": 75,
+   "name": "RAZOR_LEAF",
+   "side": "opponent",
+   "weight": 0.0009070294784580499,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     37,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "61e1838c84a33b7e",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "8b71233087786442",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 3 absolute geometries"
+  },
+  {
+   "cell": "75:player",
+   "move": 75,
+   "name": "RAZOR_LEAF",
+   "side": "player",
+   "weight": 0.0009070294784580499,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     39,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "fb6e886cd9c9cc3f",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "adef2c149c597cda",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 3 absolute geometries"
+  },
+  {
+   "cell": "18:opponent",
+   "move": 18,
+   "name": "WHIRLWIND",
+   "side": "opponent",
+   "weight": 0.0007653061224489797,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     40,
+     32,
+     24,
+     16,
+     8,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "40b4707b5cc3305c",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "509f506de99c6f16",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "18:player",
+   "move": 18,
+   "name": "WHIRLWIND",
+   "side": "player",
+   "weight": 0.0007653061224489797,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     40,
+     32,
+     24,
+     16,
+     8,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "577a163ae8dfdc8a",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "7292fcc7d70c812a",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "72:opponent",
+   "move": 72,
+   "name": "MEGA_DRAIN",
+   "side": "opponent",
+   "weight": 0.0007653061224489797,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     1,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "8f52b2fd554bfd98",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "6f36272d7a30535d",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 2,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "KEYS group not of the equal-word/different-y kind: observed order contradicts key/creation rule"
+  },
+  {
+   "cell": "72:player",
+   "move": 72,
+   "name": "MEGA_DRAIN",
+   "side": "player",
+   "weight": 0.0007653061224489797,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     1,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "22df2c438587b839",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "e8c71b6ff95682fb",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 2,
+   "distinctRelativeYVectors": 2,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "plan differs across geometries (2 distinct plans)"
+  },
+  {
+   "cell": "142:opponent",
+   "move": 142,
+   "name": "LOVELY_KISS",
+   "side": "opponent",
+   "weight": 0.000744047619047619,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     28,
+     20,
+     4,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "a373414f54f2b223",
+     "bodies": 0
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "71d56ede0129ca5f",
+     "bodies": 0
+    }
+   },
+   "verdict": "INCONCLUSIVE",
+   "why": "no complete identical new body ({\"dragonair-chansey\": 0, \"diglett-chansey\": 0})"
+  },
+  {
+   "cell": "142:player",
+   "move": 142,
+   "name": "LOVELY_KISS",
+   "side": "player",
+   "weight": 0.000744047619047619,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     28,
+     20,
+     4,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "3d9f2d2767fb7a62",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "456cd3a286447d92",
+     "bodies": 0
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 1,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "348:opponent",
+   "move": 348,
+   "name": "LEAF_BLADE",
+   "side": "opponent",
+   "weight": 0.000744047619047619,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     9,
+     0
+    ],
+    [
+     10,
+     0
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     5,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "62981a43493d7718",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "89e19b6922ff3a13",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 2,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "relative-y vectors differ across geometries: [[7, 0], [7, 0], [5, 0], [5, 0], [4, 0]] vs [[9, 0], [10, 0], [7, 0], [6, 0], [5, 0]]"
+  },
+  {
+   "cell": "348:player",
+   "move": 348,
+   "name": "LEAF_BLADE",
+   "side": "player",
+   "weight": 0.000744047619047619,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     12,
+     0
+    ],
+    [
+     11,
+     0
+    ],
+    [
+     9,
+     0
+    ],
+    [
+     8,
+     0
+    ],
+    [
+     7,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "cc3a2ddb00cffb3a",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "7ebef26728fcc263",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "236:opponent",
+   "move": 236,
+   "name": "MOONLIGHT",
+   "side": "opponent",
+   "weight": 0.0007245606575963718,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     64,
+     48,
+     32,
+     16,
+     0,
+     10
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "565917fc5930c28d",
+     "bodies": 0
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "b9b34b1901e5fd75",
+     "bodies": 0
+    }
+   },
+   "verdict": "INCONCLUSIVE",
+   "why": "no complete identical new body ({\"dragonair-chansey\": 0, \"diglett-chansey\": 0})"
+  },
+  {
+   "cell": "236:player",
+   "move": 236,
+   "name": "MOONLIGHT",
+   "side": "player",
+   "weight": 0.0007245606575963718,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     64,
+     48,
+     32,
+     16,
+     0,
+     10
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "b617d844d934c207",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "69653cddcbb560a3",
+     "bodies": 0
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 1,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "215:opponent",
+   "move": 215,
+   "name": "HEAL_BELL",
+   "side": "opponent",
+   "weight": 0.0007086167800453515,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     99,
+     97,
+     51,
+     0
+    ],
+    [
+     67,
+     0
+    ],
+    [
+     61,
+     59,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "d9a627a39fbe305c",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "be431b3a4c562a1d",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "215:player",
+   "move": 215,
+   "name": "HEAL_BELL",
+   "side": "player",
+   "weight": 0.0007086167800453515,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     99,
+     97,
+     51,
+     0
+    ],
+    [
+     67,
+     0
+    ],
+    [
+     61,
+     59,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "5c8afbadca15f7d1",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "72d37542a7e6df54",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "12:opponent",
+   "move": 12,
+   "name": "GUILLOTINE",
+   "side": "opponent",
+   "weight": 0.0006802721088435375,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     64,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "fcf4372411e931ce",
+     "bodies": 0
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "ec795d451a0e2120",
+     "bodies": 0
+    }
+   },
+   "verdict": "INCONCLUSIVE",
+   "why": "no complete identical new body ({\"dragonair-chansey\": 0, \"diglett-chansey\": 0})"
+  },
+  {
+   "cell": "12:player",
+   "move": 12,
+   "name": "GUILLOTINE",
+   "side": "player",
+   "weight": 0.0006802721088435375,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     64,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "d9e06287d900bae8",
+     "bodies": 0
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "8182705742942599",
+     "bodies": 0
+    }
+   },
+   "verdict": "INCONCLUSIVE",
+   "why": "no complete identical new body ({\"dragonair-chansey\": 0, \"diglett-chansey\": 0})"
+  },
+  {
+   "cell": "137:opponent",
+   "move": 137,
+   "name": "GLARE",
+   "side": "opponent",
+   "weight": 0.0006802721088435375,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "1c75ef6c1eb54228",
+     "bodies": 0
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "cec4a18db5001db3",
+     "bodies": 0
+    }
+   },
+   "verdict": "INCONCLUSIVE",
+   "why": "no complete identical new body ({\"dragonair-chansey\": 0, \"diglett-chansey\": 0})"
+  },
+  {
+   "cell": "137:player",
+   "move": 137,
+   "name": "GLARE",
+   "side": "player",
+   "weight": 0.0006802721088435375,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "241050323a24266e",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "3d7bfd96937605ae",
+     "bodies": 0
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 1,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "172:opponent",
+   "move": 172,
+   "name": "FLAME_WHEEL",
+   "side": "opponent",
+   "weight": 0.0005668934240362812,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     62,
+     52,
+     32,
+     20,
+     7,
+     5,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "d422fe015a651e37",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "840dfe06c2105836",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "172:player",
+   "move": 172,
+   "name": "FLAME_WHEEL",
+   "side": "player",
+   "weight": 0.0005668934240362812,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     62,
+     52,
+     32,
+     20,
+     7,
+     5,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "7253b1c4cbb81e6e",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "6f298570e6aafcb7",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "301:opponent",
+   "move": 301,
+   "name": "ICE_BALL",
+   "side": "opponent",
+   "weight": 0.0005668934240362812,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     26,
+     25,
+     20,
+     7,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "9fe0b35a731b7896",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "6bf6b5bf9ac3db6a",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 2,
+   "distinctRelativeYVectors": 2,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "plan differs across geometries (2 distinct plans)"
+  },
+  {
+   "cell": "288:opponent",
+   "move": 288,
+   "name": "GRUDGE",
+   "side": "opponent",
+   "weight": 0.0005544926303854875,
+   "oldScenarios": 2,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     12,
+     7,
+     0,
+     9,
+     2,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "84c98af590d88384",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "077df130df1a5514",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "260:opponent",
+   "move": 260,
+   "name": "FLATTER",
+   "side": "opponent",
+   "weight": 0.0003968253968253968,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     58,
+     55,
+     55,
+     53,
+     51,
+     51,
+     50,
+     50,
+     50,
+     48,
+     46,
+     34,
+     34,
+     28,
+     28,
+     25,
+     25,
+     25,
+     25,
+     23,
+     23,
+     23,
+     21,
+     21,
+     20,
+     16,
+     16,
+     14,
+     14,
+     14,
+     14,
+     12,
+     8,
+     6,
+     6,
+     6,
+     4,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "d1c77590d603954e",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "c837f0d33f7085f4",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 3,
+   "distinctRelativeYVectors": 3,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "plan differs across geometries (3 distinct plans)"
+  },
+  {
+   "cell": "260:player",
+   "move": 260,
+   "name": "FLATTER",
+   "side": "player",
+   "weight": 0.0003968253968253968,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     58,
+     55,
+     55,
+     53,
+     51,
+     51,
+     50,
+     50,
+     50,
+     48,
+     46,
+     34,
+     34,
+     28,
+     28,
+     25,
+     25,
+     25,
+     25,
+     23,
+     23,
+     23,
+     21,
+     21,
+     20,
+     16,
+     16,
+     14,
+     14,
+     14,
+     14,
+     12,
+     8,
+     6,
+     6,
+     6,
+     4,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "07d1cfe1505124de",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "abaa6f268d92ab44",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 3,
+   "distinctRelativeYVectors": 3,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "plan differs across geometries (3 distinct plans)"
+  },
+  {
+   "cell": "146:opponent",
+   "move": 146,
+   "name": "DIZZY_PUNCH",
+   "side": "opponent",
+   "weight": 0.00038442460317460316,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     6,
+     5,
+     2,
+     2,
+     0,
+     0
+    ],
+    [
+     6,
+     5,
+     2,
+     2,
+     0,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "49a5f7b69cc491a7",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "aa80e5d49105b616",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "146:player",
+   "move": 146,
+   "name": "DIZZY_PUNCH",
+   "side": "player",
+   "weight": 0.00038442460317460316,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     6,
+     5,
+     2,
+     2,
+     0,
+     0
+    ],
+    [
+     6,
+     5,
+     2,
+     2,
+     0,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "dc10b054fd35f78c",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "dc3f0c2f699855e0",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "310:player",
+   "move": 310,
+   "name": "ASTONISH",
+   "side": "player",
+   "weight": 0.00038442460317460316,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     22,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "5e4df55254e64e68",
+     "bodies": 0
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "da7ce05928db660d",
+     "bodies": 0
+    }
+   },
+   "verdict": "INCONCLUSIVE",
+   "why": "no complete identical new body ({\"dragonair-chansey\": 0, \"diglett-chansey\": 0})"
+  },
+  {
+   "cell": "173:opponent",
+   "move": 173,
+   "name": "SNORE",
+   "side": "opponent",
+   "weight": 0.0003684807256235828,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     5,
+     5,
+     0
+    ],
+    [
+     5,
+     5,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "af6b944fe0530355",
+     "bodies": 0
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "94a31edb790d6808",
+     "bodies": 0
+    }
+   },
+   "verdict": "INCONCLUSIVE",
+   "why": "no complete identical new body ({\"dragonair-chansey\": 0, \"diglett-chansey\": 0})"
+  },
+  {
+   "cell": "173:player",
+   "move": 173,
+   "name": "SNORE",
+   "side": "player",
+   "weight": 0.0003684807256235828,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     5,
+     5,
+     0
+    ],
+    [
+     5,
+     5,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "8b5f9a668fdec0a9",
+     "bodies": 0
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "d3f891eac90a9c6b",
+     "bodies": 0
+    }
+   },
+   "verdict": "INCONCLUSIVE",
+   "why": "no complete identical new body ({\"dragonair-chansey\": 0, \"diglett-chansey\": 0})"
+  },
+  {
+   "cell": "186:opponent",
+   "move": 186,
+   "name": "SWEET_KISS",
+   "side": "opponent",
+   "weight": 0.0003684807256235828,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     8,
+     6,
+     4,
+     3,
+     1,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "e68c8ac048935327",
+     "bodies": 0
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "ad5356f29fbd4039",
+     "bodies": 0
+    }
+   },
+   "verdict": "INCONCLUSIVE",
+   "why": "no complete identical new body ({\"dragonair-chansey\": 0, \"diglett-chansey\": 0})"
+  },
+  {
+   "cell": "186:player",
+   "move": 186,
+   "name": "SWEET_KISS",
+   "side": "player",
+   "weight": 0.0003684807256235828,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     8,
+     6,
+     4,
+     3,
+     1,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "a9ea3c5cd96b002b",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "20dcb38cd5ecc644",
+     "bodies": 0
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 1,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "302:opponent",
+   "move": 302,
+   "name": "NEEDLE_ARM",
+   "side": "opponent",
+   "weight": 0.0003684807256235828,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     16,
+     47,
+     40,
+     40,
+     24,
+     24,
+     7,
+     7,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "56f69cc05bc3e0f5",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "216968a548f42ff7",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 2,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "plan differs across geometries (2 distinct plans)"
+  },
+  {
+   "cell": "302:player",
+   "move": 302,
+   "name": "NEEDLE_ARM",
+   "side": "player",
+   "weight": 0.0003684807256235828,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     16,
+     47,
+     40,
+     40,
+     24,
+     24,
+     7,
+     7,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "142e7aafc289af40",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "8fc4824aec0e3c99",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "350:opponent",
+   "move": 350,
+   "name": "ROCK_BLAST",
+   "side": "opponent",
+   "weight": 0.0003684807256235828,
+   "oldScenarios": 2,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     47,
+     47,
+     5,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "58599ed967960222",
+     "bodies": 0
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "0b53c3d3e494c603",
+     "bodies": 0
+    }
+   },
+   "verdict": "INCONCLUSIVE",
+   "why": "no complete identical new body ({\"dragonair-chansey\": 0, \"diglett-chansey\": 0})"
+  },
+  {
+   "cell": "350:player",
+   "move": 350,
+   "name": "ROCK_BLAST",
+   "side": "player",
+   "weight": 0.0003684807256235828,
+   "oldScenarios": 2,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     47,
+     47,
+     5,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "f189d91fb7fb3260",
+     "bodies": 2
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "17892db22255c894",
+     "bodies": 0
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "131:opponent",
+   "move": 131,
+   "name": "SPIKE_CANNON",
+   "side": "opponent",
+   "weight": 0.00034013605442176874,
+   "oldScenarios": 2,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     16,
+     8,
+     0
+    ],
+    [
+     16,
+     8,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "88b81f1371b387ca",
+     "bodies": 3
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "b5e280b41cd5a28b",
+     "bodies": 3
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 6,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "131:player",
+   "move": 131,
+   "name": "SPIKE_CANNON",
+   "side": "player",
+   "weight": 0.00034013605442176874,
+   "oldScenarios": 3,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     16,
+     8,
+     0
+    ],
+    [
+     16,
+     8,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "cdd8b1c564a26c57",
+     "bodies": 2
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "c542d5e01c941e78",
+     "bodies": 3
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 5,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 3 absolute geometries"
+  },
+  {
+   "cell": "41:opponent",
+   "move": 41,
+   "name": "TWINEEDLE",
+   "side": "opponent",
+   "weight": 0.0001984126984126984,
+   "oldScenarios": 2,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     16,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "9c159dd258ed921d",
+     "bodies": 2
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "15764bee2986ac85",
+     "bodies": 2
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 4,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "41:player",
+   "move": 41,
+   "name": "TWINEEDLE",
+   "side": "player",
+   "weight": 0.0001984126984126984,
+   "oldScenarios": 2,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     16,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "4c362b36f729af62",
+     "bodies": 2
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "2d3c14070d6f4715",
+     "bodies": 2
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 4,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 3 absolute geometries"
+  },
+  {
+   "cell": "336:opponent",
+   "move": 336,
+   "name": "HOWL",
+   "side": "opponent",
+   "weight": 0.0001984126984126984,
+   "oldScenarios": 2,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     81,
+     41,
+     0
+    ],
+    [
+     81,
+     41,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "76848bea52a8108b",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "2f368a41164bd368",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "336:player",
+   "move": 336,
+   "name": "HOWL",
+   "side": "player",
+   "weight": 0.0001984126984126984,
+   "oldScenarios": 2,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     81,
+     41,
+     0
+    ],
+    [
+     81,
+     41,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "6057e9637ec462a9",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "1f02073a5e30f231",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "63:opponent",
+   "move": 63,
+   "name": "HYPER_BEAM",
+   "side": "opponent",
+   "weight": 0.00018601190476190475,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     6,
+     0
+    ],
+    [
+     15,
+     14,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     11,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "a3637f5a68a5b489",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "dc7184da41332139",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 3,
+   "distinctRelativeYVectors": 3,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "plan differs across geometries (3 distinct plans)"
+  },
+  {
+   "cell": "63:player",
+   "move": 63,
+   "name": "HYPER_BEAM",
+   "side": "player",
+   "weight": 0.00018601190476190475,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     11,
+     8,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     15,
+     0
+    ],
+    [
+     3,
+     1,
+     0
+    ],
+    [
+     18,
+     2,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "dc1645830f20d53d",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "1847352a55091354",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 3,
+   "distinctRelativeYVectors": 3,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "KEYS group not of the equal-word/different-y kind: observed order contradicts key/creation rule"
+  },
+  {
+   "cell": "192:opponent",
+   "move": 192,
+   "name": "ZAP_CANNON",
+   "side": "opponent",
+   "weight": 0.00018601190476190475,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     18,
+     17,
+     14,
+     12,
+     11,
+     7,
+     4,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "4f79e2266f427375",
+     "bodies": 0
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "8fb1a9a1e0681f93",
+     "bodies": 0
+    }
+   },
+   "verdict": "INCONCLUSIVE",
+   "why": "no complete identical new body ({\"dragonair-chansey\": 0, \"diglett-chansey\": 0})"
+  },
+  {
+   "cell": "192:player",
+   "move": 192,
+   "name": "ZAP_CANNON",
+   "side": "player",
+   "weight": 0.00018601190476190475,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     23,
+     16,
+     10,
+     8,
+     7,
+     5,
+     2,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "48b97468069432f6",
+     "bodies": 0
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "10136e4ad09b9955",
+     "bodies": 0
+    }
+   },
+   "verdict": "INCONCLUSIVE",
+   "why": "no complete identical new body ({\"dragonair-chansey\": 0, \"diglett-chansey\": 0})"
+  },
+  {
+   "cell": "299:opponent",
+   "move": 299,
+   "name": "BLAZE_KICK",
+   "side": "opponent",
+   "weight": 0.00018601190476190475,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     62,
+     52,
+     32,
+     20,
+     7,
+     5,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "6e960514c427ff06",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "5a8eb5f3a34b2c25",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "299:player",
+   "move": 299,
+   "name": "BLAZE_KICK",
+   "side": "player",
+   "weight": 0.00018601190476190475,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     62,
+     52,
+     32,
+     20,
+     7,
+     5,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "3374596b8aa25b31",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "c2a5c35813fe3d8f",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "312:opponent",
+   "move": 312,
+   "name": "AROMATHERAPY",
+   "side": "opponent",
+   "weight": 0.00018601190476190475,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     48,
+     0
+    ],
+    [
+     33,
+     0
+    ],
+    [
+     15,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "8783b3537a4e4961",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "a347cce2f87aa78e",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "312:player",
+   "move": 312,
+   "name": "AROMATHERAPY",
+   "side": "player",
+   "weight": 0.00018601190476190475,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     33,
+     0
+    ],
+    [
+     20,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "df4ac7e611e19f9b",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "7fa5e7a9d9878861",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "11:opponent",
+   "move": 11,
+   "name": "VICE_GRIP",
+   "side": "opponent",
+   "weight": 0.00017006802721088437,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     33,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "5f978dc7b40c112c",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "6907e16408391620",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "11:player",
+   "move": 11,
+   "name": "VICE_GRIP",
+   "side": "player",
+   "weight": 0.00017006802721088437,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     33,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "50a7bd2cc298f4be",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "bc651b41467368e3",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 2 absolute geometries"
+  },
+  {
+   "cell": "253:opponent",
+   "move": 253,
+   "name": "UPROAR",
+   "side": "opponent",
+   "weight": 0.00017006802721088437,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     39,
+     51,
+     0
+    ],
+    [
+     39,
+     51,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "3cf13155b3f43788",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "c3b870734f9637c5",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 2,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 3 absolute geometries"
+  },
+  {
+   "cell": "253:player",
+   "move": 253,
+   "name": "UPROAR",
+   "side": "player",
+   "weight": 0.00017006802721088437,
+   "oldScenarios": 2,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     39,
+     51,
+     0
+    ],
+    [
+     39,
+     51,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "7b2e41b4c246bd9b",
+     "bodies": 2
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "9e348416bb529ce9",
+     "bodies": 2
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 3,
+   "newBodies": 4,
+   "verdict": "CONFIRMED",
+   "why": "same plan + same relative-y vectors over 3 absolute geometries"
+  },
+  {
+   "cell": "255:opponent",
+   "move": 255,
+   "name": "SPIT_UP",
+   "side": "opponent",
+   "weight": 0.00017006802721088437,
+   "oldScenarios": 2,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     168,
+     132,
+     132,
+     84,
+     84,
+     24,
+     24,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "7c2f18bdbf60cbf5",
+     "bodies": 0
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "73f7f2eab764cae4",
+     "bodies": 0
+    }
+   },
+   "verdict": "INCONCLUSIVE",
+   "why": "no complete identical new body ({\"dragonair-chansey\": 0, \"diglett-chansey\": 0})"
+  },
+  {
+   "cell": "255:player",
+   "move": 255,
+   "name": "SPIT_UP",
+   "side": "player",
+   "weight": 0.00017006802721088437,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     220,
+     220,
+     172,
+     172,
+     112,
+     112,
+     88,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "0e838a3e6e639105",
+     "bodies": 0
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "697d9292f9c57f8b",
+     "bodies": 0
+    }
+   },
+   "verdict": "INCONCLUSIVE",
+   "why": "no complete identical new body ({\"dragonair-chansey\": 0, \"diglett-chansey\": 0})"
+  },
+  {
+   "cell": "284:player",
+   "move": 284,
+   "name": "ERUPTION",
+   "side": "player",
+   "weight": 0.00017006802721088437,
+   "oldScenarios": 1,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     39,
+     0
+    ],
+    [
+     39,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "0e68ce082e99af1a",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "36f75b7b5a5e0dba",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 3,
+   "distinctRelativeYVectors": 2,
+   "distinctAbsoluteYFingerprints": 2,
+   "newBodies": 2,
+   "verdict": "NEEDS-KEYS",
+   "why": "plan differs across geometries (3 distinct plans)"
+  },
+  {
+   "cell": "45:opponent",
+   "move": 45,
+   "name": "GROWL",
+   "side": "opponent",
+   "weight": 0.0,
+   "oldScenarios": 3,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     81,
+     41,
+     0
+    ],
+    [
+     81,
+     41,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "f9962eb0a462c369",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "7a6b83bf4214b42e",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  },
+  {
+   "cell": "45:player",
+   "move": 45,
+   "name": "GROWL",
+   "side": "player",
+   "weight": 0.0,
+   "oldScenarios": 6,
+   "oldAbsFingerprints": 1,
+   "relativeY": [
+    [
+     81,
+     41,
+     0
+    ],
+    [
+     81,
+     41,
+     0
+    ]
+   ],
+   "probes": {
+    "dragonair-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "4659addef21ebb84",
+     "bodies": 1
+    },
+    "diglett-chansey": {
+     "status": "ok",
+     "identical": true,
+     "sha256": "3c1407346d59c4a5",
+     "bodies": 1
+    }
+   },
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "newBodies": 2,
+   "verdict": "INCONCLUSIVE",
+   "why": "all geometries share one absolute-y fingerprint"
+  }
+ ]
+}
