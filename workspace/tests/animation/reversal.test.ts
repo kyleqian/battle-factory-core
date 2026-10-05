@@ -52,6 +52,15 @@ describe("MOVE_REVERSAL complete source-relative reducer", () => {
     )).toEqual([0, 1, 1, 0, 0, 1, 1, 0]);
   });
 
+  it("toggles +ceil(A/2) / -floor(A/2) like the ROM at A = 1, 3, 6 (prep10-analysis.json shake)", () => {
+    const series = (amplitude: number) => Array.from({ length: 12 }, (_, i) =>
+      reversalAtAge(155 + i, "player", { x: 72, y: 98 }, { x: 176, y: 48 },
+        { kind: "resolved-power-shake", amplitude }).targetX2);
+    expect(series(1)).toEqual([1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0]);
+    expect(series(3)).toEqual([2, 2, -1, -1, 2, 2, -1, -1, 2, 2, -1, -1]);
+    expect(series(6)).toEqual([3, 3, -3, -3, 3, 3, -3, -3, 3, 3, -3, -3]);
+  });
+
   it("threads only an already-resolved shake receipt through the typed seam", () => {
     const stage = createSceneOnMovePresentation({
       move: "REVERSAL",

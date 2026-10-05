@@ -1880,9 +1880,11 @@ export interface SceneOnDreamEaterConfig {
 /** Presentation-only geometry for Move_PAIN_SPLIT's bilateral body. */
 export interface SceneOnPainSplitConfig {
   readonly move: "PAIN_SPLIT";
-  readonly attacker: SceneOnPresentationBattler & { readonly species: "MISDREAVUS" };
-  readonly target: SceneOnPresentationBattler & { readonly species: "GENGAR" };
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Live per-side species pic-coords `yOffset` (liveBattlerCoordAttrs); absent = the accepted MISDREAVUS/GENGAR cells. */
+  readonly pictureYOffsets?: Readonly<{ attacker: number; target: number }>;
 }
 
 export interface SceneOnReflectConfig {
@@ -7207,12 +7209,12 @@ export function sceneOnPainSplitView(
       state.age,
       {
         side: state.config.attacker.geometry.side,
-        species: state.config.attacker.species,
+        species: state.config.pictureYOffsets?.attacker ?? state.config.attacker.species as "MISDREAVUS",
         center: state.config.attacker.geometry.animationCenter,
       },
       {
         side: state.config.target.geometry.side,
-        species: state.config.target.species,
+        species: state.config.pictureYOffsets?.target ?? state.config.target.species as "GENGAR",
         center: state.config.target.geometry.animationCenter,
       },
     ),

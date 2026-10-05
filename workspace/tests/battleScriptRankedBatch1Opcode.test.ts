@@ -281,6 +281,22 @@ describe("ranked Batch 1 committed scripts", () => {
     expect(state.rulesContext.battleTextBuff1ByteNumber).toBeGreaterThanOrEqual(4);
   });
 
+  it("Magnitude's MOVE_ANIMATION power is the rolled gBattleMovePower (70 and 110 reachable, never the table 1)", () => {
+    const seen = new Set<string>();
+    for (let seed = 1; seed <= 120; seed += 1) {
+      const state = run("BattleScript_EffectMagnitude", rules(222), seed);
+      const event = state.events.find(
+        (e) => e.kind === "animation" && e.animationId === "MOVE_ANIMATION",
+      );
+      if (event === undefined || event.kind !== "animation") continue;
+      expect(event.arguments[2]).toBe(String(state.rulesContext.dynamicBasePower));
+      expect(event.arguments[2]).not.toBe("1");
+      seen.add(event.arguments[2]!);
+    }
+    expect(seen.has("70")).toBe(true);
+    expect(seen.has("110")).toBe(true);
+  });
+
   it("Magnitude doubles the same seeded hit while its target is Underground", () => {
     const ordinary = run("BattleScript_EffectMagnitude", rules(222), 7);
     const underground = run(

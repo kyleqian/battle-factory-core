@@ -15430,6 +15430,7 @@ export function renderSceneOnMovePresentation(
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     for (const object of objects) object.draw();
 
+    if (liveField) return;
     const playerIsAttacker = view.attacker.geometry.side === "player";
     const player = playerIsAttacker ? view.attacker : view.target;
     const opponent = playerIsAttacker ? view.target : view.attacker;
@@ -21404,14 +21405,14 @@ export function renderSceneOnMovePresentation(
       age: reversalState.age - 2,
     });
     const playerToOpponent =
-      view.attacker.species === "VIGOROTH"
+      (liveField || view.attacker.species === "VIGOROTH")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "DELCATTY"
+      && (liveField || view.target.species === "DELCATTY")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "VIGOROTH"
+      (liveField || view.attacker.species === "VIGOROTH")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "DELCATTY"
+      && (liveField || view.target.species === "DELCATTY")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -21421,7 +21422,7 @@ export function renderSceneOnMovePresentation(
     }
     const vigorothSource = playerToOpponent
       ? reversalArt.vigorothBack : reversalArt.vigorothFront;
-    const vigoroth = playerToOpponent
+    const vigoroth = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? vigorothSource
       : {
           ...vigorothSource,
@@ -21429,7 +21430,7 @@ export function renderSceneOnMovePresentation(
         };
     const delcattySource = playerToOpponent
       ? fakeTearsArt.delcattyFront : fakeTearsArt.delcattyBack;
-    const delcatty = playerToOpponent
+    const delcatty = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? {
           ...delcattySource,
           tileset: subTileset(delcattySource.tileset, 0, 8),
@@ -21532,6 +21533,7 @@ export function renderSceneOnMovePresentation(
       drawDelcatty();
       drawHitEffects();
     }
+    if (liveField) return;
     drawSendOutHealthbox(
       fb,
       0,
@@ -28166,6 +28168,7 @@ export function renderSceneOnMovePresentation(
       || right.order - left.order || right.slot - left.slot);
     for (const entry of entries) entry.draw();
 
+    if (liveField) return;
     const playerIsAttacker = view.attacker.geometry.side === "player";
     const player = playerIsAttacker ? view.attacker : view.target;
     const opponent = playerIsAttacker ? view.target : view.attacker;
@@ -33539,14 +33542,14 @@ export function renderSceneOnMovePresentation(
       age: sparkState.age - 1,
     });
     const playerToOpponent =
-      view.attacker.species === "MINUN"
+      (liveField || view.attacker.species === "MINUN")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "SHUCKLE"
+      && (liveField || view.target.species === "SHUCKLE")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "MINUN"
+      (liveField || view.attacker.species === "MINUN")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "SHUCKLE"
+      && (liveField || view.target.species === "SHUCKLE")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -33555,13 +33558,13 @@ export function renderSceneOnMovePresentation(
     }
     const minunSource = playerToOpponent
       ? encoreArt.minunBack : encoreArt.minunFront;
-    const minun = playerToOpponent
+    const minun = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? minunSource
       : {
           ...minunSource,
           tileset: subTileset(minunSource.tileset, 0, 8),
         };
-    const shuckle = playerToOpponent
+    const shuckle = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? {
           ...selfDestructArt.shuckleFront,
           tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
@@ -33714,6 +33717,7 @@ export function renderSceneOnMovePresentation(
       || tieOrder.indexOf(b.slot) - tieOrder.indexOf(a.slot));
     for (const item of items) item.draw();
 
+    if (liveField) return;
     drawSendOutHealthbox(
       fb,
       0,
@@ -44971,17 +44975,17 @@ export function renderSceneOnMovePresentation(
     const gengarSource = playerToOpponent
       ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GENGAR!
       : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GENGAR!;
-    const misdreavus = playerToOpponent ? misdreavusSource : {
+    const misdreavus = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent ? misdreavusSource : {
       ...misdreavusSource,
       tileset: subTileset(misdreavusSource.tileset, 0, 8),
     };
-    const gengar = playerToOpponent ? {
+    const gengar = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent ? {
       ...gengarSource,
       tileset: subTileset(gengarSource.tileset, 0, 8),
     } : gengarSource;
 
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
-    if (opponentToPlayer && painState.age === 0) {
+    if (!liveField && opponentToPlayer && painState.age === 0) {
       const shadowX = 176 - battleEnemyShadow.width / 2;
       const shadowY = 40 + 29 - battleEnemyShadow.height / 2;
       for (const pixel of battleEnemyShadow.mask) {
@@ -44992,12 +44996,12 @@ export function renderSceneOnMovePresentation(
     const attackerTransform = painSplitDisplayedMatrixTransform(
       painState.age,
       view.attacker.geometry.side,
-      "MISDREAVUS",
+      painState.config.pictureYOffsets?.attacker ?? "MISDREAVUS",
     );
     const targetTransform = painSplitDisplayedMatrixTransform(
       painState.age,
       view.target.geometry.side,
-      "GENGAR",
+      painState.config.pictureYOffsets?.target ?? "GENGAR",
     );
     const drawBattler = (
       sprite: { tileset: Tileset; palette: RgbColor[] },
@@ -45035,6 +45039,7 @@ export function renderSceneOnMovePresentation(
       );
     }
 
+    if (liveField) return;
     drawSendOutHealthbox(
       fb,
       0,
@@ -51467,7 +51472,8 @@ export function renderSceneOnMovePresentation(
     };
     const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
     const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
-    const playerArt = battlerArt(player), opponentArt = battlerArt(opponent);
+    const playerArt = liveField ? liveSceneOnBattlerArt(player) : battlerArt(player);
+    const opponentArt = liveField ? liveSceneOnBattlerArt(opponent) : battlerArt(opponent);
     const drawBySlot = new Map<number, () => void>([
       [view.allocator.playerSpriteSlot, () => drawSpriteSheet(
         fb, playerArt.tileset, playerArt.palette,
@@ -51482,6 +51488,7 @@ export function renderSceneOnMovePresentation(
     ]);
     for (const slot of view.allocator.painterOrder) drawBySlot.get(slot)?.();
 
+    if (liveField) return;
     const profile = magnitudeState.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species, level: 50, gender: profile.opponentGender ?? "none",

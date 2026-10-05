@@ -76,3 +76,23 @@ describe("MOVE_PAIN_SPLIT source-relative presentation", () => {
     expect(readFileSync(output)).toEqual(readFileSync(resolve("src/animation/assets/pain-split.json")));
   });
 });
+
+describe("Pain Split closed-form battler y2 (prep10 s3.4, ROM 24/24)", () => {
+  const phaseY2 = (side: "player" | "opponent", picture: Parameters<typeof painSplitAtAge>[1]["species"]) =>
+    [20, 45, 70].map((age) => painSplitAtAge(age, { side, species: picture, center: { x: 0, y: 0 } },
+      { side: side === "player" ? "opponent" : "player", species: 5, center: { x: 0, y: 0 } }).attackerTransform.y2);
+  it("equals the four accepted species cells when the pic-coords yOffset is supplied directly", () => {
+    expect(phaseY2("player", "MISDREAVUS")).toEqual(phaseY2("player", 10));
+    expect(phaseY2("opponent", "MISDREAVUS")).toEqual(phaseY2("opponent", 12));
+    expect(phaseY2("player", "GENGAR")).toEqual(phaseY2("player", 9));
+    expect(phaseY2("opponent", "GENGAR")).toEqual(phaseY2("opponent", 5));
+    expect(phaseY2("player", 10)).toEqual([4, 18, 18]);
+    expect(phaseY2("opponent", 12)).toEqual([4, 2, 2]);
+    expect(phaseY2("player", 9)).toEqual([5, 18, 18]);
+    expect(phaseY2("opponent", 5)).toEqual([5, 3, 3]);
+  });
+  it("pins the DUSCLOPS cells (player yOffset 8, opponent 5): [5,18,18] / [5,3,3]", () => {
+    expect(phaseY2("player", 8)).toEqual([5, 18, 18]);
+    expect(phaseY2("opponent", 5)).toEqual([5, 3, 3]);
+  });
+});

@@ -290,6 +290,16 @@ const HOLD_EFFECT_TO_TYPE: ReadonlyArray<readonly [string, string]> = [
  * applied (see module doc comment) - always off in this engine.
  */
 export function calculateBaseDamage(input: DamageCalcInput): number {
+  return calculateBaseDamageWithPower(input).damage;
+}
+
+/**
+ * `calculateBaseDamage` plus the final `gBattleMovePower` it computed (after the
+ * pinch-ability boost; presentation-only, never read by gameplay).
+ */
+export function calculateBaseDamageWithPower(
+  input: DamageCalcInput,
+): { readonly damage: number; readonly movePower: number } {
   const { attacker, defender, moveType, isCriticalHit } = input;
   let damage: number;
 
@@ -478,7 +488,7 @@ export function calculateBaseDamage(input: DamageCalcInput): number {
   // the weather block) - confirmed against the committed RAM dump: Rock
   // Slide's actual pre-STAB gBattleMoveDamage is 32, not floor(...)=30 -
   // see docs/battle-turn-notes.md §10.
-  return damage + 2;
+  return { damage: damage + 2, movePower };
 }
 
 /** sCriticalHitChance (battle_script_commands.c:606): chance is 1-in-N per stage. */

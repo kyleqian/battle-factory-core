@@ -349,3 +349,29 @@ describe("BattleScript_EffectFlail shared Reversal terminal walk", () => {
     ]);
   });
 });
+
+describe("MOVE_ANIMATION power argument is gBattleMovePower (prep10 §1)", () => {
+  function animationPower(state: BattleScriptMachineState<BattleScriptRulesContext>): string {
+    const event = state.events.find(
+      (candidate) => candidate.kind === "animation" && candidate.animationId === "MOVE_ANIMATION",
+    );
+    if (event === undefined || event.kind !== "animation") throw new Error("no MOVE_ANIMATION");
+    return event.arguments[2]!;
+  }
+
+  it.each([
+    [48, "20"],
+    [20, "40"],
+    [10, "80"],
+    [1, "200"],
+  ])("Reversal at hp %i/48 carries the dynamic power %s, not the table power", (hp, power) => {
+    const state = runToTerminal(context(MOVE_REVERSAL, { hp, maxHP: 48 }));
+    expect(animationPower(state)).toBe(power);
+    expect(state.rulesContext.battleMovePower).toBe(Number(power));
+  });
+
+  it("Flail carries the same register and an unmodified table move keeps its table power", () => {
+    const state = runToTerminal(context(MOVE_FLAIL, { hp: 5, maxHP: 48 }));
+    expect(animationPower(state)).toBe("100");
+  });
+});

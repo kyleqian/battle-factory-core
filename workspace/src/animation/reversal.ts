@@ -123,7 +123,8 @@ function targetShakeX2(
 ): number {
   if (age < 155 || age > 168) return 0;
   const toggle = Math.floor((age - 155) / 2);
-  return toggle % 2 === 0 ? receipt.amplitude : 0;
+  // ShakeTargetBasedOnMovePowerOrDmg: +ceil(A/2) / -floor(A/2) (prep10 s3.2; identical to flail.ts).
+  return toggle % 2 === 0 ? Math.ceil(receipt.amplitude / 2) : 0 - Math.floor(receipt.amplitude / 2);
 }
 
 /**

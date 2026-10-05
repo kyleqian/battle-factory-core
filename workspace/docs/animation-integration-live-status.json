@@ -2955,6 +2955,85 @@
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
+    },
+    {
+      "move": "MOVE_MAGNITUDE",
+      "id": 222,
+      "sourceFieldEvidence": "../tools/integration/fixtures/prep10-live-adapter-receipt.json",
+      "liveEvidence": [
+        "dense 6/6 zero residual twice (regular 70 / intense 110, GRAVELER + BARBOACH + CAMERUPT, both orientations); request.power = gBattleMovePower"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "lent-order gate",
+        "ordinary command-input replay: see the receipt"
+      ]
+    },
+    {
+      "move": "MOVE_REVERSAL",
+      "id": 179,
+      "sourceFieldEvidence": "../tools/integration/fixtures/prep10-live-adapter-receipt.json",
+      "liveEvidence": [
+        "dense 6/6 zero residual twice (powers 20/40/80 = A 1/3/6; both orientations; alternate RAICHU target)"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "reducer toggle fixed to +ceil(A/2)/-floor(A/2)",
+        "ordinary command-input replay: see the receipt"
+      ]
+    },
+    {
+      "move": "MOVE_PAIN_SPLIT",
+      "id": 220,
+      "sourceFieldEvidence": "../tools/integration/fixtures/prep10-live-adapter-receipt.json",
+      "liveEvidence": [
+        "dense 4/4 zero residual twice (MISDREAVUS + DUSCLOPS, both orientations); closed-form y2 from per-side pic yOffset"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay: see the receipt"
+      ]
+    },
+    {
+      "move": "MOVE_ROCK_BLAST",
+      "id": 350,
+      "sourceFieldEvidence": "../tools/integration/fixtures/prep10-live-adapter-receipt.json",
+      "liveEvidence": [
+        "dense 10/10 zero residual twice (RHYHORN + OCTILLERY, 3 player hits / 2 opponent hits)"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "lent-order gate (later hits need the tracker's cross-body order)",
+        "ordinary command-input replay: see the receipt"
+      ]
+    },
+    {
+      "move": "MOVE_RAZOR_WIND",
+      "id": 13,
+      "sourceFieldEvidence": "../tools/integration/fixtures/prep10-live-adapter-receipt.json",
+      "liveEvidence": [
+        "dense 8 fixtures twice: 7 zero residual; ABSOL opponent-attacker unleash has 23 px at age 18 (1 row)"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ABSOL opponent-attacker unleash age 18: 23 px residual (unresolved)",
+        "order-independent: ungated (the setup body is not a tracked body)",
+        "ordinary command-input replay: see the receipt"
+      ]
+    },
+    {
+      "move": "MOVE_SPARK",
+      "id": 209,
+      "sourceFieldEvidence": "../tools/integration/fixtures/prep10-live-adapter-receipt.json",
+      "liveEvidence": [
+        "dense 3/3 zero residual twice (MINUN + PLUSLE + CHINCHOU player attacker)"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "opponent attacker NOT live (unproven side constants, prep10 s3.5)",
+        "window ends 2 rows before the script end; hardwareTieSlotOrder is an accepted constant",
+        "ordinary command-input replay: see the receipt"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -2977,7 +3056,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 198,
+  "implementedCount": 204,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
