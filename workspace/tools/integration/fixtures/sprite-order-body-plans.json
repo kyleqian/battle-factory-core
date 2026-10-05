@@ -164,6 +164,16 @@
   345,
   347
  ],
+ "liveIdOrientationCells": {
+  "EXACT-PLAN": 216,
+  "NEEDS-KEYS": 59,
+  "NOT-OBSERVED": 13
+ },
+ "promptCycle": {
+  "created [3, 4] destroyed [3, 4] class FDERIVED priorityWord 782 y -96": 20,
+  "created [3, 4] destroyed [4, 3] class FDERIVED priorityWord 782 y -96": 8
+ },
+ "bodiesWithTwoOrMoreScenarios": 72,
  "bodies": {
   "0:any": {
    "scenarios": 145,

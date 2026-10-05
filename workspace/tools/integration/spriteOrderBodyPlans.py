@@ -326,7 +326,8 @@ def markdown(out):
         if r is None:
             return "—"
         c = r["groupClasses"]
-        bits = ",".join(f"{k[0]}{v}" for k, v in sorted(c.items()) if k != "KEYS" and v) if c else "no multi-destroy"
+        lab = {"STATIC": "static", "FDERIVED": "tie"}
+        bits = ", ".join(f"{lab[k]}x{v // r['scenarios']}" for k, v in sorted(c.items()) if k in lab and v) or "single-slot only"
         if r["verdict"] == "EXACT-PLAN":
             return f"EXACT ({bits}; n={r['scenarios']})"
         why = sorted({SHORT.get(x, x) for x in r["keysReasons"]}) or ["plan varies between scenarios"]
@@ -451,11 +452,33 @@ def main(argv):
                 continue
             planw = [dict(pw_, cls=ow.get("cls", "SINGLE")) for pw_, ow in zip(plan, tw)]
             sim.apply_unit(planw, None)
+    # ---- prompt cycle: cursor pair create + destroy inside one gap (turn boundary)
+    pc = collections.Counter()
+    for sc in SC:
+        if not sc["entryMatchesProvider"]:
+            continue
+        for u in sc["units"]:
+            if u["kind"] != "gap":
+                continue
+            for i, w in enumerate(u["windows"]):
+                if "C" in w and len(w["C"]) == 2:
+                    pair = [x[0] for x in w["C"]]
+                    w2 = next((x for x in u["windows"][i + 1:] if "D" in x and set(x["D"]) == set(pair)), None)
+                    if w2:
+                        cls = classify_group(w2["G"])[0]
+                        pc[f"created {pair} destroyed {w2['D']} class {cls} priorityWord {w2['G'][0][1]} y {w2['G'][0][2]}"] += 1
+    cells = collections.Counter()
+    for m in lives:
+        for side in ("opponent", "player"):
+            r = brow.get(f"{m}:{side}") or brow.get(f"{m}:unattributed")
+            cells["NOT-OBSERVED" if r is None else r["verdict"]] += 1
     out = {"schema": "sprite-order-body-plans/v1", "table": {"scenarios": len(SC), "sha256": hashlib.sha256(TABLE.read_bytes()).hexdigest()},
            "tokens": "('n',k)=k-th sprite created by this unit (creation order: lowest-free ascending then end descending); ('c',ago,k)=survivor k of the unit `ago` units earlier (units alternate body,gap); ('o',slot)=occupant that predates every unit",
            "groupClasses": "SINGLE | STATIC (distinct priority words) | FDERIVED (tied keys; creation window then free-order index) | KEYS",
            "replay": dict(stat), "replayMismatches": bad_edges[:20],
-           "liveIds": sorted(lives), "bodies": brow, "gaps": grow}
+           "liveIds": sorted(lives), "liveIdOrientationCells": dict(cells), "promptCycle": dict(pc),
+           "bodiesWithTwoOrMoreScenarios": sum(r["scenarios"] > 1 for r in brow.values()),
+           "bodies": brow, "gaps": grow}
     covered = {int(k.split(":")[0]) for k in brow}
     out["liveNotObserved"] = sorted(lives - covered)
     print(json.dumps({"bodyVerdicts": collections.Counter(r["verdict"] for r in brow.values()),
