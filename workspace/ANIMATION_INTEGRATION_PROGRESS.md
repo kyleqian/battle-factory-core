@@ -132,7 +132,19 @@
   cancelled party menu or a voluntary switch the role relabel is exact (45 edges, 0 mismatches;
   12/12 what-ifs); the provisional recall unit is promoted (18 edges). Supervisor reran
   voluntary-cancel-slot1 (identical) + Swift O 80/80, Sunny Day P 158/158.
-- Running: voluntary-switch lends (production); elevated-opponent post-body audit (side).
+- Folded Opus worker `1f1202568` (src tree `d4bccd58`): voluntary-switch lends — roles after the
+  both-battlers reshow (cancelled menu / return from choosing), the player's voluntary recall
+  (`RETURNATKTOBALL`, battler 0, synthesized `BattleScript_ActionSwitch`) maps to the promoted
+  `switch-out` unit, allocator re-seed at the cancel return; opponent AI switches, Pursuit,
+  Baton Pass still invalidate. 13/15 drafts exact twice fresh (2,132 rows); 2 later Light Screens
+  decline (allocator history lost after earlier non-net-zero bodies, as on master). Supervisor:
+  Light Screen after cancel 88 / Thunderbolt O 237 / Swift O 80 exact twice fresh; seed-16 switch
+  and cancel routes rules + RNG parity 0 mismatches. Receipt `voluntary-lend-receipt.json`.
+- Elevated-opponent post-body audit (`c8ad855cc`, `docs/elevated-postbody-audit.md`): ordinary
+  resolution frames draw elevated opponents 8 px low without their shadow (ISSUES #147; every
+  ordinary frame, before and after bodies); script-end shadow-return table over 214 fixtures;
+  2-line patch proof (supervisor reran Whirlwind BUTTERFREE: post-body 0/30 -> 30/30).
+- Running: Scene OFF check for the elevated renderer (side); then the #147 fix (production).
 
 ## 2026-10-05 (wind-down) — CASTFORM fix + order table 445 bodies
 
