@@ -140,7 +140,7 @@
       },
       "moveTextStartAge": -30
     },
-    "order": "spriteOrderSeed (64) provider [...occupiedPrefix, ...F] == accepted literal (GROVYLE_TO_ONIX_ROCK_SLIDE_ORDER_SEED) == observed at the activation edge in both lab orientations; pixel-neutral anyway (0/40 arbitrary seeds, 143/143 model==ROM)",
+    "order": "spriteOrderSeed (64) provider [...occupiedPrefix, ...F] == accepted literal (GROVYLE_TO_ONIX_ROCK_SLIDE_ORDER_SEED) == observed at the activation edge in both lab orientations; pixel-neutral anyway (0/40 arbitrary seeds, 143/143 model==ROM). PIXEL-VERIFIED: accepted opponent-attacker reducer has 0 differing pixels over 175 ages on a first-body GROVYLE->ONIX lab run (prep7-firstbody-pixels.json)",
     "slotAudit": {
       "spawnFrames": 20,
       "spawnFramesFirstFree": 20,

@@ -80,7 +80,7 @@
         ]
       }
     },
-    "order": "1-bit/1-frame: allocationOrder derived from the provider = [1,0,2,5,4,3] reproduces the ROM front-to-back orb order [4,3,5,9,7] at window age 20 (prep7-reducer-checks.json); the accepted literal [0..5] gives [3,4,5,7,9] there and still passes its pixel test, so that frame is pixel-neutral",
+    "order": "1-bit/1-frame: allocationOrder derived from the provider = [1,0,2,5,4,3] reproduces the ROM front-to-back orb order [4,3,5,9,7] at window age 20 (prep7-reducer-checks.json); the accepted literal [0..5] gives [3,4,5,7,9] there and still passes its pixel test, so that frame is pixel-neutral. PIXEL-VERIFIED on the accepted first-body lab runs: both [0..5] and the derived order have 0 differing pixels over 142 ages in both orientations (prep7-firstbody-pixels.json)",
     "slotAudit": {
       "spawnFrames": 2,
       "spawnFramesFirstFree": 2,

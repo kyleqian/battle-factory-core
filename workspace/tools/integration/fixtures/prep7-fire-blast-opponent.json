@@ -71,7 +71,7 @@
         "targetSpriteSlot": 6
       }
     },
-    "order": "FIRST-BODY ORDER = provider [...occupiedPrefix, ...F] (== observed 64-entry order at the activation edge, 2/2 first-body scenarios); reducer literal FIRE_BLAST_ORDER_SEED differs from it only in the relative order of slots 3/4 (A vs B) and A vs B changes 0 of 197 frames (prep6-order-seed.json; fb1-* dumps seedAvsBDiffFrames 0)",
+    "order": "FIRST-BODY ORDER = provider [...occupiedPrefix, ...F] (== observed 64-entry order at the activation edge, 2/2 first-body scenarios); reducer literal FIRE_BLAST_ORDER_SEED differs from it only in the relative order of slots 3/4 (A vs B) and A vs B changes 0 of 197 frames (prep6-order-seed.json; fb1-* dumps seedAvsBDiffFrames 0). PIXEL-VERIFIED on first-body lab runs: the accepted reducer (seed A) has 0 differing pixels over 197 ages in both orientations outside the HUD (prep7-firstbody-pixels.json)",
     "slotAudit": {
       "spawnFrames": 12,
       "spawnFramesFirstFree": 12,

@@ -23,3 +23,14 @@ p.update({"species": 95, "moves": [104] * 4, "item": 0, "gender": "male"}); p["e
 o.update({"species": 278, "moves": [33] * 4}); o["ivs"]["speed"] = 0
 (OUT / "mechanic-double-team-onix-grovyle-firstbody.json").write_text(json.dumps(d, indent=2) + "\n")
 print("wrote double-team-onix-grovyle-firstbody")
+# First-body pixel scenarios for the order consumers with accepted species pairs (renderer gates): Fire Blast OCTILLERY(224)<->ONIX, Rock Slide GROVYLE(278) -> ONIX. Attacker is made faster than the Tackle-only target.
+def species_pair(template, atk_side, atk_species, tgt_species, move, name):
+    d = json.loads((ROOT / "tools/battle-lab" / template).read_text())
+    a, t = d["overrides"]["parties"][atk_side][0], d["overrides"]["parties"]["opponent" if atk_side == "player" else "player"][0]
+    a.update({"species": atk_species, "moves": [move] * 4, "item": 0, "gender": "male"}); a["evs"].update({"speed": 255, "spDefense": 0, "hp": 255}); a["ivs"]["speed"] = 31
+    t.update({"species": tgt_species, "moves": [33] * 4}); t["ivs"]["speed"] = 0
+    (OUT / f"{name}.json").write_text(json.dumps(d, indent=2) + "\n")
+species_pair("mechanic-dragon-dance-player-dragonair-opponent-onix.json", "player", 224, 95, 126, "mechanic-fire-blast-player-octillery-onix-firstbody")
+species_pair("mechanic-dragon-dance-opponent-dragonair-player-onix.json", "opponent", 224, 95, 126, "mechanic-fire-blast-opponent-octillery-onix-firstbody")
+species_pair("mechanic-dragon-dance-opponent-dragonair-player-onix.json", "opponent", 278, 95, 157, "mechanic-rock-slide-opponent-grovyle-onix-firstbody")
+print("wrote species-pair first-body scenarios")
