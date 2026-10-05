@@ -1,0 +1,66 @@
+{
+  "schema": "order-consumer-adapter-draft/v1",
+  "move": "EMBER",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "scenario": "tools/battle-lab/mechanic-ember-player-onix-opponent-murkrow.json",
+  "attacker": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player"
+    }
+  },
+  "target": {
+    "species": "MURKROW",
+    "geometry": {
+      "side": "opponent"
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 117,
+    "opponentHp": 142,
+    "playerStatus": "none",
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
+  "orientation": "player-back ONIX -> opponent-front MURKROW",
+  "denseWindow": {
+    "startFrame": 388,
+    "endFrame": 450,
+    "ageOffset": 0
+  },
+  "draft": {
+    "activationFrame": 384,
+    "scriptEndFirstInactive": 453,
+    "shadowRow": -4,
+    "shadowRowInMap": false,
+    "expectedDuration": 63,
+    "consumedByTest": false,
+    "acceptedWindow": {
+      "startFrame": 388,
+      "endFrame": 450,
+      "firstFramePresentationAge": 0
+    },
+    "windowEndMinusScriptEnd": -3,
+    "derivedAttacker": {
+      "animationCenter": {
+        "x": 72,
+        "y": 88
+      },
+      "battlePositionCenter": {
+        "x": 72,
+        "y": 80
+      }
+    },
+    "verdict": "READY (provider-independent)",
+    "orderField": "none: ember.ts:174-199 sorts equal-Y embers/flares by creationOrder (earlier created = frontmost)",
+    "orderProviderCall": "none. Every tie pair is created in a different sort window (6 frames apart: createFrames 1 slot each), so a later sprite always sorts behind an equal-key earlier one regardless of F",
+    "orderMeasurement": "order-consumer-truth.json (EMBER): reducer painter order == observed sSpriteOrder on 45/45 compared ages at nominal alignment, both orientations (0 differ)",
+    "orderValidation": {
+      "providerValid": true,
+      "edgeMatchesObserved": true,
+      "firstCreateFrame": 2394,
+      "firstCreateMatchesObserved": true
+    },
+    "pins": "tools/integration/fixtures/order-consumer-pins.json"
+  }
+}

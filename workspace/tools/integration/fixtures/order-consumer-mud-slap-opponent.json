@@ -1,0 +1,99 @@
+{
+  "schema": "order-consumer-adapter-draft/v1",
+  "move": "MUD_SLAP",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "scenario": "tools/battle-lab/mechanic-mud-slap-pidgeotto-onix.json",
+  "attacker": {
+    "species": "PIDGEOTTO",
+    "geometry": {
+      "side": "opponent"
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player"
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 117,
+    "opponentHp": 156,
+    "playerStatus": "none",
+    "playerGender": "female"
+  },
+  "orientation": "opponent-front PIDGEOTTO -> player-back ONIX",
+  "denseWindow": {
+    "startFrame": 84,
+    "endFrame": 134,
+    "ageOffset": 45
+  },
+  "draft": {
+    "activationFrame": 81,
+    "scriptEndFirstInactive": 132,
+    "shadowRow": 42,
+    "shadowRowInMap": true,
+    "expectedDuration": 96,
+    "consumedByTest": false,
+    "acceptedWindow": {
+      "startFrame": 84,
+      "endFrame": 134,
+      "firstFramePresentationAge": 45
+    },
+    "windowEndMinusScriptEnd": 2,
+    "derivedAttacker": {},
+    "verdict": "READY-WITH-PROVIDER",
+    "orderField": "animationProfile.spriteOrderSeed (64 entries; mudSlap.ts:16, :89 `order = seed.slice()`)",
+    "orderProviderCall": "[...occupiedPrefix, ...F] with F taken AFTER the body plan prefix [C n0 (slot 3, act+4), D n0 (act+8)] i.e. the frame before the 6-slot mud create window (act+9): head [3,4,21,20,5,...]; NOT the first create window (F head [4,3,...])",
+    "orderMeasurement": "order-consumer-seeds.json: literal == provider == observed at exactly that frame (2/2) and not at the first create; seed sensitivity: reversed/ascending/rotated tails change 21-41 ages (all with overlapping flips), swap(3,4) 0",
+    "orderValidation": {
+      "providerValid": true,
+      "edgeMatchesObserved": true,
+      "firstCreateFrame": 2091,
+      "firstCreateMatchesObserved": true,
+      "acceptedLiteralSource": "tools/compare/fixtures/mud-slap-pidgeotto-onix.json animationProfile.spriteOrderSeed",
+      "providerMatchesLiteral": false,
+      "observedMatchesLiteral": false,
+      "frameChecked": 2090,
+      "framesLiteralEqualsProvider": [
+        [
+          2095,
+          2095
+        ]
+      ],
+      "occupiedPrefixEqualsObserved": true,
+      "matchBeforeEachCreateWindow": [
+        [
+          2091,
+          1,
+          false
+        ],
+        [
+          2096,
+          6,
+          true
+        ],
+        [
+          2100,
+          5,
+          false
+        ],
+        [
+          2104,
+          5,
+          false
+        ],
+        [
+          2108,
+          5,
+          false
+        ],
+        [
+          2112,
+          5,
+          false
+        ]
+      ]
+    },
+    "pins": "tools/integration/fixtures/order-consumer-pins.json"
+  }
+}
