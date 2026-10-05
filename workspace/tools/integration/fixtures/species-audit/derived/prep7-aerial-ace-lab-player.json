@@ -5,7 +5,7 @@
   "playerStatus": "none",
   "playerMaxHp": 168,
   "opponentMaxHp": 187,
-  "playerGender": "male",
+  "playerGender": "female",
   "opponentGender": "male"
  },
  "schema": "prep7-adapter-draft/v1",

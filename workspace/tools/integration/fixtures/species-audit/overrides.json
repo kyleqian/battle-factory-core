@@ -1,0 +1,4 @@
+{
+ "prep7-aerial-ace-lab-player": {"fieldProfile": {"playerGender": "female"}, "why": "swapped-scenario ROM healthbox shows the player DRAGONAIR as female (source frame 77 px ff9c94 at x186-190,y79-86; live drew male)"},
+ "prep7-ice-punch-lab-player": {"fieldProfile": {"playerGender": "female"}, "why": "same lab base: ROM DRAGONAIR is female in the swapped scenario"}
+}

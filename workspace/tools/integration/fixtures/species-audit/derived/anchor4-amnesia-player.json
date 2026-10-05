@@ -5,7 +5,7 @@
  "scenario": "tools/battle-lab/species-audit-golem-anchor4-amnesia-player.json",
  "sourceWindow": {
   "startFrame": 212,
-  "endFrame": 427
+  "endFrame": 426
  },
  "attacker": {
   "species": "TORKOAL",
