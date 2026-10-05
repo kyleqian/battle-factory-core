@@ -1,5 +1,23 @@
 # Animation integration progress
 
+## 2026-10-05 — prep6 batch folded: 173 live adapters; prep8 prep
+
+- Folded worker `776478118` as `91e78cb74` (src `5a9ef5cdf`): Rock Tomb,
+  Safeguard, Sweet Scent (reducer age = live − 4), Self-Destruct, Swallow
+  (stockpile = request.turn), Knock Off (ageOffset −11), Faint Attack (player
+  attacker only). Supervisor dense 20 fixtures twice fresh, 2,771 rows/run,
+  zero residual; routes 8/8 PASS. Receipt `prep6-supervisor-receipt.json`.
+- Limit to resolve: Faint Attack's last 16 ages (fade back from the dark
+  background) differ by one script frame between BattleLab-context renders
+  and the accepted staged probe; the adapter matches the staged probe.
+- prep8 measured prep (`a6d0bb7d8`, `docs/next-adapters-prep8.md`): Swift,
+  Trick, Thunderbolt, Frustration, Horn Drill, Seismic Toss, Aurora Beam,
+  Stockpile, Uproar, Zap Cannon all READY (allocator literals = ROM plan;
+  order pixel-neutral except Zap Cannon ≤4/117 frames); gate on the lent
+  order (`spriteOrderInput.known`), no new provider module needed.
+- Running: prep7 batch (integration); order-policy gaps (stat-before-body,
+  Intimidate entry, Endeavor plan) evidence (side).
+
 ## 2026-10-05 — cross-body sprite-order tracking live
 
 - Folded Opus worker `a7753047a` (code `35c7f902f`) as `27ae6f331`: event-driven
