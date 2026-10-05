@@ -1,0 +1,123 @@
+{
+ "schema": "sprite-order-rely-replay/v1",
+ "relyScenarios": 699,
+ "relyRunsNotIdenticalSkipped": 0,
+ "corpora": {
+  "ext (committed+ext tables)": {
+   "scenarios": 573,
+   "replay": {
+    "no overlay": {
+     "edges": 1366,
+     "known": 1053,
+     "exact": 1053,
+     "mismatched": 0,
+     "mismatches": [],
+     "overlayRowEdgesExact": 0,
+     "overlayRowsExercised": 0
+    },
+    "+ policy-gaps rows": {
+     "edges": 1366,
+     "known": 1056,
+     "exact": 1056,
+     "mismatched": 0,
+     "mismatches": [],
+     "overlayRowEdgesExact": 3,
+     "overlayRowsExercised": 2
+    },
+    "+ policy-gaps + rely confirmed tier": {
+     "edges": 1366,
+     "known": 1110,
+     "exact": 1110,
+     "mismatched": 0,
+     "mismatches": [],
+     "overlayRowEdgesExact": 72,
+     "overlayRowsExercised": 62
+    },
+    "+ policy-gaps + all rely rows": {
+     "edges": 1366,
+     "known": 1119,
+     "exact": 1119,
+     "mismatched": 0,
+     "mismatches": [],
+     "overlayRowEdgesExact": 94,
+     "overlayRowsExercised": 84
+    }
+   }
+  },
+  "union (ext + rely probes)": {
+   "scenarios": 1272,
+   "replay": {
+    "no overlay": {
+     "edges": 2705,
+     "known": 1885,
+     "exact": 1885,
+     "mismatched": 0,
+     "mismatches": [],
+     "overlayRowEdgesExact": 0,
+     "overlayRowsExercised": 0
+    },
+    "+ policy-gaps rows": {
+     "edges": 2705,
+     "known": 1891,
+     "exact": 1891,
+     "mismatched": 0,
+     "mismatches": [],
+     "overlayRowEdgesExact": 8,
+     "overlayRowsExercised": 4
+    },
+    "+ policy-gaps + rely confirmed tier": {
+     "edges": 2705,
+     "known": 2158,
+     "exact": 2158,
+     "mismatched": 0,
+     "mismatches": [],
+     "overlayRowEdgesExact": 360,
+     "overlayRowsExercised": 64
+    },
+    "+ policy-gaps + all rely rows": {
+     "edges": 2705,
+     "known": 2201,
+     "exact": 2201,
+     "mismatched": 0,
+     "mismatches": [],
+     "overlayRowEdgesExact": 449,
+     "overlayRowsExercised": 86
+    }
+   }
+  }
+ },
+ "coverage": {
+  "before (plans-ext)": {
+   "weightedPercent": {
+    "EXACT": 68.19,
+    "NEEDS-KEYS": 30.86,
+    "NOT-OBSERVED": 0.95
+   },
+   "exactCells": 372
+  },
+  "+ policy-gaps rows (283/313)": {
+   "weightedPercent": {
+    "EXACT": 68.67,
+    "NEEDS-KEYS": 30.6,
+    "NOT-OBSERVED": 0.73
+   },
+   "exactCells": 376
+  },
+  "+ policy-gaps + rely confirmed tier": {
+   "weightedPercent": {
+    "EXACT": 80.63,
+    "NEEDS-KEYS": 18.64,
+    "NOT-OBSERVED": 0.73
+   },
+   "exactCells": 436
+  },
+  "+ policy-gaps + all rely rows": {
+   "weightedPercent": {
+    "EXACT": 83.67,
+    "NEEDS-KEYS": 15.61,
+    "NOT-OBSERVED": 0.73
+   },
+   "exactCells": 456
+  }
+ }
+}
