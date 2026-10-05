@@ -1,5 +1,47 @@
 # Animation integration progress
 
+## 2026-10-04 (night) — H_BUFFER S1 folded: 151 live adapters
+
+- Folded worker `8c5c734a9` as `5fd7ea33b` (src tree `c449f3775`): Mean Look,
+  Smelling Salt (ad-hoc shadow retired), Defense Curl (animationCenter =
+  battlePositionCenter + (0,6)), Ingrain, Wrap, Bind (shadow row +2, the first
+  non-zero row; shared hook needs no change), Dragon Breath (ageOffset −2,
+  85 rows, duration 83). Bind/Dragon Breath attackers are drawn without the
+  front idle rest offset (ROM-exact on ONIX, rest x2=1). No palette plans.
+- Supervisor dense: 14 fixtures + Ingrain/LILEEP, Mean Look/SABLEYE, Defense
+  Curl/SANDSHREW (windows = alt activation + accepted offset, `altSpecies7.py`)
+  twice fresh, 1,883 rows/run, zero residual. Routes 7/7 exact ON/OFF parity
+  (Bind/Wrap prep seeds missed; re-picked hitting seeds, same carriers).
+  Receipt `hbuffer-s1-supervisor-receipt.json`.
+- Limits: Bind/Wrap end-of-turn trap animation (separate status body) not
+  covered; Smelling Salt/Wrap/Bind/Dragon Breath proven on accepted species only.
+
+## 2026-10-04 (night) — free-slot sprite-order provider: module + evidence
+
+- `src/engine/spriteOrderProvider.ts` (design §4 slice 1, `4304d0fb5`): pure
+  frozen `SpriteOrderState`; TS corpus replay 80,370/0 frames (2×40,185) and
+  112/112 activation heads; `KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER` checked in all
+  44 raw files; `knownEntrySpriteOrderState` replays the 78 entry sort windows.
+  Not wired into any adapter yet.
+- Ordinary Factory entry ROM-confirmed (`0ead026e7`,
+  `docs/sprite-order-factory-entry.md`): canonical draft → battle 1
+  (`traces-groundtruth/battle1-turn1.json`) plus an RNG-shifted variant (other
+  opponent lead and first move), two byte-identical runs each (supervisor fresh
+  rerun identical): same 78 windows, same first-action free order, allocator
+  `ordinary-factory` occupants confirmed. Different player rentals and battle 2+
+  are not covered.
+- Body/gap order plans (`dc7cf6445`, `docs/sprite-order-body-plans.md`,
+  reproduce `python3 tools/integration/spriteOrderBodyPlans.py --write`,
+  supervisor rerun unchanged): 350 scenarios; live cells 216 EXACT-PLAN / 59
+  NEEDS-KEYS / 13 not observed; 107 live ids exact both sides. Plan-only replay
+  from the known entry: 659/659 edges exact (321 later actions). Ember,
+  Flamethrower, Rock Throw, Dragon Rage, Shadow Punch bodies are EXACT; Blaze
+  Kick, Mud Slap, Sand Attack, Grudge, Dive, Heal Bell, Perish Song, Leaf Blade
+  bodies need live keys (usable as targets only). Battles with an entry ability
+  animation (12 scenarios) start from a different order and must invalidate.
+- Next: order-consumer measured prep (side lane), then the integration wiring
+  step (provider in the live host + body/gap tables + first consumer).
+
 ## 2026-10-04 (evening 2) — prep2 batch folded: 144 live adapters
 
 - Folded worker `773aca6f7` (tested code `ee469399c`, src tree `702752ac5`):
