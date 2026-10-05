@@ -10,8 +10,21 @@ import {
 } from "../../src/engine/liveMoveAnimation.ts";
 import type { GbaButton } from "../../src/input.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
+import type { LiveSpriteOrderHost } from "../../src/engine/liveSpriteOrderHost.ts";
 
 class StallError extends Error {}
+
+export interface OrderHostView {
+  known: boolean; free: readonly number[]; occupied: readonly number[]; invalidReason: string | null;
+  battlerSlots: Readonly<{ player: number | null; opponent: number | null }>;
+  cursor: Readonly<{ requestId: number; segmentIndex: number; nextEventIndex: number; drained: boolean }> | null;
+}
+function orderHostView(host: LiveSpriteOrderHost | undefined): OrderHostView | undefined {
+  if (!host) return undefined;
+  const { cursor: plan, battlerSlots } = host.tracker;
+  return { known: plan.order.known, free: plan.order.free, occupied: plan.occupied, invalidReason: host.tracker.invalidReason,
+    battlerSlots, cursor: host.cursor };
+}
 
 /** Legal generated rentals/opponent; only ordinary command input follows generation. */
 export function generatedCommandAnimationReplay(
@@ -43,6 +56,8 @@ export function generatedCommandAnimationReplay(
     retainedSpriteHistoryKnown: boolean | undefined;
     spriteOrderInput: readonly number[] | undefined;
     retainedSpriteOrderKnown: boolean | undefined;
+    /** Live order host after this step (tracker + event cursor), for host == pure-transform checks. */
+    orderHostView: OrderHostView | undefined;
   }> = [];
   const requests: Array<BattleMoveAnimationRequest & { frame: number }> = [];
   const semanticEvents: Array<{
@@ -85,6 +100,7 @@ export function generatedCommandAnimationReplay(
           retainedSpriteHistoryKnown: state.liveMoveSpriteAllocatorHost?.host.historyKnown,
           spriteOrderInput: r.liveMoveSpriteOrderInput?.free,
           retainedSpriteOrderKnown: state.liveMoveSpriteAllocatorHost?.order.known,
+          orderHostView: orderHostView(state.liveMoveSpriteAllocatorHost?.orderHost),
         });
         if (command.type === "move-animation" && command.animation) requests.push({ ...command.animation, frame });
       }

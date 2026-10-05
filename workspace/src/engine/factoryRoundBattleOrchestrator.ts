@@ -20,7 +20,10 @@ import {
   createLiveSpriteOrderHost,
   invalidateLiveSpriteOrderHost,
   lendLiveSpriteOrder,
+  liveSpriteOrderBattlersPresent,
   liveSpriteOrderHostOrder,
+  openLiveSpriteOrderHostPartyMenu,
+  returnLiveSpriteOrderHostFromPartyMenu,
   seedLiveSpriteOrderHostFromBattleStart,
   type LiveSpriteOrderHost,
 } from "./liveSpriteOrderHost.ts";
@@ -1648,13 +1651,33 @@ function beginOrderTurn(
   state: FactoryRoundBattleOrchestratorState,
   requestId: number,
   promptShown: boolean,
+  fromPartyMenu: boolean,
 ): FactoryRoundBattleOrchestratorState["liveMoveSpriteAllocatorHost"] {
   const sprites = state.liveMoveSpriteAllocatorHost;
   if (
     state.config.battleScene !== "on" || sprites === undefined
     || sprites.battleCallStart !== state.activeBattleCallStart
   ) return sprites;
-  return withOrderHost(sprites, beginLiveSpriteOrderTurn(orderHostOf(sprites), requestId, promptShown));
+  return withOrderHost(
+    sprites, beginLiveSpriteOrderTurn(orderHostOf(sprites), requestId, promptShown, fromPartyMenu),
+  );
+}
+
+/**
+ * Voluntary party menu closed back to the action prompt: its exit reset and
+ * the battle reshow with both battlers (sprite-order-uncovered-units.md §2).
+ */
+function returnOrderHostFromPartyMenu(
+  state: FactoryRoundBattleOrchestratorState,
+): FactoryRoundBattleOrchestratorState["liveMoveSpriteAllocatorHost"] {
+  const sprites = state.liveMoveSpriteAllocatorHost;
+  if (
+    state.config.battleScene !== "on" || sprites === undefined
+    || sprites.battleCallStart !== state.activeBattleCallStart
+  ) return sprites;
+  return withOrderHost(sprites, returnLiveSpriteOrderHostFromPartyMenu(
+    orderHostOf(sprites), { player: true, opponent: true },
+  ));
 }
 
 function beginCommandResolution(
@@ -1740,8 +1763,11 @@ function beginCommandResolution(
     BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
     | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE
   )) !== 0;
+  // A voluntary switch is only submitted from the party menu (its return
+  // replaces the action prompt's bounce cycle).
   const liveMoveSpriteAllocatorHost = beginOrderTurn(
     state, resolution.resolutionId.requestId, retained === null && !playerLocked,
+    presentation.pendingDecision?.kind === "switch",
   );
   return Object.freeze({
     ...state,
@@ -2083,19 +2109,51 @@ function prepareResolutionPalette(
   if (resolution?.lifecycle.phase === "presenting-switch-in") {
     const retained = state.liveMovePaletteHost;
     const retainedSprites = state.liveMoveSpriteAllocatorHost;
+    // Forced party menu -> switch-in (sprite-order-uncovered-units.md §2):
+    // the menu's ResetSpriteData and the battle reshow follow every earlier
+    // segment's events; this segment's events then run through the selected
+    // switch-in (switch-in start + particles). Applied once per segment.
+    const orderHost = retainedSprites ? orderHostOf(retainedSprites) : undefined;
+    const orderPending = orderHost !== undefined && !(
+      orderHost.cursor?.requestId === resolution.resolutionId.requestId
+      && orderHost.cursor.segmentIndex === resolution.segmentIndex
+    );
     if (
       !retained?.host.historyKnown && !retainedSprites?.host.historyKnown
-      && !retainedSprites?.order.known
+      && !orderPending
     ) return state;
+    const forcedOrderHost = (host: LiveSpriteOrderHost): LiveSpriteOrderHost => {
+      const commands = resolution.segments[resolution.segmentIndex]!.commands;
+      const selected = commands.find((command) =>
+        command.type === "switch-in"
+        && command.battler === state.battleForcedPartySelect?.request.battler
+      );
+      const settled = advanceLiveSpriteOrderHost(
+        host, resolution, Number.NEGATIVE_INFINITY, true,
+      );
+      if (selected?.type !== "switch-in") {
+        return invalidateLiveSpriteOrderHost(settled, "switch-in presentation without a typed switch-in");
+      }
+      const returned = returnLiveSpriteOrderHostFromPartyMenu(
+        settled, liveSpriteOrderBattlersPresent(resolution, resolution.segmentIndex),
+      );
+      return advanceLiveSpriteOrderHost(
+        returned, resolution,
+        commands.indexOf(selected) === commands.length - 1
+          ? Number.POSITIVE_INFINITY
+          : selected.eventSequence,
+      );
+    };
     return Object.freeze({
       ...state,
       liveMovePaletteHost: retained ? Object.freeze({
         ...retained, host: invalidateLiveMovePaletteHost(retained.host),
       }) : undefined,
       liveMoveSpriteAllocatorHost: retainedSprites ? Object.freeze({
-        ...withOrderHost(retainedSprites, invalidateLiveSpriteOrderHost(
-          orderHostOf(retainedSprites), "switch-in presentation",
-        )),
+        ...withOrderHost(
+          retainedSprites,
+          orderPending ? forcedOrderHost(orderHost!) : orderHost!,
+        ),
         host: invalidateLiveSpriteAllocatorHost(retainedSprites.host),
       }) : undefined,
       battleResolutionPresentation: Object.freeze({
@@ -2663,6 +2721,7 @@ export function advanceFactoryRoundBattleCommand(
         battleCommandPresentation: cancelBattleCommandPartySelection(presentation),
         battlePartySelect: null,
         liveMovePaletteHost,
+        liveMoveSpriteAllocatorHost: returnOrderHostFromPartyMenu(state),
       });
     }
     // ISSUES #78 close cadence: after the SEND OUT confirm (fixture 963) the
@@ -2755,8 +2814,9 @@ export function advanceFactoryRoundBattleCommand(
           : state.liveMovePaletteHost,
         liveMoveSpriteAllocatorHost: state.config.battleScene === "on" && retainedSprites
           ? Object.freeze({
-              ...withOrderHost(retainedSprites, invalidateLiveSpriteOrderHost(
-                orderHostOf(retainedSprites), "party menu",
+              // ResetSpriteData: the tracked order restarts from identity.
+              ...withOrderHost(retainedSprites, openLiveSpriteOrderHostPartyMenu(
+                orderHostOf(retainedSprites),
               )),
               host: invalidateLiveSpriteAllocatorHost(retainedSprites.host),
             })

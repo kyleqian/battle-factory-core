@@ -4,11 +4,21 @@ import { prepareLiveMoveSpriteOrder } from "../src/engine/liveMoveSpriteAllocato
 import {
   KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, invalidateSpriteOrderState, knownEntrySpriteOrderState,
 } from "../src/engine/spriteOrderProvider.ts";
-import { seedLiveSpriteOrderHostFromBattleStart } from "../src/engine/liveSpriteOrderHost.ts";
+import {
+  advanceLiveSpriteOrderHost, beginLiveSpriteOrderTurn, createLiveSpriteOrderHost, liveSpriteOrderBattlersPresent,
+  openLiveSpriteOrderHostPartyMenu, returnLiveSpriteOrderHostFromPartyMenu, seedLiveSpriteOrderHostFromBattleStart,
+  type LiveSpriteOrderHost,
+} from "../src/engine/liveSpriteOrderHost.ts";
+import type { BattleKernelSemanticEvent } from "../src/engine/battleDecisionBoundary.ts";
 import { battleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
-import { ORDER_CONSUMER_MOVES, predictLentOrders, scanRoute } from "../tools/integration/orderCrossBodyRouteScan.ts";
+import { ORDER_CONSUMER_MOVES, predictLentOrders, predictTrackers, scanRoute } from "../tools/integration/orderCrossBodyRouteScan.ts";
+import { evidenceEvents, maskSlotsOf, productionReplay } from "../tools/integration/spriteOrderBattleUnitsReplay.ts";
 
 type Replay = ReturnType<typeof generatedCommandAnimationReplay>;
+// 20-battle sweep: command edges compared host vs pure, host known, host declines where pure is known (all 27 = seed 17,
+// "command resolution without an action prompt": the locked-action continuation the host refuses), later bodies with a
+// known pre-body tracker (35 of 80 without the battle units).
+const SWEEP_PIN = { compared: 863, hostKnown: 476, declines: 27, laterAfter: 47 };
 const bodies = (run: Replay) => run.commands.filter(row => row.type === "move-animation");
 
 function expectRulesEqual(on: Replay, off: Replay): void {
@@ -64,7 +74,8 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
       for (const body of route.bodies) expect(body.mismatch || (!body.agrees && body.known), `seed ${seed} body ${body.index}`).toBe(false);
       later += route.bodies.filter(body => body.index > 0).length;
       laterKnown += route.bodies.filter(body => body.index > 0 && body.known).length;
-      // Faint / switch / send-out / trainer slide invalidate for the rest of the battle.
+      // After a faint / switch / send-out / trainer slide the lend declines for the rest of the battle: the tracker
+      // stays known through the battle units, but the lend gate (known-entry occupancy) is unchanged in this rung.
       const invalidating = route.on.semanticEvents.map(row => row.event as { sequence: number; payload: { kind: string } })
         .find(event => ["faint-animation", "switch", "switch-in-animation", "trainer-slide-in"].includes(event.payload.kind));
       if (invalidating) {
@@ -82,6 +93,115 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
     expect(laterUnknownAfterKnown).toBeGreaterThan(0);
     expect(invalidatedBattles).toBeGreaterThan(0);
   }, 120000);
+
+  it("host tracker == pure transform at every command edge of the 20-battle sweep; battle units keep later bodies' tracker known", () => {
+    let compared = 0, hostKnown = 0, mismatches = 0, declines = 0, later = 0, laterBefore = 0, laterAfter = 0;
+    for (let seed = 0; seed < 20; seed += 1) {
+      const route = scanRoute(seed, [0, 0, 0]);
+      const after = predictTrackers(route.on, route.entryKnown, true);
+      const before = predictTrackers(route.on, route.entryKnown, false);
+      for (const row of route.on.commands) {
+        const view = row.orderHostView;
+        const pure = view?.cursor ? after.positions.get(`${view.cursor.requestId}:${view.cursor.segmentIndex}:${view.cursor.nextEventIndex}`) : undefined;
+        if (!view || !pure) continue;
+        compared += 1;
+        if (!view.known) { if (pure.cursor.order.known) declines += 1; continue; }
+        hostKnown += 1;
+        if (!pure.cursor.order.known || JSON.stringify([view.free, view.occupied, view.battlerSlots])
+          !== JSON.stringify([pure.cursor.order.free, pure.cursor.occupied, pure.battlerSlots])) mismatches += 1;
+      }
+      for (const body of route.bodies.filter(row => row.index > 0)) {
+        later += 1;
+        if (before.preBody.get(body.sequence)?.cursor.order.known) laterBefore += 1;
+        if (after.preBody.get(body.sequence)?.cursor.order.known) laterAfter += 1;
+      }
+    }
+    expect({ mismatches, later, laterBefore }).toEqual({ mismatches: 0, later: 80, laterBefore: 35 });
+    expect({ compared, hostKnown, declines, laterAfter }).toEqual(SWEEP_PIN);
+  }, 120000);
+
+  it("KO chain resolution views stay known and equal the observed F (battle1-turn17-dense 6519 / 6587 / 6726, edges 6864 / 7395)", () => {
+    const trace = evidenceEvents("battle1-turn17-dense");
+    const at = (frame: number) => trace.find(e => e.n === frame)!;
+    const expectObserved = (host: LiveSpriteOrderHost, frame: number) => {
+      expect(host.tracker.cursor.order.free, `F @${frame}`).toEqual(at(frame).obsF);
+      expect(host.tracker.cursor.occupied, `occupancy @${frame}`).toEqual(maskSlotsOf(at(frame).obsMask as string));
+    };
+    const pre = productionReplay("battle1-turn17-dense", true, 6519).tracker; // strict pre-state: known, battlers 6 / 8
+    expect(pre.battlerSlots).toEqual({ player: 6, opponent: 8 });
+    const ev = (sequence: number, kind: string, extra: object = {}) =>
+      Object.freeze({ sequence, payload: { kind, ...extra }, provenance: undefined }) as unknown as BattleKernelSemanticEvent;
+    const events = [ev(10, "faint-animation", { battler: 1 }), ev(11, "message"), ev(12, "draw-party-status-summary", { battler: 1 }),
+      ev(13, "switch", { side: "opponent", fromPartyIndex: 0, toPartyIndex: 1 }), ev(14, "message"), ev(15, "hide-party-status-summary", { battler: 1 }),
+      ev(16, "switch-in-animation", { battler: 1, partyIndex: 1 }),
+      ev(17, "animation", { animationId: "HELD_ITEM_EFFECT", battler: 1, target: 1, arguments: [] })];
+    const resolution = { resolutionId: { requestId: 5 }, segmentIndex: 0, segments: [{ events }] };
+    let host: LiveSpriteOrderHost = Object.freeze({ ...createLiveSpriteOrderHost(knownEntrySpriteOrderState("ordinary-factory")),
+      tracker: pre, promptRequestId: 5 });
+    host = advanceLiveSpriteOrderHost(host, resolution, 10);
+    expectObserved(host, 6519);
+    host = advanceLiveSpriteOrderHost(host, resolution, 12);
+    expectObserved(host, 6587);
+    host = advanceLiveSpriteOrderHost(host, resolution, 16);
+    expectObserved(host, 6726);
+    expect(host.tracker.battlerSlots).toEqual({ player: 6, opponent: 5 });
+    host = advanceLiveSpriteOrderHost(host, resolution, 17, true);
+    expectObserved(host, 6864);
+    host = advanceLiveSpriteOrderHost(host, resolution, Number.POSITIVE_INFINITY);
+    expect(host.cursor?.drained).toBe(true);
+    host = beginLiveSpriteOrderTurn(host, 6, true);
+    const body = { resolutionId: { requestId: 6 }, segmentIndex: 0, segments: [{ events: [
+      ev(20, "animation", { animationId: "MOVE_ANIMATION", battler: 1, target: 0, arguments: ["297", "0", "0", "0", "0", "0"] })] }] };
+    host = advanceLiveSpriteOrderHost(host, body, 20, true);
+    expectObserved(host, 7395);
+  });
+
+  it("player faint -> forced party menu (reset revives) -> reshow (player gone) -> forced switch-in equals the observed F (20291 / 20389)", () => {
+    const trace = evidenceEvents("battle1-turn17-dense");
+    const at = (frame: number) => trace.find(e => e.n === frame)!;
+    const pre = productionReplay("battle1-turn17-dense", true, 19325).tracker;
+    expect(pre.cursor.order.known).toBe(false); // strict: unknown since the plan-less 28:opponent body (frame 15468)
+    const ev = (sequence: number, kind: string, extra: object = {}) =>
+      Object.freeze({ sequence, payload: { kind, ...extra }, provenance: undefined }) as unknown as BattleKernelSemanticEvent;
+    const segments = [{ events: [ev(30, "faint-animation", { battler: 0 }), ev(31, "message")] },
+      { events: [ev(40, "switch", { side: "player", fromPartyIndex: 0, toPartyIndex: 2 }), ev(41, "draw-party-status-summary", { battler: 0 }),
+        ev(42, "message"), ev(43, "hide-party-status-summary", { battler: 0 }), ev(44, "switch-in-animation", { battler: 0, partyIndex: 2 }),
+        ev(45, "message")] }];
+    let host: LiveSpriteOrderHost = Object.freeze({ ...createLiveSpriteOrderHost(knownEntrySpriteOrderState("ordinary-factory")),
+      tracker: pre, promptRequestId: 9 });
+    host = advanceLiveSpriteOrderHost(host, { resolutionId: { requestId: 9 }, segmentIndex: 0, segments: segments.slice(0, 1) }, Number.POSITIVE_INFINITY);
+    const forced = { resolutionId: { requestId: 9 }, segmentIndex: 1, segments };
+    expect(liveSpriteOrderBattlersPresent(forced, 1)).toEqual({ player: false, opponent: true });
+    // The orchestrator's presenting-switch-in order: settle earlier segments, menu reset + reshow, then through the switch-in.
+    host = returnLiveSpriteOrderHostFromPartyMenu(advanceLiveSpriteOrderHost(host, forced, Number.NEGATIVE_INFINITY, true),
+      liveSpriteOrderBattlersPresent(forced, 1));
+    expect(host.tracker.cursor.order.free).toEqual(at(20291).obsF);
+    expect(host.tracker.cursor.occupied).toEqual(maskSlotsOf(at(20291).obsMask as string));
+    host = advanceLiveSpriteOrderHost(host, forced, 44);
+    expect(host.tracker.cursor.order.free).toEqual(at(20389).obsF);
+    expect(host.tracker.cursor.occupied).toEqual(maskSlotsOf(at(20389).obsMask as string));
+    expect(host.tracker.battlerSlots).toEqual({ player: 5, opponent: 0 });
+    // A hidden battler or a missing opponent battler at the reshow is unobserved: invalidate.
+    expect(returnLiveSpriteOrderHostFromPartyMenu(Object.freeze({ ...host, hidden: [false, true] as const }), { player: true, opponent: true })
+      .tracker.cursor.order.known).toBe(false);
+    expect(returnLiveSpriteOrderHostFromPartyMenu(host, { player: false, opponent: false }).tracker.cursor.order.known).toBe(false);
+  });
+
+  it("voluntary party menu: open resets (revives), choose = reset + reshow without the prompt cycle (issue135 Pursuit edge 2467)", () => {
+    const trace = evidenceEvents("lab:issue135-pursuit-switch-intercept");
+    const pursuit = trace.find(e => e.n === 2467)!;
+    const invalid = createLiveSpriteOrderHost(invalidateSpriteOrderState(knownEntrySpriteOrderState("ordinary-factory")));
+    const opened = openLiveSpriteOrderHostPartyMenu(invalid);
+    expect(opened.tracker.cursor.order.free).toEqual(Array.from({ length: 64 }, (_, slot) => slot));
+    const chosen = beginLiveSpriteOrderTurn(opened, 3, true, true);
+    expect(chosen.tracker.promptPair).toBeNull();
+    expect(chosen.tracker.cursor.order.free).toEqual(pursuit.obsF);
+    expect(chosen.tracker.cursor.occupied).toEqual(maskSlotsOf(pursuit.obsMask as string));
+    expect(chosen.tracker.battlerSlots).toEqual({ player: 0, opponent: 1 });
+    // Cancel: the same reshow, then the next prompt cycle applies as usual.
+    const cancelled = returnLiveSpriteOrderHostFromPartyMenu(opened, { player: true, opponent: true });
+    expect(cancelled.tracker.cursor.order.free).toEqual(pursuit.obsF);
+  });
 
   it("a consumer as a LATER body renders with the tracked order; after an unmodelled body it declines", () => {
     // Later bodies after modelled bodies only (tools/integration/fixtures/order-cross-body-live-receipt.json routes):
