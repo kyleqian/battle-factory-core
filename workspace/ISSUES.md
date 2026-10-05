@@ -17,6 +17,23 @@ backlog.
 
 # Open
 
+## #147 — Ordinary resolution frames draw elevated opponents at ground level without their shadow (found 2026-10-05)
+
+- **Symptom (affects play today):** `renderBattleResolutionSceneOffView`
+  (`src/engine/battleScene.ts` ~:54427-54433) draws the opponent at `fieldArt.opponent.origin.y`
+  without subtracting `enemyMonElevation` and never calls `drawGeneratedOpponentShadow`; the
+  command-menu path (~:8107-8121, `battleCommandFieldSpriteOrigin`) does both. Every ordinary
+  resolution frame with an elevated opponent (GOLBAT, BUTTERFREE, PIDGEOT, MISDREAVUS, PELIPPER,
+  SKIPLOOM...) shows the sprite 8 px low and no shadow (k=1 after a body: 1,109-2,160 px).
+- **Evidence:** `docs/elevated-postbody-audit.md` (36 fixtures; patch proof 0 px). Supervisor
+  reran Whirlwind BUTTERFREE: post-body 0/30 frames exact today, 30/30 with the 2-line patch.
+- **Shadow timing rule:** `SpriteCB_EnemyShadow` hides the shadow while `gAnimScriptActive`; it
+  reappears on framebuffer (scriptEnd - E) + 1 after a body window ending at E: d = 0 for 184
+  rows, -2 for Future Sight / Light Screen (fixed in #145), +1 Dream Eater / Horn Drill / Psybeam
+  / Razor Wind / Sing / Sky Uppercut, +2 Absorb, +21 Dragon Rage (hide for E+1..E+d).
+- **Open:** whether Scene OFF resolution frames share the bug (side check running); the faint-sink
+  branch (~:54418-54426) likely needs the same elevation.
+
 ## #146 — Forced switch-out and send-in presentation timing differ from the ROM (S10A, found 2026-10-05)
 
 - **Evidence:** `docs/forced-switch-continuation.md` (ROM probes twice fresh; production rendered
