@@ -26,8 +26,11 @@ fresh processes and produced identical results (RAM sha1 and per-frame-runs sha1
   word, so the strict chain dies at the first such gap.
 - Strict chain from the anchor (§4): **route: 2 of 29 move-body activation edges known and exact,
   0 mismatches.** The chain invalidates at frame 2477, the turn-2 selection gap. That count uses a
-  lag table learned from the route itself, so it is an upper bound. With a table learned on the
-  other geometry, coverage is 0 of 29 on the route and 0 of 6 in the lab.
+  lag table learned from the route itself, so it is an upper bound. A table learned from the labs
+  covers none of the route's units (0 of 29). Between the two short lab battles, though, the
+  out-of-sample chain is **6 of 6 known and exact in each direction**. The model is right whenever
+  each gap's lag takes its usual value. On the canonical battle it does not, from turn 2 on, and a
+  tracker cannot tell when that happens.
 - Once an activation value is known, words follow exactly from (non-lag frames to the draw frame
   + earlier draws + source draw order) (§5). The accepted Double Kick `fistRandom` words come out
   bit-exact, and every lab draw frame (Double Kick ×2 hits, Astonish, Mud-Slap ×6 waves) is exact.
@@ -131,7 +134,10 @@ moves are identical (Onix, moves 157/20/225/201). Even so:
 - entry clusters take 3 or 4 frames (1744: 3, 2576: 4, 5582: 3, 7218: 3, 8115: 4, …);
 - move-menu clusters take 2 or 3 frames (3849: 3; the rest 2).
 
-The extra frame is therefore not explained by mon or move-name rendering. It is a cycle-budget
+The lag positions inside an entry, counted from the selection start, also shift between
+[1,4,5,6], [3,4,5], [1,4,5] and [3,4], even when the three preceding battle states are identical
+(e.g. 2576 vs 5582; 9137 vs 9991). The extra frame is therefore not explained by mon or
+move-name rendering, and it is not a discrete event either. It is a cycle-budget
 effect: the main loop's work lands just over or just under one frame. Likely contributors are
 VBlank-time sound mixing (`m4aSoundMain` cost depends on the music's active voices) and DMA/text
 work. This is an inference; the cycle split was not measured. Either way, production has no model
@@ -145,10 +151,15 @@ of it.
 | route, seed = anchor | lab | 0 / 0 / 0 of 29 | 0 of 38 | frame 1, draft screen (unmodelled) |
 | lab, seed = lab frame 0 (`0x3A5C2A2A`) | lab (in-sample; most kinds seen once) | 6 / 6 / 0 of 6 | 7 / 7 / 0 of 7 | — |
 | lab, seed = lab frame 0 | route | 0 / 0 / 0 of 6 | 0 of 7 | frame 1, partial selection (unmodelled) |
+| lab B (Astonish → Double Kick → Mud-Slap, seed 44) | lab A (out-of-sample) | **6 / 6 / 0** of 6 | 7 / 7 / 0 of 8 | frame 2428, a final hit/HP-bar gap A never had (unmodelled) |
+| lab A | lab B (out-of-sample) | **6 / 6 / 0** of 6 | 7 / 7 / 0 of 7 | frame 2412, after the last edge (unmodelled) |
 
 - The known route edges are Double Team at 1963, StatsChange at 2125 and Rock Slide at 2340.
 - Lab edges: Double Kick at 87 and 215 (two hits), Tackle at 533 and 2371, Astonish at 1023,
   Mud-Slap at 1968, StatsChange at 2162.
+- Lab B edges: Astonish at 89, Double Kick at 1045 and 1173, Tackle at 1492 and 2387, Mud-Slap at
+  1984, StatsChange at 2178, Status_Confusion at 2584. Lab B shows the same body lag offsets as
+  lab A: Double Kick +33/+34, Tackle +28/+29, StatsChange +3/+4/+65/+66.
 - Zero mismatches wherever the chain claims to know the value. Coverage, though, ends at the first
   inter-body gap whose lag varies. On the route that is the second turn.
 
@@ -175,6 +186,7 @@ of it.
 | route, controller context | `31bb1bca…` | `b8bfb405…` |
 | lab, exhaustive stepping | `ebe7e0d7…` | `513fe7e6…` |
 | lab, controller context | `79d3a2db…` | `4eb53147…` |
+| lab B, controller context | `6795cfa5…` | `3ebed26f…` |
 | Scene OFF intro | `dc9ed63a…` | `ec4d2685…` |
 | route selection lag content | whole JSON identical | — |
 
@@ -219,6 +231,8 @@ tracker that also models lag would need cycle-accurate costs for text, DMA and s
 ## 8. Open questions
 
 1. What decides the extra selection lag frame? The sound-mixer cost hypothesis was not measured.
+   If a production-known predicate exists after all, the in-battle chain would become trackable,
+   since the lab cross-geometry result (6/6 both ways) shows the rest of the model generalises.
    A per-iteration cycle count (single-step the whole selection-entry frame and sum the cycles)
    would settle it.
 2. On real hardware without a wireless adapter, `gWirelessCommType` would be 0 and `gRng2Value`
@@ -248,11 +262,13 @@ F=tools/integration/fixtures/random2
 python3 tools/integration/random2StrictChain.py $F/route-battle1-postwin-dense-ctrl.json --merge-gaps
 python3 tools/integration/random2StrictChain.py $F/route-battle1-postwin-dense-ctrl.json --merge-gaps --train $F/lab-doublekick-astonish-mudslap-ctrl.json
 python3 tools/integration/random2StrictChain.py $F/lab-doublekick-astonish-mudslap-ctrl.json --merge-gaps
+python3 tools/integration/random2StrictChain.py $F/lab-astonish-doublekick-mudslap-ctrl.json --merge-gaps --train $F/lab-doublekick-astonish-mudslap-ctrl.json
 python3 tools/integration/random2BodyWords.py
 ```
 
 Fixtures (`tools/integration/fixtures/random2/`, about 0.5 MB, no mGBA logs):
 - `route-battle1-postwin-dense{,-ctrl}.json`, `lab-doublekick-astonish-mudslap{,-ctrl}.json`,
+  `lab-astonish-doublekick-mudslap-ctrl.json` (lab B, scenario `tools/battle-lab/random2-astonish-doublekick-mudslap.json`),
   `sceneoff-battle1-intro-inputs.json`, `route-selection-lag-content.json`;
 - `chain-*.json` (strict-chain outputs with per-edge lists and lag tables);
 - `body-words-check.json`.
