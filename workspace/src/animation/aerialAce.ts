@@ -47,9 +47,11 @@ export function aerialAceTargetSpriteXAtAge(
   animationAge: number,
   targetSide: AerialAceSide,
   stagedCornerX: number,
+  /** The target's settled front-idle x2 the staged corner carries (ONIX 1; live species-keyed, #145 D2). */
+  settledIdleX2 = 1,
 ): number {
   return stagedCornerX - (
-    targetSide === "opponent" && animationAge >= 57 ? 1 : 0
+    targetSide === "opponent" && animationAge >= 57 ? settledIdleX2 : 0
   );
 }
 

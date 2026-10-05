@@ -211,6 +211,40 @@ export const DRAGON_RAGE_FIRE_SPIT_GEOMETRY: Readonly<Record<DragonRageSide, Dra
   },
 };
 
+/**
+ * `InitAnimLinearTranslation` (`battle_anim_mons.c:1065-1091`) per-tick Q8 delta: `(|d| << 8) / duration` in u16 math,
+ * low bit set when moving up/left and cleared otherwise.
+ */
+function linearTranslationDeltaQ8(distance: number, duration: number): number {
+  const magnitude = ((Math.abs(distance) << 8) & 0xffff) / duration | 0;
+  return distance < 0 ? -(magnitude | 1) : magnitude & ~1;
+}
+
+/**
+ * `StartDragonFireTranslation` (`battle_anim_dragon.c:218-243`): start = attacker pic offset + (30, 15) (x mirrored to -15 for
+ * the opponent), target = target pic offset + (0, 10), then the linear translation. The affine matrix stays the fixed
+ * `sAffineAnim_DragonRageFire` literal. Reproduces the ONIX literals for both sides.
+ */
+export function dragonRageFireSpitGeometryFor(
+  side: DragonRageSide,
+  attackerPic: Readonly<{ x: number; y: number }>,
+  targetPic: Readonly<{ x: number; y: number }>,
+): DragonRageFireSpitGeometry {
+  const { initialX, initialY, targetX, targetY, duration } = DRAGON_RAGE_FIRE_SPIT_ARGS;
+  const start = {
+    x: attackerPic.x + (side === "player" ? initialX : -initialY),
+    y: attackerPic.y + initialY,
+  };
+  const target = { x: targetPic.x + targetX, y: targetPic.y + targetY };
+  return {
+    side,
+    start,
+    deltaXQ8: linearTranslationDeltaQ8(target.x - start.x, duration),
+    deltaYQ8: linearTranslationDeltaQ8(target.y - start.y, duration),
+    matrix: DRAGON_RAGE_FIRE_SPIT_GEOMETRY[side].matrix,
+  };
+}
+
 export interface DragonRageFireSpitState {
   readonly x: number;
   readonly y: number;

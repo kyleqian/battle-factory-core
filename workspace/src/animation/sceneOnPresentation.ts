@@ -1112,6 +1112,7 @@ import {
   DRAGON_RAGE_ATTACKER_SHAKE,
   DRAGON_RAGE_FIRE_PLUME_SPAWNS,
   DRAGON_RAGE_FIRE_SPIT_GEOMETRY,
+  type DragonRageFireSpitGeometry,
   DRAGON_RAGE_SLIDE_TO_OFFSET,
   DRAGON_RAGE_SLIDE_TO_ORIGINAL_POS,
   DRAGON_RAGE_TARGET_SHAKE,
@@ -1718,6 +1719,8 @@ export interface SceneOnDragonRageConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Per-request fire-spit aim from the attacker/target pic offsets; absent = the accepted ONIX literal. */
+  readonly fireSpitGeometry?: DragonRageFireSpitGeometry;
   readonly animationAgeOffset?: number;
 }
 
@@ -6853,7 +6856,7 @@ export function sceneOnDragonRageView(
     displayedTargetOffset,
     fireSpit: dragonRageFireSpitStateAtAge(
       animationAge - schedule.fireSpitTick,
-      DRAGON_RAGE_FIRE_SPIT_GEOMETRY[attackerSide],
+      state.config.fireSpitGeometry ?? DRAGON_RAGE_FIRE_SPIT_GEOMETRY[attackerSide],
     ),
     firePlumes: dragonRageFirePlumes(
       animationAge,
