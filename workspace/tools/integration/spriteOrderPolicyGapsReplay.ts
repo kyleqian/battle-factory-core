@@ -164,6 +164,8 @@ export function run() {
       copyNoOverride: count(baseline), copyMatchesOriginal: count(baseline).known === base.moveEdges.known + base.animEdges.known
         && count(baseline).mismatch === base.moveEdges.mismatched + base.animEdges.mismatched,
       withEndeavor: count(withEndeavor), withEndeavorAndFakeTears: count(withAll),
+      moveEdgesBaseline: count(baseline.filter(x => !x.key.startsWith("gBattleAnims"))), moveEdgesWithEndeavor: count(withEndeavor.filter(x => !x.key.startsWith("gBattleAnims"))),
+      animEdgesWithEndeavor: count(withEndeavor.filter(x => x.key.startsWith("gBattleAnims"))),
       firstInvalidationBaseline: replayEvents(entry, converted, NO_OVERRIDES, "proposed").firstInvalidation,
       firstInvalidationWithEndeavor: replayEvents(entry, converted, ENDEAVOR, "proposed").firstInvalidation,
     };

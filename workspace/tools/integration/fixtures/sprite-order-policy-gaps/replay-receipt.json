@@ -909,6 +909,27 @@
     "mismatch": 0,
     "lent": 12
    },
+   "moveEdgesBaseline": {
+    "edges": 29,
+    "known": 3,
+    "exact": 3,
+    "mismatch": 0,
+    "lent": 3
+   },
+   "moveEdgesWithEndeavor": {
+    "edges": 29,
+    "known": 10,
+    "exact": 10,
+    "mismatch": 0,
+    "lent": 10
+   },
+   "animEdgesWithEndeavor": {
+    "edges": 9,
+    "known": 2,
+    "exact": 2,
+    "mismatch": 0,
+    "lent": 2
+   },
    "firstInvalidationBaseline": {
     "n": 2992,
     "key": "283:opponent",
@@ -967,6 +988,27 @@
     "exact": 12,
     "mismatch": 0,
     "lent": 12
+   },
+   "moveEdgesBaseline": {
+    "edges": 24,
+    "known": 3,
+    "exact": 3,
+    "mismatch": 0,
+    "lent": 3
+   },
+   "moveEdgesWithEndeavor": {
+    "edges": 24,
+    "known": 10,
+    "exact": 10,
+    "mismatch": 0,
+    "lent": 10
+   },
+   "animEdgesWithEndeavor": {
+    "edges": 7,
+    "known": 2,
+    "exact": 2,
+    "mismatch": 0,
+    "lent": 2
    },
    "firstInvalidationBaseline": {
     "n": 2992,
@@ -1027,6 +1069,27 @@
     "mismatch": 0,
     "lent": 5
    },
+   "moveEdgesBaseline": {
+    "edges": 4,
+    "known": 3,
+    "exact": 3,
+    "mismatch": 0,
+    "lent": 3
+   },
+   "moveEdgesWithEndeavor": {
+    "edges": 4,
+    "known": 4,
+    "exact": 4,
+    "mismatch": 0,
+    "lent": 4
+   },
+   "animEdgesWithEndeavor": {
+    "edges": 1,
+    "known": 1,
+    "exact": 1,
+    "mismatch": 0,
+    "lent": 1
+   },
    "firstInvalidationBaseline": {
     "n": 2992,
     "key": "283:opponent",
@@ -1086,6 +1149,27 @@
     "mismatch": 0,
     "lent": 12
    },
+   "moveEdgesBaseline": {
+    "edges": 10,
+    "known": 3,
+    "exact": 3,
+    "mismatch": 0,
+    "lent": 3
+   },
+   "moveEdgesWithEndeavor": {
+    "edges": 10,
+    "known": 10,
+    "exact": 10,
+    "mismatch": 0,
+    "lent": 10
+   },
+   "animEdgesWithEndeavor": {
+    "edges": 3,
+    "known": 2,
+    "exact": 2,
+    "mismatch": 0,
+    "lent": 2
+   },
    "firstInvalidationBaseline": {
     "n": 2992,
     "key": "283:opponent",
@@ -1144,6 +1228,27 @@
     "exact": 12,
     "mismatch": 0,
     "lent": 12
+   },
+   "moveEdgesBaseline": {
+    "edges": 24,
+    "known": 3,
+    "exact": 3,
+    "mismatch": 0,
+    "lent": 3
+   },
+   "moveEdgesWithEndeavor": {
+    "edges": 24,
+    "known": 10,
+    "exact": 10,
+    "mismatch": 0,
+    "lent": 10
+   },
+   "animEdgesWithEndeavor": {
+    "edges": 7,
+    "known": 2,
+    "exact": 2,
+    "mismatch": 0,
+    "lent": 2
    },
    "firstInvalidationBaseline": {
     "n": 2992,
