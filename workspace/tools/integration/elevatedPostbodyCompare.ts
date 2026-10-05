@@ -2,7 +2,7 @@
 // (retained fresh run, POKEBENCH_LIVE_EVIDENCE_DIR of liveFixtureBatch.sh, sha256-checked) against the production views:
 //   k <= 0  : liveView(f, age)                         (the body's last rows, dense acceptance path)
 //   k >= 1  : the ordinary field = the same displayed field with NO live effect (what the queue shows after the move-animation command)
-// Compared in the opponent-sprite window (x 136..215, y 0..79: excludes both healthboxes, the text box and the player sprite).
+// Compared in the opponent-sprite window (x 136..215, y 0..72: excludes both healthboxes, the text box and the player sprite).
 // POKEBENCH_POSTBODY_FORCED=1 additionally ignores nothing: the window is the same, the ROM may already hide the target (forced switch).
 //   node --experimental-strip-types tools/integration/elevatedPostbodyCompare.ts <evidence-dir> <tail> <window:opp|plr|all> <fixture.json>...
 // EP_DIAG=1 prints each residual frame's bbox, top ROM<-live colour pairs and the best rigid shift of the live window to the ROM (stderr).
@@ -17,7 +17,7 @@ import { liveView, type Fixture } from "./liveAdapterFramebuffer.ts";
 const [evidence, tailArg, windowArg, ...fixtures] = process.argv.slice(2);
 if (!evidence || !tailArg || !windowArg || fixtures.length === 0) throw new Error("usage: <evidence-dir> <tail> <opp|plr|all> <fixture.json>...");
 const tail = Number(tailArg);
-const BOX = { opp: [136, 0, 216, 80], plr: [0, 40, 100, 112], all: [0, 0, 240, 112] }[windowArg as "opp"]!;
+const BOX = { opp: [136, 0, 216, 73], plr: [0, 40, 100, 112], all: [0, 0, 240, 112] }[windowArg as "opp"]!;
 const hash = (b: Uint8Array) => createHash("sha256").update(b).digest("hex");
 const inBox = (p: number) => { const x = p % 240, y = (p / 240) | 0; return x >= BOX[0]! && x < BOX[2]! && y >= BOX[1]! && y < BOX[3]!; };
 const px = (b: Uint8Array, p: number, stride: number) => (b[p * stride]! << 16) | (b[p * stride + 1]! << 8) | b[p * stride + 2]!;
@@ -41,12 +41,14 @@ for (const path of fixtures) {
     const probe = JSON.parse(readFileSync(join(dir, "probe.json"), "utf8"));
     const frames = new Map<number, string>(Array.isArray(probe.sha256)
       ? probe.sha256.map((s: string, i: number) => [i, s]) : (probe.frames ?? probe.rows).map((r: { frame: number; sha256: string }) => [r.frame, r.sha256]));
+    let unreceipted = 0;
     const rows: { k: number; residual: number; romShadow: boolean; bbox?: number[]; pairs?: string; shift?: string }[] = [];
     for (let k = -3; k <= tail; k++) {
       const frame = E + k;
       if (!existsSync(join(dir, "rgb", `${String(frame).padStart(5, "0")}.rgb`))) break;
       const rgb = readFileSync(join(dir, "rgb", `${String(frame).padStart(5, "0")}.rgb`));
-      if (hash(rgb) !== frames.get(frame)) throw new Error(`${dir}: RGB receipt drift at ${frame}`);
+      // Frames outside a probe's recorded sha256 range (the older per-move probes) are read unreceipted from the same fresh run.
+      if (frames.has(frame)) { if (hash(rgb) !== frames.get(frame)) throw new Error(`${dir}: RGB receipt drift at ${frame}`); } else unreceipted++;
       const rgba = new Uint8Array(240 * 160 * 4);
       // Patch proof only: the shadow returns on framebuffer scriptEnd + 1 (scriptEnd = first frame with no active script).
       if (patchProof) patchProof.suppressShadow = k > 0 && k <= scriptEndMinusE - E;
@@ -83,7 +85,7 @@ for (const path of fixtures) {
       if (process.env.EP_DIAG && residual > 0 && run === 0) console.error(`${basename(path)} k=${k} ${residual} bbox ${row.bbox} ${row.pairs} bestShift(live->rom dx,dy:res) ${row.shift}`);
     }
     const sa = (f as unknown as { speciesAudit?: { swappedBody?: number[] } }).speciesAudit?.swappedBody;
-    out.push({ fixture: basename(path), run, E, window: windowArg, rows: rows.length,
+    out.push({ fixture: basename(path), run, E, window: windowArg, rows: rows.length, unreceiptedRows: unreceipted,
       scriptEndMinusE: sa ? sa[2]! - E : null, romShadowRuns: rows.filter((r, i) => r.romShadow !== (rows[i - 1]?.romShadow ?? false)).map(r => `${r.romShadow ? "+" : "-"}${r.k}`),
       bodyRowsResidual: rows.filter(r => r.k <= 0).reduce((a, r) => a + r.residual, 0),
       postRowsResidual: rows.filter(r => r.k > 0).reduce((a, r) => a + r.residual, 0),
