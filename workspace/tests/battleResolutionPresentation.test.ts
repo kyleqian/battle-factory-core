@@ -744,6 +744,36 @@ describe("battle resolution presentation receipt ownership", () => {
     expect(battleResolutionCommandDuration(resolution.segments[0]!.commands[1]!, resolution.field)).toBe(48);
   });
 
+  it("hides the elevated shadow for the post-body hide rows after a live body (ISSUES #147)", () => {
+    const resolutionFor = (moveId: number) => createBattleResolutionPresentation(inputFor([
+      event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }, 2),
+      event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }, 3),
+      event(2, {
+        kind: "animation",
+        animationId: "MOVE_ANIMATION",
+        battler: 0,
+        target: 1,
+        arguments: [String(moveId), "0", "20", "17", "90", "0"],
+      }, 14),
+      event(3, { kind: "animation", animationId: "HIT_ANIMATION", battler: 1, arguments: [] }, 17),
+      event(4, { kind: "health-bar-update", battler: 1, healthValue: 17 }, 19),
+      event(5, { kind: "hp-change", battler: 1, from: 91, to: 74 }, 20),
+    ], NEXT_COMMAND));
+    const hiddenRows = (moveId: number) => {
+      const resolution = resolutionFor(moveId);
+      expect(resolution.segments[0]!.commands[2]!.type).toBe("hit-animation");
+      const body = createBattleResolutionPresentationRenderView(atRenderClock(resolution, 1, 0));
+      expect(body.effect?.type).toBe("move");
+      expect(body.postBodyShadowHidden).toBe(false);
+      return [0, 1, 2, 3].map((age) =>
+        createBattleResolutionPresentationRenderView(atRenderClock(resolution, 2, age)).postBodyShadowHidden);
+    };
+    // Player Absorb: script end = E + 2, so E+1 and E+2 keep the shadow hidden.
+    expect(hiddenRows(71)).toEqual([true, true, false, false]);
+    // Player Headbutt (d = 0): the shadow returns on E+1.
+    expect(hiddenRows(29)).toEqual([false, false, false, false]);
+  });
+
   it("projects typed sprite visibility receipts with relative duration and persistent render state", () => {
     const resolution = createBattleResolutionPresentation(inputFor([
       event(0, {
