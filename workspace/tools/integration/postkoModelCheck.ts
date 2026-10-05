@@ -28,6 +28,10 @@ export const SCENARIOS: Record<string, Step[]> = {
   "postko-rocktomb-thunderbolt": [...TURN1, P, C, edge("85:opponent"), body(85, "opponent"), HIT, P, C, edge("85:opponent"), body(85, "opponent"), HIT,
     edge("status:PRZ:player"), { kind: "status-animation", status: "PRZ" }, edge("317:player"), body(317, "player"), HIT, edge("stat:opponent"),
     { kind: "stat-animation", argument: 17 }],
+  // turn 2: JUMPLUFF (faster) Giga Drain -> player, player Double Team (+1 evasion stat animation); turn 3: Giga Drain, player Swift.
+  "postko-doubleteam-swift-gigadrain": [...TURN1, P, C, edge("202:opponent"), body(202, "opponent"), HIT, edge("104:player"), body(104, "player"),
+    edge("stat:player"), { kind: "stat-animation", argument: 21 }, P, C, edge("202:opponent"), body(202, "opponent"), HIT, edge("129:player"),
+    body(129, "player"), HIT],
 };
 
 const SUMMARY = decodeSpriteOrderPlan(UNIT_PLANS.summary), SENDOUT = decodeSpriteOrderPlan(UNIT_PLANS.nextSendOut);
