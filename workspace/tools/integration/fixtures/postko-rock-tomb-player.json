@@ -1,6 +1,6 @@
 {
  "schema": "postko-adapter-draft/v1",
- "draft": true,
+ "draft": false,
  "move": "ROCK_TOMB",
  "probe": "tools/integration/postkoStateProbe.py",
  "scenario": "tools/battle-lab/postko-rocktomb-thunderbolt.json",
@@ -37,5 +37,120 @@
  "note": "accepted window offset of prep6-rock-tomb-player.json (activation 217 -> window 217..390); ungated adapter (renders today post-KO)",
  "displayedStatus": {
   "player": "paralysis"
- }
+ },
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "53",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": []
+    },
+    {
+     "kind": "faint-animation",
+     "battler": 1
+    },
+    {
+     "kind": "draw-party-status-summary",
+     "battler": 1
+    },
+    {
+     "kind": "hide-party-status-summary",
+     "battler": 1
+    },
+    {
+     "kind": "switch-in-animation",
+     "battler": 1,
+     "partyIndex": 1
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "85",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "85",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    },
+    {
+     "kind": "status-animation",
+     "battler": 0,
+     "isStatus2": 0,
+     "status": 64
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "317",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    }
+   ]
+  }
+ ],
+ "denseProof": "tools/integration/fixtures/postko/lend-dense.json (production lend, 2 fresh runs, 0 residual)"
 }

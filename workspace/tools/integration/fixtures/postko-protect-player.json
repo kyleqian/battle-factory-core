@@ -1,6 +1,6 @@
 {
  "schema": "postko-adapter-draft/v1",
- "draft": true,
+ "draft": false,
  "move": "PROTECT",
  "probe": "tools/integration/postkoStateProbe.py",
  "scenario": "tools/battle-lab/postko-lightscreen-protect-rockslide.json",
@@ -32,5 +32,86 @@
   "startFrame": 3225,
   "endFrame": 3347
  },
- "note": "window = activation + 0, 123 rows (liveMoveAnimationDuration 182 = 123, anchor at the first script pointer; calibrated exact 123/123 x2 on mechanic-protect-player-houndour-opponent-onix.json activation 68 with verifyLiveAdapterFramebuffer); allocator input = liveView's known-entry host (entry labels); second post-KO body"
+ "note": "window = activation + 0, 123 rows (liveMoveAnimationDuration 182 = 123, anchor at the first script pointer; calibrated exact 123/123 x2 on mechanic-protect-player-houndour-opponent-onix.json activation 68 with verifyLiveAdapterFramebuffer); allocator input = liveView's known-entry host (entry labels); second post-KO body",
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "53",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": []
+    },
+    {
+     "kind": "faint-animation",
+     "battler": 1
+    },
+    {
+     "kind": "draw-party-status-summary",
+     "battler": 1
+    },
+    {
+     "kind": "hide-party-status-summary",
+     "battler": 1
+    },
+    {
+     "kind": "switch-in-animation",
+     "battler": 1,
+     "partyIndex": 1
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "113",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "182",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    }
+   ]
+  }
+ ],
+ "denseProof": "tools/integration/fixtures/postko/lend-dense.json (production lend, 2 fresh runs, 0 residual)"
 }

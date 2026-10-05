@@ -27,6 +27,7 @@ import type { BattleResolutionDisplayedField } from "../../src/engine/battleReso
 import type { BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import type { SceneOnDragonRageFieldProfile } from "../../src/animation/sceneOnPresentation.ts";
 import { createScratchDir } from "../lib/scratch.ts";
+import { replayPostKoTurnsThroughHost, type PostKoHostLend, type PostKoTurn } from "./postkoHostReplay.ts";
 
 export interface Fixture {
   sourceFixture?: string;
@@ -61,10 +62,19 @@ export interface Fixture {
    * per-fixture value in order-consumer-seeds.json (provider == accepted literal == observed); never capture rows.
    */
   precedingBodies?: { moveId: number; side: "player" | "opponent" }[];
+  /**
+   * Post-KO bodies (docs/postko-consumer-audit.md §4): the scenario's recorded semantic event history, one turn per action
+   * prompt, ending with this body. The harness replays it through the PRODUCTION live hosts (postkoHostReplay.ts:
+   * liveSpriteOrderHost + the orchestrator's allocator seam) and supplies their lends at the activation edge; never a
+   * value copied from the ROM state.
+   */
+  precedingTurns?: PostKoTurn[];
 }
 interface Probe {
-  frames?: { frame: number; sha256: string }[];
+  frames?: { frame: number; sha256: string }[] | number;
   rows?: { frame: number; sha256: string }[];
+  /** postkoStateProbe.py: every frame's RGB888 sha256, indexed by frame. */
+  sha256?: string[];
 }
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const ids = Object.fromEntries(moveData.moves.map(row => [row.move.replace(/^MOVE_/, ""), row.id]));
@@ -125,6 +135,22 @@ export function fixtureSpriteOrder(f: Fixture, request: BattleMoveAnimationReque
   return cursor;
 }
 
+const postKoLends = new WeakMap<PostKoTurn[], PostKoHostLend>();
+/** Production host lends of a post-KO fixture (memoized per recorded history). */
+export function fixturePostKoLend(f: Fixture, request: BattleMoveAnimationRequest): PostKoHostLend | undefined {
+  if (!f.precedingTurns) return undefined;
+  let lend = postKoLends.get(f.precedingTurns);
+  if (!lend) {
+    const body = f.precedingTurns.at(-1)?.events.at(-1) as { arguments?: string[]; battler?: number } | undefined;
+    if (Number(body?.arguments?.[0]) !== request.moveId || body?.battler !== request.attacker) {
+      throw new Error(`precedingTurns of ${f.move} do not end with its body`);
+    }
+    lend = replayPostKoTurnsThroughHost(f.precedingTurns);
+    postKoLends.set(f.precedingTurns, lend);
+  }
+  return lend;
+}
+
 export function liveView(f: Fixture, age: number): BattleResolutionPresentationRenderView {
   const profile = f.fieldProfile;
   const makeBattler = (side: "player" | "opponent") => {
@@ -152,6 +178,7 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
     ...f.requestFields,
   };
   if (liveMoveAnimationDuration(request) === null) throw new Error(`No live adapter for ${f.move}`);
+  const postKo = fixturePostKoLend(f, request);
   const healthbox = (mon: typeof field.player) => ({
     name: mon.name, level: mon.level, gender: mon.gender === "genderless" ? "none" as const : mon.gender, status: mon.status,
     hpFraction: mon.hp / mon.maxHP, currentHp: mon.hp, maxHp: mon.maxHP,
@@ -165,8 +192,9 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
     message: { lines: f.messageLines ?? [`${attacker === 1 ? "Foe " : ""}${f.attacker.species} used`, `${name}!`], visibleCharacters: 99 },
     effect: {
       type: "move", request, age,
-      // Plans exist only for audited moves; every other move yields no input.
-      spriteAllocatorInput: prepareLiveMoveSpriteAllocator(
+      // Plans exist only for audited moves; every other move yields no input. Post-KO fixtures: the production hosts'
+      // lends after replaying the recorded history (re-seeded entry-label allocator host, pi(F) order).
+      spriteAllocatorInput: postKo ? postKo.spriteAllocatorInput : prepareLiveMoveSpriteAllocator(
         createKnownEntrySpriteAllocatorProvider("battle-lab-ordinary-singles").firstMove,
         request,
       ).input,
@@ -174,7 +202,8 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
       // production does there (known-entry F, checked against the allocator occupancy), never from capture rows.
       // POKEBENCH_LIVE_ORDER_INPUT=none withholds it (order-independent adapters must stay exact without a host order).
       spriteOrderInput: process.env.POKEBENCH_LIVE_ORDER_INPUT === "none" ? undefined
-        : prepareLiveMoveSpriteOrder(fixtureSpriteOrder(f, request).order, request).input,
+        : postKo ? postKo.spriteOrderInput
+          : prepareLiveMoveSpriteOrder(fixtureSpriteOrder(f, request).order, request).input,
     },
     visibility: { player: { sprite: true, healthbox: true }, opponent: { sprite: true, healthbox: true } },
     waitCursor: null, bottom: "message", confirmHandoff: null, switchIn: null,
@@ -219,7 +248,8 @@ export function verifyLiveAdapterFramebuffer(path: string, freshRuns = 2) {
     // Use the previously accepted complete source-owned window; some probes
     // also retain pre-body text and post-body stat banners. Never pick matching rows.
     const window = fixture.denseWindow ?? fixture.sourceWindow;
-    const probeFrames = probe.frames ?? probe.rows;
+    const probeFrames = Array.isArray(probe.sha256) ? probe.sha256.map((sha256, frame) => ({ frame, sha256 }))
+      : Array.isArray(probe.frames) ? probe.frames : probe.rows;
     if (!probeFrames) throw new Error("Probe omitted framebuffer rows");
     const segments = fixture.denseSegments;
     const frames = segments

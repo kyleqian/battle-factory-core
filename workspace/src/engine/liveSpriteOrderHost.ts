@@ -29,10 +29,13 @@
  */
 import type { BattleKernelSemanticEvent } from "./battleDecisionBoundary.ts";
 import { battleMoveAnimationRequest } from "./battleMoveAnimation.ts";
+import { createKnownEntrySpriteAllocatorProvider, type KnownEntryRoute } from "./knownEntrySpriteAllocator.ts";
 import type { LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
+import type { LiveSpriteAllocatorHost } from "./liveSpriteAllocator.ts";
 import {
-  applySpriteOrderPresentationEvent, createSpriteOrderTracker, invalidateSpriteOrderTracker,
-  spriteOrderStatusAnimationName, spriteOrderTrackerLend, type SpriteOrderPresentationEvent, type SpriteOrderTracker,
+  KNOWN_ENTRY_BATTLER_SLOTS, applySpriteOrderPresentationEvent, createSpriteOrderTracker, invalidateSpriteOrderTracker,
+  spriteOrderStatusAnimationName, spriteOrderTrackerLend, spriteOrderTrackerRoleIsomorphic,
+  type SpriteOrderPresentationEvent, type SpriteOrderTracker,
 } from "./spriteOrderEventTransform.ts";
 import {
   invalidateSpriteOrderState, knownEntryPrePromptSpriteOrderState, knownEntrySpriteOrderState, type SpriteOrderState,
@@ -272,8 +275,39 @@ export function advanceLiveSpriteOrderHost(
   return Object.freeze({ ...host, tracker, hidden, cursor: Object.freeze(cursor) });
 }
 
-/** Order lent to the move body at its activation edge (null = consumers decline). */
-export function lendLiveSpriteOrder(host: LiveSpriteOrderHost): LiveMoveSpriteOrderInput | undefined {
+/**
+ * Consumers measured NOT exact after an opponent KO under the entry-label lend (docs/postko-consumer-audit.md §4; dense
+ * receipts tools/integration/fixtures/postko-lend/): they keep declining post-KO (scene-off fallback) until resolved.
+ * LEAF_BLADE 348 (player): 212/224 rows twice fresh, 11,843 px, all on the target sprite box (GOLEM, x149-203 y18-71) at ages
+ * 0-11, exact from age 12 (postko-leaf-blade-player.json). Pinned by tests/postkoLend.test.ts.
+ */
+export const POSTKO_LEND_EXCLUDED_MOVE_IDS: readonly number[] = Object.freeze([348]);
+
+/**
+ * Order lent to the move body at its activation edge (undefined = consumers decline): the tracker's entry-label lend
+ * (spriteOrderTrackerLend), withheld after a KO (battler slots not the entry ones) from POSTKO_LEND_EXCLUDED_MOVE_IDS.
+ */
+export function lendLiveSpriteOrder(host: LiveSpriteOrderHost, moveId?: number): LiveMoveSpriteOrderInput | undefined {
   const free = spriteOrderTrackerLend(host.tracker);
-  return free === null ? undefined : Object.freeze({ known: true as const, free });
+  if (free === null) return undefined;
+  const { player, opponent } = host.tracker.battlerSlots;
+  const atEntry = player === KNOWN_ENTRY_BATTLER_SLOTS.player && opponent === KNOWN_ENTRY_BATTLER_SLOTS.opponent;
+  if (!atEntry && moveId !== undefined && POSTKO_LEND_EXCLUDED_MOVE_IDS.includes(moveId)) return undefined;
+  return Object.freeze({ known: true as const, free });
+}
+
+/**
+ * Allocator host after a modelled opponent send-out (docs/postko-consumer-audit.md §4.3). The faint / next-mon summary /
+ * send-out leave the allocator occupancy role-isomorphic to the known entry (fixed occupants + the two battler sprites),
+ * so the host is re-seeded with the known-entry `firstMove` host, i.e. the post-unit view relabelled to entry slot labels
+ * (the labels the order lend uses). Only when the tracker's last unit is that send-out and its view is role-isomorphic;
+ * any other host is returned unchanged (an invalid host stays invalid). Net-zero history persists from there as usual.
+ */
+export function reseedLiveSpriteAllocatorAfterSendOut(
+  allocator: LiveSpriteAllocatorHost, host: LiveSpriteOrderHost, route: KnownEntryRoute = "ordinary-factory",
+): LiveSpriteAllocatorHost {
+  if (allocator.historyKnown || host.tracker.lastUnit !== "send-out" || !spriteOrderTrackerRoleIsomorphic(host.tracker)) {
+    return allocator;
+  }
+  return createKnownEntrySpriteAllocatorProvider(route).firstMove;
 }

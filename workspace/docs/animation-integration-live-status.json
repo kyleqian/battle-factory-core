@@ -3039,7 +3039,12 @@
       "planReplay": "TS replay of sprite-order-body-plans.json: 790 edges, 659 preceded by exact plans, 659 exact, 0 mismatched (tests/spriteOrderProvider.test.ts). Event transform, strict real-route (five battle-1 traces, no resync): 3 known / 3 exact / 0 mismatched move edges per trace (was 1), first invalidation 283:opponent (not observed); resync 91/91 exact. BattleLab corpus through the transform: 1366 edges, 1044 known (554 first + 490 later), 1044 exact, 0 mismatched (tests/spriteOrderEventTransform.test.ts). Live host = pure transform on 200 generated battles: 1009 bodies, 812 later, 239 later known, 0 mismatches (tests/liveSpriteOrderHost.test.ts, tools/integration/orderCrossBodyRouteScan.ts)",
       "receipt": "../tools/integration/fixtures/order-consumers-live-adapter-receipt.json",
       "consumerPolicy": "while the tracked order is known (any body of the battle whose every preceding unit since the known entry is modelled); otherwise null (bounded scene-off fallback)",
-      "crossBodyReceipt": "../tools/integration/fixtures/order-cross-body-live-receipt.json"
+      "crossBodyReceipt": "../tools/integration/fixtures/order-cross-body-live-receipt.json",
+      "postKoLend": {
+        "claim": "Post-KO lends for the opponent-KO geometry: after a modelled opponent faint + next-mon summary + send-out the tracked occupancy is role-isomorphic to the known entry and the body is lent pi(F) (entry slot labels; src spriteOrderTrackerLend / spriteOrderEntryLabelRelabel), and the allocator host is re-seeded with the known-entry firstMove host (reseedLiveSpriteAllocatorAfterSendOut). No consumer code changed. Measured exact twice fresh through the production lend: 13 audit bodies (2001 rows) + Barrier, Reflect, Magic Coat, Frustration, Seismic Toss, Safeguard, Heal Bell, Sweet Scent, Mega Drain, Perish Song, Grudge. Leaf Blade is NOT exact post-KO (212/224, target box ages 0-11) and keeps declining (POSTKO_LEND_EXCLUDED_MOVE_IDS).",
+        "caveats": "Player-faint reshow geometry {0,1,2,3,5,60..63} still declines; a second opponent KO lends by the same state argument but is UNIT_PLANS-predicted, not ROM-probed; remaining consumers are class-inferred (docs/postko-consumer-audit.md 3.2). Not whole-playable arbitrary-history exactness.",
+        "receipt": "../tools/integration/fixtures/postko-lend-receipt.json"
+      }
     }
   },
   "validationCheckpoint": {

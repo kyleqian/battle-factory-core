@@ -66,7 +66,7 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
   }, 60000);
 
   it("tracks the order across bodies on 20 generated battles exactly as the pure transform predicts", () => {
-    let later = 0, laterKnown = 0, laterUnknownAfterKnown = 0, invalidatedBattles = 0;
+    let later = 0, laterKnown = 0, laterUnknownAfterKnown = 0, invalidatedBattles = 0, postKoLent = 0;
     for (let seed = 0; seed < 20; seed += 1) {
       const route = scanRoute(seed, [0, 0, 0]);
       // The host may decline where the pure prediction is known (retained locked-action continuation, e.g. Rollout:
@@ -74,14 +74,18 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
       for (const body of route.bodies) expect(body.mismatch || (!body.agrees && body.known), `seed ${seed} body ${body.index}`).toBe(false);
       later += route.bodies.filter(body => body.index > 0).length;
       laterKnown += route.bodies.filter(body => body.index > 0 && body.known).length;
-      // After a faint / switch / send-out / trainer slide the lend declines for the rest of the battle: the tracker
-      // stays known through the battle units, but the lend gate (known-entry occupancy) is unchanged in this rung.
-      const invalidating = route.on.semanticEvents.map(row => row.event as { sequence: number; payload: { kind: string } })
-        .find(event => ["faint-animation", "switch", "switch-in-animation", "trainer-slide-in"].includes(event.payload.kind));
+      // Rung 2 (docs/postko-consumer-audit.md §4): after a modelled opponent faint + summary + send-out the occupancy is
+      // role-isomorphic to the entry and later bodies may lend pi(F) (checked == the pure prediction above). After a
+      // player-side unit (player faint, player switch-in, trainer slide) the lend still declines for the rest of the battle.
+      const events = route.on.semanticEvents.map(row => row.event as { sequence: number; payload: { kind: string; battler?: number } });
+      const invalidating = events.find(event => event.payload.kind === "trainer-slide-in"
+        || (["faint-animation", "switch-in-animation"].includes(event.payload.kind) && event.payload.battler === 0));
       if (invalidating) {
         invalidatedBattles += 1;
         expect(route.bodies.filter(body => body.sequence > invalidating.sequence).every(body => !body.known)).toBe(true);
       }
+      const ko = events.find(event => event.payload.kind === "switch-in-animation" && event.payload.battler === 1);
+      if (ko) postKoLent += route.bodies.filter(body => body.sequence > ko.sequence && body.known).length;
       // Once unknown, never known again in the same battle (no resync).
       const firstUnknown = route.bodies.findIndex(body => !body.known);
       if (firstUnknown >= 0) {
@@ -89,7 +93,8 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
         if (firstUnknown > 0) laterUnknownAfterKnown += 1;
       }
     }
-    expect({ later, laterKnown }).toEqual({ later: 80, laterKnown: 34 });
+    // laterKnown 34 -> 44: the 10 post-KO bodies of seeds 8 (2), 10 (1) and 11 (7, five after a second opponent KO) now lend.
+    expect({ later, laterKnown, postKoLent }).toEqual({ later: 80, laterKnown: 44, postKoLent: 10 });
     expect(laterUnknownAfterKnown).toBeGreaterThan(0);
     expect(invalidatedBattles).toBeGreaterThan(0);
   }, 120000);
