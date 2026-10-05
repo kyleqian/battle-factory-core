@@ -1,6 +1,6 @@
 {
  "schema": "postko-adapter-draft/v1",
- "draft": true,
+ "draft": false,
  "move": "FIRE_BLAST",
  "probe": "tools/integration/postkoStateProbe.py",
  "scenario": "tools/battle-lab/postko-fireblast-player.json",
@@ -96,5 +96,6 @@
     }
    ]
   }
- ]
+ ],
+ "denseProof": "tools/integration/fixtures/postko/lend-dense.json (production lend, 2 fresh runs, 0 residual)"
 }

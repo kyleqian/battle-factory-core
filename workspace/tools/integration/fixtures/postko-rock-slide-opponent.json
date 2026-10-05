@@ -1,6 +1,6 @@
 {
  "schema": "postko-adapter-draft/v1",
- "draft": true,
+ "draft": false,
  "move": "ROCK_SLIDE",
  "probe": "tools/integration/postkoStateProbe.py",
  "scenario": "tools/battle-lab/postko-rockslide-opponent.json",
@@ -117,5 +117,6 @@
     }
    ]
   }
- ]
+ ],
+ "denseProof": "tools/integration/fixtures/postko/lend-dense.json (production lend, 2 fresh runs, 0 residual)"
 }
