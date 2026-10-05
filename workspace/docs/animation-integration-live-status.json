@@ -2631,6 +2631,196 @@
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
+    },
+    {
+      "move": "MOVE_SWIFT",
+      "id": 129,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep8-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 78 / 80 rows (player / opponent attacker; activation..script end, per-orientation duration) (prep8-*.json): window start = activation frame, row 0 (docs/next-adapters-prep8.md)",
+        "ordinary route seed 45 / streak 0 / move index 2 (STARYU) player attacker; opponent attacker seed 424 / streak 0 / index 0 (ELEKID): adapter active every age, ON/OFF rules/RNG equal (scene bit 0x80 excluded); action-menu reached",
+        "alternate species: ELEKID player and opponent attackers 78/78 and 80/80"
+      ],
+      "palettePlan": "no plan, history invalidates (allocator constants valid only while the known-order gate holds)",
+      "spriteOrder": "gate: lent tracked order known (spriteOrderInput.known), else null. no order field in the config; allocator constants (star slots 3,4,5,7,9, ShakeMon2 task slot 0) valid only under the known-order gate; the caller RNG echoed into the view is 0 (not read for pixels)",
+      "remaining": [
+        "later bodies are covered only by the tracked-order claim, not by the dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_TRICK",
+      "id": 271,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep8-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 225 rows both orientations (prep8-*.json): window start = activation frame, row 0 (docs/next-adapters-prep8.md)",
+        "ordinary route seed 71 / streak 35 / index 0 (ALAKAZAM): adapter active every age, ON/OFF rules/RNG equal (scene bit 0x80 excluded); action-menu reached",
+        "alternate species: no alternate-species dense proof (alternate carrier render-only)"
+      ],
+      "palettePlan": "no plan, history invalidates (allocator constants valid only while the known-order gate holds)",
+      "spriteOrder": "gate: lent tracked order known (spriteOrderInput.known), else null. no order field; allocator constants (bag slots 3,4; stretch/shake task slots) valid under the known-order gate",
+      "remaining": [
+        "later bodies are covered only by the tracked-order claim, not by the dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_FRUSTRATION",
+      "id": 218,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep8-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 229 rows both orientations (request friendship 0, the Factory value) (prep8-*.json): window start = activation frame, row 0 (docs/next-adapters-prep8.md)",
+        "ordinary route seed 20 / streak 14 / index 0 (PERSIAN) player attacker; opponent attacker SHELGON seed 50 / streak 14 / index 0: adapter active every age, ON/OFF rules/RNG equal (scene bit 0x80 excluded); action-menu reached",
+        "alternate species: no alternate-species dense proof"
+      ],
+      "palettePlan": "no plan, history invalidates (allocator constants valid only while the known-order gate holds)",
+      "spriteOrder": "gate: lent tracked order known (spriteOrderInput.known), else null. impactOrders = slot indices in the lent 64-entry order; only friendship <= 30 (AnimTask_GetFrustrationPowerLevel level 0, the one measured branch) is live, otherwise null",
+      "remaining": [
+        "later bodies are covered only by the tracked-order claim, not by the dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_SEISMIC_TOSS",
+      "id": 69,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep8-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 228 rows both orientations (request damage 50, level-50 fixed damage) (prep8-*.json): window start = activation frame, row 0 (docs/next-adapters-prep8.md)",
+        "ordinary route seed 2 / streak 21 / index 3 (BLASTOISE): adapter active every age, ON/OFF rules/RNG equal (scene bit 0x80 excluded); action-menu reached",
+        "alternate species: no alternate-species dense proof"
+      ],
+      "palettePlan": "no plan, history invalidates (allocator constants valid only while the known-order gate holds)",
+      "spriteOrder": "gate: lent tracked order known (spriteOrderInput.known), else null. persistentOrder = slot indices in the lent order; battler palettes from the species art; only gAnimMoveDmg 33..65 (the medium branch measured) is live, otherwise null",
+      "remaining": [
+        "later bodies are covered only by the tracked-order claim, not by the dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_HORN_DRILL",
+      "id": 32,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep8-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 193 / 192 rows (player / opponent attacker; hornMatrixId 0 / 24 raw OAM bits) (prep8-*.json): window start = activation frame, row 0 (docs/next-adapters-prep8.md)",
+        "ordinary route seed 267 / streak 35 / index 0 (DEWGONG): adapter active every age, ON/OFF rules/RNG equal (scene bit 0x80 excluded); action-menu reached",
+        "alternate species: no alternate-species dense proof"
+      ],
+      "palettePlan": "no plan, history invalidates (allocator constants valid only while the known-order gate holds)",
+      "spriteOrder": "gate: lent tracked order known (spriteOrderInput.known), else null. spriteOrderSeed = lend over slots 3,4,5; the accepted window follows a Tackle body: the harness feeds the production tracker (prompt, commit, Tackle move-animation, visible hit) and the lend reproduces it; accuracy-gated moves animate only when not skipped",
+      "remaining": [
+        "later bodies are covered only by the tracked-order claim, not by the dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_AURORA_BEAM",
+      "id": 62,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep8-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 216 rows both orientations (after a Tackle body) (prep8-*.json): window start = activation frame, row 0 (docs/next-adapters-prep8.md)",
+        "ordinary route seed 52 / streak 7 / index 0 (CLOYSTER): adapter active every age, ON/OFF rules/RNG equal (scene bit 0x80 excluded); action-menu reached",
+        "alternate species: no alternate-species dense proof"
+      ],
+      "palettePlan": "no plan, history invalidates (allocator constants valid only while the known-order gate holds)",
+      "spriteOrder": "gate: lent tracked order known (spriteOrderInput.known), else null. 64-entry seed = occupied prefix + lent order (after-Tackle lend reproduces the accepted literal); ring slots/matrices cycle the 6-slot pool",
+      "remaining": [
+        "later bodies are covered only by the tracked-order claim, not by the dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_UPROAR",
+      "id": 253,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep8-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 73 rows both orientations (prep8-*.json): window start = activation frame, row 0 (docs/next-adapters-prep8.md)",
+        "ordinary route seed 585 / streak 7 / index 3 (VIGOROTH): body complete, driver stops at the frame budget (the user is locked into Uproar): adapter active every age, ON/OFF rules/RNG equal (scene bit 0x80 excluded)",
+        "alternate species: no alternate-species dense proof (single rental carrier species)"
+      ],
+      "palettePlan": "no plan, history invalidates (allocator constants valid only while the known-order gate holds)",
+      "spriteOrder": "gate: lent tracked order known (spriteOrderInput.known), else null. 64-entry order = provider order; attacker matrix slot 1 player / 2 opponent from the baseline",
+      "remaining": [
+        "later bodies are covered only by the tracked-order claim, not by the dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_THUNDERBOLT",
+      "id": 85,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep8-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 237 rows both orientations (prep8-*.json): window start = activation frame, row 0 (docs/next-adapters-prep8.md)",
+        "ordinary route seed 0 / streak 14 / index 2 (DELCATTY): adapter active every age, ON/OFF rules/RNG equal (scene bit 0x80 excluded); action-menu reached",
+        "alternate species: MINUN player and opponent attackers 237/237 each, window start derived from the alternate scenario's source activation (76 / 80); CASTFORM differs by a constant 400/800-px block inside the Castform sprite (species art/idle frame, not the move body) and is not claimed"
+      ],
+      "palettePlan": "no plan, history invalidates (allocator constants valid only while the known-order gate holds)",
+      "spriteOrder": "gate: lent tracked order known (spriteOrderInput.known), else null. orders = slot indices in the lent order (pixel-neutral on the accepted species); ad-hoc age-0 shadow draw retired under liveField",
+      "remaining": [
+        "later bodies are covered only by the tracked-order claim, not by the dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_STOCKPILE",
+      "id": 254,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep8-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 99 rows both orientations (after a Peck body) (prep8-*.json): window start = activation frame, row 0 (docs/next-adapters-prep8.md)",
+        "ordinary route seed 161 / streak 7 / index 2 (PELIPPER): adapter active every age, ON/OFF rules/RNG equal (scene bit 0x80 excluded); action-menu reached",
+        "alternate species: no alternate-species dense proof"
+      ],
+      "palettePlan": "no plan, history invalidates (allocator constants valid only while the known-order gate holds)",
+      "spriteOrder": "gate: lent tracked order known (spriteOrderInput.known), else null. spriteOrderSeed = lend over the orb slots 3,4,5,7,9 ([3,4,5,9,7] after Peck, tracker lend reproduces it); ad-hoc attackerShadowAtEntry retired under liveField",
+      "remaining": [
+        "later bodies are covered only by the tracked-order claim, not by the dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_ZAP_CANNON",
+      "id": 192,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep8-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 112 rows both orientations (prep8-*.json): window start = activation frame, row 0 (docs/next-adapters-prep8.md)",
+        "ordinary route seed 1585 / streak 35 / index 3 (FORRETRESS): adapter active every age, ON/OFF rules/RNG equal (scene bit 0x80 excluded); action-menu reached",
+        "alternate species: no alternate-species dense proof"
+      ],
+      "palettePlan": "no plan, history invalidates (allocator constants valid only while the known-order gate holds)",
+      "spriteOrder": "gate: lent tracked order known (spriteOrderInput.known), else null. the one order-sensitive move (<= 4/117 frames): orders = slot indices in the lent order, exact 112/112 on both accepted scenarios; any non-lent order is unproven; ad-hoc age-0 shadow draw retired under liveField; accuracy-gated",
+      "remaining": [
+        "later bodies are covered only by the tracked-order claim, not by the dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -2653,7 +2843,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 181,
+  "implementedCount": 191,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},

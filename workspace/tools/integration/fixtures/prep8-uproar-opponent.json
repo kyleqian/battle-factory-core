@@ -1,7 +1,7 @@
 {
   "schema": "prep8-adapter-draft/v1",
   "move": "UPROAR",
-  "probe": "uproar dense evidence",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "attacker": {
     "species": "VIGOROTH",
     "geometry": {
@@ -263,5 +263,6 @@
     ],
     "opponentAttackerRoutes": []
   },
-  "precedingBodies": []
+  "precedingBodies": [],
+  "scenario": "tools/battle-lab/mechanic-uproar-opponent-vigoroth-player-onix.json"
 }

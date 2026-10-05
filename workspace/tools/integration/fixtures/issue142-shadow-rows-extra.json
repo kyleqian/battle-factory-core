@@ -1,6 +1,6 @@
 {
  "schema": "issue142-shadow-rows-extra/v1",
- "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep7 rows from issue142ShadowRowsPrep7.py)",
+ "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep7 rows from issue142ShadowRowsPrep7.py) (+ prep8 rows from issue142ShadowRowsPrep8.py)",
  "rows": [
   {
    "id": 236,
@@ -2770,6 +2770,378 @@
     "fixture": "tools/integration/fixtures/prep7-dragon-dance-opponent.json",
     "body": "normal",
     "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 129,
+   "move": "SWIFT",
+   "orientation": "player",
+   "variant": "prep8-swift-player",
+   "activationFrame": 69,
+   "windowStart": 69,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep8-swift-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep8-activation; docs/next-adapters-prep8.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 129,
+   "move": "SWIFT",
+   "orientation": "opponent",
+   "variant": "prep8-swift-opponent",
+   "activationFrame": 73,
+   "windowStart": 73,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep8-swift-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep8-activation; docs/next-adapters-prep8.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 271,
+   "move": "TRICK",
+   "orientation": "player",
+   "variant": "prep8-trick-player",
+   "activationFrame": 66,
+   "windowStart": 66,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep8-trick-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep8-activation; docs/next-adapters-prep8.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 271,
+   "move": "TRICK",
+   "orientation": "opponent",
+   "variant": "prep8-trick-opponent",
+   "activationFrame": 70,
+   "windowStart": 70,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep8-trick-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep8-activation; docs/next-adapters-prep8.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 218,
+   "move": "FRUSTRATION",
+   "orientation": "player",
+   "variant": "prep8-frustration-player",
+   "activationFrame": 76,
+   "windowStart": 76,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep8-frustration-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep8-activation; docs/next-adapters-prep8.md; issue142ActivationProbe.py)"
+   },
+   "requestFields": {
+    "friendship": 0
+   }
+  },
+  {
+   "id": 218,
+   "move": "FRUSTRATION",
+   "orientation": "opponent",
+   "variant": "prep8-frustration-opponent",
+   "activationFrame": 80,
+   "windowStart": 80,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep8-frustration-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep8-activation; docs/next-adapters-prep8.md; issue142ActivationProbe.py)"
+   },
+   "requestFields": {
+    "friendship": 0
+   }
+  },
+  {
+   "id": 69,
+   "move": "SEISMIC_TOSS",
+   "orientation": "player",
+   "variant": "prep8-seismic-toss-player",
+   "activationFrame": 77,
+   "windowStart": 77,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep8-seismic-toss-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep8-activation; docs/next-adapters-prep8.md; issue142ActivationProbe.py)"
+   },
+   "requestFields": {
+    "damage": 50
+   }
+  },
+  {
+   "id": 69,
+   "move": "SEISMIC_TOSS",
+   "orientation": "opponent",
+   "variant": "prep8-seismic-toss-opponent",
+   "activationFrame": 81,
+   "windowStart": 81,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep8-seismic-toss-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep8-activation; docs/next-adapters-prep8.md; issue142ActivationProbe.py)"
+   },
+   "requestFields": {
+    "damage": 50
+   }
+  },
+  {
+   "id": 32,
+   "move": "HORN_DRILL",
+   "orientation": "player",
+   "variant": "prep8-horn-drill-player",
+   "activationFrame": 213,
+   "windowStart": 213,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep8-horn-drill-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep8-activation; docs/next-adapters-prep8.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 32,
+   "move": "HORN_DRILL",
+   "orientation": "opponent",
+   "variant": "prep8-horn-drill-opponent",
+   "activationFrame": 214,
+   "windowStart": 214,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep8-horn-drill-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep8-activation; docs/next-adapters-prep8.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 62,
+   "move": "AURORA_BEAM",
+   "orientation": "player",
+   "variant": "prep8-aurora-beam-player",
+   "activationFrame": 215,
+   "windowStart": 215,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep8-aurora-beam-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep8-activation; docs/next-adapters-prep8.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 62,
+   "move": "AURORA_BEAM",
+   "orientation": "opponent",
+   "variant": "prep8-aurora-beam-opponent",
+   "activationFrame": 216,
+   "windowStart": 216,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep8-aurora-beam-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep8-activation; docs/next-adapters-prep8.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 253,
+   "move": "UPROAR",
+   "orientation": "player",
+   "variant": "prep8-uproar-player",
+   "activationFrame": 75,
+   "windowStart": 75,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep8-uproar-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep8-activation; docs/next-adapters-prep8.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 253,
+   "move": "UPROAR",
+   "orientation": "opponent",
+   "variant": "prep8-uproar-opponent",
+   "activationFrame": 79,
+   "windowStart": 79,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep8-uproar-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep8-activation; docs/next-adapters-prep8.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 85,
+   "move": "THUNDERBOLT",
+   "orientation": "player",
+   "variant": "prep8-thunderbolt-player",
+   "activationFrame": 79,
+   "windowStart": 79,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep8-thunderbolt-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep8-activation; docs/next-adapters-prep8.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 85,
+   "move": "THUNDERBOLT",
+   "orientation": "opponent",
+   "variant": "prep8-thunderbolt-opponent",
+   "activationFrame": 83,
+   "windowStart": 83,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep8-thunderbolt-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep8-activation; docs/next-adapters-prep8.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 254,
+   "move": "STOCKPILE",
+   "orientation": "player",
+   "variant": "prep8-stockpile-player",
+   "activationFrame": 207,
+   "windowStart": 207,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep8-stockpile-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep8-activation; docs/next-adapters-prep8.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 254,
+   "move": "STOCKPILE",
+   "orientation": "opponent",
+   "variant": "prep8-stockpile-opponent",
+   "activationFrame": 205,
+   "windowStart": 205,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep8-stockpile-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep8-activation; docs/next-adapters-prep8.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 192,
+   "move": "ZAP_CANNON",
+   "orientation": "player",
+   "variant": "prep8-zap-cannon-player",
+   "activationFrame": 80,
+   "windowStart": 80,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep8-zap-cannon-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep8-activation; docs/next-adapters-prep8.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 192,
+   "move": "ZAP_CANNON",
+   "orientation": "opponent",
+   "variant": "prep8-zap-cannon-opponent",
+   "activationFrame": 84,
+   "windowStart": 84,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep8-zap-cannon-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep8-activation; docs/next-adapters-prep8.md; issue142ActivationProbe.py)"
    }
   }
  ]

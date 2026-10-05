@@ -15279,6 +15279,7 @@ export function renderSceneOnMovePresentation(
     const playerIsAttacker = view.attacker.geometry.side === "player";
     const player = playerIsAttacker ? view.attacker : view.target;
     const opponent = playerIsAttacker ? view.target : view.attacker;
+    if (liveField) return;
     const profile = trickState.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species,
@@ -15523,6 +15524,7 @@ export function renderSceneOnMovePresentation(
     const playerIsAttacker = view.attacker.geometry.side === "player";
     const player = playerIsAttacker ? view.attacker : view.target;
     const opponent = playerIsAttacker ? view.target : view.attacker;
+    if (liveField) return;
     const profile = swiftState.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species, level: 50, gender: profile.opponentGender ?? "none",
@@ -21651,7 +21653,7 @@ export function renderSceneOnMovePresentation(
     };
 
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
-    if (!playerAttacker && view.attackerShadowAtEntry && stockpileState.age === 0) {
+    if (!liveField && !playerAttacker && view.attackerShadowAtEntry && stockpileState.age === 0) {
       const shadowX = view.attacker.geometry.animationCenter.x - battleEnemyShadow.width / 2;
       const shadowY = view.attacker.geometry.battlePositionCenter.y + 29 - battleEnemyShadow.height / 2;
       for (const pixel of battleEnemyShadow.mask) {
@@ -21674,6 +21676,7 @@ export function renderSceneOnMovePresentation(
 
     const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
     const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
+    if (liveField) return;
     const profile = stockpileState.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponentSpecies,
@@ -27319,7 +27322,7 @@ export function renderSceneOnMovePresentation(
     const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
       side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
-    if (zapState.age === 0 && view.attacker.geometry.side === "opponent") {
+    if (!liveField && zapState.age === 0 && view.attacker.geometry.side === "opponent") {
       drawSourceOpponentEnemyShadow(fb, view.attacker.species,
         view.attacker.geometry.battlePositionCenter);
     }
@@ -27379,6 +27382,7 @@ export function renderSceneOnMovePresentation(
     const playerIsAttacker = view.attacker.geometry.side === "player";
     const player = playerIsAttacker ? view.attacker : view.target;
     const opponent = playerIsAttacker ? view.target : view.attacker;
+    if (liveField) return;
     const profile = zapState.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
@@ -27421,7 +27425,7 @@ export function renderSceneOnMovePresentation(
     const black: RgbColor = { r: 0, g: 0, b: 0 };
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap,
       blendPaletteBanksToward(battleBg.palette, black, preceding.backgroundPaletteY));
-    if (boltState.age === 0 && view.attacker.geometry.side === "opponent") {
+    if (!liveField && boltState.age === 0 && view.attacker.geometry.side === "opponent") {
       drawSourceOpponentEnemyShadow(fb, view.attacker.species,
         view.attacker.geometry.battlePositionCenter);
     }
@@ -27495,6 +27499,7 @@ export function renderSceneOnMovePresentation(
     const playerIsAttacker = view.attacker.geometry.side === "player";
     const player = playerIsAttacker ? view.attacker : view.target;
     const opponent = playerIsAttacker ? view.target : view.attacker;
+    if (liveField) return;
     const profile = boltState.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
@@ -27751,6 +27756,7 @@ export function renderSceneOnMovePresentation(
     const playerIsAttacker = view.attacker.geometry.side === "player";
     const player = playerIsAttacker ? view.attacker : view.target;
     const opponent = playerIsAttacker ? view.target : view.attacker;
+    if (liveField) return;
     const profile = auroraState.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
@@ -28029,6 +28035,7 @@ export function renderSceneOnMovePresentation(
     const playerIsAttacker = view.attacker.geometry.side === "player";
     const player = playerIsAttacker ? view.attacker : view.target;
     const opponent = playerIsAttacker ? view.target : view.attacker;
+    if (liveField) return;
     const profile = hornState.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species, level: 50,
@@ -35995,6 +36002,7 @@ export function renderSceneOnMovePresentation(
 
     const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
     const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    if (liveField) return;
     const profile = uproarState.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
@@ -39981,6 +39989,7 @@ export function renderSceneOnMovePresentation(
     }
     const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
     const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
+    if (liveField) return;
     const profile = seismicState.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponentSpecies, level: 50, gender: profile.opponentGender ?? "male",
@@ -40184,6 +40193,7 @@ export function renderSceneOnMovePresentation(
 
     const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
     const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
+    if (liveField) return;
     const profile = frustrationState.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponentSpecies, level: 50, gender: profile.opponentGender ?? "male",

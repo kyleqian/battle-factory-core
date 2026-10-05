@@ -1,7 +1,7 @@
 {
   "schema": "prep8-adapter-draft/v1",
   "move": "STOCKPILE",
-  "probe": "tools/battle-lab/mechanic-stockpile-opponent-pelipper-player-delcatty.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "attacker": {
     "species": "PELIPPER",
     "geometry": {
@@ -242,5 +242,6 @@
       "activation": 70,
       "scriptEndFirstInactive": 100
     }
-  ]
+  ],
+  "scenario": "tools/battle-lab/mechanic-stockpile-opponent-pelipper-player-delcatty.json"
 }

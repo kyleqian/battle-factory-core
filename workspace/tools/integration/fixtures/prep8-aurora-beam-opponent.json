@@ -1,7 +1,7 @@
 {
   "schema": "prep8-adapter-draft/v1",
   "move": "AURORA_BEAM",
-  "probe": "tools/battle-lab/mechanic-aurora-beam-opponent-seadra-player-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "attacker": {
     "species": "SEADRA",
     "geometry": {
@@ -590,5 +590,6 @@
       "activation": 68,
       "scriptEndFirstInactive": 109
     }
-  ]
+  ],
+  "scenario": "tools/battle-lab/mechanic-aurora-beam-opponent-seadra-player-onix.json"
 }

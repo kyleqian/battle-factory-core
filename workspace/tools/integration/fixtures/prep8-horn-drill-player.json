@@ -1,7 +1,7 @@
 {
   "schema": "prep8-adapter-draft/v1",
   "move": "HORN_DRILL",
-  "probe": "tools/battle-lab/mechanic-horn-drill-player-seaking-opponent-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "attacker": {
     "species": "SEAKING",
     "geometry": {
@@ -284,5 +284,6 @@
       "activation": 72,
       "scriptEndFirstInactive": 113
     }
-  ]
+  ],
+  "scenario": "tools/battle-lab/mechanic-horn-drill-player-seaking-opponent-onix.json"
 }
