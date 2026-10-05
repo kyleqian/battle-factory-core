@@ -38,21 +38,6 @@ backlog.
   3,358 px ages 74-112, Aromatherapy 1,676 px age 364; suspected elevated-opponent shadow row);
   Blizzard / Icy Wind fall back for the elevated pair by design.
 
-## #144 — Leaf Blade (live) shifts every non-ONIX opponent target 1 px at ages 0-11; target-swap audit leftovers (S10A, found 2026-10-05)
-
-- **Symptom (affects play today):** live Leaf Blade (348) against an opponent GOLEM leaves
-  11,843 px on rows 0-11 (212/224), first body or post-KO alike; STEELIX 12,202 px; ONIX
-  (the accepted fixture target) exact. Residual = the target's own tones shifted 1 px.
-- **Mechanism:** `src/animation/leafBlade.ts:231-233` returns `x2 = 1` for every opponent
-  target at ages <= 11; the ROM holds the target's front-idle x2, which is 1 only for ONIX
-  (0 for GOLEM, GRAVELER, GENGAR, SHUCKLE, ABSOL, ZANGOOSE, SWELLOW, STEELIX).
-- **Fix shape:** pass `targetIdleX2` from `liveBattlerAnchors(...).frontIdleRest.x2` into the
-  Leaf Blade config (as Crabhammer/Psybeam/Magical Leaf do) and thread it to
-  `leafBladeDisplayedTargetX2AtAge`; then drop 348 from `POSTKO_LEND_EXCLUDED_MOVE_IDS`
-  (`liveSpriteOrderHost.ts`) after re-proving `postko-leaf-blade-player.json`.
-- Audit follow-up: #145 (other species-blind live inputs).
-- Evidence: `tools/integration/fixtures/prep11/leaf-*.json`, supervisor rerun 2026-10-05.
-
 ## #143 — CASTFORM non-normal forms (weather) are not modelled (S10A; normal-form residual FIXED 2026-10-05)
 
 - **Fixed (`55d1ef1dd`):** the normal-form Y placement (player back delta 0 from
