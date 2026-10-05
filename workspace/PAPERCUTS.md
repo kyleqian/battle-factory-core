@@ -19,6 +19,18 @@ history.
 - **Fix:** let the driver pick the first healthy party member on forced
   replacement (or accept a `{ forcedSwitch: n }` slot entry).
 
+## `issue142ShadowRowScan.ts` cannot see a MISSING shadow-row id
+
+- **What:** the scan compares rows only for ids already in
+  `LIVE_MOVE_OPPONENT_SHADOW_ROW`; a new live id whose window starts at
+  activation but was never added to the map passes the scan with 0
+  mismatches. Only `tests/liveShadowRows.test.ts` (via the extra-rows
+  fixture) fails on it.
+- **Hits:** 1 (2026-10-04 next5 worker: Teeter Dance and Soft-Boiled rows
+  were added only after the vitest failure, ~3 min).
+- **Fix:** have the scan also iterate `LIVE_MOVE_ANIMATION_IDS` and flag any
+  id whose fixture rows say offset >= 0 but has no map entry.
+
 ## `statusBatchSupersonicProbe.py` fails on the known mGBA teardown crash
 
 - **What:** the wrapper runs `tools/compare/supersonicProbe.py` with

@@ -1,5 +1,40 @@
 # Animation integration progress
 
+## 2026-10-04 (evening 2) — next5 folded: 136 live adapters
+
+- Folded worker `172b4024b` as `4818dc692` (src tree `8a0b13c30`): Scary Face,
+  Glare (eye points from `liveBattlerAnchors` + pic-coords height), Teeter Dance,
+  Dizzy Punch (attacker personality threaded as presentation-only
+  `BattleCommandFieldBattler.personality`, also on the battle-start field),
+  Soft-Boiled (self-target; new optional `SceneOnSoftBoiledConfig.bystander`
+  draws the displayed other-side battler instead of hard-coded Onix).
+  Shadow rows 0 for Glare/Teeter Dance/Soft-Boiled; Scary Face (-4) and Dizzy
+  Punch (-13) not in map. No palette plans (history invalidates).
+- Supervisor dense: 10 fixtures + alt-species Scary Face/ARBOK and
+  Glare/SEVIPER (source-derived windows, `altSpecies5.py`) twice fresh,
+  2,229 rows/run, zero residual. Routes 4/4 exact ON/OFF parity (Scary Face
+  14/[3]/0, Glare 1/[1]/7, Teeter Dance 49/[1]/0 and Dizzy Punch 49/[0]/0 with
+  a player SPINDA). Soft-Boiled has no generated-rental carrier (dense only).
+  Receipt `next5-supervisor-receipt.json`.
+- Limits: Scary Face (14 frames) and Dizzy Punch (5) script tails beyond the
+  accepted window are not covered; Soft-Boiled proven for Chansey only;
+  a Transform-into-Spinda attacker would need `gTransformedPersonalities`
+  (Transform histories already invalidate).
+- Worker full suite had one failure (`battleCommandPresentation.test.ts`
+  expected projection lacked `personality`); fixed test-only.
+
+## 2026-10-04 (evening 2) — prep2 triage banked (evidence only)
+
+- Side-lane `0b2044ec7` folded as `3699eb6ac` (new files only):
+  `docs/next-adapters-prep2.md` triages the 33 unadapted H_BASIC/H_DERIVED
+  moves: READY 11, small-input 12, blocked 10 (switch flow Baton Pass/Roar/
+  Whirlwind; Sleep Talk called move; Substitute doll; Memento scanline; Spark
+  order; Wish/Meteor Mash Random2; Extreme Speed age basis). Drafted
+  `prep2-*` fixtures for the next batch (Surf, Muddy Water, Icy Wind,
+  Blizzard, Fake Out, Explosion, Cosmic Power, Future Sight); activation
+  receipt `docs/next-adapters-prep2-activation.json`. Supervisor re-measured
+  Surf activation 72..215 fresh (matches).
+
 ## 2026-10-04 — next-adapters prep banked (evidence only)
 
 - Side-lane prep `72ff8df29` folded (new files only): `docs/next-adapters-prep.md`
