@@ -16557,6 +16557,7 @@ export function renderSceneOnMovePresentation(
     const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
     const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
     const profile = recycleState.config.fieldProfile;
+    if (liveField) return;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponentSpecies,
       level: 50,
@@ -22689,6 +22690,7 @@ export function renderSceneOnMovePresentation(
     const targetX2 = leafBladeDisplayedTargetX2AtAge(
       state.age,
       view.target.geometry.side,
+      leafState.config.targetIdleX2,
     );
     const drawSceptile = () => drawSpriteSheet(
       fb,
@@ -23580,6 +23582,7 @@ export function renderSceneOnMovePresentation(
     const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
     const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
     const profile = cutterState.config.fieldProfile;
+    if (liveField) return;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species,
       level: 50,
@@ -27877,6 +27880,7 @@ export function renderSceneOnMovePresentation(
       || left.y - right.y || right.order - left.order || right.slot - left.slot);
     for (const entry of entries) entry.draw();
 
+    if (liveField) return;
     const playerIsAttacker = view.attacker.geometry.side === "player";
     const player = playerIsAttacker ? view.attacker : view.target;
     const opponent = playerIsAttacker ? view.target : view.attacker;
@@ -36083,6 +36087,7 @@ export function renderSceneOnMovePresentation(
     const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
     const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
     const profile = foresightState.config.fieldProfile;
+    if (liveField) return;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
       hpFraction: profile.opponentHp / profile.opponentMaxHp, status: profile.opponentStatus ?? "none",
@@ -36239,6 +36244,7 @@ export function renderSceneOnMovePresentation(
     const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
     const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
     const profile = skyState.config.fieldProfile;
+    if (liveField) return;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species, level: 50,
       gender: profile.opponentGender ?? "male",
@@ -36353,6 +36359,7 @@ export function renderSceneOnMovePresentation(
     const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
     const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
     const profile = destinyState.config.fieldProfile;
+    if (liveField) return;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
       hpFraction: profile.opponentHp / profile.opponentMaxHp, status: profile.opponentStatus ?? "none",
@@ -36836,6 +36843,7 @@ export function renderSceneOnMovePresentation(
     const player = playerAttacker ? view.attacker : view.target;
     const opponent = playerAttacker ? view.target : view.attacker;
     const profile = spiderWebState.config.fieldProfile;
+    if (liveField) return;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species,
       level: 50,
@@ -37022,6 +37030,7 @@ export function renderSceneOnMovePresentation(
     const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
     const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
     const profile = petalState.config.fieldProfile;
+    if (liveField) return;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species, level: 50,
       gender: profile.opponentGender ?? "male",
@@ -44246,13 +44255,13 @@ export function renderSceneOnMovePresentation(
       age: leechState.age - 1,
     });
     const playerToOpponent = view.attacker.geometry.side === "player"
-      && view.attacker.species === "EXEGGCUTE"
+      && (liveField || view.attacker.species === "EXEGGCUTE")
       && view.target.geometry.side === "opponent"
-      && view.target.species === "ONIX";
+      && (liveField || view.target.species === "ONIX");
     const opponentToPlayer = view.attacker.geometry.side === "opponent"
-      && view.attacker.species === "EXEGGCUTE"
+      && (liveField || view.attacker.species === "EXEGGCUTE")
       && view.target.geometry.side === "player"
-      && view.target.species === "ONIX";
+      && (liveField || view.target.species === "ONIX");
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged LEECH_SEED pair ${view.attacker.species}->${view.target.species}`,
@@ -44260,11 +44269,11 @@ export function renderSceneOnMovePresentation(
     }
     const exeggcuteSource = playerToOpponent
       ? lightScreenArt.exeggcuteBack : lightScreenArt.exeggcuteFront;
-    const exeggcute = playerToOpponent ? exeggcuteSource : {
+    const exeggcute = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent ? exeggcuteSource : {
       ...exeggcuteSource,
       tileset: subTileset(exeggcuteSource.tileset, 0, 8),
     };
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const green = { r: 107, g: 255, b: 99 };
     const bgPalettes = battleBg.palette.map((palette) =>
       blendPaletteToward(palette, green, displayed.bgPaletteBlendY));
@@ -44378,6 +44387,7 @@ export function renderSceneOnMovePresentation(
       }
     }
 
+    if (!liveField) {
     drawSendOutHealthbox(
       fb,
       0,
@@ -44417,6 +44427,7 @@ export function renderSceneOnMovePresentation(
       view.body === "main" ? "LEECH SEED!" : "",
       99,
     );
+    }
     return;
   }
 

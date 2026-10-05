@@ -1,0 +1,36 @@
+{
+ "schema": "prep11-live-fixture/v1",
+ "move": "AIR_CUTTER",
+ "sourceDraft": "tools/integration/fixtures/prep11-air-cutter-opponent-air-cutter-opponent-golbat-player-chansey.json",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-air-cutter-opponent-golbat-player-chansey.json",
+ "attacker": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "CHANSEY",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 357,
+  "playerMaxHp": 357,
+  "opponentHp": 169,
+  "opponentMaxHp": 169,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "denseWindow": {
+  "startFrame": 78,
+  "endFrame": 189,
+  "ageOffset": 0
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 55
+ }
+}

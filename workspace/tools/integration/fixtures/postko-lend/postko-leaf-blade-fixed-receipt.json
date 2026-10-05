@@ -1,0 +1,19 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/postko-lend/postko-leaf-blade-player.json",
+  "rows": 224,
+  "ageOffset": 0,
+  "expectedDuration": 224,
+  "exactRows": [
+   224,
+   224
+  ],
+  "residualPixels": [
+   0,
+   0
+  ],
+  "digest": "9c4fd8f07dc322616ff4e73a1c7604f15c9814f385f535fee8a562982330ff2c",
+  "freshRunsIdentical": true,
+  "firstMismatches": []
+ }
+]

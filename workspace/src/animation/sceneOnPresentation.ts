@@ -3016,6 +3016,8 @@ export interface SceneOnLeafBladeConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   /** Source-resolved target geometry consumed by AnimTask_LeafBlade. */
   readonly targetProfile: Readonly<LeafBladeTargetGeometry>;
+  /** Target species front-idle x2 (live host); staged default = ONIX (1 for the opponent front). */
+  readonly targetIdleX2?: number;
   /** Live host order of `LEAF_BLADE_OAM_ORDER_SLOTS` at activation (docs/order-consumer-prep.md §0); staged = ascending. */
   readonly oamOrderSeed?: readonly number[];
 }

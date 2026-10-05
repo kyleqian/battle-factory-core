@@ -81,6 +81,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   208, 211, 213, 223, 227, 231, 232, 235, 242, 243, 246, 247, 257, 264, 272, 277, 280, 281, 287, 290, 302,
   305, 306, 319, 320, 321, 325, 334, 335, 336, 337, 342, 343, 347,
   56, 61, 197, 238, 259, 294, 341,
+  // prep11 (docs/next-adapters-prep11.md): Leech Seed main body.
+  73, 80, 161, 169, 193, 194, 278, 314, 327,
   // anchor3: source battler anchors (position center, picture height, pic offset).
   86, 87, 107, 116, 203, 207, 263, 339,
   // selectors: request-selected branches and healing anchors.
@@ -218,6 +220,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // Feather Dance (297): the live window starts at the activation frame (row 0). Double Team (104): the first window row is
     // one frame after the activation (row -1): no row.
     297,
+    // prep11 (issue142-shadow-rows-extra.json): Leech Seed main body window starts at the activation frame (row 0).
+    73, 80, 161, 169, 193, 194, 278, 314, 327,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -495,6 +499,15 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 88: return 87; // Rock Throw (296..382 / 296..382, no tail).
     case 195: return 259; // Perish Song (71..329 / 75..333, no tail).
     case 348: return 224; // Leaf Blade (76..299 / 80..303, no tail).
+    case 80: return 244; // Petal Dance 215..458 / 217..460 (prep11 s0.2).
+    case 278: return 203; // Recycle 2193..2395 / 2589..2791 (prep11 s0.2).
+    case 169: return 207; // Spider Web 220..426 / 219..425.
+    case 327: return 188; // Sky Uppercut 82..269 / 86..273; the COMBUSKEN script ends one frame later (prep11 open point 1).
+    case 193: return 167; // Foresight 211..377 / 210..376.
+    case 194: return 188; // Destiny Bond 219..406 / 218..405 (prep11 s0.2).
+    case 314: return 112; // Air Cutter 74..185 / 78..189.
+    case 161: return 284; // Tri Attack 81..364 / 77..360 (prep11 s0.2).
+    case 73: return 141; // Leech Seed main body 246..386 / 245..385 (prep11 s0.2); the end-turn drain is a separate scene-off body.
     case 215: return 261; // Heal Bell (209..469 / 210..470, no tail).
     case 53: return 115; // Flamethrower (395..520 / 449..574 incl. 11 negative-age rows, ageOffset -11); script ends 600/654.
     case 82: return 150; // Dragon Rage (89..238 / 93..242); the script runs 21 frames past the window (259/263), uncovered.
@@ -1218,6 +1231,186 @@ export function liveMoveAnimationPresentation(
       config = { move: "HEAL_BELL", attacker, target, fieldProfile, noteOrderSeed };
       break;
     }
+    case 73:
+      // prep11 s0.2: the main body needs no order; the allocator constants (seeds 3,4,5) equal the accepted corpus. The
+      // residual-drain fields are unused by the main body. Launch from the attacker pic offset; the target holds its idle x2.
+      config = { move: "LEECH_SEED", body: "main", attacker, target, fieldProfile,
+        effectCenter: attackerAnchors.picOffsetPoint,
+        targetRestOffset: { x2: liveBattlerAnchors(target.geometry.side, art).frontIdleRest.x2,
+          y2: liveBattlerAnchors(target.geometry.side, art).frontIdleRest.y2 },
+        allocatorProfile: { seeds: [3, 4, 5], hitsplat: 3, orbs: [3, 4, 5, 7, 9, 10, 11, 12], stars: [3, 4, 5, 3], paletteController: 3 } };
+      break;
+    case 161: {
+      // prep11 s0.2: allocator constants equal the accepted corpus (triangle slot 3 matrix 0; flame/lightning/ice slots; palette
+      // blends 3, 12); the 64-entry order is the lent one, so the known-entry baseline gates it (no lend -> scene-off).
+      if (!spriteOrderInput?.known) return null;
+      const fullOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (fullOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      config = { move: "TRI_ATTACK", attacker, target, fieldProfile,
+        animationGeometry: { attackerPositionCenter: attackerAnchors.battlePositionCenter,
+          targetPictureCenter: targetAnchors.picOffsetPoint,
+          targetRestOffset: { x2: targetAnchors.frontIdleRest.x2, y2: targetAnchors.frontIdleRest.y2 } },
+        animationProfile: { triangleSlot: 3, triangleMatrixId: 0, fireSlots: [4, 5, 7, 9, 10, 11, 12, 3],
+          lightningSlots: [3, 4, 5], iceSlots: [3, 4, 5, 7, 9, 10, 11], iceMatrixIds: [0, 3, 4, 5, 6, 7, 8],
+          paletteSlots: [3, 12], effectSubpriority: (target.geometry.side === "player" ? 30 : 40) - 2, spriteOrderSeed: fullOrder } };
+      break;
+    }
+    case 194: case 314: {
+      // prep11 s0.2: allocator/task/resource constants equal the accepted corpora (the order is the lent one: no lend -> scene-off).
+      // monbg (prep11-monbg-formula.json): the target battler sprite position incl. the species front-idle x2.
+      if (!spriteOrderInput?.known) return null;
+      const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
+      const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (fullOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const attackerSlot = attacker.geometry.side === "player" ? 6 : 8, targetSlot = attackerSlot === 6 ? 8 : 6;
+      if (request.moveId === 194) {
+        const bottom = (side: "player" | "opponent", a: LiveBattlerAnchors) => a.picOffsetPoint.y + liveBattlerCoordAttrs(side, art).height / 2;
+        config = { move: "DESTINY_BOND", attacker, target, fieldProfile,
+          animationInputs: { attackerBottom: bottom(attacker.geometry.side, attackerAnchors), targetBottom: bottom(target.geometry.side, targetAnchors),
+            attackerSpriteSlot: attackerSlot, whiteShadowSpriteSlot: 3, whiteShadowTaskSlot: 0, shakeTaskSlot: 1, paletteTaskSlot: 2,
+            fadeTaskSlot: 0, clearMonBgTaskSlot: 0, whiteShadowTileSlot: 6, whiteShadowPaletteBank: 7, whiteShadowTileRange: [305, 32],
+            matrixBitmap: 6, spriteOrder: fullOrder, whiteShadowOrderIndex: 8, visibleObjPaletteBanks: [16, 17],
+            excludedObjPaletteBanks: Array.from({ length: 14 }, (_, index) => index + 18) } };
+      } else {
+        const sub = (side: "player" | "opponent") => (side === "player" ? 30 : 40);
+        const battlerInput = (slot: number, side: "player" | "opponent") =>
+          ({ slot, subpriority: sub(side), matrixNum: 0, matrix: [256, 0, 0, 256] as [number, number, number, number] });
+        const cx = targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2, cy = targetAnchors.spriteCenter.y + targetAnchors.frontIdleRest.y2;
+        config = { move: "AIR_CUTTER", attacker, target, fieldProfile,
+          animationInputs: { attackerSprite: battlerInput(attackerSlot, attacker.geometry.side),
+            targetSprite: battlerInput(targetSlot, target.geometry.side), waveSpriteSlots: [3, 4, 5], sliceSpriteSlot: 3,
+            taskSlots: { projectile: 0, targetShake: 0, partnerShake: 2, updateMonBg: 1, clearMonBg: 0 },
+            resources: { airWave: { paletteBank: 7, tileSlot: 6, tileRange: [305, 8] }, cut: { paletteBank: 8, tileSlot: 7, tileRange: [537, 64] },
+              impact: { paletteBank: 9, tileSlot: 10, tileRange: [313, 16] } },
+            matrixBitmap: 6, spriteOrder: fullOrder,
+            monbg: { layer: target.geometry.side === "player" ? "bg2" : "bg1", center: { x: cx, y: cy }, bgX: 32 - cx, bgY: 32 - cy } } };
+      }
+      break;
+    }
+    case 193: {
+      // prep11 s0.2: constants equal the accepted corpora; target bounds are the GetBattlerSpriteCoordAttr rectangle (pic offset
+      // +-half the pic coords; the corpus holds bottom one pixel inside and the right-top corner one below top).
+      if (!spriteOrderInput?.known) return null;
+      const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
+      const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (fullOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const tc = liveBattlerCoordAttrs(target.geometry.side, art);
+      const pic = targetAnchors.picOffsetPoint;
+      const cx = targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2, cy = targetAnchors.spriteCenter.y + targetAnchors.frontIdleRest.y2;
+      const top = pic.y - tc.height / 2;
+      config = { move: "FORESIGHT", attacker, target, fieldProfile,
+        animationInputs: { targetBounds: { left: pic.x - tc.width / 2, right: pic.x + tc.width / 2, top, bottom: pic.y + tc.height / 2 - 1, rightTop: top + 1 },
+          targetPictureOffset: pic, targetSpriteSlot: target.geometry.side === "player" ? 6 : 8, glassSpriteSlot: 3, blendTaskSlot: 0,
+          updateMonBgTaskSlot: 1, clearMonBgTaskSlot: 0, spriteOrder: fullOrder, glassPaletteBank: 7, glassTileSlot: 6, matrixBitmap: 6,
+          monbg: { layer: target.geometry.side === "player" ? "bg2" : "bg1", spriteX: cx, spriteY: cy, bgX: 32 - cx, bgY: 32 - cy,
+            inBg2: target.geometry.side === "player", battlerId: target.geometry.side === "player" ? 0 : 1 } } };
+      break;
+    }
+    case 327: {
+      // prep11 s0.2: constants equal the accepted corpora; subpriorities are the attacker slide (-2) and target impact (-3) offsets.
+      if (!spriteOrderInput?.known) return null;
+      const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
+      const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (fullOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const cx = targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2, cy = targetAnchors.spriteCenter.y + targetAnchors.frontIdleRest.y2;
+      const offset = (a: LiveBattlerAnchors) => ({ x: a.frontIdleRest.x2, y: a.frontIdleRest.y2 });
+      const attackerSub = attacker.geometry.side === "player" ? 30 : 40, targetSub = target.geometry.side === "player" ? 30 : 40;
+      const targetSlot = target.geometry.side === "player" ? 6 : 8;
+      // The reducer's attackerCenter/targetCenter are the battler OBJ centers (corner + 32), not the pic-offset animationCenter.
+      const objCentered = (battler: typeof attacker, a: LiveBattlerAnchors) =>
+        ({ ...battler, geometry: { ...battler.geometry, animationCenter: a.spriteCenter } });
+      config = { move: "SKY_UPPERCUT", attacker: objCentered(attacker, attackerAnchors), target: objCentered(target, targetAnchors), fieldProfile,
+        animationInputs: { targetPictureOrigin: targetAnchors.picOffsetPoint, attackerSpriteSlot: attacker.geometry.side === "player" ? 6 : 8,
+          targetSpriteSlot: targetSlot, attackerInitialOffset: offset(attackerAnchors), targetInitialOffset: offset(targetAnchors),
+          slideSpriteSlots: [3, 9, 3, 4], impactSpriteSlots: [4, 3, 5, 7, 4], impactMatrixSlots: [0, 3, 4, 5, 0],
+          updateMonBgTaskSlot: 1, fadeInTaskSlot: 0, backgroundTaskSlot: 2, shakeMon2TaskSlot: 0, shakeMonInPlaceTaskSlot: 0,
+          clearMonBgTaskSlot: 0, restoreFadeTaskSlot: 3, slideSubpriority: attackerSub - 2, impactSubpriority: targetSub - 3,
+          impactPaletteBank: 7, impactTileSlot: 6, baseMatrixBitmap: 6, spriteOrder: fullOrder,
+          monbg: { layer: target.geometry.side === "player" ? "bg2" : "bg1", spriteSlot: targetSlot, spriteX: cx, spriteY: cy,
+            bgX: 32 - cx, bgY: 32 - cy, inBg2: target.geometry.side === "player", battlerId: target.geometry.side === "player" ? 0 : 1 },
+          initialBg3Offset: { x: 0, y: 0 } } };
+      break;
+    }
+    case 169: {
+      // prep11 s0.2: constants equal the accepted corpora. The reducer's attacker/target centers are the thread origin and web
+      // centre: the InitSpritePosToAnim* pic-offset points; subpriorities are the battler ones minus 2 (thread: target, web:
+      // attacker) and the attacker's minus 5 (palette blend).
+      if (!spriteOrderInput?.known) return null;
+      const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
+      const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (fullOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const cx = targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2, cy = targetAnchors.spriteCenter.y + targetAnchors.frontIdleRest.y2;
+      const centered = (battler: typeof attacker, a: LiveBattlerAnchors) =>
+        ({ ...battler, geometry: { ...battler.geometry, animationCenter: a.picOffsetPoint, battlePositionCenter: a.picOffsetPoint } });
+      const attackerSub = attacker.geometry.side === "player" ? 30 : 40, targetSub = target.geometry.side === "player" ? 30 : 40;
+      // The thread spawns 20 px toward the target from the attacker's pic offset (the script's x argument).
+      const threadOrigin = { x: attackerAnchors.picOffsetPoint.x + (attacker.geometry.side === "player" ? 20 : -20), y: attackerAnchors.picOffsetPoint.y };
+      config = { move: "SPIDER_WEB", attacker: centered(attacker, { ...attackerAnchors, picOffsetPoint: threadOrigin }), target: centered(target, targetAnchors), fieldProfile,
+        animationInputs: { threadOrigin,
+          threadSpriteSlots: [3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18], paletteSpriteSlot: 3, webSpriteSlot: 3, webMatrixSlot: 0,
+          updateMonBgTaskSlot: 1, clearMonBgTaskSlot: 0, loopSoundTaskSlot: 0, spriteOrder: fullOrder,
+          paletteSubpriority: attackerSub - 5, threadSubpriority: targetSub - 2, webSubpriority: attackerSub - 2, baseMatrixBitmap: 6,
+          monbg: { layer: target.geometry.side === "player" ? "bg2" : "bg1", spriteSlot: target.geometry.side === "player" ? 6 : 8,
+            spriteX: cx, spriteY: cy, bgX: 32 - cx, bgY: 32 - cy, inBg2: target.geometry.side === "player",
+            battlerId: target.geometry.side === "player" ? 0 : 1 } } };
+      break;
+    }
+    case 278: {
+      // prep11 s0.2: spriteSlot 3 / matrix 0 constants equal the accepted corpora; the arrow spawns at the attacker's pic-offset x and
+      // BATTLER_COORD_ATTR_TOP (pic offset - height / 2), which the reducer takes as the attacker animation center. The blend task's
+      // palette id (data only, no pixels) is OBJ_PLTT_ID(battler OBJ bank 0 / 1) + 1 = 257 / 273.
+      const top = attackerAnchors.picOffsetPoint.y - liveBattlerCoordAttrs(attacker.geometry.side, art).height / 2;
+      const arrowOrigin = { x: attackerAnchors.picOffsetPoint.x, y: top };
+      config = { move: "RECYCLE", attacker: { ...attacker, geometry: { ...attacker.geometry, animationCenter: arrowOrigin } }, target, fieldProfile,
+        animationProfile: { attackerTop: top, attackerSubpriority: attacker.geometry.side === "player" ? 30 : 40, spriteSlot: 3, matrixNum: 0,
+          attackerPaletteIdPlusOne: attacker.geometry.side === "player" ? 257 : 273 } };
+      break;
+    }
+    case 80: {
+      // prep11 s0.2: slots/tasks/matrix constants equal the accepted corpora. The thirteen flower translation steps are
+      // InitAnimLinearTranslation's (|dy| << 8) / duration with the movingUp bit, from the script arguments: the big flowers
+      // start at the BATTLER_COORD_Y position (+ initial y), the small ones at the pic offset (+ initial y); all end at pic offset + target y.
+      if (!spriteOrderInput?.known) return null;
+      const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
+      const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (fullOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const pic = attackerAnchors.picOffsetPoint;
+      const programs: readonly (readonly [big: boolean, initialY: number, targetY: number, duration: number])[] = [
+        [true, -24, 8, 140], [false, -24, 8, 100], [false, -24, 8, 100], [true, -24, 8, 140], [false, -24, 8, 100], [false, -24, 8, 100],
+        [true, -24, 8, 140], [false, -24, 8, 100], [false, -24, 8, 100], [false, -24, 0, 100], [false, -24, 0, 100],
+        [false, -16, 14, 80], [false, -14, 16, 80]];
+      const flowerFixedPointSteps = programs.map(([big, initialY, targetY, duration]) => {
+        const dy = (pic.y + targetY) - ((big ? attackerAnchors.battlePositionCenter.y : pic.y) + initialY);
+        const step = ((Math.abs(dy) << 8) & 0xffff) / duration | 0;
+        return { x: 0, y: dy < 0 ? step | 1 : step & ~1 };
+      });
+      const attackerSub = attacker.geometry.side === "player" ? 30 : 40;
+      const cx = targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2, cy = targetAnchors.spriteCenter.y + targetAnchors.frontIdleRest.y2;
+      const targetSlot = target.geometry.side === "player" ? 6 : 8;
+      config = { move: "PETAL_DANCE",
+        attacker: { ...attacker, geometry: { ...attacker.geometry, animationCenter: attackerAnchors.spriteCenter } },
+        target: { ...target, geometry: { ...target.geometry, animationCenter: targetAnchors.spriteCenter, battlePositionCenter: targetAnchors.spriteCenter } },
+        fieldProfile,
+        animationInputs: { attackerPictureOrigin: pic, flowerFixedPointSteps,
+          flowerSpriteSlots: [3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17], flowerMatrixNum: 0,
+          attackerSpriteSlot: attacker.geometry.side === "player" ? 6 : 8, targetSpriteSlot: targetSlot,
+          attackerInitialOffset: { x: attackerAnchors.frontIdleRest.x2, y: attackerAnchors.frontIdleRest.y2 },
+          targetInitialOffset: { x: targetAnchors.frontIdleRest.x2, y: targetAnchors.frontIdleRest.y2 },
+          attackerSubpriority: attackerSub, ellipseTaskSlot: 0, shakeTaskSlot: 0, updateMonBgTaskSlot: 1, clearMonBgTaskSlot: 0,
+          offsetSlideSpriteSlot: 3, originalSlideSpriteSlot: 3, hitSplatSpriteSlot: 4, hitSplatMatrixSlot: 0,
+          dummySpriteOrigin: targetAnchors.picOffsetPoint, slideSubpriority: attackerSub - 2, hitSplatSubpriority: attackerSub - 3,
+          baseMatrixBitmap: 6, spriteOrder: fullOrder,
+          monbg: { layer: target.geometry.side === "player" ? "bg2" : "bg1", spriteSlot: targetSlot, spriteX: cx, spriteY: cy,
+            bgX: 32 - cx, bgY: 32 - cy, inBg2: target.geometry.side === "player", battlerId: target.geometry.side === "player" ? 0 : 1 } } };
+      break;
+    }
     case 348: {
       // Order consumer (docs/order-consumer-prep.md §0): F filtered to the blade + trail slots at activation seeds the
       // persistent sort; unknown order -> null (scene-off fallback).
@@ -1228,6 +1421,7 @@ export function liveMoveAnimationPresentation(
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
       const targetCoords = liveBattlerCoordAttrs(target.geometry.side, art);
       config = { move: "LEAF_BLADE", attacker, target, fieldProfile, oamOrderSeed,
+        targetIdleX2: targetAnchors.frontIdleRest.x2,
         targetProfile: { pictureOffset: targetAnchors.picOffsetPoint, width: targetCoords.width,
           height: targetCoords.height, subpriority: target.geometry.side === "player" ? 30 : 40 } };
       break;
