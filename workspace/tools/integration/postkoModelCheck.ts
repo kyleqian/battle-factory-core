@@ -36,6 +36,8 @@ export const SCENARIOS: Record<string, Step[]> = {
   // turn 3: player Swift -> SLOWBRO, SLOWBRO Swift.
   "postko-doubleteam-swift": [...TURN1, P, C, edge("104:player"), body(104, "player"), edge("stat:player"), { kind: "stat-animation", argument: 21 },
     edge("129:opponent"), body(129, "opponent"), HIT, P, C, edge("129:player"), body(129, "player"), HIT, edge("129:opponent"), body(129, "opponent"), HIT],
+  // turn 2: player Light Screen (faster), GOLEM Rock Slide misses (no animation); turn 3: player Protect (+4 priority), Rock Slide blocked (no animation).
+  "postko-lightscreen-protect-rockslide": [...TURN1, P, C, edge("113:player"), body(113, "player"), P, C, edge("182:player"), body(182, "player")],
 };
 
 const SUMMARY = decodeSpriteOrderPlan(UNIT_PLANS.summary), SENDOUT = decodeSpriteOrderPlan(UNIT_PLANS.nextSendOut);

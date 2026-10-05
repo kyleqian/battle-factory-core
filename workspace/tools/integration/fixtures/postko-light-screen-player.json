@@ -1,0 +1,36 @@
+{
+ "schema": "postko-adapter-draft/v1",
+ "draft": true,
+ "move": "LIGHT_SCREEN",
+ "probe": "tools/integration/postkoStateProbe.py",
+ "scenario": "tools/battle-lab/postko-lightscreen-protect-rockslide.json",
+ "stateFixture": "tools/integration/fixtures/postko/state-postko-lightscreen-protect-rockslide.json",
+ "modelCheck": "tools/integration/fixtures/postko/model-check-postko-lightscreen-protect-rockslide.json",
+ "attacker": {
+  "species": "NINETALES",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 148,
+  "playerMaxHp": 148,
+  "opponentHp": 155,
+  "opponentMaxHp": 155,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "edgeRiseFrame": 2085,
+ "windowOffsetFromActivation": 0,
+ "denseWindow": {
+  "startFrame": 2085,
+  "endFrame": 2172
+ },
+ "note": "accepted window offset of light-screen-live-slowpoke-player.json (activation 306 -> window 306..393, 88 rows); allocator input = liveView's known-entry host (entry labels = the relabel lend); first body after the send-out"
+}
