@@ -16,6 +16,7 @@
   "F-AFFINE / E-TASK: were provider blockers; docs/allocator-plan-v2-evidence.md measured gOamMatrixAllocBitmap 0x6 + no tasks at all 481 known-entry bodies, so the accepted constants gated on the lent order suffice for first bodies (invalidated after a faint/switch)",
   "D-PAL: prep9 (docs/next-adapters-prep9.md) showed Absorb/Mega Drain/Giga Drain/Dream Eater/Sunny Day consume only age-derived blend schedules, no snapshot; those five are not in the remaining set. D-PAL on the remaining moves is NOT re-measured here and stays a blocker",
   "C (Random2) stays a blocker: gRng2Value is not reconstructible (another worker is evidencing trackability)",
+  "Fire Punch accepted-window phase: not a mismatch (prep10: opponent window starts after the body; player reducer age at activation 27); Flail/Reversal X-POWER cite corrected (the power divide is AnimTask_ShakeTargetBasedOnMovePowerOrDmg, not FlailMovement)",
   "Batches N1-N3 (hard-coded) all landed except the one-input moves; batch picks are now derived from the groups each run",
   "SMALL-INPUT now means every needed code is a small input (X-REDUCER, X-POWER, E-OUT, X-DISABLE, X-SCHED), several allowed"
  ],
@@ -3828,7 +3829,7 @@
     },
     {
      "code": "X-POWER",
-     "text": "movePower: AnimTask_FlailMovement divides gAnimMovePower by 12; the request emits the static table power, Flail power is gDynamicBasePower",
+     "text": "movePower: AnimTask_ShakeTargetBasedOnMovePowerOrDmg divides gAnimMovePower by 12 (battle_anim_mon_movement.c:970-998; AnimTask_FlailMovement is the RNG-free attacker motion); the request emits the static table power, Flail power is gDynamicBasePower (ROM passes gBattleMovePower)",
      "cites": [
       "src/engine/battleScriptHitChainOpcode.ts:2285",
       "reference/pokeemerald/src/battle_anim_mon_movement.c:975"

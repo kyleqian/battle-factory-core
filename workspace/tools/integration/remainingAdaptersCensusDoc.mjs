@@ -28,7 +28,7 @@ const STALE = [
   ["Rock Blast `E-OUT`", "one body per hit; `request.multihit`/`turn` exist and per-hit adapters are live (Double Slap, Comet Punch, Triple Kick). Only the task slots remain."],
   ["Reversal `blocked on a reducer change` / Flail `power`", "both read the DYNAMIC power (`gDynamicBasePower`), but the request emits the static table power (`battleScriptHitChainOpcode.ts:2285`): a named small input, not `request.power` as noted in the progress ledger. Reversal's reducer toggle fix is banked in `reversal-shake-evidence.json`."],
   ["Fury Cutter / Ice Ball / Rollout / Spit Up counters", "come from the DisableStruct snapshot the ROM passes in the animation command (`battle_script_commands.c:1787`), not `animTurn`; the request does not carry it, though the rules state does (`battleScriptRulesContext.ts:251-252,325-326,738`). Only Swallow's stockpile uses `animTurn` (prep6)."],
-  ["Fire Punch accepted window", "UNRESOLVED (census-activation): staged activation 1967 / 2340 vs accepted windows 2081 / 2313, so the accepted `animation-owned` stage is not the copied stage boundary's script; re-derive before wiring."],
+  ["Fire Punch accepted window `UNRESOLVED`", "RESOLVED in `docs/next-adapters-prep10.md` (direct mGBA, same staged route): the player window 2313..2537 starts 27 frames BEFORE the activation 2340 (reducer age at activation 27; spiral spawn = activation+13 = age 40/41); the opponent window 2081..2357 starts 13 frames AFTER the body end (2068), so it never covers the body; the burn flames are a separate ordinary status body (2224..2262), not part of the 101-frame Fire Punch body."],
 ];
 
 export function renderDoc(c) {
