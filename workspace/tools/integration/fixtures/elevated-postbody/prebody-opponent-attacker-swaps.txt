@@ -1,0 +1,19 @@
+# production ordinary field (no live effect) vs ROM, opponent-sprite window x136-215 y0-72, frames S-6..S-1 (S = first accepted row); 's' = ROM shadow drawn
+## production
+golbat-prep8-frustration-opponent.json S 80 S-6:1845s S-5:1845s S-4:1845s S-3:1845s S-2:1845s S-1:1845s
+golbat-prep8-seismic-toss-opponent.json S 80 S-6:1845s S-5:1845s S-4:1845s S-3:1845s S-2:1845s S-1:1845s
+pidgeot-prep8-swift-opponent.json S 74 S-6:2160s S-5:2160s S-4:2160s S-3:2160s S-2:2160s S-1:2160s
+butterfree-prep9-absorb-opponent.json S 227 S-6:1444 S-5:1444 S-4:1444 S-3:1444 S-2:1444 S-1:1444
+pidgeot-prep7-ice-punch-lab-opponent.json S 80 S-6:2160s S-5:2160s S-4:2160s S-3:2160s S-2:2160s S-1:2160s
+golbat-prep8-uproar-opponent.json S 77 S-6:1845s S-5:1845s S-4:1845s S-3:1845s S-2:1845s S-1:1845s
+butterfree-prep7-dragon-dance-opponent.json S 79 S-6:1578s S-5:1578s S-4:1578s S-3:1578s S-2:1578s S-1:1578s
+pidgeot-prep8-aurora-beam-opponent.json S 220 S-6:2160s S-5:2160s S-4:2160s S-3:2160s S-2:2160s S-1:2160s
+## in-memory patch (elevation + shadow)
+golbat-prep8-frustration-opponent.json S 80 S-6:0s S-5:0s S-4:0s S-3:0s S-2:0s S-1:0s
+golbat-prep8-seismic-toss-opponent.json S 80 S-6:0s S-5:0s S-4:0s S-3:0s S-2:0s S-1:0s
+pidgeot-prep8-swift-opponent.json S 74 S-6:0s S-5:0s S-4:0s S-3:0s S-2:0s S-1:0s
+butterfree-prep9-absorb-opponent.json S 227 S-6:200 S-5:200 S-4:200 S-3:200 S-2:200 S-1:200
+pidgeot-prep7-ice-punch-lab-opponent.json S 80 S-6:0s S-5:0s S-4:0s S-3:0s S-2:0s S-1:0s
+golbat-prep8-uproar-opponent.json S 77 S-6:0s S-5:0s S-4:0s S-3:0s S-2:0s S-1:0s
+butterfree-prep7-dragon-dance-opponent.json S 79 S-6:0s S-5:0s S-4:0s S-3:0s S-2:0s S-1:0s
+pidgeot-prep8-aurora-beam-opponent.json S 220 S-6:0s S-5:0s S-4:0s S-3:0s S-2:0s S-1:0s
