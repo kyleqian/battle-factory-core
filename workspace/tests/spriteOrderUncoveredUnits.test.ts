@@ -94,7 +94,7 @@ describe("uncovered sprite-order units: strict replay with the units modelled", 
   });
   it("BattleLab KO / switch scenarios: 25/25/0 strict (baseline 15), 27/27/0 isolated", () => {
     expect(sum("baseline", false, lab)).toMatchObject({ edges: 27, known: 15, exact: 15, mismatched: 0, occupied: 0 });
-    expect(sum("modelled", false, lab)).toMatchObject({ edges: 27, known: 25, exact: 25, mismatched: 0, occupied: 0, units: 18, unitMismatched: 0, unitOccupied: 0 });
+    expect(sum("modelled", false, lab)).toMatchObject({ edges: 27, known: 25, exact: 25, mismatched: 0, occupied: 0, units: 22, unitMismatched: 0, unitOccupied: 0 });
     expect(sum("modelled", true, lab)).toMatchObject({ edges: 27, known: 27, exact: 27, mismatched: 0, occupied: 0, units: 22, unitMismatched: 0, unitOccupied: 0 });
   });
 });
