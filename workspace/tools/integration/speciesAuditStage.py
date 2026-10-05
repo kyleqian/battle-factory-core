@@ -6,17 +6,18 @@ Writes tools/battle-lab/species-audit-<tag>-<stem>.json and tools/integration/fi
 import json, sys, os, argparse
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 ap = argparse.ArgumentParser(); ap.add_argument("--species"); ap.add_argument("--id", type=int); ap.add_argument("--hp", type=int)
-ap.add_argument("--speed-ev", type=int, default=0); ap.add_argument("--tag"); ap.add_argument("--gender", default=None); ap.add_argument("list")
+ap.add_argument("--speed-ev", type=int, default=0); ap.add_argument("--tag"); ap.add_argument("--gender", default=None); ap.add_argument("--side", default="opponent"); ap.add_argument("list")
 a = ap.parse_args()
 os.makedirs(f"{ROOT}/tools/integration/fixtures/species-audit/staged", exist_ok=True)
 for l in open(a.list):
     k, orig = l.rstrip("\n").split("\t")[:2]
     src = json.load(open(f"{ROOT}/{orig}"))
     if src.get("sourceFixture"): src = {**json.load(open(f"{ROOT}/{src['sourceFixture']}")), **src}
-    if src["target"]["species"] != "ONIX" or src["target"]["geometry"]["side"] != "opponent": print("skip", k); continue
+    if src["target"]["species"] != "ONIX" or src["target"]["geometry"]["side"] != a.side: print("skip", k); continue
+    if "fieldProfile" not in src or not (src.get("denseWindow") or src.get("sourceWindow")): print("skip (no fieldProfile/window)", k); continue
     if src.get("precedingTurns"): print("skip (precedingTurns)", k); continue
     sc = json.load(open(f"{ROOT}/{src['scenario']}"))
-    party = sc.get("overrides", {}).get("parties", {}).get("opponent")
+    party = sc.get("overrides", {}).get("parties", {}).get(a.side)
     if not party or party[0]["species"] != 95: print("skip (no explicit ONIX party[0])", k); continue
     party[0]["species"] = a.id; party[0].setdefault("evs", {e: 0 for e in ("hp", "attack", "defense", "speed", "spAttack", "spDefense")})["speed"] = a.speed_ev
     ev = party[0]["evs"]  # lab limit: total <= 510 -> trim attack/spAttack/defense/spDefense (never hp: it sets the target HP)
@@ -25,8 +26,8 @@ for l in open(a.list):
     name = f"species-audit-{a.tag}-{k}"
     json.dump(sc, open(f"{ROOT}/tools/battle-lab/{name}.json", "w"), separators=(",", ":")); open(f"{ROOT}/tools/battle-lab/{name}.json", "a").write("\n")
     f = dict(src); f["scenario"] = f"tools/battle-lab/{name}.json"; f["target"] = {**src["target"], "species": a.species}
-    f["fieldProfile"] = {**src["fieldProfile"], "opponentHp": a.hp, "opponentMaxHp": a.hp}
-    if a.gender: f["fieldProfile"]["opponentGender"] = a.gender
+    f["fieldProfile"] = {**src["fieldProfile"], f"{a.side}Hp": a.hp, f"{a.side}MaxHp": a.hp}
+    if a.gender: f["fieldProfile"][f"{a.side}Gender"] = a.gender
     f.pop("sourceFixture", None); f.pop("note", None)
     json.dump(f, open(f"{ROOT}/tools/integration/fixtures/species-audit/staged/{a.tag}-{k}.json", "w"), indent=1)
     open(f"{ROOT}/tools/integration/fixtures/species-audit/staged/{a.tag}-{k}.json", "a").write("\n")

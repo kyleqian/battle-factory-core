@@ -51,12 +51,20 @@
   },
   "effectGeometrySource": "attackerCenter/targetCenter = liveBattlerAnchors(side).picOffsetPoint (Swinub player pic y clamps to 104); spikeTargetCenter = target battlePositionCenter"
  },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ],
  "speciesAudit": {
   "acceptedWindow": [
    220,
    506
   ],
   "bodyIndex": 1,
+  "origBodyIndex": 1,
+  "turnOrderChanged": false,
   "origBody": [
    196,
    220,

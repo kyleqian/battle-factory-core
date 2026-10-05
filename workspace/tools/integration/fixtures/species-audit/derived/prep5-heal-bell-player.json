@@ -53,12 +53,20 @@
    }
   }
  },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ],
  "speciesAudit": {
   "acceptedWindow": [
    209,
    469
   ],
   "bodyIndex": 1,
+  "origBodyIndex": 1,
+  "turnOrderChanged": false,
   "origBody": [
    215,
    209,

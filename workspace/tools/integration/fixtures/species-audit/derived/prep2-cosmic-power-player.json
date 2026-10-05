@@ -38,12 +38,20 @@
   "configInputs": "none; fieldProfile gender 'none' (cosmicPowerPortable.ts:130)",
   "carrier": "Factory set 222"
  },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ],
  "speciesAudit": {
   "acceptedWindow": [
    294,
    534
   ],
   "bodyIndex": 1,
+  "origBodyIndex": 1,
+  "turnOrderChanged": false,
   "origBody": [
    322,
    294,

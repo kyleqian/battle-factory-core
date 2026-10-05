@@ -42,12 +42,20 @@
   "attackerPersonality": 2349019136,
   "personalityPixelEffect": "none (player back sprite)"
  },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ],
  "speciesAudit": {
   "acceptedWindow": [
    227,
    395
   ],
   "bodyIndex": 1,
+  "origBodyIndex": 1,
+  "turnOrderChanged": false,
   "origBody": [
    298,
    227,

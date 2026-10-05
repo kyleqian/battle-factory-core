@@ -50,12 +50,20 @@
   "order": "ORDER-OK: renderer slots 6/8 battlers, 3/4/5/7 roots, 9+i orbs == known-entry firstMove free list (3,4,5,7,9,10,11); 0 overlapping equal-subpriority pairs (prep4-order-scan2.json)",
   "speciesNote": "pixel evidence is CACTURNE art; a Lileep rental renders different art (unverified)"
  },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ],
  "speciesAudit": {
   "acceptedWindow": [
    205,
    368
   ],
   "bodyIndex": 1,
+  "origBodyIndex": 1,
+  "turnOrderChanged": false,
   "origBody": [
    275,
    205,

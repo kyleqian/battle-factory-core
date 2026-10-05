@@ -47,12 +47,20 @@
   },
   "effectGeometrySource": "attacker/target liveBattlerAnchors(side).picOffsetPoint (SetAverageBattlerPositions in singles = the target's own X_2/Y_PIC_OFFSET)"
  },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ],
  "speciesAudit": {
   "acceptedWindow": [
    214,
    585
   ],
   "bodyIndex": 1,
+  "origBodyIndex": 1,
+  "turnOrderChanged": false,
   "origBody": [
    59,
    214,

@@ -35,6 +35,8 @@
    261
   ],
   "bodyIndex": 0,
+  "origBodyIndex": 0,
+  "turnOrderChanged": false,
   "origBody": [
    8,
    78,

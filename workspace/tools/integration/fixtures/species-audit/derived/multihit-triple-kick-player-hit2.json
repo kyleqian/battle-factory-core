@@ -38,12 +38,28 @@
   "",
   ""
  ],
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  },
+  {
+   "moveId": 167,
+   "side": "player"
+  },
+  {
+   "moveId": 167,
+   "side": "player"
+  }
+ ],
  "speciesAudit": {
   "acceptedWindow": [
    483,
    519
   ],
   "bodyIndex": 3,
+  "origBodyIndex": 3,
+  "turnOrderChanged": false,
   "origBody": [
    167,
    483,

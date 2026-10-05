@@ -70,6 +70,8 @@
    299
   ],
   "bodyIndex": 0,
+  "origBodyIndex": 0,
+  "turnOrderChanged": false,
   "origBody": [
    348,
    76,

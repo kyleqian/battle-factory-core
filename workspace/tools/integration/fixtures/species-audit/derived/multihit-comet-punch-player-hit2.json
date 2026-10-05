@@ -38,12 +38,24 @@
   "",
   ""
  ],
+ "precedingBodies": [
+  {
+   "moveId": 4,
+   "side": "player"
+  },
+  {
+   "moveId": 4,
+   "side": "player"
+  }
+ ],
  "speciesAudit": {
   "acceptedWindow": [
    373,
    409
   ],
   "bodyIndex": 2,
+  "origBodyIndex": 2,
+  "turnOrderChanged": false,
   "origBody": [
    4,
    373,

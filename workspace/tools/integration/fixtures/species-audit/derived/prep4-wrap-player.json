@@ -43,12 +43,20 @@
   "animationProfile": "WRAP profile (script literals: ellipse 6/4/2/4, squeeze 10/-5/5, starts [1,19])",
   "order": "no sprite-order input"
  },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ],
  "speciesAudit": {
   "acceptedWindow": [
    222,
    259
   ],
   "bodyIndex": 1,
+  "origBodyIndex": 1,
+  "turnOrderChanged": false,
   "origBody": [
    35,
    222,

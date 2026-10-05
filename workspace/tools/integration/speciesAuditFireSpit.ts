@@ -6,6 +6,8 @@ import { DRAGON_RAGE_FIRE_SPIT_GEOMETRY } from "../../src/animation/dragonRage.t
 import { liveBattlerAnchors } from "../../src/engine/liveMoveAnimation.ts";
 import { liveView } from "./liveAdapterFramebuffer.ts";
 const f = JSON.parse(readFileSync(process.argv[2]!, "utf8"));
+// InitAnimLinearTranslation: u16 (|d|<<8)/10, low bit set when moving left/up, cleared otherwise
+const q8 = (d: number) => { const m = Math.floor((Math.abs(d) << 8) / 10); return d < 0 ? -(m | 1) : (m & ~1); };
 for (const species of ["ONIX", "GOLEM", "GOLBAT", "SHUCKLE"]) {
   const view = liveView({ ...f, target: { ...f.target, species } }, 0);
   const a = liveBattlerAnchors("opponent", view.fieldArt);
@@ -15,7 +17,7 @@ for (const species of ["ONIX", "GOLEM", "GOLBAT", "SHUCKLE"]) {
   for (const dx of [0, a.frontIdleRest.x2]) {
     const tx = a.picOffsetPoint.x + dx, ty = a.picOffsetPoint.y + 10;
     console.log(species, "picOffset", a.picOffsetPoint, "rest", a.frontIdleRest, "start", [sx, sy], "target", [tx, ty],
-      "deltaQ8", [Math.floor((Math.abs(tx - sx) << 8) / 10) * Math.sign(tx - sx), Math.floor((Math.abs(ty - sy) << 8) / 10) * Math.sign(ty - sy)]);
+      "deltaQ8", [q8(tx - sx), q8(ty - sy)]);
   }
 }
 console.log("production literal (player attacker)", DRAGON_RAGE_FIRE_SPIT_GEOMETRY.player);

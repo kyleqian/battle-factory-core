@@ -51,12 +51,20 @@
   "attackerAnimationCenterSource": "attacker battlePositionCenter + (0,6): Move_DEFENSE_CURL argv (0,6,0,1), AnimSpriteOnMonPos respectMonPicOffsets=FALSE (battle_anim_mons.c:1515-1528); NOT the pic point (72,102)",
   "order": "ORDER-INDEPENDENT: single orb sprite, subpriority attackerSubpriority-2"
  },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ],
  "speciesAudit": {
   "acceptedWindow": [
    214,
    313
   ],
   "bodyIndex": 1,
+  "origBodyIndex": 1,
+  "turnOrderChanged": false,
   "origBody": [
    111,
    214,

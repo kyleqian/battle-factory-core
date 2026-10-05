@@ -183,12 +183,20 @@
   }
  ],
  "precedingBodiesNote": "The accepted scenario runs the AI Tackle (33) first; no 33->126 plan unit exists in sprite-order-body-plans.json. The Fire Blast reducer has no order input (its own 64-entry literal equals the provider order up to pixel-neutral slots 3/4, prep7 s2.3), so the harness lends the known-entry first-body order (what production supplies at a first body).",
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ],
  "speciesAudit": {
   "acceptedWindow": [
    215,
    411
   ],
   "bodyIndex": 1,
+  "origBodyIndex": 1,
+  "turnOrderChanged": false,
   "origBody": [
    126,
    215,

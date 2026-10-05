@@ -91,7 +91,6 @@
   "routes": [],
   "livePlan": "request 214 then the called move as a SEPARATE ordinary second request (prep7-sleep-talk-field.json: Exploud 214 @1432 -> Shadow Ball 247 @1488, Whiscash 214 @1648 -> Fissure 90 @1704, 56-frame gap); displayed attacker status = 'sleep' at the event (4/4 routes); no config profile"
  },
- "precedingBodies": [],
  "acceptedDenseWindow": {
   "startFrame": 1356,
   "endFrame": 1541,
@@ -100,12 +99,28 @@
  "displayedStatus": {
   "player": "sleep"
  },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  },
+  {
+   "moveId": 156,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "player"
+  }
+ ],
  "speciesAudit": {
   "acceptedWindow": [
    1356,
    1541
   ],
   "bodyIndex": 3,
+  "origBodyIndex": 3,
+  "turnOrderChanged": false,
   "origBody": [
    214,
    1356,

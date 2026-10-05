@@ -50,12 +50,20 @@
   "order": "ORDER-INDEPENDENT: hands never overlap (min centre distance 48 >= 32, prep4-order-scan2.json)",
   "adhocShadow": "none (player attacker)"
  },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ],
  "speciesAudit": {
   "acceptedWindow": [
    218,
    338
   ],
   "bodyIndex": 1,
+  "origBodyIndex": 1,
+  "turnOrderChanged": false,
   "origBody": [
    265,
    218,
