@@ -154,6 +154,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   350,
   // prep10: Razor Wind setup/unleash by request.turn (Cmd_choosetwoturnanim, like Solar Beam; lent order gate).
   13,
+  // prep10: Spark, PLAYER attacker only (accepted constants; no accepted opponent-attacker evidence).
+  209,
 ] as const);
 
 const SWEET_SCENT_PETAL_SLOTS: readonly number[] = Object.freeze([
@@ -533,6 +535,8 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     // Magnitude 411..585 (power 70, 174 frames) / 191..397 (power 110, 206 frames): the reducer's first inactive age.
     case 222: return request.power > 99 ? 206 : request.power >= 10 && request.power <= 99 ? 174 : null;
     // Razor Wind: setup 45 frames (195..240 / 192..237), unleash 72 (553..625 / 661..733); gAnimMoveTurn bit 0 selects the body.
+    // Spark 79..193 / 83..197 (activation + 9, row -9: no #142 shadow row): player attacker only; the script runs 2 rows past the window.
+    case 209: return request.attacker === 0 ? 115 : null;
     case 13: return (request.turn & 1) === 0 ? 45 : 72;
     case 350: return 89; // Rock Blast per-hit body: activation..ROCK_BLAST_FIRST_INACTIVE_AGE (84/266/448 + 89 each).
     case 220: return 81; // Pain Split 445 / 446 .. +80 (81 accepted rows; the live window ends at the script's last active row).
@@ -1483,6 +1487,18 @@ export function liveMoveAnimationPresentation(
             target: { spriteSlot: targetSlot, stretchTaskSlot: 0, shakeTaskSlot: 1 },
             orientation: attacker.geometry.side === "player" ? "player-back" : "opponent-front", gameplayRng: 0 } };
       }
+      break;
+    }
+    case 209: {
+      // prep10 s3.5, player attacker: flashing initial callback/affine advances are all 0 (Minun, Plusle, Chinchou); the
+      // tie order is the accepted artifact (not derived: unproven for other histories, so the lend gate applies).
+      if (!spriteOrderInput?.known) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      config = { move: "SPARK", attacker, target, fieldProfile,
+        attackerPictureOffset: attackerAnchors.picOffsetPoint, targetPictureOffset: targetAnchors.battlePositionCenter,
+        targetImpactPosition: targetAnchors.picOffsetPoint, attackerBgPriority: 2, targetBgPriority: 1,
+        flashingInitialCallbackAdvances: [0, 0, 0, 0, 0, 0, 0, 0], flashingInitialAffineAdvances: [0, 0, 0, 0, 0, 0, 0, 0],
+        hardwareTieSlotOrder: [12, 7, 3, 4, 5, 9, 10, 11] };
       break;
     }
     case 13: {

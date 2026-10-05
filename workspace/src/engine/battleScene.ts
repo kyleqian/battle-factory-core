@@ -33542,14 +33542,14 @@ export function renderSceneOnMovePresentation(
       age: sparkState.age - 1,
     });
     const playerToOpponent =
-      view.attacker.species === "MINUN"
+      (liveField || view.attacker.species === "MINUN")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "SHUCKLE"
+      && (liveField || view.target.species === "SHUCKLE")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "MINUN"
+      (liveField || view.attacker.species === "MINUN")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "SHUCKLE"
+      && (liveField || view.target.species === "SHUCKLE")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -33558,13 +33558,13 @@ export function renderSceneOnMovePresentation(
     }
     const minunSource = playerToOpponent
       ? encoreArt.minunBack : encoreArt.minunFront;
-    const minun = playerToOpponent
+    const minun = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? minunSource
       : {
           ...minunSource,
           tileset: subTileset(minunSource.tileset, 0, 8),
         };
-    const shuckle = playerToOpponent
+    const shuckle = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? {
           ...selfDestructArt.shuckleFront,
           tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
@@ -33717,6 +33717,7 @@ export function renderSceneOnMovePresentation(
       || tieOrder.indexOf(b.slot) - tieOrder.indexOf(a.slot));
     for (const item of items) item.draw();
 
+    if (liveField) return;
     drawSendOutHealthbox(
       fb,
       0,

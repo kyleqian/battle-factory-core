@@ -12,6 +12,7 @@ for (const f of readdirSync(FX).filter(x => x.startsWith(`prep10-${move.toLowerC
   const d = JSON.parse(readFileSync(`${FX}/${f}`, "utf8"));
   if (d.move !== move) continue;
   const stem = d.probe;
+  if (move === "SPARK" && !/-spark-player-/.test(f)) continue; // Spark opponent attacker: dropped (unproven constants, prep10 s3.5)
   const scenario = existsSync(`tools/battle-lab/${stem}.json`) ? `tools/battle-lab/${stem}.json` : `${FX}/prep10-scenarios/${stem}.json`;
   const sc = JSON.parse(readFileSync(scenario, "utf8"));
   const parties = sc.overrides.parties;
@@ -39,7 +40,7 @@ for (const f of readdirSync(FX).filter(x => x.startsWith(`prep10-${move.toLowerC
       attacker, target,
       fieldProfile: { playerHp: b.hpBefore[0], playerMaxHp: b.maxHp[0], opponentHp: b.hpBefore[1], opponentMaxHp: b.maxHp[1],
         playerGender: GEN[parties.player[0].gender], opponentGender: GEN[parties.opponent[0].gender] },
-      denseWindow: { startFrame: b.start, endFrame: b.end - 1 + (move === "PAIN_SPLIT" ? 1 : 0), // Pain Split: the accepted window includes the first inactive row (81 rows)
+      denseWindow: { startFrame: b.start + (move === "SPARK" ? 9 : 0), endFrame: move === "SPARK" ? b.start + 9 + 114 : b.end - 1 + (move === "PAIN_SPLIT" ? 1 : 0), // Pain Split: the accepted window includes the first inactive row (81 rows)
  ageOffset: 0 },
       // Magnitude's ROM text box shows STRINGID_MAGNITUDESTRENGTH (queue-owned in production), not the move-used banner.
       // Razor Wind's setup body shows no text (the unleash body shows the move-used banner).
