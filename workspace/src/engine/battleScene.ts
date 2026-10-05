@@ -44247,13 +44247,13 @@ export function renderSceneOnMovePresentation(
       age: leechState.age - 1,
     });
     const playerToOpponent = view.attacker.geometry.side === "player"
-      && view.attacker.species === "EXEGGCUTE"
+      && (liveField || view.attacker.species === "EXEGGCUTE")
       && view.target.geometry.side === "opponent"
-      && view.target.species === "ONIX";
+      && (liveField || view.target.species === "ONIX");
     const opponentToPlayer = view.attacker.geometry.side === "opponent"
-      && view.attacker.species === "EXEGGCUTE"
+      && (liveField || view.attacker.species === "EXEGGCUTE")
       && view.target.geometry.side === "player"
-      && view.target.species === "ONIX";
+      && (liveField || view.target.species === "ONIX");
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged LEECH_SEED pair ${view.attacker.species}->${view.target.species}`,
@@ -44261,11 +44261,11 @@ export function renderSceneOnMovePresentation(
     }
     const exeggcuteSource = playerToOpponent
       ? lightScreenArt.exeggcuteBack : lightScreenArt.exeggcuteFront;
-    const exeggcute = playerToOpponent ? exeggcuteSource : {
+    const exeggcute = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent ? exeggcuteSource : {
       ...exeggcuteSource,
       tileset: subTileset(exeggcuteSource.tileset, 0, 8),
     };
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const green = { r: 107, g: 255, b: 99 };
     const bgPalettes = battleBg.palette.map((palette) =>
       blendPaletteToward(palette, green, displayed.bgPaletteBlendY));
@@ -44379,6 +44379,7 @@ export function renderSceneOnMovePresentation(
       }
     }
 
+    if (!liveField) {
     drawSendOutHealthbox(
       fb,
       0,
@@ -44418,6 +44419,7 @@ export function renderSceneOnMovePresentation(
       view.body === "main" ? "LEECH SEED!" : "",
       99,
     );
+    }
     return;
   }
 

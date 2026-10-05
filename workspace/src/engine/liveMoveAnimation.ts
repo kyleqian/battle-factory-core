@@ -81,6 +81,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   208, 211, 213, 223, 227, 231, 232, 235, 242, 243, 246, 247, 257, 264, 272, 277, 280, 281, 287, 290, 302,
   305, 306, 319, 320, 321, 325, 334, 335, 336, 337, 342, 343, 347,
   56, 61, 197, 238, 259, 294, 341,
+  // prep11 (docs/next-adapters-prep11.md): Leech Seed main body.
+  73,
   // anchor3: source battler anchors (position center, picture height, pic offset).
   86, 87, 107, 116, 203, 207, 263, 339,
   // selectors: request-selected branches and healing anchors.
@@ -218,6 +220,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // Feather Dance (297): the live window starts at the activation frame (row 0). Double Team (104): the first window row is
     // one frame after the activation (row -1): no row.
     297,
+    // prep11 (issue142-shadow-rows-extra.json): Leech Seed main body window starts at the activation frame (row 0).
+    73,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -495,6 +499,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 88: return 87; // Rock Throw (296..382 / 296..382, no tail).
     case 195: return 259; // Perish Song (71..329 / 75..333, no tail).
     case 348: return 224; // Leaf Blade (76..299 / 80..303, no tail).
+    case 73: return 141; // Leech Seed main body 246..386 / 245..385 (prep11 s0.2); the end-turn drain is a separate scene-off body.
     case 215: return 261; // Heal Bell (209..469 / 210..470, no tail).
     case 53: return 115; // Flamethrower (395..520 / 449..574 incl. 11 negative-age rows, ageOffset -11); script ends 600/654.
     case 82: return 150; // Dragon Rage (89..238 / 93..242); the script runs 21 frames past the window (259/263), uncovered.
@@ -1218,6 +1223,15 @@ export function liveMoveAnimationPresentation(
       config = { move: "HEAL_BELL", attacker, target, fieldProfile, noteOrderSeed };
       break;
     }
+    case 73:
+      // prep11 s0.2: the main body needs no order; the allocator constants (seeds 3,4,5) equal the accepted corpus. The
+      // residual-drain fields are unused by the main body. Launch from the attacker pic offset; the target holds its idle x2.
+      config = { move: "LEECH_SEED", body: "main", attacker, target, fieldProfile,
+        effectCenter: attackerAnchors.picOffsetPoint,
+        targetRestOffset: { x2: liveBattlerAnchors(target.geometry.side, art).frontIdleRest.x2,
+          y2: liveBattlerAnchors(target.geometry.side, art).frontIdleRest.y2 },
+        allocatorProfile: { seeds: [3, 4, 5], hitsplat: 3, orbs: [3, 4, 5, 7, 9, 10, 11, 12], stars: [3, 4, 5, 3], paletteController: 3 } };
+      break;
     case 348: {
       // Order consumer (docs/order-consumer-prep.md §0): F filtered to the blade + trail slots at activation seeds the
       // persistent sort; unknown order -> null (scene-off fallback).
