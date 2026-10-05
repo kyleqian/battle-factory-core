@@ -1,0 +1,438 @@
+{
+ "schema": "census-activation-summary/v1",
+ "note": "activation = first frame with gAnimScriptActive for the move id (issue142ActivationProbe.py, direct mGBA, Scene ON, one fresh run per scenario); window = accepted evidence window; shadow row = activationMinusWindowStart + ageOffset",
+ "rows": [
+  {
+   "move": "AERIAL_ACE",
+   "probe": "aerial-ace-pidgeotto-onix",
+   "activation": 81,
+   "scriptEnd": 130,
+   "scriptFrames": 49,
+   "window": {
+    "start": 46,
+    "end": 281
+   },
+   "appStage": {
+    "oracleFrame": 46,
+    "presentationAge": 7
+   },
+   "activationMinusWindowStart": 35,
+   "windowEndMinusScriptEnd": 151,
+   "reducerAgeAtActivation": 42
+  },
+  {
+   "move": "AERIAL_ACE",
+   "probe": "aerial-ace-player-pidgeotto-onix",
+   "activation": 77,
+   "scriptEnd": 126,
+   "scriptFrames": 49,
+   "window": {
+    "start": 46,
+    "end": 277
+   },
+   "appStage": {
+    "oracleFrame": 46,
+    "presentationAge": 7
+   },
+   "activationMinusWindowStart": 31,
+   "windowEndMinusScriptEnd": 151,
+   "reducerAgeAtActivation": 38
+  },
+  {
+   "move": "QUICK_ATTACK",
+   "probe": "quick-attack-pidgeotto-onix",
+   "activation": 83,
+   "scriptEnd": 115,
+   "scriptFrames": 32,
+   "window": {
+    "start": 46,
+    "end": 264
+   },
+   "appStage": {
+    "oracleFrame": 46,
+    "presentationAge": 7
+   },
+   "activationMinusWindowStart": 37,
+   "windowEndMinusScriptEnd": 149,
+   "reducerAgeAtActivation": 44
+  },
+  {
+   "move": "QUICK_ATTACK",
+   "probe": "quick-attack-player-pidgeotto-onix",
+   "activation": 79,
+   "scriptEnd": 111,
+   "scriptFrames": 32,
+   "window": {
+    "start": 46,
+    "end": 259
+   },
+   "appStage": {
+    "oracleFrame": 46,
+    "presentationAge": 7
+   },
+   "activationMinusWindowStart": 33,
+   "windowEndMinusScriptEnd": 148,
+   "reducerAgeAtActivation": 40
+  },
+  {
+   "move": "FEATHER_DANCE",
+   "probe": "feather-dance-pidgeotto-onix",
+   "activation": 83,
+   "scriptEnd": 251,
+   "scriptFrames": 168,
+   "window": {
+    "start": 46,
+    "end": 445
+   },
+   "appStage": {
+    "oracleFrame": 46,
+    "presentationAge": 7
+   },
+   "activationMinusWindowStart": 37,
+   "windowEndMinusScriptEnd": 194,
+   "reducerAgeAtActivation": 44
+  },
+  {
+   "move": "FEATHER_DANCE",
+   "probe": "feather-dance-player-pidgeotto-onix",
+   "activation": 79,
+   "scriptEnd": 247,
+   "scriptFrames": 168,
+   "window": {
+    "start": 46,
+    "end": 445
+   },
+   "appStage": {
+    "oracleFrame": 46,
+    "presentationAge": 7
+   },
+   "activationMinusWindowStart": 33,
+   "windowEndMinusScriptEnd": 198,
+   "reducerAgeAtActivation": 40
+  },
+  {
+   "move": "FAKE_TEARS",
+   "probe": "fake-tears-opponent-delcatty-player-shuckle",
+   "activation": 79,
+   "scriptEnd": 162,
+   "scriptFrames": 83,
+   "window": {
+    "start": 80,
+    "end": 166
+   },
+   "appStage": {
+    "presentationAge": 0
+   },
+   "activationMinusWindowStart": -1,
+   "windowEndMinusScriptEnd": 4
+  },
+  {
+   "move": "FAKE_TEARS",
+   "probe": "fake-tears-player-delcatty-opponent-shuckle",
+   "activation": 75,
+   "scriptEnd": 158,
+   "scriptFrames": 83,
+   "window": {
+    "start": 76,
+    "end": 162
+   },
+   "appStage": {
+    "presentationAge": 0
+   },
+   "activationMinusWindowStart": -1,
+   "windowEndMinusScriptEnd": 4
+  },
+  {
+   "move": "SLEEP_TALK",
+   "probe": "sleep-talk-opponent-seaking-player-onix",
+   "activation": 4570,
+   "scriptEnd": 4758,
+   "scriptFrames": 188,
+   "window": {
+    "start": 4570,
+    "end": 4758
+   },
+   "appStage": null,
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "SLEEP_TALK",
+   "probe": "sleep-talk-player-seaking-opponent-onix",
+   "activation": 1356,
+   "scriptEnd": 1541,
+   "scriptFrames": 185,
+   "window": {
+    "start": 1356,
+    "end": 1541
+   },
+   "appStage": null,
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "SPARK",
+   "probe": "spark-opponent-minun-player-shuckle",
+   "activation": 74,
+   "scriptEnd": 199,
+   "scriptFrames": 125,
+   "window": {
+    "start": 83,
+    "end": 197
+   },
+   "appStage": {
+    "presentationAge": 0
+   },
+   "activationMinusWindowStart": -9,
+   "windowEndMinusScriptEnd": -2
+  },
+  {
+   "move": "SPARK",
+   "probe": "spark-player-minun-opponent-shuckle",
+   "activation": 70,
+   "scriptEnd": 195,
+   "scriptFrames": 125,
+   "window": {
+    "start": 79,
+    "end": 193
+   },
+   "appStage": {
+    "presentationAge": 0
+   },
+   "activationMinusWindowStart": -9,
+   "windowEndMinusScriptEnd": -2
+  },
+  {
+   "move": "REVERSAL",
+   "probe": "reversal-player-delcatty-opponent-vigoroth",
+   "activation": 404,
+   "scriptEnd": 577,
+   "scriptFrames": 173,
+   "window": {
+    "start": 404,
+    "end": 577
+   },
+   "appStage": null,
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "REVERSAL",
+   "probe": "reversal-player-vigoroth-opponent-delcatty",
+   "activation": 451,
+   "scriptEnd": 624,
+   "scriptFrames": 173,
+   "window": {
+    "start": 451,
+    "end": 624
+   },
+   "appStage": null,
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "MAGNITUDE",
+   "probe": "magnitude-intense-opponent-camerupt-player-onix",
+   "activation": 195,
+   "scriptEnd": 401,
+   "scriptFrames": 206,
+   "window": {
+    "start": 195,
+    "end": 401
+   },
+   "appStage": null,
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "MAGNITUDE",
+   "probe": "magnitude-intense-player-camerupt-opponent-onix",
+   "activation": 191,
+   "scriptEnd": 397,
+   "scriptFrames": 206,
+   "window": {
+    "start": 191,
+    "end": 397
+   },
+   "appStage": null,
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "MAGNITUDE",
+   "probe": "magnitude-regular-opponent-graveler-player-onix",
+   "activation": 411,
+   "scriptEnd": 585,
+   "scriptFrames": 174,
+   "window": {
+    "start": 411,
+    "end": 585
+   },
+   "appStage": null,
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "MAGNITUDE",
+   "probe": "magnitude-regular-player-graveler-opponent-onix",
+   "activation": 411,
+   "scriptEnd": 585,
+   "scriptFrames": 174,
+   "window": {
+    "start": 411,
+    "end": 585
+   },
+   "appStage": null,
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "ROCK_SLIDE",
+   "probe": "rock-slide-player",
+   "staged": true,
+   "activation": 2340,
+   "scriptEnd": 2477,
+   "scriptFrames": 137,
+   "window": null,
+   "appStage": null,
+   "note": "no accepted player-attacker evidence (rock-slide-grovyle-onix.json is opponent Grovyle -> player Onix only); staged run has the AI Double Team body first (history != first body)"
+  },
+  {
+   "move": "ROCK_SLIDE",
+   "probe": "rock-slide-opponent",
+   "staged": true,
+   "activation": 1967,
+   "scriptEnd": 2104,
+   "scriptFrames": 137,
+   "window": {
+    "start": 1967,
+    "end": 2141
+   },
+   "appStage": {
+    "id": "rock-slide-grovyle-onix-animation-owned",
+    "oracleFrame": 1967,
+    "presentationAge": 0
+   },
+   "note": "first body of the staged battle",
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 37,
+   "reducerAgeAtActivation": 0
+  },
+  {
+   "move": "ENDEAVOR",
+   "probe": "endeavor-player",
+   "staged": true,
+   "activation": 2339,
+   "scriptEnd": 2406,
+   "scriptFrames": 67,
+   "window": {
+    "start": 2345,
+    "end": 2485
+   },
+   "appStage": {
+    "id": "endeavor-onix-grovyle-animation-owned",
+    "oracleFrame": 2345,
+    "presentationAge": -2
+   },
+   "note": "second action (after the AI Double Team body)",
+   "activationMinusWindowStart": -6,
+   "windowEndMinusScriptEnd": 79,
+   "reducerAgeAtActivation": -8
+  },
+  {
+   "move": "ICE_PUNCH",
+   "probe": "ice-punch-player",
+   "staged": true,
+   "activation": 2339,
+   "scriptEnd": 2522,
+   "scriptFrames": 183,
+   "window": {
+    "start": 2339,
+    "end": 2800
+   },
+   "appStage": {
+    "id": "ice-punch-onix-grovyle-animation-owned",
+    "oracleFrame": 2339,
+    "presentationAge": 0
+   },
+   "note": "second action (after the AI Double Team body); window = body + controller tail",
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 278,
+   "reducerAgeAtActivation": 0
+  },
+  {
+   "move": "ICE_PUNCH",
+   "probe": "ice-punch-opponent",
+   "staged": true,
+   "activation": 1966,
+   "scriptEnd": 2149,
+   "scriptFrames": 183,
+   "window": {
+    "start": 1966,
+    "end": 3259
+   },
+   "appStage": {
+    "id": "ice-punch-grovyle-onix-animation-body",
+    "oracleFrame": 1966,
+    "presentationAge": 0
+   },
+   "note": "first body of the staged battle; window = body + controller tail (1293 frames)",
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 1110,
+   "reducerAgeAtActivation": 0
+  },
+  {
+   "move": "FIRE_PUNCH",
+   "probe": "fire-punch-player",
+   "staged": true,
+   "activation": 2340,
+   "scriptEnd": 2441,
+   "scriptFrames": 101,
+   "window": {
+    "start": 2313,
+    "end": 2537
+   },
+   "appStage": {
+    "id": "fire-punch-onix-grovyle-animation-owned",
+    "oracleFrame": 2313,
+    "presentationAge": 0
+   },
+   "note": "UNRESOLVED: accepted window starts 27 frames BEFORE the staged activation (window 2313 vs act 2340)",
+   "activationMinusWindowStart": 27,
+   "windowEndMinusScriptEnd": 96,
+   "reducerAgeAtActivation": 27
+  },
+  {
+   "move": "FIRE_PUNCH",
+   "probe": "fire-punch-opponent",
+   "staged": true,
+   "activation": 1967,
+   "scriptEnd": 2068,
+   "scriptFrames": 101,
+   "window": {
+    "start": 2081,
+    "end": 2357
+   },
+   "appStage": {
+    "id": "fire-punch-grovyle-onix-animation-owned",
+    "oracleFrame": 2081,
+    "presentationAge": 0
+   },
+   "note": "UNRESOLVED: accepted window starts 114 frames AFTER the staged activation and after the script end (2081 vs act 1967, end 2068); signs differ per side, so the accepted staging is not the copied stage boundary or the window is the burn/status phase",
+   "activationMinusWindowStart": -114,
+   "windowEndMinusScriptEnd": 289,
+   "reducerAgeAtActivation": -114
+  },
+  {
+   "move": "ENDEAVOR",
+   "probe": "endeavor-opponent",
+   "staged": true,
+   "activation": null,
+   "scriptEnd": null,
+   "scriptFrames": null,
+   "window": null,
+   "appStage": null,
+   "note": "NOT PRODUCED: the staged AI selected Rock Slide (157) instead; opponent-attacker Endeavor evidence is missing"
+  }
+ ]
+}
