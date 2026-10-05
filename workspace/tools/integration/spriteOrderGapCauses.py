@@ -170,6 +170,14 @@ def anim_identity(c: dict) -> dict:
     return {"launcher": k, "table": "ChosenStatus", "id": a[3] & 0xFF if len(a) > 3 else None, "arg": None, "caller": c["caller"]}
 
 
+def stat_arg_class(arg: int) -> str:
+    """gBattleAnims_General[B_ANIM_STATS_CHANGE] argument (battle_anim.h STAT_ANIM_*): base + stat id (1 ATK .. 7 EVASION)."""
+    for name, base in (("PLUS1", 14), ("MINUS1", 21), ("PLUS2", 38), ("MINUS2", 45)):
+        if base < arg <= base + 7:
+            return f"{name}:stat{arg - base}"
+    return {55: "MULTIPLE_PLUS1", 56: "MULTIPLE_PLUS2", 57: "MULTIPLE_MINUS1", 58: "MULTIPLE_MINUS2"}.get(arg, f"arg{arg}")
+
+
 def raw_to_lab(name: str) -> str | None:
     m = re.match(r"^\d+-(.*)-\d+\.json$", name)
     if not m:
@@ -244,7 +252,9 @@ def analyse_anims() -> dict:
             if not ids:
                 unmatched.append([sc["file"], ui, u["frame"]])
                 continue
-            key = "+".join(f"{i['table']}:{ANIMS.get(i['table'], {}).get(i['id'], i['id'])}" for i in ids)
+            ids = [i for i in ids if i["table"] != "ChosenStatus"]  # InitAndLaunchChosenStatusAnimation always launches the Status table next
+            key = "+".join(f"{i['table']}:{ANIMS.get(i['table'], {}).get(i['id'], i['id'])}"
+                           + (f"[{stat_arg_class(i['arg'])}]" if i["table"] == "General" and i["id"] == 1 else "") for i in ids)
             p = plans[key]
             p["sigs"][BP.sig(tw)].append(sc["file"])
             p["inst"].append({"file": sc["file"], "unit": ui, "args": [i["arg"] for i in ids], "launch": [i["caller"] for i in ids]})
