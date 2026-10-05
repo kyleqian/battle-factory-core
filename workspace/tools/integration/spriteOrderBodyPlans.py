@@ -199,6 +199,9 @@ def tokenize_scenario(sc):
                     if why:
                         ent["why"] = why
                     ent["pw"] = [m[1] for m in w["G"]]
+                    if cls == "FDERIVED":  # order is computed (priority word, creation window, free-order index): canonical token order
+                        both = sorted(zip(ent["D"], ent["pw"]), key=lambda x: json.dumps(x[0]))
+                        ent["D"], ent["pw"] = [x[0] for x in both], [x[1] for x in both]
                 else:
                     ent["cls"] = "SINGLE"
             tw.append(ent)
@@ -217,7 +220,8 @@ def strip_prompt(tw, last):
 
 
 def sig(tw):
-    return json.dumps([{k: v for k, v in w.items() if k in ("C", "D")} for w in tw], separators=(",", ":"))
+    return json.dumps([{k: v for k, v in w.items() if k in ("C", "D") or (k == "pw" and w.get("cls") == "FDERIVED")} for w in tw],
+                      separators=(",", ":"))
 
 
 def owner_side(sc, mv):
@@ -290,7 +294,8 @@ class Sim:
                     elif t[0] == "c": slots.append(self.surv[self.unit - t[1]][t[2]])
                     else: slots.append(t[1])
                 if w["cls"] == "FDERIVED":
-                    slots.sort(key=lambda s: self.rank[s])
+                    pws = dict(zip(slots, w["pw"]))
+                    slots.sort(key=lambda sl: (pws[sl], self.rank[sl]))
                 self.occ -= set(slots)
                 self.F = slots + [s for s in self.F if s not in slots]
         self.surv[self.unit] = [self.life[(self.unit, kk)] for kk in range(k) if self.life[(self.unit, kk)] in self.occ]
