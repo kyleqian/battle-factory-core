@@ -19,6 +19,8 @@ const cases: { id: number; move: string; duration: Orders; shadow: number | unde
   route: { seed: number; move: 0 | 1 | 2 | 3; streak: number } }[] = [
   { id: 332, move: "AERIAL_ACE", duration: [50, 50], shadow: 0, alt: ["CHARIZARD", "ONIX"], route: { seed: 3, move: 0, streak: 0 } },
   { id: 98, move: "QUICK_ATTACK", duration: [33, 33], shadow: 0, alt: ["RAICHU", "ONIX"], route: { seed: 3, move: 1, streak: 0 } },
+  // Ice Punch has no accepted-species rental carrier: the ordinary route is the alternate-species Gengar route (prep7 s2.5).
+  { id: 8, move: "ICE_PUNCH", duration: [184, 184], shadow: 0, alt: ["GENGAR", "ONIX"], route: { seed: 18, move: 2, streak: 42 } },
 ];
 
 function displayed(player: string, opponent: string): BattleResolutionDisplayedField {

@@ -1,8 +1,8 @@
 {
   "schema": "prep7-adapter-draft/v1",
   "move": "ICE_PUNCH",
-  "probe": "staged tools/probe/stage-fire-punch-portable-on.py opponent ice-punch",
-  "scenario": "staged tools/probe/stage-fire-punch-portable-on.py opponent ice-punch",
+  "probe": "tools/integration/prep7StagedProbe.py",
+  "scenario": "tools/probe/stage-fire-punch-portable-on.py",
   "attacker": {
     "species": "GROVYLE",
     "geometry": {
@@ -18,13 +18,17 @@
   "fieldProfile": {
     "playerHp": 117,
     "opponentHp": 143,
-    "playerStatus": "none"
+    "playerStatus": "none",
+    "playerMaxHp": 117,
+    "opponentMaxHp": 143,
+    "playerGender": "male",
+    "opponentGender": "male"
   },
   "orientation": "opponent-front GROVYLE -> ONIX",
   "verdict": "READY (both orientations)",
   "denseWindow": {
     "startFrame": 1966,
-    "endFrame": 3259,
+    "endFrame": 2149,
     "ageOffset": 0
   },
   "draft": {
@@ -32,7 +36,7 @@
     "scriptEndFirstInactive": 2149,
     "shadowRow": 0,
     "shadowRowInMap": true,
-    "expectedDuration": 1294,
+    "expectedDuration": 184,
     "scriptFrames": 183,
     "windowEndMinusScriptEnd": 1110,
     "windowStartMinusActivation": 0,
@@ -166,5 +170,14 @@
     ],
     "livePlan": "no hpDrainProfile/controllerDisplayProfile (queue owns HP/result/status/menu); body = crystals + overlay + hit crystals from target animationCenter; script 183 frames, the accepted window's remaining rows are controller HUD"
   },
-  "precedingBodies": []
+  "precedingBodies": [],
+  "acceptedDenseWindow": {
+    "startFrame": 1966,
+    "endFrame": 3259,
+    "ageOffset": 0
+  },
+  "probeArgs": [
+    "opponent",
+    "ice-punch"
+  ]
 }

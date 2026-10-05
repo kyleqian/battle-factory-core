@@ -2573,6 +2573,42 @@
     "body": "normal",
     "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
    }
+  },
+  {
+   "id": 8,
+   "move": "ICE_PUNCH",
+   "orientation": "player",
+   "variant": "prep7-ice-punch-player",
+   "activationFrame": 2339,
+   "windowStart": 2339,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep7-ice-punch-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 8,
+   "move": "ICE_PUNCH",
+   "orientation": "opponent",
+   "variant": "prep7-ice-punch-opponent",
+   "activationFrame": 1966,
+   "windowStart": 1966,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep7-ice-punch-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
+   }
   }
  ]
 }

@@ -110,8 +110,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   296, 312, 266, 118, 269, 187,
   // prep6 (docs/next-adapters-prep6.md): Rock Tomb, Safeguard, Sweet Scent, Self-Destruct, Swallow, Knock Off, Faint Attack (player attacker only).
   317, 219, 230, 120, 256, 282, 185,
-  // prep7 (docs/next-adapters-prep7.md): Aerial Ace, Quick Attack.
-  332, 98,
+  // prep7 (docs/next-adapters-prep7.md): Aerial Ace, Quick Attack, Ice Punch.
+  332, 98, 8,
   // order consumers (docs/order-consumer-prep.md): Grudge, first move body of a battle only (sprite-order input).
   288,
   // order consumers, order-independent (docs/order-consumer-prep.md §0): Ember (one sprite per sort window, ties resolve
@@ -182,6 +182,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // rows owned by the preceding message command); the live age basis is the activation frame (reducer age 42 / 44), so
     // the shadow row is live age 0.
     332, 98,
+    // Ice Punch (staged windows start at activation: row 0).
+    8,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -488,6 +490,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     // windows start 35/31 (AA) and 37/33 (QA) rows earlier with idle body rows owned by the queue's `message` command.
     case 332: return 50; // Aerial Ace: activation..first inactive row (81..130 / 77..126); the later hit/HP/text rows are queue commands.
     case 98: return 33; // Quick Attack (83..115 / 79..111).
+    case 8: return 184; // Ice Punch script activation..first inactive row (staged 1966..2149 / 2339..2522); HP/text/freeze/Sitrus rows are queue commands.
     case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
     case 153: return 212; // Explosion accepted window (76..287 / 80..291).
@@ -1318,6 +1321,15 @@ export function liveMoveAnimationPresentation(
             resultKind: "notVeryEffective" as const, currentMoveResetAge: never } };
       break;
     }
+    case 8:
+      // The body reads the target animation centre + side and the age only (prep7 s2.1). The accepted hpDrainProfile /
+      // controllerDisplayProfile feed HP, result text, menu, freeze status (FrozenIceCube from age 409) and Sitrus: all
+      // later queue commands outside the 183-frame script, so neutral never-reached ages are passed (omitting
+      // controllerDisplayProfile drops no body-window pixel: dense rows 0..183 are exact without it).
+      config = { move: "ICE_PUNCH", attacker, target, moveTextStartAge: 0,
+        fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" },
+        hpDrainProfile: { startHp: field.player.hp, endHp: field.player.hp, firstDisplayedAge: 1_000_000 } };
+      break;
     case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;
     case 248: config = { move: "FUTURE_SIGHT", attacker, target, fieldProfile }; break;
     case 342:

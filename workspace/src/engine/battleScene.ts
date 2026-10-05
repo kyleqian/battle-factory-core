@@ -49010,7 +49010,8 @@ export function renderSceneOnMovePresentation(
     const view = sceneOnIcePunchView(state);
     const { attacker, target, overlay } = view;
     if (
-      !(
+      !liveField
+      && !(
         attacker.species === "ONIX"
         && attacker.geometry.side === "player"
         && target.species === "GROVYLE"
@@ -49029,6 +49030,12 @@ export function renderSceneOnMovePresentation(
     }
     const player = attacker.geometry.side === "player" ? attacker : target;
     const opponent = attacker.geometry.side === "opponent" ? attacker : target;
+    // Live art follows the displayed species; the opponent's settled front idle offset is added to the production
+    // field origin (the accepted staged corner carries it, prep7 s2.1). The ice cubes and the Sitrus handoff belong to
+    // later queue commands (status-animation / item), not to this 183-frame script (prep7 s2.2, s5.5).
+    const playerArt = liveField ? liveSceneOnBattlerArt(player) : onixBackSprite;
+    const opponentArt = liveField ? liveSceneOnBattlerArt(opponent) : grovyleFrontSprite;
+    const opponentIdle = liveField ? speciesFrontIdleRestOffsetOrZero(opponent.species) : { x2: 0, y2: 0 };
     const darken = (palette: RgbColor[]): RgbColor[] =>
       overlay.backgroundBlackCoeff === 0
         ? palette
@@ -49059,12 +49066,12 @@ export function renderSceneOnMovePresentation(
       sitrusAge === undefined ? 0 : sitrusTintCoeffAtAge(sitrusAge);
     if (target.geometry.side !== "player" || !view.targetInvisible) {
       const onixPalette = target.geometry.side === "player"
-        ? blendedTargetPalette(onixBackSprite.palette)
-        : onixBackSprite.palette;
+        ? blendedTargetPalette(playerArt.palette)
+        : playerArt.palette;
       if (target.geometry.side === "player" && sitrusRotation) {
         drawSpriteSheetAffineRotate(
           fb,
-          onixBackSprite.tileset,
+          playerArt.tileset,
           onixPalette,
           player.geometry.spriteCorner.x + 32,
           player.geometry.spriteCorner.y + 32 + sitrusRotation.y2,
@@ -49076,7 +49083,7 @@ export function renderSceneOnMovePresentation(
       } else if (target.geometry.side === "player" && sitrusTint > 0) {
         drawSpriteSheetAffineTintedBlend(
           fb,
-          onixBackSprite.tileset,
+          playerArt.tileset,
           onixPalette,
           player.geometry.spriteCorner.x,
           player.geometry.spriteCorner.y,
@@ -49088,7 +49095,7 @@ export function renderSceneOnMovePresentation(
       } else {
         drawSpriteSheet(
           fb,
-          onixBackSprite.tileset,
+          playerArt.tileset,
           onixPalette,
           player.geometry.spriteCorner.x,
           player.geometry.spriteCorner.y
@@ -49105,12 +49112,12 @@ export function renderSceneOnMovePresentation(
     if (target.geometry.side !== "opponent" || !view.targetInvisible) {
       drawSpriteSheet(
         fb,
-        grovyleFrontSprite.tileset,
+        opponentArt.tileset,
         target.geometry.side === "opponent"
-          ? blendedTargetPalette(grovyleFrontSprite.palette)
-          : grovyleFrontSprite.palette,
-        opponent.geometry.spriteCorner.x,
-        opponent.geometry.spriteCorner.y
+          ? blendedTargetPalette(opponentArt.palette)
+          : opponentArt.palette,
+        opponent.geometry.spriteCorner.x + opponentIdle.x2,
+        opponent.geometry.spriteCorner.y + opponentIdle.y2
           + (
             target.geometry.side === "opponent"
             && (view.age === 68 || view.age === 69)
@@ -49230,6 +49237,7 @@ export function renderSceneOnMovePresentation(
         );
       }
     }
+    if (liveField) return;
     drawOpponentHealthboxWobble(
       fb,
       target.geometry.side === "opponent" ? view.healthboxY2 : 0,
