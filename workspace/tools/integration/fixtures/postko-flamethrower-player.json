@@ -1,0 +1,38 @@
+{
+ "schema": "postko-adapter-draft/v1",
+ "draft": true,
+ "move": "FLAMETHROWER",
+ "probe": "tools/integration/postkoStateProbe.py",
+ "scenario": "tools/battle-lab/postko-flamethrower-doubleteam.json",
+ "stateFixture": "tools/integration/fixtures/postko/state-postko-flamethrower-doubleteam.json",
+ "modelCheck": "tools/integration/fixtures/postko/model-check-postko-flamethrower-doubleteam.json",
+ "attacker": {
+  "species": "NINETALES",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 148,
+  "playerMaxHp": 148,
+  "opponentHp": 170,
+  "opponentMaxHp": 170,
+  "playerStatus": "none",
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "edgeRiseFrame": 2079,
+ "windowOffsetFromActivation": 4,
+ "denseWindow": {
+  "startFrame": 2083,
+  "endFrame": 2208,
+  "ageOffset": -11
+ },
+ "note": "accepted window offset of order-consumer-flamethrower-player.json (activation 391 -> window 395..520, ageOffset -11)"
+}
