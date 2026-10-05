@@ -26,6 +26,7 @@ def analyse(name):
     first_prompt_destroy = max(n for n in destroys if n < b["n"])  # the commit of the turn that runs this body
     row["move"] = b["ctx"]["curMove"]
     row["commitDestroyFrame"], row["bodyLaunchFrame"] = first_prompt_destroy, b["n"]
+    row["firstBodyOfTurn"] = not any(c["kind"] == "marker:LaunchBattleAnimation" and first_prompt_destroy < c["n"] < b["n"] for c in calls)
     row["allocatorCallsBetweenPromptDestroyAndBodyLaunch"] = sum(1 for c in calls if first_prompt_destroy < c["n"] < b["n"] and c["kind"] in ALLOC)
     # the body's allocator activity ends before the stat animation launches
     after = [s for s in stats if s["n"] > b["n"] and s["args"][3] == 1]
@@ -43,9 +44,9 @@ def analyse(name):
 rows = [analyse(n) for n in NAMES]
 res = {"schema": "sprite-order-policy-gaps-order/v1", "rows": rows,
        "allRunsIdentical": all(r["runsIdentical"] for r in rows),
-       "allSilentBetweenPromptAndBody": all(r.get("allocatorCallsBetweenPromptDestroyAndBodyLaunch", 0) == 0 for r in rows)}
+       "allSilentBetweenCommitAndFirstBodyOfTurn": all(r.get("allocatorCallsBetweenPromptDestroyAndBodyLaunch", 0) == 0 for r in rows if r.get("firstBodyOfTurn"))}
 for r in rows:
     print(json.dumps(r)[:330])
-print(res["allRunsIdentical"], res["allSilentBetweenPromptAndBody"])
+print(res["allRunsIdentical"], res["allSilentBetweenCommitAndFirstBodyOfTurn"])
 if "--write" in sys.argv:
     (ROOT / "tools/integration/fixtures/sprite-order-policy-gaps/order-evidence.json").write_text(json.dumps(res, indent=1) + "\n")

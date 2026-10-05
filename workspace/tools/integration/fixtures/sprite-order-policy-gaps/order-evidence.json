@@ -11,6 +11,7 @@
    "move": 104,
    "commitDestroyFrame": 2041,
    "bodyLaunchFrame": 2081,
+   "firstBodyOfTurn": true,
    "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0,
    "statAnimationFrame": 2243,
    "statAnimationArgs": [
@@ -51,6 +52,7 @@
    "move": 104,
    "commitDestroyFrame": 2041,
    "bodyLaunchFrame": 2085,
+   "firstBodyOfTurn": true,
    "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0,
    "statAnimationFrame": 2247,
    "statAnimationArgs": [
@@ -91,6 +93,7 @@
    "move": 313,
    "commitDestroyFrame": 2041,
    "bodyLaunchFrame": 2081,
+   "firstBodyOfTurn": true,
    "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0,
    "statAnimationFrame": 2168,
    "statAnimationArgs": [
@@ -131,6 +134,7 @@
    "move": 313,
    "commitDestroyFrame": 2041,
    "bodyLaunchFrame": 2085,
+   "firstBodyOfTurn": true,
    "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0,
    "statAnimationFrame": 2172,
    "statAnimationArgs": [
@@ -171,6 +175,7 @@
    "move": 313,
    "commitDestroyFrame": 2041,
    "bodyLaunchFrame": 2307,
+   "firstBodyOfTurn": false,
    "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 7,
    "statAnimationFrame": 2394,
    "statAnimationArgs": [
@@ -211,6 +216,7 @@
    "move": 313,
    "commitDestroyFrame": 2041,
    "bodyLaunchFrame": 2082,
+   "firstBodyOfTurn": true,
    "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0,
    "statAnimationFrame": 2169,
    "statAnimationArgs": [
@@ -251,6 +257,7 @@
    "move": 313,
    "commitDestroyFrame": 2041,
    "bodyLaunchFrame": 2232,
+   "firstBodyOfTurn": false,
    "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 7,
    "statAnimationFrame": 2319,
    "statAnimationArgs": [
@@ -291,6 +298,7 @@
    "move": 313,
    "commitDestroyFrame": 2041,
    "bodyLaunchFrame": 2087,
+   "firstBodyOfTurn": true,
    "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0,
    "statAnimationFrame": 2174,
    "statAnimationArgs": [
@@ -331,6 +339,7 @@
    "move": 297,
    "commitDestroyFrame": 2041,
    "bodyLaunchFrame": 2085,
+   "firstBodyOfTurn": true,
    "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0,
    "statAnimationFrame": 2257,
    "statAnimationArgs": [
@@ -371,6 +380,7 @@
    "move": 297,
    "commitDestroyFrame": 2041,
    "bodyLaunchFrame": 2089,
+   "firstBodyOfTurn": true,
    "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0,
    "statAnimationFrame": 2261,
    "statAnimationArgs": [
@@ -411,6 +421,7 @@
    "move": 283,
    "commitDestroyFrame": 2041,
    "bodyLaunchFrame": 2082,
+   "firstBodyOfTurn": true,
    "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0
   },
   {
@@ -423,9 +434,10 @@
    "move": 283,
    "commitDestroyFrame": 2041,
    "bodyLaunchFrame": 2086,
+   "firstBodyOfTurn": true,
    "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0
   }
  ],
  "allRunsIdentical": true,
- "allSilentBetweenPromptAndBody": false
+ "allSilentBetweenCommitAndFirstBodyOfTurn": true
 }
