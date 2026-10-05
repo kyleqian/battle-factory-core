@@ -3,9 +3,9 @@
 
 usage: affineTaskCallProbe.py factory <trace.json> <move-id> <out.json>
        affineTaskCallProbe.py lab <move-id> <scenario.json> <out.json>
-Pass 1 (fast frame API) finds the first body with sAnimMoveIndex == move-id (gAnimScriptActive rise .. fall).  Pass 2 re-stages the
+Pass 1 (fast frame API; env AFFINE_BODY=N picks the Nth body, default 0) finds the first body with sAnimMoveIndex == move-id (gAnimScriptActive rise .. fall).  Pass 2 re-stages the
 same battle fresh and single-steps every frame of [rise-2, fall+1], recording function entry (args, caller via LR) and return value (r0)
-of the stock functions.  No breakpoints, no ROM/RAM patching, no framebuffer.  Method follows lightScreenAllocatorCallProbe.py.
+of the stock functions (CreateTask, DestroyTask, AllocOamMatrix, FreeOamMatrix, CreateSprite*, DestroySprite).  No breakpoints, no ROM/RAM patching, no framebuffer.  Method follows lightScreenAllocatorCallProbe.py.
 Rows: [age, kind, arg, ret, caller]; age = step - rise step (first frame whose post-advance gAnimScriptActive is 1).
 """
 from __future__ import annotations
@@ -46,7 +46,8 @@ def symbol_data():
 
 
 NAMES, FUNCTIONS, ALL = symbol_data()
-HOOKS = {NAMES[n] & ~1: n for n in ("CreateTask", "DestroyTask", "AllocOamMatrix", "FreeOamMatrix")}
+HOOKS = {NAMES[n] & ~1: n for n in ("CreateTask", "DestroyTask", "AllocOamMatrix", "FreeOamMatrix",
+                                         "CreateSprite", "CreateSpriteAtEnd", "CreateSpriteAt", "DestroySprite")}
 
 
 def sym(address, table=FUNCTIONS):
@@ -93,12 +94,17 @@ def pass1():
     for b in frames(trace):
         advance(b)
     rise = fall = None
+    body = int(os.environ.get("AFFINE_BODY", "0"))  # Nth (0-based) body of this move (Razor Wind / Rock Blast have several)
+    seen, prev_act = -1, 0
     for n, act, mv in series:
-        if rise is None and act and mv == MOVE:
-            rise = n
+        if rise is None and act and mv == MOVE and not prev_act:
+            seen += 1
+            if seen == body:
+                rise = n
         elif rise is not None and not act:
             fall = n
             break
+        prev_act = act
     if rise is None:
         raise SystemExit(f"no body for move {MOVE}")
     return rise, fall
@@ -117,12 +123,19 @@ def step_frame(oracle, buttons, step, rise, calls):
         kind = HOOKS.get(ex)
         if kind is not None:
             r0 = int(oracle.core.cpu.gprs[0]); lr = int(oracle.core.cpu.lr)
-            arg = sym(r0, ALL) if kind == "CreateTask" else (r0 & 0xFF if kind != "AllocOamMatrix" else None)
+            if kind in ("CreateTask", "CreateSprite", "CreateSpriteAtEnd"):
+                arg = sym(r0, ALL)
+            elif kind == "CreateSpriteAt":
+                arg = sym(int(oracle.core.cpu.gprs[1]), ALL)
+            elif kind == "DestroySprite":
+                arg = (r0 - NAMES["gSprites"]) // 0x44
+            else:
+                arg = r0 & 0xFF if kind in ("FreeOamMatrix", "DestroyTask") else None
             c = {"age": step - rise, "kind": kind, "arg": arg, "ret": None, "caller": sym(lr), "ret_pc": lr & ~1}
             if kind == "CreateTask":
                 c["prio"] = int(oracle.core.cpu.gprs[1]) & 0xFF
             calls.append(c)
-            if kind in ("CreateTask", "AllocOamMatrix"):
+            if kind in ("CreateTask", "AllocOamMatrix", "CreateSprite", "CreateSpriteAtEnd", "CreateSpriteAt"):
                 pending.append(c)
         oracle.core.step()
         instr += 1

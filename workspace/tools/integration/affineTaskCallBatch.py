@@ -4,7 +4,7 @@
 usage: affineTaskCallBatch.py [name ...]
 Outputs tools/integration/fixtures/affine-task/calls/<name>.json (run 0); run 1 must be byte-identical or the job fails.
 """
-import subprocess, sys, tempfile
+import os, subprocess, sys, tempfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -19,17 +19,26 @@ for mid, slugs in MOVES.items():
     for s in slugs:
         name = Path(s).name.lstrip("@")
         JOBS.append((name, ["lab", str(mid), f"{s[1:]}.json" if s[0] == "@" else f"{LAB}{s}.json"]))
+EXTRA = {"razor-wind-player-nuzleaf-opponent-onix": [1], "razor-wind-opponent-nuzleaf-player-onix": [1],
+         "rock-blast-player-rhyhorn-opponent-shuckle": [1, 2], "rock-blast-opponent-rhyhorn-player-shuckle": [1]}
+for name, bodies in EXTRA.items():
+    base = next(j for j in list(JOBS) if j[0] == name)
+    for k in bodies:
+        JOBS.append((f"{name}-body{k}", base[1] + [f"@body{k}"]))
 only = set(sys.argv[1:])
 tmp = Path(tempfile.mkdtemp(prefix="affine-calls-"))
 
 
 def run(job):
     name, args = job
+    env = dict(os.environ)
+    if args[-1].startswith("@body"):
+        env["AFFINE_BODY"] = args[-1][5:]; args = args[:-1]
     outs = []
     for i in (0, 1):
         out = tmp / f"{name}-{i}.json"
         cmd = [sys.executable, "tools/run-mgba-probe.py", "--log", str(out) + ".log", str(out), "--", "python3", "tools/compare/affineTaskCallProbe.py", *args, str(out)]
-        r = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
+        r = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, env=env)
         if r.returncode != 0:
             return name, f"FAIL run{i}: {(r.stderr or r.stdout).strip()[-300:]}"
         outs.append(out)
