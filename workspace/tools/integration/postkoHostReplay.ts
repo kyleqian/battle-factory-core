@@ -13,7 +13,8 @@ import {
 import { invalidateLiveSpriteAllocatorHost, type LiveSpriteAllocatorHost } from "../../src/engine/liveSpriteAllocator.ts";
 import {
   advanceLiveSpriteOrderHost, beginLiveSpriteOrderTurn, createLiveSpriteOrderHost, lendLiveSpriteOrder,
-  reseedLiveSpriteAllocatorAfterSendOut, type LiveSpriteOrderHost,
+  openLiveSpriteOrderHostPartyMenu, reseedLiveSpriteAllocatorAfterSendOut, returnLiveSpriteOrderHostFromPartyMenu,
+  type LiveSpriteOrderHost,
 } from "../../src/engine/liveSpriteOrderHost.ts";
 import { knownEntrySpriteOrderState } from "../../src/engine/spriteOrderProvider.ts";
 
@@ -35,7 +36,10 @@ const isBody = (payload: PostKoSemanticPayload) => payload.kind === "animation" 
 
 /**
  * Replay `turns` (the last turn ends with the body under test) through the production hosts and return the lends at the final
- * body's activation edge. `route` = the known entry the scenario starts from.
+ * body's activation edge. `route` = the known entry the scenario starts from. One orchestrator marker the kernel stream does not
+ * carry, `{ kind: "forced-party-menu", battlers }` (playerfaintLendHistory.ts: the forced party handoff after a player faint), is
+ * replayed as the orchestrator's forced path does: party-menu reset + reshow (openLiveSpriteOrderHostPartyMenu +
+ * returnLiveSpriteOrderHostFromPartyMenu), the allocator host invalidated, and re-seeded after the forced switch-in.
  */
 export function replayPostKoTurnsThroughHost(
   turns: readonly PostKoTurn[], route: "ordinary-factory" | "battle-lab-ordinary-singles" = "battle-lab-ordinary-singles",
@@ -46,11 +50,17 @@ export function replayPostKoTurnsThroughHost(
   for (const [turnIndex, turn] of turns.entries()) {
     const requestId = turnIndex + 1;
     const events = turn.events.map(payload => Object.freeze({ sequence: sequence++, payload, provenance: undefined }) as unknown as BattleKernelSemanticEvent);
-    const resolution = { resolutionId: { requestId }, segmentIndex: 0, segments: [{ events }] };
+    const isMarker = (event: BattleKernelSemanticEvent) => (event.payload as unknown as PostKoSemanticPayload).kind === "forced-party-menu";
+    const resolution = { resolutionId: { requestId }, segmentIndex: 0, segments: [{ events: events.filter(event => !isMarker(event)) }] };
     host = beginLiveSpriteOrderTurn(host, requestId, true);
     const last = turnIndex === turns.length - 1;
     for (const [index, event] of events.entries()) {
       const payload = event.payload as unknown as PostKoSemanticPayload;
+      if (isMarker(event)) {
+        host = returnLiveSpriteOrderHostFromPartyMenu(openLiveSpriteOrderHostPartyMenu(host), payload.battlers as { player: boolean; opponent: boolean });
+        allocator = invalidateLiveSpriteAllocatorHost(allocator);
+        continue;
+      }
       if (last && index === events.length - 1) {
         if (!isBody(payload)) throw new Error("the last recorded event must be the body under test");
         host = advanceLiveSpriteOrderHost(host, resolution, event.sequence, true);

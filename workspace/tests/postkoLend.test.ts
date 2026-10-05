@@ -65,7 +65,7 @@ describe("post-KO entry-label lend (rung 2, presentation-only)", () => {
     expect(spriteOrderEntryLabelRelabel(view)!.get(5)).toBe(8);
   });
 
-  it("declines off the role-isomorphic occupancy: player-faint reshow {0,1,2,3,5,60..63}, mid-summary, prompt pair alive", () => {
+  it("declines off the role-isomorphic occupancy: mid-summary, prompt pair alive, player battler gone; lends after the forced switch-in", () => {
     let tracker = feed(entry(), ...KO.slice(0, 2));
     expect(spriteOrderTrackerPostUnitView(tracker)).not.toBeNull();
     expect(spriteOrderTrackerLend(tracker)).toBeNull(); // mid-summary
@@ -80,8 +80,11 @@ describe("post-KO entry-label lend (rung 2, presentation-only)", () => {
       { kind: "switch-in-start" }, { kind: "switch-in-finish" });
     expect(tracker.cursor.occupied).toEqual([0, 1, 2, 3, 5, 60, 61, 62, 63]);
     expect(tracker.battlerSlots).toEqual({ player: 5, opponent: 0 });
-    expect(spriteOrderTrackerLend(tracker)).toBeNull(); // player-faint reshow geometry (out of scope)
-    expect(spriteOrderTrackerRoleIsomorphic(tracker)).toBe(false);
+    // Player-faint geometry: role-isomorphic under the reshowPlayerGone roles (docs/playerfaint-lend-audit.md §3), lent rho(F).
+    expect(tracker.occupantRoles).toEqual({ healthboxMain: { player: 1, opponent: 2 }, shadow: 3 });
+    expect(spriteOrderTrackerRoleIsomorphic(tracker)).toBe(true);
+    expect(spriteOrderTrackerLend(feed(tracker, { kind: "action-prompt" }, { kind: "actions-committed" }))!.slice(0, 4)).toEqual([4, 3, 21, 20]);
+    expect(spriteOrderTrackerRoleIsomorphic(feed(tracker, { kind: "party-menu-reset" }))).toBe(false); // roles unknown after a reset
     expect(spriteOrderEntryLabelRelabel({ free: [], occupied: [0, 1, 2, 5, 6, 60, 61, 62, 63], battlerSlots: { player: 6, opponent: null } })).toBeNull();
   });
 

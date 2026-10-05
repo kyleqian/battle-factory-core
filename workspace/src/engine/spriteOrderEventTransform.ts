@@ -28,17 +28,26 @@
  *   next-mon-send-out            nextSendOut directly after party-summary-next; its single survivor = opponent battler
  *   switch-in-start / -finish    switchInStart (player battler gone, directly after a reshow or recall), then
  *                                switchInParticles directly after it; player battler = n1 of the start unit
- *   party-menu-reset             ResetSpriteData: identity F, empty occupancy, battler slots forgotten; revives an
- *                                invalid tracker (the one revive path)
- *   battle-reshow                directly after a reset: reshowBoth / reshowPlayerGone by playerBattlerPresent
- *   switch-out                   recall(player slot), PROVISIONAL (one instance); the live host never emits it
+ *   party-menu-reset             ResetSpriteData: identity F, empty occupancy, battler slots and occupant roles
+ *                                forgotten; revives an invalid tracker (the one revive path)
+ *   battle-reshow                directly after a reset: reshowBoth / reshowPlayerGone by playerBattlerPresent;
+ *                                reshowPlayerGone sets the occupant roles from its survivors (below)
+ *   switch-out                   recall(player slot), PROVISIONAL (one instance); the live host never emits it; roles
+ *                                forgotten
  *   trainer-slide-end            Cf (end-of-battle win slide)
+ *
+ * Occupant roles (docs/playerfaint-lend-audit.md §2.2 / §4.1): the healthbox main sprite per side and the enemy shadow
+ * (entry 0 / 1 / 2). The healthbox other/bar halves are always 63,62 / 61,60 (CreateSpriteAtEnd from a full-free order
+ * in both creation paths). reshowPlayerGone "Cf;Cfee;Cfee;Cf" sets them from its survivors (player healthbox n1,
+ * opponent healthbox n4, shadow n7: ROM 1 / 2 / 3); faint, summary, send-out, switch-in and bodies keep them. The
+ * reshowBoth geometry (voluntary party menu) and the provisional recall are not ROM-verified for the role lend: their
+ * roles are null (the lend declines there).
  *
  * Any unit whose guard fails or whose plan does not resolve invalidates. Once invalid the tracker stays invalid
  * until a fresh known entry or a party-menu reset; it never guesses.
  */
 import {
-  KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, SPRITE_ORDER_SLOT_COUNT, applySpriteOrderUnitPlan, createSpriteOrderPlanCursor,
+  KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, applySpriteOrderUnitPlan, createSpriteOrderPlanCursor,
   initSpriteOrderState,
   type SpriteOrderPlan, type SpriteOrderPlanCursor, type SpriteOrderPlanToken, type SpriteOrderPlanWindow,
   type SpriteOrderState,
@@ -70,6 +79,10 @@ export type SpriteOrderPresentationEvent =
 
 export type SpriteOrderSide = "player" | "opponent";
 export type SpriteOrderBattlerSlots = Readonly<{ player: number | null; opponent: number | null }>;
+/** Persistent occupants that are not battler sprites: the healthbox main sprite per side and the enemy shadow. */
+export type SpriteOrderOccupantRoles = Readonly<{
+  healthboxMain: Readonly<{ player: number; opponent: number }>; shadow: number;
+}>;
 /** Last allocation unit applied (adjacency guard of the §2 unit pairs). */
 export type SpriteOrderUnitKind =
   | "entry" | "prompt" | "commit" | "body" | "animation" | "faint" | "summary" | "send-out" | "switch-in-start"
@@ -83,6 +96,8 @@ export interface SpriteOrderTracker {
   readonly invalidReason: string | null;
   /** Battler sprite slot per side; null = no tracked battler sprite (fainted, recalled, or forgotten at a reset). */
   readonly battlerSlots: SpriteOrderBattlerSlots;
+  /** Healthbox main per side + enemy shadow; null = unknown (after a reset, the reshowBoth geometry, a recall). */
+  readonly occupantRoles: SpriteOrderOccupantRoles | null;
   readonly lastUnit: SpriteOrderUnitKind;
 }
 
@@ -103,6 +118,12 @@ export function spriteOrderRecallPlanText(battlerSlot: number): string {
 }
 /** Battler sprite slots at the known entry (KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER: player 6, opponent 8). */
 export const KNOWN_ENTRY_BATTLER_SLOTS: SpriteOrderBattlerSlots = Object.freeze({ player: 6, opponent: 8 });
+/** Occupant roles at the known entry (ROM gHealthboxSpriteIds: player 0, opponent 1; enemy shadow 2). */
+export const KNOWN_ENTRY_OCCUPANT_ROLES: SpriteOrderOccupantRoles = Object.freeze({
+  healthboxMain: Object.freeze({ player: 0, opponent: 1 }), shadow: 2,
+});
+/** Healthbox other half + bar per side (63,62 / 61,60 in every creation path): fixed labels. */
+const HEALTHBOX_HALVES: readonly number[] = Object.freeze([60, 61, 62, 63]);
 
 /** Moves whose bodies hand the battler sprite to another graphics owner (§2 "substitute / transform"): invalidate. */
 const OWNERSHIP_CHANGING_MOVES: ReadonlySet<number> = new Set([144, 164]);
@@ -186,17 +207,23 @@ export function spriteOrderStatusAnimationName(isStatus2: boolean, status: numbe
 
 /**
  * Tracker at `order`. `battlerSlots` defaults to the known-entry battler sprites (player 6, opponent 8), each kept only
- * while that slot is occupied in `order` (a ResetSpriteData identity order therefore tracks no battler).
+ * while that slot is occupied in `order` (a ResetSpriteData identity order therefore tracks no battler). The occupant
+ * roles default to the known-entry ones (0 / 1 / 2), kept only while all of them are occupied.
  */
 export function createSpriteOrderTracker(
   order: SpriteOrderState, battlerSlots: SpriteOrderBattlerSlots = KNOWN_ENTRY_BATTLER_SLOTS,
+  occupantRoles: SpriteOrderOccupantRoles | null = KNOWN_ENTRY_OCCUPANT_ROLES,
 ): SpriteOrderTracker {
-  const held = (slot: number | null) => slot !== null && order.known && !order.free.includes(slot) ? slot : null;
+  const occupied = (slot: number) => order.known && !order.free.includes(slot);
+  const held = (slot: number | null) => slot !== null && occupied(slot) ? slot : null;
+  const roles = occupantRoles !== null && [occupantRoles.healthboxMain.player, occupantRoles.healthboxMain.opponent,
+    occupantRoles.shadow].every(occupied) ? occupantRoles : null;
   return Object.freeze({
     cursor: createSpriteOrderPlanCursor(order),
     promptPair: null,
     invalidReason: order.known ? null : "unknown entry",
     battlerSlots: Object.freeze({ player: held(battlerSlots.player), opponent: held(battlerSlots.opponent) }),
+    occupantRoles: roles,
     lastUnit: "entry",
   });
 }
@@ -237,8 +264,9 @@ function applyUnit(tracker: SpriteOrderTracker, plan: SpriteOrderPlan): SpriteOr
 function withUnit(
   tracker: SpriteOrderTracker, cursor: SpriteOrderPlanCursor, lastUnit: SpriteOrderUnitKind,
   battlerSlots: SpriteOrderBattlerSlots = tracker.battlerSlots,
+  occupantRoles: SpriteOrderOccupantRoles | null = tracker.occupantRoles,
 ): SpriteOrderTracker {
-  return Object.freeze({ ...tracker, cursor, lastUnit, battlerSlots: Object.freeze({ ...battlerSlots }) });
+  return Object.freeze({ ...tracker, cursor, lastUnit, battlerSlots: Object.freeze({ ...battlerSlots }), occupantRoles });
 }
 
 const lastSurvivors = (cursor: SpriteOrderPlanCursor): readonly number[] => cursor.survivors[cursor.units - 1] ?? [];
@@ -294,13 +322,17 @@ function applyBattleUnit(
       const cursor = applyUnit(tracker, event.playerBattlerPresent ? UNIT_PLANS.reshowBoth : UNIT_PLANS.reshowPlayerGone);
       if (!cursor) return fail("reshow: plan did not resolve");
       const survivors = lastSurvivors(cursor);
-      return withUnit(tracker, cursor, "reshow", event.playerBattlerPresent
-        ? { player: survivors[0]!, opponent: survivors[1]! } : { player: null, opponent: survivors[0]! });
+      // reshowPlayerGone survivors: n0 opponent battler, n1..n3 / n4..n6 player / opponent healthbox, n7 shadow.
+      return event.playerBattlerPresent
+        ? withUnit(tracker, cursor, "reshow", { player: survivors[0]!, opponent: survivors[1]! }, null)
+        : withUnit(tracker, cursor, "reshow", { player: null, opponent: survivors[0]! }, Object.freeze({
+          healthboxMain: Object.freeze({ player: survivors[1]!, opponent: survivors[4]! }), shadow: survivors[7]!,
+        }));
     }
     case "switch-out": {
       if (slots.player === null) return fail("recall: player battler slot unknown");
       const cursor = applyUnit(tracker, decodeSpriteOrderPlan(spriteOrderRecallPlanText(slots.player)));
-      return cursor ? withUnit(tracker, cursor, "recall", { ...slots, player: null }) : fail("recall: plan did not resolve");
+      return cursor ? withUnit(tracker, cursor, "recall", { ...slots, player: null }, null) : fail("recall: plan did not resolve");
     }
     case "trainer-slide-end": {
       const cursor = applyUnit(tracker, UNIT_PLANS.trainerSlide);
@@ -316,7 +348,7 @@ export function applySpriteOrderPresentationEvent(
   // ResetSpriteData: identity order, nothing allocated, no battler tracked (rule (d): revives an invalid tracker).
   if (event.kind === "party-menu-reset") {
     return Object.freeze({
-      ...createSpriteOrderTracker(initSpriteOrderState(), { player: null, opponent: null }), lastUnit: "reset",
+      ...createSpriteOrderTracker(initSpriteOrderState(), { player: null, opponent: null }, null), lastUnit: "reset",
     });
   }
   if (!tracker.cursor.order.known) return tracker;
@@ -365,47 +397,51 @@ export function applySpriteOrderPresentationEvent(
   }
 }
 
-const KNOWN_ENTRY_OCCUPIED: readonly number[] = Object.freeze(Array.from(
-  { length: SPRITE_ORDER_SLOT_COUNT }, (_, slot) => slot,
-).filter(slot => !KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER.includes(slot)));
-/** Occupants that keep their slot across the modelled battle units (healthboxes 0,1,2 and 60..63). */
-const FIXED_OCCUPANTS: readonly number[] = Object.freeze(KNOWN_ENTRY_OCCUPIED.filter(slot =>
-  slot !== KNOWN_ENTRY_BATTLER_SLOTS.player && slot !== KNOWN_ENTRY_BATTLER_SLOTS.opponent));
 const KNOWN_ENTRY_FREE_SORTED: readonly number[] = Object.freeze([...KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER].sort((l, r) => l - r));
 
 /**
- * Entry-label relabel pi of docs/postko-consumer-audit.md §3.1 for a post-unit view, or null when its occupancy is not
- * role-isomorphic to the known entry: both battler slots tracked and occupied == fixed occupants {0,1,2,60..63} plus
- * exactly those two battler slots. pi maps the free slots rank-for-rank (ascending) onto the known-entry free slots,
- * the battler slots onto the entry battler labels (player 6, opponent 8) and the fixed occupants onto themselves.
- * `CreateSprite`/`CreateSpriteAtEnd` (lowest/highest free), `AllocOamMatrix`, `CreateTask` and `SortSprites` (keys,
- * ties by current order position, never by slot number) commute with pi, so every modelled allocation and sort
- * decision maps onto the entry one (§3.2). At the known entry pi is the identity.
+ * Entry-label relabel rho of docs/playerfaint-lend-audit.md §3 (generalising pi of docs/postko-consumer-audit.md §3.1) for a
+ * post-unit view, or null when its occupancy is not role-isomorphic to the known entry: both battler slots and the occupant
+ * roles known, and occupied == exactly the role set {battler P, battler O, healthbox main P / O, shadow, 60..63}. rho maps
+ * each role onto its entry label (battlers 6 / 8, healthbox mains 0 / 1, shadow 2, 60..63 themselves) and the free slots
+ * rank-for-rank (ascending) onto the known-entry free slots. `CreateSprite`/`CreateSpriteAtEnd` (lowest/highest free),
+ * `AllocOamMatrix`, `CreateTask` and `SortSprites` (keys, ties by current order position, never by slot number) commute
+ * with rho, so every modelled allocation and sort decision maps onto the entry one (§3.2 conditions (a)-(c), ROM-checked
+ * at the entry, after opponent KOs and after a player faint + forced switch-in). Roles omitted (undefined) = the entry
+ * roles 0 / 1 / 2, where rho is pi; null = unknown roles. At the known entry rho is the identity.
  */
 export function spriteOrderEntryLabelRelabel(view: Readonly<{
   free: readonly number[]; occupied: readonly number[]; battlerSlots: SpriteOrderBattlerSlots;
+  occupantRoles?: SpriteOrderOccupantRoles | null;
 }>): ReadonlyMap<number, number> | null {
   const { player, opponent } = view.battlerSlots;
-  if (player === null || opponent === null || player === opponent) return null;
-  const roles = [...FIXED_OCCUPANTS, player, opponent].sort((l, r) => l - r);
+  const roles = view.occupantRoles === undefined ? KNOWN_ENTRY_OCCUPANT_ROLES : view.occupantRoles;
+  if (player === null || opponent === null || roles === null) return null;
+  const labels: readonly (readonly [number, number])[] = [
+    [player, KNOWN_ENTRY_BATTLER_SLOTS.player!], [opponent, KNOWN_ENTRY_BATTLER_SLOTS.opponent!],
+    [roles.healthboxMain.player, KNOWN_ENTRY_OCCUPANT_ROLES.healthboxMain.player],
+    [roles.healthboxMain.opponent, KNOWN_ENTRY_OCCUPANT_ROLES.healthboxMain.opponent],
+    [roles.shadow, KNOWN_ENTRY_OCCUPANT_ROLES.shadow], ...HEALTHBOX_HALVES.map(slot => [slot, slot] as const),
+  ];
+  const roleSlots = labels.map(([slot]) => slot).sort((l, r) => l - r);
+  if (new Set(roleSlots).size !== roleSlots.length) return null;
   const occupied = [...view.occupied].sort((l, r) => l - r);
-  if (occupied.length !== roles.length || occupied.some((slot, index) => slot !== roles[index])) return null;
+  if (occupied.length !== roleSlots.length || occupied.some((slot, index) => slot !== roleSlots[index])) return null;
   const free = [...view.free].sort((l, r) => l - r);
-  if (free.length !== KNOWN_ENTRY_FREE_SORTED.length || free.some(slot => roles.includes(slot))) return null;
-  const pi = new Map<number, number>(FIXED_OCCUPANTS.map(slot => [slot, slot] as const));
-  pi.set(player, KNOWN_ENTRY_BATTLER_SLOTS.player!);
-  pi.set(opponent, KNOWN_ENTRY_BATTLER_SLOTS.opponent!);
-  free.forEach((slot, rank) => pi.set(slot, KNOWN_ENTRY_FREE_SORTED[rank]!));
-  return pi;
+  if (free.length !== KNOWN_ENTRY_FREE_SORTED.length || free.some(slot => roleSlots.includes(slot))) return null;
+  const rho = new Map<number, number>(labels);
+  free.forEach((slot, rank) => rho.set(slot, KNOWN_ENTRY_FREE_SORTED[rank]!));
+  return rho;
 }
 
 /**
  * Order lent to a move body at its activation edge: known, no prompt pair alive, and allocator occupancy
- * role-isomorphic to the known entry (spriteOrderEntryLabelRelabel; the entry itself, or after a modelled opponent
- * faint + next-mon summary + send-out). The lend is the tracked free order relabelled to entry slot labels, F.map(pi),
- * so every consumer's entry slot constants, lowest-free slices and occupied prefix stay valid labels; the raw post-KO
- * F is never handed out. Otherwise (player-faint reshow {0,1,2,3,5,60..63}, mid-summary, prompt pair alive) null:
- * consumers decline.
+ * role-isomorphic to the known entry (spriteOrderEntryLabelRelabel; the entry itself, after a modelled opponent
+ * faint + next-mon summary + send-out, or after a player faint + forced party menu + reshowPlayerGone + forced
+ * switch-in {0,1,2,3,5,60..63} with roles 1 / 2 / 3). The lend is the tracked free order relabelled to entry slot
+ * labels, F.map(rho), so every consumer's entry slot constants, lowest-free slices and occupied prefix stay valid labels;
+ * the raw post-unit F is never handed out. Otherwise (unknown roles: reshowBoth / recall; mid-summary, mid-reshow, prompt
+ * pair alive) null: consumers decline.
  */
 export function spriteOrderTrackerLend(tracker: SpriteOrderTracker): readonly number[] | null {
   const view = spriteOrderTrackerPostUnitView(tracker);
@@ -423,13 +459,14 @@ export function spriteOrderTrackerRoleIsomorphic(tracker: SpriteOrderTracker): b
 }
 
 /**
- * Post-unit view: the tracked free order, the model's own allocator occupancy and the battler sprite slots (input of
- * spriteOrderEntryLabelRelabel). Null when the order is unknown or the action-prompt pair is alive.
+ * Post-unit view: the tracked free order, the model's own allocator occupancy, the battler sprite slots and the occupant
+ * roles (input of spriteOrderEntryLabelRelabel). Null when the order is unknown or the action-prompt pair is alive.
  */
 export function spriteOrderTrackerPostUnitView(tracker: SpriteOrderTracker): Readonly<{
   free: readonly number[]; occupied: readonly number[]; battlerSlots: SpriteOrderBattlerSlots;
+  occupantRoles: SpriteOrderOccupantRoles | null;
 }> | null {
   const { order, occupied } = tracker.cursor;
   if (!order.known || tracker.promptPair !== null) return null;
-  return Object.freeze({ free: order.free, occupied, battlerSlots: tracker.battlerSlots });
+  return Object.freeze({ free: order.free, occupied, battlerSlots: tracker.battlerSlots, occupantRoles: tracker.occupantRoles });
 }

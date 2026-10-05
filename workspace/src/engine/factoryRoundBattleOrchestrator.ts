@@ -22,6 +22,7 @@ import {
   lendLiveSpriteOrder,
   liveSpriteOrderBattlersPresent,
   liveSpriteOrderHostOrder,
+  liveSpriteAllocatorReseedable,
   openLiveSpriteOrderHostPartyMenu,
   reseedLiveSpriteAllocatorAfterSendOut,
   returnLiveSpriteOrderHostFromPartyMenu,
@@ -2119,8 +2120,15 @@ function prepareResolutionPalette(
       orderHost.cursor?.requestId === resolution.resolutionId.requestId
       && orderHost.cursor.segmentIndex === resolution.segmentIndex
     );
+    // The forced switch-in leaves the allocator occupancy role-isomorphic to
+    // the known entry: its host is re-seeded once in entry labels and kept
+    // for the rest of the switch-in (docs/playerfaint-lend-audit.md §4.3).
+    const keepSprites = !orderPending && orderHost !== undefined
+      && retainedSprites?.host.historyKnown === true
+      && liveSpriteAllocatorReseedable(orderHost);
     if (
-      !retained?.host.historyKnown && !retainedSprites?.host.historyKnown
+      !retained?.host.historyKnown
+      && (!retainedSprites?.host.historyKnown || keepSprites)
       && !orderPending
     ) return state;
     const forcedOrderHost = (host: LiveSpriteOrderHost): LiveSpriteOrderHost => {
@@ -2150,13 +2158,15 @@ function prepareResolutionPalette(
       liveMovePaletteHost: retained ? Object.freeze({
         ...retained, host: invalidateLiveMovePaletteHost(retained.host),
       }) : undefined,
-      liveMoveSpriteAllocatorHost: retainedSprites ? Object.freeze({
-        ...withOrderHost(
-          retainedSprites,
-          orderPending ? forcedOrderHost(orderHost!) : orderHost!,
-        ),
-        host: invalidateLiveSpriteAllocatorHost(retainedSprites.host),
-      }) : undefined,
+      liveMoveSpriteAllocatorHost: retainedSprites ? (() => {
+        const nextOrderHost = orderPending ? forcedOrderHost(orderHost!) : orderHost!;
+        return Object.freeze({
+          ...withOrderHost(retainedSprites, nextOrderHost),
+          host: keepSprites ? retainedSprites.host : reseedLiveSpriteAllocatorAfterSendOut(
+            invalidateLiveSpriteAllocatorHost(retainedSprites.host), nextOrderHost,
+          ),
+        });
+      })() : undefined,
       battleResolutionPresentation: Object.freeze({
         ...resolution, liveMovePaletteInput: undefined,
         liveMoveSpriteAllocatorInput: undefined,
