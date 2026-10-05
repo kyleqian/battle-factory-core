@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 416,
-  "ids": 198,
+  "rows": 427,
+  "ids": 204,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -4392,6 +4392,125 @@
    "drawn": [
     0
    ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 222,
+   "move": "MAGNITUDE",
+   "orientation": "opponent",
+   "duration": 206,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 222,
+   "move": "MAGNITUDE",
+   "orientation": "player",
+   "duration": 206,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 220,
+   "move": "PAIN_SPLIT",
+   "orientation": "opponent",
+   "duration": 81,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 220,
+   "move": "PAIN_SPLIT",
+   "orientation": "player",
+   "duration": 81,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 13,
+   "move": "RAZOR_WIND",
+   "orientation": "opponent",
+   "duration": 45,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 13,
+   "move": "RAZOR_WIND",
+   "orientation": "player",
+   "duration": 45,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 179,
+   "move": "REVERSAL",
+   "orientation": "player",
+   "duration": 173,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 179,
+   "move": "REVERSAL",
+   "orientation": "opponent",
+   "duration": 173,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 350,
+   "move": "ROCK_BLAST",
+   "orientation": "opponent",
+   "duration": 89,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 350,
+   "move": "ROCK_BLAST",
+   "orientation": "player",
+   "duration": 89,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 209,
+   "move": "SPARK",
+   "orientation": "player",
+   "duration": 115,
+   "expected": null,
+   "drawn": [],
    "tailFirstAge": null
   }
  ]
