@@ -32,5 +32,67 @@
   "startFrame": 2085,
   "endFrame": 2172
  },
- "note": "accepted window offset of light-screen-live-slowpoke-player.json (activation 306 -> window 306..393, 88 rows); allocator input = liveView's known-entry host (entry labels = the relabel lend); first body after the send-out"
+ "note": "accepted window offset of light-screen-live-slowpoke-player.json (activation 306 -> window 306..393, 88 rows); allocator input = liveView's known-entry host (entry labels = the relabel lend); first body after the send-out",
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "53",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": []
+    },
+    {
+     "kind": "faint-animation",
+     "battler": 1
+    },
+    {
+     "kind": "draw-party-status-summary",
+     "battler": 1
+    },
+    {
+     "kind": "hide-party-status-summary",
+     "battler": 1
+    },
+    {
+     "kind": "switch-in-animation",
+     "battler": 1,
+     "partyIndex": 1
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "113",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
 }

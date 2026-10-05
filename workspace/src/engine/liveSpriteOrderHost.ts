@@ -29,10 +29,13 @@
  */
 import type { BattleKernelSemanticEvent } from "./battleDecisionBoundary.ts";
 import { battleMoveAnimationRequest } from "./battleMoveAnimation.ts";
+import { createKnownEntrySpriteAllocatorProvider, type KnownEntryRoute } from "./knownEntrySpriteAllocator.ts";
 import type { LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
+import type { LiveSpriteAllocatorHost } from "./liveSpriteAllocator.ts";
 import {
   applySpriteOrderPresentationEvent, createSpriteOrderTracker, invalidateSpriteOrderTracker,
-  spriteOrderStatusAnimationName, spriteOrderTrackerLend, type SpriteOrderPresentationEvent, type SpriteOrderTracker,
+  spriteOrderStatusAnimationName, spriteOrderTrackerLend, spriteOrderTrackerRoleIsomorphic,
+  type SpriteOrderPresentationEvent, type SpriteOrderTracker,
 } from "./spriteOrderEventTransform.ts";
 import {
   invalidateSpriteOrderState, knownEntryPrePromptSpriteOrderState, knownEntrySpriteOrderState, type SpriteOrderState,
@@ -276,4 +279,20 @@ export function advanceLiveSpriteOrderHost(
 export function lendLiveSpriteOrder(host: LiveSpriteOrderHost): LiveMoveSpriteOrderInput | undefined {
   const free = spriteOrderTrackerLend(host.tracker);
   return free === null ? undefined : Object.freeze({ known: true as const, free });
+}
+
+/**
+ * Allocator host after a modelled opponent send-out (docs/postko-consumer-audit.md §4.3). The faint / next-mon summary /
+ * send-out leave the allocator occupancy role-isomorphic to the known entry (fixed occupants + the two battler sprites),
+ * so the host is re-seeded with the known-entry `firstMove` host, i.e. the post-unit view relabelled to entry slot labels
+ * (the labels the order lend uses). Only when the tracker's last unit is that send-out and its view is role-isomorphic;
+ * any other host is returned unchanged (an invalid host stays invalid). Net-zero history persists from there as usual.
+ */
+export function reseedLiveSpriteAllocatorAfterSendOut(
+  allocator: LiveSpriteAllocatorHost, host: LiveSpriteOrderHost, route: KnownEntryRoute = "ordinary-factory",
+): LiveSpriteAllocatorHost {
+  if (allocator.historyKnown || host.tracker.lastUnit !== "send-out" || !spriteOrderTrackerRoleIsomorphic(host.tracker)) {
+    return allocator;
+  }
+  return createKnownEntrySpriteAllocatorProvider(route).firstMove;
 }

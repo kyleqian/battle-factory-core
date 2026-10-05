@@ -368,24 +368,63 @@ export function applySpriteOrderPresentationEvent(
 const KNOWN_ENTRY_OCCUPIED: readonly number[] = Object.freeze(Array.from(
   { length: SPRITE_ORDER_SLOT_COUNT }, (_, slot) => slot,
 ).filter(slot => !KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER.includes(slot)));
+/** Occupants that keep their slot across the modelled battle units (healthboxes 0,1,2 and 60..63). */
+const FIXED_OCCUPANTS: readonly number[] = Object.freeze(KNOWN_ENTRY_OCCUPIED.filter(slot =>
+  slot !== KNOWN_ENTRY_BATTLER_SLOTS.player && slot !== KNOWN_ENTRY_BATTLER_SLOTS.opponent));
+const KNOWN_ENTRY_FREE_SORTED: readonly number[] = Object.freeze([...KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER].sort((l, r) => l - r));
 
 /**
- * Order lent to a move body at its activation edge: known, no prompt pair alive, and allocator occupancy equal to
- * the known-entry occupants (every modelled unit is occupancy-net-zero, so consumers' lowest-free allocation slots
- * and the occupied prefix stay the known-entry ones). Otherwise null (consumers decline).
+ * Entry-label relabel pi of docs/postko-consumer-audit.md §3.1 for a post-unit view, or null when its occupancy is not
+ * role-isomorphic to the known entry: both battler slots tracked and occupied == fixed occupants {0,1,2,60..63} plus
+ * exactly those two battler slots. pi maps the free slots rank-for-rank (ascending) onto the known-entry free slots,
+ * the battler slots onto the entry battler labels (player 6, opponent 8) and the fixed occupants onto themselves.
+ * `CreateSprite`/`CreateSpriteAtEnd` (lowest/highest free), `AllocOamMatrix`, `CreateTask` and `SortSprites` (keys,
+ * ties by current order position, never by slot number) commute with pi, so every modelled allocation and sort
+ * decision maps onto the entry one (§3.2). At the known entry pi is the identity.
  */
-export function spriteOrderTrackerLend(tracker: SpriteOrderTracker): readonly number[] | null {
-  const { order, occupied } = tracker.cursor;
-  if (!order.known || tracker.promptPair !== null) return null;
-  if (occupied.length !== KNOWN_ENTRY_OCCUPIED.length || occupied.some((slot, index) => slot !== KNOWN_ENTRY_OCCUPIED[index])) {
-    return null;
-  }
-  return order.free;
+export function spriteOrderEntryLabelRelabel(view: Readonly<{
+  free: readonly number[]; occupied: readonly number[]; battlerSlots: SpriteOrderBattlerSlots;
+}>): ReadonlyMap<number, number> | null {
+  const { player, opponent } = view.battlerSlots;
+  if (player === null || opponent === null || player === opponent) return null;
+  const roles = [...FIXED_OCCUPANTS, player, opponent].sort((l, r) => l - r);
+  const occupied = [...view.occupied].sort((l, r) => l - r);
+  if (occupied.length !== roles.length || occupied.some((slot, index) => slot !== roles[index])) return null;
+  const free = [...view.free].sort((l, r) => l - r);
+  if (free.length !== KNOWN_ENTRY_FREE_SORTED.length || free.some(slot => roles.includes(slot))) return null;
+  const pi = new Map<number, number>(FIXED_OCCUPANTS.map(slot => [slot, slot] as const));
+  pi.set(player, KNOWN_ENTRY_BATTLER_SLOTS.player!);
+  pi.set(opponent, KNOWN_ENTRY_BATTLER_SLOTS.opponent!);
+  free.forEach((slot, rank) => pi.set(slot, KNOWN_ENTRY_FREE_SORTED[rank]!));
+  return pi;
 }
 
 /**
- * Post-unit view for the next rung (NOT used to lend yet): the tracked free order, the model's own allocator
- * occupancy and the battler sprite slots. Null when the order is unknown or the action-prompt pair is alive.
+ * Order lent to a move body at its activation edge: known, no prompt pair alive, and allocator occupancy
+ * role-isomorphic to the known entry (spriteOrderEntryLabelRelabel; the entry itself, or after a modelled opponent
+ * faint + next-mon summary + send-out). The lend is the tracked free order relabelled to entry slot labels, F.map(pi),
+ * so every consumer's entry slot constants, lowest-free slices and occupied prefix stay valid labels; the raw post-KO
+ * F is never handed out. Otherwise (player-faint reshow {0,1,2,3,5,60..63}, mid-summary, prompt pair alive) null:
+ * consumers decline.
+ */
+export function spriteOrderTrackerLend(tracker: SpriteOrderTracker): readonly number[] | null {
+  const view = spriteOrderTrackerPostUnitView(tracker);
+  if (view === null) return null;
+  const pi = spriteOrderEntryLabelRelabel(view);
+  if (pi === null) return null;
+  const free = view.free.map(slot => pi.get(slot)!);
+  return free.every((slot, index) => slot === view.free[index]) ? view.free : Object.freeze(free);
+}
+
+/** Whether the tracker's post-unit view is role-isomorphic to the known entry (the lend gate without the order). */
+export function spriteOrderTrackerRoleIsomorphic(tracker: SpriteOrderTracker): boolean {
+  const view = spriteOrderTrackerPostUnitView(tracker);
+  return view !== null && spriteOrderEntryLabelRelabel(view) !== null;
+}
+
+/**
+ * Post-unit view: the tracked free order, the model's own allocator occupancy and the battler sprite slots (input of
+ * spriteOrderEntryLabelRelabel). Null when the order is unknown or the action-prompt pair is alive.
  */
 export function spriteOrderTrackerPostUnitView(tracker: SpriteOrderTracker): Readonly<{
   free: readonly number[]; occupied: readonly number[]; battlerSlots: SpriteOrderBattlerSlots;

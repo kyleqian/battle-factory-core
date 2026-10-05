@@ -69,13 +69,16 @@ describe("production sprite-order battle units (faint / summary / send-out / swi
     apply({ kind: "faint", side: "opponent" }, { kind: "party-summary-next" }, { kind: "party-summary-hide" }, { kind: "next-mon-send-out" });
     expect(tracker.battlerSlots).toEqual({ player: 6, opponent: 5 });
     expect(spriteOrderTrackerPostUnitView(tracker)).toMatchObject({ occupied: [0, 1, 2, 5, 6, 60, 61, 62, 63], battlerSlots: { player: 6, opponent: 5 } });
-    expect(spriteOrderTrackerLend(tracker)).toBeNull(); // lend gate unchanged: occupancy is not the known entry's
+    // Rung 2: the occupancy is role-isomorphic to the entry, so the lend is pi(F) in entry labels (battler 5 -> 8), never the raw F.
+    // pi on the free slots: post-KO 3,4,7,8,9.. -> entry 3,4,5,7,9.. (7 -> 5, 8 -> 7, the rest fixed).
+    expect(spriteOrderTrackerLend(tracker)).toEqual(spriteOrderTrackerPostUnitView(tracker)!.free.map(slot => slot === 7 ? 5 : slot === 8 ? 7 : slot));
     apply({ kind: "faint", side: "player" }, { kind: "party-menu-reset" }, { kind: "party-menu-reset" }, { kind: "battle-reshow", playerBattlerPresent: false });
     expect(tracker.battlerSlots).toEqual({ player: null, opponent: 0 });
     expect(tracker.cursor.occupied).toEqual([0, 1, 2, 3, 60, 61, 62, 63]);
     apply({ kind: "switch-in-start" }, { kind: "switch-in-finish" });
     expect(tracker.battlerSlots).toEqual({ player: 5, opponent: 0 });
     expect(tracker.cursor.occupied).toEqual([0, 1, 2, 3, 5, 60, 61, 62, 63]);
+    expect(spriteOrderTrackerLend(tracker)).toBeNull(); // player-faint reshow geometry: not role-isomorphic, declines
   });
 
   it("adjacency guard: send-out without the summary, faint with an unknown battler slot, and unguarded units invalidate; a reset revives", () => {

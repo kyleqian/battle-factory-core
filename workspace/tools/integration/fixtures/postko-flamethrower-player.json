@@ -34,5 +34,67 @@
   "endFrame": 2208,
   "ageOffset": -11
  },
- "note": "accepted window offset of order-consumer-flamethrower-player.json (activation 391 -> window 395..520, ageOffset -11)"
+ "note": "accepted window offset of order-consumer-flamethrower-player.json (activation 391 -> window 395..520, ageOffset -11)",
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "53",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": []
+    },
+    {
+     "kind": "faint-animation",
+     "battler": 1
+    },
+    {
+     "kind": "draw-party-status-summary",
+     "battler": 1
+    },
+    {
+     "kind": "hide-party-status-summary",
+     "battler": 1
+    },
+    {
+     "kind": "switch-in-animation",
+     "battler": 1,
+     "partyIndex": 1
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "53",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
 }
