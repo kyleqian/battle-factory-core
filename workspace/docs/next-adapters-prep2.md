@@ -142,7 +142,7 @@ Cosmic Power 173/177 vs 110 with Lunatone gender `none`. Each fixture is a stand
   while the live seam gives the pic point (72,99): no read of `animationCenter` exists in the branch, so no change is needed.
 * **EXPLOSION** (`:39690`): species gate Glalie/Shuckle; art `explosionArt.glalie*`/`selfDestructArt.shuckle*` hard-coded - replace with `liveSceneOnBattlerArt`. The only extra input
   is the attacker's displayed HP 0 (`setatkhptozero` at `battle_scripts_1.s:380` runs *before* `attackanimation`; the HUD shows an empty bar for the body and the later
-  faint flow follows). Open: does `BattleResolutionDisplayedField.hp` for the attacker already read 0 at the MOVE_ANIMATION event? (it must; the accepted HUD is empty). Self-Destruct is the same input with its own renderer.
+  faint flow follows). Production models `setatkhptozero` as a real `hp-change` event emitted before the move animation (`src/engine/battleScriptExplosionOpcode.ts:30-45`), and the displayed field only holds the old HP for hp-changes that are still *later* in the stream (`src/engine/battleResolutionPresentation.ts:3140-3155`), so the displayed attacker HP is probably already 0 at the MOVE_ANIMATION event - unverified; this is why the move is SMALL rather than BLOCKED, and it may reduce to READY after one displayed-field check. Self-Destruct is the same input with its own renderer.
 * **COSMIC_POWER** (`:45734`): its field profile type permits `"none"` genders; the ad-hoc shadow at `:45789-45800` draws at `battlePositionCenter.x`, retire it for the hook (row 0).
 * **FUTURE_SIGHT** (`:46970`): the first window row is 5 frames after activation (72 vs 77), so no shadow row; the live view should never emit this request for the delayed hit (that is
   `B_ANIM_FUTURE_SIGHT_HIT` via `playanimation`, `battle_scripts_1.s:3519`).
@@ -162,7 +162,7 @@ Cosmic Power 173/177 vs 110 with Lunatone gender `none`. Each fixture is a stand
 * **Window tails.** Dragon Rage's accepted window ends at 238/242 while the script is active to 259/263 (21 uncovered frames); Dizzy/Scary Face had the same gap. Extend the evidence or accept generic post-move cleanup.
 * **Extreme Speed / Knock Off age bases.** Their accepted `appStage` ages (48 at frame 87; -11 at frame 70) do not equal `frame - activation` (9; -5). Needs a probe that records the script start relative to the window before any fixture
   (the harness assumes `age = row + ageOffset` from the window start).
-* **Displayed HP 0 for self-KO** (Explosion, Self-Destruct): confirm which production field/event carries it.
+* **Displayed HP 0 for self-KO** (Explosion, Self-Destruct): see s2 note; confirm with one displayed-field probe of the MOVE_ANIMATION event (hp-change ordering) before wiring.
 * **Perish Song 3/3**: constants vs the live `perishSongTurns` in the rules state (accepted evidence has exactly 3/3 on both sides).
 * **Heal Bell**: `animationCenter` full (x,y) is read; accepted fixture is already in the live convention, so no change; verify with the first harness run.
 * **Metronome / Sleep Talk**: how the called move's second `MOVE_ANIMATION` is emitted; a live adapter for the body is separable but the called move may have no adapter.
