@@ -16,3 +16,10 @@ for name, mid in (("double-team", 104), ("rock-slide", 157), ("ice-punch", 8), (
         (OUT / f"mechanic-{name}-{side}-dragonair-{'onix' if side == 'player' else 'onix'}.json").write_text(json.dumps(d, indent=2) + "\n")
 print(sorted(p.name for p in OUT.glob("*.json")))
 print(sorted(p.name for p in OUT.glob('*.json')))
+# Double Team first-body pixel scenario: player-back ONIX (Double Team x4, speed 255 EVs so it acts first) -> opponent-front GROVYLE (278, Tackle x4), the accepted ONIX_TO_GROVYLE species pair.
+d = json.loads((ROOT / "tools/battle-lab/mechanic-dragon-dance-player-dragonair-opponent-onix.json").read_text())
+p, o = d["overrides"]["parties"]["player"][0], d["overrides"]["parties"]["opponent"][0]
+p.update({"species": 95, "moves": [104] * 4, "item": 0, "gender": "male"}); p["evs"]["speed"] = 255; p["evs"]["spDefense"] = 0; p["ivs"]["speed"] = 31
+o.update({"species": 278, "moves": [33] * 4}); o["ivs"]["speed"] = 0
+(OUT / "mechanic-double-team-onix-grovyle-firstbody.json").write_text(json.dumps(d, indent=2) + "\n")
+print("wrote double-team-onix-grovyle-firstbody")
