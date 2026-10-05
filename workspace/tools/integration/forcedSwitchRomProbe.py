@@ -14,10 +14,11 @@ sys.path.insert(0, str(HARNESS / "oracle"))
 from battle_lab import BattleLab, validate_request
 from emerald_core import EmeraldOracle
 ref = ROOT / "reference" / "pokeemerald"
-_d = json.loads(SCEN.read_text()); _d["profile"] = "battle-scene-on"
-req = validate_request(_d, "battle-scene-on")
+PROFILE = os.environ.get("FS_PROFILE", "battle-scene-on")  # battle-scene-off: no body exists; E is anchored on the gBattlerPartyIndexes change (= ON-profile E+7)
+_d = json.loads(SCEN.read_text()); _d["profile"] = PROFILE
+req = validate_request(_d, PROFILE)
 o = EmeraldOracle(ref / "pokeemerald.gba", ref / "pokeemerald.map", HARNESS / "oracle" / "bootstrap" / "factory.json")
-lab = BattleLab(o, "battle-scene-on"); lab.prepare(req)
+lab = BattleLab(o, PROFILE); lab.prepare(req)
 nm = subprocess.run(["arm-none-eabi-nm", "-n", str(ref / "pokeemerald.elf")], check=True, capture_output=True, text=True).stdout
 sym = {p[2]: int(p[0], 16) for p in (l.split() for l in nm.splitlines()) if len(p) == 3}
 addr = sorted((v & ~1, k) for k, v in sym.items())
@@ -45,9 +46,10 @@ def frame():
             "species": [u16(sym["gBattleMons"] + 0x58 * b) for b in (0, 1)], "b": [battler(0), battler(1)], "h": [hbox(0), hbox(1)],
             "anim": u8(sym["gAnimScriptActive"]), "txt": "".join("%02x" % u8(sym["sTextPrinters"] + k) for k in range(0x24)), "bufftext": u8(sym["gBattleTextBuff1"]), "tasks": {i: name(u32(sym["gTasks"] + i * 0x28)) for i in range(16) if u8(sym["gTasks"] + i * 0x28 + 4)}}
 rows, spawns, prev, prev_sp = {}, [], None, set()
+pidx_prev = None
 f = 0; E = None
 def step():
-    global prev, prev_sp, E
+    global prev, prev_sp, E, pidx_prev
     a = u8(sym["gAnimScriptActive"]); m = u16(sym["sAnimMoveIndex"])
     sp = set(inuse())
     for i in sorted(sp - prev_sp): spawns.append({"f": f, "slot": i, "ev": "+", "cb": name(u32(SP + i * 0x44 + 0x1c)), "tmpl": hex(u32(SP + i * 0x44 + 0x14)), "x": spr(i, 0x20), "y": spr(i, 0x22), "x2": spr(i, 0x24), "y2": spr(i, 0x26), "oam": [u16(SP + i * 0x44 + k) for k in (0, 2, 4)]})
@@ -55,6 +57,8 @@ def step():
     prev_sp = sp
     rows[f] = frame()
     if E is None and prev is not None and prev[0] and m in (46, 18) and not a: E = f - 1
+    if PROFILE == "battle-scene-off" and E is None and pidx_prev is not None and rows[f]["pidx"] != pidx_prev and f > 100: E = f - 8
+    pidx_prev = rows[f]["pidx"]
     prev = (a, m)
 step()
 for seg in req["trace"]["segments"]:
