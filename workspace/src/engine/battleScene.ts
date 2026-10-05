@@ -47033,22 +47033,26 @@ export function renderSceneOnMovePresentation(
   if (state.config.move === "FUTURE_SIGHT") {
     const view = sceneOnFutureSightView(state);
     const playerToOpponent =
-      view.attacker.species === "KADABRA"
+      (liveField || view.attacker.species === "KADABRA")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "KADABRA"
+      (liveField || view.attacker.species === "KADABRA")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged FUTURE_SIGHT pair ${view.attacker.species}(${view.attacker.geometry.side})->${view.target.species}(${view.target.geometry.side})`,
       );
     }
-    const attackerSprite = playerToOpponent ? kadabraBackSprite : kadabraFrontSprite;
-    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const attackerSprite = liveField ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? kadabraBackSprite : kadabraFrontSprite;
+    const targetSprite = liveField ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const attackerIdle = liveField && view.attacker.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.attacker.species) : { x2: 0, y2: 0 };
     const gpuDarken = (palette: readonly RgbColor[]) =>
       palette.map((color) => {
         const packed = mgbaDarkenColor(
@@ -47107,8 +47111,8 @@ export function renderSceneOnMovePresentation(
         fb,
         attackerSprite.tileset,
         attackerSprite.palette,
-        view.attacker.geometry.spriteCorner.x,
-        view.attacker.geometry.spriteCorner.y,
+        view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+        view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
         256,
         256,
         0,
@@ -47120,8 +47124,8 @@ export function renderSceneOnMovePresentation(
         fb,
         attackerSprite.tileset,
         attackerSprite.palette,
-        view.attacker.geometry.spriteCorner.x,
-        view.attacker.geometry.spriteCorner.y,
+        view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+        view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
         view.attackerScale.xScale,
         view.attackerScale.yScale,
         { r: 255, g: 255, b: 255 },
@@ -47150,8 +47154,8 @@ export function renderSceneOnMovePresentation(
           fb,
           attackerSprite.tileset,
           attackerSprite.palette,
-          view.attacker.geometry.spriteCorner.x,
-          view.attacker.geometry.spriteCorner.y,
+          view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+          view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
           256,
           256,
           0,
@@ -47164,8 +47168,8 @@ export function renderSceneOnMovePresentation(
         fb,
         attackerSprite.tileset,
         attackerSprite.palette,
-        view.attacker.geometry.spriteCorner.x,
-        view.attacker.geometry.spriteCorner.y,
+        view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+        view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
         view.attackerScale.xScale,
         view.attackerScale.yScale,
         0,
@@ -47174,6 +47178,7 @@ export function renderSceneOnMovePresentation(
         false,
       );
     }
+    if (!liveField) {
     const opponentSpecies = playerToOpponent ? "ONIX" : "KADABRA";
     const playerSpecies = playerToOpponent ? "KADABRA" : "ONIX";
     drawSendOutHealthbox(
@@ -47211,6 +47216,7 @@ export function renderSceneOnMovePresentation(
       "FUTURE SIGHT!",
       99,
     );
+    }
     return;
   }
 
