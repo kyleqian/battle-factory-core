@@ -415,5 +415,14 @@
   "class-inferred consumers listed above are not measured",
   "a live adapter is not whole-playable arbitrary-history exactness"
  ],
- "gates": "pending in this receipt; see the worker final message / commit"
+ "gates": {
+  "testedCodeCommit": "17d6212c41be50e322b84611550510e03a6ea8c8",
+  "testedSrcTree": "b9da2cf468948219eca261b1975e9ed5e5c0b214",
+  "focused": "11 files / 95 tests passed (sprite-order x6 + postkoLend + liveOrderConsumerMoveAdapters + liveSpriteAllocator + liveStatusImplementedCount + playableAnimationIntegration), --maxWorkers=4",
+  "typecheck": "passed",
+  "smoke": "8 files / 448 tests passed",
+  "fullSuite": "1511 files passed, 44 skipped; 12195 tests passed, 223 skipped (383.8 s, POKEBENCH_VITEST_MAX_WORKERS=4 --maxWorkers=4)",
+  "build": "passed",
+  "diffCheck": "clean (43c82096c..HEAD)"
+ }
 }
