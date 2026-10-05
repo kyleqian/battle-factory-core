@@ -2184,6 +2184,25 @@
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
+    },
+    {
+      "move": "MOVE_GRUDGE",
+      "id": 288,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/order-wiring-live-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (order-consumer-grudge-*.json, 209 rows); order supplied as production does at a first body (known-entry F filtered to the six lowest free slots)",
+        "ordinary route seed 57 / streak 0 / move slot 3 (HAUNTER): Grudge is the battle's first body, adapter active 209/209, returns to action-menu, ON/OFF rules/RNG equal",
+        "ordinary route seed 16 / streak 0 / move slot 3 (HAUNTER): the opponent's Light Screen is the first body, so Grudge has no known order and declines to the bounded scene-off fallback (0/209 active)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "order consumer: live ONLY when Grudge is the first move body of the battle after a known entry with no other non-message presentation command before it; otherwise liveMoveAnimationPresentation returns null (fallback)",
+      "remaining": [
+        "Grudge as a later body (needs body/gap plan application in production; Grudge's own body is NEEDS-KEYS so it ends the order chain)",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -2206,7 +2225,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 157,
+  "implementedCount": 158,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
@@ -2242,6 +2261,24 @@
         "receipt": "../tools/integration/fixtures/party-cancel-supervisor-receipt.json",
         "claim": "Known entry only; source return reserves0..3, healthbox/bar4..5, no wireless, retained icon row8 supplies following Shadow Punch scratch. Unknown entry and actual switch stay unknown; private0..3 and full menu/framebuffer timing unclaimed."
       }
+    },
+    "spriteOrder": {
+      "available": "../src/engine/spriteOrderProvider.ts (spriteOrderForSlots, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, spriteOrderWithOccupiedPrefix, applySpriteOrderUnitPlan)",
+      "hostSeam": "../src/engine/factoryRoundBattleOrchestrator.ts liveMoveSpriteAllocatorHost.order + ../src/engine/liveMoveSpriteAllocator.ts prepareLiveMoveSpriteOrder / LiveMoveSpriteOrderInput",
+      "scope": "Free-slot sSpriteOrder, presentation-only. Seeded with knownEntrySpriteOrderState('ordinary-factory') at battle start (Scene ON) only when the start ran no battle-start script events (Intimidate-class entries start from a different order: invalid). Lent to the FIRST move-animation body of the battle and then invalidated. No body/gap plans are applied in production yet (docs/sprite-order-body-plans.md section 3 blip cause under probe); the plan applier is test/harness-only.",
+      "invalidationTriggers": [
+        "after the first move-animation body (consumed)",
+        "any non-message presentation command before it (switch, summary, trainer slide, recall, stat, status, status-icon, hp, hit, faint, turn-end, move-animation without request)",
+        "crossed or trailing status-animation events (unprojected graphics)",
+        "a resolution other than the first one that observed the order (prompt cycle moves the cursor pair)",
+        "presenting-switch-in phase and the party menu (with the allocator host)",
+        "battle start with lifecycle events (nextEventSequence > 0)"
+      ],
+      "liveConsumers": [
+        "MOVE_GRUDGE (288)"
+      ],
+      "planReplay": "TS replay of sprite-order-body-plans.json: 790 edges, 659 preceded by exact plans, 659 exact, 0 mismatched (tests/spriteOrderProvider.test.ts)",
+      "receipt": "../tools/integration/fixtures/order-wiring-live-receipt.json"
     }
   },
   "validationCheckpoint": {
