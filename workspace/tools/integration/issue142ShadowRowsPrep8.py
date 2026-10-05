@@ -33,7 +33,7 @@ for id_, move, stem in spec:
         if f.get("requestFields"):
             row_obj["requestFields"] = f["requestFields"]
         d["rows"].append(row_obj)
-tag = " (+ prep8 rows from issue142ShadowRowsPrep7.py)"
+tag = " (+ prep8 rows from issue142ShadowRowsPrep8.py)"
 if tag not in d["generated"]:
     d["generated"] += tag
 p.write_text(json.dumps(d, indent=1) + "\n")

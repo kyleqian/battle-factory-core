@@ -1,6 +1,6 @@
 {
  "schema": "issue142-shadow-rows-extra/v1",
- "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep7 rows from issue142ShadowRowsPrep7.py) (+ prep8 rows from issue142ShadowRowsPrep7.py)",
+ "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep7 rows from issue142ShadowRowsPrep7.py) (+ prep8 rows from issue142ShadowRowsPrep8.py)",
  "rows": [
   {
    "id": 236,
