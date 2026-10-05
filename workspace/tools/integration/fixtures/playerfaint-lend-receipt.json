@@ -1045,5 +1045,16 @@
     "digest": "f440c8316bc3041d8b5f90fc389919f3b28db91eedefa3b6a6976a3f2301da99"
    }
   ]
+ },
+ "gates": {
+  "testedCommit": "581503753",
+  "srcTree": "3172ec9ff8827a221d5f8c63161e269df7bc9f7c",
+  "note": "src unchanged since 28bea5f9c (later commits: tools/tests/fixtures/docs only)",
+  "spriteOrderGateFiles": "12 files / 105 tests passed (sprite-order 8 + liveOrderConsumerMoveAdapters + liveSpriteAllocator + playableAnimationIntegration + playerfaintLend; --maxWorkers=4)",
+  "typecheck": "passed",
+  "smoke": "8 files / 448 tests passed",
+  "fullSuite": "1516 files passed | 44 skipped; 12255 tests passed | 223 skipped (395 s, --maxWorkers=4)",
+  "build": "passed",
+  "diffCheck": "clean"
  }
 }
