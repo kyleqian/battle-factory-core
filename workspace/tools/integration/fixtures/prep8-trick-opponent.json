@@ -1,7 +1,7 @@
 {
   "schema": "prep8-adapter-draft/v1",
   "move": "TRICK",
-  "probe": "tools/compare/fixtures/trick-opponent-furret-player-chansey.json",
+  "probe": "tools/compare/trickProbe.py",
   "attacker": {
     "species": "FURRET",
     "geometry": {
@@ -199,5 +199,6 @@
     "widerRoutes": null,
     "opponentAttackerRoutes": []
   },
-  "precedingBodies": []
+  "precedingBodies": [],
+  "scenario": "tools/compare/fixtures/trick-opponent-furret-player-chansey.json"
 }

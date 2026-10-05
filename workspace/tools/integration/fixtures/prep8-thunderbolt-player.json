@@ -1,7 +1,7 @@
 {
   "schema": "prep8-adapter-draft/v1",
   "move": "THUNDERBOLT",
-  "probe": "tools/battle-lab/mechanic-thunderbolt-player-delcatty-opponent-shuckle.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "attacker": {
     "species": "DELCATTY",
     "geometry": {
@@ -397,5 +397,6 @@
     "widerRoutes": null,
     "opponentAttackerRoutes": []
   },
-  "precedingBodies": []
+  "precedingBodies": [],
+  "scenario": "tools/battle-lab/mechanic-thunderbolt-player-delcatty-opponent-shuckle.json"
 }

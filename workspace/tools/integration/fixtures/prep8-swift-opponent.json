@@ -1,7 +1,7 @@
 {
   "schema": "prep8-adapter-draft/v1",
   "move": "SWIFT",
-  "probe": "tools/battle-lab/mechanic-swift-opponent-staryu-player-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "attacker": {
     "species": "STARYU",
     "geometry": {
@@ -19,7 +19,8 @@
     "playerMaxHp": 142,
     "opponentHp": 137,
     "opponentMaxHp": 137,
-    "playerGender": "male"
+    "playerGender": "male",
+    "opponentGender": "genderless"
   },
   "orientation": "opponent-front STARYU -> ONIX",
   "verdict": "READY (both orientations): allocator constants only (starSlots, shake task slot 0), no order field; gate = known allocator baseline",
@@ -257,5 +258,6 @@
       }
     ]
   },
-  "precedingBodies": []
+  "precedingBodies": [],
+  "scenario": "tools/battle-lab/mechanic-swift-opponent-staryu-player-onix.json"
 }

@@ -1,7 +1,7 @@
 {
   "schema": "prep8-adapter-draft/v1",
   "move": "SEISMIC_TOSS",
-  "probe": "tools/battle-lab/mechanic-seismic-toss-opponent-kecleon-player-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "attacker": {
     "species": "GRUMPIG",
     "geometry": {
@@ -501,5 +501,6 @@
     "widerRoutes": null,
     "opponentAttackerRoutes": []
   },
-  "precedingBodies": []
+  "precedingBodies": [],
+  "scenario": "tools/battle-lab/mechanic-seismic-toss-opponent-kecleon-player-onix.json"
 }

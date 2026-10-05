@@ -1,7 +1,7 @@
 {
   "schema": "prep8-adapter-draft/v1",
   "move": "FRUSTRATION",
-  "probe": "tools/battle-lab/mechanic-frustration-player-furret-opponent-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "attacker": {
     "species": "FURRET",
     "geometry": {
@@ -243,5 +243,6 @@
     "widerRoutes": null,
     "opponentAttackerRoutes": []
   },
-  "precedingBodies": []
+  "precedingBodies": [],
+  "scenario": "tools/battle-lab/mechanic-frustration-player-furret-opponent-onix.json"
 }

@@ -114,6 +114,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // prep7 (docs/next-adapters-prep7.md): Aerial Ace, Quick Attack, Ice Punch, Fake Tears, Sleep Talk, Rock Slide (opponent attacker only),
   // Fire Blast (known-order gate), Dragon Dance (allocationOrder derived from the provider order).
   332, 98, 8, 313, 214, 157, 126, 349,
+  // prep8 (docs/next-adapters-prep8.md; allocator constants = docs/allocator-plan-v2-evidence.md), each gated on the lent
+  // known tracked order: Swift, Trick.
+  129, 271,
   // order consumers (docs/order-consumer-prep.md): Grudge, first move body of a battle only (sprite-order input).
   288,
   // order consumers, order-independent (docs/order-consumer-prep.md §0): Ember (one sprite per sort window, ties resolve
@@ -186,6 +189,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     332, 98,
     // Ice Punch (staged windows start at activation: row 0). Sleep Talk likewise.
     8, 214, 157, 126, 349,
+    // prep8 (issue142-shadow-rows-extra.json): every window starts at the activation frame (row 0).
+    129, 271,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -498,6 +503,8 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     // Rock Slide, opponent attacker only (no accepted player-attacker evidence): activation..first inactive script row
     // (1967..2104); the 37 later accepted rows are the target hit flash (hitFlashAnchorAge 141) and controller HUD.
     case 157: return request.attacker === 1 ? 138 : null;
+    case 129: return request.attacker === 1 ? 80 : 78; // Swift 73..152 / 69..146 (prep8 s2.2): activation..script end.
+    case 271: return 225; // Trick 70..294 / 66..290.
     case 349: return 142; // Dragon Dance (78..219 / 74..215): window start = activation, window end = script end.
     case 126: return 197; // Fire Blast (1147..1343 / 215..411): window start = activation, window end = script end.
     case 8: return 184; // Ice Punch script activation..first inactive row (staged 1966..2149 / 2339..2522); HP/text/freeze/Sitrus rows are queue commands.
@@ -1400,6 +1407,30 @@ export function liveMoveAnimationPresentation(
       config = { move: "DRAGON_DANCE", attacker, target, fieldProfile,
         animationProfile: { pictureSize: { width, height }, allocationSlots,
           allocationOrder: allocationSlots.map(slot => providerOrder.indexOf(slot)) } };
+      break;
+    }
+    case 129: case 271: {
+      // prep8 s0/s3: the allocator-derived ids (star/bag slots, ShakeMon/Stretch task slots) are the constants of the
+      // baseline (matrix bitmap 0x6, no task, equal to the ROM plan at all 481 activations, allocator-plan-v2-evidence.md),
+      // valid only while the known-entry history holds: gate on the lent tracked order. The caller-owned RNG is echoed
+      // into the view and never read for pixels; the live seam has none, so it is 0.
+      if (!spriteOrderInput?.known) return null;
+      const attackerSlot = attacker.geometry.side === "player" ? 6 : 8;
+      const targetSlot = target.geometry.side === "player" ? 6 : 8;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      if (request.moveId === 129) {
+        config = { move: "SWIFT", attacker: affineCenterBattler(attacker), target: affineCenterBattler(target), fieldProfile,
+          animationProfile: { attackerSide: attacker.geometry.side, attackerEffectCenter: attackerAnchors.picOffsetPoint,
+            targetAverageCenter: targetAnchors.picOffsetPoint, attackerSpriteSlot: attackerSlot, targetSpriteSlot: targetSlot,
+            targetInitialOffset: { x2: targetAnchors.frontIdleRest.x2, y2: 0 }, starSlots: [3, 4, 5, 7, 9],
+            targetShakeTaskSlot: 0, gameplayRng: 0 } };
+      } else {
+        config = { move: "TRICK", attacker: affineCenterBattler(attacker), target: affineCenterBattler(target), fieldProfile,
+          animationProfile: { bagSlots: [3, 4],
+            attacker: { spriteSlot: attackerSlot, stretchTaskSlot: 1, shakeTaskSlot: 0 },
+            target: { spriteSlot: targetSlot, stretchTaskSlot: 0, shakeTaskSlot: 1 },
+            orientation: attacker.geometry.side === "player" ? "player-back" : "opponent-front", gameplayRng: 0 } };
+      }
       break;
     }
     case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;

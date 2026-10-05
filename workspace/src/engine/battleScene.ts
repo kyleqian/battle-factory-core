@@ -15279,6 +15279,7 @@ export function renderSceneOnMovePresentation(
     const playerIsAttacker = view.attacker.geometry.side === "player";
     const player = playerIsAttacker ? view.attacker : view.target;
     const opponent = playerIsAttacker ? view.target : view.attacker;
+    if (liveField) return;
     const profile = trickState.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species,
@@ -15523,6 +15524,7 @@ export function renderSceneOnMovePresentation(
     const playerIsAttacker = view.attacker.geometry.side === "player";
     const player = playerIsAttacker ? view.attacker : view.target;
     const opponent = playerIsAttacker ? view.target : view.attacker;
+    if (liveField) return;
     const profile = swiftState.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species, level: 50, gender: profile.opponentGender ?? "none",

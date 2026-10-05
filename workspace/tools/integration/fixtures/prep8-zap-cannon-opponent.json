@@ -1,7 +1,7 @@
 {
   "schema": "prep8-adapter-draft/v1",
   "move": "ZAP_CANNON",
-  "probe": "tools/battle-lab/mechanic-zap-cannon-opponent-forretress-player-shuckle.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "attacker": {
     "species": "FORRETRESS",
     "geometry": {
@@ -327,5 +327,6 @@
     ],
     "opponentAttackerRoutes": []
   },
-  "precedingBodies": []
+  "precedingBodies": [],
+  "scenario": "tools/battle-lab/mechanic-zap-cannon-opponent-forretress-player-shuckle.json"
 }
