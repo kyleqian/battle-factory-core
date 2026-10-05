@@ -54416,10 +54416,12 @@ export function renderBattleResolutionSceneOffView(
     // ISSUES #147: the ordinary field draws an elevated opponent at the same
     // elevated origin and with the same generated shadow as the command menu
     // (docs/elevated-postbody-audit.md, docs/elevated-renderer-off-check.md:
-    // both profiles). `SpriteCB_EnemyShadow` hides the shadow while the
-    // battler sprite is invisible (the blink's hidden rows clear
-    // visibility.opponent.sprite) and for `postBodyShadowHidden` ordinary
-    // rows after a live body whose script outlives its accepted window.
+    // both profiles); the faint sink starts from the elevated origin too.
+    // `SpriteCB_EnemyShadow` hides the shadow while the battler sprite is
+    // invisible (the blink's hidden rows clear visibility.opponent.sprite),
+    // for `postBodyShadowHidden` ordinary rows after a live body whose script
+    // outlives its accepted window, and once the battler's HP is 0
+    // (`IsBattlerSpritePresent`: through the faint sink).
     if (
       faint?.battler === 1
       && faint.sink.type === "opponent-tile-rows"
@@ -54429,11 +54431,15 @@ export function renderBattleResolutionSceneOffView(
         view.fieldArt.opponent.pic.tileset as Tileset,
         view.fieldArt.opponent.pic.palette as RgbColor[],
         view.fieldArt.opponent.origin.x,
-        view.fieldArt.opponent.origin.y + faint.sink.y2,
+        view.fieldArt.opponent.origin.y
+          - enemyMonElevation(view.fieldArt.opponent.speciesSymbol)
+          + faint.sink.y2,
         faint.sink.keptRows,
       );
     } else {
-      if (!view.postBodyShadowHidden) drawGeneratedOpponentShadow(fb, view.fieldArt);
+      if (!view.postBodyShadowHidden && view.field.opponent.hp > 0) {
+        drawGeneratedOpponentShadow(fb, view.fieldArt);
+      }
       drawSpriteSheet(
         fb,
         view.fieldArt.opponent.pic.tileset as Tileset,

@@ -74,6 +74,26 @@ describe("ordinary resolution field: elevated opponents (ISSUES #147)", () => {
     });
   }
 
+  it("GOLBAT faint: the sink starts from the elevated origin and HP 0 hides the shadow (ROM elevated-faint frames 204-290)", () => {
+    const view = ordinary(ELEVATED[0][1]);
+    const fainted = { ...view, field: { ...view.field, opponent: { ...view.field.opponent, hp: 0 } } } as BattleResolutionPresentationRenderView;
+    // IsBattlerSpritePresent: the sprite stays drawn, the shadow goes once HP is 0.
+    expect(shadowPixels(render(fainted))).toBe(0);
+    expect(Buffer.from(render(fainted)).equals(Buffer.from(render({ ...view, postBodyShadowHidden: true })))).toBe(true);
+    const sink = (v: BattleResolutionPresentationRenderView, s: number) => render({
+      ...v, effect: { type: "faint", battler: 1, healthboxVisible: true, sink: { type: "opponent-tile-rows", keptRows: 8 - s, y2: 8 * s } },
+    } as BattleResolutionPresentationRenderView);
+    const lowered = {
+      ...fainted,
+      fieldArt: { ...fainted.fieldArt, opponent: { ...fainted.fieldArt.opponent, speciesSymbol: "ONIX",
+        origin: { x: fainted.fieldArt.opponent.origin.x, y: fainted.fieldArt.opponent.origin.y - 8 } } },
+    } as BattleResolutionPresentationRenderView;
+    for (let s = 1; s <= 7; s++) {
+      expect(shadowPixels(sink(fainted, s))).toBe(0);
+      expect(Buffer.from(sink(fainted, s)).equals(Buffer.from(sink(lowered, s))), `step ${s}`).toBe(true);
+    }
+  });
+
   it("ONIX (no elevation, no shadow) is byte-identical to the pre-#147 ordinary field", () => {
     const view = ordinary(ONIX);
     expect(view.fieldArt.opponent.speciesSymbol).toBe("ONIX");
