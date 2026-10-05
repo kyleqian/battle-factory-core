@@ -56,8 +56,22 @@
   with identical inputs (strict chain 2/29 route bodies); words are exact from a known activation
   value. Supervisor reproduced the lab probe (102 step runs, caller lists identical). User
   decision recorded as DEFERRED D3 (surrogate presentation RNG vs fallback).
-- Running: abs-invariant order rows (source check + production table); prep11 measured prep +
-  Leaf Blade species diagnosis (side).
+- Folded Sonnet worker `2264ecf0e` (src tree `da2ba8d4`): 22 abs-invariant REL-Y rows into the
+  production order table (445 -> 467 bodies), all 23 source-confirmed (sprite y = battler position
+  + script constants; `docs/sprite-order-absinv-source-check.md`); corpus known 1,101 -> 1,110,
+  later-known 547 -> 556, lab unit checks 18 -> 22, 0 mismatches; seed 54 opponent Heal Bells
+  now lent. Supervisor: 8 sprite-order test files green; generator reproduces the table
+  byte-identically; Roar citation spot-checked. Caveat: Fissure plumes' absolute y follows the
+  opponent elevation (relative y unchanged). Receipt `absinv-rows-receipt.json`.
+- prep11 (`6586f3ea2`, `docs/next-adapters-prep11.md`): **ISSUES #144** — live Leaf Blade holds
+  the target x2 = 1 at ages 0-11 for every opponent (ONIX-only in the ROM): GOLEM 11,843 px at
+  the first body (supervisor reran: GOLEM 212/224 twice, ONIX 224/224). GOLEM target-swap audit
+  of 58 accepted fixtures: 22 exact, Dragon Rage projectile residual, ~32 untriaged (window
+  suspected). D-PAL/D-BG/E-TASK/F-AFFINE labels stale for 9 moves (constants == accepted corpora
+  18/18; monbg formula 25/25); Roar/Whirlwind continuation and Baton Pass flow unresolved;
+  Rollout needs the counter; Fly/Bounce need the hidden-attacker seam.
+- Running: #144 fix + prep11 batch (Leech Seed, Tri Attack, Petal Dance, Destiny Bond, Air
+  Cutter, Foresight, Sky Uppercut, Recycle, Spider Web); live-adapter species audit (side).
 
 ## 2026-10-05 (wind-down) — CASTFORM fix + order table 445 bodies
 
