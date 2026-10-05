@@ -48,6 +48,9 @@ export const SCENARIOS: Record<string, Step[]> = {
     P, C, edge("202:player"), body(202, "player"), HIT, edge("129:opponent"), body(129, "opponent"), HIT,
     P, C, edge("85:player"), body(85, "player"), HIT, edge("status:PRZ:opponent"), { kind: "status-animation", status: "PRZ" },
     edge("129:opponent"), body(129, "opponent"), HIT],
+  // as the first scenario with JOLTEON in party slot 2 (forced menu DOWN x2): turn 2 Sunny Day, Swift, sun.
+  "playerfaint-slot2-sunnyday": [P, C, edge("129:opponent", "entry"), body(129, "opponent"), HIT, ...PLAYER_FAINT_SWITCH,
+    P, C, edge("241:player"), body(241, "player"), edge("129:opponent"), body(129, "opponent"), HIT, ...SUN],
   // second opponent KO: NINETALES Flamethrower KOs SHEDINJA #1 (turn 1) and SHEDINJA #2 (turn 2; send-out #3 reuses slot 5);
   // turn 3: Sunny Day (first body after send-out #3), SHEDINJA #3 Swift, sun; turn 4: player Swift has no effect (Wonder Guard, no
   // animation), Swift, sun.

@@ -222,6 +222,43 @@
   "verdict": "GENERALIZES (today's pi lend)"
  },
  {
+  "fixture": "tools/integration/fixtures/playerfaint-slot2-sunny-day-player.json",
+  "move": "SUNNY_DAY",
+  "side": "player",
+  "edge": 949,
+  "window": {
+   "startFrame": 949,
+   "endFrame": 1106,
+   "ageOffset": 0
+  },
+  "whatIf": {
+   "role": {
+    "exactRows": 158,
+    "rows": 158,
+    "residualPixels": 0,
+    "digest": "ddebf460ce503a10bbc498dd75b5c01ed92d6d926d382285f75c145b292e8fda"
+   },
+   "production": {
+    "exactRows": 48,
+    "rows": 158,
+    "residualPixels": 824656,
+    "digest": "2cefe62c3996e939ae9d5ae3cfb1b597f85134d2c3cedaee6b0574747337349d"
+   }
+  },
+  "hostReplay": {
+   "fixture": "tools/integration/fixtures/playerfaint-slot2-sunny-day-player.json",
+   "edge": 949,
+   "hostKnown": true,
+   "invalidReason": null,
+   "hostViewEqualsModel": true,
+   "todayOrderLend": null,
+   "todayAllocatorInput": null,
+   "todayLendEqualsRole": null,
+   "roleLendFromHostEqualsModel": true
+  },
+  "verdict": "NEEDS-PARAM (role lend)"
+ },
+ {
   "fixture": "tools/integration/fixtures/playerfaint-sunny-day-player.json",
   "move": "SUNNY_DAY",
   "side": "player",

@@ -10,12 +10,12 @@ This follows `docs/postko-consumer-audit.md`, which covers the opponent-KO geome
   pressed buttons during that fade. The cursor starts on the fainted slot 0, and pressing A there loops on "no energy left". The working sequence is **DOWN → +30 A
   (selection menu) → +40 A (SHIFT)**, starting 80 frames after `CB2_InitPartyMenu`. `tools/integration/playerfaintStage.py` drives the stock ROM adaptively from ROM state
   (prompts, the move cursor it remembers, faint, menu) and writes the button schedule as a **fixed** BattleLab `trace.segments` list. Every later run is plain controller input.
-* **ROM ground truth** (§2). There are 4 scenarios, each run twice fresh, and each pair is byte-identical. Model vs ROM: **27 known activation edges, 0 mismatches**. That is
-  4 entry edges, 17 after the forced switch-in, and 6 after an opponent KO in the second-KO scenario (1 after KO #1, 5 after KO #2). The checks per edge are F, occupancy, battler slots, matrix bitmap, battler matrices, task
+* **ROM ground truth** (§2). There are 5 scenarios, each run twice fresh, and each pair is byte-identical. Model vs ROM: **31 known activation edges, 0 mismatches**. That is
+  5 entry edges, 20 after the forced switch-in, and 6 after an opponent KO in the second-KO scenario (1 after KO #1, 5 after KO #2). The checks per edge are F, occupancy, battler slots, matrix bitmap, battler matrices, task
   table and condition (b). Four more edges follow a body without an EXACT plan (`202:player`), so the tracker is unknown there. That is a body-plan coverage gap, as with the
   post-KO audit's `85:opponent`, and those edges are not relied on.
   After the forced switch-in, occupancy is `{0,1,2,3,5,60..63}` with battler sprites P 5 / O 0, battler matrices P 1 / O 0, bitmap `0x3` and an **empty task table**. This
-  holds at all 17 edges.
+  holds at all 20 edges. It is the same when the replacement comes from party slot 2.
 * **Condition (b): YES under a ROLE map.** The post-switch occupant sort prefix is `[62,60,1,63,2,61,5,0,3]`. Under the role map ρ it relabels **exactly** to the entry
   prefix `[62,60,0,63,1,61,6,8,2]` at every edge. The roles were read from ROM `gHealthboxSpriteIds` plus each healthbox's other-half and bar links, not inferred from the sort
   order (§2.2).
@@ -27,13 +27,13 @@ This follows `docs/postko-consumer-audit.md`, which covers the opponent-KO geome
 
   Free slots map rank-for-rank onto the known-entry free set. After the forced switch-in that gives 0→8, 1→0, 2→1, 3→2, 5→6, 4→3, 6→4, 7→5, 8→7, with 9.. unchanged.
   At the entry and after an opponent KO, ρ equals today's production π. The role lend equals today's production lend at every edge where production lends.
-* **What-if** (§3): 10 representatives over the full accepted dense window, each compared with both fresh runs. The role lend gives **0 residual on all 10**, and there is
+* **What-if** (§3): 11 representatives over the full accepted dense window, each compared with both fresh runs. The role lend gives **0 residual on all 11**, and there is
   **0 NEEDS-NEW**. Verdicts:
-  * **NEEDS-PARAM (role lend):** Sunny Day P, Dragon Dance P, Swift P, Swift O, Thunderbolt O, Heal Bell P, Giga Drain P. Today's production declines on each, with
+  * **NEEDS-PARAM (role lend):** Sunny Day P (from party slot 1 and from slot 2), Dragon Dance P, Swift P, Swift O, Thunderbolt O, Heal Bell P, Giga Drain P. Today's production declines on each, with
     12–54 exact rows out of 78–261.
   * **NEEDS-PARAM (role lend + allocator re-seed after the forced switch-in):** Light Screen P, Protect P.
   * **GENERALIZES, second opponent KO:** Sunny Day P with today's production π lend, 158/158.
-* **Today's production host**, replayed with the recorded semantic histories and the forced-menu hooks: the tracker is **known** at all 10 fixture edges and its view equals
+* **Today's production host**, replayed with the recorded semantic histories and the forced-menu hooks: the tracker is **known** at all 11 fixture edges and its view equals
   the model. However, `lendLiveSpriteOrder` returns **undefined** and the allocator input is **undefined** at every post-player-faint edge. After the second opponent KO it
   lends, and the lend equals the role lend. So the gap is only the lend gate and the allocator re-seed, not the tracker.
 * **Proposal** (§4) has three parts:
@@ -66,6 +66,7 @@ The stager also has an idle fallback: if no event happens for more than 900 fram
 | `playerfaint-sunnyday-dragondance-swift` (A) | MAGIKARP L5, JOLTEON (Sunny Day, Dragon Dance, Swift, Light Screen), SNORLAX / SLOWBRO ×3 (Swift, Brave, speed 0) | 98 Swift O (entry); **937 Sunny Day P**, 1238 Swift O, 1493 SUN, **1766 Dragon Dance P**, 1911 stat, 2209 Swift O, 2464 SUN, **2747 Swift P**, 2938 Swift O, 3196 SUN | 11/11 known, 0 mismatches | `a03c635f…` |
 | `playerfaint-protect-thunderbolt` (B) | MAGIKARP L5, SNORLAX (Protect, Light Screen, Heal Bell, Swift), SNORLAX / JOLTEON ×3 (Thunderbolt) | 106 Thunderbolt O (entry); **1170 Protect P** (+4 priority; Thunderbolt blocked, no animation); **1685 Thunderbolt O** | 3/3 known, 0 mismatches (2026 PRZ / 2294 full-paralysis follow `85:opponent`, which has no EXACT plan) | `badd8a4a…` |
 | `playerfaint-lightscreen-healbell-gigadrain-thunderbolt` (D) | MAGIKARP L5, SNORLAX (speed 31: Light Screen, Heal Bell, Giga Drain, Thunderbolt) / SLOWBRO ×3 (Swift) | 98 (entry); **921 Light Screen P**, 1151 Swift O, **1540 Heal Bell P**, 1931 Swift O, **2223 Giga Drain P**; 2798, 3086, 3517, 3721 unknown | 6/6 known, 0 mismatches; 4 unknown (no EXACT plan `202:player`) | `2a3d1e55…` |
+| `playerfaint-slot2-sunnyday` (E) | as A with JOLTEON in party slot 2 (menu DOWN ×2) | 98 (entry); **949 Sunny Day P**, 1250 Swift O, 1505 SUN | 4/4 known, 0 mismatches | `f0c0a946…` |
 | `playerfaint-secondko-sunnyday-swift` (C, second opponent KO) | NINETALES (Flamethrower, Sunny Day, Swift, Fire Blast) / SHEDINJA ×3 (Swift) | 105 Flamethrower P (entry), 1453 Flamethrower P (after KO #1), **2773 Sunny Day P** (after KO #2 + send-out #3), 3075 Swift O, 3327 SUN, 3807 Swift O, 4060 SUN | 7/7 known, 0 mismatches | `c1e9081f…` |
 
 The model is the production tracker (`createSpriteOrderTracker` + `applySpriteOrderPresentationEvent`). The forced chain is fed `faint{player}`, `party-menu-reset`, `battle-reshow{playerBattlerPresent:false}`, `switch-in-start`, `switch-in-finish`, and the second KO is fed `faint{opponent}`, `party-summary-next/-hide`, `next-mon-send-out`. Only the scenario's semantic event list drives it, never masks.
@@ -75,7 +76,7 @@ The model is the production tracker (`createSpriteOrderTracker` + `applySpriteOr
 | geometry | occupancy | `gBattlerSpriteIds` [P, O] | battler matrices [P, O] | bitmap | tasks | occupant prefix | F head |
 |---|---|---|---|---|---|---|---|
 | known entry | `{0,1,2,6,8,60..63}` | [6, 8] | [1, 2] | `0x6` | – | `[62,60,0,63,1,61,6,8,2]` | `4,3,21,20,5,19,…` |
-| after forced switch-in (17 edges, A/B/D) | `{0,1,2,3,5,60..63}` | [5, 0] | [1, 0] | `0x3` | – | `[62,60,1,63,2,61,5,0,3]` | first body `6,4,21,20,19,…` (A, B), `4,6,21,…` (B 1685) |
+| after forced switch-in (20 edges, A/B/D/E) | `{0,1,2,3,5,60..63}` | [5, 0] | [1, 0] | `0x3` | – | `[62,60,1,63,2,61,5,0,3]` | first body `6,4,21,20,19,…` (A, B), `4,6,21,…` (B 1685) |
 | after the 2nd opponent KO + send-out #3 (C, 5 edges) | `{0,1,2,5,6,60..63}` | [6, 5] | [1, 0] | `0x3` | – | `[62,60,0,63,1,61,6,5,2]` | `3,4,21,20,7,19,…` |
 
 The second KO's geometry is identical to the first KO's: send-out #3 reuses slot 5, as `UNIT_PLANS` predicted in the post-KO audit's §5 caveat 2. The effect allocations after the switch-in are the rank images of the entry slots. Sunny Day creates 4,6,7,8, which ρ maps to the entry 3,4,5,7. Dragon Dance creates 4,6,7,8,9,10, which ρ maps to 3,4,5,7,9,10.
@@ -98,7 +99,7 @@ These match the reshow plan `reshowPlayerGone` = `Cf;Cfee;Cfee;Cf` from the iden
 ## 3. Role map and what-if (`tools/integration/playerfaintWhatIf.ts`, receipts `fixtures/playerfaint/whatif-*.json`, summary `verdicts.json`)
 
 **Condition (a)**, role-complete occupancy: the occupied set equals {both battlers, both healthbox triples, shadow}, which is 9 slots, with every role known. **Condition (b)**, the
-ROM occupant prefix relabelled by ρ equals the entry prefix: true at all 27 known edges, checked as `prefixRelabels`. **Condition (c)**, empty task table: true at all 27.
+ROM occupant prefix relabelled by ρ equals the entry prefix: true at all 31 known edges, checked as `prefixRelabels`. **Condition (c)**, empty task table: true at all 31.
 The isomorphism argument of the post-KO audit's §3.2 therefore carries over unchanged with ρ in place of π. Sprite allocation and sorting (`CreateSprite`, `CreateSpriteAtEnd`,
 `AllocOamMatrix`, `CreateTask`, `SortSprites`) never compare raw slot numbers: sorting uses keys and breaks ties by order position.
 
@@ -118,10 +119,11 @@ sha256 values are checked against the committed state fixture. Lends: `role` = �
 | LIGHT_SCREEN | P | D 921 | 88 | **88/88** (entry-label host) | host invalid | **NEEDS-PARAM** ρ + host re-seed |
 | HEAL_BELL | P | D 1540 | 261 | **261/261** | 12/261 | **NEEDS-PARAM** ρ |
 | GIGA_DRAIN | P | D 2223 | 230 | **230/230** | 28/230 | **NEEDS-PARAM** ρ |
+| SUNNY_DAY | P | E 949 (party slot 2) | 158 | **158/158** | 48/158 | **NEEDS-PARAM** ρ |
 | SUNNY_DAY | P | C 2773 (2nd KO) | 158 | 158/158 | **158/158** (today's π lend) | **GENERALIZES** |
 
 For Light Screen and Protect, the what-if's `production` row shows 88/88 and 123/123, but there `liveView` supplies the known-entry allocator host. Real production has no
-allocator input after the player faint, as shown by `todayAllocatorInput: null` in `host-replay-receipt.json`. The 7 declining rows are negative controls: the harness does
+allocator input after the player faint, as shown by `todayAllocatorInput: null` in `host-replay-receipt.json`. The 8 declining rows are negative controls: the harness does
 detect a missing body. The windows are those of `postko-sunny-day-player`, `postko-swift-opponent`, `postko-dragon-dance-player`, `postko-swift-player`,
 `postko-protect-player`, `postko-thunderbolt-opponent`, `postko-light-screen-player`, `postko-lend/postko-heal-bell-player` and `postko-giga-drain-opponent`. The last one has
 the same 230 rows at offset 0 as `prep9-giga-drain-player.json` 214..443.
@@ -132,13 +134,13 @@ Each fixture's semantic history, recorded in its `precedingTurns`, is replayed t
 marker, `{kind:"forced-party-menu", battlers:{player:false, opponent:true}}`, is replayed as `openLiveSpriteOrderHostPartyMenu` followed by
 `returnLiveSpriteOrderHostFromPartyMenu`. The orchestrator makes the same calls on the forced path (`factoryRoundBattleOrchestrator.ts:2138`).
 
-| | 9 post-player-faint fixtures | second-KO fixture |
+| | 10 post-player-faint fixtures | second-KO fixture |
 |---|---|---|
-| host tracker known | 9/9 | 1/1 |
-| host view (F, occupancy, battler slots) == model | 9/9 | 1/1 |
+| host tracker known | 10/10 | 1/1 |
+| host view (F, occupancy, battler slots) == model | 10/10 | 1/1 |
 | `lendLiveSpriteOrder` | **undefined** (gate: not role-isomorphic under the fixed-occupant map) | lent, == role lend |
 | allocator input | **undefined** (`reseedLiveSpriteAllocatorAfterSendOut` only fires after `lastUnit === "send-out"`) | – (Sunny Day is not an allocator consumer) |
-| role lend computed from the host view == model `roleLend` | 9/9 | 1/1 |
+| role lend computed from the host view == model `roleLend` | 10/10 | 1/1 |
 
 ## 4. Production proposal (no code changed here)
 
@@ -170,8 +172,8 @@ Tests to add, all hermetic and built from this step's fixtures:
 * A tracker test that feeds `SCENARIOS["playerfaint-sunnyday-dragondance-swift"]` and asserts that the production lend equals `roleLend` at the 10 post-switch edges.
 * A host test that replays each fixture's `precedingTurns` with the `forced-party-menu` marker, as `replayPlayerfaintTurns` does, and asserts that the lend and allocator
   input are defined and the lend equals `roleLend`.
-* Dense acceptance: the 10 drafted fixtures `tools/integration/fixtures/playerfaint-{sunny-day-player, swift-opponent, dragon-dance-player, swift-player,
-  protect-player, thunderbolt-opponent, light-screen-player, heal-bell-player, giga-drain-player, secondko-sunny-day-player}.json` are in schema
+* Dense acceptance: the 11 drafted fixtures `tools/integration/fixtures/playerfaint-{sunny-day-player, swift-opponent, dragon-dance-player, swift-player,
+  protect-player, thunderbolt-opponent, light-screen-player, heal-bell-player, giga-drain-player, secondko-sunny-day-player, slot2-sunny-day-player}.json` are in schema
   `playerfaint-adapter-draft/v1`, `draft: true`, with `precedingTurns` recorded. Run them through `verifyLiveAdapterFramebuffer` once `fixturePostKoLend`'s replay handles the
   `forced-party-menu` marker. The extension is about 6 lines, as in `replayPlayerfaintTurns`.
 
@@ -179,10 +181,10 @@ Tests to add, all hermetic and built from this step's fixtures:
 
 1. **Plan coverage, not player faint**: `202:player` (Giga Drain P) and `85:opponent` (Thunderbolt O) have no EXACT body plan. The tracker ends after them, so Thunderbolt P
    (D 3086) is not lendable in this history. The same applies to the post-KO audit's `85:opponent` / `202:opponent`.
-2. **One forced-switch geometry family**: the player lead is always MAGIKARP L5 and the replacement is party slot 1. Reset → reshow erases all prior history, so the
+2. **One forced-switch geometry family**: the player lead is always MAGIKARP L5. The replacement is party slot 1, or slot 2 in scenario E, which gives an identical geometry. Reset → reshow erases all prior history, so the
    occupancy after the switch-in does not depend on the history. The reshow plan is also pinned on route evidence (`docs/sprite-order-uncovered-units.md`). Untested cases:
-   a replacement from party slot 2, which needs DOWN ×2 (`menuDown: 2`); a second player faint; a player faint while the opponent battler is in slot 5 after an opponent KO.
-   The model predicts the same geometry for all three, because reset precedes reshow.
+   a second player faint; a player faint while the opponent battler is in slot 5 after an opponent KO. The model predicts the same geometry for both, because reset
+   precedes reshow.
 3. Weather (sun) did not affect any window.
 4. The voluntary switch (party menu → reshowBoth → recall → switch-in) is out of scope. Its recall pair group is still provisional.
 5. 26 consumers remain class-inferred, as in the post-KO audit. ρ preserves the same §3.2 class argument.
@@ -193,7 +195,7 @@ Tests to add, all hermetic and built from this step's fixtures:
 V=/Users/kyle/Developer/pokebench/vendor; export PYTHONPATH=$V/libmgba-py
 # staging (already committed; re-running rewrites the same segments): base party JSON = the scenario with its trace replaced
 $V/mgba-venv/bin/python tools/integration/playerfaintStage.py <base.json> tools/battle-lab/playerfaint-sunnyday-dragondance-swift.json '{"turns":[0,0,1,2],"menuDown":1,"frames":4200}'
-for n in sunnyday-dragondance-swift protect-thunderbolt lightscreen-healbell-gigadrain-thunderbolt secondko-sunnyday-swift; do
+for n in sunnyday-dragondance-swift protect-thunderbolt lightscreen-healbell-gigadrain-thunderbolt slot2-sunnyday secondko-sunnyday-swift; do
   for r in a b; do python3 tools/run-mgba-probe.py /tmp/pf/$n-$r.json -- $V/mgba-venv/bin/python tools/integration/postkoStateProbe.py tools/battle-lab/playerfaint-$n.json /tmp/pf/$n-$r.json /tmp/pf/$n-$r-rgb; done
   cmp /tmp/pf/$n-a.json /tmp/pf/$n-b.json          # ~8 s per run; RGB dirs ~0.5 GB each
   npx vite-node tools/integration/playerfaintModelCheck.ts -- playerfaint-$n tools/integration/fixtures/playerfaint/state-playerfaint-$n.json

@@ -108,5 +108,16 @@
   "todayAllocatorInput": null,
   "todayLendEqualsRole": true,
   "roleLendFromHostEqualsModel": true
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-slot2-sunny-day-player.json",
+  "edge": 949,
+  "hostKnown": true,
+  "invalidReason": null,
+  "hostViewEqualsModel": true,
+  "todayOrderLend": null,
+  "todayAllocatorInput": null,
+  "todayLendEqualsRole": null,
+  "roleLendFromHostEqualsModel": true
  }
 ]
