@@ -37,9 +37,19 @@ LIVE_TS = ROOT / "src/engine/liveMoveAnimation.ts"
 
 
 # ------------------------------------------------------------------ stage 1: extraction
-def side_of(path):
-    m = re.match(r"\d+-.*?-(player|opponent)\b", Path(path).name)
-    return m.group(1) if m else None
+def side_of(d):
+    """Attacker side of the scenario's named move: the BattleLab overrides that list it (battlers.<side>.moves / parties.<side>[].moves)."""
+    sp = d.get("scenario")
+    if d.get("move") is None or not sp or not (ROOT / sp).exists():
+        return None
+    ov = json.loads((ROOT / sp).read_text()).get("overrides", {})
+    mv = int(d["move"])
+    found = set()
+    for side in ("player", "opponent"):
+        lists = [ov.get("battlers", {}).get(side, {}).get("moves", [])] + [m.get("moves", []) for m in ov.get("parties", {}).get(side, [])]
+        if any(mv in l for l in lists):
+            found.add(side)
+    return found.pop() if len(found) == 1 else None
 
 
 def windows(path):
@@ -76,7 +86,7 @@ def wrapped_y(y):
 
 def extract_scenario(kind, path):
     d, W = windows(path)
-    side = side_of(path)
+    side = side_of(d)
     edges = [i for i, w in enumerate(W) if w["act"] and (i == 0 or not W[i - 1]["act"])]
     if not edges:
         return None
@@ -122,7 +132,7 @@ def extract_scenario(kind, path):
             k += 1
         units.append(unit_of("body", a, k, mv=W[a]["mv"], observedFreeAtEdge=W[a]["F"], truncated=(k >= len(W))))
         units.append(unit_of("gap", k, b, last=(j == len(edges) - 2), nextMv=(W[b]["mv"] if b < len(W) else None)))
-    return {"file": Path(path).name, "kind": kind, "move": d.get("move"), "side": side,
+    return {"file": Path(path).name, "kind": kind, "move": None if d.get("move") is None else int(d["move"]), "side": side,
             "freeAtFirstEdge": W[edges[0]]["F"], "entryMatchesProvider": entry_ok, "units": units}
 
 
@@ -227,7 +237,7 @@ def sig(tw):
 def owner_side(sc, mv):
     """named move -> its side; mv 0 = unattributed non-move animation; any other move in a 2-battler scenario belongs to the other side"""
     if sc["side"] is None:
-        return "factory"
+        return "unattributed"
     if mv == sc["move"]:
         return sc["side"]
     return "any" if mv == 0 else ("player" if sc["side"] == "opponent" else "opponent")
@@ -324,7 +334,7 @@ def main(argv):
 
     def new_plan():
         return {"sigs": collections.defaultdict(list), "scenarios": [], "cls": collections.Counter(), "why": collections.Counter(),
-                "pw": collections.defaultdict(set)}
+                "pw": collections.defaultdict(set), "kg": set()}
 
     bodies, gaps = collections.defaultdict(new_plan), collections.defaultdict(new_plan)
     toks = []
@@ -348,6 +358,7 @@ def main(argv):
                     p["cls"][w["cls"]] += 1
                     if "why" in w:
                         p["why"][w["why"]] += 1
+                        p["kg"].add(json.dumps([w["D"], w["why"]]))
                     if w["cls"] == "STATIC":
                         p["pw"][json.dumps(w["D"])].add(json.dumps(w["pw"]))
 
@@ -359,7 +370,7 @@ def main(argv):
             v = "EXACT-PLAN" if not bad and not multi else "NEEDS-KEYS"
             top = max(p["sigs"], key=lambda x: len(p["sigs"][x]))
             r = {"scenarios": len(p["scenarios"]), "distinctPlans": len(p["sigs"]), "groupClasses": dict(p["cls"]),
-                 "keysReasons": dict(p["why"]), "staticKeyWordsConstant": all(len(x) == 1 for x in p["pw"].values()),
+                 "keysReasons": dict(p["why"]), "keysGroups": sorted(p["kg"]), "staticKeyWordsConstant": all(len(x) == 1 for x in p["pw"].values()),
                  "verdict": v, "plan": json.loads(top), "planExamples": p["sigs"][top][:2]}
             if multi:
                 r["otherPlans"] = {x: len(f) for x, f in p["sigs"].items() if x != top}
@@ -378,8 +389,10 @@ def main(argv):
     for sc, T in zip(SC, toks):
         sim, ok, gap_ok = Sim(), True, True
         if not sc["entryMatchesProvider"]:
-            stat["scenariosEntryDivergesFromProvider"] += 1
-            continue
+            stat["scenariosEntryWindowsDiffer"] += 1
+            if sc["freeAtFirstEdge"] != ts_entry()[0]:  # intro-animation entries (Intimidate-class): provider entry state is invalid
+                stat["scenariosEntryFreeOrderDiffers(skipped)"] += 1
+                continue
         U = sc["units"]
         for ui, (u, tw) in enumerate(zip(U, T)):
             if u["kind"] == "body":
