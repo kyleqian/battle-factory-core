@@ -1,5 +1,27 @@
 # Animation integration progress
 
+## 2026-10-04 (night) — prep5 folded: 157 live adapters; order-consumer prep
+
+- Folded worker `ce8d7a09e` as `c23e165bb` (src tree `1f73449b5`): Mist Ball
+  (ad-hoc shadow retired; Registeel drafts fixed to genderless), Aromatherapy
+  (duration 400 player / 396 opponent attacker, same script-end frame), Follow
+  Me, Metronome (body only; called move is an ordinary second request), Taunt
+  (age 0 = window start, 10 frames after activation), Belly Drum. No palette plans.
+- Supervisor dense: 12 fixtures + Follow Me CLEFABLE/FURRET, Taunt MIGHTYENA,
+  Metronome CLEFABLE (`altSpecies8.py`) twice fresh, 2,938 rows/run, zero
+  residual. Routes 6/6 exact ON/OFF parity; Mist Ball prep seed 90 has no body
+  because Latias flinched (checked). Union typecheck/smoke/affected green.
+  Receipt `prep5-supervisor-receipt.json`.
+- Order-consumer measured prep (`66a349c26`, `docs/order-consumer-prep.md`):
+  18/18 accepted order literals equal the provider. Ember and Dragon Rage need
+  no order input (one sprite per sort window); Flamethrower's seed is
+  pixel-neutral; Rock Throw, Heal Bell, Leaf Blade, Perish Song, Blaze Kick,
+  Grudge (first body), Mud Slap, Sand Attack need the provider; consumers need
+  `F` filtered to their allocation slots, not `F.slice(0, n)`. Dive attack body
+  needs live keys; Magnitude's own evidence is not accepted.
+- Running: provider wiring step (first body of a battle + Grudge consumer,
+  Opus worker); gap-cause probe (side lane).
+
 ## 2026-10-04 (night) — H_BUFFER S1 folded: 151 live adapters
 
 - Folded worker `8c5c734a9` as `5fd7ea33b` (src tree `c449f3775`): Mean Look,
