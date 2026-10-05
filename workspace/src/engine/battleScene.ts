@@ -18652,14 +18652,14 @@ export function renderSceneOnMovePresentation(
       age: fakeOutState.age - 2,
     });
     const playerToOpponent =
-      view.attacker.species === "MAKUHITA"
+      (liveField || view.attacker.species === "MAKUHITA")
       && view.attacker.geometry.side === "player"
-      && view.targetBattler.species === "SHUCKLE"
+      && (liveField || view.targetBattler.species === "SHUCKLE")
       && view.targetBattler.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "MAKUHITA"
+      (liveField || view.attacker.species === "MAKUHITA")
       && view.attacker.geometry.side === "opponent"
-      && view.targetBattler.species === "SHUCKLE"
+      && (liveField || view.targetBattler.species === "SHUCKLE")
       && view.targetBattler.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -18671,17 +18671,19 @@ export function renderSceneOnMovePresentation(
     const makuhitaSource = playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAKUHITA!
       : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAKUHITA!;
-    const makuhita = playerToOpponent ? makuhitaSource : {
+    const makuhita = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent ? makuhitaSource : {
       ...makuhitaSource,
       tileset: subTileset(makuhitaSource.tileset, 0, 8),
     };
     const shuckleSource = playerToOpponent
       ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SHUCKLE!
       : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SHUCKLE!;
-    const shuckle = playerToOpponent ? {
+    const shuckle = liveField ? liveSceneOnBattlerArt(view.targetBattler) : playerToOpponent ? {
       ...shuckleSource,
       tileset: subTileset(shuckleSource.tileset, 0, 8),
     } : shuckleSource;
+    const liveIdle = (battler: typeof view.attacker) => liveField && battler.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
     const white = { r: 255, g: 255, b: 255 };
     const bgWhiteCoefficient = fakeOutState.age === 16
       ? view.bgWhiteCoeff : displayed.bgWhiteCoeff;
@@ -18711,8 +18713,8 @@ export function renderSceneOnMovePresentation(
         fb,
         shuckle.tileset,
         shuckle.palette,
-        view.targetBattler.geometry.spriteCorner.x,
-        view.targetBattler.geometry.spriteCorner.y,
+        view.targetBattler.geometry.spriteCorner.x + liveIdle(view.targetBattler).x2,
+        view.targetBattler.geometry.spriteCorner.y + liveIdle(view.targetBattler).y2,
         affineDisplayed.target.matrix.a,
         affineDisplayed.target.matrix.d,
         affineDisplayed.target.y2,
@@ -18726,18 +18728,19 @@ export function renderSceneOnMovePresentation(
         fb,
         shuckle.tileset,
         shuckle.palette,
-        view.targetBattler.geometry.spriteCorner.x,
-        view.targetBattler.geometry.spriteCorner.y,
+        view.targetBattler.geometry.spriteCorner.x + liveIdle(view.targetBattler).x2,
+        view.targetBattler.geometry.spriteCorner.y + liveIdle(view.targetBattler).y2,
       );
     }
     drawSpriteSheet(
       fb,
       makuhita.tileset,
       makuhita.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x + liveIdle(view.attacker).x2,
+      view.attacker.geometry.spriteCorner.y + liveIdle(view.attacker).y2,
     );
 
+    if (!liveField) {
     drawSendOutHealthbox(
       fb,
       0,
@@ -18777,6 +18780,7 @@ export function renderSceneOnMovePresentation(
       "FAKE OUT!",
       99,
     );
+    }
     return;
   }
 
@@ -45782,14 +45786,14 @@ export function renderSceneOnMovePresentation(
       age: state.age - 1,
     });
     const playerToOpponent =
-      view.attacker.species === "LUNATONE"
+      (liveField || view.attacker.species === "LUNATONE")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "LUNATONE"
+      (liveField || view.attacker.species === "LUNATONE")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -45827,7 +45831,8 @@ export function renderSceneOnMovePresentation(
     drawBackground();
     // The elevated Lunatone shadow survives in hardware OAM only on the
     // pointer-entry row; SpriteCB_EnemyShadow hides it on the next display.
-    if (opponentToPlayer && state.age === 0) {
+    // Live: the shared #142 hook draws it (liveMoveOpponentShadowRow).
+    if (!liveField && opponentToPlayer && state.age === 0) {
       const shadowX = view.attacker.geometry.battlePositionCenter.x
         - battleEnemyShadow.width / 2;
       const shadowY = view.attacker.geometry.battlePositionCenter.y + 29
@@ -45841,9 +45846,12 @@ export function renderSceneOnMovePresentation(
         );
       }
     }
-    const attackerSprite = playerToOpponent
-      ? lunatoneBackSprite : lunatoneFrontSprite;
-    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const attackerSprite = liveField ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? lunatoneBackSprite : lunatoneFrontSprite;
+    const targetSprite = liveField ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const attackerIdle = liveField && view.attacker.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.attacker.species) : { x2: 0, y2: 0 };
     const targetIdle = view.target.geometry.side === "opponent"
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : null;
@@ -45862,8 +45870,8 @@ export function renderSceneOnMovePresentation(
       fb,
       attackerSprite.tileset,
       attackerSprite.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
     );
     for (const sprite of displayed.sprites
       .filter((candidate) => !candidate.invisible)
@@ -45885,6 +45893,7 @@ export function renderSceneOnMovePresentation(
       );
     }
     const profile = cosmicState.config.fieldProfile;
+    if (!liveField) {
     const opponentSpecies = playerToOpponent ? "ONIX" : "LUNATONE";
     const playerSpecies = playerToOpponent ? "LUNATONE" : "ONIX";
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
@@ -45910,6 +45919,7 @@ export function renderSceneOnMovePresentation(
       "COSMIC POWER!",
       99,
     );
+    }
     return;
   }
 

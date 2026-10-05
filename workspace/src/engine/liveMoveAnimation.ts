@@ -87,6 +87,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   57, 330,
   // prep2: anchor-derived effect geometry.
   196, 59,
+  // prep2: pic-coord yOffset (Fake Out); plain recipe (Cosmic Power).
+  252, 322,
 ] as const);
 
 /**
@@ -117,7 +119,7 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // Scary Face (-4) and Dizzy Punch (-13) start after it and have no row.
     137, 298, 135,
     // prep2 (issue142-shadow-rows-extra.json): Surf / Muddy Water windows start at activation.
-    57, 330, 196, 59,
+    57, 330, 196, 59, 252, 322,
   ].map((id) => [id, 0])),
 );
 
@@ -170,6 +172,18 @@ export function liveBattlerAnchors(
       ? speciesFrontIdleRestOffsetOrZero(art[battler].speciesSymbol)
       : { x2: 0, y2: 0 },
   };
+}
+
+/**
+ * `GetBattlerSpriteCoordAttr` width/height/yOffset (battle_anim_mons.c:2151-2280): the species pic coords
+ * the field art view already carries (back table for the player, front for the opponent).
+ */
+export function liveBattlerCoordAttrs(
+  battler: "player" | "opponent",
+  art: ReturnType<typeof createBattleCommandFieldArtView>,
+): { readonly width: number; readonly height: number; readonly yOffset: number } {
+  const { width, height, yOffset } = art[battler].coords;
+  return { width, height, yOffset };
 }
 
 export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): number | null {
@@ -334,6 +348,8 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 196: return 287; // Icy Wind accepted window (220..506).
     // Blizzard accepted windows: 214..585 player-back, 213..573 opponent-front (Guillotine precedent).
     case 59: return request.attacker === 0 ? 372 : 361;
+    case 252: return 86; // Fake Out accepted window (78..163 / 82..167).
+    case 322: return 241; // Cosmic Power accepted window (294..534).
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
     default: return null;
   }
@@ -877,6 +893,12 @@ export function liveMoveAnimationPresentation(
         : { move: "BLIZZARD", attacker, target, fieldProfile, effectGeometry: geometry };
       break;
     }
+    case 252:
+      // SetBattlerSpriteYOffsetFromYScale reads the target's pic-coords yOffset.
+      config = { move: "FAKE_OUT", attacker, target, fieldProfile,
+        targetPictureYOffset: liveBattlerCoordAttrs(target.geometry.side, art).yOffset };
+      break;
+    case 322: config = { move: "COSMIC_POWER", attacker, target, fieldProfile }; break;
     case 342:
       config = {
         move: "POISON_TAIL",
