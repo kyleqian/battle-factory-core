@@ -22643,14 +22643,14 @@ export function renderSceneOnMovePresentation(
       age: state.age - 1,
     });
     const playerToOpponent =
-      view.attacker.species === "SCEPTILE"
+      (liveField || view.attacker.species === "SCEPTILE")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "SCEPTILE"
+      (liveField || view.attacker.species === "SCEPTILE")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -22662,11 +22662,11 @@ export function renderSceneOnMovePresentation(
     const sceptileSource = playerToOpponent
       ? leafBladeArt.sceptileBack
       : leafBladeArt.sceptileFront;
-    const sceptile = playerToOpponent
+    const sceptile = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? sceptileSource
       : { ...sceptileSource, tileset: subTileset(sceptileSource.tileset, 0, 8) };
     const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
-    const onix = playerToOpponent
+    const onix = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
     const targetX2 = leafBladeDisplayedTargetX2AtAge(
@@ -22708,6 +22708,7 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.side,
       view.target.geometry.side,
       state.config.targetProfile,
+      leafState.config.oamOrderSeed,
     );
     const drawLeaf = (sprite: (typeof visibleLeaves)[number]) => {
       const art = subTileset(
@@ -22788,6 +22789,7 @@ export function renderSceneOnMovePresentation(
       for (const item of items) item.draw();
     }
 
+    if (liveField) return;
     const profile = state.config.fieldProfile;
     drawSendOutHealthbox(
       fb,
