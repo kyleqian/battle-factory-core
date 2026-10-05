@@ -17,6 +17,29 @@ backlog.
 
 # Open
 
+## #146 — Forced switch-out and send-in presentation timing differ from the ROM (S10A, found 2026-10-05)
+
+- **Evidence:** `docs/forced-switch-continuation.md` (ROM probes twice fresh; production rendered
+  per frame on four Roar/Whirlwind routes; supervisor reran the production render).
+- **Forced switch-out (`returntoball`, Roar / Whirlwind / Baton Pass):** the ROM removes the
+  battler instantly (`Cmd_returntoball` skipAnim TRUE, `battle_script_commands.c:5346`;
+  `OpponentHandleReturnMonToBall` destroy branch): sprite + healthbox hidden at E+4, send-in at
+  E+10. Production emits the 32-frame voluntary `switch-out` (recall scale-up frames 0-26, target
+  drawn at rest), hides at +27/+32 and starts the send-in at +33
+  (`battleResolutionPresentation.ts:3496-3535`). Scene ON blocks live Roar/Whirlwind bodies (the
+  recall would redraw the slid-off target). Scene OFF: the ROM continuation is identical in OFF;
+  production OFF has the same recall chain (removal -> ball-open 51 frames vs ROM 24; the older
+  `docs/issue84-whirlwind-opponent-recall.md` claim "with animation enabled" contradicts the
+  source) — no OFF pixel compare yet.
+- **Send-in tail timing (all send-ins):** opponent healthbox slide starts send-in +70..+234 and
+  the message +96..+260 depending on the species' front animation (339 Factory species swept);
+  production uses a fixed 91+11-frame span calibrated on RATTATA (slide +33, message +102).
+  Player side: slide constant (+65 vs +66), message +101..+210 (cry overlap).
+- **Fix shape:** an instant-removal forced switch-out for `B_SCR_OP_RETURNTOBALL` (keep the
+  voluntary `RETURNATKTOBALL` recall), a 4-frame hold + 6-frame hide, send-in at E+10; a
+  species-keyed send-in tail; sprite-order `forced-switch-out {side}` (`D o<slot>`) + side-generic
+  switch-in units.
+
 ## #145 — Live-adapter species audit: unresolved residuals (S10A; Dragon Rage + Aerial Ace FIXED 2026-10-05)
 
 - **Fixed (merge of `5b7a1ff3b`):** Dragon Rage fire-spit aim from attacker/target pic offsets;
