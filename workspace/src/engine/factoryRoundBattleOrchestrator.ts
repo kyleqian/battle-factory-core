@@ -1528,8 +1528,14 @@ function installDriveReceiptImmediately(
     moveSelectionCursors,
     state.usedMessageHoldFrames,
   );
+  // The receipt's events are never presented, so the tracked order cannot
+  // follow them.
+  const sprites = state.liveMoveSpriteAllocatorHost;
   return Object.freeze({
     ...state,
+    liveMoveSpriteAllocatorHost: sprites === undefined ? undefined : withOrderHost(
+      sprites, invalidateLiveSpriteOrderHost(orderHostOf(sprites), "battle advanced without a presented resolution"),
+    ),
     battle: receipt.battle,
     battleCommandPresentation,
     battleResolutionPresentation: null,
