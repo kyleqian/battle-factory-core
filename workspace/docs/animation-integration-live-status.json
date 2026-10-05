@@ -212,7 +212,9 @@
     {
       "move": "MOVE_SING",
       "id": 47,
-      "liveEvidence": [],
+      "liveEvidence": [
+        "#147 post-body: the ordinary field after this body keeps the elevated-opponent shadow hidden for LIVE_MOVE_OPPONENT_SHADOW_POST_BODY_HIDE_ROWS rows (player d=1, ROM script end - window end); elevated-target post rows exact to the hit blink twice fresh (tools/integration/fixtures/elevated-renderer-receipt.json)"
+      ],
       "sourceFieldEvidence": "../tools/integration/fixtures/status-batch-live-framebuffer-receipt.json",
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison",
@@ -1750,7 +1752,8 @@
         "../tools/integration/fixtures/anchor4-live-adapter-receipt.json"
       ],
       "liveEvidence": [
-        "dense source framebuffer, both orientations, twice fresh x2 batches, zero residual, rows = accepted window (anchor4-psybeam-*.json)"
+        "dense source framebuffer, both orientations, twice fresh x2 batches, zero residual, rows = accepted window (anchor4-psybeam-*.json)",
+        "#147 post-body: the ordinary field after this body keeps the elevated-opponent shadow hidden for LIVE_MOVE_OPPONENT_SHADOW_POST_BODY_HIDE_ROWS rows (player d=1, ROM script end - window end); elevated-target post rows exact to the hit blink twice fresh (tools/integration/fixtures/elevated-renderer-receipt.json)"
       ],
       "palettePlan": "no plan, history invalidates",
       "remaining": [
@@ -2235,7 +2238,8 @@
       "liveEvidence": [
         "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (order-consumer-dragon-rage-*.json, 150 rows)",
         "ordinary route seed 37 / streak 14 / move slot 3 (CHARMELEON): adapter active 150/150, action-menu, ON/OFF rules/RNG equal",
-        "species targets (#145 D1, fire-spit aim from attacker/target pic offsets, twice fresh, zero residual): GOLEM / GOLBAT / SHUCKLE opponent targets 150/150 (species-audit derived fixtures), player-GOLEM back sprite vs opponent attacker 150/150; accepted ONIX fixtures unchanged (tools/integration/fixtures/issue145-flybounce-receipt.json); the CHARMELEON back-sprite start is formula-derived, other player attackers unmeasured"
+        "species targets (#145 D1, fire-spit aim from attacker/target pic offsets, twice fresh, zero residual): GOLEM / GOLBAT / SHUCKLE opponent targets 150/150 (species-audit derived fixtures), player-GOLEM back sprite vs opponent attacker 150/150; accepted ONIX fixtures unchanged (tools/integration/fixtures/issue145-flybounce-receipt.json); the CHARMELEON back-sprite start is formula-derived, other player attackers unmeasured",
+        "#147 post-body: the ordinary field after this body keeps the elevated-opponent shadow hidden for LIVE_MOVE_OPPONENT_SHADOW_POST_BODY_HIDE_ROWS rows (player/opponent d=21, ROM script end - window end); elevated-target post rows exact to the hit blink twice fresh (tools/integration/fixtures/elevated-renderer-receipt.json)"
       ],
       "palettePlan": "no plan, history invalidates",
       "spriteOrder": "order-independent (docs/order-consumer-prep.md section 0): renders with or without a host order; one fire plume per sort window (orderFirePlumesForDraw)",
@@ -2724,7 +2728,8 @@
       "liveEvidence": [
         "dense source framebuffer, both orientations, twice fresh, zero residual, 193 / 192 rows (player / opponent attacker; hornMatrixId 0 / 24 raw OAM bits) (prep8-*.json): window start = activation frame, row 0 (docs/next-adapters-prep8.md)",
         "ordinary route seed 267 / streak 35 / index 0 (DEWGONG): adapter active every age, ON/OFF rules/RNG equal (scene bit 0x80 excluded); action-menu reached",
-        "alternate species: no alternate-species dense proof"
+        "alternate species: no alternate-species dense proof",
+        "#147 post-body: the ordinary field after this body keeps the elevated-opponent shadow hidden for LIVE_MOVE_OPPONENT_SHADOW_POST_BODY_HIDE_ROWS rows (opponent d=1, ROM script end - window end); elevated-target post rows exact to the hit blink twice fresh (tools/integration/fixtures/elevated-renderer-receipt.json)"
       ],
       "palettePlan": "no plan, history invalidates (allocator constants valid only while the known-order gate holds)",
       "spriteOrder": "gate: lent tracked order known (spriteOrderInput.known), else null. spriteOrderSeed = lend over slots 3,4,5; the accepted window follows a Tackle body: the harness feeds the production tracker (prompt, commit, Tackle move-animation, visible hit) and the lend reproduces it; accuracy-gated moves animate only when not skipped",
@@ -2895,7 +2900,8 @@
       "liveEvidence": [
         "dense source framebuffer, both orientations, twice fresh, zero residual, 194 rows both orientations (prep9-absorb-*.json): window starts 10 frames after the activation edge (223..416, reducer age 0 = monbg-relative): live age 0 = first window row, ageOffset 0, duration 194, no #142 shadow row (the Taunt convention); the script runs 2 rows past the window (uncovered tail)",
         "ordinary route seed 23 / streak 0 / index 3 (LOMBRE, after the opponent's body, order known): adapter active every age, ON/OFF rules/RNG equal; action-menu reached",
-        "alternate species: VENUSAUR (first body) player and opponent attackers 194/194"
+        "alternate species: VENUSAUR (first body) player and opponent attackers 194/194",
+        "#147 post-body: the ordinary field after this body keeps the elevated-opponent shadow hidden for LIVE_MOVE_OPPONENT_SHADOW_POST_BODY_HIDE_ROWS rows (player/opponent d=2, ROM script end - window end); elevated-target post rows exact to the hit blink twice fresh (tools/integration/fixtures/elevated-renderer-receipt.json)"
       ],
       "palettePlan": "no plan, history invalidates (the D-PAL label is stale: no palette snapshot is consumed; docs/next-adapters-prep9.md s0/s1: the blend schedules are age-derived from battleBg.palette and species art)",
       "spriteOrder": "gate: lent tracked order known, else null (allocator constants valid only on the known-entry baseline). no order field in the config",
@@ -2915,7 +2921,8 @@
       "liveEvidence": [
         "dense source framebuffer, both orientations, twice fresh, zero residual, 266 / 267 rows (player / opponent attacker; prep9-dream-eater-*.json, after Tackle(s) and Sing): window start = activation frame, row 0",
         "ordinary route seed 41 / streak 14 / moves [1 (Sing), 2 (Dream Eater)] (WIGGLYTUFF): adapter active every age, ON/OFF rules/RNG equal; action-menu reached",
-        "alternate species: JIGGLYPUFF player and opponent attackers 266/266 and 267/267 (sleep status from the displayed target field)"
+        "alternate species: JIGGLYPUFF player and opponent attackers 266/266 and 267/267 (sleep status from the displayed target field)",
+        "#147 post-body: the ordinary field after this body keeps the elevated-opponent shadow hidden for LIVE_MOVE_OPPONENT_SHADOW_POST_BODY_HIDE_ROWS rows (player d=1, ROM script end - window end); elevated-target post rows exact to the hit blink twice fresh (tools/integration/fixtures/elevated-renderer-receipt.json)"
       ],
       "palettePlan": "no plan, history invalidates (the D-PAL label is stale: no palette snapshot is consumed; docs/next-adapters-prep9.md s0/s1: the blend schedules are age-derived from battleBg.palette and species art)",
       "spriteOrder": "gate: lent tracked order known, else null (Sing is the only planned sleep source; others invalidate). orderSeed (17 slots) = lend over [3,4,5,7,9,10..21]; the target's displayed sleep status comes from the field (healthbox is the queue's)",
@@ -3019,7 +3026,8 @@
       "id": 13,
       "sourceFieldEvidence": "../tools/integration/fixtures/prep10-live-adapter-receipt.json",
       "liveEvidence": [
-        "dense 8 fixtures twice: 7 zero residual; ABSOL opponent-attacker unleash has 23 px at age 18 (1 row)"
+        "dense 8 fixtures twice: 7 zero residual; ABSOL opponent-attacker unleash has 23 px at age 18 (1 row)",
+        "#147 post-body: the ordinary field after this body keeps the elevated-opponent shadow hidden for LIVE_MOVE_OPPONENT_SHADOW_POST_BODY_HIDE_ROWS rows (player d=1, ROM script end - window end); elevated-target post rows exact to the hit blink twice fresh (tools/integration/fixtures/elevated-renderer-receipt.json)"
       ],
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison",
@@ -3147,7 +3155,8 @@
       "id": 327,
       "sourceFieldEvidence": "../tools/integration/fixtures/prep11-live-adapter-receipt.json",
       "liveEvidence": [
-        "dense 2/2 HITMONCHAN both orientations zero residual twice; COMBUSKEN alternate 173/189 rows (script ends 1 frame later; ages 170-188 residual, open)"
+        "dense 2/2 HITMONCHAN both orientations zero residual twice; COMBUSKEN alternate 173/189 rows (script ends 1 frame later; ages 170-188 residual, open)",
+        "#147 post-body: the ordinary field after this body keeps the elevated-opponent shadow hidden for LIVE_MOVE_OPPONENT_SHADOW_POST_BODY_HIDE_ROWS rows (player d=1 (Combusken alt variant measured 0), ROM script end - window end); elevated-target post rows exact to the hit blink twice fresh (tools/integration/fixtures/elevated-renderer-receipt.json)"
       ],
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison",
@@ -3196,7 +3205,8 @@
     "Scene ON/OFF session trace metadata and replay",
     "real command lifecycle tests for repeated/multi-hit/two-turn/miss/immunity/switch/KO; 40 generated seeds / 470 decisions preserve logical outcomes and RNG",
     "persistent source OBJ palette allocation/load/free semantics; Shadow Punch receives retained unfaded scratch colors across audited move history",
-    "source-derived ordinary singles party/B-cancel palette return with explicit known entry provenance; unknown histories and actual switches remain invalidated"
+    "source-derived ordinary singles party/B-cancel palette return with explicit known entry provenance; unknown histories and actual switches remain invalidated",
+    "#147 ordinary resolution field (both Scene profiles): elevated opponents at origin - enemyMonElevation with the generated shadow while visible, faint sink from the elevated origin, shadow hidden on blink-invisible rows, at HP 0 and on the post-body hide rows; ROM receipts elevated-renderer-receipt.json (Scene OFF 919/935 was 0/935; 203 committed traces byte-identical)"
   ],
   "pending": [
     "production adapters/providers for the remaining 154 accepted Factory moves",
