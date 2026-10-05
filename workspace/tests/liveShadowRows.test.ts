@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { renderBattleResolutionLiveView } from "../src/engine/battleScene.ts";
 import {
-  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveOpponentShadowRow,
+  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveOpponentShadowRow, liveMoveAnimationDuration,
 } from "../src/engine/liveMoveAnimation.ts";
 import { createBattleCommandFieldArtView } from "../src/engine/battleCommandFieldArt.ts";
 import { createKnownEntrySpriteAllocatorProvider } from "../src/engine/knownEntrySpriteAllocator.ts";
@@ -99,5 +99,18 @@ describe("live elevated-opponent shadow rows (#142)", () => {
         expect(render(r, "ONIX", 0)).toBeLessThan(200);
       });
     }
+  }
+
+  // End-of-body return (docs/live-species-audit-2.md 2.1): the shadow comes back on the last 2 rows of Light Screen / Future Sight.
+  for (const id of [113, 248]) {
+    it(`id ${id} player: shadow returns on the last two rows for an elevated opponent only`, () => {
+      const r = rows.find((x) => x.id === id && x.orientation === "player")!;
+      const duration = liveMoveAnimationDuration({ moveId: id, attacker: 0, target: 1, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0, ...r.requestFields } as never)!;
+      expect(render(r, "GOLBAT", duration - 3)).toBeLessThan(200);
+      for (const age of [duration - 2, duration - 1]) {
+        expect(render(r, "GOLBAT", age)).toBe(200);
+        expect(render(r, "ONIX", age)).toBeLessThan(200);
+      }
+    });
   }
 });

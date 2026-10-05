@@ -69,6 +69,8 @@ export interface RockThrowAnimationProfile {
   readonly targetShakeEndAge: number;
   /** Display age where the target's sprite x2 drops from the ONIX-front idle residual +1 to 0 (the shake task's xOffset=0 write). */
   readonly targetX2OffAge: number;
+  /** The opponent target's species idle x2 held until `targetX2OffAge` (default 1 = ONIX; GOLBAT 0). */
+  readonly targetIdleX2?: number;
   /** Live `sSpriteOrder` before this animation allocates its sprites. */
   readonly spriteOrderSeed: readonly number[];
   /** Sprite slots already occupied at the same seed boundary. */
@@ -347,7 +349,7 @@ export function rockThrowTargetX2(
   age: number,
   profile: Readonly<RockThrowAnimationProfile> = ROCK_THROW_ANIMATION_PROFILE,
 ): number {
-  return age < profile.targetX2OffAge ? 1 : 0;
+  return age < profile.targetX2OffAge ? (profile.targetIdleX2 ?? 1) : 0;
 }
 
 export interface RockThrowAnimationState {

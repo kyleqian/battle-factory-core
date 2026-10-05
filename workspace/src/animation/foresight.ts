@@ -32,6 +32,12 @@ export interface ForesightLiveInputs {
   readonly targetSpecies: string;
   readonly attackerSpecies: string;
   readonly targetBounds: ForesightBounds;
+  /**
+   * Emulate `InitAnimLinearTranslation` / `AnimTranslateLinear` (battle_anim_mons.c:1065-1140) leg by leg from the true
+   * `GetBattlerSpriteCoordAttr` rectangle: u16 `(|d|<<8)/n` deltas with the direction in bit 0, the accumulated >>8 truncation
+   * and `sprite->x += x2` between legs. Without it the legs use the ONIX-fitted literals (`rightTop`, `bottom - 1`).
+   */
+  readonly exactTranslation?: boolean;
   readonly targetPictureOffset: ForesightPoint;
   readonly targetSpriteSlot: number;
   readonly glassSpriteSlot: number;
@@ -155,6 +161,35 @@ function glassAtAge(age: number, input: Readonly<ForesightLiveInputs>): Foresigh
   else if (age === 104) { leg = 5; x = destinations[4]!.x; y = destinations[4]!.y; stage = 0; }
   else if (age <= 111) { leg = 5; remaining = 111 - age; x = destinations[4]!.x; y = destinations[4]!.y; const progress = age - 105; x2 = q8Offset(-1025, progress); y2 = q8Offset(-1153, progress); stage = 1; }
   else { leg = 5; x = destinations[5]!.x; y = destinations[5]!.y; stage = age === 144 ? 4 : 3; }
+  if (input.exactTranslation && age >= 7) {
+    // True rectangle corners; leg k runs from S[k] to D[k] in N[k] steps (data[0] 12 / 24 for leg 4 / 6 for leg 5).
+    const rect: readonly ForesightPoint[] = [
+      { x: b.right - 4, y: b.bottom - 4 }, { x: b.right - 4, y: b.top + 4 }, { x: b.left + 4, y: b.bottom - 4 },
+      { x: b.left + 4, y: b.top - 4 }, { x: b.right - 4, y: b.bottom - 4 }, { x: (b.left + b.right) / 2, y: p.y },
+    ];
+    const steps = [12, 12, 12, 12, 24, 6];
+    const delta = (from: number, to: number, n: number) => {
+      const d = to - from;
+      const v = Math.floor(((Math.abs(d) << 8) & 0xffff) / n);
+      return d < 0 ? v | 1 : v & ~1;
+    };
+    const offsetOf = (v: number, k: number) => ((v * k) & 0xffff) >> 8 === 0 ? 0 : (v & 1 ? -1 : 1) * (((v * k) & 0xffff) >> 8);
+    const starts: ForesightPoint[] = [p];
+    const legDeltas: { dx: number; dy: number }[] = [];
+    for (let k = 0; k < 6; k++) {
+      const from = starts[k]!;
+      const dx = delta(from.x, rect[k]!.x, steps[k]!), dy = delta(from.y, rect[k]!.y, steps[k]!);
+      legDeltas.push({ dx, dy });
+      starts.push({ x: from.x + offsetOf(dx, steps[k]!), y: from.y + offsetOf(dy, steps[k]!) });
+    }
+    const progressBase = [7, 25, 43, 61, 79, 105];
+    const k = leg;
+    if (stage === 1 || stage >= 3) {
+      const progress = stage >= 3 ? steps[5]! : Math.min(steps[k]!, age - progressBase[k]!);
+      x = starts[k]!.x; y = starts[k]!.y;
+      x2 = offsetOf(legDeltas[k]!.dx, progress); y2 = offsetOf(legDeltas[k]!.dy, progress);
+    } else { x = starts[k]!.x; y = starts[k]!.y; x2 = 0; y2 = 0; }
+  }
   const qx = x2 * 256, qy = y2 * 256;
   const start = leg < 4 ? destinations[Math.max(0, leg - (stage === 1 ? 0 : 1))]! : destinations[leg === 4 ? 3 : 4]!;
   const data = stage === 2 ? [remaining, 0, 0, 0, 0, 2, leg, input.targetSide === "opponent" ? 1 : 0]

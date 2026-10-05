@@ -1,4 +1,4 @@
-import { liveMoveAnimationPresentation, liveMoveOpponentShadowRow } from "./liveMoveAnimation.ts";
+import { liveMoveAnimationPresentation, liveMoveOpponentShadowRow, liveMoveOpponentShadowReturn } from "./liveMoveAnimation.ts";
 // S6 scene-assembly + send-out engine slices: the BATTLE-SCENE ASSEMBLY
 // window (tools/compare/traces-groundtruth/battle1-scene-dense.json, trace
 // ticks 1040-1295) plus the SEND-OUT window (battle1-sendout-dense.json,
@@ -42106,7 +42106,8 @@ export function renderSceneOnMovePresentation(
           smellingSaltArt.exclamation.tileset,
           smellingSaltArt.exclamation.palette,
           view.target.geometry.animationCenter.x - 16,
-          profile.targetTop - 16,
+          // AnimSmellingSaltExclamation: `if (sprite->y < 8) sprite->y = 8`.
+          Math.max(8, profile.targetTop) - 16,
         );
       }
     };
@@ -54916,7 +54917,8 @@ export function renderBattleResolutionLiveView(
     return;
   }
   const shadowRow = effect?.type === "move" ? liveMoveOpponentShadowRow(effect.request) : null;
-  liveOpponentShadow.species = effect?.type === "move" && effect.age === shadowRow
+  liveOpponentShadow.species = effect?.type === "move"
+    && (effect.age === shadowRow || liveMoveOpponentShadowReturn(effect.request, effect.age))
     ? view.fieldArt.opponent.speciesSymbol : null;
   liveOpponentShadow.suppressAdHoc = effect?.type === "move" && effect.age === 0;
   try {

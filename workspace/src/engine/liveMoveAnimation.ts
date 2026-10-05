@@ -234,6 +234,21 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
   ])),
 );
 
+/**
+ * Rows before the end of the body on which the elevated-opponent enemy shadow is shown again: `SpriteCB_EnemyShadow`
+ * re-shows it when the script ends (one display frame later), and these accepted windows extend 2 frames past the script
+ * end (docs/live-species-audit-2.md 2.1). Any adapter whose window ends after the script end needs its own entry.
+ */
+export const LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS: Readonly<Record<number, number>> = Object.freeze({ 113: 2, 248: 2 });
+
+/** True when `age` is on one of the final return rows of a request (see LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS). */
+export function liveMoveOpponentShadowReturn(request: BattleMoveAnimationRequest, age: number): boolean {
+  const rows = LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS[request.moveId];
+  if (rows === undefined) return false;
+  const duration = liveMoveAnimationDuration(request);
+  return duration !== null && age >= duration - rows;
+}
+
 /** Shadow row for a live request, or null when the activation frame is outside the window. */
 export function liveMoveOpponentShadowRow(request: BattleMoveAnimationRequest): number | null {
   return LIVE_MOVE_OPPONENT_SHADOW_ROW[request.moveId] ?? null;
@@ -1310,7 +1325,8 @@ export function liveMoveAnimationPresentation(
       const cx = targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2, cy = targetAnchors.spriteCenter.y + targetAnchors.frontIdleRest.y2;
       const top = pic.y - tc.height / 2;
       config = { move: "FORESIGHT", attacker, target, fieldProfile,
-        animationInputs: { targetBounds: { left: pic.x - tc.width / 2, right: pic.x + tc.width / 2, top, bottom: pic.y + tc.height / 2 - 1, rightTop: top + 1 },
+        animationInputs: { exactTranslation: true,
+          targetBounds: { left: pic.x - tc.width / 2, right: pic.x + tc.width / 2, top, bottom: pic.y + tc.height / 2 },
           targetPictureOffset: pic, targetSpriteSlot: target.geometry.side === "player" ? 6 : 8, glassSpriteSlot: 3, blendTaskSlot: 0,
           updateMonBgTaskSlot: 1, clearMonBgTaskSlot: 0, spriteOrder: fullOrder, glassPaletteBank: 7, glassTileSlot: 6, matrixBitmap: 6,
           monbg: { layer: target.geometry.side === "player" ? "bg2" : "bg1", spriteX: cx, spriteY: cy, bgX: 32 - cx, bgY: 32 - cy,
@@ -1458,7 +1474,8 @@ export function liveMoveAnimationPresentation(
         { known: true, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (spriteOrderSeed === null) return null;
       config = { move: "ROCK_THROW", attacker, target, fieldProfile,
-        animationProfile: { ...ROCK_THROW_ANIMATION_PROFILE, spriteOrderSeed } };
+        animationProfile: { ...ROCK_THROW_ANIMATION_PROFILE, spriteOrderSeed,
+          targetIdleX2: liveBattlerAnchors(target.geometry.side, art).frontIdleRest.x2 } };
       break;
     }
     case 195: {
