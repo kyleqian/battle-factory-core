@@ -1,8 +1,8 @@
 {
   "schema": "prep7-adapter-draft/v1",
   "move": "ROCK_SLIDE",
-  "probe": "staged tools/probe/stage-fire-punch-portable-on.py opponent rock-slide",
-  "scenario": "staged tools/probe/stage-fire-punch-portable-on.py opponent rock-slide",
+  "probe": "tools/integration/prep7StagedProbe.py",
+  "scenario": "tools/probe/stage-fire-punch-portable-on.py",
   "attacker": {
     "species": "GROVYLE",
     "geometry": {
@@ -18,13 +18,17 @@
   "fieldProfile": {
     "playerHp": 117,
     "opponentHp": 143,
-    "playerStatus": "none"
+    "playerStatus": "none",
+    "playerMaxHp": 117,
+    "opponentMaxHp": 143,
+    "playerGender": "male",
+    "opponentGender": "male"
   },
   "orientation": "opponent-front GROVYLE -> ONIX",
   "verdict": "READY (opponent-attacker only; spriteOrderSeed pixel-neutral, provider/constant both equal the literal)",
   "denseWindow": {
     "startFrame": 1967,
-    "endFrame": 2141,
+    "endFrame": 2104,
     "ageOffset": 0
   },
   "draft": {
@@ -32,7 +36,7 @@
     "scriptEndFirstInactive": 2104,
     "shadowRow": 0,
     "shadowRowInMap": true,
-    "expectedDuration": 175,
+    "expectedDuration": 138,
     "scriptFrames": 137,
     "windowEndMinusScriptEnd": 37,
     "windowStartMinusActivation": 0,
@@ -226,5 +230,14 @@
     ],
     "livePlan": "spriteOrderSeed = spriteOrderWithOccupiedPrefix(known F, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER) when known, else the same constant (pixel-neutral: 0/40 seeds); occupiedSpriteSlots = known-entry occupants; decline the player-attacker orientation (no accepted evidence, renderer gate :49573)"
   },
-  "precedingBodies": []
+  "precedingBodies": [],
+  "acceptedDenseWindow": {
+    "startFrame": 1967,
+    "endFrame": 2141,
+    "ageOffset": 0
+  },
+  "probeArgs": [
+    "opponent",
+    "rock-slide"
+  ]
 }

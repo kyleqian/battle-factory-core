@@ -49616,8 +49616,7 @@ export function renderSceneOnMovePresentation(
     const player = attacker.geometry.side === "player" ? attacker : target;
     const opponent = attacker.geometry.side === "opponent" ? attacker : target;
     if (
-      player.species !== "ONIX"
-      || opponent.species !== "GROVYLE"
+      (!liveField && (player.species !== "ONIX" || opponent.species !== "GROVYLE"))
       || attacker.geometry.side !== "opponent"
     ) {
       throw new Error(
@@ -49625,19 +49624,24 @@ export function renderSceneOnMovePresentation(
       );
     }
 
+    // The live adapter is opponent-attacker only (no accepted player-attacker evidence): the attacker's art, corner and
+    // settled front idle offset follow the displayed species.
+    const attackerArt = liveField ? liveSceneOnBattlerArt(opponent) : grovyleFrontSprite;
+    const targetArt = liveField ? liveSceneOnBattlerArt(player) : onixBackSprite;
+    const attackerIdle = liveField ? speciesFrontIdleRestOffsetOrZero(opponent.species) : { x2: 0, y2: 0 };
     drawStaticBgShiftedY(fb, view.bg3Y);
     drawSpriteSheet(
       fb,
-      grovyleFrontSprite.tileset,
-      grovyleFrontSprite.palette,
-      opponent.geometry.spriteCorner.x,
-      opponent.geometry.spriteCorner.y,
+      attackerArt.tileset,
+      attackerArt.palette,
+      opponent.geometry.spriteCorner.x + attackerIdle.x2,
+      opponent.geometry.spriteCorner.y + attackerIdle.y2,
     );
     if (!view.targetInvisible) {
       drawSpriteSheet(
         fb,
-        onixBackSprite.tileset,
-        onixBackSprite.palette,
+        targetArt.tileset,
+        targetArt.palette,
         player.geometry.spriteCorner.x,
         player.geometry.spriteCorner.y + view.targetY2,
       );
@@ -49646,6 +49650,7 @@ export function renderSceneOnMovePresentation(
       drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
     }
 
+    if (liveField) return;
     drawSendOutHealthbox(
       fb,
       0,

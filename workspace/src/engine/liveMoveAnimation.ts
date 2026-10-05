@@ -7,6 +7,7 @@ import type { BattleResolutionDisplayedField } from "./battleResolutionPresentat
 import type {
   SceneOnMovePresentationState, SceneOnMoveConfig, SceneOnPresentationBattler,
 } from "../animation/sceneOnPresentation.ts";
+import { GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE } from "../animation/sceneOnPresentation.ts";
 import { PRESENT_DAMAGE_FRAME_COUNT, PRESENT_HEAL_FRAME_COUNT } from "../animation/present.ts";
 import { SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE, SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE } from "../animation/solarBeam.ts";
 import { HOWL_FRAME_COUNT } from "../animation/howl.ts";
@@ -110,8 +111,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   296, 312, 266, 118, 269, 187,
   // prep6 (docs/next-adapters-prep6.md): Rock Tomb, Safeguard, Sweet Scent, Self-Destruct, Swallow, Knock Off, Faint Attack (player attacker only).
   317, 219, 230, 120, 256, 282, 185,
-  // prep7 (docs/next-adapters-prep7.md): Aerial Ace, Quick Attack, Ice Punch, Fake Tears, Sleep Talk.
-  332, 98, 8, 313, 214,
+  // prep7 (docs/next-adapters-prep7.md): Aerial Ace, Quick Attack, Ice Punch, Fake Tears, Sleep Talk, Rock Slide (opponent attacker only).
+  332, 98, 8, 313, 214, 157,
   // order consumers (docs/order-consumer-prep.md): Grudge, first move body of a battle only (sprite-order input).
   288,
   // order consumers, order-independent (docs/order-consumer-prep.md §0): Ember (one sprite per sort window, ties resolve
@@ -183,7 +184,7 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // the shadow row is live age 0.
     332, 98,
     // Ice Punch (staged windows start at activation: row 0). Sleep Talk likewise.
-    8, 214,
+    8, 214, 157,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -493,6 +494,9 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 313: return 87; // Fake Tears 80..166 / 76..162: the first displayed row is one after activation (row -1, no shadow row), 83 script + 4 clear rows.
     // Sleep Talk accepted windows start at activation and end at the first inactive script row (1356..1541 / 4570..4758).
     case 214: return request.attacker === 0 ? 186 : 189;
+    // Rock Slide, opponent attacker only (no accepted player-attacker evidence): activation..first inactive script row
+    // (1967..2104); the 37 later accepted rows are the target hit flash (hitFlashAnchorAge 141) and controller HUD.
+    case 157: return request.attacker === 1 ? 138 : null;
     case 8: return 184; // Ice Punch script activation..first inactive row (staged 1966..2149 / 2339..2522); HP/text/freeze/Sitrus rows are queue commands.
     case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
@@ -1357,6 +1361,18 @@ export function liveMoveAnimationPresentation(
     // and text the staged branch hard-coded come from the displayed field under liveField (the field already says
     // `sleep`, prep7-sleep-talk-field.json). The called move is an ordinary second request (Metronome precedent).
     case 214: config = { move: "SLEEP_TALK", attacker, target }; break;
+    case 157:
+      if (attacker.geometry.side !== "opponent") return null;
+      // The reducer is seed-independent (0/40 arbitrary seeds, prep7 s2.3): the 64-entry spriteOrderSeed is the provider
+      // order (known-entry occupied prefix + F) when the tracked order is known and the accepted known-entry literal
+      // otherwise (both equal the observed order at a first body); the first-found pixel result is the same either way.
+      config = { move: "ROCK_SLIDE", attacker, target,
+        animationProfile: { ...GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE,
+          spriteOrderSeed: (spriteOrderInput?.known
+            ? spriteOrderWithOccupiedPrefix({ known: true, free: spriteOrderInput.free, pendingDestroyed: [] },
+              KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER) : null) ?? GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE.spriteOrderSeed },
+        fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" }, moveTextStartAge: 0 };
+      break;
     case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;
     case 248: config = { move: "FUTURE_SIGHT", attacker, target, fieldProfile }; break;
     case 342:

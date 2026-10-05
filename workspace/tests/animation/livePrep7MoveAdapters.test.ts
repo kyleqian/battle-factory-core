@@ -15,8 +15,9 @@ import { generatedCommandAnimationReplay } from "../../tools/integration/generat
 // (the later hit/HP/text rows belong to the queue's own commands). Shadow row 0 = live age 0 = activation.
 // route = prep7 s2.5 (seed / index of the move on party member 0 / streak, from prep7-routes.json).
 type Orders = readonly [number | null, number | null];
+// attacker: which side's body the ordinary route must produce (default the player, 0).
 const cases: { id: number; move: string; duration: Orders; shadow: number | undefined; alt: [string, string];
-  route: { seed: number; move: 0 | 1 | 2 | 3; streak: number; turns?: number; stall?: boolean } }[] = [
+  route: { seed: number; move: 0 | 1 | 2 | 3; streak: number; turns?: number; stall?: boolean; attacker?: 0 | 1 } }[] = [
   { id: 332, move: "AERIAL_ACE", duration: [50, 50], shadow: 0, alt: ["CHARIZARD", "ONIX"], route: { seed: 3, move: 0, streak: 0 } },
   { id: 98, move: "QUICK_ATTACK", duration: [33, 33], shadow: 0, alt: ["RAICHU", "ONIX"], route: { seed: 3, move: 1, streak: 0 } },
   // Ice Punch has no accepted-species rental carrier: the ordinary route is the alternate-species Gengar route (prep7 s2.5).
@@ -25,6 +26,9 @@ const cases: { id: number; move: string; duration: Orders; shadow: number | unde
   // Sleep Talk needs a sleeping attacker: Seaking seed 3014 / streak 14 (prep7 s2.5): turn 1/2 the opponent plays Double Team and
   // Sleep Powder, the player's Sleep Talk (index 2) pressed three times fires on turn 3; the called move is an ordinary second request.
   { id: 214, move: "SLEEP_TALK", duration: [186, 189], shadow: 0, alt: ["WHISCASH", "ONIX"], route: { seed: 3014, move: 2, streak: 14, turns: 3, stall: true } },
+  // Rock Slide: opponent attacker only (no accepted player-attacker evidence: no adapter there, Faint Attack precedent). Route =
+  // the opponent's Onix (seed 134, streak 0, player presses slot 0; first body, order known, prep7 s2.5).
+  { id: 157, move: "ROCK_SLIDE", duration: [null, 138], shadow: 0, alt: ["DUGTRIO", "ONIX"], route: { seed: 134, move: 0, streak: 0, attacker: 1 } },
   { id: 8, move: "ICE_PUNCH", duration: [184, 184], shadow: 0, alt: ["GENGAR", "ONIX"], route: { seed: 18, move: 2, streak: 42 } },
 ];
 
@@ -69,6 +73,9 @@ describe("live prep7 move adapters", () => {
       expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[c.id]).toBe(c.shadow);
       for (const a of [0, 1] as const) expect(liveMoveAnimationDuration(request(c.id, a)), `${c.move} ${a}`).toBe(c.duration[a]);
     }
+    // Rock Slide has no player-attacker adapter.
+    expect(liveMoveAnimationPresentation(request(157, 0), displayed("ONIX", "GROVYLE"), 0)).toBeNull();
+    expect(liveMoveAnimationPresentation(request(157, 1), displayed("ONIX", "GROVYLE"), 0)).not.toBeNull();
   });
 
   it("derives the configs (prep7 s2.1) and the pre-activation age basis (s2.2)", () => {
@@ -102,6 +109,7 @@ describe("live prep7 move adapters", () => {
       const field = a === 0 ? displayed(carrier, other) : displayed(other, carrier);
       const duration = liveMoveAnimationDuration(request(c.id, a));
       if (duration === null) {
+        expect(c.move).toBe("ROCK_SLIDE");
         expect(liveMoveAnimationPresentation(request(c.id, a), field, 0)).toBeNull();
         continue;
       }
@@ -115,8 +123,9 @@ describe("live prep7 move adapters", () => {
     const slots = Array.from({ length: r.turns ?? 1 }, () => r.move);
     const on = generatedCommandAnimationReplay(r.seed, "on", slots, r.streak, r.stall ?? false);
     const off = generatedCommandAnimationReplay(r.seed, "off", slots, r.streak, r.stall ?? false);
-    const body = on.animations.find(a => a.moveId === c.id && a.attacker === 0);
-    expect(body?.ages).toEqual(Array.from({ length: c.duration[0]! }, (_, age) => age));
+    const side = r.attacker ?? 0;
+    const body = on.animations.find(a => a.moveId === c.id && a.attacker === side);
+    expect(body?.ages).toEqual(Array.from({ length: c.duration[side]! }, (_, age) => age));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
     if (!r.stall) expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.stalled).toBe(off.stalled);
