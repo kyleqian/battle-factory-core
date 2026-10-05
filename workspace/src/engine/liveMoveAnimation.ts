@@ -115,8 +115,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // Fire Blast (known-order gate), Dragon Dance (allocationOrder derived from the provider order).
   332, 98, 8, 313, 214, 157, 126, 349,
   // prep8 (docs/next-adapters-prep8.md; allocator constants = docs/allocator-plan-v2-evidence.md), each gated on the lent
-  // known tracked order: Swift, Trick.
-  129, 271,
+  // known tracked order: Swift, Trick, Frustration (friendship <= 30), Seismic Toss (damage 33..65), Horn Drill, Aurora Beam,
+  // Uproar, Thunderbolt, Stockpile, Zap Cannon.
+  129, 271, 218, 69, 32, 62, 253, 85, 254, 192,
   // order consumers (docs/order-consumer-prep.md): Grudge, first move body of a battle only (sprite-order input).
   288,
   // order consumers, order-independent (docs/order-consumer-prep.md §0): Ember (one sprite per sort window, ties resolve
@@ -190,7 +191,7 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // Ice Punch (staged windows start at activation: row 0). Sleep Talk likewise.
     8, 214, 157, 126, 349,
     // prep8 (issue142-shadow-rows-extra.json): every window starts at the activation frame (row 0).
-    129, 271,
+    129, 271, 218, 69, 32, 62, 253, 85, 254, 192,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -505,6 +506,14 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 157: return request.attacker === 1 ? 138 : null;
     case 129: return request.attacker === 1 ? 80 : 78; // Swift 73..152 / 69..146 (prep8 s2.2): activation..script end.
     case 271: return 225; // Trick 70..294 / 66..290.
+    case 218: return 229; // Frustration 80..308 / 76..304.
+    case 69: return 228; // Seismic Toss 81..308 / 77..304.
+    case 32: return request.attacker === 1 ? 192 : 193; // Horn Drill 214..405 / 213..405 (after a Tackle body).
+    case 62: return 216; // Aurora Beam 216..431 / 215..430 (after a Tackle body).
+    case 253: return 73; // Uproar 79..151 / 75..147.
+    case 85: return 237; // Thunderbolt 83..319 / 79..315.
+    case 254: return 99; // Stockpile 205..303 / 207..305 (after a Peck body).
+    case 192: return 112; // Zap Cannon 84..195 / 80..191.
     case 349: return 142; // Dragon Dance (78..219 / 74..215): window start = activation, window end = script end.
     case 126: return 197; // Fire Blast (1147..1343 / 215..411): window start = activation, window end = script end.
     case 8: return 184; // Ice Punch script activation..first inactive row (staged 1966..2149 / 2339..2522); HP/text/freeze/Sitrus rows are queue commands.
@@ -1430,6 +1439,120 @@ export function liveMoveAnimationPresentation(
             attacker: { spriteSlot: attackerSlot, stretchTaskSlot: 1, shakeTaskSlot: 0 },
             target: { spriteSlot: targetSlot, stretchTaskSlot: 0, shakeTaskSlot: 1 },
             orientation: attacker.geometry.side === "player" ? "player-back" : "opponent-front", gameplayRng: 0 } };
+      }
+      break;
+    }
+    case 218: case 69: case 32: case 62: case 253: case 85: case 254: case 192: {
+      // prep8 s0/s3 (docs/next-adapters-prep8.md): the allocator-derived ids/slots below are the constants of the baseline
+      // (matrix bitmap 0x6, no task, equal to the ROM plan at all 481 activations; docs/allocator-plan-v2-evidence.md), valid
+      // only while the known-entry history holds, which is exactly when the host lends the tracked order: no lend -> null.
+      // Every order field is taken from the lent free order (64-entry occupied prefix + free order, or its slot subsets).
+      if (!spriteOrderInput?.known) return null;
+      const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
+      const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (fullOrder === null) return null;
+      const orderIndex = (slot: number) => fullOrder.indexOf(slot);
+      const side = attacker.geometry.side;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const subA = side === "player" ? 30 : 40, subT = side === "player" ? 40 : 30;
+      const towardTarget = side === "player" ? 1 : -1;
+      const restOffset = (a: LiveBattlerAnchors) => ({ x2: a.frontIdleRest.x2, y2: a.frontIdleRest.y2 });
+      const attackerCentre = affineCenterBattler(attacker), targetCentre = affineCenterBattler(target);
+      switch (request.moveId) {
+        case 218:
+          // AnimTask_GetFrustrationPowerLevel: gAnimFriendship <= 30 is the strongest branch the reducer ports.
+          if (request.friendship > 30) return null;
+          config = { move: "FRUSTRATION", attacker: attackerCentre, target: targetCentre, fieldProfile,
+            attackerEffectCenter: attackerAnchors.picOffsetPoint, targetEffectCenter: targetAnchors.picOffsetPoint,
+            targetInitialX2: targetAnchors.frontIdleRest.x2,
+            animationProfile: { angerSlot: 3, angerMatrix: 0, impactSlots: [3, 4], impactMatrices: [0, 3],
+              impactOrders: [orderIndex(3), orderIndex(4)], impactSubpriority: subA - 3,
+              attackerSubpriority: subA, targetSubpriority: subT } };
+          break;
+        case 69: {
+          // AnimTask_GetSeismicTossDamageLevel: gAnimMoveDmg 33..65 is the medium branch the reducer ports.
+          if (request.damage < 33 || request.damage > 65) return null;
+          const wave = (slots: number[], matrices: number[]) => slots.map((slot, i) =>
+            ({ slot, matrixNum: matrices[i]!, persistentOrder: orderIndex(slot) }));
+          const rocks = [wave([4, 5, 7, 9], [3, 4, 5, 6]), wave([10, 11, 12, 13], [7, 8, 9, 10]), wave([4, 5, 7, 9], [3, 4, 5, 6])];
+          config = { move: "SEISMIC_TOSS", attacker: attackerCentre, target: targetCentre, fieldProfile,
+            animationGeometry: { targetEffectCenter: targetAnchors.picOffsetPoint,
+              targetRockCenter: targetAnchors.battlePositionCenter,
+              attackerRestOffset: restOffset(attackerAnchors), targetRestOffset: restOffset(targetAnchors) },
+            animationProfile: { rocks, hitsplats: wave([3, 3, 3], [0, 0, 0]),
+              attackerSubpriority: subA, targetSubpriority: subT,
+              attackerPalette: art[attacker.geometry.side].pic.palette, targetPalette: art[target.geometry.side].pic.palette,
+              attackerAnimFrame: side === "player" ? 0 : 1, targetAnimFrame: side === "player" ? 1 : 0 } };
+          break;
+        }
+        case 32: {
+          const seed = spriteOrderForSlots(lentState, [3, 4, 5]);
+          if (seed === null) return null;
+          config = { move: "HORN_DRILL", attacker: attackerCentre, target: targetCentre, fieldProfile,
+            animationGeometry: { attackerCenter: attackerAnchors.spriteCenter, targetPictureCenter: targetAnchors.picOffsetPoint,
+              attackerRestOffset: restOffset(attackerAnchors), targetRestOffset: restOffset(targetAnchors) },
+            animationProfile: { hornSlot: 4, hornMatrixId: side === "player" ? 0 : 24,
+              impactSlots: [3, 4, 5, 3, 4, 5, 3, 4, 5, 3, 4], impactMatrixIds: [0, 3, 4, 0, 3, 4, 0, 3, 4, 0, 3],
+              spriteOrderSeed: seed, effectSubpriority: subT - 3 } };
+          break;
+        }
+        case 62: {
+          const cycle = <T,>(values: T[], n: number) => Array.from({ length: n }, (_, i) => values[i % values.length]!);
+          config = { move: "AURORA_BEAM", attacker: attackerCentre, target: targetCentre, fieldProfile,
+            animationGeometry: { attackerRingOrigin: { x: attackerAnchors.picOffsetPoint.x + 20 * towardTarget, y: attackerAnchors.picOffsetPoint.y },
+              targetPictureCenter: targetAnchors.picOffsetPoint, targetRestOffset: restOffset(targetAnchors) },
+            animationProfile: { ringSlots: cycle([3, 4, 5, 7, 9, 10], 40), ringMatrixIds: cycle([0, 3, 4, 5, 6, 7], 40),
+              ringSubpriority: subT - 2, spriteOrderSeed: fullOrder } };
+          break;
+        }
+        case 253:
+          config = { move: "UPROAR", attacker: attackerCentre, target: targetCentre, fieldProfile,
+            animationInputs: { ringSlots: [3, 3, 3], noteSlots: [4, 5], spriteOrder: fullOrder,
+              attackerMatrixSlot: side === "player" ? 1 : 2, ringMatrixSlots: [0, 0, 0],
+              attackerCenter: attackerAnchors.picOffsetPoint } };
+          break;
+        case 85: {
+          const alloc = (slot: number, matrixNum: number) => ({ slot, matrixNum, order: orderIndex(slot) });
+          const arcSlots = [3, 4, 3, 4, 3, 4, 3, 4], arcMatrices = [0, 8, 16, 0, 8, 16, 0, 8];
+          config = { move: "THUNDERBOLT", attacker: attackerCentre, target: targetCentre, fieldProfile,
+            animationGeometry: { targetBattleCenter: targetAnchors.battlePositionCenter, targetPictureCenter: targetAnchors.picOffsetPoint },
+            animationProfile: {
+              bolts: [3, 4, 5, 7, 9, 10, 11, 12, 3, 4, 5, 7, 9, 10, 11].map(slot => alloc(slot, 0)),
+              orb: alloc(3, 0),
+              flashes: [4, 5, 7, 9, 10, 11, 12, 13].map((slot, i) => alloc(slot, 3 + i)),
+              arcs: arcSlots.map((slot, i) => alloc(slot, arcMatrices[i]!)) } };
+          break;
+        }
+        case 254: {
+          const orbSlotPool = [3, 4, 5, 7, 9];
+          const seed = spriteOrderForSlots(lentState, orbSlotPool);
+          if (seed === null) return null;
+          config = { move: "STOCKPILE", attacker: attackerCentre, target: targetCentre, fieldProfile,
+            attackerPictureCenter: attackerAnchors.picOffsetPoint,
+            attackerPictureYOffset: liveBattlerCoordAttrs(side, art).yOffset,
+            // The ad-hoc age-0 shadow is retired under liveField (the shared liveOpponentShadow hook owns it).
+            attackerShadowAtEntry: false,
+            animationProfile: { orbSlotPool, orbMatrixPool: [0, 3, 4, 5, 6], spriteOrderSeed: seed, attackerSubpriority: subA } };
+          break;
+        }
+        case 192: {
+          const alloc = (slot: number, matrixNum: number, extra: { visibleFrom?: number; initializedFrom?: number } = {}) =>
+            ({ slot, matrixNum, order: orderIndex(slot), ...extra });
+          // Spark 7 (slot 12) becomes visible/initialised one row apart per orientation (prep8 s2.1 accepted configs).
+          const sparkRows = side === "player"
+            ? [[7, 7], [7, 7], [7, 7], [7, 7], [7, 7], [7, 7], [8, 8], [8, 8]]
+            : [[7, 7], [7, 7], [7, 7], [7, 7], [7, 7], [7, 7], [7, 8], [8, 8]];
+          const arcSlots = [3, 4, 3, 4, 3, 4, 3, 4], arcMatrices = [0, 8, 16, 0, 8, 16, 0, 8];
+          config = { move: "ZAP_CANNON", attacker: attackerCentre, target: targetCentre, fieldProfile,
+            animationGeometry: { attackerPictureCenter: { x: attackerAnchors.picOffsetPoint.x + 10 * towardTarget, y: attackerAnchors.picOffsetPoint.y },
+              targetPictureCenter: targetAnchors.picOffsetPoint, targetBattleCenter: targetAnchors.battlePositionCenter },
+            animationProfile: { ball: alloc(3, 0),
+              sparks: [4, 5, 7, 9, 10, 11, 12, 13].map((slot, i) =>
+                alloc(slot, i === 0 ? 0 : 2 + i, { visibleFrom: sparkRows[i]![0]!, initializedFrom: sparkRows[i]![1]! })),
+              arcs: arcSlots.map((slot, i) => alloc(slot, arcMatrices[i]!)) } };
+          break;
+        }
+        default: return null;
       }
       break;
     }

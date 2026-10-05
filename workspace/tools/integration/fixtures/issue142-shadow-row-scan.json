@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 368,
-  "ids": 173,
+  "rows": 403,
+  "ids": 191,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -3874,6 +3874,387 @@
    "duration": 221,
    "expected": null,
    "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 332,
+   "move": "AERIAL_ACE",
+   "orientation": "player",
+   "duration": 50,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 332,
+   "move": "AERIAL_ACE",
+   "orientation": "opponent",
+   "duration": 50,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 98,
+   "move": "QUICK_ATTACK",
+   "orientation": "player",
+   "duration": 33,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 98,
+   "move": "QUICK_ATTACK",
+   "orientation": "opponent",
+   "duration": 33,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 8,
+   "move": "ICE_PUNCH",
+   "orientation": "player",
+   "duration": 184,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 8,
+   "move": "ICE_PUNCH",
+   "orientation": "opponent",
+   "duration": 184,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 313,
+   "move": "FAKE_TEARS",
+   "orientation": "player",
+   "duration": 87,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 313,
+   "move": "FAKE_TEARS",
+   "orientation": "opponent",
+   "duration": 87,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 214,
+   "move": "SLEEP_TALK",
+   "orientation": "player",
+   "duration": 186,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 214,
+   "move": "SLEEP_TALK",
+   "orientation": "opponent",
+   "duration": 189,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 157,
+   "move": "ROCK_SLIDE",
+   "orientation": "opponent",
+   "duration": 138,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 126,
+   "move": "FIRE_BLAST",
+   "orientation": "player",
+   "duration": 197,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 126,
+   "move": "FIRE_BLAST",
+   "orientation": "opponent",
+   "duration": 197,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 349,
+   "move": "DRAGON_DANCE",
+   "orientation": "player",
+   "duration": 142,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 349,
+   "move": "DRAGON_DANCE",
+   "orientation": "opponent",
+   "duration": 142,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 129,
+   "move": "SWIFT",
+   "orientation": "player",
+   "duration": 78,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 129,
+   "move": "SWIFT",
+   "orientation": "opponent",
+   "duration": 80,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 271,
+   "move": "TRICK",
+   "orientation": "player",
+   "duration": 225,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 271,
+   "move": "TRICK",
+   "orientation": "opponent",
+   "duration": 225,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 218,
+   "move": "FRUSTRATION",
+   "orientation": "player",
+   "duration": 229,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 218,
+   "move": "FRUSTRATION",
+   "orientation": "opponent",
+   "duration": 229,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 69,
+   "move": "SEISMIC_TOSS",
+   "orientation": "player",
+   "duration": 228,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 69,
+   "move": "SEISMIC_TOSS",
+   "orientation": "opponent",
+   "duration": 228,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 32,
+   "move": "HORN_DRILL",
+   "orientation": "player",
+   "duration": 193,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 32,
+   "move": "HORN_DRILL",
+   "orientation": "opponent",
+   "duration": 192,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 62,
+   "move": "AURORA_BEAM",
+   "orientation": "player",
+   "duration": 216,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 62,
+   "move": "AURORA_BEAM",
+   "orientation": "opponent",
+   "duration": 216,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 253,
+   "move": "UPROAR",
+   "orientation": "player",
+   "duration": 73,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 253,
+   "move": "UPROAR",
+   "orientation": "opponent",
+   "duration": 73,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 85,
+   "move": "THUNDERBOLT",
+   "orientation": "player",
+   "duration": 237,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 85,
+   "move": "THUNDERBOLT",
+   "orientation": "opponent",
+   "duration": 237,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 254,
+   "move": "STOCKPILE",
+   "orientation": "player",
+   "duration": 99,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 254,
+   "move": "STOCKPILE",
+   "orientation": "opponent",
+   "duration": 99,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 192,
+   "move": "ZAP_CANNON",
+   "orientation": "player",
+   "duration": 112,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 192,
+   "move": "ZAP_CANNON",
+   "orientation": "opponent",
+   "duration": 112,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
    "tailFirstAge": null
   }
  ]

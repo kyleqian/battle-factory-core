@@ -244,5 +244,8 @@
     "opponentAttackerRoutes": []
   },
   "precedingBodies": [],
-  "scenario": "tools/battle-lab/mechanic-frustration-opponent-furret-player-onix.json"
+  "scenario": "tools/battle-lab/mechanic-frustration-opponent-furret-player-onix.json",
+  "requestFields": {
+    "friendship": 0
+  }
 }

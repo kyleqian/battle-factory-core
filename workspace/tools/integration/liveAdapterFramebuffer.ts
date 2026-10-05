@@ -19,6 +19,9 @@ import {
   applySpriteOrderUnitPlan, createSpriteOrderPlanCursor, knownEntrySpriteOrderState, spriteOrderPlanTableFromFixture,
   type SpriteOrderPlan,
 } from "../../src/engine/spriteOrderProvider.ts";
+import {
+  applySpriteOrderPresentationEvent, createSpriteOrderTracker, spriteOrderTrackerLend, type SpriteOrderPresentationEvent,
+} from "../../src/engine/spriteOrderEventTransform.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
 import type { BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
@@ -96,7 +99,21 @@ export function fixtureSpriteOrder(f: Fixture, request: BattleMoveAnimationReque
     if (index < keys.length - 1) cursor = applySpriteOrderUnitPlan(cursor, table.bodies.get(key));
     previous = key;
   });
-  if (!cursor.order.known) throw new Error(`Sprite order unknown for ${f.move}`);
+  if (!cursor.order.known) {
+    // No plan unit exists for this preceding-body pair (prep8: Tackle -> Horn Drill, Peck -> Stockpile): use the production
+    // order host's own tracker (spriteOrderEventTransform), fed the events the orchestrator feeds (prompt, commit, each body as
+    // move-animation, a visible hit after the damaging Tackle/Peck), exactly the lend production makes at the activation edge.
+    let tracker = createSpriteOrderTracker(knownEntrySpriteOrderState("battle-lab-ordinary-singles"));
+    const feed = (event: SpriteOrderPresentationEvent) => { tracker = applySpriteOrderPresentationEvent(tracker, event); };
+    feed({ kind: "action-prompt" }); feed({ kind: "actions-committed" });
+    for (const unit of f.precedingBodies ?? []) {
+      feed({ kind: "move-animation", moveId: unit.moveId, attackerSide: unit.side });
+      if (unit.moveId === 33 || unit.moveId === 64) feed({ kind: "hit-animation", targetVisible: true });
+    }
+    const lent = spriteOrderTrackerLend(tracker);
+    if (lent === null) throw new Error(`Sprite order unknown for ${f.move}`);
+    return { ...cursor, order: { known: true as const, free: lent, pendingDestroyed: [] } };
+  }
   const scenarioName = basename(f.scenario, ".json").replace(/^mechanic-/, "");
   const row = seedsFixture().scenarios.find(s => s.scenario === scenarioName && s.move === request.moveId
     && s.attackerSide === f.attacker.geometry.side && s.unitIndex === 1 + 2 * (f.precedingBodies?.length ?? 0));

@@ -502,5 +502,8 @@
     "opponentAttackerRoutes": []
   },
   "precedingBodies": [],
-  "scenario": "tools/battle-lab/mechanic-seismic-toss-opponent-kecleon-player-onix.json"
+  "scenario": "tools/battle-lab/mechanic-seismic-toss-opponent-kecleon-player-onix.json",
+  "requestFields": {
+    "damage": 50
+  }
 }
