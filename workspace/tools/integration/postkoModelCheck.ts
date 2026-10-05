@@ -51,6 +51,10 @@ export const SCENARIOS: Record<string, Step[]> = {
   "postko-fireblast-player": [...TURN1, ...[0, 1, 2].flatMap(() => [P, C, edge("126:player"), body(126, "player"), HIT, edge("129:opponent"),
     body(129, "opponent"), HIT])],
   "postko-rockslide-opponent": [...TURN1, P, C, edge("53:player"), body(53, "player"), HIT, edge("157:opponent"), body(157, "opponent")],
+  // Rung-2 class measurements (docs/postko-consumer-audit.md §5.3; the lightscreen scenario with the player's moves replaced):
+  // turn 2: player Barrier / Reflect (faster), the first body after the send-out.
+  "postko-barrier": [...TURN1, P, C, edge("112:player"), body(112, "player")],
+  "postko-reflect": [...TURN1, P, C, edge("115:player"), body(115, "player")],
 };
 
 const SUMMARY = decodeSpriteOrderPlan(UNIT_PLANS.summary), SENDOUT = decodeSpriteOrderPlan(UNIT_PLANS.nextSendOut);
