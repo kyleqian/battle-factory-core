@@ -57,6 +57,7 @@ import { MAGICAL_LEAF_FRAME_COUNT } from "../animation/magicalLeaf.ts";
 import { REST_FRAME_COUNT } from "../animation/rest.ts";
 import { SWEET_KISS_FRAME_COUNT } from "../animation/sweetKiss.ts";
 import { TICKLE_FRAME_COUNT } from "../animation/tickle.ts";
+import { SURF_WAVE_FRAME_COUNT } from "../animation/surfWave.ts";
 import { YAWN_CLEANUP_AGE } from "../animation/yawn.ts";
 
 
@@ -82,6 +83,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   298, 146,
   // next5 self-target: healing anchors on the attacker, other-side battler drawn from the field.
   135,
+  // prep2 (docs/next-adapters-prep2.md s2): Surf + Muddy Water share one branch.
+  57, 330,
 ] as const);
 
 /**
@@ -111,6 +114,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // next5 (issue142-shadow-rows-extra.json): Glare/Teeter Dance/Soft-Boiled windows start at activation;
     // Scary Face (-4) and Dizzy Punch (-13) start after it and have no row.
     137, 298, 135,
+    // prep2 (issue142-shadow-rows-extra.json): Surf / Muddy Water windows start at activation.
+    57, 330,
   ].map((id) => [id, 0])),
 );
 
@@ -323,6 +328,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 146: return 69; // Dizzy Punch accepted window; script tail 5 rows uncovered.
     case 184: return 190; // Scary Face accepted window (79..268); script tail 14 rows uncovered.
     case 137: return 213; // Glare accepted window (GLARE_SOURCE_FRAME_COUNT).
+    case 57: case 330: return SURF_WAVE_FRAME_COUNT; // Surf / Muddy Water accepted window (144 rows).
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
     default: return null;
   }
@@ -852,6 +858,9 @@ export function liveMoveAnimationPresentation(
         eyeDotEnd: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint };
       break;
     }
+    case 57: case 330:
+      config = { move: request.moveId === 330 ? "MUDDY_WATER" : "SURF", attacker, target, fieldProfile };
+      break;
     case 342:
       config = {
         move: "POISON_TAIL",
