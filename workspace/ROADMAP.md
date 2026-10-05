@@ -2217,7 +2217,8 @@ occupancy). Resume points, in order:
    (`docs/sprite-order-uncovered-units.md`: unit transforms 36/36 exact); needs
    occupancy-aware consumers and post-unit affine/task baselines.
 3. Remaining adapters: regenerate `docs/remaining-adapters-census.md`
-   (`node tools/integration/remainingAdaptersCensus.mjs --write --doc`); single-input
+   (`node tools/integration/remainingAdaptersCensus.mjs --write --doc`; first drop its
+   hard-coded N1-N3 batch lists, which have all landed and now make it throw); single-input
    moves (Magnitude/Reversal dynamic power, Pain Split yOffset, Spark, Fire Punch /
    Endeavor outcome input), Rock Blast / Razor Wind outcome, the Random2 group (a
    surrogate presentation RNG is never bit-exact in play: claim-boundary decision
