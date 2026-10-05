@@ -1,5 +1,16 @@
 # Animation integration progress
 
+## 2026-10-05 — prep7 batch folded: 181 live adapters
+
+- Folded worker `81929ce83` as `d244f2f79` (src `907516e6b`): Aerial Ace,
+  Quick Attack (live age 0 = activation, reducer age + 42 / 44), Ice Punch,
+  Fake Tears, Sleep Talk, Fire Blast, Dragon Dance (lent order), Rock Slide
+  (opponent attacker only). Supervisor dense 19 fixtures twice fresh, 2,367
+  rows/run, zero residual; routes 8/8 PASS. Receipt `prep7-supervisor-receipt.json`.
+- Limit: Aerial Ace with CHARIZARD/DRAGONAIR opponent attackers leaves 14/51 px
+  at ages 10-11 on the opponent platform clip row.
+- Running: prep8 batch (ten allocator-plan-v2 moves); REL-Y-STATIC confirmation (side).
+
 ## 2026-10-05 — prep6 batch folded: 173 live adapters; prep8 prep
 
 - Folded worker `776478118` as `91e78cb74` (src `5a9ef5cdf`): Rock Tomb,
