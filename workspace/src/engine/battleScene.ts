@@ -49765,8 +49765,7 @@ export function renderSceneOnMovePresentation(
     const player = attacker.geometry.side === "player" ? attacker : target;
     const opponent = attacker.geometry.side === "opponent" ? attacker : target;
     if (
-      player.species !== "ONIX"
-      || opponent.species !== "GROVYLE"
+      (!liveField && (player.species !== "ONIX" || opponent.species !== "GROVYLE"))
       || attacker.geometry.side !== "player"
     ) {
       throw new Error(
@@ -49774,25 +49773,46 @@ export function renderSceneOnMovePresentation(
       );
     }
 
-    const sourcePpu =
-      view.background.background === "dark"
-        ? turn16DarkFieldPpu
-        : turn15FieldPpuAsset;
-    drawMode0Ppu(fb, {
-      ...sourcePpu,
-      // `Task_FadeToBg` darkens BG3 only. Battler sprites, healthboxes, and
-      // the printer are assembled below and therefore remain unaffected.
-      bldcnt: view.background.bldy > 0 ? 0x00e8 : sourcePpu.bldcnt,
-      bldy: view.background.bldy,
-      oam: [],
-    });
+    const liveOpponentArt = liveField ? liveSceneOnBattlerArt(opponent) : null;
+    const liveAttackerArt = liveField ? liveSceneOnBattlerArt(player) : null;
+    if (liveField) {
+      // Live field: `fadetobg BG_DARK` swaps BG3 to the dark screenblock/charblock/palette bank 2 (the CRUNCH
+      // recipe) and Task_FadeToBg's BLDCNT 0x00E8 darkens BG3 + backdrop only; battlers are OBJ and unaffected.
+      const dark = view.background.background === "dark";
+      const coeff = view.background.bldy;
+      const fieldPalette = (dark
+        ? [battleBg.palette[0]!, battleBg.palette[1]!, crunchDarkBgPalette]
+        : battleBg.palette).map((bank) => bank.map((color) => crunchDarkenColor(color, coeff)));
+      drawTileBg(
+        fb,
+        dark ? crunchDarkBgTileset : battleBg.static.tileset,
+        dark ? crunchDarkBgTilemap : battleBg.static.tilemap,
+        fieldPalette,
+      );
+    } else {
+      const sourcePpu =
+        view.background.background === "dark"
+          ? turn16DarkFieldPpu
+          : turn15FieldPpuAsset;
+      drawMode0Ppu(fb, {
+        ...sourcePpu,
+        // `Task_FadeToBg` darkens BG3 only. Battler sprites, healthboxes, and
+        // the printer are assembled below and therefore remain unaffected.
+        bldcnt: view.background.bldy > 0 ? 0x00e8 : sourcePpu.bldcnt,
+        bldy: view.background.bldy,
+        oam: [],
+      });
+    }
 
+    // ShakeMon's first write zeroes the target's front-idle residual (CRUNCH): the baseline holds until the hit.
+    const targetIdle = liveField && view.age < state.config.animationProfile.hitsplatFirstVisibleAge
+      ? speciesFrontIdleRestOffsetOrZero(opponent.species) : { x2: 0, y2: 0 };
     drawSpriteSheet(
       fb,
-      grovyleFrontSprite.tileset,
-      grovyleFrontSprite.palette,
-      opponent.geometry.spriteCorner.x + view.targetShakeX2,
-      opponent.geometry.spriteCorner.y,
+      liveOpponentArt ? liveOpponentArt.tileset : grovyleFrontSprite.tileset,
+      liveOpponentArt ? liveOpponentArt.palette : grovyleFrontSprite.palette,
+      opponent.geometry.spriteCorner.x + view.targetShakeX2 + targetIdle.x2,
+      opponent.geometry.spriteCorner.y + targetIdle.y2,
     );
     if (view.attackerEva > 0) {
       const x = player.geometry.spriteCorner.x + view.attackerOffset.x2;
@@ -49800,16 +49820,16 @@ export function renderSceneOnMovePresentation(
       if (view.attackerEva === 16) {
         drawSpriteSheet(
           fb,
-          onixBackSprite.tileset,
-          onixBackSprite.palette,
+          liveAttackerArt ? liveAttackerArt.tileset : onixBackSprite.tileset,
+          liveAttackerArt ? liveAttackerArt.palette : onixBackSprite.palette,
           x,
           y,
         );
       } else {
         drawSpriteSheetBlendedOverFb(
           fb,
-          onixBackSprite.tileset,
-          onixBackSprite.palette,
+          liveAttackerArt ? liveAttackerArt.tileset : onixBackSprite.tileset,
+          liveAttackerArt ? liveAttackerArt.palette : onixBackSprite.palette,
           x,
           y,
           view.attackerEva,
@@ -49833,6 +49853,7 @@ export function renderSceneOnMovePresentation(
       );
     }
 
+    if (liveField) return;
     drawSendOutHealthbox(
       fb,
       0,

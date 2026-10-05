@@ -35,6 +35,7 @@ import { STUN_SPORE_FRAME_COUNT } from "../animation/stunSpore.ts";
 import { GRASS_WHISTLE_WINDOW_FRAMES } from "../animation/grassWhistle.ts";
 import { DOUBLE_EDGE_FRAME_COUNT } from "../animation/doubleEdge.ts";
 import { speciesFrontIdleRestOffsetOrZero } from "../animation/speciesIdleAnim.ts";
+import { FAINT_ATTACK_ANIMATION_PROFILE } from "../animation/faintAttack.ts";
 import { RAZOR_LEAF_BODY_LAST_AGE } from "../animation/razorLeaf.ts";
 import { THUNDER_PUNCH_MOVE_BODY_LAST_AGE } from "../animation/thunderPunch.ts";
 import { NEEDLE_ARM_FRAME_COUNT } from "../animation/needleArm.ts";
@@ -107,8 +108,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   212, 265, 111, 275, 35, 20, 225,
   // prep5 (docs/next-adapters-prep5.md): Mist Ball, Aromatherapy, Follow Me, Metronome (body), Taunt, Belly Drum.
   296, 312, 266, 118, 269, 187,
-  // prep6 (docs/next-adapters-prep6.md): Rock Tomb, Safeguard, Sweet Scent, Self-Destruct, Swallow, Knock Off.
-  317, 219, 230, 120, 256, 282,
+  // prep6 (docs/next-adapters-prep6.md): Rock Tomb, Safeguard, Sweet Scent, Self-Destruct, Swallow, Knock Off, Faint Attack (player attacker only).
+  317, 219, 230, 120, 256, 282, 185,
   // order consumers (docs/order-consumer-prep.md): Grudge, first move body of a battle only (sprite-order input).
   288,
   // order consumers, order-independent (docs/order-consumer-prep.md §0): Ember (one sprite per sort window, ties resolve
@@ -469,6 +470,10 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     // activation + 6 (prep6 s2.4), so live age 0 is the reducer's age 0 and the activation is live age -6 (no #142 row).
     // The window ends 4 frames after the script end (124/128); duration = rows + ageOffset (the Dragon Breath convention).
     case 282: return 48;
+    // Faint Attack: 221 rows (2344..2564 player attacker), reducer ages 0..220 (faintAttack.ts LAST_ANIMATION_OWNED_AGE);
+    // the window starts 4 frames after the script activation (row -4, no #142 shadow row). Only the player-attacker
+    // orientation has accepted evidence (prep6 s0): an opponent attacker returns null (no adapter, scene-off view).
+    case 185: return request.attacker === 0 ? 221 : null;
     // Swallow: per stockpile branch (request.turn = gBattleScripting.animTurn = stockpileCounter, prep6 s2.1) and side:
     // player 163/178/193 (1247..1409 ...), opponent 161/176/191 (= 148 + 15 turn / 146 + 15 turn), every window end = script end.
     case 256:
@@ -1275,6 +1280,14 @@ export function liveMoveAnimationPresentation(
     // Knock Off reads only the target's animation centre (the hit splat) and the reducer age; no order seed exists in
     // the config (known seed shapes give 0 differing frames, prep6 s2.3), so there is no order input to lend.
     case 282: config = { move: "KNOCK_OFF", attacker, target, fieldProfile }; break;
+    case 185:
+      if (attacker.geometry.side !== "player") return null;
+      // The canonical ONIX_TO_GROVYLE profile = the source-age constants (prep6 s2.1: spriteCorners and the target's
+      // hit-splat centre derive exactly); the move text and HP chrome come from the live view under liveField.
+      config = { move: "FAINT_ATTACK", attacker, target, animationProfile: FAINT_ATTACK_ANIMATION_PROFILE,
+        fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" },
+        moveTextStartAge: -24 };
+      break;
     case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;
     case 248: config = { move: "FUTURE_SIGHT", attacker, target, fieldProfile }; break;
     case 342:

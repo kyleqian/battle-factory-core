@@ -5,5 +5,16 @@ ignored. Side/move come from POKEBENCH_STAGE_SIDE (default player) and fixed fai
 import os, runpy, sys
 stage = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../probe/stage-fire-punch-portable-on.py")
 _scenario, output, rgb = sys.argv[1:4]
+os.makedirs(rgb, exist_ok=True)
 sys.argv = [stage, output, rgb, os.environ.get("POKEBENCH_STAGE_SIDE", "player"), "faint-attack"]
-runpy.run_path(stage, run_name="__main__")
+try:
+    runpy.run_path(stage, run_name="__main__")
+finally:
+    # liveAdapterFramebuffer.ts reads `frames`; the staged probe records the same per-frame RGB receipts as `captures`.
+    import json
+    try:
+        data = json.load(open(output))
+        data["frames"] = [{"frame": c["tick"], "sha256": c["sha256"]} for c in data["captures"]]
+        json.dump(data, open(output, "w"))
+    except (OSError, KeyError, ValueError):
+        pass
