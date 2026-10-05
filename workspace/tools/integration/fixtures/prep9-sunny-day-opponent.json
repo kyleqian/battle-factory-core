@@ -1,7 +1,7 @@
 {
   "schema": "prep9-adapter-draft/v1",
   "move": "SUNNY_DAY",
-  "probe": "tools/battle-lab/mechanic-sunny-day-opponent-bellossom-player-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "attacker": {
     "species": "BELLOSSOM",
     "geometry": {
@@ -487,7 +487,9 @@
   "precedingBodies": [
     {
       "moveId": 33,
-      "riseFrame": 2074
+      "riseFrame": 2074,
+      "side": "player"
     }
-  ]
+  ],
+  "scenario": "tools/battle-lab/mechanic-sunny-day-opponent-bellossom-player-onix.json"
 }

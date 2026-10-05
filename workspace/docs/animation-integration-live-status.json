@@ -2821,6 +2821,140 @@
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
+    },
+    {
+      "move": "MOVE_GIGA_DRAIN",
+      "id": 202,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep9-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 230 rows both orientations (prep9-giga-drain-*.json): window start = activation frame, row 0 (docs/next-adapters-prep9.md)",
+        "ordinary route seed 8 / streak 14 / index 3 (VENOMOTH, first body, order known): adapter active every age, ON/OFF rules/RNG equal (scene bit 0x80 excluded); action-menu reached",
+        "alternate species: VENUSAUR (first body) and TANGELA (after Tackle) player and opponent attackers 230/230 (prep9-alt-giga-drain-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates (the D-PAL label is stale: no palette snapshot is consumed; docs/next-adapters-prep9.md s0/s1: the blend schedules are age-derived from battleBg.palette and species art)",
+      "spriteOrder": "gate: lent tracked order known (spriteOrderInput.known), else null. orderSeed (17 slots) = spriteOrderForSlots(lend, [3,4,5,7,9,10..21]); allocator constants (hitsplat 3, orbs, stars, paletteController 3) == ROM first-free replay 12/12 histories; pixel-neutral over 4 order variants",
+      "remaining": [
+        "later bodies are covered only by the tracked-order claim, not by the dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_SUNNY_DAY",
+      "id": 241,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep9-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 158 rows both orientations (prep9-sunny-day-*.json): window start = activation frame, row 0",
+        "ordinary route seed 8 / streak 21 / index 1 (CHARIZARD): adapter active every age, ON/OFF rules/RNG equal; action-menu reached",
+        "alternate species: VENUSAUR player (first body) and TANGELA opponent (after Tackle) 158/158"
+      ],
+      "palettePlan": "no plan, history invalidates (the D-PAL label is stale: no palette snapshot is consumed; docs/next-adapters-prep9.md s0/s1: the blend schedules are age-derived from battleBg.palette and species art); paletteBanks is the accepted echo-only constant (never read by the renderer)",
+      "spriteOrder": "gate: lent tracked order known, else null. raySlots [3,4,5,7]; spriteOrder = 64-entry occupied prefix + lend; pixel-neutral over 8 ROM orders + reversed",
+      "remaining": [
+        "later bodies are covered only by the tracked-order claim, not by the dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_MEGA_DRAIN",
+      "id": 72,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep9-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 218 rows both orientations (prep9-mega-drain-*.json): window start = activation frame, row 0 (first body)",
+        "ordinary route seed 29 / streak 7 / index 0 (TANGELA): adapter active every age, ON/OFF rules/RNG equal; action-menu reached",
+        "alternate species: TANGELA (after Tackle) player and opponent attackers 218/218"
+      ],
+      "palettePlan": "no plan, history invalidates (the D-PAL label is stale: no palette snapshot is consumed; docs/next-adapters-prep9.md s0/s1: the blend schedules are age-derived from battleBg.palette and species art)",
+      "spriteOrder": "gate: lent tracked order known, else null. orderSeed (12 slots) = lend over [3,4,5,7,9,10..16]; allocator constants == ROM 12/12",
+      "remaining": [
+        "later bodies are covered only by the tracked-order claim, not by the dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_ABSORB",
+      "id": 71,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep9-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 194 rows both orientations (prep9-absorb-*.json): window starts 10 frames after the activation edge (223..416, reducer age 0 = monbg-relative): live age 0 = first window row, ageOffset 0, duration 194, no #142 shadow row (the Taunt convention); the script runs 2 rows past the window (uncovered tail)",
+        "ordinary route seed 23 / streak 0 / index 3 (LOMBRE, after the opponent's body, order known): adapter active every age, ON/OFF rules/RNG equal; action-menu reached",
+        "alternate species: VENUSAUR (first body) player and opponent attackers 194/194"
+      ],
+      "palettePlan": "no plan, history invalidates (the D-PAL label is stale: no palette snapshot is consumed; docs/next-adapters-prep9.md s0/s1: the blend schedules are age-derived from battleBg.palette and species art)",
+      "spriteOrder": "gate: lent tracked order known, else null (allocator constants valid only on the known-entry baseline). no order field in the config",
+      "remaining": [
+        "later bodies are covered only by the tracked-order claim, not by the dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness",
+        "10 pre-window script frames (activation..window start) are not covered by the dense proof"
+      ]
+    },
+    {
+      "move": "MOVE_DREAM_EATER",
+      "id": 138,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep9-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 266 / 267 rows (player / opponent attacker; prep9-dream-eater-*.json, after Tackle(s) and Sing): window start = activation frame, row 0",
+        "ordinary route seed 41 / streak 14 / moves [1 (Sing), 2 (Dream Eater)] (WIGGLYTUFF): adapter active every age, ON/OFF rules/RNG equal; action-menu reached",
+        "alternate species: JIGGLYPUFF player and opponent attackers 266/266 and 267/267 (sleep status from the displayed target field)"
+      ],
+      "palettePlan": "no plan, history invalidates (the D-PAL label is stale: no palette snapshot is consumed; docs/next-adapters-prep9.md s0/s1: the blend schedules are age-derived from battleBg.palette and species art)",
+      "spriteOrder": "gate: lent tracked order known, else null (Sing is the only planned sleep source; others invalidate). orderSeed (17 slots) = lend over [3,4,5,7,9,10..21]; the target's displayed sleep status comes from the field (healthbox is the queue's)",
+      "remaining": [
+        "later bodies are covered only by the tracked-order claim, not by the dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_DOUBLE_TEAM",
+      "id": 104,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep9-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 230 rows, player attacker only (prep7-double-team-player.json, first-body lab run ONIX -> GROVYLE, window 71..300 = activation 70 + 1; the staged post-AI-body history of the accepted fixture cannot be replayed by the plan applier): row -1, no #142 shadow row; opponent attacker returns null (no accepted evidence)",
+        "ordinary route seed 0 / streak 7 / index 2 (DELCATTY, first body, stat command no longer invalidates the order): adapter active every age, ON/OFF rules/RNG equal; action-menu reached",
+        "alternate species: no alternate-species dense proof (alternate carrier render-only)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "gate: lent tracked order known, else null. frontClone = 'b' when slot 4 precedes slot 3 in the lend (first body), 'a' otherwise (the post-AI-body history)",
+      "remaining": [
+        "later bodies are covered only by the tracked-order claim, not by the dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_FEATHER_DANCE",
+      "id": 297,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep9-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 168 rows both orientations (prep7-feather-dance-*.json, first-body lab runs PIDGEOTTO <-> ONIX): activation..script end (79..246 / 83..250), row 0; the controller's stat banner and messages after the script are queue commands; reducer age = live age + 44",
+        "ordinary route seed 3 / streak 0 / index 2 (PIDGEOTTO): adapter active every age, ON/OFF rules/RNG equal; action-menu reached",
+        "alternate species: no alternate-species dense proof (alternate carrier render-only)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "gate: lent tracked order known (the reducer simulates the persistent draw order itself; no config field; weak history dependence beyond the known-entry history)",
+      "remaining": [
+        "later bodies are covered only by the tracked-order claim, not by the dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",

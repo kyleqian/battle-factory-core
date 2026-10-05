@@ -118,6 +118,12 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // known tracked order: Swift, Trick, Frustration (friendship <= 30), Seismic Toss (damage 33..65), Horn Drill, Aurora Beam,
   // Uproar, Thunderbolt, Stockpile, Zap Cannon.
   129, 271, 218, 69, 32, 62, 253, 85, 254, 192,
+  // prep9 (docs/next-adapters-prep9.md; the D-PAL label is stale: no palette snapshot is consumed), each gated on the lent
+  // known tracked order: Giga Drain, Sunny Day, Mega Drain, Absorb, Dream Eater.
+  202, 241, 72, 71, 138,
+  // prep7 order-gated (docs/next-adapters-prep7.md s0, docs/sprite-order-policy-gaps.md): Double Team (player attacker only;
+  // frontClone from the lent order), Feather Dance (lend gate; the reducer simulates its own draw order).
+  104, 297,
   // order consumers (docs/order-consumer-prep.md): Grudge, first move body of a battle only (sprite-order input).
   288,
   // order consumers, order-independent (docs/order-consumer-prep.md §0): Ember (one sprite per sort window, ties resolve
@@ -192,6 +198,12 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     8, 214, 157, 126, 349,
     // prep8 (issue142-shadow-rows-extra.json): every window starts at the activation frame (row 0).
     129, 271, 218, 69, 32, 62, 253, 85, 254, 192,
+    // prep9 (issue142-shadow-rows-extra.json): Giga Drain, Sunny Day, Mega Drain, Dream Eater windows start at the
+    // activation frame (row 0). Absorb's window starts 10 frames after it (row -10, the Taunt convention): no row.
+    202, 241, 72, 138,
+    // Feather Dance (297): the live window starts at the activation frame (row 0). Double Team (104): the first window row is
+    // one frame after the activation (row -1): no row.
+    297,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -514,6 +526,18 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 85: return 237; // Thunderbolt 83..319 / 79..315.
     case 254: return 99; // Stockpile 205..303 / 207..305 (after a Peck body).
     case 192: return 112; // Zap Cannon 84..195 / 80..191.
+    // Double Team 71..300 (first-body lab run, activation 70; player attacker only, no accepted opponent evidence): row -1.
+    case 104: return request.attacker === 0 ? 230 : null;
+    // Feather Dance: activation..script end (79..246 / 83..250); the controller's stat banner and messages that follow are
+    // queue commands (prep7 s2.2). The reducer is relative to the printer, +44 at the activation frame.
+    case 297: return 168;
+    case 202: return 230; // Giga Drain 214..443 both orientations (activation..script end).
+    case 241: return 158; // Sunny Day 211..368.
+    case 72: return 218; // Mega Drain 75..292 / 79..296.
+    // Absorb 223..416 starts 10 frames after the activation (reducer age 0 = monbg-relative, Taunt convention: live age 0
+    // = first window row, ageOffset 0, no #142 shadow row); the script runs 2 rows past the window end (418), uncovered.
+    case 71: return 194;
+    case 138: return request.attacker === 0 ? 266 : 267; // Dream Eater 1308..1573 / 2146..2412 (after Tackle, Sing).
     case 349: return 142; // Dragon Dance (78..219 / 74..215): window start = activation, window end = script end.
     case 126: return 197; // Fire Blast (1147..1343 / 215..411): window start = activation, window end = script end.
     case 8: return 184; // Ice Punch script activation..first inactive row (staged 1966..2149 / 2339..2522); HP/text/freeze/Sitrus rows are queue commands.
@@ -1557,6 +1581,73 @@ export function liveMoveAnimationPresentation(
       }
       break;
     }
+    case 202: case 241: case 72: case 71: case 138: {
+      // prep9 (docs/next-adapters-prep9.md s0/s2): the allocator profiles are per-move constants (equal to the ROM first-free
+      // replay in 12/12 histories, and to the accepted literals), valid only on the known-entry baseline, which is exactly when
+      // the host lends the tracked order: no lend -> null. Order fields come from the lend; they are pixel-neutral (s2.3).
+      if (!spriteOrderInput?.known) return null;
+      const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
+      const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (fullOrder === null) return null;
+      const side = attacker.geometry.side;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const range = (from: number, to: number) => Array.from({ length: to - from + 1 }, (_, i) => from + i);
+      const healing = attackerAnchors.picOffsetPoint;
+      const seedFor = (slots: readonly number[]) => spriteOrderForSlots(lentState, slots);
+      const stars = [3, 4, 5, 3];
+      switch (request.moveId) {
+        case 241:
+          config = { move: "SUNNY_DAY", attacker, target, fieldProfile,
+            animationInputs: { raySlots: [3, 4, 5, 7], spriteOrder: fullOrder,
+              paletteBanks: { background: [0, 1, 2, 3], attackerPartner: side === "player" ? 17 : 18 } } };
+          break;
+        case 202: {
+          const orderSeed = seedFor([3, 4, 5, 7, 9, ...range(10, 21)]);
+          if (orderSeed === null) return null;
+          config = { move: "GIGA_DRAIN", attacker, target, fieldProfile, healingCenter: healing, absorptionCenter: healing,
+            allocatorProfile: { hitsplat: 3, orbs: [3, 4, 5, 7, 9, ...range(10, 19), 3, 20, 21, 4, 7, 9, 5, 11, 13],
+              stars, paletteController: 3, orderSeed } };
+          break;
+        }
+        case 72: {
+          const orderSeed = seedFor([3, 4, 5, 7, 9, ...range(10, 16)]);
+          if (orderSeed === null) return null;
+          config = { move: "MEGA_DRAIN", attacker, target, fieldProfile, healingCenter: healing, absorptionCenter: healing,
+            allocatorProfile: { hitsplat: 3, orbs: [3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 3, 15, 4, 5, 10, 16],
+              stars, paletteController: 3, orderSeed } };
+          break;
+        }
+        case 71:
+          config = { move: "ABSORB", attacker, target, fieldProfile, healingCenter: healing, absorptionCenter: healing,
+            allocatorProfile: { hitsplat: 3, orbs: [3, 4, 5, 7, 9, 3, 4, 10], stars, paletteController: 3 } };
+          break;
+        default: {
+          const orderSeed = seedFor([3, 4, 5, 7, 9, ...range(10, 21)]);
+          if (orderSeed === null) return null;
+          config = { move: "DREAM_EATER", attacker, target, fieldProfile, healingCenter: healing, absorptionCenter: healing,
+            targetRestOffset: { x2: targetAnchors.frontIdleRest.x2, y2: targetAnchors.frontIdleRest.y2 },
+            allocatorProfile: { orbs: [3, 4, 5, 7, 9, ...range(10, 19), 3, 20, 21, 4, 7, 9, 5, 11, 13], stars, orderSeed } };
+        }
+      }
+      break;
+    }
+    case 104: {
+      if (!spriteOrderInput?.known) return null;
+      const clonePair = spriteOrderForSlots({ known: true, free: spriteOrderInput.free, pendingDestroyed: [] }, [3, 4]);
+      if (clonePair === null) return null;
+      // The two clone sprites take slots 3 and 4; the one earlier in the lent order is drawn in front ("b" on a first body).
+      config = { move: "DOUBLE_TEAM", attacker, target,
+        fieldProfile: { ...fieldProfile, playerStatus: "none" },
+        animationProfile: { cloneAnchorAge: 0, cloneVisibleStartAge: 2, cloneVisibleEndAge: 129, statsBannerStartAge: 163,
+          statsBannerEndAge: 229, statsBannerBg1YAnchorAge: 166, frontClone: clonePair.indexOf(4) < clonePair.indexOf(3) ? "b" : "a" },
+        moveTextStartAge: -28 };
+      break;
+    }
+    case 297:
+      if (!spriteOrderInput?.known) return null;
+      config = { move: "FEATHER_DANCE", attacker, target, fieldProfile: { ...fieldProfile, playerStatus: "none" },
+        controllerProfile: { attackStageBefore: 0, attackStageAfter: 0 }, moveTextStartAge: 0, animationAgeOffset: 0 };
+      break;
     case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;
     case 248: config = { move: "FUTURE_SIGHT", attacker, target, fieldProfile }; break;
     case 342:
@@ -1582,5 +1673,7 @@ export function liveMoveAnimationPresentation(
     || request.moveId === 243 ? 7 : 0;
   // Sweet Scent's accepted rows start at reducer age -4 (the pointer-owned setup rows, sweetScentFramebuffer.ts:101).
   const setupAge = request.moveId === 230 ? 4 : 0;
-  return { config, age: wallAnchorOffset ? age - wallAnchorOffset : shineBody ? age - 1 : age - setupAge };
+  // Feather Dance: the reducer age is the printer-relative age, 44 at the activation frame (prep7 s2.2).
+  return { config, age: wallAnchorOffset ? age - wallAnchorOffset : shineBody ? age - 1
+    : request.moveId === 297 ? age + 44 : age - setupAge };
 }

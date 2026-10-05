@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 403,
-  "ids": 191,
+  "rows": 416,
+  "ids": 198,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -4251,6 +4251,143 @@
    "move": "ZAP_CANNON",
    "orientation": "opponent",
    "duration": 112,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 202,
+   "move": "GIGA_DRAIN",
+   "orientation": "player",
+   "duration": 230,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 202,
+   "move": "GIGA_DRAIN",
+   "orientation": "opponent",
+   "duration": 230,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 241,
+   "move": "SUNNY_DAY",
+   "orientation": "player",
+   "duration": 158,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 241,
+   "move": "SUNNY_DAY",
+   "orientation": "opponent",
+   "duration": 158,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 72,
+   "move": "MEGA_DRAIN",
+   "orientation": "player",
+   "duration": 218,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 72,
+   "move": "MEGA_DRAIN",
+   "orientation": "opponent",
+   "duration": 218,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 71,
+   "move": "ABSORB",
+   "orientation": "player",
+   "duration": 194,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 71,
+   "move": "ABSORB",
+   "orientation": "opponent",
+   "duration": 194,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 138,
+   "move": "DREAM_EATER",
+   "orientation": "player",
+   "duration": 266,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 138,
+   "move": "DREAM_EATER",
+   "orientation": "opponent",
+   "duration": 267,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 104,
+   "move": "DOUBLE_TEAM",
+   "orientation": "player",
+   "duration": 230,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 297,
+   "move": "FEATHER_DANCE",
+   "orientation": "player",
+   "duration": 168,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 297,
+   "move": "FEATHER_DANCE",
+   "orientation": "opponent",
+   "duration": 168,
    "expected": 0,
    "drawn": [
     0

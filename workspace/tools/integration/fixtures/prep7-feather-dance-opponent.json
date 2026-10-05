@@ -1,7 +1,7 @@
 {
   "schema": "prep7-adapter-draft/v1",
   "move": "FEATHER_DANCE",
-  "probe": "tools/battle-lab/mechanic-feather-dance-pidgeotto-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "scenario": "tools/battle-lab/mechanic-feather-dance-pidgeotto-onix.json",
   "attacker": {
     "species": "PIDGEOTTO",
@@ -17,15 +17,17 @@
   },
   "fieldProfile": {
     "playerHp": 117,
+    "playerMaxHp": 117,
     "opponentHp": 156,
-    "playerStatus": "none",
-    "playerGender": "female"
+    "opponentMaxHp": 156,
+    "playerGender": "female",
+    "opponentGender": "male"
   },
   "orientation": "opponent-front PIDGEOTTO -> ONIX",
   "verdict": "READY-WITH-PROVIDER (first-body bit blocked by the stat-command invalidation: NEEDS-ORDER-POLICY); ungated = approximate after the first body",
   "denseWindow": {
-    "startFrame": 46,
-    "endFrame": 445,
+    "startFrame": 83,
+    "endFrame": 250,
     "ageOffset": 0
   },
   "draft": {
