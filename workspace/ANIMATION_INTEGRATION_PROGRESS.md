@@ -1,5 +1,24 @@
 # Animation integration progress
 
+## 2026-10-04 (night) — sprite-order provider wired (first body) + Grudge: 158
+
+- Folded Opus worker `3bb021abb` (code `f279df7cc`, src `953b81b0a`) as
+  `0d212ae24`: provider API (`spriteOrderForSlots`, occupied prefix, body/gap
+  plan applier — TS replay 659/659, equal to Python; tests/harness only),
+  presentation-only order state beside the allocator host. Production supplies
+  a known order only to the battle's FIRST move body after a known entry with
+  no battle-start script events; invalidated by any other preceding command,
+  unknown graphics, switch-in, party menu, and after that body.
+- Grudge (288) live as the first order consumer (first body only; null →
+  bounded fallback otherwise). Supervisor dense 2 fixtures twice fresh, 418
+  rows/run, zero residual; route 288@57,3,0 PASS; seed 16 (opponent's Light
+  Screen first) falls back 0/209 with ON/OFF parity. Receipt
+  `order-wiring-supervisor-receipt.json`.
+- Running: order-consumer batch (Ember, Dragon Rage, Flamethrower always-on;
+  Heal Bell, Leaf Blade, Rock Throw, Blaze Kick, Perish Song first body).
+  Next: cross-body order tracking keyed on prompt / body / hit-animation /
+  stat events (`docs/sprite-order-gap-causes.md` §2).
+
 ## 2026-10-04 (night) — prep5 folded: 157 live adapters; order-consumer prep
 
 - Folded worker `ce8d7a09e` as `c23e165bb` (src tree `1f73449b5`): Mist Ball
