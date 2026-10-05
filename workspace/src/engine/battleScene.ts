@@ -48712,9 +48712,10 @@ export function renderSceneOnMovePresentation(
       x: attacker.geometry.spriteCorner.x + attackerIdle.x2,
       y: attacker.geometry.spriteCorner.y + attackerIdle.y2,
     };
+    // The opponent platform terrain's visible bottom is an absolute screen row (74); Pidgeotto's corner + 55 equals it.
     const attackerClipY =
       attacker.geometry.side === "opponent"
-        ? attackerCorner.y + 55
+        ? (liveField ? OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM : attackerCorner.y + 55)
         : 160;
     drawSpriteSheet(
       fb,
@@ -49056,7 +49057,12 @@ export function renderSceneOnMovePresentation(
     // later queue commands (status-animation / item), not to this 183-frame script (prep7 s2.2, s5.5).
     const playerArt = liveField ? liveSceneOnBattlerArt(player) : onixBackSprite;
     const opponentArt = liveField ? liveSceneOnBattlerArt(opponent) : grovyleFrontSprite;
-    const opponentIdle = liveField ? speciesFrontIdleRestOffsetOrZero(opponent.species) : { x2: 0, y2: 0 };
+    // AnimTask_ShakeMon (battle_anim_mon_movement.c:101-102) writes x2 = 0, y2 = 5 on its first call, replacing the target's
+    // settled idle offset for good (the shake ends at 0, :136-137). Its first y2 = 5 row is age 68 (the staged branch's
+    // 68/69 rows); the BG copy of the monbg target takes the x reset two rows earlier (the Aerial Ace rule: x reset at 57,
+    // ShakeMon's first y row at 59, aerialAce.ts aerialAceTargetSpriteXAtAge).
+    const opponentIdleBase = liveField ? speciesFrontIdleRestOffsetOrZero(opponent.species) : { x2: 0, y2: 0 };
+    const opponentIdle = target.geometry.side === "opponent" && view.age >= 66 ? { x2: 0, y2: 0 } : opponentIdleBase;
     const darken = (palette: RgbColor[]): RgbColor[] =>
       overlay.backgroundBlackCoeff === 0
         ? palette
@@ -50284,9 +50290,10 @@ export function renderSceneOnMovePresentation(
       x: attacker.geometry.spriteCorner.x + attackerIdle.x2,
       y: attacker.geometry.spriteCorner.y + attackerIdle.y2,
     };
+    // The opponent platform terrain's visible bottom is an absolute screen row (74); Pidgeotto's corner + 55 equals it.
     const attackerClipY =
       attacker.geometry.side === "opponent"
-        ? attackerCorner.y + 55
+        ? (liveField ? OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM : attackerCorner.y + 55)
         : 160;
     const hasTranslatedAttacker =
       view.attackerOffset.x2 !== 0

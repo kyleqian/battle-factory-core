@@ -1,0 +1,35 @@
+{
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 167,
+  "opponentMaxHp": 167,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "schema": "altspecies3-portable-source/v1",
+ "move": "ICE_PUNCH",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/altspecies3-scenarios/ice-punch-opponent-gengar-player-onix.json",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 262,
+  "frameCount": 184
+ },
+ "attacker": {
+  "species": "GENGAR",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "baseSourceFixture": "tools/integration/fixtures/prep7-ice-punch-lab-opponent.json",
+ "swap": {
+  "opponent": "GENGAR"
+ }
+}

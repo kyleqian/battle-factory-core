@@ -1,0 +1,33 @@
+{
+ "fieldProfile": {
+  "playerHp": 168,
+  "playerMaxHp": 168,
+  "opponentHp": 142,
+  "opponentMaxHp": 142,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "schema": "altspecies3-portable-source/v1",
+ "move": "ICE_PUNCH",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/altspecies3-scenarios/ice-punch-player-dragonair-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 78,
+  "endFrame": 261,
+  "frameCount": 184
+ },
+ "attacker": {
+  "species": "DRAGONAIR",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "baseSourceFixture": "tools/integration/fixtures/prep7-ice-punch-lab-player.json",
+ "swap": {}
+}
