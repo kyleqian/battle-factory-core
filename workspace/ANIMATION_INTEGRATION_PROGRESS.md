@@ -1,5 +1,20 @@
 # Animation integration progress
 
+## 2026-10-05 — final batch folded: 198 live adapters; session gates
+
+- Folded worker `3b64e52e9` as `09b92c56d`: Giga Drain, Sunny Day, Mega Drain,
+  Absorb (live age 0 = window start, activation + 10), Dream Eater (sleep from the
+  displayed field), Double Team (player attacker; frontClone from the lend; dense
+  source = prep7 first-body lab scenario), Feather Dance — all gated on the lent
+  order. Supervisor dense 25 fixtures (13 + 12 alternate species) twice fresh,
+  5,292 rows/run, zero residual; routes 7/7 PASS. Receipt `prep9-supervisor-receipt.json`.
+- Supervisor final gates on `09b92c56d`: typecheck, 1,508 files / 12,175 tests,
+  build 851 modules (`final-supervisor-gates-20261005.json`).
+- ISSUES #143 diagnosed (`a3511d54c`, `docs/castform-art-diagnosis.md`): CASTFORM
+  art/palette are exact; its Y placement comes from `sCastformBackSpriteYCoords`
+  (back delta 0) and `sCastformElevations` (13) that the app does not apply;
+  in-memory what-if exact 237/237 both sides.
+
 ## 2026-10-05 — prep8 batch folded: 191 live adapters; uncovered-unit evidence
 
 - Folded worker `6598eb715` as `4c7791984` (src `4bf17bef1`): Swift, Trick,
