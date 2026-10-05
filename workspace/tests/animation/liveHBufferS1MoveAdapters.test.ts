@@ -6,7 +6,7 @@ import type { BattleResolutionDisplayedField } from "../../src/engine/battleReso
 import type { BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import {
-  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveBattlerAnchors, liveBattlerCoordAttrs,
+  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveBattlerAnchors,
   liveMoveAnimationDuration, liveMoveAnimationPresentation,
 } from "../../src/engine/liveMoveAnimation.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
