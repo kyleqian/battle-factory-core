@@ -21,6 +21,7 @@ import {
   invalidateLiveSpriteOrderHost,
   lendLiveSpriteOrder,
   liveSpriteOrderHostOrder,
+  seedLiveSpriteOrderHostFromBattleStart,
   type LiveSpriteOrderHost,
 } from "./liveSpriteOrderHost.ts";
 import {
@@ -105,7 +106,7 @@ import type {
 import { deriveBattleResolutionFromTerminalBoundary } from "./battleResolutionAdapter.ts";
 import { mapStatus1ToBattleStatus } from "./battleResolutionAdapter.ts";
 import {
-  createFreshFactoryBattle,
+  initializeFreshFactoryBattle,
 } from "./factoryBattleStart.ts";
 import { BATTLE_SCRIPT_STATUS2_MASKS } from "./battleScriptSourceConstants.ts";
 import {
@@ -1048,7 +1049,7 @@ function startCurrentBattle(
   if (player === null || opponentRecords === undefined) {
     return fail("generated Factory battle start requires both full parties");
   }
-  const started = createFreshFactoryBattle({
+  const initialized = initializeFreshFactoryBattle({
     requestId: state.nextBattleRequestId,
     rngSeed: state.round.rules.rngValue,
     battleScene: state.config.battleScene ?? "off",
@@ -1056,6 +1057,8 @@ function startCurrentBattle(
     playerParty: asBattleScriptParty(player),
     opponentParty: asBattleScriptParty(asKernelParty(opponentRecords)),
   });
+  const started = initialized.state;
+  const battleStartOrderHost = seedLiveSpriteOrderHostFromBattleStart(initialized.events);
   const callStart = state.facilityRngCalls;
   if (
     started.boundary.kind !== "decision-required"
@@ -1080,17 +1083,10 @@ function startCurrentBattle(
           battleCallStart: callStart,
           commandKey: "",
           host: createKnownEntrySpriteAllocatorProvider("ordinary-factory").firstMove,
-          // An entry with battle-start script events (Intimidate-class
-          // animations, docs/sprite-order-body-plans.md §4) starts from a
-          // different order: refuse rather than assume the known entry.
-          // nextEventSequence counts the battle-start lifecycle events
-          // (factoryBattleStart.ts initializeFreshFactoryBattle).
-          order: started.nextEventSequence === 0
-            ? knownEntrySpriteOrderState("ordinary-factory")
-            : invalidateSpriteOrderState(knownEntrySpriteOrderState("ordinary-factory")),
-          orderHost: createLiveSpriteOrderHost(started.nextEventSequence === 0
-            ? knownEntrySpriteOrderState("ordinary-factory")
-            : invalidateSpriteOrderState(knownEntrySpriteOrderState("ordinary-factory"))),
+          // Battle-start script events: none = the known entry, exactly one Intimidate = pre-prompt state + stat
+          // animation, anything else is unknown history (liveSpriteOrderHost.ts seedLiveSpriteOrderHostFromBattleStart).
+          order: liveSpriteOrderHostOrder(battleStartOrderHost),
+          orderHost: battleStartOrderHost,
         })
       : undefined,
     retainedLockedActionPresentationOwner: null,

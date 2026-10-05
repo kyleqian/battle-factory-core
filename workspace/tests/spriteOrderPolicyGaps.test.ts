@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { run } from "../tools/integration/spriteOrderPolicyGapsReplay.ts";
+import { beginLiveSpriteOrderTurn, seedLiveSpriteOrderHostFromBattleStart, liveSpriteOrderHostOrder } from "../src/engine/liveSpriteOrderHost.ts";
+import { knownEntryPrePromptSpriteOrderState } from "../src/engine/spriteOrderProvider.ts";
 import { prep7Replay } from "../tools/integration/prep7Replay.ts";
 
 // docs/sprite-order-policy-gaps.md: ROM event streams (two-run-identical direct-mGBA probes, fixtures/sprite-order-policy-gaps/events) replayed through the PURE transform.
@@ -24,6 +26,22 @@ describe("sprite-order policy gaps (S10A)", () => {
     expect(q2.promptOnPreEqualsKnownEntryConstant).toBe(true);
     expect(q2.proposed).toEqual({ edges: 24, exact: 24, mismatch: 0 });
     expect(q2.controlConstantSeed.mismatch).toBe(12);
+  });
+
+  it("Q2 production seed API: seedLiveSpriteOrderHostFromBattleStart + prompt cycle is 12/12 at the Intimidate edge and 12/12 at the first move edge", () => {
+    const rows = read("events/intimidate.json") as { intimidateEdge: { obsF: number[] }; firstMoveEdge: { obsF: number[] }; statArg: number }[];
+    const ev = (kind: string, extra: object = {}) => ({ sequence: 0, payload: { kind, ...extra }, provenance: undefined }) as any;
+    let atIntimidate = 0, atMove = 0;
+    for (const row of rows) {
+      const events = [ev("stat-stage-change"), ev("animation", { animationId: "STATS_CHANGE", battler: 1, target: 0, arguments: [String(row.statArg)] }), ev("message")];
+      const host = seedLiveSpriteOrderHostFromBattleStart(events);
+      // the Intimidate edge is observed at the animation's activation: the pre-prompt state the seed starts from
+      const pre = knownEntryPrePromptSpriteOrderState("ordinary-factory");
+      if (pre.known && JSON.stringify(pre.free) === JSON.stringify(row.intimidateEdge.obsF) && liveSpriteOrderHostOrder(host).known) atIntimidate += 1;
+      const after = liveSpriteOrderHostOrder(beginLiveSpriteOrderTurn(host, 1, true));
+      if (after.known && JSON.stringify(after.free) === JSON.stringify(row.firstMoveEdge.obsF)) atMove += 1;
+    }
+    expect([rows.length, atIntimidate, atMove]).toEqual([12, 12, 12]);
   });
 
   it("Q3: the Endeavor plan keeps the lab order exact and extends the strict real-route replay with 0 mismatches", () => {
