@@ -1,0 +1,25 @@
+--- src/engine/battleScene.ts
++++ src/engine/battleScene.patched.ts
+@@ -54316,6 +54316,7 @@
+   );
+ }
+ 
++export const patchProof = { suppressShadow: false };
+ export function renderBattleResolutionSceneOffView(
+   fb: Uint8Array,
+   view: BattleResolutionPresentationRenderView,
+@@ -54425,12 +54426,13 @@
+         faint.sink.keptRows,
+       );
+     } else {
++      if (!patchProof.suppressShadow) drawGeneratedOpponentShadow(fb, view.fieldArt);
+       drawSpriteSheet(
+         fb,
+         view.fieldArt.opponent.pic.tileset as Tileset,
+         view.fieldArt.opponent.pic.palette as RgbColor[],
+         view.fieldArt.opponent.origin.x,
+-        view.fieldArt.opponent.origin.y,
++        view.fieldArt.opponent.origin.y - enemyMonElevation(view.fieldArt.opponent.speciesSymbol),
+       );
+     }
+   }

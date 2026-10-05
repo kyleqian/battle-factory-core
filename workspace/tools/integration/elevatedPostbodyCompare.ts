@@ -9,7 +9,8 @@
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
-import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
+// EP_RENDERER=battleScene.patched.ts renders through an untracked in-memory-patched copy (patch proof, never committed).
+const { renderBattleResolutionLiveView, patchProof } = await import(`../../src/engine/${process.env.EP_RENDERER ?? "battleScene.ts"}`);
 import { liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";
 import { liveView, type Fixture } from "./liveAdapterFramebuffer.ts";
 
@@ -26,7 +27,11 @@ for (const path of fixtures) {
   const f: Fixture = source.sourceFixture ? { ...JSON.parse(readFileSync(source.sourceFixture, "utf8")), ...source } : source;
   const window = (f.denseWindow ?? f.sourceWindow)!;
   const E = window.endFrame;
-  const request = (liveView(f, 0).effect as { request: never }).request;
+  const scriptEndMinusE = (f as unknown as { speciesAudit?: { swappedBody?: number[] } }).speciesAudit?.swappedBody?.[2] ?? E;
+  let request: never;
+  try { request = (liveView(f, 0).effect as { request: never }).request; } catch (e) {
+    out.push({ fixture: basename(path), error: String((e as Error).message).slice(0, 120) }); continue;
+  }
   const duration = liveMoveAnimationDuration(request)!;
   const view = (k: number) => k <= 0 ? liveView(f, Math.min(duration - 1, E - window.startFrame + k))
     : { ...liveView(f, 0), effect: null };
@@ -36,13 +41,15 @@ for (const path of fixtures) {
     const probe = JSON.parse(readFileSync(join(dir, "probe.json"), "utf8"));
     const frames = new Map<number, string>(Array.isArray(probe.sha256)
       ? probe.sha256.map((s: string, i: number) => [i, s]) : (probe.frames ?? probe.rows).map((r: { frame: number; sha256: string }) => [r.frame, r.sha256]));
-    const rows: { k: number; residual: number; bbox?: number[]; pairs?: string; shift?: string }[] = [];
+    const rows: { k: number; residual: number; romShadow: boolean; bbox?: number[]; pairs?: string; shift?: string }[] = [];
     for (let k = -3; k <= tail; k++) {
       const frame = E + k;
       if (!existsSync(join(dir, "rgb", `${String(frame).padStart(5, "0")}.rgb`))) break;
       const rgb = readFileSync(join(dir, "rgb", `${String(frame).padStart(5, "0")}.rgb`));
       if (hash(rgb) !== frames.get(frame)) throw new Error(`${dir}: RGB receipt drift at ${frame}`);
       const rgba = new Uint8Array(240 * 160 * 4);
+      // Patch proof only: the shadow returns on framebuffer scriptEnd + 1 (scriptEnd = first frame with no active script).
+      if (patchProof) patchProof.suppressShadow = k > 0 && k <= scriptEndMinusE - E;
       renderBattleResolutionLiveView(rgba, view(k) as never);
       let residual = 0, x0 = 240, y0 = 160, x1 = -1, y1 = -1; const pairs = new Map<string, number>();
       for (let p = 0; p < 240 * 160; p++) {
@@ -52,7 +59,10 @@ for (const path of fixtures) {
         const key = `${px(rgb, p, 3).toString(16).padStart(6, "0")}<-${px(rgba, p, 4).toString(16).padStart(6, "0")}`;
         pairs.set(key, (pairs.get(key) ?? 0) + 1);
       }
-      const row: (typeof rows)[number] = { k, residual };
+      // ROM elevated-enemy shadow: the 32x8 blob at x160..191 y65..72 in colour 526b63 (>= 100 px = drawn).
+      let shadowPx = 0;
+      for (let y = 65; y <= 72; y++) for (let x = 160; x <= 191; x++) if (px(rgb, y * 240 + x, 3) === 0x526b63) shadowPx++;
+      const row: (typeof rows)[number] = { k, residual, romShadow: shadowPx >= 100 };
       if (residual > 0) {
         row.bbox = [x0, y0, x1, y1];
         row.pairs = [...pairs].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([c, n]) => `${c}:${n}`).join(" ");
@@ -72,7 +82,9 @@ for (const path of fixtures) {
       rows.push(row);
       if (process.env.EP_DIAG && residual > 0 && run === 0) console.error(`${basename(path)} k=${k} ${residual} bbox ${row.bbox} ${row.pairs} bestShift(live->rom dx,dy:res) ${row.shift}`);
     }
+    const sa = (f as unknown as { speciesAudit?: { swappedBody?: number[] } }).speciesAudit?.swappedBody;
     out.push({ fixture: basename(path), run, E, window: windowArg, rows: rows.length,
+      scriptEndMinusE: sa ? sa[2]! - E : null, romShadowRuns: rows.filter((r, i) => r.romShadow !== (rows[i - 1]?.romShadow ?? false)).map(r => `${r.romShadow ? "+" : "-"}${r.k}`),
       bodyRowsResidual: rows.filter(r => r.k <= 0).reduce((a, r) => a + r.residual, 0),
       postRowsResidual: rows.filter(r => r.k > 0).reduce((a, r) => a + r.residual, 0),
       postExact: rows.filter(r => r.k > 0 && r.residual === 0).length, postRows: rows.filter(r => r.k > 0).length,
