@@ -368,7 +368,7 @@ export function healBellAtAge(
   };
 }
 
-const HEAL_BELL_REUSED_ORDER_SLOTS = [4, 5, 7, 9, 10, 11] as const;
+export const HEAL_BELL_REUSED_ORDER_SLOTS = [4, 5, 7, 9, 10, 11] as const;
 
 /**
  * Back-to-front note order after replaying the source's persistent stable OAM
@@ -381,8 +381,10 @@ export function healBellNotesInPainterOrder(
   side: "player" | "opponent",
   animationCenter: Readonly<{ x: number; y: number }>,
   battlePositionCenter: Readonly<{ x: number; y: number }>,
+  /** Relative `sSpriteOrder` of the six reused slots at activation; the accepted staged history assumes ascending. */
+  initialOrder: readonly number[] = HEAL_BELL_REUSED_ORDER_SLOTS,
 ): readonly HealBellNote[] {
-  let order: number[] = [...HEAL_BELL_REUSED_ORDER_SLOTS];
+  let order: number[] = [...initialOrder];
   for (let tick = 0; tick <= age; tick += 1) {
     const state = healBellAtAge(tick, side, animationCenter, battlePositionCenter);
     order = sortGbaSpriteOrder(order, order.map((slot) => {

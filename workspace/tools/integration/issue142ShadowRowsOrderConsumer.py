@@ -7,7 +7,9 @@ import json, pathlib
 here = pathlib.Path(__file__).parent
 p = here / "fixtures/issue142-shadow-rows-extra.json"
 d = json.loads(p.read_text())
-spec = [(288, "GRUDGE", "grudge")]
+spec = [(288, "GRUDGE", "grudge"), (52, "EMBER", "ember"), (82, "DRAGON_RAGE", "dragon-rage"), (53, "FLAMETHROWER", "flamethrower"),
+        (88, "ROCK_THROW", "rock-throw"), (215, "HEAL_BELL", "heal-bell"), (195, "PERISH_SONG", "perish-song"),
+        (348, "LEAF_BLADE", "leaf-blade"), (299, "BLAZE_KICK", "blaze-kick")]
 owned = {s[0] for s in spec}
 d["rows"] = [r for r in d["rows"] if r["id"] not in owned]
 for id_, move, stem in spec:

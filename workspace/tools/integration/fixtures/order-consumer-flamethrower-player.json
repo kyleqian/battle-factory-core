@@ -17,16 +17,18 @@
   },
   "fieldProfile": {
     "playerHp": 117,
+    "playerMaxHp": 117,
     "opponentHp": 142,
+    "opponentMaxHp": 142,
     "playerStatus": "none",
     "playerGender": "female",
     "opponentGender": "male"
   },
   "orientation": "player-back ONIX -> opponent-front MURKROW",
   "denseWindow": {
-    "startFrame": 406,
+    "startFrame": 395,
     "endFrame": 520,
-    "ageOffset": 0
+    "ageOffset": -11
   },
   "draft": {
     "activationFrame": 391,
@@ -105,5 +107,11 @@
       ]
     },
     "pins": "tools/integration/fixtures/order-consumer-pins.json"
-  }
+  },
+  "precedingBodies": [
+    {
+      "moveId": 259,
+      "side": "opponent"
+    }
+  ]
 }

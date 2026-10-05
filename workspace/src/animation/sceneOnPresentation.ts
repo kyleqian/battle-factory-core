@@ -2053,6 +2053,8 @@ export interface SceneOnHealBellConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Live host order of slots 4,5,7,9,10,11 at activation (docs/order-consumer-prep.md §0); staged = ascending. */
+  readonly noteOrderSeed?: readonly number[];
 }
 
 /** Fire Blast presentation only; damage and battle state remain battle-owned. */
@@ -3012,6 +3014,8 @@ export interface SceneOnLeafBladeConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   /** Source-resolved target geometry consumed by AnimTask_LeafBlade. */
   readonly targetProfile: Readonly<LeafBladeTargetGeometry>;
+  /** Live host order of `LEAF_BLADE_OAM_ORDER_SLOTS` at activation (docs/order-consumer-prep.md §0); staged = ascending. */
+  readonly oamOrderSeed?: readonly number[];
 }
 
 export interface SceneOnFocusEnergyConfig {
@@ -3528,6 +3532,8 @@ export interface SceneOnPerishSongConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnPerishSongFieldProfile>;
+  /** Live host front-to-back note order for equal-centerY ties (`perishSongNoteOrderFromFree`); staged = oamSlot rule. */
+  readonly noteOrderSeed?: readonly number[];
 }
 
 export interface SceneOnNeedleArmConfig {

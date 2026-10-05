@@ -17,7 +17,9 @@
   },
   "fieldProfile": {
     "playerHp": 142,
+    "playerMaxHp": 142,
     "opponentHp": 69,
+    "opponentMaxHp": 117,
     "playerStatus": "none",
     "playerGender": "female",
     "opponentGender": "male"
@@ -62,5 +64,11 @@
       "firstCreateMatchesObserved": true
     },
     "pins": "tools/integration/fixtures/order-consumer-pins.json"
-  }
+  },
+  "precedingBodies": [
+    {
+      "moveId": 185,
+      "side": "player"
+    }
+  ]
 }

@@ -77,6 +77,8 @@ const ANIMATION = [0, 1, 2, 3, 4, 5, 6] as const;
 const TILE_CELL = [7, 8, 5, 7, 4, 4, 7] as const;
 const H_FLIP = [false, false, false, true, false, true, false] as const;
 const TRAIL_OAM_SLOTS = [4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 16] as const;
+/** Slots whose relative `sSpriteOrder` seeds the persistent sort (blade slot 3 + the trail slots). */
+export const LEAF_BLADE_OAM_ORDER_SLOTS: readonly number[] = Object.freeze([3, ...TRAIL_OAM_SLOTS]);
 
 function trailSpawnAge(spawnIndex: number): number {
   return ARC_FIRST_AGE
@@ -242,8 +244,10 @@ export function leafBladeDisplayedOamOrderAtAge(
   attackerSide: LeafBladeSide,
   targetSide: LeafBladeSide,
   geometry: Readonly<LeafBladeTargetGeometry>,
+  /** Relative order of those slots at activation; the accepted staged history assumes ascending. */
+  initialOrder: readonly number[] = LEAF_BLADE_OAM_ORDER_SLOTS,
 ): readonly number[] {
-  const order = [3, ...TRAIL_OAM_SLOTS];
+  const order = [...initialOrder];
   for (let displayAge = 0; displayAge <= age; displayAge += 1) {
     const created = leafBladeAtAge(
       displayAge - 2,

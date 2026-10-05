@@ -1889,6 +1889,294 @@
     "body": "normal",
     "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
    }
+  },
+  {
+   "id": 52,
+   "move": "EMBER",
+   "orientation": "player",
+   "variant": "order-consumer-ember-player",
+   "activationFrame": 384,
+   "windowStart": 388,
+   "ageOffset": 0,
+   "shadowRow": -4,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/order-consumer-ember-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 52,
+   "move": "EMBER",
+   "orientation": "opponent",
+   "variant": "order-consumer-ember-opponent",
+   "activationFrame": 438,
+   "windowStart": 442,
+   "ageOffset": 0,
+   "shadowRow": -4,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/order-consumer-ember-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 82,
+   "move": "DRAGON_RAGE",
+   "orientation": "player",
+   "variant": "order-consumer-dragon-rage-player",
+   "activationFrame": 82,
+   "windowStart": 89,
+   "ageOffset": 0,
+   "shadowRow": -7,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/order-consumer-dragon-rage-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 82,
+   "move": "DRAGON_RAGE",
+   "orientation": "opponent",
+   "variant": "order-consumer-dragon-rage-opponent",
+   "activationFrame": 86,
+   "windowStart": 93,
+   "ageOffset": 0,
+   "shadowRow": -7,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/order-consumer-dragon-rage-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 53,
+   "move": "FLAMETHROWER",
+   "orientation": "player",
+   "variant": "order-consumer-flamethrower-player",
+   "activationFrame": 391,
+   "windowStart": 395,
+   "ageOffset": -11,
+   "shadowRow": -15,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/order-consumer-flamethrower-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 53,
+   "move": "FLAMETHROWER",
+   "orientation": "opponent",
+   "variant": "order-consumer-flamethrower-opponent",
+   "activationFrame": 445,
+   "windowStart": 449,
+   "ageOffset": -11,
+   "shadowRow": -15,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/order-consumer-flamethrower-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 88,
+   "move": "ROCK_THROW",
+   "orientation": "player",
+   "variant": "order-consumer-rock-throw-player",
+   "activationFrame": 296,
+   "windowStart": 296,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/order-consumer-rock-throw-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 88,
+   "move": "ROCK_THROW",
+   "orientation": "opponent",
+   "variant": "order-consumer-rock-throw-opponent",
+   "activationFrame": 296,
+   "windowStart": 296,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/order-consumer-rock-throw-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 215,
+   "move": "HEAL_BELL",
+   "orientation": "player",
+   "variant": "order-consumer-heal-bell-player",
+   "activationFrame": 209,
+   "windowStart": 209,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/order-consumer-heal-bell-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 215,
+   "move": "HEAL_BELL",
+   "orientation": "opponent",
+   "variant": "order-consumer-heal-bell-opponent",
+   "activationFrame": 210,
+   "windowStart": 210,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/order-consumer-heal-bell-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 195,
+   "move": "PERISH_SONG",
+   "orientation": "player",
+   "variant": "order-consumer-perish-song-player",
+   "activationFrame": 71,
+   "windowStart": 71,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/order-consumer-perish-song-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 195,
+   "move": "PERISH_SONG",
+   "orientation": "opponent",
+   "variant": "order-consumer-perish-song-opponent",
+   "activationFrame": 75,
+   "windowStart": 75,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/order-consumer-perish-song-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 348,
+   "move": "LEAF_BLADE",
+   "orientation": "player",
+   "variant": "order-consumer-leaf-blade-player",
+   "activationFrame": 76,
+   "windowStart": 76,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/order-consumer-leaf-blade-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 348,
+   "move": "LEAF_BLADE",
+   "orientation": "opponent",
+   "variant": "order-consumer-leaf-blade-opponent",
+   "activationFrame": 80,
+   "windowStart": 80,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/order-consumer-leaf-blade-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 299,
+   "move": "BLAZE_KICK",
+   "orientation": "player",
+   "variant": "order-consumer-blaze-kick-player",
+   "activationFrame": 389,
+   "windowStart": 399,
+   "ageOffset": 0,
+   "shadowRow": -10,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/order-consumer-blaze-kick-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 299,
+   "move": "BLAZE_KICK",
+   "orientation": "opponent",
+   "variant": "order-consumer-blaze-kick-opponent",
+   "activationFrame": 443,
+   "windowStart": 453,
+   "ageOffset": 0,
+   "shadowRow": -10,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/order-consumer-blaze-kick-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
+   }
   }
  ]
 }
