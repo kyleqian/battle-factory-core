@@ -15,14 +15,15 @@ import type { LiveSpriteOrderHost } from "../../src/engine/liveSpriteOrderHost.t
 class StallError extends Error {}
 
 export interface OrderHostView {
-  known: boolean; free: readonly number[]; occupied: readonly number[];
+  known: boolean; free: readonly number[]; occupied: readonly number[]; invalidReason: string | null;
   battlerSlots: Readonly<{ player: number | null; opponent: number | null }>;
   cursor: Readonly<{ requestId: number; segmentIndex: number; nextEventIndex: number; drained: boolean }> | null;
 }
 function orderHostView(host: LiveSpriteOrderHost | undefined): OrderHostView | undefined {
   if (!host) return undefined;
   const { cursor: plan, battlerSlots } = host.tracker;
-  return { known: plan.order.known, free: plan.order.free, occupied: plan.occupied, battlerSlots, cursor: host.cursor };
+  return { known: plan.order.known, free: plan.order.free, occupied: plan.occupied, invalidReason: host.tracker.invalidReason,
+    battlerSlots, cursor: host.cursor };
 }
 
 /** Legal generated rentals/opponent; only ordinary command input follows generation. */
