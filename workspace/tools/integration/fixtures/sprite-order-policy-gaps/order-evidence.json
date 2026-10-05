@@ -1,0 +1,431 @@
+{
+ "schema": "sprite-order-policy-gaps-order/v1",
+ "rows": [
+  {
+   "scenario": "dt-player",
+   "runsIdentical": true,
+   "sha256": {
+    "calls": "06211db96f3a7b9d",
+    "rows": "2346bcce727a7255"
+   },
+   "move": 104,
+   "commitDestroyFrame": 2041,
+   "bodyLaunchFrame": 2081,
+   "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0,
+   "statAnimationFrame": 2243,
+   "statAnimationArgs": [
+    0,
+    0,
+    0,
+    1,
+    21
+   ],
+   "bodyAllocatorCalls": 2,
+   "lastBodyCallFrame": 2210,
+   "statLaunchAfterBodyLastCall": true,
+   "statCopyCalls": [
+    [
+     2245,
+     "CreateSprite",
+     "CreateInvisibleSpriteWithCallback+0x10"
+    ],
+    [
+     2245,
+     "CreateSpriteAt",
+     "CreateSprite+0x34"
+    ],
+    [
+     2310,
+     "DestroySprite",
+     "StatsChangeAnimation_Step3+0x136"
+    ]
+   ]
+  },
+  {
+   "scenario": "dt-opponent",
+   "runsIdentical": true,
+   "sha256": {
+    "calls": "5b3dc299a140564a",
+    "rows": "3814d74df0d9d891"
+   },
+   "move": 104,
+   "commitDestroyFrame": 2041,
+   "bodyLaunchFrame": 2085,
+   "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0,
+   "statAnimationFrame": 2247,
+   "statAnimationArgs": [
+    1,
+    1,
+    1,
+    1,
+    21
+   ],
+   "bodyAllocatorCalls": 2,
+   "lastBodyCallFrame": 2215,
+   "statLaunchAfterBodyLastCall": true,
+   "statCopyCalls": [
+    [
+     2249,
+     "CreateSprite",
+     "CreateInvisibleSpriteWithCallback+0x10"
+    ],
+    [
+     2249,
+     "CreateSpriteAt",
+     "CreateSprite+0x34"
+    ],
+    [
+     2314,
+     "DestroySprite",
+     "StatsChangeAnimation_Step3+0x136"
+    ]
+   ]
+  },
+  {
+   "scenario": "ft-player",
+   "runsIdentical": true,
+   "sha256": {
+    "calls": "b7d0a2cd9cc68c6d",
+    "rows": "75b7fe3dc900f5af"
+   },
+   "move": 313,
+   "commitDestroyFrame": 2041,
+   "bodyLaunchFrame": 2081,
+   "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0,
+   "statAnimationFrame": 2168,
+   "statAnimationArgs": [
+    1,
+    1,
+    1,
+    1,
+    50
+   ],
+   "bodyAllocatorCalls": 16,
+   "lastBodyCallFrame": 2163,
+   "statLaunchAfterBodyLastCall": true,
+   "statCopyCalls": [
+    [
+     2170,
+     "CreateSprite",
+     "CreateInvisibleSpriteWithCallback+0x10"
+    ],
+    [
+     2170,
+     "CreateSpriteAt",
+     "CreateSprite+0x34"
+    ],
+    [
+     2257,
+     "DestroySprite",
+     "StatsChangeAnimation_Step3+0x136"
+    ]
+   ]
+  },
+  {
+   "scenario": "ft-opponent",
+   "runsIdentical": true,
+   "sha256": {
+    "calls": "4852c19abdeac9c0",
+    "rows": "85c261d4e767eeef"
+   },
+   "move": 313,
+   "commitDestroyFrame": 2041,
+   "bodyLaunchFrame": 2085,
+   "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0,
+   "statAnimationFrame": 2172,
+   "statAnimationArgs": [
+    0,
+    0,
+    0,
+    1,
+    50
+   ],
+   "bodyAllocatorCalls": 16,
+   "lastBodyCallFrame": 2167,
+   "statLaunchAfterBodyLastCall": true,
+   "statCopyCalls": [
+    [
+     2174,
+     "CreateSprite",
+     "CreateInvisibleSpriteWithCallback+0x10"
+    ],
+    [
+     2174,
+     "CreateSpriteAt",
+     "CreateSprite+0x34"
+    ],
+    [
+     2261,
+     "DestroySprite",
+     "StatsChangeAnimation_Step3+0x136"
+    ]
+   ]
+  },
+  {
+   "scenario": "ftb-player",
+   "runsIdentical": true,
+   "sha256": {
+    "calls": "510359bc9d89a44b",
+    "rows": "f3e29487780fc719"
+   },
+   "move": 313,
+   "commitDestroyFrame": 2041,
+   "bodyLaunchFrame": 2307,
+   "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 7,
+   "statAnimationFrame": 2394,
+   "statAnimationArgs": [
+    1,
+    1,
+    1,
+    1,
+    50
+   ],
+   "bodyAllocatorCalls": 16,
+   "lastBodyCallFrame": 2389,
+   "statLaunchAfterBodyLastCall": true,
+   "statCopyCalls": [
+    [
+     2396,
+     "CreateSprite",
+     "CreateInvisibleSpriteWithCallback+0x10"
+    ],
+    [
+     2396,
+     "CreateSpriteAt",
+     "CreateSprite+0x34"
+    ],
+    [
+     2483,
+     "DestroySprite",
+     "StatsChangeAnimation_Step3+0x136"
+    ]
+   ]
+  },
+  {
+   "scenario": "ftb-opponent",
+   "runsIdentical": true,
+   "sha256": {
+    "calls": "fb470ee2f6696d01",
+    "rows": "f94c4dc5ff67e922"
+   },
+   "move": 313,
+   "commitDestroyFrame": 2041,
+   "bodyLaunchFrame": 2082,
+   "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0,
+   "statAnimationFrame": 2169,
+   "statAnimationArgs": [
+    0,
+    0,
+    0,
+    1,
+    50
+   ],
+   "bodyAllocatorCalls": 16,
+   "lastBodyCallFrame": 2164,
+   "statLaunchAfterBodyLastCall": true,
+   "statCopyCalls": [
+    [
+     2171,
+     "CreateSprite",
+     "CreateInvisibleSpriteWithCallback+0x10"
+    ],
+    [
+     2171,
+     "CreateSpriteAt",
+     "CreateSprite+0x34"
+    ],
+    [
+     2258,
+     "DestroySprite",
+     "StatsChangeAnimation_Step3+0x136"
+    ]
+   ]
+  },
+  {
+   "scenario": "ftc-player",
+   "runsIdentical": true,
+   "sha256": {
+    "calls": "9df6da5c579f8a46",
+    "rows": "2b6b5e51d224d0c0"
+   },
+   "move": 313,
+   "commitDestroyFrame": 2041,
+   "bodyLaunchFrame": 2232,
+   "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 7,
+   "statAnimationFrame": 2319,
+   "statAnimationArgs": [
+    1,
+    1,
+    1,
+    1,
+    50
+   ],
+   "bodyAllocatorCalls": 16,
+   "lastBodyCallFrame": 2314,
+   "statLaunchAfterBodyLastCall": true,
+   "statCopyCalls": [
+    [
+     2321,
+     "CreateSprite",
+     "CreateInvisibleSpriteWithCallback+0x10"
+    ],
+    [
+     2321,
+     "CreateSpriteAt",
+     "CreateSprite+0x34"
+    ],
+    [
+     2408,
+     "DestroySprite",
+     "StatsChangeAnimation_Step3+0x136"
+    ]
+   ]
+  },
+  {
+   "scenario": "ftc-opponent",
+   "runsIdentical": true,
+   "sha256": {
+    "calls": "779788a9129d30be",
+    "rows": "0d15c9a7b799a299"
+   },
+   "move": 313,
+   "commitDestroyFrame": 2041,
+   "bodyLaunchFrame": 2087,
+   "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0,
+   "statAnimationFrame": 2174,
+   "statAnimationArgs": [
+    0,
+    0,
+    0,
+    1,
+    50
+   ],
+   "bodyAllocatorCalls": 16,
+   "lastBodyCallFrame": 2169,
+   "statLaunchAfterBodyLastCall": true,
+   "statCopyCalls": [
+    [
+     2176,
+     "CreateSprite",
+     "CreateInvisibleSpriteWithCallback+0x10"
+    ],
+    [
+     2176,
+     "CreateSpriteAt",
+     "CreateSprite+0x34"
+    ],
+    [
+     2263,
+     "DestroySprite",
+     "StatsChangeAnimation_Step3+0x136"
+    ]
+   ]
+  },
+  {
+   "scenario": "fd-player",
+   "runsIdentical": true,
+   "sha256": {
+    "calls": "f74ae99e192ba0d1",
+    "rows": "22180bcd959852c2"
+   },
+   "move": 297,
+   "commitDestroyFrame": 2041,
+   "bodyLaunchFrame": 2085,
+   "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0,
+   "statAnimationFrame": 2257,
+   "statAnimationArgs": [
+    1,
+    1,
+    1,
+    1,
+    46
+   ],
+   "bodyAllocatorCalls": 16,
+   "lastBodyCallFrame": 2248,
+   "statLaunchAfterBodyLastCall": true,
+   "statCopyCalls": [
+    [
+     2259,
+     "CreateSprite",
+     "CreateInvisibleSpriteWithCallback+0x10"
+    ],
+    [
+     2259,
+     "CreateSpriteAt",
+     "CreateSprite+0x34"
+    ],
+    [
+     2346,
+     "DestroySprite",
+     "StatsChangeAnimation_Step3+0x136"
+    ]
+   ]
+  },
+  {
+   "scenario": "fd-opponent",
+   "runsIdentical": true,
+   "sha256": {
+    "calls": "18b3d9adfbdc5bc7",
+    "rows": "cb29a94a54d8a01d"
+   },
+   "move": 297,
+   "commitDestroyFrame": 2041,
+   "bodyLaunchFrame": 2089,
+   "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0,
+   "statAnimationFrame": 2261,
+   "statAnimationArgs": [
+    0,
+    0,
+    0,
+    1,
+    46
+   ],
+   "bodyAllocatorCalls": 16,
+   "lastBodyCallFrame": 2252,
+   "statLaunchAfterBodyLastCall": true,
+   "statCopyCalls": [
+    [
+     2263,
+     "CreateSprite",
+     "CreateInvisibleSpriteWithCallback+0x10"
+    ],
+    [
+     2263,
+     "CreateSpriteAt",
+     "CreateSprite+0x34"
+    ],
+    [
+     2350,
+     "DestroySprite",
+     "StatsChangeAnimation_Step3+0x136"
+    ]
+   ]
+  },
+  {
+   "scenario": "en-player",
+   "runsIdentical": true,
+   "sha256": {
+    "calls": "8be0615326bebf51",
+    "rows": "b57f5238fe241103"
+   },
+   "move": 283,
+   "commitDestroyFrame": 2041,
+   "bodyLaunchFrame": 2082,
+   "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0
+  },
+  {
+   "scenario": "en-opponent",
+   "runsIdentical": true,
+   "sha256": {
+    "calls": "8a3dfd6f60fa3006",
+    "rows": "47fc6a0fda0382e0"
+   },
+   "move": 283,
+   "commitDestroyFrame": 2041,
+   "bodyLaunchFrame": 2086,
+   "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0
+  }
+ ],
+ "allRunsIdentical": true,
+ "allSilentBetweenPromptAndBody": false
+}
