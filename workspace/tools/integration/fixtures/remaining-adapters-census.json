@@ -890,7 +890,7 @@
      ],
      "orderFirstBodyOnly": true,
      "weightPct": 1.618,
-     "prep": "needs: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe from its BattleLab scenario"
+     "prep": "unmeasured: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe shared by the batch), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe (2 BattleLab scenario files in tools/battle-lab)"
     },
     {
      "move": "MOVE_FRUSTRATION",
@@ -900,7 +900,7 @@
      ],
      "orderFirstBodyOnly": true,
      "weightPct": 0.343,
-     "prep": "needs: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe from its BattleLab scenario"
+     "prep": "unmeasured: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe shared by the batch), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe (5 BattleLab scenario files in tools/battle-lab)"
     },
     {
      "move": "MOVE_SWIFT",
@@ -910,7 +910,7 @@
      ],
      "orderFirstBodyOnly": false,
      "weightPct": 0.258,
-     "prep": "needs: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe from its BattleLab scenario"
+     "prep": "unmeasured: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe shared by the batch), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe (3 BattleLab scenario files in tools/battle-lab)"
     },
     {
      "move": "MOVE_HORN_DRILL",
@@ -920,7 +920,7 @@
      ],
      "orderFirstBodyOnly": true,
      "weightPct": 0.257,
-     "prep": "needs: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe from its BattleLab scenario"
+     "prep": "unmeasured: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe shared by the batch), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe (2 BattleLab scenario files in tools/battle-lab)"
     },
     {
      "move": "MOVE_SEISMIC_TOSS",
@@ -930,7 +930,7 @@
      ],
      "orderFirstBodyOnly": true,
      "weightPct": 0.248,
-     "prep": "needs: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe from its BattleLab scenario"
+     "prep": "unmeasured: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe shared by the batch), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe (2 BattleLab scenario files in tools/battle-lab)"
     },
     {
      "move": "MOVE_TRICK",
@@ -940,7 +940,7 @@
      ],
      "orderFirstBodyOnly": false,
      "weightPct": 0.176,
-     "prep": "needs: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe from its BattleLab scenario"
+     "prep": "unmeasured: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe shared by the batch), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe (1 BattleLab scenario file in tools/battle-lab)"
     },
     {
      "move": "MOVE_AURORA_BEAM",
@@ -950,7 +950,7 @@
      ],
      "orderFirstBodyOnly": true,
      "weightPct": 0.102,
-     "prep": "needs: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe from its BattleLab scenario"
+     "prep": "unmeasured: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe shared by the batch), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe (2 BattleLab scenario files in tools/battle-lab)"
     },
     {
      "move": "MOVE_STOCKPILE",
@@ -960,7 +960,7 @@
      ],
      "orderFirstBodyOnly": true,
      "weightPct": 0.068,
-     "prep": "needs: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe from its BattleLab scenario"
+     "prep": "unmeasured: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe shared by the batch), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe (4 BattleLab scenario files in tools/battle-lab)"
     }
    ]
   }

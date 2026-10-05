@@ -357,7 +357,11 @@ const BATCH_PICKS = [
       PAIN_SPLIT: "prep6 measured (445/445..525 / 446/446..526, row 0, 81 rows); missing: per-side coords.yOffset into the reducer",
     } },
   { id: "N3", title: "first provider build: allocator plan v2 (affine matrix + task slots), exact from a known baseline", moves: ["THUNDERBOLT", "FRUSTRATION", "SWIFT", "HORN_DRILL", "SEISMIC_TOSS", "TRICK", "AURORA_BEAM", "STOCKPILE"],
-    prep: Object.fromEntries(["THUNDERBOLT", "FRUSTRATION", "SWIFT", "HORN_DRILL", "SEISMIC_TOSS", "TRICK", "AURORA_BEAM", "STOCKPILE"].map((m) => [m, "needs: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe from its BattleLab scenario"])) },
+    prep: Object.fromEntries(["THUNDERBOLT", "FRUSTRATION", "SWIFT", "HORN_DRILL", "SEISMIC_TOSS", "TRICK", "AURORA_BEAM", "STOCKPILE"].map((m) => {
+      const slug = m.toLowerCase().replaceAll("_", "-");
+      const lab = fs.readdirSync("tools/battle-lab").filter((f) => f.startsWith(`mechanic-${slug}`)).length;
+      return [m, `unmeasured: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe shared by the batch), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe (${lab} BattleLab scenario file${lab === 1 ? "" : "s"} in tools/battle-lab)`];
+    })) },
 ];
 
 // ---- summary -----------------------------------------------------------------------------------------------------------
