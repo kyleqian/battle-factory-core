@@ -1,0 +1,127 @@
+{
+ "schema": "voluntary-adapter-draft/v1",
+ "draft": true,
+ "move": "SWIFT",
+ "probe": "tools/integration/postkoStateProbe.py",
+ "scenario": "tools/battle-lab/voluntary-cancel-slot2.json",
+ "stateFixture": "tools/integration/fixtures/voluntary/state-voluntary-cancel-slot2.json",
+ "modelCheck": "tools/integration/fixtures/voluntary/model-check-voluntary-cancel-slot2.json",
+ "attacker": {
+  "species": "JOLTEON",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 235,
+  "playerMaxHp": 235,
+  "opponentHp": 140,
+  "opponentMaxHp": 140,
+  "playerGender": "male",
+  "opponentGender": "male",
+  "playerStatus": "none"
+ },
+ "edgeRiseFrame": 1614,
+ "windowOffsetFromActivation": 0,
+ "denseWindow": {
+  "startFrame": 1614,
+  "endFrame": 1693,
+  "ageOffset": 0
+ },
+ "note": "accepted window offset/length of playerfaint-swift-opponent.json (80 rows); first body after a voluntary switch to party slot 2",
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "voluntary-party-menu",
+     "outcome": "cancel"
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "129",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "241",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "SUN_CONTINUES",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "voluntary-party-menu",
+     "outcome": "switch"
+    },
+    {
+     "kind": "set-battler-sprite-visibility",
+     "battler": 0,
+     "invisible": true,
+     "provenanceOpcodeName": "B_SCR_OP_RETURNATKTOBALL"
+    },
+    {
+     "kind": "switch",
+     "battler": 0
+    },
+    {
+     "kind": "switch-in-animation",
+     "battler": 0,
+     "partyIndex": 1
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "129",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
+}

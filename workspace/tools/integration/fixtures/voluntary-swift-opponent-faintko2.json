@@ -1,0 +1,141 @@
+{
+ "schema": "voluntary-adapter-draft/v1",
+ "draft": true,
+ "move": "SWIFT",
+ "probe": "tools/integration/postkoStateProbe.py",
+ "scenario": "tools/battle-lab/voluntary-faint-ko-slot2-swift.json",
+ "stateFixture": "tools/integration/fixtures/voluntary/state-voluntary-faint-ko-slot2-swift.json",
+ "modelCheck": "tools/integration/fixtures/voluntary/model-check-voluntary-faint-ko-slot2-swift.json",
+ "attacker": {
+  "species": "JOLTEON",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "NINETALES",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 148,
+  "playerMaxHp": 148,
+  "opponentHp": 140,
+  "opponentMaxHp": 140,
+  "playerGender": "male",
+  "opponentGender": "male",
+  "playerStatus": "none"
+ },
+ "edgeRiseFrame": 2205,
+ "windowOffsetFromActivation": 0,
+ "denseWindow": {
+  "startFrame": 2205,
+  "endFrame": 2284,
+  "ageOffset": 0
+ },
+ "note": "accepted window offset/length of playerfaint-swift-opponent.json (80 rows); player faint -> forced switch-in from party slot 2 -> opponent KO + send-out",
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "129",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    },
+    {
+     "kind": "faint-animation",
+     "battler": 0
+    },
+    {
+     "kind": "forced-party-menu",
+     "battlers": {
+      "player": false,
+      "opponent": true
+     }
+    },
+    {
+     "kind": "switch-in-animation",
+     "battler": 0,
+     "partyIndex": 1
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "53",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": []
+    },
+    {
+     "kind": "faint-animation",
+     "battler": 1
+    },
+    {
+     "kind": "draw-party-status-summary",
+     "battler": 1
+    },
+    {
+     "kind": "hide-party-status-summary",
+     "battler": 1
+    },
+    {
+     "kind": "switch-in-animation",
+     "battler": 1,
+     "partyIndex": 1
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "129",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
+}
