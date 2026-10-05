@@ -97,7 +97,21 @@
   under a ROLE map (41 known edges, 0 mismatches; 13 role-lend what-ifs exact); second opponent
   KO = first-KO geometry (today's lend already exact). Forced-menu staging recipe documented.
   Supervisor reran one scenario (identical rows, model 0 mismatches, Heal Bell 261/261).
-- Running: player-faint lend (production); Roar/Whirlwind forced-switch continuation evidence (side).
+- Folded Opus worker `3cdc5c4a1` (src tree `3172ec9f`): player-faint lends — tracker occupant
+  roles (healthbox mains + shadow), role relabel ρ (= π at the entry / after opponent KOs), lend
+  and allocator re-seed after a forced switch-in; replay driver answers the forced party screen
+  (`answerForcedSwitch`, tools only). 13/13 playerfaint drafts exact twice fresh (2,029 rows);
+  25 post-KO digests unchanged; 28 of 57 post-switch bodies on 12 generated routes newly lent and
+  active. Supervisor: Light Screen 88 / Protect 123 (re-seeded host) / Thunderbolt O 237 exact twice
+  fresh; RNG parity 0 mismatches on 4 forced-switch routes. Cancelled voluntary menu still declines
+  (conservative). Receipt `playerfaint-lend-receipt.json`.
+- Forced-switch continuation evidence (`071a913e1`, `docs/forced-switch-continuation.md`): ROM
+  removes the Roar/Whirlwind target instantly (skipAnim) at E+4, send-in at E+10; production plays
+  a 27-frame recall and sends in at +33; send-in tail (healthbox slide / message) is species-
+  dependent in the ROM, fixed in production; Baton Pass flow does present a replacement once the
+  party screen is answered. Filed ISSUES #146.
+- Running: Roar/Whirlwind live with a Scene-ON forced switch-out (production); live-adapter species
+  residual audit 2 (side).
 
 ## 2026-10-05 (wind-down) — CASTFORM fix + order table 445 bodies
 
