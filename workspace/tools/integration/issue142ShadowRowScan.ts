@@ -33,16 +33,20 @@ const rows = [...table, ...extra];
 const mismatches: any[] = [];
 const out: any[] = [];
 const seen = new Set<number>();
+// Icy Wind / Blizzard fall back to the scene-off view where the retained slot table is unproven
+// (liveMoveAnimation.ts provableEffectOrder); these [player partner, elevated opponent] pairs are live in both orientations.
+const PAIR: Record<number, [string, string]> = { 196: ["SHUCKLE", "MAGNEMITE"], 59: ["SHUCKLE", "BUTTERFREE"] };
 for (const r of rows) {
   seen.add(r.id);
+  const partner = PAIR[r.id]?.[0] ?? "PHANPY";
   const mk = (opp: string) => ({
     move: r.move, body: (r.sources?.body ?? "normal") as "normal", probe: "", scenario: "",
     requestFields: r.requestFields,
-    attacker: { species: r.orientation === "player" ? "PHANPY" : opp, geometry: { side: r.orientation } },
-    target: { species: r.orientation === "player" ? opp : "PHANPY", geometry: { side: r.orientation === "player" ? "opponent" : "player" } },
+    attacker: { species: r.orientation === "player" ? partner : opp, geometry: { side: r.orientation } },
+    target: { species: r.orientation === "player" ? opp : partner, geometry: { side: r.orientation === "player" ? "opponent" : "player" } },
     fieldProfile: { playerHp: 120, playerMaxHp: 120, opponentHp: 120, opponentMaxHp: 120, playerGender: "male", opponentGender: "male" },
   });
-  const f = mk("GOLBAT");
+  const f = mk(PAIR[r.id]?.[1] ?? "GOLBAT");
   const duration = liveMoveAnimationDuration((liveView(f as any, 0).effect as any).request) as number;
   const expected: number | null = LIVE_MOVE_OPPONENT_SHADOW_ROW[r.id] ?? null;
   const tail: number = r.tailFirstAge ?? Infinity;

@@ -57,6 +57,9 @@ import { MAGICAL_LEAF_FRAME_COUNT } from "../animation/magicalLeaf.ts";
 import { REST_FRAME_COUNT } from "../animation/rest.ts";
 import { SWEET_KISS_FRAME_COUNT } from "../animation/sweetKiss.ts";
 import { TICKLE_FRAME_COUNT } from "../animation/tickle.ts";
+import { SURF_WAVE_FRAME_COUNT } from "../animation/surfWave.ts";
+import { icyWindEffectOamOrderAtAge } from "../animation/icyWind.ts";
+import { blizzardEffectOamOrderAtAge } from "../animation/blizzard.ts";
 import { YAWN_CLEANUP_AGE } from "../animation/yawn.ts";
 
 
@@ -82,6 +85,16 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   298, 146,
   // next5 self-target: healing anchors on the attacker, other-side battler drawn from the field.
   135,
+  // prep2 (docs/next-adapters-prep2.md s2): Surf + Muddy Water share one branch.
+  57, 330,
+  // prep2: anchor-derived effect geometry.
+  196, 59,
+  // prep2: pic-coord yOffset (Fake Out); plain recipe (Cosmic Power).
+  252, 322,
+  // prep2: Future Sight turn-1 body only (the delayed hit is a separate playanimation, battle_scripts_1.s:3519).
+  248,
+  // prep2: Explosion body (attacker displayed HP is 0 at the event; setatkhptozero precedes attackanimation).
+  153,
 ] as const);
 
 /**
@@ -111,6 +124,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // next5 (issue142-shadow-rows-extra.json): Glare/Teeter Dance/Soft-Boiled windows start at activation;
     // Scary Face (-4) and Dizzy Punch (-13) start after it and have no row.
     137, 298, 135,
+    // prep2 (issue142-shadow-rows-extra.json): Surf / Muddy Water windows start at activation.
+    57, 330, 196, 59, 252, 322,
   ].map((id) => [id, 0])),
 );
 
@@ -163,6 +178,41 @@ export function liveBattlerAnchors(
       ? speciesFrontIdleRestOffsetOrZero(art[battler].speciesSymbol)
       : { x2: 0, y2: 0 },
   };
+}
+
+/**
+ * `GetBattlerSpriteCoordAttr` width/height/yOffset (battle_anim_mons.c:2151-2280): the species pic coords
+ * the field art view already carries (back table for the player, front for the opponent).
+ */
+export function liveBattlerCoordAttrs(
+  battler: "player" | "opponent",
+  art: ReturnType<typeof createBattleCommandFieldArtView>,
+): { readonly width: number; readonly height: number; readonly yOffset: number } {
+  const { width, height, yOffset } = art[battler].coords;
+  return { width, height, yOffset };
+}
+
+const effectOrderProvable = new Map<string, boolean>();
+/**
+ * Icy Wind / Blizzard replay source CreateSprite/SortSprites against the retained OAM slot table, which
+ * their reducers verify and throw on (icyWind.ts:257, blizzard.ts:562). The table was captured at the
+ * accepted geometry; a species pair whose pic points sort the particles differently is not proven, so
+ * the live seam returns null (the scene-off view) instead of throwing mid-battle. The result depends on
+ * the geometry only and is cached per (move, side, geometry).
+ */
+function provableEffectOrder(moveId: 196 | 59, side: "player" | "opponent", duration: number,
+  geometry: Parameters<typeof icyWindEffectOamOrderAtAge>[2] | Parameters<typeof blizzardEffectOamOrderAtAge>[2]): boolean {
+  const key = `${moveId}/${side}/${JSON.stringify(geometry)}`;
+  let ok = effectOrderProvable.get(key);
+  if (ok === undefined) {
+    try {
+      if (moveId === 196) icyWindEffectOamOrderAtAge(duration - 1, side, geometry as Parameters<typeof icyWindEffectOamOrderAtAge>[2]);
+      else blizzardEffectOamOrderAtAge(duration - 1, side, geometry);
+      ok = true;
+    } catch { ok = false; }
+    effectOrderProvable.set(key, ok);
+  }
+  return ok;
 }
 
 export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): number | null {
@@ -323,6 +373,14 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 146: return 69; // Dizzy Punch accepted window; script tail 5 rows uncovered.
     case 184: return 190; // Scary Face accepted window (79..268); script tail 14 rows uncovered.
     case 137: return 213; // Glare accepted window (GLARE_SOURCE_FRAME_COUNT).
+    case 57: case 330: return SURF_WAVE_FRAME_COUNT; // Surf / Muddy Water accepted window (144 rows).
+    case 196: return 287; // Icy Wind accepted window (220..506).
+    // Blizzard accepted windows: 214..585 player-back, 213..573 opponent-front (Guillotine precedent).
+    case 59: return request.attacker === 0 ? 372 : 361;
+    case 252: return 86; // Fake Out accepted window (78..163 / 82..167).
+    case 322: return 241; // Cosmic Power accepted window (294..534).
+    case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
+    case 153: return 212; // Explosion accepted window (76..287 / 80..291).
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
     default: return null;
   }
@@ -852,6 +910,30 @@ export function liveMoveAnimationPresentation(
         eyeDotEnd: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint };
       break;
     }
+    case 57: case 330:
+      config = { move: request.moveId === 330 ? "MUDDY_WATER" : "SURF", attacker, target, fieldProfile };
+      break;
+    case 196: case 59: {
+      // Source X_2/Y_PIC attacker and target centers; singles SetAverageBattlerPositions is the target's own point.
+      // Icy Wind's spikes aim at the target's sBattlerCoords point (battlePositionCenter).
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const geometry = { attackerCenter: attackerAnchors.picOffsetPoint, targetCenter: targetAnchors.picOffsetPoint };
+      const icyGeometry = { ...geometry, spikeTargetCenter: targetAnchors.battlePositionCenter };
+      if (!provableEffectOrder(request.moveId as 196 | 59, attacker.geometry.side,
+        liveMoveAnimationDuration(request)!, request.moveId === 196 ? icyGeometry : geometry)) return null;
+      config = request.moveId === 196
+        ? { move: "ICY_WIND", attacker, target, fieldProfile, effectGeometry: icyGeometry }
+        : { move: "BLIZZARD", attacker, target, fieldProfile, effectGeometry: geometry };
+      break;
+    }
+    case 252:
+      // SetBattlerSpriteYOffsetFromYScale reads the target's pic-coords yOffset.
+      config = { move: "FAKE_OUT", attacker, target, fieldProfile,
+        targetPictureYOffset: liveBattlerCoordAttrs(target.geometry.side, art).yOffset };
+      break;
+    case 322: config = { move: "COSMIC_POWER", attacker, target, fieldProfile }; break;
+    case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;
+    case 248: config = { move: "FUTURE_SIGHT", attacker, target, fieldProfile }; break;
     case 342:
       config = {
         move: "POISON_TAIL",

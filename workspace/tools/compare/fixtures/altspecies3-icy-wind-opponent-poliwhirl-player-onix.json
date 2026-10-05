@@ -1,0 +1,57 @@
+{
+ "schema": "altspecies3-portable-source/v1",
+ "move": "ICY_WIND",
+ "probe": "tools/compare/icyWindProbe.py",
+ "scenario": "tools/integration/fixtures/altspecies3-scenarios/icy-wind-opponent-poliwhirl-player-onix.json",
+ "attacker": {
+  "species": "POLIWHIRL",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 110,
+  "playerMaxHp": 110,
+  "opponentHp": 140,
+  "opponentMaxHp": 140,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "denseWindow": {
+  "startFrame": 81,
+  "endFrame": 367,
+  "frameCount": 287
+ },
+ "draft": {
+  "activationFrame": 220,
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "expectedDuration": 287,
+  "consumedByTest": false,
+  "effectGeometry": {
+   "attackerCenter": {
+    "x": 176,
+    "y": 60
+   },
+   "targetCenter": {
+    "x": 72,
+    "y": 88
+   },
+   "spikeTargetCenter": {
+    "x": 72,
+    "y": 80
+   }
+  },
+  "effectGeometrySource": "same as player"
+ },
+ "baseSourceFixture": "tools/integration/fixtures/prep2-icy-wind-opponent.json",
+ "swap": {
+  "opponent": "POLIWHIRL"
+ }
+}

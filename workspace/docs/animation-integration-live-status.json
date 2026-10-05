@@ -1859,6 +1859,131 @@
         "no generated rental carries Soft-Boiled (seeds 0-119): dense-only, no ordinary route"
       ],
       "selector": "target = attacker (MOVE_TARGET_USER); healingCenter = attacker pic point; bystander = displayed other-side battler"
+    },
+    {
+      "move": "MOVE_SURF",
+      "id": 57,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep2-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep2-surf-*.json)",
+        "alternate-species dense proof twice fresh, zero residual (altspecies3-surf-player-sealeo-opponent-shuckle.json, window 69..212)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_MUDDY_WATER",
+      "id": 330,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep2-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep2-muddy-water-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_ICY_WIND",
+      "id": 196,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep2-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep2-icy-wind-*.json)",
+        "alternate-species dense proof twice fresh, zero residual (altspecies3-icy-wind-opponent-poliwhirl-player-onix.json, window 81..367)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness",
+        "scene-off fallback where the retained particle slot table is unproven (provableEffectOrder)"
+      ]
+    },
+    {
+      "move": "MOVE_BLIZZARD",
+      "id": 59,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep2-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep2-blizzard-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness",
+        "scene-off fallback where the retained particle slot table is unproven (provableEffectOrder)"
+      ]
+    },
+    {
+      "move": "MOVE_FAKE_OUT",
+      "id": 252,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep2-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep2-fake-out-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_COSMIC_POWER",
+      "id": 322,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep2-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep2-cosmic-power-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_FUTURE_SIGHT",
+      "id": 248,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep2-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep2-future-sight-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_EXPLOSION",
+      "id": 153,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep2-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep2-explosion-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness",
+        "ordinary route ends at the forced-replacement party screen"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -1881,7 +2006,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 136,
+  "implementedCount": 144,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
