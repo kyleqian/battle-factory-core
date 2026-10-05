@@ -1,0 +1,221 @@
+{
+ "acceptedDoubleKick": {
+  "activationRow": 227,
+  "drawFrame": 237,
+  "rfuStepsBeforeDraws": 10,
+  "predicted": [
+   46625,
+   58366,
+   21952,
+   56639
+  ],
+  "pinned": [
+   46625,
+   58366,
+   21952,
+   56639
+  ],
+  "exact": true
+ },
+ "labDrawFrames": [
+  {
+   "activation": 87,
+   "drawFrame": 97,
+   "offset": 10,
+   "lagBeforeDraw": 0,
+   "earlierDraws": 0,
+   "rfuFirst": true,
+   "drawCallers": [
+    "AnimFistOrFootRandomPos"
+   ],
+   "words": [
+    51410,
+    14847,
+    42872,
+    13405
+   ],
+   "valueAfterDrawFrameExact": true
+  },
+  {
+   "activation": 215,
+   "drawFrame": 225,
+   "offset": 10,
+   "lagBeforeDraw": 0,
+   "earlierDraws": 0,
+   "rfuFirst": true,
+   "drawCallers": [
+    "AnimFistOrFootRandomPos"
+   ],
+   "words": [
+    60405,
+    46118,
+    47274,
+    39157
+   ],
+   "valueAfterDrawFrameExact": true
+  },
+  {
+   "activation": 1023,
+   "drawFrame": 1054,
+   "offset": 31,
+   "lagBeforeDraw": 0,
+   "earlierDraws": 0,
+   "rfuFirst": true,
+   "drawCallers": [
+    "AnimSprayWaterDroplet"
+   ],
+   "words": [
+    64616,
+    21845,
+    58971,
+    26690
+   ],
+   "valueAfterDrawFrameExact": true
+  },
+  {
+   "activation": 1968,
+   "drawFrame": 1977,
+   "offset": 9,
+   "lagBeforeDraw": 0,
+   "earlierDraws": 0,
+   "rfuFirst": true,
+   "drawCallers": [
+    "AnimDirtScatter"
+   ],
+   "words": [
+    17933,
+    62006,
+    64200,
+    65041,
+    1395,
+    35414,
+    2748,
+    34631,
+    28446,
+    4012
+   ],
+   "valueAfterDrawFrameExact": true
+  },
+  {
+   "activation": 1968,
+   "drawFrame": 1981,
+   "offset": 13,
+   "lagBeforeDraw": 0,
+   "earlierDraws": 10,
+   "rfuFirst": true,
+   "drawCallers": [
+    "AnimDirtScatter"
+   ],
+   "words": [
+    6517,
+    8563,
+    41407,
+    6196,
+    50907,
+    54953,
+    34761,
+    18269,
+    9301,
+    31579
+   ],
+   "valueAfterDrawFrameExact": true
+  },
+  {
+   "activation": 1968,
+   "drawFrame": 1985,
+   "offset": 17,
+   "lagBeforeDraw": 0,
+   "earlierDraws": 20,
+   "rfuFirst": true,
+   "drawCallers": [
+    "AnimDirtScatter"
+   ],
+   "words": [
+    37050,
+    42152,
+    61043,
+    29079,
+    40437,
+    55460,
+    64510,
+    43386,
+    22602,
+    46624
+   ],
+   "valueAfterDrawFrameExact": true
+  },
+  {
+   "activation": 1968,
+   "drawFrame": 1989,
+   "offset": 21,
+   "lagBeforeDraw": 0,
+   "earlierDraws": 30,
+   "rfuFirst": true,
+   "drawCallers": [
+    "AnimDirtScatter"
+   ],
+   "words": [
+    25646,
+    28030,
+    17788,
+    48493,
+    18462,
+    49200,
+    1825,
+    44451,
+    28297,
+    65127
+   ],
+   "valueAfterDrawFrameExact": true
+  },
+  {
+   "activation": 1968,
+   "drawFrame": 1993,
+   "offset": 25,
+   "lagBeforeDraw": 0,
+   "earlierDraws": 40,
+   "rfuFirst": true,
+   "drawCallers": [
+    "AnimDirtScatter"
+   ],
+   "words": [
+    16780,
+    42280,
+    28163,
+    7764,
+    36867,
+    51528,
+    31614,
+    20,
+    10228,
+    21133
+   ],
+   "valueAfterDrawFrameExact": true
+  },
+  {
+   "activation": 1968,
+   "drawFrame": 1997,
+   "offset": 29,
+   "lagBeforeDraw": 0,
+   "earlierDraws": 50,
+   "rfuFirst": true,
+   "drawCallers": [
+    "AnimDirtScatter"
+   ],
+   "words": [
+    56703,
+    41536,
+    61961,
+    54672,
+    57405,
+    56374,
+    60464,
+    5383,
+    45532,
+    856
+   ],
+   "valueAfterDrawFrameExact": true
+  }
+ ],
+ "allExact": true
+}
