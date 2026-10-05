@@ -58,6 +58,9 @@ import { REST_FRAME_COUNT } from "../animation/rest.ts";
 import { SWEET_KISS_FRAME_COUNT } from "../animation/sweetKiss.ts";
 import { TICKLE_FRAME_COUNT } from "../animation/tickle.ts";
 import { SURF_WAVE_FRAME_COUNT } from "../animation/surfWave.ts";
+import { BIND_ANIMATION_PROFILE } from "../animation/bind.ts";
+import { WRAP_ANIMATION_PROFILE } from "../animation/wrap.ts";
+import { CANONICAL_DRAGON_BREATH_FIRE_GEOMETRY } from "../animation/dragonBreath.ts";
 import { icyWindEffectOamOrderAtAge } from "../animation/icyWind.ts";
 import { blizzardEffectOamOrderAtAge } from "../animation/blizzard.ts";
 import { YAWN_CLEANUP_AGE } from "../animation/yawn.ts";
@@ -95,6 +98,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   248,
   // prep2: Explosion body (attacker displayed HP is 0 at the event; setatkhptozero precedes attackanimation).
   153,
+  // H_BUFFER S1 (docs/h-buffer-s1-prep.md): Mean Look, Smelling Salt, Defense Curl, Ingrain, Wrap, Bind, Dragon Breath.
+  212, 265, 111, 275, 35, 20, 225,
 ] as const);
 
 /**
@@ -126,7 +131,14 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     137, 298, 135,
     // prep2 (issue142-shadow-rows-extra.json): Surf / Muddy Water windows start at activation.
     57, 330, 196, 59, 252, 322,
-  ].map((id) => [id, 0])),
+    // H_BUFFER S1 (issue142-shadow-rows-extra.json): Mean Look, Smelling Salt, Defense Curl, Ingrain, Wrap start at activation.
+    // Dragon Breath (-6) starts after it and has no row.
+    212, 265, 111, 275, 35,
+  ].map((id) => [id, 0] as [number, number]).concat([
+    // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
+    // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
+    [20, 2],
+  ])),
 );
 
 /** Shadow row for a live request, or null when the activation frame is outside the window. */
@@ -379,6 +391,14 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 59: return request.attacker === 0 ? 372 : 361;
     case 252: return 86; // Fake Out accepted window (78..163 / 82..167).
     case 322: return 241; // Cosmic Power accepted window (294..534).
+    // H_BUFFER S1 accepted windows (docs/h-buffer-s1-prep.md).
+    case 212: return 171; // Mean Look (71..241 / 75..245).
+    case 265: return 121; // Smelling Salt (218..338).
+    case 111: return 100; // Defense Curl (214..313 / 215..314).
+    case 275: return 164; // Ingrain (205..368 / 293..456).
+    case 35: return 38; // Wrap (222..259 / 78..115).
+    case 20: return 45; // Bind (382..426 / 436..480).
+    case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
     case 153: return 212; // Explosion accepted window (76..287 / 80..291).
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
@@ -932,6 +952,54 @@ export function liveMoveAnimationPresentation(
         targetPictureYOffset: liveBattlerCoordAttrs(target.geometry.side, art).yOffset };
       break;
     case 322: config = { move: "COSMIC_POWER", attacker, target, fieldProfile }; break;
+    case 212:
+      // meanLookFramebuffer.ts:124: the eye is created from ANIM_ATTACKER, so the profile carries its subpriority.
+      config = { move: "MEAN_LOOK", attacker, target, fieldProfile,
+        animationProfile: { targetSubpriority: attacker.geometry.side === "player" ? 30 : 40 } };
+      break;
+    case 265: {
+      // GetBattlerSpriteCoordAttr width/height + picture height of the target (prep s2.6).
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const coords = liveBattlerCoordAttrs(target.geometry.side, art);
+      config = { move: "SMELLING_SALT", attacker, target, fieldProfile,
+        animationProfile: {
+          targetLeft: targetAnchors.picOffsetPoint.x - coords.width / 2,
+          targetRight: targetAnchors.picOffsetPoint.x + coords.width / 2,
+          targetTop: targetAnchors.picOffsetPoint.y - coords.height / 2,
+          targetPictureY: targetAnchors.picOffsetPoint.y,
+          targetVerticalSpan: targetAnchors.pictureHeight,
+        } };
+      break;
+    }
+    case 111:
+      // Move_DEFENSE_CURL argv (0,6,0,1): AnimSpriteOnMonPos(respectMonPicOffsets=FALSE)
+      // = attacker battlePositionCenter + (0,6) (battle_anim_mons.c:1515-1528).
+      config = { move: "DEFENSE_CURL",
+        attacker: { ...attacker, geometry: { ...attacker.geometry, animationCenter: {
+          x: attacker.geometry.battlePositionCenter.x, y: attacker.geometry.battlePositionCenter.y + 6 } } },
+        target, fieldProfile,
+        animationProfile: { attackerPicYOffset: art[attacker.geometry.side].coords.yOffset,
+          attackerSubpriority: attacker.geometry.side === "player" ? 30 : 40 } };
+      break;
+    case 275:
+      config = { move: "INGRAIN", attacker, target, fieldProfile,
+        animationProfile: { attackerSubpriority: attacker.geometry.side === "player" ? 30 : 40 } };
+      break;
+    case 35:
+      config = { move: "WRAP", attacker, target, fieldProfile, animationProfile: WRAP_ANIMATION_PROFILE };
+      break;
+    case 20:
+      config = { move: "BIND", attacker, target, fieldProfile: { ...fieldProfile, playerStatus: "none" },
+        animationProfile: BIND_ANIMATION_PROFILE };
+      break;
+    case 225:
+      config = { move: "DRAGON_BREATH", attacker, target, fieldProfile: { ...fieldProfile, playerStatus: "none" },
+        animationProfile: { ...CANONICAL_DRAGON_BREATH_FIRE_GEOMETRY,
+          attackerCenter: attackerAnchors.picOffsetPoint,
+          targetCenter: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint,
+          attackerSide: attacker.geometry.side,
+          targetSubpriority: target.geometry.side === "player" ? 30 : 40 } };
+      break;
     case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;
     case 248: config = { move: "FUTURE_SIGHT", attacker, target, fieldProfile }; break;
     case 342:
