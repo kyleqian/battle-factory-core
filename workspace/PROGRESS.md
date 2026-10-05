@@ -5,6 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-04 (night, checkpoint 1) — S10A: 151 live adapters + sprite-order provider
+
+- **State:** S10A, local master; production `5fd7ea33b` (151 live adapters).
+  Supervisor union gates on `5fd7ea33b`: 1,497 files / 12,029 tests, build
+  passed. Preview serves `d8d96846c`: four hashes equal to earlier previews,
+  export, ON->OFF restart, no errors (`playable-preview-d8d96846c-receipt.json`).
+  Opus 5.5 supervisor, Sonnet 5.5 workers.
+- **Did:** H_BUFFER S1 batch (Mean Look, Smelling Salt, Defense Curl, Ingrain,
+  Wrap, Bind, Dragon Breath), re-proved by the supervisor (17 fixtures twice
+  fresh, zero residual; routes 7/7). Free-slot sprite-order provider module
+  (unwired), ROM-confirmed for the real Factory entry, plus per-body order
+  plans (659/659 later edges replay exact). Details in
+  `ANIMATION_INTEGRATION_PROGRESS.md`.
+- **Next:** prep5 batch (six moves, running); order-consumer measured prep
+  (running); then the provider wiring step (first body of each battle first,
+  then across bodies once the between-body one-frame sprite's cause is pinned).
+- **Notes:** oracle freshness FAIL at orient is the known false positive (no
+  harness commit since the services started). No DEFERRED entries.
+
+---
+
 ## 2026-10-04 (evening) — S10A wind-down: 131 -> 144 live adapters
 
 - **State:** S10A, local master; production `1a68bb532`; 144 live adapters,
