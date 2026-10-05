@@ -34588,14 +34588,14 @@ export function renderSceneOnMovePresentation(
       age: perishState.age - 1,
     });
     const playerToOpponent =
-      view.attacker.species === "MURKROW"
+      (liveField || view.attacker.species === "MURKROW")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "MURKROW"
+      (liveField || view.attacker.species === "MURKROW")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -34620,11 +34620,11 @@ export function renderSceneOnMovePresentation(
 
     const murkrowSource = playerToOpponent
       ? perishSongArt.murkrowBack : perishSongArt.murkrowFront;
-    const murkrow = playerToOpponent
+    const murkrow = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? murkrowSource
       : { ...murkrowSource, tileset: subTileset(murkrowSource.tileset, 0, 8) };
     const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
-    const onix = playerToOpponent
+    const onix = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
     const battlerPalette = (palette: readonly RgbColor[]) =>
@@ -34661,9 +34661,12 @@ export function renderSceneOnMovePresentation(
     // The first create batch misses the already-built hardware OAM buffer;
     // all sixteen become visible together on the following VBlank.
     const displayNotes = perishState.age === 5 ? [] : displayed.notes;
+    const noteOrderSeed = perishState.config.noteOrderSeed;
     const sortedNotes = displayNotes.slice().sort(
       (left, right) =>
-        left.centerY - right.centerY || right.oamSlot - left.oamSlot,
+        left.centerY - right.centerY || (noteOrderSeed
+          ? noteOrderSeed.indexOf(right.oamSlot) - noteOrderSeed.indexOf(left.oamSlot)
+          : right.oamSlot - left.oamSlot),
     );
     const drawNotes = (notes: typeof sortedNotes) => {
       for (const note of notes) {
@@ -34691,6 +34694,7 @@ export function renderSceneOnMovePresentation(
     };
     drawNotes(sortedNotes);
     if (opponentToPlayer) drawOnix();
+    if (liveField) return;
     drawSendOutHealthbox(
       fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
         name: playerToOpponent ? "ONIX" : "MURKROW",

@@ -12,6 +12,20 @@ const NOTE_ARGS = [
 const NOTE_SLOTS =
   [3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] as const;
 
+/**
+ * The notes are created in two sort windows (14 lowest free slots, then slots 19/20); sprites of one window inherit
+ * the free order of their slots, a later window sorts behind an equal-key earlier one (docs/order-consumer-prep.md §0).
+ */
+export const PERISH_SONG_NOTE_WINDOWS: readonly (readonly number[])[] = Object.freeze([
+  Object.freeze(NOTE_SLOTS.slice(0, 14)), Object.freeze(NOTE_SLOTS.slice(14)),
+]);
+
+/** Front-to-back equal-key note order from a free order `F` (null if a note slot is not free). */
+export function perishSongNoteOrderFromFree(free: readonly number[]): readonly number[] | null {
+  const order = PERISH_SONG_NOTE_WINDOWS.flatMap((window) => free.filter((slot) => window.includes(slot)));
+  return order.length === NOTE_SLOTS.length ? Object.freeze(order) : null;
+}
+
 export interface PerishSongNote {
   readonly index: number;
   readonly oamSlot: number;

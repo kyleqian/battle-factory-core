@@ -3532,6 +3532,8 @@ export interface SceneOnPerishSongConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnPerishSongFieldProfile>;
+  /** Live host front-to-back note order for equal-centerY ties (`perishSongNoteOrderFromFree`); staged = oamSlot rule. */
+  readonly noteOrderSeed?: readonly number[];
 }
 
 export interface SceneOnNeedleArmConfig {
