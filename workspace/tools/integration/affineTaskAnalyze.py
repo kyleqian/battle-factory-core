@@ -3,7 +3,7 @@
 
 usage: affineTaskAnalyze.py [--json out.json] raw1.json [raw2.json ...]
 A "body" is a maximal run of rows with gAnimScriptActive==1 (act rise .. act fall).  Baseline = state on the
-frame before the rise; end = state at the last row before the next rise (settled), also state 1 frame after the fall.
+frame before the rise; end = state at the last row before the next rise at the act-fall row; `settled` = last row before the next rise (post-body faint/turn-end effects included, listed in postFallEvents).
 Events are bitmap bit set/clear and task slot create/destroy/func-change between consecutive sampled frames.
 """
 import json, sys
@@ -38,12 +38,16 @@ def analyse(raw):
             for s in sorted(set(ct) - set(pt)): ev.append([r["n"], "task+", s, ct[s][1], ct[s][2]])
             for s in sorted(set(pt) - set(ct)): ev.append([r["n"], "task-", s, pt[s][1]])
             prev = r
-        end = rows[nxt - 1]
-        b["events"] = ev
+        end = rows[b["rowEnd"]] if b["fallFrame"] is not None else rows[nxt - 1]  # state at the act-fall row
+        settled = rows[nxt - 1]
+        b["settled"] = {"bitmap": settled["bitmap"], "tasks": settled["tasks"], "n": settled["n"]}
+        b["events"] = [e for e in ev if b["fallFrame"] is None or e[0] <= b["fallFrame"]]
+        b["postFallEvents"] = [e for e in ev if b["fallFrame"] is not None and e[0] > b["fallFrame"]]
         b["end"] = {"bitmap": end["bitmap"], "tasks": end["tasks"], "mask": end["mask"], "n": end["n"]}
         b["netZeroMatrix"] = b["end"]["bitmap"] == b["baseline"]["bitmap"]
         b["netZeroTask"] = [tkey(t) for t in b["end"]["tasks"]] == [tkey(t) for t in b["baseline"]["tasks"]]
         b["netZeroSprite"] = b["end"]["mask"] == b["baseline"]["mask"]
+        b["settledNetZero"] = b["settled"]["bitmap"] == b["baseline"]["bitmap"] and [tkey(t) for t in b["settled"]["tasks"]] == [tkey(t) for t in b["baseline"]["tasks"]]
         del b["rowStart"], b["rowEnd"]
     return bodies
 
@@ -62,4 +66,4 @@ if __name__ == "__main__":
         print("==", name)
         for b in v["bodies"]:
             print(f"  mv={b['mv']} rise={b['riseFrame']} fall={b['fallFrame']} base bitmap={b['baseline']['bitmap']} tasks={[(t[0], t[1]) for t in b['baseline']['tasks']]}"
-                  f" | end bitmap={b['end']['bitmap']} tasks={[(t[0], t[1]) for t in b['end']['tasks']]} netZero m={b['netZeroMatrix']} t={b['netZeroTask']} s={b['netZeroSprite']} nev={len(b['events'])}")
+                  f" | end bitmap={b['end']['bitmap']} tasks={[(t[0], t[1]) for t in b['end']['tasks']]} netZero m={b['netZeroMatrix']} t={b['netZeroTask']} s={b['netZeroSprite']} settled={b['settledNetZero']} nev={len(b['events'])} post={len(b['postFallEvents'])}")
