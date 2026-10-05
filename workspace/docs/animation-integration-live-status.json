@@ -3156,12 +3156,13 @@
       "sourceFieldEvidence": "../tools/integration/fixtures/roar-live-receipt.json",
       "liveEvidence": [
         "dense 3/3 zero residual twice (HOUNDOUR both orientations, 99 / 104 rows + VAPOREON alternate)",
-        "Scene ON forced switch-out after the body: no recall animation, target + healthbox hidden from E+4, send-in at E+10 (docs/forced-switch-continuation.md; ROM Cmd_returntoball skipAnim)"
+        "Scene ON forced switch-out (Cmd_returntoball skipAnim): no recall animation, target + healthbox hidden from framebuffer E+5, send-in from E+11 (ROM RAM E+4 / E+10 + one latch); composed body + removal + send-in zero residual through the emerge for the player-attacker side (4 fixtures x 2 fresh runs x 2 batches)"
       ],
       "remaining": [
-        "send-in tail (healthbox slide / dragged-out message start) is species-keyed in the ROM and a fixed span in production: ISSUES #146",
-        "independent arbitrary-species/history framebuffer comparison",
-        "ordinary command-input replay: see the receipt"
+        "opponent-attacker (player target) continuation not exact: player-side send-in ball arc (Roar HOUNDOUR->ONIX from E+13) and, for an elevated opponent attacker (Whirlwind BUTTERFREE), the generic post-body draw differs from the body's last row: see the receipt",
+        "send-in tail: ball-open white fade + particles keyed to the voluntary switch clock only, then the species-keyed healthbox slide / message start (ISSUES #146)",
+        "Scene OFF forced switch-out unchanged (32-frame voluntary-style span; #146 open question)",
+        "independent arbitrary-species/history framebuffer comparison"
       ]
     },
     {
@@ -3170,12 +3171,13 @@
       "sourceFieldEvidence": "../tools/integration/fixtures/roar-live-receipt.json",
       "liveEvidence": [
         "dense 3/3 zero residual twice (BUTTERFREE both orientations, 83 rows + BEAUTIFLY alternate)",
-        "Scene ON forced switch-out after the body: no recall animation, target + healthbox hidden from E+4, send-in at E+10 (docs/forced-switch-continuation.md; ROM Cmd_returntoball skipAnim)"
+        "Scene ON forced switch-out (Cmd_returntoball skipAnim): no recall animation, target + healthbox hidden from framebuffer E+5, send-in from E+11 (ROM RAM E+4 / E+10 + one latch); composed body + removal + send-in zero residual through the emerge for the player-attacker side (4 fixtures x 2 fresh runs x 2 batches)"
       ],
       "remaining": [
-        "send-in tail (healthbox slide / dragged-out message start) is species-keyed in the ROM and a fixed span in production: ISSUES #146",
-        "independent arbitrary-species/history framebuffer comparison",
-        "ordinary command-input replay: see the receipt"
+        "opponent-attacker (player target) continuation not exact: player-side send-in ball arc (Roar HOUNDOUR->ONIX from E+13) and, for an elevated opponent attacker (Whirlwind BUTTERFREE), the generic post-body draw differs from the body's last row: see the receipt",
+        "send-in tail: ball-open white fade + particles keyed to the voluntary switch clock only, then the species-keyed healthbox slide / message start (ISSUES #146)",
+        "Scene OFF forced switch-out unchanged (32-frame voluntary-style span; #146 open question)",
+        "independent arbitrary-species/history framebuffer comparison"
       ]
     }
   ],
