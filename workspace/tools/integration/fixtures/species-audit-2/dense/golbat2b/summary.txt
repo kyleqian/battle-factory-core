@@ -1,0 +1,15 @@
+petal-dance-player-petal-dance-alt-vileplume	244/244	px 0	dur 244	identical True	field 0 chrome 0	bad ages []..[] n=0
+petal-dance-player-petal-dance-player-gloom-opponent-onix	244/244	px 0	dur 244	identical True	field 0 chrome 0	bad ages []..[] n=0
+prep8-aurora-beam-player	199/215	px 292240	dur 216	identical True	field 292240 chrome 0	bad ages [197, 198, 199]..[210, 211, 212] n=16
+prep8-horn-drill-player	193/193	px 0	dur 193	identical True	field 0 chrome 0	bad ages []..[] n=0
+prep9-absorb-player	194/194	px 0	dur 194	identical True	field 0 chrome 0	bad ages []..[] n=0
+prep9-alt-dream-eater-player-sp39	ERROR	Sprite order unknown for DREAM_EATER
+prep9-alt-giga-drain-player-sp114	230/230	px 0	dur 230	identical True	field 0 chrome 0	bad ages []..[] n=0
+prep9-alt-mega-drain-player-sp114	218/218	px 0	dur 218	identical True	field 0 chrome 0	bad ages []..[] n=0
+prep9-dream-eater-player	ERROR	Sprite order unknown for DREAM_EATER
+prep9-giga-drain-player	230/230	px 0	dur 230	identical True	field 0 chrome 0	bad ages []..[] n=0
+prep9-sunny-day-player	158/158	px 0	dur 158	identical True	field 0 chrome 0	bad ages []..[] n=0
+sky-uppercut-player-sky-uppercut-alt-combusken	188/188	px 0	dur 188	identical True	field 0 chrome 0	bad ages []..[] n=0
+sky-uppercut-player-sky-uppercut-player-hitmonchan-opponent-onix	172/188	px 293616	dur 188	identical True	field 293616 chrome 0	bad ages [170, 171, 172]..[183, 184, 185] n=16
+spider-web-player-spider-web-alt-ariados	193/207	px 14	dur 207	identical True	field 14 chrome 0	bad ages [40, 43, 46]..[73, 76, 79] n=14
+spider-web-player-spider-web-player-spinarak-opponent-onix	207/207	px 0	dur 207	identical True	field 0 chrome 0	bad ages []..[] n=0

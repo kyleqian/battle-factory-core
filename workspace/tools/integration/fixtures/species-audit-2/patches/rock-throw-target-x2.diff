@@ -1,0 +1,9 @@
+diff --git a/workspace/src/animation/rockThrow.ts b/workspace/src/animation/rockThrow.ts
+index 6dc71e632..463cfd391 100644
+--- a/workspace/src/animation/rockThrow.ts
++++ b/workspace/src/animation/rockThrow.ts
+@@ -87,3 +87,3 @@ export const ROCK_THROW_ANIMATION_PROFILE: Readonly<RockThrowAnimationProfile> =
+     targetShakeEndAge: 57,
+-    targetX2OffAge: 21,
++    targetX2OffAge: 0,
+     spriteOrderSeed: [

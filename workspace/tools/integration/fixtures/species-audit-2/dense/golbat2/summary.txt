@@ -1,0 +1,12 @@
+destiny-bond-player-destiny-bond-alt-gengar	188/188	px 0	dur 188	identical True	field 0 chrome 0	bad ages []..[] n=0
+destiny-bond-player-destiny-bond-player-wobbuffet-opponent-onix	188/188	px 0	dur 188	identical True	field 0 chrome 0	bad ages []..[] n=0
+foresight-player-foresight-alt-hitmonlee	66/167	px 22875	dur 167	identical True	field 22875 chrome 0	bad ages [12, 13, 14]..[110, 111, 112] n=101
+foresight-player-foresight-player-machoke-opponent-onix	66/167	px 22875	dur 167	identical True	field 22875 chrome 0	bad ages [12, 13, 14]..[110, 111, 112] n=101
+leech-seed-player-leech-seed-alt-venusaur	141/141	px 0	dur 141	identical True	field 0 chrome 0	bad ages []..[] n=0
+leech-seed-player-leech-seed-player-exeggcute-opponent-onix	141/141	px 0	dur 141	identical True	field 0 chrome 0	bad ages []..[] n=0
+order-consumer-heal-bell-player	261/261	px 0	dur 261	identical True	field 0 chrome 0	bad ages []..[] n=0
+order-consumer-rock-throw-player	66/87	px 17405	dur 87	identical True	field 17405 chrome 0	bad ages [0, 1, 2]..[18, 19, 20] n=21
+razor-wind-player-razor-wind-player-absol-opponent-onix-b0	45/45	px 0	dur 45	identical True	field 0 chrome 0	bad ages []..[] n=0
+razor-wind-player-razor-wind-player-absol-opponent-onix-b1	ERROR	Sprite order unknown for RAZOR_WIND
+razor-wind-player-razor-wind-player-nuzleaf-opponent-onix-b0	45/45	px 0	dur 45	identical True	field 0 chrome 0	bad ages []..[] n=0
+razor-wind-player-razor-wind-player-nuzleaf-opponent-onix-b1	ERROR	Sprite order unknown for RAZOR_WIND

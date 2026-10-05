@@ -1,0 +1,13 @@
+diff --git a/workspace/src/engine/battleScene.ts b/workspace/src/engine/battleScene.ts
+index 429746037..72cda4f8d 100644
+--- a/workspace/src/engine/battleScene.ts
++++ b/workspace/src/engine/battleScene.ts
+@@ -1,2 +1,2 @@
+-import { liveMoveAnimationPresentation, liveMoveOpponentShadowRow } from "./liveMoveAnimation.ts";
++import { liveMoveAnimationPresentation, liveMoveOpponentShadowRow, liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
+ // S6 scene-assembly + send-out engine slices: the BATTLE-SCENE ASSEMBLY
+@@ -54916,3 +54916,3 @@ export function renderBattleResolutionLiveView(
+   const shadowRow = effect?.type === "move" ? liveMoveOpponentShadowRow(effect.request) : null;
+-  liveOpponentShadow.species = effect?.type === "move" && effect.age === shadowRow
++  liveOpponentShadow.species = effect?.type === "move" && (effect.age === shadowRow || ([113, 248].includes(effect.request.moveId) && effect.age >= liveMoveAnimationDuration(effect.request) - 2))
+     ? view.fieldArt.opponent.speciesSymbol : null;

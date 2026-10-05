@@ -1,0 +1,76 @@
+{
+ "schema": "prep11-live-fixture/v1",
+ "move": "SKY_UPPERCUT",
+ "sourceDraft": "tools/integration/fixtures/prep11-sky-uppercut-player-sky-uppercut-alt-combusken.json",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/species-audit-golbat2b-sky-uppercut-player-sky-uppercut-alt-combusken.json",
+ "attacker": {
+  "species": "COMBUSKEN",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 148,
+  "playerMaxHp": 167,
+  "opponentHp": 171,
+  "opponentMaxHp": 171,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "denseWindow": {
+  "startFrame": 231,
+  "endFrame": 418,
+  "ageOffset": 0
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 85
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ],
+ "speciesAudit": {
+  "acceptedWindow": [
+   223,
+   411
+  ],
+  "bodyIndex": 1,
+  "origBodyIndex": 1,
+  "turnOrderChanged": false,
+  "origBody": [
+   327,
+   223,
+   411
+  ],
+  "swappedBody": [
+   327,
+   231,
+   418
+  ],
+  "offsetFromActivation": 0,
+  "romHpAtActivation": {
+   "orig": [
+    154,
+    131
+   ],
+   "swapped": [
+    148,
+    171
+   ],
+   "acceptedProfile": [
+    154,
+    131
+   ]
+  }
+ }
+}
