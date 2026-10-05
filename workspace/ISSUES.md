@@ -31,8 +31,10 @@ backlog.
   reappears on framebuffer (scriptEnd - E) + 1 after a body window ending at E: d = 0 for 184
   rows, -2 for Future Sight / Light Screen (fixed in #145), +1 Dream Eater / Horn Drill / Psybeam
   / Razor Wind / Sing / Sky Uppercut, +2 Absorb, +21 Dragon Rage (hide for E+1..E+d).
-- **Open:** whether Scene OFF resolution frames share the bug (side check running); the faint-sink
-  branch (~:54418-54426) likely needs the same elevation.
+- **Scene OFF shares it** (`docs/elevated-renderer-off-check.md`: GOLBAT 1,845 / BUTTERFREE 1,578 px
+  every OFF resolution frame; the patch changes 0 frames across 203 committed traces and 0 tests).
+  Fix in progress (shared renderer, both modes). The faint-sink branch (~:54418-54426) likely needs
+  the same elevation.
 
 ## #146 — Forced switch-out and send-in presentation timing differ from the ROM (S10A, found 2026-10-05)
 
