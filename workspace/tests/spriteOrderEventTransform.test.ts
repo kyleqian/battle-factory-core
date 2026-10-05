@@ -6,7 +6,7 @@ import {
 } from "../src/engine/spriteOrderEventTransform.ts";
 import { SPRITE_ORDER_PRODUCTION_BODIES, SPRITE_ORDER_PRODUCTION_PLANS } from "../src/engine/spriteOrderProductionPlans.ts";
 import {
-  KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, applySpriteOrderUnitPlan, createSpriteOrderPlanCursor, knownEntrySpriteOrderState,
+  KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, applySpriteOrderUnitPlan, createSpriteOrderPlanCursor, knownEntrySpriteOrderState,
 } from "../src/engine/spriteOrderProvider.ts";
 import { encodeSpriteOrderPlan, renderSpriteOrderProductionTableFromFixtures } from "../tools/integration/spriteOrderProductionTable.ts";
 import { REAL_ROUTE_TRACES, replayCrossBodyTrace } from "../tools/integration/spriteOrderCrossBodyReplay.ts";
@@ -138,5 +138,23 @@ describe("strict real-route replay (docs/sprite-order-real-route.md events; no r
       expect(resync.moveEdges.exact).toBe(resync.moveEdges.tested);
     }
     expect(tested).toBe(91);
+  });
+
+  it("occupied prefix (Rock Throw's 64-entry seed) is the known-entry order at every body edge with the known occupants", () => {
+    let matched = 0;
+    for (const trace of REAL_ROUTE_TRACES) {
+      const raw = fixture(`sprite-order-real-route/raw/${trace}-0.json`) as { rows: [number, number, string, string][] };
+      const events = fixture(`sprite-order-real-route/events/${trace}.json`).events as { n: number; k: string }[];
+      for (const body of events.filter(event => event.k === "body")) {
+        const row = raw.rows.filter(candidate => candidate[0] <= body.n).at(-1)!;
+        const order = Array.from({ length: 64 }, (_, index) => parseInt(row[2].slice(index * 2, index * 2 + 2), 16));
+        const mask = BigInt(`0x${row[3]}`);
+        const occupied = order.filter(slot => (mask >> BigInt(slot)) & 1n);
+        if ([...occupied].sort((a, b) => a - b).join() !== [...KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER].sort((a, b) => a - b).join()) continue;
+        expect(occupied, `${trace} ${body.n}`).toEqual(KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+        matched += 1;
+      }
+    }
+    expect(matched).toBe(44);
   });
 });

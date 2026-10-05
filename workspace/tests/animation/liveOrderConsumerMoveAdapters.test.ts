@@ -16,6 +16,7 @@ import {
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { grudgeConfigFor, grudgeRowsFor } from "../../tools/compare/grudgeFramebuffer.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { predictLentOrders } from "../../tools/integration/orderCrossBodyRouteScan.ts";
 import { fixtureSpriteOrder, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { healBellNotesInPainterOrder, HEAL_BELL_REUSED_ORDER_SLOTS } from "../../src/animation/healBell.ts";
 import { leafBladeDisplayedOamOrderAtAge, LEAF_BLADE_OAM_ORDER_SLOTS } from "../../src/animation/leafBlade.ts";
@@ -68,7 +69,7 @@ function expectRulesEqual(on: ReturnType<typeof generatedCommandAnimationReplay>
   }
 }
 
-describe("live order-consumer adapters: Grudge (first move body of a battle)", () => {
+describe("live order-consumer adapters: Grudge (while the tracked order is known)", () => {
   it("registers Grudge with the accepted duration and #142 shadow row", () => {
     expect(LIVE_MOVE_ANIMATION_IDS).toContain(288);
     for (const a of [0, 1] as const) expect(liveMoveAnimationDuration(request(a))).toBe(209);
@@ -129,15 +130,31 @@ describe("live order-consumer adapters: Grudge (first move body of a battle)", (
     expectRulesEqual(on, off);
   }, 120000);
 
-  it("declines (scene-off fallback) when Grudge is not the first body (seed 16, slot 3: opponent Light Screen first)", () => {
+  it("renders Grudge as a LATER body after a modelled opponent Light Screen with the tracked order (seed 16, slot 3)", () => {
     const on = generatedCommandAnimationReplay(16, "on", [3], 0);
     const off = generatedCommandAnimationReplay(16, "off", [3], 0);
     expect(on.requests.map(q => [q.moveId, q.attacker])).toEqual([[113, 1], [288, 0]]);
     const body = on.animations.find(a => a.moveId === 288 && a.attacker === 0)!;
     expect(body.ages).toEqual(Array.from({ length: 209 }, (_, age) => age));
+    expect(body.adapterActive.every(Boolean)).toBe(true);
+    const moves = on.commands.filter(row => row.type === "move-animation");
+    const predicted = predictLentOrders(on, true);
+    expect(moves.map(row => row.spriteOrderInput ?? null))
+      .toEqual(moves.map(row => predicted.get((row.command as { eventSequence: number }).eventSequence)));
+    expect(moves.map(row => row.spriteOrderInput !== undefined)).toEqual([true, true]);
+    expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    expectRulesEqual(on, off);
+  }, 120000);
+
+  it("declines (scene-off fallback) when an earlier body has no EXACT plan (seed 16, slots [1, 3])", () => {
+    const on = generatedCommandAnimationReplay(16, "on", [1, 3], 0);
+    const off = generatedCommandAnimationReplay(16, "off", [1, 3], 0);
+    const body = on.animations.find(a => a.moveId === 288 && a.attacker === 0)!;
+    expect(body.ages).toEqual(Array.from({ length: 209 }, (_, age) => age));
     expect(body.adapterActive.some(Boolean)).toBe(false);
-    expect(on.commands.filter(row => row.type === "move-animation").map(row => row.spriteOrderInput !== undefined))
-      .toEqual([true, false]);
+    const grudge = on.commands.find(row => row.type === "move-animation"
+      && (row.command as { animation?: { moveId: number } }).animation?.moveId === 288)!;
+    expect(grudge.spriteOrderInput).toBeUndefined();
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expectRulesEqual(on, off);
   }, 120000);
@@ -145,7 +162,7 @@ describe("live order-consumer adapters: Grudge (first move body of a battle)", (
 
 // ---------------------------------------------------------------------------------------------------------------
 // Order-consumer batch 2 (docs/order-consumer-prep.md §0/§4/§5): Ember, Dragon Rage, Flamethrower (order-independent),
-// Heal Bell, Leaf Blade, Perish Song, Rock Throw, Blaze Kick (provider consumers: first body of a battle only).
+// Heal Bell, Leaf Blade, Perish Song, Rock Throw, Blaze Kick (provider consumers: while the tracked order is known).
 const NEW = { EMBER: 52, DRAGON_RAGE: 82, FLAMETHROWER: 53, HEAL_BELL: 215, LEAF_BLADE: 348, PERISH_SONG: 195, ROCK_THROW: 88, BLAZE_KICK: 299 } as const;
 const DURATION: Record<number, number> = { 52: 63, 82: 150, 53: 115, 215: 261, 348: 224, 195: 259, 88: 87, 299: 78 };
 const NAME: Record<number, string> = { 52: "EMBER", 82: "DRAGON_RAGE", 53: "FLAMETHROWER", 215: "HEAL_BELL", 348: "LEAF_BLADE", 195: "PERISH_SONG", 88: "ROCK_THROW", 299: "BLAZE_KICK" };
@@ -308,7 +325,8 @@ describe("live order-consumer adapters: Ember, Dragon Rage, Flamethrower, Heal B
       expect(body.player).toBe(route.player);
       expect(body.ages).toEqual(Array.from({ length: DURATION[id]! }, (_, age) => age));
       expect(body.adapterActive.every(Boolean)).toBe(true);
-      // Provider consumers are live only as the battle's first body (the host lends the order exactly once).
+      // These provider-consumer routes are the battle's first body (later bodies: the cross-body routes below/in
+      // tests/liveSpriteOrderHost.test.ts).
       if (![52, 82, 53].includes(id)) {
         const firstBody = on.commands.find(row => row.type === "move-animation")!;
         expect((firstBody.command as { animation: { moveId: number } }).animation.moveId).toBe(id);
@@ -319,12 +337,16 @@ describe("live order-consumer adapters: Ember, Dragon Rage, Flamethrower, Heal B
     }, 180000);
   }
 
-  it("declines (scene-off fallback) when Blaze Kick is not the first body (seed 43, streak 28, slot 0: opponent body first)", () => {
+  it("renders Blaze Kick as a LATER body after a modelled opponent Sunny Day (seed 43, streak 28, slot 0)", () => {
     const { on, off } = ordinary(43, 28, 0);
     expect(on.requests.map(q => [q.moveId, q.attacker])).toEqual([[241, 1], [299, 0]]);
     const body = on.animations.find(a => a.moveId === 299 && a.attacker === 0)!;
     expect(body.ages).toEqual(Array.from({ length: 78 }, (_, age) => age));
-    expect(body.adapterActive.some(Boolean)).toBe(false);
+    expect(body.adapterActive.every(Boolean)).toBe(true);
+    const moves = on.commands.filter(row => row.type === "move-animation");
+    const predicted = predictLentOrders(on, true);
+    expect(moves.map(row => row.spriteOrderInput ?? null))
+      .toEqual(moves.map(row => predicted.get((row.command as { eventSequence: number }).eventSequence)));
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expectRulesEqual(on, off);
   }, 180000);
