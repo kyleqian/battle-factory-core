@@ -1,0 +1,215 @@
+{
+ "firstRng2": 2354516896,
+ "steps": [
+  {
+   "from": 227,
+   "to": 228,
+   "gRng2Steps": 1,
+   "scriptOffset": 3
+  },
+  {
+   "from": 228,
+   "to": 229,
+   "gRng2Steps": 1,
+   "scriptOffset": 3
+  },
+  {
+   "from": 229,
+   "to": 230,
+   "gRng2Steps": 1,
+   "scriptOffset": 3
+  },
+  {
+   "from": 230,
+   "to": 231,
+   "gRng2Steps": 1,
+   "scriptOffset": 6
+  },
+  {
+   "from": 231,
+   "to": 232,
+   "gRng2Steps": 1,
+   "scriptOffset": 6
+  },
+  {
+   "from": 232,
+   "to": 233,
+   "gRng2Steps": 1,
+   "scriptOffset": 6
+  },
+  {
+   "from": 233,
+   "to": 234,
+   "gRng2Steps": 1,
+   "scriptOffset": 8
+  },
+  {
+   "from": 234,
+   "to": 235,
+   "gRng2Steps": 1,
+   "scriptOffset": 8
+  },
+  {
+   "from": 235,
+   "to": 236,
+   "gRng2Steps": 1,
+   "scriptOffset": 8
+  },
+  {
+   "from": 236,
+   "to": 237,
+   "gRng2Steps": 5,
+   "scriptOffset": 45
+  },
+  {
+   "from": 237,
+   "to": 238,
+   "gRng2Steps": 1,
+   "scriptOffset": 45
+  },
+  {
+   "from": 238,
+   "to": 239,
+   "gRng2Steps": 1,
+   "scriptOffset": 45
+  },
+  {
+   "from": 239,
+   "to": 240,
+   "gRng2Steps": 1,
+   "scriptOffset": 45
+  },
+  {
+   "from": 240,
+   "to": 241,
+   "gRng2Steps": 1,
+   "scriptOffset": 45
+  },
+  {
+   "from": 241,
+   "to": 242,
+   "gRng2Steps": 1,
+   "scriptOffset": 45
+  },
+  {
+   "from": 242,
+   "to": 243,
+   "gRng2Steps": 1,
+   "scriptOffset": 45
+  },
+  {
+   "from": 243,
+   "to": 244,
+   "gRng2Steps": 1,
+   "scriptOffset": 45
+  },
+  {
+   "from": 244,
+   "to": 245,
+   "gRng2Steps": 1,
+   "scriptOffset": 45
+  },
+  {
+   "from": 245,
+   "to": 246,
+   "gRng2Steps": 1,
+   "scriptOffset": 45
+  },
+  {
+   "from": 246,
+   "to": 247,
+   "gRng2Steps": 1,
+   "scriptOffset": 45
+  },
+  {
+   "from": 247,
+   "to": 248,
+   "gRng2Steps": 1,
+   "scriptOffset": 45
+  },
+  {
+   "from": 248,
+   "to": 249,
+   "gRng2Steps": 1,
+   "scriptOffset": 45
+  },
+  {
+   "from": 249,
+   "to": 250,
+   "gRng2Steps": 1,
+   "scriptOffset": 45
+  },
+  {
+   "from": 250,
+   "to": 251,
+   "gRng2Steps": 1,
+   "scriptOffset": 45
+  },
+  {
+   "from": 251,
+   "to": 252,
+   "gRng2Steps": 1,
+   "scriptOffset": 45
+  },
+  {
+   "from": 252,
+   "to": 253,
+   "gRng2Steps": 1,
+   "scriptOffset": 45
+  },
+  {
+   "from": 253,
+   "to": 254,
+   "gRng2Steps": 1,
+   "scriptOffset": 45
+  },
+  {
+   "from": 254,
+   "to": 255,
+   "gRng2Steps": 1,
+   "scriptOffset": 45
+  },
+  {
+   "from": 255,
+   "to": 256,
+   "gRng2Steps": 1,
+   "scriptOffset": 45
+  },
+  {
+   "from": 256,
+   "to": 257,
+   "gRng2Steps": 1,
+   "scriptOffset": 45
+  },
+  {
+   "from": 257,
+   "to": 258,
+   "gRng2Steps": 1,
+   "scriptOffset": 49
+  },
+  {
+   "from": 258,
+   "to": 259,
+   "gRng2Steps": 1,
+   "scriptOffset": 49
+  },
+  {
+   "from": 259,
+   "to": 260,
+   "gRng2Steps": 0,
+   "scriptOffset": 49
+  },
+  {
+   "from": 260,
+   "to": 261,
+   "gRng2Steps": 0,
+   "scriptOffset": 49
+  },
+  {
+   "from": 261,
+   "to": 262,
+   "gRng2Steps": 1,
+   "scriptOffset": 49
+  }
+ ]
+}
