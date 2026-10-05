@@ -2053,6 +2053,8 @@ export interface SceneOnHealBellConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Live host order of slots 4,5,7,9,10,11 at activation (docs/order-consumer-prep.md §0); staged = ascending. */
+  readonly noteOrderSeed?: readonly number[];
 }
 
 /** Fire Blast presentation only; damage and battle state remain battle-owned. */

@@ -34397,13 +34397,13 @@ export function renderSceneOnMovePresentation(
       ...healState,
       age: healState.age - 1,
     });
-    const playerToOpponent = view.attacker.species === "CHIMECHO"
+    const playerToOpponent = (liveField || view.attacker.species === "CHIMECHO")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
-    const opponentToPlayer = view.attacker.species === "CHIMECHO"
+    const opponentToPlayer = (liveField || view.attacker.species === "CHIMECHO")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -34425,12 +34425,12 @@ export function renderSceneOnMovePresentation(
 
     const chimechoSource = playerToOpponent
       ? healBellArt.chimechoBack : healBellArt.chimechoFront;
-    const chimecho = playerToOpponent ? chimechoSource : {
+    const chimecho = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent ? chimechoSource : {
       ...chimechoSource,
       tileset: subTileset(chimechoSource.tileset, 0, 8),
     };
     const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
-    const onix = playerToOpponent
+    const onix = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
     const attackerPalette = blendPaletteToward(
@@ -34451,7 +34451,7 @@ export function renderSceneOnMovePresentation(
         + speciesFrontIdleRestOffsetOrZero(view.target.species).x2,
       y: view.target.geometry.spriteCorner.y
         + speciesFrontIdleRestOffsetOrZero(view.target.species).y2,
-    } : ONIX_MATERIALIZE_CORNER;
+    } : liveField ? view.target.geometry.spriteCorner : ONIX_MATERIALIZE_CORNER;
 
     // Every move OBJ has priority 2. The fixed battlers follow all Heal Bell
     // allocations in BuildOamBuffer, so effects win their overlaps.
@@ -34466,7 +34466,8 @@ export function renderSceneOnMovePresentation(
     // Chimecho is elevated. SpriteCB_EnemyShadow observes the newly active
     // script after the first BuildOamBuffer pass, leaving its pre-animation
     // hardware OBJ visible on source age zero only.
-    if (opponentToPlayer && healState.age === 0) {
+    // Live: the shared #142 hook draws it (liveMoveOpponentShadowRow).
+    if (!liveField && opponentToPlayer && healState.age === 0) {
       const shadowX = view.attacker.geometry.animationCenter.x
         - battleEnemyShadow.width / 2;
       const shadowY = view.attacker.geometry.battlePositionCenter.y + 29
@@ -34512,6 +34513,7 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.side,
       view.attacker.geometry.animationCenter,
       view.attacker.geometry.battlePositionCenter,
+      healState.config.noteOrderSeed,
     );
     for (const note of notes) {
       const frame = note.tileVariant + (note.paletteVariant & 1) * 8;
@@ -34537,6 +34539,7 @@ export function renderSceneOnMovePresentation(
       );
     }
 
+    if (liveField) return;
     const profile = healState.config.fieldProfile;
     drawSendOutHealthbox(
       fb,
