@@ -1,5 +1,5 @@
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
-import type { LiveMoveSpriteAllocatorInput } from "./liveMoveSpriteAllocator.ts";
+import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import { liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import {
@@ -552,7 +552,7 @@ function sendInWhiteCoefficientAtFrame(frame: number): number {
 }
 
 export type BattleResolutionRenderEffect =
-  | Readonly<{ type: "move"; request: BattleMoveAnimationRequest; age: number; paletteInput?: LiveMovePaletteInput; spriteAllocatorInput?: LiveMoveSpriteAllocatorInput }>
+  | Readonly<{ type: "move"; request: BattleMoveAnimationRequest; age: number; paletteInput?: LiveMovePaletteInput; spriteAllocatorInput?: LiveMoveSpriteAllocatorInput; spriteOrderInput?: LiveMoveSpriteOrderInput }>
   | Readonly<{
       type: "hit";
       battler: 0 | 1;
@@ -1130,6 +1130,7 @@ export function createBattleResolutionPresentationRenderView(
         type: "move", request: command.animation, age: state.lifecycle.phaseElapsed,
         paletteInput: state.liveMovePaletteInput,
         spriteAllocatorInput: state.liveMoveSpriteAllocatorInput,
+        spriteOrderInput: state.liveMoveSpriteOrderInput,
       });
     } else if (command.type === "hit-animation") {
       effect = Object.freeze({

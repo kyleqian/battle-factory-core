@@ -3,6 +3,7 @@ import {
   allocateFirstLiveSprite, destroyLiveSprite, invalidateLiveSpriteAllocatorHost,
   type LiveSpriteAllocatorHost, type LiveSpriteOwner,
 } from "./liveSpriteAllocator.ts";
+import { invalidateSpriteOrderState, type SpriteOrderState } from "./spriteOrderProvider.ts";
 
 export interface LiveMoveSpriteAllocatorInput {
   readonly historyKnown: true;
@@ -115,5 +116,33 @@ export function prepareLiveMoveSpriteAllocator(
       wall,
       sparkles: Object.freeze(sparkles),
     }),
+  });
+}
+
+/**
+ * Free-slot `sSpriteOrder` tie order (`SpriteOrderState.free`) at the activation edge of the move body it is
+ * supplied to. Consumers derive their allocation-slot order with `spriteOrderForSlots`; absent = unknown order,
+ * and an order consumer must then return null (scene-off fallback), never a guessed order.
+ */
+export interface LiveMoveSpriteOrderInput {
+  readonly known: true;
+  readonly free: readonly number[];
+}
+
+/**
+ * Sprite-order seam for one move body. Policy of this step (docs/sprite-order-body-plans.md §3: the cause of the
+ * between-body transient blip is still being probed, so no body/gap plan is applied in production): a known order
+ * is lent to the body and then invalidated, so only the first move body after a known entry with no other
+ * graphics command in between ever receives an order. A later step can replace the invalidation with
+ * `applySpriteOrderUnitPlan` per body/gap without changing callers.
+ */
+export function prepareLiveMoveSpriteOrder(
+  order: SpriteOrderState,
+  _request: BattleMoveAnimationRequest,
+): Readonly<{ next: SpriteOrderState; input?: LiveMoveSpriteOrderInput }> {
+  if (!order.known) return Object.freeze({ next: order });
+  return Object.freeze({
+    next: invalidateSpriteOrderState(order),
+    input: Object.freeze({ known: true, free: order.free }),
   });
 }

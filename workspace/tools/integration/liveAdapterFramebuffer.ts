@@ -14,7 +14,8 @@ import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts"
 import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";
 import { liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";
 import { createKnownEntrySpriteAllocatorProvider } from "../../src/engine/knownEntrySpriteAllocator.ts";
-import { prepareLiveMoveSpriteAllocator } from "../../src/engine/liveMoveSpriteAllocator.ts";
+import { prepareLiveMoveSpriteAllocator, prepareLiveMoveSpriteOrder } from "../../src/engine/liveMoveSpriteAllocator.ts";
+import { createSpriteOrderPlanCursor, knownEntrySpriteOrderState } from "../../src/engine/spriteOrderProvider.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
 import type { BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
@@ -101,6 +102,12 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
         createKnownEntrySpriteAllocatorProvider("battle-lab-ordinary-singles").firstMove,
         request,
       ).input,
+      // Every fixture body is the scenario's first move body after the known entry: supply the order exactly as
+      // production does there (known-entry F, checked against the allocator occupancy), never from capture rows.
+      spriteOrderInput: prepareLiveMoveSpriteOrder(createSpriteOrderPlanCursor(
+        knownEntrySpriteOrderState("battle-lab-ordinary-singles"),
+        createKnownEntrySpriteAllocatorProvider("battle-lab-ordinary-singles").firstMove.occupants.map(o => o.slot),
+      ).order, request).input,
     },
     visibility: { player: { sprite: true, healthbox: true }, opponent: { sprite: true, healthbox: true } },
     waitCursor: null, bottom: "message", confirmHandoff: null, switchIn: null,

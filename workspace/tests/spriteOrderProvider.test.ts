@@ -5,7 +5,8 @@ import { createKnownEntrySpriteAllocatorProvider } from "../src/engine/knownEntr
 import {
   BATTLE_LAB_ORDINARY_SINGLES_ENTRY_WINDOWS, KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, applySpriteOrderWindow, initSpriteOrderState,
   invalidateSpriteOrderState, knownEntrySpriteOrderState, onSpriteOrderCreate, onSpriteOrderDestroyGroup,
-  spriteOrderForFirstAllocation,
+  spriteOrderForFirstAllocation, spriteOrderForSlots, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, spriteOrderWithOccupiedPrefix,
+  spriteOrderPlanTableFromFixture, createSpriteOrderPlanCursor, applySpriteOrderUnitPlan,
 } from "../src/engine/spriteOrderProvider.ts";
 
 const RAW = join(import.meta.dirname, "../tools/integration/fixtures/sprite-order-event-raw");
@@ -226,5 +227,108 @@ describe("ordinary Factory entry (Scene ON, draft -> battle 1, tools/integration
       expect(firstMoveOccupied).toEqual(occupied);
     }
     expect(opponents.size).toBe(2);
+  });
+});
+
+describe("consumer API: allocation-slot order and occupied prefix", () => {
+  const entry = knownEntrySpriteOrderState("battle-lab-ordinary-singles");
+  it("filters F to the allocation slots (not F.slice)", () => {
+    // Grudge's six flames: order-consumer-prep §0/§1, provider == literal == observed 2/2.
+    expect(spriteOrderForSlots(entry, [3, 4, 5, 7, 9, 10])).toEqual([4, 3, 5, 10, 9, 7]);
+    expect(spriteOrderForFirstAllocation(entry, 6)).toEqual([4, 3, 21, 20, 5, 19]);
+    // Leaf Blade's first-action slots (order-consumer-prep §0).
+    expect(spriteOrderForSlots(entry, [3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 16]))
+      .toEqual([4, 3, 5, 16, 15, 14, 13, 12, 11, 10, 9, 7]);
+  });
+  it("refuses unknown history, occupied, out-of-range and repeated slots", () => {
+    expect(spriteOrderForSlots(invalidateSpriteOrderState(entry), [3])).toBeNull();
+    expect(spriteOrderForSlots(entry, [3, 6])).toBeNull();
+    expect(spriteOrderForSlots(entry, [3, 64])).toBeNull();
+    expect(spriteOrderForSlots(entry, [3, 3])).toBeNull();
+  });
+  it("pins the known-entry occupied prefix to the complement of F and the allocator occupants", () => {
+    const occupants = createKnownEntrySpriteAllocatorProvider("ordinary-factory").firstMove.occupants.map(o => o.slot);
+    expect([...KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER].sort((a, b) => a - b)).toEqual([...occupants].sort((a, b) => a - b));
+    const full = spriteOrderWithOccupiedPrefix(entry, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER)!;
+    expect(full.slice(0, 12)).toEqual([62, 60, 0, 63, 1, 61, 6, 8, 2, 4, 3, 21]);
+    expect(spriteOrderWithOccupiedPrefix(entry, [62, 60])).toBeNull();
+    expect(spriteOrderWithOccupiedPrefix(invalidateSpriteOrderState(entry), KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER)).toBeNull();
+  });
+});
+
+describe("body/gap plan applier: TS replay of sprite-order-body-plans.json (mirrors spriteOrderBodyPlans.py)", () => {
+  const FIX = join(import.meta.dirname, "../tools/integration/fixtures");
+  const PLANS = JSON.parse(readFileSync(join(FIX, "sprite-order-body-plans.json"), "utf8"));
+  const EVENTS = JSON.parse(readFileSync(join(FIX, "sprite-order-body-events.json"), "utf8"));
+  const table = spriteOrderPlanTableFromFixture(PLANS);
+  interface Unit { kind: "body" | "gap"; mv?: number; truncated?: boolean; last?: boolean; observedFreeAtEdge?: number[] }
+  interface Scenario { file: string; move: number | null; side: string | null; freeAtFirstEdge: number[];
+    entryMatchesProvider: boolean; units: Unit[] }
+  const ownerSide = (sc: Scenario, mv: number): string => sc.side === null ? "unattributed"
+    : mv === sc.move ? sc.side : mv === 0 ? "any" : sc.side === "opponent" ? "player" : "opponent";
+  const ukey = (sc: Scenario, u: Unit) => `${u.mv}:${ownerSide(sc, u.mv!)}`;
+  const same = (a: readonly number[], b: readonly number[]) => a.length === b.length && a.every((x, i) => x === b[i]);
+
+  it("loads only EXACT-PLAN rows", () => {
+    expect(table.bodies.has("288:player")).toBe(false); // Grudge body: NEEDS-KEYS
+    expect(table.bodies.has("33:player")).toBe(true);
+    expect([...table.bodies.keys()].every(k => PLANS.bodies[k].verdict === "EXACT-PLAN")).toBe(true);
+    expect(table.gapAfterBody.get("101:player")).toBeDefined();
+  });
+
+  it("reproduces 659 edges preceded by exact plans, 659 exact, 0 mismatched", () => {
+    const stat: Record<string, number> = {};
+    const bump = (k: string) => { stat[k] = (stat[k] ?? 0) + 1; };
+    const entryF = knownEntrySpriteOrderState("battle-lab-ordinary-singles");
+    for (const sc of EVENTS.scenarios as Scenario[]) {
+      if (!sc.entryMatchesProvider) {
+        bump("scenariosEntryWindowsDiffer");
+        if (!same(sc.freeAtFirstEdge, KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER)) { bump("skipped"); continue; }
+      }
+      let cursor = createSpriteOrderPlanCursor(entryF,
+        createKnownEntrySpriteAllocatorProvider("battle-lab-ordinary-singles").firstMove.occupants.map(o => o.slot));
+      sc.units.forEach((u, ui) => {
+        if (stat.__break) return;
+        let plan;
+        if (u.kind === "body") {
+          if (u.truncated) { stat.__break = 1; return; }
+          bump("edges");
+          if (cursor.order.known) {
+            bump("edgesPrecededByExactPlans");
+            bump(ui > 1 ? "laterEdgesPrecededByExactPlans" : "firstEdgesPrecededByExactPlans");
+            bump(same(cursor.order.free, u.observedFreeAtEdge!) ? "edgesExact" : "edgesMismatched");
+            if (ui === 1 && same(cursor.order.free, u.observedFreeAtEdge!)) bump("firstEdgesExact");
+          }
+          plan = table.bodies.get(ukey(sc, u));
+        } else {
+          if (u.last) return;
+          const next = sc.units[ui + 1]!;
+          plan = table.gaps.get(`${ui === 0 ? "entry" : ukey(sc, sc.units[ui - 1]!)}>${ukey(sc, next)}`);
+        }
+        cursor = applySpriteOrderUnitPlan(cursor, plan);
+      });
+      delete stat.__break;
+    }
+    expect(stat).toEqual({
+      edges: 790, edgesPrecededByExactPlans: 659, firstEdgesPrecededByExactPlans: 338, laterEdgesPrecededByExactPlans: 321,
+      edgesExact: 659, firstEdgesExact: 338, scenariosEntryWindowsDiffer: 19, skipped: 12,
+    });
+    expect(PLANS.replay).toMatchObject({ edges: 790, edgesPrecededByExactPlans: 659, edgesExact: 659, firstEdgesExact: 338 });
+  });
+
+  it("invalidates on a missing or NEEDS-KEYS plan and stays invalid", () => {
+    const cursor = createSpriteOrderPlanCursor(knownEntrySpriteOrderState("ordinary-factory"));
+    const grudge = applySpriteOrderUnitPlan(cursor, table.bodies.get("288:player"));
+    expect(grudge.order.known).toBe(false);
+    expect(applySpriteOrderUnitPlan(grudge, table.bodies.get("33:player")).order.known).toBe(false);
+    expect(createSpriteOrderPlanCursor(knownEntrySpriteOrderState("ordinary-factory"), [0, 1]).order.known).toBe(false);
+  });
+
+  it("applies the transient blip and the FDERIVED cursor-pair cycle from F", () => {
+    const cursor = createSpriteOrderPlanCursor(knownEntrySpriteOrderState("ordinary-factory"));
+    const blip = applySpriteOrderUnitPlan(cursor, [{ C: [["n", 0, "f"]] }, { D: [["n", 0]] }]);
+    expect(blip.order.free.slice(0, 4)).toEqual([3, 4, 21, 20]);
+    const pair = applySpriteOrderUnitPlan(cursor, [{ C: [["n", 0, "f"], ["n", 1, "f"]] }, { D: [["n", 1], ["n", 0]], pw: [782, 782] }]);
+    expect(pair.order.free.slice(0, 4)).toEqual([4, 3, 21, 20]);
   });
 });

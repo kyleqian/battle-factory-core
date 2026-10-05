@@ -41,6 +41,8 @@ export function generatedCommandAnimationReplay(
     retainedPaletteHistoryKnown: boolean | undefined;
     spriteInputHistoryKnown: boolean | undefined;
     retainedSpriteHistoryKnown: boolean | undefined;
+    spriteOrderInput: readonly number[] | undefined;
+    retainedSpriteOrderKnown: boolean | undefined;
   }> = [];
   const requests: Array<BattleMoveAnimationRequest & { frame: number }> = [];
   const semanticEvents: Array<{
@@ -81,6 +83,8 @@ export function generatedCommandAnimationReplay(
           retainedPaletteHistoryKnown: state.liveMovePaletteHost?.host.historyKnown,
           spriteInputHistoryKnown: r.liveMoveSpriteAllocatorInput?.historyKnown,
           retainedSpriteHistoryKnown: state.liveMoveSpriteAllocatorHost?.host.historyKnown,
+          spriteOrderInput: r.liveMoveSpriteOrderInput?.free,
+          retainedSpriteOrderKnown: state.liveMoveSpriteAllocatorHost?.order.known,
         });
         if (command.type === "move-animation" && command.animation) requests.push({ ...command.animation, frame });
       }
@@ -91,7 +95,7 @@ export function generatedCommandAnimationReplay(
     const moveEffect = view.effect?.type === "move" ? view.effect : null;
     const adapterActive = moveEffect !== null && liveMoveAnimationPresentation(
       moveEffect.request, view.field, moveEffect.age, moveEffect.paletteInput,
-      moveEffect.spriteAllocatorInput,
+      moveEffect.spriteAllocatorInput, moveEffect.spriteOrderInput,
     ) !== null;
     if (key !== current) {
       key = current;

@@ -1,6 +1,6 @@
 {
  "schema": "issue142-shadow-rows-extra/v1",
- "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py)",
+ "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py)",
  "rows": [
   {
    "id": 236,
@@ -1852,6 +1852,42 @@
     "fixture": "tools/integration/fixtures/prep5-belly-drum-opponent.json",
     "body": "normal",
     "activation": "tools/integration/fixtures/prep5-activation (docs/next-adapters-prep5.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 288,
+   "move": "GRUDGE",
+   "orientation": "player",
+   "variant": "order-consumer-grudge-player",
+   "activationFrame": 66,
+   "windowStart": 66,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/order-consumer-grudge-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 288,
+   "move": "GRUDGE",
+   "orientation": "opponent",
+   "variant": "order-consumer-grudge-opponent",
+   "activationFrame": 70,
+   "windowStart": 70,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/order-consumer-grudge-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
    }
   }
  ]
