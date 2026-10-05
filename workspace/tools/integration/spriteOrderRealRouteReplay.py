@@ -158,7 +158,7 @@ def build(trace: str):
         created = [s for s in range(64) if (ma >> s) & 1 and not (mb >> s) & 1]
         destroyed_slots = [s for s in range(64) if (mb >> s) & 1 and not (ma >> s) & 1]
         # destroyed order = leading entries of F_after that were occupied before (array order)
-        head = [s for s in after[: len(destroyed_slots) + 8] if s in destroyed_slots]
+        head = [s for s in after if s in destroyed_slots]  # their order within F after the unit
         cx = [x for x in ctxs if x["n"] <= a]
         cx = cx[-1] if cx else {}
         creators = collections.Counter(strip(c["caller"]) for c in cl if c["k"] != "DestroySprite")

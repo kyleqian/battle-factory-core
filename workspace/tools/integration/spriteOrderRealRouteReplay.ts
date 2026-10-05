@@ -99,8 +99,13 @@ function replay(trace: string, mode: Mode) {
   for (let i = 0; i < events.length; i++) {
     const e = events[i]!;
     if (e.n <= entryEnd && e.k === "uncovered") continue; // known entry stream
-    if (e.k === "prompt") apply(e, PROMPT_PLAN, "prompt");
-    else if (e.k === "blip") apply(e, BLIP_PLAN, "blip");
+    if (e.k === "prompt" || e.k === "blip") {
+      const nx = events[i + 1];
+      apply(e, e.k === "prompt" ? PROMPT_PLAN : BLIP_PLAN, e.k);
+      // unit-level check of the rule alone: predicted F vs the ROM state just before the next event (an un-cascaded test only when this unit's own pre-state was a seed or an exact prediction)
+      if (cursor.order.known && nx) bodyChecks.push({ frame: e.n, unit: e.k, source: "rule", exact: eq(cursor.order.free, nx.preF as number[]), occupiedMatch: eq(cursor.occupied, maskSlots(nx.preMask as string)),
+        observedFHead: head(nx.preF as number[]), predictedFHead: head(cursor.order.free) });
+    }
     else if (e.k === "body" || e.k === "anim") {
       const isBody = e.k === "body";
       const key = isBody ? `${e.move}:${e.side}` : animKey(e.table as string, e.id as number, e.arg as number | null);
@@ -155,7 +160,7 @@ function replay(trace: string, mode: Mode) {
     mismatched: list.filter(x => x.exact === false && !x.trivial).length, occupiedMismatch: list.filter(x => x.occupiedMatch === false && !x.trivial).length,
     consumerOrderMismatch: list.filter(x => x.consumerOrderExact === false && !x.trivial).length });
   const bc = (src: (x: string) => boolean) => { const l = bodyChecks.filter(x => src(x.source)); return { checks: l.length, exact: l.filter(x => x.exact).length, mismatched: l.filter(x => !x.exact).length, occupiedMismatch: l.filter(x => !x.occupiedMatch).length }; };
-  return { trace, mode, moveEdges: stat(mv), animEdges: stat(edges.filter(x => x.kind === "anim")), bodyLevel: { table: bc(x => x === "table"), learned: bc(x => x.startsWith("learned")) },
+  return { trace, mode, moveEdges: stat(mv), animEdges: stat(edges.filter(x => x.kind === "anim")), bodyLevel: { table: bc(x => x === "table"), learned: bc(x => x.startsWith("learned")), rule: bc(x => x === "rule") },
     invalidations, bodyChecks, edges };
 }
 
