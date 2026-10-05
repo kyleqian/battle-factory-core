@@ -11,6 +11,7 @@ import { GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE } from "../animation/sceneOnPresenta
 import { PRESENT_DAMAGE_FRAME_COUNT, PRESENT_HEAL_FRAME_COUNT } from "../animation/present.ts";
 import { SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE, SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE } from "../animation/solarBeam.ts";
 import { HOWL_FRAME_COUNT } from "../animation/howl.ts";
+import { dragonRageFireSpitGeometryFor } from "../animation/dragonRage.ts";
 import { TAIL_WHIP_FRAME_COUNT } from "../animation/tailWhip.ts";
 import { CONFUSE_RAY_FRAME_COUNT } from "../animation/confuseRay.ts";
 import { FOCUS_PUNCH_FIRST_INACTIVE_AGE } from "../animation/focusPunch.ts";
@@ -1486,7 +1487,13 @@ export function liveMoveAnimationPresentation(
         } };
       break;
     }
-    case 82: config = { move: "DRAGON_RAGE", attacker, target, fieldProfile }; break;
+    case 82: {
+      // D1 (#145): ROM StartDragonFireTranslation aims from the attacker's pic offset at the TARGET's, not at an ONIX literal.
+      const dragonTargetPic = liveBattlerAnchors(target.geometry.side, art).picOffsetPoint;
+      config = { move: "DRAGON_RAGE", attacker, target, fieldProfile,
+        fireSpitGeometry: dragonRageFireSpitGeometryFor(attacker.geometry.side, attackerAnchors.picOffsetPoint, dragonTargetPic) };
+      break;
+    }
     case 288: {
       // Order consumer (docs/order-consumer-prep.md §0): the six flames take the six lowest free slots in one
       // sort window and inherit their relative free order, so only a host-supplied order is exact. Unknown tracked
