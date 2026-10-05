@@ -15,8 +15,20 @@
   Stockpile, Uproar, Zap Cannon all READY (allocator literals = ROM plan;
   order pixel-neutral except Zap Cannon ≤4/117 frames); gate on the lent
   order (`spriteOrderInput.known`), no new provider module needed.
-- Running: prep7 batch (integration); order-policy gaps (stat-before-body,
-  Intimidate entry, Endeavor plan) evidence (side).
+- Order policy gaps (`e82018fd9`, `docs/sprite-order-policy-gaps.md`): the
+  prep7 "stat command invalidates" finding is stale (the cross-body host maps
+  `stat-stage-change` to a no-op; Double Team/Feather Dance first bodies now get
+  a known order 3/3); Intimidate entry seed (pre-prompt state + stat plan)
+  reproduces the ROM 12/12; Endeavor and Fake Tears are order-static under a
+  constant relative-y spread (strict real-route known edges 15 → 44, 0
+  mismatches). Production change proposal §1 (A-C) not yet applied.
+- prep9 (`69f218f0a`, `docs/next-adapters-prep9.md`; supervisor regenerated the
+  palette baseline identically): Absorb, Mega Drain, Giga Drain, Dream Eater,
+  Sunny Day need NO palette snapshots (census D-PAL stale): BG banks constant at
+  53/53 activations, OBJ banks = species art; allocator profiles constant;
+  order pixel-neutral. All READY (four with the lent order).
+- Running: prep7 batch (integration); REL-Y-STATIC confirmation for 121
+  candidate bodies (side).
 
 ## 2026-10-05 — cross-body sprite-order tracking live
 
