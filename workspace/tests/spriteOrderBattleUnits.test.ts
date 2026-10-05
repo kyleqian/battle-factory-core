@@ -82,7 +82,11 @@ describe("production sprite-order battle units (faint / summary / send-out / swi
     apply({ kind: "switch-in-start" }, { kind: "switch-in-finish" });
     expect(tracker.battlerSlots).toEqual({ player: 5, opponent: 0 });
     expect(tracker.cursor.occupied).toEqual([0, 1, 2, 3, 5, 60, 61, 62, 63]);
-    expect(spriteOrderTrackerLend(tracker)).toBeNull(); // player-faint reshow geometry: not role-isomorphic, declines
+    // Player-faint geometry {0,1,2,3,5,60..63} with roles from reshowPlayerGone (healthbox mains 1 / 2, shadow 3,
+    // docs/playerfaint-lend-audit.md §2.2): role-isomorphic, lent rho(F) (free 0,1,2,3,5,4,6,7,8 -> 8,0,1,2,6,3,4,5,7).
+    expect(tracker.occupantRoles).toEqual({ healthboxMain: { player: 1, opponent: 2 }, shadow: 3 });
+    const rho = new Map([[0, 8], [1, 0], [2, 1], [3, 2], [5, 6], [4, 3], [6, 4], [7, 5], [8, 7]]);
+    expect(spriteOrderTrackerLend(tracker)).toEqual(spriteOrderTrackerPostUnitView(tracker)!.free.map(slot => rho.get(slot) ?? slot));
   });
 
   it("adjacency guard: send-out without the summary, faint with an unknown battler slot, and unguarded units invalidate; a reset revives", () => {
@@ -113,7 +117,8 @@ describe("production sprite-order battle units (faint / summary / send-out / swi
     expect(revived.battlerSlots).toEqual({ player: null, opponent: null });
     expect(revived.invalidReason).toBeNull();
     expect(spriteOrderTrackerPostUnitView(run(revived, { kind: "battle-reshow", playerBattlerPresent: true })))
-      .toEqual({ free: expect.any(Array), occupied: [0, 1, 2, 3, 4, 60, 61, 62, 63], battlerSlots: { player: 0, opponent: 1 } });
+      .toEqual({ free: expect.any(Array), occupied: [0, 1, 2, 3, 4, 60, 61, 62, 63], battlerSlots: { player: 0, opponent: 1 },
+        occupantRoles: null }); // reshowBoth geometry: roles not ROM-verified for the lend, declines
     expect(spriteOrderTrackerPostUnitView(invalidateSpriteOrderTracker(entry(), "test"))).toBeNull();
     // outcome-style invalidation still sticks until a reset
     expect(run(entry(), { kind: "invalidate", reason: "outcome" }, { kind: "trainer-slide-end" }).cursor.order.known).toBe(false);

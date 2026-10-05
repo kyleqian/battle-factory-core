@@ -9,6 +9,7 @@ import {
   liveMoveAnimationDuration, liveMoveAnimationPresentation,
 } from "../../src/engine/liveMoveAnimation.ts";
 import type { GbaButton } from "../../src/input.ts";
+import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import type { LiveSpriteOrderHost } from "../../src/engine/liveSpriteOrderHost.ts";
 
@@ -31,8 +32,10 @@ export function generatedCommandAnimationReplay(
   seed: number, battleScene: "on" | "off",
   moveSlots: readonly (0 | 1 | 2 | 3 | "cancel-party" | { switch: 1 | 2 })[],
   factoryWinStreak = 0,
-  /** Stop at the frame budget instead of throwing (forced-replacement party screen: the driver cannot answer it). */
+  /** Stop at the frame budget instead of throwing (forced-replacement party screen when `answerForcedSwitch` is off). */
   allowStall = false,
+  /** Answer the forced-replacement party screen with the first healthy member (DOWN -> A -> SEND OUT A), as a player would. */
+  answerForcedSwitch = false,
 ) {
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
     id: `live-animation-generated-${seed}`, rngValue: seed, battleScene,
@@ -126,13 +129,25 @@ export function generatedCommandAnimationReplay(
     animations.at(-1)!.adapterActive.push(adapterActive);
   };
   const phase = () => state.battleCommandPresentation?.lifecycle.phase;
-  const until = (predicate: () => boolean) => {
-    while (!predicate()) step(
-      (state.battleStartIntro && frame % 16 === 0)
-      || (state.battleResolutionPresentation?.lifecycle.phase === "awaiting-message-dismiss" && frame % 2 === 0)
-        ? ["A"] : []);
-  };
   const pulse = (button: GbaButton) => { step(); step([button]); step(); };
+  // Forced replacement (player faint): the selector's cursor "magby" is the first legal party member.
+  const forcedSelector = () => {
+    const selector = answerForcedSwitch ? state.battleForcedPartySelect : null;
+    return selector && selector.sendOutElapsed === null && selector.elapsed >= PARTY_LIST_INPUT_ELAPSED ? selector : null;
+  };
+  const until = (predicate: () => boolean) => {
+    while (!predicate()) {
+      const selector = forcedSelector();
+      if (selector) {
+        pulse(selector.message !== null ? "A" : selector.cursor === "onix" && !selector.submenuOpen ? "DOWN" : "A");
+        continue;
+      }
+      step(
+        (state.battleStartIntro && frame % 16 === 0)
+        || (state.battleResolutionPresentation?.lifecycle.phase === "awaiting-message-dismiss" && frame % 2 === 0)
+          ? ["A"] : []);
+    }
+  };
   until(() => phase() === "action-menu");
   boundaries.push(state.battle!);
   let stalled = false;
