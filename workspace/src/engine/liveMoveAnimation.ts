@@ -146,6 +146,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   299,
   // prep10 (docs/next-adapters-prep10.md): Magnitude (request.power = gBattleMovePower 70 / 110; lent order gate).
   222,
+  // prep10: Reversal (amplitude = clamp(request.power / 12), the ROM's ShakeTargetBasedOnMovePowerOrDmg; lent order gate).
+  179,
 ] as const);
 
 const SWEET_SCENT_PETAL_SLOTS: readonly number[] = Object.freeze([
@@ -200,8 +202,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     8, 214, 157, 126, 349,
     // prep8 (issue142-shadow-rows-extra.json): every window starts at the activation frame (row 0).
     129, 271, 218, 69, 32, 62, 253, 85, 254, 192,
-    // prep10 (issue142-shadow-rows-extra.json): Magnitude's window starts at the activation frame (row 0).
-    222,
+    // prep10 (issue142-shadow-rows-extra.json): Magnitude / Reversal windows start at the activation frame (row 0).
+    222, 179,
     // prep9 (issue142-shadow-rows-extra.json): Giga Drain, Sunny Day, Mega Drain, Dream Eater windows start at the
     // activation frame (row 0). Absorb's window starts 10 frames after it (row -10, the Taunt convention): no row.
     202, 241, 72, 138,
@@ -524,6 +526,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 271: return 225; // Trick 70..294 / 66..290.
     // Magnitude 411..585 (power 70, 174 frames) / 191..397 (power 110, 206 frames): the reducer's first inactive age.
     case 222: return request.power > 99 ? 206 : request.power >= 10 && request.power <= 99 ? 174 : null;
+    case 179: return 173; // Reversal 404..577 / 451..624: activation..first inactive row (reducer 174 displays, ages 0..173).
     case 218: return 229; // Frustration 80..308 / 76..304.
     case 69: return 228; // Seismic Toss 81..308 / 77..304.
     case 32: return request.attacker === 1 ? 192 : 193; // Horn Drill 214..405 / 213..405 (after a Tackle body).
@@ -1470,6 +1473,14 @@ export function liveMoveAnimationPresentation(
             target: { spriteSlot: targetSlot, stretchTaskSlot: 0, shakeTaskSlot: 1 },
             orientation: attacker.geometry.side === "player" ? "player-back" : "opponent-front", gameplayRng: 0 } };
       }
+      break;
+    }
+    case 179: {
+      // prep10 s3.2: ShakeTargetBasedOnMovePowerOrDmg amplitude = clamp(gAnimMovePower / 12, 1, 16) (request.power = gBattleMovePower).
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      config = { move: "REVERSAL", attacker, target, fieldProfile,
+        attackerPictureOffset: attackerAnchors.picOffsetPoint, targetPictureOffset: targetAnchors.picOffsetPoint,
+        resolvedShake: { kind: "resolved-power-shake", amplitude: Math.min(16, Math.max(1, Math.floor(request.power / 12))) } };
       break;
     }
     case 222: {

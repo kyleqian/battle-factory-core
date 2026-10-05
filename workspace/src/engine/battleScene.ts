@@ -21404,14 +21404,14 @@ export function renderSceneOnMovePresentation(
       age: reversalState.age - 2,
     });
     const playerToOpponent =
-      view.attacker.species === "VIGOROTH"
+      (liveField || view.attacker.species === "VIGOROTH")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "DELCATTY"
+      && (liveField || view.target.species === "DELCATTY")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "VIGOROTH"
+      (liveField || view.attacker.species === "VIGOROTH")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "DELCATTY"
+      && (liveField || view.target.species === "DELCATTY")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -21421,7 +21421,7 @@ export function renderSceneOnMovePresentation(
     }
     const vigorothSource = playerToOpponent
       ? reversalArt.vigorothBack : reversalArt.vigorothFront;
-    const vigoroth = playerToOpponent
+    const vigoroth = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? vigorothSource
       : {
           ...vigorothSource,
@@ -21429,7 +21429,7 @@ export function renderSceneOnMovePresentation(
         };
     const delcattySource = playerToOpponent
       ? fakeTearsArt.delcattyFront : fakeTearsArt.delcattyBack;
-    const delcatty = playerToOpponent
+    const delcatty = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? {
           ...delcattySource,
           tileset: subTileset(delcattySource.tileset, 0, 8),
@@ -21532,6 +21532,7 @@ export function renderSceneOnMovePresentation(
       drawDelcatty();
       drawHitEffects();
     }
+    if (liveField) return;
     drawSendOutHealthbox(
       fb,
       0,
