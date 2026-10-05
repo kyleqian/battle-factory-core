@@ -1,7 +1,7 @@
 {
   "schema": "prep7-adapter-draft/v1",
   "move": "FIRE_BLAST",
-  "probe": "tools/battle-lab/mechanic-fire-blast-player-octillery-opponent-onix.json",
+  "probe": "tools/compare/fireBlastProbe.py",
   "scenario": "tools/battle-lab/mechanic-fire-blast-player-octillery-opponent-onix.json",
   "attacker": {
     "species": "OCTILLERY",
@@ -176,10 +176,11 @@
     ],
     "livePlan": "gate on spriteOrderInput.known (first body); config from accepted-extras via derivedFields; no reducer input needed (seed A literal == provider B in pixels, 0/197 frames)"
   },
-  "precedingBodies": [
+  "acceptedPrecedingBodies": [
     {
       "moveId": 33,
       "side": "opponent"
     }
-  ]
+  ],
+  "precedingBodiesNote": "The accepted scenario runs the AI Tackle (33) first; no 33->126 plan unit exists in sprite-order-body-plans.json. The Fire Blast reducer has no order input (its own 64-entry literal equals the provider order up to pixel-neutral slots 3/4, prep7 s2.3), so the harness lends the known-entry first-body order (what production supplies at a first body)."
 }

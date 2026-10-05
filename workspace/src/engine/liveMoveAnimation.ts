@@ -7,6 +7,7 @@ import type { BattleResolutionDisplayedField } from "./battleResolutionPresentat
 import type {
   SceneOnMovePresentationState, SceneOnMoveConfig, SceneOnPresentationBattler,
 } from "../animation/sceneOnPresentation.ts";
+import { GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE } from "../animation/sceneOnPresentation.ts";
 import { PRESENT_DAMAGE_FRAME_COUNT, PRESENT_HEAL_FRAME_COUNT } from "../animation/present.ts";
 import { SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE, SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE } from "../animation/solarBeam.ts";
 import { HOWL_FRAME_COUNT } from "../animation/howl.ts";
@@ -110,6 +111,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   296, 312, 266, 118, 269, 187,
   // prep6 (docs/next-adapters-prep6.md): Rock Tomb, Safeguard, Sweet Scent, Self-Destruct, Swallow, Knock Off, Faint Attack (player attacker only).
   317, 219, 230, 120, 256, 282, 185,
+  // prep7 (docs/next-adapters-prep7.md): Aerial Ace, Quick Attack, Ice Punch, Fake Tears, Sleep Talk, Rock Slide (opponent attacker only),
+  // Fire Blast (known-order gate), Dragon Dance (allocationOrder derived from the provider order).
+  332, 98, 8, 313, 214, 157, 126, 349,
   // order consumers (docs/order-consumer-prep.md): Grudge, first move body of a battle only (sprite-order input).
   288,
   // order consumers, order-independent (docs/order-consumer-prep.md §0): Ember (one sprite per sort window, ties resolve
@@ -176,6 +180,12 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // order consumers (issue142-shadow-rows-extra.json): Grudge's window starts at activation (66/70).
     // Heal Bell (215), Rock Throw (88), Perish Song (195), Leaf Blade (348) start at activation (0).
     288, 215, 348, 195, 88,
+    // prep7 (issue142-shadow-rows-extra.json): Aerial Ace / Quick Attack accepted windows begin before activation (idle
+    // rows owned by the preceding message command); the live age basis is the activation frame (reducer age 42 / 44), so
+    // the shadow row is live age 0.
+    332, 98,
+    // Ice Punch (staged windows start at activation: row 0). Sleep Talk likewise.
+    8, 214, 157, 126, 349,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -478,6 +488,19 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     // player 163/178/193 (1247..1409 ...), opponent 161/176/191 (= 148 + 15 turn / 146 + 15 turn), every window end = script end.
     case 256:
       return request.turn >= 1 && request.turn <= 3 ? (request.attacker === 0 ? 148 : 146) + 15 * request.turn : null;
+    // prep7 accepted windows (docs/next-adapters-prep7.md s2.2), counted from the activation frame: the accepted dense
+    // windows start 35/31 (AA) and 37/33 (QA) rows earlier with idle body rows owned by the queue's `message` command.
+    case 332: return 50; // Aerial Ace: activation..first inactive row (81..130 / 77..126); the later hit/HP/text rows are queue commands.
+    case 98: return 33; // Quick Attack (83..115 / 79..111).
+    case 313: return 87; // Fake Tears 80..166 / 76..162: the first displayed row is one after activation (row -1, no shadow row), 83 script + 4 clear rows.
+    // Sleep Talk accepted windows start at activation and end at the first inactive script row (1356..1541 / 4570..4758).
+    case 214: return request.attacker === 0 ? 186 : 189;
+    // Rock Slide, opponent attacker only (no accepted player-attacker evidence): activation..first inactive script row
+    // (1967..2104); the 37 later accepted rows are the target hit flash (hitFlashAnchorAge 141) and controller HUD.
+    case 157: return request.attacker === 1 ? 138 : null;
+    case 349: return 142; // Dragon Dance (78..219 / 74..215): window start = activation, window end = script end.
+    case 126: return 197; // Fire Blast (1147..1343 / 215..411): window start = activation, window end = script end.
+    case 8: return 184; // Ice Punch script activation..first inactive row (staged 1966..2149 / 2339..2522); HP/text/freeze/Sitrus rows are queue commands.
     case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
     case 153: return 212; // Explosion accepted window (76..287 / 80..291).
@@ -1288,6 +1311,97 @@ export function liveMoveAnimationPresentation(
         fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" },
         moveTextStartAge: -24 };
       break;
+    case 332:
+    case 98: {
+      // The body fns read the attacker side and the reducer age only (prep7 s2.1); the controller profile, hit reaction,
+      // HP and text are HUD owned by the queue's hit/HP/message commands (never-reached ages here). The accepted windows
+      // start before activation: the reducer age at the activation frame is 42 (Aerial Ace) / 44 (Quick Attack), the
+      // same for both orientations (the player preset's offset 4 re-expresses it, prep7-reducer-checks.json), so live
+      // age 0 = activation = reducer age 42 / 44. Rows before it are idle bodies under the preceding `message` command
+      // (the move compositor's age is the move-animation command's phaseElapsed, liveMoveAnimation.ts header comment).
+      const never = 1_000_000;
+      const common = { attacker, target, animationAgeOffset: request.moveId === 332 ? 42 : 44, moveTextStartAge: 0,
+        fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" as const } };
+      config = request.moveId === 332
+        ? { move: "AERIAL_ACE", ...common, controllerProfile: { targetHpBefore: field.player.hp, targetHpAfter: field.player.hp,
+            hitReactionFirstAge: never, hpDrainFirstAge: never, moveTextClearAge: never, resultTextFirstAge: never,
+            currentMoveResetAge: never } }
+        : { move: "QUICK_ATTACK", ...common, controllerProfile: { targetHpBefore: field.player.hp, targetHpAfter: field.player.hp,
+            hitReactionFirstAge: never, hpDrainFirstAge: never, resultTextFirstAge: never,
+            resultKind: "notVeryEffective" as const, currentMoveResetAge: never } };
+      break;
+    }
+    case 8:
+      // The body reads the target animation centre + side and the age only (prep7 s2.1). The accepted hpDrainProfile /
+      // controllerDisplayProfile feed HP, result text, menu, freeze status (FrozenIceCube from age 409) and Sitrus: all
+      // later queue commands outside the 183-frame script, so neutral never-reached ages are passed (omitting
+      // controllerDisplayProfile drops no body-window pixel: dense rows 0..183 are exact without it).
+      config = { move: "ICE_PUNCH", attacker, target, moveTextStartAge: 0,
+        fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" },
+        hpDrainProfile: { startHp: field.player.hp, endHp: field.player.hp, firstDisplayedAge: 1_000_000 } };
+      break;
+    case 313: {
+      // prep7 s2.1: the picture bounds are the attacker pic point -/+ width/2 and - height/2 (GetBattlerSpriteCoordAttr
+      // LEFT/RIGHT/TOP, exact 2/2); the affine centre is the sprite centre, not the pic point. The typed
+      // controllerPresentation is read only by the renderer's bottom-UI/banner block, which liveField skips (the queue's
+      // stat command owns the banner, result text and menu): never-reached ages. The -2 Sp. Def receipt (6 -> 4, anim
+      // argument 55) is the move's fixed effect (EFFECT_SPECIAL_DEFENSE_DOWN_2), which the display fn validates.
+      const attrs = liveBattlerCoordAttrs(attacker.geometry.side, art);
+      const pic = attackerAnchors.picOffsetPoint;
+      const never = 1_000_000;
+      config = { move: "FAKE_TEARS", attacker: affineCenterBattler(attacker), target, fieldProfile,
+        attackerPictureBounds: { left: pic.x - attrs.width / 2, right: pic.x + attrs.width / 2, top: pic.y - attrs.height / 2 },
+        controllerPresentation: { kind: "resolved-stat-drop",
+          kickoff: { messageId: "STRINGID_USEDMOVE", firstAge: 0,
+            selection: { moveIds: [0, 0, 0, 0], maxPP: [0, 0, 0, 0], cursor: 0 } },
+          statChange: { battler: "target", stat: "special-defense", from: 6, to: 4 },
+          statAnimation: { animationId: "STATS_CHANGE", argument: 55, firstAge: never },
+          result: { messageId: "STRINGID_DEFENDERSSTATFELL", firstAge: never },
+          moveEnd: { clearAge: never } } };
+      break;
+    }
+    // Sleep Talk: the body reads the attacker side + animation centre and the age only (prep7 s2.1); the sleep status, HP
+    // and text the staged branch hard-coded come from the displayed field under liveField (the field already says
+    // `sleep`, prep7-sleep-talk-field.json). The called move is an ordinary second request (Metronome precedent).
+    case 214: config = { move: "SLEEP_TALK", attacker, target }; break;
+    case 157:
+      if (attacker.geometry.side !== "opponent") return null;
+      // The reducer is seed-independent (0/40 arbitrary seeds, prep7 s2.3): the 64-entry spriteOrderSeed is the provider
+      // order (known-entry occupied prefix + F) when the tracked order is known and the accepted known-entry literal
+      // otherwise (both equal the observed order at a first body); the first-found pixel result is the same either way.
+      config = { move: "ROCK_SLIDE", attacker, target,
+        animationProfile: { ...GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE,
+          spriteOrderSeed: (spriteOrderInput?.known
+            ? spriteOrderWithOccupiedPrefix({ known: true, free: spriteOrderInput.free, pendingDestroyed: [] },
+              KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER) : null) ?? GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE.spriteOrderSeed },
+        fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" }, moveTextStartAge: 0 };
+      break;
+    case 126: {
+      // First-body gate (prep7 s2.3): the reducer's own 64-entry literal (fireBlast.ts FIRE_BLAST_ORDER_SEED) differs from
+      // the provider order (occupied prefix + F) only in slots 3/4 and renders identically (0 differing pixels / 197 ages,
+      // both orientations), so no reducer input exists; a body without a known tracked order is not proven -> null.
+      if (!spriteOrderInput?.known) return null;
+      config = { move: "FIRE_BLAST", attacker, target, fieldProfile,
+        animationProfile: { attackerPictureCenter: attackerAnchors.picOffsetPoint,
+          targetPictureCenter: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint,
+          targetSpriteSlot: target.geometry.side === "opponent" ? 8 : 6 } };
+      break;
+    }
+    case 349: {
+      // First-body gate (prep7 s2): the six orbs take the slots 3,4,5,7,9,10 (first-free); the reducer ranks them by
+      // `allocationOrder` = each orb's index in the provider's free order restricted to those slots ([4,3,5,10,9,7] ->
+      // [1,0,2,5,4,3], reproduces the ROM orb order at age 20). Unknown tracked order -> null (Grudge recipe). The orb
+      // radius is max(width, height) >> 1 of the attacker's picture.
+      if (!spriteOrderInput?.known) return null;
+      const allocationSlots = [3, 4, 5, 7, 9, 10];
+      const providerOrder = spriteOrderForSlots({ known: true, free: spriteOrderInput.free, pendingDestroyed: [] }, allocationSlots);
+      if (providerOrder === null) return null;
+      const { width, height } = liveBattlerCoordAttrs(attacker.geometry.side, art);
+      config = { move: "DRAGON_DANCE", attacker, target, fieldProfile,
+        animationProfile: { pictureSize: { width, height }, allocationSlots,
+          allocationOrder: allocationSlots.map(slot => providerOrder.indexOf(slot)) } };
+      break;
+    }
     case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;
     case 248: config = { move: "FUTURE_SIGHT", attacker, target, fieldProfile }; break;
     case 342:

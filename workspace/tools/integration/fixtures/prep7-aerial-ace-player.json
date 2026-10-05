@@ -1,7 +1,7 @@
 {
   "schema": "prep7-adapter-draft/v1",
   "move": "AERIAL_ACE",
-  "probe": "tools/battle-lab/mechanic-aerial-ace-player-pidgeotto-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "scenario": "tools/battle-lab/mechanic-aerial-ace-player-pidgeotto-onix.json",
   "attacker": {
     "species": "PIDGEOTTO",
@@ -20,14 +20,16 @@
     "opponentHp": 117,
     "playerStatus": "none",
     "playerGender": "female",
-    "opponentGender": "male"
+    "opponentGender": "male",
+    "playerMaxHp": 156,
+    "opponentMaxHp": 117
   },
   "orientation": "player-back PIDGEOTTO -> ONIX",
   "verdict": "READY (both orientations; age basis +42)",
   "denseWindow": {
-    "startFrame": 46,
-    "endFrame": 277,
-    "ageOffset": 4
+    "startFrame": 77,
+    "endFrame": 126,
+    "ageOffset": 0
   },
   "draft": {
     "activationFrame": 77,
@@ -35,7 +37,7 @@
     "shadowRow": 35,
     "shadowRowInMap": false,
     "shadowRowLiveAgeBasis": 0,
-    "expectedDuration": 232,
+    "expectedDuration": 50,
     "scriptFrames": 49,
     "windowEndMinusScriptEnd": 151,
     "windowStartMinusActivation": -31,
@@ -147,5 +149,10 @@
     ],
     "livePlan": "liveMoveAnimationPresentation returns { config: {move, attacker, target, fieldProfile, controllerProfile: neutral, moveTextStartAge: 0, animationAgeOffset: 0}, age: age + 42 }; body fn reads age+offset and attacker/target side only; the queue owns the 42 pre-activation text rows (body idle for animationAge < 50)"
   },
-  "precedingBodies": []
+  "precedingBodies": [],
+  "acceptedDenseWindow": {
+    "startFrame": 46,
+    "endFrame": 277,
+    "ageOffset": 4
+  }
 }

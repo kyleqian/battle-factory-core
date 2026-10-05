@@ -2480,6 +2480,157 @@
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
+    },
+    {
+      "move": "MOVE_AERIAL_ACE",
+      "id": 332,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep7-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 50 rows from the ACTIVATION frame (prep7-aerial-ace-*.json): the accepted 236/232-row windows begin 35/31 rows earlier with idle body rows owned by the queue's preceding message command; live age 0 = activation = reducer age 42 (animationAgeOffset 42, both orientations); the 151-row hit/HP/text tail is queue commands",
+        "ordinary route seed 3 / streak 0 / move index 0 (PIDGEOTTO): adapter active 50/50, action-menu, ON/OFF rules/RNG equal",
+        "alternate species dense proofs twice fresh: CHARIZARD player attacker 50/50 and DELIBIRD opponent attacker 50/50 zero residual, DRAGONAIR lab controls player 50/50; CHARIZARD / DRAGONAIR opponent attackers 48/50 (14 / 51 px at ages 10-11 on the opponent platform clip row y 74: the live clip is the absolute terrain row, the ROM shows those pixels)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "order-independent (0/40 seeds)",
+      "remaining": [
+        "opponent-attacker alternate carriers whose sprite crosses the terrain clip row differ in 2 rows (14-51 px)",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_QUICK_ATTACK",
+      "id": 98,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep7-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 33 rows from the ACTIVATION frame (prep7-quick-attack-*.json; accepted windows start 37/33 rows earlier, queue message rows); live age 0 = activation = reducer age 44",
+        "ordinary route seed 3 / streak 0 / move index 1 (PIDGEOTTO): adapter active 33/33, action-menu, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "afterimage slots are labels: 0 equal-key pairs (prep7-quick-attack-tie.json), 0/40 seeds",
+      "remaining": [
+        "no alternate-species dense proof (Aerial Ace carries the shared Pidgeotto-block lift)",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_ICE_PUNCH",
+      "id": 8,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep7-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 184 rows (prep7-ice-punch-*.json via the staged probe wrapper tools/integration/prep7StagedProbe.py; the player fixture's staged AI Double Team preceding body is recorded, not replayed: Ice Punch is order-independent)",
+        "ordinary route seed 18 / streak 42 / move index 2 (GENGAR alternate-species route; no accepted species ever carries Ice Punch): adapter active 184/184, action-menu, ON/OFF rules/RNG equal",
+        "alternate species dense proofs twice fresh, zero residual: GENGAR player and opponent attackers 184/184 (altSpecies10.py, window start derived from the alternate scenario's source activation) and DRAGONAIR lab controls 184/184"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "order-independent (0/40 seeds); target idle offset reset at AnimTask_ShakeMon (source line 101) modelled",
+      "remaining": [
+        "freeze status / FrozenIceCube and the Sitrus handoff are separate queue commands (status-animation / item), not part of the 183-frame script",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_FAKE_TEARS",
+      "id": 313,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep7-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 87 rows (prep7-fake-tears-*.json): live age 0 = the window's first row (one frame after activation, row -1, no #142 row), 83 script rows + 4 clear rows; picture bounds from the anchors, affine centre = sprite centre",
+        "ordinary route seed 0 / streak 14 / move index 0 (DELCATTY): adapter active 87/87, action-menu, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "order-independent (0/40 seeds)",
+      "remaining": [
+        "no alternate-species dense proof",
+        "the stat banner / result text / menu rows are the queue's stat command",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_SLEEP_TALK",
+      "id": 214,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep7-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 186 / 189 rows (prep7-sleep-talk-*.json; harness displayedStatus supplies the attacker's displayed sleep): the hard-coded sleep status/HP/healthbox/text of the staged branch are lifted under liveField",
+        "ordinary route SEAKING seed 3014 / streak 14 / move index 2 pressed on three turns (the opponent sleeps the attacker first, Sleep Talk fires on turn 3): adapter active 186/186, ON/OFF rules/RNG equal; the called move is an ordinary second request (Metronome precedent)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "order-independent (0/40 seeds)",
+      "remaining": [
+        "no alternate-species dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_ROCK_SLIDE",
+      "id": 157,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep7-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, OPPONENT attacker only, twice fresh, zero residual, 138 rows (prep7-rock-slide-opponent.json via the staged probe wrapper), with the provider order (first body) and with the order withheld (POKEBENCH_LIVE_ORDER_INPUT=none); player attacker has no accepted evidence and returns null (fallback)",
+        "ordinary route: the opponent's ONIX seed 134 / streak 0, player presses move 0: adapter active 138/138, action-menu, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "spriteOrderSeed = provider order (known-entry occupied prefix + F) when the tracked order is known, else the accepted known-entry literal; pixel-neutral (0/40 seeds, both measured equal here)",
+      "remaining": [
+        "player-attacker orientation (no accepted evidence)",
+        "37 rows after the 137-frame script are target hit flash and HUD (queue commands)",
+        "no alternate-species dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_FIRE_BLAST",
+      "id": 126,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep7-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 197 rows (prep7-fire-blast-*.json; the accepted post-Tackle preceding body is recorded, the harness lends the known-entry first-body order since the reducer has no order input)",
+        "ordinary route CHARIZARD seed 8 / streak 21 / move index 0 as the battle's first body: production lent the known-entry order, adapter active 197/197, action-menu, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "first-body gate only: unknown tracked order -> null (scene-off); the reducer's own 64-entry literal differs from the provider order only in slots 3/4 and renders identically (0 differing pixels / 197 ages)",
+      "remaining": [
+        "later bodies are not covered by the dense proof",
+        "no alternate-species dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_DRAGON_DANCE",
+      "id": 349,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep7-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, 142 rows (prep7-dragon-dance-*.json); allocationOrder = each orb's index in the provider free order over [3,4,5,7,9,10] ([4,3,5,10,9,7] -> [1,0,2,5,4,3])",
+        "ordinary route KINGDRA seed 4 / streak 35 / move index 2 as the battle's first body: production lent the known-entry order, adapter active 142/142, action-menu, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "first-body gate: unknown tracked order -> null; allocationOrder derived from the provider order",
+      "remaining": [
+        "later bodies are not covered by the dense proof",
+        "no alternate-species dense proof",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -2502,7 +2653,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 173,
+  "implementedCount": 181,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},

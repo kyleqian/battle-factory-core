@@ -1,7 +1,7 @@
 {
   "schema": "prep7-adapter-draft/v1",
   "move": "DRAGON_DANCE",
-  "probe": "tools/battle-lab/mechanic-dragon-dance-opponent-dragonair-player-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "scenario": "tools/battle-lab/mechanic-dragon-dance-opponent-dragonair-player-onix.json",
   "attacker": {
     "species": "DRAGONAIR",

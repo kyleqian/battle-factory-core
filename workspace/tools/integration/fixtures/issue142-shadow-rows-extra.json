@@ -1,6 +1,6 @@
 {
  "schema": "issue142-shadow-rows-extra/v1",
- "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep6 rows from issue142ShadowRowsPrep6.py)",
+ "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep7 rows from issue142ShadowRowsPrep7.py)",
  "rows": [
   {
    "id": 236,
@@ -2500,6 +2500,276 @@
     "fixture": "tools/integration/fixtures/prep6-faint-attack-player.json",
     "body": "normal",
     "activation": "tools/integration/fixtures/prep6-activation (docs/next-adapters-prep6.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 332,
+   "move": "AERIAL_ACE",
+   "orientation": "player",
+   "variant": "prep7-aerial-ace-player",
+   "activationFrame": 77,
+   "windowStart": 77,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep7-aerial-ace-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 332,
+   "move": "AERIAL_ACE",
+   "orientation": "opponent",
+   "variant": "prep7-aerial-ace-opponent",
+   "activationFrame": 81,
+   "windowStart": 81,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep7-aerial-ace-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 98,
+   "move": "QUICK_ATTACK",
+   "orientation": "player",
+   "variant": "prep7-quick-attack-player",
+   "activationFrame": 79,
+   "windowStart": 79,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep7-quick-attack-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 98,
+   "move": "QUICK_ATTACK",
+   "orientation": "opponent",
+   "variant": "prep7-quick-attack-opponent",
+   "activationFrame": 83,
+   "windowStart": 83,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep7-quick-attack-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 8,
+   "move": "ICE_PUNCH",
+   "orientation": "player",
+   "variant": "prep7-ice-punch-player",
+   "activationFrame": 2339,
+   "windowStart": 2339,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep7-ice-punch-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 8,
+   "move": "ICE_PUNCH",
+   "orientation": "opponent",
+   "variant": "prep7-ice-punch-opponent",
+   "activationFrame": 1966,
+   "windowStart": 1966,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep7-ice-punch-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 313,
+   "move": "FAKE_TEARS",
+   "orientation": "player",
+   "variant": "prep7-fake-tears-player",
+   "activationFrame": 75,
+   "windowStart": 76,
+   "ageOffset": 0,
+   "shadowRow": -1,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep7-fake-tears-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 313,
+   "move": "FAKE_TEARS",
+   "orientation": "opponent",
+   "variant": "prep7-fake-tears-opponent",
+   "activationFrame": 79,
+   "windowStart": 80,
+   "ageOffset": 0,
+   "shadowRow": -1,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep7-fake-tears-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 214,
+   "move": "SLEEP_TALK",
+   "orientation": "player",
+   "variant": "prep7-sleep-talk-player",
+   "activationFrame": 1356,
+   "windowStart": 1356,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep7-sleep-talk-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 214,
+   "move": "SLEEP_TALK",
+   "orientation": "opponent",
+   "variant": "prep7-sleep-talk-opponent",
+   "activationFrame": 4570,
+   "windowStart": 4570,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep7-sleep-talk-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 157,
+   "move": "ROCK_SLIDE",
+   "orientation": "opponent",
+   "variant": "prep7-rock-slide-opponent",
+   "activationFrame": 1967,
+   "windowStart": 1967,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep7-rock-slide-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 126,
+   "move": "FIRE_BLAST",
+   "orientation": "player",
+   "variant": "prep7-fire-blast-player",
+   "activationFrame": 215,
+   "windowStart": 215,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep7-fire-blast-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 126,
+   "move": "FIRE_BLAST",
+   "orientation": "opponent",
+   "variant": "prep7-fire-blast-opponent",
+   "activationFrame": 1147,
+   "windowStart": 1147,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep7-fire-blast-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 349,
+   "move": "DRAGON_DANCE",
+   "orientation": "player",
+   "variant": "prep7-dragon-dance-player",
+   "activationFrame": 74,
+   "windowStart": 74,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep7-dragon-dance-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 349,
+   "move": "DRAGON_DANCE",
+   "orientation": "opponent",
+   "variant": "prep7-dragon-dance-opponent",
+   "activationFrame": 78,
+   "windowStart": 78,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep7-dragon-dance-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
    }
   }
  ]

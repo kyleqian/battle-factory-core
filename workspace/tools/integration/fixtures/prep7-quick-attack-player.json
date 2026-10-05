@@ -1,7 +1,7 @@
 {
   "schema": "prep7-adapter-draft/v1",
   "move": "QUICK_ATTACK",
-  "probe": "tools/battle-lab/mechanic-quick-attack-player-pidgeotto-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "scenario": "tools/battle-lab/mechanic-quick-attack-player-pidgeotto-onix.json",
   "attacker": {
     "species": "PIDGEOTTO",
@@ -20,14 +20,16 @@
     "opponentHp": 117,
     "playerStatus": "none",
     "playerGender": "female",
-    "opponentGender": "male"
+    "opponentGender": "male",
+    "playerMaxHp": 156,
+    "opponentMaxHp": 117
   },
   "orientation": "player-back PIDGEOTTO -> ONIX",
   "verdict": "READY (both orientations; age basis +44)",
   "denseWindow": {
-    "startFrame": 46,
-    "endFrame": 259,
-    "ageOffset": 4
+    "startFrame": 79,
+    "endFrame": 111,
+    "ageOffset": 0
   },
   "draft": {
     "activationFrame": 79,
@@ -35,7 +37,7 @@
     "shadowRow": 37,
     "shadowRowInMap": false,
     "shadowRowLiveAgeBasis": 0,
-    "expectedDuration": 214,
+    "expectedDuration": 33,
     "scriptFrames": 32,
     "windowEndMinusScriptEnd": 148,
     "windowStartMinusActivation": -33,
@@ -146,5 +148,10 @@
     ],
     "livePlan": "liveMoveAnimationPresentation returns { config: {move, attacker, target, fieldProfile, controllerProfile: neutral, moveTextStartAge: 0, animationAgeOffset: 0}, age: age + 44 }; body fn reads age+offset and attacker/target side only; the queue owns the 44 pre-activation text rows (body idle for animationAge < 52)"
   },
-  "precedingBodies": []
+  "precedingBodies": [],
+  "acceptedDenseWindow": {
+    "startFrame": 46,
+    "endFrame": 259,
+    "ageOffset": 4
+  }
 }

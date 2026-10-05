@@ -1,0 +1,35 @@
+{
+ "fieldProfile": {
+  "playerHp": 185,
+  "playerMaxHp": 185,
+  "opponentHp": 142,
+  "opponentMaxHp": 142,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "schema": "altspecies3-portable-source/v1",
+ "move": "AERIAL_ACE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/altspecies3-scenarios/aerial-ace-player-charizard-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 126,
+  "frameCount": 50
+ },
+ "attacker": {
+  "species": "CHARIZARD",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "baseSourceFixture": "tools/integration/fixtures/prep7-aerial-ace-lab-player.json",
+ "swap": {
+  "player": "CHARIZARD"
+ }
+}
