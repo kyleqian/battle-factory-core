@@ -3709,7 +3709,7 @@
       "E-TASK",
       "E-OUT"
      ],
-     "cite": "src/animation/rockBlast.ts:0",
+     "cite": "src/animation/rockBlast.ts:21",
      "note": "bodies[] = one body per hit (multi-hit count from resolution); RockBlastAnimationProfile rockBlast.ts:21-47: attacker/target {spriteSlot,initialX2/Y2,battlePositionCenter,effectCenter}, allocator {lungeSlot,rockSlot,hitsplatSlot,fragmentSlots[4],shakeTaskSlot}, gameplayRng; no order seed, no Random2 field"
     }
    ]

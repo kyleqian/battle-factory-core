@@ -99,7 +99,7 @@ export function enumerate(entry) {
         fields.push({ ...f, path: `${a.name}.${f.path}`, owner: named[1] });
       }
     } else if (a.name === "bodies") {
-      fields.push({ path: "bodies[].animationProfile(RockBlastAnimationProfile)", file: "src/animation/rockBlast.ts", line: 0, type: a.type.slice(0, 90), owner: "SceneOnRockBlastBodyConfig" });
+      fields.push({ path: "bodies[].animationProfile(RockBlastAnimationProfile)", file: "src/animation/rockBlast.ts", line: 21, type: a.type.slice(0, 90), owner: "SceneOnRockBlastBodyConfig" });
     } else {
       fields.push({ path: a.name, file: "src/animation/sceneOnPresentation.ts", line: entry.entryPoints.config.line, type: a.type.replace(/\s+/g, " ").slice(0, 90), owner: entry.entryPoints.config.symbol });
     }
@@ -436,7 +436,7 @@ Nothing was executed against the oracle or the renderer; verdicts are therefore 
 
 ## 2. Findings that shape the verdicts
 
-1. **Two seams hide inside H_BUFFER.** (a) ~40 moves with a *small profile* (slots, orders, a few constants; \`animationProfile\`/\`animationGeometry\`), and (b) ~35 moves with a
+1. **Two seams hide inside H_BUFFER.** (a) 52 moves with a *small profile* (slots, orders, a few constants; \`animationProfile\`/\`animationGeometry\`), and (b) 32 moves with a
    *LiveInputs* record (\`animationInputs\`: task slots, matrixBitmap, \`spriteOrder\`, palette \`unfaded/faded/hardware\`, \`registers\`, \`background\`, \`buffers.softwareOam/hardwareOam\`, VRAM,
    scanline). Seam (b) is all-or-nothing on the A6 graphics host; none of it is batchable before that exists.
 2. **The six live H_BUFFER moves are the degenerate case**: their config takes only \`wall\` + \`sparkles[]\` slot numbers (\`liveMoveAnimation.ts:560-592\`), their draw order is key-determined by tie audit, and

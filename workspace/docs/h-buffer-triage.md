@@ -36,7 +36,7 @@ Nothing was executed against the oracle or the renderer; verdicts are therefore 
 
 ## 2. Findings that shape the verdicts
 
-1. **Two seams hide inside H_BUFFER.** (a) ~40 moves with a *small profile* (slots, orders, a few constants; `animationProfile`/`animationGeometry`), and (b) ~35 moves with a
+1. **Two seams hide inside H_BUFFER.** (a) 52 moves with a *small profile* (slots, orders, a few constants; `animationProfile`/`animationGeometry`), and (b) 32 moves with a
    *LiveInputs* record (`animationInputs`: task slots, matrixBitmap, `spriteOrder`, palette `unfaded/faded/hardware`, `registers`, `background`, `buffers.softwareOam/hardwareOam`, VRAM,
    scanline). Seam (b) is all-or-nothing on the A6 graphics host; none of it is batchable before that exists.
 2. **The six live H_BUFFER moves are the degenerate case**: their config takes only `wall` + `sparkles[]` slot numbers (`liveMoveAnimation.ts:560-592`), their draw order is key-determined by tie audit, and
@@ -121,7 +121,7 @@ Fields are grouped by class; **A** fields are omitted (see the JSON). `A-SLOT` =
 | HIDDEN_POWER (237) | `SceneOnHiddenPowerConfig:2279` | **A-SLOT** allocationSlots (hiddenPower.ts:28); **B** spriteOrderSeed (hiddenPower.ts:30); **C** animationRngSeed (hiddenPower.ts:37); **F-AFFINE** orbitMatrixNums (hiddenPower.ts:31), scatterMatrixNums (hiddenPower.ts:32) | NEEDS-ORDER+RNG2+AFFINE | 0 | 2 | - |
 | GRUDGE (288) | `SceneOnGrudgeConfig:2269` | **A-SLOT** flameSlots (grudge.ts:18); **B** spriteOrderSeed (grudge.ts:20); **C** animationRngSeed (grudge.ts:27) | NEEDS-ORDER+RNG2 | 1710 | 2 | tools/compare/grudgeFramebuffer.ts:77 |
 | WATER_SPOUT (323) | `SceneOnWaterSpoutConfig:3919` | **A-SLOT** launchSpriteSlots (waterSpout.ts:25), impactAffineSlots (waterSpout.ts:27); **B** spriteOrderSeed (waterSpout.ts:32); **C** animationRng (waterSpout.ts:30); **E-TASK** launchTaskSlot (waterSpout.ts:24) | NEEDS-ORDER+RNG2+TASK | 567 | 2 | tools/compare/waterSpoutFramebuffer.ts:83 |
-| ROCK_BLAST (350) | `SceneOnRockBlastConfig:3956` | **A-SLOT** bodies[] (rockBlast.ts:0); **E-TASK** bodies[] (rockBlast.ts:0); **E-OUT** bodies[] (rockBlast.ts:0) | NEEDS-TASK+OUTCOME | 1229 | 2 | tools/compare/rockBlastFramebuffer.ts:78 |
+| ROCK_BLAST (350) | `SceneOnRockBlastConfig:3956` | **A-SLOT** bodies[] (rockBlast.ts:21); **E-TASK** bodies[] (rockBlast.ts:21); **E-OUT** bodies[] (rockBlast.ts:21) | NEEDS-TASK+OUTCOME | 1229 | 2 | tools/compare/rockBlastFramebuffer.ts:78 |
 | SWIFT (129) | `SceneOnSwiftConfig:3964` | **A-SLOT** attackerSpriteSlot (swift.ts:28), targetSpriteSlot (swift.ts:29), starSlots (swift.ts:31); **E-TASK** targetShakeTaskSlot (swift.ts:32) | NEEDS-TASK | 4143 | 2 | tools/compare/swiftFramebuffer.ts:57 |
 | TRICK (271) | `SceneOnTrickConfig:3938` | **A-SLOT** bagSlots (trick.ts:66), attacker (trick.ts:68), target (trick.ts:73); **E-TASK** attacker (trick.ts:69), target (trick.ts:74) | NEEDS-TASK | 3501 | 2 | tools/compare/trickFramebuffer.ts:72 |
 | ICE_BEAM (58) | `SceneOnIceBeamConfig:3973` | **A-SLOT** targetSpriteSlot (iceBeam.ts:69); **B** spriteOrder (iceBeam.ts:79); **C** animationRngStart (iceBeam.ts:75); **E-TASK** soundTaskSlot (iceBeam.ts:70), monbgTaskSlot (iceBeam.ts:71), shakeTaskSlot (iceBeam.ts:72), clearTaskSlot (iceBeam.ts:73) | NEEDS-ORDER+RNG2+TASK | 33428 | 2 | tools/compare/iceBeamFramebuffer.ts:89 |
