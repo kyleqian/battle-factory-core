@@ -1524,7 +1524,7 @@ export function liveMoveAnimationPresentation(
           break;
         }
         case 254: {
-          const orbSlotPool = [3, 4, 5, 7, 9];
+          const orbSlotPool = [3, 4, 5, 7, 9] as const;
           const seed = spriteOrderForSlots(lentState, orbSlotPool);
           if (seed === null) return null;
           config = { move: "STOCKPILE", attacker: attackerCentre, target: targetCentre, fieldProfile,
@@ -1532,7 +1532,8 @@ export function liveMoveAnimationPresentation(
             attackerPictureYOffset: liveBattlerCoordAttrs(side, art).yOffset,
             // The ad-hoc age-0 shadow is retired under liveField (the shared liveOpponentShadow hook owns it).
             attackerShadowAtEntry: false,
-            animationProfile: { orbSlotPool, orbMatrixPool: [0, 3, 4, 5, 6], spriteOrderSeed: seed, attackerSubpriority: subA } };
+            animationProfile: { orbSlotPool, orbMatrixPool: [0, 3, 4, 5, 6],
+              spriteOrderSeed: seed as unknown as readonly [number, number, number, number, number], attackerSubpriority: subA } };
           break;
         }
         case 192: {

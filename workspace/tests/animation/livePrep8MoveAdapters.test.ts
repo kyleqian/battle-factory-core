@@ -33,7 +33,7 @@ const cases: { id: number; move: string; duration: Orders; alt: [string, string]
   { id: 192, move: "ZAP_CANNON", duration: [112, 112], alt: ["FORRETRESS", "ONIX"], route: { seed: 1585, move: 3, streak: 35 } },
 ];
 // Opponent-attacker ordinary routes (generated rental on the player side presses slot 0; the opponent's move is the body).
-const opponentRoutes = [
+const opponentRoutes: { id: number; move: string; duration: number; route: { seed: number; move: 0 | 1 | 2 | 3; streak: number; attacker?: 0 | 1; stall?: boolean } }[] = [
   { id: 129, move: "SWIFT", duration: 80, route: { seed: 424, move: 0 as const, streak: 0, attacker: 1 as const } },
   { id: 218, move: "FRUSTRATION", duration: 229, route: { seed: 50, move: 0 as const, streak: 14, attacker: 1 as const } },
 ];
