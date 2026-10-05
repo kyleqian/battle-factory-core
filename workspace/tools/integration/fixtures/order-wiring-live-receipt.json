@@ -7,10 +7,11 @@
   "A-provider-api": "a3d67fef1",
   "B-host-wiring": "d4e4cb95b",
   "C-grudge-adapter": "ad6d2b176",
-  "status-doc": "098ae1728"
+  "status-doc": "098ae1728",
+  "B-fix-requestless-move-animation": "f279df7cc"
  },
- "testedCodeCommit": "098ae1728",
- "srcTree": "4fe17d2fd83a0eb9e43551ff658e3076e29ce92f",
+ "testedCodeCommit": "f279df7cc",
+ "srcTree": "953b81b0a71aba9ae517a3ea08cba9745bc0ebdc",
  "oracle": {
   "profile": "battle-scene-on",
   "url": "http://127.0.0.1:8012",
@@ -39,7 +40,7 @@
   "equalsPython": "tools/integration/fixtures/sprite-order-body-plans.json replay (spriteOrderBodyPlans.py)"
  },
  "denseProof": {
-  "command": "POKEBENCH_LIVE_EVIDENCE_DIR=.integration/validation/order-wiring-final-222951 node --experimental-strip-types tools/integration/liveAdapterFramebuffer.ts tools/integration/fixtures/order-consumer-grudge-player.json tools/integration/fixtures/order-consumer-grudge-opponent.json",
+  "command": "POKEBENCH_LIVE_EVIDENCE_DIR=.integration/validation/order-wiring-final2-224044 node --experimental-strip-types tools/integration/liveAdapterFramebuffer.ts tools/integration/fixtures/order-consumer-grudge-player.json tools/integration/fixtures/order-consumer-grudge-opponent.json",
   "orderInput": "prepareLiveMoveSpriteOrder(createSpriteOrderPlanCursor(knownEntrySpriteOrderState('battle-lab-ordinary-singles'), known-entry allocator occupants).order, request).input -- same as production at a first body; no capture rows",
   "fixtures": [
    {
@@ -86,8 +87,9 @@
    }
   ],
   "evidenceDirs": [
-   ".integration/validation/order-wiring-final-222951",
-   ".integration/validation/grudge-order-221145 (same src code, pre-commit run, identical digests)"
+   ".integration/validation/order-wiring-final2-224044 (final code f279df7cc)",
+   ".integration/validation/order-wiring-final-222951 (src tree 4fe17d2fd, before the request-less move-animation fix; identical digests)",
+   ".integration/validation/grudge-order-221145 (pre-commit, same adapter code; identical digests)"
   ],
   "fixtureChanges": "none: the drafted order-consumer-grudge-{player,opponent}.json passed unchanged"
  },
@@ -95,7 +97,7 @@
   "id": 288,
   "row": 0,
   "fixture": "tools/integration/fixtures/issue142-shadow-rows-extra.json (issue142ShadowRowsOrderConsumer.py)",
-  "scan": "node --experimental-strip-types tools/integration/issue142ShadowRowScan.ts -> rows 335, ids 158, uncoveredIds [], mismatches 0",
+  "scan": "node --experimental-strip-types tools/integration/issue142ShadowRowScan.ts -> rows 335, ids 158, uncoveredIds [], mismatches 0 (re-run on f279df7cc: identical summary)",
   "adHocShadowRetired": "battleScene.ts Grudge branch: drawSourceOpponentEnemyShadow only when !liveField"
  },
  "routes": {
@@ -118,15 +120,15 @@
   "routeSearch": "node --experimental-strip-types tools/integration/prep5RouteScan.ts GRUDGE 288 2 (first-found prep route seed 16 has the opponent move first; seed 57 is the first first-body hit)"
  },
  "gates": {
-  "focusedVitest": "9 files / 139 tests passed (spriteOrderProvider, liveSpriteOrderHost, liveOrderConsumerMoveAdapters, animationBoundaryRatchet, factoryAnimationInventory, liveMoveAnimationPalette, playableAnimationIntegration, liveShadowRows, liveSpriteAllocator; --maxWorkers=4)",
+  "focusedVitest": "9 files / 139 tests passed on f279df7cc (spriteOrderProvider, liveSpriteOrderHost, liveOrderConsumerMoveAdapters, animationBoundaryRatchet, factoryAnimationInventory, liveMoveAnimationPalette, playableAnimationIntegration, liveShadowRows, liveSpriteAllocator; --maxWorkers=4)",
   "stagedGrudge": "tests/animation/grudge{EvidenceCheckpoint,Framebuffer,Reducer}.test.ts 3 files / 8 tests passed",
-  "animationCoverage": "passed",
-  "animationAudit": "passed",
-  "typecheck": "passed",
-  "smoke": "8 files / 448 tests passed",
-  "fullSuite": "PATH=$PWD/tools/autonomy/bin:$PATH POKEBENCH_VITEST_MAX_WORKERS=4 npm test -- --maxWorkers=4: 1500 files passed / 44 skipped; 12065 tests passed / 223 skipped",
-  "build": "passed, 848 modules transformed",
-  "diffCheck": "passed"
+  "animationCoverage": "passed on f279df7cc",
+  "animationAudit": "passed on f279df7cc",
+  "typecheck": "passed on f279df7cc",
+  "smoke": "8 files / 448 tests passed on f279df7cc",
+  "fullSuite": "final code f279df7cc: PATH=$PWD/tools/autonomy/bin:$PATH POKEBENCH_VITEST_MAX_WORKERS=4 npm test -- --maxWorkers=4: 1500 files passed / 44 skipped; 12065 tests passed / 223 skipped (also green on 098ae1728 before the fix)",
+  "build": "passed on f279df7cc, 848 modules transformed",
+  "diffCheck": "git diff --check c23e165bb HEAD passed"
  },
  "limits": [
   "Grudge is live only as the battle's first move body after a known entry with only message commands before it; any later Grudge body returns null (fallback)",
