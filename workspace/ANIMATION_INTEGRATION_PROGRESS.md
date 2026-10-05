@@ -110,8 +110,19 @@
   a 27-frame recall and sends in at +33; send-in tail (healthbox slide / message) is species-
   dependent in the ROM, fixed in production; Baton Pass flow does present a replacement once the
   party screen is answered. Filed ISSUES #146.
-- Running: Roar/Whirlwind live with a Scene-ON forced switch-out (production); live-adapter species
-  residual audit 2 (side).
+- Folded Opus worker `634207ed8` (src tree `35967507`): **215 live adapters** (+Roar, Whirlwind) with a
+  Scene-ON forced switch-out after a live body (no recall; hold 4 + hide 6; send-in at the
+  framebuffer E+11) and tracker `forced-switch-out` / side-generic switch-in units (host known after
+  forced switches; sweep hostKnown 477 -> 524). Supervisor: dense Roar P / VAPOREON / Whirlwind O
+  zero residual twice fresh; Roar player-attacker continuation exact body start -> emerge
+  (128/128 both runs); tests 29/29. Limits (#146): send-in tail (ball-open fade/particles,
+  species-keyed slide/message), opponent-attacker continuation, elevated-attacker field after the
+  body (1,444 px, untriaged), Scene OFF unchanged. Receipt `roar-live-receipt.json`.
+- Live-species audit 2 (`812ce5ea2`, `docs/live-species-audit-2.md`): three more live defects,
+  patch-proven (Rock Throw idle x2, Smelling Salt y clamp, Light Screen / Future Sight end-of-body
+  shadow; supervisor reran Rock Throw GOLBAT 66/87 -> 87/87); tail fades are species-keyed lag
+  frames (not defects). ISSUES #145 updated.
+- Running: #145 open defects fix (production); voluntary-switch lend evidence (side).
 
 ## 2026-10-05 (wind-down) — CASTFORM fix + order table 445 bodies
 
