@@ -84,8 +84,20 @@
   ONIX idle x2), both proven by one-value patches (supervisor reran: Dragon Rage GOLEM 139/150 ->
   150/150, Aerial Ace 50/50). Unresolved: one-frame-later tail fades (suspected lag frame),
   GOLBAT-only small residuals.
-- Running: #145 fixes + Fly/Bounce (hidden attacker between turns); player-faint lend evidence
-  (side).
+- Folded Sonnet worker `5b7a1ff3b` (src tree `8ecf09bb`): #145 fixes — Dragon Rage fire-spit aim
+  from attacker/target pic offsets (ROM u16 low-bit rule; accepted ONIX literal reproduced) and
+  Aerial Ace settled target x from the species idle x2. Supervisor dense rerun twice fresh zero
+  residual: Dragon Rage GOLBAT 150, player-GOLEM 150, accepted ONIX 150; Aerial Ace SHUCKLE 50;
+  routes PASS on branch and master. Fly/Bounce dropped: the attacker must stay hidden between
+  turns, which needs a timed presentation visibility write from a body (new host decision;
+  `battleCommandPresentation.ts:165-172` only follows queue receipts). Receipt
+  `issue145-flybounce-receipt.json`; ISSUES #145 trimmed to the unresolved audit residuals.
+- Player-faint lend audit (`f91d6e15e`, `docs/playerfaint-lend-audit.md`, new files only): after a
+  player faint + forced menu + reshow + forced switch-in the occupants relabel exactly to the entry
+  under a ROLE map (41 known edges, 0 mismatches; 13 role-lend what-ifs exact); second opponent
+  KO = first-KO geometry (today's lend already exact). Forced-menu staging recipe documented.
+  Supervisor reran one scenario (identical rows, model 0 mismatches, Heal Bell 261/261).
+- Running: player-faint lend (production); Roar/Whirlwind forced-switch continuation evidence (side).
 
 ## 2026-10-05 (wind-down) — CASTFORM fix + order table 445 bodies
 
