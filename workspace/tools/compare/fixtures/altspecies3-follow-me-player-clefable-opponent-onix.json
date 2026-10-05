@@ -1,0 +1,63 @@
+{
+ "schema": "altspecies3-portable-source/v1",
+ "move": "FOLLOW_ME",
+ "probe": "tools/compare/metronomeProbe.py",
+ "scenario": "tools/integration/fixtures/altspecies3-scenarios/follow-me-player-clefable-opponent-onix.json",
+ "attacker": {
+  "species": "CLEFABLE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 188,
+  "playerMaxHp": 188,
+  "opponentHp": 117,
+  "opponentMaxHp": 117,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "denseWindow": {
+  "startFrame": 70,
+  "endFrame": 254,
+  "frameCount": 185
+ },
+ "draft": {
+  "activationFrame": 69,
+  "scriptEndFirstInactive": 253,
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "expectedDuration": 185,
+  "consumedByTest": false,
+  "acceptedWindow": {
+   "startFrame": 69,
+   "endFrame": 253
+  },
+  "order": "ORDER-INDEPENDENT: one finger sprite",
+  "adhocShadowDraw": "none",
+  "derivedAttacker": {
+   "animationCenter": {
+    "x": 72,
+    "y": 96
+   },
+   "battlePositionCenter": {
+    "x": 72,
+    "y": 80
+   }
+  },
+  "attackerTop": {
+   "x": 72,
+   "y": 72
+  }
+ },
+ "baseSourceFixture": "tools/integration/fixtures/prep5-follow-me-player.json",
+ "swap": {
+  "player": "CLEFABLE"
+ }
+}

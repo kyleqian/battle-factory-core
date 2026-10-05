@@ -1,0 +1,63 @@
+{
+ "schema": "altspecies3-portable-source/v1",
+ "move": "FOLLOW_ME",
+ "probe": "tools/compare/metronomeProbe.py",
+ "scenario": "tools/integration/fixtures/altspecies3-scenarios/follow-me-opponent-furret-player-onix.json",
+ "attacker": {
+  "species": "FURRET",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 117,
+  "playerMaxHp": 117,
+  "opponentHp": 178,
+  "opponentMaxHp": 178,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "denseWindow": {
+  "startFrame": 72,
+  "endFrame": 256,
+  "frameCount": 185
+ },
+ "draft": {
+  "activationFrame": 73,
+  "scriptEndFirstInactive": 257,
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "expectedDuration": 185,
+  "consumedByTest": false,
+  "acceptedWindow": {
+   "startFrame": 73,
+   "endFrame": 257
+  },
+  "order": "ORDER-INDEPENDENT: one finger sprite",
+  "adhocShadowDraw": "none",
+  "derivedAttacker": {
+   "animationCenter": {
+    "x": 176,
+    "y": 49
+   },
+   "battlePositionCenter": {
+    "x": 176,
+    "y": 40
+   }
+  },
+  "attackerTop": {
+   "x": 176,
+   "y": 25
+  }
+ },
+ "baseSourceFixture": "tools/integration/fixtures/prep5-follow-me-opponent.json",
+ "swap": {
+  "opponent": "FURRET"
+ }
+}
