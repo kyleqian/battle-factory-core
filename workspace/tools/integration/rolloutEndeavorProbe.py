@@ -11,6 +11,7 @@ import json, subprocess, sys
 from pathlib import Path
 args = [a for a in sys.argv[1:] if not a.startswith("--")]
 NOSENT = "--nosentinel" in sys.argv
+STAGE = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--stage=")), None)   # --stage=<player|opponent>:<moveId>:<pp> : canonical battle1-turn1 ordinary Factory route (real trainer AI), move written at tick 1886 as in prep10StageProbe.py
 SCEN, OUT = map(Path, args[:2])
 ROOT = Path(__file__).resolve().parents[2]
 HARNESS = next(p for p in (ROOT, *ROOT.parents) if (p / "oracle" / "emerald_core.py").is_file())
@@ -19,10 +20,13 @@ from battle_lab import BattleLab, validate_request
 from emerald_core import EmeraldOracle
 from mgba import ffi
 ref = ROOT / "reference" / "pokeemerald"
-_d = json.loads(SCEN.read_text()); _d["profile"] = "battle-scene-on"
-req = validate_request(_d, "battle-scene-on")
+if STAGE:
+    req = {"trace": {"segments": json.loads((ROOT / "tools/compare/traces-groundtruth/battle1-turn1.json").read_text())["segments"][:43] + [{"frames": 1480, "buttons": []}]}}
+else:
+    _d = json.loads(SCEN.read_text()); _d["profile"] = "battle-scene-on"
+    req = validate_request(_d, "battle-scene-on")
 o = EmeraldOracle(ref / "pokeemerald.gba", ref / "pokeemerald.map", HARNESS / "oracle" / "bootstrap" / "factory.json")
-lab = BattleLab(o, "battle-scene-on"); lab.prepare(req)
+core = o.core
 nm = subprocess.run(["arm-none-eabi-nm", "-n", str(ref / "pokeemerald.elf")], check=True, capture_output=True, text=True).stdout
 sym = {}; funcs = []
 for l in nm.splitlines():
@@ -73,7 +77,6 @@ def step_obs():
     elif cur is not None and (not a or cur["move"] != m):
         cur["end"] = f; cur = None
         if a: cur = {"move": m, "start": f, "end": None, "atActivation": enrich(snap())}; bodies.append(cur)
-step_obs()
 def stepthrough(buttons):
     """single-step one frame from the restored state; record CBD entries + the write"""
     o._set_buttons(buttons); fc = core.frame_counter; entries = []; wrote = None; n = 0
@@ -85,19 +88,34 @@ def stepthrough(buttons):
         v = u16(BMP)
         if wrote is None and v != SENT: wrote = {"stepPc": fname(core.cpu.pc), "firstValue": v}
     return entries, wrote
-for seg in req["trace"]["segments"]:
-    for _ in range(seg["frames"]):
-        btn = seg.get("buttons", [])
-        if NOSENT:
-            o.advance(btn); f += 1; step_obs(); continue
-        before = u16(BMP); st0 = bytes(ffi.buffer(core.save_raw_state()))
-        o.advance(btn); st1 = bytes(ffi.buffer(core.save_raw_state())); after = u16(BMP)   # the REAL (unperturbed) frame
-        core.load_raw_state(st0); wr16(BMP, SENT); o._set_buttons(btn); core.run_frame()    # throwaway replay with the sentinel: was the register written at all?
-        wrote_any = u16(BMP) != SENT
-        if wrote_any:
-            core.load_raw_state(st0); wr16(BMP, SENT)
-            entries, wrote = stepthrough(btn)
-            writes.append({"f": f + 1, "before": before, "after": after, "valueChanged": after != before, "currentMoveAfter": u16(sym["gCurrentMove"]) if False else None, "entries": entries, "firstWrite": wrote})
-        core.load_raw_state(st1)
-        f += 1; step_obs()
-OUT.write_text(json.dumps({"scenario": SCEN.name, "nosentinel": NOSENT, "frames": f, "bodies": bodies, "bmpWrites": writes, "powerChanges": changes}, separators=(",", ":")))
+def adv(btn, tag):
+    """one emulated frame; (unless --nosentinel) value-independent write detection for gBattleMovePower on a throwaway sentinel replay; tag = frame label"""
+    if NOSENT:
+        o.advance(btn); return
+    before = u16(BMP); st0 = bytes(ffi.buffer(core.save_raw_state()))
+    o.advance(btn); st1 = bytes(ffi.buffer(core.save_raw_state())); after = u16(BMP)   # the REAL (unperturbed) frame
+    core.load_raw_state(st0); wr16(BMP, SENT); o._set_buttons(btn); core.run_frame()    # throwaway replay with the sentinel: was the register written at all?
+    if u16(BMP) != SENT:
+        core.load_raw_state(st0); wr16(BMP, SENT)
+        entries, wrote = stepthrough(btn)
+        writes.append({"f": tag, "before": before, "after": after, "valueChanged": after != before, "entries": entries, "firstWrite": wrote})
+    core.load_raw_state(st1)
+if STAGE: o.new_session()
+else:   # the lab's prepare() frames (battle start, first AI evaluation) are part of the register's history: record them as "p<k>"
+    pk = [0]
+    real_adv = o.advance
+    def prep_adv(btn):
+        adv_btn = list(btn); pk[0] += 1
+        o.advance = real_adv; adv(adv_btn, f"p{pk[0]}"); o.advance = prep_adv
+    lab = BattleLab(o, "battle-scene-on"); o.advance = prep_adv; lab.prepare(req); o.advance = real_adv
+    prepare_frames = pk[0]
+bmp_after_prepare = u16(BMP)
+step_obs()
+for si, seg in enumerate(req["trace"]["segments"]):
+    if STAGE and si == 40:
+        side, mv, pp = STAGE.split(":"); mv = int(mv); base = sym["gBattleMons"] + (0 if side == "player" else 0x58); slot = 0 if side == "player" else 3
+        assert f == 1886, f
+        core.memory.u8.raw_write(base + 0x0c + slot * 2, mv & 255); core.memory.u8.raw_write(base + 0x0c + slot * 2 + 1, mv >> 8); core.memory.u8.raw_write(base + 0x24 + slot, int(pp))
+    for _ in range(int(seg["frames"])):
+        adv(seg.get("buttons", []), f + 1); f += 1; step_obs()
+OUT.write_text(json.dumps({"scenario": SCEN.name, "nosentinel": NOSENT, "prepareFrames": (0 if STAGE else prepare_frames), "bmpAfterPrepare": bmp_after_prepare, "frames": f, "bodies": bodies, "bmpWrites": writes, "powerChanges": changes}, separators=(",", ":")))
