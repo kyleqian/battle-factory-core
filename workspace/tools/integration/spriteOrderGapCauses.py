@@ -284,14 +284,120 @@ def analyse_anims() -> dict:
     return {"anims": out, "unmatchedMv0Bodies": unmatched}
 
 
-if __name__ == "__main__" and sys.argv[1] in ("blips", "anims"):
-    r = validate_blips() if sys.argv[1] == "blips" else analyse_anims()
-    if sys.argv[1] == "blips":
-        print({k: (v if not isinstance(v, list) else v[:6]) for k, v in r.items()}, "tableOnly", len(r["tableOnly"]), "probeOnly", len(r["probeOnly"]))
+INTIMIDATE = ("hitmontop", "ekans", "masquerain", "howl-alternate")
+
+
+def intimidate_replay() -> list[dict]:
+    """The 12 intro-animation entries: replay [pre-prompt F] -> intro anim (C f; D n0) -> prompt cursor pair (FDERIVED) and compare with
+    the observed F at the first real move edge (unit 3)."""
+    rows = []
+    for sc in TABLE:
+        u = sc["units"]
+        if not (len(u) > 3 and u[1]["kind"] == "body" and u[1]["mv"] == 0 and sc["freeAtFirstEdge"][:2] != [4, 3]):
+            continue
+        if not any(k in sc["file"] for k in INTIMIDATE):
+            continue
+        toks = BP.tokenize_scenario(sc)
+        sim = BP.Sim()
+        sim.F = list(sc["freeAtFirstEdge"])
+        sim.occ = {x for x in range(64) if x not in sim.F}
+        sim.apply_unit(toks[1], None)  # intro animation body
+        sim.apply_unit(toks[2], None)  # prompt cursor pair gap
+        edge = u[3].get("observedFreeAtEdge")
+        rows.append({"file": sc["file"], "preFirstEdgeHead": sc["freeAtFirstEdge"][:6], "predictedHead": sim.F[:6], "observedHead": (edge or [])[:6],
+                     "equal": sim.F == edge, "introWindows": u[1]["windows"], "promptWindows": [{k: v for k, v in w.items() if k != "G"} for w in u[2]["windows"]]})
+    return rows
+
+
+def entry_split_check() -> list[dict]:
+    """Entry-split scenarios: compare the (kind, caller, slot) allocator stream up to the first prompt with the control run."""
+    INTRO = {"BeginBattleIntro", "BattleIntroDrawPartySummaryScreens", "BattleIntroPrintTrainerWantsToBattle", "BattleIntroRecordMonsToDex",
+             "TryDoEventsBeforeFirstTurn", "HandleTurnActionSelectionState"}
+
+    def seq(name):
+        d = load_probe(name)
+        out = []
+        for c in d["calls"]:
+            if c["kind"].startswith("marker") or (c["kind"] != "DestroySprite" and c["caller"].split("+")[0] in INTERNAL):
+                continue
+            if c["ctx"]["mainFunc"] not in INTRO:
+                break
+            out.append([c["n"] - d["resetFrame"], c["kind"][:3], c["caller"].split("+")[0], c["slot"] if c["kind"] == "DestroySprite" else c.get("result")])
+        return out
+    base = seq("tackle-both")
+    rows = []
+    for sc in TABLE:
+        if sc["entryMatchesProvider"] or sc["freeAtFirstEdge"][:2] != [4, 3]:
+            continue
+        lab = raw_to_lab(sc["file"])
+        if not lab:
+            lab = "light-screen-slowpoke" if "light-screen" in sc["file"] else None
+        if not lab or not (OUT / f"{lab}.json").is_file():
+            rows.append({"file": sc["file"], "probe": None})
+            continue
+        sq = seq(lab)
+        same_stream = [x[1:] for x in sq] == [x[1:] for x in base]
+        same_multiset = sorted(map(tuple, (x[1:] for x in sq))) == sorted(map(tuple, (x[1:] for x in base)))
+        rows.append({"file": sc["file"], "probe": lab, "calls": len(sq), "sameOrderedStream": same_stream, "sameCallMultiset": same_multiset,
+                     "sameFrames": [x[0] for x in sq] == [x[0] for x in base],
+                     "firstFrameShift": next(([x[0], y[0]] for x, y in zip(sq, base) if x[0] != y[0]), None)})
+    return rows
+
+
+TARGETED = ["tackle-both", "tackle-vs-ghost", "splash-tackle", "growl-leer", "thunderwave-vs-ground", "thunder-seed1", "thunder-seed2", "thunder-seed3",
+            "thunder-seed4", "substitute-then-tackle", "swords-dance-tackle", "tackle-vs-substitute-faster", "prompt-move-cancel", "prompt-cursor-moves",
+            "prompt-party-cancel", "mechanic-solar-beam-player-gloom-opponent-chansey", "mechanic-present-player-delibird-opponent-onix",
+            "mechanic-present-player-delibird-opponent-onix-heal", "mechanic-double-slap-opponent-poliwhirl-player-onix",
+            "mechanic-explosion-player-glalie-opponent-shuckle", "mechanic-dive-player-chinchou-opponent-onix", "mechanic-hail-player-delibird-opponent-onix",
+            "mechanic-future-sight-opponent-kadabra-player-onix", "mechanic-fly-murkrow-onix", "mechanic-counter-opponent-hitmontop-player-onix"]
+
+
+def build_fixture() -> None:
+    fx = ROOT / "tools/integration/fixtures"
+    targeted = {n: summarize([n], quiet=True)[n] for n in TARGETED if (OUT / f"{n}.json").is_file()}
+    anims = analyse_anims()
+    for v in anims["anims"].values():
+        v.pop("planExamples", None)
+    out = {"schema": "sprite-order-gap-causes/v1", "tool": "tools/integration/spriteOrderGapCauses.py", "probe": "tools/compare/spriteOrderGapCallProbe.py",
+           "blipCorpusValidation": {k: (v if not isinstance(v, list) else v) for k, v in validate_blips().items()},
+           "targetedScenarios": targeted, "midBattleAnimations": anims, "intimidateEntryReplay": intimidate_replay(), "entrySplitCheck": entry_split_check()}
+    (fx / "sprite-order-gap-causes.json").write_text(json.dumps(out, separators=(",", ":")) + "\n")
+    # compact call-stream samples (frames after the first prompt; allocator/destroy calls with symbolized caller + context)
+    samples = {}
+    for n in ("tackle-both", "tackle-vs-ghost", "thunder-seed2", "prompt-move-cancel", "prompt-party-cancel", "mechanic-counter-opponent-hitmontop-player-onix",
+              "mechanic-solar-beam-player-gloom-opponent-chansey", "mechanic-hail-player-delibird-opponent-onix"):
+        d = load_probe(n)
+        rows = []
+        for c in d["calls"]:
+            if c["n"] < 1850 or (c["kind"] != "DestroySprite" and c["caller"].split("+")[0] in INTERNAL):
+                continue
+            t = c.get("tpl") or c.get("victim") or {}
+            rows.append([c["n"], c["kind"].replace("marker:", "@"), c.get("slot", c.get("result")), c["caller"], c.get("chain", [])[:3] if not c["kind"].startswith("marker") else None,
+                         t.get("names") or t.get("tpl") or t.get("cb") or c.get("table"), c["ctx"]["mainFunc"], c["ctx"]["ctrl"][0], c["ctx"]["curMove"],
+                         c["ctx"]["resultFlags"], c["ctx"]["animActive"], c.get("args")])
+        samples[n] = {"resetFrame": d["resetFrame"], "columns": ["frame", "kind", "slot", "callerLR", "stackChain", "template|victim|table", "mainFunc", "ctrl0", "curMove",
+                                                                  "resultFlags", "animActive", "args"], "rows": rows}
+    (fx / "sprite-order-gap-causes-calls.json").write_text(json.dumps(samples, separators=(",", ":")) + "\n")
+    print("wrote fixtures", {p.name: p.stat().st_size for p in (fx / "sprite-order-gap-causes.json", fx / "sprite-order-gap-causes-calls.json")})
+
+
+if __name__ == "__main__" and sys.argv[1] in ("blips", "anims", "intimidate", "entrysplit", "fixture"):
+    if sys.argv[1] == "fixture":
+        build_fixture()
+    elif sys.argv[1] == "intimidate":
+        for r in intimidate_replay():
+            print(r["equal"], r["file"], r["preFirstEdgeHead"], "->", r["predictedHead"], "observed", r["observedHead"])
+    elif sys.argv[1] == "entrysplit":
+        for r in entry_split_check():
+            print(r)
     else:
-        for k, v in r["anims"].items():
-            print(k, v["instances"], v["verdict"], "plans", v["distinctPlans"], v["groupClasses"], v["args"][:6])
-        print("unmatched", len(r["unmatchedMv0Bodies"]), r["unmatchedMv0Bodies"][:5])
+        r = validate_blips() if sys.argv[1] == "blips" else analyse_anims()
+        if sys.argv[1] == "blips":
+            print({k: (v if not isinstance(v, list) else v[:6]) for k, v in r.items()}, "tableOnly", len(r["tableOnly"]), "probeOnly", len(r["probeOnly"]))
+        else:
+            for k, v in r["anims"].items():
+                print(k, v["instances"], v["verdict"], "plans", v["distinctPlans"], v["groupClasses"], v["args"][:6])
+            print("unmatched", len(r["unmatchedMv0Bodies"]), r["unmatchedMv0Bodies"][:5])
     sys.exit(0)
 
 
