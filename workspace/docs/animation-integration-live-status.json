@@ -3262,7 +3262,7 @@
   "implementedCount": 218,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
-  "faithfulRandomCount": 3,
+  "faithfulRandomCount": 4,
   "faithfulRandomAdapters": [
     {
       "id": 24,
@@ -3298,6 +3298,18 @@
       ],
       "surrogateRoutes": [
         "random2-r1/thrash/seed26-streak21-slot1-2turns-5lockin-bodies (tests/animation/liveRandom2R1MoveAdapters.test.ts)"
+      ]
+    },
+    {
+      "id": 175,
+      "move": "MOVE_FLAIL",
+      "policy": "presentation-rng.v1.frame-step.no-lag.battle-stride-2^20",
+      "provenance": "surrogate",
+      "pinnedProofs": [
+        "tools/integration/fixtures/random2-r1-live-receipt.json"
+      ],
+      "surrogateRoutes": [
+        "random2-r1/flail/seed43-streak0-slot2-2turns-power20-40 (tests/animation/liveRandom2R1MoveAdapters.test.ts)"
       ]
     }
   ],

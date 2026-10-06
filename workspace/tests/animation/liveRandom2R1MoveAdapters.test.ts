@@ -70,6 +70,19 @@ const MOVES = [
     // 26/21 TAUROS: two chosen Thrash turns lock in for 2 + 3 consecutive bodies (one per lock-in segment).
     route: { seed: 26, streak: 21, slot: 1 as const, turns: 2, bodies: 5 },
   },
+  {
+    name: "flail", id: 175,
+    // plans.json form: [[w0 % 48, w1 % 24]] (the hit-splat x2 + 24, y2 + 12).
+    plansForm: (draws: readonly (readonly number[])[]): unknown => [[draws[0]![0]! % 48, draws[0]![1]! % 24]],
+    fixtures: {
+      player: "tools/integration/fixtures/random2-r1/flail-player-krabby-opponent-onix.json",
+      opponent: "tools/integration/fixtures/random2-r1/flail-opponent-krabby-player-onix.json",
+      alternate: "tools/integration/fixtures/random2-r1/flail-alt-player-magikarp-opponent-golem.json",
+    },
+    probe: "flail-full-hp-opponent",
+    // 43/0 KRABBY: Flail at power 20 then 40 (request.power = gBattleMovePower after the HP drop).
+    route: { seed: 43, streak: 0, slot: 2 as const, turns: 2, bodies: 2 },
+  },
 ] as const;
 
 const sessionKey = liveMovePresentationRngBodyKey({ resolutionId: { requestId: 0 }, segmentIndex: 0, commandIndex: 0 });
@@ -83,7 +96,7 @@ describe("faithful-random live adapters: plans and accounting", () => {
     expect([...LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS].sort((a, b) => a - b)).toEqual(MOVES.map((m) => m.id).sort((a, b) => a - b));
     for (const id of LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS) {
       expect((LIVE_MOVE_ANIMATION_IDS as readonly number[]).includes(id)).toBe(false);
-      expect(liveMoveAnimationDuration({ moveId: id, attacker: 0, target: 1, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0 })).not.toBeNull();
+      expect(liveMoveAnimationDuration({ moveId: id, attacker: 0, target: 1, turn: 0, power: 20, damage: 0, friendship: 70, multihit: 0 })).not.toBeNull();
     }
     const status = JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8"));
     expect((status.faithfulRandomAdapters as { id: number }[]).map((e) => e.id).sort((a, b) => a - b))
@@ -158,7 +171,7 @@ describe("faithful-random live adapters: surrogate ordinary routes", () => {
     const a2 = random2Route(seed, "on", slots, streak, SEED_A);
     const b = random2Route(seed, "on", slots, streak, SEED_B);
     const off = random2Route(seed, "off", slots, streak, SEED_A);
-    const duration = liveMoveAnimationDuration({ moveId: move.id, attacker: 0, target: 1, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0 })!;
+    const duration = liveMoveAnimationDuration({ moveId: move.id, attacker: 0, target: 1, turn: 0, power: 20, damage: 0, friendship: 70, multihit: 0 })!;
     const bodies = a.bodies.filter((body) => body.moveId === move.id && body.attacker === 0);
     expect(bodies).toHaveLength(move.route.bodies);
     expect(new Set(bodies.map((body) => body.key)).size).toBe(bodies.length);
@@ -169,6 +182,7 @@ describe("faithful-random live adapters: surrogate ordinary routes", () => {
       expect(body.words).toHaveLength(LIVE_MOVE_RANDOM2_PLANS[move.id]!.reduce((n, step) => n + step.count, 0));
       expect(body.activationHostFrame).not.toBeNull();
     }
+    if (move.id === 175) expect(bodies.map((body) => body.power)).toEqual([20, 40]);
     // Following prompt reached after every turn.
     expect(a.run.stalled).toBe(false);
     expect(a.run.boundaries).toHaveLength(turns + 1);

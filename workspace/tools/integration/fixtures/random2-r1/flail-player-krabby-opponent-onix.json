@@ -1,0 +1,42 @@
+{
+  "schema": "random2-r1-pinned-live-adapter/v1",
+  "move": "FLAIL",
+  "scenario": "tools/battle-lab/mechanic-flail-player-krabby-opponent-onix.json",
+  "probe": "tools/compare/flailProbe.py",
+  "probeArgs": [
+    "20"
+  ],
+  "denseWindow": {
+    "startFrame": 209,
+    "endFrame": 322
+  },
+  "windowSource": "flail-full-hp-evidence.json orientations[0].sourceWindow (209..322) == probed activation frame 209",
+  "attacker": {
+    "species": "KRABBY",
+    "geometry": {
+      "side": "player"
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent"
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 128,
+    "playerMaxHp": 137,
+    "opponentHp": 142,
+    "opponentMaxHp": 142,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "requestFields": {
+    "power": 20
+  },
+  "presentationRngActivation": {
+    "value": 2879831997,
+    "source": "tools/integration/fixtures/random2-r1/activation-probes.json flail-full-hp-player bodies[0] (0xABA6BFBD, activation frame 209; two fresh direct-mGBA runs)"
+  },
+  "fieldProfileSource": "displayed HP at the activation frame: flailProbe.py frames[0].battlers (first fresh run)"
+}

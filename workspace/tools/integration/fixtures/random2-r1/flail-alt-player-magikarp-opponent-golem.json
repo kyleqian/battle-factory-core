@@ -1,0 +1,14 @@
+{
+  "schema": "random2-r1-pinned-live-adapter/v1",
+  "move": "FLAIL",
+  "scenario": "tools/battle-lab/prep12-flail-alt-magikarp-golem.json",
+  "probe": "tools/compare/flailProbe.py",
+  "probeArgs": ["20"],
+  "denseWindow": { "startFrame": 73, "endFrame": 186 },
+  "windowSource": "prep12 plans.json moves.flail.entries[2].alternate: activation frame 73 + 0; length 114",
+  "attacker": { "species": "MAGIKARP", "geometry": { "side": "player" } },
+  "target": { "species": "GOLEM", "geometry": { "side": "opponent" } },
+  "fieldProfile": { "playerHp": 127, "playerMaxHp": 127, "opponentHp": 187, "opponentMaxHp": 187, "playerGender": "male", "opponentGender": "male" },
+  "requestFields": { "power": 20 },
+  "presentationRngActivation": { "value": 1989536647, "source": "tools/integration/fixtures/prep12-random2/plans.json moves.flail.entries[2].alternate.activationValue (0x7695EB87, activation frame 73)" }
+}

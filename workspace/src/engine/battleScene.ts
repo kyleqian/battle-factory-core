@@ -20430,13 +20430,14 @@ export function renderSceneOnMovePresentation(
       ...flailState,
       age: state.age - 2,
     });
-    const playerToOpponent = view.attacker.species === "KRABBY"
+    // Live field (faithful-random adapter): any displayed pair, art from the live species.
+    const playerToOpponent = (liveField || view.attacker.species === "KRABBY")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
-    const opponentToPlayer = view.attacker.species === "KRABBY"
+    const opponentToPlayer = (liveField || view.attacker.species === "KRABBY")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -20446,13 +20447,17 @@ export function renderSceneOnMovePresentation(
     const krabbySource = playerToOpponent
       ? mudShotArt.krabbyBack
       : mudShotArt.krabbyFront;
-    const krabby = playerToOpponent
+    const krabby = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent
       ? krabbySource
       : {
           ...krabbySource,
           tileset: subTileset(krabbySource.tileset, 0, 8),
         };
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     drawTileBg(
       fb,
       battleBg.static.tileset,
@@ -20503,6 +20508,8 @@ export function renderSceneOnMovePresentation(
         false,
       );
     }
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     const profile = flailState.config.fieldProfile;
     drawSendOutHealthbox(
       fb,

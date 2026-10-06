@@ -138,6 +138,64 @@
     }
    ],
    "scenario": "tools/battle-lab/mechanic-thrash-opponent-tauros-player-onix.json"
+  },
+  {
+   "label": "flail-full-hp-player",
+   "bodyLabel": "Move_FLAIL",
+   "runsSha1": "9f49b9c02e104b49f34fdd11cd1ebac7d1161a7d",
+   "runsSha1Run2": "9f49b9c02e104b49f34fdd11cd1ebac7d1161a7d",
+   "frames": 734,
+   "bodies": [
+    {
+     "activationFrame": 209,
+     "lastActiveFrame": 321,
+     "activationValue": 2879831997,
+     "activationValueHex": "0xABA6BFBD",
+     "plan": [
+      {
+       "ageOffset": 49,
+       "count": 2,
+       "lagBefore": 0
+      }
+     ],
+     "words": [
+      [
+       20810,
+       2811
+      ]
+     ]
+    }
+   ],
+   "scenario": "tools/battle-lab/mechanic-flail-player-krabby-opponent-onix.json"
+  },
+  {
+   "label": "flail-full-hp-opponent",
+   "bodyLabel": "Move_FLAIL",
+   "runsSha1": "14b31f64d71d7d16a5ebc9fca6775e228e82f463",
+   "runsSha1Run2": "14b31f64d71d7d16a5ebc9fca6775e228e82f463",
+   "frames": 934,
+   "bodies": [
+    {
+     "activationFrame": 210,
+     "lastActiveFrame": 322,
+     "activationValue": 802476527,
+     "activationValueHex": "0x2FD4D1EF",
+     "plan": [
+      {
+       "ageOffset": 49,
+       "count": 2,
+       "lagBefore": 0
+      }
+     ],
+     "words": [
+      [
+       19718,
+       2387
+      ]
+     ]
+    }
+   ],
+   "scenario": "tools/battle-lab/mechanic-flail-opponent-krabby-player-onix.json"
   }
  ]
 }

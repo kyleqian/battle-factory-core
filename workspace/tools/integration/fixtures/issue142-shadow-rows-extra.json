@@ -4231,6 +4231,56 @@
     "value": 765041132,
     "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
    }
+  },
+  {
+   "id": 175,
+   "move": "FLAIL",
+   "orientation": "player",
+   "variant": "flail-player",
+   "activationFrame": 209,
+   "windowStart": 209,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/compare/fixtures/flail-full-hp-evidence.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/random2-r1/activation-probes.json flail-full-hp-player (activation 209 == sourceWindow.startFrame)"
+   },
+   "requestFields": {
+    "power": 20
+   },
+   "presentationRngActivation": {
+    "value": 2879831997,
+    "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
+   }
+  },
+  {
+   "id": 175,
+   "move": "FLAIL",
+   "orientation": "opponent",
+   "variant": "flail-opponent",
+   "activationFrame": 210,
+   "windowStart": 210,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/compare/fixtures/flail-full-hp-evidence.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/random2-r1/activation-probes.json flail-full-hp-opponent (activation 210 == sourceWindow.startFrame)"
+   },
+   "requestFields": {
+    "power": 20
+   },
+   "presentationRngActivation": {
+    "value": 802476527,
+    "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
+   }
   }
  ]
 }

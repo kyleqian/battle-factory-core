@@ -31,6 +31,9 @@ export const LIVE_MOVE_RANDOM2_PLANS: Readonly<Record<number, readonly Presentat
   310: Object.freeze([Object.freeze({ ageOffset: 31, count: 4 })]),
   // Move_THRASH: three AnimFistOrFootRandomPos sprites (args 1,10,0|1|3), 4 words each (battle_anim_fight.c:487-492).
   37: Object.freeze([7, 37, 67].map((ageOffset) => Object.freeze({ ageOffset, count: 4 }))),
+  // Move_FLAIL: AnimHitSplatRandom (animation=3 skips the :1054 draw) x2 % 48 - 24, y2 % 24 - 12
+  // (battle_anim_normal.c:1062-1063); AnimTask_FlailMovement draws nothing.
+  175: Object.freeze([Object.freeze({ ageOffset: 49, count: 2 })]),
 });
 
 /** Faithful-random live adapters (disjoint from LIVE_MOVE_ANIMATION_IDS). */
