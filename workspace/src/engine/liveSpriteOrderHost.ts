@@ -53,14 +53,20 @@ export interface LiveSpriteOrderHost {
   readonly cursor: Readonly<{ requestId: number; segmentIndex: number; nextEventIndex: number; drained: boolean }> | null;
   /** Battler sprites hidden by the semi-invulnerable `moveend`/`makevisible` toggles. */
   readonly hidden: readonly [boolean, boolean];
+  /** Presentation units (animation bodies, faints, switches, party-menu resets) applied since the battle began (prep16 s0.3 first-body gate). */
+  readonly bodies?: number;
 }
 
 const RECALL_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_VARIOUS", "B_SCR_OP_RETURNATKTOBALL", "B_SCR_OP_RETURNTOBALL"]);
+/** Order events that count as a presentation unit for the first-body gate (every body, faint, switch and recall). */
+const BODY_UNIT_EVENTS: ReadonlySet<string> = new Set([
+  "move-animation", "hit-animation", "stat-animation", "general-animation", "status-animation", "faint", "switch-out",
+  "forced-switch-out", "switch-in-start", "next-mon-send-out", "invalidate"]);
 const INVALIDATING_EVENTS: ReadonlySet<string> = new Set(["trainer-slide-out", "outcome"]);
 
 export function createLiveSpriteOrderHost(order: SpriteOrderState): LiveSpriteOrderHost {
   const hidden: readonly [boolean, boolean] = Object.freeze([false, false] as const);
-  return Object.freeze({ tracker: createSpriteOrderTracker(order), promptRequestId: null, cursor: null, hidden });
+  return Object.freeze({ tracker: createSpriteOrderTracker(order), promptRequestId: null, cursor: null, hidden, bodies: 0 });
 }
 
 /**
@@ -81,7 +87,7 @@ export function seedLiveSpriteOrderHostFromBattleStart(events: readonly BattleKe
     || Number(payload.arguments[0]) !== 22) return invalid();
   const host = createLiveSpriteOrderHost(knownEntryPrePromptSpriteOrderState("ordinary-factory"));
   return Object.freeze({
-    ...host, tracker: applySpriteOrderPresentationEvent(host.tracker, { kind: "stat-animation", argument: 22 }),
+    ...host, tracker: applySpriteOrderPresentationEvent(host.tracker, { kind: "stat-animation", argument: 22 }), bodies: 1,
   });
 }
 
@@ -103,6 +109,7 @@ export function openLiveSpriteOrderHostPartyMenu(host: LiveSpriteOrderHost): Liv
   return Object.freeze({
     ...host,
     tracker: applySpriteOrderPresentationEvent(host.tracker, { kind: "party-menu-reset" }),
+    bodies: (host.bodies ?? 0) + 1,
     cursor: host.cursor === null || host.cursor.drained ? host.cursor : Object.freeze({ ...host.cursor, drained: true }),
   });
 }
@@ -119,7 +126,7 @@ export function returnLiveSpriteOrderHostFromPartyMenu(
   const tracker = !battlers.opponent ? invalidateSpriteOrderTracker(reset, "reshow without the opponent battler")
     : host.hidden[0] || host.hidden[1] ? invalidateSpriteOrderTracker(reset, "reshow with a hidden battler")
       : applySpriteOrderPresentationEvent(reset, { kind: "battle-reshow", playerBattlerPresent: battlers.player });
-  return Object.freeze({ ...host, tracker });
+  return Object.freeze({ ...host, tracker, bodies: (host.bodies ?? 0) + 1 });
 }
 
 /**
@@ -296,6 +303,7 @@ export function advanceLiveSpriteOrderHost(
   const requestId = resolution.resolutionId.requestId;
   let tracker = host.tracker;
   let hidden = host.hidden;
+  let bodies = host.bodies ?? 0;
   let cursor = host.cursor;
   if (cursor?.requestId !== requestId) {
     if (cursor !== null && !cursor.drained) tracker = invalidateSpriteOrderTracker(tracker, "previous resolution not fully applied");
@@ -309,6 +317,7 @@ export function advanceLiveSpriteOrderHost(
       if (mapped.hidden) hidden = mapped.hidden;
       if (mapped.event) tracker = applySpriteOrderPresentationEvent(tracker, mapped.event);
       if (mapped.then) tracker = applySpriteOrderPresentationEvent(tracker, mapped.then);
+      if (mapped.event && BODY_UNIT_EVENTS.has(mapped.event.kind)) bodies += 1;
       index += 1;
     }
     return index;
@@ -326,10 +335,10 @@ export function advanceLiveSpriteOrderHost(
       drained: nextEventIndex >= events.length && cursor.segmentIndex === resolution.segments.length - 1,
     };
   }
-  if (tracker === host.tracker && hidden === host.hidden && cursor.requestId === host.cursor?.requestId
+  if (tracker === host.tracker && bodies === (host.bodies ?? 0) && hidden === host.hidden && cursor.requestId === host.cursor?.requestId
     && cursor.segmentIndex === host.cursor.segmentIndex && cursor.nextEventIndex === host.cursor.nextEventIndex
     && cursor.drained === host.cursor.drained) return host;
-  return Object.freeze({ ...host, tracker, hidden, cursor: Object.freeze(cursor) });
+  return Object.freeze({ ...host, tracker, hidden, bodies, cursor: Object.freeze(cursor) });
 }
 
 /**
@@ -349,7 +358,7 @@ export function lendLiveSpriteOrder(host: LiveSpriteOrderHost, moveId?: number):
   const { player, opponent } = host.tracker.battlerSlots;
   const atEntry = player === KNOWN_ENTRY_BATTLER_SLOTS.player && opponent === KNOWN_ENTRY_BATTLER_SLOTS.opponent;
   if (!atEntry && moveId !== undefined && POSTKO_LEND_EXCLUDED_MOVE_IDS.includes(moveId)) return undefined;
-  return Object.freeze({ known: true as const, free });
+  return Object.freeze({ known: true as const, free, ...((host.bodies ?? 0) === 0 ? { firstBody: true as const } : {}) });
 }
 
 /**

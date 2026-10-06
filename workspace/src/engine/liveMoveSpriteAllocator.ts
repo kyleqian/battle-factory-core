@@ -127,6 +127,12 @@ export function prepareLiveMoveSpriteAllocator(
 export interface LiveMoveSpriteOrderInput {
   readonly known: true;
   readonly free: readonly number[];
+  /**
+   * ISSUES prep16 s0.3: no animation body, stat/status/general animation, faint, switch or party-menu unit has run since the
+   * battle began (the order host's body counter is 0). Only then is the BG-register/scroll/matrix state the measured
+   * constant S0; the BG-snapshot adapters (Overheat, Silver Wind) require it.
+   */
+  readonly firstBody?: true;
 }
 
 /**

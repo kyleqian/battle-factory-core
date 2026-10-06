@@ -78,6 +78,8 @@ import { waterSpoutTimeline, type WaterSpoutLiveInputs } from "../animation/wate
 import { hiddenPowerUnownFormIndex } from "../animation/hiddenPower.ts";
 import type { FlailPower } from "../animation/flail.ts";
 import type { HailProfile } from "../animation/hail.ts";
+import { composeLivePalettes, liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
+import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
 import {
   hyperBeamOrbFromWords, liveMovePresentationRngWords, miniTwinklingStarFromWords, type LiveMovePresentationRngInput,
 } from "./liveMovePresentationRng.ts";
@@ -182,6 +184,10 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   237,
   // prep14 s1.7: Hail (no RNG; the target table is derived from the anchors).
   258,
+  // prep16 s2.1/2.2: Overheat, Silver Wind (first body only: BG-register constants; assets-only palette composite; !shiny).
+  315, 318,
+  // prep16 s2.3: Psych Up, player attacker first body only.
+  244,
 ] as const);
 
 /** In-use OBJ slots at a first-body activation (prep14 s1: equal in all 24 probed scenarios). */
@@ -272,6 +278,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     58, 323, 237,
     // prep14 s2: Rain Dance, Water Pulse (faithful-random) and Hail activation == accepted window start (row 0).
     240, 352, 258,
+    // prep16: Overheat, Silver Wind first-body activation == window start (row 0; prep16 s1, captures of the first-body scenarios).
+    315, 318, 244,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -729,6 +737,9 @@ export function liveMoveAnimationDuration(
     case 240: return 187; // Rain Dance 213..399 / 211..397 (prep14 s2).
     case 352: return 160; // Water Pulse 77..236 / 81..240 (prep14 s2, first inactive age 159).
     case 258: return 158; // Hail 64..221 (prep14 s2).
+    case 244: return request.attacker === 0 ? 179 : null; // Psych Up player first body 69..247 (prep16 s1.3; first inactive age 178); the opponent attacker's first body is unverified.
+    case 315: return 230; // Overheat first body 75..304 / 80..309 (prep16 s2.1; reducer first inactive age 229, displayed like every adapter: duration = first inactive + 1).
+    case 318: return request.attacker === 0 ? 193 : 196; // Silver Wind first body 81..273 / 85..280 (prep16 s2.2: first inactive ages 192 / 195, duration = first inactive + 1).
     case 58: return 203; // Ice Beam 75..277 / 79..281 (prep13 s0.1; reducer first inactive age 202).
     default: return null;
   }
@@ -2371,6 +2382,41 @@ export function liveMoveAnimationPresentation(
           hardwarePaletteAtAge0: UNCONSUMED_PALETTE, unfadedPaletteAfterHailLoad: UNCONSUMED_PALETTE,
           fadedPaletteAfterHailLoad: UNCONSUMED_PALETTE, unfadedPaletteAfterCrystalLoad: UNCONSUMED_PALETTE,
           fadedPaletteAfterCrystalLoad: UNCONSUMED_PALETTE } };
+      break;
+    }
+    case 244: case 315: case 318: {
+      // prep16 s0.3: first body only (no animation unit has run since the battle began = the order host lent a `firstBody`
+      // order: the BG registers/scroll/matrices are the constant S0), non-shiny (the repo has no shiny battle palette).
+      // Everything else is the measured first-body constant set (liveBgSnapshotMoves.ts) + anchors + the assets-only composite.
+      if (!spriteOrderInput?.firstBody) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      if (palettes === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const args = { attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes };
+      if (request.moveId === 244) {
+        const inputs = livePsychUpInputs(args);
+        const order = spriteOrderWithOccupiedPrefix(
+          { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+        if (inputs === null || order === null) return null;
+        config = { move: "PSYCH_UP", attacker, target, fieldProfile, animationInputs: { ...inputs, spriteOrder: order } as never };
+      } else if (request.moveId === 315) {
+        const inputs = liveOverheatInputs(args);
+        const order = spriteOrderWithOccupiedPrefix(
+          { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+        if (inputs === null || order === null) return null;
+        config = { move: "OVERHEAT", attacker, target, fieldProfile,
+          animationInputs: { ...inputs, allocator: { ...inputs.allocator, spriteOrder: order } } as never };
+      } else {
+        const { attackerPictureOrigin, targetPictureOrigin, ...inputs } = liveSilverWindInputs(args);
+        // The accepted compositor fit: effect pictures centre on the picture origin and the age-0 enemy shadow draws at
+        // battlePositionCenter - 1 (generic shadow y 40 + 1 on the opponent side).
+        const withOrigin = (battler: SceneOnPresentationBattler, origin: { x: number; y: number }): SceneOnPresentationBattler => ({
+          ...battler, geometry: { ...battler.geometry, animationCenter: origin,
+            battlePositionCenter: battler.geometry.side === "player" ? origin : { x: 176, y: 41 } } });
+        config = { move: "SILVER_WIND", attacker: withOrigin(attacker, attackerPictureOrigin),
+          target: withOrigin(target, targetPictureOrigin), fieldProfile, animationInputs: inputs as never };
+      }
       break;
     }
     case 237: {
