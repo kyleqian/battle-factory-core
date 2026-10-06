@@ -1,0 +1,1814 @@
+{
+ "mechanic-dig-opponent-vibrava-player-chansey": [
+  {
+   "move": "DIG",
+   "bodyIndex": 0,
+   "start": 54,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  },
+  {
+   "move": "DIG",
+   "bodyIndex": 1,
+   "start": 613,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 23554,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 0,
+    "state": 0,
+    "dmaDest": 67108884,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     152
+    ],
+    "sha1": [
+     "b9bac8c99c",
+     "8391a26c3e"
+    ]
+   },
+   "firstBodyS0": false
+  }
+ ],
+ "mechanic-dig-player-vibrava-opponent-chansey": [
+  {
+   "move": "DIG",
+   "bodyIndex": 0,
+   "start": 54,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  },
+  {
+   "move": "DIG",
+   "bodyIndex": 1,
+   "start": 561,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24066,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 0,
+    "state": 0,
+    "dmaDest": 67108888,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     112
+    ],
+    "sha1": [
+     "1f7222381f",
+     "ae87b9c3cf"
+    ]
+   },
+   "firstBodyS0": false
+  }
+ ],
+ "mechanic-fury-cutter-opponent-grovyle-player-blissey": [
+  {
+   "move": "FURY_CUTTER",
+   "bodyIndex": 0,
+   "start": 82,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  },
+  {
+   "move": "FURY_CUTTER",
+   "bodyIndex": 1,
+   "start": 716,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24066,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": false
+  },
+  {
+   "move": "FURY_CUTTER",
+   "bodyIndex": 2,
+   "start": 1350,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24066,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": false
+  },
+  {
+   "move": "FURY_CUTTER",
+   "bodyIndex": 3,
+   "start": 1984,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24066,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": false
+  }
+ ],
+ "mechanic-fury-cutter-player-grovyle-opponent-blissey": [
+  {
+   "move": "FURY_CUTTER",
+   "bodyIndex": 0,
+   "start": 78,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  },
+  {
+   "move": "FURY_CUTTER",
+   "bodyIndex": 1,
+   "start": 712,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 23554,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": false
+  },
+  {
+   "move": "FURY_CUTTER",
+   "bodyIndex": 2,
+   "start": 1346,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 23554,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": false
+  },
+  {
+   "move": "FURY_CUTTER",
+   "bodyIndex": 3,
+   "start": 1980,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 23554,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": false
+  }
+ ],
+ "mechanic-megahorn-opponent-seaking-player-onix": [
+  {
+   "move": "MEGAHORN",
+   "bodyIndex": 0,
+   "start": 212,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 23554,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": false
+  }
+ ],
+ "mechanic-megahorn-player-seaking-opponent-onix": [
+  {
+   "move": "MEGAHORN",
+   "bodyIndex": 0,
+   "start": 211,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24066,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": false
+  }
+ ],
+ "mechanic-pursuit-opponent-beedrill-player-shuckle": [
+  {
+   "move": "PURSUIT",
+   "bodyIndex": 0,
+   "start": 77,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  }
+ ],
+ "mechanic-pursuit-player-beedrill-opponent-shuckle": [
+  {
+   "move": "PURSUIT",
+   "bodyIndex": 0,
+   "start": 73,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  }
+ ],
+ "mechanic-return-medium-opponent-dragonair-player-onix": [
+  {
+   "move": "RETURN",
+   "bodyIndex": 0,
+   "start": 78,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  }
+ ],
+ "mechanic-return-medium-player-dragonair-opponent-onix": [
+  {
+   "move": "RETURN",
+   "bodyIndex": 0,
+   "start": 74,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  }
+ ],
+ "mechanic-return-opponent-dragonair-player-onix": [
+  {
+   "move": "RETURN",
+   "bodyIndex": 0,
+   "start": 78,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  }
+ ],
+ "mechanic-return-player-dragonair-opponent-onix": [
+  {
+   "move": "RETURN",
+   "bodyIndex": 0,
+   "start": 74,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  }
+ ],
+ "mechanic-return-strong-opponent-dragonair-player-onix": [
+  {
+   "move": "RETURN",
+   "bodyIndex": 0,
+   "start": 78,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  }
+ ],
+ "mechanic-return-strong-player-dragonair-opponent-onix": [
+  {
+   "move": "RETURN",
+   "bodyIndex": 0,
+   "start": 74,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  }
+ ],
+ "mechanic-return-weak-opponent-dragonair-player-onix": [
+  {
+   "move": "RETURN",
+   "bodyIndex": 0,
+   "start": 78,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  }
+ ],
+ "mechanic-return-weak-player-dragonair-opponent-onix": [
+  {
+   "move": "RETURN",
+   "bodyIndex": 0,
+   "start": 74,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  }
+ ],
+ "mechanic-will-o-wisp-opponent-shuppet-player-shuckle": [
+  {
+   "move": "WILL_O_WISP",
+   "bodyIndex": 0,
+   "start": 80,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  }
+ ],
+ "mechanic-will-o-wisp-player-shuppet-opponent-shuckle": [
+  {
+   "move": "WILL_O_WISP",
+   "bodyIndex": 0,
+   "start": 76,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  }
+ ],
+ "prep18-dig-alt-flygon-golem": [
+  {
+   "move": "DIG",
+   "bodyIndex": 0,
+   "start": 54,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  },
+  {
+   "move": "DIG",
+   "bodyIndex": 1,
+   "start": 555,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24066,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 0,
+    "state": 0,
+    "dmaDest": 67108888,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     112
+    ],
+    "sha1": [
+     "1f7222381f",
+     "ae87b9c3cf"
+    ]
+   },
+   "firstBodyS0": false
+  }
+ ],
+ "prep18-fury-cutter-alt-scyther-golem": [
+  {
+   "move": "FURY_CUTTER",
+   "bodyIndex": 0,
+   "start": 78,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  },
+  {
+   "move": "FURY_CUTTER",
+   "bodyIndex": 1,
+   "start": 712,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 23554,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": false
+  },
+  {
+   "move": "FURY_CUTTER",
+   "bodyIndex": 2,
+   "start": 1346,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 23554,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": false
+  },
+  {
+   "move": "FURY_CUTTER",
+   "bodyIndex": 3,
+   "start": 1980,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 23554,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": false
+  }
+ ],
+ "prep18-megahorn-alt-heracross-golem": [
+  {
+   "move": "MEGAHORN",
+   "bodyIndex": 0,
+   "start": 221,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24066,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": false
+  }
+ ],
+ "prep18-pursuit-alt-umbreon-golem": [
+  {
+   "move": "PURSUIT",
+   "bodyIndex": 0,
+   "start": 72,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  }
+ ],
+ "prep18-return-alt-snorlax-golem": [
+  {
+   "move": "RETURN",
+   "bodyIndex": 0,
+   "start": 72,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  }
+ ],
+ "prep18-will-o-wisp-alt-banette-golem": [
+  {
+   "move": "WILL_O_WISP",
+   "bodyIndex": 0,
+   "start": 77,
+   "regs": {
+    "dispcnt": 48960,
+    "bg0": 38912,
+    "bg1": 39936,
+    "bg2": 24064,
+    "bg3": 23051,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "bgXY": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hwScroll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nonIdentityMatrices": [],
+   "bitmap": 6,
+   "scan": {
+    "srcBuffer": 1,
+    "state": 0,
+    "dmaDest": 67108892,
+    "dmaControl": 2724200449,
+    "waveTaskId": 255,
+    "nonzero": [
+     160,
+     0
+    ],
+    "sha1": [
+     "d9efe5bb0d",
+     "a5c8562f2c"
+    ]
+   },
+   "firstBodyS0": true
+  }
+ ]
+}
