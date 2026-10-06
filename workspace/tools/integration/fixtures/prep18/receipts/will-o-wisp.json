@@ -1,0 +1,406 @@
+{
+ "schema": "prep18-receipt/v1",
+ "move": "will-o-wisp",
+ "random2Draws": 0,
+ "variants": {
+  "will-o-wisp": {
+   "plans": {
+    "player": {
+     "scenario": "mechanic-will-o-wisp-player-shuppet-opponent-shuckle",
+     "probeRunsIdentical": true,
+     "runsSha1": "45689505137dc6fdab57b6bd8f3fd06862a624a4",
+     "callers": {
+      "RfuMain1+0x10": 402
+     },
+     "bodies": [
+      {
+       "bodyIndex": 0,
+       "activationFrame": 76,
+       "rows": 214,
+       "label": "Move_WILL_O_WISP",
+       "activationValueHex": "0x16194BC9",
+       "activationEqualsCorpusRow0": true,
+       "lagAges": [
+        194,
+        195
+       ],
+       "planEqualsCorpusPerRow": true
+      }
+     ]
+    },
+    "opponent": {
+     "scenario": "mechanic-will-o-wisp-opponent-shuppet-player-shuckle",
+     "probeRunsIdentical": true,
+     "runsSha1": "c7e871c8cfe3c426673891bfc2a799ded9ebb810",
+     "callers": {
+      "RfuMain1+0x10": 401
+     },
+     "bodies": [
+      {
+       "bodyIndex": 0,
+       "activationFrame": 80,
+       "rows": 213,
+       "label": "Move_WILL_O_WISP",
+       "activationValueHex": "0xDAAD9D3D",
+       "activationEqualsCorpusRow0": true,
+       "lagAges": [
+        193,
+        194
+       ],
+       "planEqualsCorpusPerRow": true
+      }
+     ]
+    }
+   },
+   "allocator": {
+    "body0": {
+     "equalToPlayer": {
+      "opponent": {
+       "spawns": false,
+       "tasks": false,
+       "bitmap": true,
+       "inUse": true,
+       "rows": false
+      },
+      "alt": {
+       "spawns": true,
+       "tasks": true,
+       "bitmap": true,
+       "inUse": true,
+       "rows": true
+      },
+      "altopp": {
+       "spawns": true,
+       "tasks": true,
+       "bitmap": true,
+       "inUse": true,
+       "rows": true
+      }
+     },
+     "corpusCrossCheck": {
+      "player": {
+       "spawnsEqual": true,
+       "taskPairsEqual": true,
+       "orderAtAct": true,
+       "animRng0==rng2AtAct": true,
+       "inUseAtAct": {
+        "corpus": [
+         0,
+         1,
+         2,
+         6,
+         8,
+         60,
+         61,
+         62,
+         63
+        ],
+        "probe": [
+         0,
+         1,
+         2,
+         6,
+         8,
+         60,
+         61,
+         62,
+         63
+        ]
+       },
+       "offset": 0,
+       "rows": {
+        "corpus": 214,
+        "probe": 214
+       }
+      },
+      "opponent": {
+       "spawnsEqual": true,
+       "taskPairsEqual": true,
+       "orderAtAct": true,
+       "animRng0==rng2AtAct": true,
+       "inUseAtAct": {
+        "corpus": [
+         0,
+         1,
+         2,
+         6,
+         8,
+         60,
+         61,
+         62,
+         63
+        ],
+        "probe": [
+         0,
+         1,
+         2,
+         6,
+         8,
+         60,
+         61,
+         62,
+         63
+        ]
+       },
+       "offset": 0,
+       "rows": {
+        "corpus": 213,
+        "probe": 213
+       }
+      }
+     },
+     "scenarios": {
+      "player": {
+       "scenario": "mechanic-will-o-wisp-player-shuppet-opponent-shuckle",
+       "activation": 76,
+       "rows": 214,
+       "bitmapAtActivation": 6,
+       "tasksAtActivation": [],
+       "inUseAtActivation": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "orderShape": "first-body",
+       "monbg": {
+        "age": 7,
+        "slot": 1,
+        "data": [
+         8,
+         176,
+         49,
+         -144,
+         -17,
+         0,
+         1,
+         0
+        ],
+        "battlerOnSprite": "opponent",
+        "formula": [
+         176,
+         49,
+         -144,
+         -17
+        ],
+        "holds": true
+       },
+       "netZeroAtEnd1": true
+      },
+      "opponent": {
+       "scenario": "mechanic-will-o-wisp-opponent-shuppet-player-shuckle",
+       "activation": 80,
+       "rows": 213,
+       "bitmapAtActivation": 6,
+       "tasksAtActivation": [],
+       "inUseAtActivation": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "orderShape": "first-body",
+       "monbg": {
+        "age": 7,
+        "slot": 1,
+        "data": [
+         6,
+         72,
+         91,
+         -40,
+         -59,
+         1,
+         0,
+         0
+        ],
+        "battlerOnSprite": "player",
+        "formula": [
+         72,
+         91,
+         -40,
+         -59
+        ],
+        "holds": true
+       },
+       "netZeroAtEnd1": true
+      },
+      "alt": {
+       "scenario": "prep18-will-o-wisp-alt-banette-golem",
+       "activation": 77,
+       "rows": 214,
+       "bitmapAtActivation": 6,
+       "tasksAtActivation": [],
+       "inUseAtActivation": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "orderShape": "first-body",
+       "monbg": {
+        "age": 7,
+        "slot": 1,
+        "data": [
+         8,
+         176,
+         45,
+         -144,
+         -13,
+         0,
+         1,
+         0
+        ],
+        "battlerOnSprite": "opponent",
+        "formula": [
+         176,
+         45,
+         -144,
+         -13
+        ],
+        "holds": true
+       },
+       "netZeroAtEnd1": true
+      },
+      "altopp": {
+       "scenario": "prep18-will-o-wisp-altopp-banette-golem",
+       "activation": 81,
+       "rows": 213,
+       "bitmapAtActivation": 6,
+       "tasksAtActivation": [],
+       "inUseAtActivation": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "orderShape": "first-body",
+       "monbg": {
+        "age": 7,
+        "slot": 1,
+        "data": [
+         6,
+         72,
+         96,
+         -40,
+         -64,
+         1,
+         0,
+         0
+        ],
+        "battlerOnSprite": "player",
+        "formula": [
+         72,
+         96,
+         -40,
+         -64
+        ],
+        "holds": true
+       },
+       "netZeroAtEnd1": true
+      }
+     }
+    }
+   }
+  }
+ },
+ "alternate": {
+  "scenario": "prep18-will-o-wisp-alt-banette-golem",
+  "probeRunsIdentical": true,
+  "runsSha1": "92b976061322198f44cc1d02966bdbe980db978b",
+  "callers": {
+   "RfuMain1+0x10": 402
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 77,
+    "activationValueHex": "0x78A77ADB",
+    "lagAges": [
+     194,
+     195
+    ],
+    "sameLagAgesAsAccepted": true,
+    "sameRowsWindow": true
+   }
+  ]
+ },
+ "alternateOpponent": {
+  "scenario": "prep18-will-o-wisp-altopp-banette-golem",
+  "probeRunsIdentical": true,
+  "runsSha1": "b1c45b67394fd117a528eb09ca8f63c854c8eb81",
+  "callers": {
+   "RfuMain1+0x10": 401
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 81,
+    "activationValueHex": "0x1C02E96C",
+    "lagAges": [
+     193,
+     194
+    ],
+    "sameLagAgesAsAccepted": true,
+    "sameRowsWindow": true
+   }
+  ]
+ },
+ "geometry": {
+  "mechanic-will-o-wisp-opponent-shuppet-player-shuckle": [
+   {
+    "move": "WILL_O_WISP",
+    "bodyIndex": 0,
+    "act": 80,
+    "spriteXYEqual": true,
+    "idleEqual": true
+   }
+  ],
+  "mechanic-will-o-wisp-player-shuppet-opponent-shuckle": [
+   {
+    "move": "WILL_O_WISP",
+    "bodyIndex": 0,
+    "act": 76,
+    "spriteXYEqual": true,
+    "idleEqual": true
+   }
+  ],
+  "prep18-will-o-wisp-alt-banette-golem": [
+   {
+    "move": "WILL_O_WISP",
+    "bodyIndex": 0,
+    "act": 77,
+    "spriteXYEqual": true,
+    "idleEqual": true
+   }
+  ],
+  "prep18-will-o-wisp-altopp-banette-golem": [
+   {
+    "move": "WILL_O_WISP",
+    "bodyIndex": 0,
+    "act": 81,
+    "spriteXYEqual": true,
+    "idleEqual": true
+   }
+  ]
+ }
+}

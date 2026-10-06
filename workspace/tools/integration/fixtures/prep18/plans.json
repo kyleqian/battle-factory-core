@@ -1,0 +1,999 @@
+{
+ "dig-player": {
+  "scenario": "mechanic-dig-player-vibrava-opponent-chansey",
+  "probeRunsIdentical": true,
+  "runsSha1": "849966ab5a25f1663f05b874c97ffa60c184cdef",
+  "callers": {
+   "RfuMain1+0x10": 393
+  },
+  "draws": [],
+  "drawsTotal": 0,
+  "note": "no Random2 draw in any body: every gRng2 write is the per-frame RfuMain1+0x10 step; no gameplay Random() in the anim window",
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 54,
+    "lastCorpusFrame": 248,
+    "rows": 195,
+    "label": "Move_DIG",
+    "activationValue": 3990907205,
+    "activationValueHex": "0xEDE06945",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     191,
+     192
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   },
+   {
+    "bodyIndex": 1,
+    "activationFrame": 561,
+    "lastCorpusFrame": 628,
+    "rows": 68,
+    "label": "Move_DIG",
+    "activationValue": 1633647762,
+    "activationValueHex": "0x615F7C92",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     34,
+     35
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ],
+  "alternate": {
+   "scenario": "prep18-dig-alt-flygon-golem",
+   "probeRunsIdentical": true,
+   "runsSha1": "0aa9a77ce130b82d5908dc24bc9705393ca648ed",
+   "callers": {
+    "RfuMain1+0x10": 391
+   },
+   "bodies": [
+    {
+     "bodyIndex": 0,
+     "activationFrame": 54,
+     "activationValueHex": "0x98FE38D4",
+     "lagAges": [
+      191,
+      192
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    },
+    {
+     "bodyIndex": 1,
+     "activationFrame": 555,
+     "activationValueHex": "0xA56D97E7",
+     "lagAges": [
+      34,
+      35
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    }
+   ]
+  }
+ },
+ "dig-opponent": {
+  "scenario": "mechanic-dig-opponent-vibrava-player-chansey",
+  "probeRunsIdentical": true,
+  "runsSha1": "c79dcb02945a6b71927cf56e56001043ca34fd45",
+  "callers": {
+   "RfuMain1+0x10": 393
+  },
+  "draws": [],
+  "drawsTotal": 0,
+  "note": "no Random2 draw in any body: every gRng2 write is the per-frame RfuMain1+0x10 step; no gameplay Random() in the anim window",
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 54,
+    "lastCorpusFrame": 248,
+    "rows": 195,
+    "label": "Move_DIG",
+    "activationValue": 1121392035,
+    "activationValueHex": "0x42D715A3",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     191,
+     192
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   },
+   {
+    "bodyIndex": 1,
+    "activationFrame": 613,
+    "lastCorpusFrame": 680,
+    "rows": 68,
+    "label": "Move_DIG",
+    "activationValue": 2242381483,
+    "activationValueHex": "0x85A806AB",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     34,
+     35
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ],
+  "alternateOpponent": {
+   "scenario": "prep18-dig-altopp-flygon-golem",
+   "probeRunsIdentical": true,
+   "runsSha1": "480e740effdc24f3e36fe96c6ea7a7dad5471f3b",
+   "callers": {
+    "RfuMain1+0x10": 391
+   },
+   "bodies": [
+    {
+     "bodyIndex": 0,
+     "activationFrame": 54,
+     "activationValueHex": "0x42D715A3",
+     "lagAges": [
+      191,
+      192
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    },
+    {
+     "bodyIndex": 1,
+     "activationFrame": 612,
+     "activationValueHex": "0xCF31FC18",
+     "lagAges": [
+      34,
+      35
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    }
+   ]
+  }
+ },
+ "megahorn-player": {
+  "scenario": "mechanic-megahorn-player-seaking-opponent-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "dcec3bf99569e135506658f336a4f399fe03d1da",
+  "callers": {
+   "RfuMain1+0x10": 212
+  },
+  "draws": [],
+  "drawsTotal": 0,
+  "note": "no Random2 draw in any body: every gRng2 write is the per-frame RfuMain1+0x10 step; no gameplay Random() in the anim window",
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 211,
+    "lastCorpusFrame": 387,
+    "rows": 177,
+    "label": "Move_MEGAHORN",
+    "activationValue": 446072370,
+    "activationValueHex": "0x1A968632",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     137,
+     138,
+     157
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ],
+  "alternate": {
+   "scenario": "prep18-megahorn-alt-heracross-golem",
+   "probeRunsIdentical": true,
+   "runsSha1": "2bf6a1685cefb6c84999e1d53269949e58babf91",
+   "callers": {
+    "RfuMain1+0x10": 212
+   },
+   "bodies": [
+    {
+     "bodyIndex": 0,
+     "activationFrame": 221,
+     "activationValueHex": "0x717CF6D7",
+     "lagAges": [
+      137,
+      138,
+      157
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    }
+   ]
+  }
+ },
+ "megahorn-opponent": {
+  "scenario": "mechanic-megahorn-opponent-seaking-player-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "6789ec00900ee20be0b7345d4133d354e8d8ba4d",
+  "callers": {
+   "RfuMain1+0x10": 212
+  },
+  "draws": [],
+  "drawsTotal": 0,
+  "note": "no Random2 draw in any body: every gRng2 write is the per-frame RfuMain1+0x10 step; no gameplay Random() in the anim window",
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 212,
+    "lastCorpusFrame": 387,
+    "rows": 176,
+    "label": "Move_MEGAHORN",
+    "activationValue": 2236636273,
+    "activationValueHex": "0x85505C71",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     137,
+     138
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ],
+  "alternateOpponent": {
+   "scenario": "prep18-megahorn-altopp-heracross-golem",
+   "probeRunsIdentical": true,
+   "runsSha1": "6a62827af6490e9bed9d38f82375f2503bc8fbb3",
+   "callers": {
+    "RfuMain1+0x10": 212
+   },
+   "bodies": [
+    {
+     "bodyIndex": 0,
+     "activationFrame": 223,
+     "activationValueHex": "0x12FFCE0D",
+     "lagAges": [
+      137,
+      138,
+      157
+     ],
+     "sameLagAgesAsAccepted": false,
+     "sameRowsWindow": true
+    }
+   ]
+  }
+ },
+ "will-o-wisp-player": {
+  "scenario": "mechanic-will-o-wisp-player-shuppet-opponent-shuckle",
+  "probeRunsIdentical": true,
+  "runsSha1": "45689505137dc6fdab57b6bd8f3fd06862a624a4",
+  "callers": {
+   "RfuMain1+0x10": 402
+  },
+  "draws": [],
+  "drawsTotal": 0,
+  "note": "no Random2 draw in any body: every gRng2 write is the per-frame RfuMain1+0x10 step; no gameplay Random() in the anim window",
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 76,
+    "lastCorpusFrame": 289,
+    "rows": 214,
+    "label": "Move_WILL_O_WISP",
+    "activationValue": 370756553,
+    "activationValueHex": "0x16194BC9",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     194,
+     195
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ],
+  "alternate": {
+   "scenario": "prep18-will-o-wisp-alt-banette-golem",
+   "probeRunsIdentical": true,
+   "runsSha1": "92b976061322198f44cc1d02966bdbe980db978b",
+   "callers": {
+    "RfuMain1+0x10": 402
+   },
+   "bodies": [
+    {
+     "bodyIndex": 0,
+     "activationFrame": 77,
+     "activationValueHex": "0x78A77ADB",
+     "lagAges": [
+      194,
+      195
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    }
+   ]
+  }
+ },
+ "will-o-wisp-opponent": {
+  "scenario": "mechanic-will-o-wisp-opponent-shuppet-player-shuckle",
+  "probeRunsIdentical": true,
+  "runsSha1": "c7e871c8cfe3c426673891bfc2a799ded9ebb810",
+  "callers": {
+   "RfuMain1+0x10": 401
+  },
+  "draws": [],
+  "drawsTotal": 0,
+  "note": "no Random2 draw in any body: every gRng2 write is the per-frame RfuMain1+0x10 step; no gameplay Random() in the anim window",
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 80,
+    "lastCorpusFrame": 292,
+    "rows": 213,
+    "label": "Move_WILL_O_WISP",
+    "activationValue": 3668811069,
+    "activationValueHex": "0xDAAD9D3D",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     193,
+     194
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ],
+  "alternateOpponent": {
+   "scenario": "prep18-will-o-wisp-altopp-banette-golem",
+   "probeRunsIdentical": true,
+   "runsSha1": "b1c45b67394fd117a528eb09ca8f63c854c8eb81",
+   "callers": {
+    "RfuMain1+0x10": 401
+   },
+   "bodies": [
+    {
+     "bodyIndex": 0,
+     "activationFrame": 81,
+     "activationValueHex": "0x1C02E96C",
+     "lagAges": [
+      193,
+      194
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    }
+   ]
+  }
+ },
+ "fury-cutter-player": {
+  "scenario": "mechanic-fury-cutter-player-grovyle-opponent-blissey",
+  "probeRunsIdentical": true,
+  "runsSha1": "cd4002e986ecdc3e936de5048b22518aa8d5138c",
+  "callers": {
+   "RfuMain1+0x10": 620
+  },
+  "draws": [],
+  "drawsTotal": 0,
+  "note": "no Random2 draw in any body: every gRng2 write is the per-frame RfuMain1+0x10 step; no gameplay Random() in the anim window",
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 78,
+    "lastCorpusFrame": 120,
+    "rows": 43,
+    "label": "Move_FURY_CUTTER",
+    "activationValue": 1262958118,
+    "activationValueHex": "0x4B473626",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     35,
+     36
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   },
+   {
+    "bodyIndex": 1,
+    "activationFrame": 712,
+    "lastCorpusFrame": 754,
+    "rows": 43,
+    "label": "Move_FURY_CUTTER",
+    "activationValue": 207854545,
+    "activationValueHex": "0x0C639BD1",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     35,
+     36
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   },
+   {
+    "bodyIndex": 2,
+    "activationFrame": 1346,
+    "lastCorpusFrame": 1388,
+    "rows": 43,
+    "label": "Move_FURY_CUTTER",
+    "activationValue": 2737841875,
+    "activationValueHex": "0xA33026D3",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     35,
+     36
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   },
+   {
+    "bodyIndex": 3,
+    "activationFrame": 1980,
+    "lastCorpusFrame": 2022,
+    "rows": 43,
+    "label": "Move_FURY_CUTTER",
+    "activationValue": 65423674,
+    "activationValueHex": "0x03E6493A",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     35,
+     36
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ],
+  "alternate": {
+   "scenario": "prep18-fury-cutter-alt-scyther-golem",
+   "probeRunsIdentical": true,
+   "runsSha1": "dfd66a993745faf8406a6e21426edca46be1647f",
+   "callers": {
+    "RfuMain1+0x10": 620
+   },
+   "bodies": [
+    {
+     "bodyIndex": 0,
+     "activationFrame": 78,
+     "activationValueHex": "0x473602A1",
+     "lagAges": [
+      35,
+      36
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    },
+    {
+     "bodyIndex": 1,
+     "activationFrame": 712,
+     "activationValueHex": "0x34896670",
+     "lagAges": [
+      35,
+      36
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    },
+    {
+     "bodyIndex": 2,
+     "activationFrame": 1346,
+     "activationValueHex": "0xC187324A",
+     "lagAges": [
+      35,
+      36
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    },
+    {
+     "bodyIndex": 3,
+     "activationFrame": 1980,
+     "activationValueHex": "0x30393A25",
+     "lagAges": [
+      35,
+      36
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    }
+   ]
+  }
+ },
+ "fury-cutter-opponent": {
+  "scenario": "mechanic-fury-cutter-opponent-grovyle-player-blissey",
+  "probeRunsIdentical": true,
+  "runsSha1": "fc5139cee16fcfe9425b43518e7f5743b053b6c7",
+  "callers": {
+   "RfuMain1+0x10": 620
+  },
+  "draws": [],
+  "drawsTotal": 0,
+  "note": "no Random2 draw in any body: every gRng2 write is the per-frame RfuMain1+0x10 step; no gameplay Random() in the anim window",
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 82,
+    "lastCorpusFrame": 124,
+    "rows": 43,
+    "label": "Move_FURY_CUTTER",
+    "activationValue": 2958200064,
+    "activationValueHex": "0xB0528D00",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     35,
+     36
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   },
+   {
+    "bodyIndex": 1,
+    "activationFrame": 716,
+    "lastCorpusFrame": 758,
+    "rows": 43,
+    "label": "Move_FURY_CUTTER",
+    "activationValue": 207854545,
+    "activationValueHex": "0x0C639BD1",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     35,
+     36
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   },
+   {
+    "bodyIndex": 2,
+    "activationFrame": 1350,
+    "lastCorpusFrame": 1392,
+    "rows": 43,
+    "label": "Move_FURY_CUTTER",
+    "activationValue": 3616389638,
+    "activationValueHex": "0xD78DBA06",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     35,
+     36
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   },
+   {
+    "bodyIndex": 3,
+    "activationFrame": 1984,
+    "lastCorpusFrame": 2026,
+    "rows": 43,
+    "label": "Move_FURY_CUTTER",
+    "activationValue": 2238069167,
+    "activationValueHex": "0x856639AF",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     35,
+     36
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ],
+  "alternateOpponent": {
+   "scenario": "prep18-fury-cutter-altopp-scyther-golem",
+   "probeRunsIdentical": true,
+   "runsSha1": "fc159046e17fb6cf6e7f58ee01aeeda7370c01e6",
+   "callers": {
+    "RfuMain1+0x10": 620
+   },
+   "bodies": [
+    {
+     "bodyIndex": 0,
+     "activationFrame": 82,
+     "activationValueHex": "0xB0528D00",
+     "lagAges": [
+      35,
+      36
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    },
+    {
+     "bodyIndex": 1,
+     "activationFrame": 716,
+     "activationValueHex": "0x0C639BD1",
+     "lagAges": [
+      35,
+      36
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    },
+    {
+     "bodyIndex": 2,
+     "activationFrame": 1350,
+     "activationValueHex": "0xD78DBA06",
+     "lagAges": [
+      35,
+      36
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    },
+    {
+     "bodyIndex": 3,
+     "activationFrame": 1984,
+     "activationValueHex": "0x856639AF",
+     "lagAges": [
+      35,
+      36
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    }
+   ]
+  }
+ },
+ "return-player": {
+  "scenario": "mechanic-return-player-dragonair-opponent-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "cf1f69b331eeac599d0f8d39fb940fa519f014d7",
+  "callers": {
+   "RfuMain1+0x10": 380
+  },
+  "draws": [],
+  "drawsTotal": 0,
+  "note": "no Random2 draw in any body: every gRng2 write is the per-frame RfuMain1+0x10 step; no gameplay Random() in the anim window",
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 74,
+    "lastCorpusFrame": 355,
+    "rows": 282,
+    "label": "Move_RETURN",
+    "activationValue": 3668811069,
+    "activationValueHex": "0xDAAD9D3D",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     279,
+     280
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ],
+  "alternate": {
+   "scenario": "prep18-return-alt-snorlax-golem",
+   "probeRunsIdentical": true,
+   "runsSha1": "111e78301b8b47d8b07b15f7b11e8c7eeb9d6f90",
+   "callers": {
+    "RfuMain1+0x10": 368
+   },
+   "bodies": [
+    {
+     "bodyIndex": 0,
+     "activationFrame": 72,
+     "activationValueHex": "0x78A77ADB",
+     "lagAges": [
+      279,
+      280
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    }
+   ]
+  }
+ },
+ "return-opponent": {
+  "scenario": "mechanic-return-opponent-dragonair-player-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "05aee76c9ffe16a630f17776f37973f6cffa4ee3",
+  "callers": {
+   "RfuMain1+0x10": 380
+  },
+  "draws": [],
+  "drawsTotal": 0,
+  "note": "no Random2 draw in any body: every gRng2 write is the per-frame RfuMain1+0x10 step; no gameplay Random() in the anim window",
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 78,
+    "lastCorpusFrame": 359,
+    "rows": 282,
+    "label": "Move_RETURN",
+    "activationValue": 3668811069,
+    "activationValueHex": "0xDAAD9D3D",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     279,
+     280
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ],
+  "alternateOpponent": {
+   "scenario": "prep18-return-altopp-snorlax-golem",
+   "probeRunsIdentical": true,
+   "runsSha1": "616f26bf74df6d8bcfb75932e80289f5569cc709",
+   "callers": {
+    "RfuMain1+0x10": 369
+   },
+   "bodies": [
+    {
+     "bodyIndex": 0,
+     "activationFrame": 76,
+     "activationValueHex": "0x072069B2",
+     "lagAges": [
+      279,
+      280
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    }
+   ]
+  }
+ },
+ "return-weak-player": {
+  "scenario": "mechanic-return-weak-player-dragonair-opponent-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "d64d86eb7c56a8eed49885418b998679cafb9beb",
+  "callers": {
+   "RfuMain1+0x10": 200
+  },
+  "draws": [],
+  "drawsTotal": 0,
+  "note": "no Random2 draw in any body: every gRng2 write is the per-frame RfuMain1+0x10 step; no gameplay Random() in the anim window",
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 74,
+    "lastCorpusFrame": 161,
+    "rows": 88,
+    "label": "Move_RETURN",
+    "activationValue": 3668811069,
+    "activationValueHex": "0xDAAD9D3D",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     85,
+     86
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "return-weak-opponent": {
+  "scenario": "mechanic-return-weak-opponent-dragonair-player-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "1023763df2706ba6eb1aa4ca1ddae3d2bbc2ae2b",
+  "callers": {
+   "RfuMain1+0x10": 200
+  },
+  "draws": [],
+  "drawsTotal": 0,
+  "note": "no Random2 draw in any body: every gRng2 write is the per-frame RfuMain1+0x10 step; no gameplay Random() in the anim window",
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 78,
+    "lastCorpusFrame": 165,
+    "rows": 88,
+    "label": "Move_RETURN",
+    "activationValue": 3668811069,
+    "activationValueHex": "0xDAAD9D3D",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     85,
+     86
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "return-medium-player": {
+  "scenario": "mechanic-return-medium-player-dragonair-opponent-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "ac16b3eb65cfc8b4a21629dd3289ae1e2b02609b",
+  "callers": {
+   "RfuMain1+0x10": 212
+  },
+  "draws": [],
+  "drawsTotal": 0,
+  "note": "no Random2 draw in any body: every gRng2 write is the per-frame RfuMain1+0x10 step; no gameplay Random() in the anim window",
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 74,
+    "lastCorpusFrame": 173,
+    "rows": 100,
+    "label": "Move_RETURN",
+    "activationValue": 3668811069,
+    "activationValueHex": "0xDAAD9D3D",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     77,
+     78
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "return-medium-opponent": {
+  "scenario": "mechanic-return-medium-opponent-dragonair-player-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "a37303e92343be83450d463a5e1a5738c2a62c98",
+  "callers": {
+   "RfuMain1+0x10": 212
+  },
+  "draws": [],
+  "drawsTotal": 0,
+  "note": "no Random2 draw in any body: every gRng2 write is the per-frame RfuMain1+0x10 step; no gameplay Random() in the anim window",
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 78,
+    "lastCorpusFrame": 177,
+    "rows": 100,
+    "label": "Move_RETURN",
+    "activationValue": 3668811069,
+    "activationValueHex": "0xDAAD9D3D",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     77,
+     78
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "return-strong-player": {
+  "scenario": "mechanic-return-strong-player-dragonair-opponent-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "419b6df3434041886db7e5087a7b849c2c3c3577",
+  "callers": {
+   "RfuMain1+0x10": 237
+  },
+  "draws": [],
+  "drawsTotal": 0,
+  "note": "no Random2 draw in any body: every gRng2 write is the per-frame RfuMain1+0x10 step; no gameplay Random() in the anim window",
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 74,
+    "lastCorpusFrame": 198,
+    "rows": 125,
+    "label": "Move_RETURN",
+    "activationValue": 3668811069,
+    "activationValueHex": "0xDAAD9D3D",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     122,
+     123
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "return-strong-opponent": {
+  "scenario": "mechanic-return-strong-opponent-dragonair-player-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "ce47f1c96632ba380f3d9f9f4630aa1fe6ddced7",
+  "callers": {
+   "RfuMain1+0x10": 237
+  },
+  "draws": [],
+  "drawsTotal": 0,
+  "note": "no Random2 draw in any body: every gRng2 write is the per-frame RfuMain1+0x10 step; no gameplay Random() in the anim window",
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 78,
+    "lastCorpusFrame": 202,
+    "rows": 125,
+    "label": "Move_RETURN",
+    "activationValue": 3668811069,
+    "activationValueHex": "0xDAAD9D3D",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     122,
+     123
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "pursuit-player": {
+  "scenario": "mechanic-pursuit-player-beedrill-opponent-shuckle",
+  "probeRunsIdentical": true,
+  "runsSha1": "5dcac6f2e1a193fc4398673b8d15463d93856939",
+  "callers": {
+   "RfuMain1+0x10": 138
+  },
+  "draws": [],
+  "drawsTotal": 0,
+  "note": "no Random2 draw in any body: every gRng2 write is the per-frame RfuMain1+0x10 step; no gameplay Random() in the anim window",
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 73,
+    "lastCorpusFrame": 175,
+    "rows": 103,
+    "label": "Move_PURSUIT",
+    "activationValue": 3854290936,
+    "activationValueHex": "0xE5BBCFF8",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     61,
+     62,
+     83
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ],
+  "alternate": {
+   "scenario": "prep18-pursuit-alt-umbreon-golem",
+   "probeRunsIdentical": true,
+   "runsSha1": "108fc2f1d08e171f28d99db49465b3ba41ead691",
+   "callers": {
+    "RfuMain1+0x10": 138
+   },
+   "bodies": [
+    {
+     "bodyIndex": 0,
+     "activationFrame": 72,
+     "activationValueHex": "0xE5BBCFF8",
+     "lagAges": [
+      61,
+      62,
+      83
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    }
+   ]
+  }
+ },
+ "pursuit-opponent": {
+  "scenario": "mechanic-pursuit-opponent-beedrill-player-shuckle",
+  "probeRunsIdentical": true,
+  "runsSha1": "13613d789a11929a8d03bf0d10d3a2c280dcc5d9",
+  "callers": {
+   "RfuMain1+0x10": 138
+  },
+  "draws": [],
+  "drawsTotal": 0,
+  "note": "no Random2 draw in any body: every gRng2 write is the per-frame RfuMain1+0x10 step; no gameplay Random() in the anim window",
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 77,
+    "lastCorpusFrame": 179,
+    "rows": 103,
+    "label": "Move_PURSUIT",
+    "activationValue": 1194721953,
+    "activationValueHex": "0x473602A1",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     61,
+     62,
+     83
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ],
+  "alternateOpponent": {
+   "scenario": "prep18-pursuit-altopp-umbreon-golem",
+   "probeRunsIdentical": true,
+   "runsSha1": "2ee722a9725172d229a2ded720a45d582fe8f590",
+   "callers": {
+    "RfuMain1+0x10": 138
+   },
+   "bodies": [
+    {
+     "bodyIndex": 0,
+     "activationFrame": 76,
+     "activationValueHex": "0x9178A09F",
+     "lagAges": [
+      61,
+      62,
+      83
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    }
+   ]
+  }
+ }
+}
