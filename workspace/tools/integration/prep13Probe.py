@@ -50,6 +50,7 @@ def state():
             "multiHitCounter": u8(sym["gMultiHitCounter"]), "currentMove": u16(sym["gCurrentMove"]), "attacker": u8(sym["gBattlerAttacker"]), "target": u8(sym["gBattlerTarget"]),
             "mons": [mon(0), mon(1)], "rng2": u32(sym["gRng2Value"]), "rng": u32(sym["gRngValue"]), "bitmap": u32(sym["gOamMatrixAllocBitmap"]), "tasks": tasks(), "sprites": sprites(), "spriteOrder": [u8(sym["sSpriteOrder"] + i) for i in range(64)]}
 bodies, changes, spawns, bseries, oseries = [], [], [], [], []
+rngser = []
 species_ev, prev_species = [], None
 taskev, prev_tasks, bgev, prev_bg = [], None, [], None
 prev_order = None
@@ -65,6 +66,7 @@ def step():
     for e in pending_end:
         if f == e[0]: e[1]["atEnd+1"] = {k: v for k, v in state().items() if k in ("mons", "bitmap", "tasks", "sprites", "gAnimMovePower", "gBattleMovePower")}
     global prev_sp, prev_order
+    if cur is not None: rngser.append([f, u32(sym["gRng2Value"])])
     global prev_species
     sp_now = [u16(sym["gBattleMons"] + 0x58 * b) for b in (0, 1)] + [u8(sym["gBattlerPartyIndexes"] + 2 * b) for b in (0, 1)]
     if sp_now != prev_species: species_ev.append([f, sp_now, u16(sym["gCurrentMove"]), bool(a), [u8(sym["gBattlerSpriteIds"] + b) for b in (0, 1)]]); prev_species = sp_now
@@ -105,4 +107,4 @@ step()
 for seg in req["trace"]["segments"]:
     for _ in range(seg["frames"]):
         o.advance(seg.get("buttons", [])); f += 1; step()
-OUT.write_text(json.dumps({"scenario": SCEN.name, "frames": f, "bodies": bodies, "powerChanges": changes, "spawns": spawns, "battlerSeries": bseries, "orderSeries": oseries, "speciesEvents": species_ev, "taskEvents": taskev, "regEvents": bgev, "battlerPal": [(u16(sym["gSprites"] + u8(sym["gBattlerSpriteIds"] + b) * 0x44 + 4) >> 12) for b in (0, 1)], "taskFuncNames": {str(v): k for k, v in sym.items() if k.startswith(("Task_", "AnimTask_", "sub_"))} }, separators=(",", ":")))
+OUT.write_text(json.dumps({"scenario": SCEN.name, "frames": f, "bodies": bodies, "powerChanges": changes, "spawns": spawns, "battlerSeries": bseries, "orderSeries": oseries, "rng2Series": rngser, "speciesEvents": species_ev, "taskEvents": taskev, "regEvents": bgev, "battlerPal": [(u16(sym["gSprites"] + u8(sym["gBattlerSpriteIds"] + b) * 0x44 + 4) >> 12) for b in (0, 1)], "taskFuncNames": {str(v): k for k, v in sym.items() if k.startswith(("Task_", "AnimTask_", "sub_"))} }, separators=(",", ":")))

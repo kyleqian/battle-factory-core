@@ -38,3 +38,10 @@ for side, src in (("player", ALT["hidden-power"][0]), ("opponent", ALT["hidden-p
     s = json.loads((LAB / src).read_text()); s["seed"] = s["seed"] + 1000
     validate_request(json.loads(json.dumps(s)), "battle-scene-on")
     out = LAB / f"prep13-hidden-power-alt-{side}-unown-seed{s['seed']}.json"; out.write_text(json.dumps(s, separators=(",", ":")) + "\n"); print("hp seed alt", out.name)
+# Hidden Power disambiguation (is the 8th scatter's age-118 init status attacker- or target-dependent?): Unown attacker vs GOLEM target, and GENGAR attacker vs the accepted ONIX target
+for side, src in (("player", ALT["hidden-power"][0]), ("opponent", ALT["hidden-power"][1])):
+    for att, tgt in (("UNOWN", "GOLEM"), ("GENGAR", "ONIX")):
+        s = json.loads((LAB / src).read_text()); P = s["overrides"]["parties"]; a, t = (side, "opponent" if side == "player" else "player")
+        if att != "UNOWN": P[a][0]["species"] = sp[att]; legal(s, a, att)
+        if tgt != "ONIX": P[t][0]["species"] = sp[tgt]; legal(s, t, tgt)
+        out = LAB / f"prep13-hidden-power-alt-{side}-{att.lower()}-{tgt.lower()}.json"; out.write_text(json.dumps(s, separators=(",", ":")) + "\n"); print("hp disambiguation", out.name)

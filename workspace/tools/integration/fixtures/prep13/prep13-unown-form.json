@@ -1,0 +1,66 @@
+{
+ "mechanic-hidden-power-opponent-unown-player-onix": {
+  "side": "opponent",
+  "personality": 1793700000,
+  "formIndex": 4,
+  "letter": "UNOWN_E",
+  "formSpeciesId": null,
+  "romCenter": {
+   "x": 176,
+   "y": 49
+  },
+  "anchorsBaseUnown": {
+   "x": 176,
+   "y": 47
+  },
+  "anchorsFormSpecies": "error: battle-command field art: unknown species id NaN"
+ },
+ "mechanic-hidden-power-player-unown-opponent-onix": {
+  "side": "player",
+  "personality": 2349019075,
+  "formIndex": 7,
+  "letter": "UNOWN_H",
+  "formSpeciesId": null,
+  "romCenter": {
+   "x": 72,
+   "y": 96
+  },
+  "anchorsBaseUnown": {
+   "x": 72,
+   "y": 96
+  },
+  "anchorsFormSpecies": "error: battle-command field art: unknown species id NaN"
+ },
+ "prep13-hidden-power-alt-opponent-unown-seed305420897": {
+  "side": "opponent",
+  "personality": 1793703050,
+  "formIndex": 6,
+  "letter": "UNOWN_G",
+  "formSpeciesId": null,
+  "romCenter": {
+   "x": 176,
+   "y": 46
+  },
+  "anchorsBaseUnown": {
+   "x": 176,
+   "y": 47
+  },
+  "anchorsFormSpecies": "error: battle-command field art: unknown species id NaN"
+ },
+ "prep13-hidden-power-alt-player-unown-seed305420897": {
+  "side": "player",
+  "personality": 2349016025,
+  "formIndex": 5,
+  "letter": "UNOWN_F",
+  "formSpeciesId": null,
+  "romCenter": {
+   "x": 72,
+   "y": 98
+  },
+  "anchorsBaseUnown": {
+   "x": 72,
+   "y": 96
+  },
+  "anchorsFormSpecies": "error: battle-command field art: unknown species id NaN"
+ }
+}

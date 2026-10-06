@@ -30,14 +30,18 @@ for (const [sc, r, bodyIdx] of Object.keys(A).filter((k) => /water-spout/.test(k
     if (m) sl += 1; if (m && m.age === s.age) exact += 1; if (m && m.y === s.y) yy += 1; if (m && m.x === s.x) xy += 1; if (m && (s.tmpl.includes("HitSplat") ? m.matrix === s.matrix : true)) mx += 1;
     if (!m || m.x !== s.x) { if (bad.length < 5) bad.push({ rom: [s.age, s.slot, s.tmpl, s.x, s.y, s.matrix], red: m ?? null }); }
   }
+  const romOrderAt = (age: number): number[] => { let o: number[] = r.orderAtAct; for (const [a, ord] of r.orderChanges) if (a <= age) o = ord; return o; };
+  let ordEq = 0; const ordBad: number[] = [];
+  tl.forEach((f, age) => { if (age >= tl.length) return; const own = new Set(f.sprites.map((q) => q.slot)); const want = romOrderAt(age).filter((q: number) => own.has(q)).reverse();
+    if (JSON.stringify(want) === JSON.stringify(f.painterOrder)) ordEq += 1; else if (ordBad.length < 6) ordBad.push(age); });
   // rain x stream
   const att = waterSpoutRainAttempts(side, waterSpoutPowerTier(mon.hp, mon.maxHP));
   const romRainX = rom.filter((s: any) => /SmallWaterOrb/.test(s.tmpl) && s.age > 100).map((s: any) => s.x);
   const endRows = tl.findIndex((f) => !f.active);
   out[`${sc}#${bodyIdx}`] = { side, species: r.monsAtAct.map((m: any) => m.species), hp: [mon.hp, mon.maxHP], tier: waterSpoutPowerTier(mon.hp, mon.maxHP), pictureHeight: aa.pictureHeight, effectCenter: inputs.attackerEffectCenter, spriteCenter: aa.spriteCenter,
-    romRows: r.rows, reducerFirstInactiveAge: endRows, romSpawns: rom.length, reducerBirths: births.length, slotMatches: sl, exactAgeMatches: exact, yMatches: yy, xMatches: xy, matrixMatches: mx, mismatchSamples: bad,
+    romRows: r.rows, reducerFirstInactiveAge: endRows, romSpawns: rom.length, reducerBirths: births.length, painterOrderEqualAges: `${ordEq}/${tl.length}`, painterOrderMismatchSample: ordBad, slotMatches: sl, exactAgeMatches: exact, yMatches: yy, xMatches: xy, matrixMatches: mx, mismatchSamples: bad,
     rainSeed: att[0]?.x, rainXpredicted: att.map((a) => a.x), rainXrom: romRainX, freeSlotsAtAct: free.slice(0, 24), tasksRom: r.tasks.map((t: any) => [t.slot, t.func, t.age]), battlerSub: r.battlerSub };
-  console.log(`${sc}#${bodyIdx}`.padEnd(54), "hp", mon.hp + "/" + mon.maxHP, "tier", waterSpoutPowerTier(mon.hp, mon.maxHP), "ROM rows", r.rows, "reducer inactive@", endRows, "spawns", rom.length, "slot", sl, "exactAge", exact, "x", xy, "y", yy, "matrix", mx, "seed", att[0]?.x, "rainSeedFirst3", JSON.stringify(att.slice(0, 3).map((a) => a.x)), "rom", JSON.stringify(romRainX.slice(0, 3)));
+  console.log(`${sc}#${bodyIdx}`.padEnd(54), "hp", mon.hp + "/" + mon.maxHP, "tier", waterSpoutPowerTier(mon.hp, mon.maxHP), "ROM rows", r.rows, "reducer inactive@", endRows, "spawns", rom.length, "order", `${ordEq}/${tl.length}`, ordBad.join(","), "slot", sl, "exactAge", exact, "x", xy, "y", yy, "matrix", mx, "seed", att[0]?.x, "rainSeedFirst3", JSON.stringify(att.slice(0, 3).map((a) => a.x)), "rom", JSON.stringify(romRainX.slice(0, 3)));
   for (const b of bad.slice(0, 3)) console.log("   ", JSON.stringify(b));
 }
 writeFileSync(`tools/integration/fixtures/prep13/prep13-water-spout-check${centerMode === "pic" ? "" : "-" + centerMode}.json`, JSON.stringify(out, null, 1));

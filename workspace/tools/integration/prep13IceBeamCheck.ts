@@ -33,13 +33,17 @@ for (const sc of Object.keys(A).filter((k) => /ice-beam/.test(k))) {
     if (m) slotOk += 1;
     if (m && m.x === s.x && m.y === s.y) posOk += 1; else if (bad.length < 4) bad.push({ rom: [s.age, s.slot, s.tmpl, s.x, s.y], red: m ?? null });
   }
+  // ROM sSpriteOrder per age (probe order series: last change at or before the age; the activation order before the first change)
+  const romOrderAt = (age: number): number[] => { let o: number[] = r.orderAtAct; for (const [a, ord] of r.orderChanges) if (a <= age) o = ord; return o; };
+  let orderEq = 0; const orderBad: number[] = [];
+  tl.frames.forEach((f, age) => { if (JSON.stringify(f.order.fullSourceOrder) === JSON.stringify(romOrderAt(age))) orderEq += 1; else if (orderBad.length < 6) orderBad.push(age); });
   const taskRom = r.tasks.map((t: any) => `${t.slot}:${t.func}:${t.age}`).sort().join(",");
   const taskRed = new Map<string, number>();
   tl.frames.forEach((f, age) => f.tasks.forEach((t) => { const k = `${t.slot}:${t.callback}`; if (!taskRed.has(k)) taskRed.set(k, age); }));
   out[sc] = { attackerSide, species: r.monsAtAct.map((m: any) => m.species), geometry: profile.geometry, anchors: { attackerSpriteCenter: aa.spriteCenter, targetSpriteCenter: ta.spriteCenter, romBattlerXY: r.battlerXY },
-    monbgFormulaHolds: monbgFormula, monbgData: monbg, romSpawns: rom.length, reducerBirths: rb.length, slotAgeMatches: slotOk, xyMatches: posOk, mismatchSamples: bad, taskPairsRom: r.tasks.map((t: any) => [t.slot, t.func, t.age]), taskPairsReducerFirstAge: [...taskRed.entries()],
+    monbgFormulaHolds: monbgFormula, monbgData: monbg, fullOrderEqualAges: `${orderEq}/${tl.frames.length}`, orderMismatchAgesSample: orderBad, romSpawns: rom.length, reducerBirths: rb.length, slotAgeMatches: slotOk, xyMatches: posOk, mismatchSamples: bad, taskPairsRom: r.tasks.map((t: any) => [t.slot, t.func, t.age]), taskPairsReducerFirstAge: [...taskRed.entries()],
     targetSpriteSlotRom: r.battlerSpriteIds, targetSpriteSlotDefault: attackerSide === "player" ? 8 : 6, battlerSub: r.battlerSub };
-  console.log(sc.padEnd(52), "geom", JSON.stringify(profile.geometry), "monbg formula", monbgFormula, "slot/age", slotOk, "/", rom.length, "xy", posOk, "/", rom.length, "tasks", JSON.stringify([...taskRed.keys()]));
+  console.log(sc.padEnd(52), "geom", JSON.stringify(profile.geometry), "monbg formula", monbgFormula, "fullOrder==", `${orderEq}/${tl.frames.length}`, orderBad.join(","), "slot/age", slotOk, "/", rom.length, "xy", posOk, "/", rom.length, "tasks", JSON.stringify([...taskRed.keys()]));
   for (const b of bad) console.log("    ", JSON.stringify(b));
 }
 writeFileSync("tools/integration/fixtures/prep13/prep13-ice-beam-check.json", JSON.stringify(out, null, 1));
