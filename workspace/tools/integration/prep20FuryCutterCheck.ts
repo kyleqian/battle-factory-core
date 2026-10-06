@@ -31,8 +31,8 @@ function knownFor(rows: Json[]): FuryCutterKnownEntry {
     occupiedSlots: rows[0]!.sprites.map((s: Json) => s.slot), cutTileBase: row1.resourceAllocators.tileRanges[tagIndex][0],
     cutPaletteBank: 16 + row1.paletteTags.indexOf(10138) - 16, dummyAttr: [0x00a0, 0x0130, 0x0c00] };
 }
-function run(name: string, window: FuryCutterWindow, rows: Json[], pixels: ((row: Json) => Uint8Array) | null, species?: readonly [string, string]) {
-  const known = knownFor(rows); const counter = Number(window.at(-1));
+function run(name: string, window: FuryCutterWindow, rows: Json[], pixels: ((row: Json) => Uint8Array) | null, species?: readonly [string, string], trueCounter?: number) {
+  const known = knownFor(rows); const counter = trueCounter ?? Number(window.at(-1));
   const out: Json = { name, rows: rows.length - 1, entries: 0, entryMatch: 0, rowsExact: 0, mismatchByIndexClass: {}, examples: [] as string[] };
   let exactPixelRows = 0, residual = 0; const failures: string[] = [];
   for (let age = 0; age < rows.length; age += 1) {
@@ -70,6 +70,10 @@ for (const side of ["player", "opponent"] as const) {
 for (const spec of args.filter((a) => a.includes(":") && !a.startsWith("--"))) { const [file, dir, side, sp] = spec.split(":"); const all = load(file!);
   for (const counter of [1, 2, 3, 4]) results.push(run(`alt-${side}-${counter}`, `${side === "player" ? "player-back" : "opponent-front"}-${counter}` as FuryCutterWindow,
     all.slice((counter - 1) * 43, counter * 43), withPixels ? dirRgb(dir!) : null, sp ? sp.split(",") as [string, string] : undefined)); }
+// counter 5: window label is only used for side/art inputs; `rightHit` = (true counter & 1), counter capped at 5 (battle_script_commands.c:8591)
+for (const spec of args.filter((a) => a.startsWith("--six="))) { const [file, dir] = spec.slice(6).split(":"); const all = load(file!), bodies = Math.floor(all.length / 43);
+  for (let body = 0; body < bodies; body += 1) { const counter = Math.min(body + 1, 5), rows = all.slice(body * 43, body * 43 + 43);
+    const r = run(`six-hits-body${body + 1}-counter${counter}`, `player-back-${Math.min(counter, 4)}` as FuryCutterWindow, rows, withPixels ? dirRgb(dir!) : null, undefined, counter); results.push(r); } }
 const total = results.reduce((a, r) => ({ rows: a.rows + r.rows, rowsExact: a.rowsExact + r.rowsExact, entries: a.entries + r.entries, entryMatch: a.entryMatch + r.entryMatch }), { rows: 0, rowsExact: 0, entries: 0, entryMatch: 0 });
 console.log(JSON.stringify({ total, windows: results }, null, 1));
 if (outPath) writeFileSync(outPath, `${JSON.stringify({ total, windows: results }, null, 1)}\n`);
