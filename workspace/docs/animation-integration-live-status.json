@@ -3365,7 +3365,7 @@
   "implementedCount": 225,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
-  "faithfulRandomCount": 8,
+  "faithfulRandomCount": 10,
   "faithfulRandomAdapters": [
     {
       "id": 24,
@@ -3461,6 +3461,30 @@
       ],
       "surrogateRoutes": [
         "random2-r4/water-pulse/seed7-streak7-slot1-1turn (tests/animation/liveRandom2R4MoveAdapters.test.ts)"
+      ]
+    },
+    {
+      "id": 189,
+      "move": "MOVE_MUD_SLAP",
+      "policy": "presentation-rng.v1.frame-step.no-lag.battle-stride-2^20",
+      "provenance": "surrogate",
+      "pinnedProofs": [
+        "tools/integration/fixtures/random2-r5-live-receipt.json"
+      ],
+      "surrogateRoutes": [
+        "random2-r5/mud-slap/seed9-streak14-slot2-1turn (tests/animation/liveRandom2R5MoveAdapters.test.ts)"
+      ]
+    },
+    {
+      "id": 28,
+      "move": "MOVE_SAND_ATTACK",
+      "policy": "presentation-rng.v1.frame-step.no-lag.battle-stride-2^20",
+      "provenance": "surrogate",
+      "pinnedProofs": [
+        "tools/integration/fixtures/random2-r5-live-receipt.json"
+      ],
+      "surrogateRoutes": [
+        "random2-r5/sand-attack/seed3-streak0-slot3-1turn (tests/animation/liveRandom2R5MoveAdapters.test.ts)"
       ]
     }
   ],

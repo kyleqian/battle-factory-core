@@ -4710,6 +4710,144 @@
     "body": "normal",
     "activation": "docs/next-adapters-prep16.md s1 (the probe's source window starts at the activation frame)"
    }
+  },
+  {
+   "id": 189,
+   "move": "MUD_SLAP",
+   "orientation": "player",
+   "variant": "prep17-mud-slap-alt-onix-nidorina",
+   "activationFrame": 72,
+   "windowStart": 72,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep17-live/mud-slap-alt-onix-nidorina.json",
+    "scenario": "tools/battle-lab/prep12-mud-slap-alt-set156-set146.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep17.md s0.2 (window = activation..activation + body rows - 1)"
+   },
+   "presentationRngActivation": {
+    "value": 1209821555,
+    "source": "prep13Probe prep12-mud-slap-alt-set156-set146 rng2Series[0] (frame 73) one LCG step back = the value at activation frame 72"
+   }
+  },
+  {
+   "id": 189,
+   "move": "MUD_SLAP",
+   "orientation": "opponent",
+   "variant": "prep17-mud-slap-opponent-pidgeotto-player-onix",
+   "activationFrame": 81,
+   "windowStart": 81,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep17-live/mud-slap-opponent-pidgeotto-player-onix.json",
+    "scenario": "tools/battle-lab/mechanic-mud-slap-pidgeotto-onix.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep17.md s0.2 (window = activation..activation + body rows - 1)"
+   },
+   "presentationRngActivation": {
+    "value": 469952876,
+    "source": "prep13Probe mechanic-mud-slap-pidgeotto-onix rng2Series[0] (frame 82) one LCG step back = the value at activation frame 81"
+   }
+  },
+  {
+   "id": 189,
+   "move": "MUD_SLAP",
+   "orientation": "player",
+   "variant": "prep17-mud-slap-player-pidgeotto-opponent-onix",
+   "activationFrame": 77,
+   "windowStart": 77,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep17-live/mud-slap-player-pidgeotto-opponent-onix.json",
+    "scenario": "tools/battle-lab/mechanic-mud-slap-player-pidgeotto-onix.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep17.md s0.2 (window = activation..activation + body rows - 1)"
+   },
+   "presentationRngActivation": {
+    "value": 2024241883,
+    "source": "prep13Probe mechanic-mud-slap-player-pidgeotto-onix rng2Series[0] (frame 78) one LCG step back = the value at activation frame 77"
+   }
+  },
+  {
+   "id": 28,
+   "move": "SAND_ATTACK",
+   "orientation": "player",
+   "variant": "prep17-sand-attack-alt-onix-nidorina",
+   "activationFrame": 73,
+   "windowStart": 73,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep17-live/sand-attack-alt-onix-nidorina.json",
+    "scenario": "tools/battle-lab/prep12-sand-attack-alt-set156-set146.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep17.md s0.2 (window = activation..activation + body rows - 1)"
+   },
+   "presentationRngActivation": {
+    "value": 1209821555,
+    "source": "prep13Probe prep12-sand-attack-alt-set156-set146 rng2Series[0] (frame 74) one LCG step back = the value at activation frame 73"
+   }
+  },
+  {
+   "id": 28,
+   "move": "SAND_ATTACK",
+   "orientation": "opponent",
+   "variant": "prep17-sand-attack-opponent-pidgeotto-player-onix",
+   "activationFrame": 82,
+   "windowStart": 82,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep17-live/sand-attack-opponent-pidgeotto-player-onix.json",
+    "scenario": "tools/battle-lab/mechanic-sand-attack-pidgeotto-onix.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep17.md s0.2 (window = activation..activation + body rows - 1)"
+   },
+   "presentationRngActivation": {
+    "value": 3320097647,
+    "source": "prep13Probe mechanic-sand-attack-pidgeotto-onix rng2Series[0] (frame 83) one LCG step back = the value at activation frame 82"
+   }
+  },
+  {
+   "id": 28,
+   "move": "SAND_ATTACK",
+   "orientation": "player",
+   "variant": "prep17-sand-attack-player-pidgeotto-opponent-onix",
+   "activationFrame": 78,
+   "windowStart": 78,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep17-live/sand-attack-player-pidgeotto-opponent-onix.json",
+    "scenario": "tools/battle-lab/mechanic-sand-attack-player-pidgeotto-onix.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep17.md s0.2 (window = activation..activation + body rows - 1)"
+   },
+   "presentationRngActivation": {
+    "value": 2024241883,
+    "source": "prep13Probe mechanic-sand-attack-player-pidgeotto-onix rng2Series[0] (frame 79) one LCG step back = the value at activation frame 78"
+   }
   }
  ]
 }
