@@ -388,6 +388,12 @@ export type BattleResolutionOpponentTrainer = Readonly<{
 }>;
 
 export type BattleResolutionPresentationState = Readonly<{
+  /**
+   * Presentation-only Scene ON semi-invulnerable hide carried in from the display ledger at this resolution's start
+   * (a live Fly/Bounce charge body in an earlier turn; battleResolutionPresentationRender.ts
+   * applyLiveSemiInvulnerableCommand). Absent = nothing hidden.
+   */
+  liveSemiInvulnerableHidden?: readonly [boolean, boolean];
   liveMovePaletteInput?: LiveMovePaletteInput;
   liveMoveSpriteAllocatorInput?: LiveMoveSpriteAllocatorInput;
   liveMoveSpriteOrderInput?: LiveMoveSpriteOrderInput;

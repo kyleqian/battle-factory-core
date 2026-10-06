@@ -3193,6 +3193,35 @@
         "Scene OFF forced switch-out unchanged (32-frame voluntary-style span; #146 open question)",
         "independent arbitrary-species/history framebuffer comparison"
       ]
+    },
+    {
+      "move": "MOVE_FLY",
+      "id": 19,
+      "sourceFieldEvidence": "../tools/integration/fixtures/flybounce-live-receipt.json",
+      "liveEvidence": [
+        "dense 6/6 zero residual twice fresh: charge 43 rows + strike 68 rows, MURKROW player and opponent attacker + SWELLOW alternate (body-only views, request.turn 0/1)",
+        "presentation-only semi-invulnerable hide: the attacker stays hidden from the charge body's end to the strike body (route 38/7 SWELLOW: 251 production gap frames, attacker region == ROM gap region 306/306, 0 px; attacker drawn again at the next prompt)"
+      ],
+      "remaining": [
+        "opponent-attacker turn gap through the player's action prompt (command presentation spriteVisibility from the ledger) is unit-pinned, not route/pixel-proven (no generated opponent Fly/Bounce route)",
+        "a LIVE body of the other battler during the gap (moves that hit a semi-invulnerable target: Gust/Twister/Thunder/Sky Uppercut vs Fly, the same vs Bounce) draws the hidden battler itself",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_BOUNCE",
+      "id": 340,
+      "sourceFieldEvidence": "../tools/integration/fixtures/flybounce-live-receipt.json",
+      "liveEvidence": [
+        "dense 5/5 zero residual twice fresh: charge 64 rows (SPOINK player + opponent attacker), strike 55 rows (SPOINK player attacker) + PONYTA alternate (charge + strike)",
+        "presentation-only semi-invulnerable hide across the turn gap (route 65/7 PONYTA: 245 production gap frames, attacker region == ROM gap region 306/306, 0 px)"
+      ],
+      "remaining": [
+        "opponent-attacker STRIKE body not window-evidenced: mechanic-bounce-spoink-onix records no second Bounce activation within its 1,368 frames (fresh prep11Probe.py run, twice identical)",
+        "opponent-attacker turn gap through the player's action prompt (command presentation spriteVisibility from the ledger) is unit-pinned, not route/pixel-proven (no generated opponent Fly/Bounce route)",
+        "a LIVE body of the other battler during the gap (moves that hit a semi-invulnerable target: Gust/Twister/Thunder/Sky Uppercut vs Fly, the same vs Bounce) draws the hidden battler itself",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3216,7 +3245,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 215,
+  "implementedCount": 217,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
