@@ -1,0 +1,4 @@
+golbat-hidden-power-player-unown-opponent-onix.json lag frames in (231, 411) [295, 350] ages [64, 119]
+golbat-hidden-power-player-unown-opponent-onix.json lag frames in (231, 411) [295, 350] ages [64, 119]
+rattata-hidden-power-player-unown-opponent-onix.json lag frames in (235, 415) [353] ages [118]
+rattata-hidden-power-player-unown-opponent-onix.json lag frames in (235, 415) [353] ages [118]
