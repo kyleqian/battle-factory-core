@@ -2297,8 +2297,9 @@ function createAttackanimationOpcodeHandler(
             arguments: Object.freeze([
               String(move),
               String(rulesContext.animTurn),
-              // gBattleMovePower when this move's damagecalc ran; else the table power.
-              String(rulesContext.battleMovePowerWritten ? rulesContext.battleMovePower : moveRow.power),
+              // gBattleMovePower when this move's damagecalc ran; else the table power. Endeavor (283) has no damagecalc:
+              // Cmd_attackanimation reads the STALE register (docs/rollout-endeavor-prep.md s0.2), so it always emits it.
+              String(rulesContext.battleMovePowerWritten || move === 283 ? rulesContext.battleMovePower : moveRow.power),
               String(rulesContext.battleMoveDamage),
               String(attackerBattler.friendship),
               String(multihit),

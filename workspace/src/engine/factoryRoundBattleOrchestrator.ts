@@ -515,6 +515,8 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
   activeBattleCallStart: number | null;
   /** One-shot adapter input, cleared as soon as the adopted battle starts. */
   pendingBattlePreCommandRngCalls: number;
+  /** Last `gBattleMovePower` of the previous battle (EWRAM carry; absent = 0). Presentation-only. */
+  carriedBattleMovePower?: number;
   nextBattleRequestId: number;
   /**
    * Route-scoped `STRINGID_USEDMOVE` post-print hold (failed/no-anim path)
@@ -1077,6 +1079,7 @@ function startCurrentBattle(
     rngSeed: state.round.rules.rngValue,
     battleScene: state.config.battleScene ?? "off",
     preCommandRngCalls: state.pendingBattlePreCommandRngCalls,
+    ...(state.carriedBattleMovePower === undefined ? {} : { battleMovePower: state.carriedBattleMovePower }),
     playerParty: asBattleScriptParty(player),
     opponentParty: asBattleScriptParty(asKernelParty(opponentRecords)),
   });
@@ -1375,6 +1378,9 @@ function finishBattle(
     round,
     roundOutcome,
     battle: null,
+    ...(battle.rules.rulesContext.battleMovePower !== 0 || state.carriedBattleMovePower !== undefined
+      ? { carriedBattleMovePower: battle.rules.rulesContext.battleMovePower }
+      : {}),
     battleCommandPresentation: null,
     battleResolutionPresentation: null,
     retainedLockedActionPresentationOwner: null,

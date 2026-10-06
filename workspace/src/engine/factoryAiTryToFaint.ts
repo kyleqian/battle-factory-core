@@ -35,6 +35,7 @@ import {
   applyStab,
   applyTypeEffectiveness,
   calculateBaseDamage,
+  calculateBaseDamageWithPower,
   type StatStages,
 } from "./damageCalc.ts";
 
@@ -164,6 +165,34 @@ function isQuadrupleEffective(
   value = Math.trunc((value * multiplierTenths) / 10);
   if (value === 240) value = 160;
   return value === 160;
+}
+
+/**
+ * Rule R (docs/rollout-endeavor-prep.md s0.2, measured 16/16 movesets x 2 AI levels): the ROM makes dozens of
+ * `AI_CalcDmg` -> `CalculateBaseDamage` calls per decision but only the LAST one survives in `gBattleMovePower`: the last
+ * slot (0..3) with `power > 1` and, unless the full flag set (TRY_TO_FAINT, mask 7) runs, an effect outside
+ * `sIgnoredPowerfulMoveEffects`. Returns that slot's modified power, or null when no slot calculates (register untouched).
+ * Presentation-only: nothing in gameplay reads the register.
+ */
+export function factoryAiLastCalcMovePower(
+  attacker: FactoryAiTryToFaintBattler,
+  defender: FactoryAiTryToFaintTarget,
+  moveset: readonly [number, number, number, number],
+  fullFlags: boolean,
+): number | null {
+  for (let slot = 3; slot >= 0; slot -= 1) {
+    const move = moveset[slot] === 0 ? undefined : MOVES_BY_ID.get(moveset[slot]!);
+    if (move === undefined || move.power <= 1) continue;
+    if (!fullFlags && IGNORED_POWERFUL_MOVE_EFFECTS.has(move.effect)) continue;
+    return calculateBaseDamageWithPower({
+      attacker: { ...attacker },
+      defender: { ...defender },
+      movePower: move.power,
+      moveType: move.type,
+      isCriticalHit: false,
+    }).movePower;
+  }
+  return null;
 }
 
 /** `Cmd_get_how_powerful_move_is` (`:1174-1234`). */

@@ -2906,6 +2906,7 @@ export function advanceBattleScriptAttackCancelerConfused(
   });
   let nextTarget = rulesContext.selectorRoles.target;
   let nextDamage = rulesContext.battleMoveDamage;
+  let nextBattleMovePower = rulesContext.battleMovePower;
   let nextSelfDmg = sourceBattler.confusionSelfDmg ?? 0;
   let nextHitMarker = rulesContext.hitMarker;
   let effect: 0 | 1 = 0;
@@ -3007,6 +3008,7 @@ export function advanceBattleScriptAttackCancelerConfused(
           isCriticalHit: false,
         });
         nextSelfDmg = 1;
+        nextBattleMovePower = 40; // W4: this CalculateBaseDamage (power 40, Normal) leaves the register at 40 (presentation-only).
         nextHitMarker = (
           rulesContext.hitMarker | BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE
         ) >>> 0;
@@ -3050,6 +3052,7 @@ export function advanceBattleScriptAttackCancelerConfused(
       ? rulesContext.selectorRoles
       : Object.freeze({ ...rulesContext.selectorRoles, target: nextTarget }),
     battleMoveDamage: nextDamage,
+    battleMovePower: nextBattleMovePower,
     multistringChooser: chooser.kind === "set"
       ? chooser.value
       : rulesContext.multistringChooser,

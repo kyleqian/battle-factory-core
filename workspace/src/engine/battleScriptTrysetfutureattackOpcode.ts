@@ -162,6 +162,9 @@ function createHandler(program: BattleScriptProgram): BattleScriptOpcodeHandler<
         futureSightMove: Object.freeze(move),
         futureSightAttacker: Object.freeze(storedAttacker),
         futureSightDmg: Object.freeze(damage),
+        // W4: Psychic / Steel make the pinch and sport halvings inert, so CalculateBaseDamage leaves the table power
+        // (presentation-only register, docs/rollout-endeavor-prep.md s0.2).
+        battleMovePower: MOVE_BY_ID.get(rules.currentMove)!.power,
         multistringChooser: rules.currentMove === MOVE_DOOM_DESIRE ? 1 : 0,
       }),
     });
