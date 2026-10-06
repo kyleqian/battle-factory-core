@@ -13,6 +13,10 @@ import { readFileSync } from "node:fs";
 import { generatedCommandAnimationReplay } from "./generatedCommandAnimationReplay.ts";
 import { createBattleResolutionPresentationRenderView, renderBattleResolutionPresentation } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { renderBattleResolutionLiveView, renderGeneratedBattleCommandPresentation } from "../../src/engine/battleScene.ts";
+const lastIndex = <T>(items: readonly T[], predicate: (item: T) => boolean): number => {
+  for (let i = items.length - 1; i >= 0; i -= 1) if (predicate(items[i]!)) return i;
+  return -1;
+};
 
 const [romDir, chargeEndArg, strikeStartArg, seedArg, streakArg, slotArg, moveArg, romDir2] = process.argv.slice(2);
 const romChargeEnd = Number(chargeEndArg), romStrikeStart = Number(strikeStartArg);
@@ -50,7 +54,7 @@ const r = generatedCommandAnimationReplay(Number(seedArg), "on", [slot], Number(
   }
   frames.push({ kind, hidden, region: region(fb, 4) });
 });
-const chargeLast = frames.findLastIndex(f => f.kind.startsWith(`move:${moveId}:t0:`));
+const chargeLast = lastIndex(frames, f => f.kind.startsWith(`move:${moveId}:t0:`));
 const strikeFirst = frames.findIndex(f => f.kind === `move:${moveId}:t1:age0`);
 if (chargeLast < 0 || strikeFirst < 0) throw new Error(`route did not reach both bodies (${chargeLast}, ${strikeFirst})`);
 const gap = frames.slice(chargeLast + 1, strikeFirst);

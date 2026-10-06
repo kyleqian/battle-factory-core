@@ -10,6 +10,10 @@ import {
 } from "../../src/engine/liveMoveAnimation.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+const lastIndex = <T>(items: readonly T[], predicate: (item: T) => boolean): number => {
+  for (let i = items.length - 1; i >= 0; i -= 1) if (predicate(items[i]!)) return i;
+  return -1;
+};
 
 // docs/next-adapters-prep11.md s0.2 / s2.3: Fly (19) / Bounce (340) charge + strike bodies by request.turn, and the
 // presentation-only semi-invulnerable hide across the turn gap. Dense framebuffer proofs:
@@ -111,13 +115,13 @@ describe("live Fly / Bounce adapters", () => {
       expect(body.ages).toEqual(Array.from({ length: body.ages.length }, (_, age) => age));
       expect(body.adapterActive.every(Boolean)).toBe(true);
     }
-    const chargeLast = frames.findLastIndex(f => f.kind === `move:${r.id}:t0`);
+    const chargeLast = lastIndex(frames, f => f.kind === `move:${r.id}:t0`);
     const strikeFirst = frames.findIndex(f => f.kind === `move:${r.id}:t1`);
     expect(strikeFirst - chargeLast - 1).toBeGreaterThan(200);
     expect(frames.slice(chargeLast + 1, strikeFirst).every(f => f.playerHidden === true)).toBe(true);
     // Before the charge and after the strike the attacker is drawn (only the opponent's hit-reaction blink hides it).
     expect(frames.slice(0, frames.findIndex(f => f.kind === `move:${r.id}:t0`)).some(f => f.playerHidden === true)).toBe(false);
-    expect(frames.slice(frames.findLastIndex(f => f.kind === `move:${r.id}:t1`) + 1)
+    expect(frames.slice(lastIndex(frames, f => f.kind === `move:${r.id}:t1`) + 1)
       .every(f => f.playerHidden !== true || f.kind === "hit")).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.state.battleCommandPresentation?.spriteVisibility.player).toBe(true);
