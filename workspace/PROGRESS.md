@@ -39,8 +39,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   R4 (Sonnet) merged: Rain Dance + Water Pulse faithful-random, Hail exact; supervisor reran 6 fixtures
   twice fresh (0 px) and 3 routes. prep16 merged: Overheat/Silver Wind first bodies exact with palettes
   composed from existing assets (230/230; 193-196/196); later bodies need a BG-register tracker.
-- **Next:** #148 x2 tracker (+ Water Spout tier re-proof; Opus) and prep17 (Meteor Mash timing,
-  Mud-Slap/Sand-Attack) in flight; then Overheat/Silver Wind (brief ready), Rollout Curl/Endeavor.
+  #148 tracker (Opus) merged: presentation-only battler x2 history; ONIX later bodies now exact
+  (Flail 2-5, Double Kick hit 2, Spike Cannon / Fury Swipes later hits, after a send-in); supervisor
+  reran 4 cases twice fresh (0 px; control 118,919 px) and a 451/451 differential. prep17 merged:
+  Meteor Mash's extra frame is a ROM lag frame (stays fallback); Mud-Slap/Sand-Attack ready.
+- **Next:** Overheat/Silver Wind (Sonnet) and prep18 (Dig, Megahorn, Will-O-Wisp, Fury Cutter, Return,
+  Pursuit) in flight; then Mud-Slap/Sand-Attack (brief ready), Rollout Curl/Endeavor (brief ready).
 - **Notes:** no DEFERRED entries. Oracle freshness FAIL at orient = known false positive (no
   oracle/ commits since the services started 2026-10-03).
 

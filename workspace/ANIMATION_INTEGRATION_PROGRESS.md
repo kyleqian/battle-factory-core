@@ -88,8 +88,23 @@
   193/196 exact for FIRST bodies (Silver Wind opponent first-body capture 196/196 with first-body
   registers; the accepted fixture is post-Tackle); BG-register history is a 20-state per-move table
   (first-body gate today); Psych Up player first body exact. Supervisor reran the Overheat pixel gate.
-- In flight: #148 x2 tracker + Water Spout tier re-proof (Opus integration); prep17 (Meteor Mash
-  timing; Mud-Slap/Sand-Attack windows, slots, order; Sonnet side).
+- Folded Opus worker `73e311248` (src tree `34a9b1f7`): ISSUES #148 tracker `src/engine/liveBattlerX2History.ts`
+  (per battler idle | zeroed | unknown; table generated from the x2-history receipts: attacker 30 zeroed /
+  91 keep, target 96 zeroed / 71 keep; mixed -> unknown = species rest; unmeasured damaging target ->
+  zeroed; send-in -> idle; fed by the orchestrator at each body's activation edge, invalidated by party
+  menu / undrained resolution); `liveBattlerAnchors(side, art, x2Input)` + 242 renderer species-rest reads
+  routed through it. Dense twice fresh 0 px: Flail natural-HP 2-5, Double Kick hit 2, Spike Cannon / Fury
+  Swipes hits 2-3, Flail after an ONIX replacement send-in (controls 12,001-118,919 px); route replay seeds
+  110 / 134 (3 and 9 later-body inputs changed); differential 911/911 on 6 traces; gates 1,531 files /
+  12,419 tests, build. Supervisor: dense rerun 4 cases 0 px, control reproduces 118,919 px, differential
+  fight-submenu + battle1-postwin-next-prompt 451/451, 7 test files 106/106, smoke 448. Water Spout tier
+  re-proof blocked: `fixtureSpriteOrder` has no plan units for the Water Spout + Toxic history.
+- prep17 (side, `a81a203b9`): Meteor Mash's 1-row tail difference is a ROM lag frame at `restorebg`
+  (`LoadDefaultBg` ~92k instructions; 4 of 5 bodies lag) — not computable from battle state, so Meteor
+  Mash stays on fallback (would need a lag-timing claim like D3). Mud-Slap / Sand-Attack READY: windows
+  re-anchored to activation, lowest-free dirt slots, anchor geometry, lent order identical across bodies.
+- In flight: Overheat + Silver Wind first-body exact adapters with the palette composite (Sonnet
+  integration); prep18 (Dig, Megahorn, Will-O-Wisp, Fury Cutter, Return, Pursuit; Sonnet side).
 
 ## 2026-10-06 — User answered D3: separate deterministic presentation RNG
 
