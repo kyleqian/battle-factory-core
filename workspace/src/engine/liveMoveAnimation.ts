@@ -38,6 +38,7 @@ import { GRASS_WHISTLE_WINDOW_FRAMES } from "../animation/grassWhistle.ts";
 import { DOUBLE_EDGE_FRAME_COUNT } from "../animation/doubleEdge.ts";
 import { speciesFrontIdleRestOffsetOrZero } from "../animation/speciesIdleAnim.ts";
 import { liveTrackedFrontIdleRest, type LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
+import { digAtAge } from "../animation/dig.ts";
 import { FAINT_ATTACK_ANIMATION_PROFILE } from "../animation/faintAttack.ts";
 import { RAZOR_LEAF_BODY_LAST_AGE } from "../animation/razorLeaf.ts";
 import { THUNDER_PUNCH_MOVE_BODY_LAST_AGE } from "../animation/thunderPunch.ts";
@@ -276,6 +277,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     63,
     // prep17: Mud-Slap, Sand-Attack faithful-random windows start at activation (row 0).
     189, 28,
+    // prep18: Dig setup and unleash windows start at activation (row 0).
+    91,
     // prep13 (issue142-shadow-rows-extra.json): Ice Beam, Water Spout activation == accepted window start (row 0), prep13 s0.1-0.2.
     58, 323, 237,
     // prep14 s2: Rain Dance, Water Pulse (faithful-random) and Hail activation == accepted window start (row 0).
@@ -734,6 +737,8 @@ export function liveMoveAnimationDuration(
     // Flail accepted windows (209..322 / 210..323; natural-HP tiers 114 rows each); power = gBattleMovePower.
     case 175: return FLAIL_POWERS.includes(request.power as FlailPower) ? 114 : null;
     case 273: return 271; // Wish accepted window (65..335 / 69..339).
+    // Dig (prep18 s1.1): setup 195 rows / unleash 68 rows, both from the activation (the turn bit selects the body like Fly/Bounce).
+    case 91: return (request.turn & 1) === 0 ? 195 : 68;
     case 189: return 51; // Mud-Slap A..A+50 (prep17: 77..127 / 81..131 / alt 72..122).
     case 28: return 58; // Sand-Attack A..A+57 (78..135 / 82..139 / alt 73..130).
     case 63: return 280; // Hyper Beam faithful-random body 79..358 / 83..362 (prep13 s0.1; reducer first inactive age 279).
@@ -773,7 +778,7 @@ const LIVE_BOUNCE_BODY_ONLY_PROFILE = Object.freeze({
  * body ends, or null. Never read by rules/RNG/queue.
  */
 export function liveSemiInvulnerableHideBattler(request: BattleMoveAnimationRequest): 0 | 1 | null {
-  return (request.moveId === 19 || request.moveId === 340) && (request.turn & 1) === 0
+  return (request.moveId === 19 || request.moveId === 340 || request.moveId === 91) && (request.turn & 1) === 0
     && liveMoveAnimationDuration(request) !== null ? request.attacker : null;
 }
 
@@ -2318,6 +2323,67 @@ export function liveMoveAnimationPresentation(
       config = { move: "HYPER_BEAM", attacker, target, fieldProfile, animationGeometry,
         animationProfile: { orbs: words.map((word, index) => ({ ...word, slot: slots[index]!, persistentOrder: lentOrder.indexOf(slots[index]!) })),
           ...subs, spriteOrderSeed: lentOrder } };
+      break;
+    }
+    case 91: {
+      // prep18 s1.1 (exact, no RNG). Setup is the battle's first body (the BG registers / scanline are the measured constant S0);
+      // unleash follows a Dig setup with no unit since (host lend `afterDigSetup`: the post-setup order and BG state, scanline chained
+      // from the setup reducer's end state). Anything else declines. Geometry from the anchors, every allocator/task/matrix field is the
+      // measured constant shared by both corpora and the FLYGON/GOLEM alternates (both attacker sides).
+      const unleash = (request.turn & 1) === 1;
+      if (unleash ? !spriteOrderInput?.afterDigSetup : !spriteOrderInput?.firstBody) return null;
+      const lentOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (lentOrder === null) return null;
+      const playerAttacker = attacker.geometry.side === "player";
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const ac = attackerAnchors.spriteCenter, tc = targetAnchors.spriteCenter;
+      const elevation = art[attacker.geometry.side].origin.y - battleCommandFieldSpriteOrigin(art[attacker.geometry.side], attacker.geometry.side).y;
+      const baseInputs = (body: "setup" | "unleash") => ({
+        attackerElevationY: playerAttacker ? 80 : 40 - elevation,
+        targetAnimationOrigin: { x: tc.x, y: tc.y + (playerAttacker ? 0 : 8) },
+        attackerInitialOffset: { x: attackerAnchors.frontIdleRest.x2, y: attackerAnchors.frontIdleRest.y2 },
+        targetInitialOffset: { x: targetAnchors.frontIdleRest.x2, y: targetAnchors.frontIdleRest.y2 },
+        attackerSpriteSlot: playerAttacker ? 6 : 8, targetSpriteSlot: playerAttacker ? 8 : 6,
+        attackerSubpriority: playerAttacker ? 30 : 40, targetSubpriority: playerAttacker ? 40 : 30,
+        attackerInitialVisible: body === "setup", targetInitialVisible: true,
+        attackerInitialMatrixNum: 0, targetInitialMatrixNum: 0,
+        attackerCleanupMatrixNum: playerAttacker ? 1 : 2, targetCleanupMatrixNum: playerAttacker ? 2 : 1,
+        attackerInitialMatrix: [256, 0, 0, 256] as const, targetInitialMatrix: [256, 0, 0, 256] as const,
+        moundSlots: [3, 4] as const, plumeSlots: body === "setup" ? [5, 7, 9, 10, 5, 7, 9, 10, 5, 7, 9, 10, 5, 7, 9, 10, 5, 7, 9, 10] : [],
+        impactSpriteSlot: body === "setup" ? 0 : 5, impactMatrixNum: 0, moundMatrixNum: 0, plumeMatrixNum: 0,
+        digTaskSlot: 0, updateMonBgTaskSlot: 1, clearMonBgTaskSlot: 2, shakeTaskSlot: 0,
+        spriteOrder: lentOrder,
+        mudSand: { tileSlot: 6, paletteBank: 7, tileRange: [305, 5] as const },
+        dirtMound: { tileSlot: 7, paletteBank: 8, tileRange: [body === "setup" ? 310 : 321, 16] as const },
+        impact: { tileSlot: 6, paletteBank: 7, tileRange: [305, 16] as const },
+        initialMatrixBitmap: 6,
+        setupBgOffset: { x: 32 - ac.x, y: 32 - ac.y },
+        monBg: { layer: playerAttacker ? "bg2" as const : "bg1" as const, layerId: playerAttacker ? 6 : 8,
+          snapshot: { x: ac.x, y: 160 }, baseScroll: { x: 32 - ac.x, y: -128 },
+          activeCnt: playerAttacker ? 0x5e02 : 0x5c02,
+          inactiveCnt: body === "unleash" ? (playerAttacker ? 0x5e02 : 0x5c02) : playerAttacker ? 0x5e00 : 0x9c00 },
+        animationRngSeed: 0,
+      });
+      const withBattlers = {
+        attacker: { ...attacker, geometry: { ...attacker.geometry, animationCenter: ac, battlePositionCenter: ac } },
+        target: { ...target, geometry: { ...target.geometry, animationCenter: baseInputs("setup").targetAnimationOrigin, battlePositionCenter: tc } },
+      };
+      // First-body scanline S0 (prep18 s1.1: bank 0 = 80 x +2, 80 x -2, then zeros; bank 1 zero; equal in every measured scenario).
+      const setupScanline = { srcBuffer: 1 as const, state: 0 as const, dmaDest: 67108892, dmaControl: 2724200449,
+        buffers: [[...Array(80).fill(2), ...Array(80).fill(-2), ...Array(160).fill(0)], Array(320).fill(0)] as [number[], number[]] };
+      const setupInputs = { ...baseInputs("setup"), initialScanline: setupScanline };
+      let initialScanline = setupScanline;
+      if (unleash) {
+        // The unleash root scanline is exactly the setup reducer's state at its first inactive row (prep18-dig-chain.json).
+        const end = digAtAge(194, { ...setupInputs, body: "setup", attackerSide: attacker.geometry.side, targetSide: target.geometry.side,
+          attackerSpecies: attacker.species, targetSpecies: target.species, attackerCenter: ac, targetCenter: tc } as never).scanline;
+        initialScanline = { srcBuffer: end.srcBuffer, state: end.state as 0, dmaDest: end.dmaDest, dmaControl: end.dmaControl,
+          buffers: [[...end.buffers[0]!], [...end.buffers[1]!]] } as never;
+      }
+      config = { move: "DIG", body: unleash ? "unleash" : "setup", ...withBattlers,
+        fieldProfile: { ...fieldProfile, playerStatus: "none" as const },
+        animationInputs: { ...baseInputs(unleash ? "unleash" : "setup"), initialScanline } as never };
       break;
     }
     case 189: case 28: {

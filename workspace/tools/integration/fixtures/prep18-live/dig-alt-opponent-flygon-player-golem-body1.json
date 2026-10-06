@@ -1,0 +1,47 @@
+{
+ "schema": "prep18-live-adapter-fixture/v1",
+ "move": "DIG",
+ "bodyIndex": 1,
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep18-dig-altopp-flygon-golem.json",
+ "denseWindow": {
+  "startFrame": 612,
+  "endFrame": 679
+ },
+ "windowSource": "prep18 s1.1: window = [activation, activation + body rows - 1] (setup 195, unleash 68); activation from a fresh prep13Probe run",
+ "attacker": {
+  "species": "FLYGON",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703599,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 187,
+  "playerMaxHp": 187,
+  "opponentHp": 174,
+  "opponentMaxHp": 174,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 1
+ },
+ "precedingBodies": [
+  {
+   "moveId": 91,
+   "side": "opponent"
+  }
+ ],
+ "digUnleashAfterSetup": true
+}

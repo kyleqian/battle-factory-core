@@ -55,6 +55,11 @@ export interface LiveSpriteOrderHost {
   readonly hidden: readonly [boolean, boolean];
   /** Presentation units (animation bodies, faints, switches, party-menu resets) applied since the battle began (prep16 s0.3 first-body gate). */
   readonly bodies?: number;
+  /**
+   * prep18 s1.1: the battle's first unit was a Dig setup body (move-animation 91 at `bodies` 0). `units` = the body counter right
+   * after it; the unleash lend requires no other unit since (only the setup's own attacker-hide invalidate may follow).
+   */
+  readonly digSetup?: Readonly<{ units: number }>;
 }
 
 const RECALL_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_VARIOUS", "B_SCR_OP_RETURNATKTOBALL", "B_SCR_OP_RETURNTOBALL"]);
@@ -304,6 +309,7 @@ export function advanceLiveSpriteOrderHost(
   let tracker = host.tracker;
   let hidden = host.hidden;
   let bodies = host.bodies ?? 0;
+  let digSetup = host.digSetup;
   let cursor = host.cursor;
   if (cursor?.requestId !== requestId) {
     if (cursor !== null && !cursor.drained) tracker = invalidateSpriteOrderTracker(tracker, "previous resolution not fully applied");
@@ -317,7 +323,9 @@ export function advanceLiveSpriteOrderHost(
       if (mapped.hidden) hidden = mapped.hidden;
       if (mapped.event) tracker = applySpriteOrderPresentationEvent(tracker, mapped.event);
       if (mapped.then) tracker = applySpriteOrderPresentationEvent(tracker, mapped.then);
+      const wasFirstBody = bodies === 0;
       if (mapped.event && BODY_UNIT_EVENTS.has(mapped.event.kind)) bodies += 1;
+      if (mapped.event?.kind === "move-animation" && mapped.event.moveId === 91 && wasFirstBody) digSetup = Object.freeze({ units: bodies });
       index += 1;
     }
     return index;
@@ -335,10 +343,10 @@ export function advanceLiveSpriteOrderHost(
       drained: nextEventIndex >= events.length && cursor.segmentIndex === resolution.segments.length - 1,
     };
   }
-  if (tracker === host.tracker && bodies === (host.bodies ?? 0) && hidden === host.hidden && cursor.requestId === host.cursor?.requestId
+  if (tracker === host.tracker && bodies === (host.bodies ?? 0) && digSetup === host.digSetup && hidden === host.hidden && cursor.requestId === host.cursor?.requestId
     && cursor.segmentIndex === host.cursor.segmentIndex && cursor.nextEventIndex === host.cursor.nextEventIndex
     && cursor.drained === host.cursor.drained) return host;
-  return Object.freeze({ ...host, tracker, hidden, bodies, cursor: Object.freeze(cursor) });
+  return Object.freeze({ ...host, tracker, hidden, bodies, ...(digSetup === undefined ? {} : { digSetup }), cursor: Object.freeze(cursor) });
 }
 
 /**
@@ -349,10 +357,27 @@ export function advanceLiveSpriteOrderHost(
 export const POSTKO_LEND_EXCLUDED_MOVE_IDS: readonly number[] = Object.freeze<number[]>([]);
 
 /**
+ * Free order after a Dig setup body (prep18 s1.1: identical in both corpora and the FLYGON/GOLEM alternates, both attacker sides):
+ * the known-entry occupied prefix `[62, 60, 0, 63, 1, 61, 6, 8, 2]` then this tail. The hide that follows the setup invalidates the
+ * tracker (a semi-invulnerable battler), so the unleash lend is this constant, valid only for "setup first, nothing since".
+ */
+const DIG_POST_SETUP_FREE: readonly number[] = Object.freeze([
+  4, 3, 7, 5, 10, 9, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 54, 55, 56, 57, 58, 59, 23, 22,
+  48, 49, 50, 51, 52, 53, ...Array.from({ length: 24 }, (_, i) => 24 + i)]);
+
+/** The unleash body's lend: post-setup order and BG/scanline history (`afterDigSetup`). Also used by the dense fixture harness. */
+export function digUnleashLend(): LiveMoveSpriteOrderInput {
+  return Object.freeze({ known: true as const, free: DIG_POST_SETUP_FREE, afterDigSetup: true as const });
+}
+
+/**
  * Order lent to the move body at its activation edge (undefined = consumers decline): the tracker's entry-label lend
  * (spriteOrderTrackerLend), withheld after a KO (battler slots not the entry ones) from POSTKO_LEND_EXCLUDED_MOVE_IDS.
  */
 export function lendLiveSpriteOrder(host: LiveSpriteOrderHost, moveId?: number): LiveMoveSpriteOrderInput | undefined {
+  if (moveId === 91 && host.digSetup !== undefined && (host.bodies ?? 0) >= host.digSetup.units && (host.bodies ?? 0) <= host.digSetup.units + 1) {
+    return digUnleashLend();
+  }
   const free = spriteOrderTrackerLend(host.tracker);
   if (free === null) return undefined;
   const { player, opponent } = host.tracker.battlerSlots;

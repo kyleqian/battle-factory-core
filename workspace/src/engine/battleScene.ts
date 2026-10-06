@@ -36663,6 +36663,8 @@ export function renderSceneOnMovePresentation(
       || left.y - right.y || right.rank - left.rank || right.slot - left.slot);
     for (const entry of entries) entry.draw();
 
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     const player = attacker.geometry.side === "player" ? attacker : target;
     const opponent = attacker.geometry.side === "opponent" ? attacker : target;
     const profile = digState.config.fieldProfile;
