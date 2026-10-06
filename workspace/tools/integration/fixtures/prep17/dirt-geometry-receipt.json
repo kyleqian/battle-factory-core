@@ -1,0 +1,864 @@
+{
+ "schema": "prep17-dirt-geometry.v1",
+ "cases": {
+  "mud-accepted": {
+   "identicalAcrossFreshProcesses": true,
+   "allocatorBaseSlots": [
+    0,
+    1,
+    2,
+    6,
+    8,
+    60,
+    61,
+    62,
+    63
+   ],
+   "allocatorMatchesDirt": true,
+   "allocatorTransientSlots": [
+    3,
+    3
+   ],
+   "transients": [
+    [
+     4,
+     8,
+     3
+    ],
+    [
+     9,
+     11,
+     3
+    ]
+   ],
+   "A": 77,
+   "bodyRows": 51,
+   "waveRows": [
+    9,
+    13,
+    17,
+    21,
+    25,
+    29
+   ],
+   "dirtSlots": [
+    4,
+    5,
+    7,
+    9,
+    10,
+    3,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34
+   ],
+   "sources": [
+    [
+     87,
+     115
+    ]
+   ],
+   "attackerXY": [
+    72,
+    92
+   ],
+   "targetXY": [
+    176,
+    42
+   ],
+   "sourceMinusAttacker": [
+    [
+     15,
+     23
+    ]
+   ],
+   "lifeRows": [
+    8,
+    11,
+    30,
+    34,
+    38,
+    42,
+    46,
+    50,
+    260,
+    438,
+    442,
+    446,
+    450,
+    454,
+    458,
+    462,
+    466,
+    470,
+    474,
+    478
+   ],
+   "targetMinusSourceSolutions": [
+    [
+     89,
+     -73
+    ]
+   ],
+   "predictedFromAnchors": [
+    89,
+    -73
+   ],
+   "attackerSide": "player",
+   "stepsMatchAllWords": true,
+   "firstWords": [
+    [
+     58590,
+     25548
+    ],
+    [
+     56190,
+     23105
+    ],
+    [
+     11939,
+     37788
+    ]
+   ],
+   "fixtureSlotsEqual": true,
+   "fixtureStepsEqual": true,
+   "fixtureWindow": {
+    "startFrame": 80,
+    "endFrame": 130
+   }
+  },
+  "sand-accepted": {
+   "identicalAcrossFreshProcesses": true,
+   "allocatorBaseSlots": [
+    0,
+    1,
+    2,
+    6,
+    8,
+    60,
+    61,
+    62,
+    63
+   ],
+   "allocatorMatchesDirt": true,
+   "allocatorTransientSlots": [
+    3,
+    3
+   ],
+   "transients": [
+    [
+     7,
+     11,
+     3
+    ],
+    [
+     12,
+     14,
+     3
+    ]
+   ],
+   "A": 78,
+   "bodyRows": 58,
+   "waveRows": [
+    12,
+    16,
+    20,
+    24,
+    28,
+    32
+   ],
+   "dirtSlots": [
+    4,
+    5,
+    7,
+    9,
+    10,
+    3,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34
+   ],
+   "sources": [
+    [
+     87,
+     115
+    ]
+   ],
+   "attackerXY": [
+    72,
+    92
+   ],
+   "targetXY": [
+    176,
+    42
+   ],
+   "sourceMinusAttacker": [
+    [
+     15,
+     23
+    ]
+   ],
+   "lifeRows": [
+    11,
+    14,
+    33,
+    37,
+    41,
+    45,
+    49,
+    53,
+    129,
+    306,
+    310,
+    314,
+    318,
+    322,
+    326,
+    330,
+    334,
+    338,
+    342,
+    346,
+    456,
+    460,
+    464,
+    468,
+    472,
+    476,
+    480,
+    484
+   ],
+   "targetMinusSourceSolutions": [
+    [
+     89,
+     -73
+    ]
+   ],
+   "predictedFromAnchors": [
+    89,
+    -73
+   ],
+   "attackerSide": "player",
+   "stepsMatchAllWords": true,
+   "firstWords": [
+    [
+     23105,
+     11939
+    ],
+    [
+     37788,
+     27340
+    ],
+    [
+     822,
+     24121
+    ]
+   ],
+   "fixtureSlotsEqual": true,
+   "fixtureStepsEqual": true,
+   "fixtureWindow": {
+    "startFrame": 46,
+    "endFrame": 314
+   }
+  },
+  "mud-accepted-opponent-attacker": {
+   "identicalAcrossFreshProcesses": true,
+   "allocatorBaseSlots": [
+    0,
+    1,
+    2,
+    6,
+    8,
+    60,
+    61,
+    62,
+    63
+   ],
+   "allocatorMatchesDirt": true,
+   "allocatorTransientSlots": [
+    3,
+    3
+   ],
+   "transients": [
+    [
+     4,
+     8,
+     3
+    ],
+    [
+     9,
+     11,
+     3
+    ]
+   ],
+   "A": 81,
+   "bodyRows": 51,
+   "waveRows": [
+    9,
+    13,
+    17,
+    21,
+    25,
+    29
+   ],
+   "dirtSlots": [
+    4,
+    5,
+    7,
+    9,
+    10,
+    3,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34
+   ],
+   "sources": [
+    [
+     161,
+     66
+    ]
+   ],
+   "attackerXY": [
+    176,
+    51
+   ],
+   "targetXY": [
+    72,
+    80
+   ],
+   "sourceMinusAttacker": [
+    [
+     -15,
+     15
+    ]
+   ],
+   "lifeRows": [
+    8,
+    11,
+    30,
+    34,
+    38,
+    42,
+    46,
+    50,
+    261
+   ],
+   "targetMinusSourceSolutions": [
+    [
+     -89,
+     22
+    ]
+   ],
+   "predictedFromAnchors": [
+    -89,
+    14
+   ],
+   "attackerSide": "opponent",
+   "stepsMatchAllWords": true,
+   "firstWords": [
+    [
+     23105,
+     11939
+    ],
+    [
+     37788,
+     27340
+    ],
+    [
+     822,
+     24121
+    ]
+   ],
+   "fixtureSlotsEqual": true,
+   "fixtureStepsEqual": true,
+   "fixtureWindow": {
+    "startFrame": 84,
+    "endFrame": 134
+   }
+  },
+  "sand-accepted-opponent-attacker": {
+   "identicalAcrossFreshProcesses": true,
+   "allocatorBaseSlots": [
+    0,
+    1,
+    2,
+    6,
+    8,
+    60,
+    61,
+    62,
+    63
+   ],
+   "allocatorMatchesDirt": true,
+   "allocatorTransientSlots": [
+    3,
+    3
+   ],
+   "transients": [
+    [
+     7,
+     11,
+     3
+    ],
+    [
+     12,
+     14,
+     3
+    ]
+   ],
+   "A": 82,
+   "bodyRows": 58,
+   "waveRows": [
+    12,
+    16,
+    20,
+    24,
+    28,
+    32
+   ],
+   "dirtSlots": [
+    4,
+    5,
+    7,
+    9,
+    10,
+    3,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34
+   ],
+   "sources": [
+    [
+     161,
+     66
+    ]
+   ],
+   "attackerXY": [
+    176,
+    51
+   ],
+   "targetXY": [
+    72,
+    80
+   ],
+   "sourceMinusAttacker": [
+    [
+     -15,
+     15
+    ]
+   ],
+   "lifeRows": [
+    11,
+    14,
+    33,
+    37,
+    41,
+    45,
+    49,
+    53,
+    129,
+    286,
+    324,
+    328,
+    332,
+    336,
+    340,
+    344,
+    348,
+    352,
+    356,
+    360,
+    364,
+    368,
+    372,
+    376,
+    380,
+    384,
+    388,
+    392,
+    396,
+    400
+   ],
+   "targetMinusSourceSolutions": [
+    [
+     -89,
+     22
+    ]
+   ],
+   "predictedFromAnchors": [
+    -89,
+    14
+   ],
+   "attackerSide": "opponent",
+   "stepsMatchAllWords": true,
+   "firstWords": [
+    [
+     822,
+     24121
+    ],
+    [
+     15325,
+     2321
+    ],
+    [
+     63770,
+     7043
+    ]
+   ],
+   "fixtureSlotsEqual": true,
+   "fixtureStepsEqual": true,
+   "fixtureWindow": {
+    "startFrame": 46,
+    "endFrame": 314
+   }
+  },
+  "mud-alt-set156-set146": {
+   "identicalAcrossFreshProcesses": true,
+   "allocatorBaseSlots": [
+    0,
+    1,
+    2,
+    6,
+    8,
+    60,
+    61,
+    62,
+    63
+   ],
+   "allocatorMatchesDirt": true,
+   "allocatorTransientSlots": [
+    3,
+    3
+   ],
+   "transients": [
+    [
+     4,
+     8,
+     3
+    ],
+    [
+     9,
+     11,
+     3
+    ]
+   ],
+   "A": 72,
+   "bodyRows": 51,
+   "waveRows": [
+    9,
+    13,
+    17,
+    21,
+    25,
+    29
+   ],
+   "dirtSlots": [
+    4,
+    5,
+    7,
+    9,
+    10,
+    3,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34
+   ],
+   "sources": [
+    [
+     87,
+     103
+    ]
+   ],
+   "attackerXY": [
+    72,
+    80
+   ],
+   "targetXY": [
+    176,
+    51
+   ],
+   "sourceMinusAttacker": [
+    [
+     15,
+     23
+    ]
+   ],
+   "lifeRows": [
+    8,
+    11,
+    30,
+    34,
+    38,
+    42,
+    46,
+    50,
+    274,
+    453,
+    456
+   ],
+   "targetMinusSourceSolutions": [
+    [
+     89,
+     -52
+    ]
+   ],
+   "predictedFromAnchors": [
+    89,
+    -52
+   ],
+   "attackerSide": "player",
+   "stepsMatchAllWords": true,
+   "firstWords": [
+    [
+     55981,
+     7170
+    ],
+    [
+     50660,
+     46451
+    ],
+    [
+     15783,
+     24630
+    ]
+   ]
+  },
+  "sand-alt-set156-set146": {
+   "identicalAcrossFreshProcesses": true,
+   "allocatorBaseSlots": [
+    0,
+    1,
+    2,
+    6,
+    8,
+    60,
+    61,
+    62,
+    63
+   ],
+   "allocatorMatchesDirt": true,
+   "allocatorTransientSlots": [
+    3,
+    3
+   ],
+   "transients": [
+    [
+     7,
+     11,
+     3
+    ],
+    [
+     12,
+     14,
+     3
+    ]
+   ],
+   "A": 73,
+   "bodyRows": 58,
+   "waveRows": [
+    12,
+    16,
+    20,
+    24,
+    28,
+    32
+   ],
+   "dirtSlots": [
+    4,
+    5,
+    7,
+    9,
+    10,
+    3,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34
+   ],
+   "sources": [
+    [
+     87,
+     103
+    ]
+   ],
+   "attackerXY": [
+    72,
+    80
+   ],
+   "targetXY": [
+    176,
+    51
+   ],
+   "sourceMinusAttacker": [
+    [
+     15,
+     23
+    ]
+   ],
+   "lifeRows": [
+    11,
+    14,
+    33,
+    37,
+    41,
+    45,
+    49,
+    53,
+    129,
+    307,
+    310
+   ],
+   "targetMinusSourceSolutions": [
+    [
+     89,
+     -52
+    ]
+   ],
+   "predictedFromAnchors": [
+    89,
+    -52
+   ],
+   "attackerSide": "player",
+   "stepsMatchAllWords": true,
+   "firstWords": [
+    [
+     46451,
+     15783
+    ],
+    [
+     24630,
+     64902
+    ],
+    [
+     48069,
+     58590
+    ]
+   ]
+  }
+ }
+}
