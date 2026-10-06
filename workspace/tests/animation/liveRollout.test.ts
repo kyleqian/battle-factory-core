@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { rolloutAtAge } from "../../src/animation/rollout.ts";
 import { battleMoveAnimationRequest, type BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";
 
@@ -17,10 +18,22 @@ describe("live Rollout adapter", () => {
       expect(liveMoveAnimationDuration(request(i + 1, 30 << i))).toBe(rows);
     });
   });
-  it("declines a missing counter, an out-of-range counter and Defense Curl power", () => {
+  it("declines a missing counter and an out-of-range counter; Defense Curl power (30 << counter, doubled) is live", () => {
     expect(liveMoveAnimationDuration(request(undefined, 30))).toBeNull();
     expect(liveMoveAnimationDuration(request(6, 960))).toBeNull();
-    expect(liveMoveAnimationDuration(request(1, 60))).toBeNull();
+    [167, 167, 161, 153].forEach((rows, i) => {
+      expect(liveMoveAnimationDuration(request(i + 1, 60 << i))).toBe(rows);
+    });
+  });
+  it("shake amplitude is clamp(floor(gAnimMovePower / 12), 1, 16); the plain ladder keeps 2/5/10/16/16", () => {
+    const state = (counter: 1 | 2 | 3 | 4 | 5, movePower?: number) => rolloutAtAge(0, counter, {
+      side: "player", attackerStart: { x: 0, y: 0 }, targetEnd: { x: 0, y: 0 }, attackerSpriteSlot: 6, targetSpriteSlot: 8,
+      ...(movePower === undefined ? {} : { movePower }),
+    }).shakeAmplitude;
+    expect(([1, 2, 3, 4, 5] as const).map((c) => state(c))).toEqual([2, 5, 10, 16, 16]);
+    expect(([1, 2, 3, 4, 5] as const).map((c) => state(c, 30 << (c - 1)))).toEqual([2, 5, 10, 16, 16]);
+    expect(([1, 2, 3, 4] as const).map((c) => state(c, 60 << (c - 1)))).toEqual([5, 10, 16, 16]);
+    expect(state(1, 1)).toBe(1);
   });
   it("parses the optional seventh MOVE_ANIMATION argument only", () => {
     expect(battleMoveAnimationRequest(0, 1, ["205", "0", "30", "5", "70", "0", "3"]).rolloutCounter).toBe(3);

@@ -66,6 +66,11 @@ import {
   evaluateFactoryAiSwitchPolicy,
   type FactoryAiSwitchPolicyResult,
 } from "./factoryAiSwitchPolicy.ts";
+import {
+  factoryAiLastCalcMovePower,
+  type FactoryAiTryToFaintBattler,
+  type FactoryAiTryToFaintTarget,
+} from "./factoryAiTryToFaint.ts";
 
 const MOVE_NONE = 0;
 const SIDE_STATUS_REFLECT = 1 << 0;
@@ -566,8 +571,27 @@ export function submitLiveFactoryAiDecision<
         value: state.rules.rulesContext.randomTurnNumber,
       }),
     });
+  // W2 (docs/rollout-endeavor-prep.md s0.2): with non-zero AI flags the decision's AI_CalcDmg calls leave
+  // gBattleMovePower at rule R's value before either move of the turn runs. Presentation-only register.
+  const ruleR = mask === 0
+    ? null
+    : factoryAiLastCalcMovePower(
+      view.attacker as FactoryAiTryToFaintBattler,
+      view.target as FactoryAiTryToFaintTarget,
+      view.moves,
+      mask === 7,
+    );
+  const decisionState = ruleR === null
+    ? state
+    : (Object.freeze({
+      ...state,
+      rules: Object.freeze({
+        ...state.rules,
+        rulesContext: Object.freeze({ ...state.rules.rulesContext, battleMovePower: ruleR }),
+      }),
+    }) as typeof state);
   const transition = submitBattleDecision(
-    state,
+    decisionState,
     policyResult.submission,
     replayAiDraws([...switchPolicy.draws, ...policyResult.trace.draws], reducer),
   );

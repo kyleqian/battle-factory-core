@@ -650,7 +650,7 @@ export function liveMoveAnimationDuration(
     // Rollout bodies by request.rolloutCounter (accepted corpus rows 167, 167, 161, 153, 145; prep11 s0.2).
     case 205: {
       const counter = request.rolloutCounter ?? 0;
-      return request.power === 30 << (counter - 1) ? [167, 167, 161, 153, 145][counter - 1] ?? null : null;
+      return [167, 167, 161, 153, 145][counter - 1] ?? null;
     }
     case 46: return request.attacker === 0 ? 99 : 104; // Roar 252..350 / 219..322 (cry timing differs by side; prep11 s0.2).
     case 18: return 83; // Whirlwind 222..304 / 316..398 (prep11 s0.2).
@@ -2191,9 +2191,7 @@ export function liveMoveAnimationPresentation(
       // applies to the counter 1 body only (accepted staged corpus, tools/compare/rolloutFramebuffer.ts).
       const counter = request.rolloutCounter;
       if (counter === undefined || !(counter >= 1 && counter <= 5)) return null;
-      // Defense Curl doubles the power (60 << (counter - 1)): the SHUCKLE / BLISSEY curl bodies keep a 6 px field residual
-      // (cause not isolated), so only the plain power ladder (30 << (counter - 1)) is live; curl bodies decline.
-      if (request.power !== 30 << (counter - 1)) return null;
+      // Defense Curl doubles the power (60 << (counter - 1)); only the shake amplitude reads it (docs/rollout-curl-diagnosis.md).
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const playerAttacker = attacker.geometry.side === "player";
       const baseX2 = counter === 1 ? targetAnchors.frontIdleRest.x2 : 0, baseY2 = counter === 1 ? targetAnchors.frontIdleRest.y2 : 0;
@@ -2205,6 +2203,7 @@ export function liveMoveAnimationPresentation(
           targetEnd: { x: targetAnchors.battlePositionCenter.x, y: targetAnchors.battlePositionCenter.y + 24 },
           attackerSpriteSlot: playerAttacker ? 6 : 8, targetSpriteSlot: playerAttacker ? 8 : 6,
           targetBaseX2: baseX2, targetBaseY2: baseY2,
+          impactCenter: targetAnchors.picOffsetPoint, movePower: request.power,
           monbg: { layer: target.geometry.side === "player" ? "bg2" : "bg1", spriteX: cx, spriteY: cy,
             bgX: 32 - cx, bgY: 32 - cy, inBg2: target.geometry.side === "player", battlerId: target.geometry.side === "player" ? 0 : 1 } } };
       break;
@@ -2270,6 +2269,7 @@ export function liveMoveAnimationPresentation(
       if (words === undefined || words.length !== 4) return null;
       config = { move: "ASTONISH", attacker, target: affineCenterBattler(target), fieldProfile,
         targetPictureYOffset: liveBattlerCoordAttrs(target.geometry.side, art).yOffset,
+        targetElevation: art[target.geometry.side].origin.y - battleCommandFieldSpriteOrigin(art[target.geometry.side], target.geometry.side).y,
         dropletRandom: [{ v1: words[0]! & 0x1ff, v2: words[1]! & 0x7f }, { v1: words[2]! & 0x1ff, v2: words[3]! & 0x7f }] };
       break;
     }
@@ -2289,7 +2289,8 @@ export function liveMoveAnimationPresentation(
             targetCenter: targetAnchors.picOffsetPoint,
             monbgBaseHofs: 544 - (targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2),
             monbgBaseVofs: 544 - targetAnchors.spriteCenter.y },
-          spriteOrder: { initialOrder } } };
+          spriteOrder: { initialOrder } },
+        targetIdleX2: targetAnchors.frontIdleRest.x2 };
       break;
     }
     case 63: {
@@ -2570,7 +2571,8 @@ export function liveMoveAnimationPresentation(
       if (order === null) return null;
       const animationInputs = waterSpoutLiveInputs(field, attacker.geometry.side, order);
       if (animationInputs === null) return null;
-      config = { move: "WATER_SPOUT", attacker, target, fieldProfile, animationInputs };
+      config = { move: "WATER_SPOUT", attacker, target, fieldProfile, animationInputs,
+        targetIdleX2: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).frontIdleRest.x2 };
       break;
     }
     default: return null;

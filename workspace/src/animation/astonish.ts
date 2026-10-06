@@ -152,6 +152,8 @@ export function astonishAtAge(
     AstonishDropletRandom,
     AstonishDropletRandom,
   ],
+  /** Enemy elevation of the target OBJ (0 for the player side); the droplets spawn at the elevated origin. */
+  targetElevation = 0,
 ): AstonishState {
   const effectLocalAge = age - ASTONISH_EFFECT_START_AGE;
   const droplets = dropletRandom.map((random, index) =>
@@ -160,7 +162,7 @@ export function astonishAtAge(
       index as 0 | 1,
       {
         x: targetCenter.x,
-        y: targetCenter.y + 32 - targetPictureYOffset,
+        y: targetCenter.y + 32 - targetPictureYOffset + targetElevation,
       },
       random,
     )

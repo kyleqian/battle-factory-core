@@ -14917,7 +14917,8 @@ export function renderSceneOnMovePresentation(
     const drawTarget = (): void => {
       // HorizontalShake is created/runs in the visual-task pass after this
       // row's OAM build, so its direct x2 write reaches scanout two rows on.
-      const ox = view.target.geometry.spriteCorner.x + taskOamDisplayed.targetX2;
+      const ox = view.target.geometry.spriteCorner.x + taskOamDisplayed.targetX2
+        + (waterSpoutState.age < 119 ? waterSpoutState.config.targetIdleX2 ?? 0 : 0);
       const oy = view.target.geometry.spriteCorner.y;
       drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side), targetArt.palette, ox, oy);
     };
@@ -15760,7 +15761,7 @@ export function renderSceneOnMovePresentation(
       fb,
       targetArt.tileset,
       targetPalette,
-      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.x + targetX2 + (iceBeamState.age < 39 ? iceBeamState.config.targetIdleX2 ?? 0 : 0),
       view.target.geometry.spriteCorner.y,
     );
     const drawAttacker = () => drawSpriteSheet(

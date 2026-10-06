@@ -96,6 +96,11 @@ export type FactoryFreshBattleConfig = Readonly<{
    * ordinary generated battles begin directly at the battle-start kernel.
    */
   preCommandRngCalls?: number;
+  /**
+   * `gBattleMovePower` is EWRAM that no battle start clears: the previous battle's last
+   * `CalculateBaseDamage` writer survives (docs/rollout-endeavor-prep.md s0.2). Presentation-only (Endeavor's animation).
+   */
+  battleMovePower?: number;
   playerParty: BattleScriptPartyState;
   opponentParty: BattleScriptPartyState;
 }>;
@@ -407,6 +412,7 @@ export function initializeFreshFactoryBattle(
       ? BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS
       : 0,
     multiHitCounter: 0,
+    ...(config.battleMovePower === undefined ? {} : { battleMovePower: config.battleMovePower }),
     moveHistory: {
       lastPrintedMoves: [0, 0, 0, 0],
       lastMoves: [0, 0, 0, 0],

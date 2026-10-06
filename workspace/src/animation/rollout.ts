@@ -35,6 +35,10 @@ export interface RolloutGeometry {
   readonly monbg?: RolloutMonBgGeometry;
   readonly attackerPan?: number;
   readonly targetPan?: number;
+  /** Target X_2 / Y_PIC_OFFSET coordinate (the hit splat is created relative_to=ANIM_TARGET); legacy staged default by side. */
+  readonly impactCenter?: RolloutPoint;
+  /** Request gAnimMovePower (Defense Curl doubles it); drives only the shake amplitude. Default: the plain ladder. */
+  readonly movePower?: number;
 }
 
 export interface RolloutParticle {
@@ -172,9 +176,8 @@ function impactAtAge(
 ): RolloutImpact | null {
   const start = TASK_LAST[counter] + 2;
   if (age < start || age >= start + 10) return null;
-  const center = geometry.side === "player"
-    ? { x: 176, y: 42 }
-    : { x: 72, y: 88 };
+  // create_basic_hitsplat_sprite ... relative_to=ANIM_TARGET: the target's X_2 / Y_PIC_OFFSET coordinate.
+  const center = geometry.impactCenter ?? (geometry.side === "player" ? { x: 176, y: 42 } : { x: 72, y: 88 });
   return {
     slot: 3,
     template: "gBasicHitSplatSpriteTemplate",
@@ -517,6 +520,13 @@ function rolloutTaskAtAge(
   };
 }
 
+/** AnimTask_ShakeTargetBasedOnMovePowerOrDmg(FALSE): data[15] = clamp(gAnimMovePower / 12, 1, 16); plain ladder default. */
+function shakeAmplitude(counter: RolloutCounter, geometry: RolloutGeometry): number {
+  return geometry.movePower === undefined
+    ? ROLLOUT_SHAKE_AMPLITUDES[counter]
+    : Math.min(16, Math.max(1, Math.floor(geometry.movePower / 12)));
+}
+
 function shakeTaskAtAge(
   counter: RolloutCounter,
   age: number,
@@ -525,7 +535,7 @@ function shakeTaskAtAge(
   const start = TASK_LAST[counter] + 2;
   const end = start + 58;
   if (age < start || age > end) return { task: null, offset: { x: 0, y: 0 }, audio: [] };
-  const amplitude = ROLLOUT_SHAKE_AMPLITUDES[counter];
+  const amplitude = shakeAmplitude(counter, geometry);
   const phase = age - start;
   const half = Math.floor(amplitude / 2);
   const ceilHalf = amplitude - half;
@@ -678,7 +688,7 @@ export function rolloutAtAge(
     timer: { start: 5, remaining: 5 - counter },
     dynamicPower: ROLLOUT_DYNAMIC_POWERS[counter],
     defenseCurlPower: ROLLOUT_DEFENSE_CURL_POWERS[counter],
-    shakeAmplitude: ROLLOUT_SHAKE_AMPLITUDES[counter],
+    shakeAmplitude: shakeAmplitude(counter, geometry),
     particles: age >= 0 && age < cleanupAge ? particleAtAge(counter, age, geometry) : [],
     impact: impactAtAge(counter, age, geometry),
     rolloutTask: rollout.task,
