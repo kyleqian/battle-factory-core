@@ -1,0 +1,23 @@
+diff --git a/workspace/src/engine/liveBgSnapshotMoves.ts b/workspace/src/engine/liveBgSnapshotMoves.ts
+index c93e8910d..ca073abbf 100644
+--- a/workspace/src/engine/liveBgSnapshotMoves.ts
++++ b/workspace/src/engine/liveBgSnapshotMoves.ts
+@@ -62,8 +62,7 @@ const palettes = (composite: LivePaletteComposite) => ({
+ /** MOVE_OVERHEAT animationInputs (prep16 s2.1). Null when a battler's idle rest is non-zero (the renderer draws no idle offset). */
+ export function liveOverheatInputs(args: LiveBgSnapshotArgs): Inputs | null {
+   const { attackerSide, attacker, target } = args, targetSide: Side = attackerSide === "player" ? "opponent" : "player";
+-  if (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0
+-    || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
++  void attacker; void target;
+   const attackerSprite = battlerSprite(attackerSide, attacker), targetSprite = battlerSprite(targetSide, target);
+   const player = attackerSide === "player";
+   // The hit splat's first OAM words sit 16 px up/left of Overheat's first hit point (target picture + (-5|+5, +3)).
+@@ -196,7 +195,7 @@ export function liveSilverWindInputs(args: LiveBgSnapshotArgs): Inputs & { reado
+  */
+ export function livePsychUpInputs(args: LiveBgSnapshotArgs): Inputs | null {
+   const { attackerSide, attacker, target } = args;
+-  if (attackerSide !== "player" || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
++  if (attackerSide !== "player") return null;
+   const attackerSprite = battlerSprite("player", attacker), targetSprite = battlerSprite("opponent", target);
+   return {
+     // The spiral sprite sits at the attacker's picture offset point; the target origin is its sprite centre (prep16 dump).
