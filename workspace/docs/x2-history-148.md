@@ -1,0 +1,65 @@
+# ISSUES #148: battler sprite x2 history (measured; S10A side lane)
+
+Evidence/design only; **new files only** (no tracked file edited, no `src/` change, no ledger edit). Every emulator number is from a **direct, independent mGBA run** (fresh process per scenario, Scene ON via `prep11Probe.py` / `x2HistorySpeciesProbe.py`; the shared HTTP oracles were never contacted). Relied-on probes were run **twice from fresh processes, byte-identical**: species table 376/376 (r1 == r2, `r1r2Differences: 0`), body series 395/395 original + 375/375 ONIX-pair scenarios (`cmp` r1 r2), faint+send-in scenario (r1 == r2). Not run in this lane's evidence: a switch-out/in of the PLAYER side (see Open). Source line numbers are `reference/pokeemerald/src/` at this checkout.
+
+## 0. Results
+
+### 0.1 The rule (proposal)
+Per battler keep one bit, **idle | zeroed**, plus the species it applies to.
+
+| Event | Effect on the battler's x2 (and y2) | ROM evidence | Source |
+|---|---|---|---|
+| Battle start / **send-in of a species** (first send-out, replacement after a faint) | state := **idle**: x2 = species front rest (opponent only: **ONIX 1, RATTATA 1**, all other 374 species 0; y2 always 0; **player back sprites always 0**) | species table (376 species, both sides); faint+send-in: PIDGEY faints, ONIX sent in at frame 858, first body at 1543 sees ONIX x2 = **1** (pred 1, ROM 1) | `pokemon_animation.c` `Anim_*` freeze the settled offset (`speciesIdleAnim.ts` header); `BattleAnimateFrontSprite` |
+| A body whose script ends an **absolute-reset task** on that battler (`ShakeMon`, `ShakeMon2`, `ShakeAndSinkMon`, `TranslateMonElliptical`, `SlideMonToOriginalPos`, `SlideMonToOffsetAndBack`, `SwayMon`, `ShakeTargetBasedOnMovePowerOrDmg`) | state := **zeroed**: x2 = y2 = 0 for the rest of the battle; the idle value is NOT restored | Flail natural-HP x5: ONIX x2 = 1 at body 1 start (f429) -> 0 at its end -> 0 at the start of bodies 2..5 (f966, 1863, 2434, 3314): matches the receipt's 1,091 px/row at x2=1 vs 0 px at x2=0 | `battle_anim_mon_movement.c`: `ShakeMon_Step` :123/:136, `ShakeMon2_Step` :231, `ShakeAndSinkMon_Step` :352, `TranslateMonElliptical_Step` :395, `SlideMonToOriginalPos_Step` :520, `SlideMonToOffsetAndBack_End` :622, `SwayMonStep` :809, `ShakeTargetBasedOnMovePowerOrDmg_Step` :1042 (each ends `sprite->x2 = 0; y2 = 0`) |
+| A body whose tasks are **relative** (`ShakeMonInPlace` `+=`/`-=` with a net-zero tail, horizontal lunges that return) | state unchanged: x2 returns to its start value (the body may leave it transiently) | Super Fang, ONIX attacker (`AnimTask_ShakeMonInPlace`, `battle_anim_scripts.s` Move_SUPER_FANG): ONIX x2 1 -> 0 -> 2 ... -> 1 at end+1, f1543..1678 (faint scenario) | `battle_anim_mon_movement.c:273-315` |
+| Action-menu idle, turn gap, end-turn message, HP drain | none (x2 constant) | flail run: ONIX x2 = 0 for every frame between bodies (frames 1074-1543, ...) | no task writes x2 outside bodies |
+| **Weather / field / status bodies without a shake** (Hail, Sandstorm, Rain Dance, stat-up/down self bodies) | unchanged | Hail 258 (delibird player, ONIX opponent): ONIX x2 = 1 for **every** frame of the body (66..223) | -- |
+| The faint slide (y2 only) | y2 rises 8..64 after the last body, then the battler is gone | flail run f7260-7276 | -- |
+
+So it is **not** purely "any body whose script resets the battler's x2": it is "any body that runs an **absolute-reset** task on that battler" (every damaging body shakes its target -> target zeroed; attackers mostly use relative tasks and keep their state). The per-move, per-role table below is the machine-readable rule.
+
+`GetBattlerSpriteCoord` (`battle_anim_mons.c:112-132`) does **not** read the sprite's x2 (`BATTLER_COORD_X/X_2` are table constants), so every adapter that anchors on `GetBattlerSpriteCoord` positions is independent of this history; only code that reproduces the battler sprite **drawn** position (x + x2) or copies `sprite->x2` (monbg, `targetRestOffset`/`initialTargetX2`/`targetIdleX2` arguments) needs the tracker.
+
+### 0.2 Species with a non-zero front-idle rest (Factory pool = all 376 species of `battle-frontier-mons.json`, both sides)
+`fixtures/x2-history/species-rest-x2.json`: opponent front sprite at the first body's activation, both sides = the species in one run (ghost species run with Bite instead of the Normal-type Flail that has no body against them), gender fallback male/female/genderless:
+
+| Side | non-zero x2 | non-zero y2 |
+|---|---|---|
+| Opponent (front) | **ONIX (1, 0), RATTATA (1, 0)** | none |
+| Player (back) | **none** (376/376 at 0, 0) | none |
+
+Production `speciesFrontIdleRestOffsetOrZero` == ROM for **376/376** (`species-prod-vs-rom.json`: 0 mismatches, 0 unported fallbacks). `liveBattlerAnchors().frontIdleRest` is `{0,0}` for the player side. Note the earlier prep14 claim "Onix x2 is 1 at activation but 0 from about age 45" (Hail) is **not reproduced**: in my Hail run (scene-on direct, `mechanic-hail-player-delibird-opponent-onix`) the ONIX opponent x2 is 1 for the whole body; Hail's hail-particle table matches without x2 because `GetBattlerSpriteCoord` ignores x2 (above), not because x2 leaves 1. Reconcile against prep14's exact scenario if it matters.
+
+### 0.3 Per-move end-state table
+`fixtures/x2-history/move-end-state-x2-onix-pairs.json` (key = move id, role = attacker | target; `x2Class`, `y2EndClass`, observations, sample scenarios). Derived from **375 ONIX-vs-ONIX copies** of the `mechanic-*` lab scenarios (both party[0] = ONIX so both roles carry x2 = 1; `x2HistoryOnixPairs.py`), 188 distinct move ids (id 0 = the status/end-turn bodies). A body's ONIX role starts at 1 (first body) and the class is read at end+1 and just before the next body:
+
+| class | attacker | target | meaning |
+|---|---|---|---|
+| zeroed | 30 | **88** | 1 -> 0 and stays 0 until the next body |
+| unchanged | **80** | 61 | stays 1 through the body |
+| transient | 9 | 4 | leaves 1 inside the body, back at 1 at end+1 |
+| rest0 | 67 | 31 | only seen after earlier bodies (ONIX already 0): no information |
+| mixed | 2 | 4 | bodies disagree (move 0, Razor Wind 13, Return 216, Dive 291: context-dependent, see `samples`) |
+
+y2: attacker/target y2 is **0 at end+1 and before the next body** for every classified move except **Whirlwind 18 and Roar 46** (the target is slid off-screen, y2/x2 stay displaced: prep11 §2.1) and the move-0 status bodies; the faint slide (y2 8..64) is the other y2 mover. The original (target-only) census `move-end-state-x2.json` agrees (89 target-zeroed, 49 unchanged, 3 transient).
+Spot checks: Flail 175 zeroed/zeroed; Tackle 33 attacker transient / target zeroed; Double Kick 24 target zeroed; Thrash 37 target transient (lock-in turns: see below); Astonish 310 attacker transient, target zeroed; Wish 273 unchanged/unchanged; Rock Throw 88, Crabhammer 152, Leaf Blade 348 target zeroed; Hail 258 unchanged; Water Pulse 352 target zeroed, attacker unchanged; Silver Wind 318 target unchanged; Toxic 92 unchanged.
+
+### 0.4 Consumers (what a tracker must feed): `src/engine/liveMoveAnimation.ts` (line numbers at this base, master `5f75db33e`)
+Direct readers of `frontIdleRest` (all `liveBattlerAnchors(side, art).frontIdleRest` which is opponent-only): HI_JUMP_KICK 136 :978; EARTHQUAKE 89 :1157-1158 (both sides); FISSURE 90 :1163; CRABHAMMER 152 :1174; LEECH_SEED 73 :1344-1345; TRI_ATTACK 161 :1359; DESTINY_BOND 194 :1386; FORESIGHT 193 :1408; SKY_UPPERCUT 327 :1426-1427 (attacker + target); SPIDER_WEB 169 :1454; PETAL_DANCE 80 :1501, 1510-1511; LEAF_BLADE 348 :1530; ROCK_THROW 88 :1561; ROCK_TOMB 317 :1644; SWIFT 129 :1788; RAZOR_WIND 13 :1820; ROCK_BLAST 350 :1835-1838 (attacker + target); MAGNITUDE 222 :1868-1869; FRUSTRATION 218 :1887, 1895; SEISMIC_TOSS 69 :1909; HORN_DRILL 32 :1921; AURORA_BEAM 62 :1931; ABSORB 71 :2032; ROLLOUT 205 :2100 (already ONLY at counter 1: the in-body history is modelled for Rollout); FLAIL 175 :2145 (`targetInitialX2`). The source of the value is `liveBattlerAnchors` :323-340 (:336 `frontIdleRest`), so **one seam** (add a `restOverride` on the anchors) feeds all of them; The one direct `speciesFrontIdleRestOffsetOrZero(target.species)` call (HI_JUMP_KICK :978) must be redirected too. Other readers outside this file: `src/animation/sceneOnPresentation.ts:6810, :12997` (`speciesFrontIdleRestOffset(target.species)`), `src/engine/battleScene.ts:5818` (GROVYLE constant) and the Leaf Blade display `battleScene.ts:22687` (`leafBladeDisplayedTargetX2AtAge`, hard-codes 1 for every opponent: the prep11 defect, independent of #148). Adapters that do not read x2 (Double Kick :2115, Thrash :2153, Astonish :2166, Wish :2127) take `GetBattlerSpriteCoord` geometry only: **Double Kick hit 2 / Thrash turns 2+ get their ONIX target shift from the renderer's battler draw, not from their config** -> the tracker must also feed the host's battler draw offset (where the 1,091 px/row of the Flail bodies 2-5 came from).
+
+### 0.5 Replay and ROM checks
+* **Rule vs ROM at every body activation** (`x2HistoryTrackerCheck.py`, `tracker-check.json`): 395 original lab scenarios, **1,944 role-observations**; first bodies 788/788 correct (rest from the species table, back sprite 0); **later bodies 1,139/1,156 correct (98.5 %)**; the 17 misses by body move: `move 0` x10 (status/end-turn bodies after Tackle 33 / Toxic 92 / Razor Wind 13 / Screech 103 / Sludge Bomb 188 / Smog 123: either the activation is mid-motion or the earlier class is `mixed`), Tackle 33 x4 (after Rollout 205, Wrap-type 0/49/129 bodies), Strong Return 150 x2 (after Return 216, a `mixed` class) and Rollout 205 x1: all follow `mixed`/`move 0` rows, none is a plain zeroed/unchanged move.
+* **Faint + send-in** (`faint-sendin-receipt.json`, scenario `scenarios/x2h-faint-sendin-onix.json`): 3/3 activations predicted (PIDGEY target 0, ONIX after send-in attacker body **1**, Flail target body **1**, end+1 -> 0).
+* **Flail natural-HP x5** (the #148 case, in the 395): ONIX target x2 at activation 1, 0, 0, 0, 0 (f429, 966, 1863, 2434, 3314) = rule.
+* **Ordinary generated routes** (`x2HistoryRouteReplay.ts`, every presented move-animation command, rule with the 188-move table; moves not in the table are treated "keep", so this UNDER-counts zeroing): seeds 100-149 + 0-3 => 48 routes, 765 bodies; **16 bodies have an ONIX/RATTATA opponent (2 routes: seeds 110 and 134, both ONIX)**, of which **4 are first bodies (input unchanged) and 12 later bodies whose input CHANGES** (rule: zeroed vs the adapters' `frontIdleRest` 1). So ~4 % of routes (2/48) contain a species whose idle x2 is non-zero and in those every later body is affected; routes with any other opponent species are unaffected by #148 (x2 is 0 either way). Seeds 0-3: 2 of 4 stalled/errored (`errors`), 100-149: 4 of 50.
+
+### 0.6 Proposed production tracker (do not wire without the Open items)
+State `x2State[side] : {species, zeroed}` in the presentation host (like `liveSpriteOrderHost.ts`): reset to idle on `switch-in`/battle start/replacement send-in (the same commands that re-seed the sprite-order tracker); after each presented body set `zeroed` for each role whose move class (table above, key move id + role) is `zeroed`; `liveBattlerAnchors` returns `frontIdleRest = zeroed ? {0,0} : species rest`. Moves not in the table: **fall back to `zeroed` for the target when the body is a damaging move (every hit shakes its target) and "keep" otherwise**, then re-measure with the same scripts. Unknown multi-body moves (`mixed`) need a context key (first hit vs later hit) from the per-scenario series in `bodies-x2*.json`.
+
+## 1. Files
+`tools/integration/`: `x2HistorySpecies.sh` + `x2HistorySpeciesProbe.py` + `x2HistorySpeciesTable.py` (species table), `x2HistoryProdTable.ts` (production vs ROM), `x2HistoryBodies.sh` (+ `x2HistoryOnixPairs.py`; `prep11Probe.py` PREP11_ALWAYS=1 per-frame series), `x2HistoryAnalyze.py`, `x2HistoryClassify.py`, `x2HistoryTrackerCheck.py`, `x2HistoryFaintSendIn.py`, `x2HistoryRouteReplay.ts`; receipts in `tools/integration/fixtures/x2-history/` (`species-rest-x2.json`, `species-prod-vs-rom.json`, `bodies-x2.json`, `bodies-x2-onix-pairs.json`, `move-end-state-x2*.json`, `tracker-check.json`, `faint-sendin-receipt.json`, `route-replay-*.json`, `scenarios/x2h-faint-sendin-onix.json`).
+
+## 2. Open
+* Player-side switch-out/in (back sprite rest is 0 for all species, so it cannot change an x2 history; not run) and the action-menu/summary-return idle were only observed as "constant"; `Leaf Blade` display (battleScene.ts:22687) is the separate prep11 defect.
+* 320 role-observations in the replay are `mixed`/unknown moves (move 0 status bodies, multi-turn moves); only ONIX-paired lab moves have a class (188 of the ~350 move ids): the rest need the same run.
+* The attacker-side `transient` class (ONIX attacker returns to 1) means attackers keep the idle value; adapters reading attacker `frontIdleRest` (Sky Uppercut, Rock Blast, Earthquake) are safe without the tracker; target readers are the exposed ones.

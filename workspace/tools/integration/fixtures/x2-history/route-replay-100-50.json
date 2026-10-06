@@ -1,0 +1,135 @@
+{
+ "seeds": [
+  100,
+  149
+ ],
+ "routes": 46,
+ "bodies": 698,
+ "bodiesWithRestSpecies": 16,
+ "laterBodiesInputChanged": 12,
+ "firstBodiesRest": 4,
+ "unknownClassBodies": 449,
+ "errors": 4,
+ "changedInputs": [
+  {
+   "seed": 110,
+   "move": 24,
+   "side": "opponent",
+   "species": "ONIX",
+   "key": "0:17:24:1"
+  },
+  {
+   "seed": 110,
+   "move": 20,
+   "side": "opponent",
+   "species": "ONIX",
+   "key": "0:1:20:0"
+  },
+  {
+   "seed": 110,
+   "move": 332,
+   "side": "opponent",
+   "species": "ONIX",
+   "key": "0:7:332:0"
+  },
+  {
+   "seed": 110,
+   "move": 157,
+   "side": "opponent",
+   "species": "ONIX",
+   "key": "0:1:157:0"
+  },
+  {
+   "seed": 134,
+   "move": 246,
+   "side": "opponent",
+   "species": "ONIX",
+   "key": "0:9:246:0"
+  },
+  {
+   "seed": 134,
+   "move": 28,
+   "side": "opponent",
+   "species": "ONIX",
+   "key": "0:6:28:0"
+  },
+  {
+   "seed": 134,
+   "move": 182,
+   "side": "opponent",
+   "species": "ONIX",
+   "key": "0:1:182:0"
+  },
+  {
+   "seed": 134,
+   "move": 201,
+   "side": "opponent",
+   "species": "ONIX",
+   "key": "0:5:201:0"
+  },
+  {
+   "seed": 134,
+   "move": 72,
+   "side": "opponent",
+   "species": "ONIX",
+   "key": "0:8:72:0"
+  },
+  {
+   "seed": 134,
+   "move": 246,
+   "side": "opponent",
+   "species": "ONIX",
+   "key": "0:4:246:0"
+  },
+  {
+   "seed": 134,
+   "move": 28,
+   "side": "opponent",
+   "species": "ONIX",
+   "key": "0:8:28:0"
+  },
+  {
+   "seed": 134,
+   "move": 72,
+   "side": "opponent",
+   "species": "ONIX",
+   "key": "0:5:72:0"
+  }
+ ],
+ "unknownClassMoves": {
+  "9": 2,
+  "13": 6,
+  "28": 26,
+  "44": 18,
+  "52": 18,
+  "75": 4,
+  "86": 12,
+  "91": 4,
+  "98": 38,
+  "103": 2,
+  "104": 14,
+  "129": 14,
+  "173": 2,
+  "184": 6,
+  "185": 34,
+  "189": 8,
+  "204": 26,
+  "205": 18,
+  "209": 20,
+  "210": 6,
+  "246": 34,
+  "252": 6,
+  "278": 2,
+  "283": 4,
+  "291": 23,
+  "297": 6,
+  "298": 2,
+  "301": 10,
+  "313": 18,
+  "324": 6,
+  "325": 2,
+  "326": 2,
+  "340": 30,
+  "351": 26
+ }
+}

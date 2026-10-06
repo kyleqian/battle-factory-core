@@ -1,0 +1,231 @@
+{
+ "bodiesChecked": 1944,
+ "counts": {
+  "first/ok": 788,
+  "later/bad": 17,
+  "later/ok": 1139,
+  "unclassified-mixed/attacker": 156,
+  "unclassified-mixed/target": 164,
+  "unclassified-unknown/attacker": 40,
+  "unclassified-unknown/target": 40
+ },
+ "mismatches": [
+  {
+   "scenario": "mechanic-pin-missile-opponent-qwilfish-player-onix.json",
+   "body": 3,
+   "move": 0,
+   "role": "attacker",
+   "species": 95,
+   "pred": 0,
+   "rom": 1,
+   "prevMove": 33
+  },
+  {
+   "scenario": "mechanic-razor-wind-player-nuzleaf-opponent-onix.json",
+   "body": 4,
+   "move": 0,
+   "role": "attacker",
+   "species": 95,
+   "pred": 1,
+   "rom": 0,
+   "prevMove": 13
+  },
+  {
+   "scenario": "mechanic-refresh-opponent-chansey-player-onix.json",
+   "body": 1,
+   "move": 0,
+   "role": "target",
+   "species": 113,
+   "pred": 0,
+   "rom": 1,
+   "prevMove": 92
+  },
+  {
+   "scenario": "mechanic-refresh-player-chansey-opponent-onix.json",
+   "body": 1,
+   "move": 0,
+   "role": "target",
+   "species": 113,
+   "pred": 0,
+   "rom": 1,
+   "prevMove": 92
+  },
+  {
+   "scenario": "mechanic-return-strong-player-dragonair-opponent-onix.json",
+   "body": 1,
+   "move": 150,
+   "role": "attacker",
+   "species": 95,
+   "pred": 1,
+   "rom": 0,
+   "prevMove": 216
+  },
+  {
+   "scenario": "mechanic-return-strong-player-dragonair-opponent-onix.json",
+   "body": 1,
+   "move": 150,
+   "role": "target",
+   "species": 95,
+   "pred": 1,
+   "rom": 0,
+   "prevMove": 216
+  },
+  {
+   "scenario": "mechanic-rollout-player-voltorb-opponent-onix.json",
+   "body": 1,
+   "move": 33,
+   "role": "attacker",
+   "species": 95,
+   "pred": 1,
+   "rom": 0,
+   "prevMove": 205
+  },
+  {
+   "scenario": "mechanic-rollout-player-voltorb-opponent-onix.json",
+   "body": 2,
+   "move": 205,
+   "role": "target",
+   "species": 95,
+   "pred": 1,
+   "rom": 0,
+   "prevMove": 33
+  },
+  {
+   "scenario": "mechanic-screech-player-voltorb-opponent-onix.json",
+   "body": 1,
+   "move": 0,
+   "role": "target",
+   "species": 95,
+   "pred": 1,
+   "rom": 0,
+   "prevMove": 103
+  },
+  {
+   "scenario": "mechanic-screech-player-voltorb-opponent-onix.json",
+   "body": 2,
+   "move": 33,
+   "role": "attacker",
+   "species": 95,
+   "pred": 1,
+   "rom": 0,
+   "prevMove": 0
+  },
+  {
+   "scenario": "mechanic-sludge-bomb-player-weepinbell-opponent-onix.json",
+   "body": 1,
+   "move": 0,
+   "role": "target",
+   "species": 95,
+   "pred": 0,
+   "rom": 1,
+   "prevMove": 188
+  },
+  {
+   "scenario": "mechanic-smog-opponent-magby-player-onix.json",
+   "body": 1,
+   "move": 0,
+   "role": "target",
+   "species": 95,
+   "pred": 0,
+   "rom": 1,
+   "prevMove": 123
+  },
+  {
+   "scenario": "mechanic-smog-opponent-magby-player-onix.json",
+   "body": 3,
+   "move": 0,
+   "role": "attacker",
+   "species": 95,
+   "pred": 0,
+   "rom": 1,
+   "prevMove": 33
+  },
+  {
+   "scenario": "mechanic-smog-opponent-magby-player-onix.json",
+   "body": 3,
+   "move": 0,
+   "role": "target",
+   "species": 95,
+   "pred": 0,
+   "rom": 1,
+   "prevMove": 33
+  },
+  {
+   "scenario": "mechanic-sonic-boom-player-magneton-opponent-onix.json",
+   "body": 1,
+   "move": 33,
+   "role": "attacker",
+   "species": 95,
+   "pred": 1,
+   "rom": 0,
+   "prevMove": 49
+  },
+  {
+   "scenario": "mechanic-swift-player-staryu-opponent-onix.json",
+   "body": 1,
+   "move": 33,
+   "role": "attacker",
+   "species": 95,
+   "pred": 1,
+   "rom": 0,
+   "prevMove": 129
+  },
+  {
+   "scenario": "mechanic-toxic-opponent-clamperl-player-onix.json",
+   "body": 2,
+   "move": 0,
+   "role": "target",
+   "species": 95,
+   "pred": 0,
+   "rom": 1,
+   "prevMove": 92
+  }
+ ],
+ "mismatchCount": 17,
+ "mismatchByPrevMove": [
+  [
+   "33",
+   4
+  ],
+  [
+   "92",
+   3
+  ],
+  [
+   "216",
+   2
+  ],
+  [
+   "13",
+   1
+  ],
+  [
+   "205",
+   1
+  ],
+  [
+   "103",
+   1
+  ],
+  [
+   "0",
+   1
+  ],
+  [
+   "188",
+   1
+  ],
+  [
+   "123",
+   1
+  ],
+  [
+   "49",
+   1
+  ],
+  [
+   "129",
+   1
+  ]
+ ]
+}
