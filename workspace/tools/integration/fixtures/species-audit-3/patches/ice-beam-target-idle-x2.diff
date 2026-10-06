@@ -1,0 +1,13 @@
+diff --git a/workspace/src/engine/battleScene.ts b/workspace/src/engine/battleScene.ts
+index ff21c3e5c..dd9e48865 100644
+--- a/workspace/src/engine/battleScene.ts
++++ b/workspace/src/engine/battleScene.ts
+@@ -15760,7 +15760,7 @@ export function renderSceneOnMovePresentation(
+       fb,
+       targetArt.tileset,
+       targetPalette,
+-      view.target.geometry.spriteCorner.x + targetX2,
++      view.target.geometry.spriteCorner.x + targetX2 + (iceBeamState.age < 39 ? 1 : 0),
+       view.target.geometry.spriteCorner.y,
+     );
+     const drawAttacker = () => drawSpriteSheet(
