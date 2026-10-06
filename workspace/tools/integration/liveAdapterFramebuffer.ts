@@ -217,6 +217,18 @@ export function fixtureBattlerX2Input(f: Fixture): LiveMoveBattlerX2Input | unde
   return liveMoveBattlerX2Input(history);
 }
 
+/**
+ * prep16 s0.3 first-body marker: what the production order host lends while no unit has run since the battle began
+ * (liveSpriteOrderHost `bodies` 0). A fixture is a first body when it declares no preceding body, turn or x2 event; the
+ * POKEBENCH_LIVE_ORDER_INPUT=first-body control forces it, mirroring fixtureSpriteOrder.
+ */
+function withFirstBody(f: Fixture, input: ReturnType<typeof prepareLiveMoveSpriteOrder>["input"]) {
+  if (input === undefined) return undefined;
+  const first = process.env.POKEBENCH_LIVE_ORDER_INPUT === "first-body"
+    || (!f.precedingBodies?.length && !f.precedingTurns && !f.precedingX2Events);
+  return first ? { ...input, firstBody: true as const } : input;
+}
+
 export function liveView(f: Fixture, age: number): BattleResolutionPresentationRenderView {
   const profile = f.fieldProfile;
   const makeBattler = (side: "player" | "opponent") => {
@@ -269,7 +281,7 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
       // POKEBENCH_LIVE_ORDER_INPUT=none withholds it (order-independent adapters must stay exact without a host order).
       spriteOrderInput: process.env.POKEBENCH_LIVE_ORDER_INPUT === "none" ? undefined
         : postKo ? postKo.spriteOrderInput
-          : prepareLiveMoveSpriteOrder(fixtureSpriteOrder(f, request).order, request).input,
+          : withFirstBody(f, prepareLiveMoveSpriteOrder(fixtureSpriteOrder(f, request).order, request).input),
       ...(liveMoveRandom2Plan(request) === null ? {} : { presentationRng: fixturePresentationRng(f, request) }),
       ...(fixtureBattlerX2Input(f) === undefined ? {} : { battlerX2Input: fixtureBattlerX2Input(f) }),
     },
