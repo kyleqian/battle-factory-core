@@ -2399,14 +2399,14 @@ export function liveMoveAnimationPresentation(
         const order = spriteOrderWithOccupiedPrefix(
           { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
         if (inputs === null || order === null) return null;
-        config = { move: "PSYCH_UP", attacker, target, fieldProfile, animationInputs: { ...inputs, spriteOrder: order } };
+        config = { move: "PSYCH_UP", attacker, target, fieldProfile, animationInputs: { ...inputs, spriteOrder: order } as never };
       } else if (request.moveId === 315) {
         const inputs = liveOverheatInputs(args);
         const order = spriteOrderWithOccupiedPrefix(
           { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
         if (inputs === null || order === null) return null;
         config = { move: "OVERHEAT", attacker, target, fieldProfile,
-          animationInputs: { ...inputs, allocator: { ...inputs.allocator, spriteOrder: order } } };
+          animationInputs: { ...inputs, allocator: { ...inputs.allocator, spriteOrder: order } } as never };
       } else {
         const { attackerPictureOrigin, targetPictureOrigin, ...inputs } = liveSilverWindInputs(args);
         // The accepted compositor fit: effect pictures centre on the picture origin and the age-0 enemy shadow draws at
@@ -2415,7 +2415,7 @@ export function liveMoveAnimationPresentation(
           ...battler, geometry: { ...battler.geometry, animationCenter: origin,
             battlePositionCenter: battler.geometry.side === "player" ? origin : { x: 176, y: 41 } } });
         config = { move: "SILVER_WIND", attacker: withOrigin(attacker, attackerPictureOrigin),
-          target: withOrigin(target, targetPictureOrigin), fieldProfile, animationInputs: inputs };
+          target: withOrigin(target, targetPictureOrigin), fieldProfile, animationInputs: inputs as never };
       }
       break;
     }

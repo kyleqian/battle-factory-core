@@ -6,11 +6,12 @@
  * equal across both accepted corpora (every K field), the fresh first-body captures and the alternate-species scenarios.
  * No capture row is read at runtime.
  */
-import type { SceneOnOverheatConfig, SceneOnPsychUpConfig, SceneOnSilverWindConfig } from "../animation/sceneOnPresentation.ts";
 import paletteData from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
 import type { LivePaletteComposite } from "./liveMovePaletteComposite.ts";
 
 type Side = "player" | "opponent";
+/** Reducer inputs, structurally typed by the move config they are spread into (src/engine may not import src/animation). */
+type Inputs = Record<string, any>;
 type Point = Readonly<{ x: number; y: number }>;
 export interface LiveBgSnapshotAnchors {
   readonly picOffsetPoint: Point;
@@ -59,7 +60,7 @@ const palettes = (composite: LivePaletteComposite) => ({
 });
 
 /** MOVE_OVERHEAT animationInputs (prep16 s2.1). Null when a battler's idle rest is non-zero (the renderer draws no idle offset). */
-export function liveOverheatInputs(args: LiveBgSnapshotArgs): SceneOnOverheatConfig["animationInputs"] | null {
+export function liveOverheatInputs(args: LiveBgSnapshotArgs): Inputs | null {
   const { attackerSide, attacker, target } = args, targetSide: Side = attackerSide === "player" ? "opponent" : "player";
   if (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0
     || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
@@ -103,7 +104,7 @@ export function liveOverheatInputs(args: LiveBgSnapshotArgs): SceneOnOverheatCon
       clearHorizontal: 0, clearVertical: 0, monbgPaletteBank: player ? 8 : 9,
     },
     registers: S0_REGISTERS, animationRngSeed: 0, gameplayRng: 0,
-  } as unknown as SceneOnOverheatConfig["animationInputs"];
+  } as Inputs;
 }
 
 // Sparkle birth table by side: [slot, matrixNum, attr0, attr1, attr2, subpriority, oamPriority] at the measured reference target
@@ -149,9 +150,7 @@ const SPARKLES: Readonly<Record<Side, readonly (readonly number[])[]>> = Object.
 const SPARKLE_REFERENCE_TARGET_Y: Readonly<Record<Side, number>> = Object.freeze({ player: 42, opponent: 88 });
 
 /** MOVE_SILVER_WIND animationInputs (prep16 s2.2): first-body S0 registers for BOTH sides (opponent: bg1cnt 0x9c00, win0 240/161, splitBg1Cnt 0x9c01). */
-export function liveSilverWindInputs(args: LiveBgSnapshotArgs): SceneOnSilverWindConfig["animationInputs"] & {
-  readonly attackerPictureOrigin: Point; readonly targetPictureOrigin: Point;
-} {
+export function liveSilverWindInputs(args: LiveBgSnapshotArgs): Inputs & { readonly attackerPictureOrigin: Point; readonly targetPictureOrigin: Point } {
   const { attackerSide, attacker, target } = args, targetSide: Side = attackerSide === "player" ? "opponent" : "player";
   const player = attackerSide === "player";
   const attackerSprite = battlerSprite(attackerSide, attacker), targetSprite = battlerSprite(targetSide, target);
@@ -163,7 +162,7 @@ export function liveSilverWindInputs(args: LiveBgSnapshotArgs): SceneOnSilverWin
     taskSlots: { pan: 0, monbg: 2, firstExclude: 1, firstFade: 3, slidingBg: 4, clearMonbg: 0, restoreFade: 0, secondExclude: 1 },
     sparkleSlots: SPARKLES[attackerSide].map(([slot, matrixNum, attr0, attr1, attr2, subpriority, oamPriority]) => ({
       slot, matrixNum, attr: [attr0! & 0xff00 | (attr0! + delta) & 0xff, attr1!, attr2!] as [number, number, number], subpriority, oamPriority,
-    })) as unknown as SceneOnSilverWindConfig["animationInputs"]["sparkleSlots"],
+    })),
     resources: { sparkle6: { tag: 10271, tileSlot: 6, paletteAllocatorSlot: 7, paletteBank: 23, tileRange: [305, 4],
       palette: resourceWords("ANIM_TAG_SPARKLE_6") } },
     allocator: {
@@ -187,7 +186,7 @@ export function liveSilverWindInputs(args: LiveBgSnapshotArgs): SceneOnSilverWin
       bugBackgroundTaskId: { player: 23, opponent: 22 },
     },
     animationRngSeed: 0, gameplayRng: 0,
-  } as unknown as ReturnType<typeof liveSilverWindInputs>;
+  };
 }
 
 /**
@@ -195,7 +194,7 @@ export function liveSilverWindInputs(args: LiveBgSnapshotArgs): SceneOnSilverWin
  * the player's `bg2cnt` is 0x5e00 at a first-body activation and the 32 software matrices are identity (measured). The spiral
  * is placed at the attacker picture origin; the monbg base scroll is 32 - the attacker's sprite centre.
  */
-export function livePsychUpInputs(args: LiveBgSnapshotArgs): SceneOnPsychUpConfig["animationInputs"] | null {
+export function livePsychUpInputs(args: LiveBgSnapshotArgs): Inputs | null {
   const { attackerSide, attacker, target } = args;
   if (attackerSide !== "player" || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
   const attackerSprite = battlerSprite("player", attacker), targetSprite = battlerSprite("opponent", target);
@@ -213,5 +212,5 @@ export function livePsychUpInputs(args: LiveBgSnapshotArgs): SceneOnPsychUpConfi
     palettes: { ...palettes(args.palettes), backgroundBanks: [1, 2, 3], attackerBank: 16, attackerPaletteSelectorHigh: 1,
       resourcePalette: resourceWords("ANIM_TAG_SPIRAL") },
     registers: { bldcnt: 0, bldalpha: 0, bldy: 0 }, animationRngSeed: 0, gameplayRng: 0,
-  } as unknown as SceneOnPsychUpConfig["animationInputs"];
+  } as Inputs;
 }
