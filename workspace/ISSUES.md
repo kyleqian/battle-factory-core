@@ -17,23 +17,17 @@ backlog.
 
 # Open
 
-## #148 — Live adapters restart the target's x2 from the species front idle after a body that shook it (S10A, found 2026-10-06)
+## #148 — Battler x2 history: unknown-history remainder (main bug FIXED 2026-10-06)
 
-- **Symptom:** the ROM leaves a battler's sprite `x2` at 0 after a body's shake task releases it
-  (e.g. Flail's `AnimTask_ShakeTargetBasedOnMovePowerOrDmg`), but live adapters derive the target's
-  resting x2 from `liveBattlerAnchors(...).frontIdleRest.x2` (species front idle: ONIX 1, most species 0),
-  which is only right until the first shake after the send-in idle. Found by the R1 faithful-random
-  batch: Flail natural-HP bodies 2-5 (powers 80/100/150/200, KRABBY -> ONIX) leave 109 rows x 1,091 px;
-  substituting x2 = 0 (diagnostic only) makes all four tiers 0 px, so words and the power shake are exact.
-- **Reach:** any live body whose target has a non-zero front-idle rest x2 and was shaken by an earlier
-  body in the battle: Double Kick hit 2, Thrash lock-in turns 2+, Leaf Blade / Aerial Ace / Rock Throw /
-  Crabhammer / Psybeam / Magical Leaf (the adapters that read `frontIdleRest`) after any shaking body.
-  First bodies after the send-in are exact (all accepted fixtures).
-- **Evidence:** `tools/integration/fixtures/random2-r1-live-receipt.json` (Flail power tiers),
-  `tools/integration/fixtures/random2-r1/flail-natural-*.json`.
-- **Fix shape (unmeasured):** a presentation-side per-battler x2 history (like the sprite-order tracker):
-  which source tasks leave x2 at 0 at body end, and what re-establishes the idle x2 (send-in idle anim,
-  switch). Needs a measured census of tasks/species before wiring.
+- **Fixed:** `src/engine/liveBattlerX2History.ts` (merged `de0e887`-era master) tracks per battler
+  idle | zeroed | unknown from the measured per-move/role table (`docs/x2-history-148.md`), resets on
+  send-in, and feeds `liveBattlerAnchors(...).frontIdleRest` + every renderer species-rest read.
+  Flail bodies 2-5, Double Kick hit 2, Spike Cannon / Fury Swipes later hits, Flail after an ONIX
+  send-in: 0 px (receipt `tools/integration/fixtures/x2-history-tracker-receipt.json`).
+- **Open:** `unknown` (falls back to the species rest = pre-fix behaviour) after the four `mixed`
+  moves (move-0 status bodies, Razor Wind 13, Return 216, Dive 291), after unmodelled general/status
+  animations, a party menu or an undrained resolution; the forced switch-in phase does not advance the
+  host (catches up at the next command). Only opponent ONIX / RATTATA are affected.
 
 ## #147 — Elevated opponents in ordinary resolution frames: remainder (main bug FIXED 2026-10-05)
 
