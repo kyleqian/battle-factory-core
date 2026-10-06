@@ -3209,6 +3209,20 @@
       ]
     },
     {
+      "move": "MOVE_ROLLOUT",
+      "id": 205,
+      "sourceFieldEvidence": "../tools/integration/fixtures/rollout-live-receipt.json",
+      "liveEvidence": [
+        "dense 12/12 zero residual twice fresh: VOLTORB -> ONIX player bodies 1..5 (167/167/161/153/145 rows), opponent bodies 1..5 + the restart counter-1 body, WAILMER alternate body 1; the request carries the presentation-only rolloutCounter (7th MOVE_ANIMATION argument, start - timer after rolloutdamagecalculation, move 205 only)",
+        "plain power ladder only (30 << (counter - 1)); the counter selects the body"
+      ],
+      "remaining": [
+        "Defense Curl bodies (power 60 << (counter - 1), SHUCKLE -> BLISSEY draft) keep a 6 px field residual from age 0 (cause not isolated): the adapter declines them (scene-off fallback)",
+        "Ice Ball (301) shares the counter but is out of scope",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
       "move": "MOVE_BOUNCE",
       "id": 340,
       "sourceFieldEvidence": "../tools/integration/fixtures/flybounce-live-receipt.json",
@@ -3245,7 +3259,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 217,
+  "implementedCount": 218,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},

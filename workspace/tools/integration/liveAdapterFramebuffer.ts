@@ -54,7 +54,7 @@ export interface Fixture {
   /** Controller arguments the ROM held at this body (gAnimMoveTurn/Power/Dmg). */
   /** Source text box content during this body (default: the move-used banner). */
   messageLines?: [string, string];
-  requestFields?: { turn?: number; power?: number; damage?: number };
+  requestFields?: { turn?: number; power?: number; damage?: number; rolloutCounter?: number };
   /**
    * Units that ran before this body in the scenario (docs/sprite-order-body-plans.md §2/§5): bodies by move id and
    * ATTACKER side, in order. Omitted = this is the scenario's first body after the known entry. The harness replays

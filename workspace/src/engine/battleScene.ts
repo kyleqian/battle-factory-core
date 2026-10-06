@@ -47838,13 +47838,13 @@ export function renderSceneOnMovePresentation(
     const rolloutState =
       state as SceneOnMovePresentationState<SceneOnRolloutConfig>;
     const live = sceneOnRolloutView(rolloutState);
-    const playerToOpponent = live.attacker.species === "VOLTORB"
+    const playerToOpponent = (liveField || live.attacker.species === "VOLTORB")
       && live.attacker.geometry.side === "player"
-      && live.target.species === "ONIX"
+      && (liveField || live.target.species === "ONIX")
       && live.target.geometry.side === "opponent";
-    const opponentToPlayer = live.attacker.species === "VOLTORB"
+    const opponentToPlayer = (liveField || live.attacker.species === "VOLTORB")
       && live.attacker.geometry.side === "opponent"
-      && live.target.species === "ONIX"
+      && (liveField || live.target.species === "ONIX")
       && live.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -47900,10 +47900,10 @@ export function renderSceneOnMovePresentation(
       );
     }
 
-    const voltorb = playerToOpponent
+    const voltorb = liveField ? liveSceneOnBattlerArt(live.attacker) : playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).VOLTORB!
       : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).VOLTORB!;
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = liveField ? liveSceneOnBattlerArt(live.target) : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const drawAttacker = (): void => drawSpriteSheet(
       fb,
       voltorb.tileset,
@@ -47980,6 +47980,7 @@ export function renderSceneOnMovePresentation(
       drawParticles();
     }
 
+    if (liveField) return;
     const profile = rolloutState.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(
       healthboxAssemblyAssets,

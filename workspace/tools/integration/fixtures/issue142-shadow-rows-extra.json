@@ -1869,7 +1869,7 @@
    "sources": {
     "fixture": "tools/integration/fixtures/order-consumer-grudge-player.json",
     "body": "normal",
-    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md §4; issue142ActivationProbe.py)"
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
    }
   },
   {
@@ -1887,7 +1887,7 @@
    "sources": {
     "fixture": "tools/integration/fixtures/order-consumer-grudge-opponent.json",
     "body": "normal",
-    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md §4; issue142ActivationProbe.py)"
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
    }
   },
   {
@@ -1905,7 +1905,7 @@
    "sources": {
     "fixture": "tools/integration/fixtures/order-consumer-ember-player.json",
     "body": "normal",
-    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md §4; issue142ActivationProbe.py)"
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
    }
   },
   {
@@ -1923,7 +1923,7 @@
    "sources": {
     "fixture": "tools/integration/fixtures/order-consumer-ember-opponent.json",
     "body": "normal",
-    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md §4; issue142ActivationProbe.py)"
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
    }
   },
   {
@@ -1941,7 +1941,7 @@
    "sources": {
     "fixture": "tools/integration/fixtures/order-consumer-dragon-rage-player.json",
     "body": "normal",
-    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md §4; issue142ActivationProbe.py)"
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
    }
   },
   {
@@ -1959,7 +1959,7 @@
    "sources": {
     "fixture": "tools/integration/fixtures/order-consumer-dragon-rage-opponent.json",
     "body": "normal",
-    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md §4; issue142ActivationProbe.py)"
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
    }
   },
   {
@@ -1977,7 +1977,7 @@
    "sources": {
     "fixture": "tools/integration/fixtures/order-consumer-flamethrower-player.json",
     "body": "normal",
-    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md §4; issue142ActivationProbe.py)"
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
    }
   },
   {
@@ -1995,7 +1995,7 @@
    "sources": {
     "fixture": "tools/integration/fixtures/order-consumer-flamethrower-opponent.json",
     "body": "normal",
-    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md §4; issue142ActivationProbe.py)"
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
    }
   },
   {
@@ -2013,7 +2013,7 @@
    "sources": {
     "fixture": "tools/integration/fixtures/order-consumer-rock-throw-player.json",
     "body": "normal",
-    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md §4; issue142ActivationProbe.py)"
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
    }
   },
   {
@@ -2031,7 +2031,7 @@
    "sources": {
     "fixture": "tools/integration/fixtures/order-consumer-rock-throw-opponent.json",
     "body": "normal",
-    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md §4; issue142ActivationProbe.py)"
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
    }
   },
   {
@@ -2049,7 +2049,7 @@
    "sources": {
     "fixture": "tools/integration/fixtures/order-consumer-heal-bell-player.json",
     "body": "normal",
-    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md §4; issue142ActivationProbe.py)"
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
    }
   },
   {
@@ -2067,7 +2067,7 @@
    "sources": {
     "fixture": "tools/integration/fixtures/order-consumer-heal-bell-opponent.json",
     "body": "normal",
-    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md §4; issue142ActivationProbe.py)"
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
    }
   },
   {
@@ -2085,7 +2085,7 @@
    "sources": {
     "fixture": "tools/integration/fixtures/order-consumer-perish-song-player.json",
     "body": "normal",
-    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md §4; issue142ActivationProbe.py)"
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
    }
   },
   {
@@ -2103,7 +2103,7 @@
    "sources": {
     "fixture": "tools/integration/fixtures/order-consumer-perish-song-opponent.json",
     "body": "normal",
-    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md §4; issue142ActivationProbe.py)"
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
    }
   },
   {
@@ -2121,7 +2121,7 @@
    "sources": {
     "fixture": "tools/integration/fixtures/order-consumer-leaf-blade-player.json",
     "body": "normal",
-    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md §4; issue142ActivationProbe.py)"
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
    }
   },
   {
@@ -2139,7 +2139,7 @@
    "sources": {
     "fixture": "tools/integration/fixtures/order-consumer-leaf-blade-opponent.json",
     "body": "normal",
-    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md §4; issue142ActivationProbe.py)"
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
    }
   },
   {
@@ -2157,7 +2157,7 @@
    "sources": {
     "fixture": "tools/integration/fixtures/order-consumer-blaze-kick-player.json",
     "body": "normal",
-    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md §4; issue142ActivationProbe.py)"
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
    }
   },
   {
@@ -2175,7 +2175,7 @@
    "sources": {
     "fixture": "tools/integration/fixtures/order-consumer-blaze-kick-opponent.json",
     "body": "normal",
-    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md §4; issue142ActivationProbe.py)"
+    "activation": "tools/integration/fixtures/order-consumer-activation (docs/order-consumer-prep.md \u00a74; issue142ActivationProbe.py)"
    }
   },
   {
@@ -4054,6 +4054,42 @@
     "fixture": "tools/integration/fixtures/flybounce-live/bounce-opponent-spoink-onix-charge.json",
     "body": "normal",
     "activation": "tools/integration/fixtures/prep11-*.json draft (activation == window start; docs/next-adapters-prep11.md s0.2); charge body (request.turn 0); the strike window also starts at its activation"
+   }
+  },
+  {
+   "id": 205,
+   "move": "ROLLOUT",
+   "orientation": "player",
+   "variant": "rollout-player",
+   "activationFrame": 75,
+   "windowStart": 75,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/rollout-live/rollout-player-plain-body1.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/rollout-endeavor/draft-rollout-*.json (activation == accepted window start; docs/rollout-endeavor-prep.md s0.1); counter 1 body, bodies 2..5 start at their own activations"
+   }
+  },
+  {
+   "id": 205,
+   "move": "ROLLOUT",
+   "orientation": "opponent",
+   "variant": "rollout-opponent",
+   "activationFrame": 79,
+   "windowStart": 79,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/rollout-live/rollout-opponent-plain-body1.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/rollout-endeavor/draft-rollout-*.json (activation == accepted window start; docs/rollout-endeavor-prep.md s0.1); counter 1 body, bodies 2..5 start at their own activations"
    }
   }
  ]
