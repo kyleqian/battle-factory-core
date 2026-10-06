@@ -40,6 +40,12 @@ export const LIVE_MOVE_RANDOM2_PLANS: Readonly<Record<number, readonly Presentat
   // Move_HYPER_BEAM: 52 orbs, two per frame group (+110 step 3, 26 groups), three words each: animation (% 8),
   // speed ((& 31) + 64), phase (& 0xff) (battle_anim_effects_1.c:2339-2356; prep12 s1.8).
   63: Object.freeze(Array.from({ length: 26 }, (_, g) => Object.freeze({ ageOffset: 110 + 3 * g, count: 6 }))),
+  // Move_RAIN_DANCE: two AnimTask_CreateRaindrops tasks, 40 spawn frames (ages 18, 20, then 23 step 3 to 134) x 4 words
+  // (x0, y0, x1, y1; battle_anim_water.c:495-496). The reducer replays them from the activation state alone.
+  240: Object.freeze([18, 20, ...Array.from({ length: 38 }, (_, i) => 23 + 3 * i)].map((ageOffset) => Object.freeze({ ageOffset, count: 4 }))),
+  // Move_WATER_PULSE: six ring emissions (ages 86, 93, 100, 101, 108, 115) x 2 words (randomY, randomX;
+  // battle_anim_water.c:1574-1575). The reducer replays them from the activation state alone.
+  352: Object.freeze([86, 93, 100, 101, 108, 115].map((ageOffset) => Object.freeze({ ageOffset, count: 2 }))),
 });
 
 /** Faithful-random live adapters (disjoint from LIVE_MOVE_ANIMATION_IDS). */

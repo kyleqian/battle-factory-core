@@ -1,0 +1,41 @@
+{
+ "schema": "prep14-live-adapter-fixture/v1",
+ "move": "RAIN_DANCE",
+ "probe": "tools/compare/rainDanceProbe.py",
+ "scenario": "tools/battle-lab/mechanic-rain-dance-opponent-wooper-player-onix.json",
+ "bodyIndex": 0,
+ "denseWindow": {
+  "startFrame": 211,
+  "endFrame": 397
+ },
+ "windowSource": "prep14 s2: window start = the scenario's own activation frame + the accepted offset 0; rows = the probed first-inactive minus activation",
+ "attacker": {
+  "species": "WOOPER",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793700232,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 110,
+  "playerMaxHp": 110,
+  "opponentHp": 117,
+  "opponentMaxHp": 130,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "presentationRngActivation": {
+  "value": 1131320630,
+  "source": "tools/integration/fixtures/prep14/prep14-analysis.json mechanic-rain-dance-opponent-wooper-player-onix[0].rng2 (activation frame 211)"
+ }
+}

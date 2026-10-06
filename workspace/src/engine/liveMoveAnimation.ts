@@ -76,6 +76,7 @@ import { DOUBLE_KICK_FRAME_COUNT } from "../animation/doubleKick.ts";
 import { waterSpoutTimeline, type WaterSpoutLiveInputs } from "../animation/waterSpout.ts";
 import { hiddenPowerUnownFormIndex } from "../animation/hiddenPower.ts";
 import type { FlailPower } from "../animation/flail.ts";
+import type { HailProfile } from "../animation/hail.ts";
 import {
   hyperBeamOrbFromWords, liveMovePresentationRngWords, miniTwinklingStarFromWords, type LiveMovePresentationRngInput,
 } from "./liveMovePresentationRng.ts";
@@ -178,7 +179,18 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   58, 323,
   // prep13 s1.3: Hidden Power (Unown attacker only: the reducer's uninitialised eighth orb is Unown-specific; lent-order gate).
   237,
+  // prep14 s1.7: Hail (no RNG; the target table is derived from the anchors).
+  258,
 ] as const);
+
+/** In-use OBJ slots at a first-body activation (prep14 s1: equal in all 24 probed scenarios). */
+const KNOWN_ENTRY_IN_USE_SPRITE_SLOTS: readonly number[] = Object.freeze([0, 1, 2, 6, 8, 60, 61, 62, 63]);
+/** Palette arrays the Rain Dance / Hail compositors never read (prep14 s1.1, s1.7: zeros reproduce births and rng). */
+const UNCONSUMED_PALETTE: readonly number[] = Object.freeze(Array.from({ length: 512 }, () => 0));
+/** sHailCoordData: x, y, battler position (0 player left, 1 opponent left, 2/3 absent right), type (0 fixed, 1 negative mod, 2 positive mod). */
+const HAIL_COORD_DATA: readonly (readonly [number, number, number, number])[] = Object.freeze([
+  [100, 120, 0, 0], [85, 120, 0, 1], [242, 120, 1, 2], [66, 120, 2, 2], [182, 120, 3, 1],
+  [60, 120, 0, 0], [214, 120, 1, 1], [113, 120, 0, 2], [210, 120, 3, 2], [38, 120, 2, 1]]);
 
 const FLAIL_POWERS: readonly FlailPower[] = Object.freeze([20, 40, 80, 100, 150, 200]);
 
@@ -257,6 +269,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     63,
     // prep13 (issue142-shadow-rows-extra.json): Ice Beam, Water Spout activation == accepted window start (row 0), prep13 s0.1-0.2.
     58, 323, 237,
+    // prep14 s2: Rain Dance, Water Pulse (faithful-random) and Hail activation == accepted window start (row 0).
+    240, 352, 258,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -709,6 +723,9 @@ export function liveMoveAnimationDuration(
     case 273: return 271; // Wish accepted window (65..335 / 69..339).
     case 63: return 280; // Hyper Beam faithful-random body 79..358 / 83..362 (prep13 s0.1; reducer first inactive age 279).
     case 237: return 180; // Hidden Power 77..256 / 81..260 (prep13 s0.1, first inactive age 179).
+    case 240: return 187; // Rain Dance 213..399 / 211..397 (prep14 s2).
+    case 352: return 160; // Water Pulse 77..236 / 81..240 (prep14 s2, first inactive age 159).
+    case 258: return 158; // Hail 64..221 (prep14 s2).
     case 58: return 203; // Ice Beam 75..277 / 79..281 (prep13 s0.1; reducer first inactive age 202).
     default: return null;
   }
@@ -2281,6 +2298,74 @@ export function liveMoveAnimationPresentation(
       config = { move: "HYPER_BEAM", attacker, target, fieldProfile, animationGeometry,
         animationProfile: { orbs: words.map((word, index) => ({ ...word, slot: slots[index]!, persistentOrder: lentOrder.indexOf(slots[index]!) })),
           ...subs, spriteOrderSeed: lentOrder } };
+      break;
+    }
+    case 240: {
+      // prep14 s1.1 (faithful random): the reducer replays its own 160 draws from one number, the host state at the body's
+      // activation frame; the plan registered with the host (liveMovePresentationRng.ts) consumes them once. The
+      // in-use slot set is the known-entry constant; the palette arrays are not consumed by the compositor.
+      const words = liveMovePresentationRngWords(presentationRngInput);
+      if (words === null) return null;
+      config = { move: "RAIN_DANCE", attacker, target, fieldProfile,
+        animationProfile: { animationRngAtAge0: words.activationValue, occupiedSpriteSlots: KNOWN_ENTRY_IN_USE_SPRITE_SLOTS,
+          unfadedPaletteBeforeLoad: UNCONSUMED_PALETTE, fadedPaletteBeforeLoad: UNCONSUMED_PALETTE,
+          hardwarePaletteAtAge0: UNCONSUMED_PALETTE, unfadedPaletteAfterLoad: UNCONSUMED_PALETTE,
+          fadedPaletteAfterLoad: UNCONSUMED_PALETTE } };
+      break;
+    }
+    case 352: {
+      // prep14 s1.2 (faithful random, first-body order lent): geometry from the anchors (sprite centres, picture offsets), the
+      // monbg snapshot from the target's source sprite centre + idle x2, allocator constants equal 3/3 scenarios + both corpora.
+      const words = liveMovePresentationRngWords(presentationRngInput);
+      if (words === null || !spriteOrderInput?.known) return null;
+      const initialOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (initialOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const playerAttacker = attacker.geometry.side === "player";
+      const snapshot = { x: targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2, y: targetAnchors.spriteCenter.y };
+      config = { move: "WATER_PULSE", attacker: affineCenterBattler(attacker), target: affineCenterBattler(target), fieldProfile,
+        animationInputs: {
+          targetPictureCenter: targetAnchors.picOffsetPoint, attackerRingOrigin: attackerAnchors.picOffsetPoint,
+          targetRingCenter: targetAnchors.picOffsetPoint,
+          attackerSpriteSlot: playerAttacker ? 6 : 8, targetSpriteSlot: playerAttacker ? 8 : 6,
+          attackerSubpriority: playerAttacker ? 30 : 40, targetSubpriority: playerAttacker ? 40 : 30,
+          targetInitialOffset: { x: targetAnchors.frontIdleRest.x2, y: targetAnchors.frontIdleRest.y2 },
+          simplePaletteSpriteSlot: 3, smallBubbleSlots: [4, 5, 7, 9, 10], ringSlots: [3, 4, 5],
+          ringBubbleSlots: [7, 9, 10, 11, 12, 13, 14, 15, 7, 9, 3, 10], ringMatrixSlots: [0, 3, 4],
+          ringBubbleMatrixSlots: [5, 6, 7, 8, 9, 10, 11, 12, 5, 6, 0, 7],
+          smallBubbles: { tileSlot: 6, paletteBank: 7, tileRange: [305, 10] }, blueRing2: { tileSlot: 7, paletteBank: 8, tileRange: [315, 8] },
+          updateMonBgTaskSlot: 1, clearMonBgTaskSlot: 0, shakeTaskSlot: 0,
+          monBg: { layer: playerAttacker ? "bg1" : "bg2", layerId: playerAttacker ? 8 : 6, snapshot,
+            baseScroll: { x: 32 - snapshot.x, y: 32 - snapshot.y },
+            // Task_UpdateMonBg's BGCNT writes; inactiveCnt is the first-body activation value (prep14 s1.2/1.4).
+            activeCnt: playerAttacker ? 0x5c02 : 0x5e02, inactiveCnt: playerAttacker ? 0x9c00 : 0x5e00 },
+          initialMatrixBitmap: 0x6, spriteOrder: initialOrder, animationRngSeed: words.activationValue } };
+      break;
+    }
+    case 258: {
+      // prep14 s1.7 (exact, no RNG): the ten-entry sHailCoordData table from GenerateHailParticle (battle_anim_ice.c:1414-1470) with
+      // the anchors. `animationRngAtAge0` only seeds the reducer's per-age echo (no pixel consumer, proven by test): 0.
+      const targets = HAIL_COORD_DATA.map(([x, y, position, type]) => {
+        let targetX: number = x, targetY: number = y, impact = false;
+        const side = position === 0 ? "player" as const : position === 1 ? "opponent" as const : null;
+        if (type !== 0 && side !== null) {
+          impact = true;
+          const anchors = liveBattlerAnchors(side, art), attrs = liveBattlerCoordAttrs(side, art);
+          // BATTLER_COORD_X_2 at generation time carries no idle x2 (front idle x2 is 0 by age ~45; prep14 s1.7).
+          targetX = anchors.picOffsetPoint.x; targetY = anchors.picOffsetPoint.y;
+          const dx = Math.trunc(attrs.width / 6), dy = Math.trunc(attrs.height / 6);
+          if (type === 1) { targetX -= dx; targetY -= dy; } else { targetX += dx; targetY += dy; }
+        }
+        return { targetX, targetY, initialX: targetX - Math.trunc((targetY + 8) / 2), initialY: -8 as const, impact };
+      }) as unknown as HailProfile["targets"];
+      config = { move: "HAIL", attacker, target, fieldProfile,
+        animationProfile: { animationRngAtAge0: 0, occupiedSpriteSlots: KNOWN_ENTRY_IN_USE_SPRITE_SLOTS,
+          occupiedAffineMatrixSlots: [1, 2], targets,
+          unfadedPaletteBeforeLoad: UNCONSUMED_PALETTE, fadedPaletteBeforeLoad: UNCONSUMED_PALETTE,
+          hardwarePaletteAtAge0: UNCONSUMED_PALETTE, unfadedPaletteAfterHailLoad: UNCONSUMED_PALETTE,
+          fadedPaletteAfterHailLoad: UNCONSUMED_PALETTE, unfadedPaletteAfterCrystalLoad: UNCONSUMED_PALETTE,
+          fadedPaletteAfterCrystalLoad: UNCONSUMED_PALETTE } };
       break;
     }
     case 237: {

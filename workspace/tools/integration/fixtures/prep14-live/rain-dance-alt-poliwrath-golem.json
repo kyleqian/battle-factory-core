@@ -1,0 +1,41 @@
+{
+ "schema": "prep14-live-adapter-fixture/v1",
+ "move": "RAIN_DANCE",
+ "probe": "tools/compare/rainDanceProbe.py",
+ "scenario": "tools/battle-lab/prep14-rain-dance-alt-poliwrath-golem.json",
+ "bodyIndex": 0,
+ "denseWindow": {
+  "startFrame": 72,
+  "endFrame": 258
+ },
+ "windowSource": "prep14 s2: window start = the scenario's own activation frame + the accepted offset 0; rows = the probed first-inactive minus activation",
+ "attacker": {
+  "species": "POLIWRATH",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349018757,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 165,
+  "playerMaxHp": 165,
+  "opponentHp": 155,
+  "opponentMaxHp": 155,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "presentationRngActivation": {
+  "value": 1989536647,
+  "source": "tools/integration/fixtures/prep14/prep14-analysis.json prep14-rain-dance-alt-poliwrath-golem[0].rng2 (activation frame 72)"
+ }
+}

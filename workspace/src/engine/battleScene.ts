@@ -36486,6 +36486,8 @@ export function renderSceneOnMovePresentation(
       || left.y - right.y || right.order - left.order || right.slot - left.slot);
     for (const entry of entries) entry.draw();
 
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
     const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
     const profile = pulseState.config.fieldProfile;
@@ -37625,19 +37627,22 @@ export function renderSceneOnMovePresentation(
       battleBg.static.tilemap,
       backgroundPalettes,
     );
+    // Under the live seam the opponent's front idle rest offset applies (as the other live adapters).
+    const liveIdle = (battler: typeof view.attacker) => liveField && battler.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
     const drawAttacker = () => drawSpriteSheet(
       fb,
       attackerArt.tileset,
       attackerPalette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x + liveIdle(view.attacker).x2,
+      view.attacker.geometry.spriteCorner.y + liveIdle(view.attacker).y2,
     );
     const drawTarget = () => drawSpriteSheet(
       fb,
       targetArt.tileset,
       targetPalette,
-      view.target.geometry.spriteCorner.x,
-      view.target.geometry.spriteCorner.y,
+      view.target.geometry.spriteCorner.x + liveIdle(view.target).x2,
+      view.target.geometry.spriteCorner.y + liveIdle(view.target).y2,
     );
     if (attackerIsPlayer) {
       drawTarget();
@@ -37674,6 +37679,8 @@ export function renderSceneOnMovePresentation(
       );
     }
 
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     const profile = rainState.config.fieldProfile;
     const playerBattler = attackerIsPlayer ? view.attacker : view.target;
     const opponentBattler = attackerIsPlayer ? view.target : view.attacker;
@@ -37764,19 +37771,22 @@ export function renderSceneOnMovePresentation(
       battleBg.static.tilemap,
       backgroundPalettes,
     );
+    // Under the live seam the opponent's front idle rest offset applies (as the other live adapters).
+    const liveIdle = (battler: typeof view.attacker) => liveField && battler.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
     const drawAttacker = () => drawSpriteSheet(
       fb,
       attackerArt.tileset,
       attackerArt.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x + liveIdle(view.attacker).x2,
+      view.attacker.geometry.spriteCorner.y + liveIdle(view.attacker).y2,
     );
     const drawTarget = () => drawSpriteSheet(
       fb,
       targetArt.tileset,
       targetArt.palette,
-      view.target.geometry.spriteCorner.x,
-      view.target.geometry.spriteCorner.y,
+      view.target.geometry.spriteCorner.x + liveIdle(view.target).x2,
+      view.target.geometry.spriteCorner.y + liveIdle(view.target).y2,
     );
     if (attackerIsPlayer) {
       drawTarget();
@@ -37828,6 +37838,8 @@ export function renderSceneOnMovePresentation(
       );
     }
 
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     const profile = hailState.config.fieldProfile;
     const playerBattler = attackerIsPlayer ? view.attacker : view.target;
     const opponentBattler = attackerIsPlayer ? view.target : view.attacker;
