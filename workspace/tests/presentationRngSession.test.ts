@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { createInitialState, render, tick, type EngineState } from "../src/engine/core.ts";
 import { presentationRngJump } from "../src/engine/presentationRng.ts";
@@ -134,4 +135,14 @@ describe("presentation RNG on the ordinary playable route", () => {
     await expect(renderAppTrace({ segments, battleScene: "on", presentationRng: { seed: "nope", policy: PRESENTATION_RNG_POLICY_V1 } }))
       .rejects.toThrow("presentationRng.seed");
   });
+
+  it("pins the browser shell seed choice: URL param, deterministic bench default, crypto otherwise, export metadata", () => {
+    const main = readFileSync(new URL("../src/main.ts", import.meta.url), "utf8");
+    expect(main).toContain(`parsePresentationSeed(new URLSearchParams(location.search).get("presentationSeed"))`);
+    expect(main).toContain("if (benchMode) return DEFAULT_PRESENTATION_RNG_SEED;");
+    expect(main).toContain("crypto.getRandomValues(new Uint32Array(1))[0]!");
+    expect(main).toContain("presentationRng: presentationRngTraceMetadata(state.presentationRng)");
+    expect(main.indexOf("const benchMode")).toBeLessThan(main.indexOf("function choosePresentationSeed"));
+  });
 });
+
