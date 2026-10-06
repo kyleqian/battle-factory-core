@@ -220,7 +220,7 @@ describe("live prep13 Hyper Beam (faithful random)", () => {
       ["hyper-beam-opponent-aerodactyl-player-onix", "mechanic-hyper-beam-opponent-aerodactyl-player-onix"]] as const) {
       const f = fixtureAt(name);
       const view = liveView(f, 0);
-      const effect = view.effect as { request: BattleMoveAnimationRequest; spriteOrderInput: LiveMoveSpriteOrderInput; presentationRng: never };
+      const effect = view.effect as unknown as { request: BattleMoveAnimationRequest; spriteOrderInput: LiveMoveSpriteOrderInput; presentationRng: never };
       const config = liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, effect.spriteOrderInput,
         effect.presentationRng)!.config as any;
       expect(config.animationProfile.orbs.map((o: { slot: number }) => o.slot)).toEqual(rows[scenario]!.romSlots);
