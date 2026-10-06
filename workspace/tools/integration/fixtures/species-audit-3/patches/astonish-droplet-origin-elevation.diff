@@ -1,0 +1,13 @@
+diff --git a/workspace/src/animation/astonish.ts b/workspace/src/animation/astonish.ts
+index 2890c69c6..168e17621 100644
+--- a/workspace/src/animation/astonish.ts
++++ b/workspace/src/animation/astonish.ts
+@@ -160,7 +160,7 @@ export function astonishAtAge(
+       index as 0 | 1,
+       {
+         x: targetCenter.x,
+-        y: targetCenter.y + 32 - targetPictureYOffset,
++        y: targetCenter.y + 32 - targetPictureYOffset + 8,
+       },
+       random,
+     )
