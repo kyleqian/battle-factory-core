@@ -3322,6 +3322,23 @@
         "shiny battlers decline (no shiny battle palette in the repo)",
         "independent arbitrary-species/history framebuffer comparison"
       ]
+    },
+    {
+      "move": "MOVE_PSYCH_UP",
+      "id": 244,
+      "sourceFieldEvidence": "../tools/integration/fixtures/prep16-live-adapter-receipt.json",
+      "liveEvidence": [
+        "PLAYER attacker first body only: dense 179/179 zero residual twice fresh through the production live renderer: JUMPLUFF -> SHUCKLE (the prep16 first-body capture) + SKIPLOOM -> GOLEM alternate first body (new scenario tools/battle-lab/prep16-alt-psychup-player-skiploom-golem-first.json; window = its own source window = activation + 0)",
+        "same first-body gate, composite and plan row 244 (ANIM_TAG_SPIRAL) as Overheat; first-body activation state: bg2cnt 0x5e00, identity matrices, hardware scroll 0",
+        "ordinary routes 66/7 JUMPLUFF and 15/28 METAGROSS first body active every age; the later-body fallback is shown by Silver Wind route 9/0"
+      ],
+      "remaining": [
+        "the OPPONENT attacker declines: its first body (bg1cnt 0x9c00, bg1vofs 0) was not captured (prep16 s0.1)",
+        "later bodies (a battle's second and later animation unit) decline to the scene-off view: the activation BG registers/scroll after an earlier body need the BG-register tracker (prep16 s0.3 transition table, not built)",
+        "shiny battlers decline (no shiny battle palette in the repo)",
+        "an opponent target with a non-zero front idle x2 (ONIX / RATTATA after a send-in) declines",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3345,7 +3362,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 224,
+  "implementedCount": 225,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 8,

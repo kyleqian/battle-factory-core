@@ -24251,6 +24251,8 @@ export function renderSceneOnMovePresentation(
       || right.order - left.order || right.slot - left.slot);
     for (const object of objects) object.draw();
 
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
     const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
     const profile = moveState.config.fieldProfile;

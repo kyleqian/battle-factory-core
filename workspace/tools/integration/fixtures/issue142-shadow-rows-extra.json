@@ -1,6 +1,6 @@
 {
  "schema": "issue142-shadow-rows-extra/v1",
- "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep7 rows from issue142ShadowRowsPrep7.py) (+ prep8 rows from issue142ShadowRowsPrep8.py) (+ prep9 rows from issue142ShadowRowsPrep9.py) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep13 ICE_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep13 WATER_SPOUT rows from issue142ShadowRowsPrep13.py) (+ prep13 HIDDEN_POWER rows from issue142ShadowRowsPrep13.py) (+ prep13 HYPER_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep14 RAIN_DANCE rows from issue142ShadowRowsPrep14.py) (+ prep14 WATER_PULSE rows from issue142ShadowRowsPrep14.py) (+ prep14 HAIL rows from issue142ShadowRowsPrep14.py) (+ prep16 Overheat/Silver Wind rows from issue142ShadowRowsPrep16.py)",
+ "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep7 rows from issue142ShadowRowsPrep7.py) (+ prep8 rows from issue142ShadowRowsPrep8.py) (+ prep9 rows from issue142ShadowRowsPrep9.py) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep13 ICE_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep13 WATER_SPOUT rows from issue142ShadowRowsPrep13.py) (+ prep13 HIDDEN_POWER rows from issue142ShadowRowsPrep13.py) (+ prep13 HYPER_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep14 RAIN_DANCE rows from issue142ShadowRowsPrep14.py) (+ prep14 WATER_PULSE rows from issue142ShadowRowsPrep14.py) (+ prep14 HAIL rows from issue142ShadowRowsPrep14.py) (+ prep16 Overheat/Silver Wind rows from issue142ShadowRowsPrep16.py) (+ prep16 Overheat/Silver Wind rows from issue142ShadowRowsPrep16.py)",
  "rows": [
   {
    "id": 236,
@@ -4688,6 +4688,25 @@
    "sources": {
     "fixture": "tools/integration/fixtures/prep16-live/silver-wind-opponent-butterfree-player-onix-first-body.json",
     "scenario": "tools/battle-lab/prep16-swopp-first-onix.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep16.md s1 (the probe's source window starts at the activation frame)"
+   }
+  },
+  {
+   "id": 244,
+   "move": "PSYCH_UP",
+   "orientation": "player",
+   "variant": "prep16-psych-up-player-jumpluff-opponent-shuckle-first-body",
+   "activationFrame": 69,
+   "windowStart": 69,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep16-live/psych-up-player-jumpluff-opponent-shuckle-first-body.json",
+    "scenario": "tools/battle-lab/prep16-hist-psychup-player-first-shuckle.json",
     "body": "normal",
     "activation": "docs/next-adapters-prep16.md s1 (the probe's source window starts at the activation frame)"
    }

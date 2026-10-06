@@ -9,6 +9,8 @@ const ROUTES = [
   { move: "MOVE_OVERHEAT", id: 315, species: "SOLROCK", seed: 69, streak: 14, slot: 3 as const, firstBody: true },
   { move: "MOVE_SILVER_WIND", id: 318, species: "VOLBEAT", seed: 3, streak: 7, slot: 0 as const, firstBody: true },
   { move: "MOVE_SILVER_WIND", id: 318, species: "VENOMOTH", seed: 8, streak: 7, slot: 0 as const, firstBody: true },
+  { move: "MOVE_PSYCH_UP", id: 244, species: "JUMPLUFF", seed: 66, streak: 7, slot: 2 as const, firstBody: true },
+  { move: "MOVE_PSYCH_UP", id: 244, species: "METAGROSS", seed: 15, streak: 28, slot: 2 as const, firstBody: true },
   // The foe acts first: the player's Silver Wind is a later body (BG registers/scroll after the foe body are not tracked) -> scene-off fallback.
   { move: "MOVE_SILVER_WIND", id: 318, species: "BUTTERFREE", seed: 9, streak: 0, slot: 0 as const, firstBody: false },
 ];

@@ -56,7 +56,7 @@ const rulesWithoutSceneMarker = (v: { rules: any }) => {
   return { ...v.rules, rulesContext: { ...rc, hitMarker: rc.hitMarker & ~0x80 } };
 };
 
-describe("live prep16 move adapters (Overheat, Silver Wind: first body)", () => {
+describe("live prep16 move adapters (Overheat, Silver Wind, Psych Up player: first body)", () => {
   it("registers both ids with the first-inactive+1 durations and shadow row 0", () => {
     for (const id of [315, 318]) {
       expect(LIVE_MOVE_ANIMATION_IDS).toContain(id);
@@ -155,12 +155,38 @@ describe("live prep16 move adapters (Overheat, Silver Wind: first body)", () => 
     }
   }, 240000);
 
+  it("Psych Up (player attacker first body): duration, gate, geometry; the opponent attacker declines", () => {
+    expect(LIVE_MOVE_ANIMATION_IDS).toContain(244);
+    expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[244]).toBe(0);
+    expect(liveMoveAnimationDuration(request(244, 0))).toBe(179);
+    expect(liveMoveAnimationDuration(request(244, 1))).toBeNull();
+    const f = displayed("SKIPLOOM", "GOLEM"), art = createBattleCommandFieldArtView(f);
+    expect(cfg(f, request(244, 0))).toBeNull();
+    expect(cfg(f, request(244, 0), laterOrder())).toBeNull();
+    expect(cfg(displayed("SKIPLOOM", "GOLEM", [0x71560001, undefined]), request(244, 0), firstOrder())).toBeNull();
+    expect(cfg(displayed("SKIPLOOM", "ONIX"), request(244, 0), firstOrder())).toBeNull();
+    const inputs = (cfg(f, request(244, 0), firstOrder())!.config as any).animationInputs;
+    const mine = liveBattlerAnchors("player", art);
+    expect(inputs.attackerPictureOrigin).toEqual(mine.picOffsetPoint);
+    expect(inputs.monBg).toMatchObject({ layer: "bg2", initialBgCnt: 0x5e00, monBgCnt: 0x5e02, copyPaletteBank: 9 });
+    expect(inputs.monBg.baseScroll).toEqual({ x: 32 - mine.spriteCenter.x, y: 32 - mine.spriteCenter.y });
+    expect(inputs.matrixSlots).toHaveLength(32);
+    expect(inputs.spriteOrder).toHaveLength(64);
+    expect(inputs.palettes).toMatchObject({ attackerBank: 16, backgroundBanks: [1, 2, 3] });
+    expect(inputs.palettes.resourcePalette).toEqual([0, 32767, 26427, 20087, 13747, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    const prepared = prepareLiveMovePalette(createLiveMovePaletteHost(), request(244, 0));
+    expect(prepared.input.historyKnown).toBe(true);
+    expect(new Set([0, 40, 100, 170].map(age => render(f, request(244, 0), age, firstOrder()))).size).toBeGreaterThan(2);
+  }, 240000);
+
   // Ordinary-input routes (prep16 s3 seeds; one turn, party member `slot` knows the move). First body: adapter active every age.
   const routes: { move: string; id: number; seed: number; streak: number; slot: 0 | 1 | 2 | 3; ages: number; active: boolean }[] = [
     { move: "OVERHEAT 4/14 MAGCARGO", id: 315, seed: 4, streak: 14, slot: 0, ages: 230, active: true },
     { move: "OVERHEAT 69/14 SOLROCK", id: 315, seed: 69, streak: 14, slot: 3, ages: 230, active: true },
     { move: "SILVER_WIND 3/7 VOLBEAT", id: 318, seed: 3, streak: 7, slot: 0, ages: 193, active: true },
     { move: "SILVER_WIND 8/7 VENOMOTH", id: 318, seed: 8, streak: 7, slot: 0, ages: 193, active: true },
+    { move: "PSYCH_UP 66/7 JUMPLUFF", id: 244, seed: 66, streak: 7, slot: 2, ages: 179, active: true },
+    { move: "PSYCH_UP 15/28 METAGROSS", id: 244, seed: 15, streak: 28, slot: 2, ages: 179, active: true },
     // Not a first body (the foe acted first): the live seam declines and the scene-off view plays.
     { move: "SILVER_WIND 9/0 BUTTERFREE (not first)", id: 318, seed: 9, streak: 0, slot: 0, ages: 193, active: false },
   ];

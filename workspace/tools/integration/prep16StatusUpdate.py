@@ -20,7 +20,14 @@ new = [
                    "first-body gate, palette composite and plan row 318 as Overheat; attacker/target picture origins from the anchors, sparkle birth y shifted by the target picture y delta",
                    "ordinary routes 3/7 VOLBEAT and 8/7 VENOMOTH first body active every age; route 9/0 BUTTERFREE (a later body) falls back"],
   "remaining": [LATER, SHINY, "independent arbitrary-species/history framebuffer comparison"]}]
-d["implementedAdapters"] = [e for e in d["implementedAdapters"] if e["id"] not in (315, 318)] + new
+new.append({"move": "MOVE_PSYCH_UP", "id": 244, "sourceFieldEvidence": "../" + REC,
+  "liveEvidence": ["PLAYER attacker first body only: dense 179/179 zero residual twice fresh through the production live renderer: JUMPLUFF -> SHUCKLE (the prep16 first-body capture) + SKIPLOOM -> GOLEM alternate first body (new scenario tools/battle-lab/prep16-alt-psychup-player-skiploom-golem-first.json; window = its own source window = activation + 0)",
+                   "same first-body gate, composite and plan row 244 (ANIM_TAG_SPIRAL) as Overheat; first-body activation state: bg2cnt 0x5e00, identity matrices, hardware scroll 0",
+                   "ordinary routes 66/7 JUMPLUFF and 15/28 METAGROSS first body active every age; the later-body fallback is shown by Silver Wind route 9/0"],
+  "remaining": ["the OPPONENT attacker declines: its first body (bg1cnt 0x9c00, bg1vofs 0) was not captured (prep16 s0.1)", LATER, SHINY,
+                "an opponent target with a non-zero front idle x2 (ONIX / RATTATA after a send-in) declines",
+                "independent arbitrary-species/history framebuffer comparison"]})
+d["implementedAdapters"] = [e for e in d["implementedAdapters"] if e["id"] not in (244, 315, 318)] + new
 d["implementedCount"] = len(d["implementedAdapters"])
 p.write_text(json.dumps(d, indent=2, ensure_ascii=False) + "\n")
 print(d["implementedCount"], d["faithfulRandomCount"])

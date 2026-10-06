@@ -6,7 +6,7 @@
  * equal across both accepted corpora (every K field), the fresh first-body captures and the alternate-species scenarios.
  * No capture row is read at runtime.
  */
-import type { SceneOnOverheatConfig, SceneOnSilverWindConfig } from "../animation/sceneOnPresentation.ts";
+import type { SceneOnOverheatConfig, SceneOnPsychUpConfig, SceneOnSilverWindConfig } from "../animation/sceneOnPresentation.ts";
 import paletteData from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
 import type { LivePaletteComposite } from "./liveMovePaletteComposite.ts";
 
@@ -188,4 +188,30 @@ export function liveSilverWindInputs(args: LiveBgSnapshotArgs): SceneOnSilverWin
     },
     animationRngSeed: 0, gameplayRng: 0,
   } as unknown as ReturnType<typeof liveSilverWindInputs>;
+}
+
+/**
+ * MOVE_PSYCH_UP animationInputs (prep16 s2.3), PLAYER attacker first body only (the opponent attacker's first body is unverified):
+ * the player's `bg2cnt` is 0x5e00 at a first-body activation and the 32 software matrices are identity (measured). The spiral
+ * is placed at the attacker picture origin; the monbg base scroll is 32 - the attacker's sprite centre.
+ */
+export function livePsychUpInputs(args: LiveBgSnapshotArgs): SceneOnPsychUpConfig["animationInputs"] | null {
+  const { attackerSide, attacker, target } = args;
+  if (attackerSide !== "player" || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
+  const attackerSprite = battlerSprite("player", attacker), targetSprite = battlerSprite("opponent", target);
+  return {
+    // The spiral sprite sits at the attacker's picture offset point; the target origin is its sprite centre (prep16 dump).
+    attackerPictureOrigin: attacker.picOffsetPoint, targetPictureOrigin: target.spriteCenter,
+    attackerSprite, targetSprite,
+    taskSlots: { blendCycle: 0, updateMonBg: 1, loopSound: 2, sway: 3, scale: 2, attackerPalette: 3, clearMonBg: 0 },
+    spiral: { slot: 3, matrixSlot: 0, subpriority: 28, attr2: 31025, painterInsertionIndex: 6 },
+    scaleMatrixSlot: 1, spriteOrder: [], matrixBitmap: 0x6,
+    matrixSlots: Array.from({ length: 32 }, () => [256, 0, 0, 256]),
+    resource: { tag: 10196, tileSlot: 6, paletteBank: 7, tileRange: [305, 64] },
+    monBg: { layer: "bg2", battlerId: 0, copyPaletteBank: 9, baseScroll: { x: 32 - attacker.spriteCenter.x, y: 32 - attacker.spriteCenter.y },
+      initialBgCnt: 0x5e00, monBgCnt: 0x5e02, initialHardwareScroll: { x: 0, y: 0 } },
+    palettes: { ...palettes(args.palettes), backgroundBanks: [1, 2, 3], attackerBank: 16, attackerPaletteSelectorHigh: 1,
+      resourcePalette: resourceWords("ANIM_TAG_SPIRAL") },
+    registers: { bldcnt: 0, bldalpha: 0, bldy: 0 }, animationRngSeed: 0, gameplayRng: 0,
+  } as unknown as SceneOnPsychUpConfig["animationInputs"];
 }

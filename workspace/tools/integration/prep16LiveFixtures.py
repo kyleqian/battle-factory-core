@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Generate the prep16 live-adapter dense fixtures (Overheat, Silver Wind: both orientations + one alternate species each).
+"""Generate the prep16 live-adapter dense fixtures (Overheat, Silver Wind, Psych Up (player attacker first body only): both orientations + one alternate species each).
 Window = the scenario's own source window as reported by its direct-mGBA probe run (activation + 0, prep14 s2); never chosen by
 matching live output. Every scenario is a first body (no preceding body declared).
-usage: prep16LiveFixtures.py <probe-output-dir>   (dirs named oh-p oh-o oh-a sw-p sw-o sw-a each holding out.json)
+usage: prep16LiveFixtures.py <probe-output-dir>   (dirs named oh-p oh-o oh-a sw-p sw-o sw-a each holding out.json; pu-p pu-a for Psych Up)
        -> tools/integration/fixtures/prep16-live/*.json"""
 import json, sys
 from pathlib import Path
@@ -14,6 +14,8 @@ SCEN = {
   "oh-a": ("OVERHEAT", "overheatProbe", "prep14-overheat-alt-charizard-golem", "player", "overheat-alt-player-charizard-golem"),
   "sw-p": ("SILVER_WIND", "silverWindProbe", "mechanic-silver-wind-player-butterfree-opponent-onix", "player", "silver-wind-player-butterfree-opponent-onix"),
   "sw-o": ("SILVER_WIND", "silverWindProbe", "prep16-swopp-first-onix", "opponent", "silver-wind-opponent-butterfree-player-onix-first-body"),
+  "pu-p": ("PSYCH_UP", "psychUpProbe", "prep16-hist-psychup-player-first-shuckle", "player", "psych-up-player-jumpluff-opponent-shuckle-first-body"),
+  "pu-a": ("PSYCH_UP", "psychUpProbe", "prep16-alt-psychup-player-skiploom-golem-first", "player", "psych-up-alt-player-skiploom-golem-first-body"),
   "sw-a": ("SILVER_WIND", "silverWindProbe", "prep14-silver-wind-alt-beautifly-golem", "player", "silver-wind-alt-player-beautifly-golem"),
 }
 def status(v):
