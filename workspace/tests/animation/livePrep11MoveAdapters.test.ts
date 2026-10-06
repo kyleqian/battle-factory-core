@@ -63,7 +63,8 @@ describe("live prep11 move adapters", () => {
     }
     // Out of scope for this batch: still no adapter.
     // Fly / Bounce (19, 340) are pinned in liveFlyBounce.test.ts.
-    for (const id of [226, 205]) expect(LIVE_MOVE_ANIMATION_IDS).not.toContain(id);
+    // Rollout (205) is pinned in liveRollout.test.ts.
+    expect(LIVE_MOVE_ANIMATION_IDS).not.toContain(226);
   });
 
   it("gates the order consumers on the lent order; Leech Seed and Recycle are order-independent", () => {

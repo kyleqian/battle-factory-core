@@ -89,6 +89,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // Fly / Bounce charge + strike bodies by request.turn (prep11 s2.3); the turn gap keeps the attacker hidden through
   // the presentation-only semi-invulnerable state (liveSemiInvulnerableHideBattler).
   19, 340,
+  // Rollout counter bodies 1..5 (request.rolloutCounter, docs/rollout-endeavor-prep.md s0.1).
+  205,
   // anchor3: source battler anchors (position center, picture height, pic offset).
   86, 87, 107, 116, 203, 207, 263, 339,
   // selectors: request-selected branches and healing anchors.
@@ -232,6 +234,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     46, 18,
     // Fly / Bounce charge and strike: activation == window start (row 0), prep11 s0.2.
     19, 340,
+    // Rollout bodies 1..5: activation == window start (row 0) on both sides.
+    205,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -549,6 +553,11 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     // strike 771..825 (55). request.turn = gAnimMoveTurn (0 charge, 1 strike).
     case 19: return (request.turn & 1) === 0 ? 43 : 68;
     case 340: return (request.turn & 1) === 0 ? 64 : 55;
+    // Rollout bodies by request.rolloutCounter (accepted corpus rows 167, 167, 161, 153, 145; prep11 s0.2).
+    case 205: {
+      const counter = request.rolloutCounter ?? 0;
+      return request.power === 30 << (counter - 1) ? [167, 167, 161, 153, 145][counter - 1] ?? null : null;
+    }
     case 46: return request.attacker === 0 ? 99 : 104; // Roar 252..350 / 219..322 (cry timing differs by side; prep11 s0.2).
     case 18: return 83; // Whirlwind 222..304 / 316..398 (prep11 s0.2).
     case 278: return 203; // Recycle 2193..2395 / 2589..2791 (prep11 s0.2).
@@ -2058,6 +2067,31 @@ export function liveMoveAnimationPresentation(
     }
     // prep11 s0.2: no order or allocator input (slots/tasks are constants); the body ends with the target off-screen and
     // the Scene ON forced switch-out hold (battleResolutionPresentation.ts) owns E+1.. without redrawing it.
+    case 205: {
+      // prep11 ROLLOUT row: the counter selects the body (mud power 30 / rock templates); the particle slot pool and sort
+      // seed are the reducer's (shared by all five bodies). AnimTask_Rollout: start/end = BATTLER_COORD_X_2 / BATTLER_COORD_Y
+      // + 24 of attacker / target; monbg = the Task_UpdateMonBg formula; sprite slots 6 / 8. The target's idle x2 offset
+      // applies to the counter 1 body only (accepted staged corpus, tools/compare/rolloutFramebuffer.ts).
+      const counter = request.rolloutCounter;
+      if (counter === undefined || !(counter >= 1 && counter <= 5)) return null;
+      // Defense Curl doubles the power (60 << (counter - 1)): the SHUCKLE / BLISSEY curl bodies keep a 6 px field residual
+      // (cause not isolated), so only the plain power ladder (30 << (counter - 1)) is live; curl bodies decline.
+      if (request.power !== 30 << (counter - 1)) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const playerAttacker = attacker.geometry.side === "player";
+      const baseX2 = counter === 1 ? targetAnchors.frontIdleRest.x2 : 0, baseY2 = counter === 1 ? targetAnchors.frontIdleRest.y2 : 0;
+      const cx = targetAnchors.spriteCenter.x + baseX2, cy = targetAnchors.spriteCenter.y + baseY2;
+      config = { move: "ROLLOUT", attacker, target, fieldProfile, counter: counter as 1 | 2 | 3 | 4 | 5,
+        animationProfile: {
+          side: attacker.geometry.side,
+          attackerStart: { x: attackerAnchors.battlePositionCenter.x, y: attackerAnchors.battlePositionCenter.y + 24 },
+          targetEnd: { x: targetAnchors.battlePositionCenter.x, y: targetAnchors.battlePositionCenter.y + 24 },
+          attackerSpriteSlot: playerAttacker ? 6 : 8, targetSpriteSlot: playerAttacker ? 8 : 6,
+          targetBaseX2: baseX2, targetBaseY2: baseY2,
+          monbg: { layer: target.geometry.side === "player" ? "bg2" : "bg1", spriteX: cx, spriteY: cy,
+            bgX: 32 - cx, bgY: 32 - cy, inBg2: target.geometry.side === "player", battlerId: target.geometry.side === "player" ? 0 : 1 } } };
+      break;
+    }
     case 46: config = { move: "ROAR", attacker, target, fieldProfile }; break;
     case 18: config = { move: "WHIRLWIND", attacker, target, fieldProfile }; break;
     default: return null;
