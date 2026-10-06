@@ -1109,6 +1109,15 @@
     "spriteXYEqual": true,
     "idleEqual": true
    }
+  ],
+  "prep18-return-altopp-snorlax-golem": [
+   {
+    "move": "RETURN",
+    "bodyIndex": 0,
+    "act": 76,
+    "spriteXYEqual": true,
+    "idleEqual": true
+   }
   ]
  }
 }

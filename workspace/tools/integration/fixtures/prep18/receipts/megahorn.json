@@ -395,6 +395,15 @@
     "spriteXYEqual": true,
     "idleEqual": true
    }
+  ],
+  "prep18-megahorn-altopp-heracross-golem": [
+   {
+    "move": "MEGAHORN",
+    "bodyIndex": 1,
+    "act": 223,
+    "spriteXYEqual": true,
+    "idleEqual": true
+   }
   ]
  }
 }

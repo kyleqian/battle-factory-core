@@ -644,6 +644,22 @@
     "spriteXYEqual": true,
     "idleEqual": true
    }
+  ],
+  "prep18-dig-altopp-flygon-golem": [
+   {
+    "move": "DIG",
+    "bodyIndex": 0,
+    "act": 54,
+    "spriteXYEqual": true,
+    "idleEqual": true
+   },
+   {
+    "move": "DIG",
+    "bodyIndex": 1,
+    "act": 612,
+    "spriteXYEqual": true,
+    "idleEqual": true
+   }
   ]
  }
 }

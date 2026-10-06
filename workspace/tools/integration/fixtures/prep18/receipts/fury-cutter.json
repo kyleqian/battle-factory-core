@@ -1400,6 +1400,36 @@
     "spriteXYEqual": true,
     "idleEqual": true
    }
+  ],
+  "prep18-fury-cutter-altopp-scyther-golem": [
+   {
+    "move": "FURY_CUTTER",
+    "bodyIndex": 0,
+    "act": 82,
+    "spriteXYEqual": true,
+    "idleEqual": true
+   },
+   {
+    "move": "FURY_CUTTER",
+    "bodyIndex": 2,
+    "act": 716,
+    "spriteXYEqual": true,
+    "idleEqual": true
+   },
+   {
+    "move": "FURY_CUTTER",
+    "bodyIndex": 4,
+    "act": 1350,
+    "spriteXYEqual": true,
+    "idleEqual": true
+   },
+   {
+    "move": "FURY_CUTTER",
+    "bodyIndex": 6,
+    "act": 1984,
+    "spriteXYEqual": true,
+    "idleEqual": true
+   }
   ]
  }
 }

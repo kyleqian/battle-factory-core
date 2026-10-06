@@ -392,6 +392,15 @@
     "spriteXYEqual": true,
     "idleEqual": true
    }
+  ],
+  "prep18-will-o-wisp-altopp-banette-golem": [
+   {
+    "move": "WILL_O_WISP",
+    "bodyIndex": 0,
+    "act": 81,
+    "spriteXYEqual": true,
+    "idleEqual": true
+   }
   ]
  }
 }

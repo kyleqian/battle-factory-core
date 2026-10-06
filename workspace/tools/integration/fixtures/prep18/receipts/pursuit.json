@@ -396,6 +396,15 @@
     "spriteXYEqual": true,
     "idleEqual": true
    }
+  ],
+  "prep18-pursuit-altopp-umbreon-golem": [
+   {
+    "move": "PURSUIT",
+    "bodyIndex": 0,
+    "act": 76,
+    "spriteXYEqual": true,
+    "idleEqual": true
+   }
   ]
  }
 }
