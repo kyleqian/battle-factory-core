@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-05 (day) — post-KO tracking rung 1 + consumer audit
+## 2026-10-05 (day, wind-down) — 198 -> 217 live adapters; lends across faints/switches; species fixes; elevated renderer
 
 - Folded Opus worker `0f08fa4d1` (code `be86f3141`, src tree `badeb050`) as `e2eb653b6`:
   the production sprite-order tracker models faint, next-mon summary + send-out, forced
@@ -157,8 +157,20 @@
   `rolloutTimerStartValues - rolloutTimer` equals the ROM at every body (Defense Curl included);
   Endeavor's stale gBattleMovePower is trackable (damagecalc, AI decision rule 16/16 movesets,
   Battle TV writer, cross-battle persistence, 0 at the first battle). Drafts ready.
-- Running: Fly / Bounce with a presentation-only hidden-attacker state (supervisor-authorized);
-  send-in tail model evidence (side).
+- Folded Opus worker `8f2a167a4` (src tree `b8565b22`): **217 live adapters** (+Fly, Bounce) with a
+  presentation-only semi-invulnerable attacker hide across the turn gap (Scene ON; set by a live
+  charge body, cleared by the battler's next body / visibility receipt / faint / switch).
+  Supervisor: Fly SWELLOW 43/68 and Bounce PONYTA 64/55 exact twice fresh; routes 38/7, 65/7 PASS.
+  Worker turn-gap proof: attacker region 0 px over 251/245 gap frames. Limits: Bounce opponent
+  strike unevidenced; a live body hitting the hidden mon draws it. Receipt
+  `flybounce-live-receipt.json`.
+- Send-in tail model (`2cb458c4b`, `docs/send-in-tail-model.md`): opponent healthbox slide start =
+  46 + max(front frame animation, delay + callback) (338/338; leave-one-out 318/318; callback
+  durations fitted); the forced-switch fade is the voluntary send-in effect gated by
+  `sourceDecision.kind === "switch"`.
+- Session final (supervisor, code `99701a8eb`): typecheck; full suite 1,524 files / 12,314 tests;
+  build 851 (`final-supervisor-gates-20261005-day.json`); preview `99701a8eb` verified (four
+  hashes, export, ON->OFF, no errors). DEFERRED D3 open (Random2).
 
 ## 2026-10-05 (wind-down) — CASTFORM fix + order table 445 bodies
 

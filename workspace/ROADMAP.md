@@ -2202,32 +2202,32 @@ fourteen-move physical batch is verified and folded. Helping Hand remains
 unaccepted pending legal doubles staging. No whole-playable arbitrary-history
 framebuffer exactness is claimed.
 
-Next (2026-10-05 day): 215 live adapters (master after the 2026-10-05 day session).
+Next (2026-10-05 day): 217 live adapters (master `99701a8eb` after the 2026-10-05 day session).
 The sprite order now stays tracked and LENT after opponent knock-outs, player faints
 (forced switch-in), voluntary switches, cancelled party menus and Roar/Whirlwind forced
 switches (entry-label / role relabel; allocator re-seeded); 467-body production table.
-Resume points, in order:
-1. DEFERRED D3 (OPEN, user decision): the Random2 group (52 of the 61 remaining moves) is
+Elevated opponents now render at the right height with their shadow in ordinary frames
+(ISSUES #147, both scene modes). Resume points, in order:
+1. DEFERRED D3 (OPEN, user decision): the Random2 group (52 of the 59 remaining moves) is
    NOT trackable in play (`docs/random2-trackability.md`); surrogate presentation RNG with
    a separate claim bucket, or keep the fallback. Do not build Random2 adapters before
    the answer.
-2. ISSUES #147 (if the day session's fix did not land): ordinary resolution frames draw
-   elevated opponents low without their shadow, both scene modes.
-3. Non-Random2 moves: Fly / Bounce (the attacker hidden across the turn gap; brief in
-   `.codex-logs/brief-flybounce-20261005.txt` carries the supervisor's authorization),
-   Rollout / Endeavor (`docs/rollout-endeavor-prep.md` if it landed), Baton Pass (instant
-   forced removal of the attacker + presented replacement), Fire Punch (needs a generic
-   Scene-ON renderer), Spark opponent, Flail (Random2), Memento, Substitute, Extreme Speed.
-4. ISSUES #146 remainder: send-in tail after a forced switch (ball-open fade/particles,
-   species-keyed healthbox slide/message), opponent-attacker Roar continuation, Scene OFF
-   forced switch-out; ISSUES #145 remainder (small species residuals).
-5. Order coverage: the 30 REFUTED (NEEDS-KEYS) and 8 INCONCLUSIVE REL-Y rows; bodies
+2. Non-Random2 moves: Rollout and Endeavor (`docs/rollout-endeavor-prep.md`: counter and
+   stale-power rules measured, drafts ready), Baton Pass (instant forced removal of the
+   attacker + presented replacement), Fire Punch (needs a generic Scene-ON renderer),
+   Memento, Substitute, Extreme Speed; Spark opponent attacker.
+3. ISSUES #146 remainder: send-in tail after any send-in (model `docs/send-in-tail-model.md`
+   338/338: species-keyed healthbox slide / message; forced-switch ball-open fade gated to
+   voluntary switches today), opponent-attacker Roar continuation, Scene OFF forced
+   switch-out; #145 / #147 small remainders (hit blink, HP-0 shadow boundary, species tails).
+4. Order coverage: the 30 REFUTED (NEEDS-KEYS) and 8 INCONCLUSIVE REL-Y rows; bodies
    without an exact plan still end tracking (e.g. 85:opponent, 202:player); opponent AI
    switches, Pursuit and Baton Pass still invalidate; allocator history is lost after
    non-net-zero bodies (later Light Screen declines).
-6. Limits to revisit: Faint Attack lab-vs-staged fade frame, Aerial Ace opponent
+5. Limits to revisit: Faint Attack lab-vs-staged fade frame, Aerial Ace opponent
    platform clip for some species, Blaze Kick first-body ROM scenario, CASTFORM weather
-   forms (#143), Razor Wind ABSOL opponent 23 px, Sky Uppercut COMBUSKEN tail.
+   forms (#143), Razor Wind ABSOL opponent 23 px, Sky Uppercut COMBUSKEN tail, Bounce
+   opponent strike unevidenced, a live body hitting a semi-invulnerable Fly/Bounce user.
 Validate new adapters with alternate-species dense proofs whose windows come from
 the source activation frame, not only the accepted fixture species.
 Latest progress supersedes this starting checkpoint as verified work lands.

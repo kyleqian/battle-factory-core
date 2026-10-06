@@ -5,18 +5,34 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-05 (day, in progress) — S10A: post-knock-out animations live; Random2 decision deferred
+## 2026-10-05 (day) — S10A wind-down: 198 -> 217 live adapters; lends across faints/switches; 8 species fixes; elevated renderer
 
-- **State:** S10A, local master; production `c35b3b64c` (198 live adapters, unchanged count).
-  Preview <http://127.0.0.1:5191/> serves `1294b06fc` (receipt
-  `playable-preview-1294b06fc-receipt.json`). Opus 5.5 supervisor; Opus/Sonnet 5.5 workers.
-- **Did:** sprite-order tracker kept across faint / summary / send-out / switch-in / party menu
-  (presentation-neutral, 43 battles identical); post-KO lends: order relabelled to entry slot
-  labels + allocator re-seed, 24 post-KO bodies dense-exact twice fresh, Leaf Blade pinned out;
-  census regenerated (78 remaining); prep10 measured prep; Random2 trackability evidence.
-- **Next:** fold the prep10 batch (running); prep11 (running); ROADMAP S10A resume points.
-- **Notes:** **DEFERRED D3 (OPEN)**: Random2 animations (52 moves) cannot be tracked exactly in
-  play; surrogate presentation RNG or fallback? Recommendation (a), separate claim bucket.
+- **State:** S10A, local master; production `99701a8eb` (217 live adapters, 59 accepted bodies
+  remain: 52 Random2 + 7 others). Supervisor final gates on that code: typecheck, 1,524 files / 12,314 tests, build 851 (`final-supervisor-gates-20261005-day.json`). Preview
+  <http://127.0.0.1:5191/> serves `99701a8eb` (four hashes, export, ON->OFF, no errors) (receipt in `tools/integration/fixtures/`). Opus 5.5
+  supervisor; Opus/Sonnet 5.5 workers; 9 integration folds + 11 evidence merges, all re-proved.
+- **Did (production):** sprite-order tracker kept and LENT across opponent KOs (entry-label relabel),
+  player faints + forced switch-in and voluntary switches / cancelled menus (role relabel), Roar /
+  Whirlwind forced switches; allocator re-seeded; +22 order rows (467 bodies). Adapters: Magnitude,
+  Reversal, Pain Split, Rock Blast, Razor Wind, Spark (player) with gBattleMovePower on the request;
+  Leech Seed, Tri Attack, Petal Dance, Destiny Bond, Air Cutter, Foresight, Sky Uppercut, Recycle,
+  Spider Web; Roar, Whirlwind (Scene-ON instant forced removal); Fly, Bounce (attacker hidden across
+  the turn gap). Species fixes from swap audits: Leaf Blade, Dragon Rage, Aerial Ace, Rock Throw,
+  Smelling Salt, Light Screen / Future Sight end shadow, Foresight (#144 closed, #145 trimmed).
+  ISSUES #147: elevated opponents were drawn 8 px low without shadow in ordinary resolution frames
+  in BOTH scene modes — fixed (Scene OFF 0/935 -> 919/935; 203 committed traces unchanged).
+- **Did (evidence):** post-KO / player-faint / voluntary-switch audits, census regen, prep10/11,
+  Random2 trackability (NOT trackable), forced-switch continuation (#146), live species audits 1+2,
+  elevated post-body + Scene OFF checks, Rollout/Endeavor prep (both trackable), send-in tail model
+  (338/338).
+- **Next:** ROADMAP S10A "Next (2026-10-05 day)": D3 answer first; then Rollout/Endeavor, Baton
+  Pass, #146 send-in tail (model ready), #145/#147 remainders, order-coverage gaps.
+- **Notes:** **DEFERRED D3 (OPEN):** Random2 animations (52 moves) cannot be tracked exactly in play;
+  ship a surrogate presentation RNG in a separate claim bucket (recommended) or keep the fallback.
+  The next `run-supervisor.sh` refuses to start until D3 is answered. Soak gates superseded for
+  S10A integration work (ANIMATION_VERIFICATION scoped policy). All worker branches merged and
+  worktrees removed; evidence summaries copied to `.integration/validation/`. A side worker once
+  committed onto master via the shared `/workspace` path suffix and self-repaired (PAPERCUTS).
 
 ---
 
@@ -81,35 +97,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   live); Soft-Boiled has no rental carrier (dense only); Scary Face/Dizzy
   Punch script tails uncovered. No DEFERRED entries. All worker branches
   merged/deleted; evidence copied to `.integration/validation/`.
-
----
-
-## 2026-10-04 — S10A session wind-down: 79 -> 131 live adapters, #142 fixed
-
-- **State:** S10A, local master `d935baca4`; 131 live adapters, 145 accepted
-  bodies remain. Supervisor final gates on `d935baca4`: 1,493 files / 11,963
-  tests, build 847 (`final-supervisor-gates-20261004.json`); preview
-  <http://127.0.0.1:5191/> serves `d935baca4`, four exact canvas/PNG hashes,
-  export, ON->OFF restart, no errors. Opus 5.5 supervisor, Sonnet 5.5 workers.
-- **Did (integration lane, 12 folds, each independently re-proved twice fresh
-  with zero residual + ordinary ON/OFF routes):** Light Screen guard repair;
-  fieldfx 6, glow 5, anchor 7 (+ `liveBattlerAnchors`), wall family 5 (source
-  allocator plans), anchor2 7, anchor3 8, selectors 4, multi-hit 3, anchor4 6 adapters;
-  allocator history now persists across the 110 audited net-zero bodies;
-  ISSUES #142 found, scoped and fixed (elevated-opponent shadow on the
-  activation frame for 97 live ids; Sandstorm opponent idle).
-- **Did (side lane, new-files-only evidence):** wall-family allocator
-  receipts, net-zero audit (all live ids), consumer tie audit, sSpriteOrder
-  evidence + exact free-slot event model and provider design, status-animation
-  sprite audit, alternate-species proofs (source-derived windows), #142
-  shadow-row table, multi-hit prep, Reversal shake evidence, visual-
-  randomness prep (Random2-only inputs; personality moves exact now).
-- **Next:** ROADMAP S10A resume points: sprite-order provider slices,
-  status-animation occupancy persistence, Reversal reducer change (needs the
-  animation program's acceptance), Dizzy Punch/Teeter Dance (personality),
-  Soft-Boiled, Scary Face/Glare, then H_BUFFER/H_RANDOM/H_OUTCOME groups. Validate with alternate-species proofs.
-- **Notes:** no material decision deferred; DEFERRED.md has no open entries.
-  Oracle freshness FAIL at orient was a false positive (workspace-only
-  commits). Papercuts added: replay forced-replacement, Supersonic probe
-  wrapper, preview manifest wiped by builds. All worker refs merged/deleted;
-  evidence copied to primary `.integration/validation/`.
