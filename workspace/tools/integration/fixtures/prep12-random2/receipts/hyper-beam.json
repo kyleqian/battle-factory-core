@@ -1,0 +1,91 @@
+{
+ "move": "hyper-beam",
+ "scenario": "tools/battle-lab/mechanic-hyper-beam-player-aerodactyl-opponent-onix.json",
+ "determinism": {
+  "runsSha1": "df18456661b43b21a3d8d4abdf4fe0cca6056482",
+  "runsSha1Run2": "df18456661b43b21a3d8d4abdf4fe0cca6056482",
+  "allFieldsEqualExceptFinalStateSha1": true,
+  "finalStateSha1Equal": false,
+  "frames": 934,
+  "anchorRng2": 3546401081,
+  "alternate": {
+   "runsSha1": "86c1bfd72f4339f874dc893735d3b56da38eeb76",
+   "runsSha1Run2": "86c1bfd72f4339f874dc893735d3b56da38eeb76",
+   "allFieldsEqualExceptFinalStateSha1": true,
+   "finalStateSha1Equal": false,
+   "frames": 934,
+   "anchorRng2": 3546401081
+  }
+ },
+ "drawsPerBody": 156,
+ "reproducedAll": true,
+ "entries": [
+  {
+   "key": "hyper-beam",
+   "bodyLabel": "Move_HYPER_BEAM",
+   "activationFrame": 79,
+   "acceptedActivationValue": 1968892309,
+   "acceptedActivationValueHex": "0x755AE995",
+   "acceptedWindowStart": 79,
+   "acceptedWindowStartMinusActivation": 0,
+   "drawsTotal": 156,
+   "drawFrames": 26,
+   "lagFramesBeforeLastDraw": 0,
+   "lagFramesInBody": 0,
+   "pinnedSource": "tools/compare/evidence/hyper-beam-player-dense-state.json.gz births (animNum, inferred speed, data[5]-48)",
+   "reproduced": true,
+   "replayEqualsObservedWords": true,
+   "alternate": {
+    "scenario": "tools/battle-lab/prep12-hyper-beam-alt-snorlax-golem.json",
+    "activationFrame": 235,
+    "activationValueHex": "0xD497D0BF",
+    "activationValue": 3566719167,
+    "planShapeIdenticalToAccepted": true,
+    "replayEqualsObservedWords": true,
+    "denseWindowFromActivation": {
+     "startFrame": 235,
+     "note": "alternate window start = activation frame + the accepted (window start - activation) offset; length = the accepted window's frameCount"
+    },
+    "firstWords": [
+     5241,
+     42969,
+     13914,
+     13718,
+     57394,
+     32259
+    ]
+   },
+   "drawAgeOffsets": [
+    110,
+    113,
+    116,
+    119,
+    122,
+    125,
+    128,
+    131,
+    134,
+    137,
+    140,
+    143,
+    146,
+    149,
+    152,
+    155,
+    158,
+    161,
+    164,
+    167,
+    170,
+    173,
+    176,
+    179,
+    182,
+    185
+   ],
+   "drawCounts": [
+    6
+   ]
+  }
+ ]
+}
