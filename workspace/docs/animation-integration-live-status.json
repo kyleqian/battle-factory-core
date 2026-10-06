@@ -3278,6 +3278,19 @@
         "declines unless the tracked sprite order is lent",
         "independent arbitrary-species/history framebuffer comparison"
       ]
+    },
+    {
+      "move": "MOVE_HAIL",
+      "id": 258,
+      "sourceFieldEvidence": "../tools/integration/fixtures/random2-r4-live-receipt.json",
+      "liveEvidence": [
+        "dense 158/158 zero residual twice fresh through the production live renderer: DELIBIRD -> ONIX accepted both orientations + GLALIE -> GOLEM alternate (window = each scenario's own activation + 0); the ten-entry target table is derived from the anchors (== the accepted literals both orientations), animationRngAtAge0 is an echo (any value renders identically, tested)",
+        "ordinary route 1/0 DELIBIRD slot 3: adapter active every age, following prompt reached, ON/OFF rules/RNG/boundary equal"
+      ],
+      "remaining": [
+        "a species whose front idle x2 is non-zero at ages 45-100 needs the idle phase (prep14 s1.7, not measured)",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3301,10 +3314,10 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 221,
+  "implementedCount": 222,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
-  "faithfulRandomCount": 6,
+  "faithfulRandomCount": 8,
   "faithfulRandomAdapters": [
     {
       "id": 24,
@@ -3376,6 +3389,30 @@
       ],
       "surrogateRoutes": [
         "prep13/hyper-beam/seed10-streak28-slot0-1turn (tests/animation/livePrep13MoveAdapters.test.ts)"
+      ]
+    },
+    {
+      "id": 240,
+      "move": "MOVE_RAIN_DANCE",
+      "policy": "presentation-rng.v1.frame-step.no-lag.battle-stride-2^20",
+      "provenance": "surrogate",
+      "pinnedProofs": [
+        "tools/integration/fixtures/random2-r4-live-receipt.json"
+      ],
+      "surrogateRoutes": [
+        "random2-r4/rain-dance/seed2-streak21-slot1-1turn (tests/animation/liveRandom2R4MoveAdapters.test.ts)"
+      ]
+    },
+    {
+      "id": 352,
+      "move": "MOVE_WATER_PULSE",
+      "policy": "presentation-rng.v1.frame-step.no-lag.battle-stride-2^20",
+      "provenance": "surrogate",
+      "pinnedProofs": [
+        "tools/integration/fixtures/random2-r4-live-receipt.json"
+      ],
+      "surrogateRoutes": [
+        "random2-r4/water-pulse/seed7-streak7-slot1-1turn (tests/animation/liveRandom2R4MoveAdapters.test.ts)"
       ]
     }
   ],

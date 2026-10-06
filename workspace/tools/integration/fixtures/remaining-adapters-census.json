@@ -10,7 +10,7 @@
   "src/data/gen/battle-frontier-mons.json",
   "src/data/gen/factory-round-policy.json"
  ],
- "liveStatusImplementedCount": 218,
+ "liveStatusImplementedCount": 222,
  "staleCodesCorrected": [
   "B (sSpriteOrder): was 'first body only'; production now lends the order and tracks it across bodies (liveSpriteOrderHost.ts / spriteOrderProvider.ts, merged cross-body tracker + post-KO rung 1), so B no longer blocks anything; recipe work only (falls back after an unmodelled graphics command)",
   "F-AFFINE / E-TASK: were provider blockers; docs/allocator-plan-v2-evidence.md measured gOamMatrixAllocBitmap 0x6 + no tasks at all 481 known-entry bodies, so the accepted constants gated on the lent order suffice for first bodies (invalidated after a faint/switch)",
@@ -23,35 +23,38 @@
  "inFlightMoves": {},
  "summary": {
   "accepted": 276,
-  "live": 218,
-  "faithfulRandom": 5,
+  "live": 222,
+  "faithfulRandom": 8,
   "faithfulRandomMoves": [
    "MOVE_ASTONISH",
    "MOVE_DOUBLE_KICK",
    "MOVE_FLAIL",
+   "MOVE_HYPER_BEAM",
+   "MOVE_RAIN_DANCE",
    "MOVE_THRASH",
+   "MOVE_WATER_PULSE",
    "MOVE_WISH"
   ],
   "inFlight": 0,
-  "remaining": 53,
+  "remaining": 46,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
   },
   "weightPct": {
-   "live": 85.129,
-   "faithfulRandom": 1.321,
+   "live": 87.438,
+   "faithfulRandom": 2.667,
    "inFlight": 0,
-   "remaining": 13.063
+   "remaining": 9.407
   },
   "remainingByGroup": {
    "PROVIDER-x": {
-    "moves": 10,
-    "weightPct": 3.998
+    "moves": 6,
+    "weightPct": 1.907
    },
    "MULTI": {
-    "moves": 40,
-    "weightPct": 8.063
+    "moves": 37,
+    "weightPct": 6.499
    },
    "SMALL-INPUT": {
     "moves": 2,
@@ -64,15 +67,15 @@
   },
   "remainingByHostClass": {
    "H_BASIC": 2,
-   "H_BUFFER": 46,
+   "H_BUFFER": 39,
    "H_DERIVED": 3,
    "H_OUTCOME": 2,
    "H_RANDOM": 1,
    "H_VARIANT": 7
   },
-  "orderFirstBodyOnlyMoves": 36,
-  "slotPlanNeededMoves": 45,
-  "sumsTo": "218+5+0+53=276",
+  "orderFirstBodyOnlyMoves": 31,
+  "slotPlanNeededMoves": 38,
+  "sumsTo": "222+8+0+46=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -116,19 +119,15 @@
    "codes": [
     "C"
    ],
-   "aloneMoves": 7,
-   "aloneWeightPct": 3.256,
+   "aloneMoves": 3,
+   "aloneWeightPct": 1.165,
    "aloneNames": [
-    "HIDDEN_POWER",
-    "HYPER_BEAM",
-    "ICE_BEAM",
     "METEOR_MASH",
     "MUD_SLAP",
-    "SAND_ATTACK",
-    "WATER_SPOUT"
+    "SAND_ATTACK"
    ],
-   "touchingMoves": 47,
-   "touchingWeightPct": 11.319,
+   "touchingMoves": 40,
+   "touchingWeightPct": 7.664,
    "meta": {
     "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
     "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
@@ -233,8 +232,8 @@
    "aloneNames": [
     "MEMENTO"
    ],
-   "touchingMoves": 40,
-   "touchingWeightPct": 7.913,
+   "touchingMoves": 37,
+   "touchingWeightPct": 6.349,
    "meta": {
     "cost": "new large host (docs/animation-integration-readiness.md A6)",
     "claim": "only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today"
@@ -249,8 +248,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 35,
-   "touchingWeightPct": 6.941,
+   "touchingMoves": 32,
+   "touchingWeightPct": 5.376,
    "meta": {
     "cost": "extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves)",
     "claim": "exact for audited plan rows from a known entry; actual status animations/switches invalidate"
@@ -278,8 +277,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 32,
-   "touchingWeightPct": 6.386,
+   "touchingMoves": 31,
+   "touchingWeightPct": 5.915,
    "meta": null
   },
   {
@@ -291,8 +290,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 16,
-   "touchingWeightPct": 3.567,
+   "touchingMoves": 15,
+   "touchingWeightPct": 3.311,
    "meta": null
   },
   {
@@ -400,32 +399,27 @@
   {
    "step": 1,
    "provider": "C",
-   "newMoves": 7,
-   "newWeightPct": 3.256,
-   "cumulativeRemainingUnlocked": 7,
+   "newMoves": 3,
+   "newWeightPct": 1.165,
+   "cumulativeRemainingUnlocked": 3,
    "newNames": [
-    "HIDDEN_POWER",
-    "HYPER_BEAM",
-    "ICE_BEAM",
     "METEOR_MASH",
     "MUD_SLAP",
-    "SAND_ATTACK",
-    "WATER_SPOUT"
+    "SAND_ATTACK"
    ]
   },
   {
    "step": 2,
    "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
-   "newMoves": 33,
-   "newWeightPct": 6.295,
-   "cumulativeRemainingUnlocked": 40,
+   "newMoves": 30,
+   "newWeightPct": 4.73,
+   "cumulativeRemainingUnlocked": 33,
    "newNames": [
     "BONEMERANG",
     "CURSE",
     "ERUPTION",
     "EXTRASENSORY",
     "FLATTER",
-    "HAIL",
     "HYPER_VOICE",
     "LOVELY_KISS",
     "LUSTER_PURGE",
@@ -438,7 +432,6 @@
     "OVERHEAT",
     "PSYCH_UP",
     "PSYWAVE",
-    "RAIN_DANCE",
     "RETURN",
     "REVENGE",
     "SAND_TOMB",
@@ -451,7 +444,6 @@
     "SNORE",
     "SPIKES",
     "SUPERPOWER",
-    "WATER_PULSE",
     "WILL_O_WISP"
    ]
   },
@@ -460,7 +452,7 @@
    "provider": "E-OUT",
    "newMoves": 5,
    "newWeightPct": 1.356,
-   "cumulativeRemainingUnlocked": 45,
+   "cumulativeRemainingUnlocked": 38,
    "newNames": [
     "ENDEAVOR",
     "FIRE_PUNCH",
@@ -474,7 +466,7 @@
    "provider": "X-DISABLE",
    "newMoves": 3,
    "newWeightPct": 0.402,
-   "cumulativeRemainingUnlocked": 48,
+   "cumulativeRemainingUnlocked": 41,
    "newNames": [
     "FURY_CUTTER",
     "ICE_BALL",
@@ -486,7 +478,7 @@
    "provider": "X-TWOTURN",
    "newMoves": 2,
    "newWeightPct": 0.937,
-   "cumulativeRemainingUnlocked": 50,
+   "cumulativeRemainingUnlocked": 43,
    "newNames": [
     "DIG",
     "DIVE"
@@ -497,7 +489,7 @@
    "provider": "X-SWITCH",
    "newMoves": 1,
    "newWeightPct": 0.482,
-   "cumulativeRemainingUnlocked": 51,
+   "cumulativeRemainingUnlocked": 44,
    "newNames": [
     "BATON_PASS"
    ]
@@ -507,7 +499,7 @@
    "provider": "X-SUBST",
    "newMoves": 1,
    "newWeightPct": 0.223,
-   "cumulativeRemainingUnlocked": 52,
+   "cumulativeRemainingUnlocked": 45,
    "newNames": [
     "SUBSTITUTE"
    ]
@@ -517,7 +509,7 @@
    "provider": "X-AGE",
    "newMoves": 1,
    "newWeightPct": 0.112,
-   "cumulativeRemainingUnlocked": 53,
+   "cumulativeRemainingUnlocked": 46,
    "newNames": [
     "EXTREME_SPEED"
    ]
@@ -527,7 +519,7 @@
    "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 53,
+   "cumulativeRemainingUnlocked": 46,
    "newNames": []
   },
   {
@@ -535,7 +527,7 @@
    "provider": "D-TILE",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 53,
+   "cumulativeRemainingUnlocked": 46,
    "newNames": []
   },
   {
@@ -543,7 +535,7 @@
    "provider": "D-BG",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 53,
+   "cumulativeRemainingUnlocked": 46,
    "newNames": []
   },
   {
@@ -551,7 +543,7 @@
    "provider": "D-OAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 53,
+   "cumulativeRemainingUnlocked": 46,
    "newNames": []
   },
   {
@@ -559,7 +551,7 @@
    "provider": "D-VRAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 53,
+   "cumulativeRemainingUnlocked": 46,
    "newNames": []
   },
   {
@@ -567,7 +559,7 @@
    "provider": "D-SCAN",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 53,
+   "cumulativeRemainingUnlocked": 46,
    "newNames": []
   }
  ],
@@ -603,39 +595,9 @@
   {
    "id": "P3",
    "title": "first provider build (derived from the greedy order): C",
-   "count": 7,
-   "weightPct": 3.256,
+   "count": 3,
+   "weightPct": 1.165,
    "moves": [
-    {
-     "move": "MOVE_HIDDEN_POWER",
-     "group": "PROVIDER-C",
-     "providerNeeds": [
-      "C"
-     ],
-     "orderFirstBodyOnly": true,
-     "weightPct": 0.04,
-     "prep": "no activation receipt; B: animationProfile:spriteOrderSeed (sSpriteOrder / live sort keys) | C: animationProfile:animationRngSeed (presentation Random2 (gRng2Value)) | F-AFFINE: animationProfile:orbitMatrixNums (affine matrix allocator)"
-    },
-    {
-     "move": "MOVE_HYPER_BEAM",
-     "group": "PROVIDER-C",
-     "providerNeeds": [
-      "C"
-     ],
-     "orderFirstBodyOnly": true,
-     "weightPct": 0.037,
-     "prep": "no activation receipt; B: animationProfile:orbs (HyperBeamOrbRandom {animation,speed,phase,slot,persistentOrder}; AnimHyperBeamOrb Random2 (battle_anim_effects_1.c:2339-2356)) | C: animationProfile:orbs (HyperBeamOrbRandom {animation,speed,phase,slot,persistentOrder}; AnimHyperBeamOrb Random2 (battle_anim_effects_1.c:2339-2356)) | F-AFFINE: animationProfile:orbs (HyperBeamOrbRandom {animation,speed,phase,slot,persistentOrder}; AnimHyperBeamOrb Random2 (battle_anim_effects_1.c:2339-2356))"
-    },
-    {
-     "move": "MOVE_ICE_BEAM",
-     "group": "PROVIDER-C",
-     "providerNeeds": [
-      "C"
-     ],
-     "orderFirstBodyOnly": true,
-     "weightPct": 1.98,
-     "prep": "no activation receipt; B: animationProfile:spriteOrder (sSpriteOrder / live sort keys) | C: animationProfile:animationRngStart (presentation Random2 (gRng2Value)) | E-TASK: animationProfile:soundTaskSlot (CreateTask slot / live task table)"
-    },
     {
      "move": "MOVE_METEOR_MASH",
      "group": "PROVIDER-C",
@@ -665,16 +627,6 @@
      "orderFirstBodyOnly": true,
      "weightPct": 0.406,
      "prep": "no activation receipt; B: animationProfile:spriteOrderSeed (sSpriteOrder / live sort keys) | C: animationProfile:dirt (SandAttackDirtSeed {slot,xStep,yStep}: AnimDirtScatter Random2)"
-    },
-    {
-     "move": "MOVE_WATER_SPOUT",
-     "group": "PROVIDER-C",
-     "providerNeeds": [
-      "C"
-     ],
-     "orderFirstBodyOnly": true,
-     "weightPct": 0.034,
-     "prep": "no activation receipt; B: animationInputs:spriteOrderSeed (sSpriteOrder / live sort keys) | C: animationInputs:animationRng (presentation Random2 (gRng2Value)) | E-TASK: animationInputs:launchTaskSlot (CreateTask slot / live task table)"
     }
    ]
   }
@@ -3659,439 +3611,6 @@
    "group": "MULTI"
   },
   {
-   "move": "MOVE_HAIL",
-   "id": 258,
-   "name": "HAIL",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0025581065759637187,
-   "config": "src/animation/sceneOnPresentation.ts:2094",
-   "needs": [
-    "C",
-    "F-AFFINE",
-    "D-PAL",
-    "D-OAM"
-   ],
-   "blockers": [
-    {
-     "code": "C",
-     "text": "animationProfile:animationRngAtAge0 (presentation Random2 (gRng2Value))",
-     "cites": [
-      "src/animation/hail.ts:31"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationProfile:occupiedAffineMatrixSlots (affine matrix allocator)",
-     "cites": [
-      "src/animation/hail.ts:35"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "animationProfile:unfadedPaletteBeforeLoad (palette host / resource plan)",
-     "cites": [
-      "src/animation/hail.ts:39"
-     ]
-    },
-    {
-     "code": "D-OAM",
-     "text": "animationProfile:hardwareMatricesAtAge0 (OAM/affine buffers)",
-     "cites": [
-      "src/animation/hail.ts:47"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationProfile:animationRngAtAge0",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/hail.ts:31"
-    },
-    {
-     "path": "animationProfile:occupiedSpriteSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/hail.ts:33"
-    },
-    {
-     "path": "animationProfile:occupiedAffineMatrixSlots",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/hail.ts:35"
-    },
-    {
-     "path": "animationProfile:targets",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/hail.ts:37"
-    },
-    {
-     "path": "animationProfile:unfadedPaletteBeforeLoad",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/hail.ts:39"
-    },
-    {
-     "path": "animationProfile:fadedPaletteBeforeLoad",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/hail.ts:40"
-    },
-    {
-     "path": "animationProfile:hardwarePaletteAtAge0",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/hail.ts:41"
-    },
-    {
-     "path": "animationProfile:unfadedPaletteAfterHailLoad",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/hail.ts:42"
-    },
-    {
-     "path": "animationProfile:fadedPaletteAfterHailLoad",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/hail.ts:43"
-    },
-    {
-     "path": "animationProfile:unfadedPaletteAfterCrystalLoad",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/hail.ts:44"
-    },
-    {
-     "path": "animationProfile:fadedPaletteAfterCrystalLoad",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/hail.ts:45"
-    },
-    {
-     "path": "animationProfile:hardwareMatricesAtAge0",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/hail.ts:47"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": null,
-   "carrierOccurrences": 4576,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": false,
-   "lentConstants": [
-    "F-AFFINE"
-   ],
-   "providerNeeds": [
-    "C",
-    "D-PAL",
-    "D-OAM"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "MULTI"
-  },
-  {
-   "move": "MOVE_HIDDEN_POWER",
-   "id": 237,
-   "name": "HIDDEN POWER",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0003968253968253967,
-   "config": "src/animation/sceneOnPresentation.ts:2151",
-   "needs": [
-    "B",
-    "C",
-    "F-AFFINE"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationProfile:spriteOrderSeed (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/hiddenPower.ts:30"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationProfile:animationRngSeed (presentation Random2 (gRng2Value))",
-     "cites": [
-      "src/animation/hiddenPower.ts:37"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationProfile:orbitMatrixNums (affine matrix allocator)",
-     "cites": [
-      "src/animation/hiddenPower.ts:31"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationProfile:attackerSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/hiddenPower.ts:25"
-    },
-    {
-     "path": "animationProfile:targetSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/hiddenPower.ts:26"
-    },
-    {
-     "path": "animationProfile:allocationSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/hiddenPower.ts:28"
-    },
-    {
-     "path": "animationProfile:spriteOrderSeed",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/hiddenPower.ts:30"
-    },
-    {
-     "path": "animationProfile:orbitMatrixNums",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/hiddenPower.ts:31"
-    },
-    {
-     "path": "animationProfile:scatterMatrixNums",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/hiddenPower.ts:32"
-    },
-    {
-     "path": "animationProfile:uninitializedScatterY",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/hiddenPower.ts:34"
-    },
-    {
-     "path": "animationProfile:attackerPersonality",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/hiddenPower.ts:36"
-    },
-    {
-     "path": "animationProfile:animationRngSeed",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/hiddenPower.ts:37"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "seed",
-   "carrierOccurrences": 0,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "B",
-    "F-AFFINE"
-   ],
-   "providerNeeds": [
-    "C"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "PROVIDER-C"
-  },
-  {
-   "move": "MOVE_HYPER_BEAM",
-   "id": 63,
-   "name": "HYPER BEAM",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0003720238095238094,
-   "config": "src/animation/sceneOnPresentation.ts:2913",
-   "needs": [
-    "B",
-    "C",
-    "F-AFFINE"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationProfile:orbs (HyperBeamOrbRandom {animation,speed,phase,slot,persistentOrder}; AnimHyperBeamOrb Random2 (battle_anim_effects_1.c:2339-2356))",
-     "cites": [
-      "src/animation/hyperBeam.ts:24"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationProfile:orbs (HyperBeamOrbRandom {animation,speed,phase,slot,persistentOrder}; AnimHyperBeamOrb Random2 (battle_anim_effects_1.c:2339-2356))",
-     "cites": [
-      "src/animation/hyperBeam.ts:24"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationProfile:orbs (HyperBeamOrbRandom {animation,speed,phase,slot,persistentOrder}; AnimHyperBeamOrb Random2 (battle_anim_effects_1.c:2339-2356))",
-     "cites": [
-      "src/animation/hyperBeam.ts:24"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationGeometry:attackerPictureCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/hyperBeam.ts:9"
-    },
-    {
-     "path": "animationGeometry:targetPictureCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/hyperBeam.ts:10"
-    },
-    {
-     "path": "animationGeometry:attackerRestOffset",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/hyperBeam.ts:11"
-    },
-    {
-     "path": "animationGeometry:targetRestOffset",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/hyperBeam.ts:12"
-    },
-    {
-     "path": "animationProfile:orbs",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "B",
-      "C"
-     ],
-     "status": "blocked: F-AFFINE+C",
-     "cite": "src/animation/hyperBeam.ts:24"
-    },
-    {
-     "path": "animationProfile:attackerSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/hyperBeam.ts:25"
-    },
-    {
-     "path": "animationProfile:targetSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/hyperBeam.ts:26"
-    },
-    {
-     "path": "animationProfile:spriteOrderSeed",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/hyperBeam.ts:27"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "seed",
-   "carrierOccurrences": 904,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "B",
-    "F-AFFINE"
-   ],
-   "providerNeeds": [
-    "C"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "PROVIDER-C"
-  },
-  {
    "move": "MOVE_HYPER_VOICE",
    "id": 304,
    "name": "HYPER VOICE",
@@ -4642,165 +4161,6 @@
     "player": "NEEDS-KEYS"
    },
    "group": "MULTI"
-  },
-  {
-   "move": "MOVE_ICE_BEAM",
-   "id": 58,
-   "name": "ICE BEAM",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.01980229591836734,
-   "config": "src/animation/sceneOnPresentation.ts:3957",
-   "needs": [
-    "B",
-    "C",
-    "E-TASK"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationProfile:spriteOrder (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/iceBeam.ts:79"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationProfile:animationRngStart (presentation Random2 (gRng2Value))",
-     "cites": [
-      "src/animation/iceBeam.ts:75"
-     ]
-    },
-    {
-     "code": "E-TASK",
-     "text": "animationProfile:soundTaskSlot (CreateTask slot / live task table)",
-     "cites": [
-      "src/animation/iceBeam.ts:70"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationProfile:orientation",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/iceBeam.ts:65"
-    },
-    {
-     "path": "animationProfile:endAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/iceBeam.ts:66"
-    },
-    {
-     "path": "animationProfile:geometry",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/iceBeam.ts:67"
-    },
-    {
-     "path": "animationProfile:targetSpriteSlot",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/iceBeam.ts:69"
-    },
-    {
-     "path": "animationProfile:soundTaskSlot",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/iceBeam.ts:70"
-    },
-    {
-     "path": "animationProfile:monbgTaskSlot",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/iceBeam.ts:71"
-    },
-    {
-     "path": "animationProfile:shakeTaskSlot",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/iceBeam.ts:72"
-    },
-    {
-     "path": "animationProfile:clearTaskSlot",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/iceBeam.ts:73"
-    },
-    {
-     "path": "animationProfile:animationRngStart",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/iceBeam.ts:75"
-    },
-    {
-     "path": "animationProfile:gameplayRng",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/iceBeam.ts:77"
-    },
-    {
-     "path": "animationProfile:immutableGameplayState",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/iceBeam.ts:78"
-    },
-    {
-     "path": "animationProfile:spriteOrder",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/iceBeam.ts:79"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "full",
-   "carrierOccurrences": 33428,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "B",
-    "E-TASK"
-   ],
-   "providerNeeds": [
-    "C"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "PROVIDER-C"
   },
   {
    "move": "MOVE_LOVELY_KISS",
@@ -8605,115 +7965,6 @@
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
-   },
-   "group": "MULTI"
-  },
-  {
-   "move": "MOVE_RAIN_DANCE",
-   "id": 240,
-   "name": "RAIN DANCE",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.008382936507936511,
-   "config": "src/animation/sceneOnPresentation.ts:2085",
-   "needs": [
-    "C",
-    "D-PAL"
-   ],
-   "blockers": [
-    {
-     "code": "C",
-     "text": "animationProfile:animationRngAtAge0 (presentation Random2 (gRng2Value))",
-     "cites": [
-      "src/animation/rainDance.ts:18"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "animationProfile:unfadedPaletteBeforeLoad (palette host / resource plan)",
-     "cites": [
-      "src/animation/rainDance.ts:22"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationProfile:animationRngAtAge0",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/rainDance.ts:18"
-    },
-    {
-     "path": "animationProfile:occupiedSpriteSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/rainDance.ts:20"
-    },
-    {
-     "path": "animationProfile:unfadedPaletteBeforeLoad",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/rainDance.ts:22"
-    },
-    {
-     "path": "animationProfile:fadedPaletteBeforeLoad",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/rainDance.ts:23"
-    },
-    {
-     "path": "animationProfile:hardwarePaletteAtAge0",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/rainDance.ts:24"
-    },
-    {
-     "path": "animationProfile:unfadedPaletteAfterLoad",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/rainDance.ts:26"
-    },
-    {
-     "path": "animationProfile:fadedPaletteAfterLoad",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/rainDance.ts:27"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": null,
-   "carrierOccurrences": 15051,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": false,
-   "lentConstants": [],
-   "providerNeeds": [
-    "C",
-    "D-PAL"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
    },
    "group": "MULTI"
   },
@@ -13600,487 +12851,6 @@
     "player": "EXACT-PLAN"
    },
    "group": "MULTI"
-  },
-  {
-   "move": "MOVE_WATER_PULSE",
-   "id": 352,
-   "name": "WATER PULSE",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.004705215419501133,
-   "config": "src/animation/sceneOnPresentation.ts:3862",
-   "needs": [
-    "B",
-    "C",
-    "F-AFFINE",
-    "E-TASK",
-    "D-PAL",
-    "D-BG"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationInputs:spriteOrder (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/waterPulse.ts:74"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationInputs:animationRngSeed (presentation Random2 (gRng2Value))",
-     "cites": [
-      "src/animation/waterPulse.ts:76"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationInputs:ringMatrixSlots (affine matrix allocator)",
-     "cites": [
-      "src/animation/waterPulse.ts:52"
-     ]
-    },
-    {
-     "code": "E-TASK",
-     "text": "animationInputs:updateMonBgTaskSlot (CreateTask slot / live task table)",
-     "cites": [
-      "src/animation/waterPulse.ts:59"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "animationInputs:simplePaletteSpriteSlot (palette host / resource plan)",
-     "cites": [
-      "src/animation/waterPulse.ts:45"
-     ]
-    },
-    {
-     "code": "D-BG",
-     "text": "animationInputs:monBg (BG regs / monbg / BLDCNT state)",
-     "cites": [
-      "src/animation/waterPulse.ts:63"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationInputs:attackerCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/waterPulse.ts:32"
-    },
-    {
-     "path": "animationInputs:targetCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/waterPulse.ts:33"
-    },
-    {
-     "path": "animationInputs:targetPictureCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/waterPulse.ts:35"
-    },
-    {
-     "path": "animationInputs:attackerRingOrigin",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/waterPulse.ts:37"
-    },
-    {
-     "path": "animationInputs:targetRingCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/waterPulse.ts:39"
-    },
-    {
-     "path": "animationInputs:attackerSpriteSlot",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/waterPulse.ts:40"
-    },
-    {
-     "path": "animationInputs:targetSpriteSlot",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/waterPulse.ts:41"
-    },
-    {
-     "path": "animationInputs:attackerSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/waterPulse.ts:42"
-    },
-    {
-     "path": "animationInputs:targetSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/waterPulse.ts:43"
-    },
-    {
-     "path": "animationInputs:targetInitialOffset",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/waterPulse.ts:44"
-    },
-    {
-     "path": "animationInputs:simplePaletteSpriteSlot",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/waterPulse.ts:45"
-    },
-    {
-     "path": "animationInputs:smallBubbleSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/waterPulse.ts:46"
-    },
-    {
-     "path": "animationInputs:ringSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/waterPulse.ts:47"
-    },
-    {
-     "path": "animationInputs:ringBubbleSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/waterPulse.ts:48"
-    },
-    {
-     "path": "animationInputs:ringMatrixSlots",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/waterPulse.ts:52"
-    },
-    {
-     "path": "animationInputs:ringBubbleMatrixSlots",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/waterPulse.ts:53"
-    },
-    {
-     "path": "animationInputs:smallBubbles",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/waterPulse.ts:57"
-    },
-    {
-     "path": "animationInputs:blueRing2",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/waterPulse.ts:58"
-    },
-    {
-     "path": "animationInputs:updateMonBgTaskSlot",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/waterPulse.ts:59"
-    },
-    {
-     "path": "animationInputs:clearMonBgTaskSlot",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/waterPulse.ts:60"
-    },
-    {
-     "path": "animationInputs:shakeTaskSlot",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/waterPulse.ts:61"
-    },
-    {
-     "path": "animationInputs:monBg",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/waterPulse.ts:63"
-    },
-    {
-     "path": "animationInputs:monBg.layer",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/waterPulse.ts:64"
-    },
-    {
-     "path": "animationInputs:monBg.layerId",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/waterPulse.ts:65"
-    },
-    {
-     "path": "animationInputs:monBg.snapshot",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/waterPulse.ts:66"
-    },
-    {
-     "path": "animationInputs:monBg.baseScroll",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/waterPulse.ts:67"
-    },
-    {
-     "path": "animationInputs:monBg.activeCnt",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/waterPulse.ts:68"
-    },
-    {
-     "path": "animationInputs:monBg.inactiveCnt",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/waterPulse.ts:69"
-    },
-    {
-     "path": "animationInputs:initialMatrixBitmap",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/waterPulse.ts:72"
-    },
-    {
-     "path": "animationInputs:spriteOrder",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/waterPulse.ts:74"
-    },
-    {
-     "path": "animationInputs:animationRngSeed",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/waterPulse.ts:76"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "full",
-   "carrierOccurrences": 7345,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "B",
-    "F-AFFINE",
-    "E-TASK"
-   ],
-   "providerNeeds": [
-    "C",
-    "D-PAL",
-    "D-BG"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "MULTI"
-  },
-  {
-   "move": "MOVE_WATER_SPOUT",
-   "id": 323,
-   "name": "WATER SPOUT",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0003401360544217687,
-   "config": "src/animation/sceneOnPresentation.ts:3903",
-   "needs": [
-    "B",
-    "C",
-    "E-TASK"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationInputs:spriteOrderSeed (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/waterSpout.ts:32"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationInputs:animationRng (presentation Random2 (gRng2Value))",
-     "cites": [
-      "src/animation/waterSpout.ts:30"
-     ]
-    },
-    {
-     "code": "E-TASK",
-     "text": "animationInputs:launchTaskSlot (CreateTask slot / live task table)",
-     "cites": [
-      "src/animation/waterSpout.ts:24"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationInputs:attackerHp",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/waterSpout.ts:20"
-    },
-    {
-     "path": "animationInputs:attackerMaxHp",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/waterSpout.ts:21"
-    },
-    {
-     "path": "animationInputs:attackerEffectCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/waterSpout.ts:22"
-    },
-    {
-     "path": "animationInputs:attackerSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/waterSpout.ts:23"
-    },
-    {
-     "path": "animationInputs:launchTaskSlot",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/waterSpout.ts:24"
-    },
-    {
-     "path": "animationInputs:launchSpriteSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/waterSpout.ts:25"
-    },
-    {
-     "path": "animationInputs:impactAffineSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/waterSpout.ts:27"
-    },
-    {
-     "path": "animationInputs:attackerSourceHeight",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/waterSpout.ts:29"
-    },
-    {
-     "path": "animationInputs:animationRng",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/waterSpout.ts:30"
-    },
-    {
-     "path": "animationInputs:spriteOrderSeed",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/waterSpout.ts:32"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "seed",
-   "carrierOccurrences": 567,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "B",
-    "E-TASK"
-   ],
-   "providerNeeds": [
-    "C"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "PROVIDER-C"
   },
   {
    "move": "MOVE_WILL_O_WISP",
