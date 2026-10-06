@@ -1,0 +1,87 @@
+{
+ "scenario": "x2h-faint-sendin-onix.json",
+ "r1EqualsR2": true,
+ "speciesEvents[frame,[sp0,sp1,idx0,idx1],move,anim,spriteIds]": [
+  [
+   0,
+   [
+    98,
+    16,
+    0,
+    0
+   ],
+   0,
+   false,
+   [
+    6,
+    8
+   ]
+  ],
+  [
+   856,
+   [
+    98,
+    16,
+    0,
+    1
+   ],
+   175,
+   false,
+   [
+    6,
+    8
+   ]
+  ],
+  [
+   858,
+   [
+    98,
+    95,
+    0,
+    1
+   ],
+   0,
+   false,
+   [
+    6,
+    8
+   ]
+  ]
+ ],
+ "bodies": [
+  {
+   "move": 175,
+   "start": 71,
+   "end": 184,
+   "opponentSpecies": 16,
+   "oppRole": "target",
+   "predictedX2": 0,
+   "romX2AtActivation": 0,
+   "romX2AtEnd1": 0,
+   "match": true
+  },
+  {
+   "move": 162,
+   "start": 1543,
+   "end": 1742,
+   "opponentSpecies": 95,
+   "oppRole": "attacker",
+   "predictedX2": 1,
+   "romX2AtActivation": 1,
+   "romX2AtEnd1": 1,
+   "match": true
+  },
+  {
+   "move": 175,
+   "start": 1897,
+   "end": 2010,
+   "opponentSpecies": 95,
+   "oppRole": "target",
+   "predictedX2": 1,
+   "romX2AtActivation": 1,
+   "romX2AtEnd1": 0,
+   "match": true
+  }
+ ],
+ "allMatch": true
+}
