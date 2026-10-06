@@ -73,6 +73,7 @@ import { LEAF_BLADE_OAM_ORDER_SLOTS } from "../animation/leafBlade.ts";
 import { HEAL_BELL_REUSED_ORDER_SLOTS } from "../animation/healBell.ts";
 import { KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, spriteOrderForSlots, spriteOrderWithOccupiedPrefix } from "./spriteOrderProvider.ts";
 import { DOUBLE_KICK_FRAME_COUNT } from "../animation/doubleKick.ts";
+import { waterSpoutTimeline, type WaterSpoutLiveInputs } from "../animation/waterSpout.ts";
 import type { FlailPower } from "../animation/flail.ts";
 import {
   liveMovePresentationRngWords, miniTwinklingStarFromWords, type LiveMovePresentationRngInput,
@@ -171,8 +172,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   13,
   // prep10: Spark, PLAYER attacker only (accepted constants; no accepted opponent-attacker evidence).
   209,
-  // prep13 (docs/next-adapters-prep13.md s1.1): Ice Beam (geometry from the anchors; lent-order gate).
-  58,
+  // prep13 (docs/next-adapters-prep13.md s1.1-1.2): Ice Beam (geometry from the anchors; lent-order gate), Water Spout
+  // (party HP tier + picture height + per-side rain seed; lent-order gate).
+  58, 323,
 ] as const);
 
 const FLAIL_POWERS: readonly FlailPower[] = Object.freeze([20, 40, 80, 100, 150, 200]);
@@ -248,8 +250,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // Faithful-random adapters (liveMovePresentationRng.ts): Double Kick hit bodies, Astonish, Thrash, Flail, Wish start at activation (row 0,
     // prep12 §0.2 / random2-r1 activation probes).
     24, 310, 37, 175, 273,
-    // prep13 (issue142-shadow-rows-extra.json): Ice Beam activation == accepted window start (row 0), prep13 s0.1.
-    58,
+    // prep13 (issue142-shadow-rows-extra.json): Ice Beam, Water Spout activation == accepted window start (row 0), prep13 s0.1-0.2.
+    58, 323,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -378,8 +380,46 @@ function provableEffectOrder(moveId: 196 | 59, side: "player" | "opponent", dura
   return ok;
 }
 
-export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): number | null {
+/** Free OBJ slots over the known-entry in-use set [0,1,2,6,8,60..63] (prep13 s1.2 launchSpriteSlots), ascending. */
+const KNOWN_ENTRY_FREE_SPRITE_SLOTS: readonly number[] = Object.freeze(
+  Array.from({ length: 64 }, (_, slot) => slot).filter(slot => ![0, 1, 2, 6, 8, 60, 61, 62, 63].includes(slot)));
+
+const waterSpoutInputsCache = new Map<string, Readonly<WaterSpoutLiveInputs>>();
+/**
+ * prep13 s1.2: Water Spout's live inputs. HP = the attacker's party HP at activation (GetWaterSpoutPowerForAnim tier +
+ * HorizontalShake length); `attackerSourceHeight` = the attacker's picture height (SetBattlerSpriteYOffsetFromYScale; the
+ * reducer default 40 is Nosepass's); the rest are the known-entry constants. Memoised so the reducer's timeline cache hits.
+ */
+function waterSpoutLiveInputs(
+  field: BattleResolutionDisplayedField, attackerSide: "player" | "opponent", order?: readonly number[],
+): Readonly<WaterSpoutLiveInputs> | null {
+  const mon = field[attackerSide];
+  if (mon.maxHP <= 0 || mon.hp < 0 || mon.hp > mon.maxHP) return null;
+  const art = createBattleCommandFieldArtView(field);
+  const anchors = liveBattlerAnchors(attackerSide, art);
+  const key = `${attackerSide}/${mon.hp}/${mon.maxHP}/${anchors.pictureHeight}/${anchors.picOffsetPoint.x},${anchors.picOffsetPoint.y}/${order?.join(",") ?? ""}`;
+  let inputs = waterSpoutInputsCache.get(key);
+  if (inputs === undefined) {
+    inputs = Object.freeze({
+      attackerSide, attackerHp: mon.hp, attackerMaxHp: mon.maxHP, attackerEffectCenter: anchors.picOffsetPoint,
+      attackerSubpriority: attackerSide === "player" ? 30 : 40, launchTaskSlot: 0, launchSpriteSlots: KNOWN_ENTRY_FREE_SPRITE_SLOTS,
+      attackerSourceHeight: anchors.pictureHeight, animationRng: 0, ...(order ? { spriteOrderSeed: order } : {}),
+    });
+    waterSpoutInputsCache.set(key, inputs);
+  }
+  return inputs;
+}
+
+export function liveMoveAnimationDuration(
+  request: BattleMoveAnimationRequest, field?: BattleResolutionDisplayedField,
+): number | null {
   switch (request.moveId) {
+    // Water Spout (prep13 s1.2): the body length depends on the attacker's party HP and picture height (accepted rows
+    // 278 full HP / 276 KINGDRA player-back / 270..201 at lower HP tiers), so it is only defined with the displayed field.
+    case 323: {
+      const inputs = field === undefined ? null : waterSpoutLiveInputs(field, request.attacker === 0 ? "player" : "opponent");
+      return inputs === null ? null : waterSpoutTimeline(inputs).length;
+    }
     case 2: return KARATE_CHOP_FRAME_COUNT;
     case 9: return THUNDER_PUNCH_MOVE_BODY_LAST_AGE + 1;
     case 5: return 160; // Mega Punch source body through first inactive row.
@@ -704,7 +744,7 @@ export function liveMoveAnimationPresentation(
   spriteOrderInput?: LiveMoveSpriteOrderInput,
   presentationRngInput?: LiveMovePresentationRngInput,
 ): SceneOnMovePresentationState | null {
-  if (liveMoveAnimationDuration(request) === null) return null;
+  if (liveMoveAnimationDuration(request, field) === null) return null;
   const art = createBattleCommandFieldArtView(field);
   const battler = (side: "player" | "opponent"): SceneOnPresentationBattler => {
     const origin = battleCommandFieldSpriteOrigin(art[side], side);
@@ -2196,6 +2236,18 @@ export function liveMoveAnimationPresentation(
             monbgBaseHofs: 544 - (targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2),
             monbgBaseVofs: 544 - targetAnchors.spriteCenter.y },
           spriteOrder: { initialOrder } } };
+      break;
+    }
+    case 323: {
+      // prep13 s1.2: the 64-entry activation order is the lent order (known entry + tracked history), pixel-relevant for the
+      // painter ties; an unknown tracked order is not proven -> null.
+      if (!spriteOrderInput?.known) return null;
+      const order = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (order === null) return null;
+      const animationInputs = waterSpoutLiveInputs(field, attacker.geometry.side, order);
+      if (animationInputs === null) return null;
+      config = { move: "WATER_SPOUT", attacker, target, fieldProfile, animationInputs };
       break;
     }
     default: return null;

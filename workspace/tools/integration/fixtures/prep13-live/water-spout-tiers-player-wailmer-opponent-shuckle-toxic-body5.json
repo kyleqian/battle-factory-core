@@ -2,6 +2,9 @@
  "schema": "prep13-live-adapter-fixture/v1",
  "move": "WATER_SPOUT",
  "probe": "tools/compare/waterSpoutProbe.py",
+ "probeEnv": {
+  "POKEBENCH_ANIM_PROBE_REPEATED_BODIES": "1"
+ },
  "scenario": "tools/battle-lab/mechanic-water-spout-tiers-player-wailmer-opponent-shuckle-toxic.json",
  "bodyIndex": 5,
  "denseWindow": {
@@ -22,6 +25,10 @@
   }
  },
  "attackerPersonality": 2349019081,
+ "displayedStatus": {
+  "player": "poison",
+  "opponent": "none"
+ },
  "fieldProfile": {
   "playerHp": 17,
   "playerMaxHp": 137,

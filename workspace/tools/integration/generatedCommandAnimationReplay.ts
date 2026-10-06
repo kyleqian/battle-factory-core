@@ -111,9 +111,11 @@ export function generatedCommandAnimationReplay(
         if (command.type === "move-animation" && command.animation) requests.push({ ...command.animation, frame });
       }
     }
-    if (command?.type !== "move-animation" || !command.animation || liveMoveAnimationDuration(command.animation) === null) return;
-    const current = `${r.resolutionId.requestId}:${r.segmentIndex}:${r.commandIndex}`;
+    if (command?.type !== "move-animation" || !command.animation) return;
     const view = createBattleResolutionPresentationRenderView(r);
+    // The duration of some bodies (Water Spout) depends on the displayed field.
+    if (liveMoveAnimationDuration(command.animation, view.field) === null) return;
+    const current = `${r.resolutionId.requestId}:${r.segmentIndex}:${r.commandIndex}`;
     const moveEffect = view.effect?.type === "move" ? view.effect : null;
     const adapterActive = moveEffect !== null && liveMoveAnimationPresentation(
       moveEffect.request, view.field, moveEffect.age, moveEffect.paletteInput,

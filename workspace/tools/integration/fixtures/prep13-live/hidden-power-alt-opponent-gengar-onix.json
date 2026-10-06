@@ -22,6 +22,10 @@
   }
  },
  "attackerPersonality": 1793700000,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
  "fieldProfile": {
   "playerHp": 142,
   "playerMaxHp": 142,

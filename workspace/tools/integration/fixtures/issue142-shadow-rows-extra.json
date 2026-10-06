@@ -1,6 +1,6 @@
 {
  "schema": "issue142-shadow-rows-extra/v1",
- "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep7 rows from issue142ShadowRowsPrep7.py) (+ prep8 rows from issue142ShadowRowsPrep8.py) (+ prep9 rows from issue142ShadowRowsPrep9.py) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep13 ICE_BEAM rows from issue142ShadowRowsPrep13.py)",
+ "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep7 rows from issue142ShadowRowsPrep7.py) (+ prep8 rows from issue142ShadowRowsPrep8.py) (+ prep9 rows from issue142ShadowRowsPrep9.py) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep13 ICE_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep13 WATER_SPOUT rows from issue142ShadowRowsPrep13.py)",
  "rows": [
   {
    "id": 236,
@@ -4360,6 +4360,44 @@
    "sources": {
     "fixture": "tools/integration/fixtures/prep13-live/ice-beam-opponent-delcatty-player-shuckle.json",
     "scenario": "tools/battle-lab/mechanic-ice-beam-opponent-delcatty-player-shuckle.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep13.md s0.2 (activation == accepted window start, prep13-crosscheck.json)"
+   }
+  },
+  {
+   "id": 323,
+   "move": "WATER_SPOUT",
+   "orientation": "player",
+   "variant": "prep13-water-spout-player-wailmer-opponent-shuckle",
+   "activationFrame": 79,
+   "windowStart": 79,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep13-live/water-spout-player-wailmer-opponent-shuckle.json",
+    "scenario": "tools/battle-lab/mechanic-water-spout-player-wailmer-opponent-shuckle.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep13.md s0.2 (activation == accepted window start, prep13-crosscheck.json)"
+   }
+  },
+  {
+   "id": 323,
+   "move": "WATER_SPOUT",
+   "orientation": "opponent",
+   "variant": "prep13-water-spout-opponent-wailmer-player-shuckle",
+   "activationFrame": 83,
+   "windowStart": 83,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep13-live/water-spout-opponent-wailmer-player-shuckle.json",
+    "scenario": "tools/battle-lab/mechanic-water-spout-opponent-wailmer-player-shuckle.json",
     "body": "normal",
     "activation": "docs/next-adapters-prep13.md s0.2 (activation == accepted window start, prep13-crosscheck.json)"
    }

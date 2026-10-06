@@ -8,6 +8,8 @@ R = Path(__file__).resolve().parents[2]
 A = json.loads((R / "tools/integration/fixtures/prep13/prep13-analysis.json").read_text())
 S = {s["id"]: s for s in json.loads((R / "src/data/gen/species-stats.json").read_text())["species"]}
 PROBE = {"ICE_BEAM": "iceBeamProbe", "WATER_SPOUT": "waterSpoutProbe", "HIDDEN_POWER": "hiddenPowerProbe", "HYPER_BEAM": "hyperBeamProbe"}
+def status(v):
+    return "sleep" if v & 7 else "poison" if v & 0x88 else "burn" if v & 0x10 else "freeze" if v & 0x20 else "paralysis" if v & 0x40 else "none"
 def gender(sp, pers):
     r = S[sp]["genderRatio"]
     return "none" if r == 255 else "female" if r == 254 else "male" if r == 0 else ("male" if (pers & 255) >= r else "female")
@@ -26,6 +28,8 @@ for scen, bodies in A.items():
             "schema": "prep13-live-adapter-fixture/v1",
             "move": b["move"],
             "probe": f"tools/compare/{PROBE[b['move']]}.py",
+            # the tier scenarios hold six bodies: run the probe with POKEBENCH_ANIM_PROBE_REPEATED_BODIES=1 (waterSpoutTierEvidence.ts)
+            **({"probeEnv": {"POKEBENCH_ANIM_PROBE_REPEATED_BODIES": "1"}} if "tiers" in scen else {}),
             "scenario": f"tools/battle-lab/{scen}.json",
             "bodyIndex": i,
             "denseWindow": {"startFrame": b["act"], "endFrame": b["act"] + b["rows"] - 1},
@@ -33,6 +37,7 @@ for scen, bodies in A.items():
             "attacker": {"species": name(sp[side]), "geometry": {"side": side}},
             "target": {"species": name(sp[foe]), "geometry": {"side": foe}},
             "attackerPersonality": sp[side]["personality"],
+            "displayedStatus": {"player": status(m[0]["status1"]), "opponent": status(m[1]["status1"])},
             "fieldProfile": {"playerHp": m[0]["hp"], "playerMaxHp": m[0]["maxHP"], "opponentHp": m[1]["hp"], "opponentMaxHp": m[1]["maxHP"],
                              "playerGender": gender(m[0]["species"], m[0]["personality"]), "opponentGender": gender(m[1]["species"], m[1]["personality"])},
         }

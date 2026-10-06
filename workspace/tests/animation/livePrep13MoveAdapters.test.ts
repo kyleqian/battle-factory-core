@@ -53,10 +53,40 @@ const rulesWithoutSceneMarker = (v: { rules: any }) => {
 };
 
 describe("live prep13 move adapters", () => {
-  it("registers Ice Beam with the accepted duration and shadow row", () => {
-    expect(LIVE_MOVE_ANIMATION_IDS).toContain(58);
-    expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[58]).toBe(0);
+  it("registers Ice Beam and Water Spout with the accepted durations and shadow rows", () => {
+    for (const id of [58, 323]) {
+      expect(LIVE_MOVE_ANIMATION_IDS).toContain(id);
+      expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[id]).toBe(0);
+    }
     for (const a of [0, 1] as const) expect(liveMoveAnimationDuration(request(58, a))).toBe(203);
+    // Water Spout's body length depends on the attacker's party HP and picture height: no field, no duration.
+    expect(liveMoveAnimationDuration(request(323, 0))).toBeNull();
+  });
+
+  // prep13 s1.2 / mechanic-water-spout-tiers-* ROM rows by attacker party HP (NOSEPASS carrier, max HP 137) and side.
+  it.each([
+    [137, 0, 278], [129, 0, 270], [113, 0, 254], [89, 0, 229], [57, 0, 204], [17, 0, 204],
+    [137, 1, 278], [129, 1, 270], [113, 1, 254], [89, 1, 230], [57, 1, 206], [17, 1, 201],
+  ] as const)("Water Spout duration at HP %i/137 attacker %i = %i rows (ROM tier scenarios)", (hp, attacker, rows) => {
+    const base = attacker === 0 ? displayed("NOSEPASS", "SHUCKLE") : displayed("SHUCKLE", "NOSEPASS");
+    const side = attacker === 0 ? "player" : "opponent";
+    const field = { ...base, [side]: { ...base[side], hp, maxHP: 137 } } as BattleResolutionDisplayedField;
+    expect(liveMoveAnimationDuration(request(323, attacker), field)).toBe(rows);
+  });
+
+  it("Water Spout takes the picture height of the attacker (KINGDRA player-back is 2 rows shorter), is gated on the lent order", () => {
+    const order = knownOrder();
+    const kingdra = displayed("KINGDRA", "GOLEM", [150, 150]);
+    expect(liveMoveAnimationDuration(request(323, 0), kingdra)).toBe(276);
+    expect(liveMoveAnimationDuration(request(323, 1), displayed("GOLEM", "KINGDRA", [150, 150]))).toBe(278);
+    expect(liveMoveAnimationPresentation(request(323, 0), kingdra, 0)).toBeNull();
+    const inputs = (liveMoveAnimationPresentation(request(323, 0), kingdra, 0, undefined, undefined, order)!.config as any).animationInputs;
+    expect(inputs).toMatchObject({ attackerSide: "player", attackerHp: 150, attackerMaxHp: 150, attackerSubpriority: 30,
+      launchTaskSlot: 0, attackerSourceHeight: 52 });
+    expect(inputs.launchSpriteSlots.slice(0, 8)).toEqual([3, 4, 5, 7, 9, 10, 11, 12]);
+    expect(inputs.spriteOrderSeed).toHaveLength(64);
+    const opp = (liveMoveAnimationPresentation(request(323, 1), displayed("GOLEM", "KINGDRA", [150, 150]), 0, undefined, undefined, order)!.config as any).animationInputs;
+    expect(opp).toMatchObject({ attackerSide: "opponent", attackerSubpriority: 40, attackerSourceHeight: 56 });
   });
 
   it("Ice Beam is gated on the lent order and derives geometry from the production anchors", () => {
@@ -89,6 +119,8 @@ describe("live prep13 move adapters", () => {
   const routes: { move: string; id: number; seed: number; moves: (0 | 1 | 2 | 3)[]; streak: number; bodies: number[] }[] = [
     { move: "ICE_BEAM 0/14 DELCATTY", id: 58, seed: 0, moves: [3], streak: 14, bodies: [203] },
     { move: "ICE_BEAM 1/14 DUNSPARCE", id: 58, seed: 1, moves: [0], streak: 14, bodies: [203] },
+    // Not a first body: the opponent's Flail acts first and the tracked order is lent after it (prep13-route-probe.json).
+    { move: "WATER_SPOUT 83/14 WAILMER", id: 323, seed: 83, moves: [0], streak: 14, bodies: [263] },
   ];
   it.each(routes)("completes ordinary $move and preserves ON/OFF rules and RNG", r => {
     const on = generatedCommandAnimationReplay(r.seed, "on", r.moves, r.streak);

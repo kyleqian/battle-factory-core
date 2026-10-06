@@ -202,7 +202,7 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
     turn: f.body === "shattered-wall" ? 1 : 0, power: 0, damage: 0, friendship: 70, multihit: 0,
     ...f.requestFields,
   };
-  if (liveMoveAnimationDuration(request) === null) throw new Error(`No live adapter for ${f.move}`);
+  if (liveMoveAnimationDuration(request, field) === null) throw new Error(`No live adapter for ${f.move}`);
   const postKo = fixturePostKoLend(f, request);
   const healthbox = (mon: typeof field.player) => ({
     name: mon.name, level: mon.level, gender: mon.gender === "genderless" ? "none" as const : mon.gender, status: mon.status,
@@ -238,6 +238,8 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
   };
 }
 
+const sharedProbeRuns = new Map<string, { scratch: string }>();
+
 export function verifyLiveAdapterFramebuffer(path: string, freshRuns = 2) {
   const source = JSON.parse(readFileSync(resolve(root, path), "utf8")) as Fixture;
   const fixture: Fixture = source.sourceFixture
@@ -259,17 +261,25 @@ export function verifyLiveAdapterFramebuffer(path: string, freshRuns = 2) {
   const results: Array<{ digest: string; exactRows: number; rows: number; expectedDuration: number | null; ageOffset: number;
     residualPixels: number } & Record<string, unknown>> = [];
   for (let run = 0; run < freshRuns; run++) {
-    const scratch = createScratchDir("pokebench-live-adapter-");
+    // POKEBENCH_LIVE_PROBE_SHARE=1: several fixtures of ONE scenario (e.g. the six Water Spout tier bodies) evaluate the same
+    // fresh probe process of run N (run 0 and run 1 are still two separate fresh probe processes); no per-fixture RGB copy.
+    const share = process.env.POKEBENCH_LIVE_PROBE_SHARE === "1";
+    const shareKey = `${run}|${fixture.probe}|${fixture.scenario}|${(fixture.probeArgs ?? []).join(" ")}`;
+    const shared = share ? sharedProbeRuns.get(shareKey) : undefined;
+    const scratch = shared?.scratch ?? createScratchDir("pokebench-live-adapter-");
     const output = join(scratch, "probe.json"), rgbDir = join(scratch, "rgb");
-    const probeRun = spawnSync("python3", [
-      join(root, "tools/run-mgba-probe.py"), output, "--",
-      join(vendor, "mgba-venv/bin/python"), resolve(root, fixture.probe),
-      resolve(root, fixture.scenario), output, rgbDir,
-      ...(probeMoveId === undefined ? [] : [String(probeMoveId)]),
-      ...(probeStartFrame === undefined ? [] : [String(probeStartFrame)]),
-      ...(fixture.probeArgs ?? []),
-    ], { cwd: root, encoding: "utf8", maxBuffer: 4 * 1024 * 1024 });
-    if (probeRun.status !== 0) throw new Error(probeRun.stderr || probeRun.stdout);
+    if (!shared) {
+      const probeRun = spawnSync("python3", [
+        join(root, "tools/run-mgba-probe.py"), output, "--",
+        join(vendor, "mgba-venv/bin/python"), resolve(root, fixture.probe),
+        resolve(root, fixture.scenario), output, rgbDir,
+        ...(probeMoveId === undefined ? [] : [String(probeMoveId)]),
+        ...(probeStartFrame === undefined ? [] : [String(probeStartFrame)]),
+        ...(fixture.probeArgs ?? []),
+      ], { cwd: root, encoding: "utf8", maxBuffer: 4 * 1024 * 1024 });
+      if (probeRun.status !== 0) throw new Error(probeRun.stderr || probeRun.stdout);
+      if (share) sharedProbeRuns.set(shareKey, { scratch });
+    }
     const probe = JSON.parse(readFileSync(output, "utf8")) as Probe;
     // Use the previously accepted complete source-owned window; some probes
     // also retain pre-body text and post-body stat banners. Never pick matching rows.
@@ -308,7 +318,8 @@ export function verifyLiveAdapterFramebuffer(path: string, freshRuns = 2) {
       }
       return { age, frame: frame.frame, residualPixels, regions, source: hash(rgb), live: hash(rgba) };
     });
-    const expectedDuration = liveMoveAnimationDuration((liveView(fixture, 0).effect as { request: BattleMoveAnimationRequest }).request);
+    const view0 = liveView(fixture, 0);
+    const expectedDuration = liveMoveAnimationDuration((view0.effect as { request: BattleMoveAnimationRequest }).request, view0.field);
     const receipt = {
       fixture: path, run, scratch, expectedDuration, ageOffset, rows: rows.length,
       exactRows: rows.filter(r => r.residualPixels === 0).length,
@@ -319,10 +330,16 @@ export function verifyLiveAdapterFramebuffer(path: string, freshRuns = 2) {
     const retainedRoot = process.env.POKEBENCH_LIVE_EVIDENCE_DIR;
     if (retainedRoot) {
       mkdirSync(retainedRoot, { recursive: true });
-      cpSync(scratch, join(retainedRoot, `${basename(path, ".json")}-run${run}`), {
-        recursive: true,
-        errorOnExist: true,
-      });
+      if (share) {
+        const dir = join(retainedRoot, `${basename(path, ".json")}-run${run}`);
+        mkdirSync(dir, { recursive: true });
+        cpSync(join(scratch, "live-comparison.json"), join(dir, "live-comparison.json"));
+      } else {
+        cpSync(scratch, join(retainedRoot, `${basename(path, ".json")}-run${run}`), {
+          recursive: true,
+          errorOnExist: true,
+        });
+      }
     }
     results.push(receipt);
   }

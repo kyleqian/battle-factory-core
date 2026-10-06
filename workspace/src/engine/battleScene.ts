@@ -14983,6 +14983,8 @@ export function renderSceneOnMovePresentation(
       || right.order - left.order || right.slot - left.slot);
     for (const entry of entries) entry.draw();
 
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     const playerIsAttacker = view.attacker.geometry.side === "player";
     const player = playerIsAttacker ? view.attacker : view.target;
     const opponent = playerIsAttacker ? view.target : view.attacker;

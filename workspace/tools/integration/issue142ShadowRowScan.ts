@@ -51,8 +51,9 @@ for (const r of rows) {
     fieldProfile: { playerHp: 120, playerMaxHp: 120, opponentHp: 120, opponentMaxHp: 120, playerGender: "male", opponentGender: "male" },
   });
   const f = mk(PAIR[r.id]?.[1] ?? "GOLBAT");
-  const request = (liveView(f as any, 0).effect as any).request;
-  const duration = liveMoveAnimationDuration(request) as number;
+  const view0 = liveView(f as any, 0);
+  const request = (view0.effect as any).request;
+  const duration = liveMoveAnimationDuration(request, view0.field) as number;
   const expected: number | null = LIVE_MOVE_OPPONENT_SHADOW_ROW[r.id] ?? null;
   const tail: number = r.tailFirstAge ?? Infinity;
   const drawn: number[] = [];

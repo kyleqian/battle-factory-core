@@ -10,7 +10,12 @@ E = {
                    "ordinary routes 0/14 DELCATTY slot 3 and 1/14 DUNSPARCE slot 0 (first body, order known): adapter active every age, following prompt reached, ON/OFF rules/RNG/boundary equal"],
               ["declines (scene-off fallback) unless the tracked sprite order is lent (first body / tracked)",
                "independent arbitrary-species/history framebuffer comparison"]),
- "WATER_SPOUT": (323, [], []),
+ "WATER_SPOUT": (323, ["dense 278/278 (accepted NOSEPASS -> SHUCKLE both orientations, first body) and KINGDRA -> GOLEM alternate (276 rows player-back = attackerSourceHeight 52, 278 opponent-front) zero residual twice fresh",
+                       "HP tiers 0..3: body length equals the ROM rows at all 12 tier bodies (278/270/254/229|230/204|206/204|201); dense tier-0 bodies (HP 17/137) 201/201 + 204/204 zero residual twice fresh; tier 1/2 and the lower-HP tier-3 bodies (not first bodies, order lent from the first-body plan) keep 16..298 px residual in the launch-orb rows 55..71 (see receipt): not claimed",
+                       "ordinary route 83/14 WAILMER (not a first body: order lent after the opponent's Flail): adapter active every age, following prompt reached, ON/OFF rules/RNG/boundary equal"],
+                      ["declines unless the tracked sprite order is lent",
+                       "dense proof of HP tiers 1-2 and lower-HP tier-3 bodies needs the true multi-body order lend (tier scenarios hold a Toxic body between each Water Spout)",
+                       "independent arbitrary-species/history framebuffer comparison"]),
  "HIDDEN_POWER": (237, [], []),
 }
 for move in sys.argv[1:]:
