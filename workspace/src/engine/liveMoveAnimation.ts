@@ -81,7 +81,7 @@ import type { HailProfile } from "../animation/hail.ts";
 import { composeLivePalettes, liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
 import {
-  hyperBeamOrbFromWords, liveMovePresentationRngWords, miniTwinklingStarFromWords, type LiveMovePresentationRngInput,
+  dirtScatterOffsetFromWord, dirtScatterSlots, hyperBeamOrbFromWords, linearTranslationStep, liveMovePresentationRngWords, miniTwinklingStarFromWords, type LiveMovePresentationRngInput,
 } from "./liveMovePresentationRng.ts";
 
 
@@ -274,6 +274,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     24, 310, 37, 175, 273,
     // Hyper Beam (63, faithful-random): activation == accepted window start (row 0), prep13 s0.1.
     63,
+    // prep17: Mud-Slap, Sand-Attack faithful-random windows start at activation (row 0).
+    189, 28,
     // prep13 (issue142-shadow-rows-extra.json): Ice Beam, Water Spout activation == accepted window start (row 0), prep13 s0.1-0.2.
     58, 323, 237,
     // prep14 s2: Rain Dance, Water Pulse (faithful-random) and Hail activation == accepted window start (row 0).
@@ -732,6 +734,8 @@ export function liveMoveAnimationDuration(
     // Flail accepted windows (209..322 / 210..323; natural-HP tiers 114 rows each); power = gBattleMovePower.
     case 175: return FLAIL_POWERS.includes(request.power as FlailPower) ? 114 : null;
     case 273: return 271; // Wish accepted window (65..335 / 69..339).
+    case 189: return 51; // Mud-Slap A..A+50 (prep17: 77..127 / 81..131 / alt 72..122).
+    case 28: return 58; // Sand-Attack A..A+57 (78..135 / 82..139 / alt 73..130).
     case 63: return 280; // Hyper Beam faithful-random body 79..358 / 83..362 (prep13 s0.1; reducer first inactive age 279).
     case 237: return 180; // Hidden Power 77..256 / 81..260 (prep13 s0.1, first inactive age 179).
     case 240: return 187; // Rain Dance 213..399 / 211..397 (prep14 s2).
@@ -2314,6 +2318,41 @@ export function liveMoveAnimationPresentation(
       config = { move: "HYPER_BEAM", attacker, target, fieldProfile, animationGeometry,
         animationProfile: { orbs: words.map((word, index) => ({ ...word, slot: slots[index]!, persistentOrder: lentOrder.indexOf(slots[index]!) })),
           ...subs, spriteOrderSeed: lentOrder } };
+      break;
+    }
+    case 189: case 28: {
+      // prep17 s0.2 (faithful random): 30 dirt sprites x (xWord, yWord) from the host's six 10-word rows. Source = the attacker's
+      // pic point + (+-15, +15), destination = the target's pic point + the AnimDirtScatter offsets (both are the anchors the
+      // production field already provides); steps = InitAnimLinearTranslation over 20 frames. Slots = lowest-free over the
+      // computed lifetimes (two transient slot-3 helpers). The lent order is the activation order (Sand) / the pre-wave-1
+      // order (Mud: the transients swap slots 4/3), identical across bodies. Unknown tracked order -> null.
+      const draws = liveMovePresentationRngWords(presentationRngInput)?.draws;
+      if (draws === undefined || draws.length !== 6 || draws.some((row) => row.length !== 10) || !spriteOrderInput?.known) return null;
+      const lentOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (lentOrder === null) return null;
+      const mud = request.moveId === 189;
+      let spriteOrderSeed: readonly number[] = lentOrder;
+      if (mud) {
+        const at = lentOrder.indexOf(4);
+        if (lentOrder[at + 1] !== 3) return null;
+        spriteOrderSeed = lentOrder.map((slot, index) => index === at ? 3 : index === at + 1 ? 4 : slot);
+      }
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const playerAttacker = attacker.geometry.side === "player";
+      const source = { x: attackerAnchors.picOffsetPoint.x + (playerAttacker ? 15 : -15), y: attackerAnchors.picOffsetPoint.y + 15 };
+      const words = draws.flat();
+      const slots = dirtScatterSlots(mud ? [[4, 8], [9, 11]] : [[7, 11], [12, 14]], mud ? 9 : 12, [0, 1, 2, 6, 8, 60, 61, 62, 63]);
+      const seeds = slots.map((slot, i) => ({ slot,
+        xStep: linearTranslationStep(targetAnchors.picOffsetPoint.x + dirtScatterOffsetFromWord(words[2 * i]!) - source.x, 20),
+        yStep: linearTranslationStep(targetAnchors.picOffsetPoint.y + dirtScatterOffsetFromWord(words[2 * i + 1]!) - source.y, 20) }));
+      const common = { attacker, target, animationAgeOffset: mud ? 42 : 43, moveTextStartAge: 0,
+        fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" as const } };
+      config = mud
+        ? { move: "MUD_SLAP", ...common, animationProfile: { mud: seeds, spriteOrderSeed } }
+        // The accuracy banner and result text are controller-owned HUD after the 58-row body (never-reached ages here).
+        : { move: "SAND_ATTACK", ...common, animationProfile: { dirt: seeds, spriteOrderSeed },
+            controllerProfile: { accuracyStageBefore: 0, accuracyStageAfter: 0, resultTextFirstAge: 1_000_000, currentMoveResetAge: 1_000_000 } };
       break;
     }
     case 240: {

@@ -1,0 +1,40 @@
+{
+ "schema": "prep17-live-adapter-fixture/v1",
+ "move": "MUD_SLAP",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep12-mud-slap-alt-set156-set146.json",
+ "denseWindow": {
+  "startFrame": 72,
+  "endFrame": 122
+ },
+ "windowSource": "prep17 s0.2: window = [activation, activation + body rows - 1] (Mud 51, Sand 58 rows); activation from a fresh prep13Probe run",
+ "attacker": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "NIDORINA",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 1301717625,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 117,
+  "playerMaxHp": 117,
+  "opponentHp": 163,
+  "opponentMaxHp": 163,
+  "playerGender": "female",
+  "opponentGender": "female"
+ },
+ "presentationRngActivation": {
+  "value": 1209821555,
+  "source": "prep13Probe prep12-mud-slap-alt-set156-set146 rng2Series[0] (frame 73) one LCG step back = the value at activation frame 72"
+ }
+}
