@@ -1,0 +1,33 @@
+{
+ "schema": "prep13-live-adapter-fixture/v1",
+ "move": "WATER_SPOUT",
+ "probe": "tools/compare/waterSpoutProbe.py",
+ "scenario": "tools/battle-lab/mechanic-water-spout-player-wailmer-opponent-shuckle.json",
+ "bodyIndex": 0,
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 356
+ },
+ "windowSource": "prep13 s0.2: window start = the scenario's own activation frame + the accepted offset 0; rows = the probed first-inactive minus activation",
+ "attacker": {
+  "species": "NOSEPASS",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SHUCKLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019081,
+ "fieldProfile": {
+  "playerHp": 105,
+  "playerMaxHp": 105,
+  "opponentHp": 127,
+  "opponentMaxHp": 127,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

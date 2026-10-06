@@ -1,0 +1,33 @@
+{
+ "schema": "prep13-live-adapter-fixture/v1",
+ "move": "HIDDEN_POWER",
+ "probe": "tools/compare/hiddenPowerProbe.py",
+ "scenario": "tools/battle-lab/prep13-hidden-power-alt-opponent-unown-seed305420897.json",
+ "bodyIndex": 0,
+ "denseWindow": {
+  "startFrame": 81,
+  "endFrame": 260
+ },
+ "windowSource": "prep13 s0.2: window start = the scenario's own activation frame + the accepted offset 0; rows = the probed first-inactive minus activation",
+ "attacker": {
+  "species": "UNOWN",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703050,
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 144,
+  "opponentMaxHp": 144,
+  "playerGender": "male",
+  "opponentGender": "none"
+ }
+}

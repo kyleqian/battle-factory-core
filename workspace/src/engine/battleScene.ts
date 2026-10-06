@@ -15809,6 +15809,8 @@ export function renderSceneOnMovePresentation(
     }
     for (const slot of displayed.order.fullPainterOrder) drawBySlot.get(slot)?.();
 
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     const profile = iceBeamState.config.fieldProfile;
     const playerBattler = attackerIsPlayer ? view.attacker : view.target;
     const opponentBattler = attackerIsPlayer ? view.target : view.attacker;

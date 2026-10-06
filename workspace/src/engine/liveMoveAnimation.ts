@@ -171,6 +171,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   13,
   // prep10: Spark, PLAYER attacker only (accepted constants; no accepted opponent-attacker evidence).
   209,
+  // prep13 (docs/next-adapters-prep13.md s1.1): Ice Beam (geometry from the anchors; lent-order gate).
+  58,
 ] as const);
 
 const FLAIL_POWERS: readonly FlailPower[] = Object.freeze([20, 40, 80, 100, 150, 200]);
@@ -246,6 +248,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // Faithful-random adapters (liveMovePresentationRng.ts): Double Kick hit bodies, Astonish, Thrash, Flail, Wish start at activation (row 0,
     // prep12 §0.2 / random2-r1 activation probes).
     24, 310, 37, 175, 273,
+    // prep13 (issue142-shadow-rows-extra.json): Ice Beam activation == accepted window start (row 0), prep13 s0.1.
+    58,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -658,6 +662,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     // Flail accepted windows (209..322 / 210..323; natural-HP tiers 114 rows each); power = gBattleMovePower.
     case 175: return FLAIL_POWERS.includes(request.power as FlailPower) ? 114 : null;
     case 273: return 271; // Wish accepted window (65..335 / 69..339).
+    case 58: return 203; // Ice Beam 75..277 / 79..281 (prep13 s0.1; reducer first inactive age 202).
     default: return null;
   }
 }
@@ -2172,6 +2177,25 @@ export function liveMoveAnimationPresentation(
       config = { move: "ASTONISH", attacker, target: affineCenterBattler(target), fieldProfile,
         targetPictureYOffset: liveBattlerCoordAttrs(target.geometry.side, art).yOffset,
         dropletRandom: [{ v1: words[0]! & 0x1ff, v2: words[1]! & 0x7f }, { v1: words[2]! & 0x1ff, v2: words[3]! & 0x7f }] };
+      break;
+    }
+    case 58: {
+      // prep13 s1.1: geometry from the anchors, the monbg base from the target's source sprite centre + idle x2 (the first
+      // Task_UpdateMonBg data), every other field a constant/echo; the 64-entry activation order is the lent order (it
+      // alone reproduces the ROM order rows), so an unknown tracked order is not proven -> null.
+      if (!spriteOrderInput?.known) return null;
+      const initialOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (initialOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      config = { move: "ICE_BEAM", attacker, target, fieldProfile,
+        animationProfile: { orientation: attacker.geometry.side === "player" ? "player-back" : "opponent-front",
+          endAge: 202, gameplayRng: 0, animationRngStart: 0,
+          geometry: { attackerPictureOffset: attackerAnchors.picOffsetPoint, targetPictureOffset: targetAnchors.picOffsetPoint,
+            targetCenter: targetAnchors.picOffsetPoint,
+            monbgBaseHofs: 544 - (targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2),
+            monbgBaseVofs: 544 - targetAnchors.spriteCenter.y },
+          spriteOrder: { initialOrder } } };
       break;
     }
     default: return null;
