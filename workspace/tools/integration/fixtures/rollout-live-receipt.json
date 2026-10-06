@@ -147,9 +147,6 @@
   },
   "allZeroResidualTwice": true
  },
- "notVerified": {
-  "defenseCurl": "tools/integration/fixtures/rollout-live-curl-unverified/*.json (SHUCKLE -> BLISSEY bodies 1..4): residual 192,916 / 265,558 / 413,286 / 835,079 px with a constant 6 px field residual from age 0 (cause not isolated); the adapter declines power != 30 << (counter - 1) (scene-off fallback)"
- },
  "route": {
   "route": {
    "seed": 2,
@@ -234,5 +231,30 @@
   "animationCoverage": "ok",
   "animationAudit": "ok",
   "diffCheck": "clean"
+ },
+ "defenseCurl": {
+  "fixtures": "tools/integration/fixtures/rollout-curl/fixtures/curl-sceneon-body{1..4}.json (Scene-ON scenario rollout-curl-defense-curl-sceneon.json, SHUCKLE -> BLISSEY, power 60/120/240/480)",
+  "fixes": "docs/rollout-curl-diagnosis.md s0: shake amplitude clamp(floor(power/12),1,16) (rollout.ts shakeAmplitude); hit splat centre = target picOffsetPoint (impactCenter); power declines removed",
+  "denseResidualPixels": {
+   "body1": 0,
+   "body2": 0,
+   "body3": 0,
+   "body4": 0
+  },
+  "exactRows": [
+   167,
+   167,
+   161,
+   153
+  ],
+  "shucklePlainSceneOn": {
+   "fixtures": "rollout-curl/fixtures/shuckle-plain-sceneon-body{1,2}.json (tools/battle-lab/rollout-curl-shuckle-plain-sceneon.json)",
+   "denseResidualPixels": {
+    "body1": 0,
+    "body2": 0
+   }
+  },
+  "acceptedPlainLadderStillZero": true,
+  "twiceFresh": true
  }
 }

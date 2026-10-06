@@ -2,7 +2,7 @@
  "schema": "rollout-live-fixture/v1",
  "move": "ROLLOUT",
  "probe": "tools/probe/run-battle-lab-rgb.py",
- "scenario": "tools/battle-lab/rollout-curl-shuckle-plain.json",
+ "scenario": "tools/battle-lab/rollout-curl-shuckle-plain-sceneon.json",
  "attacker": {
   "species": "SHUCKLE",
   "geometry": {

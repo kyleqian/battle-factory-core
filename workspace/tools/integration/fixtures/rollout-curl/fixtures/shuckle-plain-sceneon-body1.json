@@ -2,7 +2,7 @@
  "schema": "rollout-live-fixture/v1",
  "move": "ROLLOUT",
  "probe": "tools/probe/run-battle-lab-rgb.py",
- "scenario": "tools/battle-lab/rollout-endeavor-rollout-defense-curl.json",
+ "scenario": "tools/battle-lab/rollout-curl-shuckle-plain-sceneon.json",
  "attacker": {
   "species": "SHUCKLE",
   "geometry": {
@@ -18,33 +18,19 @@
  "fieldProfile": {
   "playerHp": 95,
   "playerMaxHp": 95,
-  "opponentHp": 12,
+  "opponentHp": 362,
   "opponentMaxHp": 362,
   "playerGender": "male",
   "opponentGender": "female"
  },
  "denseWindow": {
-  "startFrame": 2975,
-  "endFrame": 3127,
+  "startFrame": 318,
+  "endFrame": 484,
   "ageOffset": 0
  },
  "requestFields": {
   "turn": 0,
-  "power": 480,
-  "rolloutCounter": 4
- },
- "precedingBodies": [
-  {
-   "moveId": 205,
-   "side": "player"
-  },
-  {
-   "moveId": 205,
-   "side": "player"
-  },
-  {
-   "moveId": 205,
-   "side": "player"
-  }
- ]
+  "power": 30,
+  "rolloutCounter": 1
+ }
 }
