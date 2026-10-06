@@ -40,6 +40,10 @@ export const LIVE_MOVE_RANDOM2_PLANS: Readonly<Record<number, readonly Presentat
   // Move_HYPER_BEAM: 52 orbs, two per frame group (+110 step 3, 26 groups), three words each: animation (% 8),
   // speed ((& 31) + 64), phase (& 0xff) (battle_anim_effects_1.c:2339-2356; prep12 s1.8).
   63: Object.freeze(Array.from({ length: 26 }, (_, g) => Object.freeze({ ageOffset: 110 + 3 * g, count: 6 }))),
+  // Move_MUD_SLAP / Move_SAND_ATTACK: six AnimDirtScatter waves of five sprites, (x, y) = (Random2() & 0x1F, Random2() & 0x1F)
+  // per sprite in spawn order (battle_anim_ground.c:213-214); wave rows A+9 (Mud) / A+12 (Sand), step 4 (prep17 s0.2, authoritative).
+  189: Object.freeze(Array.from({ length: 6 }, (_, w) => Object.freeze({ ageOffset: 9 + 4 * w, count: 10 }))),
+  28: Object.freeze(Array.from({ length: 6 }, (_, w) => Object.freeze({ ageOffset: 12 + 4 * w, count: 10 }))),
   // Move_RAIN_DANCE: two AnimTask_CreateRaindrops tasks, 40 spawn frames (ages 18, 20, then 23 step 3 to 134) x 4 words
   // (x0, y0, x1, y1; battle_anim_water.c:495-496). The reducer replays them from the activation state alone.
   240: Object.freeze([18, 20, ...Array.from({ length: 38 }, (_, i) => 23 + 3 * i)].map((ageOffset) => Object.freeze({ ageOffset, count: 4 }))),
@@ -123,4 +127,48 @@ export function miniTwinklingStarFromWords(tileWord: number, yWord: number): Rea
 export function hyperBeamOrbFromWords(animationWord: number, speedWord: number, phaseWord: number):
   Readonly<{ animation: number; speed: number; phase: number }> {
   return { animation: animationWord % 8, speed: (speedWord & 31) + 64, phase: phaseWord & 0xff };
+}
+
+/** AnimDirtScatter's offset word (battle_anim_ground.c:213-218): `Random2() & 0x1F`, then `> 16` -> `16 - v` (-15..16). */
+export function dirtScatterOffsetFromWord(word: number): number {
+  const v = word & 0x1f;
+  return v > 16 ? 16 - v : v;
+}
+
+/**
+ * InitAnimLinearTranslation (battle_anim_mons.c:1065-1092) over `duration` frames for one axis: `(|d| << 8) as u16 / duration`,
+ * bit 0 set when moving negatively, cleared otherwise.
+ */
+export function linearTranslationStep(delta: number, duration: number): number {
+  const magnitude = Math.trunc(((Math.abs(delta) << 8) & 0xffff) / duration);
+  return delta < 0 ? magnitude | 1 : magnitude & ~1;
+}
+
+/**
+ * Mud-Slap / Sand-Attack dirt lowest-free OAM slots (prep17 s0.2 item 2): base in-use slots, two transient slot-3 helper
+ * sprites with measured lifetimes, `waves` x 5 sprites born every 4 rows from `firstWaveRow`, each alive 21 rows; the
+ * second transient is created before the first wave's sprites in the same row. Returns the dirt slots in spawn order.
+ */
+export function dirtScatterSlots(
+  transients: readonly (readonly [number, number])[], firstWaveRow: number, base: readonly number[],
+): readonly number[] {
+  const alive: { slot: number; until: number }[] = [];
+  const allocate = (row: number, until: number): number => {
+    for (let k = alive.length - 1; k >= 0; k -= 1) if (alive[k]!.until <= row) alive.splice(k, 1);
+    let slot = 0;
+    while (base.includes(slot) || alive.some((a) => a.slot === slot)) slot += 1;
+    alive.push({ slot, until });
+    return slot;
+  };
+  type Birth = { row: number; order: number; until: number; dirt: boolean };
+  const births: Birth[] = [
+    ...transients.map(([from, to], i): Birth => ({ row: from, order: i === 0 ? 0 : -1, until: to, dirt: false })),
+    ...Array.from({ length: 30 }, (_, i): Birth => ({ row: firstWaveRow + 4 * Math.floor(i / 5), order: 1 + i, until: firstWaveRow + 4 * Math.floor(i / 5) + 21, dirt: true })),
+  ].sort((a, b) => a.row - b.row || a.order - b.order);
+  const slots: number[] = [];
+  for (const birth of births) {
+    const slot = allocate(birth.row, birth.until);
+    if (birth.dirt) slots.push(slot);
+  }
+  return slots;
 }

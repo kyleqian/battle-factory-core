@@ -133,6 +133,11 @@ export interface LiveMoveSpriteOrderInput {
    * constant S0; the BG-snapshot adapters (Overheat, Silver Wind) require it.
    */
   readonly firstBody?: true;
+  /**
+   * prep18 s1.1: the previous unit was a Dig setup body and nothing (but its own attacker hide) has run since, so the Dig
+   * unleash's order and BG/scanline history are the measured post-setup state (liveSpriteOrderHost `digSetupUnits`).
+   */
+  readonly afterDigSetup?: true;
 }
 
 /**

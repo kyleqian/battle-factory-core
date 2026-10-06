@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 484,
-  "ids": 233,
+  "rows": 494,
+  "ids": 236,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -5144,6 +5144,116 @@
    "move": "PSYCH_UP",
    "orientation": "player",
    "duration": 179,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 189,
+   "move": "MUD_SLAP",
+   "orientation": "player",
+   "duration": 51,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 189,
+   "move": "MUD_SLAP",
+   "orientation": "opponent",
+   "duration": 51,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 189,
+   "move": "MUD_SLAP",
+   "orientation": "player",
+   "duration": 51,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 28,
+   "move": "SAND_ATTACK",
+   "orientation": "player",
+   "duration": 58,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 28,
+   "move": "SAND_ATTACK",
+   "orientation": "opponent",
+   "duration": 58,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 28,
+   "move": "SAND_ATTACK",
+   "orientation": "player",
+   "duration": 58,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 91,
+   "move": "DIG",
+   "orientation": "opponent",
+   "duration": 195,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 91,
+   "move": "DIG",
+   "orientation": "player",
+   "duration": 195,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 91,
+   "move": "DIG",
+   "orientation": "opponent",
+   "duration": 195,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 91,
+   "move": "DIG",
+   "orientation": "player",
+   "duration": 195,
    "expected": 0,
    "drawn": [
     0

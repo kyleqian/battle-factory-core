@@ -69,7 +69,10 @@ describe("live Fly / Bounce adapters", () => {
     expect(liveSemiInvulnerableHideBattler(request(19, 0, 0))).toBe(0);
     expect(liveSemiInvulnerableHideBattler(request(340, 1, 0))).toBe(1);
     expect(liveSemiInvulnerableHideBattler(request(19, 0, 1))).toBeNull();
-    expect(liveSemiInvulnerableHideBattler(request(91, 0, 0))).toBeNull(); // Dig: out of scope, never hidden here
+    // Dig (prep18): the setup body hides its attacker like a Fly/Bounce charge; the unleash restores it.
+    expect(liveSemiInvulnerableHideBattler(request(91, 0, 0))).toBe(0);
+    expect(liveSemiInvulnerableHideBattler(request(91, 1, 0))).toBe(1);
+    expect(liveSemiInvulnerableHideBattler(request(91, 0, 1))).toBeNull();
     const charged = applyLiveSemiInvulnerableCommand(LIVE_SEMI_INVULNERABLE_NONE, moveAnimation(0, request(19, 0, 0)));
     expect(charged).toEqual([true, false]);
     // The other battler's body (live or the Scene OFF pause) leaves the hidden sprite hidden.

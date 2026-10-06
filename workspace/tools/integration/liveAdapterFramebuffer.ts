@@ -15,6 +15,7 @@ import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandF
 import { liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";
 import { createKnownEntrySpriteAllocatorProvider } from "../../src/engine/knownEntrySpriteAllocator.ts";
 import { prepareLiveMoveSpriteAllocator, prepareLiveMoveSpriteOrder } from "../../src/engine/liveMoveSpriteAllocator.ts";
+import { digUnleashLend } from "../../src/engine/liveSpriteOrderHost.ts";
 import {
   applySpriteOrderUnitPlan, createSpriteOrderPlanCursor, knownEntrySpriteOrderState, spriteOrderPlanTableFromFixture,
   type SpriteOrderPlan,
@@ -85,6 +86,8 @@ export interface Fixture {
    * from them (fixtureBattlerX2Input). Takes precedence over precedingBodies for the x2 input only.
    */
   precedingX2Events?: LiveBattlerX2Event[];
+  /** Dig unleash body after its setup (prep18 s1.1): the production host lends the post-setup order (`digUnleashLend`). */
+  digUnleashAfterSetup?: boolean;
   /**
    * Faithful-random (Random2) bodies: the oracle-pinned presentation stream value at the activation frame (gRng2Value
    * after the first anim-active frame, from a direct-mGBA probe of this scenario; provenance "pinned"). The harness
@@ -281,6 +284,7 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
       // POKEBENCH_LIVE_ORDER_INPUT=none withholds it (order-independent adapters must stay exact without a host order).
       spriteOrderInput: process.env.POKEBENCH_LIVE_ORDER_INPUT === "none" ? undefined
         : postKo ? postKo.spriteOrderInput
+          : f.digUnleashAfterSetup ? digUnleashLend()
           : withFirstBody(f, prepareLiveMoveSpriteOrder(fixtureSpriteOrder(f, request).order, request).input),
       ...(liveMoveRandom2Plan(request) === null ? {} : { presentationRng: fixturePresentationRng(f, request) }),
       ...(fixtureBattlerX2Input(f) === undefined ? {} : { battlerX2Input: fixtureBattlerX2Input(f) }),

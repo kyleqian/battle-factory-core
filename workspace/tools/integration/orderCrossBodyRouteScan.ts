@@ -2,6 +2,7 @@
 // recording for every move body whether the live host lent a known free order, whether that order equals an independent
 // pure-transform prediction from the battle's semantic events, and whether the order consumers' adapters were active.
 //   run: node --experimental-strip-types tools/integration/orderCrossBodyRouteScan.ts [seeds=200] [slots=0,0,0]
+import { digUnleashLend } from "../../src/engine/liveSpriteOrderHost.ts";
 import { generatedCommandAnimationReplay } from "./generatedCommandAnimationReplay.ts";
 import { battleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import {
@@ -148,6 +149,11 @@ export function scanRoute(seed: number, slots: readonly (0 | 1 | 2 | 3)[]) {
   const predicted = predictLentOrders(on, entryKnown);
   const bodies = on.commands.filter(row => row.type === "move-animation").map((row, index) => {
     const command = row.command as { eventSequence: number; animation?: { moveId: number; attacker: number } };
+    // prep18: the Dig unleash is lent a measured post-setup constant (digUnleashLend), not the tracker's order (the setup's own
+    // attacker hide invalidates the tracker); it is a separate lend and is not part of the tracker-vs-pure-transform invariant.
+    if (command.animation?.moveId === 91 && JSON.stringify(row.spriteOrderInput) === JSON.stringify(digUnleashLend().free)) {
+      row = { ...row, spriteOrderInput: undefined };
+    }
     return {
       index, sequence: command.eventSequence, moveId: command.animation?.moveId ?? 0, side: command.animation?.attacker === 0 ? "player" : "opponent",
       known: row.spriteOrderInput !== undefined, predicted: predicted.get(command.eventSequence) ?? null,

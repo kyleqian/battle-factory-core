@@ -36663,6 +36663,8 @@ export function renderSceneOnMovePresentation(
       || left.y - right.y || right.rank - left.rank || right.slot - left.slot);
     for (const entry of entries) entry.draw();
 
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     const player = attacker.geometry.side === "player" ? attacker : target;
     const opponent = attacker.geometry.side === "opponent" ? attacker : target;
     const profile = digState.config.fieldProfile;
@@ -50036,26 +50038,32 @@ export function renderSceneOnMovePresentation(
     const view = sceneOnMudSlapView(state);
     const { attacker, target } = view;
     const originalOrientation =
-      attacker.species === "PIDGEOTTO"
+      (liveField || attacker.species === "PIDGEOTTO")
       && attacker.geometry.side === "opponent"
-      && target.species === "ONIX"
+      && (liveField || target.species === "ONIX")
       && target.geometry.side === "player";
     const oppositeOrientation =
-      attacker.species === "PIDGEOTTO"
+      (liveField || attacker.species === "PIDGEOTTO")
       && attacker.geometry.side === "player"
-      && target.species === "ONIX"
+      && (liveField || target.species === "ONIX")
       && target.geometry.side === "opponent";
     if (!originalOrientation && !oppositeOrientation) {
       throw new Error(
         `unsupported staged MUD_SLAP pair ${attacker.species}->${target.species}`,
       );
     }
-    const attackerSprite = originalOrientation
+    const attackerSprite = liveField ? liveSceneOnBattlerArt(attacker) : originalOrientation
       ? pidgeottoFrontSprite
       : pidgeottoBackSprite;
-    const targetSprite = originalOrientation
+    const targetSprite = liveField ? liveSceneOnBattlerArt(target) : originalOrientation
       ? onixBackSprite
       : onixFrontSprite;
+    // Live corners are the production field origins; the opponent's settled front idle offset is added here
+    // (the accepted staged corner carries it).
+    const liveIdle = (battler: typeof attacker) => liveField && battler.geometry.side === "opponent"
+      ? sceneOnBattlerFrontIdleRest(battler) : { x2: 0, y2: 0 };
+    const attackerIdle = liveIdle(attacker);
+    const targetIdle = liveIdle(target);
 
     drawTileBg(
       fb,
@@ -50068,8 +50076,8 @@ export function renderSceneOnMovePresentation(
         fb,
         targetSprite.tileset,
         targetSprite.palette,
-        target.geometry.spriteCorner.x,
-        target.geometry.spriteCorner.y,
+        target.geometry.spriteCorner.x + targetIdle.x2,
+        target.geometry.spriteCorner.y + targetIdle.y2,
       );
       for (const mud of view.mud) {
         drawSpriteSheet(
@@ -50084,23 +50092,23 @@ export function renderSceneOnMovePresentation(
         fb,
         attackerSprite.tileset,
         attackerSprite.palette,
-        attacker.geometry.spriteCorner.x + view.attackerX2,
-        attacker.geometry.spriteCorner.y,
+        attacker.geometry.spriteCorner.x + attackerIdle.x2 + view.attackerX2,
+        attacker.geometry.spriteCorner.y + attackerIdle.y2,
       );
     } else {
       drawSpriteSheet(
         fb,
         attackerSprite.tileset,
         attackerSprite.palette,
-        attacker.geometry.spriteCorner.x + view.attackerX2,
-        attacker.geometry.spriteCorner.y,
+        attacker.geometry.spriteCorner.x + attackerIdle.x2 + view.attackerX2,
+        attacker.geometry.spriteCorner.y + attackerIdle.y2,
       );
       drawSpriteSheet(
         fb,
         targetSprite.tileset,
         targetSprite.palette,
-        target.geometry.spriteCorner.x,
-        target.geometry.spriteCorner.y,
+        target.geometry.spriteCorner.x + targetIdle.x2,
+        target.geometry.spriteCorner.y + targetIdle.y2,
       );
       for (const mud of view.mud) {
         drawSpriteSheet(
@@ -50112,6 +50120,8 @@ export function renderSceneOnMovePresentation(
         );
       }
     }
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     if (originalOrientation) {
       drawSendOutHealthbox(
         fb,
@@ -50178,26 +50188,32 @@ export function renderSceneOnMovePresentation(
     const view = sceneOnSandAttackView(state);
     const { attacker, target } = view;
     const originalOrientation =
-      attacker.species === "PIDGEOTTO"
+      (liveField || attacker.species === "PIDGEOTTO")
       && attacker.geometry.side === "opponent"
-      && target.species === "ONIX"
+      && (liveField || target.species === "ONIX")
       && target.geometry.side === "player";
     const oppositeOrientation =
-      attacker.species === "PIDGEOTTO"
+      (liveField || attacker.species === "PIDGEOTTO")
       && attacker.geometry.side === "player"
-      && target.species === "ONIX"
+      && (liveField || target.species === "ONIX")
       && target.geometry.side === "opponent";
     if (!originalOrientation && !oppositeOrientation) {
       throw new Error(
         `unsupported staged SAND_ATTACK pair ${attacker.species}->${target.species}`,
       );
     }
-    const attackerSprite = originalOrientation
+    const attackerSprite = liveField ? liveSceneOnBattlerArt(attacker) : originalOrientation
       ? pidgeottoFrontSprite
       : pidgeottoBackSprite;
-    const targetSprite = originalOrientation
+    const targetSprite = liveField ? liveSceneOnBattlerArt(target) : originalOrientation
       ? onixBackSprite
       : onixFrontSprite;
+    // Live corners are the production field origins; the opponent's settled front idle offset is added here
+    // (the accepted staged corner carries it).
+    const liveIdle = (battler: typeof attacker) => liveField && battler.geometry.side === "opponent"
+      ? sceneOnBattlerFrontIdleRest(battler) : { x2: 0, y2: 0 };
+    const attackerIdle = liveIdle(attacker);
+    const targetIdle = liveIdle(target);
 
     drawTileBg(
       fb,
@@ -50210,15 +50226,15 @@ export function renderSceneOnMovePresentation(
       fb,
       attackerSprite.tileset,
       attackerSprite.palette,
-      attackerCorner.x + view.attackerX2,
-      attackerCorner.y,
+      attackerCorner.x + attackerIdle.x2 + view.attackerX2,
+      attackerCorner.y + attackerIdle.y2,
     );
     drawSpriteSheet(
       fb,
       targetSprite.tileset,
       targetSprite.palette,
-      target.geometry.spriteCorner.x,
-      target.geometry.spriteCorner.y,
+      target.geometry.spriteCorner.x + targetIdle.x2,
+      target.geometry.spriteCorner.y + targetIdle.y2,
     );
     for (const dirt of view.dirt) {
       drawSpriteSheet(
@@ -50230,57 +50246,61 @@ export function renderSceneOnMovePresentation(
       );
     }
 
-    if (originalOrientation) {
-      drawSendOutHealthbox(
-        fb,
-        0,
-        pidgeottoHealthboxContentForHp(state.config.fieldProfile.opponentHp),
-      );
-      drawComposedPlayerHealthbox(
-        fb,
-        onixPlayerHealthboxContentForState(
-          state.config.fieldProfile.playerHp,
-          state.config.fieldProfile.playerStatus,
-          state.config.fieldProfile.playerGender,
-          ONIX_MENU_BATTLER.name,
-          ONIX_MENU_BATTLER.level,
-          ONIX_MENU_BATTLER.maxHP,
-        ),
-      );
-    } else {
-      drawSendOutHealthbox(
-        fb,
-        0,
-        featherDanceOnixOpponentHealthbox(
-          state.config.fieldProfile.opponentHp,
-          state.config.fieldProfile.opponentGender ?? "female",
-          ONIX_MENU_BATTLER.name,
-          ONIX_MENU_BATTLER.level,
-          ONIX_MENU_BATTLER.maxHP,
-        ),
-      );
-      drawComposedPlayerHealthbox(
-        fb,
-        featherDancePidgeottoPlayerHealthbox(
-          state.config.fieldProfile.playerHp,
-          state.config.fieldProfile.playerStatus,
-          state.config.fieldProfile.playerGender ?? "male",
-          TURN5_SWITCHIN.replacementSpecies,
-          PIDGEOTTO_LEVEL,
-          PIDGEOTTO_MAX_HP,
-        ),
-      );
+    if (!liveField) {
+      if (originalOrientation) {
+        drawSendOutHealthbox(
+          fb,
+          0,
+          pidgeottoHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+        );
+        drawComposedPlayerHealthbox(
+          fb,
+          onixPlayerHealthboxContentForState(
+            state.config.fieldProfile.playerHp,
+            state.config.fieldProfile.playerStatus,
+            state.config.fieldProfile.playerGender,
+            ONIX_MENU_BATTLER.name,
+            ONIX_MENU_BATTLER.level,
+            ONIX_MENU_BATTLER.maxHP,
+          ),
+        );
+      } else {
+        drawSendOutHealthbox(
+          fb,
+          0,
+          featherDanceOnixOpponentHealthbox(
+            state.config.fieldProfile.opponentHp,
+            state.config.fieldProfile.opponentGender ?? "female",
+            ONIX_MENU_BATTLER.name,
+            ONIX_MENU_BATTLER.level,
+            ONIX_MENU_BATTLER.maxHP,
+          ),
+        );
+        drawComposedPlayerHealthbox(
+          fb,
+          featherDancePidgeottoPlayerHealthbox(
+            state.config.fieldProfile.playerHp,
+            state.config.fieldProfile.playerStatus,
+            state.config.fieldProfile.playerGender ?? "male",
+            TURN5_SWITCHIN.replacementSpecies,
+            PIDGEOTTO_LEVEL,
+            PIDGEOTTO_MAX_HP,
+          ),
+        );
+      }
     }
     if (view.accuracyBanner) {
       drawStatDecreaseBannerForBattlerPalette(
         fb,
         targetSprite.tileset,
-        target.geometry.spriteCorner,
+        { x: target.geometry.spriteCorner.x + targetIdle.x2, y: target.geometry.spriteCorner.y + targetIdle.y2 },
         view.accuracyBanner.eva,
         view.accuracyBanner.bg1Y,
         statAnimBanner.palettes.accuracy,
       );
     }
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     drawTileBg(
       fb,
       battleWindow.tileset,

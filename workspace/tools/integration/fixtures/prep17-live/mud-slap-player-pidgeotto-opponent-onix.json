@@ -1,0 +1,40 @@
+{
+ "schema": "prep17-live-adapter-fixture/v1",
+ "move": "MUD_SLAP",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-mud-slap-player-pidgeotto-onix.json",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 127
+ },
+ "windowSource": "prep17 s0.2: window = [activation, activation + body rows - 1] (Mud 51, Sand 58 rows); activation from a fresh prep13Probe run",
+ "attacker": {
+  "species": "PIDGEOTTO",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 3449509449,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 156,
+  "playerMaxHp": 156,
+  "opponentHp": 117,
+  "opponentMaxHp": 117,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "presentationRngActivation": {
+  "value": 2024241883,
+  "source": "prep13Probe mechanic-mud-slap-player-pidgeotto-onix rng2Series[0] (frame 78) one LCG step back = the value at activation frame 77"
+ }
+}

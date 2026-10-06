@@ -1,0 +1,47 @@
+{
+ "schema": "prep18-live-adapter-fixture/v1",
+ "move": "DIG",
+ "bodyIndex": 1,
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-dig-player-vibrava-opponent-chansey.json",
+ "denseWindow": {
+  "startFrame": 561,
+  "endFrame": 628
+ },
+ "windowSource": "prep18 s1.1: window = [activation, activation + body rows - 1] (setup 195, unleash 68); activation from a fresh prep13Probe run",
+ "attacker": {
+  "species": "VIBRAVA",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "CHANSEY",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015549,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 144,
+  "playerMaxHp": 144,
+  "opponentHp": 357,
+  "opponentMaxHp": 357,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 1
+ },
+ "precedingBodies": [
+  {
+   "moveId": 91,
+   "side": "player"
+  }
+ ],
+ "digUnleashAfterSetup": true
+}
