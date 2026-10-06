@@ -1,0 +1,8 @@
+{
+  "sourceFixture": "tools/compare/fixtures/thrash-player-tauros-opponent-onix.json",
+  "move": "THRASH",
+  "presentationRngActivation": {
+    "value": 1444920832,
+    "source": "tools/integration/fixtures/prep12-random2/plans.json moves.thrash.entries[0].acceptedActivationValue (0x561FBE00, activation frame 72 == denseWindow.startFrame)"
+  }
+}

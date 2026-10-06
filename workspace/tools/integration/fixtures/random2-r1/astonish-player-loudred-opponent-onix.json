@@ -1,0 +1,12 @@
+{
+  "sourceFixture": "tools/compare/fixtures/astonish-player-loudred-opponent-onix.json",
+  "move": "ASTONISH",
+  "attacker": { "species": "LOUDRED", "geometry": { "side": "player" } },
+  "target": { "species": "ONIX", "geometry": { "side": "opponent" } },
+  "fieldProfile": { "playerHp": 176, "playerMaxHp": 191, "opponentHp": 110, "opponentMaxHp": 110, "playerGender": "male", "opponentGender": "male" },
+  "fieldProfileSource": "tools/compare/astonishEvidence.ts:97-104 (Loudred has taken the Onix turn before its body)",
+  "presentationRngActivation": {
+    "value": 1487707074,
+    "source": "tools/integration/fixtures/prep12-random2/plans.json moves.astonish.entries[0].acceptedActivationValue (0x58AC9BC2, activation frame 220 == sourceWindow.startFrame)"
+  }
+}

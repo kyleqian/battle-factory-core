@@ -1,0 +1,15 @@
+{
+  "schema": "random2-r1-pinned-live-adapter/v1",
+  "move": "DOUBLE_KICK",
+  "scenario": "tools/battle-lab/prep12-double-kick-alt-hitmonlee-golem.json",
+  "probe": "tools/compare/doubleKickProbe.py",
+  "denseWindow": { "startFrame": 88, "endFrame": 123 },
+  "windowSource": "prep12 plans.json moves.double-kick.entries[0].alternate: activation frame 88 + accepted (window start - activation) 0; length = accepted frameCount 36",
+  "attacker": { "species": "HITMONLEE", "geometry": { "side": "player" } },
+  "target": { "species": "GOLEM", "geometry": { "side": "opponent" } },
+  "fieldProfile": { "playerHp": 157, "playerMaxHp": 157, "opponentHp": 187, "opponentMaxHp": 187, "playerGender": "male", "opponentGender": "male" },
+  "presentationRngActivation": {
+    "value": 782464281,
+    "source": "tools/integration/fixtures/prep12-random2/plans.json moves.double-kick.entries[0].alternate.activationValue (0x2EA37519, activation frame 88)"
+  }
+}

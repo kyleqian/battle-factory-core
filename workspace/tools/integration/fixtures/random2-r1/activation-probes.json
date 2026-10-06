@@ -1,0 +1,799 @@
+{
+ "schema": "random2-r1-activation-probes/v1",
+ "generatedBy": "tools/integration/random2R1/activationProbe.py over two fresh direct-mGBA runs each of tools/integration/random2RouteProbe.py <scenario> --lab --step-sample 0 --step-anim (prep12Probes.sh recipe)",
+ "convention": "activationValue = gRng2Value after the first anim-active frame of the body label (prep12 plans.json convention); words = replay(activationValue, probed plan)",
+ "probes": [
+  {
+   "label": "double-kick-opponent",
+   "bodyLabel": "Move_DOUBLE_KICK",
+   "runsSha1": "615600b9be73e24dd5073ccffe4f82ba78aca42f",
+   "runsSha1Run2": "615600b9be73e24dd5073ccffe4f82ba78aca42f",
+   "frames": 934,
+   "bodies": [
+    {
+     "activationFrame": 227,
+     "lastActiveFrame": 261,
+     "activationValue": 3103290310,
+     "activationValueHex": "0xB8F873C6",
+     "plan": [
+      {
+       "ageOffset": 10,
+       "count": 4,
+       "lagBefore": 0
+      }
+     ],
+     "words": [
+      [
+       49413,
+       34939,
+       46625,
+       58366
+      ]
+     ]
+    },
+    {
+     "activationFrame": 355,
+     "lastActiveFrame": 389,
+     "activationValue": 570453024,
+     "activationValueHex": "0x22006C20",
+     "plan": [
+      {
+       "ageOffset": 10,
+       "count": 4,
+       "lagBefore": 0
+      }
+     ],
+     "words": [
+      [
+       49322,
+       60288,
+       41562,
+       19767
+      ]
+     ]
+    }
+   ],
+   "scenario": "tools/battle-lab/mechanic-double-kick-opponent-nidorina-player-onix.json"
+  },
+  {
+   "label": "astonish-opponent",
+   "bodyLabel": "Move_ASTONISH",
+   "runsSha1": "9e79fd0be23bfd8486adf275c49f58c1cc86fc17",
+   "runsSha1Run2": "9e79fd0be23bfd8486adf275c49f58c1cc86fc17",
+   "frames": 534,
+   "bodies": [
+    {
+     "activationFrame": 219,
+     "lastActiveFrame": 280,
+     "activationValue": 3870620670,
+     "activationValueHex": "0xE6B4FBFE",
+     "plan": [
+      {
+       "ageOffset": 31,
+       "count": 4,
+       "lagBefore": 0
+      }
+     ],
+     "words": [
+      [
+       46000,
+       50354,
+       15243,
+       2228
+      ]
+     ]
+    }
+   ],
+   "scenario": "tools/battle-lab/mechanic-astonish-opponent-loudred-player-onix.json"
+  },
+  {
+   "label": "thrash-opponent",
+   "bodyLabel": "Move_THRASH",
+   "runsSha1": "74aaa159592787ef0e32b8a40c89998e14bf2933",
+   "runsSha1Run2": "74aaa159592787ef0e32b8a40c89998e14bf2933",
+   "frames": 934,
+   "bodies": [
+    {
+     "activationFrame": 76,
+     "lastActiveFrame": 177,
+     "activationValue": 765041132,
+     "activationValueHex": "0x2D9999EC",
+     "plan": [
+      {
+       "ageOffset": 7,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 37,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 67,
+       "count": 4,
+       "lagBefore": 0
+      }
+     ],
+     "words": [
+      [
+       51833,
+       29052,
+       59060,
+       50251
+      ],
+      [
+       46000,
+       50354,
+       15243,
+       2228
+      ],
+      [
+       21825,
+       50293,
+       19220,
+       46856
+      ]
+     ]
+    }
+   ],
+   "scenario": "tools/battle-lab/mechanic-thrash-opponent-tauros-player-onix.json"
+  },
+  {
+   "label": "flail-full-hp-player",
+   "bodyLabel": "Move_FLAIL",
+   "runsSha1": "9f49b9c02e104b49f34fdd11cd1ebac7d1161a7d",
+   "runsSha1Run2": "9f49b9c02e104b49f34fdd11cd1ebac7d1161a7d",
+   "frames": 734,
+   "bodies": [
+    {
+     "activationFrame": 209,
+     "lastActiveFrame": 321,
+     "activationValue": 2879831997,
+     "activationValueHex": "0xABA6BFBD",
+     "plan": [
+      {
+       "ageOffset": 49,
+       "count": 2,
+       "lagBefore": 0
+      }
+     ],
+     "words": [
+      [
+       20810,
+       2811
+      ]
+     ]
+    }
+   ],
+   "scenario": "tools/battle-lab/mechanic-flail-player-krabby-opponent-onix.json"
+  },
+  {
+   "label": "flail-full-hp-opponent",
+   "bodyLabel": "Move_FLAIL",
+   "runsSha1": "14b31f64d71d7d16a5ebc9fca6775e228e82f463",
+   "runsSha1Run2": "14b31f64d71d7d16a5ebc9fca6775e228e82f463",
+   "frames": 934,
+   "bodies": [
+    {
+     "activationFrame": 210,
+     "lastActiveFrame": 322,
+     "activationValue": 802476527,
+     "activationValueHex": "0x2FD4D1EF",
+     "plan": [
+      {
+       "ageOffset": 49,
+       "count": 2,
+       "lagBefore": 0
+      }
+     ],
+     "words": [
+      [
+       19718,
+       2387
+      ]
+     ]
+    }
+   ],
+   "scenario": "tools/battle-lab/mechanic-flail-opponent-krabby-player-onix.json"
+  },
+  {
+   "label": "wish-opponent",
+   "bodyLabel": "Move_WISH",
+   "runsSha1": "d767e9103aaf0cbea1ed2228e76dae98586b6bf1",
+   "runsSha1Run2": "d767e9103aaf0cbea1ed2228e76dae98586b6bf1",
+   "frames": 734,
+   "bodies": [
+    {
+     "activationFrame": 69,
+     "lastActiveFrame": 338,
+     "activationValue": 506220650,
+     "activationValueHex": "0x1E2C506A",
+     "plan": [
+      {
+       "ageOffset": 41,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 44,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 47,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 50,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 53,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 56,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 59,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 62,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 65,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 68,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 71,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 74,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 77,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 80,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 83,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 86,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 89,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 92,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 95,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 98,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 101,
+       "count": 2,
+       "lagBefore": 0
+      }
+     ],
+     "words": [
+      [
+       2629,
+       50618
+      ],
+      [
+       22331,
+       56412
+      ],
+      [
+       31080,
+       43
+      ],
+      [
+       44837,
+       43277
+      ],
+      [
+       18092,
+       44001
+      ],
+      [
+       59573,
+       12483
+      ],
+      [
+       6399,
+       59568
+      ],
+      [
+       51464,
+       1028
+      ],
+      [
+       40597,
+       37543
+      ],
+      [
+       56579,
+       30413
+      ],
+      [
+       963,
+       50240
+      ],
+      [
+       64527,
+       33697
+      ],
+      [
+       50925,
+       39483
+      ],
+      [
+       458,
+       47853
+      ],
+      [
+       36059,
+       44736
+      ],
+      [
+       59095,
+       34749
+      ],
+      [
+       50935,
+       62138
+      ],
+      [
+       26159,
+       53021
+      ],
+      [
+       15672,
+       26509
+      ],
+      [
+       43942,
+       11673
+      ],
+      [
+       28616,
+       4242
+      ]
+     ]
+    }
+   ],
+   "scenario": "tools/battle-lab/mechanic-wish-opponent-illumise-player-onix.json"
+  },
+  {
+   "label": "meteor-mash-opponent",
+   "bodyLabel": "Move_METEOR_MASH",
+   "runsSha1": "5d3e6056aa0922738f7a38f8e03a7a26358df8e3",
+   "runsSha1Run2": "5d3e6056aa0922738f7a38f8e03a7a26358df8e3",
+   "frames": 1434,
+   "bodies": [
+    {
+     "activationFrame": 231,
+     "lastActiveFrame": 444,
+     "activationValue": 327915701,
+     "activationValueHex": "0x138B98B5",
+     "plan": [
+      {
+       "ageOffset": 48,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 50,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 52,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 54,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 56,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 58,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 60,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 62,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 64,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 66,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 68,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 70,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 72,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 74,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 76,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 78,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 79,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 80,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 82,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 84,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 86,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 88,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 90,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 102,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 104,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 106,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 108,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 111,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 113,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 115,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 117,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 119,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 121,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 123,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 125,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 127,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 129,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 131,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 133,
+       "count": 2,
+       "lagBefore": 0
+      }
+     ],
+     "words": [
+      [
+       43958,
+       34624
+      ],
+      [
+       21825,
+       50293
+      ],
+      [
+       50598,
+       56763
+      ],
+      [
+       48616,
+       17410
+      ],
+      [
+       13491,
+       26503
+      ],
+      [
+       43644,
+       33569
+      ],
+      [
+       39910,
+       51418,
+       7149,
+       27177
+      ],
+      [
+       60153,
+       19084,
+       45867,
+       766
+      ],
+      [
+       64567,
+       25126,
+       18094,
+       34881
+      ],
+      [
+       61370,
+       30245,
+       22047,
+       19304
+      ],
+      [
+       7438,
+       32578,
+       47422,
+       65278
+      ],
+      [
+       30189,
+       42348,
+       5241,
+       42969
+      ],
+      [
+       57394,
+       32259,
+       64992,
+       13729
+      ],
+      [
+       25913,
+       39215,
+       42869,
+       48
+      ],
+      [
+       25389,
+       56691,
+       31750,
+       47809
+      ],
+      [
+       51446,
+       30661
+      ],
+      [
+       9957,
+       25972
+      ],
+      [
+       24505,
+       13262
+      ],
+      [
+       60288,
+       41562
+      ],
+      [
+       33578,
+       4747
+      ],
+      [
+       57448,
+       33725
+      ],
+      [
+       61954,
+       4346
+      ],
+      [
+       45890,
+       7819
+      ],
+      [
+       46125,
+       9916
+      ],
+      [
+       9547,
+       39955
+      ],
+      [
+       8680,
+       34901
+      ],
+      [
+       49890,
+       26232
+      ],
+      [
+       48290,
+       6039
+      ],
+      [
+       49114,
+       51422
+      ],
+      [
+       32514,
+       63598
+      ],
+      [
+       51461,
+       41540
+      ],
+      [
+       16972,
+       61196
+      ],
+      [
+       23925,
+       61636
+      ],
+      [
+       11078,
+       34207
+      ],
+      [
+       13791,
+       34091
+      ],
+      [
+       56110,
+       39861
+      ],
+      [
+       55976,
+       30699
+      ],
+      [
+       2613,
+       11971
+      ],
+      [
+       26220,
+       63899
+      ]
+     ]
+    }
+   ],
+   "scenario": "tools/battle-lab/mechanic-meteor-mash-opponent-metang-player-onix.json"
+  }
+ ]
+}

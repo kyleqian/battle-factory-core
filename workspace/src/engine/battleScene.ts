@@ -18401,15 +18401,16 @@ export function renderSceneOnMovePresentation(
       ...astonishState,
       age: astonishState.age - 2,
     });
+    // Live field (faithful-random adapter): any displayed pair, art from the live species.
     const playerToOpponent =
-      view.attacker.species === "LOUDRED"
+      (liveField || view.attacker.species === "LOUDRED")
       && view.attacker.geometry.side === "player"
-      && view.targetBattler.species === "ONIX"
+      && (liveField || view.targetBattler.species === "ONIX")
       && view.targetBattler.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "LOUDRED"
+      (liveField || view.attacker.species === "LOUDRED")
       && view.attacker.geometry.side === "opponent"
-      && view.targetBattler.species === "ONIX"
+      && (liveField || view.targetBattler.species === "ONIX")
       && view.targetBattler.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -18420,13 +18421,17 @@ export function renderSceneOnMovePresentation(
     const loudredSource = playerToOpponent
       ? astonishArt.loudredBack
       : astonishArt.loudredFront;
-    const loudred = playerToOpponent
+    const loudred = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent
       ? loudredSource
       : {
           ...loudredSource,
           tileset: subTileset(loudredSource.tileset, 0, 8),
         };
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.targetBattler)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     drawTileBg(
       fb,
       battleBg.static.tileset,
@@ -18434,8 +18439,10 @@ export function renderSceneOnMovePresentation(
       battleBg.palette,
     );
 
-    const targetBaselineX2 =
-      playerToOpponent && displayed.age < 31 ? 1 : 0;
+    // The opponent-front target rests at its front-idle x2 (ONIX 1) until the shake task overwrites it at age 31.
+    const targetBaselineX2 = playerToOpponent && displayed.age < 31
+      ? (liveField ? speciesFrontIdleRestOffsetOrZero(view.targetBattler.species).x2 : 1)
+      : 0;
     if (displayed.target.stretchActive) {
       // PrepareBattlerSpriteForRotScale enters affine-double OAM on the first
       // task tick, but its matrix/anchor transfer reaches the scanout on the
@@ -18486,6 +18493,8 @@ export function renderSceneOnMovePresentation(
       );
     }
 
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     drawSendOutHealthbox(
       fb,
       0,
@@ -20421,13 +20430,14 @@ export function renderSceneOnMovePresentation(
       ...flailState,
       age: state.age - 2,
     });
-    const playerToOpponent = view.attacker.species === "KRABBY"
+    // Live field (faithful-random adapter): any displayed pair, art from the live species.
+    const playerToOpponent = (liveField || view.attacker.species === "KRABBY")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
-    const opponentToPlayer = view.attacker.species === "KRABBY"
+    const opponentToPlayer = (liveField || view.attacker.species === "KRABBY")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -20437,13 +20447,17 @@ export function renderSceneOnMovePresentation(
     const krabbySource = playerToOpponent
       ? mudShotArt.krabbyBack
       : mudShotArt.krabbyFront;
-    const krabby = playerToOpponent
+    const krabby = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent
       ? krabbySource
       : {
           ...krabbySource,
           tileset: subTileset(krabbySource.tileset, 0, 8),
         };
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     drawTileBg(
       fb,
       battleBg.static.tileset,
@@ -20494,6 +20508,8 @@ export function renderSceneOnMovePresentation(
         false,
       );
     }
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     const profile = flailState.config.fieldProfile;
     drawSendOutHealthbox(
       fb,
@@ -46234,6 +46250,8 @@ export function renderSceneOnMovePresentation(
         );
       }
     }
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     const opponentBattler = attackerIsPlayer ? view.target : view.attacker;
     const playerBattler = attackerIsPlayer ? view.attacker : view.target;
     drawSendOutHealthbox(
@@ -53499,21 +53517,26 @@ export function renderSceneOnMovePresentation(
   if (state.config.move === "DOUBLE_KICK") {
     const view = sceneOnDoubleKickView(state);
     const displayed = sceneOnDoubleKickView({ ...state, age: state.age - 1 });
-    const playerToOpponent = view.attacker.species === "NIDORINA"
+    // Live field (faithful-random adapter): any displayed pair, art from the live species.
+    const playerToOpponent = (liveField || view.attacker.species === "NIDORINA")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
-    const opponentToPlayer = view.attacker.species === "NIDORINA"
+    const opponentToPlayer = (liveField || view.attacker.species === "NIDORINA")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged DOUBLE_KICK pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const nidorina = playerToOpponent ? nidorinaBackSprite : nidorinaFrontSprite;
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const nidorina = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? nidorinaBackSprite : nidorinaFrontSprite;
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
@@ -53566,6 +53589,8 @@ export function renderSceneOnMovePresentation(
         displayed.fist.y - 16,
       );
     }
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     const profile = state.config.fieldProfile;
     drawSendOutHealthbox(
       fb,
@@ -53602,13 +53627,14 @@ export function renderSceneOnMovePresentation(
 
   if (state.config.move === "THRASH") {
     const view = sceneOnThrashView(state);
-    const playerToOpponent = view.attacker.species === "TAUROS"
+    // Live field (faithful-random adapter): any displayed pair, art from the live species.
+    const playerToOpponent = (liveField || view.attacker.species === "TAUROS")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
-    const opponentToPlayer = view.attacker.species === "TAUROS"
+    const opponentToPlayer = (liveField || view.attacker.species === "TAUROS")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -53624,8 +53650,12 @@ export function renderSceneOnMovePresentation(
     const plain = sceneOnThrashView({ ...state, age: state.age - 1 });
     const task = sceneOnThrashView({ ...state, age: state.age - 2 });
     const displayedTargetOffset = sceneOnThrashDisplayedTargetOffset(state);
-    const tauros = playerToOpponent ? taurosBackSprite : taurosFrontSprite;
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const tauros = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? taurosBackSprite : taurosFrontSprite;
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
@@ -53652,7 +53682,7 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.spriteCorner.x + task.attackerPosition.x,
       view.attacker.geometry.spriteCorner.y
         + task.attackerPosition.y
-        + thrashAffineYOffset(task.attackerMatrix.d, playerToOpponent ? 13 : 0),
+        + thrashAffineYOffset(task.attackerMatrix.d, state.config.attackerPicYOffset ?? (playerToOpponent ? 13 : 0)),
       task.attackerMatrix.a,
       task.attackerMatrix.d,
       0,
@@ -53687,6 +53717,8 @@ export function renderSceneOnMovePresentation(
         fist.y - 16,
       );
     }
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     const profile = state.config.fieldProfile;
     drawSendOutHealthbox(
       fb,
@@ -54935,7 +54967,7 @@ export function renderBattleResolutionLiveView(
   const presentation = effect?.type === "move"
     ? liveMoveAnimationPresentation(
         effect.request, view.field, effect.age, effect.paletteInput,
-        effect.spriteAllocatorInput, effect.spriteOrderInput,
+        effect.spriteAllocatorInput, effect.spriteOrderInput, effect.presentationRng,
       )
     : null;
   if (!presentation) {

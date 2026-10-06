@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { LIVE_MOVE_ANIMATION_IDS } from "../src/engine/liveMoveAnimation.ts";
 import { PRESENTATION_RNG_POLICIES } from "../src/engine/presentationRngHost.ts";
+import { LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS } from "../src/engine/liveMovePresentationRng.ts";
 
 // The preview manifest and the remaining-adapters census read `implementedCount`;
 // it must agree with the entry list and the production registry.
@@ -21,7 +22,8 @@ describe("animation-integration live status count", () => {
     expect(status.playableExactCount).toBe(0);
     const faithful = status.faithfulRandomAdapters as { id: number; move: string; policy: string; provenance: string }[];
     expect(status.faithfulRandomCount).toBe(faithful.length);
-    expect(status.faithfulRandomCount).toBe(0);
+    expect(faithful.map(entry => entry.id).sort((a, b) => a - b))
+      .toEqual([...LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS].sort((a, b) => a - b));
     const implemented = new Set((status.implementedAdapters as { id: number }[]).map(entry => entry.id));
     for (const entry of faithful) {
       expect(implemented.has(entry.id)).toBe(false);

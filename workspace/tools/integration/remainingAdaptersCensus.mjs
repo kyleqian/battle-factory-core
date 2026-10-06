@@ -27,6 +27,8 @@ const nameOf = Object.fromEntries(moveRows.map((m) => [m.move, m.name]));
 const ORDER_BATCH = []; // all landed (live = 198); kept for the in-flight bucket, which is now empty
 const PREP6_READY = []; // all landed
 const liveSet = new Set(live.implementedAdapters.map((x) => x.move));
+// Faithful-random adapters (D3, docs/presentation-rng.md): a disjoint bucket, neither scoped-exact live nor remaining.
+const faithfulSet = new Set((live.faithfulRandomAdapters ?? []).map((x) => x.move));
 const inflight = new Map();
 for (const m of ORDER_BATCH) inflight.set(`MOVE_${m}`, "order-consumer batch");
 for (const m of PREP6_READY) inflight.set(`MOVE_${m}`, "prep6 READY batch");
@@ -36,13 +38,19 @@ const mergedByMove = Object.fromEntries(merged.acceptedMoves.map((x) => [x.move,
 const triageByMove = Object.fromEntries(triage.moves.map((x) => [x.move, x]));
 
 const liveIn = [...accepted].filter((m) => liveSet.has(m));
-const inflightIn = [...accepted].filter((m) => !liveSet.has(m) && inflight.has(m));
-const remaining = [...accepted].filter((m) => !liveSet.has(m) && !inflight.has(m)).sort();
+const faithfulIn = [...accepted].filter((m) => faithfulSet.has(m));
+const inflightIn = [...accepted].filter((m) => !liveSet.has(m) && !faithfulSet.has(m) && inflight.has(m));
+const remaining = [...accepted].filter((m) => !liveSet.has(m) && !faithfulSet.has(m) && !inflight.has(m)).sort();
 if (accepted.size !== live.currentAcceptedFactoryMoves) throw new Error(`accepted ${accepted.size} != live-status currentAcceptedFactoryMoves ${live.currentAcceptedFactoryMoves}`);
 for (const m of liveSet) if (!accepted.has(m)) throw new Error(`live adapter ${m} is not an accepted Factory move`);
 if (liveIn.length !== live.implementedCount) throw new Error(`live ${liveIn.length} != implementedCount ${live.implementedCount}`);
-if (liveIn.length + inflightIn.length + remaining.length !== accepted.size) throw new Error("live + in-flight + remaining != accepted");
-if (new Set([...liveIn, ...inflightIn, ...remaining]).size !== accepted.size) throw new Error("a move is counted twice");
+for (const m of faithfulSet) {
+  if (!accepted.has(m)) throw new Error(`faithful-random adapter ${m} is not an accepted Factory move`);
+  if (liveSet.has(m)) throw new Error(`faithful-random adapter ${m} is also scoped-exact live`);
+}
+if (faithfulIn.length !== (live.faithfulRandomCount ?? 0)) throw new Error(`faithful ${faithfulIn.length} != faithfulRandomCount ${live.faithfulRandomCount}`);
+if (liveIn.length + faithfulIn.length + inflightIn.length + remaining.length !== accepted.size) throw new Error("live + faithful-random + in-flight + remaining != accepted");
+if (new Set([...liveIn, ...faithfulIn, ...inflightIn, ...remaining]).size !== accepted.size) throw new Error("a move is counted twice");
 
 // ---- cite checking -----------------------------------------------------------------------------------------------------
 const fileCache = new Map();
@@ -378,14 +386,15 @@ for (const g of Object.values(groupCount)) g.weightPct = +g.weightPct.toFixed(3)
 const sumW = (ms) => +(ms.reduce((a, m) => a + share(m), 0) * 100).toFixed(3);
 const summary = {
   accepted: accepted.size,
-  live: liveIn.length, inFlight: inflightIn.length, remaining: remaining.length,
+  live: liveIn.length, faithfulRandom: faithfulIn.length, faithfulRandomMoves: [...faithfulIn].sort(), inFlight: inflightIn.length, remaining: remaining.length,
   inFlightBreakdown: { orderConsumerBatch: inflightIn.filter((m) => inflight.get(m) === "order-consumer batch").length, prep6Ready: inflightIn.filter((m) => inflight.get(m) === "prep6 READY batch").length },
-  weightPct: { live: sumW(liveIn), inFlight: sumW(inflightIn), remaining: sumW(remaining) },
+  weightPct: { live: sumW(liveIn), faithfulRandom: sumW(faithfulIn), inFlight: sumW(inflightIn), remaining: sumW(remaining) },
   remainingByGroup: groupCount,
   remainingByHostClass: Object.fromEntries([...new Set(rows.flatMap((r) => r.hostClass))].sort().map((h) => [h, rows.filter((r) => r.hostClass.includes(h)).length])),
   orderFirstBodyOnlyMoves: rows.filter((r) => r.orderFirstBodyOnly).length,
   slotPlanNeededMoves: rows.filter((r) => r.slotPlanNeeded).length,
-  sumsTo: `${liveIn.length}+${inflightIn.length}+${remaining.length}=${liveIn.length + inflightIn.length + remaining.length}`,
+  // live (scoped exact) + faithful-random + in-flight + remaining = accepted.
+  sumsTo: `${liveIn.length}+${faithfulIn.length}+${inflightIn.length}+${remaining.length}=${liveIn.length + faithfulIn.length + inflightIn.length + remaining.length}`,
 };
 if (citeErrors.length) { console.error("CITE ERRORS:\n" + citeErrors.join("\n")); process.exit(2); }
 if (rows.some((r) => r.needs.length && !r.blockers.length)) throw new Error("a need without a blocker cite");

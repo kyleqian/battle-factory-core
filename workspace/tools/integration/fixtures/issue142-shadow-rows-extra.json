@@ -4072,6 +4072,10 @@
     "fixture": "tools/integration/fixtures/rollout-live/rollout-player-plain-body1.json",
     "body": "normal",
     "activation": "tools/integration/fixtures/rollout-endeavor/draft-rollout-*.json (activation == accepted window start; docs/rollout-endeavor-prep.md s0.1); counter 1 body, bodies 2..5 start at their own activations"
+   },
+   "requestFields": {
+    "rolloutCounter": 1,
+    "power": 30
    }
   },
   {
@@ -4090,6 +4094,236 @@
     "fixture": "tools/integration/fixtures/rollout-live/rollout-opponent-plain-body1.json",
     "body": "normal",
     "activation": "tools/integration/fixtures/rollout-endeavor/draft-rollout-*.json (activation == accepted window start; docs/rollout-endeavor-prep.md s0.1); counter 1 body, bodies 2..5 start at their own activations"
+   },
+   "requestFields": {
+    "rolloutCounter": 1,
+    "power": 30
+   }
+  },
+  {
+   "id": 24,
+   "move": "DOUBLE_KICK",
+   "orientation": "player",
+   "variant": "double-kick-player",
+   "activationFrame": 227,
+   "windowStart": 227,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/compare/fixtures/double-kick-player-nidorina-opponent-onix.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep12-random2/plans.json (activation 227 == denseWindow.startFrame; faithful-random adapter, each hit its own body)"
+   },
+   "presentationRngActivation": {
+    "value": 2354516896,
+    "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
+   }
+  },
+  {
+   "id": 24,
+   "move": "DOUBLE_KICK",
+   "orientation": "opponent",
+   "variant": "double-kick-opponent",
+   "activationFrame": 227,
+   "windowStart": 227,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/compare/fixtures/double-kick-opponent-nidorina-player-onix.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/random2-r1/activation-probes.json (activation 227 == denseWindow.startFrame)"
+   },
+   "presentationRngActivation": {
+    "value": 3103290310,
+    "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
+   }
+  },
+  {
+   "id": 310,
+   "move": "ASTONISH",
+   "orientation": "player",
+   "variant": "astonish-player",
+   "activationFrame": 220,
+   "windowStart": 220,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/compare/fixtures/astonish-player-loudred-opponent-onix.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep12-random2/plans.json (activation 220 == sourceWindow.startFrame)"
+   },
+   "presentationRngActivation": {
+    "value": 1487707074,
+    "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
+   }
+  },
+  {
+   "id": 310,
+   "move": "ASTONISH",
+   "orientation": "opponent",
+   "variant": "astonish-opponent",
+   "activationFrame": 219,
+   "windowStart": 219,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/compare/fixtures/astonish-opponent-loudred-player-onix.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/random2-r1/activation-probes.json (activation 219 == sourceWindow.startFrame)"
+   },
+   "presentationRngActivation": {
+    "value": 3870620670,
+    "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
+   }
+  },
+  {
+   "id": 37,
+   "move": "THRASH",
+   "orientation": "player",
+   "variant": "thrash-player",
+   "activationFrame": 72,
+   "windowStart": 72,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/compare/fixtures/thrash-player-tauros-opponent-onix.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep12-random2/plans.json (activation 72 == denseWindow.startFrame)"
+   },
+   "presentationRngActivation": {
+    "value": 1444920832,
+    "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
+   }
+  },
+  {
+   "id": 37,
+   "move": "THRASH",
+   "orientation": "opponent",
+   "variant": "thrash-opponent",
+   "activationFrame": 76,
+   "windowStart": 76,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/compare/fixtures/thrash-opponent-tauros-player-onix.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/random2-r1/activation-probes.json (activation 76 == denseWindow.startFrame)"
+   },
+   "presentationRngActivation": {
+    "value": 765041132,
+    "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
+   }
+  },
+  {
+   "id": 175,
+   "move": "FLAIL",
+   "orientation": "player",
+   "variant": "flail-player",
+   "activationFrame": 209,
+   "windowStart": 209,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/compare/fixtures/flail-full-hp-evidence.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/random2-r1/activation-probes.json flail-full-hp-player (activation 209 == sourceWindow.startFrame)"
+   },
+   "requestFields": {
+    "power": 20
+   },
+   "presentationRngActivation": {
+    "value": 2879831997,
+    "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
+   }
+  },
+  {
+   "id": 175,
+   "move": "FLAIL",
+   "orientation": "opponent",
+   "variant": "flail-opponent",
+   "activationFrame": 210,
+   "windowStart": 210,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/compare/fixtures/flail-full-hp-evidence.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/random2-r1/activation-probes.json flail-full-hp-opponent (activation 210 == sourceWindow.startFrame)"
+   },
+   "requestFields": {
+    "power": 20
+   },
+   "presentationRngActivation": {
+    "value": 802476527,
+    "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
+   }
+  },
+  {
+   "id": 273,
+   "move": "WISH",
+   "orientation": "player",
+   "variant": "wish-player",
+   "activationFrame": 65,
+   "windowStart": 65,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/compare/fixtures/wish-player-illumise-opponent-onix.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep12-random2/plans.json (activation 65 == sourceWindow.startFrame)"
+   },
+   "presentationRngActivation": {
+    "value": 2958200064,
+    "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
+   }
+  },
+  {
+   "id": 273,
+   "move": "WISH",
+   "orientation": "opponent",
+   "variant": "wish-opponent",
+   "activationFrame": 69,
+   "windowStart": 69,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/compare/fixtures/wish-opponent-illumise-player-onix.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/random2-r1/activation-probes.json (activation 69 == sourceWindow.startFrame)"
+   },
+   "presentationRngActivation": {
+    "value": 506220650,
+    "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
    }
   }
  ]

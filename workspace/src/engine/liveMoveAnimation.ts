@@ -72,6 +72,11 @@ import { perishSongNoteOrderFromFree } from "../animation/perishSong.ts";
 import { LEAF_BLADE_OAM_ORDER_SLOTS } from "../animation/leafBlade.ts";
 import { HEAL_BELL_REUSED_ORDER_SLOTS } from "../animation/healBell.ts";
 import { KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, spriteOrderForSlots, spriteOrderWithOccupiedPrefix } from "./spriteOrderProvider.ts";
+import { DOUBLE_KICK_FRAME_COUNT } from "../animation/doubleKick.ts";
+import type { FlailPower } from "../animation/flail.ts";
+import {
+  liveMovePresentationRngWords, miniTwinklingStarFromWords, type LiveMovePresentationRngInput,
+} from "./liveMovePresentationRng.ts";
 
 
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
@@ -168,6 +173,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   209,
 ] as const);
 
+const FLAIL_POWERS: readonly FlailPower[] = Object.freeze([20, 40, 80, 100, 150, 200]);
+
 const SWEET_SCENT_PETAL_SLOTS: readonly number[] = Object.freeze([
   3, 4, 5, 7, 9, 10, 3, 11, 12, 13, 14, 15, 16, 17, 4, 5, 7, 9, 10, 3, 11, 12, 13, 14]);
 
@@ -236,6 +243,9 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     19, 340,
     // Rollout bodies 1..5: activation == window start (row 0) on both sides.
     205,
+    // Faithful-random adapters (liveMovePresentationRng.ts): Double Kick hit bodies, Astonish, Thrash, Flail, Wish start at activation (row 0,
+    // prep12 §0.2 / random2-r1 activation probes).
+    24, 310, 37, 175, 273,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -641,6 +651,13 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
     case 153: return 212; // Explosion accepted window (76..287 / 80..291).
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
+    // Faithful-random adapters (liveMovePresentationRng.ts; not LIVE_MOVE_ANIMATION_IDS). Windows start at activation.
+    case 24: return DOUBLE_KICK_FRAME_COUNT; // Double Kick per-hit body (227..262 both orientations).
+    case 310: return 63; // Astonish accepted window (220..282 / 219..281).
+    case 37: return 103; // Thrash accepted window (72..174 / 76..178); each lock-in turn is its own body.
+    // Flail accepted windows (209..322 / 210..323; natural-HP tiers 114 rows each); power = gBattleMovePower.
+    case 175: return FLAIL_POWERS.includes(request.power as FlailPower) ? 114 : null;
+    case 273: return 271; // Wish accepted window (65..335 / 69..339).
     default: return null;
   }
 }
@@ -680,6 +697,7 @@ export function liveMoveAnimationPresentation(
   paletteInput?: LiveMovePaletteInput,
   spriteAllocatorInput?: LiveMoveSpriteAllocatorInput,
   spriteOrderInput?: LiveMoveSpriteOrderInput,
+  presentationRngInput?: LiveMovePresentationRngInput,
 ): SceneOnMovePresentationState | null {
   if (liveMoveAnimationDuration(request) === null) return null;
   const art = createBattleCommandFieldArtView(field);
@@ -2094,6 +2112,68 @@ export function liveMoveAnimationPresentation(
     }
     case 46: config = { move: "ROAR", attacker, target, fieldProfile }; break;
     case 18: config = { move: "WHIRLWIND", attacker, target, fieldProfile }; break;
+    case 24: {
+      // Words from the presentation host only (activated in tick; null = not activated -> scene-off fallback).
+      // AnimFistOrFootRandomPos (battle_anim_fight.c:483-492): x % (width/2), y % (height/4), & 1 negates; the
+      // target's GetBattlerSpriteCoordAttr width/height.
+      const words = liveMovePresentationRngWords(presentationRngInput)?.words;
+      if (words === undefined || words.length !== 4) return null;
+      const dims = liveBattlerCoordAttrs(target.geometry.side, art);
+      config = { move: "DOUBLE_KICK", attacker, target, fieldProfile,
+        targetDimensions: { width: dims.width, height: dims.height },
+        fistRandom: { x: words[0]!, y: words[1]!, xSign: words[2]!, ySign: words[3]! } };
+      break;
+    }
+    case 273: {
+      // 21 mini twinkling stars, two words each in spawn order (miniTwinklingStarFromWords).
+      const draws = liveMovePresentationRngWords(presentationRngInput)?.draws;
+      if (draws === undefined || draws.length !== 21 || draws.some((pair) => pair.length !== 2)) return null;
+      config = { move: "WISH", attacker, target, fieldProfile,
+        twinkles: draws.map((pair) => miniTwinklingStarFromWords(pair[0]!, pair[1]!)) };
+      break;
+    }
+    case 175: {
+      // request.power is gBattleMovePower (the damagecalc wrote it; battleScriptHitChainOpcode.ts). AnimHitSplatRandom
+      // (battle_anim_normal.c:1049-1063): InitSpritePosToAnimTarget(FALSE) = target sBattlerCoords + (relativeTo 1,
+      // negated for an opponent attacker; animation 3 into y); x2 = w0 % 48 - 24, y2 = w1 % 24 - 12. The flail task
+      // rotates the attacker about its unshifted OBJ center; the shake starts from the target's front-idle x2.
+      const words = liveMovePresentationRngWords(presentationRngInput)?.words;
+      if (words === undefined || words.length !== 2 || !FLAIL_POWERS.includes(request.power as FlailPower)) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      config = { move: "FLAIL", attacker: affineCenterBattler(attacker), target, fieldProfile,
+        movePower: request.power as FlailPower,
+        targetInitialX2: targetAnchors.frontIdleRest.x2,
+        hitsplatCenter: {
+          x: targetAnchors.battlePositionCenter.x + (attacker.geometry.side === "player" ? 1 : -1),
+          y: targetAnchors.battlePositionCenter.y + 3,
+        },
+        visualRandom: { x: words[0]! % 48, y: words[1]! % 24 } };
+      break;
+    }
+    case 37: {
+      // Three AnimFistOrFootRandomPos groups (x, y, xSign, ySign) as Double Kick; the target's width/height moduli and
+      // the attacker's pic-coords yOffset for the affine anchor.
+      const draws = liveMovePresentationRngWords(presentationRngInput)?.draws;
+      if (draws === undefined || draws.length !== 3 || draws.some((group) => group.length !== 4)) return null;
+      const group = (g: readonly number[]) => ({ x: g[0]!, y: g[1]!, xSign: g[2]!, ySign: g[3]! });
+      const dims = liveBattlerCoordAttrs(target.geometry.side, art);
+      config = { move: "THRASH", attacker, target, fieldProfile,
+        fistRandom: [group(draws[0]!), group(draws[1]!), group(draws[2]!)],
+        targetDimensions: { width: dims.width, height: dims.height },
+        attackerPicYOffset: liveBattlerCoordAttrs(attacker.geometry.side, art).yOffset };
+      break;
+    }
+    case 310: {
+      // AnimSprayWaterDroplet (battle_anim_flying.c:1106-1107): droplet k = (w[2k] & 0x1ff, w[2k+1] & 0x7f);
+      // SetBattlerSpriteYOffsetFromYScale reads the target's pic-coords yOffset (as Fake Out). The droplets and the
+      // stretch anchor on the target's unshifted OBJ center (staged astonishEvidence.ts: ONIX back (72, 80)).
+      const words = liveMovePresentationRngWords(presentationRngInput)?.words;
+      if (words === undefined || words.length !== 4) return null;
+      config = { move: "ASTONISH", attacker, target: affineCenterBattler(target), fieldProfile,
+        targetPictureYOffset: liveBattlerCoordAttrs(target.geometry.side, art).yOffset,
+        dropletRandom: [{ v1: words[0]! & 0x1ff, v2: words[1]! & 0x7f }, { v1: words[2]! & 0x1ff, v2: words[3]! & 0x7f }] };
+      break;
+    }
     default: return null;
   }
   // sceneOnLightScreenView/lightScreenAtAge are relative to wall creation;

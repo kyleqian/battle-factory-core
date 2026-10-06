@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 449,
-  "ids": 215,
+  "rows": 457,
+  "ids": 219,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -976,7 +976,9 @@
    "duration": 88,
    "expected": 0,
    "drawn": [
-    0
+    0,
+    86,
+    87
    ],
    "tailFirstAge": 85
   },
@@ -987,7 +989,9 @@
    "duration": 88,
    "expected": 0,
    "drawn": [
-    0
+    0,
+    86,
+    87
    ],
    "tailFirstAge": 85
   },
@@ -3209,7 +3213,10 @@
    "orientation": "player",
    "duration": 114,
    "expected": null,
-   "drawn": [],
+   "drawn": [
+    112,
+    113
+   ],
    "tailFirstAge": null
   },
   {
@@ -3218,7 +3225,10 @@
    "orientation": "opponent",
    "duration": 114,
    "expected": null,
-   "drawn": [],
+   "drawn": [
+    112,
+    113
+   ],
    "tailFirstAge": null
   },
   {
@@ -4749,6 +4759,94 @@
    "move": "WHIRLWIND",
    "orientation": "player",
    "duration": 83,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 19,
+   "move": "FLY",
+   "orientation": "player",
+   "duration": 43,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 19,
+   "move": "FLY",
+   "orientation": "opponent",
+   "duration": 43,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 340,
+   "move": "BOUNCE",
+   "orientation": "player",
+   "duration": 64,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 340,
+   "move": "BOUNCE",
+   "orientation": "opponent",
+   "duration": 64,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 205,
+   "move": "ROLLOUT",
+   "orientation": "player",
+   "duration": 167,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 205,
+   "move": "ROLLOUT",
+   "orientation": "opponent",
+   "duration": 167,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 24,
+   "move": "DOUBLE_KICK",
+   "orientation": "player",
+   "duration": 36,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 24,
+   "move": "DOUBLE_KICK",
+   "orientation": "opponent",
+   "duration": 36,
    "expected": 0,
    "drawn": [
     0

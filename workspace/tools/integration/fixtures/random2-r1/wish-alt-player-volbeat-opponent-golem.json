@@ -1,0 +1,15 @@
+{
+  "schema": "random2-r1-pinned-live-adapter/v1",
+  "move": "WISH",
+  "scenario": "tools/battle-lab/prep12-wish-alt-volbeat-golem.json",
+  "probe": "tools/compare/wishProbe.py",
+  "denseWindow": { "startFrame": 64, "endFrame": 334 },
+  "windowSource": "prep12 plans.json moves.wish.entries[0].alternate: activation frame 64 + accepted (window start - activation) 0; length = accepted frameCount 271",
+  "attacker": { "species": "VOLBEAT", "geometry": { "side": "player" } },
+  "target": { "species": "GOLEM", "geometry": { "side": "opponent" } },
+  "fieldProfile": { "playerHp": 158, "playerMaxHp": 158, "opponentHp": 162, "opponentMaxHp": 162, "playerGender": "male", "opponentGender": "male" },
+  "presentationRngActivation": {
+    "value": 2958200064,
+    "source": "tools/integration/fixtures/prep12-random2/plans.json moves.wish.entries[0].alternate.activationValue (0xB0528D00, activation frame 64)"
+  }
+}

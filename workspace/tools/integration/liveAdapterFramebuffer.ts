@@ -23,6 +23,11 @@ import {
   applySpriteOrderPresentationEvent, createSpriteOrderTracker, spriteOrderTrackerLend, type SpriteOrderPresentationEvent,
 } from "../../src/engine/spriteOrderEventTransform.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
+import {
+  activateLiveMovePresentationRng, liveMovePresentationRngBodyKey, liveMoveRandom2Plan, type LiveMovePresentationRngInput,
+} from "../../src/engine/liveMovePresentationRng.ts";
+import { createPresentationRngHostAt } from "../../src/engine/presentationRngHost.ts";
+import { createPresentationRngState } from "../../src/engine/presentationRng.ts";
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
 import type { BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import type { SceneOnDragonRageFieldProfile } from "../../src/animation/sceneOnPresentation.ts";
@@ -69,6 +74,13 @@ export interface Fixture {
    * value copied from the ROM state.
    */
   precedingTurns?: PostKoTurn[];
+  /**
+   * Faithful-random (Random2) bodies: the oracle-pinned presentation stream value at the activation frame (gRng2Value
+   * after the first anim-active frame, from a direct-mGBA probe of this scenario; provenance "pinned"). The harness
+   * seeds a pinned host with it and activates the body through the PRODUCTION activation (liveMovePresentationRng.ts);
+   * render reads the words from that host exactly as in play. Never a word array.
+   */
+  presentationRngActivation?: { value: number; source: string };
 }
 interface Probe {
   frames?: { frame: number; sha256: string }[] | number;
@@ -151,6 +163,19 @@ export function fixturePostKoLend(f: Fixture, request: BattleMoveAnimationReques
   return lend;
 }
 
+/** Pinned controlled-body host for a Random2 fixture body, activated through the production seam at host frame 0. */
+export function fixturePresentationRng(f: Fixture, request: BattleMoveAnimationRequest): LiveMovePresentationRngInput | undefined {
+  if (liveMoveRandom2Plan(request) === null) return undefined;
+  const pinned = f.presentationRngActivation;
+  if (!pinned || !Number.isInteger(pinned.value) || pinned.value < 0 || pinned.value > 0xffffffff) {
+    throw new Error(`${f.move} draws Random2: the fixture needs presentationRngActivation (pinned activation value)`);
+  }
+  const key = liveMovePresentationRngBodyKey({ resolutionId: { requestId: 0 }, segmentIndex: 0, commandIndex: 0 });
+  const host = activateLiveMovePresentationRng(
+    createPresentationRngHostAt(createPresentationRngState(pinned.value, "pinned")), request, key);
+  return { host, key };
+}
+
 export function liveView(f: Fixture, age: number): BattleResolutionPresentationRenderView {
   const profile = f.fieldProfile;
   const makeBattler = (side: "player" | "opponent") => {
@@ -204,6 +229,7 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
       spriteOrderInput: process.env.POKEBENCH_LIVE_ORDER_INPUT === "none" ? undefined
         : postKo ? postKo.spriteOrderInput
           : prepareLiveMoveSpriteOrder(fixtureSpriteOrder(f, request).order, request).input,
+      ...(liveMoveRandom2Plan(request) === null ? {} : { presentationRng: fixturePresentationRng(f, request) }),
     },
     visibility: { player: { sprite: true, healthbox: true }, opponent: { sprite: true, healthbox: true } },
     waitCursor: null, bottom: "message", confirmHandoff: null, switchIn: null,

@@ -4137,6 +4137,10 @@ export interface SceneOnThrashConfig {
     ThrashRandomWords,
     ThrashRandomWords,
   ];
+  /** Live field: the target's GetBattlerSpriteCoordAttr width/height (staged ONIX: 56 x 64). */
+  readonly targetDimensions?: Readonly<{ width: number; height: number }>;
+  /** Live field: the attacker's pic-coords yOffset for the affine Y anchor (staged TAUROS: back 13, front 0). */
+  readonly attackerPicYOffset?: number;
 }
 
 /** Narrow Scene-ON seam for Double Kick's presentation-only script body. */
@@ -11217,7 +11221,7 @@ export function sceneOnThrashView(
       attackerSide: attacker.geometry.side,
       targetSide: target.geometry.side,
       targetCenter: target.geometry.animationCenter,
-      targetDimensions: { width: 56, height: 64 },
+      targetDimensions: state.config.targetDimensions ?? { width: 56, height: 64 },
       fistRandom: state.config.fistRandom,
     }),
   };
@@ -11306,7 +11310,7 @@ export function sceneOnThrashDisplayedTargetOffset(
     attackerSide: attacker.geometry.side,
     targetSide: target.geometry.side,
     targetCenter: target.geometry.animationCenter,
-    targetDimensions: { width: 56, height: 64 },
+    targetDimensions: state.config.targetDimensions ?? { width: 56, height: 64 },
     fistRandom: state.config.fistRandom,
   });
 }
