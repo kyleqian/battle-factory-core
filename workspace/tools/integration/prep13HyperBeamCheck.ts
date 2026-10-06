@@ -37,7 +37,7 @@ for (const sc of Object.keys(A).filter((k) => /hyper-beam/.test(k))) {
   const lifetime: number[] = []; for (let i = 0; i < 52; i += 1) { let first = -1, last = -1; for (let age = 110; age < 300; age += 1) { const st = hyperBeamAtAge(age, side, geometry, p1); if (st.orbs.some((o) => o.index === i)) { if (first < 0) first = age; last = age; } } lifetime.push(last - first + 1); }
   const alive: { slot: number; until: number }[] = []; const simSlots: number[] = [];
   for (let i = 0; i < 52; i += 1) { const born = 110 + Math.floor(i / 2) * 3; for (let k = alive.length - 1; k >= 0; k -= 1) if (alive[k]!.until <= born) alive.splice(k, 1);
-    let slot = 0; while (r.inUseAtAct.includes(slot) || alive.some((a) => a.slot === slot)) slot += 1; simSlots.push(slot); alive.push({ slot, until: born + lifetime[i]! + Number(process.env.DELAY ?? 0) }); }
+    let slot = 0; while (r.inUseAtAct.includes(slot) || alive.some((a) => a.slot === slot)) slot += 1; simSlots.push(slot); alive.push({ slot, until: born + lifetime[i]! + Number(process.env.DELAY ?? 1) }); }
   const romSlots = orbsRom.map((s: any) => s.slot);
   const slotsEq = JSON.stringify(simSlots) === JSON.stringify(romSlots);
   const poAcc = orbsRom.map((s: any, i: number) => romOrderAt(110 + Math.floor(i / 2) * 3).indexOf(s.slot));
