@@ -1,0 +1,335 @@
+{
+ "schema": "prep14-receipt/v1",
+ "move": "silver-wind",
+ "bodyLabel": "Move_SILVER_WIND",
+ "drawsPerBody": 0,
+ "determinism": {
+  "player": {
+   "runsSha1": "fe5e77a9926f8d0fbb1cb7e7f3bc3ef986a911b4",
+   "runsSha1Run2": "fe5e77a9926f8d0fbb1cb7e7f3bc3ef986a911b4",
+   "allFieldsEqualExceptFinalStateSha1": true
+  },
+  "opponent": {
+   "runsSha1": "f9867c372d9e45a5eb885f069d118b1aa26d94b6",
+   "runsSha1Run2": "f9867c372d9e45a5eb885f069d118b1aa26d94b6",
+   "allFieldsEqualExceptFinalStateSha1": true
+  },
+  "alternate": {
+   "runsSha1": "ceadc5672fa1f0afc92894285418f2f77fb6bdf3",
+   "runsSha1Run2": "ceadc5672fa1f0afc92894285418f2f77fb6bdf3",
+   "allFieldsEqualExceptFinalStateSha1": true
+  }
+ },
+ "plan": {
+  "drawsCompressed": [],
+  "lagAges": [
+   144,
+   145,
+   166
+  ],
+  "lagFramesBeforeLastDraw": 0
+ },
+ "accepted": {
+  "player": {
+   "scenario": "mechanic-silver-wind-player-butterfree-opponent-onix",
+   "activationFrame": 81,
+   "activationValueHex": "0xDAAD9D3D",
+   "acceptedWindow": {
+    "startFrame": 81,
+    "rows": 193,
+    "activationMinusStart": 0,
+    "corpus": "tools/compare/evidence/silver-wind-player-dense-state.json.gz",
+    "rowsCheckedAnimationRng": 193,
+    "planSeriesEqualsCorpusAnimationRng": true,
+    "firstMismatchAge": null
+   },
+   "consumers": {}
+  },
+  "opponent": {
+   "scenario": "mechanic-silver-wind-opponent-butterfree-player-onix",
+   "activationFrame": 223,
+   "activationValueHex": "0x647BEB2B",
+   "acceptedWindow": {
+    "startFrame": 223,
+    "rows": 196,
+    "activationMinusStart": 0,
+    "corpus": "tools/compare/evidence/silver-wind-opponent-dense-state.json.gz",
+    "rowsCheckedAnimationRng": 196,
+    "planSeriesEqualsCorpusAnimationRng": true,
+    "firstMismatchAge": null
+   },
+   "consumers": {}
+  }
+ },
+ "alternate": {
+  "scenario": "prep14-silver-wind-alt-beautifly-golem",
+  "activationFrame": 80,
+  "activationValue": 119564722,
+  "activationValueHex": "0x072069B2",
+  "drawFrames": 0,
+  "drawsTotal": 0,
+  "lagAges": [
+   144,
+   145,
+   166
+  ],
+  "planShapeIdenticalToAccepted": true,
+  "replayEqualsObservedWords": true,
+  "determinism": {
+   "runsSha1": "ceadc5672fa1f0afc92894285418f2f77fb6bdf3",
+   "runsSha1Run2": "ceadc5672fa1f0afc92894285418f2f77fb6bdf3",
+   "allFieldsEqualExceptFinalStateSha1": true
+  }
+ },
+ "allocator": {
+  "scenarios": {
+   "player": {
+    "scenario": "mechanic-silver-wind-player-butterfree-opponent-onix",
+    "activation": 81,
+    "rows": 193,
+    "bitmapAtActivation": 6,
+    "tasksAtActivation": [],
+    "inUseAtActivation": [
+     0,
+     1,
+     2,
+     6,
+     8,
+     60,
+     61,
+     62,
+     63
+    ],
+    "orderShape": "first-body",
+    "monbg": {
+     "age": 6,
+     "slot": 2,
+     "data": [
+      8,
+      177,
+      42,
+      -145,
+      -10,
+      0,
+      1,
+      0
+     ],
+     "battlerOnSprite": "opponent",
+     "formula": [
+      177,
+      42,
+      -145,
+      -10
+     ],
+     "holds": true
+    },
+    "netZeroAtEnd1": true
+   },
+   "opponent": {
+    "scenario": "mechanic-silver-wind-opponent-butterfree-player-onix",
+    "activation": 223,
+    "rows": 196,
+    "bitmapAtActivation": 6,
+    "tasksAtActivation": [],
+    "inUseAtActivation": [
+     0,
+     1,
+     2,
+     6,
+     8,
+     60,
+     61,
+     62,
+     63
+    ],
+    "orderShape": "post-tackle",
+    "monbg": {
+     "age": 6,
+     "slot": 2,
+     "data": [
+      6,
+      72,
+      80,
+      -40,
+      -48,
+      1,
+      0,
+      0
+     ],
+     "battlerOnSprite": "player",
+     "formula": [
+      72,
+      80,
+      -40,
+      -48
+     ],
+     "holds": true
+    },
+    "netZeroAtEnd1": true
+   },
+   "alt": {
+    "scenario": "prep14-silver-wind-alt-beautifly-golem",
+    "activation": 80,
+    "rows": 193,
+    "bitmapAtActivation": 6,
+    "tasksAtActivation": [],
+    "inUseAtActivation": [
+     0,
+     1,
+     2,
+     6,
+     8,
+     60,
+     61,
+     62,
+     63
+    ],
+    "orderShape": "first-body",
+    "monbg": {
+     "age": 6,
+     "slot": 2,
+     "data": [
+      8,
+      176,
+      45,
+      -144,
+      -13,
+      0,
+      1,
+      0
+     ],
+     "battlerOnSprite": "opponent",
+     "formula": [
+      176,
+      45,
+      -144,
+      -13
+     ],
+     "holds": true
+    },
+    "netZeroAtEnd1": true
+   }
+  },
+  "equalToPlayer": {
+   "opponent": {
+    "spawns": true,
+    "tasks": false,
+    "bitmap": true,
+    "inUse": true
+   },
+   "alt": {
+    "spawns": true,
+    "tasks": true,
+    "bitmap": true,
+    "inUse": true
+   }
+  },
+  "corpusCrossCheck": {
+   "player": {
+    "spawnsEqual": true,
+    "taskPairsEqual": true,
+    "orderAtAct": true,
+    "animRng0==rng2AtAct": true,
+    "offset": 0,
+    "rows": {
+     "corpus": 193,
+     "probe": 193
+    }
+   },
+   "opponent": {
+    "spawnsEqual": true,
+    "taskPairsEqual": true,
+    "orderAtAct": true,
+    "animRng0==rng2AtAct": true,
+    "offset": 0,
+    "rows": {
+     "corpus": 196,
+     "probe": 196
+    }
+   }
+  }
+ },
+ "palette": {
+  "objBanksDifferingAtActivation(across player/opponent/alt)": [
+   0,
+   1,
+   7,
+   13,
+   14,
+   15
+  ],
+  "bgBanksDifferingAtActivation": [],
+  "loadedBanksByAge": {
+   "1": {
+    "player": [
+     7
+    ],
+    "opponent": [
+     7
+    ],
+    "alt": [
+     7
+    ]
+   },
+   "2": {
+    "player": [
+     7
+    ],
+    "opponent": [
+     7
+    ],
+    "alt": [
+     7
+    ]
+   },
+   "3": {
+    "player": [
+     7
+    ],
+    "opponent": [
+     7
+    ],
+    "alt": [
+     7
+    ]
+   },
+   "5": {
+    "player": [
+     7
+    ],
+    "opponent": [
+     7
+    ],
+    "alt": [
+     7
+    ]
+   },
+   "8": {
+    "player": [
+     7
+    ],
+    "opponent": [
+     7
+    ],
+    "alt": [
+     7
+    ]
+   },
+   "12": {
+    "player": [
+     7
+    ],
+    "opponent": [
+     7
+    ],
+    "alt": [
+     7
+    ]
+   }
+  },
+  "loadedBankContentEqualAcrossScenarios@age12": {
+   "7": true
+  },
+  "bgChangedByAge12": []
+ }
+}

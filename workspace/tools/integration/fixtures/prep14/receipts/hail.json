@@ -1,0 +1,272 @@
+{
+ "schema": "prep14-receipt/v1",
+ "move": "hail",
+ "bodyLabel": "Move_HAIL",
+ "drawsPerBody": 0,
+ "determinism": {
+  "player": {
+   "runsSha1": "0bcb5b34a11c4b1e0fe03a239c95c825ae146637",
+   "runsSha1Run2": "0bcb5b34a11c4b1e0fe03a239c95c825ae146637",
+   "allFieldsEqualExceptFinalStateSha1": true
+  },
+  "opponent": {
+   "runsSha1": "9ce14bb58110800a22581cc6290afdad7dd42ad4",
+   "runsSha1Run2": "9ce14bb58110800a22581cc6290afdad7dd42ad4",
+   "allFieldsEqualExceptFinalStateSha1": true
+  },
+  "alternate": {
+   "runsSha1": "1edd25cdfdc7b6e48d2465b3991f6c6ee31ae8ab",
+   "runsSha1Run2": "1edd25cdfdc7b6e48d2465b3991f6c6ee31ae8ab",
+   "allFieldsEqualExceptFinalStateSha1": true
+  }
+ },
+ "plan": {
+  "drawsCompressed": [],
+  "lagAges": [],
+  "lagFramesBeforeLastDraw": 0
+ },
+ "accepted": {
+  "player": {
+   "scenario": "mechanic-hail-player-delibird-opponent-onix",
+   "activationFrame": 66,
+   "activationValueHex": "0x16194BC9",
+   "acceptedWindow": {
+    "startFrame": 66,
+    "rows": 158,
+    "activationMinusStart": 0,
+    "corpus": "tools/compare/evidence/hail-player-dense-state.json.gz",
+    "rowsCheckedAnimationRng": 158,
+    "planSeriesEqualsCorpusAnimationRng": true,
+    "firstMismatchAge": null
+   },
+   "consumers": {}
+  },
+  "opponent": {
+   "scenario": "mechanic-hail-opponent-delibird-player-onix",
+   "activationFrame": 70,
+   "activationValueHex": "0xDAAD9D3D",
+   "acceptedWindow": {
+    "startFrame": 70,
+    "rows": 158,
+    "activationMinusStart": 0,
+    "corpus": "tools/compare/evidence/hail-opponent-dense-state.json.gz",
+    "rowsCheckedAnimationRng": 158,
+    "planSeriesEqualsCorpusAnimationRng": true,
+    "firstMismatchAge": null
+   },
+   "consumers": {}
+  }
+ },
+ "alternate": {
+  "scenario": "prep14-hail-alt-glalie-golem",
+  "activationFrame": 64,
+  "activationValue": 1989536647,
+  "activationValueHex": "0x7695EB87",
+  "drawFrames": 0,
+  "drawsTotal": 0,
+  "lagAges": [],
+  "planShapeIdenticalToAccepted": true,
+  "replayEqualsObservedWords": true,
+  "determinism": {
+   "runsSha1": "1edd25cdfdc7b6e48d2465b3991f6c6ee31ae8ab",
+   "runsSha1Run2": "1edd25cdfdc7b6e48d2465b3991f6c6ee31ae8ab",
+   "allFieldsEqualExceptFinalStateSha1": true
+  }
+ },
+ "allocator": {
+  "scenarios": {
+   "player": {
+    "scenario": "mechanic-hail-player-delibird-opponent-onix",
+    "activation": 66,
+    "rows": 158,
+    "bitmapAtActivation": 6,
+    "tasksAtActivation": [],
+    "inUseAtActivation": [
+     0,
+     1,
+     2,
+     6,
+     8,
+     60,
+     61,
+     62,
+     63
+    ],
+    "orderShape": "first-body",
+    "monbg": null,
+    "netZeroAtEnd1": true
+   },
+   "opponent": {
+    "scenario": "mechanic-hail-opponent-delibird-player-onix",
+    "activation": 70,
+    "rows": 158,
+    "bitmapAtActivation": 6,
+    "tasksAtActivation": [],
+    "inUseAtActivation": [
+     0,
+     1,
+     2,
+     6,
+     8,
+     60,
+     61,
+     62,
+     63
+    ],
+    "orderShape": "first-body",
+    "monbg": null,
+    "netZeroAtEnd1": true
+   },
+   "alt": {
+    "scenario": "prep14-hail-alt-glalie-golem",
+    "activation": 64,
+    "rows": 158,
+    "bitmapAtActivation": 6,
+    "tasksAtActivation": [],
+    "inUseAtActivation": [
+     0,
+     1,
+     2,
+     6,
+     8,
+     60,
+     61,
+     62,
+     63
+    ],
+    "orderShape": "first-body",
+    "monbg": null,
+    "netZeroAtEnd1": true
+   }
+  },
+  "equalToPlayer": {
+   "opponent": {
+    "spawns": false,
+    "tasks": true,
+    "bitmap": true,
+    "inUse": true
+   },
+   "alt": {
+    "spawns": false,
+    "tasks": true,
+    "bitmap": true,
+    "inUse": true
+   }
+  },
+  "corpusCrossCheck": {
+   "player": {
+    "spawnsEqual": true,
+    "taskPairsEqual": true,
+    "orderAtAct": true,
+    "animRng0==rng2AtAct": true,
+    "offset": 0,
+    "rows": {
+     "corpus": 158,
+     "probe": 158
+    }
+   },
+   "opponent": {
+    "spawnsEqual": true,
+    "taskPairsEqual": true,
+    "orderAtAct": true,
+    "animRng0==rng2AtAct": true,
+    "offset": 0,
+    "rows": {
+     "corpus": 158,
+     "probe": 158
+    }
+   }
+  }
+ },
+ "palette": {
+  "objBanksDifferingAtActivation(across player/opponent/alt)": [
+   0,
+   1,
+   13,
+   15
+  ],
+  "bgBanksDifferingAtActivation": [],
+  "loadedBanksByAge": {
+   "1": {
+    "player": [
+     7
+    ],
+    "opponent": [
+     7
+    ],
+    "alt": [
+     7
+    ]
+   },
+   "2": {
+    "player": [
+     7
+    ],
+    "opponent": [
+     7
+    ],
+    "alt": [
+     7
+    ]
+   },
+   "3": {
+    "player": [
+     7
+    ],
+    "opponent": [
+     7
+    ],
+    "alt": [
+     7
+    ]
+   },
+   "5": {
+    "player": [
+     7,
+     8
+    ],
+    "opponent": [
+     7,
+     8
+    ],
+    "alt": [
+     7,
+     8
+    ]
+   },
+   "8": {
+    "player": [
+     7,
+     8
+    ],
+    "opponent": [
+     7,
+     8
+    ],
+    "alt": [
+     7,
+     8
+    ]
+   },
+   "12": {
+    "player": [
+     7,
+     8
+    ],
+    "opponent": [
+     7,
+     8
+    ],
+    "alt": [
+     7,
+     8
+    ]
+   }
+  },
+  "loadedBankContentEqualAcrossScenarios@age12": {
+   "7": true,
+   "8": true
+  },
+  "bgChangedByAge12": []
+ }
+}
