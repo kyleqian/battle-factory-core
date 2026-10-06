@@ -22,3 +22,16 @@ out.overheatResourceJsonEqualsAssets = { ember: JSON.stringify(res.ANIM_TAG_SMAL
 console.log("resource json == asset words", JSON.stringify(out.overheatResourceJsonEqualsAssets));
 run("silver wind (SPARKLE_6; tag 10263? taken from the asset)", [{ tag: (swAsset as any).resources.sparkle6.tagValue, colors: assetWords((swAsset as any).resources.sparkle6.palette) }]);
 if (process.argv[2]) writeFileSync(process.argv[2], JSON.stringify(out, null, 1));
+// battler banks 16/17: the existing field-art view (what the Seismic Toss adapter already passes as attackerPalette/targetPalette, liveMoveAnimation.ts case 69) vs the species assets the composite reads
+import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";
+import { composePalettes, bgr555 } from "./prep16PaletteComposite.ts";
+const pairs: [string, string][] = [["SOLROCK", "SHUCKLE"], ["SHUCKLE", "MAGCARGO"], ["CHARIZARD", "GOLEM"], ["GOLEM", "CHARIZARD"], ["BUTTERFREE", "ONIX"], ["ONIX", "BUTTERFREE"], ["BEAUTIFLY", "GOLEM"], ["GOLEM", "BEAUTIFLY"], ["JUMPLUFF", "NINJASK"], ["NINJASK", "JUMPLUFF"], ["SKIPLOOM", "GOLEM"], ["GOLEM", "SKIPLOOM"]];
+import { readFileSync } from "node:fs";
+const SP: Record<string, number> = {}; for (const m of readFileSync("reference/pokeemerald/include/constants/species.h", "utf8").matchAll(/#define SPECIES_(\w+)\s+(\d+)/g)) SP[m[1]!] = Number(m[2]);
+const artRows = pairs.map(([p, o]) => {
+  const art = createBattleCommandFieldArtView({ player: { species: SP[p] }, opponent: { species: SP[o] } } as never) as any, pal = composePalettes(p, o);
+  const eq = (side: string, bank: number) => JSON.stringify(art[side].pic.palette.map(bgr555)) === JSON.stringify(pal.hardware.slice(bank * 16, bank * 16 + 16));
+  return { player: p, opponent: o, playerPicPaletteEqualsBank16: eq("player", 16), opponentPicPaletteEqualsBank17: eq("opponent", 17) };
+});
+out.fieldArtViewPicPaletteVsComposite = artRows; console.log("field-art pic.palette == composite banks 16/17:", artRows.every((r) => r.playerPicPaletteEqualsBank16 && r.opponentPicPaletteEqualsBank17), JSON.stringify(artRows.filter((r) => !(r.playerPicPaletteEqualsBank16 && r.opponentPicPaletteEqualsBank17))));
+if (process.argv[2]) writeFileSync(process.argv[2], JSON.stringify(out, null, 1));
