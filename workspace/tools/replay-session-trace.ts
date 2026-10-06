@@ -10,6 +10,7 @@
 
 import { readFileSync } from "node:fs";
 import { createInitialState, tick } from "../src/engine/core.ts";
+import { presentationRngFromTrace } from "../src/engine/presentationRngHost.ts";
 import { normalizeButtons, type GbaButton } from "../src/input.ts";
 import type { RecordedSegment, SessionTrace } from "../src/sessionRecorder.ts";
 
@@ -39,9 +40,19 @@ console.log(
 );
 if (trace.error) console.log(`recorded error: ${trace.error.name}: ${trace.error.message}`);
 
-let state = createInitialState(
-  { ...(trace.appRoute ? { appRoute: trace.appRoute as never } : {}), battleScene: trace.battleScene ?? "off" },
-);
+// Presentation Random2 seed/policy from the export; legacy exports use the documented default.
+let presentationRng: ReturnType<typeof presentationRngFromTrace>;
+try {
+  presentationRng = presentationRngFromTrace(trace);
+} catch (error) {
+  fail(String(error));
+}
+let state = createInitialState({
+  ...(trace.appRoute ? { appRoute: trace.appRoute as never } : {}),
+  battleScene: trace.battleScene ?? "off",
+  presentationSeed: presentationRng.seed,
+  presentationRngPolicy: presentationRng.policy,
+});
 let frame = 0;
 const pressed: Array<{ frame: number; buttons: GbaButton[] }> = [];
 

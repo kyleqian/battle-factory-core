@@ -30,6 +30,11 @@ try {
   const benchUrl = new URL(url);
   benchUrl.searchParams.set("pokebench", "1");
   benchUrl.searchParams.set("battleScene", trace.battleScene);
+  // Presentation Random2 seed (docs/presentation-rng.md): replay the export's own seed; legacy
+  // exports without the field use the bench default (anchor gRng2 0x808DB3EB, policy v1).
+  const presentationRng = trace.presentationRng
+    ?? { seed: "808db3eb", policy: "presentation-rng.v1.frame-step.no-lag.battle-stride-2^20" };
+  if (trace.presentationRng) benchUrl.searchParams.set("presentationSeed", trace.presentationRng.seed);
   await page.goto(benchUrl.toString(), { waitUntil: "networkidle", timeout: 120000 });
   await page.waitForFunction(() => typeof window.__POKEBENCH__?.advance === "function");
   const prefix = (frames) => {
@@ -60,6 +65,7 @@ try {
     assert.equal(result.trace.build, evidence.build, "served revision matches expected build");
     assert.equal(result.trace.battleScene, trace.battleScene);
     assert.equal(result.trace.frame, sample.frame);
+    assert.deepEqual(result.trace.presentationRng, presentationRng, "browser export round-trips the presentation seed/policy");
     assert.equal(result.crash, false);
     const image = resolve(outputDir, sample.label + ".png");
     await page.locator('[data-testid="game-surface"]').screenshot({ path: image });

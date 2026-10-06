@@ -3262,6 +3262,22 @@
   "implementedCount": 218,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
+  "faithfulRandomCount": 0,
+  "faithfulRandomAdapters": [],
+  "faithfulRandomClaim": {
+    "policy": "presentation-rng.v1.frame-step.no-lag.battle-stride-2^20",
+    "doc": "docs/presentation-rng.md",
+    "decision": "D3 option (a), user-approved 2026-10-06 (docs/random2-trackability.md §7; ANIMATION_VERIFICATION.md \"Random2 live integration\")",
+    "entryFields": {
+      "id": "move id; never also listed in implementedAdapters (disjoint buckets)",
+      "move": "MOVE_* label",
+      "policy": "presentation RNG policy id the adapter was proved under",
+      "provenance": "surrogate: ordinary play draws from the session-seeded per-battle stream; pinned: controlled-body proofs use oracle-pinned source words",
+      "pinnedProofs": "controlled-body pinned-word proof receipts (provenance pinned)",
+      "surrogateRoutes": "ordinary surrogate-driven route tests through cleanup and the following prompt"
+    },
+    "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
+  },
   "unadaptedNotes": {},
   "verifiedPreview": {
     "commit": "1dbd33332075bdbec15ad727ea67775345b7ba14",

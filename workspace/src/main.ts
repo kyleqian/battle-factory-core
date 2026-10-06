@@ -6,6 +6,11 @@
 import { buttonForKey, normalizeButtons, type GbaButton } from "./input.ts";
 import { createInitialState, render, tick as engineTick, SCREEN_WIDTH, SCREEN_HEIGHT } from "./engine/core.ts";
 import { SessionRecorder, type SessionTrace } from "./sessionRecorder.ts";
+import {
+  DEFAULT_PRESENTATION_RNG_SEED,
+  parsePresentationSeed,
+  presentationRngTraceMetadata,
+} from "./engine/presentationRngHost.ts";
 import "./style.css";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT };
@@ -19,7 +24,18 @@ const BUILD_STAMP: string =
 
 const held = new Set<GbaButton>();
 const battleScene = new URLSearchParams(location.search).get("battleScene") === "off" ? "off" : "on";
-let state = createInitialState({ battleScene });
+const benchMode = new URLSearchParams(location.search).has("pokebench");
+// Presentation-only Random2 seed (docs/presentation-rng.md): `presentationSeed=<hex>` pins it;
+// the bench ABI otherwise stays deterministic on the documented default; ordinary play draws one
+// per session. Reset keeps the session's seed so replays and resets reproduce the same visuals.
+function choosePresentationSeed(): number {
+  const pinned = parsePresentationSeed(new URLSearchParams(location.search).get("presentationSeed"));
+  if (pinned !== null) return pinned;
+  if (benchMode) return DEFAULT_PRESENTATION_RNG_SEED;
+  return crypto.getRandomValues(new Uint32Array(1))[0]!;
+}
+const presentationSeed = choosePresentationSeed();
+let state = createInitialState({ battleScene, presentationSeed });
 const recorder = new SessionRecorder();
 
 const app = document.querySelector<HTMLDivElement>("#app")!;
@@ -27,7 +43,6 @@ const canvas = document.createElement("canvas");
 canvas.width = SCREEN_WIDTH;
 canvas.height = SCREEN_HEIGHT;
 canvas.dataset.testid = "game-surface";
-const benchMode = new URLSearchParams(location.search).has("pokebench");
 canvas.style.width = benchMode ? `${SCREEN_WIDTH}px` : `${SCREEN_WIDTH * 3}px`;
 canvas.style.height = benchMode ? `${SCREEN_HEIGHT}px` : `${SCREEN_HEIGHT * 3}px`;
 canvas.style.imageRendering = "pixelated";
@@ -63,7 +78,13 @@ function tick(buttons: ReadonlySet<GbaButton>): void {
 draw();
 
 function currentSessionTrace(error?: unknown): SessionTrace {
-  return recorder.toTrace({ appRoute: state.appRoute, battleScene, build: BUILD_STAMP, error });
+  return recorder.toTrace({
+    appRoute: state.appRoute,
+    battleScene,
+    build: BUILD_STAMP,
+    presentationRng: presentationRngTraceMetadata(state.presentationRng),
+    error,
+  });
 }
 
 // The session trace is always exportable, not just on a crash: when a played
@@ -156,7 +177,7 @@ requestAnimationFrame(loop);
 if (benchMode) {
   (window as unknown as Record<string, unknown>).__POKEBENCH__ = {
     reset(): void {
-      state = createInitialState({ battleScene });
+      state = createInitialState({ battleScene, presentationSeed });
       held.clear();
       recorder.reset();
       draw();

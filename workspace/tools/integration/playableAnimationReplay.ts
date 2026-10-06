@@ -4,6 +4,7 @@ import { createInitialState, tick, render, type EngineState } from "../../src/en
 import { liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";
 import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { SessionRecorder } from "../../src/sessionRecorder.ts";
+import { presentationRngTraceMetadata } from "../../src/engine/presentationRngHost.ts";
 import type { GbaButton } from "../../src/input.ts";
 
 export interface LiveAnimationObservation {
@@ -20,8 +21,9 @@ export interface LiveAnimationObservation {
 export function playableAnimationReplay(
   battleScene: "on" | "off",
   moveSlots: readonly (0 | 1 | 2 | 3)[] = [0, 1, 0],
+  presentationSeed?: number,
 ) {
-  let state = createInitialState({ battleScene });
+  let state = createInitialState({ battleScene, presentationSeed });
   const recorder = new SessionRecorder();
   const observations: LiveAnimationObservation[] = [];
   const boundaries: EngineState[] = [];
@@ -112,6 +114,11 @@ export function playableAnimationReplay(
   }
   return {
     state, boundaries, observations, commands, semanticEvents,
-    trace: recorder.toTrace({ appRoute: state.appRoute, battleScene, build: "integration-replay" }),
+    trace: recorder.toTrace({
+      appRoute: state.appRoute,
+      battleScene,
+      build: "integration-replay",
+      presentationRng: presentationRngTraceMetadata(state.presentationRng),
+    }),
   };
 }
