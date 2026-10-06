@@ -145,4 +145,3 @@ describe("presentation RNG on the ordinary playable route", () => {
     expect(main.indexOf("const benchMode")).toBeLessThan(main.indexOf("function choosePresentationSeed"));
   });
 });
-
