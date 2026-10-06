@@ -9,6 +9,12 @@ next main roadmap stage, with no separate supervisor lane. hcloud was deleted
 after backup and local validation.
 On 2026-10-04 the user changed the defaults to Claude Opus 5.5 supervision
 and Claude Sonnet 5.5 workers.
+On 2026-10-06 the user approved D3 option (a) for the next run: implement a
+separate deterministic presentation RNG, persist replay seeds in session
+exports, and count Random2 adapters separately as "faithful random". The
+implementation and acceptance contract lives in ROADMAP S10A,
+ANIMATION_INTEGRATION_SUPERVISOR.md and ANIMATION_VERIFICATION.md; gameplay
+outcomes and RNG remain unchanged. This decision needs no further approval.
 Historical remote-only instructions and isolated cloud branches are superseded.
 
 Canonical checkout: `/Users/kyle/Developer/pokebench/pokeemerald-factory-core`,
@@ -35,7 +41,7 @@ Document deliberate module-boundary changes; never silently widen ratchets.
 
 The latest production receipt and preview revision are in
 `ANIMATION_INTEGRATION_PROGRESS.md`, which also holds the current live adapter
-count (80 of 276 accepted Factory bodies on 2026-10-04).
+count (218 of 276 accepted Factory bodies at the 2026-10-05 wind-down).
 The established path includes ordinary Scene ON/OFF selection, typed requests
 and completion, queue resume, real-route regressions and browser verification.
 Reuse recorded same-code full-suite/build receipts under the verification policy.

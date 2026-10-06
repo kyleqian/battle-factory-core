@@ -1,3 +1,35 @@
+## 2026-10-04 (evening) — S10A wind-down: 131 -> 144 live adapters
+
+- **State:** S10A, local master; production `1a68bb532`; 144 live adapters,
+  132 accepted bodies remain. Supervisor final gates on `1a68bb532`: 1,495
+  files / 11,996 tests, build 847 (`final-supervisor-gates-20261004-evening.json`).
+  Wound down early at the user's request. Opus 5.5 supervisor, Sonnet 5.5 workers.
+- **Did (integration, 2 folds, no move dropped):** next5 — Scary Face,
+  Glare, Teeter Dance, Dizzy Punch (presentation-only party personality on
+  the field battler), Soft-Boiled (displayed bystander); prep2 — Surf, Muddy
+  Water, Icy Wind, Blizzard, Fake Out (`liveBattlerCoordAttrs`), Cosmic Power,
+  Future Sight (turn 1), Explosion. Each independently re-proved dense twice
+  fresh (2,229 and 3,620 rows/run, zero residual, incl. four alternate-species
+  cases) plus ordinary routes 4/4 and 7/7 with ON/OFF parity.
+- **Did (side lane, evidence only):** prep2 triage of 33 H_BASIC/H_DERIVED
+  moves; static H_BUFFER triage (84); measured prep with drafted fixtures and
+  routes for 13 more moves (`docs/h-buffer-s1-prep.md`,
+  `docs/next-adapters-prep5.md`). Ember, Heal Bell, Perish Song, Leaf Blade,
+  Dragon Rage need the sprite-order provider.
+- **Next:** dispatch the H_BUFFER S1/S2 batch (Mean Look, Smelling Salt,
+  Defense Curl, Ingrain, Wrap, Bind, Dragon Breath) from
+  `.codex-logs/s10a-hbuffer-s1-batch-20261004-brief.txt` (fill
+  __BASE__/__COUNT__/__CAP__/__STOPADD__), then the six prep5 READY moves, then
+  sprite-order provider slices. ROADMAP S10A "Next (2026-10-04 late)" lists all.
+- **Notes:** limits recorded per receipt: Icy Wind/Blizzard show the
+  scene-off view where the reducer's retained slot table cannot verify the
+  geometry (Blizzard ~90% player-attacker / ~34% opponent-attacker pairs
+  live); Soft-Boiled has no rental carrier (dense only); Scary Face/Dizzy
+  Punch script tails uncovered. No DEFERRED entries. All worker branches
+  merged/deleted; evidence copied to `.integration/validation/`.
+
+---
+
 ## 2026-10-04 — S10A session wind-down: 79 -> 131 live adapters, #142 fixed
 
 - **State:** S10A, local master `d935baca4`; 131 live adapters, 145 accepted

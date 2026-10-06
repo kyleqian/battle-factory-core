@@ -4,6 +4,11 @@ S10A side-lane evidence and design, 2026-10-05. Source paths are relative to `re
 All probes are direct mGBA runs (not the shared HTTP oracles). Each relied-on probe ran twice from
 fresh processes and produced identical results (RAM sha1 and per-frame-runs sha1, §6).
 
+**D3 answered, 2026-10-06:** the user approved the surrogate presentation RNG
+for the next run, with deterministic per-battle seeds stored in session exports
+and a separate "faithful random" live claim. Source findings below are unchanged.
+ROADMAP S10A and ANIMATION_VERIFICATION.md now define the implementation gates.
+
 ## 0. Verdict
 
 **NOT TRACKABLE across real play. Exact within a body once its activation value is known.**
@@ -37,9 +42,9 @@ fresh processes and produced identical results (RAM sha1 and per-frame-runs sha1
 
 Consequence: these 52 Random2 animations cannot render bit-exact in general play. Exact rendering
 needs either a CPU-cycle model of every main-loop iteration (out of scope) or an oracle-pinned
-activation value (staged scenarios only, as today). **The group needs the user's claim-boundary
-decision:** a surrogate presentation RNG with the ROM's law and draw order that is plausible but
-not bit-exact (design §7).
+activation value (staged scenarios only, as today). **D3 option (a) was approved on 2026-10-06:**
+use a surrogate presentation RNG with the ROM's law and draw order, reproducible replay seeds,
+and a separate faithful-random claim for ordinary play (design §7).
 
 ## 1. Attribution (route: `battle1-postwin-dense`, Scene ON, 29,601 frames from the canonical anchor)
 
@@ -195,7 +200,7 @@ differs between instrument variants, while each variant reproduces its own sha1 
 question 3). The raw savestate blob is not byte-stable across identical runs, which is why the
 probe hashes RAM.
 
-## 7. Design (if the user accepts a surrogate claim boundary)
+## 7. Design (D3 option (a) approved by the user, 2026-10-06)
 
 A pure module, `src/engine/presentationRng.ts`. Production code is not written here.
 - **State:** `{ value: u32, provenance: 'pinned' | 'surrogate' }`.
@@ -215,6 +220,9 @@ A pure module, `src/engine/presentationRng.ts`. Production code is not written h
 - **Orchestrator:** the host lives next to `liveSpriteOrderHost.ts`, with one instance per battle
   that the presentation seam owns. Its state is presentation-only and is never serialised into
   battle or RNG state.
+- **Replay/export:** store the presentation seed and policy version in separate session metadata.
+  Reset/replay must reproduce the stream; legacy exports use a documented deterministic default.
+  Repainting a frame must not draw again. See ANIMATION_INTEGRATION_SUPERVISOR.md for the approved contract.
 - **Tests:**
   1. The LCG and jump-ahead match the receipt sequence.
   2. The Double Kick words from the receipt activation are exact (the §5 vector).
@@ -225,8 +233,9 @@ A pure module, `src/engine/presentationRng.ts`. Production code is not written h
   Double Kick (4), Astonish (4), Thrash (12), Luster Purge (12). Mud-Slap and Sand Attack (60) come
   last. Dizzy Punch and Teeter Dance need no RNG.
 
-If the user instead requires bit-exact rendering, the honest scope is pinned scenarios only. A
-tracker that also models lag would need cycle-accurate costs for text, DMA and sound mixing.
+Oracle-exact Random2 rendering remains limited to pinned scenarios. A tracker that also models
+lag would need cycle-accurate costs for text, DMA and sound mixing; that work is outside the
+approved surrogate implementation.
 
 ## 8. Open questions
 

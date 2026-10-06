@@ -44,6 +44,36 @@ scoped gates before dispatch; production/dependency/configuration deltas or a
 missing production receipt need a full baseline. Documentation alone does not
 invalidate a code receipt. Never invent or assume a green result.
 
+## Random2 live integration — user-approved D3, 2026-10-06
+
+The user authorized a separate deterministic presentation RNG for the next
+S10A run. This narrowly changes the arbitrary-play randomness claim for the
+52 Random2-dependent remaining adapters; the source animation algorithms,
+timing, geometry, resources, lifecycle and cleanup still need their proofs.
+
+- Verify the source RNG recurrence, draw order/count and value transformations
+  against the reproduced known-activation vectors. RNG state belongs to
+  presentation, is seeded independently per battle, and never consumes or
+  mutates gameplay RNG. Rendering a frame again must not advance the stream.
+- Prove controlled bodies with pinned source random values through the
+  production live renderer: dense full windows, both orientations, twice
+  fresh, alternate species and every required variant. Vary seeds/words to
+  exercise the source branches and ranges. Keep pinned and surrogate provenance
+  explicit; a pinned fixture proves the controlled body, not arbitrary-play
+  oracle RNG synchronization.
+- Exercise ordinary surrogate-driven routes through cleanup and following
+  prompts, with repeat/multi-hit/switch/faint cases as relevant. Prove unchanged
+  gameplay outcomes and RNG with Scene ON/OFF and different presentation seeds.
+  Persist seed and policy version in session exports; replay/reset is visually
+  reproducible, including the documented default for legacy exports.
+- Count promoted surrogate adapters separately as "faithful random" in the
+  live inventory and reports. Preserve existing scoped exact claims and
+  Factory body acceptance; no production capture-row inputs or exact credit
+  for surrogate randomness. Unproved non-random host history keeps its fallback.
+- Production changes still require the normal affected controls, smoke,
+  typecheck where applicable, full suite/build and independent supervisor
+  reproduction. Approval resolves D3 only; it does not waive any other gate.
+
 ## Keep move checks local
 
 Global totals, work-plan accounting, and queue priority are checked centrally in

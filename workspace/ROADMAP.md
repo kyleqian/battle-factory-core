@@ -14,7 +14,7 @@ battles, and the open-level rule set (until the single-battle loop is solid).
 later milestone — stage S11 below (user decision, 2026-07-28). No earlier
 stage's acceptance includes audio.
 
-## Current execution priority — 2026-10-03
+## Current execution priority — 2026-10-06
 
 The next main stage is **S10A: playable animation integration**, described below.
 Run the normal `./run-supervisor.sh`; the roadmap determines its mission.
@@ -29,6 +29,12 @@ and next step, and `ANIMATION_INTEGRATION_SUPERVISOR.md` for detailed execution
 and verification. Update `PROGRESS.md` at meaningful checkpoints and wind-down;
 retain detailed source/rendering evidence in the integration progress record.
 `ANIMATION_VERIFICATION.md` controls scoped checks and unchanged-code reuse.
+
+**User decision D3, 2026-10-06:** the next run is authorized to implement a
+separate deterministic presentation RNG for Random2 animations, preserve its
+seed in session exports, and report those live adapters as "faithful random"
+separately from exact claims. S10A below defines the scope and acceptance.
+This resolves D3; no further user approval is needed for that implementation.
 
 ## Operational notes
 
@@ -2202,16 +2208,24 @@ fourteen-move physical batch is verified and folded. Helping Hand remains
 unaccepted pending legal doubles staging. No whole-playable arbitrary-history
 framebuffer exactness is claimed.
 
-Next (2026-10-05 day): 218 live adapters (master `24df8af5e` after the 2026-10-05 day session).
+Next (2026-10-06, D3 approved): 218 live adapters (production `24df8af5e` after the 2026-10-05 day session).
 The sprite order now stays tracked and LENT after opponent knock-outs, player faints
 (forced switch-in), voluntary switches, cancelled party menus and Roar/Whirlwind forced
 switches (entry-label / role relabel; allocator re-seeded); 467-body production table.
 Elevated opponents now render at the right height with their shadow in ordinary frames
 (ISSUES #147, both scene modes). Resume points, in order:
-1. DEFERRED D3 (OPEN, user decision): the Random2 group (52 of the 58 remaining moves) is
-   NOT trackable in play (`docs/random2-trackability.md`); surrogate presentation RNG with
-   a separate claim bucket, or keep the fallback. Do not build Random2 adapters before
-   the answer.
+1. **Implement approved D3 option (a).** The Random2 group (52 of the 58 remaining
+   moves) cannot stay oracle-exact in play (`docs/random2-trackability.md`). Build
+   a deterministic presentation-only RNG with the source LCG and animation draw
+   rules, seeded per battle independently of gameplay RNG. Persist the seed and
+   policy version in session exports; reset/replay must reproduce the same visuals,
+   with a documented deterministic default for older exports. Add a separate
+   "faithful random" live-adapter claim bucket before promoting Random2 adapters.
+   Reuse the known-activation word vectors and source plans; begin with a bounded
+   representative batch such as Double Kick and Astonish, then expand by shared
+   components. Regenerate the stale remaining-adapters census and batch picks
+   against the current live inventory. Approval removes the claim-boundary blocker;
+   each adapter still needs its graphics providers and verification gates.
 2. Non-Random2 moves: Endeavor (`docs/rollout-endeavor-prep.md`: stale-power rule measured,
    drafts ready), Rollout fixes (`docs/rollout-curl-diagnosis.md`: splat centre from target anchors, shake from power, then Curl bodies), Baton Pass (instant forced removal of the
    attacker + presented replacement), Fire Punch (needs a generic Scene-ON renderer),
@@ -2239,6 +2253,15 @@ Acceptance:
   evidence-required variant. Use the existing per-move integration verifiers;
   name their exact commands and tested trees in each receipt. Never consume
   capture rows in production or credit generic fallback effects as exact.
+- **D3 exception for Random2-derived visuals only:** faithful-random adapters use
+  complete dense proofs with pinned source random values through the production
+  live renderer, both orientations, twice fresh, and required variants. Verify
+  the RNG recurrence, draw order/count and value transformations; exercise
+  ordinary routes with the surrogate, seed export/replay/reset and Scene ON/OFF
+  gameplay/RNG parity. Normal-play surrogate frames carry a faithful-random
+  claim; controlled pinned-word proofs do not establish oracle-exact randomness
+  in arbitrary play. Keep timing, geometry, resources, lifecycle and cleanup
+  requirements intact, and retain fallback for other unproved host state.
 - Ordinary real command input reaches subsequent valid prompts through the
   relevant repeated/status/miss/multi-hit/two-turn/switch/KO cases. Scene ON/OFF
   controls preserve logical outcomes, RNG ownership and facility progression.
@@ -2246,6 +2269,8 @@ Acceptance:
   move's live provider and remaining blocker. Adapters, Factory acceptance and
   stronger rendering-history claims remain separate. Do not expand into the
   77 non-Factory animations or conceal unknown ownership behind a count.
+  Report faithful-random adapters separately from existing scoped exact claims;
+  do not inflate exact coverage or change Factory body acceptance for this work.
 - Follow `ANIMATION_VERIFICATION.md`: affected controls, smoke, full
   `npm test` / `npm run build` for changed production, independent central
   reproduction and an independent final full pair at session wind-down.

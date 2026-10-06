@@ -262,6 +262,10 @@ change. The selected worker lane exports both named URLs and makes
 
 ## Working style
 - Output-oriented: match the oracle's behavior and pixels for arbitrary traces.
+- For S10A Random2 adapters, the user-approved 2026-10-06 D3 exception permits
+  a separate deterministic presentation RNG and "faithful random" live claims.
+  Follow ROADMAP S10A and ANIMATION_VERIFICATION.md: persist replay seeds,
+  preserve gameplay RNG, and keep controlled exact proofs and claim counts distinct.
 - Work the roadmap top-down; land one stage's acceptance criteria before moving on.
 - The engine architecture is yours to choose — but keep it testable (pure
   tick/render split), keep the test ABI honest, and pin every pure-logic fix

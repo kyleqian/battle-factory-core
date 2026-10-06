@@ -1,5 +1,20 @@
 # Animation integration progress
 
+## 2026-10-06 — User answered D3: separate deterministic presentation RNG
+
+- Approved option (a) for the next run: source animation algorithms/draw rules,
+  independent deterministic per-battle visual RNG, seed/policy version in
+  session exports, reproducible reset/replay, separate "faithful random" claims.
+- Removed D3's open heading from DEFERRED.md. No further approval needed;
+  gameplay RNG, outcomes and Factory acceptance remain unchanged.
+- Production remains `24df8af5e`, 218 live / 58 remaining (52 Random2).
+  No surrogate implementation or adapter promotion in this docs checkpoint.
+  Final production receipt remains `final-supervisor-gates-20261005-day.json`.
+- Next: module + replay/export + claim accounting, then a bounded Double
+  Kick/Astonish batch using the reproduced word vectors. Update stale census
+  and picks; preserve all other host guards and acceptance gates. See ROADMAP
+  S10A, ANIMATION_INTEGRATION_SUPERVISOR.md and ANIMATION_VERIFICATION.md.
+
 ## 2026-10-05 (day, wind-down) — 198 -> 218 live adapters; lends across faints/switches; species fixes; elevated renderer
 
 - Folded Opus worker `0f08fa4d1` (code `be86f3141`, src tree `badeb050`) as `e2eb653b6`:

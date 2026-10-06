@@ -16,15 +16,45 @@ S10A's mission and scoped acceptance policy control this stage's work queue.
   adapters (65 to 79). Do not repeat that recovery. Reuse the latest recorded
   local full-suite/build receipt when production and environment are unchanged,
   with scoped checks for subsequent tooling changes.
-- Resume the latest ledger's next executable step: the unmerged Light Screen
-  candidate needs source allocator/intro ownership and complete displayed-frame
-  proof. Pick bounded batches rather than promoting unverified candidates.
+- Resume the latest ledger and ROADMAP S10A's ordered steps. D3 option (a) was
+  approved on 2026-10-06: begin the presentation RNG and separate claim accounting
+  described below. Current production `24df8af5e` has 218 live adapters; reuse its
+  recorded green baseline when code and environment match. Pick bounded batches.
 - Continue accepted-move adapters and source-derived host providers. Preserve
   gameplay outcomes, RNG ownership, damage, turn order and facility state.
   Helping Hand's doubles blocker does not block accepted moves. No new Factory
   acceptance campaign, Rust port, or outside-Factory expansion.
 - Whole-playable arbitrary-history framebuffer exactness remains unclaimed.
   Preserve explicit palette/switch/party-return limitations until proven fixed.
+
+## Approved Random2 implementation — D3, 2026-10-06
+
+The user approved a separate deterministic visual RNG for the next run.
+Implement the source LCG, draw order/count and value transformations in a
+presentation-owned module/host. Seed once per battle from a non-gameplay
+source; never consume, reseed or derive this stream from gameplay RNG.
+Document the presented-frame advancement policy rather than claiming to
+reconstruct the oracle's variable wireless-link lag. Rendering must be pure:
+repainting a frame cannot consume extra random values.
+
+Persist the presentation seed and policy version as separate session-export
+metadata. Reset and replay reproduce the same visuals; provide a documented
+deterministic default for legacy exports. Keep this state outside the logical
+battle/RNG state and preserve Scene ON/OFF gameplay parity.
+
+Add "faithful random" accounting to the live inventory/report pipeline before
+promoting these adapters. Existing exact claims retain their scoped limits;
+surrogate frames do not add exact coverage or Factory acceptance. A pinned
+source value may prove a controlled body exactly, with explicit provenance.
+
+Use `docs/random2-trackability.md` and `docs/visual-randomness-prep.md` for the
+source rules and known-activation vectors. Start with the module, replay/export
+contract and accounting, then a bounded representative batch (Double Kick and
+Astonish have reproduced vectors). Expand by shared source components while
+continuing independent non-Random2 fixes. Other graphics-provider blockers
+remain real; approval adds no adapter credit by itself. Follow the Random2
+acceptance section in `ANIMATION_VERIFICATION.md`. D3 is answered; do not ask
+the user to approve this choice again.
 
 ## Delegate one bounded step at a time
 
