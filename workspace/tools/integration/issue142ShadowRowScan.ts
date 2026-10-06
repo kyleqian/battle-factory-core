@@ -37,7 +37,7 @@ const out: any[] = [];
 const seen = new Set<number>();
 // Icy Wind / Blizzard fall back to the scene-off view where the retained slot table is unproven
 // (liveMoveAnimation.ts provableEffectOrder); these [player partner, elevated opponent] pairs are live in both orientations.
-const PAIR: Record<number, [string, string]> = { 196: ["SHUCKLE", "MAGNEMITE"], 59: ["SHUCKLE", "BUTTERFREE"] };
+const PAIR: Record<number, [string, string]> = { 196: ["SHUCKLE", "MAGNEMITE"], 59: ["SHUCKLE", "BUTTERFREE"], 237: ["UNOWN", "UNOWN"] };
 for (const r of rows) {
   seen.add(r.id);
   const partner = PAIR[r.id]?.[0] ?? "PHANPY";
