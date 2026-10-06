@@ -136,8 +136,25 @@
   Power vs GOLBAT tail = ROM lag frame. Supervisor reproduced Ice Beam RATTATA 164/203 -> 203/203 with the
   patch. Audit 4 (`99d7c2c84`): Overheat / Silver Wind / Psych Up 29/34 exact, 5 documented idle-offset
   declines, no defects.
-- In flight: #149 fixes + Rollout Defense Curl bodies + Endeavor (Sonnet integration); prep19 BG-register
-  history (Sonnet side).
+- Folded Sonnet worker `d8e4eaa7e` (src tree `3f95f3a8`) as `aaa945463`: ISSUES #149 fixed (Ice Beam / Water
+  Spout add the tracker's target idle x2 before monbg — RATTATA 15,990 / 48,755 px -> 0; Astonish droplet origin
+  adds the target elevation from art — GOLBAT 3,351 -> 0; accepted fixtures unchanged); Rollout Defense Curl
+  bodies 1-4 live (shake amplitude clamp(power/12, 1, 16) from the request; hit splat at the target
+  picOffsetPoint; power declines removed; Curl + SHUCKLE plain + accepted ladder 0 px); Endeavor stale
+  gBattleMovePower register plumbing only (W1 emitted for 283, W2 rule R at AI decisions, W4 confusion /
+  Future Sight, cross-battle carry) — NO Endeavor adapter (the staged reducer is GROVYLE/ONIX-specific;
+  source-relative reducer still needed; W3 TV loop not ported). Worker gates 1,535 files / 12,462 tests,
+  build. Supervisor: #149 derived fixtures 0 px twice fresh; Curl bodies 1/4 + accepted plain body 3 0 px;
+  the register's only reader is the MOVE_ANIMATION argument; winning soak seeds 0:20 per-seed outcomes
+  identical master vs branch (1M frames each); 7 test files 155/155; smoke 448.
+- prep19 (side, `65fb765b9`, `docs/bg-register-history.md`): 68-field register signature; per (move, side,
+  stat args) delta table; end+30 / end+1 chain; rule == ROM at 1,408/1,497 later activations in-sample
+  (72/72 later Overheat / Silver Wind / Psych Up bodies); Silver Wind pixels did not change under register
+  overrides (Open #1). prep20 (side, `f0e428683`): source-derived hardware-OAM assembler prototypes for
+  Will-O-Wisp, Pursuit, Fury Cutter, Megahorn — OAM rows exact vs corpora and fresh alternates, pixels 0 px
+  with the prototype buffer; open input = per-row full 64-slot order; Will-O-Wisp reducer orb math drifts on
+  other geometries (port the exact math); supervisor reran prep20Run.sh.
+- In flight: later-body evidence + gate decision for Overheat / Silver Wind / Psych Up (Opus integration).
 
 ## 2026-10-06 — User answered D3: separate deterministic presentation RNG
 

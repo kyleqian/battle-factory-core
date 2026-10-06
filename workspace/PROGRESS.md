@@ -53,8 +53,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   of this session's adapters): 3 real defects patch-proven -> ISSUES #149 (Ice Beam / Water Spout drop
   RATTATA's idle x2; Astonish ignores target elevation); supervisor reproduced Ice Beam 15,990 px -> 0.
   Audit 4 (Overheat / Silver Wind / Psych Up): no defects.
-- **Next:** #149 fixes + Rollout Defense Curl + Endeavor (Sonnet) and prep19 (BG-register history for
-  later Overheat / Silver Wind / Psych Up bodies) in flight.
+  #149 fixed and Rollout Defense Curl bodies live (merged `aaa945463`); Endeavor got only its stale-register
+  plumbing (no adapter; gameplay outcomes identical over 20 soak seeds). prep19 (BG-register history) and
+  prep20 (OAM assemblers for Will-O-Wisp / Pursuit / Fury Cutter / Megahorn) banked for the next session.
+- **Next:** final step in flight: later-body evidence + gate decision for Overheat / Silver Wind / Psych Up.
 - **Notes:** no DEFERRED entries. Oracle freshness FAIL at orient = known false positive (no
   oracle/ commits since the services started 2026-10-03).
 

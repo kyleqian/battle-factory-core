@@ -17,21 +17,6 @@ backlog.
 
 # Open
 
-## #149 — Live species audit 3: three species-blind literals in this session's adapters (S10A, found 2026-10-06)
-
-- **Ice Beam (58)**, player attacker vs an opponent with a non-zero idle x2 (RATTATA): ages 0-38 (before
-  monbg takes over) draw the target without its idle x2 — 15,990 px (164/203); `battleScene.ts` ~:15763
-  (`corner.x + targetX2`). Patch proof: add `frontIdleRest.x2` for age < 39 -> 203/203 (supervisor
-  reproduced). Use the #148 tracker's value (zeroed after a shaking body).
-- **Water Spout (323)**, same species class: `drawTarget` adds only the shake x2; the ROM keeps the idle x2
-  until age 119 — 48,755 px (151/270); `battleScene.ts` ~:14920. Patch-proven 270/270.
-- **Astonish (310)** vs an elevated opponent (GOLBAT, elevation 8): droplet origin y ignores the target
-  elevation — 3,351 px (33/63); `src/animation/astonish.ts:163`. Patch (+8) proven 63/63; production fix
-  = the target species' elevation from the anchors.
-- **Evidence:** `docs/live-species-audit-3.md`, `tools/integration/fixtures/species-audit-3/` (patches,
-  derived fixtures, receipts). Non-defects: Hidden Power vs GOLBAT tail = ROM lag frame; Astonish
-  player-GOLEM 9 px droplet edge UNRESOLVED.
-
 ## #148 — Battler x2 history: unknown-history remainder (main bug FIXED 2026-10-06)
 
 - **Fixed:** `src/engine/liveBattlerX2History.ts` (merged `de0e887`-era master) tracks per battler
