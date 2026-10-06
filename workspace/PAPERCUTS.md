@@ -8,6 +8,16 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## A worker's `pkill -f mgba` kills BOTH shared oracle services
+
+- **What:** the oracle services' command lines contain the mGBA venv path, so an integration
+  worker cleaning up its own dense probes with `pkill -f mgba` (2026-10-06 R3) took down 8012 AND
+  8014; the next side launch refused ("required battle-scene-off oracle is unavailable") and the
+  supervisor restarted both with `pokebench_ensure_oracle_profile` (~10 min).
+- **Hits:** 1 (plus the 2026-08-25 `randomRoundSoak` entry below — same pattern-kill class).
+- **Fix:** briefs say "never pattern-kill; kill only PIDs you started"; a probe wrapper that
+  records its own PIDs would make cleanup safe.
+
 ## vite-node CLIs: `import.meta.url === argv[1]` main checks silently no-op
 
 - **What:** under `npx vite-node tool.ts -- args` the usual main-module
