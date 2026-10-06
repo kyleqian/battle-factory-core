@@ -14,6 +14,8 @@ writeFileSync("dist/build.json", JSON.stringify({
   commit: git("rev-parse", "HEAD"),
   build: `${git("rev-parse", "--short", "HEAD")}${dirty} ${git("show", "-s", "--format=%cs", "HEAD")}`,
   adapters: inventory.implementedCount,
+  // Separate D3 bucket (docs/presentation-rng.md): never added to the scoped-exact `adapters`.
+  faithfulRandomAdapters: inventory.faithfulRandomCount ?? 0,
   factoryAccepted: inventory.currentAcceptedFactoryMoves,
 }, null, 2) + "\n");
 JS

@@ -61,6 +61,23 @@ describe("Factory animation inventory", () => {
   });
 });
 
+describe("live inventory claim buckets", () => {
+  it("counts faithful-random adapters apart from scoped-exact live adapters and Factory acceptance", () => {
+    const status = JSON.parse(readFileSync(join(import.meta.dirname, "../../docs/animation-integration-live-status.json"), "utf8"));
+    // implementedCount keeps meaning the scoped-exact live adapters; faithful random is a disjoint bucket.
+    expect(status.implementedCount).toBe(218);
+    expect(status.faithfulRandomCount).toBe(0);
+    expect(status.faithfulRandomAdapters).toHaveLength(status.faithfulRandomCount);
+    const implemented = new Set((status.implementedAdapters as { id: number }[]).map((entry) => entry.id));
+    const faithful = (status.faithfulRandomAdapters as { id: number }[]).map((entry) => entry.id);
+    expect(faithful.filter((id) => implemented.has(id))).toEqual([]);
+    expect(new Set(faithful).size).toBe(faithful.length);
+    // Faithful random adds no exact coverage or Factory acceptance.
+    expect(status.currentAcceptedFactoryMoves).toBe(276);
+    expect(animationCoverageSummary().find((row) => row.tier === "level50")?.exact).toBe(275);
+  });
+});
+
 describe("animation coverage ledger", () => {
   it("is internally valid and reports exact Factory coverage honestly", () => {
     expect(validateAnimationCoverage).not.toThrow();
