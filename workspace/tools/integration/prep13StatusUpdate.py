@@ -22,9 +22,16 @@ E = {
                          "declines unless the tracked sprite order is lent", "independent arbitrary-species/history framebuffer comparison"]),
 }
 for move in sys.argv[1:]:
+    if move == "HYPER_BEAM": continue
     id_, live, remaining = E[move]
     d["implementedAdapters"] = [e for e in d["implementedAdapters"] if e["id"] != id_]
     d["implementedAdapters"].append({"move": "MOVE_" + move, "id": id_, "sourceFieldEvidence": REC, "liveEvidence": live, "remaining": remaining})
+if "HYPER_BEAM" in sys.argv[1:]:
+    d["faithfulRandomAdapters"] = [e for e in d["faithfulRandomAdapters"] if e["id"] != 63]
+    d["faithfulRandomAdapters"].append({"id": 63, "move": "MOVE_HYPER_BEAM", "policy": d["faithfulRandomClaim"]["policy"], "provenance": "surrogate",
+        "pinnedProofs": ["tools/integration/fixtures/prep13-live-adapter-receipt.json"],
+        "surrogateRoutes": ["prep13/hyper-beam/seed10-streak28-slot0-1turn (tests/animation/livePrep13MoveAdapters.test.ts)"]})
+    d["faithfulRandomCount"] = len(d["faithfulRandomAdapters"])
 d["implementedCount"] = len(d["implementedAdapters"])
 p.write_text(json.dumps(d, indent=2, ensure_ascii=False) + "\n")
 print(d["implementedCount"])

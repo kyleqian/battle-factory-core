@@ -37,6 +37,9 @@ export const LIVE_MOVE_RANDOM2_PLANS: Readonly<Record<number, readonly Presentat
   // Move_WISH: 21 AnimMiniTwinklingStar, one per 3 frames from +41, (& 3 -> tile, & 7 signed -> y) each
   // (battle_anim_effects_3.c:2147, :2153).
   273: Object.freeze(Array.from({ length: 21 }, (_, i) => Object.freeze({ ageOffset: 41 + 3 * i, count: 2 }))),
+  // Move_HYPER_BEAM: 52 orbs, two per frame group (+110 step 3, 26 groups), three words each: animation (% 8),
+  // speed ((& 31) + 64), phase (& 0xff) (battle_anim_effects_1.c:2339-2356; prep12 s1.8).
+  63: Object.freeze(Array.from({ length: 26 }, (_, g) => Object.freeze({ ageOffset: 110 + 3 * g, count: 6 }))),
 });
 
 /** Faithful-random live adapters (disjoint from LIVE_MOVE_ANIMATION_IDS). */
@@ -108,4 +111,10 @@ export function tickLiveMovePresentationRngSession(
 export function miniTwinklingStarFromWords(tileWord: number, yWord: number): Readonly<{ tileOffset: 4 | 5; yOffset: number }> {
   const y = yWord & 7;
   return { tileOffset: (tileWord & 3) === 0 ? 4 : 5, yOffset: y > 3 ? -y : y };
+}
+
+/** AnimHyperBeamOrb's three words per orb (battle_anim_effects_1.c:2339-2356): StartSpriteAnim(% 8), speed (& 31) + 64, phase & 0xff. */
+export function hyperBeamOrbFromWords(animationWord: number, speedWord: number, phaseWord: number):
+  Readonly<{ animation: number; speed: number; phase: number }> {
+  return { animation: animationWord % 8, speed: (speedWord & 31) + 64, phase: phaseWord & 0xff };
 }

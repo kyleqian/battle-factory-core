@@ -27575,7 +27575,8 @@ export function renderSceneOnMovePresentation(
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, bgPalettes);
     // Elevated opponent shadows survive in the preceding hardware OAM on
     // the first source-relative row, then SpriteCB_EnemyShadow hides them.
-    if (hyperState.age === 0 && view.attacker.geometry.side === "opponent") {
+    // Under liveField the shared elevated-opponent shadow hook owns it (ISSUES #142).
+    if (!liveField && hyperState.age === 0 && view.attacker.geometry.side === "opponent") {
       drawSourceOpponentEnemyShadow(fb, view.attacker.species,
         view.attacker.geometry.battlePositionCenter);
     }
@@ -27654,6 +27655,8 @@ export function renderSceneOnMovePresentation(
       || left.y - right.y || left.order - right.order || right.slot - left.slot);
     for (const entry of entries) entry.draw();
 
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     const playerIsAttacker = view.attacker.geometry.side === "player";
     const player = playerIsAttacker ? view.attacker : view.target;
     const opponent = playerIsAttacker ? view.target : view.attacker;

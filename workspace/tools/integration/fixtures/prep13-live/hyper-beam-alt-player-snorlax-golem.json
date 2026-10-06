@@ -33,5 +33,15 @@
   "opponentMaxHp": 155,
   "playerGender": "male",
   "opponentGender": "male"
- }
+ },
+ "presentationRngActivation": {
+  "value": 3566719167,
+  "source": "tools/integration/fixtures/prep13/prep13-analysis.json prep13-hyper-beam-alt-player-snorlax-golem[0].rng2 (activation frame 235)"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ]
 }

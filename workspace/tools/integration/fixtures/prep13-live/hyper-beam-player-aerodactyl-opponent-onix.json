@@ -33,5 +33,9 @@
   "opponentMaxHp": 110,
   "playerGender": "male",
   "opponentGender": "male"
+ },
+ "presentationRngActivation": {
+  "value": 1968892309,
+  "source": "tools/integration/fixtures/prep13/prep13-analysis.json mechanic-hyper-beam-player-aerodactyl-opponent-onix[0].rng2 (activation frame 79)"
  }
 }

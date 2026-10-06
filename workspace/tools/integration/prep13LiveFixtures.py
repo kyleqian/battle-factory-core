@@ -41,6 +41,13 @@ for scen, bodies in A.items():
             "fieldProfile": {"playerHp": m[0]["hp"], "playerMaxHp": m[0]["maxHP"], "opponentHp": m[1]["hp"], "opponentMaxHp": m[1]["maxHP"],
                              "playerGender": gender(m[0]["species"], m[0]["personality"]), "opponentGender": gender(m[1]["species"], m[1]["personality"])},
         }
+        if b["move"] == "HYPER_BEAM":
+            # Faithful-random body pinned at the probed activation value (gRng2Value at the first anim-active frame, direct mGBA, prep13
+            # analysis == prep12 plans.json for the accepted player / alternate); the harness activates through the production seam.
+            fx["presentationRngActivation"] = {"value": b["rng2"], "source": f"tools/integration/fixtures/prep13/prep13-analysis.json {scen}[0].rng2 (activation frame {b['act']})"}
+        if b["move"] == "HYPER_BEAM" and b["orderShape"] != "first-body":
+            # the alternates follow the other side's Tackle (prep13 s3: order shape post-tackle); replayed through the production tracker
+            fx["precedingBodies"] = [{"moveId": 33, "side": foe}]
         tag = scen.replace("mechanic-", "").replace("prep13-", "") + (f"-body{i}" if len(bodies) > 1 else "")
         (out / f"{tag}.json").write_text(json.dumps(fx, indent=1) + "\n")
         print(tag, fx["denseWindow"], fx["attacker"]["species"], "->", fx["target"]["species"], fx["fieldProfile"])

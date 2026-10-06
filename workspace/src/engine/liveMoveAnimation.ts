@@ -77,7 +77,7 @@ import { waterSpoutTimeline, type WaterSpoutLiveInputs } from "../animation/wate
 import { hiddenPowerUnownFormIndex } from "../animation/hiddenPower.ts";
 import type { FlailPower } from "../animation/flail.ts";
 import {
-  liveMovePresentationRngWords, miniTwinklingStarFromWords, type LiveMovePresentationRngInput,
+  hyperBeamOrbFromWords, liveMovePresentationRngWords, miniTwinklingStarFromWords, type LiveMovePresentationRngInput,
 } from "./liveMovePresentationRng.ts";
 
 
@@ -253,6 +253,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // Faithful-random adapters (liveMovePresentationRng.ts): Double Kick hit bodies, Astonish, Thrash, Flail, Wish start at activation (row 0,
     // prep12 §0.2 / random2-r1 activation probes).
     24, 310, 37, 175, 273,
+    // Hyper Beam (63, faithful-random): activation == accepted window start (row 0), prep13 s0.1.
+    63,
     // prep13 (issue142-shadow-rows-extra.json): Ice Beam, Water Spout activation == accepted window start (row 0), prep13 s0.1-0.2.
     58, 323, 237,
   ].map((id) => [id, 0] as [number, number]).concat([
@@ -705,6 +707,7 @@ export function liveMoveAnimationDuration(
     // Flail accepted windows (209..322 / 210..323; natural-HP tiers 114 rows each); power = gBattleMovePower.
     case 175: return FLAIL_POWERS.includes(request.power as FlailPower) ? 114 : null;
     case 273: return 271; // Wish accepted window (65..335 / 69..339).
+    case 63: return 280; // Hyper Beam faithful-random body 79..358 / 83..362 (prep13 s0.1; reducer first inactive age 279).
     case 237: return 180; // Hidden Power 77..256 / 81..260 (prep13 s0.1, first inactive age 179).
     case 58: return 203; // Ice Beam 75..277 / 79..281 (prep13 s0.1; reducer first inactive age 202).
     default: return null;
@@ -2240,6 +2243,44 @@ export function liveMoveAnimationPresentation(
             monbgBaseHofs: 544 - (targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2),
             monbgBaseVofs: 544 - targetAnchors.spriteCenter.y },
           spriteOrder: { initialOrder } } };
+      break;
+    }
+    case 63: {
+      // prep13 s1.4 (faithful random): 52 orbs x (animation, speed, phase) from the presentation host's 26 x 6 words; the
+      // orb slots are the lowest-free allocator over the known-entry in-use set, each orb released `visible rows + 1` frames
+      // after its birth (the reducer's own lifetime, so a pass with placeholder slots measures it); persistentOrder = the
+      // slot's index in the lent order. Geometry/rest from the anchors. Unknown tracked order -> null.
+      const draws = liveMovePresentationRngWords(presentationRngInput)?.draws;
+      if (draws === undefined || draws.length !== 26 || draws.some((group) => group.length !== 6) || !spriteOrderInput?.known) return null;
+      const lentOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (lentOrder === null) return null;
+      const side = attacker.geometry.side;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const animationGeometry = { attackerPictureCenter: attackerAnchors.picOffsetPoint, targetPictureCenter: targetAnchors.picOffsetPoint,
+        attackerRestOffset: { x2: attackerAnchors.frontIdleRest.x2, y2: attackerAnchors.frontIdleRest.y2 },
+        targetRestOffset: { x2: targetAnchors.frontIdleRest.x2, y2: targetAnchors.frontIdleRest.y2 } };
+      const words = draws.flatMap((group) => [
+        hyperBeamOrbFromWords(group[0]!, group[1]!, group[2]!), hyperBeamOrbFromWords(group[3]!, group[4]!, group[5]!)]);
+      const subs = { attackerSubpriority: side === "player" ? 30 : 40, targetSubpriority: side === "player" ? 40 : 30 };
+      // Visible rows of an orb = duration - 1, duration = (|xDiff| << 4) / speed (hyperBeam.ts orbAtAge: it is created with
+      // `remaining` = duration, ticks twice by its first display row and is destroyed on the tick that finds 0 left).
+      const originX = animationGeometry.attackerPictureCenter.x + (side === "player" ? 20 : -20);
+      const xDiff = Math.abs(animationGeometry.targetPictureCenter.x - originX);
+      const visibleRows = words.map((word) => Math.max(0, Math.trunc((xDiff << 4) / word.speed) - 1));
+      const alive: { slot: number; until: number }[] = [];
+      const slots: number[] = [];
+      words.forEach((_, index) => {
+        const born = 110 + Math.floor(index / 2) * 3;
+        for (let k = alive.length - 1; k >= 0; k -= 1) if (alive[k]!.until <= born) alive.splice(k, 1);
+        let slot = 0;
+        while ([0, 1, 2, 6, 8, 60, 61, 62, 63].includes(slot) || alive.some((a) => a.slot === slot)) slot += 1;
+        slots.push(slot);
+        alive.push({ slot, until: born + visibleRows[index]! + 1 });
+      });
+      config = { move: "HYPER_BEAM", attacker, target, fieldProfile, animationGeometry,
+        animationProfile: { orbs: words.map((word, index) => ({ ...word, slot: slots[index]!, persistentOrder: lentOrder.indexOf(slots[index]!) })),
+          ...subs, spriteOrderSeed: lentOrder } };
       break;
     }
     case 237: {

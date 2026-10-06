@@ -12,6 +12,17 @@ import speciesStats from "../../src/data/gen/species-stats.json" with { type: "j
 import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../../src/engine/liveMoveSpriteAllocator.ts";
 import { knownEntrySpriteOrderState } from "../../src/engine/spriteOrderProvider.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { readFileSync } from "node:fs";
+import plans from "../../tools/integration/fixtures/prep12-random2/plans.json" with { type: "json" };
+import hyperBeamPlanDraft from "../../tools/integration/fixtures/prep13/prep13-hyper-beam-plan-draft.json" with { type: "json" };
+import {
+  LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS, LIVE_MOVE_RANDOM2_PLANS, activateLiveMovePresentationRng,
+  hyperBeamOrbFromWords, liveMovePresentationRngBodyKey,
+} from "../../src/engine/liveMovePresentationRng.ts";
+import { createPresentationRngHostAt, presentationRngBodyWords } from "../../src/engine/presentationRngHost.ts";
+import { createPresentationRngState } from "../../src/engine/presentationRng.ts";
+import { fixturePresentationRng, liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
+import { random2Route } from "../../tools/integration/random2R1/routeHarness.ts";
 
 // docs/next-adapters-prep13.md: Ice Beam (58), Water Spout (323), Hidden Power (237). The dense framebuffer proofs are
 // tools/integration/fixtures/prep13-live/*.json (receipt prep13-live-adapter-receipt.json).
@@ -166,5 +177,108 @@ describe("live prep13 move adapters", () => {
       expect(on.boundaries[i]!.rng).toEqual(off.boundaries[i]!.rng);
       expect(on.boundaries[i]!.boundary).toEqual(off.boundaries[i]!.boundary);
     }
+  }, 240000);
+});
+
+describe("live prep13 Hyper Beam (faithful random)", () => {
+  const entry = (plans as unknown as { moves: Record<string, { entries: { draws: { ageOffset: number; count: number }[];
+    acceptedActivationValue: number; predictedFromPlan: number[][] }[] }> }).moves["hyper-beam"]!.entries[0]!;
+  const key = liveMovePresentationRngBodyKey({ resolutionId: { requestId: 0 }, segmentIndex: 0, commandIndex: 0 });
+  const fixtureAt = (name: string) => JSON.parse(readFileSync(`tools/integration/fixtures/prep13-live/${name}.json`, "utf8")) as Fixture;
+  const drawsAt = (value: number) => presentationRngBodyWords(activateLiveMovePresentationRng(
+    createPresentationRngHostAt(createPresentationRngState(value, "pinned")), { moveId: 63 }, key), key)!;
+
+  it("is in the faithful-random bucket (disjoint from the exact ids) with the prep12 plan and the accepted shadow row", () => {
+    expect(LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS).toContain(63);
+    expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).not.toContain(63);
+    expect(LIVE_MOVE_RANDOM2_PLANS[63]).toEqual(entry.draws.map(({ ageOffset, count }) => ({ ageOffset, count })));
+    expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[63]).toBe(0);
+    for (const a of [0, 1] as const) expect(liveMoveAnimationDuration(request(63, a))).toBe(280);
+    const status = JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8"));
+    expect((status.faithfulRandomAdapters as { id: number }[]).map(e => e.id)).toContain(63);
+    expect((status.implementedAdapters as { id: number }[]).map(e => e.id)).not.toContain(63);
+  });
+
+  it("the production activation at the pinned accepted value reproduces the prep12 orb words (animation, speed, phase)", () => {
+    const record = drawsAt(entry.acceptedActivationValue);
+    expect(record.provenance).toBe("pinned");
+    const orbs = record.draws.flatMap(group => [
+      hyperBeamOrbFromWords(group[0]!, group[1]!, group[2]!), hyperBeamOrbFromWords(group[3]!, group[4]!, group[5]!)]);
+    // plans.json recovers `speed` only up to the translation step-data equivalence class (prep12 s1.8: observable via the
+    // step data alone), so animation and phase are exact and the raw speed word lies in the same class window.
+    expect(orbs.map(o => [o.animation, o.phase])).toEqual(entry.predictedFromPlan.map(o => [o[0], o[2]]));
+    orbs.forEach((o, i) => {
+      expect(o.speed).toBeGreaterThanOrEqual(64);
+      expect(o.speed).toBeLessThanOrEqual(95);
+      expect(o.speed).toBe((record.draws[Math.floor(i / 2)]![(i % 2) * 3 + 1]! & 31) + 64);
+    });
+  });
+
+  it("derives geometry, words, lowest-free slots and persistent order from production inputs (ROM slots 52/52, both accepted orientations)", () => {
+    const rows = (hyperBeamPlanDraft as unknown as { rows: Record<string, { romSlots: number[] }> }).rows;
+    for (const [name, scenario] of [["hyper-beam-player-aerodactyl-opponent-onix", "mechanic-hyper-beam-player-aerodactyl-opponent-onix"],
+      ["hyper-beam-opponent-aerodactyl-player-onix", "mechanic-hyper-beam-opponent-aerodactyl-player-onix"]] as const) {
+      const f = fixtureAt(name);
+      const view = liveView(f, 0);
+      const effect = view.effect as { request: BattleMoveAnimationRequest; spriteOrderInput: LiveMoveSpriteOrderInput; presentationRng: never };
+      const config = liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, effect.spriteOrderInput,
+        effect.presentationRng)!.config as any;
+      expect(config.animationProfile.orbs.map((o: { slot: number }) => o.slot)).toEqual(rows[scenario]!.romSlots);
+      expect(config.animationProfile.orbs.every((o: { persistentOrder: number }) => o.persistentOrder >= 0)).toBe(true);
+      expect(config.animationGeometry.attackerRestOffset).toBeDefined();
+      if (name.startsWith("hyper-beam-player")) {
+        // The plan's speed is the translation-step equivalence class: equal flight duration (|dx| << 4) / speed (prep12 s1.8).
+        const dx = Math.abs(config.animationGeometry.targetPictureCenter.x - (config.animationGeometry.attackerPictureCenter.x + 20));
+        config.animationProfile.orbs.forEach((o: { speed: number }, i: number) => {
+          expect(Math.trunc((dx << 4) / o.speed)).toBe(Math.trunc((dx << 4) / entry.predictedFromPlan[i]![1]!));
+        });
+      }
+      // Without the lend, without the activated body, or with another body key: no adapter (scene-off fallback).
+      expect(liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, undefined, effect.presentationRng)).toBeNull();
+      expect(liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, effect.spriteOrderInput)).toBeNull();
+      expect(fixturePresentationRng(f, effect.request)!.host).toEqual((effect.presentationRng as { host: unknown }).host);
+    }
+  });
+
+  it("renders an alternate carrier (SNORLAX -> GOLEM) in both orientations with surrogate words, never drawing on repaint", () => {
+    for (const a of [0, 1] as const) {
+      const f = fixtureAt(a === 0 ? "hyper-beam-alt-player-snorlax-golem" : "hyper-beam-alt-opponent-snorlax-golem");
+      const hashAt = (age: number) => {
+        const view = liveView(f, age);
+        const fb = new Uint8Array(240 * 160 * 4);
+        renderBattleResolutionLiveView(fb, view);
+        const again = new Uint8Array(240 * 160 * 4);
+        renderBattleResolutionLiveView(again, view);
+        expect(Buffer.from(fb).equals(Buffer.from(again))).toBe(true);
+        return createHash("sha256").update(fb).digest("hex");
+      };
+      expect(new Set([0, 90, 130, 200, 279].map(hashAt)).size).toBeGreaterThan(2);
+    }
+  }, 240000);
+
+  // Ordinary route (prep13 s2): 10/28 AERODACTYL, first body, order known; two presentation seeds, Scene ON/OFF.
+  it("route 10/28 AERODACTYL: adapter active every age; logical state identical across presentation seeds and Scene ON/OFF", () => {
+    const A = random2Route(10, "on", [0], 28, 0x1234abcd), B = random2Route(10, "on", [0], 28, 0xfeed0042);
+    const off = random2Route(10, "off", [0], 28, 0x1234abcd);
+    const bodies = A.bodies.filter(b => b.moveId === 63 && b.attacker === 0);
+    expect(bodies).toHaveLength(1);
+    expect(bodies[0]!.ages).toEqual(Array.from({ length: 280 }, (_, age) => age));
+    expect(bodies[0]!.active.every(Boolean)).toBe(true);
+    expect(bodies[0]!.provenance).toBe("surrogate");
+    expect(bodies[0]!.words).toHaveLength(156);
+    expect(B.bodies.filter(b => b.moveId === 63)[0]!.words).not.toEqual(bodies[0]!.words);
+    expect(A.run.stalled).toBe(false);
+    expect(A.run.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    expect(B.run.boundaries).toEqual(A.run.boundaries);
+    expect(B.run.state.facilityState).toEqual(A.run.state.facilityState);
+    expect(B.run.state.round.rules.rngValue).toBe(A.run.state.round.rules.rngValue);
+    expect(off.bodies).toEqual([]);
+    expect(off.run.boundaries).toHaveLength(A.run.boundaries.length);
+    for (let i = 0; i < A.run.boundaries.length; i += 1) {
+      expect(rulesWithoutSceneMarker(off.run.boundaries[i]!)).toEqual(rulesWithoutSceneMarker(A.run.boundaries[i]!));
+      expect(off.run.boundaries[i]!.rng).toEqual(A.run.boundaries[i]!.rng);
+      expect(off.run.boundaries[i]!.boundary).toEqual(A.run.boundaries[i]!.boundary);
+    }
+    expect(off.run.state.round.rules.rngValue).toBe(A.run.state.round.rules.rngValue);
   }, 240000);
 });
