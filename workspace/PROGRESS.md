@@ -7,8 +7,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-10-06 (in progress) — S10A: presentation RNG merged; Random2 draw plans measured
 
-- **State:** S10A, local master `26b3f525a`. Scoped-exact live adapters 218 (unchanged);
-  faithful-random adapters 0 (new separate bucket). Opus 5.5 supervisor; Opus/Sonnet 5.5 workers.
+- **State:** S10A, local master `4f0a93368`+. Scoped-exact live adapters 218; faithful-random
+  adapters 5 (Double Kick, Astonish, Thrash, Flail, Wish; separate bucket). Opus 5.5 supervisor;
+  Opus/Sonnet 5.5 workers.
 - **Did:** D3 option (a) infrastructure merged (Opus worker): `src/engine/presentationRng.ts`
   (exact Random2 LCG + jump-ahead), per-battle host `presentationRngHost.ts` (policy
   `presentation-rng.v1.frame-step.no-lag.battle-stride-2^20`; session seed from crypto /
@@ -21,8 +22,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   reproduce the accepted pinned words exactly (`tools/integration/fixtures/prep12-random2/plans.json`);
   Ice Beam / Water Spout / Hidden Power draw NO Random2 (stale C label). Supervisor reran Thrash and
   Wish probes twice: per-frame hashes equal the receipts.
-- **Next:** R1 faithful-random batch (Double Kick, Astonish, Thrash, Flail, then Wish / Meteor Mash)
-  in flight; prep13 (Ice Beam, Water Spout, Hidden Power, Hyper Beam plan rows) in flight.
+  R1 (Opus) merged: faithful-random adapters via `src/engine/liveMovePresentationRng.ts` (activation
+  in tick, body key per request/segment/command, render read-only); pinned dense proofs both
+  orientations + alternates zero residual; supervisor reran 4 fixtures twice fresh (0 px) and the 5
+  surrogate routes (active every age, prompt reached, seed + ON/OFF logical parity). Meteor Mash
+  dropped (alternate body is 1 frame longer). prep13 merged: Ice Beam / Water Spout / Hidden Power
+  (no RNG) + Hyper Beam briefable. ISSUES #148 filed (target x2 after a shaking body).
+- **Next:** R3 (Ice Beam, Water Spout, Hidden Power, Hyper Beam) and prep14 (Rain Dance, Overheat,
+  Curse, Silver Wind, Water Pulse, Psych Up, Hail) in flight; then #148 evidence.
 - **Notes:** no DEFERRED entries. Oracle freshness FAIL at orient = known false positive (no
   oracle/ commits since the services started 2026-10-03).
 

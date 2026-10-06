@@ -24,8 +24,29 @@
   Power draw no Random2 (stale C label). Supervisor reran Thrash + Wish probes twice: runsSha1 equal
   to the receipts. Batch picks: R1 Double Kick/Astonish/Thrash/Flail, R2 Wish/Meteor Mash, R3 Ice
   Beam/Water Spout/Hidden Power (no RNG), R4 Mud-Slap/Sand-Attack, R5 Hyper Beam.
-- In flight: R1 (+R2 if time) faithful-random adapters (Opus integration); prep13 measured prep for
-  Ice Beam / Water Spout / Hidden Power / Hyper Beam (Sonnet side, new files only).
+- Folded Opus worker `77d124b7e` (src tree `b318199d`) as `4f0a93368`: first FAITHFUL-RANDOM adapters
+  Double Kick (24), Astonish (310), Thrash (37), Flail (175), Wish (273). Plumbing
+  `src/engine/liveMovePresentationRng.ts` (plans checked against prep12 plans.json; `core.ts` tick
+  activates a body at live age 0 with key `move:<requestId>:<segment>:<command>`; render reads words
+  read-only; no host / no body -> scene-off fallback); verifier pinned input `presentationRngActivation`
+  (fixtures carry no word arrays). Pinned dense both orientations + one alternate per move, twice fresh,
+  0 px; branch coverage (sign parities, velocity parities, twinkle tiles/y signs, Flail powers 20/40).
+  Surrogate routes 5/5 (`random2-r1/*`): active every age, action menu reached, words differ across
+  seeds, boundaries/RNG/facility equal across seeds and ON/OFF. Accounting: faithfulRandomCount 5,
+  implementedCount 218; census bucket 218 + 5 + 0 + 53 = 276. Shadow-row scan repaired (Rollout rows,
+  Future Sight return rows) -> 457 rows / 0 mismatches. Worker gates 1,528 files / 12,357 tests, build
+  854. Supervisor: dense rerun Double Kick O 36, Thrash SNORLAX 103, Wish P 271, Flail MAGIKARP 114,
+  0 px twice fresh; routeReceipt 5/5; 7 test files 132/132; smoke 448 on the union. Receipt
+  `random2-r1-live-receipt.json`. Limits: Flail powers 80-200 (bodies 2-5 after a shake) 1,091 px/row
+  = ISSUES #148 (x2 history; 0 px with x2 = 0); Meteor Mash dropped (SHIFTRY->GOLEM body 215 frames,
+  bg fade ends one frame later; accepted P/O were exact).
+- prep13 (side, `e881a6423`, new files only): Ice Beam (all inputs production/constant, 48/48 births,
+  203/203 order rows, LAPRAS alt), Water Spout (`attackerSourceHeight` = pictureHeight; rain seed 185 /
+  65 per side; tiers 0..3 births exact), Hidden Power (needs Unown letter-form coords; personality),
+  Hyper Beam (orb slots = lowest-free released at birth + visible rows + 1; persistentOrder = lent
+  index). Supervisor reran the Ice Beam and Water Spout checks from the receipts.
+- In flight: R3 (Ice Beam, Water Spout, Hidden Power, Hyper Beam; Sonnet integration); prep14 (Rain
+  Dance, Overheat, Curse, Silver Wind, Water Pulse, Psych Up, Hail; Sonnet side).
 
 ## 2026-10-06 — User answered D3: separate deterministic presentation RNG
 
