@@ -17,6 +17,24 @@ backlog.
 
 # Open
 
+## #148 — Live adapters restart the target's x2 from the species front idle after a body that shook it (S10A, found 2026-10-06)
+
+- **Symptom:** the ROM leaves a battler's sprite `x2` at 0 after a body's shake task releases it
+  (e.g. Flail's `AnimTask_ShakeTargetBasedOnMovePowerOrDmg`), but live adapters derive the target's
+  resting x2 from `liveBattlerAnchors(...).frontIdleRest.x2` (species front idle: ONIX 1, most species 0),
+  which is only right until the first shake after the send-in idle. Found by the R1 faithful-random
+  batch: Flail natural-HP bodies 2-5 (powers 80/100/150/200, KRABBY -> ONIX) leave 109 rows x 1,091 px;
+  substituting x2 = 0 (diagnostic only) makes all four tiers 0 px, so words and the power shake are exact.
+- **Reach:** any live body whose target has a non-zero front-idle rest x2 and was shaken by an earlier
+  body in the battle: Double Kick hit 2, Thrash lock-in turns 2+, Leaf Blade / Aerial Ace / Rock Throw /
+  Crabhammer / Psybeam / Magical Leaf (the adapters that read `frontIdleRest`) after any shaking body.
+  First bodies after the send-in are exact (all accepted fixtures).
+- **Evidence:** `tools/integration/fixtures/random2-r1-live-receipt.json` (Flail power tiers),
+  `tools/integration/fixtures/random2-r1/flail-natural-*.json`.
+- **Fix shape (unmeasured):** a presentation-side per-battler x2 history (like the sprite-order tracker):
+  which source tasks leave x2 at 0 at body end, and what re-establishes the idle x2 (send-in idle anim,
+  switch). Needs a measured census of tasks/species before wiring.
+
 ## #147 — Elevated opponents in ordinary resolution frames: remainder (main bug FIXED 2026-10-05)
 
 - **Fixed (merge `b0818de83`):** ordinary resolution frames (both scene modes) draw elevated
