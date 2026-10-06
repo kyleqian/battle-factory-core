@@ -1,0 +1,41 @@
+{
+ "schema": "prep14-live-adapter-fixture/v1",
+ "move": "WATER_PULSE",
+ "probe": "tools/compare/waterPulseProbe.py",
+ "scenario": "tools/battle-lab/mechanic-water-pulse-player-lombre-opponent-onix.json",
+ "bodyIndex": 0,
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 236
+ },
+ "windowSource": "prep14 s2: window start = the scenario's own activation frame + the accepted offset 0; rows = the probed first-inactive minus activation",
+ "attacker": {
+  "species": "LOMBRE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015549,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 135,
+  "playerMaxHp": 135,
+  "opponentHp": 142,
+  "opponentMaxHp": 142,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "presentationRngActivation": {
+  "value": 119564722,
+  "source": "tools/integration/fixtures/prep14/prep14-analysis.json mechanic-water-pulse-player-lombre-opponent-onix[0].rng2 (activation frame 77)"
+ }
+}

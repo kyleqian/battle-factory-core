@@ -1,0 +1,37 @@
+{
+ "schema": "prep14-live-adapter-fixture/v1",
+ "move": "HAIL",
+ "probe": "tools/compare/hailProbe.py",
+ "scenario": "tools/battle-lab/mechanic-hail-player-delibird-opponent-onix.json",
+ "bodyIndex": 0,
+ "denseWindow": {
+  "startFrame": 66,
+  "endFrame": 223
+ },
+ "windowSource": "prep14 s2: window start = the scenario's own activation frame + the accepted offset 0; rows = the probed first-inactive minus activation",
+ "attacker": {
+  "species": "DELIBIRD",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349018756,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 152,
+  "playerMaxHp": 152,
+  "opponentHp": 142,
+  "opponentMaxHp": 142,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

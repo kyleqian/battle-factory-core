@@ -109,8 +109,9 @@ describe("faithful-random live adapters: plans and accounting", () => {
       expect(LIVE_MOVE_RANDOM2_PLANS[move.id]).toEqual(planMoves[move.name]!.entries[0]!.draws.map(
         ({ ageOffset, count }) => ({ ageOffset, count })));
     }
-    // Hyper Beam (63) is the prep13 faithful-random adapter (tests/animation/livePrep13MoveAdapters.test.ts).
-    expect([...LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS].sort((a, b) => a - b)).toEqual([...MOVES.map((m) => m.id), 63].sort((a, b) => a - b));
+    // Hyper Beam (63) is the prep13 and Rain Dance (240) / Water Pulse (352) the prep14 faithful-random adapters
+    // (tests/animation/livePrep13MoveAdapters.test.ts, liveRandom2R4MoveAdapters.test.ts).
+    expect([...LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS].sort((a, b) => a - b)).toEqual([...MOVES.map((m) => m.id), 63, 240, 352].sort((a, b) => a - b));
     for (const id of LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS) {
       expect((LIVE_MOVE_ANIMATION_IDS as readonly number[]).includes(id)).toBe(false);
       expect(liveMoveAnimationDuration({ moveId: id, attacker: 0, target: 1, turn: 0, power: 20, damage: 0, friendship: 70, multihit: 0 })).not.toBeNull();

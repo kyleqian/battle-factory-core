@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 473,
-  "ids": 227,
+  "rows": 479,
+  "ids": 230,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -5023,6 +5023,72 @@
    "move": "HYPER_BEAM",
    "orientation": "opponent",
    "duration": 280,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 240,
+   "move": "RAIN_DANCE",
+   "orientation": "player",
+   "duration": 187,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 240,
+   "move": "RAIN_DANCE",
+   "orientation": "opponent",
+   "duration": 187,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 352,
+   "move": "WATER_PULSE",
+   "orientation": "player",
+   "duration": 160,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 352,
+   "move": "WATER_PULSE",
+   "orientation": "opponent",
+   "duration": 160,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 258,
+   "move": "HAIL",
+   "orientation": "player",
+   "duration": 158,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 258,
+   "move": "HAIL",
+   "orientation": "opponent",
+   "duration": 158,
    "expected": 0,
    "drawn": [
     0
