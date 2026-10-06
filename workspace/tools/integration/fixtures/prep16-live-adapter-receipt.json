@@ -1,7 +1,7 @@
 {
  "schema": "prep16-live-adapter-receipt/v1",
- "testedCodeCommit": "21b0ea1a81f540edc61b393f4ec7cce9d80ea635",
- "testedSrcTree": "f0e7adebf1682c1c2f57227f554f77f3f81dfa5a",
+ "testedCodeCommit": "9e1be8ccd4146932c2bcabc43ce8ae2639b23716",
+ "testedSrcTree": "be6eec82eb86ba6c1ec108af5d61d6cc34929f12",
  "scope": "MOVE_OVERHEAT 315, MOVE_SILVER_WIND 318, MOVE_PSYCH_UP 244 (player attacker): FIRST BODY only, !shiny. Live adapter, scoped exact; not whole-playable arbitrary-history exactness.",
  "gate": "first body = liveSpriteOrderHost body counter 0 -> LiveMoveSpriteOrderInput.firstBody (src/engine/liveSpriteOrderHost.ts lendLiveSpriteOrder); shiny = GET_SHINY_VALUE under the Factory OT (src/engine/liveMovePaletteComposite.ts liveBattlerIsShiny)",
  "paletteProvider": "src/engine/liveMovePaletteComposite.ts composeLivePalettes + plan rows 244/315/318 and resources ANIM_TAG_SPIRAL/ANIM_TAG_SPARKLE_6 in src/data/gen/live-animation-palette-resources.json",
