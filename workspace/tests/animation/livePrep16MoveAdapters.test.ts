@@ -96,12 +96,12 @@ describe("live prep16 move adapters (Overheat, Silver Wind, Psych Up player: fir
     expect(prepareLiveMovePalette(host, request(315, 0)).next.historyKnown).toBe(true);
   });
 
-  it("is gated on the first-body order flag (declines without an order, with a later body's order, or an unknown order)", () => {
+  it("Overheat is gated on the first-body order flag; Silver Wind on any known order (later-bodies-bg receipt)", () => {
     for (const [id, p, o] of [[315, "SOLROCK", "SHUCKLE"], [318, "BUTTERFREE", "ONIX"]] as const) {
       const f = displayed(p, o);
       expect(cfg(f, request(id, 0), firstOrder())).not.toBeNull();
       expect(cfg(f, request(id, 0))).toBeNull();
-      expect(cfg(f, request(id, 0), laterOrder())).toBeNull();
+      expect(cfg(f, request(id, 0), laterOrder()) === null).toBe(id === 315);
       expect(cfg(f, request(id, 0), { known: false } as never)).toBeNull();
     }
     // The production order host lends `firstBody` until any unit (here a party-menu reset) has been applied.
@@ -150,8 +150,10 @@ describe("live prep16 move adapters (Overheat, Silver Wind, Psych Up player: fir
       const f = displayed(p, o), req = request(id, a), order = firstOrder();
       expect(cfg(f, req, order)).not.toBeNull();
       expect(new Set([0, 40, 100, 150].map(age => render(f, req, age, order))).size).toBeGreaterThan(2);
-      // Declined (scene-off fallback) without the first-body order.
-      expect(render(f, req, 100, laterOrder())).not.toBe(render(f, req, 100, order));
+      // Overheat: declined (scene-off fallback) without the first-body order. Silver Wind: a later body's order renders the same
+      // body (its inputs never read the activation BG registers or the lent free order).
+      if (id === 315) expect(render(f, req, 100, laterOrder())).not.toBe(render(f, req, 100, order));
+      else expect(render(f, req, 100, laterOrder())).toBe(render(f, req, 100, order));
     }
   }, 240000);
 
@@ -162,7 +164,8 @@ describe("live prep16 move adapters (Overheat, Silver Wind, Psych Up player: fir
     expect(liveMoveAnimationDuration(request(244, 1))).toBeNull();
     const f = displayed("SKIPLOOM", "GOLEM"), art = createBattleCommandFieldArtView(f);
     expect(cfg(f, request(244, 0))).toBeNull();
-    expect(cfg(f, request(244, 0), laterOrder())).toBeNull();
+    // A later body's known order is accepted (later-bodies-bg receipt: Tackle / Splash / Psychic predecessors dense-exact).
+    expect(cfg(f, request(244, 0), laterOrder())).not.toBeNull();
     expect(cfg(displayed("SKIPLOOM", "GOLEM", [0x71560001, undefined]), request(244, 0), firstOrder())).toBeNull();
     expect(cfg(displayed("SKIPLOOM", "ONIX"), request(244, 0), firstOrder())).toBeNull();
     const inputs = (cfg(f, request(244, 0), firstOrder())!.config as any).animationInputs;

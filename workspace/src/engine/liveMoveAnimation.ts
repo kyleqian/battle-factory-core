@@ -2496,10 +2496,12 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 244: case 315: case 318: {
-      // prep16 s0.3: first body only (no animation unit has run since the battle began = the order host lent a `firstBody`
-      // order: the BG registers/scroll/matrices are the constant S0), non-shiny (the repo has no shiny battle palette).
+      // prep16 s0.3: Overheat first body only (no animation unit has run since the battle began = the order host lent a
+      // `firstBody` order: the BG registers/scroll/matrices are the constant S0); non-shiny (the repo has no shiny battle palette).
+      // Silver Wind and Psych Up need only a known order lend: their compositors never read the activation BG registers (each
+      // read field is overwritten by the reducer first; later-bodies-bg-receipt.json), dense-exact after >= 3 predecessors.
       // Everything else is the measured first-body constant set (liveBgSnapshotMoves.ts) + anchors + the assets-only composite.
-      if (!spriteOrderInput?.firstBody) return null;
+      if (request.moveId === 315 ? !spriteOrderInput?.firstBody : !spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       if (palettes === null) return null;
