@@ -1127,7 +1127,7 @@ import {
   type DragonRageSchedule,
   type DragonRageSide,
 } from "./dragonRage.ts";
-import { speciesFrontIdleRestOffset } from "./speciesIdleAnim.ts";
+import { speciesFrontIdleRestOffset, speciesFrontIdleRestOffsetOrZero } from "./speciesIdleAnim.ts";
 import {
   shadowPunchAttackerVisible,
   shadowPunchAttackerX2,
@@ -1302,6 +1302,18 @@ export interface SceneOnBattlerGeometry {
 export interface SceneOnPresentationBattler {
   readonly species: string;
   readonly geometry: SceneOnBattlerGeometry;
+  /**
+   * Live x2 history override of the species front-idle rest (engine/liveBattlerX2History.ts, ISSUES #148): present only
+   * when an earlier body left this battler at {0,0}; absent = the species rest.
+   */
+  readonly liveIdleRest?: Readonly<{ x2: number; y2: number }>;
+}
+
+/** Front-idle rest a presentation battler is drawn at: the live x2 history override, else the species rest. */
+export function sceneOnBattlerFrontIdleRest(
+  battler: Readonly<{ species: string; liveIdleRest?: Readonly<{ x2: number; y2: number }> }>,
+): Readonly<{ x2: number; y2: number }> {
+  return battler.liveIdleRest ?? speciesFrontIdleRestOffsetOrZero(battler.species);
 }
 
 export interface SceneOnBounceConfig {
@@ -6807,7 +6819,7 @@ function dragonRageTargetOffset(
   target: SceneOnPresentationBattler,
 ): Readonly<{ x2: number; y2: number }> {
   if (animationAge < schedule.targetShakeTick && target.geometry.side === "opponent") {
-    const idle = speciesFrontIdleRestOffset(target.species);
+    const idle = target.liveIdleRest ?? speciesFrontIdleRestOffset(target.species);
     if (idle) return idle;
   }
   if (animationAge < schedule.targetShakeTick) return { x2: 0, y2: 0 };
@@ -12994,7 +13006,7 @@ function shadowPunchTargetShakeX2(
 ): number {
   if (animationAge < SHADOW_PUNCH_TARGET_SHAKE_FIRST_AGE) {
     if (target.geometry.side === "opponent") {
-      const idle = speciesFrontIdleRestOffset(target.species);
+      const idle = target.liveIdleRest ?? speciesFrontIdleRestOffset(target.species);
       if (idle) return idle.x2;
     }
     return 0;

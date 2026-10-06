@@ -34,6 +34,37 @@
   "requestFields": {
     "power": 100
   },
+  "precedingBodies": [
+    {
+      "moveId": 162,
+      "side": "opponent"
+    },
+    {
+      "moveId": 175,
+      "side": "player"
+    },
+    {
+      "moveId": 175,
+      "side": "player"
+    },
+    {
+      "moveId": 162,
+      "side": "opponent"
+    },
+    {
+      "moveId": 175,
+      "side": "player"
+    },
+    {
+      "moveId": 175,
+      "side": "player"
+    },
+    {
+      "moveId": 162,
+      "side": "opponent"
+    }
+  ],
+  "precedingBodiesSource": "tools/integration/fixtures/x2-history/bodies-x2.json scenarios[mechanic-flail-natural-hp-player-krabby-opponent-onix.json].bodies (move, attacker battler) before start frame 3314",
   "presentationRngActivation": {
     "value": 1840954490,
     "source": "tools/integration/fixtures/prep12-random2/plans.json moves.flail.entries[key=flail@power100].acceptedActivationValue (0x6DBABC7A, power 100)"

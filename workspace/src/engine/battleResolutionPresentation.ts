@@ -1,5 +1,6 @@
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
+import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import { battleMoveAnimationRequest, type BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import {
   battleCommandFieldBattlerFromPartyMember,
@@ -397,6 +398,8 @@ export type BattleResolutionPresentationState = Readonly<{
   liveMovePaletteInput?: LiveMovePaletteInput;
   liveMoveSpriteAllocatorInput?: LiveMoveSpriteAllocatorInput;
   liveMoveSpriteOrderInput?: LiveMoveSpriteOrderInput;
+  /** Presentation-only battler x2 history at the current move body's activation edge (liveBattlerX2History.ts, #148). */
+  liveMoveBattlerX2Input?: LiveMoveBattlerX2Input;
   resolutionId: Readonly<{
     requestId: number;
     side: "player";

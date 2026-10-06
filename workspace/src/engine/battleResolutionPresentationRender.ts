@@ -4,6 +4,7 @@ import {
 } from "./liveMovePresentationRng.ts";
 import type { PresentationRngHost } from "./presentationRngHost.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
+import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import {
   liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows, liveSemiInvulnerableHideBattler,
 } from "./liveMoveAnimation.ts";
@@ -558,7 +559,7 @@ function sendInWhiteCoefficientAtFrame(frame: number): number {
 }
 
 export type BattleResolutionRenderEffect =
-  | Readonly<{ type: "move"; request: BattleMoveAnimationRequest; age: number; paletteInput?: LiveMovePaletteInput; spriteAllocatorInput?: LiveMoveSpriteAllocatorInput; spriteOrderInput?: LiveMoveSpriteOrderInput; presentationRng?: LiveMovePresentationRngInput }>
+  | Readonly<{ type: "move"; request: BattleMoveAnimationRequest; age: number; paletteInput?: LiveMovePaletteInput; spriteAllocatorInput?: LiveMoveSpriteAllocatorInput; spriteOrderInput?: LiveMoveSpriteOrderInput; presentationRng?: LiveMovePresentationRngInput; battlerX2Input?: LiveMoveBattlerX2Input }>
   | Readonly<{
       type: "hit";
       battler: 0 | 1;
@@ -1216,6 +1217,7 @@ export function createBattleResolutionPresentationRenderView(
         paletteInput: state.liveMovePaletteInput,
         spriteAllocatorInput: state.liveMoveSpriteAllocatorInput,
         spriteOrderInput: state.liveMoveSpriteOrderInput,
+        ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
         ...(liveMoveRandom2Plan(command.animation) === null ? {} : {
           presentationRng: Object.freeze({ host: presentationRngHost ?? null, key: liveMovePresentationRngBodyKey(state) }),
         }),

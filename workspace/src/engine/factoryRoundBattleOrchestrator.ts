@@ -30,6 +30,10 @@ import {
   type LiveSpriteOrderHost,
 } from "./liveSpriteOrderHost.ts";
 import {
+  advanceLiveBattlerX2Host, applyLiveBattlerX2Event, createLiveBattlerX2Host, invalidateLiveBattlerX2Host,
+  liveBattlerX2EventsOf, liveMoveBattlerX2Input, LIVE_BATTLER_X2_IDLE, type LiveBattlerX2Host, type LiveMoveBattlerX2Input,
+} from "./liveBattlerX2History.ts";
+import {
   invalidateLiveSpriteAllocatorHost,
   type LiveSpriteAllocatorHost,
 } from "./liveSpriteAllocator.ts";
@@ -470,6 +474,11 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
     /** Event-driven order tracker; absent = derive from `order`. */
     orderHost?: LiveSpriteOrderHost;
   }>;
+  /**
+   * Presentation-only per-battler sprite x2 history (liveBattlerX2History.ts, ISSUES #148), scoped to the current
+   * battle; never read by rules/RNG/facility state. Absent = consumers keep the species front-idle rest.
+   */
+  liveBattlerX2Host?: Readonly<{ battleCallStart: number | null; commandKey: string; host: LiveBattlerX2Host }>;
   /**
    * An opposing locked action may outlive its charge presentation while the
    * player owns a real intervening command request. Its battler/move/slot
@@ -1103,6 +1112,14 @@ function startCurrentBattle(
           orderHost: battleStartOrderHost,
         })
       : undefined,
+    // Both battlers were just sent in (idle x2); battle-start script events (Intimidate) apply in order.
+    liveBattlerX2Host: state.config.battleScene === "on"
+      ? Object.freeze({
+          battleCallStart: callStart, commandKey: "",
+          host: createLiveBattlerX2Host(initialized.events.flatMap(liveBattlerX2EventsOf)
+            .reduce(applyLiveBattlerX2Event, LIVE_BATTLER_X2_IDLE)),
+        })
+      : undefined,
     retainedLockedActionPresentationOwner: null,
     battlePartySelect: null,
     battleForcedPartySelect: null,
@@ -1548,6 +1565,7 @@ function installDriveReceiptImmediately(
     liveMoveSpriteAllocatorHost: sprites === undefined ? undefined : withOrderHost(
       sprites, invalidateLiveSpriteOrderHost(orderHostOf(sprites), "battle advanced without a presented resolution"),
     ),
+    liveBattlerX2Host: invalidateX2Host(state, "battle advanced without a presented resolution"),
     battle: receipt.battle,
     battleCommandPresentation,
     battleResolutionPresentation: null,
@@ -1648,6 +1666,16 @@ type OrderHostCarrier = Readonly<{ order: SpriteOrderState; orderHost?: LiveSpri
 
 function orderHostOf(sprites: OrderHostCarrier): LiveSpriteOrderHost {
   return sprites.orderHost ?? createLiveSpriteOrderHost(sprites.order);
+}
+
+/** The battle's x2 history host with both sides unknown (unchanged when absent or from another battle). */
+function invalidateX2Host(
+  state: FactoryRoundBattleOrchestratorState, reason: string,
+): FactoryRoundBattleOrchestratorState["liveBattlerX2Host"] {
+  const x2 = state.liveBattlerX2Host;
+  if (x2 === undefined || x2.battleCallStart !== state.activeBattleCallStart) return x2;
+  const host = invalidateLiveBattlerX2Host(x2.host, reason);
+  return host === x2.host ? x2 : Object.freeze({ ...x2, host });
 }
 
 function withOrderHost<T extends OrderHostCarrier>(sprites: T, orderHost: LiveSpriteOrderHost): T {
@@ -2284,6 +2312,19 @@ function prepareResolutionPalette(
   // strictly before this command, lend the order to a move body at its
   // activation edge, then apply the command's own event (the body plan).
   if (orderHost) orderHost = advanceLiveSpriteOrderHost(orderHost, resolution, commandSequence, true);
+  // Battler x2 history (liveBattlerX2History.ts): the same event cursor discipline; a body reads the history at its
+  // activation edge, then its own event (the body's end-state class) applies.
+  const retainedX2 = state.liveBattlerX2Host?.battleCallStart === state.activeBattleCallStart
+    ? state.liveBattlerX2Host : undefined;
+  let x2Host = retainedX2 ? advanceLiveBattlerX2Host(retainedX2.host, resolution, commandSequence, true) : undefined;
+  let battlerX2Input: LiveMoveBattlerX2Input | undefined;
+  if (command?.type === "move-animation" && command.animation && x2Host) {
+    battlerX2Input = retainedX2?.commandKey === commandKey
+      ? resolution.liveMoveBattlerX2Input : liveMoveBattlerX2Input(x2Host.history);
+  }
+  if (x2Host) {
+    x2Host = advanceLiveBattlerX2Host(x2Host, resolution, isFinalCommand ? Number.POSITIVE_INFINITY : commandSequence);
+  }
   if (command?.type === "move-animation" && command.animation) {
     const prepared = prepareLiveMovePalette(host, command.animation);
     host = prepared.next;
@@ -2343,6 +2384,10 @@ function prepareResolutionPalette(
       ...resolution, liveMovePaletteInput: input,
       liveMoveSpriteAllocatorInput: spriteInput,
       liveMoveSpriteOrderInput: spriteOrderInput,
+      liveMoveBattlerX2Input: battlerX2Input,
+    }),
+    ...(x2Host === undefined ? {} : {
+      liveBattlerX2Host: Object.freeze({ battleCallStart: state.activeBattleCallStart, commandKey, host: x2Host }),
     }),
   });
 }
@@ -2885,6 +2930,8 @@ export function advanceFactoryRoundBattleCommand(
               host: invalidateLiveSpriteAllocatorHost(retainedSprites.host),
             })
           : state.liveMoveSpriteAllocatorHost,
+        // The menu's exit reshow recreates the battler sprites (x2 after it unmeasured): unknown history.
+        liveBattlerX2Host: invalidateX2Host(state, "party menu"),
         battleCommandPresentation: advanced,
         battlePartySelect: createBattlePartySelectState(
           advanced.request,
