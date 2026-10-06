@@ -36,6 +36,8 @@ export function generatedCommandAnimationReplay(
   allowStall = false,
   /** Answer the forced-replacement party screen with the first healthy member (DOWN -> A -> SEND OUT A), as a player would. */
   answerForcedSwitch = false,
+  /** Observer called with the orchestrator state after every stepped frame (read-only; e.g. production frame renders). */
+  onFrame?: (state: ReturnType<typeof createFactoryRoundBattleOrchestrator>, frame: number) => void,
 ) {
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
     id: `live-animation-generated-${seed}`, rngValue: seed, battleScene,
@@ -78,6 +80,7 @@ export function generatedCommandAnimationReplay(
     else if (state.battleResolutionPresentation) state = advanceFactoryRoundBattleResolution(state, new Set(buttons));
     else if (state.battleCommandPresentation) state = advanceFactoryRoundBattleCommand(state, new Set(buttons));
     else throw new Error(`generated command replay lost battle ownership at seed ${seed}`);
+    onFrame?.(state, frame);
     const r = state.battleResolutionPresentation;
     if (r) for (let segmentIndex = 0; segmentIndex < r.segments.length; segmentIndex += 1) {
       const segmentKey = `${r.resolutionId.requestId}:${segmentIndex}`;

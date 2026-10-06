@@ -86,6 +86,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   73, 80, 161, 169, 193, 194, 278, 314, 327,
   // Roar / Whirlwind bodies (prep11 s0.2); the forced switch-out continuation is the Scene ON skip-removal hold.
   46, 18,
+  // Fly / Bounce charge + strike bodies by request.turn (prep11 s2.3); the turn gap keeps the attacker hidden through
+  // the presentation-only semi-invulnerable state (liveSemiInvulnerableHideBattler).
+  19, 340,
   // anchor3: source battler anchors (position center, picture height, pic offset).
   86, 87, 107, 116, 203, 207, 263, 339,
   // selectors: request-selected branches and healing anchors.
@@ -227,6 +230,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     73, 80, 161, 169, 193, 194, 278, 314, 327,
     // Roar / Whirlwind: activation == window start (row 0) on both sides (prep11 s0.2).
     46, 18,
+    // Fly / Bounce charge and strike: activation == window start (row 0), prep11 s0.2.
+    19, 340,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -540,6 +545,10 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 195: return 259; // Perish Song (71..329 / 75..333, no tail).
     case 348: return 224; // Leaf Blade (76..299 / 80..303, no tail).
     case 80: return 244; // Petal Dance 215..458 / 217..460 (prep11 s0.2).
+    // Fly / Bounce (prep11 s0.2): charge 51..93 (43 rows) / strike 408..475 (68); Bounce charge 254..317 (64) /
+    // strike 771..825 (55). request.turn = gAnimMoveTurn (0 charge, 1 strike).
+    case 19: return (request.turn & 1) === 0 ? 43 : 68;
+    case 340: return (request.turn & 1) === 0 ? 64 : 55;
     case 46: return request.attacker === 0 ? 99 : 104; // Roar 252..350 / 219..322 (cry timing differs by side; prep11 s0.2).
     case 18: return 83; // Whirlwind 222..304 / 316..398 (prep11 s0.2).
     case 278: return 203; // Recycle 2193..2395 / 2589..2791 (prep11 s0.2).
@@ -628,6 +637,33 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
 }
 
 /** Source singles field geometry and art, from the current displayed party members. */
+// Body-only HUD profiles: every controller age is unreachable, so the staged views never draw text, HP drain, hit
+// reaction, action menu or status (the live resolution queue owns them as separate commands).
+const LIVE_FLY_BODY_ONLY_PROFILE = Object.freeze({
+  targetHpBefore: 0, targetHpAfter: 0, hitReactionFirstAge: Number.POSITIVE_INFINITY,
+  hpDrainFirstAge: Number.POSITIVE_INFINITY, chargeMessageFirstAge: Number.POSITIVE_INFINITY,
+  strikeMoveTextFirstAge: Number.POSITIVE_INFINITY, resultTextFirstAge: Number.POSITIVE_INFINITY,
+  currentMoveResetAge: Number.POSITIVE_INFINITY,
+});
+const LIVE_BOUNCE_BODY_ONLY_PROFILE = Object.freeze({
+  moveTextFirstAge: Number.POSITIVE_INFINITY, moveTextClearAge: Number.POSITIVE_INFINITY,
+  targetHpBefore: 0, targetHpAfter: 0, hitReactionFirstAge: Number.POSITIVE_INFINITY,
+  hpDrainFirstAge: Number.POSITIVE_INFINITY, resultTextFirstAge: Number.POSITIVE_INFINITY,
+  currentMoveResetAge: Number.POSITIVE_INFINITY,
+});
+
+/**
+ * Presentation-only semi-invulnerable hide (prep11 s2.3). A live Fly/Bounce CHARGE body sets the attacker sprite's
+ * `invisible` at age 7 (`AnimFlyBallUp` / `AnimBounceBallShrink`) and nothing in Scene ON clears it until the STRIKE
+ * body's ball leaves the screen (age 39/40 Fly, 26 Bounce): `MOVEEND_ATTACKER_INVISIBLE` only emits a receipt under
+ * HITMARKER_NO_ANIMATIONS (Scene OFF), so the queue carries no hide. Returns the hidden battler once this completed
+ * body ends, or null. Never read by rules/RNG/queue.
+ */
+export function liveSemiInvulnerableHideBattler(request: BattleMoveAnimationRequest): 0 | 1 | null {
+  return (request.moveId === 19 || request.moveId === 340) && (request.turn & 1) === 0
+    && liveMoveAnimationDuration(request) !== null ? request.attacker : null;
+}
+
 export function liveMoveAnimationPresentation(
   request: BattleMoveAnimationRequest,
   field: BattleResolutionDisplayedField,
@@ -2001,6 +2037,25 @@ export function liveMoveAnimationPresentation(
       break;
     case 343: config = { move: "COVET", attacker, target, fieldProfile }; break;
     case 347: config = { move: "CALM_MIND", attacker, target, fieldProfile }; break;
+    // prep11 s2.3: body-only (the HUD profile is inert; the live queue owns text/HP/hit reaction). The reducers' age 0
+    // is the first framebuffer row after the RAM hide (charge age 7 -> displayed 8; FLY strike ball callback 0 at age
+    // 11, BOUNCE at 7), the same epochs as the accepted staged fixtures (tools/compare/fixtures/{fly,bounce}-*.json).
+    // Allocator constants: ball slot 3 / matrix 0 (charge), ball 3 + hitsplat 4 (strike); no order lend is read.
+    case 19: {
+      const turn = (request.turn & 1) === 0 ? "charge" as const : "strike" as const;
+      config = { move: "FLY", turn, attacker, target, fieldProfile: { ...fieldProfile, playerStatus: "none" },
+        controllerProfile: LIVE_FLY_BODY_ONLY_PROFILE, animationAgeOffset: turn === "charge" ? -8 : -11 };
+      break;
+    }
+    case 340: {
+      const turn = (request.turn & 1) === 0 ? "charge" as const : "strike" as const;
+      const player = attacker.geometry.side === "player";
+      config = { move: "BOUNCE", turn, attacker, target, fieldProfile: { ...fieldProfile, playerStatus: "none" },
+        controllerProfile: LIVE_BOUNCE_BODY_ONLY_PROFILE,
+        animationAgeOffset: turn === "charge" ? -8 : -7, strikeEffectDelay: player ? 4 : 0,
+        ...(player ? { strikeAttackerRestoreAge: 20 } : {}) };
+      break;
+    }
     // prep11 s0.2: no order or allocator input (slots/tasks are constants); the body ends with the target off-screen and
     // the Scene ON forced switch-out hold (battleResolutionPresentation.ts) owns E+1.. without redrawing it.
     case 46: config = { move: "ROAR", attacker, target, fieldProfile }; break;

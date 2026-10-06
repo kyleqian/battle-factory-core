@@ -91,8 +91,11 @@ import {
   type BattleResolutionPresentationState,
 } from "./battleResolutionPresentation.ts";
 import {
+  applyLiveSemiInvulnerableCommand,
   BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES,
   createBattleResolutionPresentationRenderView,
+  LIVE_SEMI_INVULNERABLE_NONE,
+  type LiveSemiInvulnerableHidden,
   isBattleResolutionButtonMessageReady,
   isBattleResolutionCommandComplete,
 } from "./battleResolutionPresentationRender.ts";
@@ -389,6 +392,12 @@ export type FactoryBattlePresentationBattlerBoundary = Readonly<{
   displayedHp: number;
   displayedStatus1: number;
   spriteVisible: boolean;
+  /**
+   * Presentation-only Scene ON semi-invulnerable hide (a completed live Fly/Bounce charge body; ROM `invisible` set by
+   * the animation, no queue receipt): battleResolutionPresentationRender.ts applyLiveSemiInvulnerableCommand.
+   * Absent = false. Never read by rules, RNG or the queue.
+   */
+  liveSemiInvulnerableHidden?: boolean;
   idleEpoch: number;
   moveCursor: 0 | 1 | 2 | 3;
 }>;
@@ -1400,6 +1409,8 @@ function createBattlePresentationBoundaries(
       displayedHp: field.hp,
       displayedStatus1: active.status1,
       spriteVisible: prior === undefined || switched ? true : prior.spriteVisible,
+      ...(prior !== undefined && !switched && prior.liveSemiInvulnerableHidden
+        ? { liveSemiInvulnerableHidden: true } : {}),
       idleEpoch: prior === undefined || switched ? 0 : prior.idleEpoch,
       moveCursor: switched ? 0 : cursors[battler]!,
     });
@@ -1768,6 +1779,11 @@ function beginCommandResolution(
         })
       : freshResolution();
   }
+  // A charge body in an earlier turn left its attacker hidden (presentation-only display ledger state).
+  const semiInvulnerableHidden = liveSemiInvulnerableHiddenOf(state.battlePresentationBoundaries);
+  if (semiInvulnerableHidden !== LIVE_SEMI_INVULNERABLE_NONE) {
+    resolution = Object.freeze({ ...resolution, liveSemiInvulnerableHidden: semiInvulnerableHidden });
+  }
   const playerLocked = (state.battle.rules.rulesContext.battlers[presentation.request.battler]!.status2 & (
     BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
     | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE
@@ -1863,6 +1879,30 @@ function completedResolutionUpdate(
 }
 
 function commitCompletedResolutionCommand(
+  boundaries: FactoryBattlePresentationBoundaries,
+  resolution: BattleResolutionPresentationState,
+  command: BattleResolutionPresentationCommand,
+): FactoryBattlePresentationBoundaries {
+  const committed = commitCompletedResolutionCommandDisplay(boundaries, resolution, command);
+  const before = liveSemiInvulnerableHiddenOf(committed);
+  const after = applyLiveSemiInvulnerableCommand(before, command);
+  if (after === before) return committed;
+  return Object.freeze(committed.map((boundary) => {
+    const { liveSemiInvulnerableHidden: _previous, ...rest } = boundary;
+    return Object.freeze(after[boundary.battler] ? { ...rest, liveSemiInvulnerableHidden: true } : rest);
+  })) as unknown as FactoryBattlePresentationBoundaries;
+}
+
+function liveSemiInvulnerableHiddenOf(
+  boundaries: FactoryBattlePresentationBoundaries,
+): LiveSemiInvulnerableHidden {
+  return boundaries[0].liveSemiInvulnerableHidden || boundaries[1].liveSemiInvulnerableHidden
+    ? Object.freeze([boundaries[0].liveSemiInvulnerableHidden ?? false,
+      boundaries[1].liveSemiInvulnerableHidden ?? false] as const)
+    : LIVE_SEMI_INVULNERABLE_NONE;
+}
+
+function commitCompletedResolutionCommandDisplay(
   boundaries: FactoryBattlePresentationBoundaries,
   resolution: BattleResolutionPresentationState,
   command: BattleResolutionPresentationCommand,
@@ -2052,8 +2092,8 @@ function settledCommandForResolutionHandoff(
   const presentation = Object.freeze({
     ...entering,
     spriteVisibility: Object.freeze({
-      player: boundaries[0]!.spriteVisible,
-      opponent: boundaries[1]!.spriteVisible,
+      player: boundaries[0]!.spriteVisible && !boundaries[0]!.liveSemiInvulnerableHidden,
+      opponent: boundaries[1]!.spriteVisible && !boundaries[1]!.liveSemiInvulnerableHidden,
     }),
     lifecycle: Object.freeze({ phase: "action-menu" as const, phaseElapsed: 0 }),
   });

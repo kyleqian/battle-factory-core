@@ -3983,6 +3983,78 @@
     "body": "normal",
     "activation": "tools/integration/fixtures/prep11-*.json draft (activation == accepted window start; docs/next-adapters-prep11.md s3)"
    }
+  },
+  {
+   "id": 19,
+   "move": "FLY",
+   "orientation": "player",
+   "variant": "flybounce-fly-player",
+   "activationFrame": 51,
+   "windowStart": 51,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/flybounce-live/fly-player-murkrow-onix-charge.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep11-*.json draft (activation == window start; docs/next-adapters-prep11.md s0.2); charge body (request.turn 0); the strike window also starts at its activation"
+   }
+  },
+  {
+   "id": 19,
+   "move": "FLY",
+   "orientation": "opponent",
+   "variant": "flybounce-fly-opponent",
+   "activationFrame": 51,
+   "windowStart": 51,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/flybounce-live/fly-opponent-murkrow-onix-charge.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep11-*.json draft (activation == window start; docs/next-adapters-prep11.md s0.2); charge body (request.turn 0); the strike window also starts at its activation"
+   }
+  },
+  {
+   "id": 340,
+   "move": "BOUNCE",
+   "orientation": "player",
+   "variant": "flybounce-bounce-player",
+   "activationFrame": 254,
+   "windowStart": 254,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/flybounce-live/bounce-player-spoink-onix-charge.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep11-*.json draft (activation == window start; docs/next-adapters-prep11.md s0.2); charge body (request.turn 0); the strike window also starts at its activation"
+   }
+  },
+  {
+   "id": 340,
+   "move": "BOUNCE",
+   "orientation": "opponent",
+   "variant": "flybounce-bounce-opponent",
+   "activationFrame": 338,
+   "windowStart": 338,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/flybounce-live/bounce-opponent-spoink-onix-charge.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep11-*.json draft (activation == window start; docs/next-adapters-prep11.md s0.2); charge body (request.turn 0); the strike window also starts at its activation"
+   }
   }
  ]
 }

@@ -50492,26 +50492,29 @@ export function renderSceneOnMovePresentation(
     const view = sceneOnFlyView(state);
     const { attacker, target } = view;
     const originalOrientation =
-      attacker.species === "MURKROW"
+      (liveField || attacker.species === "MURKROW")
       && attacker.geometry.side === "opponent"
-      && target.species === "ONIX"
+      && (liveField || target.species === "ONIX")
       && target.geometry.side === "player";
     const oppositeOrientation =
-      attacker.species === "MURKROW"
+      (liveField || attacker.species === "MURKROW")
       && attacker.geometry.side === "player"
-      && target.species === "ONIX"
+      && (liveField || target.species === "ONIX")
       && target.geometry.side === "opponent";
     if (!originalOrientation && !oppositeOrientation) {
       throw new Error(
         `unsupported staged FLY pair ${attacker.species}->${target.species}`,
       );
     }
-    const attackerSprite = originalOrientation
+    const attackerSprite = liveField ? liveSceneOnBattlerArt(attacker) : originalOrientation
       ? murkrowFrontSprite
       : murkrowBackSprite;
-    const targetSprite = originalOrientation
+    const targetSprite = liveField ? liveSceneOnBattlerArt(target) : originalOrientation
       ? onixBackSprite
       : onixFrontSprite;
+    // Live field corners exclude the opponent's front idle rest offset (the staged ONIX corner bakes in x2 = 1).
+    const flyIdle = (battler: typeof attacker) => liveField && battler.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
 
     drawTileBg(
       fb,
@@ -50524,8 +50527,8 @@ export function renderSceneOnMovePresentation(
         fb,
         attackerSprite.tileset,
         attackerSprite.palette,
-        attacker.geometry.spriteCorner.x,
-        attacker.geometry.spriteCorner.y,
+        attacker.geometry.spriteCorner.x + flyIdle(attacker).x2,
+        attacker.geometry.spriteCorner.y + flyIdle(attacker).y2,
       );
     }
     if (!view.targetInvisible) {
@@ -50536,13 +50539,13 @@ export function renderSceneOnMovePresentation(
       // of retaining a stale settled-idle x2 in `spriteCorner`.
       const targetX = view.targetTaskOwnsX2
         ? target.geometry.animationCenter.x - 32
-        : target.geometry.spriteCorner.x;
+        : target.geometry.spriteCorner.x + flyIdle(target).x2;
       drawSpriteSheet(
         fb,
         targetSprite.tileset,
         targetSprite.palette,
         targetX + view.targetShakeX2,
-        target.geometry.spriteCorner.y,
+        target.geometry.spriteCorner.y + flyIdle(target).y2,
       );
     }
     const flyEffectBackdrop = fb.slice();
@@ -50607,6 +50610,7 @@ export function renderSceneOnMovePresentation(
         true,
       );
     }
+    if (liveField) return;
     if (originalOrientation) {
       drawSendOutHealthbox(
         fb,
@@ -50677,9 +50681,11 @@ export function renderSceneOnMovePresentation(
     const view = sceneOnBounceView(state);
     const { attacker, target } = view;
     const supported =
-      attacker.species === "SPOINK"
-      && target.species === "ONIX"
+      (liveField || attacker.species === "SPOINK")
+      && (liveField || target.species === "ONIX")
       && attacker.geometry.side !== target.geometry.side;
+    const bounceIdle = (battler: typeof attacker) => liveField && battler.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
     if (!supported) {
       throw new Error(
         `unsupported staged BOUNCE pair ${attacker.species}->${target.species}`,
@@ -50693,18 +50699,18 @@ export function renderSceneOnMovePresentation(
       battleBg.palette,
     );
     if (!view.attackerInvisible) {
-      const attackerSprite = attacker.geometry.side === "player"
+      const attackerSprite = liveField ? liveSceneOnBattlerArt(attacker) : attacker.geometry.side === "player"
         ? spoinkBackSprite
         : spoinkFrontSprite;
       drawSpriteSheet(
         fb,
         attackerSprite.tileset,
         attackerSprite.palette,
-        attacker.geometry.spriteCorner.x,
-        attacker.geometry.spriteCorner.y,
+        attacker.geometry.spriteCorner.x + bounceIdle(attacker).x2,
+        attacker.geometry.spriteCorner.y + bounceIdle(attacker).y2,
       );
     }
-    const targetSprite = target.geometry.side === "player"
+    const targetSprite = liveField ? liveSceneOnBattlerArt(target) : target.geometry.side === "player"
       ? onixBackSprite
       : onixFrontSprite;
     const statusBattlerOffset =
@@ -50715,14 +50721,18 @@ export function renderSceneOnMovePresentation(
         targetSprite.tileset,
         targetSprite.palette,
         target.geometry.spriteCorner.x
-          - (
-            target.geometry.side === "opponent"
-            && view.targetBaseOffsetReset
-              ? 1
-              : 0
-          )
+          // The staged ONIX corner bakes in its idle x2 = 1; the live corner adds the species idle until the reset.
+          + (liveField
+            ? (view.targetBaseOffsetReset ? 0 : bounceIdle(target).x2)
+            : -(
+              target.geometry.side === "opponent"
+              && view.targetBaseOffsetReset
+                ? 1
+                : 0
+            ))
           + statusBattlerOffset.x,
         target.geometry.spriteCorner.y
+          + (liveField && !view.targetBaseOffsetReset ? bounceIdle(target).y2 : 0)
           + view.targetShakeY2
           + statusBattlerOffset.y
           + (target.geometry.side === "player"
@@ -50775,6 +50785,7 @@ export function renderSceneOnMovePresentation(
         spark.y,
       );
     }
+    if (liveField) return;
     if (attacker.geometry.side === "opponent") {
       drawSendOutHealthbox(
         fb,

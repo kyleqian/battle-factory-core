@@ -1,6 +1,8 @@
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
-import { liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows } from "./liveMoveAnimation.ts";
+import {
+  liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows, liveSemiInvulnerableHideBattler,
+} from "./liveMoveAnimation.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import {
   BATTLE_COMMAND_ACTION_ENTER_DELAY,
@@ -957,6 +959,42 @@ function healthboxParams(
  * transition's settled rules, battle RNG, scene elapsed time, or a canonical
  * duration vector.
  */
+/** Per battler (0 player, 1 opponent): sprite hidden by a completed live Fly/Bounce charge body. */
+export type LiveSemiInvulnerableHidden = readonly [boolean, boolean];
+export const LIVE_SEMI_INVULNERABLE_NONE: LiveSemiInvulnerableHidden = Object.freeze([false, false] as const);
+
+/**
+ * Presentation-only semi-invulnerable hide (Scene ON; `liveSemiInvulnerableHideBattler`). A completed live charge body
+ * hides its attacker until that battler's next body completes (the strike restores it inside its own body), a
+ * controller sprite-visibility receipt takes over (MOVEEND_ATTACKER_VISIBLE after an unusable/failed strike), or the
+ * battler faints or is switched. Other battlers' bodies leave it hidden (the ROM sprite stays invisible). Scene OFF
+ * carries no MOVE_ANIMATION request, so it never sets the hide. Never read by rules, RNG or the queue.
+ */
+export function applyLiveSemiInvulnerableCommand(
+  hidden: LiveSemiInvulnerableHidden,
+  command: BattleResolutionPresentationCommand,
+): LiveSemiInvulnerableHidden {
+  if (!("battler" in command)) return hidden;
+  const battler = command.battler;
+  let next: boolean;
+  if (command.type === "move-animation") {
+    const hide = command.animation ? liveSemiInvulnerableHideBattler(command.animation) : null;
+    if (hide !== null) {
+      next = true;
+      if (hide !== battler) return hidden;
+    } else {
+      next = false;
+    }
+  } else if (command.type === "sprite-visibility" || command.type === "faint"
+    || command.type === "switch-in" || command.type === "switch-out") {
+    next = false;
+  } else {
+    return hidden;
+  }
+  if (hidden[battler] === next) return hidden;
+  return Object.freeze(battler === 0 ? [next, hidden[1]] as const : [hidden[0], next] as const);
+}
+
 export function createBattleResolutionPresentationRenderView(
   state: BattleResolutionPresentationState,
 ): BattleResolutionPresentationRenderView {
@@ -978,8 +1016,10 @@ export function createBattleResolutionPresentationRenderView(
   // Visibility receipts are controller-owned persistent state. A later
   // automatic locked-action segment starts from the finished prior segment,
   // not from an invented visible baseline.
+  let semiInvulnerableHidden = state.liveSemiInvulnerableHidden ?? LIVE_SEMI_INVULNERABLE_NONE;
   for (let segmentIndex = 0; segmentIndex < state.segmentIndex; segmentIndex += 1) {
     for (const completed of state.segments[segmentIndex]!.commands) {
+      semiInvulnerableHidden = applyLiveSemiInvulnerableCommand(semiInvulnerableHidden, completed);
       if (completed.type === "sprite-visibility") {
         spriteVisibility.set(completed.battler, completed.visible);
         if (completed.recall) healthboxVisibility.set(completed.battler, completed.visible);
@@ -1070,6 +1110,7 @@ export function createBattleResolutionPresentationRenderView(
   for (let index = 0; index < state.commandIndex; index += 1) {
     const completed = segment.commands[index]!;
     field = applyCompletedCommand(field, completed);
+    semiInvulnerableHidden = applyLiveSemiInvulnerableCommand(semiInvulnerableHidden, completed);
     if (completed.type === "message") latestMessage = completed.lines;
     if (completed.type === "faint") fainted.add(completed.battler);
     if (completed.type === "switch-in") {
@@ -1331,6 +1372,7 @@ export function createBattleResolutionPresentationRenderView(
     visibility: Object.freeze({
       player: Object.freeze({
         sprite: (spriteVisibility.get(0) ?? true)
+          && !semiInvulnerableHidden[0]
           && !fainted.has(0)
           && !(playerHit?.targetInvisible ?? false)
           // ISSUES #78: the mid-battle switch-in scene renderer owns the
@@ -1353,6 +1395,7 @@ export function createBattleResolutionPresentationRenderView(
       }),
       opponent: Object.freeze({
         sprite: (spriteVisibility.get(1) ?? true)
+          && !semiInvulnerableHidden[1]
           && !fainted.has(1)
           && !(opponentHit?.targetInvisible ?? false)
           && midBattleSwitchIn?.battler !== 1
