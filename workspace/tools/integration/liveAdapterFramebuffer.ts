@@ -27,6 +27,10 @@ import {
   activateLiveMovePresentationRng, liveMovePresentationRngBodyKey, liveMoveRandom2Plan, type LiveMovePresentationRngInput,
 } from "../../src/engine/liveMovePresentationRng.ts";
 import { createPresentationRngHostAt } from "../../src/engine/presentationRngHost.ts";
+import {
+  LIVE_BATTLER_X2_IDLE, applyLiveBattlerX2Event, liveBattlerX2EventsOf, liveMoveBattlerX2Input, type LiveMoveBattlerX2Input,
+} from "../../src/engine/liveBattlerX2History.ts";
+import type { BattleKernelSemanticEvent } from "../../src/engine/battleDecisionBoundary.ts";
 import { createPresentationRngState } from "../../src/engine/presentationRng.ts";
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
 import type { BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
@@ -176,6 +180,30 @@ export function fixturePresentationRng(f: Fixture, request: BattleMoveAnimationR
   return { host, key };
 }
 
+/**
+ * Battler x2 history at the fixture body's activation edge (ISSUES #148), through the PRODUCTION tracker
+ * (liveBattlerX2History.ts) from the scenario's real history: both battlers sent in (idle), then the recorded post-KO
+ * semantic events (precedingTurns, without the body itself) or each declared preceding body (precedingBodies). Never a
+ * hand-set state. POKEBENCH_LIVE_X2_INPUT=species-rest withholds it (the pre-#148 species front-idle rest).
+ */
+export function fixtureBattlerX2Input(f: Fixture): LiveMoveBattlerX2Input | undefined {
+  if (process.env.POKEBENCH_LIVE_X2_INPUT === "species-rest") return undefined;
+  let history = LIVE_BATTLER_X2_IDLE;
+  if (f.precedingTurns) {
+    const payloads = f.precedingTurns.flatMap((turn) => turn.events).slice(0, -1);
+    for (const payload of payloads) {
+      for (const event of liveBattlerX2EventsOf({ payload } as unknown as BattleKernelSemanticEvent)) {
+        history = applyLiveBattlerX2Event(history, event);
+      }
+    }
+  } else {
+    for (const unit of f.precedingBodies ?? []) {
+      history = applyLiveBattlerX2Event(history, { kind: "move-body", moveId: unit.moveId, attackerSide: unit.side });
+    }
+  }
+  return liveMoveBattlerX2Input(history);
+}
+
 export function liveView(f: Fixture, age: number): BattleResolutionPresentationRenderView {
   const profile = f.fieldProfile;
   const makeBattler = (side: "player" | "opponent") => {
@@ -230,6 +258,7 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
         : postKo ? postKo.spriteOrderInput
           : prepareLiveMoveSpriteOrder(fixtureSpriteOrder(f, request).order, request).input,
       ...(liveMoveRandom2Plan(request) === null ? {} : { presentationRng: fixturePresentationRng(f, request) }),
+      ...(fixtureBattlerX2Input(f) === undefined ? {} : { battlerX2Input: fixtureBattlerX2Input(f) }),
     },
     visibility: { player: { sprite: true, healthbox: true }, opponent: { sprite: true, healthbox: true } },
     waitCursor: null, bottom: "message", confirmHandoff: null, switchIn: null,

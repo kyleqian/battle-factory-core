@@ -37,6 +37,7 @@ import { STUN_SPORE_FRAME_COUNT } from "../animation/stunSpore.ts";
 import { GRASS_WHISTLE_WINDOW_FRAMES } from "../animation/grassWhistle.ts";
 import { DOUBLE_EDGE_FRAME_COUNT } from "../animation/doubleEdge.ts";
 import { speciesFrontIdleRestOffsetOrZero } from "../animation/speciesIdleAnim.ts";
+import { liveTrackedFrontIdleRest, type LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import { FAINT_ATTACK_ANIMATION_PROFILE } from "../animation/faintAttack.ts";
 import { RAZOR_LEAF_BODY_LAST_AGE } from "../animation/razorLeaf.ts";
 import { THUNDER_PUNCH_MOVE_BODY_LAST_AGE } from "../animation/thunderPunch.ts";
@@ -327,7 +328,7 @@ export interface LiveBattlerAnchors {
   readonly battlePositionCenter: Readonly<{ x: number; y: number }>;
   /** `MON_PIC_HEIGHT - 2 * yDelta` from the species pic coords. */
   readonly pictureHeight: number;
-  /** Front idle rest offset (opponent only; the player back sprite has none). */
+  /** Front idle rest offset (opponent only; the player back sprite has none); {0,0} once the x2 history is zeroed. */
   readonly frontIdleRest: Readonly<{ x2: number; y2: number }>;
 }
 
@@ -348,6 +349,7 @@ export interface LiveBattlerAnchors {
 export function liveBattlerAnchors(
   battler: "player" | "opponent",
   art: ReturnType<typeof createBattleCommandFieldArtView>,
+  x2Input?: LiveMoveBattlerX2Input,
 ): LiveBattlerAnchors {
   const origin = battleCommandFieldSpriteOrigin(art[battler], battler);
   return {
@@ -358,8 +360,9 @@ export function liveBattlerAnchors(
     spriteCenter: { x: origin.x + 32, y: origin.y + 32 },
     battlePositionCenter: battler === "player" ? { x: 72, y: 80 } : { x: 176, y: 40 },
     pictureHeight: 64 - 2 * art[battler].coords.yOffset,
+    // The species rest until a body runs an absolute-reset task on the battler (liveBattlerX2History.ts, ISSUES #148).
     frontIdleRest: battler === "opponent"
-      ? speciesFrontIdleRestOffsetOrZero(art[battler].speciesSymbol)
+      ? liveTrackedFrontIdleRest(battler, speciesFrontIdleRestOffsetOrZero(art[battler].speciesSymbol), x2Input)
       : { x2: 0, y2: 0 },
   };
 }
@@ -767,12 +770,16 @@ export function liveMoveAnimationPresentation(
   spriteAllocatorInput?: LiveMoveSpriteAllocatorInput,
   spriteOrderInput?: LiveMoveSpriteOrderInput,
   presentationRngInput?: LiveMovePresentationRngInput,
+  battlerX2Input?: LiveMoveBattlerX2Input,
 ): SceneOnMovePresentationState | null {
   if (liveMoveAnimationDuration(request, field) === null) return null;
   const art = createBattleCommandFieldArtView(field);
   const battler = (side: "player" | "opponent"): SceneOnPresentationBattler => {
     const origin = battleCommandFieldSpriteOrigin(art[side], side);
+    // ISSUES #148: a battler an earlier body left at x2/y2 0 is drawn there by the renderer's species-rest readers.
+    const rest = liveBattlerAnchors(side, art).frontIdleRest, tracked = liveBattlerAnchors(side, art, battlerX2Input).frontIdleRest;
     return {
+      ...(tracked.x2 === rest.x2 && tracked.y2 === rest.y2 ? {} : { liveIdleRest: tracked }),
       species: art[side].speciesSymbol,
       geometry: {
         side, spriteCorner: origin,
@@ -808,7 +815,7 @@ export function liveMoveAnimationPresentation(
   });
   const pictureHeight = (side: "player" | "opponent") =>
     64 - 2 * art[side].coords.yOffset;
-  const attackerAnchors = liveBattlerAnchors(attacker.geometry.side, art);
+  const attackerAnchors = liveBattlerAnchors(attacker.geometry.side, art, battlerX2Input);
   const fieldProfile = {
     playerHp: field.player.hp, playerMaxHp: field.player.maxHP,
     opponentHp: field.opponent.hp, opponentMaxHp: field.opponent.maxHP,
@@ -880,13 +887,13 @@ export function liveMoveAnimationPresentation(
       config = {
         move, attacker, target, fieldProfile,
         attackerPictureOffset: attackerAnchors.picOffsetPoint,
-        targetPictureOffset: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint,
+        targetPictureOffset: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).picOffsetPoint,
       };
       break;
     }
     case 238:
       config = { move: "CROSS_CHOP", attacker, target, fieldProfile,
-        targetPictureOffset: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint };
+        targetPictureOffset: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).picOffsetPoint };
       break;
     case 197:
       config = { move: "DETECT", attacker, target, fieldProfile,
@@ -908,7 +915,7 @@ export function liveMoveAnimationPresentation(
     case 86: case 87:
       // GetBattlerSpriteCoord(target, X_2/Y_2) resolves to the picture-offset point.
       config = { move: request.moveId === 86 ? "THUNDER_WAVE" : "THUNDER", attacker, target, fieldProfile,
-        targetEffectCenter: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint };
+        targetEffectCenter: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).picOffsetPoint };
       break;
     case 207:
       config = { move: "SWAGGER", attacker, target, fieldProfile,
@@ -923,7 +930,7 @@ export function liveMoveAnimationPresentation(
       // sourceOrbOrigin adds 10 to the "resolved animation center" to reach
       // GetBattlerSpriteCoord(Y_PIC_OFFSET), so battlers carry that point minus 10.
       const resolved = (battler: SceneOnPresentationBattler): SceneOnPresentationBattler => {
-        const point = liveBattlerAnchors(battler.geometry.side, art).picOffsetPoint;
+        const point = liveBattlerAnchors(battler.geometry.side, art, battlerX2Input).picOffsetPoint;
         return { ...battler, geometry: { ...battler.geometry, animationCenter: {
           x: point.x, y: point.y - 10 } } };
       };
@@ -934,7 +941,7 @@ export function liveMoveAnimationPresentation(
     case 217: {
       // presentAtAge adds the player-side +8 of CreateHealingEffect's Y_PIC_OFFSET
       // itself, so hand it the picture-offset point without that +8 (clamp kept).
-      const targetPoint = liveBattlerAnchors(target.geometry.side, art).picOffsetPoint;
+      const targetPoint = liveBattlerAnchors(target.geometry.side, art, battlerX2Input).picOffsetPoint;
       config = { move: "PRESENT", attacker, fieldProfile,
         branch: request.damage > 0 ? "damage" : "heal",
         target: { ...target, geometry: { ...target.geometry, animationCenter: {
@@ -956,7 +963,7 @@ export function liveMoveAnimationPresentation(
     case 259:
       config = { move: "TORMENT", attacker, target, fieldProfile,
         attackerPictureOffset: attackerAnchors.picOffsetPoint,
-        targetPictureOffset: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint,
+        targetPictureOffset: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).picOffsetPoint,
         battlerHeight: attackerAnchors.pictureHeight };
       break;
     case 232:
@@ -1043,9 +1050,7 @@ export function liveMoveAnimationPresentation(
     case 136:
       config = {
         move: "HI_JUMP_KICK", attacker, target, fieldProfile,
-        targetInitialX2: target.geometry.side === "opponent"
-          ? speciesFrontIdleRestOffsetOrZero(target.species).x2
-          : 0,
+        targetInitialX2: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).frontIdleRest.x2,
       };
       break;
     case 147: config = { move: "SPORE", attacker, target, fieldProfile }; break;
@@ -1223,13 +1228,13 @@ export function liveMoveAnimationPresentation(
       // ShakeBattlers retains each battler's current idle x2 (player back sprites have none).
       config = { move: "EARTHQUAKE", attacker, target, fieldProfile,
         initialBattlerX2: {
-          player: liveBattlerAnchors("player", art).frontIdleRest.x2,
-          opponent: liveBattlerAnchors("opponent", art).frontIdleRest.x2,
+          player: liveBattlerAnchors("player", art, battlerX2Input).frontIdleRest.x2,
+          opponent: liveBattlerAnchors("opponent", art, battlerX2Input).frontIdleRest.x2,
         } };
       break;
     case 90:
       config = { move: "FISSURE", attacker, target, fieldProfile,
-        initialTargetX2: liveBattlerAnchors(target.geometry.side, art).frontIdleRest.x2 };
+        initialTargetX2: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).frontIdleRest.x2 };
       break;
     case 133:
       // BATTLER_COORD_ATTR_WIDTH/HEIGHT: GetBattlerSpriteCoordAttr reads the species pic coords.
@@ -1240,7 +1245,7 @@ export function liveMoveAnimationPresentation(
     case 152: case 345: case 60:
       // Species-owned idle x2 of the target (player back sprites have none).
       config = { move: request.moveId === 152 ? "CRABHAMMER" : request.moveId === 60 ? "PSYBEAM" : "MAGICAL_LEAF", attacker, target, fieldProfile,
-        targetIdleX2: liveBattlerAnchors(target.geometry.side, art).frontIdleRest.x2 };
+        targetIdleX2: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).frontIdleRest.x2 };
       break;
     case 135: {
       // MOVE_TARGET_USER: the semantic target is the attacker (healing stars use X_2 / Y_PIC_OFFSET of it);
@@ -1259,7 +1264,7 @@ export function liveMoveAnimationPresentation(
       config = { move: "TEETER_DANCE",
         attacker: { ...attacker, geometry: { ...attacker.geometry, animationCenter: attackerAnchors.picOffsetPoint } },
         target: { ...target, geometry: { ...target.geometry, animationCenter: target.geometry.side === "player"
-          ? liveBattlerAnchors("player", art).spriteCenter : liveBattlerAnchors("opponent", art).picOffsetPoint } },
+          ? liveBattlerAnchors("player", art, battlerX2Input).spriteCenter : liveBattlerAnchors("opponent", art, battlerX2Input).picOffsetPoint } },
         fieldProfile, attackerSpriteCenter: attackerAnchors.spriteCenter,
         attackerPersonality: field[attacker.geometry.side].personality ?? 0 };
       break;
@@ -1281,7 +1286,7 @@ export function liveMoveAnimationPresentation(
       config = { move: "GLARE", attacker, target, fieldProfile,
         attackerEyeCenter: { x: pic.x, y: pic.y - 8 },
         eyeDotStart: { x: pic.x + (attacker.geometry.side === "player" ? quarter : -quarter), y: pic.y - quarter },
-        eyeDotEnd: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint };
+        eyeDotEnd: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).picOffsetPoint };
       break;
     }
     case 57: case 330:
@@ -1290,7 +1295,7 @@ export function liveMoveAnimationPresentation(
     case 196: case 59: {
       // Source X_2/Y_PIC attacker and target centers; singles SetAverageBattlerPositions is the target's own point.
       // Icy Wind's spikes aim at the target's sBattlerCoords point (battlePositionCenter).
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const geometry = { attackerCenter: attackerAnchors.picOffsetPoint, targetCenter: targetAnchors.picOffsetPoint };
       const icyGeometry = { ...geometry, spikeTargetCenter: targetAnchors.battlePositionCenter };
       if (!provableEffectOrder(request.moveId as 196 | 59, attacker.geometry.side,
@@ -1313,7 +1318,7 @@ export function liveMoveAnimationPresentation(
       break;
     case 265: {
       // GetBattlerSpriteCoordAttr width/height + picture height of the target (prep s2.6).
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const coords = liveBattlerCoordAttrs(target.geometry.side, art);
       config = { move: "SMELLING_SALT", attacker, target, fieldProfile,
         animationProfile: {
@@ -1350,7 +1355,7 @@ export function liveMoveAnimationPresentation(
       config = { move: "DRAGON_BREATH", attacker, target, fieldProfile: { ...fieldProfile, playerStatus: "none" },
         animationProfile: { ...CANONICAL_DRAGON_BREATH_FIRE_GEOMETRY,
           attackerCenter: attackerAnchors.picOffsetPoint,
-          targetCenter: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint,
+          targetCenter: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).picOffsetPoint,
           attackerSide: attacker.geometry.side,
           targetSubpriority: target.geometry.side === "player" ? 30 : 40 } };
       break;
@@ -1389,8 +1394,8 @@ export function liveMoveAnimationPresentation(
       config = { move: "EMBER", attacker, target, fieldProfile: { ...fieldProfile, playerStatus: "none" },
         animationProfile: {
           attackerCenter: attackerAnchors.picOffsetPoint,
-          targetCenter: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint,
-          targetBattlePosition: liveBattlerAnchors(target.geometry.side, art).battlePositionCenter,
+          targetCenter: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).picOffsetPoint,
+          targetBattlePosition: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).battlePositionCenter,
           attackerSide: attacker.geometry.side,
           targetSubpriority: target.geometry.side === "player" ? 30 : 40,
         } };
@@ -1410,8 +1415,8 @@ export function liveMoveAnimationPresentation(
       // residual-drain fields are unused by the main body. Launch from the attacker pic offset; the target holds its idle x2.
       config = { move: "LEECH_SEED", body: "main", attacker, target, fieldProfile,
         effectCenter: attackerAnchors.picOffsetPoint,
-        targetRestOffset: { x2: liveBattlerAnchors(target.geometry.side, art).frontIdleRest.x2,
-          y2: liveBattlerAnchors(target.geometry.side, art).frontIdleRest.y2 },
+        targetRestOffset: { x2: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).frontIdleRest.x2,
+          y2: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).frontIdleRest.y2 },
         allocatorProfile: { seeds: [3, 4, 5], hitsplat: 3, orbs: [3, 4, 5, 7, 9, 10, 11, 12], stars: [3, 4, 5, 3], paletteController: 3 } };
       break;
     case 161: {
@@ -1421,7 +1426,7 @@ export function liveMoveAnimationPresentation(
       const fullOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (fullOrder === null) return null;
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       config = { move: "TRI_ATTACK", attacker, target, fieldProfile,
         animationGeometry: { attackerPositionCenter: attackerAnchors.battlePositionCenter,
           targetPictureCenter: targetAnchors.picOffsetPoint,
@@ -1438,7 +1443,7 @@ export function liveMoveAnimationPresentation(
       const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
       const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (fullOrder === null) return null;
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const attackerSlot = attacker.geometry.side === "player" ? 6 : 8, targetSlot = attackerSlot === 6 ? 8 : 6;
       if (request.moveId === 194) {
         const bottom = (side: "player" | "opponent", a: LiveBattlerAnchors) => a.picOffsetPoint.y + liveBattlerCoordAttrs(side, art).height / 2;
@@ -1471,7 +1476,7 @@ export function liveMoveAnimationPresentation(
       const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
       const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (fullOrder === null) return null;
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const tc = liveBattlerCoordAttrs(target.geometry.side, art);
       const pic = targetAnchors.picOffsetPoint;
       const cx = targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2, cy = targetAnchors.spriteCenter.y + targetAnchors.frontIdleRest.y2;
@@ -1491,7 +1496,7 @@ export function liveMoveAnimationPresentation(
       const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
       const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (fullOrder === null) return null;
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const cx = targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2, cy = targetAnchors.spriteCenter.y + targetAnchors.frontIdleRest.y2;
       const offset = (a: LiveBattlerAnchors) => ({ x: a.frontIdleRest.x2, y: a.frontIdleRest.y2 });
       const attackerSub = attacker.geometry.side === "player" ? 30 : 40, targetSub = target.geometry.side === "player" ? 30 : 40;
@@ -1519,7 +1524,7 @@ export function liveMoveAnimationPresentation(
       const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
       const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (fullOrder === null) return null;
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const cx = targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2, cy = targetAnchors.spriteCenter.y + targetAnchors.frontIdleRest.y2;
       const centered = (battler: typeof attacker, a: LiveBattlerAnchors) =>
         ({ ...battler, geometry: { ...battler.geometry, animationCenter: a.picOffsetPoint, battlePositionCenter: a.picOffsetPoint } });
@@ -1555,7 +1560,7 @@ export function liveMoveAnimationPresentation(
       const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
       const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (fullOrder === null) return null;
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const pic = attackerAnchors.picOffsetPoint;
       const programs: readonly (readonly [big: boolean, initialY: number, targetY: number, duration: number])[] = [
         [true, -24, 8, 140], [false, -24, 8, 100], [false, -24, 8, 100], [true, -24, 8, 140], [false, -24, 8, 100], [false, -24, 8, 100],
@@ -1593,7 +1598,7 @@ export function liveMoveAnimationPresentation(
       const oamOrderSeed = spriteOrderForSlots({ known: true, free: spriteOrderInput.free, pendingDestroyed: [] },
         LEAF_BLADE_OAM_ORDER_SLOTS);
       if (oamOrderSeed === null) return null;
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const targetCoords = liveBattlerCoordAttrs(target.geometry.side, art);
       config = { move: "LEAF_BLADE", attacker, target, fieldProfile, oamOrderSeed,
         targetIdleX2: targetAnchors.frontIdleRest.x2,
@@ -1611,7 +1616,7 @@ export function liveMoveAnimationPresentation(
       if (spriteOrderSeed === null || spriteSlots.length !== 10) return null;
       config = { move: "BLAZE_KICK", attacker, target, fieldProfile: { ...fieldProfile, playerStatus: "none" },
         animationProfile: {
-          targetCenter: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint,
+          targetCenter: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).picOffsetPoint,
           targetSubpriority: target.geometry.side === "player" ? 30 : 40,
           attackerSide: attacker.geometry.side, spriteSlots, spriteOrderSeed,
         } };
@@ -1627,7 +1632,7 @@ export function liveMoveAnimationPresentation(
       if (spriteOrderSeed === null) return null;
       config = { move: "ROCK_THROW", attacker, target, fieldProfile,
         animationProfile: { ...ROCK_THROW_ANIMATION_PROFILE, spriteOrderSeed,
-          targetIdleX2: liveBattlerAnchors(target.geometry.side, art).frontIdleRest.x2 } };
+          targetIdleX2: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).frontIdleRest.x2 } };
       break;
     }
     case 195: {
@@ -1653,7 +1658,7 @@ export function liveMoveAnimationPresentation(
       config = { move: "FLAMETHROWER", attacker, target, fieldProfile: { ...fieldProfile, playerStatus: "none" },
         animationProfile: {
           attackerCenter: attackerAnchors.picOffsetPoint,
-          targetCenter: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint,
+          targetCenter: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).picOffsetPoint,
           attackerSide: attacker.geometry.side,
           // ANIM_ATTACKER subpriority 3 off the attacker's base (30 player / 40 opponent): 27 / 37.
           flameSubpriority: attacker.geometry.side === "player" ? 27 : 37,
@@ -1664,7 +1669,7 @@ export function liveMoveAnimationPresentation(
     }
     case 82: {
       // D1 (#145): ROM StartDragonFireTranslation aims from the attacker's pic offset at the TARGET's, not at an ONIX literal.
-      const dragonTargetPic = liveBattlerAnchors(target.geometry.side, art).picOffsetPoint;
+      const dragonTargetPic = liveBattlerAnchors(target.geometry.side, art, battlerX2Input).picOffsetPoint;
       config = { move: "DRAGON_RAGE", attacker, target, fieldProfile,
         fireSpitGeometry: dragonRageFireSpitGeometryFor(attacker.geometry.side, attackerAnchors.picOffsetPoint, dragonTargetPic) };
       break;
@@ -1707,7 +1712,7 @@ export function liveMoveAnimationPresentation(
       // docs/next-adapters-prep6.md s2.1: rocks/Red-X use the target pic point; the target's battler slot is the
       // known-entry slot (opponent 8 / player 6, equal to liveSpriteSlotForOwner on the known-entry host); the rock
       // slots 3,4,5,7,9 are first-free and seed-independent (0/42 seeds), so the reducer's slot rule needs no host.
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       config = { move: "ROCK_TOMB", attacker, target, fieldProfile,
         targetSpriteSlot: target.geometry.side === "opponent" ? 8 : 6,
         targetInitialX2: targetAnchors.frontIdleRest.x2,
@@ -1822,7 +1827,7 @@ export function liveMoveAnimationPresentation(
       if (!spriteOrderInput?.known) return null;
       config = { move: "FIRE_BLAST", attacker, target, fieldProfile,
         animationProfile: { attackerPictureCenter: attackerAnchors.picOffsetPoint,
-          targetPictureCenter: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint,
+          targetPictureCenter: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).picOffsetPoint,
           targetSpriteSlot: target.geometry.side === "opponent" ? 8 : 6 } };
       break;
     }
@@ -1849,7 +1854,7 @@ export function liveMoveAnimationPresentation(
       if (!spriteOrderInput?.known) return null;
       const attackerSlot = attacker.geometry.side === "player" ? 6 : 8;
       const targetSlot = target.geometry.side === "player" ? 6 : 8;
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       if (request.moveId === 129) {
         config = { move: "SWIFT", attacker: affineCenterBattler(attacker), target: affineCenterBattler(target), fieldProfile,
           animationProfile: { attackerSide: attacker.geometry.side, attackerEffectCenter: attackerAnchors.picOffsetPoint,
@@ -1869,7 +1874,7 @@ export function liveMoveAnimationPresentation(
       // prep10 s3.5, player attacker: flashing initial callback/affine advances are all 0 (Minun, Plusle, Chinchou); the
       // tie order is the accepted artifact (not derived: unproven for other histories, so the lend gate applies).
       if (!spriteOrderInput?.known) return null;
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       config = { move: "SPARK", attacker, target, fieldProfile,
         attackerPictureOffset: attackerAnchors.picOffsetPoint, targetPictureOffset: targetAnchors.battlePositionCenter,
         targetImpactPosition: targetAnchors.picOffsetPoint, attackerBgPriority: 2, targetBgPriority: 1,
@@ -1883,7 +1888,7 @@ export function liveMoveAnimationPresentation(
       // and nothing else in the order is drawn, so the lent order is pixel-neutral (dense-verified with the order
       // withheld AND lent): ungated like Solar Beam, which is why the unleash body (after an untracked setup body) renders.
       // ShakeMon2 starts from the target's live idle x2/y2.
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       config = { move: "RAZOR_WIND", body: (request.turn & 1) === 0 ? "setup" : "unleash", attacker, target, fieldProfile,
         attackerPictureCenter: attackerAnchors.picOffsetPoint, targetPictureCenter: targetAnchors.picOffsetPoint,
         targetRestOffset: { x2: targetAnchors.frontIdleRest.x2, y2: targetAnchors.frontIdleRest.y2 },
@@ -1897,7 +1902,7 @@ export function liveMoveAnimationPresentation(
       // hitsplat 3, fragments 4,5,7,9, ShakeMon task 0; matrix bitmap 0x6, no task at activation), identical for every hit:
       // gate on the lent order. The reducer reads no order; the caller-owned RNG is echoed only.
       if (!spriteOrderInput?.known) return null;
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const slotOf = (side: "player" | "opponent") => side === "player" ? 6 : 8;
       config = { move: "ROCK_BLAST", attacker, target, bodies: [{ fieldProfile, moveTextVisible: false,
         animationProfile: { attackerSide: attacker.geometry.side,
@@ -1918,7 +1923,7 @@ export function liveMoveAnimationPresentation(
       break;
     case 179: {
       // prep10 s3.2: ShakeTargetBasedOnMovePowerOrDmg amplitude = clamp(gAnimMovePower / 12, 1, 16) (request.power = gBattleMovePower).
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       config = { move: "REVERSAL", attacker, target, fieldProfile,
         attackerPictureOffset: attackerAnchors.picOffsetPoint, targetPictureOffset: targetAnchors.picOffsetPoint,
         resolvedShake: { kind: "resolved-power-shake", amplitude: Math.min(16, Math.max(1, Math.floor(request.power / 12))) } };
@@ -1934,8 +1939,8 @@ export function liveMoveAnimationPresentation(
       config = { move: "MAGNITUDE", attacker, target, fieldProfile,
         animationInputs: { movePower: request.power, attackerSide: attacker.geometry.side, targetSide: target.geometry.side,
           initialPlatformX: 0,
-          initialBattlerX2: { player: liveBattlerAnchors("player", art).frontIdleRest.x2,
-            opponent: liveBattlerAnchors("opponent", art).frontIdleRest.x2 },
+          initialBattlerX2: { player: liveBattlerAnchors("player", art, battlerX2Input).frontIdleRest.x2,
+            opponent: liveBattlerAnchors("opponent", art, battlerX2Input).frontIdleRest.x2 },
           battlerSpriteSlots: { player: 6, opponent: 8 }, spriteOrder: fullOrder } };
       break;
     }
@@ -1950,7 +1955,7 @@ export function liveMoveAnimationPresentation(
       if (fullOrder === null) return null;
       const orderIndex = (slot: number) => fullOrder.indexOf(slot);
       const side = attacker.geometry.side;
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const subA = side === "player" ? 30 : 40, subT = side === "player" ? 40 : 30;
       const towardTarget = side === "player" ? 1 : -1;
       const restOffset = (a: LiveBattlerAnchors) => ({ x2: a.frontIdleRest.x2, y2: a.frontIdleRest.y2 });
@@ -2063,7 +2068,7 @@ export function liveMoveAnimationPresentation(
       const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (fullOrder === null) return null;
       const side = attacker.geometry.side;
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const range = (from: number, to: number) => Array.from({ length: to - from + 1 }, (_, i) => from + i);
       const healing = attackerAnchors.picOffsetPoint;
       const seedFor = (slots: readonly number[]) => spriteOrderForSlots(lentState, slots);
@@ -2164,7 +2169,7 @@ export function liveMoveAnimationPresentation(
       // Defense Curl doubles the power (60 << (counter - 1)): the SHUCKLE / BLISSEY curl bodies keep a 6 px field residual
       // (cause not isolated), so only the plain power ladder (30 << (counter - 1)) is live; curl bodies decline.
       if (request.power !== 30 << (counter - 1)) return null;
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const playerAttacker = attacker.geometry.side === "player";
       const baseX2 = counter === 1 ? targetAnchors.frontIdleRest.x2 : 0, baseY2 = counter === 1 ? targetAnchors.frontIdleRest.y2 : 0;
       const cx = targetAnchors.spriteCenter.x + baseX2, cy = targetAnchors.spriteCenter.y + baseY2;
@@ -2208,7 +2213,7 @@ export function liveMoveAnimationPresentation(
       // rotates the attacker about its unshifted OBJ center; the shake starts from the target's front-idle x2.
       const words = liveMovePresentationRngWords(presentationRngInput)?.words;
       if (words === undefined || words.length !== 2 || !FLAIL_POWERS.includes(request.power as FlailPower)) return null;
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       config = { move: "FLAIL", attacker: affineCenterBattler(attacker), target, fieldProfile,
         movePower: request.power as FlailPower,
         targetInitialX2: targetAnchors.frontIdleRest.x2,
@@ -2251,7 +2256,7 @@ export function liveMoveAnimationPresentation(
       const initialOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (initialOrder === null) return null;
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       config = { move: "ICE_BEAM", attacker, target, fieldProfile,
         animationProfile: { orientation: attacker.geometry.side === "player" ? "player-back" : "opponent-front",
           endAge: 202, gameplayRng: 0, animationRngStart: 0,
@@ -2273,7 +2278,7 @@ export function liveMoveAnimationPresentation(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (lentOrder === null) return null;
       const side = attacker.geometry.side;
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const animationGeometry = { attackerPictureCenter: attackerAnchors.picOffsetPoint, targetPictureCenter: targetAnchors.picOffsetPoint,
         attackerRestOffset: { x2: attackerAnchors.frontIdleRest.x2, y2: attackerAnchors.frontIdleRest.y2 },
         targetRestOffset: { x2: targetAnchors.frontIdleRest.x2, y2: targetAnchors.frontIdleRest.y2 } };
@@ -2321,7 +2326,7 @@ export function liveMoveAnimationPresentation(
       const initialOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (initialOrder === null) return null;
-      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const playerAttacker = attacker.geometry.side === "player";
       const snapshot = { x: targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2, y: targetAnchors.spriteCenter.y };
       config = { move: "WATER_PULSE", attacker: affineCenterBattler(attacker), target: affineCenterBattler(target), fieldProfile,
@@ -2351,7 +2356,7 @@ export function liveMoveAnimationPresentation(
         const side = position === 0 ? "player" as const : position === 1 ? "opponent" as const : null;
         if (type !== 0 && side !== null) {
           impact = true;
-          const anchors = liveBattlerAnchors(side, art), attrs = liveBattlerCoordAttrs(side, art);
+          const anchors = liveBattlerAnchors(side, art, battlerX2Input), attrs = liveBattlerCoordAttrs(side, art);
           // BATTLER_COORD_X_2 at generation time carries no idle x2 (front idle x2 is 0 by age ~45; prep14 s1.7).
           targetX = anchors.picOffsetPoint.x; targetY = anchors.picOffsetPoint.y;
           const dx = Math.trunc(attrs.width / 6), dy = Math.trunc(attrs.height / 6);
@@ -2383,7 +2388,7 @@ export function liveMoveAnimationPresentation(
       // The art view derives the sprite origin from the species yOffset (fieldArtBattler): re-derive it for the form.
       const formArt = { ...art, [side]: { ...art[side], coords: formCoords,
         origin: { x: art[side].origin.x, y: art[side].origin.y - art[side].coords.yOffset + formCoords.yOffset } } } as typeof art;
-      const center = liveBattlerAnchors(side, formArt).picOffsetPoint;
+      const center = liveBattlerAnchors(side, formArt, battlerX2Input).picOffsetPoint;
       // The sprite itself sits at the letter form's own origin too (BattleLoadMonSpriteGfx / GetBattlerSpriteDefault_Y read the form coords).
       const formOrigin = battleCommandFieldSpriteOrigin(formArt[side], side);
       const fullOrder = spriteOrderWithOccupiedPrefix(
@@ -2396,7 +2401,7 @@ export function liveMoveAnimationPresentation(
         animationProfile: { attackerSubpriority: side === "player" ? 30 : 40, targetSubpriority: side === "player" ? 40 : 30,
           allocationSlots: slots, spriteOrderSeed: fullOrder.filter(slot => slots.includes(slot)),
           orbitMatrixNums: matrices.slice(0, 6), scatterMatrixNums: matrices.slice(6),
-          uninitializedScatterY: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint.y,
+          uninitializedScatterY: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).picOffsetPoint.y,
           attackerPersonality: personality, animationRngSeed: 0 } };
       break;
     }
