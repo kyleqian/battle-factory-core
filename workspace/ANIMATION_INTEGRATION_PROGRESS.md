@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-05 (day, wind-down) — 198 -> 217 live adapters; lends across faints/switches; species fixes; elevated renderer
+## 2026-10-05 (day, wind-down) — 198 -> 218 live adapters; lends across faints/switches; species fixes; elevated renderer
 
 - Folded Opus worker `0f08fa4d1` (code `be86f3141`, src tree `badeb050`) as `e2eb653b6`:
   the production sprite-order tracker models faint, next-mon summary + send-out, forced
@@ -168,8 +168,13 @@
   46 + max(front frame animation, delay + callback) (338/338; leave-one-out 318/318; callback
   durations fitted); the forced-switch fade is the voluntary send-in effect gated by
   `sourceDecision.kind === "switch"`.
-- Session final (supervisor, code `99701a8eb`): typecheck; full suite 1,524 files / 12,314 tests;
-  build 851 (`final-supervisor-gates-20261005-day.json`); preview `99701a8eb` verified (four
+- Folded Sonnet worker `3cbdbb943` (src tree `6418776b`): **218 live adapters** (+Rollout): presentation-
+  only `rolloutCounter` (7th MOVE_ANIMATION argument, move 205 only); bodies 1-5 by counter; the
+  plain power ladder only (Defense Curl bodies decline: SHUCKLE->BLISSEY residual unexplained).
+  Supervisor: player bodies 1/5, opponent body 3, WAILMER body 1 exact twice fresh; route 2/0
+  VOLTORB 5 bodies active, parity PASS. Receipt `rollout-live-receipt.json`.
+- Session final (supervisor, code `24df8af5e`): typecheck; full suite 1,525 files / 12,317 tests;
+  build 851 (`final-supervisor-gates-20261005-day.json`); preview `24df8af5e` verified (four
   hashes, export, ON->OFF, no errors). DEFERRED D3 open (Random2).
 
 ## 2026-10-05 (wind-down) — CASTFORM fix + order table 445 bodies

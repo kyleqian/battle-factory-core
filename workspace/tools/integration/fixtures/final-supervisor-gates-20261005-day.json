@@ -1,9 +1,9 @@
 {
   "schema": "supervisor-final-gates/v1",
   "verifier": "independent integration supervisor (Claude Opus 5.5), 2026-10-05 day wind-down",
-  "productionCodeCommit": "99701a8eb20aac55ff429fdc954ffb6b92f4bee4",
-  "srcTree": "b8565b2299a89d53a27312471440f87326e63d3d",
-  "implementedAdapters": 217,
+  "productionCodeCommit": "24df8af5ea435a8994e3d507855ac982cd90e77a",
+  "srcTree": "6418776b2fc35f58fbfebff164898ce9f1430ae4",
+  "implementedAdapters": 218,
   "typecheck": {
     "command": "npm run typecheck",
     "result": "passed",
@@ -11,11 +11,11 @@
   },
   "fullTest": {
     "command": "PATH=\"$PWD/tools/autonomy/bin:$PATH\" POKEBENCH_VITEST_MAX_WORKERS=4 npm test -- --maxWorkers=4",
-    "passedFiles": 1524,
+    "passedFiles": 1525,
     "skippedFiles": 44,
-    "passedTests": 12314,
+    "passedTests": 12317,
     "skippedTests": 223,
-    "durationSeconds": 383.14,
+    "durationSeconds": 378.14,
     "log": ".integration/validation/supervisor-final-20261005-day/npm-test.log"
   },
   "build": {
@@ -24,7 +24,7 @@
     "result": "passed",
     "log": ".integration/validation/supervisor-final-20261005-day/build-and-preview.log"
   },
-  "preview": "tools/integration/fixtures/playable-preview-99701a8eb-receipt.json",
+  "preview": "tools/integration/fixtures/playable-preview-24df8af5e-receipt.json",
   "batchReceipts": [
     "postko-tracker-receipt.json",
     "postko-lend-receipt.json",
@@ -37,6 +37,7 @@
     "issue145b-receipt.json",
     "voluntary-lend-receipt.json",
     "elevated-renderer-receipt.json",
-    "flybounce-live-receipt.json"
+    "flybounce-live-receipt.json",
+    "rollout-live-receipt.json"
   ]
 }

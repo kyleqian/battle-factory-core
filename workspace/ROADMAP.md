@@ -2202,18 +2202,18 @@ fourteen-move physical batch is verified and folded. Helping Hand remains
 unaccepted pending legal doubles staging. No whole-playable arbitrary-history
 framebuffer exactness is claimed.
 
-Next (2026-10-05 day): 217 live adapters (master `99701a8eb` after the 2026-10-05 day session).
+Next (2026-10-05 day): 218 live adapters (master `24df8af5e` after the 2026-10-05 day session).
 The sprite order now stays tracked and LENT after opponent knock-outs, player faints
 (forced switch-in), voluntary switches, cancelled party menus and Roar/Whirlwind forced
 switches (entry-label / role relabel; allocator re-seeded); 467-body production table.
 Elevated opponents now render at the right height with their shadow in ordinary frames
 (ISSUES #147, both scene modes). Resume points, in order:
-1. DEFERRED D3 (OPEN, user decision): the Random2 group (52 of the 59 remaining moves) is
+1. DEFERRED D3 (OPEN, user decision): the Random2 group (52 of the 58 remaining moves) is
    NOT trackable in play (`docs/random2-trackability.md`); surrogate presentation RNG with
    a separate claim bucket, or keep the fallback. Do not build Random2 adapters before
    the answer.
-2. Non-Random2 moves: Rollout and Endeavor (`docs/rollout-endeavor-prep.md`: counter and
-   stale-power rules measured, drafts ready), Baton Pass (instant forced removal of the
+2. Non-Random2 moves: Endeavor (`docs/rollout-endeavor-prep.md`: stale-power rule measured,
+   drafts ready), Rollout after Defense Curl (live adapter declines; residual unexplained), Baton Pass (instant forced removal of the
    attacker + presented replacement), Fire Punch (needs a generic Scene-ON renderer),
    Memento, Substitute, Extreme Speed; Spark opponent attacker.
 3. ISSUES #146 remainder: send-in tail after any send-in (model `docs/send-in-tail-model.md`

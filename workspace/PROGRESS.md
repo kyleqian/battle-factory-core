@@ -5,19 +5,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-05 (day) — S10A wind-down: 198 -> 217 live adapters; lends across faints/switches; 8 species fixes; elevated renderer
+## 2026-10-05 (day) — S10A wind-down: 198 -> 218 live adapters; lends across faints/switches; 8 species fixes; elevated renderer
 
-- **State:** S10A, local master; production `99701a8eb` (217 live adapters, 59 accepted bodies
-  remain: 52 Random2 + 7 others). Supervisor final gates on that code: typecheck, 1,524 files / 12,314 tests, build 851 (`final-supervisor-gates-20261005-day.json`). Preview
-  <http://127.0.0.1:5191/> serves `99701a8eb` (four hashes, export, ON->OFF, no errors) (receipt in `tools/integration/fixtures/`). Opus 5.5
-  supervisor; Opus/Sonnet 5.5 workers; 9 integration folds + 11 evidence merges, all re-proved.
+- **State:** S10A, local master; production `24df8af5e` (218 live adapters, 58 accepted bodies
+  remain: 52 Random2 + 6 others). Supervisor final gates on that code: typecheck, 1,525 files / 12,317 tests, build 851 (`final-supervisor-gates-20261005-day.json`). Preview
+  <http://127.0.0.1:5191/> serves `24df8af5e` (four hashes, export, ON->OFF, no errors) (receipt in `tools/integration/fixtures/`). Opus 5.5
+  supervisor; Opus/Sonnet 5.5 workers; 13 integration folds + 15 evidence merges, all re-proved.
 - **Did (production):** sprite-order tracker kept and LENT across opponent KOs (entry-label relabel),
   player faints + forced switch-in and voluntary switches / cancelled menus (role relabel), Roar /
   Whirlwind forced switches; allocator re-seeded; +22 order rows (467 bodies). Adapters: Magnitude,
   Reversal, Pain Split, Rock Blast, Razor Wind, Spark (player) with gBattleMovePower on the request;
   Leech Seed, Tri Attack, Petal Dance, Destiny Bond, Air Cutter, Foresight, Sky Uppercut, Recycle,
   Spider Web; Roar, Whirlwind (Scene-ON instant forced removal); Fly, Bounce (attacker hidden across
-  the turn gap). Species fixes from swap audits: Leaf Blade, Dragon Rage, Aerial Ace, Rock Throw,
+  the turn gap); Rollout (counter on the request; Defense Curl bodies decline). Species fixes from swap audits: Leaf Blade, Dragon Rage, Aerial Ace, Rock Throw,
   Smelling Salt, Light Screen / Future Sight end shadow, Foresight (#144 closed, #145 trimmed).
   ISSUES #147: elevated opponents were drawn 8 px low without shadow in ordinary resolution frames
   in BOTH scene modes — fixed (Scene OFF 0/935 -> 919/935; 203 committed traces unchanged).
@@ -25,7 +25,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Random2 trackability (NOT trackable), forced-switch continuation (#146), live species audits 1+2,
   elevated post-body + Scene OFF checks, Rollout/Endeavor prep (both trackable), send-in tail model
   (338/338).
-- **Next:** ROADMAP S10A "Next (2026-10-05 day)": D3 answer first; then Rollout/Endeavor, Baton
+- **Next:** ROADMAP S10A "Next (2026-10-05 day)": D3 answer first; then Endeavor, Baton
   Pass, #146 send-in tail (model ready), #145/#147 remainders, order-coverage gaps.
 - **Notes:** **DEFERRED D3 (OPEN):** Random2 animations (52 moves) cannot be tracked exactly in play;
   ship a surrogate presentation RNG in a separate claim bucket (recommended) or keep the fallback.
