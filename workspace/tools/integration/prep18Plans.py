@@ -54,9 +54,9 @@ for key, (cm, label) in CORP.items():
         res[f"{key}-{side}"] = {"scenario": sc, "probeRunsIdentical": ident, "runsSha1": sha, "callers": pr.callers, "draws": [], "drawsTotal": 0,
                                 "note": "no Random2 draw in any body: every gRng2 write is the per-frame RfuMain1+0x10 step; no gameplay Random() in the anim window", "bodies": bodies}
         print(key, side, "identical" if ident else "DIFF", [(b["activationFrame"], b["rows"], b["lagAges"], b["activationEqualsCorpusRow0"], b["planEqualsCorpusPerRow"]) for b in bodies])
-for key, alt in ALT.items():
+for key, alt0 in [(k, v) for k, v in ALT.items()] + [(k + "#opp", v.replace("-alt-", "-altopp-")) for k, v in ALT.items()]:
+    alt = alt0; base = key.split("#")[0]; acc = res[f"{base}-{'opponent' if '#opp' in key else 'player'}"]
     pr, ident, sha = probe_pair(alt)
-    acc = res[f"{key}-player"]
     bodies = []
     for b in acc["bodies"]:
         ba = None
@@ -68,6 +68,6 @@ for key, alt in ALT.items():
         a = ab["altBodyStarts"][min(b["bodyIndex"], len(ab["altBodyStarts"]) - 1)] if b["label"] != "Move_DIG" else ab["altBodyStarts"][b["bodyIndex"]]
         lag = [f - a for f in range(a + 1, a + b["rows"]) if pr.steps[f] == 0]
         alt_res.append({"bodyIndex": b["bodyIndex"], "activationFrame": a, "activationValueHex": f"0x{pr.val[a]:08X}", "lagAges": lag, "sameLagAgesAsAccepted": lag == b["lagAges"], "sameRowsWindow": True})
-    acc["alternate"] = {"scenario": alt, "probeRunsIdentical": ident, "runsSha1": sha, "callers": pr.callers, "bodies": alt_res}
+    acc["alternate" + ("Opponent" if "#opp" in key else "")] = {"scenario": alt, "probeRunsIdentical": ident, "runsSha1": sha, "callers": pr.callers, "bodies": alt_res}
     print("alt", key, ident, [(x["activationFrame"], x["sameLagAgesAsAccepted"]) for x in alt_res])
 OUT.parent.mkdir(parents=True, exist_ok=True); OUT.write_text(json.dumps(res, indent=1))

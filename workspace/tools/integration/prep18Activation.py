@@ -28,15 +28,21 @@ import re
 fam = {}
 for key, rows in res.items():
     m = re.match(r"mechanic-(.*?)-(player|opponent)-", key)
-    side, variant = (m.group(2), m.group(1)) if m else ("alt", re.match(r"prep18-(.*?)-alt-", key).group(1))
+    side, variant = (m.group(2), m.group(1)) if m else ("altopp" if "-altopp-" in key else "alt", re.match(r"prep18-(.*?)-alt(?:opp)?-", key).group(1))
     for r in rows:
         fam.setdefault((variant, r["bodyIndex"]), {})[side] = r
+summary = {}
 for (variant, bi), d in sorted(fam.items()):
     p = d.get("player")
+    ob = d.get("opponent")
     out = {}
     for s, r in d.items():
         out[s] = {"S0": r["firstBodyS0"], "dispcnt/bgcnt": [hex(r["regs"][k]) for k in ("dispcnt", "bg0", "bg1", "bg2", "bg3")], "bld": [r["regs"][k] for k in ("bldcnt", "bldalpha", "bldy")], "bgXY": r["bgXY"], "hw": r["hwScroll"],
                   "nonIdM": r["nonIdentityMatrices"], "scan": (r["scan"]["srcBuffer"], r["scan"]["state"], r["scan"]["nonzero"], r["scan"]["sha1"])}
-    eq = {s: (r["regs"] == p["regs"] and r["bgXY"] == p["bgXY"] and r["hwScroll"] == p["hwScroll"] and r["nonIdentityMatrices"] == p["nonIdentityMatrices"] and r["scan"] == p["scan"]) for s, r in d.items() if s != "player"}
-    print(variant, f"body{bi}", "equalToPlayer", eq)
+    same = lambda r, q: r["regs"] == q["regs"] and r["bgXY"] == q["bgXY"] and r["hwScroll"] == q["hwScroll"] and r["nonIdentityMatrices"] == q["nonIdentityMatrices"] and r["scan"] == q["scan"]
+    eq = {s: same(r, ob if s == "altopp" else p) for s, r in d.items() if s != "player"}  # altopp is compared with the accepted OPPONENT scenario
+    summary[f"{variant}#body{bi}"] = {"equalToAcceptedSameSide": eq, "bySide": out}
+    print(variant, f"body{bi}", "equalToAcceptedSameSide", eq)
     for s, o in out.items(): print("   ", s, json.dumps(o))
+
+OUT.with_name("prep18-activation-summary.json").write_text(json.dumps(summary, indent=1))

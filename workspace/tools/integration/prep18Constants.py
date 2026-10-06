@@ -29,7 +29,7 @@ def monbg(j, r, rk):
 res = {}
 for key, label in LABEL.items():
     scen = {"player": next(k for k in ana if k.startswith(f"mechanic-{key}-player-")), "opponent": next(k for k in ana if k.startswith(f"mechanic-{key}-opponent-"))}
-    if key in ALT: scen["alt"] = ALT[key]
+    if key in ALT: scen["alt"] = ALT[key]; scen["altopp"] = ALT[key].replace("-alt-", "-altopp-")
     rowsby = {t: [r for r in ana[sc] if r["move"] == label] for t, sc in scen.items()}
     ent = {}
     for bi in range(len(rowsby["player"])):
@@ -43,7 +43,7 @@ for key, label in LABEL.items():
             "scenarios": {t: {"scenario": s["scenario"], "activation": s["act"], "rows": s["rows"], "bitmapAtActivation": s["bitmap"], "tasksAtActivation": s["tasksAtAct"], "inUseAtActivation": s["inUse"], "orderShape": s["orderShape"],
                               "monbg": s["monbg"], "netZeroAtEnd1": all(v for v in s["netZeroAtEnd1"].values() if isinstance(v, bool))} for t, s in sigs.items()},
             "constants": {"spawns(age,slot,template,bank,tile,matrix)": p["spawns"], "tasks(age,slot,func)": p["tasks"]},
-            "equalToPlayer": {t: {"spawns": sigs[t]["spawns"] == p["spawns"], "tasks": sigs[t]["tasks"] == p["tasks"], "bitmap": sigs[t]["bitmap"] == p["bitmap"], "inUse": sigs[t]["inUse"] == p["inUse"], "rows": sigs[t]["rows"] == p["rows"]} for t in sigs if t != "player"},
+            "equalToPlayer": {t: {"spawns": sigs[t]["spawns"] == (sigs["opponent"] if t == "altopp" else p)["spawns"], "tasks": sigs[t]["tasks"] == (sigs["opponent"] if t == "altopp" else p)["tasks"], "bitmap": sigs[t]["bitmap"] == p["bitmap"], "inUse": sigs[t]["inUse"] == p["inUse"], "rows": sigs[t]["rows"] == (sigs["opponent"] if t == "altopp" else p)["rows"]} for t in sigs if t != "player"},  # altopp compares with the accepted OPPONENT scenario
             "orderAtActivation": {t: s["orderAtAct"] for t, s in sigs.items()},
             "corpusCrossCheck": {s: {k: ck(s)[k] for k in ("spawnsEqual", "taskPairsEqual", "orderAtAct", "animRng0==rng2AtAct", "inUseAtAct")} | {"offset": ck(s)["firstFrame"]["offset"], "rows": ck(s)["rows"]} for s in ("player", "opponent") if ck(s)},
         }

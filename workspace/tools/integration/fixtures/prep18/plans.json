@@ -119,7 +119,39 @@
     "planEqualsCorpusPerRow": true,
     "mismatchRows": []
    }
-  ]
+  ],
+  "alternateOpponent": {
+   "scenario": "prep18-dig-altopp-flygon-golem",
+   "probeRunsIdentical": true,
+   "runsSha1": "480e740effdc24f3e36fe96c6ea7a7dad5471f3b",
+   "callers": {
+    "RfuMain1+0x10": 391
+   },
+   "bodies": [
+    {
+     "bodyIndex": 0,
+     "activationFrame": 54,
+     "activationValueHex": "0x42D715A3",
+     "lagAges": [
+      191,
+      192
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    },
+    {
+     "bodyIndex": 1,
+     "activationFrame": 612,
+     "activationValueHex": "0xCF31FC18",
+     "lagAges": [
+      34,
+      35
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    }
+   ]
+  }
  },
  "megahorn-player": {
   "scenario": "mechanic-megahorn-player-seaking-opponent-onix",
@@ -200,7 +232,29 @@
     "planEqualsCorpusPerRow": true,
     "mismatchRows": []
    }
-  ]
+  ],
+  "alternateOpponent": {
+   "scenario": "prep18-megahorn-altopp-heracross-golem",
+   "probeRunsIdentical": true,
+   "runsSha1": "6a62827af6490e9bed9d38f82375f2503bc8fbb3",
+   "callers": {
+    "RfuMain1+0x10": 212
+   },
+   "bodies": [
+    {
+     "bodyIndex": 0,
+     "activationFrame": 223,
+     "activationValueHex": "0x12FFCE0D",
+     "lagAges": [
+      137,
+      138,
+      157
+     ],
+     "sameLagAgesAsAccepted": false,
+     "sameRowsWindow": true
+    }
+   ]
+  }
  },
  "will-o-wisp-player": {
   "scenario": "mechanic-will-o-wisp-player-shuppet-opponent-shuckle",
@@ -279,7 +333,28 @@
     "planEqualsCorpusPerRow": true,
     "mismatchRows": []
    }
-  ]
+  ],
+  "alternateOpponent": {
+   "scenario": "prep18-will-o-wisp-altopp-banette-golem",
+   "probeRunsIdentical": true,
+   "runsSha1": "b1c45b67394fd117a528eb09ca8f63c854c8eb81",
+   "callers": {
+    "RfuMain1+0x10": 401
+   },
+   "bodies": [
+    {
+     "bodyIndex": 0,
+     "activationFrame": 81,
+     "activationValueHex": "0x1C02E96C",
+     "lagAges": [
+      193,
+      194
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    }
+   ]
+  }
  },
  "fury-cutter-player": {
   "scenario": "mechanic-fury-cutter-player-grovyle-opponent-blissey",
@@ -487,7 +562,61 @@
     "planEqualsCorpusPerRow": true,
     "mismatchRows": []
    }
-  ]
+  ],
+  "alternateOpponent": {
+   "scenario": "prep18-fury-cutter-altopp-scyther-golem",
+   "probeRunsIdentical": true,
+   "runsSha1": "fc159046e17fb6cf6e7f58ee01aeeda7370c01e6",
+   "callers": {
+    "RfuMain1+0x10": 620
+   },
+   "bodies": [
+    {
+     "bodyIndex": 0,
+     "activationFrame": 82,
+     "activationValueHex": "0xB0528D00",
+     "lagAges": [
+      35,
+      36
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    },
+    {
+     "bodyIndex": 1,
+     "activationFrame": 716,
+     "activationValueHex": "0x0C639BD1",
+     "lagAges": [
+      35,
+      36
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    },
+    {
+     "bodyIndex": 2,
+     "activationFrame": 1350,
+     "activationValueHex": "0xD78DBA06",
+     "lagAges": [
+      35,
+      36
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    },
+    {
+     "bodyIndex": 3,
+     "activationFrame": 1984,
+     "activationValueHex": "0x856639AF",
+     "lagAges": [
+      35,
+      36
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    }
+   ]
+  }
  },
  "return-player": {
   "scenario": "mechanic-return-player-dragonair-opponent-onix",
@@ -566,7 +695,28 @@
     "planEqualsCorpusPerRow": true,
     "mismatchRows": []
    }
-  ]
+  ],
+  "alternateOpponent": {
+   "scenario": "prep18-return-altopp-snorlax-golem",
+   "probeRunsIdentical": true,
+   "runsSha1": "616f26bf74df6d8bcfb75932e80289f5569cc709",
+   "callers": {
+    "RfuMain1+0x10": 369
+   },
+   "bodies": [
+    {
+     "bodyIndex": 0,
+     "activationFrame": 76,
+     "activationValueHex": "0x072069B2",
+     "lagAges": [
+      279,
+      280
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    }
+   ]
+  }
  },
  "return-weak-player": {
   "scenario": "mechanic-return-weak-player-dragonair-opponent-onix",
@@ -822,6 +972,28 @@
     "planEqualsCorpusPerRow": true,
     "mismatchRows": []
    }
-  ]
+  ],
+  "alternateOpponent": {
+   "scenario": "prep18-pursuit-altopp-umbreon-golem",
+   "probeRunsIdentical": true,
+   "runsSha1": "2ee722a9725172d229a2ded720a45d582fe8f590",
+   "callers": {
+    "RfuMain1+0x10": 138
+   },
+   "bodies": [
+    {
+     "bodyIndex": 0,
+     "activationFrame": 76,
+     "activationValueHex": "0x9178A09F",
+     "lagAges": [
+      61,
+      62,
+      83
+     ],
+     "sameLagAgesAsAccepted": true,
+     "sameRowsWindow": true
+    }
+   ]
+  }
  }
 }
