@@ -31,7 +31,11 @@ for l in open(sys.argv[1]):
     act = sb[j][3]["atActivation"]; m = act["mons"]
     f = {kk: v for kk, v in of.items() if kk not in ("sourceFixture", "note", "presentationRngActivation", "precedingBodies")}
     f["scenario"] = os.path.relpath(sw, ROOT) if os.path.isabs(sw) else sw
-    f["target"] = {**of["target"], "species": S_[m[1 if tside == "opponent" else 0]["species"]]["name"].replace("SPECIES_", "")}
+    nm = lambda i: S_[m[i]["species"]]["name"].replace("SPECIES_", "")
+    aside = of["attacker"]["geometry"]["side"]; ai = 0 if aside == "player" else 1
+    f["target"] = {**of["target"], "species": nm(1 - ai)}
+    if "attacker" in of: f["attacker"] = {**of["attacker"], "species": nm(ai)}
+    if "attackerPersonality" in of: f["attackerPersonality"] = m[ai]["personality"]
     if j > 0: f["precedingBodies"] = [{"moveId": sb[q][0], "side": side(sb[q][3])} for q in range(j)]
     if of.get("precedingBodies"): f["precedingBodies"] = f.get("precedingBodies", of["precedingBodies"])
     if "bodyIndex" in f: f["bodyIndex"] = j
