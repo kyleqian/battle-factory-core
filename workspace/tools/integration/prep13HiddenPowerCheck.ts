@@ -24,6 +24,14 @@ for (const sc of Object.keys(A).filter((k) => /hidden-power/.test(k))) {
     orbitMatrixNums: matrices.slice(0, 6), scatterMatrixNums: matrices.slice(6), uninitializedScatterY: romScatter[7].y, attackerPersonality: mon.personality, animationRngSeed: r.rng2,
   };
   const center = { x: romOrbit[0].x, y: romOrbit[0].y };
+  const seedAct = r.orderAtAct.filter((q: number) => slots.includes(q));
+  const romOrderAt = (age: number): number[] => { let o: number[] = r.orderAtAct; for (const [a, ord] of r.orderChanges) if (a <= age) o = ord; return o; };
+  const painterScore = (sd: number[]) => { const p2 = { ...profile, spriteOrderSeed: sd }; let eq = 0, n = 0; const bad: number[] = [];
+    for (let age = 64; age <= 178; age += 1) { const st = hiddenPowerAtAge(age, center, p2); const slotsLive = st.orbs.map((o) => o.slot); if (!slotsLive.length) continue; n += 1;
+      const mine = st.painterOrder.map((ow) => slots[ow]!); const rom2 = romOrderAt(age).filter((q: number) => slotsLive.includes(q));
+      if (JSON.stringify(mine) === JSON.stringify(rom2) || JSON.stringify(mine) === JSON.stringify([...rom2].reverse())) eq += 1; else if (bad.length < 5) bad.push(age); }
+    return { eq, n, bad }; };
+  const pAct = painterScore(seedAct), p63 = painterScore(seed);
   const rom = { slots: [...romOrbit, ...romScatter].map((s: any) => s.slot), matrices: [...romOrbit, ...romScatter].map((s: any) => s.matrix), seed63: seed };
   // center candidates
   const centers = { rom: center, picOffsetPoint: aa.picOffsetPoint, spriteCenter: aa.spriteCenter };
@@ -35,7 +43,7 @@ for (const sc of Object.keys(A).filter((k) => /hidden-power/.test(k))) {
   const slotsEq = JSON.stringify(rom.slots) === JSON.stringify(slots);
   const matEq = JSON.stringify(rom.matrices) === JSON.stringify(matrices);
   out[sc] = { side, species: r.monsAtAct.map((m: any) => m.species), personality: mon.personality, ivWord: mon.ivWord, romSlots: rom.slots, derivedSlots: slots, slotsEqual: slotsEq, romMatrices: rom.matrices, derivedMatrices: matrices, matricesEqual: matEq,
-    uninitializedScatterYRom: romScatter.map((s: any) => s.y), centerCandidates: centers, romBirthPositionsMatched: `${posOk}/${posN}`, orderSeed63: seed, orderSeed63Equal14: seed.length === 14 };
-  console.log(sc.padEnd(52), "slots==", slotsEq, "matrices==", matEq, "pos", `${posOk}/${posN}`, "center rom", JSON.stringify(center), "pic", JSON.stringify(aa.picOffsetPoint), "sprite", JSON.stringify(aa.spriteCenter), "uninitY", romScatter.map((s: any) => s.y).join("/"));
+    uninitializedScatterYRom: romScatter.map((s: any) => s.y), centerCandidates: centers, romBirthPositionsMatched: `${posOk}/${posN}`, orderSeed63: seed, orderSeedActivationFiltered: seedAct, seedActEqualsSeed63: JSON.stringify(seedAct) === JSON.stringify(seed), painterOrderEqualAges: { seed63: p63, activationSeed: pAct }, orderSeed63Equal14: seed.length === 14 };
+  console.log(sc.padEnd(52), "slots==", slotsEq, "matrices==", matEq, "pos", `${posOk}/${posN}`, "center rom", JSON.stringify(center), "pic", JSON.stringify(aa.picOffsetPoint), "sprite", JSON.stringify(aa.spriteCenter), "uninitY", romScatter.map((s: any) => s.y).join("/"), "seedAct==63", JSON.stringify(seedAct) === JSON.stringify(seed), "painter seed63", `${p63.eq}/${p63.n}`, "actSeed", `${pAct.eq}/${pAct.n}`, p63.bad.join(","));
 }
 writeFileSync("tools/integration/fixtures/prep13/prep13-hidden-power-check.json", JSON.stringify(out, null, 1));

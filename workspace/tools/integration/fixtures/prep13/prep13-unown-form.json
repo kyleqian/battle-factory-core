@@ -31,6 +31,22 @@
   },
   "anchorsFormSpecies": "error: battle-command field art: unknown species id NaN"
  },
+ "prep13-hidden-power-alt-opponent-unown-golem": {
+  "side": "opponent",
+  "personality": 1793700000,
+  "formIndex": 4,
+  "letter": "UNOWN_E",
+  "formSpeciesId": null,
+  "romCenter": {
+   "x": 176,
+   "y": 49
+  },
+  "anchorsBaseUnown": {
+   "x": 176,
+   "y": 47
+  },
+  "anchorsFormSpecies": "error: battle-command field art: unknown species id NaN"
+ },
  "prep13-hidden-power-alt-opponent-unown-seed305420897": {
   "side": "opponent",
   "personality": 1793703050,
@@ -44,6 +60,22 @@
   "anchorsBaseUnown": {
    "x": 176,
    "y": 47
+  },
+  "anchorsFormSpecies": "error: battle-command field art: unknown species id NaN"
+ },
+ "prep13-hidden-power-alt-player-unown-golem": {
+  "side": "player",
+  "personality": 2349019075,
+  "formIndex": 7,
+  "letter": "UNOWN_H",
+  "formSpeciesId": null,
+  "romCenter": {
+   "x": 72,
+   "y": 96
+  },
+  "anchorsBaseUnown": {
+   "x": 72,
+   "y": 96
   },
   "anchorsFormSpecies": "error: battle-command field art: unknown species id NaN"
  },

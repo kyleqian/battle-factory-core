@@ -47,6 +47,102 @@
    ]
   ]
  },
+ "prep13-hidden-power-alt-opponent-gengar-onix": {
+  "accepted": "mechanic-hidden-power-opponent-unown-player-onix",
+  "move": "hidden-power",
+  "side": "opponent",
+  "actActivation": [
+   81,
+   82
+  ],
+  "identicalSignature": true,
+  "diff": {},
+  "species": [
+   [
+    95,
+    201
+   ],
+   [
+    95,
+    94
+   ]
+  ],
+  "bodyCount": 1,
+  "rng2AtAct": [
+   3668811069,
+   3668811069
+  ],
+  "positionsDiffer": [
+   [
+    [
+     72,
+     80
+    ],
+    [
+     176,
+     49
+    ]
+   ],
+   [
+    [
+     72,
+     80
+    ],
+    [
+     176,
+     45
+    ]
+   ]
+  ]
+ },
+ "prep13-hidden-power-alt-opponent-unown-golem": {
+  "accepted": "mechanic-hidden-power-opponent-unown-player-onix",
+  "move": "hidden-power",
+  "side": "opponent",
+  "actActivation": [
+   81,
+   81
+  ],
+  "identicalSignature": true,
+  "diff": {},
+  "species": [
+   [
+    95,
+    201
+   ],
+   [
+    76,
+    201
+   ]
+  ],
+  "bodyCount": 1,
+  "rng2AtAct": [
+   3668811069,
+   3668811069
+  ],
+  "positionsDiffer": [
+   [
+    [
+     72,
+     80
+    ],
+    [
+     176,
+     49
+    ]
+   ],
+   [
+    [
+     72,
+     96
+    ],
+    [
+     176,
+     49
+    ]
+   ]
+  ]
+ },
  "prep13-hidden-power-alt-opponent-unown-seed305420897": {
   "accepted": "mechanic-hidden-power-opponent-unown-player-onix",
   "move": "hidden-power",
@@ -135,6 +231,102 @@
     [
      72,
      89
+    ],
+    [
+     176,
+     45
+    ]
+   ]
+  ]
+ },
+ "prep13-hidden-power-alt-player-gengar-onix": {
+  "accepted": "mechanic-hidden-power-player-unown-opponent-onix",
+  "move": "hidden-power",
+  "side": "player",
+  "actActivation": [
+   77,
+   78
+  ],
+  "identicalSignature": true,
+  "diff": {},
+  "species": [
+   [
+    201,
+    95
+   ],
+   [
+    94,
+    95
+   ]
+  ],
+  "bodyCount": 1,
+  "rng2AtAct": [
+   3293766408,
+   2024241883
+  ],
+  "positionsDiffer": [
+   [
+    [
+     72,
+     88
+    ],
+    [
+     176,
+     42
+    ]
+   ],
+   [
+    [
+     72,
+     89
+    ],
+    [
+     176,
+     42
+    ]
+   ]
+  ]
+ },
+ "prep13-hidden-power-alt-player-unown-golem": {
+  "accepted": "mechanic-hidden-power-player-unown-opponent-onix",
+  "move": "hidden-power",
+  "side": "player",
+  "actActivation": [
+   77,
+   77
+  ],
+  "identicalSignature": true,
+  "diff": {},
+  "species": [
+   [
+    201,
+    95
+   ],
+   [
+    201,
+    76
+   ]
+  ],
+  "bodyCount": 1,
+  "rng2AtAct": [
+   3293766408,
+   3293766408
+  ],
+  "positionsDiffer": [
+   [
+    [
+     72,
+     88
+    ],
+    [
+     176,
+     42
+    ]
+   ],
+   [
+    [
+     72,
+     88
     ],
     [
      176,
