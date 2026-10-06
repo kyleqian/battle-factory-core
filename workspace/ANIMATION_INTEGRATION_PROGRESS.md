@@ -1,5 +1,32 @@
 # Animation integration progress
 
+## 2026-10-06 (in progress) — presentation RNG infrastructure merged; prep12 Random2 plans
+
+- Folded Opus worker `08c3c4ce3` as `26b3f525a`: D3 option (a) infrastructure, no adapter consumer
+  yet. `src/engine/presentationRng.ts` (Random2 = ISO_RANDOMIZE1 then `>>> 16`, u32 exact, O(log n)
+  jump-ahead); `src/engine/presentationRngHost.ts` (policy
+  `presentation-rng.v1.frame-step.no-lag.battle-stride-2^20`: battle n seed = session seed jumped
+  n x 2^20; one step per presented battle frame after the logical tick; `activatePresentationRngBody`
+  consumes a body's draws exactly once per key; `presentationRngBodyWords` read-only for render;
+  pinned hosts via `createPresentationRngHostAt`); `EngineState.presentationRng` top-level,
+  outside battle/RNG/facility state; `SessionTrace.presentationRng {seed, policy}` with legacy
+  default 0x808DB3EB; replay tools honour it; live status `faithfulRandomCount` 0 /
+  `faithfulRandomAdapters` [] disjoint from `implementedCount` 218. Doc `docs/presentation-rng.md`.
+  Worker gates: typecheck, smoke 448, 1,527 files / 12,335 tests, build 853; differential vs
+  `e45e9c361` 941/941. Supervisor: `compare:differential` fight-submenu +
+  presentation-rng-playable-live-bodies-seeded-on 408/408 byte-identical; 5 affected test files
+  42/42; smoke 448 on the union. Known approximation: overlapping bodies do not interleave draws.
+- prep12 (side, `04967a636`): census regenerated at 218 live (218 + 0 + 58 = 276; 52 Random2;
+  non-Random2: Baton Pass, Endeavor, Extreme Speed, Fire Punch, Memento, Substitute). Draw plans
+  (`tools/integration/fixtures/prep12-random2/plans.json`) reproduce the accepted pinned words for
+  Double Kick, Astonish, Thrash, Flail (5 power tiers), Wish, Meteor Mash, Mud-Slap, Sand-Attack,
+  Hyper Beam; 0 body-internal lag before the last draw everywhere. Ice Beam, Water Spout, Hidden
+  Power draw no Random2 (stale C label). Supervisor reran Thrash + Wish probes twice: runsSha1 equal
+  to the receipts. Batch picks: R1 Double Kick/Astonish/Thrash/Flail, R2 Wish/Meteor Mash, R3 Ice
+  Beam/Water Spout/Hidden Power (no RNG), R4 Mud-Slap/Sand-Attack, R5 Hyper Beam.
+- In flight: R1 (+R2 if time) faithful-random adapters (Opus integration); prep13 measured prep for
+  Ice Beam / Water Spout / Hidden Power / Hyper Beam (Sonnet side, new files only).
+
 ## 2026-10-06 — User answered D3: separate deterministic presentation RNG
 
 - Approved option (a) for the next run: source animation algorithms/draw rules,

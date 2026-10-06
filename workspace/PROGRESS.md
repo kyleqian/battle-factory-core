@@ -5,6 +5,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-06 (in progress) — S10A: presentation RNG merged; Random2 draw plans measured
+
+- **State:** S10A, local master `26b3f525a`. Scoped-exact live adapters 218 (unchanged);
+  faithful-random adapters 0 (new separate bucket). Opus 5.5 supervisor; Opus/Sonnet 5.5 workers.
+- **Did:** D3 option (a) infrastructure merged (Opus worker): `src/engine/presentationRng.ts`
+  (exact Random2 LCG + jump-ahead), per-battle host `presentationRngHost.ts` (policy
+  `presentation-rng.v1.frame-step.no-lag.battle-stride-2^20`; session seed from crypto /
+  `presentationSeed=` / bench default 0x808DB3EB; one step per presented battle frame, draws
+  exactly once per body key, render read-only), `SessionTrace.presentationRng` export with legacy
+  default, `faithfulRandomCount`/`faithfulRandomAdapters` disjoint from `implementedCount`; doc
+  `docs/presentation-rng.md`. Worker gates 1,527 files / 12,335 tests, build 853; supervisor
+  differential 408/408 byte-identical vs `e45e9c361`, affected tests 42/42, smoke 448 on master.
+  prep12 (side): census regenerated (218 + 0 + 58 = 276; 52 Random2); draw plans for 12 moves
+  reproduce the accepted pinned words exactly (`tools/integration/fixtures/prep12-random2/plans.json`);
+  Ice Beam / Water Spout / Hidden Power draw NO Random2 (stale C label). Supervisor reran Thrash and
+  Wish probes twice: per-frame hashes equal the receipts.
+- **Next:** R1 faithful-random batch (Double Kick, Astonish, Thrash, Flail, then Wish / Meteor Mash)
+  in flight; prep13 (Ice Beam, Water Spout, Hidden Power, Hyper Beam plan rows) in flight.
+- **Notes:** no DEFERRED entries. Oracle freshness FAIL at orient = known false positive (no
+  oracle/ commits since the services started 2026-10-03).
+
+---
+
 ## 2026-10-06 — D3 approved; next run implements faithful random animations
 
 - **State:** D3 answered with option (a). Production remains `24df8af5e`:
@@ -54,37 +77,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   S10A integration work (ANIMATION_VERIFICATION scoped policy). All worker branches merged and
   worktrees removed; evidence summaries copied to `.integration/validation/`. A side worker once
   committed onto master via the shared `/workspace` path suffix and self-repaired (PAPERCUTS).
-
----
-
-## 2026-10-05 (night) — S10A wind-down: 144 -> 198 live adapters, sprite order live
-
-- **State:** S10A, local master; production `782822914` (198 live adapters, 78
-  accepted bodies remain). Supervisor final gates on the final code: see the
-  Notes line. Preview verified at the final checkpoint (receipt in
-  `tools/integration/fixtures/`). Opus 5.5 supervisor; Sonnet 5.5 workers (Opus
-  for the two sprite-order wiring steps).
-- **Did (integration, 9 folds + 1 fix, each re-proved by the supervisor:
-  dense twice fresh, zero residual, alt species; ordinary routes all PASS):**
-  H_BUFFER S1 (7), prep5 (6), sprite-order provider wiring + Grudge, order
-  consumers (8), cross-body order tracking, prep6 (7), prep7 (8), prep8
-  allocator-plan-v2 moves (10), prep9 + Double Team/Feather Dance (7); CASTFORM
-  normal-form Y placement fixed (ISSUES #143 trimmed to weather forms);
-  production order table extended 381 -> 445 bodies (Endeavor/Fake Tears +
-  60 REL-Y-confirmed rows; corpus 1,101/1,101 and strict real-route 10/10 exact);
-  Intimidate battle-start order seed (12/12 exact; Intimidate-lead battles lend).
-- **Did (side lane, evidence):** sprite-order module, real Factory entry probe,
-  body/gap plans, gap causes, real-route validation, plan coverage (52 -> 68 ->
-  81% weighted with REL-Y rows), policy gaps (Intimidate seed, Endeavor/Fake
-  Tears), uncovered units (faint/switch), allocator v2 baseline, census of the
-  remaining 103 moves, prep6/7/8/9, Castform diagnosis.
-- **Next:** ROADMAP S10A "Next (2026-10-05)": post-knock-out lends, abs-invariant
-  REL-Y rows, then the census queue.
-- **Notes:** no DEFERRED entries. Soak gates are superseded for S10A
-  integration work (SUPERVISOR.md: ANIMATION_VERIFICATION scoped policy); not run.
-  Oracle freshness FAIL at orient was the known false positive. All worker
-  branches merged and worktrees removed; evidence copied to `.integration/validation/`.
-  Final gates on `782822914`: typecheck, 1,509 files / 12,178 tests, build 851
-  (`final-supervisor-gates-20261005.json`).
 
 ---
