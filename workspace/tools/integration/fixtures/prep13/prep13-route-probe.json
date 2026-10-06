@@ -1,0 +1,489 @@
+[
+ {
+  "move": "ICE_BEAM",
+  "seed": 0,
+  "streak": 14,
+  "species": "SPECIES_DELCATTY",
+  "acceptedSpecies": false,
+  "slotIndex": 3,
+  "setId": 267,
+  "moves": [
+   313,
+   47,
+   85,
+   58
+  ],
+  "requestedMove": true,
+  "firstBody": true,
+  "firstBodyOrderKnown": true,
+  "moveRequest": {
+   "attacker": 0,
+   "turn": 0,
+   "frame": 600,
+   "field": {
+    "player": {
+     "name": "DELCATTY",
+     "hp": 134,
+     "maxHP": 134,
+     "species": 316,
+     "status": "none",
+     "gender": "female"
+    },
+    "opponent": {
+     "name": "LAIRON",
+     "hp": 153,
+     "maxHP": 153,
+     "species": 383,
+     "status": "none",
+     "gender": "male"
+    }
+   },
+   "orderInput": {
+    "known": true,
+    "freeHead": [
+     4,
+     3,
+     21,
+     20,
+     5,
+     19
+    ]
+   }
+  },
+  "allRequests": [
+   {
+    "moveId": 58,
+    "attacker": 0,
+    "turn": 0,
+    "power": 95,
+    "multihit": 0,
+    "frame": 600,
+    "orderInputKnown": true,
+    "orderFreeHead": [
+     4,
+     3,
+     21,
+     20,
+     5,
+     19
+    ]
+   },
+   {
+    "moveId": 231,
+    "attacker": 1,
+    "turn": 0,
+    "power": 100,
+    "multihit": 0,
+    "frame": 810,
+    "orderInputKnown": true,
+    "orderFreeHead": [
+     3,
+     11,
+     12,
+     10,
+     9,
+     7
+    ]
+   }
+  ]
+ },
+ {
+  "move": "ICE_BEAM",
+  "seed": 1,
+  "streak": 14,
+  "species": "SPECIES_DUNSPARCE",
+  "acceptedSpecies": false,
+  "slotIndex": 0,
+  "setId": 305,
+  "moves": [
+   58,
+   317,
+   44,
+   247
+  ],
+  "requestedMove": true,
+  "firstBody": true,
+  "firstBodyOrderKnown": true,
+  "moveRequest": {
+   "attacker": 0,
+   "turn": 0,
+   "frame": 679,
+   "field": {
+    "player": {
+     "name": "DUNSPARCE",
+     "hp": 164,
+     "maxHP": 164,
+     "species": 206,
+     "status": "none",
+     "gender": "male"
+    },
+    "opponent": {
+     "name": "CHANSEY",
+     "hp": 311,
+     "maxHP": 311,
+     "species": 113,
+     "status": "none",
+     "gender": "female"
+    }
+   },
+   "orderInput": {
+    "known": true,
+    "freeHead": [
+     4,
+     3,
+     21,
+     20,
+     5,
+     19
+    ]
+   }
+  },
+  "allRequests": [
+   {
+    "moveId": 58,
+    "attacker": 0,
+    "turn": 0,
+    "power": 95,
+    "multihit": 0,
+    "frame": 679,
+    "orderInputKnown": true,
+    "orderFreeHead": [
+     4,
+     3,
+     21,
+     20,
+     5,
+     19
+    ]
+   }
+  ]
+ },
+ {
+  "move": "ICE_BEAM",
+  "seed": 1,
+  "streak": 35,
+  "species": "SPECIES_SLOWKING",
+  "acceptedSpecies": false,
+  "slotIndex": 2,
+  "setId": 602,
+  "moves": [
+   94,
+   57,
+   58,
+   89
+  ],
+  "requestedMove": true,
+  "firstBody": false,
+  "firstBodyOrderKnown": null,
+  "moveRequest": {
+   "attacker": 0,
+   "turn": 0,
+   "frame": 1091,
+   "field": {
+    "player": {
+     "name": "SLOWKING",
+     "hp": 53,
+     "maxHP": 165,
+     "species": 199,
+     "status": "none",
+     "gender": "male"
+    },
+    "opponent": {
+     "name": "GENGAR",
+     "hp": 121,
+     "maxHP": 121,
+     "species": 94,
+     "status": "none",
+     "gender": "male"
+    }
+   },
+   "orderInput": {
+    "known": false
+   }
+  },
+  "allRequests": [
+   {
+    "moveId": 85,
+    "attacker": 1,
+    "turn": 0,
+    "power": 95,
+    "multihit": 0,
+    "frame": 592,
+    "orderInputKnown": true,
+    "orderFreeHead": [
+     4,
+     3,
+     21,
+     20,
+     5,
+     19
+    ]
+   },
+   {
+    "moveId": 58,
+    "attacker": 0,
+    "turn": 0,
+    "power": 95,
+    "multihit": 0,
+    "frame": 1091,
+    "orderInputKnown": false
+   }
+  ]
+ },
+ {
+  "move": "ICE_BEAM",
+  "seed": 2,
+  "streak": 35,
+  "species": "SPECIES_BLASTOISE",
+  "acceptedSpecies": false,
+  "slotIndex": 2,
+  "setId": 640,
+  "moves": [
+   57,
+   89,
+   58,
+   68
+  ],
+  "requestedMove": true,
+  "firstBody": true,
+  "firstBodyOrderKnown": true,
+  "moveRequest": {
+   "attacker": 0,
+   "turn": 0,
+   "frame": 608,
+   "field": {
+    "player": {
+     "name": "BLASTOISE",
+     "hp": 170,
+     "maxHP": 170,
+     "species": 9,
+     "status": "none",
+     "gender": "male"
+    },
+    "opponent": {
+     "name": "FERALIGATR",
+     "hp": 167,
+     "maxHP": 167,
+     "species": 160,
+     "status": "none",
+     "gender": "male"
+    }
+   },
+   "orderInput": {
+    "known": true,
+    "freeHead": [
+     4,
+     3,
+     21,
+     20,
+     5,
+     19
+    ]
+   }
+  },
+  "allRequests": [
+   {
+    "moveId": 58,
+    "attacker": 0,
+    "turn": 0,
+    "power": 95,
+    "multihit": 0,
+    "frame": 608,
+    "orderInputKnown": true,
+    "orderFreeHead": [
+     4,
+     3,
+     21,
+     20,
+     5,
+     19
+    ]
+   },
+   {
+    "moveId": 89,
+    "attacker": 1,
+    "turn": 0,
+    "power": 100,
+    "multihit": 0,
+    "frame": 824,
+    "orderInputKnown": true,
+    "orderFreeHead": [
+     3,
+     11,
+     12,
+     10,
+     9,
+     7
+    ]
+   }
+  ]
+ },
+ {
+  "move": "WATER_SPOUT",
+  "seed": 83,
+  "streak": 14,
+  "species": "SPECIES_WAILMER",
+  "acceptedSpecies": false,
+  "slotIndex": 0,
+  "setId": 275,
+  "moves": [
+   323,
+   89,
+   34,
+   156
+  ],
+  "requestedMove": true,
+  "firstBody": false,
+  "firstBodyOrderKnown": null,
+  "moveRequest": {
+   "attacker": 0,
+   "turn": 0,
+   "frame": 712,
+   "field": {
+    "player": {
+     "name": "WAILMER",
+     "hp": 179,
+     "maxHP": 194,
+     "species": 313,
+     "status": "none",
+     "gender": "male"
+    },
+    "opponent": {
+     "name": "PINSIR",
+     "hp": 158,
+     "maxHP": 158,
+     "species": 127,
+     "status": "none",
+     "gender": "male"
+    }
+   },
+   "orderInput": {
+    "known": true,
+    "freeHead": [
+     3,
+     4,
+     21,
+     20,
+     5,
+     19
+    ]
+   }
+  },
+  "allRequests": [
+   {
+    "moveId": 175,
+    "attacker": 1,
+    "turn": 0,
+    "power": 20,
+    "multihit": 0,
+    "frame": 591,
+    "orderInputKnown": true,
+    "orderFreeHead": [
+     4,
+     3,
+     21,
+     20,
+     5,
+     19
+    ]
+   },
+   {
+    "moveId": 323,
+    "attacker": 0,
+    "turn": 0,
+    "power": 138,
+    "multihit": 0,
+    "frame": 712,
+    "orderInputKnown": true,
+    "orderFreeHead": [
+     3,
+     4,
+     21,
+     20,
+     5,
+     19
+    ]
+   }
+  ]
+ },
+ {
+  "move": "HYPER_BEAM",
+  "seed": 10,
+  "streak": 28,
+  "species": "SPECIES_AERODACTYL",
+  "acceptedSpecies": true,
+  "slotIndex": 0,
+  "setId": 531,
+  "moves": [
+   63,
+   89,
+   332,
+   246
+  ],
+  "requestedMove": true,
+  "firstBody": true,
+  "firstBodyOrderKnown": true,
+  "moveRequest": {
+   "attacker": 0,
+   "turn": 0,
+   "frame": 613,
+   "field": {
+    "player": {
+     "name": "AERODACTYL",
+     "hp": 168,
+     "maxHP": 168,
+     "species": 142,
+     "status": "none",
+     "gender": "male"
+    },
+    "opponent": {
+     "name": "HOUNDOOM",
+     "hp": 136,
+     "maxHP": 136,
+     "species": 229,
+     "status": "none",
+     "gender": "female"
+    }
+   },
+   "orderInput": {
+    "known": true,
+    "freeHead": [
+     4,
+     3,
+     21,
+     20,
+     5,
+     19
+    ]
+   }
+  },
+  "allRequests": [
+   {
+    "moveId": 63,
+    "attacker": 0,
+    "turn": 0,
+    "power": 150,
+    "multihit": 0,
+    "frame": 613,
+    "orderInputKnown": true,
+    "orderFreeHead": [
+     4,
+     3,
+     21,
+     20,
+     5,
+     19
+    ]
+   },
+   {
+    "moveId": 57,
+    "attacker": 1,
+    "turn": 0,
+    "power": 95,
+    "multihit": 0,
+    "frame": 1158,
+    "orderInputKnown": false
+   }
+  ]
+ }
+]
