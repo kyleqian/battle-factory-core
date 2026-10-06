@@ -1,0 +1,4177 @@
+{
+ "moves": 188,
+ "counts": {
+  "attacker/mixed": 2,
+  "attacker/rest0": 67,
+  "attacker/transient": 9,
+  "attacker/unchanged": 80,
+  "attacker/zeroed": 30,
+  "target/mixed": 4,
+  "target/rest0": 31,
+  "target/transient": 4,
+  "target/unchanged": 61,
+  "target/zeroed": 88
+ },
+ "table": {
+  "0": {
+   "attacker": {
+    "x2Class": "mixed:unchanged+zeroed",
+    "onixObservations": 143,
+    "y2EndClass": "nonzero",
+    "bodies": 143,
+    "samples": [
+     "mechanic-acid-armor-opponent-grimer-player-onix.json",
+     "mechanic-acid-armor-player-grimer-opponent-onix.json",
+     "mechanic-acid-opponent-ekans-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "mixed:unchanged+zeroed",
+    "onixObservations": 143,
+    "y2EndClass": "nonzero",
+    "bodies": 143,
+    "samples": [
+     "mechanic-acid-armor-opponent-grimer-player-onix.json",
+     "mechanic-acid-armor-player-grimer-opponent-onix.json",
+     "mechanic-acid-opponent-ekans-player-onix.json"
+    ]
+   }
+  },
+  "2": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-karate-chop-opponent-primeape-player-onix.json",
+     "mechanic-karate-chop-player-primeape-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-karate-chop-opponent-primeape-player-onix.json",
+     "mechanic-karate-chop-player-primeape-opponent-onix.json"
+    ]
+   }
+  },
+  "3": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 8,
+    "y2EndClass": "zero",
+    "bodies": 8,
+    "samples": [
+     "mechanic-double-slap-opponent-poliwhirl-player-onix.json",
+     "mechanic-double-slap-opponent-poliwhirl-player-onix.json",
+     "mechanic-double-slap-opponent-poliwhirl-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 8,
+    "y2EndClass": "zero",
+    "bodies": 8,
+    "samples": [
+     "mechanic-double-slap-opponent-poliwhirl-player-onix.json",
+     "mechanic-double-slap-opponent-poliwhirl-player-onix.json",
+     "mechanic-double-slap-opponent-poliwhirl-player-onix.json"
+    ]
+   }
+  },
+  "4": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 8,
+    "y2EndClass": "zero",
+    "bodies": 8,
+    "samples": [
+     "mechanic-comet-punch-opponent-ledian-player-onix.json",
+     "mechanic-comet-punch-opponent-ledian-player-onix.json",
+     "mechanic-comet-punch-opponent-ledian-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 8,
+    "y2EndClass": "zero",
+    "bodies": 8,
+    "samples": [
+     "mechanic-comet-punch-opponent-ledian-player-onix.json",
+     "mechanic-comet-punch-opponent-ledian-player-onix.json",
+     "mechanic-comet-punch-opponent-ledian-player-onix.json"
+    ]
+   }
+  },
+  "5": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-mega-punch-opponent-cacturne-player-onix.json",
+     "mechanic-mega-punch-player-cacturne-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-mega-punch-opponent-cacturne-player-onix.json",
+     "mechanic-mega-punch-player-cacturne-opponent-onix.json"
+    ]
+   }
+  },
+  "11": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-vice-grip-opponent-crawdaunt-player-onix.json",
+     "mechanic-vice-grip-player-crawdaunt-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-vice-grip-opponent-crawdaunt-player-onix.json",
+     "mechanic-vice-grip-player-crawdaunt-opponent-onix.json"
+    ]
+   }
+  },
+  "13": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 4,
+    "y2EndClass": "zero",
+    "bodies": 4,
+    "samples": [
+     "mechanic-razor-wind-opponent-nuzleaf-player-onix.json",
+     "mechanic-razor-wind-opponent-nuzleaf-player-onix.json",
+     "mechanic-razor-wind-player-nuzleaf-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "mixed:unchanged+zeroed",
+    "onixObservations": 4,
+    "y2EndClass": "zero",
+    "bodies": 4,
+    "samples": [
+     "mechanic-razor-wind-opponent-nuzleaf-player-onix.json",
+     "mechanic-razor-wind-opponent-nuzleaf-player-onix.json",
+     "mechanic-razor-wind-player-nuzleaf-opponent-onix.json"
+    ]
+   }
+  },
+  "14": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-swords-dance-opponent-ledian-player-onix.json",
+     "mechanic-swords-dance-player-ledian-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-swords-dance-opponent-ledian-player-onix.json",
+     "mechanic-swords-dance-player-ledian-opponent-onix.json"
+    ]
+   }
+  },
+  "18": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-whirlwind-opponent-butterfree-player-onix.json",
+     "mechanic-whirlwind-player-butterfree-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "nonzero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-whirlwind-opponent-butterfree-player-onix.json",
+     "mechanic-whirlwind-player-butterfree-opponent-onix.json"
+    ]
+   }
+  },
+  "20": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-role-play-player-kadabra-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-role-play-player-kadabra-opponent-onix.json"
+    ]
+   }
+  },
+  "21": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-slam-player-lickitung-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-slam-player-lickitung-opponent-onix.json"
+    ]
+   }
+  },
+  "23": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-stomp-opponent-loudred-player-onix.json",
+     "mechanic-stomp-player-loudred-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-stomp-opponent-loudred-player-onix.json",
+     "mechanic-stomp-player-loudred-opponent-onix.json"
+    ]
+   }
+  },
+  "24": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 4,
+    "y2EndClass": "zero",
+    "bodies": 4,
+    "samples": [
+     "mechanic-double-kick-opponent-nidorina-player-onix.json",
+     "mechanic-double-kick-opponent-nidorina-player-onix.json",
+     "mechanic-double-kick-player-nidorina-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 4,
+    "y2EndClass": "zero",
+    "bodies": 4,
+    "samples": [
+     "mechanic-double-kick-opponent-nidorina-player-onix.json",
+     "mechanic-double-kick-opponent-nidorina-player-onix.json",
+     "mechanic-double-kick-player-nidorina-opponent-onix.json"
+    ]
+   }
+  },
+  "25": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-mega-kick-opponent-sudowoodo-player-onix.json",
+     "mechanic-mega-kick-player-sudowoodo-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-mega-kick-opponent-sudowoodo-player-onix.json",
+     "mechanic-mega-kick-player-sudowoodo-opponent-onix.json"
+    ]
+   }
+  },
+  "27": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-rolling-kick-opponent-hitmonlee-player-onix.json",
+     "mechanic-rolling-kick-player-hitmonlee-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-rolling-kick-opponent-hitmonlee-player-onix.json",
+     "mechanic-rolling-kick-player-hitmonlee-opponent-onix.json"
+    ]
+   }
+  },
+  "29": {
+   "attacker": {
+    "x2Class": "transient",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-headbutt-opponent-zigzagoon-player-onix.json",
+     "mechanic-headbutt-player-zigzagoon-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-headbutt-opponent-zigzagoon-player-onix.json",
+     "mechanic-headbutt-player-zigzagoon-opponent-onix.json"
+    ]
+   }
+  },
+  "32": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-horn-drill-opponent-seaking-player-onix.json",
+     "mechanic-horn-drill-player-seaking-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "transient",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-horn-drill-opponent-seaking-player-onix.json",
+     "mechanic-horn-drill-player-seaking-opponent-onix.json"
+    ]
+   }
+  },
+  "33": {
+   "attacker": {
+    "x2Class": "transient",
+    "onixObservations": 306,
+    "y2EndClass": "zero",
+    "bodies": 306,
+    "samples": [
+     "mechanic-absorb-opponent-lombre-player-onix.json",
+     "mechanic-absorb-player-lombre-opponent-onix.json",
+     "mechanic-acid-armor-player-grimer-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 306,
+    "y2EndClass": "zero",
+    "bodies": 306,
+    "samples": [
+     "mechanic-absorb-opponent-lombre-player-onix.json",
+     "mechanic-absorb-player-lombre-opponent-onix.json",
+     "mechanic-acid-armor-player-grimer-opponent-onix.json"
+    ]
+   }
+  },
+  "34": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-body-slam-opponent-lickitung-player-onix.json",
+     "mechanic-body-slam-player-lickitung-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-body-slam-opponent-lickitung-player-onix.json",
+     "mechanic-body-slam-player-lickitung-opponent-onix.json"
+    ]
+   }
+  },
+  "35": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-wrap-opponent-tentacool-player-onix.json",
+     "mechanic-wrap-player-tentacool-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-wrap-opponent-tentacool-player-onix.json",
+     "mechanic-wrap-player-tentacool-opponent-onix.json"
+    ]
+   }
+  },
+  "36": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-take-down-opponent-swablu-player-onix.json",
+     "mechanic-take-down-player-swablu-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-take-down-opponent-swablu-player-onix.json",
+     "mechanic-take-down-player-swablu-opponent-onix.json"
+    ]
+   }
+  },
+  "37": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 3,
+    "y2EndClass": "zero",
+    "bodies": 3,
+    "samples": [
+     "mechanic-thrash-opponent-tauros-player-onix.json",
+     "mechanic-thrash-player-tauros-opponent-onix.json",
+     "mechanic-thrash-player-tauros-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "transient",
+    "onixObservations": 3,
+    "y2EndClass": "zero",
+    "bodies": 3,
+    "samples": [
+     "mechanic-thrash-opponent-tauros-player-onix.json",
+     "mechanic-thrash-player-tauros-opponent-onix.json",
+     "mechanic-thrash-player-tauros-opponent-onix.json"
+    ]
+   }
+  },
+  "38": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-double-edge-opponent-hitmontop-player-onix.json",
+     "mechanic-double-edge-player-hitmontop-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-double-edge-opponent-hitmontop-player-onix.json",
+     "mechanic-double-edge-player-hitmontop-opponent-onix.json"
+    ]
+   }
+  },
+  "39": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-tail-whip-opponent-ponyta-player-onix.json",
+     "mechanic-tail-whip-player-ponyta-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-tail-whip-opponent-ponyta-player-onix.json",
+     "mechanic-tail-whip-player-ponyta-opponent-onix.json"
+    ]
+   }
+  },
+  "40": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-poison-sting-opponent-weedle-player-onix.json",
+     "mechanic-poison-sting-player-weedle-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-poison-sting-opponent-weedle-player-onix.json",
+     "mechanic-poison-sting-player-weedle-opponent-onix.json"
+    ]
+   }
+  },
+  "42": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 4,
+    "y2EndClass": "zero",
+    "bodies": 4,
+    "samples": [
+     "mechanic-pin-missile-opponent-qwilfish-player-onix.json",
+     "mechanic-pin-missile-opponent-qwilfish-player-onix.json",
+     "mechanic-pin-missile-player-qwilfish-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 4,
+    "y2EndClass": "zero",
+    "bodies": 4,
+    "samples": [
+     "mechanic-pin-missile-opponent-qwilfish-player-onix.json",
+     "mechanic-pin-missile-opponent-qwilfish-player-onix.json",
+     "mechanic-pin-missile-player-qwilfish-opponent-onix.json"
+    ]
+   }
+  },
+  "43": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-leer-opponent-dragonair-player-onix.json",
+     "mechanic-leer-player-dragonair-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-leer-opponent-dragonair-player-onix.json",
+     "mechanic-leer-player-dragonair-opponent-onix.json"
+    ]
+   }
+  },
+  "46": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-roar-opponent-houndour-player-onix.json",
+     "mechanic-roar-player-houndour-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "nonzero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-roar-opponent-houndour-player-onix.json",
+     "mechanic-roar-player-houndour-opponent-onix.json"
+    ]
+   }
+  },
+  "48": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-supersonic-opponent-loudred-player-onix.json",
+     "mechanic-supersonic-player-loudred-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-supersonic-opponent-loudred-player-onix.json",
+     "mechanic-supersonic-player-loudred-opponent-onix.json"
+    ]
+   }
+  },
+  "50": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-disable-opponent-drowzee-player-onix.json",
+     "mechanic-disable-player-drowzee-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-disable-opponent-drowzee-player-onix.json",
+     "mechanic-disable-player-drowzee-opponent-onix.json"
+    ]
+   }
+  },
+  "51": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-acid-opponent-ekans-player-onix.json",
+     "mechanic-acid-player-ekans-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-acid-opponent-ekans-player-onix.json",
+     "mechanic-acid-player-ekans-opponent-onix.json"
+    ]
+   }
+  },
+  "55": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-water-gun-opponent-horsea-player-onix.json",
+     "mechanic-water-gun-player-horsea-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-water-gun-opponent-horsea-player-onix.json",
+     "mechanic-water-gun-player-horsea-opponent-onix.json"
+    ]
+   }
+  },
+  "56": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-hydro-pump-player-masquerain-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-hydro-pump-player-masquerain-opponent-onix.json"
+    ]
+   }
+  },
+  "59": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-blizzard-opponent-pelipper-player-onix.json",
+     "mechanic-blizzard-player-pelipper-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-blizzard-opponent-pelipper-player-onix.json",
+     "mechanic-blizzard-player-pelipper-opponent-onix.json"
+    ]
+   }
+  },
+  "60": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-psybeam-opponent-spinda-player-onix.json",
+     "mechanic-psybeam-player-spinda-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-psybeam-opponent-spinda-player-onix.json",
+     "mechanic-psybeam-player-spinda-opponent-onix.json"
+    ]
+   }
+  },
+  "61": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-bubble-beam-opponent-surskit-player-onix.json",
+     "mechanic-bubble-beam-player-surskit-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-bubble-beam-opponent-surskit-player-onix.json",
+     "mechanic-bubble-beam-player-surskit-opponent-onix.json"
+    ]
+   }
+  },
+  "62": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-aurora-beam-opponent-seadra-player-onix.json",
+     "mechanic-aurora-beam-player-seadra-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-aurora-beam-opponent-seadra-player-onix.json",
+     "mechanic-aurora-beam-player-seadra-opponent-onix.json"
+    ]
+   }
+  },
+  "63": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-hyper-beam-opponent-aerodactyl-player-onix.json",
+     "mechanic-hyper-beam-player-aerodactyl-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-hyper-beam-opponent-aerodactyl-player-onix.json",
+     "mechanic-hyper-beam-player-aerodactyl-opponent-onix.json"
+    ]
+   }
+  },
+  "65": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 3,
+    "y2EndClass": "zero",
+    "bodies": 3,
+    "samples": [
+     "mechanic-drill-peck-opponent-fearow-player-onix.json",
+     "mechanic-drill-peck-player-dodrio-opponent-onix.json",
+     "mechanic-drill-peck-player-fearow-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 3,
+    "y2EndClass": "zero",
+    "bodies": 3,
+    "samples": [
+     "mechanic-drill-peck-opponent-fearow-player-onix.json",
+     "mechanic-drill-peck-player-dodrio-opponent-onix.json",
+     "mechanic-drill-peck-player-fearow-opponent-onix.json"
+    ]
+   }
+  },
+  "67": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-low-kick-opponent-machoke-player-onix.json",
+     "mechanic-low-kick-player-machoke-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-low-kick-opponent-machoke-player-onix.json",
+     "mechanic-low-kick-player-machoke-opponent-onix.json"
+    ]
+   }
+  },
+  "68": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-counter-opponent-hitmontop-player-onix.json",
+     "mechanic-counter-player-hitmontop-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-counter-opponent-hitmontop-player-onix.json",
+     "mechanic-counter-player-hitmontop-opponent-onix.json"
+    ]
+   }
+  },
+  "69": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-seismic-toss-opponent-kecleon-player-onix.json",
+     "mechanic-seismic-toss-player-kecleon-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-seismic-toss-opponent-kecleon-player-onix.json",
+     "mechanic-seismic-toss-player-kecleon-opponent-onix.json"
+    ]
+   }
+  },
+  "71": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-absorb-opponent-lombre-player-onix.json",
+     "mechanic-absorb-player-lombre-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-absorb-opponent-lombre-player-onix.json",
+     "mechanic-absorb-player-lombre-opponent-onix.json"
+    ]
+   }
+  },
+  "72": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-mega-drain-opponent-skiploom-player-onix.json",
+     "mechanic-mega-drain-player-skiploom-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-mega-drain-opponent-skiploom-player-onix.json",
+     "mechanic-mega-drain-player-skiploom-opponent-onix.json"
+    ]
+   }
+  },
+  "73": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-leech-seed-opponent-exeggcute-player-onix.json",
+     "mechanic-leech-seed-player-exeggcute-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-leech-seed-opponent-exeggcute-player-onix.json",
+     "mechanic-leech-seed-player-exeggcute-opponent-onix.json"
+    ]
+   }
+  },
+  "74": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-growth-opponent-ivysaur-player-onix.json",
+     "mechanic-growth-player-ivysaur-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-growth-opponent-ivysaur-player-onix.json",
+     "mechanic-growth-player-ivysaur-opponent-onix.json"
+    ]
+   }
+  },
+  "78": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-stun-spore-opponent-hoppip-player-onix.json",
+     "mechanic-stun-spore-player-hoppip-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-stun-spore-opponent-hoppip-player-onix.json",
+     "mechanic-stun-spore-player-hoppip-opponent-onix.json"
+    ]
+   }
+  },
+  "79": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-sleep-powder-opponent-hoppip-player-onix.json",
+     "mechanic-sleep-powder-player-hoppip-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-sleep-powder-opponent-hoppip-player-onix.json",
+     "mechanic-sleep-powder-player-hoppip-opponent-onix.json"
+    ]
+   }
+  },
+  "80": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-petal-dance-opponent-gloom-player-onix.json",
+     "mechanic-petal-dance-player-gloom-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-petal-dance-opponent-gloom-player-onix.json",
+     "mechanic-petal-dance-player-gloom-opponent-onix.json"
+    ]
+   }
+  },
+  "83": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-fire-spin-opponent-charmeleon-player-onix.json",
+     "mechanic-fire-spin-player-charmeleon-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-fire-spin-opponent-charmeleon-player-onix.json",
+     "mechanic-fire-spin-player-charmeleon-opponent-onix.json"
+    ]
+   }
+  },
+  "88": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 6,
+    "y2EndClass": "zero",
+    "bodies": 6,
+    "samples": [
+     "mechanic-cotton-spore-opponent-mareep-player-onix.json",
+     "mechanic-flash-opponent-mareep-player-onix.json",
+     "mechanic-rock-throw-opponent-graveler-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 6,
+    "y2EndClass": "zero",
+    "bodies": 6,
+    "samples": [
+     "mechanic-cotton-spore-opponent-mareep-player-onix.json",
+     "mechanic-flash-opponent-mareep-player-onix.json",
+     "mechanic-rock-throw-opponent-graveler-player-onix.json"
+    ]
+   }
+  },
+  "89": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-earthquake-opponent-dugtrio-player-onix.json",
+     "mechanic-earthquake-player-dugtrio-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-earthquake-opponent-dugtrio-player-onix.json",
+     "mechanic-earthquake-player-dugtrio-opponent-onix.json"
+    ]
+   }
+  },
+  "90": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-fissure-opponent-dugtrio-player-onix.json",
+     "mechanic-fissure-player-dugtrio-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-fissure-opponent-dugtrio-player-onix.json",
+     "mechanic-fissure-player-dugtrio-opponent-onix.json"
+    ]
+   }
+  },
+  "92": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 4,
+    "y2EndClass": "zero",
+    "bodies": 4,
+    "samples": [
+     "mechanic-refresh-opponent-chansey-player-onix.json",
+     "mechanic-refresh-player-chansey-opponent-onix.json",
+     "mechanic-toxic-opponent-clamperl-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 4,
+    "y2EndClass": "zero",
+    "bodies": 4,
+    "samples": [
+     "mechanic-refresh-opponent-chansey-player-onix.json",
+     "mechanic-refresh-player-chansey-opponent-onix.json",
+     "mechanic-toxic-opponent-clamperl-player-onix.json"
+    ]
+   }
+  },
+  "93": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-confusion-opponent-kadabra-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-confusion-opponent-kadabra-player-onix.json"
+    ]
+   }
+  },
+  "94": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-metronome-player-chansey-opponent-onix.json",
+     "mechanic-psychic-opponent-kadabra-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-metronome-player-chansey-opponent-onix.json",
+     "mechanic-psychic-opponent-kadabra-player-onix.json"
+    ]
+   }
+  },
+  "95": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-hypnosis-opponent-politoed-player-onix.json",
+     "mechanic-hypnosis-player-politoed-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-hypnosis-opponent-politoed-player-onix.json",
+     "mechanic-hypnosis-player-politoed-opponent-onix.json"
+    ]
+   }
+  },
+  "97": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-agility-opponent-ledyba-player-onix.json",
+     "mechanic-agility-player-ledyba-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-agility-opponent-ledyba-player-onix.json",
+     "mechanic-agility-player-ledyba-opponent-onix.json"
+    ]
+   }
+  },
+  "101": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-night-shade-opponent-ariados-player-onix.json",
+     "mechanic-night-shade-player-ariados-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-night-shade-opponent-ariados-player-onix.json",
+     "mechanic-night-shade-player-ariados-opponent-onix.json"
+    ]
+   }
+  },
+  "105": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-recover-opponent-kadabra-player-onix.json",
+     "mechanic-recover-player-kadabra-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-recover-opponent-kadabra-player-onix.json",
+     "mechanic-recover-player-kadabra-opponent-onix.json"
+    ]
+   }
+  },
+  "106": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-harden-opponent-relicanth-player-onix.json",
+     "mechanic-harden-player-relicanth-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-harden-opponent-relicanth-player-onix.json",
+     "mechanic-harden-player-relicanth-opponent-onix.json"
+    ]
+   }
+  },
+  "107": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-minimize-opponent-grimer-player-onix.json",
+     "mechanic-minimize-player-grimer-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-minimize-opponent-grimer-player-onix.json",
+     "mechanic-minimize-player-grimer-opponent-onix.json"
+    ]
+   }
+  },
+  "108": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-smokescreen-opponent-koffing-player-onix.json",
+     "mechanic-smokescreen-player-koffing-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-smokescreen-opponent-koffing-player-onix.json",
+     "mechanic-smokescreen-player-koffing-opponent-onix.json"
+    ]
+   }
+  },
+  "109": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-confuse-ray-opponent-chinchou-player-onix.json",
+     "mechanic-confuse-ray-player-chinchou-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-confuse-ray-opponent-chinchou-player-onix.json",
+     "mechanic-confuse-ray-player-chinchou-opponent-onix.json"
+    ]
+   }
+  },
+  "111": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-defense-curl-opponent-phanpy-player-onix.json",
+     "mechanic-defense-curl-player-phanpy-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-defense-curl-opponent-phanpy-player-onix.json",
+     "mechanic-defense-curl-player-phanpy-opponent-onix.json"
+    ]
+   }
+  },
+  "112": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-barrier-opponent-drowzee-player-onix.json",
+     "mechanic-barrier-player-drowzee-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-barrier-opponent-drowzee-player-onix.json",
+     "mechanic-barrier-player-drowzee-opponent-onix.json"
+    ]
+   }
+  },
+  "113": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-light-screen-opponent-exeggcute-player-onix.json",
+     "mechanic-light-screen-player-exeggcute-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-light-screen-opponent-exeggcute-player-onix.json",
+     "mechanic-light-screen-player-exeggcute-opponent-onix.json"
+    ]
+   }
+  },
+  "114": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-haze-opponent-koffing-player-onix.json",
+     "mechanic-haze-player-koffing-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-haze-opponent-koffing-player-onix.json",
+     "mechanic-haze-player-koffing-opponent-onix.json"
+    ]
+   }
+  },
+  "115": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-brick-break-opponent-lombre-player-onix.json",
+     "mechanic-brick-break-player-lombre-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-brick-break-opponent-lombre-player-onix.json",
+     "mechanic-brick-break-player-lombre-opponent-onix.json"
+    ]
+   }
+  },
+  "116": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-focus-energy-opponent-taillow-player-onix.json",
+     "mechanic-focus-energy-player-taillow-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-focus-energy-opponent-taillow-player-onix.json",
+     "mechanic-focus-energy-player-taillow-opponent-onix.json"
+    ]
+   }
+  },
+  "118": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-metronome-opponent-chansey-player-onix.json",
+     "mechanic-metronome-player-chansey-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-metronome-opponent-chansey-player-onix.json",
+     "mechanic-metronome-player-chansey-opponent-onix.json"
+    ]
+   }
+  },
+  "122": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-lick-opponent-lickitung-player-onix.json",
+     "mechanic-lick-player-lickitung-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-lick-opponent-lickitung-player-onix.json",
+     "mechanic-lick-player-lickitung-opponent-onix.json"
+    ]
+   }
+  },
+  "123": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-smog-opponent-magby-player-onix.json",
+     "mechanic-smog-player-magby-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-smog-opponent-magby-player-onix.json",
+     "mechanic-smog-player-magby-opponent-onix.json"
+    ]
+   }
+  },
+  "124": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-sludge-opponent-grimer-player-onix.json",
+     "mechanic-sludge-player-grimer-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-sludge-opponent-grimer-player-onix.json",
+     "mechanic-sludge-player-grimer-opponent-onix.json"
+    ]
+   }
+  },
+  "126": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-fire-blast-opponent-octillery-player-onix.json",
+     "mechanic-fire-blast-player-octillery-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-fire-blast-opponent-octillery-player-onix.json",
+     "mechanic-fire-blast-player-octillery-opponent-onix.json"
+    ]
+   }
+  },
+  "131": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 5,
+    "y2EndClass": "zero",
+    "bodies": 5,
+    "samples": [
+     "mechanic-spike-cannon-opponent-omastar-player-onix.json",
+     "mechanic-spike-cannon-opponent-omastar-player-onix.json",
+     "mechanic-spike-cannon-player-omastar-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 5,
+    "y2EndClass": "zero",
+    "bodies": 5,
+    "samples": [
+     "mechanic-spike-cannon-opponent-omastar-player-onix.json",
+     "mechanic-spike-cannon-opponent-omastar-player-onix.json",
+     "mechanic-spike-cannon-player-omastar-opponent-onix.json"
+    ]
+   }
+  },
+  "133": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-amnesia-opponent-torkoal-player-onix.json",
+     "mechanic-amnesia-player-torkoal-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-amnesia-opponent-torkoal-player-onix.json",
+     "mechanic-amnesia-player-torkoal-opponent-onix.json"
+    ]
+   }
+  },
+  "135": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-soft-boiled-opponent-chansey-player-onix.json",
+     "mechanic-soft-boiled-player-chansey-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-soft-boiled-opponent-chansey-player-onix.json",
+     "mechanic-soft-boiled-player-chansey-opponent-onix.json"
+    ]
+   }
+  },
+  "136": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-hi-jump-kick-opponent-medicham-player-onix.json",
+     "mechanic-hi-jump-kick-player-medicham-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-hi-jump-kick-opponent-medicham-player-onix.json",
+     "mechanic-hi-jump-kick-player-medicham-opponent-onix.json"
+    ]
+   }
+  },
+  "142": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-lovely-kiss-opponent-jynx-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-lovely-kiss-opponent-jynx-player-onix.json"
+    ]
+   }
+  },
+  "146": {
+   "attacker": {
+    "x2Class": "transient",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-dizzy-punch-opponent-spinda-player-onix.json",
+     "mechanic-dizzy-punch-player-spinda-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-dizzy-punch-opponent-spinda-player-onix.json",
+     "mechanic-dizzy-punch-player-spinda-opponent-onix.json"
+    ]
+   }
+  },
+  "147": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-spore-opponent-parasect-player-onix.json",
+     "mechanic-spore-player-parasect-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-spore-opponent-parasect-player-onix.json",
+     "mechanic-spore-player-parasect-opponent-onix.json"
+    ]
+   }
+  },
+  "148": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-flash-player-mareep-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-flash-player-mareep-opponent-onix.json"
+    ]
+   }
+  },
+  "149": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-psywave-opponent-chimecho-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-psywave-opponent-chimecho-player-onix.json"
+    ]
+   }
+  },
+  "150": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 7,
+    "y2EndClass": "zero",
+    "bodies": 7,
+    "samples": [
+     "mechanic-return-medium-opponent-dragonair-player-onix.json",
+     "mechanic-return-medium-player-dragonair-opponent-onix.json",
+     "mechanic-return-strong-opponent-dragonair-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 7,
+    "y2EndClass": "zero",
+    "bodies": 7,
+    "samples": [
+     "mechanic-return-medium-opponent-dragonair-player-onix.json",
+     "mechanic-return-medium-player-dragonair-opponent-onix.json",
+     "mechanic-return-strong-opponent-dragonair-player-onix.json"
+    ]
+   }
+  },
+  "151": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-acid-armor-opponent-grimer-player-onix.json",
+     "mechanic-acid-armor-player-grimer-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-acid-armor-opponent-grimer-player-onix.json",
+     "mechanic-acid-armor-player-grimer-opponent-onix.json"
+    ]
+   }
+  },
+  "152": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-crabhammer-opponent-krabby-player-onix.json",
+     "mechanic-crabhammer-player-krabby-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-crabhammer-opponent-krabby-player-onix.json",
+     "mechanic-crabhammer-player-krabby-opponent-onix.json"
+    ]
+   }
+  },
+  "154": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 3,
+    "y2EndClass": "zero",
+    "bodies": 3,
+    "samples": [
+     "mechanic-fury-swipes-player-aipom-opponent-onix.json",
+     "mechanic-fury-swipes-player-aipom-opponent-onix.json",
+     "mechanic-fury-swipes-player-aipom-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 3,
+    "y2EndClass": "zero",
+    "bodies": 3,
+    "samples": [
+     "mechanic-fury-swipes-player-aipom-opponent-onix.json",
+     "mechanic-fury-swipes-player-aipom-opponent-onix.json",
+     "mechanic-fury-swipes-player-aipom-opponent-onix.json"
+    ]
+   }
+  },
+  "156": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 5,
+    "y2EndClass": "zero",
+    "bodies": 5,
+    "samples": [
+     "mechanic-rest-opponent-teddiursa-player-onix.json",
+     "mechanic-rest-player-teddiursa-opponent-onix.json",
+     "mechanic-sleep-talk-opponent-seaking-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 5,
+    "y2EndClass": "zero",
+    "bodies": 5,
+    "samples": [
+     "mechanic-rest-opponent-teddiursa-player-onix.json",
+     "mechanic-rest-player-teddiursa-opponent-onix.json",
+     "mechanic-sleep-talk-opponent-seaking-player-onix.json"
+    ]
+   }
+  },
+  "157": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 4,
+    "y2EndClass": "zero",
+    "bodies": 4,
+    "samples": [
+     "mechanic-magic-coat-opponent-spoink-player-onix.json",
+     "mechanic-magic-coat-player-spoink-opponent-onix.json",
+     "mechanic-role-play-opponent-kadabra-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 4,
+    "y2EndClass": "zero",
+    "bodies": 4,
+    "samples": [
+     "mechanic-magic-coat-opponent-spoink-player-onix.json",
+     "mechanic-magic-coat-player-spoink-opponent-onix.json",
+     "mechanic-role-play-opponent-kadabra-player-onix.json"
+    ]
+   }
+  },
+  "162": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 15,
+    "y2EndClass": "zero",
+    "bodies": 15,
+    "samples": [
+     "mechanic-flail-natural-hp-opponent-krabby-player-onix.json",
+     "mechanic-flail-natural-hp-opponent-krabby-player-onix.json",
+     "mechanic-flail-natural-hp-opponent-krabby-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 15,
+    "y2EndClass": "zero",
+    "bodies": 15,
+    "samples": [
+     "mechanic-flail-natural-hp-opponent-krabby-player-onix.json",
+     "mechanic-flail-natural-hp-opponent-krabby-player-onix.json",
+     "mechanic-flail-natural-hp-opponent-krabby-player-onix.json"
+    ]
+   }
+  },
+  "163": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-slash-opponent-charmeleon-player-onix.json",
+     "mechanic-slash-player-charmeleon-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-slash-opponent-charmeleon-player-onix.json",
+     "mechanic-slash-player-charmeleon-opponent-onix.json"
+    ]
+   }
+  },
+  "164": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-substitute-opponent-golem-player-onix.json",
+     "mechanic-substitute-player-golem-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-substitute-opponent-golem-player-onix.json",
+     "mechanic-substitute-player-golem-opponent-onix.json"
+    ]
+   }
+  },
+  "167": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 6,
+    "y2EndClass": "zero",
+    "bodies": 6,
+    "samples": [
+     "mechanic-triple-kick-opponent-hitmontop-player-onix.json",
+     "mechanic-triple-kick-opponent-hitmontop-player-onix.json",
+     "mechanic-triple-kick-opponent-hitmontop-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 6,
+    "y2EndClass": "zero",
+    "bodies": 6,
+    "samples": [
+     "mechanic-triple-kick-opponent-hitmontop-player-onix.json",
+     "mechanic-triple-kick-opponent-hitmontop-player-onix.json",
+     "mechanic-triple-kick-opponent-hitmontop-player-onix.json"
+    ]
+   }
+  },
+  "169": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-spider-web-opponent-spinarak-player-onix.json",
+     "mechanic-spider-web-player-spinarak-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-spider-web-opponent-spinarak-player-onix.json",
+     "mechanic-spider-web-player-spinarak-opponent-onix.json"
+    ]
+   }
+  },
+  "172": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-flame-wheel-opponent-quilava-player-onix.json",
+     "mechanic-flame-wheel-player-quilava-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-flame-wheel-opponent-quilava-player-onix.json",
+     "mechanic-flame-wheel-player-quilava-opponent-onix.json"
+    ]
+   }
+  },
+  "175": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 22,
+    "y2EndClass": "zero",
+    "bodies": 22,
+    "samples": [
+     "mechanic-flail-natural-hp-opponent-krabby-player-onix.json",
+     "mechanic-flail-natural-hp-opponent-krabby-player-onix.json",
+     "mechanic-flail-natural-hp-opponent-krabby-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 22,
+    "y2EndClass": "zero",
+    "bodies": 22,
+    "samples": [
+     "mechanic-flail-natural-hp-opponent-krabby-player-onix.json",
+     "mechanic-flail-natural-hp-opponent-krabby-player-onix.json",
+     "mechanic-flail-natural-hp-opponent-krabby-player-onix.json"
+    ]
+   }
+  },
+  "178": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-cotton-spore-opponent-mareep-player-onix.json",
+     "mechanic-cotton-spore-player-mareep-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-cotton-spore-opponent-mareep-player-onix.json",
+     "mechanic-cotton-spore-player-mareep-opponent-onix.json"
+    ]
+   }
+  },
+  "180": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-spite-opponent-haunter-player-onix.json",
+     "mechanic-spite-player-haunter-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-spite-opponent-haunter-player-onix.json",
+     "mechanic-spite-player-haunter-opponent-onix.json"
+    ]
+   }
+  },
+  "182": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-protect-opponent-houndour-player-onix.json",
+     "mechanic-protect-player-houndour-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-protect-opponent-houndour-player-onix.json",
+     "mechanic-protect-player-houndour-opponent-onix.json"
+    ]
+   }
+  },
+  "186": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-sweet-kiss-opponent-luvdisc-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-sweet-kiss-opponent-luvdisc-player-onix.json"
+    ]
+   }
+  },
+  "187": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-belly-drum-opponent-poliwrath-player-onix.json",
+     "mechanic-belly-drum-player-poliwrath-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-belly-drum-opponent-poliwrath-player-onix.json",
+     "mechanic-belly-drum-player-poliwrath-opponent-onix.json"
+    ]
+   }
+  },
+  "188": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-sludge-bomb-opponent-weepinbell-player-onix.json",
+     "mechanic-sludge-bomb-player-weepinbell-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-sludge-bomb-opponent-weepinbell-player-onix.json",
+     "mechanic-sludge-bomb-player-weepinbell-opponent-onix.json"
+    ]
+   }
+  },
+  "190": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-octazooka-opponent-octillery-player-onix.json",
+     "mechanic-octazooka-player-octillery-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-octazooka-opponent-octillery-player-onix.json",
+     "mechanic-octazooka-player-octillery-opponent-onix.json"
+    ]
+   }
+  },
+  "191": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-spikes-opponent-qwilfish-player-onix.json",
+     "mechanic-spikes-player-qwilfish-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-spikes-opponent-qwilfish-player-onix.json",
+     "mechanic-spikes-player-qwilfish-opponent-onix.json"
+    ]
+   }
+  },
+  "193": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-foresight-opponent-machoke-player-onix.json",
+     "mechanic-foresight-player-machoke-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-foresight-opponent-machoke-player-onix.json",
+     "mechanic-foresight-player-machoke-opponent-onix.json"
+    ]
+   }
+  },
+  "194": {
+   "attacker": {
+    "x2Class": "transient",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-destiny-bond-opponent-wobbuffet-player-onix.json",
+     "mechanic-destiny-bond-player-wobbuffet-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "transient",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-destiny-bond-opponent-wobbuffet-player-onix.json",
+     "mechanic-destiny-bond-player-wobbuffet-opponent-onix.json"
+    ]
+   }
+  },
+  "195": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-perish-song-opponent-murkrow-player-onix.json",
+     "mechanic-perish-song-player-murkrow-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-perish-song-opponent-murkrow-player-onix.json",
+     "mechanic-perish-song-player-murkrow-opponent-onix.json"
+    ]
+   }
+  },
+  "196": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-icy-wind-opponent-swinub-player-onix.json",
+     "mechanic-icy-wind-player-swinub-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-icy-wind-opponent-swinub-player-onix.json",
+     "mechanic-icy-wind-player-swinub-opponent-onix.json"
+    ]
+   }
+  },
+  "197": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-detect-opponent-yanma-player-onix.json",
+     "mechanic-detect-player-yanma-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-detect-opponent-yanma-player-onix.json",
+     "mechanic-detect-player-yanma-opponent-onix.json"
+    ]
+   }
+  },
+  "200": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 3,
+    "y2EndClass": "zero",
+    "bodies": 3,
+    "samples": [
+     "mechanic-outrage-opponent-dragonite-player-onix.json",
+     "mechanic-outrage-player-dragonite-opponent-onix.json",
+     "mechanic-outrage-player-dragonite-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 3,
+    "y2EndClass": "zero",
+    "bodies": 3,
+    "samples": [
+     "mechanic-outrage-opponent-dragonite-player-onix.json",
+     "mechanic-outrage-player-dragonite-opponent-onix.json",
+     "mechanic-outrage-player-dragonite-opponent-onix.json"
+    ]
+   }
+  },
+  "201": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-sandstorm-opponent-phanpy-player-onix.json",
+     "mechanic-sandstorm-player-phanpy-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-sandstorm-opponent-phanpy-player-onix.json",
+     "mechanic-sandstorm-player-phanpy-opponent-onix.json"
+    ]
+   }
+  },
+  "202": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-giga-drain-opponent-roselia-player-onix.json",
+     "mechanic-giga-drain-player-roselia-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-giga-drain-opponent-roselia-player-onix.json",
+     "mechanic-giga-drain-player-roselia-opponent-onix.json"
+    ]
+   }
+  },
+  "203": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-endure-opponent-eevee-player-onix.json",
+     "mechanic-endure-player-eevee-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-endure-opponent-eevee-player-onix.json",
+     "mechanic-endure-player-eevee-opponent-onix.json"
+    ]
+   }
+  },
+  "208": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-milk-drink-opponent-miltank-player-onix.json",
+     "mechanic-milk-drink-player-miltank-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-milk-drink-opponent-miltank-player-onix.json",
+     "mechanic-milk-drink-player-miltank-opponent-onix.json"
+    ]
+   }
+  },
+  "211": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-steel-wing-opponent-wingull-player-onix.json",
+     "mechanic-steel-wing-player-wingull-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-steel-wing-opponent-wingull-player-onix.json",
+     "mechanic-steel-wing-player-wingull-opponent-onix.json"
+    ]
+   }
+  },
+  "212": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-mean-look-opponent-murkrow-player-onix.json",
+     "mechanic-mean-look-player-murkrow-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-mean-look-opponent-murkrow-player-onix.json",
+     "mechanic-mean-look-player-murkrow-opponent-onix.json"
+    ]
+   }
+  },
+  "213": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-attract-opponent-eevee-player-onix.json",
+     "mechanic-attract-player-eevee-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-attract-opponent-eevee-player-onix.json",
+     "mechanic-attract-player-eevee-opponent-onix.json"
+    ]
+   }
+  },
+  "214": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-sleep-talk-opponent-seaking-player-onix.json",
+     "mechanic-sleep-talk-player-seaking-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-sleep-talk-opponent-seaking-player-onix.json",
+     "mechanic-sleep-talk-player-seaking-opponent-onix.json"
+    ]
+   }
+  },
+  "215": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-heal-bell-opponent-chimecho-player-onix.json",
+     "mechanic-heal-bell-player-chimecho-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-heal-bell-opponent-chimecho-player-onix.json",
+     "mechanic-heal-bell-player-chimecho-opponent-onix.json"
+    ]
+   }
+  },
+  "216": {
+   "attacker": {
+    "x2Class": "mixed:transient+unchanged",
+    "onixObservations": 8,
+    "y2EndClass": "zero",
+    "bodies": 8,
+    "samples": [
+     "mechanic-return-medium-opponent-dragonair-player-onix.json",
+     "mechanic-return-medium-player-dragonair-opponent-onix.json",
+     "mechanic-return-opponent-dragonair-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "mixed:unchanged+zeroed",
+    "onixObservations": 8,
+    "y2EndClass": "zero",
+    "bodies": 8,
+    "samples": [
+     "mechanic-return-medium-opponent-dragonair-player-onix.json",
+     "mechanic-return-medium-player-dragonair-opponent-onix.json",
+     "mechanic-return-opponent-dragonair-player-onix.json"
+    ]
+   }
+  },
+  "217": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-present-player-delibird-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-present-player-delibird-opponent-onix.json"
+    ]
+   }
+  },
+  "218": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-frustration-opponent-furret-player-onix.json",
+     "mechanic-frustration-player-furret-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-frustration-opponent-furret-player-onix.json",
+     "mechanic-frustration-player-furret-opponent-onix.json"
+    ]
+   }
+  },
+  "219": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-safeguard-opponent-bayleef-player-onix.json",
+     "mechanic-safeguard-player-bayleef-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-safeguard-opponent-bayleef-player-onix.json",
+     "mechanic-safeguard-player-bayleef-opponent-onix.json"
+    ]
+   }
+  },
+  "222": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 4,
+    "y2EndClass": "zero",
+    "bodies": 4,
+    "samples": [
+     "mechanic-magnitude-intense-opponent-camerupt-player-onix.json",
+     "mechanic-magnitude-intense-player-camerupt-opponent-onix.json",
+     "mechanic-magnitude-regular-opponent-graveler-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 4,
+    "y2EndClass": "zero",
+    "bodies": 4,
+    "samples": [
+     "mechanic-magnitude-intense-opponent-camerupt-player-onix.json",
+     "mechanic-magnitude-intense-player-camerupt-opponent-onix.json",
+     "mechanic-magnitude-regular-opponent-graveler-player-onix.json"
+    ]
+   }
+  },
+  "224": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 3,
+    "y2EndClass": "zero",
+    "bodies": 3,
+    "samples": [
+     "mechanic-megahorn-opponent-seaking-player-onix.json",
+     "mechanic-megahorn-player-seaking-opponent-onix.json",
+     "mechanic-sleep-talk-opponent-seaking-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 3,
+    "y2EndClass": "zero",
+    "bodies": 3,
+    "samples": [
+     "mechanic-megahorn-opponent-seaking-player-onix.json",
+     "mechanic-megahorn-player-seaking-opponent-onix.json",
+     "mechanic-sleep-talk-opponent-seaking-player-onix.json"
+    ]
+   }
+  },
+  "225": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-follow-me-player-togetic-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-follow-me-player-togetic-opponent-onix.json"
+    ]
+   }
+  },
+  "226": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-baton-pass-opponent-aipom-player-onix.json",
+     "mechanic-baton-pass-player-aipom-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-baton-pass-opponent-aipom-player-onix.json",
+     "mechanic-baton-pass-player-aipom-opponent-onix.json"
+    ]
+   }
+  },
+  "227": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-encore-opponent-minun-player-onix.json",
+     "mechanic-encore-player-minun-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-encore-opponent-minun-player-onix.json",
+     "mechanic-encore-player-minun-opponent-onix.json"
+    ]
+   }
+  },
+  "229": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-rapid-spin-opponent-wartortle-player-onix.json",
+     "mechanic-rapid-spin-player-wartortle-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-rapid-spin-opponent-wartortle-player-onix.json",
+     "mechanic-rapid-spin-player-wartortle-opponent-onix.json"
+    ]
+   }
+  },
+  "230": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-sweet-scent-opponent-weepinbell-player-onix.json",
+     "mechanic-sweet-scent-player-weepinbell-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-sweet-scent-opponent-weepinbell-player-onix.json",
+     "mechanic-sweet-scent-player-weepinbell-opponent-onix.json"
+    ]
+   }
+  },
+  "231": {
+   "attacker": {
+    "x2Class": "transient",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-iron-tail-opponent-azumarill-player-onix.json",
+     "mechanic-iron-tail-player-azumarill-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-iron-tail-opponent-azumarill-player-onix.json",
+     "mechanic-iron-tail-player-azumarill-opponent-onix.json"
+    ]
+   }
+  },
+  "232": {
+   "attacker": {
+    "x2Class": "transient",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-metal-claw-opponent-charmander-player-onix.json",
+     "mechanic-metal-claw-player-charmander-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-metal-claw-opponent-charmander-player-onix.json",
+     "mechanic-metal-claw-player-charmander-opponent-onix.json"
+    ]
+   }
+  },
+  "235": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-synthesis-opponent-skiploom-player-onix.json",
+     "mechanic-synthesis-player-skiploom-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-synthesis-opponent-skiploom-player-onix.json",
+     "mechanic-synthesis-player-skiploom-opponent-onix.json"
+    ]
+   }
+  },
+  "236": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-moonlight-opponent-gloom-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-moonlight-opponent-gloom-player-onix.json"
+    ]
+   }
+  },
+  "238": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-cross-chop-opponent-machoke-player-onix.json",
+     "mechanic-cross-chop-player-machoke-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-cross-chop-opponent-machoke-player-onix.json",
+     "mechanic-cross-chop-player-machoke-opponent-onix.json"
+    ]
+   }
+  },
+  "240": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-rain-dance-opponent-wooper-player-onix.json",
+     "mechanic-rain-dance-player-wooper-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-rain-dance-opponent-wooper-player-onix.json",
+     "mechanic-rain-dance-player-wooper-opponent-onix.json"
+    ]
+   }
+  },
+  "241": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-sunny-day-opponent-bellossom-player-onix.json",
+     "mechanic-sunny-day-player-bellossom-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-sunny-day-opponent-bellossom-player-onix.json",
+     "mechanic-sunny-day-player-bellossom-opponent-onix.json"
+    ]
+   }
+  },
+  "242": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-crunch-opponent-houndour-player-onix.json",
+     "mechanic-crunch-player-houndour-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-crunch-opponent-houndour-player-onix.json",
+     "mechanic-crunch-player-houndour-opponent-onix.json"
+    ]
+   }
+  },
+  "247": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 3,
+    "y2EndClass": "zero",
+    "bodies": 3,
+    "samples": [
+     "mechanic-shadow-ball-opponent-sableye-player-onix.json",
+     "mechanic-shadow-ball-opponent-sableye-player-onix.json",
+     "mechanic-shadow-ball-player-sableye-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 3,
+    "y2EndClass": "zero",
+    "bodies": 3,
+    "samples": [
+     "mechanic-shadow-ball-opponent-sableye-player-onix.json",
+     "mechanic-shadow-ball-opponent-sableye-player-onix.json",
+     "mechanic-shadow-ball-player-sableye-opponent-onix.json"
+    ]
+   }
+  },
+  "248": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-future-sight-opponent-kadabra-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-future-sight-opponent-kadabra-player-onix.json"
+    ]
+   }
+  },
+  "250": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 4,
+    "y2EndClass": "zero",
+    "bodies": 4,
+    "samples": [
+     "mechanic-status-whirlpool-opponent-wailmer-player-onix.json",
+     "mechanic-status-whirlpool-player-wailmer-opponent-onix.json",
+     "mechanic-whirlpool-opponent-wailmer-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 4,
+    "y2EndClass": "zero",
+    "bodies": 4,
+    "samples": [
+     "mechanic-status-whirlpool-opponent-wailmer-player-onix.json",
+     "mechanic-status-whirlpool-player-wailmer-opponent-onix.json",
+     "mechanic-whirlpool-opponent-wailmer-player-onix.json"
+    ]
+   }
+  },
+  "253": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-uproar-opponent-vigoroth-player-onix.json",
+     "mechanic-uproar-player-vigoroth-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-uproar-opponent-vigoroth-player-onix.json",
+     "mechanic-uproar-player-vigoroth-opponent-onix.json"
+    ]
+   }
+  },
+  "257": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-heat-wave-opponent-ninetales-player-onix.json",
+     "mechanic-heat-wave-player-ninetales-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-heat-wave-opponent-ninetales-player-onix.json",
+     "mechanic-heat-wave-player-ninetales-opponent-onix.json"
+    ]
+   }
+  },
+  "258": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-hail-opponent-delibird-player-onix.json",
+     "mechanic-hail-player-delibird-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-hail-opponent-delibird-player-onix.json",
+     "mechanic-hail-player-delibird-opponent-onix.json"
+    ]
+   }
+  },
+  "259": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-torment-opponent-murkrow-player-onix.json",
+     "mechanic-torment-player-murkrow-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-torment-opponent-murkrow-player-onix.json",
+     "mechanic-torment-player-murkrow-opponent-onix.json"
+    ]
+   }
+  },
+  "260": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-flatter-opponent-nidorina-player-onix.json",
+     "mechanic-flatter-player-nidorina-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-flatter-opponent-nidorina-player-onix.json",
+     "mechanic-flatter-player-nidorina-opponent-onix.json"
+    ]
+   }
+  },
+  "262": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-memento-opponent-weezing-player-onix.json",
+     "mechanic-memento-player-weezing-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-memento-opponent-weezing-player-onix.json",
+     "mechanic-memento-player-weezing-opponent-onix.json"
+    ]
+   }
+  },
+  "263": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-facade-opponent-azumarill-player-onix.json",
+     "mechanic-facade-player-azumarill-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-facade-opponent-azumarill-player-onix.json",
+     "mechanic-facade-player-azumarill-opponent-onix.json"
+    ]
+   }
+  },
+  "265": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-smelling-salt-opponent-granbull-player-onix.json",
+     "mechanic-smelling-salt-player-granbull-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-smelling-salt-opponent-granbull-player-onix.json",
+     "mechanic-smelling-salt-player-granbull-opponent-onix.json"
+    ]
+   }
+  },
+  "266": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-follow-me-opponent-togetic-player-onix.json",
+     "mechanic-follow-me-player-togetic-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-follow-me-opponent-togetic-player-onix.json",
+     "mechanic-follow-me-player-togetic-opponent-onix.json"
+    ]
+   }
+  },
+  "272": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-role-play-opponent-kadabra-player-onix.json",
+     "mechanic-role-play-player-kadabra-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-role-play-opponent-kadabra-player-onix.json",
+     "mechanic-role-play-player-kadabra-opponent-onix.json"
+    ]
+   }
+  },
+  "273": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-wish-opponent-illumise-player-onix.json",
+     "mechanic-wish-player-illumise-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-wish-opponent-illumise-player-onix.json",
+     "mechanic-wish-player-illumise-opponent-onix.json"
+    ]
+   }
+  },
+  "275": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-ingrain-opponent-lileep-player-onix.json",
+     "mechanic-ingrain-player-lileep-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-ingrain-opponent-lileep-player-onix.json",
+     "mechanic-ingrain-player-lileep-opponent-onix.json"
+    ]
+   }
+  },
+  "276": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-superpower-player-nidoqueen-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-superpower-player-nidoqueen-opponent-onix.json"
+    ]
+   }
+  },
+  "277": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-magic-coat-opponent-spoink-player-onix.json",
+     "mechanic-magic-coat-player-spoink-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-magic-coat-opponent-spoink-player-onix.json",
+     "mechanic-magic-coat-player-spoink-opponent-onix.json"
+    ]
+   }
+  },
+  "280": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 4,
+    "y2EndClass": "zero",
+    "bodies": 4,
+    "samples": [
+     "mechanic-brick-break-normal-opponent-lombre-player-onix.json",
+     "mechanic-brick-break-normal-player-lombre-opponent-onix.json",
+     "mechanic-brick-break-opponent-lombre-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 4,
+    "y2EndClass": "zero",
+    "bodies": 4,
+    "samples": [
+     "mechanic-brick-break-normal-opponent-lombre-player-onix.json",
+     "mechanic-brick-break-normal-player-lombre-opponent-onix.json",
+     "mechanic-brick-break-opponent-lombre-player-onix.json"
+    ]
+   }
+  },
+  "282": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-knock-off-opponent-shuppet-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-knock-off-opponent-shuppet-player-onix.json"
+    ]
+   }
+  },
+  "284": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-eruption-opponent-camerupt-player-onix.json",
+     "mechanic-eruption-player-camerupt-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-eruption-opponent-camerupt-player-onix.json",
+     "mechanic-eruption-player-camerupt-opponent-onix.json"
+    ]
+   }
+  },
+  "288": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 4,
+    "y2EndClass": "zero",
+    "bodies": 4,
+    "samples": [
+     "mechanic-grudge-opponent-haunter-player-onix.json",
+     "mechanic-grudge-opponent-haunter-player-onix.json",
+     "mechanic-grudge-player-haunter-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 4,
+    "y2EndClass": "zero",
+    "bodies": 4,
+    "samples": [
+     "mechanic-grudge-opponent-haunter-player-onix.json",
+     "mechanic-grudge-opponent-haunter-player-onix.json",
+     "mechanic-grudge-player-haunter-opponent-onix.json"
+    ]
+   }
+  },
+  "290": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-secret-power-opponent-teddiursa-player-onix.json",
+     "mechanic-secret-power-player-teddiursa-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-secret-power-opponent-teddiursa-player-onix.json",
+     "mechanic-secret-power-player-teddiursa-opponent-onix.json"
+    ]
+   }
+  },
+  "291": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 4,
+    "y2EndClass": "zero",
+    "bodies": 4,
+    "samples": [
+     "mechanic-dive-opponent-chinchou-player-onix.json",
+     "mechanic-dive-opponent-chinchou-player-onix.json",
+     "mechanic-dive-player-chinchou-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "mixed:unchanged+zeroed",
+    "onixObservations": 4,
+    "y2EndClass": "zero",
+    "bodies": 4,
+    "samples": [
+     "mechanic-dive-opponent-chinchou-player-onix.json",
+     "mechanic-dive-opponent-chinchou-player-onix.json",
+     "mechanic-dive-player-chinchou-opponent-onix.json"
+    ]
+   }
+  },
+  "295": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-luster-purge-opponent-latios-player-onix.json",
+     "mechanic-luster-purge-player-latios-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-luster-purge-opponent-latios-player-onix.json",
+     "mechanic-luster-purge-player-latios-opponent-onix.json"
+    ]
+   }
+  },
+  "302": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-needle-arm-opponent-cacnea-player-onix.json",
+     "mechanic-needle-arm-player-cacnea-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-needle-arm-opponent-cacnea-player-onix.json",
+     "mechanic-needle-arm-player-cacnea-opponent-onix.json"
+    ]
+   }
+  },
+  "305": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-poison-fang-opponent-zubat-player-onix.json",
+     "mechanic-poison-fang-player-zubat-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-poison-fang-opponent-zubat-player-onix.json",
+     "mechanic-poison-fang-player-zubat-opponent-onix.json"
+    ]
+   }
+  },
+  "306": {
+   "attacker": {
+    "x2Class": "transient",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-crush-claw-opponent-grovyle-player-onix.json",
+     "mechanic-crush-claw-player-grovyle-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-crush-claw-opponent-grovyle-player-onix.json",
+     "mechanic-crush-claw-player-grovyle-opponent-onix.json"
+    ]
+   }
+  },
+  "310": {
+   "attacker": {
+    "x2Class": "transient",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-astonish-opponent-loudred-player-onix.json",
+     "mechanic-astonish-player-loudred-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-astonish-opponent-loudred-player-onix.json",
+     "mechanic-astonish-player-loudred-opponent-onix.json"
+    ]
+   }
+  },
+  "312": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-aromatherapy-opponent-vileplume-player-onix.json",
+     "mechanic-aromatherapy-player-vileplume-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-aromatherapy-opponent-vileplume-player-onix.json",
+     "mechanic-aromatherapy-player-vileplume-opponent-onix.json"
+    ]
+   }
+  },
+  "317": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-rock-tomb-player-grimer-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-rock-tomb-player-grimer-opponent-onix.json"
+    ]
+   }
+  },
+  "318": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-silver-wind-opponent-butterfree-player-onix.json",
+     "mechanic-silver-wind-player-butterfree-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-silver-wind-opponent-butterfree-player-onix.json",
+     "mechanic-silver-wind-player-butterfree-opponent-onix.json"
+    ]
+   }
+  },
+  "319": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-metal-sound-opponent-aron-player-onix.json",
+     "mechanic-metal-sound-player-aron-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-metal-sound-opponent-aron-player-onix.json",
+     "mechanic-metal-sound-player-aron-opponent-onix.json"
+    ]
+   }
+  },
+  "320": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-grass-whistle-player-roselia-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-grass-whistle-player-roselia-opponent-onix.json"
+    ]
+   }
+  },
+  "321": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-tickle-opponent-omanyte-player-onix.json",
+     "mechanic-tickle-player-omanyte-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "transient",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-tickle-opponent-omanyte-player-onix.json",
+     "mechanic-tickle-player-omanyte-opponent-onix.json"
+    ]
+   }
+  },
+  "327": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-sky-uppercut-opponent-hitmonchan-player-onix.json",
+     "mechanic-sky-uppercut-player-hitmonchan-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-sky-uppercut-opponent-hitmonchan-player-onix.json",
+     "mechanic-sky-uppercut-player-hitmonchan-opponent-onix.json"
+    ]
+   }
+  },
+  "328": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-sand-tomb-opponent-dugtrio-player-onix.json",
+     "mechanic-sand-tomb-player-dugtrio-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-sand-tomb-opponent-dugtrio-player-onix.json",
+     "mechanic-sand-tomb-player-dugtrio-opponent-onix.json"
+    ]
+   }
+  },
+  "330": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-muddy-water-opponent-marshtomp-player-onix.json",
+     "mechanic-muddy-water-player-marshtomp-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-muddy-water-opponent-marshtomp-player-onix.json",
+     "mechanic-muddy-water-player-marshtomp-opponent-onix.json"
+    ]
+   }
+  },
+  "332": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-present-player-delibird-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 1,
+    "y2EndClass": "zero",
+    "bodies": 1,
+    "samples": [
+     "mechanic-present-player-delibird-opponent-onix.json"
+    ]
+   }
+  },
+  "334": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-iron-defense-opponent-clamperl-player-onix.json",
+     "mechanic-iron-defense-player-clamperl-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-iron-defense-opponent-clamperl-player-onix.json",
+     "mechanic-iron-defense-player-clamperl-opponent-onix.json"
+    ]
+   }
+  },
+  "335": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-block-opponent-sudowoodo-player-onix.json",
+     "mechanic-block-player-sudowoodo-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-block-opponent-sudowoodo-player-onix.json",
+     "mechanic-block-player-sudowoodo-opponent-onix.json"
+    ]
+   }
+  },
+  "336": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-howl-opponent-loudred-player-onix.json",
+     "mechanic-howl-player-loudred-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-howl-opponent-loudred-player-onix.json",
+     "mechanic-howl-player-loudred-opponent-onix.json"
+    ]
+   }
+  },
+  "337": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-dragon-claw-opponent-altaria-player-onix.json",
+     "mechanic-dragon-claw-player-altaria-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-dragon-claw-opponent-altaria-player-onix.json",
+     "mechanic-dragon-claw-player-altaria-opponent-onix.json"
+    ]
+   }
+  },
+  "339": {
+   "attacker": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-bulk-up-opponent-primeape-player-onix.json",
+     "mechanic-bulk-up-player-primeape-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "rest0",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-bulk-up-opponent-primeape-player-onix.json",
+     "mechanic-bulk-up-player-primeape-opponent-onix.json"
+    ]
+   }
+  },
+  "341": {
+   "attacker": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-mud-shot-opponent-krabby-player-onix.json",
+     "mechanic-mud-shot-player-krabby-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-mud-shot-opponent-krabby-player-onix.json",
+     "mechanic-mud-shot-player-krabby-opponent-onix.json"
+    ]
+   }
+  },
+  "342": {
+   "attacker": {
+    "x2Class": "transient",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-poison-tail-opponent-seviper-player-onix.json",
+     "mechanic-poison-tail-player-seviper-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-poison-tail-opponent-seviper-player-onix.json",
+     "mechanic-poison-tail-player-seviper-opponent-onix.json"
+    ]
+   }
+  },
+  "345": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 3,
+    "y2EndClass": "zero",
+    "bodies": 3,
+    "samples": [
+     "mechanic-magical-leaf-opponent-roselia-player-onix.json",
+     "mechanic-magical-leaf-player-roselia-opponent-onix.json",
+     "mechanic-metronome-opponent-chansey-player-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 3,
+    "y2EndClass": "zero",
+    "bodies": 3,
+    "samples": [
+     "mechanic-magical-leaf-opponent-roselia-player-onix.json",
+     "mechanic-magical-leaf-player-roselia-opponent-onix.json",
+     "mechanic-metronome-opponent-chansey-player-onix.json"
+    ]
+   }
+  },
+  "348": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-leaf-blade-opponent-sceptile-player-onix.json",
+     "mechanic-leaf-blade-player-sceptile-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-leaf-blade-opponent-sceptile-player-onix.json",
+     "mechanic-leaf-blade-player-sceptile-opponent-onix.json"
+    ]
+   }
+  },
+  "349": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-dragon-dance-opponent-dragonair-player-onix.json",
+     "mechanic-dragon-dance-player-dragonair-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-dragon-dance-opponent-dragonair-player-onix.json",
+     "mechanic-dragon-dance-player-dragonair-opponent-onix.json"
+    ]
+   }
+  },
+  "352": {
+   "attacker": {
+    "x2Class": "unchanged",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-water-pulse-opponent-lombre-player-onix.json",
+     "mechanic-water-pulse-player-lombre-opponent-onix.json"
+    ]
+   },
+   "target": {
+    "x2Class": "zeroed",
+    "onixObservations": 2,
+    "y2EndClass": "zero",
+    "bodies": 2,
+    "samples": [
+     "mechanic-water-pulse-opponent-lombre-player-onix.json",
+     "mechanic-water-pulse-player-lombre-opponent-onix.json"
+    ]
+   }
+  }
+ }
+}

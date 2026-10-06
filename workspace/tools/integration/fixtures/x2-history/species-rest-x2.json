@@ -1,0 +1,8667 @@
+{
+ "source": "direct mGBA, fresh process per species, both sides = the species, values at the first body's activation (Flail natural-HP lab base); r1 == r2 byte-equal activation+series for all rows",
+ "speciesCount": 376,
+ "errors": 0,
+ "r1r2Differences": 0,
+ "nonZeroOpponentFront": {
+  "ONIX": {
+   "x2": 1,
+   "y2": 0
+  },
+  "RATTATA": {
+   "x2": 1,
+   "y2": 0
+  }
+ },
+ "nonZeroPlayerBack": {},
+ "all": {
+  "ABRA": {
+   "id": 63,
+   "gender": "male",
+   "activationFrame": 69,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ABSOL": {
+   "id": 376,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "AERODACTYL": {
+   "id": 142,
+   "gender": "male",
+   "activationFrame": 75,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "AGGRON": {
+   "id": 384,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "AIPOM": {
+   "id": 190,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ALAKAZAM": {
+   "id": 65,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ALTARIA": {
+   "id": 359,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "AMPHAROS": {
+   "id": 181,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ANORITH": {
+   "id": 390,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ARBOK": {
+   "id": 24,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ARCANINE": {
+   "id": 59,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ARIADOS": {
+   "id": 168,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ARMALDO": {
+   "id": 391,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ARON": {
+   "id": 382,
+   "gender": "male",
+   "activationFrame": 69,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ARTICUNO": {
+   "id": 144,
+   "gender": "genderless",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "AZUMARILL": {
+   "id": 184,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "AZURILL": {
+   "id": 350,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "BAGON": {
+   "id": 395,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "BALTOY": {
+   "id": 318,
+   "gender": "genderless",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "BANETTE": {
+   "id": 378,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "BARBOACH": {
+   "id": 323,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "BAYLEEF": {
+   "id": 153,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "BEAUTIFLY": {
+   "id": 292,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "BEEDRILL": {
+   "id": 15,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "BELDUM": {
+   "id": 398,
+   "gender": "genderless",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "BELLOSSOM": {
+   "id": 182,
+   "gender": "male",
+   "activationFrame": 776,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "BELLSPROUT": {
+   "id": 69,
+   "gender": "male",
+   "activationFrame": 75,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "BLASTOISE": {
+   "id": 9,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "BLAZIKEN": {
+   "id": 282,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "BLISSEY": {
+   "id": 242,
+   "gender": "female",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "BRELOOM": {
+   "id": 307,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "BULBASAUR": {
+   "id": 1,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "BUTTERFREE": {
+   "id": 12,
+   "gender": "male",
+   "activationFrame": 75,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CACNEA": {
+   "id": 344,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CACTURNE": {
+   "id": 345,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CAMERUPT": {
+   "id": 340,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CARVANHA": {
+   "id": 330,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CASCOON": {
+   "id": 293,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CASTFORM": {
+   "id": 385,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CATERPIE": {
+   "id": 10,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CHANSEY": {
+   "id": 113,
+   "gender": "female",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CHARIZARD": {
+   "id": 6,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CHARMANDER": {
+   "id": 4,
+   "gender": "male",
+   "activationFrame": 75,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     2
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CHARMELEON": {
+   "id": 5,
+   "gender": "male",
+   "activationFrame": 75,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CHIKORITA": {
+   "id": 152,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CHIMECHO": {
+   "id": 411,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CHINCHOU": {
+   "id": 170,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CLAMPERL": {
+   "id": 373,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CLAYDOL": {
+   "id": 319,
+   "gender": "genderless",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CLEFABLE": {
+   "id": 36,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CLEFAIRY": {
+   "id": 35,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CLEFFA": {
+   "id": 173,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CLOYSTER": {
+   "id": 91,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "COMBUSKEN": {
+   "id": 281,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CORPHISH": {
+   "id": 326,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CORSOLA": {
+   "id": 222,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CRADILY": {
+   "id": 389,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CRAWDAUNT": {
+   "id": 327,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CROBAT": {
+   "id": 169,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CROCONAW": {
+   "id": 159,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CUBONE": {
+   "id": 104,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "CYNDAQUIL": {
+   "id": 155,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "DELCATTY": {
+   "id": 316,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "DELIBIRD": {
+   "id": 225,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "DEWGONG": {
+   "id": 87,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "DIGLETT": {
+   "id": 50,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "DITTO": {
+   "id": 132,
+   "gender": "genderless",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "DODRIO": {
+   "id": 85,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "DODUO": {
+   "id": 84,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "DONPHAN": {
+   "id": 232,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "DRAGONAIR": {
+   "id": 148,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "DRAGONITE": {
+   "id": 149,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "DRATINI": {
+   "id": 147,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "DROWZEE": {
+   "id": 96,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "DUGTRIO": {
+   "id": 51,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "DUNSPARCE": {
+   "id": 206,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "DUSCLOPS": {
+   "id": 362,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "DUSKULL": {
+   "id": 361,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "DUSTOX": {
+   "id": 294,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "EEVEE": {
+   "id": 133,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "EKANS": {
+   "id": 23,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ELECTABUZZ": {
+   "id": 125,
+   "gender": "male",
+   "activationFrame": 75,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ELECTRIKE": {
+   "id": 337,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ELECTRODE": {
+   "id": 101,
+   "gender": "genderless",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ELEKID": {
+   "id": 239,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ENTEI": {
+   "id": 244,
+   "gender": "genderless",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ESPEON": {
+   "id": 196,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "EXEGGCUTE": {
+   "id": 102,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "EXEGGUTOR": {
+   "id": 103,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "EXPLOUD": {
+   "id": 372,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "FARFETCHD": {
+   "id": 83,
+   "gender": "male",
+   "activationFrame": 75,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "FEAROW": {
+   "id": 22,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "FEEBAS": {
+   "id": 328,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "FERALIGATR": {
+   "id": 160,
+   "gender": "male",
+   "activationFrame": 75,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "FLAAFFY": {
+   "id": 180,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "FLAREON": {
+   "id": 136,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "FLYGON": {
+   "id": 334,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "FORRETRESS": {
+   "id": 205,
+   "gender": "male",
+   "activationFrame": 75,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "FURRET": {
+   "id": 162,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GARDEVOIR": {
+   "id": 394,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GASTLY": {
+   "id": 92,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GENGAR": {
+   "id": 94,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GEODUDE": {
+   "id": 74,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GIRAFARIG": {
+   "id": 203,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GLALIE": {
+   "id": 347,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GLIGAR": {
+   "id": 207,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     2
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GLOOM": {
+   "id": 44,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GOLBAT": {
+   "id": 42,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GOLDEEN": {
+   "id": 118,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GOLDUCK": {
+   "id": 55,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GOLEM": {
+   "id": 76,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GOREBYSS": {
+   "id": 375,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GRANBULL": {
+   "id": 210,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GRAVELER": {
+   "id": 75,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GRIMER": {
+   "id": 88,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GROVYLE": {
+   "id": 278,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GROWLITHE": {
+   "id": 58,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GRUMPIG": {
+   "id": 352,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GULPIN": {
+   "id": 367,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "GYARADOS": {
+   "id": 130,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "HARIYAMA": {
+   "id": 336,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "HAUNTER": {
+   "id": 93,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "HERACROSS": {
+   "id": 214,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "HITMONCHAN": {
+   "id": 107,
+   "gender": "male",
+   "activationFrame": 75,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "HITMONLEE": {
+   "id": 106,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "HITMONTOP": {
+   "id": 237,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "HOOTHOOT": {
+   "id": 163,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "HOPPIP": {
+   "id": 187,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "HORSEA": {
+   "id": 116,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "HOUNDOOM": {
+   "id": 229,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "HOUNDOUR": {
+   "id": 228,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "HUNTAIL": {
+   "id": 374,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "HYPNO": {
+   "id": 97,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "IGGLYBUFF": {
+   "id": 174,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ILLUMISE": {
+   "id": 387,
+   "gender": "female",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "IVYSAUR": {
+   "id": 2,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "JIGGLYPUFF": {
+   "id": 39,
+   "gender": "male",
+   "activationFrame": 75,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "JOLTEON": {
+   "id": 135,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "JUMPLUFF": {
+   "id": 189,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "JYNX": {
+   "id": 124,
+   "gender": "female",
+   "activationFrame": 69,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "KABUTO": {
+   "id": 140,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "KABUTOPS": {
+   "id": 141,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "KADABRA": {
+   "id": 64,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "KAKUNA": {
+   "id": 14,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "KANGASKHAN": {
+   "id": 115,
+   "gender": "female",
+   "activationFrame": 75,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "KECLEON": {
+   "id": 317,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "KINGDRA": {
+   "id": 230,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "KINGLER": {
+   "id": 99,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "KIRLIA": {
+   "id": 393,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "KOFFING": {
+   "id": 109,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "KRABBY": {
+   "id": 98,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "LAIRON": {
+   "id": 383,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "LANTURN": {
+   "id": 171,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "LAPRAS": {
+   "id": 131,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "LARVITAR": {
+   "id": 246,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "LATIAS": {
+   "id": 407,
+   "gender": "female",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "LATIOS": {
+   "id": 408,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "LEDIAN": {
+   "id": 166,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "LEDYBA": {
+   "id": 165,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "LICKITUNG": {
+   "id": 108,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "LILEEP": {
+   "id": 388,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "LINOONE": {
+   "id": 289,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "LOMBRE": {
+   "id": 296,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "LOTAD": {
+   "id": 295,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "LOUDRED": {
+   "id": 371,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "LUDICOLO": {
+   "id": 297,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "LUNATONE": {
+   "id": 348,
+   "gender": "genderless",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "LUVDISC": {
+   "id": 325,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MACHAMP": {
+   "id": 68,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MACHOKE": {
+   "id": 67,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MACHOP": {
+   "id": 66,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MAGBY": {
+   "id": 240,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MAGCARGO": {
+   "id": 219,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MAGIKARP": {
+   "id": 129,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MAGMAR": {
+   "id": 126,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MAGNEMITE": {
+   "id": 81,
+   "gender": "genderless",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MAGNETON": {
+   "id": 82,
+   "gender": "genderless",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MAKUHITA": {
+   "id": 335,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MANECTRIC": {
+   "id": 338,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MANKEY": {
+   "id": 56,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MANTINE": {
+   "id": 226,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MAREEP": {
+   "id": 179,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MARILL": {
+   "id": 183,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MAROWAK": {
+   "id": 105,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MARSHTOMP": {
+   "id": 284,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MASQUERAIN": {
+   "id": 312,
+   "gender": "male",
+   "activationFrame": 75,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MAWILE": {
+   "id": 355,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MEDICHAM": {
+   "id": 357,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MEDITITE": {
+   "id": 356,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MEGANIUM": {
+   "id": 154,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MEOWTH": {
+   "id": 52,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "METAGROSS": {
+   "id": 400,
+   "gender": "genderless",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "METANG": {
+   "id": 399,
+   "gender": "genderless",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "METAPOD": {
+   "id": 11,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MIGHTYENA": {
+   "id": 287,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MILOTIC": {
+   "id": 329,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MILTANK": {
+   "id": 241,
+   "gender": "female",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MINUN": {
+   "id": 354,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MISDREAVUS": {
+   "id": 200,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MOLTRES": {
+   "id": 146,
+   "gender": "genderless",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MR_MIME": {
+   "id": 122,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MUDKIP": {
+   "id": 283,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MUK": {
+   "id": 89,
+   "gender": "male",
+   "activationFrame": 68,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "MURKROW": {
+   "id": 198,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "NATU": {
+   "id": 177,
+   "gender": "male",
+   "activationFrame": 69,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "NIDOKING": {
+   "id": 34,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "NIDOQUEEN": {
+   "id": 31,
+   "gender": "female",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "NIDORAN_F": {
+   "id": 29,
+   "gender": "female",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "NIDORAN_M": {
+   "id": 32,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "NIDORINA": {
+   "id": 30,
+   "gender": "female",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "NIDORINO": {
+   "id": 33,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "NINCADA": {
+   "id": 301,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "NINETALES": {
+   "id": 38,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "NINJASK": {
+   "id": 302,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "NOCTOWL": {
+   "id": 164,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "NOSEPASS": {
+   "id": 320,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "NUMEL": {
+   "id": 339,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "NUZLEAF": {
+   "id": 299,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "OCTILLERY": {
+   "id": 224,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ODDISH": {
+   "id": 43,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "OMANYTE": {
+   "id": 138,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "OMASTAR": {
+   "id": 139,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ONIX": {
+   "id": 95,
+   "gender": "male",
+   "activationFrame": 69,
+   "opponentFront": {
+    "x2": 1,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     1,
+     0
+    ]
+   }
+  },
+  "PARAS": {
+   "id": 46,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "PARASECT": {
+   "id": 47,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "PELIPPER": {
+   "id": 310,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "PERSIAN": {
+   "id": 53,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "PHANPY": {
+   "id": 231,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "PICHU": {
+   "id": 172,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "PIDGEOT": {
+   "id": 18,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "PIDGEOTTO": {
+   "id": 17,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "PIDGEY": {
+   "id": 16,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "PIKACHU": {
+   "id": 25,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "PILOSWINE": {
+   "id": 221,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "PINECO": {
+   "id": 204,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "PINSIR": {
+   "id": 127,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "PLUSLE": {
+   "id": 353,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "POLITOED": {
+   "id": 186,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "POLIWAG": {
+   "id": 60,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "POLIWHIRL": {
+   "id": 61,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "POLIWRATH": {
+   "id": 62,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "PONYTA": {
+   "id": 77,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "POOCHYENA": {
+   "id": 286,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "PORYGON": {
+   "id": 137,
+   "gender": "genderless",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "PORYGON2": {
+   "id": 233,
+   "gender": "genderless",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "PRIMEAPE": {
+   "id": 57,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "PSYDUCK": {
+   "id": 54,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "PUPITAR": {
+   "id": 247,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "QUAGSIRE": {
+   "id": 195,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "QUILAVA": {
+   "id": 156,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "QWILFISH": {
+   "id": 211,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "RAICHU": {
+   "id": 26,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "RAIKOU": {
+   "id": 243,
+   "gender": "genderless",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "RALTS": {
+   "id": 392,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "RAPIDASH": {
+   "id": 78,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "RATICATE": {
+   "id": 20,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "RATTATA": {
+   "id": 19,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 1,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     1,
+     0
+    ]
+   }
+  },
+  "REGICE": {
+   "id": 402,
+   "gender": "genderless",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "REGIROCK": {
+   "id": 401,
+   "gender": "genderless",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "REGISTEEL": {
+   "id": 403,
+   "gender": "genderless",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "RELICANTH": {
+   "id": 381,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "REMORAID": {
+   "id": 223,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "RHYDON": {
+   "id": 112,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "RHYHORN": {
+   "id": 111,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ROSELIA": {
+   "id": 363,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SABLEYE": {
+   "id": 322,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SALAMENCE": {
+   "id": 397,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SANDSHREW": {
+   "id": 27,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SANDSLASH": {
+   "id": 28,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SCEPTILE": {
+   "id": 279,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SCIZOR": {
+   "id": 212,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SCYTHER": {
+   "id": 123,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SEADRA": {
+   "id": 117,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SEAKING": {
+   "id": 119,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SEALEO": {
+   "id": 342,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SEEDOT": {
+   "id": 298,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SEEL": {
+   "id": 86,
+   "gender": "male",
+   "activationFrame": 69,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SENTRET": {
+   "id": 161,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SEVIPER": {
+   "id": 379,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SHARPEDO": {
+   "id": 331,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SHEDINJA": {
+   "id": 303,
+   "gender": "genderless",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SHELGON": {
+   "id": 396,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SHELLDER": {
+   "id": 90,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SHIFTRY": {
+   "id": 300,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SHROOMISH": {
+   "id": 306,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SHUCKLE": {
+   "id": 213,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SHUPPET": {
+   "id": 377,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SILCOON": {
+   "id": 291,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SKARMORY": {
+   "id": 227,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SKIPLOOM": {
+   "id": 188,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SKITTY": {
+   "id": 315,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SLAKING": {
+   "id": 366,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SLAKOTH": {
+   "id": 364,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SLOWBRO": {
+   "id": 80,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SLOWKING": {
+   "id": 199,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SLOWPOKE": {
+   "id": 79,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SLUGMA": {
+   "id": 218,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SMEARGLE": {
+   "id": 235,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SMOOCHUM": {
+   "id": 238,
+   "gender": "female",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SNEASEL": {
+   "id": 215,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SNORLAX": {
+   "id": 143,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SNORUNT": {
+   "id": 346,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SNUBBULL": {
+   "id": 209,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SOLROCK": {
+   "id": 349,
+   "gender": "genderless",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SPEAROW": {
+   "id": 21,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SPHEAL": {
+   "id": 341,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SPINARAK": {
+   "id": 167,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SPINDA": {
+   "id": 308,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SPOINK": {
+   "id": 351,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SQUIRTLE": {
+   "id": 7,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "STANTLER": {
+   "id": 234,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "STARMIE": {
+   "id": 121,
+   "gender": "genderless",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "STARYU": {
+   "id": 120,
+   "gender": "genderless",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "STEELIX": {
+   "id": 208,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SUDOWOODO": {
+   "id": 185,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SUICUNE": {
+   "id": 245,
+   "gender": "genderless",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SUNFLORA": {
+   "id": 192,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SUNKERN": {
+   "id": 191,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SURSKIT": {
+   "id": 311,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SWABLU": {
+   "id": 358,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SWALOT": {
+   "id": 368,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SWAMPERT": {
+   "id": 285,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SWELLOW": {
+   "id": 305,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "SWINUB": {
+   "id": 220,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "TAILLOW": {
+   "id": 304,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "TANGELA": {
+   "id": 114,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "TAUROS": {
+   "id": 128,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "TEDDIURSA": {
+   "id": 216,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "TENTACOOL": {
+   "id": 72,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "TENTACRUEL": {
+   "id": 73,
+   "gender": "male",
+   "activationFrame": 75,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "TOGEPI": {
+   "id": 175,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "TOGETIC": {
+   "id": 176,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "TORCHIC": {
+   "id": 280,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "TORKOAL": {
+   "id": 321,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "TOTODILE": {
+   "id": 158,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "TRAPINCH": {
+   "id": 332,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "TREECKO": {
+   "id": 277,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "TROPIUS": {
+   "id": 369,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "TYPHLOSION": {
+   "id": 157,
+   "gender": "male",
+   "activationFrame": 75,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "TYRANITAR": {
+   "id": 248,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "TYROGUE": {
+   "id": 236,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "UMBREON": {
+   "id": 197,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "UNOWN": {
+   "id": 201,
+   "gender": "genderless",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "URSARING": {
+   "id": 217,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "VAPOREON": {
+   "id": 134,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "VENOMOTH": {
+   "id": 49,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "VENONAT": {
+   "id": 48,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "VENUSAUR": {
+   "id": 3,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "VIBRAVA": {
+   "id": 333,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "VICTREEBEL": {
+   "id": 71,
+   "gender": "male",
+   "activationFrame": 75,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "VIGOROTH": {
+   "id": 365,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "VILEPLUME": {
+   "id": 45,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "VOLBEAT": {
+   "id": 386,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "VOLTORB": {
+   "id": 100,
+   "gender": "genderless",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "VULPIX": {
+   "id": 37,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "WAILMER": {
+   "id": 313,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "WAILORD": {
+   "id": 314,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "WALREIN": {
+   "id": 343,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "WARTORTLE": {
+   "id": 8,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "WEEDLE": {
+   "id": 13,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "WEEPINBELL": {
+   "id": 70,
+   "gender": "male",
+   "activationFrame": 75,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "WEEZING": {
+   "id": 110,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "WHISCASH": {
+   "id": 324,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "WHISMUR": {
+   "id": 370,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "WIGGLYTUFF": {
+   "id": 40,
+   "gender": "male",
+   "activationFrame": 75,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "WINGULL": {
+   "id": 309,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "WOBBUFFET": {
+   "id": 202,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "WOOPER": {
+   "id": 194,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "WURMPLE": {
+   "id": 290,
+   "gender": "male",
+   "activationFrame": 72,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "WYNAUT": {
+   "id": 360,
+   "gender": "male",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "XATU": {
+   "id": 178,
+   "gender": "male",
+   "activationFrame": 69,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "YANMA": {
+   "id": 193,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ZANGOOSE": {
+   "id": 380,
+   "gender": "male",
+   "activationFrame": 73,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ZAPDOS": {
+   "id": 145,
+   "gender": "genderless",
+   "activationFrame": 71,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ZIGZAGOON": {
+   "id": 288,
+   "gender": "male",
+   "activationFrame": 74,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     1
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  },
+  "ZUBAT": {
+   "id": 41,
+   "gender": "male",
+   "activationFrame": 70,
+   "opponentFront": {
+    "x2": 0,
+    "y2": 0
+   },
+   "playerBack": {
+    "x2": 0,
+    "y2": 0
+   },
+   "frame0": {
+    "player": [
+     0,
+     0
+    ],
+    "opponent": [
+     0,
+     0
+    ]
+   }
+  }
+ }
+}
