@@ -1,0 +1,2970 @@
+{
+ "schema": "prep14-random2-plans/v1",
+ "generatedBy": "tools/integration/prep14Plans.py",
+ "convention": "activationValue = gRng2 after the first anim-active frame A (== accepted dense window row 0 animationRng); ageOffset = D - A for draw frame D; each age >= 1 takes one RfuMain1 step unless it is a lag age (0 steps), then `count` Random2 draws in source order; word = state >> 16; words = replay(activationValue, plan) with no probe data other than the plan itself. Per-row check: the plan-only gRng2 series equals the corpus animationRng on every window row.",
+ "moves": {
+  "rain-dance": {
+   "player": {
+    "scenario": "mechanic-rain-dance-player-wooper-opponent-onix",
+    "bodyLabel": "Move_RAIN_DANCE",
+    "bodyIndex": 0,
+    "bodyStarts": [
+     213
+    ],
+    "activationFrame": 213,
+    "lastActiveFrame": 398,
+    "activationValue": 1875389072,
+    "activationValueHex": "0x6FC82A90",
+    "drawFrames": 40,
+    "drawsTotal": 160,
+    "lagAges": [],
+    "lagFramesBeforeLastDraw": 0,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "f96b18198dcb97ad561e296f09110dff5bce350b",
+     "runsSha1Run2": "f96b18198dcb97ad561e296f09110dff5bce350b",
+     "allFieldsEqualExceptFinalStateSha1": true
+    },
+    "draws": [
+     {
+      "ageOffset": 18,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 20,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 23,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 26,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 29,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 32,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 35,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 38,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 41,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 44,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 47,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 50,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 53,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 56,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 59,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 62,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 65,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 68,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 71,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 74,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 77,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 80,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 83,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 86,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 89,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 92,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 95,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 98,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 101,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 104,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 107,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 110,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 113,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 116,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 119,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 122,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 125,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 128,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 131,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 134,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     }
+    ],
+    "drawsCompressed": [
+     {
+      "ageOffsets": [
+       18,
+       20
+      ],
+      "lagBefore": [
+       0,
+       0
+      ],
+      "count": 4,
+      "groups": 2
+     },
+     {
+      "ageOffsets": [
+       23,
+       26,
+       29,
+       32,
+       35,
+       38,
+       41,
+       44,
+       47,
+       50,
+       53,
+       56,
+       59,
+       62,
+       65,
+       68,
+       71,
+       74,
+       77,
+       80,
+       83,
+       86,
+       89,
+       92,
+       95,
+       98,
+       101,
+       104,
+       107,
+       110,
+       113,
+       116,
+       119,
+       122,
+       125,
+       128,
+       131,
+       134
+      ],
+      "lagBefore": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      "count": 4,
+      "groups": 38
+     }
+    ],
+    "activationOffsets": [
+     18,
+     20,
+     23,
+     26,
+     29,
+     32,
+     35,
+     38,
+     41,
+     44,
+     47,
+     50,
+     53,
+     56,
+     59,
+     62,
+     65,
+     68,
+     71,
+     74,
+     77,
+     80,
+     83,
+     86,
+     89,
+     92,
+     95,
+     98,
+     101,
+     104,
+     107,
+     110,
+     113,
+     116,
+     119,
+     122,
+     125,
+     128,
+     131,
+     134
+    ],
+    "acceptedWindow": {
+     "startFrame": 213,
+     "rows": 187,
+     "activationMinusStart": 0,
+     "corpus": "tools/compare/evidence/rain-dance-player-dense-state.json.gz",
+     "rowsCheckedAnimationRng": 187,
+     "planSeriesEqualsCorpusAnimationRng": true,
+     "firstMismatchAge": null
+    },
+    "consumers": {
+     "kind": "rain drop birth (age, x, y)",
+     "n": 80,
+     "predicted==observed": true,
+     "first": [
+      [
+       18,
+       203,
+       5
+      ],
+      [
+       18,
+       38,
+       74
+      ],
+      [
+       20,
+       213,
+       59
+      ]
+     ]
+    }
+   },
+   "opponent": {
+    "scenario": "mechanic-rain-dance-opponent-wooper-player-onix",
+    "bodyLabel": "Move_RAIN_DANCE",
+    "bodyIndex": 0,
+    "bodyStarts": [
+     211
+    ],
+    "activationFrame": 211,
+    "lastActiveFrame": 396,
+    "activationValue": 1131320630,
+    "activationValueHex": "0x436E9536",
+    "drawFrames": 40,
+    "drawsTotal": 160,
+    "lagAges": [],
+    "lagFramesBeforeLastDraw": 0,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "f1bf19a01ab60aef278c8e38e5fec1e27808ce33",
+     "runsSha1Run2": "f1bf19a01ab60aef278c8e38e5fec1e27808ce33",
+     "allFieldsEqualExceptFinalStateSha1": true
+    },
+    "draws": [
+     {
+      "ageOffset": 18,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 20,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 23,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 26,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 29,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 32,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 35,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 38,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 41,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 44,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 47,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 50,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 53,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 56,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 59,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 62,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 65,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 68,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 71,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 74,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 77,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 80,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 83,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 86,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 89,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 92,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 95,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 98,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 101,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 104,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 107,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 110,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 113,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 116,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 119,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 122,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 125,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 128,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 131,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     },
+     {
+      "ageOffset": 134,
+      "count": 4,
+      "lagBefore": 0,
+      "transform": [
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]",
+       "% DISPLAY_WIDTH (240)  [battle_anim_water.c:495]",
+       "% (DISPLAY_HEIGHT/2) (80)  [battle_anim_water.c:496]"
+      ],
+      "consumerField": [
+       "drop[i].x",
+       "drop[i].y",
+       "drop[i].x",
+       "drop[i].y"
+      ]
+     }
+    ],
+    "drawsCompressed": [
+     {
+      "ageOffsets": [
+       18,
+       20
+      ],
+      "lagBefore": [
+       0,
+       0
+      ],
+      "count": 4,
+      "groups": 2
+     },
+     {
+      "ageOffsets": [
+       23,
+       26,
+       29,
+       32,
+       35,
+       38,
+       41,
+       44,
+       47,
+       50,
+       53,
+       56,
+       59,
+       62,
+       65,
+       68,
+       71,
+       74,
+       77,
+       80,
+       83,
+       86,
+       89,
+       92,
+       95,
+       98,
+       101,
+       104,
+       107,
+       110,
+       113,
+       116,
+       119,
+       122,
+       125,
+       128,
+       131,
+       134
+      ],
+      "lagBefore": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      "count": 4,
+      "groups": 38
+     }
+    ],
+    "activationOffsets": [
+     18,
+     20,
+     23,
+     26,
+     29,
+     32,
+     35,
+     38,
+     41,
+     44,
+     47,
+     50,
+     53,
+     56,
+     59,
+     62,
+     65,
+     68,
+     71,
+     74,
+     77,
+     80,
+     83,
+     86,
+     89,
+     92,
+     95,
+     98,
+     101,
+     104,
+     107,
+     110,
+     113,
+     116,
+     119,
+     122,
+     125,
+     128,
+     131,
+     134
+    ],
+    "acceptedWindow": {
+     "startFrame": 211,
+     "rows": 187,
+     "activationMinusStart": 0,
+     "corpus": "tools/compare/evidence/rain-dance-opponent-dense-state.json.gz",
+     "rowsCheckedAnimationRng": 187,
+     "planSeriesEqualsCorpusAnimationRng": true,
+     "firstMismatchAge": null
+    },
+    "consumers": {
+     "kind": "rain drop birth (age, x, y)",
+     "n": 80,
+     "predicted==observed": true,
+     "first": [
+      [
+       18,
+       78,
+       51
+      ],
+      [
+       18,
+       203,
+       5
+      ],
+      [
+       20,
+       37,
+       77
+      ]
+     ]
+    }
+   },
+   "alternate": {
+    "scenario": "prep14-rain-dance-alt-poliwrath-golem",
+    "activationFrame": 72,
+    "activationValue": 1989536647,
+    "activationValueHex": "0x7695EB87",
+    "drawFrames": 40,
+    "drawsTotal": 160,
+    "lagAges": [],
+    "planShapeIdenticalToAccepted": true,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "795f1ab7d8346f9dc96b18948b90039f58f2e7d2",
+     "runsSha1Run2": "795f1ab7d8346f9dc96b18948b90039f58f2e7d2",
+     "allFieldsEqualExceptFinalStateSha1": true
+    },
+    "consumers": {
+     "kind": "rain drop birth (age, x, y)",
+     "n": 80,
+     "predicted==observed": true,
+     "first": [
+      [
+       18,
+       108,
+       60
+      ],
+      [
+       18,
+       102,
+       41
+      ],
+      [
+       20,
+       170,
+       3
+      ]
+     ]
+    }
+   },
+   "drawsPerBody": 160
+  },
+  "overheat": {
+   "player": {
+    "scenario": "mechanic-overheat-player-solrock-opponent-shuckle",
+    "bodyLabel": "Move_OVERHEAT",
+    "bodyIndex": 0,
+    "bodyStarts": [
+     75
+    ],
+    "activationFrame": 75,
+    "lastActiveFrame": 303,
+    "activationValue": 3293766408,
+    "activationValueHex": "0xC452E308",
+    "drawFrames": 0,
+    "drawsTotal": 0,
+    "lagAges": [
+     65,
+     73,
+     81,
+     188,
+     189
+    ],
+    "lagFramesBeforeLastDraw": 0,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "88f9bb8aa31a4edca6c5721cb4866862ba7c0cf7",
+     "runsSha1Run2": "88f9bb8aa31a4edca6c5721cb4866862ba7c0cf7",
+     "allFieldsEqualExceptFinalStateSha1": true
+    },
+    "draws": [],
+    "drawsCompressed": [],
+    "activationOffsets": [],
+    "acceptedWindow": {
+     "startFrame": 75,
+     "rows": 230,
+     "activationMinusStart": 0,
+     "corpus": "tools/compare/evidence/overheat-player-dense-state.json.gz",
+     "rowsCheckedAnimationRng": 230,
+     "planSeriesEqualsCorpusAnimationRng": true,
+     "firstMismatchAge": null
+    }
+   },
+   "opponent": {
+    "scenario": "mechanic-overheat-opponent-magcargo-player-shuckle",
+    "bodyLabel": "Move_OVERHEAT",
+    "bodyIndex": 0,
+    "bodyStarts": [
+     80
+    ],
+    "activationFrame": 80,
+    "lastActiveFrame": 308,
+    "activationValue": 3320097647,
+    "activationValueHex": "0xC5E4AB6F",
+    "drawFrames": 0,
+    "drawsTotal": 0,
+    "lagAges": [
+     65,
+     73,
+     81,
+     188,
+     189
+    ],
+    "lagFramesBeforeLastDraw": 0,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "d63a3d4bcc337f090843d59c53b8ced3c75a9e14",
+     "runsSha1Run2": "d63a3d4bcc337f090843d59c53b8ced3c75a9e14",
+     "allFieldsEqualExceptFinalStateSha1": true
+    },
+    "draws": [],
+    "drawsCompressed": [],
+    "activationOffsets": [],
+    "acceptedWindow": {
+     "startFrame": 80,
+     "rows": 230,
+     "activationMinusStart": 0,
+     "corpus": "tools/compare/evidence/overheat-opponent-dense-state.json.gz",
+     "rowsCheckedAnimationRng": 230,
+     "planSeriesEqualsCorpusAnimationRng": true,
+     "firstMismatchAge": null
+    }
+   },
+   "alternate": {
+    "scenario": "prep14-overheat-alt-charizard-golem",
+    "activationFrame": 77,
+    "activationValue": 3668811069,
+    "activationValueHex": "0xDAAD9D3D",
+    "drawFrames": 0,
+    "drawsTotal": 0,
+    "lagAges": [
+     65,
+     73,
+     81,
+     188,
+     189
+    ],
+    "planShapeIdenticalToAccepted": true,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "2531aa6f6203db3315710c050724611d28dd712a",
+     "runsSha1Run2": "2531aa6f6203db3315710c050724611d28dd712a",
+     "allFieldsEqualExceptFinalStateSha1": true
+    }
+   },
+   "drawsPerBody": 0
+  },
+  "curse-ghost": {
+   "player": {
+    "scenario": "mechanic-curse-ghost-player-haunter-opponent-magikarp",
+    "bodyLabel": "Move_CURSE",
+    "bodyIndex": 0,
+    "bodyStarts": [
+     71
+    ],
+    "activationFrame": 71,
+    "lastActiveFrame": 442,
+    "activationValue": 3854290936,
+    "activationValueHex": "0xE5BBCFF8",
+    "drawFrames": 0,
+    "drawsTotal": 0,
+    "lagAges": [
+     290,
+     291,
+     370,
+     371
+    ],
+    "lagFramesBeforeLastDraw": 0,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "50e60baa4cdd7ea42c4bce3096b826524073f94f",
+     "runsSha1Run2": "50e60baa4cdd7ea42c4bce3096b826524073f94f",
+     "allFieldsEqualExceptFinalStateSha1": true
+    },
+    "draws": [],
+    "drawsCompressed": [],
+    "activationOffsets": [],
+    "acceptedWindow": {
+     "startFrame": 71,
+     "rows": 373,
+     "activationMinusStart": 0,
+     "corpus": "tools/compare/evidence/curse-ghost-player-dense-state.json.gz",
+     "rowsCheckedAnimationRng": 373,
+     "planSeriesEqualsCorpusAnimationRng": true,
+     "firstMismatchAge": null
+    }
+   },
+   "opponent": {
+    "scenario": "mechanic-curse-ghost-opponent-haunter-player-magikarp",
+    "bodyLabel": "Move_CURSE",
+    "bodyIndex": 0,
+    "bodyStarts": [
+     75
+    ],
+    "activationFrame": 75,
+    "lastActiveFrame": 446,
+    "activationValue": 254129500,
+    "activationValueHex": "0x0F25B55C",
+    "drawFrames": 0,
+    "drawsTotal": 0,
+    "lagAges": [
+     290,
+     291,
+     370,
+     371
+    ],
+    "lagFramesBeforeLastDraw": 0,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "3705df2ffe73d15abe3a133aed1a2dfc4c32d41f",
+     "runsSha1Run2": "3705df2ffe73d15abe3a133aed1a2dfc4c32d41f",
+     "allFieldsEqualExceptFinalStateSha1": true
+    },
+    "draws": [],
+    "drawsCompressed": [],
+    "activationOffsets": [],
+    "acceptedWindow": {
+     "startFrame": 75,
+     "rows": 373,
+     "activationMinusStart": 0,
+     "corpus": "tools/compare/evidence/curse-ghost-opponent-dense-state.json.gz",
+     "rowsCheckedAnimationRng": 373,
+     "planSeriesEqualsCorpusAnimationRng": true,
+     "firstMismatchAge": null
+    }
+   },
+   "alternate": {
+    "scenario": "prep14-curse-ghost-alt-gengar-golem",
+    "activationFrame": 70,
+    "activationValue": 3854290936,
+    "activationValueHex": "0xE5BBCFF8",
+    "drawFrames": 0,
+    "drawsTotal": 0,
+    "lagAges": [
+     290,
+     291,
+     370,
+     371
+    ],
+    "planShapeIdenticalToAccepted": true,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "470cd932f525a35c2c6bafca84fa70c0ea2e455c",
+     "runsSha1Run2": "470cd932f525a35c2c6bafca84fa70c0ea2e455c",
+     "allFieldsEqualExceptFinalStateSha1": true
+    }
+   },
+   "drawsPerBody": 0
+  },
+  "curse-stat": {
+   "player": {
+    "scenario": "mechanic-curse-stat-player-snorlax-opponent-magikarp",
+    "bodyLabel": "Move_CURSE",
+    "bodyIndex": 0,
+    "bodyStarts": [
+     312
+    ],
+    "activationFrame": 312,
+    "lastActiveFrame": 486,
+    "activationValue": 2200014907,
+    "activationValueHex": "0x8321903B",
+    "drawFrames": 0,
+    "drawsTotal": 0,
+    "lagAges": [
+     78,
+     79,
+     143,
+     144,
+     145,
+     146
+    ],
+    "lagFramesBeforeLastDraw": 0,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "d2dc846921a31ca1adb8a3f1b5da84f8c9691c3a",
+     "runsSha1Run2": "d2dc846921a31ca1adb8a3f1b5da84f8c9691c3a",
+     "allFieldsEqualExceptFinalStateSha1": true
+    },
+    "draws": [],
+    "drawsCompressed": [],
+    "activationOffsets": [],
+    "acceptedWindow": {
+     "startFrame": 312,
+     "rows": 176,
+     "activationMinusStart": 0,
+     "corpus": "tools/compare/evidence/curse-stats-player-dense-state.json.gz",
+     "rowsCheckedAnimationRng": 176,
+     "planSeriesEqualsCorpusAnimationRng": true,
+     "firstMismatchAge": null
+    }
+   },
+   "opponent": {
+    "scenario": "mechanic-curse-stat-opponent-snorlax-player-magikarp",
+    "bodyLabel": "Move_CURSE",
+    "bodyIndex": 0,
+    "bodyStarts": [
+     312
+    ],
+    "activationFrame": 312,
+    "lastActiveFrame": 486,
+    "activationValue": 2200014907,
+    "activationValueHex": "0x8321903B",
+    "drawFrames": 0,
+    "drawsTotal": 0,
+    "lagAges": [
+     78,
+     79,
+     143,
+     144,
+     145,
+     146
+    ],
+    "lagFramesBeforeLastDraw": 0,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "2de17b62808bb03e060fb0dfc197bd38022e6047",
+     "runsSha1Run2": "2de17b62808bb03e060fb0dfc197bd38022e6047",
+     "allFieldsEqualExceptFinalStateSha1": true
+    },
+    "draws": [],
+    "drawsCompressed": [],
+    "activationOffsets": [],
+    "acceptedWindow": {
+     "startFrame": 312,
+     "rows": 176,
+     "activationMinusStart": 0,
+     "corpus": "tools/compare/evidence/curse-stats-opponent-dense-state.json.gz",
+     "rowsCheckedAnimationRng": 176,
+     "planSeriesEqualsCorpusAnimationRng": true,
+     "firstMismatchAge": null
+    }
+   },
+   "alternate": {
+    "scenario": "prep14-curse-stat-alt-miltank-golem",
+    "activationFrame": 68,
+    "activationValue": 907760222,
+    "activationValueHex": "0x361B525E",
+    "drawFrames": 0,
+    "drawsTotal": 0,
+    "lagAges": [
+     78,
+     79,
+     143,
+     144,
+     145,
+     146
+    ],
+    "planShapeIdenticalToAccepted": true,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "aef2c1d7a07b6341f68ad350e32f3e082730239c",
+     "runsSha1Run2": "aef2c1d7a07b6341f68ad350e32f3e082730239c",
+     "allFieldsEqualExceptFinalStateSha1": true
+    }
+   },
+   "drawsPerBody": 0
+  },
+  "silver-wind": {
+   "player": {
+    "scenario": "mechanic-silver-wind-player-butterfree-opponent-onix",
+    "bodyLabel": "Move_SILVER_WIND",
+    "bodyIndex": 0,
+    "bodyStarts": [
+     81
+    ],
+    "activationFrame": 81,
+    "lastActiveFrame": 272,
+    "activationValue": 3668811069,
+    "activationValueHex": "0xDAAD9D3D",
+    "drawFrames": 0,
+    "drawsTotal": 0,
+    "lagAges": [
+     144,
+     145,
+     166
+    ],
+    "lagFramesBeforeLastDraw": 0,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "fe5e77a9926f8d0fbb1cb7e7f3bc3ef986a911b4",
+     "runsSha1Run2": "fe5e77a9926f8d0fbb1cb7e7f3bc3ef986a911b4",
+     "allFieldsEqualExceptFinalStateSha1": true
+    },
+    "draws": [],
+    "drawsCompressed": [],
+    "activationOffsets": [],
+    "acceptedWindow": {
+     "startFrame": 81,
+     "rows": 193,
+     "activationMinusStart": 0,
+     "corpus": "tools/compare/evidence/silver-wind-player-dense-state.json.gz",
+     "rowsCheckedAnimationRng": 193,
+     "planSeriesEqualsCorpusAnimationRng": true,
+     "firstMismatchAge": null
+    }
+   },
+   "opponent": {
+    "scenario": "mechanic-silver-wind-opponent-butterfree-player-onix",
+    "bodyLabel": "Move_SILVER_WIND",
+    "bodyIndex": 0,
+    "bodyStarts": [
+     223
+    ],
+    "activationFrame": 223,
+    "lastActiveFrame": 417,
+    "activationValue": 1685842731,
+    "activationValueHex": "0x647BEB2B",
+    "drawFrames": 0,
+    "drawsTotal": 0,
+    "lagAges": [
+     147,
+     148,
+     169
+    ],
+    "lagFramesBeforeLastDraw": 0,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "f9867c372d9e45a5eb885f069d118b1aa26d94b6",
+     "runsSha1Run2": "f9867c372d9e45a5eb885f069d118b1aa26d94b6",
+     "allFieldsEqualExceptFinalStateSha1": true
+    },
+    "draws": [],
+    "drawsCompressed": [],
+    "activationOffsets": [],
+    "acceptedWindow": {
+     "startFrame": 223,
+     "rows": 196,
+     "activationMinusStart": 0,
+     "corpus": "tools/compare/evidence/silver-wind-opponent-dense-state.json.gz",
+     "rowsCheckedAnimationRng": 196,
+     "planSeriesEqualsCorpusAnimationRng": true,
+     "firstMismatchAge": null
+    }
+   },
+   "alternate": {
+    "scenario": "prep14-silver-wind-alt-beautifly-golem",
+    "activationFrame": 80,
+    "activationValue": 119564722,
+    "activationValueHex": "0x072069B2",
+    "drawFrames": 0,
+    "drawsTotal": 0,
+    "lagAges": [
+     144,
+     145,
+     166
+    ],
+    "planShapeIdenticalToAccepted": true,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "ceadc5672fa1f0afc92894285418f2f77fb6bdf3",
+     "runsSha1Run2": "ceadc5672fa1f0afc92894285418f2f77fb6bdf3",
+     "allFieldsEqualExceptFinalStateSha1": true
+    }
+   },
+   "drawsPerBody": 0
+  },
+  "water-pulse": {
+   "player": {
+    "scenario": "mechanic-water-pulse-player-lombre-opponent-onix",
+    "bodyLabel": "Move_WATER_PULSE",
+    "bodyIndex": 0,
+    "bodyStarts": [
+     77
+    ],
+    "activationFrame": 77,
+    "lastActiveFrame": 235,
+    "activationValue": 119564722,
+    "activationValueHex": "0x072069B2",
+    "drawFrames": 6,
+    "drawsTotal": 12,
+    "lagAges": [
+     157,
+     158
+    ],
+    "lagFramesBeforeLastDraw": 0,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "d5df9b836340c0e0e6804f188ee935a739f0243d",
+     "runsSha1Run2": "d5df9b836340c0e0e6804f188ee935a739f0243d",
+     "allFieldsEqualExceptFinalStateSha1": true
+    },
+    "draws": [
+     {
+      "ageOffset": 86,
+      "count": 2,
+      "lagBefore": 0,
+      "transform": [
+       "yDiff + (w % 10) - 5  [battle_anim_water.c:1574]",
+       "-xDiff + (w % 10) - 5; data[2] = -|.| first bubble / +- second  [battle_anim_water.c:1575,1583-1608]"
+      ],
+      "consumerField": [
+       "ring bubble data[1] (randomSomethingY)",
+       "ring bubble data[2] (randomSomethingX)"
+      ]
+     },
+     {
+      "ageOffset": 93,
+      "count": 2,
+      "lagBefore": 0,
+      "transform": [
+       "yDiff + (w % 10) - 5  [battle_anim_water.c:1574]",
+       "-xDiff + (w % 10) - 5; data[2] = -|.| first bubble / +- second  [battle_anim_water.c:1575,1583-1608]"
+      ],
+      "consumerField": [
+       "ring bubble data[1] (randomSomethingY)",
+       "ring bubble data[2] (randomSomethingX)"
+      ]
+     },
+     {
+      "ageOffset": 100,
+      "count": 2,
+      "lagBefore": 0,
+      "transform": [
+       "yDiff + (w % 10) - 5  [battle_anim_water.c:1574]",
+       "-xDiff + (w % 10) - 5; data[2] = -|.| first bubble / +- second  [battle_anim_water.c:1575,1583-1608]"
+      ],
+      "consumerField": [
+       "ring bubble data[1] (randomSomethingY)",
+       "ring bubble data[2] (randomSomethingX)"
+      ]
+     },
+     {
+      "ageOffset": 101,
+      "count": 2,
+      "lagBefore": 0,
+      "transform": [
+       "yDiff + (w % 10) - 5  [battle_anim_water.c:1574]",
+       "-xDiff + (w % 10) - 5; data[2] = -|.| first bubble / +- second  [battle_anim_water.c:1575,1583-1608]"
+      ],
+      "consumerField": [
+       "ring bubble data[1] (randomSomethingY)",
+       "ring bubble data[2] (randomSomethingX)"
+      ]
+     },
+     {
+      "ageOffset": 108,
+      "count": 2,
+      "lagBefore": 0,
+      "transform": [
+       "yDiff + (w % 10) - 5  [battle_anim_water.c:1574]",
+       "-xDiff + (w % 10) - 5; data[2] = -|.| first bubble / +- second  [battle_anim_water.c:1575,1583-1608]"
+      ],
+      "consumerField": [
+       "ring bubble data[1] (randomSomethingY)",
+       "ring bubble data[2] (randomSomethingX)"
+      ]
+     },
+     {
+      "ageOffset": 115,
+      "count": 2,
+      "lagBefore": 0,
+      "transform": [
+       "yDiff + (w % 10) - 5  [battle_anim_water.c:1574]",
+       "-xDiff + (w % 10) - 5; data[2] = -|.| first bubble / +- second  [battle_anim_water.c:1575,1583-1608]"
+      ],
+      "consumerField": [
+       "ring bubble data[1] (randomSomethingY)",
+       "ring bubble data[2] (randomSomethingX)"
+      ]
+     }
+    ],
+    "drawsCompressed": [
+     {
+      "ageOffsets": [
+       86,
+       93,
+       100
+      ],
+      "lagBefore": [
+       0,
+       0,
+       0
+      ],
+      "count": 2,
+      "groups": 3
+     },
+     {
+      "ageOffsets": [
+       101,
+       108,
+       115
+      ],
+      "lagBefore": [
+       0,
+       0,
+       0
+      ],
+      "count": 2,
+      "groups": 3
+     }
+    ],
+    "activationOffsets": [
+     86,
+     93,
+     100,
+     101,
+     108,
+     115
+    ],
+    "acceptedWindow": {
+     "startFrame": 77,
+     "rows": 160,
+     "activationMinusStart": 0,
+     "corpus": "tools/compare/evidence/water-pulse-player-dense-state.json.gz",
+     "rowsCheckedAnimationRng": 160,
+     "planSeriesEqualsCorpusAnimationRng": true,
+     "firstMismatchAge": null
+    },
+    "consumers": {
+     "kind": "ring bubble data[1]/data[2] (xDiff,yDiff from the ring sprite: target-attacker)",
+     "ringGeometry(x,y,targetX,targetY)": [
+      72,
+      96,
+      176,
+      42
+     ],
+     "xDiff": 104,
+     "yDiff": -54,
+     "n": 12,
+     "predicted==observed": true,
+     "rows": [
+      {
+       "age": 86,
+       "words": [
+        43267,
+        29699
+       ],
+       "randomY": -52,
+       "randomX": -100,
+       "observedData1,2,1,2": [
+        -52,
+        100,
+        -52,
+        -100
+       ],
+       "first.data2": 100,
+       "second.data2": -100
+      },
+      {
+       "age": 93,
+       "words": [
+        56367,
+        41657
+       ],
+       "randomY": -52,
+       "randomX": -102,
+       "observedData1,2,1,2": [
+        -52,
+        102,
+        -52,
+        -102
+       ],
+       "first.data2": 102,
+       "second.data2": -102
+      },
+      {
+       "age": 100,
+       "words": [
+        44736,
+        28576
+       ],
+       "randomY": -53,
+       "randomX": -103,
+       "observedData1,2,1,2": [
+        -53,
+        103,
+        -53,
+        -103
+       ],
+       "first.data2": 103,
+       "second.data2": -103
+      },
+      {
+       "age": 101,
+       "words": [
+        986,
+        59095
+       ],
+       "randomY": -53,
+       "randomX": -104,
+       "observedData1,2,1,2": [
+        -53,
+        104,
+        -53,
+        -104
+       ],
+       "first.data2": 104,
+       "second.data2": -104
+      },
+      {
+       "age": 108,
+       "words": [
+        45823,
+        16108
+       ],
+       "randomY": -56,
+       "randomX": -101,
+       "observedData1,2,1,2": [
+        -56,
+        101,
+        -56,
+        -101
+       ],
+       "first.data2": 101,
+       "second.data2": -101
+      },
+      {
+       "age": 115,
+       "words": [
+        2055,
+        10986
+       ],
+       "randomY": -54,
+       "randomX": -103,
+       "observedData1,2,1,2": [
+        -54,
+        103,
+        -54,
+        -103
+       ],
+       "first.data2": 103,
+       "second.data2": -103
+      }
+     ]
+    }
+   },
+   "opponent": {
+    "scenario": "mechanic-water-pulse-opponent-lombre-player-onix",
+    "bodyLabel": "Move_WATER_PULSE",
+    "bodyIndex": 0,
+    "bodyStarts": [
+     81
+    ],
+    "activationFrame": 81,
+    "lastActiveFrame": 239,
+    "activationValue": 3044225206,
+    "activationValueHex": "0xB57330B6",
+    "drawFrames": 6,
+    "drawsTotal": 12,
+    "lagAges": [
+     157,
+     158
+    ],
+    "lagFramesBeforeLastDraw": 0,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "3cfc98791d5c2b5607ec6d5bdb5883376a4aa302",
+     "runsSha1Run2": "3cfc98791d5c2b5607ec6d5bdb5883376a4aa302",
+     "allFieldsEqualExceptFinalStateSha1": true
+    },
+    "draws": [
+     {
+      "ageOffset": 86,
+      "count": 2,
+      "lagBefore": 0,
+      "transform": [
+       "yDiff + (w % 10) - 5  [battle_anim_water.c:1574]",
+       "-xDiff + (w % 10) - 5; data[2] = -|.| first bubble / +- second  [battle_anim_water.c:1575,1583-1608]"
+      ],
+      "consumerField": [
+       "ring bubble data[1] (randomSomethingY)",
+       "ring bubble data[2] (randomSomethingX)"
+      ]
+     },
+     {
+      "ageOffset": 93,
+      "count": 2,
+      "lagBefore": 0,
+      "transform": [
+       "yDiff + (w % 10) - 5  [battle_anim_water.c:1574]",
+       "-xDiff + (w % 10) - 5; data[2] = -|.| first bubble / +- second  [battle_anim_water.c:1575,1583-1608]"
+      ],
+      "consumerField": [
+       "ring bubble data[1] (randomSomethingY)",
+       "ring bubble data[2] (randomSomethingX)"
+      ]
+     },
+     {
+      "ageOffset": 100,
+      "count": 2,
+      "lagBefore": 0,
+      "transform": [
+       "yDiff + (w % 10) - 5  [battle_anim_water.c:1574]",
+       "-xDiff + (w % 10) - 5; data[2] = -|.| first bubble / +- second  [battle_anim_water.c:1575,1583-1608]"
+      ],
+      "consumerField": [
+       "ring bubble data[1] (randomSomethingY)",
+       "ring bubble data[2] (randomSomethingX)"
+      ]
+     },
+     {
+      "ageOffset": 101,
+      "count": 2,
+      "lagBefore": 0,
+      "transform": [
+       "yDiff + (w % 10) - 5  [battle_anim_water.c:1574]",
+       "-xDiff + (w % 10) - 5; data[2] = -|.| first bubble / +- second  [battle_anim_water.c:1575,1583-1608]"
+      ],
+      "consumerField": [
+       "ring bubble data[1] (randomSomethingY)",
+       "ring bubble data[2] (randomSomethingX)"
+      ]
+     },
+     {
+      "ageOffset": 108,
+      "count": 2,
+      "lagBefore": 0,
+      "transform": [
+       "yDiff + (w % 10) - 5  [battle_anim_water.c:1574]",
+       "-xDiff + (w % 10) - 5; data[2] = -|.| first bubble / +- second  [battle_anim_water.c:1575,1583-1608]"
+      ],
+      "consumerField": [
+       "ring bubble data[1] (randomSomethingY)",
+       "ring bubble data[2] (randomSomethingX)"
+      ]
+     },
+     {
+      "ageOffset": 115,
+      "count": 2,
+      "lagBefore": 0,
+      "transform": [
+       "yDiff + (w % 10) - 5  [battle_anim_water.c:1574]",
+       "-xDiff + (w % 10) - 5; data[2] = -|.| first bubble / +- second  [battle_anim_water.c:1575,1583-1608]"
+      ],
+      "consumerField": [
+       "ring bubble data[1] (randomSomethingY)",
+       "ring bubble data[2] (randomSomethingX)"
+      ]
+     }
+    ],
+    "drawsCompressed": [
+     {
+      "ageOffsets": [
+       86,
+       93,
+       100
+      ],
+      "lagBefore": [
+       0,
+       0,
+       0
+      ],
+      "count": 2,
+      "groups": 3
+     },
+     {
+      "ageOffsets": [
+       101,
+       108,
+       115
+      ],
+      "lagBefore": [
+       0,
+       0,
+       0
+      ],
+      "count": 2,
+      "groups": 3
+     }
+    ],
+    "activationOffsets": [
+     86,
+     93,
+     100,
+     101,
+     108,
+     115
+    ],
+    "acceptedWindow": {
+     "startFrame": 81,
+     "rows": 160,
+     "activationMinusStart": 0,
+     "corpus": "tools/compare/evidence/water-pulse-opponent-dense-state.json.gz",
+     "rowsCheckedAnimationRng": 160,
+     "planSeriesEqualsCorpusAnimationRng": true,
+     "firstMismatchAge": null
+    },
+    "consumers": {
+     "kind": "ring bubble data[1]/data[2] (xDiff,yDiff from the ring sprite: target-attacker)",
+     "ringGeometry(x,y,targetX,targetY)": [
+      176,
+      49,
+      72,
+      88
+     ],
+     "xDiff": -104,
+     "yDiff": 39,
+     "n": 12,
+     "predicted==observed": true,
+     "rows": [
+      {
+       "age": 86,
+       "words": [
+        28035,
+        14979
+       ],
+       "randomY": 39,
+       "randomX": 108,
+       "observedData1,2,1,2": [
+        39,
+        108,
+        39,
+        -108
+       ],
+       "first.data2": 108,
+       "second.data2": -108
+      },
+      {
+       "age": 93,
+       "words": [
+        47853,
+        22267
+       ],
+       "randomY": 37,
+       "randomX": 106,
+       "observedData1,2,1,2": [
+        37,
+        106,
+        37,
+        -106
+       ],
+       "first.data2": 106,
+       "second.data2": -106
+      },
+      {
+       "age": 100,
+       "words": [
+        59095,
+        34749
+       ],
+       "randomY": 39,
+       "randomX": 108,
+       "observedData1,2,1,2": [
+        39,
+        108,
+        39,
+        -108
+       ],
+       "first.data2": 108,
+       "second.data2": -108
+      },
+      {
+       "age": 101,
+       "words": [
+        26959,
+        35552
+       ],
+       "randomY": 43,
+       "randomX": 101,
+       "observedData1,2,1,2": [
+        43,
+        101,
+        43,
+        -101
+       ],
+       "first.data2": 101,
+       "second.data2": -101
+      },
+      {
+       "age": 108,
+       "words": [
+        26828,
+        42626
+       ],
+       "randomY": 42,
+       "randomX": 105,
+       "observedData1,2,1,2": [
+        42,
+        105,
+        42,
+        -105
+       ],
+       "first.data2": 105,
+       "second.data2": -105
+      },
+      {
+       "age": 115,
+       "words": [
+        11673,
+        12244
+       ],
+       "randomY": 37,
+       "randomX": 103,
+       "observedData1,2,1,2": [
+        37,
+        103,
+        37,
+        -103
+       ],
+       "first.data2": 103,
+       "second.data2": -103
+      }
+     ]
+    }
+   },
+   "alternate": {
+    "scenario": "prep14-water-pulse-alt-blastoise-golem",
+    "activationFrame": 80,
+    "activationValue": 3320097647,
+    "activationValueHex": "0xC5E4AB6F",
+    "drawFrames": 6,
+    "drawsTotal": 12,
+    "lagAges": [
+     157,
+     158
+    ],
+    "planShapeIdenticalToAccepted": true,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "c00612a8313387eedde399fccbf5bd8aea93b48c",
+     "runsSha1Run2": "c00612a8313387eedde399fccbf5bd8aea93b48c",
+     "allFieldsEqualExceptFinalStateSha1": true
+    },
+    "consumers": {
+     "kind": "ring bubble data[1]/data[2]",
+     "ringGeometry(x,y,targetX,targetY)": [
+      72,
+      96,
+      176,
+      45
+     ],
+     "xDiff": 104,
+     "yDiff": -51,
+     "n": 12,
+     "predicted==observed": true
+    }
+   },
+   "drawsPerBody": 12
+  },
+  "psych-up": {
+   "player": {
+    "scenario": "mechanic-psych-up-player-jumpluff-opponent-ninjask",
+    "bodyLabel": "Move_PSYCH_UP",
+    "bodyIndex": 0,
+    "bodyStarts": [
+     379
+    ],
+    "activationFrame": 379,
+    "lastActiveFrame": 556,
+    "activationValue": 3232395997,
+    "activationValueHex": "0xC0AA72DD",
+    "drawFrames": 0,
+    "drawsTotal": 0,
+    "lagAges": [
+     176,
+     177
+    ],
+    "lagFramesBeforeLastDraw": 0,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "a0053500280068faf8f53cf21da4f636d0b04156",
+     "runsSha1Run2": "a0053500280068faf8f53cf21da4f636d0b04156",
+     "allFieldsEqualExceptFinalStateSha1": true
+    },
+    "draws": [],
+    "drawsCompressed": [],
+    "activationOffsets": [],
+    "acceptedWindow": {
+     "startFrame": 379,
+     "rows": 179,
+     "activationMinusStart": 0,
+     "corpus": "tools/compare/evidence/psych-up-player-dense-state.json.gz",
+     "rowsCheckedAnimationRng": 179,
+     "planSeriesEqualsCorpusAnimationRng": true,
+     "firstMismatchAge": null
+    }
+   },
+   "opponent": {
+    "scenario": "mechanic-psych-up-opponent-jumpluff-player-ninjask",
+    "bodyLabel": "Move_PSYCH_UP",
+    "bodyIndex": 0,
+    "bodyStarts": [
+     375
+    ],
+    "activationFrame": 375,
+    "lastActiveFrame": 552,
+    "activationValue": 2009410357,
+    "activationValueHex": "0x77C52B35",
+    "drawFrames": 0,
+    "drawsTotal": 0,
+    "lagAges": [
+     176,
+     177
+    ],
+    "lagFramesBeforeLastDraw": 0,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "d9df9516417a5b6cf73cc0bca127526156235659",
+     "runsSha1Run2": "d9df9516417a5b6cf73cc0bca127526156235659",
+     "allFieldsEqualExceptFinalStateSha1": true
+    },
+    "draws": [],
+    "drawsCompressed": [],
+    "activationOffsets": [],
+    "acceptedWindow": {
+     "startFrame": 375,
+     "rows": 179,
+     "activationMinusStart": 0,
+     "corpus": "tools/compare/evidence/psych-up-opponent-dense-state.json.gz",
+     "rowsCheckedAnimationRng": 179,
+     "planSeriesEqualsCorpusAnimationRng": true,
+     "firstMismatchAge": null
+    }
+   },
+   "alternate": {
+    "scenario": "prep14-psych-up-alt-skiploom-golem",
+    "activationFrame": 375,
+    "activationValue": 1605994024,
+    "activationValueHex": "0x5FB98628",
+    "drawFrames": 0,
+    "drawsTotal": 0,
+    "lagAges": [
+     176,
+     177
+    ],
+    "planShapeIdenticalToAccepted": true,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "607ecef4cf875b212bfd82c9215744e3844ff3e3",
+     "runsSha1Run2": "607ecef4cf875b212bfd82c9215744e3844ff3e3",
+     "allFieldsEqualExceptFinalStateSha1": true
+    }
+   },
+   "drawsPerBody": 0
+  },
+  "hail": {
+   "player": {
+    "scenario": "mechanic-hail-player-delibird-opponent-onix",
+    "bodyLabel": "Move_HAIL",
+    "bodyIndex": 0,
+    "bodyStarts": [
+     66,
+     562
+    ],
+    "activationFrame": 66,
+    "lastActiveFrame": 222,
+    "activationValue": 370756553,
+    "activationValueHex": "0x16194BC9",
+    "drawFrames": 0,
+    "drawsTotal": 0,
+    "lagAges": [],
+    "lagFramesBeforeLastDraw": 0,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "0bcb5b34a11c4b1e0fe03a239c95c825ae146637",
+     "runsSha1Run2": "0bcb5b34a11c4b1e0fe03a239c95c825ae146637",
+     "allFieldsEqualExceptFinalStateSha1": true
+    },
+    "draws": [],
+    "drawsCompressed": [],
+    "activationOffsets": [],
+    "acceptedWindow": {
+     "startFrame": 66,
+     "rows": 158,
+     "activationMinusStart": 0,
+     "corpus": "tools/compare/evidence/hail-player-dense-state.json.gz",
+     "rowsCheckedAnimationRng": 158,
+     "planSeriesEqualsCorpusAnimationRng": true,
+     "firstMismatchAge": null
+    }
+   },
+   "opponent": {
+    "scenario": "mechanic-hail-opponent-delibird-player-onix",
+    "bodyLabel": "Move_HAIL",
+    "bodyIndex": 0,
+    "bodyStarts": [
+     70,
+     563
+    ],
+    "activationFrame": 70,
+    "lastActiveFrame": 226,
+    "activationValue": 3668811069,
+    "activationValueHex": "0xDAAD9D3D",
+    "drawFrames": 0,
+    "drawsTotal": 0,
+    "lagAges": [],
+    "lagFramesBeforeLastDraw": 0,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "9ce14bb58110800a22581cc6290afdad7dd42ad4",
+     "runsSha1Run2": "9ce14bb58110800a22581cc6290afdad7dd42ad4",
+     "allFieldsEqualExceptFinalStateSha1": true
+    },
+    "draws": [],
+    "drawsCompressed": [],
+    "activationOffsets": [],
+    "acceptedWindow": {
+     "startFrame": 70,
+     "rows": 158,
+     "activationMinusStart": 0,
+     "corpus": "tools/compare/evidence/hail-opponent-dense-state.json.gz",
+     "rowsCheckedAnimationRng": 158,
+     "planSeriesEqualsCorpusAnimationRng": true,
+     "firstMismatchAge": null
+    }
+   },
+   "alternate": {
+    "scenario": "prep14-hail-alt-glalie-golem",
+    "activationFrame": 64,
+    "activationValue": 1989536647,
+    "activationValueHex": "0x7695EB87",
+    "drawFrames": 0,
+    "drawsTotal": 0,
+    "lagAges": [],
+    "planShapeIdenticalToAccepted": true,
+    "replayEqualsObservedWords": true,
+    "determinism": {
+     "runsSha1": "1edd25cdfdc7b6e48d2465b3991f6c6ee31ae8ab",
+     "runsSha1Run2": "1edd25cdfdc7b6e48d2465b3991f6c6ee31ae8ab",
+     "allFieldsEqualExceptFinalStateSha1": true
+    }
+   },
+   "drawsPerBody": 0
+  }
+ }
+}
