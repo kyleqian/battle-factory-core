@@ -52,3 +52,5 @@ variants("hist-psychup-opp", "mechanic-psych-up-opponent-jumpluff-player-ninjask
 variants("hist-overheat-player", "mechanic-overheat-player-solrock-opponent-shuckle.json", "opponent", None)
 variants("hist-overheat-opp", "mechanic-overheat-opponent-magcargo-player-shuckle.json", "player", None)
 variants("hist-silverwind-player", "mechanic-silver-wind-player-butterfree-opponent-onix.json", "opponent", None)
+# dense-capture scenario: Silver Wind opponent as FIRST body with the accepted species (the accepted reducer inputs hard-code BUTTERFREE/ONIX): the player Onix gets nature BRAVE (+Atk -Spe) and speed IV 0 so the opponent acts first
+s = load("mechanic-silver-wind-opponent-butterfree-player-onix.json"); m = s["overrides"]["parties"]["player"][0]; m["nature"] = 2; m["ivs"]["speed"] = 0; emit("swopp-first-onix", s)
