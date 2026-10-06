@@ -7,9 +7,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-10-06 (in progress) — S10A: presentation RNG merged; Random2 draw plans measured
 
-- **State:** S10A, local master `4f0a93368`+. Scoped-exact live adapters 218; faithful-random
-  adapters 5 (Double Kick, Astonish, Thrash, Flail, Wish; separate bucket). Opus 5.5 supervisor;
-  Opus/Sonnet 5.5 workers.
+- **State:** S10A, local master `4abe570f9`+. Scoped-exact live adapters 221; faithful-random
+  adapters 6 (Double Kick, Astonish, Thrash, Flail, Wish, Hyper Beam; separate bucket). Preview
+  <http://127.0.0.1:5191/> serves `4abe570f9` (browser replay 4 samples, export + mode restart pass,
+  no errors; `playable-preview-4abe570f9-receipt.json`). Opus 5.5 supervisor; Opus/Sonnet 5.5 workers.
 - **Did:** D3 option (a) infrastructure merged (Opus worker): `src/engine/presentationRng.ts`
   (exact Random2 LCG + jump-ahead), per-battle host `presentationRngHost.ts` (policy
   `presentation-rng.v1.frame-step.no-lag.battle-stride-2^20`; session seed from crypto /
@@ -28,8 +29,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   surrogate routes (active every age, prompt reached, seed + ON/OFF logical parity). Meteor Mash
   dropped (alternate body is 1 frame longer). prep13 merged: Ice Beam / Water Spout / Hidden Power
   (no RNG) + Hyper Beam briefable. ISSUES #148 filed (target x2 after a shaking body).
-- **Next:** R3 (Ice Beam, Water Spout, Hidden Power, Hyper Beam) and prep14 (Rain Dance, Overheat,
-  Curse, Silver Wind, Water Pulse, Psych Up, Hail) in flight; then #148 evidence.
+  R3 (Sonnet) merged: Ice Beam, Water Spout, Hidden Power (Unown letter-form coords) exact; Hyper
+  Beam faithful-random; supervisor reran 4 alternates twice fresh, 0 px. Water Spout middle HP tiers
+  (later bodies) unproven: the tier fixtures lend the first-body order. prep14 (Rain Dance + Water
+  Pulse Random2-ready, Hail no RNG, Overheat/Silver Wind need palettes, Psych Up/Curse later) and the
+  #148 evidence (only ONIX/RATTATA opponents have idle x2 1; per-move reset table; rule == ROM
+  1,927/1,944 activations) merged. Both oracles were killed by a worker's `pkill -f mgba` and
+  restarted by the supervisor at 11:29 (PAPERCUTS).
+- **Next:** R4 (Rain Dance, Water Pulse, Hail) and prep16 (Overheat/Silver Wind palettes) in flight;
+  then the #148 x2 tracker (+ Water Spout tier re-proof), Overheat/Silver Wind, Rollout Curl/Endeavor.
 - **Notes:** no DEFERRED entries. Oracle freshness FAIL at orient = known false positive (no
   oracle/ commits since the services started 2026-10-03).
 

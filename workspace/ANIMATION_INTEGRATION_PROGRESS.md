@@ -45,8 +45,36 @@
   65 per side; tiers 0..3 births exact), Hidden Power (needs Unown letter-form coords; personality),
   Hyper Beam (orb slots = lowest-free released at birth + visible rows + 1; persistentOrder = lent
   index). Supervisor reran the Ice Beam and Water Spout checks from the receipts.
-- In flight: R3 (Ice Beam, Water Spout, Hidden Power, Hyper Beam; Sonnet integration); prep14 (Rain
-  Dance, Overheat, Curse, Silver Wind, Water Pulse, Psych Up, Hail; Sonnet side).
+- Folded Sonnet worker `609dbb2e1` (src tree `0375dc73`) as `4abe570f9`: EXACT Ice Beam (58; anchors,
+  monbg base, lent order), Water Spout (323; HP tier, attackerSourceHeight = pictureHeight, lent order;
+  `liveMoveAnimationDuration(request, field?)` takes the displayed field), Hidden Power (237; Unown
+  attackers only, letter form from personality -> `UNOWN_<letter>` pic coords, 8th scatter y from the
+  target anchor; non-Unown declines) -> implementedCount 221; FAITHFUL-RANDOM Hyper Beam (63; host
+  words, orb slots lowest-free over closed-form lifetimes, persistentOrder = lent index) -> 6. Dense both
+  orientations + alternates zero residual twice fresh; routes Ice Beam 0/14 + 1/14 DELCATTY/DUNSPARCE,
+  Water Spout 83/14, Hyper Beam 10/28 (seed + ON/OFF parity); Hidden Power has no ordinary route (Unown
+  is never a generated rental). Shadow scan 473 rows / 0 mismatches. Worker gates 1,529 files / 12,382
+  tests, build 854. Supervisor: dense rerun twice fresh 0 px — Ice Beam LAPRAS 203, Hidden Power second
+  Unown personality 180, Hyper Beam SNORLAX pinned 280, Water Spout KINGDRA 276; 7 test files 149/149;
+  smoke 448 on the union. Receipt `prep13-live-adapter-receipt.json`. Limit: Water Spout tier bodies 1-2
+  and lower-HP tier 3 (later bodies) 16-298 px in orb rows 55-71; fixtures lack `precedingBodies`, so
+  the verifier lends the first-body order (suspected harness cause).
+- prep14 (side, `3dc9394c2`): Rain Dance (160 draws, reducer replays from one seed) and Water Pulse (12
+  draws) READY-WITH-PRESENTATION-RNG; Hail READY (no RNG; target table from anchors); Overheat/Silver
+  Wind need the palette composite (+ Silver Wind opponent BG registers after an earlier body); Psych Up
+  needs activation BG/matrix state; Curse needs a reducer port. Supervisor reran the Rain Dance and Hail
+  checks; fixed two trailing-whitespace lines at merge.
+- #148 evidence (side, `b17e9753e`, `docs/x2-history-148.md`): only ONIX and RATTATA (opponent front)
+  have idle x2 1 (376/376 species measured; production table equal); absolute-reset target bodies zero
+  it until the next send-in; per-move/role table over 188 moves; rule == ROM 788/788 first and
+  1,139/1,156 later activations (misses after move-0 / mixed bodies). Supervisor reproduced the
+  faint+send-in probe twice (3/3) and the tracker check from receipts.
+- Preview refreshed: `4abe570f9` served at :5191, browser replay 4 samples hash-equal, mode control +
+  session export passed, no errors (`playable-preview-4abe570f9-receipt.json`).
+- Ops: a worker's `pkill -f mgba` killed both shared oracles; supervisor restarted ON/OFF at 11:29 via
+  `pokebench_ensure_oracle_profile` (anchor 1/1, fight-submenu 235/235 after restart).
+- In flight: R4 (Rain Dance, Water Pulse faithful-random; Hail exact); prep16 (Overheat / Silver Wind
+  palette composite + BG-register history).
 
 ## 2026-10-06 — User answered D3: separate deterministic presentation RNG
 
