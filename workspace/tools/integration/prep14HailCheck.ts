@@ -22,7 +22,7 @@ for (const sc of Object.keys(A).filter((k) => /hail/.test(k) && !/factory/.test(
     const side = pos === 0 ? "player" : pos === 1 ? "opponent" : null;
     if (type !== 0 && side) {
       impact = true; const an = liveBattlerAnchors(side, art), at = liveBattlerCoordAttrs(side, art);
-      bx = an.picOffsetPoint.x; // X_2 at generation (ages >= 45): the front-idle x2 is 0 there; adding frontIdleRest.x2 (activation-time x2 = 1) is off by one on the opponent side (measured) by = an.picOffsetPoint.y;
+      /* X_2 at generation (ages >= 45): the front-idle x2 is 0 there; adding frontIdleRest.x2 (activation-time x2 = 1) is off by one on the opponent side (measured) */ bx = an.picOffsetPoint.x; by = an.picOffsetPoint.y;
       const dx = Math.trunc(at.width / 6), dy = Math.trunc(at.height / 6);
       if (type === 1) { bx -= dx; by -= dy; } else { bx += dx; by += dy; }
     }
