@@ -24,25 +24,34 @@
  "summary": {
   "accepted": 276,
   "live": 218,
+  "faithfulRandom": 5,
+  "faithfulRandomMoves": [
+   "MOVE_ASTONISH",
+   "MOVE_DOUBLE_KICK",
+   "MOVE_FLAIL",
+   "MOVE_THRASH",
+   "MOVE_WISH"
+  ],
   "inFlight": 0,
-  "remaining": 58,
+  "remaining": 53,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
   },
   "weightPct": {
    "live": 85.129,
+   "faithfulRandom": 1.321,
    "inFlight": 0,
-   "remaining": 14.384
+   "remaining": 13.063
   },
   "remainingByGroup": {
    "PROVIDER-x": {
-    "moves": 14,
-    "weightPct": 4.914
+    "moves": 10,
+    "weightPct": 3.998
    },
    "MULTI": {
-    "moves": 41,
-    "weightPct": 8.468
+    "moves": 40,
+    "weightPct": 8.063
    },
    "SMALL-INPUT": {
     "moves": 2,
@@ -56,14 +65,14 @@
   "remainingByHostClass": {
    "H_BASIC": 2,
    "H_BUFFER": 46,
-   "H_DERIVED": 4,
+   "H_DERIVED": 3,
    "H_OUTCOME": 2,
-   "H_RANDOM": 5,
+   "H_RANDOM": 1,
    "H_VARIANT": 7
   },
   "orderFirstBodyOnlyMoves": 36,
   "slotPlanNeededMoves": 45,
-  "sumsTo": "218+0+58=276",
+  "sumsTo": "218+5+0+53=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -107,23 +116,19 @@
    "codes": [
     "C"
    ],
-   "aloneMoves": 11,
-   "aloneWeightPct": 4.172,
+   "aloneMoves": 7,
+   "aloneWeightPct": 3.256,
    "aloneNames": [
-    "ASTONISH",
-    "DOUBLE_KICK",
     "HIDDEN_POWER",
     "HYPER_BEAM",
     "ICE_BEAM",
     "METEOR_MASH",
     "MUD_SLAP",
     "SAND_ATTACK",
-    "THRASH",
-    "WATER_SPOUT",
-    "WISH"
+    "WATER_SPOUT"
    ],
-   "touchingMoves": 52,
-   "touchingWeightPct": 12.64,
+   "touchingMoves": 47,
+   "touchingWeightPct": 11.319,
    "meta": {
     "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
     "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
@@ -341,8 +346,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 1,
-   "touchingWeightPct": 0.405,
+   "touchingMoves": 0,
+   "touchingWeightPct": 0,
    "meta": {
     "cost": "emit the dynamic gBattleMovePower/gDynamicBasePower on the request instead of the static table power (src/engine/battleScriptHitChainOpcode.ts:2285)",
     "claim": "exact; must not alter damage"
@@ -395,21 +400,17 @@
   {
    "step": 1,
    "provider": "C",
-   "newMoves": 11,
-   "newWeightPct": 4.172,
-   "cumulativeRemainingUnlocked": 11,
+   "newMoves": 7,
+   "newWeightPct": 3.256,
+   "cumulativeRemainingUnlocked": 7,
    "newNames": [
-    "ASTONISH",
-    "DOUBLE_KICK",
     "HIDDEN_POWER",
     "HYPER_BEAM",
     "ICE_BEAM",
     "METEOR_MASH",
     "MUD_SLAP",
     "SAND_ATTACK",
-    "THRASH",
-    "WATER_SPOUT",
-    "WISH"
+    "WATER_SPOUT"
    ]
   },
   {
@@ -417,7 +418,7 @@
    "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
    "newMoves": 33,
    "newWeightPct": 6.295,
-   "cumulativeRemainingUnlocked": 44,
+   "cumulativeRemainingUnlocked": 40,
    "newNames": [
     "BONEMERANG",
     "CURSE",
@@ -459,7 +460,7 @@
    "provider": "E-OUT",
    "newMoves": 5,
    "newWeightPct": 1.356,
-   "cumulativeRemainingUnlocked": 49,
+   "cumulativeRemainingUnlocked": 45,
    "newNames": [
     "ENDEAVOR",
     "FIRE_PUNCH",
@@ -473,7 +474,7 @@
    "provider": "X-DISABLE",
    "newMoves": 3,
    "newWeightPct": 0.402,
-   "cumulativeRemainingUnlocked": 52,
+   "cumulativeRemainingUnlocked": 48,
    "newNames": [
     "FURY_CUTTER",
     "ICE_BALL",
@@ -485,7 +486,7 @@
    "provider": "X-TWOTURN",
    "newMoves": 2,
    "newWeightPct": 0.937,
-   "cumulativeRemainingUnlocked": 54,
+   "cumulativeRemainingUnlocked": 50,
    "newNames": [
     "DIG",
     "DIVE"
@@ -496,79 +497,77 @@
    "provider": "X-SWITCH",
    "newMoves": 1,
    "newWeightPct": 0.482,
-   "cumulativeRemainingUnlocked": 55,
+   "cumulativeRemainingUnlocked": 51,
    "newNames": [
     "BATON_PASS"
    ]
   },
   {
    "step": 7,
-   "provider": "X-POWER",
-   "newMoves": 1,
-   "newWeightPct": 0.405,
-   "cumulativeRemainingUnlocked": 56,
-   "newNames": [
-    "FLAIL"
-   ]
-  },
-  {
-   "step": 8,
    "provider": "X-SUBST",
    "newMoves": 1,
    "newWeightPct": 0.223,
-   "cumulativeRemainingUnlocked": 57,
+   "cumulativeRemainingUnlocked": 52,
    "newNames": [
     "SUBSTITUTE"
    ]
   },
   {
-   "step": 9,
+   "step": 8,
    "provider": "X-AGE",
    "newMoves": 1,
    "newWeightPct": 0.112,
-   "cumulativeRemainingUnlocked": 58,
+   "cumulativeRemainingUnlocked": 53,
    "newNames": [
     "EXTREME_SPEED"
    ]
   },
   {
-   "step": 10,
+   "step": 9,
    "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 58,
+   "cumulativeRemainingUnlocked": 53,
+   "newNames": []
+  },
+  {
+   "step": 10,
+   "provider": "D-TILE",
+   "newMoves": 0,
+   "newWeightPct": 0,
+   "cumulativeRemainingUnlocked": 53,
    "newNames": []
   },
   {
    "step": 11,
-   "provider": "D-TILE",
+   "provider": "D-BG",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 58,
+   "cumulativeRemainingUnlocked": 53,
    "newNames": []
   },
   {
    "step": 12,
-   "provider": "D-BG",
+   "provider": "D-OAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 58,
+   "cumulativeRemainingUnlocked": 53,
    "newNames": []
   },
   {
    "step": 13,
-   "provider": "D-OAM",
+   "provider": "D-VRAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 58,
+   "cumulativeRemainingUnlocked": 53,
    "newNames": []
   },
   {
    "step": 14,
-   "provider": "D-VRAM",
+   "provider": "D-SCAN",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 58,
+   "cumulativeRemainingUnlocked": 53,
    "newNames": []
   }
  ],
@@ -604,29 +603,9 @@
   {
    "id": "P3",
    "title": "first provider build (derived from the greedy order): C",
-   "count": 11,
-   "weightPct": 4.172,
+   "count": 7,
+   "weightPct": 3.256,
    "moves": [
-    {
-     "move": "MOVE_ASTONISH",
-     "group": "PROVIDER-C",
-     "providerNeeds": [
-      "C"
-     ],
-     "orderFirstBodyOnly": false,
-     "weightPct": 0.077,
-     "prep": "no activation receipt; C: dropletRandom: 4 Random2 words (AnimSprayWaterDroplet 0x1ff&, 0x7f&)"
-    },
-    {
-     "move": "MOVE_DOUBLE_KICK",
-     "group": "PROVIDER-C",
-     "providerNeeds": [
-      "C"
-     ],
-     "orderFirstBodyOnly": false,
-     "weightPct": 0.444,
-     "prep": "no activation receipt; C: fistRandom: 4 Random2 words (x, y, two sign bits)"
-    },
     {
      "move": "MOVE_HIDDEN_POWER",
      "group": "PROVIDER-C",
@@ -688,16 +667,6 @@
      "prep": "no activation receipt; B: animationProfile:spriteOrderSeed (sSpriteOrder / live sort keys) | C: animationProfile:dirt (SandAttackDirtSeed {slot,xStep,yStep}: AnimDirtScatter Random2)"
     },
     {
-     "move": "MOVE_THRASH",
-     "group": "PROVIDER-C",
-     "providerNeeds": [
-      "C"
-     ],
-     "orderFirstBodyOnly": false,
-     "weightPct": 0.037,
-     "prep": "no activation receipt; C: fistRandom: 12 Random2 words (three fist sprites x 4)"
-    },
-    {
      "move": "MOVE_WATER_SPOUT",
      "group": "PROVIDER-C",
      "providerNeeds": [
@@ -706,61 +675,11 @@
      "orderFirstBodyOnly": true,
      "weightPct": 0.034,
      "prep": "no activation receipt; B: animationInputs:spriteOrderSeed (sSpriteOrder / live sort keys) | C: animationInputs:animationRng (presentation Random2 (gRng2Value)) | E-TASK: animationInputs:launchTaskSlot (CreateTask slot / live task table)"
-    },
-    {
-     "move": "MOVE_WISH",
-     "group": "PROVIDER-C",
-     "providerNeeds": [
-      "C"
-     ],
-     "orderFirstBodyOnly": false,
-     "weightPct": 0.358,
-     "prep": "no activation receipt; C: twinkles: 21 Random2-resolved variants, reducer throws on any other count"
     }
    ]
   }
  ],
  "rows": [
-  {
-   "move": "MOVE_ASTONISH",
-   "id": 310,
-   "name": "ASTONISH",
-   "hostClass": [
-    "H_RANDOM"
-   ],
-   "weightShare": 0.0007688492063492061,
-   "config": "src/animation/sceneOnPresentation.ts:3675",
-   "needs": [
-    "C"
-   ],
-   "blockers": [
-    {
-     "code": "C",
-     "text": "dropletRandom: 4 Random2 words (AnimSprayWaterDroplet 0x1ff&, 0x7f&)",
-     "cites": [
-      "src/animation/astonish.ts:151",
-      "reference/pokeemerald/src/battle_anim_flying.c:1106-1107"
-     ]
-    }
-   ],
-   "notes": [
-    "targetPictureYOffset is coords-derivable"
-   ],
-   "staleCorrections": [],
-   "orderFirstBodyOnly": false,
-   "lentConstants": [],
-   "providerNeeds": [
-    "C"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "PROVIDER-C"
-  },
   {
    "move": "MOVE_BATON_PASS",
    "id": 226,
@@ -2125,46 +2044,6 @@
    "group": "MULTI"
   },
   {
-   "move": "MOVE_DOUBLE_KICK",
-   "id": 24,
-   "name": "DOUBLE KICK",
-   "hostClass": [
-    "H_RANDOM"
-   ],
-   "weightShare": 0.004443027210884353,
-   "config": "src/animation/sceneOnPresentation.ts:4143",
-   "needs": [
-    "C"
-   ],
-   "blockers": [
-    {
-     "code": "C",
-     "text": "fistRandom: 4 Random2 words (x, y, two sign bits)",
-     "cites": [
-      "src/animation/doubleKick.ts:17",
-      "reference/pokeemerald/src/battle_anim_fight.c:487-492"
-     ]
-    }
-   ],
-   "notes": [
-    "targetDimensions is coords-derivable; two hits -> per-hit windows as in multihit-prep"
-   ],
-   "staleCorrections": [],
-   "orderFirstBodyOnly": false,
-   "lentConstants": [],
-   "providerNeeds": [
-    "C"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "PROVIDER-C"
-  },
-  {
    "move": "MOVE_ENDEAVOR",
    "id": 283,
    "name": "ENDEAVOR",
@@ -3077,7 +2956,7 @@
      "code": "E-OUT",
      "text": "view.burnFlames depend on resolution.secondaryRollSucceeded and resolution.faint (burn roll + target faint outcomes), which the MOVE_ANIMATION request does not carry; the view bundles status-animation flames with the move body",
      "cites": [
-      "src/animation/sceneOnPresentation.ts:12563",
+      "src/animation/sceneOnPresentation.ts:12567",
       "src/animation/sceneOnPresentation.ts:1542"
      ]
     }
@@ -3124,56 +3003,6 @@
     "player": "NEEDS-KEYS"
    },
    "group": "SMALL-INPUT"
-  },
-  {
-   "move": "MOVE_FLAIL",
-   "id": 175,
-   "name": "FLAIL",
-   "hostClass": [
-    "H_RANDOM"
-   ],
-   "weightShare": 0.004046201814058956,
-   "config": "src/animation/sceneOnPresentation.ts:3661",
-   "needs": [
-    "C",
-    "X-POWER"
-   ],
-   "blockers": [
-    {
-     "code": "C",
-     "text": "visualRandom: 2 Random2 words (x%48-24, y%24-12)",
-     "cites": [
-      "src/animation/flail.ts:171-181",
-      "reference/pokeemerald/src/battle_anim_normal.c:1062-1063"
-     ]
-    },
-    {
-     "code": "X-POWER",
-     "text": "movePower: AnimTask_ShakeTargetBasedOnMovePowerOrDmg divides gAnimMovePower by 12 (battle_anim_mon_movement.c:970-998; AnimTask_FlailMovement is the RNG-free attacker motion); the request emits the static table power, Flail power is gDynamicBasePower (ROM passes gBattleMovePower)",
-     "cites": [
-      "src/engine/battleScriptHitChainOpcode.ts:2285",
-      "reference/pokeemerald/src/battle_anim_mon_movement.c:975"
-     ]
-    }
-   ],
-   "notes": [
-    "AnimTask_FlailMovement is RNG-free"
-   ],
-   "staleCorrections": [],
-   "orderFirstBodyOnly": false,
-   "lentConstants": [],
-   "providerNeeds": [
-    "C",
-    "X-POWER"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "MULTI"
   },
   {
    "move": "MOVE_FLATTER",
@@ -13773,46 +13602,6 @@
    "group": "MULTI"
   },
   {
-   "move": "MOVE_THRASH",
-   "id": 37,
-   "name": "THRASH",
-   "hostClass": [
-    "H_RANDOM"
-   ],
-   "weightShare": 0.0003720238095238094,
-   "config": "src/animation/sceneOnPresentation.ts:4130",
-   "needs": [
-    "C"
-   ],
-   "blockers": [
-    {
-     "code": "C",
-     "text": "fistRandom: 12 Random2 words (three fist sprites x 4)",
-     "cites": [
-      "src/animation/thrash.ts:1",
-      "reference/pokeemerald/src/battle_anim_fight.c:487-492"
-     ]
-    }
-   ],
-   "notes": [
-    "lock-in / confusion end flow is gameplay, not presentation"
-   ],
-   "staleCorrections": [],
-   "orderFirstBodyOnly": false,
-   "lentConstants": [],
-   "providerNeeds": [
-    "C"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "PROVIDER-C"
-  },
-  {
    "move": "MOVE_WATER_PULSE",
    "id": 352,
    "name": "WATER PULSE",
@@ -14493,46 +14282,6 @@
     "player": "NEEDS-KEYS"
    },
    "group": "MULTI"
-  },
-  {
-   "move": "MOVE_WISH",
-   "id": 273,
-   "name": "WISH",
-   "hostClass": [
-    "H_DERIVED"
-   ],
-   "weightShare": 0.003578514739229024,
-   "config": "src/animation/sceneOnPresentation.ts:2032",
-   "needs": [
-    "C"
-   ],
-   "blockers": [
-    {
-     "code": "C",
-     "text": "twinkles: 21 Random2-resolved variants, reducer throws on any other count",
-     "cites": [
-      "src/animation/wish.ts:104-107",
-      "src/animation/wish.ts:136"
-     ]
-    }
-   ],
-   "notes": [
-    "no species gate in the renderer (art lookup by species)"
-   ],
-   "staleCorrections": [],
-   "orderFirstBodyOnly": false,
-   "lentConstants": [],
-   "providerNeeds": [
-    "C"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "PROVIDER-C"
   }
  ]
 }

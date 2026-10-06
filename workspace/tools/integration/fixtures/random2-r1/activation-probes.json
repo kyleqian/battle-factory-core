@@ -405,6 +405,395 @@
     }
    ],
    "scenario": "tools/battle-lab/mechanic-wish-opponent-illumise-player-onix.json"
+  },
+  {
+   "label": "meteor-mash-opponent",
+   "bodyLabel": "Move_METEOR_MASH",
+   "runsSha1": "5d3e6056aa0922738f7a38f8e03a7a26358df8e3",
+   "runsSha1Run2": "5d3e6056aa0922738f7a38f8e03a7a26358df8e3",
+   "frames": 1434,
+   "bodies": [
+    {
+     "activationFrame": 231,
+     "lastActiveFrame": 444,
+     "activationValue": 327915701,
+     "activationValueHex": "0x138B98B5",
+     "plan": [
+      {
+       "ageOffset": 48,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 50,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 52,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 54,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 56,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 58,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 60,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 62,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 64,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 66,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 68,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 70,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 72,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 74,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 76,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 78,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 79,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 80,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 82,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 84,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 86,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 88,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 90,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 102,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 104,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 106,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 108,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 111,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 113,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 115,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 117,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 119,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 121,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 123,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 125,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 127,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 129,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 131,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 133,
+       "count": 2,
+       "lagBefore": 0
+      }
+     ],
+     "words": [
+      [
+       43958,
+       34624
+      ],
+      [
+       21825,
+       50293
+      ],
+      [
+       50598,
+       56763
+      ],
+      [
+       48616,
+       17410
+      ],
+      [
+       13491,
+       26503
+      ],
+      [
+       43644,
+       33569
+      ],
+      [
+       39910,
+       51418,
+       7149,
+       27177
+      ],
+      [
+       60153,
+       19084,
+       45867,
+       766
+      ],
+      [
+       64567,
+       25126,
+       18094,
+       34881
+      ],
+      [
+       61370,
+       30245,
+       22047,
+       19304
+      ],
+      [
+       7438,
+       32578,
+       47422,
+       65278
+      ],
+      [
+       30189,
+       42348,
+       5241,
+       42969
+      ],
+      [
+       57394,
+       32259,
+       64992,
+       13729
+      ],
+      [
+       25913,
+       39215,
+       42869,
+       48
+      ],
+      [
+       25389,
+       56691,
+       31750,
+       47809
+      ],
+      [
+       51446,
+       30661
+      ],
+      [
+       9957,
+       25972
+      ],
+      [
+       24505,
+       13262
+      ],
+      [
+       60288,
+       41562
+      ],
+      [
+       33578,
+       4747
+      ],
+      [
+       57448,
+       33725
+      ],
+      [
+       61954,
+       4346
+      ],
+      [
+       45890,
+       7819
+      ],
+      [
+       46125,
+       9916
+      ],
+      [
+       9547,
+       39955
+      ],
+      [
+       8680,
+       34901
+      ],
+      [
+       49890,
+       26232
+      ],
+      [
+       48290,
+       6039
+      ],
+      [
+       49114,
+       51422
+      ],
+      [
+       32514,
+       63598
+      ],
+      [
+       51461,
+       41540
+      ],
+      [
+       16972,
+       61196
+      ],
+      [
+       23925,
+       61636
+      ],
+      [
+       11078,
+       34207
+      ],
+      [
+       13791,
+       34091
+      ],
+      [
+       56110,
+       39861
+      ],
+      [
+       55976,
+       30699
+      ],
+      [
+       2613,
+       11971
+      ],
+      [
+       26220,
+       63899
+      ]
+     ]
+    }
+   ],
+   "scenario": "tools/battle-lab/mechanic-meteor-mash-opponent-metang-player-onix.json"
   }
  ]
 }
