@@ -1,0 +1,48 @@
+{
+ "player-back": {
+  "scanlineStateEqual": true,
+  "srcBufferEqual": true,
+  "dmaDestEqual": true,
+  "dmaControlEqual": true,
+  "scanlineBuffersEqual": true,
+  "attackerHiddenAtSetupEnd": true,
+  "unleashAttackerInitialVisible": false,
+  "setupEndAttackerMatrixNum": 1,
+  "unleashAttackerInitialMatrixNum": 0,
+  "setupCleanupMatrixNum": 1,
+  "setupEndBgScroll": {
+   "x": 0,
+   "y": 0
+  },
+  "unleashSetupBgOffset": {
+   "x": -40,
+   "y": -65
+  },
+  "setupEndMatrixBitmap": 6,
+  "unleashInitialMatrixBitmap": 6,
+  "setupEndOrderOwned": 0
+ },
+ "opponent-front": {
+  "scanlineStateEqual": true,
+  "srcBufferEqual": true,
+  "dmaDestEqual": true,
+  "dmaControlEqual": true,
+  "scanlineBuffersEqual": true,
+  "attackerHiddenAtSetupEnd": true,
+  "unleashAttackerInitialVisible": false,
+  "setupEndAttackerMatrixNum": 2,
+  "unleashAttackerInitialMatrixNum": 0,
+  "setupCleanupMatrixNum": 2,
+  "setupEndBgScroll": {
+   "x": 0,
+   "y": 0
+  },
+  "unleashSetupBgOffset": {
+   "x": -144,
+   "y": -20
+  },
+  "setupEndMatrixBitmap": 6,
+  "unleashInitialMatrixBitmap": 6,
+  "setupEndOrderOwned": 0
+ }
+}
