@@ -363,10 +363,13 @@ const BATCH_PICKS = (() => {
   const rowOf = (n) => rows.find((r) => r.move === `MOVE_${n}`);
   const short = (n) => { const r = rowOf(n); return r.activationReceipts.length ? `activation measured (${r.activationReceipts.length} receipt${r.activationReceipts.length === 1 ? "" : "s"}); ` : "no activation receipt; "; };
   const blk = (n) => rowOf(n).blockers.map((b) => `${b.code}: ${b.text}`).join(" | ") || "none (recipe work only)";
+  const p1 = byGroup("READY-NOW"), p2 = byGroup("SMALL-INPUT");
+  // A move already picked by P1/P2 is not repeated in P3 (the greedy provider's newly unlocked names can include a READY-NOW move).
+  const p3 = top ? top.newNames.filter((n) => !p1.includes(n) && !p2.includes(n)) : [];
   return [
-    mk("P1", "READY-NOW (derived): no provider dependency", byGroup("READY-NOW"), (n) => short(n) + blk(n)),
-    mk("P2", "SMALL-INPUT (derived): one named input / reducer parameter each (docs/next-adapters-prep10.md measures them)", byGroup("SMALL-INPUT"), (n) => short(n) + blk(n)),
-    mk("P3", `first provider build (derived from the greedy order): ${top ? top.provider : "none"}`, top ? top.newNames : [], (n) => short(n) + blk(n)),
+    mk("P1", "READY-NOW (derived): no provider dependency", p1, (n) => short(n) + blk(n)),
+    mk("P2", "SMALL-INPUT (derived): one named input / reducer parameter each (docs/next-adapters-prep10.md measures them)", p2, (n) => short(n) + blk(n)),
+    mk("P3", `first provider build (derived from the greedy order): ${top ? top.provider : "none"}`, p3, (n) => short(n) + blk(n)),
   ].filter((b) => b.moves.length);
 })();
 

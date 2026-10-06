@@ -10,7 +10,7 @@
   "src/data/gen/battle-frontier-mons.json",
   "src/data/gen/factory-round-policy.json"
  ],
- "liveStatusImplementedCount": 225,
+ "liveStatusImplementedCount": 226,
  "staleCodesCorrected": [
   "B (sSpriteOrder): was 'first body only'; production now lends the order and tracks it across bodies (liveSpriteOrderHost.ts / spriteOrderProvider.ts, merged cross-body tracker + post-KO rung 1), so B no longer blocks anything; recipe work only (falls back after an unmodelled graphics command)",
   "F-AFFINE / E-TASK: were provider blockers; docs/allocator-plan-v2-evidence.md measured gOamMatrixAllocBitmap 0x6 + no tasks at all 481 known-entry bodies, so the accepted constants gated on the lent order suffice for first bodies (invalidated after a faint/switch)",
@@ -23,38 +23,40 @@
  "inFlightMoves": {},
  "summary": {
   "accepted": 276,
-  "live": 225,
-  "faithfulRandom": 8,
+  "live": 226,
+  "faithfulRandom": 10,
   "faithfulRandomMoves": [
    "MOVE_ASTONISH",
    "MOVE_DOUBLE_KICK",
    "MOVE_FLAIL",
    "MOVE_HYPER_BEAM",
+   "MOVE_MUD_SLAP",
    "MOVE_RAIN_DANCE",
+   "MOVE_SAND_ATTACK",
    "MOVE_THRASH",
    "MOVE_WATER_PULSE",
    "MOVE_WISH"
   ],
   "inFlight": 0,
-  "remaining": 43,
+  "remaining": 40,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
   },
   "weightPct": {
-   "live": 89.092,
-   "faithfulRandom": 2.667,
+   "live": 89.842,
+   "faithfulRandom": 3.612,
    "inFlight": 0,
-   "remaining": 7.753
+   "remaining": 6.059
   },
   "remainingByGroup": {
    "PROVIDER-x": {
-    "moves": 6,
-    "weightPct": 1.907
+    "moves": 4,
+    "weightPct": 0.962
    },
    "MULTI": {
-    "moves": 34,
-    "weightPct": 4.845
+    "moves": 33,
+    "weightPct": 4.095
    },
    "SMALL-INPUT": {
     "moves": 2,
@@ -67,15 +69,15 @@
   },
   "remainingByHostClass": {
    "H_BASIC": 2,
-   "H_BUFFER": 36,
+   "H_BUFFER": 33,
    "H_DERIVED": 3,
-   "H_OUTCOME": 2,
+   "H_OUTCOME": 1,
    "H_RANDOM": 1,
-   "H_VARIANT": 7
+   "H_VARIANT": 6
   },
-  "orderFirstBodyOnlyMoves": 28,
-  "slotPlanNeededMoves": 35,
-  "sumsTo": "225+8+0+43=276",
+  "orderFirstBodyOnlyMoves": 25,
+  "slotPlanNeededMoves": 32,
+  "sumsTo": "226+10+0+40=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -113,26 +115,6 @@
   ]
  },
  "ranking": [
-  {
-   "provider": "C",
-   "label": "Random2 surrogate (presentation-only gRng2Value stream)",
-   "codes": [
-    "C"
-   ],
-   "aloneMoves": 3,
-   "aloneWeightPct": 1.165,
-   "aloneNames": [
-    "METEOR_MASH",
-    "MUD_SLAP",
-    "SAND_ATTACK"
-   ],
-   "touchingMoves": 37,
-   "touchingWeightPct": 6.01,
-   "meta": {
-    "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
-    "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
-   }
-  },
   {
    "provider": "E-OUT",
    "label": "outcome selector from resolution not on the request",
@@ -186,6 +168,24 @@
    "meta": null
   },
   {
+   "provider": "C",
+   "label": "Random2 surrogate (presentation-only gRng2Value stream)",
+   "codes": [
+    "C"
+   ],
+   "aloneMoves": 1,
+   "aloneWeightPct": 0.22,
+   "aloneNames": [
+    "METEOR_MASH"
+   ],
+   "touchingMoves": 34,
+   "touchingWeightPct": 4.315,
+   "meta": {
+    "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
+    "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
+   }
+  },
+  {
    "provider": "X-AGE",
    "label": "accepted evidence lacks the early source ages (age basis)",
    "codes": [
@@ -211,8 +211,8 @@
    "aloneNames": [
     "MEMENTO"
    ],
-   "touchingMoves": 5,
-   "touchingWeightPct": 1.453,
+   "touchingMoves": 4,
+   "touchingWeightPct": 0.703,
    "meta": null
   },
   {
@@ -232,8 +232,8 @@
    "aloneNames": [
     "MEMENTO"
    ],
-   "touchingMoves": 34,
-   "touchingWeightPct": 4.695,
+   "touchingMoves": 33,
+   "touchingWeightPct": 3.945,
    "meta": {
     "cost": "new large host (docs/animation-integration-readiness.md A6)",
     "claim": "only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today"
@@ -264,8 +264,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 29,
-   "touchingWeightPct": 4.332,
+   "touchingMoves": 28,
+   "touchingWeightPct": 3.583,
    "meta": null
   },
   {
@@ -277,8 +277,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 28,
-   "touchingWeightPct": 4.261,
+   "touchingMoves": 27,
+   "touchingWeightPct": 3.512,
    "meta": null
   },
   {
@@ -290,8 +290,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 15,
-   "touchingWeightPct": 3.311,
+   "touchingMoves": 14,
+   "touchingWeightPct": 2.561,
    "meta": null
   },
   {
@@ -387,8 +387,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 2,
-   "touchingWeightPct": 0.937,
+   "touchingMoves": 1,
+   "touchingWeightPct": 0.187,
    "meta": {
     "cost": "hidden-battler state across the two turns in the field art view",
     "claim": "exact once the semi-invulnerable state is rendered"
@@ -398,22 +398,51 @@
  "greedy": [
   {
    "step": 1,
-   "provider": "C",
-   "newMoves": 3,
-   "newWeightPct": 1.165,
-   "cumulativeRemainingUnlocked": 3,
+   "provider": "E-OUT",
+   "newMoves": 2,
+   "newWeightPct": 0.89,
+   "cumulativeRemainingUnlocked": 2,
    "newNames": [
-    "METEOR_MASH",
-    "MUD_SLAP",
-    "SAND_ATTACK"
+    "ENDEAVOR",
+    "FIRE_PUNCH"
    ]
   },
   {
    "step": 2,
+   "provider": "X-SWITCH",
+   "newMoves": 1,
+   "newWeightPct": 0.482,
+   "cumulativeRemainingUnlocked": 3,
+   "newNames": [
+    "BATON_PASS"
+   ]
+  },
+  {
+   "step": 3,
+   "provider": "X-SUBST",
+   "newMoves": 1,
+   "newWeightPct": 0.223,
+   "cumulativeRemainingUnlocked": 4,
+   "newNames": [
+    "SUBSTITUTE"
+   ]
+  },
+  {
+   "step": 4,
+   "provider": "C",
+   "newMoves": 1,
+   "newWeightPct": 0.22,
+   "cumulativeRemainingUnlocked": 5,
+   "newNames": [
+    "METEOR_MASH"
+   ]
+  },
+  {
+   "step": 5,
    "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
-   "newMoves": 27,
-   "newWeightPct": 3.076,
-   "cumulativeRemainingUnlocked": 30,
+   "newMoves": 30,
+   "newWeightPct": 3.543,
+   "cumulativeRemainingUnlocked": 35,
    "newNames": [
     "BONEMERANG",
     "CURSE",
@@ -430,12 +459,15 @@
     "OCTAZOOKA",
     "OUTRAGE",
     "PSYWAVE",
+    "PURSUIT",
+    "RAPID_SPIN",
     "RETURN",
     "REVENGE",
     "SAND_TOMB",
     "SHEER_COLD",
     "SHOCK_WAVE",
     "SIGNAL_BEAM",
+    "SKILL_SWAP",
     "SKY_ATTACK",
     "SMOG",
     "SNORE",
@@ -445,21 +477,7 @@
    ]
   },
   {
-   "step": 3,
-   "provider": "E-OUT",
-   "newMoves": 5,
-   "newWeightPct": 1.356,
-   "cumulativeRemainingUnlocked": 35,
-   "newNames": [
-    "ENDEAVOR",
-    "FIRE_PUNCH",
-    "PURSUIT",
-    "RAPID_SPIN",
-    "SKILL_SWAP"
-   ]
-  },
-  {
-   "step": 4,
+   "step": 6,
    "provider": "X-DISABLE",
    "newMoves": 3,
    "newWeightPct": 0.402,
@@ -471,34 +489,13 @@
    ]
   },
   {
-   "step": 5,
-   "provider": "X-TWOTURN",
-   "newMoves": 2,
-   "newWeightPct": 0.937,
-   "cumulativeRemainingUnlocked": 40,
-   "newNames": [
-    "DIG",
-    "DIVE"
-   ]
-  },
-  {
-   "step": 6,
-   "provider": "X-SWITCH",
-   "newMoves": 1,
-   "newWeightPct": 0.482,
-   "cumulativeRemainingUnlocked": 41,
-   "newNames": [
-    "BATON_PASS"
-   ]
-  },
-  {
    "step": 7,
-   "provider": "X-SUBST",
+   "provider": "X-TWOTURN",
    "newMoves": 1,
-   "newWeightPct": 0.223,
-   "cumulativeRemainingUnlocked": 42,
+   "newWeightPct": 0.187,
+   "cumulativeRemainingUnlocked": 39,
    "newNames": [
-    "SUBSTITUTE"
+    "DIVE"
    ]
   },
   {
@@ -506,7 +503,7 @@
    "provider": "X-AGE",
    "newMoves": 1,
    "newWeightPct": 0.112,
-   "cumulativeRemainingUnlocked": 43,
+   "cumulativeRemainingUnlocked": 40,
    "newNames": [
     "EXTREME_SPEED"
    ]
@@ -516,7 +513,7 @@
    "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 43,
+   "cumulativeRemainingUnlocked": 40,
    "newNames": []
   },
   {
@@ -524,7 +521,7 @@
    "provider": "D-TILE",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 43,
+   "cumulativeRemainingUnlocked": 40,
    "newNames": []
   },
   {
@@ -532,7 +529,7 @@
    "provider": "D-BG",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 43,
+   "cumulativeRemainingUnlocked": 40,
    "newNames": []
   },
   {
@@ -540,7 +537,7 @@
    "provider": "D-OAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 43,
+   "cumulativeRemainingUnlocked": 40,
    "newNames": []
   },
   {
@@ -548,7 +545,7 @@
    "provider": "D-VRAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 43,
+   "cumulativeRemainingUnlocked": 40,
    "newNames": []
   },
   {
@@ -556,7 +553,7 @@
    "provider": "D-SCAN",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 43,
+   "cumulativeRemainingUnlocked": 40,
    "newNames": []
   }
  ],
@@ -586,44 +583,6 @@
      "orderFirstBodyOnly": false,
      "weightPct": 0.221,
      "prep": "activation measured (2 receipts); E-OUT: animationProfile:staleMovePower (HP before/after + stale gAnimMovePower (value left by the previous animation))"
-    }
-   ]
-  },
-  {
-   "id": "P3",
-   "title": "first provider build (derived from the greedy order): C",
-   "count": 3,
-   "weightPct": 1.165,
-   "moves": [
-    {
-     "move": "MOVE_METEOR_MASH",
-     "group": "PROVIDER-C",
-     "providerNeeds": [
-      "C"
-     ],
-     "orderFirstBodyOnly": false,
-     "weightPct": 0.22,
-     "prep": "no activation receipt; C: twinkles: 48 Random2-resolved variants (optional field; geometry.twinkles)"
-    },
-    {
-     "move": "MOVE_MUD_SLAP",
-     "group": "PROVIDER-C",
-     "providerNeeds": [
-      "C"
-     ],
-     "orderFirstBodyOnly": true,
-     "weightPct": 0.539,
-     "prep": "no activation receipt; B: animationProfile:spriteOrderSeed (sSpriteOrder / live sort keys) | C: animationProfile:mud (MudSlapMudSeed {slot,xStep,yStep}: AnimDirtScatter Random2 (battle_anim_ground.c:213-214))"
-    },
-    {
-     "move": "MOVE_SAND_ATTACK",
-     "group": "PROVIDER-C",
-     "providerNeeds": [
-      "C"
-     ],
-     "orderFirstBodyOnly": true,
-     "weightPct": 0.406,
-     "prep": "no activation receipt; B: animationProfile:spriteOrderSeed (sSpriteOrder / live sort keys) | C: animationProfile:dirt (SandAttackDirtSeed {slot,xStep,yStep}: AnimDirtScatter Random2)"
     }
    ]
   }
@@ -1259,529 +1218,6 @@
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
-   },
-   "group": "MULTI"
-  },
-  {
-   "move": "MOVE_DIG",
-   "id": 91,
-   "name": "DIG",
-   "hostClass": [
-    "H_BUFFER",
-    "H_VARIANT"
-   ],
-   "weightShare": 0.0074971655328798185,
-   "config": "src/animation/sceneOnPresentation.ts:3889",
-   "needs": [
-    "B",
-    "C",
-    "F-AFFINE",
-    "E-TASK",
-    "D-TILE",
-    "D-BG",
-    "D-OAM",
-    "D-SCAN",
-    "X-TWOTURN"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationInputs:spriteOrder (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/dig.ts:65"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationInputs:animationRngSeed (presentation Random2 (gRng2Value))",
-     "cites": [
-      "src/animation/dig.ts:102"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationInputs:attackerInitialMatrixNum (affine matrix allocator)",
-     "cites": [
-      "src/animation/dig.ts:46"
-     ]
-    },
-    {
-     "code": "E-TASK",
-     "text": "animationInputs:digTaskSlot (CreateTask slot / live task table)",
-     "cites": [
-      "src/animation/dig.ts:61"
-     ]
-    },
-    {
-     "code": "D-TILE",
-     "text": "animationInputs:mudSand (OBJ tile/palette resource allocator)",
-     "cites": [
-      "src/animation/dig.ts:67"
-     ]
-    },
-    {
-     "code": "D-BG",
-     "text": "animationInputs:setupBgOffset (BG regs / monbg / BLDCNT state)",
-     "cites": [
-      "src/animation/dig.ts:73"
-     ]
-    },
-    {
-     "code": "D-OAM",
-     "text": "animationInputs:initialScanline.buffers (OAM/affine buffers)",
-     "cites": [
-      "src/animation/dig.ts:99"
-     ]
-    },
-    {
-     "code": "D-SCAN",
-     "text": "animationInputs:initialScanline (gScanlineEffect buffers)",
-     "cites": [
-      "src/animation/dig.ts:94"
-     ]
-    },
-    {
-     "code": "X-TWOTURN",
-     "text": "semi-invulnerable two-turn state (hidden battler between turns)",
-     "cites": [
-      "src/engine/battleScriptHitChainOpcode.ts:2276-2289",
-      "reference/pokeemerald/data/battle_anim_scripts.s:2653"
-     ]
-    }
-   ],
-   "notes": [
-    "body selector is request.turn (choosetwoturnanim, battle_anim_scripts.s:2653); the blocker is the hidden-battler state between turns"
-   ],
-   "staleCorrections": [
-    "body selector is request.turn (choosetwoturnanim, battle_anim_scripts.s:2653); the blocker is the hidden-battler state between turns"
-   ],
-   "consumedInputs": [
-    {
-     "path": "body",
-     "classes": [
-      "E-OUT"
-     ],
-     "status": "blocked: E-OUT",
-     "cite": null
-    },
-    {
-     "path": "animationInputs:body",
-     "classes": [
-      "E-OUT"
-     ],
-     "status": "blocked: E-OUT",
-     "cite": "src/animation/dig.ts:26"
-    },
-    {
-     "path": "animationInputs:attackerCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dig.ts:32"
-    },
-    {
-     "path": "animationInputs:targetCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dig.ts:33"
-    },
-    {
-     "path": "animationInputs:targetAnimationOrigin",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dig.ts:35"
-    },
-    {
-     "path": "animationInputs:attackerElevationY",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dig.ts:37"
-    },
-    {
-     "path": "animationInputs:attackerInitialOffset",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dig.ts:38"
-    },
-    {
-     "path": "animationInputs:targetInitialOffset",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dig.ts:39"
-    },
-    {
-     "path": "animationInputs:attackerSpriteSlot",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/dig.ts:40"
-    },
-    {
-     "path": "animationInputs:targetSpriteSlot",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/dig.ts:41"
-    },
-    {
-     "path": "animationInputs:attackerSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dig.ts:42"
-    },
-    {
-     "path": "animationInputs:targetSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dig.ts:43"
-    },
-    {
-     "path": "animationInputs:attackerInitialVisible",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dig.ts:44"
-    },
-    {
-     "path": "animationInputs:targetInitialVisible",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dig.ts:45"
-    },
-    {
-     "path": "animationInputs:attackerInitialMatrixNum",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/dig.ts:46"
-    },
-    {
-     "path": "animationInputs:targetInitialMatrixNum",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/dig.ts:47"
-    },
-    {
-     "path": "animationInputs:attackerCleanupMatrixNum",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/dig.ts:48"
-    },
-    {
-     "path": "animationInputs:targetCleanupMatrixNum",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/dig.ts:49"
-    },
-    {
-     "path": "animationInputs:attackerInitialMatrix",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/dig.ts:50"
-    },
-    {
-     "path": "animationInputs:targetInitialMatrix",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/dig.ts:51"
-    },
-    {
-     "path": "animationInputs:moundSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/dig.ts:54"
-    },
-    {
-     "path": "animationInputs:plumeSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/dig.ts:56"
-    },
-    {
-     "path": "animationInputs:impactSpriteSlot",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/dig.ts:57"
-    },
-    {
-     "path": "animationInputs:impactMatrixNum",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/dig.ts:58"
-    },
-    {
-     "path": "animationInputs:moundMatrixNum",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/dig.ts:59"
-    },
-    {
-     "path": "animationInputs:plumeMatrixNum",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/dig.ts:60"
-    },
-    {
-     "path": "animationInputs:digTaskSlot",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/dig.ts:61"
-    },
-    {
-     "path": "animationInputs:updateMonBgTaskSlot",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/dig.ts:62"
-    },
-    {
-     "path": "animationInputs:clearMonBgTaskSlot",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/dig.ts:63"
-    },
-    {
-     "path": "animationInputs:shakeTaskSlot",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/dig.ts:64"
-    },
-    {
-     "path": "animationInputs:spriteOrder",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/dig.ts:65"
-    },
-    {
-     "path": "animationInputs:mudSand",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/dig.ts:67"
-    },
-    {
-     "path": "animationInputs:dirtMound",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/dig.ts:68"
-    },
-    {
-     "path": "animationInputs:impact",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dig.ts:69"
-    },
-    {
-     "path": "animationInputs:initialMatrixBitmap",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/dig.ts:70"
-    },
-    {
-     "path": "animationInputs:setupBgOffset",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/dig.ts:73"
-    },
-    {
-     "path": "animationInputs:monBg",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/dig.ts:74"
-    },
-    {
-     "path": "animationInputs:monBg.layer",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/dig.ts:75"
-    },
-    {
-     "path": "animationInputs:monBg.layerId",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/dig.ts:76"
-    },
-    {
-     "path": "animationInputs:monBg.snapshot",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/dig.ts:78"
-    },
-    {
-     "path": "animationInputs:monBg.baseScroll",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/dig.ts:79"
-    },
-    {
-     "path": "animationInputs:monBg.activeCnt",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/dig.ts:80"
-    },
-    {
-     "path": "animationInputs:monBg.inactiveCnt",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/dig.ts:81"
-    },
-    {
-     "path": "animationInputs:initialScanline",
-     "classes": [
-      "D-SCAN"
-     ],
-     "status": "blocked: D-SCAN",
-     "cite": "src/animation/dig.ts:94"
-    },
-    {
-     "path": "animationInputs:initialScanline.srcBuffer",
-     "classes": [
-      "D-SCAN"
-     ],
-     "status": "blocked: D-SCAN",
-     "cite": "src/animation/dig.ts:95"
-    },
-    {
-     "path": "animationInputs:initialScanline.state",
-     "classes": [
-      "D-SCAN"
-     ],
-     "status": "blocked: D-SCAN",
-     "cite": "src/animation/dig.ts:96"
-    },
-    {
-     "path": "animationInputs:initialScanline.dmaDest",
-     "classes": [
-      "D-SCAN"
-     ],
-     "status": "blocked: D-SCAN",
-     "cite": "src/animation/dig.ts:97"
-    },
-    {
-     "path": "animationInputs:initialScanline.dmaControl",
-     "classes": [
-      "D-SCAN"
-     ],
-     "status": "blocked: D-SCAN",
-     "cite": "src/animation/dig.ts:98"
-    },
-    {
-     "path": "animationInputs:initialScanline.buffers",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/dig.ts:99"
-    },
-    {
-     "path": "animationInputs:animationRngSeed",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/dig.ts:102"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "full",
-   "carrierOccurrences": 12580,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "B",
-    "F-AFFINE",
-    "E-TASK"
-   ],
-   "providerNeeds": [
-    "C",
-    "D-TILE",
-    "D-BG",
-    "D-OAM",
-    "D-SCAN",
-    "X-TWOTURN"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
    },
    "group": "MULTI"
   },
@@ -5004,93 +4440,6 @@
    "group": "PROVIDER-C"
   },
   {
-   "move": "MOVE_MUD_SLAP",
-   "id": 189,
-   "name": "MUD-SLAP",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0053925736961451245,
-   "config": "src/animation/sceneOnPresentation.ts:1544",
-   "needs": [
-    "B",
-    "C"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationProfile:spriteOrderSeed (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/mudSlap.ts:16"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationProfile:mud (MudSlapMudSeed {slot,xStep,yStep}: AnimDirtScatter Random2 (battle_anim_ground.c:213-214))",
-     "cites": [
-      "src/animation/mudSlap.ts:14"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationProfile:mud",
-     "classes": [
-      "A-SLOT",
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/mudSlap.ts:14"
-    },
-    {
-     "path": "animationProfile:spriteOrderSeed",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/mudSlap.ts:16"
-    },
-    {
-     "path": "moveTextStartAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    },
-    {
-     "path": "animationAgeOffset",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "seed",
-   "carrierOccurrences": 8231,
-   "stagedOrientations": "single-or-unnamed",
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "B"
-   ],
-   "providerNeeds": [
-    "C"
-   ],
-   "palettePlan": false,
-   "activationMeasured": true,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "PROVIDER-C"
-  },
-  {
    "move": "MOVE_NIGHTMARE",
    "id": 171,
    "name": "NIGHTMARE",
@@ -7967,106 +7316,6 @@
     "player": "EXACT-PLAN"
    },
    "group": "MULTI"
-  },
-  {
-   "move": "MOVE_SAND_ATTACK",
-   "id": 28,
-   "name": "SAND-ATTACK",
-   "hostClass": [
-    "H_BUFFER",
-    "H_OUTCOME"
-   ],
-   "weightShare": 0.004056831065759637,
-   "config": "src/animation/sceneOnPresentation.ts:1527",
-   "needs": [
-    "B",
-    "C"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationProfile:spriteOrderSeed (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/sandAttack.ts:13"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationProfile:dirt (SandAttackDirtSeed {slot,xStep,yStep}: AnimDirtScatter Random2)",
-     "cites": [
-      "src/animation/sandAttack.ts:11"
-     ]
-    }
-   ],
-   "notes": [
-    "STALE triage verdict: the accuracy banner is body (sandAttackAccuracyBannerAtAge); controllerProfile only feeds resultText/currentMove HUD fields (sceneOnPresentation.ts sceneOnSandAttackView)"
-   ],
-   "staleCorrections": [
-    "STALE triage verdict: the accuracy banner is body (sandAttackAccuracyBannerAtAge); controllerProfile only feeds resultText/currentMove HUD fields (sceneOnPresentation.ts sceneOnSandAttackView)"
-   ],
-   "consumedInputs": [
-    {
-     "path": "animationProfile:dirt",
-     "classes": [
-      "A-SLOT",
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/sandAttack.ts:11"
-    },
-    {
-     "path": "animationProfile:spriteOrderSeed",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/sandAttack.ts:13"
-    },
-    {
-     "path": "controllerProfile",
-     "classes": [
-      "E-OUT"
-     ],
-     "status": "blocked: E-OUT",
-     "cite": null
-    },
-    {
-     "path": "moveTextStartAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    },
-    {
-     "path": "animationAgeOffset",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "seed",
-   "carrierOccurrences": 7040,
-   "stagedOrientations": "single-or-unnamed",
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "B"
-   ],
-   "providerNeeds": [
-    "C"
-   ],
-   "palettePlan": false,
-   "activationMeasured": true,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "PROVIDER-C"
   },
   {
    "move": "MOVE_SAND_TOMB",

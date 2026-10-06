@@ -2336,7 +2336,7 @@ export function liveMoveAnimationPresentation(
       // from the setup reducer's end state). Anything else declines. Geometry from the anchors, every allocator/task/matrix field is the
       // measured constant shared by both corpora and the FLYGON/GOLEM alternates (both attacker sides).
       const unleash = (request.turn & 1) === 1;
-      if (unleash ? !spriteOrderInput?.afterDigSetup : !spriteOrderInput?.firstBody) return null;
+      if (!spriteOrderInput || (unleash ? !spriteOrderInput.afterDigSetup : !spriteOrderInput.firstBody)) return null;
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (lentOrder === null) return null;

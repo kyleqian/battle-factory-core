@@ -1,5 +1,4 @@
 import { readFileSync } from "node:fs";
-import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import {
   LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS,
@@ -14,11 +13,12 @@ import { createBattleResolutionPresentationRenderView } from "../../src/engine/b
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
-import { digInputsFor } from "../../tools/compare/verifyDigReducer.ts";
 
 // docs/next-adapters-prep18.md s1.1 (authoritative): Dig exact adapter, setup 195 / unleash 68, body by request.turn bit 0.
 // Dense framebuffer proofs: tools/integration/fixtures/prep18-live/*.json (receipt random2-r5-live-receipt.json).
 const fixtureAt = (name: string) => JSON.parse(readFileSync(`tools/integration/fixtures/prep18-live/${name}.json`, "utf8")) as Fixture;
+// digInputsFor(retained corpus rows) of tools/compare/verifyDigReducer.ts, saved once (that module does not typecheck when imported).
+const corpusInputs = (JSON.parse(readFileSync("tools/integration/fixtures/prep18-live/dig-corpus-inputs.json", "utf8")) as { inputs: Record<string, any> }).inputs;
 const ACCEPTED = { player: "dig-player-vibrava-opponent-chansey", opponent: "dig-opponent-vibrava-player-chansey" } as const;
 const request = (attacker: 0 | 1, turn: number): BattleMoveAnimationRequest => ({
   moveId: 91, attacker, target: attacker === 0 ? 1 : 0, turn, power: 0, damage: 0, friendship: 70, multihit: 0 });
@@ -82,8 +82,7 @@ describe("live Dig inputs equal the accepted corpora's reducer inputs", () => {
   for (const side of ["player", "opponent"] as const) {
     for (const body of ["setup", "unleash"] as const) {
       it(`${side} attacker, ${body}: every DigLiveInputs field produced by the live seam equals digInputsFor(retained corpus)`, () => {
-        const rows = (JSON.parse(gunzipSync(readFileSync(`tools/compare/evidence/dig-${side}-dense-state.json.gz`)).toString("utf8")) as { frames: any[] }).frames;
-        const reference = digInputsFor(rows, side === "player" ? "player-back" : "opponent-front", body) as any;
+        const reference = corpusInputs[`${side}-${body}`];
         const state = configOf(fixtureAt(`${ACCEPTED[side]}-body${body === "setup" ? 0 : 1}`))!;
         const config = state.config as any;
         const live = { ...config.animationInputs, body: config.body, attackerSide: config.attacker.geometry.side,
