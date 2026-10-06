@@ -7,8 +7,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-10-06 (in progress) — S10A: presentation RNG merged; Random2 draw plans measured
 
-- **State:** S10A, local master `4abe570f9`+. Scoped-exact live adapters 221; faithful-random
-  adapters 6 (Double Kick, Astonish, Thrash, Flail, Wish, Hyper Beam; separate bucket). Preview
+- **State:** S10A, local master `cce4739da`+. Scoped-exact live adapters 222; faithful-random
+  adapters 8 (Double Kick, Astonish, Thrash, Flail, Wish, Hyper Beam, Rain Dance, Water Pulse). Preview
   <http://127.0.0.1:5191/> serves `4abe570f9` (browser replay 4 samples, export + mode restart pass,
   no errors; `playable-preview-4abe570f9-receipt.json`). Opus 5.5 supervisor; Opus/Sonnet 5.5 workers.
 - **Did:** D3 option (a) infrastructure merged (Opus worker): `src/engine/presentationRng.ts`
@@ -36,8 +36,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   #148 evidence (only ONIX/RATTATA opponents have idle x2 1; per-move reset table; rule == ROM
   1,927/1,944 activations) merged. Both oracles were killed by a worker's `pkill -f mgba` and
   restarted by the supervisor at 11:29 (PAPERCUTS).
-- **Next:** R4 (Rain Dance, Water Pulse, Hail) and prep16 (Overheat/Silver Wind palettes) in flight;
-  then the #148 x2 tracker (+ Water Spout tier re-proof), Overheat/Silver Wind, Rollout Curl/Endeavor.
+  R4 (Sonnet) merged: Rain Dance + Water Pulse faithful-random, Hail exact; supervisor reran 6 fixtures
+  twice fresh (0 px) and 3 routes. prep16 merged: Overheat/Silver Wind first bodies exact with palettes
+  composed from existing assets (230/230; 193-196/196); later bodies need a BG-register tracker.
+- **Next:** #148 x2 tracker (+ Water Spout tier re-proof; Opus) and prep17 (Meteor Mash timing,
+  Mud-Slap/Sand-Attack) in flight; then Overheat/Silver Wind (brief ready), Rollout Curl/Endeavor.
 - **Notes:** no DEFERRED entries. Oracle freshness FAIL at orient = known false positive (no
   oracle/ commits since the services started 2026-10-03).
 

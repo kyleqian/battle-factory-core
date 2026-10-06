@@ -73,8 +73,23 @@
   session export passed, no errors (`playable-preview-4abe570f9-receipt.json`).
 - Ops: a worker's `pkill -f mgba` killed both shared oracles; supervisor restarted ON/OFF at 11:29 via
   `pokebench_ensure_oracle_profile` (anchor 1/1, fight-submenu 235/235 after restart).
-- In flight: R4 (Rain Dance, Water Pulse faithful-random; Hail exact); prep16 (Overheat / Silver Wind
-  palette composite + BG-register history).
+- Folded Sonnet worker `af6855919` (src tree `e5a8c9aa`) as `cce4739da`: Rain Dance (240) and Water
+  Pulse (352) FAITHFUL-RANDOM (reducers replay their own draws from the host activation state; plans
+  registered so the stream consumes them once) and Hail (258) EXACT (target table from anchors; rng
+  echo proven pixel-neutral) -> implementedCount 222, faithfulRandomCount 8. Rain Dance/Hail/Water Pulse
+  renderer blocks yield to the live seam under liveField and apply the opponent idle rest. Dense both
+  orientations + alternate (POLIWRATH, BLASTOISE, GLALIE -> GOLEM) 0 px twice fresh; 12 pinned values
+  each for branch coverage; routes 2/21 BLASTOISE, 7/7 CASTFORM (non-first body), 1/0 DELIBIRD. Shadow
+  scan 479 rows / 0 mismatches. Worker gates 1,530 files / 12,394 tests, build. Supervisor: dense rerun
+  twice fresh 0 px (Rain Dance P/O/alt, Water Pulse O/alt, Hail alt); routeReceipt 3/3; targeted tests
+  150/150; smoke 448. Receipt `random2-r4-live-receipt.json`.
+- prep16 (side, `f69850675`): palette composite from assets (BG 2/3/4 battle-bg, OBJ 16/17 battler
+  species palettes, OBJ 23/24 move assets; shiny missing -> gate) makes Overheat 230/230 and Silver Wind
+  193/196 exact for FIRST bodies (Silver Wind opponent first-body capture 196/196 with first-body
+  registers; the accepted fixture is post-Tackle); BG-register history is a 20-state per-move table
+  (first-body gate today); Psych Up player first body exact. Supervisor reran the Overheat pixel gate.
+- In flight: #148 x2 tracker + Water Spout tier re-proof (Opus integration); prep17 (Meteor Mash
+  timing; Mud-Slap/Sand-Attack windows, slots, order; Sonnet side).
 
 ## 2026-10-06 — User answered D3: separate deterministic presentation RNG
 
