@@ -1,7 +1,7 @@
 {
  "schema": "later-bodies-bg-receipt/v1",
- "testedCodeCommit": "d53d347060b6dd7f530631d8b5b69b9a0e6ff33b",
- "testedSrcTree": "943a92c1b402b01a4ba244195fa91aa452928687",
+ "testedCodeCommit": "074276a0e8357717416bdf508660cf9c32961926",
+ "testedSrcTree": "c41c494992d376d29a9560423518366661d96c38",
  "scope": "MOVE_SILVER_WIND 318 (both sides) and MOVE_PSYCH_UP 244 (player attacker) on LATER bodies with a known production order lend (known-entry occupancy), !shiny. MOVE_OVERHEAT 315 stays first body. Live adapter, scoped exact; not whole-playable arbitrary-history exactness.",
  "gate": "src/engine/liveMoveAnimation.ts case 244/315/318: 315 requires spriteOrderInput.firstBody; 244/318 require spriteOrderInput.known (Psych Up and Silver Wind: spriteOrderWithOccupiedPrefix(free, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER) non-null).",
  "registerConsumption": {
@@ -638,5 +638,6 @@
   "python3 tools/integration/laterBodiesBgFixtures.py <probe dir>",
   "ls tools/integration/fixtures/later-bodies-bg/*.json | xargs -P 6 -n 1 sh tools/integration/liveFixtureOne.sh <evidence dir> <summary dir>   (repeat with POKEBENCH_LIVE_ORDER_HIT=damaging for the lend control)",
   "npx vitest run tests/animation/liveLaterBodiesBg.test.ts tests/animation/livePrep16MoveAdapters.test.ts --maxWorkers=4"
- ]
+ ],
+ "finalCodeRerun": "all 19 fixtures (11 later-body + 8 prep16-live first-body) re-run twice fresh on this commit: 0 px, digests identical to the recorded freshRuns"
 }
