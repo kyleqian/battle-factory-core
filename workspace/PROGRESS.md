@@ -7,8 +7,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-10-06 (in progress) — S10A: presentation RNG merged; Random2 draw plans measured
 
-- **State:** S10A, local master `5ffd380`+. Scoped-exact live adapters 225; faithful-random
-  adapters 8 (Double Kick, Astonish, Thrash, Flail, Wish, Hyper Beam, Rain Dance, Water Pulse). Preview
+- **State:** S10A, local master `5330218e8`+. Scoped-exact live adapters 226; faithful-random
+  adapters 10 (Double Kick, Astonish, Thrash, Flail, Wish, Hyper Beam, Rain Dance, Water Pulse,
+  Mud-Slap, Sand-Attack). Census 226 + 10 + 0 + 40 = 276. Preview
   <http://127.0.0.1:5191/> serves `4abe570f9` (browser replay 4 samples, export + mode restart pass,
   no errors; `playable-preview-4abe570f9-receipt.json`). Opus 5.5 supervisor; Opus/Sonnet 5.5 workers.
 - **Did:** D3 option (a) infrastructure merged (Opus worker): `src/engine/presentationRng.ts`
@@ -47,8 +48,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   an assets-only palette composite; supervisor reran 6 fixtures (0 px) + 533/533 differential. prep18
   merged: Dig ready (no RNG); Megahorn / Will-O-Wisp / Fury Cutter / Return / Pursuit need an OAM-buffer
   reducer port.
-- **Next:** R5 (Mud-Slap, Sand-Attack faithful-random; Dig exact) and species audit 3 in flight; then
-  Rollout Curl/Endeavor (brief ready).
+  R5 (Sonnet) merged: Mud-Slap + Sand-Attack faithful-random, Dig exact (both turns; hidden attacker
+  between turns); supervisor reran 4 fixtures (0 px) + 533/533 differential. Species audit 3 (89 swaps
+  of this session's adapters): 3 real defects patch-proven -> ISSUES #149 (Ice Beam / Water Spout drop
+  RATTATA's idle x2; Astonish ignores target elevation); supervisor reproduced Ice Beam 15,990 px -> 0.
+  Audit 4 (Overheat / Silver Wind / Psych Up): no defects.
+- **Next:** #149 fixes + Rollout Defense Curl + Endeavor (Sonnet) and prep19 (BG-register history for
+  later Overheat / Silver Wind / Psych Up bodies) in flight.
 - **Notes:** no DEFERRED entries. Oracle freshness FAIL at orient = known false positive (no
   oracle/ commits since the services started 2026-10-03).
 

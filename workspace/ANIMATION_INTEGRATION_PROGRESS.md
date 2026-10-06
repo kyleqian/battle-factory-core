@@ -120,8 +120,24 @@
   (stale C). Dig READY (reducer == ROM on 4 scenarios incl. elevated FLYGON; geometry 46/46). The other
   five decode a per-frame hardware-OAM buffer nothing in production builds (reducer ports needed; Fury
   Cutter also needs its counter on the request; Return only reaches the strongest branch in the Factory).
-- In flight: R5 Mud-Slap + Sand-Attack faithful-random, Dig exact (Sonnet integration); species audit 3
-  of this session's adapters (Sonnet side).
+- Folded Sonnet worker `c886fc9a7` (src tree `6f596c07`) as `5330218e8`: FAITHFUL-RANDOM Mud-Slap (189) and
+  Sand-Attack (28) (60 words in 6 draw rows; prep17 activation windows; lowest-free dirt slots over
+  computed lifetimes; anchor geometry; tracker lend; Mud needs the 4/3 slot pair) -> 10; EXACT Dig (91)
+  (setup 195 / unleash 68 rows by request.turn; hidden attacker between turns; setup gated on firstBody,
+  unleash on a new `afterDigSetup` lend; unleash has no opponent shadow row) -> 226. Dense 14 fixtures 0 px
+  twice fresh (both orientations, ONIX->NIDORINA and FLYGON->GOLEM alternates; 10 pinned values per dirt
+  move); routes 9/14 POLITOED, 3/0 PIDGEOTTO, 13/7 AZUMARILL (both Dig turns, 241 hidden gap frames).
+  Shadow scan 494 / 0. Worker gates 1,534 files / 12,457 tests, build. Supervisor: dense rerun twice fresh
+  0 px (Mud alt 51, Sand O 58, Dig FLYGON O setup 195 + unleash 68); differential 533/533; 6 test files
+  138/138; smoke 448. Receipt `random2-r5-live-receipt.json`.
+- Species audit 3 (side, `f674ca13d`): 89 swapped rows over this session's 12 adapters, 84 exact; 3
+  SPECIES-DEFECTs patch-proven (ISSUES #149: Ice Beam and Water Spout omit the target idle x2 before monbg —
+  RATTATA 15,990 / 48,755 px; Astonish droplet origin ignores target elevation — GOLBAT 3,351 px); Hidden
+  Power vs GOLBAT tail = ROM lag frame. Supervisor reproduced Ice Beam RATTATA 164/203 -> 203/203 with the
+  patch. Audit 4 (`99d7c2c84`): Overheat / Silver Wind / Psych Up 29/34 exact, 5 documented idle-offset
+  declines, no defects.
+- In flight: #149 fixes + Rollout Defense Curl bodies + Endeavor (Sonnet integration); prep19 BG-register
+  history (Sonnet side).
 
 ## 2026-10-06 — User answered D3: separate deterministic presentation RNG
 
