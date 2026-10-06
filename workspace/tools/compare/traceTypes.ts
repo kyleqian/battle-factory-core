@@ -16,6 +16,11 @@ export interface Trace {
   appRoute?: "generated-orchestrator" | "canonical-recorded";
   battleScene?: "on" | "off";
   /**
+   * App-only presentation Random2 session seed/policy (docs/presentation-rng.md), as exported by
+   * SessionTrace; absent = the documented default. Never sent to the ROM oracle.
+   */
+  presentationRng?: { seed: string; policy: string };
+  /**
    * Existing traces predate profiles and therefore default to Battle Scene ON.
    * New main/round-loop traces must opt into battle-scene-off explicitly.
    */

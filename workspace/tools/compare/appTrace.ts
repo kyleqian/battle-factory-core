@@ -8,6 +8,7 @@
 
 import type { Trace } from "./oracleClient.ts";
 import { createInitialState, render, tick } from "../../src/engine/core.ts";
+import { presentationRngFromTrace } from "../../src/engine/presentationRngHost.ts";
 import type { EngineState } from "../../src/engine/core.ts";
 import { traceAdvances } from "./traceReplay.ts";
 import { BATTLE2_OFF_TURN1_COMMAND_DURATIONS } from "../../src/engine/battle2CommandAdapter.ts";
@@ -1686,7 +1687,13 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
 };
 
 export async function renderAppTrace(trace: Trace): Promise<AppCapture[]> {
-  let state = createInitialState({ appRoute: trace.appRoute, battleScene: trace.battleScene });
+  const presentationRng = presentationRngFromTrace(trace);
+  let state = createInitialState({
+    appRoute: trace.appRoute,
+    battleScene: trace.battleScene,
+    presentationSeed: presentationRng.seed,
+    presentationRngPolicy: presentationRng.policy,
+  });
   const captureFrames = new Set(trace.captureFrames ?? []);
   const captures: AppCapture[] = [];
   let frame = 0;

@@ -690,6 +690,12 @@ import {
   createBattleTerminalResolutionPresentation,
   storeBattleTerminalPresentationDismiss,
 } from "./battleResolutionPresentation.ts";
+import {
+  createPresentationRngSession,
+  tickPresentationRngSession,
+  type PresentationRngPolicyId,
+  type PresentationRngSession,
+} from "./presentationRngHost.ts";
 
 /**
  * Builds the source-owned completed-command chain once the turn-4 lifecycle
@@ -844,6 +850,12 @@ export interface EngineState {
    * anchor schedule (createFactoryAnchorSession).
    */
   pendingGeneratedRound: Readonly<{ rngValueBefore: number; carry: FactoryCarry }> | null;
+  /**
+   * Presentation-only Random2 stream (presentationRngHost.ts, docs/presentation-rng.md): session
+   * seed/policy plus the current battle's host. Never read by rules, RNG, the queue or facility
+   * state, and excluded from battle/RNG snapshots and Scene ON/OFF parity inputs.
+   */
+  presentationRng: PresentationRngSession;
 }
 
 /** battleRoom "settled" phase's own elapsed (0 = trace tick 843, see battleTransition.ts) at which core.ts hands off to battleScene.ts - trace tick 1040 (battleScene.ts's own TICK0), the ground-truth trace's own window start. Ticks 1030-1039 are flat black either way (battleTransition's own exit-fade hold and battleScene's own pre-reveal hold render byte-identical solid black), so the exact handoff point within that range is inconsequential to pixels. */
@@ -859,6 +871,9 @@ export interface InitialEngineStateOptions {
   readonly battleScenario?: BattleScenario;
   readonly appRoute?: InteractiveBattleRoute;
   readonly battleScene?: "on" | "off";
+  /** Session presentation seed (u32); absent = DEFAULT_PRESENTATION_RNG_SEED (docs/presentation-rng.md). */
+  readonly presentationSeed?: number;
+  readonly presentationRngPolicy?: PresentationRngPolicyId;
 }
 
 type FactoryTerminalCommand =
@@ -933,6 +948,7 @@ export function createInitialState(
     lobbyFreeRoam: null,
     factoryCarry: createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId),
     pendingGeneratedRound: null,
+    presentationRng: createPresentationRngSession(options.presentationSeed, options.presentationRngPolicy),
   };
 }
 
@@ -946,6 +962,22 @@ export function createInitialState(
  * scope for this stage (S4/S5).
  */
 export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): EngineState {
+  const next = tickEngineState(state, buttons);
+  // Presentation seam, after the logical frame: one Random2 step per presented battle frame
+  // (presentationRngHost.ts). Reads only the battle's identity edge, never gameplay RNG values.
+  const presentationRng = tickPresentationRngSession(
+    state.presentationRng ?? createPresentationRngSession(),
+    presentedBattleKey(next),
+  );
+  return next.presentationRng === presentationRng ? next : { ...next, presentationRng };
+}
+
+/** Identity of the battle on screen for the presentation RNG host; null outside a generated battle. */
+function presentedBattleKey(state: EngineState): number | null {
+  return state.factoryRoundBattleOrchestrator?.activeBattleCallStart ?? null;
+}
+
+function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): EngineState {
   const { newKeys, newAndRepeatedKeys, next: keyRepeat } = readKeys(buttons, state.keyRepeat);
   let draftScreen = state.draftScreen;
   let summaryScreen = advanceSummaryScreen(state.summaryScreen);

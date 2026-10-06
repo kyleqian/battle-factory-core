@@ -240,7 +240,8 @@ describe("interactive battle routing", () => {
       new URL("../src/main.ts", import.meta.url),
       "utf8",
     );
-    expect(mainSource.match(/\bcreateInitialState\(\{ battleScene \}\)/g)).toHaveLength(2);
+    // Startup and reset share the session presentation seed (docs/presentation-rng.md) and no route override.
+    expect(mainSource.match(/\bcreateInitialState\(\{ battleScene, presentationSeed \}\)/g)).toHaveLength(2);
     expect(mainSource).not.toContain("canonical-recorded");
   });
 

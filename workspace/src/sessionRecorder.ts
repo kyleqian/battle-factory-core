@@ -6,6 +6,7 @@
 // button log is the complete session state.
 
 import type { GbaButton } from "./input.ts";
+import type { PresentationRngTraceMetadata } from "./engine/presentationRngHost.ts";
 
 export interface RecordedSegment {
   frames: number;
@@ -19,6 +20,11 @@ export interface SessionTrace {
   build: string;
   frame: number;
   error?: { name: string; message: string; stack?: string };
+  /**
+   * Presentation-only Random2 session seed + policy (docs/presentation-rng.md). Absent on legacy
+   * exports, which replay with the documented default (presentationRngFromTrace).
+   */
+  presentationRng?: PresentationRngTraceMetadata;
   segments: RecordedSegment[];
 }
 
@@ -66,13 +72,22 @@ export class SessionRecorder {
     this.truncated = false;
   }
 
-  toTrace(options: { appRoute: string; build: string; battleScene?: "on" | "off"; error?: unknown }): SessionTrace {
+  toTrace(options: {
+    appRoute: string;
+    build: string;
+    battleScene?: "on" | "off";
+    presentationRng?: PresentationRngTraceMetadata;
+    error?: unknown;
+  }): SessionTrace {
     const trace: SessionTrace = {
       appRoute: options.appRoute,
       oracleProfile: options.battleScene === "on" ? "battle-scene-on" : "battle-scene-off",
       ...(options.battleScene ? { battleScene: options.battleScene } : {}),
       build: options.build,
       frame: this.frames,
+      ...(options.presentationRng
+        ? { presentationRng: { seed: options.presentationRng.seed, policy: options.presentationRng.policy } }
+        : {}),
       segments: this.segments.map((segment) => ({
         frames: segment.frames,
         buttons: [...segment.buttons],

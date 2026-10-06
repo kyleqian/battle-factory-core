@@ -90,7 +90,7 @@ export function presentationRngPlanWords(
   let state = activation;
   let age = 0;
   const words: number[] = [];
-  const draws: number[][] = [];
+  const draws: (readonly number[])[] = [];
   for (const step of plan) {
     state = advancePresentationRng(state, step.ageOffset - age);
     age = step.ageOffset;
@@ -258,4 +258,28 @@ export function parsePresentationSeed(text: string | null | undefined): number |
 
 export function formatPresentationSeed(seed: number): string {
   return (seed >>> 0).toString(16).padStart(8, "0");
+}
+
+/** Session-export metadata (SessionTrace.presentationRng): seed as 8 hex digits plus policy id. */
+export type PresentationRngTraceMetadata = Readonly<{ seed: string; policy: string }>;
+
+export function presentationRngTraceMetadata(session: Pick<PresentationRngSession, "seed" | "policy">): PresentationRngTraceMetadata {
+  return Object.freeze({ seed: formatPresentationSeed(session.seed), policy: session.policy });
+}
+
+/**
+ * Seed/policy a replay must use: the trace's own metadata, or the documented legacy default
+ * (DEFAULT_PRESENTATION_RNG_SEED, policy v1) for exports recorded before the field existed.
+ */
+export function presentationRngFromTrace(trace: Readonly<{ presentationRng?: PresentationRngTraceMetadata }>): Readonly<{
+  seed: number;
+  policy: PresentationRngPolicyId;
+}> {
+  const meta = trace.presentationRng;
+  if (meta === undefined) return Object.freeze({ seed: DEFAULT_PRESENTATION_RNG_SEED, policy: PRESENTATION_RNG_POLICY_V1 });
+  const seed = parsePresentationSeed(meta.seed);
+  if (seed === null) throw new Error(`session trace presentationRng.seed must be 1-8 hex digits, got ${JSON.stringify(meta.seed)}`);
+  const policy = PRESENTATION_RNG_POLICIES.find((id) => id === meta.policy);
+  if (policy === undefined) throw new Error(`session trace presentationRng.policy ${JSON.stringify(meta.policy)} is not a known policy`);
+  return Object.freeze({ seed, policy });
 }
