@@ -72,6 +72,8 @@ import { perishSongNoteOrderFromFree } from "../animation/perishSong.ts";
 import { LEAF_BLADE_OAM_ORDER_SLOTS } from "../animation/leafBlade.ts";
 import { HEAL_BELL_REUSED_ORDER_SLOTS } from "../animation/healBell.ts";
 import { KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, spriteOrderForSlots, spriteOrderWithOccupiedPrefix } from "./spriteOrderProvider.ts";
+import { DOUBLE_KICK_FRAME_COUNT } from "../animation/doubleKick.ts";
+import { liveMovePresentationRngWords, type LiveMovePresentationRngInput } from "./liveMovePresentationRng.ts";
 
 
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
@@ -236,6 +238,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     19, 340,
     // Rollout bodies 1..5: activation == window start (row 0) on both sides.
     205,
+    // Faithful-random adapters (liveMovePresentationRng.ts): Double Kick hit bodies start at activation (row 0, prep12 §0.2).
+    24,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -641,6 +645,8 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
     case 153: return 212; // Explosion accepted window (76..287 / 80..291).
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
+    // Faithful-random adapters (liveMovePresentationRng.ts; not LIVE_MOVE_ANIMATION_IDS). Windows start at activation.
+    case 24: return DOUBLE_KICK_FRAME_COUNT; // Double Kick per-hit body (227..262 both orientations).
     default: return null;
   }
 }
@@ -680,6 +686,7 @@ export function liveMoveAnimationPresentation(
   paletteInput?: LiveMovePaletteInput,
   spriteAllocatorInput?: LiveMoveSpriteAllocatorInput,
   spriteOrderInput?: LiveMoveSpriteOrderInput,
+  presentationRngInput?: LiveMovePresentationRngInput,
 ): SceneOnMovePresentationState | null {
   if (liveMoveAnimationDuration(request) === null) return null;
   const art = createBattleCommandFieldArtView(field);
@@ -2094,6 +2101,18 @@ export function liveMoveAnimationPresentation(
     }
     case 46: config = { move: "ROAR", attacker, target, fieldProfile }; break;
     case 18: config = { move: "WHIRLWIND", attacker, target, fieldProfile }; break;
+    case 24: {
+      // Words from the presentation host only (activated in tick; null = not activated -> scene-off fallback).
+      // AnimFistOrFootRandomPos (battle_anim_fight.c:483-492): x % (width/2), y % (height/4), & 1 negates; the
+      // target's GetBattlerSpriteCoordAttr width/height.
+      const words = liveMovePresentationRngWords(presentationRngInput)?.words;
+      if (words === undefined || words.length !== 4) return null;
+      const dims = liveBattlerCoordAttrs(target.geometry.side, art);
+      config = { move: "DOUBLE_KICK", attacker, target, fieldProfile,
+        targetDimensions: { width: dims.width, height: dims.height },
+        fistRandom: { x: words[0]!, y: words[1]!, xSign: words[2]!, ySign: words[3]! } };
+      break;
+    }
     default: return null;
   }
   // sceneOnLightScreenView/lightScreenAtAge are relative to wall creation;

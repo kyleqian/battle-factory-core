@@ -1,0 +1,143 @@
+{
+ "schema": "random2-r1-activation-probes/v1",
+ "generatedBy": "tools/integration/random2R1/activationProbe.py over two fresh direct-mGBA runs each of tools/integration/random2RouteProbe.py <scenario> --lab --step-sample 0 --step-anim (prep12Probes.sh recipe)",
+ "convention": "activationValue = gRng2Value after the first anim-active frame of the body label (prep12 plans.json convention); words = replay(activationValue, probed plan)",
+ "probes": [
+  {
+   "label": "double-kick-opponent",
+   "bodyLabel": "Move_DOUBLE_KICK",
+   "runsSha1": "615600b9be73e24dd5073ccffe4f82ba78aca42f",
+   "runsSha1Run2": "615600b9be73e24dd5073ccffe4f82ba78aca42f",
+   "frames": 934,
+   "bodies": [
+    {
+     "activationFrame": 227,
+     "lastActiveFrame": 261,
+     "activationValue": 3103290310,
+     "activationValueHex": "0xB8F873C6",
+     "plan": [
+      {
+       "ageOffset": 10,
+       "count": 4,
+       "lagBefore": 0
+      }
+     ],
+     "words": [
+      [
+       49413,
+       34939,
+       46625,
+       58366
+      ]
+     ]
+    },
+    {
+     "activationFrame": 355,
+     "lastActiveFrame": 389,
+     "activationValue": 570453024,
+     "activationValueHex": "0x22006C20",
+     "plan": [
+      {
+       "ageOffset": 10,
+       "count": 4,
+       "lagBefore": 0
+      }
+     ],
+     "words": [
+      [
+       49322,
+       60288,
+       41562,
+       19767
+      ]
+     ]
+    }
+   ],
+   "scenario": "tools/battle-lab/mechanic-double-kick-opponent-nidorina-player-onix.json"
+  },
+  {
+   "label": "astonish-opponent",
+   "bodyLabel": "Move_ASTONISH",
+   "runsSha1": "9e79fd0be23bfd8486adf275c49f58c1cc86fc17",
+   "runsSha1Run2": "9e79fd0be23bfd8486adf275c49f58c1cc86fc17",
+   "frames": 534,
+   "bodies": [
+    {
+     "activationFrame": 219,
+     "lastActiveFrame": 280,
+     "activationValue": 3870620670,
+     "activationValueHex": "0xE6B4FBFE",
+     "plan": [
+      {
+       "ageOffset": 31,
+       "count": 4,
+       "lagBefore": 0
+      }
+     ],
+     "words": [
+      [
+       46000,
+       50354,
+       15243,
+       2228
+      ]
+     ]
+    }
+   ],
+   "scenario": "tools/battle-lab/mechanic-astonish-opponent-loudred-player-onix.json"
+  },
+  {
+   "label": "thrash-opponent",
+   "bodyLabel": "Move_THRASH",
+   "runsSha1": "74aaa159592787ef0e32b8a40c89998e14bf2933",
+   "runsSha1Run2": "74aaa159592787ef0e32b8a40c89998e14bf2933",
+   "frames": 934,
+   "bodies": [
+    {
+     "activationFrame": 76,
+     "lastActiveFrame": 177,
+     "activationValue": 765041132,
+     "activationValueHex": "0x2D9999EC",
+     "plan": [
+      {
+       "ageOffset": 7,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 37,
+       "count": 4,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 67,
+       "count": 4,
+       "lagBefore": 0
+      }
+     ],
+     "words": [
+      [
+       51833,
+       29052,
+       59060,
+       50251
+      ],
+      [
+       46000,
+       50354,
+       15243,
+       2228
+      ],
+      [
+       21825,
+       50293,
+       19220,
+       46856
+      ]
+     ]
+    }
+   ],
+   "scenario": "tools/battle-lab/mechanic-thrash-opponent-tauros-player-onix.json"
+  }
+ ]
+}

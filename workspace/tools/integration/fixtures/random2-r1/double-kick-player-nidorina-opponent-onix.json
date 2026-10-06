@@ -1,0 +1,8 @@
+{
+  "sourceFixture": "tools/compare/fixtures/double-kick-player-nidorina-opponent-onix.json",
+  "move": "DOUBLE_KICK",
+  "presentationRngActivation": {
+    "value": 2354516896,
+    "source": "tools/integration/fixtures/prep12-random2/plans.json moves.double-kick.entries[0].acceptedActivationValue (0x8C5713A0, activation frame 227 == denseWindow.startFrame)"
+  }
+}

@@ -1,4 +1,8 @@
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
+import {
+  liveMovePresentationRngBodyKey, liveMoveRandom2Plan, type LiveMovePresentationRngInput,
+} from "./liveMovePresentationRng.ts";
+import type { PresentationRngHost } from "./presentationRngHost.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import {
   liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows, liveSemiInvulnerableHideBattler,
@@ -554,7 +558,7 @@ function sendInWhiteCoefficientAtFrame(frame: number): number {
 }
 
 export type BattleResolutionRenderEffect =
-  | Readonly<{ type: "move"; request: BattleMoveAnimationRequest; age: number; paletteInput?: LiveMovePaletteInput; spriteAllocatorInput?: LiveMoveSpriteAllocatorInput; spriteOrderInput?: LiveMoveSpriteOrderInput }>
+  | Readonly<{ type: "move"; request: BattleMoveAnimationRequest; age: number; paletteInput?: LiveMovePaletteInput; spriteAllocatorInput?: LiveMoveSpriteAllocatorInput; spriteOrderInput?: LiveMoveSpriteOrderInput; presentationRng?: LiveMovePresentationRngInput }>
   | Readonly<{
       type: "hit";
       battler: 0 | 1;
@@ -997,6 +1001,8 @@ export function applyLiveSemiInvulnerableCommand(
 
 export function createBattleResolutionPresentationRenderView(
   state: BattleResolutionPresentationState,
+  /** Read-only presentation Random2 host (EngineState.presentationRng.host); render never draws from it. */
+  presentationRngHost?: PresentationRngHost | null,
 ): BattleResolutionPresentationRenderView {
   const segment = currentSegment(state);
   let field = state.field;
@@ -1210,6 +1216,9 @@ export function createBattleResolutionPresentationRenderView(
         paletteInput: state.liveMovePaletteInput,
         spriteAllocatorInput: state.liveMoveSpriteAllocatorInput,
         spriteOrderInput: state.liveMoveSpriteOrderInput,
+        ...(liveMoveRandom2Plan(command.animation) === null ? {} : {
+          presentationRng: Object.freeze({ host: presentationRngHost ?? null, key: liveMovePresentationRngBodyKey(state) }),
+        }),
       });
     } else if (command.type === "hit-animation") {
       effect = Object.freeze({
@@ -1455,9 +1464,10 @@ export function renderBattleResolutionPresentation(
   framebuffer: Uint8Array,
   state: BattleResolutionPresentationState,
   assets: BattleResolutionPresentationRenderAssets,
+  presentationRngHost?: PresentationRngHost | null,
 ): void {
   assets.drawScene(
     framebuffer,
-    createBattleResolutionPresentationRenderView(state),
+    createBattleResolutionPresentationRenderView(state, presentationRngHost),
   );
 }

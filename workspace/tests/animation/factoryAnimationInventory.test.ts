@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import inventory from "../../src/data/gen/factory-animation-inventory.json" with { type: "json" };
+import { LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS } from "../../src/engine/liveMovePresentationRng.ts";
 import {
   animationComponentLeverage,
   animationCoverageSummary,
@@ -66,7 +67,8 @@ describe("live inventory claim buckets", () => {
     const status = JSON.parse(readFileSync(join(import.meta.dirname, "../../docs/animation-integration-live-status.json"), "utf8"));
     // implementedCount keeps meaning the scoped-exact live adapters; faithful random is a disjoint bucket.
     expect(status.implementedCount).toBe(218);
-    expect(status.faithfulRandomCount).toBe(0);
+    // Faithful-random adapters (liveMovePresentationRng.ts): the production list, nothing more.
+    expect(status.faithfulRandomCount).toBe(LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS.length);
     expect(status.faithfulRandomAdapters).toHaveLength(status.faithfulRandomCount);
     const implemented = new Set((status.implementedAdapters as { id: number }[]).map((entry) => entry.id));
     const faithful = (status.faithfulRandomAdapters as { id: number }[]).map((entry) => entry.id);

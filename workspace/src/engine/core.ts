@@ -692,10 +692,10 @@ import {
 } from "./battleResolutionPresentation.ts";
 import {
   createPresentationRngSession,
-  tickPresentationRngSession,
   type PresentationRngPolicyId,
   type PresentationRngSession,
 } from "./presentationRngHost.ts";
+import { tickLiveMovePresentationRngSession } from "./liveMovePresentationRng.ts";
 
 /**
  * Builds the source-owned completed-command chain once the turn-4 lifecycle
@@ -965,16 +965,12 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   const next = tickEngineState(state, buttons);
   // Presentation seam, after the logical frame: one Random2 step per presented battle frame
   // (presentationRngHost.ts). Reads only the battle's identity edge, never gameplay RNG values.
-  const presentationRng = tickPresentationRngSession(
+  // Faithful-random bodies activate on their activation frame after that frame's step (liveMovePresentationRng.ts).
+  const presentationRng = tickLiveMovePresentationRngSession(
     state.presentationRng ?? createPresentationRngSession(),
-    presentedBattleKey(next),
+    next.factoryRoundBattleOrchestrator ?? null,
   );
   return next.presentationRng === presentationRng ? next : { ...next, presentationRng };
-}
-
-/** Identity of the battle on screen for the presentation RNG host; null outside a generated battle. */
-function presentedBattleKey(state: EngineState): number | null {
-  return state.factoryRoundBattleOrchestrator?.activeBattleCallStart ?? null;
 }
 
 function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): EngineState {
@@ -3510,6 +3506,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
         fb,
         resolution,
         { drawScene: renderBattleResolutionLiveView },
+        state.presentationRng?.host ?? null,
       );
     }
     return fb;

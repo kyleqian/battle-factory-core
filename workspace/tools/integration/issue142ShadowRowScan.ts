@@ -13,7 +13,9 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { liveView } from "./liveAdapterFramebuffer.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
-import { LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";
+import {
+  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveOpponentShadowReturn,
+} from "../../src/engine/liveMoveAnimation.ts";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const FULL = 200;
@@ -42,12 +44,15 @@ for (const r of rows) {
   const mk = (opp: string) => ({
     move: r.move, body: (r.sources?.body ?? "normal") as "normal", probe: "", scenario: "",
     requestFields: r.requestFields,
+    // Faithful-random rows carry a pinned activation value (liveAdapterFramebuffer.ts fixturePresentationRng).
+    ...(r.presentationRngActivation ? { presentationRngActivation: r.presentationRngActivation } : {}),
     attacker: { species: r.orientation === "player" ? partner : opp, geometry: { side: r.orientation } },
     target: { species: r.orientation === "player" ? opp : partner, geometry: { side: r.orientation === "player" ? "opponent" : "player" } },
     fieldProfile: { playerHp: 120, playerMaxHp: 120, opponentHp: 120, opponentMaxHp: 120, playerGender: "male", opponentGender: "male" },
   });
   const f = mk(PAIR[r.id]?.[1] ?? "GOLBAT");
-  const duration = liveMoveAnimationDuration((liveView(f as any, 0).effect as any).request) as number;
+  const request = (liveView(f as any, 0).effect as any).request;
+  const duration = liveMoveAnimationDuration(request) as number;
   const expected: number | null = LIVE_MOVE_OPPONENT_SHADOW_ROW[r.id] ?? null;
   const tail: number = r.tailFirstAge ?? Infinity;
   const drawn: number[] = [];
@@ -58,7 +63,8 @@ for (const r of rows) {
   }
   const bad: string[] = [];
   if (expected !== null && !drawn.includes(expected)) bad.push(`missing row ${expected}`);
-  for (const a of drawn) if (a !== expected && a < tail) bad.push(`extra row ${a}`);
+  // End-of-body return rows (LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS: Light Screen, Future Sight) are expected draws.
+  for (const a of drawn) if (a !== expected && a < tail && !liveMoveOpponentShadowReturn(request, a)) bad.push(`extra row ${a}`);
   if (bad.length) mismatches.push({ id: r.id, move: r.move, orientation: r.orientation, expected, drawn, bad });
   out.push({ id: r.id, move: r.move, orientation: r.orientation, duration, expected, drawn, tailFirstAge: Number.isFinite(tail) ? tail : null });
 }

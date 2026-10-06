@@ -53499,21 +53499,26 @@ export function renderSceneOnMovePresentation(
   if (state.config.move === "DOUBLE_KICK") {
     const view = sceneOnDoubleKickView(state);
     const displayed = sceneOnDoubleKickView({ ...state, age: state.age - 1 });
-    const playerToOpponent = view.attacker.species === "NIDORINA"
+    // Live field (faithful-random adapter): any displayed pair, art from the live species.
+    const playerToOpponent = (liveField || view.attacker.species === "NIDORINA")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
-    const opponentToPlayer = view.attacker.species === "NIDORINA"
+    const opponentToPlayer = (liveField || view.attacker.species === "NIDORINA")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged DOUBLE_KICK pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const nidorina = playerToOpponent ? nidorinaBackSprite : nidorinaFrontSprite;
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const nidorina = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? nidorinaBackSprite : nidorinaFrontSprite;
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
@@ -53566,6 +53571,8 @@ export function renderSceneOnMovePresentation(
         displayed.fist.y - 16,
       );
     }
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     const profile = state.config.fieldProfile;
     drawSendOutHealthbox(
       fb,
@@ -54935,7 +54942,7 @@ export function renderBattleResolutionLiveView(
   const presentation = effect?.type === "move"
     ? liveMoveAnimationPresentation(
         effect.request, view.field, effect.age, effect.paletteInput,
-        effect.spriteAllocatorInput, effect.spriteOrderInput,
+        effect.spriteAllocatorInput, effect.spriteOrderInput, effect.presentationRng,
       )
     : null;
   if (!presentation) {

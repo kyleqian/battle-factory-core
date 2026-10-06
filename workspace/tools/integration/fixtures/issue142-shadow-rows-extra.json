@@ -4072,6 +4072,10 @@
     "fixture": "tools/integration/fixtures/rollout-live/rollout-player-plain-body1.json",
     "body": "normal",
     "activation": "tools/integration/fixtures/rollout-endeavor/draft-rollout-*.json (activation == accepted window start; docs/rollout-endeavor-prep.md s0.1); counter 1 body, bodies 2..5 start at their own activations"
+   },
+   "requestFields": {
+    "rolloutCounter": 1,
+    "power": 30
    }
   },
   {
@@ -4090,6 +4094,54 @@
     "fixture": "tools/integration/fixtures/rollout-live/rollout-opponent-plain-body1.json",
     "body": "normal",
     "activation": "tools/integration/fixtures/rollout-endeavor/draft-rollout-*.json (activation == accepted window start; docs/rollout-endeavor-prep.md s0.1); counter 1 body, bodies 2..5 start at their own activations"
+   },
+   "requestFields": {
+    "rolloutCounter": 1,
+    "power": 30
+   }
+  },
+  {
+   "id": 24,
+   "move": "DOUBLE_KICK",
+   "orientation": "player",
+   "variant": "double-kick-player",
+   "activationFrame": 227,
+   "windowStart": 227,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/compare/fixtures/double-kick-player-nidorina-opponent-onix.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep12-random2/plans.json (activation 227 == denseWindow.startFrame; faithful-random adapter, each hit its own body)"
+   },
+   "presentationRngActivation": {
+    "value": 2354516896,
+    "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
+   }
+  },
+  {
+   "id": 24,
+   "move": "DOUBLE_KICK",
+   "orientation": "opponent",
+   "variant": "double-kick-opponent",
+   "activationFrame": 227,
+   "windowStart": 227,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/compare/fixtures/double-kick-opponent-nidorina-player-onix.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/random2-r1/activation-probes.json (activation 227 == denseWindow.startFrame)"
+   },
+   "presentationRngActivation": {
+    "value": 3103290310,
+    "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
    }
   }
  ]
