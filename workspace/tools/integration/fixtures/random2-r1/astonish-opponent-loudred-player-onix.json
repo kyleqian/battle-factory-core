@@ -1,0 +1,12 @@
+{
+  "sourceFixture": "tools/compare/fixtures/astonish-opponent-loudred-player-onix.json",
+  "move": "ASTONISH",
+  "attacker": { "species": "LOUDRED", "geometry": { "side": "opponent" } },
+  "target": { "species": "ONIX", "geometry": { "side": "player" } },
+  "fieldProfile": { "playerHp": 110, "playerMaxHp": 110, "opponentHp": 176, "opponentMaxHp": 191, "playerGender": "male", "opponentGender": "male" },
+  "fieldProfileSource": "tools/compare/astonishEvidence.ts:97-104",
+  "presentationRngActivation": {
+    "value": 3870620670,
+    "source": "tools/integration/fixtures/random2-r1/activation-probes.json astonish-opponent bodies[0] (0xE6B4FBFE, activation frame 219 == sourceWindow.startFrame; two fresh direct-mGBA runs)"
+  }
+}

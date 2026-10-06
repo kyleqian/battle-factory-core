@@ -4143,6 +4143,50 @@
     "value": 3103290310,
     "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
    }
+  },
+  {
+   "id": 310,
+   "move": "ASTONISH",
+   "orientation": "player",
+   "variant": "astonish-player",
+   "activationFrame": 220,
+   "windowStart": 220,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/compare/fixtures/astonish-player-loudred-opponent-onix.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep12-random2/plans.json (activation 220 == sourceWindow.startFrame)"
+   },
+   "presentationRngActivation": {
+    "value": 1487707074,
+    "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
+   }
+  },
+  {
+   "id": 310,
+   "move": "ASTONISH",
+   "orientation": "opponent",
+   "variant": "astonish-opponent",
+   "activationFrame": 219,
+   "windowStart": 219,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/compare/fixtures/astonish-opponent-loudred-player-onix.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/random2-r1/activation-probes.json (activation 219 == sourceWindow.startFrame)"
+   },
+   "presentationRngActivation": {
+    "value": 3870620670,
+    "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
+   }
   }
  ]
 }

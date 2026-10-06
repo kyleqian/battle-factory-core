@@ -41,6 +41,22 @@ const MOVES = [
     probe: "double-kick-opponent",
     route: { seed: 51, streak: 0, slot: 0 as const, turns: 2, bodiesPerTurn: 2 },
   },
+  {
+    name: "astonish", id: 310,
+    // plans.json form: per droplet [w & 0x1ff, w & 0x7f].
+    plansForm: (draws: readonly (readonly number[])[]): unknown => {
+      const w = draws.flat();
+      return [[w[0]! & 0x1ff, w[1]! & 0x7f], [w[2]! & 0x1ff, w[3]! & 0x7f]];
+    },
+    fixtures: {
+      player: "tools/integration/fixtures/random2-r1/astonish-player-loudred-opponent-onix.json",
+      opponent: "tools/integration/fixtures/random2-r1/astonish-opponent-loudred-player-onix.json",
+      alternate: "tools/integration/fixtures/random2-r1/astonish-alt-player-gengar-opponent-golem.json",
+    },
+    probe: "astonish-opponent",
+    // First-found 6/0 LOUDRED reaches the body on turn 1 only; 8/0 LOUDRED reaches it on both turns.
+    route: { seed: 8, streak: 0, slot: 2 as const, turns: 2, bodiesPerTurn: 1 },
+  },
 ] as const;
 
 const sessionKey = liveMovePresentationRngBodyKey({ resolutionId: { requestId: 0 }, segmentIndex: 0, commandIndex: 0 });

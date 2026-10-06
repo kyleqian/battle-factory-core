@@ -238,8 +238,9 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     19, 340,
     // Rollout bodies 1..5: activation == window start (row 0) on both sides.
     205,
-    // Faithful-random adapters (liveMovePresentationRng.ts): Double Kick hit bodies start at activation (row 0, prep12 §0.2).
-    24,
+    // Faithful-random adapters (liveMovePresentationRng.ts): Double Kick hit bodies, Astonish start at activation (row 0,
+    // prep12 §0.2 / random2-r1 activation probes).
+    24, 310,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -647,6 +648,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
     // Faithful-random adapters (liveMovePresentationRng.ts; not LIVE_MOVE_ANIMATION_IDS). Windows start at activation.
     case 24: return DOUBLE_KICK_FRAME_COUNT; // Double Kick per-hit body (227..262 both orientations).
+    case 310: return 63; // Astonish accepted window (220..282 / 219..281).
     default: return null;
   }
 }
@@ -2111,6 +2113,17 @@ export function liveMoveAnimationPresentation(
       config = { move: "DOUBLE_KICK", attacker, target, fieldProfile,
         targetDimensions: { width: dims.width, height: dims.height },
         fistRandom: { x: words[0]!, y: words[1]!, xSign: words[2]!, ySign: words[3]! } };
+      break;
+    }
+    case 310: {
+      // AnimSprayWaterDroplet (battle_anim_flying.c:1106-1107): droplet k = (w[2k] & 0x1ff, w[2k+1] & 0x7f);
+      // SetBattlerSpriteYOffsetFromYScale reads the target's pic-coords yOffset (as Fake Out). The droplets and the
+      // stretch anchor on the target's unshifted OBJ center (staged astonishEvidence.ts: ONIX back (72, 80)).
+      const words = liveMovePresentationRngWords(presentationRngInput)?.words;
+      if (words === undefined || words.length !== 4) return null;
+      config = { move: "ASTONISH", attacker, target: affineCenterBattler(target), fieldProfile,
+        targetPictureYOffset: liveBattlerCoordAttrs(target.geometry.side, art).yOffset,
+        dropletRandom: [{ v1: words[0]! & 0x1ff, v2: words[1]! & 0x7f }, { v1: words[2]! & 0x1ff, v2: words[3]! & 0x7f }] };
       break;
     }
     default: return null;

@@ -18401,15 +18401,16 @@ export function renderSceneOnMovePresentation(
       ...astonishState,
       age: astonishState.age - 2,
     });
+    // Live field (faithful-random adapter): any displayed pair, art from the live species.
     const playerToOpponent =
-      view.attacker.species === "LOUDRED"
+      (liveField || view.attacker.species === "LOUDRED")
       && view.attacker.geometry.side === "player"
-      && view.targetBattler.species === "ONIX"
+      && (liveField || view.targetBattler.species === "ONIX")
       && view.targetBattler.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "LOUDRED"
+      (liveField || view.attacker.species === "LOUDRED")
       && view.attacker.geometry.side === "opponent"
-      && view.targetBattler.species === "ONIX"
+      && (liveField || view.targetBattler.species === "ONIX")
       && view.targetBattler.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -18420,13 +18421,17 @@ export function renderSceneOnMovePresentation(
     const loudredSource = playerToOpponent
       ? astonishArt.loudredBack
       : astonishArt.loudredFront;
-    const loudred = playerToOpponent
+    const loudred = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent
       ? loudredSource
       : {
           ...loudredSource,
           tileset: subTileset(loudredSource.tileset, 0, 8),
         };
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.targetBattler)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     drawTileBg(
       fb,
       battleBg.static.tileset,
@@ -18434,8 +18439,10 @@ export function renderSceneOnMovePresentation(
       battleBg.palette,
     );
 
-    const targetBaselineX2 =
-      playerToOpponent && displayed.age < 31 ? 1 : 0;
+    // The opponent-front target rests at its front-idle x2 (ONIX 1) until the shake task overwrites it at age 31.
+    const targetBaselineX2 = playerToOpponent && displayed.age < 31
+      ? (liveField ? speciesFrontIdleRestOffsetOrZero(view.targetBattler.species).x2 : 1)
+      : 0;
     if (displayed.target.stretchActive) {
       // PrepareBattlerSpriteForRotScale enters affine-double OAM on the first
       // task tick, but its matrix/anchor transfer reaches the scanout on the
@@ -18486,6 +18493,8 @@ export function renderSceneOnMovePresentation(
       );
     }
 
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     drawSendOutHealthbox(
       fb,
       0,

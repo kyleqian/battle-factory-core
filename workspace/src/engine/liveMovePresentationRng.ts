@@ -27,6 +27,8 @@ export const LIVE_MOVE_RANDOM2_PLANS: Readonly<Record<number, readonly Presentat
   // Move_DOUBLE_KICK (one body per hit): AnimFistOrFootRandomPos x, y, x sign, y sign
   // (battle_anim_fight.c:487-492; script arg2 = 1 skips the :478 draw).
   24: Object.freeze([Object.freeze({ ageOffset: 10, count: 4 })]),
+  // Move_ASTONISH: AnimSprayWaterDroplet x2 in one frame, (& 0x1ff, & 0x7f) per droplet (battle_anim_flying.c:1106-1107).
+  310: Object.freeze([Object.freeze({ ageOffset: 31, count: 4 })]),
 });
 
 /** Faithful-random live adapters (disjoint from LIVE_MOVE_ANIMATION_IDS). */
