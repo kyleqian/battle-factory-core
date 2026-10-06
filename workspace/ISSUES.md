@@ -64,6 +64,12 @@ backlog.
 - **Fixed today:** Leaf Blade (#144), Dragon Rage fire-spit aim, Aerial Ace settled x, Rock Throw
   idle x2, Smelling Salt y clamp, Light Screen / Future Sight end-of-body shadow return, Foresight
   glass translation (merges of `5b7a1ff3b`, `48a1bd913`; audits `docs/live-species-audit{,-2}.md`).
+- **Rollout (205, live since 2026-10-05; `docs/rollout-curl-diagnosis.md`):** the hit-splat centre
+  is hard-coded to ONIX's (`src/animation/rollout.ts:175-177`, y 42; BLISSEY 46) — a few px for 10
+  ages against targets with a different pic y; the shake amplitude is keyed by counter
+  (`:209`) while the ROM uses `gAnimMovePower / 12` clamped 1..16 (`battle_anim_mon_movement.c:973-984`),
+  so Defense Curl bodies decline today. Fix shape in the doc (centre from the target anchors,
+  shake from request power, drop the two declines, regenerate the Scene-ON Curl fixtures).
 - **Not defects:** one-frame-later tail fades are species-keyed lag frames (CPU load past VBlank).
 - **Open remainder:** Aerial Ace with a player-side GOLEM 1 px at ages 10-11; Spider Web ARIADOS
   back sprite 1 px; Sky Uppercut COMBUSKEN script one frame longer; Blizzard / Icy Wind fall back
