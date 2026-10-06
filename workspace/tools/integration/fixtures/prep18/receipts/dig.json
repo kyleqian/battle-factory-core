@@ -94,6 +94,13 @@
        "bitmap": true,
        "inUse": true,
        "rows": true
+      },
+      "altopp": {
+       "spawns": true,
+       "tasks": true,
+       "bitmap": true,
+       "inUse": true,
+       "rows": true
       }
      },
      "corpusCrossCheck": {
@@ -231,6 +238,27 @@
        "orderShape": "first-body",
        "monbg": null,
        "netZeroAtEnd1": true
+      },
+      "altopp": {
+       "scenario": "prep18-dig-altopp-flygon-golem",
+       "activation": 54,
+       "rows": 195,
+       "bitmapAtActivation": 6,
+       "tasksAtActivation": [],
+       "inUseAtActivation": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "orderShape": "first-body",
+       "monbg": null,
+       "netZeroAtEnd1": true
       }
      }
     },
@@ -244,6 +272,13 @@
        "rows": true
       },
       "alt": {
+       "spawns": true,
+       "tasks": true,
+       "bitmap": true,
+       "inUse": true,
+       "rows": true
+      },
+      "altopp": {
        "spawns": true,
        "tasks": true,
        "bitmap": true,
@@ -449,6 +484,48 @@
         "holds": false
        },
        "netZeroAtEnd1": true
+      },
+      "altopp": {
+       "scenario": "prep18-dig-altopp-flygon-golem",
+       "activation": 612,
+       "rows": 68,
+       "bitmapAtActivation": 6,
+       "tasksAtActivation": [],
+       "inUseAtActivation": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "orderShape": "other",
+       "monbg": {
+        "age": 8,
+        "slot": 1,
+        "data": [
+         8,
+         176,
+         160,
+         -144,
+         -128,
+         0,
+         1,
+         0
+        ],
+        "battlerOnSprite": "opponent",
+        "formula": [
+         176,
+         34,
+         -144,
+         -2
+        ],
+        "holds": false
+       },
+       "netZeroAtEnd1": true
       }
      }
     }
@@ -478,6 +555,38 @@
     "bodyIndex": 1,
     "activationFrame": 555,
     "activationValueHex": "0xA56D97E7",
+    "lagAges": [
+     34,
+     35
+    ],
+    "sameLagAgesAsAccepted": true,
+    "sameRowsWindow": true
+   }
+  ]
+ },
+ "alternateOpponent": {
+  "scenario": "prep18-dig-altopp-flygon-golem",
+  "probeRunsIdentical": true,
+  "runsSha1": "480e740effdc24f3e36fe96c6ea7a7dad5471f3b",
+  "callers": {
+   "RfuMain1+0x10": 391
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 54,
+    "activationValueHex": "0x42D715A3",
+    "lagAges": [
+     191,
+     192
+    ],
+    "sameLagAgesAsAccepted": true,
+    "sameRowsWindow": true
+   },
+   {
+    "bodyIndex": 1,
+    "activationFrame": 612,
+    "activationValueHex": "0xCF31FC18",
     "lagAges": [
      34,
      35

@@ -3,6 +3,7 @@
  "consumedByTest": false,
  "note": "unverified until an adapter exists; window = [activationFrame, activationFrame + rows - 1] (accepted windows start at the activation, offset 0)",
  "move": "fury-cutter",
+ "attackerSide": "player",
  "bodyIndex": 3,
  "scenario": "tools/battle-lab/prep18-fury-cutter-alt-scyther-golem.json",
  "activationFrame": 1980,

@@ -68,6 +68,13 @@
        "bitmap": true,
        "inUse": true,
        "rows": true
+      },
+      "altopp": {
+       "spawns": true,
+       "tasks": true,
+       "bitmap": true,
+       "inUse": true,
+       "rows": true
       }
      },
      "corpusCrossCheck": {
@@ -264,6 +271,48 @@
          45,
          -144,
          -13
+        ],
+        "holds": true
+       },
+       "netZeroAtEnd1": true
+      },
+      "altopp": {
+       "scenario": "prep18-return-altopp-snorlax-golem",
+       "activation": 76,
+       "rows": 282,
+       "bitmapAtActivation": 6,
+       "tasksAtActivation": [],
+       "inUseAtActivation": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "orderShape": "first-body",
+       "monbg": {
+        "age": 4,
+        "slot": 1,
+        "data": [
+         6,
+         72,
+         96,
+         -40,
+         -64,
+         1,
+         0,
+         0
+        ],
+        "battlerOnSprite": "player",
+        "formula": [
+         72,
+         96,
+         -40,
+         -64
         ],
         "holds": true
        },
@@ -949,6 +998,27 @@
     "bodyIndex": 0,
     "activationFrame": 72,
     "activationValueHex": "0x78A77ADB",
+    "lagAges": [
+     279,
+     280
+    ],
+    "sameLagAgesAsAccepted": true,
+    "sameRowsWindow": true
+   }
+  ]
+ },
+ "alternateOpponent": {
+  "scenario": "prep18-return-altopp-snorlax-golem",
+  "probeRunsIdentical": true,
+  "runsSha1": "616f26bf74df6d8bcfb75932e80289f5569cc709",
+  "callers": {
+   "RfuMain1+0x10": 369
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 76,
+    "activationValueHex": "0x072069B2",
     "lagAges": [
      279,
      280

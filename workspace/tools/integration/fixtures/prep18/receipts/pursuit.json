@@ -70,6 +70,13 @@
        "bitmap": true,
        "inUse": true,
        "rows": true
+      },
+      "altopp": {
+       "spawns": true,
+       "tasks": true,
+       "bitmap": true,
+       "inUse": true,
+       "rows": true
       }
      },
      "corpusCrossCheck": {
@@ -270,6 +277,48 @@
         "holds": true
        },
        "netZeroAtEnd1": true
+      },
+      "altopp": {
+       "scenario": "prep18-pursuit-altopp-umbreon-golem",
+       "activation": 76,
+       "rows": 103,
+       "bitmapAtActivation": 6,
+       "tasksAtActivation": [],
+       "inUseAtActivation": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "orderShape": "first-body",
+       "monbg": {
+        "age": 4,
+        "slot": 1,
+        "data": [
+         6,
+         72,
+         96,
+         -40,
+         -64,
+         1,
+         0,
+         0
+        ],
+        "battlerOnSprite": "player",
+        "formula": [
+         72,
+         96,
+         -40,
+         -64
+        ],
+        "holds": true
+       },
+       "netZeroAtEnd1": true
       }
      }
     }
@@ -288,6 +337,28 @@
     "bodyIndex": 0,
     "activationFrame": 72,
     "activationValueHex": "0xE5BBCFF8",
+    "lagAges": [
+     61,
+     62,
+     83
+    ],
+    "sameLagAgesAsAccepted": true,
+    "sameRowsWindow": true
+   }
+  ]
+ },
+ "alternateOpponent": {
+  "scenario": "prep18-pursuit-altopp-umbreon-golem",
+  "probeRunsIdentical": true,
+  "runsSha1": "2ee722a9725172d229a2ded720a45d582fe8f590",
+  "callers": {
+   "RfuMain1+0x10": 138
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 76,
+    "activationValueHex": "0x9178A09F",
     "lagAges": [
      61,
      62,

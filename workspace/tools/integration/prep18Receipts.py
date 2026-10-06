@@ -17,13 +17,14 @@ for move, variants in FAM.items():
                   "bodies": [{k: b[k] for k in ("bodyIndex", "activationFrame", "rows", "label", "activationValueHex", "activationEqualsCorpusRow0", "lagAges", "planEqualsCorpusPerRow")} for b in plans[f"{v}-{s}"]["bodies"]]} for s in ("player", "opponent")}
         rec["variants"][v] = {"plans": pv, "allocator": {b: {"equalToPlayer": e["equalToPlayer"], "corpusCrossCheck": e["corpusCrossCheck"], "scenarios": e["scenarios"]} for b, e in consts[v].items()}}
     if move in plans and False: pass
-    a = plans[f"{move}-player"].get("alternate")
-    rec["alternate"] = a
+    rec["alternate"] = plans[f"{move}-player"].get("alternate"); rec["alternateOpponent"] = plans[f"{move}-opponent"].get("alternateOpponent")
     rec["geometry"] = {sc: [{k: r[k] for k in ("move", "bodyIndex", "act", "spriteXYEqual", "idleEqual")} for r in rows] for sc, rows in geo.items() if sc.startswith((f"mechanic-{move}-", f"prep18-{move}-"))}
     (F / "receipts" / f"{move}.json").write_text(json.dumps(rec, indent=1))
-    for b, ab in zip(plans[f"{move}-player"]["bodies"], a["bodies"]):
-        draft = {"draft": True, "consumedByTest": False, "note": "unverified until an adapter exists; window = [activationFrame, activationFrame + rows - 1] (accepted windows start at the activation, offset 0)",
-                 "move": move, "bodyIndex": b["bodyIndex"], "scenario": f"tools/battle-lab/{a['scenario']}.json", "activationFrame": ab["activationFrame"], "activationValueHex": ab["activationValueHex"],
-                 "window": {"startFrame": ab["activationFrame"], "frameCount": b["rows"]}, "plan": [], "drawsTotal": 0, "lagAges": ab["lagAges"], "expected": {"planShapeIdenticalToAccepted": ab["sameLagAgesAsAccepted"], "random2Draws": 0}}
-        (F / "drafts" / f"{a['scenario']}-body{b['bodyIndex']}.json").write_text(json.dumps(draft, indent=1))
+    for side, key in (("player", "alternate"), ("opponent", "alternateOpponent")):
+        a = rec[key]
+        for b, ab in zip(plans[f"{move}-{side}"]["bodies"], a["bodies"]):
+            draft = {"draft": True, "consumedByTest": False, "note": "unverified until an adapter exists; window = [activationFrame, activationFrame + rows - 1] (accepted windows start at the activation, offset 0)",
+                     "move": move, "attackerSide": side, "bodyIndex": b["bodyIndex"], "scenario": f"tools/battle-lab/{a['scenario']}.json", "activationFrame": ab["activationFrame"], "activationValueHex": ab["activationValueHex"],
+                     "window": {"startFrame": ab["activationFrame"], "frameCount": b["rows"]}, "plan": [], "drawsTotal": 0, "lagAges": ab["lagAges"], "expected": {"planShapeIdenticalToAccepted": ab["sameLagAgesAsAccepted"], "random2Draws": 0}}
+            (F / "drafts" / f"{a['scenario']}-body{b['bodyIndex']}.json").write_text(json.dumps(draft, indent=1))
 print("ok")

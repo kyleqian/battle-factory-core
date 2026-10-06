@@ -69,6 +69,13 @@
        "bitmap": true,
        "inUse": true,
        "rows": true
+      },
+      "altopp": {
+       "spawns": true,
+       "tasks": true,
+       "bitmap": true,
+       "inUse": true,
+       "rows": false
       }
      },
      "corpusCrossCheck": {
@@ -269,6 +276,48 @@
         "holds": true
        },
        "netZeroAtEnd1": true
+      },
+      "altopp": {
+       "scenario": "prep18-megahorn-altopp-heracross-golem",
+       "activation": 223,
+       "rows": 177,
+       "bitmapAtActivation": 6,
+       "tasksAtActivation": [],
+       "inUseAtActivation": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "orderShape": "post-tackle",
+       "monbg": {
+        "age": 7,
+        "slot": 1,
+        "data": [
+         6,
+         72,
+         96,
+         -40,
+         -64,
+         1,
+         0,
+         0
+        ],
+        "battlerOnSprite": "player",
+        "formula": [
+         72,
+         96,
+         -40,
+         -64
+        ],
+        "holds": true
+       },
+       "netZeroAtEnd1": true
       }
      }
     }
@@ -293,6 +342,28 @@
      157
     ],
     "sameLagAgesAsAccepted": true,
+    "sameRowsWindow": true
+   }
+  ]
+ },
+ "alternateOpponent": {
+  "scenario": "prep18-megahorn-altopp-heracross-golem",
+  "probeRunsIdentical": true,
+  "runsSha1": "6a62827af6490e9bed9d38f82375f2503bc8fbb3",
+  "callers": {
+   "RfuMain1+0x10": 212
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 223,
+    "activationValueHex": "0x12FFCE0D",
+    "lagAges": [
+     137,
+     138,
+     157
+    ],
+    "sameLagAgesAsAccepted": false,
     "sameRowsWindow": true
    }
   ]

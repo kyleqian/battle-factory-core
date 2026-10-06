@@ -146,6 +146,13 @@
        "bitmap": true,
        "inUse": true,
        "rows": true
+      },
+      "altopp": {
+       "spawns": true,
+       "tasks": true,
+       "bitmap": true,
+       "inUse": true,
+       "rows": true
       }
      },
      "corpusCrossCheck": {
@@ -346,6 +353,48 @@
         "holds": true
        },
        "netZeroAtEnd1": true
+      },
+      "altopp": {
+       "scenario": "prep18-fury-cutter-altopp-scyther-golem",
+       "activation": 82,
+       "rows": 43,
+       "bitmapAtActivation": 6,
+       "tasksAtActivation": [],
+       "inUseAtActivation": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "orderShape": "first-body",
+       "monbg": {
+        "age": 4,
+        "slot": 1,
+        "data": [
+         6,
+         72,
+         96,
+         -40,
+         -64,
+         1,
+         0,
+         0
+        ],
+        "battlerOnSprite": "player",
+        "formula": [
+         72,
+         96,
+         -40,
+         -64
+        ],
+        "holds": true
+       },
+       "netZeroAtEnd1": true
       }
      }
     },
@@ -359,6 +408,13 @@
        "rows": true
       },
       "alt": {
+       "spawns": true,
+       "tasks": true,
+       "bitmap": true,
+       "inUse": true,
+       "rows": true
+      },
+      "altopp": {
        "spawns": true,
        "tasks": true,
        "bitmap": true,
@@ -564,6 +620,48 @@
         "holds": true
        },
        "netZeroAtEnd1": true
+      },
+      "altopp": {
+       "scenario": "prep18-fury-cutter-altopp-scyther-golem",
+       "activation": 716,
+       "rows": 43,
+       "bitmapAtActivation": 6,
+       "tasksAtActivation": [],
+       "inUseAtActivation": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "orderShape": "post-tackle",
+       "monbg": {
+        "age": 4,
+        "slot": 1,
+        "data": [
+         6,
+         72,
+         96,
+         -40,
+         -64,
+         1,
+         0,
+         0
+        ],
+        "battlerOnSprite": "player",
+        "formula": [
+         72,
+         96,
+         -40,
+         -64
+        ],
+        "holds": true
+       },
+       "netZeroAtEnd1": true
       }
      }
     },
@@ -577,6 +675,13 @@
        "rows": true
       },
       "alt": {
+       "spawns": true,
+       "tasks": true,
+       "bitmap": true,
+       "inUse": true,
+       "rows": true
+      },
+      "altopp": {
        "spawns": true,
        "tasks": true,
        "bitmap": true,
@@ -782,6 +887,48 @@
         "holds": true
        },
        "netZeroAtEnd1": true
+      },
+      "altopp": {
+       "scenario": "prep18-fury-cutter-altopp-scyther-golem",
+       "activation": 1350,
+       "rows": 43,
+       "bitmapAtActivation": 6,
+       "tasksAtActivation": [],
+       "inUseAtActivation": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "orderShape": "post-tackle",
+       "monbg": {
+        "age": 4,
+        "slot": 1,
+        "data": [
+         6,
+         72,
+         96,
+         -40,
+         -64,
+         1,
+         0,
+         0
+        ],
+        "battlerOnSprite": "player",
+        "formula": [
+         72,
+         96,
+         -40,
+         -64
+        ],
+        "holds": true
+       },
+       "netZeroAtEnd1": true
       }
      }
     },
@@ -795,6 +942,13 @@
        "rows": true
       },
       "alt": {
+       "spawns": true,
+       "tasks": true,
+       "bitmap": true,
+       "inUse": true,
+       "rows": true
+      },
+      "altopp": {
        "spawns": true,
        "tasks": true,
        "bitmap": true,
@@ -1000,6 +1154,48 @@
         "holds": true
        },
        "netZeroAtEnd1": true
+      },
+      "altopp": {
+       "scenario": "prep18-fury-cutter-altopp-scyther-golem",
+       "activation": 1984,
+       "rows": 43,
+       "bitmapAtActivation": 6,
+       "tasksAtActivation": [],
+       "inUseAtActivation": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "orderShape": "post-tackle",
+       "monbg": {
+        "age": 4,
+        "slot": 1,
+        "data": [
+         6,
+         72,
+         96,
+         -40,
+         -64,
+         1,
+         0,
+         0
+        ],
+        "battlerOnSprite": "player",
+        "formula": [
+         72,
+         96,
+         -40,
+         -64
+        ],
+        "holds": true
+       },
+       "netZeroAtEnd1": true
       }
      }
     }
@@ -1051,6 +1247,60 @@
     "bodyIndex": 3,
     "activationFrame": 1980,
     "activationValueHex": "0x30393A25",
+    "lagAges": [
+     35,
+     36
+    ],
+    "sameLagAgesAsAccepted": true,
+    "sameRowsWindow": true
+   }
+  ]
+ },
+ "alternateOpponent": {
+  "scenario": "prep18-fury-cutter-altopp-scyther-golem",
+  "probeRunsIdentical": true,
+  "runsSha1": "fc159046e17fb6cf6e7f58ee01aeeda7370c01e6",
+  "callers": {
+   "RfuMain1+0x10": 620
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 82,
+    "activationValueHex": "0xB0528D00",
+    "lagAges": [
+     35,
+     36
+    ],
+    "sameLagAgesAsAccepted": true,
+    "sameRowsWindow": true
+   },
+   {
+    "bodyIndex": 1,
+    "activationFrame": 716,
+    "activationValueHex": "0x0C639BD1",
+    "lagAges": [
+     35,
+     36
+    ],
+    "sameLagAgesAsAccepted": true,
+    "sameRowsWindow": true
+   },
+   {
+    "bodyIndex": 2,
+    "activationFrame": 1350,
+    "activationValueHex": "0xD78DBA06",
+    "lagAges": [
+     35,
+     36
+    ],
+    "sameLagAgesAsAccepted": true,
+    "sameRowsWindow": true
+   },
+   {
+    "bodyIndex": 3,
+    "activationFrame": 1984,
+    "activationValueHex": "0x856639AF",
     "lagAges": [
      35,
      36
