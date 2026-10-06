@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-10-06 (in progress) — S10A: presentation RNG merged; Random2 draw plans measured
 
-- **State:** S10A, local master `cce4739da`+. Scoped-exact live adapters 222; faithful-random
+- **State:** S10A, local master `5ffd380`+. Scoped-exact live adapters 225; faithful-random
   adapters 8 (Double Kick, Astonish, Thrash, Flail, Wish, Hyper Beam, Rain Dance, Water Pulse). Preview
   <http://127.0.0.1:5191/> serves `4abe570f9` (browser replay 4 samples, export + mode restart pass,
   no errors; `playable-preview-4abe570f9-receipt.json`). Opus 5.5 supervisor; Opus/Sonnet 5.5 workers.
@@ -43,8 +43,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (Flail 2-5, Double Kick hit 2, Spike Cannon / Fury Swipes later hits, after a send-in); supervisor
   reran 4 cases twice fresh (0 px; control 118,919 px) and a 451/451 differential. prep17 merged:
   Meteor Mash's extra frame is a ROM lag frame (stays fallback); Mud-Slap/Sand-Attack ready.
-- **Next:** Overheat/Silver Wind (Sonnet) and prep18 (Dig, Megahorn, Will-O-Wisp, Fury Cutter, Return,
-  Pursuit) in flight; then Mud-Slap/Sand-Attack (brief ready), Rollout Curl/Endeavor (brief ready).
+  P3 (Sonnet) merged: Overheat, Silver Wind, Psych Up (player) exact for the battle's FIRST body with
+  an assets-only palette composite; supervisor reran 6 fixtures (0 px) + 533/533 differential. prep18
+  merged: Dig ready (no RNG); Megahorn / Will-O-Wisp / Fury Cutter / Return / Pursuit need an OAM-buffer
+  reducer port.
+- **Next:** R5 (Mud-Slap, Sand-Attack faithful-random; Dig exact) and species audit 3 in flight; then
+  Rollout Curl/Endeavor (brief ready).
 - **Notes:** no DEFERRED entries. Oracle freshness FAIL at orient = known false positive (no
   oracle/ commits since the services started 2026-10-03).
 

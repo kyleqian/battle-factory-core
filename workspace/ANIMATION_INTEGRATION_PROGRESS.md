@@ -103,8 +103,25 @@
   (`LoadDefaultBg` ~92k instructions; 4 of 5 bodies lag) — not computable from battle state, so Meteor
   Mash stays on fallback (would need a lag-timing claim like D3). Mud-Slap / Sand-Attack READY: windows
   re-anchored to activation, lowest-free dirt slots, anchor geometry, lent order identical across bodies.
-- In flight: Overheat + Silver Wind first-body exact adapters with the palette composite (Sonnet
-  integration); prep18 (Dig, Megahorn, Will-O-Wisp, Fury Cutter, Return, Pursuit; Sonnet side).
+- Folded Sonnet worker `e7b97688a` (src tree `be6eec82`): EXACT first-body Overheat (315), Silver Wind
+  (318) and Psych Up (244, player attacker) -> implementedCount 225. `src/engine/liveMovePaletteComposite.ts`
+  `composeLivePalettes` (assets only; equals the prep16 composite) + `liveBattlerIsShiny` gate; palette
+  plan rows 244/315/318 + SPARKLE_6/SPIRAL resources; input builders `liveBgSnapshotMoves.ts`;
+  `LiveSpriteOrderHost` body counter -> `LiveMoveSpriteOrderInput.firstBody` (the order host tracks across
+  bodies, so `known` no longer implies first body; Intimidate seed counts as a unit). Decline: later
+  bodies (BG-register tracker needed), shiny battlers, Psych Up opponent attacker, Overheat/Psych Up with
+  an idle-offset species (ONIX/RATTATA). Durations 230 / 193 / 196 / 179 rows. Routes 4/14 MAGCARGO,
+  69/14 SOLROCK, 3/7 VOLBEAT, 8/7 VENOMOTH, 66/7 JUMPLUFF, 15/28 METAGROSS; fallback 9/0 BUTTERFREE (later
+  body). Shadow scan 484 rows / 0. Census 225 + 8 + 0 + 43 = 276. Worker gates 1,532 files / 12,434
+  tests, build. Supervisor: dense rerun twice fresh 0 px (Overheat P/O/CHARIZARD, Psych Up SKIPLOOM,
+  Silver Wind O-first-body / BEAUTIFLY); differential 533/533 on 3 traces; route receipt 7/7; 8 test
+  files 159/159; smoke 448. Receipt `prep16-live-adapter-receipt.json`.
+- prep18 (side, `209e94592`): Dig, Megahorn, Will-O-Wisp, Fury Cutter, Return, Pursuit draw NO Random2
+  (stale C). Dig READY (reducer == ROM on 4 scenarios incl. elevated FLYGON; geometry 46/46). The other
+  five decode a per-frame hardware-OAM buffer nothing in production builds (reducer ports needed; Fury
+  Cutter also needs its counter on the request; Return only reaches the strongest branch in the Factory).
+- In flight: R5 Mud-Slap + Sand-Attack faithful-random, Dig exact (Sonnet integration); species audit 3
+  of this session's adapters (Sonnet side).
 
 ## 2026-10-06 — User answered D3: separate deterministic presentation RNG
 
