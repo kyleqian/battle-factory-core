@@ -3,15 +3,14 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import plans from "../../tools/integration/fixtures/prep14/plans.json" with { type: "json" };
 import {
-  LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS, LIVE_MOVE_RANDOM2_PLANS, activateLiveMovePresentationRng, liveMovePresentationRngBodyKey,
+  LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS, LIVE_MOVE_RANDOM2_PLANS, liveMovePresentationRngBodyKey,
 } from "../../src/engine/liveMovePresentationRng.ts";
 import {
   LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation,
 } from "../../src/engine/liveMoveAnimation.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { sceneOnHailView, sceneOnRainDanceView, sceneOnWaterPulseView } from "../../src/animation/sceneOnPresentation.ts";
-import { createPresentationRngHostAt, presentationRngBodyWords } from "../../src/engine/presentationRngHost.ts";
-import { createPresentationRngState } from "../../src/engine/presentationRng.ts";
+import { presentationRngBodyWords } from "../../src/engine/presentationRngHost.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { fixturePresentationRng, liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
