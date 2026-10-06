@@ -190,7 +190,8 @@ describe("live prep16 move adapters (Overheat, Silver Wind, Psych Up player: fir
     { move: "SILVER_WIND 8/7 VENOMOTH", id: 318, seed: 8, streak: 7, slot: 0, ages: 193, active: true },
     { move: "PSYCH_UP 66/7 JUMPLUFF", id: 244, seed: 66, streak: 7, slot: 2, ages: 179, active: true },
     { move: "PSYCH_UP 15/28 METAGROSS", id: 244, seed: 15, streak: 28, slot: 2, ages: 179, active: true },
-    // Not a first body (the foe acted first): the live seam declines and the scene-off view plays.
+    // A later body after the foe's Sand-Attack (no production order plan for 28 -> order unknown): the live seam declines and
+    // the scene-off view plays (later bodies with a known lend: tests/animation/liveLaterBodiesBg.test.ts).
     { move: "SILVER_WIND 9/0 BUTTERFREE (not first)", id: 318, seed: 9, streak: 0, slot: 0, ages: 193, active: false },
   ];
   it.each(routes)("completes ordinary $move and preserves ON/OFF rules and RNG", r => {

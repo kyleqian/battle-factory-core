@@ -2521,6 +2521,9 @@ export function liveMoveAnimationPresentation(
         config = { move: "OVERHEAT", attacker, target, fieldProfile,
           animationInputs: { ...inputs, allocator: { ...inputs.allocator, spriteOrder: order } } as never };
       } else {
+        // The sparkle slots/order are the known-entry constants: the lend must leave exactly the known-entry occupancy.
+        if (spriteOrderWithOccupiedPrefix({ known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] },
+          KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER) === null) return null;
         const { attackerPictureOrigin, targetPictureOrigin, ...inputs } = liveSilverWindInputs(args);
         // The accepted compositor fit: effect pictures centre on the picture origin and the age-0 enemy shadow draws at
         // battlePositionCenter - 1 (generic shadow y 40 + 1 on the opponent side).
