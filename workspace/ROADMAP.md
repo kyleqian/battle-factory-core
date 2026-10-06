@@ -2213,7 +2213,7 @@ Elevated opponents now render at the right height with their shadow in ordinary 
    a separate claim bucket, or keep the fallback. Do not build Random2 adapters before
    the answer.
 2. Non-Random2 moves: Endeavor (`docs/rollout-endeavor-prep.md`: stale-power rule measured,
-   drafts ready), Rollout after Defense Curl (live adapter declines; residual unexplained), Baton Pass (instant forced removal of the
+   drafts ready), Rollout fixes (`docs/rollout-curl-diagnosis.md`: splat centre from target anchors, shake from power, then Curl bodies), Baton Pass (instant forced removal of the
    attacker + presented replacement), Fire Punch (needs a generic Scene-ON renderer),
    Memento, Substitute, Extreme Speed; Spark opponent attacker.
 3. ISSUES #146 remainder: send-in tail after any send-in (model `docs/send-in-tail-model.md`
