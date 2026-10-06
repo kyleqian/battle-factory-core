@@ -3691,6 +3691,8 @@ export interface SceneOnAstonishConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   /** Source mon-pic coordinate consumed by SetBattlerSpriteYOffsetFromYScale. */
   readonly targetPictureYOffset: number;
+  /** Target species' enemy elevation (opponent OBJ origin shift; 0 on the player side). */
+  readonly targetElevation?: number;
   /** Four masked Random2 outputs produced before the two callback bodies. */
   readonly dropletRandom: readonly [
     AstonishDropletRandom,
@@ -3918,6 +3920,8 @@ export interface SceneOnWaterSpoutConfig {
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   readonly animationInputs: Readonly<WaterSpoutLiveInputs>;
+  /** Target OBJ idle x2 (tracked front idle rest), held until the HorizontalShake task ends (age 119). */
+  readonly targetIdleX2?: number;
 }
 
 /** Narrow Scene-ON seam for the source-relative Sand Tomb vortex body. */
@@ -3972,6 +3976,8 @@ export interface SceneOnIceBeamConfig {
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   readonly animationProfile: Readonly<IceBeamAnimationProfile>;
+  /** Target OBJ idle x2 (tracked front idle rest), kept on the OBJ until monbg takes over (age 39). */
+  readonly targetIdleX2?: number;
 }
 
 /** Narrow Scene-ON Fissure seam; OHKO resolution and RNG stay external. */
@@ -10994,6 +11000,7 @@ export function sceneOnAstonishView(
       state.config.target.geometry.animationCenter,
       state.config.targetPictureYOffset,
       state.config.dropletRandom,
+      state.config.targetElevation ?? 0,
     ),
   };
 }

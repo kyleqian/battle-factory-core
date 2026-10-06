@@ -2270,6 +2270,7 @@ export function liveMoveAnimationPresentation(
       if (words === undefined || words.length !== 4) return null;
       config = { move: "ASTONISH", attacker, target: affineCenterBattler(target), fieldProfile,
         targetPictureYOffset: liveBattlerCoordAttrs(target.geometry.side, art).yOffset,
+        targetElevation: art[target.geometry.side].origin.y - battleCommandFieldSpriteOrigin(art[target.geometry.side], target.geometry.side).y,
         dropletRandom: [{ v1: words[0]! & 0x1ff, v2: words[1]! & 0x7f }, { v1: words[2]! & 0x1ff, v2: words[3]! & 0x7f }] };
       break;
     }
@@ -2289,7 +2290,8 @@ export function liveMoveAnimationPresentation(
             targetCenter: targetAnchors.picOffsetPoint,
             monbgBaseHofs: 544 - (targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2),
             monbgBaseVofs: 544 - targetAnchors.spriteCenter.y },
-          spriteOrder: { initialOrder } } };
+          spriteOrder: { initialOrder } },
+        targetIdleX2: targetAnchors.frontIdleRest.x2 };
       break;
     }
     case 63: {
@@ -2570,7 +2572,8 @@ export function liveMoveAnimationPresentation(
       if (order === null) return null;
       const animationInputs = waterSpoutLiveInputs(field, attacker.geometry.side, order);
       if (animationInputs === null) return null;
-      config = { move: "WATER_SPOUT", attacker, target, fieldProfile, animationInputs };
+      config = { move: "WATER_SPOUT", attacker, target, fieldProfile, animationInputs,
+        targetIdleX2: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).frontIdleRest.x2 };
       break;
     }
     default: return null;
