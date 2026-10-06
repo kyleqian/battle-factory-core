@@ -1,0 +1,413 @@
+{
+ "schema": "x2-tracker-route-replay/v1",
+ "routes": [
+  {
+   "seed": 110,
+   "slots": [
+    0,
+    1,
+    2,
+    3,
+    0,
+    1,
+    2,
+    3,
+    0,
+    1
+   ],
+   "frames": 7395,
+   "stalled": false,
+   "bodies": 14,
+   "bodiesWithRestSpeciesOpponent": 10,
+   "inputChanged": 3,
+   "inputChangedLive": 3,
+   "restBodiesUnknownOpponentAfter": 3,
+   "parity": {
+    "boundaries": 11,
+    "onOffLogicRngBoundaryEqual": true
+   },
+   "restSpeciesBodies": [
+    {
+     "key": "1:0:1",
+     "moveId": 225,
+     "attacker": "opponent",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [],
+     "historyAfterBody": {
+      "player": "zeroed",
+      "opponent": "idle"
+     },
+     "inputChanged": false
+    },
+    {
+     "key": "1:0:10",
+     "moveId": 24,
+     "attacker": "player",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [],
+     "historyAfterBody": {
+      "player": "unknown",
+      "opponent": "zeroed"
+     },
+     "inputChanged": false
+    },
+    {
+     "key": "1:0:17",
+     "moveId": 24,
+     "attacker": "player",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [
+      "opponent"
+     ],
+     "historyAfterBody": {
+      "player": "unknown",
+      "opponent": "zeroed"
+     },
+     "inputChanged": true
+    },
+    {
+     "key": "3:0:1",
+     "moveId": 20,
+     "attacker": "opponent",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [
+      "opponent"
+     ],
+     "historyAfterBody": {
+      "player": "zeroed",
+      "opponent": "zeroed"
+     },
+     "inputChanged": true
+    },
+    {
+     "key": "5:0:1",
+     "moveId": 20,
+     "attacker": "opponent",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [],
+     "historyAfterBody": {
+      "player": "zeroed",
+      "opponent": "zeroed"
+     },
+     "inputChanged": false
+    },
+    {
+     "key": "5:0:7",
+     "moveId": 332,
+     "attacker": "player",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [
+      "player",
+      "opponent"
+     ],
+     "historyAfterBody": {
+      "player": "zeroed",
+      "opponent": "zeroed"
+     },
+     "inputChanged": true
+    },
+    {
+     "key": "7:0:1",
+     "moveId": 157,
+     "attacker": "opponent",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [],
+     "historyAfterBody": {
+      "player": "zeroed",
+      "opponent": "unknown"
+     },
+     "inputChanged": false
+    },
+    {
+     "key": "11:0:1",
+     "moveId": 20,
+     "attacker": "opponent",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [],
+     "historyAfterBody": {
+      "player": "zeroed",
+      "opponent": "zeroed"
+     },
+     "inputChanged": false
+    },
+    {
+     "key": "13:0:1",
+     "moveId": 157,
+     "attacker": "opponent",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [],
+     "historyAfterBody": {
+      "player": "zeroed",
+      "opponent": "unknown"
+     },
+     "inputChanged": false
+    },
+    {
+     "key": "15:0:1",
+     "moveId": 157,
+     "attacker": "opponent",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [],
+     "historyAfterBody": {
+      "player": "zeroed",
+      "opponent": "unknown"
+     },
+     "inputChanged": false
+    }
+   ]
+  },
+  {
+   "seed": 134,
+   "slots": [
+    0,
+    1,
+    2,
+    3,
+    0,
+    1,
+    2,
+    3,
+    0,
+    1
+   ],
+   "frames": 6878,
+   "stalled": false,
+   "bodies": 15,
+   "bodiesWithRestSpeciesOpponent": 13,
+   "inputChanged": 9,
+   "inputChangedLive": 7,
+   "restBodiesUnknownOpponentAfter": 0,
+   "parity": {
+    "boundaries": 11,
+    "onOffLogicRngBoundaryEqual": true
+   },
+   "restSpeciesBodies": [
+    {
+     "key": "1:0:1",
+     "moveId": 157,
+     "attacker": "opponent",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [],
+     "historyAfterBody": {
+      "player": "zeroed",
+      "opponent": "idle"
+     },
+     "inputChanged": false
+    },
+    {
+     "key": "3:0:1",
+     "moveId": 20,
+     "attacker": "opponent",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [
+      "player"
+     ],
+     "historyAfterBody": {
+      "player": "zeroed",
+      "opponent": "zeroed"
+     },
+     "inputChanged": false
+    },
+    {
+     "key": "3:0:9",
+     "moveId": 246,
+     "attacker": "player",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [
+      "player",
+      "opponent"
+     ],
+     "historyAfterBody": {
+      "player": "zeroed",
+      "opponent": "zeroed"
+     },
+     "inputChanged": true
+    },
+    {
+     "key": "5:0:6",
+     "moveId": 28,
+     "attacker": "player",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": false,
+     "zeroed": [
+      "opponent"
+     ],
+     "historyAfterBody": {
+      "player": "unknown",
+      "opponent": "zeroed"
+     },
+     "inputChanged": true
+    },
+    {
+     "key": "7:0:1",
+     "moveId": 182,
+     "attacker": "player",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [
+      "opponent"
+     ],
+     "historyAfterBody": {
+      "player": "unknown",
+      "opponent": "zeroed"
+     },
+     "inputChanged": true
+    },
+    {
+     "key": "7:0:5",
+     "moveId": 201,
+     "attacker": "opponent",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [
+      "opponent"
+     ],
+     "historyAfterBody": {
+      "player": "unknown",
+      "opponent": "zeroed"
+     },
+     "inputChanged": true
+    },
+    {
+     "key": "9:0:1",
+     "moveId": 20,
+     "attacker": "opponent",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [],
+     "historyAfterBody": {
+      "player": "zeroed",
+      "opponent": "zeroed"
+     },
+     "inputChanged": false
+    },
+    {
+     "key": "9:0:8",
+     "moveId": 72,
+     "attacker": "player",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [
+      "player",
+      "opponent"
+     ],
+     "historyAfterBody": {
+      "player": "zeroed",
+      "opponent": "zeroed"
+     },
+     "inputChanged": true
+    },
+    {
+     "key": "11:0:4",
+     "moveId": 246,
+     "attacker": "player",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [],
+     "historyAfterBody": {
+      "player": "unknown",
+      "opponent": "zeroed"
+     },
+     "inputChanged": false
+    },
+    {
+     "key": "13:0:1",
+     "moveId": 157,
+     "attacker": "opponent",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [
+      "opponent"
+     ],
+     "historyAfterBody": {
+      "player": "zeroed",
+      "opponent": "zeroed"
+     },
+     "inputChanged": true
+    },
+    {
+     "key": "13:0:8",
+     "moveId": 28,
+     "attacker": "player",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": false,
+     "zeroed": [
+      "player",
+      "opponent"
+     ],
+     "historyAfterBody": {
+      "player": "zeroed",
+      "opponent": "zeroed"
+     },
+     "inputChanged": true
+    },
+    {
+     "key": "15:0:1",
+     "moveId": 182,
+     "attacker": "player",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [
+      "opponent"
+     ],
+     "historyAfterBody": {
+      "player": "unknown",
+      "opponent": "zeroed"
+     },
+     "inputChanged": true
+    },
+    {
+     "key": "17:0:5",
+     "moveId": 72,
+     "attacker": "player",
+     "opponent": "ONIX",
+     "opponentRestX2": 1,
+     "live": true,
+     "zeroed": [
+      "opponent"
+     ],
+     "historyAfterBody": {
+      "player": "unknown",
+      "opponent": "zeroed"
+     },
+     "inputChanged": true
+    }
+   ]
+  }
+ ]
+}
