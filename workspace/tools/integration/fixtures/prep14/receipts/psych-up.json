@@ -1,0 +1,332 @@
+{
+ "schema": "prep14-receipt/v1",
+ "move": "psych-up",
+ "bodyLabel": "Move_PSYCH_UP",
+ "drawsPerBody": 0,
+ "determinism": {
+  "player": {
+   "runsSha1": "a0053500280068faf8f53cf21da4f636d0b04156",
+   "runsSha1Run2": "a0053500280068faf8f53cf21da4f636d0b04156",
+   "allFieldsEqualExceptFinalStateSha1": true
+  },
+  "opponent": {
+   "runsSha1": "d9df9516417a5b6cf73cc0bca127526156235659",
+   "runsSha1Run2": "d9df9516417a5b6cf73cc0bca127526156235659",
+   "allFieldsEqualExceptFinalStateSha1": true
+  },
+  "alternate": {
+   "runsSha1": "607ecef4cf875b212bfd82c9215744e3844ff3e3",
+   "runsSha1Run2": "607ecef4cf875b212bfd82c9215744e3844ff3e3",
+   "allFieldsEqualExceptFinalStateSha1": true
+  }
+ },
+ "plan": {
+  "drawsCompressed": [],
+  "lagAges": [
+   176,
+   177
+  ],
+  "lagFramesBeforeLastDraw": 0
+ },
+ "accepted": {
+  "player": {
+   "scenario": "mechanic-psych-up-player-jumpluff-opponent-ninjask",
+   "activationFrame": 379,
+   "activationValueHex": "0xC0AA72DD",
+   "acceptedWindow": {
+    "startFrame": 379,
+    "rows": 179,
+    "activationMinusStart": 0,
+    "corpus": "tools/compare/evidence/psych-up-player-dense-state.json.gz",
+    "rowsCheckedAnimationRng": 179,
+    "planSeriesEqualsCorpusAnimationRng": true,
+    "firstMismatchAge": null
+   },
+   "consumers": {}
+  },
+  "opponent": {
+   "scenario": "mechanic-psych-up-opponent-jumpluff-player-ninjask",
+   "activationFrame": 375,
+   "activationValueHex": "0x77C52B35",
+   "acceptedWindow": {
+    "startFrame": 375,
+    "rows": 179,
+    "activationMinusStart": 0,
+    "corpus": "tools/compare/evidence/psych-up-opponent-dense-state.json.gz",
+    "rowsCheckedAnimationRng": 179,
+    "planSeriesEqualsCorpusAnimationRng": true,
+    "firstMismatchAge": null
+   },
+   "consumers": {}
+  }
+ },
+ "alternate": {
+  "scenario": "prep14-psych-up-alt-skiploom-golem",
+  "activationFrame": 375,
+  "activationValue": 1605994024,
+  "activationValueHex": "0x5FB98628",
+  "drawFrames": 0,
+  "drawsTotal": 0,
+  "lagAges": [
+   176,
+   177
+  ],
+  "planShapeIdenticalToAccepted": true,
+  "replayEqualsObservedWords": true,
+  "determinism": {
+   "runsSha1": "607ecef4cf875b212bfd82c9215744e3844ff3e3",
+   "runsSha1Run2": "607ecef4cf875b212bfd82c9215744e3844ff3e3",
+   "allFieldsEqualExceptFinalStateSha1": true
+  }
+ },
+ "allocator": {
+  "scenarios": {
+   "player": {
+    "scenario": "mechanic-psych-up-player-jumpluff-opponent-ninjask",
+    "activation": 379,
+    "rows": 179,
+    "bitmapAtActivation": 6,
+    "tasksAtActivation": [],
+    "inUseAtActivation": [
+     0,
+     1,
+     2,
+     6,
+     8,
+     60,
+     61,
+     62,
+     63
+    ],
+    "orderShape": "post-tackle",
+    "monbg": {
+     "age": 4,
+     "slot": 1,
+     "data": [
+      6,
+      72,
+      84,
+      -40,
+      -52,
+      1,
+      0,
+      0
+     ],
+     "battlerOnSprite": "player",
+     "formula": [
+      72,
+      84,
+      -40,
+      -52
+     ],
+     "holds": true
+    },
+    "netZeroAtEnd1": true
+   },
+   "opponent": {
+    "scenario": "mechanic-psych-up-opponent-jumpluff-player-ninjask",
+    "activation": 375,
+    "rows": 179,
+    "bitmapAtActivation": 6,
+    "tasksAtActivation": [],
+    "inUseAtActivation": [
+     0,
+     1,
+     2,
+     6,
+     8,
+     60,
+     61,
+     62,
+     63
+    ],
+    "orderShape": "post-tackle",
+    "monbg": {
+     "age": 4,
+     "slot": 1,
+     "data": [
+      8,
+      176,
+      38,
+      -144,
+      -6,
+      0,
+      1,
+      0
+     ],
+     "battlerOnSprite": "opponent",
+     "formula": [
+      176,
+      38,
+      -144,
+      -6
+     ],
+     "holds": true
+    },
+    "netZeroAtEnd1": true
+   },
+   "alt": {
+    "scenario": "prep14-psych-up-alt-skiploom-golem",
+    "activation": 375,
+    "rows": 179,
+    "bitmapAtActivation": 6,
+    "tasksAtActivation": [],
+    "inUseAtActivation": [
+     0,
+     1,
+     2,
+     6,
+     8,
+     60,
+     61,
+     62,
+     63
+    ],
+    "orderShape": "post-tackle",
+    "monbg": {
+     "age": 4,
+     "slot": 1,
+     "data": [
+      6,
+      72,
+      93,
+      -40,
+      -61,
+      1,
+      0,
+      0
+     ],
+     "battlerOnSprite": "player",
+     "formula": [
+      72,
+      93,
+      -40,
+      -61
+     ],
+     "holds": true
+    },
+    "netZeroAtEnd1": true
+   }
+  },
+  "equalToPlayer": {
+   "opponent": {
+    "spawns": true,
+    "tasks": true,
+    "bitmap": true,
+    "inUse": true
+   },
+   "alt": {
+    "spawns": true,
+    "tasks": true,
+    "bitmap": true,
+    "inUse": true
+   }
+  },
+  "corpusCrossCheck": {
+   "player": {
+    "spawnsEqual": true,
+    "taskPairsEqual": true,
+    "orderAtAct": true,
+    "animRng0==rng2AtAct": true,
+    "offset": 0,
+    "rows": {
+     "corpus": 179,
+     "probe": 179
+    }
+   },
+   "opponent": {
+    "spawnsEqual": true,
+    "taskPairsEqual": true,
+    "orderAtAct": true,
+    "animRng0==rng2AtAct": true,
+    "offset": 0,
+    "rows": {
+     "corpus": 179,
+     "probe": 179
+    }
+   }
+  }
+ },
+ "palette": {
+  "objBanksDifferingAtActivation(across player/opponent/alt)": [
+   0,
+   1,
+   13,
+   14,
+   15
+  ],
+  "bgBanksDifferingAtActivation": [],
+  "loadedBanksByAge": {
+   "1": {
+    "player": [
+     7
+    ],
+    "opponent": [
+     7
+    ],
+    "alt": [
+     7
+    ]
+   },
+   "2": {
+    "player": [
+     7
+    ],
+    "opponent": [
+     7
+    ],
+    "alt": [
+     7
+    ]
+   },
+   "3": {
+    "player": [
+     7
+    ],
+    "opponent": [
+     7
+    ],
+    "alt": [
+     7
+    ]
+   },
+   "5": {
+    "player": [
+     7
+    ],
+    "opponent": [
+     7
+    ],
+    "alt": [
+     7
+    ]
+   },
+   "8": {
+    "player": [
+     7
+    ],
+    "opponent": [
+     7
+    ],
+    "alt": [
+     7
+    ]
+   },
+   "12": {
+    "player": [
+     7
+    ],
+    "opponent": [
+     7
+    ],
+    "alt": [
+     7
+    ]
+   }
+  },
+  "loadedBankContentEqualAcrossScenarios@age12": {
+   "7": true
+  },
+  "bgChangedByAge12": []
+ }
+}
