@@ -1,0 +1,64 @@
+{
+ "move": "astonish",
+ "scenario": "tools/battle-lab/mechanic-astonish-player-loudred-opponent-onix.json",
+ "determinism": {
+  "runsSha1": "46d23ac7e71b394e3cd0494d91cd21a1f5ccf985",
+  "runsSha1Run2": "46d23ac7e71b394e3cd0494d91cd21a1f5ccf985",
+  "allFieldsEqualExceptFinalStateSha1": true,
+  "finalStateSha1Equal": false,
+  "frames": 534,
+  "anchorRng2": 979118634,
+  "alternate": {
+   "runsSha1": "c3d1ac288ce3235c66f7e9b9b5d709e33ae93aa3",
+   "runsSha1Run2": "c3d1ac288ce3235c66f7e9b9b5d709e33ae93aa3",
+   "allFieldsEqualExceptFinalStateSha1": true,
+   "finalStateSha1Equal": false,
+   "frames": 534,
+   "anchorRng2": 979118634
+  }
+ },
+ "drawsPerBody": 4,
+ "reproducedAll": true,
+ "entries": [
+  {
+   "key": "astonish",
+   "bodyLabel": "Move_ASTONISH",
+   "activationFrame": 220,
+   "acceptedActivationValue": 1487707074,
+   "acceptedActivationValueHex": "0x58AC9BC2",
+   "acceptedWindowStart": 220,
+   "acceptedWindowStartMinusActivation": 0,
+   "drawsTotal": 4,
+   "drawFrames": 1,
+   "lagFramesBeforeLastDraw": 0,
+   "lagFramesInBody": 0,
+   "pinnedSource": "tools/compare/astonishEvidence.ts:62 dropletRandom (player-to-opponent)",
+   "reproduced": true,
+   "replayEqualsObservedWords": true,
+   "alternate": {
+    "scenario": "tools/battle-lab/prep12-astonish-alt-gengar-golem.json",
+    "activationFrame": 75,
+    "activationValueHex": "0xDAAD9D3D",
+    "activationValue": 3668811069,
+    "planShapeIdenticalToAccepted": true,
+    "replayEqualsObservedWords": true,
+    "denseWindowFromActivation": {
+     "startFrame": 75,
+     "note": "alternate window start = activation frame + the accepted (window start - activation) offset; length = the accepted window's frameCount"
+    },
+    "firstWords": [
+     16100,
+     2629,
+     50618,
+     7863
+    ]
+   },
+   "drawAgeOffsets": [
+    31
+   ],
+   "drawCounts": [
+    4
+   ]
+  }
+ ]
+}

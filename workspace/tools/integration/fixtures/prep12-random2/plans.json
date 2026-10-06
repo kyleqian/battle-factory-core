@@ -1,0 +1,4312 @@
+{
+ "schema": "prep12-random2-plans/v1",
+ "generatedBy": "tools/integration/prep12Plans.py",
+ "convention": "activationValue = gRng2 after the first anim-active frame A (== the accepted dense window's first row where the window starts at the script activation); ageOffset = D - A for draw frame D; each draw frame takes one RfuMain1 step (non-lag frames) then `count` Random2 draws; word = state >> 16; words = replay(activationValue, plan) with no probe data other than the plan itself",
+ "moves": {
+  "double-kick": {
+   "scenario": "tools/battle-lab/mechanic-double-kick-player-nidorina-opponent-onix.json",
+   "determinism": {
+    "runsSha1": "1b66e81761666372528c0d1d95bbb9a0b07174c0",
+    "runsSha1Run2": "1b66e81761666372528c0d1d95bbb9a0b07174c0",
+    "allFieldsEqualExceptFinalStateSha1": true,
+    "finalStateSha1Equal": false,
+    "frames": 934,
+    "anchorRng2": 979118634,
+    "alternate": {
+     "runsSha1": "87dd225d4adbd33740ae5358f3e3814bc1474a83",
+     "runsSha1Run2": "87dd225d4adbd33740ae5358f3e3814bc1474a83",
+     "allFieldsEqualExceptFinalStateSha1": true,
+     "finalStateSha1Equal": false,
+     "frames": 934,
+     "anchorRng2": 979118634
+    }
+   },
+   "drawsPerBody": 4,
+   "entries": [
+    {
+     "key": "double-kick",
+     "bodyLabel": "Move_DOUBLE_KICK",
+     "activationFrame": 227,
+     "acceptedActivationValue": 2354516896,
+     "acceptedActivationValueHex": "0x8C5713A0",
+     "acceptedWindowStart": 227,
+     "acceptedWindowStartMinusActivation": 0,
+     "draws": [
+      {
+       "ageOffset": 10,
+       "count": 4,
+       "transform": [
+        "% (targetWidth/2)  [battle_anim_fight.c:487]",
+        "% (targetHeight/4)  [battle_anim_fight.c:488]",
+        "& 1 negates x  [battle_anim_fight.c:490]",
+        "& 1 negates y  [battle_anim_fight.c:492]"
+       ],
+       "consumerField": [
+        "fistRandom.x",
+        "fistRandom.y",
+        "fistRandom.xSign",
+        "fistRandom.ySign"
+       ]
+      }
+     ],
+     "drawsTotal": 4,
+     "drawFrames": 1,
+     "lagFramesBeforeLastDraw": 0,
+     "lagFramesInBody": 2,
+     "pinnedSource": "tools/compare/fixtures/double-kick-player-nidorina-opponent-onix.json fistRandom",
+     "pinnedWords": [
+      46625,
+      58366,
+      21952,
+      56639
+     ],
+     "predictedFromPlan": [
+      46625,
+      58366,
+      21952,
+      56639
+     ],
+     "reproduced": true,
+     "replayEqualsObservedWords": true,
+     "wordToField": {
+      "word0": "fistRandom.x (x %= width/2)",
+      "word1": "fistRandom.y (y %= height/4)",
+      "word2": "fistRandom.xSign (&1 negates x)",
+      "word3": "fistRandom.ySign (&1 negates y)"
+     },
+     "alternate": {
+      "scenario": "tools/battle-lab/prep12-double-kick-alt-hitmonlee-golem.json",
+      "activationFrame": 88,
+      "activationValueHex": "0x2EA37519",
+      "activationValue": 782464281,
+      "planShapeIdenticalToAccepted": true,
+      "replayEqualsObservedWords": true,
+      "denseWindowFromActivation": {
+       "startFrame": 88,
+       "note": "alternate window start = activation frame + the accepted (window start - activation) offset; length = the accepted window's frameCount"
+      },
+      "firstWords": [
+       51410,
+       14847,
+       42872,
+       13405
+      ]
+     }
+    },
+    {
+     "key": "double-kick#1",
+     "bodyLabel": "Move_DOUBLE_KICK",
+     "activationFrame": 355,
+     "acceptedActivationValue": 3371570314,
+     "acceptedActivationValueHex": "0xC8F6148A",
+     "acceptedWindowStart": null,
+     "acceptedWindowStartMinusActivation": null,
+     "draws": [
+      {
+       "ageOffset": 10,
+       "count": 4,
+       "transform": [
+        "% (targetWidth/2)  [battle_anim_fight.c:487]",
+        "% (targetHeight/4)  [battle_anim_fight.c:488]",
+        "& 1 negates x  [battle_anim_fight.c:490]",
+        "& 1 negates y  [battle_anim_fight.c:492]"
+       ],
+       "consumerField": [
+        "fistRandom.x",
+        "fistRandom.y",
+        "fistRandom.xSign",
+        "fistRandom.ySign"
+       ]
+      }
+     ],
+     "drawsTotal": 4,
+     "drawFrames": 1,
+     "lagFramesBeforeLastDraw": 0,
+     "lagFramesInBody": 2,
+     "pinnedSource": "none pinned (second hit of the same turn)",
+     "pinnedWords": null,
+     "predictedFromPlan": [
+      41562,
+      19767,
+      45868,
+      33578
+     ],
+     "reproduced": null,
+     "replayEqualsObservedWords": true,
+     "wordToField": {
+      "same as hit 1": "per-body"
+     }
+    }
+   ],
+   "reproducedAll": true
+  },
+  "thrash": {
+   "scenario": "tools/battle-lab/mechanic-thrash-player-tauros-opponent-onix.json",
+   "determinism": {
+    "runsSha1": "b1979938f950cd22d7ef9466473d0f55f3ce3cdf",
+    "runsSha1Run2": "b1979938f950cd22d7ef9466473d0f55f3ce3cdf",
+    "allFieldsEqualExceptFinalStateSha1": true,
+    "finalStateSha1Equal": false,
+    "frames": 934,
+    "anchorRng2": 2603307746,
+    "alternate": {
+     "runsSha1": "16111a7908e8c3821222549d743936d1709e851c",
+     "runsSha1Run2": "16111a7908e8c3821222549d743936d1709e851c",
+     "allFieldsEqualExceptFinalStateSha1": true,
+     "finalStateSha1Equal": false,
+     "frames": 934,
+     "anchorRng2": 1268703424
+    }
+   },
+   "drawsPerBody": 12,
+   "entries": [
+    {
+     "key": "thrash",
+     "bodyLabel": "Move_THRASH",
+     "activationFrame": 72,
+     "acceptedActivationValue": 1444920832,
+     "acceptedActivationValueHex": "0x561FBE00",
+     "acceptedWindowStart": 72,
+     "acceptedWindowStartMinusActivation": 0,
+     "draws": [
+      {
+       "ageOffset": 7,
+       "count": 4,
+       "transform": [
+        "% (targetWidth/2)  [battle_anim_fight.c:487]",
+        "% (targetHeight/4)  [battle_anim_fight.c:488]",
+        "& 1 negates x  [battle_anim_fight.c:490]",
+        "& 1 negates y  [battle_anim_fight.c:492]"
+       ],
+       "consumerField": [
+        "fistRandom.x",
+        "fistRandom.y",
+        "fistRandom.xSign",
+        "fistRandom.ySign"
+       ]
+      },
+      {
+       "ageOffset": 37,
+       "count": 4,
+       "transform": [
+        "% (targetWidth/2)  [battle_anim_fight.c:487]",
+        "% (targetHeight/4)  [battle_anim_fight.c:488]",
+        "& 1 negates x  [battle_anim_fight.c:490]",
+        "& 1 negates y  [battle_anim_fight.c:492]"
+       ],
+       "consumerField": [
+        "fistRandom.x",
+        "fistRandom.y",
+        "fistRandom.xSign",
+        "fistRandom.ySign"
+       ]
+      },
+      {
+       "ageOffset": 67,
+       "count": 4,
+       "transform": [
+        "% (targetWidth/2)  [battle_anim_fight.c:487]",
+        "% (targetHeight/4)  [battle_anim_fight.c:488]",
+        "& 1 negates x  [battle_anim_fight.c:490]",
+        "& 1 negates y  [battle_anim_fight.c:492]"
+       ],
+       "consumerField": [
+        "fistRandom.x",
+        "fistRandom.y",
+        "fistRandom.xSign",
+        "fistRandom.ySign"
+       ]
+      }
+     ],
+     "drawsTotal": 12,
+     "drawFrames": 3,
+     "lagFramesBeforeLastDraw": 0,
+     "lagFramesInBody": 0,
+     "pinnedSource": "tools/compare/fixtures/thrash-player-tauros-opponent-onix.json fistRandom[3]",
+     "pinnedWords": [
+      [
+       11893,
+       50161,
+       30189,
+       42348
+      ],
+      [
+       64666,
+       49322,
+       60288,
+       41562
+      ],
+      [
+       22148,
+       62276,
+       9547,
+       39955
+      ]
+     ],
+     "predictedFromPlan": [
+      [
+       11893,
+       50161,
+       30189,
+       42348
+      ],
+      [
+       64666,
+       49322,
+       60288,
+       41562
+      ],
+      [
+       22148,
+       62276,
+       9547,
+       39955
+      ]
+     ],
+     "reproduced": true,
+     "replayEqualsObservedWords": true,
+     "wordToField": {
+      "group g word0..3": "fistRandom[g].x / y / xSign / ySign (same transforms as Double Kick)"
+     },
+     "alternate": {
+      "scenario": "tools/battle-lab/prep12-thrash-alt-snorlax-golem.json",
+      "activationFrame": 73,
+      "activationValueHex": "0x16194BC9",
+      "activationValue": 370756553,
+      "planShapeIdenticalToAccepted": true,
+      "replayEqualsObservedWords": true,
+      "denseWindowFromActivation": {
+       "startFrame": 73,
+       "note": "alternate window start = activation frame + the accepted (window start - activation) offset; length = the accepted window's frameCount"
+      },
+      "firstWords": [
+       15783,
+       24630,
+       64902,
+       48069
+      ]
+     }
+    }
+   ],
+   "reproducedAll": true
+  },
+  "astonish": {
+   "scenario": "tools/battle-lab/mechanic-astonish-player-loudred-opponent-onix.json",
+   "determinism": {
+    "runsSha1": "46d23ac7e71b394e3cd0494d91cd21a1f5ccf985",
+    "runsSha1Run2": "46d23ac7e71b394e3cd0494d91cd21a1f5ccf985",
+    "allFieldsEqualExceptFinalStateSha1": true,
+    "finalStateSha1Equal": false,
+    "frames": 534,
+    "anchorRng2": 979118634,
+    "alternate": {
+     "runsSha1": "c3d1ac288ce3235c66f7e9b9b5d709e33ae93aa3",
+     "runsSha1Run2": "c3d1ac288ce3235c66f7e9b9b5d709e33ae93aa3",
+     "allFieldsEqualExceptFinalStateSha1": true,
+     "finalStateSha1Equal": false,
+     "frames": 534,
+     "anchorRng2": 979118634
+    }
+   },
+   "drawsPerBody": 4,
+   "entries": [
+    {
+     "key": "astonish",
+     "bodyLabel": "Move_ASTONISH",
+     "activationFrame": 220,
+     "acceptedActivationValue": 1487707074,
+     "acceptedActivationValueHex": "0x58AC9BC2",
+     "acceptedWindowStart": 220,
+     "acceptedWindowStartMinusActivation": 0,
+     "draws": [
+      {
+       "ageOffset": 31,
+       "count": 4,
+       "transform": [
+        "& 0x1ff  [battle_anim_flying.c:1106]",
+        "& 0x7f  [battle_anim_flying.c:1107]",
+        "& 0x1ff  [battle_anim_flying.c:1106]",
+        "& 0x7f  [battle_anim_flying.c:1107]"
+       ],
+       "consumerField": [
+        "dropletRandom[k].v1",
+        "dropletRandom[k].v2",
+        "dropletRandom[k].v1",
+        "dropletRandom[k].v2"
+       ]
+      }
+     ],
+     "drawsTotal": 4,
+     "drawFrames": 1,
+     "lagFramesBeforeLastDraw": 0,
+     "lagFramesInBody": 0,
+     "pinnedSource": "tools/compare/astonishEvidence.ts:62 dropletRandom (player-to-opponent)",
+     "pinnedWords": [
+      [
+       299,
+       127
+      ],
+      [
+       291,
+       74
+      ]
+     ],
+     "predictedFromPlan": [
+      [
+       299,
+       127
+      ],
+      [
+       291,
+       74
+      ]
+     ],
+     "reproduced": true,
+     "replayEqualsObservedWords": true,
+     "wordToField": {
+      "droplet k word0": "dropletRandom[k].v1 (& 0x1ff)",
+      "droplet k word1": "dropletRandom[k].v2 (& 0x7f)"
+     },
+     "alternate": {
+      "scenario": "tools/battle-lab/prep12-astonish-alt-gengar-golem.json",
+      "activationFrame": 75,
+      "activationValueHex": "0xDAAD9D3D",
+      "activationValue": 3668811069,
+      "planShapeIdenticalToAccepted": true,
+      "replayEqualsObservedWords": true,
+      "denseWindowFromActivation": {
+       "startFrame": 75,
+       "note": "alternate window start = activation frame + the accepted (window start - activation) offset; length = the accepted window's frameCount"
+      },
+      "firstWords": [
+       16100,
+       2629,
+       50618,
+       7863
+      ]
+     }
+    }
+   ],
+   "reproducedAll": true
+  },
+  "hyper-beam": {
+   "scenario": "tools/battle-lab/mechanic-hyper-beam-player-aerodactyl-opponent-onix.json",
+   "determinism": {
+    "runsSha1": "df18456661b43b21a3d8d4abdf4fe0cca6056482",
+    "runsSha1Run2": "df18456661b43b21a3d8d4abdf4fe0cca6056482",
+    "allFieldsEqualExceptFinalStateSha1": true,
+    "finalStateSha1Equal": false,
+    "frames": 934,
+    "anchorRng2": 3546401081,
+    "alternate": {
+     "runsSha1": "86c1bfd72f4339f874dc893735d3b56da38eeb76",
+     "runsSha1Run2": "86c1bfd72f4339f874dc893735d3b56da38eeb76",
+     "allFieldsEqualExceptFinalStateSha1": true,
+     "finalStateSha1Equal": false,
+     "frames": 934,
+     "anchorRng2": 3546401081
+    }
+   },
+   "drawsPerBody": 156,
+   "entries": [
+    {
+     "key": "hyper-beam",
+     "bodyLabel": "Move_HYPER_BEAM",
+     "activationFrame": 79,
+     "acceptedActivationValue": 1968892309,
+     "acceptedActivationValueHex": "0x755AE995",
+     "acceptedWindowStart": 79,
+     "acceptedWindowStartMinusActivation": 0,
+     "draws": [
+      {
+       "ageOffset": 110,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 113,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 116,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 119,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 122,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 125,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 128,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 131,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 134,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 137,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 140,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 143,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 146,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 149,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 152,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 155,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 158,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 161,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 164,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 167,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 170,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 173,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 176,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 179,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 182,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      },
+      {
+       "ageOffset": 185,
+       "count": 6,
+       "transform": [
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]",
+        "u16 % 8 (StartSpriteAnim)  [battle_anim_effects_1.c:2339]",
+        "(& 31) + 64  [battle_anim_effects_1.c:2349-2351]",
+        "& 0xff  [battle_anim_effects_1.c:2356]"
+       ],
+       "consumerField": [
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase",
+        "animationProfile.orbs[i].animation",
+        "animationProfile.orbs[i].speed",
+        "animationProfile.orbs[i].phase"
+       ]
+      }
+     ],
+     "drawsTotal": 156,
+     "drawFrames": 26,
+     "lagFramesBeforeLastDraw": 0,
+     "lagFramesInBody": 0,
+     "pinnedSource": "tools/compare/evidence/hyper-beam-player-dense-state.json.gz births (animNum, inferred speed, data[5]-48)",
+     "pinnedWords": [
+      [
+       3,
+       64,
+       160
+      ],
+      [
+       0,
+       90,
+       215
+      ],
+      [
+       0,
+       85,
+       186
+      ],
+      [
+       0,
+       90,
+       236
+      ],
+      [
+       2,
+       80,
+       56
+      ],
+      [
+       5,
+       71,
+       234
+      ],
+      [
+       4,
+       75,
+       80
+      ],
+      [
+       0,
+       80,
+       82
+      ],
+      [
+       4,
+       75,
+       12
+      ],
+      [
+       3,
+       75,
+       255
+      ],
+      [
+       3,
+       85,
+       206
+      ],
+      [
+       3,
+       75,
+       245
+      ],
+      [
+       5,
+       68,
+       123
+      ],
+      [
+       1,
+       90,
+       192
+      ],
+      [
+       1,
+       90,
+       168
+      ],
+      [
+       0,
+       75,
+       176
+      ],
+      [
+       3,
+       90,
+       35
+      ],
+      [
+       2,
+       90,
+       6
+      ],
+      [
+       5,
+       65,
+       203
+      ],
+      [
+       1,
+       68,
+       199
+      ],
+      [
+       0,
+       80,
+       38
+      ],
+      [
+       7,
+       65,
+       94
+      ],
+      [
+       0,
+       85,
+       53
+      ],
+      [
+       1,
+       85,
+       20
+      ],
+      [
+       1,
+       90,
+       232
+      ],
+      [
+       2,
+       80,
+       178
+      ],
+      [
+       6,
+       90,
+       33
+      ],
+      [
+       6,
+       90,
+       230
+      ],
+      [
+       7,
+       65,
+       249
+      ],
+      [
+       4,
+       75,
+       254
+      ],
+      [
+       6,
+       75,
+       65
+      ],
+      [
+       1,
+       80,
+       186
+      ],
+      [
+       7,
+       71,
+       14
+      ],
+      [
+       2,
+       90,
+       254
+      ],
+      [
+       4,
+       85,
+       217
+      ],
+      [
+       2,
+       85,
+       50
+      ],
+      [
+       6,
+       80,
+       57
+      ],
+      [
+       7,
+       85,
+       48
+      ],
+      [
+       3,
+       68,
+       193
+      ],
+      [
+       0,
+       64,
+       246
+      ],
+      [
+       4,
+       85,
+       185
+      ],
+      [
+       6,
+       90,
+       170
+      ],
+      [
+       4,
+       71,
+       139
+      ],
+      [
+       0,
+       75,
+       104
+      ],
+      [
+       2,
+       90,
+       26
+      ],
+      [
+       6,
+       65,
+       139
+      ],
+      [
+       2,
+       80,
+       106
+      ],
+      [
+       3,
+       85,
+       79
+      ],
+      [
+       5,
+       90,
+       132
+      ],
+      [
+       4,
+       75,
+       19
+      ],
+      [
+       5,
+       64,
+       142
+      ],
+      [
+       2,
+       85,
+       231
+      ]
+     ],
+     "predictedFromPlan": [
+      [
+       3,
+       64,
+       160
+      ],
+      [
+       0,
+       90,
+       215
+      ],
+      [
+       0,
+       85,
+       186
+      ],
+      [
+       0,
+       90,
+       236
+      ],
+      [
+       2,
+       80,
+       56
+      ],
+      [
+       5,
+       71,
+       234
+      ],
+      [
+       4,
+       75,
+       80
+      ],
+      [
+       0,
+       80,
+       82
+      ],
+      [
+       4,
+       75,
+       12
+      ],
+      [
+       3,
+       75,
+       255
+      ],
+      [
+       3,
+       85,
+       206
+      ],
+      [
+       3,
+       75,
+       245
+      ],
+      [
+       5,
+       68,
+       123
+      ],
+      [
+       1,
+       90,
+       192
+      ],
+      [
+       1,
+       90,
+       168
+      ],
+      [
+       0,
+       75,
+       176
+      ],
+      [
+       3,
+       90,
+       35
+      ],
+      [
+       2,
+       90,
+       6
+      ],
+      [
+       5,
+       65,
+       203
+      ],
+      [
+       1,
+       68,
+       199
+      ],
+      [
+       0,
+       80,
+       38
+      ],
+      [
+       7,
+       65,
+       94
+      ],
+      [
+       0,
+       85,
+       53
+      ],
+      [
+       1,
+       85,
+       20
+      ],
+      [
+       1,
+       90,
+       232
+      ],
+      [
+       2,
+       80,
+       178
+      ],
+      [
+       6,
+       90,
+       33
+      ],
+      [
+       6,
+       90,
+       230
+      ],
+      [
+       7,
+       65,
+       249
+      ],
+      [
+       4,
+       75,
+       254
+      ],
+      [
+       6,
+       75,
+       65
+      ],
+      [
+       1,
+       80,
+       186
+      ],
+      [
+       7,
+       71,
+       14
+      ],
+      [
+       2,
+       90,
+       254
+      ],
+      [
+       4,
+       85,
+       217
+      ],
+      [
+       2,
+       85,
+       50
+      ],
+      [
+       6,
+       80,
+       57
+      ],
+      [
+       7,
+       85,
+       48
+      ],
+      [
+       3,
+       68,
+       193
+      ],
+      [
+       0,
+       64,
+       246
+      ],
+      [
+       4,
+       85,
+       185
+      ],
+      [
+       6,
+       90,
+       170
+      ],
+      [
+       4,
+       71,
+       139
+      ],
+      [
+       0,
+       75,
+       104
+      ],
+      [
+       2,
+       90,
+       26
+      ],
+      [
+       6,
+       65,
+       139
+      ],
+      [
+       2,
+       80,
+       106
+      ],
+      [
+       3,
+       85,
+       79
+      ],
+      [
+       5,
+       90,
+       132
+      ],
+      [
+       4,
+       75,
+       19
+      ],
+      [
+       5,
+       64,
+       142
+      ],
+      [
+       2,
+       85,
+       231
+      ]
+     ],
+     "reproduced": true,
+     "replayEqualsObservedWords": true,
+     "wordToField": {
+      "orb word0": "orbs[i].animation (& 7: StartSpriteAnim(animNum % 8))",
+      "orb word1": "orbs[i].speed ((w & 31) + 64; observable only via the translation step data, equivalence-class compared)",
+      "orb word2": "orbs[i].phase (w & 0xff)"
+     },
+     "alternate": {
+      "scenario": "tools/battle-lab/prep12-hyper-beam-alt-snorlax-golem.json",
+      "activationFrame": 235,
+      "activationValueHex": "0xD497D0BF",
+      "activationValue": 3566719167,
+      "planShapeIdenticalToAccepted": true,
+      "replayEqualsObservedWords": true,
+      "denseWindowFromActivation": {
+       "startFrame": 235,
+       "note": "alternate window start = activation frame + the accepted (window start - activation) offset; length = the accepted window's frameCount"
+      },
+      "firstWords": [
+       5241,
+       42969,
+       13914,
+       13718,
+       57394,
+       32259
+      ]
+     }
+    }
+   ],
+   "reproducedAll": true
+  },
+  "meteor-mash": {
+   "scenario": "tools/battle-lab/mechanic-meteor-mash-player-metang-opponent-onix.json",
+   "determinism": {
+    "runsSha1": "5ffeb451dcaaee7fca97b980bb499b298076bbf5",
+    "runsSha1Run2": "5ffeb451dcaaee7fca97b980bb499b298076bbf5",
+    "allFieldsEqualExceptFinalStateSha1": true,
+    "finalStateSha1Equal": false,
+    "frames": 1434,
+    "anchorRng2": 2733919585,
+    "alternate": {
+     "runsSha1": "9eea3ee26280ba6a078129c9715222852dd8d25f",
+     "runsSha1Run2": "9eea3ee26280ba6a078129c9715222852dd8d25f",
+     "allFieldsEqualExceptFinalStateSha1": true,
+     "finalStateSha1Equal": false,
+     "frames": 1434,
+     "anchorRng2": 2733919585
+    }
+   },
+   "drawsPerBody": 96,
+   "entries": [
+    {
+     "key": "meteor-mash",
+     "bodyLabel": "Move_METEOR_MASH",
+     "activationFrame": 298,
+     "acceptedActivationValue": 884186052,
+     "acceptedActivationValueHex": "0x34B39BC4",
+     "acceptedWindowStart": 298,
+     "acceptedWindowStartMinusActivation": 0,
+     "draws": [
+      {
+       "ageOffset": 48,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 50,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 52,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 54,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 56,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 58,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 60,
+       "count": 4,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]",
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset",
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 62,
+       "count": 4,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]",
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset",
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 64,
+       "count": 4,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]",
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset",
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 66,
+       "count": 4,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]",
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset",
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 68,
+       "count": 4,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]",
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset",
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 70,
+       "count": 4,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]",
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset",
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 72,
+       "count": 4,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]",
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset",
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 74,
+       "count": 4,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]",
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset",
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 76,
+       "count": 4,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]",
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset",
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 78,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 79,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 80,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 82,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 84,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 86,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 88,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 90,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 102,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 104,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 106,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 108,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 111,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 113,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 115,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 117,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 119,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 121,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 123,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 125,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 127,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 129,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 131,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 133,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      }
+     ],
+     "drawsTotal": 96,
+     "drawFrames": 39,
+     "lagFramesBeforeLastDraw": 0,
+     "lagFramesInBody": 0,
+     "pinnedSource": "tools/compare/fixtures/meteor-mash-player-metang-opponent-onix.json twinkles[48]",
+     "pinnedWords": [
+      [
+       4,
+       1
+      ],
+      [
+       4,
+       3
+      ],
+      [
+       5,
+       -6
+      ],
+      [
+       4,
+       -6
+      ],
+      [
+       5,
+       -4
+      ],
+      [
+       5,
+       2
+      ],
+      [
+       5,
+       -7
+      ],
+      [
+       4,
+       2
+      ],
+      [
+       4,
+       0
+      ],
+      [
+       5,
+       1
+      ],
+      [
+       5,
+       2
+      ],
+      [
+       5,
+       2
+      ],
+      [
+       5,
+       2
+      ],
+      [
+       5,
+       0
+      ],
+      [
+       5,
+       -7
+      ],
+      [
+       5,
+       1
+      ],
+      [
+       4,
+       -4
+      ],
+      [
+       4,
+       3
+      ],
+      [
+       5,
+       0
+      ],
+      [
+       5,
+       0
+      ],
+      [
+       4,
+       -7
+      ],
+      [
+       4,
+       3
+      ],
+      [
+       5,
+       0
+      ],
+      [
+       5,
+       -6
+      ],
+      [
+       5,
+       -6
+      ],
+      [
+       4,
+       -5
+      ],
+      [
+       5,
+       -6
+      ],
+      [
+       5,
+       -6
+      ],
+      [
+       5,
+       0
+      ],
+      [
+       5,
+       3
+      ],
+      [
+       5,
+       -6
+      ],
+      [
+       4,
+       -6
+      ],
+      [
+       4,
+       1
+      ],
+      [
+       4,
+       -5
+      ],
+      [
+       5,
+       -4
+      ],
+      [
+       5,
+       -7
+      ],
+      [
+       5,
+       -4
+      ],
+      [
+       5,
+       -6
+      ],
+      [
+       5,
+       0
+      ],
+      [
+       5,
+       -4
+      ],
+      [
+       5,
+       1
+      ],
+      [
+       4,
+       2
+      ],
+      [
+       4,
+       3
+      ],
+      [
+       5,
+       -4
+      ],
+      [
+       5,
+       1
+      ],
+      [
+       5,
+       2
+      ],
+      [
+       5,
+       -7
+      ],
+      [
+       4,
+       -6
+      ]
+     ],
+     "predictedFromPlan": [
+      [
+       4,
+       1
+      ],
+      [
+       4,
+       3
+      ],
+      [
+       5,
+       -6
+      ],
+      [
+       4,
+       -6
+      ],
+      [
+       5,
+       -4
+      ],
+      [
+       5,
+       2
+      ],
+      [
+       5,
+       -7
+      ],
+      [
+       4,
+       2
+      ],
+      [
+       4,
+       0
+      ],
+      [
+       5,
+       1
+      ],
+      [
+       5,
+       2
+      ],
+      [
+       5,
+       2
+      ],
+      [
+       5,
+       2
+      ],
+      [
+       5,
+       0
+      ],
+      [
+       5,
+       -7
+      ],
+      [
+       5,
+       1
+      ],
+      [
+       4,
+       -4
+      ],
+      [
+       4,
+       3
+      ],
+      [
+       5,
+       0
+      ],
+      [
+       5,
+       0
+      ],
+      [
+       4,
+       -7
+      ],
+      [
+       4,
+       3
+      ],
+      [
+       5,
+       0
+      ],
+      [
+       5,
+       -6
+      ],
+      [
+       5,
+       -6
+      ],
+      [
+       4,
+       -5
+      ],
+      [
+       5,
+       -6
+      ],
+      [
+       5,
+       -6
+      ],
+      [
+       5,
+       0
+      ],
+      [
+       5,
+       3
+      ],
+      [
+       5,
+       -6
+      ],
+      [
+       4,
+       -6
+      ],
+      [
+       4,
+       1
+      ],
+      [
+       4,
+       -5
+      ],
+      [
+       5,
+       -4
+      ],
+      [
+       5,
+       -7
+      ],
+      [
+       5,
+       -4
+      ],
+      [
+       5,
+       -6
+      ],
+      [
+       5,
+       0
+      ],
+      [
+       5,
+       -4
+      ],
+      [
+       5,
+       1
+      ],
+      [
+       4,
+       2
+      ],
+      [
+       4,
+       3
+      ],
+      [
+       5,
+       -4
+      ],
+      [
+       5,
+       1
+      ],
+      [
+       5,
+       2
+      ],
+      [
+       5,
+       -7
+      ],
+      [
+       4,
+       -6
+      ]
+     ],
+     "reproduced": true,
+     "replayEqualsObservedWords": true,
+     "wordToField": {
+      "twinkle i word0": "twinkles[i].tile (w&3==0 ? +4 : +5)",
+      "twinkle i word1": "twinkles[i].y2 (w&7, >3 negated)"
+     },
+     "alternate": {
+      "scenario": "tools/battle-lab/prep12-meteor-mash-alt-shiftry-golem.json",
+      "activationFrame": 78,
+      "activationValueHex": "0x072069B2",
+      "activationValue": 119564722,
+      "planShapeIdenticalToAccepted": true,
+      "replayEqualsObservedWords": true,
+      "denseWindowFromActivation": {
+       "startFrame": 78,
+       "note": "alternate window start = activation frame + the accepted (window start - activation) offset; length = the accepted window's frameCount"
+      },
+      "firstWords": [
+       44837,
+       43277
+      ]
+     }
+    }
+   ],
+   "reproducedAll": true
+  },
+  "wish": {
+   "scenario": "tools/battle-lab/mechanic-wish-player-illumise-opponent-onix.json",
+   "determinism": {
+    "runsSha1": "7aa15e7e8a9bba4de4376486724f4a7aeeb30650",
+    "runsSha1Run2": "7aa15e7e8a9bba4de4376486724f4a7aeeb30650",
+    "allFieldsEqualExceptFinalStateSha1": true,
+    "finalStateSha1Equal": false,
+    "frames": 734,
+    "anchorRng2": 799052339,
+    "alternate": {
+     "runsSha1": "d61c66e10ae723417e85f9f9dc8806c3b2541227",
+     "runsSha1Run2": "d61c66e10ae723417e85f9f9dc8806c3b2541227",
+     "allFieldsEqualExceptFinalStateSha1": true,
+     "finalStateSha1Equal": false,
+     "frames": 734,
+     "anchorRng2": 979118634
+    }
+   },
+   "drawsPerBody": 42,
+   "entries": [
+    {
+     "key": "wish",
+     "bodyLabel": "Move_WISH",
+     "activationFrame": 65,
+     "acceptedActivationValue": 2958200064,
+     "acceptedActivationValueHex": "0xB0528D00",
+     "acceptedWindowStart": 65,
+     "acceptedWindowStartMinusActivation": 0,
+     "draws": [
+      {
+       "ageOffset": 41,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 44,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 47,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 50,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 53,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 56,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 59,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 62,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 65,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 68,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 71,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 74,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 77,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 80,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 83,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 86,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 89,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 92,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 95,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 98,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      },
+      {
+       "ageOffset": 101,
+       "count": 2,
+       "transform": [
+        "& 3 == 0 ? tile+4 : tile+5  [battle_anim_effects_3.c:2147]",
+        "& 7, >3 negated  [battle_anim_effects_3.c:2153]"
+       ],
+       "consumerField": [
+        "twinkles[i].tile / tileOffset",
+        "twinkles[i].y2 / yOffset"
+       ]
+      }
+     ],
+     "drawsTotal": 42,
+     "drawFrames": 21,
+     "lagFramesBeforeLastDraw": 0,
+     "lagFramesInBody": 0,
+     "pinnedSource": "tools/compare/fixtures/wish-player-illumise-opponent-onix.json twinkles[21]",
+     "pinnedWords": [
+      [
+       4,
+       -4
+      ],
+      [
+       5,
+       2
+      ],
+      [
+       5,
+       1
+      ],
+      [
+       5,
+       -4
+      ],
+      [
+       5,
+       -6
+      ],
+      [
+       5,
+       3
+      ],
+      [
+       5,
+       0
+      ],
+      [
+       5,
+       2
+      ],
+      [
+       5,
+       -5
+      ],
+      [
+       5,
+       -5
+      ],
+      [
+       5,
+       1
+      ],
+      [
+       5,
+       3
+      ],
+      [
+       5,
+       -4
+      ],
+      [
+       5,
+       1
+      ],
+      [
+       5,
+       1
+      ],
+      [
+       4,
+       2
+      ],
+      [
+       5,
+       0
+      ],
+      [
+       5,
+       -4
+      ],
+      [
+       5,
+       1
+      ],
+      [
+       5,
+       -6
+      ],
+      [
+       5,
+       0
+      ]
+     ],
+     "predictedFromPlan": [
+      [
+       4,
+       -4
+      ],
+      [
+       5,
+       2
+      ],
+      [
+       5,
+       1
+      ],
+      [
+       5,
+       -4
+      ],
+      [
+       5,
+       -6
+      ],
+      [
+       5,
+       3
+      ],
+      [
+       5,
+       0
+      ],
+      [
+       5,
+       2
+      ],
+      [
+       5,
+       -5
+      ],
+      [
+       5,
+       -5
+      ],
+      [
+       5,
+       1
+      ],
+      [
+       5,
+       3
+      ],
+      [
+       5,
+       -4
+      ],
+      [
+       5,
+       1
+      ],
+      [
+       5,
+       1
+      ],
+      [
+       4,
+       2
+      ],
+      [
+       5,
+       0
+      ],
+      [
+       5,
+       -4
+      ],
+      [
+       5,
+       1
+      ],
+      [
+       5,
+       -6
+      ],
+      [
+       5,
+       0
+      ]
+     ],
+     "reproduced": true,
+     "replayEqualsObservedWords": true,
+     "wordToField": {
+      "twinkle i word0": "twinkles[i].tileOffset (w&3==0 ? 4 : 5)",
+      "twinkle i word1": "twinkles[i].yOffset (w&7, >3 negated)"
+     },
+     "alternate": {
+      "scenario": "tools/battle-lab/prep12-wish-alt-volbeat-golem.json",
+      "activationFrame": 64,
+      "activationValueHex": "0xB0528D00",
+      "activationValue": 2958200064,
+      "planShapeIdenticalToAccepted": true,
+      "replayEqualsObservedWords": true,
+      "denseWindowFromActivation": {
+       "startFrame": 64,
+       "note": "alternate window start = activation frame + the accepted (window start - activation) offset; length = the accepted window's frameCount"
+      },
+      "firstWords": [
+       57532,
+       16100
+      ]
+     }
+    }
+   ],
+   "reproducedAll": true
+  },
+  "mud-slap": {
+   "scenario": "tools/battle-lab/mechanic-mud-slap-player-pidgeotto-onix.json",
+   "determinism": {
+    "runsSha1": "afc63cf259ffb2cd819baa50db2f1d658621eb51",
+    "runsSha1Run2": "afc63cf259ffb2cd819baa50db2f1d658621eb51",
+    "allFieldsEqualExceptFinalStateSha1": true,
+    "finalStateSha1Equal": false,
+    "frames": 734,
+    "anchorRng2": 2964911078,
+    "alternate": {
+     "runsSha1": "44bb6c6a140f174779b985c850a5b0cf49f56ceb",
+     "runsSha1Run2": "44bb6c6a140f174779b985c850a5b0cf49f56ceb",
+     "allFieldsEqualExceptFinalStateSha1": true,
+     "finalStateSha1Equal": false,
+     "frames": 734,
+     "anchorRng2": 1935180205
+    }
+   },
+   "drawsPerBody": 60,
+   "entries": [
+    {
+     "key": "mud-slap",
+     "bodyLabel": "Move_MUD_SLAP",
+     "activationFrame": 77,
+     "acceptedActivationValue": 2024241883,
+     "acceptedActivationValueHex": "0x78A77ADB",
+     "acceptedWindowStart": 80,
+     "acceptedWindowStartMinusActivation": 3,
+     "draws": [
+      {
+       "ageOffset": 9,
+       "count": 10,
+       "transform": [
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]"
+       ],
+       "consumerField": [
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep"
+       ]
+      },
+      {
+       "ageOffset": 13,
+       "count": 10,
+       "transform": [
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]"
+       ],
+       "consumerField": [
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep"
+       ]
+      },
+      {
+       "ageOffset": 17,
+       "count": 10,
+       "transform": [
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]"
+       ],
+       "consumerField": [
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep"
+       ]
+      },
+      {
+       "ageOffset": 21,
+       "count": 10,
+       "transform": [
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]"
+       ],
+       "consumerField": [
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep"
+       ]
+      },
+      {
+       "ageOffset": 25,
+       "count": 10,
+       "transform": [
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]"
+       ],
+       "consumerField": [
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep"
+       ]
+      },
+      {
+       "ageOffset": 29,
+       "count": 10,
+       "transform": [
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]"
+       ],
+       "consumerField": [
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep"
+       ]
+      }
+     ],
+     "drawsTotal": 60,
+     "drawFrames": 6,
+     "lagFramesBeforeLastDraw": 0,
+     "lagFramesInBody": 0,
+     "pinnedSource": "tools/compare/fixtures/mud-slap-player-pidgeotto-onix.json animationProfile.mud[30] (xStep, yStep)",
+     "pinnedWords": [
+      [
+       960,
+       781
+      ],
+      [
+       960,
+       921
+      ],
+      [
+       1176,
+       1089
+      ],
+      [
+       1292,
+       1011
+      ],
+      [
+       1024,
+       1101
+      ],
+      [
+       1152,
+       961
+      ],
+      [
+       946,
+       1037
+      ],
+      [
+       972,
+       729
+      ],
+      [
+       1112,
+       1063
+      ],
+      [
+       1152,
+       1089
+      ],
+      [
+       1330,
+       909
+      ],
+      [
+       998,
+       1089
+      ],
+      [
+       1112,
+       961
+      ],
+      [
+       1126,
+       833
+      ],
+      [
+       1280,
+       769
+      ],
+      [
+       960,
+       921
+      ],
+      [
+       1318,
+       781
+      ],
+      [
+       1152,
+       781
+      ],
+      [
+       1304,
+       793
+      ],
+      [
+       1074,
+       897
+      ],
+      [
+       1344,
+       871
+      ],
+      [
+       1010,
+       961
+      ],
+      [
+       1240,
+       883
+      ],
+      [
+       946,
+       793
+      ],
+      [
+       1202,
+       999
+      ],
+      [
+       1176,
+       769
+      ],
+      [
+       1010,
+       1113
+      ],
+      [
+       1254,
+       897
+      ],
+      [
+       1138,
+       793
+      ],
+      [
+       1176,
+       897
+      ]
+     ],
+     "predictedFromPlan": [
+      [
+       960,
+       781
+      ],
+      [
+       960,
+       921
+      ],
+      [
+       1176,
+       1089
+      ],
+      [
+       1292,
+       1011
+      ],
+      [
+       1024,
+       1101
+      ],
+      [
+       1152,
+       961
+      ],
+      [
+       946,
+       1037
+      ],
+      [
+       972,
+       729
+      ],
+      [
+       1112,
+       1063
+      ],
+      [
+       1152,
+       1089
+      ],
+      [
+       1330,
+       909
+      ],
+      [
+       998,
+       1089
+      ],
+      [
+       1112,
+       961
+      ],
+      [
+       1126,
+       833
+      ],
+      [
+       1280,
+       769
+      ],
+      [
+       960,
+       921
+      ],
+      [
+       1318,
+       781
+      ],
+      [
+       1152,
+       781
+      ],
+      [
+       1304,
+       793
+      ],
+      [
+       1074,
+       897
+      ],
+      [
+       1344,
+       871
+      ],
+      [
+       1010,
+       961
+      ],
+      [
+       1240,
+       883
+      ],
+      [
+       946,
+       793
+      ],
+      [
+       1202,
+       999
+      ],
+      [
+       1176,
+       769
+      ],
+      [
+       1010,
+       1113
+      ],
+      [
+       1254,
+       897
+      ],
+      [
+       1138,
+       793
+      ],
+      [
+       1176,
+       897
+      ]
+     ],
+     "reproduced": true,
+     "replayEqualsObservedWords": true,
+     "wordToField": {
+      "dirt i word0": "xOffset = w & 0x1f, >16 -> 16-xOffset; data[2]=targetX+xOffset -> xStep = (|dx|<<8 as u16)/20, LSB=left",
+      "dirt i word1": "yOffset = w & 0x1f, same clamp; data[4]=targetY+yOffset -> yStep"
+     },
+     "alternate": {
+      "scenario": "tools/battle-lab/prep12-mud-slap-alt-set156-set146.json",
+      "activationFrame": 72,
+      "activationValueHex": "0x481C6973",
+      "activationValue": 1209821555,
+      "planShapeIdenticalToAccepted": true,
+      "replayEqualsObservedWords": true,
+      "denseWindowFromActivation": {
+       "startFrame": 75,
+       "note": "alternate window start = activation frame + the accepted (window start - activation) offset; length = the accepted window's frameCount"
+      },
+      "firstWords": [
+       55981,
+       7170,
+       50660,
+       46451,
+       15783,
+       24630,
+       64902,
+       48069,
+       58590,
+       25548
+      ]
+     },
+     "fittedScenarioConstant": {
+      "targetMinusSource": [
+       89,
+       -73
+      ],
+      "uniqueSolutionsInRange(-150..150)": 1,
+      "geometryExpectation": "target (BATTLER_COORD_X_2,Y_PIC_OFFSET) minus source (attacker X_2 + 15 [player], Y_PIC_OFFSET + 15)"
+     }
+    }
+   ],
+   "reproducedAll": true
+  },
+  "sand-attack": {
+   "scenario": "tools/battle-lab/mechanic-sand-attack-player-pidgeotto-onix.json",
+   "determinism": {
+    "runsSha1": "2d5fe4e46c01abd149888004ac0452883b4c1091",
+    "runsSha1Run2": "2d5fe4e46c01abd149888004ac0452883b4c1091",
+    "allFieldsEqualExceptFinalStateSha1": true,
+    "finalStateSha1Equal": false,
+    "frames": 734,
+    "anchorRng2": 2964911078,
+    "alternate": {
+     "runsSha1": "b148d073dd118ea92f8be6c185f2ccb201770954",
+     "runsSha1Run2": "b148d073dd118ea92f8be6c185f2ccb201770954",
+     "allFieldsEqualExceptFinalStateSha1": true,
+     "finalStateSha1Equal": false,
+     "frames": 734,
+     "anchorRng2": 1935180205
+    }
+   },
+   "drawsPerBody": 60,
+   "entries": [
+    {
+     "key": "sand-attack",
+     "bodyLabel": "Move_SAND_ATTACK",
+     "activationFrame": 78,
+     "acceptedActivationValue": 2024241883,
+     "acceptedActivationValueHex": "0x78A77ADB",
+     "acceptedWindowStart": 46,
+     "acceptedWindowStartMinusActivation": -32,
+     "draws": [
+      {
+       "ageOffset": 12,
+       "count": 10,
+       "transform": [
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]"
+       ],
+       "consumerField": [
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep"
+       ]
+      },
+      {
+       "ageOffset": 16,
+       "count": 10,
+       "transform": [
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]"
+       ],
+       "consumerField": [
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep"
+       ]
+      },
+      {
+       "ageOffset": 20,
+       "count": 10,
+       "transform": [
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]"
+       ],
+       "consumerField": [
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep"
+       ]
+      },
+      {
+       "ageOffset": 24,
+       "count": 10,
+       "transform": [
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]"
+       ],
+       "consumerField": [
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep"
+       ]
+      },
+      {
+       "ageOffset": 28,
+       "count": 10,
+       "transform": [
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]"
+       ],
+       "consumerField": [
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep"
+       ]
+      },
+      {
+       "ageOffset": 32,
+       "count": 10,
+       "transform": [
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]",
+        "& 0x1f, >16 -> 16-x; data[2]=targetX+x; xStep=(|dx|<<8 as u16)/20, LSB=left  [battle_anim_ground.c:213]",
+        "& 0x1f, >16 -> 16-y; data[4]=targetY+y; yStep likewise  [battle_anim_ground.c:214]"
+       ],
+       "consumerField": [
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep",
+        "animationProfile.mud|dirt[i].xStep",
+        "animationProfile.mud|dirt[i].yStep"
+       ]
+      }
+     ],
+     "drawsTotal": 60,
+     "drawFrames": 6,
+     "lagFramesBeforeLastDraw": 0,
+     "lagFramesInBody": 2,
+     "pinnedSource": "tools/compare/fixtures/sand-attack-player-pidgeotto-onix.json animationProfile.dirt[30] (xStep, yStep)",
+     "pinnedWords": [
+      [
+       1152,
+       897
+      ],
+      [
+       984,
+       781
+      ],
+      [
+       1062,
+       1049
+      ],
+      [
+       972,
+       947
+      ],
+      [
+       1010,
+       897
+      ],
+      [
+       1036,
+       1101
+      ],
+      [
+       1344,
+       961
+      ],
+      [
+       1010,
+       921
+      ],
+      [
+       984,
+       883
+      ],
+      [
+       1202,
+       1063
+      ],
+      [
+       984,
+       961
+      ],
+      [
+       1112,
+       947
+      ],
+      [
+       1240,
+       793
+      ],
+      [
+       1304,
+       973
+      ],
+      [
+       984,
+       871
+      ],
+      [
+       1292,
+       921
+      ],
+      [
+       1292,
+       769
+      ],
+      [
+       1280,
+       999
+      ],
+      [
+       1176,
+       973
+      ],
+      [
+       1062,
+       729
+      ],
+      [
+       1112,
+       833
+      ],
+      [
+       1190,
+       1127
+      ],
+      [
+       1280,
+       871
+      ],
+      [
+       1074,
+       845
+      ],
+      [
+       1024,
+       743
+      ],
+      [
+       960,
+       819
+      ],
+      [
+       1176,
+       935
+      ],
+      [
+       1280,
+       897
+      ],
+      [
+       1176,
+       743
+      ],
+      [
+       1152,
+       897
+      ]
+     ],
+     "predictedFromPlan": [
+      [
+       1152,
+       897
+      ],
+      [
+       984,
+       781
+      ],
+      [
+       1062,
+       1049
+      ],
+      [
+       972,
+       947
+      ],
+      [
+       1010,
+       897
+      ],
+      [
+       1036,
+       1101
+      ],
+      [
+       1344,
+       961
+      ],
+      [
+       1010,
+       921
+      ],
+      [
+       984,
+       883
+      ],
+      [
+       1202,
+       1063
+      ],
+      [
+       984,
+       961
+      ],
+      [
+       1112,
+       947
+      ],
+      [
+       1240,
+       793
+      ],
+      [
+       1304,
+       973
+      ],
+      [
+       984,
+       871
+      ],
+      [
+       1292,
+       921
+      ],
+      [
+       1292,
+       769
+      ],
+      [
+       1280,
+       999
+      ],
+      [
+       1176,
+       973
+      ],
+      [
+       1062,
+       729
+      ],
+      [
+       1112,
+       833
+      ],
+      [
+       1190,
+       1127
+      ],
+      [
+       1280,
+       871
+      ],
+      [
+       1074,
+       845
+      ],
+      [
+       1024,
+       743
+      ],
+      [
+       960,
+       819
+      ],
+      [
+       1176,
+       935
+      ],
+      [
+       1280,
+       897
+      ],
+      [
+       1176,
+       743
+      ],
+      [
+       1152,
+       897
+      ]
+     ],
+     "reproduced": true,
+     "replayEqualsObservedWords": true,
+     "wordToField": {
+      "dirt i word0": "xOffset = w & 0x1f, >16 -> 16-xOffset; data[2]=targetX+xOffset -> xStep = (|dx|<<8 as u16)/20, LSB=left",
+      "dirt i word1": "yOffset = w & 0x1f, same clamp; data[4]=targetY+yOffset -> yStep"
+     },
+     "alternate": {
+      "scenario": "tools/battle-lab/prep12-sand-attack-alt-set156-set146.json",
+      "activationFrame": 73,
+      "activationValueHex": "0x481C6973",
+      "activationValue": 1209821555,
+      "planShapeIdenticalToAccepted": true,
+      "replayEqualsObservedWords": true,
+      "denseWindowFromActivation": {
+       "startFrame": 41,
+       "note": "alternate window start = activation frame + the accepted (window start - activation) offset; length = the accepted window's frameCount"
+      },
+      "firstWords": [
+       46451,
+       15783,
+       24630,
+       64902,
+       48069,
+       58590,
+       25548,
+       56190,
+       23105,
+       11939
+      ]
+     },
+     "fittedScenarioConstant": {
+      "targetMinusSource": [
+       89,
+       -73
+      ],
+      "uniqueSolutionsInRange(-150..150)": 1,
+      "geometryExpectation": "target (BATTLER_COORD_X_2,Y_PIC_OFFSET) minus source (attacker X_2 + 15 [player], Y_PIC_OFFSET + 15)"
+     }
+    }
+   ],
+   "reproducedAll": true
+  },
+  "flail": {
+   "scenario": "tools/battle-lab/mechanic-flail-natural-hp-player-krabby-opponent-onix.json",
+   "determinism": {
+    "runsSha1": "9574826255c784ab429d684a81c4c209c76b1ee0",
+    "runsSha1Run2": "9574826255c784ab429d684a81c4c209c76b1ee0",
+    "allFieldsEqualExceptFinalStateSha1": true,
+    "finalStateSha1Equal": false,
+    "frames": 7340,
+    "anchorRng2": 2964911078,
+    "alternate": {
+     "runsSha1": "7368e857cfeaea55cbb2ebb5549b574cdd66b806",
+     "runsSha1Run2": "7368e857cfeaea55cbb2ebb5549b574cdd66b806",
+     "allFieldsEqualExceptFinalStateSha1": true,
+     "finalStateSha1Equal": false,
+     "frames": 734,
+     "anchorRng2": 2964911078
+    }
+   },
+   "drawsPerBody": 2,
+   "entries": [
+    {
+     "key": "flail@power40",
+     "bodyLabel": "Move_FLAIL",
+     "activationFrame": 429,
+     "acceptedActivationValue": 1716326075,
+     "acceptedActivationValueHex": "0x664D0EBB",
+     "acceptedWindowStart": 429,
+     "acceptedWindowStartMinusActivation": 0,
+     "draws": [
+      {
+       "ageOffset": 49,
+       "count": 2,
+       "transform": [
+        "% 48, then -24 into x2  [battle_anim_normal.c:1062]",
+        "% 24, then -12 into y2  [battle_anim_normal.c:1063]"
+       ],
+       "consumerField": [
+        "visualRandom.x",
+        "visualRandom.y"
+       ]
+      }
+     ],
+     "drawsTotal": 2,
+     "drawFrames": 1,
+     "lagFramesBeforeLastDraw": 0,
+     "lagFramesInBody": 2,
+     "pinnedSource": "flail-natural-hp-player-back-power-40-dense-state first gRandomPosHitSplatSpriteTemplate (x2+24, y2+12)",
+     "pinnedWords": [
+      [
+       4,
+       3
+      ]
+     ],
+     "predictedFromPlan": [
+      [
+       4,
+       3
+      ]
+     ],
+     "reproduced": true,
+     "replayEqualsObservedWords": true,
+     "wordToField": {
+      "word0": "visualRandom.x (% 48, then -24 into x2)",
+      "word1": "visualRandom.y (% 24, then -12 into y2)"
+     },
+     "power": 40,
+     "activationValueEqualsDenseCorpus": true
+    },
+    {
+     "key": "flail@power80",
+     "bodyLabel": "Move_FLAIL",
+     "activationFrame": 1863,
+     "acceptedActivationValue": 3643745719,
+     "acceptedActivationValueHex": "0xD92F25B7",
+     "acceptedWindowStart": 1863,
+     "acceptedWindowStartMinusActivation": 0,
+     "draws": [
+      {
+       "ageOffset": 49,
+       "count": 2,
+       "transform": [
+        "% 48, then -24 into x2  [battle_anim_normal.c:1062]",
+        "% 24, then -12 into y2  [battle_anim_normal.c:1063]"
+       ],
+       "consumerField": [
+        "visualRandom.x",
+        "visualRandom.y"
+       ]
+      }
+     ],
+     "drawsTotal": 2,
+     "drawFrames": 1,
+     "lagFramesBeforeLastDraw": 0,
+     "lagFramesInBody": 2,
+     "pinnedSource": "flail-natural-hp-player-back-power-80-dense-state first gRandomPosHitSplatSpriteTemplate (x2+24, y2+12)",
+     "pinnedWords": [
+      [
+       46,
+       14
+      ]
+     ],
+     "predictedFromPlan": [
+      [
+       46,
+       14
+      ]
+     ],
+     "reproduced": true,
+     "replayEqualsObservedWords": true,
+     "wordToField": {
+      "word0": "visualRandom.x (% 48, then -24 into x2)",
+      "word1": "visualRandom.y (% 24, then -12 into y2)"
+     },
+     "power": 80,
+     "activationValueEqualsDenseCorpus": true
+    },
+    {
+     "key": "flail@power100",
+     "bodyLabel": "Move_FLAIL",
+     "activationFrame": 3314,
+     "acceptedActivationValue": 1840954490,
+     "acceptedActivationValueHex": "0x6DBABC7A",
+     "acceptedWindowStart": 3314,
+     "acceptedWindowStartMinusActivation": 0,
+     "draws": [
+      {
+       "ageOffset": 49,
+       "count": 2,
+       "transform": [
+        "% 48, then -24 into x2  [battle_anim_normal.c:1062]",
+        "% 24, then -12 into y2  [battle_anim_normal.c:1063]"
+       ],
+       "consumerField": [
+        "visualRandom.x",
+        "visualRandom.y"
+       ]
+      }
+     ],
+     "drawsTotal": 2,
+     "drawFrames": 1,
+     "lagFramesBeforeLastDraw": 0,
+     "lagFramesInBody": 2,
+     "pinnedSource": "flail-natural-hp-player-back-power-100-dense-state first gRandomPosHitSplatSpriteTemplate (x2+24, y2+12)",
+     "pinnedWords": [
+      [
+       22,
+       7
+      ]
+     ],
+     "predictedFromPlan": [
+      [
+       22,
+       7
+      ]
+     ],
+     "reproduced": true,
+     "replayEqualsObservedWords": true,
+     "wordToField": {
+      "word0": "visualRandom.x (% 48, then -24 into x2)",
+      "word1": "visualRandom.y (% 24, then -12 into y2)"
+     },
+     "alternate": {
+      "scenario": "tools/battle-lab/prep12-flail-alt-magikarp-golem.json",
+      "activationFrame": 73,
+      "activationValueHex": "0x7695EB87",
+      "activationValue": 1989536647,
+      "planShapeIdenticalToAccepted": true,
+      "replayEqualsObservedWords": true,
+      "denseWindowFromActivation": {
+       "startFrame": 73,
+       "note": "alternate window start = activation frame + the accepted (window start - activation) offset; length = the accepted window's frameCount"
+      },
+      "firstWords": [
+       43,
+       63629
+      ]
+     },
+     "power": 100,
+     "activationValueEqualsDenseCorpus": true
+    },
+    {
+     "key": "flail@power150",
+     "bodyLabel": "Move_FLAIL",
+     "activationFrame": 4040,
+     "acceptedActivationValue": 3779721043,
+     "acceptedActivationValueHex": "0xE149F753",
+     "acceptedWindowStart": 4040,
+     "acceptedWindowStartMinusActivation": 0,
+     "draws": [
+      {
+       "ageOffset": 49,
+       "count": 2,
+       "transform": [
+        "% 48, then -24 into x2  [battle_anim_normal.c:1062]",
+        "% 24, then -12 into y2  [battle_anim_normal.c:1063]"
+       ],
+       "consumerField": [
+        "visualRandom.x",
+        "visualRandom.y"
+       ]
+      }
+     ],
+     "drawsTotal": 2,
+     "drawFrames": 1,
+     "lagFramesBeforeLastDraw": 0,
+     "lagFramesInBody": 2,
+     "pinnedSource": "flail-natural-hp-player-back-power-150-dense-state first gRandomPosHitSplatSpriteTemplate (x2+24, y2+12)",
+     "pinnedWords": [
+      [
+       14,
+       1
+      ]
+     ],
+     "predictedFromPlan": [
+      [
+       14,
+       1
+      ]
+     ],
+     "reproduced": true,
+     "replayEqualsObservedWords": true,
+     "wordToField": {
+      "word0": "visualRandom.x (% 48, then -24 into x2)",
+      "word1": "visualRandom.y (% 24, then -12 into y2)"
+     },
+     "power": 150,
+     "activationValueEqualsDenseCorpus": true
+    },
+    {
+     "key": "flail@power200",
+     "bodyLabel": "Move_FLAIL",
+     "activationFrame": 4769,
+     "acceptedActivationValue": 1106230405,
+     "acceptedActivationValueHex": "0x41EFBC85",
+     "acceptedWindowStart": 4769,
+     "acceptedWindowStartMinusActivation": 0,
+     "draws": [
+      {
+       "ageOffset": 49,
+       "count": 2,
+       "transform": [
+        "% 48, then -24 into x2  [battle_anim_normal.c:1062]",
+        "% 24, then -12 into y2  [battle_anim_normal.c:1063]"
+       ],
+       "consumerField": [
+        "visualRandom.x",
+        "visualRandom.y"
+       ]
+      }
+     ],
+     "drawsTotal": 2,
+     "drawFrames": 1,
+     "lagFramesBeforeLastDraw": 0,
+     "lagFramesInBody": 2,
+     "pinnedSource": "flail-natural-hp-player-back-power-200-dense-state first gRandomPosHitSplatSpriteTemplate (x2+24, y2+12)",
+     "pinnedWords": [
+      [
+       34,
+       4
+      ]
+     ],
+     "predictedFromPlan": [
+      [
+       34,
+       4
+      ]
+     ],
+     "reproduced": true,
+     "replayEqualsObservedWords": true,
+     "wordToField": {
+      "word0": "visualRandom.x (% 48, then -24 into x2)",
+      "word1": "visualRandom.y (% 24, then -12 into y2)"
+     },
+     "power": 200,
+     "activationValueEqualsDenseCorpus": true
+    }
+   ],
+   "reproducedAll": true
+  },
+  "hidden-power": {
+   "scenario": "tools/battle-lab/mechanic-hidden-power-player-unown-opponent-onix.json",
+   "determinism": {
+    "runsSha1": "c7fb2fdd987e5c004408b22577fc2d167112bb31",
+    "runsSha1Run2": "c7fb2fdd987e5c004408b22577fc2d167112bb31",
+    "allFieldsEqualExceptFinalStateSha1": true,
+    "finalStateSha1Equal": false,
+    "frames": 634,
+    "anchorRng2": 2964911078
+   },
+   "drawsPerBody": 0,
+   "entries": [
+    {
+     "key": "hidden-power",
+     "bodyLabel": "Move_HIDDEN_POWER",
+     "activationFrame": 77,
+     "acceptedActivationValue": 3293766408,
+     "acceptedActivationValueHex": "0xC452E308",
+     "acceptedWindowStart": 77,
+     "acceptedWindowStartMinusActivation": 0,
+     "draws": [],
+     "drawsTotal": 0,
+     "drawFrames": 0,
+     "lagFramesBeforeLastDraw": 0,
+     "lagFramesInBody": 1,
+     "pinnedSource": "hidden-power-player-dense-state frames[0].animationRng (HiddenPowerAnimationProfile.animationRngSeed)",
+     "pinnedWords": null,
+     "predictedFromPlan": null,
+     "reproduced": null,
+     "replayEqualsObservedWords": true,
+     "wordToField": {
+      "none": "no Random2 draw anywhere in the body"
+     },
+     "activationValueEqualsPinned": true
+    }
+   ],
+   "reproducedAll": null
+  },
+  "ice-beam": {
+   "scenario": "tools/battle-lab/mechanic-ice-beam-player-delcatty-opponent-shuckle.json",
+   "determinism": {
+    "runsSha1": "8254bd106a7548925ecbe0791f0c8dcf1d5aa56a",
+    "runsSha1Run2": "8254bd106a7548925ecbe0791f0c8dcf1d5aa56a",
+    "allFieldsEqualExceptFinalStateSha1": true,
+    "finalStateSha1Equal": false,
+    "frames": 634,
+    "anchorRng2": 1935180205
+   },
+   "drawsPerBody": 0,
+   "entries": [
+    {
+     "key": "ice-beam",
+     "bodyLabel": "Move_ICE_BEAM",
+     "activationFrame": 75,
+     "acceptedActivationValue": 689912548,
+     "acceptedActivationValueHex": "0x291F3AE4",
+     "acceptedWindowStart": 75,
+     "acceptedWindowStartMinusActivation": 0,
+     "draws": [],
+     "drawsTotal": 0,
+     "drawFrames": 0,
+     "lagFramesBeforeLastDraw": 0,
+     "lagFramesInBody": 2,
+     "pinnedSource": "ice-beam-player-dense-state frames[0].animationRng (IceBeamAnimationProfile.animationRngStart 689912548)",
+     "pinnedWords": null,
+     "predictedFromPlan": null,
+     "reproduced": null,
+     "replayEqualsObservedWords": true,
+     "wordToField": {
+      "none": "no Random2 draw anywhere in the body"
+     },
+     "activationValueEqualsPinned": true
+    }
+   ],
+   "reproducedAll": null
+  },
+  "water-spout": {
+   "scenario": "tools/battle-lab/mechanic-water-spout-player-wailmer-opponent-shuckle.json",
+   "determinism": {
+    "runsSha1": "5b07f2299aa3232231b35fa068f76b5166339dd4",
+    "runsSha1Run2": "5b07f2299aa3232231b35fa068f76b5166339dd4",
+    "allFieldsEqualExceptFinalStateSha1": true,
+    "finalStateSha1Equal": false,
+    "frames": 634,
+    "anchorRng2": 3823409300
+   },
+   "drawsPerBody": 0,
+   "entries": [
+    {
+     "key": "water-spout",
+     "bodyLabel": "Move_WATER_SPOUT",
+     "activationFrame": 79,
+     "acceptedActivationValue": 2958200064,
+     "acceptedActivationValueHex": "0xB0528D00",
+     "acceptedWindowStart": 79,
+     "acceptedWindowStartMinusActivation": 0,
+     "draws": [],
+     "drawsTotal": 0,
+     "drawFrames": 0,
+     "lagFramesBeforeLastDraw": 0,
+     "lagFramesInBody": 2,
+     "pinnedSource": "water-spout-player-dense-state frames[0].animationRng (WaterSpoutLiveInputs.animationRng)",
+     "pinnedWords": null,
+     "predictedFromPlan": null,
+     "reproduced": null,
+     "replayEqualsObservedWords": true,
+     "wordToField": {
+      "none": "no Random2 draw anywhere in the body"
+     },
+     "activationValueEqualsPinned": true
+    }
+   ],
+   "reproducedAll": null
+  }
+ }
+}
