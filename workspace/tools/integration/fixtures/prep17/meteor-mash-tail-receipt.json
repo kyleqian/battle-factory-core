@@ -1,0 +1,219 @@
+{
+ "schema": "prep17-meteor-mash-tail.v1",
+ "ageZero": "first anim-active row of the 309 body (the probe's activation, = script activation)",
+ "cases": {
+  "mechanic-meteor-mash-opponent-metang-player-onix": {
+   "identicalAcrossFreshProcesses": true,
+   "activation": 231,
+   "bodyRows": 214,
+   "lagRows": [
+    195
+   ],
+   "fadeUpLastRow": 192,
+   "fallFirstRow": 197,
+   "lastMiniFreeRow": 194,
+   "miniFreeTail": [
+    [
+     188,
+     16
+    ],
+    [
+     190,
+     17
+    ],
+    [
+     192,
+     18
+    ],
+    [
+     194,
+     19
+    ]
+   ],
+   "heavyRow": [
+    193
+   ],
+   "row192": {
+    "instrs": 43873,
+    "random2Vcount": 204
+   },
+   "row193": {
+    "instrs": 136080,
+    "random2Vcount": 205,
+    "drawBgStartVcount": 10,
+    "lzEndVcount": 109
+   },
+   "row194HasRandom2": false
+  },
+  "mechanic-meteor-mash-player-metang-opponent-onix": {
+   "identicalAcrossFreshProcesses": true,
+   "activation": 298,
+   "bodyRows": 213,
+   "lagRows": [],
+   "fadeUpLastRow": 192,
+   "fallFirstRow": 196,
+   "lastMiniFreeRow": 194,
+   "miniFreeTail": [
+    [
+     188,
+     16
+    ],
+    [
+     190,
+     17
+    ],
+    [
+     192,
+     18
+    ],
+    [
+     194,
+     19
+    ]
+   ],
+   "heavyRow": [
+    193
+   ],
+   "row192": {
+    "instrs": 40528,
+    "random2Vcount": 199
+   },
+   "row193": {
+    "instrs": 128103,
+    "random2Vcount": 193,
+    "drawBgStartVcount": 226,
+    "lzEndVcount": 96
+   },
+   "row194HasRandom2": true
+  },
+  "meteor-mash-alt2-player-metang-opponent-golem": {
+   "identicalAcrossFreshProcesses": true,
+   "activation": 77,
+   "bodyRows": 214,
+   "lagRows": [
+    195
+   ],
+   "fadeUpLastRow": 192,
+   "fallFirstRow": 197,
+   "lastMiniFreeRow": 194,
+   "miniFreeTail": [
+    [
+     188,
+     16
+    ],
+    [
+     190,
+     17
+    ],
+    [
+     192,
+     18
+    ],
+    [
+     194,
+     19
+    ]
+   ],
+   "heavyRow": [
+    193
+   ],
+   "row192": {
+    "instrs": 46115,
+    "random2Vcount": 207
+   },
+   "row193": {
+    "instrs": 136921,
+    "random2Vcount": 207,
+    "drawBgStartVcount": 12,
+    "lzEndVcount": 111
+   },
+   "row194HasRandom2": false
+  },
+  "meteor-mash-alt3-player-golem-opponent-shiftry": {
+   "identicalAcrossFreshProcesses": true,
+   "activation": 302,
+   "bodyRows": 214,
+   "lagRows": [
+    195
+   ],
+   "fadeUpLastRow": 192,
+   "fallFirstRow": 197,
+   "lastMiniFreeRow": 194,
+   "miniFreeTail": [
+    [
+     188,
+     16
+    ],
+    [
+     190,
+     17
+    ],
+    [
+     192,
+     18
+    ],
+    [
+     194,
+     19
+    ]
+   ],
+   "heavyRow": [
+    193
+   ],
+   "row192": {
+    "instrs": 42900,
+    "random2Vcount": 203
+   },
+   "row193": {
+    "instrs": 135677,
+    "random2Vcount": 203,
+    "drawBgStartVcount": 8,
+    "lzEndVcount": 107
+   },
+   "row194HasRandom2": false
+  },
+  "prep12-meteor-mash-alt-shiftry-golem": {
+   "identicalAcrossFreshProcesses": true,
+   "activation": 78,
+   "bodyRows": 214,
+   "lagRows": [
+    195
+   ],
+   "fadeUpLastRow": 192,
+   "fallFirstRow": 197,
+   "lastMiniFreeRow": 194,
+   "miniFreeTail": [
+    [
+     188,
+     16
+    ],
+    [
+     190,
+     17
+    ],
+    [
+     192,
+     18
+    ],
+    [
+     194,
+     19
+    ]
+   ],
+   "heavyRow": [
+    193
+   ],
+   "row192": {
+    "instrs": 46464,
+    "random2Vcount": 208
+   },
+   "row193": {
+    "instrs": 137045,
+    "random2Vcount": 206,
+    "drawBgStartVcount": 11,
+    "lzEndVcount": 110
+   },
+   "row194HasRandom2": false
+  }
+ }
+}
