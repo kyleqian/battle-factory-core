@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 479,
-  "ids": 230,
+  "rows": 483,
+  "ids": 232,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -5089,6 +5089,50 @@
    "move": "HAIL",
    "orientation": "opponent",
    "duration": 158,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 315,
+   "move": "OVERHEAT",
+   "orientation": "player",
+   "duration": 230,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 315,
+   "move": "OVERHEAT",
+   "orientation": "opponent",
+   "duration": 230,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 318,
+   "move": "SILVER_WIND",
+   "orientation": "player",
+   "duration": 193,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 318,
+   "move": "SILVER_WIND",
+   "orientation": "opponent",
+   "duration": 196,
    "expected": 0,
    "drawn": [
     0
