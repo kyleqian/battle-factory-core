@@ -1,0 +1,434 @@
+{
+ "mechanic-ice-beam-opponent-delcatty-player-shuckle": {
+  "attackerSide": "opponent",
+  "species": [
+   213,
+   301
+  ],
+  "geometry": {
+   "attackerPictureOffset": {
+    "x": 176,
+    "y": 58
+   },
+   "targetPictureOffset": {
+    "x": 72,
+    "y": 99
+   },
+   "targetCenter": {
+    "x": 72,
+    "y": 99
+   },
+   "monbgBaseHofs": 472,
+   "monbgBaseVofs": 453
+  },
+  "anchors": {
+   "attackerSpriteCenter": {
+    "x": 176,
+    "y": 58
+   },
+   "targetSpriteCenter": {
+    "x": 72,
+    "y": 91
+   },
+   "romBattlerXY": [
+    [
+     72,
+     91
+    ],
+    [
+     176,
+     58
+    ]
+   ]
+  },
+  "monbgFormulaHolds": true,
+  "monbgData": [
+   6,
+   72,
+   91,
+   -40,
+   -59,
+   1,
+   0,
+   0
+  ],
+  "romSpawns": 48,
+  "reducerBirths": 48,
+  "slotAgeMatches": 48,
+  "xyMatches": 48,
+  "mismatchSamples": [],
+  "taskPairsRom": [
+   [
+    1,
+    "Task_UpdateMonBg",
+    1
+   ],
+   [
+    0,
+    "SoundTask_LoopSEAdjustPanning_Step",
+    26
+   ],
+   [
+    2,
+    "AnimTask_ShakeMon2_Step",
+    38
+   ],
+   [
+    0,
+    "Task_ClearMonBg",
+    198
+   ]
+  ],
+  "taskPairsReducerFirstAge": [
+   [
+    "1:Task_UpdateMonBg",
+    1
+   ],
+   [
+    "0:SoundTask_LoopSEAdjustPanning_Step",
+    26
+   ],
+   [
+    "2:AnimTask_ShakeMon2_Step",
+    38
+   ],
+   [
+    "0:Task_ClearMonBg",
+    198
+   ]
+  ],
+  "targetSpriteSlotRom": [
+   6,
+   8
+  ],
+  "targetSpriteSlotDefault": 6,
+  "battlerSub": [
+   30,
+   40
+  ]
+ },
+ "mechanic-ice-beam-player-delcatty-opponent-shuckle": {
+  "attackerSide": "player",
+  "species": [
+   301,
+   213
+  ],
+  "geometry": {
+   "attackerPictureOffset": {
+    "x": 72,
+    "y": 104
+   },
+   "targetPictureOffset": {
+    "x": 176,
+    "y": 49
+   },
+   "targetCenter": {
+    "x": 176,
+    "y": 49
+   },
+   "monbgBaseHofs": 368,
+   "monbgBaseVofs": 495
+  },
+  "anchors": {
+   "attackerSpriteCenter": {
+    "x": 72,
+    "y": 100
+   },
+   "targetSpriteCenter": {
+    "x": 176,
+    "y": 49
+   },
+   "romBattlerXY": [
+    [
+     72,
+     100
+    ],
+    [
+     176,
+     49
+    ]
+   ]
+  },
+  "monbgFormulaHolds": true,
+  "monbgData": [
+   8,
+   176,
+   49,
+   -144,
+   -17,
+   0,
+   1,
+   0
+  ],
+  "romSpawns": 48,
+  "reducerBirths": 48,
+  "slotAgeMatches": 48,
+  "xyMatches": 48,
+  "mismatchSamples": [],
+  "taskPairsRom": [
+   [
+    1,
+    "Task_UpdateMonBg",
+    1
+   ],
+   [
+    0,
+    "SoundTask_LoopSEAdjustPanning_Step",
+    26
+   ],
+   [
+    2,
+    "AnimTask_ShakeMon2_Step",
+    38
+   ],
+   [
+    0,
+    "Task_ClearMonBg",
+    198
+   ]
+  ],
+  "taskPairsReducerFirstAge": [
+   [
+    "1:Task_UpdateMonBg",
+    1
+   ],
+   [
+    "0:SoundTask_LoopSEAdjustPanning_Step",
+    26
+   ],
+   [
+    "2:AnimTask_ShakeMon2_Step",
+    38
+   ],
+   [
+    "0:Task_ClearMonBg",
+    198
+   ]
+  ],
+  "targetSpriteSlotRom": [
+   6,
+   8
+  ],
+  "targetSpriteSlotDefault": 8,
+  "battlerSub": [
+   30,
+   40
+  ]
+ },
+ "prep13-ice-beam-alt-opponent-lapras-golem": {
+  "attackerSide": "opponent",
+  "species": [
+   76,
+   131
+  ],
+  "geometry": {
+   "attackerPictureOffset": {
+    "x": 176,
+    "y": 53
+   },
+   "targetPictureOffset": {
+    "x": 72,
+    "y": 104
+   },
+   "targetCenter": {
+    "x": 72,
+    "y": 104
+   },
+   "monbgBaseHofs": 472,
+   "monbgBaseVofs": 448
+  },
+  "anchors": {
+   "attackerSpriteCenter": {
+    "x": 176,
+    "y": 53
+   },
+   "targetSpriteCenter": {
+    "x": 72,
+    "y": 96
+   },
+   "romBattlerXY": [
+    [
+     72,
+     96
+    ],
+    [
+     176,
+     53
+    ]
+   ]
+  },
+  "monbgFormulaHolds": true,
+  "monbgData": [
+   6,
+   72,
+   96,
+   -40,
+   -64,
+   1,
+   0,
+   0
+  ],
+  "romSpawns": 48,
+  "reducerBirths": 48,
+  "slotAgeMatches": 48,
+  "xyMatches": 48,
+  "mismatchSamples": [],
+  "taskPairsRom": [
+   [
+    1,
+    "Task_UpdateMonBg",
+    1
+   ],
+   [
+    0,
+    "SoundTask_LoopSEAdjustPanning_Step",
+    26
+   ],
+   [
+    2,
+    "AnimTask_ShakeMon2_Step",
+    38
+   ],
+   [
+    0,
+    "Task_ClearMonBg",
+    198
+   ]
+  ],
+  "taskPairsReducerFirstAge": [
+   [
+    "1:Task_UpdateMonBg",
+    1
+   ],
+   [
+    "0:SoundTask_LoopSEAdjustPanning_Step",
+    26
+   ],
+   [
+    "2:AnimTask_ShakeMon2_Step",
+    38
+   ],
+   [
+    "0:Task_ClearMonBg",
+    198
+   ]
+  ],
+  "targetSpriteSlotRom": [
+   6,
+   8
+  ],
+  "targetSpriteSlotDefault": 6,
+  "battlerSub": [
+   30,
+   40
+  ]
+ },
+ "prep13-ice-beam-alt-player-lapras-golem": {
+  "attackerSide": "player",
+  "species": [
+   131,
+   76
+  ],
+  "geometry": {
+   "attackerPictureOffset": {
+    "x": 72,
+    "y": 92
+   },
+   "targetPictureOffset": {
+    "x": 176,
+    "y": 45
+   },
+   "targetCenter": {
+    "x": 176,
+    "y": 45
+   },
+   "monbgBaseHofs": 368,
+   "monbgBaseVofs": 499
+  },
+  "anchors": {
+   "attackerSpriteCenter": {
+    "x": 72,
+    "y": 84
+   },
+   "targetSpriteCenter": {
+    "x": 176,
+    "y": 45
+   },
+   "romBattlerXY": [
+    [
+     72,
+     84
+    ],
+    [
+     176,
+     45
+    ]
+   ]
+  },
+  "monbgFormulaHolds": true,
+  "monbgData": [
+   8,
+   176,
+   45,
+   -144,
+   -13,
+   0,
+   1,
+   0
+  ],
+  "romSpawns": 48,
+  "reducerBirths": 48,
+  "slotAgeMatches": 48,
+  "xyMatches": 48,
+  "mismatchSamples": [],
+  "taskPairsRom": [
+   [
+    1,
+    "Task_UpdateMonBg",
+    1
+   ],
+   [
+    0,
+    "SoundTask_LoopSEAdjustPanning_Step",
+    26
+   ],
+   [
+    2,
+    "AnimTask_ShakeMon2_Step",
+    38
+   ],
+   [
+    0,
+    "Task_ClearMonBg",
+    198
+   ]
+  ],
+  "taskPairsReducerFirstAge": [
+   [
+    "1:Task_UpdateMonBg",
+    1
+   ],
+   [
+    "0:SoundTask_LoopSEAdjustPanning_Step",
+    26
+   ],
+   [
+    "2:AnimTask_ShakeMon2_Step",
+    38
+   ],
+   [
+    "0:Task_ClearMonBg",
+    198
+   ]
+  ],
+  "targetSpriteSlotRom": [
+   6,
+   8
+  ],
+  "targetSpriteSlotDefault": 8,
+  "battlerSub": [
+   30,
+   40
+  ]
+ }
+}
