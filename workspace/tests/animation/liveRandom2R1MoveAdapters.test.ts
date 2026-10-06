@@ -8,7 +8,7 @@ import {
 } from "../../src/engine/liveMoveAnimation.ts";
 import {
   LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS, LIVE_MOVE_RANDOM2_PLANS, activateLiveMovePresentationRng,
-  liveMovePresentationRngBodyKey, tickLiveMovePresentationRngSession,
+  liveMovePresentationRngBodyKey, miniTwinklingStarFromWords, tickLiveMovePresentationRngSession,
 } from "../../src/engine/liveMovePresentationRng.ts";
 import {
   createPresentationRngHostAt, createPresentationRngSession, presentationRngBodyWords,
@@ -82,6 +82,22 @@ const MOVES = [
     probe: "flail-full-hp-opponent",
     // 43/0 KRABBY: Flail at power 20 then 40 (request.power = gBattleMovePower after the HP drop).
     route: { seed: 43, streak: 0, slot: 2 as const, turns: 2, bodies: 2 },
+  },
+  {
+    name: "wish", id: 273,
+    // plans.json form: per star [tileOffset, yOffset] (miniTwinklingStarFromWords).
+    plansForm: (draws: readonly (readonly number[])[]): unknown => draws.map((pair) => {
+      const star = miniTwinklingStarFromWords(pair[0]!, pair[1]!);
+      return [star.tileOffset, star.yOffset];
+    }),
+    fixtures: {
+      player: "tools/integration/fixtures/random2-r1/wish-player-illumise-opponent-onix.json",
+      opponent: "tools/integration/fixtures/random2-r1/wish-opponent-illumise-player-onix.json",
+      alternate: "tools/integration/fixtures/random2-r1/wish-alt-player-volbeat-opponent-golem.json",
+    },
+    probe: "wish-opponent",
+    // First-found 16/14 PLUSLE: turn 1 Wish body; the turn-2 Wish fails by rule (a wish is pending), no body.
+    route: { seed: 16, streak: 14, slot: 3 as const, turns: 2, bodies: 1 },
   },
 ] as const;
 

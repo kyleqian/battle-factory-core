@@ -196,6 +196,215 @@
     }
    ],
    "scenario": "tools/battle-lab/mechanic-flail-opponent-krabby-player-onix.json"
+  },
+  {
+   "label": "wish-opponent",
+   "bodyLabel": "Move_WISH",
+   "runsSha1": "d767e9103aaf0cbea1ed2228e76dae98586b6bf1",
+   "runsSha1Run2": "d767e9103aaf0cbea1ed2228e76dae98586b6bf1",
+   "frames": 734,
+   "bodies": [
+    {
+     "activationFrame": 69,
+     "lastActiveFrame": 338,
+     "activationValue": 506220650,
+     "activationValueHex": "0x1E2C506A",
+     "plan": [
+      {
+       "ageOffset": 41,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 44,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 47,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 50,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 53,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 56,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 59,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 62,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 65,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 68,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 71,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 74,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 77,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 80,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 83,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 86,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 89,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 92,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 95,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 98,
+       "count": 2,
+       "lagBefore": 0
+      },
+      {
+       "ageOffset": 101,
+       "count": 2,
+       "lagBefore": 0
+      }
+     ],
+     "words": [
+      [
+       2629,
+       50618
+      ],
+      [
+       22331,
+       56412
+      ],
+      [
+       31080,
+       43
+      ],
+      [
+       44837,
+       43277
+      ],
+      [
+       18092,
+       44001
+      ],
+      [
+       59573,
+       12483
+      ],
+      [
+       6399,
+       59568
+      ],
+      [
+       51464,
+       1028
+      ],
+      [
+       40597,
+       37543
+      ],
+      [
+       56579,
+       30413
+      ],
+      [
+       963,
+       50240
+      ],
+      [
+       64527,
+       33697
+      ],
+      [
+       50925,
+       39483
+      ],
+      [
+       458,
+       47853
+      ],
+      [
+       36059,
+       44736
+      ],
+      [
+       59095,
+       34749
+      ],
+      [
+       50935,
+       62138
+      ],
+      [
+       26159,
+       53021
+      ],
+      [
+       15672,
+       26509
+      ],
+      [
+       43942,
+       11673
+      ],
+      [
+       28616,
+       4242
+      ]
+     ]
+    }
+   ],
+   "scenario": "tools/battle-lab/mechanic-wish-opponent-illumise-player-onix.json"
   }
  ]
 }

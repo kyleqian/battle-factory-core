@@ -74,7 +74,9 @@ import { HEAL_BELL_REUSED_ORDER_SLOTS } from "../animation/healBell.ts";
 import { KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, spriteOrderForSlots, spriteOrderWithOccupiedPrefix } from "./spriteOrderProvider.ts";
 import { DOUBLE_KICK_FRAME_COUNT } from "../animation/doubleKick.ts";
 import type { FlailPower } from "../animation/flail.ts";
-import { liveMovePresentationRngWords, type LiveMovePresentationRngInput } from "./liveMovePresentationRng.ts";
+import {
+  liveMovePresentationRngWords, miniTwinklingStarFromWords, type LiveMovePresentationRngInput,
+} from "./liveMovePresentationRng.ts";
 
 
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
@@ -241,9 +243,9 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     19, 340,
     // Rollout bodies 1..5: activation == window start (row 0) on both sides.
     205,
-    // Faithful-random adapters (liveMovePresentationRng.ts): Double Kick hit bodies, Astonish, Thrash, Flail start at activation (row 0,
+    // Faithful-random adapters (liveMovePresentationRng.ts): Double Kick hit bodies, Astonish, Thrash, Flail, Wish start at activation (row 0,
     // prep12 §0.2 / random2-r1 activation probes).
-    24, 310, 37, 175,
+    24, 310, 37, 175, 273,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -655,6 +657,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 37: return 103; // Thrash accepted window (72..174 / 76..178); each lock-in turn is its own body.
     // Flail accepted windows (209..322 / 210..323; natural-HP tiers 114 rows each); power = gBattleMovePower.
     case 175: return FLAIL_POWERS.includes(request.power as FlailPower) ? 114 : null;
+    case 273: return 271; // Wish accepted window (65..335 / 69..339).
     default: return null;
   }
 }
@@ -2119,6 +2122,14 @@ export function liveMoveAnimationPresentation(
       config = { move: "DOUBLE_KICK", attacker, target, fieldProfile,
         targetDimensions: { width: dims.width, height: dims.height },
         fistRandom: { x: words[0]!, y: words[1]!, xSign: words[2]!, ySign: words[3]! } };
+      break;
+    }
+    case 273: {
+      // 21 mini twinkling stars, two words each in spawn order (miniTwinklingStarFromWords).
+      const draws = liveMovePresentationRngWords(presentationRngInput)?.draws;
+      if (draws === undefined || draws.length !== 21 || draws.some((pair) => pair.length !== 2)) return null;
+      config = { move: "WISH", attacker, target, fieldProfile,
+        twinkles: draws.map((pair) => miniTwinklingStarFromWords(pair[0]!, pair[1]!)) };
       break;
     }
     case 175: {

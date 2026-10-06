@@ -4281,6 +4281,50 @@
     "value": 802476527,
     "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
    }
+  },
+  {
+   "id": 273,
+   "move": "WISH",
+   "orientation": "player",
+   "variant": "wish-player",
+   "activationFrame": 65,
+   "windowStart": 65,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/compare/fixtures/wish-player-illumise-opponent-onix.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep12-random2/plans.json (activation 65 == sourceWindow.startFrame)"
+   },
+   "presentationRngActivation": {
+    "value": 2958200064,
+    "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
+   }
+  },
+  {
+   "id": 273,
+   "move": "WISH",
+   "orientation": "opponent",
+   "variant": "wish-opponent",
+   "activationFrame": 69,
+   "windowStart": 69,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/compare/fixtures/wish-opponent-illumise-player-onix.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/random2-r1/activation-probes.json (activation 69 == sourceWindow.startFrame)"
+   },
+   "presentationRngActivation": {
+    "value": 506220650,
+    "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
+   }
   }
  ]
 }

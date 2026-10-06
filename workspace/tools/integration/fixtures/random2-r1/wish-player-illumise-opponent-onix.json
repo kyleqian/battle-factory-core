@@ -1,0 +1,8 @@
+{
+  "sourceFixture": "tools/compare/fixtures/wish-player-illumise-opponent-onix.json",
+  "move": "WISH",
+  "presentationRngActivation": {
+    "value": 2958200064,
+    "source": "tools/integration/fixtures/prep12-random2/plans.json moves.wish.entries[0].acceptedActivationValue (0xB0528D00, activation frame 65 == sourceWindow.startFrame)"
+  }
+}

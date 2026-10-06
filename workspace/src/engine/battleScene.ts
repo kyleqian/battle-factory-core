@@ -46250,6 +46250,8 @@ export function renderSceneOnMovePresentation(
         );
       }
     }
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     const opponentBattler = attackerIsPlayer ? view.target : view.attacker;
     const playerBattler = attackerIsPlayer ? view.attacker : view.target;
     drawSendOutHealthbox(

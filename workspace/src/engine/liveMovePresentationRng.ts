@@ -34,6 +34,9 @@ export const LIVE_MOVE_RANDOM2_PLANS: Readonly<Record<number, readonly Presentat
   // Move_FLAIL: AnimHitSplatRandom (animation=3 skips the :1054 draw) x2 % 48 - 24, y2 % 24 - 12
   // (battle_anim_normal.c:1062-1063); AnimTask_FlailMovement draws nothing.
   175: Object.freeze([Object.freeze({ ageOffset: 49, count: 2 })]),
+  // Move_WISH: 21 AnimMiniTwinklingStar, one per 3 frames from +41, (& 3 -> tile, & 7 signed -> y) each
+  // (battle_anim_effects_3.c:2147, :2153).
+  273: Object.freeze(Array.from({ length: 21 }, (_, i) => Object.freeze({ ageOffset: 41 + 3 * i, count: 2 }))),
 });
 
 /** Faithful-random live adapters (disjoint from LIVE_MOVE_ANIMATION_IDS). */
@@ -99,4 +102,10 @@ export function tickLiveMovePresentationRngSession(
   if (command?.type !== "move-animation" || !command.animation) return stepped;
   const activated = activateLiveMovePresentationRng(host, command.animation, liveMovePresentationRngBodyKey(resolution));
   return activated === host ? stepped : Object.freeze({ ...stepped, host: activated });
+}
+
+/** AnimMiniTwinklingStar (battle_anim_effects_3.c:2147-2156): `Random2() & 3` 0 -> tile +4 else +5; `Random2() & 7`, > 3 negated. */
+export function miniTwinklingStarFromWords(tileWord: number, yWord: number): Readonly<{ tileOffset: 4 | 5; yOffset: number }> {
+  const y = yWord & 7;
+  return { tileOffset: (tileWord & 3) === 0 ? 4 : 5, yOffset: y > 3 ? -y : y };
 }
