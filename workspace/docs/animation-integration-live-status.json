@@ -3339,6 +3339,17 @@
         "an opponent target with a non-zero front idle x2 (ONIX / RATTATA after a send-in) declines",
         "independent arbitrary-species/history framebuffer comparison"
       ]
+    },
+    {
+      "move": "MOVE_DIG",
+      "id": 91,
+      "sourceFieldEvidence": "../tools/integration/fixtures/random2-r5-live-receipt.json",
+      "liveEvidence": [
+        "No RNG (prep18: Dig draws no Random2). Dense full windows through the production live renderer, both bodies (setup 195 rows, unleash 68 rows, window = [activation, activation + rows - 1]), both attacker sides, twice fresh, 0 px: accepted VIBRAVA -> CHANSEY player and opponent attacker, FLYGON -> GOLEM alternates on both attacker sides (tools/integration/fixtures/prep18-live/*.json, 16 runs x2).",
+        "Setup requires the battle's first body (BG registers/scanline = measured constant S0); unleash requires the host lend afterDigSetup (setup was the first unit, nothing since but its own attacker hide): post-setup order constant and the scanline chained from the setup reducer's end state; both gates fall back to the scene-off view otherwise.",
+        "Ordinary route, hidden attacker between turns, prompt reached, ON/OFF parity: see the receipt (random2-r5-live-receipt.json dig)."
+      ],
+      "remaining": "Unleash after any intervening animation body / party-menu unit, a Dig setup that is not the battle's first body, and the Dig hit-flash/HUD queue commands are not proved; those decline to the scene-off view."
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3362,7 +3373,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 225,
+  "implementedCount": 226,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 10,

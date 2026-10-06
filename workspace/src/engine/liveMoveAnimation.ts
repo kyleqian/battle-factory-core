@@ -101,6 +101,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // Fly / Bounce charge + strike bodies by request.turn (prep11 s2.3); the turn gap keeps the attacker hidden through
   // the presentation-only semi-invulnerable state (liveSemiInvulnerableHideBattler).
   19, 340,
+  // Dig setup + unleash by request.turn (prep18 s1.1; hide through the between-turn gap like Fly/Bounce; setup = first body, unleash = host lend afterDigSetup).
+  91,
   // Rollout counter bodies 1..5 (request.rolloutCounter, docs/rollout-endeavor-prep.md s0.1).
   205,
   // anchor3: source battler anchors (position center, picture height, pic offset).
@@ -329,6 +331,9 @@ export function liveMoveOpponentShadowReturn(request: BattleMoveAnimationRequest
 
 /** Shadow row for a live request, or null when the activation frame is outside the window. */
 export function liveMoveOpponentShadowRow(request: BattleMoveAnimationRequest): number | null {
+  // Dig unleash: the attacker is still hidden (semi-invulnerable) on its activation frame, so the shadow is not shown (prep18 dense,
+  // elevated FLYGON opponent attacker: 200 px at age 0 otherwise); only the setup body shows it.
+  if (request.moveId === 91 && (request.turn & 1) === 1) return null;
   return LIVE_MOVE_OPPONENT_SHADOW_ROW[request.moveId] ?? null;
 }
 

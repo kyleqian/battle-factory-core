@@ -4848,6 +4848,82 @@
     "value": 2024241883,
     "source": "prep13Probe mechanic-sand-attack-player-pidgeotto-onix rng2Series[0] (frame 79) one LCG step back = the value at activation frame 78"
    }
+  },
+  {
+   "id": 91,
+   "move": "DIG",
+   "orientation": "opponent",
+   "variant": "prep17-prep18-dig-alt-opponent-flygon-player-golem-body0",
+   "activationFrame": 54,
+   "windowStart": 54,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep18-live/dig-alt-opponent-flygon-player-golem-body0.json",
+    "scenario": "tools/battle-lab/prep18-dig-altopp-flygon-golem.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep18.md s1.1 (setup window = activation..activation + 194; the unleash body has no shadow row)"
+   }
+  },
+  {
+   "id": 91,
+   "move": "DIG",
+   "orientation": "player",
+   "variant": "prep17-prep18-dig-alt-player-flygon-opponent-golem-body0",
+   "activationFrame": 54,
+   "windowStart": 54,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep18-live/dig-alt-player-flygon-opponent-golem-body0.json",
+    "scenario": "tools/battle-lab/prep18-dig-alt-flygon-golem.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep18.md s1.1 (setup window = activation..activation + 194; the unleash body has no shadow row)"
+   }
+  },
+  {
+   "id": 91,
+   "move": "DIG",
+   "orientation": "opponent",
+   "variant": "prep17-prep18-dig-opponent-vibrava-player-chansey-body0",
+   "activationFrame": 54,
+   "windowStart": 54,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep18-live/dig-opponent-vibrava-player-chansey-body0.json",
+    "scenario": "tools/battle-lab/mechanic-dig-opponent-vibrava-player-chansey.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep18.md s1.1 (setup window = activation..activation + 194; the unleash body has no shadow row)"
+   }
+  },
+  {
+   "id": 91,
+   "move": "DIG",
+   "orientation": "player",
+   "variant": "prep17-prep18-dig-player-vibrava-opponent-chansey-body0",
+   "activationFrame": 54,
+   "windowStart": 54,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep18-live/dig-player-vibrava-opponent-chansey-body0.json",
+    "scenario": "tools/battle-lab/mechanic-dig-player-vibrava-opponent-chansey.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep18.md s1.1 (setup window = activation..activation + 194; the unleash body has no shadow row)"
+   }
   }
  ]
 }
