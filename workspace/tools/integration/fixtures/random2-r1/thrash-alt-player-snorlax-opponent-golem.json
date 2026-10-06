@@ -1,0 +1,15 @@
+{
+  "schema": "random2-r1-pinned-live-adapter/v1",
+  "move": "THRASH",
+  "scenario": "tools/battle-lab/prep12-thrash-alt-snorlax-golem.json",
+  "probe": "tools/compare/thrashProbe.py",
+  "denseWindow": { "startFrame": 73, "endFrame": 175 },
+  "windowSource": "prep12 plans.json moves.thrash.entries[0].alternate: activation frame 73 + accepted (window start - activation) 0; length = accepted frameCount 103",
+  "attacker": { "species": "SNORLAX", "geometry": { "side": "player" } },
+  "target": { "species": "GOLEM", "geometry": { "side": "opponent" } },
+  "fieldProfile": { "playerHp": 235, "playerMaxHp": 235, "opponentHp": 176, "opponentMaxHp": 176, "playerGender": "male", "opponentGender": "male" },
+  "presentationRngActivation": {
+    "value": 370756553,
+    "source": "tools/integration/fixtures/prep12-random2/plans.json moves.thrash.entries[0].alternate.activationValue (0x16194BC9, activation frame 73)"
+  }
+}

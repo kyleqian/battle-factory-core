@@ -39,7 +39,7 @@ const MOVES = [
       alternate: "tools/integration/fixtures/random2-r1/double-kick-alt-player-hitmonlee-opponent-golem.json",
     },
     probe: "double-kick-opponent",
-    route: { seed: 51, streak: 0, slot: 0 as const, turns: 2, bodiesPerTurn: 2 },
+    route: { seed: 51, streak: 0, slot: 0 as const, turns: 2, bodies: 4 }, // both hits on both turns
   },
   {
     name: "astonish", id: 310,
@@ -55,7 +55,20 @@ const MOVES = [
     },
     probe: "astonish-opponent",
     // First-found 6/0 LOUDRED reaches the body on turn 1 only; 8/0 LOUDRED reaches it on both turns.
-    route: { seed: 8, streak: 0, slot: 2 as const, turns: 2, bodiesPerTurn: 1 },
+    route: { seed: 8, streak: 0, slot: 2 as const, turns: 2, bodies: 2 },
+  },
+  {
+    name: "thrash", id: 37,
+    // plans.json form: three raw four-word groups (fistRandom[g] x, y, xSign, ySign).
+    plansForm: (draws: readonly (readonly number[])[]): unknown => draws.map((group) => [...group]),
+    fixtures: {
+      player: "tools/integration/fixtures/random2-r1/thrash-player-tauros-opponent-onix.json",
+      opponent: "tools/integration/fixtures/random2-r1/thrash-opponent-tauros-player-onix.json",
+      alternate: "tools/integration/fixtures/random2-r1/thrash-alt-player-snorlax-opponent-golem.json",
+    },
+    probe: "thrash-opponent",
+    // 26/21 TAUROS: two chosen Thrash turns lock in for 2 + 3 consecutive bodies (one per lock-in segment).
+    route: { seed: 26, streak: 21, slot: 1 as const, turns: 2, bodies: 5 },
   },
 ] as const;
 
@@ -139,7 +152,7 @@ describe("faithful-random live adapters: plans and accounting", () => {
 describe("faithful-random live adapters: surrogate ordinary routes", () => {
   const SEED_A = 0x1234abcd, SEED_B = 0xfeed0042;
   it.each(MOVES)("$name: route reaches every body, live at every age, surrogate words; logic/RNG unchanged across seeds and Scene ON/OFF", (move) => {
-    const { seed, streak, slot, turns, bodiesPerTurn } = move.route;
+    const { seed, streak, slot, turns } = move.route;
     const slots = Array(turns).fill(slot) as (0 | 1 | 2 | 3)[];
     const a = random2Route(seed, "on", slots, streak, SEED_A);
     const a2 = random2Route(seed, "on", slots, streak, SEED_A);
@@ -147,7 +160,7 @@ describe("faithful-random live adapters: surrogate ordinary routes", () => {
     const off = random2Route(seed, "off", slots, streak, SEED_A);
     const duration = liveMoveAnimationDuration({ moveId: move.id, attacker: 0, target: 1, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0 })!;
     const bodies = a.bodies.filter((body) => body.moveId === move.id && body.attacker === 0);
-    expect(bodies).toHaveLength(turns * bodiesPerTurn);
+    expect(bodies).toHaveLength(move.route.bodies);
     expect(new Set(bodies.map((body) => body.key)).size).toBe(bodies.length);
     for (const body of bodies) {
       expect(body.ages).toEqual(Array.from({ length: duration }, (_, age) => age));

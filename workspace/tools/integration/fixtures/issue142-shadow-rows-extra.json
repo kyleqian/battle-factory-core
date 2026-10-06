@@ -4187,6 +4187,50 @@
     "value": 3870620670,
     "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
    }
+  },
+  {
+   "id": 37,
+   "move": "THRASH",
+   "orientation": "player",
+   "variant": "thrash-player",
+   "activationFrame": 72,
+   "windowStart": 72,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/compare/fixtures/thrash-player-tauros-opponent-onix.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep12-random2/plans.json (activation 72 == denseWindow.startFrame)"
+   },
+   "presentationRngActivation": {
+    "value": 1444920832,
+    "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
+   }
+  },
+  {
+   "id": 37,
+   "move": "THRASH",
+   "orientation": "opponent",
+   "variant": "thrash-opponent",
+   "activationFrame": 76,
+   "windowStart": 76,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/compare/fixtures/thrash-opponent-tauros-player-onix.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/random2-r1/activation-probes.json (activation 76 == denseWindow.startFrame)"
+   },
+   "presentationRngActivation": {
+    "value": 765041132,
+    "source": "pinned controlled body (random2-r1 fixtures); the shadow row is word-independent"
+   }
   }
  ]
 }

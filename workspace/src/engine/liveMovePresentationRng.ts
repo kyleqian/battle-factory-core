@@ -29,6 +29,8 @@ export const LIVE_MOVE_RANDOM2_PLANS: Readonly<Record<number, readonly Presentat
   24: Object.freeze([Object.freeze({ ageOffset: 10, count: 4 })]),
   // Move_ASTONISH: AnimSprayWaterDroplet x2 in one frame, (& 0x1ff, & 0x7f) per droplet (battle_anim_flying.c:1106-1107).
   310: Object.freeze([Object.freeze({ ageOffset: 31, count: 4 })]),
+  // Move_THRASH: three AnimFistOrFootRandomPos sprites (args 1,10,0|1|3), 4 words each (battle_anim_fight.c:487-492).
+  37: Object.freeze([7, 37, 67].map((ageOffset) => Object.freeze({ ageOffset, count: 4 }))),
 });
 
 /** Faithful-random live adapters (disjoint from LIVE_MOVE_ANIMATION_IDS). */

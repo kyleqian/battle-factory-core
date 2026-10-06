@@ -238,9 +238,9 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     19, 340,
     // Rollout bodies 1..5: activation == window start (row 0) on both sides.
     205,
-    // Faithful-random adapters (liveMovePresentationRng.ts): Double Kick hit bodies, Astonish start at activation (row 0,
+    // Faithful-random adapters (liveMovePresentationRng.ts): Double Kick hit bodies, Astonish, Thrash start at activation (row 0,
     // prep12 §0.2 / random2-r1 activation probes).
-    24, 310,
+    24, 310, 37,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -649,6 +649,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     // Faithful-random adapters (liveMovePresentationRng.ts; not LIVE_MOVE_ANIMATION_IDS). Windows start at activation.
     case 24: return DOUBLE_KICK_FRAME_COUNT; // Double Kick per-hit body (227..262 both orientations).
     case 310: return 63; // Astonish accepted window (220..282 / 219..281).
+    case 37: return 103; // Thrash accepted window (72..174 / 76..178); each lock-in turn is its own body.
     default: return null;
   }
 }
@@ -2113,6 +2114,19 @@ export function liveMoveAnimationPresentation(
       config = { move: "DOUBLE_KICK", attacker, target, fieldProfile,
         targetDimensions: { width: dims.width, height: dims.height },
         fistRandom: { x: words[0]!, y: words[1]!, xSign: words[2]!, ySign: words[3]! } };
+      break;
+    }
+    case 37: {
+      // Three AnimFistOrFootRandomPos groups (x, y, xSign, ySign) as Double Kick; the target's width/height moduli and
+      // the attacker's pic-coords yOffset for the affine anchor.
+      const draws = liveMovePresentationRngWords(presentationRngInput)?.draws;
+      if (draws === undefined || draws.length !== 3 || draws.some((group) => group.length !== 4)) return null;
+      const group = (g: readonly number[]) => ({ x: g[0]!, y: g[1]!, xSign: g[2]!, ySign: g[3]! });
+      const dims = liveBattlerCoordAttrs(target.geometry.side, art);
+      config = { move: "THRASH", attacker, target, fieldProfile,
+        fistRandom: [group(draws[0]!), group(draws[1]!), group(draws[2]!)],
+        targetDimensions: { width: dims.width, height: dims.height },
+        attackerPicYOffset: liveBattlerCoordAttrs(attacker.geometry.side, art).yOffset };
       break;
     }
     case 310: {

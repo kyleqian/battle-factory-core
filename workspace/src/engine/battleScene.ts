@@ -53618,13 +53618,14 @@ export function renderSceneOnMovePresentation(
 
   if (state.config.move === "THRASH") {
     const view = sceneOnThrashView(state);
-    const playerToOpponent = view.attacker.species === "TAUROS"
+    // Live field (faithful-random adapter): any displayed pair, art from the live species.
+    const playerToOpponent = (liveField || view.attacker.species === "TAUROS")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
-    const opponentToPlayer = view.attacker.species === "TAUROS"
+    const opponentToPlayer = (liveField || view.attacker.species === "TAUROS")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -53640,8 +53641,12 @@ export function renderSceneOnMovePresentation(
     const plain = sceneOnThrashView({ ...state, age: state.age - 1 });
     const task = sceneOnThrashView({ ...state, age: state.age - 2 });
     const displayedTargetOffset = sceneOnThrashDisplayedTargetOffset(state);
-    const tauros = playerToOpponent ? taurosBackSprite : taurosFrontSprite;
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const tauros = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? taurosBackSprite : taurosFrontSprite;
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
@@ -53668,7 +53673,7 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.spriteCorner.x + task.attackerPosition.x,
       view.attacker.geometry.spriteCorner.y
         + task.attackerPosition.y
-        + thrashAffineYOffset(task.attackerMatrix.d, playerToOpponent ? 13 : 0),
+        + thrashAffineYOffset(task.attackerMatrix.d, state.config.attackerPicYOffset ?? (playerToOpponent ? 13 : 0)),
       task.attackerMatrix.a,
       task.attackerMatrix.d,
       0,
@@ -53703,6 +53708,8 @@ export function renderSceneOnMovePresentation(
         fist.y - 16,
       );
     }
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     const profile = state.config.fieldProfile;
     drawSendOutHealthbox(
       fb,
