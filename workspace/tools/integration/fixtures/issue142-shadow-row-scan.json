@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 483,
-  "ids": 232,
+  "rows": 484,
+  "ids": 233,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -5133,6 +5133,17 @@
    "move": "SILVER_WIND",
    "orientation": "opponent",
    "duration": 196,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 244,
+   "move": "PSYCH_UP",
+   "orientation": "player",
+   "duration": 179,
    "expected": 0,
    "drawn": [
     0
