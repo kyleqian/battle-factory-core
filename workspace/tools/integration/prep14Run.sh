@@ -4,7 +4,7 @@
 set -e
 export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
 ACC="mechanic-rain-dance-player-wooper-opponent-onix mechanic-rain-dance-opponent-wooper-player-onix mechanic-overheat-player-solrock-opponent-shuckle mechanic-overheat-opponent-magcargo-player-shuckle mechanic-curse-ghost-player-haunter-opponent-magikarp mechanic-curse-ghost-opponent-haunter-player-magikarp mechanic-curse-stat-player-snorlax-opponent-magikarp mechanic-curse-stat-opponent-snorlax-player-magikarp mechanic-silver-wind-player-butterfree-opponent-onix mechanic-silver-wind-opponent-butterfree-player-onix mechanic-water-pulse-player-lombre-opponent-onix mechanic-water-pulse-opponent-lombre-player-onix mechanic-psych-up-player-jumpluff-opponent-ninjask mechanic-psych-up-opponent-jumpluff-player-ninjask mechanic-hail-player-delibird-opponent-onix mechanic-hail-opponent-delibird-player-onix"
-python3 tools/integration/prep14AltScenarios.py                      # writes tools/battle-lab/prep14-*-alt-*.json (curse-stat MILTANK is female-only: gender patched by hand, see the doc papercuts)
+python3 tools/integration/prep14AltScenarios.py                      # writes tools/battle-lab/prep14-*-alt-*.json
 ALT=$(ls tools/battle-lab/prep14-*.json | xargs -n1 basename | sed 's/.json//')
 JOBS=16 sh tools/integration/prep14Probes.sh /tmp/p14 $ACC $ALT       # Random2 attribution probes x2 -> /tmp/p14/<scenario>-r{1,2}.json
 for r in r1 r2; do mkdir -p /tmp/p14a/$r /tmp/p14b/$r; done          # allocator-state probes x2 (+ palette-bank snapshots at ages 1,2,3,5,8,12)

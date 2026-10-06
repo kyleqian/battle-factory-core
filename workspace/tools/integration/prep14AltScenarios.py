@@ -61,6 +61,7 @@ for move, (src, att, tgt) in ALT.items():
                     raise
         else:
             raise SystemExit(f"{move}: no legal gender for {side}")
+    if att == "MILTANK": parties["player"][0]["gender"] = "female"  # species data: MILTANK is female-only; validate_request does not reject male, BattleLab.prepare does
     out = LAB / f"prep14-{move}-alt-{att.lower()}-{tgt.lower()}.json"
     out.write_text(json.dumps(s, separators=(",", ":")) + "\n")
     print(move, src, b, "->", (sp[att], sp[tgt]), out.name)
