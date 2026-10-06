@@ -53,12 +53,13 @@ const rulesWithoutSceneMarker = (v: { rules: any }) => {
 };
 
 describe("live prep13 move adapters", () => {
-  it("registers Ice Beam and Water Spout with the accepted durations and shadow rows", () => {
-    for (const id of [58, 323]) {
+  it("registers Ice Beam, Water Spout and Hidden Power with the accepted durations and shadow rows", () => {
+    for (const id of [58, 323, 237]) {
       expect(LIVE_MOVE_ANIMATION_IDS).toContain(id);
       expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[id]).toBe(0);
     }
     for (const a of [0, 1] as const) expect(liveMoveAnimationDuration(request(58, a))).toBe(203);
+    for (const a of [0, 1] as const) expect(liveMoveAnimationDuration(request(237, a))).toBe(180);
     // Water Spout's body length depends on the attacker's party HP and picture height: no field, no duration.
     expect(liveMoveAnimationDuration(request(323, 0))).toBeNull();
   });
@@ -114,6 +115,31 @@ describe("live prep13 move adapters", () => {
       expect(new Set([0, 50, 100, 202].map(age => render(field, req, age, order))).size).toBeGreaterThan(1);
     }
   }, 240000);
+
+  // prep13 s1.3: Unown letter-form pic coordinates (the one missing provider), letter from the personality.
+  it("Hidden Power derives the Unown letter-form centre and sprite origin from the personality; declines for non-Unown and unlent order", () => {
+    const order = knownOrder();
+    const unown = (personality: number, side: 0 | 1) => {
+      const f = side === 0 ? displayed("UNOWN", "ONIX", [100, 100], personality)
+        : { ...displayed("ONIX", "UNOWN"), opponent: { ...displayed("ONIX", "UNOWN").opponent, personality } } as BattleResolutionDisplayedField;
+      return liveMoveAnimationPresentation(request(237, side), f, 0, undefined, undefined, order)!.config as any;
+    };
+    // personality -> letter (GET_UNOWN_LETTER) -> SPECIES_UNOWN_<letter> pic coords (prep13-unown-form.json ROM centres).
+    expect(unown(2349019075, 0).attacker.geometry.animationCenter).toEqual({ x: 72, y: 96 });  // H player
+    expect(unown(2349016025, 0).attacker.geometry.animationCenter).toEqual({ x: 72, y: 98 });  // F player
+    expect(unown(1793700000, 1).attacker.geometry.animationCenter).toEqual({ x: 176, y: 49 }); // E opponent (base UNOWN 47)
+    expect(unown(1793703050, 1).attacker.geometry.animationCenter).toEqual({ x: 176, y: 46 }); // G opponent
+    expect(unown(1793700000, 1).animationProfile).toMatchObject({ attackerSubpriority: 40, targetSubpriority: 30,
+      attackerPersonality: 1793700000, uninitializedScatterY: 88 });
+    expect(unown(2349019075, 0).animationProfile.allocationSlots).toEqual([3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]);
+    expect(unown(2349019075, 0).animationProfile.spriteOrderSeed).toHaveLength(14);
+    const f = displayed("UNOWN", "ONIX", [100, 100], 2349019075);
+    expect(liveMoveAnimationPresentation(request(237, 0), f, 0)).toBeNull();
+    // The reducer is Unown-only (GENGAR controls show an already-initialised eighth orb).
+    expect(liveMoveAnimationPresentation(request(237, 0), displayed("GENGAR", "ONIX"), 0, undefined, undefined, order)).toBeNull();
+    // Letters 26/27 are unproven.
+    expect(liveMoveAnimationPresentation(request(237, 0), displayed("UNOWN", "ONIX", [100, 100], 0x03000000 | 2), 0, undefined, undefined, order)).toBeNull();
+  });
 
   // route = ordinary-input replay (prep13 s2 seeds: generated rentals, party member 0 knows the move, one turn).
   const routes: { move: string; id: number; seed: number; moves: (0 | 1 | 2 | 3)[]; streak: number; bodies: number[] }[] = [

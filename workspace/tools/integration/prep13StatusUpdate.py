@@ -16,7 +16,10 @@ E = {
                       ["declines unless the tracked sprite order is lent",
                        "dense proof of HP tiers 1-2 and lower-HP tier-3 bodies needs the true multi-body order lend (tier scenarios hold a Toxic body between each Water Spout)",
                        "independent arbitrary-species/history framebuffer comparison"]),
- "HIDDEN_POWER": (237, [], []),
+ "HIDDEN_POWER": (237, ["dense 180/180 zero residual twice fresh, all six Unown bodies: accepted UNOWN_H player / UNOWN_E opponent -> ONIX, UNOWN -> GOLEM alternates (both orientations), and a second personality (UNOWN_F player / UNOWN_G opponent -> ONIX); the attacker sprite origin and orbit centre come from the personality's LETTER-form pic coords (hiddenPowerUnownFormIndex), the eighth scatter orb y from the target's pic-offset anchor",
+                         "no ordinary-input route: FRONTIER_MON_UNOWN is never a generated rental (prep13 s2); Unown opponents are not searched"],
+                        ["Unown attacker only (the reducer's uninitialised eighth orb is Unown-specific; any other attacker declines to the scene-off view); letter forms 26/27 (!, ?) decline",
+                         "declines unless the tracked sprite order is lent", "independent arbitrary-species/history framebuffer comparison"]),
 }
 for move in sys.argv[1:]:
     id_, live, remaining = E[move]

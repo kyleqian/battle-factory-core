@@ -3264,6 +3264,20 @@
         "dense proof of HP tiers 1-2 and lower-HP tier-3 bodies needs the true multi-body order lend (tier scenarios hold a Toxic body between each Water Spout)",
         "independent arbitrary-species/history framebuffer comparison"
       ]
+    },
+    {
+      "move": "MOVE_HIDDEN_POWER",
+      "id": 237,
+      "sourceFieldEvidence": "../tools/integration/fixtures/prep13-live-adapter-receipt.json",
+      "liveEvidence": [
+        "dense 180/180 zero residual twice fresh, all six Unown bodies: accepted UNOWN_H player / UNOWN_E opponent -> ONIX, UNOWN -> GOLEM alternates (both orientations), and a second personality (UNOWN_F player / UNOWN_G opponent -> ONIX); the attacker sprite origin and orbit centre come from the personality's LETTER-form pic coords (hiddenPowerUnownFormIndex), the eighth scatter orb y from the target's pic-offset anchor",
+        "no ordinary-input route: FRONTIER_MON_UNOWN is never a generated rental (prep13 s2); Unown opponents are not searched"
+      ],
+      "remaining": [
+        "Unown attacker only (the reducer's uninitialised eighth orb is Unown-specific; any other attacker declines to the scene-off view); letter forms 26/27 (!, ?) decline",
+        "declines unless the tracked sprite order is lent",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3287,7 +3301,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 220,
+  "implementedCount": 221,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 5,

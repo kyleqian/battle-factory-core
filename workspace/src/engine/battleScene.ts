@@ -16326,6 +16326,8 @@ export function renderSceneOnMovePresentation(
       drawEffects((orb) => orb.kind === "scatter");
     }
 
+    // The live seam composes the controller-owned healthboxes, window and text itself.
+    if (liveField) return;
     const opponent = playerAttacker ? view.target : view.attacker;
     const player = playerAttacker ? view.attacker : view.target;
     const profile = hiddenState.config.fieldProfile;

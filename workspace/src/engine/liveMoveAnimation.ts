@@ -74,6 +74,7 @@ import { HEAL_BELL_REUSED_ORDER_SLOTS } from "../animation/healBell.ts";
 import { KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, spriteOrderForSlots, spriteOrderWithOccupiedPrefix } from "./spriteOrderProvider.ts";
 import { DOUBLE_KICK_FRAME_COUNT } from "../animation/doubleKick.ts";
 import { waterSpoutTimeline, type WaterSpoutLiveInputs } from "../animation/waterSpout.ts";
+import { hiddenPowerUnownFormIndex } from "../animation/hiddenPower.ts";
 import type { FlailPower } from "../animation/flail.ts";
 import {
   liveMovePresentationRngWords, miniTwinklingStarFromWords, type LiveMovePresentationRngInput,
@@ -175,6 +176,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // prep13 (docs/next-adapters-prep13.md s1.1-1.2): Ice Beam (geometry from the anchors; lent-order gate), Water Spout
   // (party HP tier + picture height + per-side rain seed; lent-order gate).
   58, 323,
+  // prep13 s1.3: Hidden Power (Unown attacker only: the reducer's uninitialised eighth orb is Unown-specific; lent-order gate).
+  237,
 ] as const);
 
 const FLAIL_POWERS: readonly FlailPower[] = Object.freeze([20, 40, 80, 100, 150, 200]);
@@ -251,7 +254,7 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // prep12 §0.2 / random2-r1 activation probes).
     24, 310, 37, 175, 273,
     // prep13 (issue142-shadow-rows-extra.json): Ice Beam, Water Spout activation == accepted window start (row 0), prep13 s0.1-0.2.
-    58, 323,
+    58, 323, 237,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -702,6 +705,7 @@ export function liveMoveAnimationDuration(
     // Flail accepted windows (209..322 / 210..323; natural-HP tiers 114 rows each); power = gBattleMovePower.
     case 175: return FLAIL_POWERS.includes(request.power as FlailPower) ? 114 : null;
     case 273: return 271; // Wish accepted window (65..335 / 69..339).
+    case 237: return 180; // Hidden Power 77..256 / 81..260 (prep13 s0.1, first inactive age 179).
     case 58: return 203; // Ice Beam 75..277 / 79..281 (prep13 s0.1; reducer first inactive age 202).
     default: return null;
   }
@@ -2236,6 +2240,38 @@ export function liveMoveAnimationPresentation(
             monbgBaseHofs: 544 - (targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2),
             monbgBaseVofs: 544 - targetAnchors.spriteCenter.y },
           spriteOrder: { initialOrder } } };
+      break;
+    }
+    case 237: {
+      // prep13 s1.3. The reducer is Unown-only (GENGAR controls show the eighth orb already initialised); every Factory
+      // Hidden Power user is Unown. The attacker centre is GetBattlerSpriteCoord(Y_PIC_OFFSET) of the personality's LETTER-form
+      // species (SPECIES_UNOWN_B.. coords), the only provider the base-species anchors lack; letters 26/27 are unproven -> null.
+      if (attacker.species !== "UNOWN" || !spriteOrderInput?.known) return null;
+      const personality = field[attacker.geometry.side].personality ?? 0;
+      const form = hiddenPowerUnownFormIndex(personality);
+      if (form >= 26) return null;
+      const formKey = form === 0 ? "UNOWN" : `UNOWN_${String.fromCharCode(65 + form)}`;
+      const side = attacker.geometry.side;
+      const formCoords = (monPicCoordsData as unknown as Record<"back" | "front", Record<string, { width: number; height: number; yOffset: number }>>)[side === "player" ? "back" : "front"][formKey];
+      if (formCoords === undefined) return null;
+      // The art view derives the sprite origin from the species yOffset (fieldArtBattler): re-derive it for the form.
+      const formArt = { ...art, [side]: { ...art[side], coords: formCoords,
+        origin: { x: art[side].origin.x, y: art[side].origin.y - art[side].coords.yOffset + formCoords.yOffset } } } as typeof art;
+      const center = liveBattlerAnchors(side, formArt).picOffsetPoint;
+      // The sprite itself sits at the letter form's own origin too (BattleLoadMonSpriteGfx / GetBattlerSpriteDefault_Y read the form coords).
+      const formOrigin = battleCommandFieldSpriteOrigin(formArt[side], side);
+      const fullOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (fullOrder === null) return null;
+      // Orbit [3,4,5,7,9,10] + scatter [11..18]: lowest-free over the in-use set [0,1,2,6,8,60..63]; matrices first-free over 0x6.
+      const slots = KNOWN_ENTRY_FREE_SPRITE_SLOTS.slice(0, 14);
+      const matrices = [0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+      config = { move: "HIDDEN_POWER", attacker: { ...attacker, geometry: { ...attacker.geometry, spriteCorner: formOrigin, animationCenter: center } }, target, fieldProfile,
+        animationProfile: { attackerSubpriority: side === "player" ? 30 : 40, targetSubpriority: side === "player" ? 40 : 30,
+          allocationSlots: slots, spriteOrderSeed: fullOrder.filter(slot => slots.includes(slot)),
+          orbitMatrixNums: matrices.slice(0, 6), scatterMatrixNums: matrices.slice(6),
+          uninitializedScatterY: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint.y,
+          attackerPersonality: personality, animationRngSeed: 0 } };
       break;
     }
     case 323: {
