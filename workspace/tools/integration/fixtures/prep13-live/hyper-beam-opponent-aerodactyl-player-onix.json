@@ -1,0 +1,41 @@
+{
+ "schema": "prep13-live-adapter-fixture/v1",
+ "move": "HYPER_BEAM",
+ "probe": "tools/compare/hyperBeamProbe.py",
+ "scenario": "tools/battle-lab/mechanic-hyper-beam-opponent-aerodactyl-player-onix.json",
+ "bodyIndex": 0,
+ "denseWindow": {
+  "startFrame": 83,
+  "endFrame": 362
+ },
+ "windowSource": "prep13 s0.2: window start = the scenario's own activation frame + the accepted offset 0; rows = the probed first-inactive minus activation",
+ "attacker": {
+  "species": "AERODACTYL",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793700128,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 110,
+  "playerMaxHp": 110,
+  "opponentHp": 162,
+  "opponentMaxHp": 162,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "presentationRngActivation": {
+  "value": 3320097647,
+  "source": "tools/integration/fixtures/prep13/prep13-analysis.json mechanic-hyper-beam-opponent-aerodactyl-player-onix[0].rng2 (activation frame 83)"
+ }
+}

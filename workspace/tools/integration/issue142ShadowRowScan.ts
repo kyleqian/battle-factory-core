@@ -37,7 +37,7 @@ const out: any[] = [];
 const seen = new Set<number>();
 // Icy Wind / Blizzard fall back to the scene-off view where the retained slot table is unproven
 // (liveMoveAnimation.ts provableEffectOrder); these [player partner, elevated opponent] pairs are live in both orientations.
-const PAIR: Record<number, [string, string]> = { 196: ["SHUCKLE", "MAGNEMITE"], 59: ["SHUCKLE", "BUTTERFREE"] };
+const PAIR: Record<number, [string, string]> = { 196: ["SHUCKLE", "MAGNEMITE"], 59: ["SHUCKLE", "BUTTERFREE"], 237: ["UNOWN", "UNOWN"] };
 for (const r of rows) {
   seen.add(r.id);
   const partner = PAIR[r.id]?.[0] ?? "PHANPY";
@@ -51,8 +51,9 @@ for (const r of rows) {
     fieldProfile: { playerHp: 120, playerMaxHp: 120, opponentHp: 120, opponentMaxHp: 120, playerGender: "male", opponentGender: "male" },
   });
   const f = mk(PAIR[r.id]?.[1] ?? "GOLBAT");
-  const request = (liveView(f as any, 0).effect as any).request;
-  const duration = liveMoveAnimationDuration(request) as number;
+  const view0 = liveView(f as any, 0);
+  const request = (view0.effect as any).request;
+  const duration = liveMoveAnimationDuration(request, view0.field) as number;
   const expected: number | null = LIVE_MOVE_OPPONENT_SHADOW_ROW[r.id] ?? null;
   const tail: number = r.tailFirstAge ?? Infinity;
   const drawn: number[] = [];

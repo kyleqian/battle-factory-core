@@ -27,7 +27,7 @@ const shadowPixels = (fb: Uint8Array): number => {
   return n;
 };
 // Icy Wind / Blizzard are live only for pairs whose particle slot order is proven (liveMoveAnimation.ts provableEffectOrder).
-const PAIR: Record<number, [string, string]> = { 196: ["SHUCKLE", "MAGNEMITE"], 59: ["SHUCKLE", "BUTTERFREE"] };
+const PAIR: Record<number, [string, string]> = { 196: ["SHUCKLE", "MAGNEMITE"], 59: ["SHUCKLE", "BUTTERFREE"], 237: ["UNOWN", "UNOWN"] };
 const render = (r: (typeof rows)[number], opponent: string, age: number): number => {
   const mon = (name: string, side: "player" | "opponent") => ({
     species: speciesStats.species.find((x) => x.name === `SPECIES_${name}`)!.id, speciesSymbol: name, name, level: 50,

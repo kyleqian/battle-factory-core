@@ -1,0 +1,37 @@
+{
+ "schema": "prep13-live-adapter-fixture/v1",
+ "move": "HIDDEN_POWER",
+ "probe": "tools/compare/hiddenPowerProbe.py",
+ "scenario": "tools/battle-lab/prep13-hidden-power-alt-opponent-unown-golem.json",
+ "bodyIndex": 0,
+ "denseWindow": {
+  "startFrame": 81,
+  "endFrame": 260
+ },
+ "windowSource": "prep13 s0.2: window start = the scenario's own activation frame + the accepted offset 0; rows = the probed first-inactive minus activation",
+ "attacker": {
+  "species": "UNOWN",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793700000,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 187,
+  "playerMaxHp": 187,
+  "opponentHp": 144,
+  "opponentMaxHp": 144,
+  "playerGender": "male",
+  "opponentGender": "none"
+ }
+}

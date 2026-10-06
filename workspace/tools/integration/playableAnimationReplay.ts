@@ -65,7 +65,7 @@ export function playableAnimationReplay(
           frame: state.frame, moveId: command.animation.moveId,
           attacker: command.animation.attacker,
           player: view.field.player.name, opponent: view.field.opponent.name,
-          duration: liveMoveAnimationDuration(command.animation), samples: [],
+          duration: liveMoveAnimationDuration(command.animation, view.field), samples: [],
         });
       }
       const observation = observations.at(-1)!;

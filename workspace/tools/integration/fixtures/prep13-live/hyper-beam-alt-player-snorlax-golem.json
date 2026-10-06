@@ -1,0 +1,47 @@
+{
+ "schema": "prep13-live-adapter-fixture/v1",
+ "move": "HYPER_BEAM",
+ "probe": "tools/compare/hyperBeamProbe.py",
+ "scenario": "tools/battle-lab/prep13-hyper-beam-alt-player-snorlax-golem.json",
+ "bodyIndex": 0,
+ "denseWindow": {
+  "startFrame": 235,
+  "endFrame": 514
+ },
+ "windowSource": "prep13 s0.2: window start = the scenario's own activation frame + the accepted offset 0; rows = the probed first-inactive minus activation",
+ "attacker": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349018728,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 213,
+  "playerMaxHp": 242,
+  "opponentHp": 155,
+  "opponentMaxHp": 155,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "presentationRngActivation": {
+  "value": 3566719167,
+  "source": "tools/integration/fixtures/prep13/prep13-analysis.json prep13-hyper-beam-alt-player-snorlax-golem[0].rng2 (activation frame 235)"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ]
+}

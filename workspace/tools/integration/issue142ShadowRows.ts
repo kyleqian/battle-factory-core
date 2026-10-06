@@ -46,7 +46,8 @@ async function renderMode(jobsPath: string, outPath: string) {
     });
     try {
       const f = mk("GOLBAT");
-      const duration = liveMoveAnimationDuration((liveView(f as any, 0).effect as any).request) as number;
+      const view0 = liveView(f as any, 0);
+      const duration = liveMoveAnimationDuration((view0.effect as any).request, view0.field) as number;
       const golbat: number[] = [];
       for (let age = 0; age < duration; age++) {
         const fb = new Uint8Array(240 * 160 * 4);

@@ -828,7 +828,7 @@ export function battleResolutionCommandDuration(
       ) + command.timing.holdFrames;
     case "move-animation":
       return command.animation
-        ? liveMoveAnimationDuration(command.animation) ?? command.timing.minimumFrames
+        ? liveMoveAnimationDuration(command.animation, field) ?? command.timing.minimumFrames
         : command.timing.minimumFrames;
     case "hit-animation":
       return command.timing.minimumFrames;
@@ -933,7 +933,7 @@ function postBodyShadowHiddenAt(
   for (let index = state.commandIndex - 1; index >= 0; index -= 1) {
     const completed = segment.commands[index]!;
     if (completed.type === "move-animation") {
-      if (!completed.animation || liveMoveAnimationDuration(completed.animation) === null) return false;
+      if (!completed.animation || liveMoveAnimationDuration(completed.animation, fields[index]!) === null) return false;
       return rows <= liveMoveOpponentShadowPostBodyHideRows(completed.animation);
     }
     rows += battleResolutionCommandDuration(completed, fields[index]!);

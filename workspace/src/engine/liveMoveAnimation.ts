@@ -73,9 +73,11 @@ import { LEAF_BLADE_OAM_ORDER_SLOTS } from "../animation/leafBlade.ts";
 import { HEAL_BELL_REUSED_ORDER_SLOTS } from "../animation/healBell.ts";
 import { KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, spriteOrderForSlots, spriteOrderWithOccupiedPrefix } from "./spriteOrderProvider.ts";
 import { DOUBLE_KICK_FRAME_COUNT } from "../animation/doubleKick.ts";
+import { waterSpoutTimeline, type WaterSpoutLiveInputs } from "../animation/waterSpout.ts";
+import { hiddenPowerUnownFormIndex } from "../animation/hiddenPower.ts";
 import type { FlailPower } from "../animation/flail.ts";
 import {
-  liveMovePresentationRngWords, miniTwinklingStarFromWords, type LiveMovePresentationRngInput,
+  hyperBeamOrbFromWords, liveMovePresentationRngWords, miniTwinklingStarFromWords, type LiveMovePresentationRngInput,
 } from "./liveMovePresentationRng.ts";
 
 
@@ -171,6 +173,11 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   13,
   // prep10: Spark, PLAYER attacker only (accepted constants; no accepted opponent-attacker evidence).
   209,
+  // prep13 (docs/next-adapters-prep13.md s1.1-1.2): Ice Beam (geometry from the anchors; lent-order gate), Water Spout
+  // (party HP tier + picture height + per-side rain seed; lent-order gate).
+  58, 323,
+  // prep13 s1.3: Hidden Power (Unown attacker only: the reducer's uninitialised eighth orb is Unown-specific; lent-order gate).
+  237,
 ] as const);
 
 const FLAIL_POWERS: readonly FlailPower[] = Object.freeze([20, 40, 80, 100, 150, 200]);
@@ -246,6 +253,10 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // Faithful-random adapters (liveMovePresentationRng.ts): Double Kick hit bodies, Astonish, Thrash, Flail, Wish start at activation (row 0,
     // prep12 §0.2 / random2-r1 activation probes).
     24, 310, 37, 175, 273,
+    // Hyper Beam (63, faithful-random): activation == accepted window start (row 0), prep13 s0.1.
+    63,
+    // prep13 (issue142-shadow-rows-extra.json): Ice Beam, Water Spout activation == accepted window start (row 0), prep13 s0.1-0.2.
+    58, 323, 237,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -374,8 +385,46 @@ function provableEffectOrder(moveId: 196 | 59, side: "player" | "opponent", dura
   return ok;
 }
 
-export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): number | null {
+/** Free OBJ slots over the known-entry in-use set [0,1,2,6,8,60..63] (prep13 s1.2 launchSpriteSlots), ascending. */
+const KNOWN_ENTRY_FREE_SPRITE_SLOTS: readonly number[] = Object.freeze(
+  Array.from({ length: 64 }, (_, slot) => slot).filter(slot => ![0, 1, 2, 6, 8, 60, 61, 62, 63].includes(slot)));
+
+const waterSpoutInputsCache = new Map<string, Readonly<WaterSpoutLiveInputs>>();
+/**
+ * prep13 s1.2: Water Spout's live inputs. HP = the attacker's party HP at activation (GetWaterSpoutPowerForAnim tier +
+ * HorizontalShake length); `attackerSourceHeight` = the attacker's picture height (SetBattlerSpriteYOffsetFromYScale; the
+ * reducer default 40 is Nosepass's); the rest are the known-entry constants. Memoised so the reducer's timeline cache hits.
+ */
+function waterSpoutLiveInputs(
+  field: BattleResolutionDisplayedField, attackerSide: "player" | "opponent", order?: readonly number[],
+): Readonly<WaterSpoutLiveInputs> | null {
+  const mon = field[attackerSide];
+  if (mon.maxHP <= 0 || mon.hp < 0 || mon.hp > mon.maxHP) return null;
+  const art = createBattleCommandFieldArtView(field);
+  const anchors = liveBattlerAnchors(attackerSide, art);
+  const key = `${attackerSide}/${mon.hp}/${mon.maxHP}/${anchors.pictureHeight}/${anchors.picOffsetPoint.x},${anchors.picOffsetPoint.y}/${order?.join(",") ?? ""}`;
+  let inputs = waterSpoutInputsCache.get(key);
+  if (inputs === undefined) {
+    inputs = Object.freeze({
+      attackerSide, attackerHp: mon.hp, attackerMaxHp: mon.maxHP, attackerEffectCenter: anchors.picOffsetPoint,
+      attackerSubpriority: attackerSide === "player" ? 30 : 40, launchTaskSlot: 0, launchSpriteSlots: KNOWN_ENTRY_FREE_SPRITE_SLOTS,
+      attackerSourceHeight: anchors.pictureHeight, animationRng: 0, ...(order ? { spriteOrderSeed: order } : {}),
+    });
+    waterSpoutInputsCache.set(key, inputs);
+  }
+  return inputs;
+}
+
+export function liveMoveAnimationDuration(
+  request: BattleMoveAnimationRequest, field?: BattleResolutionDisplayedField,
+): number | null {
   switch (request.moveId) {
+    // Water Spout (prep13 s1.2): the body length depends on the attacker's party HP and picture height (accepted rows
+    // 278 full HP / 276 KINGDRA player-back / 270..201 at lower HP tiers), so it is only defined with the displayed field.
+    case 323: {
+      const inputs = field === undefined ? null : waterSpoutLiveInputs(field, request.attacker === 0 ? "player" : "opponent");
+      return inputs === null ? null : waterSpoutTimeline(inputs).length;
+    }
     case 2: return KARATE_CHOP_FRAME_COUNT;
     case 9: return THUNDER_PUNCH_MOVE_BODY_LAST_AGE + 1;
     case 5: return 160; // Mega Punch source body through first inactive row.
@@ -658,6 +707,9 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     // Flail accepted windows (209..322 / 210..323; natural-HP tiers 114 rows each); power = gBattleMovePower.
     case 175: return FLAIL_POWERS.includes(request.power as FlailPower) ? 114 : null;
     case 273: return 271; // Wish accepted window (65..335 / 69..339).
+    case 63: return 280; // Hyper Beam faithful-random body 79..358 / 83..362 (prep13 s0.1; reducer first inactive age 279).
+    case 237: return 180; // Hidden Power 77..256 / 81..260 (prep13 s0.1, first inactive age 179).
+    case 58: return 203; // Ice Beam 75..277 / 79..281 (prep13 s0.1; reducer first inactive age 202).
     default: return null;
   }
 }
@@ -699,7 +751,7 @@ export function liveMoveAnimationPresentation(
   spriteOrderInput?: LiveMoveSpriteOrderInput,
   presentationRngInput?: LiveMovePresentationRngInput,
 ): SceneOnMovePresentationState | null {
-  if (liveMoveAnimationDuration(request) === null) return null;
+  if (liveMoveAnimationDuration(request, field) === null) return null;
   const art = createBattleCommandFieldArtView(field);
   const battler = (side: "player" | "opponent"): SceneOnPresentationBattler => {
     const origin = battleCommandFieldSpriteOrigin(art[side], side);
@@ -2172,6 +2224,107 @@ export function liveMoveAnimationPresentation(
       config = { move: "ASTONISH", attacker, target: affineCenterBattler(target), fieldProfile,
         targetPictureYOffset: liveBattlerCoordAttrs(target.geometry.side, art).yOffset,
         dropletRandom: [{ v1: words[0]! & 0x1ff, v2: words[1]! & 0x7f }, { v1: words[2]! & 0x1ff, v2: words[3]! & 0x7f }] };
+      break;
+    }
+    case 58: {
+      // prep13 s1.1: geometry from the anchors, the monbg base from the target's source sprite centre + idle x2 (the first
+      // Task_UpdateMonBg data), every other field a constant/echo; the 64-entry activation order is the lent order (it
+      // alone reproduces the ROM order rows), so an unknown tracked order is not proven -> null.
+      if (!spriteOrderInput?.known) return null;
+      const initialOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (initialOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      config = { move: "ICE_BEAM", attacker, target, fieldProfile,
+        animationProfile: { orientation: attacker.geometry.side === "player" ? "player-back" : "opponent-front",
+          endAge: 202, gameplayRng: 0, animationRngStart: 0,
+          geometry: { attackerPictureOffset: attackerAnchors.picOffsetPoint, targetPictureOffset: targetAnchors.picOffsetPoint,
+            targetCenter: targetAnchors.picOffsetPoint,
+            monbgBaseHofs: 544 - (targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2),
+            monbgBaseVofs: 544 - targetAnchors.spriteCenter.y },
+          spriteOrder: { initialOrder } } };
+      break;
+    }
+    case 63: {
+      // prep13 s1.4 (faithful random): 52 orbs x (animation, speed, phase) from the presentation host's 26 x 6 words; the
+      // orb slots are the lowest-free allocator over the known-entry in-use set, each orb released `visible rows + 1` frames
+      // after its birth (the reducer's own lifetime, so a pass with placeholder slots measures it); persistentOrder = the
+      // slot's index in the lent order. Geometry/rest from the anchors. Unknown tracked order -> null.
+      const draws = liveMovePresentationRngWords(presentationRngInput)?.draws;
+      if (draws === undefined || draws.length !== 26 || draws.some((group) => group.length !== 6) || !spriteOrderInput?.known) return null;
+      const lentOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (lentOrder === null) return null;
+      const side = attacker.geometry.side;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const animationGeometry = { attackerPictureCenter: attackerAnchors.picOffsetPoint, targetPictureCenter: targetAnchors.picOffsetPoint,
+        attackerRestOffset: { x2: attackerAnchors.frontIdleRest.x2, y2: attackerAnchors.frontIdleRest.y2 },
+        targetRestOffset: { x2: targetAnchors.frontIdleRest.x2, y2: targetAnchors.frontIdleRest.y2 } };
+      const words = draws.flatMap((group) => [
+        hyperBeamOrbFromWords(group[0]!, group[1]!, group[2]!), hyperBeamOrbFromWords(group[3]!, group[4]!, group[5]!)]);
+      const subs = { attackerSubpriority: side === "player" ? 30 : 40, targetSubpriority: side === "player" ? 40 : 30 };
+      // Visible rows of an orb = duration - 1, duration = (|xDiff| << 4) / speed (hyperBeam.ts orbAtAge: it is created with
+      // `remaining` = duration, ticks twice by its first display row and is destroyed on the tick that finds 0 left).
+      const originX = animationGeometry.attackerPictureCenter.x + (side === "player" ? 20 : -20);
+      const xDiff = Math.abs(animationGeometry.targetPictureCenter.x - originX);
+      const visibleRows = words.map((word) => Math.max(0, Math.trunc((xDiff << 4) / word.speed) - 1));
+      const alive: { slot: number; until: number }[] = [];
+      const slots: number[] = [];
+      words.forEach((_, index) => {
+        const born = 110 + Math.floor(index / 2) * 3;
+        for (let k = alive.length - 1; k >= 0; k -= 1) if (alive[k]!.until <= born) alive.splice(k, 1);
+        let slot = 0;
+        while ([0, 1, 2, 6, 8, 60, 61, 62, 63].includes(slot) || alive.some((a) => a.slot === slot)) slot += 1;
+        slots.push(slot);
+        alive.push({ slot, until: born + visibleRows[index]! + 1 });
+      });
+      config = { move: "HYPER_BEAM", attacker, target, fieldProfile, animationGeometry,
+        animationProfile: { orbs: words.map((word, index) => ({ ...word, slot: slots[index]!, persistentOrder: lentOrder.indexOf(slots[index]!) })),
+          ...subs, spriteOrderSeed: lentOrder } };
+      break;
+    }
+    case 237: {
+      // prep13 s1.3. The reducer is Unown-only (GENGAR controls show the eighth orb already initialised); every Factory
+      // Hidden Power user is Unown. The attacker centre is GetBattlerSpriteCoord(Y_PIC_OFFSET) of the personality's LETTER-form
+      // species (SPECIES_UNOWN_B.. coords), the only provider the base-species anchors lack; letters 26/27 are unproven -> null.
+      if (attacker.species !== "UNOWN" || !spriteOrderInput?.known) return null;
+      const personality = field[attacker.geometry.side].personality ?? 0;
+      const form = hiddenPowerUnownFormIndex(personality);
+      if (form >= 26) return null;
+      const formKey = form === 0 ? "UNOWN" : `UNOWN_${String.fromCharCode(65 + form)}`;
+      const side = attacker.geometry.side;
+      const formCoords = (monPicCoordsData as unknown as Record<"back" | "front", Record<string, { width: number; height: number; yOffset: number }>>)[side === "player" ? "back" : "front"][formKey];
+      if (formCoords === undefined) return null;
+      // The art view derives the sprite origin from the species yOffset (fieldArtBattler): re-derive it for the form.
+      const formArt = { ...art, [side]: { ...art[side], coords: formCoords,
+        origin: { x: art[side].origin.x, y: art[side].origin.y - art[side].coords.yOffset + formCoords.yOffset } } } as typeof art;
+      const center = liveBattlerAnchors(side, formArt).picOffsetPoint;
+      // The sprite itself sits at the letter form's own origin too (BattleLoadMonSpriteGfx / GetBattlerSpriteDefault_Y read the form coords).
+      const formOrigin = battleCommandFieldSpriteOrigin(formArt[side], side);
+      const fullOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (fullOrder === null) return null;
+      // Orbit [3,4,5,7,9,10] + scatter [11..18]: lowest-free over the in-use set [0,1,2,6,8,60..63]; matrices first-free over 0x6.
+      const slots = KNOWN_ENTRY_FREE_SPRITE_SLOTS.slice(0, 14);
+      const matrices = [0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+      config = { move: "HIDDEN_POWER", attacker: { ...attacker, geometry: { ...attacker.geometry, spriteCorner: formOrigin, animationCenter: center } }, target, fieldProfile,
+        animationProfile: { attackerSubpriority: side === "player" ? 30 : 40, targetSubpriority: side === "player" ? 40 : 30,
+          allocationSlots: slots, spriteOrderSeed: fullOrder.filter(slot => slots.includes(slot)),
+          orbitMatrixNums: matrices.slice(0, 6), scatterMatrixNums: matrices.slice(6),
+          uninitializedScatterY: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint.y,
+          attackerPersonality: personality, animationRngSeed: 0 } };
+      break;
+    }
+    case 323: {
+      // prep13 s1.2: the 64-entry activation order is the lent order (known entry + tracked history), pixel-relevant for the
+      // painter ties; an unknown tracked order is not proven -> null.
+      if (!spriteOrderInput?.known) return null;
+      const order = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (order === null) return null;
+      const animationInputs = waterSpoutLiveInputs(field, attacker.geometry.side, order);
+      if (animationInputs === null) return null;
+      config = { move: "WATER_SPOUT", attacker, target, fieldProfile, animationInputs };
       break;
     }
     default: return null;

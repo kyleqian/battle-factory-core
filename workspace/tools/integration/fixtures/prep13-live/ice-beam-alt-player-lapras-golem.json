@@ -1,0 +1,37 @@
+{
+ "schema": "prep13-live-adapter-fixture/v1",
+ "move": "ICE_BEAM",
+ "probe": "tools/compare/iceBeamProbe.py",
+ "scenario": "tools/battle-lab/prep13-ice-beam-alt-player-lapras-golem.json",
+ "bodyIndex": 0,
+ "denseWindow": {
+  "startFrame": 74,
+  "endFrame": 276
+ },
+ "windowSource": "prep13 s0.2: window start = the scenario's own activation frame + the accepted offset 0; rows = the probed first-inactive minus activation",
+ "attacker": {
+  "species": "LAPRAS",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019028,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 205,
+  "playerMaxHp": 205,
+  "opponentHp": 187,
+  "opponentMaxHp": 187,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

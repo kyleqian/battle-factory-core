@@ -1,0 +1,37 @@
+{
+ "schema": "prep13-live-adapter-fixture/v1",
+ "move": "HIDDEN_POWER",
+ "probe": "tools/compare/hiddenPowerProbe.py",
+ "scenario": "tools/battle-lab/prep13-hidden-power-alt-opponent-gengar-onix.json",
+ "bodyIndex": 0,
+ "denseWindow": {
+  "startFrame": 82,
+  "endFrame": 261
+ },
+ "windowSource": "prep13 s0.2: window start = the scenario's own activation frame + the accepted offset 0; rows = the probed first-inactive minus activation",
+ "attacker": {
+  "species": "GENGAR",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793700000,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 156,
+  "opponentMaxHp": 156,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}
