@@ -1,0 +1,39 @@
+{
+ "schema": "curse-live-adapter-fixture/v1",
+ "move": "CURSE",
+ "probe": "tools/compare/curseProbe.py",
+ "scenario": "tools/battle-lab/curse-live-stat-opp-skarmory-pichu.json",
+ "denseWindow": {
+  "startFrame": 73,
+  "endFrame": 248
+ },
+ "windowSource": "window = [activation, activation + 175] of the scenario Curse body (CurseStats); activation = its own first anim-active frame (curseProbe.py sourceWindow; first body)",
+ "attacker": {
+  "species": "SKARMORY",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "PICHU",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 95,
+  "playerMaxHp": 95,
+  "opponentHp": 140,
+  "opponentMaxHp": 140,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 1,
+  "power": 0
+ }
+}

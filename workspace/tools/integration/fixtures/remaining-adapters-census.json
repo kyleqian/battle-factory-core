@@ -10,7 +10,7 @@
   "src/data/gen/battle-frontier-mons.json",
   "src/data/gen/factory-round-policy.json"
  ],
- "liveStatusImplementedCount": 230,
+ "liveStatusImplementedCount": 231,
  "staleCodesCorrected": [
   "B (sSpriteOrder): was 'first body only'; production now lends the order and tracks it across bodies (liveSpriteOrderHost.ts / spriteOrderProvider.ts, merged cross-body tracker + post-KO rung 1), so B no longer blocks anything; recipe work only (falls back after an unmodelled graphics command)",
   "F-AFFINE / E-TASK: were provider blockers; docs/allocator-plan-v2-evidence.md measured gOamMatrixAllocBitmap 0x6 + no tasks at all 481 known-entry bodies, so the accepted constants gated on the lent order suffice for first bodies (invalidated after a faint/switch)",
@@ -23,7 +23,7 @@
  "inFlightMoves": {},
  "summary": {
   "accepted": 276,
-  "live": 230,
+  "live": 231,
   "faithfulRandom": 10,
   "faithfulRandomMoves": [
    "MOVE_ASTONISH",
@@ -38,16 +38,16 @@
    "MOVE_WISH"
   ],
   "inFlight": 0,
-  "remaining": 36,
+  "remaining": 35,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
   },
   "weightPct": {
-   "live": 91.313,
+   "live": 91.834,
    "faithfulRandom": 3.612,
    "inFlight": 0,
-   "remaining": 4.588
+   "remaining": 4.067
   },
   "remainingByGroup": {
    "PROVIDER-x": {
@@ -55,8 +55,8 @@
     "weightPct": 0.962
    },
    "MULTI": {
-    "moves": 30,
-    "weightPct": 3.293
+    "moves": 29,
+    "weightPct": 2.772
    },
    "SMALL-INPUT": {
     "moves": 1,
@@ -69,14 +69,14 @@
   },
   "remainingByHostClass": {
    "H_BASIC": 2,
-   "H_BUFFER": 30,
+   "H_BUFFER": 29,
    "H_DERIVED": 3,
    "H_RANDOM": 1,
-   "H_VARIANT": 5
+   "H_VARIANT": 4
   },
   "orderFirstBodyOnlyMoves": 23,
-  "slotPlanNeededMoves": 29,
-  "sumsTo": "230+10+0+36=276",
+  "slotPlanNeededMoves": 28,
+  "sumsTo": "231+10+0+35=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -176,8 +176,8 @@
    "aloneNames": [
     "METEOR_MASH"
    ],
-   "touchingMoves": 31,
-   "touchingWeightPct": 3.513,
+   "touchingMoves": 30,
+   "touchingWeightPct": 2.992,
    "meta": {
     "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
     "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
@@ -209,8 +209,8 @@
    "aloneNames": [
     "MEMENTO"
    ],
-   "touchingMoves": 4,
-   "touchingWeightPct": 0.703,
+   "touchingMoves": 3,
+   "touchingWeightPct": 0.182,
    "meta": null
   },
   {
@@ -230,8 +230,8 @@
    "aloneNames": [
     "MEMENTO"
    ],
-   "touchingMoves": 30,
-   "touchingWeightPct": 3.143,
+   "touchingMoves": 29,
+   "touchingWeightPct": 2.622,
    "meta": {
     "cost": "new large host (docs/animation-integration-readiness.md A6)",
     "claim": "only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today"
@@ -246,8 +246,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 26,
-   "touchingWeightPct": 2.92,
+   "touchingMoves": 25,
+   "touchingWeightPct": 2.399,
    "meta": {
     "cost": "extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves)",
     "claim": "exact for audited plan rows from a known entry; actual status animations/switches invalidate"
@@ -262,8 +262,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 25,
-   "touchingWeightPct": 2.781,
+   "touchingMoves": 24,
+   "touchingWeightPct": 2.26,
    "meta": null
   },
   {
@@ -275,8 +275,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 24,
-   "touchingWeightPct": 2.709,
+   "touchingMoves": 23,
+   "touchingWeightPct": 2.189,
    "meta": null
   },
   {
@@ -288,8 +288,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 11,
-   "touchingWeightPct": 1.759,
+   "touchingMoves": 10,
+   "touchingWeightPct": 1.238,
    "meta": null
   },
   {
@@ -437,12 +437,11 @@
   {
    "step": 5,
    "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
-   "newMoves": 28,
-   "newWeightPct": 2.996,
-   "cumulativeRemainingUnlocked": 32,
+   "newMoves": 27,
+   "newWeightPct": 2.475,
+   "cumulativeRemainingUnlocked": 31,
    "newNames": [
     "BONEMERANG",
-    "CURSE",
     "ERUPTION",
     "EXTRASENSORY",
     "FLATTER",
@@ -476,7 +475,7 @@
    "provider": "X-DISABLE",
    "newMoves": 2,
    "newWeightPct": 0.147,
-   "cumulativeRemainingUnlocked": 34,
+   "cumulativeRemainingUnlocked": 33,
    "newNames": [
     "ICE_BALL",
     "SPIT_UP"
@@ -487,7 +486,7 @@
    "provider": "X-TWOTURN",
    "newMoves": 1,
    "newWeightPct": 0.187,
-   "cumulativeRemainingUnlocked": 35,
+   "cumulativeRemainingUnlocked": 34,
    "newNames": [
     "DIVE"
    ]
@@ -497,7 +496,7 @@
    "provider": "X-AGE",
    "newMoves": 1,
    "newWeightPct": 0.112,
-   "cumulativeRemainingUnlocked": 36,
+   "cumulativeRemainingUnlocked": 35,
    "newNames": [
     "EXTREME_SPEED"
    ]
@@ -507,7 +506,7 @@
    "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 36,
+   "cumulativeRemainingUnlocked": 35,
    "newNames": []
   },
   {
@@ -515,7 +514,7 @@
    "provider": "D-TILE",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 36,
+   "cumulativeRemainingUnlocked": 35,
    "newNames": []
   },
   {
@@ -523,7 +522,7 @@
    "provider": "D-BG",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 36,
+   "cumulativeRemainingUnlocked": 35,
    "newNames": []
   },
   {
@@ -531,7 +530,7 @@
    "provider": "D-OAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 36,
+   "cumulativeRemainingUnlocked": 35,
    "newNames": []
   },
   {
@@ -539,7 +538,7 @@
    "provider": "D-VRAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 36,
+   "cumulativeRemainingUnlocked": 35,
    "newNames": []
   },
   {
@@ -547,7 +546,7 @@
    "provider": "D-SCAN",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 36,
+   "cumulativeRemainingUnlocked": 35,
    "newNames": []
   }
  ],
@@ -968,251 +967,6 @@
     "C",
     "D-TILE",
     "D-BG"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "MULTI"
-  },
-  {
-   "move": "MOVE_CURSE",
-   "id": 174,
-   "name": "CURSE",
-   "hostClass": [
-    "H_BUFFER",
-    "H_VARIANT"
-   ],
-   "weightShare": 0.005208333333333333,
-   "config": "src/animation/sceneOnPresentation.ts:2833",
-   "needs": [
-    "E-TASK",
-    "D-OAM",
-    "D-SCAN",
-    "D-PAL",
-    "D-BG",
-    "D-TILE",
-    "C"
-   ],
-   "blockers": [
-    {
-     "code": "E-TASK",
-     "text": "liveTasks (readonly Readonly<{ slot: number; callback: string)",
-     "cites": [
-      "src/animation/curse.ts:31"
-     ]
-    },
-    {
-     "code": "D-OAM",
-     "text": "buffers (Readonly<{ softwareOam: readonly unknown[]; hardwa)",
-     "cites": [
-      "src/animation/curse.ts:32"
-     ]
-    },
-    {
-     "code": "D-SCAN",
-     "text": "scanlineBuffers (readonly unknown[] }>;)",
-     "cites": [
-      "src/animation/curse.ts:34"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "palette (Readonly<{ unfaded: readonly number[]; faded: read)",
-     "cites": [
-      "src/animation/curse.ts:35"
-     ]
-    },
-    {
-     "code": "D-BG",
-     "text": "registers (Readonly<Record<string, number>>;)",
-     "cites": [
-      "src/animation/curse.ts:38"
-     ]
-    },
-    {
-     "code": "D-TILE",
-     "text": "resources (Readonly<{ nailTileBase: number; ghostTileBase: nu)",
-     "cites": [
-      "src/animation/curse.ts:40"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationRng (number; readonly gameplayRng: unknown; readonly ga)",
-     "cites": [
-      "src/animation/curse.ts:44"
-     ]
-    }
-   ],
-   "notes": [
-    "branch ghost|stats = request.turn (choosetwoturnanim, battle_anim_scripts.s:7641); the request already carries it, so this is recipe, not a provider",
-    "accepted as a LiveInputs config (docs/animation-integration-merged-readiness.json); not in the older triage docs"
-   ],
-   "staleCorrections": [
-    "Curse selector is request.turn"
-   ],
-   "slotPlanNeeded": true,
-   "consumedInputs": [
-    {
-     "path": "branch",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/curse.ts:22"
-    },
-    {
-     "path": "attackerArt",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/curse.ts:27"
-    },
-    {
-     "path": "animationTargetArt",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/curse.ts:29"
-    },
-    {
-     "path": "ownedSprites",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/curse.ts:30"
-    },
-    {
-     "path": "liveTasks",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/curse.ts:31"
-    },
-    {
-     "path": "buffers",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/curse.ts:32"
-    },
-    {
-     "path": "softwareMatrices",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/curse.ts:33"
-    },
-    {
-     "path": "scanlineBuffers",
-     "classes": [
-      "D-SCAN"
-     ],
-     "status": "blocked: D-SCAN",
-     "cite": "src/animation/curse.ts:34"
-    },
-    {
-     "path": "palette",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/curse.ts:35"
-    },
-    {
-     "path": "hardware",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/curse.ts:36"
-    },
-    {
-     "path": "paletteScanoutTransfer",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/curse.ts:37"
-    },
-    {
-     "path": "registers",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/curse.ts:38"
-    },
-    {
-     "path": "battleBg",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/curse.ts:39"
-    },
-    {
-     "path": "resources",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/curse.ts:40"
-    },
-    {
-     "path": "nailLoaded",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/curse.ts:41"
-    },
-    {
-     "path": "order",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/curse.ts:42"
-    },
-    {
-     "path": "liveCounts",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/curse.ts:43"
-    },
-    {
-     "path": "animationRng",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/curse.ts:44"
-    }
-   ],
-   "orderFirstBodyOnly": false,
-   "lentConstants": [
-    "E-TASK"
-   ],
-   "providerNeeds": [
-    "D-OAM",
-    "D-SCAN",
-    "D-PAL",
-    "D-BG",
-    "D-TILE",
-    "C"
    ],
    "palettePlan": false,
    "activationMeasured": false,

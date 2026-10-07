@@ -1,0 +1,57 @@
+{
+ "schema": "curse-live-ghost-p1-vcount/v1",
+ "method": "tools/compare/cursePaletteTimingProbe.py (fresh direct mGBA, instruction stepping at BeginNormalPaletteFade CpuSet; no framebuffer read) on the two accepted Ghost scenarios and the two prep14/prep23 alternates",
+ "question": "Is the row-26 palette-transfer scanline (prep23 P1) derivable from the body source timing or the activation frame the production queue knows?",
+ "windows": [
+  {
+   "scenario": "tools/battle-lab/mechanic-curse-ghost-player-haunter-opponent-magikarp.json",
+   "attackerSide": "player",
+   "attacker": "HAUNTER",
+   "target": "MAGIKARP",
+   "firstStep2TraceFrame": 97,
+   "bodyRow": 26,
+   "site": "BeginNormalPaletteFade/CpuSet-call",
+   "vcount": 17,
+   "inHBlank": true,
+   "firstPostTransferScanline": 18
+  },
+  {
+   "scenario": "tools/battle-lab/prep14-curse-ghost-alt-gengar-golem.json",
+   "attackerSide": "player",
+   "attacker": "GENGAR",
+   "target": "GOLEM",
+   "firstStep2TraceFrame": 96,
+   "bodyRow": 26,
+   "site": "BeginNormalPaletteFade/CpuSet-call",
+   "vcount": 9,
+   "inHBlank": false,
+   "firstPostTransferScanline": 9
+  },
+  {
+   "scenario": "tools/battle-lab/prep23-curse-ghost-altopp-gengar-golem.json",
+   "attackerSide": "opponent",
+   "attacker": "GENGAR",
+   "target": "GOLEM",
+   "firstStep2TraceFrame": 100,
+   "bodyRow": 26,
+   "site": "BeginNormalPaletteFade/CpuSet-call",
+   "vcount": 14,
+   "inHBlank": false,
+   "firstPostTransferScanline": 14
+  },
+  {
+   "scenario": "tools/battle-lab/mechanic-curse-ghost-opponent-haunter-player-magikarp.json",
+   "attackerSide": "opponent",
+   "attacker": "HAUNTER",
+   "target": "MAGIKARP",
+   "firstStep2TraceFrame": 101,
+   "bodyRow": 26,
+   "site": "BeginNormalPaletteFade/CpuSet-call",
+   "vcount": 14,
+   "inHBlank": false,
+   "firstPostTransferScanline": 14,
+   "source": "tools/compare/fixtures/curse-palette-transfer-timing.json (accepted, fresh x2)"
+  }
+ ],
+ "verdict": "NOT DERIVABLE: the same CurseGhost script position (first Step2 row, body row 26) on the same side samples REG_VCOUNT 17 + HBlank (scanline 18, HAUNTER->MAGIKARP) vs 9 (scanline 9, GENGAR->GOLEM): the transfer lands after the frame main loop CPU work that precedes the task (VBlank m4a sound mixing, battle controllers, text printers, palette fade), a CPU-cycle phase the production queue does not carry (it knows the activation frame index, not cycles). R1 (BG2 scroll one row early in 2/4 windows) is the same main-loop-vs-VBlank phase. The Ghost branch declines to the scene-off view (prep23 alternate residual at row 26: 135 / 15 px)."
+}

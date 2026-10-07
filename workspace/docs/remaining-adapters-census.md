@@ -8,18 +8,18 @@ node tools/integration/censusActivationSummary.mjs                    # fixtures
 tools/integration/censusActivation.sh; tools/integration/censusStagedActivation.sh   # direct-mGBA probes (optional, regenerates the receipts)
 ```
 
-Inputs: `docs/animation-integration-live-status.json` (230 live, 10 faithful random), `docs/animation-integration-readiness.json` + `-merged-readiness.json` (276 accepted, host classes), `tools/integration/fixtures/h-buffer-triage.json` (per-field classes/cites of the 78 H_BUFFER moves; stale config line numbers are re-resolved by symbol), `sprite-order-body-plans-ext.json`, the Level-50 set pools for the usage weight (the model of `tools/integration/spriteOrderPlanCoverageRank.py`: ranges 0..6, 4 moves per set, both sides; `weight` below is the share of all Factory move uses). The script asserts `live (scoped exact) + faithful-random + in-flight + remaining = 276` (faithful-random = the disjoint D3 bucket `faithfulRandomAdapters`, docs/presentation-rng.md) and that every cited `file:line` exists and is non-empty. In-flight = batches the supervisor has running (none; the lists in the script are empty). Helping Hand is the 277th Factory move and is not accepted (not counted).
+Inputs: `docs/animation-integration-live-status.json` (231 live, 10 faithful random), `docs/animation-integration-readiness.json` + `-merged-readiness.json` (276 accepted, host classes), `tools/integration/fixtures/h-buffer-triage.json` (per-field classes/cites of the 78 H_BUFFER moves; stale config line numbers are re-resolved by symbol), `sprite-order-body-plans-ext.json`, the Level-50 set pools for the usage weight (the model of `tools/integration/spriteOrderPlanCoverageRank.py`: ranges 0..6, 4 moves per set, both sides; `weight` below is the share of all Factory move uses). The script asserts `live (scoped exact) + faithful-random + in-flight + remaining = 276` (faithful-random = the disjoint D3 bucket `faithfulRandomAdapters`, docs/presentation-rng.md) and that every cited `file:line` exists and is non-empty. In-flight = batches the supervisor has running (none; the lists in the script are empty). Helping Hand is the 277th Factory move and is not accepted (not counted).
 
 ## 1. Summary
 
 | Bucket | Moves | Weight |
 |---|---:|---:|
 | accepted Factory moves | 276 | 100% |
-| live adapters (scoped exact) | 230 | 91.31% |
+| live adapters (scoped exact) | 231 | 91.83% |
 | faithful-random adapters (ASTONISH, DOUBLE_KICK, FLAIL, HYPER_BEAM, MUD_SLAP, RAIN_DANCE, SAND_ATTACK, THRASH, WATER_PULSE, WISH) | 10 | 3.61% |
 | in flight (0 order-consumer + 0 prep6) | 0 | 0.00% |
-| **remaining (this census)** | **36** | **4.59%** |
-| check | 230+10+0+36=276 | |
+| **remaining (this census)** | **35** | **4.07%** |
+| check | 231+10+0+35=276 | |
 
 Remaining moves by group:
 
@@ -27,10 +27,10 @@ Remaining moves by group:
 |---|---:|---:|---|
 | SMALL-INPUT | 1 | 0.22% | one named production input / reducer parameter |
 | PROVIDER-x | 4 | 0.96% | blocked on exactly one named provider |
-| MULTI | 30 | 3.29% | several providers |
+| MULTI | 29 | 2.77% | several providers |
 | OUT | 1 | 0.11% | needs something outside S10A scope |
 
-Remaining by readiness host class (a move can carry several): H_BASIC 2, H_BUFFER 30, H_DERIVED 3, H_RANDOM 1, H_VARIANT 5. Moves whose order input is satisfied only for the battle's first body: 23. Moves that still need a per-move sprite-slot plan row: 29.
+Remaining by readiness host class (a move can carry several): H_BASIC 2, H_BUFFER 29, H_DERIVED 3, H_RANDOM 1, H_VARIANT 4. Moves whose order input is satisfied only for the battle's first body: 23. Moves that still need a per-move sprite-slot plan row: 28.
 
 PROVIDER-x breakdown: X-SWITCH (1: BATON_PASS); D-SCAN (1: MEMENTO); C (1: METEOR_MASH); X-SUBST (1: SUBSTITUTE).
 
@@ -88,7 +88,7 @@ Columns: `needs` = provider codes after removing what production supplies (`B(fi
 |---|---|---:|---|---|---|
 | EXTREME_SPEED (245) | H_DERIVED | 0.11% | X-AGE | X-AGE: evidence covers ages 48..350 only (window starts mid-body: activation 78, window 87, ageOffset 48, row 39); ages 0..47 never accepted; 1 rental species (Arcanine) @ a/sceneOnPresentation.ts:1499, a/extremeSpeed.ts:1 | OUT: needs animation-lane dense evidence for the first 48 source ages (docs/next-adapters-prep2.md row 20) |
 
-### MULTI (30)
+### MULTI (29)
 
 | Move (id) | Host class | Weight | needs | Blockers (consumed field @ cite) | Notes / measured |
 |---|---|---:|---|---|---|
@@ -113,7 +113,6 @@ Columns: `needs` = provider codes after removing what production supplies (`B(fi
 | REVENGE (279) | H_BUFFER | 0.07% | D-OAM+D-PAL+D-BG+D-TILE+C+B(first body) | E-TASK: liveTasks (readonly Readonly<{slot:number;c… @ a/revenge.ts:19; D-OAM: buffers (Readonly<{softwareOam:readonly unk… @ a/revenge.ts:20; D-PAL: palette (Readonly<{unfaded:readonly number[… @ a/revenge.ts:22; D-BG: registers (Readonly<Record<string,number>>;) @ a/revenge.ts:23; D-TILE: resources (Readonly<{scratchTileBase:number… @ a/revenge.ts:26; B: spriteOrder (readonly number[]; readonly au… @ a/revenge.ts:28; C: animationRng (number; readonly gameplayRng:… @ a/revenge.ts:30 | accepted as a LiveInputs config (docs/animation-integration-merged-readiness.json); not in the older triage docs |
 | SKY_ATTACK (143) | H_BUFFER+H_VARIANT | 0.04% | C+D-PAL+D-TILE+D-BG+D-VRAM+B(first body) | B: animationInputs:allocator.activeOrderKeys (… @ a/skyAttack.ts:52; C: animationInputs:animationRngSeed (presentat… @ a/skyAttack.ts:60; F-AFFINE: animationInputs:attackerSprite (battler spr… @ a/skyAttack.ts:40; E-TASK: animationInputs:taskSlots (CreateTask slot… @ a/skyAttack.ts:42; D-PAL: animationInputs:palettes (palette host / re… @ a/skyAttack.ts:54; D-TILE: animationInputs:resources (OBJ tile/palette… @ a/skyAttack.ts:49; D-BG: animationInputs:background (BG regs / monbg… @ a/skyAttack.ts:55; D-VRAM: animationInputs:background.vram (BG VRAM sn… @ a/skyAttack.ts:58 | visible charge turn selected by request.turn like live Solar Beam |
 | SUPERPOWER (276) | H_BUFFER | 0.04% | D-OAM+D-PAL+D-BG+D-TILE+C+B(first body) | E-TASK: liveTasks (readonly Readonly<{slot:number;c… @ a/superpower.ts:19; D-OAM: buffers (Readonly<{softwareOam:readonly unk… @ a/superpower.ts:20; D-PAL: palette (Readonly<{unfaded:readonly number[… @ a/superpower.ts:22; D-BG: registers (Readonly<Record<string,number>>;) @ a/superpower.ts:23; D-TILE: resources (Readonly<{orbTileBase:number;met… @ a/superpower.ts:25; B: spriteOrder (readonly number[]; readonly au… @ a/superpower.ts:28; C: animationRng (number; readonly gameplayRng:… @ a/superpower.ts:30 | accepted as a LiveInputs config (docs/animation-integration-merged-readiness.json); not in the older triage docs |
-| CURSE (174) | H_BUFFER+H_VARIANT | 0.52% | D-OAM+D-SCAN+D-PAL+D-BG+D-TILE+C | E-TASK: liveTasks (readonly Readonly<{ slot: number… @ a/curse.ts:31; D-OAM: buffers (Readonly<{ softwareOam: readonly u… @ a/curse.ts:32; D-SCAN: scanlineBuffers (readonly unknown[] }>;) @ a/curse.ts:34; D-PAL: palette (Readonly<{ unfaded: readonly numbe… @ a/curse.ts:35; D-BG: registers (Readonly<Record<string, number>>… @ a/curse.ts:38; D-TILE: resources (Readonly<{ nailTileBase: number;… @ a/curse.ts:40; C: animationRng (number; readonly gameplayRng:… @ a/curse.ts:44 | branch ghost\|stats = request.turn (choosetwoturnanim, battle_anim_scripts.s:7641); the request already carries it, so t… |
 | RETURN (216) | H_BUFFER | 0.25% | C+D-PAL+D-TILE+D-BG+D-OAM+F-AUDIO+B(first body) | B: animationInputs:spriteOrder (sSpriteOrder /… @ a/return.ts:88; C: animationInputs:animationRng (presentation… @ a/return.ts:129; F-AFFINE: animationInputs:attackerArt (battler sprite… @ a/return.ts:81; E-TASK: animationInputs:taskSlots (CreateTask slot… @ a/return.ts:83; D-PAL: animationInputs:palette (palette host / res… @ a/return.ts:96; D-TILE: animationInputs:impactAllocations (per-spri… @ a/return.ts:85; D-BG: animationInputs:registers (BG regs / monbg… @ a/return.ts:101; D-OAM: animationInputs:buffers (OAM/affine buffers) @ a/return.ts:90; F-AUDIO: animationInputs:audio (sound task state) @ a/return.ts:118 |  |
 | ICE_BALL (301) | H_BUFFER+H_VARIANT | 0.11% | D-OAM+D-PAL+D-BG+D-TILE+C+X-DISABLE | D-OAM: buffers (Readonly<{ softwareOam: readonly u… @ a/iceBall.ts:22; D-PAL: palette (Readonly<{ unfaded: readonly numbe… @ a/iceBall.ts:24; D-BG: registers (Readonly<Record<string, number>>… @ a/iceBall.ts:26; D-TILE: resources (Readonly<{ chunkTileBase: number… @ a/iceBall.ts:27; E-TASK: tasks (readonly Readonly<{ slot: number; ca… @ a/iceBall.ts:29; C: initialPresentationRng (number; readonly ga… @ a/iceBall.ts:32; X-DISABLE: counter 0..4 = rolloutTimerStartValue - rol… @ rom/src/battle_anim_ice.c:1613, a/iceBall.ts:9 | accepted as a LiveInputs config (docs/animation-integration-merged-readiness.json); not in the older triage docs |
 | FLATTER (260) | H_BUFFER | 0.08% | C+D-PAL+D-TILE+D-BG+D-OAM+F-AUDIO+B(first body) | B: animationInputs:spriteOrder (sSpriteOrder /… @ a/flatter.ts:87; C: animationInputs:animationRng (presentation… @ a/flatter.ts:120; F-AFFINE: animationInputs:attackerArt (battler sprite… @ a/flatter.ts:79; E-TASK: animationInputs:taskSlots (CreateTask slot… @ a/flatter.ts:86; D-PAL: animationInputs:palette (palette host / res… @ a/flatter.ts:94; D-TILE: animationInputs:spotlight (38 confetti + sp… @ a/flatter.ts:81; D-BG: animationInputs:registers (BG regs / monbg… @ a/flatter.ts:99; D-OAM: animationInputs:buffers (OAM/affine buffers) @ a/flatter.ts:88; F-AUDIO: animationInputs:audio (sound task state) @ a/flatter.ts:109 |  |
@@ -134,14 +133,14 @@ Ranked by remaining moves that become fully unlocked when that provider alone is
 | X-SWITCH | +1 | 0.48% | 1 | 0.48% | new flow owner (switch / forced-switch presentation; shares the pending 'actual switches' graphics ownership). separate S10x program: forced replacement and summaries are explicitly pending in docs/animation-integration-live-status.json | BATON_PASS |
 | X-SUBST | +1 | 0.22% | 1 | 0.22% | persistent Substitute doll sprite state | SUBSTITUTE |
 | E-OUT | +1 | 0.22% | 3 | 0.43% | per-move plumbing from resolution (secondary-effect / HP / stale-power values). exact outcome data; no RNG ownership | ENDEAVOR |
-| C | +1 | 0.22% | 31 | 3.51% | new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4). NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact | METEOR_MASH |
+| C | +1 | 0.22% | 30 | 2.99% | new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4). NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact | METEOR_MASH |
 | X-AGE | +1 | 0.11% | 1 | 0.11% | accepted evidence lacks the early source ages (age basis) | EXTREME_SPEED |
-| D-SCAN | +1 | 0.04% | 4 | 0.70% | gScanlineEffect buffers | MEMENTO |
-| A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio) | +1 | 0.04% | 30 | 3.14% | new large host (docs/animation-integration-readiness.md A6). only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today | MEMENTO |
-| D-PAL | +0 | 0.00% | 26 | 2.92% | extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves). exact for audited plan rows from a known entry; actual status animations/switches invalidate | - |
-| D-TILE | +0 | 0.00% | 25 | 2.78% | OBJ tile / palette-bank resource allocator | - |
-| D-BG | +0 | 0.00% | 24 | 2.71% | BG regs / BLDCNT / monbg state | - |
-| D-OAM | +0 | 0.00% | 11 | 1.76% | software/hardware OAM + affine buffer host | - |
+| D-SCAN | +1 | 0.04% | 3 | 0.18% | gScanlineEffect buffers | MEMENTO |
+| A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio) | +1 | 0.04% | 29 | 2.62% | new large host (docs/animation-integration-readiness.md A6). only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today | MEMENTO |
+| D-PAL | +0 | 0.00% | 25 | 2.40% | extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves). exact for audited plan rows from a known entry; actual status animations/switches invalidate | - |
+| D-TILE | +0 | 0.00% | 24 | 2.26% | OBJ tile / palette-bank resource allocator | - |
+| D-BG | +0 | 0.00% | 23 | 2.19% | BG regs / BLDCNT / monbg state | - |
+| D-OAM | +0 | 0.00% | 10 | 1.24% | software/hardware OAM + affine buffer host | - |
 | D-VRAM | +0 | 0.00% | 5 | 0.55% | BG VRAM snapshots | - |
 | F-AUDIO | +0 | 0.00% | 7 | 0.80% | sound task / pan / current-song state | - |
 | X-DISABLE | +0 | 0.00% | 2 | 0.15% | add a DisableStruct counter snapshot to the MOVE_ANIMATION request (rules context already holds the counters). exact (presentation-only copy of rules state) | - |
@@ -155,16 +154,16 @@ Greedy build order (each step = the provider/bundle with the most newly unlocked
 | 2 | X-SUBST | +1 | 0.22% | 2 | SUBSTITUTE |
 | 3 | E-OUT | +1 | 0.22% | 3 | ENDEAVOR |
 | 4 | C | +1 | 0.22% | 4 | METEOR_MASH |
-| 5 | A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio) | +28 | 3.00% | 32 | BONEMERANG, CURSE, ERUPTION, EXTRASENSORY, FLATTER, HYPER_VOICE, LOVELY_KISS, LUSTER_PURGE, MACH_PUNCH, MEGAHORN, MEMENTO, NIGHTMARE, OCTAZOOKA, OUTRAGE, PSYWAVE, RAPID_SPIN, RETURN, REVENGE, SAND_TOMB, SHEER_COLD, SHOCK_WAVE, SIGNAL_BEAM, SKILL_SWAP, SKY_ATTACK, SMOG, SNORE, SPIKES, SUPERPOWER |
-| 6 | X-DISABLE | +2 | 0.15% | 34 | ICE_BALL, SPIT_UP |
-| 7 | X-TWOTURN | +1 | 0.19% | 35 | DIVE |
-| 8 | X-AGE | +1 | 0.11% | 36 | EXTREME_SPEED |
-| 9 | D-PAL | +0 | 0.00% | 36 | - |
-| 10 | D-TILE | +0 | 0.00% | 36 | - |
-| 11 | D-BG | +0 | 0.00% | 36 | - |
-| 12 | D-OAM | +0 | 0.00% | 36 | - |
-| 13 | D-VRAM | +0 | 0.00% | 36 | - |
-| 14 | D-SCAN | +0 | 0.00% | 36 | - |
+| 5 | A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio) | +27 | 2.48% | 31 | BONEMERANG, ERUPTION, EXTRASENSORY, FLATTER, HYPER_VOICE, LOVELY_KISS, LUSTER_PURGE, MACH_PUNCH, MEGAHORN, MEMENTO, NIGHTMARE, OCTAZOOKA, OUTRAGE, PSYWAVE, RAPID_SPIN, RETURN, REVENGE, SAND_TOMB, SHEER_COLD, SHOCK_WAVE, SIGNAL_BEAM, SKILL_SWAP, SKY_ATTACK, SMOG, SNORE, SPIKES, SUPERPOWER |
+| 6 | X-DISABLE | +2 | 0.15% | 33 | ICE_BALL, SPIT_UP |
+| 7 | X-TWOTURN | +1 | 0.19% | 34 | DIVE |
+| 8 | X-AGE | +1 | 0.11% | 35 | EXTREME_SPEED |
+| 9 | D-PAL | +0 | 0.00% | 35 | - |
+| 10 | D-TILE | +0 | 0.00% | 35 | - |
+| 11 | D-BG | +0 | 0.00% | 35 | - |
+| 12 | D-OAM | +0 | 0.00% | 35 | - |
+| 13 | D-VRAM | +0 | 0.00% | 35 | - |
+| 14 | D-SCAN | +0 | 0.00% | 35 | - |
 
 Notes:
 - **Random2 is the keystone but non-exact.** It touches the most remaining moves and, after the allocator-v2 and A6 steps, unlocks 1 more; production cannot reconstruct `gRng2Value` (it advances every rendered frame and with every earlier animation's draws, `docs/visual-randomness-prep.md` s4). A presentation LCG is ROM-faithful in distribution and draw order only; the claim boundary (a non-exact presentation class beside the exact one) must be decided before building it. It cannot make a move exact on its own.
