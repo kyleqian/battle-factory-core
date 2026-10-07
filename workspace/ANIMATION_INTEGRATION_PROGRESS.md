@@ -155,6 +155,11 @@
   player outgoing healthbox A+48..A+75 not drawn. Worker gates 1,546 files / 12,647 tests, build. Supervisor: dense
   rerun 5 windows 0 px r1 == r2; compare:endeavor-portable 141/141; differential 389/389; union typecheck, smoke,
   9 files 194/194. Receipt `baton-endeavor-live-receipt.json`.
+- #151 diagnosis (side, `069dad5a8`, new files only): the Sheer Cold tail (ages 172-189) is a LAG FRAME — the
+  residual rows are exactly those whose age-171 lag differs from their orientation's accepted pair (counter
+  evidence on 31 rows; shift test 0 px; the field BG is one fade step off); no species property predicts it. The
+  Hyper Voice age-59 row is a scanline-phase palette upload (band depth 16 / 15 / 0 by pair; 0 lag frames). Both are
+  the CPU-timing class (DEFERRED D4). Supervisor reran both env-override patch proofs (0 px, reverted).
 
 ## 2026-10-06 (day, wind-down) — D3 implemented: 218 -> 226 exact + 10 faithful-random live adapters
 
