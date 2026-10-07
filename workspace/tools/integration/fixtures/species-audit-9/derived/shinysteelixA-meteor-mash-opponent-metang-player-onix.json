@@ -1,0 +1,60 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "METEOR_MASH",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-9/scenarios/shinysteelixA-meteor-mash-opponent-metang-player-onix.json",
+ "denseWindow": {
+  "startFrame": 232,
+  "endFrame": 446
+ },
+ "windowSource": "speciesAudit9: window = [activation, activation + 215 - 1] of the swapped scenario's own body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "event",
+ "attacker": {
+  "species": "STEELIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 2545608425,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 110,
+  "playerMaxHp": 110,
+  "opponentHp": 150,
+  "opponentMaxHp": 150,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "presentationRngActivation": {
+  "value": 327915701,
+  "source": "speciesAudit9: prep22Probe.py rng2Series[233] stepped back once (activation frame 232), r1 == r2"
+ },
+ "speciesAudit9": {
+  "acceptedFixture": "tools/integration/fixtures/d4a-live/meteor-mash-opponent-metang-player-onix.json",
+  "swappedSide": "opponent",
+  "bodies": [
+   [
+    309,
+    232,
+    446
+   ]
+  ],
+  "bodyIndex": 0,
+  "rows": 215,
+  "monbgCntRow": null,
+  "personality": [
+   2654435775,
+   2545608425
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

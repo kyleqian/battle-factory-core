@@ -1,0 +1,71 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "REVENGE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-9/scenarios/onixA-revenge-player-machamp-opponent-shuckle.json",
+ "denseWindow": {
+  "startFrame": 292,
+  "endFrame": 436
+ },
+ "windowSource": "speciesAudit9: window = [activation, activation + 145 - 1] of the swapped scenario's own body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "event",
+ "timingPhases": {
+  "bg-write-row": "event"
+ },
+ "monbgCntRow": 5,
+ "attacker": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SHUCKLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019028,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 130,
+  "playerMaxHp": 131,
+  "opponentHp": 127,
+  "opponentMaxHp": 127,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ],
+ "speciesAudit9": {
+  "acceptedFixture": "tools/integration/fixtures/d4a-live/revenge-player-machamp-opponent-shuckle.json",
+  "swappedSide": "player",
+  "bodies": [
+   [
+    33,
+    75,
+    116
+   ],
+   [
+    279,
+    292,
+    436
+   ]
+  ],
+  "bodyIndex": 1,
+  "rows": 145,
+  "monbgCntRow": 5,
+  "personality": [
+   2349019028,
+   1793699975
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

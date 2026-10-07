@@ -1,0 +1,71 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "METEOR_MASH",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-9/scenarios/golbat-meteor-mash-player-metang-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 302,
+  "endFrame": 516
+ },
+ "windowSource": "speciesAudit9: window = [activation, activation + 215 - 1] of the swapped scenario's own body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "event",
+ "attacker": {
+  "species": "METANG",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2654435775,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 129,
+  "playerMaxHp": 135,
+  "opponentHp": 150,
+  "opponentMaxHp": 150,
+  "playerGender": "none",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ],
+ "presentationRngActivation": {
+  "value": 2860282344,
+  "source": "speciesAudit9: prep22Probe.py rng2Series[303] stepped back once (activation frame 302), r1 == r2"
+ },
+ "speciesAudit9": {
+  "acceptedFixture": "tools/integration/fixtures/d4a-live/meteor-mash-player-metang-opponent-onix.json",
+  "swappedSide": "opponent",
+  "bodies": [
+   [
+    33,
+    74,
+    115
+   ],
+   [
+    309,
+    302,
+    516
+   ]
+  ],
+  "bodyIndex": 1,
+  "rows": 215,
+  "monbgCntRow": null,
+  "personality": [
+   2654435775,
+   2027808500
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

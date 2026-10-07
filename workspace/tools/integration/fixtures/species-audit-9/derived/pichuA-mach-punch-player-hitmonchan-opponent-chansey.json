@@ -1,0 +1,66 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "MACH_PUNCH",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-9/scenarios/pichuA-mach-punch-player-hitmonchan-opponent-chansey.json",
+ "denseWindow": {
+  "startFrame": 73,
+  "endFrame": 181
+ },
+ "windowSource": "speciesAudit9: window = [activation, activation + 109 - 1] of the swapped scenario's own body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "no-event",
+ "attacker": {
+  "species": "PICHU",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "CHANSEY",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015428,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 127,
+  "playerMaxHp": 127,
+  "opponentHp": 357,
+  "opponentMaxHp": 357,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "speciesAudit9": {
+  "acceptedFixture": "tools/integration/fixtures/d4a-live/mach-punch-player-hitmonchan-opponent-chansey.json",
+  "swappedSide": "player",
+  "bodies": [
+   [
+    183,
+    73,
+    182
+   ],
+   [
+    33,
+    449,
+    490
+   ],
+   [
+    0,
+    566,
+    604
+   ]
+  ],
+  "bodyIndex": 0,
+  "rows": 109,
+  "monbgCntRow": null,
+  "personality": [
+   2349015428,
+   1793703525
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

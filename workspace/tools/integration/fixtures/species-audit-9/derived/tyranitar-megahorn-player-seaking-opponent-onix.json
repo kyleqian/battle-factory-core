@@ -1,0 +1,71 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "MEGAHORN",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-9/scenarios/tyranitar-megahorn-player-seaking-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 73,
+  "endFrame": 249
+ },
+ "windowSource": "speciesAudit9: window = [activation, activation + 177 - 1] of the swapped scenario's own body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "event",
+ "timingPhases": {
+  "optional-lag-age": "event",
+  "bg-write-row": "event"
+ },
+ "monbgCntRow": 8,
+ "attacker": {
+  "species": "SEAKING",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "TYRANITAR",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019083,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 162,
+  "playerMaxHp": 162,
+  "opponentHp": 175,
+  "opponentMaxHp": 175,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "speciesAudit9": {
+  "acceptedFixture": "tools/integration/fixtures/d4a-live/megahorn-player-seaking-opponent-onix.json",
+  "swappedSide": "opponent",
+  "bodies": [
+   [
+    224,
+    73,
+    249
+   ],
+   [
+    33,
+    499,
+    540
+   ],
+   [
+    0,
+    712,
+    878
+   ]
+  ],
+  "bodyIndex": 0,
+  "rows": 177,
+  "monbgCntRow": 8,
+  "personality": [
+   2349019083,
+   1793700000
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

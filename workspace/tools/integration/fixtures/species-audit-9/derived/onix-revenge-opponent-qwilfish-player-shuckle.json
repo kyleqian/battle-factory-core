@@ -1,0 +1,81 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "REVENGE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-9/scenarios/onix-revenge-opponent-qwilfish-player-shuckle.json",
+ "denseWindow": {
+  "startFrame": 416,
+  "endFrame": 560
+ },
+ "windowSource": "speciesAudit9: window = [activation, activation + 145 - 1] of the swapped scenario's own body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "no-event",
+ "timingPhases": {
+  "bg-write-row": "no-event"
+ },
+ "monbgCntRow": 4,
+ "attacker": {
+  "species": "QWILFISH",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793699878,
+ "displayedStatus": {
+  "player": "poison",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 162,
+  "opponentMaxHp": 172,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "player",
+   "statusAnimation": "SLP"
+  }
+ ],
+ "speciesAudit9": {
+  "acceptedFixture": "tools/integration/fixtures/d4a-live/revenge-opponent-qwilfish-player-shuckle.json",
+  "swappedSide": "player",
+  "bodies": [
+   [
+    33,
+    68,
+    109
+   ],
+   [
+    0,
+    185,
+    255
+   ],
+   [
+    279,
+    416,
+    560
+   ]
+  ],
+  "bodyIndex": 2,
+  "rows": 145,
+  "monbgCntRow": 4,
+  "personality": [
+   2349019025,
+   1793699878
+  ],
+  "freshProbeRunsAgree": true
+ }
+}
