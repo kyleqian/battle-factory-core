@@ -17,9 +17,10 @@ S10A's mission and scoped acceptance policy control this stage's work queue.
   local full-suite/build receipt when production and environment are unchanged,
   with scoped checks for subsequent tooling changes.
 - Resume the latest ledger and ROADMAP S10A's ordered steps. D3 option (a) was
-  approved on 2026-10-06: begin the presentation RNG and separate claim accounting
-  described below. Current production `24df8af5e` has 218 live adapters; reuse its
-  recorded green baseline when code and environment match. Pick bounded batches.
+  approved and implemented on 2026-10-06 (presentation RNG host, seed export,
+  separate faithful-random accounting). Production `7e7816b98` has 226 scoped-exact
+  + 10 faithful-random live adapters; reuse its recorded green baseline when code
+  and environment match. Pick bounded batches.
 - Continue accepted-move adapters and source-derived host providers. Preserve
   gameplay outcomes, RNG ownership, damage, turn order and facility state.
   Helping Hand's doubles blocker does not block accepted moves. No new Factory

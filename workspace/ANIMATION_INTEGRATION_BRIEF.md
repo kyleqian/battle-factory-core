@@ -41,7 +41,8 @@ Document deliberate module-boundary changes; never silently widen ratchets.
 
 The latest production receipt and preview revision are in
 `ANIMATION_INTEGRATION_PROGRESS.md`, which also holds the current live adapter
-count (218 of 276 accepted Factory bodies at the 2026-10-05 wind-down).
+count (226 scoped-exact + 10 faithful-random of 276 accepted Factory bodies at the
+2026-10-06 wind-down).
 The established path includes ordinary Scene ON/OFF selection, typed requests
 and completion, queue resume, real-route regressions and browser verification.
 Reuse recorded same-code full-suite/build receipts under the verification policy.

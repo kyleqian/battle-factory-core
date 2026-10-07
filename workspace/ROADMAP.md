@@ -35,6 +35,7 @@ separate deterministic presentation RNG for Random2 animations, preserve its
 seed in session exports, and report those live adapters as "faithful random"
 separately from exact claims. S10A below defines the scope and acceptance.
 This resolves D3; no further user approval is needed for that implementation.
+Implemented 2026-10-06: `docs/presentation-rng.md`; 10 faithful-random adapters live.
 
 ## Operational notes
 
@@ -2208,40 +2209,30 @@ fourteen-move physical batch is verified and folded. Helping Hand remains
 unaccepted pending legal doubles staging. No whole-playable arbitrary-history
 framebuffer exactness is claimed.
 
-Next (2026-10-06, D3 approved): 218 live adapters (production `24df8af5e` after the 2026-10-05 day session).
-The sprite order now stays tracked and LENT after opponent knock-outs, player faints
-(forced switch-in), voluntary switches, cancelled party menus and Roar/Whirlwind forced
-switches (entry-label / role relabel; allocator re-seeded); 467-body production table.
-Elevated opponents now render at the right height with their shadow in ordinary frames
-(ISSUES #147, both scene modes). Resume points, in order:
-1. **Implement approved D3 option (a).** The Random2 group (52 of the 58 remaining
-   moves) cannot stay oracle-exact in play (`docs/random2-trackability.md`). Build
-   a deterministic presentation-only RNG with the source LCG and animation draw
-   rules, seeded per battle independently of gameplay RNG. Persist the seed and
-   policy version in session exports; reset/replay must reproduce the same visuals,
-   with a documented deterministic default for older exports. Add a separate
-   "faithful random" live-adapter claim bucket before promoting Random2 adapters.
-   Reuse the known-activation word vectors and source plans; begin with a bounded
-   representative batch such as Double Kick and Astonish, then expand by shared
-   components. Regenerate the stale remaining-adapters census and batch picks
-   against the current live inventory. Approval removes the claim-boundary blocker;
-   each adapter still needs its graphics providers and verification gates.
-2. Non-Random2 moves: Endeavor (`docs/rollout-endeavor-prep.md`: stale-power rule measured,
-   drafts ready), Rollout fixes (`docs/rollout-curl-diagnosis.md`: splat centre from target anchors, shake from power, then Curl bodies), Baton Pass (instant forced removal of the
-   attacker + presented replacement), Fire Punch (needs a generic Scene-ON renderer),
-   Memento, Substitute, Extreme Speed; Spark opponent attacker.
-3. ISSUES #146 remainder: send-in tail after any send-in (model `docs/send-in-tail-model.md`
-   338/338: species-keyed healthbox slide / message; forced-switch ball-open fade gated to
-   voluntary switches today), opponent-attacker Roar continuation, Scene OFF forced
-   switch-out; #145 / #147 small remainders (hit blink, HP-0 shadow boundary, species tails).
-4. Order coverage: the 30 REFUTED (NEEDS-KEYS) and 8 INCONCLUSIVE REL-Y rows; bodies
-   without an exact plan still end tracking (e.g. 85:opponent, 202:player); opponent AI
-   switches, Pursuit and Baton Pass still invalidate; allocator history is lost after
-   non-net-zero bodies (later Light Screen declines).
-5. Limits to revisit: Faint Attack lab-vs-staged fade frame, Aerial Ace opponent
-   platform clip for some species, Blaze Kick first-body ROM scenario, CASTFORM weather
-   forms (#143), Razor Wind ABSOL opponent 23 px, Sky Uppercut COMBUSKEN tail, Bounce
-   opponent strike unevidenced, a live body hitting a semi-invulnerable Fly/Bounce user.
+Next (2026-10-06 evening): 226 scoped-exact live adapters + 10 faithful-random (D3 surrogate) adapters
+(production `7e7816b98`); 40 accepted bodies remain (6.1% of Factory move uses; census
+`226+10+0+40=276`). This session built the presentation-only Random2 host (`docs/presentation-rng.md`;
+seed + policy in session exports), the battler x2 history tracker (#148), the assets-only palette
+composite and the first-body gate. Most census "C" (Random2) labels were stale: only Double Kick,
+Astonish, Thrash, Flail, Wish, Hyper Beam, Rain Dance, Water Pulse, Mud-Slap and Sand-Attack draw
+Random2 among the moves probed. Resume points, in order:
+1. OAM-buffer reducer ports (`docs/next-adapters-prep20.md`, `prep18.md`): Will-O-Wisp, Pursuit, Fury
+   Cutter (counter on the request, Rollout precedent; counter 5 = counter-3 body), Megahorn, then
+   Return (strongest branch only). Prototype assemblers are exact; open input = per-row full 64-slot
+   order; port Will-O-Wisp's exact orb math (the shipped reducer drifts on other geometries).
+2. Overheat later bodies (needs >=3 later-body predecessors per side; Silver Wind and Psych Up player are
+   already live on later bodies — their history registers never reach the pixels,
+   `later-bodies-bg-receipt.json`). Psych Up opponent attacker has no first-body capture yet.
+3. Endeavor adapter: the stale-register plumbing is merged; a source-relative reducer + renderer is
+   needed (the staged reducer is GROVYLE/ONIX-specific); W3 (TV loop) is unported -> decline there.
+4. Remaining Random2-labelled moves: re-probe each (expect stale labels) with the prep12/prep14 method.
+   Meteor Mash stays fallback: its last-row timing is a ROM lag frame at `restorebg` (`prep17.md`),
+   which no battle state predicts (a D3-like timing claim would need a user decision).
+5. Curse (reducer port), Fire Punch (generic Scene-ON renderer), Baton Pass (flow), Substitute (doll
+   state), Memento (scanline buffer), Extreme Speed (first 48 ages unevidenced).
+6. History gaps: Water Spout middle HP tiers need sprite-order plan units for the Water Spout + Toxic
+   history; #148 `unknown` after mixed/status bodies; #146 send-in tail; #145/#147 small remainders.
+7. Run a species-swap audit after every adapter batch (audit 3 found 3 real defects this session).
 Validate new adapters with alternate-species dense proofs whose windows come from
 the source activation frame, not only the accepted fixture species.
 Latest progress supersedes this starting checkpoint as verified work lands.
