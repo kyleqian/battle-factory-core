@@ -16,6 +16,14 @@ superpower)
     $Q-player-machamp-weezing-r1.json:$Q-player-machamp-weezing-r1-rgb:player:MACHAMP,WEEZING $Q-opponent-weezing-snorlax-r1.json:$Q-opponent-weezing-snorlax-r1-rgb:opponent:WEEZING,SNORLAX --out=$REC/superpower-pixels.json > /dev/null
   for n in oam palette registers phase; do npx vite-node tools/integration/prep31SuperpowerCheck.ts --neg=$n --out=$REC/superpower-neg-check-$n.json > /dev/null; done
   for n in oam palette registers; do npx vite-node tools/integration/prep31SuperpowerPixels.ts --neg=$n --out=$REC/superpower-neg-pixels-$n.json > /dev/null; done ;;
-spitup) [ -f tools/integration/prep31SpitUpRun.sh ] && sh tools/integration/prep31SpitUpRun.sh ;;
+spitup)
+  S=$OUT/prep29-spit-up-alt; ALT=""; PIX=""
+  for side in player opponent; do for c in 1:one 2:two 3:three; do n=${c%%:*}; w=${c##*:}; f=$S-$side-seviper-golem-$w-stockpile-r1.json
+    ALT="$ALT $f:$side:$n"; PIX="$PIX $f:${f%.json}-rgb:$side:$n:SEVIPER,GOLEM"; done; done
+  npx vite-node tools/integration/prep31SpitUpCheck.ts $ALT --out=$REC/spitup-check.json > /dev/null
+  npx vite-node tools/integration/prep31SpitUpPixels.ts $PIX --out=$REC/spitup-pixels.json > /dev/null
+  for n in oam palette; do npx vite-node tools/integration/prep31SpitUpCheck.ts --neg=$n --out=$REC/spitup-neg-check-$n.json > /dev/null; done
+  npx vite-node tools/integration/prep31SpitUpCheck.ts --lend=slot --out=$REC/spitup-neg-check-lend-slot.json > /dev/null
+  for n in oam palette; do npx vite-node tools/integration/prep31SpitUpPixels.ts --neg=$n --out=$REC/spitup-neg-pixels-$n.json > /dev/null; done ;;
 esac; done
 echo "receipts in $REC"
