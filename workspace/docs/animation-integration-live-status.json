@@ -3315,13 +3315,17 @@
       "liveEvidence": [
         "dense 193/193 (player) and 196/196 (opponent) zero residual twice fresh: BUTTERFREE -> ONIX player, the prep16 opponent FIRST-BODY capture (first-body registers bg1cnt 0x9c00, win0 240/161, splitBg1Cnt 0x9c01; NOT the accepted post-Tackle values), BEAUTIFLY -> GOLEM alternate",
         "first-body gate, palette composite and plan row 318 as Overheat; attacker/target picture origins from the anchors, sparkle birth y shifted by the target picture y delta",
-        "ordinary routes 3/7 VOLBEAT and 8/7 VENOMOTH first body active every age; route 9/0 BUTTERFREE (a later body) falls back"
+        "ordinary routes 3/7 VOLBEAT and 8/7 VENOMOTH first body active every age; route 9/0 BUTTERFREE (a later body after Sand-Attack, order unknown) falls back",
+        "LATER bodies (later-bodies-bg receipt): dense 0 px twice fresh through the production renderer, opponent after a player Tackle / Splash / Psychic and after its own Silver Wind (Tackle-SW, Splash-SW-Splash); player after its own Silver Wind + foe Tackle / Splash x2 / Psychic + SpDef STATS_CHANGE; identical under a damaging-hit order-lend control",
+        "the activation BG registers are not consumed by the compositor (bldcnt/bldy/bg3hofs rewritten before read; monbg priority = constant splitBg1/2Cnt; the opponent never reads splitBg1Cnt): renderSceneOnMovePresentation is frame-identical at every age under S0, the bg-register rule's later-body inputs and an absurd override (tests/animation/liveLaterBodiesBg.test.ts)",
+        "ordinary later-body routes 106/[0] (player, after foe Fury Swipes x2) and 160/[0] (foe, after the player's Silver Wind) active every age, following prompt reached, ON/OFF rules/RNG/boundary equal"
       ],
       "remaining": [
-        "later bodies (a battle's second and later animation unit) decline to the scene-off view: the activation BG registers/scroll after an earlier body need the BG-register tracker (prep16 s0.3 transition table, not built)",
+        "later bodies run live when the production order host lends a known order with the known-entry occupancy; a later body after an unplanned predecessor (e.g. Sand-Attack 28, Hyper Beam 63: order unknown) or after a KO with non-entry battler slots declines",
         "shiny battlers decline (no shiny battle palette in the repo)",
         "independent arbitrary-species/history framebuffer comparison"
-      ]
+      ],
+      "laterBodyEvidence": "../tools/integration/fixtures/later-bodies-bg-receipt.json"
     },
     {
       "move": "MOVE_PSYCH_UP",
@@ -3330,15 +3334,18 @@
       "liveEvidence": [
         "PLAYER attacker first body only: dense 179/179 zero residual twice fresh through the production live renderer: JUMPLUFF -> SHUCKLE (the prep16 first-body capture) + SKIPLOOM -> GOLEM alternate first body (new scenario tools/battle-lab/prep16-alt-psychup-player-skiploom-golem-first.json; window = its own source window = activation + 0)",
         "same first-body gate, composite and plan row 244 (ANIM_TAG_SPIRAL) as Overheat; first-body activation state: bg2cnt 0x5e00, identity matrices, hardware scroll 0",
-        "ordinary routes 66/7 JUMPLUFF and 15/28 METAGROSS first body active every age; the later-body fallback is shown by Silver Wind route 9/0"
+        "ordinary routes 66/7 JUMPLUFF and 15/28 METAGROSS first body active every age; later player bodies live with a known order lend",
+        "LATER player bodies (later-bodies-bg receipt): dense 179/179 0 px twice fresh after a foe Tackle / Splash / Psychic; the compositor reads bldalpha only from age 8 (rewritten from age 7) and never bgCnt / hardwareScroll (frame-identical under S0 / rule / absurd activation registers)"
       ],
       "remaining": [
         "the OPPONENT attacker declines: its first body (bg1cnt 0x9c00, bg1vofs 0) was not captured (prep16 s0.1)",
-        "later bodies (a battle's second and later animation unit) decline to the scene-off view: the activation BG registers/scroll after an earlier body need the BG-register tracker (prep16 s0.3 transition table, not built)",
+        "later bodies run live when the production order host lends a known order with the known-entry occupancy; a later body after an unplanned predecessor (e.g. Sand-Attack 28, Hyper Beam 63: order unknown) or after a KO with non-entry battler slots declines",
         "shiny battlers decline (no shiny battle palette in the repo)",
         "an opponent target with a non-zero front idle x2 (ONIX / RATTATA after a send-in) declines",
-        "independent arbitrary-species/history framebuffer comparison"
-      ]
+        "independent arbitrary-species/history framebuffer comparison",
+        "later player bodies after a stat body (Growl / Swords Dance + STATS_CHANGE) have no dense fixture yet"
+      ],
+      "laterBodyEvidence": "../tools/integration/fixtures/later-bodies-bg-receipt.json"
     },
     {
       "move": "MOVE_DIG",
@@ -3502,7 +3509,7 @@
   "faithfulRandomClaim": {
     "policy": "presentation-rng.v1.frame-step.no-lag.battle-stride-2^20",
     "doc": "docs/presentation-rng.md",
-    "decision": "D3 option (a), user-approved 2026-10-06 (docs/random2-trackability.md §7; ANIMATION_VERIFICATION.md \"Random2 live integration\")",
+    "decision": "D3 option (a), user-approved 2026-10-06 (docs/random2-trackability.md \u00a77; ANIMATION_VERIFICATION.md \"Random2 live integration\")",
     "entryFields": {
       "id": "move id; never also listed in implementedAdapters (disjoint buckets)",
       "move": "MOVE_* label",
@@ -3591,7 +3598,7 @@
         "receipt": "../tools/integration/fixtures/playerfaint-lend-receipt.json"
       },
       "voluntaryLend": {
-        "claim": "Lends after a cancelled voluntary party menu and after a voluntary switch (docs/voluntary-switch-lend-audit.md §4): battle-reshow with both battlers sets the occupant roles from the reshowBoth survivors n2/n5/n8 (ROM 2/3/4, 45 edges, 0 mismatches); the player's voluntary recall (B_SCR_OP_RETURNATKTOBALL of battler 0 before any body of the segment; the synthesized-voluntary-switch receipt) maps to the promoted switch-out recall unit and keeps the roles; the allocator host is re-seeded at the cancel return (orchestrator returnOrderHostFromPartyMenu) and after the voluntary switch-in (existing switch-in path). No consumer code changed. Measured twice fresh through the production lend (voluntaryLendDense.ts, two batches, identical digests): 13 of the 15 voluntary drafts exact, 2132 rows, 0 px, adapters active every row (Sunny Day P x3, Swift O x4, Thunderbolt O, Giga Drain O, Heal Bell P x3, Light Screen P as the first body after a cancel via the re-seeded allocator). Generated seed-16 routes with {switch: 1|2} / cancel-party: bodies before the menu byte-identical to master, RNG/boundaries equal master, ON/OFF parity, next prompt, 10 post-menu bodies newly lent.",
+        "claim": "Lends after a cancelled voluntary party menu and after a voluntary switch (docs/voluntary-switch-lend-audit.md \u00a74): battle-reshow with both battlers sets the occupant roles from the reshowBoth survivors n2/n5/n8 (ROM 2/3/4, 45 edges, 0 mismatches); the player's voluntary recall (B_SCR_OP_RETURNATKTOBALL of battler 0 before any body of the segment; the synthesized-voluntary-switch receipt) maps to the promoted switch-out recall unit and keeps the roles; the allocator host is re-seeded at the cancel return (orchestrator returnOrderHostFromPartyMenu) and after the voluntary switch-in (existing switch-in path). No consumer code changed. Measured twice fresh through the production lend (voluntaryLendDense.ts, two batches, identical digests): 13 of the 15 voluntary drafts exact, 2132 rows, 0 px, adapters active every row (Sunny Day P x3, Swift O x4, Thunderbolt O, Giga Drain O, Heal Bell P x3, Light Screen P as the first body after a cancel via the re-seeded allocator). Generated seed-16 routes with {switch: 1|2} / cancel-party: bodies before the menu byte-identical to master, RNG/boundaries equal master, ON/OFF parity, next prompt, 10 post-menu bodies newly lent.",
         "caveats": "Light Screen in a later turn after Sunny Day / Swift bodies (@3153, @2432) still declines: the allocator history is lost after non-net-zero bodies (not voluntary-specific); its order lend is defined and equals the role lend. Opponent AI switches (RETURNATKTOBALL battler 1), a recall after a body (Pursuit), Baton Pass and B_SCR_OP_VARIOUS keep invalidating (unprobed). A cancel with a hidden battler invalidates. Not whole-playable arbitrary-history exactness.",
         "receipt": "../tools/integration/fixtures/voluntary-lend-receipt.json"
       }

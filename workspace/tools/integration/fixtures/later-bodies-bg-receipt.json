@@ -1,0 +1,643 @@
+{
+ "schema": "later-bodies-bg-receipt/v1",
+ "testedCodeCommit": "074276a0e8357717416bdf508660cf9c32961926",
+ "testedSrcTree": "c41c494992d376d29a9560423518366661d96c38",
+ "scope": "MOVE_SILVER_WIND 318 (both sides) and MOVE_PSYCH_UP 244 (player attacker) on LATER bodies with a known production order lend (known-entry occupancy), !shiny. MOVE_OVERHEAT 315 stays first body. Live adapter, scoped exact; not whole-playable arbitrary-history exactness.",
+ "gate": "src/engine/liveMoveAnimation.ts case 244/315/318: 315 requires spriteOrderInput.firstBody; 244/318 require spriteOrderInput.known (Psych Up and Silver Wind: spriteOrderWithOccupiedPrefix(free, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER) non-null).",
+ "registerConsumption": {
+  "finding": "The activation BG registers (the bg-register history) never reach the pixels of any of the three bodies: every register field the compositor reads is rewritten by the reducer before it is read.",
+  "silverWind": "compositor src/engine/battleScene.ts SILVER_WIND branch reads view.registers.bldcnt/bldy (rewritten every age, src/animation/silverWind.ts backgroundAtAge fade block), bg3hofs (only while the BUG BG is visible, age >= 32; rewritten from age 31) and bg{monbg.bg}cnt & 3 only while displayed.background.monbgActive (ages 7..clearEnd+1, where the reducer sets bg1cnt := monbg.splitBg1Cnt, bg2cnt := monbg.splitBg2Cnt). Opponent: monbg.bg = 2 -> reads splitBg2Cnt 0x5e02 (constant); its history-dependent splitBg1Cnt is never read. Player: splitBg1Cnt 0x5c01 is the rule's fixed `set` row (318/player).",
+  "psychUp": "compositor PSYCH_UP branch reads view.registers.bldalpha only for the spiral (displayed age >= 7 -> current age >= 8) and the attacker affine blend (age >= 142); psychUpAtAge returns input.registers only for age < 7. background.bgCnt / hardwareScroll (initialBgCnt / initialHardwareScroll) are never read by the compositor.",
+  "overheat": "compositor OVERHEAT branch reads view.registers.bldalpha only; registersAtAge (src/animation/overheat.ts) rewrites bldcnt/bldalpha every age.",
+  "test": "tests/animation/liveLaterBodiesBg.test.ts renders renderSceneOnMovePresentation (live field) at every age with S0, the rule's later-body inputs and an absurd override: identical frames (318 both sides, 244 player, 315 player)."
+ },
+ "experiments": {
+  "a_firstBodyInputsGateWidened": "all 11 later-body fixtures 0 px twice fresh (this receipt's freshRuns; the production inputs on later bodies ARE the first-body inputs)",
+  "b_ruleInputs": "not separately rendered against the ROM: by the compositor read set (registerConsumption) and the render-invariance test, (b) renders the same frames as (a) at every age",
+  "orderLendControl": "POKEBENCH_LIVE_ORDER_HIT=damaging (verifier fallback also feeds the visible hit after Psychic / Silver Wind, as production does): identical digests, 0 px, every fixture"
+ },
+ "fixtures": {
+  "pu-p-psychic": {
+   "move": "PSYCH_UP",
+   "scenario": "tools/battle-lab/prep16-hist-psychup-player-after-psychic.json",
+   "attackerSide": "player",
+   "bodyIndex": 0,
+   "denseWindow": {
+    "startFrame": 333,
+    "endFrame": 511
+   },
+   "precedingBodies": [
+    {
+     "moveId": 94,
+     "side": "opponent"
+    }
+   ],
+   "rows": 179,
+   "expectedDuration": 179,
+   "freshRuns": [
+    {
+     "exactRows": 179,
+     "residualPixels": 0,
+     "digest": "c67f37417b616445edeb69baf8b0dc4c0e27bcd9cb8932b09b393ae0fb03f57a"
+    },
+    {
+     "exactRows": 179,
+     "residualPixels": 0,
+     "digest": "c67f37417b616445edeb69baf8b0dc4c0e27bcd9cb8932b09b393ae0fb03f57a"
+    }
+   ],
+   "damagingHitLendControl": {
+    "env": "POKEBENCH_LIVE_ORDER_HIT=damaging",
+    "residual": [
+     0,
+     0
+    ],
+    "sameDigest": true
+   }
+  },
+  "pu-p-splash": {
+   "move": "PSYCH_UP",
+   "scenario": "tools/battle-lab/prep16-hist-psychup-player-after-splash.json",
+   "attackerSide": "player",
+   "bodyIndex": 0,
+   "denseWindow": {
+    "startFrame": 312,
+    "endFrame": 490
+   },
+   "precedingBodies": [
+    {
+     "moveId": 150,
+     "side": "opponent"
+    }
+   ],
+   "rows": 179,
+   "expectedDuration": 179,
+   "freshRuns": [
+    {
+     "exactRows": 179,
+     "residualPixels": 0,
+     "digest": "958c788ef2c68a5077023679e75499959486d3aaf828cd35fe4c9ebc08534d3f"
+    },
+    {
+     "exactRows": 179,
+     "residualPixels": 0,
+     "digest": "958c788ef2c68a5077023679e75499959486d3aaf828cd35fe4c9ebc08534d3f"
+    }
+   ],
+   "damagingHitLendControl": {
+    "env": "POKEBENCH_LIVE_ORDER_HIT=damaging",
+    "residual": [
+     0,
+     0
+    ],
+    "sameDigest": true
+   }
+  },
+  "pu-p-tackle": {
+   "move": "PSYCH_UP",
+   "scenario": "tools/battle-lab/prep16-hist-psychup-player-after-tackle.json",
+   "attackerSide": "player",
+   "bodyIndex": 0,
+   "denseWindow": {
+    "startFrame": 218,
+    "endFrame": 396
+   },
+   "precedingBodies": [
+    {
+     "moveId": 33,
+     "side": "opponent"
+    }
+   ],
+   "rows": 179,
+   "expectedDuration": 179,
+   "freshRuns": [
+    {
+     "exactRows": 179,
+     "residualPixels": 0,
+     "digest": "2a52c78faaedfc0ab8fa3919d899c05e097b5c4f36957ba2e101b78f3046b685"
+    },
+    {
+     "exactRows": 179,
+     "residualPixels": 0,
+     "digest": "2a52c78faaedfc0ab8fa3919d899c05e097b5c4f36957ba2e101b78f3046b685"
+    }
+   ],
+   "damagingHitLendControl": {
+    "env": "POKEBENCH_LIVE_ORDER_HIT=damaging",
+    "residual": [
+     0,
+     0
+    ],
+    "sameDigest": true
+   }
+  },
+  "sw-o-psychic": {
+   "move": "SILVER_WIND",
+   "scenario": "tools/battle-lab/prep16-hist-silverwind-opp-after-psychic.json",
+   "attackerSide": "opponent",
+   "bodyIndex": 0,
+   "denseWindow": {
+    "startFrame": 333,
+    "endFrame": 528
+   },
+   "precedingBodies": [
+    {
+     "moveId": 94,
+     "side": "player"
+    }
+   ],
+   "rows": 196,
+   "expectedDuration": 196,
+   "freshRuns": [
+    {
+     "exactRows": 196,
+     "residualPixels": 0,
+     "digest": "9d9c3c1608910899db9d01bbddd8c146454e8592f24721d1119160ef35963e1a"
+    },
+    {
+     "exactRows": 196,
+     "residualPixels": 0,
+     "digest": "9d9c3c1608910899db9d01bbddd8c146454e8592f24721d1119160ef35963e1a"
+    }
+   ],
+   "damagingHitLendControl": {
+    "env": "POKEBENCH_LIVE_ORDER_HIT=damaging",
+    "residual": [
+     0,
+     0
+    ],
+    "sameDigest": true
+   }
+  },
+  "sw-o-splash": {
+   "move": "SILVER_WIND",
+   "scenario": "tools/battle-lab/prep16-hist-silverwind-opp-after-splash.json",
+   "attackerSide": "opponent",
+   "bodyIndex": 0,
+   "denseWindow": {
+    "startFrame": 321,
+    "endFrame": 516
+   },
+   "precedingBodies": [
+    {
+     "moveId": 150,
+     "side": "player"
+    }
+   ],
+   "rows": 196,
+   "expectedDuration": 196,
+   "freshRuns": [
+    {
+     "exactRows": 196,
+     "residualPixels": 0,
+     "digest": "6bfb2f301290932cf065955cc54f16cb9a6927b8e0669c955dd49ae2c98286e5"
+    },
+    {
+     "exactRows": 196,
+     "residualPixels": 0,
+     "digest": "6bfb2f301290932cf065955cc54f16cb9a6927b8e0669c955dd49ae2c98286e5"
+    }
+   ],
+   "damagingHitLendControl": {
+    "env": "POKEBENCH_LIVE_ORDER_HIT=damaging",
+    "residual": [
+     0,
+     0
+    ],
+    "sameDigest": true
+   }
+  },
+  "sw-o-splash-sw-splash": {
+   "move": "SILVER_WIND",
+   "scenario": "tools/battle-lab/prep16-hist-silverwind-opp-after-splash.json",
+   "attackerSide": "opponent",
+   "bodyIndex": 1,
+   "denseWindow": {
+    "startFrame": 1155,
+    "endFrame": 1350
+   },
+   "precedingBodies": [
+    {
+     "moveId": 150,
+     "side": "player"
+    },
+    {
+     "moveId": 318,
+     "side": "opponent"
+    },
+    {
+     "moveId": 150,
+     "side": "player"
+    }
+   ],
+   "rows": 196,
+   "expectedDuration": 196,
+   "freshRuns": [
+    {
+     "exactRows": 196,
+     "residualPixels": 0,
+     "digest": "1c506c967a6be977d065ca37b4b8682c9e9377fdb6cf29dfcf88ee031b66bf85"
+    },
+    {
+     "exactRows": 196,
+     "residualPixels": 0,
+     "digest": "1c506c967a6be977d065ca37b4b8682c9e9377fdb6cf29dfcf88ee031b66bf85"
+    }
+   ],
+   "damagingHitLendControl": {
+    "env": "POKEBENCH_LIVE_ORDER_HIT=damaging",
+    "residual": [
+     0,
+     0
+    ],
+    "sameDigest": true
+   }
+  },
+  "sw-o-tackle": {
+   "move": "SILVER_WIND",
+   "scenario": "tools/battle-lab/prep16-hist-silverwind-opp-after-tackle.json",
+   "attackerSide": "opponent",
+   "bodyIndex": 0,
+   "denseWindow": {
+    "startFrame": 223,
+    "endFrame": 418
+   },
+   "precedingBodies": [
+    {
+     "moveId": 33,
+     "side": "player"
+    }
+   ],
+   "rows": 196,
+   "expectedDuration": 196,
+   "freshRuns": [
+    {
+     "exactRows": 196,
+     "residualPixels": 0,
+     "digest": "a1744681da9215c451da8cdaa99106427771ccf2e225dfa607069a32d103ce63"
+    },
+    {
+     "exactRows": 196,
+     "residualPixels": 0,
+     "digest": "a1744681da9215c451da8cdaa99106427771ccf2e225dfa607069a32d103ce63"
+    }
+   ],
+   "damagingHitLendControl": {
+    "env": "POKEBENCH_LIVE_ORDER_HIT=damaging",
+    "residual": [
+     0,
+     0
+    ],
+    "sameDigest": true
+   }
+  },
+  "sw-o-tackle-sw": {
+   "move": "SILVER_WIND",
+   "scenario": "tools/battle-lab/prep16-hist-silverwind-opp-after-tackle.json",
+   "attackerSide": "opponent",
+   "bodyIndex": 1,
+   "denseWindow": {
+    "startFrame": 919,
+    "endFrame": 1114
+   },
+   "precedingBodies": [
+    {
+     "moveId": 33,
+     "side": "player"
+    },
+    {
+     "moveId": 318,
+     "side": "opponent"
+    }
+   ],
+   "rows": 196,
+   "expectedDuration": 196,
+   "freshRuns": [
+    {
+     "exactRows": 196,
+     "residualPixels": 0,
+     "digest": "a19e8cf74aa746323cec64942eb4e9b7059cfb844569cb24663547e93e987f98"
+    },
+    {
+     "exactRows": 196,
+     "residualPixels": 0,
+     "digest": "a19e8cf74aa746323cec64942eb4e9b7059cfb844569cb24663547e93e987f98"
+    }
+   ],
+   "damagingHitLendControl": {
+    "env": "POKEBENCH_LIVE_ORDER_HIT=damaging",
+    "residual": [
+     0,
+     0
+    ],
+    "sameDigest": true
+   }
+  },
+  "sw-p-psychic": {
+   "move": "SILVER_WIND",
+   "scenario": "tools/battle-lab/prep16-hist-silverwind-player-after-psychic.json",
+   "attackerSide": "player",
+   "bodyIndex": 1,
+   "denseWindow": {
+    "startFrame": 915,
+    "endFrame": 1107
+   },
+   "precedingBodies": [
+    {
+     "moveId": 318,
+     "side": "player"
+    },
+    {
+     "moveId": 94,
+     "side": "opponent"
+    },
+    {
+     "moveId": 0,
+     "side": "player",
+     "statAnimation": 26
+    }
+   ],
+   "rows": 193,
+   "expectedDuration": 193,
+   "freshRuns": [
+    {
+     "exactRows": 193,
+     "residualPixels": 0,
+     "digest": "d191f89e1967c1533eaa8faae42dcffaa518c92c104df10c35b31d33706ef48f"
+    },
+    {
+     "exactRows": 193,
+     "residualPixels": 0,
+     "digest": "d191f89e1967c1533eaa8faae42dcffaa518c92c104df10c35b31d33706ef48f"
+    }
+   ],
+   "damagingHitLendControl": {
+    "env": "POKEBENCH_LIVE_ORDER_HIT=damaging",
+    "residual": [
+     0,
+     0
+    ],
+    "sameDigest": true
+   }
+  },
+  "sw-p-splash": {
+   "move": "SILVER_WIND",
+   "scenario": "tools/battle-lab/prep16-hist-silverwind-player-after-splash.json",
+   "attackerSide": "player",
+   "bodyIndex": 1,
+   "denseWindow": {
+    "startFrame": 1155,
+    "endFrame": 1347
+   },
+   "precedingBodies": [
+    {
+     "moveId": 318,
+     "side": "player"
+    },
+    {
+     "moveId": 150,
+     "side": "opponent"
+    },
+    {
+     "moveId": 150,
+     "side": "opponent"
+    }
+   ],
+   "rows": 193,
+   "expectedDuration": 193,
+   "freshRuns": [
+    {
+     "exactRows": 193,
+     "residualPixels": 0,
+     "digest": "2a901b5ef90b2b367497ca67e97c1d2a5b7b846c56b43d84393e5ade4930d29b"
+    },
+    {
+     "exactRows": 193,
+     "residualPixels": 0,
+     "digest": "2a901b5ef90b2b367497ca67e97c1d2a5b7b846c56b43d84393e5ade4930d29b"
+    }
+   ],
+   "damagingHitLendControl": {
+    "env": "POKEBENCH_LIVE_ORDER_HIT=damaging",
+    "residual": [
+     0,
+     0
+    ],
+    "sameDigest": true
+   }
+  },
+  "sw-p-tackle": {
+   "move": "SILVER_WIND",
+   "scenario": "tools/battle-lab/prep16-hist-silverwind-player-after-tackle.json",
+   "attackerSide": "player",
+   "bodyIndex": 1,
+   "denseWindow": {
+    "startFrame": 915,
+    "endFrame": 1107
+   },
+   "precedingBodies": [
+    {
+     "moveId": 318,
+     "side": "player"
+    },
+    {
+     "moveId": 33,
+     "side": "opponent"
+    }
+   ],
+   "rows": 193,
+   "expectedDuration": 193,
+   "freshRuns": [
+    {
+     "exactRows": 193,
+     "residualPixels": 0,
+     "digest": "4391323a1f627505b24f1396c1f11cd6fd88ca241078f280b3df39e90c93d41d"
+    },
+    {
+     "exactRows": 193,
+     "residualPixels": 0,
+     "digest": "4391323a1f627505b24f1396c1f11cd6fd88ca241078f280b3df39e90c93d41d"
+    }
+   ],
+   "damagingHitLendControl": {
+    "env": "POKEBENCH_LIVE_ORDER_HIT=damaging",
+    "residual": [
+     0,
+     0
+    ],
+    "sameDigest": true
+   }
+  }
+ },
+ "firstBodyFixturesUnchanged": {
+  "overheat-alt-player-charizard-golem": {
+   "rows": 230,
+   "expectedDuration": 230,
+   "freshRuns": [
+    {
+     "exactRows": 230,
+     "residualPixels": 0,
+     "digest": "5796baf791ef198b03697a8e83b92c40f79828b66634b286102a59e2226b2543"
+    },
+    {
+     "exactRows": 230,
+     "residualPixels": 0,
+     "digest": "5796baf791ef198b03697a8e83b92c40f79828b66634b286102a59e2226b2543"
+    }
+   ]
+  },
+  "overheat-opponent-magcargo-player-shuckle": {
+   "rows": 230,
+   "expectedDuration": 230,
+   "freshRuns": [
+    {
+     "exactRows": 230,
+     "residualPixels": 0,
+     "digest": "70f59dd9aba19eb2d2f7e723fe8e5d9c47f5995bf9d9f57d02ce0c20c7f80e80"
+    },
+    {
+     "exactRows": 230,
+     "residualPixels": 0,
+     "digest": "70f59dd9aba19eb2d2f7e723fe8e5d9c47f5995bf9d9f57d02ce0c20c7f80e80"
+    }
+   ]
+  },
+  "overheat-player-solrock-opponent-shuckle": {
+   "rows": 230,
+   "expectedDuration": 230,
+   "freshRuns": [
+    {
+     "exactRows": 230,
+     "residualPixels": 0,
+     "digest": "fb1dd7c1acf56eb37b31e3cc953c6eae0db45a8ff361bb824a5f2a6863255aae"
+    },
+    {
+     "exactRows": 230,
+     "residualPixels": 0,
+     "digest": "fb1dd7c1acf56eb37b31e3cc953c6eae0db45a8ff361bb824a5f2a6863255aae"
+    }
+   ]
+  },
+  "psych-up-alt-player-skiploom-golem-first-body": {
+   "rows": 179,
+   "expectedDuration": 179,
+   "freshRuns": [
+    {
+     "exactRows": 179,
+     "residualPixels": 0,
+     "digest": "dfb36ad9dddca4a095ed534cae31126846bed845928f6bcc845fb41996c4435a"
+    },
+    {
+     "exactRows": 179,
+     "residualPixels": 0,
+     "digest": "dfb36ad9dddca4a095ed534cae31126846bed845928f6bcc845fb41996c4435a"
+    }
+   ]
+  },
+  "psych-up-player-jumpluff-opponent-shuckle-first-body": {
+   "rows": 179,
+   "expectedDuration": 179,
+   "freshRuns": [
+    {
+     "exactRows": 179,
+     "residualPixels": 0,
+     "digest": "cc455bfc7d780ebf8f46183ea178ae70ff2efd88606ee2e533d2cd26c0018079"
+    },
+    {
+     "exactRows": 179,
+     "residualPixels": 0,
+     "digest": "cc455bfc7d780ebf8f46183ea178ae70ff2efd88606ee2e533d2cd26c0018079"
+    }
+   ]
+  },
+  "silver-wind-alt-player-beautifly-golem": {
+   "rows": 193,
+   "expectedDuration": 193,
+   "freshRuns": [
+    {
+     "exactRows": 193,
+     "residualPixels": 0,
+     "digest": "03e489832b8e0e980b7825d9881ac57d5def3db1c9a08c60df0ef422662f20ab"
+    },
+    {
+     "exactRows": 193,
+     "residualPixels": 0,
+     "digest": "03e489832b8e0e980b7825d9881ac57d5def3db1c9a08c60df0ef422662f20ab"
+    }
+   ]
+  },
+  "silver-wind-opponent-butterfree-player-onix-first-body": {
+   "rows": 196,
+   "expectedDuration": 196,
+   "freshRuns": [
+    {
+     "exactRows": 196,
+     "residualPixels": 0,
+     "digest": "0829ffe22927b4d74fcb4c9c2e51258c4b9072111cfc4ed5a1c29f690ce09c69"
+    },
+    {
+     "exactRows": 196,
+     "residualPixels": 0,
+     "digest": "0829ffe22927b4d74fcb4c9c2e51258c4b9072111cfc4ed5a1c29f690ce09c69"
+    }
+   ]
+  },
+  "silver-wind-player-butterfree-opponent-onix": {
+   "rows": 193,
+   "expectedDuration": 193,
+   "freshRuns": [
+    {
+     "exactRows": 193,
+     "residualPixels": 0,
+     "digest": "1b6bba80f615daf30e5ef035aab6d36762beabc6c28ecf9b6decbc5d663ec3f0"
+    },
+    {
+     "exactRows": 193,
+     "residualPixels": 0,
+     "digest": "1b6bba80f615daf30e5ef035aab6d36762beabc6c28ecf9b6decbc5d663ec3f0"
+    }
+   ]
+  }
+ },
+ "excluded": {
+  "afterHyperBeam": "prep16-hist-{silverwind-opp,silverwind-player,psychup-player}-after-hyperbeam: the production order tracker has no Hyper Beam (63) body plan -> lend unknown -> production declines; not relied on",
+  "overheatLaterBodies": "the only lab later Overheat bodies (prep16-hist-overheat-player-after-splash body 1, -opp-after-hyperbeam body 1) follow Overheat's own SpAtk STATS_CHANGE (and a Hyper Beam): one predecessor class per orientation (< 3); Overheat keeps firstBody",
+  "statPredecessorsForPsychUp": "Psych Up player bodies after Growl / Swords Dance (+ their STATS_CHANGE) not run in this step"
+ },
+ "routes": [
+  {
+   "route": "106/[0] streak 0",
+   "body": "index 2 player SILVER_WIND after foe Fury Swipes x2",
+   "adapterActiveEveryAge": true,
+   "ages": 193,
+   "followingPrompt": "action-menu",
+   "sceneOnOffParity": true
+  },
+  {
+   "route": "160/[0] streak 0",
+   "body": "index 1 foe SILVER_WIND after the player's Silver Wind",
+   "adapterActiveEveryAge": true,
+   "ages": 196,
+   "followingPrompt": "action-menu",
+   "sceneOnOffParity": true
+  },
+  {
+   "route": "9/[0] streak 0",
+   "body": "index 1 player SILVER_WIND after foe Sand-Attack (no order plan for 28)",
+   "adapterActiveEveryAge": false,
+   "ages": 193,
+   "followingPrompt": "action-menu",
+   "sceneOnOffParity": true
+  },
+  {
+   "note": "x2 route patterns (bgHistoryRouteBodies.ts PATTERNS): later SILVER_WIND bodies now active every age at seeds 106 i2, 160 i1/i3, 194 i9/i11, 195 i2; still declined at 126 i5/i11, 140 i6/i12, 141 i3/i7, 153 i3/i6/i9, 157 i5, 160 i9, 181 i4, 183 i5 (order lend unknown after an unplanned predecessor)"
+  }
+ ],
+ "reproduce": [
+  "probes (direct mGBA, Scene ON): python3 tools/run-mgba-probe.py <dir>/out.json -- <vendor>/mgba-venv/bin/python tools/compare/{silverWind,psychUp,overheat}BodiesProbe.py tools/battle-lab/prep16-hist-<...>.json <dir>/out.json <dir>/rgb",
+  "python3 tools/integration/laterBodiesBgFixtures.py <probe dir>",
+  "ls tools/integration/fixtures/later-bodies-bg/*.json | xargs -P 6 -n 1 sh tools/integration/liveFixtureOne.sh <evidence dir> <summary dir>   (repeat with POKEBENCH_LIVE_ORDER_HIT=damaging for the lend control)",
+  "npx vitest run tests/animation/liveLaterBodiesBg.test.ts tests/animation/livePrep16MoveAdapters.test.ts --maxWorkers=4"
+ ],
+ "finalCodeRerun": "all 19 fixtures (11 later-body + 8 prep16-live first-body) re-run twice fresh on this commit: 0 px, digests identical to the recorded freshRuns"
+}

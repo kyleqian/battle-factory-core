@@ -1,0 +1,52 @@
+{
+ "schema": "later-bodies-bg-fixture/v1",
+ "move": "SILVER_WIND",
+ "probe": "tools/compare/silverWindBodiesProbe.py",
+ "scenario": "tools/battle-lab/prep16-hist-silverwind-player-after-psychic.json",
+ "bodyIndex": 1,
+ "denseWindow": {
+  "startFrame": 915,
+  "endFrame": 1107
+ },
+ "windowSource": "later-bodies-bg: window = the scenario's own bodyWindows[bodyIndex] from its direct-mGBA repeated-body probe (activation + 0 .. first inactive)",
+ "precedingBodies": [
+  {
+   "moveId": 318,
+   "side": "player"
+  },
+  {
+   "moveId": 94,
+   "side": "opponent"
+  },
+  {
+   "moveId": 0,
+   "side": "player",
+   "statAnimation": 26
+  }
+ ],
+ "attacker": {
+  "species": "BUTTERFREE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015574,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 148,
+  "playerMaxHp": 167,
+  "opponentHp": 96,
+  "opponentMaxHp": 110,
+  "playerGender": "female",
+  "opponentGender": "male"
+ }
+}

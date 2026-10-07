@@ -1,0 +1,43 @@
+{
+ "schema": "later-bodies-bg-fixture/v1",
+ "move": "PSYCH_UP",
+ "probe": "tools/compare/psychUpBodiesProbe.py",
+ "scenario": "tools/battle-lab/prep16-hist-psychup-player-after-splash.json",
+ "bodyIndex": 0,
+ "denseWindow": {
+  "startFrame": 312,
+  "endFrame": 490
+ },
+ "windowSource": "later-bodies-bg: window = the scenario's own bodyWindows[bodyIndex] from its direct-mGBA repeated-body probe (activation + 0 .. first inactive)",
+ "precedingBodies": [
+  {
+   "moveId": 150,
+   "side": "opponent"
+  }
+ ],
+ "attacker": {
+  "species": "JUMPLUFF",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "NINJASK",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349018756,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 182,
+  "playerMaxHp": 182,
+  "opponentHp": 168,
+  "opponentMaxHp": 168,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}
