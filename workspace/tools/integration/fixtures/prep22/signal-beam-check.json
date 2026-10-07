@@ -1,0 +1,38 @@
+{
+ "mechanic-signal-beam-opponent-ariados-player-chansey": {
+  "attackerSide": "opponent",
+  "lowestFreePairsEqualRom": true,
+  "helperSlotSim": 17,
+  "helperSlotRom": 17,
+  "rows": 143,
+  "exactRows": 143,
+  "firstDiffs": []
+ },
+ "mechanic-signal-beam-player-ariados-opponent-chansey": {
+  "attackerSide": "player",
+  "lowestFreePairsEqualRom": true,
+  "helperSlotSim": 17,
+  "helperSlotRom": 17,
+  "rows": 144,
+  "exactRows": 144,
+  "firstDiffs": []
+ },
+ "prep22-signal-beam-alt-opponent-venomoth-golem": {
+  "attackerSide": "opponent",
+  "lowestFreePairsEqualRom": true,
+  "helperSlotSim": 17,
+  "helperSlotRom": 17,
+  "rows": 143,
+  "exactRows": 143,
+  "firstDiffs": []
+ },
+ "prep22-signal-beam-alt-player-venomoth-golem": {
+  "attackerSide": "player",
+  "lowestFreePairsEqualRom": true,
+  "helperSlotSim": 17,
+  "helperSlotRom": 17,
+  "rows": 144,
+  "exactRows": 144,
+  "firstDiffs": []
+ }
+}
