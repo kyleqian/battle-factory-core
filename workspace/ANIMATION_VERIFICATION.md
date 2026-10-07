@@ -74,6 +74,37 @@ timing, geometry, resources, lifecycle and cleanup still need their proofs.
   typecheck where applicable, full suite/build and independent supervisor
   reproduction. Approval resolves D3 only; it does not waive any other gate.
 
+## CPU-load timing integration — user-approved D4, 2026-10-07
+
+The user approved D4 option (b): ship the dominant measured phase of animation
+lag frames / VBlank writes as separately counted "faithful timing". This applies
+to further evidenced cases of the same class without renewed approval. Follow
+`docs/faithful-timing.md` for scope, banked evidence and disjoint claim accounting.
+
+- Keep the source program, geometry, resources, allocation, task/sprite order,
+  lifecycle and cleanup proofs. Identify each permitted CPU-phase parameter,
+  its measured alternatives and the deterministic production policy. An
+  unrelated residual remains a defect or blocker.
+- Exercise complete dense production windows through cleanup, both orientations,
+  twice fresh and all evidence-required variants. Require zero pixel residual on
+  every measured window in the selected dominant phase. For windows in another
+  measured phase, record the affected rows, pixel cost and source cause; retain
+  checks that fail for residuals outside that explicitly documented difference.
+  Controlled phase probes may establish the other phase, with their provenance
+  named, but never grant arbitrary-play exact credit.
+- Exercise ordinary real-input completion and relevant repeated/multi-hit/
+  two-turn/status/switch/KO paths. Preserve Scene ON/OFF gameplay outcomes, RNG
+  and facility progression. Timing is presentation-owned, render-pure and
+  deterministic on replay/reset. Moves using Random2 still require every D3
+  RNG/seed/export check above.
+- Report faithful-timing adapters separately from scoped exact. Count adapters
+  using both D3 and D4 once in faithful timing, preserving an explicit D3 flag;
+  retain existing exact proofs only within their proved scopes. Factory body
+  acceptance and the total of 276 accepted bodies stay unchanged.
+- Production gates and independent supervisor reproduction still apply. Reuse
+  already reproduced evidence for unchanged claims; do not repeatedly probe a
+  settled CPU-phase limitation. New code needs its integration proof and gates.
+
 ## Keep move checks local
 
 Global totals, work-plan accounting, and queue priority are checked centrally in

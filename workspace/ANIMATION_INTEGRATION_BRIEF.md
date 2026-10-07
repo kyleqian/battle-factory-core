@@ -15,6 +15,12 @@ exports, and count Random2 adapters separately as "faithful random". The
 implementation and acceptance contract lives in ROADMAP S10A,
 ANIMATION_INTEGRATION_SUPERVISOR.md and ANIMATION_VERIFICATION.md; gameplay
 outcomes and RNG remain unchanged. This decision needs no further approval.
+On 2026-10-07 the user approved D4 option (b) and authorized unblocking and
+finishing S10A: implement deterministic dominant measured CPU-load timing as
+separately counted "faithful timing". Follow `docs/faithful-timing.md` and
+ANIMATION_VERIFICATION.md; further evidenced cases of the same lag-frame /
+VBlank-phase class need no renewed approval. Batch shared mechanisms and reuse
+valid receipts while prioritizing the remaining adapters and ordinary play.
 Historical remote-only instructions and isolated cloud branches are superseded.
 
 Canonical checkout: `/Users/kyle/Developer/pokebench/pokeemerald-factory-core`,
@@ -41,8 +47,8 @@ Document deliberate module-boundary changes; never silently widen ratchets.
 
 The latest production receipt and preview revision are in
 `ANIMATION_INTEGRATION_PROGRESS.md`, which also holds the current live adapter
-count (226 scoped-exact + 10 faithful-random of 276 accepted Factory bodies at the
-2026-10-06 wind-down).
+count (246 scoped-exact + 12 faithful-random of 276 accepted Factory bodies at the
+2026-10-07 wind-down; 18 remain, D4 implementation pending).
 The established path includes ordinary Scene ON/OFF selection, typed requests
 and completion, queue resume, real-route regressions and browser verification.
 Reuse recorded same-code full-suite/build receipts under the verification policy.

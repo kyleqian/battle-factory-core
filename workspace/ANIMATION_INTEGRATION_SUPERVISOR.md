@@ -57,6 +57,25 @@ remain real; approval adds no adapter credit by itself. Follow the Random2
 acceptance section in `ANIMATION_VERIFICATION.md`. D3 is answered; do not ask
 the user to approve this choice again.
 
+## Approved CPU-load timing and completion priority — D4, 2026-10-07
+
+The user approved option (b) and directed us to unblock and finish S10A. Read
+`docs/faithful-timing.md` and the D4 section of ANIMATION_VERIFICATION.md.
+Implement separate faithful-timing accounting, then deterministic dominant
+measured lag/VBlank phases using the banked source models. Adapters using both
+D3 and D4 count once as faithful timing with a D3 flag. Keep exact fixture proofs
+within their scopes and quantify alternate-phase differences. All other
+source/pixel, ordinary-route, gameplay/RNG and production gates still apply.
+
+Apply this approval to further evidenced cases of the same CPU-phase class;
+do not defer the same choice again. Prioritize the remaining 18 accepted
+adapters and required continuation/history providers. Batch siblings sharing a
+proved mechanism, reuse valid unchanged receipts, and independently prove new
+production integrations. Do not continue phase scouting solely to pursue
+exactness that D4 has relaxed. Stop at a truthful completed S10A checkpoint when
+its acceptance is satisfied, or leave specific remaining blockers at the cap;
+no audio or outside-Factory work is authorized by this completion direction.
+
 ## Delegate one bounded step at a time
 
 Use only `tools/run-subagent.sh`, one integration worker at a time. Write a brief
@@ -90,6 +109,8 @@ committed partial work before salvage; resume only from a verified base.
 1. Review the complete diff and proof on the worker's exact code/tree. Source
    acceptance needs complete dense windows, both orientations, twice fresh,
    and every source-required variant through the production live renderer.
+   D3/D4 claims use their explicit exceptions in ANIMATION_VERIFICATION.md;
+   exact scopes retain the zero-residual requirement.
    Captured fixture rows must never become production rendering inputs.
 2. Independently reproduce the central source/framebuffer claim. Exercise
    ordinary commands and subsequent queue completion, relevant repeat/status/

@@ -1,3 +1,24 @@
+## 2026-10-06 — D3 approved; next run implements faithful random animations
+
+- **State:** D3 answered with option (a). Production remains `24df8af5e`:
+  218 live adapters, 58 remaining (52 Random2); no surrogate adapter credit yet.
+- **Did:** recorded the user's approval, removed the open D3 launcher block,
+  and aligned ROADMAP S10A, worker instructions and verification. The next
+  Opus/Sonnet run may implement a separate deterministic presentation RNG,
+  persist its seed in session exports and report "faithful random" separately.
+- **Next:** presentation RNG + replay/export metadata + claim accounting;
+  then Double Kick/Astonish as a bounded representative batch, source-verified
+  with pinned words and ordinary seeded routes. Continue other exact adapters
+  and outstanding fixes as the current roadmap directs. Do not re-ask D3.
+- **Checks:** docs-only diff/ledger checks and resolved launch profile; no open
+  deferred headings. Reuse unchanged final production receipt: typecheck,
+  1,525 files / 12,317 tests, build851 (`final-supervisor-gates-20261005-day.json`).
+- **Notes:** gameplay RNG/outcomes stay unchanged; controlled pinned-word
+  proofs do not turn normal-play surrogate randomness into an exact claim.
+  This checkpoint prepares the next run and launches no supervisor or worker.
+
+---
+
 ## 2026-10-05 (day) — S10A wind-down: 198 -> 218 live adapters; lends across faints/switches; 8 species fixes; elevated renderer
 
 - **State:** S10A, local master; production `24df8af5e` (218 live adapters, 58 accepted bodies

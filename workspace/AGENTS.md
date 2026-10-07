@@ -266,6 +266,12 @@ change. The selected worker lane exports both named URLs and makes
   a separate deterministic presentation RNG and "faithful random" live claims.
   Follow ROADMAP S10A and ANIMATION_VERIFICATION.md: persist replay seeds,
   preserve gameplay RNG, and keep controlled exact proofs and claim counts distinct.
+- The user-approved 2026-10-07 D4 option (b) permits deterministic dominant
+  measured CPU-load timing as separate "faithful timing" claims. Follow
+  `docs/faithful-timing.md` and ANIMATION_VERIFICATION.md; retain dense proofs,
+  quantify alternate-phase residuals and count D3+D4 adapters only once. Do not
+  re-ask this decision for further evidenced lag-frame / VBlank-phase cases.
+  Prioritize finishing S10A's remaining adapters and ordinary-play continuation.
 - Work the roadmap top-down; land one stage's acceptance criteria before moving on.
 - The engine architecture is yours to choose — but keep it testable (pure
   tick/render split), keep the test ABI honest, and pin every pure-logic fix

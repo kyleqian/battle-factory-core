@@ -1,5 +1,23 @@
 # Animation integration progress
 
+## 2026-10-07 — D4 approved; finish remaining S10A integration
+
+- The user authorized unblocking and finishing the campaign. D4 option (b) is
+  approved: deterministic dominant measured CPU-load timing, separately counted
+  as "faithful timing". `docs/faithful-timing.md` records the scope, banked
+  evidence and disjoint D3/D4 accounting; ANIMATION_VERIFICATION.md defines the
+  dense phase-aware proof and ordinary-play requirements.
+- No further approval is needed for evidenced cases of the same lag-frame /
+  VBlank-phase class. Preserve gameplay/RNG and Factory acceptance; unknown
+  host state and unrelated pixel defects remain real implementation work.
+- Production remains src tree `1efb1872`: 246 scoped-exact + 12 faithful-random,
+  18 accepted bodies remaining. This docs-only checkpoint adds no adapter credit
+  and reuses `final-supervisor-gates-20261007.json` on the unchanged code.
+- Next run: implement timing claim accounting and the banked consumers; finish
+  remaining adapters/providers and ordinary continuations, batch proved shared
+  mechanisms, then deliver an honest final census and verified playable preview.
+  Reuse valid receipts; avoid further scouting of settled CPU-phase limitations.
+
 ## 2026-10-06 (night, wind-down 2026-10-07) — 226 -> 246 scoped-exact, 10 -> 12 faithful-random; D4 OPEN
 
 - prep22 (side, `c31dfd3c1`, new files only, merged `e7b7a1ac3`): Fire Punch is a 101-row body identical across

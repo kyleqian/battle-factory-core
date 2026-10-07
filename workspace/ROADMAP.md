@@ -14,7 +14,7 @@ battles, and the open-level rule set (until the single-battle loop is solid).
 later milestone — stage S11 below (user decision, 2026-07-28). No earlier
 stage's acceptance includes audio.
 
-## Current execution priority — 2026-10-06
+## Current execution priority — 2026-10-07
 
 The next main stage is **S10A: playable animation integration**, described below.
 Run the normal `./run-supervisor.sh`; the roadmap determines its mission.
@@ -36,8 +36,13 @@ seed in session exports, and report those live adapters as "faithful random"
 separately from exact claims. S10A below defines the scope and acceptance.
 This resolves D3; no further user approval is needed for that implementation.
 Implemented 2026-10-06: `docs/presentation-rng.md`; 12 faithful-random adapters live (2026-10-07).
-**DEFERRED D4 (OPEN, 2026-10-07):** CPU-load timing animations — see DEFERRED.md; it blocks the next
-`run-supervisor.sh` until answered.
+**User decision D4, 2026-10-07:** option (b) is approved. Implement deterministic
+dominant measured CPU-load timing in a separate "faithful timing" category;
+see `docs/faithful-timing.md` and ANIMATION_VERIFICATION.md. This also covers
+further evidenced lag-frame / VBlank-phase cases without asking again. The user
+authorized unblocking and finishing S10A; prioritize remaining adapters and
+ordinary-play continuation, batch shared mechanisms and reuse valid evidence.
+This decision adds no live adapter credit; implementation remains next-run work.
 
 ## Operational notes
 
@@ -2215,10 +2220,12 @@ Next (2026-10-07 morning): 246 scoped-exact live adapters + 12 faithful-random (
 (production src tree `1efb1872`); 18 accepted bodies remain (census `246+12+0+18=276`). The 2026-10-06 night session added the hardware-OAM provider
 (`src/engine/liveMoveOamAssembler.ts`, `liveOamMoves.ts`), source models for Curse / Return / Endeavor, two
 builder families (`liveProfileMoves.ts`, `liveQ2Moves.ts`), 14 production sprite-order plan rows, and fixed
-ISSUES #150 and the idle-x2 part of #151. **DEFERRED D4 is OPEN and blocks the next run until answered:**
-animations whose exact timing depends on emulator CPU load (lag frames / VBlank phase) — keep the fallback,
-or ship them in a separate "faithful timing" bucket. Resume points, in order:
-1. Apply the D4 answer: Megahorn, Meteor Mash, Mach Punch, Extrasensory, Nightmare, Psywave, Flatter, Ice Ball,
+ISSUES #150 and the idle-x2 part of #151. **D4 option (b) is approved (2026-10-07):**
+ship dominant measured CPU-load timing in a separate "faithful timing" bucket
+under `docs/faithful-timing.md`; no open user decision blocks launch. Finish the
+remaining accepted bodies and ordinary-play continuations before new exploratory
+campaigns. Resume points, in order:
+1. Implement D4 claim accounting and deterministic timing consumers: Megahorn, Meteor Mash, Mach Punch, Extrasensory, Nightmare, Psywave, Flatter, Ice Ball,
    Revenge, Curse Ghost (models / evidence banked: `docs/next-adapters-prep23..26.md`); #151 Sheer Cold tail and
    Hyper Voice age-59 row (`docs/issue151-diagnosis.md`).
 2. Ready recipes: Dive (faithful-random; `docs/next-adapters-prep25.md` §B.1a anchor split + plan rows);
@@ -2251,6 +2258,13 @@ Acceptance:
   claim; controlled pinned-word proofs do not establish oracle-exact randomness
   in arbitrary play. Keep timing, geometry, resources, lifecycle and cleanup
   requirements intact, and retain fallback for other unproved host state.
+- **D4 exception for evidenced CPU-load timing only:** deterministic dominant
+  measured phases may be promoted as faithful timing under
+  ANIMATION_VERIFICATION.md. Preserve all other source/pixel requirements;
+  quantify alternate-phase residuals and prove ordinary completion and
+  gameplay/RNG parity. Keep a disjoint census; adapters using both D3 and D4
+  count once as faithful timing with an explicit D3 flag. Existing exact
+  fixture proofs do not make the widened timing claim exact.
 - Ordinary real command input reaches subsequent valid prompts through the
   relevant repeated/status/miss/multi-hit/two-turn/switch/KO cases. Scene ON/OFF
   controls preserve logical outcomes, RNG ownership and facility progression.
@@ -2258,7 +2272,7 @@ Acceptance:
   move's live provider and remaining blocker. Adapters, Factory acceptance and
   stronger rendering-history claims remain separate. Do not expand into the
   77 non-Factory animations or conceal unknown ownership behind a count.
-  Report faithful-random adapters separately from existing scoped exact claims;
+  Report faithful-random and faithful-timing adapters separately from existing scoped exact claims;
   do not inflate exact coverage or change Factory body acceptance for this work.
 - Follow `ANIMATION_VERIFICATION.md`: affected controls, smoke, full
   `npm test` / `npm run build` for changed production, independent central
