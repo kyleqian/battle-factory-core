@@ -1,0 +1,29 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/s10a-live/spit-up-alt-player-seviper-golem-3.json",
+  "move": "SPIT_UP",
+  "selectedPhase": true,
+  "window": 109,
+  "expectedDuration": 109,
+  "runs": [
+   {
+    "rows": 109,
+    "exactRows": 109,
+    "residualPixels": 0,
+    "digest": "3d9ca1c8c765c91f61117fcaa4d122947eba5476c7d5a798e3b1848aa3204624",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 109,
+    "exactRows": 109,
+    "residualPixels": 0,
+    "digest": "3d9ca1c8c765c91f61117fcaa4d122947eba5476c7d5a798e3b1848aa3204624",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

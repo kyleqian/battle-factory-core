@@ -127,13 +127,13 @@ const IMPACT_PALETTE = (paletteData.resources as Record<string, { colors: readon
 const cache = new Map<string, { oam: string[][]; matrices: Matrix[][] }>();
 
 /**
- * Spit Up live inputs. Null for a non-zero idle rest on either battler (the ShakeMon2 / ShakeTarget x2 programs are proven from a zero rest
- * only) or a counter outside 1..3.
+ * Spit Up live inputs. Null for a non-zero TARGET idle rest (the ShakeTarget x2 program is proven from a zero rest only; an attacker rest is
+ * exact: species audit 10 gate lift, ONIX / RATTATA opponent attackers 0 px) or a counter outside 1..3.
  */
 export function liveSpitUpInputs(args: LiveSpitUpArgs): { duration: number; animationInputsAt: (age: number) => Record<string, unknown> } | null {
   const { counter, attackerSide, attacker, target } = args;
   if (counter !== 1 && counter !== 2 && counter !== 3) return null;
-  if (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0 || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
+  if (target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
   const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
   const T = liveSpitUpRows(counter);
   const g: Geometry = { side: attackerSide, T, counter, attackerAnchor: attacker.picOffsetPoint, targetAnchor: target.picOffsetPoint };

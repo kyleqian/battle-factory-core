@@ -1,0 +1,29 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-10/derived/rattataA-spit-up-opponent-1.json",
+  "move": "SPIT_UP",
+  "selectedPhase": true,
+  "window": 108,
+  "expectedDuration": 108,
+  "runs": [
+   {
+    "rows": 108,
+    "exactRows": 108,
+    "residualPixels": 0,
+    "digest": "0f17098e8814864e140a765e92a29ed5e4ee0fc95a26fe0d05df9a29cc9c5e96",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 108,
+    "exactRows": 108,
+    "residualPixels": 0,
+    "digest": "0f17098e8814864e140a765e92a29ed5e4ee0fc95a26fe0d05df9a29cc9c5e96",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

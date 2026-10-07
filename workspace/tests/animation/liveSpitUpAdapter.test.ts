@@ -95,14 +95,14 @@ describe("Spit Up gates and inputs", () => {
     for (const turn of [0, 4]) expect(call(effect.spriteOrderInput, view.field, { ...effect.request, turn })).toBeNull();
   });
 
-  it("declines a non-zero idle rest on either battler; the burst-lag rows repeat the previous hardware OAM row", () => {
+  it("declines a non-zero target idle rest (an attacker rest engages: species audit 10); the burst-lag rows repeat the previous hardware OAM row", () => {
     const anchors = { spriteCenter: { x: 176, y: 47 }, picOffsetPoint: { x: 176, y: 47 }, frontIdleRest: { x2: 0, y2: 0 } };
     const player = { spriteCenter: { x: 72, y: 93 }, picOffsetPoint: { x: 72, y: 101 }, frontIdleRest: { x2: 0, y2: 0 } };
     const order = Array.from({ length: 64 }, (_, i) => i);
     const base = { counter: 3 as const, attackerSide: "opponent" as const, attackerSpecies: "KECLEON", targetSpecies: "BLISSEY", attacker: anchors, target: player,
       attackerYDelta: 7, palettes: { unfaded: Array(512).fill(0), faded: Array(512).fill(0), hardware: Array(512).fill(0) } as never, redOrbPalette: Array(16).fill(0), activationOrder: order,
       sort: (previous: readonly number[]) => [...previous] };
-    expect(liveSpitUpInputs({ ...base, attacker: { ...anchors, frontIdleRest: { x2: 2, y2: 0 } } })).toBeNull();
+    expect(liveSpitUpInputs({ ...base, attacker: { ...anchors, frontIdleRest: { x2: 2, y2: 0 } } })?.duration).toBe(109);
     expect(liveSpitUpInputs({ ...base, target: { ...player, frontIdleRest: { x2: 0, y2: 1 } } })).toBeNull();
     const built = liveSpitUpInputs(base)!;
     expect(built.duration).toBe(109);

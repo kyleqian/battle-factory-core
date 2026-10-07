@@ -32,3 +32,24 @@ describe("Extrasensory (326): the clone carries the attacker's idle rest (CloneB
     }
   });
 });
+
+describe("Spit Up (255): the idle-rest gate is the target rest only (species audit 10 gate lift)", () => {
+  const r = receipts("spit-up-attacker-rest");
+  it("ONIX / RATTATA opponent attackers (counters 1 and 3; 168,172 / 60,826 px fallback before) are exact twice fresh, as are the player-side rows", () => {
+    for (const stem of ["onixA-spit-up-opponent-1", "onixA-spit-up-opponent-3", "rattataA-spit-up-opponent-1", "rattataA-spit-up-opponent-3",
+      "onixA-spit-up-player-1", "rattataA-spit-up-player-1", "rattata-spit-up-opponent-1", "rattata-spit-up-opponent-3"]) {
+      const x = r[stem]!;
+      expect([stem, x.violations, x.runs.map((run) => run.residualPixels), x.window === x.expectedDuration]).toEqual([stem, [], [0, 0], true]);
+      expect(x.runs[1]!.digest).toBe(x.runs[0]!.digest);
+    }
+  });
+  it("the s10a-live accepted / alternate windows (12) stay exact", () => {
+    const live = Object.keys(r).filter((k) => k.startsWith("spit-up-"));
+    expect(live).toHaveLength(12);
+    for (const k of live) expect(r[k]!.runs.map((run) => run.residualPixels)).toEqual([0, 0]);
+  });
+  it("an opponent-side RATTATA target still declines (fallback residual = the audit's 164,894 / 168,357 px)", () => {
+    expect(r["rattata-spit-up-player-1"]!.runs.map((run) => run.residualPixels)).toEqual([164894, 164894]);
+    expect(r["rattata-spit-up-player-3"]!.runs.map((run) => run.residualPixels)).toEqual([168357, 168357]);
+  });
+});
