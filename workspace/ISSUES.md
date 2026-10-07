@@ -36,21 +36,6 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
   policy phase; likely the documented scanline-split class (prep30 §1.4) but the split line was not measured.
 - Harness limit: the verifier passes only the attacker's personality, so shiny TARGET declines are unverified.
 
-## #151 — Species audit 7 remainder: CPU-timing residuals in live Sheer Cold / Hyper Voice (D4 integration pending)
-
-Evidence `docs/live-species-audit-7.md`, diagnosis `docs/issue151-diagnosis.md` (counter evidence, shift tests and
-env-override patch proofs, all twice fresh; supervisor reran both patch proofs). The idle-x2 class and the Sheer Cold
-elevated-opponent shadow were fixed by fix151 (`fix151-live-receipt.json`).
-- **Sheer Cold (329):** the background restore fade ends one frame early / late (ages 172-189, ~17k px/row) when the
-  age-171 lag frame differs from the orientation's accepted pair — TYRANITAR / PICHU / FLYGON / GOLBAT / ONIX in some
-  roles; no species property predicts it. Restore end 188 / 189 from the measured lag gives 0 px.
-- **Hyper Voice (304):** the age-59 palette upload lands at a pair-dependent scanline (band depth 16 / 15 / 0; 229 px
-  to ~3.8k px in one row); not a lag frame; not derivable from battle state.
-- Both are the CPU-timing class of D4; the accepted acceptance sets are exact.
-  The user approved option (b) on 2026-10-07: apply faithful-timing accounting and
-  the documented deterministic policy under `docs/faithful-timing.md`. Retain
-  this entry until the production policy, residual checks and inventory land.
-
 ## #148 — Battler x2 history: unknown-history remainder (main bug FIXED 2026-10-06)
 
 - **Fixed:** `src/engine/liveBattlerX2History.ts` (merged `de0e887`-era master) tracks per battler

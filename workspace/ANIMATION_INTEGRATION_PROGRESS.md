@@ -26,6 +26,18 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- Folded Opus worker `7074ed95d` as `dc0283345` (src tree `797960f7`): checker fix (other-phase windows without
+  documented rows must be 0 px; all 55 timing fixtures rerun, 0 violations). FAITHFUL-TIMING + D3 Ice Ball counter 0
+  (301; `liveIceBallInputs.ts`; policy no lag, 15 of 18; counters 1..4 decline — order-lend blocker; the hit-chain
+  attackanimation request now also carries the presentation-only rollout counter for 301, as for Rollout; routes
+  seed 1 DELIBIRD, two seeds, ON/OFF parity). FAITHFUL-TIMING + D3 Dive setup turn (291; new kind oam-transfer-row:
+  player row 68 shows the age-66 state in 4 of 6, age-67 in 2 -> documented 284 px on row 68; anchor split behind
+  optional fields, staged Dive unchanged; attack body declines; route seed 111). ISSUES #151 closed: Sheer Cold (329)
+  and Hyper Voice (304) read per-side / band phases from the policy (dominant == old defaults; accepted fixtures 0 px)
+  and are RECLASSIFIED from scoped exact to faithful timing (28 + 32 windows incl. audit-7 rows, other phase only on
+  documented rows). Worker gates 1,556 files / 12,762 tests, build, differential 624 (3 traces). Supervisor: 19
+  windows (4 Ice Ball, 9 Dive, 3 Sheer Cold, 3 Hyper Voice) x2 fresh one process each — 0 violations; union typecheck,
+  smoke, 12 targeted files 217/217, own differential vs `ab85c19c8` 624/624 (3 traces). Counts: 246 scoped-exact + 12 faithful-random + 12 faithful-timing, 6 remaining.
 - Species audit 10 (side, `ba13d9d12`, new files only): Shock Wave, Superpower, Psywave, Extrasensory, Nightmare, Spit
   Up — 208 rows x2 fresh: 14 TIMING-PHASE (documented rows only), 30 declines confirmed by gate lifts, 1 SPECIES-DEFECT
   (Extrasensory clone ignores the attacker's idle rest; patch proof RATTATA 8,009 -> 0 px, reproduced by the
