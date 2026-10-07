@@ -86,7 +86,7 @@ import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
 import paletteResources from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
 import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "json" };
 import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
-import { liveBonemerangInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
+import { liveBonemerangInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
 import { liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
 import { liveCurseStatsInputs, liveFuryCutterInputs, livePursuitInputs, liveReturnInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
@@ -133,6 +133,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   304, 123, 328, 143, 173,
   // prep29 R1 (docs/next-adapters-prep29.md B.1): Bonemerang, both hit bodies (hit 1 first body, hit 2 after hit 1 through the lent order).
   155,
+  // prep29 R1 (B.3): Rapid Spin (any known lend; the entry scanline is the constant S0 banks).
+  229,
   // oam1 (docs/next-adapters-prep20.md): production hardware-OAM provider (liveMoveOamAssembler.ts), first body.
   // Fury Cutter: the counter-1 body only (a first body implies furyCutterCounter 1).
   261, 228, 210,
@@ -345,7 +347,7 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // Q2 (prep25 moves/*.json): the windows start at activation (row 0).
     304, 123, 328, 143, 173,
     // prep29 R1: Bonemerang windows start at activation (row 0).
-    155,
+    155, 229,
     // Sheer Cold (ISSUES #151, species audit 7 elevated FLYGON / GOLBAT opponent, both orientations): activation == window start (row 0).
     329,
   ].map((id) => [id, 0] as [number, number]).concat([
@@ -815,6 +817,7 @@ export function liveMoveAnimationDuration(
     // Sheer Cold first body: 191 rows (player attacker) / 190 (opponent), constant across the accepted + alternate scenarios (prep22 s0.2).
     case 329: return request.attacker === 0 ? 191 : 190;
     // Sky Attack (prep25): charge 148 rows / strike 180 rows, selected by gAnimMoveTurn bit 0 like Razor Wind / Solar Beam.
+    case 229: return 130; // Rapid Spin (prep29 B.3: 130 rows, constant in all four scenarios).
     case 155: return 71; // Bonemerang (prep29 B.1: 71 rows per hit body, constant in all 8 bodies).
     case 173: return 69; // Snore (prep25: 69 rows, constant across the scenarios; no Random2).
     case 143: return (request.turn & 1) === 0 ? 148 : 180; // charge 148 rows, strike 180 (the strike needs the 10143 order-plan lend, see case 143)
@@ -2546,6 +2549,23 @@ export function liveMoveAnimationPresentation(
       config = { move: "BONEMERANG", attacker, target, fieldProfile, animationInputs: liveBonemerangInputs({
         attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes: undefined as never, spriteOrder: lentOrder,
         firstBody: spriteOrderInput.firstBody === true }) as never };
+      break;
+    }
+    case 229: {
+      // prep29 R1 / B.3: Rapid Spin. The spin sprite is at the attacker's battle-position centre, the hit splat at the target's picture offset point.
+      if (!spriteOrderInput?.known) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const lentOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (lentOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const { targetSide: _targetSide, gameplayRng: _gameplayRng, ...inputs } = liveRapidSpinInputs({
+        attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, spriteOrder: lentOrder,
+        movePower: request.power, moveDamage: request.damage }) as Record<string, unknown>;
+      config = { move: "RAPID_SPIN", fieldProfile,
+        attacker: { ...attacker, geometry: { ...attacker.geometry, animationCenter: attackerAnchors.battlePositionCenter } },
+        target: { ...target, geometry: { ...target.geometry, animationCenter: targetAnchors.picOffsetPoint } },
+        animationInputs: inputs as never };
       break;
     }
     case 173: {

@@ -32,5 +32,9 @@
   "opponentMaxHp": 167,
   "playerGender": "male",
   "opponentGender": "none"
+ },
+ "requestFields": {
+  "power": 20,
+  "damage": 2
  }
 }

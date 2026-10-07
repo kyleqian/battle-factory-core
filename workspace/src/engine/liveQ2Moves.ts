@@ -200,3 +200,28 @@ export function liveBonemerangInputs(args: LiveQ2Args): Inputs {
     animationRngSeed: 0, gameplayRng: null,
   };
 }
+
+/** The Dig first-body scanline S0 (prep18 s1.1; Rapid Spin's entry state is the same constant, prep29 B.3): bank 0 = 80 x +2, 80 x -2, then zeros; bank 1 zero. */
+const rapidSpinScanline = (): [number[], number[]] => [[...Array(80).fill(2), ...Array(80).fill(-2), ...Array(160).fill(0)], Array(320).fill(0)];
+
+/**
+ * `Move_RAPID_SPIN` (229; prep29 B.3): 130 rows. The spin sprite sits at the attacker's BATTLE POSITION centre and the hit splat at the target's picture
+ * offset point (the seam takes the attacker / target `animationCenter`s, set by the caller); both effect sprites take slot 3 (lowest free), the splat
+ * matrix 0, tasks elevation 0 / shake 0 / monbg 1 / clear 0 / sound 2; the monbg is the ATTACKER's (BG2 for a player attacker, BG1 for an opponent) at
+ * 32 - its sprite centre. Power / damage come from the request; the entry scanline is the constant S0 banks.
+ */
+export function liveRapidSpinInputs(args: Omit<LiveQ2Args, "firstBody" | "palettes"> & { movePower: number; moveDamage: number }): Inputs {
+  const { attackerSide, attacker, target } = args, targetSide = opposite(attackerSide), player = attackerSide === "player";
+  return {
+    attackerSpriteSlot: player ? 6 : 8, targetSpriteSlot: player ? 8 : 6, rapidSpriteSlot: 3, impactSpriteSlot: 3, impactMatrixSlot: 0,
+    elevationTaskSlot: 0, shakeTaskSlot: 0, monbgTaskSlot: 1, clearTaskSlot: 0, soundTaskSlot: 2,
+    spriteOrder: args.spriteOrder, paletteBanks: { impact: 7, rapidSpin: 8 }, tileSlots: { impact: 6, rapidSpin: 7 }, baseMatrixBitmap: 6,
+    movePower: args.movePower, moveDamage: args.moveDamage,
+    targetInitialOffset: { x: target.frontIdleRest.x2, y: target.frontIdleRest.y2 },
+    animationRng: 0,
+    monbg: { layer: player ? "bg2" : "bg1", spriteX: attacker.spriteCenter.x, spriteY: attacker.spriteCenter.y,
+      bgX: 32 - attacker.spriteCenter.x, bgY: 32 - attacker.spriteCenter.y, inBg2: player, battlerId: player ? 0 : 1 },
+    initialScanlineSrcBuffer: 1, initialScanlineBanks: rapidSpinScanline(),
+    gameplayRng: null, targetSide,
+  };
+}

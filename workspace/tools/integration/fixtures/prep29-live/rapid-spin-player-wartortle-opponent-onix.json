@@ -38,5 +38,9 @@
    "moveId": 33,
    "side": "opponent"
   }
- ]
+ ],
+ "requestFields": {
+  "power": 20,
+  "damage": 1
+ }
 }

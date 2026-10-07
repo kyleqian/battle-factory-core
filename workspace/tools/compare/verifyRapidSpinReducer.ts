@@ -30,7 +30,7 @@ function battler(species: "WARTORTLE" | "ONIX", side: "player" | "opponent", cen
   } as const;
 }
 
-function inputsFor(orientation: Orientation, rows: Json[]): RapidSpinLiveInputs {
+export function inputsFor(orientation: Orientation, rows: Json[]): RapidSpinLiveInputs {
   const player = orientation === "player-back";
   const monbg = task(rows[7]!, "Task_UpdateMonBg")!.data as number[];
   const targetSlot = player ? 8 : 6;

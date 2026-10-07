@@ -47,6 +47,7 @@ for key, (move, acc, alt) in ACC.items():
                 pre_b = [{"moveId": b["move"], "side": "player" if b["atActivation"]["attacker"] == 0 else "opponent"} for b in bodies[:idx] if b["move"] != 0]
                 if pre_b: fx["precedingBodies"] = pre_b
                 if nbody > 1: fx["requestFields"] = {"turn": body["atActivation"]["animTurn"] - 1}
+                if move == "RAPID_SPIN": fx["requestFields"] = {"power": body["atActivation"]["gAnimMovePower"], "damage": body["atActivation"]["gAnimMoveDmg"]}
                 if n > 0: fx["messageLines"] = ["", ""]  # the later hit's text box is blank during the body (as the Sky Attack charge fixtures)
                 tag = f"{key}-{kind}{side}-{a}-{foe}-{t}" + (f"-hit{n + 1}" if nbody > 1 else "")
                 (out / f"{tag}.json").write_text(json.dumps(fx, indent=1) + "\n")
