@@ -1,0 +1,49 @@
+{
+ "schema": "q2-live-adapter-fixture/v1",
+ "move": "SKY_ATTACK",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-sky-attack-player-fearow-opponent-shuckle.json",
+ "denseWindow": {
+  "startFrame": 595,
+  "endFrame": 774
+ },
+ "windowSource": "window = [activation, activation + 180 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "FEAROW",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SHUCKLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015475,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 140,
+  "playerMaxHp": 140,
+  "opponentHp": 127,
+  "opponentMaxHp": 127,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 143,
+   "side": "player"
+  },
+  {
+   "moveId": 150,
+   "side": "opponent"
+  }
+ ],
+ "requestFields": {
+  "turn": 1
+ }
+}

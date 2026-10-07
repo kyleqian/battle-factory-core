@@ -1,0 +1,42 @@
+{
+ "schema": "q2-live-adapter-fixture/v1",
+ "move": "SNORE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-snore-opponent-sealeo-player-venomoth.json",
+ "denseWindow": {
+  "startFrame": 700,
+  "endFrame": 768
+ },
+ "windowSource": "window = [activation, activation + 69 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "SEALEO",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "VENOMOTH",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703675,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "sleep"
+ },
+ "fieldProfile": {
+  "playerHp": 145,
+  "playerMaxHp": 145,
+  "opponentHp": 197,
+  "opponentMaxHp": 197,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 79,
+   "side": "player"
+  }
+ ]
+}

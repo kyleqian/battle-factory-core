@@ -1,0 +1,36 @@
+{
+ "schema": "q2-live-adapter-fixture/v1",
+ "move": "SAND_TOMB",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep25-sand-tomb-alt-player-sandslash-golem.json",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 201
+ },
+ "windowSource": "window = [activation, activation + 123 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "SANDSLASH",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015453,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 150,
+  "playerMaxHp": 150,
+  "opponentHp": 187,
+  "opponentMaxHp": 187,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

@@ -1,0 +1,36 @@
+{
+ "schema": "q2-live-adapter-fixture/v1",
+ "move": "HYPER_VOICE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/q2-hyper-voice-extra-opponent-exploud-golbat.json",
+ "denseWindow": {
+  "startFrame": 80,
+  "endFrame": 183
+ },
+ "windowSource": "window = [activation, activation + 104 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "EXPLOUD",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703808,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 182,
+  "playerMaxHp": 182,
+  "opponentHp": 211,
+  "opponentMaxHp": 211,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

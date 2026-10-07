@@ -1,0 +1,42 @@
+{
+ "schema": "q2-live-adapter-fixture/v1",
+ "move": "SNORE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/q2-snore-extra-player-snorlax-snorlax.json",
+ "denseWindow": {
+  "startFrame": 694,
+  "endFrame": 762
+ },
+ "windowSource": "window = [activation, activation + 69 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015475,
+ "displayedStatus": {
+  "player": "sleep",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 267,
+  "playerMaxHp": 267,
+  "opponentHp": 235,
+  "opponentMaxHp": 235,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 79,
+   "side": "opponent"
+  }
+ ]
+}

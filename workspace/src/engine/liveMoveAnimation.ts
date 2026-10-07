@@ -83,6 +83,9 @@ import { composeLivePalettes, liveBattlerIsShiny } from "./liveMovePaletteCompos
 import lovelyKissAsset from "../animation/assets/lovely-kiss.json" with { type: "json" };
 import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
 import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
+import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
+import paletteResources from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
+import { liveHyperVoiceInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
 import { liveLovelyKissProfile, liveOctazookaProfile, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
 import { liveCurseStatsInputs, liveFuryCutterInputs, livePursuitInputs, liveReturnInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
@@ -122,6 +125,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   191, 190,
   // prep22 P3: Signal Beam first body (the WIN0 first-body registers and the lent order are the first-body inputs).
   324,
+  // Q2 (docs/next-adapters-prep25.md s0.2 / C): zero-Random2 bodies through liveQ2Moves.ts. Snore (later body: it needs sleep).
+  173, 304,
   // oam1 (docs/next-adapters-prep20.md): production hardware-OAM provider (liveMoveOamAssembler.ts), first body.
   // Fury Cutter: the counter-1 body only (a first body implies furyCutterCounter 1).
   261, 228, 210,
@@ -321,6 +326,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     174,
     // prep22 P1: Lovely Kiss (faithful-random), Spikes, Octazooka windows start at activation (row 0; prep22 moves/*.json, both sides).
     142, 191, 190, 324,
+    // Q2 (prep25 moves/*.json): Snore's window starts at activation (row 0).
+    173, 304,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -785,6 +792,8 @@ export function liveMoveAnimationDuration(
     case 190: return 79;
     // Signal Beam first body: signalBeamFirstInactiveAge = 18 + |pan target - initial| = 145 (player attacker) / 144 (opponent), prep22 s0.2.
     case 324: return request.attacker === 0 ? 145 : 144;
+    case 173: return 69; // Snore (prep25: constant across the four scenarios).
+    case 304: return 104; // Hyper Voice (prep25: constant across the four scenarios).
     case 189: return 51; // Mud-Slap A..A+50 (prep17: 77..127 / 81..131 / alt 72..122).
     case 28: return 58; // Sand-Attack A..A+57 (78..135 / 82..139 / alt 73..130).
     case 63: return 280; // Hyper Beam faithful-random body 79..358 / 83..362 (prep13 s0.1; reducer first inactive age 279).
@@ -2438,6 +2447,36 @@ export function liveMoveAnimationPresentation(
       config = { move: "SIGNAL_BEAM", attacker, target, fieldProfile,
         animationInputs: liveSignalBeamInputs({ attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors,
           palettes, spriteOrder: lentOrder }) as never };
+      break;
+    }
+    case 173: {
+      // prep25 Q2: Snore. WIN0 (0, 0) is measured only after an earlier body (Snore needs sleep, so a Rest / status body always precedes
+      // it in the measured scenarios); a first body declines. Lent order required; non-shiny; assets-only palette composite.
+      if (!spriteOrderInput?.known || spriteOrderInput.firstBody) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const lentOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (palettes === null || lentOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      config = { move: "SNORE", attacker, target, fieldProfile, animationInputs: liveSnoreInputs({
+        attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes, spriteOrder: lentOrder,
+        firstBody: false, snoreZPalette: snoreAsset.snoreZ.palette }) as never };
+      break;
+    }
+    case 304: {
+      // prep25 Q2: Hyper Voice. No register input; the lent order (any known history) and the assets-only composite are the inputs.
+      if (!spriteOrderInput?.known) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const lentOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (palettes === null || lentOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      config = { move: "HYPER_VOICE", attacker, target, fieldProfile, animationInputs: liveHyperVoiceInputs({
+        attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes, spriteOrder: lentOrder,
+        attackerSpeciesId: art[attacker.geometry.side].species,
+        thinRingPalette: (paletteResources.resources as Record<string, { colors: readonly number[] }>).ANIM_TAG_THIN_RING!.colors }) as never };
       break;
     }
     case 91: {
