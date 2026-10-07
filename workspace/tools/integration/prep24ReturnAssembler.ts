@@ -31,7 +31,7 @@ export function dipY2(row: number, c: number, d: number, dy: number): number {
   if (k < d) return dy * (k + 1); if (k < d + 2) return dy * d; if (k < 2 * d + 2) return dy * (2 * d + 2 - k - 1); return 0;
 }
 export function attackerY2At(row: number): number { let y = 0; for (const [c, d, dy] of RETURN_DIPS) y += dipY2(row, c, d, dy); return y; }
-interface Life { kind: "dip" | "splat" | "trace" | "blend"; first: number; last: number; order: number; idx: number; slot?: number; matrix?: number }
+export interface Life { kind: "dip" | "splat" | "trace" | "blend"; first: number; last: number; order: number; idx: number; slot?: number; matrix?: number }
 function lives(): Life[] {
   const out: Life[] = []; let order = 0;
   const add = (kind: Life["kind"], first: number, life: number, idx: number) => out.push({ kind, first, last: first + life - 1, order: order++, idx });
@@ -44,14 +44,17 @@ function lives(): Life[] {
   for (const e of events) add(e.kind, e.f, e.life, e.idx);
   return out;
 }
-export function assembleReturnHardwareOam(row: number, input: ReturnAssemblerInputs): { oam: string[]; matrices: number[][] } {
-  const state = row - 1, k = input.known, all = lives();
-  // lowest-free sprite slots / matrix ids in creation order
-  const held: Life[] = [];
+/** Lowest-free sprite slots / matrix ids over the helper-sprite lifetimes, in script creation order. */
+export function returnAllocations(k: ReturnKnown24): Life[] {
+  const all = lives(), held: Life[] = [];
   for (const l of all) { const used = new Set(k.occupiedSlots); for (const o of held) if (o.last >= l.first && o.first <= l.first) used.add(o.slot!);
     let s = 0; while (used.has(s)) s += 1; l.slot = s;
     if (l.kind === "splat") { const mu = new Set<number>(); for (const o of held) if (o.kind === "splat" && o.last >= l.first && o.first <= l.first) mu.add(o.matrix!); let m = 0; for (const free of k.impactMatrixBase) { if (!mu.has(free)) { m = free; break; } } l.matrix = m; }
     held.push(l); }
+  return all;
+}
+export function assembleReturnHardwareOam(row: number, input: ReturnAssemblerInputs): { oam: string[]; matrices: number[][] } {
+  const state = row - 1, k = input.known, all = returnAllocations(k);
   const attrs = new Map<number, Attr>(), matrices = Array.from({ length: 32 }, () => [256, 0, 0, 256]);
   const y2 = attackerY2At(state);
   attrs.set(k.attackerSlot, [k.attackerAttr[0] + y2 - k.attackerIdleY2 & 0xff | k.attackerAttr[0] & ~0xff, k.attackerAttr[1], k.attackerAttr[2]]);
