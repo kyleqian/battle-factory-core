@@ -1,0 +1,36 @@
+{
+ "schema": "prep29-live-adapter-fixture/v1",
+ "move": "LUSTER_PURGE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep29-luster-purge-alt-opponent-latias-golem.json",
+ "denseWindow": {
+  "startFrame": 82,
+  "endFrame": 413
+ },
+ "windowSource": "window = [activation, activation + 332 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "LATIAS",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793700015,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 155,
+  "playerMaxHp": 155,
+  "opponentHp": 176,
+  "opponentMaxHp": 176,
+  "playerGender": "male",
+  "opponentGender": "female"
+ }
+}

@@ -5,7 +5,7 @@
  * scenarios), the assets-only palette composite with the move's own asset palettes written by the reducers, the lent 64-slot order, and the
  * WIN0 history rule (first body (240,161); (0,0) once an earlier body ran). No capture row is read.
  */
-import { S0_REGISTERS, ZERO_BG_VALUES, battlerSprite, type LiveBgSnapshotArgs } from "./liveBgSnapshotMoves.ts";
+import { KNOWN_ENTRY_NON_BATTLER_SPRITES, S0_REGISTERS, ZERO_BG_VALUES, battlerSprite, type LiveBgSnapshotArgs } from "./liveBgSnapshotMoves.ts";
 
 type Side = "player" | "opponent";
 type Inputs = Record<string, any>;
@@ -223,5 +223,43 @@ export function liveRapidSpinInputs(args: Omit<LiveQ2Args, "firstBody" | "palett
       bgX: 32 - attacker.spriteCenter.x, bgY: 32 - attacker.spriteCenter.y, inBg2: player, battlerId: player ? 0 : 1 },
     initialScanlineSrcBuffer: 1, initialScanlineBanks: rapidSpinScanline(),
     gameplayRng: null, targetSide,
+  };
+}
+
+const OUTRAGE_FLAME_BIRTHS = [6, 8, 10, 12, 14, 16, 18, 20, 22, 27, 29, 31, 33, 35, 37, 39, 44, 46, 48, 50, 52, 54, 56] as const;
+/** Lowest-free flame slots over the known-entry in-use set, births first; a flame is destroyed at birth + 31 after that frame's births (prep29 B.6). */
+const outrageFlameSlots = (): number[] => {
+  const used = new Set([0, 1, 2, 6, 8, 60, 61, 62, 63]), slots: number[] = [];
+  OUTRAGE_FLAME_BIRTHS.forEach((age, i) => {
+    OUTRAGE_FLAME_BIRTHS.forEach((birth, j) => { if (j < i && birth + 31 < age) used.delete(slots[j]!); });
+    let s = 0; while (used.has(s)) s += 1;
+    used.add(s); slots.push(s);
+  });
+  return slots;
+};
+
+/**
+ * `Move_OUTRAGE` (200; prep29 B.6): 119 rows, first body only (S0 registers). The flame origin is the attacker's picture offset point; the 23 flames take
+ * the lowest-free slots (birth-first, destroyed at birth + 31); the flame OAM words are the known-entry constant [0, 0x8000, 31257]; tasks
+ * loop-SE 0 / blend 1 / elliptical translate 2 / shake 3; ANIM_TAG_SMALL_EMBER: tile slot 6, tiles 537..616, hardware bank 23.
+ */
+export function liveOutrageInputs(args: LiveBgSnapshotArgs & { spriteOrder: readonly number[]; smallEmberPalette: readonly number[] }): Inputs {
+  const { attackerSide, attacker, target } = args;
+  const attackerSprite = battlerSprite(attackerSide, attacker), targetSprite = battlerSprite(opposite(attackerSide), target);
+  const sprites = [attackerSprite, targetSprite].sort((a, b) => a.slot - b.slot);
+  return {
+    attackerPictureOrigin: { ...attacker.picOffsetPoint }, targetPictureOrigin: { ...target.spriteCenter },
+    attackerSprite, targetSprite,
+    taskSlots: { loopSe: 0, blendColorCycle: 1, translateMonElliptical: 2, shakeMon2: 3 },
+    spriteSlots: { flames: outrageFlameSlots() },
+    resources: { smallEmber: { tag: 10029, tileSlot: 6, paletteAllocatorSlot: 7, hardwarePaletteBank: 23, tileRange: [537, 80], palette: [...args.smallEmberPalette] } },
+    allocator: {
+      initialOccupiedSprites: [0, 1, 2, 6, 8, 60, 61, 62, 63], initialMatrixBitmap: 6, spriteOrder: args.spriteOrder,
+      initialLiveSprites: [...KNOWN_ENTRY_NON_BATTLER_SPRITES.map((s) => ({ slot: s.slot, attr: [...s.attr] as [number, number, number], subpriority: s.subpriority })),
+        ...sprites.map((s) => ({ slot: s.slot, attr: s.attr, subpriority: s.subpriority }))].sort((a, b) => a.slot - b.slot),
+    },
+    oam: { flame: [0, 0x8000, 31257] },
+    palettes: { unfaded: args.palettes.unfaded, faded: args.palettes.faded, hardware: args.palettes.hardware },
+    registers: { ...S0_REGISTERS }, animationRngSeed: 0, gameplayRng: null,
   };
 }
