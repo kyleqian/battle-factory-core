@@ -1,5 +1,29 @@
 # Animation integration progress
 
+## 2026-10-06 (night) — in progress: 226 -> 229 scoped-exact (hardware-OAM provider)
+
+- prep22 (side, `c31dfd3c1`, new files only, merged `e7b7a1ac3`): Fire Punch is a 101-row body identical across
+  burn / no-burn / faint outcomes (flames = separate Status_Burn body 152-155 frames later; status animations are
+  not drawn in production today); body-only through the accepted renderer 101/101 rows 0 px both orientations with a
+  neutral profile, reducer age 27 at activation. Random2 re-probe: Signal Beam, Sheer Cold, Spikes, Octazooka, Skill
+  Swap, Shock Wave draw none (stale C); Lovely Kiss draws 4 words at age +120 (plan replay == accepted words). Spikes /
+  Octazooka / Lovely Kiss / Signal Beam / Sheer Cold reducers equal the ROM per-age sprite state from
+  production-derivable inputs; Skill Swap / Shock Wave need a graphics-host provider. Supervisor: `prep22Run.sh` into
+  fresh dirs — Fire Punch 101/101 0 px, plans / palette / lowest-free / 7 per-move receipts byte-identical.
+- Folded Opus worker `425bff8fb` (src tree `89c9294d`) as `8502a5d71`: production hardware-OAM provider
+  `src/engine/liveMoveOamAssembler.ts` (+ `liveOamMoves.ts`); G1 solved (lent activation order carried by a full
+  64-slot SortSprites, ResetSprite dummy keys for free slots, stale oam.y for invisible sprites; carried order ==
+  sSpriteOrder on every corpus row). EXACT first bodies: Will-O-Wisp (261; real InitAnimLinearTranslationWithSpeed
+  orb math, staged outputs unchanged), Pursuit normal body (228; switch interception declines, duration null), Fury
+  Cutter counter-1 body (210; a first body implies counter 1; counters 2-5 decline with duration 43). Dense 18
+  windows x 2 fresh 0 px (accepted + BANETTE/UMBREON/SCYTHER->GOLEM + NINETALES/SNEASEL/SCYTHER -> GOLBAT/SNORLAX);
+  routes 82/7, 52/0, 38/14, 58/0, 60/0 active every age, ON/OFF parity. Worker gates 1,537 files / 12,486 tests,
+  build 859. Supervisor: dense rerun 6 windows 0 px r1 == r2; differential fight-submenu 235/235 +
+  battle1-postwin-next-prompt 216/216; presentation-rng-playable-live-bodies-seeded-on 45/173 — the shift comes only
+  from a declined second-body Fury Cutter now taking its 43 source rows (case 210 -> null experiment: 173/173);
+  accepted (same pattern as later Overheat). Route 38/14 reproduced; union typecheck, smoke 448, 7 files 124/124.
+  Receipt `oam1-live-adapter-receipt.json`; supervisor logs `.integration/validation/oam1-20261006/`.
+
 ## 2026-10-06 (day, wind-down) — D3 implemented: 218 -> 226 exact + 10 faithful-random live adapters
 
 - Folded Opus worker `08c3c4ce3` as `26b3f525a`: D3 option (a) infrastructure, no adapter consumer
