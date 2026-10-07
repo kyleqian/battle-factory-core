@@ -17,6 +17,7 @@ node --experimental-strip-types tools/integration/prep25PaletteCheck.ts "$OUT/st
 python3 tools/integration/prep25LowestFree.py "$OUT/state" "$OUT/receipts/lowest-free.json" >/dev/null
 python3 tools/integration/prep25DiveData.py "$OUT/state" "$OUT/r2" "$OUT/receipts/dive-data.json"
 python3 tools/integration/prep25IceBallData.py "$OUT/state" "$OUT/r2" "$OUT/receipts/ice-ball-data.json" >/dev/null
+GEOM=battle node --experimental-strip-types tools/integration/prep25DiveReducerCheck.ts "$OUT/state" "$OUT/r2" "$OUT/receipts/dive-reducer.json" | tail -9
 python3 tools/integration/prep25DiveHidden.py "$OUT/state" "$OUT/receipts/dive-hidden.json" >/dev/null
 # twice-identical check of the state probes (full JSON) and of the Random2 probes (all fields except finalStateSha1)
 python3 - "$OUT" <<'PYEOF'
