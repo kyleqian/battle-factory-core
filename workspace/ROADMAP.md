@@ -35,7 +35,9 @@ separate deterministic presentation RNG for Random2 animations, preserve its
 seed in session exports, and report those live adapters as "faithful random"
 separately from exact claims. S10A below defines the scope and acceptance.
 This resolves D3; no further user approval is needed for that implementation.
-Implemented 2026-10-06: `docs/presentation-rng.md`; 10 faithful-random adapters live.
+Implemented 2026-10-06: `docs/presentation-rng.md`; 11 faithful-random adapters live (2026-10-07).
+**DEFERRED D4 (OPEN, 2026-10-07):** CPU-load timing animations — see DEFERRED.md; it blocks the next
+`run-supervisor.sh` until answered.
 
 ## Operational notes
 
@@ -2209,31 +2211,28 @@ fourteen-move physical batch is verified and folded. Helping Hand remains
 unaccepted pending legal doubles staging. No whole-playable arbitrary-history
 framebuffer exactness is claimed.
 
-Next (2026-10-06 evening): 226 scoped-exact live adapters + 10 faithful-random (D3 surrogate) adapters
-(production `7e7816b98`); 40 accepted bodies remain (6.1% of Factory move uses; census
-`226+10+0+40=276`). This session built the presentation-only Random2 host (`docs/presentation-rng.md`;
-seed + policy in session exports), the battler x2 history tracker (#148), the assets-only palette
-composite and the first-body gate. Most census "C" (Random2) labels were stale: only Double Kick,
-Astonish, Thrash, Flail, Wish, Hyper Beam, Rain Dance, Water Pulse, Mud-Slap and Sand-Attack draw
-Random2 among the moves probed. Resume points, in order:
-1. OAM-buffer reducer ports (`docs/next-adapters-prep20.md`, `prep18.md`): Will-O-Wisp, Pursuit, Fury
-   Cutter (counter on the request, Rollout precedent; counter 5 = counter-3 body), Megahorn, then
-   Return (strongest branch only). Prototype assemblers are exact; open input = per-row full 64-slot
-   order; port Will-O-Wisp's exact orb math (the shipped reducer drifts on other geometries).
-2. Widen Overheat (both sides) to later bodies and add the Psych Up opponent attacker: evidence is banked
-   (`docs/later-bodies-overheat-psychup.md`, 17 later-body fixtures 0 px with the first-body gate
-   bypassed; not yet supervisor-reproduced) — gate = known order lend, as Silver Wind / Psych Up player
-   already use (`later-bodies-bg-receipt.json`).
-3. Endeavor adapter: the stale-register plumbing is merged; a source-relative reducer + renderer is
-   needed (the staged reducer is GROVYLE/ONIX-specific); W3 (TV loop) is unported -> decline there.
-4. Remaining Random2-labelled moves: re-probe each (expect stale labels) with the prep12/prep14 method.
-   Meteor Mash stays fallback: its last-row timing is a ROM lag frame at `restorebg` (`prep17.md`),
-   which no battle state predicts (a D3-like timing claim would need a user decision).
-5. Curse (reducer port), Fire Punch (generic Scene-ON renderer), Baton Pass (flow), Substitute (doll
-   state), Memento (scanline buffer), Extreme Speed (first 48 ages unevidenced).
-6. History gaps: Water Spout middle HP tiers need sprite-order plan units for the Water Spout + Toxic
-   history; #148 `unknown` after mixed/status bodies; #146 send-in tail; #145/#147 small remainders.
-7. Run a species-swap audit after every adapter batch (audit 3 found 3 real defects this session).
+Next (2026-10-07 morning): 243 scoped-exact live adapters + 11 faithful-random (D3 surrogate) adapters
+(production at the order-rows merge, src tree `34e54570`); 22 accepted bodies remain (2.2% of Factory move
+uses; census `243+11+0+22=276`). The 2026-10-06 night session added the hardware-OAM provider
+(`src/engine/liveMoveOamAssembler.ts`, `liveOamMoves.ts`), source models for Curse / Return / Endeavor, two
+builder families (`liveProfileMoves.ts`, `liveQ2Moves.ts`), 14 production sprite-order plan rows, and fixed
+ISSUES #150 and the idle-x2 part of #151. **DEFERRED D4 is OPEN and blocks the next run until answered:**
+animations whose exact timing depends on emulator CPU load (lag frames / VBlank phase) — keep the fallback,
+or ship them in a separate "faithful timing" bucket. Resume points, in order:
+1. Apply the D4 answer: Megahorn, Meteor Mash, Mach Punch, Extrasensory, Nightmare, Psywave, Flatter, Ice Ball,
+   Revenge, Curse Ghost (models / evidence banked: `docs/next-adapters-prep23..26.md`); #151 Sheer Cold tail and
+   Hyper Voice age-59 row (`docs/issue151-diagnosis.md`).
+2. Ready recipes: Dive (faithful-random; `docs/next-adapters-prep25.md` §B.1a anchor split + plan rows);
+   Bonemerang, Rapid Spin, Outrage, Luster Purge (faithful-random plan), then Eruption and Spit Up
+   (`docs/next-adapters-prep29.md`).
+3. Baton Pass flow: opponent instant removal hold 9 -> message E+14 -> ball E+51 (species-keyed tail); the
+   player's outgoing healthbox A+48..A+75 (`docs/next-adapters-prep27.md` §1-§4). Endeavor W3 port (declines today).
+4. Providers still missing: Superpower (inventory in prep26), Skill Swap / Shock Wave (graphics host: OAM + VRAM
+   + BG registers), Substitute (doll state), Memento (scanline buffer), Extreme Speed (early ages unevidenced).
+5. Sprite-order coverage: 66 NEEDS-KEYS cells + 14 inconclusive (`docs/sprite-order-plan-gaps-28.md`) limit
+   later bodies; Confusion / TURN_TRAP status animations; #148 `unknown`; #146 send-in tail.
+6. Species-swap audit after every adapter batch (audits 5-8 this session found 4 real defect classes) and a
+   verifier fix so a target personality reaches the shiny gate.
 Validate new adapters with alternate-species dense proofs whose windows come from
 the source activation frame, not only the accepted fixture species.
 Latest progress supersedes this starting checkpoint as verified work lands.

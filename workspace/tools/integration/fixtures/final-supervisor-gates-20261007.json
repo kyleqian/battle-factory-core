@@ -1,0 +1,40 @@
+{
+  "schema": "supervisor-final-gates/v1",
+  "verifier": "independent integration supervisor (Claude Opus 5.5), 2026-10-07 wind-down",
+  "productionCodeCommit": "8122e5672e5a99d557cd704d224b0e6bff86e983",
+  "srcTree": "34e545701e2a7c8fb9feb20ccc1b2c646bda5c48",
+  "implementedAdapters": 243,
+  "faithfulRandomAdapters": 11,
+  "typecheck": {
+    "command": "npm run typecheck",
+    "result": "passed",
+    "log": ".integration/validation/supervisor-final-20261007/typecheck.log"
+  },
+  "fullTest": {
+    "command": "PATH=\"$PWD/tools/autonomy/bin:$PATH\" POKEBENCH_VITEST_MAX_WORKERS=4 npm test -- --maxWorkers=4",
+    "passedFiles": 1547,
+    "skippedFiles": 44,
+    "passedTests": 12658,
+    "skippedTests": 223,
+    "durationSeconds": 407.7,
+    "log": ".integration/validation/supervisor-final-20261007/suite.log"
+  },
+  "build": {
+    "command": "npm run build",
+    "modules": 862,
+    "result": "passed",
+    "log": ".integration/validation/supervisor-final-20261007/build.log"
+  },
+  "batchReceipts": [
+    "oam1-live-adapter-receipt.json",
+    "r2-gates-firepunch-receipt.json",
+    "curse-live-adapter-receipt.json",
+    "r3-profile-live-receipt.json",
+    "return-live-adapter-receipt.json",
+    "q2-live-adapter-receipt.json",
+    "fix150-live-receipt.json",
+    "baton-endeavor-live-receipt.json",
+    "fix151-live-receipt.json"
+  ],
+  "note": "Run on master after the order-rows merge + census regeneration; covers the order-rows worker's missing post-fix full-suite rerun. Later commits on this session are docs / new evidence files only."
+}
