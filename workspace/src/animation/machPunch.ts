@@ -83,6 +83,11 @@ export interface MachPunchLiveInputs {
   readonly animationRngSeed: number;
   /** Gameplay RNG is opaque and is returned byte-for-byte unchanged. */
   readonly gameplayRng: unknown;
+  /**
+   * The optional late lag frame at age 91 (a VBlank overrun, CPU phase; prep25 lag-frames.json). Absent: the accepted fixtures' side rule
+   * (player attacker with the lag, 110 rows; opponent without, 109). The live seam sets it from the D4 timing policy (liveMoveTimingPolicy.ts).
+   */
+  readonly optionalLateLag?: boolean;
 }
 
 export const MACH_PUNCH_SOURCE_START = 0x082cd565;
@@ -233,8 +238,11 @@ function assertInputs(input: Readonly<MachPunchLiveInputs>): void {
   }
 }
 
-export function machPunchFirstInactiveAge(input: Readonly<Pick<MachPunchLiveInputs, "attackerSide">>): number {
-  return input.attackerSide === "player" ? MACH_PUNCH_PLAYER_FIRST_INACTIVE : MACH_PUNCH_OPPONENT_FIRST_INACTIVE;
+const lateLag = (input: Readonly<Pick<MachPunchLiveInputs, "attackerSide" | "optionalLateLag">>): boolean =>
+  input.optionalLateLag ?? input.attackerSide === "player";
+
+export function machPunchFirstInactiveAge(input: Readonly<Pick<MachPunchLiveInputs, "attackerSide" | "optionalLateLag">>): number {
+  return lateLag(input) ? MACH_PUNCH_PLAYER_FIRST_INACTIVE : MACH_PUNCH_OPPONENT_FIRST_INACTIVE;
 }
 
 export function machPunchSourceAtAge(age: number, firstInactiveAge: number): MachPunchSourceCursor {
@@ -256,11 +264,11 @@ export function machPunchSourceAtAge(age: number, firstInactiveAge: number): Mac
   return { owner: "Move_MACH_PUNCH", pointer: MACH_PUNCH_SOURCE_START + pointerOffset, pointerOffset, active: age < firstInactiveAge, wait };
 }
 
-function animationDrawsAtAge(age: number, attackerSide: MachPunchSide): number {
+function animationDrawsAtAge(age: number, optionalLateLag: boolean): number {
   let draws = age;
   if (age >= 71) draws -= 1;
   if (age >= 72) draws -= 1;
-  if (attackerSide === "player" && age >= 91) draws -= 1;
+  if (optionalLateLag && age >= 91) draws -= 1;
   return draws;
 }
 
@@ -381,7 +389,7 @@ function taskAtAge(age: number, input: Readonly<MachPunchLiveInputs>, firstInact
     tasks.push({ slot: input.taskSlots.clearMonBg, callback: "Task_ClearMonBg", role: "clear-monbg", data: taskData(0, age === 69 ? 1 : 2, input.attackerSide === "player" ? 0 : 1, 0) });
   }
   if (age >= 69 && age <= firstInactive - 2) {
-    const phase = age < 89 ? 1 : age === 89 || (input.attackerSide === "player" && age === 90) ? 2 : 3;
+    const phase = age < 89 ? 1 : age === 89 || (lateLag(input) && age === 90) ? 2 : 3;
     tasks.push({ slot: input.taskSlots.restoreFade, callback: "Task_FadeToBg", role: "fade-restore", data: fadeTaskData(-1, phase) });
   }
   return tasks.sort((left, right) => left.slot - right.slot || left.role.localeCompare(right.role));
@@ -494,7 +502,7 @@ export function machPunchAtAge(age: number, input: Readonly<MachPunchLiveInputs>
   const handsLoaded = age >= 4 && age < firstInactive;
   const matrixAllocated = age >= 58 && age < 68;
   const matrixSlots = input.matrixSlots.map((matrix, slot) => matrixAllocated && slot === input.matrixSlot ? input.fistMatrix : matrix);
-  const sourceDraws = animationDrawsAtAge(age, input.attackerSide);
+  const sourceDraws = animationDrawsAtAge(age, lateLag(input));
   const audio = age === 50
     ? [{ channel: "SE1" as const, sound: "SE_M_JUMP_KICK" as const, sourcePan: "SOUND_PAN_ATTACKER" as const, pan: input.attackerSide === "player" ? -64 : 63 }]
     : age === 58

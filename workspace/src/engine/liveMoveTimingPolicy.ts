@@ -95,4 +95,7 @@ export function liveMoveTimingBodyRows(moveId: number): number | null {
 }
 
 /** Production faithful-timing consumers (disjoint from LIVE_MOVE_ANIMATION_IDS and the faithful-random list). */
-export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object.freeze([]);
+export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object.freeze([
+  // D4a: Mach Punch first body (liveQ2Moves.ts liveMachPunchInputs; fixtures tools/integration/fixtures/d4a-live).
+  183,
+]);

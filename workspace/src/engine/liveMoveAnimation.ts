@@ -86,7 +86,8 @@ import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
 import paletteResources from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
 import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "json" };
 import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
-import { liveBonemerangInputs, liveLusterPurgeFields, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
+import { liveMoveTimingBodyRows } from "./liveMoveTimingPolicy.ts";
+import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
 import { liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
 import { liveCurseStatsInputs, liveFuryCutterInputs, livePursuitInputs, liveReturnInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
@@ -350,6 +351,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     304, 123, 328, 143, 173,
     // prep29 R1: Bonemerang windows start at activation (row 0).
     155, 229, 200, 295,
+    // D4a faithful timing (liveMoveTimingPolicy.ts): Mach Punch windows start at activation (row 0; prep25 moves/mach-punch.json).
+    183,
     // Sheer Cold (ISSUES #151, species audit 7 elevated FLYGON / GOLBAT opponent, both orientations): activation == window start (row 0).
     329,
   ].map((id) => [id, 0] as [number, number]).concat([
@@ -819,6 +822,9 @@ export function liveMoveAnimationDuration(
     // Sheer Cold first body: 191 rows (player attacker) / 190 (opponent), constant across the accepted + alternate scenarios (prep22 s0.2).
     case 329: return request.attacker === 0 ? 191 : 190;
     // Sky Attack (prep25): charge 148 rows / strike 180 rows, selected by gAnimMoveTurn bit 0 like Razor Wind / Solar Beam.
+    // Faithful timing (D4, liveMoveTimingPolicy.ts; not LIVE_MOVE_ANIMATION_IDS): Mach Punch 107 iterations + fixed lags 71, 72 + the policy's
+    // optional late lag at 91 (dominant measured phase, 110 rows; the other phase is 109 rows).
+    case 183: return request.attacker === 0 || request.attacker === 1 ? liveMoveTimingBodyRows(183) : null;
     case 295: return 332; // Luster Purge (prep29 B.5: 332 rows, constant in all four scenarios; faithful-random, plan rows in liveMovePresentationRng.ts).
     case 200: return 119; // Outrage (prep29 B.6: 119 rows, constant in all five bodies).
     case 229: return 130; // Rapid Spin (prep29 B.3: 130 rows, constant in all four scenarios).
@@ -2597,6 +2603,21 @@ export function liveMoveAnimationPresentation(
         attacker: { ...attacker, geometry: { ...attacker.geometry, animationCenter: attackerPictureOrigin } },
         target: { ...target, geometry: { ...target.geometry, animationCenter: targetPictureOrigin } },
         animationInputs: inputs as never };
+      break;
+    }
+    case 183: {
+      // D4a faithful timing: Mach Punch, first body only (prep25 B.5: WIN0 (240, 161) and the S0 BG3HOFS / blend registers in all four first bodies;
+      // the trace / splat / fist slots are the known-entry lowest-free slots). The optional late lag is the timing policy's phase.
+      if (spriteOrderInput?.known !== true || spriteOrderInput.firstBody !== true) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const lentOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (palettes === null || lentOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      config = { move: "MACH_PUNCH", attacker, target, fieldProfile, animationInputs: liveMachPunchInputs({
+        attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes, spriteOrder: lentOrder, firstBody: true,
+        healthbarPalette: (paletteResources as unknown as { initial: { healthbar: readonly number[] } }).initial.healthbar }) as never };
       break;
     }
     case 173: {

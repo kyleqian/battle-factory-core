@@ -3860,8 +3860,74 @@
     },
     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
   },
-  "faithfulTimingCount": 0,
-  "faithfulTimingAdapters": [],
+  "faithfulTimingCount": 1,
+  "faithfulTimingAdapters": [
+    {
+      "id": 183,
+      "move": "MOVE_MACH_PUNCH",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 91,
+          "fixedLagAges": [
+            71,
+            72
+          ],
+          "iterations": 107,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 110,
+              "measured": 5
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 109,
+              "measured": 3
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          92,
+          93,
+          94,
+          95,
+          96,
+          97,
+          98,
+          99,
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107
+        ],
+        "rows": 16,
+        "maxPixelsPerRow": 18252,
+        "cause": "the optional lag at age 91 holds the restore fade (Task_FadeToBg, BLDY) one row: a no-lag window equals the policy body one row earlier from age 92 to the fade end (107); rows 0..91 and 108 are exact"
+      },
+      "d3": false,
+      "evidence": [
+        "tools/integration/fixtures/d4a-live-receipt.json",
+        "tools/integration/fixtures/d4a-live/mach-punch-*.json (8 dense windows: accepted, prep25 alternate, D4a SNORLAX / GOLBAT extras, both orientations)",
+        "tools/integration/fixtures/prep25/lag-frames.json + tools/integration/fixtures/d4a/lag-frames-tiebreak.json (5 of 8 with the lag)",
+        "tests/animation/liveFaithfulTimingAdapters.test.ts (builder == accepted corpus inputs, gates, ordinary routes seed 48 streak 7 / 14 Scene ON/OFF parity)"
+      ],
+      "proofCommands": [
+        "python3 tools/integration/d4aFixtures.py PROBEDIR MACH_PUNCH   # PROBEDIR from tools/integration/prep22Probes.sh PROBEDIR 1 <scenarios>",
+        "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/d4a-live/mach-punch-*.json",
+        "npx vitest run tests/animation/liveFaithfulTimingAdapters.test.ts tests/animation/liveMoveTimingPolicy.test.ts"
+      ]
+    }
+  ],
   "faithfulTimingClaim": {
     "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
     "module": "src/engine/liveMoveTimingPolicy.ts",

@@ -6,6 +6,7 @@
  * WIN0 history rule (first body (240,161); (0,0) once an earlier body ran). No capture row is read.
  */
 import { KNOWN_ENTRY_NON_BATTLER_SPRITES, S0_REGISTERS, ZERO_BG_VALUES, battlerSprite, type LiveBgSnapshotArgs } from "./liveBgSnapshotMoves.ts";
+import { liveMoveOptionalLagAge } from "./liveMoveTimingPolicy.ts";
 
 type Side = "player" | "opponent";
 type Inputs = Record<string, any>;
@@ -278,5 +279,41 @@ export function liveLusterPurgeFields(args: Omit<LiveQ2Args, "firstBody" | "pale
     monbgPosition: { x: 32 - attacker.spriteCenter.x, y: 32 - attacker.spriteCenter.y },
     hitsplatCenter: { x: target.battlePositionCenter.x + (player ? 1 : -1), y: target.battlePositionCenter.y + 2 },
     visualRandom: { hitsplats: args.draws.map((pair) => ({ x: pair[0]!, y: pair[1]! })) as never },
+  };
+}
+
+const IDENTITY_MATRIX = [256, 0, 0, 256] as const;
+/** The source's optional late lag age of Mach Punch (machPunch.ts animationDrawsAtAge / MACH_PUNCH_PLAYER_FIRST_INACTIVE). */
+const MACH_PUNCH_OPTIONAL_LAG_AGE = 91;
+
+/**
+ * `Move_MACH_PUNCH` (183; prep25 s0.2 / B.5, FAITHFUL TIMING D4): first body only. Tasks fade 0 / monbg 1 / sliding BG 3 / punch 0 / shake 2 /
+ * clear 0 / restore fade 2; the eight traces take the known-entry free slots 3, 4, 5, 7, 9..12, the hit splat 13 and the fist 14 (lowest free,
+ * matrix 0, fist scale 303); impact tile slot 6 / bank 7, hands-and-feet tile slot 7 / bank 8; the trace palette is OBJ bank 9, whose unfaded
+ * contents at a first body are the known-entry healthbar palette (tag 55044; equal in all eight D4a / prep25 scenarios, two trainers, any species).
+ * Traces start at the attacker's sprite centre, the hit splat at the
+ * target's picture offset point. The optional late lag at age 91 (CPU phase) comes only from the timing policy (dominant phase, 110 rows).
+ */
+export function liveMachPunchInputs(args: LiveQ2Args & { healthbarPalette: readonly number[] }): Inputs {
+  const { attackerSide, attacker, target } = args, targetSide = opposite(attackerSide);
+  const attackerSprite = battlerSprite(attackerSide, attacker), targetSprite = battlerSprite(targetSide, target);
+  const lag = liveMoveOptionalLagAge(183);
+  if (lag !== null && lag !== MACH_PUNCH_OPTIONAL_LAG_AGE) throw new Error(`Mach Punch timing policy lag age ${lag} is not the source's ${MACH_PUNCH_OPTIONAL_LAG_AGE}`);
+  const battlerInput = (s: ReturnType<typeof battlerSprite>) =>
+    ({ slot: s.slot, x: s.x, y: s.y, x2: s.x2, y2: s.y2, subpriority: s.subpriority, oamPriority: s.oamPriority, matrixNum: s.matrixNum, matrix: [...s.matrix] });
+  return {
+    attackerPictureOrigin: { ...attacker.spriteCenter }, targetPictureOrigin: { ...target.picOffsetPoint },
+    attackerSprite: battlerInput(attackerSprite), targetSprite: battlerInput(targetSprite),
+    taskSlots: { monBg: 1, initialFade: 0, slidingBg: 3, punch: 0, shake: 2, clearMonBg: 0, restoreFade: 2 },
+    traceSlots: [3, 4, 5, 7, 9, 10, 11, 12], hitSplatSlot: 13, fistSlot: 14, matrixSlot: 0,
+    resources: { impact: { tileSlot: 6, paletteBank: 7, tileRange: [305, 16] }, handsAndFeet: { tileSlot: 7, paletteBank: 8, tileRange: [537, 64] } },
+    tracePalette: { bank: 9, bgr555: [...args.healthbarPalette] },
+    matrixBitmap: 6, matrixSlots: Array.from({ length: 32 }, () => [...IDENTITY_MATRIX]), fistMatrix: [303, 0, 0, 303],
+    spriteOrder: args.spriteOrder,
+    painterSprites: orderKeys(attackerSide, attackerSprite.attr[0], targetSprite.attr[0])
+      .map((k) => ({ slot: k.slot, subpriority: k.subpriority, oamPriority: k.oamPriority, oamY: k.oamY & 0xff })),
+    registers: { bg3hofs: 0, bldcnt: 0, bldalpha: 0, bldy: 0 },
+    animationRngSeed: 0, gameplayRng: null,
+    optionalLateLag: lag !== null,
   };
 }
