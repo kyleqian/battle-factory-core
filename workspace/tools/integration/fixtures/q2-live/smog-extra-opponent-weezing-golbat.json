@@ -1,0 +1,42 @@
+{
+ "schema": "q2-live-adapter-fixture/v1",
+ "move": "SMOG",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/q2-smog-extra-opponent-weezing-golbat.json",
+ "denseWindow": {
+  "startFrame": 214,
+  "endFrame": 518
+ },
+ "windowSource": "window = [activation, activation + 305 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "WEEZING",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703306,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 182,
+  "playerMaxHp": 182,
+  "opponentHp": 160,
+  "opponentMaxHp": 172,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "player"
+  }
+ ]
+}

@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 515,
-  "ids": 246,
+  "rows": 523,
+  "ids": 250,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -5485,6 +5485,94 @@
    "move": "RETURN",
    "orientation": "opponent",
    "duration": 282,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 304,
+   "move": "HYPER_VOICE",
+   "orientation": "player",
+   "duration": 104,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 304,
+   "move": "HYPER_VOICE",
+   "orientation": "opponent",
+   "duration": 104,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 123,
+   "move": "SMOG",
+   "orientation": "player",
+   "duration": 305,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 123,
+   "move": "SMOG",
+   "orientation": "opponent",
+   "duration": 305,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 328,
+   "move": "SAND_TOMB",
+   "orientation": "player",
+   "duration": 123,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 328,
+   "move": "SAND_TOMB",
+   "orientation": "opponent",
+   "duration": 123,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 143,
+   "move": "SKY_ATTACK",
+   "orientation": "player",
+   "duration": 148,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 143,
+   "move": "SKY_ATTACK",
+   "orientation": "opponent",
+   "duration": 148,
    "expected": 0,
    "drawn": [
     0

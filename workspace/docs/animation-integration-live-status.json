@@ -3507,6 +3507,59 @@
         "the monbg BGnCNT write row (4 | 5) is a VBlank phase the renderer never reads (target drawn on the BG from age 5)",
         "independent arbitrary-species/history framebuffer comparison"
       ]
+    },
+    {
+      "move": "MOVE_HYPER_VOICE",
+      "id": 304,
+      "sourceFieldEvidence": "../tools/integration/fixtures/q2-live-adapter-receipt.json",
+      "liveEvidence": [
+        "Known order lend, non-shiny (any history: the reducer takes no register input); tasks 0..4, palette-blend helper slot 3, ring slot 4, ANIM_TAG_THIN_RING bank 7 tile 305, painter placement the measured constants; cry species = the displayed attacker species id",
+        "dense full windows (104 rows) zero residual twice fresh through the production live renderer on the accepted pair, the prep25 alternate and a GOLBAT / SNORLAX-target pair, both orientations; builder src/engine/liveQ2Moves.ts (no capture row is read; equals the accepted corpus-built inputs, tools/integration/q2InputsCompare.ts)"
+      ],
+      "remaining": [
+        "shiny battlers decline",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_SMOG",
+      "id": 123,
+      "sourceFieldEvidence": "../tools/integration/fixtures/q2-live-adapter-receipt.json",
+      "liveEvidence": [
+        "Known order lend, non-shiny (no WIN0 input; a later body after a Tackle is exact); seven clouds in the lowest free slots, clouds at the target's battle-position centre, monbg scroll 32 - target centre (+ idle rest), BG control registers S0 plus the monbg / split writes of the target's side",
+        "dense full windows (305 rows) zero residual twice fresh through the production live renderer on the accepted pair, the prep25 alternate and a GOLBAT / SNORLAX-target pair, both orientations; builder src/engine/liveQ2Moves.ts (no capture row is read; equals the accepted corpus-built inputs, tools/integration/q2InputsCompare.ts)"
+      ],
+      "remaining": [
+        "shiny battlers decline",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_SAND_TOMB",
+      "id": 328,
+      "sourceFieldEvidence": "../tools/integration/fixtures/q2-live-adapter-receipt.json",
+      "liveEvidence": [
+        "Known order lend, non-shiny (no register input); SandTombAnimationProfile from the anchors (vortex centre = target battle-position centre, palette sentinel = target picture offset point), mud sand bank 7 tile 305, shake task slot 0, known-entry free slots",
+        "dense full windows (123 rows) zero residual twice fresh through the production live renderer on the accepted pair, the prep25 alternate and a GOLBAT / SNORLAX-target pair, both orientations; builder src/engine/liveQ2Moves.ts (no capture row is read; equals the accepted corpus-built inputs, tools/integration/q2InputsCompare.ts)"
+      ],
+      "remaining": [
+        "shiny battlers decline",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_SKY_ATTACK",
+      "id": 143,
+      "sourceFieldEvidence": "../tools/integration/fixtures/q2-live-adapter-receipt.json",
+      "liveEvidence": [
+        "CHARGE body only (request.turn bit 0, 148 rows), first body (WIN0 (240, 161) is the battle's first-body reset) with the lent known-entry order, non-shiny; the strike (turn bit 1, 180 rows) declines: the order tracker has no plan for the 143 charge body, so the strike never has a known lend",
+        "dense full windows (148 rows, charge, blank text box like the Solar Beam setup) zero residual twice fresh through the production live renderer on the accepted pair, the prep25 alternate and a GOLBAT / SNORLAX-target pair, both orientations; builder src/engine/liveQ2Moves.ts (no capture row is read; equals the accepted corpus-built inputs, tools/integration/q2InputsCompare.ts)"
+      ],
+      "remaining": [
+        "the 180-row strike body is not claimed (no exact order lend after the charge); later-body charges decline",
+        "shiny battlers decline",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3530,7 +3583,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 235,
+  "implementedCount": 239,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 11,

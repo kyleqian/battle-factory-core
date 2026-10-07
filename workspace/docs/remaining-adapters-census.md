@@ -8,18 +8,18 @@ node tools/integration/censusActivationSummary.mjs                    # fixtures
 tools/integration/censusActivation.sh; tools/integration/censusStagedActivation.sh   # direct-mGBA probes (optional, regenerates the receipts)
 ```
 
-Inputs: `docs/animation-integration-live-status.json` (235 live, 11 faithful random), `docs/animation-integration-readiness.json` + `-merged-readiness.json` (276 accepted, host classes), `tools/integration/fixtures/h-buffer-triage.json` (per-field classes/cites of the 78 H_BUFFER moves; stale config line numbers are re-resolved by symbol), `sprite-order-body-plans-ext.json`, the Level-50 set pools for the usage weight (the model of `tools/integration/spriteOrderPlanCoverageRank.py`: ranges 0..6, 4 moves per set, both sides; `weight` below is the share of all Factory move uses). The script asserts `live (scoped exact) + faithful-random + in-flight + remaining = 276` (faithful-random = the disjoint D3 bucket `faithfulRandomAdapters`, docs/presentation-rng.md) and that every cited `file:line` exists and is non-empty. In-flight = batches the supervisor has running (none; the lists in the script are empty). Helping Hand is the 277th Factory move and is not accepted (not counted).
+Inputs: `docs/animation-integration-live-status.json` (239 live, 11 faithful random), `docs/animation-integration-readiness.json` + `-merged-readiness.json` (276 accepted, host classes), `tools/integration/fixtures/h-buffer-triage.json` (per-field classes/cites of the 78 H_BUFFER moves; stale config line numbers are re-resolved by symbol), `sprite-order-body-plans-ext.json`, the Level-50 set pools for the usage weight (the model of `tools/integration/spriteOrderPlanCoverageRank.py`: ranges 0..6, 4 moves per set, both sides; `weight` below is the share of all Factory move uses). The script asserts `live (scoped exact) + faithful-random + in-flight + remaining = 276` (faithful-random = the disjoint D3 bucket `faithfulRandomAdapters`, docs/presentation-rng.md) and that every cited `file:line` exists and is non-empty. In-flight = batches the supervisor has running (none; the lists in the script are empty). Helping Hand is the 277th Factory move and is not accepted (not counted).
 
 ## 1. Summary
 
 | Bucket | Moves | Weight |
 |---|---:|---:|
 | accepted Factory moves | 276 | 100% |
-| live adapters (scoped exact) | 235 | 92.45% |
+| live adapters (scoped exact) | 239 | 92.60% |
 | faithful-random adapters (ASTONISH, DOUBLE_KICK, FLAIL, HYPER_BEAM, LOVELY_KISS, MUD_SLAP, RAIN_DANCE, SAND_ATTACK, THRASH, WATER_PULSE, WISH) | 11 | 3.76% |
 | in flight (0 order-consumer + 0 prep6) | 0 | 0.00% |
-| **remaining (this census)** | **30** | **3.31%** |
-| check | 235+11+0+30=276 | |
+| **remaining (this census)** | **26** | **3.15%** |
+| check | 239+11+0+26=276 | |
 
 Remaining moves by group:
 
@@ -27,10 +27,10 @@ Remaining moves by group:
 |---|---:|---:|---|
 | SMALL-INPUT | 1 | 0.22% | one named production input / reducer parameter |
 | PROVIDER-x | 4 | 0.96% | blocked on exactly one named provider |
-| MULTI | 24 | 2.01% | several providers |
+| MULTI | 20 | 1.86% | several providers |
 | OUT | 1 | 0.11% | needs something outside S10A scope |
 
-Remaining by readiness host class (a move can carry several): H_BASIC 2, H_BUFFER 24, H_DERIVED 3, H_RANDOM 1, H_VARIANT 4. Moves whose order input is satisfied only for the battle's first body: 21. Moves that still need a per-move sprite-slot plan row: 23.
+Remaining by readiness host class (a move can carry several): H_BASIC 2, H_BUFFER 20, H_DERIVED 3, H_RANDOM 1, H_VARIANT 3. Moves whose order input is satisfied only for the battle's first body: 17. Moves that still need a per-move sprite-slot plan row: 19.
 
 PROVIDER-x breakdown: X-SWITCH (1: BATON_PASS); D-SCAN (1: MEMENTO); C (1: METEOR_MASH); X-SUBST (1: SUBSTITUTE).
 
@@ -88,7 +88,7 @@ Columns: `needs` = provider codes after removing what production supplies (`B(fi
 |---|---|---:|---|---|---|
 | EXTREME_SPEED (245) | H_DERIVED | 0.11% | X-AGE | X-AGE: evidence covers ages 48..350 only (window starts mid-body: activation 78, window 87, ageOffset 48, row 39); ages 0..47 never accepted; 1 rental species (Arcanine) @ a/sceneOnPresentation.ts:1499, a/extremeSpeed.ts:1 | OUT: needs animation-lane dense evidence for the first 48 source ages (docs/next-adapters-prep2.md row 20) |
 
-### MULTI (24)
+### MULTI (20)
 
 | Move (id) | Host class | Weight | needs | Blockers (consumed field @ cite) | Notes / measured |
 |---|---|---:|---|---|---|
@@ -96,18 +96,14 @@ Columns: `needs` = provider codes after removing what production supplies (`B(fi
 | LUSTER_PURGE (295) | H_RANDOM | 0.00% | C+D-BG | C: visualRandom: 12 Random2 words (6 hitsplats… @ a/lusterPurge.ts:29, rom/src/battle_anim_normal.c:1062-1063; D-BG: monbgCenter / monbgPosition (monbg state) @ a/sceneOnPresentation.ts:3587 | also attackerBattlerId, sprite slots, circleCenter (A/A-SLOT) |
 | SHEER_COLD (329) | H_BUFFER | 0.15% | C+D-TILE+D-BG+B(first body) | B: animationInputs:spriteOrder (sSpriteOrder /… @ a/sheerCold.ts:59; C: animationInputs:animationRng (presentation… @ a/sheerCold.ts:71; F-AFFINE: animationInputs:attackerSprite (battler spr… @ a/sheerCold.ts:45; E-TASK: animationInputs:taskSlots (CreateTask slot… @ a/sheerCold.ts:48; D-TILE: animationInputs:resources (OBJ tile/palette… @ a/sheerCold.ts:56; D-BG: animationInputs:monbg (BG regs / monbg / BL… @ a/sheerCold.ts:62 |  |
 | BONEMERANG (155) | H_BUFFER | 0.04% | C+D-TILE+D-BG+B(first body) | B: animationInputs:spriteOrder (sSpriteOrder /… @ a/bonemerang.ts:69; C: animationInputs:animationRngSeed (presentat… @ a/bonemerang.ts:88; F-AFFINE: animationInputs:attackerSprite (battler spr… @ a/bonemerang.ts:51; E-TASK: animationInputs:allocations.shakeTaskSlot (… @ a/bonemerang.ts:58; D-TILE: animationInputs:resources (OBJ tile/palette… @ a/bonemerang.ts:64; D-BG: animationInputs:monbg (BG regs / monbg / BL… @ a/bonemerang.ts:72 |  |
-| SAND_TOMB (328) | H_BUFFER | 0.04% | C+D-PAL+D-TILE+B(first body) | B: animationProfile:spriteOrder (sSpriteOrder… @ a/sandTomb.ts:51; C: animationProfile:startingAnimationRng (pres… @ a/sandTomb.ts:61; E-TASK: animationProfile:shakeTaskSlot (CreateTask… @ a/sandTomb.ts:59; D-PAL: animationProfile:mudSand.paletteNum (palett… @ a/sandTomb.ts:56; D-TILE: animationProfile:mudSand (OBJ tile/palette… @ a/sandTomb.ts:53 |  |
 | MACH_PUNCH (183) | H_BUFFER | 0.14% | C+D-PAL+D-TILE+D-BG+B(first body) | B: animationInputs:spriteOrder (sSpriteOrder /… @ a/machPunch.ts:75; C: animationInputs:animationRngSeed (presentat… @ a/machPunch.ts:83; F-AFFINE: animationInputs:attackerSprite (battler spr… @ a/machPunch.ts:47; E-TASK: animationInputs:taskSlots (CreateTask slot… @ a/machPunch.ts:49; D-PAL: animationInputs:tracePalette (palette host… @ a/machPunch.ts:68; D-TILE: animationInputs:resources (OBJ tile/palette… @ a/machPunch.ts:63; D-BG: animationInputs:registers (BG regs / monbg… @ a/machPunch.ts:77 |  |
 | SNORE (173) | H_BUFFER | 0.07% | C+D-PAL+D-TILE+D-BG+B(first body) | B: animationInputs:allocator (one-line inline… @ a/snore.ts:47; C: animationInputs:animationRngSeed (presentat… @ a/snore.ts:53; F-AFFINE: animationInputs:attackerSprite (battler spr… @ a/snore.ts:38; E-TASK: animationInputs:taskSlots (CreateTask slot… @ a/snore.ts:40; D-PAL: animationInputs:palettes (palette host / re… @ a/snore.ts:48; D-TILE: animationInputs:resource (OBJ tile/palette… @ a/snore.ts:46; D-BG: animationInputs:background (BG regs / monbg… @ a/snore.ts:49 |  |
-| SMOG (123) | H_BUFFER | 0.04% | C+D-PAL+D-TILE+D-BG+B(first body) | B: animationInputs:spriteOrder (sSpriteOrder /… @ a/smog.ts:75; C: animationInputs:animationRngSeed (presentat… @ a/smog.ts:94; F-AFFINE: animationInputs:attackerSprite (battler spr… @ a/smog.ts:60; E-TASK: animationInputs:taskSlots (CreateTask slot… @ a/smog.ts:64; D-PAL: animationInputs:targetPaletteBank (palette… @ a/smog.ts:92; D-TILE: animationInputs:resources (OBJ tile/palette… @ a/smog.ts:72; D-BG: animationInputs:targetBgPriority (BG regs /… @ a/smog.ts:59 |  |
-| HYPER_VOICE (304) | H_BUFFER | 0.04% | C+D-PAL+D-TILE+D-BG+B(first body) | B: animationInputs:spriteOrder (sSpriteOrder /… @ a/hyperVoice.ts:62; C: animationInputs:animationRngSeed (presentat… @ a/hyperVoice.ts:78; F-AFFINE: animationInputs:attackerSprite (battler spr… @ a/hyperVoice.ts:46; E-TASK: animationInputs:taskSlots (CreateTask slot… @ a/hyperVoice.ts:48; D-PAL: animationInputs:paletteBlendSubpriority (pa… @ a/hyperVoice.ts:58; D-TILE: animationInputs:resource (OBJ tile/palette… @ a/hyperVoice.ts:60; D-BG: animationInputs:palettes.backgroundBanks (B… @ a/hyperVoice.ts:69 |  |
 | ERUPTION (284) | H_BUFFER | 0.03% | C+D-PAL+D-TILE+F-AUDIO+B(first body) | B: animationProfile:launch (Eruption{Launch,Fa… @ a/eruption.ts:64; C: animationProfile:launch (Eruption{Launch,Fa… @ a/eruption.ts:64; E-TASK: animationProfile:launch (Eruption{Launch,Fa… @ a/eruption.ts:64; D-PAL: animationProfile:palette (EruptionPalettePr… @ a/eruption.ts:67; D-TILE: animationProfile:launch (Eruption{Launch,Fa… @ a/eruption.ts:64; F-AUDIO: animationProfile:audio (EruptionAudioProfil… @ a/eruption.ts:68 |  |
 | OUTRAGE (200) | H_BUFFER | 0.00% | D-TILE+D-PAL+D-BG+C+B(first body) | E-TASK: taskSlots (Readonly<{) @ a/outrage.ts:51; D-TILE: resources (Readonly<{ readonly smallEmber:… @ a/outrage.ts:58; B: allocator.spriteOrder (readonly number[];) @ a/outrage.ts:62; D-PAL: palettes (Readonly<{) @ a/outrage.ts:70; D-BG: registers (Readonly<Record<string, number>>… @ a/outrage.ts:75; C: animationRngSeed (number;) @ a/outrage.ts:76 | accepted as a LiveInputs config (docs/animation-integration-merged-readiness.json); not in the older triage docs |
 | MEGAHORN (224) | H_BUFFER | 0.29% | D-OAM+D-PAL+D-BG+D-TILE+C+B(first body) | E-TASK: liveTasks (readonly Readonly<{slot:number;c… @ a/megaHorn.ts:14; D-OAM: buffers (Readonly<{softwareOam:readonly unk… @ a/megaHorn.ts:15; D-PAL: palette (Readonly<{unfaded:readonly number[… @ a/megaHorn.ts:17; D-BG: registers (Readonly<Record<string,number>>;) @ a/megaHorn.ts:18; D-TILE: resources (Readonly<{hornTileBase:number;im… @ a/megaHorn.ts:20; B: spriteOrder (readonly number[]; readonly au… @ a/megaHorn.ts:22; C: animationRng (number; readonly gameplayRng:… @ a/megaHorn.ts:24 | accepted as a LiveInputs config (docs/animation-integration-merged-readiness.json); not in the older triage docs |
 | SHOCK_WAVE (351) | H_BUFFER | 0.15% | C+D-PAL+D-TILE+D-BG+D-VRAM+B(first body) | B: animationInputs:allocator.spriteOrder (sSpr… @ a/shockWave.ts:77; C: animationInputs:animationRngSeed (presentat… @ a/shockWave.ts:119; F-AFFINE: animationInputs:attackerSprite (battler spr… @ a/shockWave.ts:54; E-TASK: animationInputs:taskSlots (CreateTask slot… @ a/shockWave.ts:56; D-PAL: animationInputs:oam.paletteBlend (palette h… @ a/shockWave.ts:89; D-TILE: animationInputs:resources (OBJ tile/palette… @ a/shockWave.ts:67; D-BG: animationInputs:background (BG regs / monbg… @ a/shockWave.ts:96; D-VRAM: animationInputs:background.initialVram (BG… @ a/shockWave.ts:112 |  |
 | NIGHTMARE (171) | H_BUFFER | 0.07% | C+D-PAL+D-TILE+D-BG+F-AUDIO+B(first body) | B: animationInputs:painterOrder (sSpriteOrder… @ a/nightmare.ts:90; C: animationInputs:animationRngSeed (presentat… @ a/nightmare.ts:113; F-AFFINE: animationInputs:attackerSprite (battler spr… @ a/nightmare.ts:84; E-TASK: animationInputs:tasks (CreateTask slot / li… @ a/nightmare.ts:87; D-PAL: animationInputs:palettes (palette host / re… @ a/nightmare.ts:96; D-TILE: animationInputs:resources (OBJ tile/palette… @ a/nightmare.ts:92; D-BG: animationInputs:monBg (BG regs / monbg / BL… @ a/nightmare.ts:88; F-AUDIO: animationInputs:audio (sound task state) @ a/nightmare.ts:112 |  |
 | REVENGE (279) | H_BUFFER | 0.07% | D-OAM+D-PAL+D-BG+D-TILE+C+B(first body) | E-TASK: liveTasks (readonly Readonly<{slot:number;c… @ a/revenge.ts:19; D-OAM: buffers (Readonly<{softwareOam:readonly unk… @ a/revenge.ts:20; D-PAL: palette (Readonly<{unfaded:readonly number[… @ a/revenge.ts:22; D-BG: registers (Readonly<Record<string,number>>;) @ a/revenge.ts:23; D-TILE: resources (Readonly<{scratchTileBase:number… @ a/revenge.ts:26; B: spriteOrder (readonly number[]; readonly au… @ a/revenge.ts:28; C: animationRng (number; readonly gameplayRng:… @ a/revenge.ts:30 | accepted as a LiveInputs config (docs/animation-integration-merged-readiness.json); not in the older triage docs |
-| SKY_ATTACK (143) | H_BUFFER+H_VARIANT | 0.04% | C+D-PAL+D-TILE+D-BG+D-VRAM+B(first body) | B: animationInputs:allocator.activeOrderKeys (… @ a/skyAttack.ts:52; C: animationInputs:animationRngSeed (presentat… @ a/skyAttack.ts:60; F-AFFINE: animationInputs:attackerSprite (battler spr… @ a/skyAttack.ts:40; E-TASK: animationInputs:taskSlots (CreateTask slot… @ a/skyAttack.ts:42; D-PAL: animationInputs:palettes (palette host / re… @ a/skyAttack.ts:54; D-TILE: animationInputs:resources (OBJ tile/palette… @ a/skyAttack.ts:49; D-BG: animationInputs:background (BG regs / monbg… @ a/skyAttack.ts:55; D-VRAM: animationInputs:background.vram (BG VRAM sn… @ a/skyAttack.ts:58 | visible charge turn selected by request.turn like live Solar Beam |
 | SUPERPOWER (276) | H_BUFFER | 0.04% | D-OAM+D-PAL+D-BG+D-TILE+C+B(first body) | E-TASK: liveTasks (readonly Readonly<{slot:number;c… @ a/superpower.ts:19; D-OAM: buffers (Readonly<{softwareOam:readonly unk… @ a/superpower.ts:20; D-PAL: palette (Readonly<{unfaded:readonly number[… @ a/superpower.ts:22; D-BG: registers (Readonly<Record<string,number>>;) @ a/superpower.ts:23; D-TILE: resources (Readonly<{orbTileBase:number;met… @ a/superpower.ts:25; B: spriteOrder (readonly number[]; readonly au… @ a/superpower.ts:28; C: animationRng (number; readonly gameplayRng:… @ a/superpower.ts:30 | accepted as a LiveInputs config (docs/animation-integration-merged-readiness.json); not in the older triage docs |
 | ICE_BALL (301) | H_BUFFER+H_VARIANT | 0.11% | D-OAM+D-PAL+D-BG+D-TILE+C+X-DISABLE | D-OAM: buffers (Readonly<{ softwareOam: readonly u… @ a/iceBall.ts:22; D-PAL: palette (Readonly<{ unfaded: readonly numbe… @ a/iceBall.ts:24; D-BG: registers (Readonly<Record<string, number>>… @ a/iceBall.ts:26; D-TILE: resources (Readonly<{ chunkTileBase: number… @ a/iceBall.ts:27; E-TASK: tasks (readonly Readonly<{ slot: number; ca… @ a/iceBall.ts:29; C: initialPresentationRng (number; readonly ga… @ a/iceBall.ts:32; X-DISABLE: counter 0..4 = rolloutTimerStartValue - rol… @ rom/src/battle_anim_ice.c:1613, a/iceBall.ts:9 | accepted as a LiveInputs config (docs/animation-integration-merged-readiness.json); not in the older triage docs |
 | FLATTER (260) | H_BUFFER | 0.08% | C+D-PAL+D-TILE+D-BG+D-OAM+F-AUDIO+B(first body) | B: animationInputs:spriteOrder (sSpriteOrder /… @ a/flatter.ts:87; C: animationInputs:animationRng (presentation… @ a/flatter.ts:120; F-AFFINE: animationInputs:attackerArt (battler sprite… @ a/flatter.ts:79; E-TASK: animationInputs:taskSlots (CreateTask slot… @ a/flatter.ts:86; D-PAL: animationInputs:palette (palette host / res… @ a/flatter.ts:94; D-TILE: animationInputs:spotlight (38 confetti + sp… @ a/flatter.ts:81; D-BG: animationInputs:registers (BG regs / monbg… @ a/flatter.ts:99; D-OAM: animationInputs:buffers (OAM/affine buffers) @ a/flatter.ts:88; F-AUDIO: animationInputs:audio (sound task state) @ a/flatter.ts:109 |  |
@@ -128,15 +124,15 @@ Ranked by remaining moves that become fully unlocked when that provider alone is
 | X-SWITCH | +1 | 0.48% | 1 | 0.48% | new flow owner (switch / forced-switch presentation; shares the pending 'actual switches' graphics ownership). separate S10x program: forced replacement and summaries are explicitly pending in docs/animation-integration-live-status.json | BATON_PASS |
 | X-SUBST | +1 | 0.22% | 1 | 0.22% | persistent Substitute doll sprite state | SUBSTITUTE |
 | E-OUT | +1 | 0.22% | 3 | 0.43% | per-move plumbing from resolution (secondary-effect / HP / stale-power values). exact outcome data; no RNG ownership | ENDEAVOR |
-| C | +1 | 0.22% | 25 | 2.23% | new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4). NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact | METEOR_MASH |
+| C | +1 | 0.22% | 21 | 2.08% | new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4). NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact | METEOR_MASH |
 | X-AGE | +1 | 0.11% | 1 | 0.11% | accepted evidence lacks the early source ages (age basis) | EXTREME_SPEED |
 | D-SCAN | +1 | 0.04% | 3 | 0.18% | gScanlineEffect buffers | MEMENTO |
-| A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio) | +1 | 0.04% | 24 | 1.86% | new large host (docs/animation-integration-readiness.md A6). only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today | MEMENTO |
-| D-PAL | +0 | 0.00% | 20 | 1.64% | extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves). exact for audited plan rows from a known entry; actual status animations/switches invalidate | - |
-| D-TILE | +0 | 0.00% | 22 | 1.82% | OBJ tile / palette-bank resource allocator | - |
-| D-BG | +0 | 0.00% | 21 | 1.75% | BG regs / BLDCNT / monbg state | - |
+| A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio) | +1 | 0.04% | 20 | 1.71% | new large host (docs/animation-integration-readiness.md A6). only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today | MEMENTO |
+| D-PAL | +0 | 0.00% | 16 | 1.49% | extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves). exact for audited plan rows from a known entry; actual status animations/switches invalidate | - |
+| D-TILE | +0 | 0.00% | 18 | 1.67% | OBJ tile / palette-bank resource allocator | - |
+| D-BG | +0 | 0.00% | 18 | 1.64% | BG regs / BLDCNT / monbg state | - |
 | D-OAM | +0 | 0.00% | 9 | 0.99% | software/hardware OAM + affine buffer host | - |
-| D-VRAM | +0 | 0.00% | 5 | 0.55% | BG VRAM snapshots | - |
+| D-VRAM | +0 | 0.00% | 4 | 0.51% | BG VRAM snapshots | - |
 | F-AUDIO | +0 | 0.00% | 6 | 0.55% | sound task / pan / current-song state | - |
 | X-DISABLE | +0 | 0.00% | 2 | 0.15% | add a DisableStruct counter snapshot to the MOVE_ANIMATION request (rules context already holds the counters). exact (presentation-only copy of rules state) | - |
 | X-TWOTURN | +0 | 0.00% | 1 | 0.19% | hidden-battler state across the two turns in the field art view. exact once the semi-invulnerable state is rendered | - |
@@ -149,16 +145,16 @@ Greedy build order (each step = the provider/bundle with the most newly unlocked
 | 2 | X-SUBST | +1 | 0.22% | 2 | SUBSTITUTE |
 | 3 | E-OUT | +1 | 0.22% | 3 | ENDEAVOR |
 | 4 | C | +1 | 0.22% | 4 | METEOR_MASH |
-| 5 | A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio) | +22 | 1.71% | 26 | BONEMERANG, ERUPTION, EXTRASENSORY, FLATTER, HYPER_VOICE, LUSTER_PURGE, MACH_PUNCH, MEGAHORN, MEMENTO, NIGHTMARE, OUTRAGE, PSYWAVE, RAPID_SPIN, REVENGE, SAND_TOMB, SHEER_COLD, SHOCK_WAVE, SKILL_SWAP, SKY_ATTACK, SMOG, SNORE, SUPERPOWER |
-| 6 | X-DISABLE | +2 | 0.15% | 28 | ICE_BALL, SPIT_UP |
-| 7 | X-TWOTURN | +1 | 0.19% | 29 | DIVE |
-| 8 | X-AGE | +1 | 0.11% | 30 | EXTREME_SPEED |
-| 9 | D-PAL | +0 | 0.00% | 30 | - |
-| 10 | D-TILE | +0 | 0.00% | 30 | - |
-| 11 | D-BG | +0 | 0.00% | 30 | - |
-| 12 | D-OAM | +0 | 0.00% | 30 | - |
-| 13 | D-VRAM | +0 | 0.00% | 30 | - |
-| 14 | D-SCAN | +0 | 0.00% | 30 | - |
+| 5 | A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio) | +18 | 1.56% | 22 | BONEMERANG, ERUPTION, EXTRASENSORY, FLATTER, LUSTER_PURGE, MACH_PUNCH, MEGAHORN, MEMENTO, NIGHTMARE, OUTRAGE, PSYWAVE, RAPID_SPIN, REVENGE, SHEER_COLD, SHOCK_WAVE, SKILL_SWAP, SNORE, SUPERPOWER |
+| 6 | X-DISABLE | +2 | 0.15% | 24 | ICE_BALL, SPIT_UP |
+| 7 | X-TWOTURN | +1 | 0.19% | 25 | DIVE |
+| 8 | X-AGE | +1 | 0.11% | 26 | EXTREME_SPEED |
+| 9 | D-PAL | +0 | 0.00% | 26 | - |
+| 10 | D-TILE | +0 | 0.00% | 26 | - |
+| 11 | D-BG | +0 | 0.00% | 26 | - |
+| 12 | D-OAM | +0 | 0.00% | 26 | - |
+| 13 | D-VRAM | +0 | 0.00% | 26 | - |
+| 14 | D-SCAN | +0 | 0.00% | 26 | - |
 
 Notes:
 - **Random2 is the keystone but non-exact.** It touches the most remaining moves and, after the allocator-v2 and A6 steps, unlocks 1 more; production cannot reconstruct `gRng2Value` (it advances every rendered frame and with every earlier animation's draws, `docs/visual-randomness-prep.md` s4). A presentation LCG is ROM-faithful in distribution and draw order only; the claim boundary (a non-exact presentation class beside the exact one) must be decided before building it. It cannot make a move exact on its own.

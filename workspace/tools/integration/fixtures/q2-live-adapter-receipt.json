@@ -1,0 +1,571 @@
+{
+ "schema": "q2-live-adapter-receipt/v1",
+ "testedCodeCommit": "8fa34f420d872d39e8186a9c27582e05c8384d3a",
+ "srcTree": "f16cabf6ad8c62f48be4483eefe0fcfb7102acb7",
+ "scope": "Hyper Voice 304, Smog 123, Sand Tomb 328, Sky Attack 143 charge body; Snore 173 and the Sky Attack strike are NOT wired (no exact order lend)",
+ "summary": {
+  "fixtures": 29,
+  "rows": 4889,
+  "allExactTwiceFresh": true
+ },
+ "rows": [
+  {
+   "fixture": "tools/integration/fixtures/q2-live/hyper-voice-alt-opponent-loudred-golem.json",
+   "rows": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "7ced168821b8fbd8e18ab6989f94271b55750c5ec5172efdf3ff53c11c26dfac"
+    },
+    {
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "7ced168821b8fbd8e18ab6989f94271b55750c5ec5172efdf3ff53c11c26dfac"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/hyper-voice-alt-player-loudred-golem.json",
+   "rows": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "97cb71692c37765df2e8c338a2fa8d7bedb77b2a93fa79637b7ee301ff437ef1"
+    },
+    {
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "97cb71692c37765df2e8c338a2fa8d7bedb77b2a93fa79637b7ee301ff437ef1"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/hyper-voice-extra-opponent-exploud-golbat.json",
+   "rows": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "aaa81869a6fe62b92753388823830f93beb6bfdc61cf08160be6d4e0314474dc"
+    },
+    {
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "aaa81869a6fe62b92753388823830f93beb6bfdc61cf08160be6d4e0314474dc"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/hyper-voice-extra-opponent-loudred-snorlax.json",
+   "rows": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "f9b969be4af631dba374a1380512751ad33994f30654ca68544b0dfc47574972"
+    },
+    {
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "f9b969be4af631dba374a1380512751ad33994f30654ca68544b0dfc47574972"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/hyper-voice-extra-player-exploud-golbat.json",
+   "rows": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "56f9af883350fa146c36520cba3a4c47dfb0e3ac1c6d323163b31f23fda02636"
+    },
+    {
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "56f9af883350fa146c36520cba3a4c47dfb0e3ac1c6d323163b31f23fda02636"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/hyper-voice-extra-player-loudred-snorlax.json",
+   "rows": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "896f42a31e324168c979caea5830039b422b74ba6bd310d1fc3eabde5aa2ccc4"
+    },
+    {
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "896f42a31e324168c979caea5830039b422b74ba6bd310d1fc3eabde5aa2ccc4"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/hyper-voice-opponent-exploud-player-slowking.json",
+   "rows": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "8f4aace21bf1ae986545ba1566703c07c1ba4ce89053b39485f9d77adf02ced9"
+    },
+    {
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "8f4aace21bf1ae986545ba1566703c07c1ba4ce89053b39485f9d77adf02ced9"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/hyper-voice-player-exploud-opponent-slowking.json",
+   "rows": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "1c35ff10476ade027d46f0a846a3dc4552841f36cc028e5795aa5d19bf36110b"
+    },
+    {
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "1c35ff10476ade027d46f0a846a3dc4552841f36cc028e5795aa5d19bf36110b"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/sand-tomb-alt-opponent-sandslash-golem.json",
+   "rows": 123,
+   "expectedDuration": 123,
+   "runs": [
+    {
+     "exactRows": 123,
+     "residualPixels": 0,
+     "digest": "4f822929dd98c3c94ee0530382cb9fccb2ab1fa3c8e8449d2ba769449b4a6551"
+    },
+    {
+     "exactRows": 123,
+     "residualPixels": 0,
+     "digest": "4f822929dd98c3c94ee0530382cb9fccb2ab1fa3c8e8449d2ba769449b4a6551"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/sand-tomb-alt-player-sandslash-golem.json",
+   "rows": 123,
+   "expectedDuration": 123,
+   "runs": [
+    {
+     "exactRows": 123,
+     "residualPixels": 0,
+     "digest": "9ace4d27a8843b708af4723690fee7a2cd53c285117a1c33c1aa4af587f43d8a"
+    },
+    {
+     "exactRows": 123,
+     "residualPixels": 0,
+     "digest": "9ace4d27a8843b708af4723690fee7a2cd53c285117a1c33c1aa4af587f43d8a"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/sand-tomb-extra-opponent-sandslash-snorlax.json",
+   "rows": 123,
+   "expectedDuration": 123,
+   "runs": [
+    {
+     "exactRows": 123,
+     "residualPixels": 0,
+     "digest": "28bb4928d883353cd1654692a9ef2c6e9bc69cc3c47121c5495c6192b9ad7ebf"
+    },
+    {
+     "exactRows": 123,
+     "residualPixels": 0,
+     "digest": "28bb4928d883353cd1654692a9ef2c6e9bc69cc3c47121c5495c6192b9ad7ebf"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/sand-tomb-extra-player-sandslash-snorlax.json",
+   "rows": 123,
+   "expectedDuration": 123,
+   "runs": [
+    {
+     "exactRows": 123,
+     "residualPixels": 0,
+     "digest": "1d35559f3cb40d9b5b6c3486bac265cd0bdda4743fea03019640b080e1b3e2a6"
+    },
+    {
+     "exactRows": 123,
+     "residualPixels": 0,
+     "digest": "1d35559f3cb40d9b5b6c3486bac265cd0bdda4743fea03019640b080e1b3e2a6"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/sand-tomb-opponent-dugtrio-player-onix.json",
+   "rows": 123,
+   "expectedDuration": 123,
+   "runs": [
+    {
+     "exactRows": 123,
+     "residualPixels": 0,
+     "digest": "cf96d1531e6bc91c031dd331d927f3b9af9ef7a3f440488a6d5d2e60575c75d7"
+    },
+    {
+     "exactRows": 123,
+     "residualPixels": 0,
+     "digest": "cf96d1531e6bc91c031dd331d927f3b9af9ef7a3f440488a6d5d2e60575c75d7"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/sand-tomb-player-dugtrio-opponent-onix.json",
+   "rows": 123,
+   "expectedDuration": 123,
+   "runs": [
+    {
+     "exactRows": 123,
+     "residualPixels": 0,
+     "digest": "a69faa578fb44b3cca9ebe379a1ee9f14242c74c59affb36e147727600e20caa"
+    },
+    {
+     "exactRows": 123,
+     "residualPixels": 0,
+     "digest": "a69faa578fb44b3cca9ebe379a1ee9f14242c74c59affb36e147727600e20caa"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/sky-attack-alt-opponent-pidgeot-golem-charge.json",
+   "rows": 148,
+   "expectedDuration": 148,
+   "runs": [
+    {
+     "exactRows": 148,
+     "residualPixels": 0,
+     "digest": "92d3eaf7727a776b64d9ea8a6e254ca631a39714fe8105a0325a98884527cffb"
+    },
+    {
+     "exactRows": 148,
+     "residualPixels": 0,
+     "digest": "92d3eaf7727a776b64d9ea8a6e254ca631a39714fe8105a0325a98884527cffb"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/sky-attack-alt-player-pidgeot-golem-charge.json",
+   "rows": 148,
+   "expectedDuration": 148,
+   "runs": [
+    {
+     "exactRows": 148,
+     "residualPixels": 0,
+     "digest": "6fc1b328468c9ca38a826de87d616e1a824d82bfa72c860a01dd5d9daa74a2b4"
+    },
+    {
+     "exactRows": 148,
+     "residualPixels": 0,
+     "digest": "6fc1b328468c9ca38a826de87d616e1a824d82bfa72c860a01dd5d9daa74a2b4"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/sky-attack-extra-opponent-fearow-golbat-charge.json",
+   "rows": 148,
+   "expectedDuration": 148,
+   "runs": [
+    {
+     "exactRows": 148,
+     "residualPixels": 0,
+     "digest": "422addfe2cd8f17b2b32757c039a0cf7fe7ec54cc3a75127f2e7c9a71f5afa7d"
+    },
+    {
+     "exactRows": 148,
+     "residualPixels": 0,
+     "digest": "422addfe2cd8f17b2b32757c039a0cf7fe7ec54cc3a75127f2e7c9a71f5afa7d"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/sky-attack-extra-opponent-pidgeot-snorlax-charge.json",
+   "rows": 148,
+   "expectedDuration": 148,
+   "runs": [
+    {
+     "exactRows": 148,
+     "residualPixels": 0,
+     "digest": "2ccc6f7616f50a11f9612ce6bcb240efead6fae380fd303582331cfa0b875d5b"
+    },
+    {
+     "exactRows": 148,
+     "residualPixels": 0,
+     "digest": "2ccc6f7616f50a11f9612ce6bcb240efead6fae380fd303582331cfa0b875d5b"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/sky-attack-extra-player-fearow-golbat-charge.json",
+   "rows": 148,
+   "expectedDuration": 148,
+   "runs": [
+    {
+     "exactRows": 148,
+     "residualPixels": 0,
+     "digest": "da796a4633517d76c63f9567fffbf728fc52274afc5e84f1995ef465bb6dbae9"
+    },
+    {
+     "exactRows": 148,
+     "residualPixels": 0,
+     "digest": "da796a4633517d76c63f9567fffbf728fc52274afc5e84f1995ef465bb6dbae9"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/sky-attack-extra-player-pidgeot-snorlax-charge.json",
+   "rows": 148,
+   "expectedDuration": 148,
+   "runs": [
+    {
+     "exactRows": 148,
+     "residualPixels": 0,
+     "digest": "29ee8b98d6dd7bf3946a616a82bc960b80296930906c49e72bc4aee216fc346f"
+    },
+    {
+     "exactRows": 148,
+     "residualPixels": 0,
+     "digest": "29ee8b98d6dd7bf3946a616a82bc960b80296930906c49e72bc4aee216fc346f"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/sky-attack-opponent-fearow-player-shuckle-charge.json",
+   "rows": 148,
+   "expectedDuration": 148,
+   "runs": [
+    {
+     "exactRows": 148,
+     "residualPixels": 0,
+     "digest": "f6ee2511e2b2fd762c34b4edc98ac68656e8f62e96b325d9e1ae06c991cf8c4a"
+    },
+    {
+     "exactRows": 148,
+     "residualPixels": 0,
+     "digest": "f6ee2511e2b2fd762c34b4edc98ac68656e8f62e96b325d9e1ae06c991cf8c4a"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/sky-attack-player-fearow-opponent-shuckle-charge.json",
+   "rows": 148,
+   "expectedDuration": 148,
+   "runs": [
+    {
+     "exactRows": 148,
+     "residualPixels": 0,
+     "digest": "0afd1e3a83b89772955c719879e5bf183d16efde769b8aa3ae1ff1c75312b828"
+    },
+    {
+     "exactRows": 148,
+     "residualPixels": 0,
+     "digest": "0afd1e3a83b89772955c719879e5bf183d16efde769b8aa3ae1ff1c75312b828"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/smog-alt-opponent-weezing-golem.json",
+   "rows": 305,
+   "expectedDuration": 305,
+   "runs": [
+    {
+     "exactRows": 305,
+     "residualPixels": 0,
+     "digest": "50cfd934b4d17b62fdafb7b3901861ab8c43291bda4f1100c98e0b0238f0f400"
+    },
+    {
+     "exactRows": 305,
+     "residualPixels": 0,
+     "digest": "50cfd934b4d17b62fdafb7b3901861ab8c43291bda4f1100c98e0b0238f0f400"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/smog-alt-player-weezing-golem.json",
+   "rows": 305,
+   "expectedDuration": 305,
+   "runs": [
+    {
+     "exactRows": 305,
+     "residualPixels": 0,
+     "digest": "29834b40f3dcb3149f4a1491b3cd88a930f27844517be37112dae3c2d9be51c0"
+    },
+    {
+     "exactRows": 305,
+     "residualPixels": 0,
+     "digest": "29834b40f3dcb3149f4a1491b3cd88a930f27844517be37112dae3c2d9be51c0"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/smog-extra-opponent-magby-snorlax.json",
+   "rows": 305,
+   "expectedDuration": 305,
+   "runs": [
+    {
+     "exactRows": 305,
+     "residualPixels": 0,
+     "digest": "0884d0708e1bc76d4077d58f244ce679ae7c6e6c5bb149a7ed8e3d7a45f4df0f"
+    },
+    {
+     "exactRows": 305,
+     "residualPixels": 0,
+     "digest": "0884d0708e1bc76d4077d58f244ce679ae7c6e6c5bb149a7ed8e3d7a45f4df0f"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/smog-extra-opponent-weezing-golbat.json",
+   "rows": 305,
+   "expectedDuration": 305,
+   "runs": [
+    {
+     "exactRows": 305,
+     "residualPixels": 0,
+     "digest": "8ae32a263a60bfe5e0959e3bd8db00eecffb617705b074f59679f938cbbf3811"
+    },
+    {
+     "exactRows": 305,
+     "residualPixels": 0,
+     "digest": "8ae32a263a60bfe5e0959e3bd8db00eecffb617705b074f59679f938cbbf3811"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/smog-extra-player-magby-snorlax.json",
+   "rows": 305,
+   "expectedDuration": 305,
+   "runs": [
+    {
+     "exactRows": 305,
+     "residualPixels": 0,
+     "digest": "ef6277d66b6ea9feced682483ac8c7cddcb99c8356796134c0c110e313fa15eb"
+    },
+    {
+     "exactRows": 305,
+     "residualPixels": 0,
+     "digest": "ef6277d66b6ea9feced682483ac8c7cddcb99c8356796134c0c110e313fa15eb"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/smog-opponent-magby-player-onix.json",
+   "rows": 305,
+   "expectedDuration": 305,
+   "runs": [
+    {
+     "exactRows": 305,
+     "residualPixels": 0,
+     "digest": "6dbbfbb64f8658d7495a8357a86ba5f58803e8cf7f8919c94e36ffb9cbebd6a4"
+    },
+    {
+     "exactRows": 305,
+     "residualPixels": 0,
+     "digest": "6dbbfbb64f8658d7495a8357a86ba5f58803e8cf7f8919c94e36ffb9cbebd6a4"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/smog-player-magby-opponent-onix.json",
+   "rows": 305,
+   "expectedDuration": 305,
+   "runs": [
+    {
+     "exactRows": 305,
+     "residualPixels": 0,
+     "digest": "309de772738dd314bd792f6279a85047f8eaf181ecce1063be92aaf1b0bbe315"
+    },
+    {
+     "exactRows": 305,
+     "residualPixels": 0,
+     "digest": "309de772738dd314bd792f6279a85047f8eaf181ecce1063be92aaf1b0bbe315"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  }
+ ],
+ "gates": {
+  "fullSuite": "1543 files passed / 44 skipped, 12606 tests passed / 223 skipped",
+  "build": "ok",
+  "smoke": "448/448",
+  "differential": "fight-submenu + battle1-postwin-next-prompt + presentation-rng-playable-live-bodies-seeded-on: 624 captures byte-identical vs 338a03df5",
+  "shadowScan": "523 rows / 0 mismatches"
+ }
+}

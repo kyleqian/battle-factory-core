@@ -1,0 +1,43 @@
+{
+ "schema": "q2-live-adapter-fixture/v1",
+ "move": "SKY_ATTACK",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/q2-sky-attack-extra-player-fearow-golbat.json",
+ "denseWindow": {
+  "startFrame": 50,
+  "endFrame": 197
+ },
+ "windowSource": "window = [activation, activation + 148 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "FEAROW",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015475,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 140,
+  "playerMaxHp": 140,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "messageLines": [
+  "",
+  ""
+ ]
+}

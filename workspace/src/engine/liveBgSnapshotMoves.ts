@@ -26,12 +26,12 @@ export interface LiveBgSnapshotArgs {
 }
 
 /** The first-body BG register state S0 (prep16 s0.3: 64/64 first-body activations, both sides, alternates, shiny). */
-const S0_REGISTERS: Readonly<Record<string, number>> = Object.freeze({
+export const S0_REGISTERS: Readonly<Record<string, number>> = Object.freeze({
   dispcnt: 0xbf40, bg0cnt: 0x9800, bg1cnt: 0x9c00, bg2cnt: 0x5e00, bg3cnt: 0x5a0b,
   bg0hofs: 0, bg0vofs: 0, bg1hofs: 0, bg1vofs: 0, bg2hofs: 0, bg2vofs: 0, bg3hofs: 0, bg3vofs: 0,
   win0h: 240, win0v: 161, winin: 0x3f3f, winout: 0x3f3f, mosaic: 0, bldcnt: 0, bldalpha: 0, bldy: 0,
 });
-const ZERO_BG_VALUES: Readonly<Record<string, number>> = Object.freeze({
+export const ZERO_BG_VALUES: Readonly<Record<string, number>> = Object.freeze({
   gBattle_BG0_X: 0, gBattle_BG0_Y: 0, gBattle_BG1_X: 0, gBattle_BG1_Y: 0,
   gBattle_BG2_X: 0, gBattle_BG2_Y: 0, gBattle_BG3_X: 0, gBattle_BG3_Y: 0,
 });
@@ -45,7 +45,7 @@ export const KNOWN_ENTRY_NON_BATTLER_SPRITES = Object.freeze([
   { slot: 63, attr: [72, 49342, 20572], subpriority: 1 },
 ] as const);
 
-const battlerSprite = (side: Side, anchors: LiveBgSnapshotAnchors) => {
+export const battlerSprite = (side: Side, anchors: LiveBgSnapshotAnchors) => {
   const { x, y } = anchors.spriteCenter, { x2, y2 } = anchors.frontIdleRest;
   return Object.freeze({
     slot: side === "player" ? 6 : 8, x, y, x2, y2,

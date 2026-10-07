@@ -1,0 +1,43 @@
+{
+ "schema": "q2-live-adapter-fixture/v1",
+ "move": "SKY_ATTACK",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep25-sky-attack-alt-opponent-pidgeot-golem.json",
+ "denseWindow": {
+  "startFrame": 50,
+  "endFrame": 197
+ },
+ "windowSource": "window = [activation, activation + 148 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "PIDGEOT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703675,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 187,
+  "playerMaxHp": 187,
+  "opponentHp": 158,
+  "opponentMaxHp": 158,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "messageLines": [
+  "",
+  ""
+ ]
+}

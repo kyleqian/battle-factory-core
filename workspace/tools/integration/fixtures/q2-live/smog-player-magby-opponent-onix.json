@@ -1,0 +1,36 @@
+{
+ "schema": "q2-live-adapter-fixture/v1",
+ "move": "SMOG",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-smog-player-magby-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 69,
+  "endFrame": 373
+ },
+ "windowSource": "window = [activation, activation + 305 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "MAGBY",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015631,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 152,
+  "playerMaxHp": 152,
+  "opponentHp": 142,
+  "opponentMaxHp": 142,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}
