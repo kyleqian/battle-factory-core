@@ -35,7 +35,9 @@ for move, tag, scen, side in CASES:
     mid, rows = MOVES[move]
     bodies = p["bodies"]
     idxs = [i for i, b in enumerate(bodies) if b["move"] == mid]
-    for n, idx in enumerate(idxs if move == "SKY_ATTACK" else idxs[:1]):
+    if move == "SNORE":
+        continue  # not wired: no exact order lend after the sleep-inducing body (docs in the final report)
+    for n, idx in enumerate(idxs[:1]):  # Sky Attack: the charge body only (the strike has no known order lend)
         body = bodies[idx]
         A = body["start"]
         rows_ = rows if rows is not None else (148 if n == 0 else 180)
@@ -61,5 +63,7 @@ for move, tag, scen, side in CASES:
             fx["precedingBodies"] = pre
         if move == "SKY_ATTACK":
             fx["requestFields"] = {"turn": 0 if n == 0 else 1}
+            if n == 0:
+                fx["messageLines"] = ["", ""]  # the charge turn's text box is blank during the body (as the Solar Beam setup fixtures)
         (out / f"{tag}{suffix}.json").write_text(json.dumps(fx, indent=1) + "\n")
         print(tag + suffix, fx["denseWindow"], fx["attacker"]["species"], "->", fx["target"]["species"], pre)

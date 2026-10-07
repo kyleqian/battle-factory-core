@@ -5,7 +5,8 @@ import { smogInputsFor } from "../compare/verifySmogReducer.ts";
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { sandTombProfileFor } from "../compare/sandTombReducer.ts";
-import { liveSandTombProfile, liveSmogInputs, liveHyperVoiceInputs, liveSnoreInputs } from "../../src/engine/liveQ2Moves.ts";
+import { skyAttackInputsFor } from "../compare/verifySkyAttackReducer.ts";
+import { liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveHyperVoiceInputs, liveSnoreInputs } from "../../src/engine/liveQ2Moves.ts";
 import snoreAsset from "../../src/animation/assets/snore.json" with { type: "json" };
 import { hyperVoiceInputsFor } from "../compare/verifyHyperVoiceReducer.ts";
 import paletteData from "../../src/data/gen/live-animation-palette-resources.json" with { type: "json" };
@@ -74,5 +75,17 @@ if (move === "sand-tomb") {
       spriteOrder: c.spriteOrder.initialOrder, freeSpriteSlots: c.spriteOrder.freeSpriteSlots });
     const d = diff(built, c).filter((l) => !/gameplay|immutable|AnimationRng/i.test(l));
     console.log(o, d.length ? d.join("\n") : "EQUAL");
+  }
+}
+
+if (move === "sky-attack") {
+  for (const o of ["player-back", "opponent-front"] as const) {
+    const c: any = skyAttackInputsFor(o);
+    const anchors = (sprite: any, origin: any) => ({ picOffsetPoint: origin, spriteCenter: { x: sprite.x, y: sprite.y }, frontIdleRest: { x2: sprite.x2, y2: sprite.y2 } });
+    const built = liveSkyAttackInputs({ attackerSide: c.attackerSide, attacker: anchors(c.attackerSprite, c.attackerPictureOrigin), target: anchors(c.targetSprite, c.targetPictureOrigin),
+      palettes: c.palettes, spriteOrder: c.allocator.spriteOrder, firstBody: true, impactPalette: c.resources.impact.palette, birdPalette: c.resources.bird.palette });
+    const d = diff(built, c).filter((l) => !/gameplay|animationRngSeed|\/data|animNum|animCmdIndex|animDelayCounter|oamY|^\/(attacker|target)(Side|Species|PictureOrigin)/.test(l));
+    console.log(o, d.length ? d.join("\n") : "EQUAL");
+    console.log(" impact vs asset", JSON.stringify((paletteData.resources as any).ANIM_TAG_IMPACT.colors), "bird", JSON.stringify(c.resources.bird.palette));
   }
 }

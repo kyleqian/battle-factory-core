@@ -144,3 +144,31 @@ export function liveSandTombProfile(args: Omit<LiveQ2Args, "firstBody" | "target
     shakeTaskSlot: 0, shakeTaskPriority: 254, startingAnimationRng: 0, gameplayRng: 0,
   };
 }
+
+/**
+ * `Move_SKY_ATTACK` (143; setup = charge turn 148 rows, unleash = strike 180 rows, selected by `request.turn & 1`): one input for both
+ * bodies. Task slots, the bird (the healthbox sprite 63 key), the impact (tile slot 6 / palette 7 / tile 305) and bird (slot 7 / bank 8 /
+ * tile 537) allocations are the known-entry constants (equal across the four prep25 scenarios); the monbg BG / control by attacker side.
+ * Registers: S0 for the first body (the charge), WIN0 cleared once an earlier body ran (the strike; prep25 B.5).
+ */
+export function liveSkyAttackInputs(args: LiveQ2Args & { impactPalette: readonly number[]; birdPalette: readonly number[] }): Inputs {
+  const { attackerSide, attacker, target } = args, targetSide = opposite(attackerSide), player = attackerSide === "player";
+  const attackerSprite = battler(attackerSide, attacker), targetSprite = battler(targetSide, target);
+  return {
+    attackerSprite, targetSprite,
+    taskSlots: { monbg: 1, blendSetup: 0, shake: 2, sound: 3, fade: 3, blendUnleash: 0, birdShake: 0, slidingBg: 2, clearMonbg: 0, fadeBg: 0 },
+    bird: { slot: 63, matrixNum: 0, attr: [72, 49342, 20572], subpriority: 1, oamPriority: 0, flags: 1 },
+    resources: {
+      impact: { tag: 10135, tileSlot: 6, paletteAllocatorSlot: 7, paletteBank: 7, tileRange: [305, 16], palette: args.impactPalette },
+      bird: { tag: 10284, tileSlot: 7, paletteAllocatorSlot: 8, paletteBank: 8, tileRange: [537, 64], palette: args.birdPalette },
+    },
+    allocator: { matrixBitmap: 6, spriteOrder: args.spriteOrder, activeOrderKeys: orderKeys(attackerSide, attackerSprite.attr[0], targetSprite.attr[0]) },
+    palettes: { unfaded: args.palettes.unfaded, faded: args.palettes.faded, hardware: args.palettes.hardware },
+    background: {
+      values: ZERO_BG_VALUES, registers: registersFor(args.firstBody),
+      monbg: player ? { bg: 1, unleashBg: 2, activeCnt: 0x5c02, paletteBank: 9 } : { bg: 2, unleashBg: 1, activeCnt: 0x5e02, paletteBank: 8 },
+      vram: {},
+    },
+    animationRngSeed: 0, gameplayRng: null,
+  };
+}

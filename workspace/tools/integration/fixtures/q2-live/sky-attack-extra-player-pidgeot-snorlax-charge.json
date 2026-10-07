@@ -35,5 +35,9 @@
  },
  "requestFields": {
   "turn": 0
- }
+ },
+ "messageLines": [
+  "",
+  ""
+ ]
 }
