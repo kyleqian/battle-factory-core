@@ -96,7 +96,7 @@ shinysteelixA-pursuit-opponent-beedrill-player-shuckle	body0 orig(228, 77, 179) 
 shinysteelixA-fury-cutter-counter1-opponent-grovyle-player-blissey	body0 orig(210, 82, 124) sw(210, 82, 124) acc[82,124]->[82,124] rng2 2958200064->2958200064 len 42/42
 onixA-will-o-wisp-player-plusle-opponent-shuckle	body0 orig(261, 76, 289) sw(261, 74, 287) acc[76,289]->[74,287] rng2 370756553->1989536647 len 213/21
 onixA-pursuit-player-beedrill-opponent-shuckle	body0 orig(228, 73, 175) sw(228, 69, 171) acc[73,175]->[69,171] rng2 3854290936->2566797524 len 102/102
-onixA-fury-cutter-counter1-player-grovyle-opponent-blissey	body0 orig(210, 78, 120) sw(210, 75, 117) acc[78,120]->[75,117] rng2 1262958118->957178605 
+onixA-fury-cutter-counter1-player-grovyle-opponent-blissey	body0 orig(210, 78, 120) sw(210, 75, 117) acc[78,120]->[75,117] rng2 1262958118->957178605
 onixA-will-o-wisp-opponent-plusle-player-shuckle	body0 orig(261, 80, 292) sw(261, 78, 290) acc[80,292]->[78,290] rng2 3668811069->119564722 len 212/21
 onixA-pursuit-opponent-beedrill-player-shuckle	body0 orig(228, 77, 179) sw(228, 73, 175) acc[77,179]->[73,175] rng2 1194721953->957178605 len 102/102
 onixA-fury-cutter-counter1-opponent-grovyle-player-blissey	body0 orig(210, 82, 124) sw(210, 79, 121) acc[82,124]->[79,121] rng2 2958200064->1262958118
