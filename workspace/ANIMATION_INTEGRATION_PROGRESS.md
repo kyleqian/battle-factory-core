@@ -135,6 +135,14 @@
   fixtures 0 px twice fresh; worker gates 1,544 files / 12,618 tests, build. Supervisor: reran 7 #150 / Curse rows +
   2 Sheer Cold fixtures 0 px r1 == r2; differential 389/389; union typecheck, smoke, 10 files 218/218. Receipt
   `fix150-live-receipt.json`.
+- prep28 (side, `149b62374`, new files only): 94 (move, side) cells lack production order plans (~16.3% of weighted
+  uses; ranked in `fixtures/prep28/ranked-gaps.json`); 14 new EXACT-PLAN rows (Sleep Powder both sides, Thunderbolt
+  opponent, 95, 78 opponent, 352, 337, 309, 348) via synthetic dense-rank words for y ties; Sky Attack charge / strike
+  plans differ (host must key the strike by request.turn). With the rows: corpus replay known edges 1210 -> 1285 (0
+  mismatches), Snore after Sleep Powder known, route scans 140 -> 149 of 317 later bodies; the named declined routes
+  stay declined on other causes (Sand-Attack 28:opponent, TURN_TRAP / Flatter, Confusion status). Rows not yet in
+  production. Supervisor: `prep28Run.sh` with a fresh OUT — 0 differing probe pairs, replays reproduced, receipts
+  unchanged.
 
 ## 2026-10-06 (day, wind-down) — D3 implemented: 218 -> 226 exact + 10 faithful-random live adapters
 
