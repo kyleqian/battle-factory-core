@@ -21,8 +21,8 @@ import { snoreInputsFor } from "../../tools/compare/verifySnoreReducer.ts";
 const DIR = "tools/integration/fixtures/q2-live";
 const fixtureAt = (name: string) => JSON.parse(readFileSync(`${DIR}/${name}.json`, "utf8")) as Fixture;
 const NAMES = readdirSync(DIR).filter((n) => n.endsWith(".json")).map((n) => n.slice(0, -5)).sort();
-const IDS = { HYPER_VOICE: 304, SMOG: 123, SAND_TOMB: 328, SKY_ATTACK: 143 } as const;
-const ROWS = { 304: 104, 123: 305, 328: 123, 143: 148 } as const;
+const IDS = { HYPER_VOICE: 304, SMOG: 123, SAND_TOMB: 328, SKY_ATTACK: 143, SNORE: 173 } as const;
+const ROWS = { 304: 104, 123: 305, 328: 123, 143: 148, 173: 69 } as const;
 const idOf = (f: Fixture) => IDS[f.move as keyof typeof IDS];
 const rowsOf = (name: string, f: Fixture) => name.endsWith("-strike") ? 180 : ROWS[idOf(f)];
 const effectOf = (f: Fixture, age = 0) => {
@@ -35,12 +35,11 @@ const configOf = (f: Fixture, age = 0, mutate?: (r: BattleMoveAnimationRequest) 
 };
 
 describe("live Q2 registration", () => {
-  it("Hyper Voice, Smog, Sand Tomb and the Sky Attack charge + strike are scoped-exact; Snore is not wired; durations are the prep25 constants", () => {
-    for (const id of [304, 123, 328, 143]) {
+  it("Hyper Voice, Smog, Sand Tomb, Snore and the Sky Attack charge + strike are scoped-exact; durations are the prep25 constants", () => {
+    for (const id of [304, 123, 328, 143, 173]) {
       expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).toContain(id);
       expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[id]).toBe(0);
     }
-    expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).not.toContain(173);
     for (const attacker of [0, 1] as const) {
       const base = { attacker, target: (1 - attacker) as 0 | 1, power: 0, damage: 0, friendship: 70, multihit: 0 };
       expect(liveMoveAnimationDuration({ ...base, moveId: 304, turn: 0 })).toBe(104);
@@ -48,27 +47,26 @@ describe("live Q2 registration", () => {
       expect(liveMoveAnimationDuration({ ...base, moveId: 328, turn: 0 })).toBe(123);
       expect(liveMoveAnimationDuration({ ...base, moveId: 143, turn: 0 })).toBe(148);
       expect(liveMoveAnimationDuration({ ...base, moveId: 143, turn: 1 })).toBe(180);
-      expect(liveMoveAnimationDuration({ ...base, moveId: 173, turn: 0 })).toBeNull();
+      expect(liveMoveAnimationDuration({ ...base, moveId: 173, turn: 0 })).toBe(69);
     }
     const exact = (JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8")).implementedAdapters as { id: number }[]).map((e) => e.id);
-    expect(exact).toEqual(expect.arrayContaining([304, 123, 328, 143]));
-    expect(exact).not.toContain(173);
+    expect(exact).toEqual(expect.arrayContaining([304, 123, 328, 143, 173]));
   });
 
-  it("covers 37 dense fixtures (accepted, prep25 alternate, GOLBAT-elevated / SNORLAX-large extras) x both orientations; windows start at activation", () => {
-    expect(NAMES).toHaveLength(37);
+  it("covers 45 dense fixtures (accepted, prep25 alternate, GOLBAT-elevated / SNORLAX-large extras) x both orientations; windows start at activation", () => {
+    expect(NAMES).toHaveLength(45);
     for (const name of NAMES) {
       const f = fixtureAt(name);
       expect(f.denseWindow!.endFrame - f.denseWindow!.startFrame + 1).toBe(rowsOf(name, f));
     }
-    for (const move of ["hyper-voice", "smog", "sand-tomb", "sky-attack"]) {
+    for (const move of ["hyper-voice", "smog", "sand-tomb", "sky-attack", "snore"]) {
       const bodies = move === "sky-attack" ? 2 : 1; // charge + strike
       expect(NAMES.filter((n) => n.startsWith(`${move}-`) && !n.includes("-alt-") && !n.includes("-extra-"))).toHaveLength(2 * bodies);
       expect(NAMES.filter((n) => n.startsWith(`${move}-alt-`))).toHaveLength(2 * bodies);
       expect(NAMES.filter((n) => n.startsWith(`${move}-extra-`)).length).toBeGreaterThanOrEqual(2);
     }
     const receipt = JSON.parse(readFileSync("tools/integration/fixtures/q2-live-adapter-receipt.json", "utf8"));
-    expect(receipt.summary).toMatchObject({ fixtures: 37, allExactTwiceFresh: true });
+    expect(receipt.summary).toMatchObject({ fixtures: 45, allExactTwiceFresh: true });
   });
 });
 
@@ -115,7 +113,7 @@ describe("live Q2 builders equal the accepted corpus-built inputs", () => {
       palettes: c.palettes, spriteOrder: c.allocator.spriteOrder, firstBody: true, impactPalette: c.resources.impact.palette, birdPalette: c.resources.bird.palette });
     expect(diff(built, c).filter((l) => !IGNORE.test(l))).toEqual([]);
   });
-  it.each(ORIENTATIONS)("Snore %s (builder only; not wired)", (o) => {
+  it.each(ORIENTATIONS)("Snore %s", (o) => {
     const c: any = snoreInputsFor(o);
     const built = liveSnoreInputs({ attackerSide: c.attackerSide, attacker: anchors(c.attackerSprite, c.attackerPictureOrigin), target: anchors(c.targetSprite, c.targetPictureOrigin),
       palettes: c.palettes, spriteOrder: c.allocator.spriteOrder, firstBody: false, snoreZPalette: (snoreAsset as any).snoreZ.palette });
@@ -148,6 +146,15 @@ describe("live Q2 gates", () => {
     const strike = liveMoveAnimationPresentation({ ...effect.request, turn: 1 }, view.field, 0, undefined, undefined, later as never);
     expect((strike!.config as any).animationInputs.background.registers).toMatchObject({ win0h: 0, win0v: 0 });
     expect((configOf(f)!.config as any).animationInputs.background.registers).toMatchObject({ win0h: 240, win0v: 161 });
+  });
+
+  it("Snore needs a known lend (it only exists behind Sleep Powder + the sleep status animations) and declines without one or for a shiny battler", () => {
+    const f = fixtureAt("snore-alt-player-snorlax-golem");
+    expect(f.precedingBodies).toEqual([{ moveId: 79, side: "opponent" }, { moveId: 0, side: "opponent", statusAnimation: "SLP" }, { moveId: 0, side: "player", statusAnimation: "SLP" }]);
+    expect(configOf(f)).not.toBeNull();
+    const { view, effect } = effectOf(f);
+    expect(liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, undefined)).toBeNull();
+    expect(liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, { known: false } as never)).toBeNull();
   });
 
   it("Smog and Hyper Voice stay exact after an earlier body (a known lend is the only history input); the Smog extra after a Tackle is a dense fixture", () => {

@@ -5497,6 +5497,88 @@
    }
   },
   {
+   "id": 173,
+   "move": "SNORE",
+   "orientation": "player",
+   "variant": "q2-snore-player-sealeo-opponent-venomoth",
+   "activationFrame": 692,
+   "windowStart": 692,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/q2-live/snore-player-sealeo-opponent-venomoth.json",
+    "scenario": "tools/battle-lab/mechanic-snore-player-sealeo-opponent-venomoth.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep25 moves/*.json; q2-live receipt)"
+   }
+  },
+  {
+   "id": 173,
+   "move": "SNORE",
+   "orientation": "opponent",
+   "variant": "q2-snore-opponent-sealeo-player-venomoth",
+   "activationFrame": 700,
+   "windowStart": 700,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/q2-live/snore-opponent-sealeo-player-venomoth.json",
+    "scenario": "tools/battle-lab/mechanic-snore-opponent-sealeo-player-venomoth.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep25 moves/*.json; q2-live receipt)"
+   }
+  },
+  {
+   "id": 143,
+   "move": "SKY_ATTACK",
+   "orientation": "player",
+   "variant": "q2-sky-attack-player-fearow-opponent-shuckle-strike",
+   "activationFrame": 595,
+   "windowStart": 595,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/q2-live/sky-attack-player-fearow-opponent-shuckle-strike.json",
+    "scenario": "tools/battle-lab/mechanic-sky-attack-player-fearow-opponent-shuckle.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep25 moves/*.json; q2-live receipt)"
+   },
+   "requestFields": {
+    "turn": 1
+   }
+  },
+  {
+   "id": 143,
+   "move": "SKY_ATTACK",
+   "orientation": "opponent",
+   "variant": "q2-sky-attack-opponent-fearow-player-shuckle-strike",
+   "activationFrame": 819,
+   "windowStart": 819,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/q2-live/sky-attack-opponent-fearow-player-shuckle-strike.json",
+    "scenario": "tools/battle-lab/mechanic-sky-attack-opponent-fearow-player-shuckle.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep25 moves/*.json; q2-live receipt)"
+   },
+   "requestFields": {
+    "turn": 1
+   }
+  },
+  {
    "id": 329,
    "move": "SHEER_COLD",
    "orientation": "player",

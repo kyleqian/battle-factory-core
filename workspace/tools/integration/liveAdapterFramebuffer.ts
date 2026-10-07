@@ -73,9 +73,10 @@ export interface Fixture {
    * them with the plan applier (gap tables between units) and asserts the resulting free order equals the
    * per-fixture value in order-consumer-seeds.json (provider == accepted literal == observed); never capture rows.
    * `statAnimation` marks a STATS_CHANGE unit (moveId 0; its B_ANIM_STATS_CHANGE argument), fed as the production
-   * `stat-animation` event (plan key `0:any`; no battler x2 effect, liveBattlerX2History KEEP_ANIMATIONS).
+   * `stat-animation` event (plan key `0:any`; no battler x2 effect, liveBattlerX2History KEEP_ANIMATIONS). `statusAnimation` (e.g. "SLP") marks an
+   * InitAndLaunchChosenStatusAnimation unit (moveId 0), fed as the production `status-animation` event (prep28: Snore after Sleep Powder).
    */
-  precedingBodies?: { moveId: number; side: "player" | "opponent"; statAnimation?: number }[];
+  precedingBodies?: { moveId: number; side: "player" | "opponent"; statAnimation?: number; statusAnimation?: string }[];
   /**
    * Post-KO bodies (docs/postko-consumer-audit.md §4): the scenario's recorded semantic event history, one turn per action
    * prompt, ending with this body. The harness replays it through the PRODUCTION live hosts (postkoHostReplay.ts:
@@ -129,7 +130,7 @@ export function fixtureSpriteOrder(f: Fixture, request: BattleMoveAnimationReque
   const table = planFixture();
   const entry = createKnownEntrySpriteAllocatorProvider("battle-lab-ordinary-singles").firstMove.occupants.map(o => o.slot);
   let cursor = createSpriteOrderPlanCursor(knownEntrySpriteOrderState("battle-lab-ordinary-singles"), entry);
-  const keys = [...(f.precedingBodies ?? []).map(u => u.statAnimation === undefined ? `${u.moveId}:${u.side}` : "0:any"),
+  const keys = [...(f.precedingBodies ?? []).map(u => u.statAnimation === undefined && u.statusAnimation === undefined ? `${u.moveId}:${u.side}` : "0:any"),
     `${request.moveId}:${f.attacker.geometry.side}`];
   let previous = "entry";
   keys.forEach((key, index) => {
@@ -148,6 +149,7 @@ export function fixtureSpriteOrder(f: Fixture, request: BattleMoveAnimationReque
     feed({ kind: "action-prompt" }); feed({ kind: "actions-committed" });
     for (const unit of f.precedingBodies ?? []) {
       if (unit.statAnimation !== undefined) { feed({ kind: "stat-animation", argument: unit.statAnimation }); continue; }
+      if (unit.statusAnimation !== undefined) { feed({ kind: "status-animation", status: unit.statusAnimation }); continue; }
       feed({ kind: "move-animation", moveId: unit.moveId, attackerSide: unit.side });
       // POKEBENCH_LIVE_ORDER_HIT=damaging: control that also feeds the visible hit after every other damaging body (power > 0).
       if (unit.moveId === 33 || unit.moveId === 64 || (process.env.POKEBENCH_LIVE_ORDER_HIT === "damaging"
@@ -221,7 +223,7 @@ export function fixtureBattlerX2Input(f: Fixture): LiveMoveBattlerX2Input | unde
     }
   } else {
     for (const unit of f.precedingBodies ?? []) {
-      if (unit.statAnimation !== undefined) continue;
+      if (unit.statAnimation !== undefined || unit.statusAnimation !== undefined) continue;
       history = applyLiveBattlerX2Event(history, { kind: "move-body", moveId: unit.moveId, attackerSide: unit.side });
     }
   }

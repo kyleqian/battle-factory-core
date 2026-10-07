@@ -37,8 +37,6 @@ for move, tag, scen, side in CASES:
     mid, rows = MOVES[move]
     bodies = p["bodies"]
     idxs = [i for i, b in enumerate(bodies) if b["move"] == mid]
-    if move == "SNORE":
-        continue  # not wired: no exact order lend after the sleep-inducing body (docs in the final report)
     for n, idx in enumerate(idxs[:2] if move == "SKY_ATTACK" else idxs[:1]):  # Sky Attack: charge + strike (prep28: strike keyed 10143)
         body = bodies[idx]
         A = body["start"]
@@ -60,7 +58,11 @@ for move, tag, scen, side in CASES:
             "fieldProfile": {"playerHp": m[0]["hp"], "playerMaxHp": m[0]["maxHP"], "opponentHp": m[1]["hp"], "opponentMaxHp": m[1]["maxHP"],
                              "playerGender": gender(m[0]["species"], m[0]["personality"]), "opponentGender": gender(m[1]["species"], m[1]["personality"])},
         }
+        # prep28: Snore follows Sleep Powder + its two sleep status animations (the mv-0 bodies of window shape C1;C1;D1 equal the STATUS_SLP plan)
         pre = [{"moveId": b["move"], "side": "player" if b["atActivation"]["attacker"] == 0 else "opponent"} for b in bodies[:idx] if b["move"] != 0]
+        if move == "SNORE":
+            pre = [{"moveId": b["move"], "side": "player" if b["atActivation"]["attacker"] == 0 else "opponent"} if b["move"] != 0
+                   else {"moveId": 0, "side": "player" if b["atActivation"]["attacker"] == 0 else "opponent", "statusAnimation": "SLP"} for b in bodies[:idx]]
         if pre:
             fx["precedingBodies"] = pre
         if move == "SKY_ATTACK":

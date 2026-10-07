@@ -85,7 +85,8 @@ import octazookaAsset from "../animation/assets/octazooka.json" with { type: "js
 import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
 import paletteResources from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
 import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "json" };
-import { liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs } from "./liveQ2Moves.ts";
+import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
+import { liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
 import { liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
 import { liveCurseStatsInputs, liveFuryCutterInputs, livePursuitInputs, liveReturnInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
@@ -128,8 +129,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // prep22 P3: Sheer Cold first body (the ice-fade background, the lent order and the activation registers are the first-body inputs).
   329,
   // Q2 (docs/next-adapters-prep25.md s0.2 / C): zero-Random2 bodies through liveQ2Moves.ts: Hyper Voice, Smog, Sand Tomb, Sky Attack
-  // (charge + strike). Snore is NOT wired (see liveSnoreInputs).
-  304, 123, 328, 143,
+  // (charge + strike). Snore (prep28: a known lend after Sleep Powder + its sleep status animations; any unknown lend declines).
+  304, 123, 328, 143, 173,
   // oam1 (docs/next-adapters-prep20.md): production hardware-OAM provider (liveMoveOamAssembler.ts), first body.
   // Fury Cutter: the counter-1 body only (a first body implies furyCutterCounter 1).
   261, 228, 210,
@@ -340,7 +341,7 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // prep22 P1: Lovely Kiss (faithful-random), Spikes, Octazooka windows start at activation (row 0; prep22 moves/*.json, both sides).
     142, 191, 190, 324,
     // Q2 (prep25 moves/*.json): the windows start at activation (row 0).
-    304, 123, 328, 143,
+    304, 123, 328, 143, 173,
     // Sheer Cold (ISSUES #151, species audit 7 elevated FLYGON / GOLBAT opponent, both orientations): activation == window start (row 0).
     329,
   ].map((id) => [id, 0] as [number, number]).concat([
@@ -810,6 +811,7 @@ export function liveMoveAnimationDuration(
     // Sheer Cold first body: 191 rows (player attacker) / 190 (opponent), constant across the accepted + alternate scenarios (prep22 s0.2).
     case 329: return request.attacker === 0 ? 191 : 190;
     // Sky Attack (prep25): charge 148 rows / strike 180 rows, selected by gAnimMoveTurn bit 0 like Razor Wind / Solar Beam.
+    case 173: return 69; // Snore (prep25: 69 rows, constant across the scenarios; no Random2).
     case 143: return (request.turn & 1) === 0 ? 148 : 180; // charge 148 rows, strike 180 (the strike needs the 10143 order-plan lend, see case 143)
     case 328: return 123; // Sand Tomb (prep25: constant across the four scenarios).
     case 123: return 305; // Smog (prep25: constant across the four scenarios).
@@ -2526,6 +2528,21 @@ export function liveMoveAnimationPresentation(
         attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes, spriteOrder: lentOrder, firstBody: !strike,
         impactPalette: (paletteResources.resources as Record<string, { colors: readonly number[] }>).ANIM_TAG_IMPACT!.colors,
         birdPalette: skyAttackAsset.bird.palette.map((c) => (c.r >> 3) | (c.g >> 3) << 5 | (c.b >> 3) << 10) }) as never };
+      break;
+    }
+    case 173: {
+      // prep25 Q2 / prep28: Snore (the user is asleep, so a known lend exists only behind planned sleep bodies: Sleep Powder + the sleep status animations).
+      // No first-body gate: the registers follow the body history (firstBody false once any unit ran).
+      if (!spriteOrderInput?.known) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const lentOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (palettes === null || lentOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      config = { move: "SNORE", attacker, target, fieldProfile, animationInputs: liveSnoreInputs({
+        attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes, spriteOrder: lentOrder,
+        firstBody: spriteOrderInput.firstBody === true, snoreZPalette: snoreAsset.snoreZ.palette as never }) as never };
       break;
     }
     case 328: {
