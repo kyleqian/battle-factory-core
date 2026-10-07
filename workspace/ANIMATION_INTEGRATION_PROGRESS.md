@@ -23,6 +23,13 @@
   from a declined second-body Fury Cutter now taking its 43 source rows (case 210 -> null experiment: 173/173);
   accepted (same pattern as later Overheat). Route 38/14 reproduced; union typecheck, smoke 448, 7 files 124/124.
   Receipt `oam1-live-adapter-receipt.json`; supervisor logs `.integration/validation/oam1-20261006/`.
+- prep23 (side, `46818fdda`, new files only, merged `95664e651`): source-derived Curse models
+  (`tools/integration/prep23Curse*.ts`) replace every corpus input of the existing renderer. Stats (non-Ghost)
+  branch exact on every field in 5 windows (accepted P/O, MILTANK->GOLEM P/O, ONIX->PIDGEOT), renderer 879/880 rows
+  (ONIX row 142: the falling-lines mask gate `data[11] < 4` ends 3 rows early). Ghost branch exact except R1 (BG2
+  scroll one row early, 2/4 windows) and P1 (row-26 palette-transfer phase: 15 / 135 px on alternates). Variant =
+  Ghost iff the attacker is Ghost type. Supervisor: `prep23Run.sh` with fresh probes (r1 == r2) — all four receipts
+  byte-identical.
 
 ## 2026-10-06 (day, wind-down) — D3 implemented: 218 -> 226 exact + 10 faithful-random live adapters
 
