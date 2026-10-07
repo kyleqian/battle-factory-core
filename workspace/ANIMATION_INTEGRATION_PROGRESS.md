@@ -26,6 +26,15 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- Integration step D4d (Ice Ball + Dive) STOPPED at a measured blocker, evidence merged (`57ca6674e`, no src change):
+  Ice Ball counters 1..4 and the Dive attack body start from the previous body's end-of-body sprite order, which
+  depends on that body's Random2 words (shard / droplet y-sort before death), so no constant lend exists and the order
+  tracker lives on the logical side without the words. Words-free lend: Ice Ball counter-0 bodies 0 px, later bodies
+  482 px (rows 38-42); Dive attack 116 / 61 px (rows 17-22). Design checked: a deferred lend resolved in the render
+  seam (replay the earlier body from its true start order, then the tracker plans) gives the ROM start order on 12/12
+  Ice Ball transitions (`docs/s10a-random2-order-lend-blocker.md`). Supervisor: fresh `prep26Probes.sh iceball`, both
+  blocker receipts byte-identical. Decision: ship Ice Ball counter 0 and the Dive setup turn first; the deferred lend
+  is remaining work (est. 60-90 min infrastructure + 45-60 min per move).
 - prep33 (side, `6f9b9f7a8`, new files only): Shock Wave (351) READY-WITH-CHANGE as scoped exact — the reducer's
   side-keyed timing table is wrong for 3 of 4 alternates; derived rule (attacker pic-offset y, target battle y, lightning
   count N: ShakeMon = lightning + 2N + 30, clear + 67, end + 4) matches 6/6 windows; every renderer-read field exact on
