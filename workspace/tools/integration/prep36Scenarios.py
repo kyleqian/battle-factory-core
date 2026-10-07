@@ -18,6 +18,7 @@ NEW = [
     ("prep29-eruption-alt-player-torkoal-golem.json", "player", 208, "male", "prep36-eruption-alt-player-steelix-golem.json"),
     ("prep29-eruption-alt-player-torkoal-golem.json", "player", 340, "male", "prep36-eruption-alt-player-camerupt-golem.json"),
     ("prep29-eruption-alt-opponent-torkoal-golem.json", "opponent", 340, "male", "prep36-eruption-alt-opponent-camerupt-golem.json"),
+    ("prep36-eruption-alt-player-camerupt-golem.json", "opponent", 110, "male", "prep36-eruption-alt-player-camerupt-weezing.json"),
 ]
 for base, side, species, gender, name in NEW:
     data = json.loads((LAB / base).read_text())

@@ -7,7 +7,7 @@ set -e
 mkdir -p "$REC" "$OUT/scratch"
 SCEN="prep29-eruption-alt-player-torkoal-golem:player prep29-eruption-alt-opponent-torkoal-golem:opponent prep36-eruption-alt-player-camerupt-golem:player
 prep36-eruption-alt-opponent-camerupt-golem:opponent prep36-eruption-alt-player-steelix-golem:player prep36-eruption-alt-opponent-weezing-golem:opponent
-prep36-eruption-alt-opponent-onix-golem:opponent"
+prep36-eruption-alt-opponent-onix-golem:opponent prep36-eruption-alt-player-camerupt-weezing:player"
 probe() { for r in 1 2; do ( rm -rf "$OUT/$1-r$r.json" "$OUT/$1-r$r-rgb"; python3 tools/run-mgba-probe.py "$OUT/$1-r$r.json" -- python3 tools/compare/eruptionProbe.py \
   tools/battle-lab/$1.json "$OUT/$1-r$r.json" "$OUT/$1-r$r-rgb" > "$OUT/$1-r$r.out" 2>&1 ) & done; wait; }
 if [ -z "$SKIP_PROBES" ]; then

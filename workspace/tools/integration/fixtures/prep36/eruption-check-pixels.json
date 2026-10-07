@@ -1022,6 +1022,139 @@
      ]
     }
    }
+  },
+  {
+   "window": "prep36-eruption-alt-player-camerupt-weezing",
+   "attackerSide": "player",
+   "species": [
+    "CAMERUPT",
+    "WEEZING"
+   ],
+   "romRows": 476,
+   "modelRows": 476,
+   "attackerY": 99,
+   "waveEnds": [
+    99,
+    181
+   ],
+   "wave2Start": 101,
+   "profile": {
+    "leaves": 163,
+    "equal": 158,
+    "differing": [
+     "profile.launch.geometry.battlerYDelta: model 19 corpus 10",
+     "profile.launch.allocator.tileRangeBeforeLoad: model [0,0] corpus [433,12]",
+     "profile.falling.allocator.tileRangeBeforeLoad: model [0,0] corpus [433,12]",
+     "profile.horizontalShake.resources.tileRangeBeforeLoad: model [0,0] corpus [433,12]",
+     "profile.spriteOrder.initialKeys.2.y: model 0 corpus 65"
+    ],
+    "full512PaletteAtAge0Equal": false
+   },
+   "fields": {
+    "rowCount": "476/476",
+    "source": "476/476",
+    "active": "476/476",
+    "taskCounts": "476/476",
+    "tasks": "476/476",
+    "sprites": "476/476",
+    "launchBattler": "476/476",
+    "paletteBanks2_3_4_16_17": "476/476",
+    "paletteBank23FromRow2": "476/476",
+    "paletteAll512": "0/476",
+    "shakeBattlers": "476/476",
+    "platformLatch": "476/476",
+    "sourceOrder": "476/476",
+    "fullSourceOrder": "474/476",
+    "fullSourceOrderCorpusProfile": "474/476",
+    "animationRng": "476/476",
+    "reducerEqualsCorpusProfileReducer": "383/476"
+   },
+   "mismatchRows": {
+    "paletteAll512": [
+     "0-475"
+    ],
+    "fullSourceOrder": [
+     "61",
+     "143"
+    ],
+    "fullSourceOrderCorpusProfile": [
+     "61",
+     "143"
+    ],
+    "reducerEqualsCorpusProfileReducer": [
+     "0",
+     "19",
+     "21-59",
+     "87-92",
+     "101",
+     "103-141",
+     "169-174"
+    ]
+   },
+   "pixels": {
+    "model": {
+     "rows": 476,
+     "zeroPx": 475,
+     "residualPx": 195,
+     "worst": [
+      [
+       0,
+       195
+      ]
+     ],
+     "mismatchRows": [
+      "0"
+     ]
+    },
+    "corpusProfileBaseline": {
+     "rows": 476,
+     "zeroPx": 383,
+     "residualPx": 52045,
+     "worst": [
+      [
+       89,
+       725
+      ],
+      [
+       171,
+       725
+      ],
+      [
+       31,
+       664
+      ],
+      [
+       113,
+       664
+      ],
+      [
+       36,
+       657
+      ],
+      [
+       118,
+       657
+      ],
+      [
+       34,
+       649
+      ],
+      [
+       116,
+       649
+      ]
+     ],
+     "mismatchRows": [
+      "0",
+      "21",
+      "23-61",
+      "89-94",
+      "103",
+      "105-143",
+      "171-176"
+     ]
+    }
+   }
   }
  ]
 }
