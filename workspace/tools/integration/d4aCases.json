@@ -82,5 +82,17 @@
   "revenge-extra-opponent-hitmonlee-golbat",
   "d4a-revenge-extra-opponent-hitmonlee-golbat",
   "opponent"
+ ],
+ [
+  "METEOR_MASH",
+  "meteor-mash-extra-player-metagross-golbat",
+  "d4a-meteor-mash-extra-player-metagross-golbat",
+  "player"
+ ],
+ [
+  "METEOR_MASH",
+  "meteor-mash-extra-opponent-metagross-golbat",
+  "d4a-meteor-mash-extra-opponent-metagross-golbat",
+  "opponent"
  ]
 ]

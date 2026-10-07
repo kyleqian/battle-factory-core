@@ -1,0 +1,41 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "METEOR_MASH",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/d4a-meteor-mash-extra-opponent-metagross-golbat.json",
+ "denseWindow": {
+  "startFrame": 238,
+  "endFrame": 452
+ },
+ "windowSource": "window = [activation, activation + 215 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": "event",
+ "attacker": {
+  "species": "METAGROSS",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 2027808500,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 150,
+  "playerMaxHp": 150,
+  "opponentHp": 155,
+  "opponentMaxHp": 155,
+  "playerGender": "male",
+  "opponentGender": "none"
+ },
+ "presentationRngActivation": {
+  "value": 3238375675,
+  "source": "prep22Probe.py rng2Series[239] stepped back once (activation frame 238)"
+ }
+}

@@ -9,9 +9,9 @@ R = Path(__file__).resolve().parents[2]
 D = Path(sys.argv[1]); ONLY = set(sys.argv[2:])
 S = {s["id"]: s for s in json.loads((R / "src/data/gen/species-stats.json").read_text())["species"]}
 # move -> (id, rows with the optional lag ("event"), rows without)
-MOVES = {"MACH_PUNCH": (183, 110, 109), "NIGHTMARE": (171, 168, 167), "MEGAHORN": (224, 177, 176), "REVENGE": (279, 145, 145)}
+MOVES = {"MACH_PUNCH": (183, 110, 109), "NIGHTMARE": (171, 168, 167), "MEGAHORN": (224, 177, 176), "REVENGE": (279, 145, 145), "METEOR_MASH": (309, 215, 214)}
 # Megahorn rows include the first inactive row (probe end - start + 1; liveMoveAnimationDuration = first inactive age + 1, as Pursuit / Return).
-INCLUSIVE = {"MEGAHORN": 1, "REVENGE": 1}
+INCLUSIVE = {"MEGAHORN": 1, "REVENGE": 1, "METEOR_MASH": 1}
 # Revenge has no optional lag (145 rows in every window); its only CPU-phase parameter is the monbg BGnCNT write row ("event" = row 5),
 # banked by prep26RevengeCheck.ts knownFor for the four prep26 windows (docs/next-adapters-prep26.md s2.4).
 PREP26_MONBG_ROW = {"mechanic-revenge-player-machamp-opponent-shuckle": 5, "mechanic-revenge-opponent-qwilfish-player-shuckle": 4,
@@ -42,7 +42,13 @@ CASES += [("MEGAHORN", "megahorn-player-seaking-opponent-onix", "mechanic-megaho
           ("REVENGE", "revenge-player-machamp-opponent-shuckle", "mechanic-revenge-player-machamp-opponent-shuckle", "player"),
           ("REVENGE", "revenge-opponent-qwilfish-player-shuckle", "mechanic-revenge-opponent-qwilfish-player-shuckle", "opponent"),
           ("REVENGE", "revenge-alt-player-machoke-golem", "prep25-revenge-alt-player-machoke-golem", "player"),
-          ("REVENGE", "revenge-alt-opponent-machoke-golem", "prep25-revenge-alt-opponent-machoke-golem", "opponent")]
+          ("REVENGE", "revenge-alt-opponent-machoke-golem", "prep25-revenge-alt-opponent-machoke-golem", "opponent"),
+          ("METEOR_MASH", "meteor-mash-player-metang-opponent-onix", "mechanic-meteor-mash-player-metang-opponent-onix", "player"),
+          ("METEOR_MASH", "meteor-mash-opponent-metang-player-onix", "mechanic-meteor-mash-opponent-metang-player-onix", "opponent"),
+          ("METEOR_MASH", "meteor-mash-alt-player-shiftry-golem", "prep12-meteor-mash-alt-shiftry-golem", "player")]
+# Random2 bodies (D3): the presentation host is pinned to the ROM's gRng2Value at the activation frame (one ISO_RANDOMIZE1 step before the
+# probe's first rng2Series row A + 1), so the dense check replays the source words; production draws them from the per-battle host.
+LCG_INV = pow(1103515245, -1, 2 ** 32)
 def status(v):
     return "sleep" if v & 7 else "poison" if v & 0x88 else "burn" if v & 0x10 else "freeze" if v & 0x20 else "paralysis" if v & 0x40 else "none"
 def gender(sp, pers):
@@ -94,5 +100,9 @@ for move, tag, scen, side in CASES:
            else {"moveId": 0, "side": "player" if b["atActivation"]["attacker"] == 0 else "opponent", "statusAnimation": "SLP"} for b in bodies[:idx]]
     if pre:
         fx["precedingBodies"] = pre
+    if move == "METEOR_MASH":
+        r2 = dict((f, v) for f, v in p["rng2Series"])
+        fx["presentationRngActivation"] = {"value": ((r2[A + 1] - 24691) * LCG_INV) & 0xFFFFFFFF,
+                                           "source": f"prep22Probe.py rng2Series[{A + 1}] stepped back once (activation frame {A})"}
     (out / f"{tag}.json").write_text(json.dumps(fx, indent=1) + "\n")
     print(tag, fx["denseWindow"], rows, fx["timingPhase"], fx["attacker"]["species"], "->", fx["target"]["species"], pre)

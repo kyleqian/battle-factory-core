@@ -123,6 +123,22 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
       evidence: ["tools/integration/prep26RevengeCheck.ts knownFor phase.monbgCntRow (row 5: accP, altP, altO; row 4: accO)", "docs/next-adapters-prep26.md s2.4"],
     }],
   },
+  /**
+   * D4b Meteor Mash (docs/next-adapters-prep17.md s0.1; tools/integration/fixtures/prep17/meteor-mash-tail-receipt.json): restorebg's
+   * LoadDefaultBg frame (row 193) skips the main-loop iteration of row 195 in 4 of 5 measured bodies (accepted opponent, prep12 SHIFTRY ->
+   * GOLEM, A2 METANG -> GOLEM, A3 GOLEM -> SHIFTRY; the accepted player METANG -> ONIX body does not lag): first inactive age 213 + L,
+   * fade-down first row 196 + L. Window rows (activation .. first inactive, inclusive) 215 with the lag, 214 without. Also D3 (Random2 twinkles).
+   */
+  309: {
+    move: "MOVE_METEOR_MASH",
+    parameters: [{
+      kind: "optional-lag-age", age: 195, fixedLagAges: [], iterations: 214,
+      alternatives: [{ phase: "event", bodyRows: 215, measured: 5 }, { phase: "no-event", bodyRows: 214, measured: 2 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/prep17/meteor-mash-tail-receipt.json (4 of 5 lag at row 195)", "docs/next-adapters-prep17.md s0.1",
+        "tools/integration/fixtures/d4a-live/meteor-mash-extra-*.json (D4b METAGROSS -> GOLBAT: opponent lag, player no lag)"],
+    }],
+  },
 });
 
 /** The chosen write row of a move's bg-write-row parameter (`age` for "event", `age - 1` for "no-event"), or null without one. */
@@ -156,4 +172,6 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   224,
   // D4b: Revenge (liveOamMoves.ts liveRevengeInputs; fixtures tools/integration/fixtures/d4a-live/revenge-*).
   279,
+  // D4b: Meteor Mash (D3 + D4; Random2 twinkles from the presentation host, liveMovePresentationRng.ts plan 309).
+  309,
 ]);

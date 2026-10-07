@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sp = {m.group(1): int(m.group(2)) for m in re.finditer(r"#define SPECIES_(\w+)\s+(\d+)", (ROOT / "reference/pokeemerald/include/constants/species.h").read_text())}
 LAB = ROOT / "tools/battle-lab"
+RATIO = {m["id"]: m["genderRatio"] for m in json.loads((ROOT / "src/data/gen/species-stats.json").read_text())["species"]}
 HARNESS = next(p for p in (ROOT, *ROOT.parents) if (p / "oracle/emerald_core.py").is_file())
 sys.path.insert(0, str(HARNESS / "oracle"))
 from battle_lab import validate_request  # noqa: E402
@@ -16,9 +17,11 @@ SRC = {
     # D4b: Megahorn bg-write-row tie-break (3:3 in prep24) + extra windows; the Tackle predecessor of the accepted scenarios is kept.
     "megahorn": ("MEGAHORN", "mechanic-megahorn-player-seaking-opponent-onix", "mechanic-megahorn-opponent-seaking-player-onix"),
     "revenge": ("REVENGE", "mechanic-revenge-player-machamp-opponent-shuckle", "mechanic-revenge-opponent-qwilfish-player-shuckle"),
+    "meteor-mash": ("METEOR_MASH", "mechanic-meteor-mash-player-metang-opponent-onix", "mechanic-meteor-mash-opponent-metang-player-onix"),
 }
 PAIRS = {"mach-punch": [("HITMONCHAN", "SNORLAX"), ("BRELOOM", "GOLBAT")], "nightmare": [("HAUNTER", "SNORLAX"), ("GENGAR", "GOLBAT")],
-         "megahorn": [("RHYDON", "GOLBAT"), ("NIDOKING", "SNORLAX")], "revenge": [("HITMONLEE", "GOLBAT")]}
+         "megahorn": [("RHYDON", "GOLBAT"), ("NIDOKING", "SNORLAX")], "revenge": [("HITMONLEE", "GOLBAT")],
+         "meteor-mash": [("METAGROSS", "GOLBAT")]}
 cases = []
 for move, (label, ps, os_) in SRC.items():
     for att, tgt in PAIRS[move]:
@@ -29,7 +32,8 @@ for move, (label, ps, os_) in SRC.items():
             changed = [m for m, new in ((a, att), (t, tgt)) if m["species"] != sp[new]]
             a["species"], t["species"] = sp[att], sp[tgt]
             for mon in changed:
-                for g in ("male", "female", "none"):
+                # Genderless species (genderRatio 255, e.g. METAGROSS) take "genderless" first (as the accepted METANG scenarios): validate_request does not check every field.
+                for g in (("genderless",) if RATIO[mon["species"]] == 255 else ()) + ("male", "female", "none"):
                     mon["gender"] = g
                     try:
                         validate_request(json.loads(json.dumps(s)), "battle-scene-on"); break

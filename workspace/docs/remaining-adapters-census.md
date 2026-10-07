@@ -8,7 +8,7 @@ node tools/integration/censusActivationSummary.mjs                    # fixtures
 tools/integration/censusActivation.sh; tools/integration/censusStagedActivation.sh   # direct-mGBA probes (optional, regenerates the receipts)
 ```
 
-Inputs: `docs/animation-integration-live-status.json` (246 live, 12 faithful random, 3 faithful timing), `docs/animation-integration-readiness.json` + `-merged-readiness.json` (276 accepted, host classes), `tools/integration/fixtures/h-buffer-triage.json` (per-field classes/cites of the 78 H_BUFFER moves; stale config line numbers are re-resolved by symbol), `sprite-order-body-plans-ext.json`, the Level-50 set pools for the usage weight (the model of `tools/integration/spriteOrderPlanCoverageRank.py`: ranges 0..6, 4 moves per set, both sides; `weight` below is the share of all Factory move uses). The script asserts `live (scoped exact) + faithful-random + faithful-timing + in-flight + remaining = 276` (faithful-random = the disjoint D3 bucket `faithfulRandomAdapters`, docs/presentation-rng.md; faithful-timing = the disjoint D4 bucket `faithfulTimingAdapters`, docs/faithful-timing.md, where a D3+D4 adapter is counted once with `d3: true`) and that every cited `file:line` exists and is non-empty. In-flight = batches the supervisor has running (none; the lists in the script are empty). Helping Hand is the 277th Factory move and is not accepted (not counted).
+Inputs: `docs/animation-integration-live-status.json` (246 live, 12 faithful random, 4 faithful timing), `docs/animation-integration-readiness.json` + `-merged-readiness.json` (276 accepted, host classes), `tools/integration/fixtures/h-buffer-triage.json` (per-field classes/cites of the 78 H_BUFFER moves; stale config line numbers are re-resolved by symbol), `sprite-order-body-plans-ext.json`, the Level-50 set pools for the usage weight (the model of `tools/integration/spriteOrderPlanCoverageRank.py`: ranges 0..6, 4 moves per set, both sides; `weight` below is the share of all Factory move uses). The script asserts `live (scoped exact) + faithful-random + faithful-timing + in-flight + remaining = 276` (faithful-random = the disjoint D3 bucket `faithfulRandomAdapters`, docs/presentation-rng.md; faithful-timing = the disjoint D4 bucket `faithfulTimingAdapters`, docs/faithful-timing.md, where a D3+D4 adapter is counted once with `d3: true`) and that every cited `file:line` exists and is non-empty. In-flight = batches the supervisor has running (none; the lists in the script are empty). Helping Hand is the 277th Factory move and is not accepted (not counted).
 
 ## 1. Summary
 
@@ -17,22 +17,22 @@ Inputs: `docs/animation-integration-live-status.json` (246 live, 12 faithful ran
 | accepted Factory moves | 276 | 100% |
 | live adapters (scoped exact) | 246 | 93.59% |
 | faithful-random adapters (ASTONISH, DOUBLE_KICK, FLAIL, HYPER_BEAM, LOVELY_KISS, LUSTER_PURGE, MUD_SLAP, RAIN_DANCE, SAND_ATTACK, THRASH, WATER_PULSE, WISH) | 12 | 3.76% |
-| faithful-timing adapters (MACH_PUNCH, MEGAHORN, REVENGE) | 3 | 0.50% |
+| faithful-timing adapters (MACH_PUNCH, MEGAHORN, METEOR_MASH, REVENGE) | 4 | 0.72% |
 | in flight (0 order-consumer + 0 prep6) | 0 | 0.00% |
-| **remaining (this census)** | **15** | **1.66%** |
-| check | 246+12+3+0+15=276 | |
+| **remaining (this census)** | **14** | **1.44%** |
+| check | 246+12+4+0+14=276 | |
 
 Remaining moves by group:
 
 | Group | Moves | Weight | Meaning |
 |---|---:|---:|---|
-| PROVIDER-x | 3 | 0.48% | blocked on exactly one named provider |
+| PROVIDER-x | 2 | 0.26% | blocked on exactly one named provider |
 | MULTI | 11 | 1.06% | several providers |
 | OUT | 1 | 0.11% | needs something outside S10A scope |
 
-Remaining by readiness host class (a move can carry several): H_BASIC 1, H_BUFFER 11, H_DERIVED 3, H_VARIANT 3. Moves whose order input is satisfied only for the battle's first body: 9. Moves that still need a per-move sprite-slot plan row: 11.
+Remaining by readiness host class (a move can carry several): H_BASIC 1, H_BUFFER 11, H_DERIVED 2, H_VARIANT 3. Moves whose order input is satisfied only for the battle's first body: 9. Moves that still need a per-move sprite-slot plan row: 11.
 
-PROVIDER-x breakdown: D-SCAN (1: MEMENTO); C (1: METEOR_MASH); X-SUBST (1: SUBSTITUTE).
+PROVIDER-x breakdown: D-SCAN (1: MEMENTO); X-SUBST (1: SUBSTITUTE).
 
 ## 2. What production derives today
 
@@ -67,19 +67,18 @@ PROVIDER-x breakdown: D-SCAN (1: MEMENTO); C (1: METEOR_MASH); X-SUBST (1: SUBST
 
 Columns: `needs` = provider codes after removing what production supplies (`B(first body)` = also consumes sSpriteOrder, supplied by production for the first body only; legend in section 5). Blockers cite the consumed field (`a/` = `src/animation/`, `e/` = `src/engine/`, `rom/` = `reference/pokeemerald/`). Full text per blocker is in the JSON.
 
-### PROVIDER-x (3)
+### PROVIDER-x (2)
 
 | Move (id) | Host class | Weight | needs | Blockers (consumed field @ cite) | Notes / measured |
 |---|---|---:|---|---|---|
-| SUBSTITUTE (164) | H_BASIC | 0.22% | X-SUBST | X-SUBST: body ends with the battler shown as the doll (AnimTask_MonToSubstitute); field art view has no behind-substitute state @ rom/data/battle_scripts_1.s:1085-1103, e/battleCommandFieldArt.ts:1, a/sceneOnPresentation.ts:3717 | persistent doll sprite after the body |
-| METEOR_MASH (309) | H_DERIVED | 0.22% | C | C: twinkles: 48 Random2-resolved variants (optional field; geometry.twinkles) @ a/meteorMash.ts:46, a/meteorMash.ts:195 | everything else is anchors + faint-attack-style profile |
+| SUBSTITUTE (164) | H_BASIC | 0.22% | X-SUBST | X-SUBST: body ends with the battler shown as the doll (AnimTask_MonToSubstitute); field art view has no behind-substitute state @ rom/data/battle_scripts_1.s:1085-1103, e/battleCommandFieldArt.ts:1, a/sceneOnPresentation.ts:3719 | persistent doll sprite after the body |
 | MEMENTO (262) | H_DERIVED | 0.04% | D-SCAN | D-SCAN: reducer.initialScanlineSourceBuffer / initialScanlineBuffers[2][320] captured from RAM (HDMA scanline state) @ a/memento.ts:31-32, a/memento.ts:269 | self-KO displayed HP 0 is the same input proven for Self-Destruct (prep6); the scanline buffer has no production owner |
 
 ### OUT (1)
 
 | Move (id) | Host class | Weight | needs | Blockers (consumed field @ cite) | Notes / measured |
 |---|---|---:|---|---|---|
-| EXTREME_SPEED (245) | H_DERIVED | 0.11% | X-AGE | X-AGE: evidence covers ages 48..350 only (window starts mid-body: activation 78, window 87, ageOffset 48, row 39); ages 0..47 never accepted; 1 rental species (Arcanine) @ a/sceneOnPresentation.ts:1499, a/extremeSpeed.ts:1 | OUT: needs animation-lane dense evidence for the first 48 source ages (docs/next-adapters-prep2.md row 20) |
+| EXTREME_SPEED (245) | H_DERIVED | 0.11% | X-AGE | X-AGE: evidence covers ages 48..350 only (window starts mid-body: activation 78, window 87, ageOffset 48, row 39); ages 0..47 never accepted; 1 rental species (Arcanine) @ a/sceneOnPresentation.ts:1501, a/extremeSpeed.ts:1 | OUT: needs animation-lane dense evidence for the first 48 source ages (docs/next-adapters-prep2.md row 20) |
 
 ### MULTI (11)
 
@@ -106,10 +105,10 @@ Ranked by remaining moves that become fully unlocked when that provider alone is
 | Provider | Alone unlocks | Weight | Touching | Touching weight | Cost / claim | Unlocked moves |
 |---|---:|---:|---:|---:|---|---|
 | X-SUBST | +1 | 0.22% | 1 | 0.22% | persistent Substitute doll sprite state | SUBSTITUTE |
-| C | +1 | 0.22% | 12 | 1.28% | new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4). NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact | METEOR_MASH |
 | X-AGE | +1 | 0.11% | 1 | 0.11% | accepted evidence lacks the early source ages (age basis) | EXTREME_SPEED |
 | D-SCAN | +1 | 0.04% | 2 | 0.15% | gScanlineEffect buffers | MEMENTO |
 | A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio) | +1 | 0.04% | 11 | 0.92% | new large host (docs/animation-integration-readiness.md A6). only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today | MEMENTO |
+| C | +0 | 0.00% | 11 | 1.06% | new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4). NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact | - |
 | D-PAL | +0 | 0.00% | 10 | 0.88% | extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves). exact for audited plan rows from a known entry; actual status animations/switches invalidate | - |
 | D-TILE | +0 | 0.00% | 10 | 0.88% | OBJ tile / palette-bank resource allocator | - |
 | D-BG | +0 | 0.00% | 9 | 0.84% | BG regs / BLDCNT / monbg state | - |
@@ -125,22 +124,22 @@ Greedy build order (each step = the provider/bundle with the most newly unlocked
 | Step | Provider | New moves | New weight | Cumulative remaining unlocked | Newly unlocked |
 |---:|---|---:|---:|---:|---|
 | 1 | X-SUBST | +1 | 0.22% | 1 | SUBSTITUTE |
-| 2 | C | +1 | 0.22% | 2 | METEOR_MASH |
-| 3 | A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio) | +8 | 0.59% | 10 | ERUPTION, EXTRASENSORY, FLATTER, MEMENTO, NIGHTMARE, PSYWAVE, SHOCK_WAVE, SUPERPOWER |
-| 4 | X-DISABLE | +2 | 0.15% | 12 | ICE_BALL, SPIT_UP |
-| 5 | X-TWOTURN | +1 | 0.19% | 13 | DIVE |
-| 6 | E-OUT | +1 | 0.18% | 14 | SKILL_SWAP |
-| 7 | X-AGE | +1 | 0.11% | 15 | EXTREME_SPEED |
-| 8 | D-PAL | +0 | 0.00% | 15 | - |
-| 9 | D-TILE | +0 | 0.00% | 15 | - |
-| 10 | D-BG | +0 | 0.00% | 15 | - |
-| 11 | D-OAM | +0 | 0.00% | 15 | - |
-| 12 | D-VRAM | +0 | 0.00% | 15 | - |
-| 13 | D-SCAN | +0 | 0.00% | 15 | - |
-| 14 | F-AUDIO | +0 | 0.00% | 15 | - |
+| 2 | X-AGE | +1 | 0.11% | 2 | EXTREME_SPEED |
+| 3 | D-SCAN | +1 | 0.04% | 3 | MEMENTO |
+| 4 | C | +0 | 0.00% | 3 | - |
+| 5 | A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio) | +7 | 0.55% | 10 | ERUPTION, EXTRASENSORY, FLATTER, NIGHTMARE, PSYWAVE, SHOCK_WAVE, SUPERPOWER |
+| 6 | X-DISABLE | +2 | 0.15% | 12 | ICE_BALL, SPIT_UP |
+| 7 | X-TWOTURN | +1 | 0.19% | 13 | DIVE |
+| 8 | E-OUT | +1 | 0.18% | 14 | SKILL_SWAP |
+| 9 | D-PAL | +0 | 0.00% | 14 | - |
+| 10 | D-TILE | +0 | 0.00% | 14 | - |
+| 11 | D-BG | +0 | 0.00% | 14 | - |
+| 12 | D-OAM | +0 | 0.00% | 14 | - |
+| 13 | D-VRAM | +0 | 0.00% | 14 | - |
+| 14 | F-AUDIO | +0 | 0.00% | 14 | - |
 
 Notes:
-- **Random2 is the keystone but non-exact.** It touches the most remaining moves and, after the allocator-v2 and A6 steps, unlocks 1 more; production cannot reconstruct `gRng2Value` (it advances every rendered frame and with every earlier animation's draws, `docs/visual-randomness-prep.md` s4). A presentation LCG is ROM-faithful in distribution and draw order only; the claim boundary (a non-exact presentation class beside the exact one) must be decided before building it. It cannot make a move exact on its own.
+- **Random2 is the keystone but non-exact.** It touches the most remaining moves and, after the allocator-v2 and A6 steps, unlocks 0 more; production cannot reconstruct `gRng2Value` (it advances every rendered frame and with every earlier animation's draws, `docs/visual-randomness-prep.md` s4). A presentation LCG is ROM-faithful in distribution and draw order only; the claim boundary (a non-exact presentation class beside the exact one) must be decided before building it. It cannot make a move exact on its own.
 - **Cross-body order tracking** is not a blocker for any remaining move's first body; it upgrades the exactness of the 62 first-body-only moves for later bodies (weighted per-(move,side) plan coverage 68.2%, `docs/sprite-order-plan-coverage.md`: the heaviest NEEDS-KEYS bodies are Ice Beam, Thunderbolt and Attract).
 - **E-OUT** lumps four different small inputs (Endeavor HP/stale power, Fire Punch burn/faint, Leech Seed body, Pursuit/Skill Swap/Rapid Spin outcomes); only Endeavor and Fire Punch are single-input moves.
 - **A6 graphics host** has no single-provider unlocks beyond 6 moves; the other D-* codes unlock nothing alone.

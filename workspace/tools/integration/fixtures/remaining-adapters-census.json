@@ -39,14 +39,15 @@
    "MOVE_WATER_PULSE",
    "MOVE_WISH"
   ],
-  "faithfulTiming": 3,
+  "faithfulTiming": 4,
   "faithfulTimingMoves": [
    "MOVE_MACH_PUNCH",
    "MOVE_MEGAHORN",
+   "MOVE_METEOR_MASH",
    "MOVE_REVENGE"
   ],
   "inFlight": 0,
-  "remaining": 15,
+  "remaining": 14,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
@@ -54,9 +55,9 @@
   "weightPct": {
    "live": 93.593,
    "faithfulRandom": 3.761,
-   "faithfulTiming": 0.502,
+   "faithfulTiming": 0.722,
    "inFlight": 0,
-   "remaining": 1.657
+   "remaining": 1.437
   },
   "remainingByGroup": {
    "MULTI": {
@@ -68,19 +69,19 @@
     "weightPct": 0.112
    },
    "PROVIDER-x": {
-    "moves": 3,
-    "weightPct": 0.48
+    "moves": 2,
+    "weightPct": 0.26
    }
   },
   "remainingByHostClass": {
    "H_BASIC": 1,
    "H_BUFFER": 11,
-   "H_DERIVED": 3,
+   "H_DERIVED": 2,
    "H_VARIANT": 3
   },
   "orderFirstBodyOnlyMoves": 9,
   "slotPlanNeededMoves": 11,
-  "sumsTo": "246+12+3+0+15=276",
+  "sumsTo": "246+12+4+0+14=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -134,24 +135,6 @@
    "meta": null
   },
   {
-   "provider": "C",
-   "label": "Random2 surrogate (presentation-only gRng2Value stream)",
-   "codes": [
-    "C"
-   ],
-   "aloneMoves": 1,
-   "aloneWeightPct": 0.22,
-   "aloneNames": [
-    "METEOR_MASH"
-   ],
-   "touchingMoves": 12,
-   "touchingWeightPct": 1.285,
-   "meta": {
-    "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
-    "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
-   }
-  },
-  {
    "provider": "X-AGE",
    "label": "accepted evidence lacks the early source ages (age basis)",
    "codes": [
@@ -203,6 +186,22 @@
    "meta": {
     "cost": "new large host (docs/animation-integration-readiness.md A6)",
     "claim": "only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today"
+   }
+  },
+  {
+   "provider": "C",
+   "label": "Random2 surrogate (presentation-only gRng2Value stream)",
+   "codes": [
+    "C"
+   ],
+   "aloneMoves": 0,
+   "aloneWeightPct": 0,
+   "aloneNames": [],
+   "touchingMoves": 11,
+   "touchingWeightPct": 1.065,
+   "meta": {
+    "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
+    "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
    }
   },
   {
@@ -406,25 +405,42 @@
   },
   {
    "step": 2,
-   "provider": "C",
+   "provider": "X-AGE",
    "newMoves": 1,
-   "newWeightPct": 0.22,
+   "newWeightPct": 0.112,
    "cumulativeRemainingUnlocked": 2,
    "newNames": [
-    "METEOR_MASH"
+    "EXTREME_SPEED"
    ]
   },
   {
    "step": 3,
+   "provider": "D-SCAN",
+   "newMoves": 1,
+   "newWeightPct": 0.037,
+   "cumulativeRemainingUnlocked": 3,
+   "newNames": [
+    "MEMENTO"
+   ]
+  },
+  {
+   "step": 4,
+   "provider": "C",
+   "newMoves": 0,
+   "newWeightPct": 0,
+   "cumulativeRemainingUnlocked": 3,
+   "newNames": []
+  },
+  {
+   "step": 5,
    "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
-   "newMoves": 8,
-   "newWeightPct": 0.591,
+   "newMoves": 7,
+   "newWeightPct": 0.554,
    "cumulativeRemainingUnlocked": 10,
    "newNames": [
     "ERUPTION",
     "EXTRASENSORY",
     "FLATTER",
-    "MEMENTO",
     "NIGHTMARE",
     "PSYWAVE",
     "SHOCK_WAVE",
@@ -432,7 +448,7 @@
    ]
   },
   {
-   "step": 4,
+   "step": 6,
    "provider": "X-DISABLE",
    "newMoves": 2,
    "newWeightPct": 0.147,
@@ -443,7 +459,7 @@
    ]
   },
   {
-   "step": 5,
+   "step": 7,
    "provider": "X-TWOTURN",
    "newMoves": 1,
    "newWeightPct": 0.187,
@@ -453,7 +469,7 @@
    ]
   },
   {
-   "step": 6,
+   "step": 8,
    "provider": "E-OUT",
    "newMoves": 1,
    "newWeightPct": 0.176,
@@ -463,61 +479,43 @@
    ]
   },
   {
-   "step": 7,
-   "provider": "X-AGE",
-   "newMoves": 1,
-   "newWeightPct": 0.112,
-   "cumulativeRemainingUnlocked": 15,
-   "newNames": [
-    "EXTREME_SPEED"
-   ]
-  },
-  {
-   "step": 8,
+   "step": 9,
    "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 15,
-   "newNames": []
-  },
-  {
-   "step": 9,
-   "provider": "D-TILE",
-   "newMoves": 0,
-   "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 15,
+   "cumulativeRemainingUnlocked": 14,
    "newNames": []
   },
   {
    "step": 10,
-   "provider": "D-BG",
+   "provider": "D-TILE",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 15,
+   "cumulativeRemainingUnlocked": 14,
    "newNames": []
   },
   {
    "step": 11,
-   "provider": "D-OAM",
+   "provider": "D-BG",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 15,
+   "cumulativeRemainingUnlocked": 14,
    "newNames": []
   },
   {
    "step": 12,
-   "provider": "D-VRAM",
+   "provider": "D-OAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 15,
+   "cumulativeRemainingUnlocked": 14,
    "newNames": []
   },
   {
    "step": 13,
-   "provider": "D-SCAN",
+   "provider": "D-VRAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 15,
+   "cumulativeRemainingUnlocked": 14,
    "newNames": []
   },
   {
@@ -525,7 +523,7 @@
    "provider": "F-AUDIO",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 15,
+   "cumulativeRemainingUnlocked": 14,
    "newNames": []
   }
  ],
@@ -559,7 +557,7 @@
     "H_VARIANT"
    ],
    "weightShare": 0.0018707482993197276,
-   "config": "src/animation/sceneOnPresentation.ts:3129",
+   "config": "src/animation/sceneOnPresentation.ts:3131",
    "needs": [
     "B",
     "C",
@@ -765,7 +763,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0003401360544217687,
-   "config": "src/animation/sceneOnPresentation.ts:3908",
+   "config": "src/animation/sceneOnPresentation.ts:3910",
    "needs": [
     "B",
     "C",
@@ -949,7 +947,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0011089852607709747,
-   "config": "src/animation/sceneOnPresentation.ts:2753",
+   "config": "src/animation/sceneOnPresentation.ts:2755",
    "needs": [
     "B",
     "C",
@@ -1504,7 +1502,7 @@
     "H_DERIVED"
    ],
    "weightShare": 0.0011160714285714283,
-   "config": "src/animation/sceneOnPresentation.ts:1499",
+   "config": "src/animation/sceneOnPresentation.ts:1501",
    "needs": [
     "X-AGE"
    ],
@@ -1513,7 +1511,7 @@
      "code": "X-AGE",
      "text": "evidence covers ages 48..350 only (window starts mid-body: activation 78, window 87, ageOffset 48, row 39); ages 0..47 never accepted; 1 rental species (Arcanine)",
      "cites": [
-      "src/animation/sceneOnPresentation.ts:1499",
+      "src/animation/sceneOnPresentation.ts:1501",
       "src/animation/extremeSpeed.ts:1"
      ]
     }
@@ -1544,7 +1542,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0007936507936507934,
-   "config": "src/animation/sceneOnPresentation.ts:2868",
+   "config": "src/animation/sceneOnPresentation.ts:2870",
    "needs": [
     "B",
     "C",
@@ -1996,7 +1994,7 @@
     "H_VARIANT"
    ],
    "weightShare": 0.0011337868480725622,
-   "config": "src/animation/sceneOnPresentation.ts:2827",
+   "config": "src/animation/sceneOnPresentation.ts:2829",
    "needs": [
     "D-OAM",
     "D-PAL",
@@ -2206,7 +2204,7 @@
     "H_DERIVED"
    ],
    "weightShare": 0.0003720238095238094,
-   "config": "src/animation/sceneOnPresentation.ts:1982",
+   "config": "src/animation/sceneOnPresentation.ts:1984",
    "needs": [
     "D-SCAN"
    ],
@@ -2239,46 +2237,6 @@
    "group": "PROVIDER-D-SCAN"
   },
   {
-   "move": "MOVE_METEOR_MASH",
-   "id": 309,
-   "name": "METEOR MASH",
-   "hostClass": [
-    "H_DERIVED"
-   ],
-   "weightShare": 0.002200255102040816,
-   "config": "src/animation/sceneOnPresentation.ts:1413",
-   "needs": [
-    "C"
-   ],
-   "blockers": [
-    {
-     "code": "C",
-     "text": "twinkles: 48 Random2-resolved variants (optional field; geometry.twinkles)",
-     "cites": [
-      "src/animation/meteorMash.ts:46",
-      "src/animation/meteorMash.ts:195"
-     ]
-    }
-   ],
-   "notes": [
-    "everything else is anchors + faint-attack-style profile"
-   ],
-   "staleCorrections": [],
-   "orderFirstBodyOnly": false,
-   "lentConstants": [],
-   "providerNeeds": [
-    "C"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "PROVIDER-C"
-  },
-  {
    "move": "MOVE_NIGHTMARE",
    "id": 171,
    "name": "NIGHTMARE",
@@ -2286,7 +2244,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0007121598639455781,
-   "config": "src/animation/sceneOnPresentation.ts:2696",
+   "config": "src/animation/sceneOnPresentation.ts:2698",
    "needs": [
     "B",
     "C",
@@ -2613,7 +2571,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0007369614512471653,
-   "config": "src/animation/sceneOnPresentation.ts:2741",
+   "config": "src/animation/sceneOnPresentation.ts:2743",
    "needs": [
     "B",
     "C",
@@ -3119,7 +3077,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0014739229024943307,
-   "config": "src/animation/sceneOnPresentation.ts:2339",
+   "config": "src/animation/sceneOnPresentation.ts:2341",
    "needs": [
     "B",
     "C",
@@ -3717,7 +3675,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0017644557823129248,
-   "config": "src/animation/sceneOnPresentation.ts:2712",
+   "config": "src/animation/sceneOnPresentation.ts:2714",
    "needs": [
     "B",
     "C",
@@ -4217,7 +4175,7 @@
     "H_VARIANT"
    ],
    "weightShare": 0.0003401360544217687,
-   "config": "src/animation/sceneOnPresentation.ts:2805",
+   "config": "src/animation/sceneOnPresentation.ts:2807",
    "needs": [
     "E-TASK",
     "D-OAM",
@@ -4419,7 +4377,7 @@
     "H_BASIC"
    ],
    "weightShare": 0.0022321428571428566,
-   "config": "src/animation/sceneOnPresentation.ts:3717",
+   "config": "src/animation/sceneOnPresentation.ts:3719",
    "needs": [
     "X-SUBST"
    ],
@@ -4430,7 +4388,7 @@
      "cites": [
       "reference/pokeemerald/data/battle_scripts_1.s:1085-1103",
       "src/engine/battleCommandFieldArt.ts:1",
-      "src/animation/sceneOnPresentation.ts:3717"
+      "src/animation/sceneOnPresentation.ts:3719"
      ]
     }
    ],
@@ -4460,7 +4418,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0003720238095238094,
-   "config": "src/animation/sceneOnPresentation.ts:2785",
+   "config": "src/animation/sceneOnPresentation.ts:2787",
    "needs": [
     "E-TASK",
     "D-OAM",

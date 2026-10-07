@@ -360,6 +360,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     224,
     // D4b faithful timing: Revenge windows start at activation (row 0; d4a-live/revenge-*.json).
     279,
+    // D4b faithful timing + D3: Meteor Mash windows start at activation (row 0; prep12 plans.json acceptedWindowStartMinusActivation 0).
+    309,
     // Sheer Cold (ISSUES #151, species audit 7 elevated FLYGON / GOLBAT opponent, both orientations): activation == window start (row 0).
     329,
   ].map((id) => [id, 0] as [number, number]).concat([
@@ -837,6 +839,8 @@ export function liveMoveAnimationDuration(
     case 224: return liveMoveTimingBodyRows(224);
     // Faithful timing (D4b): Revenge 145 rows both sides (activation .. first inactive); the policy picks the monbg BGnCNT write row.
     case 279: return 145;
+    // Faithful timing (D4b, + D3 Random2): Meteor Mash 213 + the policy's restore lag L (row 195) + the first inactive row = 215 both sides.
+    case 309: return liveMoveTimingBodyRows(309);
     case 295: return 332; // Luster Purge (prep29 B.5: 332 rows, constant in all four scenarios; faithful-random, plan rows in liveMovePresentationRng.ts).
     case 200: return 119; // Outrage (prep29 B.6: 119 rows, constant in all five bodies).
     case 229: return 130; // Rapid Spin (prep29 B.3: 130 rows, constant in all four scenarios).
@@ -3040,6 +3044,26 @@ export function liveMoveAnimationPresentation(
         ...battler, geometry: { ...battler.geometry, animationCenter: center, battlePositionCenter: center } });
       config = { move: "REVENGE", attacker: withCenter(attacker, attackerAnchors.spriteCenter), target: withCenter(target, targetAnchors.spriteCenter),
         fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
+      break;
+    }
+    case 309: {
+      // D4b faithful timing + D3: Meteor Mash (prep17 s0.1). 48 mini twinkling stars, two presentation-host words each in spawn order
+      // (miniTwinklingStarFromWords); the row-195 restore lag L from the timing policy. Non-shiny. Centres: the attacker's sprite centre, the
+      // target's Y_PIC_OFFSET point (the accepted seam: opponent target = its sprite centre, player target = centre + 8).
+      // The METEOR_MASH branch draws status-free healthboxes: a displayed status declines.
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if ((field.player.status ?? "none") !== "none" || (field.opponent.status ?? "none") !== "none") return null;
+      const words = liveMovePresentationRngWords(presentationRngInput)?.words;
+      if (words === undefined || words.length !== 96) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const withCenter = (battler: SceneOnPresentationBattler, center: { x: number; y: number }): SceneOnPresentationBattler => ({
+        ...battler, geometry: { ...battler.geometry, animationCenter: center } });
+      config = { move: "METEOR_MASH", attacker: withCenter(attacker, attackerAnchors.spriteCenter), target: withCenter(target, targetAnchors.picOffsetPoint),
+        fieldProfile: { ...fieldProfile, playerStatus: "none" }, restoreLagRows: liveMoveOptionalLagAge(309) === null ? 0 : 1,
+        twinkles: Array.from({ length: 48 }, (_, i) => {
+          const star = miniTwinklingStarFromWords(words[2 * i]!, words[2 * i + 1]!);
+          return { tile: star.tileOffset, y2: star.yOffset };
+        }) };
       break;
     }
     case 237: {

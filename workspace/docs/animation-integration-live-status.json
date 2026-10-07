@@ -3860,7 +3860,7 @@
     },
     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
   },
-  "faithfulTimingCount": 3,
+  "faithfulTimingCount": 4,
   "faithfulTimingAdapters": [
     {
       "id": 183,
@@ -4053,6 +4053,70 @@
         "python3 tools/integration/d4aScenarios.py && sh tools/integration/prep22Probes.sh PROBEDIR 1 mechanic-revenge-player-machamp-opponent-shuckle mechanic-revenge-opponent-qwilfish-player-shuckle prep25-revenge-alt-player-machoke-golem prep25-revenge-alt-opponent-machoke-golem d4a-revenge-extra-player-hitmonlee-golbat d4a-revenge-extra-opponent-hitmonlee-golbat",
         "python3 tools/integration/d4aFixtures.py PROBEDIR REVENGE",
         "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/d4a-live/revenge-*.json",
+        "npx vitest run tests/animation/liveFaithfulTimingAdapters.test.ts tests/animation/liveMoveTimingPolicy.test.ts"
+      ]
+    },
+    {
+      "id": 309,
+      "move": "MOVE_METEOR_MASH",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 195,
+          "fixedLagAges": [],
+          "iterations": 214,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 215,
+              "measured": 5
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 214,
+              "measured": 2
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          196,
+          197,
+          198,
+          199,
+          200,
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211
+        ],
+        "rows": 16,
+        "maxPixelsPerRow": 18589,
+        "cause": "the row-195 lag holds restorebg's fade-down one row (first row 196 + L): a no-lag window equals the policy body one row earlier from age 196 to the fade end (211); rows 0..195 and 212..213 are exact (accepted player METANG -> ONIX and D4b player METAGROSS -> GOLBAT, 2 of 5 windows)"
+      },
+      "d3": true,
+      "evidence": [
+        "tools/integration/fixtures/d4b-live-receipt.json",
+        "D3: Random2 words only from the per-battle presentation host (src/engine/liveMovePresentationRng.ts LIVE_MOVE_RANDOM2_PLANS[309]: 48 twinkles x 2 words, prep12 plans.json meteor-mash); dense windows pin the host to each scenario's activation gRng2Value",
+        "tools/integration/fixtures/d4a-live/meteor-mash-*.json (5 dense windows: accepted METANG -> ONIX both orientations, prep12 SHIFTRY -> GOLEM player, D4b METAGROSS -> GOLBAT both orientations; host pinned to each scenario's activation gRng2Value)",
+        "tools/integration/fixtures/prep17/meteor-mash-tail-receipt.json (prep17: lag in 4 of 5 bodies) + the D4b METAGROSS -> GOLBAT pair (opponent lag, player none): 5 of 7",
+        "tests/animation/liveFaithfulTimingAdapters.test.ts (D4b Meteor Mash: registration (not faithful random), dense receipt, the reducer's explicit L pin, D3 route seeds 0x1234abcd / 0xfeed0042 + Scene OFF parity)"
+      ],
+      "proofCommands": [
+        "python3 tools/integration/d4aScenarios.py && sh tools/integration/prep22Probes.sh PROBEDIR 1 mechanic-meteor-mash-player-metang-opponent-onix mechanic-meteor-mash-opponent-metang-player-onix prep12-meteor-mash-alt-shiftry-golem d4a-meteor-mash-extra-player-metagross-golbat d4a-meteor-mash-extra-opponent-metagross-golbat",
+        "python3 tools/integration/d4aFixtures.py PROBEDIR METEOR_MASH",
+        "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/d4a-live/meteor-mash-*.json",
         "npx vitest run tests/animation/liveFaithfulTimingAdapters.test.ts tests/animation/liveMoveTimingPolicy.test.ts"
       ]
     }

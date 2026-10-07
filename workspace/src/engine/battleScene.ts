@@ -1745,7 +1745,6 @@ const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFro
 const octilleryFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).OCTILLERY!;
 const baltoyFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).BALTOY!;
 const lunatoneFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LUNATONE!;
-const metangFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).METANG!;
 const dragonairFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DRAGONAIR!;
 const aronFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ARON!;
 const nidorinaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).NIDORINA!;
@@ -3228,7 +3227,6 @@ export const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBa
 const octilleryBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).OCTILLERY!;
 const baltoyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).BALTOY!;
 const lunatoneBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LUNATONE!;
-const metangBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).METANG!;
 const dragonairBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).DRAGONAIR!;
 const aronBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ARON!;
 const nidorinaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).NIDORINA!;
@@ -46368,23 +46366,19 @@ export function renderSceneOnMovePresentation(
       ...meteorState,
       age: state.age - 1,
     });
-    const playerToOpponent =
-      view.attacker.species === "METANG"
-      && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
-      && view.target.geometry.side === "opponent";
-    const opponentToPlayer =
-      view.attacker.species === "METANG"
-      && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
-      && view.target.geometry.side === "player";
-    if (!playerToOpponent && !opponentToPlayer) {
+    // D4b live Meteor Mash: any species pair through the live battler art (the staged METANG / ONIX pair resolves to the same assets).
+    const playerToOpponent = view.attacker.geometry.side === "player" && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.geometry.side === "opponent" && view.target.geometry.side === "player";
+    const meteorArt = (side: "player" | "opponent", species: string) => side === "player"
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[species]
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[species];
+    const attackerSprite = meteorArt(view.attacker.geometry.side, view.attacker.species);
+    const targetSprite = meteorArt(view.target.geometry.side, view.target.species);
+    if ((!playerToOpponent && !opponentToPlayer) || !attackerSprite || !targetSprite) {
       throw new Error(
         `unsupported staged METEOR_MASH pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const attackerSprite = playerToOpponent ? metangBackSprite : metangFrontSprite;
-    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
       ? sceneOnBattlerFrontIdleRest(view.target)
       : { x2: 0, y2: 0 };
@@ -46532,14 +46526,14 @@ export function renderSceneOnMovePresentation(
     const opponentMaxHp = Math.max(1, profile.opponentMaxHp);
     const playerMaxHp = Math.max(1, profile.playerMaxHp);
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
-      name: playerToOpponent ? "ONIX" : "METANG",
+      name: playerToOpponent ? view.target.species : view.attacker.species,
       level: 50,
       gender: profile.opponentGender ?? "male",
       hpFraction: profile.opponentHp / opponentMaxHp,
       status: "none",
     }));
     drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
-      name: playerToOpponent ? "METANG" : "ONIX",
+      name: playerToOpponent ? view.attacker.species : view.target.species,
       level: 50,
       gender: profile.playerGender ?? "male",
       hpFraction: profile.playerHp / playerMaxHp,
@@ -46550,7 +46544,7 @@ export function renderSceneOnMovePresentation(
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawMessageTextLines(
       fb,
-      playerToOpponent ? "METANG used" : "Foe METANG used",
+      playerToOpponent ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "METEOR MASH!",
       99,
     );
