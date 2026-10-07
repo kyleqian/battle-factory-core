@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-06 (night) — in progress: 226 -> 230 scoped-exact (hardware-OAM provider, Fire Punch)
+## 2026-10-06 (night) — in progress: 226 -> 231 scoped-exact (hardware-OAM provider, Fire Punch, Curse)
 
 - prep22 (side, `c31dfd3c1`, new files only, merged `e7b7a1ac3`): Fire Punch is a 101-row body identical across
   burn / no-burn / faint outcomes (flames = separate Status_Burn body 152-155 frames later; status animations are
@@ -58,6 +58,18 @@
   bits — monbg BGnCNT write row 7/8 and the restorebg fade ending early/late — which vary across windows
   ((8,late) accP, (8,early) accO, (7,late) altP/altO/onP, (8,late) onO) and are not derivable (flipping costs 16
   rows x 17.5k px). Supervisor: `prep24Run.sh` with fresh probes — all 12 receipts byte-identical.
+- Folded Opus worker `949b3c6fc` (src unchanged since `1b3ded85f`): EXACT Curse (174) non-Ghost body — source model
+  `src/animation/curseModel.ts` + provider `liveCurseStatsInputs` (`liveOamMoves.ts`); gate stats variant
+  (request.turn & 1), known order lend, non-shiny, zero idle rests -> 231. Falling-lines mask gate fixed (keyed on
+  the clearing step's BG1VOFS pre-wrap scroll; ONIX row 142 exact; 1,098 staged Curse framebuffers digest
+  unchanged). Ghost branch DECLINES: the row-26 palette transfer lands at a CPU-load-dependent vcount (17+HBlank vs
+  9 at the same script row; `curse-live/ghost-p1-vcount.json`). 19 of 20 Factory Curse sets are non-Ghost
+  (DUSCLOPS set 666). Dense 7 windows x 2 fresh 0 px (accepted SNORLAX P/O after Splash, MILTANK->GOLEM P/O,
+  ONIX->PIDGEOT, SKARMORY->GOLBAT, SKARMORY->PICHU); routes 28/28 MUK, 47/28 FLAREON active every age, 143/42
+  DUSCLOPS Ghost declines; ON/OFF parity. Worker gates 1,540 files / 12,515 tests, build 860. Supervisor: dense
+  rerun 4 windows 0 px r1 == r2; staged digest recomputed on the base (== branch); differential 389/389; union
+  typecheck, smoke, 7 files 126/126. OPEN: the gate admits any known lend but later-body evidence covers only a
+  Splash predecessor — >= 3 predecessors queued next (narrow to first body if any fails).
 
 ## 2026-10-06 (day, wind-down) — D3 implemented: 218 -> 226 exact + 10 faithful-random live adapters
 
