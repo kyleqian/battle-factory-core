@@ -5,11 +5,15 @@
  * source animation programs; the OAM rows come from liveMoveOamAssembler.ts. Never a capture row.
  */
 import willOWispAsset from "../animation/assets/will-o-wisp.json" with { type: "json" };
+import darkBgAsset from "../assets/gen/battle-anim-bg-dark.json" with { type: "json" };
+import paletteData from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
 import { willOWispTimeline } from "../animation/willOWisp.ts";
+import { pursuitTargetOffsetAtAge } from "../animation/pursuit.ts";
 import { KNOWN_ENTRY_NON_BATTLER_SPRITES } from "./liveBgSnapshotMoves.ts";
 import type { LivePaletteComposite } from "./liveMovePaletteComposite.ts";
 import {
-  KNOWN_ENTRY_HEALTHBOX_OAM, KNOWN_ENTRY_HEALTHBOX_SLOTS, liveWillOWispHardwareOamRows, type LiveOamScene, type OamAttr,
+  KNOWN_ENTRY_HEALTHBOX_OAM, KNOWN_ENTRY_HEALTHBOX_SLOTS, PURSUIT_ROWS, livePursuitHardwareOamRows, liveWillOWispHardwareOamRows,
+  type LiveOamScene, type OamAttr,
 } from "./liveMoveOamAssembler.ts";
 
 type Side = "player" | "opponent";
@@ -143,6 +147,114 @@ export function liveWillOWispInputs(args: LiveWillOWispArgs): LiveWillOWispInput
           orbLoaded: age >= 5, fireLoaded: age >= 2, allocator: null },
         spriteOrder: args.activationOrder, audio: null,
         liveCounts: { visualTasks: 0, soundTasks: 0, matrixBitmap: 0 }, animationRng: 0, gameplayRng: null, gameplayState: null,
+      };
+    },
+  };
+}
+
+export interface LivePursuitArgs {
+  readonly attackerSide: Side;
+  readonly attacker: LiveOamBattlerAnchors;
+  readonly target: LiveOamBattlerAnchors;
+  readonly palettes: LivePaletteComposite;
+  readonly activationOrder: readonly number[];
+  /** gAnimMovePower (AnimTask_ShakeTargetBasedOnMovePowerOrDmg amplitude). */
+  readonly movePower: number;
+}
+export interface LivePursuitInputs {
+  readonly impactCenter: Point;
+  readonly duration: number;
+  readonly animationInputsAt: (age: number) => Record<string, unknown>;
+}
+
+const pursuitCache = new Map<string, ReturnType<typeof livePursuitHardwareOamRows>>();
+const resourceWords = (name: string): readonly number[] =>
+  (paletteData.resources as Record<string, { colors: readonly number[] }>)[name]!.colors;
+/**
+ * Move_PURSUIT fadetobg BG_DARK / restorebg (Task_FadeToBg: BLDCNT 0xe8 darken, BLDY 0 -> 16, BG swap, 16 -> 0): rows 8..43
+ * (peak held 25..27) and 64..100 (peak held 81..84), measured identical in both accepted orientations and the alternates.
+ */
+const pursuitBldy = (age: number): { bldcnt: number; bldy: number } => {
+  if (age >= 8 && age <= 43) return { bldcnt: 0xe8, bldy: age <= 24 ? age - 8 : age <= 27 ? 16 : 43 - age };
+  if (age >= 64 && age <= 100) return { bldcnt: 0xe8, bldy: age <= 80 ? age - 64 : age <= 84 ? 16 : 100 - age };
+  return { bldcnt: 0, bldy: 0 };
+};
+
+/**
+ * MOVE_PURSUIT (228) normal body live inputs (prep20 s1.2): hardware OAM + matrices from the assembler (IMPACT slot 3 /
+ * matrix 0 / tile 305 / palette slot 7 = the known-entry lowest-free allocation), the target impact centre = target X_2 /
+ * Y_PIC_OFFSET; palette = composite + ANIM_TAG_IMPACT (OBJ bank 23) from row 2, the monbg copy of the target's OBJ bank
+ * into BG bank 8 / 9 from row 4, the BG_DARK bank-2 palette on rows 27..83; registers = S0 + MoveBattlerSpriteToBG /
+ * Task_UpdateMonBg (row 5: cnt, scroll 32 - (centre + shake x2 one row later); cleared on row 63), the BLDY ramps of
+ * fadetobg / restorebg and the hit-splat blend (bldcnt 0x3f40, bldalpha 0x080c on rows 47..58). Declines on a non-zero
+ * idle rest (the shake restores x2 to 0).
+ */
+export function livePursuitInputs(args: LivePursuitArgs): LivePursuitInputs | null {
+  const { attackerSide, attacker, target } = args;
+  if (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0
+    || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
+  const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
+  const attackerObject = battlerObject(attackerSide, attacker), targetObject = battlerObject(targetSide, target);
+  const impactCenter = target.picOffsetPoint;
+  const key = JSON.stringify([attackerSide, impactCenter, attackerObject.attr, targetObject.attr, args.activationOrder]);
+  let built = pursuitCache.get(key);
+  if (!built) {
+    built = livePursuitHardwareOamRows({ attacker: attackerObject, target: targetObject, scene: KNOWN_ENTRY_SCENE, impactCenter,
+      impactSlot: 3, impactMatrixNum: 0, impactTileBase: 305, impactPaletteSlot: 7, impactScale: 372, activationOrder: args.activationOrder });
+    if (pursuitCache.size > 16) pursuitCache.clear();
+    pursuitCache.set(key, built);
+  }
+  const rows = built;
+  const monbgBank = targetSide === "opponent" ? 8 : 9, targetObjBank = targetSide === "opponent" ? 17 : 16;
+  const layer = targetSide === "opponent" ? "bg1" : "bg2";
+  const darkBank2 = (darkBgAsset as unknown as { paletteBank2Bgr555: number[] }).paletteBank2Bgr555;
+  const impactPalette = resourceWords("ANIM_TAG_IMPACT");
+  const paletteAt = (age: number): number[] => {
+    const out = args.palettes.hardware.slice();
+    if (age >= 2) impactPalette.forEach((word, i) => { out[23 * 16 + i] = word; });
+    if (age >= 4) for (let i = 0; i < 16; i += 1) out[monbgBank * 16 + i] = out[targetObjBank * 16 + i]!;
+    if (age >= 27 && age < 84) darkBank2.forEach((word, i) => { out[2 * 16 + i] = word; });
+    return out;
+  };
+  const registersAt = (age: number): Record<string, number> => {
+    const registers: Record<string, number> = { ...S0_REGISTERS, ...pursuitBldy(age) };
+    if (age >= 1) { registers.win0h = 0; registers.win0v = 0; }
+    if (age >= 47 && age <= 58) { registers.bldcnt = 0x3f40; registers.bldalpha = 0x080c; }
+    if (age >= 5) {
+      registers[`${layer}cnt`] = targetSide === "opponent" ? 0x5c02 : 0x5e02;
+      if (age < 63) {
+        const shake = pursuitTargetOffsetAtAge(age - 1, args.movePower, { x: 0, y: 0 });
+        registers[`${layer}hofs`] = (32 - (target.spriteCenter.x + shake.x)) & 0x1ff;
+        registers[`${layer}vofs`] = (32 - (target.spriteCenter.y + shake.y)) & 0x1ff;
+      }
+    }
+    return registers;
+  };
+  const unconsumedOam = Object.freeze(Array<null>(128).fill(null));
+  return {
+    impactCenter, duration: PURSUIT_ROWS,
+    animationInputsAt: (age: number) => {
+      const row = Math.min(age, rows.oam.length - 1), palette = paletteAt(age);
+      return {
+        branch: "normal",
+        attackerSpriteSlot: attackerObject.slot, targetSpriteSlot: targetObject.slot,
+        attackerAttr2: attackerObject.attr[2], targetAttr2: targetObject.attr[2],
+        targetInitialOffset: { x: 0, y: 0 },
+        // Task slots only label the reducer's task records (not drawn).
+        taskSlots: { fadeToDark: 2, monbg: 1, shake: 3, clearMonbg: 1, restoreBattle: 2 },
+        impact: { slot: 3, matrixSlot: 0, attr: [0, 0, 0], subpriority: attackerObject.subpriority - 3, paletteSlot: 7, tileSlot: 6,
+          allocator: { tileRanges: Object.assign([], { 6: [305, 16] }) } },
+        monbg: { layer, spriteX: target.spriteCenter.x, spriteY: target.spriteCenter.y,
+          bgX: 32 - target.spriteCenter.x, bgY: 32 - target.spriteCenter.y, inBg2: targetSide === "player", battlerId: targetSide === "player" ? 0 : 1 },
+        spriteOrder: args.activationOrder,
+        buffers: { softwareOam: unconsumedOam, hardwareOam: rows.oam[row]!, softwareMatrices: IDENTITY_MATRICES, hardwareMatrices: rows.matrices[row]! },
+        palette: { unfaded: palette, faded: palette, hardware: palette },
+        registers: registersAt(age),
+        background: { currentVram: null, battleVram: null, darkVram: null },
+        sharedTaskData: { fadeToDark: Array(16).fill(0), restoreBattle: Array(16).fill(0) },
+        audio: { current: null, targetPan: 0 },
+        liveCounts: { visualTasks: 0, soundTasks: 0, matrixBitmap: 0 },
+        movePower: args.movePower, moveDamage: 0, animationRng: 0, gameplayRng: null, gameplayState: null,
       };
     },
   };

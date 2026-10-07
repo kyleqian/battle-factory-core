@@ -1,0 +1,40 @@
+{
+ "schema": "oam1-live-adapter-fixture/v1",
+ "move": "PURSUIT",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/oam1-pursuit-alt2-sneasel-golbat.json",
+ "denseWindow": {
+  "startFrame": 72,
+  "endFrame": 174
+ },
+ "windowSource": "window = [activation, activation + 102]; activation = the scenario's own first anim-active frame (fresh prep18Probe.py run)",
+ "attacker": {
+  "species": "SNEASEL",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349018753,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 130,
+  "playerMaxHp": 130,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 40
+ }
+}

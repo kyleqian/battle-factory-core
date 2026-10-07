@@ -184,3 +184,56 @@ export function liveWillOWispHardwareOamRows(input: LiveWillOWispOamInputs): str
   }
   return rows;
 }
+
+export interface LivePursuitOamInputs {
+  readonly attacker: LiveOamBattler;
+  readonly target: LiveOamBattler;
+  readonly scene: LiveOamScene;
+  /** InitSpritePosToAnimTarget(TRUE): the target's X_2 / Y_PIC_OFFSET. */
+  readonly impactCenter: Point;
+  /** Known-entry allocator values of the IMPACT hit splat (lowest-free slot, matrix, tile base, palette slot). */
+  readonly impactSlot: number;
+  readonly impactMatrixNum: number;
+  readonly impactTileBase: number;
+  readonly impactPaletteSlot: number;
+  /** sBasicHitSplat affine anim end scale: 372 (anim 2, normal) / 303 (anim 1, switch interception). */
+  readonly impactScale: number;
+  readonly activationOrder: readonly number[];
+}
+
+/** createsprite gBasicHitSplatSpriteTemplate, ANIM_TARGET, 3: subpriority = attacker subpriority - 3 (prep20 s1.2). */
+const PURSUIT_IMPACT_SUBPRIORITY_OFFSET = 3;
+export const PURSUIT_ROWS = 103;
+
+/**
+ * Per-row hardware OAM of one Pursuit body (rows 0..102): the static attacker, the target absent from the builds of states
+ * [5, 58] (monbg), and the IMPACT hit splat (AffineNormal ObjBlend 32x32, priority 2) alive for states 47..56 with its
+ * constant end matrix in its matrix slot, folded into the entry pad words like the hardware buffer.
+ */
+export function livePursuitHardwareOamRows(input: LivePursuitOamInputs): { oam: string[][]; matrices: (readonly [number, number, number, number])[][] } {
+  const impactAttr: OamAttr = [0x0100 | 0x0400 | (input.impactCenter.y - 16) & 0xff,
+    0x8000 | input.impactMatrixNum << 9 | (input.impactCenter.x - 16) & 0x1ff,
+    input.impactTileBase | 2 << 10 | input.impactPaletteSlot << 12];
+  const spritesAt = (state: number): LiveOamSprite[] => {
+    const out: LiveOamSprite[] = input.scene.occupants.map((o) => ({ ...o, oamY: o.attr[0] & 0xff }));
+    out.push({ ...input.attacker, visible: true, oamY: input.attacker.attr[0] & 0xff });
+    out.push({ ...input.target, visible: !(state >= 5 && state <= 58), oamY: input.target.attr[0] & 0xff });
+    if (state >= 47 && state <= 56) out.push({ slot: input.impactSlot, attr: impactAttr, visible: true, oamY: impactAttr[0] & 0xff,
+      subpriority: input.attacker.subpriority - PURSUIT_IMPACT_SUBPRIORITY_OFFSET });
+    return out;
+  };
+  const matricesAt = (state: number) => Array.from({ length: 32 }, (_, index) =>
+    state >= 47 && state <= 56 && index === input.impactMatrixNum
+      ? [input.impactScale, 0, 0, input.impactScale] as const : IDENTITY);
+  const oam: string[][] = [], matrices: (readonly [number, number, number, number])[][] = [];
+  let order: readonly number[] = input.activationOrder;
+  let previous = spritesAt(-1);
+  for (let row = 0; row < PURSUIT_ROWS; row += 1) {
+    const m = matricesAt(row - 1);
+    oam.push(buildLiveHardwareOam(order, previous, input.scene.healthbox, m));
+    matrices.push(m);
+    previous = spritesAt(row);
+    order = carryLiveSpriteOrder(order, previous);
+  }
+  return { oam, matrices };
+}

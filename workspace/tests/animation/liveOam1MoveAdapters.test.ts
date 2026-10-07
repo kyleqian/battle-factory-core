@@ -116,3 +116,46 @@ describe("oam1 production hardware-OAM provider: MOVE_WILL_O_WISP", () => {
     }
   }, 240000);
 });
+
+describe("oam1 production hardware-OAM provider: MOVE_PURSUIT", () => {
+  it("registers the normal body (103 rows, activation shadow row) and declines the switch-interception body", () => {
+    expect(LIVE_MOVE_ANIMATION_IDS).toContain(228);
+    expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[228]).toBe(0);
+    for (const a of [0, 1] as const) expect(liveMoveAnimationDuration(request(228, a))).toBe(103);
+    expect(liveMoveAnimationDuration(request(228, 1, { turn: 1 }))).toBeNull();
+    const field = displayed("SNEASEL", "GOLBAT");
+    expect(liveMoveAnimationPresentation(request(228, 0, { power: 40 }), field, 47, undefined, undefined, firstBodyOrder())?.config.move).toBe("PURSUIT");
+    expect(liveMoveAnimationPresentation(request(228, 0, { power: 40, turn: 1 }), field, 47, undefined, undefined, firstBodyOrder())).toBeNull();
+    expect(liveMoveAnimationPresentation(request(228, 0, { power: 40 }), field, 47)).toBeNull();
+    const later = prepareLiveMoveSpriteOrder(knownEntrySpriteOrderState("ordinary-factory"), request(228, 0)).input!;
+    expect(liveMoveAnimationPresentation(request(228, 0, { power: 40 }), field, 47, undefined, undefined, later)).toBeNull();
+  });
+
+  it("builds the retained corpus hardware OAM (entries + matrix pad words) on every body row, both accepted orientations", () => {
+    for (const [name, path] of [
+      ["pursuit-player-beedrill-opponent-shuckle", "tools/compare/evidence/pursuit-player-dense-state.json.gz"],
+      ["pursuit-opponent-beedrill-player-shuckle", "tools/compare/evidence/pursuit-opponent-dense-state.json.gz"],
+    ] as const) {
+      const rows = corpus(path), f = fixture(name);
+      let exact = 0;
+      for (let age = 1; age < rows.length; age += 1) if (JSON.stringify(hardwareOamAt(f, age)) === JSON.stringify(rows[age]!.hardwareOam)) exact += 1;
+      expect(exact).toBe(rows.length - 1);
+    }
+  });
+
+  // orderConsumerRouteScan.ts PURSUIT 228: first-body player Pursuit on generated rentals.
+  it.each([[52, 0, 1], [38, 14, 2]] as const)("route %i/%i slot %i: active every age, prompt reached, ON/OFF parity", (seed, streak, slot) => {
+    const on = generatedCommandAnimationReplay(seed, "on", [slot], streak);
+    const off = generatedCommandAnimationReplay(seed, "off", [slot], streak);
+    const bodies = on.animations.filter(a => a.moveId === 228 && a.attacker === 0);
+    expect(bodies.map(b => b.ages.length)).toEqual([103]);
+    expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
+    expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    expect(off.boundaries).toHaveLength(on.boundaries.length);
+    for (let i = 0; i < on.boundaries.length; i += 1) {
+      expect(rulesWithoutSceneMarker(on.boundaries[i]!)).toEqual(rulesWithoutSceneMarker(off.boundaries[i]!));
+      expect(on.boundaries[i]!.rng).toEqual(off.boundaries[i]!.rng);
+      expect(on.boundaries[i]!.boundary).toEqual(off.boundaries[i]!.boundary);
+    }
+  }, 240000);
+});

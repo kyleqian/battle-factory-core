@@ -4962,6 +4962,44 @@
     "body": "normal",
     "activation": "tools/integration/fixtures/prep18/prep18-activation.json (activation == window start); elevated GOLBAT dense window 0 px (oam1-live-adapter-receipt.json)"
    }
+  },
+  {
+   "id": 228,
+   "move": "PURSUIT",
+   "orientation": "player",
+   "variant": "oam1-pursuit-player-beedrill-opponent-shuckle",
+   "activationFrame": 73,
+   "windowStart": 73,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/oam1-live/pursuit-player-beedrill-opponent-shuckle.json",
+    "scenario": "tools/battle-lab/mechanic-pursuit-player-beedrill-opponent-shuckle.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep18/prep18-activation.json (activation == window start); elevated GOLBAT dense window 0 px (oam1-live-adapter-receipt.json)"
+   }
+  },
+  {
+   "id": 228,
+   "move": "PURSUIT",
+   "orientation": "opponent",
+   "variant": "oam1-pursuit-opponent-beedrill-player-shuckle",
+   "activationFrame": 77,
+   "windowStart": 77,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/oam1-live/pursuit-opponent-beedrill-player-shuckle.json",
+    "scenario": "tools/battle-lab/mechanic-pursuit-opponent-beedrill-player-shuckle.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep18/prep18-activation.json (activation == window start); elevated GOLBAT dense window 0 px (oam1-live-adapter-receipt.json)"
+   }
   }
  ]
 }

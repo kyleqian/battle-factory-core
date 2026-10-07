@@ -418,6 +418,12 @@ function shakeAtAge(age: number, input: Readonly<PursuitLiveInputs>): Readonly<{
   };
 }
 
+/** The target battler's x2/y2 under AnimTask_ShakeTargetBasedOnMovePowerOrDmg at `age` (live OAM/monbg providers). */
+export function pursuitTargetOffsetAtAge(age: number, movePower: number, targetInitialOffset: Readonly<PursuitPoint>): PursuitPoint {
+  return shakeAtAge(age, { movePower, targetInitialOffset, targetSpriteSlot: 0,
+    taskSlots: { shake: 0 } } as unknown as PursuitLiveInputs).targetOffset;
+}
+
 function phaseAtAge(age: number): PursuitState["background"]["phase"] {
   if (age < 7 || age >= 82) return "battle";
   if (age < 26) return "fading-to-dark";
