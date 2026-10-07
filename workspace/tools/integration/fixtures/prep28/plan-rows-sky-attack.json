@@ -1,0 +1,97 @@
+{
+ "schema": "sprite-order-body-plans/rows-v1",
+ "note": "Sky Attack charge/strike split rows; 10143:* requires host change moveId -> 10000+moveId when request.turn===1 (see prep28-temp-src.patch)",
+ "bodies": {
+  "143:player": {
+   "verdict": "EXACT-PLAN",
+   "rule": "charge turn (MOVE_ANIMATION turn 0): no sort windows",
+   "tier": "confirmed",
+   "plan": [],
+   "census": {
+    "bodies": 5,
+    "scenarios": [
+     "143-mechanic-sky-attack-player-fearow-opponent-shuckle-0.json",
+     "143-player-diglett-chansey-A.json",
+     "143-player-dragonair-chansey-A.json",
+     "143-player-onix-pidgeotto-A.json"
+    ]
+   }
+  },
+  "10143:player": {
+   "verdict": "EXACT-PLAN",
+   "rule": "strike turn (MOVE_ANIMATION turn 1), key = 10000 + move id: needs the turn discriminator in the host mapping",
+   "tier": "confirmed",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "census": {
+    "bodies": 3,
+    "scenarios": [
+     "143-mechanic-sky-attack-player-fearow-opponent-shuckle-0.json",
+     "143-player-diglett-chansey-A.json"
+    ]
+   }
+  },
+  "143:opponent": {
+   "verdict": "EXACT-PLAN",
+   "rule": "charge turn (MOVE_ANIMATION turn 0): no sort windows",
+   "tier": "confirmed",
+   "plan": [],
+   "census": {
+    "bodies": 5,
+    "scenarios": [
+     "143-mechanic-sky-attack-opponent-fearow-player-shuckle-0.json",
+     "143-opponent-diglett-chansey-A.json",
+     "143-opponent-dragonair-chansey-A.json",
+     "143-opponent-onix-pidgeotto-A.json"
+    ]
+   }
+  },
+  "10143:opponent": {
+   "verdict": "EXACT-PLAN",
+   "rule": "strike turn (MOVE_ANIMATION turn 1), key = 10000 + move id: needs the turn discriminator in the host mapping",
+   "tier": "confirmed",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "census": {
+    "bodies": 2,
+    "scenarios": [
+     "143-mechanic-sky-attack-opponent-fearow-player-shuckle-0.json"
+    ]
+   }
+  }
+ }
+}
