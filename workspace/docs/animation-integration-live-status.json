@@ -3299,10 +3299,11 @@
       "liveEvidence": [
         "dense 230/230 zero residual twice fresh through the production live renderer: SOLROCK -> SHUCKLE (player) and MAGCARGO -> SHUCKLE (opponent) first bodies + CHARIZARD -> GOLEM alternate (window = each scenario's own source window = activation + 0)",
         "first-body gate: the order host's body counter (liveSpriteOrderHost.ts, LiveMoveSpriteOrderInput.firstBody); palettes = composeLivePalettes (assets only, liveMovePaletteComposite.ts); plan row 315 in live-animation-palette-resources.json",
-        "ordinary routes 4/14 MAGCARGO and 69/14 SOLROCK: first body reached, adapter active every age, following prompt reached, ON/OFF rules/RNG/boundary equal"
+        "ordinary routes 4/14 MAGCARGO and 69/14 SOLROCK: first body reached, adapter active every age, following prompt reached, ON/OFF rules/RNG/boundary equal",
+        "r2-gates (docs/later-bodies-overheat-psychup.md, receipt ../tools/integration/fixtures/r2-gates-firepunch-receipt.json): LATER bodies, both sides: dense 230/230 0 px twice fresh through the UNPATCHED production renderer after Tackle / Splash / Psychic / Growl+stat / Swords Dance+stat (tools/integration/fixtures/later-bodies-bg-2/oh2-*.json); gate = known order lend + known-entry occupancy (as Silver Wind / Psych Up); an ordinary route with a later player Overheat: seeds 43/35, 162/14, 175/35 adapter active every age, action menu reached"
       ],
       "remaining": [
-        "later bodies (a battle's second and later animation unit) decline to the scene-off view: the activation BG registers/scroll after an earlier body need the BG-register tracker (prep16 s0.3 transition table, not built)",
+        "a later Overheat after an earlier Overheat of the battle has no sprite-order plan (the lend is unknown), so it declines to the scene-off view; the Overheat SpAtk -2 stat unit only matters for a following body",
         "shiny battlers decline (no shiny battle palette in the repo)",
         "an opponent attacker/target whose front idle x2 is non-zero (ONIX / RATTATA right after a send-in) declines: the renderer draws no idle offset",
         "independent arbitrary-species/history framebuffer comparison"
@@ -3335,15 +3336,15 @@
         "PLAYER attacker first body only: dense 179/179 zero residual twice fresh through the production live renderer: JUMPLUFF -> SHUCKLE (the prep16 first-body capture) + SKIPLOOM -> GOLEM alternate first body (new scenario tools/battle-lab/prep16-alt-psychup-player-skiploom-golem-first.json; window = its own source window = activation + 0)",
         "same first-body gate, composite and plan row 244 (ANIM_TAG_SPIRAL) as Overheat; first-body activation state: bg2cnt 0x5e00, identity matrices, hardware scroll 0",
         "ordinary routes 66/7 JUMPLUFF and 15/28 METAGROSS first body active every age; later player bodies live with a known order lend",
-        "LATER player bodies (later-bodies-bg receipt): dense 179/179 0 px twice fresh after a foe Tackle / Splash / Psychic; the compositor reads bldalpha only from age 8 (rewritten from age 7) and never bgCnt / hardwareScroll (frame-identical under S0 / rule / absurd activation registers)"
+        "LATER player bodies (later-bodies-bg receipt): dense 179/179 0 px twice fresh after a foe Tackle / Splash / Psychic; the compositor reads bldalpha only from age 8 (rewritten from age 7) and never bgCnt / hardwareScroll (frame-identical under S0 / rule / absurd activation registers)",
+        "r2-gates (docs/later-bodies-overheat-psychup.md, receipt ../tools/integration/fixtures/r2-gates-firepunch-receipt.json): OPPONENT attacker (duration 179 either side; inputs: spiral subpriority 38, painterInsertionIndex 7, scaleMatrixSlot 2, monBg bg1 / battler 1 / copy bank 8 / initialBgCnt 0x9c00 / monBgCnt 0x5c02, attackerBank 17, attackerPictureOrigin = sprite centre, all derived in liveBgSnapshotMoves.ts): dense 179/179 0 px twice fresh through the unpatched production renderer, first body + after Tackle / Splash / Psychic / Growl+stat / Swords Dance+stat + after its own earlier Psych Up (later-bodies-bg-2/pu-o-*.json), alternate species HYPNO -> GOLBAT (elevated target) and CLAYDOL -> GOLEM (tools/integration/fixtures/r2-gates/pua-*.json); ordinary routes 336/7 and 713/7 (opponent JUMPLUFF first body) active every age, action menu reached"
       ],
       "remaining": [
-        "the OPPONENT attacker declines: its first body (bg1cnt 0x9c00, bg1vofs 0) was not captured (prep16 s0.1)",
         "later bodies run live when the production order host lends a known order with the known-entry occupancy; a later body after an unplanned predecessor (e.g. Sand-Attack 28, Hyper Beam 63: order unknown) or after a KO with non-entry battler slots declines",
         "shiny battlers decline (no shiny battle palette in the repo)",
         "an opponent target with a non-zero front idle x2 (ONIX / RATTATA after a send-in) declines",
         "independent arbitrary-species/history framebuffer comparison",
-        "later player bodies after a stat body (Growl / Swords Dance + STATS_CHANGE) have no dense fixture yet"
+        "opponent attacker alternate-species breadth is 2 pairs (HYPNO -> GOLBAT, CLAYDOL -> GOLEM); MR_MIME -> MAGNETON showed a constant 537 px/row from age 0 (field + chrome, not body-dependent; unresolved, not claimed); an opponent attacker with a non-zero idle rest declines; no ordinary route reached a LATER opponent Psych Up with a known lend (routes searched: streaks 7/21/28/35/49 lead-carrier seeds, later bodies had 207/136 predecessors with unknown order)"
       ],
       "laterBodyEvidence": "../tools/integration/fixtures/later-bodies-bg-receipt.json"
     },
@@ -3406,6 +3407,27 @@
         "shiny battlers and battlers with a non-zero front idle rest decline",
         "independent arbitrary-species/history framebuffer comparison"
       ]
+    },
+    {
+      "move": "MOVE_FIRE_PUNCH",
+      "id": 7,
+      "sourceFieldEvidence": [
+        "../docs/next-adapters-prep22.md",
+        "../tools/integration/fixtures/prep22/fire-punch.json"
+      ],
+      "liveEvidence": [
+        "BODY-ONLY (Move_FIRE_PUNCH 101 rows, A .. first inactive; identical across burn / no-burn / faint, both orientations): dense 101/101 0 px twice fresh through the production live renderer, both orientations: staged ONIX/GROVYLE (tools/integration/fixtures/r2-gates/fp-staged-*.json), the six ONIX/GROVYLE lab outcomes burn / no-burn / faint per side (fp-{player,opponent}-{burn,noburn,faint}.json) and alternate species HITMONCHAN -> GOLBAT (elevated target), SNORLAX -> ALAKAZAM (player), GOLBAT (elevated attacker) -> MACHAMP, SNORLAX -> GOLEM (opponent); windows = each scenario's own Move_FIRE_PUNCH activation; fixtures after an earlier Tackle body (known order lend) are 0 px (receipt ../tools/integration/fixtures/r2-gates-firepunch-receipt.json)",
+        "renderer: staged-only branch gained a liveField branch (live species art, opponent idle rest replaced by the target hit shake at reducer age 72, no burn flames, no healthbox/text); config = neutral resolution profile, animationAgeOffset 27 (reducer age at activation, both sides)",
+        "ordinary routes with a Fire Punch body: see the receipt (generated seeds, adapter active every age, action menu reached, ON/OFF rules/RNG equal)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "order-independent in the measured scenarios (the body reads geometry + age only; the 4 simultaneous equal-subpriority sprites of a later body are not claimed)",
+      "remaining": [
+        "the BURN FLAMES are the separate Status_Burn body 152-155 frames after the Fire Punch body (38 frames, 3 BurnFlame sprites): status-animation events are not drawn in production, so a Fire Punch burn reaches its prompt with NO flames (documented, expected); a Status_Burn adapter is separate work",
+        "HP drain, 'burned' text, faint sink and the hit wobble are queue commands, not part of this body",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3429,7 +3451,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 229,
+  "implementedCount": 230,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 10,

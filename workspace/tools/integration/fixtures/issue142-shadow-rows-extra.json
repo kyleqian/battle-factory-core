@@ -1,6 +1,6 @@
 {
  "schema": "issue142-shadow-rows-extra/v1",
- "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep7 rows from issue142ShadowRowsPrep7.py) (+ prep8 rows from issue142ShadowRowsPrep8.py) (+ prep9 rows from issue142ShadowRowsPrep9.py) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep13 ICE_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep13 WATER_SPOUT rows from issue142ShadowRowsPrep13.py) (+ prep13 HIDDEN_POWER rows from issue142ShadowRowsPrep13.py) (+ prep13 HYPER_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep14 RAIN_DANCE rows from issue142ShadowRowsPrep14.py) (+ prep14 WATER_PULSE rows from issue142ShadowRowsPrep14.py) (+ prep14 HAIL rows from issue142ShadowRowsPrep14.py) (+ prep16 Overheat/Silver Wind rows from issue142ShadowRowsPrep16.py) (+ prep16 Overheat/Silver Wind rows from issue142ShadowRowsPrep16.py)",
+ "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep7 rows from issue142ShadowRowsPrep7.py) (+ prep8 rows from issue142ShadowRowsPrep8.py) (+ prep9 rows from issue142ShadowRowsPrep9.py) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep13 ICE_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep13 WATER_SPOUT rows from issue142ShadowRowsPrep13.py) (+ prep13 HIDDEN_POWER rows from issue142ShadowRowsPrep13.py) (+ prep13 HYPER_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep14 RAIN_DANCE rows from issue142ShadowRowsPrep14.py) (+ prep14 WATER_PULSE rows from issue142ShadowRowsPrep14.py) (+ prep14 HAIL rows from issue142ShadowRowsPrep14.py) (+ prep16 Overheat/Silver Wind rows from issue142ShadowRowsPrep16.py) (+ prep16 Overheat/Silver Wind rows from issue142ShadowRowsPrep16.py) (+ r2-gates Fire Punch / Psych Up opponent rows from issue142ShadowRowsR2Gates.py)",
  "rows": [
   {
    "id": 236,
@@ -5037,6 +5037,63 @@
     "scenario": "tools/battle-lab/mechanic-fury-cutter-opponent-grovyle-player-blissey.json",
     "body": "normal",
     "activation": "tools/integration/fixtures/prep18/prep18-activation.json bodyIndex 0 (activation == window start); elevated GOLBAT dense window 0 px (oam1-live-adapter-receipt.json)"
+   }
+  },
+  {
+   "id": 7,
+   "move": "FIRE_PUNCH",
+   "orientation": "player",
+   "variant": "r2g-r2-gates-fp-player-noburn",
+   "activationFrame": 219,
+   "windowStart": 219,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/r2-gates/fp-player-noburn.json",
+    "scenario": "tools/battle-lab/prep22-fire-punch-player-seed1.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own body activation (prep22 s0.2 / lb21 bodyWindows)"
+   }
+  },
+  {
+   "id": 7,
+   "move": "FIRE_PUNCH",
+   "orientation": "opponent",
+   "variant": "r2g-r2-gates-fp-opponent-noburn",
+   "activationFrame": 218,
+   "windowStart": 218,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/r2-gates/fp-opponent-noburn.json",
+    "scenario": "tools/battle-lab/prep22-fire-punch-opponent-seed1.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own body activation (prep22 s0.2 / lb21 bodyWindows)"
+   }
+  },
+  {
+   "id": 244,
+   "move": "PSYCH_UP",
+   "orientation": "opponent",
+   "variant": "r2g-later-bodies-bg-2-pu-o-first-b0",
+   "activationFrame": 73,
+   "windowStart": 73,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/later-bodies-bg-2/pu-o-first-b0.json",
+    "scenario": "tools/battle-lab/lb21-pu-o-first.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own body activation (prep22 s0.2 / lb21 bodyWindows)"
    }
   }
  ]

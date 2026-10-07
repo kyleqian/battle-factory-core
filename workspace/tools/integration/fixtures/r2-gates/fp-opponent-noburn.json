@@ -1,0 +1,44 @@
+{
+ "schema": "r2-gates-fire-punch-fixture/v1",
+ "move": "FIRE_PUNCH",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep22-fire-punch-opponent-seed1.json",
+ "denseWindow": {
+  "startFrame": 218,
+  "endFrame": 318,
+  "ageOffset": 0
+ },
+ "windowSource": "r2-gates: the scenario's own Move_FIRE_PUNCH body A .. first inactive (101 rows; prep22Probe.py direct-mGBA bodies), never matched to live output",
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "player"
+  }
+ ],
+ "attacker": {
+  "species": "GROVYLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 110,
+  "playerMaxHp": 110,
+  "opponentHp": 120,
+  "opponentMaxHp": 132,
+  "playerLevel": 50,
+  "opponentLevel": 50,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

@@ -1,0 +1,44 @@
+{
+ "schema": "r2-gates-fire-punch-fixture/v1",
+ "move": "FIRE_PUNCH",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/r2g-fp-p-hitmonchan-golbat.json",
+ "denseWindow": {
+  "startFrame": 225,
+  "endFrame": 325,
+  "ageOffset": 0
+ },
+ "windowSource": "r2-gates: the scenario's own Move_FIRE_PUNCH body A .. first inactive (101 rows; prep22Probe.py direct-mGBA bodies), never matched to live output",
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ],
+ "attacker": {
+  "species": "HITMONCHAN",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 118,
+  "playerMaxHp": 132,
+  "opponentHp": 150,
+  "opponentMaxHp": 150,
+  "playerLevel": 50,
+  "opponentLevel": 50,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

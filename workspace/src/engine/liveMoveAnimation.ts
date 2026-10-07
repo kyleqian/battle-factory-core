@@ -200,6 +200,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   315, 318,
   // prep16 s2.3 + lb21: Psych Up, both attackers (known order lend).
   244,
+  // r2-gates (docs/next-adapters-prep22.md s0/A): Fire Punch BODY only (101 rows; the burn flames are the separate Status_Burn body).
+  7,
 ] as const);
 
 /** In-use OBJ slots at a first-body activation (prep14 s1: equal in all 24 probed scenarios). */
@@ -261,8 +263,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // rows owned by the preceding message command); the live age basis is the activation frame (reducer age 42 / 44), so
     // the shadow row is live age 0.
     332, 98,
-    // Ice Punch (staged windows start at activation: row 0). Sleep Talk likewise.
-    8, 214, 157, 126, 349,
+    // Ice Punch (staged windows start at activation: row 0). Sleep Talk likewise. Fire Punch (prep22 s0.2: body A = row 0).
+    8, 7, 214, 157, 126, 349,
     // prep8 (issue142-shadow-rows-extra.json): every window starts at the activation frame (row 0).
     129, 271, 218, 69, 32, 62, 253, 85, 254, 192,
     // prep10 (issue142-shadow-rows-extra.json): Magnitude / Reversal windows start at the activation frame (row 0).
@@ -741,6 +743,7 @@ export function liveMoveAnimationDuration(
     case 138: return request.attacker === 0 ? 266 : 267; // Dream Eater 1308..1573 / 2146..2412 (after Tackle, Sing).
     case 349: return 142; // Dragon Dance (78..219 / 74..215): window start = activation, window end = script end.
     case 126: return 197; // Fire Blast (1147..1343 / 215..411): window start = activation, window end = script end.
+    case 7: return 101; // Fire Punch body A..first inactive (prep22 s0.1/A.1: identical across burn / no-burn / faint, both sides); Status_Burn is a later body.
     case 8: return 184; // Ice Punch script activation..first inactive row (staged 1966..2149 / 2339..2522); HP/text/freeze/Sitrus rows are queue commands.
     case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
@@ -1823,6 +1826,16 @@ export function liveMoveAnimationPresentation(
             resultKind: "notVeryEffective" as const, currentMoveResetAge: never } };
       break;
     }
+    case 7:
+      // prep22 s0.1/A.5: the body reads the geometry + the reducer age only (reducer age 27 at activation, both sides). The
+      // resolution profile is the measured neutral constant (no HP commit / roll / burn: never-reached ages; the burn flames are
+      // the separate Status_Burn body, which the live renderer never draws from this config). The opponent's idle rest is drawn by the
+      // renderer (the target's hit shake replaces it at reducer age 72).
+      config = { move: "FIRE_PUNCH", attacker, target, animationAgeOffset: 27, moveTextStartAge: 0,
+        resolutionProfile: { startHp: 0, endHp: 0, initialStatus: "none", hpCommitAge: 1_000_000, hpDrainFirstAge: 1_000_000,
+          hitWobbleFirstAge: 1_000_000, hitBlinkFirstAge: 1_000_000, secondaryRollAge: 1_000_000, secondaryRollSucceeded: false,
+          currentMoveResetAge: 1_000_000 } };
+      break;
     case 8:
       // The body reads the target animation centre + side and the age only (prep7 s2.1). The accepted hpDrainProfile /
       // controllerDisplayProfile feed HP, result text, menu, freeze status (FrozenIceCube from age 409) and Sitrus: all

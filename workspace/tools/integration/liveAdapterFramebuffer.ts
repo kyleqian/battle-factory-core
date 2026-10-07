@@ -249,7 +249,8 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
       ...(f.attacker.geometry.side === side && f.attackerPersonality !== undefined
         ? { personality: f.attackerPersonality } : {}),
       species, name: mon.species, side: side === "player" ? "player" as const : "trainer" as const,
-      battler: side === "player" ? 0 as const : 1 as const, partyIndex: 0 as const, level: 50,
+      battler: side === "player" ? 0 as const : 1 as const, partyIndex: 0 as const,
+      level: (profile as { playerLevel?: number; opponentLevel?: number })[side === "player" ? "playerLevel" : "opponentLevel"] ?? 50,
       hp: side === "player" ? profile.playerHp : profile.opponentHp,
       maxHP: side === "player" ? profile.playerMaxHp : profile.opponentMaxHp,
       gender: (side === "player" ? profile.playerGender : profile.opponentGender) ?? "male",
