@@ -25180,9 +25180,14 @@ export function renderSceneOnMovePresentation(
     }
     // The non-Ghost branch loads the source Curse mask on BG1 and gates it
     // with an OBJ-window copy of the attacker. Derive both the scrolling mask
-    // and silhouette from live register/OAM/species inputs.
-    if (view.tasks.some((task) => task.callback === "AnimTask_DrawFallingWhiteLinesOnAttacker_Step"
-      && task.data[11]! < 4)
+    // and silhouette from live register/OAM/species inputs. The step that
+    // sets data[11] = 4 clears the mask (ResetBattleAnimBg) after its own
+    // row is scanned out: that row still shows the lines (a 64-px-tall
+    // attacker exposes them), recognised by the BG1VOFS register holding the
+    // step's pre-wrap scroll (gBattle_BG1_Y - 60).
+    const linesStep = view.tasks.find((task) => task.callback === "AnimTask_DrawFallingWhiteLinesOnAttacker_Step");
+    if (linesStep && (linesStep.data[11]! < 4
+      || ((view.registers.bg1vofs ?? 0) - (view.battleBg.gBattle_BG1_Y ?? 0) & 0x1ff) === (-60 & 0x1ff))
       && (view.registers.dispcnt & 0x8000) !== 0 && plan.attacker) {
       const object = plan.attacker, corner = top(object.attr), tiles = tilesFor(attackerArt, view.attacker.geometry.side);
       const width = tiles.columns * 8, height = tiles.rows * 8;
