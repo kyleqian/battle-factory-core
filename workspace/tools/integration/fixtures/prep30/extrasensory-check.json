@@ -1,0 +1,410 @@
+[
+ {
+  "name": "accepted-player",
+  "species": [
+   "NUZLEAF",
+   "SHUCKLE"
+  ],
+  "rows": 161,
+  "modelRows": 161,
+  "phase": {
+   "lateLag": false,
+   "measured": false
+  },
+  "anchors": {
+   "attackerYDelta": 10,
+   "targetYElevation": 40,
+   "cloneSlot": 3,
+   "cloneMatrix": 0
+  },
+  "entries": 20480,
+  "entryMatch": 20480,
+  "oamRowsExact": 160,
+  "matrixRowsExact": 160,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 161,
+    "rows": 161
+   },
+   "battleBg": {
+    "exact": 161,
+    "rows": 161
+   },
+   "hardwarePalette": {
+    "exact": 161,
+    "rows": 161
+   },
+   "unfadedPalette": {
+    "exact": 161,
+    "rows": 161
+   },
+   "fadedPalette": {
+    "exact": 161,
+    "rows": 161
+   },
+   "tasks": {
+    "exact": 161,
+    "rows": 161
+   },
+   "scanlineState": {
+    "exact": 161,
+    "rows": 161
+   },
+   "scanlineBuffers": {
+    "exact": 161,
+    "rows": 161
+   },
+   "vramHandle": {
+    "exact": 161,
+    "rows": 161
+   },
+   "cloneSprite": {
+    "exact": 161,
+    "rows": 161
+   }
+  },
+  "rowsCompared": 161
+ },
+ {
+  "name": "accepted-opponent",
+  "species": [
+   "NUZLEAF",
+   "SHUCKLE"
+  ],
+  "rows": 161,
+  "modelRows": 161,
+  "phase": {
+   "lateLag": false,
+   "measured": false
+  },
+  "anchors": {
+   "attackerYDelta": 8,
+   "targetYElevation": 80,
+   "cloneSlot": 3,
+   "cloneMatrix": 0
+  },
+  "entries": 20480,
+  "entryMatch": 20480,
+  "oamRowsExact": 160,
+  "matrixRowsExact": 160,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 161,
+    "rows": 161
+   },
+   "battleBg": {
+    "exact": 161,
+    "rows": 161
+   },
+   "hardwarePalette": {
+    "exact": 161,
+    "rows": 161
+   },
+   "unfadedPalette": {
+    "exact": 161,
+    "rows": 161
+   },
+   "fadedPalette": {
+    "exact": 161,
+    "rows": 161
+   },
+   "tasks": {
+    "exact": 161,
+    "rows": 161
+   },
+   "scanlineState": {
+    "exact": 161,
+    "rows": 161
+   },
+   "scanlineBuffers": {
+    "exact": 161,
+    "rows": 161
+   },
+   "vramHandle": {
+    "exact": 161,
+    "rows": 161
+   },
+   "cloneSprite": {
+    "exact": 161,
+    "rows": 161
+   }
+  },
+  "rowsCompared": 161
+ },
+ {
+  "name": "prep25-extrasensory-alt-player-alakazam-golem",
+  "species": [
+   "ALAKAZAM",
+   "GOLEM"
+  ],
+  "rows": 161,
+  "modelRows": 161,
+  "phase": {
+   "lateLag": false,
+   "measured": false
+  },
+  "anchors": {
+   "attackerYDelta": 5,
+   "targetYElevation": 40,
+   "cloneSlot": 3,
+   "cloneMatrix": 0
+  },
+  "entries": 20480,
+  "entryMatch": 20480,
+  "oamRowsExact": 160,
+  "matrixRowsExact": 160,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 161,
+    "rows": 161
+   },
+   "battleBg": {
+    "exact": 161,
+    "rows": 161
+   },
+   "hardwarePalette": {
+    "exact": 161,
+    "rows": 161
+   },
+   "unfadedPalette": {
+    "exact": 161,
+    "rows": 161
+   },
+   "fadedPalette": {
+    "exact": 161,
+    "rows": 161
+   },
+   "tasks": {
+    "exact": 161,
+    "rows": 161
+   },
+   "scanlineState": {
+    "exact": 161,
+    "rows": 161
+   },
+   "scanlineBuffers": {
+    "exact": 161,
+    "rows": 161
+   },
+   "vramHandle": {
+    "exact": 161,
+    "rows": 161
+   },
+   "cloneSprite": {
+    "exact": 161,
+    "rows": 161
+   }
+  },
+  "rowsCompared": 161
+ },
+ {
+  "name": "prep25-extrasensory-alt-opponent-alakazam-golem",
+  "species": [
+   "ALAKAZAM",
+   "GOLEM"
+  ],
+  "rows": 162,
+  "modelRows": 162,
+  "phase": {
+   "lateLag": true,
+   "measured": true
+  },
+  "anchors": {
+   "attackerYDelta": 4,
+   "targetYElevation": 80,
+   "cloneSlot": 3,
+   "cloneMatrix": 0
+  },
+  "entries": 20608,
+  "entryMatch": 20608,
+  "oamRowsExact": 161,
+  "matrixRowsExact": 161,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 162,
+    "rows": 162
+   },
+   "battleBg": {
+    "exact": 162,
+    "rows": 162
+   },
+   "hardwarePalette": {
+    "exact": 162,
+    "rows": 162
+   },
+   "unfadedPalette": {
+    "exact": 162,
+    "rows": 162
+   },
+   "fadedPalette": {
+    "exact": 162,
+    "rows": 162
+   },
+   "tasks": {
+    "exact": 162,
+    "rows": 162
+   },
+   "scanlineState": {
+    "exact": 162,
+    "rows": 162
+   },
+   "scanlineBuffers": {
+    "exact": 162,
+    "rows": 162
+   },
+   "vramHandle": {
+    "exact": 162,
+    "rows": 162
+   },
+   "cloneSprite": {
+    "exact": 162,
+    "rows": 162
+   }
+  },
+  "rowsCompared": 162
+ },
+ {
+  "name": "prep30-extrasensory-alt-player-espeon-crobat",
+  "species": [
+   "ESPEON",
+   "CROBAT"
+  ],
+  "rows": 162,
+  "modelRows": 162,
+  "phase": {
+   "lateLag": true,
+   "measured": true
+  },
+  "anchors": {
+   "attackerYDelta": 11,
+   "targetYElevation": 34,
+   "cloneSlot": 3,
+   "cloneMatrix": 0
+  },
+  "entries": 20608,
+  "entryMatch": 20608,
+  "oamRowsExact": 161,
+  "matrixRowsExact": 161,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 162,
+    "rows": 162
+   },
+   "battleBg": {
+    "exact": 162,
+    "rows": 162
+   },
+   "hardwarePalette": {
+    "exact": 162,
+    "rows": 162
+   },
+   "unfadedPalette": {
+    "exact": 162,
+    "rows": 162
+   },
+   "fadedPalette": {
+    "exact": 162,
+    "rows": 162
+   },
+   "tasks": {
+    "exact": 162,
+    "rows": 162
+   },
+   "scanlineState": {
+    "exact": 162,
+    "rows": 162
+   },
+   "scanlineBuffers": {
+    "exact": 162,
+    "rows": 162
+   },
+   "vramHandle": {
+    "exact": 162,
+    "rows": 162
+   },
+   "cloneSprite": {
+    "exact": 162,
+    "rows": 162
+   }
+  },
+  "rowsCompared": 162
+ },
+ {
+  "name": "prep30-extrasensory-alt-opponent-espeon-crobat",
+  "species": [
+   "ESPEON",
+   "CROBAT"
+  ],
+  "rows": 161,
+  "modelRows": 161,
+  "phase": {
+   "lateLag": false,
+   "measured": false
+  },
+  "anchors": {
+   "attackerYDelta": 8,
+   "targetYElevation": 80,
+   "cloneSlot": 3,
+   "cloneMatrix": 0
+  },
+  "entries": 20480,
+  "entryMatch": 20480,
+  "oamRowsExact": 160,
+  "matrixRowsExact": 160,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 161,
+    "rows": 161
+   },
+   "battleBg": {
+    "exact": 161,
+    "rows": 161
+   },
+   "hardwarePalette": {
+    "exact": 161,
+    "rows": 161
+   },
+   "unfadedPalette": {
+    "exact": 161,
+    "rows": 161
+   },
+   "fadedPalette": {
+    "exact": 161,
+    "rows": 161
+   },
+   "tasks": {
+    "exact": 161,
+    "rows": 161
+   },
+   "scanlineState": {
+    "exact": 161,
+    "rows": 161
+   },
+   "scanlineBuffers": {
+    "exact": 161,
+    "rows": 161
+   },
+   "vramHandle": {
+    "exact": 161,
+    "rows": 161
+   },
+   "cloneSprite": {
+    "exact": 161,
+    "rows": 161
+   }
+  },
+  "rowsCompared": 161
+ }
+]
