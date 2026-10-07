@@ -26,6 +26,12 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- prep35 (side, `a41cfc5bd`, new files only): Skill Swap (285) READY as faithful timing — full hardware OAM rows 1..end,
+  32 matrices, 64-slot order, palette program (psychic BG rotation, two white blends) exact in 6 windows; pixels
+  1172/1174 rows 0 px at the measured phase (row 0 enemy shadow of two elevated windows); lag at row 176 (4 of 6) +
+  a display-neutral restore row. Flatter (260) READY as faithful random — spotlight, VerticalDip dips, 38 confetti in
+  sort order, burst latch; hardware OAM exact rows 1..218 in 4/4 windows; 876/876 rows 0 px. Supervisor:
+  `prep35Run.sh` into fresh dirs — probes r1 == r2, 11/11 receipts byte-identical.
 - Folded Opus worker `fb101d18d` as `0b4f5bf83` (src tree `0fa8e76b`): FAITHFUL-TIMING Nightmare (171; prep32 model
   port; lag at 149 policy; second display-neutral parameter palette-transfer-row 4:4 tie -> 148 by the tie rule; GOLBAT
   row-0 shadow via the live #142 hook; routes 30/28 HYPNO (Hypnosis first), 166/14 HAUNTER). EXACT Shock Wave (351;
