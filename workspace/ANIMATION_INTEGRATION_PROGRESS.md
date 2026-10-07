@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-06 (night) — in progress: 226 -> 240 scoped-exact, 10 -> 11 faithful-random
+## 2026-10-06 (night) — in progress: 226 -> 242 scoped-exact, 10 -> 11 faithful-random
 
 - prep22 (side, `c31dfd3c1`, new files only, merged `e7b7a1ac3`): Fire Punch is a 101-row body identical across
   burn / no-burn / faint outcomes (flames = separate Status_Burn body 152-155 frames later; status animations are
@@ -143,6 +143,18 @@
   stay declined on other causes (Sand-Attack 28:opponent, TURN_TRAP / Flatter, Confusion status). Rows not yet in
   production. Supervisor: `prep28Run.sh` with a fresh OUT — 0 differing probe pairs, replays reproduced, receipts
   unchanged.
+- Species audit 7 (side, `896a8ebd4`, new files only): Return 57/57 non-shiny rows exact; residuals filed as ISSUES
+  #151 (Sheer Cold elevated-target age-0 shadow; Sheer Cold tail ages 173-189 with TYRANITAR / PICHU / FLYGON /
+  GOLBAT; RATTATA / ONIX idle-x2 rows in Sheer Cold / Sand Tomb / Sky Attack; Hyper Voice one row at age 59).
+  Supervisor reran 5 rows (4 residuals reproduce). D4 filed in DEFERRED.md (CPU-load timing class).
+- Folded Opus worker `fafd380ca`: EXACT Baton Pass body (226; 53 rows; renderer pair gate generalised; attacker hidden
+  after the body through its switch-out) and Endeavor (283; 68 rows; source-relative inputs; stale power from the
+  register; W3 battle-TV case declined by a conservative presentation-only flag carried across battles) -> 242.
+  15 dense windows x 2 fresh 0 px; routes Baton 71/0, 2/7, Endeavor 58/0, 38/7, 52/0, 61/0 with ON/OFF parity.
+  Open: opponent Baton Pass removal ~25 frames late, message / ball timing unmodelled (no route reaches it);
+  player outgoing healthbox A+48..A+75 not drawn. Worker gates 1,546 files / 12,647 tests, build. Supervisor: dense
+  rerun 5 windows 0 px r1 == r2; compare:endeavor-portable 141/141; differential 389/389; union typecheck, smoke,
+  9 files 194/194. Receipt `baton-endeavor-live-receipt.json`.
 
 ## 2026-10-06 (day, wind-down) — D3 implemented: 218 -> 226 exact + 10 faithful-random live adapters
 
