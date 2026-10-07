@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-06 (night) — in progress: 226 -> 239 scoped-exact, 10 -> 11 faithful-random
+## 2026-10-06 (night) — in progress: 226 -> 240 scoped-exact, 10 -> 11 faithful-random
 
 - prep22 (side, `c31dfd3c1`, new files only, merged `e7b7a1ac3`): Fire Punch is a 101-row body identical across
   burn / no-burn / faint outcomes (flames = separate Status_Burn body 152-155 frames later; status animations are
@@ -127,6 +127,14 @@
   opponent-attacker flow. Endeavor: source-relative prototype exact 68/68 rows on 4 fresh pairs; W3 (battle-TV)
   predicate written from battle_tv.c and reachable on generated routes (decline until ported). Supervisor:
   `prep27Run.sh` with fresh R1/R2 dirs — probes (RGB incl.) R1 == R2, receipts identical.
+- Folded Sonnet worker `e74701d86` (src tree `acf610da`): ISSUES #150 fixed and removed — Signal Beam shake tasks own
+  x2 (`shakeOwnsX2`; RATTATA attacker / target rows 41,134 / 54,510 px -> 0), Fire Punch shiny decline, verifier
+  display names (MR_MIME 537 px/row -> 0); Curse target-side idle decline lifted (RATTATA / ONIX 176/176); EXACT Sheer
+  Cold (329; first body; 191 / 190 rows constant per side; accepted, CLOYSTER->GOLEM, DEWGONG->SNORLAX both
+  orientations; route 267/35) -> 240. Open: no #142 shadow row for Sheer Cold (elevated opponents unmeasured). 45
+  fixtures 0 px twice fresh; worker gates 1,544 files / 12,618 tests, build. Supervisor: reran 7 #150 / Curse rows +
+  2 Sheer Cold fixtures 0 px r1 == r2; differential 389/389; union typecheck, smoke, 10 files 218/218. Receipt
+  `fix150-live-receipt.json`.
 
 ## 2026-10-06 (day, wind-down) — D3 implemented: 218 -> 226 exact + 10 faithful-random live adapters
 
