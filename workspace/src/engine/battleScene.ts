@@ -4317,6 +4317,14 @@ export function drawTileBg(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, s
   }
 }
 
+/** Paint the armed live #142 shadow after a branch's battle BG drawn outside drawTileBg (e.g. the scrolled BG3 of Superpower). */
+function flushLiveOpponentShadow(fb: Uint8Array): void {
+  if (liveOpponentShadow.species === null) return;
+  const species = liveOpponentShadow.species;
+  liveOpponentShadow.species = null;
+  drawSourceOpponentEnemyShadow(fb, species, { x: 176, y: 40 }, true);
+}
+
 const drawExtractedTileBg: typeof drawExtractedTileBgBase = (fb, bg, ...rest) => {
   drawExtractedTileBgBase(fb, bg, ...rest);
   if (liveOpponentShadow.species !== null && bg.tileset === battleBg.static.tileset) {
@@ -25319,6 +25327,7 @@ export function renderSceneOnMovePresentation(
     const top=(attr:readonly[number,number,number])=>({x:signed(attr[1]),y:(attr[0]&0xff)>=160?(attr[0]&0xff)-256:attr[0]&0xff});
     drawScrolledTileBg(fb,battleBg.static.tileset,battleBg.static.tilemap,[2,3,4].map(paletteBank),
       view.registers.bg3hofs??0,view.registers.bg3vofs??0);
+    flushLiveOpponentShadow(fb);
     const attackerArt=artFor(view.attacker,view.battlers.attacker.art.displaySpecies);
     const targetArt=artFor(view.target,view.battlers.target.art.displaySpecies);
     if(moveState.age===0){const opponent=view.attacker.geometry.side==="opponent"?

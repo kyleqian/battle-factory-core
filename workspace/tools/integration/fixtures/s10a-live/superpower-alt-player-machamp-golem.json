@@ -1,0 +1,41 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "SUPERPOWER",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep25-superpower-alt-player-machamp-golem.json",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 324
+ },
+ "windowSource": "window = [activation, first inactive row] of this scenario's first SUPERPOWER body (248 rows) from 2 fresh prep22Probes.sh runs (bodies agree)",
+ "timingPhase": "event",
+ "timingPhases": {
+  "bg-write-row": "event"
+ },
+ "monbgCntRow": 11,
+ "attacker": {
+  "species": "MACHAMP",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349018978,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 186,
+  "playerMaxHp": 186,
+  "opponentHp": 187,
+  "opponentMaxHp": 187,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

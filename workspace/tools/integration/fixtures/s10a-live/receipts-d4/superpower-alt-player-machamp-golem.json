@@ -1,0 +1,36 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/s10a-live/superpower-alt-player-machamp-golem.json",
+  "move": "SUPERPOWER",
+  "measuredPhase": "event",
+  "measuredPhases": {
+   "bg-write-row": "event"
+  },
+  "policyPhases": {
+   "bg-write-row": "no-event"
+  },
+  "selectedPhase": false,
+  "window": 248,
+  "expectedDuration": 248,
+  "runs": [
+   {
+    "rows": 248,
+    "exactRows": 248,
+    "residualPixels": 0,
+    "digest": "66649f1a2ae5854a636247634690e99d7562ba883386b3a95f59c0dde5da503c",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 248,
+    "exactRows": 248,
+    "residualPixels": 0,
+    "digest": "66649f1a2ae5854a636247634690e99d7562ba883386b3a95f59c0dde5da503c",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": [],
+  "violations": []
+ }
+]

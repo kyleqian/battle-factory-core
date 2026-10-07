@@ -294,8 +294,10 @@ const MACH_PUNCH_OPTIONAL_LAG_AGE = 91;
  * Traces start at the attacker's sprite centre, the hit splat at the
  * target's picture offset point. The optional late lag at age 91 (CPU phase) comes only from the timing policy (dominant phase, 110 rows).
  */
-export function liveMachPunchInputs(args: LiveQ2Args & { healthbarPalette: readonly number[] }): Inputs {
+/** Null when the target has a non-zero idle rest (species audit 9: a residual at age 60 stays unexplained for ONIX / RATTATA targets). */
+export function liveMachPunchInputs(args: LiveQ2Args & { healthbarPalette: readonly number[] }): Inputs | null {
   const { attackerSide, attacker, target } = args, targetSide = opposite(attackerSide);
+  if (target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
   const attackerSprite = battlerSprite(attackerSide, attacker), targetSprite = battlerSprite(targetSide, target);
   const lag = liveMoveOptionalLagAge(183);
   if (lag !== null && lag !== MACH_PUNCH_OPTIONAL_LAG_AGE) throw new Error(`Mach Punch timing policy lag age ${lag} is not the source's ${MACH_PUNCH_OPTIONAL_LAG_AGE}`);

@@ -1,0 +1,41 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "SUPERPOWER",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-superpower-opponent-registeel-player-regirock.json",
+ "denseWindow": {
+  "startFrame": 81,
+  "endFrame": 328
+ },
+ "windowSource": "window = [activation, first inactive row] of this scenario's first SUPERPOWER body (248 rows) from 2 fresh prep22Probes.sh runs (bodies agree)",
+ "timingPhase": "event",
+ "timingPhases": {
+  "bg-write-row": "event"
+ },
+ "monbgCntRow": 11,
+ "attacker": {
+  "species": "SEVIPER",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SHUCKLE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793699978,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 127,
+  "playerMaxHp": 127,
+  "opponentHp": 169,
+  "opponentMaxHp": 169,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

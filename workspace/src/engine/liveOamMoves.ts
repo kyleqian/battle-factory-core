@@ -674,12 +674,13 @@ const revengeCache = new Map<string, ReturnType<typeof liveRevengeHardwareOamRow
  * (known-entry allocator: PURPLE_SCRATCH tile 305, PURPLE_SWIPE 537, IMPACT 305 (reloaded after the scratch is freed), all on palette
  * slot 7 = OBJ bank 23; matrices 1 and 2 held at the known entry); every other input from the prep26 source model (liveRevengeInputs.ts)
  * with the activation palette = the asset composite and the registers = S0 (the accepted bodies are first bodies; after a Tackle the
- * renderer branch reads only registers the body writes: the monbg scroll and the blend). Declines (null) for a non-zero idle rest on
- * either battler (the lunge / AnimTask_ShakeMon2 x2 programs are proven from a zero rest only).
+ * renderer branch reads only registers the body writes: the monbg scroll and the blend). Declines (null) for a non-zero TARGET idle rest
+ * (the AnimTask_ShakeMon2 x2 program is proven from a zero rest only: lifted, ONIX / RATTATA targets leave 99,435 / 37,733 px); an
+ * attacker rest is exact (species audit 9 gate lift: ONIX / RATTATA opponent attackers 0 px).
  */
 export function liveRevengeInputs(args: LiveRevengeInputArgs): { duration: number; animationInputsAt: (age: number) => Record<string, unknown> } | null {
   const { attackerSide, attacker, target } = args;
-  if (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0 || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
+  if (target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
   const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
   const attackerObject = battlerObject(attackerSide, attacker), targetObject = battlerObject(targetSide, target);
   const key = JSON.stringify([attackerSide, attacker.battlePositionCenter, target.battlePositionCenter, target.picOffsetPoint, attackerObject.attr, targetObject.attr, args.activationOrder]);

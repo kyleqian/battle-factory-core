@@ -47,6 +47,8 @@ export type LiveMoveTimingParameter = Readonly<{
   /** True when the measured counts tie and the tie rule (no optional event) chose the phase. */
   tieRuleUsed: boolean;
   evidence: readonly string[];
+  /** Attacker side this parameter applies to (absent = both sides): a phase measured per side (Superpower's monbg write row). */
+  side?: "player" | "opponent";
 }>;
 
 export type LiveMoveTimingEntry = Readonly<{ move: string; parameters: readonly LiveMoveTimingParameter[] }>;
@@ -127,6 +129,26 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
     }],
   },
   /**
+   * D4 Superpower (docs/next-adapters-prep31.md s1.4 T; tools/integration/fixtures/prep31/superpower-*.json): the monbg BGnCNT / HOFS write row
+   * (first HOFS change) is 10 or 11, a CPU phase, measured PER SIDE (the reducer's monbg gate superpower.ts:75 is player >= 10, opponent >= 11):
+   * player {10: 2 (accepted NIDOQUEEN, prep31 MACHAMP -> WEEZING), 11: 1 (prep25 MACHAMP -> GOLEM)}, opponent {11: 3}. 248 rows in every
+   * window. Wrong phase: row 10 only (the monbg copy one row before the ROM moves the attacker to the BG).
+   */
+  276: {
+    move: "MOVE_SUPERPOWER",
+    parameters: [{
+      kind: "bg-write-row", age: 11, fixedLagAges: [], iterations: 248, side: "player",
+      alternatives: [{ phase: "event", bodyRows: 248, measured: 1 }, { phase: "no-event", bodyRows: 248, measured: 2 }],
+      chosen: "no-event", tieRuleUsed: false,
+      evidence: ["tools/integration/prep31SuperpowerCheck.ts knownFor phase.monbgCntRow (player: row 10 accepted, prep31 alt; row 11 prep25 alt)", "docs/next-adapters-prep31.md s1.4"],
+    }, {
+      kind: "bg-write-row", age: 11, fixedLagAges: [], iterations: 248, side: "opponent",
+      alternatives: [{ phase: "event", bodyRows: 248, measured: 3 }, { phase: "no-event", bodyRows: 248, measured: 0 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/prep31SuperpowerCheck.ts knownFor phase.monbgCntRow (opponent: row 11 accepted, prep25 alt, prep31 alt)", "docs/next-adapters-prep31.md s1.4"],
+    }],
+  },
+  /**
    * D4c Psywave (docs/next-adapters-prep30.md s0.2 T / s2.5; tools/integration/fixtures/prep30/psywave-check.json): an optional lag at task
    * row 185 (Fade 2's VRAM restore row 184, palette restore 185, registers >= 187 one row later): present in 4 of 6 measured windows (accepted
    * player / opponent, ALAKAZAM -> GOLEM player, ESPEON -> CROBAT player), absent in ALAKAZAM -> GOLEM opponent and ESPEON -> CROBAT opponent.
@@ -185,8 +207,8 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
 });
 
 /** The chosen write row of a move's bg-write-row parameter (`age` for "event", `age - 1` for "no-event"), or null without one. */
-export function liveMoveBgWriteRow(moveId: number): number | null {
-  const p = liveMoveTimingParameter(moveId, "bg-write-row");
+export function liveMoveBgWriteRow(moveId: number, side?: "player" | "opponent"): number | null {
+  const p = LIVE_MOVE_TIMING_POLICY[moveId]?.parameters.find((q) => q.kind === "bg-write-row" && (q.side === undefined || q.side === side)) ?? null;
   return p === null ? null : p.chosen === "event" ? p.age : p.age - 1;
 }
 
@@ -221,4 +243,6 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   326,
   // D4b: Meteor Mash (D3 + D4; Random2 twinkles from the presentation host, liveMovePresentationRng.ts plan 309).
   309,
+  // D4 (S10A): Superpower first body (liveSuperpowerInputs.ts; per-side monbg write row; fixtures tools/integration/fixtures/s10a-live/superpower-*).
+  276,
 ]);

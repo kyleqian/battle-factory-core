@@ -1,0 +1,54 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "SPIT_UP",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep29-spit-up-alt-player-seviper-golem-one-stockpile.json",
+ "denseWindow": {
+  "startFrame": 998,
+  "endFrame": 1105
+ },
+ "windowSource": "window = [activation, first inactive row] of this scenario's first Spit Up body (108 rows) from 2 fresh prep22Probes.sh runs (bodies agree)",
+ "requestFields": {
+  "turn": 1
+ },
+ "attacker": {
+  "species": "SEVIPER",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019074,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 136,
+  "playerMaxHp": 136,
+  "opponentHp": 174,
+  "opponentMaxHp": 174,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 254,
+   "side": "player"
+  },
+  {
+   "moveId": 45,
+   "side": "opponent"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statAnimation": 21
+  }
+ ]
+}

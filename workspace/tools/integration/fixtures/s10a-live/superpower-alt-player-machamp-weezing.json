@@ -1,0 +1,47 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "SUPERPOWER",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep31-superpower-alt-player-machamp-weezing.json",
+ "denseWindow": {
+  "startFrame": 225,
+  "endFrame": 472
+ },
+ "windowSource": "window = [activation, first inactive row] of this scenario's first SUPERPOWER body (248 rows) from 2 fresh prep22Probes.sh runs (bodies agree)",
+ "timingPhase": "no-event",
+ "timingPhases": {
+  "bg-write-row": "no-event"
+ },
+ "monbgCntRow": 10,
+ "attacker": {
+  "species": "MACHAMP",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "WEEZING",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349018978,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 170,
+  "playerMaxHp": 186,
+  "opponentHp": 172,
+  "opponentMaxHp": 172,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ]
+}

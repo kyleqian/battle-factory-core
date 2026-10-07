@@ -1,0 +1,36 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/s10a-live/superpower-alt-player-machamp-weezing.json",
+  "move": "SUPERPOWER",
+  "measuredPhase": "no-event",
+  "measuredPhases": {
+   "bg-write-row": "no-event"
+  },
+  "policyPhases": {
+   "bg-write-row": "no-event"
+  },
+  "selectedPhase": true,
+  "window": 248,
+  "expectedDuration": 248,
+  "runs": [
+   {
+    "rows": 248,
+    "exactRows": 248,
+    "residualPixels": 0,
+    "digest": "51923691ddd8e7166a9b8dbe70a858aa4c76832418f451c213ba498b62ddec00",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 248,
+    "exactRows": 248,
+    "residualPixels": 0,
+    "digest": "51923691ddd8e7166a9b8dbe70a858aa4c76832418f451c213ba498b62ddec00",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

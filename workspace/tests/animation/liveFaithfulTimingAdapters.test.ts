@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import paletteData from "../../src/data/gen/live-animation-palette-resources.json" with { type: "json" };
-import { machPunchFirstInactiveAge } from "../../src/animation/machPunch.ts";
+import { machPunchAtAge, machPunchFirstInactiveAge } from "../../src/animation/machPunch.ts";
 import {
   LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation,
 } from "../../src/engine/liveMoveAnimation.ts";
@@ -75,6 +75,31 @@ describe("Mach Punch builder equals the accepted corpus-built inputs", () => {
   });
 });
 
+// Species audit 9 (ISSUES #152): AnimTask_AttackerPunchWithTrace moves the attacker relative to its idle rest, the traces copy it, the task ends
+// with x2 = 0; a non-zero TARGET rest declines (unexplained age-60 residual). Receipts tools/integration/fixtures/s10a-part0/.
+describe("Mach Punch idle rest (species audit 9)", () => {
+  const c: any = machPunchInputsFor("opponent-front");
+  const anchors = (s: any, pic: any, rest: { x2: number; y2: number }) => ({ picOffsetPoint: pic, spriteCenter: { x: s.x, y: s.y }, frontIdleRest: rest });
+  const build = (attackerRest: { x2: number; y2: number }, targetRest: { x2: number; y2: number }) => liveMachPunchInputs({ attackerSide: c.attackerSide,
+    attacker: anchors(c.attackerSprite, { x: 0, y: 0 }, attackerRest), target: anchors(c.targetSprite, c.targetPictureOrigin, targetRest),
+    palettes: { unfaded: [], faded: [], hardware: [] } as never, spriteOrder: c.spriteOrder, firstBody: true, healthbarPalette: (paletteData as any).initial.healthbar });
+  it("a non-zero target idle rest declines", () => {
+    expect(build({ x2: 0, y2: 0 }, { x2: 2, y2: 0 })).toBeNull();
+    expect(build({ x2: 0, y2: 0 }, { x2: 0, y2: 1 })).toBeNull();
+  });
+  it("the opponent attacker's rest offsets the punch and the traces, then x2 returns to 0", () => {
+    // The host adds the sides / species (liveMoveAnimation.ts config); the corpus inputs carry them here.
+    const zero = { ...c, ...build({ x2: 0, y2: 0 }, { x2: 0, y2: 0 })! }, rest = { ...c, ...build({ x2: -3, y2: 0 }, { x2: 0, y2: 0 })! };
+    expect(machPunchAtAge(49, rest as never).battlers.attacker.sprite.x2).toBe(-3);
+    for (let age = 50; age <= 57; age++) {
+      expect(machPunchAtAge(age, rest as never).battlers.attacker.sprite.x2).toBe(machPunchAtAge(age, zero as never).battlers.attacker.sprite.x2 - 3);
+      const traces = (s: any) => s.sprites.filter((t: any) => t.kind === "trace").map((t: any) => t.x2);
+      expect(traces(machPunchAtAge(age, rest as never))).toEqual(traces(machPunchAtAge(age, zero as never)).map((x: number) => x - 3));
+    }
+    expect(machPunchAtAge(58, rest as never).battlers.attacker.sprite.x2).toBe(0);
+  });
+});
+
 describe("Mach Punch dense windows (D4 check)", () => {
   const mp = NAMES.filter((n) => n.startsWith("mach-punch-"));
   it("8 windows (accepted, prep25 alternate, D4a SNORLAX / GOLBAT extras) x both orientations from each scenario's own activation", () => {
@@ -124,6 +149,16 @@ describe("Mach Punch gates", () => {
     expect(call({ known: false })).toBeNull();
     const ot = 416049562, shiny = ((ot >>> 16) ^ (ot & 0xffff)) >>> 0;
     for (const side of ["player", "opponent"] as const) expect(call(first, { ...view.field, [side]: { ...view.field[side], personality: shiny } })).toBeNull();
+  });
+
+  it("declines an opponent-side target with a non-zero idle rest (species audit 9 ONIX / RATTATA); engages an idle-rest opponent attacker", () => {
+    const at = (path: string) => { const { view, effect } = effectOf(JSON.parse(readFileSync(path, "utf8")) as Fixture);
+      return liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, effect.spriteOrderInput); };
+    const D9 = "tools/integration/fixtures/species-audit-9/derived";
+    for (const species of ["onix", "rattata"]) {
+      expect(at(`${D9}/${species}-mach-punch-player-hitmonchan-opponent-chansey.json`)).toBeNull();
+      expect(at(`${D9}/${species}A-mach-punch-opponent-hitmonchan-player-chansey.json`)).not.toBeNull();
+    }
   });
 });
 
@@ -312,6 +347,16 @@ describe("D4b Revenge (279) faithful timing", () => {
     expect(call({ known: false })).toBeNull();
     const ot = 416049562, shiny = ((ot >>> 16) ^ (ot & 0xffff)) >>> 0;
     for (const side of ["player", "opponent"] as const) expect(call(lend, { ...view.field, [side]: { ...view.field[side], personality: shiny } })).toBeNull();
+  });
+
+  it("the idle-rest gate is the target's only (species audit 9: ONIX / RATTATA opponent attackers engage, 0 px; targets decline)", () => {
+    const at = (path: string) => { const { view, effect } = effectOf(JSON.parse(readFileSync(path, "utf8")) as Fixture);
+      return liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, effect.spriteOrderInput); };
+    const D9 = "tools/integration/fixtures/species-audit-9/derived";
+    for (const species of ["onix", "rattata"]) {
+      expect(at(`${D9}/${species}-revenge-player-machamp-opponent-shuckle.json`)).toBeNull();
+      expect((at(`${D9}/${species}A-revenge-opponent-qwilfish-player-shuckle.json`)!.config as any).move).toBe("REVENGE");
+    }
   });
 });
 

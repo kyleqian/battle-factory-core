@@ -86,7 +86,11 @@ import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
 import paletteResources from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
 import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "json" };
 import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
+import spitUpRedOrbAsset from "../animation/assets/spit-up-red-orb.json" with { type: "json" };
+import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
 import { liveMoveBgWriteRow, liveMoveOptionalLagAge, liveMoveTimingBodyRows } from "./liveMoveTimingPolicy.ts";
+import { liveSpitUpDuration, liveSpitUpInputs, type SpitUpCounter } from "./liveSpitUpInputs.ts";
+import { SUPERPOWER_ROWS, liveSuperpowerInputs } from "./liveSuperpowerInputs.ts";
 import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
 import { liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
@@ -108,6 +112,18 @@ import {
 
 
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
+/** Superpower's CIRCLE_OF_LIGHT / METEOR / FLAT_ROCK palettes (BGR555 words) for liveSuperpowerInputs (seam-provided, as Spit Up's). */
+const SUPERPOWER_PALETTES = (() => {
+  const words = (name: "circleOfLight" | "meteor" | "flatRock") => Object.freeze((superpowerAsset as unknown as {
+    resources: Record<string, { art: { palette: { r: number; g: number; b: number }[] } }> }).resources[name]!.art.palette
+    .map((c) => (c.r >> 3) | (c.g >> 3) << 5 | (c.b >> 3) << 10));
+  return Object.freeze({ orb: words("circleOfLight"), meteor: words("meteor"), rock: words("flatRock") });
+})();
+
+/** Spit Up's RED_ORB_2 palette (BGR555 words) for liveSpitUpInputs (the engine reads animation assets only through this seam). */
+const SPIT_UP_RED_ORB_PALETTE: readonly number[] = Object.freeze((spitUpRedOrbAsset as { art: { palette: { r: number; g: number; b: number }[] } }).art.palette
+  .map((c) => (c.r >> 3) | (c.g >> 3) << 5 | (c.b >> 3) << 10));
+
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   2, 5, 9, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 42, 43, 44, 47, 48, 49, 50,
   51, 55, 65, 66, 67, 68, 74, 75, 78, 79, 83, 92, 93, 94, 95, 97, 101, 103, 105, 106, 108, 109, 112, 113,
@@ -146,6 +162,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   261, 228, 210,
   // Return (strongest branch, friendship 255: the only one the Factory reaches), first body (docs/next-adapters-prep24.md s2).
   216,
+  // Spit Up, all three Stockpile counters (docs/next-adapters-prep31.md s2 / s3; liveSpitUpInputs.ts): any known lend.
+  255,
   // anchor3: source battler anchors (position center, picture height, pic offset).
   86, 87, 107, 116, 203, 207, 263, 339,
   // selectors: request-selected branches and healing anchors.
@@ -342,6 +360,11 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     261, 228, 210,
     // Return (strongest): activation == window start (row 0; prep24 / prep18 return probes, both sides).
     216,
+    // Spit Up: activation == window start (row 0; prep31 / s10a-live spit-up windows, both sides, all three counters).
+    255,
+    // D4 faithful timing: Superpower windows start at activation (row 0; s10a-live/superpower-*.json; elevated WEEZING opponent in both roles:
+    // 195 px at age 0 otherwise).
+    276,
     // prep27: Baton Pass activation == window start (row 0; the dense body probe's first active frame, elevated NINJASK attacker).
     226,
     // prep27: Endeavor activation == window start (row 0; the dense script window, elevated GOLBAT target / NINJASK attacker).
@@ -844,6 +867,8 @@ export function liveMoveAnimationDuration(
     case 224: return liveMoveTimingBodyRows(224);
     // Faithful timing (D4b): Revenge 145 rows both sides (activation .. first inactive); the policy picks the monbg BGnCNT write row.
     case 279: return 145;
+    // D4 faithful timing: Superpower (prep31 s1): 248 rows both sides (constant in all 6 windows; the CPU phase is the monbg write row only).
+    case 276: return SUPERPOWER_ROWS;
     // Faithful timing (D4c): Psywave 204 rows + the policy's optional late lag at task row 185 (dominant measured phase, 205 rows both sides).
     case 149: return liveMoveTimingBodyRows(149);
     // Faithful timing (D4c): Extrasensory 161 rows (activation .. first inactive) without the optional lag at task row 142 (policy: no lag, 4 of 6).
@@ -883,6 +908,8 @@ export function liveMoveAnimationDuration(
     case 283: return 68;
     // Return (strongest branch, friendship 255, Factory-only): 282 rows both sides (0.25% of Factory move slots).
     case 216: return RETURN_ROWS;
+    // Spit Up (prep31 s2.2): 108 rows (counters 1, 2), 109 (counter 3); request.turn = the Stockpile counter (gameplay-owned, read only).
+    case 255: return liveSpitUpDuration(request.turn);
     // Curse (curse-live): MOVE_CURSE's choosetwoturnanim picks CurseStats when gAnimMoveTurn & 1 (BattleScript_EffectCurse
     // setbyte sB_ANIM_TURN 1 for a non-Ghost attacker, battle_scripts_1.s:1491-1492): 176 rows (first inactive age 175 + 1).
     // The Ghost branch (turn 0) declines: its row-26 palette-transfer scanline and BG2 scroll phase are frame-phase inputs.
@@ -2640,9 +2667,11 @@ export function liveMoveAnimationPresentation(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || lentOrder === null) return null;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
-      config = { move: "MACH_PUNCH", attacker, target, fieldProfile, animationInputs: liveMachPunchInputs({
+      const machPunchInputs = liveMachPunchInputs({
         attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes, spriteOrder: lentOrder, firstBody: true,
-        healthbarPalette: (paletteResources as unknown as { initial: { healthbar: readonly number[] } }).initial.healthbar }) as never };
+        healthbarPalette: (paletteResources as unknown as { initial: { healthbar: readonly number[] } }).initial.healthbar });
+      if (machPunchInputs === null) return null;
+      config = { move: "MACH_PUNCH", attacker, target, fieldProfile, animationInputs: machPunchInputs as never };
       break;
     }
     case 173: {
@@ -3015,6 +3044,44 @@ export function liveMoveAnimationPresentation(
       config = { move: "RETURN", attacker, target, fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
       break;
     }
+    case 276: {
+      // D4 faithful timing: Superpower (prep31 s1 / s3; liveSuperpowerInputs.ts). Known lend (the prep31 WEEZING player window follows a Tackle:
+      // the renderer branch reads only registers the body writes, as Revenge), known-entry allocator (orb / meteor / rock tiles 305 / 537 / 433,
+      // banks 7 / 8 / 9, matrix 0), non-shiny, zero idle rests. The monbg write row (10 | 11) is the policy's, per side.
+      if (!spriteOrderInput?.known) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const activationOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      const monbgCntRow = liveMoveBgWriteRow(276, attacker.geometry.side);
+      if (palettes === null || activationOrder === null || (monbgCntRow !== 10 && monbgCntRow !== 11)) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const inputs = liveSuperpowerInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
+        targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors, palettes,
+        orbPalette: SUPERPOWER_PALETTES.orb, meteorPalette: SUPERPOWER_PALETTES.meteor, rockPalette: SUPERPOWER_PALETTES.rock,
+        activationOrder, sort: sortGbaSpriteOrder, monbgCntRow });
+      if (inputs === null) return null;
+      config = { move: "SUPERPOWER", attacker, target, fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
+      break;
+    }
+    case 255: {
+      // Spit Up (prep31 s3): every Stockpile counter (request.turn 1..3), any known lend (the bodies follow Stockpile / Growl units; the
+      // host's lent 64-slot order is the L input), known-entry allocator, non-shiny, zero idle rests. Registers never change (prep31 s2.1).
+      if (!spriteOrderInput?.known) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const activationOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (palettes === null || activationOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const inputs = liveSpitUpInputs({ counter: request.turn as SpitUpCounter, attackerSide: attacker.geometry.side,
+        attackerSpecies: art[attacker.geometry.side].speciesSymbol, targetSpecies: art[target.geometry.side].speciesSymbol,
+        attacker: attackerAnchors, target: targetAnchors, attackerYDelta: liveBattlerCoordAttrs(attacker.geometry.side, art).yOffset,
+        palettes, redOrbPalette: SPIT_UP_RED_ORB_PALETTE, activationOrder, sort: sortGbaSpriteOrder });
+      if (inputs === null) return null;
+      config = { move: "SPIT_UP", attacker, target, fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
+      break;
+    }
     case 224: {
       // D4b faithful timing: Megahorn (prep24 s1.4; liveOamMoves.ts liveMegahornInputs). Known lend (the corpora follow a Tackle; any known lend:
       // the renderer branch reads no activation register the body does not overwrite), known-entry allocator (horn / impact tiles 305 / 313,
@@ -3081,7 +3148,7 @@ export function liveMoveAnimationPresentation(
     }
     case 279: {
       // D4b faithful timing: Revenge (prep26 s2 / s4; liveOamMoves.ts liveRevengeInputs). Known lend (the accepted bodies are first bodies, the
-      // alternates follow a Tackle), known-entry allocator, non-shiny, zero idle rests. The monbg BGnCNT write row comes from the timing policy.
+      // alternates follow a Tackle), known-entry allocator, non-shiny, a zero TARGET idle rest (an attacker rest is exact, species audit 9). The monbg BGnCNT write row comes from the timing policy.
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);

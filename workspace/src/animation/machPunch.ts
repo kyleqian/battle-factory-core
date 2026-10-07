@@ -322,11 +322,14 @@ function targetShakeAtAge(age: number): MachPunchPoint {
   return { x: pulse ? 3 : 0, y: 0 };
 }
 
+// AnimTask_AttackerPunchWithTrace (battle_anim_mons.c:2408-2466) moves x2 RELATIVE to the battler's current x2 (the idle rest) and ends
+// with an absolute x2 = 0 (species audit 9: ONIX / RATTATA opponent attackers).
 function attackerPunchOffset(age: number, input: Readonly<MachPunchLiveInputs>): number {
-  if (age < 50 || age > 57) return input.attackerSprite.x2;
+  if (age < 50) return input.attackerSprite.x2;
+  if (age > 57) return 0;
   const player = [2, 10, 18, 26, 34, 26, 18, 10];
   const opponent = [-16, -24, -32, -40, -48, -40, -32, -24];
-  return (input.attackerSide === "player" ? player : opponent)[age - 50]!;
+  return input.attackerSprite.x2 + (input.attackerSide === "player" ? player : opponent)[age - 50]!;
 }
 
 function battlerSpriteAtAge(age: number, input: Readonly<MachPunchLiveInputs>, sprite: "attacker" | "target"): MachPunchBattlerSprite {
@@ -344,7 +347,8 @@ function battlerSpriteAtAge(age: number, input: Readonly<MachPunchLiveInputs>, s
       matrix,
     };
   }
-  const shake = targetShakeAtAge(age);
+  // AnimTask_ShakeMon sets x2 absolutely when it starts (age 58); before that the target keeps its idle rest.
+  const shake = age <= 58 ? { x: source.x2, y: source.y2 } : targetShakeAtAge(age);
   return { ...source, x2: shake.x, y2: shake.y, matrix };
 }
 
@@ -409,7 +413,8 @@ function traceSpritesAtAge(age: number, input: Readonly<MachPunchLiveInputs>): M
   return indices.map((index) => {
     const spawned = age < 58 ? 50 + index : (index === 0 ? 58 : 50 + index);
     const life = Math.max(0, 8 - (age - spawned));
-    const x2 = age < 58 ? firstCycle[index]! : laterCycle[index]!;
+    // The trace clones copy the attacker's x2, which includes its idle rest.
+    const x2 = (age < 58 ? firstCycle[index]! : laterCycle[index]!) + input.attackerSprite.x2;
     return {
       kind: "trace", slot: input.traceSlots[index]!, template: "gMultiuseSpriteTemplate", callback: "AnimBattlerTrace",
       x: input.attackerPictureOrigin.x, y: input.attackerPictureOrigin.y, x2, y2: 0,
