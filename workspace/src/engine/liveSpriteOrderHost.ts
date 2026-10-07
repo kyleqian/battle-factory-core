@@ -60,6 +60,8 @@ export interface LiveSpriteOrderHost {
    * after it; the unleash lend requires no other unit since (only the setup's own attacker-hide invalidate may follow).
    */
   readonly digSetup?: Readonly<{ units: number }>;
+  /** prep29: the battle's first unit was a Bonemerang hit 1 (move-animation 155 at `bodies` 0); `units` = the body counter right after it (hit 2 lend gate). */
+  readonly bonemerangHit1?: Readonly<{ units: number }>;
 }
 
 const RECALL_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_VARIOUS", "B_SCR_OP_RETURNATKTOBALL", "B_SCR_OP_RETURNTOBALL"]);
@@ -310,6 +312,7 @@ export function advanceLiveSpriteOrderHost(
   let hidden = host.hidden;
   let bodies = host.bodies ?? 0;
   let digSetup = host.digSetup;
+  let bonemerangHit1 = host.bonemerangHit1;
   let cursor = host.cursor;
   if (cursor?.requestId !== requestId) {
     if (cursor !== null && !cursor.drained) tracker = invalidateSpriteOrderTracker(tracker, "previous resolution not fully applied");
@@ -326,6 +329,7 @@ export function advanceLiveSpriteOrderHost(
       const wasFirstBody = bodies === 0;
       if (mapped.event && BODY_UNIT_EVENTS.has(mapped.event.kind)) bodies += 1;
       if (mapped.event?.kind === "move-animation" && mapped.event.moveId === 91 && wasFirstBody) digSetup = Object.freeze({ units: bodies });
+      if (mapped.event?.kind === "move-animation" && mapped.event.moveId === 155 && wasFirstBody) bonemerangHit1 = Object.freeze({ units: bodies });
       index += 1;
     }
     return index;
@@ -343,10 +347,10 @@ export function advanceLiveSpriteOrderHost(
       drained: nextEventIndex >= events.length && cursor.segmentIndex === resolution.segments.length - 1,
     };
   }
-  if (tracker === host.tracker && bodies === (host.bodies ?? 0) && digSetup === host.digSetup && hidden === host.hidden && cursor.requestId === host.cursor?.requestId
+  if (tracker === host.tracker && bodies === (host.bodies ?? 0) && digSetup === host.digSetup && bonemerangHit1 === host.bonemerangHit1 && hidden === host.hidden && cursor.requestId === host.cursor?.requestId
     && cursor.segmentIndex === host.cursor.segmentIndex && cursor.nextEventIndex === host.cursor.nextEventIndex
     && cursor.drained === host.cursor.drained) return host;
-  return Object.freeze({ ...host, tracker, hidden, bodies, ...(digSetup === undefined ? {} : { digSetup }), cursor: Object.freeze(cursor) });
+  return Object.freeze({ ...host, tracker, hidden, bodies, ...(digSetup === undefined ? {} : { digSetup }), ...(bonemerangHit1 === undefined ? {} : { bonemerangHit1 }), cursor: Object.freeze(cursor) });
 }
 
 /**
@@ -374,6 +378,18 @@ export function digUnleashLend(): LiveMoveSpriteOrderInput {
  * Order lent to the move body at its activation edge (undefined = consumers decline): the tracker's entry-label lend
  * (spriteOrderTrackerLend), withheld after a KO (battler slots not the entry ones) from POSTKO_LEND_EXCLUDED_MOVE_IDS.
  */
+/**
+ * Bonemerang hit 2 lend (prep29 B.1; identical in the accepted scenarios and the RHYDON/GOLEM alternates, both sides): the known-entry
+ * free order with the hit-1 sprite pair swapped (slots 3 and 4 trade places after the bone / impact / lunge births and frees). The
+ * tracker's own lend (after the hit-1 body and the target's hit animation) is only the known / unknown gate.
+ */
+export function bonemerangHit2Free(): readonly number[] {
+  return BONEMERANG_HIT2_FREE;
+}
+const BONEMERANG_HIT2_FREE: readonly number[] = Object.freeze([
+  3, 4, 21, 20, 5, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 7, 54, 55, 56, 57, 58, 59, 23, 22,
+  48, 49, 50, 51, 52, 53, ...Array.from({ length: 24 }, (_, i) => 24 + i)]);
+
 export function lendLiveSpriteOrder(host: LiveSpriteOrderHost, moveId?: number): LiveMoveSpriteOrderInput | undefined {
   if (moveId === 91 && host.digSetup !== undefined && (host.bodies ?? 0) >= host.digSetup.units && (host.bodies ?? 0) <= host.digSetup.units + 1) {
     return digUnleashLend();
@@ -383,7 +399,12 @@ export function lendLiveSpriteOrder(host: LiveSpriteOrderHost, moveId?: number):
   const { player, opponent } = host.tracker.battlerSlots;
   const atEntry = player === KNOWN_ENTRY_BATTLER_SLOTS.player && opponent === KNOWN_ENTRY_BATTLER_SLOTS.opponent;
   if (!atEntry && moveId !== undefined && POSTKO_LEND_EXCLUDED_MOVE_IDS.includes(moveId)) return undefined;
-  return Object.freeze({ known: true as const, free, ...((host.bodies ?? 0) === 0 ? { firstBody: true as const } : {}) });
+  // hit 1 first body; the target's hit animation between the hits is the only unit that may follow it
+  const hit2 = moveId === 155 && host.bonemerangHit1 !== undefined && (host.bodies ?? 0) >= host.bonemerangHit1.units && (host.bodies ?? 0) <= host.bonemerangHit1.units + 1;
+  return Object.freeze({
+    known: true as const, free: hit2 ? bonemerangHit2Free() : free, ...((host.bodies ?? 0) === 0 ? { firstBody: true as const } : {}),
+    ...(hit2 ? { afterBonemerangHit1: true as const } : {}),
+  });
 }
 
 /**

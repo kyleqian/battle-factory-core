@@ -1,0 +1,40 @@
+{
+ "schema": "prep29-live-adapter-fixture/v1",
+ "move": "RAPID_SPIN",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep29-rapid-spin-alt-player-starmie-golem.json",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 206
+ },
+ "windowSource": "window = [activation, activation + 130 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "STARMIE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349018756,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 167,
+  "playerMaxHp": 167,
+  "opponentHp": 187,
+  "opponentMaxHp": 187,
+  "playerGender": "none",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "power": 20,
+  "damage": 5
+ }
+}

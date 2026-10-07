@@ -138,6 +138,8 @@ export interface LiveMoveSpriteOrderInput {
    * unleash's order and BG/scanline history are the measured post-setup state (liveSpriteOrderHost `digSetupUnits`).
    */
   readonly afterDigSetup?: true;
+  /** prep29: the previous unit was the battle's first body, a Bonemerang hit 1 (nothing since): hit 2's BG registers are hit 1's split values. */
+  readonly afterBonemerangHit1?: true;
 }
 
 /**

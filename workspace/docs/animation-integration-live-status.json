@@ -3630,6 +3630,51 @@
         "shiny battlers decline",
         "independent arbitrary-species/history framebuffer comparison"
       ]
+    },
+    {
+      "move": "MOVE_BONEMERANG",
+      "id": 155,
+      "sourceFieldEvidence": "../tools/integration/fixtures/r29-live-receipt.json",
+      "liveEvidence": [
+        "Both hit bodies (71 rows each, constant): builder src/engine/liveQ2Moves.ts liveBonemerangInputs (picture centres = picOffsetPoint, slots 3/4/4 lowest-free birth-first, subpriority = attacker sub - 2, monbg = 32 - target sprite centre on the target's BG; no capture row, no Random2). Hit 1 is the battle's first body (S0 registers); hit 2 only directly after a first-body hit 1 (+ the target hit animation): host liveSpriteOrderHost `bonemerangHit1` lends the measured constant order ([3,4,...] swapped pair). Any other history declines.",
+        "dense full windows 0 px twice fresh: MAROWAK <-> CHANSEY accepted, RHYDON <-> GOLEM alternate, hit 1 and hit 2, both orientations (8 windows); hit 2's blank text box is the fixture's messageLines",
+        "ordinary route: generated rentals seed 246 / streak 21 (MAROWAK slot 0, one turn): both hit bodies adapter-active every age, next prompt reached, Scene ON/OFF logical parity (tests/animation/livePrep29Adapters.test.ts)"
+      ],
+      "remaining": [
+        "Bonemerang after any earlier body declines (first-body gate); hit 2 only behind a first-body hit 1",
+        "shiny battlers decline",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_RAPID_SPIN",
+      "id": 229,
+      "sourceFieldEvidence": "../tools/integration/fixtures/r29-live-receipt.json",
+      "liveEvidence": [
+        "130 rows: liveRapidSpinInputs (spin sprite at the attacker battlePositionCenter, hit splat at the target picOffsetPoint via the seam's animationCenters, slot 3, matrix 0, task slots 0/0/1/0/2, monbg of the attacker (BG2 player / BG1 opponent) at 32 - its sprite centre, power / damage on the request, entry scanline = the constant S0 banks (the Dig first-body banks); no capture row, no Random2). Any known lend (the scanline carry is measured after Tackle and as first body)",
+        "dense full windows 0 px twice fresh: WARTORTLE <-> ONIX (after Tackle) and STARMIE <-> GOLEM (first body), both orientations (4 windows)",
+        "ordinary route: generated rentals seed 80 / streak 14 (WARTORTLE slot 2, one turn): body adapter-active every age, next prompt reached, Scene ON/OFF logical parity"
+      ],
+      "remaining": [
+        "the entry scanline banks are measured only after Tackle and as first body; a body that changed the scanline buffers earlier is not measured",
+        "shiny battlers decline",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_OUTRAGE",
+      "id": 200,
+      "sourceFieldEvidence": "../tools/integration/fixtures/r29-live-receipt.json",
+      "liveEvidence": [
+        "119 rows, first body only (S0 registers): liveOutrageInputs (flame origin = attacker picOffsetPoint, 23 flames in lowest-free slots birth-first destroyed at birth + 31, flame OAM constant [0, 32768, 31257], task slots 0..3, assets-only palette composite; no capture row, no Random2). Locked-turn later bodies decline",
+        "dense full windows 0 px twice fresh: DRAGONITE <-> ONIX accepted and FLYGON <-> GOLEM alternate, both orientations (4 windows)"
+      ],
+      "remaining": [
+        "no ordinary generated route found: seeds 0..3999 x streaks 0..42 (r3ProfileRouteSearch, ~2-minute bound) yielded no rental with Outrage",
+        "the locked-turn second body of a lock (not first body) declines",
+        "shiny battlers decline",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3653,10 +3698,10 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 243,
+  "implementedCount": 246,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
-  "faithfulRandomCount": 11,
+  "faithfulRandomCount": 12,
   "faithfulRandomAdapters": [
     {
       "id": 24,
@@ -3789,6 +3834,16 @@
       "surrogateRoutes": [
         "r3-profile/lovely-kiss (tests/animation/liveProfileMoveAdapters.test.ts)"
       ]
+    },
+    {
+      "id": 295,
+      "move": "MOVE_LUSTER_PURGE",
+      "policy": "presentation-rng.v1.frame-step.no-lag.battle-stride-2^20",
+      "provenance": "pinned",
+      "pinnedProofs": [
+        "tools/integration/fixtures/r29-live-receipt.json"
+      ],
+      "surrogateRoutes": []
     }
   ],
   "faithfulRandomClaim": {

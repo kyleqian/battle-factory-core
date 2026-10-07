@@ -50,6 +50,8 @@ export const LIVE_MOVE_RANDOM2_PLANS: Readonly<Record<number, readonly Presentat
   // Move_RAIN_DANCE: two AnimTask_CreateRaindrops tasks, 40 spawn frames (ages 18, 20, then 23 step 3 to 134) x 4 words
   // (x0, y0, x1, y1; battle_anim_water.c:495-496). The reducer replays them from the activation state alone.
   240: Object.freeze([18, 20, ...Array.from({ length: 38 }, (_, i) => 23 + 3 * i)].map((ageOffset) => Object.freeze({ ageOffset, count: 4 }))),
+  // Move_LUSTER_PURGE: six AnimHitSplatRandom sprites at ages 170 + 5k, two words each (x2, y2; battle_anim_normal.c:1049-1062; prep29 B.5).
+  295: Object.freeze(Array.from({ length: 6 }, (_, k) => Object.freeze({ ageOffset: 170 + 5 * k, count: 2 }))),
   // Move_WATER_PULSE: six ring emissions (ages 86, 93, 100, 101, 108, 115) x 2 words (randomY, randomX;
   // battle_anim_water.c:1574-1575). The reducer replays them from the activation state alone.
   352: Object.freeze([86, 93, 100, 101, 108, 115].map((ageOffset) => Object.freeze({ ageOffset, count: 2 }))),

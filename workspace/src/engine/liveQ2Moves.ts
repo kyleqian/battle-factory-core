@@ -5,7 +5,7 @@
  * scenarios), the assets-only palette composite with the move's own asset palettes written by the reducers, the lent 64-slot order, and the
  * WIN0 history rule (first body (240,161); (0,0) once an earlier body ran). No capture row is read.
  */
-import { S0_REGISTERS, ZERO_BG_VALUES, battlerSprite, type LiveBgSnapshotArgs } from "./liveBgSnapshotMoves.ts";
+import { KNOWN_ENTRY_NON_BATTLER_SPRITES, S0_REGISTERS, ZERO_BG_VALUES, battlerSprite, type LiveBgSnapshotArgs } from "./liveBgSnapshotMoves.ts";
 
 type Side = "player" | "opponent";
 type Inputs = Record<string, any>;
@@ -170,5 +170,113 @@ export function liveSkyAttackInputs(args: LiveQ2Args & { impactPalette: readonly
       vram: {},
     },
     animationRngSeed: 0, gameplayRng: null,
+  };
+}
+
+/**
+ * `Move_BONEMERANG` (155; prep29 B.1): one input per hit body (71 rows, constant). Picture centres are the battlers' picture offset points; the bone /
+ * impact / lunge sprites take slots 3 / 4 / 4 (lowest free, birth-first) with the attacker's battler subpriority - 2; tasks shake 0 / monbg 1 / clear 0;
+ * the monbg scroll is 32 - the target sprite centre on the target's BG (opponent target BG1, player target BG2). The BG control registers are the
+ * first-body S0 pair for hit 1; hit 2 starts from hit 1's split values (a Bonemerang hit is the only history this builder supports).
+ */
+export function liveBonemerangInputs(args: LiveQ2Args): Inputs {
+  const { attackerSide, attacker, target } = args, targetSide = opposite(attackerSide), toOpponent = targetSide === "opponent";
+  const attackerSprite = battlerSprite(attackerSide, attacker), targetSprite = battlerSprite(targetSide, target);
+  const monbgBg1Cnt = toOpponent ? 0x5c02 : 0x9c00, monbgBg2Cnt = toOpponent ? 0x5e00 : 0x5e02;
+  const splitBg1Cnt = toOpponent ? 0x5c02 : 0x9c01, splitBg2Cnt = toOpponent ? 0x5e00 : 0x5e02;
+  const first = args.firstBody;
+  return {
+    attackerPictureCenter: { ...attacker.picOffsetPoint }, targetPictureCenter: { ...target.picOffsetPoint },
+    attackerSprite, targetSprite,
+    allocations: { boneSpriteSlot: 3, impactSpriteSlot: 4, lungeSpriteSlot: 4, shakeTaskSlot: 0, updateMonBgTaskSlot: 1, clearMonBgTaskSlot: 0, boneMatrixSlot: 0, impactMatrixSlot: 3 },
+    resources: { bone: { tileSlot: 6, paletteBank: 7, tileRange: [305, 16] }, impact: { tileSlot: 7, paletteBank: 8, tileRange: [321, 16] } },
+    spriteOrder: args.spriteOrder,
+    painterSprites: orderKeys(attackerSide, attackerSprite.attr[0], targetSprite.attr[0]).map((k) => ({ slot: k.slot, subpriority: k.subpriority, oamPriority: k.oamPriority, oamY: k.oamY })),
+    initialMatrixBitmap: 6,
+    monbg: { layer: toOpponent ? "bg1" : "bg2", scroll: { x: 32 - target.spriteCenter.x, y: 32 - target.spriteCenter.y }, targetBgPriority: toOpponent ? 1 : 0 },
+    background: {
+      baseBg1Cnt: first ? 0x9c00 : splitBg1Cnt, baseBg2Cnt: first ? 0x5e00 : splitBg2Cnt, monbgBg1Cnt, monbgBg2Cnt, splitBg1Cnt, splitBg2Cnt,
+    },
+    animationRngSeed: 0, gameplayRng: null,
+  };
+}
+
+/** The Dig first-body scanline S0 (prep18 s1.1; Rapid Spin's entry state is the same constant, prep29 B.3): bank 0 = 80 x +2, 80 x -2, then zeros; bank 1 zero. */
+const rapidSpinScanline = (): [number[], number[]] => [[...Array(80).fill(2), ...Array(80).fill(-2), ...Array(160).fill(0)], Array(320).fill(0)];
+
+/**
+ * `Move_RAPID_SPIN` (229; prep29 B.3): 130 rows. The spin sprite sits at the attacker's BATTLE POSITION centre and the hit splat at the target's picture
+ * offset point (the seam takes the attacker / target `animationCenter`s, set by the caller); both effect sprites take slot 3 (lowest free), the splat
+ * matrix 0, tasks elevation 0 / shake 0 / monbg 1 / clear 0 / sound 2; the monbg is the ATTACKER's (BG2 for a player attacker, BG1 for an opponent) at
+ * 32 - its sprite centre. Power / damage come from the request; the entry scanline is the constant S0 banks.
+ */
+export function liveRapidSpinInputs(args: Omit<LiveQ2Args, "firstBody" | "palettes"> & { movePower: number; moveDamage: number }): Inputs {
+  const { attackerSide, attacker, target } = args, targetSide = opposite(attackerSide), player = attackerSide === "player";
+  return {
+    attackerSpriteSlot: player ? 6 : 8, targetSpriteSlot: player ? 8 : 6, rapidSpriteSlot: 3, impactSpriteSlot: 3, impactMatrixSlot: 0,
+    elevationTaskSlot: 0, shakeTaskSlot: 0, monbgTaskSlot: 1, clearTaskSlot: 0, soundTaskSlot: 2,
+    spriteOrder: args.spriteOrder, paletteBanks: { impact: 7, rapidSpin: 8 }, tileSlots: { impact: 6, rapidSpin: 7 }, baseMatrixBitmap: 6,
+    movePower: args.movePower, moveDamage: args.moveDamage,
+    targetInitialOffset: { x: target.frontIdleRest.x2, y: target.frontIdleRest.y2 },
+    animationRng: 0,
+    monbg: { layer: player ? "bg2" : "bg1", spriteX: attacker.spriteCenter.x, spriteY: attacker.spriteCenter.y,
+      bgX: 32 - attacker.spriteCenter.x, bgY: 32 - attacker.spriteCenter.y, inBg2: player, battlerId: player ? 0 : 1 },
+    initialScanlineSrcBuffer: 1, initialScanlineBanks: rapidSpinScanline(),
+    gameplayRng: null, targetSide,
+  };
+}
+
+const OUTRAGE_FLAME_BIRTHS = [6, 8, 10, 12, 14, 16, 18, 20, 22, 27, 29, 31, 33, 35, 37, 39, 44, 46, 48, 50, 52, 54, 56] as const;
+/** Lowest-free flame slots over the known-entry in-use set, births first; a flame is destroyed at birth + 31 after that frame's births (prep29 B.6). */
+const outrageFlameSlots = (): number[] => {
+  const used = new Set([0, 1, 2, 6, 8, 60, 61, 62, 63]), slots: number[] = [], freed = new Set<number>();
+  OUTRAGE_FLAME_BIRTHS.forEach((age, i) => {
+    OUTRAGE_FLAME_BIRTHS.forEach((birth, j) => { if (j < i && birth + 31 < age && !freed.has(j)) { freed.add(j); used.delete(slots[j]!); } });
+    let s = 0; while (used.has(s)) s += 1;
+    used.add(s); slots.push(s);
+  });
+  return slots;
+};
+
+/**
+ * `Move_OUTRAGE` (200; prep29 B.6): 119 rows, first body only (S0 registers). The flame origin is the attacker's picture offset point; the 23 flames take
+ * the lowest-free slots (birth-first, destroyed at birth + 31); the flame OAM words are the known-entry constant [0, 0x8000, 31257]; tasks
+ * loop-SE 0 / blend 1 / elliptical translate 2 / shake 3; ANIM_TAG_SMALL_EMBER: tile slot 6, tiles 537..616, hardware bank 23.
+ */
+export function liveOutrageInputs(args: LiveBgSnapshotArgs & { spriteOrder: readonly number[]; smallEmberPalette: readonly number[] }): Inputs {
+  const { attackerSide, attacker, target } = args;
+  const attackerSprite = battlerSprite(attackerSide, attacker), targetSprite = battlerSprite(opposite(attackerSide), target);
+  const sprites = [attackerSprite, targetSprite].sort((a, b) => a.slot - b.slot);
+  return {
+    attackerPictureOrigin: { ...attacker.picOffsetPoint }, targetPictureOrigin: { ...target.spriteCenter },
+    attackerSprite, targetSprite,
+    taskSlots: { loopSe: 0, blendColorCycle: 1, translateMonElliptical: 2, shakeMon2: 3 },
+    spriteSlots: { flames: outrageFlameSlots() },
+    resources: { smallEmber: { tag: 10029, tileSlot: 6, paletteAllocatorSlot: 7, hardwarePaletteBank: 23, tileRange: [537, 80], palette: [...args.smallEmberPalette] } },
+    allocator: {
+      initialOccupiedSprites: [0, 1, 2, 6, 8, 60, 61, 62, 63], initialMatrixBitmap: 6, spriteOrder: args.spriteOrder,
+      initialLiveSprites: [...KNOWN_ENTRY_NON_BATTLER_SPRITES.map((s) => ({ slot: s.slot, attr: [...s.attr] as [number, number, number], subpriority: s.subpriority })),
+        ...sprites.map((s) => ({ slot: s.slot, attr: s.attr, subpriority: s.subpriority }))].sort((a, b) => a.slot - b.slot),
+    },
+    oam: { flame: [0, 0x8000, 31257] },
+    palettes: { unfaded: args.palettes.unfaded, faded: args.palettes.faded, hardware: args.palettes.hardware },
+    registers: { ...S0_REGISTERS }, animationRngSeed: 0, gameplayRng: null,
+  };
+}
+
+/**
+ * `Move_LUSTER_PURGE` (295; prep29 B.5, faithful-random): the circle is at the attacker's picture offset point, the six hit splats at the target's battle
+ * position centre + (-1, +2) for a player target / (+1, +2) for an opponent target, the monbg at the attacker sprite centre (scroll 32 - centre).
+ * The six word pairs (plan rows {ageOffset: 170 + 5k, count: 2}) come only from the presentation host.
+ */
+export function liveLusterPurgeFields(args: Omit<LiveQ2Args, "firstBody" | "palettes" | "spriteOrder"> & { target: PositionAnchors; draws: readonly (readonly number[])[] }) {
+  const { attackerSide, attacker, target } = args, player = attackerSide === "player";
+  return {
+    attackerBattlerId: (player ? 0 : 1) as 0 | 1, attackerSpriteSlot: player ? 6 : 8, targetSpriteSlot: player ? 8 : 6,
+    targetInitialX2: target.frontIdleRest.x2,
+    circleCenter: { ...attacker.picOffsetPoint }, monbgCenter: { ...attacker.spriteCenter },
+    monbgPosition: { x: 32 - attacker.spriteCenter.x, y: 32 - attacker.spriteCenter.y },
+    hitsplatCenter: { x: target.battlePositionCenter.x + (player ? 1 : -1), y: target.battlePositionCenter.y + 2 },
+    visualRandom: { hitsplats: args.draws.map((pair) => ({ x: pair[0]!, y: pair[1]! })) as never },
   };
 }

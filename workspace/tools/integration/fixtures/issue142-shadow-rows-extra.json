@@ -1,6 +1,6 @@
 {
  "schema": "issue142-shadow-rows-extra/v1",
- "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep7 rows from issue142ShadowRowsPrep7.py) (+ prep8 rows from issue142ShadowRowsPrep8.py) (+ prep9 rows from issue142ShadowRowsPrep9.py) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep13 ICE_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep13 WATER_SPOUT rows from issue142ShadowRowsPrep13.py) (+ prep13 HIDDEN_POWER rows from issue142ShadowRowsPrep13.py) (+ prep13 HYPER_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep14 RAIN_DANCE rows from issue142ShadowRowsPrep14.py) (+ prep14 WATER_PULSE rows from issue142ShadowRowsPrep14.py) (+ prep14 HAIL rows from issue142ShadowRowsPrep14.py) (+ prep16 Overheat/Silver Wind rows from issue142ShadowRowsPrep16.py) (+ prep16 Overheat/Silver Wind rows from issue142ShadowRowsPrep16.py) (+ r2-gates Fire Punch / Psych Up opponent rows from issue142ShadowRowsR2Gates.py) (+ r3 profile Lovely Kiss / Spikes / Octazooka rows from issue142ShadowRowsR3Profile.py) (+ q2 rows from issue142ShadowRowsQ2.py) (+ baton-endeavor rows, tools/integration/fixtures/baton-endeavor-live)",
+ "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep7 rows from issue142ShadowRowsPrep7.py) (+ prep8 rows from issue142ShadowRowsPrep8.py) (+ prep9 rows from issue142ShadowRowsPrep9.py) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep13 ICE_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep13 WATER_SPOUT rows from issue142ShadowRowsPrep13.py) (+ prep13 HIDDEN_POWER rows from issue142ShadowRowsPrep13.py) (+ prep13 HYPER_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep14 RAIN_DANCE rows from issue142ShadowRowsPrep14.py) (+ prep14 WATER_PULSE rows from issue142ShadowRowsPrep14.py) (+ prep14 HAIL rows from issue142ShadowRowsPrep14.py) (+ prep16 Overheat/Silver Wind rows from issue142ShadowRowsPrep16.py) (+ prep16 Overheat/Silver Wind rows from issue142ShadowRowsPrep16.py) (+ r2-gates Fire Punch / Psych Up opponent rows from issue142ShadowRowsR2Gates.py) (+ r3 profile Lovely Kiss / Spikes / Octazooka rows from issue142ShadowRowsR3Profile.py) (+ q2 rows from issue142ShadowRowsQ2.py) (+ baton-endeavor rows, tools/integration/fixtures/baton-endeavor-live) (+ prep29 rows from issue142ShadowRowsPrep29.py)",
  "rows": [
   {
    "id": 236,
@@ -5698,6 +5698,172 @@
     "scenario": "tools/battle-lab/s10a-endeavor-opponent-golbat-chansey.json",
     "body": "normal",
     "activation": "the dense window starts at the first gAnimScriptActive frame (poisonFangProbe.py 283); elevated opponent measured in-window: GOLBAT attacker 68/68 rows 0 px twice fresh (baton-endeavor-live-receipt.json)"
+   }
+  },
+  {
+   "id": 155,
+   "move": "BONEMERANG",
+   "orientation": "player",
+   "variant": "p29-bonemerang-player-marowak-opponent-chansey-hit1",
+   "activationFrame": 85,
+   "windowStart": 85,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep29-live/bonemerang-player-marowak-opponent-chansey-hit1.json",
+    "scenario": "tools/battle-lab/mechanic-bonemerang-player-marowak-opponent-chansey.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep29 moves/*.json; r29 live receipt)"
+   },
+   "requestFields": {
+    "turn": 0
+   }
+  },
+  {
+   "id": 155,
+   "move": "BONEMERANG",
+   "orientation": "opponent",
+   "variant": "p29-bonemerang-opponent-marowak-player-chansey-hit1",
+   "activationFrame": 89,
+   "windowStart": 89,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep29-live/bonemerang-opponent-marowak-player-chansey-hit1.json",
+    "scenario": "tools/battle-lab/mechanic-bonemerang-opponent-marowak-player-chansey.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep29 moves/*.json; r29 live receipt)"
+   },
+   "requestFields": {
+    "turn": 0
+   }
+  },
+  {
+   "id": 229,
+   "move": "RAPID_SPIN",
+   "orientation": "player",
+   "variant": "p29-rapid-spin-player-wartortle-opponent-onix",
+   "activationFrame": 310,
+   "windowStart": 310,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep29-live/rapid-spin-player-wartortle-opponent-onix.json",
+    "scenario": "tools/battle-lab/mechanic-rapid-spin-player-wartortle-opponent-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep29 moves/*.json; r29 live receipt)"
+   },
+   "requestFields": {
+    "power": 20,
+    "damage": 1
+   }
+  },
+  {
+   "id": 229,
+   "move": "RAPID_SPIN",
+   "orientation": "opponent",
+   "variant": "p29-rapid-spin-opponent-wartortle-player-onix",
+   "activationFrame": 218,
+   "windowStart": 218,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep29-live/rapid-spin-opponent-wartortle-player-onix.json",
+    "scenario": "tools/battle-lab/mechanic-rapid-spin-opponent-wartortle-player-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep29 moves/*.json; r29 live receipt)"
+   },
+   "requestFields": {
+    "power": 20,
+    "damage": 1
+   }
+  },
+  {
+   "id": 200,
+   "move": "OUTRAGE",
+   "orientation": "player",
+   "variant": "p29-outrage-player-dragonite-opponent-onix",
+   "activationFrame": 76,
+   "windowStart": 76,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep29-live/outrage-player-dragonite-opponent-onix.json",
+    "scenario": "tools/battle-lab/mechanic-outrage-player-dragonite-opponent-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep29 moves/*.json; r29 live receipt)"
+   }
+  },
+  {
+   "id": 200,
+   "move": "OUTRAGE",
+   "orientation": "opponent",
+   "variant": "p29-outrage-opponent-dragonite-player-onix",
+   "activationFrame": 80,
+   "windowStart": 80,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep29-live/outrage-opponent-dragonite-player-onix.json",
+    "scenario": "tools/battle-lab/mechanic-outrage-opponent-dragonite-player-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep29 moves/*.json; r29 live receipt)"
+   }
+  },
+  {
+   "id": 295,
+   "move": "LUSTER_PURGE",
+   "orientation": "player",
+   "variant": "p29-luster-purge-player-latios-opponent-onix",
+   "activationFrame": 78,
+   "windowStart": 78,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep29-live/luster-purge-player-latios-opponent-onix.json",
+    "scenario": "tools/battle-lab/mechanic-luster-purge-player-latios-opponent-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep29 moves/*.json; r29 live receipt)"
+   }
+  },
+  {
+   "id": 295,
+   "move": "LUSTER_PURGE",
+   "orientation": "opponent",
+   "variant": "p29-luster-purge-opponent-latios-player-onix",
+   "activationFrame": 82,
+   "windowStart": 82,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep29-live/luster-purge-opponent-latios-player-onix.json",
+    "scenario": "tools/battle-lab/mechanic-luster-purge-opponent-latios-player-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep29 moves/*.json; r29 live receipt)"
    }
   }
  ]

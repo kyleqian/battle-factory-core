@@ -1,0 +1,36 @@
+{
+ "schema": "prep29-live-adapter-fixture/v1",
+ "move": "OUTRAGE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-outrage-player-dragonite-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 76,
+  "endFrame": 194
+ },
+ "windowSource": "window = [activation, activation + 119 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "DRAGONITE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349018756,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 166,
+  "playerMaxHp": 166,
+  "opponentHp": 110,
+  "opponentMaxHp": 110,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

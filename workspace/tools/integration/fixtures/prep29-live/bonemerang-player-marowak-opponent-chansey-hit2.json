@@ -1,0 +1,49 @@
+{
+ "schema": "prep29-live-adapter-fixture/v1",
+ "move": "BONEMERANG",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-bonemerang-player-marowak-opponent-chansey.json",
+ "denseWindow": {
+  "startFrame": 387,
+  "endFrame": 457
+ },
+ "windowSource": "window = [activation, activation + 71 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "MAROWAK",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "CHANSEY",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015703,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 167,
+  "playerMaxHp": 167,
+  "opponentHp": 193,
+  "opponentMaxHp": 357,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 155,
+   "side": "player"
+  }
+ ],
+ "requestFields": {
+  "turn": 1
+ },
+ "messageLines": [
+  "",
+  ""
+ ]
+}

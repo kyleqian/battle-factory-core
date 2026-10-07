@@ -86,7 +86,7 @@ import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
 import paletteResources from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
 import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "json" };
 import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
-import { liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
+import { liveBonemerangInputs, liveLusterPurgeFields, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
 import { liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
 import { liveCurseStatsInputs, liveFuryCutterInputs, livePursuitInputs, liveReturnInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
@@ -131,6 +131,12 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // Q2 (docs/next-adapters-prep25.md s0.2 / C): zero-Random2 bodies through liveQ2Moves.ts: Hyper Voice, Smog, Sand Tomb, Sky Attack
   // (charge + strike). Snore (prep28: a known lend after Sleep Powder + its sleep status animations; any unknown lend declines).
   304, 123, 328, 143, 173,
+  // prep29 R1 (docs/next-adapters-prep29.md B.1): Bonemerang, both hit bodies (hit 1 first body, hit 2 after hit 1 through the lent order).
+  155,
+  // prep29 R1 (B.3): Rapid Spin (any known lend; the entry scanline is the constant S0 banks).
+  229,
+  // prep29 R1 (B.6): Outrage first body (S0 registers).
+  200,
   // oam1 (docs/next-adapters-prep20.md): production hardware-OAM provider (liveMoveOamAssembler.ts), first body.
   // Fury Cutter: the counter-1 body only (a first body implies furyCutterCounter 1).
   261, 228, 210,
@@ -342,6 +348,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     142, 191, 190, 324,
     // Q2 (prep25 moves/*.json): the windows start at activation (row 0).
     304, 123, 328, 143, 173,
+    // prep29 R1: Bonemerang windows start at activation (row 0).
+    155, 229, 200, 295,
     // Sheer Cold (ISSUES #151, species audit 7 elevated FLYGON / GOLBAT opponent, both orientations): activation == window start (row 0).
     329,
   ].map((id) => [id, 0] as [number, number]).concat([
@@ -811,6 +819,10 @@ export function liveMoveAnimationDuration(
     // Sheer Cold first body: 191 rows (player attacker) / 190 (opponent), constant across the accepted + alternate scenarios (prep22 s0.2).
     case 329: return request.attacker === 0 ? 191 : 190;
     // Sky Attack (prep25): charge 148 rows / strike 180 rows, selected by gAnimMoveTurn bit 0 like Razor Wind / Solar Beam.
+    case 295: return 332; // Luster Purge (prep29 B.5: 332 rows, constant in all four scenarios; faithful-random, plan rows in liveMovePresentationRng.ts).
+    case 200: return 119; // Outrage (prep29 B.6: 119 rows, constant in all five bodies).
+    case 229: return 130; // Rapid Spin (prep29 B.3: 130 rows, constant in all four scenarios).
+    case 155: return 71; // Bonemerang (prep29 B.1: 71 rows per hit body, constant in all 8 bodies).
     case 173: return 69; // Snore (prep25: 69 rows, constant across the scenarios; no Random2).
     case 143: return (request.turn & 1) === 0 ? 148 : 180; // charge 148 rows, strike 180 (the strike needs the 10143 order-plan lend, see case 143)
     case 328: return 123; // Sand Tomb (prep25: constant across the four scenarios).
@@ -2350,6 +2362,15 @@ export function liveMoveAnimationPresentation(
         fistRandom: { x: words[0]!, y: words[1]!, xSign: words[2]!, ySign: words[3]! } };
       break;
     }
+    case 295: {
+      // prep29 R1 / B.5: Luster Purge (faithful-random). Six AnimHitSplatRandom word pairs from the presentation host; geometry from the anchors.
+      const draws = liveMovePresentationRngWords(presentationRngInput)?.draws;
+      if (draws === undefined || draws.length !== 6 || draws.some((pair) => pair.length !== 2)) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      config = { move: "LUSTER_PURGE", attacker, target, fieldProfile,
+        ...liveLusterPurgeFields({ attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, draws }) };
+      break;
+    }
     case 273: {
       // 21 mini twinkling stars, two words each in spawn order (miniTwinklingStarFromWords).
       const draws = liveMovePresentationRngWords(presentationRngInput)?.draws;
@@ -2528,6 +2549,54 @@ export function liveMoveAnimationPresentation(
         attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes, spriteOrder: lentOrder, firstBody: !strike,
         impactPalette: (paletteResources.resources as Record<string, { colors: readonly number[] }>).ANIM_TAG_IMPACT!.colors,
         birdPalette: skyAttackAsset.bird.palette.map((c) => (c.r >> 3) | (c.g >> 3) << 5 | (c.b >> 3) << 10) }) as never };
+      break;
+    }
+    case 155: {
+      // prep29 R1: Bonemerang. Hit 1 is the first body (S0 registers); hit 2 only directly after a first-body hit 1 (a later body declines).
+      if (!spriteOrderInput?.known || (spriteOrderInput.firstBody !== true && spriteOrderInput.afterBonemerangHit1 !== true)) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const lentOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (lentOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      config = { move: "BONEMERANG", attacker, target, fieldProfile, animationInputs: liveBonemerangInputs({
+        attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes: undefined as never, spriteOrder: lentOrder,
+        firstBody: spriteOrderInput.firstBody === true }) as never };
+      break;
+    }
+    case 229: {
+      // prep29 R1 / B.3: Rapid Spin. The spin sprite is at the attacker's battle-position centre, the hit splat at the target's picture offset point.
+      if (!spriteOrderInput?.known) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const lentOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (lentOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const { targetSide: _targetSide, gameplayRng: _gameplayRng, ...inputs } = liveRapidSpinInputs({
+        attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, spriteOrder: lentOrder,
+        movePower: request.power, moveDamage: request.damage }) as Record<string, unknown>;
+      config = { move: "RAPID_SPIN", fieldProfile,
+        attacker: { ...attacker, geometry: { ...attacker.geometry, animationCenter: attackerAnchors.battlePositionCenter } },
+        target: { ...target, geometry: { ...target.geometry, animationCenter: targetAnchors.picOffsetPoint } },
+        animationInputs: inputs as never };
+      break;
+    }
+    case 200: {
+      // prep29 R1 / B.6: Outrage, first body only (the S0 registers; a later body declines).
+      if (spriteOrderInput?.known !== true || spriteOrderInput.firstBody !== true) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const lentOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (palettes === null || lentOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const { attackerPictureOrigin, targetPictureOrigin, ...inputs } = liveOutrageInputs({
+        attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes, spriteOrder: lentOrder,
+        smallEmberPalette: (paletteResources.resources as Record<string, { colors: readonly number[] }>).ANIM_TAG_SMALL_EMBER!.colors }) as Record<string, any>;
+      config = { move: "OUTRAGE", fieldProfile,
+        attacker: { ...attacker, geometry: { ...attacker.geometry, animationCenter: attackerPictureOrigin } },
+        target: { ...target, geometry: { ...target.geometry, animationCenter: targetPictureOrigin } },
+        animationInputs: inputs as never };
       break;
     }
     case 173: {

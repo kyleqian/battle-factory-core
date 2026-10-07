@@ -1743,7 +1743,6 @@ export const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string,
 const fearowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).FEAROW!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
 const octilleryFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).OCTILLERY!;
-const latiosFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LATIOS!;
 const baltoyFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).BALTOY!;
 const lunatoneFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LUNATONE!;
 const metangFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).METANG!;
@@ -3227,7 +3226,6 @@ export const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 export const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
 const octilleryBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).OCTILLERY!;
-const latiosBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LATIOS!;
 const baltoyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).BALTOY!;
 const lunatoneBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LUNATONE!;
 const metangBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).METANG!;
@@ -17366,21 +17364,17 @@ export function renderSceneOnMovePresentation(
       ...lusterState,
       age: lusterState.age - 2,
     });
-    const playerToOpponent = view.attacker.species === "LATIOS"
-      && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
-      && view.target.geometry.side === "opponent";
-    const opponentToPlayer = view.attacker.species === "LATIOS"
-      && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
-      && view.target.geometry.side === "player";
-    if (!playerToOpponent && !opponentToPlayer) {
-      throw new Error(
-        `unsupported staged LUSTER_PURGE pair ${view.attacker.species}->${view.target.species}`,
-      );
+    // prep29 R1: any species pair (the live adapter's seam); the staged Latios / Onix pair keeps its art through the same lookup.
+    const playerToOpponent = view.attacker.geometry.side === "player";
+    const opponentToPlayer = !playerToOpponent;
+    const artFor = (battler: typeof view.attacker) => battler.geometry.side === "player"
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+    const attacker = artFor(view.attacker);
+    const target = artFor(view.target);
+    if (!attacker || !target) {
+      throw new Error(`unsupported staged LUSTER_PURGE pair ${view.attacker.species}->${view.target.species}`);
     }
-    const attacker = playerToOpponent ? latiosBackSprite : latiosFrontSprite;
-    const target = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const white = { r: 255, g: 255, b: 255 };
     const impactTint = { r: 0, g: 0, b: 189 };
     const paletteCoefficient = (age: number): number => {
@@ -17555,7 +17549,7 @@ export function renderSceneOnMovePresentation(
       fb,
       0,
       composeOpponentHealthbox(healthboxAssemblyAssets, {
-        name: playerToOpponent ? "ONIX" : "LATIOS",
+        name: view.target.geometry.side === "opponent" ? view.target.species : view.attacker.species,
         level: 50,
         gender: profile.opponentGender ?? "male",
         hpFraction: profile.opponentHp / profile.opponentMaxHp,
@@ -17565,7 +17559,7 @@ export function renderSceneOnMovePresentation(
     drawComposedPlayerHealthbox(
       fb,
       composePlayerHealthbox(playerHealthboxAssets, {
-        name: playerToOpponent ? "LATIOS" : "ONIX",
+        name: view.attacker.geometry.side === "player" ? view.attacker.species : view.target.species,
         level: 50,
         gender: profile.playerGender ?? "male",
         hpFraction: profile.playerHp / profile.playerMaxHp,
@@ -17582,7 +17576,7 @@ export function renderSceneOnMovePresentation(
     );
     drawMessageTextLines(
       fb,
-      playerToOpponent ? "LATIOS used" : "Foe LATIOS used",
+      playerToOpponent ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "LUSTER PURGE!",
       99,
     );

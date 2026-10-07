@@ -1,0 +1,36 @@
+{
+ "schema": "prep29-live-adapter-fixture/v1",
+ "move": "OUTRAGE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep29-outrage-alt-player-flygon-golem.json",
+ "denseWindow": {
+  "startFrame": 73,
+  "endFrame": 191
+ },
+ "windowSource": "window = [activation, activation + 119 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "FLYGON",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349018756,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 155,
+  "playerMaxHp": 155,
+  "opponentHp": 155,
+  "opponentMaxHp": 155,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}
