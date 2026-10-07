@@ -57,6 +57,19 @@ plumbing, not a source model. The prep26 Ice Ball and prep25 Dive per-age progra
      EXACT-plan body, the prompt cycle and so on. For Dive it is "setup first, nothing since" (the Dig gate).
    - The tracker state stays word-free. Only the lend's resolution, which is presentation-side and render-pure, reads the words.
    - Estimate: infrastructure + tests ~60-90 min, then each adapter ~45-60 min with its dense fixtures and routes.
+   - **Checked end to end** (`tools/integration/s10aLendChainCheck.ts`, receipt
+     `fixtures/s10a-live/blockers/lend-chain-check.json`, two runs byte-identical). The recipe:
+     1. Take Ice Ball body k's activation order.
+     2. Carry it through the body.
+     3. Apply the production tracker's existing plans for the units that follow (`hit-animation` blip, the opponent's Tackle body,
+        `hit-animation` blip).
+     4. Compare `spriteOrderTrackerLend` with body k+1's ROM activation free order.
+
+     Results:
+     - **12/12** transitions at the entry occupancy are exact (accepted 4 + 4, GLALIE -> GOLEM 2 + 2), with or without a prompt cycle.
+     - The control (blip only) is exact in 3/12.
+     - Two post-KO transitions of the GLALIE player scenario were not compared: after a KO the lend is relabelled to entry labels
+       (rho), and the KO + send-in units were not modelled here.
 2. **Presentation-side order tracker mirror.** Move the order tracker, or a copy of it, into presentation state ticked with the
    presentation RNG session. This is larger, because every lend consumer would read the new host.
 
@@ -72,4 +85,7 @@ npx vite-node tools/integration/s10aOrderLendBlocker.ts OUT.json \
   /tmp/s10a-ib/prep25-ice-ball-alt-player-glalie-golem-r1.json:/tmp/s10a-ib/prep25-ice-ball-alt-player-glalie-golem-r1-rgb:player \
   /tmp/s10a-ib/prep25-ice-ball-alt-opponent-glalie-golem-r1.json:/tmp/s10a-ib/prep25-ice-ball-alt-opponent-glalie-golem-r1-rgb:opponent
 cmp OUT.json tools/integration/fixtures/s10a-live/blockers/order-lend-blocker.json
+npx vite-node tools/integration/s10aLendChainCheck.ts OUT2.json \
+  /tmp/s10a-ib/prep25-ice-ball-alt-player-glalie-golem-r1.json:player /tmp/s10a-ib/prep25-ice-ball-alt-opponent-glalie-golem-r1.json:opponent
+cmp OUT2.json tools/integration/fixtures/s10a-live/blockers/lend-chain-check.json
 ```
