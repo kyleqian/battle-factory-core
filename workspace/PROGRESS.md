@@ -5,19 +5,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-07 (day) — S10A finish run IN PROGRESS: D4 faithful timing live (checkpoint)
+## 2026-10-07 (day) — S10A finish run IN PROGRESS (checkpoint 15:00)
 
-- **State:** local master `c87cd70c1`, production src tree `5ae017dd`: 246 scoped-exact + 12 faithful-random +
-  4 faithful-timing (Mach Punch, Megahorn, Revenge, Meteor Mash with D3), 14 accepted bodies remaining (census
-  `246+12+4+0+14=276`). Opus 5.5 supervisor; Opus 5.5 workers.
-- **Did:** D4 accounting + `src/engine/liveMoveTimingPolicy.ts` (v1 dominant measured phase, tie -> no optional
-  event); two integration folds (D4a, D4b) and prep30 (Extrasensory / Psywave providers), all re-proved by the
-  supervisor (every timing window rerun twice fresh, own differential, union typecheck/smoke/targeted).
-- **Next:** in flight — integration D4c (Psywave, Extrasensory) and side prep31 (Superpower, Spit Up). Queue:
-  Ice Ball + Dive, Spit Up + Superpower (+ Eruption), species audit 9, Nightmare / Flatter models, widenings
-  (Curse Ghost, Pursuit later bodies, Hidden Power, Sheer Cold tail, Hyper Voice row 59), providers (Substitute,
-  Memento, Skill Swap, Shock Wave, Extreme Speed). Details: ANIMATION_INTEGRATION_PROGRESS.md top entry.
-- **Notes:** no open DEFERRED entries. Briefs in `/tmp/s10a-1007/`; validation logs `.integration/validation/*-20261007/`.
+- **State:** local master `3ff2d2e54`, production src tree `0fa8e76b`: 248 scoped-exact + 12 faithful-random +
+  8 faithful-timing, 8 accepted bodies remaining (census `248+12+8+0+8=276`). Opus 5.5 supervisor and workers.
+- **Did:** D4 accounting + `src/engine/liveMoveTimingPolicy.ts`; faithful timing Mach Punch, Megahorn, Revenge,
+  Meteor Mash (D3), Psywave, Extrasensory, Superpower, Nightmare; exact Spit Up, Shock Wave; species audit 9 (Mach
+  Punch idle-rest defect fixed, Revenge gate narrowed; ISSUES #152 remainder). Evidence prep30-34 merged. Every fold
+  re-proved by the supervisor (all timing windows rerun twice fresh, own differential, union typecheck/smoke/targeted).
+- **Next:** in flight — Ice Ball first body + Dive setup turn + #151 Sheer Cold / Hyper Voice accounting; side prep35
+  (Skill Swap + Flatter sprite providers). Queue: Extreme Speed + Memento (ready, prep34), Skill Swap + Flatter,
+  Pursuit / Hidden Power / Ghost Curse widening; Ice Ball later bodies + Dive attack need a deferred post-body order
+  lend (`docs/s10a-random2-order-lend-blocker.md`); Eruption and Substitute need prep.
+- **Notes:** no open DEFERRED entries. Briefs `/tmp/s10a-1007/`; validation logs `.integration/validation/*-20261007/`.
 
 ---
 
