@@ -14,7 +14,7 @@ import {
   LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation,
 } from "../../src/engine/liveMoveAnimation.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
-import { createPresentationRngHostAt, presentationRngBodyWords } from "../../src/engine/presentationRngHost.ts";
+import { presentationRngBodyWords } from "../../src/engine/presentationRngHost.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { fixturePresentationRng, liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
@@ -71,7 +71,7 @@ describe("live r3 profile registration", () => {
     for (const id of [142, 191, 190] as const) {
       expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[id]).toBe(0);
       for (const attacker of [0, 1] as const) {
-        expect(liveMoveAnimationDuration({ moveId: id, attacker, target: 1 - attacker, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0 })).toBe(ROWS[id]);
+        expect(liveMoveAnimationDuration({ moveId: id, attacker, target: (1 - attacker) as 0 | 1, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0 })).toBe(ROWS[id]);
       }
     }
     const status = JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8"));
