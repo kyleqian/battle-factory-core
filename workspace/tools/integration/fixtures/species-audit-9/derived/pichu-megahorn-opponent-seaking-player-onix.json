@@ -1,0 +1,61 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "MEGAHORN",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-9/scenarios/pichu-megahorn-opponent-seaking-player-onix.json",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 253
+ },
+ "windowSource": "speciesAudit9: window = [activation, activation + 177 - 1] of the swapped scenario's own body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "event",
+ "timingPhases": {
+  "optional-lag-age": "event",
+  "bg-write-row": "event"
+ },
+ "monbgCntRow": 8,
+ "attacker": {
+  "species": "SEAKING",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "PICHU",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793700008,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 95,
+  "playerMaxHp": 95,
+  "opponentHp": 162,
+  "opponentMaxHp": 162,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "speciesAudit9": {
+  "acceptedFixture": "tools/integration/fixtures/d4a-live/megahorn-opponent-seaking-player-onix.json",
+  "swappedSide": "player",
+  "bodies": [
+   [
+    224,
+    77,
+    253
+   ]
+  ],
+  "bodyIndex": 0,
+  "rows": 177,
+  "monbgCntRow": 8,
+  "personality": [
+   2349019075,
+   1793700008
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

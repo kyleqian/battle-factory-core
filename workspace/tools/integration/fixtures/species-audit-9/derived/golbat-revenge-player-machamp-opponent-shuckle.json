@@ -1,0 +1,60 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "REVENGE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-9/scenarios/golbat-revenge-player-machamp-opponent-shuckle.json",
+ "denseWindow": {
+  "startFrame": 236,
+  "endFrame": 380
+ },
+ "windowSource": "speciesAudit9: window = [activation, activation + 145 - 1] of the swapped scenario's own body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "event",
+ "timingPhases": {
+  "bg-write-row": "event"
+ },
+ "monbgCntRow": 5,
+ "attacker": {
+  "species": "MACHAMP",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349018978,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 186,
+  "playerMaxHp": 186,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "speciesAudit9": {
+  "acceptedFixture": "tools/integration/fixtures/d4a-live/revenge-player-machamp-opponent-shuckle.json",
+  "swappedSide": "opponent",
+  "bodies": [
+   [
+    279,
+    236,
+    380
+   ]
+  ],
+  "bodyIndex": 0,
+  "rows": 145,
+  "monbgCntRow": 5,
+  "personality": [
+   2349018978,
+   1793699975
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

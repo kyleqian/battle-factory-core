@@ -1,0 +1,76 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "MEGAHORN",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-9/scenarios/nidokingA-megahorn-player-seaking-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 74,
+  "endFrame": 250
+ },
+ "windowSource": "speciesAudit9: window = [activation, activation + 177 - 1] of the swapped scenario's own body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "event",
+ "timingPhases": {
+  "optional-lag-age": "event",
+  "bg-write-row": "event"
+ },
+ "monbgCntRow": 8,
+ "attacker": {
+  "species": "NIDOKING",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019083,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 163,
+  "playerMaxHp": 163,
+  "opponentHp": 110,
+  "opponentMaxHp": 110,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "speciesAudit9": {
+  "acceptedFixture": "tools/integration/fixtures/d4a-live/megahorn-player-seaking-opponent-onix.json",
+  "swappedSide": "player",
+  "bodies": [
+   [
+    224,
+    74,
+    250
+   ],
+   [
+    33,
+    363,
+    404
+   ],
+   [
+    0,
+    480,
+    550
+   ],
+   [
+    0,
+    765,
+    835
+   ]
+  ],
+  "bodyIndex": 0,
+  "rows": 177,
+  "monbgCntRow": 8,
+  "personality": [
+   2349019083,
+   1793700000
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

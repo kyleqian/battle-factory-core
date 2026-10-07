@@ -1,0 +1,61 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "MACH_PUNCH",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-9/scenarios/onix-mach-punch-opponent-hitmonchan-player-chansey.json",
+ "denseWindow": {
+  "startFrame": 82,
+  "endFrame": 190
+ },
+ "windowSource": "speciesAudit9: window = [activation, activation + 109 - 1] of the swapped scenario's own body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "no-event",
+ "attacker": {
+  "species": "HITMONCHAN",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703528,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 157,
+  "opponentMaxHp": 157,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "speciesAudit9": {
+  "acceptedFixture": "tools/integration/fixtures/d4a-live/mach-punch-opponent-hitmonchan-player-chansey.json",
+  "swappedSide": "player",
+  "bodies": [
+   [
+    183,
+    82,
+    191
+   ],
+   [
+    33,
+    400,
+    441
+   ]
+  ],
+  "bodyIndex": 0,
+  "rows": 109,
+  "monbgCntRow": null,
+  "personality": [
+   2349015325,
+   1793703528
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

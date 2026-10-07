@@ -1,0 +1,65 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "METEOR_MASH",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-9/scenarios/pichu-meteor-mash-player-metang-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 291
+ },
+ "windowSource": "speciesAudit9: window = [activation, activation + 215 - 1] of the swapped scenario's own body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "event",
+ "attacker": {
+  "species": "METANG",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "PICHU",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2654435775,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 135,
+  "playerMaxHp": 135,
+  "opponentHp": 95,
+  "opponentMaxHp": 95,
+  "playerGender": "none",
+  "opponentGender": "male"
+ },
+ "presentationRngActivation": {
+  "value": 2024241883,
+  "source": "speciesAudit9: prep22Probe.py rng2Series[78] stepped back once (activation frame 77), r1 == r2"
+ },
+ "speciesAudit9": {
+  "acceptedFixture": "tools/integration/fixtures/d4a-live/meteor-mash-player-metang-opponent-onix.json",
+  "swappedSide": "opponent",
+  "bodies": [
+   [
+    309,
+    77,
+    291
+   ],
+   [
+    33,
+    552,
+    593
+   ]
+  ],
+  "bodyIndex": 0,
+  "rows": 215,
+  "monbgCntRow": null,
+  "personality": [
+   2654435775,
+   2027808500
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

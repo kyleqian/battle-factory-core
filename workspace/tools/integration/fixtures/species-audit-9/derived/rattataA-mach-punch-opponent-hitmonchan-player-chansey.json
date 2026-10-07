@@ -1,0 +1,61 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "MACH_PUNCH",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-9/scenarios/rattataA-mach-punch-opponent-hitmonchan-player-chansey.json",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 188
+ },
+ "windowSource": "speciesAudit9: window = [activation, activation + 110 - 1] of the swapped scenario's own body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "event",
+ "attacker": {
+  "species": "RATTATA",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "CHANSEY",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703553,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 357,
+  "playerMaxHp": 357,
+  "opponentHp": 137,
+  "opponentMaxHp": 137,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "speciesAudit9": {
+  "acceptedFixture": "tools/integration/fixtures/d4a-live/mach-punch-opponent-hitmonchan-player-chansey.json",
+  "swappedSide": "opponent",
+  "bodies": [
+   [
+    183,
+    79,
+    189
+   ],
+   [
+    33,
+    472,
+    513
+   ]
+  ],
+  "bodyIndex": 0,
+  "rows": 110,
+  "monbgCntRow": null,
+  "personality": [
+   2349015325,
+   1793703553
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

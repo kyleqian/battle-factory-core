@@ -1,0 +1,68 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "MACH_PUNCH",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-9/scenarios/shedinjaA-mach-punch-player-hitmonchan-opponent-chansey.json",
+ "denseWindow": {
+  "startFrame": 465,
+  "endFrame": 574
+ },
+ "windowSource": "speciesAudit9: window = [activation, activation + 110 - 1] of the swapped scenario's own body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "event",
+ "attacker": {
+  "species": "SHEDINJA",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015328,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 1,
+  "playerMaxHp": 1,
+  "opponentHp": 142,
+  "opponentMaxHp": 142,
+  "playerGender": "none",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statusAnimation": "SLP"
+  }
+ ],
+ "speciesAudit9": {
+  "acceptedFixture": "tools/integration/fixtures/d4a-live/mach-punch-player-hitmonchan-opponent-chansey.json",
+  "swappedSide": "player",
+  "bodies": [
+   [
+    0,
+    85,
+    113
+   ],
+   [
+    183,
+    465,
+    575
+   ]
+  ],
+  "bodyIndex": 1,
+  "rows": 110,
+  "monbgCntRow": null,
+  "personality": [
+   2349015328,
+   86063250
+  ],
+  "freshProbeRunsAgree": true
+ }
+}
