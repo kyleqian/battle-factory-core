@@ -2,10 +2,10 @@
 # prep26 reproduction (run from workspace/).  Direct mGBA only (never the shared HTTP oracles).
 #   sh tools/integration/prep26Run.sh                                  # probes (each scenario twice, cmp'd) + checkers + pixels; receipts -> $REC
 #   REC=/tmp/rec2 SKIP_PROBES=1 sh tools/integration/prep26Run.sh      # second checker pass; cmp the receipts against tools/integration/fixtures/prep26
-#   STAGES="iceball" sh tools/integration/prep26Run.sh                 # subset (iceball revenge superpower)
+#   STAGES="iceball" sh tools/integration/prep26Run.sh                 # subset (iceball revenge; superpower = probes only, see docs)
 set -e
 export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
-OUT=${OUT:-/tmp/p26/alt}; REC=${REC:-tools/integration/fixtures/prep26}; STAGES=${STAGES:-iceball revenge superpower}; mkdir -p "$REC"; export OUT
+OUT=${OUT:-/tmp/p26/alt}; REC=${REC:-tools/integration/fixtures/prep26}; STAGES=${STAGES:-iceball revenge}; mkdir -p "$REC"; export OUT
 [ -n "$SKIP_PROBES" ] || sh tools/integration/prep26Probes.sh $STAGES 2>&1 | grep -v "Segmentation fault"
 for w in $STAGES; do case $w in
 iceball)
