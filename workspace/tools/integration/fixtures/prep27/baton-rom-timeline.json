@@ -1,0 +1,294 @@
+{
+ "mechanic-baton-pass-opponent-aipom-player-onix": {
+  "side": "opponent",
+  "E": 124,
+  "body": {
+   "firstActive": -51,
+   "lastActive": 0,
+   "activeFrames": 52
+  },
+  "t": {
+   "attackerHide": -42,
+   "attackerHideAge": 9,
+   "hbHideAfterBody": 9,
+   "attackerSpriteFree": 9,
+   "ctrlOpenParty": null,
+   "cb2InitParty": null,
+   "cb2UpdateParty": null,
+   "partyCloseTask": null,
+   "cb2Reshow": null,
+   "cb2BackToBattle": null,
+   "partyIndexChange": 10,
+   "speciesChange": 12,
+   "ballSpawn": 51,
+   "monSendOutSpawn": 52,
+   "firstParticle": 69,
+   "healthboxSlideSpawn": null,
+   "returnToBall": 9,
+   "healthboxHideAtReturn": 9,
+   "healthboxShown": 140,
+   "textStart": 14,
+   "textLastChange": 316,
+   "partyOpenFrames": [
+    null,
+    null
+   ],
+   "mainTurnPassed": 314,
+   "ctrlWaitMonSelection": null
+  },
+  "ctrlTail": [
+   [
+    0,
+    "OpponentDoMoveAnimation"
+   ],
+   [
+    2,
+    "OpponentBufferRunCommand"
+   ]
+  ]
+ },
+ "mechanic-baton-pass-player-aipom-opponent-onix": {
+  "side": "player",
+  "E": 120,
+  "body": {
+   "firstActive": -51,
+   "lastActive": 0,
+   "activeFrames": 52
+  },
+  "t": {
+   "attackerHide": -42,
+   "attackerHideAge": 9,
+   "hbHideAfterBody": 175,
+   "attackerSpriteFree": 27,
+   "ctrlOpenParty": 4,
+   "cb2InitParty": 26,
+   "cb2UpdateParty": 47,
+   "partyCloseTask": 131,
+   "cb2Reshow": 153,
+   "cb2BackToBattle": 185,
+   "partyIndexChange": 208,
+   "speciesChange": 210,
+   "ballSpawn": 225,
+   "monSendOutSpawn": 226,
+   "firstParticle": 272,
+   "healthboxSlideSpawn": 179,
+   "returnToBall": 207,
+   "healthboxHideAtReturn": 207,
+   "healthboxShown": 290,
+   "textStart": 212,
+   "textLastChange": 477,
+   "partyOpenFrames": [
+    26,
+    185
+   ],
+   "mainTurnPassed": 475,
+   "ctrlWaitMonSelection": 26
+  },
+  "ctrlTail": [
+   [
+    0,
+    "PlayerDoMoveAnimation"
+   ],
+   [
+    2,
+    "PlayerBufferRunCommand"
+   ],
+   [
+    4,
+    "OpenPartyMenuToChooseMon"
+   ],
+   [
+    26,
+    "WaitForMonSelection"
+   ],
+   [
+    203,
+    "PlayerBufferRunCommand"
+   ],
+   [
+    212,
+    "Task_PlayerController_RestoreBgmAfterCry"
+   ],
+   [
+    224,
+    "PlayerBufferRunCommand"
+   ],
+   [
+    225,
+    "SwitchIn_TryShinyAnimShowHealthbox"
+   ],
+   [
+    290,
+    "SwitchIn_CleanShinyAnimShowSubstitute"
+   ],
+   [
+    325,
+    "PlayerBufferRunCommand"
+   ],
+   [
+    413,
+    "CompleteWhenChoseItem"
+   ],
+   [
+    446,
+    "PlayerBufferRunCommand"
+   ],
+   [
+    448,
+    "Task_PlayerController_RestoreBgmAfterCry"
+   ],
+   [
+    460,
+    "PlayerBufferRunCommand"
+   ],
+   [
+    479,
+    "PlayerHandlePrintSelectionString"
+   ]
+  ]
+ },
+ "prep27-baton-opponent-ninjask-player-golem": {
+  "side": "opponent",
+  "E": 126,
+  "body": {
+   "firstActive": -51,
+   "lastActive": 0,
+   "activeFrames": 52
+  },
+  "t": {
+   "attackerHide": -42,
+   "attackerHideAge": 9,
+   "hbHideAfterBody": 9,
+   "attackerSpriteFree": 9,
+   "ctrlOpenParty": null,
+   "cb2InitParty": null,
+   "cb2UpdateParty": null,
+   "partyCloseTask": null,
+   "cb2Reshow": null,
+   "cb2BackToBattle": null,
+   "partyIndexChange": 10,
+   "speciesChange": 12,
+   "ballSpawn": 51,
+   "monSendOutSpawn": 52,
+   "firstParticle": 69,
+   "healthboxSlideSpawn": null,
+   "returnToBall": 9,
+   "healthboxHideAtReturn": 9,
+   "healthboxShown": 140,
+   "textStart": 14,
+   "textLastChange": 334,
+   "partyOpenFrames": [
+    null,
+    null
+   ],
+   "mainTurnPassed": 332,
+   "ctrlWaitMonSelection": null
+  },
+  "ctrlTail": [
+   [
+    0,
+    "OpponentDoMoveAnimation"
+   ],
+   [
+    2,
+    "OpponentBufferRunCommand"
+   ]
+  ]
+ },
+ "prep27-baton-player-ninjask-opponent-golem": {
+  "side": "player",
+  "E": 122,
+  "body": {
+   "firstActive": -51,
+   "lastActive": 0,
+   "activeFrames": 52
+  },
+  "t": {
+   "attackerHide": -42,
+   "attackerHideAge": 9,
+   "hbHideAfterBody": 175,
+   "attackerSpriteFree": 27,
+   "ctrlOpenParty": 4,
+   "cb2InitParty": 26,
+   "cb2UpdateParty": 47,
+   "partyCloseTask": 131,
+   "cb2Reshow": 153,
+   "cb2BackToBattle": 185,
+   "partyIndexChange": 208,
+   "speciesChange": 210,
+   "ballSpawn": 225,
+   "monSendOutSpawn": 226,
+   "firstParticle": 272,
+   "healthboxSlideSpawn": 179,
+   "returnToBall": 207,
+   "healthboxHideAtReturn": 207,
+   "healthboxShown": 290,
+   "textStart": 212,
+   "textLastChange": 360,
+   "partyOpenFrames": [
+    26,
+    185
+   ],
+   "mainTurnPassed": null,
+   "ctrlWaitMonSelection": 26
+  },
+  "ctrlTail": [
+   [
+    0,
+    "PlayerDoMoveAnimation"
+   ],
+   [
+    2,
+    "PlayerBufferRunCommand"
+   ],
+   [
+    4,
+    "OpenPartyMenuToChooseMon"
+   ],
+   [
+    26,
+    "WaitForMonSelection"
+   ],
+   [
+    203,
+    "PlayerBufferRunCommand"
+   ],
+   [
+    212,
+    "Task_PlayerController_RestoreBgmAfterCry"
+   ],
+   [
+    224,
+    "PlayerBufferRunCommand"
+   ],
+   [
+    225,
+    "SwitchIn_TryShinyAnimShowHealthbox"
+   ],
+   [
+    290,
+    "SwitchIn_CleanShinyAnimShowSubstitute"
+   ],
+   [
+    325,
+    "PlayerBufferRunCommand"
+   ],
+   [
+    414,
+    "CompleteWhenChoseItem"
+   ],
+   [
+    447,
+    "PlayerBufferRunCommand"
+   ],
+   [
+    449,
+    "Task_PlayerController_RestoreBgmAfterCry"
+   ],
+   [
+    473,
+    "PlayerBufferRunCommand"
+   ]
+  ]
+ }
+}
