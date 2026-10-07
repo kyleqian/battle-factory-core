@@ -1,7 +1,7 @@
 {
  "schema": "d4b-live-receipt/v1",
- "testedCommit": "0693a432c5fd2b38dba905b8ff899fda0f45df68",
- "testedSrcTree": "85d9048bd690befa6bd27bf8891a9777b75aa546",
+ "testedCommit": "05ea2a147fe4da55d390dcab11fde9d55172915c",
+ "testedSrcTree": "5ae017dd9dabf8eb6b8e6a2f346e37bed3cdbf52",
  "dirty": false,
  "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
  "commands": [
@@ -174,6 +174,51 @@
     "maxPixelsPerRow": 0,
     "cause": "bg-write-row only: with the monbg BGnCNT write on row 4 MoveBattlerSpriteToBG also writes that row's BG scroll, but the target OBJ is still drawn on row 4 (hidden from row 5), so the REVENGE renderer branch shows no difference: the row-4 window (accepted opponent, 1 of 6) is 0 px under the row-5 policy"
    }
+  },
+  {
+   "id": 309,
+   "move": "MOVE_METEOR_MASH",
+   "kind": "optional-lag-age",
+   "age": 195,
+   "fixedLagAges": [],
+   "iterations": 214,
+   "alternatives": [
+    {
+     "phase": "event",
+     "bodyRows": 215,
+     "measured": 5
+    },
+    {
+     "phase": "no-event",
+     "bodyRows": 214,
+     "measured": 2
+    }
+   ],
+   "chosen": "event",
+   "tieRuleUsed": false,
+   "alternatePhaseResidual": {
+    "ages": [
+     196,
+     197,
+     198,
+     199,
+     200,
+     201,
+     202,
+     203,
+     204,
+     205,
+     206,
+     207,
+     208,
+     209,
+     210,
+     211
+    ],
+    "rows": 16,
+    "maxPixelsPerRow": 18589,
+    "cause": "the row-195 lag holds restorebg's fade-down one row (first row 196 + L): a no-lag window equals the policy body one row earlier from age 196 to the fade end (211); rows 0..195 and 212..213 are exact (accepted player METANG -> ONIX and D4b player METAGROSS -> GOLBAT, 2 of 5 windows)"
+   }
   }
  ],
  "summary": {
@@ -201,6 +246,33 @@
     173
    ],
    "otherPhaseMaxPixelsPerRow": 17211,
+   "freshRunsIdentical": true,
+   "violations": 0
+  },
+  "METEOR_MASH": {
+   "windows": 5,
+   "selectedPhaseWindows": 3,
+   "selectedPhaseResidualPixels": 0,
+   "otherPhaseWindows": 2,
+   "otherPhaseAffectedAges": [
+    196,
+    197,
+    198,
+    199,
+    200,
+    201,
+    202,
+    203,
+    204,
+    205,
+    206,
+    207,
+    208,
+    209,
+    210,
+    211
+   ],
+   "otherPhaseMaxPixelsPerRow": 18589,
    "freshRunsIdentical": true,
    "violations": 0
   },
@@ -686,6 +758,253 @@
     }
    ],
    "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/meteor-mash-alt-player-shiftry-golem.json",
+   "move": "METEOR_MASH",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 215,
+   "expectedDuration": 215,
+   "runs": [
+    {
+     "rows": 215,
+     "exactRows": 215,
+     "residualPixels": 0,
+     "digest": "922c5110a8faddfcf28a4abefe5c2eece3e3baca1f5ba4dab6b0f8edb95c5eae",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 215,
+     "exactRows": 215,
+     "residualPixels": 0,
+     "digest": "922c5110a8faddfcf28a4abefe5c2eece3e3baca1f5ba4dab6b0f8edb95c5eae",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/meteor-mash-extra-opponent-metagross-golbat.json",
+   "move": "METEOR_MASH",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 215,
+   "expectedDuration": 215,
+   "runs": [
+    {
+     "rows": 215,
+     "exactRows": 215,
+     "residualPixels": 0,
+     "digest": "daca479977ed1110cf9cba6d3cfa4dc3fee1c731a343cc65b941af11f555ace3",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 215,
+     "exactRows": 215,
+     "residualPixels": 0,
+     "digest": "daca479977ed1110cf9cba6d3cfa4dc3fee1c731a343cc65b941af11f555ace3",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/meteor-mash-extra-player-metagross-golbat.json",
+   "move": "METEOR_MASH",
+   "measuredPhase": "no-event",
+   "policyPhase": "event",
+   "selectedPhase": false,
+   "window": 214,
+   "expectedDuration": 215,
+   "runs": [
+    {
+     "rows": 214,
+     "exactRows": 198,
+     "residualPixels": 297424,
+     "digest": "62c9336de3d68bc2012f1c1fc2d8712ec2d5015acbb5667535228a752d65682a",
+     "affectedAges": [
+      196,
+      197,
+      198,
+      199,
+      200,
+      201,
+      202,
+      203,
+      204,
+      205,
+      206,
+      207,
+      208,
+      209,
+      210,
+      211
+     ],
+     "maxPixelsPerRow": 18589
+    },
+    {
+     "rows": 214,
+     "exactRows": 198,
+     "residualPixels": 297424,
+     "digest": "62c9336de3d68bc2012f1c1fc2d8712ec2d5015acbb5667535228a752d65682a",
+     "affectedAges": [
+      196,
+      197,
+      198,
+      199,
+      200,
+      201,
+      202,
+      203,
+      204,
+      205,
+      206,
+      207,
+      208,
+      209,
+      210,
+      211
+     ],
+     "maxPixelsPerRow": 18589
+    }
+   ],
+   "documentedAges": [
+    196,
+    197,
+    198,
+    199,
+    200,
+    201,
+    202,
+    203,
+    204,
+    205,
+    206,
+    207,
+    208,
+    209,
+    210,
+    211
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/meteor-mash-opponent-metang-player-onix.json",
+   "move": "METEOR_MASH",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 215,
+   "expectedDuration": 215,
+   "runs": [
+    {
+     "rows": 215,
+     "exactRows": 215,
+     "residualPixels": 0,
+     "digest": "177a7ceb3d9aed4da4db12fc3be64e911f151d322d6b04624ccdd09bc8155653",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 215,
+     "exactRows": 215,
+     "residualPixels": 0,
+     "digest": "177a7ceb3d9aed4da4db12fc3be64e911f151d322d6b04624ccdd09bc8155653",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/meteor-mash-player-metang-opponent-onix.json",
+   "move": "METEOR_MASH",
+   "measuredPhase": "no-event",
+   "policyPhase": "event",
+   "selectedPhase": false,
+   "window": 214,
+   "expectedDuration": 215,
+   "runs": [
+    {
+     "rows": 214,
+     "exactRows": 198,
+     "residualPixels": 283184,
+     "digest": "517ae21a4c06e192b8fb176b61c635d2d6f446db80326f7a826e0cfa98e37533",
+     "affectedAges": [
+      196,
+      197,
+      198,
+      199,
+      200,
+      201,
+      202,
+      203,
+      204,
+      205,
+      206,
+      207,
+      208,
+      209,
+      210,
+      211
+     ],
+     "maxPixelsPerRow": 17699
+    },
+    {
+     "rows": 214,
+     "exactRows": 198,
+     "residualPixels": 283184,
+     "digest": "517ae21a4c06e192b8fb176b61c635d2d6f446db80326f7a826e0cfa98e37533",
+     "affectedAges": [
+      196,
+      197,
+      198,
+      199,
+      200,
+      201,
+      202,
+      203,
+      204,
+      205,
+      206,
+      207,
+      208,
+      209,
+      210,
+      211
+     ],
+     "maxPixelsPerRow": 17699
+    }
+   ],
+   "documentedAges": [
+    196,
+    197,
+    198,
+    199,
+    200,
+    201,
+    202,
+    203,
+    204,
+    205,
+    206,
+    207,
+    208,
+    209,
+    210,
+    211
+   ],
    "violations": []
   },
   {

@@ -8,6 +8,9 @@ import {
 import { LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS } from "../../src/engine/liveMovePresentationRng.ts";
 import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS, LIVE_MOVE_TIMING_POLICY, LIVE_MOVE_TIMING_POLICY_VERSION } from "../../src/engine/liveMoveTimingPolicy.ts";
 import { liveMachPunchInputs } from "../../src/engine/liveQ2Moves.ts";
+import { LIVE_MOVE_RANDOM2_PLANS } from "../../src/engine/liveMovePresentationRng.ts";
+import { meteorMashAtAge } from "../../src/animation/meteorMash.ts";
+import { random2Route } from "../../tools/integration/random2R1/routeHarness.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
@@ -302,4 +305,95 @@ describe("D4b Revenge (279) faithful timing", () => {
     const ot = 416049562, shiny = ((ot >>> 16) ^ (ot & 0xffff)) >>> 0;
     for (const side of ["player", "opponent"] as const) expect(call(lend, { ...view.field, [side]: { ...view.field[side], personality: shiny } })).toBeNull();
   });
+});
+
+// D4b faithful timing + D3: Meteor Mash (the R1 reducer with the explicit restore lag from the policy; Random2 twinkles from the presentation host).
+describe("D4b Meteor Mash (309) faithful timing with D3", () => {
+  const mm = NAMES.filter((n) => n.startsWith("meteor-mash-"));
+  const receiptB = JSON.parse(readFileSync("tools/integration/fixtures/d4b-live-receipt.json", "utf8"));
+
+  it("counts once, in faithful timing with d3 (never faithful random / scoped exact); 215 rows both sides; the status entry is the policy", () => {
+    expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).toContain(309);
+    expect(LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS).not.toContain(309);
+    expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).not.toContain(309);
+    expect(LIVE_MOVE_RANDOM2_PLANS[309]!.reduce((n, step) => n + step.count, 0)).toBe(96);
+    expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[309]).toBe(0);
+    for (const attacker of [0, 1] as const) {
+      const base = { attacker, target: (1 - attacker) as 0 | 1, power: 100, damage: 10, friendship: 70, multihit: 0, turn: 0 };
+      expect(liveMoveAnimationDuration({ ...base, moveId: 309 })).toBe(215);
+    }
+    const entry = (status.faithfulTimingAdapters as { id: number; timingParameters: unknown[]; policyVersion: string; d3: boolean }[]).find((e) => e.id === 309)!;
+    expect(entry.timingParameters).toEqual(LIVE_MOVE_TIMING_POLICY[309]!.parameters.map(({ evidence: _evidence, ...p }) => p));
+    expect(entry.policyVersion).toBe(LIVE_MOVE_TIMING_POLICY_VERSION);
+    expect(entry.d3).toBe(true);
+    expect((status.faithfulRandomAdapters as { id: number }[]).some((e) => e.id === 309)).toBe(false);
+  });
+
+  it("the reducer's restore lag is an explicit input; absent = the accepted corpora's phases (the accepted player body is the L = 0 pin)", () => {
+    const targets = { opponent: { x: 176, y: 42 }, player: { x: 72, y: 88 } } as const;
+    for (const [targetSide, lag] of [["opponent", 0], ["player", 1]] as const) {
+      const geometry = { targetSide, targetCenter: targets[targetSide] };
+      for (let age = 0; age <= 215; age += 1) expect(meteorMashAtAge(age, { ...geometry, restoreLagRows: lag })).toEqual(meteorMashAtAge(age, geometry));
+      expect(meteorMashAtAge(213 + lag - 1, { ...geometry, restoreLagRows: lag }).active).toBe(true);
+      expect(meteorMashAtAge(213 + lag, { ...geometry, restoreLagRows: lag }).active).toBe(false);
+    }
+    // The policy phase L = 1 on a player-attacker body: one row longer, the fade-down one row later.
+    const g = { targetSide: "opponent" as const, targetCenter: targets.opponent };
+    expect(meteorMashAtAge(213, { ...g, restoreLagRows: 1 }).active).toBe(true);
+    expect([196, 197].map((age) => meteorMashAtAge(age, { ...g, restoreLagRows: 1 }).fadeCoefficient)).toEqual([16, 15]);
+    expect([196, 197].map((age) => meteorMashAtAge(age, g).fadeCoefficient)).toEqual([15, 14]);
+  });
+
+  it("the receipt: 5 windows x 2 fresh; the 3 lag windows exact, the 2 no-lag windows only on the documented fade rows", () => {
+    expect(mm).toHaveLength(5);
+    const documented = (status.faithfulTimingAdapters as { id: number; alternatePhaseResidual: { ages: number[]; maxPixelsPerRow: number } }[]).find((e) => e.id === 309)!.alternatePhaseResidual;
+    const [lag] = LIVE_MOVE_TIMING_POLICY[309]!.parameters;
+    const phases = mm.map((n) => fixtureAt(n).timingPhase);
+    // prep17 banked 4 of 5 with the lag; the D4b METAGROSS -> GOLBAT pair adds one of each.
+    expect(lag!.alternatives.map((a) => a.measured)).toEqual([4 + 1, 1 + 1]);
+    expect(phases.filter((p) => p === "event")).toHaveLength(3);
+    const rows = (receiptB.windows as { fixture: string; move: string; selectedPhase: boolean; window: number; expectedDuration: number; violations: string[];
+      runs: { residualPixels: number; digest: string; affectedAges: number[]; maxPixelsPerRow: number }[] }[]).filter((r) => r.move === "METEOR_MASH");
+    expect(rows.map((r) => r.fixture.replace(`${DIR}/`, "").replace(".json", "")).sort()).toEqual(mm);
+    for (const r of rows) {
+      expect(r.violations).toEqual([]);
+      expect(r.runs[1]!.digest).toBe(r.runs[0]!.digest);
+      if (r.selectedPhase) {
+        expect(r.runs.map((run) => run.residualPixels)).toEqual([0, 0]);
+        expect(r.window).toBe(r.expectedDuration);
+      } else {
+        expect(r.runs[0]!.affectedAges).toEqual(documented.ages);
+        expect(r.runs[0]!.maxPixelsPerRow).toBeLessThanOrEqual(documented.maxPixelsPerRow);
+      }
+    }
+    for (const n of mm) expect(Number.isInteger((fixtureAt(n) as any).presentationRngActivation.value)).toBe(true);
+  });
+
+  it("D3 route 15/21 METAGROSS: live every age with surrogate words; two presentation seeds and Scene OFF keep gameplay / RNG / facility; same seed -> same frames", () => {
+    const SEED_A = 0x1234abcd, SEED_B = 0xfeed0042;
+    const a = random2Route(15, "on", [0], 21, SEED_A), a2 = random2Route(15, "on", [0], 21, SEED_A);
+    const b = random2Route(15, "on", [0], 21, SEED_B), off = random2Route(15, "off", [0], 21, SEED_A);
+    const bodies = a.bodies.filter((body) => body.moveId === 309 && body.attacker === 0);
+    expect(bodies).toHaveLength(1);
+    expect(bodies[0]!.ages).toEqual(Array.from({ length: 215 }, (_, age) => age));
+    expect(bodies[0]!.active.every(Boolean)).toBe(true);
+    expect(bodies[0]!.provenance).toBe("surrogate");
+    expect(bodies[0]!.words).toHaveLength(96);
+    expect(a.run.stalled).toBe(false);
+    expect(a.run.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    expect(a2.bodies).toEqual(a.bodies);
+    expect(b.bodies.filter((body) => body.moveId === 309)[0]!.words).not.toEqual(bodies[0]!.words);
+    expect(off.bodies).toEqual([]);
+    const rules = (value: (typeof a.run.boundaries)[number]) => ({
+      ...value.rules, rulesContext: { ...value.rules.rulesContext, hitMarker: value.rules.rulesContext.hitMarker & ~0x80 } });
+    expect(b.run.boundaries).toEqual(a.run.boundaries);
+    expect(off.run.boundaries).toHaveLength(a.run.boundaries.length);
+    for (let i = 0; i < a.run.boundaries.length; i += 1) {
+      expect(rules(off.run.boundaries[i]!)).toEqual(rules(a.run.boundaries[i]!));
+      expect(off.run.boundaries[i]!.rng).toEqual(a.run.boundaries[i]!.rng);
+    }
+    expect(b.run.state.facilityState).toEqual(a.run.state.facilityState);
+    expect(off.run.state.facilityState).toEqual(a.run.state.facilityState);
+    expect(off.run.state.round.rules.rngValue).toBe(a.run.state.round.rules.rngValue);
+  }, 240000);
 });
