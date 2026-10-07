@@ -17,5 +17,6 @@ for fx in "$@"; do
   echo "== $stem (start $first) shift tables identical over 2 fresh runs: $(cmp -s "$OUT/$stem.shift0.txt" "$OUT/$stem.shift1.txt" && echo true || echo false)"
   cat "$OUT/$stem.shift0.txt"
   npx vite-node tools/integration/speciesAudit5Diff.ts "$fx" "$OUT/ev0/$stem-run0" "$first" ${DIFFAGE:-175} 2>&1 | sed 's/^/  diff /'
+  [ -n "$TEAR" ] && for r in 0 1; do npx vite-node tools/integration/issue151Tear.ts "$fx" "$OUT/ev$r/$stem-run0" "$first" $TEAR > "$OUT/$stem.tear$r.txt" 2>&1; done && echo "  tear (identical over 2 fresh runs: $(cmp -s "$OUT/$stem.tear0.txt" "$OUT/$stem.tear1.txt" && echo true || echo false))" && sed "s/^/  /" "$OUT/$stem.tear0.txt"
   rm -rf "$OUT/ev0/$stem-run0/rgb" "$OUT/ev1/$stem-run0/rgb"
 done
