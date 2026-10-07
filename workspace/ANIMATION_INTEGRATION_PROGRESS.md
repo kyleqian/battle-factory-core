@@ -14,6 +14,14 @@
   windows 0 px, 3 other-phase windows residual only on ages 92..107 (max 18,252 px/row), digests r1 == r2;
   typecheck, smoke 448, 7 targeted files 144/144 on master. Logs `.integration/validation/d4a-20261007/`.
   Counts: 246 scoped-exact + 12 faithful-random + 1 faithful-timing, 17 remaining.
+- prep30 (side, `cc3786f20`, new files only, merged `3f0023e1e`): source-derived Extrasensory (326) and Psywave
+  (149) providers — every field the renderer reads exact on every row in 6 windows each (accepted P/O, ALAKAZAM->GOLEM,
+  new ESPEON->CROBAT elevated). Pixels at the measured phase: Psywave 0 px in 5/6 (CROBAT P row 0: 200 px renderer
+  age-0 shadow, also with corpus input); Extrasensory 0 px in 4/6 — opponent-target alternates 1,433 / 11,551 px from
+  a mid-frame scanline-buffer write (D4 class; no constant split line). Extrasensory reducer must take the target
+  elevation (CROBAT window 2/66, not 8/48); activation scanline buffers are battle-intro history. Phases: Extrasensory
+  late lag absent 4/6, Psywave present 4/6. Supervisor: `prep30Run.sh` into fresh dirs — probes r1 == r2, 16/16
+  receipts byte-identical.
 
 ## 2026-10-07 — D4 approved; finish remaining S10A integration
 
