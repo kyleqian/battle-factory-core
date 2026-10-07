@@ -1,0 +1,48 @@
+{
+ "schema": "later-bodies-bg-fixture/v1",
+ "move": "PSYCH_UP",
+ "probe": "tools/compare/psychUpBodiesProbe.py",
+ "scenario": "tools/battle-lab/r2g-pua-hypno-golbat.json",
+ "bodyIndex": 0,
+ "denseWindow": {
+  "startFrame": 370,
+  "endFrame": 548
+ },
+ "windowSource": "lb21: window = the scenario's own bodyWindows[bodyIndex] from its direct-mGBA repeated-body probe (activation + 0 .. first inactive)",
+ "precedingBodies": [
+  {
+   "moveId": 14,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "player",
+   "statAnimation": 39
+  }
+ ],
+ "attacker": {
+  "species": "HYPNO",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793700231,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 182,
+  "playerMaxHp": 182,
+  "opponentHp": 192,
+  "opponentMaxHp": 192,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

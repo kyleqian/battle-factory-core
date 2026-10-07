@@ -25,13 +25,16 @@ def stat(args, move):  # args0[:2] of the STATS_CHANGE script: [minus?, stat]; O
     minus, idx = args
     big = move == 315 or move == 14   # class 2 (+-2): the unit that follows an Overheat / Swords Dance
     return (45 if minus else 39) + idx if big else (21 if minus else 15) + idx
-out = R / "tools/integration/fixtures/later-bodies-bg-2"; out.mkdir(exist_ok=True)
+import os
+if os.environ.get("R2G_ALT"):  # r2-gates: alternate opponent Psych Up species (scenarios r2g-pua-*, probe dirs named r2g-pua-<tag>)
+    PICK = {f"pua-{t}-b0": (f"r2g-pua-{t}", 0) for t in ("hypno-golbat", "claydol-golem", "mrmime-magneton")}
+out = R / ("tools/integration/fixtures/r2-gates" if os.environ.get("R2G_ALT") else "tools/integration/fixtures/later-bodies-bg-2"); out.mkdir(exist_ok=True)
 for tag, (pt, k) in PICK.items():
     move = "OVERHEAT" if tag.startswith("oh2") else "PSYCH_UP"; mid = 315 if move == "OVERHEAT" else 244
     d = json.loads((A / pt / "out.json").read_text())
     if k >= len(d["bodyWindows"]): print("SKIP (probe found no body window)", tag); continue
     w = d["bodyWindows"][k]
-    scen = f"lb21-{pt}"; h = json.loads((H / f"{scen}.json").read_text())["bodies"]
+    scen = pt if pt.startswith("r2g-") else f"lb21-{pt}"; h = json.loads((H / f"{scen}.json").read_text())["bodies"]
     n = k  # k-th body of the target move
     idxs = [i for i, b in enumerate(h) if b["move"] == mid]; bi = idxs[k]
     pre = []; prev = None
