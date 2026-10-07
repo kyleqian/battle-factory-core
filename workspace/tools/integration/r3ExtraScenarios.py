@@ -14,12 +14,16 @@ SRC = {
     "spikes": ("SPIKES", "mechanic-spikes-player-qwilfish-opponent-onix", "mechanic-spikes-opponent-qwilfish-player-onix"),
     "octazooka": ("OCTAZOOKA", "mechanic-octazooka-player-octillery-opponent-onix", "mechanic-octazooka-opponent-octillery-player-onix"),
     "signal-beam": ("SIGNAL_BEAM", "mechanic-signal-beam-player-ariados-opponent-chansey", "mechanic-signal-beam-opponent-ariados-player-chansey"),
+    "sheer-cold": ("SHEER_COLD", "mechanic-sheer-cold-player-dewgong-opponent-chansey", "mechanic-sheer-cold-opponent-dewgong-player-chansey"),
 }
 PAIRS = {"lovely-kiss": [("NINETALES", "GOLBAT"), ("JYNX", "SNORLAX")], "spikes": [("SKARMORY", "GOLBAT"), ("FORRETRESS", "SNORLAX")],
          "octazooka": [("OCTILLERY", "GOLBAT"), ("KINGLER", "SNORLAX")],
-         "signal-beam": [("BEEDRILL", "GOLBAT"), ("VENOMOTH", "SNORLAX")]}
+         "signal-beam": [("BEEDRILL", "GOLBAT"), ("VENOMOTH", "SNORLAX")],
+         "sheer-cold": [("DEWGONG", "SNORLAX")]}  # (CLOYSTER -> GOLBAT: no body, the OHKO misses / reorders)
 cases = []
+import os
 for move, (label, ps, os_) in SRC.items():
+    if os.environ.get("ONLY_MOVE") and os.environ["ONLY_MOVE"] != move: continue
     for att, tgt in PAIRS[move]:
         for side, src in (("player", ps), ("opponent", os_)):
             s = json.loads((LAB / f"{src}.json").read_text())
@@ -39,4 +43,7 @@ for move, (label, ps, os_) in SRC.items():
             (LAB / f"{name}.json").write_text(json.dumps(s, separators=(",", ":")) + "\n")
             cases.append([label, f"{move}-extra-{side}-{att.lower()}-{tgt.lower()}", name, side])
             print(name)
-(ROOT / "tools/integration/r3ProfileExtraCases.json").write_text(json.dumps(cases, indent=1) + "\n")
+ef = ROOT / "tools/integration/r3ProfileExtraCases.json"
+if os.environ.get("ONLY_MOVE"):  # merge: keep the other moves' committed cases
+    cases = [c for c in json.loads(ef.read_text()) if c[0] != "SHEER_COLD"] + cases
+ef.write_text(json.dumps(cases, indent=1) + "\n")

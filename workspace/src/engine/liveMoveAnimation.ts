@@ -86,7 +86,7 @@ import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
 import paletteResources from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
 import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "json" };
 import { liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs } from "./liveQ2Moves.ts";
-import { liveLovelyKissProfile, liveOctazookaProfile, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
+import { liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
 import { liveCurseStatsInputs, liveFuryCutterInputs, livePursuitInputs, liveReturnInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
 import {
@@ -125,6 +125,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   191, 190,
   // prep22 P3: Signal Beam first body (the WIN0 first-body registers and the lent order are the first-body inputs).
   324,
+  // prep22 P3: Sheer Cold first body (the ice-fade background, the lent order and the activation registers are the first-body inputs).
+  329,
   // Q2 (docs/next-adapters-prep25.md s0.2 / C): zero-Random2 bodies through liveQ2Moves.ts: Hyper Voice, Smog, Sand Tomb, Sky Attack
   // (charge body only). Snore is NOT wired (see liveSnoreInputs).
   304, 123, 328, 143,
@@ -326,7 +328,7 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // curse-live: Curse (stats body) activation == window start (row 0; curseProbe.py sourceWindow, elevated PIDGEOT target dense).
     174,
     // prep22 P1: Lovely Kiss (faithful-random), Spikes, Octazooka windows start at activation (row 0; prep22 moves/*.json, both sides).
-    142, 191, 190, 324,
+    142, 191, 190, 324, 329,
     // Q2 (prep25 moves/*.json): the windows start at activation (row 0).
     304, 123, 328, 143,
   ].map((id) => [id, 0] as [number, number]).concat([
@@ -793,6 +795,8 @@ export function liveMoveAnimationDuration(
     case 190: return 79;
     // Signal Beam first body: signalBeamFirstInactiveAge = 18 + |pan target - initial| = 145 (player attacker) / 144 (opponent), prep22 s0.2.
     case 324: return request.attacker === 0 ? 145 : 144;
+    // Sheer Cold first body: 191 rows (player attacker) / 190 (opponent), constant across the accepted + alternate scenarios (prep22 s0.2).
+    case 329: return request.attacker === 0 ? 191 : 190;
     // Sky Attack (prep25): charge 148 rows / strike 180 rows, selected by gAnimMoveTurn bit 0 like Razor Wind / Solar Beam.
     case 143: return (request.turn & 1) === 0 ? 148 : null; // the strike (180 rows) declines: no exact order lend after the charge (see case 143)
     case 328: return 123; // Sand Tomb (prep25: constant across the four scenarios).
@@ -2452,6 +2456,19 @@ export function liveMoveAnimationPresentation(
       config = { move: "SIGNAL_BEAM", attacker, target, fieldProfile,
         animationInputs: liveSignalBeamInputs({ attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors,
           palettes, spriteOrder: lentOrder }) as never };
+      break;
+    }
+    case 329: {
+      // prep22 P3: Sheer Cold, first body only (the activation BG registers and the lent order are the first-body inputs); a later body declines.
+      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const lentOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (lentOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      config = { move: "SHEER_COLD", attacker, target, fieldProfile,
+        animationInputs: liveSheerColdInputs({ attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors,
+          spriteOrder: lentOrder }) as never };
       break;
     }
     case 143: {

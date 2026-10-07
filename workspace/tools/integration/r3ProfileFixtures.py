@@ -8,7 +8,7 @@ from pathlib import Path
 R = Path(__file__).resolve().parents[2]
 D = Path(sys.argv[1])
 S = {s["id"]: s for s in json.loads((R / "src/data/gen/species-stats.json").read_text())["species"]}
-MOVES = {"LOVELY_KISS": (142, 152), "SPIKES": (191, 113), "OCTAZOOKA": (190, 79), "SIGNAL_BEAM": (324, None)}  # Signal Beam rows: 145 (player attacker) / 144 (opponent)
+MOVES = {"LOVELY_KISS": (142, 152), "SPIKES": (191, 113), "OCTAZOOKA": (190, 79), "SIGNAL_BEAM": (324, None), "SHEER_COLD": (329, None)}  # Signal Beam rows: 145 (player attacker) / 144 (opponent)
 CASES = [  # (move, tag, scenario, attacker side)
     ("LOVELY_KISS", "lovely-kiss-player-jynx-opponent-onix", "mechanic-lovely-kiss-player-jynx-opponent-onix", "player"),
     ("LOVELY_KISS", "lovely-kiss-opponent-jynx-player-onix", "mechanic-lovely-kiss-opponent-jynx-player-onix", "opponent"),
@@ -29,9 +29,18 @@ CASES += [
     ("SIGNAL_BEAM", "signal-beam-alt-player-venomoth-golem", "prep22-signal-beam-alt-player-venomoth-golem", "player"),
     ("SIGNAL_BEAM", "signal-beam-alt-opponent-venomoth-golem", "prep22-signal-beam-alt-opponent-venomoth-golem", "opponent"),
 ]
+CASES += [
+    ("SHEER_COLD", "sheer-cold-player-dewgong-opponent-chansey", "mechanic-sheer-cold-player-dewgong-opponent-chansey", "player"),
+    ("SHEER_COLD", "sheer-cold-opponent-dewgong-player-chansey", "mechanic-sheer-cold-opponent-dewgong-player-chansey", "opponent"),
+    ("SHEER_COLD", "sheer-cold-alt-player-cloyster-golem", "prep22-sheer-cold-alt-player-cloyster-golem", "player"),
+    ("SHEER_COLD", "sheer-cold-alt-opponent-cloyster-golem", "prep22-sheer-cold-alt-opponent-cloyster-golem", "opponent"),
+]
+import os
+if os.environ.get("ONLY_MOVE"):
+    CASES = [c for c in CASES if c[0] == os.environ["ONLY_MOVE"]]
 extra = Path(__file__).parent / "r3ProfileExtraCases.json"
 if extra.exists():
-    CASES += [tuple(c) for c in json.loads(extra.read_text())]
+    CASES += [tuple(c) for c in json.loads(extra.read_text()) if not os.environ.get("ONLY_MOVE") or c[0] == os.environ["ONLY_MOVE"]]
 def status(v):
     return "sleep" if v & 7 else "poison" if v & 0x88 else "burn" if v & 0x10 else "freeze" if v & 0x20 else "paralysis" if v & 0x40 else "none"
 def gender(sp, pers):
@@ -43,7 +52,7 @@ for move, tag, scen, side in CASES:
     p = json.loads((D / f"{scen}-r1.json").read_text())
     mid, rows = MOVES[move]
     if rows is None:
-        rows = 145 if side == "player" else 144
+        rows = (145 if side == "player" else 144) if move == "SIGNAL_BEAM" else (191 if side == "player" else 190)
     bodies = p["bodies"]
     idx = next(i for i, b in enumerate(bodies) if b["move"] == mid)
     body = bodies[idx]
@@ -69,5 +78,5 @@ for move, tag, scen, side in CASES:
         fx["precedingBodies"] = pre
     if move == "LOVELY_KISS":
         fx["presentationRngActivation"] = {"value": body["atActivation"]["rng2"], "source": f"prep22Probe {scen} gRng2Value at activation frame {A}"}
-    (out / f"{tag}.json").write_text(json.dumps(fx, indent=1) + "\n")
+    (R / "tools/integration/fixtures/sheer-cold-live" if move == "SHEER_COLD" else out).joinpath(f"{tag}.json").write_text(json.dumps(fx, indent=1) + "\n")
     print(tag, fx["denseWindow"], fx["attacker"]["species"], "->", fx["target"]["species"], pre)

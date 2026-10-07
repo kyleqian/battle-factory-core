@@ -163,3 +163,34 @@ export function liveSignalBeamInputs(input: {
     animationRngSeed: 0, gameplayRng: null,
   };
 }
+
+/**
+ * `Move_SHEER_COLD` (329; prep22 s B.2-B.5 P3, first body only): SheerColdLiveInputs from production sources. The single FrozenIceCube sprite
+ * takes the lowest free slot over the known-entry in-use set; the cube is born at the target picOffsetPoint - (32, 36) and Task_UpdateMonBg
+ * carries the target sprite (x + x2, y + y2) with the scroll (32 - x, 32 - y) on bg2 for a player target / bg1 for an opponent target.
+ * Task slots, the cube resource (bank 7, tile 305, 64 tiles) and the activation BG registers (the reducer defaults) are the known-entry
+ * constants equal across the four prep22 scenarios; the order is the lent known-entry `sSpriteOrder`. The caller gates on the first body.
+ */
+export function liveSheerColdInputs(input: {
+  attackerSide: "player" | "opponent"; attacker: Anchors; target: Anchors; spriteOrder: readonly number[];
+}) {
+  const { attackerSide, attacker, target } = input;
+  const targetSide = attackerSide === "player" ? "opponent" : "player";
+  const sprite = (side: "player" | "opponent") => ({ slot: side === "player" ? 6 : 8, subpriority: side === "player" ? 30 : 40, matrixNum: 0, matrix: IDENTITY_MATRIX });
+  const cubeSpriteSlot = Array.from({ length: 64 }, (_, i) => i).find((i) => !SIGNAL_BEAM_OCCUPIED_SLOTS.has(i))!;
+  const tx = target.spriteCenter.x + target.frontIdleRest.x2, ty = target.spriteCenter.y + target.frontIdleRest.y2;
+  return {
+    targetAnimationCenter: target.picOffsetPoint, targetBattlePositionCenter: { x: tx, y: ty },
+    attackerSprite: sprite(attackerSide), targetSprite: sprite(targetSide), cubeSpriteSlot,
+    taskSlots: { fadeToBg: 0, cube: 0, updateMonBg: 1, sound: 2, clearMonBg: 0, restoreBg: 0 },
+    resources: { iceCube: { paletteBank: 7, tileSlot: 0, tileRange: [305, 64] as const } },
+    matrixBitmap: 6, spriteOrder: input.spriteOrder,
+    painterSprites: [
+      ...HEALTHBOX_PAINTER_KEYS.map((k) => ({ slot: k.slot, subpriority: k.subpriority, oamPriority: k.oamPriority, y: k.oamY })),
+      { slot: 6, subpriority: 30, oamPriority: 2, y: ((attackerSide === "player" ? attacker : target).spriteCenter.y - 32) & 0xff },
+      { slot: 8, subpriority: 40, oamPriority: 2, y: ((attackerSide === "opponent" ? attacker : target).spriteCenter.y - 32) & 0xff },
+    ].sort((l, r) => l.slot - r.slot),
+    monbg: { layer: targetSide === "player" ? "bg2" as const : "bg1" as const, scroll: { x: 32 - tx, y: 32 - ty } },
+    animationRng: 0, gameplayRng: null,
+  };
+}

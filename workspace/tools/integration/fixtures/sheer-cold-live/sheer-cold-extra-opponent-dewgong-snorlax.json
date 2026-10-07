@@ -1,0 +1,36 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "SHEER_COLD",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/r3-sheer-cold-extra-opponent-dewgong-snorlax.json",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 268
+ },
+ "windowSource": "window = [activation, activation + 190 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "DEWGONG",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793699980,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 267,
+  "playerMaxHp": 267,
+  "opponentHp": 184,
+  "opponentMaxHp": 184,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}
