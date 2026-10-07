@@ -1,0 +1,401 @@
+{
+ "schema": "prep35-skill-swap-check/v1",
+ "neg": null,
+ "pixels": true,
+ "windows": [
+  {
+   "window": "skill-swap-player",
+   "attackerSide": "player",
+   "species": [
+    "GIRAFARIG",
+    "SHUCKLE"
+   ],
+   "rows": 196,
+   "T": {
+    "lagRow176": true,
+    "restoreRow": 175
+   },
+   "fields": {
+    "hwOam": "195/196",
+    "hwOamRows1toEnd": "196/196",
+    "hwMatrices": "196/196",
+    "swMatrices": "196/196",
+    "spriteOrder": "196/196",
+    "paletteRenderedBanks": "194/196",
+    "paletteAllLent": "196/196",
+    "bldRegisters": "196/196"
+   },
+   "mismatchRows": {
+    "hwOam": [
+     "0"
+    ],
+    "paletteRenderedBanks": [
+     "0-1"
+    ]
+   },
+   "pixels": {
+    "measured": {
+     "firstInactiveAge": 195,
+     "rows": 196,
+     "exact": 196,
+     "residualPixels": 0,
+     "failures": []
+    },
+    "flipped": {
+     "firstInactiveAge": 194,
+     "rows": 196,
+     "exact": 180,
+     "residualPixels": 294352,
+     "failures": [
+      "177:18397",
+      "178:18397",
+      "179:18397",
+      "180:18397",
+      "181:18397",
+      "182:18397",
+      "183:18397",
+      "184:18397",
+      "185:18397",
+      "186:18397",
+      "187:18397",
+      "188:18397",
+      "189:18397",
+      "190:18397",
+      "191:18397",
+      "192:18397"
+     ]
+    }
+   }
+  },
+  {
+   "window": "skill-swap-opponent",
+   "attackerSide": "opponent",
+   "species": [
+    "GIRAFARIG",
+    "SHUCKLE"
+   ],
+   "rows": 195,
+   "T": {
+    "lagRow176": false,
+    "restoreRow": 175
+   },
+   "fields": {
+    "hwOam": "194/195",
+    "hwOamRows1toEnd": "195/195",
+    "hwMatrices": "195/195",
+    "swMatrices": "195/195",
+    "spriteOrder": "195/195",
+    "paletteRenderedBanks": "193/195",
+    "paletteAllLent": "195/195",
+    "bldRegisters": "195/195"
+   },
+   "mismatchRows": {
+    "hwOam": [
+     "0"
+    ],
+    "paletteRenderedBanks": [
+     "0-1"
+    ]
+   },
+   "pixels": {
+    "measured": {
+     "firstInactiveAge": 194,
+     "rows": 195,
+     "exact": 195,
+     "residualPixels": 0,
+     "failures": []
+    },
+    "flipped": {
+     "firstInactiveAge": 195,
+     "rows": 195,
+     "exact": 179,
+     "residualPixels": 298384,
+     "failures": [
+      "177:18649",
+      "178:18649",
+      "179:18649",
+      "180:18649",
+      "181:18649",
+      "182:18649",
+      "183:18649",
+      "184:18649",
+      "185:18649",
+      "186:18649",
+      "187:18649",
+      "188:18649",
+      "189:18649",
+      "190:18649",
+      "191:18649",
+      "192:18649"
+     ]
+    }
+   }
+  },
+  {
+   "window": "prep22-skill-swap-alt-player-alakazam-golem",
+   "attackerSide": "player",
+   "species": [
+    "ALAKAZAM",
+    "GOLEM"
+   ],
+   "rows": 196,
+   "T": {
+    "lagRow176": true,
+    "restoreRow": 176
+   },
+   "fields": {
+    "hwOam": "195/196",
+    "hwOamRows1toEnd": "196/196",
+    "hwMatrices": "196/196",
+    "swMatrices": "196/196",
+    "spriteOrder": "196/196",
+    "paletteRenderedBanks": "192/196",
+    "paletteAllLent": "194/196",
+    "bldRegisters": "196/196"
+   },
+   "mismatchRows": {
+    "hwOam": [
+     "0"
+    ],
+    "paletteRenderedBanks": [
+     "0-1",
+     "175-176"
+    ],
+    "paletteAllLent": [
+     "175-176"
+    ]
+   },
+   "pixels": {
+    "measured": {
+     "firstInactiveAge": 195,
+     "rows": 196,
+     "exact": 196,
+     "residualPixels": 0,
+     "failures": []
+    },
+    "flipped": {
+     "firstInactiveAge": 194,
+     "rows": 196,
+     "exact": 180,
+     "residualPixels": 273456,
+     "failures": [
+      "177:17091",
+      "178:17091",
+      "179:17091",
+      "180:17091",
+      "181:17091",
+      "182:17091",
+      "183:17091",
+      "184:17091",
+      "185:17091",
+      "186:17091",
+      "187:17091",
+      "188:17091",
+      "189:17091",
+      "190:17091",
+      "191:17091",
+      "192:17091"
+     ]
+    }
+   }
+  },
+  {
+   "window": "prep22-skill-swap-alt-opponent-alakazam-golem",
+   "attackerSide": "opponent",
+   "species": [
+    "ALAKAZAM",
+    "GOLEM"
+   ],
+   "rows": 195,
+   "T": {
+    "lagRow176": false,
+    "restoreRow": 175
+   },
+   "fields": {
+    "hwOam": "194/195",
+    "hwOamRows1toEnd": "195/195",
+    "hwMatrices": "195/195",
+    "swMatrices": "195/195",
+    "spriteOrder": "195/195",
+    "paletteRenderedBanks": "193/195",
+    "paletteAllLent": "195/195",
+    "bldRegisters": "195/195"
+   },
+   "mismatchRows": {
+    "hwOam": [
+     "0"
+    ],
+    "paletteRenderedBanks": [
+     "0-1"
+    ]
+   },
+   "pixels": {
+    "measured": {
+     "firstInactiveAge": 194,
+     "rows": 195,
+     "exact": 195,
+     "residualPixels": 0,
+     "failures": []
+    },
+    "flipped": {
+     "firstInactiveAge": 195,
+     "rows": 195,
+     "exact": 179,
+     "residualPixels": 293344,
+     "failures": [
+      "177:18334",
+      "178:18334",
+      "179:18334",
+      "180:18334",
+      "181:18334",
+      "182:18334",
+      "183:18334",
+      "184:18334",
+      "185:18334",
+      "186:18334",
+      "187:18334",
+      "188:18334",
+      "189:18334",
+      "190:18334",
+      "191:18334",
+      "192:18334"
+     ]
+    }
+   }
+  },
+  {
+   "window": "prep33-skill-swap-alt-player-espeon-weezing",
+   "attackerSide": "player",
+   "species": [
+    "ESPEON",
+    "WEEZING"
+   ],
+   "rows": 196,
+   "T": {
+    "lagRow176": true,
+    "restoreRow": 175
+   },
+   "fields": {
+    "hwOam": "195/196",
+    "hwOamRows1toEnd": "196/196",
+    "hwMatrices": "196/196",
+    "swMatrices": "196/196",
+    "spriteOrder": "196/196",
+    "paletteRenderedBanks": "194/196",
+    "paletteAllLent": "196/196",
+    "bldRegisters": "196/196"
+   },
+   "mismatchRows": {
+    "hwOam": [
+     "0"
+    ],
+    "paletteRenderedBanks": [
+     "0-1"
+    ]
+   },
+   "pixels": {
+    "measured": {
+     "firstInactiveAge": 195,
+     "rows": 196,
+     "exact": 195,
+     "residualPixels": 195,
+     "failures": [
+      "0:195"
+     ]
+    },
+    "flipped": {
+     "firstInactiveAge": 194,
+     "rows": 196,
+     "exact": 179,
+     "residualPixels": 285507,
+     "failures": [
+      "0:195",
+      "177:17832",
+      "178:17832",
+      "179:17832",
+      "180:17832",
+      "181:17832",
+      "182:17832",
+      "183:17832",
+      "184:17832",
+      "185:17832",
+      "186:17832",
+      "187:17832",
+      "188:17832",
+      "189:17832",
+      "190:17832",
+      "191:17832",
+      "192:17832"
+     ]
+    }
+   }
+  },
+  {
+   "window": "prep33-skill-swap-alt-opponent-weezing-snorlax",
+   "attackerSide": "opponent",
+   "species": [
+    "WEEZING",
+    "SNORLAX"
+   ],
+   "rows": 196,
+   "T": {
+    "lagRow176": true,
+    "restoreRow": 175
+   },
+   "fields": {
+    "hwOam": "195/196",
+    "hwOamRows1toEnd": "196/196",
+    "hwMatrices": "196/196",
+    "swMatrices": "196/196",
+    "spriteOrder": "196/196",
+    "paletteRenderedBanks": "194/196",
+    "paletteAllLent": "196/196",
+    "bldRegisters": "196/196"
+   },
+   "mismatchRows": {
+    "hwOam": [
+     "0"
+    ],
+    "paletteRenderedBanks": [
+     "0-1"
+    ]
+   },
+   "pixels": {
+    "measured": {
+     "firstInactiveAge": 195,
+     "rows": 196,
+     "exact": 195,
+     "residualPixels": 195,
+     "failures": [
+      "0:195"
+     ]
+    },
+    "flipped": {
+     "firstInactiveAge": 194,
+     "rows": 196,
+     "exact": 179,
+     "residualPixels": 279171,
+     "failures": [
+      "0:195",
+      "177:17436",
+      "178:17436",
+      "179:17436",
+      "180:17436",
+      "181:17436",
+      "182:17436",
+      "183:17436",
+      "184:17436",
+      "185:17436",
+      "186:17436",
+      "187:17436",
+      "188:17436",
+      "189:17436",
+      "190:17436",
+      "191:17436",
+      "192:17436"
+     ]
+    }
+   }
+  }
+ ]
+}
