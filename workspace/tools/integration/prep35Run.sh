@@ -22,6 +22,11 @@ skillswap)
   NEGW="$EV/skill-swap-player-dense-state.json.gz:player:$EV/skill-swap-player-raw-rgb.tar.gz $OUT/prep33-skill-swap-alt-opponent-weezing-snorlax-r1.json:opponent:$OUT/prep33-skill-swap-alt-opponent-weezing-snorlax-r1-rgb"
   for n in anim sort anchor palette blend; do npx vite-node tools/integration/prep35SkillSwapCheck.ts $NEGW --pixels --neg=$n --scratch=$OUT/scratch --out=$REC/skillswap-neg-$n.json 2> /dev/null; done ;;
 flatter)
-  [ ! -f tools/integration/prep35FlatterRun.sh ] || sh tools/integration/prep35FlatterRun.sh ;;
+  if [ -z "$SKIP_PROBES" ]; then N=""; for s in $FL_ALT; do probe flatterProbe.py ${s%%:*}; N="$N ${s%%:*}"; done; wait; verify $N 2>&1 | grep -v "Segmentation fault"; fi
+  W="$EV/flatter-player-dense-state.json.gz:player:$EV/flatter-player-raw-rgb.tar.gz $EV/flatter-opponent-dense-state.json.gz:opponent:$EV/flatter-opponent-raw-rgb.tar.gz"
+  for s in $FL_ALT; do n=${s%%:*}; W="$W $OUT/$n-r1.json:${s##*:}:$OUT/$n-r1-rgb"; done
+  npx vite-node tools/integration/prep35FlatterCheck.ts $W --pixels --scratch=$OUT/scratch --out=$REC/flatter-check-pixels.json 2> /dev/null
+  NEGW="$EV/flatter-player-dense-state.json.gz:player:$EV/flatter-player-raw-rgb.tar.gz $OUT/prep25-flatter-alt-opponent-hypno-golem-r1.json:opponent:$OUT/prep25-flatter-alt-opponent-hypno-golem-r1-rgb"
+  for n in sort burst seed dip; do npx vite-node tools/integration/prep35FlatterCheck.ts $NEGW --pixels --neg=$n --scratch=$OUT/scratch --out=$REC/flatter-neg-$n.json 2> /dev/null; done ;;
 esac; done
 echo "receipts in $REC"
