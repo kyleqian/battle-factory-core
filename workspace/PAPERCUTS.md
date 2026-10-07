@@ -18,15 +18,50 @@ history.
 - **Fix:** briefs say "never pattern-kill; kill only PIDs you started"; a probe wrapper that
   records its own PIDs would make cleanup safe.
 
+## Evidence run scripts reuse fixed /tmp dirs; `run-mgba-probe.py` refuses to overwrite -> silently stale reruns
+
+- **What:** several prepNN / lbNN run scripts default their probe dirs to `/tmp/pNN` and the probe wrapper refuses to
+  overwrite an existing output, so a rerun into a populated dir keeps the OLD probes without an error (prep22 worker
+  ~10 min; the supervisor's first prep27 reproduction reused the worker's probes and had to be redone). Some run
+  scripts also exit non-zero after every probe completed (`set -e` + an xargs / segfault status: lb26Run, prep29Run).
+- **Hits:** 4 (2026-10-06/07).
+- **Fix:** every run script takes its OUT/R1/R2 dirs as required arguments and refuses an existing dir; treat the
+  probe segfault-at-exit as success only when the output JSON parses (as `run-mgba-probe.py` already does).
+
+## Live verifier passes only the attacker's personality — a shiny TARGET never reaches the decline gate
+
+- **What:** `tools/integration/liveAdapterFramebuffer.ts` supplies `attackerPersonality` only, so target-side shiny
+  declines cannot be tested without `species-audit-5/patches/harness-target-personality.diff` (audits 6 and 8, ~8 min
+  each).
+- **Hits:** 3.
+- **Fix:** read `targetPersonality` from fixtures in the verifier.
+
+## Live adapter counts pinned by number in several test files
+
+- **What:** `implementedCount` is pinned in `tests/liveStatusImplementedCount.test.ts`,
+  `tests/animation/factoryAnimationInventory.test.ts` and per-batch files (`livePrep11MoveAdapters.test.ts` pinned 226),
+  so every batch edits several pins and a missed one only fails in the full suite (Baton / Endeavor worker ~8 min,
+  fix150 worker ~5 min).
+- **Hits:** 2.
+- **Fix:** one shared constant read from `docs/animation-integration-live-status.json`.
+
+## Committed `.diff` receipts trip `git diff --check`
+
+- **What:** blank context lines in stored patch files look like trailing whitespace; each fixture dir that stores a
+  patch needs its own `.gitattributes` (`*.diff -whitespace`) (prep28, #151 diagnosis; audit 6's patch merged with a
+  flagged line).
+- **Hits:** 3.
+- **Fix:** one `.gitattributes` at `tools/integration/fixtures/` with `*.diff -whitespace`.
+
 ## vite-node CLIs: `import.meta.url === argv[1]` main checks silently no-op
 
 - **What:** under `npx vite-node tool.ts -- args` the usual main-module
   check is false, so `tools/integration/liveAdapterFramebuffer.ts`'s CLI
   exits 0 with no output; new tools have to be split into a library plus a
   `...Run.ts` entry (or call the exported function from a wrapper).
-- **Hits:** 5 (2026-10-05 post-KO tracker worker ~3 min; post-KO audit
+- **Hits:** 7 (2026-10-05 post-KO tracker worker ~3 min; post-KO audit
   worker ~4 min; post-KO lend worker ~2 min; prep11 worker ~10 min; prep10
-  batch used a shell wrapper).
+  batch used a shell wrapper; 2026-10-07 oam1 ~2 min, prep24 ~5 min).
 - **Fix:** run CLIs with `node --experimental-strip-types`, or make the
   check vite-node-aware (compare resolved file paths, not URLs).
 
@@ -1086,8 +1121,8 @@ Per entry:
   "(1 trace)" with a nonsense combined filename instead of erroring.
   Flagged by the 2026-08-03 typeref slice-2 worker; same zsh trap class
   as the 2026-08-01 session's word-splitting note.
-- **Hits:** 2 (as a worker-facing papercut; the trap class itself is
-  previously known).
+- **Hits:** 5 (as a worker-facing papercut; the trap class itself is
+  previously known; 2026-10-07: prep25 ~10 min, audit 8 ~6 min, #151 diagnosis ~1 min).
 - **Cost each:** ~5 min; 2026-10-03 allocator worker lost ~1 min on a probe loop.
 - **Workaround:** `${=ARGS}` for explicit splitting, or arrays
   (`"${traces[@]}"`), or pass files via xargs.
@@ -1407,7 +1442,9 @@ current app stage should be rejected before replay.
 
 - **What:** no GNU coreutils on this host; `timeout` is "command not found".
   Workers that follow a brief's guarded-vitest idiom lose a minute each.
-- **Hits:** 2 (2026-08-22: scout S ~1 min, audit R ~2 min).
+- **Hits:** 6 (2026-08-22: scout S ~1 min, audit R ~2 min; 2026-10-07: prep26 ~4 min, audit 7 ~8 min,
+  Curse worker ~1 min, order-rows worker ~2 min — the supervisor's briefs said "explicit Bash timeouts on long
+  loops", which invites `timeout(1)`; say "Bash tool timeouts" instead).
 - **Fix:** never write `timeout` into a brief; rely on the Bash tool's own
   per-call timeout.
 
