@@ -1,0 +1,93 @@
+golbat-shock-wave-player-flaaffy-opponent-corsola A=75 rows=267 phase=None body0 pre=[] FLAAFFY -> GOLBAT
+golbat-shock-wave-opponent-flaaffy-player-corsola A=79 rows=263 phase=None body0 pre=[] FLAAFFY -> GOLBAT
+weezing-shock-wave-player-flaaffy-opponent-corsola A=75 rows=267 phase=None body0 pre=[] FLAAFFY -> WEEZING
+weezing-shock-wave-opponent-flaaffy-player-corsola A=79 rows=263 phase=None body0 pre=[] FLAAFFY -> WEEZING
+magneton-shock-wave-player-flaaffy-opponent-corsola A=75 rows=267 phase=None body0 pre=[] FLAAFFY -> MAGNETON
+magneton-shock-wave-opponent-flaaffy-player-corsola A=79 rows=263 phase=None body0 pre=[] FLAAFFY -> MAGNETON
+castform-shock-wave-player-flaaffy-opponent-corsola A=75 rows=267 phase=None body0 pre=[] FLAAFFY -> CASTFORM
+castform-shock-wave-opponent-flaaffy-player-corsola A=79 rows=263 phase=None body0 pre=[] FLAAFFY -> CASTFORM
+tyranitar-shock-wave-player-flaaffy-opponent-corsola A=75 rows=267 phase=None body0 pre=[] FLAAFFY -> TYRANITAR
+tyranitar-shock-wave-opponent-flaaffy-player-corsola A=79 rows=263 phase=None body0 pre=[] FLAAFFY -> TYRANITAR
+wailord-shock-wave-player-flaaffy-opponent-corsola A=75 rows=267 phase=None body0 pre=[] FLAAFFY -> WAILORD
+wailord-shock-wave-opponent-flaaffy-player-corsola A=79 rows=263 phase=None body0 pre=[] FLAAFFY -> WAILORD
+pichu-shock-wave-player-flaaffy-opponent-corsola A=75 rows=267 phase=None body0 pre=[] FLAAFFY -> PICHU
+pichu-shock-wave-opponent-flaaffy-player-corsola A=79 rows=263 phase=None body0 pre=[] FLAAFFY -> PICHU
+rattata-shock-wave-player-flaaffy-opponent-corsola A=75 rows=267 phase=None body0 pre=[] FLAAFFY -> RATTATA
+rattata-shock-wave-opponent-flaaffy-player-corsola A=79 rows=263 phase=None body0 pre=[] FLAAFFY -> RATTATA
+magnetonA-shock-wave-player-flaaffy-opponent-corsola A=76 rows=267 phase=None body0 pre=[] MAGNETON -> CORSOLA
+magnetonA-shock-wave-opponent-flaaffy-player-corsola A=80 rows=264 phase=None body0 pre=[] MAGNETON -> CORSOLA
+magnemiteA-shock-wave-player-flaaffy-opponent-corsola A=77 rows=268 phase=None body0 pre=[] MAGNEMITE -> CORSOLA
+magnemiteA-shock-wave-opponent-flaaffy-player-corsola A=81 rows=263 phase=None body0 pre=[] MAGNEMITE -> CORSOLA
+castformA-shock-wave-player-flaaffy-opponent-corsola A=76 rows=266 phase=None body0 pre=[] CASTFORM -> CORSOLA
+castformA-shock-wave-opponent-flaaffy-player-corsola A=80 rows=264 phase=None body0 pre=[] CASTFORM -> CORSOLA
+nosepassA-shock-wave-player-flaaffy-opponent-corsola A=76 rows=267 phase=None body0 pre=[] NOSEPASS -> CORSOLA
+nosepassA-shock-wave-opponent-flaaffy-player-corsola A=80 rows=263 phase=None body0 pre=[] NOSEPASS -> CORSOLA
+pichuA-shock-wave-player-flaaffy-opponent-corsola A=73 rows=267 phase=None body0 pre=[] PICHU -> CORSOLA
+pichuA-shock-wave-opponent-flaaffy-player-corsola A=77 rows=263 phase=None body0 pre=[] PICHU -> CORSOLA
+flygonA-shock-wave-player-flaaffy-opponent-corsola A=74 rows=266 phase=None body0 pre=[] FLYGON -> CORSOLA
+flygonA-shock-wave-opponent-flaaffy-player-corsola A=78 rows=264 phase=None body0 pre=[] FLYGON -> CORSOLA
+shedinjaA-shock-wave-player-flaaffy-opponent-corsola A=421 rows=267 phase=None body1 pre=[0] SHEDINJA -> MAWILE
+shedinjaA-shock-wave-opponent-flaaffy-player-corsola A=80 rows=264 phase=None body0 pre=[] SHEDINJA -> CORSOLA
+golbatA-shock-wave-player-flaaffy-opponent-corsola A=74 rows=267 phase=None body0 pre=[] GOLBAT -> CORSOLA
+golbatA-shock-wave-opponent-flaaffy-player-corsola A=78 rows=264 phase=None body0 pre=[] GOLBAT -> CORSOLA
+weezingA-shock-wave-player-flaaffy-opponent-corsola A=75 rows=267 phase=None body0 pre=[] WEEZING -> CORSOLA
+weezingA-shock-wave-opponent-flaaffy-player-corsola A=79 rows=264 phase=None body0 pre=[] WEEZING -> CORSOLA
+steelixA-shock-wave-player-flaaffy-opponent-corsola A=75 rows=266 phase=None body0 pre=[] STEELIX -> CORSOLA
+steelixA-shock-wave-opponent-flaaffy-player-corsola A=79 rows=264 phase=None body0 pre=[] STEELIX -> CORSOLA
+tyranitarA-shock-wave-player-flaaffy-opponent-corsola A=77 rows=266 phase=None body0 pre=[] TYRANITAR -> CORSOLA
+tyranitarA-shock-wave-opponent-flaaffy-player-corsola A=81 rows=264 phase=None body0 pre=[] TYRANITAR -> CORSOLA
+wailordA-shock-wave-player-flaaffy-opponent-corsola A=75 rows=268 phase=None body0 pre=[] WAILORD -> CORSOLA
+wailordA-shock-wave-opponent-flaaffy-player-corsola A=79 rows=263 phase=None body0 pre=[] WAILORD -> CORSOLA
+pichuA-shock-wave-player-flaaffy-opponent-corsola A=73 rows=267 phase=None body0 pre=[] PICHU -> CORSOLA
+pichuA-shock-wave-opponent-flaaffy-player-corsola A=77 rows=263 phase=None body0 pre=[] PICHU -> CORSOLA
+rattataA-shock-wave-player-flaaffy-opponent-corsola A=75 rows=268 phase=None body0 pre=[] RATTATA -> CORSOLA
+rattataA-shock-wave-opponent-flaaffy-player-corsola A=79 rows=264 phase=None body0 pre=[] RATTATA -> CORSOLA
+onixA-shock-wave-player-flaaffy-opponent-corsola A=72 rows=266 phase=None body0 pre=[] ONIX -> CORSOLA
+onixA-shock-wave-opponent-flaaffy-player-corsola A=76 rows=264 phase=None body0 pre=[] ONIX -> CORSOLA
+shinysteelixA-shock-wave-player-flaaffy-opponent-corsola A=75 rows=266 phase=None body0 pre=[] STEELIX -> CORSOLA
+shinysteelixA-shock-wave-opponent-flaaffy-player-corsola A=79 rows=264 phase=None body0 pre=[] STEELIX -> CORSOLA
+flygon-superpower-player-nidoqueen-opponent-onix A=79 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] NIDOQUEEN -> FLYGON
+flygon-superpower-opponent-registeel-player-regirock A=231 rows=248 phase={'bg-write-row': 'event'} body1 pre=[33] SEVIPER -> FLYGON
+golbat-superpower-player-nidoqueen-opponent-onix A=79 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] NIDOQUEEN -> GOLBAT
+golbat-superpower-opponent-registeel-player-regirock A=81 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] SEVIPER -> GOLBAT
+weezing-superpower-player-nidoqueen-opponent-onix A=79 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] NIDOQUEEN -> WEEZING
+weezing-superpower-opponent-registeel-player-regirock A=81 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] SEVIPER -> WEEZING
+steelix-superpower-player-nidoqueen-opponent-onix A=79 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] NIDOQUEEN -> STEELIX
+steelix-superpower-opponent-registeel-player-regirock A=81 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] SEVIPER -> STEELIX
+tyranitar-superpower-player-nidoqueen-opponent-onix NO-PROBE [Errno 2] No such file or directory: '/tmp/s10/probes/tyranitar-superpower-player-nidoqueen-opponent-onix-r1.json'
+tyranitar-superpower-opponent-registeel-player-regirock A=81 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] SEVIPER -> TYRANITAR
+wailord-superpower-player-nidoqueen-opponent-onix A=79 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] NIDOQUEEN -> WAILORD
+wailord-superpower-opponent-registeel-player-regirock A=81 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] SEVIPER -> WAILORD
+pichu-superpower-player-nidoqueen-opponent-onix A=79 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] NIDOQUEEN -> PICHU
+pichu-superpower-opponent-registeel-player-regirock A=81 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] SEVIPER -> PICHU
+rattata-superpower-player-nidoqueen-opponent-onix A=79 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] NIDOQUEEN -> RATTATA
+rattata-superpower-opponent-registeel-player-regirock A=81 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] SEVIPER -> RATTATA
+onix-superpower-player-nidoqueen-opponent-onix A=79 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] NIDOQUEEN -> ONIX
+onix-superpower-opponent-registeel-player-regirock A=81 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] SEVIPER -> ONIX
+regirockA-superpower-player-nidoqueen-opponent-onix A=78 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] REGIROCK -> SHUCKLE
+regirockA-superpower-opponent-registeel-player-regirock A=82 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] REGIROCK -> SHUCKLE
+registeelA-superpower-player-nidoqueen-opponent-onix A=79 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] REGISTEEL -> SHUCKLE
+registeelA-superpower-opponent-registeel-player-regirock A=83 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] REGISTEEL -> SHUCKLE
+nidoqueenA-superpower-opponent-registeel-player-regirock A=83 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] NIDOQUEEN -> SHUCKLE
+flygonA-superpower-player-nidoqueen-opponent-onix A=76 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] FLYGON -> SHUCKLE
+flygonA-superpower-opponent-registeel-player-regirock A=80 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] FLYGON -> SHUCKLE
+shedinjaA-superpower-player-nidoqueen-opponent-onix A=78 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] SHEDINJA -> SHUCKLE
+shedinjaA-superpower-opponent-registeel-player-regirock A=82 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] SHEDINJA -> SHUCKLE
+golbatA-superpower-player-nidoqueen-opponent-onix A=76 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] GOLBAT -> SHUCKLE
+golbatA-superpower-opponent-registeel-player-regirock A=80 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] GOLBAT -> SHUCKLE
+weezingA-superpower-player-nidoqueen-opponent-onix A=77 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] WEEZING -> SHUCKLE
+weezingA-superpower-opponent-registeel-player-regirock A=81 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] WEEZING -> SHUCKLE
+steelixA-superpower-player-nidoqueen-opponent-onix A=77 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] STEELIX -> SHUCKLE
+steelixA-superpower-opponent-registeel-player-regirock A=81 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] STEELIX -> SHUCKLE
+tyranitarA-superpower-player-nidoqueen-opponent-onix A=79 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] TYRANITAR -> SHUCKLE
+tyranitarA-superpower-opponent-registeel-player-regirock A=83 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] TYRANITAR -> SHUCKLE
+wailordA-superpower-player-nidoqueen-opponent-onix A=77 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] WAILORD -> SHUCKLE
+wailordA-superpower-opponent-registeel-player-regirock A=81 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] WAILORD -> SHUCKLE
+pichuA-superpower-player-nidoqueen-opponent-onix A=75 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] PICHU -> SHUCKLE
+pichuA-superpower-opponent-registeel-player-regirock A=79 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] PICHU -> SHUCKLE
+rattataA-superpower-player-nidoqueen-opponent-onix A=77 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] RATTATA -> SHUCKLE
+rattataA-superpower-opponent-registeel-player-regirock A=81 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] RATTATA -> SHUCKLE
+onixA-superpower-player-nidoqueen-opponent-onix A=74 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] ONIX -> SHUCKLE
+onixA-superpower-opponent-registeel-player-regirock A=78 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] ONIX -> SHUCKLE
+shinysteelixA-superpower-player-nidoqueen-opponent-onix A=77 rows=248 phase={'bg-write-row': 'no-event'} body0 pre=[] STEELIX -> SHUCKLE
+shinysteelixA-superpower-opponent-registeel-player-regirock A=81 rows=248 phase={'bg-write-row': 'event'} body0 pre=[] STEELIX -> SHUCKLE
