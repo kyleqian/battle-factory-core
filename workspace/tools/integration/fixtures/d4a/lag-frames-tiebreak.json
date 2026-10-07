@@ -1,0 +1,96 @@
+{
+ "mach-punch": [
+  {
+   "scenario": "d4a-mach-punch-extra-opponent-breloom-golbat",
+   "body": 0,
+   "len": 110,
+   "lagAges": [
+    71,
+    72,
+    91
+   ],
+   "iterations": 107
+  },
+  {
+   "scenario": "d4a-mach-punch-extra-opponent-hitmonchan-snorlax",
+   "body": 0,
+   "len": 109,
+   "lagAges": [
+    71,
+    72
+   ],
+   "iterations": 107
+  },
+  {
+   "scenario": "d4a-mach-punch-extra-player-breloom-golbat",
+   "body": 0,
+   "len": 110,
+   "lagAges": [
+    71,
+    72,
+    91
+   ],
+   "iterations": 107
+  },
+  {
+   "scenario": "d4a-mach-punch-extra-player-hitmonchan-snorlax",
+   "body": 0,
+   "len": 110,
+   "lagAges": [
+    71,
+    72,
+    91
+   ],
+   "iterations": 107
+  }
+ ],
+ "nightmare": [
+  {
+   "scenario": "d4a-nightmare-extra-opponent-gengar-golbat",
+   "body": 0,
+   "len": 168,
+   "lagAges": [
+    21,
+    129,
+    130,
+    149
+   ],
+   "iterations": 164
+  },
+  {
+   "scenario": "d4a-nightmare-extra-opponent-haunter-snorlax",
+   "body": 0,
+   "len": 168,
+   "lagAges": [
+    21,
+    129,
+    130,
+    149
+   ],
+   "iterations": 164
+  },
+  {
+   "scenario": "d4a-nightmare-extra-player-gengar-golbat",
+   "body": 0,
+   "len": 167,
+   "lagAges": [
+    21,
+    129,
+    130
+   ],
+   "iterations": 164
+  },
+  {
+   "scenario": "d4a-nightmare-extra-player-haunter-snorlax",
+   "body": 0,
+   "len": 168,
+   "lagAges": [
+    21,
+    129,
+    130,
+    149
+   ],
+   "iterations": 164
+  }
+ ]
+}

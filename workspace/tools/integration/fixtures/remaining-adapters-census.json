@@ -39,6 +39,8 @@
    "MOVE_WATER_PULSE",
    "MOVE_WISH"
   ],
+  "faithfulTiming": 0,
+  "faithfulTimingMoves": [],
   "inFlight": 0,
   "remaining": 18,
   "inFlightBreakdown": {
@@ -48,6 +50,7 @@
   "weightPct": {
    "live": 93.593,
    "faithfulRandom": 3.761,
+   "faithfulTiming": 0,
    "inFlight": 0,
    "remaining": 2.158
   },
@@ -73,7 +76,7 @@
   },
   "orderFirstBodyOnlyMoves": 12,
   "slotPlanNeededMoves": 14,
-  "sumsTo": "246+12+0+18=276",
+  "sumsTo": "246+12+0+0+18=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },

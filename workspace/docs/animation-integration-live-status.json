@@ -3860,6 +3860,25 @@
     },
     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
   },
+  "faithfulTimingCount": 0,
+  "faithfulTimingAdapters": [],
+  "faithfulTimingClaim": {
+    "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+    "module": "src/engine/liveMoveTimingPolicy.ts",
+    "doc": "docs/faithful-timing.md",
+    "decision": "D4 option (b), user-approved 2026-10-07 (docs/faithful-timing.md; ANIMATION_VERIFICATION.md \"CPU-load timing integration\")",
+    "entryFields": {
+      "id": "move id; never also listed in implementedAdapters or faithfulRandomAdapters (disjoint buckets)",
+      "move": "MOVE_* label",
+      "timingParameters": "each permitted CPU-phase parameter: kind (optional-lag-age / bg-write-row / palette-transfer-row), age, measured alternatives {phase, bodyRows, measured}, chosen phase, tieRuleUsed",
+      "policyVersion": "LIVE_MOVE_TIMING_POLICY_VERSION the adapter was proved under",
+      "alternatePhaseResidual": "windows measured in the other phase: the affected body ages and the max differing pixels per row (the check fails on any residual outside these rows)",
+      "d3": "true when the adapter also draws from the presentation RNG (D3); such an adapter is counted here once and never in faithfulRandomAdapters",
+      "evidence": "lag / phase measurements and the dense fixture receipt",
+      "proofCommands": "commands reproducing the dense windows, the phase table and the ordinary route"
+    },
+    "claimBoundary": "Faithful timing means the live body renders the source animation program exactly (geometry, allocation, order, lifecycle, cleanup, palettes) with ONE deterministic CPU-phase per documented timing parameter: the dominant measured phase (most frequent across all banked measurements; a tie selects the phase without the optional event). Windows measured in the selected phase are pixel-exact; windows measured in the other phase differ only on the documented rows. Faithful-timing adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG, damage, turn order or facility state."
+  },
   "unadaptedNotes": {},
   "verifiedPreview": {
     "commit": "1dbd33332075bdbec15ad727ea67775345b7ba14",

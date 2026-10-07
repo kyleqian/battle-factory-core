@@ -16,6 +16,8 @@ writeFileSync("dist/build.json", JSON.stringify({
   adapters: inventory.implementedCount,
   // Separate D3 bucket (docs/presentation-rng.md): never added to the scoped-exact `adapters`.
   faithfulRandomAdapters: inventory.faithfulRandomCount ?? 0,
+  // Separate D4 bucket (docs/faithful-timing.md): never added to `adapters` or `faithfulRandomAdapters`.
+  faithfulTimingAdapters: inventory.faithfulTimingCount ?? 0,
   factoryAccepted: inventory.currentAcceptedFactoryMoves,
 }, null, 2) + "\n");
 JS

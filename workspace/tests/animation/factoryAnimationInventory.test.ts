@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import inventory from "../../src/data/gen/factory-animation-inventory.json" with { type: "json" };
 import { LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS } from "../../src/engine/liveMovePresentationRng.ts";
+import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS } from "../../src/engine/liveMoveTimingPolicy.ts";
 import {
   animationComponentLeverage,
   animationCoverageSummary,
@@ -74,7 +75,17 @@ describe("live inventory claim buckets", () => {
     const faithful = (status.faithfulRandomAdapters as { id: number }[]).map((entry) => entry.id);
     expect(faithful.filter((id) => implemented.has(id))).toEqual([]);
     expect(new Set(faithful).size).toBe(faithful.length);
-    // Faithful random adds no exact coverage or Factory acceptance.
+    // Faithful timing (D4, docs/faithful-timing.md): a third disjoint bucket; a D3+D4 adapter is counted there once (d3: true).
+    expect(status.faithfulTimingCount).toBe(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS.length);
+    expect(status.faithfulTimingAdapters).toHaveLength(status.faithfulTimingCount);
+    const timing = (status.faithfulTimingAdapters as { id: number; d3: boolean }[]);
+    expect(timing.filter((entry) => implemented.has(entry.id) || faithful.includes(entry.id))).toEqual([]);
+    expect(timing.filter((entry) => (LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS as readonly number[]).includes(entry.id))).toEqual([]);
+    // every accepted move is in exactly one of exact / faithful random / faithful timing / remaining (276)
+    const census = JSON.parse(readFileSync(join(import.meta.dirname, "../../tools/integration/fixtures/remaining-adapters-census.json"), "utf8")).summary;
+    expect(status.implementedCount + status.faithfulRandomCount + status.faithfulTimingCount + census.remaining).toBe(276);
+    expect(census.faithfulTiming).toBe(status.faithfulTimingCount);
+    // Faithful random / timing add no exact coverage or Factory acceptance.
     expect(status.currentAcceptedFactoryMoves).toBe(276);
     expect(animationCoverageSummary().find((row) => row.tier === "level50")?.exact).toBe(275);
   });
