@@ -1,0 +1,654 @@
+{
+ "schema": "d4b-live-receipt/v1",
+ "testedCommit": "0ad30e1c0bdefa8d57fe3a6ebf7c351e3fd43717",
+ "testedSrcTree": "42a9ef978a414badffc0b46fde5cc2c1d8114688",
+ "dirty": false,
+ "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+ "commands": [
+  "python3 tools/integration/d4aScenarios.py",
+  "sh tools/integration/prep22Probes.sh PROBEDIR 1 <accepted + prep25 alternate + d4a extra scenarios>",
+  "python3 tools/integration/d4aFixtures.py PROBEDIR",
+  "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts CHECK.json tools/integration/fixtures/d4a-live/<move>-*.json",
+  "python3 tools/integration/d4aReceipt.py CHECK.json..."
+ ],
+ "phaseTable": [
+  {
+   "id": 183,
+   "move": "MOVE_MACH_PUNCH",
+   "kind": "optional-lag-age",
+   "age": 91,
+   "fixedLagAges": [
+    71,
+    72
+   ],
+   "iterations": 107,
+   "alternatives": [
+    {
+     "phase": "event",
+     "bodyRows": 110,
+     "measured": 5
+    },
+    {
+     "phase": "no-event",
+     "bodyRows": 109,
+     "measured": 3
+    }
+   ],
+   "chosen": "event",
+   "tieRuleUsed": false,
+   "alternatePhaseResidual": {
+    "ages": [
+     92,
+     93,
+     94,
+     95,
+     96,
+     97,
+     98,
+     99,
+     100,
+     101,
+     102,
+     103,
+     104,
+     105,
+     106,
+     107
+    ],
+    "rows": 16,
+    "maxPixelsPerRow": 18252,
+    "cause": "the optional lag at age 91 holds the restore fade (Task_FadeToBg, BLDY) one row: a no-lag window equals the policy body one row earlier from age 92 to the fade end (107); rows 0..91 and 108 are exact"
+   }
+  },
+  {
+   "id": 224,
+   "move": "MOVE_MEGAHORN",
+   "kind": "optional-lag-age",
+   "age": 156,
+   "fixedLagAges": [],
+   "iterations": 176,
+   "alternatives": [
+    {
+     "phase": "event",
+     "bodyRows": 177,
+     "measured": 9
+    },
+    {
+     "phase": "no-event",
+     "bodyRows": 176,
+     "measured": 1
+    }
+   ],
+   "chosen": "event",
+   "tieRuleUsed": false,
+   "timingParameters": [
+    {
+     "kind": "optional-lag-age",
+     "age": 156,
+     "fixedLagAges": [],
+     "iterations": 176,
+     "alternatives": [
+      {
+       "phase": "event",
+       "bodyRows": 177,
+       "measured": 9
+      },
+      {
+       "phase": "no-event",
+       "bodyRows": 176,
+       "measured": 1
+      }
+     ],
+     "chosen": "event",
+     "tieRuleUsed": false
+    },
+    {
+     "kind": "bg-write-row",
+     "age": 8,
+     "fixedLagAges": [],
+     "iterations": 176,
+     "alternatives": [
+      {
+       "phase": "event",
+       "bodyRows": 177,
+       "measured": 7
+      },
+      {
+       "phase": "no-event",
+       "bodyRows": 177,
+       "measured": 3
+      }
+     ],
+     "chosen": "event",
+     "tieRuleUsed": false
+    }
+   ],
+   "alternatePhaseResidual": {
+    "ages": [
+     158,
+     159,
+     160,
+     161,
+     162,
+     163,
+     164,
+     165,
+     166,
+     167,
+     168,
+     169,
+     170,
+     171,
+     172,
+     173
+    ],
+    "rows": 16,
+    "maxPixelsPerRow": 17211,
+    "cause": "optional-lag-age only: without the late restorebg row the final Task_FadeToBg (BLDY 15..0 after LoadDefaultBg) runs one row earlier, so a 176-row window differs on the 16 fade rows 158..173 (the accepted opponent window, 1 of 10); rows 0..157 and 174..175 are exact. bg-write-row: the monbg BGnCNT row (8 policy / 7 other, 3 of 10 windows) is never read by the MEGAHORN renderer branch, so row-7 windows are 0 px"
+   }
+  }
+ ],
+ "summary": {
+  "MEGAHORN": {
+   "windows": 10,
+   "selectedPhaseWindows": 6,
+   "selectedPhaseResidualPixels": 0,
+   "otherPhaseWindows": 4,
+   "otherPhaseAffectedAges": [
+    158,
+    159,
+    160,
+    161,
+    162,
+    163,
+    164,
+    165,
+    166,
+    167,
+    168,
+    169,
+    170,
+    171,
+    172,
+    173
+   ],
+   "otherPhaseMaxPixelsPerRow": 17211,
+   "freshRunsIdentical": true,
+   "violations": 0
+  }
+ },
+ "windows": [
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/megahorn-alt-opponent-heracross-golem.json",
+   "move": "MEGAHORN",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "measuredPhases": {
+    "optional-lag-age": "event",
+    "bg-write-row": "no-event"
+   },
+   "policyPhases": {
+    "optional-lag-age": "event",
+    "bg-write-row": "event"
+   },
+   "selectedPhase": false,
+   "window": 177,
+   "expectedDuration": 177,
+   "runs": [
+    {
+     "rows": 177,
+     "exactRows": 177,
+     "residualPixels": 0,
+     "digest": "8266a2da564b9ede0d7d8b5d8942d7fce825a2ee18c9d007dbd67aac0449f75c",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 177,
+     "exactRows": 177,
+     "residualPixels": 0,
+     "digest": "8266a2da564b9ede0d7d8b5d8942d7fce825a2ee18c9d007dbd67aac0449f75c",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": [
+    158,
+    159,
+    160,
+    161,
+    162,
+    163,
+    164,
+    165,
+    166,
+    167,
+    168,
+    169,
+    170,
+    171,
+    172,
+    173
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/megahorn-alt-opponent-heracross-onix.json",
+   "move": "MEGAHORN",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "measuredPhases": {
+    "optional-lag-age": "event",
+    "bg-write-row": "event"
+   },
+   "policyPhases": {
+    "optional-lag-age": "event",
+    "bg-write-row": "event"
+   },
+   "selectedPhase": true,
+   "window": 177,
+   "expectedDuration": 177,
+   "runs": [
+    {
+     "rows": 177,
+     "exactRows": 177,
+     "residualPixels": 0,
+     "digest": "eb052229b368785e70b40b1f8de2c74fefd2b389eccc623712585e936f05d3d9",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 177,
+     "exactRows": 177,
+     "residualPixels": 0,
+     "digest": "eb052229b368785e70b40b1f8de2c74fefd2b389eccc623712585e936f05d3d9",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/megahorn-alt-player-heracross-golem.json",
+   "move": "MEGAHORN",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "measuredPhases": {
+    "optional-lag-age": "event",
+    "bg-write-row": "no-event"
+   },
+   "policyPhases": {
+    "optional-lag-age": "event",
+    "bg-write-row": "event"
+   },
+   "selectedPhase": false,
+   "window": 177,
+   "expectedDuration": 177,
+   "runs": [
+    {
+     "rows": 177,
+     "exactRows": 177,
+     "residualPixels": 0,
+     "digest": "43d53d06f0a4daa51df931bfcd5116409df2143ec7233cde96eb5c29496fc362",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 177,
+     "exactRows": 177,
+     "residualPixels": 0,
+     "digest": "43d53d06f0a4daa51df931bfcd5116409df2143ec7233cde96eb5c29496fc362",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": [
+    158,
+    159,
+    160,
+    161,
+    162,
+    163,
+    164,
+    165,
+    166,
+    167,
+    168,
+    169,
+    170,
+    171,
+    172,
+    173
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/megahorn-alt-player-heracross-onix.json",
+   "move": "MEGAHORN",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "measuredPhases": {
+    "optional-lag-age": "event",
+    "bg-write-row": "no-event"
+   },
+   "policyPhases": {
+    "optional-lag-age": "event",
+    "bg-write-row": "event"
+   },
+   "selectedPhase": false,
+   "window": 177,
+   "expectedDuration": 177,
+   "runs": [
+    {
+     "rows": 177,
+     "exactRows": 177,
+     "residualPixels": 0,
+     "digest": "ae2273f0edfc9b6ac1df3f0910e908c58ee510956c0a5373b340136bcba634c0",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 177,
+     "exactRows": 177,
+     "residualPixels": 0,
+     "digest": "ae2273f0edfc9b6ac1df3f0910e908c58ee510956c0a5373b340136bcba634c0",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": [
+    158,
+    159,
+    160,
+    161,
+    162,
+    163,
+    164,
+    165,
+    166,
+    167,
+    168,
+    169,
+    170,
+    171,
+    172,
+    173
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/megahorn-extra-opponent-nidoking-snorlax.json",
+   "move": "MEGAHORN",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "measuredPhases": {
+    "optional-lag-age": "event",
+    "bg-write-row": "event"
+   },
+   "policyPhases": {
+    "optional-lag-age": "event",
+    "bg-write-row": "event"
+   },
+   "selectedPhase": true,
+   "window": 177,
+   "expectedDuration": 177,
+   "runs": [
+    {
+     "rows": 177,
+     "exactRows": 177,
+     "residualPixels": 0,
+     "digest": "91ca2eaaf0edad138fb3183ee0b1eea18c7f92159273d3c7d46af814144c25e4",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 177,
+     "exactRows": 177,
+     "residualPixels": 0,
+     "digest": "91ca2eaaf0edad138fb3183ee0b1eea18c7f92159273d3c7d46af814144c25e4",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/megahorn-extra-opponent-rhydon-golbat.json",
+   "move": "MEGAHORN",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "measuredPhases": {
+    "optional-lag-age": "event",
+    "bg-write-row": "event"
+   },
+   "policyPhases": {
+    "optional-lag-age": "event",
+    "bg-write-row": "event"
+   },
+   "selectedPhase": true,
+   "window": 177,
+   "expectedDuration": 177,
+   "runs": [
+    {
+     "rows": 177,
+     "exactRows": 177,
+     "residualPixels": 0,
+     "digest": "02f2f7b292a4c446bb57a7e3b532fa366b8a8176a510c88d09faf0faf2729260",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 177,
+     "exactRows": 177,
+     "residualPixels": 0,
+     "digest": "02f2f7b292a4c446bb57a7e3b532fa366b8a8176a510c88d09faf0faf2729260",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/megahorn-extra-player-nidoking-snorlax.json",
+   "move": "MEGAHORN",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "measuredPhases": {
+    "optional-lag-age": "event",
+    "bg-write-row": "event"
+   },
+   "policyPhases": {
+    "optional-lag-age": "event",
+    "bg-write-row": "event"
+   },
+   "selectedPhase": true,
+   "window": 177,
+   "expectedDuration": 177,
+   "runs": [
+    {
+     "rows": 177,
+     "exactRows": 177,
+     "residualPixels": 0,
+     "digest": "8a76fea3ee711a563558002a153c8cb8566a1f5dc2be63104ee6c937640c6df2",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 177,
+     "exactRows": 177,
+     "residualPixels": 0,
+     "digest": "8a76fea3ee711a563558002a153c8cb8566a1f5dc2be63104ee6c937640c6df2",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/megahorn-extra-player-rhydon-golbat.json",
+   "move": "MEGAHORN",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "measuredPhases": {
+    "optional-lag-age": "event",
+    "bg-write-row": "event"
+   },
+   "policyPhases": {
+    "optional-lag-age": "event",
+    "bg-write-row": "event"
+   },
+   "selectedPhase": true,
+   "window": 177,
+   "expectedDuration": 177,
+   "runs": [
+    {
+     "rows": 177,
+     "exactRows": 177,
+     "residualPixels": 0,
+     "digest": "d34d1c37371988856686cb5a082716362f43e27eb1b11a013ed17d3b88b7cfa8",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 177,
+     "exactRows": 177,
+     "residualPixels": 0,
+     "digest": "d34d1c37371988856686cb5a082716362f43e27eb1b11a013ed17d3b88b7cfa8",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/megahorn-opponent-seaking-player-onix.json",
+   "move": "MEGAHORN",
+   "measuredPhase": "no-event",
+   "policyPhase": "event",
+   "measuredPhases": {
+    "optional-lag-age": "no-event",
+    "bg-write-row": "event"
+   },
+   "policyPhases": {
+    "optional-lag-age": "event",
+    "bg-write-row": "event"
+   },
+   "selectedPhase": false,
+   "window": 176,
+   "expectedDuration": 177,
+   "runs": [
+    {
+     "rows": 176,
+     "exactRows": 160,
+     "residualPixels": 275376,
+     "digest": "2d2b970142857b2cf6f03537ad4c84187129151bc1cd8972b6dd1c9e73a0e69a",
+     "affectedAges": [
+      158,
+      159,
+      160,
+      161,
+      162,
+      163,
+      164,
+      165,
+      166,
+      167,
+      168,
+      169,
+      170,
+      171,
+      172,
+      173
+     ],
+     "maxPixelsPerRow": 17211
+    },
+    {
+     "rows": 176,
+     "exactRows": 160,
+     "residualPixels": 275376,
+     "digest": "2d2b970142857b2cf6f03537ad4c84187129151bc1cd8972b6dd1c9e73a0e69a",
+     "affectedAges": [
+      158,
+      159,
+      160,
+      161,
+      162,
+      163,
+      164,
+      165,
+      166,
+      167,
+      168,
+      169,
+      170,
+      171,
+      172,
+      173
+     ],
+     "maxPixelsPerRow": 17211
+    }
+   ],
+   "documentedAges": [
+    158,
+    159,
+    160,
+    161,
+    162,
+    163,
+    164,
+    165,
+    166,
+    167,
+    168,
+    169,
+    170,
+    171,
+    172,
+    173
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/megahorn-player-seaking-opponent-onix.json",
+   "move": "MEGAHORN",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "measuredPhases": {
+    "optional-lag-age": "event",
+    "bg-write-row": "event"
+   },
+   "policyPhases": {
+    "optional-lag-age": "event",
+    "bg-write-row": "event"
+   },
+   "selectedPhase": true,
+   "window": 177,
+   "expectedDuration": 177,
+   "runs": [
+    {
+     "rows": 177,
+     "exactRows": 177,
+     "residualPixels": 0,
+     "digest": "ffabf003cfbbaddf7ae571f4864dd8ab495457baa0a7f542724e1ed5e86c4608",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 177,
+     "exactRows": 177,
+     "residualPixels": 0,
+     "digest": "ffabf003cfbbaddf7ae571f4864dd8ab495457baa0a7f542724e1ed5e86c4608",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  }
+ ]
+}

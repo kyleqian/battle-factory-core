@@ -134,6 +134,8 @@ describe("faithful-timing ordinary routes", () => {
     ["MACH_PUNCH 48/7 HITMONCHAN", 183, 48, 7, 0 as const, 110, true],
     ["MACH_PUNCH 48/14 HITMONCHAN", 183, 48, 14, 1 as const, 110, true],
     ["MACH_PUNCH 11/7 HITMONTOP (later body: gate)", 183, 11, 7, 2 as const, 110, false],
+    // D4b: r3ProfileRouteSearch.ts 224 3 1 4000 (first candidates: 5/35 RHYDON active, 5/42 RHYDON declined, 23/14 SEAKING slot 1 active).
+    ["MEGAHORN 5/35 RHYDON", 224, 5, 35, 0 as const, 177, true],
   ])("route %s: body reached, following prompt reached, Scene ON/OFF parity", (_name, id, seed, streak, slot, ages, active) => {
     const on = generatedCommandAnimationReplay(seed, "on", [slot], streak);
     const off = generatedCommandAnimationReplay(seed, "off", [slot], streak);
@@ -153,4 +155,83 @@ describe("faithful-timing ordinary routes", () => {
     expect(on.state.facilityState).toEqual(off.state.facilityState);
     expect(on.state.round.rules.rngValue).toBe(off.state.round.rules.rngValue);
   }, 240000);
+});
+
+// D4b faithful timing: Megahorn (prep24 source model + oam assembler, liveOamMoves.ts liveMegahornInputs) with both CPU-phase bits from the policy.
+describe("D4b Megahorn (224) faithful timing", () => {
+  const mh = NAMES.filter((n) => n.startsWith("megahorn-"));
+  type MhFixture = D4Fixture & { timingPhases: Record<"optional-lag-age" | "bg-write-row", "event" | "no-event">; monbgCntRow: 7 | 8 };
+  const receiptB = JSON.parse(readFileSync("tools/integration/fixtures/d4b-live-receipt.json", "utf8"));
+
+  it("is a faithful-timing adapter (never scoped exact / faithful random); 177 rows both sides; the status entry is the policy", () => {
+    expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).toContain(224);
+    expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).not.toContain(224);
+    expect(LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS).not.toContain(224);
+    expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[224]).toBe(0);
+    for (const attacker of [0, 1] as const) {
+      const base = { attacker, target: (1 - attacker) as 0 | 1, power: 120, damage: 10, friendship: 70, multihit: 0, turn: 0 };
+      expect(liveMoveAnimationDuration({ ...base, moveId: 224 })).toBe(177);
+    }
+    const entry = (status.faithfulTimingAdapters as { id: number; timingParameters: unknown[]; policyVersion: string; d3: boolean }[]).find((e) => e.id === 224)!;
+    expect(entry.timingParameters).toEqual(LIVE_MOVE_TIMING_POLICY[224]!.parameters.map(({ evidence: _evidence, ...p }) => p));
+    expect(entry.policyVersion).toBe(LIVE_MOVE_TIMING_POLICY_VERSION);
+    expect(entry.d3).toBe(false);
+    expect((status.implementedAdapters as { id: number }[]).some((e) => e.id === 224)).toBe(false);
+  });
+
+  it("the policy counts are the measured phases of the 10 dense windows (prep24 six + the D4b tie-break four), both orientations", () => {
+    expect(mh).toHaveLength(10);
+    const fx = mh.map((n) => fixtureAt(n) as MhFixture);
+    for (const side of ["player", "opponent"]) expect(fx.filter((f) => f.attacker.geometry.side === side)).toHaveLength(5);
+    const [lag, row] = LIVE_MOVE_TIMING_POLICY[224]!.parameters;
+    expect([lag!.kind, row!.kind]).toEqual(["optional-lag-age", "bg-write-row"]);
+    for (const f of fx) {
+      expect(f.denseWindow!.endFrame - f.denseWindow!.startFrame + 1).toBe(f.timingPhases["optional-lag-age"] === "event" ? 177 : 176);
+      expect(f.timingPhases["bg-write-row"]).toBe(f.monbgCntRow === 8 ? "event" : "no-event");
+    }
+    const count = (kind: "optional-lag-age" | "bg-write-row", phase: string) => fx.filter((f) => f.timingPhases[kind] === phase).length;
+    expect(lag!.alternatives.map((a) => a.measured)).toEqual([count("optional-lag-age", "event"), count("optional-lag-age", "no-event")]);
+    expect(row!.alternatives.map((a) => a.measured)).toEqual([count("bg-write-row", "event"), count("bg-write-row", "no-event")]);
+    expect([lag!.chosen, row!.chosen, lag!.tieRuleUsed, row!.tieRuleUsed]).toEqual(["event", "event", false, false]);
+  });
+
+  it("the receipt: policy-phase windows exact twice fresh; other-phase windows differ only on the documented rows", () => {
+    const documented = (status.faithfulTimingAdapters as { id: number; alternatePhaseResidual: { ages: number[]; maxPixelsPerRow: number } }[]).find((e) => e.id === 224)!.alternatePhaseResidual;
+    const rows = (receiptB.windows as { fixture: string; move: string; selectedPhase: boolean; window: number; expectedDuration: number; violations: string[];
+      measuredPhases: Record<string, string>; runs: { residualPixels: number; digest: string; affectedAges: number[]; maxPixelsPerRow: number }[] }[]).filter((r) => r.move === "MEGAHORN");
+    expect(rows.map((r) => r.fixture.replace(`${DIR}/`, "").replace(".json", "")).sort()).toEqual(mh);
+    for (const r of rows) {
+      expect(r.violations).toEqual([]);
+      expect(r.runs).toHaveLength(2);
+      expect(r.runs[1]!.digest).toBe(r.runs[0]!.digest);
+      if (r.selectedPhase) {
+        expect(r.runs.map((run) => run.residualPixels)).toEqual([0, 0]);
+        expect(r.window).toBe(r.expectedDuration);
+      } else {
+        expect(r.runs[0]!.affectedAges.every((age) => documented.ages.includes(age))).toBe(true);
+        expect(r.runs[0]!.maxPixelsPerRow).toBeLessThanOrEqual(documented.maxPixelsPerRow);
+        // The bg-write-row phase is pixel-neutral: a window whose only other-phase bit is the monbg row is exact.
+        if (r.measuredPhases["optional-lag-age"] === "event") expect(r.runs.map((run) => run.residualPixels)).toEqual([0, 0]);
+      }
+    }
+    expect(rows.filter((r) => r.selectedPhase)).toHaveLength(6);
+    expect(receiptB.testedSrcTree).toMatch(/^[0-9a-f]{40}$/);
+    expect(receiptB.dirty).toBe(false);
+  });
+
+  it("gates: known lend required (any known lend, also after a Tackle); declines with an unknown order and for a shiny battler", () => {
+    const f = fixtureAt("megahorn-alt-player-heracross-golem");
+    const { view, effect } = effectOf(f);
+    const call = (order: unknown, field = view.field) => liveMoveAnimationPresentation(effect.request, field, 0, undefined, undefined, order as never);
+    const lend = effect.spriteOrderInput as { known: true; free: number[]; firstBody?: true };
+    expect(lend.known).toBe(true);
+    expect(lend.firstBody).toBeUndefined();
+    const presentation = call(lend);
+    expect(presentation).not.toBeNull();
+    expect((presentation!.config as any).move).toBe("MEGAHORN");
+    expect(call(undefined)).toBeNull();
+    expect(call({ known: false })).toBeNull();
+    const ot = 416049562, shiny = ((ot >>> 16) ^ (ot & 0xffff)) >>> 0;
+    for (const side of ["player", "opponent"] as const) expect(call(lend, { ...view.field, [side]: { ...view.field[side], personality: shiny } })).toBeNull();
+  });
 });
