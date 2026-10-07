@@ -14,7 +14,11 @@ iceball)
   npx vite-node tools/integration/prep26IceBallPixels.ts $I-player-glalie-golem-r1.json:$I-player-glalie-golem-r1-rgb:player:GLALIE,GOLEM $I-opponent-glalie-golem-r1.json:$I-opponent-glalie-golem-r1-rgb:opponent:GLALIE,GOLEM --out=$REC/iceball-pixels.json > /dev/null
   for n in oam palette registers words; do npx vite-node tools/integration/prep26IceBallPixels.ts --neg=$n --out=$REC/iceball-neg-$n.json > /dev/null; done
   npx vite-node tools/integration/prep26IceBallCheck.ts --neg=lag --out=$REC/iceball-neg-lag.json > /dev/null ;;
-revenge) ;;
+revenge)
+  V=$OUT/prep25-revenge-alt
+  npx vite-node tools/integration/prep26RevengeCheck.ts $V-player-machoke-golem-r1.json:player $V-opponent-machoke-golem-r1.json:opponent --out=$REC/revenge-check.json > /dev/null
+  npx vite-node tools/integration/prep26RevengePixels.ts $V-player-machoke-golem-r1.json:$V-player-machoke-golem-r1-rgb:player:MACHOKE,GOLEM $V-opponent-machoke-golem-r1.json:$V-opponent-machoke-golem-r1-rgb:opponent:MACHOKE,GOLEM --out=$REC/revenge-pixels.json > /dev/null
+  for n in oam palette registers; do npx vite-node tools/integration/prep26RevengePixels.ts --neg=$n --out=$REC/revenge-neg-$n.json > /dev/null; done ;;
 superpower) ;;
 esac; done
 echo "receipts in $REC"
