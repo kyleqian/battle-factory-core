@@ -1,0 +1,66 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "SHEER_COLD",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-7/scenarios/rattata-sheer-cold-opponent-dewgong-player-chansey.json",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 268
+ },
+ "windowSource": "window = [activation, activation + 190 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "DEWGONG",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "RATTATA",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793699980,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 137,
+  "playerMaxHp": 137,
+  "opponentHp": 184,
+  "opponentMaxHp": 184,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "speciesAudit6": {
+  "acceptedWindow": [
+   79,
+   268
+  ],
+  "bodyIndex": 0,
+  "origBodyIndex": 0,
+  "turnOrderChanged": false,
+  "origBody": [
+   329,
+   79,
+   269
+  ],
+  "swappedBody": [
+   329,
+   79,
+   269
+  ],
+  "offset": 0,
+  "origRng2": 3150275578,
+  "swappedRng2": 3150275578,
+  "hp": [
+   137,
+   184
+  ],
+  "frames": [
+   1234,
+   1234
+  ]
+ }
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "return-live-adapter-fixture/v1",
+ "move": "RETURN",
+ "probe": "tools/compare/returnProbe.py",
+ "scenario": "tools/integration/fixtures/species-audit-7/scenarios/pichuA-accepted-opponent-dragonair-player-onix.json",
+ "denseWindow": {
+  "startFrame": 74,
+  "endFrame": 355
+ },
+ "windowSource": "window = the scenario's own sourceWindow (activation .. first inactive row, 282 rows) from its direct-mGBA returnProbe.py run",
+ "attacker": {
+  "species": "PICHU",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703703,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 127,
+  "opponentMaxHp": 127,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "speciesAudit6": {
+  "acceptedWindow": [
+   78,
+   359
+  ],
+  "bodyIndex": 0,
+  "origBodyIndex": 0,
+  "turnOrderChanged": false,
+  "origBody": [
+   216,
+   78,
+   359
+  ],
+  "swappedBody": [
+   216,
+   74,
+   355
+  ],
+  "offset": 0,
+  "origRng2": 3668811069,
+  "swappedRng2": 3293766408,
+  "hp": [
+   142,
+   127
+  ],
+  "frames": [
+   634,
+   634
+  ]
+ }
+}

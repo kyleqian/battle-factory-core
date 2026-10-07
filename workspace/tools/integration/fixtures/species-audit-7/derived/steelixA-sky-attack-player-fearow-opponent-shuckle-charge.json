@@ -1,0 +1,73 @@
+{
+ "schema": "q2-live-adapter-fixture/v1",
+ "move": "SKY_ATTACK",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-7/scenarios/steelixA-sky-attack-player-fearow-opponent-shuckle-charge.json",
+ "denseWindow": {
+  "startFrame": 50,
+  "endFrame": 197
+ },
+ "windowSource": "window = [activation, activation + 148 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "STEELIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SHUCKLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015475,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 150,
+  "playerMaxHp": 150,
+  "opponentHp": 127,
+  "opponentMaxHp": 127,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "messageLines": [
+  "",
+  ""
+ ],
+ "speciesAudit6": {
+  "acceptedWindow": [
+   50,
+   197
+  ],
+  "bodyIndex": 0,
+  "origBodyIndex": 0,
+  "turnOrderChanged": false,
+  "origBody": [
+   143,
+   50,
+   198
+  ],
+  "swappedBody": [
+   143,
+   50,
+   198
+  ],
+  "offset": 0,
+  "origRng2": 3662670287,
+  "swappedRng2": 3662670287,
+  "hp": [
+   150,
+   127
+  ],
+  "frames": [
+   2568,
+   2568
+  ]
+ }
+}

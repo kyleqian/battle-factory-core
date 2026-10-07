@@ -1,0 +1,66 @@
+{
+ "schema": "q2-live-adapter-fixture/v1",
+ "move": "HYPER_VOICE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-7/scenarios/golbat-hyper-voice-player-exploud-opponent-slowking.json",
+ "denseWindow": {
+  "startFrame": 76,
+  "endFrame": 179
+ },
+ "windowSource": "window = [activation, activation + 104 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "EXPLOUD",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015483,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 211,
+  "playerMaxHp": 211,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "speciesAudit6": {
+  "acceptedWindow": [
+   76,
+   179
+  ],
+  "bodyIndex": 0,
+  "origBodyIndex": 0,
+  "turnOrderChanged": false,
+  "origBody": [
+   304,
+   76,
+   180
+  ],
+  "swappedBody": [
+   304,
+   76,
+   180
+  ],
+  "offset": 0,
+  "origRng2": 2024241883,
+  "swappedRng2": 2024241883,
+  "hp": [
+   211,
+   182
+  ],
+  "frames": [
+   1234,
+   1234
+  ]
+ }
+}

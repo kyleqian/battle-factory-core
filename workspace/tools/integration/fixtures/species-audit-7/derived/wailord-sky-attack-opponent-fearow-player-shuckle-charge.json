@@ -1,0 +1,73 @@
+{
+ "schema": "q2-live-adapter-fixture/v1",
+ "move": "SKY_ATTACK",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-7/scenarios/wailord-sky-attack-opponent-fearow-player-shuckle-charge.json",
+ "denseWindow": {
+  "startFrame": 50,
+  "endFrame": 197
+ },
+ "windowSource": "window = [activation, activation + 148 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "FEAROW",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "WAILORD",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703675,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 277,
+  "playerMaxHp": 277,
+  "opponentHp": 140,
+  "opponentMaxHp": 140,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "messageLines": [
+  "",
+  ""
+ ],
+ "speciesAudit6": {
+  "acceptedWindow": [
+   50,
+   197
+  ],
+  "bodyIndex": 0,
+  "origBodyIndex": 0,
+  "turnOrderChanged": false,
+  "origBody": [
+   143,
+   50,
+   198
+  ],
+  "swappedBody": [
+   143,
+   50,
+   198
+  ],
+  "offset": 0,
+  "origRng2": 2992504726,
+  "swappedRng2": 2992504726,
+  "hp": [
+   277,
+   140
+  ],
+  "frames": [
+   2568,
+   2568
+  ]
+ }
+}
