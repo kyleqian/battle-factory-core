@@ -17,6 +17,22 @@ backlog.
 
 # Open
 
+## #150 — Species audit 6 defects in live adapters (Signal Beam RATTATA shake, Fire Punch shiny gate, verifier names)
+
+- **Signal Beam (324):** with an opponent RATTATA (idle x2 = 1) as target or attacker, the live renderer
+  draws idle rest + shake; the ROM's shake task overwrites x2 (0/3) and the rest never returns, so every row
+  after the shake starts is 1 px right: target 41,134 px (`battleScene.ts:27296`), attacker 54,510 px
+  (`:27286`). Patch `tools/integration/fixtures/species-audit-6/signal-beam-shake-drops-idle-x2.diff`
+  (use 0 instead of `sprite.x2` once the shake's local age is >= 1) -> 0 px; supervisor reproduced
+  41,134 -> 0 twice fresh.
+- **Fire Punch (7):** `case 7` lacks the `liveBattlerIsShiny` decline every other adapter has
+  (`liveMoveAnimation.ts:1861`); a shiny battler is drawn with the normal palette (1,846 px/row).
+- **Verifier only:** `tools/integration/liveAdapterFramebuffer.ts:251,281` names battlers by species constant
+  (MR_MIME -> "MRMIME"), so every punctuated species name is wrong in verifier fixtures (MR_MIME -> MAGNETON
+  Psych Up: 537 px/row; `harness-display-name.diff` -> 0 px). Production text is right.
+- Evidence: `docs/live-species-audit-6.md`. Coverage opportunity (not a defect): Curse's target-side idle
+  decline is over-conservative (RATTATA / ONIX targets 176/176 with it lifted).
+
 ## #148 — Battler x2 history: unknown-history remainder (main bug FIXED 2026-10-06)
 
 - **Fixed:** `src/engine/liveBattlerX2History.ts` (merged `de0e887`-era master) tracks per battler
