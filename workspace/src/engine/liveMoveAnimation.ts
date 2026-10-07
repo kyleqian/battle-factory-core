@@ -3083,7 +3083,7 @@ export function liveMoveAnimationPresentation(
     }
     case 279: {
       // D4b faithful timing: Revenge (prep26 s2 / s4; liveOamMoves.ts liveRevengeInputs). Known lend (the accepted bodies are first bodies, the
-      // alternates follow a Tackle), known-entry allocator, non-shiny, zero idle rests. The monbg BGnCNT write row comes from the timing policy.
+      // alternates follow a Tackle), known-entry allocator, non-shiny, a zero TARGET idle rest (an attacker rest is exact, species audit 9). The monbg BGnCNT write row comes from the timing policy.
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);

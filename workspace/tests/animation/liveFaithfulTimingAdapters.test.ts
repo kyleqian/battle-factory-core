@@ -348,6 +348,16 @@ describe("D4b Revenge (279) faithful timing", () => {
     const ot = 416049562, shiny = ((ot >>> 16) ^ (ot & 0xffff)) >>> 0;
     for (const side of ["player", "opponent"] as const) expect(call(lend, { ...view.field, [side]: { ...view.field[side], personality: shiny } })).toBeNull();
   });
+
+  it("the idle-rest gate is the target's only (species audit 9: ONIX / RATTATA opponent attackers engage, 0 px; targets decline)", () => {
+    const at = (path: string) => { const { view, effect } = effectOf(JSON.parse(readFileSync(path, "utf8")) as Fixture);
+      return liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, effect.spriteOrderInput); };
+    const D9 = "tools/integration/fixtures/species-audit-9/derived";
+    for (const species of ["onix", "rattata"]) {
+      expect(at(`${D9}/${species}-revenge-player-machamp-opponent-shuckle.json`)).toBeNull();
+      expect((at(`${D9}/${species}A-revenge-opponent-qwilfish-player-shuckle.json`)!.config as any).move).toBe("REVENGE");
+    }
+  });
 });
 
 // D4b faithful timing + D3: Meteor Mash (the R1 reducer with the explicit restore lag from the policy; Random2 twinkles from the presentation host).
