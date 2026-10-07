@@ -11,7 +11,7 @@ for (const m of readFileSync(join(root, "reference/pokeemerald/include/constants
 const MOVES: Record<string, number> = { dive: 291, "mach-punch": 183, extrasensory: 326, "ice-ball": 301, flatter: 260, nightmare: 171, psywave: 149, revenge: 279, snore: 173, smog: 123, "sand-tomb": 328, "hyper-voice": 304, "sky-attack": 143, superpower: 276 };
 const out: any = {};
 for (const f of readdirSync(dir).filter((x) => x.endsWith("-r1.json")).sort()) {
-  const scName = f.slice(0, -8); 
+  const scName = f.slice(0, -8);
   const mv = Object.keys(MOVES).find((k) => scName.startsWith(`mechanic-${k}-`) || scName.startsWith(`prep25-${k}-alt-`));
   if (!mv) continue;
   const probe = JSON.parse(readFileSync(join(dir, f), "utf8"));
