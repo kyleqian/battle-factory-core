@@ -1,0 +1,41 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "SUPERPOWER",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-superpower-player-nidoqueen-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 326
+ },
+ "windowSource": "window = [activation, first inactive row] of this scenario's first SUPERPOWER body (248 rows) from 2 fresh prep22Probes.sh runs (bodies agree)",
+ "timingPhase": "no-event",
+ "timingPhases": {
+  "bg-write-row": "no-event"
+ },
+ "monbgCntRow": 10,
+ "attacker": {
+  "species": "NIDOQUEEN",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SHUCKLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349018978,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 186,
+  "playerMaxHp": 186,
+  "opponentHp": 127,
+  "opponentMaxHp": 127,
+  "playerGender": "female",
+  "opponentGender": "male"
+ }
+}

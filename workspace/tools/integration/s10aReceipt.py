@@ -23,6 +23,6 @@ receipt = {"schema": "s10a-live-receipt/v1", "testedCommit": git("rev-parse", "H
            "summary": {m: {"windows": sum(w["move"] == m for w in windows), "rows": sum(w["rows"] for w in windows if w["move"] == m),
                            "exactRows": sum(w["exactRows"] for w in windows if w["move"] == m),
                            "residualPixels": sum(w["residualPixels"] for w in windows if w["move"] == m)} for m in sorted({w["move"] for w in windows})},
-           "windows": windows, "routes": prev.get("routes", {}), "gates": gates}
+           "windows": windows, "routes": prev.get("routes", {}), **({"d4Receipts": prev["d4Receipts"]} if "d4Receipts" in prev else {}), "gates": gates}
 out.write_text(json.dumps(receipt, indent=1) + "\n")
 print(json.dumps(receipt["summary"]))

@@ -3873,7 +3873,7 @@
     },
     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
   },
-  "faithfulTimingCount": 6,
+  "faithfulTimingCount": 7,
   "faithfulTimingAdapters": [
     {
       "id": 183,
@@ -4431,6 +4431,72 @@
         "python3 tools/integration/d4aFixtures.py PROBEDIR EXTRASENSORY",
         "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/d4a-live/extrasensory-*.json",
         "npx vitest run tests/animation/liveFaithfulTimingAdapters.test.ts tests/animation/liveMoveTimingPolicy.test.ts"
+      ]
+    },
+    {
+      "id": 276,
+      "move": "MOVE_SUPERPOWER",
+      "timingParameters": [
+        {
+          "kind": "bg-write-row",
+          "age": 11,
+          "fixedLagAges": [],
+          "iterations": 248,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 248,
+              "measured": 1
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 248,
+              "measured": 2
+            }
+          ],
+          "chosen": "no-event",
+          "tieRuleUsed": false,
+          "side": "player"
+        },
+        {
+          "kind": "bg-write-row",
+          "age": 11,
+          "fixedLagAges": [],
+          "iterations": 248,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 248,
+              "measured": 3
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 248,
+              "measured": 0
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false,
+          "side": "opponent"
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [],
+        "rows": 0,
+        "maxPixelsPerRow": 0,
+        "cause": "bg-write-row only, measured per side (the reducer's monbg gate superpower.ts:75 is player >= 10, opponent >= 11): with the player policy row 10 the monbg scroll is written on row 10, so the BG copy drawn from row 10 sits exactly where the ROM still shows the attacker OBJ in a row-11 window (prep25 MACHAMP -> GOLEM player: 0 px; the prep31 prototype's 889 px on row 10 came from a row-11 register model); an opponent row 10 is never read (gate >= 11)"
+      },
+      "d3": false,
+      "evidence": [
+        "tools/integration/fixtures/r5-live-receipt.json",
+        "tools/integration/fixtures/s10a-live/superpower-*.json (6 dense windows, both orientations: accepted NIDOQUEEN / SEVIPER -> SHUCKLE, prep25 MACHAMP -> GOLEM, prep31 MACHAMP -> WEEZING (after a Tackle, elevated target) / WEEZING -> SNORLAX (elevated attacker); each fixture records its prep31-measured monbg row)",
+        "docs/next-adapters-prep31.md s1.4 (T: player {10: 2, 11: 1}, opponent {11: 3})"
+      ],
+      "proofCommands": [
+        "sh tools/integration/prep22Probes.sh PROBEDIR 2 mechanic-superpower-player-nidoqueen-opponent-onix mechanic-superpower-opponent-registeel-player-regirock prep25-superpower-alt-player-machamp-golem prep25-superpower-alt-opponent-machamp-golem prep31-superpower-alt-player-machamp-weezing prep31-superpower-alt-opponent-weezing-snorlax",
+        "python3 tools/integration/s10aLiveFixtures.py PROBEDIR SUPERPOWER",
+        "node --experimental-strip-types tools/integration/d4aTimingCheck.ts <receipt.json> tools/integration/fixtures/s10a-live/superpower-<window>.json"
       ]
     }
   ],

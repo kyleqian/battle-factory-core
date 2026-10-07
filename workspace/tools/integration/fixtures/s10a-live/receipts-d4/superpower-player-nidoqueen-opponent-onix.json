@@ -1,0 +1,36 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/s10a-live/superpower-player-nidoqueen-opponent-onix.json",
+  "move": "SUPERPOWER",
+  "measuredPhase": "no-event",
+  "measuredPhases": {
+   "bg-write-row": "no-event"
+  },
+  "policyPhases": {
+   "bg-write-row": "no-event"
+  },
+  "selectedPhase": true,
+  "window": 248,
+  "expectedDuration": 248,
+  "runs": [
+   {
+    "rows": 248,
+    "exactRows": 248,
+    "residualPixels": 0,
+    "digest": "8840862d27005af25606ef1226cb24e701270d5694fed9cec166c518238e1756",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 248,
+    "exactRows": 248,
+    "residualPixels": 0,
+    "digest": "8840862d27005af25606ef1226cb24e701270d5694fed9cec166c518238e1756",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

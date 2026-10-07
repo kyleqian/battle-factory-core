@@ -1,7 +1,7 @@
 {
  "schema": "s10a-live-receipt/v1",
- "testedCommit": "079c5a0ae6efea0f05fff3099134ea6ea769c4a0",
- "testedSrcTree": "57e403ff6bc5a5499cc6ad7252c9c781976bed6f",
+ "testedCommit": "8eedf616d8494713eb0e17b9990a590bbd9f16d1",
+ "testedSrcTree": "a94c49ef32e976016938edc5a269a555d6ec2e89",
  "dirty": true,
  "commands": [
   "sh tools/integration/prep22Probes.sh /tmp/s10a/sp 2 <12 spit-up scenarios>; python3 tools/integration/s10aLiveFixtures.py /tmp/s10a/sp",
@@ -13,6 +13,12 @@
    "windows": 12,
    "rows": 1300,
    "exactRows": 1300,
+   "residualPixels": 0
+  },
+  "SUPERPOWER": {
+   "windows": 6,
+   "rows": 1488,
+   "exactRows": 1488,
    "residualPixels": 0
   }
  },
@@ -184,6 +190,90 @@
     "2ecacc0ede67672fc766bb0d5f2adce5b0964c76aa494d2605b1bea202d9998b"
    ],
    "identical": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/superpower-alt-opponent-machamp-golem.json",
+   "move": "SUPERPOWER",
+   "rows": 248,
+   "exactRows": 248,
+   "residualPixels": 0,
+   "expectedDuration": 248,
+   "freshRuns": 2,
+   "digests": [
+    "9af3921a1d6ca2a402c32153f3e1cc85f14650771f511489606d5b3de6be548a",
+    "9af3921a1d6ca2a402c32153f3e1cc85f14650771f511489606d5b3de6be548a"
+   ],
+   "identical": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/superpower-alt-opponent-weezing-snorlax.json",
+   "move": "SUPERPOWER",
+   "rows": 248,
+   "exactRows": 248,
+   "residualPixels": 0,
+   "expectedDuration": 248,
+   "freshRuns": 2,
+   "digests": [
+    "869810412a878c510daf9e5b4f2bb40509a046e6a7304fdfb3e60bed18263249",
+    "869810412a878c510daf9e5b4f2bb40509a046e6a7304fdfb3e60bed18263249"
+   ],
+   "identical": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/superpower-alt-player-machamp-golem.json",
+   "move": "SUPERPOWER",
+   "rows": 248,
+   "exactRows": 248,
+   "residualPixels": 0,
+   "expectedDuration": 248,
+   "freshRuns": 2,
+   "digests": [
+    "66649f1a2ae5854a636247634690e99d7562ba883386b3a95f59c0dde5da503c",
+    "66649f1a2ae5854a636247634690e99d7562ba883386b3a95f59c0dde5da503c"
+   ],
+   "identical": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/superpower-alt-player-machamp-weezing.json",
+   "move": "SUPERPOWER",
+   "rows": 248,
+   "exactRows": 248,
+   "residualPixels": 0,
+   "expectedDuration": 248,
+   "freshRuns": 2,
+   "digests": [
+    "51923691ddd8e7166a9b8dbe70a858aa4c76832418f451c213ba498b62ddec00",
+    "51923691ddd8e7166a9b8dbe70a858aa4c76832418f451c213ba498b62ddec00"
+   ],
+   "identical": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/superpower-opponent-registeel-player-regirock.json",
+   "move": "SUPERPOWER",
+   "rows": 248,
+   "exactRows": 248,
+   "residualPixels": 0,
+   "expectedDuration": 248,
+   "freshRuns": 2,
+   "digests": [
+    "d456667303dc50212fec6b62de06f4d07a0e5449c739817f8ca6e1e9c8e04c7c",
+    "d456667303dc50212fec6b62de06f4d07a0e5449c739817f8ca6e1e9c8e04c7c"
+   ],
+   "identical": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/superpower-player-nidoqueen-opponent-onix.json",
+   "move": "SUPERPOWER",
+   "rows": 248,
+   "exactRows": 248,
+   "residualPixels": 0,
+   "expectedDuration": 248,
+   "freshRuns": 2,
+   "digests": [
+    "8840862d27005af25606ef1226cb24e701270d5694fed9cec166c518238e1756",
+    "8840862d27005af25606ef1226cb24e701270d5694fed9cec166c518238e1756"
+   ],
+   "identical": true
   }
  ],
  "routes": {
@@ -227,7 +317,45 @@
     }
    ],
    "pinned": "seed 33 streak 7 SWALOT: Stockpile (slot 0) then Spit Up (slot 2), counter 1, 108 live rows, next prompt action-menu, Scene ON/OFF rules / RNG / boundaries / facility state identical (tests/animation/liveSpitUpAdapter.test.ts)"
+  },
+  "SUPERPOWER": {
+   "search": "node --experimental-strip-types tools/integration/r3ProfileRouteSearch.ts 276 4 1 4000 (4 s)",
+   "candidates": [
+    {
+     "seed": 179,
+     "streak": 42,
+     "species": "NIDOQUEEN",
+     "slot": 0,
+     "ages": 248,
+     "active": true
+    },
+    {
+     "seed": 245,
+     "streak": 42,
+     "species": "NIDOQUEEN",
+     "slot": 0,
+     "ages": 248,
+     "active": true
+    },
+    {
+     "seed": 311,
+     "streak": 42,
+     "species": "NIDOQUEEN",
+     "slot": 0,
+     "bodies": 0
+    },
+    {
+     "seed": 377,
+     "streak": 42,
+     "species": "NIDOQUEEN",
+     "slot": 0,
+     "ages": 248,
+     "active": true
+    }
+   ],
+   "pinned": "seed 179 streak 42 NIDOQUEEN slot 0: 248 live rows, next prompt action-menu, Scene ON/OFF rules / RNG / boundaries / facility state identical (tests/animation/liveSuperpowerAdapter.test.ts)"
   }
  },
+ "d4Receipts": "tools/integration/fixtures/s10a-live/receipts-d4/superpower-*.json (d4aTimingCheck.ts: 6/6 no violations; selected phases 0 px x2 fresh; the other-phase prep25 MACHAMP -> GOLEM player window 0 px x2 fresh)",
  "gates": {}
 }
