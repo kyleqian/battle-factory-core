@@ -186,6 +186,48 @@
    "identical": true
   }
  ],
- "routes": {},
+ "routes": {
+  "SPIT_UP": {
+   "search": "node --experimental-strip-types tools/integration/s10aSpitUpRouteSearch.ts 3 1 20000 (4 s; seeds ascending, rentals[0] knows Stockpile + Spit Up)",
+   "candidates": [
+    {
+     "seed": 33,
+     "streak": 7,
+     "species": "SWALOT",
+     "slots": [
+      0,
+      2
+     ],
+     "ages": 108,
+     "active": true,
+     "prompt": "action-menu"
+    },
+    {
+     "seed": 128,
+     "streak": 7,
+     "species": "SWALOT",
+     "slots": [
+      0,
+      2
+     ],
+     "ages": 108,
+     "active": true,
+     "prompt": "action-menu"
+    },
+    {
+     "seed": 156,
+     "streak": 7,
+     "species": "SWALOT",
+     "slots": [
+      0,
+      2
+     ],
+     "bodies": 0,
+     "prompt": "action-menu"
+    }
+   ],
+   "pinned": "seed 33 streak 7 SWALOT: Stockpile (slot 0) then Spit Up (slot 2), counter 1, 108 live rows, next prompt action-menu, Scene ON/OFF rules / RNG / boundaries / facility state identical (tests/animation/liveSpitUpAdapter.test.ts)"
+  }
+ },
  "gates": {}
 }

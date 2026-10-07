@@ -8,6 +8,7 @@ import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS } from "../../src/engine/liveMo
 import { liveSpitUpInputs, liveSpitUpRows } from "../../src/engine/liveSpitUpInputs.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
+import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 
 // Spit Up (255) live adapter, all three Stockpile counters (docs/next-adapters-prep31.md s3; src/engine/liveSpitUpInputs.ts). Dense proofs:
 // tools/integration/fixtures/s10a-live/spit-up-*.json (2 fresh prep22Probe runs per scenario), receipt tools/integration/fixtures/r5-live-receipt.json.
@@ -112,4 +113,31 @@ describe("Spit Up gates and inputs", () => {
     const resources = (age: number) => built.animationInputsAt(age).resources as { redOrbLoaded: boolean; impactLoaded: boolean };
     expect([0, 1, 3, 4].map((age) => [resources(age).redOrbLoaded, resources(age).impactLoaded])).toEqual([[false, false], [true, false], [true, false], [true, true]]);
   });
+});
+
+describe("Spit Up ordinary route", () => {
+  const rulesWithoutSceneMarker = (v: { rules: any }) => {
+    const rc = v.rules.rulesContext;
+    return { ...v.rules, rulesContext: { ...rc, hitMarker: rc.hitMarker & ~0x80 } };
+  };
+  // route = generated rentals, party member 0 knows Stockpile + Spit Up; Stockpile then Spit Up (tools/integration/s10aSpitUpRouteSearch.ts 3 1 20000,
+  // seeds ascending: 33/7 and 128/7 SWALOT active over 108 rows, 156/7 SWALOT no Spit Up body).
+  it("route 33/7 SWALOT (Stockpile, Spit Up): body live every age at counter 1, following prompt reached, Scene ON/OFF parity", () => {
+    const on = generatedCommandAnimationReplay(33, "on", [0, 2], 7);
+    const off = generatedCommandAnimationReplay(33, "off", [0, 2], 7);
+    const bodies = on.animations.filter((a) => a.moveId === 255 && a.attacker === 0);
+    expect(bodies).toHaveLength(1);
+    expect(bodies[0]!.ages).toEqual(Array.from({ length: 108 }, (_, age) => age));
+    expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
+    expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    expect(on.stalled).toBe(off.stalled);
+    expect(off.boundaries).toHaveLength(on.boundaries.length);
+    for (let i = 0; i < on.boundaries.length; i += 1) {
+      expect(rulesWithoutSceneMarker(on.boundaries[i]!)).toEqual(rulesWithoutSceneMarker(off.boundaries[i]!));
+      expect(on.boundaries[i]!.rng).toEqual(off.boundaries[i]!.rng);
+      expect(on.boundaries[i]!.boundary).toEqual(off.boundaries[i]!.boundary);
+    }
+    expect(on.state.facilityState).toEqual(off.state.facilityState);
+    expect(on.state.round.rules.rngValue).toBe(off.state.round.rules.rngValue);
+  }, 240000);
 });
