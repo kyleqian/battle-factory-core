@@ -24,7 +24,6 @@ for p in sorted(SD.glob("*-r1.json")):
     for fr in sorted({x["frame"] for x in r["singleSteppedNonTrivial"] if A <= x["frame"] <= E}):
         k = steps[fr]; seq = []; v = val[fr - 1]
         for _ in range(k): v = lcg(v); seq.append(v >> 16)
-        words = seq[1:] if True else seq  # first step = the per-frame RfuMain1 advance
         births = sorted((s for s in d["spawns"] if s["f"] == fr and s["ev"] == "+"), key=lambda s: s["slot"])
         # RfuMain1 may step first or last in the frame: try both
         cand = []
