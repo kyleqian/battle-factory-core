@@ -1,0 +1,48 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "MEGAHORN",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-megahorn-opponent-seaking-player-onix.json",
+ "denseWindow": {
+  "startFrame": 212,
+  "endFrame": 387
+ },
+ "windowSource": "window = [activation, activation + 176 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": "no-event",
+ "timingPhases": {
+  "optional-lag-age": "no-event",
+  "bg-write-row": "event"
+ },
+ "monbgCntRow": 8,
+ "attacker": {
+  "species": "SEAKING",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793700008,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 110,
+  "playerMaxHp": 110,
+  "opponentHp": 152,
+  "opponentMaxHp": 162,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "player"
+  }
+ ]
+}

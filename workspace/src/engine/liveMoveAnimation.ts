@@ -86,11 +86,13 @@ import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
 import paletteResources from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
 import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "json" };
 import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
-import { liveMoveTimingBodyRows } from "./liveMoveTimingPolicy.ts";
+import { liveMoveBgWriteRow, liveMoveOptionalLagAge, liveMoveTimingBodyRows } from "./liveMoveTimingPolicy.ts";
 import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
 import { liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
-import { liveCurseStatsInputs, liveFuryCutterInputs, livePursuitInputs, liveReturnInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
+import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
+import hornDrillAsset from "../animation/assets/horn-drill.json" with { type: "json" };
+import megaHornAsset from "../animation/assets/mega-horn-horn-hit-2.json" with { type: "json" };
 import {
   CURSE_STATS_ROWS, curseStatsBattleBgAt, curseStatsPaletteAt, curseStatsRegistersAt, curseStatsSpritesAt, curseStatsTasksAt,
 } from "../animation/curseModel.ts";
@@ -353,6 +355,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     155, 229, 200, 295,
     // D4a faithful timing (liveMoveTimingPolicy.ts): Mach Punch windows start at activation (row 0; prep25 moves/mach-punch.json).
     183,
+    // D4b faithful timing: Megahorn windows start at activation (row 0; d4a-live/megahorn-*.json, elevated GOLBAT target: 200 px at age 0 otherwise).
+    224,
     // Sheer Cold (ISSUES #151, species audit 7 elevated FLYGON / GOLBAT opponent, both orientations): activation == window start (row 0).
     329,
   ].map((id) => [id, 0] as [number, number]).concat([
@@ -825,6 +829,9 @@ export function liveMoveAnimationDuration(
     // Faithful timing (D4, liveMoveTimingPolicy.ts; not LIVE_MOVE_ANIMATION_IDS): Mach Punch 107 iterations + fixed lags 71, 72 + the policy's
     // optional late lag at 91 (dominant measured phase, 110 rows; the other phase is 109 rows).
     case 183: return request.attacker === 0 || request.attacker === 1 ? liveMoveTimingBodyRows(183) : null;
+    // Faithful timing (D4b): Megahorn 176 rows + the policy's optional late restorebg fade (dominant measured phase, 177 rows both sides;
+    // the reducer's `cleanup = player ? 176 : 175` side rule is only the accepted corpora's phases).
+    case 224: return liveMoveTimingBodyRows(224);
     case 295: return 332; // Luster Purge (prep29 B.5: 332 rows, constant in all four scenarios; faithful-random, plan rows in liveMovePresentationRng.ts).
     case 200: return 119; // Outrage (prep29 B.6: 119 rows, constant in all five bodies).
     case 229: return 130; // Rapid Spin (prep29 B.3: 130 rows, constant in all four scenarios).
@@ -2988,6 +2995,25 @@ export function liveMoveAnimationPresentation(
         sort: sortGbaSpriteOrder });
       if (inputs === null) return null;
       config = { move: "RETURN", attacker, target, fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
+      break;
+    }
+    case 224: {
+      // D4b faithful timing: Megahorn (prep24 s1.4; liveOamMoves.ts liveMegahornInputs). Known lend (the corpora follow a Tackle; any known lend:
+      // the renderer branch reads no activation register the body does not overwrite), known-entry allocator (horn / impact tiles 305 / 313,
+      // palette slots 7 / 8, matrices 0 / 3), non-shiny, the attacker's idle rest zero. Both CPU-phase bits come from the timing policy.
+      if (!spriteOrderInput?.known) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const activationOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (palettes === null || activationOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const inputs = liveMegahornInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
+        targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
+        sort: sortGbaSpriteOrder, hornPalette: megaHornAsset.hornHit2.palette, drillPalette: hornDrillAsset.drill.palette,
+        endLate: liveMoveOptionalLagAge(224) !== null, monbgCntRow: liveMoveBgWriteRow(224) as 7 | 8 });
+      if (inputs === null) return null;
+      config = { move: "MEGAHORN", attacker, target, fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
       break;
     }
     case 237: {

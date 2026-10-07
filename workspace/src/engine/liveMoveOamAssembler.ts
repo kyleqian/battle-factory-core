@@ -441,3 +441,114 @@ export function liveReturnHardwareOamRows(input: LiveReturnOamInputs): { oam: st
   }
   return { oam, matrices };
 }
+
+/** Move_MEGAHORN (prep20 megahorn assembler + prep24): attacker ShakeMon x15 at state 48, slide out 89, slide back 122; horn 94..100. */
+const MEGAHORN_HORN_FIRST = 94, MEGAHORN_HORN_LAST = 100;
+const MEGAHORN_TARGET_HIDDEN_FIRST = 8, MEGAHORN_TARGET_HIDDEN_LAST = 134;
+const MEGAHORN_SHAKE_FIRST = 48, MEGAHORN_SLIDE_OUT_FIRST = 89, MEGAHORN_SLIDE_BACK_FIRST = 122;
+/**
+ * Sprite lifetimes (states) in script order with their createsprite subpriority offsets from the attacker (Move_MEGAHORN:
+ * gSlideMonToOffsetSpriteTemplate 2, horn 3, hit splat 2, slide 2, complex_palette_blend 2, SlideMonToOriginalPos 2 x2).
+ * The slide / blend helpers are invisible (gDummyOamData) but hold their lowest-free slots and sort keys.
+ */
+const MEGAHORN_SPRITES = [["slideA", 89, 95, 2], ["horn", 94, 100, 3], ["splat", 100, 108, 2], ["slideB", 100, 104, 2],
+  ["blend", 110, 121, 2], ["backA", 122, 132, 2], ["backB", 127, 133, 2]] as const;
+/** Attacker x2: AnimTask_ShakeMon(2, 0, 15, 1), SlideMonToOffset(0, 24, .., 6), SlideMonToOriginalPos (24 << 8) / 11 per step. */
+export function liveMegahornAttackerX2(state: number, side: Side): number {
+  const sign = side === "player" ? 1 : -1;
+  const shake = state - MEGAHORN_SHAKE_FIRST;
+  if (shake === 0 || (shake >= 3 && shake <= 28 && ((shake - 3) & 3) < 2)) return 2;
+  if (state >= MEGAHORN_SLIDE_OUT_FIRST && state < MEGAHORN_SLIDE_BACK_FIRST) return sign * 4 * Math.min(state - MEGAHORN_SLIDE_OUT_FIRST + 1, 6);
+  if (state >= MEGAHORN_SLIDE_BACK_FIRST && state < MEGAHORN_SLIDE_BACK_FIRST + 11) {
+    const step = Math.floor((24 << 8) / 11);
+    return (sign * ((24 << 8) - (state - MEGAHORN_SLIDE_BACK_FIRST + 1) * step)) >> 8;
+  }
+  return 0;
+}
+/** InitAnimLinearTranslation + AnimTranslateLinear: Q8 per-step deltas with a sign flag in the low bit. */
+function megahornLinear(dx: number, dy: number, duration: number, n: number) {
+  const xd = ((Math.abs(dx) << 8) / duration | 0) & 0xffff & ~1 | (dx < 0 ? 1 : 0), yd = ((Math.abs(dy) << 8) / duration | 0) & 0xffff & ~1 | (dy < 0 ? 1 : 0);
+  const X = (n * xd) & 0xffff, Y = (n * yd) & 0xffff;
+  return { x2: xd & 1 ? -(X >> 8) : X >> 8, y2: yd & 1 ? -(Y >> 8) : Y >> 8 };
+}
+/** sAffineAnim_MegahornHorn_0 / _1 (AFFINEANIMCMD_FRAME(0x100, 0x100, rot, 0)): HLE ObjAffineSet at unit scale, signed truncation. */
+export function liveMegahornHornMatrix(side: Side): readonly [number, number, number, number] {
+  const rotation = side === "player" ? 30 : -99, radians = (rotation & 0xff) * 2 * Math.PI / 256, c = Math.cos(radians), s = Math.sin(radians);
+  return [Math.trunc(256 * c), Math.trunc(-256 * s), Math.trunc(256 * s), Math.trunc(256 * c)];
+}
+export interface LiveMegahornOamInputs {
+  readonly attackerSide: Side;
+  readonly attacker: LiveOamBattler;
+  readonly target: LiveOamBattler;
+  /** Target idle rest at activation (SlideMonToOriginalPos / ShakeMonInPlace leave it at 0 after the monbg window). */
+  readonly targetIdle: Readonly<{ x2: number; y2: number }>;
+  /** BATTLER_COORD_X_2 / Y_PIC_OFFSET of the target (the hit splat and the horn's destination). */
+  readonly targetPicCenter: Point;
+  readonly scene: LiveOamScene;
+  /** Known-entry allocator: ANIM_TAG_HORN_HIT_2 / ANIM_TAG_IMPACT tile bases, palette slots, matrix numbers. */
+  readonly hornTileBase: number;
+  readonly hornPaletteSlot: number;
+  readonly hornMatrixNum: number;
+  readonly impactTileBase: number;
+  readonly impactPaletteSlot: number;
+  readonly impactMatrixNum: number;
+  readonly occupiedSlots: readonly number[];
+  readonly activationOrder: readonly number[];
+  readonly sort: LiveSpriteOrderSort;
+  readonly rows: number;
+}
+/** hardwareOam[row] / hardwareMatrices[row] of the Megahorn body over the carried lent order. */
+export function liveMegahornHardwareOamRows(input: LiveMegahornOamInputs): { oam: string[][]; matrices: (readonly [number, number, number, number])[][] } {
+  const held = new Map<string, number>();
+  for (const [name, first] of MEGAHORN_SPRITES) {
+    const used = new Set(input.occupiedSlots);
+    for (const [other, f, l] of MEGAHORN_SPRITES) if (held.has(other) && f <= first && first <= l) used.add(held.get(other)!);
+    let slot = 0; while (used.has(slot)) slot += 1;
+    held.set(name, slot);
+  }
+  const { attacker, target } = input, side = input.attackerSide, flip = side === "opponent" ? -1 : 1, t = input.targetPicCenter;
+  const spritesAt = (state: number): LiveOamSprite[] => {
+    const out: LiveOamSprite[] = input.scene.occupants.map((o) => ({ ...o, oamY: o.attr[0] & 0xff }));
+    const x2 = state < 0 ? 0 : liveMegahornAttackerX2(state, side);
+    const attackerAttr: OamAttr = [attacker.attr[0], attacker.attr[1] & ~0x1ff | attacker.attr[1] + x2 & 0x1ff, attacker.attr[2]];
+    out.push({ ...attacker, attr: attackerAttr, visible: true, oamY: attackerAttr[0] & 0xff });
+    const back = state > MEGAHORN_TARGET_HIDDEN_LAST, o = input.targetIdle;
+    const targetAttr: OamAttr = back
+      ? [target.attr[0] & ~0xff | target.attr[0] - o.y2 & 0xff, target.attr[1] & ~0x1ff | target.attr[1] - o.x2 & 0x1ff, target.attr[2]]
+      : target.attr;
+    out.push({ ...target, attr: targetAttr, visible: state < MEGAHORN_TARGET_HIDDEN_FIRST || back, oamY: targetAttr[0] & 0xff });
+    for (const [name, first, last, offset] of MEGAHORN_SPRITES) {
+      if (state < first || state > last) continue;
+      const slot = held.get(name)!, subpriority = attacker.subpriority - offset;
+      if (name === "horn") {
+        const sx = t.x - 42 * flip, sy = t.y + 25 * flip, d = megahornLinear(t.x - sx, t.y - sy, 6, Math.min(state - MEGAHORN_HORN_FIRST + 1, 6));
+        const attr: OamAttr = [0x4000 | 0x0300 | sy + d.y2 - 16 & 0xff, 0x8000 | input.hornMatrixNum << 9 | sx + d.x2 - 32 & 0x1ff,
+          input.hornTileBase | 2 << 10 | input.hornPaletteSlot << 12];
+        out.push({ slot, attr, subpriority, visible: true, oamY: attr[0] & 0xff });
+      } else if (name === "splat") {
+        const attr: OamAttr = [0x0100 | 0x0400 | t.y - 16 & 0xff, 0x8000 | input.impactMatrixNum << 9 | t.x - 16 & 0x1ff,
+          input.impactTileBase | 2 << 10 | input.impactPaletteSlot << 12];
+        out.push({ slot, attr, subpriority, visible: true, oamY: attr[0] & 0xff });
+      } else {
+        out.push({ slot, attr: GBA_DUMMY_OAM_ATTR, subpriority, visible: false, oamY: 0xa0 });
+      }
+    }
+    return out;
+  };
+  const matricesAt = (state: number): (readonly [number, number, number, number])[] => {
+    const m = Array.from({ length: 32 }, () => IDENTITY as readonly [number, number, number, number]);
+    if (state >= MEGAHORN_HORN_FIRST && state <= MEGAHORN_HORN_LAST) m[input.hornMatrixNum] = liveMegahornHornMatrix(side);
+    return m;
+  };
+  const oam: string[][] = [], matrices: (readonly [number, number, number, number])[][] = [];
+  let order: readonly number[] = input.activationOrder;
+  let previous = spritesAt(-1);
+  for (let row = 0; row < input.rows; row += 1) {
+    const m = matricesAt(row - 1);
+    oam.push(buildLiveHardwareOam(order, previous, input.scene.healthbox, m));
+    matrices.push(m);
+    previous = spritesAt(row);
+    order = carryLiveSpriteOrder(order, previous, input.sort);
+  }
+  return { oam, matrices };
+}

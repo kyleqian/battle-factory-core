@@ -1,0 +1,48 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "MEGAHORN",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep18-megahorn-alt-heracross-golem.json",
+ "denseWindow": {
+  "startFrame": 221,
+  "endFrame": 397
+ },
+ "windowSource": "window = [activation, activation + 177 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": "event",
+ "timingPhases": {
+  "optional-lag-age": "event",
+  "bg-write-row": "no-event"
+ },
+ "monbgCntRow": 7,
+ "attacker": {
+  "species": "HERACROSS",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019083,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 146,
+  "playerMaxHp": 162,
+  "opponentHp": 155,
+  "opponentMaxHp": 155,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ]
+}

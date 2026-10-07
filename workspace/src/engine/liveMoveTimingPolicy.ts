@@ -14,7 +14,13 @@
 export const LIVE_MOVE_TIMING_POLICY_VERSION = "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event" as const;
 
 export type LiveMoveTimingParameterKind = "optional-lag-age" | "bg-write-row" | "palette-transfer-row";
-/** "event" = the optional lag frame / late write happens; "no-event" = it does not (the source iteration count). */
+/**
+ * "event" = the optional lag frame / late write happens; "no-event" = it does not (the source iteration count). Per kind:
+ * - optional-lag-age: "event" = the optional lag frame at `age` is present (one more body row).
+ * - bg-write-row: "event" = the LATER of the two write rows (`age`; the slower-CPU phase), "no-event" = the earlier row (`age - 1`).
+ *   A tie therefore selects the earlier write row.
+ * - palette-transfer-row: "event" = the later transfer row.
+ */
 export type LiveMoveTimingPhase = "event" | "no-event";
 
 export type LiveMoveTimingAlternative = Readonly<{
@@ -27,7 +33,7 @@ export type LiveMoveTimingAlternative = Readonly<{
 
 export type LiveMoveTimingParameter = Readonly<{
   kind: LiveMoveTimingParameterKind;
-  /** Body age at which the optional event occurs (the fixed lags are part of the source program, not of the policy). */
+  /** Body age at which the optional event occurs (bg-write-row: the later write row; the fixed lags are part of the source program). */
   age: number;
   /** Fixed (always present) lag ages of the body, for the record. */
   fixedLagAges: readonly number[];
@@ -51,6 +57,8 @@ export function dominantLiveMoveTimingPhase(alternatives: readonly LiveMoveTimin
 
 const LAG_EVIDENCE = "tools/integration/fixtures/prep25/lag-frames.json";
 const TIEBREAK_EVIDENCE = "tools/integration/fixtures/d4a/lag-frames-tiebreak.json";
+const PREP24_EVIDENCE = "tools/integration/prep24MegahornCheck.ts phaseOf";
+const D4B_EVIDENCE = "tools/integration/fixtures/d4a-live/megahorn-extra-*.json";
 
 /**
  * Per-move CPU-phase parameters. Mach Punch / Nightmare: prep25 measured 2 of 4 scenarios with the optional lag (a tie); the D4a tie-break
@@ -75,7 +83,39 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
       evidence: [`${LAG_EVIDENCE} nightmare (2 of 4)`, `${TIEBREAK_EVIDENCE} nightmare (3 of 4)`, "docs/next-adapters-prep25.md s0.1 item 3"],
     }],
   },
+  /**
+   * D4b Megahorn (docs/next-adapters-prep24.md s0.2 H / s1.3: 6 windows accepted P/O, HERACROSS -> GOLEM P/O, HERACROSS -> ONIX P/O; the D4b
+   * tie-break: 4 more windows chosen before probing, RHYDON -> GOLBAT and NIDOKING -> SNORLAX both orientations, tools/integration/d4aScenarios.py,
+   * measured by the same prep22 probe from each scenario's own activation, tools/integration/fixtures/d4a-live/megahorn-*.json).
+   * (a) the final restorebg fade (Task_FadeToBg after LoadDefaultBg) ends one row late in 9 of 10 windows (accepted opponent early):
+   *     an optional lag before the LoadDefaultBg row 156 -> 177 body rows (176 without). (b) the monbg BGnCNT write lands on row 8 in 7 of
+   *     10 windows (accP, accO, onO + all four tie-break windows) and on row 7 in 3 (altP, altO, onP; prep24 alone was a 3:3 tie). With row 7
+   *     MoveBattlerSpriteToBG also writes that row's BG scroll; the MEGAHORN renderer branch reads no BGnCNT and draws the monbg target only
+   *     once the target OBJ is disabled (row 9), so (b) is pixel-neutral (row-7 windows are 0 px under the row-8 policy).
+   */
+  224: {
+    move: "MOVE_MEGAHORN",
+    parameters: [{
+      kind: "optional-lag-age", age: 156, fixedLagAges: [], iterations: 176,
+      alternatives: [{ phase: "event", bodyRows: 177, measured: 9 }, { phase: "no-event", bodyRows: 176, measured: 1 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: [`${PREP24_EVIDENCE} phase.endLate (5 of 6 late)`, `${D4B_EVIDENCE} probe end - start + 1 (4 of 4 late)`,
+        "docs/next-adapters-prep24.md s0.1 negative control (16 fade rows 158..173, 17.5k px each)"],
+    }, {
+      kind: "bg-write-row", age: 8, fixedLagAges: [], iterations: 176,
+      alternatives: [{ phase: "event", bodyRows: 177, measured: 7 }, { phase: "no-event", bodyRows: 177, measured: 3 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: [`${PREP24_EVIDENCE} phase.monbgCntRow (row 8: accP, accO, onO; row 7: altP, altO, onP)`,
+        `${D4B_EVIDENCE} monbgCntRow from the probe regEvents (row 8 in 4 of 4)`, "docs/next-adapters-prep24.md s1.3"],
+    }],
+  },
 });
+
+/** The chosen write row of a move's bg-write-row parameter (`age` for "event", `age - 1` for "no-event"), or null without one. */
+export function liveMoveBgWriteRow(moveId: number): number | null {
+  const p = liveMoveTimingParameter(moveId, "bg-write-row");
+  return p === null ? null : p.chosen === "event" ? p.age : p.age - 1;
+}
 
 /** The policy parameter of a move, or null when the move has no D4 timing parameter of that kind. */
 export function liveMoveTimingParameter(moveId: number, kind: LiveMoveTimingParameterKind): LiveMoveTimingParameter | null {
@@ -98,4 +138,6 @@ export function liveMoveTimingBodyRows(moveId: number): number | null {
 export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object.freeze([
   // D4a: Mach Punch first body (liveQ2Moves.ts liveMachPunchInputs; fixtures tools/integration/fixtures/d4a-live).
   183,
+  // D4b: Megahorn (liveOamMoves.ts liveMegahornInputs; fixtures tools/integration/fixtures/d4a-live/megahorn-*).
+  224,
 ]);

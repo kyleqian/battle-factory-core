@@ -1,0 +1,48 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "MEGAHORN",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/d4a-megahorn-extra-player-rhydon-golbat.json",
+ "denseWindow": {
+  "startFrame": 295,
+  "endFrame": 471
+ },
+ "windowSource": "window = [activation, activation + 177 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": "event",
+ "timingPhases": {
+  "optional-lag-age": "event",
+  "bg-write-row": "event"
+ },
+ "monbgCntRow": 8,
+ "attacker": {
+  "species": "RHYDON",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019083,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 183,
+  "playerMaxHp": 187,
+  "opponentHp": 150,
+  "opponentMaxHp": 150,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ]
+}

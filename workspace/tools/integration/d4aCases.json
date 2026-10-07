@@ -46,5 +46,29 @@
   "nightmare-extra-opponent-gengar-golbat",
   "d4a-nightmare-extra-opponent-gengar-golbat",
   "opponent"
+ ],
+ [
+  "MEGAHORN",
+  "megahorn-extra-player-rhydon-golbat",
+  "d4a-megahorn-extra-player-rhydon-golbat",
+  "player"
+ ],
+ [
+  "MEGAHORN",
+  "megahorn-extra-opponent-rhydon-golbat",
+  "d4a-megahorn-extra-opponent-rhydon-golbat",
+  "opponent"
+ ],
+ [
+  "MEGAHORN",
+  "megahorn-extra-player-nidoking-snorlax",
+  "d4a-megahorn-extra-player-nidoking-snorlax",
+  "player"
+ ],
+ [
+  "MEGAHORN",
+  "megahorn-extra-opponent-nidoking-snorlax",
+  "d4a-megahorn-extra-opponent-nidoking-snorlax",
+  "opponent"
  ]
 ]

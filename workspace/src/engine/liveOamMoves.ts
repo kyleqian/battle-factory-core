@@ -9,9 +9,10 @@ import paletteData from "../data/gen/live-animation-palette-resources.json" with
 import { KNOWN_ENTRY_NON_BATTLER_SPRITES } from "./liveBgSnapshotMoves.ts";
 import type { LivePaletteComposite } from "./liveMovePaletteComposite.ts";
 import {
-  FURY_CUTTER_ROWS, KNOWN_ENTRY_HEALTHBOX_OAM, buildLiveHardwareOam, carryLiveSpriteOrder, KNOWN_ENTRY_HEALTHBOX_SLOTS, PURSUIT_ROWS, RETURN_ROWS, liveFuryCutterHardwareOamRows, livePursuitHardwareOamRows, liveReturnHardwareOamRows, liveReturnLives, liveWillOWispHardwareOamRows,
+  FURY_CUTTER_ROWS, KNOWN_ENTRY_HEALTHBOX_OAM, buildLiveHardwareOam, carryLiveSpriteOrder, KNOWN_ENTRY_HEALTHBOX_SLOTS, PURSUIT_ROWS, RETURN_ROWS, liveFuryCutterHardwareOamRows, liveMegahornHardwareOamRows, livePursuitHardwareOamRows, liveReturnHardwareOamRows, liveReturnLives, liveWillOWispHardwareOamRows,
   type LiveOamScene, type LiveSpriteOrderSort, type OamAttr, type WispProgram,
 } from "./liveMoveOamAssembler.ts";
+import { liveMegahornBodyRows, liveMegahornRows } from "./liveMegahornInputs.ts";
 
 type Side = "player" | "opponent";
 type Point = Readonly<{ x: number; y: number }>;
@@ -568,6 +569,78 @@ export function liveReturnInputs(args: LiveReturnArgs): { duration: number; anim
         // ANIM_TAG_IMPACT (10135): known-entry allocation, tile slot 6 range [305, 16], palette slot 7 = OBJ bank 23.
         resources: { impactTag: 10135, tileSlot: 6, paletteSlot: 7, paletteBank: 23, tileRange: [305, 16], allocator: null },
         audio: { current: null, attackerPan: attackerSide === "player" ? -64 : 63, targetPan: targetSide === "player" ? -64 : 63 },
+        liveCounts: { visualTasks: 0, soundTasks: 0, matrixBitmap: 0 }, animationRng: 0, gameplayRng: null, gameplayState: null,
+      };
+    },
+  };
+}
+
+export interface LiveMegahornInputArgs {
+  readonly attackerSide: Side;
+  readonly attackerSpecies: string;
+  readonly targetSpecies: string;
+  readonly attacker: LiveOamBattlerAnchors;
+  readonly target: LiveOamBattlerAnchors;
+  readonly palettes: LivePaletteComposite;
+  readonly activationOrder: readonly number[];
+  readonly sort: LiveSpriteOrderSort;
+  /** Seam-provided (liveMoveAnimation.ts): mega-horn-horn-hit-2.json and horn-drill.json palettes. */
+  readonly hornPalette: readonly Rgb[];
+  readonly drillPalette: readonly Rgb[];
+  /** D4 policy (liveMoveTimingPolicy.ts MOVE_MEGAHORN): the restorebg fade ends one row late; the monbg BGnCNT write row. */
+  readonly endLate: boolean;
+  readonly monbgCntRow: 7 | 8;
+}
+const megahornCache = new Map<string, ReturnType<typeof liveMegahornHardwareOamRows>>();
+
+/**
+ * MOVE_MEGAHORN (224) live inputs (prep24 s1.4; D4b faithful timing). Hardware OAM + matrices from the assembler over the lent order
+ * (known-entry allocator: ANIM_TAG_HORN_HIT_2 tile 305 / palette slot 7 / matrix 0, ANIM_TAG_IMPACT tile 313 / slot 8 / matrix 3 --
+ * matrices 1 and 2 are held at the known entry, as for Return); every other input from the prep24 source model
+ * (liveMegahornInputs.ts) with the activation palette = the asset composite and the activation register block = S0. The corpora
+ * follow a Tackle (bg1cnt / bg2cnt 0x5c02 / 0x5e02 at activation); the MEGAHORN renderer branch reads only bg3cnt, BG3 / monbg
+ * scroll and BLDY, all written by the body, so the activation BGnCNT values are never read. Declines (null) when the attacker has
+ * a non-zero idle rest (ShakeMon resets the attacker's x2 absolutely: unproven); the target's rest is modelled (ONIX corpus).
+ */
+export function liveMegahornInputs(args: LiveMegahornInputArgs): { duration: number; animationInputsAt: (age: number) => Record<string, unknown> } | null {
+  const { attackerSide, attacker, target } = args;
+  if (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0) return null;
+  const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
+  const attackerObject = battlerObject(attackerSide, attacker), targetObject = battlerObject(targetSide, target);
+  const rows = liveMegahornBodyRows(args.endLate);
+  const key = JSON.stringify([attackerSide, target.frontIdleRest, target.picOffsetPoint, attackerObject.attr, targetObject.attr, args.activationOrder, rows]);
+  let built = megahornCache.get(key);
+  if (!built) {
+    built = liveMegahornHardwareOamRows({ attackerSide, attacker: attackerObject, target: targetObject, targetIdle: target.frontIdleRest,
+      targetPicCenter: target.picOffsetPoint, scene: KNOWN_ENTRY_SCENE, hornTileBase: 305, hornPaletteSlot: 7, hornMatrixNum: 0,
+      impactTileBase: 313, impactPaletteSlot: 8, impactMatrixNum: 3, occupiedSlots: KNOWN_ENTRY_OCCUPIED_SLOTS,
+      activationOrder: args.activationOrder, sort: args.sort, rows });
+    if (megahornCache.size > 16) megahornCache.clear();
+    megahornCache.set(key, built);
+  }
+  const oamRows = built;
+  const model = liveMegahornRows({ attackerSide, targetSpriteCenter: target.spriteCenter, targetIdleRest: target.frontIdleRest,
+    attackerSlot: attackerObject.slot, targetSlot: targetObject.slot, registers0: S0_REGISTERS, palette0: args.palettes.hardware,
+    hornBank: 23, impactBank: 24, hornPalette: args.hornPalette, impactPalette: resourceWords("ANIM_TAG_IMPACT"), drillPalette: args.drillPalette,
+    endLate: args.endLate, monbgCntRow: args.monbgCntRow });
+  const art = (species: string, object: ReturnType<typeof battlerObject>) =>
+    ({ displaySpecies: species, slot: object.slot, attr: object.attr, subpriority: object.subpriority });
+  return {
+    duration: rows,
+    animationInputsAt: (age: number) => {
+      const row = Math.min(age, rows - 1), m = model[row]!;
+      const registers = { ...m.registers };
+      if (age >= 1) { registers.win0h = 0; registers.win0v = 0; }
+      return {
+        attackerArt: art(args.attackerSpecies, attackerObject), targetArt: art(args.targetSpecies, targetObject),
+        liveTasks: m.tasks,
+        buffers: { softwareOam: [], hardwareOam: oamRows.oam[row]!, softwareMatrices: IDENTITY_MATRICES, hardwareMatrices: oamRows.matrices[row]! },
+        palette: { unfaded: m.unfadedPalette, faded: m.hardwarePalette, hardware: m.hardwarePalette },
+        registers,
+        background: { battleVram: null, currentVram: null, monbgPaletteBank: targetSide === "opponent" ? 8 : 9 },
+        resources: { hornTileBase: 305, impactTileBase: 313, hornPaletteBank: 23, impactPaletteBank: 24,
+          hornLoaded: age >= 2, impactLoaded: age >= 5, allocator: null },
+        spriteOrder: args.activationOrder, audio: null,
         liveCounts: { visualTasks: 0, soundTasks: 0, matrixBitmap: 0 }, animationRng: 0, gameplayRng: null, gameplayState: null,
       };
     },

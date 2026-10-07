@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS, LIVE_MOVE_TIMING_POLICY, LIVE_MOVE_TIMING_POLICY_VERSION, dominantLiveMoveTimingPhase,
-  liveMoveOptionalLagAge, liveMoveTimingBodyRows, liveMoveTimingParameter,
+  liveMoveBgWriteRow, liveMoveOptionalLagAge, liveMoveTimingBodyRows, liveMoveTimingParameter,
 } from "../../src/engine/liveMoveTimingPolicy.ts";
 
 // D4 (docs/faithful-timing.md): the policy is the dominant phase over ALL banked measurements of each parameter; a tie selects the
@@ -58,5 +58,15 @@ describe("live move timing policy (D4)", () => {
     expect(source).not.toMatch(/^import /m);
     expect(liveMoveOptionalLagAge(1)).toBeNull();
     expect(liveMoveTimingBodyRows(1)).toBeNull();
+    expect(liveMoveBgWriteRow(1)).toBeNull();
+  });
+
+  it("bg-write-row: 'event' is the later write row (age), 'no-event' the earlier (age - 1); Megahorn picks the measured row 8 (7 of 10)", () => {
+    const p = liveMoveTimingParameter(224, "bg-write-row")!;
+    expect([p.age, p.chosen, p.tieRuleUsed]).toEqual([8, "event", false]);
+    expect(liveMoveBgWriteRow(224)).toBe(8);
+    expect(liveMoveBgWriteRow(183)).toBeNull();
+    expect(liveMoveOptionalLagAge(224)).toBe(156);
+    expect(liveMoveTimingBodyRows(224)).toBe(177);
   });
 });

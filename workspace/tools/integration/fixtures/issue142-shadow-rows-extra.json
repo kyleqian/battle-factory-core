@@ -5909,6 +5909,50 @@
    "requestFields": {
     "turn": 0
    }
+  },
+  {
+   "id": 224,
+   "move": "MEGAHORN",
+   "orientation": "player",
+   "variant": "d4b-megahorn-player-seaking-opponent-onix",
+   "activationFrame": 211,
+   "windowStart": 211,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/d4a-live/megahorn-player-seaking-opponent-onix.json",
+    "scenario": "tools/battle-lab/mechanic-megahorn-player-seaking-opponent-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep22Probes.sh; d4b live receipt; the elevated GOLBAT target window megahorn-extra-player-rhydon-golbat is 200 px at age 0 without the row, 0 px with it)"
+   },
+   "requestFields": {
+    "turn": 0
+   }
+  },
+  {
+   "id": 224,
+   "move": "MEGAHORN",
+   "orientation": "opponent",
+   "variant": "d4b-megahorn-opponent-seaking-player-onix",
+   "activationFrame": 212,
+   "windowStart": 212,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/d4a-live/megahorn-opponent-seaking-player-onix.json",
+    "scenario": "tools/battle-lab/mechanic-megahorn-opponent-seaking-player-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep22Probes.sh; d4b live receipt; the elevated GOLBAT target window megahorn-extra-player-rhydon-golbat is 200 px at age 0 without the row, 0 px with it)"
+   },
+   "requestFields": {
+    "turn": 0
+   }
   }
  ]
 }
