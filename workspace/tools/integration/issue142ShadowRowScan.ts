@@ -31,7 +31,9 @@ const count = (fb: Uint8Array) => {
 };
 const table = JSON.parse(readFileSync(resolve(repo, "tools/integration/fixtures/issue142-shadow-rows.json"), "utf8")).rows as any[];
 const extra = JSON.parse(readFileSync(resolve(repo, "tools/integration/fixtures/issue142-shadow-rows-extra.json"), "utf8")).rows as any[];
-const rows = [...table, ...extra];
+// ISSUE142_SCAN_IDS=183,... restricts the scan to those ids (a per-adapter check; the default full scan writes the committed fixture).
+const onlyIds = process.env.ISSUE142_SCAN_IDS?.split(",").map(Number);
+const rows = [...table, ...extra].filter((r) => !onlyIds || onlyIds.includes(r.id));
 const mismatches: any[] = [];
 const out: any[] = [];
 const seen = new Set<number>();
