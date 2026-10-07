@@ -26,6 +26,13 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- prep33 (side, `6f9b9f7a8`, new files only): Shock Wave (351) READY-WITH-CHANGE as scoped exact — the reducer's
+  side-keyed timing table is wrong for 3 of 4 alternates; derived rule (attacker pic-offset y, target battle y, lightning
+  count N: ShakeMon = lightning + 2N + 30, clear + 67, end + 4) matches 6/6 windows; every renderer-read field exact on
+  1591 rows; pixels 1590/1592 (row 0 enemy shadow of two elevated opponents). No CPU-phase field. Skill Swap (285)
+  partial: tasks / 24 orbs / blend registers exact on 1173 rows; body 194/195 = lag at row 176 (T, 4 of 6); no
+  outcome input needed (animation only on the success path); still needs the OAM order, orb matrices and palette
+  program. Supervisor: `prep33Run.sh` into fresh dirs — probes r1 == r2, 9/9 receipts byte-identical.
 - Folded Opus worker `9398ab3a8` as `a7402719b` (src tree `58b592bc`): audit-9 fixes (Mach Punch attacker idle rest
   in `machPunch.ts`; Mach Punch declines idle-rest targets; Revenge gate narrowed to targets; Meteor Mash FLYGON =
   fixture Random2 offset, no production change). EXACT Spit Up (255; `liveSpitUpInputs.ts`, counters 1-3 =
