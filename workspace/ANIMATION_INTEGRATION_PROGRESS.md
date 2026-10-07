@@ -26,6 +26,12 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- prep31 (side, `201cdf91c`, new files only): source-derived Superpower (276) and Spit Up (255, Stockpile counters
+  1-3 = request.turn) providers. Superpower: every field exact in 6 windows (accepted P/O, MACHAMP->GOLEM,
+  MACHAMP->WEEZING elevated, WEEZING->SNORLAX), OAM order derived by SortSprites; pixels 1487/1488 rows — the one
+  row is the T bit monbg BGnCNT row (player {10: 2, 11: 1}, opponent {11: 3}). Spit Up: 12/12 windows field- and
+  pixel-exact (1300 rows, 0 px); the 8-orb burst overrun at row 59 (+67 for counter 3) is constant (M), not T.
+  Supervisor: `prep31Run.sh` into fresh dirs — probes r1 == r2, 17/17 receipts byte-identical.
 - prep30 (side, `cc3786f20`, new files only, merged `3f0023e1e`): source-derived Extrasensory (326) and Psywave
   (149) providers — every field the renderer reads exact on every row in 6 windows each (accepted P/O, ALAKAZAM->GOLEM,
   new ESPEON->CROBAT elevated). Pixels at the measured phase: Psywave 0 px in 5/6 (CROBAT P row 0: 200 px renderer
