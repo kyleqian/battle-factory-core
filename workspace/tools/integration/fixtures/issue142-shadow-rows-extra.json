@@ -5865,6 +5865,50 @@
     "body": "normal",
     "activation": "window start = the scenario's own source activation frame (prep29 moves/*.json; r29 live receipt)"
    }
+  },
+  {
+   "id": 183,
+   "move": "MACH_PUNCH",
+   "orientation": "player",
+   "variant": "d4a-mach-punch-player-hitmonchan-opponent-chansey",
+   "activationFrame": 78,
+   "windowStart": 78,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/d4a-live/mach-punch-player-hitmonchan-opponent-chansey.json",
+    "scenario": "tools/battle-lab/mechanic-mach-punch-player-hitmonchan-opponent-chansey.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep22Probes.sh; d4a live receipt; the elevated GOLBAT target window mach-punch-extra-player-breloom-golbat is 0 px from row 0)"
+   },
+   "requestFields": {
+    "turn": 0
+   }
+  },
+  {
+   "id": 183,
+   "move": "MACH_PUNCH",
+   "orientation": "opponent",
+   "variant": "d4a-mach-punch-opponent-hitmonchan-player-chansey",
+   "activationFrame": 82,
+   "windowStart": 82,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/d4a-live/mach-punch-opponent-hitmonchan-player-chansey.json",
+    "scenario": "tools/battle-lab/mechanic-mach-punch-opponent-hitmonchan-player-chansey.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep22Probes.sh; d4a live receipt; the elevated GOLBAT target window mach-punch-extra-player-breloom-golbat is 0 px from row 0)"
+   },
+   "requestFields": {
+    "turn": 0
+   }
   }
  ]
 }
