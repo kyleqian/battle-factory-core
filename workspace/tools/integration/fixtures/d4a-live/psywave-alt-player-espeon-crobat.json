@@ -1,0 +1,37 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "PSYWAVE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep30-psywave-alt-player-espeon-crobat.json",
+ "denseWindow": {
+  "startFrame": 71,
+  "endFrame": 275
+ },
+ "windowSource": "window = [activation, activation + 205 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": "event",
+ "attacker": {
+  "species": "ESPEON",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "CROBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015175,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 127,
+  "playerMaxHp": 127,
+  "opponentHp": 167,
+  "opponentMaxHp": 167,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

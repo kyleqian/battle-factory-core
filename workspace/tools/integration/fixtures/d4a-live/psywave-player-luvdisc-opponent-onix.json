@@ -1,0 +1,37 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "PSYWAVE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-psywave-player-spoink-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 72,
+  "endFrame": 276
+ },
+ "windowSource": "window = [activation, activation + 205 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": "event",
+ "attacker": {
+  "species": "LUVDISC",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015232,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 136,
+  "playerMaxHp": 136,
+  "opponentHp": 117,
+  "opponentMaxHp": 117,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

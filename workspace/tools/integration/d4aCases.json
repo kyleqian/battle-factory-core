@@ -94,5 +94,41 @@
   "meteor-mash-extra-opponent-metagross-golbat",
   "d4a-meteor-mash-extra-opponent-metagross-golbat",
   "opponent"
+ ],
+ [
+  "PSYWAVE",
+  "psywave-player-luvdisc-opponent-onix",
+  "mechanic-psywave-player-spoink-opponent-onix",
+  "player"
+ ],
+ [
+  "PSYWAVE",
+  "psywave-opponent-swablu-player-onix",
+  "mechanic-psywave-opponent-chimecho-player-onix",
+  "opponent"
+ ],
+ [
+  "PSYWAVE",
+  "psywave-alt-player-alakazam-golem",
+  "prep25-psywave-alt-player-alakazam-golem",
+  "player"
+ ],
+ [
+  "PSYWAVE",
+  "psywave-alt-opponent-alakazam-golem",
+  "prep25-psywave-alt-opponent-alakazam-golem",
+  "opponent"
+ ],
+ [
+  "PSYWAVE",
+  "psywave-alt-player-espeon-crobat",
+  "prep30-psywave-alt-player-espeon-crobat",
+  "player"
+ ],
+ [
+  "PSYWAVE",
+  "psywave-alt-opponent-espeon-crobat",
+  "prep30-psywave-alt-opponent-espeon-crobat",
+  "opponent"
  ]
 ]

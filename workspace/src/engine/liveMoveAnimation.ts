@@ -90,7 +90,7 @@ import { liveMoveBgWriteRow, liveMoveOptionalLagAge, liveMoveTimingBodyRows } fr
 import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
 import { liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
-import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
+import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs } from "./liveOamMoves.ts";
 import revengeScratchAsset from "../animation/assets/revenge-purple-scratch-swipe.json" with { type: "json" };
 import hornDrillAsset from "../animation/assets/horn-drill.json" with { type: "json" };
 import megaHornAsset from "../animation/assets/mega-horn-horn-hit-2.json" with { type: "json" };
@@ -360,6 +360,9 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     224,
     // D4b faithful timing: Revenge windows start at activation (row 0; d4a-live/revenge-*.json).
     279,
+    // D4c faithful timing: Psywave windows start at activation (row 0; d4a-live/psywave-*.json). The live hook draws an elevated opponent's
+    // shadow whichever role it has (ESPEON -> CROBAT player window: 200 px at age 0 otherwise, docs/next-adapters-prep30.md s2.4).
+    149,
     // D4b faithful timing + D3: Meteor Mash windows start at activation (row 0; prep12 plans.json acceptedWindowStartMinusActivation 0).
     309,
     // Sheer Cold (ISSUES #151, species audit 7 elevated FLYGON / GOLBAT opponent, both orientations): activation == window start (row 0).
@@ -839,6 +842,8 @@ export function liveMoveAnimationDuration(
     case 224: return liveMoveTimingBodyRows(224);
     // Faithful timing (D4b): Revenge 145 rows both sides (activation .. first inactive); the policy picks the monbg BGnCNT write row.
     case 279: return 145;
+    // Faithful timing (D4c): Psywave 204 rows + the policy's optional late lag at task row 185 (dominant measured phase, 205 rows both sides).
+    case 149: return liveMoveTimingBodyRows(149);
     // Faithful timing (D4b, + D3 Random2): Meteor Mash 213 + the policy's restore lag L (row 195) + the first inactive row = 215 both sides.
     case 309: return liveMoveTimingBodyRows(309);
     case 295: return 332; // Luster Purge (prep29 B.5: 332 rows, constant in all four scenarios; faithful-random, plan rows in liveMovePresentationRng.ts).
@@ -3023,6 +3028,28 @@ export function liveMoveAnimationPresentation(
         endLate: liveMoveOptionalLagAge(224) !== null, monbgCntRow: liveMoveBgWriteRow(224) as 7 | 8 });
       if (inputs === null) return null;
       config = { move: "MEGAHORN", attacker, target, fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
+      break;
+    }
+    case 149: {
+      // D4c faithful timing: Psywave (prep30 s2 / s3; liveOamMoves.ts livePsywaveInputs). Known lend (the accepted player body is a first body,
+      // the accepted opponent follows a Tackle), known-entry allocator (BLUE_RING tile 305, palette slot 7, matrices 1 / 2 held), non-shiny.
+      // Psywave never moves a battler: the ring origin / destination are the X_2 / Y_PIC_OFFSET coordinates (not the sprite position), and the
+      // battler OBJ keeps its idle rest (battlerObject; the accepted ONIX opponent target rests at a non-zero x2 / y2). The late lag is the policy's.
+      if (!spriteOrderInput?.known) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const activationOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (palettes === null || activationOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const inputs = livePsywaveInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
+        targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
+        sort: sortGbaSpriteOrder, lateLag: liveMoveOptionalLagAge(149) !== null });
+      // The PSYWAVE seam centres: battlePositionCenter = X_2 / Y_PIC_OFFSET (ring origin / destination), animationCenter = the sprite centre.
+      const withCenters = (battler: SceneOnPresentationBattler, anchors: typeof attackerAnchors): SceneOnPresentationBattler => ({
+        ...battler, geometry: { ...battler.geometry, animationCenter: anchors.spriteCenter, battlePositionCenter: anchors.picOffsetPoint } });
+      config = { move: "PSYWAVE", attacker: withCenters(attacker, attackerAnchors), target: withCenters(target, targetAnchors),
+        fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
       break;
     }
     case 279: {

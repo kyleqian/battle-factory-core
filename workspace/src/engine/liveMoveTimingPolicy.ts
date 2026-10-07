@@ -124,6 +124,22 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
     }],
   },
   /**
+   * D4c Psywave (docs/next-adapters-prep30.md s0.2 T / s2.5; tools/integration/fixtures/prep30/psywave-check.json): an optional lag at task
+   * row 185 (Fade 2's VRAM restore row 184, palette restore 185, registers >= 187 one row later): present in 4 of 6 measured windows (accepted
+   * player / opponent, ALAKAZAM -> GOLEM player, ESPEON -> CROBAT player), absent in ALAKAZAM -> GOLEM opponent and ESPEON -> CROBAT opponent.
+   * Window rows (activation .. first inactive, inclusive) 205 with the lag, 204 without. Wrong phase moves rows 186..201 + the final row.
+   */
+  149: {
+    move: "MOVE_PSYWAVE",
+    parameters: [{
+      kind: "optional-lag-age", age: 185, fixedLagAges: [], iterations: 204,
+      alternatives: [{ phase: "event", bodyRows: 205, measured: 4 }, { phase: "no-event", bodyRows: 204, measured: 2 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/prep30/psywave-check.json phase.measured (4 of 6 lag)", "docs/next-adapters-prep30.md s2.5",
+        "tools/integration/fixtures/d4a-live/psywave-*.json (D4c: the same 6 windows re-probed fresh)"],
+    }],
+  },
+  /**
    * D4b Meteor Mash (docs/next-adapters-prep17.md s0.1; tools/integration/fixtures/prep17/meteor-mash-tail-receipt.json): restorebg's
    * LoadDefaultBg frame (row 193) skips the main-loop iteration of row 195 in 4 of 5 measured bodies (accepted opponent, prep12 SHIFTRY ->
    * GOLEM, A2 METANG -> GOLEM, A3 GOLEM -> SHIFTRY; the accepted player METANG -> ONIX body does not lag): first inactive age 213 + L,
@@ -172,6 +188,8 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   224,
   // D4b: Revenge (liveOamMoves.ts liveRevengeInputs; fixtures tools/integration/fixtures/d4a-live/revenge-*).
   279,
+  // D4c: Psywave (liveOamMoves.ts livePsywaveInputs; fixtures tools/integration/fixtures/d4a-live/psywave-*).
+  149,
   // D4b: Meteor Mash (D3 + D4; Random2 twinkles from the presentation host, liveMovePresentationRng.ts plan 309).
   309,
 ]);

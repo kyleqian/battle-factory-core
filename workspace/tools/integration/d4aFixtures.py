@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""D4a/D4b faithful-timing dense fixtures (Mach Punch 183, Nightmare 171, Megahorn 224) from fresh direct-mGBA prep22Probe.py outputs (prep22Probes.sh DIR 1 <scenarios>).
+"""D4a/D4b/D4c faithful-timing dense fixtures (Mach Punch 183, Nightmare 171, Megahorn 224, Revenge 279, Meteor Mash 309, Psywave 149) from fresh direct-mGBA prep22Probe.py outputs (prep22Probes.sh DIR 1 <scenarios>).
 Window = [activation, activation + own body rows - 1] of the probed body: each scenario's OWN activation and length (the measured CPU phase); the fixture
 records the phase ("event" = the optional late lag is present, "no-event" = not) for the D4 check (zero residual in the policy's phase, documented rows
 only in the other). Same recipe as q2Fixtures.py. usage: d4aFixtures.py PROBEDIR [move...]   -> tools/integration/fixtures/d4a-live/*.json"""
@@ -9,9 +9,9 @@ R = Path(__file__).resolve().parents[2]
 D = Path(sys.argv[1]); ONLY = set(sys.argv[2:])
 S = {s["id"]: s for s in json.loads((R / "src/data/gen/species-stats.json").read_text())["species"]}
 # move -> (id, rows with the optional lag ("event"), rows without)
-MOVES = {"MACH_PUNCH": (183, 110, 109), "NIGHTMARE": (171, 168, 167), "MEGAHORN": (224, 177, 176), "REVENGE": (279, 145, 145), "METEOR_MASH": (309, 215, 214)}
+MOVES = {"MACH_PUNCH": (183, 110, 109), "NIGHTMARE": (171, 168, 167), "MEGAHORN": (224, 177, 176), "REVENGE": (279, 145, 145), "METEOR_MASH": (309, 215, 214), "PSYWAVE": (149, 205, 204)}
 # Megahorn rows include the first inactive row (probe end - start + 1; liveMoveAnimationDuration = first inactive age + 1, as Pursuit / Return).
-INCLUSIVE = {"MEGAHORN": 1, "REVENGE": 1, "METEOR_MASH": 1}
+INCLUSIVE = {"MEGAHORN": 1, "REVENGE": 1, "METEOR_MASH": 1, "PSYWAVE": 1}
 # Revenge has no optional lag (145 rows in every window); its only CPU-phase parameter is the monbg BGnCNT write row ("event" = row 5),
 # banked by prep26RevengeCheck.ts knownFor for the four prep26 windows (docs/next-adapters-prep26.md s2.4).
 PREP26_MONBG_ROW = {"mechanic-revenge-player-machamp-opponent-shuckle": 5, "mechanic-revenge-opponent-qwilfish-player-shuckle": 4,

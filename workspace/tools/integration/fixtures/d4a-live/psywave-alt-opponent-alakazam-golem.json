@@ -1,0 +1,37 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "PSYWAVE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep25-psywave-alt-opponent-alakazam-golem.json",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 280
+ },
+ "windowSource": "window = [activation, activation + 204 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": "no-event",
+ "attacker": {
+  "species": "ALAKAZAM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703907,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 162,
+  "playerMaxHp": 162,
+  "opponentHp": 148,
+  "opponentMaxHp": 148,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

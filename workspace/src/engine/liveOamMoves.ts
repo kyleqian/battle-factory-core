@@ -5,15 +5,18 @@
  * source animation programs; the OAM rows come from liveMoveOamAssembler.ts. Never a capture row.
  */
 import darkBgAsset from "../assets/gen/battle-anim-bg-dark.json" with { type: "json" };
+import psychicBgAsset from "../assets/gen/battle-anim-psychic-bg.json" with { type: "json" };
 import paletteData from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
 import { KNOWN_ENTRY_NON_BATTLER_SPRITES } from "./liveBgSnapshotMoves.ts";
 import type { LivePaletteComposite } from "./liveMovePaletteComposite.ts";
 import {
-  FURY_CUTTER_ROWS, KNOWN_ENTRY_HEALTHBOX_OAM, buildLiveHardwareOam, carryLiveSpriteOrder, KNOWN_ENTRY_HEALTHBOX_SLOTS, PURSUIT_ROWS, RETURN_ROWS, liveFuryCutterHardwareOamRows, liveMegahornHardwareOamRows, livePursuitHardwareOamRows, liveReturnHardwareOamRows, liveReturnLives, liveRevengeHardwareOamRows, liveWillOWispHardwareOamRows,
+  FURY_CUTTER_ROWS, KNOWN_ENTRY_HEALTHBOX_OAM, buildLiveHardwareOam, carryLiveSpriteOrder, KNOWN_ENTRY_HEALTHBOX_SLOTS, PURSUIT_ROWS, RETURN_ROWS, liveFuryCutterHardwareOamRows, liveMegahornHardwareOamRows, livePursuitHardwareOamRows, liveReturnHardwareOamRows, liveReturnLives, liveRevengeHardwareOamRows, liveWillOWispHardwareOamRows, livePsywaveHardwareOamRows, livePsywaveRingAttr,
   type LiveOamScene, type LiveSpriteOrderSort, type OamAttr, type WispProgram,
 } from "./liveMoveOamAssembler.ts";
 import { liveMegahornBodyRows, liveMegahornRows } from "./liveMegahornInputs.ts";
 import { LIVE_REVENGE_ROWS, liveRevengeRows } from "./liveRevengeInputs.ts";
+import { livePsywaveRowCount, livePsywaveRows } from "./livePsywaveInputs.ts";
+import { GBA_SINE_TABLE_256 } from "./battleMenu.ts";
 
 type Side = "player" | "opponent";
 type Point = Readonly<{ x: number; y: number }>;
@@ -711,6 +714,84 @@ export function liveRevengeInputs(args: LiveRevengeInputArgs): { duration: numbe
         resources: { scratchTileBase: 305, swipeTileBase: 537, impactTileBase: 305,
           scratchLoaded: age >= 1 && age <= 72, swipeLoaded: age >= 73 && age <= 95, impactLoaded: age >= 96, allocator: null },
         spriteOrder: args.activationOrder, audio: null,
+        liveCounts: { visualTasks: 0, soundTasks: 0, matrixBitmap: 0 }, animationRng: 0, gameplayRng: null, gameplayState: null,
+      };
+    },
+  };
+}
+
+export interface LivePsywaveInputArgs {
+  readonly attackerSide: Side;
+  readonly attackerSpecies: string;
+  readonly targetSpecies: string;
+  readonly attacker: LiveOamBattlerAnchors;
+  readonly target: LiveOamBattlerAnchors;
+  readonly palettes: LivePaletteComposite;
+  readonly activationOrder: readonly number[];
+  readonly sort: LiveSpriteOrderSort;
+  /** D4 policy (liveMoveTimingPolicy.ts MOVE_PSYWAVE optional-lag-age): the optional late lag at task row 185. */
+  readonly lateLag: boolean;
+}
+/** graphics/battle_anims/sprites/blue_ring.pal (JASC, 16 colours) as BGR555 words (gBattleAnimSpritePal_BlueRing). */
+const BLUE_RING_PALETTE: readonly number[] = Object.freeze([18004, 0, 32326, 32640, 32767, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+/** ANIM_TAG_BLUE_RING (10165) at the known entry: tile slot 6 = tiles 305..312, palette slot 7 (OBJ bank 23); first bodies and after a Tackle. */
+const PSYWAVE_RING_RESOURCES = Object.freeze({ tag: 10165, tileSlot: 6, paletteSlot: 7, paletteBank: 23, tileRange: [305, 8] as const, allocator: null });
+const psywaveCache = new Map<string, ReturnType<typeof livePsywaveHardwareOamRows>>();
+
+/**
+ * MOVE_PSYWAVE (149) live inputs (docs/next-adapters-prep30.md s2 / s3; D4c faithful timing). Hardware OAM + matrices + the ring sprite
+ * states + the carried painter order from the assembler (known-entry allocator: BLUE_RING tile 305, palette slot 7; matrices 1 and 2 held at the
+ * known entry; ring slots lowest-free over the known-entry occupants); palettes / registers / modelled tasks / VRAM label from livePsywaveInputs.ts
+ * with the activation palette = the asset composite and the registers = S0 (the renderer branch reads only bldy and the hardware palette, both
+ * written by the body). Task slots (fade 0, psy 1, sin timer 0, loop sound 2, blend cycle 3, restore 0) and the loop-sound pans are constants
+ * equal in every measured window (K). The BlendColorCycleLoop / LoopSEAdjustPanning task data are not modelled (not rendered; empty).
+ */
+export function livePsywaveInputs(args: LivePsywaveInputArgs): { duration: number; animationInputsAt: (age: number) => Record<string, unknown> } {
+  const { attackerSide, attacker, target } = args;
+  const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
+  const attackerObject = battlerObject(attackerSide, attacker), targetObject = battlerObject(targetSide, target);
+  const rows = livePsywaveRowCount(args.lateLag);
+  // InitSpritePosToAnimAttacker: attacker X_2 +-10 (toward the target), Y_PIC_OFFSET + 10; AnimToTargetInSinWave: target X_2 / Y_PIC_OFFSET.
+  const origin = { x: attacker.picOffsetPoint.x + (attackerSide === "player" ? 10 : -10), y: attacker.picOffsetPoint.y + 10 };
+  const dest = target.picOffsetPoint;
+  const key = JSON.stringify([attackerSide, origin, dest, attackerObject.attr, targetObject.attr, args.activationOrder, rows]);
+  let built = psywaveCache.get(key);
+  if (!built) {
+    built = livePsywaveHardwareOamRows({ attacker: attackerObject, target: targetObject, origin, dest, scene: KNOWN_ENTRY_SCENE,
+      ringTileBase: PSYWAVE_RING_RESOURCES.tileRange[0], ringPaletteSlot: PSYWAVE_RING_RESOURCES.paletteSlot,
+      freeMatrices: Array.from({ length: 32 }, (_, i) => i).filter((i) => i !== 1 && i !== 2), occupiedSlots: KNOWN_ENTRY_OCCUPIED_SLOTS,
+      activationOrder: args.activationOrder, sort: args.sort, sine: GBA_SINE_TABLE_256, rows });
+    if (psywaveCache.size > 16) psywaveCache.clear();
+    psywaveCache.set(key, built);
+  }
+  const oamRows = built;
+  const model = livePsywaveRows({ registers0: S0_REGISTERS, palette0: args.palettes.hardware, faded0: args.palettes.faded, unfaded0: args.palettes.unfaded,
+    psychicPalette: (psychicBgAsset as { palette: readonly Rgb[] }).palette.map(bgr555), ringPalette: BLUE_RING_PALETTE,
+    ringBank: PSYWAVE_RING_RESOURCES.paletteSlot, targetObjBank: targetObject.attr[2] >>> 12 & 0xf, lateLag: args.lateLag });
+  const art = (species: string, object: ReturnType<typeof battlerObject>) =>
+    ({ displaySpecies: species, slot: object.slot, attr: object.attr, subpriority: object.subpriority, matrixNum: 0, matrix: [256, 0, 0, 256] });
+  const playerAttacker = attackerSide === "player";
+  return {
+    duration: rows,
+    animationInputsAt: (age: number) => {
+      const row = Math.min(age, rows - 1), m = model[row]!;
+      const fade = m.tasks.find((t) => t.callback === "Task_FadeToBg")?.data ?? [];
+      return {
+        attackerArt: art(args.attackerSpecies, attackerObject), targetArt: art(args.targetSpecies, targetObject),
+        taskSlots: { fadeToPsychic: 0, psychicBackground: 1, sinTimer: 0, loopSound: 2, paletteCycle: 3, restoreBattle: 0 },
+        ringAllocations: oamRows.allocations,
+        ringOam: oamRows.rings[row]!.map((s) => ({ slot: s.slot, attr: livePsywaveRingAttr(s, PSYWAVE_RING_RESOURCES.tileRange[0], PSYWAVE_RING_RESOURCES.paletteSlot),
+          subpriority: targetObject.subpriority - 3 })),
+        spriteOrder: oamRows.orders[row]!,
+        buffers: { softwareOam: oamRows.oam[row]!, hardwareOam: oamRows.oam[row]!, softwareMatrices: oamRows.matrices[row]!, hardwareMatrices: oamRows.matrices[row]! },
+        palette: { unfaded: m.unfadedPalette, faded: m.fadedPalette, hardware: m.hardwarePalette },
+        targetPaletteBank: 16 + (targetObject.attr[2] >>> 12 & 0xf),
+        registers: m.registers,
+        background: { currentVram: `vram-${m.vram}`, battleVram: "vram-0", psychicVram: "vram-1" },
+        resources: PSYWAVE_RING_RESOURCES,
+        sharedTaskData: { fadeToPsychic: fade, paletteCycle: [], restoreBattle: fade },
+        // SoundTask_LoopSEAdjustPanning pans (SOUND_PAN_ATTACKER -> SOUND_PAN_TARGET), equal in both accepted orientations (K; not rendered).
+        audio: { current: null, attackerPan: playerAttacker ? -64 : 63, targetPan: playerAttacker ? 63 : -63 },
         liveCounts: { visualTasks: 0, soundTasks: 0, matrixBitmap: 0 }, animationRng: 0, gameplayRng: null, gameplayState: null,
       };
     },
