@@ -5495,6 +5495,44 @@
    "requestFields": {
     "turn": 0
    }
+  },
+  {
+   "id": 329,
+   "move": "SHEER_COLD",
+   "orientation": "player",
+   "variant": "sheer-cold-player",
+   "activationFrame": null,
+   "windowStart": null,
+   "ageOffset": 0,
+   "shadowRow": null,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/sheer-cold-live/sheer-cold-player-dewgong-opponent-chansey.json",
+    "scenario": "tools/battle-lab/mechanic-sheer-cold-player-dewgong-opponent-chansey.json",
+    "body": "normal",
+    "activation": "elevated opponents NOT measured for Sheer Cold (no OHKO body with a GOLBAT pair: CLOYSTER -> GOLBAT has no body); the non-elevated dense windows start at the scenario activation (inWindow false = no claimed shadow row, the hook stays off)"
+   }
+  },
+  {
+   "id": 329,
+   "move": "SHEER_COLD",
+   "orientation": "opponent",
+   "variant": "sheer-cold-opponent",
+   "activationFrame": null,
+   "windowStart": null,
+   "ageOffset": 0,
+   "shadowRow": null,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/sheer-cold-live/sheer-cold-opponent-dewgong-player-chansey.json",
+    "scenario": "tools/battle-lab/mechanic-sheer-cold-opponent-dewgong-player-chansey.json",
+    "body": "normal",
+    "activation": "elevated opponents NOT measured for Sheer Cold (no OHKO body with a GOLBAT pair: CLOYSTER -> GOLBAT has no body); the non-elevated dense windows start at the scenario activation (inWindow false = no claimed shadow row, the hook stays off)"
+   }
   }
  ]
 }

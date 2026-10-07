@@ -3560,6 +3560,23 @@
         "shiny battlers decline",
         "independent arbitrary-species/history framebuffer comparison"
       ]
+    },
+    {
+      "move": "MOVE_SHEER_COLD",
+      "id": 329,
+      "sourceFieldEvidence": "../tools/integration/fixtures/fix150-live-receipt.json",
+      "liveEvidence": [
+        "First body only (the activation BG registers, the Task_FadeToBg ice fade and the lent order are first-body inputs); a later body, an unknown lend and shiny battlers decline",
+        "SheerColdLiveInputs builder src/engine/liveProfileMoves.ts liveSheerColdInputs: geometry from the battler anchors (cube born at the target picOffsetPoint - (32, 36), monbg = the target sprite (x + x2, y + y2) on bg2 for a player target / bg1 for an opponent target), the cube sprite in the lowest free slot, task slots / cube resource / non-owned painter keys the measured known-entry constants (equal across the four prep22 scenarios); no Random2; never a capture row",
+        "dense full windows (191 rows player attacker / 190 opponent, constant across the accepted + alternate + extra scenarios) zero residual twice fresh through the production live renderer on the accepted DEWGONG / CHANSEY pair, the prep22 CLOYSTER -> GOLEM alternate and DEWGONG -> SNORLAX (large), both orientations (tools/integration/fixtures/sheer-cold-live)"
+      ],
+      "remaining": [
+        "later bodies decline (not measured)",
+        "shiny battlers decline",
+        "elevated opponents (the #142 activation-frame shadow row) are not measured for Sheer Cold: no shadow-row entry, the hook stays off",
+        "CLOYSTER -> GOLBAT (elevated) not staged: no body (the OHKO misses / reorders)",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3583,7 +3600,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 239,
+  "implementedCount": 240,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 11,

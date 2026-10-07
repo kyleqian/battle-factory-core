@@ -10,7 +10,7 @@
   "src/data/gen/battle-frontier-mons.json",
   "src/data/gen/factory-round-policy.json"
  ],
- "liveStatusImplementedCount": 239,
+ "liveStatusImplementedCount": 240,
  "staleCodesCorrected": [
   "B (sSpriteOrder): was 'first body only'; production now lends the order and tracks it across bodies (liveSpriteOrderHost.ts / spriteOrderProvider.ts, merged cross-body tracker + post-KO rung 1), so B no longer blocks anything; recipe work only (falls back after an unmodelled graphics command)",
   "F-AFFINE / E-TASK: were provider blockers; docs/allocator-plan-v2-evidence.md measured gOamMatrixAllocBitmap 0x6 + no tasks at all 481 known-entry bodies, so the accepted constants gated on the lent order suffice for first bodies (invalidated after a faint/switch)",
@@ -23,7 +23,7 @@
  "inFlightMoves": {},
  "summary": {
   "accepted": 276,
-  "live": 239,
+  "live": 240,
   "faithfulRandom": 11,
   "faithfulRandomMoves": [
    "MOVE_ASTONISH",
@@ -39,16 +39,16 @@
    "MOVE_WISH"
   ],
   "inFlight": 0,
-  "remaining": 26,
+  "remaining": 25,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
   },
   "weightPct": {
-   "live": 92.597,
+   "live": 92.746,
    "faithfulRandom": 3.761,
    "inFlight": 0,
-   "remaining": 3.155
+   "remaining": 3.006
   },
   "remainingByGroup": {
    "PROVIDER-x": {
@@ -56,8 +56,8 @@
     "weightPct": 0.962
    },
    "MULTI": {
-    "moves": 20,
-    "weightPct": 1.86
+    "moves": 19,
+    "weightPct": 1.711
    },
    "SMALL-INPUT": {
     "moves": 1,
@@ -70,14 +70,14 @@
   },
   "remainingByHostClass": {
    "H_BASIC": 2,
-   "H_BUFFER": 20,
+   "H_BUFFER": 19,
    "H_DERIVED": 3,
    "H_RANDOM": 1,
    "H_VARIANT": 3
   },
-  "orderFirstBodyOnlyMoves": 17,
-  "slotPlanNeededMoves": 19,
-  "sumsTo": "239+11+0+26=276",
+  "orderFirstBodyOnlyMoves": 16,
+  "slotPlanNeededMoves": 18,
+  "sumsTo": "240+11+0+25=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -177,8 +177,8 @@
    "aloneNames": [
     "METEOR_MASH"
    ],
-   "touchingMoves": 21,
-   "touchingWeightPct": 2.08,
+   "touchingMoves": 20,
+   "touchingWeightPct": 1.931,
    "meta": {
     "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
     "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
@@ -231,8 +231,8 @@
    "aloneNames": [
     "MEMENTO"
    ],
-   "touchingMoves": 20,
-   "touchingWeightPct": 1.71,
+   "touchingMoves": 19,
+   "touchingWeightPct": 1.561,
    "meta": {
     "cost": "new large host (docs/animation-integration-readiness.md A6)",
     "claim": "only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today"
@@ -263,8 +263,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 18,
-   "touchingWeightPct": 1.673,
+   "touchingMoves": 17,
+   "touchingWeightPct": 1.524,
    "meta": null
   },
   {
@@ -276,8 +276,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 18,
-   "touchingWeightPct": 1.639,
+   "touchingMoves": 17,
+   "touchingWeightPct": 1.49,
    "meta": null
   },
   {
@@ -438,9 +438,9 @@
   {
    "step": 5,
    "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
-   "newMoves": 18,
-   "newWeightPct": 1.563,
-   "cumulativeRemainingUnlocked": 22,
+   "newMoves": 17,
+   "newWeightPct": 1.414,
+   "cumulativeRemainingUnlocked": 21,
    "newNames": [
     "BONEMERANG",
     "ERUPTION",
@@ -455,7 +455,6 @@
     "PSYWAVE",
     "RAPID_SPIN",
     "REVENGE",
-    "SHEER_COLD",
     "SHOCK_WAVE",
     "SKILL_SWAP",
     "SNORE",
@@ -467,7 +466,7 @@
    "provider": "X-DISABLE",
    "newMoves": 2,
    "newWeightPct": 0.147,
-   "cumulativeRemainingUnlocked": 24,
+   "cumulativeRemainingUnlocked": 23,
    "newNames": [
     "ICE_BALL",
     "SPIT_UP"
@@ -478,7 +477,7 @@
    "provider": "X-TWOTURN",
    "newMoves": 1,
    "newWeightPct": 0.187,
-   "cumulativeRemainingUnlocked": 25,
+   "cumulativeRemainingUnlocked": 24,
    "newNames": [
     "DIVE"
    ]
@@ -488,7 +487,7 @@
    "provider": "X-AGE",
    "newMoves": 1,
    "newWeightPct": 0.112,
-   "cumulativeRemainingUnlocked": 26,
+   "cumulativeRemainingUnlocked": 25,
    "newNames": [
     "EXTREME_SPEED"
    ]
@@ -498,7 +497,7 @@
    "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 26,
+   "cumulativeRemainingUnlocked": 25,
    "newNames": []
   },
   {
@@ -506,7 +505,7 @@
    "provider": "D-TILE",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 26,
+   "cumulativeRemainingUnlocked": 25,
    "newNames": []
   },
   {
@@ -514,7 +513,7 @@
    "provider": "D-BG",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 26,
+   "cumulativeRemainingUnlocked": 25,
    "newNames": []
   },
   {
@@ -522,7 +521,7 @@
    "provider": "D-OAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 26,
+   "cumulativeRemainingUnlocked": 25,
    "newNames": []
   },
   {
@@ -530,7 +529,7 @@
    "provider": "D-VRAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 26,
+   "cumulativeRemainingUnlocked": 25,
    "newNames": []
   },
   {
@@ -538,7 +537,7 @@
    "provider": "D-SCAN",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 26,
+   "cumulativeRemainingUnlocked": 25,
    "newNames": []
   }
  ],
@@ -5034,298 +5033,6 @@
     "D-BG",
     "D-TILE",
     "C"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "MULTI"
-  },
-  {
-   "move": "MOVE_SHEER_COLD",
-   "id": 329,
-   "name": "SHEER COLD",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0014880952380952376,
-   "config": "src/animation/sceneOnPresentation.ts:2632",
-   "needs": [
-    "B",
-    "C",
-    "F-AFFINE",
-    "E-TASK",
-    "D-TILE",
-    "D-BG"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationInputs:spriteOrder (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/sheerCold.ts:59"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationInputs:animationRng (presentation Random2 (gRng2Value))",
-     "cites": [
-      "src/animation/sheerCold.ts:71"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationInputs:attackerSprite (battler sprite record {slot,x,y,x2,y2,subpriority,oamPriority,matrixNum,matrix}: battler owner slot + battler matrix)",
-     "cites": [
-      "src/animation/sheerCold.ts:45"
-     ]
-    },
-    {
-     "code": "E-TASK",
-     "text": "animationInputs:taskSlots (CreateTask slot / live task table)",
-     "cites": [
-      "src/animation/sheerCold.ts:48"
-     ]
-    },
-    {
-     "code": "D-TILE",
-     "text": "animationInputs:resources (OBJ tile/palette resource allocator)",
-     "cites": [
-      "src/animation/sheerCold.ts:56"
-     ]
-    },
-    {
-     "code": "D-BG",
-     "text": "animationInputs:monbg (BG regs / monbg / BLDCNT state)",
-     "cites": [
-      "src/animation/sheerCold.ts:62"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationInputs:targetAnimationCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/sheerCold.ts:42"
-    },
-    {
-     "path": "animationInputs:targetBattlePositionCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/sheerCold.ts:44"
-    },
-    {
-     "path": "animationInputs:attackerSprite",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/sheerCold.ts:45"
-    },
-    {
-     "path": "animationInputs:targetSprite",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/sheerCold.ts:46"
-    },
-    {
-     "path": "animationInputs:cubeSpriteSlot",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/sheerCold.ts:47"
-    },
-    {
-     "path": "animationInputs:taskSlots",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/sheerCold.ts:48"
-    },
-    {
-     "path": "animationInputs:taskSlots.fadeToBg",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/sheerCold.ts:49"
-    },
-    {
-     "path": "animationInputs:taskSlots.cube",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/sheerCold.ts:50"
-    },
-    {
-     "path": "animationInputs:taskSlots.updateMonBg",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/sheerCold.ts:51"
-    },
-    {
-     "path": "animationInputs:taskSlots.sound",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/sheerCold.ts:52"
-    },
-    {
-     "path": "animationInputs:taskSlots.clearMonBg",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/sheerCold.ts:53"
-    },
-    {
-     "path": "animationInputs:taskSlots.restoreBg",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/sheerCold.ts:54"
-    },
-    {
-     "path": "animationInputs:resources",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/sheerCold.ts:56"
-    },
-    {
-     "path": "animationInputs:matrixBitmap",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/sheerCold.ts:57"
-    },
-    {
-     "path": "animationInputs:spriteOrder",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/sheerCold.ts:59"
-    },
-    {
-     "path": "animationInputs:painterSprites",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/sheerCold.ts:61"
-    },
-    {
-     "path": "animationInputs:monbg",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/sheerCold.ts:62"
-    },
-    {
-     "path": "animationInputs:monbg.layer",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/sheerCold.ts:63"
-    },
-    {
-     "path": "animationInputs:monbg.scroll",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/sheerCold.ts:64"
-    },
-    {
-     "path": "animationInputs:background",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/sheerCold.ts:66"
-    },
-    {
-     "path": "animationInputs:background.bg1Cnt",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/sheerCold.ts:67"
-    },
-    {
-     "path": "animationInputs:background.bg2Cnt",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/sheerCold.ts:68"
-    },
-    {
-     "path": "animationInputs:animationRng",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/sheerCold.ts:71"
-    },
-    {
-     "path": "animationInputs:gameplayRng",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/sheerCold.ts:72"
-    },
-    {
-     "path": "animationInputs:restoreFadeEndAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/sheerCold.ts:74"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "full",
-   "carrierOccurrences": 2092,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "B",
-    "F-AFFINE",
-    "E-TASK"
-   ],
-   "providerNeeds": [
-    "C",
-    "D-TILE",
-    "D-BG"
    ],
    "palettePlan": false,
    "activationMeasured": false,

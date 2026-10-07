@@ -328,7 +328,7 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // curse-live: Curse (stats body) activation == window start (row 0; curseProbe.py sourceWindow, elevated PIDGEOT target dense).
     174,
     // prep22 P1: Lovely Kiss (faithful-random), Spikes, Octazooka windows start at activation (row 0; prep22 moves/*.json, both sides).
-    142, 191, 190, 324, 329,
+    142, 191, 190, 324,
     // Q2 (prep25 moves/*.json): the windows start at activation (row 0).
     304, 123, 328, 143,
   ].map((id) => [id, 0] as [number, number]).concat([
