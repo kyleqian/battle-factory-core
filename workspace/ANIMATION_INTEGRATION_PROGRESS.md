@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-06 (night, wind-down 2026-10-07) — 226 -> 243 scoped-exact, 10 -> 11 faithful-random; D4 OPEN
+## 2026-10-06 (night, wind-down 2026-10-07) — 226 -> 246 scoped-exact, 10 -> 12 faithful-random; D4 OPEN
 
 - prep22 (side, `c31dfd3c1`, new files only, merged `e7b7a1ac3`): Fire Punch is a 101-row body identical across
   burn / no-burn / faint outcomes (flames = separate Status_Burn body 152-155 frames later; status animations are
@@ -189,6 +189,14 @@
   tests, build 862 (`final-supervisor-gates-20261007.json`); preview `ba696679b` served at :5191, 4 samples
   hash-equal, mode control + session export passed, no browser errors (`playable-preview-ba696679b-receipt.json`).
   DEFERRED D4 OPEN (CPU-load timing class). Next: ROADMAP S10A "Next (2026-10-07 morning)".
+- Folded Sonnet worker `aca3fd801` (src tree `1efb1872`): `liveQ2Moves.ts` builders — EXACT Bonemerang (155; both hits,
+  hit 2 behind a first-body hit 1 via a host marker), Rapid Spin (229; S0 scanline carry, mixed anchors), Outrage
+  (200; first body) -> 246; FAITHFUL-RANDOM Luster Purge (295; plan rows 170 + 5k x 2; species-generic renderer art)
+  -> 12. 20 dense fixtures x 2 fresh 0 px; Bonemerang route 246 both hits active; worker gates 1,548 files / 12,665
+  tests, build; census `246+12+0+18=276`. Supervisor: dense rerun 4 alternates 0 px r1 == r2; differential 389/389.
+- Final wind-down: supervisor final gates on master `e09090833` (src tree `1efb1872`): typecheck, 1,548 files / 12,665 tests, build 862
+  (`final-supervisor-gates-20261007.json`); preview refreshed on this src (`playable-preview-<served commit>-receipt.json`). DEFERRED D4 OPEN. Next: ROADMAP S10A
+  "Next (2026-10-07 morning)".
 
 ## 2026-10-06 (day, wind-down) — D3 implemented: 218 -> 226 exact + 10 faithful-random live adapters
 
