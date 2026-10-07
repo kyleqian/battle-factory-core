@@ -17,18 +17,16 @@ backlog.
 
 # Open
 
-## #152 — Species audit 9: live Mach Punch idle rest; Meteor Mash player-side FLYGON target (S10A, found 2026-10-07)
+## #152 — Species audit 9 remainder: Mach Punch idle-rest target; Meteor Mash FLYGON fixture offset (S10A, 2026-10-07)
 
-Evidence `docs/live-species-audit-9.md`, receipts `tools/integration/fixtures/species-audit-9/` (154 rows, two fresh
-runs each). Supervisor reran the patch proof and the unpatched row.
-- **Mach Punch (183), opponent-side attacker with a nonzero idle rest (ONIX / RATTATA):** the ROM punch task moves the
-  attacker relative to its idle offset and the traces copy it (reset to 0 after age 57); the renderer uses fixed
-  tables (`machPunch.ts:325-330`, `:412`). Unpatched ONIX attacker 86,089 px (ages 51..109); the reverted patch
-  `mach-punch-idle-rest-env.diff` (default knobs) gives 0 px for ONIX and RATTATA, accepted window unchanged.
-- **Mach Punch, opponent-side target with an idle rest:** `targetShakeAtAge` returns 0 instead of the offset; the
-  patch leaves one row (age 60) unexplained -> decline such targets until resolved.
-- **Revenge (279):** the idle-rest decline is too broad for attackers (gate lifted: 0 px); keep it for targets.
-- **Meteor Mash (309), player-side FLYGON target:** star pixels 5-159 px/row on ages 49..189, cause not found.
+Evidence `docs/live-species-audit-9.md`, receipts `tools/integration/fixtures/species-audit-9/`. FIXED in `a7402719b`
+(supervisor reran x2 fresh): Mach Punch opponent attacker with an idle rest (ONIX 86,089 -> 0 px, RATTATA 36,222 -> 0)
+and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 px). Open remainder:
+- **Mach Punch (183), opponent-side target with an idle rest:** one row (age 60) unexplained after the rest fix; the
+  live adapter now DECLINES such targets (fallback view). Resume: RAM-probe the target x2 at ages 58..61.
+- **Meteor Mash (309), player-side FLYGON target:** not a production defect — the derived audit fixture's pinned
+  Random2 activation is 4 steps late (offset scan: 0 px only at -4, equal to the GOLBAT sibling's value); why the two
+  FLYGON probes record 4 extra steps is unexplained. Corrected fixture `fixtures/s10a-part0/meteor-mash-flygon/`.
 - Harness limit: the verifier passes only the attacker's personality, so shiny TARGET declines are unverified.
 
 ## #151 — Species audit 7 remainder: CPU-timing residuals in live Sheer Cold / Hyper Voice (D4 integration pending)

@@ -26,6 +26,17 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- Folded Opus worker `9398ab3a8` as `a7402719b` (src tree `58b592bc`): audit-9 fixes (Mach Punch attacker idle rest
+  in `machPunch.ts`; Mach Punch declines idle-rest targets; Revenge gate narrowed to targets; Meteor Mash FLYGON =
+  fixture Random2 offset, no production change). EXACT Spit Up (255; `liveSpitUpInputs.ts`, counters 1-3 =
+  request.turn, 12 windows 1300/1300 rows 0 px; route 33/7 SWALOT). FAITHFUL-TIMING Superpower (276;
+  `liveSuperpowerInputs.ts`; per-side monbg write row player 10 / opponent 11; all 6 windows 0 px in both phases;
+  gate = known order; Superpower branch now paints the armed #142 shadow after its scrolled BG3; route 179/42
+  NIDOQUEEN). Eruption not attempted (needs dense falling-rock / shake / palette profiles; prep29 R2). Worker gates
+  1,552 files / 12,725 tests, build, differential 389. Supervisor: Spit Up 4 windows (counters 1/3/2/3, accepted +
+  alternates) and Superpower 6 windows x2 fresh 0 px; the audit-9 ONIX / RATTATA Mach Punch and ONIX Revenge rows 0 px
+  on production, accepted Mach Punch / Revenge unchanged; union typecheck, smoke, 18 targeted files 1712/1712, own
+  differential vs `42ee4514f` 389/389. Counts: 247 + 12 + 7 faithful-timing, 10 remaining.
 - prep32 (side, `7ea9671a7`, new files only): Nightmare (171) READY as faithful timing — per-age caller inputs
   (palettes, registers, battler sprites, SortSprites order, clone / tasks) exact on 22,921 / 22,925 field-rows in 8
   windows (misses = state-only restore row T); pixels 1348/1349 rows 0 px at the measured phase (GENGAR->GOLBAT row 0
