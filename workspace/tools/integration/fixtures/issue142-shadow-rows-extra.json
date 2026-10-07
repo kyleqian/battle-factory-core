@@ -6093,6 +6093,50 @@
    "requestFields": {
     "turn": 0
    }
+  },
+  {
+   "id": 326,
+   "move": "EXTRASENSORY",
+   "orientation": "player",
+   "variant": "d4c-extrasensory-player-nuzleaf-opponent-shuckle",
+   "activationFrame": 80,
+   "windowStart": 80,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/d4a-live/extrasensory-player-nuzleaf-opponent-shuckle.json",
+    "scenario": "tools/battle-lab/mechanic-extrasensory-player-nuzleaf-opponent-shuckle.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep22Probes.sh; d4c live receipt; the elevated CROBAT opponent windows extrasensory-alt-*-espeon-crobat show the shadow on row 0: the opponent-attacker window is 0 px, the player-attacker window differs only on its documented split / lag rows from 43)"
+   },
+   "requestFields": {
+    "turn": 0
+   }
+  },
+  {
+   "id": 326,
+   "move": "EXTRASENSORY",
+   "orientation": "opponent",
+   "variant": "d4c-extrasensory-opponent-nuzleaf-player-shuckle",
+   "activationFrame": 84,
+   "windowStart": 84,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/d4a-live/extrasensory-opponent-nuzleaf-player-shuckle.json",
+    "scenario": "tools/battle-lab/mechanic-extrasensory-opponent-nuzleaf-player-shuckle.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep22Probes.sh; d4c live receipt; the elevated CROBAT opponent windows extrasensory-alt-*-espeon-crobat show the shadow on row 0: the opponent-attacker window is 0 px, the player-attacker window differs only on its documented split / lag rows from 43)"
+   },
+   "requestFields": {
+    "turn": 0
+   }
   }
  ]
 }

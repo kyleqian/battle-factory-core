@@ -130,5 +130,41 @@
   "psywave-alt-opponent-espeon-crobat",
   "prep30-psywave-alt-opponent-espeon-crobat",
   "opponent"
+ ],
+ [
+  "EXTRASENSORY",
+  "extrasensory-player-nuzleaf-opponent-shuckle",
+  "mechanic-extrasensory-player-nuzleaf-opponent-shuckle",
+  "player"
+ ],
+ [
+  "EXTRASENSORY",
+  "extrasensory-opponent-nuzleaf-player-shuckle",
+  "mechanic-extrasensory-opponent-nuzleaf-player-shuckle",
+  "opponent"
+ ],
+ [
+  "EXTRASENSORY",
+  "extrasensory-alt-player-alakazam-golem",
+  "prep25-extrasensory-alt-player-alakazam-golem",
+  "player"
+ ],
+ [
+  "EXTRASENSORY",
+  "extrasensory-alt-opponent-alakazam-golem",
+  "prep25-extrasensory-alt-opponent-alakazam-golem",
+  "opponent"
+ ],
+ [
+  "EXTRASENSORY",
+  "extrasensory-alt-player-espeon-crobat",
+  "prep30-extrasensory-alt-player-espeon-crobat",
+  "player"
+ ],
+ [
+  "EXTRASENSORY",
+  "extrasensory-alt-opponent-espeon-crobat",
+  "prep30-extrasensory-alt-opponent-espeon-crobat",
+  "opponent"
  ]
 ]

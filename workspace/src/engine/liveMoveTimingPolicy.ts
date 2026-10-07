@@ -13,13 +13,16 @@
 
 export const LIVE_MOVE_TIMING_POLICY_VERSION = "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event" as const;
 
-export type LiveMoveTimingParameterKind = "optional-lag-age" | "bg-write-row" | "palette-transfer-row";
+export type LiveMoveTimingParameterKind = "optional-lag-age" | "bg-write-row" | "palette-transfer-row" | "scanline-split-line";
 /**
  * "event" = the optional lag frame / late write happens; "no-event" = it does not (the source iteration count). Per kind:
  * - optional-lag-age: "event" = the optional lag frame at `age` is present (one more body row).
  * - bg-write-row: "event" = the LATER of the two write rows (`age`; the slower-CPU phase), "no-event" = the earlier row (`age - 1`).
  *   A tie therefore selects the earlier write row.
  * - palette-transfer-row: "event" = the later transfer row.
+ * - scanline-split-line: a main-loop write of BOTH scanline buffers lands while the frame is scanned out; "event" = the write lands below the
+ *   top of the distortion window (lines above the beam still show the previous row's values), "no-event" = before the window (split line
+ *   S = 0: the displayed buffer is the written one).
  */
 export type LiveMoveTimingPhase = "event" | "no-event";
 
@@ -140,6 +143,30 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
     }],
   },
   /**
+   * D4c Extrasensory (docs/next-adapters-prep30.md s0.2 T / s1.4 / s1.5; tools/integration/fixtures/prep30/extrasensory-{check,pixels,split}.json):
+   * (1) an optional lag at task row 142 (restore Fade 2: data[10] stays 2 on row 141, BG palette restore 142, registers >= 143 one row later): absent
+   * in 4 of 6 measured windows (accepted player / opponent, ALAKAZAM -> GOLEM player, ESPEON -> CROBAT opponent) -> 161 rows; wrong phase moves rows
+   * 143..158. (2) the distortion task rewrites both scanline buffers during the main loop: for the opponent-target ALAKAZAM -> GOLEM and ESPEON ->
+   * CROBAT player windows the write lands inside the target's lines (no constant split line is exact: prep30 split sweep); the other 4 windows are
+   * exact at S = 0 (the written buffer; the reducer's source-fitted stage-2 row stays). Body rows are independent of the split.
+   */
+  326: {
+    move: "MOVE_EXTRASENSORY",
+    parameters: [{
+      kind: "optional-lag-age", age: 142, fixedLagAges: [122, 123], iterations: 161,
+      alternatives: [{ phase: "event", bodyRows: 162, measured: 2 }, { phase: "no-event", bodyRows: 161, measured: 4 }],
+      chosen: "no-event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/prep30/extrasensory-check.json phase.measured (2 of 6 lag)", "docs/next-adapters-prep30.md s1.5",
+        "tools/integration/fixtures/d4a-live/extrasensory-*.json (D4c: the same 6 windows re-probed fresh)"],
+    }, {
+      kind: "scanline-split-line", age: 0, fixedLagAges: [], iterations: 161,
+      alternatives: [{ phase: "event", bodyRows: 161, measured: 2 }, { phase: "no-event", bodyRows: 161, measured: 4 }],
+      chosen: "no-event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/prep30/extrasensory-split.json (S = 0..36 sweep)", "tools/integration/fixtures/prep30/extrasensory-pixels.json",
+        "docs/next-adapters-prep30.md s1.4"],
+    }],
+  },
+  /**
    * D4b Meteor Mash (docs/next-adapters-prep17.md s0.1; tools/integration/fixtures/prep17/meteor-mash-tail-receipt.json): restorebg's
    * LoadDefaultBg frame (row 193) skips the main-loop iteration of row 195 in 4 of 5 measured bodies (accepted opponent, prep12 SHIFTRY ->
    * GOLEM, A2 METANG -> GOLEM, A3 GOLEM -> SHIFTRY; the accepted player METANG -> ONIX body does not lag): first inactive age 213 + L,
@@ -190,6 +217,8 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   279,
   // D4c: Psywave (liveOamMoves.ts livePsywaveInputs; fixtures tools/integration/fixtures/d4a-live/psywave-*).
   149,
+  // D4c: Extrasensory (liveOamMoves.ts liveExtrasensoryInputs; first bodies; fixtures tools/integration/fixtures/d4a-live/extrasensory-*).
+  326,
   // D4b: Meteor Mash (D3 + D4; Random2 twinkles from the presentation host, liveMovePresentationRng.ts plan 309).
   309,
 ]);

@@ -747,3 +747,71 @@ export function livePsywaveHardwareOamRows(input: LivePsywaveOamInputs): {
   }
   return { oam, matrices, orders, rings, allocations: lives.map((l) => ({ slot: l.slot, matrixNum: l.matrix, sourceCreationOrder: l.idx })) };
 }
+
+/**
+ * Move_EXTRASENSORY (docs/next-adapters-prep30.md s1; ported from tools/integration/prep30ExtrasensoryModel.ts cloneStep /
+ * assembleExtrasensoryHardwareOam): the battlers (the target is on the monbg for OAM rows 41..120), the CloneBattlerSpriteWithBlend clone
+ * (attacker attrs, double affine, blend, corner -64) on OAM rows 95..119 whose scale / y2 are written by AnimTask_TransparentCloneGrowAndShrink:
+ * BuildOamBuffer precedes RunTasks, so OAM row r carries task step r - 2 (row 95: y2 0, identity). Clone subpriority = attacker + 1.
+ */
+export const EXTRASENSORY_CLONE_FIRST = 94, EXTRASENSORY_MONBG = 39, EXTRASENSORY_CLEAR = 120;
+/** AnimTask_TransparentCloneGrowAndShrink_Step task step j (row 94 + j): scale 256 - sin(4j) >> 1; SetBattlerSpriteYOffsetFromOtherYScale y2. */
+export function liveExtrasensoryCloneStep(j: number, pictureHeight: number, sine: readonly number[]): { angle: number; state: number; scale: number; y2: number } {
+  const angle = j <= 11 ? 4 * (j + 1) : j <= 23 ? 4 * (23 - j) : 0, state = j <= 10 ? 0 : j <= 22 ? 1 : j === 23 ? 2 : 3;
+  const scale = 256 - (sine[angle]! >> 1), v = pictureHeight, v2 = Math.min(Math.trunc((v << 8) / scale), 128);
+  return { angle, state, scale, y2: Math.trunc((v - v2) / 2) };
+}
+export interface LiveExtrasensoryOamInputs {
+  readonly attacker: LiveOamBattler;
+  readonly target: LiveOamBattler;
+  /** The attacker's sprite position (gSprites x / y, no idle rest) and picture height 64 - 2 y_offset. */
+  readonly attackerPosition: Point;
+  readonly attackerPictureHeight: number;
+  readonly scene: LiveOamScene;
+  /** Lowest free sprite slot / matrix at the known entry. */
+  readonly cloneSlot: number;
+  readonly cloneMatrix: number;
+  readonly activationOrder: readonly number[];
+  readonly sort: LiveSpriteOrderSort;
+  readonly sine: readonly number[];
+  readonly rows: number;
+}
+export function liveExtrasensoryHardwareOamRows(input: LiveExtrasensoryOamInputs): {
+  oam: string[][]; matrices: (readonly [number, number, number, number])[][]; orders: number[][];
+} {
+  const { attacker, target } = input, a = attacker.attr;
+  const cloneAt = (row: number): { attr: OamAttr; scale: number } | null => {
+    if (row < EXTRASENSORY_CLONE_FIRST + 1 || row > EXTRASENSORY_CLONE_FIRST + 25) return null;
+    const j = row - 2 - EXTRASENSORY_CLONE_FIRST;
+    const st = j < 0 ? { scale: 256, y2: 0 } : liveExtrasensoryCloneStep(j, input.attackerPictureHeight, input.sine);
+    return { scale: st.scale, attr: [a[0] & 0xc000 | 0x0700 | (input.attackerPosition.y + st.y2 - 64) & 0xff,
+      a[1] & 0xc000 | input.cloneMatrix << 9 | (input.attackerPosition.x - 64) & 0x1ff, a[2]] };
+  };
+  // Sprite state s is what OAM row s + 1 shows.
+  const spritesAt = (state: number): LiveOamSprite[] => {
+    const out: LiveOamSprite[] = input.scene.occupants.map((o) => ({ ...o, oamY: o.attr[0] & 0xff }));
+    out.push({ ...attacker, visible: true, oamY: attacker.attr[0] & 0xff });
+    const row = state + 1;
+    out.push({ ...target, visible: row < EXTRASENSORY_MONBG + 2 || row > EXTRASENSORY_CLEAR, oamY: target.attr[0] & 0xff });
+    const clone = cloneAt(row);
+    if (clone) out.push({ slot: input.cloneSlot, attr: clone.attr, subpriority: attacker.subpriority + 1, visible: true, oamY: clone.attr[0] & 0xff });
+    return out;
+  };
+  const matricesAt = (row: number): (readonly [number, number, number, number])[] => {
+    const m = Array.from({ length: 32 }, () => IDENTITY as readonly [number, number, number, number]);
+    const clone = cloneAt(row); if (clone) m[input.cloneMatrix] = [clone.scale, 0, 0, clone.scale];
+    return m;
+  };
+  const oam: string[][] = [], matrices: (readonly [number, number, number, number])[][] = [], orders: number[][] = [];
+  let order: readonly number[] = input.activationOrder;
+  let previous = spritesAt(-1);
+  for (let row = 0; row < input.rows; row += 1) {
+    const m = matricesAt(row);
+    oam.push(buildLiveHardwareOam(order, previous, input.scene.healthbox, m));
+    matrices.push(m);
+    previous = spritesAt(row);
+    order = carryLiveSpriteOrder(order, previous, input.sort);
+    orders.push([...order]);
+  }
+  return { oam, matrices, orders };
+}

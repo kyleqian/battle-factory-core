@@ -1,0 +1,41 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "EXTRASENSORY",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep30-extrasensory-alt-opponent-espeon-crobat.json",
+ "denseWindow": {
+  "startFrame": 83,
+  "endFrame": 243
+ },
+ "windowSource": "window = [activation, activation + 161 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": "no-event",
+ "timingPhases": {
+  "optional-lag-age": "no-event",
+  "scanline-split-line": "no-event"
+ },
+ "attacker": {
+  "species": "ESPEON",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "CROBAT",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 2027808500,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 192,
+  "playerMaxHp": 192,
+  "opponentHp": 141,
+  "opponentMaxHp": 141,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}
