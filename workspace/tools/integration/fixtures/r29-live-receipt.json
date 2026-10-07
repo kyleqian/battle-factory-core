@@ -1,0 +1,260 @@
+{
+ "schema": "r29-live-adapter-receipt/v1",
+ "oracle": "battle-scene-on (direct mGBA probe + production live renderer; docs/next-adapters-prep29.md)",
+ "generator": "tools/integration/prep29Fixtures.py (probes: tools/integration/prep22Probes.sh)",
+ "verifier": "tools/integration/liveFixtureBatch.sh -> liveAdapterFramebuffer.ts (2 fresh probe processes each)",
+ "summary": {
+  "fixtures": 20,
+  "rows": 2892,
+  "residualPixels": 0,
+  "allExactTwiceFresh": true,
+  "moves": {
+   "BONEMERANG": {
+    "id": 155,
+    "fixtures": 8,
+    "rows": 71,
+    "class": "scoped-exact"
+   },
+   "RAPID_SPIN": {
+    "id": 229,
+    "fixtures": 4,
+    "rows": 130,
+    "class": "scoped-exact"
+   },
+   "OUTRAGE": {
+    "id": 200,
+    "fixtures": 4,
+    "rows": 119,
+    "class": "scoped-exact"
+   },
+   "LUSTER_PURGE": {
+    "id": 295,
+    "fixtures": 4,
+    "rows": 332,
+    "class": "faithful-random (pinned activation words)"
+   }
+  }
+ },
+ "fixtures": {
+  "bonemerang-alt-opponent-rhydon-player-golem-hit1": {
+   "rows": 71,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    71,
+    71
+   ]
+  },
+  "bonemerang-alt-opponent-rhydon-player-golem-hit2": {
+   "rows": 71,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    71,
+    71
+   ]
+  },
+  "bonemerang-alt-player-rhydon-opponent-golem-hit1": {
+   "rows": 71,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    71,
+    71
+   ]
+  },
+  "bonemerang-alt-player-rhydon-opponent-golem-hit2": {
+   "rows": 71,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    71,
+    71
+   ]
+  },
+  "bonemerang-opponent-marowak-player-chansey-hit1": {
+   "rows": 71,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    71,
+    71
+   ]
+  },
+  "bonemerang-opponent-marowak-player-chansey-hit2": {
+   "rows": 71,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    71,
+    71
+   ]
+  },
+  "bonemerang-player-marowak-opponent-chansey-hit1": {
+   "rows": 71,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    71,
+    71
+   ]
+  },
+  "bonemerang-player-marowak-opponent-chansey-hit2": {
+   "rows": 71,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    71,
+    71
+   ]
+  },
+  "luster-purge-alt-opponent-latias-player-golem": {
+   "rows": 332,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    332,
+    332
+   ]
+  },
+  "luster-purge-alt-player-latias-opponent-golem": {
+   "rows": 332,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    332,
+    332
+   ]
+  },
+  "luster-purge-opponent-latios-player-onix": {
+   "rows": 332,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    332,
+    332
+   ]
+  },
+  "luster-purge-player-latios-opponent-onix": {
+   "rows": 332,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    332,
+    332
+   ]
+  },
+  "outrage-alt-opponent-flygon-player-golem": {
+   "rows": 119,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    119,
+    119
+   ]
+  },
+  "outrage-alt-player-flygon-opponent-golem": {
+   "rows": 119,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    119,
+    119
+   ]
+  },
+  "outrage-opponent-dragonite-player-onix": {
+   "rows": 119,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    119,
+    119
+   ]
+  },
+  "outrage-player-dragonite-opponent-onix": {
+   "rows": 119,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    119,
+    119
+   ]
+  },
+  "rapid-spin-alt-opponent-starmie-player-golem": {
+   "rows": 130,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    130,
+    130
+   ]
+  },
+  "rapid-spin-alt-player-starmie-opponent-golem": {
+   "rows": 130,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    130,
+    130
+   ]
+  },
+  "rapid-spin-opponent-wartortle-player-onix": {
+   "rows": 130,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    130,
+    130
+   ]
+  },
+  "rapid-spin-player-wartortle-opponent-onix": {
+   "rows": 130,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    130,
+    130
+   ]
+  }
+ }
+}

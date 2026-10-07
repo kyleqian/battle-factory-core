@@ -229,9 +229,9 @@ export function liveRapidSpinInputs(args: Omit<LiveQ2Args, "firstBody" | "palett
 const OUTRAGE_FLAME_BIRTHS = [6, 8, 10, 12, 14, 16, 18, 20, 22, 27, 29, 31, 33, 35, 37, 39, 44, 46, 48, 50, 52, 54, 56] as const;
 /** Lowest-free flame slots over the known-entry in-use set, births first; a flame is destroyed at birth + 31 after that frame's births (prep29 B.6). */
 const outrageFlameSlots = (): number[] => {
-  const used = new Set([0, 1, 2, 6, 8, 60, 61, 62, 63]), slots: number[] = [];
+  const used = new Set([0, 1, 2, 6, 8, 60, 61, 62, 63]), slots: number[] = [], freed = new Set<number>();
   OUTRAGE_FLAME_BIRTHS.forEach((age, i) => {
-    OUTRAGE_FLAME_BIRTHS.forEach((birth, j) => { if (j < i && birth + 31 < age) used.delete(slots[j]!); });
+    OUTRAGE_FLAME_BIRTHS.forEach((birth, j) => { if (j < i && birth + 31 < age && !freed.has(j)) { freed.add(j); used.delete(slots[j]!); } });
     let s = 0; while (used.has(s)) s += 1;
     used.add(s); slots.push(s);
   });
