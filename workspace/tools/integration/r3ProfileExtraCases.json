@@ -70,5 +70,29 @@
   "octazooka-extra-opponent-kingler-snorlax",
   "r3-octazooka-extra-opponent-kingler-snorlax",
   "opponent"
+ ],
+ [
+  "SIGNAL_BEAM",
+  "signal-beam-extra-player-beedrill-golbat",
+  "r3-signal-beam-extra-player-beedrill-golbat",
+  "player"
+ ],
+ [
+  "SIGNAL_BEAM",
+  "signal-beam-extra-opponent-beedrill-golbat",
+  "r3-signal-beam-extra-opponent-beedrill-golbat",
+  "opponent"
+ ],
+ [
+  "SIGNAL_BEAM",
+  "signal-beam-extra-player-venomoth-snorlax",
+  "r3-signal-beam-extra-player-venomoth-snorlax",
+  "player"
+ ],
+ [
+  "SIGNAL_BEAM",
+  "signal-beam-extra-opponent-venomoth-snorlax",
+  "r3-signal-beam-extra-opponent-venomoth-snorlax",
+  "opponent"
  ]
 ]

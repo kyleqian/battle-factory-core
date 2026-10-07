@@ -13,9 +13,11 @@ SRC = {
     "lovely-kiss": ("LOVELY_KISS", "mechanic-lovely-kiss-player-jynx-opponent-onix", "mechanic-lovely-kiss-opponent-jynx-player-onix"),
     "spikes": ("SPIKES", "mechanic-spikes-player-qwilfish-opponent-onix", "mechanic-spikes-opponent-qwilfish-player-onix"),
     "octazooka": ("OCTAZOOKA", "mechanic-octazooka-player-octillery-opponent-onix", "mechanic-octazooka-opponent-octillery-player-onix"),
+    "signal-beam": ("SIGNAL_BEAM", "mechanic-signal-beam-player-ariados-opponent-chansey", "mechanic-signal-beam-opponent-ariados-player-chansey"),
 }
 PAIRS = {"lovely-kiss": [("NINETALES", "GOLBAT"), ("JYNX", "SNORLAX")], "spikes": [("SKARMORY", "GOLBAT"), ("FORRETRESS", "SNORLAX")],
-         "octazooka": [("OCTILLERY", "GOLBAT"), ("KINGLER", "SNORLAX")]}
+         "octazooka": [("OCTILLERY", "GOLBAT"), ("KINGLER", "SNORLAX")],
+         "signal-beam": [("BEEDRILL", "GOLBAT"), ("VENOMOTH", "SNORLAX")]}
 cases = []
 for move, (label, ps, os_) in SRC.items():
     for att, tgt in PAIRS[move]:

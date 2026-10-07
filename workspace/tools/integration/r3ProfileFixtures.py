@@ -8,7 +8,7 @@ from pathlib import Path
 R = Path(__file__).resolve().parents[2]
 D = Path(sys.argv[1])
 S = {s["id"]: s for s in json.loads((R / "src/data/gen/species-stats.json").read_text())["species"]}
-MOVES = {"LOVELY_KISS": (142, 152), "SPIKES": (191, 113), "OCTAZOOKA": (190, 79)}
+MOVES = {"LOVELY_KISS": (142, 152), "SPIKES": (191, 113), "OCTAZOOKA": (190, 79), "SIGNAL_BEAM": (324, None)}  # Signal Beam rows: 145 (player attacker) / 144 (opponent)
 CASES = [  # (move, tag, scenario, attacker side)
     ("LOVELY_KISS", "lovely-kiss-player-jynx-opponent-onix", "mechanic-lovely-kiss-player-jynx-opponent-onix", "player"),
     ("LOVELY_KISS", "lovely-kiss-opponent-jynx-player-onix", "mechanic-lovely-kiss-opponent-jynx-player-onix", "opponent"),
@@ -23,6 +23,12 @@ CASES = [  # (move, tag, scenario, attacker side)
     ("OCTAZOOKA", "octazooka-alt-player-kingler-golem", "prep22-octazooka-alt-player-kingler-golem", "player"),
     ("OCTAZOOKA", "octazooka-alt-opponent-kingler-golem", "prep22-octazooka-alt-opponent-kingler-golem", "opponent"),
 ]
+CASES += [
+    ("SIGNAL_BEAM", "signal-beam-player-ariados-opponent-chansey", "mechanic-signal-beam-player-ariados-opponent-chansey", "player"),
+    ("SIGNAL_BEAM", "signal-beam-opponent-ariados-player-chansey", "mechanic-signal-beam-opponent-ariados-player-chansey", "opponent"),
+    ("SIGNAL_BEAM", "signal-beam-alt-player-venomoth-golem", "prep22-signal-beam-alt-player-venomoth-golem", "player"),
+    ("SIGNAL_BEAM", "signal-beam-alt-opponent-venomoth-golem", "prep22-signal-beam-alt-opponent-venomoth-golem", "opponent"),
+]
 extra = Path(__file__).parent / "r3ProfileExtraCases.json"
 if extra.exists():
     CASES += [tuple(c) for c in json.loads(extra.read_text())]
@@ -36,6 +42,8 @@ out.mkdir(exist_ok=True)
 for move, tag, scen, side in CASES:
     p = json.loads((D / f"{scen}-r1.json").read_text())
     mid, rows = MOVES[move]
+    if rows is None:
+        rows = 145 if side == "player" else 144
     bodies = p["bodies"]
     idx = next(i for i, b in enumerate(bodies) if b["move"] == mid)
     body = bodies[idx]
