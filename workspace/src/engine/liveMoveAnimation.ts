@@ -128,7 +128,7 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // prep22 P3: Sheer Cold first body (the ice-fade background, the lent order and the activation registers are the first-body inputs).
   329,
   // Q2 (docs/next-adapters-prep25.md s0.2 / C): zero-Random2 bodies through liveQ2Moves.ts: Hyper Voice, Smog, Sand Tomb, Sky Attack
-  // (charge body only). Snore is NOT wired (see liveSnoreInputs).
+  // (charge + strike). Snore is NOT wired (see liveSnoreInputs).
   304, 123, 328, 143,
   // oam1 (docs/next-adapters-prep20.md): production hardware-OAM provider (liveMoveOamAssembler.ts), first body.
   // Fury Cutter: the counter-1 body only (a first body implies furyCutterCounter 1).
@@ -810,7 +810,7 @@ export function liveMoveAnimationDuration(
     // Sheer Cold first body: 191 rows (player attacker) / 190 (opponent), constant across the accepted + alternate scenarios (prep22 s0.2).
     case 329: return request.attacker === 0 ? 191 : 190;
     // Sky Attack (prep25): charge 148 rows / strike 180 rows, selected by gAnimMoveTurn bit 0 like Razor Wind / Solar Beam.
-    case 143: return (request.turn & 1) === 0 ? 148 : null; // the strike (180 rows) declines: no exact order lend after the charge (see case 143)
+    case 143: return (request.turn & 1) === 0 ? 148 : 180; // charge 148 rows, strike 180 (the strike needs the 10143 order-plan lend, see case 143)
     case 328: return 123; // Sand Tomb (prep25: constant across the four scenarios).
     case 123: return 305; // Smog (prep25: constant across the four scenarios).
     case 304: return 104; // Hyper Voice (prep25: constant across the four scenarios).
@@ -2512,11 +2512,10 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 143: {
-      // prep25 Q2: Sky Attack CHARGE body (first body: WIN0 (240, 161) is the battle's first-body reset). The strike (turn bit 1, 180 rows) is
-      // not claimed: the order tracker has no plan for the 143 charge body, so the strike never has a known lend (liveSkyAttackInputs still
-      // builds it: WIN0 (0, 0) after the charge).
+      // prep25 Q2 / prep28: Sky Attack charge (first body: WIN0 (240, 161) is the battle's first-body reset) and strike (turn bit 1, 180 rows,
+      // WIN0 (0, 0) after the charge). The order host keys the strike 10143 (request.turn), so the tracker lends the strike its own free order.
       const strike = (request.turn & 1) === 1;
-      if (strike || !spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      if (!spriteOrderInput?.known || (!strike && !spriteOrderInput.firstBody)) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       const lentOrder = spriteOrderWithOccupiedPrefix(

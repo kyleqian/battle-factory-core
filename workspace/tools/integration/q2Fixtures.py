@@ -31,13 +31,15 @@ def gender(sp, pers):
 out = R / "tools/integration/fixtures/q2-live"
 out.mkdir(exist_ok=True)
 for move, tag, scen, side in CASES:
+    if not (D / f"{scen}-r1.json").exists():
+        continue  # a PROBEDIR may hold a subset of the scenarios
     p = json.loads((D / f"{scen}-r1.json").read_text())
     mid, rows = MOVES[move]
     bodies = p["bodies"]
     idxs = [i for i, b in enumerate(bodies) if b["move"] == mid]
     if move == "SNORE":
         continue  # not wired: no exact order lend after the sleep-inducing body (docs in the final report)
-    for n, idx in enumerate(idxs[:1]):  # Sky Attack: the charge body only (the strike has no known order lend)
+    for n, idx in enumerate(idxs[:2] if move == "SKY_ATTACK" else idxs[:1]):  # Sky Attack: charge + strike (prep28: strike keyed 10143)
         body = bodies[idx]
         A = body["start"]
         rows_ = rows if rows is not None else (148 if n == 0 else 180)

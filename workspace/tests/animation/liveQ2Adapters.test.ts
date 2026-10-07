@@ -24,6 +24,7 @@ const NAMES = readdirSync(DIR).filter((n) => n.endsWith(".json")).map((n) => n.s
 const IDS = { HYPER_VOICE: 304, SMOG: 123, SAND_TOMB: 328, SKY_ATTACK: 143 } as const;
 const ROWS = { 304: 104, 123: 305, 328: 123, 143: 148 } as const;
 const idOf = (f: Fixture) => IDS[f.move as keyof typeof IDS];
+const rowsOf = (name: string, f: Fixture) => name.endsWith("-strike") ? 180 : ROWS[idOf(f)];
 const effectOf = (f: Fixture, age = 0) => {
   const view = liveView(f, age);
   return { view, effect: view.effect as unknown as { request: BattleMoveAnimationRequest; spriteOrderInput: never } };
@@ -34,7 +35,7 @@ const configOf = (f: Fixture, age = 0, mutate?: (r: BattleMoveAnimationRequest) 
 };
 
 describe("live Q2 registration", () => {
-  it("Hyper Voice, Smog, Sand Tomb and the Sky Attack charge are scoped-exact; Snore is not wired; durations are the prep25 constants", () => {
+  it("Hyper Voice, Smog, Sand Tomb and the Sky Attack charge + strike are scoped-exact; Snore is not wired; durations are the prep25 constants", () => {
     for (const id of [304, 123, 328, 143]) {
       expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).toContain(id);
       expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[id]).toBe(0);
@@ -46,7 +47,7 @@ describe("live Q2 registration", () => {
       expect(liveMoveAnimationDuration({ ...base, moveId: 123, turn: 0 })).toBe(305);
       expect(liveMoveAnimationDuration({ ...base, moveId: 328, turn: 0 })).toBe(123);
       expect(liveMoveAnimationDuration({ ...base, moveId: 143, turn: 0 })).toBe(148);
-      expect(liveMoveAnimationDuration({ ...base, moveId: 143, turn: 1 })).toBeNull();
+      expect(liveMoveAnimationDuration({ ...base, moveId: 143, turn: 1 })).toBe(180);
       expect(liveMoveAnimationDuration({ ...base, moveId: 173, turn: 0 })).toBeNull();
     }
     const exact = (JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8")).implementedAdapters as { id: number }[]).map((e) => e.id);
@@ -54,19 +55,20 @@ describe("live Q2 registration", () => {
     expect(exact).not.toContain(173);
   });
 
-  it("covers 29 dense fixtures (accepted, prep25 alternate, GOLBAT-elevated / SNORLAX-large extras) x both orientations; windows start at activation", () => {
-    expect(NAMES).toHaveLength(29);
+  it("covers 37 dense fixtures (accepted, prep25 alternate, GOLBAT-elevated / SNORLAX-large extras) x both orientations; windows start at activation", () => {
+    expect(NAMES).toHaveLength(37);
     for (const name of NAMES) {
       const f = fixtureAt(name);
-      expect(f.denseWindow!.endFrame - f.denseWindow!.startFrame + 1).toBe(ROWS[idOf(f)]);
+      expect(f.denseWindow!.endFrame - f.denseWindow!.startFrame + 1).toBe(rowsOf(name, f));
     }
     for (const move of ["hyper-voice", "smog", "sand-tomb", "sky-attack"]) {
-      expect(NAMES.filter((n) => n.startsWith(`${move}-`) && !n.includes("-alt-") && !n.includes("-extra-"))).toHaveLength(2);
-      expect(NAMES.filter((n) => n.startsWith(`${move}-alt-`))).toHaveLength(2);
+      const bodies = move === "sky-attack" ? 2 : 1; // charge + strike
+      expect(NAMES.filter((n) => n.startsWith(`${move}-`) && !n.includes("-alt-") && !n.includes("-extra-"))).toHaveLength(2 * bodies);
+      expect(NAMES.filter((n) => n.startsWith(`${move}-alt-`))).toHaveLength(2 * bodies);
       expect(NAMES.filter((n) => n.startsWith(`${move}-extra-`)).length).toBeGreaterThanOrEqual(2);
     }
     const receipt = JSON.parse(readFileSync("tools/integration/fixtures/q2-live-adapter-receipt.json", "utf8"));
-    expect(receipt.summary).toMatchObject({ fixtures: 29, allExactTwiceFresh: true });
+    expect(receipt.summary).toMatchObject({ fixtures: 37, allExactTwiceFresh: true });
   });
 });
 
@@ -134,15 +136,17 @@ describe("live Q2 gates", () => {
     for (const side of ["player", "opponent"] as const) expect(call(effect.spriteOrderInput, { ...view.field, [side]: { ...view.field[side], personality: shiny } })).toBeNull();
   });
 
-  it("Sky Attack: the charge needs the first body (a later-body charge declines) and the strike (turn bit 1) declines", () => {
+  it("Sky Attack: the charge needs the first body (a later-body charge declines); the strike (turn bit 1) needs a known lend and starts with WIN0 (0, 0)", () => {
     const f = fixtureAt("sky-attack-alt-player-pidgeot-golem-charge");
     const { view, effect } = effectOf(f);
     const first = effect.spriteOrderInput as { known: true; free: number[]; firstBody?: true };
     const { firstBody: _drop, ...later } = first;
     expect(liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, first as never)).not.toBeNull();
     expect(liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, later as never)).toBeNull();
-    expect(liveMoveAnimationPresentation({ ...effect.request, turn: 1 }, view.field, 0, undefined, undefined, later as never)).toBeNull();
-    expect(liveMoveAnimationPresentation({ ...effect.request, turn: 1 }, view.field, 0, undefined, undefined, first as never)).toBeNull();
+    expect(liveMoveAnimationPresentation({ ...effect.request, turn: 1 }, view.field, 0, undefined, undefined, undefined)).toBeNull();
+    expect(liveMoveAnimationPresentation({ ...effect.request, turn: 1 }, view.field, 0, undefined, undefined, { known: false } as never)).toBeNull();
+    const strike = liveMoveAnimationPresentation({ ...effect.request, turn: 1 }, view.field, 0, undefined, undefined, later as never);
+    expect((strike!.config as any).animationInputs.background.registers).toMatchObject({ win0h: 0, win0v: 0 });
     expect((configOf(f)!.config as any).animationInputs.background.registers).toMatchObject({ win0h: 240, win0v: 161 });
   });
 
@@ -178,15 +182,23 @@ describe("live Q2 ordinary routes", () => {
     ["SMOG 70/0 MAGBY", 123, 70, 0, 3 as const, 305],
     ["SAND_TOMB 345/21 DUGTRIO", 328, 345, 21, 3 as const, 123],
     ["SAND_TOMB 543/21 DUGTRIO", 328, 543, 21, 3 as const, 123],
-    ["SKY_ATTACK 244/42 FEAROW charge", 143, 244, 42, 3 as const, 148],
-    ["SKY_ATTACK 376/42 FEAROW charge", 143, 376, 42, 3 as const, 148],
+    ["SKY_ATTACK 244/42 FEAROW charge + strike", 143, 244, 42, 3 as const, 148],
+    ["SKY_ATTACK 376/42 FEAROW charge + strike", 143, 376, 42, 3 as const, 148],
   ])("route %s: body reached, adapter active every age, following prompt reached, Scene ON/OFF parity", (_name, id, seed, streak, slot, ages) => {
     const on = generatedCommandAnimationReplay(seed, "on", [slot], streak);
     const off = generatedCommandAnimationReplay(seed, "off", [slot], streak);
     const bodies = on.animations.filter((a) => a.moveId === id && a.attacker === 0);
-    expect(bodies).toHaveLength(1);
+    // Sky Attack: the charge body and the strike body of the same route (the strike is keyed 10143 in the order host).
+    expect(bodies).toHaveLength(id === 143 ? 2 : 1);
     expect(bodies[0]!.ages).toEqual(Array.from({ length: ages }, (_, age) => age));
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
+    if (id === 143) {
+      expect(bodies[1]!.ages).toEqual(Array.from({ length: 180 }, (_, age) => age));
+      // 376: Thunder Wave in between (planned) -> known lend -> adapter active every age. 244: Ice Beam after the opponent's Dragon Dance (349:opponent
+      // is NEEDS-KEYS) leaves the order unknown, so the strike declines on every age (gate); logic unchanged.
+      if (seed === 376) expect(bodies[1]!.adapterActive.every(Boolean)).toBe(true);
+      else expect(bodies[1]!.adapterActive.some(Boolean)).toBe(false);
+    }
     parityOf(on, off);
   }, 240000);
 

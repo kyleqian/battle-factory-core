@@ -1,0 +1,49 @@
+{
+ "schema": "q2-live-adapter-fixture/v1",
+ "move": "SKY_ATTACK",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/q2-sky-attack-extra-opponent-pidgeot-snorlax.json",
+ "denseWindow": {
+  "startFrame": 820,
+  "endFrame": 999
+ },
+ "windowSource": "window = [activation, activation + 180 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "PIDGEOT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703675,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 267,
+  "playerMaxHp": 267,
+  "opponentHp": 158,
+  "opponentMaxHp": 158,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 143,
+   "side": "opponent"
+  },
+  {
+   "moveId": 150,
+   "side": "player"
+  }
+ ],
+ "requestFields": {
+  "turn": 1
+ }
+}
