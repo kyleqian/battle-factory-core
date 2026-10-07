@@ -1,0 +1,66 @@
+{
+ "schema": "q2-live-adapter-fixture/v1",
+ "move": "HYPER_VOICE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-7/scenarios/pichuA-hyper-voice-opponent-exploud-player-slowking.json",
+ "denseWindow": {
+  "startFrame": 78,
+  "endFrame": 181
+ },
+ "windowSource": "window = [activation, activation + 104 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "PICHU",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SLOWKING",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703808,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 202,
+  "playerMaxHp": 202,
+  "opponentHp": 127,
+  "opponentMaxHp": 127,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "speciesAudit6": {
+  "acceptedWindow": [
+   80,
+   183
+  ],
+  "bodyIndex": 0,
+  "origBodyIndex": 0,
+  "turnOrderChanged": false,
+  "origBody": [
+   304,
+   80,
+   184
+  ],
+  "swappedBody": [
+   304,
+   78,
+   182
+  ],
+  "offset": 0,
+  "origRng2": 469952876,
+  "swappedRng2": 469952876,
+  "hp": [
+   202,
+   127
+  ],
+  "frames": [
+   1234,
+   1234
+  ]
+ }
+}

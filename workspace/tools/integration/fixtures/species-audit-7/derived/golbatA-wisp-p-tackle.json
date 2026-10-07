@@ -1,0 +1,75 @@
+{
+ "schema": "oam1-live-adapter-fixture/v1",
+ "move": "WILL_O_WISP",
+ "probe": "tools/compare/willOWispBodiesProbe.py",
+ "scenario": "tools/integration/fixtures/species-audit-7/scenarios/golbatA-wisp-p-tackle.json",
+ "denseWindow": {
+  "startFrame": 225,
+  "endFrame": 438
+ },
+ "windowSource": "lb26: window = the scenario's own bodyWindows[0] from its direct-mGBA repeated-body probe (activation + 0 .. first inactive)",
+ "attacker": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "NINJASK",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349018756,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 165,
+  "playerMaxHp": 182,
+  "opponentHp": 168,
+  "opponentMaxHp": 168,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ],
+ "speciesAudit6": {
+  "acceptedWindow": [
+   227,
+   440
+  ],
+  "bodyIndex": 1,
+  "origBodyIndex": 1,
+  "turnOrderChanged": false,
+  "origBody": [
+   261,
+   227,
+   440
+  ],
+  "swappedBody": [
+   261,
+   225,
+   438
+  ],
+  "offset": 0,
+  "origRng2": 3870620670,
+  "swappedRng2": 579407973,
+  "hp": [
+   165,
+   168
+  ],
+  "frames": [
+   1668,
+   1668
+  ]
+ }
+}

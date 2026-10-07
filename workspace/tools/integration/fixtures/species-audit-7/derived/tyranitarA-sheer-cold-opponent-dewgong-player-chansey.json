@@ -1,0 +1,66 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "SHEER_COLD",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-7/scenarios/tyranitarA-sheer-cold-opponent-dewgong-player-chansey.json",
+ "denseWindow": {
+  "startFrame": 81,
+  "endFrame": 270
+ },
+ "windowSource": "window = [activation, activation + 190 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "TYRANITAR",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "CHANSEY",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793699980,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 357,
+  "playerMaxHp": 357,
+  "opponentHp": 194,
+  "opponentMaxHp": 194,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "speciesAudit6": {
+  "acceptedWindow": [
+   79,
+   268
+  ],
+  "bodyIndex": 0,
+  "origBodyIndex": 0,
+  "turnOrderChanged": false,
+  "origBody": [
+   329,
+   79,
+   269
+  ],
+  "swappedBody": [
+   329,
+   81,
+   272
+  ],
+  "offset": 0,
+  "origRng2": 3150275578,
+  "swappedRng2": 2816079983,
+  "hp": [
+   357,
+   194
+  ],
+  "frames": [
+   1234,
+   1234
+  ]
+ }
+}

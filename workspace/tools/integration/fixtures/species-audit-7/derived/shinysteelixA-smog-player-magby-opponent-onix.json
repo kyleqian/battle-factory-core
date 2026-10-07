@@ -1,0 +1,66 @@
+{
+ "schema": "q2-live-adapter-fixture/v1",
+ "move": "SMOG",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-7/scenarios/shinysteelixA-smog-player-magby-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 71,
+  "endFrame": 375
+ },
+ "windowSource": "window = [activation, activation + 305 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "STEELIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 1406345856,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 182,
+  "playerMaxHp": 182,
+  "opponentHp": 142,
+  "opponentMaxHp": 142,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "speciesAudit6": {
+  "acceptedWindow": [
+   69,
+   373
+  ],
+  "bodyIndex": 0,
+  "origBodyIndex": 0,
+  "turnOrderChanged": false,
+  "origBody": [
+   123,
+   69,
+   374
+  ],
+  "swappedBody": [
+   123,
+   71,
+   376
+  ],
+  "offset": 0,
+  "origRng2": 1262958118,
+  "swappedRng2": 1209821555,
+  "hp": [
+   182,
+   142
+  ],
+  "frames": [
+   1234,
+   1234
+  ]
+ }
+}

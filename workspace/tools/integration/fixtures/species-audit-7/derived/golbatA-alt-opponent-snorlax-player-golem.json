@@ -1,0 +1,69 @@
+{
+ "schema": "return-live-adapter-fixture/v1",
+ "move": "RETURN",
+ "probe": "tools/compare/returnProbe.py",
+ "scenario": "tools/integration/fixtures/species-audit-7/scenarios/golbatA-alt-opponent-snorlax-player-golem.json",
+ "denseWindow": {
+  "startFrame": 75,
+  "endFrame": 356
+ },
+ "windowSource": "window = the scenario's own sourceWindow (activation .. first inactive row, 282 rows) from its direct-mGBA returnProbe.py run",
+ "attacker": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703653,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 187,
+  "playerMaxHp": 187,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "speciesAudit6": {
+  "acceptedWindow": [
+   76,
+   357
+  ],
+  "bodyIndex": 0,
+  "origBodyIndex": 0,
+  "turnOrderChanged": false,
+  "origBody": [
+   216,
+   76,
+   357
+  ],
+  "swappedBody": [
+   216,
+   75,
+   356
+  ],
+  "offset": 0,
+  "origRng2": 119564722,
+  "swappedRng2": 2024241883,
+  "hp": [
+   187,
+   182
+  ],
+  "frames": [
+   634,
+   634
+  ]
+ }
+}

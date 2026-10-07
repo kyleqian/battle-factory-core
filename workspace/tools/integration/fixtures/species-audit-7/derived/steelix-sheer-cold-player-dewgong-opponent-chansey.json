@@ -1,0 +1,66 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "SHEER_COLD",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-7/scenarios/steelix-sheer-cold-player-dewgong-opponent-chansey.json",
+ "denseWindow": {
+  "startFrame": 75,
+  "endFrame": 265
+ },
+ "windowSource": "window = [activation, activation + 191 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "DEWGONG",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "STEELIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019030,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 184,
+  "playerMaxHp": 184,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "speciesAudit6": {
+  "acceptedWindow": [
+   75,
+   265
+  ],
+  "bodyIndex": 0,
+  "origBodyIndex": 0,
+  "turnOrderChanged": false,
+  "origBody": [
+   329,
+   75,
+   266
+  ],
+  "swappedBody": [
+   329,
+   75,
+   266
+  ],
+  "offset": 0,
+  "origRng2": 2634205934,
+  "swappedRng2": 2634205934,
+  "hp": [
+   184,
+   182
+  ],
+  "frames": [
+   1234,
+   1234
+  ]
+ }
+}

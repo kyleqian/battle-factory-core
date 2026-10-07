@@ -1,0 +1,66 @@
+{
+ "schema": "q2-live-adapter-fixture/v1",
+ "move": "SAND_TOMB",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-7/scenarios/wailordA-sand-tomb-player-dugtrio-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 199
+ },
+ "windowSource": "window = [activation, activation + 123 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "WAILORD",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015453,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 245,
+  "playerMaxHp": 245,
+  "opponentHp": 142,
+  "opponentMaxHp": 142,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "speciesAudit6": {
+  "acceptedWindow": [
+   77,
+   199
+  ],
+  "bodyIndex": 0,
+  "origBodyIndex": 0,
+  "turnOrderChanged": false,
+  "origBody": [
+   328,
+   77,
+   200
+  ],
+  "swappedBody": [
+   328,
+   77,
+   200
+  ],
+  "offset": 0,
+  "origRng2": 2958200064,
+  "swappedRng2": 2958200064,
+  "hp": [
+   245,
+   142
+  ],
+  "frames": [
+   934,
+   934
+  ]
+ }
+}

@@ -1,0 +1,66 @@
+{
+ "schema": "q2-live-adapter-fixture/v1",
+ "move": "HYPER_VOICE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-7/scenarios/shinysteelixA-hyper-voice-opponent-exploud-player-slowking.json",
+ "denseWindow": {
+  "startFrame": 80,
+  "endFrame": 183
+ },
+ "windowSource": "window = [activation, activation + 104 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "STEELIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SLOWKING",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 3483877108,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 202,
+  "playerMaxHp": 202,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "speciesAudit6": {
+  "acceptedWindow": [
+   80,
+   183
+  ],
+  "bodyIndex": 0,
+  "origBodyIndex": 0,
+  "turnOrderChanged": false,
+  "origBody": [
+   304,
+   80,
+   184
+  ],
+  "swappedBody": [
+   304,
+   80,
+   184
+  ],
+  "offset": 0,
+  "origRng2": 469952876,
+  "swappedRng2": 3320097647,
+  "hp": [
+   202,
+   182
+  ],
+  "frames": [
+   1234,
+   1234
+  ]
+ }
+}

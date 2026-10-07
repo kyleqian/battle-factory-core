@@ -1,0 +1,66 @@
+{
+ "schema": "q2-live-adapter-fixture/v1",
+ "move": "SMOG",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-7/scenarios/pichu-smog-opponent-magby-player-onix.json",
+ "denseWindow": {
+  "startFrame": 73,
+  "endFrame": 377
+ },
+ "windowSource": "window = [activation, activation + 305 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "MAGBY",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "PICHU",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703256,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 127,
+  "playerMaxHp": 127,
+  "opponentHp": 152,
+  "opponentMaxHp": 152,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "speciesAudit6": {
+  "acceptedWindow": [
+   73,
+   377
+  ],
+  "bodyIndex": 0,
+  "origBodyIndex": 0,
+  "turnOrderChanged": false,
+  "origBody": [
+   123,
+   73,
+   378
+  ],
+  "swappedBody": [
+   123,
+   73,
+   378
+  ],
+  "offset": 0,
+  "origRng2": 1989536647,
+  "swappedRng2": 1989536647,
+  "hp": [
+   127,
+   152
+  ],
+  "frames": [
+   1234,
+   1234
+  ]
+ }
+}

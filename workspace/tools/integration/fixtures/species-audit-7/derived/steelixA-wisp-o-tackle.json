@@ -1,0 +1,75 @@
+{
+ "schema": "oam1-live-adapter-fixture/v1",
+ "move": "WILL_O_WISP",
+ "probe": "tools/compare/willOWispBodiesProbe.py",
+ "scenario": "tools/integration/fixtures/species-audit-7/scenarios/steelixA-wisp-o-tackle.json",
+ "denseWindow": {
+  "startFrame": 300,
+  "endFrame": 512
+ },
+ "windowSource": "lb26: window = the scenario's own bodyWindows[0] from its direct-mGBA repeated-body probe (activation + 0 .. first inactive)",
+ "attacker": {
+  "species": "STEELIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "NINJASK",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793700231,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 168,
+  "playerMaxHp": 168,
+  "opponentHp": 179,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "player"
+  }
+ ],
+ "speciesAudit6": {
+  "acceptedWindow": [
+   228,
+   440
+  ],
+  "bodyIndex": 1,
+  "origBodyIndex": 1,
+  "turnOrderChanged": false,
+  "origBody": [
+   261,
+   228,
+   440
+  ],
+  "swappedBody": [
+   261,
+   300,
+   512
+  ],
+  "offset": 0,
+  "origRng2": 1904015063,
+  "swappedRng2": 3720025087,
+  "hp": [
+   168,
+   179
+  ],
+  "frames": [
+   1668,
+   1668
+  ]
+ }
+}
