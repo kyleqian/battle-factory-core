@@ -5261,6 +5261,44 @@
     "body": "normal",
     "activation": "window start = the scenario's own first-body activation (prep22 moves/*.json; elevated GOLBAT target dense 0 px in the r3 receipt)"
    }
+  },
+  {
+   "id": 324,
+   "move": "SIGNAL_BEAM",
+   "orientation": "player",
+   "variant": "r3p-signal-beam-player-ariados-opponent-chansey",
+   "activationFrame": 78,
+   "windowStart": 78,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/r3-profile-live/signal-beam-player-ariados-opponent-chansey.json",
+    "scenario": "tools/battle-lab/mechanic-signal-beam-player-ariados-opponent-chansey.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own first-body activation (prep22 moves/*.json; elevated GOLBAT target dense 0 px in the r3 receipt)"
+   }
+  },
+  {
+   "id": 324,
+   "move": "SIGNAL_BEAM",
+   "orientation": "opponent",
+   "variant": "r3p-signal-beam-opponent-ariados-player-chansey",
+   "activationFrame": 82,
+   "windowStart": 82,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/r3-profile-live/signal-beam-opponent-ariados-player-chansey.json",
+    "scenario": "tools/battle-lab/mechanic-signal-beam-opponent-ariados-player-chansey.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own first-body activation (prep22 moves/*.json; elevated GOLBAT target dense 0 px in the r3 receipt)"
+   }
   }
  ]
 }

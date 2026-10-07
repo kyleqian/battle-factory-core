@@ -14,6 +14,7 @@ import {
   LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation,
 } from "../../src/engine/liveMoveAnimation.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
+import { signalBeamOrbSlots } from "../../src/engine/liveProfileMoves.ts";
 import { presentationRngBodyWords } from "../../src/engine/presentationRngHost.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { fixturePresentationRng, liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
@@ -26,8 +27,9 @@ import { random2Route } from "../../tools/integration/random2R1/routeHarness.ts"
 const DIR = "tools/integration/fixtures/r3-profile-live";
 const fixtureAt = (name: string) => JSON.parse(readFileSync(`${DIR}/${name}.json`, "utf8")) as Fixture;
 const NAMES = readdirSync(DIR).filter((n) => n.endsWith(".json")).map((n) => n.slice(0, -5)).sort();
-const IDS = { LOVELY_KISS: 142, SPIKES: 191, OCTAZOOKA: 190 } as const;
+const IDS = { LOVELY_KISS: 142, SPIKES: 191, OCTAZOOKA: 190, SIGNAL_BEAM: 324 } as const;
 const ROWS = { 142: 152, 191: 113, 190: 79 } as const;
+const rowsOf = (f: Fixture) => IDS[f.move as keyof typeof IDS] === 324 ? (f.attacker.geometry.side === "player" ? 145 : 144) : ROWS[IDS[f.move as keyof typeof IDS] as 142 | 191 | 190];
 const key = liveMovePresentationRngBodyKey({ resolutionId: { requestId: 0 }, segmentIndex: 0, commandIndex: 0 });
 const viewOf = (f: Fixture, age: number) => {
   const view = liveView(f, age);
@@ -64,39 +66,40 @@ describe("live r3 profile registration", () => {
     expect(LIVE_MOVE_RANDOM2_PLANS[142]).toEqual([{ ageOffset: 120, count: 4 }]);
     expect(LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS).toContain(142);
     expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).not.toContain(142);
-    for (const id of [191, 190]) {
+    for (const id of [191, 190, 324]) {
       expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).toContain(id);
       expect(LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS).not.toContain(id);
     }
-    for (const id of [142, 191, 190] as const) {
+    for (const id of [142, 191, 190, 324] as const) {
       expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[id]).toBe(0);
       for (const attacker of [0, 1] as const) {
-        expect(liveMoveAnimationDuration({ moveId: id, attacker, target: (1 - attacker) as 0 | 1, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0 })).toBe(ROWS[id]);
+        expect(liveMoveAnimationDuration({ moveId: id, attacker, target: (1 - attacker) as 0 | 1, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0 }))
+          .toBe(id === 324 ? (attacker === 0 ? 145 : 144) : ROWS[id]);
       }
     }
     const status = JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8"));
     expect((status.faithfulRandomAdapters as { id: number }[]).map((e) => e.id)).toContain(142);
     const exact = (status.implementedAdapters as { id: number }[]).map((e) => e.id);
-    expect(exact).toEqual(expect.arrayContaining([191, 190]));
+    expect(exact).toEqual(expect.arrayContaining([191, 190, 324]));
     expect(exact).not.toContain(142);
   });
 
-  it("covers 24 dense fixtures: 3 moves x (accepted, prep22 alternate, GOLBAT-elevated, SNORLAX-large) x both orientations", () => {
-    expect(NAMES).toHaveLength(24);
-    for (const move of ["lovely-kiss", "spikes", "octazooka"]) {
+  it("covers 32 dense fixtures: 4 moves x (accepted, prep22 alternate, GOLBAT-elevated, SNORLAX-large) x both orientations", () => {
+    expect(NAMES).toHaveLength(32);
+    for (const move of ["lovely-kiss", "spikes", "octazooka", "signal-beam"]) {
       for (const kind of ["alt", "extra"]) expect(NAMES.filter((n) => n.startsWith(`${move}-${kind}-`))).toHaveLength(move === "lovely-kiss" || kind === "extra" ? (kind === "extra" ? 4 : 2) : 2);
       expect(NAMES.filter((n) => n.startsWith(`${move}-`) && !n.includes("-alt-") && !n.includes("-extra-"))).toHaveLength(2);
     }
     for (const name of NAMES) {
       const f = fixtureAt(name);
-      expect(f.denseWindow!.endFrame - f.denseWindow!.startFrame + 1).toBe(ROWS[IDS[f.move as keyof typeof IDS]]);
+      expect(f.denseWindow!.endFrame - f.denseWindow!.startFrame + 1).toBe(rowsOf(f));
       expect(f.presentationRngActivation !== undefined).toBe(f.move === "LOVELY_KISS");
     }
   });
 });
 
 describe("live r3 profile builder (production-derivable inputs)", () => {
-  it.each(NAMES)("%s: slots = lowest free, target subpriority, attr2 and palette snapshots from the production sources", (name) => {
+  it.each(NAMES.filter((n) => !n.startsWith("signal-beam")))("%s: slots = lowest free, target subpriority, attr2 and palette snapshots from the production sources", (name) => {
     const f = fixtureAt(name);
     const p = profileOf(f);
     const targetSub = f.target.geometry.side === "player" ? 30 : 40;
@@ -307,5 +310,62 @@ describe("live r3 profile ordinary routes", () => {
     expect(kiss[0]!.adapterActive.some(Boolean)).toBe(false);
     expect(on.animations.find((a) => a.moveId === 7)!.adapterActive.every(Boolean)).toBe(true);
     parityOf(on, off);
+  }, 240000);
+});
+
+describe("live r3 Signal Beam (exact, first body)", () => {
+  const SB = NAMES.filter((n) => n.startsWith("signal-beam"));
+  it.each(SB)("%s: orb pairs / helper = lowest free over the known-entry set; inputs equal the measured constants", (name) => {
+    const f = fixtureAt(name);
+    const inputs = (configOf(f)!.config as any).animationInputs;
+    const { pairs, helperSlot } = signalBeamOrbSlots();
+    expect(inputs.orbPairs).toEqual(pairs);
+    expect(inputs.paletteBlendSpriteSlot).toBe(helperSlot);
+    expect(inputs.taskSlots).toEqual({ attackerShake: 0, pan: 1, sinTimer: 2, targetShake: 3 });
+    expect(inputs.registers).toEqual({ win0h: 240, win0v: 161 });
+    expect(inputs.spriteOrder).toHaveLength(64);
+    expect(inputs.targetPalette.bank).toBe(f.target.geometry.side === "player" ? 16 : 17);
+    expect(inputs.attackerSprite.slot).toBe(f.attacker.geometry.side === "player" ? 6 : 8);
+  });
+
+  it("the lowest-free simulation reproduces the ROM pairs of prep22 (23 pairs, helper slot at age 36)", () => {
+    const { pairs, helperSlot } = signalBeamOrbSlots();
+    expect(pairs).toHaveLength(23);
+    expect(pairs[0]).toEqual({ redSlot: 3, greenSlot: 4 });
+    expect(helperSlot).toBeGreaterThan(2);
+    const check = JSON.parse(readFileSync("tools/integration/fixtures/prep22/signal-beam-check.json", "utf8")) as Record<string, { lowestFreePairsEqualRom: boolean; helperSlotRom: number }>;
+    for (const row of Object.values(check)) { expect(row.lowestFreePairsEqualRom).toBe(true); expect(row.helperSlotRom).toBe(helperSlot); }
+  });
+
+  it("declines a later body, an unknown order and a shiny battler (first-body gate)", () => {
+    const f = fixtureAt("signal-beam-player-ariados-opponent-chansey");
+    const { view, effect } = viewOf(f, 0);
+    const call = (order: unknown, field = view.field) => liveMoveAnimationPresentation(effect.request, field, 0, undefined, undefined, order as never);
+    expect(call(effect.spriteOrderInput)).not.toBeNull();
+    expect(call({ ...(effect.spriteOrderInput as object), firstBody: undefined })).toBeNull();
+    expect(call(undefined)).toBeNull();
+    expect(call({ known: false })).toBeNull();
+    const ot = 416049562, shiny = ((ot >>> 16) ^ (ot & 0xffff)) >>> 0;
+    for (const side of ["player", "opponent"] as const) expect(call(effect.spriteOrderInput, { ...view.field, [side]: { ...view.field[side], personality: shiny } })).toBeNull();
+  });
+
+  it.each([
+    ["SIGNAL_BEAM 8/14 VENOMOTH", 8, 14, 0 as const],
+    ["SIGNAL_BEAM 10/0 YANMA", 10, 0, 0 as const],
+  ])("route %s: body reached, adapter active every age, following prompt reached, Scene ON/OFF parity", (_name, seed, streak, slot) => {
+    const on = generatedCommandAnimationReplay(seed, "on", [slot], streak);
+    const off = generatedCommandAnimationReplay(seed, "off", [slot], streak);
+    const bodies = on.animations.filter((a) => a.moveId === 324 && a.attacker === 0);
+    expect(bodies).toHaveLength(1);
+    expect(bodies[0]!.ages).toEqual(Array.from({ length: 145 }, (_, age) => age));
+    expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
+    expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    expect(off.boundaries).toHaveLength(on.boundaries.length);
+    for (let i = 0; i < on.boundaries.length; i += 1) {
+      expect(rulesWithoutSceneMarker(on.boundaries[i]!)).toEqual(rulesWithoutSceneMarker(off.boundaries[i]!));
+      expect(on.boundaries[i]!.rng).toEqual(off.boundaries[i]!.rng);
+      expect(on.boundaries[i]!.boundary).toEqual(off.boundaries[i]!.boundary);
+    }
+    expect(on.state.facilityState).toEqual(off.state.facilityState);
   }, 240000);
 });

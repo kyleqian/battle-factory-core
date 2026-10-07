@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 511,
-  "ids": 244,
+  "rows": 513,
+  "ids": 245,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -5441,6 +5441,28 @@
    "move": "OCTAZOOKA",
    "orientation": "opponent",
    "duration": 79,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 324,
+   "move": "SIGNAL_BEAM",
+   "orientation": "player",
+   "duration": 145,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 324,
+   "move": "SIGNAL_BEAM",
+   "orientation": "opponent",
+   "duration": 144,
    "expected": 0,
    "drawn": [
     0
