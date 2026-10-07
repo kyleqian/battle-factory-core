@@ -56,16 +56,38 @@ export interface WillOWispDisplayPlan {
 const IDENTITY: WillOWispMatrix = [256, 0, 0, 256];
 export const WILL_O_WISP_ROOT = 0x082d4709;
 
-const profile = (side: WillOWispSide) => side === "player"
-  ? { cleanup: 213, orbEnd: 146, fireStart: 163, fireEnd: 190, panEnd: 128, shakeStart: 163, shakeEnd: 186 }
-  : { cleanup: 212, orbEnd: 145, fireStart: 162, fireEnd: 189, panEnd: 127, shakeStart: 162, shakeEnd: 185 };
 const gbaSin = (angle: number, amplitude: number): number =>
   GBA_SINE_TABLE_256[angle & 255]! * amplitude >> 8;
 const gbaCos = (angle: number, amplitude: number): number => gbaSin(angle + 64, amplitude);
 
-export function willOWispSourceAtAge(age: number, side: WillOWispSide) {
+/**
+ * Source timeline from the live anchors (battle_anim_effects / AnimWillOWispOrb + InitAnimLinearTranslationWithSpeed,
+ * prep20 s0.2.1): each orb wobbles 31 ticks at the attacker picture anchor, then translates linearly for |dx| ticks
+ * (speed 256: duration = |dx|) to the target anchor; Q8.8 deltas `(|d| << 8) / duration` with the sign in bit 0. The
+ * fires start two ticks after the last orb ends (waitforvisualfinish + splitbgprio_all) and live 28 ticks; the body
+ * cleans up 23 ticks after them. The singles sBattlerCoords X_2 anchors give |dx| = 105 (player) / 104 (opponent).
+ */
+export function willOWispTimeline(attackerSide: WillOWispSide, attackerCenter: Readonly<{ x: number; y: number }>,
+  targetCenter: Readonly<{ x: number; y: number }>) {
+  const dir = attackerSide === "player" ? -1 : 1;
+  const x = attackerCenter.x + gbaSin(124, dir * 4), y = attackerCenter.y;
+  const dx = targetCenter.x - x, dy = targetCenter.y - y;
+  if (dx === 0) throw new Error("Will-O-Wisp orb translation has dx == 0");
+  const duration = Math.abs(dx);
+  const xDelta = (Math.trunc((Math.abs(dx) << 8) / duration) & 0xffff & ~1) | (dx < 0 ? 1 : 0);
+  const yDelta = (Math.trunc((Math.abs(dy) << 8) / duration) & 0xffff & ~1) | (dy < 0 ? 1 : 0);
+  const orbEnd = 10 + 31 + duration, fireStart = orbEnd + 15 + 2, fireEnd = fireStart + 27;
+  return { dir, x, y, duration, xDelta, yDelta, orbEnd, fireStart, fireEnd, cleanup: fireEnd + 23 };
+}
+const profile = (input: Readonly<Pick<WillOWispLiveInputs, "attackerSide" | "attackerCenter" | "targetCenter">>) => {
+  const t = willOWispTimeline(input.attackerSide, input.attackerCenter, input.targetCenter);
+  return { ...t, panEnd: input.attackerSide === "player" ? 128 : 127, shakeStart: t.fireStart, shakeEnd: t.fireStart + 23 };
+};
+
+export function willOWispSourceAtAge(age: number,
+  input: Readonly<Pick<WillOWispLiveInputs, "attackerSide" | "attackerCenter" | "targetCenter">>) {
   if (!Number.isInteger(age) || age < 0) throw new Error(`invalid Will-O-Wisp age ${age}`);
-  const p = profile(side);
+  const p = profile(input);
   const active = age < p.cleanup;
   const offset = age === 0 ? 0 : age < 4 ? 3 : age < 7 ? 6 : age < 10 ? 8
     : age < 15 ? 49 : age < 20 ? 64 : age < 25 ? 79 : age < 67 ? 94
@@ -75,32 +97,25 @@ export function willOWispSourceAtAge(age: number, side: WillOWispSide) {
 }
 
 function orbAt(age: number, ordinal: number, input: Readonly<WillOWispLiveInputs>): WillOWispSpriteProgram | null {
-  const p = profile(input.attackerSide), start = 10 + ordinal * 5, end = p.orbEnd + ordinal * 5;
+  const p = profile(input), start = 10 + ordinal * 5, end = p.orbEnd + ordinal * 5;
   if (age < start || age > end) return null;
-  const local = age - start, direction = input.attackerSide === "player" ? -1 : 1;
-  const startX = input.attackerCenter.x, startY = input.attackerCenter.y;
-  let callback: WillOWispSpriteProgram["callback"] = "AnimWillOWispOrb", x = startX, y = startY;
-  let x2 = gbaSin(local * 4, direction * 4), y2 = 0;
+  const local = age - start;
+  let callback: WillOWispSpriteProgram["callback"] = "AnimWillOWispOrb", x = input.attackerCenter.x, y = input.attackerCenter.y;
+  let x2 = gbaSin(local * 4, p.dir * 4), y2 = 0;
   if (local >= 31) {
+    // AnimTranslateLinear: u16 Q8.8 accumulators, the sign of each axis in bit 0 of its delta.
     callback = "AnimWillOWispOrb_Step";
-    x = startX + gbaSin(124, direction * 4); y = startY;
-    const step = local - 31;
-    const xDelta = input.targetCenter.x - x;
-    const yDelta = input.targetCenter.y - y;
-    // InitAnimLinearTranslationWithSpeed stores these Q8.8 increments after
-    // its signed speed rounding; the two singles orientations round on
-    // opposite sides of zero.
-    const xStep = input.attackerSide === "player" ? 256 : 257;
-    const yStep = input.attackerSide === "player" ? 75 : 144;
-    x2 = Math.sign(xDelta) * (step * xStep >> 8) + gbaSin(Math.max(0, step - 1) * 4, 16);
-    y2 = Math.sign(yDelta) * (step * yStep >> 8);
+    x = p.x; y = p.y;
+    const step = local - 31, accX = (step * p.xDelta) & 0xffff, accY = (step * p.yDelta) & 0xffff;
+    x2 = (p.xDelta & 1 ? -(accX >> 8) : accX >> 8) + gbaSin(Math.max(0, step - 1) * 4, 16);
+    y2 = p.yDelta & 1 ? -(accY >> 8) : accY >> 8;
   }
   return { kind: "orb", ordinal, start, end, callback, animation: ordinal,
     x, y, x2, y2, invisible: false, priority: 0 };
 }
 
 function fireAt(age: number, ordinal: number, input: Readonly<WillOWispLiveInputs>): WillOWispSpriteProgram | null {
-  const p = profile(input.attackerSide), start = p.fireStart, end = p.fireEnd;
+  const p = profile(input), start = p.fireStart, end = p.fireEnd;
   if (age < start || age > end) return null;
   const local = age - start, phase = (ordinal * 42 + (local + 1) * 7) & 255;
   const radialX = Math.trunc(((local + 2) * 0x180) / 256);
@@ -111,12 +126,19 @@ function fireAt(age: number, ordinal: number, input: Readonly<WillOWispLiveInput
     priority: 0 };
 }
 
+/** The four orb and six fire source programs alive at `age` (geometry only; the live OAM provider builds from these). */
+export function willOWispSpritesAtAge(age: number,
+  input: Readonly<Pick<WillOWispLiveInputs, "attackerSide" | "attackerCenter" | "targetCenter">>): WillOWispSpriteProgram[] {
+  const geometry = input as Readonly<WillOWispLiveInputs>;
+  return [...Array.from({length: 4}, (_, i) => orbAt(age, i, geometry)),
+    ...Array.from({length: 6}, (_, i) => fireAt(age, i, geometry))]
+    .filter((entry): entry is WillOWispSpriteProgram => entry !== null);
+}
+
 export function willOWispAtAge(age: number, input: Readonly<WillOWispLiveInputs>): WillOWispState {
   if (input.attackerSide === input.targetSide) throw new Error("Will-O-Wisp requires opposite sides");
-  const p = profile(input.attackerSide), source = willOWispSourceAtAge(age, input.attackerSide);
-  const sprites = [...Array.from({length: 4}, (_, i) => orbAt(age, i, input)),
-    ...Array.from({length: 6}, (_, i) => fireAt(age, i, input))]
-    .filter((entry): entry is WillOWispSpriteProgram => entry !== null);
+  const p = profile(input), source = willOWispSourceAtAge(age, input);
+  const sprites = willOWispSpritesAtAge(age, input);
   const panActive = age >= 67 && age <= p.panEnd;
   const panStart = input.attackerSide === "player" ? -64 : 63;
   const panEnd = -panStart, panValue = panActive

@@ -1,0 +1,39 @@
+{
+ "schema": "oam1-live-adapter-fixture/v1",
+ "move": "WILL_O_WISP",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-will-o-wisp-opponent-shuppet-player-shuckle.json",
+ "denseWindow": {
+  "startFrame": 80,
+  "endFrame": 292
+ },
+ "windowSource": "window = [activation, activation + duration - 1]; activation = the scenario's own first anim-active frame (tools/integration/fixtures/prep18/prep18-activation.json)",
+ "attacker": {
+  "species": "PLUSLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SHUCKLE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 2027808515,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 127,
+  "playerMaxHp": 127,
+  "opponentHp": 167,
+  "opponentMaxHp": 167,
+  "playerGender": "female",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0
+ }
+}

@@ -3357,6 +3357,55 @@
         "Ordinary route, hidden attacker between turns, prompt reached, ON/OFF parity: see the receipt (random2-r5-live-receipt.json dig)."
       ],
       "remaining": "Unleash after any intervening animation body / party-menu unit, a Dig setup that is not the battle's first body, and the Dig hit-flash/HUD queue commands are not proved; those decline to the scene-off view."
+    },
+    {
+      "move": "MOVE_WILL_O_WISP",
+      "id": 261,
+      "sourceFieldEvidence": "../tools/integration/fixtures/oam1-live-adapter-receipt.json",
+      "liveEvidence": [
+        "Production hardware-OAM provider (src/engine/liveMoveOamAssembler.ts): every row's 128-entry OAM buffer is built from the anchors, the known-entry allocator/scene constants, the reducer's own source programs (orb InitAnimLinearTranslationWithSpeed math, fire spiral) and the lent activation order carried through the body (full 64-slot SortSprites, free slots = ResetSprite dummy key: gap G1 solved); rows 1..N-1 string-equal to the retained corpora and the BANETTE->GOLEM alternates (all 128 entries incl. pad words)",
+        "dense 214/214 (player attacker) and 213/213 (opponent attacker) zero residual twice fresh through the production live renderer: PLUSLE->SHUCKLE accepted both orientations, BANETTE->GOLEM alternates both orientations, NINETALES->GOLBAT (elevated target) / NINETALES->SNORLAX (new scenarios, window = each scenario's own activation + 0)",
+        "ordinary route 82/7 BANETTE slot 1 (first body): adapter active every age, following prompt reached, ON/OFF rules/RNG/boundary equal"
+      ],
+      "remaining": [
+        "first body only (spriteOrderInput.firstBody): later bodies decline to the scene-off fallback (no later-body dense fixture; routes 54/14 and 61/21 are second bodies)",
+        "shiny battlers and battlers with a non-zero front idle rest decline",
+        "singles |dx| is fixed by the static sBattlerCoords X_2 (105 / 104): other dx is exercised by unit tests only",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_PURSUIT",
+      "id": 228,
+      "sourceFieldEvidence": "../tools/integration/fixtures/oam1-live-adapter-receipt.json",
+      "liveEvidence": [
+        "Production hardware-OAM provider (liveMoveOamAssembler.ts livePursuitHardwareOamRows): IMPACT hit splat (slot 3, matrix 0 at scale 372 folded into the pad words, tile 305, palette slot 7), target absent from the builds of states [5, 58], carried full 64-slot order; rows 1..102 string-equal to the retained corpora and the UMBREON->GOLEM alternates",
+        "palette / BLDY / monbg / power-shake registers from the source schedule (BG_DARK bank-2 palette rows 27..83, BLDY ramps 8..43 / 64..100, hit-splat blend 47..58, Task_UpdateMonBg scroll with AnimTask_ShakeTargetBasedOnMovePowerOrDmg x2)",
+        "dense 103/103 zero residual twice fresh through the production live renderer, normal body: BEEDRILL->SHUCKLE accepted both orientations, UMBREON->GOLEM alternates both orientations, SNEASEL->GOLBAT (elevated target) / SNEASEL->SNORLAX (new scenarios; window = each scenario's own activation + 0)",
+        "ordinary routes 52/0 BEEDRILL slot 1 and 38/14 SWELLOW slot 2 (first body): adapter active every age, following prompt reached, ON/OFF rules/RNG/boundary equal"
+      ],
+      "remaining": [
+        "the switch-interception body (request.turn & 1) declines to the scene-off view: its allocator (IMPACT slot 5 / matrix 2 / tile 405 / palette slot 6), healthbox block and slot set follow the party-menu unit and are not yet provided by the production hosts",
+        "first body only; later bodies decline (no later-body dense fixture)",
+        "shiny battlers and battlers with a non-zero front idle rest decline",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_FURY_CUTTER",
+      "id": 210,
+      "sourceFieldEvidence": "../tools/integration/fixtures/oam1-live-adapter-receipt.json",
+      "liveEvidence": [
+        "Counter-1 body only: a first body implies furyCutterCounter 1 (it starts at 0 for a sent-in battler, every successful Fury Cutter plays a body, a miss resets it), so no counter argument and no gameplay/opcode change is needed",
+        "Production hardware-OAM provider (liveFuryCutterHardwareOamRows): the right-hit cutting slice (AnimSlice_Step Q8 x20 + 3 waits from the static sBattlerCoords anchor, h-flip, tile 305 + 16 x frame, palette slot 7, slot 3), target absent states [5, 32], carried full 64-slot order; rows 1..42 string-equal to the retained counter-1 bodies and the SCYTHER->GOLEM alternates",
+        "dense 43/43 zero residual twice fresh through the production live renderer: GROVYLE->BLISSEY accepted both orientations, SCYTHER->GOLEM alternates both orientations, SCYTHER->GOLBAT (elevated target) / SCYTHER->SNORLAX (new scenarios; window = the scenario's first Fury Cutter activation + 0)",
+        "ordinary routes 58/0 and 60/0 GROVYLE slot 0 (first body): adapter active every age, following prompt reached, ON/OFF rules/RNG/boundary equal"
+      ],
+      "remaining": [
+        "counters 2..5 decline to the scene-off view: they are never first bodies (later-body lend), carry no counter in the MOVE_ANIMATION request (the Rollout-style 7th argument is not plumbed) and need the gComplexPaletteBlend palette provider (BG + battler banks 1, 2, 3, 8, 16, 17)",
+        "shiny battlers and battlers with a non-zero front idle rest decline",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3380,7 +3429,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 226,
+  "implementedCount": 229,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 10,

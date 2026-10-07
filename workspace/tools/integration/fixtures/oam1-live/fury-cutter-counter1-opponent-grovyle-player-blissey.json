@@ -1,0 +1,40 @@
+{
+ "schema": "oam1-live-adapter-fixture/v1",
+ "move": "FURY_CUTTER",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-fury-cutter-opponent-grovyle-player-blissey.json",
+ "denseWindow": {
+  "startFrame": 82,
+  "endFrame": 124
+ },
+ "windowSource": "window = [activation, activation + 42] of the scenario's FIRST Fury Cutter body (counter 1); activation = its own first anim-active frame (prep18-activation.json / fresh prep18Probe.py run)",
+ "attacker": {
+  "species": "GROVYLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "BLISSEY",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 2027808507,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 362,
+  "playerMaxHp": 362,
+  "opponentHp": 157,
+  "opponentMaxHp": 157,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 10
+ }
+}

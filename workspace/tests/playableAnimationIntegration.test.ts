@@ -67,7 +67,9 @@ describe("ordinary playable animation queue", () => {
     expect(() => battleMoveAnimationRequest(0, 1, [])).toThrow("six integer");
     expect(() => battleMoveAnimationRequest(0, undefined, ["29", "0", "70", "17", "90", "0"])).toThrow("singles target");
     expect(() => battleMoveAnimationRequest(0, 1, ["9999999999999999999", "0", "70", "17", "90", "0"])).toThrow("safe integers");
-    expect(liveMoveAnimationDuration(battleMoveAnimationRequest(0, 1, ["210","0","10","1","0","0"]))).toBeNull();
+    // oam1: Fury Cutter has one 43-row body for every counter; only the counter-1 (first-body) presentation is live
+    // (liveMoveAnimation.ts case 210), every other counter declines to the scene-off view.
+    expect(liveMoveAnimationDuration(battleMoveAnimationRequest(0, 1, ["210","0","10","1","0","0"]))).toBe(43);
   });
 
   it("plays Light Screen from six generated rentals, preserves text/self-target, and resumes after repeat failure", () => {
