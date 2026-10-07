@@ -77,10 +77,10 @@ Two species pairs per side give identical rows (AIPOM/ONIX vs NINJASK/GOLEM), ex
 | party screen starts | E+4 ctrl / E+26 screen | P+9 (`forced-party-handoff` el 0) | not comparable (transition frames not pixel-compared) |
 | confirm -> fade/close | A+0 close, A+22 reshow | A+1 fade-out start, A+17 black | n/a (different phase naming) |
 | battle screen back | A+54 | A+56 (battle fade-in start) | +2 |
-| outgoing healthbox drawn on the reshown screen | A+48..A+75 | **not drawn** (healthbox first at A+161) | **missing 28 frames** |
+| outgoing healthbox drawn on the reshown screen | A+48..A+75 | **not drawn** (`partySendOutHealthboxDx` is null for elapsed < 162: checked for 48..75) | **missing 28 frames** |
 | "Go! X!" first glyph | A+81 | A+84 | +3 |
 | ball first visible (spawn) | A+94 (spawn) | A+99 (visible) | +5 (spawn vs visible: +3..+4 after a one-frame OAM latch) |
-| new healthbox visible | A+159 | A+161 | +2 |
+| new healthbox visible | A+159 | A+161 (constant; `partySendOutHealthboxDx` first non-null at elapsed 162, checked in code) | +2..+3 |
 | controller free / action menu | `BattleTurnPassed` includes the opponent's turn: not comparable | A+311 | n/a |
 
 The A anchor is the same event on both sides (confirm accepted); the +2..+5 offsets are the calibration difference between the OFF post-faint flow (what `partySendOut*` was calibrated on) and this Scene ON Baton flow. **Not pixel-compared** (no framebuffer of the ROM party flow was captured); only boundaries.
