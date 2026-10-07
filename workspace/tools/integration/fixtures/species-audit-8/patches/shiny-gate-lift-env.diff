@@ -1,0 +1,22 @@
+diff --git a/workspace/src/engine/liveMoveAnimation.ts b/workspace/src/engine/liveMoveAnimation.ts
+index 29b0a16c2..e0c81ccab 100644
+--- a/workspace/src/engine/liveMoveAnimation.ts
++++ b/workspace/src/engine/liveMoveAnimation.ts
+@@ -1244,7 +1244,7 @@ export function liveMoveAnimationPresentation(
+       // gAnimMovePower = the engine's battleMovePower register (request.power; W1/W2/W4/carry). The Battle TV loop (W3) is not
+       // ported: a possible W3 write declines. HP is unchanged inside the script body. A shiny pair declines (normal palettes).
+       if (battlerX2Input?.staleMovePowerUnknown) return null;
+-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
++      if (process.env.S8_LIFT !== "1" && (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality))) return null;
+       const targetHp = field[target.geometry.side].hp;
+       config = { move: "ENDEAVOR", attacker, target,
+         fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" },
+@@ -1255,7 +1255,7 @@ export function liveMoveAnimationPresentation(
+     case 226:
+       // batonPassAtAge(age, attacker.geometry.animationCenter) = liveBattlerAnchors(...).picOffsetPoint (prep27 s0.1: 53/53 component
+       // rows on 4 pairs). The attacker palette blend reads the normal battle palette: a shiny pair declines.
+-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
++      if (process.env.S8_LIFT !== "1" && (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality))) return null;
+       config = { move: "BATON_PASS", attacker, target, fieldProfile };
+       break;
+     case 242: config = { move: "CRUNCH", attacker, target, fieldProfile }; break;
