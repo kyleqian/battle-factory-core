@@ -1,0 +1,16 @@
+{
+ "schema": "d4d2-timing-window/v1",
+ "sourceFixture": "tools/integration/fixtures/species-audit-7/derived/golbatA-hyper-voice-player-exploud-opponent-slowking.json",
+ "move": "HYPER_VOICE",
+ "timingPhase": "no-event",
+ "attacker": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "bandDepth": 15,
+ "timingPhases": {
+  "palette-upload-scanline": "no-event"
+ }
+}

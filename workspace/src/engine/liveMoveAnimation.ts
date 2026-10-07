@@ -92,7 +92,7 @@ import { liveMoveBgWriteRow, liveMoveOptionalLagAge, liveMovePaletteTransferRow,
 import { liveSpitUpDuration, liveSpitUpInputs, type SpitUpCounter } from "./liveSpitUpInputs.ts";
 import { SUPERPOWER_ROWS, liveSuperpowerInputs } from "./liveSuperpowerInputs.ts";
 import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
-import { liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
+import { liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSheerColdRestoreFadeEndAge, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
 import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs, liveShockWaveInputs } from "./liveOamMoves.ts";
 import shockWaveAsset from "../animation/assets/shock-wave.json" with { type: "json" };
@@ -194,11 +194,10 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   191, 190,
   // prep22 P3: Signal Beam first body (the WIN0 first-body registers and the lent order are the first-body inputs).
   324,
-  // prep22 P3: Sheer Cold first body (the ice-fade background, the lent order and the activation registers are the first-body inputs).
-  329,
-  // Q2 (docs/next-adapters-prep25.md s0.2 / C): zero-Random2 bodies through liveQ2Moves.ts: Hyper Voice, Smog, Sand Tomb, Sky Attack
-  // (charge + strike). Snore (prep28: a known lend after Sleep Powder + its sleep status animations; any unknown lend declines).
-  304, 123, 328, 143, 173,
+  // prep22 P3: Sheer Cold first body: reclassified to faithful timing (#151, liveMoveTimingPolicy.ts 329); its exact fixtures stay valid in scope.
+  // Q2 (docs/next-adapters-prep25.md s0.2 / C): zero-Random2 bodies through liveQ2Moves.ts: Smog, Sand Tomb, Sky Attack
+  // (charge + strike); Hyper Voice reclassified to faithful timing (#151, liveMoveTimingPolicy.ts 304). Snore (prep28: a known lend after Sleep Powder + its sleep status animations; any unknown lend declines).
+  123, 328, 143, 173,
   // prep29 R1 (docs/next-adapters-prep29.md B.1): Bonemerang, both hit bodies (hit 1 first body, hit 2 after hit 1 through the lent order).
   155,
   // prep29 R1 (B.3): Rapid Spin (any known lend; the entry scanline is the constant S0 banks).
@@ -933,8 +932,8 @@ export function liveMoveAnimationDuration(
     case 190: return 79;
     // Signal Beam first body: signalBeamFirstInactiveAge = 18 + |pan target - initial| = 145 (player attacker) / 144 (opponent), prep22 s0.2.
     case 324: return request.attacker === 0 ? 145 : 144;
-    // Sheer Cold first body: 191 rows (player attacker) / 190 (opponent), constant across the accepted + alternate scenarios (prep22 s0.2).
-    case 329: return request.attacker === 0 ? 191 : 190;
+    // Sheer Cold first body (faithful timing, #151): restore fade end (policy: per-side age-171 lag) + 2 = 191 rows (player attacker) / 190 (opponent).
+    case 329: return liveSheerColdRestoreFadeEndAge(request.attacker === 0 ? "player" : "opponent") + 2;
     // Sky Attack (prep25): charge 148 rows / strike 180 rows, selected by gAnimMoveTurn bit 0 like Razor Wind / Solar Beam.
     // Faithful timing (D4, liveMoveTimingPolicy.ts; not LIVE_MOVE_ANIMATION_IDS): Mach Punch 107 iterations + fixed lags 71, 72 + the policy's
     // optional late lag at 91 (dominant measured phase, 110 rows; the other phase is 109 rows).

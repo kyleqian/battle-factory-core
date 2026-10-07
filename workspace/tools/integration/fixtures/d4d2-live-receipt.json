@@ -1,10 +1,26 @@
 {
  "schema": "d4d2-live-receipt/v1",
- "testedCommit": "09ebd2a2727e27ba0218bca729ab24facb4c14f4",
- "testedSrcTree": "55ef43ef4fb8248d816ac19ca06d7644a731dce3",
+ "testedCommit": "4496169c92eb5b10622eb4cb90cde34140777c48",
+ "testedSrcTree": "6fefafd02d6d1d1ecf7a9a203803db911b2c2830",
  "dirty": true,
  "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
  "summary": {
+  "HYPER_VOICE": {
+   "windows": 32,
+   "rows": 3328,
+   "selected": 26,
+   "selectedPx": 0,
+   "otherPhase": 6,
+   "violations": 0
+  },
+  "SHEER_COLD": {
+   "windows": 28,
+   "rows": 5334,
+   "selected": 21,
+   "selectedPx": 0,
+   "otherPhase": 7,
+   "violations": 0
+  },
   "DIVE": {
    "windows": 9,
    "rows": 1053,
@@ -23,6 +39,2313 @@
   }
  },
  "windows": [
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-flygon-hyper-voice-opponent-exploud-player-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "b2da9ab36577c205570a0dbdcd03190f453958e144c43eb470226a067c11ea5b",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "b2da9ab36577c205570a0dbdcd03190f453958e144c43eb470226a067c11ea5b",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-flygon-hyper-voice-player-exploud-opponent-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "93924203107202a7ba824b207e1bde2c3046ffbe5b7dcb89be0c0c53d94e3b69",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "93924203107202a7ba824b207e1bde2c3046ffbe5b7dcb89be0c0c53d94e3b69",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-flygonA-hyper-voice-opponent-exploud-player-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "e4ccec94e3d3fe3ed71d6d8771bc93ccc8f2334738b92103fa4d8066b24b3fff",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "e4ccec94e3d3fe3ed71d6d8771bc93ccc8f2334738b92103fa4d8066b24b3fff",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-flygonA-hyper-voice-player-exploud-opponent-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "no-event",
+   "measuredPhases": {
+    "palette-upload-scanline": "no-event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": false,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 103,
+     "residualPixels": 229,
+     "digest": "ec4ddae6d9836ed5436f5b923ba5cc36f59aa44ed67140c8e572913b25d88559",
+     "affectedAges": [
+      59
+     ],
+     "maxPixelsPerRow": 229
+    },
+    {
+     "rows": 104,
+     "exactRows": 103,
+     "residualPixels": 229,
+     "digest": "ec4ddae6d9836ed5436f5b923ba5cc36f59aa44ed67140c8e572913b25d88559",
+     "affectedAges": [
+      59
+     ],
+     "maxPixelsPerRow": 229
+    }
+   ],
+   "documentedAges": [
+    59
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-golbat-hyper-voice-opponent-exploud-player-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "aaa81869a6fe62b92753388823830f93beb6bfdc61cf08160be6d4e0314474dc",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "aaa81869a6fe62b92753388823830f93beb6bfdc61cf08160be6d4e0314474dc",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-golbat-hyper-voice-player-exploud-opponent-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "56f9af883350fa146c36520cba3a4c47dfb0e3ac1c6d323163b31f23fda02636",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "56f9af883350fa146c36520cba3a4c47dfb0e3ac1c6d323163b31f23fda02636",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-golbatA-hyper-voice-opponent-exploud-player-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "1606f551586448e2aa5f219f6c6cb2fc1169c9d9e9ea4f324ad1526960bef2a7",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "1606f551586448e2aa5f219f6c6cb2fc1169c9d9e9ea4f324ad1526960bef2a7",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-golbatA-hyper-voice-player-exploud-opponent-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "no-event",
+   "measuredPhases": {
+    "palette-upload-scanline": "no-event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": false,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 103,
+     "residualPixels": 229,
+     "digest": "220c3006089f9cae7715877c70480087275b2d6c292cfde1c5656efcd84c5500",
+     "affectedAges": [
+      59
+     ],
+     "maxPixelsPerRow": 229
+    },
+    {
+     "rows": 104,
+     "exactRows": 103,
+     "residualPixels": 229,
+     "digest": "220c3006089f9cae7715877c70480087275b2d6c292cfde1c5656efcd84c5500",
+     "affectedAges": [
+      59
+     ],
+     "maxPixelsPerRow": 229
+    }
+   ],
+   "documentedAges": [
+    59
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-pichu-hyper-voice-opponent-exploud-player-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "78bf3bb9436c182e63fce3ae6cc8dce20c7d6f6ff3588a3433e236c1e341bdde",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "78bf3bb9436c182e63fce3ae6cc8dce20c7d6f6ff3588a3433e236c1e341bdde",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-pichu-hyper-voice-player-exploud-opponent-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "f1c2a432a5590cc3f37b70ddcf4e832a0bf9169684ded560797920eeff755c5f",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "f1c2a432a5590cc3f37b70ddcf4e832a0bf9169684ded560797920eeff755c5f",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-pichuA-hyper-voice-opponent-exploud-player-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "no-event",
+   "measuredPhases": {
+    "palette-upload-scanline": "no-event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": false,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 103,
+     "residualPixels": 3840,
+     "digest": "70b401c99d3d69c9764bcfdca6629013f176c0474c2b1cdbe12d834a5c07470d",
+     "affectedAges": [
+      59
+     ],
+     "maxPixelsPerRow": 3840
+    },
+    {
+     "rows": 104,
+     "exactRows": 103,
+     "residualPixels": 3840,
+     "digest": "70b401c99d3d69c9764bcfdca6629013f176c0474c2b1cdbe12d834a5c07470d",
+     "affectedAges": [
+      59
+     ],
+     "maxPixelsPerRow": 3840
+    }
+   ],
+   "documentedAges": [
+    59
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-pichuA-hyper-voice-player-exploud-opponent-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "no-event",
+   "measuredPhases": {
+    "palette-upload-scanline": "no-event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": false,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 103,
+     "residualPixels": 3818,
+     "digest": "4d7599feea4176e1b39d5e77d4574c54415b8d7197fcad460f345fd02d133471",
+     "affectedAges": [
+      59
+     ],
+     "maxPixelsPerRow": 3818
+    },
+    {
+     "rows": 104,
+     "exactRows": 103,
+     "residualPixels": 3818,
+     "digest": "4d7599feea4176e1b39d5e77d4574c54415b8d7197fcad460f345fd02d133471",
+     "affectedAges": [
+      59
+     ],
+     "maxPixelsPerRow": 3818
+    }
+   ],
+   "documentedAges": [
+    59
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-rattata-hyper-voice-opponent-exploud-player-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "0f8ce10e3c46807816ac52859b52bd9582e960957b3661efad092f0b121fe640",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "0f8ce10e3c46807816ac52859b52bd9582e960957b3661efad092f0b121fe640",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-rattata-hyper-voice-player-exploud-opponent-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "49c22d2b97aea45c92f9d988a9e6946be3cfc140b884ff338f25d2d0267ad9c8",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "49c22d2b97aea45c92f9d988a9e6946be3cfc140b884ff338f25d2d0267ad9c8",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-rattataA-hyper-voice-opponent-exploud-player-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "no-event",
+   "measuredPhases": {
+    "palette-upload-scanline": "no-event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": false,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 103,
+     "residualPixels": 3840,
+     "digest": "f6871b35c8765a40e10e629e0a441989eb35d9e46383673822dbf2d35d2e057f",
+     "affectedAges": [
+      59
+     ],
+     "maxPixelsPerRow": 3840
+    },
+    {
+     "rows": 104,
+     "exactRows": 103,
+     "residualPixels": 3840,
+     "digest": "f6871b35c8765a40e10e629e0a441989eb35d9e46383673822dbf2d35d2e057f",
+     "affectedAges": [
+      59
+     ],
+     "maxPixelsPerRow": 3840
+    }
+   ],
+   "documentedAges": [
+    59
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-rattataA-hyper-voice-player-exploud-opponent-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "no-event",
+   "measuredPhases": {
+    "palette-upload-scanline": "no-event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": false,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 103,
+     "residualPixels": 3818,
+     "digest": "f9ef0c67b8853ba5aefd7870ccd593b29e1355bc19dc38a63aac9895dc8dafde",
+     "affectedAges": [
+      59
+     ],
+     "maxPixelsPerRow": 3818
+    },
+    {
+     "rows": 104,
+     "exactRows": 103,
+     "residualPixels": 3818,
+     "digest": "f9ef0c67b8853ba5aefd7870ccd593b29e1355bc19dc38a63aac9895dc8dafde",
+     "affectedAges": [
+      59
+     ],
+     "maxPixelsPerRow": 3818
+    }
+   ],
+   "documentedAges": [
+    59
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-steelix-hyper-voice-opponent-exploud-player-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "52b74e7894a2bd83d6f3e176e02f7a3da9d0226bf59ee8861f0091f3f08f8f26",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "52b74e7894a2bd83d6f3e176e02f7a3da9d0226bf59ee8861f0091f3f08f8f26",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-steelix-hyper-voice-player-exploud-opponent-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "b39f097ce097965126fa83ffc48c974106563f8312fcea11e305388d32b8eec0",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "b39f097ce097965126fa83ffc48c974106563f8312fcea11e305388d32b8eec0",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-steelixA-hyper-voice-opponent-exploud-player-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "b1eb73a7081714c2ec679ba286ee3e9021dba0c98ad3542a2cf209183376a683",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "b1eb73a7081714c2ec679ba286ee3e9021dba0c98ad3542a2cf209183376a683",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-steelixA-hyper-voice-player-exploud-opponent-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "a0f52200c667de71ebd6f2623d61e80fe13975e6ed7684cc8d13a795bbddaa95",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "a0f52200c667de71ebd6f2623d61e80fe13975e6ed7684cc8d13a795bbddaa95",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-wailord-hyper-voice-opponent-exploud-player-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "f87d9e01e4a539d09bde23a7004a2a91776d4f8afe458af86975b5021877e2c4",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "f87d9e01e4a539d09bde23a7004a2a91776d4f8afe458af86975b5021877e2c4",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-wailord-hyper-voice-player-exploud-opponent-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "11f5ce70831596b75d921bd06ea45387ee1ae8d1c04bf540b4ae7b19dd471254",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "11f5ce70831596b75d921bd06ea45387ee1ae8d1c04bf540b4ae7b19dd471254",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-wailordA-hyper-voice-opponent-exploud-player-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "f6468272bc090d2309854272a53a20228b2a2638b092a3f7a7d15ceeec7199f7",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "f6468272bc090d2309854272a53a20228b2a2638b092a3f7a7d15ceeec7199f7",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-a7-wailordA-hyper-voice-player-exploud-opponent-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "1d424d34ba7076a6c1f097b709d1092e151d5cad6723115aac87b9fc62181a83",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "1d424d34ba7076a6c1f097b709d1092e151d5cad6723115aac87b9fc62181a83",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-alt-opponent-loudred-golem.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "7ced168821b8fbd8e18ab6989f94271b55750c5ec5172efdf3ff53c11c26dfac",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "7ced168821b8fbd8e18ab6989f94271b55750c5ec5172efdf3ff53c11c26dfac",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-alt-player-loudred-golem.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "97cb71692c37765df2e8c338a2fa8d7bedb77b2a93fa79637b7ee301ff437ef1",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "97cb71692c37765df2e8c338a2fa8d7bedb77b2a93fa79637b7ee301ff437ef1",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-extra-opponent-exploud-golbat.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "aaa81869a6fe62b92753388823830f93beb6bfdc61cf08160be6d4e0314474dc",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "aaa81869a6fe62b92753388823830f93beb6bfdc61cf08160be6d4e0314474dc",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-extra-opponent-loudred-snorlax.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "f9b969be4af631dba374a1380512751ad33994f30654ca68544b0dfc47574972",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "f9b969be4af631dba374a1380512751ad33994f30654ca68544b0dfc47574972",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-extra-player-exploud-golbat.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "56f9af883350fa146c36520cba3a4c47dfb0e3ac1c6d323163b31f23fda02636",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "56f9af883350fa146c36520cba3a4c47dfb0e3ac1c6d323163b31f23fda02636",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-extra-player-loudred-snorlax.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "896f42a31e324168c979caea5830039b422b74ba6bd310d1fc3eabde5aa2ccc4",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "896f42a31e324168c979caea5830039b422b74ba6bd310d1fc3eabde5aa2ccc4",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-opponent-exploud-player-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "8f4aace21bf1ae986545ba1566703c07c1ba4ce89053b39485f9d77adf02ced9",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "8f4aace21bf1ae986545ba1566703c07c1ba4ce89053b39485f9d77adf02ced9",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/hyper-voice-player-exploud-opponent-slowking.json",
+   "move": "HYPER_VOICE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "policyPhases": {
+    "palette-upload-scanline": "event"
+   },
+   "selectedPhase": true,
+   "window": 104,
+   "expectedDuration": 104,
+   "runs": [
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "1c35ff10476ade027d46f0a846a3dc4552841f36cc028e5795aa5d19bf36110b",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 104,
+     "exactRows": 104,
+     "residualPixels": 0,
+     "digest": "1c35ff10476ade027d46f0a846a3dc4552841f36cc028e5795aa5d19bf36110b",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-flygon-sheer-cold-player-dewgong-opponent-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 191,
+   "expectedDuration": 191,
+   "runs": [
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "6a73c9fd7c920577522960bf12a94be033f7b7464f4e2b6934b073712b6f6242",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "6a73c9fd7c920577522960bf12a94be033f7b7464f4e2b6934b073712b6f6242",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-flygonA-sheer-cold-opponent-dewgong-player-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "event",
+   "policyPhase": "no-event",
+   "selectedPhase": false,
+   "window": 190,
+   "expectedDuration": 190,
+   "runs": [
+    {
+     "rows": 190,
+     "exactRows": 174,
+     "residualPixels": 275392,
+     "digest": "00842b085e99f52952c9ab712741cbddbc27bd80b5b4e243f0a71695d750473f",
+     "affectedAges": [
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187,
+      188
+     ],
+     "maxPixelsPerRow": 17212
+    },
+    {
+     "rows": 190,
+     "exactRows": 174,
+     "residualPixels": 275392,
+     "digest": "00842b085e99f52952c9ab712741cbddbc27bd80b5b4e243f0a71695d750473f",
+     "affectedAges": [
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187,
+      188
+     ],
+     "maxPixelsPerRow": 17212
+    }
+   ],
+   "documentedAges": [
+    172,
+    173,
+    174,
+    175,
+    176,
+    177,
+    178,
+    179,
+    180,
+    181,
+    182,
+    183,
+    184,
+    185,
+    186,
+    187,
+    188,
+    189
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-golbat-sheer-cold-player-dewgong-opponent-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 191,
+   "expectedDuration": 191,
+   "runs": [
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "f448db989306a6fd8c103d067375de6838c34876edd530965ae166b82c02b0b4",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "f448db989306a6fd8c103d067375de6838c34876edd530965ae166b82c02b0b4",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-golbatA-sheer-cold-opponent-dewgong-player-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "event",
+   "policyPhase": "no-event",
+   "selectedPhase": false,
+   "window": 190,
+   "expectedDuration": 190,
+   "runs": [
+    {
+     "rows": 190,
+     "exactRows": 174,
+     "residualPixels": 284576,
+     "digest": "e8cb55f5028ba2470be8f46fcb39e3f9c063b9e81b0354125a4e03047eb9b3e7",
+     "affectedAges": [
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187,
+      188
+     ],
+     "maxPixelsPerRow": 17786
+    },
+    {
+     "rows": 190,
+     "exactRows": 174,
+     "residualPixels": 284576,
+     "digest": "e8cb55f5028ba2470be8f46fcb39e3f9c063b9e81b0354125a4e03047eb9b3e7",
+     "affectedAges": [
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187,
+      188
+     ],
+     "maxPixelsPerRow": 17786
+    }
+   ],
+   "documentedAges": [
+    172,
+    173,
+    174,
+    175,
+    176,
+    177,
+    178,
+    179,
+    180,
+    181,
+    182,
+    183,
+    184,
+    185,
+    186,
+    187,
+    188,
+    189
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-golbatA-sheer-cold-player-dewgong-opponent-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 191,
+   "expectedDuration": 191,
+   "runs": [
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "d47f6ec72552b896fc75067e82533748d8537e55477542043f54c7ca80c7a0dd",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "d47f6ec72552b896fc75067e82533748d8537e55477542043f54c7ca80c7a0dd",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-onix-sheer-cold-player-dewgong-opponent-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 191,
+   "expectedDuration": 191,
+   "runs": [
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "926c4fc00b982edcfa7276b091362ac7be42dcec908cc35c302e7796cfcceb44",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "926c4fc00b982edcfa7276b091362ac7be42dcec908cc35c302e7796cfcceb44",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-onixA-sheer-cold-opponent-dewgong-player-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "event",
+   "policyPhase": "no-event",
+   "selectedPhase": false,
+   "window": 190,
+   "expectedDuration": 190,
+   "runs": [
+    {
+     "rows": 190,
+     "exactRows": 174,
+     "residualPixels": 276352,
+     "digest": "98fa3b78faf1178685631c430e79e9d30094427fbb9f428f005053143210da91",
+     "affectedAges": [
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187,
+      188
+     ],
+     "maxPixelsPerRow": 17272
+    },
+    {
+     "rows": 190,
+     "exactRows": 174,
+     "residualPixels": 276352,
+     "digest": "98fa3b78faf1178685631c430e79e9d30094427fbb9f428f005053143210da91",
+     "affectedAges": [
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187,
+      188
+     ],
+     "maxPixelsPerRow": 17272
+    }
+   ],
+   "documentedAges": [
+    172,
+    173,
+    174,
+    175,
+    176,
+    177,
+    178,
+    179,
+    180,
+    181,
+    182,
+    183,
+    184,
+    185,
+    186,
+    187,
+    188,
+    189
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-pichu-sheer-cold-player-dewgong-opponent-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 191,
+   "expectedDuration": 191,
+   "runs": [
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "0e8950f6bc03fb4d6f841e4f748e0fc3a303df198220c7fea48f47eee9ea07a5",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "0e8950f6bc03fb4d6f841e4f748e0fc3a303df198220c7fea48f47eee9ea07a5",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-pichuA-sheer-cold-opponent-dewgong-player-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "event",
+   "policyPhase": "no-event",
+   "selectedPhase": false,
+   "window": 190,
+   "expectedDuration": 190,
+   "runs": [
+    {
+     "rows": 190,
+     "exactRows": 174,
+     "residualPixels": 297760,
+     "digest": "356a25cd26484af09c9a85cc3dd456899fe968448340f6759fd1c7a4c9d15fa0",
+     "affectedAges": [
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187,
+      188
+     ],
+     "maxPixelsPerRow": 18610
+    },
+    {
+     "rows": 190,
+     "exactRows": 174,
+     "residualPixels": 297760,
+     "digest": "356a25cd26484af09c9a85cc3dd456899fe968448340f6759fd1c7a4c9d15fa0",
+     "affectedAges": [
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187,
+      188
+     ],
+     "maxPixelsPerRow": 18610
+    }
+   ],
+   "documentedAges": [
+    172,
+    173,
+    174,
+    175,
+    176,
+    177,
+    178,
+    179,
+    180,
+    181,
+    182,
+    183,
+    184,
+    185,
+    186,
+    187,
+    188,
+    189
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-pichuA-sheer-cold-player-dewgong-opponent-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "no-event",
+   "policyPhase": "event",
+   "selectedPhase": false,
+   "window": 191,
+   "expectedDuration": 191,
+   "runs": [
+    {
+     "rows": 191,
+     "exactRows": 175,
+     "residualPixels": 292288,
+     "digest": "7d2e094b53fbc21eb5c0d6d2774335782e424bbefba6acf5f1d5b53f8f0fbe1e",
+     "affectedAges": [
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187,
+      188
+     ],
+     "maxPixelsPerRow": 18268
+    },
+    {
+     "rows": 191,
+     "exactRows": 175,
+     "residualPixels": 292288,
+     "digest": "7d2e094b53fbc21eb5c0d6d2774335782e424bbefba6acf5f1d5b53f8f0fbe1e",
+     "affectedAges": [
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187,
+      188
+     ],
+     "maxPixelsPerRow": 18268
+    }
+   ],
+   "documentedAges": [
+    172,
+    173,
+    174,
+    175,
+    176,
+    177,
+    178,
+    179,
+    180,
+    181,
+    182,
+    183,
+    184,
+    185,
+    186,
+    187,
+    188,
+    189
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-rattata-sheer-cold-opponent-dewgong-player-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "no-event",
+   "policyPhase": "no-event",
+   "selectedPhase": true,
+   "window": 190,
+   "expectedDuration": 190,
+   "runs": [
+    {
+     "rows": 190,
+     "exactRows": 190,
+     "residualPixels": 0,
+     "digest": "3b5954f4a4e1b00e7051cbf0502d4132161c73cde5fda4cedf6b981b1fc06153",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 190,
+     "exactRows": 190,
+     "residualPixels": 0,
+     "digest": "3b5954f4a4e1b00e7051cbf0502d4132161c73cde5fda4cedf6b981b1fc06153",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-rattata-sheer-cold-player-dewgong-opponent-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 191,
+   "expectedDuration": 191,
+   "runs": [
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "4e7c137dab62b1d72211d94d7611dad7124fbd4d1d4edaad4db654f0d61cb250",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "4e7c137dab62b1d72211d94d7611dad7124fbd4d1d4edaad4db654f0d61cb250",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-rattataA-sheer-cold-opponent-dewgong-player-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "no-event",
+   "policyPhase": "no-event",
+   "selectedPhase": true,
+   "window": 190,
+   "expectedDuration": 190,
+   "runs": [
+    {
+     "rows": 190,
+     "exactRows": 190,
+     "residualPixels": 0,
+     "digest": "c4dd16226eb0825b98bb27904fde338090d6eb0427503ac2c57c0ef56f6fc163",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 190,
+     "exactRows": 190,
+     "residualPixels": 0,
+     "digest": "c4dd16226eb0825b98bb27904fde338090d6eb0427503ac2c57c0ef56f6fc163",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-steelix-sheer-cold-opponent-dewgong-player-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "no-event",
+   "policyPhase": "no-event",
+   "selectedPhase": true,
+   "window": 190,
+   "expectedDuration": 190,
+   "runs": [
+    {
+     "rows": 190,
+     "exactRows": 190,
+     "residualPixels": 0,
+     "digest": "be31d60ec7f2b97ca89ebbdfac39432f859d7c2affb62ca4b1fbeeb7d7217340",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 190,
+     "exactRows": 190,
+     "residualPixels": 0,
+     "digest": "be31d60ec7f2b97ca89ebbdfac39432f859d7c2affb62ca4b1fbeeb7d7217340",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-steelix-sheer-cold-player-dewgong-opponent-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 191,
+   "expectedDuration": 191,
+   "runs": [
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "f19ce20d90bb66b5755e3d33d5c7b157dfa93db1bf80ff3c444fbc4806ea76ef",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "f19ce20d90bb66b5755e3d33d5c7b157dfa93db1bf80ff3c444fbc4806ea76ef",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-steelixA-sheer-cold-opponent-dewgong-player-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "no-event",
+   "policyPhase": "no-event",
+   "selectedPhase": true,
+   "window": 190,
+   "expectedDuration": 190,
+   "runs": [
+    {
+     "rows": 190,
+     "exactRows": 190,
+     "residualPixels": 0,
+     "digest": "7a61c404b4edbdc0ea9564537b7c298c330a843fa74cce99c7caf0eb7b4fc3b5",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 190,
+     "exactRows": 190,
+     "residualPixels": 0,
+     "digest": "7a61c404b4edbdc0ea9564537b7c298c330a843fa74cce99c7caf0eb7b4fc3b5",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-tyranitar-sheer-cold-player-dewgong-opponent-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "no-event",
+   "policyPhase": "event",
+   "selectedPhase": false,
+   "window": 191,
+   "expectedDuration": 191,
+   "runs": [
+    {
+     "rows": 191,
+     "exactRows": 175,
+     "residualPixels": 271680,
+     "digest": "ff96e37bd58aa722844ce0b22cfc638355380fd0de84142dfc8ef6ac8d5cca95",
+     "affectedAges": [
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187,
+      188
+     ],
+     "maxPixelsPerRow": 16980
+    },
+    {
+     "rows": 191,
+     "exactRows": 175,
+     "residualPixels": 271680,
+     "digest": "ff96e37bd58aa722844ce0b22cfc638355380fd0de84142dfc8ef6ac8d5cca95",
+     "affectedAges": [
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187,
+      188
+     ],
+     "maxPixelsPerRow": 16980
+    }
+   ],
+   "documentedAges": [
+    172,
+    173,
+    174,
+    175,
+    176,
+    177,
+    178,
+    179,
+    180,
+    181,
+    182,
+    183,
+    184,
+    185,
+    186,
+    187,
+    188,
+    189
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-tyranitarA-sheer-cold-opponent-dewgong-player-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "event",
+   "policyPhase": "no-event",
+   "selectedPhase": false,
+   "window": 190,
+   "expectedDuration": 190,
+   "runs": [
+    {
+     "rows": 190,
+     "exactRows": 174,
+     "residualPixels": 265680,
+     "digest": "90b60ce3131bc55d6c4912b01405d30533dc0aa225f7c4bf0d0d407d3a01a7f6",
+     "affectedAges": [
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187,
+      188
+     ],
+     "maxPixelsPerRow": 16605
+    },
+    {
+     "rows": 190,
+     "exactRows": 174,
+     "residualPixels": 265680,
+     "digest": "90b60ce3131bc55d6c4912b01405d30533dc0aa225f7c4bf0d0d407d3a01a7f6",
+     "affectedAges": [
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187,
+      188
+     ],
+     "maxPixelsPerRow": 16605
+    }
+   ],
+   "documentedAges": [
+    172,
+    173,
+    174,
+    175,
+    176,
+    177,
+    178,
+    179,
+    180,
+    181,
+    182,
+    183,
+    184,
+    185,
+    186,
+    187,
+    188,
+    189
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-tyranitarA-sheer-cold-player-dewgong-opponent-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 191,
+   "expectedDuration": 191,
+   "runs": [
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "c1a9096a073799fe9dd5d1a7720939ac07777c5f058da46fc794be0bb3ddc7bc",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "c1a9096a073799fe9dd5d1a7720939ac07777c5f058da46fc794be0bb3ddc7bc",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-wailord-sheer-cold-opponent-dewgong-player-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "no-event",
+   "policyPhase": "no-event",
+   "selectedPhase": true,
+   "window": 190,
+   "expectedDuration": 190,
+   "runs": [
+    {
+     "rows": 190,
+     "exactRows": 190,
+     "residualPixels": 0,
+     "digest": "174bf5460c50912d8a6237e41dae7c15a0645790478482ba65a4c4eaf9a3c693",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 190,
+     "exactRows": 190,
+     "residualPixels": 0,
+     "digest": "174bf5460c50912d8a6237e41dae7c15a0645790478482ba65a4c4eaf9a3c693",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-wailord-sheer-cold-player-dewgong-opponent-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 191,
+   "expectedDuration": 191,
+   "runs": [
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "bb74f15d72141457fe08afbe275606a8514112032bd85f9544b710659d44948d",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "bb74f15d72141457fe08afbe275606a8514112032bd85f9544b710659d44948d",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-a7-wailordA-sheer-cold-opponent-dewgong-player-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "no-event",
+   "policyPhase": "no-event",
+   "selectedPhase": true,
+   "window": 190,
+   "expectedDuration": 190,
+   "runs": [
+    {
+     "rows": 190,
+     "exactRows": 190,
+     "residualPixels": 0,
+     "digest": "271dfea70016038a663b971885eb981964eaec0503b1c2cf4b2a16129b70d69f",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 190,
+     "exactRows": 190,
+     "residualPixels": 0,
+     "digest": "271dfea70016038a663b971885eb981964eaec0503b1c2cf4b2a16129b70d69f",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-alt-opponent-cloyster-golem.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "no-event",
+   "policyPhase": "no-event",
+   "selectedPhase": true,
+   "window": 190,
+   "expectedDuration": 190,
+   "runs": [
+    {
+     "rows": 190,
+     "exactRows": 190,
+     "residualPixels": 0,
+     "digest": "435bf17efe71aee3dfdd1c4532efc3eaf916e94873c8ddd2093307b673bf3a78",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 190,
+     "exactRows": 190,
+     "residualPixels": 0,
+     "digest": "435bf17efe71aee3dfdd1c4532efc3eaf916e94873c8ddd2093307b673bf3a78",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-alt-player-cloyster-golem.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 191,
+   "expectedDuration": 191,
+   "runs": [
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "783f4b1650644ab960438917adeed77582bd985d4059cc2bac898b735738f3de",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "783f4b1650644ab960438917adeed77582bd985d4059cc2bac898b735738f3de",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-extra-opponent-dewgong-snorlax.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "no-event",
+   "policyPhase": "no-event",
+   "selectedPhase": true,
+   "window": 190,
+   "expectedDuration": 190,
+   "runs": [
+    {
+     "rows": 190,
+     "exactRows": 190,
+     "residualPixels": 0,
+     "digest": "5b75919cced67e032f317d1c8c640797f56530b6a7ff93f426261119532174ad",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 190,
+     "exactRows": 190,
+     "residualPixels": 0,
+     "digest": "5b75919cced67e032f317d1c8c640797f56530b6a7ff93f426261119532174ad",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-extra-player-dewgong-snorlax.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 191,
+   "expectedDuration": 191,
+   "runs": [
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "ff1d13284783359f554fac9a9d82e76cd752a2684a344a3d7121f7c465e72977",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "ff1d13284783359f554fac9a9d82e76cd752a2684a344a3d7121f7c465e72977",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-opponent-dewgong-player-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "no-event",
+   "policyPhase": "no-event",
+   "selectedPhase": true,
+   "window": 190,
+   "expectedDuration": 190,
+   "runs": [
+    {
+     "rows": 190,
+     "exactRows": 190,
+     "residualPixels": 0,
+     "digest": "f8ba9233a348055a3357a03ec4bb07236dfa5f3ca0172e43d8ecf622530e4702",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 190,
+     "exactRows": 190,
+     "residualPixels": 0,
+     "digest": "f8ba9233a348055a3357a03ec4bb07236dfa5f3ca0172e43d8ecf622530e4702",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4d2-live/sheer-cold-player-dewgong-opponent-chansey.json",
+   "move": "SHEER_COLD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 191,
+   "expectedDuration": 191,
+   "runs": [
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "932a92cd97255a0a96b8a90b82327f1ad91cd8cab9703dbbca08ff8e22c7336b",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 191,
+     "exactRows": 191,
+     "residualPixels": 0,
+     "digest": "932a92cd97255a0a96b8a90b82327f1ad91cd8cab9703dbbca08ff8e22c7336b",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
   {
    "fixture": "tools/integration/fixtures/s10a-live/dive-alt-opponent-lanturn-golem.json",
    "move": "DIVE",

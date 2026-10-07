@@ -1,0 +1,16 @@
+{
+ "schema": "d4d2-timing-window/v1",
+ "sourceFixture": "tools/integration/fixtures/q2-live/hyper-voice-alt-opponent-loudred-golem.json",
+ "move": "HYPER_VOICE",
+ "timingPhase": "event",
+ "attacker": {
+  "species": "LOUDRED",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "bandDepth": 16,
+ "timingPhases": {
+  "palette-upload-scanline": "event"
+ }
+}

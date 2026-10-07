@@ -13,7 +13,8 @@
 
 export const LIVE_MOVE_TIMING_POLICY_VERSION = "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event" as const;
 
-export type LiveMoveTimingParameterKind = "optional-lag-age" | "bg-write-row" | "palette-transfer-row" | "scanline-split-line" | "oam-transfer-row";
+export type LiveMoveTimingParameterKind = "optional-lag-age" | "bg-write-row" | "palette-transfer-row" | "scanline-split-line" | "oam-transfer-row"
+  | "palette-upload-scanline";
 /**
  * "event" = the optional lag frame / late write happens; "no-event" = it does not (the source iteration count). Per kind:
  * - optional-lag-age: "event" = the optional lag frame at `age` is present (one more body row).
@@ -22,6 +23,8 @@ export type LiveMoveTimingParameterKind = "optional-lag-age" | "bg-write-row" | 
  * - palette-transfer-row: "event" = the later transfer row.
  * - oam-transfer-row: "event" = the hardware OAM / matrix buffer of row `age` still shows the sprite state of `age - 2` (the VBlank OAM transfer
  *   of the previous frame did not carry the new affine state), "no-event" = the ordinary one-row latch (`age - 1`).
+ * - palette-upload-scanline: a main-loop palette upload lands while row `age` is scanned out; "event" = the measured late band (the upper
+ *   scanlines keep the previous row's palette), "no-event" = an earlier upload (a shallower band: none, or fewer lines).
  * - scanline-split-line: a main-loop write of BOTH scanline buffers lands while the frame is scanned out; "event" = the write lands below the
  *   top of the distortion window (lines above the beam still show the previous row's values), "no-event" = before the window (split line
  *   S = 0: the displayed buffer is the written one).
@@ -216,6 +219,43 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
     }],
   },
   /**
+   * ISSUES #151 Hyper Voice (docs/issue151-diagnosis.md s1, docs/live-species-audit-7.md): the second effect call's yellow BG blend is uploaded
+   * partway into the age-59 frame; scanlines above that point keep the age-58 palette. Band depth per measured window (32 non-shiny windows,
+   * twice fresh): 16 for EXPLOUD / LOUDRED / STEELIX / WAILORD attackers (both sides), FLYGON / GOLBAT opponent-side attackers and every target
+   * swap (26, incl. the 8 q2-live fixtures); 15 for FLYGON / GOLBAT player-side attackers (2); 0 for PICHU / RATTATA attackers (4). Dominant:
+   * the 16-line band (today's reducer). Wrong phase: row 59 only (scanline 15: 229 px; scanlines 0..15: 3,818 / 3,840 px).
+   */
+  304: {
+    move: "MOVE_HYPER_VOICE",
+    parameters: [{
+      kind: "palette-upload-scanline", age: 59, fixedLagAges: [], iterations: 104,
+      alternatives: [{ phase: "event", bodyRows: 104, measured: 26 }, { phase: "no-event", bodyRows: 104, measured: 6 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["docs/issue151-diagnosis.md s1 (band depth 16 / 15 / 0)", "tools/integration/fixtures/issue151/hyper-voice-upper-rows-env.diff (patch proof: measured depth -> 0 px)",
+        "tools/integration/fixtures/d4d2-live-receipt.json hyper-voice-* windows"],
+    }],
+  },
+  /**
+   * ISSUES #151 Sheer Cold (docs/issue151-diagnosis.md s1-s3, tools/integration/fixtures/issue151/sheer-cold-counters.txt, docs/live-species-audit-7.md):
+   * the restorebg fade-in ends one row later when the age-171 frame lags (fixed lags 151, 152 in every window); measured PER SIDE (31 windows,
+   * twice fresh): opponent attacker no lag 11 / lag 5 -> no lag (restore fade end 188); player attacker lag 13 / no lag 2 -> lag (189). Both
+   * equal the reducer's side defaults (sheerCold.ts restoreEndAge). Wrong phase: one BLDY step on the tail ages 172..189 (~16.6k-18.6k px/row).
+   */
+  329: {
+    move: "MOVE_SHEER_COLD",
+    parameters: [{
+      kind: "optional-lag-age", age: 171, fixedLagAges: [151, 152], iterations: 188, side: "player",
+      alternatives: [{ phase: "event", bodyRows: 191, measured: 13 }, { phase: "no-event", bodyRows: 190, measured: 2 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/issue151/sheer-cold-counters.txt (player attacker: age-171 lag 13 of 15)", "docs/issue151-diagnosis.md s1 table 2"],
+    }, {
+      kind: "optional-lag-age", age: 171, fixedLagAges: [151, 152], iterations: 188, side: "opponent",
+      alternatives: [{ phase: "event", bodyRows: 191, measured: 5 }, { phase: "no-event", bodyRows: 190, measured: 11 }],
+      chosen: "no-event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/issue151/sheer-cold-counters.txt (opponent attacker: age-171 lag 5 of 16)", "docs/issue151-diagnosis.md s1 table 2"],
+    }],
+  },
+  /**
    * S10A Dive SETUP body, player attacker (tools/integration/fixtures/s10a-live/dive-*.json, d4d2-live-receipt.json): the splash reuses the
    * ball's affine matrix at age 67; on row 68 the hardware OAM shows the source state of age 66 (the renderer's measured reused-affine
    * exception, battleScene.ts DIVE) in 4 of 6 measured player windows (accepted CHINCHOU -> ONIX, prep25 LANTURN -> GOLEM, CHINCHOU -> SHUCKLE,
@@ -264,6 +304,11 @@ export function liveMovePaletteTransferRow(moveId: number): number | null {
   const p = liveMoveTimingParameter(moveId, "palette-transfer-row");
   return p === null ? null : p.chosen === "event" ? p.age : p.age - 1;
 }
+/** The chosen phase of a move's per-side parameter (a parameter without `side` applies to both), or null without one. */
+export function liveMoveTimingSidePhase(moveId: number, kind: LiveMoveTimingParameterKind, side: "player" | "opponent"): LiveMoveTimingPhase | null {
+  return LIVE_MOVE_TIMING_POLICY[moveId]?.parameters.find((p) => p.kind === kind && (p.side === undefined || p.side === side))?.chosen ?? null;
+}
+
 /** The policy parameter of a move, or null when the move has no D4 timing parameter of that kind. */
 export function liveMoveTimingParameter(moveId: number, kind: LiveMoveTimingParameterKind): LiveMoveTimingParameter | null {
   return LIVE_MOVE_TIMING_POLICY[moveId]?.parameters.find((p) => p.kind === kind) ?? null;
@@ -299,6 +344,12 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   171,
   // D4 (S10A): Superpower first body (liveSuperpowerInputs.ts; per-side monbg write row; fixtures tools/integration/fixtures/s10a-live/superpower-*).
   276,
+  // ISSUES #151 (reclassified from scoped exact): Hyper Voice (liveQ2Moves.ts liveHyperVoiceInputs; the age-59 palette-upload band; exact fixtures
+  // tools/integration/fixtures/q2-live/hyper-voice-*, alternate-phase audit-7 windows tools/integration/fixtures/d4d2-live/hyper-voice-*).
+  304,
+  // ISSUES #151 (reclassified from scoped exact): Sheer Cold first body (liveProfileMoves.ts liveSheerColdInputs; per-side age-171 restore lag;
+  // exact fixtures tools/integration/fixtures/sheer-cold-live, alternate-phase audit-7 windows tools/integration/fixtures/d4d2-live/sheer-cold-*).
+  329,
   // S10A: Dive SETUP body (D3 + D4; Random2 droplets from the presentation host; the player row-68 OAM transfer phase; liveMoveAnimation.ts 291;
   // fixtures tools/integration/fixtures/s10a-live/dive-*).
   291,

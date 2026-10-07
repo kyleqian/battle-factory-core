@@ -34,6 +34,11 @@ export interface HyperVoiceResourceAllocation {
 
 /** Inputs owned by the live Scene-ON presentation boundary. */
 export interface HyperVoiceLiveInputs {
+  /**
+   * The second effect call's age-59 palette upload lands below scanline 16 (the measured EXPLOUD / LOUDRED band: scanlines 0..15 keep the
+   * age-58 palette). Absent = true (the accepted staged seam); the live seam passes the faithful-timing policy's phase (#151; false = no band).
+   */
+  readonly paletteUploadLate?: boolean;
   readonly attackerSide: HyperVoiceSide;
   readonly targetSide: HyperVoiceSide;
   readonly attackerSpecies: string;
@@ -491,8 +496,8 @@ export function hyperVoiceAtAge(age: number, input: Readonly<HyperVoiceLiveInput
       // 0..15 to retain the preceding hardware palette. The lower field and
       // both palette-RAM snapshots already contain the new setup blend.
       scanout: {
-        upperRows: effect?.call === 2 && local === 0 ? 16 : 0,
-        upperHardware: effect?.call === 2 && local === 0
+        upperRows: effect?.call === 2 && local === 0 && (input.paletteUploadLate ?? true) ? 16 : 0,
+        upperHardware: effect?.call === 2 && local === 0 && (input.paletteUploadLate ?? true)
           ? hardwarePaletteAtAge(age - 1, input) : hardwarePalette,
       },
     },

@@ -6,6 +6,7 @@
  * (composeLivePalettes) with the move's own asset palette written into the measured OBJ bank. No capture row is read.
  * Lovely Kiss alone consumes Random2 (4 words at age +120); its activation value comes from the presentation host.
  */
+import { liveMoveTimingSidePhase } from "./liveMoveTimingPolicy.ts";
 import type { LivePaletteComposite } from "./liveMovePaletteComposite.ts";
 
 // src/engine may not import src/animation (animationBoundaryRatchet): the move assets' palettes are passed in by liveMoveAnimation.ts.
@@ -192,5 +193,12 @@ export function liveSheerColdInputs(input: {
     ].sort((l, r) => l.slot - r.slot),
     monbg: { layer: targetSide === "player" ? "bg2" as const : "bg1" as const, scroll: { x: 32 - tx, y: 32 - ty } },
     animationRng: 0, gameplayRng: null,
+    // D4 (#151): the restorebg fade end from the faithful-timing policy's per-side age-171 lag (189 with the lag, 188 without).
+    restoreFadeEndAge: liveSheerColdRestoreFadeEndAge(attackerSide),
   };
+}
+
+/** Sheer Cold's restore fade end (D4, liveMoveTimingPolicy.ts 329): 188 + the chosen age-171 lag of the attacker's side. */
+export function liveSheerColdRestoreFadeEndAge(attackerSide: "player" | "opponent"): number {
+  return 188 + (liveMoveTimingSidePhase(329, "optional-lag-age", attackerSide) === "event" ? 1 : 0);
 }

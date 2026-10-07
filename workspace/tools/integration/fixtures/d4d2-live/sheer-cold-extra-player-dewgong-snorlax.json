@@ -1,0 +1,12 @@
+{
+ "schema": "d4d2-timing-window/v1",
+ "sourceFixture": "tools/integration/fixtures/sheer-cold-live/sheer-cold-extra-player-dewgong-snorlax.json",
+ "move": "SHEER_COLD",
+ "timingPhase": "event",
+ "attacker": {
+  "species": "DEWGONG",
+  "geometry": {
+   "side": "player"
+  }
+ }
+}

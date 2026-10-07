@@ -1,5 +1,6 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS } from "../../src/engine/liveMoveTimingPolicy.ts";
 import { gunzipSync } from "node:zlib";
 import snoreAsset from "../../src/animation/assets/snore.json" with { type: "json" };
 import paletteData from "../../src/data/gen/live-animation-palette-resources.json" with { type: "json" };
@@ -35,11 +36,13 @@ const configOf = (f: Fixture, age = 0, mutate?: (r: BattleMoveAnimationRequest) 
 };
 
 describe("live Q2 registration", () => {
-  it("Hyper Voice, Smog, Sand Tomb, Snore and the Sky Attack charge + strike are scoped-exact; durations are the prep25 constants", () => {
+  it("Smog, Sand Tomb, Snore and the Sky Attack charge + strike are scoped-exact (Hyper Voice: faithful timing, #151); durations are the prep25 constants", () => {
     for (const id of [304, 123, 328, 143, 173]) {
-      expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).toContain(id);
+      expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).toContain(id === 304 ? 123 : id);
       expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[id]).toBe(0);
     }
+    expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).not.toContain(304);
+    expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).toContain(304);
     for (const attacker of [0, 1] as const) {
       const base = { attacker, target: (1 - attacker) as 0 | 1, power: 0, damage: 0, friendship: 70, multihit: 0 };
       expect(liveMoveAnimationDuration({ ...base, moveId: 304, turn: 0 })).toBe(104);
@@ -50,7 +53,8 @@ describe("live Q2 registration", () => {
       expect(liveMoveAnimationDuration({ ...base, moveId: 173, turn: 0 })).toBe(69);
     }
     const exact = (JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8")).implementedAdapters as { id: number }[]).map((e) => e.id);
-    expect(exact).toEqual(expect.arrayContaining([304, 123, 328, 143, 173]));
+    expect(exact).toEqual(expect.arrayContaining([123, 328, 143, 173]));
+    expect(exact).not.toContain(304);
   });
 
   it("covers 45 dense fixtures (accepted, prep25 alternate, GOLBAT-elevated / SNORLAX-large extras) x both orientations; windows start at activation", () => {
@@ -86,7 +90,10 @@ describe("live Q2 builders equal the accepted corpus-built inputs", () => {
     const c: any = hyperVoiceInputsFor(o);
     const built = liveHyperVoiceInputs({ attackerSide: c.attackerSide, attacker: anchors(c.attackerSprite, c.attackerPictureOrigin), target: anchors(c.targetSprite, c.targetPictureOrigin),
       palettes: c.palettes, spriteOrder: c.spriteOrder, attackerSpeciesId: 372, thinRingPalette: (paletteData.resources as any).ANIM_TAG_THIN_RING.colors });
-    expect(diff(built, c).filter((l) => !IGNORE.test(l))).toEqual([]);
+    // #151 D4: the live seam passes the policy's palette-upload phase; the dominant (late upload, 16-line band) is the staged default (absent).
+    const { paletteUploadLate, ...rest } = built as typeof built & { paletteUploadLate?: boolean };
+    expect(paletteUploadLate).toBe(true);
+    expect(diff(rest, c).filter((l) => !IGNORE.test(l))).toEqual([]);
   });
   it.each(ORIENTATIONS)("Smog %s", (o) => {
     const rows = JSON.parse(gunzipSync(readFileSync(`tools/compare/evidence/smog-${o === "player-back" ? "player" : "opponent"}-dense-state.json.gz`)).toString()).frames;
