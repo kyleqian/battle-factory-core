@@ -16,7 +16,7 @@ import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandF
 import { liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";
 import { createKnownEntrySpriteAllocatorProvider } from "../../src/engine/knownEntrySpriteAllocator.ts";
 import { prepareLiveMoveSpriteAllocator, prepareLiveMoveSpriteOrder } from "../../src/engine/liveMoveSpriteAllocator.ts";
-import { digUnleashLend } from "../../src/engine/liveSpriteOrderHost.ts";
+import { bonemerangHit2Free, digUnleashLend } from "../../src/engine/liveSpriteOrderHost.ts";
 import {
   applySpriteOrderUnitPlan, createSpriteOrderPlanCursor, knownEntrySpriteOrderState, spriteOrderPlanTableFromFixture,
   type SpriteOrderPlan,
@@ -239,7 +239,11 @@ function withFirstBody(f: Fixture, input: ReturnType<typeof prepareLiveMoveSprit
   if (input === undefined) return undefined;
   const first = process.env.POKEBENCH_LIVE_ORDER_INPUT === "first-body"
     || (!f.precedingBodies?.length && !f.precedingTurns && !f.precedingX2Events);
-  return first ? { ...input, firstBody: true as const } : input;
+  if (first) return { ...input, firstBody: true as const };
+  // prep29: Bonemerang hit 2 directly after a first-body hit 1 (host `bonemerangHit1`).
+  const only = f.precedingBodies?.length === 1 && !f.precedingTurns && !f.precedingX2Events ? f.precedingBodies[0]! : undefined;
+  return only?.moveId === 155 && only.statAnimation === undefined && only.statusAnimation === undefined && f.move === "BONEMERANG"
+    ? { ...input, free: bonemerangHit2Free(input.free), afterBonemerangHit1: true as const } : input;
 }
 
 // Production reads display names from species-names.json (MR_MIME -> "MR. MIME"); the raw constant drops punctuation glyphs.

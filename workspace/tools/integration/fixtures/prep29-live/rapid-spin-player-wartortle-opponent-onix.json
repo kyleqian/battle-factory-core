@@ -1,0 +1,42 @@
+{
+ "schema": "prep29-live-adapter-fixture/v1",
+ "move": "RAPID_SPIN",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-rapid-spin-player-wartortle-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 310,
+  "endFrame": 439
+ },
+ "windowSource": "window = [activation, activation + 130 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "WARTORTLE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349018756,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 143,
+  "playerMaxHp": 166,
+  "opponentHp": 142,
+  "opponentMaxHp": 142,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ]
+}

@@ -1,0 +1,49 @@
+{
+ "schema": "prep29-live-adapter-fixture/v1",
+ "move": "BONEMERANG",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep29-bonemerang-alt-player-rhydon-golem.json",
+ "denseWindow": {
+  "startFrame": 300,
+  "endFrame": 370
+ },
+ "windowSource": "window = [activation, activation + 71 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "RHYDON",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015703,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 212,
+  "playerMaxHp": 212,
+  "opponentHp": 109,
+  "opponentMaxHp": 187,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 155,
+   "side": "player"
+  }
+ ],
+ "requestFields": {
+  "turn": 1
+ },
+ "messageLines": [
+  "",
+  ""
+ ]
+}

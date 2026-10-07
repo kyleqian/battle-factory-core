@@ -172,3 +172,31 @@ export function liveSkyAttackInputs(args: LiveQ2Args & { impactPalette: readonly
     animationRngSeed: 0, gameplayRng: null,
   };
 }
+
+/**
+ * `Move_BONEMERANG` (155; prep29 B.1): one input per hit body (71 rows, constant). Picture centres are the battlers' picture offset points; the bone /
+ * impact / lunge sprites take slots 3 / 4 / 4 (lowest free, birth-first) with the attacker's battler subpriority - 2; tasks shake 0 / monbg 1 / clear 0;
+ * the monbg scroll is 32 - the target sprite centre on the target's BG (opponent target BG1, player target BG2). The BG control registers are the
+ * first-body S0 pair for hit 1; hit 2 starts from hit 1's split values (a Bonemerang hit is the only history this builder supports).
+ */
+export function liveBonemerangInputs(args: LiveQ2Args): Inputs {
+  const { attackerSide, attacker, target } = args, targetSide = opposite(attackerSide), toOpponent = targetSide === "opponent";
+  const attackerSprite = battlerSprite(attackerSide, attacker), targetSprite = battlerSprite(targetSide, target);
+  const monbgBg1Cnt = toOpponent ? 0x5c02 : 0x9c00, monbgBg2Cnt = toOpponent ? 0x5e00 : 0x5e02;
+  const splitBg1Cnt = toOpponent ? 0x5c02 : 0x9c01, splitBg2Cnt = toOpponent ? 0x5e00 : 0x5e02;
+  const first = args.firstBody;
+  return {
+    attackerPictureCenter: { ...attacker.picOffsetPoint }, targetPictureCenter: { ...target.picOffsetPoint },
+    attackerSprite, targetSprite,
+    allocations: { boneSpriteSlot: 3, impactSpriteSlot: 4, lungeSpriteSlot: 4, shakeTaskSlot: 0, updateMonBgTaskSlot: 1, clearMonBgTaskSlot: 0, boneMatrixSlot: 0, impactMatrixSlot: 3 },
+    resources: { bone: { tileSlot: 6, paletteBank: 7, tileRange: [305, 16] }, impact: { tileSlot: 7, paletteBank: 8, tileRange: [321, 16] } },
+    spriteOrder: args.spriteOrder,
+    painterSprites: orderKeys(attackerSide, attackerSprite.attr[0], targetSprite.attr[0]).map((k) => ({ slot: k.slot, subpriority: k.subpriority, oamPriority: k.oamPriority, oamY: k.oamY })),
+    initialMatrixBitmap: 6,
+    monbg: { layer: toOpponent ? "bg1" : "bg2", scroll: { x: 32 - target.spriteCenter.x, y: 32 - target.spriteCenter.y }, targetBgPriority: toOpponent ? 1 : 0 },
+    background: {
+      baseBg1Cnt: first ? 0x9c00 : splitBg1Cnt, baseBg2Cnt: first ? 0x5e00 : splitBg2Cnt, monbgBg1Cnt, monbgBg2Cnt, splitBg1Cnt, splitBg2Cnt,
+    },
+    animationRngSeed: 0, gameplayRng: null,
+  };
+}
