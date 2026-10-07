@@ -109,6 +109,20 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
         `${D4B_EVIDENCE} monbgCntRow from the probe regEvents (row 8 in 4 of 4)`, "docs/next-adapters-prep24.md s1.3"],
     }],
   },
+  /**
+   * D4b Revenge (docs/next-adapters-prep26.md s2.4): the monbg BGnCNT write lands on row 5 (accepted player, MACHOKE -> GOLEM player and opponent)
+   * or 4 (accepted opponent; with row 4 MoveBattlerSpriteToBG also writes that row's BG scroll): row 5 dominant, 3 of 4. The body length (145
+   * rows) and the blend-cycle arm rows [21, 34, 46, 58] (a measured constant) are equal in every window.
+   */
+  279: {
+    move: "MOVE_REVENGE",
+    parameters: [{
+      kind: "bg-write-row", age: 5, fixedLagAges: [], iterations: 145,
+      alternatives: [{ phase: "event", bodyRows: 145, measured: 5 }, { phase: "no-event", bodyRows: 145, measured: 1 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/prep26RevengeCheck.ts knownFor phase.monbgCntRow (row 5: accP, altP, altO; row 4: accO)", "docs/next-adapters-prep26.md s2.4"],
+    }],
+  },
 });
 
 /** The chosen write row of a move's bg-write-row parameter (`age` for "event", `age - 1` for "no-event"), or null without one. */
@@ -140,4 +154,6 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   183,
   // D4b: Megahorn (liveOamMoves.ts liveMegahornInputs; fixtures tools/integration/fixtures/d4a-live/megahorn-*).
   224,
+  // D4b: Revenge (liveOamMoves.ts liveRevengeInputs; fixtures tools/integration/fixtures/d4a-live/revenge-*).
+  279,
 ]);

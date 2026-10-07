@@ -15,9 +15,10 @@ SRC = {
     "nightmare": ("NIGHTMARE", "mechanic-nightmare-player-haunter-opponent-shuckle", "mechanic-nightmare-opponent-haunter-player-shuckle"),
     # D4b: Megahorn bg-write-row tie-break (3:3 in prep24) + extra windows; the Tackle predecessor of the accepted scenarios is kept.
     "megahorn": ("MEGAHORN", "mechanic-megahorn-player-seaking-opponent-onix", "mechanic-megahorn-opponent-seaking-player-onix"),
+    "revenge": ("REVENGE", "mechanic-revenge-player-machamp-opponent-shuckle", "mechanic-revenge-opponent-qwilfish-player-shuckle"),
 }
 PAIRS = {"mach-punch": [("HITMONCHAN", "SNORLAX"), ("BRELOOM", "GOLBAT")], "nightmare": [("HAUNTER", "SNORLAX"), ("GENGAR", "GOLBAT")],
-         "megahorn": [("RHYDON", "GOLBAT"), ("NIDOKING", "SNORLAX")]}
+         "megahorn": [("RHYDON", "GOLBAT"), ("NIDOKING", "SNORLAX")], "revenge": [("HITMONLEE", "GOLBAT")]}
 cases = []
 for move, (label, ps, os_) in SRC.items():
     for att, tgt in PAIRS[move]:

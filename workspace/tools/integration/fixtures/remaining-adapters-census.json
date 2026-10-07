@@ -39,13 +39,14 @@
    "MOVE_WATER_PULSE",
    "MOVE_WISH"
   ],
-  "faithfulTiming": 2,
+  "faithfulTiming": 3,
   "faithfulTimingMoves": [
    "MOVE_MACH_PUNCH",
-   "MOVE_MEGAHORN"
+   "MOVE_MEGAHORN",
+   "MOVE_REVENGE"
   ],
   "inFlight": 0,
-  "remaining": 16,
+  "remaining": 15,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
@@ -53,14 +54,14 @@
   "weightPct": {
    "live": 93.593,
    "faithfulRandom": 3.761,
-   "faithfulTiming": 0.434,
+   "faithfulTiming": 0.502,
    "inFlight": 0,
-   "remaining": 1.725
+   "remaining": 1.657
   },
   "remainingByGroup": {
    "MULTI": {
-    "moves": 12,
-    "weightPct": 1.133
+    "moves": 11,
+    "weightPct": 1.065
    },
    "OUT": {
     "moves": 1,
@@ -73,13 +74,13 @@
   },
   "remainingByHostClass": {
    "H_BASIC": 1,
-   "H_BUFFER": 12,
+   "H_BUFFER": 11,
    "H_DERIVED": 3,
    "H_VARIANT": 3
   },
-  "orderFirstBodyOnlyMoves": 10,
-  "slotPlanNeededMoves": 12,
-  "sumsTo": "246+12+2+0+16=276",
+  "orderFirstBodyOnlyMoves": 9,
+  "slotPlanNeededMoves": 11,
+  "sumsTo": "246+12+3+0+15=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -143,8 +144,8 @@
    "aloneNames": [
     "METEOR_MASH"
    ],
-   "touchingMoves": 13,
-   "touchingWeightPct": 1.353,
+   "touchingMoves": 12,
+   "touchingWeightPct": 1.285,
    "meta": {
     "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
     "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
@@ -197,8 +198,8 @@
    "aloneNames": [
     "MEMENTO"
    ],
-   "touchingMoves": 12,
-   "touchingWeightPct": 0.983,
+   "touchingMoves": 11,
+   "touchingWeightPct": 0.915,
    "meta": {
     "cost": "new large host (docs/animation-integration-readiness.md A6)",
     "claim": "only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today"
@@ -213,8 +214,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 11,
-   "touchingWeightPct": 0.946,
+   "touchingMoves": 10,
+   "touchingWeightPct": 0.878,
    "meta": {
     "cost": "extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves)",
     "claim": "exact for audited plan rows from a known entry; actual status animations/switches invalidate"
@@ -229,8 +230,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 11,
-   "touchingWeightPct": 0.946,
+   "touchingMoves": 10,
+   "touchingWeightPct": 0.878,
    "meta": null
   },
   {
@@ -242,8 +243,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 10,
-   "touchingWeightPct": 0.912,
+   "touchingMoves": 9,
+   "touchingWeightPct": 0.844,
    "meta": null
   },
   {
@@ -255,8 +256,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 8,
-   "touchingWeightPct": 0.693,
+   "touchingMoves": 7,
+   "touchingWeightPct": 0.625,
    "meta": null
   },
   {
@@ -416,9 +417,9 @@
   {
    "step": 3,
    "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
-   "newMoves": 9,
-   "newWeightPct": 0.659,
-   "cumulativeRemainingUnlocked": 11,
+   "newMoves": 8,
+   "newWeightPct": 0.591,
+   "cumulativeRemainingUnlocked": 10,
    "newNames": [
     "ERUPTION",
     "EXTRASENSORY",
@@ -426,7 +427,6 @@
     "MEMENTO",
     "NIGHTMARE",
     "PSYWAVE",
-    "REVENGE",
     "SHOCK_WAVE",
     "SUPERPOWER"
    ]
@@ -436,7 +436,7 @@
    "provider": "X-DISABLE",
    "newMoves": 2,
    "newWeightPct": 0.147,
-   "cumulativeRemainingUnlocked": 13,
+   "cumulativeRemainingUnlocked": 12,
    "newNames": [
     "ICE_BALL",
     "SPIT_UP"
@@ -447,7 +447,7 @@
    "provider": "X-TWOTURN",
    "newMoves": 1,
    "newWeightPct": 0.187,
-   "cumulativeRemainingUnlocked": 14,
+   "cumulativeRemainingUnlocked": 13,
    "newNames": [
     "DIVE"
    ]
@@ -457,7 +457,7 @@
    "provider": "E-OUT",
    "newMoves": 1,
    "newWeightPct": 0.176,
-   "cumulativeRemainingUnlocked": 15,
+   "cumulativeRemainingUnlocked": 14,
    "newNames": [
     "SKILL_SWAP"
    ]
@@ -467,7 +467,7 @@
    "provider": "X-AGE",
    "newMoves": 1,
    "newWeightPct": 0.112,
-   "cumulativeRemainingUnlocked": 16,
+   "cumulativeRemainingUnlocked": 15,
    "newNames": [
     "EXTREME_SPEED"
    ]
@@ -477,7 +477,7 @@
    "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 16,
+   "cumulativeRemainingUnlocked": 15,
    "newNames": []
   },
   {
@@ -485,7 +485,7 @@
    "provider": "D-TILE",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 16,
+   "cumulativeRemainingUnlocked": 15,
    "newNames": []
   },
   {
@@ -493,7 +493,7 @@
    "provider": "D-BG",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 16,
+   "cumulativeRemainingUnlocked": 15,
    "newNames": []
   },
   {
@@ -501,7 +501,7 @@
    "provider": "D-OAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 16,
+   "cumulativeRemainingUnlocked": 15,
    "newNames": []
   },
   {
@@ -509,7 +509,7 @@
    "provider": "D-VRAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 16,
+   "cumulativeRemainingUnlocked": 15,
    "newNames": []
   },
   {
@@ -517,7 +517,7 @@
    "provider": "D-SCAN",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 16,
+   "cumulativeRemainingUnlocked": 15,
    "newNames": []
   },
   {
@@ -525,7 +525,7 @@
    "provider": "F-AUDIO",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 16,
+   "cumulativeRemainingUnlocked": 15,
    "newNames": []
   }
  ],
@@ -3101,215 +3101,6 @@
     "D-OAM",
     "D-VRAM",
     "F-AUDIO"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "MULTI"
-  },
-  {
-   "move": "MOVE_REVENGE",
-   "id": 279,
-   "name": "REVENGE",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0006802721088435374,
-   "config": "src/animation/sceneOnPresentation.ts:2795",
-   "needs": [
-    "E-TASK",
-    "D-OAM",
-    "D-PAL",
-    "D-BG",
-    "D-TILE",
-    "B",
-    "C"
-   ],
-   "blockers": [
-    {
-     "code": "E-TASK",
-     "text": "liveTasks (readonly Readonly<{slot:number;callback:string;dat)",
-     "cites": [
-      "src/animation/revenge.ts:19"
-     ]
-    },
-    {
-     "code": "D-OAM",
-     "text": "buffers (Readonly<{softwareOam:readonly unknown[];hardwareO)",
-     "cites": [
-      "src/animation/revenge.ts:20"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "palette (Readonly<{unfaded:readonly number[];faded:readonly)",
-     "cites": [
-      "src/animation/revenge.ts:22"
-     ]
-    },
-    {
-     "code": "D-BG",
-     "text": "registers (Readonly<Record<string,number>>;)",
-     "cites": [
-      "src/animation/revenge.ts:23"
-     ]
-    },
-    {
-     "code": "D-TILE",
-     "text": "resources (Readonly<{scratchTileBase:number;swipeTileBase:num)",
-     "cites": [
-      "src/animation/revenge.ts:26"
-     ]
-    },
-    {
-     "code": "B",
-     "text": "spriteOrder (readonly number[]; readonly audio:unknown;)",
-     "cites": [
-      "src/animation/revenge.ts:28"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationRng (number; readonly gameplayRng:unknown; readonly gam)",
-     "cites": [
-      "src/animation/revenge.ts:30"
-     ]
-    }
-   ],
-   "notes": [
-    "accepted as a LiveInputs config (docs/animation-integration-merged-readiness.json); not in the older triage docs"
-   ],
-   "staleCorrections": [],
-   "slotPlanNeeded": true,
-   "consumedInputs": [
-    {
-     "path": "attackerArt",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/revenge.ts:17"
-    },
-    {
-     "path": "ownedSprites",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/revenge.ts:18"
-    },
-    {
-     "path": "liveTasks",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/revenge.ts:19"
-    },
-    {
-     "path": "buffers",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/revenge.ts:20"
-    },
-    {
-     "path": "softwareMatrices",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/revenge.ts:21"
-    },
-    {
-     "path": "palette",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/revenge.ts:22"
-    },
-    {
-     "path": "registers",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/revenge.ts:23"
-    },
-    {
-     "path": "background",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/revenge.ts:24"
-    },
-    {
-     "path": "selected",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/revenge.ts:25"
-    },
-    {
-     "path": "resources",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/revenge.ts:26"
-    },
-    {
-     "path": "scratchLoaded",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/revenge.ts:27"
-    },
-    {
-     "path": "spriteOrder",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/revenge.ts:28"
-    },
-    {
-     "path": "liveCounts",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/revenge.ts:29"
-    },
-    {
-     "path": "animationRng",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/revenge.ts:30"
-    }
-   ],
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "E-TASK",
-    "B"
-   ],
-   "providerNeeds": [
-    "D-OAM",
-    "D-PAL",
-    "D-BG",
-    "D-TILE",
-    "C"
    ],
    "palettePlan": false,
    "activationMeasured": false,

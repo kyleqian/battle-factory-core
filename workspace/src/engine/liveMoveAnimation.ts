@@ -90,7 +90,8 @@ import { liveMoveBgWriteRow, liveMoveOptionalLagAge, liveMoveTimingBodyRows } fr
 import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
 import { liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
-import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
+import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
+import revengeScratchAsset from "../animation/assets/revenge-purple-scratch-swipe.json" with { type: "json" };
 import hornDrillAsset from "../animation/assets/horn-drill.json" with { type: "json" };
 import megaHornAsset from "../animation/assets/mega-horn-horn-hit-2.json" with { type: "json" };
 import {
@@ -357,6 +358,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     183,
     // D4b faithful timing: Megahorn windows start at activation (row 0; d4a-live/megahorn-*.json, elevated GOLBAT target: 200 px at age 0 otherwise).
     224,
+    // D4b faithful timing: Revenge windows start at activation (row 0; d4a-live/revenge-*.json).
+    279,
     // Sheer Cold (ISSUES #151, species audit 7 elevated FLYGON / GOLBAT opponent, both orientations): activation == window start (row 0).
     329,
   ].map((id) => [id, 0] as [number, number]).concat([
@@ -832,6 +835,8 @@ export function liveMoveAnimationDuration(
     // Faithful timing (D4b): Megahorn 176 rows + the policy's optional late restorebg fade (dominant measured phase, 177 rows both sides;
     // the reducer's `cleanup = player ? 176 : 175` side rule is only the accepted corpora's phases).
     case 224: return liveMoveTimingBodyRows(224);
+    // Faithful timing (D4b): Revenge 145 rows both sides (activation .. first inactive); the policy picks the monbg BGnCNT write row.
+    case 279: return 145;
     case 295: return 332; // Luster Purge (prep29 B.5: 332 rows, constant in all four scenarios; faithful-random, plan rows in liveMovePresentationRng.ts).
     case 200: return 119; // Outrage (prep29 B.6: 119 rows, constant in all five bodies).
     case 229: return 130; // Rapid Spin (prep29 B.3: 130 rows, constant in all four scenarios).
@@ -3014,6 +3019,27 @@ export function liveMoveAnimationPresentation(
         endLate: liveMoveOptionalLagAge(224) !== null, monbgCntRow: liveMoveBgWriteRow(224) as 7 | 8 });
       if (inputs === null) return null;
       config = { move: "MEGAHORN", attacker, target, fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
+      break;
+    }
+    case 279: {
+      // D4b faithful timing: Revenge (prep26 s2 / s4; liveOamMoves.ts liveRevengeInputs). Known lend (the accepted bodies are first bodies, the
+      // alternates follow a Tackle), known-entry allocator, non-shiny, zero idle rests. The monbg BGnCNT write row comes from the timing policy.
+      if (!spriteOrderInput?.known) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const activationOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (palettes === null || activationOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const inputs = liveRevengeInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
+        targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
+        sort: sortGbaSpriteOrder, scratchPalette: revengeScratchAsset.purpleScratch.palette, monbgCntRow: liveMoveBgWriteRow(279) as 4 | 5 });
+      if (inputs === null) return null;
+      // The REVENGE seam centres are the battler sprite centres (gSprites x / y), as the accepted seam.
+      const withCenter = (battler: SceneOnPresentationBattler, center: { x: number; y: number }): SceneOnPresentationBattler => ({
+        ...battler, geometry: { ...battler.geometry, animationCenter: center, battlePositionCenter: center } });
+      config = { move: "REVENGE", attacker: withCenter(attacker, attackerAnchors.spriteCenter), target: withCenter(target, targetAnchors.spriteCenter),
+        fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
       break;
     }
     case 237: {

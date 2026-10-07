@@ -552,3 +552,97 @@ export function liveMegahornHardwareOamRows(input: LiveMegahornOamInputs): { oam
   }
   return { oam, matrices };
 }
+
+/**
+ * Move_REVENGE (prep26 assembler): gRevengeSmallScratch (attacker - 2; states 7..19, frames at ages 0 / 3 / 7), gHorizontalLunge (invisible,
+ * attacker - 2; 76..90; drives the attacker x2: +4 x6, hold 2, -4 x5), gRevengeBigScratch (target - 2; 82..94, frames at 0 / 5), two
+ * gPersistHitSplat (target - 3; 99..116 / 109..126, affine anim 1 = matrix 303, lowest free matrix). Target on the monbg from state 5 to 127.
+ */
+const REVENGE_SPRITES = [["small", 7, 13, 0], ["lunge", 76, 15, 0], ["big", 82, 13, 0], ["splat", 99, 18, 0], ["splat", 109, 18, 1]] as const;
+const REVENGE_MONBG_BIRTH = 4, REVENGE_CLEAR_MONBG = 128;
+export function liveRevengeAttackerX2(state: number, side: Side): number {
+  const k = state - 76, sign = side === "player" ? 1 : -1;
+  const v = k >= 0 && k <= 5 ? 4 * (k + 1) : k >= 6 && k <= 7 ? 24 : k >= 8 && k <= 12 ? 24 - 4 * (k - 7) : 0;
+  return sign * v;
+}
+export interface LiveRevengeOamInputs {
+  readonly attackerSide: Side;
+  readonly attacker: LiveOamBattler;
+  readonly target: LiveOamBattler;
+  readonly targetIdle: Readonly<{ x2: number; y2: number }>;
+  /** sBattlerCoords of the attacker (small scratch) and of the target (big scratch); target Y_PIC_OFFSET point (hit splats). */
+  readonly attackerCoord: Point;
+  readonly targetCoord: Point;
+  readonly targetPic: Point;
+  readonly scene: LiveOamScene;
+  /** Known-entry allocator: PURPLE_SCRATCH / PURPLE_SWIPE / IMPACT tile bases, their shared palette slot, the free matrices. */
+  readonly scratchTileBase: number;
+  readonly swipeTileBase: number;
+  readonly impactTileBase: number;
+  readonly paletteSlot: number;
+  readonly freeMatrices: readonly number[];
+  readonly occupiedSlots: readonly number[];
+  readonly activationOrder: readonly number[];
+  readonly sort: LiveSpriteOrderSort;
+  readonly rows: number;
+}
+export function liveRevengeHardwareOamRows(input: LiveRevengeOamInputs): { oam: string[][]; matrices: (readonly [number, number, number, number])[][] } {
+  type Life = { kind: string; first: number; last: number; slot: number; idx: number; matrix: number };
+  const lives: Life[] = [];
+  for (const [kind, first, life, idx] of REVENGE_SPRITES) {
+    const used = new Set(input.occupiedSlots);
+    for (const o of lives) if (o.last >= first) used.add(o.slot);
+    let slot = 0; while (used.has(slot)) slot += 1;
+    const busy = new Set(lives.filter((o) => o.kind === "splat" && o.last >= first).map((o) => o.matrix));
+    lives.push({ kind, first, last: first + life - 1, slot, idx, matrix: kind === "splat" ? input.freeMatrices.find((m) => !busy.has(m))! : -1 });
+  }
+  const { attacker, target } = input, side = input.attackerSide, xs = side === "player" ? 1 : -1, flip = side === "player" ? 0 : 1;
+  const lungeAttr: OamAttr = [0x00a0, 0x0130, 0xffff];
+  const spritesAt = (state: number): LiveOamSprite[] => {
+    const out: LiveOamSprite[] = input.scene.occupants.map((o) => ({ ...o, oamY: o.attr[0] & 0xff }));
+    const x2 = state < 0 ? 0 : liveRevengeAttackerX2(state, side);
+    const attackerAttr: OamAttr = [attacker.attr[0], attacker.attr[1] & ~0x1ff | (attacker.attr[1] & 0x1ff) + x2 & 0x1ff, attacker.attr[2]];
+    out.push({ ...attacker, attr: attackerAttr, visible: true, oamY: attackerAttr[0] & 0xff });
+    const back = state >= REVENGE_CLEAR_MONBG, o = input.targetIdle;
+    const targetAttr: OamAttr = back
+      ? [target.attr[0] & ~0xff | target.attr[0] - o.y2 & 0xff, target.attr[1] & ~0x1ff | target.attr[1] - o.x2 & 0x1ff, target.attr[2]]
+      : target.attr;
+    out.push({ ...target, attr: targetAttr, visible: state < REVENGE_MONBG_BIRTH + 1 || back, oamY: targetAttr[0] & 0xff });
+    for (const l of lives) {
+      if (state < l.first || state > l.last) continue;
+      const age = state - l.first;
+      if (l.kind === "small") {
+        const x = input.attackerCoord.x + 10 * xs, y = input.attackerCoord.y - 10, f = age < 3 ? 0 : age < 7 ? 1 : 2;
+        const attr: OamAttr = [y - 16 & 0xff, 0x8000 | (flip ? 0x2000 : 0) | x - 16 & 0x1ff, input.scratchTileBase + 16 * f | 2 << 10 | input.paletteSlot << 12];
+        out.push({ slot: l.slot, attr, subpriority: attacker.subpriority - 2, visible: true, oamY: attr[0] & 0xff });
+      } else if (l.kind === "lunge") {
+        out.push({ slot: l.slot, attr: lungeAttr, subpriority: attacker.subpriority - 2, visible: false, oamY: 0xa0 });
+      } else if (l.kind === "big") {
+        const x = input.targetCoord.x + 10 * xs, y = input.targetCoord.y - 10, f = age < 5 ? 0 : 1;
+        const attr: OamAttr = [y - 32 & 0xff, 0xc000 | (flip ? 0x3000 : 0) | x - 32 & 0x1ff, input.swipeTileBase + 64 * f | 2 << 10 | input.paletteSlot << 12];
+        out.push({ slot: l.slot, attr, subpriority: target.subpriority - 2, visible: true, oamY: attr[0] & 0xff });
+      } else {
+        const [sx, sy] = l.idx === 0 ? [-10, -8] : [10, 8], cx = input.targetPic.x + xs * sx, cy = input.targetPic.y + sy;
+        const attr: OamAttr = [0x0100 | 0x0400 | cy - 16 & 0xff, 0x8000 | l.matrix << 9 | cx - 16 & 0x1ff, input.impactTileBase | 2 << 10 | input.paletteSlot << 12];
+        out.push({ slot: l.slot, attr, subpriority: target.subpriority - 3, visible: true, oamY: attr[0] & 0xff });
+      }
+    }
+    return out;
+  };
+  const matricesAt = (state: number): (readonly [number, number, number, number])[] => {
+    const m = Array.from({ length: 32 }, () => IDENTITY as readonly [number, number, number, number]);
+    for (const l of lives) if (l.kind === "splat" && state >= l.first && state <= l.last) m[l.matrix] = [303, 0, 0, 303];
+    return m;
+  };
+  const oam: string[][] = [], matrices: (readonly [number, number, number, number])[][] = [];
+  let order: readonly number[] = input.activationOrder;
+  let previous = spritesAt(-1);
+  for (let row = 0; row < input.rows; row += 1) {
+    const m = matricesAt(row - 1);
+    oam.push(buildLiveHardwareOam(order, previous, input.scene.healthbox, m));
+    matrices.push(m);
+    previous = spritesAt(row);
+    order = carryLiveSpriteOrder(order, previous, input.sort);
+  }
+  return { oam, matrices };
+}

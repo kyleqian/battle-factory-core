@@ -70,5 +70,17 @@
   "megahorn-extra-opponent-nidoking-snorlax",
   "d4a-megahorn-extra-opponent-nidoking-snorlax",
   "opponent"
+ ],
+ [
+  "REVENGE",
+  "revenge-extra-player-hitmonlee-golbat",
+  "d4a-revenge-extra-player-hitmonlee-golbat",
+  "player"
+ ],
+ [
+  "REVENGE",
+  "revenge-extra-opponent-hitmonlee-golbat",
+  "d4a-revenge-extra-opponent-hitmonlee-golbat",
+  "opponent"
  ]
 ]

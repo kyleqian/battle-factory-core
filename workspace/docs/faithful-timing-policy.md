@@ -24,6 +24,7 @@ Implements the accounting and policy of `docs/faithful-timing.md` (D4, approved 
 | NIGHTMARE 171 | optional lag at age 149 | 21, 129, 130 | 164 | lag 168: 5, no lag 167: 3 | lag (168 rows) | no |
 | MEGAHORN 224 | optional lag before the LoadDefaultBg row 156 (final restorebg fade one row late) | - | 176 | late 177: 9, early 176: 1 | late (177 rows) | no |
 | MEGAHORN 224 | bg-write-row: monbg BGnCNT write row 8 / 7 | - | 176 | row 8: 7, row 7: 3 | row 8 (pixel-neutral) | no (prep24 alone was 3:3) |
+| REVENGE 279 | bg-write-row: monbg BGnCNT write row 5 / 4 | - | 145 | row 5: 5, row 4: 1 | row 5 (pixel-neutral) | no |
 
 Measurements: `tools/integration/fixtures/prep25/lag-frames.json` (2 of 4 each, a tie) + the D4a tie-break
 `tools/integration/fixtures/d4a/lag-frames-tiebreak.json` (4 more scenarios per move by the same method, 3 of 4 with the lag each).
@@ -51,6 +52,7 @@ in flight + remaining = 276; `tools/integration/start-local-preview.sh` stamps t
 | NIGHTMARE 171 | policy entry only (chosen 168 rows = the reducer's fixed `NIGHTMARE_FIRST_INACTIVE_AGE`); **no live consumer yet** | the accepted reducer reads caller-owned per-age state that the corpus verifier feeds row by row: hardware palettes (ghost BG palette in BG bank 2 at ages 22..149, the target's palette in BG banks 8/9 from age 40), BG1/BG2 HOFS/VOFS (monbg scroll at 41, the shake toggling every 2 rows 46..120, cleared at 131), the painter order (re-sorted at ages 43/45/124). A production builder needs that per-age host model plus a known lend after Hypnosis + the SLP status units |
 
 | MEGAHORN 224 | **faithful timing** (D4b; any known lend, also after a Tackle; `liveOamMoves.ts` `liveMegahornInputs` = the prep24 source model ported 1:1 in `liveMegahornInputs.ts` + `liveMoveOamAssembler.ts` `liveMegahornHardwareOamRows`; duration `liveMoveTimingBodyRows(224)` = 177 both sides) | `tools/integration/fixtures/d4b-live-receipt.json`: 10 dense windows x 2 fresh; 6 policy-phase windows 0 px; 3 row-7 windows 0 px (the monbg BGnCNT row is not read by the renderer); the early-fade accepted opponent window differs only on ages 158..173, max 17211 px/row; route seed 5 streak 35 (RHYDON) Scene ON/OFF parity; #142 shadow row 0 (elevated GOLBAT target) |
+| REVENGE 279 | **faithful timing** (D4b; any known lend: first bodies and after a Tackle; `liveOamMoves.ts` `liveRevengeInputs` = the prep26 source model ported 1:1 in `liveRevengeInputs.ts` + `liveMoveOamAssembler.ts` `liveRevengeHardwareOamRows`; 145 rows both sides) | `tools/integration/fixtures/d4b-live-receipt.json`: 6 dense windows x 2 fresh, all 0 px (5 policy-phase windows + the row-4 accepted opponent window: the target OBJ still covers row 4); ordinary route Scene ON/OFF parity; #142 shadow row 0 (elevated GOLBAT target) |
 
 Megahorn tie-break (D4b): prep24's six windows tie the monbg write row 3:3. Four more windows chosen before probing
 (`d4aScenarios.py`: RHYDON -> GOLBAT, NIDOKING -> SNORLAX, both orientations) measured by the prep22 probe (`d4aFixtures.py` reads the
