@@ -4,20 +4,10 @@
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
-import { curseStatsRow, type CurseStatsKnown, type Oam3 } from "./prep23CurseStats.ts";
+import { curseStatsRow } from "./prep23CurseStats.ts";
+import { knownFor } from "./prep23CurseStatsKnown.ts";
 type Json = Record<string, any>;
 const load = (p: string): Json[] => { const b = readFileSync(p); return JSON.parse((p.endsWith(".gz") ? gunzipSync(b) : b).toString("utf8")).frames; };
-const word = (e: string, o: number) => parseInt(e.slice(o + 2, o + 4) + e.slice(o, o + 2), 16);
-const attrOf = (e: string): Oam3 => [word(e, 0), word(e, 4), word(e, 8)];
-export function knownFor(rows: Json[], side: "player" | "opponent"): CurseStatsKnown {
-  const r0 = rows[0]!, r1 = rows[1]!, att = r0.battlerSprites.attacker, tgt = r0.battlerSprites.target;
-  const attackerSprite = r0.sprites.find((s: Json) => s.slot === att.slot);
-  return { side, healthboxAttr: r1.hardwareOam.slice(0, 9).map(attrOf), healthboxSlots: r1.spriteOrder.slice(0, 6), dummyAttr: [0x00a0, 0x0130, 0x0c00],
-    attackerSlot: att.slot, targetSlot: r0.animationBattlers.spriteIds[side === "player" ? 1 : 0], attackerAttr: att.attr, targetAttr: r0.sprites.find((s: Json) => s.slot === r0.animationBattlers.spriteIds[side === "player" ? 1 : 0]).attr,
-    attackerX: attackerSprite.x, attackerY: attackerSprite.y, occupiedSlots: r0.sprites.map((s: Json) => s.slot),
-    activationRegisters: r0.registers, bodyRegisters: r1.registers, activationPalette: r0.hardwarePalette, attackerObjBank: att.attr[2] >> 12, hardwareMatrices: r1.hardwareMatrices,
-    spriteOrderAt: (s) => rows[Math.max(s, 0)]!.spriteOrder };
-}
 export function checkWindow(name: string, rows: Json[], side: "player" | "opponent") {
   const k = knownFor(rows, side);
   const cnt: Json = { name, rows: rows.length, oamRowsExact: 0, oamRows: 0, tasksExact: 0, regsExact: 0, palExact: 0, matExact: 0, mismatch: {} as Record<string, number[]> };
