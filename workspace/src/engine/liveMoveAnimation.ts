@@ -85,7 +85,7 @@ import octazookaAsset from "../animation/assets/octazooka.json" with { type: "js
 import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
 import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
 import paletteResources from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
-import { liveHyperVoiceInputs, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
+import { liveHyperVoiceInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
 import { liveLovelyKissProfile, liveOctazookaProfile, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
 import { liveCurseStatsInputs, liveFuryCutterInputs, livePursuitInputs, liveReturnInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
@@ -126,7 +126,7 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // prep22 P3: Signal Beam first body (the WIN0 first-body registers and the lent order are the first-body inputs).
   324,
   // Q2 (docs/next-adapters-prep25.md s0.2 / C): zero-Random2 bodies through liveQ2Moves.ts. Snore (later body: it needs sleep).
-  173, 304, 123,
+  173, 304, 123, 328,
   // oam1 (docs/next-adapters-prep20.md): production hardware-OAM provider (liveMoveOamAssembler.ts), first body.
   // Fury Cutter: the counter-1 body only (a first body implies furyCutterCounter 1).
   261, 228, 210,
@@ -327,7 +327,7 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // prep22 P1: Lovely Kiss (faithful-random), Spikes, Octazooka windows start at activation (row 0; prep22 moves/*.json, both sides).
     142, 191, 190, 324,
     // Q2 (prep25 moves/*.json): Snore's window starts at activation (row 0).
-    173, 304, 123,
+    173, 304, 123, 328,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -793,6 +793,7 @@ export function liveMoveAnimationDuration(
     // Signal Beam first body: signalBeamFirstInactiveAge = 18 + |pan target - initial| = 145 (player attacker) / 144 (opponent), prep22 s0.2.
     case 324: return request.attacker === 0 ? 145 : 144;
     case 173: return 69; // Snore (prep25: constant across the four scenarios).
+    case 328: return 123; // Sand Tomb (prep25: constant across the four scenarios).
     case 123: return 305; // Smog (prep25: constant across the four scenarios).
     case 304: return 104; // Hyper Voice (prep25: constant across the four scenarios).
     case 189: return 51; // Mud-Slap A..A+50 (prep17: 77..127 / 81..131 / alt 72..122).
@@ -2463,6 +2464,19 @@ export function liveMoveAnimationPresentation(
       config = { move: "SNORE", attacker, target, fieldProfile, animationInputs: liveSnoreInputs({
         attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes, spriteOrder: lentOrder,
         firstBody: false, snoreZPalette: snoreAsset.snoreZ.palette }) as never };
+      break;
+    }
+    case 328: {
+      // prep25 Q2: Sand Tomb through the SandTombAnimationProfile builder (no register input); lent order + non-shiny.
+      if (!spriteOrderInput?.known) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const lentOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (lentOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      config = { move: "SAND_TOMB", attacker, target, fieldProfile, animationProfile: liveSandTombProfile({
+        attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, spriteOrder: lentOrder,
+        freeSpriteSlots: KNOWN_ENTRY_FREE_SPRITE_SLOTS }) as never };
       break;
     }
     case 123: {

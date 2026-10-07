@@ -117,3 +117,30 @@ export function liveSmogInputs(args: Omit<LiveQ2Args, "firstBody" | "target"> & 
     animationRngSeed: 0, gameplayRng: null,
   };
 }
+
+const signedOamY = (y: number): number => ((y & 0xff) >= 160 ? (y & 0xff) - 256 : y & 0xff);
+
+/**
+ * `Move_SAND_TOMB` (328): the SandTombAnimationProfile. The vortex centre is the target's battle-position centre, the palette-blend
+ * sentinel the target's picture offset point; mud sand in OBJ bank 7 tile 305; the shake task takes slot 0 (priority 254); the free list is the
+ * known-entry free set. The painter keys are the healthbox constants plus the two battlers (OAM y = sprite centre - 32 + idle rest).
+ */
+export function liveSandTombProfile(args: Omit<LiveQ2Args, "firstBody" | "target" | "palettes"> & { target: PositionAnchors; freeSpriteSlots: readonly number[] }): Inputs {
+  const { attackerSide, attacker, target } = args, targetSide = opposite(attackerSide), player = attackerSide === "player";
+  const attackerSprite = battlerSprite(attackerSide, attacker), targetSprite = battlerSprite(targetSide, target);
+  const keys = orderKeys(attackerSide, attackerSprite.attr[0], targetSprite.attr[0])
+    .map((k) => ({ slot: k.slot, priority: k.oamPriority, subpriority: k.subpriority, y: signedOamY(k.oamY) }));
+  return {
+    orientation: player ? "player-back" : "opponent-front", endAge: 123, attackerSide,
+    attackerSpriteSlot: player ? 6 : 8, attackerSubpriority: player ? 30 : 40,
+    target: {
+      vortexCenter: { x: target.battlePositionCenter.x, y: target.battlePositionCenter.y },
+      paletteCenter: { x: target.picOffsetPoint.x, y: target.picOffsetPoint.y },
+      spriteSlot: player ? 8 : 6, initialX2: target.frontIdleRest.x2, initialY2: target.frontIdleRest.y2,
+      subpriority: player ? 40 : 30, sortTopY: signedOamY(targetSprite.attr[0]),
+    },
+    spriteOrder: { initialOrder: args.spriteOrder, initialKeys: keys, freeSpriteSlots: args.freeSpriteSlots },
+    mudSand: { tag: 10074, tileNum: 305, paletteNum: 7 },
+    shakeTaskSlot: 0, shakeTaskPriority: 254, startingAnimationRng: 0, gameplayRng: 0,
+  };
+}

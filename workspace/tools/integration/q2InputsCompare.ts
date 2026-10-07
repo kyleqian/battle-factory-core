@@ -4,7 +4,8 @@ import { snoreInputsFor } from "../compare/verifySnoreReducer.ts";
 import { smogInputsFor } from "../compare/verifySmogReducer.ts";
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
-import { liveSmogInputs, liveHyperVoiceInputs, liveSnoreInputs } from "../../src/engine/liveQ2Moves.ts";
+import { sandTombProfileFor } from "../compare/sandTombReducer.ts";
+import { liveSandTombProfile, liveSmogInputs, liveHyperVoiceInputs, liveSnoreInputs } from "../../src/engine/liveQ2Moves.ts";
 import snoreAsset from "../../src/animation/assets/snore.json" with { type: "json" };
 import { hyperVoiceInputsFor } from "../compare/verifyHyperVoiceReducer.ts";
 import paletteData from "../../src/data/gen/live-animation-palette-resources.json" with { type: "json" };
@@ -56,6 +57,22 @@ if (move === "smog") {
       target: { picOffsetPoint: { x: 0, y: 0 }, spriteCenter: { x: t.x, y: t.y }, frontIdleRest: { x2: t.x2, y2: t.y2 }, battlePositionCenter: pos },
       palettes: { unfaded: [], faded: [], hardware: [] }, spriteOrder: c.spriteOrder });
     const d = diff(built, c).filter((l) => !/gameplay|animationRngSeed|flags|^\/(attacker|target)(Side|Species)/.test(l));
+    console.log(o, d.length ? d.join("\n") : "EQUAL");
+  }
+}
+
+if (move === "sand-tomb") {
+  for (const o of ["player-back", "opponent-front"] as const) {
+    const c: any = sandTombProfileFor(o);
+    const player = o === "player-back";
+    // attacker sprite centre/rest from its sort key: oamY = y - 32
+    const attackerKey = c.spriteOrder.initialKeys.find((k: any) => k.slot === (player ? 6 : 8));
+    const targetKey = c.spriteOrder.initialKeys.find((k: any) => k.slot === (player ? 8 : 6));
+    const built = liveSandTombProfile({ attackerSide: c.attackerSide,
+      attacker: { picOffsetPoint: { x: 0, y: 0 }, spriteCenter: { x: 0, y: attackerKey.y + 32 }, frontIdleRest: { x2: 0, y2: 0 } },
+      target: { picOffsetPoint: c.target.paletteCenter, spriteCenter: { x: 0, y: targetKey.y + 32 - c.target.initialY2 }, frontIdleRest: { x2: c.target.initialX2, y2: c.target.initialY2 }, battlePositionCenter: c.target.vortexCenter },
+      spriteOrder: c.spriteOrder.initialOrder, freeSpriteSlots: c.spriteOrder.freeSpriteSlots });
+    const d = diff(built, c).filter((l) => !/gameplay|immutable|AnimationRng/i.test(l));
     console.log(o, d.length ? d.join("\n") : "EQUAL");
   }
 }
