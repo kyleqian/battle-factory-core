@@ -33,17 +33,29 @@ Elevation: GOLBAT 8 (audit 3), SHEDINJA 8, FLYGON 7 (`enemy_mon_elevation.h`); t
 
 ## 2. Coverage (exact twice unless noted)
 
-| Move | opp target swap: STEELIX / TYRANITAR / PICHU / FLYGON / SHEDINJA / WAILORD / RATTATA / ONIX | player-side target: same list | player attacker swap: STEELIX / PICHU / FLYGON / TYRANITAR / RATTATA / ONIX | opponent attacker swap: same list |
-|---|---|---|---|---|
-| Will-O-Wisp 261 | exact x5 (SHEDINJA incl.) / WAILORD not staged / RATTATA, ONIX DECLINE | exact x7 (WAILORD not staged; RATTATA, ONIX back sprite exact) | exact x6 | exact x4 (STEELIX/PICHU/FLYGON; TYRANITAR not staged); RATTATA, ONIX DECLINE |
-| Pursuit 228 | exact x6 / TYRANITAR exact (opp target) / RATTATA, ONIX DECLINE | exact x7 incl. WAILORD; **TYRANITAR LAG FRAME** | exact x5 + **TYRANITAR LAG FRAME**; RATTATA exact | exact x3; TYRANITAR not staged; RATTATA, ONIX DECLINE |
-| Fury Cutter 210 | exact x5 / SHEDINJA not staged / RATTATA, ONIX DECLINE | exact x7 | exact x6 | exact x4 (STEELIX/PICHU/FLYGON/TYRANITAR); RATTATA, ONIX DECLINE |
+Generated from `receipts/` (ok = 0 px twice fresh, X = residual; "attacker side player" = the target is the opponent-side front sprite, "attacker side opponent" = the target is the player-side back sprite;
+species missing from a line = not staged):
+
+| Move | Swap | Attacker side | Rows |
+|---|---|---|---|
+| Will-O-Wisp 261 | target | player | flygon ok, onix X (decline), pichu ok, rattata X (decline), shedinja ok, steelix ok, tyranitar ok |
+| Will-O-Wisp 261 | target | opponent | flygon, onix, pichu, rattata, shedinja, steelix, tyranitar: all ok |
+| Will-O-Wisp 261 | attacker | player | flygon, onix, pichu, rattata, steelix, tyranitar: all ok |
+| Will-O-Wisp 261 | attacker | opponent | flygon ok, onix X (decline), pichu ok, rattata X (decline), steelix ok |
+| Pursuit 228 | target | player | flygon ok, onix X (decline), pichu ok, rattata X (decline), shedinja ok, steelix ok, tyranitar ok, wailord ok |
+| Pursuit 228 | target | opponent | flygon, onix, pichu, rattata, shedinja, steelix, wailord ok; **tyranitar X (LAG FRAME)** |
+| Pursuit 228 | attacker | player | flygon, onix, pichu, rattata, steelix ok; **tyranitar X (LAG FRAME)** |
+| Pursuit 228 | attacker | opponent | flygon ok, onix X (decline), pichu ok, rattata X (decline), steelix ok |
+| Fury Cutter 210 | target | player | flygon ok, onix X (decline), pichu ok, rattata X (decline), steelix ok, tyranitar ok, wailord ok |
+| Fury Cutter 210 | target | opponent | flygon, onix, pichu, rattata, steelix, tyranitar, wailord: all ok |
+| Fury Cutter 210 | attacker | player | flygon, onix, pichu, rattata, steelix, tyranitar: all ok |
+| Fury Cutter 210 | attacker | opponent | flygon ok, onix X (decline), pichu ok, rattata X (decline), steelix ok, tyranitar ok |
 
 (See `derive.txt` and `receipts/<tag>-<fixture>.json`; the row name is `<species>[A]-<oam1 fixture stem>`, `A` = attacker swap.) Shiny: STEELIX target + attacker on both sides, all three moves (decline table above).
 
 **Not staged** (swapped battle never reaches the first body; harness/staging limit, not production): WAILORD as the Will-O-Wisp target (both sides; the swapped battle shows
 no body 261, probable Water Veil immunity, not probed); SHEDINJA as the Fury Cutter target (both sides; body missing, 1 HP / Wonder Guard staging, not probed);
-TYRANITAR as the opponent-side attacker for Will-O-Wisp and Pursuit (the swapped mon never acts first, even at 252 speed EV). Not reached: WAILORD / SHEDINJA as attackers,
+TYRANITAR as the opponent-side attacker for Will-O-Wisp and Pursuit; the opponent-side attacker lists above omit it (the swapped mon never acts first, even at 252 speed EV). Not reached: WAILORD / SHEDINJA as attackers,
 other elevated species (only FLYGON 7 / SHEDINJA 8 beyond GOLBAT), Unown-class forms, Spinda, alt-pair fixtures (`will-o-wisp-alt*`, `pursuit-alt*`, `fury-cutter-counter1-alt*`)
 as the base pair, and the non-normal Pursuit body (`request.turn & 1`) / Fury Cutter counters 2-5, which decline by design.
 Staging fix: genderless species (SHEDINJA) need `gender: genderless` (the lab rejects `male`; `--genderless`); a target swap boosts the non-swapped attacker's speed EV to 252 so it stays the first body.
