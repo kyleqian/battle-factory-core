@@ -1,0 +1,890 @@
+[
+ {
+  "name": "accepted-player-b1",
+  "rows": 76,
+  "lagRows": [],
+  "entries": 9600,
+  "entryMatch": 9600,
+  "oamRowsExact": 75,
+  "matrixRowsExact": 75,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 76,
+    "rows": 76
+   },
+   "battleBg": {
+    "exact": 76,
+    "rows": 76
+   },
+   "hardwarePalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "unfadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "fadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "tasks": {
+    "exact": 76,
+    "rows": 76
+   },
+   "chunk": {
+    "exact": 76,
+    "rows": 76
+   },
+   "shards": {
+    "exact": 76,
+    "rows": 76
+   },
+   "targetX2": {
+    "exact": 76,
+    "rows": 76
+   }
+  }
+ },
+ {
+  "name": "accepted-player-b2",
+  "rows": 76,
+  "lagRows": [],
+  "entries": 9600,
+  "entryMatch": 9600,
+  "oamRowsExact": 75,
+  "matrixRowsExact": 75,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 76,
+    "rows": 76
+   },
+   "battleBg": {
+    "exact": 76,
+    "rows": 76
+   },
+   "hardwarePalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "unfadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "fadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "tasks": {
+    "exact": 76,
+    "rows": 76
+   },
+   "chunk": {
+    "exact": 76,
+    "rows": 76
+   },
+   "shards": {
+    "exact": 76,
+    "rows": 76
+   },
+   "targetX2": {
+    "exact": 76,
+    "rows": 76
+   }
+  }
+ },
+ {
+  "name": "accepted-player-b3",
+  "rows": 76,
+  "lagRows": [],
+  "entries": 9600,
+  "entryMatch": 9600,
+  "oamRowsExact": 75,
+  "matrixRowsExact": 75,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 76,
+    "rows": 76
+   },
+   "battleBg": {
+    "exact": 76,
+    "rows": 76
+   },
+   "hardwarePalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "unfadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "fadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "tasks": {
+    "exact": 76,
+    "rows": 76
+   },
+   "chunk": {
+    "exact": 76,
+    "rows": 76
+   },
+   "shards": {
+    "exact": 76,
+    "rows": 76
+   },
+   "targetX2": {
+    "exact": 76,
+    "rows": 76
+   }
+  }
+ },
+ {
+  "name": "accepted-player-b4",
+  "rows": 76,
+  "lagRows": [
+   38
+  ],
+  "entries": 9600,
+  "entryMatch": 9600,
+  "oamRowsExact": 75,
+  "matrixRowsExact": 75,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 76,
+    "rows": 76
+   },
+   "battleBg": {
+    "exact": 76,
+    "rows": 76
+   },
+   "hardwarePalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "unfadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "fadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "tasks": {
+    "exact": 76,
+    "rows": 76
+   },
+   "chunk": {
+    "exact": 76,
+    "rows": 76
+   },
+   "shards": {
+    "exact": 76,
+    "rows": 76
+   },
+   "targetX2": {
+    "exact": 76,
+    "rows": 76
+   }
+  }
+ },
+ {
+  "name": "accepted-player-b5",
+  "rows": 132,
+  "lagRows": [
+   112
+  ],
+  "entries": 16768,
+  "entryMatch": 16768,
+  "oamRowsExact": 131,
+  "matrixRowsExact": 131,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 132,
+    "rows": 132
+   },
+   "battleBg": {
+    "exact": 132,
+    "rows": 132
+   },
+   "hardwarePalette": {
+    "exact": 132,
+    "rows": 132
+   },
+   "unfadedPalette": {
+    "exact": 132,
+    "rows": 132
+   },
+   "fadedPalette": {
+    "exact": 132,
+    "rows": 132
+   },
+   "tasks": {
+    "exact": 132,
+    "rows": 132
+   },
+   "chunk": {
+    "exact": 132,
+    "rows": 132
+   },
+   "shards": {
+    "exact": 132,
+    "rows": 132
+   },
+   "targetX2": {
+    "exact": 132,
+    "rows": 132
+   }
+  }
+ },
+ {
+  "name": "accepted-opponent-b1",
+  "rows": 76,
+  "lagRows": [],
+  "entries": 9600,
+  "entryMatch": 9600,
+  "oamRowsExact": 75,
+  "matrixRowsExact": 75,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 76,
+    "rows": 76
+   },
+   "battleBg": {
+    "exact": 76,
+    "rows": 76
+   },
+   "hardwarePalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "unfadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "fadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "tasks": {
+    "exact": 76,
+    "rows": 76
+   },
+   "chunk": {
+    "exact": 76,
+    "rows": 76
+   },
+   "shards": {
+    "exact": 76,
+    "rows": 76
+   },
+   "targetX2": {
+    "exact": 76,
+    "rows": 76
+   }
+  }
+ },
+ {
+  "name": "accepted-opponent-b2",
+  "rows": 76,
+  "lagRows": [],
+  "entries": 9600,
+  "entryMatch": 9600,
+  "oamRowsExact": 75,
+  "matrixRowsExact": 75,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 76,
+    "rows": 76
+   },
+   "battleBg": {
+    "exact": 76,
+    "rows": 76
+   },
+   "hardwarePalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "unfadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "fadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "tasks": {
+    "exact": 76,
+    "rows": 76
+   },
+   "chunk": {
+    "exact": 76,
+    "rows": 76
+   },
+   "shards": {
+    "exact": 76,
+    "rows": 76
+   },
+   "targetX2": {
+    "exact": 76,
+    "rows": 76
+   }
+  }
+ },
+ {
+  "name": "accepted-opponent-b3",
+  "rows": 76,
+  "lagRows": [],
+  "entries": 9600,
+  "entryMatch": 9600,
+  "oamRowsExact": 75,
+  "matrixRowsExact": 75,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 76,
+    "rows": 76
+   },
+   "battleBg": {
+    "exact": 76,
+    "rows": 76
+   },
+   "hardwarePalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "unfadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "fadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "tasks": {
+    "exact": 76,
+    "rows": 76
+   },
+   "chunk": {
+    "exact": 76,
+    "rows": 76
+   },
+   "shards": {
+    "exact": 76,
+    "rows": 76
+   },
+   "targetX2": {
+    "exact": 76,
+    "rows": 76
+   }
+  }
+ },
+ {
+  "name": "accepted-opponent-b4",
+  "rows": 76,
+  "lagRows": [],
+  "entries": 9600,
+  "entryMatch": 9600,
+  "oamRowsExact": 75,
+  "matrixRowsExact": 75,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 76,
+    "rows": 76
+   },
+   "battleBg": {
+    "exact": 76,
+    "rows": 76
+   },
+   "hardwarePalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "unfadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "fadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "tasks": {
+    "exact": 76,
+    "rows": 76
+   },
+   "chunk": {
+    "exact": 76,
+    "rows": 76
+   },
+   "shards": {
+    "exact": 76,
+    "rows": 76
+   },
+   "targetX2": {
+    "exact": 76,
+    "rows": 76
+   }
+  }
+ },
+ {
+  "name": "accepted-opponent-b5",
+  "rows": 132,
+  "lagRows": [
+   112
+  ],
+  "entries": 16768,
+  "entryMatch": 16768,
+  "oamRowsExact": 131,
+  "matrixRowsExact": 131,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 132,
+    "rows": 132
+   },
+   "battleBg": {
+    "exact": 132,
+    "rows": 132
+   },
+   "hardwarePalette": {
+    "exact": 132,
+    "rows": 132
+   },
+   "unfadedPalette": {
+    "exact": 132,
+    "rows": 132
+   },
+   "fadedPalette": {
+    "exact": 132,
+    "rows": 132
+   },
+   "tasks": {
+    "exact": 132,
+    "rows": 132
+   },
+   "chunk": {
+    "exact": 132,
+    "rows": 132
+   },
+   "shards": {
+    "exact": 132,
+    "rows": 132
+   },
+   "targetX2": {
+    "exact": 132,
+    "rows": 132
+   }
+  }
+ },
+ {
+  "name": "prep25-ice-ball-alt-player-glalie-golem-b1",
+  "rows": 76,
+  "lagRows": [],
+  "entries": 9600,
+  "entryMatch": 9600,
+  "oamRowsExact": 75,
+  "matrixRowsExact": 75,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 76,
+    "rows": 76
+   },
+   "battleBg": {
+    "exact": 76,
+    "rows": 76
+   },
+   "hardwarePalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "unfadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "fadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "tasks": {
+    "exact": 76,
+    "rows": 76
+   },
+   "chunk": {
+    "exact": 76,
+    "rows": 76
+   },
+   "shards": {
+    "exact": 76,
+    "rows": 76
+   },
+   "targetX2": {
+    "exact": 76,
+    "rows": 76
+   }
+  }
+ },
+ {
+  "name": "prep25-ice-ball-alt-player-glalie-golem-b2",
+  "rows": 76,
+  "lagRows": [],
+  "entries": 9600,
+  "entryMatch": 9600,
+  "oamRowsExact": 75,
+  "matrixRowsExact": 75,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 76,
+    "rows": 76
+   },
+   "battleBg": {
+    "exact": 76,
+    "rows": 76
+   },
+   "hardwarePalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "unfadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "fadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "tasks": {
+    "exact": 76,
+    "rows": 76
+   },
+   "chunk": {
+    "exact": 76,
+    "rows": 76
+   },
+   "shards": {
+    "exact": 76,
+    "rows": 76
+   },
+   "targetX2": {
+    "exact": 76,
+    "rows": 76
+   }
+  }
+ },
+ {
+  "name": "prep25-ice-ball-alt-player-glalie-golem-b3",
+  "rows": 76,
+  "lagRows": [],
+  "entries": 9600,
+  "entryMatch": 9600,
+  "oamRowsExact": 75,
+  "matrixRowsExact": 75,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 76,
+    "rows": 76
+   },
+   "battleBg": {
+    "exact": 76,
+    "rows": 76
+   },
+   "hardwarePalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "unfadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "fadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "tasks": {
+    "exact": 76,
+    "rows": 76
+   },
+   "chunk": {
+    "exact": 76,
+    "rows": 76
+   },
+   "shards": {
+    "exact": 76,
+    "rows": 76
+   },
+   "targetX2": {
+    "exact": 76,
+    "rows": 76
+   }
+  }
+ },
+ {
+  "name": "prep25-ice-ball-alt-player-glalie-golem-b4",
+  "rows": 76,
+  "lagRows": [],
+  "entries": 9600,
+  "entryMatch": 9600,
+  "oamRowsExact": 75,
+  "matrixRowsExact": 75,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 76,
+    "rows": 76
+   },
+   "battleBg": {
+    "exact": 76,
+    "rows": 76
+   },
+   "hardwarePalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "unfadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "fadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "tasks": {
+    "exact": 76,
+    "rows": 76
+   },
+   "chunk": {
+    "exact": 76,
+    "rows": 76
+   },
+   "shards": {
+    "exact": 76,
+    "rows": 76
+   },
+   "targetX2": {
+    "exact": 76,
+    "rows": 76
+   }
+  }
+ },
+ {
+  "name": "prep25-ice-ball-alt-player-glalie-golem-b5",
+  "rows": 131,
+  "lagRows": [],
+  "entries": 16640,
+  "entryMatch": 16640,
+  "oamRowsExact": 130,
+  "matrixRowsExact": 130,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 131,
+    "rows": 131
+   },
+   "battleBg": {
+    "exact": 131,
+    "rows": 131
+   },
+   "hardwarePalette": {
+    "exact": 131,
+    "rows": 131
+   },
+   "unfadedPalette": {
+    "exact": 131,
+    "rows": 131
+   },
+   "fadedPalette": {
+    "exact": 131,
+    "rows": 131
+   },
+   "tasks": {
+    "exact": 131,
+    "rows": 131
+   },
+   "chunk": {
+    "exact": 131,
+    "rows": 131
+   },
+   "shards": {
+    "exact": 131,
+    "rows": 131
+   },
+   "targetX2": {
+    "exact": 131,
+    "rows": 131
+   }
+  }
+ },
+ {
+  "name": "prep25-ice-ball-alt-opponent-glalie-golem-b1",
+  "rows": 76,
+  "lagRows": [],
+  "entries": 9600,
+  "entryMatch": 9600,
+  "oamRowsExact": 75,
+  "matrixRowsExact": 75,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 76,
+    "rows": 76
+   },
+   "battleBg": {
+    "exact": 76,
+    "rows": 76
+   },
+   "hardwarePalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "unfadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "fadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "tasks": {
+    "exact": 76,
+    "rows": 76
+   },
+   "chunk": {
+    "exact": 76,
+    "rows": 76
+   },
+   "shards": {
+    "exact": 76,
+    "rows": 76
+   },
+   "targetX2": {
+    "exact": 76,
+    "rows": 76
+   }
+  }
+ },
+ {
+  "name": "prep25-ice-ball-alt-opponent-glalie-golem-b2",
+  "rows": 76,
+  "lagRows": [],
+  "entries": 9600,
+  "entryMatch": 9600,
+  "oamRowsExact": 75,
+  "matrixRowsExact": 75,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 76,
+    "rows": 76
+   },
+   "battleBg": {
+    "exact": 76,
+    "rows": 76
+   },
+   "hardwarePalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "unfadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "fadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "tasks": {
+    "exact": 76,
+    "rows": 76
+   },
+   "chunk": {
+    "exact": 76,
+    "rows": 76
+   },
+   "shards": {
+    "exact": 76,
+    "rows": 76
+   },
+   "targetX2": {
+    "exact": 76,
+    "rows": 76
+   }
+  }
+ },
+ {
+  "name": "prep25-ice-ball-alt-opponent-glalie-golem-b3",
+  "rows": 76,
+  "lagRows": [],
+  "entries": 9600,
+  "entryMatch": 9600,
+  "oamRowsExact": 75,
+  "matrixRowsExact": 75,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 76,
+    "rows": 76
+   },
+   "battleBg": {
+    "exact": 76,
+    "rows": 76
+   },
+   "hardwarePalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "unfadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "fadedPalette": {
+    "exact": 76,
+    "rows": 76
+   },
+   "tasks": {
+    "exact": 76,
+    "rows": 76
+   },
+   "chunk": {
+    "exact": 76,
+    "rows": 76
+   },
+   "shards": {
+    "exact": 76,
+    "rows": 76
+   },
+   "targetX2": {
+    "exact": 76,
+    "rows": 76
+   }
+  }
+ }
+]
