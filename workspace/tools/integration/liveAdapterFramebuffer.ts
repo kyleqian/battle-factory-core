@@ -243,7 +243,7 @@ function withFirstBody(f: Fixture, input: ReturnType<typeof prepareLiveMoveSprit
   // prep29: Bonemerang hit 2 directly after a first-body hit 1 (host `bonemerangHit1`).
   const only = f.precedingBodies?.length === 1 && !f.precedingTurns && !f.precedingX2Events ? f.precedingBodies[0]! : undefined;
   return only?.moveId === 155 && only.statAnimation === undefined && only.statusAnimation === undefined && f.move === "BONEMERANG"
-    ? { ...input, free: bonemerangHit2Free(input.free), afterBonemerangHit1: true as const } : input;
+    ? { ...input, free: bonemerangHit2Free(), afterBonemerangHit1: true as const } : input;
 }
 
 // Production reads display names from species-names.json (MR_MIME -> "MR. MIME"); the raw constant drops punctuation glyphs.

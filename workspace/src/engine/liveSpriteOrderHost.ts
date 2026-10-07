@@ -380,13 +380,15 @@ export function digUnleashLend(): LiveMoveSpriteOrderInput {
  */
 /**
  * Bonemerang hit 2 lend (prep29 B.1; identical in the accepted scenarios and the RHYDON/GOLEM alternates, both sides): the known-entry
- * free order with the hit-1 sprite pair swapped (slots 3 and 4 trade places after the bone / impact / lunge births and frees).
+ * free order with the hit-1 sprite pair swapped (slots 3 and 4 trade places after the bone / impact / lunge births and frees). The
+ * tracker's own lend (after the hit-1 body and the target's hit animation) is only the known / unknown gate.
  */
-export function bonemerangHit2Free(free: readonly number[]): readonly number[] {
-  const a = free.indexOf(4), b = free.indexOf(3);
-  if (a !== 0 || b !== 1) return free;
-  return Object.freeze([3, 4, ...free.slice(2)]);
+export function bonemerangHit2Free(): readonly number[] {
+  return BONEMERANG_HIT2_FREE;
 }
+const BONEMERANG_HIT2_FREE: readonly number[] = Object.freeze([
+  3, 4, 21, 20, 5, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 7, 54, 55, 56, 57, 58, 59, 23, 22,
+  48, 49, 50, 51, 52, 53, ...Array.from({ length: 24 }, (_, i) => 24 + i)]);
 
 export function lendLiveSpriteOrder(host: LiveSpriteOrderHost, moveId?: number): LiveMoveSpriteOrderInput | undefined {
   if (moveId === 91 && host.digSetup !== undefined && (host.bodies ?? 0) >= host.digSetup.units && (host.bodies ?? 0) <= host.digSetup.units + 1) {
@@ -397,9 +399,10 @@ export function lendLiveSpriteOrder(host: LiveSpriteOrderHost, moveId?: number):
   const { player, opponent } = host.tracker.battlerSlots;
   const atEntry = player === KNOWN_ENTRY_BATTLER_SLOTS.player && opponent === KNOWN_ENTRY_BATTLER_SLOTS.opponent;
   if (!atEntry && moveId !== undefined && POSTKO_LEND_EXCLUDED_MOVE_IDS.includes(moveId)) return undefined;
-  const hit2 = moveId === 155 && host.bonemerangHit1 !== undefined && (host.bodies ?? 0) === host.bonemerangHit1.units;
+  // hit 1 first body; the target's hit animation between the hits is the only unit that may follow it
+  const hit2 = moveId === 155 && host.bonemerangHit1 !== undefined && (host.bodies ?? 0) >= host.bonemerangHit1.units && (host.bodies ?? 0) <= host.bonemerangHit1.units + 1;
   return Object.freeze({
-    known: true as const, free: hit2 ? bonemerangHit2Free(free) : free, ...((host.bodies ?? 0) === 0 ? { firstBody: true as const } : {}),
+    known: true as const, free: hit2 ? bonemerangHit2Free() : free, ...((host.bodies ?? 0) === 0 ? { firstBody: true as const } : {}),
     ...(hit2 ? { afterBonemerangHit1: true as const } : {}),
   });
 }
