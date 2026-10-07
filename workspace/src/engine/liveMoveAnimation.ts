@@ -94,7 +94,9 @@ import { SUPERPOWER_ROWS, liveSuperpowerInputs } from "./liveSuperpowerInputs.ts
 import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
 import { liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
-import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs } from "./liveOamMoves.ts";
+import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs, liveShockWaveInputs } from "./liveOamMoves.ts";
+import shockWaveAsset from "../animation/assets/shock-wave.json" with { type: "json" };
+import { shockWaveTimingFor } from "../animation/shockWave.ts";
 import revengeScratchAsset from "../animation/assets/revenge-purple-scratch-swipe.json" with { type: "json" };
 import hornDrillAsset from "../animation/assets/horn-drill.json" with { type: "json" };
 import megaHornAsset from "../animation/assets/mega-horn-horn-hit-2.json" with { type: "json" };
@@ -164,6 +166,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   216,
   // Spit Up, all three Stockpile counters (docs/next-adapters-prep31.md s2 / s3; liveSpitUpInputs.ts): any known lend.
   255,
+  // Shock Wave (docs/next-adapters-prep33.md s1 / s3; liveOamMoves.ts liveShockWaveInputs): the reducer's geometry-derived timing, any known lend.
+  351,
   // anchor3: source battler anchors (position center, picture height, pic offset).
   86, 87, 107, 116, 203, 207, 263, 339,
   // selectors: request-selected branches and healing anchors.
@@ -362,6 +366,9 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     216,
     // Spit Up: activation == window start (row 0; prep31 / s10a-live spit-up windows, both sides, all three counters).
     255,
+    // Shock Wave: activation == window start (row 0; d4a-live/shock-wave-*.json). The live hook draws an elevated opponent's shadow (WEEZING in
+    // both roles: 195 px at age 0 otherwise, docs/next-adapters-prep33.md s1.4).
+    351,
     // D4 faithful timing: Superpower windows start at activation (row 0; s10a-live/superpower-*.json; elevated WEEZING opponent in both roles:
     // 195 px at age 0 otherwise).
     276,
@@ -558,10 +565,23 @@ function waterSpoutLiveInputs(
   return inputs;
 }
 
+/**
+ * MOVE_SHOCK_WAVE's body timing from the live geometry (docs/next-adapters-prep33.md s0.2): the attacker's X_2 / Y_PIC_OFFSET picture origin
+ * (the progressing bolt's destroy row), the target's picture origin and its plain BATTLER_COORD_Y (the lightning count).
+ */
+function liveShockWaveTiming(field: BattleResolutionDisplayedField, attackerSide: "player" | "opponent") {
+  const art = createBattleCommandFieldArtView(field);
+  const attacker = liveBattlerAnchors(attackerSide, art), target = liveBattlerAnchors(attackerSide === "player" ? "opponent" : "player", art);
+  return shockWaveTimingFor({ attackerSide, attackerPictureOrigin: attacker.picOffsetPoint, targetPictureOrigin: target.picOffsetPoint,
+    targetBattlePosition: target.battlePositionCenter, derivedTiming: true });
+}
+
 export function liveMoveAnimationDuration(
   request: BattleMoveAnimationRequest, field?: BattleResolutionDisplayedField,
 ): number | null {
   switch (request.moveId) {
+    // Shock Wave (prep33): activation .. the derived first inactive row (262..266 measured), only defined with the displayed field.
+    case 351: return field === undefined ? null : liveShockWaveTiming(field, request.attacker === 0 ? "player" : "opponent").cleanupAge + 1;
     // Water Spout (prep13 s1.2): the body length depends on the attacker's party HP and picture height (accepted rows
     // 278 full HP / 276 KINGDRA player-back / 270..201 at lower HP tiers), so it is only defined with the displayed field.
     case 323: {
@@ -3104,6 +3124,36 @@ export function liveMoveAnimationPresentation(
         endLate: liveMoveOptionalLagAge(224) !== null, monbgCntRow: liveMoveBgWriteRow(224) as 7 | 8 });
       if (inputs === null) return null;
       config = { move: "MEGAHORN", attacker, target, fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
+      break;
+    }
+    case 351: {
+      // Shock Wave (prep33 s1 / s3 item 1; liveOamMoves.ts liveShockWaveInputs). Any known lend (the lent 64-slot order is the L input), known-entry
+      // allocator (orb / circle / spark / lightning tiles 305 / 537 / 309 / 601), non-shiny, zero idle rests (the attacker's monbg origin and the
+      // target ShakeMon x2 start from the sprite centre). The reducer derives its timing from the seam geometry (shockWaveTimingFor).
+      if (!spriteOrderInput?.known) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const activationOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (palettes === null || activationOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const zeroRest = (a: typeof attackerAnchors) => a.frontIdleRest.x2 === 0 && a.frontIdleRest.y2 === 0;
+      if (!zeroRest(attackerAnchors) || !zeroRest(targetAnchors)) return null;
+      const rgb555 = (c: { r: number; g: number; b: number }) => (c.r >> 3) | (c.g >> 3) << 5 | (c.b >> 3) << 10;
+      const resourcePalette = (name: "circleOfLight" | "electricOrbs" | "spark" | "lightning") =>
+        (shockWaveAsset as unknown as { art: Record<string, { palette: { r: number; g: number; b: number }[] }> }).art[name]!.palette.map(rgb555);
+      const animationInputs = liveShockWaveInputs({ attackerSide: attacker.geometry.side, opponentSpecies: art.opponent.speciesSymbol,
+        attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
+        resourcePalettes: { circleOfLight: resourcePalette("circleOfLight"), electricOrbs: resourcePalette("electricOrbs"),
+          spark: resourcePalette("spark"), lightning: resourcePalette("lightning") } });
+      // The SHOCK_WAVE seam: animationCenter = X_2 / Y_PIC_OFFSET (picture origins), the target's battlePositionCenter = the plain
+      // BATTLER_COORD_Y (no elevation; the lightning count), the corner = sprite centre - 32.
+      const withGeometry = (battler: SceneOnPresentationBattler, anchors: typeof attackerAnchors, position: { x: number; y: number }): SceneOnPresentationBattler => ({
+        ...battler, geometry: { ...battler.geometry, spriteCorner: { x: anchors.spriteCenter.x - 32, y: anchors.spriteCenter.y - 32 },
+          animationCenter: anchors.picOffsetPoint, battlePositionCenter: position } });
+      config = { move: "SHOCK_WAVE", attacker: withGeometry(attacker, attackerAnchors, attackerAnchors.picOffsetPoint),
+        target: withGeometry(target, targetAnchors, { x: targetAnchors.picOffsetPoint.x, y: targetAnchors.battlePositionCenter.y }),
+        fieldProfile, animationInputs: animationInputs as never };
       break;
     }
     case 171: {

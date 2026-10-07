@@ -1,0 +1,37 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "SHOCK_WAVE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep33-shock-wave-alt-opponent-weezing-snorlax.json",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 342
+ },
+ "windowSource": "window = [activation, activation + 264 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": null,
+ "attacker": {
+  "species": "WEEZING",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703666,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 256,
+  "playerMaxHp": 256,
+  "opponentHp": 172,
+  "opponentMaxHp": 172,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

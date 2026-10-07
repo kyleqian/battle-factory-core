@@ -686,8 +686,8 @@ describe("Nightmare (171) faithful timing", () => {
       const ot = 416049562, shiny = ((ot >>> 16) ^ (ot & 0xffff)) >>> 0;
       for (const side of ["player", "opponent"] as const) expect(call(lend, { ...view.field, [side]: { ...view.field[side], personality: shiny } })).toBeNull();
       // An opponent with a front idle rest (ONIX, species audit 9): the ShakeMon x2 program starts from 0, so the body declines; GOLEM (no rest) engages.
-      expect(call(lend, { ...view.field, opponent: { ...view.field.opponent, species: 95, speciesSymbol: "ONIX", name: "ONIX" } })).toBeNull();
-      expect(call(lend, { ...view.field, opponent: { ...view.field.opponent, species: 76, speciesSymbol: "GOLEM", name: "GOLEM" } })).not.toBeNull();
+      expect(call(lend, { ...view.field, opponent: { ...view.field.opponent, species: 95, speciesSymbol: "ONIX", name: "ONIX" } as never })).toBeNull();
+      expect(call(lend, { ...view.field, opponent: { ...view.field.opponent, species: 76, speciesSymbol: "GOLEM", name: "GOLEM" } as never })).not.toBeNull();
     }
   });
 

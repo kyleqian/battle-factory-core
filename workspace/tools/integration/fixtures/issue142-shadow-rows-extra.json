@@ -6263,6 +6263,50 @@
    "requestFields": {
     "turn": 0
    }
+  },
+  {
+   "id": 351,
+   "move": "SHOCK_WAVE",
+   "orientation": "player",
+   "variant": "s10a-shock-wave-alt-player-raichu-weezing",
+   "activationFrame": 74,
+   "windowStart": 74,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/d4a-live/shock-wave-alt-player-raichu-weezing.json",
+    "scenario": "tools/battle-lab/prep33-shock-wave-alt-player-raichu-weezing.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep22Probes.sh; ns live receipt; the elevated WEEZING opponent is 0 px from row 0 in both roles via the live hook, docs/next-adapters-prep33.md s1.4)"
+   },
+   "requestFields": {
+    "turn": 0
+   }
+  },
+  {
+   "id": 351,
+   "move": "SHOCK_WAVE",
+   "orientation": "opponent",
+   "variant": "s10a-shock-wave-alt-opponent-weezing-snorlax",
+   "activationFrame": 79,
+   "windowStart": 79,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/d4a-live/shock-wave-alt-opponent-weezing-snorlax.json",
+    "scenario": "tools/battle-lab/prep33-shock-wave-alt-opponent-weezing-snorlax.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep22Probes.sh; ns live receipt; the elevated WEEZING opponent is 0 px from row 0 in both roles via the live hook, docs/next-adapters-prep33.md s1.4)"
+   },
+   "requestFields": {
+    "turn": 0
+   }
   }
  ]
 }

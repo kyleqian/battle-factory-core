@@ -3688,6 +3688,21 @@
         "shiny battlers and non-zero idle rests decline (the shake x2 programs are proven from a zero rest only); an unknown lent order declines",
         "the burst-row partial sprite snapshots (prep31 T) never reach hardware OAM and are not modelled; doubles / contest paths not covered"
       ]
+    },
+    {
+      "move": "MOVE_SHOCK_WAVE",
+      "id": 351,
+      "sourceFieldEvidence": "../tools/integration/fixtures/ns-live-receipt.json",
+      "liveEvidence": [
+        "Input builder src/engine/liveOamMoves.ts liveShockWaveInputs (docs/next-adapters-prep33.md s1.2 / s3 item 1, ported 1:1 from tools/integration/prep33ShockWaveModel.ts shockWaveInputs33): anchors from liveBattlerAnchors (X_2 / Y_PIC_OFFSET picture origins, sprite centres, the target's plain BATTLER_COORD_Y), the known-entry constants (task / sprite / matrix slots, resource allocator, attr2 words, monbg BGnCNT), the asset palette composite + shock-wave.json resource palettes, the host's lent 64-slot activation order (L), first-body registers S0; never a capture row",
+        "reducer change (src/animation/shockWave.ts shockWaveTimingFor / shockWaveSourceAtAge): the timing is derived from the live geometry (progressing-bolt destroy row from the attacker Y_PIC_OFFSET; lightning count N from the target BATTLER_COORD_Y: ShakeMon = lightning + 2N + 30, clearmonbg + 67, first inactive + 4), equal to the ROM in 6/6 windows; side-only callers keep the accepted tables; the accepted corpora's reducer states and staged frames are byte-identical before / after (tools/integration/shockWaveStagedDigest.ts)",
+        "dense full windows zero residual twice fresh through the production live renderer, both orientations: accepted FLAAFFY -> CORSOLA P / O, prep22 MANECTRIC -> WAILMER P / O, prep33 RAICHU -> WEEZING P and WEEZING -> SNORLAX O (6 windows, 1591 rows; tools/integration/fixtures/d4a-live/shock-wave-*.json); row 0 of the elevated WEEZING windows via the live #142 hook",
+        "ordinary route 7/7 CASTFORM (slot 2): live every age (266), following prompt, Scene ON/OFF gameplay / RNG / facility parity (tests/animation/liveShockWaveAdapter.test.ts)"
+      ],
+      "remaining": [
+        "shiny battlers and non-zero idle rests decline; an unknown lent order declines",
+        "later-body registers are the first-body block S0 (the renderer branch reads only body-written BG values / bldalpha); doubles / contest paths not covered"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3711,7 +3726,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 247,
+  "implementedCount": 248,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 12,

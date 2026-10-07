@@ -1,0 +1,37 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "SHOCK_WAVE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-shock-wave-opponent-flaaffy-player-corsola.json",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 341
+ },
+ "windowSource": "window = [activation, activation + 263 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": null,
+ "attacker": {
+  "species": "FLAAFFY",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "CORSOLA",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703691,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 151,
+  "playerMaxHp": 151,
+  "opponentHp": 177,
+  "opponentMaxHp": 177,
+  "playerGender": "female",
+  "opponentGender": "female"
+ }
+}

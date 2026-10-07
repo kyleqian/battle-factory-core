@@ -117,6 +117,11 @@ export interface ShockWaveLiveInputs {
   readonly registers: Readonly<Record<string, number>>;
   /** The source's animation-only gRng2 seed. */
   readonly animationRngSeed: number;
+  /**
+   * Derive the body timing from the geometry (shockWaveTimingFor). Set by the live input builder; absent = the two accepted windows' side
+   * tables, so every existing staged / accepted caller (and its retained digests) is unchanged.
+   */
+  readonly derivedTiming?: boolean;
   /** Opaque gameplay state; this reducer returns the same value unchanged. */
   readonly gameplayRng: unknown;
 }
@@ -153,8 +158,40 @@ export type ShockWaveTiming = Readonly<{
   readonly cleanupAge: number;
 }>;
 
-export function shockWaveTimingFor(input: Readonly<Pick<ShockWaveLiveInputs, "attackerSide">>): ShockWaveTiming {
-  return input.attackerSide === "player" ? PLAYER_TIMING : OPPONENT_TIMING;
+/**
+ * The body timing. With the live geometry (attacker / target picture origins, target BATTLER_COORD_Y) it is derived from the source
+ * (docs/next-adapters-prep33.md s0.2 / s1.3; equal to the ROM in 6/6 measured windows): AnimTask_ShockWaveProgressingBolt runs from row 77
+ * to its destroy row (column 1 walks up from the attacker Y_PIC_OFFSET in steps of 8), AnimTask_ShockWaveLightning starts on the next row
+ * and spawns one bolt every 2 rows from (BATTLER_COORD_Y + 32) reduced below 17 up to that bound (count N, each lives 30 rows), so
+ * ShakeMon = lightning + 2N + 30, clearmonbg = ShakeMon + 67, first inactive = clearmonbg + 4. Without `derivedTiming` (or the
+ * geometry) a caller keeps the two accepted windows' tables (player 159 / 195 / 262 / 266, opponent 153 / 191 / 258 / 262), which the
+ * derivation reproduces for the accepted corpora.
+ */
+export function shockWaveTimingFor(input: Readonly<Pick<ShockWaveLiveInputs, "attackerSide">> & Partial<Pick<ShockWaveLiveInputs, "attackerPictureOrigin" | "targetPictureOrigin" | "targetBattlePosition" | "derivedTiming">>): ShockWaveTiming {
+  if (!input.derivedTiming || !input.attackerPictureOrigin || !input.targetPictureOrigin || !input.targetBattlePosition) return input.attackerSide === "player" ? PLAYER_TIMING : OPPONENT_TIMING;
+  // AnimTask_ShockWaveProgressingBolt from row 77 to its destroy row (live bolt count 0 in state 3); the lightning task is the next row.
+  const s = [1, 0, 0, 0, 7, -1, input.attackerPictureOrigin.x, input.attackerPictureOrigin.y, 4, truncDiv(input.targetPictureOrigin.x - input.attackerPictureOrigin.x, 5), 0, 12];
+  const live: number[] = [];
+  let progressEnd = -1;
+  for (let age = PROGRESSING_START; progressEnd < 0; age += 1) {
+    for (let index = live.length - 1; index >= 0; index -= 1) if (age - live[index]! > 12) { live.splice(index, 1); s[3] -= 1; }
+    if (s[0] === 1) {
+      s[1] = 0; live.push(age); s[3] += 1;
+      if ((s[5]! < 0 && s[7]! <= s[8]!) || (s[5]! > 0 && s[7]! >= s[8]!)) { s[2] += 1; s[0] = s[2] === 5 ? 3 : 2; } else s[7] += s[5]! * 8;
+      if (s[11]) s[11] -= 1;
+    } else if (s[0] === 2) {
+      if (s[11]) s[11] -= 1;
+      if (++s[1]! > 4) { s[1] = 0; if ((s[2]! & 1) !== 0) { s[7] = 4; s[8] = 68; s[5] = 1; } else { s[7] = 68; s[8] = 4; s[5] = -1; } s[0] = s[11] ? 4 : 1; }
+    } else if (s[0] === 4) { if (s[11]) s[11] -= 1; else s[0] = 1; }
+    else if (s[0] === 3 && s[3] === 0) progressEnd = age;
+  }
+  // AnimTask_ShockWaveLightning: one bolt every 2 rows from (BATTLER_COORD_Y + 32) reduced below 17 up to that bound; each lives 30 rows.
+  const bound = input.targetBattlePosition.y + 32;
+  let y = bound, count = 1;
+  while (y > 16) y -= 32;
+  while (y < bound) { y += 32; count += 1; }
+  const lightningStart = progressEnd + 1, shakeStart = lightningStart + 2 * count + 30, clearStart = shakeStart + 67;
+  return { lightningStart, shakeStart, clearStart, cleanupAge: clearStart + 4 };
 }
 
 export function shockWaveFirstInactiveAge(input: Readonly<Pick<ShockWaveLiveInputs, "attackerSide">>): number {
@@ -331,9 +368,9 @@ function blendColor(source: number, target: number, coefficient: number): number
 }
 
 /** The actual move-script cursor, including its cleanup row. */
-export function shockWaveSourceAtAge(age: number, lightningStart: number = PLAYER_TIMING.lightningStart): ShockWaveSourceCursor {
+export function shockWaveSourceAtAge(age: number, lightningStart: number = PLAYER_TIMING.lightningStart, derivedShakeStart?: number): ShockWaveSourceCursor {
   assertAge(age);
-  const shakeStart = lightningStart + (lightningStart === OPPONENT_TIMING.lightningStart ? 38 : 36);
+  const shakeStart = derivedShakeStart ?? lightningStart + (lightningStart === OPPONENT_TIMING.lightningStart ? 38 : 36);
   const clearStart = shakeStart + 67;
   const cleanupAge = clearStart + 4;
   let pointerOffset: ShockWaveSourceCursor["pointerOffset"];
@@ -634,7 +671,7 @@ function battlerAtAge(age: number, input: Readonly<ShockWaveLiveInputs>, timing:
 /** Reduce one source-relative age of the complete Shock Wave root. */
 export function shockWaveAtAge(age: number, input: Readonly<ShockWaveLiveInputs>): ShockWaveState {
   assertAge(age); assertInputs(input);
-  const timing = shockWaveTimingFor(input), source = shockWaveSourceAtAge(age, timing.lightningStart), active = source.active;
+  const timing = shockWaveTimingFor(input), source = shockWaveSourceAtAge(age, timing.lightningStart, timing.shakeStart), active = source.active;
   const sourceSprites = sourceBirthsAtAge(age, input).map((birth) => spriteForBirth(birth, age, input));
   const matrix = age >= ORB_START && age <= ORB_END ? [Math.floor(0x10000 / affineScale(age - ORB_START)), 0, 0, Math.floor(0x10000 / affineScale(age - ORB_START))] as ShockWaveMatrix : IDENTITY;
   const sprites = sourceSprites.map((sprite) => sprite.matrixNum === input.matrixSlots.orb ? { ...sprite, matrix } : sprite).sort((left, right) => left.slot - right.slot);

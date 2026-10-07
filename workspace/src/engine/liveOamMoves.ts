@@ -967,3 +967,88 @@ export function liveNightmareInputs(args: LiveNightmareInputArgs): { duration: n
     },
   };
 }
+
+export interface LiveShockWaveInputArgs {
+  readonly attackerSide: Side;
+  readonly opponentSpecies: string;
+  readonly attacker: LiveOamBattlerAnchors;
+  readonly target: LiveOamBattlerAnchors;
+  readonly palettes: LivePaletteComposite;
+  /** shock-wave.json asset palettes (BGR555) of the four resources. */
+  readonly resourcePalettes: Readonly<Record<"circleOfLight" | "electricOrbs" | "spark" | "lightning", readonly number[]>>;
+  readonly activationOrder: readonly number[];
+}
+/** prep33 SW_K: known-entry constants, identical in all 6 measured windows (docs/next-adapters-prep33.md s0.5 K). */
+const SHOCK_WAVE_K = Object.freeze({
+  taskSlots: Object.freeze({ charging: 0, progressing: 2, lightning: 0, shake: 0, blend: 2, monbg: 1, clear: 0 }),
+  matrixBitmap: 6,
+  // resource allocator (first load into the known entry): tile slot, tile range, OBJ palette allocator slot
+  resources: Object.freeze({ electricOrbs: [6, [305, 4], 7], circleOfLight: [7, [537, 64], 8], spark: [10, [309, 24], 9], lightning: [11, [601, 80], 10] } as const),
+  tags: Object.freeze({ circleOfLight: 10212, electricOrbs: 10211, spark: 10001, lightning: 10037 } as const),
+  attr2: Object.freeze({ charging: 0x7000 | 0x800 | 308, orb: 35353, progressing: 0x9000 | 0x800 | 316, lightning: 0xa000 | 0x800 | 601 }),
+  paletteBlendAttr: Object.freeze([160, 304, 65535] as const),
+  monbg: Object.freeze({ player: { bg: 2, cnt: 24066, bank: 9 }, opponent: { bg: 1, cnt: 23554, bank: 8 } } as const),
+  shadowAttr2: 23853,
+});
+const ZERO_BATTLE_BG = Object.freeze({ gBattle_BG0_X: 0, gBattle_BG0_Y: 0, gBattle_BG1_X: 0, gBattle_BG1_Y: 0, gBattle_BG2_X: 0, gBattle_BG2_Y: 0,
+  gBattle_BG3_X: 0, gBattle_BG3_Y: 0 });
+/** Lowest-free simulation of the move's sprite births up to the orb over the known-entry occupants (palette-blend sprite row 16, 20 charging
+ *  particles from row 31, orb row 45; prep33 shockWaveSpriteSlots). */
+const SHOCK_WAVE_SPRITE_SLOTS = (() => {
+  const occ = new Set<number>(KNOWN_ENTRY_OCCUPIED_SLOTS);
+  const low = () => { for (let s = 0; s < 64; s += 1) if (!occ.has(s)) { occ.add(s); return s; } throw new Error("full"); };
+  const paletteBlend = low(); const live: { slot: number; end: number }[] = [{ slot: paletteBlend, end: 29 }];
+  const free = (age: number) => { for (let i = live.length - 1; i >= 0; i -= 1) if (live[i]!.end < age) { occ.delete(live[i]!.slot); live.splice(i, 1); } };
+  const durations = [40, 40, 35, 35, 30, 30, 25, 25, 20, 20, 15, 15, 10, 10];
+  for (let age = 31; age < 45; age += 1) { free(age); live.push({ slot: low(), end: age + durations[age - 31]! + 7 }); }
+  free(45);
+  return Object.freeze({ paletteBlend, orb: low() });
+})();
+
+/**
+ * MOVE_SHOCK_WAVE (351) live inputs (docs/next-adapters-prep33.md s1.2 / s3 item 1; scoped exact): the accepted reducer is a source model,
+ * so the live provider is an input builder, ported 1:1 from tools/integration/prep33ShockWaveModel.ts shockWaveInputs33 with production
+ * values only: the anchors (X_2 / Y_PIC_OFFSET picture origins, sprite centres, the plain BATTLER_COORD_Y of the target), the known-entry
+ * constants (SHOCK_WAVE_K), the asset palette composite, the shock-wave.json resource palettes and the lent activation order. Registers /
+ * BG scroll are the first-body block S0 (the renderer branch reads only the monbg BG values and bldalpha, both written by the body).
+ * The seam fields (sides, species, picture origins, target battle position) come from the presentation battlers. Never a capture row.
+ */
+export function liveShockWaveInputs(args: LiveShockWaveInputArgs): Record<string, unknown> {
+  const { attackerSide, attacker, target } = args;
+  const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
+  const sprite = (side: Side, anchors: LiveOamBattlerAnchors) => {
+    const o = battlerObject(side, anchors);
+    return { slot: o.slot, x: anchors.spriteCenter.x, y: anchors.spriteCenter.y, x2: 0, y2: 0, subpriority: o.subpriority, oamPriority: (o.attr[2] >>> 10) & 3,
+      matrixNum: 0, matrix: [256, 0, 0, 256] as const, attr: o.attr };
+  };
+  const attackerSprite = sprite(attackerSide, attacker), targetSprite = sprite(targetSide, target);
+  const resource = (name: keyof typeof SHOCK_WAVE_K.tags) => {
+    const [tileSlot, tileRange, pal] = SHOCK_WAVE_K.resources[name];
+    return { tag: SHOCK_WAVE_K.tags[name], tileSlot, tileRange: [tileRange[0], tileRange[1]] as const, paletteAllocatorSlot: pal, hardwarePaletteBank: 16 + pal,
+      palette: [...args.resourcePalettes[name]] };
+  };
+  const mb = SHOCK_WAVE_K.monbg[attackerSide];
+  // The elevated opponent's enemy shadow (slot 2) at activation: x 160 / y 65 (SpriteCB_EnemyShadow), otherwise the invisible template words.
+  const elevated = ((enemyElevations as Readonly<Record<string, number>>)[args.opponentSpecies] ?? 0) !== 0;
+  const live = [...KNOWN_ENTRY_NON_BATTLER_SPRITES.filter((s) => s.slot !== 2).map((s) => ({ slot: s.slot, attr: [...s.attr] as [number, number, number], subpriority: s.subpriority })),
+    { slot: 2, attr: (elevated ? [0x4000 | 65, 0x4000 | 160, SHOCK_WAVE_K.shadowAttr2] : [0x4000, 0x4000, SHOCK_WAVE_K.shadowAttr2]) as [number, number, number], subpriority: 200 },
+    { slot: attackerSprite.slot, attr: attackerSprite.attr, subpriority: attackerSprite.subpriority },
+    { slot: targetSprite.slot, attr: targetSprite.attr, subpriority: targetSprite.subpriority }].sort((l, r) => l.slot - r.slot);
+  let orbMatrix = 0; while (SHOCK_WAVE_K.matrixBitmap & (1 << orbMatrix)) orbMatrix += 1;
+  return {
+    attackerSprite, targetSprite, taskSlots: { ...SHOCK_WAVE_K.taskSlots }, spriteSlots: { ...SHOCK_WAVE_SPRITE_SLOTS }, matrixSlots: { orb: orbMatrix },
+    resources: { circleOfLight: resource("circleOfLight"), electricOrbs: resource("electricOrbs"), spark: resource("spark"), lightning: resource("lightning") },
+    allocator: { initialOccupiedSprites: [...KNOWN_ENTRY_OCCUPIED_SLOTS], initialMatrixBitmap: SHOCK_WAVE_K.matrixBitmap, spriteOrder: [...args.activationOrder],
+      initialLiveSprites: live },
+    oam: { charging: [0, 0, SHOCK_WAVE_K.attr2.charging], orb: [0x500 | ((attacker.picOffsetPoint.y - 32) & 0xff), 0xc000 | ((attacker.picOffsetPoint.x - 32) & 0x1ff), SHOCK_WAVE_K.attr2.orb],
+      progressing: [0, 0, SHOCK_WAVE_K.attr2.progressing], lightning: [0, 0, SHOCK_WAVE_K.attr2.lightning], paletteBlend: [...SHOCK_WAVE_K.paletteBlendAttr] },
+    palettes: { unfaded: [...args.palettes.unfaded], faded: [...args.palettes.faded], hardware: [...args.palettes.hardware] },
+    background: { values: { ...ZERO_BATTLE_BG }, xKey: `gBattle_BG${mb.bg}_X`, yKey: `gBattle_BG${mb.bg}_Y`, controlRegister: `bg${mb.bg}cnt`,
+      horizontalRegister: `bg${mb.bg}hofs`, verticalRegister: `bg${mb.bg}vofs`, setupX: 32 - attackerSprite.x, setupY: 32 - attackerSprite.y, setupControl: mb.cnt,
+      clearX: 0, clearY: 0, clearControl: mb.cnt, clearHorizontal: 0, clearVertical: 0, monbgPaletteBank: mb.bank,
+      initialVram: "vram:activation", setupVram: "vram:monbg-setup", clearingVram: "vram:monbg-clearing", clearVram: "vram:monbg-cleared" },
+    registers: { ...S0_REGISTERS }, animationRngSeed: 0, gameplayRng: null,
+    // The reducer derives the body timing from the seam geometry (docs/next-adapters-prep33.md s0.2), not the accepted side tables.
+    derivedTiming: true,
+  };
+}

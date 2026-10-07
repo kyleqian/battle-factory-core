@@ -1,0 +1,37 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "SHOCK_WAVE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep22-shock-wave-alt-player-manectric-wailmer.json",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 342
+ },
+ "windowSource": "window = [activation, activation + 266 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": null,
+ "attacker": {
+  "species": "MANECTRIC",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "WAILMER",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015441,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 177,
+  "playerMaxHp": 177,
+  "opponentHp": 226,
+  "opponentMaxHp": 226,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}
