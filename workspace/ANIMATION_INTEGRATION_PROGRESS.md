@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-06 (night) — in progress: 226 -> 234 scoped-exact, 10 -> 11 faithful-random
+## 2026-10-06 (night) — in progress: 226 -> 235 scoped-exact, 10 -> 11 faithful-random
 
 - prep22 (side, `c31dfd3c1`, new files only, merged `e7b7a1ac3`): Fire Punch is a 101-row body identical across
   burn / no-burn / faint outcomes (flames = separate Status_Burn body 152-155 frames later; status animations are
@@ -99,6 +99,14 @@
   frame-phase inputs that are not derivable: Ice Ball lag rows (accepted player body 4 row 38, accepted bodies 5 row
   112; none in the alternates), Revenge `bg*cnt` write row 4 (accepted opponent) vs 5. Superpower not reached.
   Supervisor: `prep26Run.sh` with fresh probes — 12 receipts byte-identical.
+- Folded Sonnet worker `6c3bb10d5` (tested `332161c18`, src tree `7584e7a5`): EXACT Return (216, strongest branch;
+  hardware-OAM provider port of prep24; known lend + first body, non-shiny) -> 235; RETURN renderer draws the age-0
+  enemy shadow for an elevated opponent target (prep24 windows 1692/1692; staged unchanged); Will-O-Wisp widened to
+  later bodies (lb26 12/12); attacker-side idle-rest gate lifted for Will-O-Wisp (first body) / Pursuit / Fury
+  Cutter (RATTATA / ONIX attackers 12/12). 50 dense fixtures x 2 fresh 0 px; routes 24/14 PIDGEOT, 51/28 EXEGGUTOR
+  (29/42 GYARADOS inactive, undiagnosed). Worker gates 1,542 files / 12,579 tests, build; shadow scan 515 / 0.
+  Supervisor: dense rerun 5 fixtures + 3 gate-lift rows 0 px r1 == r2; differential 389/389; union typecheck,
+  smoke, 9 files 190/190. Receipt `return-live-adapter-receipt.json`.
 
 ## 2026-10-06 (day, wind-down) — D3 implemented: 218 -> 226 exact + 10 faithful-random live adapters
 
