@@ -15045,13 +15045,16 @@ export function renderSceneOnMovePresentation(
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     const attackerSlot = sandTombState.config.animationProfile.attackerSpriteSlot;
     const targetSlot = sandTombState.config.animationProfile.target.spriteSlot;
+    // Only the target is shaken; the attacker keeps its front-idle rest
+    // (ONIX / RATTATA opponent x2 = 1; ISSUES #151).
+    const attackerIdle = sandTombState.config.attackerIdleRest ?? { x2: 0, y2: 0 };
     const drawBySlot = new Map<number, () => void>([
       [attackerSlot, () => drawSpriteSheet(
         fb,
         attackerArt.tileset,
         attackerArt.palette,
-        view.attacker.geometry.spriteCorner.x,
-        view.attacker.geometry.spriteCorner.y,
+        view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+        view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
       )],
       [targetSlot, () => drawSpriteSheet(
         fb,
@@ -23663,11 +23666,12 @@ export function renderSceneOnMovePresentation(
       side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
     const attackerArt = artFor(view.attacker);
     const targetArt = artFor(view.target);
-    // The retained source rows provide the live sprite center after the
-    // front-idle callback. Their x2/y2 are zero throughout this move, so the
-    // compositor must not apply the species rest offset a second time.
-    const attackerIdle = { x2: 0, y2: 0 };
-    const targetIdle = { x2: 0, y2: 0 };
+    // No Sheer Cold task writes x2/y2, so each battler keeps its front-idle
+    // rest (ONIX / RATTATA opponent x2 = 1) through the body, the monbg copy
+    // included (Task_UpdateMonBg reads x + x2). The retained corpus rows have
+    // zero rests; the live adapter carries the tracked rest (ISSUES #151).
+    const attackerIdle = sheerState.config.idleRest?.attacker ?? { x2: 0, y2: 0 };
+    const targetIdle = sheerState.config.idleRest?.target ?? { x2: 0, y2: 0 };
     const darken = (palette: readonly RgbColor[]): RgbColor[] => palette.map((color) => {
       const packed = mgbaDarkenColor(
         color.r | color.g << 8 | color.b << 16,
@@ -26964,9 +26968,11 @@ export function renderSceneOnMovePresentation(
     }
     const targetMonbg = view.body === "setup" && moveState.age >= 1 && moveState.age <= 128;
     const attackerMonbg = view.body === "unleash" && moveState.age >= 45 && moveState.age <= 142;
+    // Task_UpdateMonBg copies the target at x + x2 (the charge never writes
+    // the target's x2, so an ONIX / RATTATA idle rest persists; ISSUES #151).
     if (targetMonbg) drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side),
-      paletteBank(monbgBank), view.target.geometry.spriteCorner.x,
-      view.target.geometry.spriteCorner.y);
+      paletteBank(monbgBank), view.target.geometry.spriteCorner.x + input.targetSprite.x2,
+      view.target.geometry.spriteCorner.y + input.targetSprite.y2);
     if (attackerMonbg) {
       const eva = moveState.age >= 140 ? 16 : moveState.age <= 54 ? 16 : moveState.age <= 70
         ? 70 - moveState.age : moveState.age <= 109 ? 0

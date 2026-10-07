@@ -341,6 +341,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     142, 191, 190, 324,
     // Q2 (prep25 moves/*.json): the windows start at activation (row 0).
     304, 123, 328, 143,
+    // Sheer Cold (ISSUES #151, species audit 7 elevated FLYGON / GOLBAT opponent, both orientations): activation == window start (row 0).
+    329,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -2505,7 +2507,8 @@ export function liveMoveAnimationPresentation(
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       config = { move: "SHEER_COLD", attacker, target, fieldProfile,
         animationInputs: liveSheerColdInputs({ attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors,
-          spriteOrder: lentOrder }) as never };
+          spriteOrder: lentOrder }) as never,
+        idleRest: { attacker: attackerAnchors.frontIdleRest, target: targetAnchors.frontIdleRest } };
       break;
     }
     case 143: {
@@ -2536,7 +2539,7 @@ export function liveMoveAnimationPresentation(
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       config = { move: "SAND_TOMB", attacker, target, fieldProfile, animationProfile: liveSandTombProfile({
         attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, spriteOrder: lentOrder,
-        freeSpriteSlots: KNOWN_ENTRY_FREE_SPRITE_SLOTS }) as never };
+        freeSpriteSlots: KNOWN_ENTRY_FREE_SPRITE_SLOTS }) as never, attackerIdleRest: attackerAnchors.frontIdleRest };
       break;
     }
     case 123: {

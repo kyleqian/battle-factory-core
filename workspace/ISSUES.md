@@ -17,17 +17,17 @@ backlog.
 
 # Open
 
-## #151 — Species audit 7 residuals in live adapters (Sheer Cold, Sand Tomb, Sky Attack, Hyper Voice)
+## #151 — Species audit 7 residuals in live adapters (Sheer Cold, Hyper Voice)
 
 Evidence `docs/live-species-audit-7.md`, `tools/integration/fixtures/species-audit-7/residuals.tsv` (2 fresh runs,
 identical digests; supervisor reproduced 4 rows).
-- **Sheer Cold (329):** elevated opponent target (FLYGON / GOLBAT): 200 px at age 0 only (same signature as the
-  Return age-0 elevated-opponent shadow; Sheer Cold has no #142 shadow row). Tail ages 173-189, ~17k px/row, with
+- **Sheer Cold (329):** Tail ages 173-189, ~17k px/row, with
   TYRANITAR / PICHU / FLYGON / GOLBAT (attacker or target) while DEWGONG / CHANSEY / CLOYSTER / GOLEM / SNORLAX /
   STEELIX / WAILORD are exact — cause unknown (lag frame vs derivable timing not measured).
-- **Idle x2 class:** RATTATA / ONIX battlers give 410 / 1,091 px per row from age 0 in Sheer Cold (both roles),
-  Sand Tomb (RATTATA attacker) and Sky Attack charge (RATTATA target from age 1, attacker from age 45); dropping
-  Sheer Cold's target rest (`liveProfileMoves.ts:174`) did not change it.
+- **Fixed (fix151, `3da2d5bbe`, receipt `tools/integration/fixtures/fix151-live-receipt.json`):** the idle-x2 class
+  (RATTATA / ONIX in Sheer Cold both roles, Sand Tomb RATTATA attacker, Sky Attack charge RATTATA target / attacker)
+  and the Sheer Cold elevated-opponent age-0 shadow (#142 row 0): 0 px twice fresh. With its idle class gone the
+  ONIX opponent attacker shows the same Sheer Cold tail (ages 173-188, 276,352 px).
 - **Hyper Voice (304):** one row at age 59 (229 px FLYGON / GOLBAT, ~3.8k px PICHU / RATTATA attackers); no
   counter probe yet (possible lag frame).
 - Return: no defect (57/57 non-shiny rows exact). Shiny rows decline as designed.

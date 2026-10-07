@@ -3540,7 +3540,8 @@
       "sourceFieldEvidence": "../tools/integration/fixtures/q2-live-adapter-receipt.json",
       "liveEvidence": [
         "Known order lend, non-shiny (no register input); SandTombAnimationProfile from the anchors (vortex centre = target battle-position centre, palette sentinel = target picture offset point), mud sand bank 7 tile 305, shake task slot 0, known-entry free slots",
-        "dense full windows (123 rows) zero residual twice fresh through the production live renderer on the accepted pair, the prep25 alternate and a GOLBAT / SNORLAX-target pair, both orientations; builder src/engine/liveQ2Moves.ts (no capture row is read; equals the accepted corpus-built inputs, tools/integration/q2InputsCompare.ts)"
+        "dense full windows (123 rows) zero residual twice fresh through the production live renderer on the accepted pair, the prep25 alternate and a GOLBAT / SNORLAX-target pair, both orientations; builder src/engine/liveQ2Moves.ts (no capture row is read; equals the accepted corpus-built inputs, tools/integration/q2InputsCompare.ts)",
+        "ISSUES #151 (species audit 7, tools/integration/fixtures/fix151-live-receipt.json): only the target is shaken, so the attacker keeps its tracked front-idle rest: RATTATA opponent attacker 0 px twice fresh (was 410 px/row); every other species-audit-7 Sand Tomb row exact"
       ],
       "remaining": [
         "shiny battlers decline",
@@ -3553,7 +3554,8 @@
       "sourceFieldEvidence": "../tools/integration/fixtures/q2-live-adapter-receipt.json",
       "liveEvidence": [
         "CHARGE body only (request.turn bit 0, 148 rows), first body (WIN0 (240, 161) is the battle's first-body reset) with the lent known-entry order, non-shiny; the strike (turn bit 1, 180 rows) declines: the order tracker has no plan for the 143 charge body, so the strike never has a known lend",
-        "dense full windows (148 rows, charge, blank text box like the Solar Beam setup) zero residual twice fresh through the production live renderer on the accepted pair, the prep25 alternate and a GOLBAT / SNORLAX-target pair, both orientations; builder src/engine/liveQ2Moves.ts (no capture row is read; equals the accepted corpus-built inputs, tools/integration/q2InputsCompare.ts)"
+        "dense full windows (148 rows, charge, blank text box like the Solar Beam setup) zero residual twice fresh through the production live renderer on the accepted pair, the prep25 alternate and a GOLBAT / SNORLAX-target pair, both orientations; builder src/engine/liveQ2Moves.ts (no capture row is read; equals the accepted corpus-built inputs, tools/integration/q2InputsCompare.ts)",
+        "ISSUES #151 (species audit 7, tools/integration/fixtures/fix151-live-receipt.json): the attacker's AnimTask_HorizontalShake writes x2 from its second frame and zeroes it at the end (battle_anim_ground.c:666-705); the target monbg copy is drawn at x + x2 (Task_UpdateMonBg): RATTATA opponent target / attacker 0 px twice fresh (were 52,119 / 16,400 px); every other non-shiny species-audit-7 Sky Attack row exact"
       ],
       "remaining": [
         "the 180-row strike body is not claimed (no exact order lend after the charge); later-body charges decline",
@@ -3568,13 +3570,14 @@
       "liveEvidence": [
         "First body only (the activation BG registers, the Task_FadeToBg ice fade and the lent order are first-body inputs); a later body, an unknown lend and shiny battlers decline",
         "SheerColdLiveInputs builder src/engine/liveProfileMoves.ts liveSheerColdInputs: geometry from the battler anchors (cube born at the target picOffsetPoint - (32, 36), monbg = the target sprite (x + x2, y + y2) on bg2 for a player target / bg1 for an opponent target), the cube sprite in the lowest free slot, task slots / cube resource / non-owned painter keys the measured known-entry constants (equal across the four prep22 scenarios); no Random2; never a capture row",
-        "dense full windows (191 rows player attacker / 190 opponent, constant across the accepted + alternate + extra scenarios) zero residual twice fresh through the production live renderer on the accepted DEWGONG / CHANSEY pair, the prep22 CLOYSTER -> GOLEM alternate and DEWGONG -> SNORLAX (large), both orientations (tools/integration/fixtures/sheer-cold-live)"
+        "dense full windows (191 rows player attacker / 190 opponent, constant across the accepted + alternate + extra scenarios) zero residual twice fresh through the production live renderer on the accepted DEWGONG / CHANSEY pair, the prep22 CLOYSTER -> GOLEM alternate and DEWGONG -> SNORLAX (large), both orientations (tools/integration/fixtures/sheer-cold-live)",
+        "ISSUES #151 (species audit 7 swaps, tools/integration/fixtures/fix151-live-receipt.json): no Sheer Cold task writes x2/y2, so both battlers keep the tracked front-idle rest, the monbg copy included: RATTATA / ONIX opponent target and RATTATA attacker 0 px twice fresh (were 410 / 1,091 px per row); elevated FLYGON / GOLBAT opponent targets 0 px twice fresh with the #142 shadow row 0 (activation == window start, both orientations); STEELIX / WAILORD / PICHU targets and STEELIX / WAILORD attackers exact"
       ],
       "remaining": [
         "later bodies decline (not measured)",
         "shiny battlers decline",
-        "elevated opponents (the #142 activation-frame shadow row) are not measured for Sheer Cold: no shadow-row entry, the hook stays off",
-        "CLOYSTER -> GOLBAT (elevated) not staged: no body (the OHKO misses / reorders)",
+        "the last rows (ages 173-188) differ ~17k px/row with TYRANITAR / PICHU / FLYGON / GOLBAT / ONIX battlers (attacker, or TYRANITAR target) while the accepted species are exact: ISSUES #151 open, cause unknown",
+        "CLOYSTER -> GOLBAT (elevated) not staged: no body (the OHKO misses / reorders); the elevated rows are the species-audit-7 DEWGONG <-> FLYGON / GOLBAT swaps",
         "independent arbitrary-species/history framebuffer comparison"
       ]
     },
