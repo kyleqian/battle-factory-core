@@ -1,0 +1,12 @@
+{
+ "schema": "d4d2-timing-window/v1",
+ "sourceFixture": "tools/integration/fixtures/species-audit-7/derived/golbatA-sheer-cold-opponent-dewgong-player-chansey.json",
+ "move": "SHEER_COLD",
+ "timingPhase": "event",
+ "attacker": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ }
+}

@@ -3509,19 +3509,6 @@
       ]
     },
     {
-      "move": "MOVE_HYPER_VOICE",
-      "id": 304,
-      "sourceFieldEvidence": "../tools/integration/fixtures/q2-live-adapter-receipt.json",
-      "liveEvidence": [
-        "Known order lend, non-shiny (any history: the reducer takes no register input); tasks 0..4, palette-blend helper slot 3, ring slot 4, ANIM_TAG_THIN_RING bank 7 tile 305, painter placement the measured constants; cry species = the displayed attacker species id",
-        "dense full windows (104 rows) zero residual twice fresh through the production live renderer on the accepted pair, the prep25 alternate and a GOLBAT / SNORLAX-target pair, both orientations; builder src/engine/liveQ2Moves.ts (no capture row is read; equals the accepted corpus-built inputs, tools/integration/q2InputsCompare.ts)"
-      ],
-      "remaining": [
-        "shiny battlers decline",
-        "independent arbitrary-species/history framebuffer comparison"
-      ]
-    },
-    {
       "move": "MOVE_SMOG",
       "id": 123,
       "sourceFieldEvidence": "../tools/integration/fixtures/q2-live-adapter-receipt.json",
@@ -3576,24 +3563,6 @@
         "no real generated route with Sleep Powder on one side and Snore on the other was found (seeds 0-599): the live route proof is the dense fixtures after the declared history",
         "Snore after any other sleep source (Hypnosis, Spore, Sing...) declines unless that body's plan is also known",
         "shiny battlers decline",
-        "independent arbitrary-species/history framebuffer comparison"
-      ]
-    },
-    {
-      "move": "MOVE_SHEER_COLD",
-      "id": 329,
-      "sourceFieldEvidence": "../tools/integration/fixtures/fix150-live-receipt.json",
-      "liveEvidence": [
-        "First body only (the activation BG registers, the Task_FadeToBg ice fade and the lent order are first-body inputs); a later body, an unknown lend and shiny battlers decline",
-        "SheerColdLiveInputs builder src/engine/liveProfileMoves.ts liveSheerColdInputs: geometry from the battler anchors (cube born at the target picOffsetPoint - (32, 36), monbg = the target sprite (x + x2, y + y2) on bg2 for a player target / bg1 for an opponent target), the cube sprite in the lowest free slot, task slots / cube resource / non-owned painter keys the measured known-entry constants (equal across the four prep22 scenarios); no Random2; never a capture row",
-        "dense full windows (191 rows player attacker / 190 opponent, constant across the accepted + alternate + extra scenarios) zero residual twice fresh through the production live renderer on the accepted DEWGONG / CHANSEY pair, the prep22 CLOYSTER -> GOLEM alternate and DEWGONG -> SNORLAX (large), both orientations (tools/integration/fixtures/sheer-cold-live)",
-        "ISSUES #151 (species audit 7 swaps, tools/integration/fixtures/fix151-live-receipt.json): no Sheer Cold task writes x2/y2, so both battlers keep the tracked front-idle rest, the monbg copy included: RATTATA / ONIX opponent target and RATTATA attacker 0 px twice fresh (were 410 / 1,091 px per row); elevated FLYGON / GOLBAT opponent targets 0 px twice fresh with the #142 shadow row 0 (activation == window start, both orientations); STEELIX / WAILORD / PICHU targets and STEELIX / WAILORD attackers exact"
-      ],
-      "remaining": [
-        "later bodies decline (not measured)",
-        "shiny battlers decline",
-        "the last rows (ages 173-188) differ ~17k px/row with TYRANITAR / PICHU / FLYGON / GOLBAT / ONIX battlers (attacker, or TYRANITAR target) while the accepted species are exact: ISSUES #151 open, cause unknown",
-        "CLOYSTER -> GOLBAT (elevated) not staged: no body (the OHKO misses / reorders); the elevated rows are the species-audit-7 DEWGONG <-> FLYGON / GOLBAT swaps",
         "independent arbitrary-species/history framebuffer comparison"
       ]
     },
@@ -3726,7 +3695,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 248,
+  "implementedCount": 246,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 12,
@@ -3888,7 +3857,7 @@
     },
     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
   },
-  "faithfulTimingCount": 8,
+  "faithfulTimingCount": 12,
   "faithfulTimingAdapters": [
     {
       "id": 183,
@@ -4631,6 +4600,241 @@
         "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/d4a-live/nightmare-*.json",
         "node --experimental-strip-types --no-warnings tools/integration/sleepRouteSearch.ts 171 4 1 4000",
         "npx vitest run tests/animation/liveFaithfulTimingAdapters.test.ts tests/animation/liveMoveTimingPolicy.test.ts"
+      ]
+    },
+    {
+      "id": 301,
+      "move": "MOVE_ICE_BALL",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 38,
+          "fixedLagAges": [],
+          "iterations": 75,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 77,
+              "measured": 3
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 76,
+              "measured": 15
+            }
+          ],
+          "chosen": "no-event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [],
+        "rows": 0,
+        "maxPixelsPerRow": 0,
+        "cause": "no counter-0 body has a lag row (prep26 s1.4: the 3 lag windows are accepted player body 4 [row 38] and accepted bodies 5 [row 112], counters 3 / 4, which decline live): no live window is in the other phase. A lag window would differ on one row of the shake / fade (the lag row repeats the previous hardware OAM and moves the task step one row earlier)"
+      },
+      "d3": true,
+      "evidence": [
+        "scope: counter 0 only (request.rolloutCounter 1: the first body of a chain), any known lend with the known-entry occupancy, non-shiny, zero idle rests. Counters 1..4 (rolloutCounter 2..5) DECLINE (fallback): their activation sprite order is the earlier Ice Ball body's Random2-dependent shard y-sort, which needs a words-dependent post-body lend production does not have (resume: docs/s10a-random2-order-lend-blocker.md, design 1 'seam-resolved deferred lend')",
+        "tools/integration/fixtures/d4d2-live-receipt.json",
+        "tools/integration/fixtures/s10a-live/ice-ball-*.json (4 dense counter-0 windows, both orientations: accepted SPHEAL -> REGISTEEL after REGISTEEL's Tackle, prep25 GLALIE -> GOLEM first bodies; presentation host pinned at the probed activation animationRng)",
+        "docs/next-adapters-prep26.md s1 / s4 (assembler + model exact 18/18 windows, 1535 rows, given the H lag rows)",
+        "tools/integration/fixtures/prep26/iceball-check.json lagRows (3 of 18)"
+      ],
+      "proofCommands": [
+        "sh tools/integration/prep26Probes.sh iceball (OUT=PROBEDIR) + tools/integration/s10aRouteProbes: iceBallProbe.py on mechanic-ice-ball-{player-spheal-opponent-onix,opponent-spheal-player-onix}",
+        "python3 -I tools/integration/s10aIceBallFixtures.py PROBEDIR",
+        "node --experimental-strip-types tools/integration/d4aTimingCheck.ts <receipt.json> tools/integration/fixtures/s10a-live/ice-ball-<window>.json",
+        "npx vitest run tests/animation/liveIceBallAdapter.test.ts"
+      ]
+    },
+    {
+      "id": 291,
+      "move": "MOVE_DIVE",
+      "timingParameters": [
+        {
+          "kind": "oam-transfer-row",
+          "age": 68,
+          "fixedLagAges": [],
+          "iterations": 117,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 118,
+              "measured": 4
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 118,
+              "measured": 2
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false,
+          "side": "player"
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          68
+        ],
+        "rows": 1,
+        "maxPixelsPerRow": 284,
+        "cause": "oam-transfer-row (player setup only): in a no-event window the ROM's row 68 shows the ordinary age-67 sprite state, the policy renders the reused-affine age-66 state (battleScene.ts DIVE setupRow68ReusedAffine): the splash / ball differ on row 68 only (CHINCHOU -> GOLBAT, CHINCHOU -> GOLEM after a Tackle: 284 px each)"
+      },
+      "d3": true,
+      "evidence": [
+        "scope: the SETUP body only (request.turn bit 0 = 0), any known lend with the known-entry occupancy, non-shiny, no displayed status; the attacker stays hidden from setup age 10 across the turn gap (liveSemiInvulnerableHideBattler, as Dig). The ATTACK body (turn 1) DECLINES (fallback): its activation sprite order is the setup body's Random2-dependent droplet y-sort, which needs a words-dependent post-body lend production does not have (resume: docs/s10a-random2-order-lend-blocker.md, design 1 'seam-resolved deferred lend')",
+        "tools/integration/fixtures/d4d2-live-receipt.json",
+        "tools/integration/fixtures/s10a-live/dive-*.json (9 dense setup windows: accepted CHINCHOU <-> ONIX after a Tackle, prep25 LANTURN -> GOLEM first bodies, CHINCHOU -> GOLBAT (elevated target) / GOLEM / SHUCKLE / GOLEM (prep11) player, CHINCHOU (opponent) -> GOLEM player; host pinned at the probed activation gRng2Value)",
+        "docs/next-adapters-prep25.md s0.2 / B.1 / B.1a / C (anchor split: splash / droplets at battlePositionCenter, ball at the attacker's picOffsetPoint)"
+      ],
+      "proofCommands": [
+        "sh tools/integration/prep22Probes.sh PROBEDIR 1 <the 9 scenarios of tools/integration/s10aDiveFixtures.py>",
+        "python3 -I tools/integration/s10aDiveFixtures.py PROBEDIR",
+        "node --experimental-strip-types tools/integration/d4aTimingCheck.ts <receipt.json> tools/integration/fixtures/s10a-live/dive-<window>.json",
+        "npx vitest run tests/animation/liveDiveSetupAdapter.test.ts"
+      ]
+    },
+    {
+      "id": 329,
+      "move": "MOVE_SHEER_COLD",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 171,
+          "fixedLagAges": [
+            151,
+            152
+          ],
+          "iterations": 188,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 191,
+              "measured": 13
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 190,
+              "measured": 2
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false,
+          "side": "player"
+        },
+        {
+          "kind": "optional-lag-age",
+          "age": 171,
+          "fixedLagAges": [
+            151,
+            152
+          ],
+          "iterations": 188,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 191,
+              "measured": 5
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 190,
+              "measured": 11
+            }
+          ],
+          "chosen": "no-event",
+          "tieRuleUsed": false,
+          "side": "opponent"
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          172,
+          173,
+          174,
+          175,
+          176,
+          177,
+          178,
+          179,
+          180,
+          181,
+          182,
+          183,
+          184,
+          185,
+          186,
+          187,
+          188,
+          189
+        ],
+        "rows": 18,
+        "maxPixelsPerRow": 18610,
+        "cause": "optional-lag-age (#151, docs/issue151-diagnosis.md s1-s2): the age-171 lag holds restorebg's fade-in one row; a window in the other phase is one BLDY step darker (lag) / brighter (no lag) on the tail rows 172/173..188/189 over the BG area not covered by the battlers (16.6k-18.6k px/row); battlers, cube and monbg are exact"
+      },
+      "d3": false,
+      "evidence": [
+        "reclassified from scoped exact (ISSUES #151 D4 accounting); the existing exact fixture proofs stay valid in their proved scope: First body only (the activation BG registers, the Task_FadeToBg ice fade and the lent order are first-body inputs); a later body, an unknown lend and shiny battlers decline | SheerColdLiveInputs builder src/engine/liveProfileMoves.ts liveSheerColdInputs: geometry from the battler anchors (cube born at the target picOffsetPoint - (32, 36), monbg = the target sprite (x + x2, y + y2) on bg2 for a player target / bg1 for an opponent target), the cube sprite in the lowest free slot, task slots / cube resource / non-owned painter keys the measured known-entry constants (equal across the four prep22 scenarios); no Random2; never a capture row | dense full windows (191 rows player attacker / 190 opponent, constant across the accepted + alternate + extra scenarios) zero residual twice fresh through the production live renderer on the accepted DEWGONG / CHANSEY pair, the prep22 CLOYSTER -> GOLEM alternate and DEWGONG -> SNORLAX (large), both orientations (tools/integration/fixtures/sheer-cold-live) | ISSUES #151 (species audit 7 swaps, tools/integration/fixtures/fix151-live-receipt.json): no Sheer Cold task writes x2/y2, so both battlers keep the tracked front-idle rest, the monbg copy included: RATTATA / ONIX opponent target and RATTATA attacker 0 px twice fresh (were 410 / 1,091 px per row); elevated FLYGON / GOLBAT opponent targets 0 px twice fresh with the #142 shadow row 0 (activation == window start, both orientations); STEELIX / WAILORD / PICHU targets and STEELIX / WAILORD attackers exact",
+        "sourceFieldEvidence: ../tools/integration/fixtures/fix150-live-receipt.json",
+        "tools/integration/fixtures/d4d2-live-receipt.json (28 windows: the 6 sheer-cold-live fixtures + 22 non-shiny audit-7 swaps, each labelled with its banked age-171 lag, tools/integration/d4d2Fixtures.py)",
+        "tools/integration/fixtures/issue151/sheer-cold-counters.txt; tools/integration/fixtures/issue151/sheer-cold-restore-end-env.diff (patch proof: the measured restore end -> every tail row 0 px)"
+      ],
+      "proofCommands": [
+        "python3 -I tools/integration/d4d2Fixtures.py",
+        "node --experimental-strip-types tools/integration/d4aTimingCheck.ts <receipt.json> tools/integration/fixtures/d4d2-live/sheer-cold-*.json",
+        "npx vitest run tests/animation/liveIssue151Timing.test.ts"
+      ]
+    },
+    {
+      "id": 304,
+      "move": "MOVE_HYPER_VOICE",
+      "timingParameters": [
+        {
+          "kind": "palette-upload-scanline",
+          "age": 59,
+          "fixedLagAges": [],
+          "iterations": 104,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 104,
+              "measured": 26
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 104,
+              "measured": 6
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          59
+        ],
+        "rows": 1,
+        "maxPixelsPerRow": 3840,
+        "cause": "palette-upload-scanline (#151, docs/issue151-diagnosis.md s1): the second effect call's yellow BG blend lands at a CPU-dependent scanline of the age-59 frame; the policy draws the measured 16-line band (scanlines 0..15 keep the age-58 palette). A 15-line window (FLYGON / GOLBAT player-side attacker) differs on scanline 15 (229 px), a 0-line window (PICHU / RATTATA attacker) on scanlines 0..15 (3,818 / 3,840 px); every other row is exact"
+      },
+      "d3": false,
+      "evidence": [
+        "reclassified from scoped exact (ISSUES #151 D4 accounting); the existing exact fixture proofs stay valid in their proved scope: Known order lend, non-shiny (any history: the reducer takes no register input); tasks 0..4, palette-blend helper slot 3, ring slot 4, ANIM_TAG_THIN_RING bank 7 tile 305, painter placement the measured constants; cry species = the displayed attacker species id | dense full windows (104 rows) zero residual twice fresh through the production live renderer on the accepted pair, the prep25 alternate and a GOLBAT / SNORLAX-target pair, both orientations; builder src/engine/liveQ2Moves.ts (no capture row is read; equals the accepted corpus-built inputs, tools/integration/q2InputsCompare.ts)",
+        "sourceFieldEvidence: ../tools/integration/fixtures/q2-live-adapter-receipt.json",
+        "tools/integration/fixtures/d4d2-live-receipt.json (32 windows: the 8 q2-live fixtures + 24 non-shiny audit-7 swaps, each labelled with its banked band depth, tools/integration/d4d2Fixtures.py)",
+        "tools/integration/fixtures/issue151/hyper-voice-upper-rows-env.diff (patch proof: the measured depth -> 6/6 rows 0 px)"
+      ],
+      "proofCommands": [
+        "python3 -I tools/integration/d4d2Fixtures.py",
+        "node --experimental-strip-types tools/integration/d4aTimingCheck.ts <receipt.json> tools/integration/fixtures/d4d2-live/hyper-voice-*.json",
+        "npx vitest run tests/animation/liveIssue151Timing.test.ts"
       ]
     }
   ],

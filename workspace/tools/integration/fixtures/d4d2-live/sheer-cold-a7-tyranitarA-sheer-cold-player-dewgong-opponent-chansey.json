@@ -1,0 +1,12 @@
+{
+ "schema": "d4d2-timing-window/v1",
+ "sourceFixture": "tools/integration/fixtures/species-audit-7/derived/tyranitarA-sheer-cold-player-dewgong-opponent-chansey.json",
+ "move": "SHEER_COLD",
+ "timingPhase": "event",
+ "attacker": {
+  "species": "TYRANITAR",
+  "geometry": {
+   "side": "player"
+  }
+ }
+}

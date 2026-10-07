@@ -1,0 +1,16 @@
+{
+ "schema": "d4d2-timing-window/v1",
+ "sourceFixture": "tools/integration/fixtures/q2-live/hyper-voice-player-exploud-opponent-slowking.json",
+ "move": "HYPER_VOICE",
+ "timingPhase": "event",
+ "attacker": {
+  "species": "EXPLOUD",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "bandDepth": 16,
+ "timingPhases": {
+  "palette-upload-scanline": "event"
+ }
+}

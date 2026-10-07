@@ -5,6 +5,7 @@
  * scenarios), the assets-only palette composite with the move's own asset palettes written by the reducers, the lent 64-slot order, and the
  * WIN0 history rule (first body (240,161); (0,0) once an earlier body ran). No capture row is read.
  */
+import { liveMoveTimingSidePhase } from "./liveMoveTimingPolicy.ts";
 import { KNOWN_ENTRY_NON_BATTLER_SPRITES, S0_REGISTERS, ZERO_BG_VALUES, battlerSprite, type LiveBgSnapshotArgs } from "./liveBgSnapshotMoves.ts";
 import { liveMoveOptionalLagAge } from "./liveMoveTimingPolicy.ts";
 
@@ -74,6 +75,8 @@ export function liveHyperVoiceInputs(args: Omit<LiveQ2Args, "firstBody"> & { att
   const { attackerSide, attacker, target } = args, targetSide = opposite(attackerSide), player = attackerSide === "player";
   const attackerBank = player ? 16 : 17, targetBank = player ? 17 : 16;
   return {
+    // D4 (#151): the age-59 palette-upload band from the faithful-timing policy (liveMoveTimingPolicy.ts 304; dominant = the late upload).
+    paletteUploadLate: liveMoveTimingSidePhase(304, "palette-upload-scanline", attackerSide) === "event",
     attackerCrySpecies: args.attackerSpeciesId,
     attackerSprite: battlerSprite(attackerSide, attacker), targetSprite: battlerSprite(targetSide, target),
     taskSlots: { cry: 0, scale: 1, targetShake: 2, platform: 3, waitForCry: 4, duckBgm: 1 },

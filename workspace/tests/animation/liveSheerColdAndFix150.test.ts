@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS } from "../../src/engine/liveMoveTimingPolicy.ts";
 import {
   LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation,
 } from "../../src/engine/liveMoveAnimation.ts";
@@ -21,14 +22,17 @@ const rowsOf = (f: Fixture) => (f.attacker.geometry.side === "player" ? 191 : 19
 
 describe("live Sheer Cold (329) first-body adapter", () => {
   it("is registered (shadow row 0) with a side-constant body length", () => {
-    expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).toContain(329);
+    // ISSUES #151: reclassified to faithful timing (the per-side age-171 restore lag, liveMoveTimingPolicy.ts 329); the exact proofs stand.
+    expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).not.toContain(329);
+    expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).toContain(329);
     expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[329]).toBe(0); // elevated FLYGON / GOLBAT opponent measured in species audit 7 (ISSUES #151)
     for (const attacker of [0, 1] as const) {
       expect(liveMoveAnimationDuration({ moveId: 329, attacker, target: (1 - attacker) as 0 | 1, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0 }))
         .toBe(attacker === 0 ? 191 : 190);
     }
     const status = JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8"));
-    expect((status.implementedAdapters as { id: number }[]).map((e) => e.id)).toContain(329);
+    expect((status.faithfulTimingAdapters as { id: number }[]).map((e) => e.id)).toContain(329);
+    expect((status.implementedAdapters as { id: number }[]).map((e) => e.id)).not.toContain(329);
   });
 
   it("covers 6 dense fixtures: accepted, prep22 alternate, SNORLAX-large x both orientations", () => {

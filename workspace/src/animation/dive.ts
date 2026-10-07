@@ -47,6 +47,13 @@ export interface DiveGeometry {
   readonly targetPictureOffset: Readonly<{ x: number; y: number }>;
   readonly attackerRestOffset: Readonly<{ x2: number; y2: number }>;
   readonly targetRestOffset: Readonly<{ x2: number; y2: number }>;
+  /**
+   * Optional anchor split (docs/next-adapters-prep25.md s B.1a, measured 8/8): the setup ball's base point (the reducer adds 16 to y;
+   * the ROM ball sits at the attacker's Y_PIC_OFFSET point) and the attack impact / bubble anchor (target Y_PIC_OFFSET y - 8 for a
+   * player target, - 2 for an opponent target). Absent = `attackerPictureOffset` / `targetPictureOffset` (the accepted staged seam).
+   */
+  readonly attackerBallOffset?: Readonly<{ x: number; y: number }>;
+  readonly targetImpactOffset?: Readonly<{ x: number; y: number }>;
 }
 
 interface DiveSpriteBase extends DiveAllocation {
@@ -199,12 +206,13 @@ function diveAtAgeRaw(age: number, body: DiveBody, attackerSide: DiveSide,
     .filter((item) => !overwritten(item.slot, splashBirth, age, allBirths));
   const impacts: DiveImpact[] = [];
   const bubbles: DiveBubble[] = [];
+  const impactAnchor = geometry.targetImpactOffset ?? geometry.targetPictureOffset;
   if (!setup) for (const [index, p] of profile.impacts.entries()) {
     const birth = 30 + index * 4, localAge = age - birth;
     if (localAge >= 0 && localAge <= 9 && !overwritten(p.slot, birth, age, allBirths)) {
       impacts.push({ kind: "impact", index, localAge, ...p,
-        x: geometry.targetPictureOffset.x,
-        y: geometry.targetPictureOffset.y + (attackerSide === "player" ? 22 : 28) - index * 5,
+        x: impactAnchor.x,
+        y: impactAnchor.y + (attackerSide === "player" ? 22 : 28) - index * 5,
         x2: 0, y2: 0,
         subpriority: profile.targetSubpriority + (attackerSide === "player" ? -13 : 7),
         matrix: [303, 0, 0, 303] });
@@ -214,8 +222,8 @@ function diveAtAgeRaw(age: number, body: DiveBody, attackerSide: DiveSide,
       const callbacks = localAge + 1;
       const xAccumulator = bubble.velocityX * callbacks;
       bubbles.push({ kind: "bubble", impact: index, index: bubbleIndex as 0 | 1,
-        localAge, ...bubble, x: geometry.targetPictureOffset.x,
-        y: geometry.targetPictureOffset.y + (attackerSide === "player" ? 22 : 28) - index * 5,
+        localAge, ...bubble, x: impactAnchor.x,
+        y: impactAnchor.y + (attackerSide === "player" ? 22 : 28) - index * 5,
         x2: bubble.velocityX & 1 ? -(xAccumulator >> 8) : xAccumulator >> 8,
         y2: bubble.velocityY * callbacks >> 8,
         subpriority: profile.targetSubpriority + (attackerSide === "player" ? -14 : 6) });
@@ -225,10 +233,11 @@ function diveAtAgeRaw(age: number, body: DiveBody, attackerSide: DiveSide,
   if (setup) {
     const localAge = age - 10;
     if (localAge >= 0 && localAge <= splashBirth - 12) {
-      const motion = ballMotion(localAge, geometry.attackerPictureOffset.y + 16);
+      const ballAnchor = geometry.attackerBallOffset ?? geometry.attackerPictureOffset;
+      const motion = ballMotion(localAge, ballAnchor.y + 16);
       const matrixIndex = Math.min(localAge, BALL_MATRIX_X.length - 1);
       ball = { kind: "ball", localAge, ...profile.ball,
-        x: geometry.attackerPictureOffset.x, y: geometry.attackerPictureOffset.y + 16,
+        x: ballAnchor.x, y: ballAnchor.y + 16,
         x2: 0, y2: motion.y2, invisible: motion.invisible,
         subpriority: profile.attackerSubpriority - 2,
         matrix: [BALL_MATRIX_X[matrixIndex]!, 0, 0, BALL_MATRIX_Y[matrixIndex]!] };

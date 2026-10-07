@@ -2,23 +2,24 @@
 // D4 faithful-timing check (ANIMATION_VERIFICATION.md "CPU-load timing integration"): every fixture runs verifyLiveAdapterFramebuffer (two fresh
 // probe processes, production live renderer, complete dense window from the scenario's own activation). A window measured in the policy's chosen
 // phase must be pixel-exact on every row and its length must equal the live duration. A window measured in the other phase must differ ONLY on
-// the documented rows (docs/animation-integration-live-status.json faithfulTimingAdapters[].alternatePhaseResidual.ages, when documented); the
-// affected ages and the max differing pixels per row are recorded. Exit 1 on any violation.
+// the documented rows (docs/animation-integration-live-status.json faithfulTimingAdapters[].alternatePhaseResidual.ages); an entry without
+// documented rows is documented-empty (any nonzero residual fails). The affected ages and the max differing pixels per row are recorded.
+// Exit 1 on any violation.
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { verifyLiveAdapterFramebuffer } from "./liveAdapterFramebuffer.ts";
 import { LIVE_MOVE_TIMING_POLICY, type LiveMoveTimingParameterKind, type LiveMoveTimingPhase } from "../../src/engine/liveMoveTimingPolicy.ts";
 
-const IDS: Record<string, number> = { MACH_PUNCH: 183, NIGHTMARE: 171, MEGAHORN: 224, REVENGE: 279, METEOR_MASH: 309, PSYWAVE: 149, EXTRASENSORY: 326, SUPERPOWER: 276, SHOCK_WAVE: 351 };
+const IDS: Record<string, number> = { MACH_PUNCH: 183, NIGHTMARE: 171, MEGAHORN: 224, REVENGE: 279, METEOR_MASH: 309, PSYWAVE: 149, EXTRASENSORY: 326, SUPERPOWER: 276, SHOCK_WAVE: 351, ICE_BALL: 301, DIVE: 291, SHEER_COLD: 329, HYPER_VOICE: 304 };
 const [outPath, ...paths] = process.argv.slice(2);
 const status = JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8"));
 // A move whose other-phase residual differs per window (D4c Extrasensory: the scanout split) documents it per fixture
 // (alternatePhaseResidual.windows[fixture basename].ages); otherwise the move-level ages apply.
-const documented = (id: number, fixture: string): number[] | null => {
+const documented = (id: number, fixture: string): number[] => {
   const r = (status.faithfulTimingAdapters as { id: number; alternatePhaseResidual?: { ages?: number[]; windows?: Record<string, { ages: number[] }> } }[])
     .find((e) => e.id === id)?.alternatePhaseResidual;
   const tag = fixture.split("/").pop()!.replace(/\.json$/, "");
-  return r?.windows?.[tag]?.ages ?? r?.ages ?? null;
+  return r?.windows?.[tag]?.ages ?? r?.ages ?? [];
 };
 const out: Record<string, unknown>[] = [];
 let failed = false;
@@ -48,7 +49,7 @@ for (const path of paths) {
   if (selected) {
     if (run0.residualPixels !== 0) violations.push(`selected phase residual ${run0.residualPixels} px on ages ${run0.affectedAges.join(",")}`);
     if (results[0]!.expectedDuration !== run0.rows) violations.push(`duration ${results[0]!.expectedDuration} != window ${run0.rows}`);
-  } else if (doc !== null) {
+  } else {
     const outside = run0.affectedAges.filter((age) => !doc.includes(age));
     if (outside.length) violations.push(`other-phase residual outside the documented rows: ages ${outside.join(",")}`);
   }

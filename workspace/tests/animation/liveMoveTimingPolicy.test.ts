@@ -19,7 +19,8 @@ describe("live move timing policy (D4)", () => {
     for (const [id, entry] of Object.entries(LIVE_MOVE_TIMING_POLICY)) {
       expect(entry.move).toMatch(/^MOVE_/);
       for (const p of entry.parameters) {
-        expect(["optional-lag-age", "bg-write-row", "palette-transfer-row", "scanline-split-line"]).toContain(p.kind);
+        // S10A d4d2: oam-transfer-row (Dive's player setup row-68 OAM source) and palette-upload-scanline (#151 Hyper Voice age-59 band).
+        expect(["optional-lag-age", "bg-write-row", "palette-transfer-row", "scanline-split-line", "oam-transfer-row", "palette-upload-scanline"]).toContain(p.kind);
         const dominant = dominantLiveMoveTimingPhase(p.alternatives);
         expect([id, p.chosen, p.tieRuleUsed]).toEqual([id, dominant.phase, dominant.tie]);
         expect(p.evidence.length).toBeGreaterThan(0);
