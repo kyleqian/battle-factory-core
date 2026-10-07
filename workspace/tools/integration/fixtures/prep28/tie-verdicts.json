@@ -1,9 +1,9 @@
 {
  "schema": "prep28-tie-verdicts/v1",
  "counts": {
-  "CONFIRMED": 10,
-  "NEEDS-KEYS": 64,
-  "INCONCLUSIVE": 20
+  "CONFIRMED": 14,
+  "NEEDS-KEYS": 66,
+  "INCONCLUSIVE": 14
  },
  "cells": [
   {
@@ -335,13 +335,28 @@
    "extVerdict": "NEEDS-KEYS",
    "runsIdentical": {
     "diglett-chansey": true,
+    "diglett-chansey-s11": true,
+    "diglett-chansey-s22": true,
+    "diglett-chansey-s33": true,
     "dragonair-chansey": true,
-    "onix-pidgeotto": true
+    "dragonair-chansey-s11": true,
+    "dragonair-chansey-s22": true,
+    "dragonair-chansey-s33": true,
+    "onix-pidgeotto": true,
+    "onix-pidgeotto-s11": true,
+    "onix-pidgeotto-s22": true,
+    "onix-pidgeotto-s33": true
    },
-   "bodies": 1,
-   "newBodies": 0,
-   "verdict": "INCONCLUSIVE",
-   "why": "no complete identical new body"
+   "bodies": 10,
+   "newBodies": 9,
+   "verdict": "NEEDS-KEYS",
+   "why": "observed order contradicts (pw, -y, creation, F index)",
+   "badGeometries": [
+    "new:diglett-chansey-s11",
+    "new:diglett-chansey-s22",
+    "new:diglett-chansey-s33",
+    "new:dragonair-chansey-s11"
+   ]
   },
   {
    "cell": "56:player",
@@ -459,8 +474,17 @@
    "extVerdict": "NOT-OBSERVED",
    "runsIdentical": {
     "diglett-chansey": "no body",
+    "diglett-chansey-s11": "no body",
+    "diglett-chansey-s22": "no body",
+    "diglett-chansey-s33": "no body",
     "dragonair-chansey": "no body",
-    "onix-pidgeotto": "no body"
+    "dragonair-chansey-s11": "no body",
+    "dragonair-chansey-s22": "no body",
+    "dragonair-chansey-s33": "no body",
+    "onix-pidgeotto": "no body",
+    "onix-pidgeotto-s11": "no body",
+    "onix-pidgeotto-s22": "no body",
+    "onix-pidgeotto-s33": "no body"
    },
    "bodies": 0,
    "newBodies": 0,
@@ -604,8 +628,17 @@
    "extVerdict": "NOT-OBSERVED",
    "runsIdentical": {
     "diglett-chansey": true,
+    "diglett-chansey-s11": true,
+    "diglett-chansey-s22": true,
+    "diglett-chansey-s33": true,
     "dragonair-chansey": true,
-    "onix-pidgeotto": true
+    "dragonair-chansey-s11": true,
+    "dragonair-chansey-s22": true,
+    "dragonair-chansey-s33": true,
+    "onix-pidgeotto": true,
+    "onix-pidgeotto-s11": true,
+    "onix-pidgeotto-s22": true,
+    "onix-pidgeotto-s33": true
    },
    "bodies": 0,
    "newBodies": 0,
@@ -620,8 +653,17 @@
    "extVerdict": "NOT-OBSERVED",
    "runsIdentical": {
     "diglett-chansey": true,
+    "diglett-chansey-s11": true,
+    "diglett-chansey-s22": true,
+    "diglett-chansey-s33": true,
     "dragonair-chansey": true,
-    "onix-pidgeotto": true
+    "dragonair-chansey-s11": true,
+    "dragonair-chansey-s22": true,
+    "dragonair-chansey-s33": true,
+    "onix-pidgeotto": true,
+    "onix-pidgeotto-s11": true,
+    "onix-pidgeotto-s22": true,
+    "onix-pidgeotto-s33": true
    },
    "bodies": 0,
    "newBodies": 0,
@@ -636,13 +678,33 @@
    "extVerdict": "NEEDS-KEYS",
    "runsIdentical": {
     "diglett-chansey": true,
+    "diglett-chansey-s11": true,
+    "diglett-chansey-s22": true,
+    "diglett-chansey-s33": true,
     "dragonair-chansey": true,
-    "onix-pidgeotto": true
+    "dragonair-chansey-s11": true,
+    "dragonair-chansey-s22": true,
+    "dragonair-chansey-s33": true,
+    "onix-pidgeotto": true,
+    "onix-pidgeotto-s11": true,
+    "onix-pidgeotto-s22": true,
+    "onix-pidgeotto-s33": true
    },
-   "bodies": 1,
-   "newBodies": 0,
-   "verdict": "INCONCLUSIVE",
-   "why": "no complete identical new body"
+   "bodies": 7,
+   "newBodies": 6,
+   "distinctPlans": 1,
+   "distinctAbsFingerprints": 3,
+   "geometries": [
+    "new:diglett-chansey-s11",
+    "new:diglett-chansey-s33",
+    "new:dragonair-chansey-s11",
+    "new:dragonair-chansey-s33",
+    "new:onix-pidgeotto-s11",
+    "new:onix-pidgeotto-s33",
+    "old:78-mechanic-stun-spore-opponent-hoppip-player-onix-0.json"
+   ],
+   "verdict": "CONFIRMED",
+   "why": "same plan + same (pw,-y) rank vectors over 3 absolute-y fingerprints"
   },
   {
    "cell": "337:opponent",
@@ -768,13 +830,34 @@
    "extVerdict": "NEEDS-KEYS",
    "runsIdentical": {
     "diglett-chansey": true,
+    "diglett-chansey-s11": true,
+    "diglett-chansey-s22": true,
+    "diglett-chansey-s33": true,
     "dragonair-chansey": true,
-    "onix-pidgeotto": true
+    "dragonair-chansey-s11": true,
+    "dragonair-chansey-s22": true,
+    "dragonair-chansey-s33": true,
+    "onix-pidgeotto": true,
+    "onix-pidgeotto-s11": true,
+    "onix-pidgeotto-s22": true,
+    "onix-pidgeotto-s33": true
    },
-   "bodies": 2,
-   "newBodies": 0,
-   "verdict": "INCONCLUSIVE",
-   "why": "no complete identical new body"
+   "bodies": 8,
+   "newBodies": 6,
+   "distinctPlans": 1,
+   "distinctAbsFingerprints": 4,
+   "geometries": [
+    "new:diglett-chansey-s11",
+    "new:diglett-chansey-s33",
+    "new:dragonair-chansey-s11",
+    "new:dragonair-chansey-s33",
+    "new:onix-pidgeotto-s11",
+    "new:onix-pidgeotto-s33",
+    "old:173-mechanic-snore-player-sealeo-opponent-venomoth-0.json",
+    "old:79-mechanic-sleep-powder-opponent-hoppip-player-onix-0.json"
+   ],
+   "verdict": "CONFIRMED",
+   "why": "same plan + same (pw,-y) rank vectors over 4 absolute-y fingerprints"
   },
   {
    "cell": "79:player",
@@ -808,13 +891,34 @@
    "extVerdict": "NEEDS-KEYS",
    "runsIdentical": {
     "diglett-chansey": true,
+    "diglett-chansey-s11": true,
+    "diglett-chansey-s22": true,
+    "diglett-chansey-s33": true,
     "dragonair-chansey": true,
-    "onix-pidgeotto": true
+    "dragonair-chansey-s11": true,
+    "dragonair-chansey-s22": true,
+    "dragonair-chansey-s33": true,
+    "onix-pidgeotto": true,
+    "onix-pidgeotto-s11": true,
+    "onix-pidgeotto-s22": true,
+    "onix-pidgeotto-s33": true
    },
-   "bodies": 2,
-   "newBodies": 0,
-   "verdict": "INCONCLUSIVE",
-   "why": "no complete identical new body"
+   "bodies": 8,
+   "newBodies": 6,
+   "distinctPlans": 1,
+   "distinctAbsFingerprints": 4,
+   "geometries": [
+    "new:diglett-chansey-s11",
+    "new:diglett-chansey-s33",
+    "new:dragonair-chansey-s11",
+    "new:dragonair-chansey-s33",
+    "new:onix-pidgeotto-s11",
+    "new:onix-pidgeotto-s33",
+    "old:171-mechanic-nightmare-player-haunter-opponent-shuckle-0.json",
+    "old:95-mechanic-hypnosis-opponent-politoed-player-onix-0.json"
+   ],
+   "verdict": "CONFIRMED",
+   "why": "same plan + same (pw,-y) rank vectors over 4 absolute-y fingerprints"
   },
   {
    "cell": "95:player",
@@ -824,13 +928,34 @@
    "extVerdict": "NEEDS-KEYS",
    "runsIdentical": {
     "diglett-chansey": true,
+    "diglett-chansey-s11": true,
+    "diglett-chansey-s22": true,
+    "diglett-chansey-s33": true,
     "dragonair-chansey": true,
-    "onix-pidgeotto": true
+    "dragonair-chansey-s11": true,
+    "dragonair-chansey-s22": true,
+    "dragonair-chansey-s33": true,
+    "onix-pidgeotto": true,
+    "onix-pidgeotto-s11": true,
+    "onix-pidgeotto-s22": true,
+    "onix-pidgeotto-s33": true
    },
-   "bodies": 2,
-   "newBodies": 0,
-   "verdict": "INCONCLUSIVE",
-   "why": "no complete identical new body"
+   "bodies": 8,
+   "newBodies": 6,
+   "distinctPlans": 1,
+   "distinctAbsFingerprints": 4,
+   "geometries": [
+    "new:diglett-chansey-s11",
+    "new:diglett-chansey-s33",
+    "new:dragonair-chansey-s11",
+    "new:dragonair-chansey-s22",
+    "new:onix-pidgeotto-s11",
+    "new:onix-pidgeotto-s22",
+    "old:171-mechanic-nightmare-opponent-haunter-player-shuckle-0.json",
+    "old:95-mechanic-hypnosis-player-politoed-opponent-onix-0.json"
+   ],
+   "verdict": "CONFIRMED",
+   "why": "same plan + same (pw,-y) rank vectors over 4 absolute-y fingerprints"
   },
   {
    "cell": "258:opponent",
@@ -984,8 +1109,17 @@
    "extVerdict": "NEEDS-KEYS",
    "runsIdentical": {
     "diglett-chansey": true,
+    "diglett-chansey-s11": true,
+    "diglett-chansey-s22": true,
+    "diglett-chansey-s33": true,
     "dragonair-chansey": true,
-    "onix-pidgeotto": true
+    "dragonair-chansey-s11": true,
+    "dragonair-chansey-s22": true,
+    "dragonair-chansey-s33": true,
+    "onix-pidgeotto": true,
+    "onix-pidgeotto-s11": true,
+    "onix-pidgeotto-s22": true,
+    "onix-pidgeotto-s33": true
    },
    "bodies": 1,
    "newBodies": 0,
@@ -1000,8 +1134,17 @@
    "extVerdict": "NEEDS-KEYS",
    "runsIdentical": {
     "diglett-chansey": true,
+    "diglett-chansey-s11": true,
+    "diglett-chansey-s22": true,
+    "diglett-chansey-s33": true,
     "dragonair-chansey": true,
-    "onix-pidgeotto": true
+    "dragonair-chansey-s11": true,
+    "dragonair-chansey-s22": true,
+    "dragonair-chansey-s33": true,
+    "onix-pidgeotto": true,
+    "onix-pidgeotto-s11": true,
+    "onix-pidgeotto-s22": true,
+    "onix-pidgeotto-s33": true
    },
    "bodies": 1,
    "newBodies": 0,
@@ -1064,8 +1207,17 @@
    "extVerdict": "NEEDS-KEYS",
    "runsIdentical": {
     "diglett-chansey": true,
+    "diglett-chansey-s11": true,
+    "diglett-chansey-s22": true,
+    "diglett-chansey-s33": true,
     "dragonair-chansey": true,
-    "onix-pidgeotto": true
+    "dragonair-chansey-s11": true,
+    "dragonair-chansey-s22": true,
+    "dragonair-chansey-s33": true,
+    "onix-pidgeotto": true,
+    "onix-pidgeotto-s11": true,
+    "onix-pidgeotto-s22": true,
+    "onix-pidgeotto-s33": true
    },
    "bodies": 1,
    "newBodies": 0,
@@ -1381,8 +1533,17 @@
    "extVerdict": "NEEDS-KEYS",
    "runsIdentical": {
     "diglett-chansey": true,
+    "diglett-chansey-s11": true,
+    "diglett-chansey-s22": true,
+    "diglett-chansey-s33": true,
     "dragonair-chansey": true,
-    "onix-pidgeotto": true
+    "dragonair-chansey-s11": true,
+    "dragonair-chansey-s22": true,
+    "dragonair-chansey-s33": true,
+    "onix-pidgeotto": true,
+    "onix-pidgeotto-s11": true,
+    "onix-pidgeotto-s22": true,
+    "onix-pidgeotto-s33": true
    },
    "bodies": 1,
    "newBodies": 0,
@@ -1585,8 +1746,17 @@
    "extVerdict": "NEEDS-KEYS",
    "runsIdentical": {
     "diglett-chansey": true,
+    "diglett-chansey-s11": true,
+    "diglett-chansey-s22": true,
+    "diglett-chansey-s33": true,
     "dragonair-chansey": true,
-    "onix-pidgeotto": true
+    "dragonair-chansey-s11": true,
+    "dragonair-chansey-s22": true,
+    "dragonair-chansey-s33": true,
+    "onix-pidgeotto": true,
+    "onix-pidgeotto-s11": true,
+    "onix-pidgeotto-s22": true,
+    "onix-pidgeotto-s33": true
    },
    "bodies": 1,
    "newBodies": 0,
@@ -1673,8 +1843,17 @@
    "extVerdict": "NEEDS-KEYS",
    "runsIdentical": {
     "diglett-chansey": true,
+    "diglett-chansey-s11": true,
+    "diglett-chansey-s22": true,
+    "diglett-chansey-s33": true,
     "dragonair-chansey": true,
-    "onix-pidgeotto": true
+    "dragonair-chansey-s11": true,
+    "dragonair-chansey-s22": true,
+    "dragonair-chansey-s33": true,
+    "onix-pidgeotto": true,
+    "onix-pidgeotto-s11": true,
+    "onix-pidgeotto-s22": true,
+    "onix-pidgeotto-s33": true
    },
    "bodies": 1,
    "newBodies": 0,
@@ -1689,8 +1868,17 @@
    "extVerdict": "NEEDS-KEYS",
    "runsIdentical": {
     "diglett-chansey": true,
+    "diglett-chansey-s11": true,
+    "diglett-chansey-s22": true,
+    "diglett-chansey-s33": true,
     "dragonair-chansey": true,
-    "onix-pidgeotto": true
+    "dragonair-chansey-s11": true,
+    "dragonair-chansey-s22": true,
+    "dragonair-chansey-s33": true,
+    "onix-pidgeotto": true,
+    "onix-pidgeotto-s11": true,
+    "onix-pidgeotto-s22": true,
+    "onix-pidgeotto-s33": true
    },
    "bodies": 1,
    "newBodies": 0,
@@ -1863,13 +2051,33 @@
    "extVerdict": "NEEDS-KEYS",
    "runsIdentical": {
     "diglett-chansey": true,
+    "diglett-chansey-s11": true,
+    "diglett-chansey-s22": true,
+    "diglett-chansey-s33": true,
     "dragonair-chansey": true,
-    "onix-pidgeotto": true
+    "dragonair-chansey-s11": true,
+    "dragonair-chansey-s22": true,
+    "dragonair-chansey-s33": true,
+    "onix-pidgeotto": true,
+    "onix-pidgeotto-s11": true,
+    "onix-pidgeotto-s22": true,
+    "onix-pidgeotto-s33": true
    },
-   "bodies": 1,
-   "newBodies": 0,
-   "verdict": "INCONCLUSIVE",
-   "why": "no complete identical new body"
+   "bodies": 7,
+   "newBodies": 6,
+   "distinctPlans": 2,
+   "distinctAbsFingerprints": 3,
+   "geometries": [
+    "new:diglett-chansey-s11",
+    "new:diglett-chansey-s33",
+    "new:dragonair-chansey-s11",
+    "new:dragonair-chansey-s22",
+    "new:onix-pidgeotto-s11",
+    "new:onix-pidgeotto-s22",
+    "old:192-mechanic-zap-cannon-player-forretress-opponent-shuckle-0.json"
+   ],
+   "verdict": "NEEDS-KEYS",
+   "why": "plan (with tie-normalised words) differs across geometries (2 plans)"
   },
   {
    "cell": "143:opponent",
@@ -1927,8 +2135,17 @@
    "extVerdict": "NEEDS-KEYS",
    "runsIdentical": {
     "diglett-chansey": true,
+    "diglett-chansey-s11": "no body",
+    "diglett-chansey-s22": true,
+    "diglett-chansey-s33": true,
     "dragonair-chansey": true,
-    "onix-pidgeotto": true
+    "dragonair-chansey-s11": "no body",
+    "dragonair-chansey-s22": true,
+    "dragonair-chansey-s33": true,
+    "onix-pidgeotto": true,
+    "onix-pidgeotto-s11": "no body",
+    "onix-pidgeotto-s22": true,
+    "onix-pidgeotto-s33": true
    },
    "bodies": 4,
    "newBodies": 0,
@@ -1943,8 +2160,17 @@
    "extVerdict": "NEEDS-KEYS",
    "runsIdentical": {
     "diglett-chansey": true,
+    "diglett-chansey-s11": "no body",
+    "diglett-chansey-s22": true,
+    "diglett-chansey-s33": true,
     "dragonair-chansey": true,
-    "onix-pidgeotto": true
+    "dragonair-chansey-s11": true,
+    "dragonair-chansey-s22": true,
+    "dragonair-chansey-s33": true,
+    "onix-pidgeotto": true,
+    "onix-pidgeotto-s11": true,
+    "onix-pidgeotto-s22": true,
+    "onix-pidgeotto-s33": true
    },
    "bodies": 1,
    "newBodies": 0,

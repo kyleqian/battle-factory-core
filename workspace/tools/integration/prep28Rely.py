@@ -27,3 +27,7 @@ if __name__ == "__main__":
     if cmd == "gen": RY.gen(rows)
     elif cmd == "probe": RY.probe(rows, int(sys.argv[sys.argv.index("--jobs") + 1]) if "--jobs" in sys.argv else 12, len(rows))
     elif cmd == "analyze": RY.analyze(rows, True)
+    elif cmd == "retry":  # alternate battle seeds for the cells whose first scenarios gave no complete body (accuracy / sleep-immunity misses)
+        v = json.loads((RY.FIX / "prep28/tie-verdicts.json").read_text())["cells"]
+        need = {x["cell"] for x in v if x["verdict"] == "INCONCLUSIVE" and x["why"].startswith("no complete") and x["move"] != 0}
+        for sd in (11, 22, 33): RY.gen(rows, sd, need)

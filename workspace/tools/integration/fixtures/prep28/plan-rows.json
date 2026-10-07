@@ -1095,6 +1095,204 @@
     "distinctAbsoluteYFingerprints": 4
    }
   },
+  "78:opponent": {
+   "verdict": "EXACT-PLAN",
+   "rule": "relative-y static, ties by free-order index (FDERIVED words)",
+   "tier": "confirmed",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ],
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       3,
+       "f"
+      ],
+      [
+       "n",
+       4,
+       "f"
+      ],
+      [
+       "n",
+       5,
+       "f"
+      ],
+      [
+       "n",
+       6,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       7,
+       "f"
+      ],
+      [
+       "n",
+       8,
+       "f"
+      ],
+      [
+       "n",
+       9,
+       "f"
+      ],
+      [
+       "n",
+       10,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       11,
+       "f"
+      ],
+      [
+       "n",
+       12,
+       "f"
+      ],
+      [
+       "n",
+       13,
+       "f"
+      ],
+      [
+       "n",
+       14,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ],
+      [
+       "n",
+       1
+      ],
+      [
+       "n",
+       2
+      ]
+     ],
+     "pw": [
+      1,
+      1,
+      0
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       6
+      ],
+      [
+       "n",
+       4
+      ],
+      [
+       "n",
+       3
+      ],
+      [
+       "n",
+       5
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       7
+      ],
+      [
+       "n",
+       9
+      ],
+      [
+       "n",
+       10
+      ],
+      [
+       "n",
+       8
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       11
+      ],
+      [
+       "n",
+       12
+      ],
+      [
+       "n",
+       13
+      ],
+      [
+       "n",
+       14
+      ]
+     ],
+     "pw": [
+      2,
+      1,
+      0,
+      2
+     ]
+    }
+   ],
+   "census": {
+    "weight": 0.0018175,
+    "geometries": [
+     "new:diglett-chansey-s11",
+     "new:diglett-chansey-s33",
+     "new:dragonair-chansey-s11",
+     "new:dragonair-chansey-s33",
+     "new:onix-pidgeotto-s11",
+     "new:onix-pidgeotto-s33",
+     "old:78-mechanic-stun-spore-opponent-hoppip-player-onix-0.json"
+    ],
+    "distinctAbsoluteYFingerprints": 3
+   }
+  },
   "337:opponent": {
    "verdict": "EXACT-PLAN",
    "rule": "relative-y static, ties by free-order index (FDERIVED words)",
@@ -2097,6 +2295,205 @@
     "distinctAbsoluteYFingerprints": 3
    }
   },
+  "79:opponent": {
+   "verdict": "EXACT-PLAN",
+   "rule": "relative-y static, ties by free-order index (FDERIVED words)",
+   "tier": "confirmed",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ],
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       3,
+       "f"
+      ],
+      [
+       "n",
+       4,
+       "f"
+      ],
+      [
+       "n",
+       5,
+       "f"
+      ],
+      [
+       "n",
+       6,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       7,
+       "f"
+      ],
+      [
+       "n",
+       8,
+       "f"
+      ],
+      [
+       "n",
+       9,
+       "f"
+      ],
+      [
+       "n",
+       10,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       11,
+       "f"
+      ],
+      [
+       "n",
+       12,
+       "f"
+      ],
+      [
+       "n",
+       13,
+       "f"
+      ],
+      [
+       "n",
+       14,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ],
+      [
+       "n",
+       1
+      ],
+      [
+       "n",
+       2
+      ]
+     ],
+     "pw": [
+      1,
+      1,
+      0
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       6
+      ],
+      [
+       "n",
+       4
+      ],
+      [
+       "n",
+       3
+      ],
+      [
+       "n",
+       5
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       7
+      ],
+      [
+       "n",
+       9
+      ],
+      [
+       "n",
+       10
+      ],
+      [
+       "n",
+       8
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       11
+      ],
+      [
+       "n",
+       12
+      ],
+      [
+       "n",
+       13
+      ],
+      [
+       "n",
+       14
+      ]
+     ],
+     "pw": [
+      2,
+      1,
+      0,
+      2
+     ]
+    }
+   ],
+   "census": {
+    "weight": 0.00161,
+    "geometries": [
+     "new:diglett-chansey-s11",
+     "new:diglett-chansey-s33",
+     "new:dragonair-chansey-s11",
+     "new:dragonair-chansey-s33",
+     "new:onix-pidgeotto-s11",
+     "new:onix-pidgeotto-s33",
+     "old:173-mechanic-snore-player-sealeo-opponent-venomoth-0.json",
+     "old:79-mechanic-sleep-powder-opponent-hoppip-player-onix-0.json"
+    ],
+    "distinctAbsoluteYFingerprints": 4
+   }
+  },
   "79:player": {
    "verdict": "EXACT-PLAN",
    "rule": "relative-y static, ties by free-order index (FDERIVED words)",
@@ -2288,6 +2685,204 @@
      "new:onix-pidgeotto",
      "old:173-mechanic-snore-opponent-sealeo-player-venomoth-0.json",
      "old:79-mechanic-sleep-powder-player-hoppip-opponent-onix-0.json"
+    ],
+    "distinctAbsoluteYFingerprints": 4
+   }
+  },
+  "95:opponent": {
+   "verdict": "EXACT-PLAN",
+   "rule": "relative-y static, ties by free-order index (FDERIVED words)",
+   "tier": "confirmed",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ],
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       4,
+       "f"
+      ],
+      [
+       "n",
+       5,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ],
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ],
+      [
+       "n",
+       3
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       4
+      ],
+      [
+       "n",
+       5
+      ]
+     ]
+    }
+   ],
+   "census": {
+    "weight": 0.00161,
+    "geometries": [
+     "new:diglett-chansey-s11",
+     "new:diglett-chansey-s33",
+     "new:dragonair-chansey-s11",
+     "new:dragonair-chansey-s33",
+     "new:onix-pidgeotto-s11",
+     "new:onix-pidgeotto-s33",
+     "old:171-mechanic-nightmare-player-haunter-opponent-shuckle-0.json",
+     "old:95-mechanic-hypnosis-opponent-politoed-player-onix-0.json"
+    ],
+    "distinctAbsoluteYFingerprints": 4
+   }
+  },
+  "95:player": {
+   "verdict": "EXACT-PLAN",
+   "rule": "relative-y static, ties by free-order index (FDERIVED words)",
+   "tier": "confirmed",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ],
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       4,
+       "f"
+      ],
+      [
+       "n",
+       5,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ],
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ],
+      [
+       "n",
+       3
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       4
+      ],
+      [
+       "n",
+       5
+      ]
+     ]
+    }
+   ],
+   "census": {
+    "weight": 0.00161,
+    "geometries": [
+     "new:diglett-chansey-s11",
+     "new:diglett-chansey-s33",
+     "new:dragonair-chansey-s11",
+     "new:dragonair-chansey-s22",
+     "new:onix-pidgeotto-s11",
+     "new:onix-pidgeotto-s22",
+     "old:171-mechanic-nightmare-opponent-haunter-player-shuckle-0.json",
+     "old:95-mechanic-hypnosis-player-politoed-opponent-onix-0.json"
     ],
     "distinctAbsoluteYFingerprints": 4
    }
