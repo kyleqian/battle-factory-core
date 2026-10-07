@@ -87,12 +87,13 @@ describe("oam1 production hardware-OAM provider: MOVE_WILL_O_WISP", () => {
     }
   });
 
-  it("is gated on a first-body known order, non-shiny battlers and zero idle rests", () => {
+  it("is gated on a known order, non-shiny battlers and a zero target idle rest", () => {
     const field = displayed("NINETALES", "GOLBAT");
     expect(liveMoveAnimationPresentation(request(261, 0), field, 50, undefined, undefined, firstBodyOrder())?.config.move).toBe("WILL_O_WISP");
     expect(liveMoveAnimationPresentation(request(261, 0), field, 50)).toBeNull();
+    // Later bodies (any known lend) are exact too: 12/12 lb26 fixtures (later-bodies-lb26/wisp-*).
     const later = prepareLiveMoveSpriteOrder(knownEntrySpriteOrderState("ordinary-factory"), request(261, 0)).input!;
-    expect(liveMoveAnimationPresentation(request(261, 0), field, 50, undefined, undefined, later)).toBeNull();
+    expect(liveMoveAnimationPresentation(request(261, 0), field, 50, undefined, undefined, later)?.config.move).toBe("WILL_O_WISP");
     // A shiny personality under the Factory OT (GET_SHINY_VALUE < 8): the repo has no shiny battle palette.
     const shiny = ((416_049_562 >>> 16) ^ (416_049_562 & 0xffff)) << 16 >>> 0;
     expect(liveMoveAnimationPresentation(request(261, 0), displayed("NINETALES", "GOLBAT", shiny), 50, undefined, undefined, firstBodyOrder())).toBeNull();

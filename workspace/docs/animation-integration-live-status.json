@@ -3369,8 +3369,8 @@
         "ordinary route 82/7 BANETTE slot 1 (first body): adapter active every age, following prompt reached, ON/OFF rules/RNG/boundary equal"
       ],
       "remaining": [
-        "first body only (spriteOrderInput.firstBody): later bodies decline to the scene-off fallback (no later-body dense fixture; routes 54/14 and 61/21 are second bodies)",
-        "shiny battlers and battlers with a non-zero front idle rest decline",
+        "later bodies: exact on any known lend (12/12 lb26 fixtures after Tackle / Splash / Psychic / Growl+unit / Swords Dance+unit / Surf, both sides, 0 px twice fresh on the unpatched code); an unknown lend declines",
+        "shiny battlers and a target with a non-zero front idle rest decline; an attacker with a non-zero idle rest (RATTATA / ONIX opponent attackers, species audit 5) runs on first bodies only (6/6 rows 0 px; later-body combination unproven)",
         "singles |dx| is fixed by the static sBattlerCoords X_2 (105 / 104): other dx is exercised by unit tests only",
         "independent arbitrary-species/history framebuffer comparison"
       ]
@@ -3387,8 +3387,8 @@
       ],
       "remaining": [
         "the switch-interception body (request.turn & 1) declines to the scene-off view: its allocator (IMPACT slot 5 / matrix 2 / tile 405 / palette slot 6), healthbox block and slot set follow the party-menu unit and are not yet provided by the production hosts",
-        "first body only; later bodies decline (no later-body dense fixture)",
-        "shiny battlers and battlers with a non-zero front idle rest decline",
+        "first body only; later bodies decline (4 of 12 lb26 later-body fixtures are one frame short from age 84: lag-schedule class)",
+        "shiny battlers and a target with a non-zero front idle rest decline (the attacker-side decline is lifted: RATTATA / ONIX opponent and player attackers 0 px twice fresh)",
         "independent arbitrary-species/history framebuffer comparison"
       ]
     },
@@ -3404,7 +3404,7 @@
       ],
       "remaining": [
         "counters 2..5 decline to the scene-off view: they are never first bodies (later-body lend), carry no counter in the MOVE_ANIMATION request (the Rollout-style 7th argument is not plumbed) and need the gComplexPaletteBlend palette provider (BG + battler banks 1, 2, 3, 8, 16, 17)",
-        "shiny battlers and battlers with a non-zero front idle rest decline",
+        "shiny battlers and a target with a non-zero front idle rest decline (the attacker-side decline is lifted: RATTATA / ONIX attackers 0 px twice fresh)",
         "independent arbitrary-species/history framebuffer comparison"
       ]
     },
@@ -3490,6 +3490,23 @@
         "shiny battlers decline",
         "independent arbitrary-species/history framebuffer comparison"
       ]
+    },
+    {
+      "move": "MOVE_RETURN",
+      "id": 216,
+      "sourceFieldEvidence": "../tools/integration/fixtures/return-live-adapter-receipt.json",
+      "liveEvidence": [
+        "Strongest branch only (friendship 255, the only Return the Factory reaches: every Factory mon has friendship 255, so no request plumbing): hardware OAM + matrices from the production assembler (src/engine/liveMoveOamAssembler.ts liveReturnHardwareOamRows: attacker vertical dips, monbg target absence, 13 hit splats, 7 blended trace clones, invisible dip / palette-blend helpers keyed into the carried 64-slot order); registers / palette / target shake from liveReturnInputs (src/engine/liveOamMoves.ts); event schedule = src/animation/return.ts PROGRAMS.strongest; never a capture row",
+        "dense 282-row windows zero residual twice fresh through the production live renderer, both orientations: accepted DRAGONAIR/ONIX, SNORLAX->GOLEM, SNORLAX->PIDGEOT (elevated target), SCYTHER->GOLBAT (elevated target, smaller attacker); each window from its own activation frame",
+        "the RETURN renderer branch now draws the age-0 enemy shadow for an elevated opponent TARGET (staged accepted windows 282/282 x2 unchanged; live rows use the shared #142 hook, row 0)",
+        "ordinary routes 24/14 PIDGEOT and 51/28 EXEGGUTOR (first body): adapter active every age, next prompt reached, ON/OFF rules/RNG/boundary equal"
+      ],
+      "remaining": [
+        "first body only (known-entry allocator slots / matrices, S0 registers): later bodies decline to the scene-off fallback",
+        "shiny battlers decline; the weak / medium / strong branches (friendship < 201) are Factory-unreachable and not provided",
+        "the monbg BGnCNT write row (4 | 5) is a VBlank phase the renderer never reads (target drawn on the BG from age 5)",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3513,7 +3530,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 234,
+  "implementedCount": 235,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 11,
