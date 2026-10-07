@@ -7,11 +7,11 @@
 | MEGAHORN | target swap | opponent attacker | flygon ok, golbat ok, pichu ok, rattata ok, shinysteelix(shinyT) X(323517,0..176), steelix ok, tyranitar ok, wailord ok, weezing ok |
 | MEGAHORN | target swap | player attacker | flygon TP(16r,17511), golbat ok, pichu ok, rattata ok, shinysteelix(shinyT) X(348317,0..176), steelix ok, tyranitar ok, wailord ok, weezing ok |
 | METEOR_MASH | attacker swap | opponent attacker | shinysteelix X(3867267,0..214), steelix ok |
-| METEOR_MASH | attacker swap | player attacker | flygon ok, golbat ok, onix ok, pichu ok, rattata ok, shedinja TP(16r,17523), shinysteelix X(3972680,0..213), steelix TP(16r,17025), tyranitar TP(16r,16867), wailord ok, weezing ok |
+| METEOR_MASH | attacker swap | player attacker | flygon ok, golbat ok, metagrossG ok, onix ok, pichu ok, rattata ok, shedinja TP(16r,17523), shinysteelix X(3972680,0..213), steelix TP(16r,17025), tyranitar TP(16r,16867), wailord ok, weezing ok |
 | METEOR_MASH | target swap | opponent attacker | flygon X(289856,49..211), golbat TP(16r,17675) |
 | METEOR_MASH | target swap | player attacker | flygon TP(16r,17639), golbat ok, pichu ok, rattata ok, shinysteelix(shinyT) X(410940,0..214), steelix ok, tyranitar TP(16r,17032), wailord ok, weezing ok |
 | REVENGE | attacker swap | opponent attacker | flygon ok, golbat ok, onix X(246670,0..144), pichu ok, rattata X(105150,0..144), shedinja ok, shinysteelix X(348137,0..144), steelix ok, tyranitar ok, wailord ok, weezing ok |
 | REVENGE | attacker swap | player attacker | flygon ok, golbat ok, hitmonlee ok, hitmontop ok, onix ok, pichu ok, rattata ok, shedinja ok, shinysteelix X(329189,0..144), steelix ok, tyranitar ok, wailord ok, weezing ok |
 | REVENGE | target swap | opponent attacker | flygon ok, golbat ok, onix ok, pichu ok, rattata ok, shinysteelix(shinyT) X(262815,0..144), steelix ok, tyranitar ok, wailord ok, weezing ok |
 | REVENGE | target swap | player attacker | flygon ok, golbat ok, onix X(274449,0..127), pichu ok, rattata X(190485,0..127), shinysteelix(shinyT) X(280230,0..144), steelix ok, tyranitar ok, wailord ok, weezing ok |
-rows: 153 non-identical receipts: 0
+rows: 154 non-identical receipts: 0

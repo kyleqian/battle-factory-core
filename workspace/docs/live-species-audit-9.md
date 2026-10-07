@@ -4,7 +4,7 @@ This uses the method of `docs/live-species-audit-6.md`, `-7.md` and `-8.md`: swa
 The D4 recipe is `tools/integration/d4aFixtures.py`. Each swapped scenario's window, measured CPU phase, HP, gender, personality, preceding bodies and the Meteor Mash D3 rng2 come from that scenario's **own** two fresh `prep22Probe.py` runs, which must agree. The check is `d4aTimingCheck.ts`: the policy phase must be 0 px, and the other phase may differ only on the documented `alternatePhaseResidual.ages`.
 All runs used direct mGBA only. No shared oracle was touched. Source patches were applied by `issue151Patch.sh` and always reverted, and `git status src` was clean at every commit.
 Evidence is in `tools/integration/fixtures/species-audit-9/`: `receipts/` (153 compact `d4aTimingCheck` receipts), `coverage-grid.txt`, `residuals.tsv`, `derive.txt`, `derived/`, `scenarios/`, `list-*.tsv`, `patch-receipts/{mach-punch-idle-rest,gate-lift}/`, `mach-punch-idle-rest-env.diff` and `gate-lift.diff`.
-**153 rows were run. Every receipt is `identical true` over 2 fresh mGBA runs (0 non-identical).** Results: 98 rows are 0 px, of which 8 were measured in the other phase but are still 0 px. 30 rows are TIMING-PHASE with residuals on the documented rows only. 25 rows have other residuals, classified below.
+**154 rows were run (153 plus the METAGROSS restage). Every receipt is `identical true` over 2 fresh mGBA runs (0 non-identical).** Results: 99 rows are 0 px, of which 8 were measured in the other phase but are still 0 px. 30 rows are TIMING-PHASE with residuals on the documented rows only. 25 rows have other residuals, classified below.
 
 ## 1. Results first
 
@@ -49,13 +49,14 @@ Cell legend: `ok` = 0 px; `TP(16r,max)` = other phase, documented rows only; `X(
 | Megahorn 224 (40 rows) | FLYGON (opponent attacker; player: TP), GOLBAT, WEEZING, STEELIX, TYRANITAR, WAILORD, PICHU, RATTATA | NIDOKING, RHYDON (legal), ONIX, RATTATA, STEELIX, WAILORD, PICHU (player), SHEDINJA / TYRANITAR / WEEZING (opponent); FLYGON / GOLBAT TP |
 | Revenge 279 (44) | FLYGON, GOLBAT, WEEZING, STEELIX, TYRANITAR, WAILORD, PICHU, ONIX / RATTATA (opponent attacker; player: decline) | HITMONLEE, HITMONTOP (legal, player), FLYGON, GOLBAT, WEEZING, SHEDINJA, STEELIX, TYRANITAR, WAILORD, PICHU, ONIX / RATTATA (player; opponent: decline) |
 | Mach Punch 183 (45) | FLYGON (both), TYRANITAR (opponent attacker), GOLBAT / WAILORD / WEEZING (player attacker); the rest TP; ONIX / RATTATA player-attacker defect | BRELOOM (opponent), HITMONLEE (player), FLYGON, GOLBAT, PICHU, STEELIX, WAILORD, WEEZING (opponent), ONIX, RATTATA, TYRANITAR (player); ONIX / RATTATA opponent defect |
-| Meteor Mash 309 (24) | player attacker: GOLBAT, PICHU, RATTATA, STEELIX, WAILORD, WEEZING (FLYGON / TYRANITAR TP); opponent attacker: GOLBAT TP, FLYGON unresolved | player attacker: FLYGON, GOLBAT, ONIX, PICHU, RATTATA, WAILORD, WEEZING (SHEDINJA / STEELIX / TYRANITAR TP); opponent attacker: STEELIX |
+| Meteor Mash 309 (25) | player attacker: GOLBAT, PICHU, RATTATA, STEELIX, WAILORD, WEEZING (FLYGON / TYRANITAR TP); opponent attacker: GOLBAT TP, FLYGON unresolved | player attacker: **METAGROSS** (legal; genderless restage `list-meteor-mash-metagross.tsv`), FLYGON, GOLBAT, ONIX, PICHU, RATTATA, WAILORD, WEEZING (SHEDINJA / STEELIX / TYRANITAR TP); opponent attacker: STEELIX |
 
 **Not reached** (dropped by the derive step, `derive.txt`):
 - Meteor Mash, opponent-attacker orientation: 14 swaps show BODY-MISSING. The swapped run ends after the opponent's Tackle and no Meteor Mash body is recorded.
 - Mach Punch: TYRANITAR opponent attacker (no bodies).
 - Megahorn: WEEZING / TYRANITAR / SHEDINJA player attackers, PICHU opponent attacker (BODY-MISSING).
-- METAGROSS (Meteor Mash, both) and HITMONLEE / HITMONTOP (Revenge, opponent side): the probe failed. These are likely gender validation problems (METAGROSS is genderless and needs `--genderless`).
+- METAGROSS: the first stage failed the probe (gender). The `--genderless` restage ran the player side at 0 px; the opponent side shows BODY-MISSING, like the other opponent-side Meteor Mash swaps.
+- HITMONLEE / HITMONTOP (Revenge, opponent side): the probe failed, probably gender validation (both species are male-only).
 - SHEDINJA targets for all four moves (immune).
 - A target-personality shiny probe (harness limit).
 
