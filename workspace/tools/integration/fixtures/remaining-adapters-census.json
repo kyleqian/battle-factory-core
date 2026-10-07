@@ -10,7 +10,7 @@
   "src/data/gen/battle-frontier-mons.json",
   "src/data/gen/factory-round-policy.json"
  ],
- "liveStatusImplementedCount": 235,
+ "liveStatusImplementedCount": 239,
  "staleCodesCorrected": [
   "B (sSpriteOrder): was 'first body only'; production now lends the order and tracks it across bodies (liveSpriteOrderHost.ts / spriteOrderProvider.ts, merged cross-body tracker + post-KO rung 1), so B no longer blocks anything; recipe work only (falls back after an unmodelled graphics command)",
   "F-AFFINE / E-TASK: were provider blockers; docs/allocator-plan-v2-evidence.md measured gOamMatrixAllocBitmap 0x6 + no tasks at all 481 known-entry bodies, so the accepted constants gated on the lent order suffice for first bodies (invalidated after a faint/switch)",
@@ -23,7 +23,7 @@
  "inFlightMoves": {},
  "summary": {
   "accepted": 276,
-  "live": 235,
+  "live": 239,
   "faithfulRandom": 11,
   "faithfulRandomMoves": [
    "MOVE_ASTONISH",
@@ -39,16 +39,16 @@
    "MOVE_WISH"
   ],
   "inFlight": 0,
-  "remaining": 30,
+  "remaining": 26,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
   },
   "weightPct": {
-   "live": 92.446,
+   "live": 92.597,
    "faithfulRandom": 3.761,
    "inFlight": 0,
-   "remaining": 3.306
+   "remaining": 3.155
   },
   "remainingByGroup": {
    "PROVIDER-x": {
@@ -56,8 +56,8 @@
     "weightPct": 0.962
    },
    "MULTI": {
-    "moves": 24,
-    "weightPct": 2.011
+    "moves": 20,
+    "weightPct": 1.86
    },
    "SMALL-INPUT": {
     "moves": 1,
@@ -70,14 +70,14 @@
   },
   "remainingByHostClass": {
    "H_BASIC": 2,
-   "H_BUFFER": 24,
+   "H_BUFFER": 20,
    "H_DERIVED": 3,
    "H_RANDOM": 1,
-   "H_VARIANT": 4
+   "H_VARIANT": 3
   },
-  "orderFirstBodyOnlyMoves": 21,
-  "slotPlanNeededMoves": 23,
-  "sumsTo": "235+11+0+30=276",
+  "orderFirstBodyOnlyMoves": 17,
+  "slotPlanNeededMoves": 19,
+  "sumsTo": "239+11+0+26=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -177,8 +177,8 @@
    "aloneNames": [
     "METEOR_MASH"
    ],
-   "touchingMoves": 25,
-   "touchingWeightPct": 2.231,
+   "touchingMoves": 21,
+   "touchingWeightPct": 2.08,
    "meta": {
     "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
     "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
@@ -231,8 +231,8 @@
    "aloneNames": [
     "MEMENTO"
    ],
-   "touchingMoves": 24,
-   "touchingWeightPct": 1.862,
+   "touchingMoves": 20,
+   "touchingWeightPct": 1.71,
    "meta": {
     "cost": "new large host (docs/animation-integration-readiness.md A6)",
     "claim": "only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today"
@@ -247,8 +247,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 20,
-   "touchingWeightPct": 1.638,
+   "touchingMoves": 16,
+   "touchingWeightPct": 1.487,
    "meta": {
     "cost": "extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves)",
     "claim": "exact for audited plan rows from a known entry; actual status animations/switches invalidate"
@@ -263,8 +263,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 22,
-   "touchingWeightPct": 1.824,
+   "touchingMoves": 18,
+   "touchingWeightPct": 1.673,
    "meta": null
   },
   {
@@ -276,8 +276,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 21,
-   "touchingWeightPct": 1.753,
+   "touchingMoves": 18,
+   "touchingWeightPct": 1.639,
    "meta": null
   },
   {
@@ -302,8 +302,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 5,
-   "touchingWeightPct": 0.546,
+   "touchingMoves": 4,
+   "touchingWeightPct": 0.508,
    "meta": null
   },
   {
@@ -438,15 +438,14 @@
   {
    "step": 5,
    "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
-   "newMoves": 22,
-   "newWeightPct": 1.714,
-   "cumulativeRemainingUnlocked": 26,
+   "newMoves": 18,
+   "newWeightPct": 1.563,
+   "cumulativeRemainingUnlocked": 22,
    "newNames": [
     "BONEMERANG",
     "ERUPTION",
     "EXTRASENSORY",
     "FLATTER",
-    "HYPER_VOICE",
     "LUSTER_PURGE",
     "MACH_PUNCH",
     "MEGAHORN",
@@ -456,12 +455,9 @@
     "PSYWAVE",
     "RAPID_SPIN",
     "REVENGE",
-    "SAND_TOMB",
     "SHEER_COLD",
     "SHOCK_WAVE",
     "SKILL_SWAP",
-    "SKY_ATTACK",
-    "SMOG",
     "SNORE",
     "SUPERPOWER"
    ]
@@ -471,7 +467,7 @@
    "provider": "X-DISABLE",
    "newMoves": 2,
    "newWeightPct": 0.147,
-   "cumulativeRemainingUnlocked": 28,
+   "cumulativeRemainingUnlocked": 24,
    "newNames": [
     "ICE_BALL",
     "SPIT_UP"
@@ -482,7 +478,7 @@
    "provider": "X-TWOTURN",
    "newMoves": 1,
    "newWeightPct": 0.187,
-   "cumulativeRemainingUnlocked": 29,
+   "cumulativeRemainingUnlocked": 25,
    "newNames": [
     "DIVE"
    ]
@@ -492,7 +488,7 @@
    "provider": "X-AGE",
    "newMoves": 1,
    "newWeightPct": 0.112,
-   "cumulativeRemainingUnlocked": 30,
+   "cumulativeRemainingUnlocked": 26,
    "newNames": [
     "EXTREME_SPEED"
    ]
@@ -502,7 +498,7 @@
    "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 30,
+   "cumulativeRemainingUnlocked": 26,
    "newNames": []
   },
   {
@@ -510,7 +506,7 @@
    "provider": "D-TILE",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 30,
+   "cumulativeRemainingUnlocked": 26,
    "newNames": []
   },
   {
@@ -518,7 +514,7 @@
    "provider": "D-BG",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 30,
+   "cumulativeRemainingUnlocked": 26,
    "newNames": []
   },
   {
@@ -526,7 +522,7 @@
    "provider": "D-OAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 30,
+   "cumulativeRemainingUnlocked": 26,
    "newNames": []
   },
   {
@@ -534,7 +530,7 @@
    "provider": "D-VRAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 30,
+   "cumulativeRemainingUnlocked": 26,
    "newNames": []
   },
   {
@@ -542,7 +538,7 @@
    "provider": "D-SCAN",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 30,
+   "cumulativeRemainingUnlocked": 26,
    "newNames": []
   }
  ],
@@ -2524,347 +2520,6 @@
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
-   },
-   "group": "MULTI"
-  },
-  {
-   "move": "MOVE_HYPER_VOICE",
-   "id": 304,
-   "name": "HYPER VOICE",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0003720238095238094,
-   "config": "src/animation/sceneOnPresentation.ts:2324",
-   "needs": [
-    "B",
-    "C",
-    "F-AFFINE",
-    "E-TASK",
-    "D-PAL",
-    "D-TILE",
-    "D-BG"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationInputs:spriteOrder (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/hyperVoice.ts:62"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationInputs:animationRngSeed (presentation Random2 (gRng2Value))",
-     "cites": [
-      "src/animation/hyperVoice.ts:78"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationInputs:attackerSprite (battler sprite record {slot,x,y,x2,y2,subpriority,oamPriority,matrixNum,matrix}: battler owner slot + battler matrix)",
-     "cites": [
-      "src/animation/hyperVoice.ts:46"
-     ]
-    },
-    {
-     "code": "E-TASK",
-     "text": "animationInputs:taskSlots (CreateTask slot / live task table)",
-     "cites": [
-      "src/animation/hyperVoice.ts:48"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "animationInputs:paletteBlendSubpriority (palette host / resource plan)",
-     "cites": [
-      "src/animation/hyperVoice.ts:58"
-     ]
-    },
-    {
-     "code": "D-TILE",
-     "text": "animationInputs:resource (OBJ tile/palette resource allocator)",
-     "cites": [
-      "src/animation/hyperVoice.ts:60"
-     ]
-    },
-    {
-     "code": "D-BG",
-     "text": "animationInputs:palettes.backgroundBanks (BG regs / monbg / BLDCNT state)",
-     "cites": [
-      "src/animation/hyperVoice.ts:69"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationInputs:attackerCrySpecies",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/hyperVoice.ts:42"
-    },
-    {
-     "path": "animationInputs:attackerPictureOrigin",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/hyperVoice.ts:44"
-    },
-    {
-     "path": "animationInputs:targetPictureOrigin",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/hyperVoice.ts:45"
-    },
-    {
-     "path": "animationInputs:attackerSprite",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/hyperVoice.ts:46"
-    },
-    {
-     "path": "animationInputs:targetSprite",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/hyperVoice.ts:47"
-    },
-    {
-     "path": "animationInputs:taskSlots",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/hyperVoice.ts:48"
-    },
-    {
-     "path": "animationInputs:taskSlots.cry",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/hyperVoice.ts:49"
-    },
-    {
-     "path": "animationInputs:taskSlots.scale",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/hyperVoice.ts:50"
-    },
-    {
-     "path": "animationInputs:taskSlots.targetShake",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/hyperVoice.ts:51"
-    },
-    {
-     "path": "animationInputs:taskSlots.platform",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/hyperVoice.ts:52"
-    },
-    {
-     "path": "animationInputs:taskSlots.waitForCry",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/hyperVoice.ts:53"
-    },
-    {
-     "path": "animationInputs:taskSlots.duckBgm",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/hyperVoice.ts:54"
-    },
-    {
-     "path": "animationInputs:spriteSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/hyperVoice.ts:56"
-    },
-    {
-     "path": "animationInputs:paletteBlendSubpriority",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/hyperVoice.ts:58"
-    },
-    {
-     "path": "animationInputs:matrixSlots",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/hyperVoice.ts:59"
-    },
-    {
-     "path": "animationInputs:resource",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/hyperVoice.ts:60"
-    },
-    {
-     "path": "animationInputs:spriteOrder",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/hyperVoice.ts:62"
-    },
-    {
-     "path": "animationInputs:painter",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/hyperVoice.ts:64"
-    },
-    {
-     "path": "animationInputs:palettes",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/hyperVoice.ts:65"
-    },
-    {
-     "path": "animationInputs:palettes.unfaded",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/hyperVoice.ts:66"
-    },
-    {
-     "path": "animationInputs:palettes.faded",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/hyperVoice.ts:67"
-    },
-    {
-     "path": "animationInputs:palettes.hardware",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/hyperVoice.ts:68"
-    },
-    {
-     "path": "animationInputs:palettes.backgroundBanks",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/hyperVoice.ts:69"
-    },
-    {
-     "path": "animationInputs:palettes.attackerBank",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/hyperVoice.ts:70"
-    },
-    {
-     "path": "animationInputs:palettes.targetBank",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/hyperVoice.ts:71"
-    },
-    {
-     "path": "animationInputs:palettes.thinRingBank",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/hyperVoice.ts:72"
-    },
-    {
-     "path": "animationInputs:palettes.thinRingPalette",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/hyperVoice.ts:74"
-    },
-    {
-     "path": "animationInputs:matrixBitmap",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/hyperVoice.ts:76"
-    },
-    {
-     "path": "animationInputs:animationRngSeed",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/hyperVoice.ts:78"
-    },
-    {
-     "path": "animationInputs:gameplayRng",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/hyperVoice.ts:79"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "full",
-   "carrierOccurrences": 662,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "B",
-    "F-AFFINE",
-    "E-TASK"
-   ],
-   "providerNeeds": [
-    "C",
-    "D-PAL",
-    "D-TILE",
-    "D-BG"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
    },
    "group": "MULTI"
   },
@@ -5390,208 +5045,6 @@
    "group": "MULTI"
   },
   {
-   "move": "MOVE_SAND_TOMB",
-   "id": 328,
-   "name": "SAND TOMB",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0003720238095238094,
-   "config": "src/animation/sceneOnPresentation.ts:3928",
-   "needs": [
-    "B",
-    "C",
-    "E-TASK",
-    "D-PAL",
-    "D-TILE"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationProfile:spriteOrder (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/sandTomb.ts:51"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationProfile:startingAnimationRng (presentation Random2 (gRng2Value))",
-     "cites": [
-      "src/animation/sandTomb.ts:61"
-     ]
-    },
-    {
-     "code": "E-TASK",
-     "text": "animationProfile:shakeTaskSlot (CreateTask slot / live task table)",
-     "cites": [
-      "src/animation/sandTomb.ts:59"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "animationProfile:mudSand.paletteNum (palette host / resource plan)",
-     "cites": [
-      "src/animation/sandTomb.ts:56"
-     ]
-    },
-    {
-     "code": "D-TILE",
-     "text": "animationProfile:mudSand (OBJ tile/palette resource allocator)",
-     "cites": [
-      "src/animation/sandTomb.ts:53"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationProfile:orientation",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/sandTomb.ts:45"
-    },
-    {
-     "path": "animationProfile:endAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/sandTomb.ts:46"
-    },
-    {
-     "path": "animationProfile:attackerSpriteSlot",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/sandTomb.ts:48"
-    },
-    {
-     "path": "animationProfile:attackerSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/sandTomb.ts:49"
-    },
-    {
-     "path": "animationProfile:target",
-     "classes": [
-      "A",
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/sandTomb.ts:50"
-    },
-    {
-     "path": "animationProfile:spriteOrder",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/sandTomb.ts:51"
-    },
-    {
-     "path": "animationProfile:mudSand",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/sandTomb.ts:53"
-    },
-    {
-     "path": "animationProfile:mudSand.tag",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/sandTomb.ts:54"
-    },
-    {
-     "path": "animationProfile:mudSand.tileNum",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/sandTomb.ts:55"
-    },
-    {
-     "path": "animationProfile:mudSand.paletteNum",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/sandTomb.ts:56"
-    },
-    {
-     "path": "animationProfile:shakeTaskSlot",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/sandTomb.ts:59"
-    },
-    {
-     "path": "animationProfile:shakeTaskPriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/sandTomb.ts:60"
-    },
-    {
-     "path": "animationProfile:startingAnimationRng",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/sandTomb.ts:61"
-    },
-    {
-     "path": "animationProfile:gameplayRng",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/sandTomb.ts:62"
-    },
-    {
-     "path": "animationProfile:immutableGameplayState",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/sandTomb.ts:64"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "full",
-   "carrierOccurrences": 760,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "B",
-    "E-TASK"
-   ],
-   "providerNeeds": [
-    "C",
-    "D-PAL",
-    "D-TILE"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "MULTI"
-  },
-  {
    "move": "MOVE_SHEER_COLD",
    "id": 329,
    "name": "SHEER COLD",
@@ -6970,631 +6423,6 @@
     "D-VRAM",
     "E-OUT",
     "F-AUDIO"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "MULTI"
-  },
-  {
-   "move": "MOVE_SKY_ATTACK",
-   "id": 143,
-   "name": "SKY ATTACK",
-   "hostClass": [
-    "H_BUFFER",
-    "H_VARIANT"
-   ],
-   "weightShare": 0.0003720238095238094,
-   "config": "src/animation/sceneOnPresentation.ts:2406",
-   "needs": [
-    "B",
-    "C",
-    "F-AFFINE",
-    "E-TASK",
-    "D-PAL",
-    "D-TILE",
-    "D-BG",
-    "D-VRAM"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationInputs:allocator.activeOrderKeys (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/skyAttack.ts:52"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationInputs:animationRngSeed (presentation Random2 (gRng2Value))",
-     "cites": [
-      "src/animation/skyAttack.ts:60"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationInputs:attackerSprite (battler sprite record {slot,x,y,x2,y2,subpriority,oamPriority,matrixNum,matrix}: battler owner slot + battler matrix)",
-     "cites": [
-      "src/animation/skyAttack.ts:40"
-     ]
-    },
-    {
-     "code": "E-TASK",
-     "text": "animationInputs:taskSlots (CreateTask slot / live task table)",
-     "cites": [
-      "src/animation/skyAttack.ts:42"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "animationInputs:palettes (palette host / resource plan)",
-     "cites": [
-      "src/animation/skyAttack.ts:54"
-     ]
-    },
-    {
-     "code": "D-TILE",
-     "text": "animationInputs:resources (OBJ tile/palette resource allocator)",
-     "cites": [
-      "src/animation/skyAttack.ts:49"
-     ]
-    },
-    {
-     "code": "D-BG",
-     "text": "animationInputs:background (BG regs / monbg / BLDCNT state)",
-     "cites": [
-      "src/animation/skyAttack.ts:55"
-     ]
-    },
-    {
-     "code": "D-VRAM",
-     "text": "animationInputs:background.vram (BG VRAM snapshot)",
-     "cites": [
-      "src/animation/skyAttack.ts:58"
-     ]
-    }
-   ],
-   "notes": [
-    "visible charge turn selected by request.turn like live Solar Beam"
-   ],
-   "staleCorrections": [
-    "visible charge turn selected by request.turn like live Solar Beam"
-   ],
-   "consumedInputs": [
-    {
-     "path": "body",
-     "classes": [
-      "E-OUT"
-     ],
-     "status": "blocked: E-OUT",
-     "cite": null
-    },
-    {
-     "path": "animationInputs:attackerPictureOrigin",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/skyAttack.ts:38"
-    },
-    {
-     "path": "animationInputs:targetPictureOrigin",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/skyAttack.ts:39"
-    },
-    {
-     "path": "animationInputs:attackerSprite",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/skyAttack.ts:40"
-    },
-    {
-     "path": "animationInputs:targetSprite",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/skyAttack.ts:41"
-    },
-    {
-     "path": "animationInputs:taskSlots",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/skyAttack.ts:42"
-    },
-    {
-     "path": "animationInputs:taskSlots.monbg",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/skyAttack.ts:43"
-    },
-    {
-     "path": "animationInputs:taskSlots.sound",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/skyAttack.ts:44"
-    },
-    {
-     "path": "animationInputs:taskSlots.birdShake",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/skyAttack.ts:45"
-    },
-    {
-     "path": "animationInputs:taskSlots.fadeBg",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/skyAttack.ts:46"
-    },
-    {
-     "path": "animationInputs:bird",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/skyAttack.ts:48"
-    },
-    {
-     "path": "animationInputs:resources",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/skyAttack.ts:49"
-    },
-    {
-     "path": "animationInputs:allocator",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/skyAttack.ts:50"
-    },
-    {
-     "path": "animationInputs:allocator.matrixBitmap",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/skyAttack.ts:51"
-    },
-    {
-     "path": "animationInputs:allocator.activeOrderKeys",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/skyAttack.ts:52"
-    },
-    {
-     "path": "animationInputs:palettes",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/skyAttack.ts:54"
-    },
-    {
-     "path": "animationInputs:background",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/skyAttack.ts:55"
-    },
-    {
-     "path": "animationInputs:background.values",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/skyAttack.ts:56"
-    },
-    {
-     "path": "animationInputs:background.monbg",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/skyAttack.ts:57"
-    },
-    {
-     "path": "animationInputs:background.vram",
-     "classes": [
-      "D-VRAM"
-     ],
-     "status": "blocked: D-VRAM",
-     "cite": "src/animation/skyAttack.ts:58"
-    },
-    {
-     "path": "animationInputs:animationRngSeed",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/skyAttack.ts:60"
-    },
-    {
-     "path": "animationInputs:gameplayRng",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/skyAttack.ts:61"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "full",
-   "carrierOccurrences": 463,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "B",
-    "F-AFFINE",
-    "E-TASK"
-   ],
-   "providerNeeds": [
-    "C",
-    "D-PAL",
-    "D-TILE",
-    "D-BG",
-    "D-VRAM"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "MULTI"
-  },
-  {
-   "move": "MOVE_SMOG",
-   "id": 123,
-   "name": "SMOG",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0003968253968253967,
-   "config": "src/animation/sceneOnPresentation.ts:2647",
-   "needs": [
-    "B",
-    "C",
-    "F-AFFINE",
-    "E-TASK",
-    "D-PAL",
-    "D-TILE",
-    "D-BG"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationInputs:spriteOrder (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/smog.ts:75"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationInputs:animationRngSeed (presentation Random2 (gRng2Value))",
-     "cites": [
-      "src/animation/smog.ts:94"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationInputs:attackerSprite (battler sprite record {slot,x,y,x2,y2,subpriority,oamPriority,matrixNum,matrix}: battler owner slot + battler matrix)",
-     "cites": [
-      "src/animation/smog.ts:60"
-     ]
-    },
-    {
-     "code": "E-TASK",
-     "text": "animationInputs:taskSlots (CreateTask slot / live task table)",
-     "cites": [
-      "src/animation/smog.ts:64"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "animationInputs:targetPaletteBank (palette host / resource plan)",
-     "cites": [
-      "src/animation/smog.ts:92"
-     ]
-    },
-    {
-     "code": "D-TILE",
-     "text": "animationInputs:resources (OBJ tile/palette resource allocator)",
-     "cites": [
-      "src/animation/smog.ts:72"
-     ]
-    },
-    {
-     "code": "D-BG",
-     "text": "animationInputs:targetBgPriority (BG regs / monbg / BLDCNT state)",
-     "cites": [
-      "src/animation/smog.ts:59"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationInputs:targetPictureOrigin",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/smog.ts:57"
-    },
-    {
-     "path": "animationInputs:targetBgPriority",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/smog.ts:59"
-    },
-    {
-     "path": "animationInputs:attackerSprite",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/smog.ts:60"
-    },
-    {
-     "path": "animationInputs:targetSprite",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/smog.ts:61"
-    },
-    {
-     "path": "animationInputs:cloudSpriteSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/smog.ts:63"
-    },
-    {
-     "path": "animationInputs:taskSlots",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/smog.ts:64"
-    },
-    {
-     "path": "animationInputs:taskSlots.updateMonBg",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/smog.ts:65"
-    },
-    {
-     "path": "animationInputs:taskSlots.mistSound",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/smog.ts:66"
-    },
-    {
-     "path": "animationInputs:taskSlots.blendColorCycle",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/smog.ts:67"
-    },
-    {
-     "path": "animationInputs:taskSlots.shakeMon2",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/smog.ts:68"
-    },
-    {
-     "path": "animationInputs:taskSlots.toxicSound",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/smog.ts:69"
-    },
-    {
-     "path": "animationInputs:taskSlots.clearMonBg",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/smog.ts:70"
-    },
-    {
-     "path": "animationInputs:resources",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/smog.ts:72"
-    },
-    {
-     "path": "animationInputs:matrixBitmap",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/smog.ts:73"
-    },
-    {
-     "path": "animationInputs:spriteOrder",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/smog.ts:75"
-    },
-    {
-     "path": "animationInputs:painterSprites",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/smog.ts:76"
-    },
-    {
-     "path": "animationInputs:monbg",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/smog.ts:77"
-    },
-    {
-     "path": "animationInputs:monbg.layer",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/smog.ts:78"
-    },
-    {
-     "path": "animationInputs:monbg.scroll",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/smog.ts:80"
-    },
-    {
-     "path": "animationInputs:background",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/smog.ts:83"
-    },
-    {
-     "path": "animationInputs:background.baseBg1Cnt",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/smog.ts:84"
-    },
-    {
-     "path": "animationInputs:background.baseBg2Cnt",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/smog.ts:85"
-    },
-    {
-     "path": "animationInputs:background.monbgBg1Cnt",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/smog.ts:86"
-    },
-    {
-     "path": "animationInputs:background.monbgBg2Cnt",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/smog.ts:87"
-    },
-    {
-     "path": "animationInputs:background.splitBg1Cnt",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/smog.ts:88"
-    },
-    {
-     "path": "animationInputs:background.splitBg2Cnt",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/smog.ts:89"
-    },
-    {
-     "path": "animationInputs:targetPaletteBank",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/smog.ts:92"
-    },
-    {
-     "path": "animationInputs:animationRngSeed",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/smog.ts:94"
-    },
-    {
-     "path": "animationInputs:gameplayRng",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/smog.ts:95"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "full",
-   "carrierOccurrences": 532,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "B",
-    "F-AFFINE",
-    "E-TASK"
-   ],
-   "providerNeeds": [
-    "C",
-    "D-PAL",
-    "D-TILE",
-    "D-BG"
    ],
    "palettePlan": false,
    "activationMeasured": false,
