@@ -66,6 +66,8 @@ export interface LiveWillOWispArgs {
   readonly spritesAt: (state: number, attackerCenter: Point, targetCenter: Point) => readonly WispProgram[];
   readonly orbPalette: readonly Rgb[];
   readonly firePalette: readonly Rgb[];
+  /** The host's order lend is not the first body's (later bodies: the attacker idle-rest lift is unproven). */
+  readonly laterBody?: boolean;
 }
 export interface LiveWillOWispInputs {
   readonly attackerCenter: Point;
@@ -78,7 +80,7 @@ export interface LiveWillOWispInputs {
 const wispCache = new Map<string, readonly string[][]>();
 
 /**
- * MOVE_WILL_O_WISP (261) live inputs (prep20 s1.1 + G1). Declines (null) when a battler has a non-zero idle rest
+ * MOVE_WILL_O_WISP (261) live inputs (prep20 s1.1 + G1). Declines (null) when the target has a non-zero idle rest (and, on later bodies, the attacker)
  * (Task_UpdateMonBg follows the target's x + x2 and AnimTask_ShakeMon2 restores x2 to 0, unproven for a non-zero rest).
  * Rows: hardware OAM from the assembler; palette = composite + ANIM_TAG_WISP_FIRE (slot 7, OBJ bank 23) loaded on row 2,
  * ANIM_TAG_WISP_ORB (slot 8, bank 24) on row 5, and the monbg copy of the target's OBJ palette into BG bank 8 (opponent
@@ -88,8 +90,9 @@ const wispCache = new Map<string, readonly string[][]>();
  */
 export function liveWillOWispInputs(args: LiveWillOWispArgs): LiveWillOWispInputs | null {
   const { attackerSide, attacker, target } = args;
-  if (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0
-    || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
+  if (target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
+  // The attacker-side idle rest is proven on first bodies only (RATTATA / ONIX opponent attackers, species audit 5); a later body declines.
+  if (args.laterBody && (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0)) return null;
   const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
   // AnimWillOWispOrb: InitSpritePosToAnimAttacker(sprite, FALSE) = the attacker's sBattlerCoords X / Y; AnimWillOWispFire
   // re-anchors on the target's X_2 / Y_PIC_OFFSET (corpora + alternates: orb (72, 80) / (176, 40), fire = target pic point).
@@ -198,8 +201,7 @@ const pursuitBldy = (age: number): { bldcnt: number; bldy: number } => {
  */
 export function livePursuitInputs(args: LivePursuitArgs): LivePursuitInputs | null {
   const { attackerSide, attacker, target } = args;
-  if (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0
-    || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
+  if (target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
   const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
   const attackerObject = battlerObject(attackerSide, attacker), targetObject = battlerObject(targetSide, target);
   const impactCenter = target.picOffsetPoint;
@@ -291,8 +293,7 @@ const furyCache = new Map<string, readonly string[][]>();
  */
 export function liveFuryCutterInputs(args: LiveFuryCutterArgs): { duration: number; animationInputsAt: (age: number) => Record<string, unknown> } | null {
   const { attackerSide, attacker, target } = args;
-  if (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0
-    || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
+  if (target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
   const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
   const attackerObject = battlerObject(attackerSide, attacker), targetObject = battlerObject(targetSide, target);
   const key = JSON.stringify([attackerSide, args.counter, attackerObject.attr, targetObject.attr, args.activationOrder]);

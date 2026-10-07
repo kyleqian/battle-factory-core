@@ -2661,6 +2661,7 @@ export function liveMoveAnimationPresentation(
       const inputs = liveWillOWispInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
         targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
         sort: sortGbaSpriteOrder, orbPalette: willOWispAsset.orb.palette, firePalette: willOWispAsset.fire.palette,
+        laterBody: !spriteOrderInput.firstBody,
         timeline: (a, t) => willOWispTimeline(attacker.geometry.side, a, t),
         spritesAt: (state, a, t) => willOWispSpritesAtAge(state, { attackerSide: attacker.geometry.side, attackerCenter: a, targetCenter: t }) });
       if (inputs === null) return null;
