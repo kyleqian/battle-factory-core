@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/d4a-live/extrasensory-player-nuzleaf-opponent-shuckle.json",
+  "move": "EXTRASENSORY",
+  "measuredPhase": "no-event",
+  "policyPhase": "no-event",
+  "measuredPhases": {
+   "optional-lag-age": "no-event",
+   "scanline-split-line": "no-event"
+  },
+  "policyPhases": {
+   "optional-lag-age": "no-event",
+   "scanline-split-line": "no-event"
+  },
+  "selectedPhase": true,
+  "window": 161,
+  "expectedDuration": 161,
+  "runs": [
+   {
+    "rows": 161,
+    "exactRows": 161,
+    "residualPixels": 0,
+    "digest": "9ed9c8cfdd1a564042fbc1bfc7ec50b0cb96048724b61186aed87ffa42ddc209",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 161,
+    "exactRows": 161,
+    "residualPixels": 0,
+    "digest": "9ed9c8cfdd1a564042fbc1bfc7ec50b0cb96048724b61186aed87ffa42ddc209",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

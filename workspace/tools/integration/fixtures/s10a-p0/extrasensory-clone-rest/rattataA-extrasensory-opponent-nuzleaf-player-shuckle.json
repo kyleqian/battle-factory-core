@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-10/derived/rattataA-extrasensory-opponent-nuzleaf-player-shuckle.json",
+  "move": "EXTRASENSORY",
+  "measuredPhase": "no-event",
+  "policyPhase": "no-event",
+  "measuredPhases": {
+   "optional-lag-age": "no-event",
+   "scanline-split-line": "no-event"
+  },
+  "policyPhases": {
+   "optional-lag-age": "no-event",
+   "scanline-split-line": "no-event"
+  },
+  "selectedPhase": true,
+  "window": 161,
+  "expectedDuration": 161,
+  "runs": [
+   {
+    "rows": 161,
+    "exactRows": 161,
+    "residualPixels": 0,
+    "digest": "d5bb43ee778840ccf6deea4d19ab30824c7aa3eca3e88cb7faa281dc74e5f7e7",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 161,
+    "exactRows": 161,
+    "residualPixels": 0,
+    "digest": "d5bb43ee778840ccf6deea4d19ab30824c7aa3eca3e88cb7faa281dc74e5f7e7",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

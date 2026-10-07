@@ -844,10 +844,12 @@ export function liveExtrasensoryInputs(args: LiveExtrasensoryInputArgs): { durat
   const rows = liveExtrasensoryRowCount(args.lateLag), cloneSlot = 3, cloneMatrix = 0;
   const elevation = targetSide === "opponent" ? (enemyElevations as Readonly<Record<string, number>>)[args.targetSpecies] ?? 0 : 0;
   const targetYElevation = targetSide === "opponent" ? 40 - elevation : 80;
-  const key = JSON.stringify([attackerSide, attacker.spriteCenter, args.attackerPictureHeight, attackerObject.attr, targetObject.attr, args.activationOrder, rows]);
+  // CloneBattlerSpriteWithBlend copies the whole attacker sprite struct, so the clone carries the attacker's idle x2 / y2 rest.
+  const attackerPosition = { x: attacker.spriteCenter.x + attacker.frontIdleRest.x2, y: attacker.spriteCenter.y + attacker.frontIdleRest.y2 };
+  const key = JSON.stringify([attackerSide, attackerPosition, args.attackerPictureHeight, attackerObject.attr, targetObject.attr, args.activationOrder, rows]);
   let built = extrasensoryCache.get(key);
   if (!built) {
-    built = liveExtrasensoryHardwareOamRows({ attacker: attackerObject, target: targetObject, attackerPosition: attacker.spriteCenter,
+    built = liveExtrasensoryHardwareOamRows({ attacker: attackerObject, target: targetObject, attackerPosition,
       attackerPictureHeight: args.attackerPictureHeight, scene: KNOWN_ENTRY_SCENE, cloneSlot, cloneMatrix,
       activationOrder: args.activationOrder, sort: args.sort, sine: GBA_SINE_TABLE_256, rows });
     if (extrasensoryCache.size > 16) extrasensoryCache.clear();

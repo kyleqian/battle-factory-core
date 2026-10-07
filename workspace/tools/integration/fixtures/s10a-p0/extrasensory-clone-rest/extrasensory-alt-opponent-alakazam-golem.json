@@ -1,0 +1,90 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/d4a-live/extrasensory-alt-opponent-alakazam-golem.json",
+  "move": "EXTRASENSORY",
+  "measuredPhase": "event",
+  "policyPhase": "no-event",
+  "measuredPhases": {
+   "optional-lag-age": "event",
+   "scanline-split-line": "no-event"
+  },
+  "policyPhases": {
+   "optional-lag-age": "no-event",
+   "scanline-split-line": "no-event"
+  },
+  "selectedPhase": false,
+  "window": 162,
+  "expectedDuration": 161,
+  "runs": [
+   {
+    "rows": 162,
+    "exactRows": 146,
+    "residualPixels": 293344,
+    "digest": "ffc8bdd6e756282ba8d57999f99e741fa9944b4f641f0b16abda4aa75ee8ec9d",
+    "affectedAges": [
+     143,
+     144,
+     145,
+     146,
+     147,
+     148,
+     149,
+     150,
+     151,
+     152,
+     153,
+     154,
+     155,
+     156,
+     157,
+     158
+    ],
+    "maxPixelsPerRow": 18334
+   },
+   {
+    "rows": 162,
+    "exactRows": 146,
+    "residualPixels": 293344,
+    "digest": "ffc8bdd6e756282ba8d57999f99e741fa9944b4f641f0b16abda4aa75ee8ec9d",
+    "affectedAges": [
+     143,
+     144,
+     145,
+     146,
+     147,
+     148,
+     149,
+     150,
+     151,
+     152,
+     153,
+     154,
+     155,
+     156,
+     157,
+     158
+    ],
+    "maxPixelsPerRow": 18334
+   }
+  ],
+  "documentedAges": [
+   143,
+   144,
+   145,
+   146,
+   147,
+   148,
+   149,
+   150,
+   151,
+   152,
+   153,
+   154,
+   155,
+   156,
+   157,
+   158
+  ],
+  "violations": []
+ }
+]

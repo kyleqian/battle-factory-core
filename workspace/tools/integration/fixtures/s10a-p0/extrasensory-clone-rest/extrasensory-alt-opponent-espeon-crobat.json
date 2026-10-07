@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/d4a-live/extrasensory-alt-opponent-espeon-crobat.json",
+  "move": "EXTRASENSORY",
+  "measuredPhase": "no-event",
+  "policyPhase": "no-event",
+  "measuredPhases": {
+   "optional-lag-age": "no-event",
+   "scanline-split-line": "no-event"
+  },
+  "policyPhases": {
+   "optional-lag-age": "no-event",
+   "scanline-split-line": "no-event"
+  },
+  "selectedPhase": true,
+  "window": 161,
+  "expectedDuration": 161,
+  "runs": [
+   {
+    "rows": 161,
+    "exactRows": 161,
+    "residualPixels": 0,
+    "digest": "0c86c1ac7b488824feb94058942771e01be93002c923ae5afaa7a24c980e6459",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 161,
+    "exactRows": 161,
+    "residualPixels": 0,
+    "digest": "0c86c1ac7b488824feb94058942771e01be93002c923ae5afaa7a24c980e6459",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]
