@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-06 (night) — in progress: 226 -> 235 scoped-exact, 10 -> 11 faithful-random
+## 2026-10-06 (night) — in progress: 226 -> 239 scoped-exact, 10 -> 11 faithful-random
 
 - prep22 (side, `c31dfd3c1`, new files only, merged `e7b7a1ac3`): Fire Punch is a 101-row body identical across
   burn / no-burn / faint outcomes (flames = separate Status_Burn body 152-155 frames later; status animations are
@@ -107,6 +107,19 @@
   (29/42 GYARADOS inactive, undiagnosed). Worker gates 1,542 files / 12,579 tests, build; shadow scan 515 / 0.
   Supervisor: dense rerun 5 fixtures + 3 gate-lift rows 0 px r1 == r2; differential 389/389; union typecheck,
   smoke, 9 files 190/190. Receipt `return-live-adapter-receipt.json`.
+- Species audit 6 (side, `fbc1036c1`, new files only): 140 swapped rows x 2 fresh over Fire Punch, Curse, Psych Up
+  opponent, Signal Beam, Lovely Kiss, Spikes, Octazooka (STEELIX / TYRANITAR / WAILORD / PICHU / FLYGON / GOLBAT /
+  SHEDINJA / RATTATA): 122 exact. Defects -> ISSUES #150: Signal Beam keeps the RATTATA idle x2 under its shake
+  tasks (41,134 / 54,510 px -> 0 with a patch); Fire Punch lacks the shiny decline; the verifier names battlers by
+  species constant (MR_MIME -> "MRMIME": the r2 537 px/row is this artifact, 0 px with a harness patch). Curse's
+  target-side idle decline is over-conservative. Supervisor reran 4 rows + both patch proofs.
+- Folded Sonnet worker `768569da9` (src last changed `8fa34f420`, tree `f16cabf6`): `src/engine/liveQ2Moves.ts`
+  builders — EXACT Hyper Voice (304), Smog (123; exact after a Tackle too), Sand Tomb (328) on a known lend and the
+  Sky Attack charge body (143; first body; the strike declines: no order plan after the charge) -> 239. Snore not
+  wired (all measured bodies follow Sleep Powder, which has no order plan). 29 dense fixtures x 2 fresh 0 px; routes
+  75/21, 141/21, 29/0, 70/0, 345/21, 543/21, 244/42, 376/42. Worker gates 1,543 files / 12,606 tests, build; shadow
+  scan 523 / 0. Supervisor: dense rerun 5 fixtures 0 px r1 == r2; differential 389/389; union typecheck, smoke,
+  8 files 196/196. Receipt `q2-live-adapter-receipt.json`.
 
 ## 2026-10-06 (day, wind-down) — D3 implemented: 218 -> 226 exact + 10 faithful-random live adapters
 
