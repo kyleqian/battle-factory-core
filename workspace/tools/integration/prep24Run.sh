@@ -13,6 +13,6 @@ npx vite-node tools/integration/prep24MegahornPixels.ts $M-alt-heracross-golem-r
 npx vite-node tools/integration/prep24ReturnCheck.ts $R-alt-snorlax-golem-r1.json:player $R-altopp-snorlax-golem-r1.json:opponent $Q-alt-snorlax-pidgeot-r1.json:player $Q-altopp-snorlax-pidgeot-r1.json:opponent --out=$REC/return-model-check.json > /dev/null
 npx vite-node tools/integration/prep24ReturnPixels.ts $R-alt-snorlax-golem-r1.json:$R-alt-snorlax-golem-r1-rgb:player $R-altopp-snorlax-golem-r1.json:$R-altopp-snorlax-golem-r1-rgb:opponent $Q-alt-snorlax-pidgeot-r1.json:$Q-alt-snorlax-pidgeot-r1-rgb:player $Q-altopp-snorlax-pidgeot-r1.json:$Q-altopp-snorlax-pidgeot-r1-rgb:opponent --out=$REC/return-pixels.json > /dev/null
 npx vite-node tools/integration/prep24ReturnRow0Control.ts $Q-alt-snorlax-pidgeot-r1 > $REC/return-row0-control.txt
-for n in registers palette; do npx vite-node tools/integration/prep24MegahornPixels.ts --neg=$n --out=$REC/megahorn-neg-$n.json > /dev/null; done
+for n in registers palette phase; do npx vite-node tools/integration/prep24MegahornPixels.ts --neg=$n --out=$REC/megahorn-neg-$n.json > /dev/null; done
 for n in registers palette oam; do npx vite-node tools/integration/prep24ReturnPixels.ts --neg=$n --out=$REC/return-neg-$n.json > /dev/null; done
 echo "receipts in $REC"

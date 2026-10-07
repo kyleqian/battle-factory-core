@@ -36,7 +36,7 @@ function knownOam(rows: Json[]): MegahornKnownEntry {   // identical to prep20Me
 }
 let neg: string | undefined;
 function run(name: string, window: MegaHornWindow, rows: Json[], pixels: (row: Json) => Uint8Array, species: readonly [string, string] | undefined, useCorpusOam: boolean) {
-  const side = window === "player-back" ? "player" : "opponent", known = knownOam(rows), model = megahornModel(knownFor24(rows, side));
+  const side = window === "player-back" ? "player" : "opponent", known = knownOam(rows), kn = knownFor24(rows, side), flip = neg === "phase", model = megahornModel(flip ? { ...kn, phase: { monbgCntRow: kn.phase.monbgCntRow === 7 ? 8 : 7, endLate: !kn.phase.endLate } } : kn);
   const splat = rows.find((r) => r.sprites.some((s: Json) => /HitSplat/.test(s.template?.symbol ?? "")))!.sprites.find((s: Json) => /HitSplat/.test(s.template.symbol));
   let exact = 0, residual = 0; const failures: string[] = [];
   for (let age = 0; age < rows.length; age += 1) {
