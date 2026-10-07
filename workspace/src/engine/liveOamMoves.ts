@@ -4,16 +4,13 @@
  * composite (`composeLivePalettes`), the known-entry allocator/scene constants, the lent activation order and the
  * source animation programs; the OAM rows come from liveMoveOamAssembler.ts. Never a capture row.
  */
-import willOWispAsset from "../animation/assets/will-o-wisp.json" with { type: "json" };
 import darkBgAsset from "../assets/gen/battle-anim-bg-dark.json" with { type: "json" };
 import paletteData from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
-import { willOWispTimeline } from "../animation/willOWisp.ts";
-import { pursuitTargetOffsetAtAge } from "../animation/pursuit.ts";
 import { KNOWN_ENTRY_NON_BATTLER_SPRITES } from "./liveBgSnapshotMoves.ts";
 import type { LivePaletteComposite } from "./liveMovePaletteComposite.ts";
 import {
   FURY_CUTTER_ROWS, KNOWN_ENTRY_HEALTHBOX_OAM, KNOWN_ENTRY_HEALTHBOX_SLOTS, PURSUIT_ROWS, liveFuryCutterHardwareOamRows, livePursuitHardwareOamRows, liveWillOWispHardwareOamRows,
-  type LiveOamScene, type OamAttr,
+  type LiveOamScene, type LiveSpriteOrderSort, type OamAttr, type WispProgram,
 } from "./liveMoveOamAssembler.ts";
 
 type Side = "player" | "opponent";
@@ -62,6 +59,13 @@ export interface LiveWillOWispArgs {
   readonly palettes: LivePaletteComposite;
   /** The lent full 64-slot activation order (known-entry occupied prefix + the host's free order). */
   readonly activationOrder: readonly number[];
+  /** Seam-provided (liveMoveAnimation.ts): sortGbaSpriteOrder, willOWisp.ts programs and the will-o-wisp.json palettes. */
+  readonly sort: LiveSpriteOrderSort;
+  readonly timeline: (attackerCenter: Point, targetCenter: Point) =>
+    Readonly<{ orbEnd: number; fireStart: number; fireEnd: number; cleanup: number }>;
+  readonly spritesAt: (state: number, attackerCenter: Point, targetCenter: Point) => readonly WispProgram[];
+  readonly orbPalette: readonly Rgb[];
+  readonly firePalette: readonly Rgb[];
 }
 export interface LiveWillOWispInputs {
   readonly attackerCenter: Point;
@@ -90,7 +94,7 @@ export function liveWillOWispInputs(args: LiveWillOWispArgs): LiveWillOWispInput
   // AnimWillOWispOrb: InitSpritePosToAnimAttacker(sprite, FALSE) = the attacker's sBattlerCoords X / Y; AnimWillOWispFire
   // re-anchors on the target's X_2 / Y_PIC_OFFSET (corpora + alternates: orb (72, 80) / (176, 40), fire = target pic point).
   const attackerCenter = attacker.battlePositionCenter, targetCenter = target.picOffsetPoint;
-  const t = willOWispTimeline(attackerSide, attackerCenter, targetCenter);
+  const t = args.timeline(attackerCenter, targetCenter);
   const attackerObject = battlerObject(attackerSide, attacker), targetObject = battlerObject(targetSide, target);
   const key = JSON.stringify([attackerSide, attackerCenter, targetCenter, attackerObject.attr, targetObject.attr, args.activationOrder]);
   let rows = wispCache.get(key);
@@ -98,21 +102,21 @@ export function liveWillOWispInputs(args: LiveWillOWispArgs): LiveWillOWispInput
     rows = liveWillOWispHardwareOamRows({
       attackerSide, attackerCenter, targetCenter, attacker: attackerObject, target: targetObject, scene: KNOWN_ENTRY_SCENE,
       orbTileBase: 537, fireTileBase: 305, orbPaletteSlot: 8, firePaletteSlot: 7,
-      occupiedSlots: KNOWN_ENTRY_OCCUPIED_SLOTS, activationOrder: args.activationOrder,
+      occupiedSlots: KNOWN_ENTRY_OCCUPIED_SLOTS, activationOrder: args.activationOrder, sort: args.sort, timeline: t,
+      spritesAt: (state) => args.spritesAt(state, attackerCenter, targetCenter),
     });
     if (wispCache.size > 16) wispCache.clear();
     wispCache.set(key, rows);
   }
   const hardwareRows = rows;
-  const wispPalette = (willOWispAsset as unknown as { fire: { palette: Rgb[] }; orb: { palette: Rgb[] } });
   const monbgBank = targetSide === "opponent" ? 8 : 9, targetObjBank = targetSide === "opponent" ? 17 : 16;
   const layer = targetSide === "opponent" ? "bg1" : "bg2";
   const shakeX2 = (state: number) => state >= t.fireStart && state <= t.fireStart + 23
     ? (Math.floor((state - t.fireStart) / 2) % 2 ? 4 : -4) : 0;
   const paletteAt = (age: number): number[] => {
     const out = args.palettes.hardware.slice();
-    if (age >= 2) wispPalette.fire.palette.forEach((c, i) => { out[23 * 16 + i] = bgr555(c); });
-    if (age >= 5) wispPalette.orb.palette.forEach((c, i) => { out[24 * 16 + i] = bgr555(c); });
+    if (age >= 2) args.firePalette.forEach((c, i) => { out[23 * 16 + i] = bgr555(c); });
+    if (age >= 5) args.orbPalette.forEach((c, i) => { out[24 * 16 + i] = bgr555(c); });
     if (age >= 7) for (let i = 0; i < 16; i += 1) out[monbgBank * 16 + i] = out[targetObjBank * 16 + i]!;
     return out;
   };
@@ -160,6 +164,9 @@ export interface LivePursuitArgs {
   readonly activationOrder: readonly number[];
   /** gAnimMovePower (AnimTask_ShakeTargetBasedOnMovePowerOrDmg amplitude). */
   readonly movePower: number;
+  /** Seam-provided: sortGbaSpriteOrder and pursuit.ts pursuitTargetOffsetAtAge (the reducer's own shake). */
+  readonly sort: LiveSpriteOrderSort;
+  readonly targetOffsetAt: (age: number, movePower: number) => Point;
 }
 export interface LivePursuitInputs {
   readonly impactCenter: Point;
@@ -200,7 +207,8 @@ export function livePursuitInputs(args: LivePursuitArgs): LivePursuitInputs | nu
   let built = pursuitCache.get(key);
   if (!built) {
     built = livePursuitHardwareOamRows({ attacker: attackerObject, target: targetObject, scene: KNOWN_ENTRY_SCENE, impactCenter,
-      impactSlot: 3, impactMatrixNum: 0, impactTileBase: 305, impactPaletteSlot: 7, impactScale: 372, activationOrder: args.activationOrder });
+      impactSlot: 3, impactMatrixNum: 0, impactTileBase: 305, impactPaletteSlot: 7, impactScale: 372, activationOrder: args.activationOrder,
+      sort: args.sort });
     if (pursuitCache.size > 16) pursuitCache.clear();
     pursuitCache.set(key, built);
   }
@@ -223,7 +231,7 @@ export function livePursuitInputs(args: LivePursuitArgs): LivePursuitInputs | nu
     if (age >= 5) {
       registers[`${layer}cnt`] = targetSide === "opponent" ? 0x5c02 : 0x5e02;
       if (age < 63) {
-        const shake = pursuitTargetOffsetAtAge(age - 1, args.movePower, { x: 0, y: 0 });
+        const shake = args.targetOffsetAt(age - 1, args.movePower);
         registers[`${layer}hofs`] = (32 - (target.spriteCenter.x + shake.x)) & 0x1ff;
         registers[`${layer}vofs`] = (32 - (target.spriteCenter.y + shake.y)) & 0x1ff;
       }
@@ -270,6 +278,7 @@ export interface LiveFuryCutterArgs {
   readonly activationOrder: readonly number[];
   /** gDisableStructs[attacker].furyCutterCounter after Cmd_furycuttercalc (only 1 is provided: the first body). */
   readonly counter: 1;
+  readonly sort: LiveSpriteOrderSort;
 }
 const furyCache = new Map<string, readonly string[][]>();
 
@@ -290,7 +299,8 @@ export function liveFuryCutterInputs(args: LiveFuryCutterArgs): { duration: numb
   let rows = furyCache.get(key);
   if (!rows) {
     rows = liveFuryCutterHardwareOamRows({ attacker: attackerObject, target: targetObject, targetSide, scene: KNOWN_ENTRY_SCENE,
-      rightHit: (args.counter & 1) === 1, sliceSlot: 3, cutTileBase: 305, cutPaletteSlot: 7, activationOrder: args.activationOrder });
+      rightHit: (args.counter & 1) === 1, sliceSlot: 3, cutTileBase: 305, cutPaletteSlot: 7, activationOrder: args.activationOrder,
+      sort: args.sort });
     if (furyCache.size > 16) furyCache.clear();
     furyCache.set(key, rows);
   }

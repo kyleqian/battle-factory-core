@@ -10,6 +10,7 @@ import { carryLiveSpriteOrder, type LiveOamSprite } from "../../src/engine/liveM
 import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../../src/engine/liveMoveSpriteAllocator.ts";
 import { knownEntrySpriteOrderState } from "../../src/engine/spriteOrderProvider.ts";
 import { willOWispTimeline } from "../../src/animation/willOWisp.ts";
+import { sortGbaSpriteOrder } from "../../src/animation/gbaObjCompositor.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
@@ -69,7 +70,7 @@ describe("oam1 production hardware-OAM provider: MOVE_WILL_O_WISP", () => {
       { slot: 5, attr: [100, 0, 2 << 10], subpriority: 20, visible: true, oamY: 100 },
       { slot: 3, attr: [10, 0, 2 << 10], subpriority: 20, visible: false, oamY: 120 },
     ];
-    const carried = carryLiveSpriteOrder(order, sprites);
+    const carried = carryLiveSpriteOrder(order, sprites, sortGbaSpriteOrder);
     expect(carried.slice(0, 2)).toEqual([3, 5]); // equal priority word: the larger (stale) oam.y first
     expect(carried.slice(2)).toEqual(order.filter(s => s !== 3 && s !== 5)); // dummy keys tie: their order is retained
   });

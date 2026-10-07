@@ -83,7 +83,10 @@ import { composeLivePalettes, liveBattlerIsShiny } from "./liveMovePaletteCompos
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
 import { liveFuryCutterInputs, livePursuitInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
 import { FURY_CUTTER_ROWS, PURSUIT_ROWS } from "./liveMoveOamAssembler.ts";
-import { willOWispTimeline } from "../animation/willOWisp.ts";
+import { willOWispSpritesAtAge, willOWispTimeline } from "../animation/willOWisp.ts";
+import { pursuitTargetOffsetAtAge } from "../animation/pursuit.ts";
+import { sortGbaSpriteOrder } from "../animation/gbaObjCompositor.ts";
+import willOWispAsset from "../animation/assets/will-o-wisp.json" with { type: "json" };
 import {
   dirtScatterOffsetFromWord, dirtScatterSlots, hyperBeamOrbFromWords, linearTranslationStep, liveMovePresentationRngWords, miniTwinklingStarFromWords, type LiveMovePresentationRngInput,
 } from "./liveMovePresentationRng.ts";
@@ -2568,7 +2571,10 @@ export function liveMoveAnimationPresentation(
       if (palettes === null || activationOrder === null) return null;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const inputs = liveWillOWispInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
-        targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder });
+        targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
+        sort: sortGbaSpriteOrder, orbPalette: willOWispAsset.orb.palette, firePalette: willOWispAsset.fire.palette,
+        timeline: (a, t) => willOWispTimeline(attacker.geometry.side, a, t),
+        spritesAt: (state, a, t) => willOWispSpritesAtAge(state, { attackerSide: attacker.geometry.side, attackerCenter: a, targetCenter: t }) });
       if (inputs === null) return null;
       const withCenter = (battler: SceneOnPresentationBattler, center: { x: number; y: number }): SceneOnPresentationBattler => ({
         ...battler, geometry: { ...battler.geometry, animationCenter: center } });
@@ -2588,7 +2594,8 @@ export function liveMoveAnimationPresentation(
       if (palettes === null || activationOrder === null) return null;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const inputs = livePursuitInputs({ attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors,
-        palettes, activationOrder, movePower: request.power });
+        palettes, activationOrder, movePower: request.power, sort: sortGbaSpriteOrder,
+        targetOffsetAt: (state, power) => pursuitTargetOffsetAtAge(state, power, { x: 0, y: 0 }) });
       if (inputs === null) return null;
       config = { move: "PURSUIT", attacker,
         target: { ...target, geometry: { ...target.geometry, battlePositionCenter: inputs.impactCenter } },
@@ -2609,7 +2616,7 @@ export function liveMoveAnimationPresentation(
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const inputs = liveFuryCutterInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
         targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
-        counter: 1 });
+        counter: 1, sort: sortGbaSpriteOrder });
       if (inputs === null) return null;
       config = { move: "FURY_CUTTER", attacker, target, fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
       break;
