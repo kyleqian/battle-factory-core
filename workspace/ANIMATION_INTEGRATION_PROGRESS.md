@@ -50,6 +50,14 @@
   dense rerun 6 fixtures 0 px r1 == r2; differential battle1-postwin-next-prompt 216/216 +
   presentation-rng-playable-live-bodies-seeded-on 173/173; union typecheck, smoke 448, 10 files 160/160.
   Receipt `r2-gates-firepunch-receipt.json`.
+- prep24 (side, `104138545`, new files only): source-derived Megahorn and Return (strongest branch, the only one
+  the Factory reaches) input models. Return: OAM 35,968/35,968 entries, matrices, registers, battleBg, palettes,
+  tasks, target x2 exact in 6 windows (accepted P/O, SNORLAX->GOLEM, SNORLAX->PIDGEOT elevated); pixels 1691/1692
+  (row 0 of the elevated-target player window: the Return renderer draws the age-0 enemy shadow only for an opponent
+  attacker). Megahorn: every non-OAM field exact in 6 windows (incl. HERACROSS->ONIX) GIVEN two VBlank frame-phase
+  bits — monbg BGnCNT write row 7/8 and the restorebg fade ending early/late — which vary across windows
+  ((8,late) accP, (8,early) accO, (7,late) altP/altO/onP, (8,late) onO) and are not derivable (flipping costs 16
+  rows x 17.5k px). Supervisor: `prep24Run.sh` with fresh probes — all 12 receipts byte-identical.
 
 ## 2026-10-06 (day, wind-down) — D3 implemented: 218 -> 226 exact + 10 faithful-random live adapters
 
