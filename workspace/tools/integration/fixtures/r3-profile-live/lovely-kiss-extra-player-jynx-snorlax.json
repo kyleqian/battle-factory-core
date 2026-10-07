@@ -1,0 +1,40 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "LOVELY_KISS",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/r3-lovely-kiss-extra-player-jynx-snorlax.json",
+ "denseWindow": {
+  "startFrame": 73,
+  "endFrame": 224
+ },
+ "windowSource": "window = [activation, activation + 152 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "JYNX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019082,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 140,
+  "playerMaxHp": 140,
+  "opponentHp": 235,
+  "opponentMaxHp": 235,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "presentationRngActivation": {
+  "value": 957178605,
+  "source": "prep22Probe r3-lovely-kiss-extra-player-jynx-snorlax gRng2Value at activation frame 73"
+ }
+}

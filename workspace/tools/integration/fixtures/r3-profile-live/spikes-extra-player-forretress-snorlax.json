@@ -1,0 +1,36 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "SPIKES",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/r3-spikes-extra-player-forretress-snorlax.json",
+ "denseWindow": {
+  "startFrame": 69,
+  "endFrame": 181
+ },
+ "windowSource": "window = [activation, activation + 113 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "FORRETRESS",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019083,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 150,
+  "playerMaxHp": 150,
+  "opponentHp": 267,
+  "opponentMaxHp": 267,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

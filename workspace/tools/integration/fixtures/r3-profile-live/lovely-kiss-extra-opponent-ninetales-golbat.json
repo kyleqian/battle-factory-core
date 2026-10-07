@@ -1,0 +1,46 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "LOVELY_KISS",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/r3-lovely-kiss-extra-opponent-ninetales-golbat.json",
+ "denseWindow": {
+  "startFrame": 223,
+  "endFrame": 374
+ },
+ "windowSource": "window = [activation, activation + 152 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "NINETALES",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793700032,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 150,
+  "playerMaxHp": 150,
+  "opponentHp": 134,
+  "opponentMaxHp": 148,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "player"
+  }
+ ],
+ "presentationRngActivation": {
+  "value": 995266682,
+  "source": "prep22Probe r3-lovely-kiss-extra-opponent-ninetales-golbat gRng2Value at activation frame 223"
+ }
+}

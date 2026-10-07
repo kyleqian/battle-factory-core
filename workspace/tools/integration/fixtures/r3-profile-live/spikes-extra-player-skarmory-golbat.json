@@ -1,0 +1,42 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "SPIKES",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/r3-spikes-extra-player-skarmory-golbat.json",
+ "denseWindow": {
+  "startFrame": 290,
+  "endFrame": 402
+ },
+ "windowSource": "window = [activation, activation + 113 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "SKARMORY",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019083,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 136,
+  "playerMaxHp": 140,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ]
+}
