@@ -22,6 +22,14 @@ extrasensory)
   python3 tools/integration/prep30SplitSummary.py $REC/extrasensory-split.json $OUT/xs-split/s*.json > /dev/null
   for n in oam palette scanline; do npx vite-node tools/integration/prep30ExtrasensoryPixels.ts --neg=$n --out=$REC/extrasensory-neg-$n.json > /dev/null; done ;;
 psywave)
-  [ -f tools/integration/prep30PsywaveCheck.ts ] && sh tools/integration/prep30RunPsywave.sh "$OUT" "$REC" ;;
+  P=$OUT/prep25-psywave-alt; Q=$OUT/prep30-psywave-alt
+  ALT="$P-player-alakazam-golem-r1.json:player $P-opponent-alakazam-golem-r1.json:opponent $Q-player-espeon-crobat-r1.json:player $Q-opponent-espeon-crobat-r1.json:opponent"
+  ALTPX="$P-player-alakazam-golem-r1.json:$P-player-alakazam-golem-r1-rgb:player $P-opponent-alakazam-golem-r1.json:$P-opponent-alakazam-golem-r1-rgb:opponent $Q-player-espeon-crobat-r1.json:$Q-player-espeon-crobat-r1-rgb:player $Q-opponent-espeon-crobat-r1.json:$Q-opponent-espeon-crobat-r1-rgb:opponent"
+  npx vite-node tools/integration/prep30PsywaveCheck.ts $ALT --out=$REC/psywave-check.json > /dev/null
+  npx vite-node tools/integration/prep30PsywaveCheck.ts $ALT --phase=flip --out=$REC/psywave-check-flip.json > /dev/null
+  npx vite-node tools/integration/prep30PsywavePixels.ts $ALTPX --out=$REC/psywave-pixels.json > /dev/null
+  npx vite-node tools/integration/prep30PsywavePixels.ts $ALTPX --phase=flip --out=$REC/psywave-pixels-flip.json > /dev/null
+  npx vite-node tools/integration/prep30PsywavePixels.ts $ALTPX --feed=corpus --out=$REC/psywave-pixels-corpus-fed.json > /dev/null
+  for n in oam palette; do npx vite-node tools/integration/prep30PsywavePixels.ts --neg=$n --out=$REC/psywave-neg-$n.json > /dev/null; done ;;
 esac; done
 echo "receipts in $REC"

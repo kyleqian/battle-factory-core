@@ -1,0 +1,437 @@
+[
+ {
+  "name": "accepted-player",
+  "species": [
+   "LUVDISC",
+   "ONIX"
+  ],
+  "rows": 205,
+  "modelRows": 205,
+  "phase": {
+   "lateLag": true,
+   "measured": true
+  },
+  "anchors": {
+   "origin": {
+    "x": 82,
+    "y": 108
+   },
+   "dest": {
+    "x": 176,
+    "y": 42
+   }
+  },
+  "entries": 26112,
+  "entryMatch": 26112,
+  "oamRowsExact": 204,
+  "matrixRowsExact": 204,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 205,
+    "rows": 205
+   },
+   "hardwarePalette": {
+    "exact": 205,
+    "rows": 205
+   },
+   "hardwarePaletteTargetBank": {
+    "exact": 205,
+    "rows": 205
+   },
+   "unfadedPalette": {
+    "exact": 205,
+    "rows": 205
+   },
+   "unfadedPaletteTargetBank": {
+    "exact": 205,
+    "rows": 205
+   },
+   "fadedPalette": {
+    "exact": 205,
+    "rows": 205
+   },
+   "fadedPaletteTargetBank": {
+    "exact": 205,
+    "rows": 205
+   },
+   "tasks(modelled)": {
+    "exact": 205,
+    "rows": 205
+   },
+   "ringSprites": {
+    "exact": 205,
+    "rows": 205
+   },
+   "vramHandle": {
+    "exact": 205,
+    "rows": 205
+   }
+  },
+  "rowsCompared": 205
+ },
+ {
+  "name": "accepted-opponent",
+  "species": [
+   "SWABLU",
+   "ONIX"
+  ],
+  "rows": 205,
+  "modelRows": 205,
+  "phase": {
+   "lateLag": true,
+   "measured": true
+  },
+  "anchors": {
+   "origin": {
+    "x": 166,
+    "y": 55
+   },
+   "dest": {
+    "x": 72,
+    "y": 88
+   }
+  },
+  "entries": 26112,
+  "entryMatch": 26112,
+  "oamRowsExact": 204,
+  "matrixRowsExact": 204,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 205,
+    "rows": 205
+   },
+   "hardwarePalette": {
+    "exact": 205,
+    "rows": 205
+   },
+   "hardwarePaletteTargetBank": {
+    "exact": 205,
+    "rows": 205
+   },
+   "unfadedPalette": {
+    "exact": 204,
+    "rows": 205,
+    "bad": [
+     "184:1@33"
+    ]
+   },
+   "unfadedPaletteTargetBank": {
+    "exact": 205,
+    "rows": 205
+   },
+   "fadedPalette": {
+    "exact": 205,
+    "rows": 205
+   },
+   "fadedPaletteTargetBank": {
+    "exact": 205,
+    "rows": 205
+   },
+   "tasks(modelled)": {
+    "exact": 205,
+    "rows": 205
+   },
+   "ringSprites": {
+    "exact": 205,
+    "rows": 205
+   },
+   "vramHandle": {
+    "exact": 205,
+    "rows": 205
+   }
+  },
+  "rowsCompared": 205
+ },
+ {
+  "name": "prep25-psywave-alt-player-alakazam-golem",
+  "species": [
+   "ALAKAZAM",
+   "GOLEM"
+  ],
+  "rows": 205,
+  "modelRows": 205,
+  "phase": {
+   "lateLag": true,
+   "measured": true
+  },
+  "anchors": {
+   "origin": {
+    "x": 82,
+    "y": 103
+   },
+   "dest": {
+    "x": 176,
+    "y": 45
+   }
+  },
+  "entries": 26112,
+  "entryMatch": 26112,
+  "oamRowsExact": 204,
+  "matrixRowsExact": 204,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 205,
+    "rows": 205
+   },
+   "hardwarePalette": {
+    "exact": 205,
+    "rows": 205
+   },
+   "hardwarePaletteTargetBank": {
+    "exact": 205,
+    "rows": 205
+   },
+   "unfadedPalette": {
+    "exact": 205,
+    "rows": 205
+   },
+   "unfadedPaletteTargetBank": {
+    "exact": 205,
+    "rows": 205
+   },
+   "fadedPalette": {
+    "exact": 205,
+    "rows": 205
+   },
+   "fadedPaletteTargetBank": {
+    "exact": 205,
+    "rows": 205
+   },
+   "tasks(modelled)": {
+    "exact": 205,
+    "rows": 205
+   },
+   "ringSprites": {
+    "exact": 205,
+    "rows": 205
+   },
+   "vramHandle": {
+    "exact": 205,
+    "rows": 205
+   }
+  },
+  "rowsCompared": 205
+ },
+ {
+  "name": "prep25-psywave-alt-opponent-alakazam-golem",
+  "species": [
+   "ALAKAZAM",
+   "GOLEM"
+  ],
+  "rows": 204,
+  "modelRows": 204,
+  "phase": {
+   "lateLag": false,
+   "measured": false
+  },
+  "anchors": {
+   "origin": {
+    "x": 166,
+    "y": 54
+   },
+   "dest": {
+    "x": 72,
+    "y": 104
+   }
+  },
+  "entries": 25984,
+  "entryMatch": 25984,
+  "oamRowsExact": 203,
+  "matrixRowsExact": 203,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 204,
+    "rows": 204
+   },
+   "hardwarePalette": {
+    "exact": 204,
+    "rows": 204
+   },
+   "hardwarePaletteTargetBank": {
+    "exact": 204,
+    "rows": 204
+   },
+   "unfadedPalette": {
+    "exact": 204,
+    "rows": 204
+   },
+   "unfadedPaletteTargetBank": {
+    "exact": 204,
+    "rows": 204
+   },
+   "fadedPalette": {
+    "exact": 204,
+    "rows": 204
+   },
+   "fadedPaletteTargetBank": {
+    "exact": 204,
+    "rows": 204
+   },
+   "tasks(modelled)": {
+    "exact": 204,
+    "rows": 204
+   },
+   "ringSprites": {
+    "exact": 204,
+    "rows": 204
+   },
+   "vramHandle": {
+    "exact": 204,
+    "rows": 204
+   }
+  },
+  "rowsCompared": 204
+ },
+ {
+  "name": "prep30-psywave-alt-player-espeon-crobat",
+  "species": [
+   "ESPEON",
+   "CROBAT"
+  ],
+  "rows": 205,
+  "modelRows": 205,
+  "phase": {
+   "lateLag": true,
+   "measured": true
+  },
+  "anchors": {
+   "origin": {
+    "x": 82,
+    "y": 109
+   },
+   "dest": {
+    "x": 176,
+    "y": 34
+   }
+  },
+  "entries": 26112,
+  "entryMatch": 26112,
+  "oamRowsExact": 204,
+  "matrixRowsExact": 204,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 205,
+    "rows": 205
+   },
+   "hardwarePalette": {
+    "exact": 205,
+    "rows": 205
+   },
+   "hardwarePaletteTargetBank": {
+    "exact": 205,
+    "rows": 205
+   },
+   "unfadedPalette": {
+    "exact": 205,
+    "rows": 205
+   },
+   "unfadedPaletteTargetBank": {
+    "exact": 205,
+    "rows": 205
+   },
+   "fadedPalette": {
+    "exact": 205,
+    "rows": 205
+   },
+   "fadedPaletteTargetBank": {
+    "exact": 205,
+    "rows": 205
+   },
+   "tasks(modelled)": {
+    "exact": 205,
+    "rows": 205
+   },
+   "ringSprites": {
+    "exact": 205,
+    "rows": 205
+   },
+   "vramHandle": {
+    "exact": 205,
+    "rows": 205
+   }
+  },
+  "rowsCompared": 205
+ },
+ {
+  "name": "prep30-psywave-alt-opponent-espeon-crobat",
+  "species": [
+   "ESPEON",
+   "CROBAT"
+  ],
+  "rows": 204,
+  "modelRows": 204,
+  "phase": {
+   "lateLag": false,
+   "measured": false
+  },
+  "anchors": {
+   "origin": {
+    "x": 166,
+    "y": 58
+   },
+   "dest": {
+    "x": 72,
+    "y": 93
+   }
+  },
+  "entries": 25984,
+  "entryMatch": 25984,
+  "oamRowsExact": 203,
+  "matrixRowsExact": 203,
+  "badRows": [],
+  "examples": [],
+  "fields": {
+   "registers": {
+    "exact": 204,
+    "rows": 204
+   },
+   "hardwarePalette": {
+    "exact": 204,
+    "rows": 204
+   },
+   "hardwarePaletteTargetBank": {
+    "exact": 204,
+    "rows": 204
+   },
+   "unfadedPalette": {
+    "exact": 204,
+    "rows": 204
+   },
+   "unfadedPaletteTargetBank": {
+    "exact": 204,
+    "rows": 204
+   },
+   "fadedPalette": {
+    "exact": 204,
+    "rows": 204
+   },
+   "fadedPaletteTargetBank": {
+    "exact": 204,
+    "rows": 204
+   },
+   "tasks(modelled)": {
+    "exact": 204,
+    "rows": 204
+   },
+   "ringSprites": {
+    "exact": 204,
+    "rows": 204
+   },
+   "vramHandle": {
+    "exact": 204,
+    "rows": 204
+   }
+  },
+  "rowsCompared": 204
+ }
+]
