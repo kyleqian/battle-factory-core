@@ -1,6 +1,6 @@
 {
  "schema": "q2-live-adapter-receipt/v1",
- "testedCodeCommit": "e86cfaef351e4bd152f70f20ef2fa83af1cf1e27",
+ "testedCodeCommit": "",
  "srcTree": "f16cabf6ad8c62f48be4483eefe0fcfb7102acb7",
  "scope": "Hyper Voice 304, Smog 123, Sand Tomb 328, Sky Attack 143 charge body; Snore 173 and the Sky Attack strike are NOT wired (no exact order lend)",
  "summary": {
@@ -560,5 +560,12 @@
    "freshRunsIdentical": true,
    "exact": true
   }
- ]
+ ],
+ "gates": {
+  "fullSuite": "1543 files passed / 44 skipped, 12606 tests passed / 223 skipped",
+  "build": "ok",
+  "smoke": "448/448",
+  "differential": "fight-submenu + battle1-postwin-next-prompt + presentation-rng-playable-live-bodies-seeded-on: 624 captures byte-identical vs 338a03df5",
+  "shadowScan": "523 rows / 0 mismatches"
+ }
 }
