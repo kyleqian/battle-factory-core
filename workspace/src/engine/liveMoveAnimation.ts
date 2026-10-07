@@ -80,6 +80,9 @@ import { hiddenPowerUnownFormIndex } from "../animation/hiddenPower.ts";
 import type { FlailPower } from "../animation/flail.ts";
 import type { HailProfile } from "../animation/hail.ts";
 import { composeLivePalettes, liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
+import lovelyKissAsset from "../animation/assets/lovely-kiss.json" with { type: "json" };
+import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
+import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
 import { liveLovelyKissProfile, liveOctazookaProfile, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
 import { liveCurseStatsInputs, liveFuryCutterInputs, livePursuitInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
@@ -2406,11 +2409,13 @@ export function liveMoveAnimationPresentation(
         const words = liveMovePresentationRngWords(presentationRngInput);
         if (words === null || words.draws.length !== 1 || words.words.length !== 4) return null;
         config = { move: "LOVELY_KISS", attacker, target, fieldProfile,
-          animationProfile: liveLovelyKissProfile({ ...base, activationRng: words.activationValue }) };
+          animationProfile: liveLovelyKissProfile({ ...base, activationRng: words.activationValue,
+            pinkHeartPalette: lovelyKissAsset.pinkHeart.palette, devilPalette: lovelyKissAsset.devil.palette }) };
       } else if (request.moveId === 191) {
-        config = { move: "SPIKES", attacker, target, fieldProfile, animationProfile: liveSpikesProfile({ ...base, activationRng: 0 }) };
+        config = { move: "SPIKES", attacker, target, fieldProfile, animationProfile: liveSpikesProfile({ ...base, activationRng: 0, spikePalette: spikesAsset.spike.palette }) };
       } else {
-        config = { move: "OCTAZOOKA", attacker, target, fieldProfile, animationProfile: liveOctazookaProfile({ ...base, activationRng: 0 }) };
+        config = { move: "OCTAZOOKA", attacker, target, fieldProfile, animationProfile: liveOctazookaProfile({ ...base, activationRng: 0,
+          graySmokePalette: octazookaAsset.graySmoke.palette, blackBallPalette: octazookaAsset.blackBall.palette }) };
       }
       break;
     }

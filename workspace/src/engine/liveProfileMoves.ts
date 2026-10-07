@@ -6,15 +6,11 @@
  * (composeLivePalettes) with the move's own asset palette written into the measured OBJ bank. No capture row is read.
  * Lovely Kiss alone consumes Random2 (4 words at age +120); its activation value comes from the presentation host.
  */
-import type { LovelyKissProfile } from "../animation/lovelyKiss.ts";
-import type { OctazookaProfile } from "../animation/octazooka.ts";
-import type { SpikesProfile } from "../animation/spikes.ts";
-import lovelyKissAsset from "../animation/assets/lovely-kiss.json" with { type: "json" };
-import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
-import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
 import type { LivePaletteComposite } from "./liveMovePaletteComposite.ts";
 
-type Rgb = Readonly<{ r: number; g: number; b: number }>;
+// src/engine may not import src/animation (animationBoundaryRatchet): the move assets' palettes are passed in by liveMoveAnimation.ts.
+export type LiveProfileRgb = Readonly<{ r: number; g: number; b: number }>;
+type Rgb = LiveProfileRgb;
 const bgr555 = (c: Rgb): number => (c.r >> 3) | (c.g >> 3) << 5 | (c.b >> 3) << 10;
 const OBJ_BANK_BASE = 16;
 
@@ -30,12 +26,12 @@ const targetBattlerSubpriority = (side: "player" | "opponent") => side === "play
 const attr2 = (bank: number, tile: number) => (bank << 12) | (2 << 10) | tile;
 
 /** `Move_SPIKES`: three spikes in the lowest free slots, the target's palette copy (monbg) leaves the OBJ banks unchanged. */
-export function liveSpikesProfile(input: LiveProfileSlots & { palettes: LivePaletteComposite; activationRng: number }): SpikesProfile {
+export function liveSpikesProfile(input: LiveProfileSlots & { palettes: LivePaletteComposite; activationRng: number; spikePalette: readonly Rgb[] }) {
   const { free, targetSide, palettes } = input;
-  const after = (base: readonly number[]) => withObjBank(base, 7, spikesAsset.spike.palette as Rgb[]);
+  const after = (base: readonly number[]) => withObjBank(base, 7, input.spikePalette);
   return {
     animationRngAtAge0: input.activationRng,
-    spriteSlots: [free[0]!, free[1]!, free[2]!],
+    spriteSlots: [free[0]!, free[1]!, free[2]!] as [number, number, number],
     targetSubpriority: targetBattlerSubpriority(targetSide) - 2,
     oam: { spikeAttr2: attr2(7, 305) },
     palette: {
@@ -47,14 +43,14 @@ export function liveSpikesProfile(input: LiveProfileSlots & { palettes: LivePale
 }
 
 /** `Move_OCTAZOOKA`: ball in the lowest free slot, then four smokes (graySmoke sheet bank 7, blackBall sheet bank 8). */
-export function liveOctazookaProfile(input: LiveProfileSlots & { palettes: LivePaletteComposite; activationRng: number }): OctazookaProfile {
+export function liveOctazookaProfile(input: LiveProfileSlots & { palettes: LivePaletteComposite; activationRng: number; graySmokePalette: readonly Rgb[]; blackBallPalette: readonly Rgb[] }) {
   const { free, targetSide, palettes } = input;
-  const smoke = (base: readonly number[]) => withObjBank(base, 7, octazookaAsset.graySmoke.palette as Rgb[]);
-  const ball = (base: readonly number[]) => withObjBank(smoke(base), 8, octazookaAsset.blackBall.palette as Rgb[]);
+  const smoke = (base: readonly number[]) => withObjBank(base, 7, input.graySmokePalette);
+  const ball = (base: readonly number[]) => withObjBank(smoke(base), 8, input.blackBallPalette);
   return {
     animationRngAtAge0: input.activationRng,
     ballSpriteSlot: free[0]!,
-    smokeSpriteSlots: [free[0]!, free[1]!, free[2]!, free[3]!],
+    smokeSpriteSlots: [free[0]!, free[1]!, free[2]!, free[3]!] as [number, number, number, number],
     targetSubpriority: targetBattlerSubpriority(targetSide) - 2,
     oam: { ballAttr2: attr2(8, 305), smokeAttr2: attr2(7, 537) },
     palette: {
@@ -69,14 +65,14 @@ export function liveOctazookaProfile(input: LiveProfileSlots & { palettes: LiveP
  * `Move_LOVELY_KISS`: devil in the lowest free slot, then four hearts (pinkHeart sheet bank 7, devil sheet bank 8). The
  * reducer replays the host's four `% 180` draws from the host's activation value (plan `{ageOffset 120, count 4}`).
  */
-export function liveLovelyKissProfile(input: LiveProfileSlots & { palettes: LivePaletteComposite; activationRng: number }): LovelyKissProfile {
+export function liveLovelyKissProfile(input: LiveProfileSlots & { palettes: LivePaletteComposite; activationRng: number; pinkHeartPalette: readonly Rgb[]; devilPalette: readonly Rgb[] }) {
   const { free, targetSide, palettes } = input;
-  const heart = (base: readonly number[]) => withObjBank(base, 7, lovelyKissAsset.pinkHeart.palette as Rgb[]);
-  const devil = (base: readonly number[]) => withObjBank(heart(base), 8, lovelyKissAsset.devil.palette as Rgb[]);
+  const heart = (base: readonly number[]) => withObjBank(base, 7, input.pinkHeartPalette);
+  const devil = (base: readonly number[]) => withObjBank(heart(base), 8, input.devilPalette);
   return {
     animationRngAtAge0: input.activationRng,
     devilSpriteSlot: free[0]!,
-    heartSpriteSlots: [free[0]!, free[1]!, free[2]!, free[3]!],
+    heartSpriteSlots: [free[0]!, free[1]!, free[2]!, free[3]!] as [number, number, number, number],
     targetSubpriority: targetBattlerSubpriority(targetSide),
     palette: {
       unfadedAtAge0: palettes.unfaded, fadedAtAge0: palettes.faded, hardwareAtAge0: palettes.hardware,
