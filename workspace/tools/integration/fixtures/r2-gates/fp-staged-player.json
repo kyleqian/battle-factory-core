@@ -1,0 +1,44 @@
+{
+ "schema": "r2-gates-fire-punch-fixture/v1",
+ "move": "FIRE_PUNCH",
+ "probe": "tools/integration/prep7StagedProbe.py",
+ "scenario": "tools/probe/stage-fire-punch-portable-on.py",
+ "attacker": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GROVYLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 117,
+  "opponentHp": 143,
+  "playerStatus": "none",
+  "playerMaxHp": 117,
+  "opponentMaxHp": 143,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "denseWindow": {
+  "startFrame": 2340,
+  "endFrame": 2440,
+  "ageOffset": 0
+ },
+ "probeArgs": [
+  "player",
+  "fire-punch"
+ ],
+ "acceptedPrecedingBodies": [
+  {
+   "moveId": 104,
+   "side": "opponent"
+  }
+ ],
+ "precedingBodiesNote": "Ice Punch is order-independent (0/40 arbitrary seeds, prep7 s2.3): the harness replays the first-body known-entry order; the staged AI Double Team (104) that ran first is recorded in acceptedPrecedingBodies (no 104:opponent plan unit exists).",
+ "windowSource": "r2-gates: staged Onix/Grovyle route body A..first inactive (prep22 s A.1: player 2340..2441, opponent 1967..2068)"
+}

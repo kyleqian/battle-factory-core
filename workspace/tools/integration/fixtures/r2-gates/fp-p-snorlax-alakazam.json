@@ -1,0 +1,44 @@
+{
+ "schema": "r2-gates-fire-punch-fixture/v1",
+ "move": "FIRE_PUNCH",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/r2g-fp-p-snorlax-alakazam.json",
+ "denseWindow": {
+  "startFrame": 220,
+  "endFrame": 320,
+  "ageOffset": 0
+ },
+ "windowSource": "r2-gates: the scenario's own Move_FIRE_PUNCH body A .. first inactive (101 rows; prep22Probe.py direct-mGBA bodies), never matched to live output",
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ],
+ "attacker": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ALAKAZAM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 232,
+  "playerMaxHp": 242,
+  "opponentHp": 130,
+  "opponentMaxHp": 130,
+  "playerLevel": 50,
+  "opponentLevel": 50,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

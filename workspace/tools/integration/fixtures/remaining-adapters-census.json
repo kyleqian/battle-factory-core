@@ -10,7 +10,7 @@
   "src/data/gen/battle-frontier-mons.json",
   "src/data/gen/factory-round-policy.json"
  ],
- "liveStatusImplementedCount": 229,
+ "liveStatusImplementedCount": 230,
  "staleCodesCorrected": [
   "B (sSpriteOrder): was 'first body only'; production now lends the order and tracks it across bodies (liveSpriteOrderHost.ts / spriteOrderProvider.ts, merged cross-body tracker + post-KO rung 1), so B no longer blocks anything; recipe work only (falls back after an unmodelled graphics command)",
   "F-AFFINE / E-TASK: were provider blockers; docs/allocator-plan-v2-evidence.md measured gOamMatrixAllocBitmap 0x6 + no tasks at all 481 known-entry bodies, so the accepted constants gated on the lent order suffice for first bodies (invalidated after a faint/switch)",
@@ -23,7 +23,7 @@
  "inFlightMoves": {},
  "summary": {
   "accepted": 276,
-  "live": 229,
+  "live": 230,
   "faithfulRandom": 10,
   "faithfulRandomMoves": [
    "MOVE_ASTONISH",
@@ -38,16 +38,16 @@
    "MOVE_WISH"
   ],
   "inFlight": 0,
-  "remaining": 37,
+  "remaining": 36,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
   },
   "weightPct": {
-   "live": 90.644,
+   "live": 91.313,
    "faithfulRandom": 3.612,
    "inFlight": 0,
-   "remaining": 5.257
+   "remaining": 4.588
   },
   "remainingByGroup": {
    "PROVIDER-x": {
@@ -59,8 +59,8 @@
     "weightPct": 3.293
    },
    "SMALL-INPUT": {
-    "moves": 2,
-    "weightPct": 0.89
+    "moves": 1,
+    "weightPct": 0.221
    },
    "OUT": {
     "moves": 1,
@@ -71,13 +71,12 @@
    "H_BASIC": 2,
    "H_BUFFER": 30,
    "H_DERIVED": 3,
-   "H_OUTCOME": 1,
    "H_RANDOM": 1,
    "H_VARIANT": 5
   },
   "orderFirstBodyOnlyMoves": 23,
   "slotPlanNeededMoves": 29,
-  "sumsTo": "229+10+0+37=276",
+  "sumsTo": "230+10+0+36=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -116,25 +115,6 @@
  },
  "ranking": [
   {
-   "provider": "E-OUT",
-   "label": "outcome selector from resolution not on the request",
-   "codes": [
-    "E-OUT"
-   ],
-   "aloneMoves": 2,
-   "aloneWeightPct": 0.89,
-   "aloneNames": [
-    "ENDEAVOR",
-    "FIRE_PUNCH"
-   ],
-   "touchingMoves": 4,
-   "touchingWeightPct": 1.1,
-   "meta": {
-    "cost": "per-move plumbing from resolution (secondary-effect / HP / stale-power values)",
-    "claim": "exact outcome data; no RNG ownership"
-   }
-  },
-  {
    "provider": "X-SWITCH",
    "label": "switch / forced-switch flow owner (post-body field, return-to-ball, slide-off)",
    "codes": [
@@ -166,6 +146,24 @@
    "touchingMoves": 1,
    "touchingWeightPct": 0.223,
    "meta": null
+  },
+  {
+   "provider": "E-OUT",
+   "label": "outcome selector from resolution not on the request",
+   "codes": [
+    "E-OUT"
+   ],
+   "aloneMoves": 1,
+   "aloneWeightPct": 0.221,
+   "aloneNames": [
+    "ENDEAVOR"
+   ],
+   "touchingMoves": 3,
+   "touchingWeightPct": 0.432,
+   "meta": {
+    "cost": "per-move plumbing from resolution (secondary-effect / HP / stale-power values)",
+    "claim": "exact outcome data; no RNG ownership"
+   }
   },
   {
    "provider": "C",
@@ -398,33 +396,32 @@
  "greedy": [
   {
    "step": 1,
-   "provider": "E-OUT",
-   "newMoves": 2,
-   "newWeightPct": 0.89,
-   "cumulativeRemainingUnlocked": 2,
-   "newNames": [
-    "ENDEAVOR",
-    "FIRE_PUNCH"
-   ]
-  },
-  {
-   "step": 2,
    "provider": "X-SWITCH",
    "newMoves": 1,
    "newWeightPct": 0.482,
-   "cumulativeRemainingUnlocked": 3,
+   "cumulativeRemainingUnlocked": 1,
    "newNames": [
     "BATON_PASS"
    ]
   },
   {
-   "step": 3,
+   "step": 2,
    "provider": "X-SUBST",
    "newMoves": 1,
    "newWeightPct": 0.223,
-   "cumulativeRemainingUnlocked": 4,
+   "cumulativeRemainingUnlocked": 2,
    "newNames": [
     "SUBSTITUTE"
+   ]
+  },
+  {
+   "step": 3,
+   "provider": "E-OUT",
+   "newMoves": 1,
+   "newWeightPct": 0.221,
+   "cumulativeRemainingUnlocked": 3,
+   "newNames": [
+    "ENDEAVOR"
    ]
   },
   {
@@ -432,7 +429,7 @@
    "provider": "C",
    "newMoves": 1,
    "newWeightPct": 0.22,
-   "cumulativeRemainingUnlocked": 5,
+   "cumulativeRemainingUnlocked": 4,
    "newNames": [
     "METEOR_MASH"
    ]
@@ -442,7 +439,7 @@
    "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
    "newMoves": 28,
    "newWeightPct": 2.996,
-   "cumulativeRemainingUnlocked": 33,
+   "cumulativeRemainingUnlocked": 32,
    "newNames": [
     "BONEMERANG",
     "CURSE",
@@ -479,7 +476,7 @@
    "provider": "X-DISABLE",
    "newMoves": 2,
    "newWeightPct": 0.147,
-   "cumulativeRemainingUnlocked": 35,
+   "cumulativeRemainingUnlocked": 34,
    "newNames": [
     "ICE_BALL",
     "SPIT_UP"
@@ -490,7 +487,7 @@
    "provider": "X-TWOTURN",
    "newMoves": 1,
    "newWeightPct": 0.187,
-   "cumulativeRemainingUnlocked": 36,
+   "cumulativeRemainingUnlocked": 35,
    "newNames": [
     "DIVE"
    ]
@@ -500,7 +497,7 @@
    "provider": "X-AGE",
    "newMoves": 1,
    "newWeightPct": 0.112,
-   "cumulativeRemainingUnlocked": 37,
+   "cumulativeRemainingUnlocked": 36,
    "newNames": [
     "EXTREME_SPEED"
    ]
@@ -510,7 +507,7 @@
    "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 37,
+   "cumulativeRemainingUnlocked": 36,
    "newNames": []
   },
   {
@@ -518,7 +515,7 @@
    "provider": "D-TILE",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 37,
+   "cumulativeRemainingUnlocked": 36,
    "newNames": []
   },
   {
@@ -526,7 +523,7 @@
    "provider": "D-BG",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 37,
+   "cumulativeRemainingUnlocked": 36,
    "newNames": []
   },
   {
@@ -534,7 +531,7 @@
    "provider": "D-OAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 37,
+   "cumulativeRemainingUnlocked": 36,
    "newNames": []
   },
   {
@@ -542,7 +539,7 @@
    "provider": "D-VRAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 37,
+   "cumulativeRemainingUnlocked": 36,
    "newNames": []
   },
   {
@@ -550,7 +547,7 @@
    "provider": "D-SCAN",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 37,
+   "cumulativeRemainingUnlocked": 36,
    "newNames": []
   }
  ],
@@ -558,19 +555,9 @@
   {
    "id": "P2",
    "title": "SMALL-INPUT (derived): one named input / reducer parameter each (docs/next-adapters-prep10.md measures them)",
-   "count": 2,
-   "weightPct": 0.89,
+   "count": 1,
+   "weightPct": 0.221,
    "moves": [
-    {
-     "move": "MOVE_FIRE_PUNCH",
-     "group": "SMALL-INPUT",
-     "providerNeeds": [
-      "E-OUT"
-     ],
-     "orderFirstBodyOnly": false,
-     "weightPct": 0.669,
-     "prep": "activation measured (2 receipts); E-OUT: view.burnFlames depend on resolution.secondaryRollSucceeded and resolution.faint (burn roll + target faint outcomes), which the MOVE_ANIMATION request does not carry; the view bundles status-animation flames with the move body"
-    },
     {
      "move": "MOVE_ENDEAVOR",
      "group": "SMALL-INPUT",
@@ -580,6 +567,24 @@
      "orderFirstBodyOnly": false,
      "weightPct": 0.221,
      "prep": "activation measured (2 receipts); E-OUT: animationProfile:staleMovePower (HP before/after + stale gAnimMovePower (value left by the previous animation))"
+    }
+   ]
+  },
+  {
+   "id": "P3",
+   "title": "first provider build (derived from the greedy order): X-SWITCH",
+   "count": 1,
+   "weightPct": 0.482,
+   "moves": [
+    {
+     "move": "MOVE_BATON_PASS",
+     "group": "PROVIDER-X-SWITCH",
+     "providerNeeds": [
+      "X-SWITCH"
+     ],
+     "orderFirstBodyOnly": false,
+     "weightPct": 0.482,
+     "prep": "no activation receipt; X-SWITCH: attackanimation; openpartyscreen; switchoutabilities; returntoball; switchinanim after the body"
     }
    ]
   }
@@ -2320,71 +2325,6 @@
     "player": "EXACT-PLAN"
    },
    "group": "OUT"
-  },
-  {
-   "move": "MOVE_FIRE_PUNCH",
-   "id": 7,
-   "name": "FIRE PUNCH",
-   "hostClass": [
-    "H_OUTCOME"
-   ],
-   "weightShare": 0.006689342403628118,
-   "config": "src/animation/sceneOnPresentation.ts:1554",
-   "needs": [
-    "E-OUT"
-   ],
-   "blockers": [
-    {
-     "code": "E-OUT",
-     "text": "view.burnFlames depend on resolution.secondaryRollSucceeded and resolution.faint (burn roll + target faint outcomes), which the MOVE_ANIMATION request does not carry; the view bundles status-animation flames with the move body",
-     "cites": [
-      "src/animation/sceneOnPresentation.ts:12586",
-      "src/animation/sceneOnPresentation.ts:1554"
-     ]
-    }
-   ],
-   "notes": [
-    "SMALL-INPUT: secondary-effect (burn applied) + faint outcome, or a body-only split that leaves flames to the ordinary status animation"
-   ],
-   "staleCorrections": [],
-   "orderFirstBodyOnly": false,
-   "lentConstants": [],
-   "providerNeeds": [
-    "E-OUT"
-   ],
-   "palettePlan": false,
-   "activationMeasured": true,
-   "activationReceipts": [
-    {
-     "probe": "fire-punch-player",
-     "staged": true,
-     "activation": 2340,
-     "scriptFrames": 101,
-     "windowStart": 2313,
-     "windowEnd": 2537,
-     "activationMinusWindowStart": 27,
-     "windowEndMinusScriptEnd": 96,
-     "reducerAgeAtActivation": 27,
-     "note": "UNRESOLVED: accepted window starts 27 frames BEFORE the staged activation (window 2313 vs act 2340)"
-    },
-    {
-     "probe": "fire-punch-opponent",
-     "staged": true,
-     "activation": 1967,
-     "scriptFrames": 101,
-     "windowStart": 2081,
-     "windowEnd": 2357,
-     "activationMinusWindowStart": -114,
-     "windowEndMinusScriptEnd": 289,
-     "reducerAgeAtActivation": -114,
-     "note": "UNRESOLVED: accepted window starts 114 frames AFTER the staged activation and after the script end (2081 vs act 1967, end 2068); signs differ per side, so the accepted staging is not the copied stage boundary or the window is the burn/status phase"
-    }
-   ],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "SMALL-INPUT"
   },
   {
    "move": "MOVE_FLATTER",

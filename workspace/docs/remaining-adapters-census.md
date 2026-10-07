@@ -8,29 +8,29 @@ node tools/integration/censusActivationSummary.mjs                    # fixtures
 tools/integration/censusActivation.sh; tools/integration/censusStagedActivation.sh   # direct-mGBA probes (optional, regenerates the receipts)
 ```
 
-Inputs: `docs/animation-integration-live-status.json` (229 live, 10 faithful random), `docs/animation-integration-readiness.json` + `-merged-readiness.json` (276 accepted, host classes), `tools/integration/fixtures/h-buffer-triage.json` (per-field classes/cites of the 78 H_BUFFER moves; stale config line numbers are re-resolved by symbol), `sprite-order-body-plans-ext.json`, the Level-50 set pools for the usage weight (the model of `tools/integration/spriteOrderPlanCoverageRank.py`: ranges 0..6, 4 moves per set, both sides; `weight` below is the share of all Factory move uses). The script asserts `live (scoped exact) + faithful-random + in-flight + remaining = 276` (faithful-random = the disjoint D3 bucket `faithfulRandomAdapters`, docs/presentation-rng.md) and that every cited `file:line` exists and is non-empty. In-flight = batches the supervisor has running (none; the lists in the script are empty). Helping Hand is the 277th Factory move and is not accepted (not counted).
+Inputs: `docs/animation-integration-live-status.json` (230 live, 10 faithful random), `docs/animation-integration-readiness.json` + `-merged-readiness.json` (276 accepted, host classes), `tools/integration/fixtures/h-buffer-triage.json` (per-field classes/cites of the 78 H_BUFFER moves; stale config line numbers are re-resolved by symbol), `sprite-order-body-plans-ext.json`, the Level-50 set pools for the usage weight (the model of `tools/integration/spriteOrderPlanCoverageRank.py`: ranges 0..6, 4 moves per set, both sides; `weight` below is the share of all Factory move uses). The script asserts `live (scoped exact) + faithful-random + in-flight + remaining = 276` (faithful-random = the disjoint D3 bucket `faithfulRandomAdapters`, docs/presentation-rng.md) and that every cited `file:line` exists and is non-empty. In-flight = batches the supervisor has running (none; the lists in the script are empty). Helping Hand is the 277th Factory move and is not accepted (not counted).
 
 ## 1. Summary
 
 | Bucket | Moves | Weight |
 |---|---:|---:|
 | accepted Factory moves | 276 | 100% |
-| live adapters (scoped exact) | 229 | 90.64% |
+| live adapters (scoped exact) | 230 | 91.31% |
 | faithful-random adapters (ASTONISH, DOUBLE_KICK, FLAIL, HYPER_BEAM, MUD_SLAP, RAIN_DANCE, SAND_ATTACK, THRASH, WATER_PULSE, WISH) | 10 | 3.61% |
 | in flight (0 order-consumer + 0 prep6) | 0 | 0.00% |
-| **remaining (this census)** | **37** | **5.26%** |
-| check | 229+10+0+37=276 | |
+| **remaining (this census)** | **36** | **4.59%** |
+| check | 230+10+0+36=276 | |
 
 Remaining moves by group:
 
 | Group | Moves | Weight | Meaning |
 |---|---:|---:|---|
-| SMALL-INPUT | 2 | 0.89% | one named production input / reducer parameter |
+| SMALL-INPUT | 1 | 0.22% | one named production input / reducer parameter |
 | PROVIDER-x | 4 | 0.96% | blocked on exactly one named provider |
 | MULTI | 30 | 3.29% | several providers |
 | OUT | 1 | 0.11% | needs something outside S10A scope |
 
-Remaining by readiness host class (a move can carry several): H_BASIC 2, H_BUFFER 30, H_DERIVED 3, H_OUTCOME 1, H_RANDOM 1, H_VARIANT 5. Moves whose order input is satisfied only for the battle's first body: 23. Moves that still need a per-move sprite-slot plan row: 29.
+Remaining by readiness host class (a move can carry several): H_BASIC 2, H_BUFFER 30, H_DERIVED 3, H_RANDOM 1, H_VARIANT 5. Moves whose order input is satisfied only for the battle's first body: 23. Moves that still need a per-move sprite-slot plan row: 29.
 
 PROVIDER-x breakdown: X-SWITCH (1: BATON_PASS); D-SCAN (1: MEMENTO); C (1: METEOR_MASH); X-SUBST (1: SUBSTITUTE).
 
@@ -67,11 +67,10 @@ PROVIDER-x breakdown: X-SWITCH (1: BATON_PASS); D-SCAN (1: MEMENTO); C (1: METEO
 
 Columns: `needs` = provider codes after removing what production supplies (`B(first body)` = also consumes sSpriteOrder, supplied by production for the first body only; legend in section 5). Blockers cite the consumed field (`a/` = `src/animation/`, `e/` = `src/engine/`, `rom/` = `reference/pokeemerald/`). Full text per blocker is in the JSON.
 
-### SMALL-INPUT (2)
+### SMALL-INPUT (1)
 
 | Move (id) | Host class | Weight | needs | Blockers (consumed field @ cite) | Notes / measured |
 |---|---|---:|---|---|---|
-| FIRE_PUNCH (7) | H_OUTCOME | 0.67% | E-OUT | E-OUT: view.burnFlames depend on resolution.secondaryRollSucceeded and resolution.faint (burn roll + target faint outcomes), which the MOVE_ANIMATION request does not carry; the view bundles status-animation flames with the move body @ a/sceneOnPresentation.ts:12586, a/sceneOnPresentation.ts:1554 | SMALL-INPUT: secondary-effect (burn applied) + faint outcome, or a body-only split that leaves flames to the ordinary status animation Activation/window start: fire-punch-player 2340/2313, fire-punch-opponent 1967/2081. |
 | ENDEAVOR (283) | H_BUFFER | 0.22% | E-OUT | E-OUT: animationProfile:staleMovePower (HP before/after + stale gAnimMovePower (value left by the previous animation)) @ a/sceneOnPresentation.ts:1699 |  Activation/window start: endeavor-player 2339/2345, endeavor-opponent none produced. |
 
 ### PROVIDER-x (4)
@@ -132,9 +131,9 @@ Ranked by remaining moves that become fully unlocked when that provider alone is
 
 | Provider | Alone unlocks | Weight | Touching | Touching weight | Cost / claim | Unlocked moves |
 |---|---:|---:|---:|---:|---|---|
-| E-OUT | +2 | 0.89% | 4 | 1.10% | per-move plumbing from resolution (secondary-effect / HP / stale-power values). exact outcome data; no RNG ownership | ENDEAVOR, FIRE_PUNCH |
 | X-SWITCH | +1 | 0.48% | 1 | 0.48% | new flow owner (switch / forced-switch presentation; shares the pending 'actual switches' graphics ownership). separate S10x program: forced replacement and summaries are explicitly pending in docs/animation-integration-live-status.json | BATON_PASS |
 | X-SUBST | +1 | 0.22% | 1 | 0.22% | persistent Substitute doll sprite state | SUBSTITUTE |
+| E-OUT | +1 | 0.22% | 3 | 0.43% | per-move plumbing from resolution (secondary-effect / HP / stale-power values). exact outcome data; no RNG ownership | ENDEAVOR |
 | C | +1 | 0.22% | 31 | 3.51% | new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4). NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact | METEOR_MASH |
 | X-AGE | +1 | 0.11% | 1 | 0.11% | accepted evidence lacks the early source ages (age basis) | EXTREME_SPEED |
 | D-SCAN | +1 | 0.04% | 4 | 0.70% | gScanlineEffect buffers | MEMENTO |
@@ -152,20 +151,20 @@ Greedy build order (each step = the provider/bundle with the most newly unlocked
 
 | Step | Provider | New moves | New weight | Cumulative remaining unlocked | Newly unlocked |
 |---:|---|---:|---:|---:|---|
-| 1 | E-OUT | +2 | 0.89% | 2 | ENDEAVOR, FIRE_PUNCH |
-| 2 | X-SWITCH | +1 | 0.48% | 3 | BATON_PASS |
-| 3 | X-SUBST | +1 | 0.22% | 4 | SUBSTITUTE |
-| 4 | C | +1 | 0.22% | 5 | METEOR_MASH |
-| 5 | A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio) | +28 | 3.00% | 33 | BONEMERANG, CURSE, ERUPTION, EXTRASENSORY, FLATTER, HYPER_VOICE, LOVELY_KISS, LUSTER_PURGE, MACH_PUNCH, MEGAHORN, MEMENTO, NIGHTMARE, OCTAZOOKA, OUTRAGE, PSYWAVE, RAPID_SPIN, RETURN, REVENGE, SAND_TOMB, SHEER_COLD, SHOCK_WAVE, SIGNAL_BEAM, SKILL_SWAP, SKY_ATTACK, SMOG, SNORE, SPIKES, SUPERPOWER |
-| 6 | X-DISABLE | +2 | 0.15% | 35 | ICE_BALL, SPIT_UP |
-| 7 | X-TWOTURN | +1 | 0.19% | 36 | DIVE |
-| 8 | X-AGE | +1 | 0.11% | 37 | EXTREME_SPEED |
-| 9 | D-PAL | +0 | 0.00% | 37 | - |
-| 10 | D-TILE | +0 | 0.00% | 37 | - |
-| 11 | D-BG | +0 | 0.00% | 37 | - |
-| 12 | D-OAM | +0 | 0.00% | 37 | - |
-| 13 | D-VRAM | +0 | 0.00% | 37 | - |
-| 14 | D-SCAN | +0 | 0.00% | 37 | - |
+| 1 | X-SWITCH | +1 | 0.48% | 1 | BATON_PASS |
+| 2 | X-SUBST | +1 | 0.22% | 2 | SUBSTITUTE |
+| 3 | E-OUT | +1 | 0.22% | 3 | ENDEAVOR |
+| 4 | C | +1 | 0.22% | 4 | METEOR_MASH |
+| 5 | A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio) | +28 | 3.00% | 32 | BONEMERANG, CURSE, ERUPTION, EXTRASENSORY, FLATTER, HYPER_VOICE, LOVELY_KISS, LUSTER_PURGE, MACH_PUNCH, MEGAHORN, MEMENTO, NIGHTMARE, OCTAZOOKA, OUTRAGE, PSYWAVE, RAPID_SPIN, RETURN, REVENGE, SAND_TOMB, SHEER_COLD, SHOCK_WAVE, SIGNAL_BEAM, SKILL_SWAP, SKY_ATTACK, SMOG, SNORE, SPIKES, SUPERPOWER |
+| 6 | X-DISABLE | +2 | 0.15% | 34 | ICE_BALL, SPIT_UP |
+| 7 | X-TWOTURN | +1 | 0.19% | 35 | DIVE |
+| 8 | X-AGE | +1 | 0.11% | 36 | EXTREME_SPEED |
+| 9 | D-PAL | +0 | 0.00% | 36 | - |
+| 10 | D-TILE | +0 | 0.00% | 36 | - |
+| 11 | D-BG | +0 | 0.00% | 36 | - |
+| 12 | D-OAM | +0 | 0.00% | 36 | - |
+| 13 | D-VRAM | +0 | 0.00% | 36 | - |
+| 14 | D-SCAN | +0 | 0.00% | 36 | - |
 
 Notes:
 - **Random2 is the keystone but non-exact.** It touches the most remaining moves and, after the allocator-v2 and A6 steps, unlocks 1 more; production cannot reconstruct `gRng2Value` (it advances every rendered frame and with every earlier animation's draws, `docs/visual-randomness-prep.md` s4). A presentation LCG is ROM-faithful in distribution and draw order only; the claim boundary (a non-exact presentation class beside the exact one) must be decided before building it. It cannot make a move exact on its own.
@@ -177,12 +176,19 @@ Notes:
 
 ### P2: SMALL-INPUT (derived): one named input / reducer parameter each (docs/next-adapters-prep10.md measures them)
 
-2 moves, 0.89% of Factory move uses.
+1 moves, 0.22% of Factory move uses.
 
 | Order | Move | Group | needs | Weight | Measured prep / still needed |
 |---:|---|---|---|---:|---|
-| 1 | FIRE_PUNCH | SMALL-INPUT | E-OUT | 0.67% | activation measured (2 receipts); E-OUT: view.burnFlames depend on resolution.secondaryRollSucceeded and resolution.faint (burn roll + target faint outcomes), which the MOVE_ANIMATION request does not carry; the view bundles status-animation flames with the move body |
-| 2 | ENDEAVOR | SMALL-INPUT | E-OUT | 0.22% | activation measured (2 receipts); E-OUT: animationProfile:staleMovePower (HP before/after + stale gAnimMovePower (value left by the previous animation)) |
+| 1 | ENDEAVOR | SMALL-INPUT | E-OUT | 0.22% | activation measured (2 receipts); E-OUT: animationProfile:staleMovePower (HP before/after + stale gAnimMovePower (value left by the previous animation)) |
+
+### P3: first provider build (derived from the greedy order): X-SWITCH
+
+1 moves, 0.48% of Factory move uses.
+
+| Order | Move | Group | needs | Weight | Measured prep / still needed |
+|---:|---|---|---|---:|---|
+| 1 | BATON_PASS | PROVIDER-X-SWITCH | X-SWITCH | 0.48% | no activation receipt; X-SWITCH: attackanimation; openpartyscreen; switchoutabilities; returntoball; switchinanim after the body |
 
 Batches are derived each run: P1 = READY-NOW, P2 = SMALL-INPUT (measured in `docs/next-adapters-prep10.md`), P3 = the first greedy provider.
 
@@ -204,8 +210,6 @@ Direct independent mGBA runs (Scene ON, one fresh run per scenario, `tools/integ
 |---|---|---:|---|---:|---:|---:|---:|
 | ENDEAVOR | endeavor-player (staged) | 2339 | 2345..2485 | -6 | 79 | -8 | 67 |
 | ENDEAVOR | endeavor-opponent (staged) | - | - | - | - | - | - |
-| FIRE_PUNCH | fire-punch-player (staged) | 2340 | 2313..2537 | 27 | 96 | 27 | 101 |
-| FIRE_PUNCH | fire-punch-opponent (staged) | 1967 | 2081..2357 | -114 | 289 | -114 | 101 |
 
 Reading: for Aerial Ace / Quick Attack / Feather Dance the accepted dense window starts 31-37 frames BEFORE the script activation and runs 148-198 frames past it (the whole controller timeline), so a live window that starts at the activation frame needs the reducer age at activation (38-44) as its age basis, and ends at the script end; Ice Punch, Sleep Talk, Magnitude, Reversal and the opponent Rock Slide have window start == activation (row 0).
 

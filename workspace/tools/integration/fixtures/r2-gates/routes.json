@@ -1,0 +1,114 @@
+{
+ "note": "Ordinary generated routes (tools/integration/generatedCommandAnimationReplay.ts, move slots per turn = [[0,1,2,3],[1,2,3,0]][seed % 2], factoryWinStreak per entry); every body adapter-active every age, next prompt = action-menu, Scene ON/OFF boundaries/RNG equal (tests/animation/liveFirePunchBody.test.ts, tests/animation/liveLaterBodiesBg.test.ts). Search tools: r2GatesRouteScan.ts, r2GatesCarrierRoutes.ts, r2GatesOpponentSeedScan.ts, r2GatesBurnCheck.ts.",
+ "fire-punch": [
+  {
+   "seed": 70,
+   "streak": 0,
+   "index": 0,
+   "attacker": "player",
+   "pair": "MAGBY -> PHANPY",
+   "prior": "",
+   "burn": false
+  },
+  {
+   "seed": 180,
+   "streak": 0,
+   "index": 0,
+   "attacker": "player",
+   "pair": "MAGBY -> SABLEYE",
+   "prior": "",
+   "burn": false
+  },
+  {
+   "seed": 65,
+   "streak": 0,
+   "index": 1,
+   "attacker": "opponent",
+   "pair": "TENTACOOL <- MAGBY",
+   "prior": "109o",
+   "burn": false,
+   "note": "index 2 is a second Fire Punch (prior 109o,7o)"
+  },
+  {
+   "seed": 389,
+   "streak": 0,
+   "index": 2,
+   "attacker": "opponent",
+   "pair": "FARFETCH'D <- MAGBY",
+   "prior": "109o,282p",
+   "burn": false
+  },
+  {
+   "seed": 780,
+   "streak": 0,
+   "index": 0,
+   "attacker": "player",
+   "pair": "MAGBY -> ?",
+   "prior": "",
+   "burn": true,
+   "note": "target burned after the body (5 burn semantic events); Status_Burn is not drawn: no flames, prompt reached"
+  }
+ ],
+ "overheat-later-body": [
+  {
+   "seed": 43,
+   "streak": 35,
+   "index": 1,
+   "attacker": "player",
+   "pair": "BLAZIKEN vs SNORLAX",
+   "prior": "25o",
+   "active": true
+  },
+  {
+   "seed": 162,
+   "streak": 14,
+   "index": 1,
+   "attacker": "player",
+   "pair": "TORKOAL vs PERSIAN",
+   "prior": "218o",
+   "active": true
+  },
+  {
+   "seed": 175,
+   "streak": 35,
+   "index": 1,
+   "attacker": "player",
+   "pair": "RAPIDASH vs ESPEON",
+   "prior": "273o",
+   "active": true
+  },
+  {
+   "seed": 143,
+   "streak": 28,
+   "index": 1,
+   "attacker": "player",
+   "pair": "GRANBULL vs JOLTEON",
+   "prior": "85o",
+   "active": false,
+   "note": "order unknown after an unplanned predecessor: declines"
+  }
+ ],
+ "psych-up-opponent": [
+  {
+   "seed": 336,
+   "streak": 7,
+   "index": 0,
+   "attacker": "opponent",
+   "pair": "SNEASEL vs JUMPLUFF",
+   "prior": "",
+   "active": true
+  },
+  {
+   "seed": 713,
+   "streak": 7,
+   "index": 0,
+   "attacker": "opponent",
+   "pair": "PLUSLE vs JUMPLUFF",
+   "prior": "",
+   "active": true
+  },
+  {
+   "searched": "streaks 7/21/28/35/49/56, every seed < 1500 whose opponent party leads with a Psych Up carrier (<= 16 seeds per streak), 3 turns; later opponent Psych Up bodies (seeds 122, 276, 159, 273, 216, 450, 780, 1361, 1461, 863) all followed an unplanned predecessor (Swagger 207 / High Jump Kick 136 / ...) and declined; none had a known lend"
+  }
+ ]
+}

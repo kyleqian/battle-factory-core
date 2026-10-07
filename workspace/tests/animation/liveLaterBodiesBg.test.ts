@@ -73,7 +73,7 @@ const frame = (state: SceneOnMovePresentationState, age: number): string => {
 };
 
 describe("live later-body Silver Wind / Psych Up (BG-register history not consumed)", () => {
-  it("gates Silver Wind and Psych Up (player) on a known lend with the known-entry occupancy; Overheat keeps firstBody", () => {
+  it("gates Silver Wind and Psych Up (player) on a known lend with the known-entry occupancy; Overheat both sides and the opponent Psych Up follow (lb21)", () => {
     const sw = displayed("BUTTERFREE", "ONIX"), pu = displayed("JUMPLUFF", "SHUCKLE"), oh = displayed("SOLROCK", "SHUCKLE");
     for (const [f, id, a] of [[sw, 318, 0], [displayed("ONIX", "BUTTERFREE"), 318, 1], [pu, 244, 0]] as const) {
       expect(cfg(f, request(id, a), laterOrder())).not.toBeNull();
@@ -82,9 +82,14 @@ describe("live later-body Silver Wind / Psych Up (BG-register history not consum
       // A lend whose free set is not the known-entry complement (a slot taken) declines.
       expect(cfg(f, request(id, a), { known: true, free: laterOrder().free.slice(1) })).toBeNull();
     }
-    expect(cfg(oh, request(315, 0), firstOrder())).not.toBeNull();
-    expect(cfg(oh, request(315, 0), laterOrder())).toBeNull();
-    expect(liveMoveAnimationDuration(request(244, 1))).toBeNull();
+    // lb21 (later-bodies-bg-2): Overheat (both sides) and Psych Up (opponent attacker too) are gated on a known lend as well.
+    for (const [f, id, a] of [[oh, 315, 0], [displayed("SHUCKLE", "SOLROCK"), 315, 1], [displayed("GOLEM", "JUMPLUFF"), 244, 1]] as const) {
+      expect(cfg(f, request(id, a), firstOrder())).not.toBeNull();
+      expect(cfg(f, request(id, a), laterOrder())).not.toBeNull();
+      expect(cfg(f, request(id, a))).toBeNull();
+      expect(cfg(f, request(id, a), { known: false } as never)).toBeNull();
+    }
+    expect(liveMoveAnimationDuration(request(244, 1))).toBe(179);
   });
 
   // Experiment (b): the production move compositor (renderSceneOnMovePresentation, live field) renders every age identically with

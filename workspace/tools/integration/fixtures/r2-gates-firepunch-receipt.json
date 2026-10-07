@@ -1,0 +1,1042 @@
+{
+ "schema": "r2-gates-firepunch-receipt/v1",
+ "testedCommit": "6dc962856",
+ "srcTree": "b88557b1d3a74bc2e47ee31407e71d65a63abbcb",
+ "renderer": "UNPATCHED production live renderer (tools/integration/liveAdapterFramebuffer.ts: direct mGBA, 2 fresh probe processes per fixture; windows = each scenario's own source activation, never matched to live output)",
+ "firePunch": {
+  "fixtures": {
+   "fp-o-golbat-machamp": {
+    "rows": 101,
+    "expectedDuration": 101,
+    "freshRuns": [
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "bb413971fada0e326a7774fca222388779a4d1746432e1f5b5941a4e50af3160"
+     },
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "bb413971fada0e326a7774fca222388779a4d1746432e1f5b5941a4e50af3160"
+     }
+    ]
+   },
+   "fp-o-snorlax-golem": {
+    "rows": 101,
+    "expectedDuration": 101,
+    "freshRuns": [
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "bc10a46a6a7883dfa6d9590f0b380f83ffa4c47e0fc534574b88b4f2b9b854b0"
+     },
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "bc10a46a6a7883dfa6d9590f0b380f83ffa4c47e0fc534574b88b4f2b9b854b0"
+     }
+    ]
+   },
+   "fp-opponent-burn": {
+    "rows": 101,
+    "expectedDuration": 101,
+    "freshRuns": [
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "aaf884797e6f053e11dc713eb481b914685a5da8ca2241e26bef323a4b15f31c"
+     },
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "aaf884797e6f053e11dc713eb481b914685a5da8ca2241e26bef323a4b15f31c"
+     }
+    ]
+   },
+   "fp-opponent-faint": {
+    "rows": 101,
+    "expectedDuration": 101,
+    "freshRuns": [
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "5cf549e2f02a34ba43f7f4a152c6eeea19c1fad76fc661631950fb77291879bd"
+     },
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "5cf549e2f02a34ba43f7f4a152c6eeea19c1fad76fc661631950fb77291879bd"
+     }
+    ]
+   },
+   "fp-opponent-noburn": {
+    "rows": 101,
+    "expectedDuration": 101,
+    "freshRuns": [
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "5ab5731031124e9e7b0f2ebb82027c78b2b9e0c15cb5e4b7d948df86657f8c17"
+     },
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "5ab5731031124e9e7b0f2ebb82027c78b2b9e0c15cb5e4b7d948df86657f8c17"
+     }
+    ]
+   },
+   "fp-p-hitmonchan-golbat": {
+    "rows": 101,
+    "expectedDuration": 101,
+    "freshRuns": [
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "915ac614463c625e4c0fa2b91aa4f3b30117c3d74d06201c1174aecd769318e6"
+     },
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "915ac614463c625e4c0fa2b91aa4f3b30117c3d74d06201c1174aecd769318e6"
+     }
+    ]
+   },
+   "fp-p-snorlax-alakazam": {
+    "rows": 101,
+    "expectedDuration": 101,
+    "freshRuns": [
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "2b3d66393b0614b96a292f1cfb6906dba50b36a622cb443cf61686cf60a2f104"
+     },
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "2b3d66393b0614b96a292f1cfb6906dba50b36a622cb443cf61686cf60a2f104"
+     }
+    ]
+   },
+   "fp-player-burn": {
+    "rows": 101,
+    "expectedDuration": 101,
+    "freshRuns": [
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "b460baa6c9a31779303affcf8d2ec68fb0ac877b9abada6b3c417601c1bbc1a8"
+     },
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "b460baa6c9a31779303affcf8d2ec68fb0ac877b9abada6b3c417601c1bbc1a8"
+     }
+    ]
+   },
+   "fp-player-faint": {
+    "rows": 101,
+    "expectedDuration": 101,
+    "freshRuns": [
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "88a06805e3dd6b7ebb5237ec67e60d3984cef4f2ace457b1fd16421b9aaab019"
+     },
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "88a06805e3dd6b7ebb5237ec67e60d3984cef4f2ace457b1fd16421b9aaab019"
+     }
+    ]
+   },
+   "fp-player-noburn": {
+    "rows": 101,
+    "expectedDuration": 101,
+    "freshRuns": [
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "9ec90f9dfecb0aaed1bae026590f12a090b036dcaa69049fcae3a853f7878e9f"
+     },
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "9ec90f9dfecb0aaed1bae026590f12a090b036dcaa69049fcae3a853f7878e9f"
+     }
+    ]
+   },
+   "fp-staged-opponent": {
+    "rows": 101,
+    "expectedDuration": 101,
+    "freshRuns": [
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "6af25fd835f3b3e93ef4647c7712276e86b05e9fd3595eb12836a0ac8d0d4680"
+     },
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "6af25fd835f3b3e93ef4647c7712276e86b05e9fd3595eb12836a0ac8d0d4680"
+     }
+    ]
+   },
+   "fp-staged-player": {
+    "rows": 101,
+    "expectedDuration": 101,
+    "freshRuns": [
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "a00bb60b285047f583937b48bfa2737cd4785a241c040e8481fd145f9e46103c"
+     },
+     {
+      "rows": 101,
+      "exactRows": 101,
+      "residualPixels": 0,
+      "digest": "a00bb60b285047f583937b48bfa2737cd4785a241c040e8481fd145f9e46103c"
+     }
+    ]
+   }
+  }
+ },
+ "psychUpOpponentAlternates": {
+  "fixtures": {
+   "pua-claydol-golem-b0": {
+    "rows": 179,
+    "expectedDuration": 179,
+    "freshRuns": [
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "634b4c59c3fb4c7a019420ca8019d1afe4682b0a1a034a495f3991f9dc74a517"
+     },
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "634b4c59c3fb4c7a019420ca8019d1afe4682b0a1a034a495f3991f9dc74a517"
+     }
+    ]
+   },
+   "pua-hypno-golbat-b0": {
+    "rows": 179,
+    "expectedDuration": 179,
+    "freshRuns": [
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "d261563321e68525e5891e2b8763a5413c284f8170cffed7bf1bea6012173cdb"
+     },
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "d261563321e68525e5891e2b8763a5413c284f8170cffed7bf1bea6012173cdb"
+     }
+    ]
+   }
+  },
+  "declined": {
+   "r2g-pua-mrmime-magneton": "MR_MIME -> MAGNETON: constant 537 px/row from age 0 (field 189 + chrome 348), 0/179 exact rows twice fresh; not body dependent, unresolved, not claimed (fixture not committed)"
+  }
+ },
+ "lb21LaterBodies": {
+  "fixtures": {
+   "oh2-o-growl-b0": {
+    "rows": 230,
+    "expectedDuration": 230,
+    "freshRuns": [
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "fe250137237a865b86e6e24e0319f5b0d136138e5b3e6c0d406a2c6a0b03ae92"
+     },
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "fe250137237a865b86e6e24e0319f5b0d136138e5b3e6c0d406a2c6a0b03ae92"
+     }
+    ]
+   },
+   "oh2-o-psychic-b0": {
+    "rows": 230,
+    "expectedDuration": 230,
+    "freshRuns": [
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "cf5e6910ba959aeedb3ce40d990013a37dc1664ff3f8f687452a98233ff9c1e7"
+     },
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "cf5e6910ba959aeedb3ce40d990013a37dc1664ff3f8f687452a98233ff9c1e7"
+     }
+    ]
+   },
+   "oh2-o-splash-b0": {
+    "rows": 230,
+    "expectedDuration": 230,
+    "freshRuns": [
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "e73eb0dcb02c0c4e03848b9cd519f8c3534c0122b8903db72d2659000ed26e74"
+     },
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "e73eb0dcb02c0c4e03848b9cd519f8c3534c0122b8903db72d2659000ed26e74"
+     }
+    ]
+   },
+   "oh2-o-swordsdance-b0": {
+    "rows": 230,
+    "expectedDuration": 230,
+    "freshRuns": [
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "a633914686935c4ea40574afc31f80f07d559abcbb53d4fc6998239c72a145f8"
+     },
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "a633914686935c4ea40574afc31f80f07d559abcbb53d4fc6998239c72a145f8"
+     }
+    ]
+   },
+   "oh2-o-tackle-b0": {
+    "rows": 230,
+    "expectedDuration": 230,
+    "freshRuns": [
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "dc9a840af65b3f9c2a4681a9fe9a784156f09247ccac1014783be3a53a6c1b3d"
+     },
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "dc9a840af65b3f9c2a4681a9fe9a784156f09247ccac1014783be3a53a6c1b3d"
+     }
+    ]
+   },
+   "oh2-p-growl-b0": {
+    "rows": 230,
+    "expectedDuration": 230,
+    "freshRuns": [
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "16d15bcbf4437b3fec17b10a8379be2af2bba294e2f64fdf616b30863885a92f"
+     },
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "16d15bcbf4437b3fec17b10a8379be2af2bba294e2f64fdf616b30863885a92f"
+     }
+    ]
+   },
+   "oh2-p-psychic-b0": {
+    "rows": 230,
+    "expectedDuration": 230,
+    "freshRuns": [
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "4223f16d8790e287d8c0cbb32d1053777566470787baa3afd33d4960bae95d24"
+     },
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "4223f16d8790e287d8c0cbb32d1053777566470787baa3afd33d4960bae95d24"
+     }
+    ]
+   },
+   "oh2-p-splash-b0": {
+    "rows": 230,
+    "expectedDuration": 230,
+    "freshRuns": [
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "0b248618445afc4e932da8609d83ac9f5f39db5f535d84ea84ea9f3fe94f8f5f"
+     },
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "0b248618445afc4e932da8609d83ac9f5f39db5f535d84ea84ea9f3fe94f8f5f"
+     }
+    ]
+   },
+   "oh2-p-swordsdance-b0": {
+    "rows": 230,
+    "expectedDuration": 230,
+    "freshRuns": [
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "2959e6d2b6deda649177f83f6003851343531f48e0b1c13752f5a349ae4609e3"
+     },
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "2959e6d2b6deda649177f83f6003851343531f48e0b1c13752f5a349ae4609e3"
+     }
+    ]
+   },
+   "oh2-p-tackle-b0": {
+    "rows": 230,
+    "expectedDuration": 230,
+    "freshRuns": [
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "c1ee55b815f44e9b58b6a80a93485471f72cae9edb0db4ab5550d7df6ab4e48e"
+     },
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "c1ee55b815f44e9b58b6a80a93485471f72cae9edb0db4ab5550d7df6ab4e48e"
+     }
+    ]
+   },
+   "pu-o-first-b0": {
+    "rows": 179,
+    "expectedDuration": 179,
+    "freshRuns": [
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "74efd226a344999810164f353c1656872b5dad732674235d33006efe896c1792"
+     },
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "74efd226a344999810164f353c1656872b5dad732674235d33006efe896c1792"
+     }
+    ]
+   },
+   "pu-o-growl-b0": {
+    "rows": 179,
+    "expectedDuration": 179,
+    "freshRuns": [
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "b65dd7cc3b79664833b177247dd57996899feea7a43ac6d00415688755957f80"
+     },
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "b65dd7cc3b79664833b177247dd57996899feea7a43ac6d00415688755957f80"
+     }
+    ]
+   },
+   "pu-o-psychic-b0": {
+    "rows": 179,
+    "expectedDuration": 179,
+    "freshRuns": [
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "6e20bd5d385754dac81f6ff4c51aee9ea452986597deaf0c1da24d2aae5e8efe"
+     },
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "6e20bd5d385754dac81f6ff4c51aee9ea452986597deaf0c1da24d2aae5e8efe"
+     }
+    ]
+   },
+   "pu-o-splash-b0": {
+    "rows": 179,
+    "expectedDuration": 179,
+    "freshRuns": [
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "d7b59989ee4758f9772bcd3f0a9d0b8af5dc3296290ec02a68b585afad8f9cab"
+     },
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "d7b59989ee4758f9772bcd3f0a9d0b8af5dc3296290ec02a68b585afad8f9cab"
+     }
+    ]
+   },
+   "pu-o-swordsdance-b0": {
+    "rows": 179,
+    "expectedDuration": 179,
+    "freshRuns": [
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "f3566dabef25e1b6e9f076059ee2ded2398dff0f3fe897f26856577231ec0eee"
+     },
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "f3566dabef25e1b6e9f076059ee2ded2398dff0f3fe897f26856577231ec0eee"
+     }
+    ]
+   },
+   "pu-o-tackle-b0": {
+    "rows": 179,
+    "expectedDuration": 179,
+    "freshRuns": [
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "fb8b76afe0c2b870e5af6219f6403ea270cbf1a0f6fc6dfecb5786fe951e7ba4"
+     },
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "fb8b76afe0c2b870e5af6219f6403ea270cbf1a0f6fc6dfecb5786fe951e7ba4"
+     }
+    ]
+   },
+   "pu-o-tackle-b1-ownpsychup": {
+    "rows": 179,
+    "expectedDuration": 179,
+    "freshRuns": [
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "0f14e9c5072eeaf2da6653a0540699bf0dc84d7035798a217d865563697b4b5b"
+     },
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "0f14e9c5072eeaf2da6653a0540699bf0dc84d7035798a217d865563697b4b5b"
+     }
+    ]
+   }
+  },
+  "note": "Overheat both sides after Tackle / Splash / Psychic / Growl+stat / Swords Dance+stat; Psych Up opponent first body + 5 later + 1 after its own Psych Up; docs/later-bodies-overheat-psychup.md"
+ },
+ "existingRegression": {
+  "prep16Live": {
+   "overheat-alt-player-charizard-golem": {
+    "rows": 230,
+    "expectedDuration": 230,
+    "freshRuns": [
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "5796baf791ef198b03697a8e83b92c40f79828b66634b286102a59e2226b2543"
+     },
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "5796baf791ef198b03697a8e83b92c40f79828b66634b286102a59e2226b2543"
+     }
+    ]
+   },
+   "overheat-opponent-magcargo-player-shuckle": {
+    "rows": 230,
+    "expectedDuration": 230,
+    "freshRuns": [
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "70f59dd9aba19eb2d2f7e723fe8e5d9c47f5995bf9d9f57d02ce0c20c7f80e80"
+     },
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "70f59dd9aba19eb2d2f7e723fe8e5d9c47f5995bf9d9f57d02ce0c20c7f80e80"
+     }
+    ]
+   },
+   "overheat-player-solrock-opponent-shuckle": {
+    "rows": 230,
+    "expectedDuration": 230,
+    "freshRuns": [
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "fb1dd7c1acf56eb37b31e3cc953c6eae0db45a8ff361bb824a5f2a6863255aae"
+     },
+     {
+      "rows": 230,
+      "exactRows": 230,
+      "residualPixels": 0,
+      "digest": "fb1dd7c1acf56eb37b31e3cc953c6eae0db45a8ff361bb824a5f2a6863255aae"
+     }
+    ]
+   },
+   "psych-up-alt-player-skiploom-golem-first-body": {
+    "rows": 179,
+    "expectedDuration": 179,
+    "freshRuns": [
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "dfb36ad9dddca4a095ed534cae31126846bed845928f6bcc845fb41996c4435a"
+     },
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "dfb36ad9dddca4a095ed534cae31126846bed845928f6bcc845fb41996c4435a"
+     }
+    ]
+   },
+   "psych-up-player-jumpluff-opponent-shuckle-first-body": {
+    "rows": 179,
+    "expectedDuration": 179,
+    "freshRuns": [
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "cc455bfc7d780ebf8f46183ea178ae70ff2efd88606ee2e533d2cd26c0018079"
+     },
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "cc455bfc7d780ebf8f46183ea178ae70ff2efd88606ee2e533d2cd26c0018079"
+     }
+    ]
+   },
+   "silver-wind-alt-player-beautifly-golem": {
+    "rows": 193,
+    "expectedDuration": 193,
+    "freshRuns": [
+     {
+      "rows": 193,
+      "exactRows": 193,
+      "residualPixels": 0,
+      "digest": "03e489832b8e0e980b7825d9881ac57d5def3db1c9a08c60df0ef422662f20ab"
+     },
+     {
+      "rows": 193,
+      "exactRows": 193,
+      "residualPixels": 0,
+      "digest": "03e489832b8e0e980b7825d9881ac57d5def3db1c9a08c60df0ef422662f20ab"
+     }
+    ]
+   },
+   "silver-wind-opponent-butterfree-player-onix-first-body": {
+    "rows": 196,
+    "expectedDuration": 196,
+    "freshRuns": [
+     {
+      "rows": 196,
+      "exactRows": 196,
+      "residualPixels": 0,
+      "digest": "0829ffe22927b4d74fcb4c9c2e51258c4b9072111cfc4ed5a1c29f690ce09c69"
+     },
+     {
+      "rows": 196,
+      "exactRows": 196,
+      "residualPixels": 0,
+      "digest": "0829ffe22927b4d74fcb4c9c2e51258c4b9072111cfc4ed5a1c29f690ce09c69"
+     }
+    ]
+   },
+   "silver-wind-player-butterfree-opponent-onix": {
+    "rows": 193,
+    "expectedDuration": 193,
+    "freshRuns": [
+     {
+      "rows": 193,
+      "exactRows": 193,
+      "residualPixels": 0,
+      "digest": "1b6bba80f615daf30e5ef035aab6d36762beabc6c28ecf9b6decbc5d663ec3f0"
+     },
+     {
+      "rows": 193,
+      "exactRows": 193,
+      "residualPixels": 0,
+      "digest": "1b6bba80f615daf30e5ef035aab6d36762beabc6c28ecf9b6decbc5d663ec3f0"
+     }
+    ]
+   }
+  },
+  "laterBodiesBg": {
+   "pu-p-psychic": {
+    "rows": 179,
+    "expectedDuration": 179,
+    "freshRuns": [
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "c67f37417b616445edeb69baf8b0dc4c0e27bcd9cb8932b09b393ae0fb03f57a"
+     },
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "c67f37417b616445edeb69baf8b0dc4c0e27bcd9cb8932b09b393ae0fb03f57a"
+     }
+    ]
+   },
+   "pu-p-splash": {
+    "rows": 179,
+    "expectedDuration": 179,
+    "freshRuns": [
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "958c788ef2c68a5077023679e75499959486d3aaf828cd35fe4c9ebc08534d3f"
+     },
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "958c788ef2c68a5077023679e75499959486d3aaf828cd35fe4c9ebc08534d3f"
+     }
+    ]
+   },
+   "pu-p-tackle": {
+    "rows": 179,
+    "expectedDuration": 179,
+    "freshRuns": [
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "2a52c78faaedfc0ab8fa3919d899c05e097b5c4f36957ba2e101b78f3046b685"
+     },
+     {
+      "rows": 179,
+      "exactRows": 179,
+      "residualPixels": 0,
+      "digest": "2a52c78faaedfc0ab8fa3919d899c05e097b5c4f36957ba2e101b78f3046b685"
+     }
+    ]
+   },
+   "sw-o-psychic": {
+    "rows": 196,
+    "expectedDuration": 196,
+    "freshRuns": [
+     {
+      "rows": 196,
+      "exactRows": 196,
+      "residualPixels": 0,
+      "digest": "9d9c3c1608910899db9d01bbddd8c146454e8592f24721d1119160ef35963e1a"
+     },
+     {
+      "rows": 196,
+      "exactRows": 196,
+      "residualPixels": 0,
+      "digest": "9d9c3c1608910899db9d01bbddd8c146454e8592f24721d1119160ef35963e1a"
+     }
+    ]
+   },
+   "sw-o-splash-sw-splash": {
+    "rows": 196,
+    "expectedDuration": 196,
+    "freshRuns": [
+     {
+      "rows": 196,
+      "exactRows": 196,
+      "residualPixels": 0,
+      "digest": "1c506c967a6be977d065ca37b4b8682c9e9377fdb6cf29dfcf88ee031b66bf85"
+     },
+     {
+      "rows": 196,
+      "exactRows": 196,
+      "residualPixels": 0,
+      "digest": "1c506c967a6be977d065ca37b4b8682c9e9377fdb6cf29dfcf88ee031b66bf85"
+     }
+    ]
+   },
+   "sw-o-splash": {
+    "rows": 196,
+    "expectedDuration": 196,
+    "freshRuns": [
+     {
+      "rows": 196,
+      "exactRows": 196,
+      "residualPixels": 0,
+      "digest": "6bfb2f301290932cf065955cc54f16cb9a6927b8e0669c955dd49ae2c98286e5"
+     },
+     {
+      "rows": 196,
+      "exactRows": 196,
+      "residualPixels": 0,
+      "digest": "6bfb2f301290932cf065955cc54f16cb9a6927b8e0669c955dd49ae2c98286e5"
+     }
+    ]
+   },
+   "sw-o-tackle-sw": {
+    "rows": 196,
+    "expectedDuration": 196,
+    "freshRuns": [
+     {
+      "rows": 196,
+      "exactRows": 196,
+      "residualPixels": 0,
+      "digest": "a19e8cf74aa746323cec64942eb4e9b7059cfb844569cb24663547e93e987f98"
+     },
+     {
+      "rows": 196,
+      "exactRows": 196,
+      "residualPixels": 0,
+      "digest": "a19e8cf74aa746323cec64942eb4e9b7059cfb844569cb24663547e93e987f98"
+     }
+    ]
+   },
+   "sw-o-tackle": {
+    "rows": 196,
+    "expectedDuration": 196,
+    "freshRuns": [
+     {
+      "rows": 196,
+      "exactRows": 196,
+      "residualPixels": 0,
+      "digest": "a1744681da9215c451da8cdaa99106427771ccf2e225dfa607069a32d103ce63"
+     },
+     {
+      "rows": 196,
+      "exactRows": 196,
+      "residualPixels": 0,
+      "digest": "a1744681da9215c451da8cdaa99106427771ccf2e225dfa607069a32d103ce63"
+     }
+    ]
+   },
+   "sw-p-psychic": {
+    "rows": 193,
+    "expectedDuration": 193,
+    "freshRuns": [
+     {
+      "rows": 193,
+      "exactRows": 193,
+      "residualPixels": 0,
+      "digest": "d191f89e1967c1533eaa8faae42dcffaa518c92c104df10c35b31d33706ef48f"
+     },
+     {
+      "rows": 193,
+      "exactRows": 193,
+      "residualPixels": 0,
+      "digest": "d191f89e1967c1533eaa8faae42dcffaa518c92c104df10c35b31d33706ef48f"
+     }
+    ]
+   },
+   "sw-p-splash": {
+    "rows": 193,
+    "expectedDuration": 193,
+    "freshRuns": [
+     {
+      "rows": 193,
+      "exactRows": 193,
+      "residualPixels": 0,
+      "digest": "2a901b5ef90b2b367497ca67e97c1d2a5b7b846c56b43d84393e5ade4930d29b"
+     },
+     {
+      "rows": 193,
+      "exactRows": 193,
+      "residualPixels": 0,
+      "digest": "2a901b5ef90b2b367497ca67e97c1d2a5b7b846c56b43d84393e5ade4930d29b"
+     }
+    ]
+   },
+   "sw-p-tackle": {
+    "rows": 193,
+    "expectedDuration": 193,
+    "freshRuns": [
+     {
+      "rows": 193,
+      "exactRows": 193,
+      "residualPixels": 0,
+      "digest": "4391323a1f627505b24f1396c1f11cd6fd88ca241078f280b3df39e90c93d41d"
+     },
+     {
+      "rows": 193,
+      "exactRows": 193,
+      "residualPixels": 0,
+      "digest": "4391323a1f627505b24f1396c1f11cd6fd88ca241078f280b3df39e90c93d41d"
+     }
+    ]
+   }
+  }
+ },
+ "routes": {
+  "note": "Ordinary generated routes (tools/integration/generatedCommandAnimationReplay.ts, move slots per turn = [[0,1,2,3],[1,2,3,0]][seed % 2], factoryWinStreak per entry); every body adapter-active every age, next prompt = action-menu, Scene ON/OFF boundaries/RNG equal (tests/animation/liveFirePunchBody.test.ts, tests/animation/liveLaterBodiesBg.test.ts). Search tools: r2GatesRouteScan.ts, r2GatesCarrierRoutes.ts, r2GatesOpponentSeedScan.ts, r2GatesBurnCheck.ts.",
+  "fire-punch": [
+   {
+    "seed": 70,
+    "streak": 0,
+    "index": 0,
+    "attacker": "player",
+    "pair": "MAGBY -> PHANPY",
+    "prior": "",
+    "burn": false
+   },
+   {
+    "seed": 180,
+    "streak": 0,
+    "index": 0,
+    "attacker": "player",
+    "pair": "MAGBY -> SABLEYE",
+    "prior": "",
+    "burn": false
+   },
+   {
+    "seed": 65,
+    "streak": 0,
+    "index": 1,
+    "attacker": "opponent",
+    "pair": "TENTACOOL <- MAGBY",
+    "prior": "109o",
+    "burn": false,
+    "note": "index 2 is a second Fire Punch (prior 109o,7o)"
+   },
+   {
+    "seed": 389,
+    "streak": 0,
+    "index": 2,
+    "attacker": "opponent",
+    "pair": "FARFETCH'D <- MAGBY",
+    "prior": "109o,282p",
+    "burn": false
+   },
+   {
+    "seed": 780,
+    "streak": 0,
+    "index": 0,
+    "attacker": "player",
+    "pair": "MAGBY -> ?",
+    "prior": "",
+    "burn": true,
+    "note": "target burned after the body (5 burn semantic events); Status_Burn is not drawn: no flames, prompt reached"
+   }
+  ],
+  "overheat-later-body": [
+   {
+    "seed": 43,
+    "streak": 35,
+    "index": 1,
+    "attacker": "player",
+    "pair": "BLAZIKEN vs SNORLAX",
+    "prior": "25o",
+    "active": true
+   },
+   {
+    "seed": 162,
+    "streak": 14,
+    "index": 1,
+    "attacker": "player",
+    "pair": "TORKOAL vs PERSIAN",
+    "prior": "218o",
+    "active": true
+   },
+   {
+    "seed": 175,
+    "streak": 35,
+    "index": 1,
+    "attacker": "player",
+    "pair": "RAPIDASH vs ESPEON",
+    "prior": "273o",
+    "active": true
+   },
+   {
+    "seed": 143,
+    "streak": 28,
+    "index": 1,
+    "attacker": "player",
+    "pair": "GRANBULL vs JOLTEON",
+    "prior": "85o",
+    "active": false,
+    "note": "order unknown after an unplanned predecessor: declines"
+   }
+  ],
+  "psych-up-opponent": [
+   {
+    "seed": 336,
+    "streak": 7,
+    "index": 0,
+    "attacker": "opponent",
+    "pair": "SNEASEL vs JUMPLUFF",
+    "prior": "",
+    "active": true
+   },
+   {
+    "seed": 713,
+    "streak": 7,
+    "index": 0,
+    "attacker": "opponent",
+    "pair": "PLUSLE vs JUMPLUFF",
+    "prior": "",
+    "active": true
+   },
+   {
+    "searched": "streaks 7/21/28/35/49/56, every seed < 1500 whose opponent party leads with a Psych Up carrier (<= 16 seeds per streak), 3 turns; later opponent Psych Up bodies (seeds 122, 276, 159, 273, 216, 450, 780, 1361, 1461, 863) all followed an unplanned predecessor (Swagger 207 / High Jump Kick 136 / ...) and declined; none had a known lend"
+   }
+  ]
+ }
+}

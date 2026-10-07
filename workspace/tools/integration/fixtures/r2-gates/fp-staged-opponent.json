@@ -1,0 +1,38 @@
+{
+ "schema": "r2-gates-fire-punch-fixture/v1",
+ "move": "FIRE_PUNCH",
+ "probe": "tools/integration/prep7StagedProbe.py",
+ "scenario": "tools/probe/stage-fire-punch-portable-on.py",
+ "attacker": {
+  "species": "GROVYLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 117,
+  "opponentHp": 143,
+  "playerStatus": "none",
+  "playerMaxHp": 117,
+  "opponentMaxHp": 143,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "denseWindow": {
+  "startFrame": 1967,
+  "endFrame": 2067,
+  "ageOffset": 0
+ },
+ "precedingBodies": [],
+ "probeArgs": [
+  "opponent",
+  "fire-punch"
+ ],
+ "windowSource": "r2-gates: staged Onix/Grovyle route body A..first inactive (prep22 s A.1: player 2340..2441, opponent 1967..2068)"
+}

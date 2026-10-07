@@ -54024,12 +54024,20 @@ export function renderSceneOnMovePresentation(
   const { attacker, target, resolution } = view;
   const player = attacker.geometry.side === "player" ? attacker : target;
   const opponent = attacker.geometry.side === "opponent" ? attacker : target;
-  if (player.species !== "ONIX" || opponent.species !== "GROVYLE") {
+  if (!liveField && (player.species !== "ONIX" || opponent.species !== "GROVYLE")) {
     throw new Error(
       `unsupported staged FIRE_PUNCH pair ${attacker.species}->${target.species}`,
     );
   }
 
+  // Live art follows the displayed species (liveMoveAnimation gates out non-zero idle rests: the staged corner carries none);
+  // the burn flames belong to the separate Status_Burn body 152-155 frames after this 101-frame script (prep22 s0.1), never to it.
+  const playerArt = liveField ? liveSceneOnBattlerArt(player) : onixBackSprite;
+  const opponentArt = liveField ? liveSceneOnBattlerArt(opponent) : grovyleFrontSprite;
+  // The opponent's settled front idle offset is added to the production field origin; the target's hit shake (AnimTask_ShakeMon,
+  // first row = reducer age 72) replaces it for good (x2 = 0, y2 = the shake value).
+  const opponentIdleBase = liveField ? sceneOnBattlerFrontIdleRest(opponent) : { x2: 0, y2: 0 };
+  const opponentIdle = target.geometry.side === "opponent" && view.animationAge >= 72 ? { x2: 0, y2: 0 } : opponentIdleBase;
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
   const coeff = firePunchTargetBlendCoeff(view.animationAge);
   const blendedTargetPalette = (palette: RgbColor[]): RgbColor[] => (
@@ -54044,10 +54052,10 @@ export function renderSceneOnMovePresentation(
   if (target.geometry.side !== "player" || !resolution.targetInvisible) {
     drawSpriteSheet(
       fb,
-      onixBackSprite.tileset,
+      playerArt.tileset,
       target.geometry.side === "player"
-        ? blendedTargetPalette(onixBackSprite.palette)
-        : onixBackSprite.palette,
+        ? blendedTargetPalette(playerArt.palette)
+        : playerArt.palette,
       player.geometry.spriteCorner.x,
       player.geometry.spriteCorner.y
         + (target.geometry.side === "player"
@@ -54058,12 +54066,12 @@ export function renderSceneOnMovePresentation(
   if (target.geometry.side !== "opponent" || !resolution.targetInvisible) {
     drawSpriteSheet(
       fb,
-      grovyleFrontSprite.tileset,
+      opponentArt.tileset,
       target.geometry.side === "opponent"
-        ? blendedTargetPalette(grovyleFrontSprite.palette)
-        : grovyleFrontSprite.palette,
-      opponent.geometry.spriteCorner.x,
-      opponent.geometry.spriteCorner.y
+        ? blendedTargetPalette(opponentArt.palette)
+        : opponentArt.palette,
+      opponent.geometry.spriteCorner.x + opponentIdle.x2,
+      opponent.geometry.spriteCorner.y + opponentIdle.y2
         + (target.geometry.side === "opponent"
           ? firePunchTargetShakeY2(view.animationAge)
           : 0),
@@ -54072,7 +54080,7 @@ export function renderSceneOnMovePresentation(
 
   const beforeEffects = fb.slice();
   drawFirePunchParticleList(fb, view.particles);
-  drawFirePunchParticleList(fb, view.burnFlames);
+  if (!liveField) drawFirePunchParticleList(fb, view.burnFlames);
   const frontEffects = beforeEffects.slice();
   const impactCoverage = new Uint8Array(240 * 160);
   drawFirePunchImpact(
@@ -54088,6 +54096,8 @@ export function renderSceneOnMovePresentation(
     fb[i + 2] = frontEffects[i + 2]!;
     fb[i + 3] = frontEffects[i + 3]!;
   }
+
+  if (liveField) return; // the live field's healthboxes, text and menu belong to the queue's commands
 
   const opponentContent = opponentHealthboxContentForHp(
     target.geometry.side === "opponent"

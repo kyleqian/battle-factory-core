@@ -196,10 +196,12 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   237,
   // prep14 s1.7: Hail (no RNG; the target table is derived from the anchors).
   258,
-  // prep16 s2.1/2.2: Overheat, Silver Wind (first body only: BG-register constants; assets-only palette composite; !shiny).
+  // prep16 s2.1/2.2 + lb21: Overheat, Silver Wind (known order lend; assets-only palette composite; !shiny).
   315, 318,
-  // prep16 s2.3: Psych Up, player attacker first body only.
+  // prep16 s2.3 + lb21: Psych Up, both attackers (known order lend).
   244,
+  // r2-gates (docs/next-adapters-prep22.md s0/A): Fire Punch BODY only (101 rows; the burn flames are the separate Status_Burn body).
+  7,
 ] as const);
 
 /** In-use OBJ slots at a first-body activation (prep14 s1: equal in all 24 probed scenarios). */
@@ -261,8 +263,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // rows owned by the preceding message command); the live age basis is the activation frame (reducer age 42 / 44), so
     // the shadow row is live age 0.
     332, 98,
-    // Ice Punch (staged windows start at activation: row 0). Sleep Talk likewise.
-    8, 214, 157, 126, 349,
+    // Ice Punch (staged windows start at activation: row 0). Sleep Talk likewise. Fire Punch (prep22 s0.2: body A = row 0).
+    8, 7, 214, 157, 126, 349,
     // prep8 (issue142-shadow-rows-extra.json): every window starts at the activation frame (row 0).
     129, 271, 218, 69, 32, 62, 253, 85, 254, 192,
     // prep10 (issue142-shadow-rows-extra.json): Magnitude / Reversal windows start at the activation frame (row 0).
@@ -741,6 +743,7 @@ export function liveMoveAnimationDuration(
     case 138: return request.attacker === 0 ? 266 : 267; // Dream Eater 1308..1573 / 2146..2412 (after Tackle, Sing).
     case 349: return 142; // Dragon Dance (78..219 / 74..215): window start = activation, window end = script end.
     case 126: return 197; // Fire Blast (1147..1343 / 215..411): window start = activation, window end = script end.
+    case 7: return 101; // Fire Punch body A..first inactive (prep22 s0.1/A.1: identical across burn / no-burn / faint, both sides); Status_Burn is a later body.
     case 8: return 184; // Ice Punch script activation..first inactive row (staged 1966..2149 / 2339..2522); HP/text/freeze/Sitrus rows are queue commands.
     case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
@@ -762,7 +765,7 @@ export function liveMoveAnimationDuration(
     case 240: return 187; // Rain Dance 213..399 / 211..397 (prep14 s2).
     case 352: return 160; // Water Pulse 77..236 / 81..240 (prep14 s2, first inactive age 159).
     case 258: return 158; // Hail 64..221 (prep14 s2).
-    case 244: return request.attacker === 0 ? 179 : null; // Psych Up player first body 69..247 (prep16 s1.3; first inactive age 178); the opponent attacker's first body is unverified.
+    case 244: return 179; // Psych Up 69..247 (prep16 s1.3; first inactive age 178); opponent attacker + later bodies: lb21 (docs/later-bodies-overheat-psychup.md).
     case 315: return 230; // Overheat first body 75..304 / 80..309 (prep16 s2.1; reducer first inactive age 229, displayed like every adapter: duration = first inactive + 1).
     case 318: return request.attacker === 0 ? 193 : 196; // Silver Wind first body 81..273 / 85..280 (prep16 s2.2: first inactive ages 192 / 195, duration = first inactive + 1).
     case 58: return 203; // Ice Beam 75..277 / 79..281 (prep13 s0.1; reducer first inactive age 202).
@@ -1823,6 +1826,16 @@ export function liveMoveAnimationPresentation(
             resultKind: "notVeryEffective" as const, currentMoveResetAge: never } };
       break;
     }
+    case 7:
+      // prep22 s0.1/A.5: the body reads the geometry + the reducer age only (reducer age 27 at activation, both sides). The
+      // resolution profile is the measured neutral constant (no HP commit / roll / burn: never-reached ages; the burn flames are
+      // the separate Status_Burn body, which the live renderer never draws from this config). The opponent's idle rest is drawn by the
+      // renderer (the target's hit shake replaces it at reducer age 72).
+      config = { move: "FIRE_PUNCH", attacker, target, animationAgeOffset: 27, moveTextStartAge: 0,
+        resolutionProfile: { startHp: 0, endHp: 0, initialStatus: "none", hpCommitAge: 1_000_000, hpDrainFirstAge: 1_000_000,
+          hitWobbleFirstAge: 1_000_000, hitBlinkFirstAge: 1_000_000, secondaryRollAge: 1_000_000, secondaryRollSucceeded: false,
+          currentMoveResetAge: 1_000_000 } };
+      break;
     case 8:
       // The body reads the target animation centre + side and the age only (prep7 s2.1). The accepted hpDrainProfile /
       // controllerDisplayProfile feed HP, result text, menu, freeze status (FrozenIceCube from age 409) and Sitrus: all
@@ -2519,12 +2532,12 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 244: case 315: case 318: {
-      // prep16 s0.3: Overheat first body only (no animation unit has run since the battle began = the order host lent a
-      // `firstBody` order: the BG registers/scroll/matrices are the constant S0); non-shiny (the repo has no shiny battle palette).
-      // Silver Wind and Psych Up need only a known order lend: their compositors never read the activation BG registers (each
-      // read field is overwritten by the reducer first; later-bodies-bg-receipt.json), dense-exact after >= 3 predecessors.
+      // prep16 s0.3 + lb21: Overheat, Silver Wind and Psych Up (either side) need only a known order lend: their compositors never
+      // read the activation BG registers (each read field is overwritten by the reducer first; later-bodies-bg-receipt.json,
+      // docs/later-bodies-overheat-psychup.md), dense-exact after Tackle/Splash/Psychic/Growl+stat/Swords Dance+stat. A later
+      // Overheat after an earlier Overheat has no order plan, so `known` declines it. Non-shiny (no shiny battle palette).
       // Everything else is the measured first-body constant set (liveBgSnapshotMoves.ts) + anchors + the assets-only composite.
-      if (!spriteOrderInput?.known || (request.moveId === 315 && !spriteOrderInput.firstBody)) return null;
+      if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       if (palettes === null) return null;
