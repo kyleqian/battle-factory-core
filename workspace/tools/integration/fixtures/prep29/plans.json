@@ -1,0 +1,458 @@
+{
+ "bonemerang-player": {
+  "scenario": "mechanic-bonemerang-player-marowak-opponent-chansey",
+  "probeRunsIdentical": true,
+  "runsSha1": "c2ef681598c72b12ab4b3837ee6672ac5fc02233",
+  "callers": {
+   "RfuMain1+0x10": 177
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 85,
+    "lastCorpusFrame": 156,
+    "rows": 72,
+    "label": "Move_BONEMERANG",
+    "activationValueHex": "0x072069B2",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     69,
+     70
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "bonemerang-opponent": {
+  "scenario": "mechanic-bonemerang-opponent-marowak-player-chansey",
+  "probeRunsIdentical": true,
+  "runsSha1": "60b7038587236769219796af612134f022204e75",
+  "callers": {
+   "RfuMain1+0x10": 177
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 89,
+    "lastCorpusFrame": 160,
+    "rows": 72,
+    "label": "Move_BONEMERANG",
+    "activationValueHex": "0xB57330B6",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     69,
+     70
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "eruption-player": {
+  "scenario": "mechanic-eruption-player-camerupt-opponent-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "18eadf2f673abfcde41d7072a97a6adb771f1ff0",
+  "callers": {
+   "RfuMain1+0x10": 528
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 234,
+    "lastCorpusFrame": 709,
+    "rows": 476,
+    "label": "Move_ERUPTION",
+    "activationValueHex": "0xEBF58B84",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "eruption-opponent": {
+  "scenario": "mechanic-eruption-opponent-camerupt-player-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "90e38405b204cb84c82c85922e2a9e548f455dd8",
+  "callers": {
+   "RfuMain1+0x10": 585
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 221,
+    "lastCorpusFrame": 714,
+    "rows": 494,
+    "label": "Move_ERUPTION",
+    "activationValueHex": "0x7E036E43",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "rapid-spin-player": {
+  "scenario": "mechanic-rapid-spin-player-wartortle-opponent-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "61f1f73ca15bbbcb4c8fe335306b95dabb3151b2",
+  "callers": {
+   "RfuMain1+0x10": 378
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 310,
+    "lastCorpusFrame": 440,
+    "rows": 131,
+    "label": "Move_RAPID_SPIN",
+    "activationValueHex": "0x4402B2D3",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     128,
+     129
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "rapid-spin-opponent": {
+  "scenario": "mechanic-rapid-spin-opponent-wartortle-player-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "85e121448ad171a52ae66c99cdb1a55fd3b77c87",
+  "callers": {
+   "RfuMain1+0x10": 378
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 218,
+    "lastCorpusFrame": 348,
+    "rows": 131,
+    "label": "Move_RAPID_SPIN",
+    "activationValueHex": "0x436E9536",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     128,
+     129
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "spit-up-1-player": {
+  "scenario": "mechanic-spit-up-player-swalot-one-stockpile",
+  "probeRunsIdentical": true,
+  "runsSha1": "159c3ff76f642f7b32ec024aa1599ecdf3c42ca3",
+  "callers": {
+   "RfuMain1+0x10": 486
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 1279,
+    "lastCorpusFrame": 1386,
+    "rows": 108,
+    "label": "Move_SPIT_UP",
+    "activationValueHex": "0xEED8245D",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     60
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "spit-up-3-player": {
+  "scenario": "mechanic-spit-up-player-swalot-three-stockpile",
+  "probeRunsIdentical": true,
+  "runsSha1": "7e7dce2a78ce89ce94bcd6bf6c9c19cdc829a2fd",
+  "callers": {
+   "RfuMain1+0x10": 964
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 3147,
+    "lastCorpusFrame": 3255,
+    "rows": 109,
+    "label": "Move_SPIT_UP",
+    "activationValueHex": "0x9DAF58F5",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     60,
+     68
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "spit-up-2-player": {
+  "scenario": "mechanic-spit-up-player-swalot-two-stockpile",
+  "probeRunsIdentical": true,
+  "runsSha1": "6a171612b2f1c4e9ce97a137639e9d0e9e9dbcf9",
+  "callers": {
+   "RfuMain1+0x10": 725
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 2213,
+    "lastCorpusFrame": 2320,
+    "rows": 108,
+    "label": "Move_SPIT_UP",
+    "activationValueHex": "0x10735109",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     60
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "spit-up-1-opponent": {
+  "scenario": "mechanic-spit-up-opponent-swalot-one-stockpile",
+  "probeRunsIdentical": true,
+  "runsSha1": "40857c03be195512cc7cce9084b8f66aba49ea1a",
+  "callers": {
+   "RfuMain1+0x10": 1113
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 2225,
+    "lastCorpusFrame": 2332,
+    "rows": 108,
+    "label": "Move_SPIT_UP",
+    "activationValueHex": "0xBCD51F25",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     60
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "spit-up-3-opponent": {
+  "scenario": "mechanic-spit-up-opponent-swalot-three-stockpile",
+  "probeRunsIdentical": true,
+  "runsSha1": "bd2eda8346d22ad7cece3035dec4f45b0f3ea704",
+  "callers": {
+   "RfuMain1+0x10": 1177
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 3255,
+    "lastCorpusFrame": 3363,
+    "rows": 109,
+    "label": "Move_SPIT_UP",
+    "activationValueHex": "0x9FA42EF6",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     60,
+     68
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "spit-up-2-opponent": {
+  "scenario": "mechanic-spit-up-opponent-swalot-two-stockpile",
+  "probeRunsIdentical": true,
+  "runsSha1": "a90b7d14638ef9ef286ad0817a1a267d5dd1c96e",
+  "callers": {
+   "RfuMain1+0x10": 1291
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 4221,
+    "lastCorpusFrame": 4328,
+    "rows": 108,
+    "label": "Move_SPIT_UP",
+    "activationValueHex": "0xA2F0E1F1",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     60
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "luster-purge-player": {
+  "scenario": "mechanic-luster-purge-player-latios-opponent-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "9c57bfb38171b828987c27a3f60c7a62d3423768",
+  "callers": {
+   "RfuMain1+0x10": 329,
+   "AnimHitSplatRandom+0x48": 6,
+   "AnimHitSplatRandom+0x60": 6
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 78,
+    "lastCorpusFrame": 410,
+    "rows": 333,
+    "label": "Move_LUSTER_PURGE",
+    "activationValueHex": "0x16194BC9",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     293,
+     294,
+     313
+    ],
+    "extraDrawStepsByAge": [
+     [
+      170,
+      2
+     ],
+     [
+      175,
+      2
+     ],
+     [
+      180,
+      2
+     ],
+     [
+      185,
+      2
+     ],
+     [
+      190,
+      2
+     ],
+     [
+      195,
+      2
+     ]
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "luster-purge-opponent": {
+  "scenario": "mechanic-luster-purge-opponent-latios-player-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "fdda0139f3c19807f45a1d81a65913aeb6004792",
+  "callers": {
+   "RfuMain1+0x10": 329,
+   "AnimHitSplatRandom+0x48": 6,
+   "AnimHitSplatRandom+0x60": 6
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 82,
+    "lastCorpusFrame": 414,
+    "rows": 333,
+    "label": "Move_LUSTER_PURGE",
+    "activationValueHex": "0x16194BC9",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     293,
+     294,
+     313
+    ],
+    "extraDrawStepsByAge": [
+     [
+      170,
+      2
+     ],
+     [
+      175,
+      2
+     ],
+     [
+      180,
+      2
+     ],
+     [
+      185,
+      2
+     ],
+     [
+      190,
+      2
+     ],
+     [
+      195,
+      2
+     ]
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "outrage-player": {
+  "scenario": "mechanic-outrage-player-dragonite-opponent-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "83603e99327f1e61b0b2e8b9ab412a16d78904e6",
+  "callers": {
+   "RfuMain1+0x10": 119
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 76,
+    "lastCorpusFrame": 195,
+    "rows": 120,
+    "label": "Move_OUTRAGE",
+    "activationValueHex": "0x755AE995",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "outrage-opponent": {
+  "scenario": "mechanic-outrage-opponent-dragonite-player-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "e3e3e28d7e7a8bd541492ec0c930f78a1852f9ab",
+  "callers": {
+   "RfuMain1+0x10": 158
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 80,
+    "lastCorpusFrame": 199,
+    "rows": 120,
+    "label": "Move_OUTRAGE",
+    "activationValueHex": "0x9D02CAEE",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ }
+}
