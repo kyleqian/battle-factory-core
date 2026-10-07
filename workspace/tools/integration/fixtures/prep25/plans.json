@@ -1,0 +1,881 @@
+{
+ "dive-player": {
+  "scenario": "mechanic-dive-player-chinchou-opponent-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "cdd28d992426bc27b7b6ead1bbb6b9c1c367fcef",
+  "callers": {
+   "RfuMain1+0x10": 245,
+   "AnimSprayWaterDroplet+0x8": 20,
+   "AnimSprayWaterDroplet+0x10": 20,
+   "AnimSmallDriftingBubbles+0x26": 18,
+   "AnimSmallDriftingBubbles+0x36": 18
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 199,
+    "lastCorpusFrame": 316,
+    "rows": 118,
+    "label": "Move_DIVE",
+    "activationValueHex": "0x68CC3C15",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     68
+    ],
+    "extraDrawStepsByAge": [
+     [
+      67,
+      20
+     ]
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   },
+   {
+    "bodyIndex": 1,
+    "activationFrame": 629,
+    "lastCorpusFrame": 721,
+    "rows": 93,
+    "label": "Move_DIVE",
+    "activationValueHex": "0x26573AB3",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     85,
+     86
+    ],
+    "extraDrawStepsByAge": [
+     [
+      16,
+      20
+     ],
+     [
+      30,
+      4
+     ],
+     [
+      34,
+      4
+     ],
+     [
+      38,
+      4
+     ],
+     [
+      42,
+      4
+     ],
+     [
+      46,
+      4
+     ],
+     [
+      50,
+      4
+     ],
+     [
+      54,
+      4
+     ],
+     [
+      58,
+      4
+     ],
+     [
+      62,
+      4
+     ]
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "dive-opponent": {
+  "scenario": "mechanic-dive-opponent-chinchou-player-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "c5dba16a5167ee2cc494b9ba7d73e7bbfb675e14",
+  "callers": {
+   "RfuMain1+0x10": 243,
+   "AnimSprayWaterDroplet+0x8": 20,
+   "AnimSprayWaterDroplet+0x10": 20,
+   "AnimSmallDriftingBubbles+0x26": 18,
+   "AnimSmallDriftingBubbles+0x36": 18
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 196,
+    "lastCorpusFrame": 310,
+    "rows": 115,
+    "label": "Move_DIVE",
+    "activationValueHex": "0xC6F745DC",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [],
+    "extraDrawStepsByAge": [
+     [
+      64,
+      20
+     ]
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   },
+   {
+    "bodyIndex": 1,
+    "activationFrame": 764,
+    "lastCorpusFrame": 856,
+    "rows": 93,
+    "label": "Move_DIVE",
+    "activationValueHex": "0x66D70F55",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     85,
+     86
+    ],
+    "extraDrawStepsByAge": [
+     [
+      16,
+      20
+     ],
+     [
+      30,
+      4
+     ],
+     [
+      34,
+      4
+     ],
+     [
+      38,
+      4
+     ],
+     [
+      42,
+      4
+     ],
+     [
+      46,
+      4
+     ],
+     [
+      50,
+      4
+     ],
+     [
+      54,
+      4
+     ],
+     [
+      58,
+      4
+     ],
+     [
+      62,
+      4
+     ]
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "mach-punch-player": {
+  "scenario": "mechanic-mach-punch-player-hitmonchan-opponent-chansey",
+  "probeRunsIdentical": true,
+  "runsSha1": "75b229efc571b41d7f09b9af23d49dfb8421d95d",
+  "callers": {
+   "RfuMain1+0x10": 146
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 78,
+    "lastCorpusFrame": 188,
+    "rows": 111,
+    "label": "Move_MACH_PUNCH",
+    "activationValueHex": "0xC452E308",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     71,
+     72,
+     91
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "mach-punch-opponent": {
+  "scenario": "mechanic-mach-punch-opponent-hitmonchan-player-chansey",
+  "probeRunsIdentical": true,
+  "runsSha1": "424aa7cbf48ce16b52c2988c0cfe1dcf770924a0",
+  "callers": {
+   "RfuMain1+0x10": 146
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 82,
+    "lastCorpusFrame": 191,
+    "rows": 110,
+    "label": "Move_MACH_PUNCH",
+    "activationValueHex": "0x072069B2",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     71,
+     72
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "extrasensory-player": {
+  "scenario": "mechanic-extrasensory-player-nuzleaf-opponent-shuckle",
+  "probeRunsIdentical": true,
+  "runsSha1": "c6766f8015301f2a53d2e6b8c84ffb246d8d1310",
+  "callers": {
+   "RfuMain1+0x10": 273
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 80,
+    "lastCorpusFrame": 240,
+    "rows": 161,
+    "label": "Move_EXTRASENSORY",
+    "activationValueHex": "0xB0528D00",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     122,
+     123
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "extrasensory-opponent": {
+  "scenario": "mechanic-extrasensory-opponent-nuzleaf-player-shuckle",
+  "probeRunsIdentical": true,
+  "runsSha1": "69dfd58f7f3b14cb2fab1b35976811e086ff376b",
+  "callers": {
+   "RfuMain1+0x10": 273
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 84,
+    "lastCorpusFrame": 244,
+    "rows": 161,
+    "label": "Move_EXTRASENSORY",
+    "activationValueHex": "0x7695EB87",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     122,
+     123
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "ice-ball-player": {
+  "scenario": "mechanic-ice-ball-player-spheal-opponent-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "9fdc3852d6ea7f757d105d62c2c00012162777b3",
+  "callers": {
+   "RfuMain1+0x10": 624,
+   "InitIceBallParticle+0x26": 41,
+   "InitIceBallParticle+0x36": 41
+  },
+  "noCorpus": true
+ },
+ "ice-ball-opponent": {
+  "scenario": "mechanic-ice-ball-opponent-spheal-player-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "dbbc1c741a9088c967795a7591e4c73a1754c0fb",
+  "callers": {
+   "RfuMain1+0x10": 661,
+   "InitIceBallParticle+0x26": 46,
+   "InitIceBallParticle+0x36": 46
+  },
+  "noCorpus": true
+ },
+ "flatter-player": {
+  "scenario": "mechanic-flatter-player-nidorina-opponent-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "061339202792224745abd96fe4feb5132a69aac9",
+  "callers": {
+   "RfuMain1+0x10": 385,
+   "AnimFlatterConfetti+0x8": 38,
+   "AnimFlatterConfetti+0x30": 38,
+   "AnimFlatterConfetti+0x38": 38
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 70,
+    "lastCorpusFrame": 288,
+    "rows": 219,
+    "label": "Move_FLATTER",
+    "activationValueHex": "0x16194BC9",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     68
+    ],
+    "extraDrawStepsByAge": [
+     [
+      65,
+      43
+     ],
+     [
+      66,
+      43
+     ],
+     [
+      67,
+      26
+     ]
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "flatter-opponent": {
+  "scenario": "mechanic-flatter-opponent-nidorina-player-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "3e8e7c0764a81cb2f600b7e942a8f9fa27a33ec2",
+  "callers": {
+   "RfuMain1+0x10": 385,
+   "AnimFlatterConfetti+0x8": 38,
+   "AnimFlatterConfetti+0x30": 38,
+   "AnimFlatterConfetti+0x38": 38
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 74,
+    "lastCorpusFrame": 292,
+    "rows": 219,
+    "label": "Move_FLATTER",
+    "activationValueHex": "0x16194BC9",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     68
+    ],
+    "extraDrawStepsByAge": [
+     [
+      65,
+      45
+     ],
+     [
+      66,
+      41
+     ],
+     [
+      67,
+      26
+     ]
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "nightmare-player": {
+  "scenario": "mechanic-nightmare-player-haunter-opponent-shuckle",
+  "probeRunsIdentical": true,
+  "runsSha1": "f2162613170863a621a8afcfff0755c45aedf4cc",
+  "callers": {
+   "RfuMain1+0x10": 691
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 987,
+    "lastCorpusFrame": 1155,
+    "rows": 169,
+    "label": "Move_NIGHTMARE",
+    "activationValueHex": "0x6DB69B7A",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     21,
+     129,
+     130,
+     149
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "nightmare-opponent": {
+  "scenario": "mechanic-nightmare-opponent-haunter-player-shuckle",
+  "probeRunsIdentical": true,
+  "runsSha1": "9a3345faa3e77b4088ab2d4b6a0a850edf767907",
+  "callers": {
+   "RfuMain1+0x10": 710
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 1157,
+    "lastCorpusFrame": 1325,
+    "rows": 169,
+    "label": "Move_NIGHTMARE",
+    "activationValueHex": "0xC363FB1A",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     21,
+     129,
+     130,
+     149
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "psywave-player": {
+  "scenario": "mechanic-psywave-player-spoink-opponent-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "ff69217e7ffb9c3f49b2405c0e4c3b0c3166d6f6",
+  "callers": {
+   "RfuMain1+0x10": 453
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 72,
+    "lastCorpusFrame": 276,
+    "rows": 205,
+    "label": "Move_PSYWAVE",
+    "activationValueHex": "0x1E2C506A",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     185
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "psywave-opponent": {
+  "scenario": "mechanic-psywave-opponent-chimecho-player-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "f4b46542c1d8733823050ac937fa9647c7c0a160",
+  "callers": {
+   "RfuMain1+0x10": 453
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 211,
+    "lastCorpusFrame": 415,
+    "rows": 205,
+    "label": "Move_PSYWAVE",
+    "activationValueHex": "0x2AEA395B",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     185
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "revenge-player": {
+  "scenario": "mechanic-revenge-player-machamp-opponent-shuckle",
+  "probeRunsIdentical": true,
+  "runsSha1": "e6f76361efe9780a9d1b25dcc30670dc2162e6a2",
+  "callers": {
+   "RfuMain1+0x10": 142
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 238,
+    "lastCorpusFrame": 382,
+    "rows": 145,
+    "label": "Move_REVENGE",
+    "activationValueHex": "0x55C0238F",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     130,
+     131
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "revenge-opponent": {
+  "scenario": "mechanic-revenge-opponent-qwilfish-player-shuckle",
+  "probeRunsIdentical": true,
+  "runsSha1": "b6328585cf00e852e58e99a31d782bf6363870e1",
+  "callers": {
+   "RfuMain1+0x10": 142
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 235,
+    "lastCorpusFrame": 379,
+    "rows": 145,
+    "label": "Move_REVENGE",
+    "activationValueHex": "0x16CE7B93",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     130,
+     131
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "snore-player": {
+  "scenario": "mechanic-snore-player-sealeo-opponent-venomoth",
+  "probeRunsIdentical": true,
+  "runsSha1": "7a83452ca76c573508e9039e103585ca157fad50",
+  "callers": {
+   "RfuMain1+0x10": 663
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 692,
+    "lastCorpusFrame": 761,
+    "rows": 70,
+    "label": "Move_SNORE",
+    "activationValueHex": "0xE6571E23",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     67,
+     68
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "snore-opponent": {
+  "scenario": "mechanic-snore-opponent-sealeo-player-venomoth",
+  "probeRunsIdentical": true,
+  "runsSha1": "6b2ac17dd2d700e02b7df48864a883099238743c",
+  "callers": {
+   "RfuMain1+0x10": 663
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 700,
+    "lastCorpusFrame": 769,
+    "rows": 70,
+    "label": "Move_SNORE",
+    "activationValueHex": "0xDC7D7A78",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     67,
+     68
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "smog-player": {
+  "scenario": "mechanic-smog-player-magby-opponent-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "098fc297b732f5c5dffd1105f4876370dab580b9",
+  "callers": {
+   "RfuMain1+0x10": 303
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 69,
+    "lastCorpusFrame": 374,
+    "rows": 306,
+    "label": "Move_SMOG",
+    "activationValueHex": "0x4B473626",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     303,
+     304
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "smog-opponent": {
+  "scenario": "mechanic-smog-opponent-magby-player-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "abe69f4e69738d23d3607cfb4dcd6a975b219578",
+  "callers": {
+   "RfuMain1+0x10": 482
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 73,
+    "lastCorpusFrame": 378,
+    "rows": 306,
+    "label": "Move_SMOG",
+    "activationValueHex": "0x7695EB87",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     303,
+     304
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "sand-tomb-player": {
+  "scenario": "mechanic-sand-tomb-player-dugtrio-opponent-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "282fd4473e2f4c89dbf2a115cf60b32a0ace4c2a",
+  "callers": {
+   "RfuMain1+0x10": 334
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 77,
+    "lastCorpusFrame": 200,
+    "rows": 124,
+    "label": "Move_SAND_TOMB",
+    "activationValueHex": "0xB0528D00",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "sand-tomb-opponent": {
+  "scenario": "mechanic-sand-tomb-opponent-dugtrio-player-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "a47d715046511924d4fe655b7af04f67ffd16ab3",
+  "callers": {
+   "RfuMain1+0x10": 373
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 81,
+    "lastCorpusFrame": 204,
+    "rows": 124,
+    "label": "Move_SAND_TOMB",
+    "activationValueHex": "0xC452E308",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "hyper-voice-player": {
+  "scenario": "mechanic-hyper-voice-player-exploud-opponent-slowking",
+  "probeRunsIdentical": true,
+  "runsSha1": "f02e0c2db058c5f39a5cedde77643080ceb31e6e",
+  "callers": {
+   "RfuMain1+0x10": 614
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 76,
+    "lastCorpusFrame": 180,
+    "rows": 105,
+    "label": "Move_HYPER_VOICE",
+    "activationValueHex": "0x78A77ADB",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "hyper-voice-opponent": {
+  "scenario": "mechanic-hyper-voice-opponent-exploud-player-slowking",
+  "probeRunsIdentical": true,
+  "runsSha1": "788deae67d42b97e9759fefd07e42111deaf1a61",
+  "callers": {
+   "RfuMain1+0x10": 614
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 80,
+    "lastCorpusFrame": 184,
+    "rows": 105,
+    "label": "Move_HYPER_VOICE",
+    "activationValueHex": "0x1C02E96C",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "sky-attack-player": {
+  "scenario": "mechanic-sky-attack-player-fearow-opponent-shuckle",
+  "probeRunsIdentical": true,
+  "runsSha1": "a759dddcb5338bcfa802221da86d4df6f22ed3c5",
+  "callers": {
+   "RfuMain1+0x10": 554
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 50,
+    "lastCorpusFrame": 198,
+    "rows": 149,
+    "label": "Move_SKY_ATTACK",
+    "activationValueHex": "0xDA4FE9CF",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     127,
+     128
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   },
+   {
+    "bodyIndex": 1,
+    "activationFrame": 595,
+    "lastCorpusFrame": 775,
+    "rows": 181,
+    "label": "Move_SKY_ATTACK",
+    "activationValueHex": "0x4C3EDBB2",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     142,
+     143
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "sky-attack-opponent": {
+  "scenario": "mechanic-sky-attack-opponent-fearow-player-shuckle",
+  "probeRunsIdentical": true,
+  "runsSha1": "f8c696bf1ae7b76e6c427ea9487d4ae00aa3fc4c",
+  "callers": {
+   "RfuMain1+0x10": 554
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 50,
+    "lastCorpusFrame": 198,
+    "rows": 149,
+    "label": "Move_SKY_ATTACK",
+    "activationValueHex": "0xB25DFF96",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     127,
+     128
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   },
+   {
+    "bodyIndex": 1,
+    "activationFrame": 819,
+    "lastCorpusFrame": 999,
+    "rows": 181,
+    "label": "Move_SKY_ATTACK",
+    "activationValueHex": "0x96F413E8",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     142,
+     143
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "superpower-player": {
+  "scenario": "mechanic-superpower-player-nidoqueen-opponent-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "c2debc056ecae79e684590b5adc12298831d3946",
+  "callers": {
+   "RfuMain1+0x10": 355
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 79,
+    "lastCorpusFrame": 326,
+    "rows": 248,
+    "label": "Move_SUPERPOWER",
+    "activationValueHex": "0xC5E4AB6F",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     244,
+     245
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "superpower-opponent": {
+  "scenario": "mechanic-superpower-opponent-registeel-player-regirock",
+  "probeRunsIdentical": true,
+  "runsSha1": "200d1f9ee000540aa6f744e22c7b6612ebdd2ce8",
+  "callers": {
+   "RfuMain1+0x10": 355
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 81,
+    "lastCorpusFrame": 328,
+    "rows": 248,
+    "label": "Move_SUPERPOWER",
+    "activationValueHex": "0x16194BC9",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     244,
+     245
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ }
+}
