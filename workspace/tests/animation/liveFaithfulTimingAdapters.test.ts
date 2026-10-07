@@ -141,6 +141,8 @@ describe("faithful-timing ordinary routes", () => {
     ["MEGAHORN 5/35 RHYDON", 224, 5, 35, 0 as const, 177, true],
     // D4b: r3ProfileRouteSearch.ts 279 3 1 4000 (first candidates: 61/7 PINSIR slot 3 declined, 75/14 and 170/14 QWILFISH active).
     ["REVENGE 75/14 QWILFISH", 279, 75, 14, 0 as const, 145, true],
+    // D4c: r3ProfileRouteSearch.ts 149 3 1 4000 (first candidates: 84/7 CHIMECHO active, 87/0 SPOINK active, 128/0 SPOINK no Psywave body).
+    ["PSYWAVE 84/7 CHIMECHO", 149, 84, 7, 0 as const, 205, true],
   ])("route %s: body reached, following prompt reached, Scene ON/OFF parity", (_name, id, seed, streak, slot, ages, active) => {
     const on = generatedCommandAnimationReplay(seed, "on", [slot], streak);
     const off = generatedCommandAnimationReplay(seed, "off", [slot], streak);
@@ -396,4 +398,73 @@ describe("D4b Meteor Mash (309) faithful timing with D3", () => {
     expect(off.run.state.facilityState).toEqual(a.run.state.facilityState);
     expect(off.run.state.round.rules.rngValue).toBe(a.run.state.round.rules.rngValue);
   }, 240000);
+});
+
+// D4c faithful timing: Psywave (prep30 source model ported in livePsywaveInputs.ts + liveMoveOamAssembler.ts livePsywaveHardwareOamRows) with the
+// optional late lag at task row 185 from the policy. Receipt tools/integration/fixtures/d4c-live-receipt.json (d4aTimingCheck.ts).
+describe("D4c Psywave (149) faithful timing", () => {
+  const pw = NAMES.filter((n) => n.startsWith("psywave-"));
+  const receiptC = JSON.parse(readFileSync("tools/integration/fixtures/d4c-live-receipt.json", "utf8"));
+
+  it("is a faithful-timing adapter (never scoped exact / faithful random); 205 rows both sides; the status entry is the policy", () => {
+    expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).toContain(149);
+    expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).not.toContain(149);
+    expect(LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS).not.toContain(149);
+    expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[149]).toBe(0);
+    for (const attacker of [0, 1] as const) {
+      const base = { attacker, target: (1 - attacker) as 0 | 1, power: 1, damage: 10, friendship: 70, multihit: 0, turn: 0 };
+      expect(liveMoveAnimationDuration({ ...base, moveId: 149 })).toBe(205);
+    }
+    const entry = (status.faithfulTimingAdapters as { id: number; timingParameters: unknown[]; policyVersion: string; d3: boolean }[]).find((e) => e.id === 149)!;
+    expect(entry.timingParameters).toEqual(LIVE_MOVE_TIMING_POLICY[149]!.parameters.map(({ evidence: _evidence, ...p }) => p));
+    expect(entry.policyVersion).toBe(LIVE_MOVE_TIMING_POLICY_VERSION);
+    expect(entry.d3).toBe(false);
+    expect((status.implementedAdapters as { id: number }[]).some((e) => e.id === 149)).toBe(false);
+  });
+
+  it("the policy counts are the measured phases of the 6 dense windows (accepted, prep25 ALAKAZAM -> GOLEM, prep30 ESPEON -> CROBAT, both orientations)", () => {
+    expect(pw).toHaveLength(6);
+    const fx = pw.map(fixtureAt);
+    for (const side of ["player", "opponent"]) expect(fx.filter((f) => f.attacker.geometry.side === side)).toHaveLength(3);
+    const [lag] = LIVE_MOVE_TIMING_POLICY[149]!.parameters;
+    for (const f of fx) expect(f.denseWindow!.endFrame - f.denseWindow!.startFrame + 1).toBe(f.timingPhase === "event" ? 205 : 204);
+    expect(lag!.alternatives.map((a) => a.measured)).toEqual([fx.filter((f) => f.timingPhase === "event").length, fx.filter((f) => f.timingPhase === "no-event").length]);
+    expect([lag!.kind, lag!.age, lag!.chosen, lag!.tieRuleUsed]).toEqual(["optional-lag-age", 185, "event", false]);
+  });
+
+  it("the receipt: the 4 lag windows exact twice fresh (ESPEON -> CROBAT player row 0 too); the 2 no-lag windows only on the documented fade rows", () => {
+    const documented = (status.faithfulTimingAdapters as { id: number; alternatePhaseResidual: { ages: number[] } }[]).find((e) => e.id === 149)!.alternatePhaseResidual;
+    expect(documented.ages).toEqual(Array.from({ length: 16 }, (_, i) => 186 + i));
+    const rows = (receiptC.windows as { fixture: string; move: string; selectedPhase: boolean; window: number; expectedDuration: number; violations: string[];
+      runs: { residualPixels: number; digest: string; affectedAges: number[] }[] }[]).filter((r) => r.move === "PSYWAVE");
+    expect(rows.map((r) => r.fixture.replace(`${DIR}/`, "").replace(".json", "")).sort()).toEqual(pw);
+    for (const r of rows) {
+      expect(r.violations).toEqual([]);
+      expect(r.runs[1]!.digest).toBe(r.runs[0]!.digest);
+      if (r.selectedPhase) {
+        expect(r.runs.map((run) => run.residualPixels)).toEqual([0, 0]);
+        expect(r.window).toBe(r.expectedDuration);
+      } else {
+        expect(r.runs[0]!.affectedAges).toEqual(documented.ages);
+      }
+    }
+    expect(rows.filter((r) => r.selectedPhase)).toHaveLength(4);
+  });
+
+  it("gates: known lend required (first body and after a Tackle); declines with an unknown order and for a shiny battler", () => {
+    for (const name of ["psywave-player-luvdisc-opponent-onix", "psywave-opponent-swablu-player-onix"]) {
+      const f = fixtureAt(name);
+      const { view, effect } = effectOf(f);
+      const call = (order: unknown, field = view.field) => liveMoveAnimationPresentation(effect.request, field, 0, undefined, undefined, order as never);
+      const lend = effect.spriteOrderInput as { known: true; free: number[] };
+      expect(lend.known).toBe(true);
+      const presentation = call(lend);
+      expect(presentation).not.toBeNull();
+      expect((presentation!.config as any).move).toBe("PSYWAVE");
+      expect(call(undefined)).toBeNull();
+      expect(call({ known: false })).toBeNull();
+      const ot = 416049562, shiny = ((ot >>> 16) ^ (ot & 0xffff)) >>> 0;
+      for (const side of ["player", "opponent"] as const) expect(call(lend, { ...view.field, [side]: { ...view.field[side], personality: shiny } })).toBeNull();
+    }
+  });
 });
