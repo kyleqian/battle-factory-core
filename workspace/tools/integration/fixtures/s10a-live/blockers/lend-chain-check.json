@@ -1,0 +1,159 @@
+{
+ "schema": "s10a-lend-chain-check/v1",
+ "transitions": [
+  {
+   "scenario": "player-dense.json.gz",
+   "transition": "b1->b2",
+   "compared": true,
+   "results": {
+    "hit,foe-body,hit": "EXACT",
+    "hit,prompt,foe-body,hit": "EXACT",
+    "hit,foe-body,hit,prompt": "EXACT",
+    "hit": "EXACT"
+   }
+  },
+  {
+   "scenario": "player-dense.json.gz",
+   "transition": "b2->b3",
+   "compared": true,
+   "results": {
+    "hit,foe-body,hit": "EXACT",
+    "hit,prompt,foe-body,hit": "EXACT",
+    "hit,foe-body,hit,prompt": "EXACT",
+    "hit": "diff"
+   }
+  },
+  {
+   "scenario": "player-dense.json.gz",
+   "transition": "b3->b4",
+   "compared": true,
+   "results": {
+    "hit,foe-body,hit": "EXACT",
+    "hit,prompt,foe-body,hit": "EXACT",
+    "hit,foe-body,hit,prompt": "EXACT",
+    "hit": "diff"
+   }
+  },
+  {
+   "scenario": "player-dense.json.gz",
+   "transition": "b4->b5",
+   "compared": true,
+   "results": {
+    "hit,foe-body,hit": "EXACT",
+    "hit,prompt,foe-body,hit": "EXACT",
+    "hit,foe-body,hit,prompt": "EXACT",
+    "hit": "diff"
+   }
+  },
+  {
+   "scenario": "opponent-dense.json.gz",
+   "transition": "b1->b2",
+   "compared": true,
+   "results": {
+    "hit,foe-body,hit": "EXACT",
+    "hit,prompt,foe-body,hit": "EXACT",
+    "hit,foe-body,hit,prompt": "EXACT",
+    "hit": "EXACT"
+   }
+  },
+  {
+   "scenario": "opponent-dense.json.gz",
+   "transition": "b2->b3",
+   "compared": true,
+   "results": {
+    "hit,foe-body,hit": "EXACT",
+    "hit,prompt,foe-body,hit": "EXACT",
+    "hit,foe-body,hit,prompt": "EXACT",
+    "hit": "diff"
+   }
+  },
+  {
+   "scenario": "opponent-dense.json.gz",
+   "transition": "b3->b4",
+   "compared": true,
+   "results": {
+    "hit,foe-body,hit": "EXACT",
+    "hit,prompt,foe-body,hit": "EXACT",
+    "hit,foe-body,hit,prompt": "EXACT",
+    "hit": "diff"
+   }
+  },
+  {
+   "scenario": "opponent-dense.json.gz",
+   "transition": "b4->b5",
+   "compared": true,
+   "results": {
+    "hit,foe-body,hit": "EXACT",
+    "hit,prompt,foe-body,hit": "EXACT",
+    "hit,foe-body,hit,prompt": "EXACT",
+    "hit": "diff"
+   }
+  },
+  {
+   "scenario": "prep25-ice-ball-alt-player-glalie-golem-r1.json",
+   "transition": "b1->b2",
+   "compared": true,
+   "results": {
+    "hit,foe-body,hit": "EXACT",
+    "hit,prompt,foe-body,hit": "EXACT",
+    "hit,foe-body,hit,prompt": "EXACT",
+    "hit": "diff"
+   }
+  },
+  {
+   "scenario": "prep25-ice-ball-alt-player-glalie-golem-r1.json",
+   "transition": "b2->b3",
+   "compared": true,
+   "results": {
+    "hit,foe-body,hit": "EXACT",
+    "hit,prompt,foe-body,hit": "EXACT",
+    "hit,foe-body,hit,prompt": "EXACT",
+    "hit": "diff"
+   }
+  },
+  {
+   "scenario": "prep25-ice-ball-alt-player-glalie-golem-r1.json",
+   "transition": "b3->b4",
+   "compared": false,
+   "results": {
+    "hit,foe-body,hit": "diff",
+    "hit,prompt,foe-body,hit": "diff",
+    "hit,foe-body,hit,prompt": "diff",
+    "hit": "diff"
+   }
+  },
+  {
+   "scenario": "prep25-ice-ball-alt-player-glalie-golem-r1.json",
+   "transition": "b4->b5",
+   "compared": false,
+   "results": {
+    "hit,foe-body,hit": "diff",
+    "hit,prompt,foe-body,hit": "diff",
+    "hit,foe-body,hit,prompt": "diff",
+    "hit": "diff"
+   }
+  },
+  {
+   "scenario": "prep25-ice-ball-alt-opponent-glalie-golem-r1.json",
+   "transition": "b1->b2",
+   "compared": true,
+   "results": {
+    "hit,foe-body,hit": "EXACT",
+    "hit,prompt,foe-body,hit": "EXACT",
+    "hit,foe-body,hit,prompt": "EXACT",
+    "hit": "diff"
+   }
+  },
+  {
+   "scenario": "prep25-ice-ball-alt-opponent-glalie-golem-r1.json",
+   "transition": "b2->b3",
+   "compared": true,
+   "results": {
+    "hit,foe-body,hit": "EXACT",
+    "hit,prompt,foe-body,hit": "EXACT",
+    "hit,foe-body,hit,prompt": "EXACT",
+    "hit": "EXACT"
+   }
+  }
+ ]
+}
