@@ -1,0 +1,40 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "ENDEAVOR",
+ "probe": "tools/compare/poisonFangProbe.py",
+ "scenario": "tools/battle-lab/prep27-endeavor-player-abra-blissey.json",
+ "denseWindow": {
+  "startFrame": 922,
+  "endFrame": 989
+ },
+ "windowSource": "window = [activation, activation + 68 - 1]: the first gAnimScriptActive frame of a fresh poisonFangProbe.py 283 run (67 active rows + cleanup); RGB == the prep27 sweetScentProbe Move_ENDEAVOR rows",
+ "attacker": {
+  "species": "ABRA",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "BLISSEY",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "requestFields": {
+  "power": 40
+ },
+ "requestFieldsSource": "stale gAnimMovePower read from the ROM (sweetScentProbe animationMovePower): a faster Quick Attack's W1 write",
+ "fieldProfile": {
+  "playerHp": 58,
+  "playerMaxHp": 100,
+  "opponentHp": 312,
+  "opponentMaxHp": 330,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "genderSource": "CHANSEY / BLISSEY are female-only (the lab scenario leaves gender to the personality)"
+}

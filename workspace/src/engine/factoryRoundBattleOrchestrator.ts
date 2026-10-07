@@ -31,7 +31,8 @@ import {
 } from "./liveSpriteOrderHost.ts";
 import {
   advanceLiveBattlerX2Host, applyLiveBattlerX2Event, createLiveBattlerX2Host, invalidateLiveBattlerX2Host,
-  liveBattlerX2EventsOf, liveMoveBattlerX2Input, LIVE_BATTLER_X2_IDLE, type LiveBattlerX2Host, type LiveMoveBattlerX2Input,
+  liveBattlerX2EventsOf, liveMoveBattlerX2InputForBody, liveStaleMovePowerTaintedBy, LIVE_BATTLER_X2_IDLE, type LiveBattlerX2Host,
+  type LiveMoveBattlerX2Input,
 } from "./liveBattlerX2History.ts";
 import {
   invalidateLiveSpriteAllocatorHost,
@@ -1119,8 +1120,11 @@ function startCurrentBattle(
     liveBattlerX2Host: state.config.battleScene === "on"
       ? Object.freeze({
           battleCallStart: callStart, commandKey: "",
+          // gBattleMovePower carries across battles (carriedBattleMovePower), so a possible W3 write carries with it.
           host: createLiveBattlerX2Host(initialized.events.flatMap(liveBattlerX2EventsOf)
-            .reduce(applyLiveBattlerX2Event, LIVE_BATTLER_X2_IDLE)),
+            .reduce(applyLiveBattlerX2Event, LIVE_BATTLER_X2_IDLE),
+          state.liveBattlerX2Host?.host.staleMovePowerUnknown === true
+            || initialized.events.some(liveStaleMovePowerTaintedBy)),
         })
       : undefined,
     retainedLockedActionPresentationOwner: null,
@@ -1571,7 +1575,7 @@ function installDriveReceiptImmediately(
     liveMoveSpriteAllocatorHost: sprites === undefined ? undefined : withOrderHost(
       sprites, invalidateLiveSpriteOrderHost(orderHostOf(sprites), "battle advanced without a presented resolution"),
     ),
-    liveBattlerX2Host: invalidateX2Host(state, "battle advanced without a presented resolution"),
+    liveBattlerX2Host: invalidateX2Host(state, "battle advanced without a presented resolution", true),
     battle: receipt.battle,
     battleCommandPresentation,
     battleResolutionPresentation: null,
@@ -1676,11 +1680,11 @@ function orderHostOf(sprites: OrderHostCarrier): LiveSpriteOrderHost {
 
 /** The battle's x2 history host with both sides unknown (unchanged when absent or from another battle). */
 function invalidateX2Host(
-  state: FactoryRoundBattleOrchestratorState, reason: string,
+  state: FactoryRoundBattleOrchestratorState, reason: string, eventsUnseen = false,
 ): FactoryRoundBattleOrchestratorState["liveBattlerX2Host"] {
   const x2 = state.liveBattlerX2Host;
   if (x2 === undefined || x2.battleCallStart !== state.activeBattleCallStart) return x2;
-  const host = invalidateLiveBattlerX2Host(x2.host, reason);
+  const host = invalidateLiveBattlerX2Host(x2.host, reason, eventsUnseen);
   return host === x2.host ? x2 : Object.freeze({ ...x2, host });
 }
 
@@ -2326,7 +2330,7 @@ function prepareResolutionPalette(
   let battlerX2Input: LiveMoveBattlerX2Input | undefined;
   if (command?.type === "move-animation" && command.animation && x2Host) {
     battlerX2Input = retainedX2?.commandKey === commandKey
-      ? resolution.liveMoveBattlerX2Input : liveMoveBattlerX2Input(x2Host.history);
+      ? resolution.liveMoveBattlerX2Input : liveMoveBattlerX2InputForBody(x2Host, command.animation);
   }
   if (x2Host) {
     x2Host = advanceLiveBattlerX2Host(x2Host, resolution, isFinalCommand ? Number.POSITIVE_INFINITY : commandSequence);

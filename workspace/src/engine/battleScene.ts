@@ -8427,6 +8427,8 @@ export function drawFightSubmenuChromeFromLiveState(
  * be the more direct check.
  */
 const ENDEAVOR_BLEND_COLOR: RgbColor = { r: 248, g: 168, b: 0 };
+/** Live Endeavor bodies: staged reducer age 0 = script age 8 (docs/next-adapters-prep27.md s0.2 anchors, equal in all 4 runs). */
+const ENDEAVOR_LIVE_SCRIPT_AGE_OFFSET = 8;
 const ENDEAVOR_SQUISH_START_DELAY = 55; // pressTick+55 = render tick 3000, the first visible tick of this window (blend only - see the table's own doc)
 /**
  * **The matrix (`xScale`/`yScale`/`y2`) and the blend `coeff` do NOT share
@@ -32572,22 +32574,23 @@ export function renderSceneOnMovePresentation(
   if (state.config.move === "BATON_PASS") {
     const batonState = state as SceneOnMovePresentationState<SceneOnBatonPassConfig>;
     const view = sceneOnBatonPassView(batonState);
-    const playerToOpponent = view.attacker.species === "AIPOM"
+    // Live field (prep27 s4 item 2): any species pair, the ROLE_PLAY pattern; the live composer owns healthboxes and text.
+    const playerToOpponent = (liveField || view.attacker.species === "AIPOM")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
-    const opponentToPlayer = view.attacker.species === "AIPOM"
+    const opponentToPlayer = (liveField || view.attacker.species === "AIPOM")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(`unsupported staged BATON_PASS pair ${view.attacker.species}->${view.target.species}`);
     }
     const tint = { r: 255, g: 181, b: 247 };
-    const aipom = playerToOpponent
+    const aipom = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? aipomBackSprite
       : { ...aipomFrontSprite, tileset: subTileset(aipomFrontSprite.tileset, 0, 8) };
-    const onix = playerToOpponent
+    const onix = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? { ...onixFrontSprite, tileset: subTileset(onixFrontSprite.tileset, 0, 8) }
       : onixBackSprite;
     drawTileBg(
@@ -32607,6 +32610,8 @@ export function renderSceneOnMovePresentation(
       view.target.geometry.spriteCorner.y + targetIdle.y2,
     );
     const aipomPalette = blendPaletteToward(aipom.palette, tint, view.displayedBattlerPaletteY);
+    // A live opponent attacker keeps its species front idle rest until it goes invisible.
+    const attackerIdle = liveField && opponentToPlayer ? sceneOnBattlerFrontIdleRest(view.attacker) : { x2: 0, y2: 0 };
     const drawAttacker = () => {
       if (view.displayedAttackerInvisible) return;
       const matrix = view.displayedAttackerMatrix;
@@ -32615,16 +32620,16 @@ export function renderSceneOnMovePresentation(
           fb,
           aipom.tileset,
           aipomPalette,
-          view.attacker.geometry.spriteCorner.x,
-          view.attacker.geometry.spriteCorner.y,
+          view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+          view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
         );
       } else {
         drawSpriteSheetAffineRotate(
           fb,
           aipom.tileset,
           aipomPalette,
-          view.attacker.geometry.spriteCorner.x + 32,
-          view.attacker.geometry.spriteCorner.y + 32,
+          view.attacker.geometry.spriteCorner.x + 32 + attackerIdle.x2,
+          view.attacker.geometry.spriteCorner.y + 32 + attackerIdle.y2,
           matrix.a,
           0,
           0,
@@ -32643,6 +32648,7 @@ export function renderSceneOnMovePresentation(
         view.displayedPokeball.y + view.displayedPokeball.y2 - 8,
       );
     }
+    if (liveField) return;
     const profile = batonState.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: playerToOpponent ? "ONIX" : "AIPOM", level: 50,
@@ -49515,10 +49521,9 @@ export function renderSceneOnMovePresentation(
     const view = sceneOnEndeavorView(state);
     const { attacker, target, animationProfile } = view;
     if (
-      attacker.species !== "ONIX"
-      || attacker.geometry.side !== "player"
-      || target.species !== "GROVYLE"
-      || target.geometry.side !== "opponent"
+      (!liveField && (attacker.species !== "ONIX" || target.species !== "GROVYLE"))
+      || (!liveField && attacker.geometry.side !== "player")
+      || attacker.geometry.side === target.geometry.side
     ) {
       throw new Error(
         `unsupported staged ENDEAVOR pair ${attacker.species}->${target.species}`,
@@ -49527,9 +49532,22 @@ export function renderSceneOnMovePresentation(
 
     // The canonical reducers are press-relative. Mapping body age zero to
     // press+55 preserves their independently probed register/OAM lags while
-    // keeping this staged path free of the canonical battle clock.
-    const relativeTick = view.age + ENDEAVOR_SQUISH_START_DELAY;
-    const entry = ENDEAVOR_SQUISH_TABLE[view.age];
+    // keeping this staged path free of the canonical battle clock. Live bodies
+    // are script-relative (age 0 = the activation frame): the staged age 0 is
+    // script age 8 (prep27 s0.2: squish task / blend start at script age 7 in
+    // RAM, first displayed one frame later; first hitsplat RAM age 15).
+    const stagedAge = liveField ? view.age - ENDEAVOR_LIVE_SCRIPT_AGE_OFFSET : view.age;
+    const relativeTick = stagedAge + ENDEAVOR_SQUISH_START_DELAY;
+    const entry = stagedAge >= 0 ? ENDEAVOR_SQUISH_TABLE[stagedAge] : undefined;
+    const attackerArt = liveField ? liveSceneOnBattlerArt(attacker) : onixBackSprite;
+    const targetArt = liveField ? liveSceneOnBattlerArt(target) : grovyleFrontSprite;
+    const targetIdle = liveField && target.geometry.side === "opponent"
+      ? sceneOnBattlerFrontIdleRest(target) : { x2: 0, y2: 0 };
+    // An opponent attacker keeps its front idle x2; the squish task owns y2 (SetBattlerSpriteYOffsetFromYScale) once it starts.
+    const attackerIdle = liveField && attacker.geometry.side === "opponent"
+      ? sceneOnBattlerFrontIdleRest(attacker) : { x2: 0, y2: 0 };
+    // create_basic_hitsplat_sprite relative_to ANIM_TARGET: the x offset is mirrored for a player target (prep27 s0.2).
+    const hitSign = target.geometry.side === "opponent" ? 1 : -1;
     const targetShakeX2 = endeavorShakeX2(
       relativeTick,
       0,
@@ -49539,74 +49557,81 @@ export function renderSceneOnMovePresentation(
     const healthboxY2 = endeavorHealthboxBounceY2(relativeTick, 0);
 
     drawStaticBgShiftedY(fb, 0);
-    if (!targetInvisible) {
+    const drawTarget = () => {
+      if (targetInvisible) return;
       drawSpriteSheet(
         fb,
-        grovyleFrontSprite.tileset,
-        grovyleFrontSprite.palette,
-        target.geometry.spriteCorner.x + targetShakeX2,
-        target.geometry.spriteCorner.y,
+        targetArt.tileset,
+        targetArt.palette,
+        target.geometry.spriteCorner.x + targetShakeX2 + targetIdle.x2,
+        target.geometry.spriteCorner.y + targetIdle.y2,
       );
-    }
-
-    const ramTick = relativeTick - ENDEAVOR_HITSPLAT_RENDER_LAG;
-    const hitOffsets = [
-      { x: 12, y: -12, ramOffset: 62 },
-      { x: -12, y: 12, ramOffset: 88 },
-    ] as const;
-    for (const hit of hitOffsets) {
-      const n = ramTick - hit.ramOffset;
-      if (n < 0 || n >= ENDEAVOR_HITSPLAT_VISIBLE_TICKS) continue;
-      drawSpriteSheetAffineStretch(
-        fb,
-        battleAnimHitsplat.tileset,
-        battleAnimHitsplat.palette,
-        target.geometry.animationCenter.x + hit.x - 16,
-        target.geometry.animationCenter.y + hit.y - 16,
-        ENDEAVOR_HITSPLAT_MATRIX,
-        ENDEAVOR_HITSPLAT_MATRIX,
-        0,
-        ENDEAVOR_BLEND_COLOR,
-        0,
-        true,
-      );
-    }
-
-    if (entry) {
-      const height = 64 - animationProfile.attackerYOffset * 2;
-      const scaledHeight = Math.min(
-        128,
-        Math.floor((height * 256) / entry.yScale),
-      );
-      const y2 = Math.trunc((height - scaledHeight) / 2);
-      drawSpriteSheetAffineStretch(
-        fb,
-        onixBackSprite.tileset,
-        onixBackSprite.palette,
-        attacker.geometry.spriteCorner.x,
-        attacker.geometry.spriteCorner.y,
-        entry.xScale,
-        entry.yScale,
-        y2,
-        ENDEAVOR_BLEND_COLOR,
-        entry.coeff,
-        true,
-      );
-      drawEndeavorDroplets(
-        fb,
-        relativeTick,
-        0,
-        attacker.geometry.battlePositionCenter,
-      );
-    } else {
-      drawSpriteSheet(
-        fb,
-        onixBackSprite.tileset,
-        onixBackSprite.palette,
-        attacker.geometry.spriteCorner.x,
-        attacker.geometry.spriteCorner.y,
-      );
-    }
+    };
+    const drawHitsplats = () => {
+      const ramTick = relativeTick - ENDEAVOR_HITSPLAT_RENDER_LAG;
+      const hitOffsets = [
+        { x: 12, y: -12, ramOffset: 62 },
+        { x: -12, y: 12, ramOffset: 88 },
+      ] as const;
+      for (const hit of hitOffsets) {
+        const n = ramTick - hit.ramOffset;
+        if (n < 0 || n >= ENDEAVOR_HITSPLAT_VISIBLE_TICKS) continue;
+        drawSpriteSheetAffineStretch(
+          fb,
+          battleAnimHitsplat.tileset,
+          battleAnimHitsplat.palette,
+          target.geometry.animationCenter.x + hitSign * hit.x - 16,
+          target.geometry.animationCenter.y + hit.y - 16,
+          ENDEAVOR_HITSPLAT_MATRIX,
+          ENDEAVOR_HITSPLAT_MATRIX,
+          0,
+          ENDEAVOR_BLEND_COLOR,
+          0,
+          true,
+        );
+      }
+    };
+    const drawAttacker = () => {
+      if (entry) {
+        const height = 64 - animationProfile.attackerYOffset * 2;
+        const scaledHeight = Math.min(
+          128,
+          Math.floor((height * 256) / entry.yScale),
+        );
+        const y2 = Math.trunc((height - scaledHeight) / 2);
+        drawSpriteSheetAffineStretch(
+          fb,
+          attackerArt.tileset,
+          attackerArt.palette,
+          attacker.geometry.spriteCorner.x + attackerIdle.x2,
+          attacker.geometry.spriteCorner.y,
+          entry.xScale,
+          entry.yScale,
+          y2,
+          ENDEAVOR_BLEND_COLOR,
+          entry.coeff,
+          true,
+        );
+        drawEndeavorDroplets(
+          fb,
+          relativeTick,
+          0,
+          attacker.geometry.battlePositionCenter,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          attackerArt.tileset,
+          attackerArt.palette,
+          attacker.geometry.spriteCorner.x + attackerIdle.x2,
+          attacker.geometry.spriteCorner.y + attackerIdle.y2,
+        );
+      }
+    };
+    // The player battler is drawn over the opponent one; the hitsplat sits over its target only.
+    if (attacker.geometry.side === "player") { drawTarget(); drawHitsplats(); drawAttacker(); }
+    else { drawAttacker(); drawTarget(); drawHitsplats(); }
+    if (liveField) return;
 
     // Healthboxes have a lower OAM priority number than battlers. This is
     // observable when ONIX's vertically stretched back sprite reaches the

@@ -1104,13 +1104,20 @@ describe("battle resolution presentation receipt ownership", () => {
     ]);
     expect(off[1]).not.toHaveProperty("skipAnimation");
     // Baton Pass shape (`returntoball BS_ATTACKER`: the hidden battler is the body's attacker) keeps the span.
-    const baton = createBattleResolutionPresentation(inputFor([
+    const batonResolution = createBattleResolutionPresentation(inputFor([
       event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }, 2),
       event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }, 3),
       event(2, { kind: "animation", animationId: "MOVE_ANIMATION", battler: 0, target: 1,
         arguments: ["226", "0", "0", "0", "70", "0"] }, 14),
       opcodeEvent(3, { kind: "set-battler-sprite-visibility", battler: 0, invisible: true }, "B_SCR_OP_RETURNTOBALL"),
-    ], NEXT_COMMAND)).segments[0]!.commands;
+    ], NEXT_COMMAND));
+    const baton = batonResolution.segments[0]!.commands;
+    // The live Baton Pass body (226) hid its attacker from age 9; the span keeps it hidden (no recall scale-up redraw).
+    for (const elapsed of [0, 14, 20, 31]) {
+      const view = createBattleResolutionPresentationRenderView(atRenderClock(batonResolution, 2, elapsed));
+      expect(view.switchOut).toMatchObject({ battler: 0, spriteVisible: false });
+      expect(view.visibility.player.sprite).toBe(false);
+    }
     expect(baton.slice(2, 4)).toMatchObject([
       { type: "switch-out", battler: 0, timing: { minimumFrames: 32 } },
       { type: "sprite-visibility", battler: 0, recall: true, timing: { minimumFrames: 1 } },

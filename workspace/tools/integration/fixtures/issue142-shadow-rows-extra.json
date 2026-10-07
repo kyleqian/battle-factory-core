@@ -1,6 +1,6 @@
 {
  "schema": "issue142-shadow-rows-extra/v1",
- "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep7 rows from issue142ShadowRowsPrep7.py) (+ prep8 rows from issue142ShadowRowsPrep8.py) (+ prep9 rows from issue142ShadowRowsPrep9.py) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep13 ICE_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep13 WATER_SPOUT rows from issue142ShadowRowsPrep13.py) (+ prep13 HIDDEN_POWER rows from issue142ShadowRowsPrep13.py) (+ prep13 HYPER_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep14 RAIN_DANCE rows from issue142ShadowRowsPrep14.py) (+ prep14 WATER_PULSE rows from issue142ShadowRowsPrep14.py) (+ prep14 HAIL rows from issue142ShadowRowsPrep14.py) (+ prep16 Overheat/Silver Wind rows from issue142ShadowRowsPrep16.py) (+ prep16 Overheat/Silver Wind rows from issue142ShadowRowsPrep16.py) (+ r2-gates Fire Punch / Psych Up opponent rows from issue142ShadowRowsR2Gates.py) (+ r3 profile Lovely Kiss / Spikes / Octazooka rows from issue142ShadowRowsR3Profile.py) (+ q2 rows from issue142ShadowRowsQ2.py)",
+ "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep7 rows from issue142ShadowRowsPrep7.py) (+ prep8 rows from issue142ShadowRowsPrep8.py) (+ prep9 rows from issue142ShadowRowsPrep9.py) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep13 ICE_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep13 WATER_SPOUT rows from issue142ShadowRowsPrep13.py) (+ prep13 HIDDEN_POWER rows from issue142ShadowRowsPrep13.py) (+ prep13 HYPER_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep14 RAIN_DANCE rows from issue142ShadowRowsPrep14.py) (+ prep14 WATER_PULSE rows from issue142ShadowRowsPrep14.py) (+ prep14 HAIL rows from issue142ShadowRowsPrep14.py) (+ prep16 Overheat/Silver Wind rows from issue142ShadowRowsPrep16.py) (+ prep16 Overheat/Silver Wind rows from issue142ShadowRowsPrep16.py) (+ r2-gates Fire Punch / Psych Up opponent rows from issue142ShadowRowsR2Gates.py) (+ r3 profile Lovely Kiss / Spikes / Octazooka rows from issue142ShadowRowsR3Profile.py) (+ q2 rows from issue142ShadowRowsQ2.py) (+ baton-endeavor rows, tools/integration/fixtures/baton-endeavor-live)",
  "rows": [
   {
    "id": 236,
@@ -5532,6 +5532,82 @@
     "scenario": "tools/battle-lab/mechanic-sheer-cold-opponent-dewgong-player-chansey.json",
     "body": "normal",
     "activation": "elevated opponents NOT measured for Sheer Cold (no OHKO body with a GOLBAT pair: CLOYSTER -> GOLBAT has no body); the non-elevated dense windows start at the scenario activation (inWindow false = no claimed shadow row, the hook stays off)"
+   }
+  },
+  {
+   "id": 226,
+   "move": "BATON_PASS",
+   "orientation": "player",
+   "variant": "baton-pass-player",
+   "activationFrame": 71,
+   "windowStart": 71,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 123,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/baton-endeavor-live/baton-s10a-player-jolteon-golbat.json",
+    "scenario": "tools/battle-lab/s10a-baton-player-jolteon-opponent-golbat.json",
+    "body": "normal",
+    "activation": "the dense window starts at the first gAnimScriptActive frame (poisonFangProbe.py 226); elevated opponent measured in-window: GOLBAT target 53/53 rows 0 px twice fresh (baton-endeavor-live-receipt.json)"
+   }
+  },
+  {
+   "id": 226,
+   "move": "BATON_PASS",
+   "orientation": "opponent",
+   "variant": "baton-pass-opponent",
+   "activationFrame": 75,
+   "windowStart": 75,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 127,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/baton-endeavor-live/baton-prep27-opponent-ninjask-golem.json",
+    "scenario": "tools/battle-lab/prep27-baton-opponent-ninjask-player-golem.json",
+    "body": "normal",
+    "activation": "the dense window starts at the first gAnimScriptActive frame (poisonFangProbe.py 226); elevated opponent measured in-window: NINJASK attacker 53/53 rows 0 px twice fresh (baton-endeavor-live-receipt.json)"
+   }
+  },
+  {
+   "id": 283,
+   "move": "ENDEAVOR",
+   "orientation": "player",
+   "variant": "endeavor-player",
+   "activationFrame": 939,
+   "windowStart": 939,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 1006,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/baton-endeavor-live/endeavor-s10a-player-diglett-golbat.json",
+    "scenario": "tools/battle-lab/s10a-endeavor-player-diglett-golbat.json",
+    "body": "normal",
+    "activation": "the dense window starts at the first gAnimScriptActive frame (poisonFangProbe.py 283); elevated opponent measured in-window: GOLBAT target 68/68 rows 0 px twice fresh (baton-endeavor-live-receipt.json)"
+   }
+  },
+  {
+   "id": 283,
+   "move": "ENDEAVOR",
+   "orientation": "opponent",
+   "variant": "endeavor-opponent",
+   "activationFrame": 79,
+   "windowStart": 79,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 146,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/baton-endeavor-live/endeavor-s10a-opponent-golbat-chansey.json",
+    "scenario": "tools/battle-lab/s10a-endeavor-opponent-golbat-chansey.json",
+    "body": "normal",
+    "activation": "the dense window starts at the first gAnimScriptActive frame (poisonFangProbe.py 283); elevated opponent measured in-window: GOLBAT attacker 68/68 rows 0 px twice fresh (baton-endeavor-live-receipt.json)"
    }
   }
  ]

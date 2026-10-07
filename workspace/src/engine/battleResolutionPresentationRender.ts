@@ -1302,8 +1302,10 @@ export function createBattleResolutionPresentationRenderView(
       // the battler's pixels for the whole span (the generic draw is gated
       // off below); from relative 25 the sprite is freed and the field is
       // empty until the send-in.
-      switchOut = command.skipAnimation
-        // Scene ON forced removal: the live body left the target off-screen; nothing draws it until the recall receipt.
+      // Scene ON forced removal: the live body left the target off-screen; nothing draws it until the recall receipt. A Baton
+      // Pass attacker hidden by its completed live body (liveSemiInvulnerableHideBattler) is likewise already invisible: its
+      // returntoball frees it unseen (prep27 s0.1: no recall scale-up in the ROM), so the span draws nothing either.
+      switchOut = command.skipAnimation || semiInvulnerableHidden[command.battler]
         ? Object.freeze({
             ...midBattleSwitchOutAt(state.lifecycle.phaseElapsed, command.battler),
             spriteVisible: false,
