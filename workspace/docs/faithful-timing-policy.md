@@ -37,3 +37,14 @@ python3 tools/integration/prep25LagFrames.py /tmp/d4a/state /tmp/d4a/r2 /tmp/d4a
 bucket beside `implementedAdapters` (scoped exact) and `faithfulRandomAdapters` (D3). An adapter using both D3 and D4 is listed once, in
 faithful timing, with `d3: true`. `tools/integration/remainingAdaptersCensus.mjs` asserts exact + faithful random + faithful timing +
 in flight + remaining = 276; `tools/integration/start-local-preview.sh` stamps the three counts separately.
+
+## Consumers (D4a)
+
+| Move | Status | Proof |
+|---|---|---|
+| MACH_PUNCH 183 | **faithful timing** (first body; `liveQ2Moves.ts` `liveMachPunchInputs`, the reducer's `optionalLateLag` input set from the policy, duration `liveMoveTimingBodyRows(183)` = 110) | `tools/integration/fixtures/d4a-live-receipt.json`: 8 dense windows x 2 fresh runs; 5 policy-phase windows 0 px; 3 other-phase windows differ only on ages 92..107 (the restore fade one row later), max 18252 px/row; routes seed 48 streak 7 / 14 (HITMONCHAN) Scene ON/OFF parity |
+| NIGHTMARE 171 | policy entry only (chosen 168 rows = the reducer's fixed `NIGHTMARE_FIRST_INACTIVE_AGE`); **no live consumer yet** | the accepted reducer reads caller-owned per-age state that the corpus verifier feeds row by row: hardware palettes (ghost BG palette in BG bank 2 at ages 22..149, the target's palette in BG banks 8/9 from age 40), BG1/BG2 HOFS/VOFS (monbg scroll at 41, the shake toggling every 2 rows 46..120, cleared at 131), the painter order (re-sorted at ages 43/45/124). A production builder needs that per-age host model plus a known lend after Hypnosis + the SLP status units |
+
+Mach Punch trace palette: OBJ bank 9's unfaded contents at a first body are the known-entry healthbar palette
+(`live-animation-palette-resources.json` `initial.healthbar`, tag 55044), equal in all 8 Mach Punch and 8 Nightmare D4a/prep25 state probes
+(two trainers, any species); the attacker's battler palette is NOT what the trace shows.
