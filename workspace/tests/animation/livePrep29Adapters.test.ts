@@ -19,9 +19,9 @@ const NAMES = readdirSync(DIR).filter((n) => n.endsWith(".json")).map((n) => n.s
 const ROWS = { BONEMERANG: 71, RAPID_SPIN: 130, OUTRAGE: 119, LUSTER_PURGE: 332 } as const;
 const configOf = (f: Fixture, mutate?: (r: BattleMoveAnimationRequest) => BattleMoveAnimationRequest, order?: unknown) => {
   const view = liveView(f, 0);
-  const effect = view.effect as unknown as { request: BattleMoveAnimationRequest; spriteOrderInput: never; presentationRng?: never };
+  const effect = view.effect as unknown as { request: BattleMoveAnimationRequest; spriteOrderInput: never };
   return liveMoveAnimationPresentation(mutate ? mutate(effect.request) : effect.request, view.field, 0, undefined, undefined,
-    (order ?? effect.spriteOrderInput) as never, undefined, undefined, effect.presentationRng);
+    (order ?? effect.spriteOrderInput) as never);
 };
 
 describe("live prep29 registration", () => {

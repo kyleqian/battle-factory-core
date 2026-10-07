@@ -277,6 +277,6 @@ export function liveLusterPurgeFields(args: Omit<LiveQ2Args, "firstBody" | "pale
     circleCenter: { ...attacker.picOffsetPoint }, monbgCenter: { ...attacker.spriteCenter },
     monbgPosition: { x: 32 - attacker.spriteCenter.x, y: 32 - attacker.spriteCenter.y },
     hitsplatCenter: { x: target.battlePositionCenter.x + (player ? 1 : -1), y: target.battlePositionCenter.y + 2 },
-    visualRandom: { hitsplats: args.draws.map((pair) => ({ x: pair[0]!, y: pair[1]! })) },
+    visualRandom: { hitsplats: args.draws.map((pair) => ({ x: pair[0]!, y: pair[1]! })) as never },
   };
 }
