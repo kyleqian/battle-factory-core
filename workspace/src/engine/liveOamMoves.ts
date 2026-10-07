@@ -389,13 +389,13 @@ const curseStatsCache = new Map<string, readonly string[][]>();
  * target and the OBJ-window copy of the attacker (attr0 | OBJ-window mode, priority 0, the attacker's tiles; lowest-free slot)
  * keyed into the lent order carried through the body. Registers = S0 (row 0) / S0 with WIN0 cleared (rows >= 1) plus the
  * DrawFallingWhiteLines writes; palette = the assets-only composite + the Curse lines colour + the attacker bank's red blend.
- * The renderer reads no activation BG register the body does not overwrite. Declines (null) on a non-zero idle rest (SwayMon
+ * The renderer reads no activation BG register the body does not overwrite. Declines (null) on a non-zero ATTACKER idle rest (SwayMon
  * writes x2 absolutely and ends at 0: a resting battler's history is unproven).
  */
 export function liveCurseStatsInputs(args: LiveCurseStatsArgs): LiveCurseStatsInputs | null {
   const { attackerSide, attacker, target, model } = args;
-  if (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0
-    || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
+  // Only the ATTACKER's idle rest declines (unproven); the target's rest is exact (species audit 6: RATTATA / ONIX targets 176/176, 0 px).
+  if (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0) return null;
   if (args.free.length === 0) return null;
   const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
   const attackerObject = battlerObject(attackerSide, attacker), targetObject = battlerObject(targetSide, target);
