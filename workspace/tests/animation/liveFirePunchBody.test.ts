@@ -92,7 +92,7 @@ describe("live Fire Punch body-only adapter (7)", () => {
     }
     expect([...sides].sort()).toEqual(["opponent", "player"]);
     for (const o of ["burn", "noburn", "faint"]) expect(outcomes.has(o)).toBe(true);
-    expect(files.filter(n => JSON.parse(readFileSync(`${dir}/${n}.json`, "utf8")).precedingBodies.length > 0).length).toBeGreaterThan(0);
+    expect(files.filter(n => JSON.parse(readFileSync(`${dir}/${n}.json`, "utf8")).precedingBodies?.length > 0).length).toBeGreaterThan(0);
   });
 
   // Ordinary routes (generated rentals, one move slot per turn): Fire Punch bodies are live every age and the next prompt is reached;
