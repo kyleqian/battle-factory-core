@@ -27278,6 +27278,9 @@ export function renderSceneOnMovePresentation(
     };
     const attackerShake = displayedShake(10, 0, 2);
     const targetShake = displayedShake(36, 3, 0);
+    // AnimTask_ShakeMon_Step writes the sprite's x2 absolutely (the task's x offset, 0 for the attacker's y-axis task), so from
+    // the task's local age 1 on the battler's front-idle rest x2 never returns (docs/live-species-audit-6.md; RATTATA rest 1).
+    const shakeOwnsX2 = (startAge: number): boolean => moveState.age - startAge >= 1;
 
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     type ObjEntry = Readonly<{ slot: number; priority: number; order: number; draw: () => void }>;
@@ -27292,7 +27295,7 @@ export function renderSceneOnMovePresentation(
         order: orderOf(input.attackerSprite.slot),
         draw: () => drawSpriteSheet(
           fb, tilesFor(attackerArt, view.attacker.geometry.side), attackerArt.palette,
-          view.attacker.geometry.spriteCorner.x + input.attackerSprite.x2 + attackerShake.x,
+          view.attacker.geometry.spriteCorner.x + (shakeOwnsX2(10) ? 0 : input.attackerSprite.x2) + attackerShake.x,
           view.attacker.geometry.spriteCorner.y + input.attackerSprite.y2 + attackerShake.y,
         ),
       },
@@ -27302,7 +27305,7 @@ export function renderSceneOnMovePresentation(
         order: orderOf(input.targetSprite.slot),
         draw: () => drawSpriteSheet(
           fb, tilesFor(targetArt, view.target.geometry.side), targetPalette,
-          view.target.geometry.spriteCorner.x + input.targetSprite.x2 + targetShake.x,
+          view.target.geometry.spriteCorner.x + (shakeOwnsX2(36) ? 0 : input.targetSprite.x2) + targetShake.x,
           view.target.geometry.spriteCorner.y + input.targetSprite.y2 + targetShake.y,
         ),
       },

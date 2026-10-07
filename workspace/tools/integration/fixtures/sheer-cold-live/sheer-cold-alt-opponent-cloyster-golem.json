@@ -1,0 +1,36 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "SHEER_COLD",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep22-sheer-cold-alt-opponent-cloyster-golem.json",
+ "denseWindow": {
+  "startFrame": 80,
+  "endFrame": 269
+ },
+ "windowSource": "window = [activation, activation + 190 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "CLOYSTER",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 2027808505,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 187,
+  "playerMaxHp": 187,
+  "opponentHp": 144,
+  "opponentMaxHp": 144,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

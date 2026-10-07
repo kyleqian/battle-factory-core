@@ -9,6 +9,7 @@ import { cpSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "no
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import moveData from "../../src/data/gen/moves.json" with { type: "json" };
+import speciesNames from "../../src/data/gen/species-names.json" with { type: "json" };
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";
@@ -239,6 +240,9 @@ function withFirstBody(f: Fixture, input: ReturnType<typeof prepareLiveMoveSprit
   return first ? { ...input, firstBody: true as const } : input;
 }
 
+// Production reads display names from species-names.json (MR_MIME -> "MR. MIME"); the raw constant drops punctuation glyphs.
+const dispName = (c: string): string =>
+  speciesNames.species.find(s => s.species === `SPECIES_${c}`)?.name ?? c;
 export function liveView(f: Fixture, age: number): BattleResolutionPresentationRenderView {
   const profile = f.fieldProfile;
   const makeBattler = (side: "player" | "opponent") => {
@@ -248,7 +252,7 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
     return {
       ...(f.attacker.geometry.side === side && f.attackerPersonality !== undefined
         ? { personality: f.attackerPersonality } : {}),
-      species, name: mon.species, side: side === "player" ? "player" as const : "trainer" as const,
+      species, name: dispName(mon.species), side: side === "player" ? "player" as const : "trainer" as const,
       battler: side === "player" ? 0 as const : 1 as const, partyIndex: 0 as const,
       level: (profile as { playerLevel?: number; opponentLevel?: number })[side === "player" ? "playerLevel" : "opponentLevel"] ?? 50,
       hp: side === "player" ? profile.playerHp : profile.opponentHp,
@@ -278,7 +282,7 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
   return {
     field, fieldArt: createBattleCommandFieldArtView(field),
     healthboxes: { player: healthbox(field.player), opponent: healthbox(field.opponent) },
-    message: { lines: f.messageLines ?? [`${attacker === 1 ? "Foe " : ""}${f.attacker.species} used`, `${name}!`], visibleCharacters: 99 },
+    message: { lines: f.messageLines ?? [`${attacker === 1 ? "Foe " : ""}${dispName(f.attacker.species)} used`, `${name}!`], visibleCharacters: 99 },
     effect: {
       type: "move", request, age,
       // Plans exist only for audited moves; every other move yields no input. Post-KO fixtures: the production hosts'

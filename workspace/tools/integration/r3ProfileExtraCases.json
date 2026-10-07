@@ -94,5 +94,17 @@
   "signal-beam-extra-opponent-venomoth-snorlax",
   "r3-signal-beam-extra-opponent-venomoth-snorlax",
   "opponent"
+ ],
+ [
+  "SHEER_COLD",
+  "sheer-cold-extra-player-dewgong-snorlax",
+  "r3-sheer-cold-extra-player-dewgong-snorlax",
+  "player"
+ ],
+ [
+  "SHEER_COLD",
+  "sheer-cold-extra-opponent-dewgong-snorlax",
+  "r3-sheer-cold-extra-opponent-dewgong-snorlax",
+  "opponent"
  ]
 ]
