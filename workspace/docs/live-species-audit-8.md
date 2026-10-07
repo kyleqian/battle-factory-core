@@ -24,7 +24,7 @@ None. Every non-shiny species swap is 0 px on every row (incl. the elevated oppo
 
 | Move | Swap | Species 0 px (both orientations unless noted) |
 |---|---|---|
-| Baton Pass 226 | target | FLYGON, GOLBAT, SHEDINJA, STEELIX, TYRANITAR, WAILORD, PICHU, RATTATA, ONIX (accepted, prep27 ninjask-golem and s10a jolteon-golbat fixtures: 75 rows) |
+| Baton Pass 226 | target | FLYGON, GOLBAT, SHEDINJA, STEELIX, TYRANITAR, WAILORD, PICHU, RATTATA, ONIX (accepted, prep27 ninjask-golem and s10a jolteon-golbat fixtures: 43 target-swap rows) |
 | Baton Pass 226 | attacker | FLYGON, GOLBAT, ONIX, PICHU, RATTATA, SHEDINJA, STEELIX (player/opponent where the order held), WAILORD, TYRANITAR (player fixture) |
 | Endeavor 283 | target | FLYGON, GOLBAT, ONIX, RATTATA, STEELIX, WAILORD (both), PICHU, TYRANITAR (opponent fixture) |
 | Endeavor 283 | attacker | FLYGON (both), RATTATA (both), GOLBAT / PICHU / SHEDINJA (opponent fixture); staged with target HP EV 252 (`speciesAudit8EndeavorHp.py`, Endeavor needs attacker HP < target HP) |
