@@ -235,10 +235,15 @@ function birdAtAge(body: SkyAttackBody, age: number, input: Readonly<SkyAttackLi
 
 function battlersAtAge(body: SkyAttackBody, age: number, input: Readonly<SkyAttackLiveInputs>) {
   let attacker = { ...input.attackerSprite }, target = { ...input.targetSprite };
-  if (body === "setup" && age >= 43 && age <= 106) {
+  // AnimTask_HorizontalShake (battle_anim_ground.c:666-705) writes x2 absolutely from its second frame (age 44; the age-43 entry keeps
+  // the battler's own x2, e.g. the ONIX / RATTATA idle rest) and its final state zeroes x2, which then holds for the rest of the body.
+  if (body === "setup" && age >= 44 && age <= 106) {
     const shake = [0, 3, 3, -2, -2, 3, 3, -2, -2, 3, 3, -2, -2, 3, 3, -2, -2, 3, 3, -2, -2, 3, 3, -2, -2, 3, 3, -2, -2, 3, 3, -2, -2, 2, 2, -2, -2, 2, 2, -2, -2, 2, 2, -1, -1, 2, 2, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, 0, 0, 1, 1, 0, 0] as const;
     const x2 = shake[age - 43] ?? 0;
     attacker = { ...attacker, x2, attr: [attacker.attr[0], (attacker.attr[1] - x2) & 0xffff, attacker.attr[2]] };
+  }
+  if (body === "setup" && age > 106 && attacker.x2 !== 0) {
+    attacker = { ...attacker, x2: 0, attr: [attacker.attr[0], (attacker.attr[1] - attacker.x2) & 0xffff, attacker.attr[2]] };
   }
   if (body === "unleash" && age >= 86 && age <= 119) {
     const local = age - 86; const x2 = Math.floor(local / 2) % 2 === 0 ? -10 : 10;

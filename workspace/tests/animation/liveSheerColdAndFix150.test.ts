@@ -20,9 +20,9 @@ const rulesWithoutSceneMarker = (v: { rules: any }) => {
 const rowsOf = (f: Fixture) => (f.attacker.geometry.side === "player" ? 191 : 190);
 
 describe("live Sheer Cold (329) first-body adapter", () => {
-  it("is registered (no shadow row claimed) with a side-constant body length", () => {
+  it("is registered (shadow row 0) with a side-constant body length", () => {
     expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).toContain(329);
-    expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[329]).toBeUndefined(); // elevated opponents not measured: no shadow row claimed
+    expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[329]).toBe(0); // elevated FLYGON / GOLBAT opponent measured in species audit 7 (ISSUES #151)
     for (const attacker of [0, 1] as const) {
       expect(liveMoveAnimationDuration({ moveId: 329, attacker, target: (1 - attacker) as 0 | 1, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0 }))
         .toBe(attacker === 0 ? 191 : 190);

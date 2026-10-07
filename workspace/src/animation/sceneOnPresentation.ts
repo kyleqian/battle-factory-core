@@ -2637,6 +2637,11 @@ export interface SceneOnSheerColdConfig {
   readonly animationInputs: Readonly<Omit<SheerColdLiveInputs,
     "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
       | "targetAnimationCenter" | "targetBattlePositionCenter">>;
+  /** Live front-idle x2/y2 rest per battler (no Sheer Cold task writes x2/y2, so the rest persists); absent = zero. */
+  readonly idleRest?: Readonly<{
+    readonly attacker: Readonly<{ x2: number; y2: number }>;
+    readonly target: Readonly<{ x2: number; y2: number }>;
+  }>;
 }
 
 /**
@@ -3932,6 +3937,8 @@ export interface SceneOnSandTombConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   /** Live allocator, source geometry and initial OAM facts for this animation. */
   readonly animationProfile: Readonly<SandTombAnimationProfile>;
+  /** Live attacker front-idle x2/y2 rest (no Sand Tomb task writes the attacker's x2/y2); absent = zero. */
+  readonly attackerIdleRest?: Readonly<{ x2: number; y2: number }>;
 }
 
 /** Narrow Scene-ON seam for the source-relative Trick Item Bag body. */

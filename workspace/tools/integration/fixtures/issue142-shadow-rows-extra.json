@@ -5501,18 +5501,22 @@
    "move": "SHEER_COLD",
    "orientation": "player",
    "variant": "sheer-cold-player",
-   "activationFrame": null,
-   "windowStart": null,
+   "activationFrame": 75,
+   "windowStart": 75,
    "ageOffset": 0,
-   "shadowRow": null,
+   "shadowRow": 0,
    "cleanupFrame": null,
    "tailFirstAge": null,
-   "inWindow": false,
+   "inWindow": true,
    "sources": {
     "fixture": "tools/integration/fixtures/sheer-cold-live/sheer-cold-player-dewgong-opponent-chansey.json",
     "scenario": "tools/battle-lab/mechanic-sheer-cold-player-dewgong-opponent-chansey.json",
     "body": "normal",
-    "activation": "elevated opponents NOT measured for Sheer Cold (no OHKO body with a GOLBAT pair: CLOYSTER -> GOLBAT has no body); the non-elevated dense windows start at the scenario activation (inWindow false = no claimed shadow row, the hook stays off)"
+    "activation": "window start = the swapped scenario's own first-body activation (species-audit-7 derive.txt: FLYGON / GOLBAT targets orig(329, 75) sw(329, 75)); the elevated opponent's age-0 residual (200 px) is the enemy shadow (ISSUES #151); 0 px with the row (fix151-live-receipt.json)",
+    "elevatedFixtures": [
+     "tools/integration/fixtures/species-audit-7/derived/flygon-sheer-cold-player-dewgong-opponent-chansey.json",
+     "tools/integration/fixtures/species-audit-7/derived/golbat-sheer-cold-player-dewgong-opponent-chansey.json"
+    ]
    }
   },
   {
@@ -5520,18 +5524,22 @@
    "move": "SHEER_COLD",
    "orientation": "opponent",
    "variant": "sheer-cold-opponent",
-   "activationFrame": null,
-   "windowStart": null,
+   "activationFrame": 78,
+   "windowStart": 78,
    "ageOffset": 0,
-   "shadowRow": null,
+   "shadowRow": 0,
    "cleanupFrame": null,
    "tailFirstAge": null,
-   "inWindow": false,
+   "inWindow": true,
    "sources": {
     "fixture": "tools/integration/fixtures/sheer-cold-live/sheer-cold-opponent-dewgong-player-chansey.json",
     "scenario": "tools/battle-lab/mechanic-sheer-cold-opponent-dewgong-player-chansey.json",
     "body": "normal",
-    "activation": "elevated opponents NOT measured for Sheer Cold (no OHKO body with a GOLBAT pair: CLOYSTER -> GOLBAT has no body); the non-elevated dense windows start at the scenario activation (inWindow false = no claimed shadow row, the hook stays off)"
+    "activation": "window start = the swapped scenario's own first-body activation (species-audit-7 derive.txt: FLYGON / GOLBAT attackers sw(329, 78) = window start 78); the elevated opponent's age-0 residual (200 px) is the enemy shadow (ISSUES #151); 0 px with the row (fix151-live-receipt.json)",
+    "elevatedFixtures": [
+     "tools/integration/fixtures/species-audit-7/derived/flygonA-sheer-cold-opponent-dewgong-player-chansey.json",
+     "tools/integration/fixtures/species-audit-7/derived/golbatA-sheer-cold-opponent-dewgong-player-chansey.json"
+    ]
    }
   },
   {
