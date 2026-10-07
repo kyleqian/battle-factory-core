@@ -96,12 +96,12 @@ describe("live prep16 move adapters (Overheat, Silver Wind, Psych Up player: fir
     expect(prepareLiveMovePalette(host, request(315, 0)).next.historyKnown).toBe(true);
   });
 
-  it("Overheat is gated on the first-body order flag; Silver Wind on any known order (later-bodies-bg receipt)", () => {
+  it("Overheat and Silver Wind are gated on any known order (lb21) (later-bodies-bg receipt)", () => {
     for (const [id, p, o] of [[315, "SOLROCK", "SHUCKLE"], [318, "BUTTERFREE", "ONIX"]] as const) {
       const f = displayed(p, o);
       expect(cfg(f, request(id, 0), firstOrder())).not.toBeNull();
       expect(cfg(f, request(id, 0))).toBeNull();
-      expect(cfg(f, request(id, 0), laterOrder()) === null).toBe(id === 315);
+      expect(cfg(f, request(id, 0), laterOrder())).not.toBeNull();
       expect(cfg(f, request(id, 0), { known: false } as never)).toBeNull();
     }
     // The production order host lends `firstBody` until any unit (here a party-menu reset) has been applied.
@@ -150,18 +150,16 @@ describe("live prep16 move adapters (Overheat, Silver Wind, Psych Up player: fir
       const f = displayed(p, o), req = request(id, a), order = firstOrder();
       expect(cfg(f, req, order)).not.toBeNull();
       expect(new Set([0, 40, 100, 150].map(age => render(f, req, age, order))).size).toBeGreaterThan(2);
-      // Overheat: declined (scene-off fallback) without the first-body order. Silver Wind: a later body's order renders the same
-      // body (its inputs never read the activation BG registers or the lent free order).
-      if (id === 315) expect(render(f, req, 100, laterOrder())).not.toBe(render(f, req, 100, order));
-      else expect(render(f, req, 100, laterOrder())).toBe(render(f, req, 100, order));
+      // A later body's order renders the same body (its inputs never read the activation BG registers or the lent free order).
+      expect(render(f, req, 100, laterOrder())).toBe(render(f, req, 100, order));
     }
   }, 240000);
 
-  it("Psych Up (player attacker first body): duration, gate, geometry; the opponent attacker declines", () => {
+  it("Psych Up (player attacker first body): duration, gate, geometry; the opponent attacker: lb21 orientation inputs", () => {
     expect(LIVE_MOVE_ANIMATION_IDS).toContain(244);
     expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[244]).toBe(0);
     expect(liveMoveAnimationDuration(request(244, 0))).toBe(179);
-    expect(liveMoveAnimationDuration(request(244, 1))).toBeNull();
+    expect(liveMoveAnimationDuration(request(244, 1))).toBe(179); // lb21: the opponent attacker too
     const f = displayed("SKIPLOOM", "GOLEM"), art = createBattleCommandFieldArtView(f);
     expect(cfg(f, request(244, 0))).toBeNull();
     // A later body's known order is accepted (later-bodies-bg receipt: Tackle / Splash / Psychic predecessors dense-exact).
@@ -179,6 +177,15 @@ describe("live prep16 move adapters (Overheat, Silver Wind, Psych Up player: fir
     expect(inputs.palettes.resourcePalette).toEqual([0, 32767, 26427, 20087, 13747, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
     const prepared = prepareLiveMovePalette(createLiveMovePaletteHost(), request(244, 0));
     expect(prepared.input.historyKnown).toBe(true);
+    // Opponent attacker (docs/later-bodies-overheat-psychup.md): the documented opponent-orientation inputs, derived from the anchors.
+    const fo = displayed("GOLEM", "JUMPLUFF"), artO = createBattleCommandFieldArtView(fo), theirs = liveBattlerAnchors("opponent", artO);
+    const oin = (cfg(fo, request(244, 1), laterOrder())!.config as any).animationInputs;
+    expect(oin.attackerPictureOrigin).toEqual(theirs.spriteCenter);
+    expect(oin.spiral).toMatchObject({ subpriority: 38, painterInsertionIndex: 7 });
+    expect(oin.scaleMatrixSlot).toBe(2);
+    expect(oin.monBg).toMatchObject({ layer: "bg1", battlerId: 1, copyPaletteBank: 8, initialBgCnt: 0x9c00, monBgCnt: 0x5c02 });
+    expect(oin.palettes).toMatchObject({ attackerBank: 17 });
+    expect(cfg(displayed("GOLEM", "ONIX"), request(244, 1), firstOrder())).toBeNull(); // idle-offset attacker declines
     expect(new Set([0, 40, 100, 170].map(age => render(f, request(244, 0), age, firstOrder()))).size).toBeGreaterThan(2);
   }, 240000);
 

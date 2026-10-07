@@ -190,26 +190,31 @@ export function liveSilverWindInputs(args: LiveBgSnapshotArgs): Inputs & { reado
 }
 
 /**
- * MOVE_PSYCH_UP animationInputs (prep16 s2.3), PLAYER attacker first body only (the opponent attacker's first body is unverified):
+ * MOVE_PSYCH_UP animationInputs (prep16 s2.3 player; lb21 opponent), any body with a known order lend:
  * the player's `bg2cnt` is 0x5e00 at a first-body activation and the 32 software matrices are identity (measured). The spiral
  * is placed at the attacker picture origin; the monbg base scroll is 32 - the attacker's sprite centre.
  */
 export function livePsychUpInputs(args: LiveBgSnapshotArgs): Inputs | null {
   const { attackerSide, attacker, target } = args;
-  if (attackerSide !== "player" || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
-  const attackerSprite = battlerSprite("player", attacker), targetSprite = battlerSprite("opponent", target);
+  if (target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
+  const player = attackerSide === "player";
+  // lb21 (docs/later-bodies-overheat-psychup.md): the opponent attacker's orientation inputs, confirmed 0 px on 7 bodies.
+  if (!player && (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0)) return null;
+  const attackerSprite = battlerSprite(attackerSide, attacker), targetSprite = battlerSprite(player ? "opponent" : "player", target);
   return {
-    // The spiral sprite sits at the attacker's picture offset point; the target origin is its sprite centre (prep16 dump).
-    attackerPictureOrigin: attacker.picOffsetPoint, targetPictureOrigin: target.spriteCenter,
+    // The player spiral sits at the attacker's picture offset point, the opponent's at its sprite centre; the target origin is
+    // the target sprite centre (prep16 dump, lb21 opponent first-body capture).
+    attackerPictureOrigin: player ? attacker.picOffsetPoint : attacker.spriteCenter, targetPictureOrigin: target.spriteCenter,
     attackerSprite, targetSprite,
     taskSlots: { blendCycle: 0, updateMonBg: 1, loopSound: 2, sway: 3, scale: 2, attackerPalette: 3, clearMonBg: 0 },
-    spiral: { slot: 3, matrixSlot: 0, subpriority: 28, attr2: 31025, painterInsertionIndex: 6 },
-    scaleMatrixSlot: 1, spriteOrder: [], matrixBitmap: 0x6,
+    spiral: { slot: 3, matrixSlot: 0, subpriority: player ? 28 : 38, attr2: 31025, painterInsertionIndex: player ? 6 : 7 },
+    scaleMatrixSlot: player ? 1 : 2, spriteOrder: [], matrixBitmap: 0x6,
     matrixSlots: Array.from({ length: 32 }, () => [256, 0, 0, 256]),
     resource: { tag: 10196, tileSlot: 6, paletteBank: 7, tileRange: [305, 64] },
-    monBg: { layer: "bg2", battlerId: 0, copyPaletteBank: 9, baseScroll: { x: 32 - attacker.spriteCenter.x, y: 32 - attacker.spriteCenter.y },
-      initialBgCnt: 0x5e00, monBgCnt: 0x5e02, initialHardwareScroll: { x: 0, y: 0 } },
-    palettes: { ...palettes(args.palettes), backgroundBanks: [1, 2, 3], attackerBank: 16, attackerPaletteSelectorHigh: 1,
+    monBg: { layer: player ? "bg2" : "bg1", battlerId: player ? 0 : 1, copyPaletteBank: player ? 9 : 8,
+      baseScroll: { x: 32 - attacker.spriteCenter.x, y: 32 - attacker.spriteCenter.y },
+      initialBgCnt: player ? 0x5e00 : 0x9c00, monBgCnt: player ? 0x5e02 : 0x5c02, initialHardwareScroll: { x: 0, y: 0 } },
+    palettes: { ...palettes(args.palettes), backgroundBanks: [1, 2, 3], attackerBank: player ? 16 : 17, attackerPaletteSelectorHigh: 1,
       resourcePalette: resourceWords("ANIM_TAG_SPIRAL") },
     registers: { bldcnt: 0, bldalpha: 0, bldy: 0 }, animationRngSeed: 0, gameplayRng: 0,
   } as Inputs;
