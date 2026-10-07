@@ -25,6 +25,7 @@ for l in open(sys.argv[1]):
     if len(js) < occ: print(k, "BODY-MISSING", [b[:3] for b in ob], [b[:3] for b in sb]); continue
     j = js[occ - 1]
     if side(sb[j][3]) != side(ob[i][3]): print(k, "BODY-SIDE-MISMATCH"); continue
+    if ob[i][2] is None or sb[j][2] is None: print(k, "BODY-NO-END", ob[i][:3], sb[j][:3]); continue
     reordered = [b[0] for b in ob[:i]] != [b[0] for b in sb[:j]]
     off = S - ob[i][1]; s2 = sb[j][1] + off; e2 = s2 + (E - S); olen, slen = ob[i][2] - ob[i][1], sb[j][2] - sb[j][1]
     if olen != slen: e2 = min(e2, sb[j][2])
