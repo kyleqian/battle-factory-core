@@ -8,7 +8,9 @@ import { generatedCommandAnimationReplay } from "../../tools/integration/generat
 const strip = (v: { rules: any }) => ({ ...v.rules, rulesContext: { ...v.rules.rulesContext, hitMarker: v.rules.rulesContext.hitMarker & ~0x80 } });
 const routes = JSON.parse(readFileSync("tools/integration/fixtures/r2-gates/routes.json", "utf8"));
 const cases = [
-  ...routes["overheat-later-body"].map((r: any) => ({ ...r, moveId: 315, duration: 230, slots: [0] as (0 | 1 | 2 | 3)[] })),
+  // prep28: seed 143 / streak 28 / index 1 declined behind an unplanned predecessor (Water Pulse); the 14 prep28 plan rows make its lend known, so the body is now live.
+  ...routes["overheat-later-body"].map((r: any) => ({ ...r, moveId: 315, duration: 230, slots: [0] as (0 | 1 | 2 | 3)[],
+    active: r.seed === 143 && r.streak === 28 && r.index === 1 ? true : r.active })),
   ...routes["psych-up-opponent"].filter((r: any) => r.seed !== undefined).map((r: any) => ({
     ...r, moveId: 244, duration: 179, slots: ([[0, 1, 2, 3], [1, 2, 3, 0]] as const)[r.seed % 2]!.slice(0, 3) as (0 | 1 | 2 | 3)[] })),
 ];

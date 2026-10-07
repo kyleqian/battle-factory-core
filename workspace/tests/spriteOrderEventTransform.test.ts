@@ -21,8 +21,8 @@ describe("production sprite-order plan table (generated, pinned)", () => {
   it("regenerates byte-identically from the evidence JSON", () => {
     const committed = readFileSync(new URL("../src/engine/spriteOrderProductionPlans.ts", import.meta.url), "utf8");
     expect(renderSpriteOrderProductionTableFromFixtures()).toBe(committed);
-    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(467);
-    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(187);
+    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(485);
+    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(196);
   });
 
   it("decodes every EXACT-PLAN (move, side) body of the ext table to the fixture plan", () => {
@@ -30,6 +30,7 @@ describe("production sprite-order plan table (generated, pinned)", () => {
     // Rows merged from the policy-gaps relative-y plans and the rely table (confirmed tier + the source-confirmed abs-invariant allowlist) cover keys the ext table leaves non-EXACT.
     const extra: Record<string, { verdict: string; plan: unknown; tier?: string }> = {
       ...fixture("sprite-order-policy-gaps/relative-y-plans.json").bodies, ...fixture("sprite-order-body-plans-rely.json").bodies,
+      ...fixture("prep28/plan-rows.json").bodies, ...fixture("prep28/plan-rows-sky-attack.json").bodies,
     };
     let exact = 0;
     for (const [key, row] of Object.entries(bodies)) {
@@ -176,7 +177,7 @@ describe("strict real-route replay (docs/sprite-order-real-route.md events; no r
     expect({ scenarios: corpus.scenarios, skipped: corpus.skipped, edges: corpus.edges, mismatched: corpus.mismatched })
       .toEqual({ scenarios: 573, skipped: 19, edges: 1366, mismatched: 0 });
     expect(corpus.exact).toBe(corpus.known);
-    expect(corpus.known).toBe(1110);
-    expect(corpus.laterKnown).toBe(556);
+    expect(corpus.known).toBe(1130);
+    expect(corpus.laterKnown).toBe(576);
   });
 });

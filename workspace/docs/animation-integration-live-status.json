@@ -3553,12 +3553,28 @@
       "id": 143,
       "sourceFieldEvidence": "../tools/integration/fixtures/q2-live-adapter-receipt.json",
       "liveEvidence": [
-        "CHARGE body only (request.turn bit 0, 148 rows), first body (WIN0 (240, 161) is the battle's first-body reset) with the lent known-entry order, non-shiny; the strike (turn bit 1, 180 rows) declines: the order tracker has no plan for the 143 charge body, so the strike never has a known lend",
-        "dense full windows (148 rows, charge, blank text box like the Solar Beam setup) zero residual twice fresh through the production live renderer on the accepted pair, the prep25 alternate and a GOLBAT / SNORLAX-target pair, both orientations; builder src/engine/liveQ2Moves.ts (no capture row is read; equals the accepted corpus-built inputs, tools/integration/q2InputsCompare.ts)",
+        "CHARGE body (request.turn bit 0, 148 rows), first body only (WIN0 (240, 161) is the battle's first-body reset) with the lent known-entry order, non-shiny; STRIKE body (turn bit 1, 180 rows, WIN0 (0, 0) after the charge) with the tracker's lent order: the order host keys the strike 10143 by request.turn (prep28 plan rows: charge plan empty, strike Cf;D0), so a known lend after the charge exists; an unknown lend declines (ordinary route 244/42: Ice Beam after the opponent's NEEDS-KEYS Dragon Dance leaves the strike declined; 376/42: strike active every age)",
+        "dense full windows (148 rows charge, blank text box like the Solar Beam setup; 180 rows strike after the charge + the opponent's Splash) zero residual twice fresh through the production live renderer on the accepted pair, the prep25 alternate and a GOLBAT / SNORLAX-target pair, both orientations; builder src/engine/liveQ2Moves.ts (no capture row is read; equals the accepted corpus-built inputs, tools/integration/q2InputsCompare.ts)",
         "ISSUES #151 (species audit 7, tools/integration/fixtures/fix151-live-receipt.json): the attacker's AnimTask_HorizontalShake writes x2 from its second frame and zeroes it at the end (battle_anim_ground.c:666-705); the target monbg copy is drawn at x + x2 (Task_UpdateMonBg): RATTATA opponent target / attacker 0 px twice fresh (were 52,119 / 16,400 px); every other non-shiny species-audit-7 Sky Attack row exact"
       ],
       "remaining": [
-        "the 180-row strike body is not claimed (no exact order lend after the charge); later-body charges decline",
+        "later-body charges decline; a strike whose history leaves the lent order unknown declines",
+        "shiny battlers decline",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_SNORE",
+      "id": 173,
+      "sourceFieldEvidence": "../tools/integration/fixtures/q2-live-adapter-receipt.json",
+      "liveEvidence": [
+        "A known lend only: Snore needs a sleeping user, so a known order exists only behind planned sleep bodies (prep28: Sleep Powder 79 EXACT-PLAN both sides + the two STATUS_SLP status animations); no first-body gate, any unknown lend or a shiny battler declines",
+        "dense full windows (69 rows, constant across scenarios) zero residual twice fresh through the production live renderer after Sleep Powder + 2 sleep status animations on the accepted SEALEO / VENOMOTH pair, the prep25 SNORLAX -> GOLEM alternate and SEALEO -> GOLBAT / SNORLAX -> SNORLAX extras, both orientations; builder src/engine/liveQ2Moves.ts liveSnoreInputs (no Random2; no capture row is read; equals the accepted corpus-built inputs, tools/integration/q2InputsCompare.ts)",
+        "the two mv-0 bodies after Sleep Powder are fed as status-animation SLP because their window shape equals the production STATUS_SLP plan (inference from plan equality, docs/sprite-order-plan-gaps-28.md s1.6)"
+      ],
+      "remaining": [
+        "no real generated route with Sleep Powder on one side and Snore on the other was found (seeds 0-599): the live route proof is the dense fixtures after the declared history",
+        "Snore after any other sleep source (Hypnosis, Spore, Sing...) declines unless that body's plan is also known",
         "shiny battlers decline",
         "independent arbitrary-species/history framebuffer comparison"
       ]
@@ -3637,7 +3653,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 242,
+  "implementedCount": 243,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 11,

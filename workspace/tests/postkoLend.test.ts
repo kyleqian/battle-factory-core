@@ -91,17 +91,22 @@ describe("post-KO entry-label lend (rung 2, presentation-only)", () => {
   it("the production tracker fed each model-check scenario lends pi(F) of model-check-*.json at every known edge", () => {
     const files = readdirSync(FX).filter(name => name.startsWith("model-check-")).sort();
     expect(files).toHaveLength(8);
-    let lent = 0, postKoLent = 0, declined = 0;
+    let lent = 0, postKoLent = 0, declined = 0, newlyPlanned = 0;
     for (const file of files) {
       const check = modelCheck(file.replace(/^model-check-|\.json$/g, ""));
       expect(Object.keys(SCENARIOS)).toContain(check.scenario);
+      let afterThunderbolt = false;
       let tracker = createSpriteOrderTracker(knownEntrySpriteOrderState("battle-lab-ordinary-singles"));
       for (const step of postkoTrackerSteps(check.scenario)) {
         if (step.kind !== "edge") { tracker = applySpriteOrderPresentationEvent(tracker, step); continue; }
         const edge = check.edges[step.index]!;
         expect(edge.label).toBe(step.label);
         const lend = spriteOrderTrackerLend(tracker);
-        if (edge.rung2Lend === null) { expect(lend, `${check.scenario} ${edge.label}`).toBeNull(); declined += 1; continue; }
+        if (edge.rung2Lend === null) {
+          // prep28 plans Thunderbolt-opponent (85:opponent): the audit's strict-unknown edges at and behind it now lend (no pi(F) reference exists for it).
+          if (check.scenario === "postko-rocktomb-thunderbolt" && (afterThunderbolt ||= step.label.includes("85:opponent"))) { if (lend !== null) { newlyPlanned += 1; continue; } }
+          expect(lend, `${check.scenario} ${edge.label}`).toBeNull(); declined += 1; continue;
+        }
         expect(edge.mismatches).toBe(0);
         expect([...spriteOrderTrackerPostUnitView(tracker)!.free]).toEqual(edge.rung2Lend.free);
         expect(lend, `${check.scenario} ${edge.label} @${edge.riseFrame}`).toEqual(referenceRelabel(edge.rung2Lend));
@@ -110,7 +115,8 @@ describe("post-KO entry-label lend (rung 2, presentation-only)", () => {
       }
     }
     // 37 known edges (8 entry + 29 post-KO) of the audit, all lent; the 8 strict-unknown edges (no EXACT plan) decline.
-    expect({ lent, postKoLent, declined }).toEqual({ lent: 37, postKoLent: 29, declined: 8 });
+    expect({ lent, postKoLent, declined }).toEqual({ lent: 37, postKoLent: 29, declined: 8 - newlyPlanned });
+    expect(newlyPlanned).toBeGreaterThanOrEqual(1);
   });
 
   it("the production HOST replay of each dense fixture's history lends exactly whatif-*-relabel.json lendFree", () => {

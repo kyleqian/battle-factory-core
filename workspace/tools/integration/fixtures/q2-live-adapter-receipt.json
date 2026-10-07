@@ -1,11 +1,8 @@
 {
- "schema": "q2-live-adapter-receipt/v1",
- "testedCodeCommit": "8fa34f420d872d39e8186a9c27582e05c8384d3a",
- "srcTree": "f16cabf6ad8c62f48be4483eefe0fcfb7102acb7",
- "scope": "Hyper Voice 304, Smog 123, Sand Tomb 328, Sky Attack 143 charge body; Snore 173 and the Sky Attack strike are NOT wired (no exact order lend)",
+ "schema": "q2-live-receipt/v1",
  "summary": {
-  "fixtures": 29,
-  "rows": 4889,
+  "fixtures": 45,
+  "rows": 6881,
   "allExactTwiceFresh": true
  },
  "rows": [
@@ -295,6 +292,25 @@
    "exact": true
   },
   {
+   "fixture": "tools/integration/fixtures/q2-live/sky-attack-alt-opponent-pidgeot-golem-strike.json",
+   "rows": 180,
+   "expectedDuration": 180,
+   "runs": [
+    {
+     "exactRows": 180,
+     "residualPixels": 0,
+     "digest": "a03f7814041ffa8f5dd304ff1650768b03b4deee99b8786d42454ab81a80f331"
+    },
+    {
+     "exactRows": 180,
+     "residualPixels": 0,
+     "digest": "a03f7814041ffa8f5dd304ff1650768b03b4deee99b8786d42454ab81a80f331"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
    "fixture": "tools/integration/fixtures/q2-live/sky-attack-alt-player-pidgeot-golem-charge.json",
    "rows": 148,
    "expectedDuration": 148,
@@ -308,6 +324,25 @@
      "exactRows": 148,
      "residualPixels": 0,
      "digest": "6fc1b328468c9ca38a826de87d616e1a824d82bfa72c860a01dd5d9daa74a2b4"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/sky-attack-alt-player-pidgeot-golem-strike.json",
+   "rows": 180,
+   "expectedDuration": 180,
+   "runs": [
+    {
+     "exactRows": 180,
+     "residualPixels": 0,
+     "digest": "feac8811f73ccfcf61978e9da00bebeedd281f931a52bfe149072ae9169455f7"
+    },
+    {
+     "exactRows": 180,
+     "residualPixels": 0,
+     "digest": "feac8811f73ccfcf61978e9da00bebeedd281f931a52bfe149072ae9169455f7"
     }
    ],
    "freshRunsIdentical": true,
@@ -333,6 +368,25 @@
    "exact": true
   },
   {
+   "fixture": "tools/integration/fixtures/q2-live/sky-attack-extra-opponent-fearow-golbat-strike.json",
+   "rows": 180,
+   "expectedDuration": 180,
+   "runs": [
+    {
+     "exactRows": 180,
+     "residualPixels": 0,
+     "digest": "30d7b28fe334d0f945248bc0d6c404bedb0df829d29393ddd9906403fa4fb88a"
+    },
+    {
+     "exactRows": 180,
+     "residualPixels": 0,
+     "digest": "30d7b28fe334d0f945248bc0d6c404bedb0df829d29393ddd9906403fa4fb88a"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
    "fixture": "tools/integration/fixtures/q2-live/sky-attack-extra-opponent-pidgeot-snorlax-charge.json",
    "rows": 148,
    "expectedDuration": 148,
@@ -346,6 +400,25 @@
      "exactRows": 148,
      "residualPixels": 0,
      "digest": "2ccc6f7616f50a11f9612ce6bcb240efead6fae380fd303582331cfa0b875d5b"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/sky-attack-extra-opponent-pidgeot-snorlax-strike.json",
+   "rows": 180,
+   "expectedDuration": 180,
+   "runs": [
+    {
+     "exactRows": 180,
+     "residualPixels": 0,
+     "digest": "76ae4e34a90f7c2b155b3957d7fbb9497464a59529a52cec6f379c69cf2f3112"
+    },
+    {
+     "exactRows": 180,
+     "residualPixels": 0,
+     "digest": "76ae4e34a90f7c2b155b3957d7fbb9497464a59529a52cec6f379c69cf2f3112"
     }
    ],
    "freshRunsIdentical": true,
@@ -371,6 +444,25 @@
    "exact": true
   },
   {
+   "fixture": "tools/integration/fixtures/q2-live/sky-attack-extra-player-fearow-golbat-strike.json",
+   "rows": 180,
+   "expectedDuration": 180,
+   "runs": [
+    {
+     "exactRows": 180,
+     "residualPixels": 0,
+     "digest": "89e721589b5aa6d5aa9f7db741fa4193f91dea2b6ea8866d7b9e78d1138d5dd8"
+    },
+    {
+     "exactRows": 180,
+     "residualPixels": 0,
+     "digest": "89e721589b5aa6d5aa9f7db741fa4193f91dea2b6ea8866d7b9e78d1138d5dd8"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
    "fixture": "tools/integration/fixtures/q2-live/sky-attack-extra-player-pidgeot-snorlax-charge.json",
    "rows": 148,
    "expectedDuration": 148,
@@ -384,6 +476,25 @@
      "exactRows": 148,
      "residualPixels": 0,
      "digest": "29ee8b98d6dd7bf3946a616a82bc960b80296930906c49e72bc4aee216fc346f"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/sky-attack-extra-player-pidgeot-snorlax-strike.json",
+   "rows": 180,
+   "expectedDuration": 180,
+   "runs": [
+    {
+     "exactRows": 180,
+     "residualPixels": 0,
+     "digest": "7250dbf0a5abfce60ba04cafec87158d0f6279331b44393f5aa66823499dee8a"
+    },
+    {
+     "exactRows": 180,
+     "residualPixels": 0,
+     "digest": "7250dbf0a5abfce60ba04cafec87158d0f6279331b44393f5aa66823499dee8a"
     }
    ],
    "freshRunsIdentical": true,
@@ -409,6 +520,25 @@
    "exact": true
   },
   {
+   "fixture": "tools/integration/fixtures/q2-live/sky-attack-opponent-fearow-player-shuckle-strike.json",
+   "rows": 180,
+   "expectedDuration": 180,
+   "runs": [
+    {
+     "exactRows": 180,
+     "residualPixels": 0,
+     "digest": "9018af9b4a9b6782dbf986ab03b68aa844b984ce41a6bcb9ff7b196a774689c2"
+    },
+    {
+     "exactRows": 180,
+     "residualPixels": 0,
+     "digest": "9018af9b4a9b6782dbf986ab03b68aa844b984ce41a6bcb9ff7b196a774689c2"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
    "fixture": "tools/integration/fixtures/q2-live/sky-attack-player-fearow-opponent-shuckle-charge.json",
    "rows": 148,
    "expectedDuration": 148,
@@ -422,6 +552,25 @@
      "exactRows": 148,
      "residualPixels": 0,
      "digest": "0afd1e3a83b89772955c719879e5bf183d16efde769b8aa3ae1ff1c75312b828"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/sky-attack-player-fearow-opponent-shuckle-strike.json",
+   "rows": 180,
+   "expectedDuration": 180,
+   "runs": [
+    {
+     "exactRows": 180,
+     "residualPixels": 0,
+     "digest": "84c36b32484c776e397b7f7f57c9411d0bb510dcf20c7d1da11695552a4ba808"
+    },
+    {
+     "exactRows": 180,
+     "residualPixels": 0,
+     "digest": "84c36b32484c776e397b7f7f57c9411d0bb510dcf20c7d1da11695552a4ba808"
     }
    ],
    "freshRunsIdentical": true,
@@ -559,13 +708,158 @@
    ],
    "freshRunsIdentical": true,
    "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/snore-alt-opponent-snorlax-golem.json",
+   "rows": 69,
+   "expectedDuration": 69,
+   "runs": [
+    {
+     "exactRows": 69,
+     "residualPixels": 0,
+     "digest": "6a9ddc8b4e1885f5e9c2b85504092a4cfc7054a7bee92023f960023ac2fd84c4"
+    },
+    {
+     "exactRows": 69,
+     "residualPixels": 0,
+     "digest": "6a9ddc8b4e1885f5e9c2b85504092a4cfc7054a7bee92023f960023ac2fd84c4"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/snore-alt-player-snorlax-golem.json",
+   "rows": 69,
+   "expectedDuration": 69,
+   "runs": [
+    {
+     "exactRows": 69,
+     "residualPixels": 0,
+     "digest": "b464096c0e2b3c415add9a2edc183a3f9c4d70f49efbbb4535b45cfd1092cb83"
+    },
+    {
+     "exactRows": 69,
+     "residualPixels": 0,
+     "digest": "b464096c0e2b3c415add9a2edc183a3f9c4d70f49efbbb4535b45cfd1092cb83"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/snore-extra-opponent-sealeo-golbat.json",
+   "rows": 69,
+   "expectedDuration": 69,
+   "runs": [
+    {
+     "exactRows": 69,
+     "residualPixels": 0,
+     "digest": "1522031a9cdb1282a757669f9a1b807be1f9153ae739a6f814f0de62a437aa73"
+    },
+    {
+     "exactRows": 69,
+     "residualPixels": 0,
+     "digest": "1522031a9cdb1282a757669f9a1b807be1f9153ae739a6f814f0de62a437aa73"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/snore-extra-opponent-snorlax-snorlax.json",
+   "rows": 69,
+   "expectedDuration": 69,
+   "runs": [
+    {
+     "exactRows": 69,
+     "residualPixels": 0,
+     "digest": "008aacac72b1ca0784b960214194dc774f4c9517d8e6ba95401f4188cea36fda"
+    },
+    {
+     "exactRows": 69,
+     "residualPixels": 0,
+     "digest": "008aacac72b1ca0784b960214194dc774f4c9517d8e6ba95401f4188cea36fda"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/snore-extra-player-sealeo-golbat.json",
+   "rows": 69,
+   "expectedDuration": 69,
+   "runs": [
+    {
+     "exactRows": 69,
+     "residualPixels": 0,
+     "digest": "01fa329dbb9ffe411bfd2035c1f1f18c78fabcdb58ee46f7470ed4a0fd59556e"
+    },
+    {
+     "exactRows": 69,
+     "residualPixels": 0,
+     "digest": "01fa329dbb9ffe411bfd2035c1f1f18c78fabcdb58ee46f7470ed4a0fd59556e"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/snore-extra-player-snorlax-snorlax.json",
+   "rows": 69,
+   "expectedDuration": 69,
+   "runs": [
+    {
+     "exactRows": 69,
+     "residualPixels": 0,
+     "digest": "4f6571e93ad53851c7a96093e5be3075bc2c3e4d4696b21543ebd1b4fb74ea10"
+    },
+    {
+     "exactRows": 69,
+     "residualPixels": 0,
+     "digest": "4f6571e93ad53851c7a96093e5be3075bc2c3e4d4696b21543ebd1b4fb74ea10"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/snore-opponent-sealeo-player-venomoth.json",
+   "rows": 69,
+   "expectedDuration": 69,
+   "runs": [
+    {
+     "exactRows": 69,
+     "residualPixels": 0,
+     "digest": "ac3b9b66a9206b3a7301cd963953c4c4c8283aeadd4d773f5ef1c3abb3a7605e"
+    },
+    {
+     "exactRows": 69,
+     "residualPixels": 0,
+     "digest": "ac3b9b66a9206b3a7301cd963953c4c4c8283aeadd4d773f5ef1c3abb3a7605e"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/q2-live/snore-player-sealeo-opponent-venomoth.json",
+   "rows": 69,
+   "expectedDuration": 69,
+   "runs": [
+    {
+     "exactRows": 69,
+     "residualPixels": 0,
+     "digest": "9ce66ac12641456a03e4fd4fa267546a53b437acb756f10511a1c3187b4853b0"
+    },
+    {
+     "exactRows": 69,
+     "residualPixels": 0,
+     "digest": "9ce66ac12641456a03e4fd4fa267546a53b437acb756f10511a1c3187b4853b0"
+    }
+   ],
+   "freshRunsIdentical": true,
+   "exact": true
   }
- ],
- "gates": {
-  "fullSuite": "1543 files passed / 44 skipped, 12606 tests passed / 223 skipped",
-  "build": "ok",
-  "smoke": "448/448",
-  "differential": "fight-submenu + battle1-postwin-next-prompt + presentation-rng-playable-live-bodies-seeded-on: 624 captures byte-identical vs 338a03df5",
-  "shadowScan": "523 rows / 0 mismatches"
- }
+ ]
 }
