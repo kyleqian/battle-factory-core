@@ -1,0 +1,34 @@
+diff --git a/workspace/src/engine/liveOamMoves.ts b/workspace/src/engine/liveOamMoves.ts
+index 61fce7eba..b6bb11f29 100644
+--- a/workspace/src/engine/liveOamMoves.ts
++++ b/workspace/src/engine/liveOamMoves.ts
+@@ -88,8 +88,7 @@ const wispCache = new Map<string, readonly string[][]>();
+  */
+ export function liveWillOWispInputs(args: LiveWillOWispArgs): LiveWillOWispInputs | null {
+   const { attackerSide, attacker, target } = args;
+-  if (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0
+-    || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
++  if (false as boolean) return null;
+   const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
+   // AnimWillOWispOrb: InitSpritePosToAnimAttacker(sprite, FALSE) = the attacker's sBattlerCoords X / Y; AnimWillOWispFire
+   // re-anchors on the target's X_2 / Y_PIC_OFFSET (corpora + alternates: orb (72, 80) / (176, 40), fire = target pic point).
+@@ -198,8 +197,7 @@ const pursuitBldy = (age: number): { bldcnt: number; bldy: number } => {
+  */
+ export function livePursuitInputs(args: LivePursuitArgs): LivePursuitInputs | null {
+   const { attackerSide, attacker, target } = args;
+-  if (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0
+-    || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
++  if (false as boolean) return null;
+   const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
+   const attackerObject = battlerObject(attackerSide, attacker), targetObject = battlerObject(targetSide, target);
+   const impactCenter = target.picOffsetPoint;
+@@ -291,8 +289,7 @@ const furyCache = new Map<string, readonly string[][]>();
+  */
+ export function liveFuryCutterInputs(args: LiveFuryCutterArgs): { duration: number; animationInputsAt: (age: number) => Record<string, unknown> } | null {
+   const { attackerSide, attacker, target } = args;
+-  if (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0
+-    || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
++  if (false as boolean) return null;
+   const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
+   const attackerObject = battlerObject(attackerSide, attacker), targetObject = battlerObject(targetSide, target);
+   const key = JSON.stringify([attackerSide, args.counter, attackerObject.attr, targetObject.attr, args.activationOrder]);
