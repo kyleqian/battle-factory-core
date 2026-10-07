@@ -17,20 +17,17 @@ backlog.
 
 # Open
 
-## #151 — Species audit 7 residuals in live adapters (Sheer Cold, Hyper Voice)
+## #151 — Species audit 7 remainder: CPU-timing residuals in live Sheer Cold / Hyper Voice (awaits DEFERRED D4)
 
-Evidence `docs/live-species-audit-7.md`, `tools/integration/fixtures/species-audit-7/residuals.tsv` (2 fresh runs,
-identical digests; supervisor reproduced 4 rows).
-- **Sheer Cold (329):** Tail ages 173-189, ~17k px/row, with
-  TYRANITAR / PICHU / FLYGON / GOLBAT (attacker or target) while DEWGONG / CHANSEY / CLOYSTER / GOLEM / SNORLAX /
-  STEELIX / WAILORD are exact — cause unknown (lag frame vs derivable timing not measured).
-- **Fixed (fix151, `3da2d5bbe`, receipt `tools/integration/fixtures/fix151-live-receipt.json`):** the idle-x2 class
-  (RATTATA / ONIX in Sheer Cold both roles, Sand Tomb RATTATA attacker, Sky Attack charge RATTATA target / attacker)
-  and the Sheer Cold elevated-opponent age-0 shadow (#142 row 0): 0 px twice fresh. With its idle class gone the
-  ONIX opponent attacker shows the same Sheer Cold tail (ages 173-188, 276,352 px).
-- **Hyper Voice (304):** one row at age 59 (229 px FLYGON / GOLBAT, ~3.8k px PICHU / RATTATA attackers); no
-  counter probe yet (possible lag frame).
-- Return: no defect (57/57 non-shiny rows exact). Shiny rows decline as designed.
+Evidence `docs/live-species-audit-7.md`, diagnosis `docs/issue151-diagnosis.md` (counter evidence, shift tests and
+env-override patch proofs, all twice fresh; supervisor reran both patch proofs). The idle-x2 class and the Sheer Cold
+elevated-opponent shadow were fixed by fix151 (`fix151-live-receipt.json`).
+- **Sheer Cold (329):** the background restore fade ends one frame early / late (ages 172-189, ~17k px/row) when the
+  age-171 lag frame differs from the orientation's accepted pair — TYRANITAR / PICHU / FLYGON / GOLBAT / ONIX in some
+  roles; no species property predicts it. Restore end 188 / 189 from the measured lag gives 0 px.
+- **Hyper Voice (304):** the age-59 palette upload lands at a pair-dependent scanline (band depth 16 / 15 / 0; 229 px
+  to ~3.8k px in one row); not a lag frame; not derivable from battle state.
+- Both are the CPU-timing class of DEFERRED D4; the accepted acceptance sets are exact. Resolve per the D4 answer.
 
 ## #148 — Battler x2 history: unknown-history remainder (main bug FIXED 2026-10-06)
 
