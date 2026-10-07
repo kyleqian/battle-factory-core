@@ -17,7 +17,7 @@ backlog.
 
 # Open
 
-## #152 — Species audit 9 remainder: Mach Punch idle-rest target; Meteor Mash FLYGON fixture offset (S10A, 2026-10-07)
+## #152 — Species audits 9-10 remainder: idle-rest gaps, Extrasensory split rows, fixture offset (S10A, 2026-10-07)
 
 Evidence `docs/live-species-audit-9.md`, receipts `tools/integration/fixtures/species-audit-9/`. FIXED in `a7402719b`
 (supervisor reran x2 fresh): Mach Punch opponent attacker with an idle rest (ONIX 86,089 -> 0 px, RATTATA 36,222 -> 0)
@@ -27,6 +27,13 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 - **Meteor Mash (309), player-side FLYGON target:** not a production defect — the derived audit fixture's pinned
   Random2 activation is 4 steps late (offset scan: 0 px only at -4, equal to the GOLBAT sibling's value); why the two
   FLYGON probes record 4 extra steps is unexplained. Corrected fixture `fixtures/s10a-part0/meteor-mash-flygon/`.
+- **Extrasensory (326), opponent-side attacker with an idle x2 rest (audit 10, `docs/live-species-audit-10.md`):** the
+  ROM clone copies the attacker's x2 rest; the live clone uses `spriteCenter` without it (`liveOamMoves.ts` ~:847-850).
+  Patch `species-audit-10/extrasensory-clone-rest-env.diff`: RATTATA 8,009 -> 0 px (supervisor reran; env-off 8,009).
+- **Spit Up (255):** the attacker idle-rest gate is too strict (gate lifted: ONIX / RATTATA attackers 0 px); keep the
+  target half.
+- **Extrasensory opponent-side targets FLYGON / GOLBAT / WAILORD:** 18,345 / 8,318 / 162 px on ages 43..117 in the
+  policy phase; likely the documented scanline-split class (prep30 §1.4) but the split line was not measured.
 - Harness limit: the verifier passes only the attacker's personality, so shiny TARGET declines are unverified.
 
 ## #151 — Species audit 7 remainder: CPU-timing residuals in live Sheer Cold / Hyper Voice (D4 integration pending)

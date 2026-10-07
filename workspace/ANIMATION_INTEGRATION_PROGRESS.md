@@ -26,6 +26,10 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- Species audit 10 (side, `ba13d9d12`, new files only): Shock Wave, Superpower, Psywave, Extrasensory, Nightmare, Spit
+  Up — 208 rows x2 fresh: 14 TIMING-PHASE (documented rows only), 30 declines confirmed by gate lifts, 1 SPECIES-DEFECT
+  (Extrasensory clone ignores the attacker's idle rest; patch proof RATTATA 8,009 -> 0 px, reproduced by the
+  supervisor), Spit Up attacker gate too strict, 6 UNRESOLVED Extrasensory rows (likely scanline split). ISSUES #152.
 - prep35 (side, `a41cfc5bd`, new files only): Skill Swap (285) READY as faithful timing — full hardware OAM rows 1..end,
   32 matrices, 64-slot order, palette program (psychic BG rotation, two white blends) exact in 6 windows; pixels
   1172/1174 rows 0 px at the measured phase (row 0 enemy shadow of two elevated windows); lag at row 176 (4 of 6) +
