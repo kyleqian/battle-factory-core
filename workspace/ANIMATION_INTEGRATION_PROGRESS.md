@@ -1,5 +1,20 @@
 # Animation integration progress
 
+## 2026-10-07 (day) — S10A finish run: D4 faithful timing implemented
+
+- Folded Opus worker `6e4142713` (fast-forward; src tree `57de0763`): D4 accounting + policy.
+  `src/engine/liveMoveTimingPolicy.ts` (`live-move-timing.v1.dominant-measured-phase.tie-no-optional-event`;
+  fixed global table, no gameplay/RNG/capture inputs, no session-export field because nothing is per battle);
+  live status `faithfulTimingAdapters` / `faithfulTimingCount` / `faithfulTimingClaim`; census and inventory
+  tests assert exact + faithful random + faithful timing + remaining = 276, disjoint. FAITHFUL-TIMING
+  Mach Punch (183; first body; optional lag at age 91 in 5 of 8 measured scenarios -> 110 rows; tie-break
+  probes `fixtures/d4a/lag-frames-tiebreak.json`). Nightmare declined (needs a per-age palette / order host
+  model and a Hypnosis / sleep-status lend). Worker gates 1,550 files / 12,681 tests, build, differential 389
+  byte-identical. Supervisor: `d4aTimingCheck.ts` on all 8 fixtures, two fresh runs each — 5 policy-phase
+  windows 0 px, 3 other-phase windows residual only on ages 92..107 (max 18,252 px/row), digests r1 == r2;
+  typecheck, smoke 448, 7 targeted files 144/144 on master. Logs `.integration/validation/d4a-20261007/`.
+  Counts: 246 scoped-exact + 12 faithful-random + 1 faithful-timing, 17 remaining.
+
 ## 2026-10-07 — D4 approved; finish remaining S10A integration
 
 - The user authorized unblocking and finishing the campaign. D4 option (b) is
