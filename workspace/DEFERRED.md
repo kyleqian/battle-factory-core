@@ -50,6 +50,11 @@ the dominant measured timing as a separately counted claim, like D3's "faithful 
 - Pursuit: first bodies shipped as scoped-exact; 4 of 12 later bodies are one frame short (kept first-body
   only; `docs/later-bodies-curse-oam.md`), and a player-side TYRANITAR attacker lacks the usual lag
   (`docs/live-species-audit-5.md`). Hidden Power vs GOLBAT has a similar tail lag (audit 3).
+- Shipped this session, found by audit 7 + diagnosis (`docs/issue151-diagnosis.md`): Sheer Cold's background
+  restore fade ends one frame earlier / later when an age-171 lag frame differs from the accepted pair (TYRANITAR /
+  PICHU / FLYGON / GOLBAT / ONIX in some roles; ~17k px/row for 16-17 rows); Hyper Voice's age-59 palette upload
+  lands at a pair-dependent scanline (band depth 16 / 15 / 0; up to 3.8k px in one row). Both acceptance sets are
+  exact; under option (a) they would keep their current scoped-exact claim with this documented limitation.
 
 **Options.**
 - (a) Keep the fallback for these moves (status quo; about 1.3% of Factory move uses stay unanimated).
