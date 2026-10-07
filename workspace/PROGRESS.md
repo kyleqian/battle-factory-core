@@ -10,7 +10,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **State:** S10A, local master; production src tree `1efb1872` (prep29 R1 merge): 246 scoped-exact + 12
   faithful-random live adapters, 18 accepted bodies remain (census `246+12+0+18=276`). Supervisor final gates on
   that code: typecheck, 1,548 files / 12,665 tests, build 862 (`final-supervisor-gates-20261007.json`). Preview <http://127.0.0.1:5191/> refreshed on this src at wind-down (receipt
-  `playable-preview-<served commit>-receipt.json`: 4 samples hash-equal, export + mode restart, no errors).
+  `playable-preview-d01f11d1e-receipt.json`; serves `d01f11d1e`: 4 samples hash-equal, export + mode restart, no errors).
   Opus 5.5 supervisor; Opus / Sonnet 5.5 workers; 11 integration folds + 14 evidence merges, all re-proved by the
   supervisor (dense reruns twice fresh, differential on 2-3 traces, reruns of every evidence script).
 - **Did (production):** hardware-OAM provider + Will-O-Wisp / Pursuit / Fury Cutter / Return; source models for

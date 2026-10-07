@@ -195,7 +195,7 @@
   -> 12. 20 dense fixtures x 2 fresh 0 px; Bonemerang route 246 both hits active; worker gates 1,548 files / 12,665
   tests, build; census `246+12+0+18=276`. Supervisor: dense rerun 4 alternates 0 px r1 == r2; differential 389/389.
 - Final wind-down: supervisor final gates on master `e09090833` (src tree `1efb1872`): typecheck, 1,548 files / 12,665 tests, build 862
-  (`final-supervisor-gates-20261007.json`); preview refreshed on this src (`playable-preview-<served commit>-receipt.json`). DEFERRED D4 OPEN. Next: ROADMAP S10A
+  (`final-supervisor-gates-20261007.json`); preview refreshed on this src (`playable-preview-d01f11d1e-receipt.json`, serves `d01f11d1e`). DEFERRED D4 OPEN. Next: ROADMAP S10A
   "Next (2026-10-07 morning)".
 
 ## 2026-10-06 (day, wind-down) — D3 implemented: 218 -> 226 exact + 10 faithful-random live adapters
