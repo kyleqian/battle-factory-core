@@ -824,7 +824,7 @@ export interface LiveExtrasensoryInputArgs {
  * First-body scanline entry S0 (the battle intro's residue; prep18 s1.1 / prep30 s0.2 H: bank 0 = 80 x +2, 80 x -2, then zeros; bank 1 zero;
  * srcBuffer 1, state 0; equal in every measured scenario; the same constant as the Dig / Rapid Spin first bodies).
  */
-const FIRST_BODY_SCANLINE = Object.freeze({ state: 0, srcBuffer: 1, dmaDest: 67108892,
+export const FIRST_BODY_SCANLINE = Object.freeze({ state: 0, srcBuffer: 1, dmaDest: 67108892,
   buffers: Object.freeze([Object.freeze([...Array(80).fill(2), ...Array(80).fill(-2), ...Array(160).fill(0)]), Object.freeze(Array(320).fill(0))]) });
 const extrasensoryCache = new Map<string, ReturnType<typeof liveExtrasensoryHardwareOamRows>>();
 

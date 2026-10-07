@@ -2,7 +2,7 @@
 """S10A live dense fixtures for Extreme Speed 245 and Memento 262 (docs/next-adapters-prep34.md; scoped exact, no CPU phase) from TWO fresh
 direct-mGBA prep22Probe.py runs per scenario (prep22Probes.sh DIR 2 <scenarios>; the runs must agree on every body). Window = [activation, end]
 of the scenario's FIRST body of the move (its own activation and length); precedingBodies = every unit before it. Recipe of s10aLiveFixtures.py.
-usage: s10aEsMementoFixtures.py PROBEDIR   -> tools/integration/fixtures/s10a-live/{extreme-speed,memento}-*.json"""
+usage: s10aEsMementoFixtures.py PROBEDIR   -> tools/integration/fixtures/s10a-live/{extreme-speed,memento}-*.json (+ s10a-live-declines/memento-later-*.json)"""
 import json, sys
 from pathlib import Path
 R = Path(__file__).resolve().parents[2]
@@ -18,6 +18,7 @@ CASES = [  # (move, id, tag, scenario, attacker side, rows or None = the body's 
     ("MEMENTO", 262, "memento-opponent-weezing-player-onix", "mechanic-memento-opponent-weezing-player-onix", "opponent", None),
     ("MEMENTO", 262, "memento-alt-player-weezing-golem", "prep34-memento-alt-player-weezing-golem", "player", None),
     ("MEMENTO", 262, "memento-alt-opponent-weezing-golem", "prep34-memento-alt-opponent-weezing-golem", "opponent", None),
+    ("MEMENTO", 262, "memento-alt-player-weezing-golbat", "s10a-memento-player-weezing-opponent-golbat", "player", None),
     ("MEMENTO", 262, "memento-later-player-weezing-chimecho", "prep34-memento-after-psywave-player-weezing-chimecho", "player", None),
 ]
 ONLY = set(sys.argv[2:])
@@ -60,5 +61,8 @@ for move, mid, tag, scen, side, want in CASES:
     pre = [{"moveId": b["move"], "side": side_of(b)} for b in bodies[:idx]]
     assert all(b["moveId"] != 0 for b in pre), (scen, "unexpected non-move unit")
     if pre: fx["precedingBodies"] = pre
-    (out / f"{tag}.json").write_text(json.dumps(fx, indent=1) + "\n")
+    # A later-body window is a decline control (the first-body gate), kept apart from the exact fixtures.
+    dest = out.parent / "s10a-live-declines" if "-later-" in tag else out
+    dest.mkdir(exist_ok=True)
+    (dest / f"{tag}.json").write_text(json.dumps(fx, indent=1) + "\n")
     print(tag, A, E, rows, fx["attacker"]["species"], "->", fx["target"]["species"], [b["moveId"] for b in pre], m[0]["hp"], m[1]["hp"])

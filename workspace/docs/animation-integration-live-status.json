@@ -3687,6 +3687,23 @@
         "shiny battlers and non-zero idle rests on either battler decline (no rest window measured; the impact program writes the target x2)",
         "doubles / contest paths not covered"
       ]
+    },
+    {
+      "move": "MOVE_MEMENTO",
+      "id": 262,
+      "sourceFieldEvidence": "../tools/integration/fixtures/em-live-receipt.json",
+      "liveEvidence": [
+        "docs/next-adapters-prep34.md s2: the unchanged reducer src/animation/memento.ts fed liveMoveAnimation.ts liveMementoReducerConfig from the displayed field: x = sprite x, shadowTop = Y_PIC_OFFSET - height / 2 - 7 (picOffsetPoint; pic-coords height), shadowBottom = battle-position y + 31, bgX / bgY = 32 - (x + x2), 32 - (y + y2) (x2 = the tracked opponent idle rest), BG / rank / palette per side; activation scanline = FIRST_BODY_SCANLINE (liveOamMoves.ts; equal up to a display-neutral bank relabel), WIN0 240 / 161; duration = reduceMemento(config).length (175..179 rows); never a capture row",
+        "gate: the battle's first animation body (spriteOrderInput.firstBody, the Extrasensory precedent); non-shiny. The self-KO and stat drops are gameplay-owned (read only); the displayed attacker HP is already 0 at the event (prep6 Self-Destruct path) and the HUD is live-owned (!liveField healthbox / message block)",
+        "#142: row 0 for an elevated opponent target (WEEZING -> GOLBAT 0 px); the shared hook now follows SpriteCB_EnemyShadow's IsBattlerSpritePresent (opponent HP 0 = no shadow), so an elevated self-KO WEEZING attacker's shadow stays hidden (opponent windows 195 px on row 0 otherwise)",
+        "renderer: battleScene.ts MEMENTO branch with live-field gates and live battler art (+ the opponent front idle rest); staged / accepted outputs byte-identical (tools/integration/s10aStagedDigest.ts at dc0283345 == at the change)",
+        "dense full windows zero residual twice fresh through the production live renderer from each scenario's own activation, both orientations: accepted WEEZING -> ONIX P / O, prep34 WEEZING -> GOLEM P / O, elevated GOLBAT target P (5 windows, 888 / 888 rows; tools/integration/fixtures/s10a-live/memento-*.json); the later-body window after Psywave declines (s10a-live-declines/)",
+        "ordinary route 259/28 WEEZING (slot 0): live every age (179), the user faints, forced replacement answered, next action prompt reached, Scene ON/OFF gameplay / RNG / facility parity; 127/28 (after the opponent's body) declines (tests/animation/liveExtremeSpeedMementoAdapters.test.ts)"
+      ],
+      "remaining": [
+        "later bodies decline (the scanline entry after an earlier scanline body differs, prep34 s2.2); shiny battlers decline",
+        "doubles / contest paths not covered"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3710,7 +3727,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 247,
+  "implementedCount": 248,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 12,

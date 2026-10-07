@@ -113,3 +113,100 @@ describe("Extreme Speed (245) live adapter (scoped exact)", () => {
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
   }, 240000);
 });
+
+describe("Memento (262) live adapter (scoped exact, first body)", () => {
+  const names = namesOf("memento-");
+  const later = JSON.parse(readFileSync("tools/integration/fixtures/s10a-live-declines/memento-later-player-weezing-chimecho.json", "utf8")) as Fixture;
+  it("is a scoped-exact adapter (never faithful random / timing; no timing policy); duration from the field; row-0 #142 shadow", () => {
+    expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).toContain(262);
+    expect(LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS).not.toContain(262);
+    expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).not.toContain(262);
+    expect(LIVE_MOVE_TIMING_POLICY[262]).toBeUndefined();
+    expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[262]).toBe(0);
+    expect(liveMoveAnimationDuration({ moveId: 262, attacker: 0, target: 1, power: 0, damage: 0, friendship: 70, multihit: 0, turn: 0 })).toBeNull();
+    expect((status.implementedAdapters as { id: number }[]).some((e) => e.id === 262)).toBe(true);
+  });
+
+  it("5 first-body windows (accepted WEEZING -> ONIX + prep34 WEEZING -> GOLEM both orientations, elevated GOLBAT target); duration = the window", () => {
+    expect(names).toEqual(["memento-alt-opponent-weezing-golem", "memento-alt-player-weezing-golbat", "memento-alt-player-weezing-golem",
+      "memento-opponent-weezing-player-onix", "memento-player-weezing-opponent-onix"]);
+    for (const n of names) {
+      const f = fixtureAt(n);
+      const { view, effect } = effectOf(f);
+      expect((effect.spriteOrderInput as { firstBody?: boolean }).firstBody).toBe(true);
+      expect(liveMoveAnimationDuration(effect.request, view.field)).toBe(f.denseWindow!.endFrame - f.denseWindow!.startFrame + 1);
+      const config = liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, effect.spriteOrderInput)!.config as any;
+      expect(config.move).toBe("MEMENTO");
+      // The self-KO displayed HP 0 is the field's (read only).
+      expect(f.attacker.geometry.side === "player" ? view.field.player.hp : view.field.opponent.hp).toBe(0);
+      expect([config.reducer.initialScanlineSourceBuffer, config.reducer.initialWindow]).toEqual([1, { win0h: 240, win0v: 161 }]);
+    }
+    // prep34 s2.4 derived inputs reproduce the accepted harness values (tools/compare/mementoPortable.ts WEEZING / ONIX).
+    const p = effectOf(fixtureAt("memento-player-weezing-opponent-onix"));
+    const r = (liveMoveAnimationPresentation(p.effect.request, p.view.field, 0, undefined, undefined, p.effect.spriteOrderInput)!.config as any).reducer;
+    expect([r.attacker.shadowTop, r.attacker.shadowBottom, r.attacker.bgX, r.attacker.bgY]).toEqual([59, 111, -40, -54]);
+    expect([r.target.shadowTop, r.target.shadowBottom, r.target.bgX, r.target.bgY]).toEqual([3, 71, -145, -10]);
+  });
+
+  it("the receipt: every first-body window exact twice fresh in two invocations, window == duration; the later body declines", () => {
+    const rows = windowsOf("MEMENTO");
+    const exact = rows.filter((r) => !r.fixture.includes("-later-"));
+    expect(exact.map((r) => r.fixture.replace(`${DIR}/`, "").replace(".json", "")).sort()).toEqual(names);
+    for (const r of exact) {
+      for (const inv of [r.invocationA, r.invocationB]) {
+        expect(inv.violations).toEqual([]);
+        expect(inv.runs.map((run) => run.residualPixels)).toEqual([0, 0]);
+      }
+      expect(r.invocationA.window).toBe(r.invocationA.expectedDuration);
+      expect(r.invocationB.runs[0]!.digest).toBe(r.invocationA.runs[0]!.digest);
+    }
+    const declined = rows.find((r) => r.fixture.includes("-later-"))!;
+    expect(declined.invocationA.runs.map((run) => run.residualPixels)).toEqual([72910, 72910]);
+    expect(receipt.stagedByteIdentity.identical).toBe(true);
+    expect(Object.keys(receipt.stagedByteIdentity.base)).toEqual(expect.arrayContaining(["MEMENTO player", "MEMENTO opponent"]));
+  });
+
+  it("gates: a later body (after Psywave) and an unknown order decline; a shiny battler declines", () => {
+    const { view, effect } = effectOf(later);
+    expect((effect.spriteOrderInput as { firstBody?: boolean }).firstBody).not.toBe(true);
+    expect(liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, effect.spriteOrderInput)).toBeNull();
+    const first = effectOf(fixtureAt("memento-player-weezing-opponent-onix"));
+    const call = (order: unknown, field = first.view.field) => liveMoveAnimationPresentation(first.effect.request, field, 0, undefined, undefined, order as never);
+    expect(call(first.effect.spriteOrderInput)).not.toBeNull();
+    expect(call(undefined)).toBeNull();
+    expect(call({ known: false })).toBeNull();
+    for (const side of ["player", "opponent"] as const) {
+      expect(call(first.effect.spriteOrderInput, { ...first.view.field, [side]: { ...first.view.field[side], personality: SHINY } })).toBeNull();
+    }
+  });
+
+  // /tmp scan (r3ProfileRouteSearch recipe with answerForcedSwitch): 61/28 no Memento body; 127/28, 193/28, 325/28 the opponent's body first
+  // (later body: declines); 259/28 and 335/28 WEEZING first body live.
+  it("route 259/28 WEEZING: live every age, the user faints, forced replacement, next action prompt, Scene ON/OFF parity", () => {
+    const on = generatedCommandAnimationReplay(259, "on", [0], 28, false, true);
+    const off = generatedCommandAnimationReplay(259, "off", [0], 28, false, true);
+    const bodies = on.animations.filter((a) => a.moveId === 262 && a.attacker === 0);
+    expect(bodies).toHaveLength(1);
+    expect(bodies[0]!.ages).toEqual(Array.from({ length: 179 }, (_, age) => age));
+    expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
+    expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    expect(on.stalled).toBe(false);
+    expect(off.stalled).toBe(false);
+    expect(off.boundaries).toHaveLength(on.boundaries.length);
+    for (let i = 0; i < on.boundaries.length; i += 1) {
+      expect(strip(on.boundaries[i]!)).toEqual(strip(off.boundaries[i]!));
+      expect(on.boundaries[i]!.rng).toEqual(off.boundaries[i]!.rng);
+      expect(on.boundaries[i]!.boundary).toEqual(off.boundaries[i]!.boundary);
+    }
+    expect(on.state.facilityState).toEqual(off.state.facilityState);
+    expect(on.state.round.rules.rngValue).toBe(off.state.round.rules.rngValue);
+  }, 240000);
+
+  it("route 127/28 WEEZING (the opponent's body first): the later Memento body declines and the battle continues", () => {
+    const on = generatedCommandAnimationReplay(127, "on", [0], 28, false, true);
+    const bodies = on.animations.filter((a) => a.moveId === 262 && a.attacker === 0);
+    expect(bodies).toHaveLength(1);
+    expect(bodies[0]!.adapterActive.some(Boolean)).toBe(false);
+    expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+  }, 240000);
+});

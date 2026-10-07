@@ -6435,6 +6435,44 @@
     "body": "normal",
     "activation": "window start = the scenario's own source activation frame (prep22Probes.sh, 2 fresh runs; docs/next-adapters-prep34.md; em-live-receipt.json)"
    }
+  },
+  {
+   "id": 262,
+   "move": "MEMENTO",
+   "orientation": "player",
+   "variant": "s10a-memento-player-weezing-opponent-onix",
+   "activationFrame": 70,
+   "windowStart": 70,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/s10a-live/memento-player-weezing-opponent-onix.json",
+    "scenario": "tools/battle-lab/mechanic-memento-player-weezing-opponent-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep22Probes.sh, 2 fresh runs; docs/next-adapters-prep34.md; em-live-receipt.json)"
+   }
+  },
+  {
+   "id": 262,
+   "move": "MEMENTO",
+   "orientation": "opponent",
+   "variant": "s10a-memento-opponent-weezing-player-onix",
+   "activationFrame": 74,
+   "windowStart": 74,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/s10a-live/memento-opponent-weezing-player-onix.json",
+    "scenario": "tools/battle-lab/mechanic-memento-opponent-weezing-player-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep22Probes.sh, 2 fresh runs; docs/next-adapters-prep34.md; em-live-receipt.json)"
+   }
   }
  ]
 }

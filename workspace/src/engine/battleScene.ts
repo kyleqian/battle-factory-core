@@ -29353,13 +29353,13 @@ export function renderSceneOnMovePresentation(
       ...mementoState,
       age: Math.max(0, mementoState.age - 1),
     });
-    const playerToOpponent = view.attacker.species === "WEEZING"
+    const playerToOpponent = (liveField || view.attacker.species === "WEEZING")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
-    const opponentToPlayer = view.attacker.species === "WEEZING"
+    const opponentToPlayer = (liveField || view.attacker.species === "WEEZING")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(`unsupported staged MEMENTO pair ${view.attacker.species}->${view.target.species}`);
@@ -29367,16 +29367,19 @@ export function renderSceneOnMovePresentation(
     const weezingSource = playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).WEEZING!
       : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).WEEZING!;
-    const weezing = playerToOpponent
+    // Live: the field's battler art (an opponent front sheet's frame 0) and the opponent battler's front idle rest; staged: the accepted
+    // WEEZING / ONIX sheets (the attacker's rest is not drawn there).
+    const weezing = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? weezingSource
       : { ...weezingSource, tileset: subTileset(weezingSource.tileset, 0, 8) };
     const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
-    const onix = playerToOpponent
+    const onix = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
     const onixIdle = playerToOpponent
       ? sceneOnBattlerFrontIdleRest(view.target)
       : { x2: 0, y2: 0 };
+    const weezingIdle = liveField && opponentToPlayer ? sceneOnBattlerFrontIdleRest(view.attacker) : { x2: 0, y2: 0 };
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
 
     const alpha = view.registers.bldalpha;
@@ -29409,8 +29412,8 @@ export function renderSceneOnMovePresentation(
     } else {
       drawSpriteSheet(
         fb, weezing.tileset, weezing.palette,
-        view.attacker.geometry.spriteCorner.x,
-        view.attacker.geometry.spriteCorner.y,
+        view.attacker.geometry.spriteCorner.x + weezingIdle.x2,
+        view.attacker.geometry.spriteCorner.y + weezingIdle.y2,
       );
       drawSpriteSheet(
         fb, onix.tileset, onix.palette,
@@ -29420,6 +29423,8 @@ export function renderSceneOnMovePresentation(
     }
     shadow("target", onix.tileset);
 
+    // The live HUD owns the healthboxes and the message window (liveField; the self-KO HP 0 is a later HUD command).
+    if (liveField) return;
     const profile = mementoState.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: playerToOpponent ? "ONIX" : "WEEZING", level: 50,
@@ -55095,7 +55100,9 @@ export function renderBattleResolutionLiveView(
     return;
   }
   const shadowRow = effect?.type === "move" ? liveMoveOpponentShadowRow(effect.request) : null;
-  liveOpponentShadow.species = effect?.type === "move"
+  // SpriteCB_EnemyShadow (battle_gfx_sfx_util.c:1209) hides the shadow while !IsBattlerSpritePresent (HP 0: a self-KO attacker after
+  // setatkhptozero, e.g. Memento's opponent-side WEEZING, prep34 s2.5 windows 0 px only without the shadow).
+  liveOpponentShadow.species = effect?.type === "move" && view.field.opponent.hp !== 0
     && (effect.age === shadowRow || liveMoveOpponentShadowReturn(effect.request, effect.age))
     ? view.fieldArt.opponent.speciesSymbol : null;
   liveOpponentShadow.suppressAdHoc = effect?.type === "move" && effect.age === 0;
