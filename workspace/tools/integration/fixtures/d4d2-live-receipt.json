@@ -1,8 +1,8 @@
 {
  "schema": "d4d2-live-receipt/v1",
- "testedCommit": "4496169c92eb5b10622eb4cb90cde34140777c48",
- "testedSrcTree": "6fefafd02d6d1d1ecf7a9a203803db911b2c2830",
- "dirty": true,
+ "testedCommit": "e3a3f346cbc5c1ab7dfa7c17d7923bc9d67ae425",
+ "testedSrcTree": "797960f7fc8d85f206c17ed940a95716c8e0ad08",
+ "dirty": false,
  "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
  "summary": {
   "HYPER_VOICE": {
@@ -2762,5 +2762,16 @@
    "documentedAges": null,
    "violations": []
   }
- ]
+ ],
+ "commands": [
+  "sh tools/integration/prep26Probes.sh iceball (OUT=PROBEDIR) + iceBallProbe.py mechanic-ice-ball-{player-spheal-opponent-onix,opponent-spheal-player-onix}; python3 -I tools/integration/s10aIceBallFixtures.py PROBEDIR",
+  "sh tools/integration/prep22Probes.sh PROBEDIR 1 <9 Dive scenarios>; python3 -I tools/integration/s10aDiveFixtures.py PROBEDIR",
+  "python3 -I tools/integration/d4d2Fixtures.py",
+  "node --experimental-strip-types tools/integration/d4aTimingCheck.ts OUT.json <fixture> (one process per fixture, 10 parallel; two fresh probe processes each)",
+  "python3 -I tools/integration/d4d2Receipt.py OUTDIR /tmp/extra.json"
+ ],
+ "part0": {
+  "change": "d4aTimingCheck.ts: an other-phase window whose move has no documented ages is documented-empty (any nonzero residual fails)",
+  "rerun": "55 d4a-live fixtures, 55/55 exit 0, 0 violations (commit 0d844a26b)"
+ }
 }
