@@ -92,6 +92,13 @@
   11/35 (surrogate), 17/21, 75/7, 116/7, 239/7, 8/14, 10/0 active every age, ON/OFF parity. Worker gates 1,541 files
   / 12,574 tests, build; shadow scan 513 / 0. Supervisor: dense rerun 6 fixtures 0 px r1 == r2; differential
   389/389; union typecheck, smoke, 11 files 223/223. Receipt `r3-profile-live-receipt.json`.
+- Preview refreshed: `a1d8036bf` served at :5191 (234 + 11), 4 samples hash-equal, mode control + session export
+  passed, no browser errors (`playable-preview-a1d8036bf-receipt.json`).
+- prep26 (side, `699217c53`, new files only): source-derived Ice Ball (all 5 counter bodies; 18 windows, 1,535 rows;
+  OAM 194,176/194,176) and Revenge (4 windows, 580 rows) models — every field and every pixel row exact GIVEN
+  frame-phase inputs that are not derivable: Ice Ball lag rows (accepted player body 4 row 38, accepted bodies 5 row
+  112; none in the alternates), Revenge `bg*cnt` write row 4 (accepted opponent) vs 5. Superpower not reached.
+  Supervisor: `prep26Run.sh` with fresh probes — 12 receipts byte-identical.
 
 ## 2026-10-06 (day, wind-down) — D3 implemented: 218 -> 226 exact + 10 faithful-random live adapters
 
