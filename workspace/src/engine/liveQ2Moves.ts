@@ -89,3 +89,31 @@ export function liveHyperVoiceInputs(args: Omit<LiveQ2Args, "firstBody"> & { att
     matrixBitmap: 6, animationRngSeed: 0, gameplayRng: null,
   };
 }
+
+type PositionAnchors = LiveBgSnapshotArgs["attacker"] & Readonly<{ battlePositionCenter: Readonly<{ x: number; y: number }> }>;
+
+/**
+ * `Move_SMOG` (123): seven purple gas clouds in the lowest free slots (ages 7, 16, ..., 61), tasks monbg 1 / mist sound 0 / blend 2 / shake 3 /
+ * toxic sound 0 / clear 0, ANIM_TAG_PURPLE_GAS_CLOUD in OBJ bank 7 tile 305 (16 tiles). The clouds sit at the target's BATTLE POSITION
+ * centre; the monbg scroll is 32 - the target sprite centre (+ its idle rest x2); the BG control registers are the S0 values plus the
+ * monbg / split writes of the target's side (opponent target: BG1, player target: BG2).
+ */
+export function liveSmogInputs(args: Omit<LiveQ2Args, "firstBody" | "target"> & { target: PositionAnchors }): Inputs {
+  const { attackerSide, attacker, target } = args, targetSide = opposite(attackerSide), toOpponent = targetSide === "opponent";
+  const attackerSprite = battlerSprite(attackerSide, attacker), targetSprite = battlerSprite(targetSide, target);
+  return {
+    targetPictureOrigin: { x: target.battlePositionCenter.x, y: target.battlePositionCenter.y },
+    targetBgPriority: toOpponent ? 1 : 2,
+    attackerSprite, targetSprite, cloudSpriteSlots: [3, 4, 5, 7, 9, 10, 11],
+    taskSlots: { updateMonBg: 1, mistSound: 0, blendColorCycle: 2, shakeMon2: 3, toxicSound: 0, clearMonBg: 0 },
+    resources: { purpleGasCloud: { paletteBank: 7, tileSlot: 6, tileRange: [305, 16] } },
+    matrixBitmap: 6, spriteOrder: args.spriteOrder,
+    painterSprites: orderKeys(attackerSide, attackerSprite.attr[0], targetSprite.attr[0]),
+    monbg: { layer: toOpponent ? "bg1" : "bg2", scroll: { x: 32 - target.spriteCenter.x - target.frontIdleRest.x2, y: 32 - target.spriteCenter.y - target.frontIdleRest.y2 } },
+    background: toOpponent
+      ? { baseBg1Cnt: 0x9c00, baseBg2Cnt: 0x5e00, monbgBg1Cnt: 0x5c02, monbgBg2Cnt: 0x5e00, splitBg1Cnt: 0x5c01, splitBg2Cnt: 0x5e02 }
+      : { baseBg1Cnt: 0x9c00, baseBg2Cnt: 0x5e00, monbgBg1Cnt: 0x9c00, monbgBg2Cnt: 0x5e02, splitBg1Cnt: 0x9c01, splitBg2Cnt: 0x5e02 },
+    targetPaletteBank: toOpponent ? 17 : 16,
+    animationRngSeed: 0, gameplayRng: null,
+  };
+}

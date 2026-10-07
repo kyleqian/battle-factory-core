@@ -1,7 +1,10 @@
 // Deep-compare the production Q2 input builders against the accepted corpus-built inputs (anchors taken from the corpus; first-body /
 // later-body register rule applied by the corpus value).  usage: node --experimental-strip-types tools/integration/q2InputsCompare.ts snore
 import { snoreInputsFor } from "../compare/verifySnoreReducer.ts";
-import { liveHyperVoiceInputs, liveSnoreInputs } from "../../src/engine/liveQ2Moves.ts";
+import { smogInputsFor } from "../compare/verifySmogReducer.ts";
+import { readFileSync } from "node:fs";
+import { gunzipSync } from "node:zlib";
+import { liveSmogInputs, liveHyperVoiceInputs, liveSnoreInputs } from "../../src/engine/liveQ2Moves.ts";
 import snoreAsset from "../../src/animation/assets/snore.json" with { type: "json" };
 import { hyperVoiceInputsFor } from "../compare/verifyHyperVoiceReducer.ts";
 import paletteData from "../../src/data/gen/live-animation-palette-resources.json" with { type: "json" };
@@ -39,6 +42,20 @@ if (move === "hyper-voice") {
       palettes: { unfaded: c.palettes.unfaded, faded: c.palettes.faded, hardware: c.palettes.hardware }, spriteOrder: c.spriteOrder, attackerSpeciesId: 372,
       thinRingPalette: (paletteData.resources as any).ANIM_TAG_THIN_RING.colors });
     const d = diff(built, c).filter((l) => !/gameplay|animationRngSeed|^\/(attacker|target)(Side|Species|PictureOrigin)/.test(l));
+    console.log(o, d.length ? d.join("\n") : "EQUAL");
+  }
+}
+
+if (move === "smog") {
+  for (const o of ["player-back", "opponent-front"] as const) {
+    const rows = JSON.parse(gunzipSync(readFileSync(`tools/compare/evidence/smog-${o === "player-back" ? "player" : "opponent"}-dense-state.json.gz`)).toString()).frames;
+    const c: any = smogInputsFor(o, rows);
+    const t = c.targetSprite, a = c.attackerSprite;
+    const pos = c.targetSide === "opponent" ? { x: 176, y: 40 } : { x: 72, y: 80 };
+    const built = liveSmogInputs({ attackerSide: c.attackerSide, attacker: { picOffsetPoint: { x: 0, y: 0 }, spriteCenter: { x: a.x, y: a.y }, frontIdleRest: { x2: a.x2, y2: a.y2 } },
+      target: { picOffsetPoint: { x: 0, y: 0 }, spriteCenter: { x: t.x, y: t.y }, frontIdleRest: { x2: t.x2, y2: t.y2 }, battlePositionCenter: pos },
+      palettes: { unfaded: [], faded: [], hardware: [] }, spriteOrder: c.spriteOrder });
+    const d = diff(built, c).filter((l) => !/gameplay|animationRngSeed|flags|^\/(attacker|target)(Side|Species)/.test(l));
     console.log(o, d.length ? d.join("\n") : "EQUAL");
   }
 }
