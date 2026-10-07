@@ -1,0 +1,40 @@
+{
+ "schema": "oam1-live-adapter-fixture/v1",
+ "move": "FURY_CUTTER",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/oam1-fury-cutter-alt2opp-scyther-snorlax.json",
+ "denseWindow": {
+  "startFrame": 82,
+  "endFrame": 124
+ },
+ "windowSource": "window = [activation, activation + 42] of the scenario's FIRST Fury Cutter body (counter 1); activation = its own first anim-active frame (fresh prep18Probe.py run)",
+ "attacker": {
+  "species": "SCYTHER",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 2027808507,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 267,
+  "playerMaxHp": 267,
+  "opponentHp": 177,
+  "opponentMaxHp": 177,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 10
+ }
+}

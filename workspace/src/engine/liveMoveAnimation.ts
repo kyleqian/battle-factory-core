@@ -81,8 +81,8 @@ import type { FlailPower } from "../animation/flail.ts";
 import type { HailProfile } from "../animation/hail.ts";
 import { composeLivePalettes, liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
-import { livePursuitInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
-import { PURSUIT_ROWS } from "./liveMoveOamAssembler.ts";
+import { liveFuryCutterInputs, livePursuitInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
+import { FURY_CUTTER_ROWS, PURSUIT_ROWS } from "./liveMoveOamAssembler.ts";
 import { willOWispTimeline } from "../animation/willOWisp.ts";
 import {
   dirtScatterOffsetFromWord, dirtScatterSlots, hyperBeamOrbFromWords, linearTranslationStep, liveMovePresentationRngWords, miniTwinklingStarFromWords, type LiveMovePresentationRngInput,
@@ -109,7 +109,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // Rollout counter bodies 1..5 (request.rolloutCounter, docs/rollout-endeavor-prep.md s0.1).
   205,
   // oam1 (docs/next-adapters-prep20.md): production hardware-OAM provider (liveMoveOamAssembler.ts), first body.
-  261, 228,
+  // Fury Cutter: the counter-1 body only (a first body implies furyCutterCounter 1).
+  261, 228, 210,
   // anchor3: source battler anchors (position center, picture height, pic offset).
   86, 87, 107, 116, 203, 207, 263, 339,
   // selectors: request-selected branches and healing anchors.
@@ -292,8 +293,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     240, 352, 258,
     // prep16: Overheat, Silver Wind first-body activation == window start (row 0; prep16 s1, captures of the first-body scenarios).
     315, 318, 244,
-    // oam1: Will-O-Wisp, Pursuit (normal body) activation == window start (row 0; prep18-activation.json).
-    261, 228,
+    // oam1: Will-O-Wisp, Pursuit (normal body), Fury Cutter (counter 1) activation == window start (row 0; prep18-activation.json).
+    261, 228, 210,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -767,6 +768,8 @@ export function liveMoveAnimationDuration(
     // Pursuit normal body (oam1): 103 rows (73..175 / 77..179), PURSUIT_FIRST_INACTIVE_AGE 102 + 1. The switch-interception
     // body (request.turn & 1) declines (scene-off view): its allocator/healthbox scene follows a party-menu unit.
     case 228: return (request.turn & 1) === 0 ? PURSUIT_ROWS : null;
+    // Fury Cutter (oam1): one body = 43 rows (78..120 / 82..124, first inactive age 42 + 1) for every counter.
+    case 210: return FURY_CUTTER_ROWS;
     case 261: {
       const player = { x: 72, y: 0 }, opponent = { x: 176, y: 0 };
       return request.attacker === 0 ? willOWispTimeline("player", player, opponent).cleanup + 1
@@ -2590,6 +2593,25 @@ export function liveMoveAnimationPresentation(
       config = { move: "PURSUIT", attacker,
         target: { ...target, geometry: { ...target.geometry, battlePositionCenter: inputs.impactCenter } },
         fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
+      break;
+    }
+    case 210: {
+      // oam1 (prep20 s1.3): counter-1 body only. No counter reaches the request (MOVE_ANIMATION carries none for 210), but a
+      // first body implies it: furyCutterCounter starts at 0 for a sent-in battler, a successful Fury Cutter always plays its
+      // body (so none ran before) and a miss resets it; Cmd_furycuttercalc then sets 1. Counters 2..5 are never first bodies
+      // and also need the gComplexPaletteBlend palette provider: they decline. Non-shiny, zero idle rests.
+      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const activationOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (palettes === null || activationOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const inputs = liveFuryCutterInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
+        targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
+        counter: 1 });
+      if (inputs === null) return null;
+      config = { move: "FURY_CUTTER", attacker, target, fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
       break;
     }
     case 237: {

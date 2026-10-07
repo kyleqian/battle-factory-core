@@ -237,3 +237,56 @@ export function livePursuitHardwareOamRows(input: LivePursuitOamInputs): { oam: 
   }
   return { oam, matrices };
 }
+
+export interface LiveFuryCutterOamInputs {
+  readonly attacker: LiveOamBattler;
+  readonly target: LiveOamBattler;
+  readonly targetSide: Side;
+  readonly scene: LiveOamScene;
+  /** AnimTask_IsFuryCutterHitRight: furyCutterCounter & 1. */
+  readonly rightHit: boolean;
+  /** Known-entry allocator values of ANIM_TAG_CUT (lowest-free slot, tile base, palette slot). */
+  readonly sliceSlot: number;
+  readonly cutTileBase: number;
+  readonly cutPaletteSlot: number;
+  readonly activationOrder: readonly number[];
+}
+/** sBattlerCoords (battle_anim_mons.c): AnimCuttingSlice anchors on GetBattlerSpriteCoord(X / Y), the static table (prep20 s0.2.4). */
+const SINGLES_BATTLER_COORDS: Readonly<Record<Side, Point>> = Object.freeze({ player: { x: 72, y: 80 }, opponent: { x: 176, y: 40 } });
+export const FURY_CUTTER_ROWS = 43;
+
+/**
+ * Per-row hardware OAM of one Fury Cutter body (rows 0..42): the cutting slice (gCuttingSliceSpriteTemplate, ObjBlend 32x32,
+ * priority 2, subpriority attacker - 2) alive for states 7..30 (AnimSlice_Step x20 in Q8, then WaitAnimForDuration(3)),
+ * h-flipped for the right hit; the target absent from the builds of states [5, 32] (monbg).
+ */
+export function liveFuryCutterHardwareOamRows(input: LiveFuryCutterOamInputs): string[][] {
+  const c = SINGLES_BATTLER_COORDS[input.targetSide];
+  const x = c.x + (input.rightHit ? -40 : 40), y = c.y + (input.targetSide === "player" ? 8 : 0) - 32;
+  const sliceAt = (state: number): OamAttr | null => {
+    if (state < 7 || state > 30) return null;
+    const local = state - 7, steps = Math.min(local + 1, 20);
+    let d1 = input.rightHit ? 0x400 : -0x400, d2 = 0x400, d3 = 0, d4 = 0;
+    for (let i = 0; i < steps; i += 1) { d3 += d1; d4 += d2; d1 += input.rightHit ? -0x18 : 0x18; d2 -= 0x18; }
+    const tile = input.cutTileBase + Math.min(3, Math.floor((local + 1) / 5)) * 16;
+    return [0x0400 | (y + (d4 >> 8) - 16) & 0xff, 0x8000 | (input.rightHit ? 0x1000 : 0) | (x + (d3 >> 8) - 16) & 0x1ff,
+      tile | 2 << 10 | input.cutPaletteSlot << 12];
+  };
+  const spritesAt = (state: number): LiveOamSprite[] => {
+    const out: LiveOamSprite[] = input.scene.occupants.map((o) => ({ ...o, oamY: o.attr[0] & 0xff }));
+    out.push({ ...input.attacker, visible: true, oamY: input.attacker.attr[0] & 0xff });
+    out.push({ ...input.target, visible: !(state >= 5 && state <= 32), oamY: input.target.attr[0] & 0xff });
+    const slice = sliceAt(state);
+    if (slice) out.push({ slot: input.sliceSlot, attr: slice, visible: true, oamY: slice[0] & 0xff, subpriority: input.attacker.subpriority - 2 });
+    return out;
+  };
+  const rows: string[][] = [];
+  let order: readonly number[] = input.activationOrder;
+  let previous = spritesAt(-1);
+  for (let row = 0; row < FURY_CUTTER_ROWS; row += 1) {
+    rows.push(buildLiveHardwareOam(order, previous, input.scene.healthbox));
+    previous = spritesAt(row);
+    order = carryLiveSpriteOrder(order, previous);
+  }
+  return rows;
+}

@@ -12,7 +12,7 @@ import { pursuitTargetOffsetAtAge } from "../animation/pursuit.ts";
 import { KNOWN_ENTRY_NON_BATTLER_SPRITES } from "./liveBgSnapshotMoves.ts";
 import type { LivePaletteComposite } from "./liveMovePaletteComposite.ts";
 import {
-  KNOWN_ENTRY_HEALTHBOX_OAM, KNOWN_ENTRY_HEALTHBOX_SLOTS, PURSUIT_ROWS, livePursuitHardwareOamRows, liveWillOWispHardwareOamRows,
+  FURY_CUTTER_ROWS, KNOWN_ENTRY_HEALTHBOX_OAM, KNOWN_ENTRY_HEALTHBOX_SLOTS, PURSUIT_ROWS, liveFuryCutterHardwareOamRows, livePursuitHardwareOamRows, liveWillOWispHardwareOamRows,
   type LiveOamScene, type OamAttr,
 } from "./liveMoveOamAssembler.ts";
 
@@ -255,6 +255,87 @@ export function livePursuitInputs(args: LivePursuitArgs): LivePursuitInputs | nu
         audio: { current: null, targetPan: 0 },
         liveCounts: { visualTasks: 0, soundTasks: 0, matrixBitmap: 0 },
         movePower: args.movePower, moveDamage: 0, animationRng: 0, gameplayRng: null, gameplayState: null,
+      };
+    },
+  };
+}
+
+export interface LiveFuryCutterArgs {
+  readonly attackerSide: Side;
+  readonly attackerSpecies: string;
+  readonly targetSpecies: string;
+  readonly attacker: LiveOamBattlerAnchors;
+  readonly target: LiveOamBattlerAnchors;
+  readonly palettes: LivePaletteComposite;
+  readonly activationOrder: readonly number[];
+  /** gDisableStructs[attacker].furyCutterCounter after Cmd_furycuttercalc (only 1 is provided: the first body). */
+  readonly counter: 1;
+}
+const furyCache = new Map<string, readonly string[][]>();
+
+/**
+ * MOVE_FURY_CUTTER (210) counter-1 body live inputs (prep20 s1.3): the right-hit slice (counter & 1), no complex palette
+ * blend (counter 1 takes FuryCutterContinue2 directly). Palette = composite + ANIM_TAG_CUT (OBJ bank 23) from row 2 and the
+ * monbg copy into BG bank 8 / 9 from row 4; registers = S0 + monbg (row 5: cnt, scroll 32 - centre; cleared on row 37),
+ * setalpha 12, 8 (rows 7..32) and AnimTask_ShakeMon(ANIM_TARGET, 0, 3, 10, 1) on the monbg y (+3 on rows 17..30 in
+ * 2-row phases, measured identical in both accepted orientations and the SCYTHER -> GOLEM alternates).
+ */
+export function liveFuryCutterInputs(args: LiveFuryCutterArgs): { duration: number; animationInputsAt: (age: number) => Record<string, unknown> } | null {
+  const { attackerSide, attacker, target } = args;
+  if (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0
+    || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
+  const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
+  const attackerObject = battlerObject(attackerSide, attacker), targetObject = battlerObject(targetSide, target);
+  const key = JSON.stringify([attackerSide, args.counter, attackerObject.attr, targetObject.attr, args.activationOrder]);
+  let rows = furyCache.get(key);
+  if (!rows) {
+    rows = liveFuryCutterHardwareOamRows({ attacker: attackerObject, target: targetObject, targetSide, scene: KNOWN_ENTRY_SCENE,
+      rightHit: (args.counter & 1) === 1, sliceSlot: 3, cutTileBase: 305, cutPaletteSlot: 7, activationOrder: args.activationOrder });
+    if (furyCache.size > 16) furyCache.clear();
+    furyCache.set(key, rows);
+  }
+  const hardwareRows = rows;
+  const monbgBank = targetSide === "opponent" ? 8 : 9, targetObjBank = targetSide === "opponent" ? 17 : 16;
+  const layer = targetSide === "opponent" ? "bg1" : "bg2";
+  const cutPalette = resourceWords("ANIM_TAG_CUT");
+  const paletteAt = (age: number): number[] => {
+    const out = args.palettes.hardware.slice();
+    if (age >= 2) cutPalette.forEach((word, i) => { out[23 * 16 + i] = word; });
+    if (age >= 4) for (let i = 0; i < 16; i += 1) out[monbgBank * 16 + i] = out[targetObjBank * 16 + i]!;
+    return out;
+  };
+  const registersAt = (age: number): Record<string, number> => {
+    const registers: Record<string, number> = { ...S0_REGISTERS };
+    if (age >= 1) { registers.win0h = 0; registers.win0v = 0; }
+    if (age >= 7 && age <= 32) { registers.bldcnt = 0x3f40; registers.bldalpha = 0x080c; }
+    if (age >= 5) {
+      registers[`${layer}cnt`] = targetSide === "opponent" ? 0x5c02 : 0x5e02;
+      if (age < 37) {
+        const shakeY = age >= 17 && age <= 30 && Math.floor((age - 17) / 2) % 2 === 0 ? 3 : 0;
+        registers[`${layer}hofs`] = (32 - target.spriteCenter.x) & 0x1ff;
+        registers[`${layer}vofs`] = (32 - (target.spriteCenter.y + shakeY)) & 0x1ff;
+      }
+    }
+    return registers;
+  };
+  const art = (species: string, object: ReturnType<typeof battlerObject>) =>
+    ({ displaySpecies: species, slot: object.slot, attr: object.attr, subpriority: object.subpriority });
+  return {
+    duration: FURY_CUTTER_ROWS,
+    animationInputsAt: (age: number) => {
+      const palette = paletteAt(age);
+      return {
+        counter: args.counter,
+        attackerArt: art(args.attackerSpecies, attackerObject), targetArt: art(args.targetSpecies, targetObject),
+        // Not consumed by the renderer branch (the reducer passes them through).
+        ownedSprites: [], liveTasks: [],
+        buffers: { softwareOam: [], hardwareOam: hardwareRows[Math.min(age, hardwareRows.length - 1)]!,
+          softwareMatrices: IDENTITY_MATRICES, hardwareMatrices: IDENTITY_MATRICES },
+        palette: { unfaded: palette, faded: palette, hardware: palette },
+        registers: registersAt(age),
+        resources: { cutTileBase: 305, cutLoaded: age >= 2, allocator: null },
+        order: args.activationOrder, audio: null,
+        liveCounts: { visualTasks: 0, soundTasks: 0, matrixBitmap: 0 }, animationRng: 0, gameplayRng: null, gameplayState: null,
       };
     },
   };

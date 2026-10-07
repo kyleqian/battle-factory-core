@@ -3390,6 +3390,22 @@
         "shiny battlers and battlers with a non-zero front idle rest decline",
         "independent arbitrary-species/history framebuffer comparison"
       ]
+    },
+    {
+      "move": "MOVE_FURY_CUTTER",
+      "id": 210,
+      "sourceFieldEvidence": "../tools/integration/fixtures/oam1-live-adapter-receipt.json",
+      "liveEvidence": [
+        "Counter-1 body only: a first body implies furyCutterCounter 1 (it starts at 0 for a sent-in battler, every successful Fury Cutter plays a body, a miss resets it), so no counter argument and no gameplay/opcode change is needed",
+        "Production hardware-OAM provider (liveFuryCutterHardwareOamRows): the right-hit cutting slice (AnimSlice_Step Q8 x20 + 3 waits from the static sBattlerCoords anchor, h-flip, tile 305 + 16 x frame, palette slot 7, slot 3), target absent states [5, 32], carried full 64-slot order; rows 1..42 string-equal to the retained counter-1 bodies and the SCYTHER->GOLEM alternates",
+        "dense 43/43 zero residual twice fresh through the production live renderer: GROVYLE->BLISSEY accepted both orientations, SCYTHER->GOLEM alternates both orientations, SCYTHER->GOLBAT (elevated target) / SCYTHER->SNORLAX (new scenarios; window = the scenario's first Fury Cutter activation + 0)",
+        "ordinary routes 58/0 and 60/0 GROVYLE slot 0 (first body): adapter active every age, following prompt reached, ON/OFF rules/RNG/boundary equal"
+      ],
+      "remaining": [
+        "counters 2..5 decline to the scene-off view: they are never first bodies (later-body lend), carry no counter in the MOVE_ANIMATION request (the Rollout-style 7th argument is not plumbed) and need the gComplexPaletteBlend palette provider (BG + battler banks 1, 2, 3, 8, 16, 17)",
+        "shiny battlers and battlers with a non-zero front idle rest decline",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3413,7 +3429,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 228,
+  "implementedCount": 229,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 10,

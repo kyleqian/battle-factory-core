@@ -20,7 +20,8 @@ const results = [];
 for (const pair of args.filter((a) => !a.startsWith("--"))) {
   const [fixturePath, corpusPath] = pair.split(":") as [string, string];
   const fixture = JSON.parse(readFileSync(resolve(root, fixturePath), "utf8")) as Fixture;
-  const rows = load(resolve(root, corpusPath));
+  // Only the fixture's own body: the corpus may hold several bodies (Fury Cutter: 4 x 43 rows); row 0 = its activation.
+  const window = fixture.denseWindow!, rows = load(resolve(root, corpusPath)).slice(0, window.endFrame - window.startFrame + 1);
   let entries = 0, entryMatch = 0, rowsExact = 0, row0Exact = false;
   const examples: string[] = [];
   for (let age = 0; age < rows.length; age += 1) {

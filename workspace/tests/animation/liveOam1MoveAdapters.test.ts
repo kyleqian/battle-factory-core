@@ -159,3 +159,45 @@ describe("oam1 production hardware-OAM provider: MOVE_PURSUIT", () => {
     }
   }, 240000);
 });
+
+describe("oam1 production hardware-OAM provider: MOVE_FURY_CUTTER (counter-1 body)", () => {
+  it("registers a 43-row body, runs only as a first body (counter 1 implied) and declines otherwise", () => {
+    expect(LIVE_MOVE_ANIMATION_IDS).toContain(210);
+    expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[210]).toBe(0);
+    for (const a of [0, 1] as const) expect(liveMoveAnimationDuration(request(210, a))).toBe(43);
+    const field = displayed("SCYTHER", "GOLBAT");
+    const live = liveMoveAnimationPresentation(request(210, 0, { power: 10 }), field, 10, undefined, undefined, firstBodyOrder()) as any;
+    expect(live?.config.animationInputs.counter).toBe(1);
+    expect(liveMoveAnimationPresentation(request(210, 0), field, 10)).toBeNull();
+    const later = prepareLiveMoveSpriteOrder(knownEntrySpriteOrderState("ordinary-factory"), request(210, 0)).input!;
+    expect(liveMoveAnimationPresentation(request(210, 0), field, 10, undefined, undefined, later)).toBeNull();
+  });
+
+  it("builds the retained counter-1 hardware OAM on every body row, both accepted orientations", () => {
+    for (const [name, path] of [
+      ["fury-cutter-counter1-player-grovyle-opponent-blissey", "tools/compare/evidence/fury-cutter-player-dense-state.json.gz"],
+      ["fury-cutter-counter1-opponent-grovyle-player-blissey", "tools/compare/evidence/fury-cutter-opponent-dense-state.json.gz"],
+    ] as const) {
+      const rows = corpus(path).slice(0, 43), f = fixture(name);
+      let exact = 0;
+      for (let age = 1; age < rows.length; age += 1) if (JSON.stringify(hardwareOamAt(f, age)) === JSON.stringify(rows[age]!.hardwareOam)) exact += 1;
+      expect(exact).toBe(42);
+    }
+  });
+
+  // orderConsumerRouteScan.ts FURY_CUTTER 210: first-body player Fury Cutter on generated rentals.
+  it.each([[58, 0, 0], [60, 0, 0]] as const)("route %i/%i slot %i: active every age, prompt reached, ON/OFF parity", (seed, streak, slot) => {
+    const on = generatedCommandAnimationReplay(seed, "on", [slot], streak);
+    const off = generatedCommandAnimationReplay(seed, "off", [slot], streak);
+    const bodies = on.animations.filter(a => a.moveId === 210 && a.attacker === 0);
+    expect(bodies.map(b => b.ages.length)).toEqual([43]);
+    expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
+    expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    expect(off.boundaries).toHaveLength(on.boundaries.length);
+    for (let i = 0; i < on.boundaries.length; i += 1) {
+      expect(rulesWithoutSceneMarker(on.boundaries[i]!)).toEqual(rulesWithoutSceneMarker(off.boundaries[i]!));
+      expect(on.boundaries[i]!.rng).toEqual(off.boundaries[i]!.rng);
+      expect(on.boundaries[i]!.boundary).toEqual(off.boundaries[i]!.boundary);
+    }
+  }, 240000);
+});
