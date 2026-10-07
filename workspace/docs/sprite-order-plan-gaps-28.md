@@ -7,7 +7,7 @@ Reproduce: `sh tools/integration/prep28Run.sh` (~15 min; `SKIP_PROBES=1` reuses 
 ## 1. Results (first)
 
 1. **Gap census.** 94 (move, side) cells of Factory Level-50 sets are absent from `SPRITE_ORDER_PRODUCTION_BODIES` = **16.3 %** of weighted move uses
-   (`fixtures/prep28/ranked-gaps.json`; 92 real cells + the 2 `UNAVAILABLE` ids). 91 are NEEDS-KEYS, 3 NOT-OBSERVED (Baton Pass player, Helping Hand x2).
+   (`fixtures/prep28/ranked-gaps.json`; 92 real cells + the 2 `UNAVAILABLE` id-0 cells). 89 are NEEDS-KEYS, 5 NOT-OBSERVED (Baton Pass player, Helping Hand x2, id 0 x2).
 2. **New idea that closes part of the gap (no src grammar change).** `applySpriteOrderUnitPlan` already sorts a `P` group by `(word, creation window, free-order index)`.
    The words only have to be *a* sort key, so a KEYS group (equal priority word, different y) whose observed order obeys
    `sort by (priority word, -y, creation, F index)` can be written with **synthetic words = dense rank of (pw, -y)**; tied-y members then resolve from the lent free order
