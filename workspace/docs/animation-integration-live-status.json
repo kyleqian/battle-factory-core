@@ -3428,6 +3428,23 @@
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
+    },
+    {
+      "move": "MOVE_CURSE",
+      "id": 174,
+      "sourceFieldEvidence": "../tools/integration/fixtures/curse-live-adapter-receipt.json",
+      "liveEvidence": [
+        "Non-Ghost (CurseStats) body only: variant from request.turn & 1 (= gAnimMoveTurn read by Move_CURSE choosetwoturnanim; BattleScript_EffectCurse setbyte sB_ANIM_TURN 1 for a non-Ghost attacker, battle_scripts_1.s:1491-1492)",
+        "Pure source model src/animation/curseModel.ts (ported from prep23: SwayMon sine replay, DrawFallingWhiteLines task/registers/BG1 scroll, BlendColorCycle BeginNormalPaletteFade schedule) + production provider liveCurseStatsInputs (src/engine/liveOamMoves.ts): hardware OAM through the assembler (attacker sway x2, OBJ-window copy in the lowest free slot, carried 64-slot order), S0 registers, assets-only palette composite; never a capture row",
+        "field checks vs 5 retained corpora (accepted SNORLAX P/O, MILTANK->GOLEM P/O, ONIX->PIDGEOT): hardware OAM, tasks, gBattle_BG, consumed palette banks 176/176 each; registers 176/176 on first bodies, 175/176 after a Splash body (row-0 WIN0H/WIN0V host leftover, not read by the renderer)",
+        "renderer falling-lines gate keyed on the clearing step scanout (staged/accepted Curse framebuffers byte-identical): tall ONIX row 142 exact",
+        "dense 176-row windows zero residual twice fresh through the production live renderer (see receipt)"
+      ],
+      "remaining": [
+        "the Ghost branch (gAnimMoveTurn 0: Ghost-type attacker, Factory DUSCLOPS only) declines to the scene-off view: its row-26 palette-transfer scanline (P1) and the BG2 scroll phase (R1) are frame-phase inputs the production queue does not carry",
+        "shiny battlers and battlers with a non-zero front idle rest decline",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3451,7 +3468,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 230,
+  "implementedCount": 231,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 10,

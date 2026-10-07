@@ -1,0 +1,39 @@
+{
+ "schema": "curse-live-adapter-fixture/v1",
+ "move": "CURSE",
+ "probe": "tools/compare/curseProbe.py",
+ "scenario": "tools/battle-lab/prep23-curse-stat-altopp-miltank-golem.json",
+ "denseWindow": {
+  "startFrame": 72,
+  "endFrame": 247
+ },
+ "windowSource": "window = [activation, activation + 175] of the scenario Curse body (CurseStats); activation = its own first anim-active frame (curseProbe.py sourceWindow; first body)",
+ "attacker": {
+  "species": "MILTANK",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 155,
+  "playerMaxHp": 155,
+  "opponentHp": 170,
+  "opponentMaxHp": 170,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 1,
+  "power": 0
+ }
+}

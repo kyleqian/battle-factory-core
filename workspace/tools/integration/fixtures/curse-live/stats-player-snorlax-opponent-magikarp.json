@@ -1,0 +1,45 @@
+{
+ "schema": "curse-live-adapter-fixture/v1",
+ "move": "CURSE",
+ "probe": "tools/compare/curseProbe.py",
+ "scenario": "tools/battle-lab/mechanic-curse-stat-player-snorlax-opponent-magikarp.json",
+ "denseWindow": {
+  "startFrame": 312,
+  "endFrame": 487
+ },
+ "windowSource": "window = [activation, activation + 175] of the scenario Curse body (CurseStats); activation = its own first anim-active frame (curseProbe.py sourceWindow; second body, after the opponent/player Splash)",
+ "attacker": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "MAGIKARP",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 235,
+  "playerMaxHp": 235,
+  "opponentHp": 95,
+  "opponentMaxHp": 95,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 1,
+  "power": 0
+ },
+ "precedingBodies": [
+  {
+   "moveId": 150,
+   "side": "opponent"
+  }
+ ]
+}
