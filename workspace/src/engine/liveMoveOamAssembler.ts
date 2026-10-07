@@ -1,0 +1,186 @@
+/**
+ * Production hardware-OAM provider for the live move bodies whose display plans decode a per-frame OAM buffer
+ * (docs/next-adapters-prep20.md). Pure and source-derived: never a capture row.
+ *
+ * Model (prep20 s0.1, all corpora): `hardwareOam[row] = build(sprite state of row - 1)` (the VBlank copy lags one frame);
+ * row 0 is the pre-activation idle scene. One build walks the full 64-slot `sSpriteOrder` once: the healthbox group
+ * contributes its measured entry block, every visible in-use sprite its attr triple, the tail is the dummy entry, and
+ * each entry's pad halfword carries one parameter of hardware matrix `index >> 2`.
+ *
+ * Sprite order (gap G1): `BuildSpritePriorities` + `SortSprites` run over ALL 64 slots every frame with the keys
+ * `(oam.priority << 8 | subpriority, oam.y)`. A free slot holds `ResetSprite`'s `sDummySprite` (priority 3, subpriority
+ * 0xFF, oam.y 160), an invisible sprite keeps its last written oam.y (UpdateOamCoords skips it). With those keys the
+ * lent activation order carried through the body with `sortGbaSpriteOrder` equals the ROM `sSpriteOrder` on every row.
+ */
+import { sortGbaSpriteOrder, type GbaSpriteOrderKey } from "../animation/gbaObjCompositor.ts";
+import { willOWispSpritesAtAge, willOWispTimeline } from "../animation/willOWisp.ts";
+
+export type OamAttr = readonly [number, number, number];
+export interface LiveOamSprite {
+  readonly slot: number;
+  /** attr0..2 written to the OAM buffer when visible. */
+  readonly attr: OamAttr;
+  readonly subpriority: number;
+  readonly visible: boolean;
+  /** The sprite's oam.y byte used by SortSprites (stale while invisible). */
+  readonly oamY: number;
+}
+const IDENTITY = [256, 0, 0, 256] as const;
+/** `sDummySprite` (sprite.c ResetSprite): DUMMY_OAM_DATA y 160, x 304, priority 3; subpriority 0xFF. */
+export const GBA_DUMMY_OAM_ATTR: OamAttr = Object.freeze([0x00a0, 0x0130, 0x0c00] as const);
+const DUMMY_KEY = Object.freeze({ priority: 3, subpriority: 0xff, y: 160 - 256 });
+
+/**
+ * Known-entry healthbox / healthbar OAM block (9 entries from slots 62, 60, 0, 63, 1, 61; subsprite tables) that leads
+ * every build while those occupants are unchanged. Measured constant (prep20 WISP_HEALTHBOX; equal in the Will-O-Wisp,
+ * Pursuit normal and Fury Cutter corpora and alternates). No renderer branch draws it (healthboxes are composed by the
+ * controller), it only keeps every move entry's `oamIndex` source-exact.
+ */
+export const KNOWN_ENTRY_HEALTHBOX_OAM: readonly string[] = Object.freeze([
+  "58409e401c610001", "5840be4020610000", "1e40244024610000", "1e40444028610001", "1e0014002c610001",
+  "48007ec01c500000", "4800bec05c500000", "0e400cc09c500001", "0e404cc0bc500001",
+]);
+export const KNOWN_ENTRY_HEALTHBOX_SLOTS: readonly number[] = Object.freeze([62, 60, 0, 63, 1, 61]);
+
+const signedY = (oamY: number): number => { const y = oamY & 0xff; return y >= 160 ? y - 256 : y; };
+
+/** One SortSprites pass over the full 64-slot order (free slots carry the dummy key). */
+export function carryLiveSpriteOrder(previous: readonly number[], sprites: readonly LiveOamSprite[]): number[] {
+  const bySlot = new Map(sprites.map((sprite) => [sprite.slot, sprite] as const));
+  return sortGbaSpriteOrder(previous, previous.map((slot) => {
+    const sprite = bySlot.get(slot);
+    return (sprite ? { slot, priority: sprite.attr[2] >>> 10 & 3, subpriority: sprite.subpriority, y: signedY(sprite.oamY) }
+      : { slot, ...DUMMY_KEY }) as GbaSpriteOrderKey;
+  }));
+}
+
+const hex4 = (value: number): string => ((value & 0xff) << 8 | value >>> 8 & 0xff).toString(16).padStart(4, "0");
+const entry = (attr: OamAttr, pad: number): string => hex4(attr[0]) + hex4(attr[1]) + hex4(attr[2]) + hex4(pad);
+
+/** The 128-entry hardware OAM strings (retained-corpus hex layout) of one build. */
+export function buildLiveHardwareOam(
+  order: readonly number[], sprites: readonly LiveOamSprite[],
+  healthbox: Readonly<{ slots: readonly number[]; entries: readonly string[] }>,
+  matrices: readonly (readonly [number, number, number, number])[] = [],
+): string[] {
+  const bySlot = new Map(sprites.map((sprite) => [sprite.slot, sprite] as const));
+  const entries: string[] = [];
+  let healthboxEmitted = false;
+  for (const slot of order) {
+    if (healthbox.slots.includes(slot)) {
+      if (!healthboxEmitted) { entries.push(...healthbox.entries); healthboxEmitted = true; }
+      continue;
+    }
+    const sprite = bySlot.get(slot);
+    if (sprite?.visible) entries.push(entry(sprite.attr, 0));
+    if (entries.length >= 128) break;
+  }
+  while (entries.length < 128) entries.push(entry(GBA_DUMMY_OAM_ATTR, 0));
+  return entries.slice(0, 128).map((value, index) =>
+    value.slice(0, 12) + hex4((matrices[index >> 2] ?? IDENTITY)[index & 3]!));
+}
+
+type Point = Readonly<{ x: number; y: number }>;
+type Side = "player" | "opponent";
+export interface LiveOamBattler {
+  readonly slot: number;
+  readonly attr: OamAttr;
+  readonly subpriority: number;
+}
+/** Known-entry occupants other than the battlers (healthboxes, healthbars, the invisible slot-2 shadow helper). */
+export interface LiveOamScene {
+  readonly occupants: readonly Readonly<{ slot: number; attr: OamAttr; subpriority: number; visible: boolean }>[];
+  readonly healthbox: Readonly<{ slots: readonly number[]; entries: readonly string[] }>;
+}
+
+export interface LiveWillOWispOamInputs {
+  readonly attackerSide: Side;
+  /** Orb origin (attacker sBattlerCoords X / Y) and fire origin (target X_2 / Y_PIC_OFFSET). */
+  readonly attackerCenter: Point;
+  readonly targetCenter: Point;
+  readonly attacker: LiveOamBattler;
+  readonly target: LiveOamBattler;
+  readonly scene: LiveOamScene;
+  /** Known-entry allocator values: ANIM_TAG_WISP_ORB / ANIM_TAG_WISP_FIRE tile bases and palette slots. */
+  readonly orbTileBase: number;
+  readonly fireTileBase: number;
+  readonly orbPaletteSlot: number;
+  readonly firePaletteSlot: number;
+  /** Occupied slots at activation (lowest-free allocation skips them). */
+  readonly occupiedSlots: readonly number[];
+  /** The lent full 64-slot activation order. */
+  readonly activationOrder: readonly number[];
+}
+
+/** createsprite subpriority offsets of Move_WILL_O_WISP (orbs 2, 3, 4, 4; fires 2), from the attacker's subpriority. */
+const ORB_SUBPRIORITY_OFFSET = [2, 3, 4, 4] as const;
+const FIRE_SUBPRIORITY_OFFSET = 2;
+
+/** Lowest-free slots over the source lifetimes, creation order (start, orbs before fires, ordinal). */
+function wispSlots(input: LiveWillOWispOamInputs): Map<string, number> {
+  const t = willOWispTimeline(input.attackerSide, input.attackerCenter, input.targetCenter);
+  const lives: { key: string; start: number; end: number }[] = [];
+  for (let o = 0; o < 4; o += 1) lives.push({ key: `orb${o}`, start: 10 + o * 5, end: t.orbEnd + o * 5 });
+  for (let o = 0; o < 6; o += 1) lives.push({ key: `fire${o}`, start: t.fireStart, end: t.fireEnd });
+  const slots = new Map<string, number>();
+  for (const life of lives) {
+    const used = new Set(input.occupiedSlots);
+    for (const other of lives) {
+      const slot = slots.get(other.key);
+      if (slot !== undefined && other.start <= life.start && life.start <= other.end) used.add(slot);
+    }
+    let slot = 0;
+    while (used.has(slot)) slot += 1;
+    slots.set(life.key, slot);
+  }
+  return slots;
+}
+
+/**
+ * Per-row hardware OAM of one Will-O-Wisp body (rows 0..cleanup): the reducer's own source programs (orb linear
+ * translation, fire spiral) placed in lowest-free slots, keyed into the carried full sprite order. Orb priority is the
+ * target's BG priority at creation (2); fire priority = the target's BG priority (opponent target BG1 drops to 1 at
+ * splitbgprio_all) + 1 while `data[1]` is in [64, 195]. The target battler is absent from the build of states
+ * [8, fireEnd + 1] (monbg; prep20 s0.2.3).
+ */
+export function liveWillOWispHardwareOamRows(input: LiveWillOWispOamInputs): string[][] {
+  const t = willOWispTimeline(input.attackerSide, input.attackerCenter, input.targetCenter);
+  const slots = wispSlots(input);
+  const geometry = { attackerSide: input.attackerSide, attackerCenter: input.attackerCenter, targetCenter: input.targetCenter };
+  const staleY = new Map<number, number>();
+  const spritesAt = (state: number): LiveOamSprite[] => {
+    const out: LiveOamSprite[] = input.scene.occupants.map((o) => ({ ...o, oamY: o.attr[0] & 0xff }));
+    out.push({ ...input.attacker, visible: true, oamY: input.attacker.attr[0] & 0xff });
+    out.push({ ...input.target, visible: !(state >= 8 && state <= t.fireEnd + 1), oamY: input.target.attr[0] & 0xff });
+    if (state < 0) return out;
+    for (const sprite of willOWispSpritesAtAge(state, geometry)) {
+      const slot = slots.get(`${sprite.kind}${sprite.ordinal}`)!, local = state - sprite.start;
+      const frame = Math.floor((local + 1) / 5);
+      let attr: OamAttr, subpriority: number;
+      if (sprite.kind === "orb") {
+        const tile = input.orbTileBase + (sprite.animation === 0 ? (frame % 4) * 4 : sprite.animation === 1 ? 16 : 20);
+        attr = [(sprite.y + sprite.y2 - 8) & 0xff, 0x4000 | (sprite.x + sprite.x2 - 8) & 0x1ff,
+          tile | 2 << 10 | input.orbPaletteSlot << 12];
+        subpriority = input.attacker.subpriority - ORB_SUBPRIORITY_OFFSET[sprite.ordinal]!;
+      } else {
+        const data1 = (sprite.ordinal * 42 + (local + 2) * 7) & 255;
+        const priority = (input.attackerSide === "player" ? 1 : 2) + (data1 < 64 || data1 > 195 ? 0 : 1);
+        attr = [(sprite.y + sprite.y2 - 16) & 0xff, 0x8000 | (sprite.x + sprite.x2 - 16) & 0x1ff,
+          input.fireTileBase + (frame % 4) * 16 | priority << 10 | input.firePaletteSlot << 12];
+        subpriority = input.attacker.subpriority - FIRE_SUBPRIORITY_OFFSET;
+      }
+      if (!sprite.invisible) staleY.set(slot, attr[0] & 0xff);
+      out.push({ slot, attr, subpriority, visible: !sprite.invisible, oamY: staleY.get(slot) ?? attr[0] & 0xff });
+    }
+    return out;
+  };
+  const rows: string[][] = [];
+  let order: readonly number[] = input.activationOrder;
+  let previous = spritesAt(-1);
+  for (let row = 0; row <= t.cleanup; row += 1) {
+    rows.push(buildLiveHardwareOam(order, previous, input.scene.healthbox));
+    previous = spritesAt(row);
+    order = carryLiveSpriteOrder(order, previous);
+  }
+  return rows;
+}

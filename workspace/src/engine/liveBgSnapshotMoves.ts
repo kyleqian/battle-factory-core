@@ -38,7 +38,7 @@ const ZERO_BG_VALUES: Readonly<Record<string, number>> = Object.freeze({
 const IDENTITY = Object.freeze([256, 0, 0, 256] as const);
 /** Battler OBJ attr2 (tile | palette bank << 12): player OBJ bank 0 tile 0x171, opponent bank 1 tile 0x1d9. */
 const BATTLER_ATTR2: Readonly<Record<Side, number>> = Object.freeze({ player: 2417, opponent: 6617 });
-const KNOWN_ENTRY_NON_BATTLER_SPRITES = Object.freeze([
+export const KNOWN_ENTRY_NON_BATTLER_SPRITES = Object.freeze([
   { slot: 0, attr: [72, 49278, 20508], subpriority: 1 }, { slot: 1, attr: [16398, 49164, 20636], subpriority: 1 },
   { slot: 2, attr: [16384, 16384, 23853], subpriority: 200 }, { slot: 60, attr: [16410, 16420, 24868], subpriority: 0 },
   { slot: 61, attr: [16398, 49228, 20668], subpriority: 1 }, { slot: 62, attr: [16468, 16542, 24860], subpriority: 0 },

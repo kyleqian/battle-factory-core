@@ -3357,6 +3357,22 @@
         "Ordinary route, hidden attacker between turns, prompt reached, ON/OFF parity: see the receipt (random2-r5-live-receipt.json dig)."
       ],
       "remaining": "Unleash after any intervening animation body / party-menu unit, a Dig setup that is not the battle's first body, and the Dig hit-flash/HUD queue commands are not proved; those decline to the scene-off view."
+    },
+    {
+      "move": "MOVE_WILL_O_WISP",
+      "id": 261,
+      "sourceFieldEvidence": "../tools/integration/fixtures/oam1-live-adapter-receipt.json",
+      "liveEvidence": [
+        "Production hardware-OAM provider (src/engine/liveMoveOamAssembler.ts): every row's 128-entry OAM buffer is built from the anchors, the known-entry allocator/scene constants, the reducer's own source programs (orb InitAnimLinearTranslationWithSpeed math, fire spiral) and the lent activation order carried through the body (full 64-slot SortSprites, free slots = ResetSprite dummy key: gap G1 solved); rows 1..N-1 string-equal to the retained corpora and the BANETTE->GOLEM alternates (all 128 entries incl. pad words)",
+        "dense 214/214 (player attacker) and 213/213 (opponent attacker) zero residual twice fresh through the production live renderer: PLUSLE->SHUCKLE accepted both orientations, BANETTE->GOLEM alternates both orientations, NINETALES->GOLBAT (elevated target) / NINETALES->SNORLAX (new scenarios, window = each scenario's own activation + 0)",
+        "ordinary route 82/7 BANETTE slot 1 (first body): adapter active every age, following prompt reached, ON/OFF rules/RNG/boundary equal"
+      ],
+      "remaining": [
+        "first body only (spriteOrderInput.firstBody): later bodies decline to the scene-off fallback (no later-body dense fixture; routes 54/14 and 61/21 are second bodies)",
+        "shiny battlers and battlers with a non-zero front idle rest decline",
+        "singles |dx| is fixed by the static sBattlerCoords X_2 (105 / 104): other dx is exercised by unit tests only",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3380,7 +3396,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 226,
+  "implementedCount": 227,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 10,

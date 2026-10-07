@@ -4924,6 +4924,44 @@
     "body": "normal",
     "activation": "docs/next-adapters-prep18.md s1.1 (setup window = activation..activation + 194; the unleash body has no shadow row)"
    }
+  },
+  {
+   "id": 261,
+   "move": "WILL_O_WISP",
+   "orientation": "player",
+   "variant": "oam1-will-o-wisp-player-plusle-opponent-shuckle",
+   "activationFrame": 76,
+   "windowStart": 76,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/oam1-live/will-o-wisp-player-plusle-opponent-shuckle.json",
+    "scenario": "tools/battle-lab/mechanic-will-o-wisp-player-shuppet-opponent-shuckle.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep18/prep18-activation.json (activation == window start); elevated GOLBAT dense window 0 px (oam1-live-adapter-receipt.json)"
+   }
+  },
+  {
+   "id": 261,
+   "move": "WILL_O_WISP",
+   "orientation": "opponent",
+   "variant": "oam1-will-o-wisp-opponent-plusle-player-shuckle",
+   "activationFrame": 80,
+   "windowStart": 80,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/oam1-live/will-o-wisp-opponent-plusle-player-shuckle.json",
+    "scenario": "tools/battle-lab/mechanic-will-o-wisp-opponent-shuppet-player-shuckle.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep18/prep18-activation.json (activation == window start); elevated GOLBAT dense window 0 px (oam1-live-adapter-receipt.json)"
+   }
   }
  ]
 }

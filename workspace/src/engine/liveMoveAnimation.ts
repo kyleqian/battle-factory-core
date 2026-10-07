@@ -81,6 +81,8 @@ import type { FlailPower } from "../animation/flail.ts";
 import type { HailProfile } from "../animation/hail.ts";
 import { composeLivePalettes, liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
+import { liveWillOWispInputs } from "./liveOamMoves.ts";
+import { willOWispTimeline } from "../animation/willOWisp.ts";
 import {
   dirtScatterOffsetFromWord, dirtScatterSlots, hyperBeamOrbFromWords, linearTranslationStep, liveMovePresentationRngWords, miniTwinklingStarFromWords, type LiveMovePresentationRngInput,
 } from "./liveMovePresentationRng.ts";
@@ -105,6 +107,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   91,
   // Rollout counter bodies 1..5 (request.rolloutCounter, docs/rollout-endeavor-prep.md s0.1).
   205,
+  // oam1 (docs/next-adapters-prep20.md): production hardware-OAM provider (liveMoveOamAssembler.ts), first body.
+  261,
   // anchor3: source battler anchors (position center, picture height, pic offset).
   86, 87, 107, 116, 203, 207, 263, 339,
   // selectors: request-selected branches and healing anchors.
@@ -287,6 +291,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     240, 352, 258,
     // prep16: Overheat, Silver Wind first-body activation == window start (row 0; prep16 s1, captures of the first-body scenarios).
     315, 318, 244,
+    // oam1: Will-O-Wisp activation == window start (row 0; prep18-activation.json).
+    261,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -755,6 +761,13 @@ export function liveMoveAnimationDuration(
     case 315: return 230; // Overheat first body 75..304 / 80..309 (prep16 s2.1; reducer first inactive age 229, displayed like every adapter: duration = first inactive + 1).
     case 318: return request.attacker === 0 ? 193 : 196; // Silver Wind first body 81..273 / 85..280 (prep16 s2.2: first inactive ages 192 / 195, duration = first inactive + 1).
     case 58: return 203; // Ice Beam 75..277 / 79..281 (prep13 s0.1; reducer first inactive age 202).
+    // Will-O-Wisp (oam1): first inactive age + 1 of the source timeline from the static sBattlerCoords X_2 anchors (|dx| 105 /
+    // 104 in singles; the orb translation duration is |dx|): 214 / 213 rows (76..289 / 80..292).
+    case 261: {
+      const player = { x: 72, y: 0 }, opponent = { x: 176, y: 0 };
+      return request.attacker === 0 ? willOWispTimeline("player", player, opponent).cleanup + 1
+        : willOWispTimeline("opponent", opponent, player).cleanup + 1;
+    }
     default: return null;
   }
 }
@@ -2533,6 +2546,27 @@ export function liveMoveAnimationPresentation(
         config = { move: "SILVER_WIND", attacker: withOrigin(attacker, attackerPictureOrigin),
           target: withOrigin(target, targetPictureOrigin), fieldProfile, animationInputs: inputs as never };
       }
+      break;
+    }
+    case 261: {
+      // oam1 (prep20 s1.1 + G1): the display plan decodes a hardware-OAM buffer, built here by the production assembler from the
+      // anchors, the known-entry allocator/scene constants and the lent activation order carried through the body (full 64-slot
+      // SortSprites, dummy keys for free slots). First body only: the known-entry occupancy, allocator slots and the unfaded
+      // composite palette are proven there (every dense fixture); non-shiny (no shiny battle palette); zero idle rests.
+      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const activationOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (palettes === null || activationOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const inputs = liveWillOWispInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
+        targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder });
+      if (inputs === null) return null;
+      const withCenter = (battler: SceneOnPresentationBattler, center: { x: number; y: number }): SceneOnPresentationBattler => ({
+        ...battler, geometry: { ...battler.geometry, animationCenter: center } });
+      config = { move: "WILL_O_WISP", attacker: withCenter(attacker, inputs.attackerCenter), target: withCenter(target, inputs.targetCenter),
+        fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
       break;
     }
     case 237: {

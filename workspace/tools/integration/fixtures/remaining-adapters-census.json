@@ -10,7 +10,7 @@
   "src/data/gen/battle-frontier-mons.json",
   "src/data/gen/factory-round-policy.json"
  ],
- "liveStatusImplementedCount": 226,
+ "liveStatusImplementedCount": 227,
  "staleCodesCorrected": [
   "B (sSpriteOrder): was 'first body only'; production now lends the order and tracks it across bodies (liveSpriteOrderHost.ts / spriteOrderProvider.ts, merged cross-body tracker + post-KO rung 1), so B no longer blocks anything; recipe work only (falls back after an unmodelled graphics command)",
   "F-AFFINE / E-TASK: were provider blockers; docs/allocator-plan-v2-evidence.md measured gOamMatrixAllocBitmap 0x6 + no tasks at all 481 known-entry bodies, so the accepted constants gated on the lent order suffice for first bodies (invalidated after a faint/switch)",
@@ -23,7 +23,7 @@
  "inFlightMoves": {},
  "summary": {
   "accepted": 276,
-  "live": 226,
+  "live": 227,
   "faithfulRandom": 10,
   "faithfulRandomMoves": [
    "MOVE_ASTONISH",
@@ -38,16 +38,16 @@
    "MOVE_WISH"
   ],
   "inFlight": 0,
-  "remaining": 40,
+  "remaining": 39,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
   },
   "weightPct": {
-   "live": 89.842,
+   "live": 90.133,
    "faithfulRandom": 3.612,
    "inFlight": 0,
-   "remaining": 6.059
+   "remaining": 5.767
   },
   "remainingByGroup": {
    "PROVIDER-x": {
@@ -55,8 +55,8 @@
     "weightPct": 0.962
    },
    "MULTI": {
-    "moves": 33,
-    "weightPct": 4.095
+    "moves": 32,
+    "weightPct": 3.804
    },
    "SMALL-INPUT": {
     "moves": 2,
@@ -69,15 +69,15 @@
   },
   "remainingByHostClass": {
    "H_BASIC": 2,
-   "H_BUFFER": 33,
+   "H_BUFFER": 32,
    "H_DERIVED": 3,
    "H_OUTCOME": 1,
    "H_RANDOM": 1,
    "H_VARIANT": 6
   },
-  "orderFirstBodyOnlyMoves": 25,
-  "slotPlanNeededMoves": 32,
-  "sumsTo": "226+10+0+40=276",
+  "orderFirstBodyOnlyMoves": 24,
+  "slotPlanNeededMoves": 31,
+  "sumsTo": "227+10+0+39=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -178,8 +178,8 @@
    "aloneNames": [
     "METEOR_MASH"
    ],
-   "touchingMoves": 34,
-   "touchingWeightPct": 4.315,
+   "touchingMoves": 33,
+   "touchingWeightPct": 4.024,
    "meta": {
     "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
     "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
@@ -232,8 +232,8 @@
    "aloneNames": [
     "MEMENTO"
    ],
-   "touchingMoves": 33,
-   "touchingWeightPct": 3.945,
+   "touchingMoves": 32,
+   "touchingWeightPct": 3.654,
    "meta": {
     "cost": "new large host (docs/animation-integration-readiness.md A6)",
     "claim": "only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today"
@@ -248,8 +248,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 29,
-   "touchingWeightPct": 3.722,
+   "touchingMoves": 28,
+   "touchingWeightPct": 3.431,
    "meta": {
     "cost": "extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves)",
     "claim": "exact for audited plan rows from a known entry; actual status animations/switches invalidate"
@@ -264,8 +264,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 28,
-   "touchingWeightPct": 3.583,
+   "touchingMoves": 27,
+   "touchingWeightPct": 3.292,
    "meta": null
   },
   {
@@ -277,8 +277,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 27,
-   "touchingWeightPct": 3.512,
+   "touchingMoves": 26,
+   "touchingWeightPct": 3.22,
    "meta": null
   },
   {
@@ -290,8 +290,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 14,
-   "touchingWeightPct": 2.561,
+   "touchingMoves": 13,
+   "touchingWeightPct": 2.27,
    "meta": null
   },
   {
@@ -440,9 +440,9 @@
   {
    "step": 5,
    "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
-   "newMoves": 30,
-   "newWeightPct": 3.543,
-   "cumulativeRemainingUnlocked": 35,
+   "newMoves": 29,
+   "newWeightPct": 3.251,
+   "cumulativeRemainingUnlocked": 34,
    "newNames": [
     "BONEMERANG",
     "CURSE",
@@ -472,8 +472,7 @@
     "SMOG",
     "SNORE",
     "SPIKES",
-    "SUPERPOWER",
-    "WILL_O_WISP"
+    "SUPERPOWER"
    ]
   },
   {
@@ -481,7 +480,7 @@
    "provider": "X-DISABLE",
    "newMoves": 3,
    "newWeightPct": 0.402,
-   "cumulativeRemainingUnlocked": 38,
+   "cumulativeRemainingUnlocked": 37,
    "newNames": [
     "FURY_CUTTER",
     "ICE_BALL",
@@ -493,7 +492,7 @@
    "provider": "X-TWOTURN",
    "newMoves": 1,
    "newWeightPct": 0.187,
-   "cumulativeRemainingUnlocked": 39,
+   "cumulativeRemainingUnlocked": 38,
    "newNames": [
     "DIVE"
    ]
@@ -503,7 +502,7 @@
    "provider": "X-AGE",
    "newMoves": 1,
    "newWeightPct": 0.112,
-   "cumulativeRemainingUnlocked": 40,
+   "cumulativeRemainingUnlocked": 39,
    "newNames": [
     "EXTREME_SPEED"
    ]
@@ -513,7 +512,7 @@
    "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 40,
+   "cumulativeRemainingUnlocked": 39,
    "newNames": []
   },
   {
@@ -521,7 +520,7 @@
    "provider": "D-TILE",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 40,
+   "cumulativeRemainingUnlocked": 39,
    "newNames": []
   },
   {
@@ -529,7 +528,7 @@
    "provider": "D-BG",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 40,
+   "cumulativeRemainingUnlocked": 39,
    "newNames": []
   },
   {
@@ -537,7 +536,7 @@
    "provider": "D-OAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 40,
+   "cumulativeRemainingUnlocked": 39,
    "newNames": []
   },
   {
@@ -545,7 +544,7 @@
    "provider": "D-VRAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 40,
+   "cumulativeRemainingUnlocked": 39,
    "newNames": []
   },
   {
@@ -553,7 +552,7 @@
    "provider": "D-SCAN",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 40,
+   "cumulativeRemainingUnlocked": 39,
    "newNames": []
   }
  ],
@@ -1553,7 +1552,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0003401360544217687,
-   "config": "src/animation/sceneOnPresentation.ts:3901",
+   "config": "src/animation/sceneOnPresentation.ts:3903",
    "needs": [
     "B",
     "C",
@@ -2341,7 +2340,7 @@
      "code": "E-OUT",
      "text": "view.burnFlames depend on resolution.secondaryRollSucceeded and resolution.faint (burn roll + target faint outcomes), which the MOVE_ANIMATION request does not carry; the view bundles status-animation flames with the move body",
      "cites": [
-      "src/animation/sceneOnPresentation.ts:12579",
+      "src/animation/sceneOnPresentation.ts:12586",
       "src/animation/sceneOnPresentation.ts:1554"
      ]
     }
@@ -6316,7 +6315,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0003401360544217687,
-   "config": "src/animation/sceneOnPresentation.ts:3799",
+   "config": "src/animation/sceneOnPresentation.ts:3801",
    "needs": [
     "B",
     "C",
@@ -7325,7 +7324,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0003720238095238094,
-   "config": "src/animation/sceneOnPresentation.ts:3924",
+   "config": "src/animation/sceneOnPresentation.ts:3928",
    "needs": [
     "B",
     "C",
@@ -10421,7 +10420,7 @@
     "H_BASIC"
    ],
    "weightShare": 0.0022321428571428566,
-   "config": "src/animation/sceneOnPresentation.ts:3710",
+   "config": "src/animation/sceneOnPresentation.ts:3712",
    "needs": [
     "X-SUBST"
    ],
@@ -10432,7 +10431,7 @@
      "cites": [
       "reference/pokeemerald/data/battle_scripts_1.s:1085-1103",
       "src/engine/battleCommandFieldArt.ts:1",
-      "src/animation/sceneOnPresentation.ts:3710"
+      "src/animation/sceneOnPresentation.ts:3712"
      ]
     }
    ],
@@ -10660,207 +10659,6 @@
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
-   },
-   "group": "MULTI"
-  },
-  {
-   "move": "MOVE_WILL_O_WISP",
-   "id": 261,
-   "name": "WILL-O-WISP",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.002912414965986394,
-   "config": "src/animation/sceneOnPresentation.ts:2759",
-   "needs": [
-    "E-TASK",
-    "D-OAM",
-    "D-PAL",
-    "D-BG",
-    "D-TILE",
-    "B",
-    "C"
-   ],
-   "blockers": [
-    {
-     "code": "E-TASK",
-     "text": "taskSlots (Readonly<{ updateMonBg: number; clearMonBg: number)",
-     "cites": [
-      "src/animation/willOWisp.ts:16"
-     ]
-    },
-    {
-     "code": "D-OAM",
-     "text": "buffers (Readonly<{ softwareOam: readonly unknown[]; hardwa)",
-     "cites": [
-      "src/animation/willOWisp.ts:18"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "palette (Readonly<{ unfaded: readonly number[]; faded: read)",
-     "cites": [
-      "src/animation/willOWisp.ts:20"
-     ]
-    },
-    {
-     "code": "D-BG",
-     "text": "registers (Readonly<Record<string, number>>;)",
-     "cites": [
-      "src/animation/willOWisp.ts:21"
-     ]
-    },
-    {
-     "code": "D-TILE",
-     "text": "resources (Readonly<{ orbTileBase: number; fireTileBase: numb)",
-     "cites": [
-      "src/animation/willOWisp.ts:23"
-     ]
-    },
-    {
-     "code": "B",
-     "text": "spriteOrder (readonly number[]; readonly audio: unknown;)",
-     "cites": [
-      "src/animation/willOWisp.ts:25"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationRng (number; readonly gameplayRng: unknown; readonly ga)",
-     "cites": [
-      "src/animation/willOWisp.ts:27"
-     ]
-    }
-   ],
-   "notes": [
-    "accepted as a LiveInputs config (docs/animation-integration-merged-readiness.json); not in the older triage docs"
-   ],
-   "staleCorrections": [],
-   "slotPlanNeeded": true,
-   "consumedInputs": [
-    {
-     "path": "attackerArt",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/willOWisp.ts:15"
-    },
-    {
-     "path": "taskSlots",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/willOWisp.ts:16"
-    },
-    {
-     "path": "liveTasks",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/willOWisp.ts:17"
-    },
-    {
-     "path": "buffers",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/willOWisp.ts:18"
-    },
-    {
-     "path": "softwareMatrices",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/willOWisp.ts:19"
-    },
-    {
-     "path": "palette",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/willOWisp.ts:20"
-    },
-    {
-     "path": "registers",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/willOWisp.ts:21"
-    },
-    {
-     "path": "background",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/willOWisp.ts:22"
-    },
-    {
-     "path": "resources",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/willOWisp.ts:23"
-    },
-    {
-     "path": "firePaletteBank",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/willOWisp.ts:24"
-    },
-    {
-     "path": "spriteOrder",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/willOWisp.ts:25"
-    },
-    {
-     "path": "liveCounts",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/willOWisp.ts:26"
-    },
-    {
-     "path": "animationRng",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/willOWisp.ts:27"
-    }
-   ],
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "E-TASK",
-    "B"
-   ],
-   "providerNeeds": [
-    "D-OAM",
-    "D-PAL",
-    "D-BG",
-    "D-TILE",
-    "C"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
    },
    "group": "MULTI"
   }
