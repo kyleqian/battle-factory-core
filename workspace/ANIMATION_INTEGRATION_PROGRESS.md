@@ -30,6 +30,13 @@
   scroll one row early, 2/4 windows) and P1 (row-26 palette-transfer phase: 15 / 135 px on alternates). Variant =
   Ghost iff the attacker is Ghost type. Supervisor: `prep23Run.sh` with fresh probes (r1 == r2) — all four receipts
   byte-identical.
+- Species audit 5 (side, `89cc60935`, merged `7eac909ee`): oam1 adapters vs STEELIX / TYRANITAR / PICHU / WAILORD /
+  FLYGON / SHEDINJA swaps (both sides, attacker and target): no species defects. Player-side TYRANITAR attacker
+  Pursuit 86/102 = LAG FRAME (the ROM lacks the usual age-82 lag; body 102 vs 103; counter evidence) — the live
+  Pursuit timeline assumes that lag. Declines confirmed: RATTATA/ONIX target (correct), RATTATA/ONIX opponent
+  attacker (over-conservative: 6/6 exact with the gate lifted — coverage opportunity), shiny (correct; the verifier
+  ignores target personality without a harness patch). Supervisor reran 8 rows twice fresh: 7 exact, the TYRANITAR
+  lag row reproduces (284,768 px).
 
 ## 2026-10-06 (day, wind-down) — D3 implemented: 218 -> 226 exact + 10 faithful-random live adapters
 
