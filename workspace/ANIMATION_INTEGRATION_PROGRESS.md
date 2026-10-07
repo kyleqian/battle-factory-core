@@ -14,6 +14,18 @@
   windows 0 px, 3 other-phase windows residual only on ages 92..107 (max 18,252 px/row), digests r1 == r2;
   typecheck, smoke 448, 7 targeted files 144/144 on master. Logs `.integration/validation/d4a-20261007/`.
   Counts: 246 scoped-exact + 12 faithful-random + 1 faithful-timing, 17 remaining.
+- Folded Opus worker `37c7751ef` as `f2554c70e` (src tree `5ae017dd`): FAITHFUL-TIMING Megahorn (224; prep24 model
+  + assembler, `liveMegahornInputs.ts`; late restorebg fade 9 of 10 -> 177 rows, monbg BGnCNT row 8 7 of 10 after a
+  4-window tie-break; activation registers = the S0 first-body block, exact after a Tackle because the renderer reads
+  only registers the body writes), Revenge (279; prep26 model, `liveRevengeInputs.ts`; BGnCNT row 5, 5 of 6 — pixels
+  identical in both phases, kept in the timing bucket conservatively), Meteor Mash (309; explicit restore lag
+  `restoreLagRows`, policy L = 1 (5 of 7) -> 215 rows; D3 words from the presentation host, counted once with
+  d3: true; renderer generalised from METANG/ONIX to live battler art; declines shiny / displayed status). Routes
+  5/35 RHYDON, 75/14 QWILFISH, 15/21 METAGROSS (two seeds) with ON/OFF parity. Worker gates 1,550 files / 12,696
+  tests, build 865, differential 389. Supervisor: `d4aTimingCheck.ts` on all 21 windows x2 fresh — 0 violations
+  (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
+  196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
+  Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
 - prep30 (side, `cc3786f20`, new files only, merged `3f0023e1e`): source-derived Extrasensory (326) and Psywave
   (149) providers — every field the renderer reads exact on every row in 6 windows each (accepted P/O, ALAKAZAM->GOLEM,
   new ESPEON->CROBAT elevated). Pixels at the measured phase: Psywave 0 px in 5/6 (CROBAT P row 0: 200 px renderer
