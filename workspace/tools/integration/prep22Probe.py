@@ -42,7 +42,7 @@ def scan():
     return {"srcBuffer": u8(e + 20), "state": u8(e + 21), "dmaDest": u32(e + 8), "dmaControl": u32(e + 12), "waveTaskId": u8(e + 24),
             "banks": [[sg(b + 0x3C0 * 2 * k + 2 * i) for i in range(320)] for k in (0, 1)]}
 def regs():
-    return {n: u16(0x04000000 + a) for n, a in (("dispcnt", 0), ("bg0", 8), ("bg1", 10), ("bg2", 12), ("bg3", 14), ("bldcnt", 0x50), ("bldalpha", 0x52), ("bldy", 0x54))}
+    return {n: u16(0x04000000 + a) for n, a in (("dispcnt", 0), ("bg0", 8), ("bg1", 10), ("bg2", 12), ("bg3", 14), ("bldcnt", 0x50), ("bldalpha", 0x52), ("bldy", 0x54), ("win0h", 0x40), ("win1h", 0x42), ("win0v", 0x44), ("win1v", 0x46), ("winin", 0x48), ("winout", 0x4a))}
 def tfuncs():
     b = sym["gTasks"]; return {i: u32(b + i * 0x28) for i in range(16) if u8(b + i * 0x28 + 4)}
 def state():
@@ -96,6 +96,8 @@ def step():
             tb = sym["gTasks"]; taskev.append([f, {str(k): v for k, v in tf.items()}, {str(k): [sg(tb + k * 0x28 + 8 + 2 * j) for j in range(8)] for k in tf}]); prev_tasks = tf
         rg = regs()
         if rg != prev_bg: bgev.append([f, rg]); prev_bg = rg
+    if cur is not None and f - cur["start"] <= 24:  # prep22: OBJ palette banks (unfaded + faded) per age around the move's load edges
+        cur.setdefault("palEarly", []).append([f - cur["start"], banks(sym["gPlttBufferUnfaded"]), banks(sym["gPlttBufferFaded"]), bgb(sym["gPlttBufferUnfaded"])[:8]])
     if ALWAYS or cur is not None:  # sSpriteOrder whenever it changes inside a body (hardware tie-order derivation)
         od = [u8(sym["sSpriteOrder"] + i) for i in range(64)]
         if od != prev_order: oseries.append([f, od]); prev_order = od

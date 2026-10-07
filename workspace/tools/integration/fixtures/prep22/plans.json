@@ -1,0 +1,357 @@
+{
+ "signal-beam-player": {
+  "scenario": "mechanic-signal-beam-player-ariados-opponent-chansey",
+  "probeRunsIdentical": true,
+  "runsSha1": "954e0abc779634febfb62f5f08db5bd053f501aa",
+  "callers": {
+   "RfuMain1+0x10": 184
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 78,
+    "lastCorpusFrame": 223,
+    "rows": 146,
+    "label": "Move_SIGNAL_BEAM",
+    "activationValueHex": "0x072069B2",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "signal-beam-opponent": {
+  "scenario": "mechanic-signal-beam-opponent-ariados-player-chansey",
+  "probeRunsIdentical": true,
+  "runsSha1": "be7b539b86212d2072124bbb76a9c57b7be12124",
+  "callers": {
+   "RfuMain1+0x10": 183
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 82,
+    "lastCorpusFrame": 226,
+    "rows": 145,
+    "label": "Move_SIGNAL_BEAM",
+    "activationValueHex": "0xC5E4AB6F",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "lovely-kiss-player": {
+  "scenario": "mechanic-lovely-kiss-player-jynx-opponent-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "269060c466f8023c7f9d0a1f8323203e2d1682a9",
+  "callers": {
+   "RfuMain1+0x10": 344,
+   "AnimPinkHeart+0x6c": 4
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 73,
+    "lastCorpusFrame": 225,
+    "rows": 153,
+    "label": "Move_LOVELY_KISS",
+    "activationValueHex": "0x0F25B55C",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [],
+    "extraDrawStepsByAge": [
+     [
+      120,
+      4
+     ]
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "lovely-kiss-opponent": {
+  "scenario": "mechanic-lovely-kiss-opponent-jynx-player-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "3a6974a071e29cfe0a700265838a3ab11fe35df5",
+  "callers": {
+   "RfuMain1+0x10": 344,
+   "AnimPinkHeart+0x6c": 4
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 77,
+    "lastCorpusFrame": 229,
+    "rows": 153,
+    "label": "Move_LOVELY_KISS",
+    "activationValueHex": "0x755AE995",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [],
+    "extraDrawStepsByAge": [
+     [
+      120,
+      4
+     ]
+    ],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "sheer-cold-player": {
+  "scenario": "mechanic-sheer-cold-player-dewgong-opponent-chansey",
+  "probeRunsIdentical": true,
+  "runsSha1": "e504726d7aeb30ce48e20673690b5ff17947b3b1",
+  "callers": {
+   "RfuMain1+0x10": 188
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 75,
+    "lastCorpusFrame": 266,
+    "rows": 192,
+    "label": "Move_SHEER_COLD",
+    "activationValueHex": "0x9D02CAEE",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     152,
+     153,
+     172
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "sheer-cold-opponent": {
+  "scenario": "mechanic-sheer-cold-opponent-dewgong-player-chansey",
+  "probeRunsIdentical": true,
+  "runsSha1": "3bcba6dcf4a60d90242709c808a3c42246ac2f64",
+  "callers": {
+   "RfuMain1+0x10": 188
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 79,
+    "lastCorpusFrame": 269,
+    "rows": 191,
+    "label": "Move_SHEER_COLD",
+    "activationValueHex": "0xBBC563FA",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     152,
+     153
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "spikes-player": {
+  "scenario": "mechanic-spikes-player-qwilfish-opponent-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "3b59247385f56e28a039be4d21446371ef47c677",
+  "callers": {
+   "RfuMain1+0x10": 150
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 67,
+    "lastCorpusFrame": 180,
+    "rows": 114,
+    "label": "Move_SPIKES",
+    "activationValueHex": "0x473602A1",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     111,
+     112
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "spikes-opponent": {
+  "scenario": "mechanic-spikes-opponent-qwilfish-player-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "74119f996562a0fc9a04c57a4614be58ce88b3ee",
+  "callers": {
+   "RfuMain1+0x10": 150
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 71,
+    "lastCorpusFrame": 184,
+    "rows": 114,
+    "label": "Move_SPIKES",
+    "activationValueHex": "0x9178A09F",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     111,
+     112
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "octazooka-player": {
+  "scenario": "mechanic-octazooka-player-octillery-opponent-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "f7c4afb316d40be32bb7d6531d898a5ef47a4335",
+  "callers": {
+   "RfuMain1+0x10": 118
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 218,
+    "lastCorpusFrame": 297,
+    "rows": 80,
+    "label": "Move_OCTAZOOKA",
+    "activationValueHex": "0x647BEB2B",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "octazooka-opponent": {
+  "scenario": "mechanic-octazooka-opponent-octillery-player-onix",
+  "probeRunsIdentical": true,
+  "runsSha1": "e85be43792c0f46c9716ae9a8e9a75c81978b8ca",
+  "callers": {
+   "RfuMain1+0x10": 118
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 217,
+    "lastCorpusFrame": 296,
+    "rows": 80,
+    "label": "Move_OCTAZOOKA",
+    "activationValueHex": "0x3B52907A",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "skill-swap-player": {
+  "scenario": "mechanic-skill-swap-player-girafarig-opponent-shuckle",
+  "probeRunsIdentical": true,
+  "runsSha1": "da762915acca1cc220adcdab025ab44113a2ea15",
+  "callers": {
+   "RfuMain1+0x10": 309
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 73,
+    "lastCorpusFrame": 268,
+    "rows": 196,
+    "label": "Move_SKILL_SWAP",
+    "activationValueHex": "0xDC257D0B",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     176
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "skill-swap-opponent": {
+  "scenario": "mechanic-skill-swap-opponent-girafarig-player-shuckle",
+  "probeRunsIdentical": true,
+  "runsSha1": "9f4fbdc39b5d8a2e563ae2a2ba29b252d9d51a2d",
+  "callers": {
+   "RfuMain1+0x10": 309
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 77,
+    "lastCorpusFrame": 271,
+    "rows": 195,
+    "label": "Move_SKILL_SWAP",
+    "activationValueHex": "0x9D02CAEE",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "shock-wave-player": {
+  "scenario": "mechanic-shock-wave-player-flaaffy-opponent-corsola",
+  "probeRunsIdentical": true,
+  "runsSha1": "18c30b2bec281704fbb90d74ae01829d7893d7f7",
+  "callers": {
+   "RfuMain1+0x10": 347
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 75,
+    "lastCorpusFrame": 341,
+    "rows": 267,
+    "label": "Move_SHOCK_WAVE",
+    "activationValueHex": "0x755AE995",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     264,
+     265
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ },
+ "shock-wave-opponent": {
+  "scenario": "mechanic-shock-wave-opponent-flaaffy-player-corsola",
+  "probeRunsIdentical": true,
+  "runsSha1": "412e25ae15730615872622686d43c2a58d34e0b4",
+  "callers": {
+   "RfuMain1+0x10": 554
+  },
+  "bodies": [
+   {
+    "bodyIndex": 0,
+    "activationFrame": 79,
+    "lastCorpusFrame": 341,
+    "rows": 263,
+    "label": "Move_SHOCK_WAVE",
+    "activationValueHex": "0xC452E308",
+    "activationEqualsCorpusRow0": true,
+    "lagAges": [
+     260,
+     261
+    ],
+    "extraDrawStepsByAge": [],
+    "planEqualsCorpusPerRow": true,
+    "mismatchRows": []
+   }
+  ]
+ }
+}
