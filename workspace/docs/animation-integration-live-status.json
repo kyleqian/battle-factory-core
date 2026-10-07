@@ -3445,6 +3445,36 @@
         "shiny battlers and battlers with a non-zero front idle rest decline",
         "independent arbitrary-species/history framebuffer comparison"
       ]
+    },
+    {
+      "move": "MOVE_SPIKES",
+      "id": 191,
+      "sourceFieldEvidence": "../tools/integration/fixtures/r3-profile-live-receipt.json",
+      "liveEvidence": [
+        "Spikes' hazard side condition stays battle-owned; presentation only",
+        "Shared profile builder src/engine/liveProfileMoves.ts: lowest-free sprite slots over the known-entry in-use set, sprite subpriority from the target battler side (Spikes / Octazooka target - 2, Lovely Kiss target), attr2 = bank << 12 | 2 << 10 | tile from the measured allocation, palette snapshots = composeLivePalettes + the move asset palette in the measured OBJ bank; never a capture row",
+        "Tracker-lend gate (known sprite order, as every order-sensitive adapter; the activation order differs between bodies of one battle) and non-shiny; live opponent front idle rest applied by the three renderers only for the live field (staged outputs unchanged)",
+        "dense full windows (113 rows) zero residual twice fresh through the production live renderer on the accepted pair, the prep22 alternate (FORRETRESS / KINGLER / HYPNO -> GOLEM) and GOLBAT / SNORLAX target pairs, both orientations"
+      ],
+      "remaining": [
+        "shiny battlers decline",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_OCTAZOOKA",
+      "id": 190,
+      "sourceFieldEvidence": "../tools/integration/fixtures/r3-profile-live-receipt.json",
+      "liveEvidence": [
+        "No Random2 draw (prep22 s B.1: every gRng2 write inside the body is the per-frame RfuMain1 step)",
+        "Shared profile builder src/engine/liveProfileMoves.ts: lowest-free sprite slots over the known-entry in-use set, sprite subpriority from the target battler side (Spikes / Octazooka target - 2, Lovely Kiss target), attr2 = bank << 12 | 2 << 10 | tile from the measured allocation, palette snapshots = composeLivePalettes + the move asset palette in the measured OBJ bank; never a capture row",
+        "Tracker-lend gate (known sprite order, as every order-sensitive adapter; the activation order differs between bodies of one battle) and non-shiny; live opponent front idle rest applied by the three renderers only for the live field (staged outputs unchanged)",
+        "dense full windows (79 rows) zero residual twice fresh through the production live renderer on the accepted pair, the prep22 alternate (FORRETRESS / KINGLER / HYPNO -> GOLEM) and GOLBAT / SNORLAX target pairs, both orientations"
+      ],
+      "remaining": [
+        "shiny battlers decline",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3468,10 +3498,10 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 231,
+  "implementedCount": 233,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
-  "faithfulRandomCount": 10,
+  "faithfulRandomCount": 11,
   "faithfulRandomAdapters": [
     {
       "id": 24,
@@ -3591,6 +3621,18 @@
       ],
       "surrogateRoutes": [
         "random2-r5/sand-attack/seed3-streak0-slot3-1turn (tests/animation/liveRandom2R5MoveAdapters.test.ts)"
+      ]
+    },
+    {
+      "id": 142,
+      "move": "MOVE_LOVELY_KISS",
+      "policy": "presentation-rng.v1.frame-step.no-lag.battle-stride-2^20",
+      "provenance": "surrogate",
+      "pinnedProofs": [
+        "tools/integration/fixtures/r3-profile-live-receipt.json"
+      ],
+      "surrogateRoutes": [
+        "r3-profile/lovely-kiss (tests/animation/liveProfileMoveAdapters.test.ts)"
       ]
     }
   ],
