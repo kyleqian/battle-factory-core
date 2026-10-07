@@ -1,0 +1,43 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "PSYWAVE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-psywave-opponent-chimecho-player-onix.json",
+ "denseWindow": {
+  "startFrame": 211,
+  "endFrame": 415
+ },
+ "windowSource": "window = [activation, activation + 205 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": "event",
+ "attacker": {
+  "species": "SWABLU",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703907,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 117,
+  "playerMaxHp": 117,
+  "opponentHp": 127,
+  "opponentMaxHp": 138,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "player"
+  }
+ ]
+}

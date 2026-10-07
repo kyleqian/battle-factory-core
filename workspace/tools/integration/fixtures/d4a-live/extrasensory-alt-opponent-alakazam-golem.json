@@ -1,0 +1,41 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "EXTRASENSORY",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep25-extrasensory-alt-opponent-alakazam-golem.json",
+ "denseWindow": {
+  "startFrame": 85,
+  "endFrame": 246
+ },
+ "windowSource": "window = [activation, activation + 162 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": "event",
+ "timingPhases": {
+  "optional-lag-age": "event",
+  "scanline-split-line": "no-event"
+ },
+ "attacker": {
+  "species": "ALAKAZAM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 2027808500,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 187,
+  "playerMaxHp": 187,
+  "opponentHp": 162,
+  "opponentMaxHp": 162,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

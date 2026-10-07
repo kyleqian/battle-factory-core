@@ -10,6 +10,8 @@ import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS, LIVE_MOVE_TIMING_POLICY, LIVE_
 import { liveMachPunchInputs } from "../../src/engine/liveQ2Moves.ts";
 import { LIVE_MOVE_RANDOM2_PLANS } from "../../src/engine/liveMovePresentationRng.ts";
 import { meteorMashAtAge } from "../../src/animation/meteorMash.ts";
+import { extrasensoryAtAge } from "../../src/animation/extrasensory.ts";
+import { extrasensoryInputsFor } from "../../tools/compare/verifyExtrasensoryReducer.ts";
 import { random2Route } from "../../tools/integration/random2R1/routeHarness.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
@@ -141,6 +143,12 @@ describe("faithful-timing ordinary routes", () => {
     ["MEGAHORN 5/35 RHYDON", 224, 5, 35, 0 as const, 177, true],
     // D4b: r3ProfileRouteSearch.ts 279 3 1 4000 (first candidates: 61/7 PINSIR slot 3 declined, 75/14 and 170/14 QWILFISH active).
     ["REVENGE 75/14 QWILFISH", 279, 75, 14, 0 as const, 145, true],
+    // D4c: r3ProfileRouteSearch.ts 149 3 1 4000 (first candidates: 84/7 CHIMECHO active, 87/0 SPOINK active, 128/0 SPOINK no Psywave body).
+    ["PSYWAVE 84/7 CHIMECHO", 149, 84, 7, 0 as const, 205, true],
+    // D4c: r3ProfileRouteSearch.ts 326 4 1 4000 (first candidates: 9/35 EXPLOUD slot 3 active; 42/7 STANTLER declined: Intimidate's switch-in stat
+    // animation is an earlier unit, so the first-body scanline gate declines the whole body (scene-off view, logic unchanged); 75/35 EXPLOUD active).
+    ["EXTRASENSORY 9/35 EXPLOUD", 326, 9, 35, 3 as const, 161, true],
+    ["EXTRASENSORY 42/7 STANTLER (later body: scanline gate)", 326, 42, 7, 0 as const, 161, false],
   ])("route %s: body reached, following prompt reached, Scene ON/OFF parity", (_name, id, seed, streak, slot, ages, active) => {
     const on = generatedCommandAnimationReplay(seed, "on", [slot], streak);
     const off = generatedCommandAnimationReplay(seed, "off", [slot], streak);
@@ -396,4 +404,164 @@ describe("D4b Meteor Mash (309) faithful timing with D3", () => {
     expect(off.run.state.facilityState).toEqual(a.run.state.facilityState);
     expect(off.run.state.round.rules.rngValue).toBe(a.run.state.round.rules.rngValue);
   }, 240000);
+});
+
+// D4c faithful timing: Psywave (prep30 source model ported in livePsywaveInputs.ts + liveMoveOamAssembler.ts livePsywaveHardwareOamRows) with the
+// optional late lag at task row 185 from the policy. Receipt tools/integration/fixtures/d4c-live-receipt.json (d4aTimingCheck.ts).
+describe("D4c Psywave (149) faithful timing", () => {
+  const pw = NAMES.filter((n) => n.startsWith("psywave-"));
+  const receiptC = JSON.parse(readFileSync("tools/integration/fixtures/d4c-live-receipt.json", "utf8"));
+
+  it("is a faithful-timing adapter (never scoped exact / faithful random); 205 rows both sides; the status entry is the policy", () => {
+    expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).toContain(149);
+    expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).not.toContain(149);
+    expect(LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS).not.toContain(149);
+    expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[149]).toBe(0);
+    for (const attacker of [0, 1] as const) {
+      const base = { attacker, target: (1 - attacker) as 0 | 1, power: 1, damage: 10, friendship: 70, multihit: 0, turn: 0 };
+      expect(liveMoveAnimationDuration({ ...base, moveId: 149 })).toBe(205);
+    }
+    const entry = (status.faithfulTimingAdapters as { id: number; timingParameters: unknown[]; policyVersion: string; d3: boolean }[]).find((e) => e.id === 149)!;
+    expect(entry.timingParameters).toEqual(LIVE_MOVE_TIMING_POLICY[149]!.parameters.map(({ evidence: _evidence, ...p }) => p));
+    expect(entry.policyVersion).toBe(LIVE_MOVE_TIMING_POLICY_VERSION);
+    expect(entry.d3).toBe(false);
+    expect((status.implementedAdapters as { id: number }[]).some((e) => e.id === 149)).toBe(false);
+  });
+
+  it("the policy counts are the measured phases of the 6 dense windows (accepted, prep25 ALAKAZAM -> GOLEM, prep30 ESPEON -> CROBAT, both orientations)", () => {
+    expect(pw).toHaveLength(6);
+    const fx = pw.map(fixtureAt);
+    for (const side of ["player", "opponent"]) expect(fx.filter((f) => f.attacker.geometry.side === side)).toHaveLength(3);
+    const [lag] = LIVE_MOVE_TIMING_POLICY[149]!.parameters;
+    for (const f of fx) expect(f.denseWindow!.endFrame - f.denseWindow!.startFrame + 1).toBe(f.timingPhase === "event" ? 205 : 204);
+    expect(lag!.alternatives.map((a) => a.measured)).toEqual([fx.filter((f) => f.timingPhase === "event").length, fx.filter((f) => f.timingPhase === "no-event").length]);
+    expect([lag!.kind, lag!.age, lag!.chosen, lag!.tieRuleUsed]).toEqual(["optional-lag-age", 185, "event", false]);
+  });
+
+  it("the receipt: the 4 lag windows exact twice fresh (ESPEON -> CROBAT player row 0 too); the 2 no-lag windows only on the documented fade rows", () => {
+    const documented = (status.faithfulTimingAdapters as { id: number; alternatePhaseResidual: { ages: number[] } }[]).find((e) => e.id === 149)!.alternatePhaseResidual;
+    expect(documented.ages).toEqual(Array.from({ length: 16 }, (_, i) => 186 + i));
+    const rows = (receiptC.windows as { fixture: string; move: string; selectedPhase: boolean; window: number; expectedDuration: number; violations: string[];
+      runs: { residualPixels: number; digest: string; affectedAges: number[] }[] }[]).filter((r) => r.move === "PSYWAVE");
+    expect(rows.map((r) => r.fixture.replace(`${DIR}/`, "").replace(".json", "")).sort()).toEqual(pw);
+    for (const r of rows) {
+      expect(r.violations).toEqual([]);
+      expect(r.runs[1]!.digest).toBe(r.runs[0]!.digest);
+      if (r.selectedPhase) {
+        expect(r.runs.map((run) => run.residualPixels)).toEqual([0, 0]);
+        expect(r.window).toBe(r.expectedDuration);
+      } else {
+        expect(r.runs[0]!.affectedAges).toEqual(documented.ages);
+      }
+    }
+    expect(rows.filter((r) => r.selectedPhase)).toHaveLength(4);
+  });
+
+  it("gates: known lend required (first body and after a Tackle); declines with an unknown order and for a shiny battler", () => {
+    for (const name of ["psywave-player-luvdisc-opponent-onix", "psywave-opponent-swablu-player-onix"]) {
+      const f = fixtureAt(name);
+      const { view, effect } = effectOf(f);
+      const call = (order: unknown, field = view.field) => liveMoveAnimationPresentation(effect.request, field, 0, undefined, undefined, order as never);
+      const lend = effect.spriteOrderInput as { known: true; free: number[] };
+      expect(lend.known).toBe(true);
+      const presentation = call(lend);
+      expect(presentation).not.toBeNull();
+      expect((presentation!.config as any).move).toBe("PSYWAVE");
+      expect(call(undefined)).toBeNull();
+      expect(call({ known: false })).toBeNull();
+      const ot = 416049562, shiny = ((ot >>> 16) ^ (ot & 0xffff)) >>> 0;
+      for (const side of ["player", "opponent"] as const) expect(call(lend, { ...view.field, [side]: { ...view.field[side], personality: shiny } })).toBeNull();
+    }
+  });
+});
+
+// D4c faithful timing: Extrasensory (prep30 source model ported in liveExtrasensoryInputs.ts + liveMoveOamAssembler.ts liveExtrasensoryHardwareOamRows;
+// reducer distortion window from the targetYElevation input) with two CPU-phase parameters from the policy (late lag, scanout split).
+describe("D4c Extrasensory (326) faithful timing", () => {
+  const xs = NAMES.filter((n) => n.startsWith("extrasensory-"));
+  type XsFixture = D4Fixture & { timingPhases: Record<"optional-lag-age" | "scanline-split-line", "event" | "no-event"> };
+  const receiptC = JSON.parse(readFileSync("tools/integration/fixtures/d4c-live-receipt.json", "utf8"));
+
+  it("is a faithful-timing adapter (never scoped exact / faithful random); 161 rows both sides; the status entry is the policy", () => {
+    expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).toContain(326);
+    expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).not.toContain(326);
+    expect(LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS).not.toContain(326);
+    expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[326]).toBe(0);
+    for (const attacker of [0, 1] as const) {
+      const base = { attacker, target: (1 - attacker) as 0 | 1, power: 80, damage: 10, friendship: 70, multihit: 0, turn: 0 };
+      expect(liveMoveAnimationDuration({ ...base, moveId: 326 })).toBe(161);
+    }
+    const entry = (status.faithfulTimingAdapters as { id: number; timingParameters: unknown[]; policyVersion: string; d3: boolean }[]).find((e) => e.id === 326)!;
+    expect(entry.timingParameters).toEqual(LIVE_MOVE_TIMING_POLICY[326]!.parameters.map(({ evidence: _evidence, ...p }) => p));
+    expect(entry.policyVersion).toBe(LIVE_MOVE_TIMING_POLICY_VERSION);
+    expect(entry.d3).toBe(false);
+    expect((status.implementedAdapters as { id: number }[]).some((e) => e.id === 326)).toBe(false);
+  });
+
+  it("the policy counts are the measured phases of the 6 dense windows (accepted, prep25 ALAKAZAM -> GOLEM, prep30 ESPEON -> CROBAT, both orientations)", () => {
+    expect(xs).toHaveLength(6);
+    const fx = xs.map((n) => fixtureAt(n) as XsFixture);
+    for (const side of ["player", "opponent"]) expect(fx.filter((f) => f.attacker.geometry.side === side)).toHaveLength(3);
+    const [lag, split] = LIVE_MOVE_TIMING_POLICY[326]!.parameters;
+    for (const f of fx) expect(f.denseWindow!.endFrame - f.denseWindow!.startFrame + 1).toBe(f.timingPhases["optional-lag-age"] === "event" ? 162 : 161);
+    for (const [p, kind] of [[lag, "optional-lag-age"], [split, "scanline-split-line"]] as const) {
+      expect(p!.kind).toBe(kind);
+      expect(p!.alternatives.map((a) => a.measured)).toEqual([fx.filter((f) => f.timingPhases[kind] === "event").length, fx.filter((f) => f.timingPhases[kind] === "no-event").length]);
+      expect([p!.chosen, p!.tieRuleUsed]).toEqual(["no-event", false]);
+    }
+    // The split is measured on the opponent-target alternates only (player attackers vs GOLEM / CROBAT).
+    expect(fx.filter((f) => f.timingPhases["scanline-split-line"] === "event").map((f) => [f.attacker.geometry.side, f.target.species]).sort())
+      .toEqual([["player", "CROBAT"], ["player", "GOLEM"]]);
+  });
+
+  it("the receipt: policy-phase windows exact twice fresh; every other-phase window differs only on its documented rows", () => {
+    const documented = (status.faithfulTimingAdapters as { id: number; alternatePhaseResidual: { ages: number[]; windows: Record<string, { ages: number[]; pixels: number }> } }[])
+      .find((e) => e.id === 326)!.alternatePhaseResidual;
+    expect(documented.ages).toEqual(Array.from({ length: 16 }, (_, i) => 143 + i));
+    const rows = (receiptC.windows as { fixture: string; move: string; selectedPhase: boolean; window: number; expectedDuration: number; violations: string[];
+      runs: { residualPixels: number; digest: string; affectedAges: number[] }[] }[]).filter((r) => r.move === "EXTRASENSORY");
+    expect(rows.map((r) => r.fixture.replace(`${DIR}/`, "").replace(".json", "")).sort()).toEqual(xs);
+    for (const r of rows) {
+      const tag = r.fixture.replace(`${DIR}/`, "").replace(".json", "");
+      expect(r.violations).toEqual([]);
+      expect(r.runs[1]!.digest).toBe(r.runs[0]!.digest);
+      if (r.selectedPhase) {
+        expect(r.runs.map((run) => run.residualPixels)).toEqual([0, 0]);
+        expect(r.window).toBe(r.expectedDuration);
+      } else {
+        expect(r.runs[0]!.affectedAges).toEqual(documented.windows[tag]!.ages);
+        expect(r.runs[0]!.residualPixels).toBe(documented.windows[tag]!.pixels);
+      }
+    }
+    expect(rows.filter((r) => r.selectedPhase)).toHaveLength(3);
+    expect(documented.windows["extrasensory-alt-player-alakazam-golem"]!.pixels).toBe(1433);
+  });
+
+  it("the reducer's window is the target elevation input; absent = the accepted 8 / 48 windows (accepted corpora unchanged)", () => {
+    for (const [window, lower] of [["player-back", 8], ["opponent-front", 48]] as const) {
+      const input = extrasensoryInputsFor(window, undefined, 50);
+      expect(extrasensoryAtAge(50, input).distortion.lower).toBe(lower);
+      expect(extrasensoryAtAge(50, { ...input, targetYElevation: lower + 32 })).toEqual(extrasensoryAtAge(50, input));
+      const elevated = extrasensoryAtAge(50, { ...input, targetYElevation: 34 }).distortion;
+      expect([elevated.lower, elevated.upper]).toEqual([2, 66]);
+    }
+  });
+
+  it("gates: first body only (scanline history); declines with an unknown order, after an earlier body, for a shiny battler", () => {
+    const f = fixtureAt("extrasensory-alt-player-espeon-crobat");
+    const { view, effect } = effectOf(f);
+    const call = (order: unknown, field = view.field) => liveMoveAnimationPresentation(effect.request, field, 0, undefined, undefined, order as never);
+    const lend = effect.spriteOrderInput as { known: true; free: number[]; firstBody?: true };
+    expect(lend.known).toBe(true);
+    expect(lend.firstBody).toBe(true);
+    const presentation = call(lend);
+    expect(presentation).not.toBeNull();
+    expect((presentation!.config as any).move).toBe("EXTRASENSORY");
+    expect((presentation!.config as any).animationInputs.targetYElevation).toBe(34);
+    expect(call(undefined)).toBeNull();
+    expect(call({ known: false })).toBeNull();
+    expect(call({ ...lend, firstBody: undefined })).toBeNull();
+    const ot = 416049562, shiny = ((ot >>> 16) ^ (ot & 0xffff)) >>> 0;
+    for (const side of ["player", "opponent"] as const) expect(call(lend, { ...view.field, [side]: { ...view.field[side], personality: shiny } })).toBeNull();
+  });
 });

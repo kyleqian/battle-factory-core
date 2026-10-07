@@ -19,7 +19,7 @@ describe("live move timing policy (D4)", () => {
     for (const [id, entry] of Object.entries(LIVE_MOVE_TIMING_POLICY)) {
       expect(entry.move).toMatch(/^MOVE_/);
       for (const p of entry.parameters) {
-        expect(["optional-lag-age", "bg-write-row", "palette-transfer-row"]).toContain(p.kind);
+        expect(["optional-lag-age", "bg-write-row", "palette-transfer-row", "scanline-split-line"]).toContain(p.kind);
         const dominant = dominantLiveMoveTimingPhase(p.alternatives);
         expect([id, p.chosen, p.tieRuleUsed]).toEqual([id, dominant.phase, dominant.tie]);
         expect(p.evidence.length).toBeGreaterThan(0);
@@ -71,5 +71,8 @@ describe("live move timing policy (D4)", () => {
     expect(liveMoveBgWriteRow(279)).toBe(5);
     expect(liveMoveOptionalLagAge(279)).toBeNull();
     expect([liveMoveOptionalLagAge(309), liveMoveTimingBodyRows(309), liveMoveBgWriteRow(309)]).toEqual([195, 215, null]);
+    expect([liveMoveOptionalLagAge(149), liveMoveTimingBodyRows(149), liveMoveBgWriteRow(149)]).toEqual([185, 205, null]);
+    expect([liveMoveOptionalLagAge(326), liveMoveTimingBodyRows(326), liveMoveBgWriteRow(326)]).toEqual([null, 161, null]);
+    expect(liveMoveTimingParameter(326, "scanline-split-line")!.chosen).toBe("no-event");
   });
 });

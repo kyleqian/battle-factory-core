@@ -9,11 +9,17 @@ import { join } from "node:path";
 import { verifyLiveAdapterFramebuffer } from "./liveAdapterFramebuffer.ts";
 import { LIVE_MOVE_TIMING_POLICY, type LiveMoveTimingParameterKind, type LiveMoveTimingPhase } from "../../src/engine/liveMoveTimingPolicy.ts";
 
-const IDS: Record<string, number> = { MACH_PUNCH: 183, NIGHTMARE: 171, MEGAHORN: 224, REVENGE: 279, METEOR_MASH: 309 };
+const IDS: Record<string, number> = { MACH_PUNCH: 183, NIGHTMARE: 171, MEGAHORN: 224, REVENGE: 279, METEOR_MASH: 309, PSYWAVE: 149, EXTRASENSORY: 326 };
 const [outPath, ...paths] = process.argv.slice(2);
 const status = JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8"));
-const documented = (id: number): number[] | null =>
-  (status.faithfulTimingAdapters as { id: number; alternatePhaseResidual?: { ages?: number[] } }[]).find((e) => e.id === id)?.alternatePhaseResidual?.ages ?? null;
+// A move whose other-phase residual differs per window (D4c Extrasensory: the scanout split) documents it per fixture
+// (alternatePhaseResidual.windows[fixture basename].ages); otherwise the move-level ages apply.
+const documented = (id: number, fixture: string): number[] | null => {
+  const r = (status.faithfulTimingAdapters as { id: number; alternatePhaseResidual?: { ages?: number[]; windows?: Record<string, { ages: number[] }> } }[])
+    .find((e) => e.id === id)?.alternatePhaseResidual;
+  const tag = fixture.split("/").pop()!.replace(/\.json$/, "");
+  return r?.windows?.[tag]?.ages ?? r?.ages ?? null;
+};
 const out: Record<string, unknown>[] = [];
 let failed = false;
 for (const path of paths) {
@@ -33,7 +39,7 @@ for (const path of paths) {
       affectedAges: affected.map((row) => row.age), maxPixelsPerRow: Math.max(0, ...affected.map((row) => row.residualPixels)) };
   });
   const selected = parameters.every((p) => measured[p.kind] === p.chosen);
-  const doc = documented(id);
+  const doc = documented(id, path);
   const run0 = runs[0]!;
   const violations: string[] = [];
   if (runs.some((r) => r.digest !== run0.digest)) violations.push("fresh runs differ");

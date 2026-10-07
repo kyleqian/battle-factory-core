@@ -3860,7 +3860,7 @@
     },
     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
   },
-  "faithfulTimingCount": 4,
+  "faithfulTimingCount": 6,
   "faithfulTimingAdapters": [
     {
       "id": 183,
@@ -4117,6 +4117,306 @@
         "python3 tools/integration/d4aScenarios.py && sh tools/integration/prep22Probes.sh PROBEDIR 1 mechanic-meteor-mash-player-metang-opponent-onix mechanic-meteor-mash-opponent-metang-player-onix prep12-meteor-mash-alt-shiftry-golem d4a-meteor-mash-extra-player-metagross-golbat d4a-meteor-mash-extra-opponent-metagross-golbat",
         "python3 tools/integration/d4aFixtures.py PROBEDIR METEOR_MASH",
         "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/d4a-live/meteor-mash-*.json",
+        "npx vitest run tests/animation/liveFaithfulTimingAdapters.test.ts tests/animation/liveMoveTimingPolicy.test.ts"
+      ]
+    },
+    {
+      "id": 149,
+      "move": "MOVE_PSYWAVE",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 185,
+          "fixedLagAges": [],
+          "iterations": 204,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 205,
+              "measured": 4
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 204,
+              "measured": 2
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          186,
+          187,
+          188,
+          189,
+          190,
+          191,
+          192,
+          193,
+          194,
+          195,
+          196,
+          197,
+          198,
+          199,
+          200,
+          201
+        ],
+        "rows": 16,
+        "maxPixelsPerRow": 18618,
+        "cause": "the optional lag at task row 185 splits restorebg's Fade 2 (VRAM restore row 184, palette restore 185, registers >= 187 one row later): a no-lag window equals the policy body one row earlier on the BLDY fade rows 186..201; rows 0..185 and 202..203 are exact (ALAKAZAM -> GOLEM opponent and ESPEON -> CROBAT opponent, 2 of 6 windows)"
+      },
+      "d3": false,
+      "evidence": [
+        "tools/integration/fixtures/d4c-live-receipt.json",
+        "tools/integration/fixtures/d4a-live/psywave-*.json (6 dense windows, both orientations: accepted LUVDISC -> ONIX (first body) / SWABLU -> ONIX (after a Tackle), prep25 ALAKAZAM -> GOLEM, prep30 ESPEON -> CROBAT (elevated opponent))",
+        "docs/next-adapters-prep30.md s0.2 / s2.5 + tools/integration/fixtures/prep30/psywave-check.json: the lag in 4 of 6 windows (re-measured by the D4c probes: identical)",
+        "row-0 elevated-opponent shadow (prep30 s2.4): drawn by the live #142 hook (liveMoveAnimation.ts LIVE_MOVE_OPPONENT_SHADOW_ROW[149] = 0) whichever role the opponent has; the staged branch's attacker-only age-0 rule is not used live (suppressAdHoc); ESPEON -> CROBAT player row 0 is 0 px",
+        "tests/animation/liveFaithfulTimingAdapters.test.ts (D4c Psywave: registration, dense receipt, gates, ordinary route Scene ON/OFF parity)"
+      ],
+      "proofCommands": [
+        "sh tools/integration/prep22Probes.sh PROBEDIR 1 mechanic-psywave-player-spoink-opponent-onix mechanic-psywave-opponent-chimecho-player-onix prep25-psywave-alt-player-alakazam-golem prep25-psywave-alt-opponent-alakazam-golem prep30-psywave-alt-player-espeon-crobat prep30-psywave-alt-opponent-espeon-crobat",
+        "python3 tools/integration/d4aFixtures.py PROBEDIR PSYWAVE",
+        "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/d4a-live/psywave-*.json",
+        "npx vitest run tests/animation/liveFaithfulTimingAdapters.test.ts tests/animation/liveMoveTimingPolicy.test.ts"
+      ]
+    },
+    {
+      "id": 326,
+      "move": "MOVE_EXTRASENSORY",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 142,
+          "fixedLagAges": [
+            122,
+            123
+          ],
+          "iterations": 161,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 162,
+              "measured": 2
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 161,
+              "measured": 4
+            }
+          ],
+          "chosen": "no-event",
+          "tieRuleUsed": false
+        },
+        {
+          "kind": "scanline-split-line",
+          "age": 0,
+          "fixedLagAges": [],
+          "iterations": 161,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 161,
+              "measured": 2
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 161,
+              "measured": 4
+            }
+          ],
+          "chosen": "no-event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          143,
+          144,
+          145,
+          146,
+          147,
+          148,
+          149,
+          150,
+          151,
+          152,
+          153,
+          154,
+          155,
+          156,
+          157,
+          158
+        ],
+        "rows": 16,
+        "maxPixelsPerRow": 18334,
+        "cause": "optional-lag-age: the lag at task row 142 holds restorebg's Fade 2 one row (palette restore 142, registers >= 143): a lag window under the no-lag policy differs on the BLDY rows 143..158; scanline-split-line: per window (windows), the opponent-target alternates' measured scanout residual on the target's top lines of the displayed distortion rows",
+        "windows": {
+          "extrasensory-alt-opponent-alakazam-golem": {
+            "ages": [
+              143,
+              144,
+              145,
+              146,
+              147,
+              148,
+              149,
+              150,
+              151,
+              152,
+              153,
+              154,
+              155,
+              156,
+              157,
+              158
+            ],
+            "rows": 16,
+            "pixels": 293344,
+            "maxPixelsPerRow": 18334,
+            "cause": "optional-lag-age only (lag window under the no-lag policy): restore Fade 2's BLDY one row early on 143..158"
+          },
+          "extrasensory-alt-player-alakazam-golem": {
+            "ages": [
+              43,
+              61,
+              70,
+              95,
+              97,
+              98,
+              99,
+              100,
+              101,
+              102,
+              103,
+              104,
+              105,
+              106,
+              107,
+              108,
+              109,
+              110,
+              114,
+              115,
+              116,
+              117
+            ],
+            "rows": 22,
+            "pixels": 1433,
+            "maxPixelsPerRow": 151,
+            "cause": "scanline-split-line only (prep30 s1.4): the distortion task rewrites both scanline buffers while the frame is scanned out; GOLEM's lines 18..28 above the beam still show the previous row's buffer on displayed distortion rows (no constant split line is exact; prep30 best constant 1433 px)"
+          },
+          "extrasensory-alt-player-espeon-crobat": {
+            "ages": [
+              43,
+              44,
+              45,
+              46,
+              47,
+              48,
+              49,
+              50,
+              51,
+              52,
+              53,
+              54,
+              55,
+              56,
+              57,
+              58,
+              59,
+              60,
+              61,
+              62,
+              63,
+              64,
+              65,
+              69,
+              70,
+              71,
+              72,
+              73,
+              74,
+              75,
+              76,
+              77,
+              78,
+              79,
+              80,
+              81,
+              82,
+              83,
+              84,
+              85,
+              86,
+              87,
+              88,
+              89,
+              90,
+              91,
+              95,
+              96,
+              97,
+              98,
+              99,
+              100,
+              101,
+              102,
+              103,
+              104,
+              105,
+              106,
+              107,
+              108,
+              109,
+              110,
+              111,
+              112,
+              113,
+              114,
+              115,
+              116,
+              117,
+              143,
+              144,
+              145,
+              146,
+              147,
+              148,
+              149,
+              150,
+              151,
+              152,
+              153,
+              154,
+              155,
+              156,
+              157,
+              158
+            ],
+            "rows": 85,
+            "pixels": 306721,
+            "maxPixelsPerRow": 18473,
+            "cause": "both parameters: the scanout split on CROBAT's lines 3..18 of the displayed distortion rows (prep30 s1.4: 11551 px at S = 0, the row-98 source-fitted split cannot be exact for an elevated target) + the lag window's restore fade one row early on 143..158"
+          }
+        }
+      },
+      "d3": false,
+      "evidence": [
+        "tools/integration/fixtures/d4c-live-receipt.json",
+        "tools/integration/fixtures/d4a-live/extrasensory-*.json (6 dense windows, both orientations, all first bodies: accepted NUZLEAF -> SHUCKLE, prep25 ALAKAZAM -> GOLEM, prep30 ESPEON -> CROBAT (elevated opponent: distortion window 2..66 from the reducer's targetYElevation input))",
+        "docs/next-adapters-prep30.md s0.2 / s1.4 / s1.5 + tools/integration/fixtures/prep30/extrasensory-{check,pixels,split}.json (lag in 2 of 6; split residual in 2 of 6; re-measured by the D4c probes: identical rows / pixels)",
+        "scanline history gate: the entry buffers are the first-body battle-intro residue (the Dig / Rapid Spin S0 constant); liveMoveAnimation.ts case 326 requires spriteOrderInput.firstBody (a later body declines: an earlier scanline body may have left other buffers)",
+        "tests/animation/liveFaithfulTimingAdapters.test.ts (D4c Extrasensory: registration, dense receipt, reducer default window pin, gates, ordinary route Scene ON/OFF parity)"
+      ],
+      "proofCommands": [
+        "sh tools/integration/prep22Probes.sh PROBEDIR 1 mechanic-extrasensory-player-nuzleaf-opponent-shuckle mechanic-extrasensory-opponent-nuzleaf-player-shuckle prep25-extrasensory-alt-player-alakazam-golem prep25-extrasensory-alt-opponent-alakazam-golem prep30-extrasensory-alt-player-espeon-crobat prep30-extrasensory-alt-opponent-espeon-crobat",
+        "python3 tools/integration/d4aFixtures.py PROBEDIR EXTRASENSORY",
+        "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/d4a-live/extrasensory-*.json",
         "npx vitest run tests/animation/liveFaithfulTimingAdapters.test.ts tests/animation/liveMoveTimingPolicy.test.ts"
       ]
     }

@@ -75,6 +75,11 @@ export interface ExtrasensoryLiveInputs {
   readonly animationRng: number;
   readonly gameplayRng: unknown;
   readonly gameplayState: unknown;
+  /**
+   * GetBattlerYCoordWithElevation(target) (AnimTask_ExtrasensoryDistortion: lines max(0, y - 32) .. y + 32). Absent = the accepted corpora's
+   * unelevated windows (opponent target 40 -> 8..72, player target 80 -> 48..112); the live provider passes the species elevation.
+   */
+  readonly targetYElevation?: number;
 }
 
 export interface ExtrasensoryTask {
@@ -166,15 +171,21 @@ function stageAt(age: number): Readonly<{ stage: 0 | 1 | 2; start: number; step:
   return null;
 }
 
+/** The distortion window (task data[14] / data[15]): GetBattlerYCoordWithElevation(target) -+ 32, the lower bound clamped at 0. */
+function distortionWindow(input: Readonly<ExtrasensoryLiveInputs>): Readonly<{ lower: number; upper: number }> {
+  const y = input.targetYElevation ?? (input.targetSide === "opponent" ? 40 : 80);
+  return { lower: Math.max(0, y - 32), upper: y + 32 };
+}
+
 function distortionData(age: number, input: Readonly<ExtrasensoryLiveInputs>): readonly number[] | null {
   const stage = stageAt(age);
   if (!stage) return null;
   const local = age - stage.start;
   const phase = local <= 22 ? 0 : local === 23 ? 1 : 2;
   const base = input.targetSide === "opponent" ? -144 : -40;
-  const lower = input.targetSide === "opponent" ? 8 : 48;
+  const { lower, upper } = distortionWindow(input);
   return data16([phase, Math.min(24, local + 1), 0, 0, 0, 0, 0, 0, 0, 0,
-    base, stage.step, stage.shift, stage.phase, lower, lower + 64]);
+    base, stage.step, stage.shift, stage.phase, lower, upper]);
 }
 
 function blendData(age: number, input: Readonly<ExtrasensoryLiveInputs>): readonly number[] | null {
@@ -205,14 +216,14 @@ function sharedTask(slot: number, callback: string, role: string,
 function generatedScanline(age: number, input: Readonly<ExtrasensoryLiveInputs>): readonly number[] {
   const stage = stageAt(age);
   const base = input.targetSide === "opponent" ? -144 : -40;
-  const lower = input.targetSide === "opponent" ? 8 : 48;
+  const { lower, upper } = distortionWindow(input);
   const result = Array(160).fill(base) as number[];
   if (!stage) return result;
   let sineIndex = stage.phase;
   // The scanline buffer is written with data[1] before the callback's
   // terminal pre-increment reflected by the retained task row.
   const phase = Math.min(23, age - stage.start);
-  for (let y = lower; y <= lower + 64; y += 1) {
+  for (let y = lower; y <= upper; y += 1) {
     // The ROM table carries the first quadrant again through index 319;
     // the stage-1 terminal sample at 320 reads the following zero word.
     const sine = sineIndex < 320 ? GBA_SINE_TABLE_256[sineIndex & 0xff]! : 0;
@@ -281,8 +292,8 @@ export function extrasensoryAtAge(age: number, input: Readonly<ExtrasensoryLiveI
     distortion: {
       active: stage !== null, stage: stage?.stage ?? null,
       displayed: displayedStage !== null,
-      lower: input.targetSide === "opponent" ? 8 : 48,
-      upper: input.targetSide === "opponent" ? 72 : 112,
+      lower: distortionWindow(input).lower,
+      upper: distortionWindow(input).upper,
       baseHofs: input.targetSide === "opponent" ? -144 : -40,
       sourceScanlineHofs: generatedScanline(age, input),
       scanlineHofs: displayedStage ? displayedScanline : precedingScanline,

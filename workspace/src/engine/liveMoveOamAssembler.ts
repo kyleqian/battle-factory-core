@@ -646,3 +646,172 @@ export function liveRevengeHardwareOamRows(input: LiveRevengeOamInputs): { oam: 
   }
   return { oam, matrices };
 }
+
+/**
+ * Move_PSYWAVE (docs/next-adapters-prep30.md s2; ported from tools/integration/prep30PsywaveModel.ts psywaveRings / ringState /
+ * assemblePsywaveHardwareOam): 12 BLUE_RING sprites born on rows 42 + 6k, 29 rows each, slots / matrices lowest-free over the source
+ * lifetimes; AnimToTargetInSinWave (InitAnimLinearTranslation 30 steps with u16 accumulators + Sin(data6 >> 8, +-16), data6 += 0xD200 / 30
+ * with the > 127 wrap, phase seed gBattleAnimArgs[7] = 3 * (birth - 42)); two callback steps on the birth row; gGrowingRingAffineAnims
+ * scale 0x20 + 7 (a + 1), matrix 0x10000 / scale. Ring fields are callback / affine-anim driven: OAM row r = sprite state r - 1.
+ * Subpriority = target subpriority - 3 (createsprite ANIM_TARGET, 3).
+ */
+export const PSYWAVE_RING_BIRTHS: readonly number[] = Object.freeze(Array.from({ length: 12 }, (_, i) => 42 + 6 * i));
+const PSYWAVE_RING_LIFE = 29, PSYWAVE_TIMER = 42;
+export interface LivePsywaveRingState {
+  readonly idx: number; readonly slot: number; readonly matrix: number;
+  readonly x: number; readonly y: number; readonly x2: number; readonly y2: number;
+  readonly data: readonly number[]; readonly scale: number; readonly pa: number;
+}
+type PsywaveRingLife = { idx: number; birth: number; slot: number; matrix: number };
+function psywaveRingLives(occupied: readonly number[], freeMatrices: readonly number[]): PsywaveRingLife[] {
+  const out: PsywaveRingLife[] = [];
+  for (const [idx, birth] of PSYWAVE_RING_BIRTHS.entries()) {
+    const alive = out.filter((o) => o.birth + PSYWAVE_RING_LIFE > birth), used = new Set([...occupied, ...alive.map((o) => o.slot)]);
+    const busy = new Set(alive.map((o) => o.matrix));
+    let slot = 0; while (used.has(slot)) slot += 1;
+    out.push({ idx, birth, slot, matrix: freeMatrices.find((m) => !busy.has(m))! });
+  }
+  return out;
+}
+function psywaveRingState(ring: PsywaveRingLife, r: number, origin: Point, dest: Point, sine: readonly number[]): LivePsywaveRingState | null {
+  const a = r - ring.birth; if (a < 0 || a >= PSYWAVE_RING_LIFE) return null;
+  const { x, y } = origin, dx = dest.x - x, dy = dest.y - y;
+  let xd = Math.floor((Math.abs(dx) << 8) / 30) & 0xffff, yd = Math.floor((Math.abs(dy) << 8) / 30) & 0xffff;
+  xd = dx < 0 ? xd | 1 : xd & ~1; yd = dy < 0 ? yd | 1 : yd & ~1;
+  const args7 = 3 * (ring.birth - PSYWAVE_TIMER) & 0xff;
+  let d6 = args7 > 127 ? (args7 - 127) * 256 : args7 * 256, d7 = args7 > 127 ? -16 : 16;
+  let xa = 0, ya = 0, x2 = 0, y2 = 0; const steps = a + 2;
+  for (let s = 0; s < steps; s += 1) {
+    xa = xa + xd & 0xffff; ya = ya + yd & 0xffff; x2 = xd & 1 ? -(xa >> 8) : xa >> 8; y2 = yd & 1 ? -(ya >> 8) : ya >> 8;
+    y2 += (sine[(d6 >> 8) & 0xff]! * d7) >> 8;
+    if ((d6 + 1792) >> 8 > 127) { d6 = 0; d7 = -d7; } else d6 += 1792;
+  }
+  const scale = 32 + 7 * (a + 1);
+  return { idx: ring.idx, slot: ring.slot, matrix: ring.matrix, x, y, x2, y2,
+    data: [30 - steps, xd, yd, xa << 16 >> 16, ya << 16 >> 16, 1792, d6 << 16 >> 16, d7], scale, pa: Math.floor(65536 / scale) };
+}
+export interface LivePsywaveOamInputs {
+  readonly attacker: LiveOamBattler;
+  readonly target: LiveOamBattler;
+  /** InitSpritePosToAnimAttacker origin (attacker X_2 +-10, Y_PIC_OFFSET + 10) and the target X_2 / Y_PIC_OFFSET destination. */
+  readonly origin: Point;
+  readonly dest: Point;
+  readonly scene: LiveOamScene;
+  /** Known-entry allocator: BLUE_RING tile base and palette slot, the free matrices. */
+  readonly ringTileBase: number;
+  readonly ringPaletteSlot: number;
+  readonly freeMatrices: readonly number[];
+  readonly occupiedSlots: readonly number[];
+  readonly activationOrder: readonly number[];
+  readonly sort: LiveSpriteOrderSort;
+  /** GBA_SINE_TABLE_256 (battleMenu.ts gSineTable[0..255]). */
+  readonly sine: readonly number[];
+  readonly rows: number;
+}
+export const livePsywaveRingAttr = (s: LivePsywaveRingState, tileBase: number, paletteSlot: number): OamAttr =>
+  [0x8000 | 0x0300 | (s.y + s.y2 - 32) & 0xff, 0x8000 | s.matrix << 9 | (s.x + s.x2 - 16) & 0x1ff, tileBase | 2 << 10 | paletteSlot << 12];
+export function livePsywaveHardwareOamRows(input: LivePsywaveOamInputs): {
+  oam: string[][]; matrices: (readonly [number, number, number, number])[][]; orders: number[][]; rings: LivePsywaveRingState[][];
+  allocations: readonly Readonly<{ slot: number; matrixNum: number; sourceCreationOrder: number }>[];
+} {
+  const lives = psywaveRingLives(input.occupiedSlots, input.freeMatrices);
+  const ringSub = input.target.subpriority - 3;
+  const ringsAt = (state: number): LivePsywaveRingState[] => state < 0 ? []
+    : lives.map((l) => psywaveRingState(l, state, input.origin, input.dest, input.sine)).filter((s): s is LivePsywaveRingState => s !== null);
+  const spritesAt = (rings: readonly LivePsywaveRingState[]): LiveOamSprite[] => {
+    const out: LiveOamSprite[] = input.scene.occupants.map((o) => ({ ...o, oamY: o.attr[0] & 0xff }));
+    for (const b of [input.attacker, input.target]) out.push({ ...b, visible: true, oamY: b.attr[0] & 0xff });
+    for (const s of rings) {
+      const attr = livePsywaveRingAttr(s, input.ringTileBase, input.ringPaletteSlot);
+      out.push({ slot: s.slot, attr, subpriority: ringSub, visible: true, oamY: attr[0] & 0xff });
+    }
+    return out;
+  };
+  const matricesOf = (rings: readonly LivePsywaveRingState[]): (readonly [number, number, number, number])[] => {
+    const m = Array.from({ length: 32 }, () => IDENTITY as readonly [number, number, number, number]);
+    for (const s of rings) m[s.matrix] = [s.pa, 0, 0, s.pa];
+    return m;
+  };
+  const oam: string[][] = [], matrices: (readonly [number, number, number, number])[][] = [], orders: number[][] = [], rings: LivePsywaveRingState[][] = [];
+  let order: readonly number[] = input.activationOrder;
+  let previousRings: LivePsywaveRingState[] = [], previous = spritesAt(previousRings);
+  for (let row = 0; row < input.rows; row += 1) {
+    const m = matricesOf(previousRings);
+    oam.push(buildLiveHardwareOam(order, previous, input.scene.healthbox, m));
+    matrices.push(m);
+    previousRings = ringsAt(row);
+    rings.push(previousRings);
+    previous = spritesAt(previousRings);
+    order = carryLiveSpriteOrder(order, previous, input.sort);
+    orders.push([...order]);
+  }
+  return { oam, matrices, orders, rings, allocations: lives.map((l) => ({ slot: l.slot, matrixNum: l.matrix, sourceCreationOrder: l.idx })) };
+}
+
+/**
+ * Move_EXTRASENSORY (docs/next-adapters-prep30.md s1; ported from tools/integration/prep30ExtrasensoryModel.ts cloneStep /
+ * assembleExtrasensoryHardwareOam): the battlers (the target is on the monbg for OAM rows 41..120), the CloneBattlerSpriteWithBlend clone
+ * (attacker attrs, double affine, blend, corner -64) on OAM rows 95..119 whose scale / y2 are written by AnimTask_TransparentCloneGrowAndShrink:
+ * BuildOamBuffer precedes RunTasks, so OAM row r carries task step r - 2 (row 95: y2 0, identity). Clone subpriority = attacker + 1.
+ */
+export const EXTRASENSORY_CLONE_FIRST = 94, EXTRASENSORY_MONBG = 39, EXTRASENSORY_CLEAR = 120;
+/** AnimTask_TransparentCloneGrowAndShrink_Step task step j (row 94 + j): scale 256 - sin(4j) >> 1; SetBattlerSpriteYOffsetFromOtherYScale y2. */
+export function liveExtrasensoryCloneStep(j: number, pictureHeight: number, sine: readonly number[]): { angle: number; state: number; scale: number; y2: number } {
+  const angle = j <= 11 ? 4 * (j + 1) : j <= 23 ? 4 * (23 - j) : 0, state = j <= 10 ? 0 : j <= 22 ? 1 : j === 23 ? 2 : 3;
+  const scale = 256 - (sine[angle]! >> 1), v = pictureHeight, v2 = Math.min(Math.trunc((v << 8) / scale), 128);
+  return { angle, state, scale, y2: Math.trunc((v - v2) / 2) };
+}
+export interface LiveExtrasensoryOamInputs {
+  readonly attacker: LiveOamBattler;
+  readonly target: LiveOamBattler;
+  /** The attacker's sprite position (gSprites x / y, no idle rest) and picture height 64 - 2 y_offset. */
+  readonly attackerPosition: Point;
+  readonly attackerPictureHeight: number;
+  readonly scene: LiveOamScene;
+  /** Lowest free sprite slot / matrix at the known entry. */
+  readonly cloneSlot: number;
+  readonly cloneMatrix: number;
+  readonly activationOrder: readonly number[];
+  readonly sort: LiveSpriteOrderSort;
+  readonly sine: readonly number[];
+  readonly rows: number;
+}
+export function liveExtrasensoryHardwareOamRows(input: LiveExtrasensoryOamInputs): {
+  oam: string[][]; matrices: (readonly [number, number, number, number])[][]; orders: number[][];
+} {
+  const { attacker, target } = input, a = attacker.attr;
+  const cloneAt = (row: number): { attr: OamAttr; scale: number } | null => {
+    if (row < EXTRASENSORY_CLONE_FIRST + 1 || row > EXTRASENSORY_CLONE_FIRST + 25) return null;
+    const j = row - 2 - EXTRASENSORY_CLONE_FIRST;
+    const st = j < 0 ? { scale: 256, y2: 0 } : liveExtrasensoryCloneStep(j, input.attackerPictureHeight, input.sine);
+    return { scale: st.scale, attr: [a[0] & 0xc000 | 0x0700 | (input.attackerPosition.y + st.y2 - 64) & 0xff,
+      a[1] & 0xc000 | input.cloneMatrix << 9 | (input.attackerPosition.x - 64) & 0x1ff, a[2]] };
+  };
+  // Sprite state s is what OAM row s + 1 shows.
+  const spritesAt = (state: number): LiveOamSprite[] => {
+    const out: LiveOamSprite[] = input.scene.occupants.map((o) => ({ ...o, oamY: o.attr[0] & 0xff }));
+    out.push({ ...attacker, visible: true, oamY: attacker.attr[0] & 0xff });
+    const row = state + 1;
+    out.push({ ...target, visible: row < EXTRASENSORY_MONBG + 2 || row > EXTRASENSORY_CLEAR, oamY: target.attr[0] & 0xff });
+    const clone = cloneAt(row);
+    if (clone) out.push({ slot: input.cloneSlot, attr: clone.attr, subpriority: attacker.subpriority + 1, visible: true, oamY: clone.attr[0] & 0xff });
+    return out;
+  };
+  const matricesAt = (row: number): (readonly [number, number, number, number])[] => {
+    const m = Array.from({ length: 32 }, () => IDENTITY as readonly [number, number, number, number]);
+    const clone = cloneAt(row); if (clone) m[input.cloneMatrix] = [clone.scale, 0, 0, clone.scale];
+    return m;
+  };
+  const oam: string[][] = [], matrices: (readonly [number, number, number, number])[][] = [], orders: number[][] = [];
+  let order: readonly number[] = input.activationOrder;
+  let previous = spritesAt(-1);
+  for (let row = 0; row < input.rows; row += 1) {
+    const m = matricesAt(row);
+    oam.push(buildLiveHardwareOam(order, previous, input.scene.healthbox, m));
+    matrices.push(m);
+    previous = spritesAt(row);
+    order = carryLiveSpriteOrder(order, previous, input.sort);
+    orders.push([...order]);
+  }
+  return { oam, matrices, orders };
+}

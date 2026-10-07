@@ -39,15 +39,17 @@
    "MOVE_WATER_PULSE",
    "MOVE_WISH"
   ],
-  "faithfulTiming": 4,
+  "faithfulTiming": 6,
   "faithfulTimingMoves": [
+   "MOVE_EXTRASENSORY",
    "MOVE_MACH_PUNCH",
    "MOVE_MEGAHORN",
    "MOVE_METEOR_MASH",
+   "MOVE_PSYWAVE",
    "MOVE_REVENGE"
   ],
   "inFlight": 0,
-  "remaining": 14,
+  "remaining": 12,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
@@ -55,14 +57,14 @@
   "weightPct": {
    "live": 93.593,
    "faithfulRandom": 3.761,
-   "faithfulTiming": 0.722,
+   "faithfulTiming": 0.906,
    "inFlight": 0,
-   "remaining": 1.437
+   "remaining": 1.252
   },
   "remainingByGroup": {
    "MULTI": {
-    "moves": 11,
-    "weightPct": 1.065
+    "moves": 9,
+    "weightPct": 0.88
    },
    "OUT": {
     "moves": 1,
@@ -75,13 +77,13 @@
   },
   "remainingByHostClass": {
    "H_BASIC": 1,
-   "H_BUFFER": 11,
+   "H_BUFFER": 9,
    "H_DERIVED": 2,
    "H_VARIANT": 3
   },
-  "orderFirstBodyOnlyMoves": 9,
-  "slotPlanNeededMoves": 11,
-  "sumsTo": "246+12+4+0+14=276",
+  "orderFirstBodyOnlyMoves": 7,
+  "slotPlanNeededMoves": 9,
+  "sumsTo": "246+12+6+0+12=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -160,8 +162,8 @@
    "aloneNames": [
     "MEMENTO"
    ],
-   "touchingMoves": 2,
-   "touchingWeightPct": 0.148,
+   "touchingMoves": 1,
+   "touchingWeightPct": 0.037,
    "meta": null
   },
   {
@@ -181,8 +183,8 @@
    "aloneNames": [
     "MEMENTO"
    ],
-   "touchingMoves": 11,
-   "touchingWeightPct": 0.915,
+   "touchingMoves": 9,
+   "touchingWeightPct": 0.73,
    "meta": {
     "cost": "new large host (docs/animation-integration-readiness.md A6)",
     "claim": "only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today"
@@ -197,8 +199,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 11,
-   "touchingWeightPct": 1.065,
+   "touchingMoves": 9,
+   "touchingWeightPct": 0.88,
    "meta": {
     "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
     "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
@@ -213,8 +215,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 10,
-   "touchingWeightPct": 0.878,
+   "touchingMoves": 8,
+   "touchingWeightPct": 0.693,
    "meta": {
     "cost": "extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves)",
     "claim": "exact for audited plan rows from a known entry; actual status animations/switches invalidate"
@@ -229,8 +231,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 10,
-   "touchingWeightPct": 0.878,
+   "touchingMoves": 8,
+   "touchingWeightPct": 0.693,
    "meta": null
   },
   {
@@ -242,8 +244,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 9,
-   "touchingWeightPct": 0.844,
+   "touchingMoves": 7,
+   "touchingWeightPct": 0.659,
    "meta": null
   },
   {
@@ -255,8 +257,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 7,
-   "touchingWeightPct": 0.625,
+   "touchingMoves": 5,
+   "touchingWeightPct": 0.44,
    "meta": null
   },
   {
@@ -268,8 +270,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 4,
-   "touchingWeightPct": 0.508,
+   "touchingMoves": 2,
+   "touchingWeightPct": 0.324,
    "meta": null
   },
   {
@@ -281,8 +283,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 6,
-   "touchingWeightPct": 0.546,
+   "touchingMoves": 4,
+   "touchingWeightPct": 0.361,
    "meta": null
   },
   {
@@ -434,15 +436,13 @@
   {
    "step": 5,
    "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
-   "newMoves": 7,
-   "newWeightPct": 0.554,
-   "cumulativeRemainingUnlocked": 10,
+   "newMoves": 5,
+   "newWeightPct": 0.369,
+   "cumulativeRemainingUnlocked": 8,
    "newNames": [
     "ERUPTION",
-    "EXTRASENSORY",
     "FLATTER",
     "NIGHTMARE",
-    "PSYWAVE",
     "SHOCK_WAVE",
     "SUPERPOWER"
    ]
@@ -452,7 +452,7 @@
    "provider": "X-DISABLE",
    "newMoves": 2,
    "newWeightPct": 0.147,
-   "cumulativeRemainingUnlocked": 12,
+   "cumulativeRemainingUnlocked": 10,
    "newNames": [
     "ICE_BALL",
     "SPIT_UP"
@@ -463,7 +463,7 @@
    "provider": "X-TWOTURN",
    "newMoves": 1,
    "newWeightPct": 0.187,
-   "cumulativeRemainingUnlocked": 13,
+   "cumulativeRemainingUnlocked": 11,
    "newNames": [
     "DIVE"
    ]
@@ -473,7 +473,7 @@
    "provider": "E-OUT",
    "newMoves": 1,
    "newWeightPct": 0.176,
-   "cumulativeRemainingUnlocked": 14,
+   "cumulativeRemainingUnlocked": 12,
    "newNames": [
     "SKILL_SWAP"
    ]
@@ -483,7 +483,7 @@
    "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 14,
+   "cumulativeRemainingUnlocked": 12,
    "newNames": []
   },
   {
@@ -491,7 +491,7 @@
    "provider": "D-TILE",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 14,
+   "cumulativeRemainingUnlocked": 12,
    "newNames": []
   },
   {
@@ -499,7 +499,7 @@
    "provider": "D-BG",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 14,
+   "cumulativeRemainingUnlocked": 12,
    "newNames": []
   },
   {
@@ -507,7 +507,7 @@
    "provider": "D-OAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 14,
+   "cumulativeRemainingUnlocked": 12,
    "newNames": []
   },
   {
@@ -515,7 +515,7 @@
    "provider": "D-VRAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 14,
+   "cumulativeRemainingUnlocked": 12,
    "newNames": []
   },
   {
@@ -523,7 +523,7 @@
    "provider": "F-AUDIO",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 14,
+   "cumulativeRemainingUnlocked": 12,
    "newNames": []
   }
  ],
@@ -936,561 +936,6 @@
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "NEEDS-KEYS"
-   },
-   "group": "MULTI"
-  },
-  {
-   "move": "MOVE_EXTRASENSORY",
-   "id": 326,
-   "name": "EXTRASENSORY",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0011089852607709747,
-   "config": "src/animation/sceneOnPresentation.ts:2755",
-   "needs": [
-    "B",
-    "C",
-    "F-AFFINE",
-    "E-TASK",
-    "D-PAL",
-    "D-TILE",
-    "D-BG",
-    "D-OAM",
-    "D-VRAM",
-    "D-SCAN",
-    "F-AUDIO"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationInputs:spriteOrder (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/extrasensory.ts:47"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationInputs:animationRng (presentation Random2 (gRng2Value))",
-     "cites": [
-      "src/animation/extrasensory.ts:75"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationInputs:attackerArt (battler sprite record {slot,x,y,x2,y2,subpriority,oamPriority,matrixNum,matrix}: battler owner slot + battler matrix)",
-     "cites": [
-      "src/animation/extrasensory.ts:23"
-     ]
-    },
-    {
-     "code": "E-TASK",
-     "text": "animationInputs:taskSlots (CreateTask slot / live task table)",
-     "cites": [
-      "src/animation/extrasensory.ts:25"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "animationInputs:palette (palette host / resource plan)",
-     "cites": [
-      "src/animation/extrasensory.ts:54"
-     ]
-    },
-    {
-     "code": "D-TILE",
-     "text": "animationInputs:allocator (OBJ tile/palette resource allocator)",
-     "cites": [
-      "src/animation/extrasensory.ts:72"
-     ]
-    },
-    {
-     "code": "D-BG",
-     "text": "animationInputs:registers (BG regs / monbg / BLDCNT state)",
-     "cites": [
-      "src/animation/extrasensory.ts:59"
-     ]
-    },
-    {
-     "code": "D-OAM",
-     "text": "animationInputs:clone (clone {slot,matrixNum,attr(OAM),subpriority,x,y,x2,y2})",
-     "cites": [
-      "src/animation/extrasensory.ts:37"
-     ]
-    },
-    {
-     "code": "D-VRAM",
-     "text": "animationInputs:background.currentVram (BG VRAM snapshot)",
-     "cites": [
-      "src/animation/extrasensory.ts:61"
-     ]
-    },
-    {
-     "code": "D-SCAN",
-     "text": "animationInputs:scanline (gScanlineEffect buffers)",
-     "cites": [
-      "src/animation/extrasensory.ts:66"
-     ]
-    },
-    {
-     "code": "F-AUDIO",
-     "text": "animationInputs:audio (sound task state)",
-     "cites": [
-      "src/animation/extrasensory.ts:73"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationInputs:attackerCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/extrasensory.ts:21"
-    },
-    {
-     "path": "animationInputs:targetCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/extrasensory.ts:22"
-    },
-    {
-     "path": "animationInputs:attackerArt",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/extrasensory.ts:23"
-    },
-    {
-     "path": "animationInputs:targetArt",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/extrasensory.ts:24"
-    },
-    {
-     "path": "animationInputs:taskSlots",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/extrasensory.ts:25"
-    },
-    {
-     "path": "animationInputs:taskSlots.fadeToPsychic",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/extrasensory.ts:26"
-    },
-    {
-     "path": "animationInputs:taskSlots.psychicBackground",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/extrasensory.ts:27"
-    },
-    {
-     "path": "animationInputs:taskSlots.blend",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/extrasensory.ts:28"
-    },
-    {
-     "path": "animationInputs:taskSlots.distortion",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/extrasensory.ts:29"
-    },
-    {
-     "path": "animationInputs:taskSlots.clone",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/extrasensory.ts:30"
-    },
-    {
-     "path": "animationInputs:taskSlots.updateMonBg",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/extrasensory.ts:31"
-    },
-    {
-     "path": "animationInputs:taskSlots.clearMonBg",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/extrasensory.ts:32"
-    },
-    {
-     "path": "animationInputs:taskSlots.restoreBattle",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/extrasensory.ts:33"
-    },
-    {
-     "path": "animationInputs:sharedTaskData",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/extrasensory.ts:36"
-    },
-    {
-     "path": "animationInputs:clone",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "D-OAM"
-     ],
-     "status": "blocked: F-AFFINE+D-OAM",
-     "cite": "src/animation/extrasensory.ts:37"
-    },
-    {
-     "path": "animationInputs:clone.slot",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "D-OAM"
-     ],
-     "status": "blocked: F-AFFINE+D-OAM",
-     "cite": "src/animation/extrasensory.ts:38"
-    },
-    {
-     "path": "animationInputs:clone.matrixNum",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "D-OAM"
-     ],
-     "status": "blocked: F-AFFINE+D-OAM",
-     "cite": "src/animation/extrasensory.ts:39"
-    },
-    {
-     "path": "animationInputs:clone.attr",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "D-OAM"
-     ],
-     "status": "blocked: F-AFFINE+D-OAM",
-     "cite": "src/animation/extrasensory.ts:40"
-    },
-    {
-     "path": "animationInputs:clone.subpriority",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "D-OAM"
-     ],
-     "status": "blocked: F-AFFINE+D-OAM",
-     "cite": "src/animation/extrasensory.ts:41"
-    },
-    {
-     "path": "animationInputs:clone.x",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "D-OAM"
-     ],
-     "status": "blocked: F-AFFINE+D-OAM",
-     "cite": "src/animation/extrasensory.ts:42"
-    },
-    {
-     "path": "animationInputs:clone.y",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "D-OAM"
-     ],
-     "status": "blocked: F-AFFINE+D-OAM",
-     "cite": "src/animation/extrasensory.ts:43"
-    },
-    {
-     "path": "animationInputs:clone.x2",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "D-OAM"
-     ],
-     "status": "blocked: F-AFFINE+D-OAM",
-     "cite": "src/animation/extrasensory.ts:44"
-    },
-    {
-     "path": "animationInputs:clone.y2",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "D-OAM"
-     ],
-     "status": "blocked: F-AFFINE+D-OAM",
-     "cite": "src/animation/extrasensory.ts:45"
-    },
-    {
-     "path": "animationInputs:spriteOrder",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/extrasensory.ts:47"
-    },
-    {
-     "path": "animationInputs:buffers",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/extrasensory.ts:48"
-    },
-    {
-     "path": "animationInputs:buffers.softwareOam",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/extrasensory.ts:49"
-    },
-    {
-     "path": "animationInputs:buffers.hardwareOam",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/extrasensory.ts:50"
-    },
-    {
-     "path": "animationInputs:buffers.softwareMatrices",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/extrasensory.ts:51"
-    },
-    {
-     "path": "animationInputs:buffers.hardwareMatrices",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/extrasensory.ts:52"
-    },
-    {
-     "path": "animationInputs:palette",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/extrasensory.ts:54"
-    },
-    {
-     "path": "animationInputs:palette.unfaded",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/extrasensory.ts:55"
-    },
-    {
-     "path": "animationInputs:palette.faded",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/extrasensory.ts:56"
-    },
-    {
-     "path": "animationInputs:palette.hardware",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/extrasensory.ts:57"
-    },
-    {
-     "path": "animationInputs:registers",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/extrasensory.ts:59"
-    },
-    {
-     "path": "animationInputs:background",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/extrasensory.ts:60"
-    },
-    {
-     "path": "animationInputs:background.currentVram",
-     "classes": [
-      "D-VRAM"
-     ],
-     "status": "blocked: D-VRAM",
-     "cite": "src/animation/extrasensory.ts:61"
-    },
-    {
-     "path": "animationInputs:background.battleVram",
-     "classes": [
-      "D-VRAM"
-     ],
-     "status": "blocked: D-VRAM",
-     "cite": "src/animation/extrasensory.ts:62"
-    },
-    {
-     "path": "animationInputs:background.psychicVram",
-     "classes": [
-      "D-VRAM"
-     ],
-     "status": "blocked: D-VRAM",
-     "cite": "src/animation/extrasensory.ts:63"
-    },
-    {
-     "path": "animationInputs:background.monbgPaletteBank",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/extrasensory.ts:64"
-    },
-    {
-     "path": "animationInputs:scanline",
-     "classes": [
-      "D-SCAN"
-     ],
-     "status": "blocked: D-SCAN",
-     "cite": "src/animation/extrasensory.ts:66"
-    },
-    {
-     "path": "animationInputs:scanline.state",
-     "classes": [
-      "D-SCAN"
-     ],
-     "status": "blocked: D-SCAN",
-     "cite": "src/animation/extrasensory.ts:67"
-    },
-    {
-     "path": "animationInputs:scanline.srcBuffer",
-     "classes": [
-      "D-SCAN"
-     ],
-     "status": "blocked: D-SCAN",
-     "cite": "src/animation/extrasensory.ts:68"
-    },
-    {
-     "path": "animationInputs:scanline.dmaDest",
-     "classes": [
-      "D-SCAN"
-     ],
-     "status": "blocked: D-SCAN",
-     "cite": "src/animation/extrasensory.ts:69"
-    },
-    {
-     "path": "animationInputs:scanline.buffers",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/extrasensory.ts:70"
-    },
-    {
-     "path": "animationInputs:allocator",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/extrasensory.ts:72"
-    },
-    {
-     "path": "animationInputs:audio",
-     "classes": [
-      "F-AUDIO"
-     ],
-     "status": "blocked: F-AUDIO",
-     "cite": "src/animation/extrasensory.ts:73"
-    },
-    {
-     "path": "animationInputs:liveCounts",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/extrasensory.ts:74"
-    },
-    {
-     "path": "animationInputs:animationRng",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/extrasensory.ts:75"
-    },
-    {
-     "path": "animationInputs:gameplayRng",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/extrasensory.ts:76"
-    },
-    {
-     "path": "animationInputs:gameplayState",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/extrasensory.ts:77"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "full",
-   "carrierOccurrences": 1984,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "B",
-    "F-AFFINE",
-    "E-TASK"
-   ],
-   "providerNeeds": [
-    "C",
-    "D-PAL",
-    "D-TILE",
-    "D-BG",
-    "D-OAM",
-    "D-VRAM",
-    "D-SCAN",
-    "F-AUDIO"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
    },
    "group": "MULTI"
   },
@@ -2552,512 +1997,6 @@
     "D-PAL",
     "D-TILE",
     "D-BG",
-    "F-AUDIO"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "MULTI"
-  },
-  {
-   "move": "MOVE_PSYWAVE",
-   "id": 149,
-   "name": "PSYWAVE",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0007369614512471653,
-   "config": "src/animation/sceneOnPresentation.ts:2743",
-   "needs": [
-    "B",
-    "C",
-    "F-AFFINE",
-    "E-TASK",
-    "D-PAL",
-    "D-TILE",
-    "D-BG",
-    "D-OAM",
-    "D-VRAM",
-    "F-AUDIO"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationInputs:spriteOrder (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/psywave.ts:75"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationInputs:animationRng (presentation Random2 (gRng2Value))",
-     "cites": [
-      "src/animation/psywave.ts:121"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationInputs:attackerArt (battler sprite record {slot,x,y,x2,y2,subpriority,oamPriority,matrixNum,matrix}: battler owner slot + battler matrix)",
-     "cites": [
-      "src/animation/psywave.ts:68"
-     ]
-    },
-    {
-     "code": "E-TASK",
-     "text": "animationInputs:taskSlots (CreateTask slot / live task table)",
-     "cites": [
-      "src/animation/psywave.ts:70"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "animationInputs:palette (palette host / resource plan)",
-     "cites": [
-      "src/animation/psywave.ts:83"
-     ]
-    },
-    {
-     "code": "D-TILE",
-     "text": "animationInputs:resources (OBJ tile/palette resource allocator)",
-     "cites": [
-      "src/animation/psywave.ts:96"
-     ]
-    },
-    {
-     "code": "D-BG",
-     "text": "animationInputs:registers (BG regs / monbg / BLDCNT state)",
-     "cites": [
-      "src/animation/psywave.ts:90"
-     ]
-    },
-    {
-     "code": "D-OAM",
-     "text": "animationInputs:ringAllocations (ring slots + live OAM words)",
-     "cites": [
-      "src/animation/psywave.ts:72"
-     ]
-    },
-    {
-     "code": "D-VRAM",
-     "text": "animationInputs:background.currentVram (BG VRAM snapshot)",
-     "cites": [
-      "src/animation/psywave.ts:92"
-     ]
-    },
-    {
-     "code": "F-AUDIO",
-     "text": "animationInputs:audio (sound task state)",
-     "cites": [
-      "src/animation/psywave.ts:110"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationInputs:attackerPictureCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/psywave.ts:63"
-    },
-    {
-     "path": "animationInputs:targetPictureCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/psywave.ts:64"
-    },
-    {
-     "path": "animationInputs:attackerAnimationCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/psywave.ts:66"
-    },
-    {
-     "path": "animationInputs:targetAnimationCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/psywave.ts:67"
-    },
-    {
-     "path": "animationInputs:attackerArt",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/psywave.ts:68"
-    },
-    {
-     "path": "animationInputs:targetArt",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/psywave.ts:69"
-    },
-    {
-     "path": "animationInputs:taskSlots",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/psywave.ts:70"
-    },
-    {
-     "path": "animationInputs:ringAllocations",
-     "classes": [
-      "A-SLOT",
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/psywave.ts:72"
-    },
-    {
-     "path": "animationInputs:ringOam",
-     "classes": [
-      "A-SLOT",
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/psywave.ts:73"
-    },
-    {
-     "path": "animationInputs:spriteOrder",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/psywave.ts:75"
-    },
-    {
-     "path": "animationInputs:buffers",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/psywave.ts:77"
-    },
-    {
-     "path": "animationInputs:buffers.softwareOam",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/psywave.ts:78"
-    },
-    {
-     "path": "animationInputs:buffers.hardwareOam",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/psywave.ts:79"
-    },
-    {
-     "path": "animationInputs:buffers.softwareMatrices",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/psywave.ts:80"
-    },
-    {
-     "path": "animationInputs:buffers.hardwareMatrices",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/psywave.ts:81"
-    },
-    {
-     "path": "animationInputs:palette",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/psywave.ts:83"
-    },
-    {
-     "path": "animationInputs:palette.unfaded",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/psywave.ts:84"
-    },
-    {
-     "path": "animationInputs:palette.faded",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/psywave.ts:85"
-    },
-    {
-     "path": "animationInputs:palette.hardware",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/psywave.ts:86"
-    },
-    {
-     "path": "animationInputs:targetPaletteBank",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/psywave.ts:89"
-    },
-    {
-     "path": "animationInputs:registers",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/psywave.ts:90"
-    },
-    {
-     "path": "animationInputs:background",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/psywave.ts:91"
-    },
-    {
-     "path": "animationInputs:background.currentVram",
-     "classes": [
-      "D-VRAM"
-     ],
-     "status": "blocked: D-VRAM",
-     "cite": "src/animation/psywave.ts:92"
-    },
-    {
-     "path": "animationInputs:background.battleVram",
-     "classes": [
-      "D-VRAM"
-     ],
-     "status": "blocked: D-VRAM",
-     "cite": "src/animation/psywave.ts:93"
-    },
-    {
-     "path": "animationInputs:background.psychicVram",
-     "classes": [
-      "D-VRAM"
-     ],
-     "status": "blocked: D-VRAM",
-     "cite": "src/animation/psywave.ts:94"
-    },
-    {
-     "path": "animationInputs:resources",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/psywave.ts:96"
-    },
-    {
-     "path": "animationInputs:resources.tag",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/psywave.ts:97"
-    },
-    {
-     "path": "animationInputs:resources.tileSlot",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/psywave.ts:98"
-    },
-    {
-     "path": "animationInputs:resources.paletteSlot",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/psywave.ts:99"
-    },
-    {
-     "path": "animationInputs:resources.paletteBank",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/psywave.ts:100"
-    },
-    {
-     "path": "animationInputs:resources.tileRange",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/psywave.ts:101"
-    },
-    {
-     "path": "animationInputs:resources.allocator",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/psywave.ts:102"
-    },
-    {
-     "path": "animationInputs:sharedTaskData",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/psywave.ts:105"
-    },
-    {
-     "path": "animationInputs:sharedTaskData.fadeToPsychic",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/psywave.ts:106"
-    },
-    {
-     "path": "animationInputs:sharedTaskData.paletteCycle",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/psywave.ts:107"
-    },
-    {
-     "path": "animationInputs:sharedTaskData.restoreBattle",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/psywave.ts:108"
-    },
-    {
-     "path": "animationInputs:audio",
-     "classes": [
-      "F-AUDIO"
-     ],
-     "status": "blocked: F-AUDIO",
-     "cite": "src/animation/psywave.ts:110"
-    },
-    {
-     "path": "animationInputs:audio.current",
-     "classes": [
-      "F-AUDIO"
-     ],
-     "status": "blocked: F-AUDIO",
-     "cite": "src/animation/psywave.ts:111"
-    },
-    {
-     "path": "animationInputs:audio.attackerPan",
-     "classes": [
-      "F-AUDIO"
-     ],
-     "status": "blocked: F-AUDIO",
-     "cite": "src/animation/psywave.ts:112"
-    },
-    {
-     "path": "animationInputs:audio.targetPan",
-     "classes": [
-      "F-AUDIO"
-     ],
-     "status": "blocked: F-AUDIO",
-     "cite": "src/animation/psywave.ts:113"
-    },
-    {
-     "path": "animationInputs:liveCounts",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/psywave.ts:115"
-    },
-    {
-     "path": "animationInputs:liveCounts.visualTasks",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/psywave.ts:116"
-    },
-    {
-     "path": "animationInputs:liveCounts.soundTasks",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/psywave.ts:117"
-    },
-    {
-     "path": "animationInputs:liveCounts.matrixBitmap",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/psywave.ts:118"
-    },
-    {
-     "path": "animationInputs:animationRng",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/psywave.ts:121"
-    },
-    {
-     "path": "animationInputs:gameplayRng",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/psywave.ts:122"
-    },
-    {
-     "path": "animationInputs:gameplayState",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/psywave.ts:123"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "full",
-   "carrierOccurrences": 1168,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "B",
-    "F-AFFINE",
-    "E-TASK"
-   ],
-   "providerNeeds": [
-    "C",
-    "D-PAL",
-    "D-TILE",
-    "D-BG",
-    "D-OAM",
-    "D-VRAM",
     "F-AUDIO"
    ],
    "palettePlan": false,
