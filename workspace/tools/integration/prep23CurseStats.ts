@@ -72,6 +72,7 @@ export interface CurseStatsRow {
   readonly hardwareOam: string[] | null;                            // null at row 0 (pre-activation frame, not assembled)
   readonly hardwareMatrices: readonly (readonly number[])[];
   readonly registers: Record<string, number>;
+  readonly battleBg: Record<string, number>;
   readonly hardwarePalette: number[];
   readonly tasks: { slot: number; callback: string; data: number[] }[];
 }
@@ -109,6 +110,9 @@ export function curseStatsRow(row: number, k: CurseStatsKnown): CurseStatsRow {
   } else if (row >= DRAW_TASK_LAST_ROW) {
     r.bg1cnt = (r.bg1cnt! & ~0xc003 & ~0xc) | 0; r.dispcnt = (r.dispcnt! | 0x8000) ^ 0x8000; r.winin = 0x3f3f; r.winout = 0x3f3f; r.bldcnt = 0; r.bldalpha = 0; r.bg1hofs = 0; r.bg1vofs = 0;
   }
+  // ---- battleBg (gBattle_BG1_X/Y are written by the task step itself: visible in the same row, registers one row later)
+  const bbg: Record<string, number> = { gBattle_BG0_X: 0, gBattle_BG0_Y: 0, gBattle_BG1_X: 0, gBattle_BG1_Y: 0, gBattle_BG2_X: 0, gBattle_BG2_Y: 0, gBattle_BG3_X: 0, gBattle_BG3_Y: 0 };
+  if (row >= DRAW_STEP_FIRST && row <= 143) { const n = Math.min(row - 78, 64); bbg.gBattle_BG1_X = 32 - k.attackerX; bbg.gBattle_BG1_Y = 32 - k.attackerY - 4 * (n % 16); }
   // ---- palette
   const pal = [...k.activationPalette];
   if (row >= 79) pal[129] = 0x7fff;                                   // LoadPalette(sCurseLinesPalette, BG_PLTT_ID(8) + 1)
@@ -130,5 +134,5 @@ export function curseStatsRow(row: number, k: CurseStatsKnown): CurseStatsRow {
     while (list.length < 128) list.push(k.dummyAttr);
     oam = list.map((q, i) => hex4(q[0]) + hex4(q[1]) + hex4(q[2]) + hex4(k.hardwareMatrices[i >> 2]![i & 3]!));
   }
-  return { hardwareOam: oam, hardwareMatrices: k.hardwareMatrices, registers: r, hardwarePalette: pal, tasks };
+  return { hardwareOam: oam, hardwareMatrices: k.hardwareMatrices, registers: r, battleBg: bbg, hardwarePalette: pal, tasks };
 }

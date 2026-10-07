@@ -8,7 +8,7 @@ Evidence + design; **new files only** (no tracked file edited; no `src/`, adapte
 
 | Variant | Verdict | Field checks (rows exact / rows) over 5 (stats) / 4 (ghost) windows | Renderer with the model's inputs vs ROM RGB |
 |---|---|---|---|
-| **Stats (non-Ghost)** | **MODEL EXACT** on every field in 5/5 windows | hardwareOam (128 entries/row, rows 1..175): **875/875**; hardwareMatrices **880/880**; registers (all 21) **880/880**; hardwarePalette (512 words) **880/880**; live tasks (slot, callback, data[0..15]) **880/880** | **879/880 rows, 0 px** in 4/5 windows; Onix/Pidgeot row 142: 25 px, **identical with the corpus inputs** (renderer gate, §0.4) |
+| **Stats (non-Ghost)** | **MODEL EXACT** on every field in 5/5 windows | hardwareOam (128 entries/row, rows 1..175): **875/875**; hardwareMatrices **880/880**; registers (all 21) **880/880**; battleBg **880/880**; hardwarePalette (512 words) **880/880**; live tasks (slot, callback, data[0..15]) **880/880** | **879/880 rows, 0 px** in 4/5 windows; Onix/Pidgeot row 142: 25 px, **identical with the corpus inputs** (renderer gate, §0.4) |
 | **Ghost** | **MODEL EXACT** except one scroll-register phase class (2 rows of 1492) | hardwareOam **1488/1488**; tasks **1492/1492**; battleBg **1492/1492**; hardwarePalette **1492/1492**; registers **1490/1492** (2 rows, class R1 below) | accepted player/opponent **746/746 rows, 0 px**; alternates **744/746 rows**, the 2 misses are **row 26 only** (135 px / 15 px), the palette scanout-transfer scanline (class P1), **identical with the corpus inputs** |
 
 Windows: accepted `curse-{stats,ghost}-{player,opponent}-dense-state.json.gz` (176 / 373 rows each); alternates (fresh probes, each x2 identical): `prep14-curse-stat-alt-miltank-golem` (MILTANK player -> GOLEM), `prep23-curse-stat-altopp-miltank-golem` (opposite orientation), `prep23-curse-stat-alt2-onix-pidgeot` (ONIX: tall 64x64 picture, different elevation, vs PIDGEOT), `prep14-curse-ghost-alt-gengar-golem`, `prep23-curse-ghost-altopp-gengar-golem` (opposite orientation). Not reached: a ghost alternate with a different picture size (both ghost alternates are Gengar vs Golem).
@@ -37,7 +37,7 @@ Legend: **S** source program (move script + task/sprite callbacks, derived), **K
 | `buffers.softwareOam / softwareMatrices` | not consumed by `curseDisplayPlan` (`curse.ts:108-123` reads `hardwareOam` + `hardwareMatrices` only) | same |
 | `buffers.scanlineBuffers` | **K** (all-zero, constant in 176/176 + 373/373 rows: no HBlank DMA effect) | **K** (constant) |
 | `registers` | **S + K**: WININ/WINOUT/BLDCNT/BLDALPHA/BG1CNT/DISPCNT writes of `AnimTask_DrawFallingWhiteLinesOnAttacker` (`:279-345`), BG1 scroll `32 - sprite.{x,y} - 4*(n%16)` one row after the task step; activation block **K / lent** (§3) | **S + K**: stretch window (`WIN_RANGE` + the `0.0625` double math truncated as `u16`), BLDY 16, monbg BGnCNT `(cnt & ~0xc003) \| 0x4000 \| 2`, BGn scroll `-(x+x2)+32`, nail/ghost BLDCNT/BLDALPHA sequences |
-| `battleBg` | **K** (constant) | **S** (`gBattle_BGn_X/Y` = the monbg scroll; immediate, registers lag one row) |
+| `battleBg` | **S** (`gBattle_BG1_X/Y` = `32 - sprite.{x,y} - 4*(n%16)`, written by the task step, 880/880) | **S** (`gBattle_BGn_X/Y` = the monbg scroll; immediate, registers lag one row) |
 | `palette.hardware` (+faded/unfaded: not consumed) | **S + A + P**: `BlendPalette` (`util.c:264`) of the attacker OBJ bank towards RGB_RED by the `BeginNormalPaletteFade` y schedule (0..10..0 step 2, period 6), BG idx 129 = white (`sCurseLinesPalette`) | **S + P + A**: nail / ghost palettes are **assets** (`src/animation/assets/curse.json`, BGR555 = `c >> 3`), monbg BG banks 8/9 = copy of the battler OBJ bank, BG banks 1-3 black fade (16 at row 26, 14..0 step 2 / 3 rows from 340) |
 | `paletteScanoutTransfer` | none | **H / M** (P1) |
 | `resources` (nail/ghost tile base, loaded) | n/a | **K** (allocator: bank 7 tile 305 / bank 8 tile 337) |
@@ -80,11 +80,11 @@ monbg(attacker) at row 7 -> `AnimTask_CurseStretchingBlackBg` (WIN0 stretch 16 s
 
 | Window | Rows | OAM | tasks | registers | battleBg | palette | matrices |
 |---|---|---|---|---|---|---|---|
-| stats accepted player (SNORLAX) | 176 | 175/175 | 176 | 176 | n/a (K) | 176 | 176 |
-| stats accepted opponent | 176 | 175/175 | 176 | 176 | n/a | 176 | 176 |
-| stats alt Miltank->Golem player | 176 | 175/175 | 176 | 176 | n/a | 176 | 176 |
-| stats alt Miltank->Golem opponent | 176 | 175/175 | 176 | 176 | n/a | 176 | 176 |
-| stats alt Onix->Pidgeot player | 176 | 175/175 | 176 | 176 | n/a | 176 | 176 |
+| stats accepted player (SNORLAX) | 176 | 175/175 | 176 | 176 | 176 | 176 | 176 |
+| stats accepted opponent | 176 | 175/175 | 176 | 176 | 176 | 176 | 176 |
+| stats alt Miltank->Golem player | 176 | 175/175 | 176 | 176 | 176 | 176 | 176 |
+| stats alt Miltank->Golem opponent | 176 | 175/175 | 176 | 176 | 176 | 176 | 176 |
+| stats alt Onix->Pidgeot player | 176 | 175/175 | 176 | 176 | 176 | 176 | 176 |
 | ghost accepted player (HAUNTER) | 373 | 372/372 | 373 | 373 | 373 | 373 | const |
 | ghost accepted opponent | 373 | 372/372 | 373 | **372** (R1 @293) | 373 | 373 | const |
 | ghost alt Gengar->Golem player | 373 | 372/372 | 373 | **372** (R1 @7) | 373 | 373 | const |

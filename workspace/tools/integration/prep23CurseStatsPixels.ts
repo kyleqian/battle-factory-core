@@ -35,7 +35,7 @@ for (const spec of args.filter((a) => a.includes(":") && !a.startsWith("--"))) {
     const m = curseStatsRow(age, k);
     const inputs = process.env.CORPUS ? config.animationInputs : { ...config.animationInputs,
       buffers: { ...config.animationInputs.buffers, hardwareOam: m.hardwareOam ?? rows[age]!.hardwareOam, hardwareMatrices: m.hardwareMatrices },
-      registers: m.registers, palette: { unfaded: m.hardwarePalette, faded: m.hardwarePalette, hardware: m.hardwarePalette },
+      registers: m.registers, battleBg: m.battleBg, palette: { unfaded: m.hardwarePalette, faded: m.hardwarePalette, hardware: m.hardwarePalette },
       liveTasks: m.tasks };
     const raw = readFileSync(resolve(dir, `${String(rows[age]!.frame).padStart(5, "0")}.rgb`)); if (sha(raw) !== rows[age]!.sha256) throw new Error("rgb drift");
     const d = diff(render({ ...createInitialState(), rngMode: "frontierBattle", sceneOnPresentation: { ...createSceneOnMovePresentation({ ...config, animationInputs: inputs } as never), age } as never }), raw);
