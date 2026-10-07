@@ -1,0 +1,42 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "SPIKES",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep22-spikes-alt-opponent-forretress-golem.json",
+ "denseWindow": {
+  "startFrame": 292,
+  "endFrame": 404
+ },
+ "windowSource": "window = [activation, activation + 113 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "FORRETRESS",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793700008,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 187,
+  "playerMaxHp": 187,
+  "opponentHp": 145,
+  "opponentMaxHp": 150,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "player"
+  }
+ ]
+}

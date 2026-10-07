@@ -23232,19 +23232,22 @@ export function renderSceneOnMovePresentation(
     };
     const attackerArt = battlerArt(view.attacker);
     const targetArt = battlerArt(view.target);
+    // The live opponent front sprite keeps its tracked idle rest offset (ISSUES #142 / #148); the staged pairs omit it.
+    const liveIdle = (battler: typeof view.attacker) => liveField && battler.geometry.side === "opponent"
+      ? sceneOnBattlerFrontIdleRest(battler) : { x2: 0, y2: 0 };
     const drawAttacker = () => drawSpriteSheet(
       fb,
       attackerArt.tileset,
       attackerArt.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x + liveIdle(view.attacker).x2,
+      view.attacker.geometry.spriteCorner.y + liveIdle(view.attacker).y2,
     );
     const drawTarget = () => drawSpriteSheet(
       fb,
       targetArt.tileset,
       targetArt.palette,
-      view.target.geometry.spriteCorner.x,
-      view.target.geometry.spriteCorner.y,
+      view.target.geometry.spriteCorner.x + liveIdle(view.target).x2,
+      view.target.geometry.spriteCorner.y + liveIdle(view.target).y2,
     );
     const oamCoordinate = (value: number, wrap: number): number => {
       const masked = value & (wrap - 1);
@@ -35314,19 +35317,22 @@ export function renderSceneOnMovePresentation(
     };
     const attackerArt = battlerArt(view.attacker);
     const targetArt = battlerArt(view.target);
+    // The live opponent front sprite keeps its tracked idle rest offset (ISSUES #142 / #148); the staged pairs omit it.
+    const liveIdle = (battler: typeof view.attacker) => liveField && battler.geometry.side === "opponent"
+      ? sceneOnBattlerFrontIdleRest(battler) : { x2: 0, y2: 0 };
     const drawAttacker = () => drawSpriteSheet(
       fb,
       attackerArt.tileset,
       attackerArt.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x + liveIdle(view.attacker).x2,
+      view.attacker.geometry.spriteCorner.y + liveIdle(view.attacker).y2,
     );
     const drawTarget = () => drawSpriteSheet(
       fb,
       targetArt.tileset,
       targetArt.palette,
-      view.target.geometry.spriteCorner.x,
-      view.target.geometry.spriteCorner.y,
+      view.target.geometry.spriteCorner.x + liveIdle(view.target).x2,
+      view.target.geometry.spriteCorner.y + liveIdle(view.target).y2,
     );
     const oamCoordinate = (value: number, wrap: number): number => {
       const masked = value & (wrap - 1);
@@ -37924,19 +37930,22 @@ export function renderSceneOnMovePresentation(
     };
     const attackerArt = battlerArt(view.attacker);
     const targetArt = battlerArt(view.target);
+    // The live opponent front sprite keeps its tracked idle rest offset (ISSUES #142 / #148); the staged pairs omit it.
+    const liveIdle = (battler: typeof view.attacker) => liveField && battler.geometry.side === "opponent"
+      ? sceneOnBattlerFrontIdleRest(battler) : { x2: 0, y2: 0 };
     const drawAttacker = () => drawSpriteSheet(
       fb,
       attackerArt.tileset,
       attackerArt.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x + liveIdle(view.attacker).x2,
+      view.attacker.geometry.spriteCorner.y + liveIdle(view.attacker).y2,
     );
     const drawTarget = () => drawSpriteSheet(
       fb,
       targetArt.tileset,
       targetArt.palette,
-      view.target.geometry.spriteCorner.x,
-      view.target.geometry.spriteCorner.y,
+      view.target.geometry.spriteCorner.x + liveIdle(view.target).x2,
+      view.target.geometry.spriteCorner.y + liveIdle(view.target).y2,
     );
     const oamCoordinate = (value: number, wrap: number): number => {
       const masked = value & (wrap - 1);

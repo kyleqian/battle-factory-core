@@ -10,7 +10,7 @@
   "src/data/gen/battle-frontier-mons.json",
   "src/data/gen/factory-round-policy.json"
  ],
- "liveStatusImplementedCount": 231,
+ "liveStatusImplementedCount": 234,
  "staleCodesCorrected": [
   "B (sSpriteOrder): was 'first body only'; production now lends the order and tracks it across bodies (liveSpriteOrderHost.ts / spriteOrderProvider.ts, merged cross-body tracker + post-KO rung 1), so B no longer blocks anything; recipe work only (falls back after an unmodelled graphics command)",
   "F-AFFINE / E-TASK: were provider blockers; docs/allocator-plan-v2-evidence.md measured gOamMatrixAllocBitmap 0x6 + no tasks at all 481 known-entry bodies, so the accepted constants gated on the lent order suffice for first bodies (invalidated after a faint/switch)",
@@ -23,13 +23,14 @@
  "inFlightMoves": {},
  "summary": {
   "accepted": 276,
-  "live": 231,
-  "faithfulRandom": 10,
+  "live": 234,
+  "faithfulRandom": 11,
   "faithfulRandomMoves": [
    "MOVE_ASTONISH",
    "MOVE_DOUBLE_KICK",
    "MOVE_FLAIL",
    "MOVE_HYPER_BEAM",
+   "MOVE_LOVELY_KISS",
    "MOVE_MUD_SLAP",
    "MOVE_RAIN_DANCE",
    "MOVE_SAND_ATTACK",
@@ -38,16 +39,16 @@
    "MOVE_WISH"
   ],
   "inFlight": 0,
-  "remaining": 35,
+  "remaining": 31,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
   },
   "weightPct": {
-   "live": 91.834,
-   "faithfulRandom": 3.612,
+   "live": 92.195,
+   "faithfulRandom": 3.761,
    "inFlight": 0,
-   "remaining": 4.067
+   "remaining": 3.557
   },
   "remainingByGroup": {
    "PROVIDER-x": {
@@ -55,8 +56,8 @@
     "weightPct": 0.962
    },
    "MULTI": {
-    "moves": 29,
-    "weightPct": 2.772
+    "moves": 25,
+    "weightPct": 2.262
    },
    "SMALL-INPUT": {
     "moves": 1,
@@ -69,14 +70,14 @@
   },
   "remainingByHostClass": {
    "H_BASIC": 2,
-   "H_BUFFER": 29,
+   "H_BUFFER": 25,
    "H_DERIVED": 3,
    "H_RANDOM": 1,
    "H_VARIANT": 4
   },
-  "orderFirstBodyOnlyMoves": 23,
-  "slotPlanNeededMoves": 28,
-  "sumsTo": "231+10+0+35=276",
+  "orderFirstBodyOnlyMoves": 22,
+  "slotPlanNeededMoves": 24,
+  "sumsTo": "234+11+0+31=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -176,8 +177,8 @@
    "aloneNames": [
     "METEOR_MASH"
    ],
-   "touchingMoves": 30,
-   "touchingWeightPct": 2.992,
+   "touchingMoves": 26,
+   "touchingWeightPct": 2.482,
    "meta": {
     "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
     "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
@@ -230,8 +231,8 @@
    "aloneNames": [
     "MEMENTO"
    ],
-   "touchingMoves": 29,
-   "touchingWeightPct": 2.622,
+   "touchingMoves": 25,
+   "touchingWeightPct": 2.112,
    "meta": {
     "cost": "new large host (docs/animation-integration-readiness.md A6)",
     "claim": "only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today"
@@ -246,8 +247,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 25,
-   "touchingWeightPct": 2.399,
+   "touchingMoves": 21,
+   "touchingWeightPct": 1.889,
    "meta": {
     "cost": "extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves)",
     "claim": "exact for audited plan rows from a known entry; actual status animations/switches invalidate"
@@ -262,8 +263,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 24,
-   "touchingWeightPct": 2.26,
+   "touchingMoves": 23,
+   "touchingWeightPct": 2.075,
    "meta": null
   },
   {
@@ -275,8 +276,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 23,
-   "touchingWeightPct": 2.189,
+   "touchingMoves": 22,
+   "touchingWeightPct": 2.004,
    "meta": null
   },
   {
@@ -437,22 +438,20 @@
   {
    "step": 5,
    "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
-   "newMoves": 27,
-   "newWeightPct": 2.475,
-   "cumulativeRemainingUnlocked": 31,
+   "newMoves": 23,
+   "newWeightPct": 1.965,
+   "cumulativeRemainingUnlocked": 27,
    "newNames": [
     "BONEMERANG",
     "ERUPTION",
     "EXTRASENSORY",
     "FLATTER",
     "HYPER_VOICE",
-    "LOVELY_KISS",
     "LUSTER_PURGE",
     "MACH_PUNCH",
     "MEGAHORN",
     "MEMENTO",
     "NIGHTMARE",
-    "OCTAZOOKA",
     "OUTRAGE",
     "PSYWAVE",
     "RAPID_SPIN",
@@ -461,12 +460,10 @@
     "SAND_TOMB",
     "SHEER_COLD",
     "SHOCK_WAVE",
-    "SIGNAL_BEAM",
     "SKILL_SWAP",
     "SKY_ATTACK",
     "SMOG",
     "SNORE",
-    "SPIKES",
     "SUPERPOWER"
    ]
   },
@@ -475,7 +472,7 @@
    "provider": "X-DISABLE",
    "newMoves": 2,
    "newWeightPct": 0.147,
-   "cumulativeRemainingUnlocked": 33,
+   "cumulativeRemainingUnlocked": 29,
    "newNames": [
     "ICE_BALL",
     "SPIT_UP"
@@ -486,7 +483,7 @@
    "provider": "X-TWOTURN",
    "newMoves": 1,
    "newWeightPct": 0.187,
-   "cumulativeRemainingUnlocked": 34,
+   "cumulativeRemainingUnlocked": 30,
    "newNames": [
     "DIVE"
    ]
@@ -496,7 +493,7 @@
    "provider": "X-AGE",
    "newMoves": 1,
    "newWeightPct": 0.112,
-   "cumulativeRemainingUnlocked": 35,
+   "cumulativeRemainingUnlocked": 31,
    "newNames": [
     "EXTREME_SPEED"
    ]
@@ -506,7 +503,7 @@
    "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 35,
+   "cumulativeRemainingUnlocked": 31,
    "newNames": []
   },
   {
@@ -514,7 +511,7 @@
    "provider": "D-TILE",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 35,
+   "cumulativeRemainingUnlocked": 31,
    "newNames": []
   },
   {
@@ -522,7 +519,7 @@
    "provider": "D-BG",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 35,
+   "cumulativeRemainingUnlocked": 31,
    "newNames": []
   },
   {
@@ -530,7 +527,7 @@
    "provider": "D-OAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 35,
+   "cumulativeRemainingUnlocked": 31,
    "newNames": []
   },
   {
@@ -538,7 +535,7 @@
    "provider": "D-VRAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 35,
+   "cumulativeRemainingUnlocked": 31,
    "newNames": []
   },
   {
@@ -546,7 +543,7 @@
    "provider": "D-SCAN",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 35,
+   "cumulativeRemainingUnlocked": 31,
    "newNames": []
   }
  ],
@@ -3084,155 +3081,6 @@
    "group": "MULTI"
   },
   {
-   "move": "MOVE_LOVELY_KISS",
-   "id": 142,
-   "name": "LOVELY KISS",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0014880952380952376,
-   "config": "src/animation/sceneOnPresentation.ts:3465",
-   "needs": [
-    "C",
-    "D-PAL"
-   ],
-   "blockers": [
-    {
-     "code": "C",
-     "text": "animationProfile:animationRngAtAge0 (presentation Random2 (gRng2Value))",
-     "cites": [
-      "src/animation/lovelyKiss.ts:28"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "animationProfile:palette (palette host / resource plan)",
-     "cites": [
-      "src/animation/lovelyKiss.ts:35"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationProfile:animationRngAtAge0",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/lovelyKiss.ts:28"
-    },
-    {
-     "path": "animationProfile:heartSpriteSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/lovelyKiss.ts:30"
-    },
-    {
-     "path": "animationProfile:devilSpriteSlot",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/lovelyKiss.ts:32"
-    },
-    {
-     "path": "animationProfile:targetSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/lovelyKiss.ts:34"
-    },
-    {
-     "path": "animationProfile:palette",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/lovelyKiss.ts:35"
-    },
-    {
-     "path": "animationProfile:palette.unfadedAtAge0",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/lovelyKiss.ts:36"
-    },
-    {
-     "path": "animationProfile:palette.fadedAtAge0",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/lovelyKiss.ts:37"
-    },
-    {
-     "path": "animationProfile:palette.hardwareAtAge0",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/lovelyKiss.ts:38"
-    },
-    {
-     "path": "animationProfile:palette.unfadedAfterPinkHeartLoad",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/lovelyKiss.ts:39"
-    },
-    {
-     "path": "animationProfile:palette.fadedAfterPinkHeartLoad",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/lovelyKiss.ts:40"
-    },
-    {
-     "path": "animationProfile:palette.unfadedAfterDevilLoad",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/lovelyKiss.ts:41"
-    },
-    {
-     "path": "animationProfile:palette.fadedAfterDevilLoad",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/lovelyKiss.ts:42"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": null,
-   "carrierOccurrences": 2211,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": false,
-   "lentConstants": [],
-   "providerNeeds": [
-    "C",
-    "D-PAL"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "MULTI"
-  },
-  {
    "move": "MOVE_LUSTER_PURGE",
    "id": 295,
    "name": "LUSTER PURGE",
@@ -4244,179 +4092,6 @@
     "D-TILE",
     "D-BG",
     "F-AUDIO"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "MULTI"
-  },
-  {
-   "move": "MOVE_OCTAZOOKA",
-   "id": 190,
-   "name": "OCTAZOOKA",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0006802721088435374,
-   "config": "src/animation/sceneOnPresentation.ts:2962",
-   "needs": [
-    "C",
-    "D-PAL"
-   ],
-   "blockers": [
-    {
-     "code": "C",
-     "text": "animationProfile:animationRngAtAge0 (presentation Random2 (gRng2Value))",
-     "cites": [
-      "src/animation/octazooka.ts:32"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "animationProfile:palette (palette host / resource plan)",
-     "cites": [
-      "src/animation/octazooka.ts:45"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationProfile:animationRngAtAge0",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/octazooka.ts:32"
-    },
-    {
-     "path": "animationProfile:ballSpriteSlot",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/octazooka.ts:34"
-    },
-    {
-     "path": "animationProfile:smokeSpriteSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/octazooka.ts:36"
-    },
-    {
-     "path": "animationProfile:targetSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/octazooka.ts:38"
-    },
-    {
-     "path": "animationProfile:oam",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/octazooka.ts:40"
-    },
-    {
-     "path": "animationProfile:oam.ballAttr2",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/octazooka.ts:41"
-    },
-    {
-     "path": "animationProfile:oam.smokeAttr2",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/octazooka.ts:42"
-    },
-    {
-     "path": "animationProfile:palette",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/octazooka.ts:45"
-    },
-    {
-     "path": "animationProfile:palette.unfadedAtAge0",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/octazooka.ts:46"
-    },
-    {
-     "path": "animationProfile:palette.fadedAtAge0",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/octazooka.ts:47"
-    },
-    {
-     "path": "animationProfile:palette.hardwareAtAge0",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/octazooka.ts:48"
-    },
-    {
-     "path": "animationProfile:palette.unfadedAfterGraySmokeLoad",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/octazooka.ts:49"
-    },
-    {
-     "path": "animationProfile:palette.fadedAfterGraySmokeLoad",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/octazooka.ts:50"
-    },
-    {
-     "path": "animationProfile:palette.unfadedAfterBlackBallLoad",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/octazooka.ts:51"
-    },
-    {
-     "path": "animationProfile:palette.fadedAfterBlackBallLoad",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/octazooka.ts:52"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": null,
-   "carrierOccurrences": 1209,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": false,
-   "lentConstants": [],
-   "providerNeeds": [
-    "C",
-    "D-PAL"
    ],
    "palettePlan": false,
    "activationMeasured": false,
@@ -7307,292 +6982,6 @@
    "group": "MULTI"
   },
   {
-   "move": "MOVE_SIGNAL_BEAM",
-   "id": 324,
-   "name": "SIGNAL BEAM",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0018459467120181402,
-   "config": "src/animation/sceneOnPresentation.ts:2677",
-   "needs": [
-    "B",
-    "C",
-    "F-AFFINE",
-    "E-TASK",
-    "D-PAL",
-    "D-TILE",
-    "D-BG"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationInputs:spriteOrder (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/signalBeam.ts:73"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationInputs:animationRngSeed (presentation Random2 (gRng2Value))",
-     "cites": [
-      "src/animation/signalBeam.ts:79"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationInputs:attackerSprite (battler sprite record {slot,x,y,x2,y2,subpriority,oamPriority,matrixNum,matrix}: battler owner slot + battler matrix)",
-     "cites": [
-      "src/animation/signalBeam.ts:54"
-     ]
-    },
-    {
-     "code": "E-TASK",
-     "text": "animationInputs:taskSlots (CreateTask slot / live task table)",
-     "cites": [
-      "src/animation/signalBeam.ts:58"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "animationInputs:paletteBlendSpriteSlot (palette host / resource plan)",
-     "cites": [
-      "src/animation/signalBeam.ts:64"
-     ]
-    },
-    {
-     "code": "D-TILE",
-     "text": "animationInputs:resources (OBJ tile/palette resource allocator)",
-     "cites": [
-      "src/animation/signalBeam.ts:65"
-     ]
-    },
-    {
-     "code": "D-BG",
-     "text": "animationInputs:registers (BG regs / monbg / BLDCNT state)",
-     "cites": [
-      "src/animation/signalBeam.ts:78"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationInputs:attackerPictureOrigin",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/signalBeam.ts:52"
-    },
-    {
-     "path": "animationInputs:targetPictureOrigin",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/signalBeam.ts:53"
-    },
-    {
-     "path": "animationInputs:attackerSprite",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/signalBeam.ts:54"
-    },
-    {
-     "path": "animationInputs:targetSprite",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/signalBeam.ts:55"
-    },
-    {
-     "path": "animationInputs:orbPairs",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/signalBeam.ts:57"
-    },
-    {
-     "path": "animationInputs:taskSlots",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/signalBeam.ts:58"
-    },
-    {
-     "path": "animationInputs:taskSlots.attackerShake",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/signalBeam.ts:59"
-    },
-    {
-     "path": "animationInputs:taskSlots.pan",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/signalBeam.ts:60"
-    },
-    {
-     "path": "animationInputs:taskSlots.sinTimer",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/signalBeam.ts:61"
-    },
-    {
-     "path": "animationInputs:taskSlots.targetShake",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/signalBeam.ts:62"
-    },
-    {
-     "path": "animationInputs:paletteBlendSpriteSlot",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/signalBeam.ts:64"
-    },
-    {
-     "path": "animationInputs:resources",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/signalBeam.ts:65"
-    },
-    {
-     "path": "animationInputs:resources.duck",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/signalBeam.ts:66"
-    },
-    {
-     "path": "animationInputs:resources.redOrb",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/signalBeam.ts:67"
-    },
-    {
-     "path": "animationInputs:resources.greenOrb",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/signalBeam.ts:68"
-    },
-    {
-     "path": "animationInputs:matrixBitmap",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/signalBeam.ts:71"
-    },
-    {
-     "path": "animationInputs:matrixSlots",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/signalBeam.ts:72"
-    },
-    {
-     "path": "animationInputs:spriteOrder",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/signalBeam.ts:73"
-    },
-    {
-     "path": "animationInputs:painterSprites",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/signalBeam.ts:74"
-    },
-    {
-     "path": "animationInputs:targetPalette",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/signalBeam.ts:76"
-    },
-    {
-     "path": "animationInputs:registers",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/signalBeam.ts:78"
-    },
-    {
-     "path": "animationInputs:animationRngSeed",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/signalBeam.ts:79"
-    },
-    {
-     "path": "animationInputs:gameplayRng",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/signalBeam.ts:81"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "full",
-   "carrierOccurrences": 2794,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "B",
-    "F-AFFINE",
-    "E-TASK"
-   ],
-   "providerNeeds": [
-    "C",
-    "D-PAL",
-    "D-TILE",
-    "D-BG"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "MULTI"
-  },
-  {
    "move": "MOVE_SKILL_SWAP",
    "id": 285,
    "name": "SKILL SWAP",
@@ -8955,155 +8344,6 @@
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
-   },
-   "group": "MULTI"
-  },
-  {
-   "move": "MOVE_SPIKES",
-   "id": 191,
-   "name": "SPIKES",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0010841836734693875,
-   "config": "src/animation/sceneOnPresentation.ts:2971",
-   "needs": [
-    "C",
-    "D-PAL"
-   ],
-   "blockers": [
-    {
-     "code": "C",
-     "text": "animationProfile:animationRngAtAge0 (presentation Random2 (gRng2Value))",
-     "cites": [
-      "src/animation/spikes.ts:28"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "animationProfile:palette (palette host / resource plan)",
-     "cites": [
-      "src/animation/spikes.ts:36"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationProfile:animationRngAtAge0",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/spikes.ts:28"
-    },
-    {
-     "path": "animationProfile:spriteSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/spikes.ts:30"
-    },
-    {
-     "path": "animationProfile:targetSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/spikes.ts:32"
-    },
-    {
-     "path": "animationProfile:oam",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/spikes.ts:34"
-    },
-    {
-     "path": "animationProfile:palette",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/spikes.ts:36"
-    },
-    {
-     "path": "animationProfile:palette.unfadedAtAge0",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/spikes.ts:37"
-    },
-    {
-     "path": "animationProfile:palette.fadedAtAge0",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/spikes.ts:38"
-    },
-    {
-     "path": "animationProfile:palette.hardwareAtAge0",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/spikes.ts:39"
-    },
-    {
-     "path": "animationProfile:palette.unfadedAfterLoad",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/spikes.ts:40"
-    },
-    {
-     "path": "animationProfile:palette.fadedAfterLoad",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/spikes.ts:41"
-    },
-    {
-     "path": "animationProfile:palette.unfadedAfterMonbg",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/spikes.ts:43"
-    },
-    {
-     "path": "animationProfile:palette.fadedAfterMonbg",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/spikes.ts:44"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": null,
-   "carrierOccurrences": 1829,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": false,
-   "lentConstants": [],
-   "providerNeeds": [
-    "C",
-    "D-PAL"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
    },
    "group": "MULTI"
   },

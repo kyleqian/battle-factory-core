@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 494,
-  "ids": 236,
+  "rows": 513,
+  "ids": 245,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -5254,6 +5254,215 @@
    "move": "DIG",
    "orientation": "player",
    "duration": 195,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 261,
+   "move": "WILL_O_WISP",
+   "orientation": "player",
+   "duration": 214,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 261,
+   "move": "WILL_O_WISP",
+   "orientation": "opponent",
+   "duration": 213,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 228,
+   "move": "PURSUIT",
+   "orientation": "player",
+   "duration": 103,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 228,
+   "move": "PURSUIT",
+   "orientation": "opponent",
+   "duration": 103,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 210,
+   "move": "FURY_CUTTER",
+   "orientation": "player",
+   "duration": 43,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 210,
+   "move": "FURY_CUTTER",
+   "orientation": "opponent",
+   "duration": 43,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 7,
+   "move": "FIRE_PUNCH",
+   "orientation": "player",
+   "duration": 101,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 7,
+   "move": "FIRE_PUNCH",
+   "orientation": "opponent",
+   "duration": 101,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 244,
+   "move": "PSYCH_UP",
+   "orientation": "opponent",
+   "duration": 179,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 174,
+   "move": "CURSE",
+   "orientation": "player",
+   "duration": 176,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 174,
+   "move": "CURSE",
+   "orientation": "opponent",
+   "duration": 176,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 142,
+   "move": "LOVELY_KISS",
+   "orientation": "player",
+   "duration": 152,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 142,
+   "move": "LOVELY_KISS",
+   "orientation": "opponent",
+   "duration": 152,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 191,
+   "move": "SPIKES",
+   "orientation": "player",
+   "duration": 113,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 191,
+   "move": "SPIKES",
+   "orientation": "opponent",
+   "duration": 113,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 190,
+   "move": "OCTAZOOKA",
+   "orientation": "player",
+   "duration": 79,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 190,
+   "move": "OCTAZOOKA",
+   "orientation": "opponent",
+   "duration": 79,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 324,
+   "move": "SIGNAL_BEAM",
+   "orientation": "player",
+   "duration": 145,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 324,
+   "move": "SIGNAL_BEAM",
+   "orientation": "opponent",
+   "duration": 144,
    "expected": 0,
    "drawn": [
     0

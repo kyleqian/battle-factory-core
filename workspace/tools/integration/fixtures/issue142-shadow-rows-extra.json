@@ -1,6 +1,6 @@
 {
  "schema": "issue142-shadow-rows-extra/v1",
- "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep7 rows from issue142ShadowRowsPrep7.py) (+ prep8 rows from issue142ShadowRowsPrep8.py) (+ prep9 rows from issue142ShadowRowsPrep9.py) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep13 ICE_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep13 WATER_SPOUT rows from issue142ShadowRowsPrep13.py) (+ prep13 HIDDEN_POWER rows from issue142ShadowRowsPrep13.py) (+ prep13 HYPER_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep14 RAIN_DANCE rows from issue142ShadowRowsPrep14.py) (+ prep14 WATER_PULSE rows from issue142ShadowRowsPrep14.py) (+ prep14 HAIL rows from issue142ShadowRowsPrep14.py) (+ prep16 Overheat/Silver Wind rows from issue142ShadowRowsPrep16.py) (+ prep16 Overheat/Silver Wind rows from issue142ShadowRowsPrep16.py) (+ r2-gates Fire Punch / Psych Up opponent rows from issue142ShadowRowsR2Gates.py)",
+ "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep7 rows from issue142ShadowRowsPrep7.py) (+ prep8 rows from issue142ShadowRowsPrep8.py) (+ prep9 rows from issue142ShadowRowsPrep9.py) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep13 ICE_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep13 WATER_SPOUT rows from issue142ShadowRowsPrep13.py) (+ prep13 HIDDEN_POWER rows from issue142ShadowRowsPrep13.py) (+ prep13 HYPER_BEAM rows from issue142ShadowRowsPrep13.py) (+ prep14 RAIN_DANCE rows from issue142ShadowRowsPrep14.py) (+ prep14 WATER_PULSE rows from issue142ShadowRowsPrep14.py) (+ prep14 HAIL rows from issue142ShadowRowsPrep14.py) (+ prep16 Overheat/Silver Wind rows from issue142ShadowRowsPrep16.py) (+ prep16 Overheat/Silver Wind rows from issue142ShadowRowsPrep16.py) (+ r2-gates Fire Punch / Psych Up opponent rows from issue142ShadowRowsR2Gates.py) (+ r3 profile Lovely Kiss / Spikes / Octazooka rows from issue142ShadowRowsR3Profile.py)",
  "rows": [
   {
    "id": 236,
@@ -5138,6 +5138,166 @@
     "scenario": "tools/battle-lab/mechanic-curse-stat-opponent-snorlax-player-magikarp.json",
     "body": "stats",
     "activation": "window start = the scenario own Curse activation (curseProbe.py sourceWindow); elevated PIDGEOT target dense 0 px (curse-live-adapter-receipt.json)"
+   }
+  },
+  {
+   "id": 142,
+   "move": "LOVELY_KISS",
+   "orientation": "player",
+   "variant": "r3p-lovely-kiss-player-jynx-opponent-onix",
+   "activationFrame": 73,
+   "windowStart": 73,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/r3-profile-live/lovely-kiss-player-jynx-opponent-onix.json",
+    "scenario": "tools/battle-lab/mechanic-lovely-kiss-player-jynx-opponent-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own first-body activation (prep22 moves/*.json; elevated GOLBAT target dense 0 px in the r3 receipt)"
+   },
+   "presentationRngActivation": {
+    "value": 254129500,
+    "source": "prep22Probe mechanic-lovely-kiss-player-jynx-opponent-onix gRng2Value at activation frame 73"
+   }
+  },
+  {
+   "id": 142,
+   "move": "LOVELY_KISS",
+   "orientation": "opponent",
+   "variant": "r3p-lovely-kiss-opponent-jynx-player-onix",
+   "activationFrame": 77,
+   "windowStart": 77,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/r3-profile-live/lovely-kiss-opponent-jynx-player-onix.json",
+    "scenario": "tools/battle-lab/mechanic-lovely-kiss-opponent-jynx-player-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own first-body activation (prep22 moves/*.json; elevated GOLBAT target dense 0 px in the r3 receipt)"
+   },
+   "presentationRngActivation": {
+    "value": 1968892309,
+    "source": "prep22Probe mechanic-lovely-kiss-opponent-jynx-player-onix gRng2Value at activation frame 77"
+   }
+  },
+  {
+   "id": 191,
+   "move": "SPIKES",
+   "orientation": "player",
+   "variant": "r3p-spikes-player-qwilfish-opponent-onix",
+   "activationFrame": 67,
+   "windowStart": 67,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/r3-profile-live/spikes-player-qwilfish-opponent-onix.json",
+    "scenario": "tools/battle-lab/mechanic-spikes-player-qwilfish-opponent-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own first-body activation (prep22 moves/*.json; elevated GOLBAT target dense 0 px in the r3 receipt)"
+   }
+  },
+  {
+   "id": 191,
+   "move": "SPIKES",
+   "orientation": "opponent",
+   "variant": "r3p-spikes-opponent-qwilfish-player-onix",
+   "activationFrame": 71,
+   "windowStart": 71,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/r3-profile-live/spikes-opponent-qwilfish-player-onix.json",
+    "scenario": "tools/battle-lab/mechanic-spikes-opponent-qwilfish-player-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own first-body activation (prep22 moves/*.json; elevated GOLBAT target dense 0 px in the r3 receipt)"
+   }
+  },
+  {
+   "id": 190,
+   "move": "OCTAZOOKA",
+   "orientation": "player",
+   "variant": "r3p-octazooka-alt-player-kingler-golem",
+   "activationFrame": 76,
+   "windowStart": 76,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/r3-profile-live/octazooka-alt-player-kingler-golem.json",
+    "scenario": "tools/battle-lab/prep22-octazooka-alt-player-kingler-golem.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own first-body activation (prep22 moves/*.json; elevated GOLBAT target dense 0 px in the r3 receipt)"
+   }
+  },
+  {
+   "id": 190,
+   "move": "OCTAZOOKA",
+   "orientation": "opponent",
+   "variant": "r3p-octazooka-alt-opponent-kingler-golem",
+   "activationFrame": 80,
+   "windowStart": 80,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/r3-profile-live/octazooka-alt-opponent-kingler-golem.json",
+    "scenario": "tools/battle-lab/prep22-octazooka-alt-opponent-kingler-golem.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own first-body activation (prep22 moves/*.json; elevated GOLBAT target dense 0 px in the r3 receipt)"
+   }
+  },
+  {
+   "id": 324,
+   "move": "SIGNAL_BEAM",
+   "orientation": "player",
+   "variant": "r3p-signal-beam-player-ariados-opponent-chansey",
+   "activationFrame": 78,
+   "windowStart": 78,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/r3-profile-live/signal-beam-player-ariados-opponent-chansey.json",
+    "scenario": "tools/battle-lab/mechanic-signal-beam-player-ariados-opponent-chansey.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own first-body activation (prep22 moves/*.json; elevated GOLBAT target dense 0 px in the r3 receipt)"
+   }
+  },
+  {
+   "id": 324,
+   "move": "SIGNAL_BEAM",
+   "orientation": "opponent",
+   "variant": "r3p-signal-beam-opponent-ariados-player-chansey",
+   "activationFrame": 82,
+   "windowStart": 82,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/r3-profile-live/signal-beam-opponent-ariados-player-chansey.json",
+    "scenario": "tools/battle-lab/mechanic-signal-beam-opponent-ariados-player-chansey.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own first-body activation (prep22 moves/*.json; elevated GOLBAT target dense 0 px in the r3 receipt)"
    }
   }
  ]

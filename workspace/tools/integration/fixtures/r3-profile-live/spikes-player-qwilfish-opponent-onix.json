@@ -1,0 +1,36 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "SPIKES",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-spikes-player-qwilfish-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 67,
+  "endFrame": 179
+ },
+ "windowSource": "window = [activation, activation + 113 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "QWILFISH",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019083,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 140,
+  "playerMaxHp": 140,
+  "opponentHp": 142,
+  "opponentMaxHp": 142,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

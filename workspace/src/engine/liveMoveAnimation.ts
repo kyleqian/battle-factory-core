@@ -80,6 +80,10 @@ import { hiddenPowerUnownFormIndex } from "../animation/hiddenPower.ts";
 import type { FlailPower } from "../animation/flail.ts";
 import type { HailProfile } from "../animation/hail.ts";
 import { composeLivePalettes, liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
+import lovelyKissAsset from "../animation/assets/lovely-kiss.json" with { type: "json" };
+import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
+import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
+import { liveLovelyKissProfile, liveOctazookaProfile, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
 import { liveCurseStatsInputs, liveFuryCutterInputs, livePursuitInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
 import {
@@ -114,6 +118,10 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   91,
   // Rollout counter bodies 1..5 (request.rolloutCounter, docs/rollout-endeavor-prep.md s0.1).
   205,
+  // prep22 P1 (docs/next-adapters-prep22.md s B.5): Spikes and Octazooka through the shared profile builder (liveProfileMoves.ts).
+  191, 190,
+  // prep22 P3: Signal Beam first body (the WIN0 first-body registers and the lent order are the first-body inputs).
+  324,
   // oam1 (docs/next-adapters-prep20.md): production hardware-OAM provider (liveMoveOamAssembler.ts), first body.
   // Fury Cutter: the counter-1 body only (a first body implies furyCutterCounter 1).
   261, 228, 210,
@@ -307,6 +315,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     261, 228, 210,
     // curse-live: Curse (stats body) activation == window start (row 0; curseProbe.py sourceWindow, elevated PIDGEOT target dense).
     174,
+    // prep22 P1: Lovely Kiss (faithful-random), Spikes, Octazooka windows start at activation (row 0; prep22 moves/*.json, both sides).
+    142, 191, 190, 324,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -765,6 +775,12 @@ export function liveMoveAnimationDuration(
     case 273: return 271; // Wish accepted window (65..335 / 69..339).
     // Dig (prep18 s1.1): setup 195 rows / unleash 68 rows, both from the activation (the turn bit selects the body like Fly/Bounce).
     case 91: return (request.turn & 1) === 0 ? 195 : 68;
+    // Profile moves (prep22 s0.2, bodies from the activation): Lovely Kiss 152 (faithful-random), Spikes 113, Octazooka 79.
+    case 142: return 152;
+    case 191: return 113;
+    case 190: return 79;
+    // Signal Beam first body: signalBeamFirstInactiveAge = 18 + |pan target - initial| = 145 (player attacker) / 144 (opponent), prep22 s0.2.
+    case 324: return request.attacker === 0 ? 145 : 144;
     case 189: return 51; // Mud-Slap A..A+50 (prep17: 77..127 / 81..131 / alt 72..122).
     case 28: return 58; // Sand-Attack A..A+57 (78..135 / 82..139 / alt 73..130).
     case 63: return 280; // Hyper Beam faithful-random body 79..358 / 83..362 (prep13 s0.1; reducer first inactive age 279).
@@ -2376,6 +2392,46 @@ export function liveMoveAnimationPresentation(
       config = { move: "HYPER_BEAM", attacker, target, fieldProfile, animationGeometry,
         animationProfile: { orbs: words.map((word, index) => ({ ...word, slot: slots[index]!, persistentOrder: lentOrder.indexOf(slots[index]!) })),
           ...subs, spriteOrderSeed: lentOrder } };
+      break;
+    }
+    case 142: case 191: case 190: {
+      // prep22 P1 (docs/next-adapters-prep22.md s B.5): the shared profile builder. Slots / subpriority / attr2 / palette snapshots are
+      // production-derivable (liveProfileMoves.ts); the effect pictures are drawn from the displayed species art, so only a tracker lend
+      // (the first-body / known-order gate: the activation order differs between bodies of one battle) and a non-shiny pair are required.
+      // Lovely Kiss reads its activation value from the presentation host (the four `% 180` draws replay from it); no host = decline.
+      if (!spriteOrderInput?.known) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      if (palettes === null) return null;
+      const targetSide = target.geometry.side;
+      const base = { free: KNOWN_ENTRY_FREE_SPRITE_SLOTS, targetSide, palettes };
+      if (request.moveId === 142) {
+        const words = liveMovePresentationRngWords(presentationRngInput);
+        if (words === null || words.draws.length !== 1 || words.words.length !== 4) return null;
+        config = { move: "LOVELY_KISS", attacker, target, fieldProfile,
+          animationProfile: liveLovelyKissProfile({ ...base, activationRng: words.activationValue,
+            pinkHeartPalette: lovelyKissAsset.pinkHeart.palette, devilPalette: lovelyKissAsset.devil.palette }) };
+      } else if (request.moveId === 191) {
+        config = { move: "SPIKES", attacker, target, fieldProfile, animationProfile: liveSpikesProfile({ ...base, activationRng: 0, spikePalette: spikesAsset.spike.palette }) };
+      } else {
+        config = { move: "OCTAZOOKA", attacker, target, fieldProfile, animationProfile: liveOctazookaProfile({ ...base, activationRng: 0,
+          graySmokePalette: octazookaAsset.graySmoke.palette, blackBallPalette: octazookaAsset.blackBall.palette }) };
+      }
+      break;
+    }
+    case 324: {
+      // prep22 P3 (docs/next-adapters-prep22.md s B.5): Signal Beam, first body only (WIN0 (240, 161) is the battle's first-body reset and the
+      // painter order is the lent known-entry order); a later body declines. Non-shiny, the assets-only composite palette.
+      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const lentOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (palettes === null || lentOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      config = { move: "SIGNAL_BEAM", attacker, target, fieldProfile,
+        animationInputs: liveSignalBeamInputs({ attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors,
+          palettes, spriteOrder: lentOrder }) as never };
       break;
     }
     case 91: {

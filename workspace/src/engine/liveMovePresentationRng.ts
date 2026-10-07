@@ -44,6 +44,9 @@ export const LIVE_MOVE_RANDOM2_PLANS: Readonly<Record<number, readonly Presentat
   // per sprite in spawn order (battle_anim_ground.c:213-214); wave rows A+9 (Mud) / A+12 (Sand), step 4 (prep17 s0.2, authoritative).
   189: Object.freeze(Array.from({ length: 6 }, (_, w) => Object.freeze({ ageOffset: 9 + 4 * w, count: 10 }))),
   28: Object.freeze(Array.from({ length: 6 }, (_, w) => Object.freeze({ ageOffset: 12 + 4 * w, count: 10 }))),
+  // Move_LOVELY_KISS: four AnimPinkHeart sprites switch to AnimPinkHeart_Step on the same frame (+120) and each draws
+  // `data[3] = Random2() % 180` (battle_anim_effects_2.c:3577; prep22 s B.1, plan replay == accepted animationRng 153/153).
+  142: Object.freeze([Object.freeze({ ageOffset: 120, count: 4 })]),
   // Move_RAIN_DANCE: two AnimTask_CreateRaindrops tasks, 40 spawn frames (ages 18, 20, then 23 step 3 to 134) x 4 words
   // (x0, y0, x1, y1; battle_anim_water.c:495-496). The reducer replays them from the activation state alone.
   240: Object.freeze([18, 20, ...Array.from({ length: 38 }, (_, i) => 23 + 3 * i)].map((ageOffset) => Object.freeze({ ageOffset, count: 4 }))),

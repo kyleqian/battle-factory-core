@@ -1,0 +1,40 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "LOVELY_KISS",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep22-lovely-kiss-alt-opponent-hypno-golem.json",
+ "denseWindow": {
+  "startFrame": 78,
+  "endFrame": 229
+ },
+ "windowSource": "window = [activation, activation + 152 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "HYPNO",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793700007,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 155,
+  "playerMaxHp": 155,
+  "opponentHp": 160,
+  "opponentMaxHp": 160,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "presentationRngActivation": {
+  "value": 689912548,
+  "source": "prep22Probe prep22-lovely-kiss-alt-opponent-hypno-golem gRng2Value at activation frame 78"
+ }
+}

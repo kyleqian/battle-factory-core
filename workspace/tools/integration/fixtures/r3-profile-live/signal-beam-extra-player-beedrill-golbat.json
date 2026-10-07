@@ -1,0 +1,36 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "SIGNAL_BEAM",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/r3-signal-beam-extra-player-beedrill-golbat.json",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 223
+ },
+ "windowSource": "window = [activation, activation + 145 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "BEEDRILL",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019090,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 141,
+  "playerMaxHp": 141,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

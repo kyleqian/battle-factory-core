@@ -1,0 +1,36 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "SIGNAL_BEAM",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep22-signal-beam-alt-player-venomoth-golem.json",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 223
+ },
+ "windowSource": "window = [activation, activation + 145 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "VENOMOTH",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019090,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 146,
+  "playerMaxHp": 146,
+  "opponentHp": 187,
+  "opponentMaxHp": 187,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

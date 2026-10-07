@@ -1,0 +1,42 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "OCTAZOOKA",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/r3-octazooka-extra-player-octillery-golbat.json",
+ "denseWindow": {
+  "startFrame": 226,
+  "endFrame": 304
+ },
+ "windowSource": "window = [activation, activation + 79 - 1] from a fresh prep22Probes.sh run",
+ "attacker": {
+  "species": "OCTILLERY",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019100,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 133,
+  "playerMaxHp": 150,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ]
+}
