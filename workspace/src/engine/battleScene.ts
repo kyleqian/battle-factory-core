@@ -30363,20 +30363,26 @@ export function renderSceneOnMovePresentation(
     const attackerReappeared =
       view.attackerAffine.invisible && view.attackerVisible;
     const playerToOpponent =
-      view.attacker.species === "ARCANINE"
+      (liveField || view.attacker.species === "ARCANINE")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "DUGTRIO"
+      && (liveField || view.target.species === "DUGTRIO")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "ARCANINE"
+      (liveField || view.attacker.species === "ARCANINE")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "DUGTRIO"
+      && (liveField || view.target.species === "DUGTRIO")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged EXTREME_SPEED pair ${view.attacker.species}->${view.target.species}`,
       );
     }
+    // Live: the field's battler art and sprite corners (the adapter declines a non-zero idle rest, so the corner is the rest
+    // position); staged: the accepted ARCANINE / DUGTRIO sheets and corners.
+    const esAttackerArt = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent ? arcanineBackSprite : arcanineFrontSprite;
+    const esTargetArt = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent ? dugtrioFrontSprite : dugtrioBackSprite;
+    const esAttackerCorner = liveField ? view.attacker.geometry.spriteCorner : playerToOpponent ? { x: 40, y: 54 } : { x: 144, y: 10 };
+    const esTargetCorner = liveField ? view.target.geometry.spriteCorner : playerToOpponent ? { x: 144, y: 21 } : { x: 40, y: 59 };
     const scrollX =
       ((view.background.scrollX % 256) + 256) % 256;
     const gpuDarken = (palette: readonly RgbColor[]) =>
@@ -30417,18 +30423,18 @@ export function renderSceneOnMovePresentation(
     if (playerToOpponent) {
       drawSpriteSheet(
         fb,
-        dugtrioFrontSprite.tileset,
-        dugtrioFrontSprite.palette,
-        144 + displayedImpact.targetX2,
-        21,
+        esTargetArt.tileset,
+        esTargetArt.palette,
+        esTargetCorner.x + displayedImpact.targetX2,
+        esTargetCorner.y,
       );
       if (!view.attackerAffine.invisible || view.attackerVisible) {
         drawSpriteSheetAffineStretch(
           fb,
-          arcanineBackSprite.tileset,
-          arcanineBackSprite.palette,
-          40,
-          54,
+          esAttackerArt.tileset,
+          esAttackerArt.palette,
+          esAttackerCorner.x,
+          esAttackerCorner.y,
           attackerReappeared ? 256 : view.attackerAffine.xScale,
           attackerReappeared ? 256 : view.attackerAffine.yScale,
           attackerReappeared ? 0 : view.attackerAffine.y2,
@@ -30441,10 +30447,10 @@ export function renderSceneOnMovePresentation(
       if (!view.attackerAffine.invisible || view.attackerVisible) {
         drawSpriteSheetAffineStretch(
           fb,
-          arcanineFrontSprite.tileset,
-          arcanineFrontSprite.palette,
-          144,
-          10,
+          esAttackerArt.tileset,
+          esAttackerArt.palette,
+          esAttackerCorner.x,
+          esAttackerCorner.y,
           attackerReappeared ? 256 : view.attackerAffine.xScale,
           attackerReappeared ? 256 : view.attackerAffine.yScale,
           attackerReappeared ? 0 : view.attackerAffine.y2,
@@ -30455,10 +30461,10 @@ export function renderSceneOnMovePresentation(
       }
       drawSpriteSheet(
         fb,
-        dugtrioBackSprite.tileset,
-        dugtrioBackSprite.palette,
-        40 + displayedImpact.targetX2,
-        59,
+        esTargetArt.tileset,
+        esTargetArt.palette,
+        esTargetCorner.x + displayedImpact.targetX2,
+        esTargetCorner.y,
       );
     }
     for (const hitsplat of view.hitsplats) {
@@ -30495,6 +30501,8 @@ export function renderSceneOnMovePresentation(
         attackerCenter.y + dust.y2 - 8,
       );
     }
+    // The live HUD owns the healthboxes and the message window (liveField).
+    if (liveField) return;
     if (playerToOpponent) {
       drawSendOutHealthbox(
         fb,

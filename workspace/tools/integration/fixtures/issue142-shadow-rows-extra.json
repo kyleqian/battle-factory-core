@@ -6397,6 +6397,44 @@
    "requestFields": {
     "turn": 0
    }
+  },
+  {
+   "id": 245,
+   "move": "EXTREME_SPEED",
+   "orientation": "player",
+   "variant": "s10a-extreme-speed-player-arcanine-opponent-dugtrio",
+   "activationFrame": 78,
+   "windowStart": 78,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/s10a-live/extreme-speed-player-arcanine-opponent-dugtrio.json",
+    "scenario": "tools/battle-lab/mechanic-extreme-speed-player-arcanine-dugtrio.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep22Probes.sh, 2 fresh runs; docs/next-adapters-prep34.md; em-live-receipt.json)"
+   }
+  },
+  {
+   "id": 245,
+   "move": "EXTREME_SPEED",
+   "orientation": "opponent",
+   "variant": "s10a-extreme-speed-opponent-arcanine-player-dugtrio",
+   "activationFrame": 82,
+   "windowStart": 82,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/s10a-live/extreme-speed-opponent-arcanine-player-dugtrio.json",
+    "scenario": "tools/battle-lab/mechanic-extreme-speed-arcanine-dugtrio.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep22Probes.sh, 2 fresh runs; docs/next-adapters-prep34.md; em-live-receipt.json)"
+   }
   }
  ]
 }

@@ -3654,7 +3654,7 @@
         "dense full windows zero residual twice fresh through the production live renderer, both orientations, all three counters: accepted KECLEON -> BLISSEY and prep29 SEVIPER -> GOLEM alternates (12 windows, 1300/1300 rows; tools/integration/fixtures/s10a-live/spit-up-*.json, receipts s10a-live/receipts/)"
       ],
       "remaining": [
-        "shiny battlers and non-zero idle rests decline (the shake x2 programs are proven from a zero rest only); an unknown lent order declines",
+        "shiny battlers and a non-zero TARGET idle rest decline (the ShakeTarget x2 program is proven from a zero rest only; an attacker rest engages since species audit 10: ONIX / RATTATA opponent attackers 0 px twice fresh, tools/integration/fixtures/s10a-p0/spit-up-attacker-rest/); an unknown lent order declines",
         "the burst-row partial sprite snapshots (prep31 T) never reach hardware OAM and are not modelled; doubles / contest paths not covered"
       ]
     },
@@ -3671,6 +3671,21 @@
       "remaining": [
         "shiny battlers and non-zero idle rests decline; an unknown lent order declines",
         "later-body registers are the first-body block S0 (the renderer branch reads only body-written BG values / bldalpha); doubles / contest paths not covered"
+      ]
+    },
+    {
+      "move": "MOVE_EXTREME_SPEED",
+      "id": 245,
+      "sourceFieldEvidence": "../tools/integration/fixtures/em-live-receipt.json",
+      "liveEvidence": [
+        "docs/next-adapters-prep34.md s1: the unchanged reducer src/animation/extremeSpeed.ts at reducer age 43 on the activation row (live age 0 = activation, animationAgeOffset 43, both sides, both species pairs), duration 321 rows; the attacker pic-coords yOffset is the A input of the stretch y2 (SceneOnExtremeSpeedConfig.attackerYOffset from the art view's coords.yOffset; absent = the accepted ARCANINE 6 / 2); hit-splat anchor = the target sprite centre; no Random2, lag or history input; never a capture row",
+        "renderer: battleScene.ts EXTREME_SPEED branch with live-field gates, live battler art at the field sprite corners, healthboxes / message under !liveField; staged / accepted outputs byte-identical (tools/integration/s10aStagedDigest.ts at dc0283345 == at the change)",
+        "dense full windows zero residual twice fresh through the production live renderer from each scenario's own activation, both orientations: accepted ARCANINE -> DUGTRIO P / O, prep34 SMEARGLE -> GOLEM P / O, elevated opponent target SMEARGLE -> GOLBAT P (#142 shadow row 0) (5 windows, 1605 / 1605 rows; tools/integration/fixtures/s10a-live/extreme-speed-*.json)",
+        "ordinary route 182/21 ARCANINE (slot 1): live every age (321), following prompt reached, Scene ON/OFF gameplay / RNG / facility parity (tests/animation/liveExtremeSpeedMementoAdapters.test.ts)"
+      ],
+      "remaining": [
+        "shiny battlers and non-zero idle rests on either battler decline (no rest window measured; the impact program writes the target x2)",
+        "doubles / contest paths not covered"
       ]
     }
   ],
@@ -3695,7 +3710,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 246,
+  "implementedCount": 247,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 12,

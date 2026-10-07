@@ -1505,6 +1505,11 @@ export interface SceneOnExtremeSpeedConfig {
   readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
   /** Player-side move-used text releases the source body four frames sooner. */
   readonly animationAgeOffset?: number;
+  /**
+   * The attacker's pic-coords yOffset (back table for a player attacker, front for an opponent; prep34 s1.4 A). Absent = the
+   * accepted ARCANINE values 6 / 2 the staged fixtures were built with.
+   */
+  readonly attackerYOffset?: number;
 }
 
 export interface SceneOnAerialAceConfig {
@@ -12981,7 +12986,7 @@ export function sceneOnExtremeSpeedView(
     ),
     attackerAffine: extremeSpeedAttackerAffineAtAge(
       animationAge,
-      state.config.attacker.geometry.side === "player" ? 6 : 2,
+      state.config.attackerYOffset ?? (state.config.attacker.geometry.side === "player" ? 6 : 2),
     ),
     attackerVisible: extremeSpeedAttackerVisibleAtAge(animationAge),
     dust: extremeSpeedDustAtAge(animationAge),

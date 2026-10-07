@@ -1,0 +1,249 @@
+{
+ "schema": "em-live-receipt/v1",
+ "testedCommit": "cf807194769d33f6cd4c64ba94d26dd7d8ed4de2",
+ "testedSrcTree": "3589f6252c61617be31237e6c18e014ef4179235",
+ "dirty": true,
+ "commands": [
+  "JOBS=16 sh tools/integration/prep22Probes.sh PROBEDIR 2 <the scenarios named by each fixture>",
+  "python3 tools/integration/s10aEsMementoFixtures.py PROBEDIR",
+  "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/s10a-live/<extreme-speed|memento>-*.json (two independent invocations A / B)",
+  "npx vite-node tools/integration/s10aStagedDigest.ts (at dc0283345 and at the change)"
+ ],
+ "windows": [
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/extreme-speed-alt-opponent-smeargle-golem.json",
+   "move": "EXTREME_SPEED",
+   "invocationA": {
+    "selectedPhase": true,
+    "window": 321,
+    "expectedDuration": 321,
+    "violations": [],
+    "runs": [
+     {
+      "residualPixels": 0,
+      "exactRows": 321,
+      "digest": "1ab5a922eb6db2ef314328173c28b4f56e78448ed6e8c69a5eeda4612f767711",
+      "affectedAges": []
+     },
+     {
+      "residualPixels": 0,
+      "exactRows": 321,
+      "digest": "1ab5a922eb6db2ef314328173c28b4f56e78448ed6e8c69a5eeda4612f767711",
+      "affectedAges": []
+     }
+    ]
+   },
+   "invocationB": {
+    "selectedPhase": true,
+    "window": 321,
+    "expectedDuration": 321,
+    "violations": [],
+    "runs": [
+     {
+      "residualPixels": 0,
+      "exactRows": 321,
+      "digest": "1ab5a922eb6db2ef314328173c28b4f56e78448ed6e8c69a5eeda4612f767711",
+      "affectedAges": []
+     },
+     {
+      "residualPixels": 0,
+      "exactRows": 321,
+      "digest": "1ab5a922eb6db2ef314328173c28b4f56e78448ed6e8c69a5eeda4612f767711",
+      "affectedAges": []
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/extreme-speed-alt-player-smeargle-golbat.json",
+   "move": "EXTREME_SPEED",
+   "invocationA": {
+    "selectedPhase": true,
+    "window": 321,
+    "expectedDuration": 321,
+    "violations": [],
+    "runs": [
+     {
+      "residualPixels": 0,
+      "exactRows": 321,
+      "digest": "1768f5174cdc789158c5801128cc8a7f49bfd76c4338131442a54e07a7bfd4bb",
+      "affectedAges": []
+     },
+     {
+      "residualPixels": 0,
+      "exactRows": 321,
+      "digest": "1768f5174cdc789158c5801128cc8a7f49bfd76c4338131442a54e07a7bfd4bb",
+      "affectedAges": []
+     }
+    ]
+   },
+   "invocationB": {
+    "selectedPhase": true,
+    "window": 321,
+    "expectedDuration": 321,
+    "violations": [],
+    "runs": [
+     {
+      "residualPixels": 0,
+      "exactRows": 321,
+      "digest": "1768f5174cdc789158c5801128cc8a7f49bfd76c4338131442a54e07a7bfd4bb",
+      "affectedAges": []
+     },
+     {
+      "residualPixels": 0,
+      "exactRows": 321,
+      "digest": "1768f5174cdc789158c5801128cc8a7f49bfd76c4338131442a54e07a7bfd4bb",
+      "affectedAges": []
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/extreme-speed-alt-player-smeargle-golem.json",
+   "move": "EXTREME_SPEED",
+   "invocationA": {
+    "selectedPhase": true,
+    "window": 321,
+    "expectedDuration": 321,
+    "violations": [],
+    "runs": [
+     {
+      "residualPixels": 0,
+      "exactRows": 321,
+      "digest": "d73d971f74c5fc356b592461d4fbd883dd98e448fd1b026a8dc61258169e1b18",
+      "affectedAges": []
+     },
+     {
+      "residualPixels": 0,
+      "exactRows": 321,
+      "digest": "d73d971f74c5fc356b592461d4fbd883dd98e448fd1b026a8dc61258169e1b18",
+      "affectedAges": []
+     }
+    ]
+   },
+   "invocationB": {
+    "selectedPhase": true,
+    "window": 321,
+    "expectedDuration": 321,
+    "violations": [],
+    "runs": [
+     {
+      "residualPixels": 0,
+      "exactRows": 321,
+      "digest": "d73d971f74c5fc356b592461d4fbd883dd98e448fd1b026a8dc61258169e1b18",
+      "affectedAges": []
+     },
+     {
+      "residualPixels": 0,
+      "exactRows": 321,
+      "digest": "d73d971f74c5fc356b592461d4fbd883dd98e448fd1b026a8dc61258169e1b18",
+      "affectedAges": []
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/extreme-speed-opponent-arcanine-player-dugtrio.json",
+   "move": "EXTREME_SPEED",
+   "invocationA": {
+    "selectedPhase": true,
+    "window": 321,
+    "expectedDuration": 321,
+    "violations": [],
+    "runs": [
+     {
+      "residualPixels": 0,
+      "exactRows": 321,
+      "digest": "3f3f325780950b9dfa1d97c2592b99c7b76c37a68772e714d9035bd673a379d5",
+      "affectedAges": []
+     },
+     {
+      "residualPixels": 0,
+      "exactRows": 321,
+      "digest": "3f3f325780950b9dfa1d97c2592b99c7b76c37a68772e714d9035bd673a379d5",
+      "affectedAges": []
+     }
+    ]
+   },
+   "invocationB": {
+    "selectedPhase": true,
+    "window": 321,
+    "expectedDuration": 321,
+    "violations": [],
+    "runs": [
+     {
+      "residualPixels": 0,
+      "exactRows": 321,
+      "digest": "3f3f325780950b9dfa1d97c2592b99c7b76c37a68772e714d9035bd673a379d5",
+      "affectedAges": []
+     },
+     {
+      "residualPixels": 0,
+      "exactRows": 321,
+      "digest": "3f3f325780950b9dfa1d97c2592b99c7b76c37a68772e714d9035bd673a379d5",
+      "affectedAges": []
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/extreme-speed-player-arcanine-opponent-dugtrio.json",
+   "move": "EXTREME_SPEED",
+   "invocationA": {
+    "selectedPhase": true,
+    "window": 321,
+    "expectedDuration": 321,
+    "violations": [],
+    "runs": [
+     {
+      "residualPixels": 0,
+      "exactRows": 321,
+      "digest": "4428770f9b4caa693ebd15c1c9e1e2eedab62d582e0014484d735c76dcb0c451",
+      "affectedAges": []
+     },
+     {
+      "residualPixels": 0,
+      "exactRows": 321,
+      "digest": "4428770f9b4caa693ebd15c1c9e1e2eedab62d582e0014484d735c76dcb0c451",
+      "affectedAges": []
+     }
+    ]
+   },
+   "invocationB": {
+    "selectedPhase": true,
+    "window": 321,
+    "expectedDuration": 321,
+    "violations": [],
+    "runs": [
+     {
+      "residualPixels": 0,
+      "exactRows": 321,
+      "digest": "4428770f9b4caa693ebd15c1c9e1e2eedab62d582e0014484d735c76dcb0c451",
+      "affectedAges": []
+     },
+     {
+      "residualPixels": 0,
+      "exactRows": 321,
+      "digest": "4428770f9b4caa693ebd15c1c9e1e2eedab62d582e0014484d735c76dcb0c451",
+      "affectedAges": []
+     }
+    ]
+   }
+  }
+ ],
+ "stagedByteIdentity": {
+  "base": {
+   "EXTREME_SPEED player-to-opponent": "9b37b06f8273962ecd61f13c81ac208f346151cc02e35685309a4255585f4c98",
+   "EXTREME_SPEED opponent-to-player": "fd464a9c5090f3d77cdaf289b4bd6c11482f1b315d91e515ff1b25590a89674f",
+   "MEMENTO player": "2f90fb0d6e1b919ede6149a7b765ba7cfa1dc235724c3291f3392a3006480608",
+   "MEMENTO opponent": "9ea6e41861059dfea44cf4c4fce85ecb03698a693697b5c6dda101bd86a4a3d9"
+  },
+  "change": {
+   "EXTREME_SPEED player-to-opponent": "9b37b06f8273962ecd61f13c81ac208f346151cc02e35685309a4255585f4c98",
+   "EXTREME_SPEED opponent-to-player": "fd464a9c5090f3d77cdaf289b4bd6c11482f1b315d91e515ff1b25590a89674f",
+   "MEMENTO player": "2f90fb0d6e1b919ede6149a7b765ba7cfa1dc235724c3291f3392a3006480608",
+   "MEMENTO opponent": "9ea6e41861059dfea44cf4c4fce85ecb03698a693697b5c6dda101bd86a4a3d9"
+  },
+  "identical": true
+ }
+}

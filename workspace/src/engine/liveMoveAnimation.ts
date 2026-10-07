@@ -211,6 +211,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   216,
   // Spit Up, all three Stockpile counters (docs/next-adapters-prep31.md s2 / s3; liveSpitUpInputs.ts): any known lend.
   255,
+  // Extreme Speed (docs/next-adapters-prep34.md s1): reducer age 43 at activation, 321 rows; no Random2 / lag / history input.
+  245,
   // Shock Wave (docs/next-adapters-prep33.md s1 / s3; liveOamMoves.ts liveShockWaveInputs): the reducer's geometry-derived timing, any known lend.
   351,
   // anchor3: source battler anchors (position center, picture height, pic offset).
@@ -451,6 +453,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     291,
     // Sheer Cold (ISSUES #151, species audit 7 elevated FLYGON / GOLBAT opponent, both orientations): activation == window start (row 0).
     329,
+    // Extreme Speed (prep34 s1.5): live age 0 = activation (s10a-live/extreme-speed-*.json; elevated GOLBAT target window).
+    245,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -638,6 +642,7 @@ export function liveMoveAnimationDuration(
       return inputs === null ? null : waterSpoutTimeline(inputs).length;
     }
     case 2: return KARATE_CHOP_FRAME_COUNT;
+    case 245: return 321; // Extreme Speed: activation .. first inactive row (prep34 s1.1, both sides, both species pairs).
     case 9: return THUNDER_PUNCH_MOVE_BODY_LAST_AGE + 1;
     case 5: return 160; // Mega Punch source body through first inactive row.
     case 11: return 42; // Vice Grip source body through first inactive row.
@@ -2029,6 +2034,19 @@ export function liveMoveAnimationPresentation(
     // The attacker's displayed HP is already 0 at the event (setatkhptozero precedes attackanimation; prep6 s2.1),
     // the same displayed-field path as Explosion; the live seam reads it from the field.
     case 120: config = { move: "SELF_DESTRUCT", attacker, target, fieldProfile }; break;
+    case 245: {
+      // Extreme Speed (docs/next-adapters-prep34.md s1.4 / s1.5): reducer age 43 at the activation row (live age 0), both sides; the attacker's
+      // pic-coords yOffset is the A input of the stretch y2. The renderer draws the live battler art at the field corners: zero idle rests
+      // (the impact program writes the target x2 absolutely; no rest window was measured) and non-shiny battlers (normal palettes).
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const targetRest = liveBattlerAnchors(target.geometry.side, art, battlerX2Input).frontIdleRest;
+      if (attackerAnchors.frontIdleRest.x2 !== 0 || attackerAnchors.frontIdleRest.y2 !== 0 || targetRest.x2 !== 0 || targetRest.y2 !== 0) return null;
+      // The hit splats' anchor is the target battler sprite (x, y) on both sides (prep34 s1.4 A: DUGTRIO (72, 91), GOLEM (72, 96)).
+      config = { move: "EXTREME_SPEED", attacker, target: affineCenterBattler(target), animationAgeOffset: 43,
+        attackerYOffset: liveBattlerCoordAttrs(attacker.geometry.side, art).yOffset,
+        fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" } };
+      break;
+    }
     case 256: {
       // Stockpile count = request.turn (measured 1/2/3, prep6-swallow-probe.json). The attacker's affine centre is the
       // OBJ/sprite centre (affineCenterBattler), not the pic point; the pic point and coords.yOffset are separate inputs.

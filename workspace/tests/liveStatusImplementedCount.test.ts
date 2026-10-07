@@ -20,7 +20,7 @@ describe("animation-integration live status count", () => {
   it("keeps the faithful-random bucket separate from implementedCount (D3, docs/presentation-rng.md)", () => {
     const status = JSON.parse(readFileSync(join(import.meta.dirname, "../docs/animation-integration-live-status.json"), "utf8"));
     // 248 - Sheer Cold / Hyper Voice reclassified to faithful timing (ISSUES #151 D4 accounting).
-    expect(status.implementedCount).toBe(246);
+    expect(status.implementedCount).toBe(247);
     expect(status.playableExactCount).toBe(0);
     const faithful = status.faithfulRandomAdapters as { id: number; move: string; policy: string; provenance: string }[];
     expect(status.faithfulRandomCount).toBe(faithful.length);
