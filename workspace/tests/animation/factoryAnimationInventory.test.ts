@@ -66,7 +66,7 @@ describe("live inventory claim buckets", () => {
   it("counts faithful-random adapters apart from scoped-exact live adapters and Factory acceptance", () => {
     const status = JSON.parse(readFileSync(join(import.meta.dirname, "../../docs/animation-integration-live-status.json"), "utf8"));
     // implementedCount keeps meaning the scoped-exact live adapters; faithful random is a disjoint bucket.
-    expect(status.implementedCount).toBe(239);
+    expect(status.implementedCount).toBe(240);
     // Faithful-random adapters (liveMovePresentationRng.ts): the production list, nothing more.
     expect(status.faithfulRandomCount).toBe(LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS.length);
     expect(status.faithfulRandomAdapters).toHaveLength(status.faithfulRandomCount);
