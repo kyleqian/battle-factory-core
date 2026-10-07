@@ -9,9 +9,11 @@ R = Path(__file__).resolve().parents[2]
 D = Path(sys.argv[1]); ONLY = set(sys.argv[2:])
 S = {s["id"]: s for s in json.loads((R / "src/data/gen/species-stats.json").read_text())["species"]}
 # move -> (id, rows with the optional lag ("event"), rows without)
-MOVES = {"MACH_PUNCH": (183, 110, 109), "NIGHTMARE": (171, 168, 167), "MEGAHORN": (224, 177, 176), "REVENGE": (279, 145, 145), "METEOR_MASH": (309, 215, 214), "PSYWAVE": (149, 205, 204), "EXTRASENSORY": (326, 162, 161)}
+MOVES = {"MACH_PUNCH": (183, 110, 109), "NIGHTMARE": (171, 168, 167), "MEGAHORN": (224, 177, 176), "REVENGE": (279, 145, 145), "METEOR_MASH": (309, 215, 214), "PSYWAVE": (149, 205, 204), "EXTRASENSORY": (326, 162, 161),
+         # Shock Wave (S10A, scoped exact): no CPU-phase parameter; the body length is the geometry-derived first inactive row + 1 (262..266, prep33 s0.2).
+         "SHOCK_WAVE": (351, None, None)}
 # Megahorn rows include the first inactive row (probe end - start + 1; liveMoveAnimationDuration = first inactive age + 1, as Pursuit / Return).
-INCLUSIVE = {"MEGAHORN": 1, "REVENGE": 1, "METEOR_MASH": 1, "PSYWAVE": 1, "EXTRASENSORY": 1}
+INCLUSIVE = {"SHOCK_WAVE": 1, "MEGAHORN": 1, "REVENGE": 1, "METEOR_MASH": 1, "PSYWAVE": 1, "EXTRASENSORY": 1}
 # Revenge has no optional lag (145 rows in every window); its only CPU-phase parameter is the monbg BGnCNT write row ("event" = row 5),
 # banked by prep26RevengeCheck.ts knownFor for the four prep26 windows (docs/next-adapters-prep26.md s2.4).
 PREP26_MONBG_ROW = {"mechanic-revenge-player-machamp-opponent-shuckle": 5, "mechanic-revenge-opponent-qwilfish-player-shuckle": 4,
@@ -26,6 +28,12 @@ PREP30_SPLIT = {"prep25-extrasensory-alt-player-alakazam-golem": "event", "prep3
 PREP24_MONBG_ROW = {"mechanic-megahorn-player-seaking-opponent-onix": 8, "mechanic-megahorn-opponent-seaking-player-onix": 8,
              "prep18-megahorn-alt-heracross-golem": 7, "prep18-megahorn-altopp-heracross-golem": 7,
              "prep24-megahorn-alt-heracross-onix": 7, "prep24-megahorn-altopp-heracross-onix": 8}
+# Nightmare's second CPU-phase parameter (palette-transfer-row, "event" = the Task_FadeToBg BG-palette restore lands on the later row 149, "no-event"
+# = row 148; display-neutral: BLDY 16 on rows 146..150), banked by tools/integration/fixtures/prep32/nightmare-check.json windows[].phase.restoreRow.
+PREP32_RESTORE_ROW = {"mechanic-nightmare-player-haunter-opponent-shuckle": 149, "mechanic-nightmare-opponent-haunter-player-shuckle": 149,
+                      "prep25-nightmare-alt-player-gengar-golem": 148, "prep25-nightmare-alt-opponent-gengar-golem": 148,
+                      "d4a-nightmare-extra-player-gengar-golbat": 148, "d4a-nightmare-extra-opponent-gengar-golbat": 148,
+                      "d4a-nightmare-extra-player-haunter-snorlax": 149, "d4a-nightmare-extra-opponent-haunter-snorlax": 149}
 ACC = {"mach-punch": ("MACH_PUNCH", "hitmonchan-chansey"), "nightmare": ("NIGHTMARE", "haunter-shuckle")}
 ALT = {"mach-punch": "machamp-golem", "nightmare": "gengar-golem"}
 CASES = []  # (move, tag, scenario, side)
@@ -49,7 +57,13 @@ CASES += [("MEGAHORN", "megahorn-player-seaking-opponent-onix", "mechanic-megaho
           ("REVENGE", "revenge-alt-opponent-machoke-golem", "prep25-revenge-alt-opponent-machoke-golem", "opponent"),
           ("METEOR_MASH", "meteor-mash-player-metang-opponent-onix", "mechanic-meteor-mash-player-metang-opponent-onix", "player"),
           ("METEOR_MASH", "meteor-mash-opponent-metang-player-onix", "mechanic-meteor-mash-opponent-metang-player-onix", "opponent"),
-          ("METEOR_MASH", "meteor-mash-alt-player-shiftry-golem", "prep12-meteor-mash-alt-shiftry-golem", "player")]
+          ("METEOR_MASH", "meteor-mash-alt-player-shiftry-golem", "prep12-meteor-mash-alt-shiftry-golem", "player"),
+          ("SHOCK_WAVE", "shock-wave-player-flaaffy-opponent-corsola", "mechanic-shock-wave-player-flaaffy-opponent-corsola", "player"),
+          ("SHOCK_WAVE", "shock-wave-opponent-flaaffy-player-corsola", "mechanic-shock-wave-opponent-flaaffy-player-corsola", "opponent"),
+          ("SHOCK_WAVE", "shock-wave-alt-player-manectric-wailmer", "prep22-shock-wave-alt-player-manectric-wailmer", "player"),
+          ("SHOCK_WAVE", "shock-wave-alt-opponent-manectric-wailmer", "prep22-shock-wave-alt-opponent-manectric-wailmer", "opponent"),
+          ("SHOCK_WAVE", "shock-wave-alt-player-raichu-weezing", "prep33-shock-wave-alt-player-raichu-weezing", "player"),
+          ("SHOCK_WAVE", "shock-wave-alt-opponent-weezing-snorlax", "prep33-shock-wave-alt-opponent-weezing-snorlax", "opponent")]
 # Random2 bodies (D3): the presentation host is pinned to the ROM's gRng2Value at the activation frame (one ISO_RANDOMIZE1 step before the
 # probe's first rng2Series row A + 1), so the dense check replays the source words; production draws them from the per-battle host.
 LCG_INV = pow(1103515245, -1, 2 ** 32)
@@ -79,7 +93,7 @@ for move, tag, scen, side in CASES:
         monbg_row = next(f for f, rg in regs if f > 0 and rg[key] != at)
         rows_ok = (7, 8) if move == "MEGAHORN" else (4, 5)
         assert monbg_row in rows_ok and {**PREP24_MONBG_ROW, **PREP26_MONBG_ROW}.get(scen, monbg_row) == monbg_row, (scen, monbg_row)
-    assert rows in (event_rows, none_rows), (scen, rows)
+    assert move == "SHOCK_WAVE" or rows in (event_rows, none_rows), (scen, rows)
     m = body["atActivation"]["mons"]
     foe = "opponent" if side == "player" else "player"
     sp = {"player": m[0], "opponent": m[1]}
@@ -89,12 +103,15 @@ for move, tag, scen, side in CASES:
         "probe": "tools/probe/run-battle-lab-rgb.py", "scenario": f"tools/battle-lab/{scen}.json",
         "denseWindow": {"startFrame": A, "endFrame": A + rows - 1},
         "windowSource": f"window = [activation, activation + {rows} - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
-        "timingPhase": ("event" if monbg_row == 5 else "no-event") if move == "REVENGE" else "event" if rows == event_rows else "no-event",
+        "timingPhase": None if move == "SHOCK_WAVE" else ("event" if monbg_row == 5 else "no-event") if move == "REVENGE" else "event" if rows == event_rows else "no-event",
         **({"timingPhases": {"optional-lag-age": "event" if rows == event_rows else "no-event",
                              "bg-write-row": "event" if monbg_row == 8 else "no-event"}, "monbgCntRow": monbg_row} if move == "MEGAHORN" else
            {"timingPhases": {"bg-write-row": "event" if monbg_row == 5 else "no-event"}, "monbgCntRow": monbg_row} if move == "REVENGE" else
            {"timingPhases": {"optional-lag-age": "event" if rows == event_rows else "no-event",
-                             "scanline-split-line": PREP30_SPLIT.get(scen, "no-event")}} if move == "EXTRASENSORY" else {}),
+                             "scanline-split-line": PREP30_SPLIT.get(scen, "no-event")}} if move == "EXTRASENSORY" else
+           {"timingPhases": {"optional-lag-age": "event" if rows == event_rows else "no-event",
+                             "palette-transfer-row": "event" if PREP32_RESTORE_ROW[scen] == 149 else "no-event"},
+            "restoreRow": PREP32_RESTORE_ROW[scen]} if move == "NIGHTMARE" else {}),
         "attacker": {"species": name(sp[side]), "geometry": {"side": side}},
         "target": {"species": name(sp[foe]), "geometry": {"side": foe}},
         "attackerPersonality": sp[side]["personality"],

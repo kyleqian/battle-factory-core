@@ -9,7 +9,7 @@ import { join } from "node:path";
 import { verifyLiveAdapterFramebuffer } from "./liveAdapterFramebuffer.ts";
 import { LIVE_MOVE_TIMING_POLICY, type LiveMoveTimingParameterKind, type LiveMoveTimingPhase } from "../../src/engine/liveMoveTimingPolicy.ts";
 
-const IDS: Record<string, number> = { MACH_PUNCH: 183, NIGHTMARE: 171, MEGAHORN: 224, REVENGE: 279, METEOR_MASH: 309, PSYWAVE: 149, EXTRASENSORY: 326, SUPERPOWER: 276 };
+const IDS: Record<string, number> = { MACH_PUNCH: 183, NIGHTMARE: 171, MEGAHORN: 224, REVENGE: 279, METEOR_MASH: 309, PSYWAVE: 149, EXTRASENSORY: 326, SUPERPOWER: 276, SHOCK_WAVE: 351 };
 const [outPath, ...paths] = process.argv.slice(2);
 const status = JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8"));
 // A move whose other-phase residual differs per window (D4c Extrasensory: the scanout split) documents it per fixture
@@ -30,7 +30,8 @@ for (const path of paths) {
   // (a fixture without timingPhases measured only the optional lag).
   const measured = fixture.timingPhases ?? { "optional-lag-age": fixture.timingPhase };
   // A per-side parameter (Superpower's monbg write row) applies to the fixture's attacker side only.
-  const parameters = LIVE_MOVE_TIMING_POLICY[id]!.parameters.filter((p) => p.side === undefined || p.side === fixture.attacker.geometry.side);
+  // A scoped-exact move (no policy entry, e.g. Shock Wave) has no CPU-phase parameter: every window is in the "selected" phase (zero residual, duration).
+  const parameters = (LIVE_MOVE_TIMING_POLICY[id]?.parameters ?? []).filter((p) => p.side === undefined || p.side === fixture.attacker.geometry.side);
   const policyPhases = Object.fromEntries(parameters.map((p) => [p.kind, p.chosen]));
   const results = verifyLiveAdapterFramebuffer(path);
   const runs = results.map((r) => {

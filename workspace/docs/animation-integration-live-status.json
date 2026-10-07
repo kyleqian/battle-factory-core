@@ -3688,6 +3688,21 @@
         "shiny battlers and non-zero idle rests decline (the shake x2 programs are proven from a zero rest only); an unknown lent order declines",
         "the burst-row partial sprite snapshots (prep31 T) never reach hardware OAM and are not modelled; doubles / contest paths not covered"
       ]
+    },
+    {
+      "move": "MOVE_SHOCK_WAVE",
+      "id": 351,
+      "sourceFieldEvidence": "../tools/integration/fixtures/ns-live-receipt.json",
+      "liveEvidence": [
+        "Input builder src/engine/liveOamMoves.ts liveShockWaveInputs (docs/next-adapters-prep33.md s1.2 / s3 item 1, ported 1:1 from tools/integration/prep33ShockWaveModel.ts shockWaveInputs33): anchors from liveBattlerAnchors (X_2 / Y_PIC_OFFSET picture origins, sprite centres, the target's plain BATTLER_COORD_Y), the known-entry constants (task / sprite / matrix slots, resource allocator, attr2 words, monbg BGnCNT), the asset palette composite + shock-wave.json resource palettes, the host's lent 64-slot activation order (L), first-body registers S0; never a capture row",
+        "reducer change (src/animation/shockWave.ts shockWaveTimingFor / shockWaveSourceAtAge): the timing is derived from the live geometry (progressing-bolt destroy row from the attacker Y_PIC_OFFSET; lightning count N from the target BATTLER_COORD_Y: ShakeMon = lightning + 2N + 30, clearmonbg + 67, first inactive + 4), equal to the ROM in 6/6 windows; side-only callers keep the accepted tables; the accepted corpora's reducer states and staged frames are byte-identical before / after (tools/integration/shockWaveStagedDigest.ts)",
+        "dense full windows zero residual twice fresh through the production live renderer, both orientations: accepted FLAAFFY -> CORSOLA P / O, prep22 MANECTRIC -> WAILMER P / O, prep33 RAICHU -> WEEZING P and WEEZING -> SNORLAX O (6 windows, 1591 rows; tools/integration/fixtures/d4a-live/shock-wave-*.json); row 0 of the elevated WEEZING windows via the live #142 hook",
+        "ordinary route 7/7 CASTFORM (slot 2): live every age (266), following prompt, Scene ON/OFF gameplay / RNG / facility parity (tests/animation/liveShockWaveAdapter.test.ts)"
+      ],
+      "remaining": [
+        "shiny battlers and non-zero idle rests decline; an unknown lent order declines",
+        "later-body registers are the first-body block S0 (the renderer branch reads only body-written BG values / bldalpha); doubles / contest paths not covered"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3711,7 +3726,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 247,
+  "implementedCount": 248,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 12,
@@ -3873,7 +3888,7 @@
     },
     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
   },
-  "faithfulTimingCount": 7,
+  "faithfulTimingCount": 8,
   "faithfulTimingAdapters": [
     {
       "id": 183,
@@ -4497,6 +4512,125 @@
         "sh tools/integration/prep22Probes.sh PROBEDIR 2 mechanic-superpower-player-nidoqueen-opponent-onix mechanic-superpower-opponent-registeel-player-regirock prep25-superpower-alt-player-machamp-golem prep25-superpower-alt-opponent-machamp-golem prep31-superpower-alt-player-machamp-weezing prep31-superpower-alt-opponent-weezing-snorlax",
         "python3 tools/integration/s10aLiveFixtures.py PROBEDIR SUPERPOWER",
         "node --experimental-strip-types tools/integration/d4aTimingCheck.ts <receipt.json> tools/integration/fixtures/s10a-live/superpower-<window>.json"
+      ]
+    },
+    {
+      "id": 171,
+      "move": "MOVE_NIGHTMARE",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 149,
+          "fixedLagAges": [
+            21,
+            129,
+            130
+          ],
+          "iterations": 164,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 168,
+              "measured": 5
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 167,
+              "measured": 3
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        },
+        {
+          "kind": "palette-transfer-row",
+          "age": 149,
+          "fixedLagAges": [],
+          "iterations": 164,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 168,
+              "measured": 4
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 168,
+              "measured": 4
+            }
+          ],
+          "chosen": "no-event",
+          "tieRuleUsed": true
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          150,
+          151,
+          152,
+          153,
+          154,
+          155,
+          156,
+          157,
+          158,
+          159,
+          160,
+          161,
+          162,
+          163,
+          164,
+          165
+        ],
+        "rows": 16,
+        "maxPixelsPerRow": 17811,
+        "cause": "optional-lag-age: a no-lag window is the lag program with row 149 deleted, so under the lag policy its restorebg fade-out (BLDY 15..0) is drawn one row late on rows 150..165 (prep25 GENGAR -> GOLEM P / O, d4a GENGAR -> GOLBAT P: 3 of 8 windows); palette-transfer-row: display-neutral (BLDY 16 on rows 146..150 darkens the restored BG bank 2 to black in both phases), so the restore-149 windows are documented with no residual row (windows)",
+        "windows": {
+          "nightmare-player-haunter-opponent-shuckle": {
+            "ages": [],
+            "rows": 0,
+            "pixels": 0,
+            "maxPixelsPerRow": 0,
+            "cause": "palette-transfer-row only (restore row 149 under the 148 policy): display-neutral, no residual allowed"
+          },
+          "nightmare-opponent-haunter-player-shuckle": {
+            "ages": [],
+            "rows": 0,
+            "pixels": 0,
+            "maxPixelsPerRow": 0,
+            "cause": "palette-transfer-row only (restore row 149 under the 148 policy): display-neutral, no residual allowed"
+          },
+          "nightmare-extra-player-haunter-snorlax": {
+            "ages": [],
+            "rows": 0,
+            "pixels": 0,
+            "maxPixelsPerRow": 0,
+            "cause": "palette-transfer-row only (restore row 149 under the 148 policy): display-neutral, no residual allowed"
+          },
+          "nightmare-extra-opponent-haunter-snorlax": {
+            "ages": [],
+            "rows": 0,
+            "pixels": 0,
+            "maxPixelsPerRow": 0,
+            "cause": "palette-transfer-row only (restore row 149 under the 148 policy): display-neutral, no residual allowed"
+          }
+        }
+      },
+      "d3": false,
+      "evidence": [
+        "tools/integration/fixtures/ns-live-receipt.json",
+        "tools/integration/fixtures/d4a-live/nightmare-*.json (8 dense windows, both orientations: accepted HAUNTER -> SHUCKLE / KANGASKHAN, prep25 GENGAR -> GOLEM, d4a HAUNTER -> SNORLAX, d4a GENGAR -> GOLBAT (elevated opponent); every body follows Hypnosis + the SLP status animation)",
+        "docs/next-adapters-prep32.md s0.1 / s1.4 + tools/integration/fixtures/prep32/nightmare-check.json: caller inputs exact on 22,921 / 22,925 field-rows (the 4 misses = the Task_FadeToBg state word on row 148 of the restore-148 windows); lag in 5 of 8, restore row 149 in 4 of 8",
+        "row-0 elevated-opponent shadow (prep32 s1.5): drawn by the live #142 hook (liveMoveAnimation.ts LIVE_MOVE_OPPONENT_SHADOW_ROW[171] = 0) whichever role the opponent has; the staged branch's attacker-only age-0 rule is not used live (suppressAdHoc); GENGAR -> GOLBAT player row 0 is 0 px",
+        "tests/animation/liveFaithfulTimingAdapters.test.ts (Nightmare: registration, dense receipt, gates, ordinary route Scene ON/OFF parity)"
+      ],
+      "proofCommands": [
+        "sh tools/integration/prep22Probes.sh PROBEDIR 2 mechanic-nightmare-player-haunter-opponent-shuckle mechanic-nightmare-opponent-haunter-player-shuckle prep25-nightmare-alt-player-gengar-golem prep25-nightmare-alt-opponent-gengar-golem d4a-nightmare-extra-player-haunter-snorlax d4a-nightmare-extra-opponent-haunter-snorlax d4a-nightmare-extra-player-gengar-golbat d4a-nightmare-extra-opponent-gengar-golbat",
+        "python3 tools/integration/d4aFixtures.py PROBEDIR NIGHTMARE",
+        "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/d4a-live/nightmare-*.json",
+        "node --experimental-strip-types --no-warnings tools/integration/sleepRouteSearch.ts 171 4 1 4000",
+        "npx vitest run tests/animation/liveFaithfulTimingAdapters.test.ts tests/animation/liveMoveTimingPolicy.test.ts"
       ]
     }
   ],

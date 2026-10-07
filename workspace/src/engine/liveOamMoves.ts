@@ -6,6 +6,7 @@
  */
 import darkBgAsset from "../assets/gen/battle-anim-bg-dark.json" with { type: "json" };
 import psychicBgAsset from "../assets/gen/battle-anim-psychic-bg.json" with { type: "json" };
+import ghostBgAsset from "../assets/gen/battle-anim-ghost-bg.json" with { type: "json" };
 import enemyElevations from "../data/gen/enemy-mon-elevations.json" with { type: "json" };
 import paletteData from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
 import { KNOWN_ENTRY_NON_BATTLER_SPRITES } from "./liveBgSnapshotMoves.ts";
@@ -19,6 +20,10 @@ import { LIVE_REVENGE_ROWS, liveRevengeRows } from "./liveRevengeInputs.ts";
 import { livePsywaveRowCount, livePsywaveRows } from "./livePsywaveInputs.ts";
 import { GBA_SINE_TABLE_256 } from "./battleMenu.ts";
 import { liveExtrasensoryRowCount, liveExtrasensoryRows } from "./liveExtrasensoryInputs.ts";
+import {
+  liveNightmareBattlers, liveNightmareClone, liveNightmareFirstInactive, liveNightmareMonbgBg, liveNightmareMonbgOrigin, liveNightmareOrders,
+  liveNightmarePalettes, liveNightmareRegisters, type LiveNightmareKnown, type LiveNightmarePhase, type LiveNightmareSprite,
+} from "./liveNightmareInputs.ts";
 
 type Side = "player" | "opponent";
 type Point = Readonly<{ x: number; y: number }>;
@@ -878,5 +883,172 @@ export function liveExtrasensoryInputs(args: LiveExtrasensoryInputArgs): { durat
         allocator: null, audio: null, liveCounts: { visualTasks: 0, soundTasks: 0, matrixBitmap: 0 }, animationRng: 0, gameplayRng: null, gameplayState: null,
       };
     },
+  };
+}
+
+export interface LiveNightmareInputArgs {
+  readonly attackerSide: Side;
+  readonly attacker: LiveOamBattlerAnchors;
+  readonly target: LiveOamBattlerAnchors;
+  /** Species numbers (battler sprite data[2]; carried, never rendered). */
+  readonly attackerSpeciesId: number;
+  readonly targetSpeciesId: number;
+  readonly palettes: LivePaletteComposite;
+  readonly activationOrder: readonly number[];
+  readonly sort: LiveSpriteOrderSort;
+  /** D4 policy (liveMoveTimingPolicy.ts MOVE_NIGHTMARE): the optional lag at age 149 and the BG-palette restore row (148 | 149). */
+  readonly phase: LiveNightmarePhase;
+}
+/** The first-body register block S0 with WIN0 cleared: Nightmare always follows an earlier body (its target is asleep), whose window
+ *  registers end at 0,0 (prep25 s B.5; equal in all 8 prep32 windows). */
+const NIGHTMARE_REGISTERS0: Readonly<Record<string, number>> = Object.freeze({ ...S0_REGISTERS, win0h: 0, win0v: 0 });
+/** SpriteCallbackDummy (pokeemerald.sym 0x08007429; equal in all 8 prep32 windows): stored in the clone's data[6..7], never rendered. */
+const SPRITE_CALLBACK_DUMMY = 0x08007429;
+/** The known-entry matrix bitmap (matrices 1, 2 held by the battlers) and resource label: carried by the reducer, never read. */
+const NIGHTMARE_MATRIX_BITMAP = 6;
+const nightmareCache = new Map<string, number[][]>();
+
+/**
+ * MOVE_NIGHTMARE (171) live inputs (docs/next-adapters-prep32.md s1 / s3; D4 faithful timing): the reducer's caller-owned inputs of each age
+ * from liveNightmareInputs.ts (the prep32 model), ported 1:1 from tools/integration/prep32NightmareLib.ts liveInputs. Host values: battler
+ * sprites from the anchors (slot 6 / 8, subpriority 30 / 40, the battler OBJ words; idle rests zero, gated by the caller), the known-entry
+ * host sprites and occupied slots (the clone takes slot 3), the asset palette composite, the ghost BG asset palette, the lent activation
+ * order. Task slots (fade 0, clone 0, shake 2, restore 2, monbg update 1 / clear 0) are constants equal in all 8 windows (K). The battler
+ * data words beyond the battler id / species are history residue (not rendered) and start at zero here.
+ */
+export function liveNightmareInputs(args: LiveNightmareInputArgs): { duration: number; animationInputsAt: (age: number) => Record<string, unknown> } {
+  const { attackerSide, phase } = args;
+  const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
+  const sprite = (side: Side, anchors: LiveOamBattlerAnchors, species: number): LiveNightmareSprite => {
+    const o = battlerObject(side, anchors);
+    return { slot: o.slot, template: "gMultiuseSpriteTemplate", callback: "SpriteCallbackDummy", x: anchors.spriteCenter.x, y: anchors.spriteCenter.y,
+      x2: anchors.frontIdleRest.x2, y2: anchors.frontIdleRest.y2, subpriority: o.subpriority, attr: o.attr, flags: 1, matrixNum: 0,
+      matrix: [256, 0, 0, 256], data: [side === "player" ? 0 : 1, 0, species, 0, 0, 0, 0, 0] };
+  };
+  const k: LiveNightmareKnown = {
+    attackerSide, registers0: NIGHTMARE_REGISTERS0,
+    unfaded0: args.palettes.unfaded, faded0: args.palettes.faded, hardware0: args.palettes.hardware,
+    attacker0: sprite(attackerSide, args.attacker, args.attackerSpeciesId), target0: sprite(targetSide, args.target, args.targetSpeciesId),
+    order0: args.activationOrder,
+    hostSprites: KNOWN_ENTRY_NON_BATTLER_SPRITES.map((s) => ({ slot: s.slot, attr: s.attr as unknown as [number, number, number], subpriority: s.subpriority })),
+    inUse0: KNOWN_ENTRY_OCCUPIED_SLOTS,
+    ghostPalette: (ghostBgAsset as { palette: readonly Rgb[] }).palette.map(bgr555),
+    battlerMatrix: { attacker: attackerSide === "player" ? 1 : 2, target: attackerSide === "player" ? 2 : 1 },
+    spriteCallbackDummy: SPRITE_CALLBACK_DUMMY,
+  };
+  const rows = liveNightmareFirstInactive(phase) + 1;
+  const key = JSON.stringify([attackerSide, k.attacker0.attr, k.target0.attr, args.activationOrder, phase]);
+  let orders = nightmareCache.get(key);
+  if (!orders) {
+    orders = liveNightmareOrders(rows, k, phase, args.sort);
+    if (nightmareCache.size > 16) nightmareCache.clear();
+    nightmareCache.set(key, orders);
+  }
+  const painter = orders;
+  const clone = liveNightmareClone(k), origin = liveNightmareMonbgOrigin(k), bg = liveNightmareMonbgBg(k);
+  const setupControl = liveNightmareRegisters(liveNightmareFirstInactive(phase) - 1, k, phase)[`${bg}cnt`]!;
+  return {
+    duration: rows - 1,
+    // `age` is the reducer (program) age; a no-lag body skips program age 149 (liveNightmareProgramAge).
+    animationInputsAt: (age: number) => {
+      const row = Math.min(!phase.lag149 && age >= 150 ? age - 1 : age, rows - 1);
+      const b = liveNightmareBattlers(row, k, phase);
+      return {
+        attackerSprite: b.attacker, targetSprite: b.target, clone,
+        tasks: { fadeToGhost: 0, clone: 0, shake: 2, fadeRestore: 2 },
+        monBg: { updateTaskSlot: 1, clearTaskSlot: 0, selected: bg === "bg1" ? "BG1" : "BG2", backgroundOrigin: origin,
+          inBg2: bg === "bg1" ? 0 : 1, battler: attackerSide === "player" ? 1 : 0, setupControl },
+        painterOrder: painter[row]!, resources: "known-entry", matrixBitmap: NIGHTMARE_MATRIX_BITMAP, matrices: IDENTITY_MATRICES,
+        palettes: liveNightmarePalettes(row, k, phase),
+        backgrounds: { battle: "battle", ghost: "ghost", monBg: "monbg", clear: "clear", clearedGhost: "cleared-ghost", restoredBattle: "restored" },
+        registers: liveNightmareRegisters(row, k, phase), audio: { targetPan: attackerSide === "player" ? 63 : -64 },
+        animationRngSeed: 0, gameplayRng: null, gameplayState: null,
+      };
+    },
+  };
+}
+
+export interface LiveShockWaveInputArgs {
+  readonly attackerSide: Side;
+  readonly opponentSpecies: string;
+  readonly attacker: LiveOamBattlerAnchors;
+  readonly target: LiveOamBattlerAnchors;
+  readonly palettes: LivePaletteComposite;
+  /** shock-wave.json asset palettes (BGR555) of the four resources. */
+  readonly resourcePalettes: Readonly<Record<"circleOfLight" | "electricOrbs" | "spark" | "lightning", readonly number[]>>;
+  readonly activationOrder: readonly number[];
+}
+/** prep33 SW_K: known-entry constants, identical in all 6 measured windows (docs/next-adapters-prep33.md s0.5 K). */
+const SHOCK_WAVE_K = Object.freeze({
+  taskSlots: Object.freeze({ charging: 0, progressing: 2, lightning: 0, shake: 0, blend: 2, monbg: 1, clear: 0 }),
+  matrixBitmap: 6,
+  // resource allocator (first load into the known entry): tile slot, tile range, OBJ palette allocator slot
+  resources: Object.freeze({ electricOrbs: [6, [305, 4], 7], circleOfLight: [7, [537, 64], 8], spark: [10, [309, 24], 9], lightning: [11, [601, 80], 10] } as const),
+  tags: Object.freeze({ circleOfLight: 10212, electricOrbs: 10211, spark: 10001, lightning: 10037 } as const),
+  attr2: Object.freeze({ charging: 0x7000 | 0x800 | 308, orb: 35353, progressing: 0x9000 | 0x800 | 316, lightning: 0xa000 | 0x800 | 601 }),
+  paletteBlendAttr: Object.freeze([160, 304, 65535] as const),
+  monbg: Object.freeze({ player: { bg: 2, cnt: 24066, bank: 9 }, opponent: { bg: 1, cnt: 23554, bank: 8 } } as const),
+  shadowAttr2: 23853,
+});
+const ZERO_BATTLE_BG = Object.freeze({ gBattle_BG0_X: 0, gBattle_BG0_Y: 0, gBattle_BG1_X: 0, gBattle_BG1_Y: 0, gBattle_BG2_X: 0, gBattle_BG2_Y: 0,
+  gBattle_BG3_X: 0, gBattle_BG3_Y: 0 });
+/** Lowest-free simulation of the move's sprite births up to the orb over the known-entry occupants (palette-blend sprite row 16, 20 charging
+ *  particles from row 31, orb row 45; prep33 shockWaveSpriteSlots). */
+const SHOCK_WAVE_SPRITE_SLOTS = (() => {
+  const occ = new Set<number>(KNOWN_ENTRY_OCCUPIED_SLOTS);
+  const low = () => { for (let s = 0; s < 64; s += 1) if (!occ.has(s)) { occ.add(s); return s; } throw new Error("full"); };
+  const paletteBlend = low(); const live: { slot: number; end: number }[] = [{ slot: paletteBlend, end: 29 }];
+  const free = (age: number) => { for (let i = live.length - 1; i >= 0; i -= 1) if (live[i]!.end < age) { occ.delete(live[i]!.slot); live.splice(i, 1); } };
+  const durations = [40, 40, 35, 35, 30, 30, 25, 25, 20, 20, 15, 15, 10, 10];
+  for (let age = 31; age < 45; age += 1) { free(age); live.push({ slot: low(), end: age + durations[age - 31]! + 7 }); }
+  free(45);
+  return Object.freeze({ paletteBlend, orb: low() });
+})();
+
+/**
+ * MOVE_SHOCK_WAVE (351) live inputs (docs/next-adapters-prep33.md s1.2 / s3 item 1; scoped exact): the accepted reducer is a source model,
+ * so the live provider is an input builder, ported 1:1 from tools/integration/prep33ShockWaveModel.ts shockWaveInputs33 with production
+ * values only: the anchors (X_2 / Y_PIC_OFFSET picture origins, sprite centres, the plain BATTLER_COORD_Y of the target), the known-entry
+ * constants (SHOCK_WAVE_K), the asset palette composite, the shock-wave.json resource palettes and the lent activation order. Registers /
+ * BG scroll are the first-body block S0 (the renderer branch reads only the monbg BG values and bldalpha, both written by the body).
+ * The seam fields (sides, species, picture origins, target battle position) come from the presentation battlers. Never a capture row.
+ */
+export function liveShockWaveInputs(args: LiveShockWaveInputArgs): Record<string, unknown> {
+  const { attackerSide, attacker, target } = args;
+  const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
+  const sprite = (side: Side, anchors: LiveOamBattlerAnchors) => {
+    const o = battlerObject(side, anchors);
+    return { slot: o.slot, x: anchors.spriteCenter.x, y: anchors.spriteCenter.y, x2: 0, y2: 0, subpriority: o.subpriority, oamPriority: (o.attr[2] >>> 10) & 3,
+      matrixNum: 0, matrix: [256, 0, 0, 256] as const, attr: o.attr };
+  };
+  const attackerSprite = sprite(attackerSide, attacker), targetSprite = sprite(targetSide, target);
+  const resource = (name: keyof typeof SHOCK_WAVE_K.tags) => {
+    const [tileSlot, tileRange, pal] = SHOCK_WAVE_K.resources[name];
+    return { tag: SHOCK_WAVE_K.tags[name], tileSlot, tileRange: [tileRange[0], tileRange[1]] as const, paletteAllocatorSlot: pal, hardwarePaletteBank: 16 + pal,
+      palette: [...args.resourcePalettes[name]] };
+  };
+  const mb = SHOCK_WAVE_K.monbg[attackerSide];
+  // The elevated opponent's enemy shadow (slot 2) at activation: x 160 / y 65 (SpriteCB_EnemyShadow), otherwise the invisible template words.
+  const elevated = ((enemyElevations as Readonly<Record<string, number>>)[args.opponentSpecies] ?? 0) !== 0;
+  const live = [...KNOWN_ENTRY_NON_BATTLER_SPRITES.filter((s) => s.slot !== 2).map((s) => ({ slot: s.slot, attr: [...s.attr] as [number, number, number], subpriority: s.subpriority })),
+    { slot: 2, attr: (elevated ? [0x4000 | 65, 0x4000 | 160, SHOCK_WAVE_K.shadowAttr2] : [0x4000, 0x4000, SHOCK_WAVE_K.shadowAttr2]) as [number, number, number], subpriority: 200 },
+    { slot: attackerSprite.slot, attr: attackerSprite.attr, subpriority: attackerSprite.subpriority },
+    { slot: targetSprite.slot, attr: targetSprite.attr, subpriority: targetSprite.subpriority }].sort((l, r) => l.slot - r.slot);
+  let orbMatrix = 0; while (SHOCK_WAVE_K.matrixBitmap & (1 << orbMatrix)) orbMatrix += 1;
+  return {
+    attackerSprite, targetSprite, taskSlots: { ...SHOCK_WAVE_K.taskSlots }, spriteSlots: { ...SHOCK_WAVE_SPRITE_SLOTS }, matrixSlots: { orb: orbMatrix },
+    resources: { circleOfLight: resource("circleOfLight"), electricOrbs: resource("electricOrbs"), spark: resource("spark"), lightning: resource("lightning") },
+    allocator: { initialOccupiedSprites: [...KNOWN_ENTRY_OCCUPIED_SLOTS], initialMatrixBitmap: SHOCK_WAVE_K.matrixBitmap, spriteOrder: [...args.activationOrder],
+      initialLiveSprites: live },
+    oam: { charging: [0, 0, SHOCK_WAVE_K.attr2.charging], orb: [0x500 | ((attacker.picOffsetPoint.y - 32) & 0xff), 0xc000 | ((attacker.picOffsetPoint.x - 32) & 0x1ff), SHOCK_WAVE_K.attr2.orb],
+      progressing: [0, 0, SHOCK_WAVE_K.attr2.progressing], lightning: [0, 0, SHOCK_WAVE_K.attr2.lightning], paletteBlend: [...SHOCK_WAVE_K.paletteBlendAttr] },
+    palettes: { unfaded: [...args.palettes.unfaded], faded: [...args.palettes.faded], hardware: [...args.palettes.hardware] },
+    background: { values: { ...ZERO_BATTLE_BG }, xKey: `gBattle_BG${mb.bg}_X`, yKey: `gBattle_BG${mb.bg}_Y`, controlRegister: `bg${mb.bg}cnt`,
+      horizontalRegister: `bg${mb.bg}hofs`, verticalRegister: `bg${mb.bg}vofs`, setupX: 32 - attackerSprite.x, setupY: 32 - attackerSprite.y, setupControl: mb.cnt,
+      clearX: 0, clearY: 0, clearControl: mb.cnt, clearHorizontal: 0, clearVertical: 0, monbgPaletteBank: mb.bank,
+      initialVram: "vram:activation", setupVram: "vram:monbg-setup", clearingVram: "vram:monbg-clearing", clearVram: "vram:monbg-cleared" },
+    registers: { ...S0_REGISTERS }, animationRngSeed: 0, gameplayRng: null,
+    // The reducer derives the body timing from the seam geometry (docs/next-adapters-prep33.md s0.2), not the accepted side tables.
+    derivedTiming: true,
   };
 }
