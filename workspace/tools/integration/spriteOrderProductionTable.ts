@@ -133,6 +133,7 @@ export function renderSpriteOrderProductionTableFromFixtures(): string {
   const fixture = (name: string) => JSON.parse(readFileSync(new URL(`./fixtures/${name}`, import.meta.url), "utf8"));
   return renderSpriteOrderProductionTable(fixture("sprite-order-body-plans-ext.json"), fixture("sprite-order-gap-causes.json"), [
     fixture("sprite-order-policy-gaps/relative-y-plans.json").bodies, fixture("sprite-order-body-plans-rely.json").bodies,
+    fixture("prep28/plan-rows.json").bodies, fixture("prep28/plan-rows-sky-attack.json").bodies,
   ]);
 }
 

@@ -255,7 +255,7 @@ function orderEventOf(
     switch (payload.animationId) {
       case "MOVE_ANIMATION": {
         const request = battleMoveAnimationRequest(battler, payload.target, payload.arguments);
-        return { event: { kind: "move-animation", moveId: request.moveId, attackerSide: battler === 0 ? "player" : "opponent" } };
+        return { event: { kind: "move-animation", moveId: request.moveId === 143 && request.turn === 1 ? 10143 : request.moveId, attackerSide: battler === 0 ? "player" : "opponent" } };
       }
       case "HIT_ANIMATION":
         return { event: { kind: "hit-animation", targetVisible: !hidden[battler] } };
