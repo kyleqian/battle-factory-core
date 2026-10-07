@@ -263,3 +263,20 @@ export function liveOutrageInputs(args: LiveBgSnapshotArgs & { spriteOrder: read
     registers: { ...S0_REGISTERS }, animationRngSeed: 0, gameplayRng: null,
   };
 }
+
+/**
+ * `Move_LUSTER_PURGE` (295; prep29 B.5, faithful-random): the circle is at the attacker's picture offset point, the six hit splats at the target's battle
+ * position centre + (-1, +2) for a player target / (+1, +2) for an opponent target, the monbg at the attacker sprite centre (scroll 32 - centre).
+ * The six word pairs (plan rows {ageOffset: 170 + 5k, count: 2}) come only from the presentation host.
+ */
+export function liveLusterPurgeFields(args: Omit<LiveQ2Args, "firstBody" | "palettes" | "spriteOrder"> & { target: PositionAnchors; draws: readonly (readonly number[])[] }) {
+  const { attackerSide, attacker, target } = args, player = attackerSide === "player";
+  return {
+    attackerBattlerId: (player ? 0 : 1) as 0 | 1, attackerSpriteSlot: player ? 6 : 8, targetSpriteSlot: player ? 8 : 6,
+    targetInitialX2: target.frontIdleRest.x2,
+    circleCenter: { ...attacker.picOffsetPoint }, monbgCenter: { ...attacker.spriteCenter },
+    monbgPosition: { x: 32 - attacker.spriteCenter.x, y: 32 - attacker.spriteCenter.y },
+    hitsplatCenter: { x: target.battlePositionCenter.x + (player ? 1 : -1), y: target.battlePositionCenter.y + 2 },
+    visualRandom: { hitsplats: args.draws.map((pair) => ({ x: pair[0]!, y: pair[1]! })) },
+  };
+}

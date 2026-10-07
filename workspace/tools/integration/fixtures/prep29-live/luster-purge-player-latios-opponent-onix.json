@@ -32,5 +32,9 @@
   "opponentMaxHp": 110,
   "playerGender": "male",
   "opponentGender": "male"
+ },
+ "presentationRngActivation": {
+  "value": 370756553,
+  "source": "pinned: the probed gRng2Value at the body's activation frame (prep22Probe atActivation.rng2; docs/next-adapters-prep29.md B.5)"
  }
 }

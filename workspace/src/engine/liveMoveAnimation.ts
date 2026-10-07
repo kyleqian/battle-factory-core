@@ -86,7 +86,7 @@ import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
 import paletteResources from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
 import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "json" };
 import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
-import { liveBonemerangInputs, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
+import { liveBonemerangInputs, liveLusterPurgeFields, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
 import { liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
 import { liveCurseStatsInputs, liveFuryCutterInputs, livePursuitInputs, liveReturnInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
@@ -349,7 +349,7 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // Q2 (prep25 moves/*.json): the windows start at activation (row 0).
     304, 123, 328, 143, 173,
     // prep29 R1: Bonemerang windows start at activation (row 0).
-    155, 229, 200,
+    155, 229, 200, 295,
     // Sheer Cold (ISSUES #151, species audit 7 elevated FLYGON / GOLBAT opponent, both orientations): activation == window start (row 0).
     329,
   ].map((id) => [id, 0] as [number, number]).concat([
@@ -819,6 +819,7 @@ export function liveMoveAnimationDuration(
     // Sheer Cold first body: 191 rows (player attacker) / 190 (opponent), constant across the accepted + alternate scenarios (prep22 s0.2).
     case 329: return request.attacker === 0 ? 191 : 190;
     // Sky Attack (prep25): charge 148 rows / strike 180 rows, selected by gAnimMoveTurn bit 0 like Razor Wind / Solar Beam.
+    case 295: return 332; // Luster Purge (prep29 B.5: 332 rows, constant in all four scenarios; faithful-random, plan rows in liveMovePresentationRng.ts).
     case 200: return 119; // Outrage (prep29 B.6: 119 rows, constant in all five bodies).
     case 229: return 130; // Rapid Spin (prep29 B.3: 130 rows, constant in all four scenarios).
     case 155: return 71; // Bonemerang (prep29 B.1: 71 rows per hit body, constant in all 8 bodies).
@@ -2359,6 +2360,15 @@ export function liveMoveAnimationPresentation(
       config = { move: "DOUBLE_KICK", attacker, target, fieldProfile,
         targetDimensions: { width: dims.width, height: dims.height },
         fistRandom: { x: words[0]!, y: words[1]!, xSign: words[2]!, ySign: words[3]! } };
+      break;
+    }
+    case 295: {
+      // prep29 R1 / B.5: Luster Purge (faithful-random). Six AnimHitSplatRandom word pairs from the presentation host; geometry from the anchors.
+      const draws = liveMovePresentationRngWords(presentationRngInput)?.draws;
+      if (draws === undefined || draws.length !== 6 || draws.some((pair) => pair.length !== 2)) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      config = { move: "LUSTER_PURGE", attacker, target, fieldProfile,
+        ...liveLusterPurgeFields({ attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, draws }) };
       break;
     }
     case 273: {
