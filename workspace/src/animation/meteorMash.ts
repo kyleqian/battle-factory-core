@@ -44,6 +44,12 @@ export interface MeteorMashGeometry {
   readonly targetCenter: Readonly<{ x: number; y: number }>;
   /** Two Random2 results, reduced to tile/y, for each of 48 source spawns. */
   readonly twinkles?: readonly MeteorMashTwinkleVariant[];
+  /**
+   * CPU-phase lag L at row 195 (docs/next-adapters-prep17.md s0.1): the restorebg LoadDefaultBg frame skips the next main-loop
+   * iteration in 4 of 5 measured bodies. First inactive age 213 + L, restore fade-down first row 196 + L. Absent: the accepted
+   * corpora's phases (the opponent-attacker body lagged, the player-attacker one did not); the live adapter passes the D4 policy.
+   */
+  readonly restoreLagRows?: 0 | 1;
 }
 
 export interface MeteorMashState {
@@ -161,14 +167,19 @@ function starAtAge(
   };
 }
 
+/** The row-195 lag: the explicit input, else the accepted corpora's phases (lag when the target is on the player side). */
+export function meteorMashRestoreLagRows(geometry: Pick<MeteorMashGeometry, "targetSide" | "restoreLagRows">): 0 | 1 {
+  return geometry.restoreLagRows ?? (geometry.targetSide === "player" ? 1 : 0);
+}
+
 /** Source pointer-relative reducer for the complete unbranched Meteor Mash body. */
 export function meteorMashAtAge(
   age: number,
   geometry: MeteorMashGeometry,
 ): MeteorMashState {
-  // RestoreBg's task runs one row longer when the target is on the player
-  // side. The pointer-bounded windows include the following inactive row.
-  const terminalAge = geometry.targetSide === "player" ? 214 : 213;
+  // The pointer-bounded windows include the following inactive row. RestoreBg's task runs one row longer with the row-195 lag.
+  const lag = meteorMashRestoreLagRows(geometry);
+  const terminalAge = 213 + lag;
   const inWindow = age >= 0 && age < terminalAge;
   if (!inWindow) {
     return {
@@ -245,7 +256,7 @@ export function meteorMashAtAge(
     }];
   });
   const restore = age >= METEOR_MASH_RESTORE_AGE;
-  const restoreFallAge = geometry.targetSide === "player" ? 197 : 196;
+  const restoreFallAge = 196 + lag;
   const fadeCoefficient = age < 11
     ? 0
     : age <= 27

@@ -1,0 +1,41 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "REVENGE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-revenge-player-machamp-opponent-shuckle.json",
+ "denseWindow": {
+  "startFrame": 238,
+  "endFrame": 382
+ },
+ "windowSource": "window = [activation, activation + 145 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": "event",
+ "timingPhases": {
+  "bg-write-row": "event"
+ },
+ "monbgCntRow": 5,
+ "attacker": {
+  "species": "MACHAMP",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SHUCKLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349018978,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 186,
+  "playerMaxHp": 186,
+  "opponentHp": 127,
+  "opponentMaxHp": 127,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

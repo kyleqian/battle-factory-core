@@ -1,0 +1,41 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "REVENGE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/d4a-revenge-extra-opponent-hitmonlee-golbat.json",
+ "denseWindow": {
+  "startFrame": 234,
+  "endFrame": 378
+ },
+ "windowSource": "window = [activation, activation + 145 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": "event",
+ "timingPhases": {
+  "bg-write-row": "event"
+ },
+ "monbgCntRow": 5,
+ "attacker": {
+  "species": "HITMONLEE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793699878,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 182,
+  "playerMaxHp": 182,
+  "opponentHp": 157,
+  "opponentMaxHp": 157,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

@@ -1,0 +1,47 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "REVENGE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep25-revenge-alt-player-machoke-golem.json",
+ "denseWindow": {
+  "startFrame": 226,
+  "endFrame": 370
+ },
+ "windowSource": "window = [activation, activation + 145 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": "event",
+ "timingPhases": {
+  "bg-write-row": "event"
+ },
+ "monbgCntRow": 5,
+ "attacker": {
+  "species": "MACHOKE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349018978,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 154,
+  "playerMaxHp": 176,
+  "opponentHp": 187,
+  "opponentMaxHp": 187,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ]
+}

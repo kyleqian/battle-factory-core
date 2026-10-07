@@ -11,6 +11,7 @@
  */
 
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
+import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS } from "./liveMoveTimingPolicy.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
 import {
   activatePresentationRngBody,
@@ -55,11 +56,16 @@ export const LIVE_MOVE_RANDOM2_PLANS: Readonly<Record<number, readonly Presentat
   // Move_WATER_PULSE: six ring emissions (ages 86, 93, 100, 101, 108, 115) x 2 words (randomY, randomX;
   // battle_anim_water.c:1574-1575). The reducer replays them from the activation state alone.
   352: Object.freeze([86, 93, 100, 101, 108, 115].map((ageOffset) => Object.freeze({ ageOffset, count: 2 }))),
+  // Move_METEOR_MASH (D4b; faithful TIMING with d3, liveMoveTimingPolicy.ts, so not in LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS): 48 AnimMiniTwinklingStar
+  // spawns, (& 3 -> tile, & 7 signed -> y) each (battle_anim_effects_3.c:2147, :2153), in the prep12 plan's frame groups (plans.json meteor-mash).
+  309: Object.freeze([[48, 2], [50, 2], [52, 2], [54, 2], [56, 2], [58, 2], [60, 4], [62, 4], [64, 4], [66, 4], [68, 4], [70, 4], [72, 4], [74, 4],
+    [76, 4], [78, 2], [79, 2], [80, 2], [82, 2], [84, 2], [86, 2], [88, 2], [90, 2], [102, 2], [104, 2], [106, 2], [108, 2], [111, 2], [113, 2],
+    [115, 2], [117, 2], [119, 2], [121, 2], [123, 2], [125, 2], [127, 2], [129, 2], [131, 2], [133, 2]].map(([ageOffset, count]) => Object.freeze({ ageOffset: ageOffset!, count: count! }))),
 });
 
-/** Faithful-random live adapters (disjoint from LIVE_MOVE_ANIMATION_IDS). */
+/** Faithful-random live adapters (disjoint from LIVE_MOVE_ANIMATION_IDS and from the faithful-timing ids, which keep their D3 plan). */
 export const LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS: readonly number[] = Object.freeze(
-  Object.keys(LIVE_MOVE_RANDOM2_PLANS).map(Number),
+  Object.keys(LIVE_MOVE_RANDOM2_PLANS).map(Number).filter((id) => !LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS.includes(id)),
 );
 
 export function liveMoveRandom2Plan(request: Pick<BattleMoveAnimationRequest, "moveId">): readonly PresentationRngDrawStep[] | null {

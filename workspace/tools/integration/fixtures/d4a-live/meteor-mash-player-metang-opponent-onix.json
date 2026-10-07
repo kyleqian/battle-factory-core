@@ -1,0 +1,47 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "METEOR_MASH",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-meteor-mash-player-metang-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 298,
+  "endFrame": 511
+ },
+ "windowSource": "window = [activation, activation + 214 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": "no-event",
+ "attacker": {
+  "species": "METANG",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2654435775,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 131,
+  "playerMaxHp": 135,
+  "opponentHp": 110,
+  "opponentMaxHp": 110,
+  "playerGender": "none",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ],
+ "presentationRngActivation": {
+  "value": 884186052,
+  "source": "prep22Probe.py rng2Series[299] stepped back once (activation frame 298)"
+ }
+}

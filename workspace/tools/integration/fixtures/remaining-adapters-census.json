@@ -39,12 +39,15 @@
    "MOVE_WATER_PULSE",
    "MOVE_WISH"
   ],
-  "faithfulTiming": 1,
+  "faithfulTiming": 4,
   "faithfulTimingMoves": [
-   "MOVE_MACH_PUNCH"
+   "MOVE_MACH_PUNCH",
+   "MOVE_MEGAHORN",
+   "MOVE_METEOR_MASH",
+   "MOVE_REVENGE"
   ],
   "inFlight": 0,
-  "remaining": 17,
+  "remaining": 14,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
@@ -52,33 +55,33 @@
   "weightPct": {
    "live": 93.593,
    "faithfulRandom": 3.761,
-   "faithfulTiming": 0.139,
+   "faithfulTiming": 0.722,
    "inFlight": 0,
-   "remaining": 2.019
+   "remaining": 1.437
   },
   "remainingByGroup": {
    "MULTI": {
-    "moves": 13,
-    "weightPct": 1.427
+    "moves": 11,
+    "weightPct": 1.065
    },
    "OUT": {
     "moves": 1,
     "weightPct": 0.112
    },
    "PROVIDER-x": {
-    "moves": 3,
-    "weightPct": 0.48
+    "moves": 2,
+    "weightPct": 0.26
    }
   },
   "remainingByHostClass": {
    "H_BASIC": 1,
-   "H_BUFFER": 13,
-   "H_DERIVED": 3,
+   "H_BUFFER": 11,
+   "H_DERIVED": 2,
    "H_VARIANT": 3
   },
-  "orderFirstBodyOnlyMoves": 11,
-  "slotPlanNeededMoves": 13,
-  "sumsTo": "246+12+1+0+17=276",
+  "orderFirstBodyOnlyMoves": 9,
+  "slotPlanNeededMoves": 11,
+  "sumsTo": "246+12+4+0+14=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -132,24 +135,6 @@
    "meta": null
   },
   {
-   "provider": "C",
-   "label": "Random2 surrogate (presentation-only gRng2Value stream)",
-   "codes": [
-    "C"
-   ],
-   "aloneMoves": 1,
-   "aloneWeightPct": 0.22,
-   "aloneNames": [
-    "METEOR_MASH"
-   ],
-   "touchingMoves": 14,
-   "touchingWeightPct": 1.647,
-   "meta": {
-    "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
-    "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
-   }
-  },
-  {
    "provider": "X-AGE",
    "label": "accepted evidence lacks the early source ages (age basis)",
    "codes": [
@@ -196,11 +181,27 @@
    "aloneNames": [
     "MEMENTO"
    ],
-   "touchingMoves": 13,
-   "touchingWeightPct": 1.277,
+   "touchingMoves": 11,
+   "touchingWeightPct": 0.915,
    "meta": {
     "cost": "new large host (docs/animation-integration-readiness.md A6)",
     "claim": "only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today"
+   }
+  },
+  {
+   "provider": "C",
+   "label": "Random2 surrogate (presentation-only gRng2Value stream)",
+   "codes": [
+    "C"
+   ],
+   "aloneMoves": 0,
+   "aloneWeightPct": 0,
+   "aloneNames": [],
+   "touchingMoves": 11,
+   "touchingWeightPct": 1.065,
+   "meta": {
+    "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
+    "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
    }
   },
   {
@@ -212,8 +213,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 12,
-   "touchingWeightPct": 1.24,
+   "touchingMoves": 10,
+   "touchingWeightPct": 0.878,
    "meta": {
     "cost": "extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves)",
     "claim": "exact for audited plan rows from a known entry; actual status animations/switches invalidate"
@@ -228,8 +229,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 12,
-   "touchingWeightPct": 1.24,
+   "touchingMoves": 10,
+   "touchingWeightPct": 0.878,
    "meta": null
   },
   {
@@ -241,8 +242,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 11,
-   "touchingWeightPct": 1.206,
+   "touchingMoves": 9,
+   "touchingWeightPct": 0.844,
    "meta": null
   },
   {
@@ -254,8 +255,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 9,
-   "touchingWeightPct": 0.987,
+   "touchingMoves": 7,
+   "touchingWeightPct": 0.625,
    "meta": null
   },
   {
@@ -404,120 +405,117 @@
   },
   {
    "step": 2,
-   "provider": "C",
+   "provider": "X-AGE",
    "newMoves": 1,
-   "newWeightPct": 0.22,
+   "newWeightPct": 0.112,
    "cumulativeRemainingUnlocked": 2,
    "newNames": [
-    "METEOR_MASH"
+    "EXTREME_SPEED"
    ]
   },
   {
    "step": 3,
+   "provider": "D-SCAN",
+   "newMoves": 1,
+   "newWeightPct": 0.037,
+   "cumulativeRemainingUnlocked": 3,
+   "newNames": [
+    "MEMENTO"
+   ]
+  },
+  {
+   "step": 4,
+   "provider": "C",
+   "newMoves": 0,
+   "newWeightPct": 0,
+   "cumulativeRemainingUnlocked": 3,
+   "newNames": []
+  },
+  {
+   "step": 5,
    "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
-   "newMoves": 10,
-   "newWeightPct": 0.953,
-   "cumulativeRemainingUnlocked": 12,
+   "newMoves": 7,
+   "newWeightPct": 0.554,
+   "cumulativeRemainingUnlocked": 10,
    "newNames": [
     "ERUPTION",
     "EXTRASENSORY",
     "FLATTER",
-    "MEGAHORN",
-    "MEMENTO",
     "NIGHTMARE",
     "PSYWAVE",
-    "REVENGE",
     "SHOCK_WAVE",
     "SUPERPOWER"
    ]
   },
   {
-   "step": 4,
+   "step": 6,
    "provider": "X-DISABLE",
    "newMoves": 2,
    "newWeightPct": 0.147,
-   "cumulativeRemainingUnlocked": 14,
+   "cumulativeRemainingUnlocked": 12,
    "newNames": [
     "ICE_BALL",
     "SPIT_UP"
    ]
   },
   {
-   "step": 5,
+   "step": 7,
    "provider": "X-TWOTURN",
    "newMoves": 1,
    "newWeightPct": 0.187,
-   "cumulativeRemainingUnlocked": 15,
+   "cumulativeRemainingUnlocked": 13,
    "newNames": [
     "DIVE"
    ]
   },
   {
-   "step": 6,
+   "step": 8,
    "provider": "E-OUT",
    "newMoves": 1,
    "newWeightPct": 0.176,
-   "cumulativeRemainingUnlocked": 16,
+   "cumulativeRemainingUnlocked": 14,
    "newNames": [
     "SKILL_SWAP"
    ]
   },
   {
-   "step": 7,
-   "provider": "X-AGE",
-   "newMoves": 1,
-   "newWeightPct": 0.112,
-   "cumulativeRemainingUnlocked": 17,
-   "newNames": [
-    "EXTREME_SPEED"
-   ]
-  },
-  {
-   "step": 8,
+   "step": 9,
    "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 17,
-   "newNames": []
-  },
-  {
-   "step": 9,
-   "provider": "D-TILE",
-   "newMoves": 0,
-   "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 17,
+   "cumulativeRemainingUnlocked": 14,
    "newNames": []
   },
   {
    "step": 10,
-   "provider": "D-BG",
+   "provider": "D-TILE",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 17,
+   "cumulativeRemainingUnlocked": 14,
    "newNames": []
   },
   {
    "step": 11,
-   "provider": "D-OAM",
+   "provider": "D-BG",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 17,
+   "cumulativeRemainingUnlocked": 14,
    "newNames": []
   },
   {
    "step": 12,
-   "provider": "D-VRAM",
+   "provider": "D-OAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 17,
+   "cumulativeRemainingUnlocked": 14,
    "newNames": []
   },
   {
    "step": 13,
-   "provider": "D-SCAN",
+   "provider": "D-VRAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 17,
+   "cumulativeRemainingUnlocked": 14,
    "newNames": []
   },
   {
@@ -525,7 +523,7 @@
    "provider": "F-AUDIO",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 17,
+   "cumulativeRemainingUnlocked": 14,
    "newNames": []
   }
  ],
@@ -559,7 +557,7 @@
     "H_VARIANT"
    ],
    "weightShare": 0.0018707482993197276,
-   "config": "src/animation/sceneOnPresentation.ts:3129",
+   "config": "src/animation/sceneOnPresentation.ts:3131",
    "needs": [
     "B",
     "C",
@@ -765,7 +763,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0003401360544217687,
-   "config": "src/animation/sceneOnPresentation.ts:3908",
+   "config": "src/animation/sceneOnPresentation.ts:3910",
    "needs": [
     "B",
     "C",
@@ -949,7 +947,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0011089852607709747,
-   "config": "src/animation/sceneOnPresentation.ts:2753",
+   "config": "src/animation/sceneOnPresentation.ts:2755",
    "needs": [
     "B",
     "C",
@@ -1504,7 +1502,7 @@
     "H_DERIVED"
    ],
    "weightShare": 0.0011160714285714283,
-   "config": "src/animation/sceneOnPresentation.ts:1499",
+   "config": "src/animation/sceneOnPresentation.ts:1501",
    "needs": [
     "X-AGE"
    ],
@@ -1513,7 +1511,7 @@
      "code": "X-AGE",
      "text": "evidence covers ages 48..350 only (window starts mid-body: activation 78, window 87, ageOffset 48, row 39); ages 0..47 never accepted; 1 rental species (Arcanine)",
      "cites": [
-      "src/animation/sceneOnPresentation.ts:1499",
+      "src/animation/sceneOnPresentation.ts:1501",
       "src/animation/extremeSpeed.ts:1"
      ]
     }
@@ -1544,7 +1542,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0007936507936507934,
-   "config": "src/animation/sceneOnPresentation.ts:2868",
+   "config": "src/animation/sceneOnPresentation.ts:2870",
    "needs": [
     "B",
     "C",
@@ -1996,7 +1994,7 @@
     "H_VARIANT"
    ],
    "weightShare": 0.0011337868480725622,
-   "config": "src/animation/sceneOnPresentation.ts:2827",
+   "config": "src/animation/sceneOnPresentation.ts:2829",
    "needs": [
     "D-OAM",
     "D-PAL",
@@ -2199,199 +2197,6 @@
    "group": "MULTI"
   },
   {
-   "move": "MOVE_MEGAHORN",
-   "id": 224,
-   "name": "MEGAHORN",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0029443027210884344,
-   "config": "src/animation/sceneOnPresentation.ts:2775",
-   "needs": [
-    "E-TASK",
-    "D-OAM",
-    "D-PAL",
-    "D-BG",
-    "D-TILE",
-    "B",
-    "C"
-   ],
-   "blockers": [
-    {
-     "code": "E-TASK",
-     "text": "liveTasks (readonly Readonly<{slot:number;callback:string;dat)",
-     "cites": [
-      "src/animation/megaHorn.ts:14"
-     ]
-    },
-    {
-     "code": "D-OAM",
-     "text": "buffers (Readonly<{softwareOam:readonly unknown[];hardwareO)",
-     "cites": [
-      "src/animation/megaHorn.ts:15"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "palette (Readonly<{unfaded:readonly number[];faded:readonly)",
-     "cites": [
-      "src/animation/megaHorn.ts:17"
-     ]
-    },
-    {
-     "code": "D-BG",
-     "text": "registers (Readonly<Record<string,number>>;)",
-     "cites": [
-      "src/animation/megaHorn.ts:18"
-     ]
-    },
-    {
-     "code": "D-TILE",
-     "text": "resources (Readonly<{hornTileBase:number;impactTileBase:numbe)",
-     "cites": [
-      "src/animation/megaHorn.ts:20"
-     ]
-    },
-    {
-     "code": "B",
-     "text": "spriteOrder (readonly number[]; readonly audio:unknown;)",
-     "cites": [
-      "src/animation/megaHorn.ts:22"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationRng (number; readonly gameplayRng:unknown; readonly gam)",
-     "cites": [
-      "src/animation/megaHorn.ts:24"
-     ]
-    }
-   ],
-   "notes": [
-    "accepted as a LiveInputs config (docs/animation-integration-merged-readiness.json); not in the older triage docs"
-   ],
-   "staleCorrections": [],
-   "slotPlanNeeded": true,
-   "consumedInputs": [
-    {
-     "path": "attackerArt",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/megaHorn.ts:13"
-    },
-    {
-     "path": "liveTasks",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/megaHorn.ts:14"
-    },
-    {
-     "path": "buffers",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/megaHorn.ts:15"
-    },
-    {
-     "path": "softwareMatrices",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/megaHorn.ts:16"
-    },
-    {
-     "path": "palette",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/megaHorn.ts:17"
-    },
-    {
-     "path": "registers",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/megaHorn.ts:18"
-    },
-    {
-     "path": "background",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/megaHorn.ts:19"
-    },
-    {
-     "path": "resources",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/megaHorn.ts:20"
-    },
-    {
-     "path": "impactPaletteBank",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/megaHorn.ts:21"
-    },
-    {
-     "path": "spriteOrder",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/megaHorn.ts:22"
-    },
-    {
-     "path": "liveCounts",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/megaHorn.ts:23"
-    },
-    {
-     "path": "animationRng",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/megaHorn.ts:24"
-    }
-   ],
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "E-TASK",
-    "B"
-   ],
-   "providerNeeds": [
-    "D-OAM",
-    "D-PAL",
-    "D-BG",
-    "D-TILE",
-    "C"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "MULTI"
-  },
-  {
    "move": "MOVE_MEMENTO",
    "id": 262,
    "name": "MEMENTO",
@@ -2399,7 +2204,7 @@
     "H_DERIVED"
    ],
    "weightShare": 0.0003720238095238094,
-   "config": "src/animation/sceneOnPresentation.ts:1982",
+   "config": "src/animation/sceneOnPresentation.ts:1984",
    "needs": [
     "D-SCAN"
    ],
@@ -2432,46 +2237,6 @@
    "group": "PROVIDER-D-SCAN"
   },
   {
-   "move": "MOVE_METEOR_MASH",
-   "id": 309,
-   "name": "METEOR MASH",
-   "hostClass": [
-    "H_DERIVED"
-   ],
-   "weightShare": 0.002200255102040816,
-   "config": "src/animation/sceneOnPresentation.ts:1413",
-   "needs": [
-    "C"
-   ],
-   "blockers": [
-    {
-     "code": "C",
-     "text": "twinkles: 48 Random2-resolved variants (optional field; geometry.twinkles)",
-     "cites": [
-      "src/animation/meteorMash.ts:46",
-      "src/animation/meteorMash.ts:195"
-     ]
-    }
-   ],
-   "notes": [
-    "everything else is anchors + faint-attack-style profile"
-   ],
-   "staleCorrections": [],
-   "orderFirstBodyOnly": false,
-   "lentConstants": [],
-   "providerNeeds": [
-    "C"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "PROVIDER-C"
-  },
-  {
    "move": "MOVE_NIGHTMARE",
    "id": 171,
    "name": "NIGHTMARE",
@@ -2479,7 +2244,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0007121598639455781,
-   "config": "src/animation/sceneOnPresentation.ts:2696",
+   "config": "src/animation/sceneOnPresentation.ts:2698",
    "needs": [
     "B",
     "C",
@@ -2806,7 +2571,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0007369614512471653,
-   "config": "src/animation/sceneOnPresentation.ts:2741",
+   "config": "src/animation/sceneOnPresentation.ts:2743",
    "needs": [
     "B",
     "C",
@@ -3305,215 +3070,6 @@
    "group": "MULTI"
   },
   {
-   "move": "MOVE_REVENGE",
-   "id": 279,
-   "name": "REVENGE",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0006802721088435374,
-   "config": "src/animation/sceneOnPresentation.ts:2795",
-   "needs": [
-    "E-TASK",
-    "D-OAM",
-    "D-PAL",
-    "D-BG",
-    "D-TILE",
-    "B",
-    "C"
-   ],
-   "blockers": [
-    {
-     "code": "E-TASK",
-     "text": "liveTasks (readonly Readonly<{slot:number;callback:string;dat)",
-     "cites": [
-      "src/animation/revenge.ts:19"
-     ]
-    },
-    {
-     "code": "D-OAM",
-     "text": "buffers (Readonly<{softwareOam:readonly unknown[];hardwareO)",
-     "cites": [
-      "src/animation/revenge.ts:20"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "palette (Readonly<{unfaded:readonly number[];faded:readonly)",
-     "cites": [
-      "src/animation/revenge.ts:22"
-     ]
-    },
-    {
-     "code": "D-BG",
-     "text": "registers (Readonly<Record<string,number>>;)",
-     "cites": [
-      "src/animation/revenge.ts:23"
-     ]
-    },
-    {
-     "code": "D-TILE",
-     "text": "resources (Readonly<{scratchTileBase:number;swipeTileBase:num)",
-     "cites": [
-      "src/animation/revenge.ts:26"
-     ]
-    },
-    {
-     "code": "B",
-     "text": "spriteOrder (readonly number[]; readonly audio:unknown;)",
-     "cites": [
-      "src/animation/revenge.ts:28"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationRng (number; readonly gameplayRng:unknown; readonly gam)",
-     "cites": [
-      "src/animation/revenge.ts:30"
-     ]
-    }
-   ],
-   "notes": [
-    "accepted as a LiveInputs config (docs/animation-integration-merged-readiness.json); not in the older triage docs"
-   ],
-   "staleCorrections": [],
-   "slotPlanNeeded": true,
-   "consumedInputs": [
-    {
-     "path": "attackerArt",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/revenge.ts:17"
-    },
-    {
-     "path": "ownedSprites",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/revenge.ts:18"
-    },
-    {
-     "path": "liveTasks",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/revenge.ts:19"
-    },
-    {
-     "path": "buffers",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/revenge.ts:20"
-    },
-    {
-     "path": "softwareMatrices",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/revenge.ts:21"
-    },
-    {
-     "path": "palette",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/revenge.ts:22"
-    },
-    {
-     "path": "registers",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/revenge.ts:23"
-    },
-    {
-     "path": "background",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/revenge.ts:24"
-    },
-    {
-     "path": "selected",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/revenge.ts:25"
-    },
-    {
-     "path": "resources",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/revenge.ts:26"
-    },
-    {
-     "path": "scratchLoaded",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/revenge.ts:27"
-    },
-    {
-     "path": "spriteOrder",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/revenge.ts:28"
-    },
-    {
-     "path": "liveCounts",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/revenge.ts:29"
-    },
-    {
-     "path": "animationRng",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/revenge.ts:30"
-    }
-   ],
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "E-TASK",
-    "B"
-   ],
-   "providerNeeds": [
-    "D-OAM",
-    "D-PAL",
-    "D-BG",
-    "D-TILE",
-    "C"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "MULTI"
-  },
-  {
    "move": "MOVE_SHOCK_WAVE",
    "id": 351,
    "name": "SHOCK WAVE",
@@ -3521,7 +3077,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0014739229024943307,
-   "config": "src/animation/sceneOnPresentation.ts:2339",
+   "config": "src/animation/sceneOnPresentation.ts:2341",
    "needs": [
     "B",
     "C",
@@ -4119,7 +3675,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0017644557823129248,
-   "config": "src/animation/sceneOnPresentation.ts:2712",
+   "config": "src/animation/sceneOnPresentation.ts:2714",
    "needs": [
     "B",
     "C",
@@ -4619,7 +4175,7 @@
     "H_VARIANT"
    ],
    "weightShare": 0.0003401360544217687,
-   "config": "src/animation/sceneOnPresentation.ts:2805",
+   "config": "src/animation/sceneOnPresentation.ts:2807",
    "needs": [
     "E-TASK",
     "D-OAM",
@@ -4821,7 +4377,7 @@
     "H_BASIC"
    ],
    "weightShare": 0.0022321428571428566,
-   "config": "src/animation/sceneOnPresentation.ts:3717",
+   "config": "src/animation/sceneOnPresentation.ts:3719",
    "needs": [
     "X-SUBST"
    ],
@@ -4832,7 +4388,7 @@
      "cites": [
       "reference/pokeemerald/data/battle_scripts_1.s:1085-1103",
       "src/engine/battleCommandFieldArt.ts:1",
-      "src/animation/sceneOnPresentation.ts:3717"
+      "src/animation/sceneOnPresentation.ts:3719"
      ]
     }
    ],
@@ -4862,7 +4418,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0003720238095238094,
-   "config": "src/animation/sceneOnPresentation.ts:2785",
+   "config": "src/animation/sceneOnPresentation.ts:2787",
    "needs": [
     "E-TASK",
     "D-OAM",

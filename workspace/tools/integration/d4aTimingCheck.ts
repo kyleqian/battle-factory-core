@@ -7,9 +7,9 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { verifyLiveAdapterFramebuffer } from "./liveAdapterFramebuffer.ts";
-import { liveMoveTimingParameter } from "../../src/engine/liveMoveTimingPolicy.ts";
+import { LIVE_MOVE_TIMING_POLICY, type LiveMoveTimingParameterKind, type LiveMoveTimingPhase } from "../../src/engine/liveMoveTimingPolicy.ts";
 
-const IDS: Record<string, number> = { MACH_PUNCH: 183, NIGHTMARE: 171 };
+const IDS: Record<string, number> = { MACH_PUNCH: 183, NIGHTMARE: 171, MEGAHORN: 224, REVENGE: 279, METEOR_MASH: 309 };
 const [outPath, ...paths] = process.argv.slice(2);
 const status = JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8"));
 const documented = (id: number): number[] | null =>
@@ -17,9 +17,14 @@ const documented = (id: number): number[] | null =>
 const out: Record<string, unknown>[] = [];
 let failed = false;
 for (const path of paths) {
-  const fixture = JSON.parse(readFileSync(path, "utf8")) as { move: string; timingPhase: "event" | "no-event" };
+  const fixture = JSON.parse(readFileSync(path, "utf8")) as { move: string; timingPhase: LiveMoveTimingPhase;
+    timingPhases?: Partial<Record<LiveMoveTimingParameterKind, LiveMoveTimingPhase>> };
   const id = IDS[fixture.move]!;
-  const parameter = liveMoveTimingParameter(id, "optional-lag-age")!;
+  // Every policy parameter of the move: the window is in the selected phase iff each measured phase equals the policy's choice
+  // (a fixture without timingPhases measured only the optional lag).
+  const measured = fixture.timingPhases ?? { "optional-lag-age": fixture.timingPhase };
+  const parameters = LIVE_MOVE_TIMING_POLICY[id]!.parameters;
+  const policyPhases = Object.fromEntries(parameters.map((p) => [p.kind, p.chosen]));
   const results = verifyLiveAdapterFramebuffer(path);
   const runs = results.map((r) => {
     const rows = (JSON.parse(readFileSync(join(r.scratch as string, "live-comparison.json"), "utf8")).comparisons as { age: number; residualPixels: number }[]);
@@ -27,7 +32,7 @@ for (const path of paths) {
     return { rows: rows.length, exactRows: r.exactRows, residualPixels: r.residualPixels, digest: r.digest,
       affectedAges: affected.map((row) => row.age), maxPixelsPerRow: Math.max(0, ...affected.map((row) => row.residualPixels)) };
   });
-  const selected = fixture.timingPhase === parameter.chosen;
+  const selected = parameters.every((p) => measured[p.kind] === p.chosen);
   const doc = documented(id);
   const run0 = runs[0]!;
   const violations: string[] = [];
@@ -40,7 +45,8 @@ for (const path of paths) {
     if (outside.length) violations.push(`other-phase residual outside the documented rows: ages ${outside.join(",")}`);
   }
   failed ||= violations.length > 0;
-  const entry = { fixture: path, move: fixture.move, measuredPhase: fixture.timingPhase, policyPhase: parameter.chosen, selectedPhase: selected,
+  const entry = { fixture: path, move: fixture.move, measuredPhase: fixture.timingPhase, policyPhase: policyPhases["optional-lag-age"],
+    ...(fixture.timingPhases ? { measuredPhases: measured, policyPhases } : {}), selectedPhase: selected,
     window: run0.rows, expectedDuration: results[0]!.expectedDuration, runs, documentedAges: selected ? null : doc, violations };
   out.push(entry);
   console.log(path, JSON.stringify({ phase: fixture.timingPhase, selected, rows: run0.rows, px: runs.map((r) => r.residualPixels), ages: run0.affectedAges.length ? `${run0.affectedAges[0]}..${run0.affectedAges.at(-1)} (${run0.affectedAges.length})` : "-", maxPxRow: run0.maxPixelsPerRow, violations }));

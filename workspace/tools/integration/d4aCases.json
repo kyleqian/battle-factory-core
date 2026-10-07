@@ -46,5 +46,53 @@
   "nightmare-extra-opponent-gengar-golbat",
   "d4a-nightmare-extra-opponent-gengar-golbat",
   "opponent"
+ ],
+ [
+  "MEGAHORN",
+  "megahorn-extra-player-rhydon-golbat",
+  "d4a-megahorn-extra-player-rhydon-golbat",
+  "player"
+ ],
+ [
+  "MEGAHORN",
+  "megahorn-extra-opponent-rhydon-golbat",
+  "d4a-megahorn-extra-opponent-rhydon-golbat",
+  "opponent"
+ ],
+ [
+  "MEGAHORN",
+  "megahorn-extra-player-nidoking-snorlax",
+  "d4a-megahorn-extra-player-nidoking-snorlax",
+  "player"
+ ],
+ [
+  "MEGAHORN",
+  "megahorn-extra-opponent-nidoking-snorlax",
+  "d4a-megahorn-extra-opponent-nidoking-snorlax",
+  "opponent"
+ ],
+ [
+  "REVENGE",
+  "revenge-extra-player-hitmonlee-golbat",
+  "d4a-revenge-extra-player-hitmonlee-golbat",
+  "player"
+ ],
+ [
+  "REVENGE",
+  "revenge-extra-opponent-hitmonlee-golbat",
+  "d4a-revenge-extra-opponent-hitmonlee-golbat",
+  "opponent"
+ ],
+ [
+  "METEOR_MASH",
+  "meteor-mash-extra-player-metagross-golbat",
+  "d4a-meteor-mash-extra-player-metagross-golbat",
+  "player"
+ ],
+ [
+  "METEOR_MASH",
+  "meteor-mash-extra-opponent-metagross-golbat",
+  "d4a-meteor-mash-extra-opponent-metagross-golbat",
+  "opponent"
  ]
 ]

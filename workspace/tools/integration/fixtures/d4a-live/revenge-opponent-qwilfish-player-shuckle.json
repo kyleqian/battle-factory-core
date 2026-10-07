@@ -1,0 +1,41 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "REVENGE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-revenge-opponent-qwilfish-player-shuckle.json",
+ "denseWindow": {
+  "startFrame": 235,
+  "endFrame": 379
+ },
+ "windowSource": "window = [activation, activation + 145 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": "no-event",
+ "timingPhases": {
+  "bg-write-row": "no-event"
+ },
+ "monbgCntRow": 4,
+ "attacker": {
+  "species": "QWILFISH",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SHUCKLE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793699878,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 127,
+  "playerMaxHp": 127,
+  "opponentHp": 172,
+  "opponentMaxHp": 172,
+  "playerGender": "male",
+  "opponentGender": "female"
+ }
+}

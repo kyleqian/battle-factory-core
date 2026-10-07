@@ -3860,7 +3860,7 @@
     },
     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
   },
-  "faithfulTimingCount": 1,
+  "faithfulTimingCount": 4,
   "faithfulTimingAdapters": [
     {
       "id": 183,
@@ -3924,6 +3924,199 @@
       "proofCommands": [
         "python3 tools/integration/d4aFixtures.py PROBEDIR MACH_PUNCH   # PROBEDIR from tools/integration/prep22Probes.sh PROBEDIR 1 <scenarios>",
         "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/d4a-live/mach-punch-*.json",
+        "npx vitest run tests/animation/liveFaithfulTimingAdapters.test.ts tests/animation/liveMoveTimingPolicy.test.ts"
+      ]
+    },
+    {
+      "id": 224,
+      "move": "MOVE_MEGAHORN",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 156,
+          "fixedLagAges": [],
+          "iterations": 176,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 177,
+              "measured": 9
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 176,
+              "measured": 1
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        },
+        {
+          "kind": "bg-write-row",
+          "age": 8,
+          "fixedLagAges": [],
+          "iterations": 176,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 177,
+              "measured": 7
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 177,
+              "measured": 3
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          158,
+          159,
+          160,
+          161,
+          162,
+          163,
+          164,
+          165,
+          166,
+          167,
+          168,
+          169,
+          170,
+          171,
+          172,
+          173
+        ],
+        "rows": 16,
+        "maxPixelsPerRow": 17211,
+        "cause": "optional-lag-age only: without the late restorebg row the final Task_FadeToBg (BLDY 15..0 after LoadDefaultBg) runs one row earlier, so a 176-row window differs on the 16 fade rows 158..173 (the accepted opponent window, 1 of 10); rows 0..157 and 174..175 are exact. bg-write-row: the monbg BGnCNT row (8 policy / 7 other, 3 of 10 windows) is never read by the MEGAHORN renderer branch, so row-7 windows are 0 px"
+      },
+      "d3": false,
+      "evidence": [
+        "tools/integration/fixtures/d4b-live-receipt.json",
+        "tools/integration/fixtures/d4a-live/megahorn-*.json (10 dense windows, both orientations: accepted SEAKING -> ONIX, prep18 HERACROSS -> GOLEM, prep24 HERACROSS -> ONIX, D4b tie-break RHYDON -> GOLBAT / NIDOKING -> SNORLAX; each fixture records its measured phases)",
+        "docs/next-adapters-prep24.md s0.2 H / s1.3 (prep24: endLate 5 of 6 late; monbgCntRow 3:3) + the D4b tie-break windows (4 of 4 late, row 8): totals late 9 of 10, row 8 7 of 10",
+        "tests/animation/liveFaithfulTimingAdapters.test.ts (D4b Megahorn: registration, dense receipt, gates, ordinary route Scene ON/OFF parity)"
+      ],
+      "proofCommands": [
+        "python3 tools/integration/d4aScenarios.py && sh tools/integration/prep22Probes.sh PROBEDIR 1 mechanic-megahorn-player-seaking-opponent-onix mechanic-megahorn-opponent-seaking-player-onix prep18-megahorn-alt-heracross-golem prep18-megahorn-altopp-heracross-golem prep24-megahorn-alt-heracross-onix prep24-megahorn-altopp-heracross-onix d4a-megahorn-extra-player-rhydon-golbat d4a-megahorn-extra-opponent-rhydon-golbat d4a-megahorn-extra-player-nidoking-snorlax d4a-megahorn-extra-opponent-nidoking-snorlax",
+        "python3 tools/integration/d4aFixtures.py PROBEDIR MEGAHORN",
+        "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/d4a-live/megahorn-*.json",
+        "npx vitest run tests/animation/liveFaithfulTimingAdapters.test.ts tests/animation/liveMoveTimingPolicy.test.ts"
+      ]
+    },
+    {
+      "id": 279,
+      "move": "MOVE_REVENGE",
+      "timingParameters": [
+        {
+          "kind": "bg-write-row",
+          "age": 5,
+          "fixedLagAges": [],
+          "iterations": 145,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 145,
+              "measured": 5
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 145,
+              "measured": 1
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [],
+        "rows": 0,
+        "maxPixelsPerRow": 0,
+        "cause": "bg-write-row only: with the monbg BGnCNT write on row 4 MoveBattlerSpriteToBG also writes that row's BG scroll, but the target OBJ is still drawn on row 4 (hidden from row 5), so the REVENGE renderer branch shows no difference: the row-4 window (accepted opponent, 1 of 6) is 0 px under the row-5 policy"
+      },
+      "d3": false,
+      "evidence": [
+        "tools/integration/fixtures/d4b-live-receipt.json",
+        "tools/integration/fixtures/d4a-live/revenge-*.json (6 dense windows, both orientations: accepted MACHAMP / QWILFISH -> SHUCKLE (first bodies), prep25 MACHOKE -> GOLEM (after a Tackle), D4b HITMONLEE -> GOLBAT (elevated target); each fixture records its measured monbg row)",
+        "docs/next-adapters-prep26.md s2.4 (prep26: row 5 in 3 of 4) + the D4b HITMONLEE -> GOLBAT pair (row 5, 2 of 2): row 5 in 5 of 6",
+        "tests/animation/liveFaithfulTimingAdapters.test.ts (D4b Revenge: registration, dense receipt, gates, ordinary route Scene ON/OFF parity)"
+      ],
+      "proofCommands": [
+        "python3 tools/integration/d4aScenarios.py && sh tools/integration/prep22Probes.sh PROBEDIR 1 mechanic-revenge-player-machamp-opponent-shuckle mechanic-revenge-opponent-qwilfish-player-shuckle prep25-revenge-alt-player-machoke-golem prep25-revenge-alt-opponent-machoke-golem d4a-revenge-extra-player-hitmonlee-golbat d4a-revenge-extra-opponent-hitmonlee-golbat",
+        "python3 tools/integration/d4aFixtures.py PROBEDIR REVENGE",
+        "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/d4a-live/revenge-*.json",
+        "npx vitest run tests/animation/liveFaithfulTimingAdapters.test.ts tests/animation/liveMoveTimingPolicy.test.ts"
+      ]
+    },
+    {
+      "id": 309,
+      "move": "MOVE_METEOR_MASH",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 195,
+          "fixedLagAges": [],
+          "iterations": 214,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 215,
+              "measured": 5
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 214,
+              "measured": 2
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          196,
+          197,
+          198,
+          199,
+          200,
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211
+        ],
+        "rows": 16,
+        "maxPixelsPerRow": 18589,
+        "cause": "the row-195 lag holds restorebg's fade-down one row (first row 196 + L): a no-lag window equals the policy body one row earlier from age 196 to the fade end (211); rows 0..195 and 212..213 are exact (accepted player METANG -> ONIX and D4b player METAGROSS -> GOLBAT, 2 of 5 windows)"
+      },
+      "d3": true,
+      "evidence": [
+        "tools/integration/fixtures/d4b-live-receipt.json",
+        "D3: Random2 words only from the per-battle presentation host (src/engine/liveMovePresentationRng.ts LIVE_MOVE_RANDOM2_PLANS[309]: 48 twinkles x 2 words, prep12 plans.json meteor-mash); dense windows pin the host to each scenario's activation gRng2Value",
+        "tools/integration/fixtures/d4a-live/meteor-mash-*.json (5 dense windows: accepted METANG -> ONIX both orientations, prep12 SHIFTRY -> GOLEM player, D4b METAGROSS -> GOLBAT both orientations; host pinned to each scenario's activation gRng2Value)",
+        "tools/integration/fixtures/prep17/meteor-mash-tail-receipt.json (prep17: lag in 4 of 5 bodies) + the D4b METAGROSS -> GOLBAT pair (opponent lag, player none): 5 of 7",
+        "tests/animation/liveFaithfulTimingAdapters.test.ts (D4b Meteor Mash: registration (not faithful random), dense receipt, the reducer's explicit L pin, D3 route seeds 0x1234abcd / 0xfeed0042 + Scene OFF parity)"
+      ],
+      "proofCommands": [
+        "python3 tools/integration/d4aScenarios.py && sh tools/integration/prep22Probes.sh PROBEDIR 1 mechanic-meteor-mash-player-metang-opponent-onix mechanic-meteor-mash-opponent-metang-player-onix prep12-meteor-mash-alt-shiftry-golem d4a-meteor-mash-extra-player-metagross-golbat d4a-meteor-mash-extra-opponent-metagross-golbat",
+        "python3 tools/integration/d4aFixtures.py PROBEDIR METEOR_MASH",
+        "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/d4a-live/meteor-mash-*.json",
         "npx vitest run tests/animation/liveFaithfulTimingAdapters.test.ts tests/animation/liveMoveTimingPolicy.test.ts"
       ]
     }

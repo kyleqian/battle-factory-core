@@ -1425,6 +1425,8 @@ export interface SceneOnMeteorMashConfig {
   >;
   /** Presentation-only Random2 results for the 48 source mini stars. */
   readonly twinkles?: readonly import("./meteorMash.ts").MeteorMashTwinkleVariant[];
+  /** D4 restore-tail lag (meteorMash.ts MeteorMashGeometry.restoreLagRows); absent = the accepted corpora's side phases. */
+  readonly restoreLagRows?: 0 | 1;
 }
 
 export interface SceneOnFlameWheelConfig {
@@ -10984,6 +10986,7 @@ export function sceneOnMeteorMashView(
       targetSide: state.config.target.geometry.side,
       targetCenter: state.config.target.geometry.animationCenter,
       twinkles: state.config.twinkles,
+      ...(state.config.restoreLagRows === undefined ? {} : { restoreLagRows: state.config.restoreLagRows }),
     }),
   };
 }
