@@ -1,0 +1,1188 @@
+{
+ "schema": "ns-live-receipt/v1",
+ "testedCommit": "577cb973537b4da1d330e1e84c969d106578aad5",
+ "testedSrcTree": "54bac4057448ea77bd9702c672f249795556b505",
+ "dirty": false,
+ "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+ "commands": [
+  "python3 tools/integration/d4aScenarios.py",
+  "sh tools/integration/prep22Probes.sh PROBEDIR 1 <accepted + prep25 alternate + d4a extra scenarios>",
+  "python3 tools/integration/d4aFixtures.py PROBEDIR",
+  "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts CHECK.json tools/integration/fixtures/d4a-live/<move>-*.json",
+  "python3 tools/integration/d4aReceipt.py CHECK.json..."
+ ],
+ "phaseTable": [
+  {
+   "id": 183,
+   "move": "MOVE_MACH_PUNCH",
+   "kind": "optional-lag-age",
+   "age": 91,
+   "fixedLagAges": [
+    71,
+    72
+   ],
+   "iterations": 107,
+   "alternatives": [
+    {
+     "phase": "event",
+     "bodyRows": 110,
+     "measured": 5
+    },
+    {
+     "phase": "no-event",
+     "bodyRows": 109,
+     "measured": 3
+    }
+   ],
+   "chosen": "event",
+   "tieRuleUsed": false,
+   "alternatePhaseResidual": {
+    "ages": [
+     92,
+     93,
+     94,
+     95,
+     96,
+     97,
+     98,
+     99,
+     100,
+     101,
+     102,
+     103,
+     104,
+     105,
+     106,
+     107
+    ],
+    "rows": 16,
+    "maxPixelsPerRow": 18252,
+    "cause": "the optional lag at age 91 holds the restore fade (Task_FadeToBg, BLDY) one row: a no-lag window equals the policy body one row earlier from age 92 to the fade end (107); rows 0..91 and 108 are exact"
+   }
+  },
+  {
+   "id": 224,
+   "move": "MOVE_MEGAHORN",
+   "kind": "optional-lag-age",
+   "age": 156,
+   "fixedLagAges": [],
+   "iterations": 176,
+   "alternatives": [
+    {
+     "phase": "event",
+     "bodyRows": 177,
+     "measured": 9
+    },
+    {
+     "phase": "no-event",
+     "bodyRows": 176,
+     "measured": 1
+    }
+   ],
+   "chosen": "event",
+   "tieRuleUsed": false,
+   "timingParameters": [
+    {
+     "kind": "optional-lag-age",
+     "age": 156,
+     "fixedLagAges": [],
+     "iterations": 176,
+     "alternatives": [
+      {
+       "phase": "event",
+       "bodyRows": 177,
+       "measured": 9
+      },
+      {
+       "phase": "no-event",
+       "bodyRows": 176,
+       "measured": 1
+      }
+     ],
+     "chosen": "event",
+     "tieRuleUsed": false
+    },
+    {
+     "kind": "bg-write-row",
+     "age": 8,
+     "fixedLagAges": [],
+     "iterations": 176,
+     "alternatives": [
+      {
+       "phase": "event",
+       "bodyRows": 177,
+       "measured": 7
+      },
+      {
+       "phase": "no-event",
+       "bodyRows": 177,
+       "measured": 3
+      }
+     ],
+     "chosen": "event",
+     "tieRuleUsed": false
+    }
+   ],
+   "alternatePhaseResidual": {
+    "ages": [
+     158,
+     159,
+     160,
+     161,
+     162,
+     163,
+     164,
+     165,
+     166,
+     167,
+     168,
+     169,
+     170,
+     171,
+     172,
+     173
+    ],
+    "rows": 16,
+    "maxPixelsPerRow": 17211,
+    "cause": "optional-lag-age only: without the late restorebg row the final Task_FadeToBg (BLDY 15..0 after LoadDefaultBg) runs one row earlier, so a 176-row window differs on the 16 fade rows 158..173 (the accepted opponent window, 1 of 10); rows 0..157 and 174..175 are exact. bg-write-row: the monbg BGnCNT row (8 policy / 7 other, 3 of 10 windows) is never read by the MEGAHORN renderer branch, so row-7 windows are 0 px"
+   }
+  },
+  {
+   "id": 279,
+   "move": "MOVE_REVENGE",
+   "kind": "bg-write-row",
+   "age": 5,
+   "fixedLagAges": [],
+   "iterations": 145,
+   "alternatives": [
+    {
+     "phase": "event",
+     "bodyRows": 145,
+     "measured": 5
+    },
+    {
+     "phase": "no-event",
+     "bodyRows": 145,
+     "measured": 1
+    }
+   ],
+   "chosen": "event",
+   "tieRuleUsed": false,
+   "alternatePhaseResidual": {
+    "ages": [],
+    "rows": 0,
+    "maxPixelsPerRow": 0,
+    "cause": "bg-write-row only: with the monbg BGnCNT write on row 4 MoveBattlerSpriteToBG also writes that row's BG scroll, but the target OBJ is still drawn on row 4 (hidden from row 5), so the REVENGE renderer branch shows no difference: the row-4 window (accepted opponent, 1 of 6) is 0 px under the row-5 policy"
+   }
+  },
+  {
+   "id": 309,
+   "move": "MOVE_METEOR_MASH",
+   "kind": "optional-lag-age",
+   "age": 195,
+   "fixedLagAges": [],
+   "iterations": 214,
+   "alternatives": [
+    {
+     "phase": "event",
+     "bodyRows": 215,
+     "measured": 5
+    },
+    {
+     "phase": "no-event",
+     "bodyRows": 214,
+     "measured": 2
+    }
+   ],
+   "chosen": "event",
+   "tieRuleUsed": false,
+   "alternatePhaseResidual": {
+    "ages": [
+     196,
+     197,
+     198,
+     199,
+     200,
+     201,
+     202,
+     203,
+     204,
+     205,
+     206,
+     207,
+     208,
+     209,
+     210,
+     211
+    ],
+    "rows": 16,
+    "maxPixelsPerRow": 18589,
+    "cause": "the row-195 lag holds restorebg's fade-down one row (first row 196 + L): a no-lag window equals the policy body one row earlier from age 196 to the fade end (211); rows 0..195 and 212..213 are exact (accepted player METANG -> ONIX and D4b player METAGROSS -> GOLBAT, 2 of 5 windows)"
+   }
+  },
+  {
+   "id": 149,
+   "move": "MOVE_PSYWAVE",
+   "kind": "optional-lag-age",
+   "age": 185,
+   "fixedLagAges": [],
+   "iterations": 204,
+   "alternatives": [
+    {
+     "phase": "event",
+     "bodyRows": 205,
+     "measured": 4
+    },
+    {
+     "phase": "no-event",
+     "bodyRows": 204,
+     "measured": 2
+    }
+   ],
+   "chosen": "event",
+   "tieRuleUsed": false,
+   "alternatePhaseResidual": {
+    "ages": [
+     186,
+     187,
+     188,
+     189,
+     190,
+     191,
+     192,
+     193,
+     194,
+     195,
+     196,
+     197,
+     198,
+     199,
+     200,
+     201
+    ],
+    "rows": 16,
+    "maxPixelsPerRow": 18618,
+    "cause": "the optional lag at task row 185 splits restorebg's Fade 2 (VRAM restore row 184, palette restore 185, registers >= 187 one row later): a no-lag window equals the policy body one row earlier on the BLDY fade rows 186..201; rows 0..185 and 202..203 are exact (ALAKAZAM -> GOLEM opponent and ESPEON -> CROBAT opponent, 2 of 6 windows)"
+   }
+  },
+  {
+   "id": 326,
+   "move": "MOVE_EXTRASENSORY",
+   "kind": "optional-lag-age",
+   "age": 142,
+   "fixedLagAges": [
+    122,
+    123
+   ],
+   "iterations": 161,
+   "alternatives": [
+    {
+     "phase": "event",
+     "bodyRows": 162,
+     "measured": 2
+    },
+    {
+     "phase": "no-event",
+     "bodyRows": 161,
+     "measured": 4
+    }
+   ],
+   "chosen": "no-event",
+   "tieRuleUsed": false,
+   "timingParameters": [
+    {
+     "kind": "optional-lag-age",
+     "age": 142,
+     "fixedLagAges": [
+      122,
+      123
+     ],
+     "iterations": 161,
+     "alternatives": [
+      {
+       "phase": "event",
+       "bodyRows": 162,
+       "measured": 2
+      },
+      {
+       "phase": "no-event",
+       "bodyRows": 161,
+       "measured": 4
+      }
+     ],
+     "chosen": "no-event",
+     "tieRuleUsed": false
+    },
+    {
+     "kind": "scanline-split-line",
+     "age": 0,
+     "fixedLagAges": [],
+     "iterations": 161,
+     "alternatives": [
+      {
+       "phase": "event",
+       "bodyRows": 161,
+       "measured": 2
+      },
+      {
+       "phase": "no-event",
+       "bodyRows": 161,
+       "measured": 4
+      }
+     ],
+     "chosen": "no-event",
+     "tieRuleUsed": false
+    }
+   ],
+   "alternatePhaseResidual": {
+    "ages": [
+     143,
+     144,
+     145,
+     146,
+     147,
+     148,
+     149,
+     150,
+     151,
+     152,
+     153,
+     154,
+     155,
+     156,
+     157,
+     158
+    ],
+    "rows": 16,
+    "maxPixelsPerRow": 18334,
+    "cause": "optional-lag-age: the lag at task row 142 holds restorebg's Fade 2 one row (palette restore 142, registers >= 143): a lag window under the no-lag policy differs on the BLDY rows 143..158; scanline-split-line: per window (windows), the opponent-target alternates' measured scanout residual on the target's top lines of the displayed distortion rows",
+    "windows": {
+     "extrasensory-alt-opponent-alakazam-golem": {
+      "ages": [
+       143,
+       144,
+       145,
+       146,
+       147,
+       148,
+       149,
+       150,
+       151,
+       152,
+       153,
+       154,
+       155,
+       156,
+       157,
+       158
+      ],
+      "rows": 16,
+      "pixels": 293344,
+      "maxPixelsPerRow": 18334,
+      "cause": "optional-lag-age only (lag window under the no-lag policy): restore Fade 2's BLDY one row early on 143..158"
+     },
+     "extrasensory-alt-player-alakazam-golem": {
+      "ages": [
+       43,
+       61,
+       70,
+       95,
+       97,
+       98,
+       99,
+       100,
+       101,
+       102,
+       103,
+       104,
+       105,
+       106,
+       107,
+       108,
+       109,
+       110,
+       114,
+       115,
+       116,
+       117
+      ],
+      "rows": 22,
+      "pixels": 1433,
+      "maxPixelsPerRow": 151,
+      "cause": "scanline-split-line only (prep30 s1.4): the distortion task rewrites both scanline buffers while the frame is scanned out; GOLEM's lines 18..28 above the beam still show the previous row's buffer on displayed distortion rows (no constant split line is exact; prep30 best constant 1433 px)"
+     },
+     "extrasensory-alt-player-espeon-crobat": {
+      "ages": [
+       43,
+       44,
+       45,
+       46,
+       47,
+       48,
+       49,
+       50,
+       51,
+       52,
+       53,
+       54,
+       55,
+       56,
+       57,
+       58,
+       59,
+       60,
+       61,
+       62,
+       63,
+       64,
+       65,
+       69,
+       70,
+       71,
+       72,
+       73,
+       74,
+       75,
+       76,
+       77,
+       78,
+       79,
+       80,
+       81,
+       82,
+       83,
+       84,
+       85,
+       86,
+       87,
+       88,
+       89,
+       90,
+       91,
+       95,
+       96,
+       97,
+       98,
+       99,
+       100,
+       101,
+       102,
+       103,
+       104,
+       105,
+       106,
+       107,
+       108,
+       109,
+       110,
+       111,
+       112,
+       113,
+       114,
+       115,
+       116,
+       117,
+       143,
+       144,
+       145,
+       146,
+       147,
+       148,
+       149,
+       150,
+       151,
+       152,
+       153,
+       154,
+       155,
+       156,
+       157,
+       158
+      ],
+      "rows": 85,
+      "pixels": 306721,
+      "maxPixelsPerRow": 18473,
+      "cause": "both parameters: the scanout split on CROBAT's lines 3..18 of the displayed distortion rows (prep30 s1.4: 11551 px at S = 0, the row-98 source-fitted split cannot be exact for an elevated target) + the lag window's restore fade one row early on 143..158"
+     }
+    }
+   }
+  },
+  {
+   "id": 276,
+   "move": "MOVE_SUPERPOWER",
+   "kind": "bg-write-row",
+   "age": 11,
+   "fixedLagAges": [],
+   "iterations": 248,
+   "alternatives": [
+    {
+     "phase": "event",
+     "bodyRows": 248,
+     "measured": 1
+    },
+    {
+     "phase": "no-event",
+     "bodyRows": 248,
+     "measured": 2
+    }
+   ],
+   "chosen": "no-event",
+   "tieRuleUsed": false,
+   "timingParameters": [
+    {
+     "kind": "bg-write-row",
+     "age": 11,
+     "fixedLagAges": [],
+     "iterations": 248,
+     "alternatives": [
+      {
+       "phase": "event",
+       "bodyRows": 248,
+       "measured": 1
+      },
+      {
+       "phase": "no-event",
+       "bodyRows": 248,
+       "measured": 2
+      }
+     ],
+     "chosen": "no-event",
+     "tieRuleUsed": false,
+     "side": "player"
+    },
+    {
+     "kind": "bg-write-row",
+     "age": 11,
+     "fixedLagAges": [],
+     "iterations": 248,
+     "alternatives": [
+      {
+       "phase": "event",
+       "bodyRows": 248,
+       "measured": 3
+      },
+      {
+       "phase": "no-event",
+       "bodyRows": 248,
+       "measured": 0
+      }
+     ],
+     "chosen": "event",
+     "tieRuleUsed": false,
+     "side": "opponent"
+    }
+   ],
+   "alternatePhaseResidual": {
+    "ages": [],
+    "rows": 0,
+    "maxPixelsPerRow": 0,
+    "cause": "bg-write-row only, measured per side (the reducer's monbg gate superpower.ts:75 is player >= 10, opponent >= 11): with the player policy row 10 the monbg scroll is written on row 10, so the BG copy drawn from row 10 sits exactly where the ROM still shows the attacker OBJ in a row-11 window (prep25 MACHAMP -> GOLEM player: 0 px; the prep31 prototype's 889 px on row 10 came from a row-11 register model); an opponent row 10 is never read (gate >= 11)"
+   }
+  },
+  {
+   "id": 171,
+   "move": "MOVE_NIGHTMARE",
+   "kind": "optional-lag-age",
+   "age": 149,
+   "fixedLagAges": [
+    21,
+    129,
+    130
+   ],
+   "iterations": 164,
+   "alternatives": [
+    {
+     "phase": "event",
+     "bodyRows": 168,
+     "measured": 5
+    },
+    {
+     "phase": "no-event",
+     "bodyRows": 167,
+     "measured": 3
+    }
+   ],
+   "chosen": "event",
+   "tieRuleUsed": false,
+   "timingParameters": [
+    {
+     "kind": "optional-lag-age",
+     "age": 149,
+     "fixedLagAges": [
+      21,
+      129,
+      130
+     ],
+     "iterations": 164,
+     "alternatives": [
+      {
+       "phase": "event",
+       "bodyRows": 168,
+       "measured": 5
+      },
+      {
+       "phase": "no-event",
+       "bodyRows": 167,
+       "measured": 3
+      }
+     ],
+     "chosen": "event",
+     "tieRuleUsed": false
+    },
+    {
+     "kind": "palette-transfer-row",
+     "age": 149,
+     "fixedLagAges": [],
+     "iterations": 164,
+     "alternatives": [
+      {
+       "phase": "event",
+       "bodyRows": 168,
+       "measured": 4
+      },
+      {
+       "phase": "no-event",
+       "bodyRows": 168,
+       "measured": 4
+      }
+     ],
+     "chosen": "no-event",
+     "tieRuleUsed": true
+    }
+   ],
+   "alternatePhaseResidual": {
+    "ages": [
+     150,
+     151,
+     152,
+     153,
+     154,
+     155,
+     156,
+     157,
+     158,
+     159,
+     160,
+     161,
+     162,
+     163,
+     164,
+     165
+    ],
+    "rows": 16,
+    "maxPixelsPerRow": 17811,
+    "cause": "optional-lag-age: a no-lag window is the lag program with row 149 deleted, so under the lag policy its restorebg fade-out (BLDY 15..0) is drawn one row late on rows 150..165 (prep25 GENGAR -> GOLEM P / O, d4a GENGAR -> GOLBAT P: 3 of 8 windows); palette-transfer-row: display-neutral (BLDY 16 on rows 146..150 darkens the restored BG bank 2 to black in both phases), so the restore-149 windows are documented with no residual row (windows)",
+    "windows": {
+     "nightmare-player-haunter-opponent-shuckle": {
+      "ages": [],
+      "rows": 0,
+      "pixels": 0,
+      "maxPixelsPerRow": 0,
+      "cause": "palette-transfer-row only (restore row 149 under the 148 policy): display-neutral, no residual allowed"
+     },
+     "nightmare-opponent-haunter-player-shuckle": {
+      "ages": [],
+      "rows": 0,
+      "pixels": 0,
+      "maxPixelsPerRow": 0,
+      "cause": "palette-transfer-row only (restore row 149 under the 148 policy): display-neutral, no residual allowed"
+     },
+     "nightmare-extra-player-haunter-snorlax": {
+      "ages": [],
+      "rows": 0,
+      "pixels": 0,
+      "maxPixelsPerRow": 0,
+      "cause": "palette-transfer-row only (restore row 149 under the 148 policy): display-neutral, no residual allowed"
+     },
+     "nightmare-extra-opponent-haunter-snorlax": {
+      "ages": [],
+      "rows": 0,
+      "pixels": 0,
+      "maxPixelsPerRow": 0,
+      "cause": "palette-transfer-row only (restore row 149 under the 148 policy): display-neutral, no residual allowed"
+     }
+    }
+   }
+  }
+ ],
+ "summary": {
+  "NIGHTMARE": {
+   "windows": 8,
+   "selectedPhaseWindows": 1,
+   "selectedPhaseResidualPixels": 0,
+   "otherPhaseWindows": 7,
+   "otherPhaseAffectedAges": [
+    150,
+    151,
+    152,
+    153,
+    154,
+    155,
+    156,
+    157,
+    158,
+    159,
+    160,
+    161,
+    162,
+    163,
+    164,
+    165
+   ],
+   "otherPhaseMaxPixelsPerRow": 17811,
+   "freshRunsIdentical": true,
+   "violations": 0
+  }
+ },
+ "windows": [
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/nightmare-alt-opponent-gengar-golem.json",
+   "move": "NIGHTMARE",
+   "measuredPhase": "no-event",
+   "policyPhase": "event",
+   "measuredPhases": {
+    "optional-lag-age": "no-event",
+    "palette-transfer-row": "no-event"
+   },
+   "policyPhases": {
+    "optional-lag-age": "event",
+    "palette-transfer-row": "no-event"
+   },
+   "selectedPhase": false,
+   "window": 167,
+   "expectedDuration": 168,
+   "runs": [
+    {
+     "rows": 167,
+     "exactRows": 151,
+     "residualPixels": 284976,
+     "digest": "6334dad44c7daf15fe8dd555c7bab76e2d994712e152b0ec03c2328ea9004641",
+     "affectedAges": [
+      150,
+      151,
+      152,
+      153,
+      154,
+      155,
+      156,
+      157,
+      158,
+      159,
+      160,
+      161,
+      162,
+      163,
+      164,
+      165
+     ],
+     "maxPixelsPerRow": 17811
+    },
+    {
+     "rows": 167,
+     "exactRows": 151,
+     "residualPixels": 284976,
+     "digest": "6334dad44c7daf15fe8dd555c7bab76e2d994712e152b0ec03c2328ea9004641",
+     "affectedAges": [
+      150,
+      151,
+      152,
+      153,
+      154,
+      155,
+      156,
+      157,
+      158,
+      159,
+      160,
+      161,
+      162,
+      163,
+      164,
+      165
+     ],
+     "maxPixelsPerRow": 17811
+    }
+   ],
+   "documentedAges": [
+    150,
+    151,
+    152,
+    153,
+    154,
+    155,
+    156,
+    157,
+    158,
+    159,
+    160,
+    161,
+    162,
+    163,
+    164,
+    165
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/nightmare-alt-player-gengar-golem.json",
+   "move": "NIGHTMARE",
+   "measuredPhase": "no-event",
+   "policyPhase": "event",
+   "measuredPhases": {
+    "optional-lag-age": "no-event",
+    "palette-transfer-row": "no-event"
+   },
+   "policyPhases": {
+    "optional-lag-age": "event",
+    "palette-transfer-row": "no-event"
+   },
+   "selectedPhase": false,
+   "window": 167,
+   "expectedDuration": 168,
+   "runs": [
+    {
+     "rows": 167,
+     "exactRows": 151,
+     "residualPixels": 274592,
+     "digest": "0f262bf8e209727fee06a29a975b5019baffbfd056b0bd7f07a40e13d6c9e950",
+     "affectedAges": [
+      150,
+      151,
+      152,
+      153,
+      154,
+      155,
+      156,
+      157,
+      158,
+      159,
+      160,
+      161,
+      162,
+      163,
+      164,
+      165
+     ],
+     "maxPixelsPerRow": 17162
+    },
+    {
+     "rows": 167,
+     "exactRows": 151,
+     "residualPixels": 274592,
+     "digest": "0f262bf8e209727fee06a29a975b5019baffbfd056b0bd7f07a40e13d6c9e950",
+     "affectedAges": [
+      150,
+      151,
+      152,
+      153,
+      154,
+      155,
+      156,
+      157,
+      158,
+      159,
+      160,
+      161,
+      162,
+      163,
+      164,
+      165
+     ],
+     "maxPixelsPerRow": 17162
+    }
+   ],
+   "documentedAges": [
+    150,
+    151,
+    152,
+    153,
+    154,
+    155,
+    156,
+    157,
+    158,
+    159,
+    160,
+    161,
+    162,
+    163,
+    164,
+    165
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/nightmare-extra-opponent-gengar-golbat.json",
+   "move": "NIGHTMARE",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "measuredPhases": {
+    "optional-lag-age": "event",
+    "palette-transfer-row": "no-event"
+   },
+   "policyPhases": {
+    "optional-lag-age": "event",
+    "palette-transfer-row": "no-event"
+   },
+   "selectedPhase": true,
+   "window": 168,
+   "expectedDuration": 168,
+   "runs": [
+    {
+     "rows": 168,
+     "exactRows": 168,
+     "residualPixels": 0,
+     "digest": "b536032f856791cc97cb5564ac2945b93a1af5c3169e0b45542fd7e1b160c070",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 168,
+     "exactRows": 168,
+     "residualPixels": 0,
+     "digest": "b536032f856791cc97cb5564ac2945b93a1af5c3169e0b45542fd7e1b160c070",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/nightmare-extra-opponent-haunter-snorlax.json",
+   "move": "NIGHTMARE",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "measuredPhases": {
+    "optional-lag-age": "event",
+    "palette-transfer-row": "event"
+   },
+   "policyPhases": {
+    "optional-lag-age": "event",
+    "palette-transfer-row": "no-event"
+   },
+   "selectedPhase": false,
+   "window": 168,
+   "expectedDuration": 168,
+   "runs": [
+    {
+     "rows": 168,
+     "exactRows": 168,
+     "residualPixels": 0,
+     "digest": "1cff0eed6474d0c5348b7622ed01878bb35e0ef124fe2a988fe7d99bc112488d",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 168,
+     "exactRows": 168,
+     "residualPixels": 0,
+     "digest": "1cff0eed6474d0c5348b7622ed01878bb35e0ef124fe2a988fe7d99bc112488d",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": [],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/nightmare-extra-player-gengar-golbat.json",
+   "move": "NIGHTMARE",
+   "measuredPhase": "no-event",
+   "policyPhase": "event",
+   "measuredPhases": {
+    "optional-lag-age": "no-event",
+    "palette-transfer-row": "no-event"
+   },
+   "policyPhases": {
+    "optional-lag-age": "event",
+    "palette-transfer-row": "no-event"
+   },
+   "selectedPhase": false,
+   "window": 167,
+   "expectedDuration": 168,
+   "runs": [
+    {
+     "rows": 167,
+     "exactRows": 151,
+     "residualPixels": 284464,
+     "digest": "88a3179b246aea9f2107ebc1092e11220f97384a67c8af89df663bc91a84073f",
+     "affectedAges": [
+      150,
+      151,
+      152,
+      153,
+      154,
+      155,
+      156,
+      157,
+      158,
+      159,
+      160,
+      161,
+      162,
+      163,
+      164,
+      165
+     ],
+     "maxPixelsPerRow": 17779
+    },
+    {
+     "rows": 167,
+     "exactRows": 151,
+     "residualPixels": 284464,
+     "digest": "88a3179b246aea9f2107ebc1092e11220f97384a67c8af89df663bc91a84073f",
+     "affectedAges": [
+      150,
+      151,
+      152,
+      153,
+      154,
+      155,
+      156,
+      157,
+      158,
+      159,
+      160,
+      161,
+      162,
+      163,
+      164,
+      165
+     ],
+     "maxPixelsPerRow": 17779
+    }
+   ],
+   "documentedAges": [
+    150,
+    151,
+    152,
+    153,
+    154,
+    155,
+    156,
+    157,
+    158,
+    159,
+    160,
+    161,
+    162,
+    163,
+    164,
+    165
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/nightmare-extra-player-haunter-snorlax.json",
+   "move": "NIGHTMARE",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "measuredPhases": {
+    "optional-lag-age": "event",
+    "palette-transfer-row": "event"
+   },
+   "policyPhases": {
+    "optional-lag-age": "event",
+    "palette-transfer-row": "no-event"
+   },
+   "selectedPhase": false,
+   "window": 168,
+   "expectedDuration": 168,
+   "runs": [
+    {
+     "rows": 168,
+     "exactRows": 168,
+     "residualPixels": 0,
+     "digest": "1fc01e4322b9eccd2fe9f085532231de17edad536c91a34798f832d8c03d0ab3",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 168,
+     "exactRows": 168,
+     "residualPixels": 0,
+     "digest": "1fc01e4322b9eccd2fe9f085532231de17edad536c91a34798f832d8c03d0ab3",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": [],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/nightmare-opponent-haunter-player-shuckle.json",
+   "move": "NIGHTMARE",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "measuredPhases": {
+    "optional-lag-age": "event",
+    "palette-transfer-row": "event"
+   },
+   "policyPhases": {
+    "optional-lag-age": "event",
+    "palette-transfer-row": "no-event"
+   },
+   "selectedPhase": false,
+   "window": 168,
+   "expectedDuration": 168,
+   "runs": [
+    {
+     "rows": 168,
+     "exactRows": 168,
+     "residualPixels": 0,
+     "digest": "95eab7a87385cb66be6d400f043c5c1656b2861c9cdfacb193edff3f45b5d0e4",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 168,
+     "exactRows": 168,
+     "residualPixels": 0,
+     "digest": "95eab7a87385cb66be6d400f043c5c1656b2861c9cdfacb193edff3f45b5d0e4",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": [],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/nightmare-player-haunter-opponent-shuckle.json",
+   "move": "NIGHTMARE",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "measuredPhases": {
+    "optional-lag-age": "event",
+    "palette-transfer-row": "event"
+   },
+   "policyPhases": {
+    "optional-lag-age": "event",
+    "palette-transfer-row": "no-event"
+   },
+   "selectedPhase": false,
+   "window": 168,
+   "expectedDuration": 168,
+   "runs": [
+    {
+     "rows": 168,
+     "exactRows": 168,
+     "residualPixels": 0,
+     "digest": "7fffae18e976522b5293ef7bde38ad3dc095b05dd1ff5f0ac87b8b4a6d4bdb8a",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 168,
+     "exactRows": 168,
+     "residualPixels": 0,
+     "digest": "7fffae18e976522b5293ef7bde38ad3dc095b05dd1ff5f0ac87b8b4a6d4bdb8a",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": [],
+   "violations": []
+  }
+ ]
+}

@@ -610,3 +610,108 @@ describe("D4c Extrasensory (326) faithful timing", () => {
     for (const side of ["player", "opponent"] as const) expect(call(lend, { ...view.field, [side]: { ...view.field[side], personality: shiny } })).toBeNull();
   });
 });
+
+// S10A faithful timing: Nightmare (prep32 source model ported in liveNightmareInputs.ts, packed by liveOamMoves.ts liveNightmareInputs) with two
+// CPU-phase parameters from the policy (the optional lag at 149; the display-neutral BG-palette restore row). Every body follows Hypnosis + SLP.
+// Receipt tools/integration/fixtures/ns-live-receipt.json (d4aTimingCheck.ts).
+describe("Nightmare (171) faithful timing", () => {
+  const nm = NAMES.filter((n) => n.startsWith("nightmare-"));
+  const receiptN = JSON.parse(readFileSync("tools/integration/fixtures/ns-live-receipt.json", "utf8"));
+  type NmFixture = D4Fixture & { timingPhases: Record<string, "event" | "no-event">; restoreRow: 148 | 149; precedingBodies: { moveId: number }[] };
+
+  it("is a faithful-timing adapter (never scoped exact / faithful random); 168 rows both sides; the status entry is the policy", () => {
+    expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).toContain(171);
+    expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).not.toContain(171);
+    expect(LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS).not.toContain(171);
+    expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[171]).toBe(0);
+    for (const attacker of [0, 1] as const) {
+      const base = { attacker, target: (1 - attacker) as 0 | 1, power: 0, damage: 0, friendship: 70, multihit: 0, turn: 0 };
+      expect(liveMoveAnimationDuration({ ...base, moveId: 171 })).toBe(168);
+    }
+    const entry = (status.faithfulTimingAdapters as { id: number; timingParameters: unknown[]; policyVersion: string; d3: boolean }[]).find((e) => e.id === 171)!;
+    expect(entry.timingParameters).toEqual(LIVE_MOVE_TIMING_POLICY[171]!.parameters.map(({ evidence: _evidence, ...p }) => p));
+    expect(entry.policyVersion).toBe(LIVE_MOVE_TIMING_POLICY_VERSION);
+    expect(entry.d3).toBe(false);
+    expect((status.implementedAdapters as { id: number }[]).some((e) => e.id === 171)).toBe(false);
+  });
+
+  it("the policy counts are the measured phases of the 8 dense windows (accepted, prep25 GENGAR -> GOLEM, d4a HAUNTER -> SNORLAX / GENGAR -> GOLBAT)", () => {
+    expect(nm).toHaveLength(8);
+    const fx = nm.map(fixtureAt) as NmFixture[];
+    for (const side of ["player", "opponent"]) expect(fx.filter((f) => f.attacker.geometry.side === side)).toHaveLength(4);
+    // Nightmare needs a sleeping target: every window follows Hypnosis (95) and the SLP status animation.
+    for (const f of fx) expect(f.precedingBodies.some((u) => u.moveId === 95)).toBe(true);
+    const [lag, restore] = LIVE_MOVE_TIMING_POLICY[171]!.parameters;
+    for (const f of fx) expect(f.denseWindow!.endFrame - f.denseWindow!.startFrame + 1).toBe(f.timingPhases["optional-lag-age"] === "event" ? 168 : 167);
+    const count = (kind: string, phase: string) => fx.filter((f) => f.timingPhases[kind] === phase).length;
+    expect(lag!.alternatives.map((a) => a.measured)).toEqual([count("optional-lag-age", "event"), count("optional-lag-age", "no-event")]);
+    expect(restore!.alternatives.map((a) => a.measured)).toEqual([count("palette-transfer-row", "event"), count("palette-transfer-row", "no-event")]);
+    for (const f of fx) expect(f.timingPhases["palette-transfer-row"]).toBe(f.restoreRow === 149 ? "event" : "no-event");
+    expect([lag!.kind, lag!.age, lag!.chosen, lag!.tieRuleUsed]).toEqual(["optional-lag-age", 149, "event", false]);
+    expect([restore!.kind, restore!.age, restore!.chosen, restore!.tieRuleUsed]).toEqual(["palette-transfer-row", 149, "no-event", true]);
+  });
+
+  it("the receipt: every lag window exact twice fresh (GENGAR -> GOLBAT player row 0 too, either restore row); the no-lag windows only on 150..165", () => {
+    const documented = (status.faithfulTimingAdapters as { id: number; alternatePhaseResidual: { ages: number[] } }[]).find((e) => e.id === 171)!.alternatePhaseResidual;
+    expect(documented.ages).toEqual(Array.from({ length: 16 }, (_, i) => 150 + i));
+    const rows = (receiptN.windows as { fixture: string; move: string; selectedPhase: boolean; window: number; expectedDuration: number; violations: string[];
+      runs: { residualPixels: number; digest: string; affectedAges: number[] }[] }[]).filter((r) => r.move === "NIGHTMARE");
+    expect(rows.map((r) => r.fixture.replace(`${DIR}/`, "").replace(".json", "")).sort()).toEqual(nm);
+    for (const r of rows) {
+      const f = fixtureAt(r.fixture.replace(`${DIR}/`, "").replace(".json", "")) as NmFixture;
+      expect(r.violations).toEqual([]);
+      expect(r.runs[1]!.digest).toBe(r.runs[0]!.digest);
+      if (f.timingPhases["optional-lag-age"] === "event") {
+        expect(r.runs.map((run) => run.residualPixels)).toEqual([0, 0]);
+        expect(r.window).toBe(r.expectedDuration);
+      } else {
+        expect(r.runs[0]!.affectedAges).toEqual(documented.ages);
+      }
+    }
+    expect(rows.filter((r) => r.selectedPhase)).toHaveLength(1);
+  });
+
+  it("gates: known lend required (every body follows Hypnosis + SLP); declines with an unknown order, for a shiny battler, for a non-zero idle rest", () => {
+    for (const name of ["nightmare-player-haunter-opponent-shuckle", "nightmare-opponent-haunter-player-shuckle"]) {
+      const f = fixtureAt(name);
+      const { view, effect } = effectOf(f);
+      const call = (order: unknown, field = view.field) => liveMoveAnimationPresentation(effect.request, field, 0, undefined, undefined, order as never);
+      const lend = effect.spriteOrderInput as { known: true; free: number[] };
+      expect(lend.known).toBe(true);
+      const presentation = call(lend);
+      expect(presentation).not.toBeNull();
+      expect((presentation!.config as any).move).toBe("NIGHTMARE");
+      expect(call(undefined)).toBeNull();
+      expect(call({ known: false })).toBeNull();
+      const ot = 416049562, shiny = ((ot >>> 16) ^ (ot & 0xffff)) >>> 0;
+      for (const side of ["player", "opponent"] as const) expect(call(lend, { ...view.field, [side]: { ...view.field[side], personality: shiny } })).toBeNull();
+      // An opponent with a front idle rest (ONIX, species audit 9): the ShakeMon x2 program starts from 0, so the body declines; GOLEM (no rest) engages.
+      expect(call(lend, { ...view.field, opponent: { ...view.field.opponent, species: 95, speciesSymbol: "ONIX", name: "ONIX" } })).toBeNull();
+      expect(call(lend, { ...view.field, opponent: { ...view.field.opponent, species: 76, speciesSymbol: "GOLEM", name: "GOLEM" } })).not.toBeNull();
+    }
+  });
+
+  // tools/integration/sleepRouteSearch.ts 171 4 1 4000 (first candidates: 30/28 HYPNO active, 71/14 HAUNTER and 96/28 HYPNO exceed the replay budget,
+  // 166/14 HAUNTER active): Hypnosis on turn 1, Nightmare on turn 2.
+  it.each([["30/28 HYPNO", 30, 28, [0, 1]], ["166/14 HAUNTER", 166, 14, [1, 2]]] as const)(
+    "route %s: Hypnosis then Nightmare live on every age, following prompt reached, Scene ON/OFF parity", (_name, seed, streak, slots) => {
+      const on = generatedCommandAnimationReplay(seed, "on", [...slots], streak);
+      const off = generatedCommandAnimationReplay(seed, "off", [...slots], streak);
+      const bodies = on.animations.filter((a) => a.moveId === 171 && a.attacker === 0);
+      expect(bodies).toHaveLength(1);
+      expect(bodies[0]!.ages).toEqual(Array.from({ length: 168 }, (_, age) => age));
+      expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
+      expect(on.animations.some((a) => a.moveId === 95 && a.attacker === 0)).toBe(true);
+      expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+      expect(on.stalled).toBe(off.stalled);
+      expect(off.boundaries).toHaveLength(on.boundaries.length);
+      const strip = (v: { rules: any }) => ({ ...v.rules, rulesContext: { ...v.rules.rulesContext, hitMarker: v.rules.rulesContext.hitMarker & ~0x80 } });
+      for (let i = 0; i < on.boundaries.length; i += 1) {
+        expect(strip(on.boundaries[i]!)).toEqual(strip(off.boundaries[i]!));
+        expect(on.boundaries[i]!.rng).toEqual(off.boundaries[i]!.rng);
+        expect(on.boundaries[i]!.boundary).toEqual(off.boundaries[i]!.boundary);
+      }
+      expect(on.state.facilityState).toEqual(off.state.facilityState);
+      expect(on.state.round.rules.rngValue).toBe(off.state.round.rules.rngValue);
+    }, 240000);
+});
