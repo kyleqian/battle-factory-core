@@ -90,7 +90,9 @@ export function eruptionProfile36(f: Eruption36Facts, neg: Eruption36Neg = {}): 
   const before = f.tileRangeBeforeLoad ?? [0, 0];
   const freeAtEntry = Array.from({ length: 64 }, (_, s) => s).filter((s) => !ER36.occupied.includes(s));
   const geometry = { attackerSpriteSlot: side === "player" ? 6 : 8, attackerX: A.spriteCenter.x, attackerY: A.spriteCenter.y + (neg.anchor ? 1 : 0),
-    centerToCornerVecY: -64, battlerPicHeight: 64, battlerYDelta: art[side].coords.yOffset + (neg.ydelta ? 1 : 0), matrixNum: ER36.matrixNum[side] };
+    centerToCornerVecY: -64, battlerPicHeight: 64, battlerYDelta: art[side].coords.yOffset + (neg.ydelta ? 1 : 0), matrixNum: ER36.matrixNum[side],
+    // the attacker's idle rest before the task writes x2 (battle_anim_fire.c:829-834)
+    ...(A.frontIdleRest.x2 || A.frontIdleRest.y2 ? { initialX2: A.frontIdleRest.x2, initialY2: A.frontIdleRest.y2 } : {}) };
   const launchFor = (wave2Start: number, endAge: number): EruptionLaunchProfile => ({
     side, geometry,
     allocator: { freeSpriteSlots: freeAtEntry, tileTag: ER36.tag, paletteTag: ER36.tag, tileRange: ER36.tileRange, tileRangeBeforeLoad: [before[0]!, before[1]!],
@@ -125,8 +127,10 @@ export function eruptionProfile36(f: Eruption36Facts, neg: Eruption36Neg = {}): 
   const keys: EruptionSpriteOrderKey[] = [...scene, sprite(side), sprite(tside)].map((s) => ({
     slot: s.slot, priority: ((s.attr[2]! >> 10) & 3) as 0 | 1 | 2 | 3, subpriority: s.subpriority, y: signedY(s.attr[0]!) }));
   const lowestFree = (n: number) => freeAtEntry.slice(0, n);
+  // AnimTask_EruptionLaunchRocks_Step state 1 ends with x2 = 0 and state 5 restores y (battle_anim_fire.c:845, 899): at the shake
+  // creation the attacker carries no idle rest; the target keeps its species rest
   const shakeBattler = (s: Side) => ({ battlerId: s === "player" ? 0 : 1, side: s, spriteSlot: s === "player" ? 6 : 8,
-    x: anchors[s].spriteCenter.x, y: anchors[s].spriteCenter.y, initialX2: anchors[s].frontIdleRest.x2, initialY2: anchors[s].frontIdleRest.y2 });
+    x: anchors[s].spriteCenter.x, y: anchors[s].spriteCenter.y, initialX2: s === side ? 0 : anchors[s].frontIdleRest.x2, initialY2: s === side ? 0 : anchors[s].frontIdleRest.y2 });
   return {
     orientation: side === "player" ? "player-back" : "opponent-front",
     endAge,
