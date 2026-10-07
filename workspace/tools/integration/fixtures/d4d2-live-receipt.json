@@ -1,10 +1,18 @@
 {
  "schema": "d4d2-live-receipt/v1",
- "testedCommit": "0d844a26b69fd9c7701732e097ec0a162f6b9055",
- "testedSrcTree": "0fa8e76bb4a595691b4477094218de91973c006b",
+ "testedCommit": "09ebd2a2727e27ba0218bca729ab24facb4c14f4",
+ "testedSrcTree": "55ef43ef4fb8248d816ac19ca06d7644a731dce3",
  "dirty": true,
  "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
  "summary": {
+  "DIVE": {
+   "windows": 9,
+   "rows": 1053,
+   "selected": 7,
+   "selectedPx": 0,
+   "otherPhase": 2,
+   "violations": 0
+  },
   "ICE_BALL": {
    "windows": 4,
    "rows": 304,
@@ -15,6 +23,306 @@
   }
  },
  "windows": [
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/dive-alt-opponent-lanturn-golem.json",
+   "move": "DIVE",
+   "measuredPhase": null,
+   "selectedPhase": true,
+   "window": 115,
+   "expectedDuration": 115,
+   "runs": [
+    {
+     "rows": 115,
+     "exactRows": 115,
+     "residualPixels": 0,
+     "digest": "d68861631b1b2968564daead576d824664389230a5064d49508bec81c2947ef3",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 115,
+     "exactRows": 115,
+     "residualPixels": 0,
+     "digest": "d68861631b1b2968564daead576d824664389230a5064d49508bec81c2947ef3",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/dive-alt-player-lanturn-golem.json",
+   "move": "DIVE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "oam-transfer-row": "event"
+   },
+   "policyPhases": {
+    "oam-transfer-row": "event"
+   },
+   "selectedPhase": true,
+   "window": 118,
+   "expectedDuration": 118,
+   "runs": [
+    {
+     "rows": 118,
+     "exactRows": 118,
+     "residualPixels": 0,
+     "digest": "a654a16ad299926582f07d29a50afa0fd7c828227f70ccf6318f425cf9902c22",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 118,
+     "exactRows": 118,
+     "residualPixels": 0,
+     "digest": "a654a16ad299926582f07d29a50afa0fd7c828227f70ccf6318f425cf9902c22",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/dive-extra-opponent-chinchou-golem.json",
+   "move": "DIVE",
+   "measuredPhase": null,
+   "selectedPhase": true,
+   "window": 115,
+   "expectedDuration": 115,
+   "runs": [
+    {
+     "rows": 115,
+     "exactRows": 115,
+     "residualPixels": 0,
+     "digest": "12ad6f2b2fcb3c04fc1f16d895264d0ae3b1b3929449a33120248d8caf893708",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 115,
+     "exactRows": 115,
+     "residualPixels": 0,
+     "digest": "12ad6f2b2fcb3c04fc1f16d895264d0ae3b1b3929449a33120248d8caf893708",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/dive-extra-player-chinchou-golbat.json",
+   "move": "DIVE",
+   "measuredPhase": "no-event",
+   "measuredPhases": {
+    "oam-transfer-row": "no-event"
+   },
+   "policyPhases": {
+    "oam-transfer-row": "event"
+   },
+   "selectedPhase": false,
+   "window": 118,
+   "expectedDuration": 118,
+   "runs": [
+    {
+     "rows": 118,
+     "exactRows": 117,
+     "residualPixels": 284,
+     "digest": "7c32ee06e1d79d2da77b50195bc6a81c8b51c73ba20794bf7a328d3c69cd0ebd",
+     "affectedAges": [
+      68
+     ],
+     "maxPixelsPerRow": 284
+    },
+    {
+     "rows": 118,
+     "exactRows": 117,
+     "residualPixels": 284,
+     "digest": "7c32ee06e1d79d2da77b50195bc6a81c8b51c73ba20794bf7a328d3c69cd0ebd",
+     "affectedAges": [
+      68
+     ],
+     "maxPixelsPerRow": 284
+    }
+   ],
+   "documentedAges": [
+    68
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/dive-extra-player-chinchou-golem-prep11.json",
+   "move": "DIVE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "oam-transfer-row": "event"
+   },
+   "policyPhases": {
+    "oam-transfer-row": "event"
+   },
+   "selectedPhase": true,
+   "window": 118,
+   "expectedDuration": 118,
+   "runs": [
+    {
+     "rows": 118,
+     "exactRows": 118,
+     "residualPixels": 0,
+     "digest": "3e763956403f69c5aaad511f9e57de22e4063fa162a59b3f81fe865243368b1e",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 118,
+     "exactRows": 118,
+     "residualPixels": 0,
+     "digest": "3e763956403f69c5aaad511f9e57de22e4063fa162a59b3f81fe865243368b1e",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/dive-extra-player-chinchou-golem.json",
+   "move": "DIVE",
+   "measuredPhase": "no-event",
+   "measuredPhases": {
+    "oam-transfer-row": "no-event"
+   },
+   "policyPhases": {
+    "oam-transfer-row": "event"
+   },
+   "selectedPhase": false,
+   "window": 118,
+   "expectedDuration": 118,
+   "runs": [
+    {
+     "rows": 118,
+     "exactRows": 117,
+     "residualPixels": 284,
+     "digest": "d7f6740f076ea30bfddaaef1cc03a3a622db76d72c2498fdda5ce606716ee945",
+     "affectedAges": [
+      68
+     ],
+     "maxPixelsPerRow": 284
+    },
+    {
+     "rows": 118,
+     "exactRows": 117,
+     "residualPixels": 284,
+     "digest": "d7f6740f076ea30bfddaaef1cc03a3a622db76d72c2498fdda5ce606716ee945",
+     "affectedAges": [
+      68
+     ],
+     "maxPixelsPerRow": 284
+    }
+   ],
+   "documentedAges": [
+    68
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/dive-extra-player-chinchou-shuckle.json",
+   "move": "DIVE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "oam-transfer-row": "event"
+   },
+   "policyPhases": {
+    "oam-transfer-row": "event"
+   },
+   "selectedPhase": true,
+   "window": 118,
+   "expectedDuration": 118,
+   "runs": [
+    {
+     "rows": 118,
+     "exactRows": 118,
+     "residualPixels": 0,
+     "digest": "e21ea9423b313ad731ce8c0d1fd00c60bdd78556eee62887c7a288c01749eb2c",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 118,
+     "exactRows": 118,
+     "residualPixels": 0,
+     "digest": "e21ea9423b313ad731ce8c0d1fd00c60bdd78556eee62887c7a288c01749eb2c",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/dive-opponent-chinchou-player-onix.json",
+   "move": "DIVE",
+   "measuredPhase": null,
+   "selectedPhase": true,
+   "window": 115,
+   "expectedDuration": 115,
+   "runs": [
+    {
+     "rows": 115,
+     "exactRows": 115,
+     "residualPixels": 0,
+     "digest": "28baca07618defcf58e86969f98fc5b24a559dcae415370ff5c0822b95f99877",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 115,
+     "exactRows": 115,
+     "residualPixels": 0,
+     "digest": "28baca07618defcf58e86969f98fc5b24a559dcae415370ff5c0822b95f99877",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/dive-player-chinchou-opponent-onix.json",
+   "move": "DIVE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "oam-transfer-row": "event"
+   },
+   "policyPhases": {
+    "oam-transfer-row": "event"
+   },
+   "selectedPhase": true,
+   "window": 118,
+   "expectedDuration": 118,
+   "runs": [
+    {
+     "rows": 118,
+     "exactRows": 118,
+     "residualPixels": 0,
+     "digest": "fb8470369280b09fec6db5037bf057cd5b9d3d2069ee8800f90a6720b9621d54",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 118,
+     "exactRows": 118,
+     "residualPixels": 0,
+     "digest": "fb8470369280b09fec6db5037bf057cd5b9d3d2069ee8800f90a6720b9621d54",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
   {
    "fixture": "tools/integration/fixtures/s10a-live/ice-ball-alt-opponent-glalie-golem.json",
    "move": "ICE_BALL",

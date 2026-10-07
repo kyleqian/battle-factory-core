@@ -1,0 +1,58 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "DIVE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/species-audit-golem-order-consumer-dive-player.json",
+ "denseWindow": {
+  "startFrame": 219,
+  "endFrame": 336
+ },
+ "windowSource": "window = [activation, activation + 118 - 1] (the setup body + its first inactive row) from a fresh prep22Probes.sh run",
+ "timingPhase": "no-event",
+ "timingPhases": {
+  "oam-transfer-row": "no-event"
+ },
+ "row68Source": 67,
+ "attacker": {
+  "species": "CHINCHOU",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015300,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 102,
+  "playerMaxHp": 138,
+  "opponentHp": 174,
+  "opponentMaxHp": 174,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "messageLines": [
+  "",
+  ""
+ ],
+ "presentationRngActivation": {
+  "value": 3293253529,
+  "source": "prep22Probe.py rng2Series[220] stepped back once (activation frame 219)"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ]
+}

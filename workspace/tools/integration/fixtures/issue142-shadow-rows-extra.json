@@ -6307,6 +6307,96 @@
    "requestFields": {
     "turn": 0
    }
+  },
+  {
+   "id": 301,
+   "move": "ICE_BALL",
+   "orientation": "player",
+   "variant": "s10a-ice-ball-player-spheal-opponent-registeel",
+   "activationFrame": 228,
+   "windowStart": 228,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/s10a-live/ice-ball-player-spheal-opponent-registeel.json",
+    "scenario": "tools/battle-lab/mechanic-ice-ball-player-spheal-opponent-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own activation frame (iceBallProbe.py; d4d2 live receipt, counter-0 body)"
+   },
+   "requestFields": {
+    "turn": 0,
+    "rolloutCounter": 1
+   }
+  },
+  {
+   "id": 301,
+   "move": "ICE_BALL",
+   "orientation": "opponent",
+   "variant": "s10a-ice-ball-opponent-spheal-player-registeel",
+   "activationFrame": 229,
+   "windowStart": 229,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/s10a-live/ice-ball-opponent-spheal-player-registeel.json",
+    "scenario": "tools/battle-lab/mechanic-ice-ball-opponent-spheal-player-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own activation frame (iceBallProbe.py; d4d2 live receipt, counter-0 body)"
+   },
+   "requestFields": {
+    "turn": 0,
+    "rolloutCounter": 1
+   }
+  },
+  {
+   "id": 291,
+   "move": "DIVE",
+   "orientation": "player",
+   "variant": "s10a-dive-extra-player-chinchou-golbat",
+   "activationFrame": 211,
+   "windowStart": 211,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/s10a-live/dive-extra-player-chinchou-golbat.json",
+    "scenario": "tools/battle-lab/species-audit-golbat-order-consumer-dive-player.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own activation frame (prep22Probes.sh; d4d2 live receipt; the elevated GOLBAT target is 0 px on row 0 via the live hook in the player window)"
+   },
+   "requestFields": {
+    "turn": 0
+   }
+  },
+  {
+   "id": 291,
+   "move": "DIVE",
+   "orientation": "opponent",
+   "variant": "s10a-dive-opponent-chinchou-player-onix",
+   "activationFrame": 196,
+   "windowStart": 196,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/s10a-live/dive-opponent-chinchou-player-onix.json",
+    "scenario": "tools/battle-lab/mechanic-dive-opponent-chinchou-player-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own activation frame (prep22Probes.sh; d4d2 live receipt; the elevated GOLBAT target is 0 px on row 0 via the live hook in the player window)"
+   },
+   "requestFields": {
+    "turn": 0
+   }
   }
  ]
 }

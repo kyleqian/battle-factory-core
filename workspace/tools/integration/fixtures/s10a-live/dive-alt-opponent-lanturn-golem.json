@@ -1,0 +1,48 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "DIVE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep25-dive-alt-opponent-lanturn-golem.json",
+ "denseWindow": {
+  "startFrame": 53,
+  "endFrame": 167
+ },
+ "windowSource": "window = [activation, activation + 115 - 1] (the setup body + its first inactive row) from a fresh prep22Probes.sh run",
+ "timingPhase": null,
+ "attacker": {
+  "species": "LANTURN",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703925,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 174,
+  "playerMaxHp": 174,
+  "opponentHp": 188,
+  "opponentMaxHp": 188,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "messageLines": [
+  "",
+  ""
+ ],
+ "presentationRngActivation": {
+  "value": 1508501329,
+  "source": "prep22Probe.py rng2Series[54] stepped back once (activation frame 53)"
+ }
+}

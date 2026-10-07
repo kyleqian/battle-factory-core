@@ -1,0 +1,58 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "DIVE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-dive-player-chinchou-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 199,
+  "endFrame": 316
+ },
+ "windowSource": "window = [activation, activation + 118 - 1] (the setup body + its first inactive row) from a fresh prep22Probes.sh run",
+ "timingPhase": "event",
+ "timingPhases": {
+  "oam-transfer-row": "event"
+ },
+ "row68Source": 66,
+ "attacker": {
+  "species": "CHINCHOU",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015300,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 121,
+  "playerMaxHp": 138,
+  "opponentHp": 129,
+  "opponentMaxHp": 129,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "messageLines": [
+  "",
+  ""
+ ],
+ "presentationRngActivation": {
+  "value": 1758215189,
+  "source": "prep22Probe.py rng2Series[200] stepped back once (activation frame 199)"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ]
+}

@@ -39,8 +39,9 @@
    "MOVE_WATER_PULSE",
    "MOVE_WISH"
   ],
-  "faithfulTiming": 9,
+  "faithfulTiming": 10,
   "faithfulTimingMoves": [
+   "MOVE_DIVE",
    "MOVE_EXTRASENSORY",
    "MOVE_ICE_BALL",
    "MOVE_MACH_PUNCH",
@@ -52,7 +53,7 @@
    "MOVE_SUPERPOWER"
   ],
   "inFlight": 0,
-  "remaining": 7,
+  "remaining": 6,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
@@ -60,14 +61,14 @@
   "weightPct": {
    "live": 93.775,
    "faithfulRandom": 3.761,
-   "faithfulTiming": 1.128,
+   "faithfulTiming": 1.315,
    "inFlight": 0,
-   "remaining": 0.849
+   "remaining": 0.662
   },
   "remainingByGroup": {
    "MULTI": {
-    "moves": 4,
-    "weightPct": 0.477
+    "moves": 3,
+    "weightPct": 0.29
    },
    "OUT": {
     "moves": 1,
@@ -80,13 +81,12 @@
   },
   "remainingByHostClass": {
    "H_BASIC": 1,
-   "H_BUFFER": 4,
-   "H_DERIVED": 2,
-   "H_VARIANT": 1
+   "H_BUFFER": 3,
+   "H_DERIVED": 2
   },
-  "orderFirstBodyOnlyMoves": 4,
-  "slotPlanNeededMoves": 4,
-  "sumsTo": "248+12+9+0+7=276",
+  "orderFirstBodyOnlyMoves": 3,
+  "slotPlanNeededMoves": 3,
+  "sumsTo": "248+12+10+0+6=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -202,8 +202,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 4,
-   "touchingWeightPct": 0.477,
+   "touchingMoves": 3,
+   "touchingWeightPct": 0.29,
    "meta": {
     "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
     "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
@@ -389,8 +389,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 1,
-   "touchingWeightPct": 0.187,
+   "touchingMoves": 0,
+   "touchingWeightPct": 0,
    "meta": {
     "cost": "hidden-battler state across the two turns in the field art view",
     "claim": "exact once the semi-invulnerable state is rendered"
@@ -449,70 +449,60 @@
   },
   {
    "step": 6,
-   "provider": "X-TWOTURN",
-   "newMoves": 1,
-   "newWeightPct": 0.187,
-   "cumulativeRemainingUnlocked": 6,
-   "newNames": [
-    "DIVE"
-   ]
-  },
-  {
-   "step": 7,
    "provider": "E-OUT",
    "newMoves": 1,
    "newWeightPct": 0.176,
-   "cumulativeRemainingUnlocked": 7,
+   "cumulativeRemainingUnlocked": 6,
    "newNames": [
     "SKILL_SWAP"
    ]
   },
   {
-   "step": 8,
+   "step": 7,
    "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 7,
+   "cumulativeRemainingUnlocked": 6,
+   "newNames": []
+  },
+  {
+   "step": 8,
+   "provider": "D-TILE",
+   "newMoves": 0,
+   "newWeightPct": 0,
+   "cumulativeRemainingUnlocked": 6,
    "newNames": []
   },
   {
    "step": 9,
-   "provider": "D-TILE",
+   "provider": "D-BG",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 7,
+   "cumulativeRemainingUnlocked": 6,
    "newNames": []
   },
   {
    "step": 10,
-   "provider": "D-BG",
+   "provider": "D-OAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 7,
+   "cumulativeRemainingUnlocked": 6,
    "newNames": []
   },
   {
    "step": 11,
-   "provider": "D-OAM",
+   "provider": "D-VRAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 7,
+   "cumulativeRemainingUnlocked": 6,
    "newNames": []
   },
   {
    "step": 12,
-   "provider": "D-VRAM",
-   "newMoves": 0,
-   "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 7,
-   "newNames": []
-  },
-  {
-   "step": 13,
    "provider": "F-AUDIO",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 7,
+   "cumulativeRemainingUnlocked": 6,
    "newNames": []
   }
  ],
@@ -538,213 +528,6 @@
  ],
  "rows": [
   {
-   "move": "MOVE_DIVE",
-   "id": 291,
-   "name": "DIVE",
-   "hostClass": [
-    "H_BUFFER",
-    "H_VARIANT"
-   ],
-   "weightShare": 0.0018707482993197276,
-   "config": "src/animation/sceneOnPresentation.ts:3131",
-   "needs": [
-    "B",
-    "C",
-    "F-AFFINE",
-    "X-TWOTURN"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationProfile:ball (DiveAllocation dive.ts:8)",
-     "cites": [
-      "src/animation/dive.ts:35"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationProfile:droplets (DiveDropletProfile velocity/direction: AnimSprayWaterDroplet Random2 (battle_anim_flying.c:1106-1107))",
-     "cites": [
-      "src/animation/dive.ts:37"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationProfile:ball (DiveAllocation dive.ts:8)",
-     "cites": [
-      "src/animation/dive.ts:35"
-     ]
-    },
-    {
-     "code": "X-TWOTURN",
-     "text": "semi-invulnerable two-turn state (hidden battler between turns)",
-     "cites": [
-      "src/engine/battleScriptHitChainOpcode.ts:2276-2289",
-      "reference/pokeemerald/data/battle_anim_scripts.s:9225"
-     ]
-    }
-   ],
-   "notes": [
-    "request.turn selects setup/attack (choosetwoturnanim, battle_anim_scripts.s:9225); setup body is order-consumer READY-WITH-PROVIDER; attack body NEEDS-KEYS (docs/order-consumer-prep.md)"
-   ],
-   "staleCorrections": [
-    "request.turn selects setup/attack (choosetwoturnanim, battle_anim_scripts.s:9225); setup body is order-consumer READY-WITH-PROVIDER; attack body NEEDS-KEYS (docs/order-consumer-prep.md)"
-   ],
-   "consumedInputs": [
-    {
-     "path": "body",
-     "classes": [
-      "E-OUT"
-     ],
-     "status": "blocked: E-OUT",
-     "cite": null
-    },
-    {
-     "path": "animationGeometry:attackerCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dive.ts:44"
-    },
-    {
-     "path": "animationGeometry:targetCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dive.ts:45"
-    },
-    {
-     "path": "animationGeometry:attackerPictureOffset",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dive.ts:46"
-    },
-    {
-     "path": "animationGeometry:targetPictureOffset",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dive.ts:47"
-    },
-    {
-     "path": "animationGeometry:attackerRestOffset",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dive.ts:48"
-    },
-    {
-     "path": "animationGeometry:targetRestOffset",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dive.ts:49"
-    },
-    {
-     "path": "animationProfile:firstInactiveAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dive.ts:32"
-    },
-    {
-     "path": "animationProfile:attackerSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dive.ts:33"
-    },
-    {
-     "path": "animationProfile:targetSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dive.ts:34"
-    },
-    {
-     "path": "animationProfile:ball",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "B"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/dive.ts:35"
-    },
-    {
-     "path": "animationProfile:splash",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "B"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/dive.ts:36"
-    },
-    {
-     "path": "animationProfile:droplets",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "B",
-      "C"
-     ],
-     "status": "blocked: F-AFFINE+C",
-     "cite": "src/animation/dive.ts:37"
-    },
-    {
-     "path": "animationProfile:impacts",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "B"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/dive.ts:38"
-    },
-    {
-     "path": "animationProfile:spriteOrderSeed",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/dive.ts:40"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "seed",
-   "carrierOccurrences": 3486,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "B",
-    "F-AFFINE"
-   ],
-   "providerNeeds": [
-    "C",
-    "X-TWOTURN"
-   ],
-   "palettePlan": false,
-   "activationMeasured": true,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "MULTI"
-  },
-  {
    "move": "MOVE_ERUPTION",
    "id": 284,
    "name": "ERUPTION",
@@ -752,7 +535,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0003401360544217687,
-   "config": "src/animation/sceneOnPresentation.ts:3910",
+   "config": "src/animation/sceneOnPresentation.ts:3915",
    "needs": [
     "B",
     "C",
@@ -1966,7 +1749,7 @@
     "H_BASIC"
    ],
    "weightShare": 0.0022321428571428566,
-   "config": "src/animation/sceneOnPresentation.ts:3719",
+   "config": "src/animation/sceneOnPresentation.ts:3724",
    "needs": [
     "X-SUBST"
    ],
@@ -1977,7 +1760,7 @@
      "cites": [
       "reference/pokeemerald/data/battle_scripts_1.s:1085-1103",
       "src/engine/battleCommandFieldArt.ts:1",
-      "src/animation/sceneOnPresentation.ts:3719"
+      "src/animation/sceneOnPresentation.ts:3724"
      ]
     }
    ],

@@ -88,7 +88,7 @@ import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "j
 import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
 import spitUpRedOrbAsset from "../animation/assets/spit-up-red-orb.json" with { type: "json" };
 import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
-import { liveMoveBgWriteRow, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveTimingBodyRows } from "./liveMoveTimingPolicy.ts";
+import { liveMoveBgWriteRow, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveTimingBodyRows, liveMoveTimingParameter } from "./liveMoveTimingPolicy.ts";
 import { liveSpitUpDuration, liveSpitUpInputs, type SpitUpCounter } from "./liveSpitUpInputs.ts";
 import { SUPERPOWER_ROWS, liveSuperpowerInputs } from "./liveSuperpowerInputs.ts";
 import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
@@ -111,6 +111,7 @@ import willOWispAsset from "../animation/assets/will-o-wisp.json" with { type: "
 import iceBallAsset from "../animation/assets/ice-ball.json" with { type: "json" };
 import icyWindAsset from "../animation/assets/icy-wind.json" with { type: "json" };
 import { liveIceBallEnd, liveIceBallInputs } from "./liveIceBallInputs.ts";
+import type { DiveProfile } from "../animation/dive.ts";
 import { linearTranslationDeltaQ8, linearTranslationOffsetAfterCallbacks } from "../animation/animLinearTranslation.ts";
 import {
   dirtScatterOffsetFromWord, dirtScatterSlots, hyperBeamOrbFromWords, linearTranslationStep, liveMovePresentationRngWords, miniTwinklingStarFromWords, type LiveMovePresentationRngInput,
@@ -129,6 +130,41 @@ const SUPERPOWER_PALETTES = (() => {
 /** Spit Up's RED_ORB_2 palette (BGR555 words) for liveSpitUpInputs (the engine reads animation assets only through this seam). */
 const SPIT_UP_RED_ORB_PALETTE: readonly number[] = Object.freeze((spitUpRedOrbAsset as { art: { palette: { r: number; g: number; b: number }[] } }).art.palette
   .map((c) => (c.r >> 3) | (c.g >> 3) << 5 | (c.b >> 3) << 10));
+
+/** Dive setup first inactive age by attacker side (prep25 s0.2: 117 / 114 in all 4 scenarios; the splash births at first inactive - 50). */
+function liveDiveSetupFirstInactive(side: "player" | "opponent"): number {
+  return side === "player" ? 117 : 114;
+}
+
+/**
+ * Dive SETUP body profile (prep25 s B.1 / C; tools/integration/prep25DiveReducerCheck.ts recipe): lowest-free slots over the known-entry
+ * occupancy with the source lifetimes (ball at +10, splash + 10 droplets at first inactive - 50, birth-first), matrices K [0], subpriorities
+ * the battler values, droplet velocities from the presentation words (AnimSprayWaterDroplet, battle_anim_flying.c:1106-1107:
+ * data[0] = 736 +- (w & 0x1ff), data[1] = 896 +- (w & 0x7f), sign by bit 0; direction = the script's alternating arg), and the lent
+ * activation order restricted to the body's slots (nothing is allocated before the ball at +10: the seed row 9 order is the lend).
+ */
+function liveDiveSetupProfile(side: "player" | "opponent", words: readonly number[], activationOrder: readonly number[]): DiveProfile {
+  const firstInactiveAge = liveDiveSetupFirstInactive(side), splashBirth = firstInactiveAge - 50;
+  const alive: { slot: number; until: number }[] = [];
+  const take = (age: number, last: number): number => {
+    let slot = 0;
+    while (KNOWN_ENTRY_IN_USE_SPRITE_SLOTS.includes(slot) || alive.some((a) => a.slot === slot && a.until >= age)) slot += 1;
+    alive.push({ slot, until: age + last + 1 });
+    return slot;
+  };
+  const ballSlot = take(10, splashBirth - 22);
+  const splashSlot = take(splashBirth, side === "player" ? 23 : 22);
+  const droplets = Array.from({ length: 10 }, (_, i) => {
+    const slot = take(splashBirth, side === "player" ? 30 : 29);
+    const v1 = words[2 * i]! & 0x1ff, v2 = words[2 * i + 1]! & 0x7f;
+    return { slot, matrixNum: 0, persistentOrder: 0, velocityX: v1 % 2 ? 736 + v1 : 736 - v1, velocityY: v2 % 2 ? 896 + v2 : 896 - v2,
+      direction: (i % 2) as 0 | 1 };
+  });
+  const slots = [ballSlot, splashSlot, ...droplets.map((d) => d.slot)];
+  return { firstInactiveAge, attackerSubpriority: side === "player" ? 30 : 40, targetSubpriority: side === "player" ? 40 : 30,
+    ball: { slot: ballSlot, matrixNum: 0, persistentOrder: 0 }, splash: { slot: splashSlot, matrixNum: 0, persistentOrder: 0 },
+    droplets, impacts: [], spriteOrderSeed: activationOrder.filter((slot) => slots.includes(slot)) };
+}
 
 /** Ice Ball's D4 lag rows: the timing policy's optional lag (liveMoveTimingPolicy.ts 301; the dominant phase has none). */
 function liveIceBallLagRows(): number[] {
@@ -412,6 +448,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     309,
     // Faithful timing + D3: Ice Ball counter-0 windows start at activation (row 0; s10a-live/ice-ball-*.json).
     301,
+    // Faithful timing + D3: Dive setup windows start at activation (row 0; s10a-live/dive-*.json; elevated GOLBAT target: the shadow row).
+    291,
     // Sheer Cold (ISSUES #151, species audit 7 elevated FLYGON / GOLBAT opponent, both orientations): activation == window start (row 0).
     329,
   ].map((id) => [id, 0] as [number, number]).concat([
@@ -786,6 +824,10 @@ export function liveMoveAnimationDuration(
     // Fly / Bounce (prep11 s0.2): charge 51..93 (43 rows) / strike 408..475 (68); Bounce charge 254..317 (64) /
     // strike 771..825 (55). request.turn = gAnimMoveTurn (0 charge, 1 strike).
     case 19: return (request.turn & 1) === 0 ? 43 : 68;
+    // Dive (S10A, faithful timing with D3; prep25 s0.2 / B.1): SETUP body only (request.turn bit 0 = 0): first inactive 117 (player attacker) / 114
+    // (opponent attacker), constant per side, + the first inactive row. The attack body (turn 1) declines: its activation order is the setup
+    // body's words-dependent droplet sort (docs/s10a-random2-order-lend-blocker.md).
+    case 291: return (request.turn & 1) === 0 ? liveDiveSetupFirstInactive(request.attacker === 0 ? "player" : "opponent") + 1 : null;
     case 340: return (request.turn & 1) === 0 ? 64 : 55;
     // Rollout bodies by request.rolloutCounter (accepted corpus rows 167, 167, 161, 153, 145; prep11 s0.2).
     case 205: {
@@ -991,7 +1033,7 @@ export function liveSemiInvulnerableHideBattler(request: BattleMoveAnimationRequ
   // Baton Pass (prep27 s0.1): AnimBatonPassPokeball sets the attacker `invisible` at age 9 and the ROM keeps it hidden until the
   // switch-out's instant returntoball (opponent E+9; player through the party screen, A+76), so the same hide carries it.
   if (request.moveId === 226) return liveMoveAnimationDuration(request) !== null ? request.attacker : null;
-  return (request.moveId === 19 || request.moveId === 340 || request.moveId === 91) && (request.turn & 1) === 0
+  return (request.moveId === 19 || request.moveId === 340 || request.moveId === 91 || request.moveId === 291) && (request.turn & 1) === 0
     && liveMoveAnimationDuration(request) !== null ? request.attacker : null;
 }
 
@@ -3282,6 +3324,34 @@ export function liveMoveAnimationPresentation(
           const star = miniTwinklingStarFromWords(words[2 * i]!, words[2 * i + 1]!);
           return { tile: star.tileOffset, y2: star.yOffset };
         }) };
+      break;
+    }
+    case 291: {
+      // Faithful timing with D3 (S10A; docs/next-adapters-prep25.md s0.2 / B.1 / B.1a / C): the Dive SETUP body (turn bit 0 = 0) after any known
+      // lend with the known-entry occupancy; the attack body declines (its activation order is the setup droplets' words-dependent sort,
+      // docs/s10a-random2-order-lend-blocker.md). The attacker stays hidden from setup age 10 across the turn gap (liveSemiInvulnerableHideBattler,
+      // as Dig). Anchors (B.1a, 8/8): splash / droplets at battlePositionCenter, the ball at the attacker's Y_PIC_OFFSET point (reducer + 16).
+      // Words from the presentation host only. The DIVE branch draws status-free healthboxes and unshaded battler art: a displayed status
+      // or a shiny battler declines.
+      if ((request.turn & 1) !== 0 || !spriteOrderInput?.known) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if ((field.player.status ?? "none") !== "none" || (field.opponent.status ?? "none") !== "none") return null;
+      const words = liveMovePresentationRngWords(presentationRngInput)?.words;
+      const activationOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (words === undefined || words.length !== 20 || activationOrder === null) return null;
+      const side = attacker.geometry.side;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const a = attackerAnchors, t = targetAnchors;
+      const withCenter = (battler: SceneOnPresentationBattler, center: { x: number; y: number }): SceneOnPresentationBattler => ({
+        ...battler, geometry: { ...battler.geometry, animationCenter: center } });
+      config = { move: "DIVE", body: "setup", setupRow68ReusedAffine: liveMoveTimingParameter(291, "oam-transfer-row")?.chosen === "event", attacker: withCenter(attacker, a.spriteCenter), target: withCenter(target, t.spriteCenter),
+        fieldProfile: { ...fieldProfile, playerStatus: "none" },
+        animationGeometry: { attackerCenter: a.spriteCenter, targetCenter: t.spriteCenter,
+          attackerPictureOffset: a.battlePositionCenter, targetPictureOffset: t.battlePositionCenter,
+          attackerBallOffset: { x: a.battlePositionCenter.x, y: a.picOffsetPoint.y - 16 },
+          attackerRestOffset: a.frontIdleRest, targetRestOffset: t.frontIdleRest },
+        animationProfile: liveDiveSetupProfile(side, words, activationOrder) };
       break;
     }
     case 301: {

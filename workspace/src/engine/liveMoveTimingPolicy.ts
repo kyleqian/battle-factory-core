@@ -13,13 +13,15 @@
 
 export const LIVE_MOVE_TIMING_POLICY_VERSION = "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event" as const;
 
-export type LiveMoveTimingParameterKind = "optional-lag-age" | "bg-write-row" | "palette-transfer-row" | "scanline-split-line";
+export type LiveMoveTimingParameterKind = "optional-lag-age" | "bg-write-row" | "palette-transfer-row" | "scanline-split-line" | "oam-transfer-row";
 /**
  * "event" = the optional lag frame / late write happens; "no-event" = it does not (the source iteration count). Per kind:
  * - optional-lag-age: "event" = the optional lag frame at `age` is present (one more body row).
  * - bg-write-row: "event" = the LATER of the two write rows (`age`; the slower-CPU phase), "no-event" = the earlier row (`age - 1`).
  *   A tie therefore selects the earlier write row.
  * - palette-transfer-row: "event" = the later transfer row.
+ * - oam-transfer-row: "event" = the hardware OAM / matrix buffer of row `age` still shows the sprite state of `age - 2` (the VBlank OAM transfer
+ *   of the previous frame did not carry the new affine state), "no-event" = the ordinary one-row latch (`age - 1`).
  * - scanline-split-line: a main-loop write of BOTH scanline buffers lands while the frame is scanned out; "event" = the write lands below the
  *   top of the distortion window (lines above the beam still show the previous row's values), "no-event" = before the window (split line
  *   S = 0: the displayed buffer is the written one).
@@ -214,6 +216,24 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
     }],
   },
   /**
+   * S10A Dive SETUP body, player attacker (tools/integration/fixtures/s10a-live/dive-*.json, d4d2-live-receipt.json): the splash reuses the
+   * ball's affine matrix at age 67; on row 68 the hardware OAM shows the source state of age 66 (the renderer's measured reused-affine
+   * exception, battleScene.ts DIVE) in 4 of 6 measured player windows (accepted CHINCHOU -> ONIX, prep25 LANTURN -> GOLEM, CHINCHOU -> SHUCKLE,
+   * prep11 CHINCHOU -> GOLEM) and the ordinary age 67 in 2 (CHINCHOU -> GOLBAT and CHINCHOU -> GOLEM after a Tackle): a VBlank-transfer CPU
+   * phase. Opponent-attacker setups have no such row (3 of 3 exact under the ordinary latch). Wrong phase: row 68 only (the splash / ball).
+   * Also D3 (Random2 droplets).
+   */
+  291: {
+    move: "MOVE_DIVE",
+    parameters: [{
+      kind: "oam-transfer-row", age: 68, fixedLagAges: [], iterations: 117, side: "player",
+      alternatives: [{ phase: "event", bodyRows: 118, measured: 4 }, { phase: "no-event", bodyRows: 118, measured: 2 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/d4d2-live-receipt.json dive-* player windows (row 68 source 66: 4, source 67: 2)",
+        "tools/compare/fixtures/dive-evidence.json (accepted player-back setup row 68: source 66)"],
+    }],
+  },
+  /**
    * S10A Ice Ball (docs/next-adapters-prep26.md s1.4 H / s4 item 6; tools/integration/fixtures/prep26/iceball-check.json lagRows): 0-step lag rows
    * (an animationRng stall: VBlank overrun) in 3 of 18 measured counter bodies (accepted player body 4 row 38, accepted bodies 5 row 112 both
    * sides), none in the other 15 (accepted bodies 1..3, accepted opponent body 4, every GLALIE -> GOLEM / REGISTEEL alternate body): the
@@ -279,6 +299,9 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   171,
   // D4 (S10A): Superpower first body (liveSuperpowerInputs.ts; per-side monbg write row; fixtures tools/integration/fixtures/s10a-live/superpower-*).
   276,
+  // S10A: Dive SETUP body (D3 + D4; Random2 droplets from the presentation host; the player row-68 OAM transfer phase; liveMoveAnimation.ts 291;
+  // fixtures tools/integration/fixtures/s10a-live/dive-*).
+  291,
   // S10A: Ice Ball counter 0 (D3 + D4; liveIceBallInputs.ts; Random2 shards from the presentation host, counter-keyed plan; no-lag policy;
   // fixtures tools/integration/fixtures/s10a-live/ice-ball-*).
   301,

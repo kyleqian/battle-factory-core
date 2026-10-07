@@ -3137,6 +3137,11 @@ export interface SceneOnDiveConfig {
   readonly animationGeometry: Readonly<DiveGeometry>;
   /** Allocator identities/order and animation-RNG results resolved by the caller. */
   readonly animationProfile: Readonly<DiveProfile>;
+  /**
+   * Player setup row 68 shows the source state of age 66 (the reused-affine OAM transfer phase). Absent = true (the accepted staged
+   * corpus); the live seam passes the faithful-timing policy's phase (liveMoveTimingPolicy.ts 291).
+   */
+  readonly setupRow68ReusedAffine?: boolean;
 }
 
 /** Level damage remains battle-owned; this seam is the level-50 Medium body. */
