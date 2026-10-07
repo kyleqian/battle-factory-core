@@ -1,0 +1,76 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "SPIT_UP",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-spit-up-player-swalot-two-stockpile.json",
+ "denseWindow": {
+  "startFrame": 2213,
+  "endFrame": 2320
+ },
+ "windowSource": "window = [activation, first inactive row] of this scenario's first Spit Up body (108 rows) from 2 fresh prep22Probes.sh runs (bodies agree)",
+ "requestFields": {
+  "turn": 2
+ },
+ "attacker": {
+  "species": "KECLEON",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "BLISSEY",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019074,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 123,
+  "playerMaxHp": 123,
+  "opponentHp": 349,
+  "opponentMaxHp": 349,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 45,
+   "side": "opponent"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statAnimation": 21
+  },
+  {
+   "moveId": 254,
+   "side": "player"
+  },
+  {
+   "moveId": 45,
+   "side": "opponent"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statAnimation": 21
+  },
+  {
+   "moveId": 254,
+   "side": "player"
+  },
+  {
+   "moveId": 45,
+   "side": "opponent"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statAnimation": 21
+  }
+ ]
+}

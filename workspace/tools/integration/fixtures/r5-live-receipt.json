@@ -1,0 +1,191 @@
+{
+ "schema": "s10a-live-receipt/v1",
+ "testedCommit": "079c5a0ae6efea0f05fff3099134ea6ea769c4a0",
+ "testedSrcTree": "57e403ff6bc5a5499cc6ad7252c9c781976bed6f",
+ "dirty": true,
+ "commands": [
+  "sh tools/integration/prep22Probes.sh /tmp/s10a/sp 2 <12 spit-up scenarios>; python3 tools/integration/s10aLiveFixtures.py /tmp/s10a/sp",
+  "OUT_DIR=<dir> npx vite-node tools/integration/speciesAuditDense.ts tools/integration/fixtures/s10a-live/<fixture>.json  (2 fresh mGBA runs)",
+  "python3 tools/integration/s10aReceipt.py <dir> [gates.json]"
+ ],
+ "summary": {
+  "SPIT_UP": {
+   "windows": 12,
+   "rows": 1300,
+   "exactRows": 1300,
+   "residualPixels": 0
+  }
+ },
+ "windows": [
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/spit-up-alt-opponent-seviper-golem-1.json",
+   "move": "SPIT_UP",
+   "rows": 108,
+   "exactRows": 108,
+   "residualPixels": 0,
+   "expectedDuration": 108,
+   "freshRuns": 2,
+   "digests": [
+    "9378866fc4766bf7492896709944ffe53f76396651fda77956d5d45019f148d3",
+    "9378866fc4766bf7492896709944ffe53f76396651fda77956d5d45019f148d3"
+   ],
+   "identical": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/spit-up-alt-opponent-seviper-golem-2.json",
+   "move": "SPIT_UP",
+   "rows": 108,
+   "exactRows": 108,
+   "residualPixels": 0,
+   "expectedDuration": 108,
+   "freshRuns": 2,
+   "digests": [
+    "6588354ad106dc6a64c3ae310142b5e7d44ec103549236c17797435ecc049d95",
+    "6588354ad106dc6a64c3ae310142b5e7d44ec103549236c17797435ecc049d95"
+   ],
+   "identical": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/spit-up-alt-opponent-seviper-golem-3.json",
+   "move": "SPIT_UP",
+   "rows": 109,
+   "exactRows": 109,
+   "residualPixels": 0,
+   "expectedDuration": 109,
+   "freshRuns": 2,
+   "digests": [
+    "250f58ba534023dfc427900adb898a84aa6a596a772a8c54028d195ee2da9ed8",
+    "250f58ba534023dfc427900adb898a84aa6a596a772a8c54028d195ee2da9ed8"
+   ],
+   "identical": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/spit-up-alt-player-seviper-golem-1.json",
+   "move": "SPIT_UP",
+   "rows": 108,
+   "exactRows": 108,
+   "residualPixels": 0,
+   "expectedDuration": 108,
+   "freshRuns": 2,
+   "digests": [
+    "1b45ce9ed8f4049fa707b30113b1bd0c465155a423f5c2eb454a9472aab28493",
+    "1b45ce9ed8f4049fa707b30113b1bd0c465155a423f5c2eb454a9472aab28493"
+   ],
+   "identical": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/spit-up-alt-player-seviper-golem-2.json",
+   "move": "SPIT_UP",
+   "rows": 108,
+   "exactRows": 108,
+   "residualPixels": 0,
+   "expectedDuration": 108,
+   "freshRuns": 2,
+   "digests": [
+    "3b6f15cd977d92817934234223a35c3dca1a361f81a8cf52f002b4612a46b5dc",
+    "3b6f15cd977d92817934234223a35c3dca1a361f81a8cf52f002b4612a46b5dc"
+   ],
+   "identical": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/spit-up-alt-player-seviper-golem-3.json",
+   "move": "SPIT_UP",
+   "rows": 109,
+   "exactRows": 109,
+   "residualPixels": 0,
+   "expectedDuration": 109,
+   "freshRuns": 2,
+   "digests": [
+    "3d9ca1c8c765c91f61117fcaa4d122947eba5476c7d5a798e3b1848aa3204624",
+    "3d9ca1c8c765c91f61117fcaa4d122947eba5476c7d5a798e3b1848aa3204624"
+   ],
+   "identical": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/spit-up-opponent-1.json",
+   "move": "SPIT_UP",
+   "rows": 108,
+   "exactRows": 108,
+   "residualPixels": 0,
+   "expectedDuration": 108,
+   "freshRuns": 2,
+   "digests": [
+    "e52b17f80364fdc54e685e19343d6bc764117862e4192959dd5c7876acd174c0",
+    "e52b17f80364fdc54e685e19343d6bc764117862e4192959dd5c7876acd174c0"
+   ],
+   "identical": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/spit-up-opponent-2.json",
+   "move": "SPIT_UP",
+   "rows": 108,
+   "exactRows": 108,
+   "residualPixels": 0,
+   "expectedDuration": 108,
+   "freshRuns": 2,
+   "digests": [
+    "a942d5aee2c248da4658cf1ddd01f23e8ce2de83d59628b96aa85d720fbc5cfc",
+    "a942d5aee2c248da4658cf1ddd01f23e8ce2de83d59628b96aa85d720fbc5cfc"
+   ],
+   "identical": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/spit-up-opponent-3.json",
+   "move": "SPIT_UP",
+   "rows": 109,
+   "exactRows": 109,
+   "residualPixels": 0,
+   "expectedDuration": 109,
+   "freshRuns": 2,
+   "digests": [
+    "068b02d75aa803bfdd6e5be2ab404d6c9087e68a38696f1a266f7f2a2894057f",
+    "068b02d75aa803bfdd6e5be2ab404d6c9087e68a38696f1a266f7f2a2894057f"
+   ],
+   "identical": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/spit-up-player-1.json",
+   "move": "SPIT_UP",
+   "rows": 108,
+   "exactRows": 108,
+   "residualPixels": 0,
+   "expectedDuration": 108,
+   "freshRuns": 2,
+   "digests": [
+    "ae2b01a88e978b2707ed1f8ae067c3558979fd4b82a526f8d5205fc4c151aea6",
+    "ae2b01a88e978b2707ed1f8ae067c3558979fd4b82a526f8d5205fc4c151aea6"
+   ],
+   "identical": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/spit-up-player-2.json",
+   "move": "SPIT_UP",
+   "rows": 108,
+   "exactRows": 108,
+   "residualPixels": 0,
+   "expectedDuration": 108,
+   "freshRuns": 2,
+   "digests": [
+    "4425abc42ef6bbaaf862557f08e9f7b01ecf3edba01e82e78c6ad33d1f42ea35",
+    "4425abc42ef6bbaaf862557f08e9f7b01ecf3edba01e82e78c6ad33d1f42ea35"
+   ],
+   "identical": true
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/spit-up-player-3.json",
+   "move": "SPIT_UP",
+   "rows": 109,
+   "exactRows": 109,
+   "residualPixels": 0,
+   "expectedDuration": 109,
+   "freshRuns": 2,
+   "digests": [
+    "2ecacc0ede67672fc766bb0d5f2adce5b0964c76aa494d2605b1bea202d9998b",
+    "2ecacc0ede67672fc766bb0d5f2adce5b0964c76aa494d2605b1bea202d9998b"
+   ],
+   "identical": true
+  }
+ ],
+ "routes": {},
+ "gates": {}
+}

@@ -86,7 +86,9 @@ import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
 import paletteResources from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
 import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "json" };
 import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
+import spitUpRedOrbAsset from "../animation/assets/spit-up-red-orb.json" with { type: "json" };
 import { liveMoveBgWriteRow, liveMoveOptionalLagAge, liveMoveTimingBodyRows } from "./liveMoveTimingPolicy.ts";
+import { liveSpitUpDuration, liveSpitUpInputs, type SpitUpCounter } from "./liveSpitUpInputs.ts";
 import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
 import { liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
@@ -108,6 +110,10 @@ import {
 
 
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
+/** Spit Up's RED_ORB_2 palette (BGR555 words) for liveSpitUpInputs (the engine reads animation assets only through this seam). */
+const SPIT_UP_RED_ORB_PALETTE: readonly number[] = Object.freeze((spitUpRedOrbAsset as { art: { palette: { r: number; g: number; b: number }[] } }).art.palette
+  .map((c) => (c.r >> 3) | (c.g >> 3) << 5 | (c.b >> 3) << 10));
+
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   2, 5, 9, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 42, 43, 44, 47, 48, 49, 50,
   51, 55, 65, 66, 67, 68, 74, 75, 78, 79, 83, 92, 93, 94, 95, 97, 101, 103, 105, 106, 108, 109, 112, 113,
@@ -146,6 +152,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   261, 228, 210,
   // Return (strongest branch, friendship 255: the only one the Factory reaches), first body (docs/next-adapters-prep24.md s2).
   216,
+  // Spit Up, all three Stockpile counters (docs/next-adapters-prep31.md s2 / s3; liveSpitUpInputs.ts): any known lend.
+  255,
   // anchor3: source battler anchors (position center, picture height, pic offset).
   86, 87, 107, 116, 203, 207, 263, 339,
   // selectors: request-selected branches and healing anchors.
@@ -342,6 +350,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     261, 228, 210,
     // Return (strongest): activation == window start (row 0; prep24 / prep18 return probes, both sides).
     216,
+    // Spit Up: activation == window start (row 0; prep31 / s10a-live spit-up windows, both sides, all three counters).
+    255,
     // prep27: Baton Pass activation == window start (row 0; the dense body probe's first active frame, elevated NINJASK attacker).
     226,
     // prep27: Endeavor activation == window start (row 0; the dense script window, elevated GOLBAT target / NINJASK attacker).
@@ -883,6 +893,8 @@ export function liveMoveAnimationDuration(
     case 283: return 68;
     // Return (strongest branch, friendship 255, Factory-only): 282 rows both sides (0.25% of Factory move slots).
     case 216: return RETURN_ROWS;
+    // Spit Up (prep31 s2.2): 108 rows (counters 1, 2), 109 (counter 3); request.turn = the Stockpile counter (gameplay-owned, read only).
+    case 255: return liveSpitUpDuration(request.turn);
     // Curse (curse-live): MOVE_CURSE's choosetwoturnanim picks CurseStats when gAnimMoveTurn & 1 (BattleScript_EffectCurse
     // setbyte sB_ANIM_TURN 1 for a non-Ghost attacker, battle_scripts_1.s:1491-1492): 176 rows (first inactive age 175 + 1).
     // The Ghost branch (turn 0) declines: its row-26 palette-transfer scanline and BG2 scroll phase are frame-phase inputs.
@@ -3015,6 +3027,24 @@ export function liveMoveAnimationPresentation(
         sort: sortGbaSpriteOrder });
       if (inputs === null) return null;
       config = { move: "RETURN", attacker, target, fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
+      break;
+    }
+    case 255: {
+      // Spit Up (prep31 s3): every Stockpile counter (request.turn 1..3), any known lend (the bodies follow Stockpile / Growl units; the
+      // host's lent 64-slot order is the L input), known-entry allocator, non-shiny, zero idle rests. Registers never change (prep31 s2.1).
+      if (!spriteOrderInput?.known) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const activationOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (palettes === null || activationOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const inputs = liveSpitUpInputs({ counter: request.turn as SpitUpCounter, attackerSide: attacker.geometry.side,
+        attackerSpecies: art[attacker.geometry.side].speciesSymbol, targetSpecies: art[target.geometry.side].speciesSymbol,
+        attacker: attackerAnchors, target: targetAnchors, attackerYDelta: liveBattlerCoordAttrs(attacker.geometry.side, art).yOffset,
+        palettes, redOrbPalette: SPIT_UP_RED_ORB_PALETTE, activationOrder, sort: sortGbaSpriteOrder });
+      if (inputs === null) return null;
+      config = { move: "SPIT_UP", attacker, target, fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
       break;
     }
     case 224: {

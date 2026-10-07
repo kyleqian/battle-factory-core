@@ -3675,6 +3675,19 @@
         "shiny battlers decline",
         "independent arbitrary-species/history framebuffer comparison"
       ]
+    },
+    {
+      "move": "MOVE_SPIT_UP",
+      "id": 255,
+      "sourceFieldEvidence": "../tools/integration/fixtures/r5-live-receipt.json",
+      "liveEvidence": [
+        "All three Stockpile counters (request.turn 1..3 = the gameplay-owned stockpile counter, read only): hardware OAM + matrices from src/engine/liveSpitUpInputs.ts (docs/next-adapters-prep31.md s3, the prep31SpitUpModel.ts programs ported 1:1: AnimSpitUpOrb waves, AnimTask_SpitUpDeformMon rot-scale + y2 from the attacker pic y_offset, ShakeMon2 / ShakeTargetBasedOnMovePowerOrDmg x2, flashing hit splats, lowest-free slots / matrices); the 64-slot order carried by SortSprites passes from the host's lent activation order (the L input); the 8-orb burst lag rows are program constants (M); palettes = composite + RED_ORB_2 (row 1) / IMPACT (row 4); the reducer src/animation/spitUp.ts unchanged; never a capture row",
+        "dense full windows zero residual twice fresh through the production live renderer, both orientations, all three counters: accepted KECLEON -> BLISSEY and prep29 SEVIPER -> GOLEM alternates (12 windows, 1300/1300 rows; tools/integration/fixtures/s10a-live/spit-up-*.json, receipts s10a-live/receipts/)"
+      ],
+      "remaining": [
+        "shiny battlers and non-zero idle rests decline (the shake x2 programs are proven from a zero rest only); an unknown lent order declines",
+        "the burst-row partial sprite snapshots (prep31 T) never reach hardware OAM and are not modelled; doubles / contest paths not covered"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3698,7 +3711,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 246,
+  "implementedCount": 247,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 12,

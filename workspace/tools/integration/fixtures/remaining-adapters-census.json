@@ -10,7 +10,7 @@
   "src/data/gen/battle-frontier-mons.json",
   "src/data/gen/factory-round-policy.json"
  ],
- "liveStatusImplementedCount": 246,
+ "liveStatusImplementedCount": 247,
  "staleCodesCorrected": [
   "B (sSpriteOrder): was 'first body only'; production now lends the order and tracks it across bodies (liveSpriteOrderHost.ts / spriteOrderProvider.ts, merged cross-body tracker + post-KO rung 1), so B no longer blocks anything; recipe work only (falls back after an unmodelled graphics command)",
   "F-AFFINE / E-TASK: were provider blockers; docs/allocator-plan-v2-evidence.md measured gOamMatrixAllocBitmap 0x6 + no tasks at all 481 known-entry bodies, so the accepted constants gated on the lent order suffice for first bodies (invalidated after a faint/switch)",
@@ -23,7 +23,7 @@
  "inFlightMoves": {},
  "summary": {
   "accepted": 276,
-  "live": 246,
+  "live": 247,
   "faithfulRandom": 12,
   "faithfulRandomMoves": [
    "MOVE_ASTONISH",
@@ -49,22 +49,22 @@
    "MOVE_REVENGE"
   ],
   "inFlight": 0,
-  "remaining": 12,
+  "remaining": 11,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
   },
   "weightPct": {
-   "live": 93.593,
+   "live": 93.627,
    "faithfulRandom": 3.761,
    "faithfulTiming": 0.906,
    "inFlight": 0,
-   "remaining": 1.252
+   "remaining": 1.218
   },
   "remainingByGroup": {
    "MULTI": {
-    "moves": 9,
-    "weightPct": 0.88
+    "moves": 8,
+    "weightPct": 0.846
    },
    "OUT": {
     "moves": 1,
@@ -77,13 +77,13 @@
   },
   "remainingByHostClass": {
    "H_BASIC": 1,
-   "H_BUFFER": 9,
+   "H_BUFFER": 8,
    "H_DERIVED": 2,
-   "H_VARIANT": 3
+   "H_VARIANT": 2
   },
   "orderFirstBodyOnlyMoves": 7,
-  "slotPlanNeededMoves": 9,
-  "sumsTo": "246+12+6+0+12=276",
+  "slotPlanNeededMoves": 8,
+  "sumsTo": "247+12+6+0+11=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -183,8 +183,8 @@
    "aloneNames": [
     "MEMENTO"
    ],
-   "touchingMoves": 9,
-   "touchingWeightPct": 0.73,
+   "touchingMoves": 8,
+   "touchingWeightPct": 0.696,
    "meta": {
     "cost": "new large host (docs/animation-integration-readiness.md A6)",
     "claim": "only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today"
@@ -199,8 +199,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 9,
-   "touchingWeightPct": 0.88,
+   "touchingMoves": 8,
+   "touchingWeightPct": 0.846,
    "meta": {
     "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
     "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
@@ -215,8 +215,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 8,
-   "touchingWeightPct": 0.693,
+   "touchingMoves": 7,
+   "touchingWeightPct": 0.659,
    "meta": {
     "cost": "extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves)",
     "claim": "exact for audited plan rows from a known entry; actual status animations/switches invalidate"
@@ -231,8 +231,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 8,
-   "touchingWeightPct": 0.693,
+   "touchingMoves": 7,
+   "touchingWeightPct": 0.659,
    "meta": null
   },
   {
@@ -244,8 +244,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 7,
-   "touchingWeightPct": 0.659,
+   "touchingMoves": 6,
+   "touchingWeightPct": 0.625,
    "meta": null
   },
   {
@@ -257,8 +257,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 5,
-   "touchingWeightPct": 0.44,
+   "touchingMoves": 4,
+   "touchingWeightPct": 0.406,
    "meta": null
   },
   {
@@ -312,8 +312,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 2,
-   "touchingWeightPct": 0.147,
+   "touchingMoves": 1,
+   "touchingWeightPct": 0.113,
    "meta": {
     "cost": "add a DisableStruct counter snapshot to the MOVE_ANIMATION request (rules context already holds the counters)",
     "claim": "exact (presentation-only copy of rules state)"
@@ -449,33 +449,32 @@
   },
   {
    "step": 6,
-   "provider": "X-DISABLE",
-   "newMoves": 2,
-   "newWeightPct": 0.147,
-   "cumulativeRemainingUnlocked": 10,
-   "newNames": [
-    "ICE_BALL",
-    "SPIT_UP"
-   ]
-  },
-  {
-   "step": 7,
    "provider": "X-TWOTURN",
    "newMoves": 1,
    "newWeightPct": 0.187,
-   "cumulativeRemainingUnlocked": 11,
+   "cumulativeRemainingUnlocked": 9,
    "newNames": [
     "DIVE"
    ]
   },
   {
-   "step": 8,
+   "step": 7,
    "provider": "E-OUT",
    "newMoves": 1,
    "newWeightPct": 0.176,
-   "cumulativeRemainingUnlocked": 12,
+   "cumulativeRemainingUnlocked": 10,
    "newNames": [
     "SKILL_SWAP"
+   ]
+  },
+  {
+   "step": 8,
+   "provider": "X-DISABLE",
+   "newMoves": 1,
+   "newWeightPct": 0.113,
+   "cumulativeRemainingUnlocked": 11,
+   "newNames": [
+    "ICE_BALL"
    ]
   },
   {
@@ -483,7 +482,7 @@
    "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 12,
+   "cumulativeRemainingUnlocked": 11,
    "newNames": []
   },
   {
@@ -491,7 +490,7 @@
    "provider": "D-TILE",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 12,
+   "cumulativeRemainingUnlocked": 11,
    "newNames": []
   },
   {
@@ -499,7 +498,7 @@
    "provider": "D-BG",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 12,
+   "cumulativeRemainingUnlocked": 11,
    "newNames": []
   },
   {
@@ -507,7 +506,7 @@
    "provider": "D-OAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 12,
+   "cumulativeRemainingUnlocked": 11,
    "newNames": []
   },
   {
@@ -515,7 +514,7 @@
    "provider": "D-VRAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 12,
+   "cumulativeRemainingUnlocked": 11,
    "newNames": []
   },
   {
@@ -523,7 +522,7 @@
    "provider": "F-AUDIO",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 12,
+   "cumulativeRemainingUnlocked": 11,
    "newNames": []
   }
  ],
@@ -3102,209 +3101,6 @@
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
-   },
-   "group": "MULTI"
-  },
-  {
-   "move": "MOVE_SPIT_UP",
-   "id": 255,
-   "name": "SPIT UP",
-   "hostClass": [
-    "H_BUFFER",
-    "H_VARIANT"
-   ],
-   "weightShare": 0.0003401360544217687,
-   "config": "src/animation/sceneOnPresentation.ts:2807",
-   "needs": [
-    "E-TASK",
-    "D-OAM",
-    "D-PAL",
-    "D-BG",
-    "D-TILE",
-    "C",
-    "X-DISABLE"
-   ],
-   "blockers": [
-    {
-     "code": "E-TASK",
-     "text": "liveTasks (readonly Readonly<{ slot: number; callback: string)",
-     "cites": [
-      "src/animation/spitUp.ts:21"
-     ]
-    },
-    {
-     "code": "D-OAM",
-     "text": "buffers (Readonly<{ softwareOam: readonly unknown[]; hardwa)",
-     "cites": [
-      "src/animation/spitUp.ts:22"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "palette (Readonly<{ unfaded: readonly number[]; faded: read)",
-     "cites": [
-      "src/animation/spitUp.ts:24"
-     ]
-    },
-    {
-     "code": "D-BG",
-     "text": "registers (Readonly<Record<string, number>>;)",
-     "cites": [
-      "src/animation/spitUp.ts:25"
-     ]
-    },
-    {
-     "code": "D-TILE",
-     "text": "resources (Readonly<{ redOrbTileBase: number; impactTileBase:)",
-     "cites": [
-      "src/animation/spitUp.ts:26"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationRng (number; readonly gameplayRng: unknown; readonly ga)",
-     "cites": [
-      "src/animation/spitUp.ts:30"
-     ]
-    },
-    {
-     "code": "X-DISABLE",
-     "text": "stockpiles 1/2/3 branch = DisableStruct.stockpileCounter (Cmd_stockpiletohpheal sets animTurn only for Swallow; Spit Up reads the counter from the DisableStruct snapshot)",
-     "cites": [
-      "reference/pokeemerald/src/battle_script_commands.c:1787",
-      "src/animation/spitUp.ts:14"
-     ]
-    }
-   ],
-   "notes": [
-    "accepted as a LiveInputs config (docs/animation-integration-merged-readiness.json); not in the older triage docs"
-   ],
-   "staleCorrections": [],
-   "slotPlanNeeded": true,
-   "consumedInputs": [
-    {
-     "path": "stockpiles",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/spitUp.ts:14"
-    },
-    {
-     "path": "attackerArt",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/spitUp.ts:19"
-    },
-    {
-     "path": "ownedSprites",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/spitUp.ts:20"
-    },
-    {
-     "path": "liveTasks",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/spitUp.ts:21"
-    },
-    {
-     "path": "buffers",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/spitUp.ts:22"
-    },
-    {
-     "path": "softwareMatrices",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/spitUp.ts:23"
-    },
-    {
-     "path": "palette",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/spitUp.ts:24"
-    },
-    {
-     "path": "registers",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/spitUp.ts:25"
-    },
-    {
-     "path": "resources",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/spitUp.ts:26"
-    },
-    {
-     "path": "redOrbLoaded",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/spitUp.ts:27"
-    },
-    {
-     "path": "order",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/spitUp.ts:28"
-    },
-    {
-     "path": "liveCounts",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/spitUp.ts:29"
-    },
-    {
-     "path": "animationRng",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/spitUp.ts:30"
-    }
-   ],
-   "orderFirstBodyOnly": false,
-   "lentConstants": [
-    "E-TASK"
-   ],
-   "providerNeeds": [
-    "D-OAM",
-    "D-PAL",
-    "D-BG",
-    "D-TILE",
-    "C",
-    "X-DISABLE"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
    },
    "group": "MULTI"
   },

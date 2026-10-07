@@ -6137,6 +6137,50 @@
    "requestFields": {
     "turn": 0
    }
+  },
+  {
+   "id": 255,
+   "move": "SPIT_UP",
+   "orientation": "player",
+   "variant": "s10a-spit-up-player-1",
+   "activationFrame": 1279,
+   "windowStart": 1279,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 1
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/s10a-live/spit-up-player-1.json",
+    "scenario": "tools/battle-lab/mechanic-spit-up-player-swalot-one-stockpile.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own first Spit Up body activation (2 fresh prep22Probe runs); dense 0 px (r5-live-receipt.json)"
+   }
+  },
+  {
+   "id": 255,
+   "move": "SPIT_UP",
+   "orientation": "opponent",
+   "variant": "s10a-spit-up-opponent-1",
+   "activationFrame": 2225,
+   "windowStart": 2225,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 1
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/s10a-live/spit-up-opponent-1.json",
+    "scenario": "tools/battle-lab/mechanic-spit-up-opponent-swalot-one-stockpile.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own first Spit Up body activation (2 fresh prep22Probe runs); dense 0 px (r5-live-receipt.json)"
+   }
   }
  ]
 }
