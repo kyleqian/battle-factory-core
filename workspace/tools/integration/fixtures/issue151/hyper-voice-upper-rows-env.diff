@@ -1,0 +1,13 @@
+diff --git a/workspace/src/animation/hyperVoice.ts b/workspace/src/animation/hyperVoice.ts
+index 26a6db550..22b2ed704 100644
+--- a/workspace/src/animation/hyperVoice.ts
++++ b/workspace/src/animation/hyperVoice.ts
+@@ -491,7 +491,7 @@ export function hyperVoiceAtAge(age: number, input: Readonly<HyperVoiceLiveInput
+       // 0..15 to retain the preceding hardware palette. The lower field and
+       // both palette-RAM snapshots already contain the new setup blend.
+       scanout: {
+-        upperRows: effect?.call === 2 && local === 0 ? 16 : 0,
++        upperRows: effect?.call === 2 && local === 0 ? Number(process.env.I151_HV_UPPER ?? 16) : 0,
+         upperHardware: effect?.call === 2 && local === 0
+           ? hardwarePaletteAtAge(age - 1, input) : hardwarePalette,
+       },
