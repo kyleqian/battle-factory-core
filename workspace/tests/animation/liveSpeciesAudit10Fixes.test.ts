@@ -53,3 +53,17 @@ describe("Spit Up (255): the idle-rest gate is the target rest only (species aud
     expect(r["rattata-spit-up-player-3"]!.runs.map((run) => run.residualPixels)).toEqual([168357, 168357]);
   });
 });
+
+describe("d4aTimingCheck: a missing measured phase label is a hard FAIL (D4d2 papercut)", () => {
+  const r = JSON.parse(readFileSync(`${DIR}/timing-label-rerun.json`, "utf8"));
+  it("every d4a-live / d4d2-live / s10a-live window passes with the label check (146 windows, 0 violations, digests equal)", () => {
+    expect([r.windows, r.violations, r.rows.length]).toEqual([146, 0, 146]);
+    for (const row of r.rows) expect([row.fixture, row.digestsEqual, row.violations]).toEqual([row.fixture, true, []]);
+  });
+  it("the negative control (a Revenge window with its timingPhases deleted) fails on the missing label", () => {
+    expect(r.negativeControl.violations).toEqual(["missing measured phase label for bg-write-row"]);
+  });
+  it("the checker source carries the hard check", () => {
+    expect(readFileSync("tools/integration/d4aTimingCheck.ts", "utf8")).toContain("missing measured phase label for");
+  });
+});

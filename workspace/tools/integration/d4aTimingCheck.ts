@@ -45,6 +45,9 @@ for (const path of paths) {
   const doc = documented(id, path);
   const run0 = runs[0]!;
   const violations: string[] = [];
+  // A window without a measured label for one of the move's parameter kinds is unclassified, never silently "other phase".
+  const unlabeled = parameters.filter((p) => measured[p.kind] !== "event" && measured[p.kind] !== "no-event").map((p) => p.kind);
+  if (unlabeled.length) violations.push(`missing measured phase label for ${unlabeled.join(", ")}`);
   if (runs.some((r) => r.digest !== run0.digest)) violations.push("fresh runs differ");
   if (selected) {
     if (run0.residualPixels !== 0) violations.push(`selected phase residual ${run0.residualPixels} px on ages ${run0.affectedAges.join(",")}`);
