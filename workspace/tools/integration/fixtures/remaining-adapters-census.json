@@ -39,18 +39,19 @@
    "MOVE_WATER_PULSE",
    "MOVE_WISH"
   ],
-  "faithfulTiming": 7,
+  "faithfulTiming": 8,
   "faithfulTimingMoves": [
    "MOVE_EXTRASENSORY",
    "MOVE_MACH_PUNCH",
    "MOVE_MEGAHORN",
    "MOVE_METEOR_MASH",
+   "MOVE_NIGHTMARE",
    "MOVE_PSYWAVE",
    "MOVE_REVENGE",
    "MOVE_SUPERPOWER"
   ],
   "inFlight": 0,
-  "remaining": 10,
+  "remaining": 9,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
@@ -58,14 +59,14 @@
   "weightPct": {
    "live": 93.627,
    "faithfulRandom": 3.761,
-   "faithfulTiming": 0.944,
+   "faithfulTiming": 1.015,
    "inFlight": 0,
-   "remaining": 1.181
+   "remaining": 1.11
   },
   "remainingByGroup": {
    "MULTI": {
-    "moves": 7,
-    "weightPct": 0.809
+    "moves": 6,
+    "weightPct": 0.738
    },
    "OUT": {
     "moves": 1,
@@ -78,13 +79,13 @@
   },
   "remainingByHostClass": {
    "H_BASIC": 1,
-   "H_BUFFER": 7,
+   "H_BUFFER": 6,
    "H_DERIVED": 2,
    "H_VARIANT": 2
   },
-  "orderFirstBodyOnlyMoves": 6,
-  "slotPlanNeededMoves": 7,
-  "sumsTo": "247+12+7+0+10=276",
+  "orderFirstBodyOnlyMoves": 5,
+  "slotPlanNeededMoves": 6,
+  "sumsTo": "247+12+8+0+9=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -184,8 +185,8 @@
    "aloneNames": [
     "MEMENTO"
    ],
-   "touchingMoves": 7,
-   "touchingWeightPct": 0.659,
+   "touchingMoves": 6,
+   "touchingWeightPct": 0.588,
    "meta": {
     "cost": "new large host (docs/animation-integration-readiness.md A6)",
     "claim": "only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today"
@@ -200,8 +201,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 7,
-   "touchingWeightPct": 0.809,
+   "touchingMoves": 6,
+   "touchingWeightPct": 0.738,
    "meta": {
     "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
     "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
@@ -216,8 +217,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 6,
-   "touchingWeightPct": 0.622,
+   "touchingMoves": 5,
+   "touchingWeightPct": 0.551,
    "meta": {
     "cost": "extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves)",
     "claim": "exact for audited plan rows from a known entry; actual status animations/switches invalidate"
@@ -232,8 +233,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 6,
-   "touchingWeightPct": 0.622,
+   "touchingMoves": 5,
+   "touchingWeightPct": 0.551,
    "meta": null
   },
   {
@@ -245,8 +246,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 5,
-   "touchingWeightPct": 0.588,
+   "touchingMoves": 4,
+   "touchingWeightPct": 0.517,
    "meta": null
   },
   {
@@ -284,8 +285,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 4,
-   "touchingWeightPct": 0.361,
+   "touchingMoves": 3,
+   "touchingWeightPct": 0.29,
    "meta": null
   },
   {
@@ -437,13 +438,12 @@
   {
    "step": 5,
    "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
-   "newMoves": 4,
-   "newWeightPct": 0.332,
-   "cumulativeRemainingUnlocked": 7,
+   "newMoves": 3,
+   "newWeightPct": 0.261,
+   "cumulativeRemainingUnlocked": 6,
    "newNames": [
     "ERUPTION",
     "FLATTER",
-    "NIGHTMARE",
     "SHOCK_WAVE"
    ]
   },
@@ -452,7 +452,7 @@
    "provider": "X-TWOTURN",
    "newMoves": 1,
    "newWeightPct": 0.187,
-   "cumulativeRemainingUnlocked": 8,
+   "cumulativeRemainingUnlocked": 7,
    "newNames": [
     "DIVE"
    ]
@@ -462,7 +462,7 @@
    "provider": "E-OUT",
    "newMoves": 1,
    "newWeightPct": 0.176,
-   "cumulativeRemainingUnlocked": 9,
+   "cumulativeRemainingUnlocked": 8,
    "newNames": [
     "SKILL_SWAP"
    ]
@@ -472,7 +472,7 @@
    "provider": "X-DISABLE",
    "newMoves": 1,
    "newWeightPct": 0.113,
-   "cumulativeRemainingUnlocked": 10,
+   "cumulativeRemainingUnlocked": 9,
    "newNames": [
     "ICE_BALL"
    ]
@@ -482,7 +482,7 @@
    "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 10,
+   "cumulativeRemainingUnlocked": 9,
    "newNames": []
   },
   {
@@ -490,7 +490,7 @@
    "provider": "D-TILE",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 10,
+   "cumulativeRemainingUnlocked": 9,
    "newNames": []
   },
   {
@@ -498,7 +498,7 @@
    "provider": "D-BG",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 10,
+   "cumulativeRemainingUnlocked": 9,
    "newNames": []
   },
   {
@@ -506,7 +506,7 @@
    "provider": "D-OAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 10,
+   "cumulativeRemainingUnlocked": 9,
    "newNames": []
   },
   {
@@ -514,7 +514,7 @@
    "provider": "D-VRAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 10,
+   "cumulativeRemainingUnlocked": 9,
    "newNames": []
   },
   {
@@ -522,7 +522,7 @@
    "provider": "F-AUDIO",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 10,
+   "cumulativeRemainingUnlocked": 9,
    "newNames": []
   }
  ],
@@ -1679,333 +1679,6 @@
     "player": "EXACT-PLAN"
    },
    "group": "PROVIDER-D-SCAN"
-  },
-  {
-   "move": "MOVE_NIGHTMARE",
-   "id": 171,
-   "name": "NIGHTMARE",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0007121598639455781,
-   "config": "src/animation/sceneOnPresentation.ts:2698",
-   "needs": [
-    "B",
-    "C",
-    "F-AFFINE",
-    "E-TASK",
-    "D-PAL",
-    "D-TILE",
-    "D-BG",
-    "F-AUDIO"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationInputs:painterOrder (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/nightmare.ts:90"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationInputs:animationRngSeed (presentation Random2 (gRng2Value))",
-     "cites": [
-      "src/animation/nightmare.ts:113"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationInputs:attackerSprite (battler sprite record {slot,x,y,x2,y2,subpriority,oamPriority,matrixNum,matrix}: battler owner slot + battler matrix)",
-     "cites": [
-      "src/animation/nightmare.ts:84"
-     ]
-    },
-    {
-     "code": "E-TASK",
-     "text": "animationInputs:tasks (CreateTask slot / live task table)",
-     "cites": [
-      "src/animation/nightmare.ts:87"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "animationInputs:palettes (palette host / resource plan)",
-     "cites": [
-      "src/animation/nightmare.ts:96"
-     ]
-    },
-    {
-     "code": "D-TILE",
-     "text": "animationInputs:resources (OBJ tile/palette resource allocator)",
-     "cites": [
-      "src/animation/nightmare.ts:92"
-     ]
-    },
-    {
-     "code": "D-BG",
-     "text": "animationInputs:monBg (BG regs / monbg / BLDCNT state)",
-     "cites": [
-      "src/animation/nightmare.ts:88"
-     ]
-    },
-    {
-     "code": "F-AUDIO",
-     "text": "animationInputs:audio (sound task state)",
-     "cites": [
-      "src/animation/nightmare.ts:112"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationInputs:attackerPictureOrigin",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/nightmare.ts:81"
-    },
-    {
-     "path": "animationInputs:targetPictureOrigin",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/nightmare.ts:82"
-    },
-    {
-     "path": "animationInputs:attackerSprite",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/nightmare.ts:84"
-    },
-    {
-     "path": "animationInputs:targetSprite",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/nightmare.ts:85"
-    },
-    {
-     "path": "animationInputs:clone",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/nightmare.ts:86"
-    },
-    {
-     "path": "animationInputs:tasks",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/nightmare.ts:87"
-    },
-    {
-     "path": "animationInputs:monBg",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/nightmare.ts:88"
-    },
-    {
-     "path": "animationInputs:painterOrder",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/nightmare.ts:90"
-    },
-    {
-     "path": "animationInputs:resources",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/nightmare.ts:92"
-    },
-    {
-     "path": "animationInputs:matrixBitmap",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/nightmare.ts:93"
-    },
-    {
-     "path": "animationInputs:matrices",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/nightmare.ts:94"
-    },
-    {
-     "path": "animationInputs:palettes",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/nightmare.ts:96"
-    },
-    {
-     "path": "animationInputs:palettes.unfaded",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/nightmare.ts:97"
-    },
-    {
-     "path": "animationInputs:palettes.faded",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/nightmare.ts:98"
-    },
-    {
-     "path": "animationInputs:palettes.hardware",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/nightmare.ts:99"
-    },
-    {
-     "path": "animationInputs:backgrounds",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/nightmare.ts:102"
-    },
-    {
-     "path": "animationInputs:backgrounds.battle",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/nightmare.ts:103"
-    },
-    {
-     "path": "animationInputs:backgrounds.ghost",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/nightmare.ts:104"
-    },
-    {
-     "path": "animationInputs:backgrounds.monBg",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/nightmare.ts:105"
-    },
-    {
-     "path": "animationInputs:backgrounds.clear",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/nightmare.ts:106"
-    },
-    {
-     "path": "animationInputs:backgrounds.clearedGhost",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/nightmare.ts:107"
-    },
-    {
-     "path": "animationInputs:backgrounds.restoredBattle",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/nightmare.ts:108"
-    },
-    {
-     "path": "animationInputs:registers",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/nightmare.ts:111"
-    },
-    {
-     "path": "animationInputs:audio",
-     "classes": [
-      "F-AUDIO"
-     ],
-     "status": "blocked: F-AUDIO",
-     "cite": "src/animation/nightmare.ts:112"
-    },
-    {
-     "path": "animationInputs:animationRngSeed",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/nightmare.ts:113"
-    },
-    {
-     "path": "animationInputs:gameplayRng",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/nightmare.ts:115"
-    },
-    {
-     "path": "animationInputs:gameplayState",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/nightmare.ts:116"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "full",
-   "carrierOccurrences": 1439,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "B",
-    "F-AFFINE",
-    "E-TASK"
-   ],
-   "providerNeeds": [
-    "C",
-    "D-PAL",
-    "D-TILE",
-    "D-BG",
-    "F-AUDIO"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "MULTI"
   },
   {
    "move": "MOVE_SHOCK_WAVE",

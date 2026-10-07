@@ -1,0 +1,57 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "NIGHTMARE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/d4a-nightmare-extra-opponent-haunter-snorlax.json",
+ "denseWindow": {
+  "startFrame": 959,
+  "endFrame": 1126
+ },
+ "windowSource": "window = [activation, activation + 168 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": "event",
+ "timingPhases": {
+  "optional-lag-age": "event",
+  "palette-transfer-row": "event"
+ },
+ "restoreRow": 149,
+ "attacker": {
+  "species": "HAUNTER",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 2027808532,
+ "displayedStatus": {
+  "player": "sleep",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 235,
+  "playerMaxHp": 235,
+  "opponentHp": 141,
+  "opponentMaxHp": 141,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 150,
+   "side": "player"
+  },
+  {
+   "moveId": 95,
+   "side": "opponent"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statusAnimation": "SLP"
+  }
+ ]
+}

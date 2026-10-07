@@ -86,6 +86,15 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
       alternatives: [{ phase: "event", bodyRows: 168, measured: 5 }, { phase: "no-event", bodyRows: 167, measured: 3 }],
       chosen: "event", tieRuleUsed: false,
       evidence: [`${LAG_EVIDENCE} nightmare (2 of 4)`, `${TIEBREAK_EVIDENCE} nightmare (3 of 4)`, "docs/next-adapters-prep25.md s0.1 item 3"],
+    }, {
+      // prep32 s1.4: the Task_FadeToBg restore iteration that reloads the battle BG palette (bank 2) completes before the row-148 VBlank or
+      // not: restore row 149 (accepted P / O, d4a HAUNTER -> SNORLAX P / O) or 148 (prep25 GENGAR -> GOLEM P / O, d4a GENGAR -> GOLBAT P / O),
+      // a 4:4 tie -> the earlier row. Display-neutral: BLDY 16 on rows 146..150 darkens the restored bank to black in both phases (moves only
+      // the hidden palette rows and the Task_FadeToBg state word on row 148).
+      kind: "palette-transfer-row", age: 149, fixedLagAges: [], iterations: 164,
+      alternatives: [{ phase: "event", bodyRows: 168, measured: 4 }, { phase: "no-event", bodyRows: 168, measured: 4 }],
+      chosen: "no-event", tieRuleUsed: true,
+      evidence: ["tools/integration/fixtures/prep32/nightmare-check.json windows[].phase.restoreRow (149: 4, 148: 4)", "docs/next-adapters-prep32.md s1.4"],
     }],
   },
   /**
@@ -212,6 +221,11 @@ export function liveMoveBgWriteRow(moveId: number, side?: "player" | "opponent")
   return p === null ? null : p.chosen === "event" ? p.age : p.age - 1;
 }
 
+/** The chosen row of a move's palette-transfer-row parameter (`age` for "event", `age - 1` for "no-event"), or null without one. */
+export function liveMovePaletteTransferRow(moveId: number): number | null {
+  const p = liveMoveTimingParameter(moveId, "palette-transfer-row");
+  return p === null ? null : p.chosen === "event" ? p.age : p.age - 1;
+}
 /** The policy parameter of a move, or null when the move has no D4 timing parameter of that kind. */
 export function liveMoveTimingParameter(moveId: number, kind: LiveMoveTimingParameterKind): LiveMoveTimingParameter | null {
   return LIVE_MOVE_TIMING_POLICY[moveId]?.parameters.find((p) => p.kind === kind) ?? null;
@@ -243,6 +257,8 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   326,
   // D4b: Meteor Mash (D3 + D4; Random2 twinkles from the presentation host, liveMovePresentationRng.ts plan 309).
   309,
+  // S10A: Nightmare (liveOamMoves.ts liveNightmareInputs; any known lend; fixtures tools/integration/fixtures/d4a-live/nightmare-*).
+  171,
   // D4 (S10A): Superpower first body (liveSuperpowerInputs.ts; per-side monbg write row; fixtures tools/integration/fixtures/s10a-live/superpower-*).
   276,
 ]);

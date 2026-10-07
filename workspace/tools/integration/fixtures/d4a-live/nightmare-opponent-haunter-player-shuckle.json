@@ -1,0 +1,62 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "NIGHTMARE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-nightmare-opponent-haunter-player-shuckle.json",
+ "denseWindow": {
+  "startFrame": 1157,
+  "endFrame": 1324
+ },
+ "windowSource": "window = [activation, activation + 168 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": "event",
+ "timingPhases": {
+  "optional-lag-age": "event",
+  "palette-transfer-row": "event"
+ },
+ "restoreRow": 149,
+ "attacker": {
+  "species": "HAUNTER",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "KANGASKHAN",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 2027808532,
+ "displayedStatus": {
+  "player": "sleep",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 180,
+  "playerMaxHp": 180,
+  "opponentHp": 141,
+  "opponentMaxHp": 141,
+  "playerGender": "female",
+  "opponentGender": "female"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 150,
+   "side": "player"
+  },
+  {
+   "moveId": 95,
+   "side": "opponent"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statusAnimation": "SLP"
+  },
+  {
+   "moveId": 0,
+   "side": "player",
+   "statusAnimation": "SLP"
+  }
+ ]
+}

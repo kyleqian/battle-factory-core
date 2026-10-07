@@ -6,6 +6,7 @@
  */
 import darkBgAsset from "../assets/gen/battle-anim-bg-dark.json" with { type: "json" };
 import psychicBgAsset from "../assets/gen/battle-anim-psychic-bg.json" with { type: "json" };
+import ghostBgAsset from "../assets/gen/battle-anim-ghost-bg.json" with { type: "json" };
 import enemyElevations from "../data/gen/enemy-mon-elevations.json" with { type: "json" };
 import paletteData from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
 import { KNOWN_ENTRY_NON_BATTLER_SPRITES } from "./liveBgSnapshotMoves.ts";
@@ -19,6 +20,10 @@ import { LIVE_REVENGE_ROWS, liveRevengeRows } from "./liveRevengeInputs.ts";
 import { livePsywaveRowCount, livePsywaveRows } from "./livePsywaveInputs.ts";
 import { GBA_SINE_TABLE_256 } from "./battleMenu.ts";
 import { liveExtrasensoryRowCount, liveExtrasensoryRows } from "./liveExtrasensoryInputs.ts";
+import {
+  liveNightmareBattlers, liveNightmareClone, liveNightmareFirstInactive, liveNightmareMonbgBg, liveNightmareMonbgOrigin, liveNightmareOrders,
+  liveNightmarePalettes, liveNightmareRegisters, type LiveNightmareKnown, type LiveNightmarePhase, type LiveNightmareSprite,
+} from "./liveNightmareInputs.ts";
 
 type Side = "player" | "opponent";
 type Point = Readonly<{ x: number; y: number }>;
@@ -876,6 +881,88 @@ export function liveExtrasensoryInputs(args: LiveExtrasensoryInputArgs): { durat
         scanline: m.scanline,
         targetYElevation,
         allocator: null, audio: null, liveCounts: { visualTasks: 0, soundTasks: 0, matrixBitmap: 0 }, animationRng: 0, gameplayRng: null, gameplayState: null,
+      };
+    },
+  };
+}
+
+export interface LiveNightmareInputArgs {
+  readonly attackerSide: Side;
+  readonly attacker: LiveOamBattlerAnchors;
+  readonly target: LiveOamBattlerAnchors;
+  /** Species numbers (battler sprite data[2]; carried, never rendered). */
+  readonly attackerSpeciesId: number;
+  readonly targetSpeciesId: number;
+  readonly palettes: LivePaletteComposite;
+  readonly activationOrder: readonly number[];
+  readonly sort: LiveSpriteOrderSort;
+  /** D4 policy (liveMoveTimingPolicy.ts MOVE_NIGHTMARE): the optional lag at age 149 and the BG-palette restore row (148 | 149). */
+  readonly phase: LiveNightmarePhase;
+}
+/** The first-body register block S0 with WIN0 cleared: Nightmare always follows an earlier body (its target is asleep), whose window
+ *  registers end at 0,0 (prep25 s B.5; equal in all 8 prep32 windows). */
+const NIGHTMARE_REGISTERS0: Readonly<Record<string, number>> = Object.freeze({ ...S0_REGISTERS, win0h: 0, win0v: 0 });
+/** SpriteCallbackDummy (pokeemerald.sym 0x08007429; equal in all 8 prep32 windows): stored in the clone's data[6..7], never rendered. */
+const SPRITE_CALLBACK_DUMMY = 0x08007429;
+/** The known-entry matrix bitmap (matrices 1, 2 held by the battlers) and resource label: carried by the reducer, never read. */
+const NIGHTMARE_MATRIX_BITMAP = 6;
+const nightmareCache = new Map<string, number[][]>();
+
+/**
+ * MOVE_NIGHTMARE (171) live inputs (docs/next-adapters-prep32.md s1 / s3; D4 faithful timing): the reducer's caller-owned inputs of each age
+ * from liveNightmareInputs.ts (the prep32 model), ported 1:1 from tools/integration/prep32NightmareLib.ts liveInputs. Host values: battler
+ * sprites from the anchors (slot 6 / 8, subpriority 30 / 40, the battler OBJ words; idle rests zero, gated by the caller), the known-entry
+ * host sprites and occupied slots (the clone takes slot 3), the asset palette composite, the ghost BG asset palette, the lent activation
+ * order. Task slots (fade 0, clone 0, shake 2, restore 2, monbg update 1 / clear 0) are constants equal in all 8 windows (K). The battler
+ * data words beyond the battler id / species are history residue (not rendered) and start at zero here.
+ */
+export function liveNightmareInputs(args: LiveNightmareInputArgs): { duration: number; animationInputsAt: (age: number) => Record<string, unknown> } {
+  const { attackerSide, phase } = args;
+  const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
+  const sprite = (side: Side, anchors: LiveOamBattlerAnchors, species: number): LiveNightmareSprite => {
+    const o = battlerObject(side, anchors);
+    return { slot: o.slot, template: "gMultiuseSpriteTemplate", callback: "SpriteCallbackDummy", x: anchors.spriteCenter.x, y: anchors.spriteCenter.y,
+      x2: anchors.frontIdleRest.x2, y2: anchors.frontIdleRest.y2, subpriority: o.subpriority, attr: o.attr, flags: 1, matrixNum: 0,
+      matrix: [256, 0, 0, 256], data: [side === "player" ? 0 : 1, 0, species, 0, 0, 0, 0, 0] };
+  };
+  const k: LiveNightmareKnown = {
+    attackerSide, registers0: NIGHTMARE_REGISTERS0,
+    unfaded0: args.palettes.unfaded, faded0: args.palettes.faded, hardware0: args.palettes.hardware,
+    attacker0: sprite(attackerSide, args.attacker, args.attackerSpeciesId), target0: sprite(targetSide, args.target, args.targetSpeciesId),
+    order0: args.activationOrder,
+    hostSprites: KNOWN_ENTRY_NON_BATTLER_SPRITES.map((s) => ({ slot: s.slot, attr: s.attr as unknown as [number, number, number], subpriority: s.subpriority })),
+    inUse0: KNOWN_ENTRY_OCCUPIED_SLOTS,
+    ghostPalette: (ghostBgAsset as { palette: readonly Rgb[] }).palette.map(bgr555),
+    battlerMatrix: { attacker: attackerSide === "player" ? 1 : 2, target: attackerSide === "player" ? 2 : 1 },
+    spriteCallbackDummy: SPRITE_CALLBACK_DUMMY,
+  };
+  const rows = liveNightmareFirstInactive(phase) + 1;
+  const key = JSON.stringify([attackerSide, k.attacker0.attr, k.target0.attr, args.activationOrder, phase]);
+  let orders = nightmareCache.get(key);
+  if (!orders) {
+    orders = liveNightmareOrders(rows, k, phase, args.sort);
+    if (nightmareCache.size > 16) nightmareCache.clear();
+    nightmareCache.set(key, orders);
+  }
+  const painter = orders;
+  const clone = liveNightmareClone(k), origin = liveNightmareMonbgOrigin(k), bg = liveNightmareMonbgBg(k);
+  const setupControl = liveNightmareRegisters(liveNightmareFirstInactive(phase) - 1, k, phase)[`${bg}cnt`]!;
+  return {
+    duration: rows - 1,
+    // `age` is the reducer (program) age; a no-lag body skips program age 149 (liveNightmareProgramAge).
+    animationInputsAt: (age: number) => {
+      const row = Math.min(!phase.lag149 && age >= 150 ? age - 1 : age, rows - 1);
+      const b = liveNightmareBattlers(row, k, phase);
+      return {
+        attackerSprite: b.attacker, targetSprite: b.target, clone,
+        tasks: { fadeToGhost: 0, clone: 0, shake: 2, fadeRestore: 2 },
+        monBg: { updateTaskSlot: 1, clearTaskSlot: 0, selected: bg === "bg1" ? "BG1" : "BG2", backgroundOrigin: origin,
+          inBg2: bg === "bg1" ? 0 : 1, battler: attackerSide === "player" ? 1 : 0, setupControl },
+        painterOrder: painter[row]!, resources: "known-entry", matrixBitmap: NIGHTMARE_MATRIX_BITMAP, matrices: IDENTITY_MATRICES,
+        palettes: liveNightmarePalettes(row, k, phase),
+        backgrounds: { battle: "battle", ghost: "ghost", monBg: "monbg", clear: "clear", clearedGhost: "cleared-ghost", restoredBattle: "restored" },
+        registers: liveNightmareRegisters(row, k, phase), audio: { targetPan: attackerSide === "player" ? 63 : -64 },
+        animationRngSeed: 0, gameplayRng: null, gameplayState: null,
       };
     },
   };

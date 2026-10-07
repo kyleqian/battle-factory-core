@@ -26,6 +26,12 @@ PREP30_SPLIT = {"prep25-extrasensory-alt-player-alakazam-golem": "event", "prep3
 PREP24_MONBG_ROW = {"mechanic-megahorn-player-seaking-opponent-onix": 8, "mechanic-megahorn-opponent-seaking-player-onix": 8,
              "prep18-megahorn-alt-heracross-golem": 7, "prep18-megahorn-altopp-heracross-golem": 7,
              "prep24-megahorn-alt-heracross-onix": 7, "prep24-megahorn-altopp-heracross-onix": 8}
+# Nightmare's second CPU-phase parameter (palette-transfer-row, "event" = the Task_FadeToBg BG-palette restore lands on the later row 149, "no-event"
+# = row 148; display-neutral: BLDY 16 on rows 146..150), banked by tools/integration/fixtures/prep32/nightmare-check.json windows[].phase.restoreRow.
+PREP32_RESTORE_ROW = {"mechanic-nightmare-player-haunter-opponent-shuckle": 149, "mechanic-nightmare-opponent-haunter-player-shuckle": 149,
+                      "prep25-nightmare-alt-player-gengar-golem": 148, "prep25-nightmare-alt-opponent-gengar-golem": 148,
+                      "d4a-nightmare-extra-player-gengar-golbat": 148, "d4a-nightmare-extra-opponent-gengar-golbat": 148,
+                      "d4a-nightmare-extra-player-haunter-snorlax": 149, "d4a-nightmare-extra-opponent-haunter-snorlax": 149}
 ACC = {"mach-punch": ("MACH_PUNCH", "hitmonchan-chansey"), "nightmare": ("NIGHTMARE", "haunter-shuckle")}
 ALT = {"mach-punch": "machamp-golem", "nightmare": "gengar-golem"}
 CASES = []  # (move, tag, scenario, side)
@@ -94,7 +100,10 @@ for move, tag, scen, side in CASES:
                              "bg-write-row": "event" if monbg_row == 8 else "no-event"}, "monbgCntRow": monbg_row} if move == "MEGAHORN" else
            {"timingPhases": {"bg-write-row": "event" if monbg_row == 5 else "no-event"}, "monbgCntRow": monbg_row} if move == "REVENGE" else
            {"timingPhases": {"optional-lag-age": "event" if rows == event_rows else "no-event",
-                             "scanline-split-line": PREP30_SPLIT.get(scen, "no-event")}} if move == "EXTRASENSORY" else {}),
+                             "scanline-split-line": PREP30_SPLIT.get(scen, "no-event")}} if move == "EXTRASENSORY" else
+           {"timingPhases": {"optional-lag-age": "event" if rows == event_rows else "no-event",
+                             "palette-transfer-row": "event" if PREP32_RESTORE_ROW[scen] == 149 else "no-event"},
+            "restoreRow": PREP32_RESTORE_ROW[scen]} if move == "NIGHTMARE" else {}),
         "attacker": {"species": name(sp[side]), "geometry": {"side": side}},
         "target": {"species": name(sp[foe]), "geometry": {"side": foe}},
         "attackerPersonality": sp[side]["personality"],

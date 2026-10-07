@@ -1,0 +1,62 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "NIGHTMARE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/d4a-nightmare-extra-opponent-gengar-golbat.json",
+ "denseWindow": {
+  "startFrame": 1152,
+  "endFrame": 1319
+ },
+ "windowSource": "window = [activation, activation + 168 - 1] (this scenario's own body) from a fresh prep22Probes.sh run",
+ "timingPhase": "event",
+ "timingPhases": {
+  "optional-lag-age": "event",
+  "palette-transfer-row": "no-event"
+ },
+ "restoreRow": 148,
+ "attacker": {
+  "species": "GENGAR",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 2027808507,
+ "displayedStatus": {
+  "player": "sleep",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 150,
+  "playerMaxHp": 150,
+  "opponentHp": 156,
+  "opponentMaxHp": 156,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 150,
+   "side": "player"
+  },
+  {
+   "moveId": 95,
+   "side": "opponent"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statusAnimation": "SLP"
+  },
+  {
+   "moveId": 0,
+   "side": "player",
+   "statusAnimation": "SLP"
+  }
+ ]
+}
