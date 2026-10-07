@@ -160,6 +160,14 @@
   evidence on 31 rows; shift test 0 px; the field BG is one fade step off); no species property predicts it. The
   Hyper Voice age-59 row is a scanline-phase palette upload (band depth 16 / 15 / 0 by pair; 0 lag frames). Both are
   the CPU-timing class (DEFERRED D4). Supervisor reran both env-override patch proofs (0 px, reverted).
+- Folded Opus worker `7754fb14d` (src tree `e7259f42`): ISSUES #151 idle-x2 class fixed — Sheer Cold
+  (`config.idleRest`: no task writes x2 and `Task_UpdateMonBg` copies at x + x2), Sand Tomb (attacker rest), Sky Attack
+  charge (`AnimTask_ShakeBattlers` makes no write on its first frame and ends at x2 = 0; monbg copy at x + x2) — plus
+  the Sheer Cold elevated-opponent age-0 shadow row; #151 trimmed to the D4 timing remainder. 84 dense rows x 2 fresh;
+  audit-7 non-shiny rows of the three moves 57/64 exact (the 7 others = the lag tail); accepted / alternate fixtures
+  unchanged; shadow scan 529 / 0. Worker gates 1,547 files / 12,657 tests, build. Supervisor: reran 6 fixed rows + 3
+  regression fixtures 0 px twice fresh; differential 389/389; union typecheck, smoke, 8 files 153/153. Receipt
+  `fix151-live-receipt.json`.
 
 ## 2026-10-06 (day, wind-down) — D3 implemented: 218 -> 226 exact + 10 faithful-random live adapters
 
