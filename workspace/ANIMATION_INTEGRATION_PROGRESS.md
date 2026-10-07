@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-06 (night) — in progress: 226 -> 242 scoped-exact, 10 -> 11 faithful-random
+## 2026-10-06 (night, wind-down 2026-10-07) — 226 -> 243 scoped-exact, 10 -> 11 faithful-random; D4 OPEN
 
 - prep22 (side, `c31dfd3c1`, new files only, merged `e7b7a1ac3`): Fire Punch is a 101-row body identical across
   burn / no-burn / faint outcomes (flames = separate Status_Burn body 152-155 frames later; status animations are
@@ -172,6 +172,23 @@
   rows x 2 fresh, 135 exact, 6 shiny (decline confirmed with the ROM personality); no species defect. Endeavor is
   exact when the stale-power register matches the ROM (40 / 0 in these fixtures; 17k-58k px at other values). The
   verifier cannot pass a target personality, so a target-side shiny decline is untested. Supervisor reran 4 rows.
+- Folded Sonnet worker `69474d445` (src tree `34e54570`): 14 prep28 EXACT-PLAN rows in the production order table via
+  the generator (bodies 467 -> 485, plans 187 -> 196), Sky Attack strike keyed 10143 by request.turn; EXACT Sky
+  Attack strike body (180 rows, WIN0 (0,0) after the charge) and Snore (173; known lend after Sleep Powder + sleep
+  status animations; no generated route has that history in seeds 0-599) -> 243. 16 new dense fixtures 0 px twice
+  fresh; regression samples across six adapter families 0 px; newly known lends make the r2 Overheat route 143/28/1
+  live. The worker ran out of cap before its differential and post-fix full suite. Supervisor: dense rerun 4 fixtures
+  0 px r1 == r2; `prep28Replay.ts` 1,285 known / 1,285 exact / 0 mismatched; differential 624/624 byte-identical
+  (three traces) vs `2ee877356`; census regenerated `243+11+0+22=276`.
+- prep29 (side, `a9cd93c84`, new files only): the six untriaged moves — Bonemerang (70/70 rows x 8 bodies), Outrage
+  (118/118 x 5), Rapid Spin (129/129 x 4) READY-WITH-CHANGE; Luster Purge READY-WITH-PRESENTATION-RNG (12 words, ages
+  170..195; 331/331 x 4); Eruption length = 2 x wave-1 end + 277 from the attacker Y (no lag frames); Spit Up
+  NEEDS-PROVIDER (request.turn = Stockpile counter). None in the D4 class. Supervisor: probes reproduced (64 pairs
+  r1 == r2), analysis receipts 18/18 byte-identical.
+- Wind-down: supervisor final gates on master `8122e5672` (src tree `34e54570`): typecheck, 1,547 files / 12,658
+  tests, build 862 (`final-supervisor-gates-20261007.json`); preview `ba696679b` served at :5191, 4 samples
+  hash-equal, mode control + session export passed, no browser errors (`playable-preview-ba696679b-receipt.json`).
+  DEFERRED D4 OPEN (CPU-load timing class). Next: ROADMAP S10A "Next (2026-10-07 morning)".
 
 ## 2026-10-06 (day, wind-down) — D3 implemented: 218 -> 226 exact + 10 faithful-random live adapters
 

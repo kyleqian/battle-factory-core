@@ -5,20 +5,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-06 (night) — S10A in progress: 226 -> 230 scoped-exact (checkpoint 22:40)
+## 2026-10-06 (night) — S10A wind-down: 226 -> 243 scoped-exact, 10 -> 11 faithful-random; D4 OPEN
 
-- **State:** S10A, local master; production src at the r2-gates merge: 230 scoped-exact + 10 faithful-random live
-  adapters, 36 accepted bodies remain (census `230+10+0+36=276`). Worker full gates on that code: 1,539 files /
-  12,508 tests, build; supervisor union checks typecheck + smoke 448 + targeted. Opus 5.5 supervisor; Opus/Sonnet
-  5.5 workers. Running: Curse integration (Opus), Megahorn/Return prep24 (side).
-- **Did:** hardware-OAM provider + Will-O-Wisp / Pursuit / Fury Cutter first bodies (oam1); Fire Punch body-only;
-  Overheat any known lend; Psych Up opponent attacker. Evidence: prep22 (Fire Punch split; 6 stale Random2 labels;
-  Lovely Kiss plan), prep23 (Curse source models), species audit 5 (no defects). Details in
-  `ANIMATION_INTEGRATION_PROGRESS.md`.
-- **Next:** Curse fold; Lovely Kiss / Spikes / Octazooka / Signal Beam batch; Megahorn / Return from prep24;
-  Endeavor; prep25 triage of the next tier.
-- **Notes:** oracles 8012/8014 are from 11:29 with oracle code unchanged since (freshness script flags docs-only
-  commits). No DEFERRED entries.
+- **State:** S10A, local master; production src tree `34e54570` (order-rows merge): 243 scoped-exact + 11
+  faithful-random live adapters, 22 accepted bodies remain (2.2% of Factory move uses; census `243+11+0+22=276`).
+  Supervisor final gates on that code: typecheck, 1,547 files / 12,658 tests, build 862 (`final-supervisor-gates-20261007.json`). Preview <http://127.0.0.1:5191/> serves `ba696679b` (same src; 4 samples hash-equal, export + mode restart pass, no errors).
+  Opus 5.5 supervisor; Opus / Sonnet 5.5 workers; 10 integration folds + 14 evidence merges, all re-proved by the
+  supervisor (dense reruns twice fresh, differential on 2-3 traces, reruns of every evidence script).
+- **Did (production):** hardware-OAM provider + Will-O-Wisp / Pursuit / Fury Cutter / Return; source models for
+  Curse (non-Ghost) and Endeavor; Fire Punch body; Baton Pass body; profile builders (Spikes, Octazooka, Signal Beam,
+  Sheer Cold, Lovely Kiss faithful-random) and Q2 builders (Hyper Voice, Smog, Sand Tomb, Sky Attack both turns,
+  Snore); Overheat any known lend; Psych Up opponent; Will-O-Wisp later bodies; 14 sprite-order plan rows
+  (corpus replay known 1210 -> 1285, 0 mismatches). ISSUES #150 fixed; #151 idle-x2 class fixed. Gameplay / RNG
+  unchanged (route ON/OFF parity per batch; differential byte-identical at every fold).
+- **Did (evidence):** prep22-29 (Fire Punch split, Curse / Megahorn / Return / Ice Ball / Revenge / Endeavor models,
+  Baton Pass flow, 26 moves triaged — most "C" labels stale), lb26 later bodies, order-plan gaps (prep28), species
+  audits 5-8 (4 defect classes found and fixed), #151 diagnosis.
+- **Next:** ROADMAP S10A "Next (2026-10-07 morning)": answer D4 first; then Dive, Bonemerang / Rapid Spin / Outrage
+  / Luster Purge, Baton Pass flow, remaining providers.
+- **Notes:** **DEFERRED D4 (OPEN):** about 1.3% of Factory move uses animate with timing that depends on emulator CPU
+  load (lag frames / VBlank phase) and cannot meet the scoped-exact bar; fallback vs a separate "faithful timing"
+  bucket (recommended). The next `run-supervisor.sh` refuses to start until D4 is answered. Soak gates are
+  superseded for S10A (ANIMATION_VERIFICATION scoped policy). All worker branches merged, worktrees removed;
+  supervisor validation logs in `.integration/validation/*-2026100{6,7}/`.
 
 ---
 
