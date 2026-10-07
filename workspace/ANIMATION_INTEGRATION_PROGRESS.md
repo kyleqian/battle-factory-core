@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-06 (night) — in progress: 226 -> 229 scoped-exact (hardware-OAM provider)
+## 2026-10-06 (night) — in progress: 226 -> 230 scoped-exact (hardware-OAM provider, Fire Punch)
 
 - prep22 (side, `c31dfd3c1`, new files only, merged `e7b7a1ac3`): Fire Punch is a 101-row body identical across
   burn / no-burn / faint outcomes (flames = separate Status_Burn body 152-155 frames later; status animations are
@@ -37,6 +37,19 @@
   attacker (over-conservative: 6/6 exact with the gate lifted — coverage opportunity), shiny (correct; the verifier
   ignores target personality without a harness patch). Supervisor reran 8 rows twice fresh: 7 exact, the TYRANITAR
   lag row reproduces (284,768 px).
+- Folded Sonnet worker `c173bb959` (src unchanged since `6dc962856`) as the r2-gates merge: EXACT Fire Punch body
+  (7; 101 rows, neutral resolution profile at reducer age 27, `liveField` renderer branch with live species art and
+  the target hit shake; no burn flames — Status_Burn is a separate body production does not draw yet) -> 230;
+  Overheat (315) widened to any known order lend, both sides; Psych Up (244) opponent attacker (duration 179,
+  opponent-orientation inputs). 50 fixtures 0 px twice fresh on the unpatched renderer (lb21 17, prep16 8,
+  later-bodies-bg 11, Fire Punch 12 = staged + burn / no-burn / faint per side + 4 alternates; Psych Up opponent
+  HYPNO->GOLBAT, CLAYDOL->GOLEM). Routes: later Overheat 43/35, 162/14, 175/35 (143/28 declines: unplanned
+  predecessor); opponent Psych Up 336/7, 713/7 (no later-body route with a known lend found); Fire Punch 70, 180, 65,
+  389; burn route 780 reaches its prompt. Open: MR_MIME->MAGNETON opponent Psych Up constant 537 px/row from age 0
+  (not body-dependent, unresolved, not committed). Worker gates 1,539 files / 12,508 tests, build. Supervisor:
+  dense rerun 6 fixtures 0 px r1 == r2; differential battle1-postwin-next-prompt 216/216 +
+  presentation-rng-playable-live-bodies-seeded-on 173/173; union typecheck, smoke 448, 10 files 160/160.
+  Receipt `r2-gates-firepunch-receipt.json`.
 
 ## 2026-10-06 (day, wind-down) — D3 implemented: 218 -> 226 exact + 10 faithful-random live adapters
 
