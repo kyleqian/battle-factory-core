@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-07 (day) — S10A finish run IN PROGRESS: D4 faithful timing live (checkpoint)
+
+- **State:** local master `c87cd70c1`, production src tree `5ae017dd`: 246 scoped-exact + 12 faithful-random +
+  4 faithful-timing (Mach Punch, Megahorn, Revenge, Meteor Mash with D3), 14 accepted bodies remaining (census
+  `246+12+4+0+14=276`). Opus 5.5 supervisor; Opus 5.5 workers.
+- **Did:** D4 accounting + `src/engine/liveMoveTimingPolicy.ts` (v1 dominant measured phase, tie -> no optional
+  event); two integration folds (D4a, D4b) and prep30 (Extrasensory / Psywave providers), all re-proved by the
+  supervisor (every timing window rerun twice fresh, own differential, union typecheck/smoke/targeted).
+- **Next:** in flight — integration D4c (Psywave, Extrasensory) and side prep31 (Superpower, Spit Up). Queue:
+  Ice Ball + Dive, Spit Up + Superpower (+ Eruption), species audit 9, Nightmare / Flatter models, widenings
+  (Curse Ghost, Pursuit later bodies, Hidden Power, Sheer Cold tail, Hyper Voice row 59), providers (Substitute,
+  Memento, Skill Swap, Shock Wave, Extreme Speed). Details: ANIMATION_INTEGRATION_PROGRESS.md top entry.
+- **Notes:** no open DEFERRED entries. Briefs in `/tmp/s10a-1007/`; validation logs `.integration/validation/*-20261007/`.
+
+---
+
 ## 2026-10-07 — D4 approved; unblock and finish S10A
 
 - **State:** local master; D4 option (b) approved. Production unchanged at src
