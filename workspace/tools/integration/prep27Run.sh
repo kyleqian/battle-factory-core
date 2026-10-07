@@ -11,6 +11,10 @@ if [ -z "$SKIP_PROBES" ]; then
   for f in $R1/dense/*.json; do cmp "$f" "$R2/dense/$(basename $f)" || { echo "DIFF $f"; exit 1; }; cmp -s "$R1/dense/$(basename $f .json)-rgb/00071.rgb" "$R2/dense/$(basename $f .json)-rgb/00071.rgb" || true; done
   for s in $R1/dense/*-rgb; do b=$(basename $s); for g in $s/*.rgb; do cmp -s "$g" "$R2/dense/$b/$(basename $g)" || { echo "RGB DIFF $g"; exit 1; }; done; done
   echo "probes: R1 == R2 byte-identical (state, dense json, RGB)"
+  OUT=$R1/endeavor sh tools/integration/prep27EndeavorProbes.sh 2>&1 | grep -v "Segmentation fault"; OUT=$R2/endeavor sh tools/integration/prep27EndeavorProbes.sh 2>&1 | grep -v "Segmentation fault"
+  for f in $R1/endeavor/*.json; do cmp "$f" "$R2/endeavor/$(basename $f)" || { echo "DIFF $f"; exit 1; }; done
+  for s in $R1/endeavor/*-rgb; do b=$(basename $s); for g in $s/*.rgb; do cmp -s "$g" "$R2/endeavor/$b/$(basename $g)" || { echo "RGB DIFF $g"; exit 1; }; done; done
+  echo "endeavor probes: R1 == R2 byte-identical"
 fi
 python3 tools/integration/prep27BatonTimeline.py $R1/flow $REC/baton-rom-timeline.json > /dev/null
 python3 tools/integration/prep27BatonTimeline.py $R1/repl $REC/baton-rom-replacement.json > /dev/null
@@ -18,4 +22,8 @@ D=$R1/dense; A=mechanic-baton-pass-player-aipom-opponent-onix; B=mechanic-baton-
 npx vite-node tools/integration/prep27BatonReducerCheck.ts $D/$A.json:$D/$A-rgb:player:190,95 $D/$B.json:$D/$B-rgb:opponent:190,95 $D/$C.json:$D/$C-rgb:player:302,76 $D/$E.json:$D/$E-rgb:opponent:302,76 --out=$REC/baton-reducer-check.json
 for n in center matrix palette; do npx vite-node tools/integration/prep27BatonReducerCheck.ts $D/$A.json:$D/$A-rgb:player:190,95 --neg=$n --out=$REC/baton-reducer-neg-$n.json > /dev/null; done
 node --experimental-strip-types tools/integration/prep27ProdBaton.ts /tmp/p27/prodBaton.json $REC/baton-prod-timeline.json > /dev/null
+X=$R1/endeavor
+npx vite-node tools/integration/prep27EndeavorCheck.ts $X/player-diglett-chansey.json:player:50,113 $X/opponent-diglett-chansey.json:opponent:50,113 $X/player-abra-blissey.json:player:63,242 $X/opponent-abra-blissey.json:opponent:63,242 --out=$REC/endeavor-check.json
+for n in y2 power; do npx vite-node tools/integration/prep27EndeavorCheck.ts $X/player-abra-blissey.json:player:63,242 --neg=$n --out=$REC/endeavor-neg-$n.json > /dev/null; done
+node --experimental-strip-types tools/integration/prep27W3Predicate.ts > $REC/endeavor-w3-predicate.json
 echo "receipts in $REC"

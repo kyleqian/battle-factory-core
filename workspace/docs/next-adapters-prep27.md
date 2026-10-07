@@ -1,6 +1,6 @@
 # prep27 (S10A, side lane): Baton Pass flow measured in the ROM + body reducer check; Endeavor prep
 
-Evidence only, NEW FILES ONLY (no `src/` change). Direct mGBA (fresh process per probe, never the shared HTTP oracles), Scene ON lab scenarios.
+Evidence only, NEW FILES ONLY (no `src/` change, no existing tracked file touched). Direct mGBA (fresh process per probe, never the shared HTTP oracles), Scene ON lab scenarios.
 Every relied-on probe ran **twice from fresh processes and is byte-identical** (state probes, dense body JSON, raw RGB; `sh tools/integration/prep27Run.sh` asserts it).
 Conventions: **E** = last frame with `gAnimScriptActive` (the body's last active frame; the first inactive frame is E+1; same convention as `forcedSwitchRomProbe.py`,
 so numbers are comparable with `docs/forced-switch-continuation.md`). **age** = frame - first active frame. **P** (production) = last frame of the `move-animation` command.
@@ -25,7 +25,7 @@ so numbers are comparable with `docs/forced-switch-continuation.md`). **age** = 
    healthbox shown again at E+140 (replacement 278) -- and the tail is **replacement-species keyed** exactly as for Roar: ball E+49 / healthbox E+159 for GOLEM, ball E+51 / healthbox E+217 for SHUCKLE and SABLEYE
    (`baton-rom-replacement.json`; the ball start also moves with the name length of the message). Compared with Roar (free E+4, party index E+7, ball E+10 straight after, no message before the ball): **Baton is E+9 / E+10 / message / ball E+51**.
 4. **Player attacker flow (party screen answered at E+75 RIGHT, E+100 A, E+130 A; input-dependent boundaries listed relative to A = E+131):** `PlayerDoMoveAnimation -> PlayerBufferRunCommand` E+2; **`OpenPartyMenuToChooseMon` E+4**; `CB2_InitPartyMenu` E+26 (the party menu
-   init resets all sprites: **both battler sprites and both healthboxes are freed at E+27**, i.e. there is *no* E+8 free on the player side); `CB2_UpdatePartyMenu` E+47 (E+46 once); first accepted input is between E+61 and E+75 (RIGHT at E+60 was ignored, at E+75 accepted).
+   init resets all sprites: **both battler sprites and both healthboxes are freed at E+27**, i.e. there is *no* E+8 free on the player side); `CB2_UpdatePartyMenu` E+47 (E+46 once); first accepted input is between E+64 and E+75 (RIGHT held E+60..63 was ignored, at E+75 accepted).
    After the confirm: party-menu close task A+0; `CB2_SetUpReshowBattleScreenAfterMenu` A+22; battle screen live again (`BattleMainCB2`) A+54; **the reshown battle screen shows the outgoing healthbox again (A+48..A+75) with the attacker sprite still `invisible`**;
    **instant `returntoball`: sprite destroyed + healthbox hidden A+76**; party index A+77; species A+79; **"Go! X!" text from A+81**; **ball spawn A+94**, mon A+95; particles A+141; **new healthbox visible A+159**; `BattleTurnPassed` A+344 (opponent's turn included).
 5. **Production today (player; the opponent side is unreachable, the route driver cannot generate an opponent-attacker Baton Pass):** `message > move-animation(32-frame placeholder: no `case 226`) > turn-end`, **party selector opens at P+9**, then `switch-out[seg1]` is the **forced-party selector send-out sequence** (the OFF post-faint calibration `partySendOut*`,
@@ -34,8 +34,20 @@ so numbers are comparable with `docs/forced-switch-continuation.md`). **age** = 
 6. **Verdict (items 2-3):** player side is already **within +2..+5 frames** of the ROM from the answer (table §2); the real gaps are the missing outgoing healthbox during the reshown battle screen (A+48..A+75, 28 frames in the ROM) and the unwired body (case 226 + renderer pair gate).
    The opponent side is **entirely unpresented** (new commands: instant removal hold 9 -> recall -> message -> send-in with species-keyed tail).
 
-### 0.2 Endeavor
-(see §5; filled in below)
+### 0.2 Endeavor (MOVE_ENDEAVOR 283, 0.22%)
+
+1. **What the accepted reducer reads** (`sceneOnEndeavorView`, `sceneOnPresentation.ts:12847-12866`; renderer `battleScene.ts:49511-49680`): `EndeavorAnimationProfile {attackerYOffset, staleMovePower, hpDrainFirstAge, targetStartHp, targetEndHp}` (`sceneOnPresentation.ts:1670-1679`) + the two geometries. The renderer branch is the **staged ONIX(player)->GROVYLE(opponent) pair only**
+   (`battleScene.ts:49514-49523` throws otherwise; ONIX/GROVYLE sprites, healthbox and the 8-row `ENDEAVOR_SQUISH_TABLE` are constants). Fresh re-run of the accepted pixel corpus today: `npm run compare:endeavor-portable` -> 141/141 frames, 0 differing pixels.
+2. **Source-relative prototype (`prep27EndeavorCheck.ts`): 68/68 rows exact on all 4 fresh runs** (2 species pairs x 2 orientations, DIGLETT->CHANSEY and ABRA->BLISSEY, neither in the accepted corpora; every probe x2 byte-identical incl. RGB). Per age it derives, from the C source + production anchors only:
+   attacker matrix (`gFacadeSquishAffineAnimCmds` x2, stride 25), attacker `y2` (`SetBattlerSpriteYOffsetFromYScale` with `64 - 2*picYOffset`, picYOffset from `createBattleCommandFieldArtView(...).coords.yOffset`), the 16 sweat droplets (base = attacker `battlePositionCenter` 72,80 / 176,40; lower batch 30/+20 at tTimer 6, upper 18/-20 at 18, vx -2,-2,+2,+2, vy -1, alive sTimer 0..6),
+   the 2 hitsplats (target pic-offset centre `liveBattlerAnchors(...).picOffsetPoint`, **x offset mirrored by the target's side**: +12 for an opponent target, -12 for a player target; rows hit1..hit1+9 and hit1+26..+35), the attacker palette blend (`BlendMonInAndOut` RGB(31,21,0), coefficient 1..12..0 twice, bank 1..15), and the target shake x2 value set `{0, +upStep, -downStep}` of `endeavorShakeSteps(gAnimMovePower)`.
+   The only measured constants are three **script-age anchors, equal in all 4 runs**: squish/droplet task start T = 7, first hitsplat age 15, blend start 7 (= the accepted reducer's "age 0 = first visible palette/affine frame"). Stale `gAnimMovePower` read from the ROM per run: **40** (player attacker, lab challenge 2: a faster Quick Attack's W1) and **0** (opponent attacker, first action).
+   Negative controls: `--neg=y2` (picYOffset+1) 58/68 (10 `y2` rows), `--neg=power` (power+24) 1 shake failure. **Not covered**: the HP drain age (`hpDrainFirstAge` 99), the healthbox bounce / flicker (they live after the script ends: the probe window is the 68-row script, ages 0..67); the shake check is set-membership only (timing is the accepted constants); **alternate-pair pixels cannot be rendered** (renderer gate above).
+3. **W3 (Battle TV loop) eligibility predicate** (`prep27W3Predicate.ts`, exact `battle_tv.c` lines): the loop runs iff (a) `BattleTv_SetDataBasedOnString` (`:540-556`, only the player controller calls it, `battle_controller_player.c:2553`) gets STRINGID_ITDOESNTAFFECT, or STRINGID_NOTVERYEFFECTIVE with the defender's HP != 0 (`:588-598`); then `TrySetBattleSeminarShow` (`:1419-1451`) returns early unless NOT double/link, the **attacker is the player side**, attacker ACC stage >= 6, target EVA stage <= 6, current move not HIDDEN_POWER/WEATHER_BALL, not Palace/Pike/Pyramid, the **selected slot's** move power != 0 and the selected move not in `sVariableDmgMoves` (`:73-85`, includes ENDEAVOR, Magnitude, Psywave...).
+   It then calls `CalculateBaseDamage` once per slot where `ShouldCalculateDamage` (`:1508-1546`: power != 0, not variable; Magnitude with powerOverride 10; Psywave excluded) -> **only the last eligible slot's modified power survives** in `gBattleMovePower`.
+   Pinned against the measured lab case (`tv-order`: slots `[157,33,98,283]`, ROM left 40): predicate gives 40 (exit-code checked).
+4. **Reachable by generated Factory routes: yes, no structural barrier.** All **6** Endeavor carrier sets (44 TAILLOW, 96 MUDKIP, 154 BEEDRILL, 188 GROVYLE, 197 RATICATE, 214 SWELLOW) have >= 2 eligible slots, i.e. any NVE / immune player hit (no ACC drop, no foe evasion boost, foe alive) followed by the carrier's own Endeavor with no later damagecalc/AI decision
+   (player slower in the NVE turn so its hit is the last writer; then Endeavor goes first the next turn; Factory AI flags are 0 below challenge 2 so no AI burst before it) leaves the W3 register, predicted per carrier: TAILLOW 40, MUDKIP 20, BEEDRILL 40, GROVYLE 75, RATICATE 40, SWELLOW 40 (`endeavor-w3-predicate.json`; table powers, sport/pinch modifiers not applied; only the 40 case is ROM-measured). Probability per route not measured (it needs the player to have used an NVE move before). Until W3 exists, a player Endeavor after an NVE/immune hit in the same battle must **decline** (render the generic placeholder) rather than guess the shake amplitude.
 
 ## 1. ROM timelines (E-relative; sources: `fixtures/prep27/baton-rom-timeline.json`, `baton-rom-replacement.json`)
 
@@ -97,8 +109,13 @@ New:
 5. `liveSpriteOrderHost.ts:189-194`: accept the attacker-target case; player side: the party menu init frees every battler sprite at E+27 (not modelled; keep `invalidate` for the player until measured against the order plans).
 6. Tests: pin the numbers of §1 from `baton-rom-timeline.json`; render test that the opponent attacker is absent from E+9 and (player) the old healthbox is drawn A+48..A+75.
 
-## 5. Endeavor
-(written below)
+## 5. Endeavor integration recipe (not applied)
+
+1. `liveMoveAnimation.ts`: `case 283` duration (script 68 rows, the accepted window continues through the hit/drain: reuse the accepted 141-row staged window) + `config = { move: "ENDEAVOR", attacker, target, animationProfile, fieldProfile }` where `animationProfile.attackerYOffset = art[attackerSide].coords.yOffset`, `staleMovePower` = the engine's `battleMovePower` register
+   (`docs/rollout-endeavor-prep.md` §0.2: W1 merged, carry merged; W2 rule R, W4, W3 outstanding), `targetStartHp/EndHp` from the resolved outcome (HP set to the user's HP), `hpDrainFirstAge` = the accepted 99 (unmeasured for other pairs).
+2. `battleScene.ts:49511-49680`: replace the ONIX/GROVYLE gate with `liveField` art as the DOUBLE_TEAM branch directly below does (`liveSceneOnBattlerArt`, `sceneOnBattlerFrontIdleRest`); replace the 8-row `ENDEAVOR_SQUISH_TABLE` by the source formula of `prep27EndeavorCheck.ts` (`squishRows`; table == formula on all 4 runs), droplet base = `attacker.geometry.battlePositionCenter` (already), hitsplat x mirrored by target side (the renderer's `hitOffsets` `{x:12,y:-12},{x:-12,y:12}` at `:49550-49553` are opponent-target values; a player target needs -x), `y2` from the same `SetBattlerSpriteYOffsetFromYScale` formula already in the `if (entry)` block (`:49572-49582`).
+3. W3: port `w3Runs` / `w3Register` (`prep27W3Predicate.ts`) at the point the engine prints the "not very effective" / "doesn't affect" string for a player attacker; write the last eligible slot's `calculateBaseDamageWithPower(...).movePower` into `battleMovePower`.
+4. Pins: the fixtures in `fixtures/prep27/endeavor-*.json`; the pair gate removal needs a render test per orientation against `endeavor-check` once pixels exist (not measurable before the renderer is generalised).
 
 ## 6. Reproduction (workspace root; PY = vendor mgba venv)
 
