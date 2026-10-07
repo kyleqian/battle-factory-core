@@ -32572,22 +32572,23 @@ export function renderSceneOnMovePresentation(
   if (state.config.move === "BATON_PASS") {
     const batonState = state as SceneOnMovePresentationState<SceneOnBatonPassConfig>;
     const view = sceneOnBatonPassView(batonState);
-    const playerToOpponent = view.attacker.species === "AIPOM"
+    // Live field (prep27 s4 item 2): any species pair, the ROLE_PLAY pattern; the live composer owns healthboxes and text.
+    const playerToOpponent = (liveField || view.attacker.species === "AIPOM")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
-    const opponentToPlayer = view.attacker.species === "AIPOM"
+    const opponentToPlayer = (liveField || view.attacker.species === "AIPOM")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(`unsupported staged BATON_PASS pair ${view.attacker.species}->${view.target.species}`);
     }
     const tint = { r: 255, g: 181, b: 247 };
-    const aipom = playerToOpponent
+    const aipom = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? aipomBackSprite
       : { ...aipomFrontSprite, tileset: subTileset(aipomFrontSprite.tileset, 0, 8) };
-    const onix = playerToOpponent
+    const onix = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? { ...onixFrontSprite, tileset: subTileset(onixFrontSprite.tileset, 0, 8) }
       : onixBackSprite;
     drawTileBg(
@@ -32643,6 +32644,7 @@ export function renderSceneOnMovePresentation(
         view.displayedPokeball.y + view.displayedPokeball.y2 - 8,
       );
     }
+    if (liveField) return;
     const profile = batonState.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: playerToOpponent ? "ONIX" : "AIPOM", level: 50,

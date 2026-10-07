@@ -1,0 +1,35 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "BATON_PASS",
+ "probe": "tools/compare/poisonFangProbe.py",
+ "scenario": "tools/battle-lab/mechanic-baton-pass-opponent-aipom-player-onix.json",
+ "denseWindow": {
+  "startFrame": 73,
+  "endFrame": 125
+ },
+ "windowSource": "window = [activation, activation + 53 - 1]: the first gAnimScriptActive frame of the prep27 dense probe (fixtures/prep27/baton-rom-timeline.json E-51) through the cleanup row E+1",
+ "attacker": {
+  "species": "AIPOM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 117,
+  "playerMaxHp": 117,
+  "opponentHp": 148,
+  "opponentMaxHp": 148,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

@@ -225,6 +225,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   7,
   // curse-live (docs/next-adapters-prep23.md s1.3/s3): Curse non-Ghost (CurseStats) body, known order lend; the Ghost branch declines.
   174,
+  // prep27 (docs/next-adapters-prep27.md s0.1/s4): Baton Pass body (53 rows, constant; the attacker stays hidden after it through
+  // liveSemiInvulnerableHideBattler until its switch-out).
+  226,
 ] as const);
 
 /** In-use OBJ slots at a first-body activation (prep14 s1: equal in all 24 probed scenarios). */
@@ -325,6 +328,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     261, 228, 210,
     // Return (strongest): activation == window start (row 0; prep24 / prep18 return probes, both sides).
     216,
+    // prep27: Baton Pass activation == window start (row 0; the dense body probe's first active frame, elevated NINJASK attacker).
+    226,
     // curse-live: Curse (stats body) activation == window start (row 0; curseProbe.py sourceWindow, elevated PIDGEOT target dense).
     174,
     // prep22 P1: Lovely Kiss (faithful-random), Spikes, Octazooka windows start at activation (row 0; prep22 moves/*.json, both sides).
@@ -820,6 +825,8 @@ export function liveMoveAnimationDuration(
     case 228: return (request.turn & 1) === 0 ? PURSUIT_ROWS : null;
     // Fury Cutter (oam1): one body = 43 rows (78..120 / 82..124, first inactive age 42 + 1) for every counter.
     case 210: return FURY_CUTTER_ROWS;
+    // Baton Pass (prep27 s0.1): 52 active rows + the cleanup row, constant across species, sides and body-start shifts.
+    case 226: return 53;
     // Return (strongest branch, friendship 255, Factory-only): 282 rows both sides (0.25% of Factory move slots).
     case 216: return RETURN_ROWS;
     // Curse (curse-live): MOVE_CURSE's choosetwoturnanim picks CurseStats when gAnimMoveTurn & 1 (BattleScript_EffectCurse
@@ -859,6 +866,9 @@ const LIVE_BOUNCE_BODY_ONLY_PROFILE = Object.freeze({
  * body ends, or null. Never read by rules/RNG/queue.
  */
 export function liveSemiInvulnerableHideBattler(request: BattleMoveAnimationRequest): 0 | 1 | null {
+  // Baton Pass (prep27 s0.1): AnimBatonPassPokeball sets the attacker `invisible` at age 9 and the ROM keeps it hidden until the
+  // switch-out's instant returntoball (opponent E+9; player through the party screen, A+76), so the same hide carries it.
+  if (request.moveId === 226) return liveMoveAnimationDuration(request) !== null ? request.attacker : null;
   return (request.moveId === 19 || request.moveId === 340 || request.moveId === 91) && (request.turn & 1) === 0
     && liveMoveAnimationDuration(request) !== null ? request.attacker : null;
 }
@@ -1221,6 +1231,12 @@ export function liveMoveAnimationPresentation(
     case 204: config = { move: "CHARM", attacker, target, fieldProfile }; break;
     case 213: config = { move: "ATTRACT", attacker, target, fieldProfile }; break;
     case 227: config = { move: "ENCORE", attacker, target, fieldProfile }; break;
+    case 226:
+      // batonPassAtAge(age, attacker.geometry.animationCenter) = liveBattlerAnchors(...).picOffsetPoint (prep27 s0.1: 53/53 component
+      // rows on 4 pairs). The attacker palette blend reads the normal battle palette: a shiny pair declines.
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      config = { move: "BATON_PASS", attacker, target, fieldProfile };
+      break;
     case 242: config = { move: "CRUNCH", attacker, target, fieldProfile }; break;
     case 246: config = { move: "ANCIENT_POWER", attacker, target, fieldProfile }; break;
     case 247: config = { move: "SHADOW_BALL", attacker, target, fieldProfile }; break;

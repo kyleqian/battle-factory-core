@@ -1,0 +1,35 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "BATON_PASS",
+ "probe": "tools/compare/poisonFangProbe.py",
+ "scenario": "tools/battle-lab/s10a-baton-player-jolteon-opponent-golbat.json",
+ "denseWindow": {
+  "startFrame": 71,
+  "endFrame": 123
+ },
+ "windowSource": "window = [activation, activation + 53 - 1]: the first gAnimScriptActive frame of a fresh poisonFangProbe.py 226 run (52 active rows + cleanup)",
+ "attacker": {
+  "species": "JOLTEON",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 158,
+  "playerMaxHp": 158,
+  "opponentHp": 157,
+  "opponentMaxHp": 157,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

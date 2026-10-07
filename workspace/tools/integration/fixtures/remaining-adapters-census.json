@@ -10,7 +10,7 @@
   "src/data/gen/battle-frontier-mons.json",
   "src/data/gen/factory-round-policy.json"
  ],
- "liveStatusImplementedCount": 240,
+ "liveStatusImplementedCount": 241,
  "staleCodesCorrected": [
   "B (sSpriteOrder): was 'first body only'; production now lends the order and tracks it across bodies (liveSpriteOrderHost.ts / spriteOrderProvider.ts, merged cross-body tracker + post-KO rung 1), so B no longer blocks anything; recipe work only (falls back after an unmodelled graphics command)",
   "F-AFFINE / E-TASK: were provider blockers; docs/allocator-plan-v2-evidence.md measured gOamMatrixAllocBitmap 0x6 + no tasks at all 481 known-entry bodies, so the accepted constants gated on the lent order suffice for first bodies (invalidated after a faint/switch)",
@@ -23,7 +23,7 @@
  "inFlightMoves": {},
  "summary": {
   "accepted": 276,
-  "live": 240,
+  "live": 241,
   "faithfulRandom": 11,
   "faithfulRandomMoves": [
    "MOVE_ASTONISH",
@@ -39,22 +39,18 @@
    "MOVE_WISH"
   ],
   "inFlight": 0,
-  "remaining": 25,
+  "remaining": 24,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
   },
   "weightPct": {
-   "live": 92.746,
+   "live": 93.227,
    "faithfulRandom": 3.761,
    "inFlight": 0,
-   "remaining": 3.006
+   "remaining": 2.524
   },
   "remainingByGroup": {
-   "PROVIDER-x": {
-    "moves": 4,
-    "weightPct": 0.962
-   },
    "MULTI": {
     "moves": 19,
     "weightPct": 1.711
@@ -66,10 +62,14 @@
    "OUT": {
     "moves": 1,
     "weightPct": 0.112
+   },
+   "PROVIDER-x": {
+    "moves": 3,
+    "weightPct": 0.48
    }
   },
   "remainingByHostClass": {
-   "H_BASIC": 2,
+   "H_BASIC": 1,
    "H_BUFFER": 19,
    "H_DERIVED": 3,
    "H_RANDOM": 1,
@@ -77,7 +77,7 @@
   },
   "orderFirstBodyOnlyMoves": 16,
   "slotPlanNeededMoves": 18,
-  "sumsTo": "240+11+0+25=276",
+  "sumsTo": "241+11+0+24=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -115,24 +115,6 @@
   ]
  },
  "ranking": [
-  {
-   "provider": "X-SWITCH",
-   "label": "switch / forced-switch flow owner (post-body field, return-to-ball, slide-off)",
-   "codes": [
-    "X-SWITCH"
-   ],
-   "aloneMoves": 1,
-   "aloneWeightPct": 0.482,
-   "aloneNames": [
-    "BATON_PASS"
-   ],
-   "touchingMoves": 1,
-   "touchingWeightPct": 0.482,
-   "meta": {
-    "cost": "new flow owner (switch / forced-switch presentation; shares the pending 'actual switches' graphics ownership)",
-    "claim": "separate S10x program: forced replacement and summaries are explicitly pending in docs/animation-integration-live-status.json"
-   }
-  },
   {
    "provider": "X-SUBST",
    "label": "persistent Substitute doll sprite state",
@@ -336,6 +318,22 @@
    }
   },
   {
+   "provider": "X-SWITCH",
+   "label": "switch / forced-switch flow owner (post-body field, return-to-ball, slide-off)",
+   "codes": [
+    "X-SWITCH"
+   ],
+   "aloneMoves": 0,
+   "aloneWeightPct": 0,
+   "aloneNames": [],
+   "touchingMoves": 0,
+   "touchingWeightPct": 0,
+   "meta": {
+    "cost": "new flow owner (switch / forced-switch presentation; shares the pending 'actual switches' graphics ownership)",
+    "claim": "separate S10x program: forced replacement and summaries are explicitly pending in docs/animation-integration-live-status.json"
+   }
+  },
+  {
    "provider": "X-POWER",
    "label": "dynamic gBattleMovePower / gDynamicBasePower on the MOVE_ANIMATION request (production emits the static move-table power)",
    "codes": [
@@ -397,50 +395,40 @@
  "greedy": [
   {
    "step": 1,
-   "provider": "X-SWITCH",
-   "newMoves": 1,
-   "newWeightPct": 0.482,
-   "cumulativeRemainingUnlocked": 1,
-   "newNames": [
-    "BATON_PASS"
-   ]
-  },
-  {
-   "step": 2,
    "provider": "X-SUBST",
    "newMoves": 1,
    "newWeightPct": 0.223,
-   "cumulativeRemainingUnlocked": 2,
+   "cumulativeRemainingUnlocked": 1,
    "newNames": [
     "SUBSTITUTE"
    ]
   },
   {
-   "step": 3,
+   "step": 2,
    "provider": "E-OUT",
    "newMoves": 1,
    "newWeightPct": 0.221,
-   "cumulativeRemainingUnlocked": 3,
+   "cumulativeRemainingUnlocked": 2,
    "newNames": [
     "ENDEAVOR"
    ]
   },
   {
-   "step": 4,
+   "step": 3,
    "provider": "C",
    "newMoves": 1,
    "newWeightPct": 0.22,
-   "cumulativeRemainingUnlocked": 4,
+   "cumulativeRemainingUnlocked": 3,
    "newNames": [
     "METEOR_MASH"
    ]
   },
   {
-   "step": 5,
+   "step": 4,
    "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
    "newMoves": 17,
    "newWeightPct": 1.414,
-   "cumulativeRemainingUnlocked": 21,
+   "cumulativeRemainingUnlocked": 20,
    "newNames": [
     "BONEMERANG",
     "ERUPTION",
@@ -462,82 +450,90 @@
    ]
   },
   {
-   "step": 6,
+   "step": 5,
    "provider": "X-DISABLE",
    "newMoves": 2,
    "newWeightPct": 0.147,
-   "cumulativeRemainingUnlocked": 23,
+   "cumulativeRemainingUnlocked": 22,
    "newNames": [
     "ICE_BALL",
     "SPIT_UP"
    ]
   },
   {
-   "step": 7,
+   "step": 6,
    "provider": "X-TWOTURN",
    "newMoves": 1,
    "newWeightPct": 0.187,
-   "cumulativeRemainingUnlocked": 24,
+   "cumulativeRemainingUnlocked": 23,
    "newNames": [
     "DIVE"
    ]
   },
   {
-   "step": 8,
+   "step": 7,
    "provider": "X-AGE",
    "newMoves": 1,
    "newWeightPct": 0.112,
-   "cumulativeRemainingUnlocked": 25,
+   "cumulativeRemainingUnlocked": 24,
    "newNames": [
     "EXTREME_SPEED"
    ]
   },
   {
-   "step": 9,
+   "step": 8,
    "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 25,
+   "cumulativeRemainingUnlocked": 24,
+   "newNames": []
+  },
+  {
+   "step": 9,
+   "provider": "D-TILE",
+   "newMoves": 0,
+   "newWeightPct": 0,
+   "cumulativeRemainingUnlocked": 24,
    "newNames": []
   },
   {
    "step": 10,
-   "provider": "D-TILE",
+   "provider": "D-BG",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 25,
+   "cumulativeRemainingUnlocked": 24,
    "newNames": []
   },
   {
    "step": 11,
-   "provider": "D-BG",
+   "provider": "D-OAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 25,
+   "cumulativeRemainingUnlocked": 24,
    "newNames": []
   },
   {
    "step": 12,
-   "provider": "D-OAM",
+   "provider": "D-VRAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 25,
+   "cumulativeRemainingUnlocked": 24,
    "newNames": []
   },
   {
    "step": 13,
-   "provider": "D-VRAM",
+   "provider": "D-SCAN",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 25,
+   "cumulativeRemainingUnlocked": 24,
    "newNames": []
   },
   {
    "step": 14,
-   "provider": "D-SCAN",
+   "provider": "F-AUDIO",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 25,
+   "cumulativeRemainingUnlocked": 24,
    "newNames": []
   }
  ],
@@ -562,64 +558,24 @@
   },
   {
    "id": "P3",
-   "title": "first provider build (derived from the greedy order): X-SWITCH",
+   "title": "first provider build (derived from the greedy order): X-SUBST",
    "count": 1,
-   "weightPct": 0.482,
+   "weightPct": 0.223,
    "moves": [
     {
-     "move": "MOVE_BATON_PASS",
-     "group": "PROVIDER-X-SWITCH",
+     "move": "MOVE_SUBSTITUTE",
+     "group": "PROVIDER-X-SUBST",
      "providerNeeds": [
-      "X-SWITCH"
+      "X-SUBST"
      ],
      "orderFirstBodyOnly": false,
-     "weightPct": 0.482,
-     "prep": "no activation receipt; X-SWITCH: attackanimation; openpartyscreen; switchoutabilities; returntoball; switchinanim after the body"
+     "weightPct": 0.223,
+     "prep": "no activation receipt; X-SUBST: body ends with the battler shown as the doll (AnimTask_MonToSubstitute); field art view has no behind-substitute state"
     }
    ]
   }
  ],
  "rows": [
-  {
-   "move": "MOVE_BATON_PASS",
-   "id": 226,
-   "name": "BATON PASS",
-   "hostClass": [
-    "H_BASIC"
-   ],
-   "weightShare": 0.004815051020408163,
-   "config": "src/animation/sceneOnPresentation.ts:2458",
-   "needs": [
-    "X-SWITCH"
-   ],
-   "blockers": [
-    {
-     "code": "X-SWITCH",
-     "text": "attackanimation; openpartyscreen; switchoutabilities; returntoball; switchinanim after the body",
-     "cites": [
-      "reference/pokeemerald/data/battle_scripts_1.s:1700-1714",
-      "src/animation/sceneOnPresentation.ts:2458"
-     ]
-    }
-   ],
-   "notes": [
-    "body ends in a Pokeball sprite hand-off with no live switch owner (docs/next-adapters-prep2.md row 2)"
-   ],
-   "staleCorrections": [],
-   "orderFirstBodyOnly": false,
-   "lentConstants": [],
-   "providerNeeds": [
-    "X-SWITCH"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "NOT-OBSERVED"
-   },
-   "group": "PROVIDER-X-SWITCH"
-  },
   {
    "move": "MOVE_BONEMERANG",
    "id": 155,
