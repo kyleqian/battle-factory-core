@@ -1,0 +1,13 @@
+diff --git a/workspace/tools/integration/liveAdapterFramebuffer.ts b/workspace/tools/integration/liveAdapterFramebuffer.ts
+index 376fb863a..9f36c9b61 100644
+--- a/workspace/tools/integration/liveAdapterFramebuffer.ts
++++ b/workspace/tools/integration/liveAdapterFramebuffer.ts
+@@ -247,7 +247,7 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
+     if (species === undefined) throw new Error(`Unknown species ${mon.species}`);
+     return {
+       ...(f.attacker.geometry.side === side && f.attackerPersonality !== undefined
+-        ? { personality: f.attackerPersonality } : {}),
++        ? { personality: f.attackerPersonality } : f.attacker.geometry.side !== side && (f as { targetPersonality?: number }).targetPersonality !== undefined ? { personality: (f as { targetPersonality?: number }).targetPersonality } : {}),
+       species, name: mon.species, side: side === "player" ? "player" as const : "trainer" as const,
+       battler: side === "player" ? 0 as const : 1 as const, partyIndex: 0 as const, level: 50,
+       hp: side === "player" ? profile.playerHp : profile.opponentHp,

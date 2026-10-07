@@ -1,0 +1,15 @@
+# TYRANITAR Pursuit LAG FRAME evidence (speciesAudit2Counters.py main-loop pass counter, speciesAudit3Lag.py, speciesAudit3LagShift.ts)
+2 fresh counter runs identical: ty-t
+2 fresh counter runs identical: ty-a
+tyranitar-pursuit-opponent-beedrill-player-shuckle.json lag frames in (77, 178) [137, 138] ages [60, 61]
+tyranitarA-pursuit-player-beedrill-opponent-shuckle.json lag frames in (74, 175) [134, 135] ages [60, 61]
+controls (no player-side TYRANITAR):
+tyranitar-pursuit-player-beedrill-opponent-shuckle.json lag frames in (73, 175) [133, 134, 155] ages [60, 61, 82]
+mechanic-pursuit-opponent-beedrill-player-shuckle.json lag frames in (77, 179) [137, 138, 159] ages [60, 61, 82]
+ROM frame offset test, tyranitarA (player attacker):
+age 62: ROM frame offset -1=0 +0=0 +1=0
+age 83: ROM frame offset -1=0 +0=0 +1=17798
+age 84: ROM frame offset -1=0 +0=17798 +1=17798
+age 90: ROM frame offset -1=0 +0=17798 +1=17798
+age 99: ROM frame offset -1=0 +0=17798 +1=17798
+age 100: ROM frame offset -1=0 +0=0 +1=0
