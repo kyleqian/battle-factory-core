@@ -81,7 +81,10 @@ import type { FlailPower } from "../animation/flail.ts";
 import type { HailProfile } from "../animation/hail.ts";
 import { composeLivePalettes, liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
-import { liveFuryCutterInputs, livePursuitInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
+import { liveCurseStatsInputs, liveFuryCutterInputs, livePursuitInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
+import {
+  CURSE_STATS_ROWS, curseStatsBattleBgAt, curseStatsPaletteAt, curseStatsRegistersAt, curseStatsSpritesAt, curseStatsTasksAt,
+} from "../animation/curseModel.ts";
 import { FURY_CUTTER_ROWS, PURSUIT_ROWS } from "./liveMoveOamAssembler.ts";
 import { willOWispSpritesAtAge, willOWispTimeline } from "../animation/willOWisp.ts";
 import { pursuitTargetOffsetAtAge } from "../animation/pursuit.ts";
@@ -202,6 +205,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   244,
   // r2-gates (docs/next-adapters-prep22.md s0/A): Fire Punch BODY only (101 rows; the burn flames are the separate Status_Burn body).
   7,
+  // curse-live (docs/next-adapters-prep23.md s1.3/s3): Curse non-Ghost (CurseStats) body, known order lend; the Ghost branch declines.
+  174,
 ] as const);
 
 /** In-use OBJ slots at a first-body activation (prep14 s1: equal in all 24 probed scenarios). */
@@ -300,6 +305,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     315, 318, 244,
     // oam1: Will-O-Wisp, Pursuit (normal body), Fury Cutter (counter 1) activation == window start (row 0; prep18-activation.json).
     261, 228, 210,
+    // curse-live: Curse (stats body) activation == window start (row 0; curseProbe.py sourceWindow, elevated PIDGEOT target dense).
+    174,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -776,6 +783,10 @@ export function liveMoveAnimationDuration(
     case 228: return (request.turn & 1) === 0 ? PURSUIT_ROWS : null;
     // Fury Cutter (oam1): one body = 43 rows (78..120 / 82..124, first inactive age 42 + 1) for every counter.
     case 210: return FURY_CUTTER_ROWS;
+    // Curse (curse-live): MOVE_CURSE's choosetwoturnanim picks CurseStats when gAnimMoveTurn & 1 (BattleScript_EffectCurse
+    // setbyte sB_ANIM_TURN 1 for a non-Ghost attacker, battle_scripts_1.s:1491-1492): 176 rows (first inactive age 175 + 1).
+    // The Ghost branch (turn 0) declines: its row-26 palette-transfer scanline and BG2 scroll phase are frame-phase inputs.
+    case 174: return (request.turn & 1) === 1 ? CURSE_STATS_ROWS : null;
     case 261: {
       const player = { x: 72, y: 0 }, opponent = { x: 176, y: 0 };
       return request.attacker === 0 ? willOWispTimeline("player", player, opponent).cleanup + 1
@@ -2593,6 +2604,32 @@ export function liveMoveAnimationPresentation(
         ...battler, geometry: { ...battler.geometry, animationCenter: center } });
       config = { move: "WILL_O_WISP", attacker: withCenter(attacker, inputs.attackerCenter), target: withCenter(target, inputs.targetCenter),
         fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
+      break;
+    }
+    case 174: {
+      // curse-live (prep23 s1.3/s3): the non-Ghost body (request.turn & 1, the gAnimMoveTurn choosetwoturnanim reads). Hardware OAM
+      // from the assembler over the lent order (any known lend: the renderer reads no activation BG register the body does not
+      // overwrite, and the only move sprite is the OBJ-window copy in the lowest free slot); tasks / registers / BG scroll /
+      // palette from curseModel.ts; non-shiny (no shiny battle palette); zero idle rests (liveCurseStatsInputs).
+      if ((request.turn & 1) !== 1 || !spriteOrderInput?.known) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const activationOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (palettes === null || activationOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const inputs = liveCurseStatsInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
+        targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
+        free: spriteOrderInput.free, sort: sortGbaSpriteOrder,
+        model: { rows: CURSE_STATS_ROWS, tasksAt: curseStatsTasksAt, registersAt: curseStatsRegistersAt, battleBgAt: curseStatsBattleBgAt,
+          paletteAt: curseStatsPaletteAt, spritesAt: curseStatsSpritesAt } });
+      if (inputs === null) return null;
+      // The CURSE seam centres are the battler sprite centres (gSprites x / y, as the staged seam); the renderer reads geometry only
+      // for the age-0 enemy shadow (battlePositionCenter.y - (attr0 y - 8) = the shadow's y 40).
+      const withCenter = (battler: SceneOnPresentationBattler, center: { x: number; y: number }): SceneOnPresentationBattler => ({
+        ...battler, geometry: { ...battler.geometry, animationCenter: center, battlePositionCenter: center } });
+      config = { move: "CURSE", attacker: withCenter(attacker, attackerAnchors.spriteCenter),
+        target: withCenter(target, targetAnchors.spriteCenter), fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
       break;
     }
     case 228: {

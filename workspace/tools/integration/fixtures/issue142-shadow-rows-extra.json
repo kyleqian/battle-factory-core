@@ -5095,6 +5095,50 @@
     "body": "normal",
     "activation": "window start = the scenario's own body activation (prep22 s0.2 / lb21 bodyWindows)"
    }
+  },
+  {
+   "id": 174,
+   "move": "CURSE",
+   "orientation": "player",
+   "variant": "curse-live-stats-player-snorlax-opponent-magikarp",
+   "activationFrame": 312,
+   "windowStart": 312,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 1
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/curse-live/stats-player-snorlax-opponent-magikarp.json",
+    "scenario": "tools/battle-lab/mechanic-curse-stat-player-snorlax-opponent-magikarp.json",
+    "body": "stats",
+    "activation": "window start = the scenario own Curse activation (curseProbe.py sourceWindow); elevated PIDGEOT target dense 0 px (curse-live-adapter-receipt.json)"
+   }
+  },
+  {
+   "id": 174,
+   "move": "CURSE",
+   "orientation": "opponent",
+   "variant": "curse-live-stats-opponent-snorlax-player-magikarp",
+   "activationFrame": 312,
+   "windowStart": 312,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 1
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/curse-live/stats-opponent-snorlax-player-magikarp.json",
+    "scenario": "tools/battle-lab/mechanic-curse-stat-opponent-snorlax-player-magikarp.json",
+    "body": "stats",
+    "activation": "window start = the scenario own Curse activation (curseProbe.py sourceWindow); elevated PIDGEOT target dense 0 px (curse-live-adapter-receipt.json)"
+   }
   }
  ]
 }

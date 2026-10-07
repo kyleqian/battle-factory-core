@@ -9,7 +9,7 @@ import paletteData from "../data/gen/live-animation-palette-resources.json" with
 import { KNOWN_ENTRY_NON_BATTLER_SPRITES } from "./liveBgSnapshotMoves.ts";
 import type { LivePaletteComposite } from "./liveMovePaletteComposite.ts";
 import {
-  FURY_CUTTER_ROWS, KNOWN_ENTRY_HEALTHBOX_OAM, KNOWN_ENTRY_HEALTHBOX_SLOTS, PURSUIT_ROWS, liveFuryCutterHardwareOamRows, livePursuitHardwareOamRows, liveWillOWispHardwareOamRows,
+  FURY_CUTTER_ROWS, KNOWN_ENTRY_HEALTHBOX_OAM, buildLiveHardwareOam, carryLiveSpriteOrder, KNOWN_ENTRY_HEALTHBOX_SLOTS, PURSUIT_ROWS, liveFuryCutterHardwareOamRows, livePursuitHardwareOamRows, liveWillOWispHardwareOamRows,
   type LiveOamScene, type LiveSpriteOrderSort, type OamAttr, type WispProgram,
 } from "./liveMoveOamAssembler.ts";
 
@@ -344,6 +344,110 @@ export function liveFuryCutterInputs(args: LiveFuryCutterArgs): { duration: numb
         palette: { unfaded: palette, faded: palette, hardware: palette },
         registers: registersAt(age),
         resources: { cutTileBase: 305, cutLoaded: age >= 2, allocator: null },
+        order: args.activationOrder, audio: null,
+        liveCounts: { visualTasks: 0, soundTasks: 0, matrixBitmap: 0 }, animationRng: 0, gameplayRng: null, gameplayState: null,
+      };
+    },
+  };
+}
+
+/** Seam-provided curseModel.ts programs (src/animation/curseModel.ts; liveMoveAnimation.ts passes them in). */
+export interface LiveCurseStatsModel {
+  readonly rows: number;
+  readonly tasksAt: (row: number, side: Side, attackerSpriteId: number, copySpriteId: number) =>
+    readonly Readonly<{ slot: number; callback: string; data: readonly number[] }>[];
+  readonly registersAt: (row: number, activation: Readonly<Record<string, number>>, body: Readonly<Record<string, number>>,
+    attackerSprite: Point) => Record<string, number>;
+  readonly battleBgAt: (row: number, attackerSprite: Point) => Record<string, number>;
+  readonly paletteAt: (row: number, activation: readonly number[], attackerObjBank: number) => number[];
+  readonly spritesAt: (state: number, side: Side) => Readonly<{ attackerX2: number; copy: boolean }>;
+}
+export interface LiveCurseStatsArgs {
+  readonly attackerSide: Side;
+  readonly attackerSpecies: string;
+  readonly targetSpecies: string;
+  readonly attacker: LiveOamBattlerAnchors;
+  readonly target: LiveOamBattlerAnchors;
+  readonly palettes: LivePaletteComposite;
+  /** The lent full 64-slot activation order and its free slots (CreateInvisibleSpriteCopy takes the lowest free slot). */
+  readonly activationOrder: readonly number[];
+  readonly free: readonly number[];
+  readonly sort: LiveSpriteOrderSort;
+  readonly model: LiveCurseStatsModel;
+}
+export interface LiveCurseStatsInputs {
+  readonly duration: number;
+  /** `animationInputs` of the CURSE config at a live age (branch "stats"). */
+  readonly animationInputsAt: (age: number) => Record<string, unknown>;
+}
+const curseStatsCache = new Map<string, readonly string[][]>();
+
+/**
+ * MOVE_CURSE (174) non-Ghost ("CurseStats") live inputs (docs/next-adapters-prep23.md s1.3 / s3). The display plan decodes the
+ * hardware OAM built here: the scene occupants, the attacker swaying by the SwayMon x2 (two rows behind its sprite), the static
+ * target and the OBJ-window copy of the attacker (attr0 | OBJ-window mode, priority 0, the attacker's tiles; lowest-free slot)
+ * keyed into the lent order carried through the body. Registers = S0 (row 0) / S0 with WIN0 cleared (rows >= 1) plus the
+ * DrawFallingWhiteLines writes; palette = the assets-only composite + the Curse lines colour + the attacker bank's red blend.
+ * The renderer reads no activation BG register the body does not overwrite. Declines (null) on a non-zero idle rest (SwayMon
+ * writes x2 absolutely and ends at 0: a resting battler's history is unproven).
+ */
+export function liveCurseStatsInputs(args: LiveCurseStatsArgs): LiveCurseStatsInputs | null {
+  const { attackerSide, attacker, target, model } = args;
+  if (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0
+    || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
+  if (args.free.length === 0) return null;
+  const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
+  const attackerObject = battlerObject(attackerSide, attacker), targetObject = battlerObject(targetSide, target);
+  const copySlot = Math.min(...args.free);
+  const a = attackerObject.attr;
+  const copyAttr: OamAttr = [a[0] | 0x800, a[1], a[2] & ~0xc00];
+  const key = JSON.stringify([attackerSide, attackerObject.attr, targetObject.attr, copySlot, args.activationOrder]);
+  let rows = curseStatsCache.get(key);
+  if (!rows) {
+    const spritesAt = (state: number) => {
+      const out = KNOWN_ENTRY_SCENE.occupants.map((o) => ({ ...o, oamY: o.attr[0] & 0xff }));
+      const s = model.spritesAt(state, attackerSide);
+      out.push({ slot: attackerObject.slot, attr: [a[0], a[1] & ~0x1ff | (a[1] + s.attackerX2) & 0x1ff, a[2]],
+        subpriority: attackerObject.subpriority, visible: true, oamY: a[0] & 0xff });
+      out.push({ slot: targetObject.slot, attr: targetObject.attr, subpriority: targetObject.subpriority, visible: true,
+        oamY: targetObject.attr[0] & 0xff });
+      if (s.copy) out.push({ slot: copySlot, attr: copyAttr, subpriority: attackerObject.subpriority, visible: true, oamY: a[0] & 0xff });
+      return out;
+    };
+    const built: string[][] = [];
+    let order: readonly number[] = args.activationOrder;
+    let previous = spritesAt(-1);
+    for (let row = 0; row < model.rows; row += 1) {
+      built.push(buildLiveHardwareOam(order, previous, KNOWN_ENTRY_SCENE.healthbox));
+      previous = spritesAt(row);
+      order = carryLiveSpriteOrder(order, previous, args.sort);
+    }
+    rows = built;
+    if (curseStatsCache.size > 16) curseStatsCache.clear();
+    curseStatsCache.set(key, rows);
+  }
+  const hardwareRows = rows;
+  const bodyRegisters = { ...S0_REGISTERS, win0h: 0, win0v: 0 };
+  const attackerSprite = attacker.spriteCenter, objBank = BATTLER_ATTR2[attackerSide] >> 12;
+  const art = (species: string, object: ReturnType<typeof battlerObject>) =>
+    ({ displaySpecies: species, slot: object.slot, attr: object.attr, subpriority: object.subpriority });
+  return {
+    duration: model.rows,
+    animationInputsAt: (age: number) => {
+      const row = Math.min(Math.max(age, 0), model.rows - 1);
+      const palette = model.paletteAt(row, args.palettes.hardware, objBank);
+      return {
+        branch: "stats",
+        attackerArt: art(args.attackerSpecies, attackerObject), defenderArt: art(args.targetSpecies, targetObject),
+        // gBattleAnimTarget aliases the attacker in the stats branch (battle_scripts_1.s:1491 copybyte gBattlerTarget).
+        animationTargetArt: art(args.attackerSpecies, attackerObject),
+        ownedSprites: [], liveTasks: model.tasksAt(row, attackerSide, attackerObject.slot, copySlot),
+        buffers: { softwareOam: [], hardwareOam: hardwareRows[row]!, softwareMatrices: IDENTITY_MATRICES,
+          hardwareMatrices: IDENTITY_MATRICES, scanlineBuffers: [] },
+        palette: { unfaded: palette, faded: palette, hardware: palette }, paletteScanoutTransfer: null,
+        registers: model.registersAt(row, S0_REGISTERS, bodyRegisters, attackerSprite),
+        battleBg: model.battleBgAt(row, attackerSprite),
+        resources: { nailTileBase: 0, ghostTileBase: 0, nailLoaded: false, ghostLoaded: false, allocator: null },
         order: args.activationOrder, audio: null,
         liveCounts: { visualTasks: 0, soundTasks: 0, matrixBitmap: 0 }, animationRng: 0, gameplayRng: null, gameplayState: null,
       };
