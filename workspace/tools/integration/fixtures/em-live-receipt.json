@@ -1,8 +1,8 @@
 {
  "schema": "em-live-receipt/v1",
- "testedCommit": "f426f7f00bbf0876a0e80c85f9d157342430e3f4",
- "testedSrcTree": "271702ddcb8a9bc453274bdf0ad748d4c612c814",
- "dirty": true,
+ "testedCommit": "c864b0a03b20716033b75ee0e58de9a7dccd7562",
+ "testedSrcTree": "51b5f3b601dc8a7fe9642a4bf953d5d601bb7250",
+ "dirty": false,
  "commands": [
   "JOBS=16 sh tools/integration/prep22Probes.sh PROBEDIR 2 <the scenarios named by each fixture>",
   "python3 tools/integration/s10aEsMementoFixtures.py PROBEDIR",
