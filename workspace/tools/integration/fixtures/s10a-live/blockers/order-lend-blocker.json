@@ -1,0 +1,494 @@
+{
+ "schema": "s10a-order-lend-blocker/v1",
+ "iceBall": [
+  {
+   "window": "accepted-player-b1",
+   "counter": 0,
+   "rows": 76,
+   "activationOrderIsKnownEntry": true,
+   "orderRowsExact": 76,
+   "trueActivationOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   },
+   "wordsFreeKnownEntryOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   }
+  },
+  {
+   "window": "accepted-player-b2",
+   "counter": 1,
+   "rows": 76,
+   "activationOrderIsKnownEntry": false,
+   "orderRowsExact": 76,
+   "trueActivationOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   },
+   "wordsFreeKnownEntryOrder": {
+    "rowsDiffering": 1,
+    "residualPixels": 20,
+    "ages": [
+     39
+    ]
+   }
+  },
+  {
+   "window": "accepted-player-b3",
+   "counter": 2,
+   "rows": 76,
+   "activationOrderIsKnownEntry": false,
+   "orderRowsExact": 76,
+   "trueActivationOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   },
+   "wordsFreeKnownEntryOrder": {
+    "rowsDiffering": 2,
+    "residualPixels": 2,
+    "ages": [
+     39,
+     40
+    ]
+   }
+  },
+  {
+   "window": "accepted-player-b4",
+   "counter": 3,
+   "rows": 76,
+   "activationOrderIsKnownEntry": false,
+   "orderRowsExact": 76,
+   "trueActivationOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   },
+   "wordsFreeKnownEntryOrder": {
+    "rowsDiffering": 2,
+    "residualPixels": 38,
+    "ages": [
+     40,
+     41
+    ]
+   }
+  },
+  {
+   "window": "accepted-player-b5",
+   "counter": 4,
+   "rows": 132,
+   "activationOrderIsKnownEntry": false,
+   "orderRowsExact": 132,
+   "trueActivationOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   },
+   "wordsFreeKnownEntryOrder": {
+    "rowsDiffering": 3,
+    "residualPixels": 60,
+    "ages": [
+     39,
+     40,
+     41
+    ]
+   }
+  },
+  {
+   "window": "accepted-opponent-b1",
+   "counter": 0,
+   "rows": 76,
+   "activationOrderIsKnownEntry": true,
+   "orderRowsExact": 76,
+   "trueActivationOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   },
+   "wordsFreeKnownEntryOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   }
+  },
+  {
+   "window": "accepted-opponent-b2",
+   "counter": 1,
+   "rows": 76,
+   "activationOrderIsKnownEntry": false,
+   "orderRowsExact": 76,
+   "trueActivationOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   },
+   "wordsFreeKnownEntryOrder": {
+    "rowsDiffering": 3,
+    "residualPixels": 68,
+    "ages": [
+     39,
+     40,
+     41
+    ]
+   }
+  },
+  {
+   "window": "accepted-opponent-b3",
+   "counter": 2,
+   "rows": 76,
+   "activationOrderIsKnownEntry": false,
+   "orderRowsExact": 76,
+   "trueActivationOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   },
+   "wordsFreeKnownEntryOrder": {
+    "rowsDiffering": 2,
+    "residualPixels": 11,
+    "ages": [
+     39,
+     41
+    ]
+   }
+  },
+  {
+   "window": "accepted-opponent-b4",
+   "counter": 3,
+   "rows": 76,
+   "activationOrderIsKnownEntry": false,
+   "orderRowsExact": 76,
+   "trueActivationOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   },
+   "wordsFreeKnownEntryOrder": {
+    "rowsDiffering": 4,
+    "residualPixels": 96,
+    "ages": [
+     39,
+     40,
+     41,
+     42
+    ]
+   }
+  },
+  {
+   "window": "accepted-opponent-b5",
+   "counter": 4,
+   "rows": 132,
+   "activationOrderIsKnownEntry": false,
+   "orderRowsExact": 132,
+   "trueActivationOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   },
+   "wordsFreeKnownEntryOrder": {
+    "rowsDiffering": 2,
+    "residualPixels": 26,
+    "ages": [
+     38,
+     39
+    ]
+   }
+  },
+  {
+   "window": "prep25-ice-ball-alt-player-glalie-golem-b1",
+   "counter": 0,
+   "rows": 76,
+   "activationOrderIsKnownEntry": false,
+   "orderRowsExact": 76,
+   "trueActivationOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   },
+   "wordsFreeKnownEntryOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   }
+  },
+  {
+   "window": "prep25-ice-ball-alt-player-glalie-golem-b2",
+   "counter": 1,
+   "rows": 76,
+   "activationOrderIsKnownEntry": false,
+   "orderRowsExact": 76,
+   "trueActivationOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   },
+   "wordsFreeKnownEntryOrder": {
+    "rowsDiffering": 2,
+    "residualPixels": 35,
+    "ages": [
+     38,
+     39
+    ]
+   }
+  },
+  {
+   "window": "prep25-ice-ball-alt-player-glalie-golem-b3",
+   "counter": 2,
+   "rows": 76,
+   "activationOrderIsKnownEntry": false,
+   "orderRowsExact": 76,
+   "trueActivationOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   },
+   "wordsFreeKnownEntryOrder": {
+    "rowsDiffering": 1,
+    "residualPixels": 16,
+    "ages": [
+     39
+    ]
+   }
+  },
+  {
+   "window": "prep25-ice-ball-alt-player-glalie-golem-b4",
+   "counter": 3,
+   "rows": 76,
+   "activationOrderIsKnownEntry": false,
+   "orderRowsExact": 76,
+   "trueActivationOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   },
+   "wordsFreeKnownEntryOrder": {
+    "rowsDiffering": 4,
+    "residualPixels": 77,
+    "ages": [
+     38,
+     39,
+     40,
+     41
+    ]
+   }
+  },
+  {
+   "window": "prep25-ice-ball-alt-player-glalie-golem-b5",
+   "counter": 4,
+   "rows": 131,
+   "activationOrderIsKnownEntry": false,
+   "orderRowsExact": 131,
+   "trueActivationOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   },
+   "wordsFreeKnownEntryOrder": {
+    "rowsDiffering": 1,
+    "residualPixels": 9,
+    "ages": [
+     39
+    ]
+   }
+  },
+  {
+   "window": "prep25-ice-ball-alt-opponent-glalie-golem-b1",
+   "counter": 0,
+   "rows": 76,
+   "activationOrderIsKnownEntry": false,
+   "orderRowsExact": 76,
+   "trueActivationOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   },
+   "wordsFreeKnownEntryOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   }
+  },
+  {
+   "window": "prep25-ice-ball-alt-opponent-glalie-golem-b2",
+   "counter": 1,
+   "rows": 76,
+   "activationOrderIsKnownEntry": false,
+   "orderRowsExact": 76,
+   "trueActivationOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   },
+   "wordsFreeKnownEntryOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   }
+  },
+  {
+   "window": "prep25-ice-ball-alt-opponent-glalie-golem-b3",
+   "counter": 2,
+   "rows": 76,
+   "activationOrderIsKnownEntry": false,
+   "orderRowsExact": 76,
+   "trueActivationOrder": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   },
+   "wordsFreeKnownEntryOrder": {
+    "rowsDiffering": 2,
+    "residualPixels": 24,
+    "ages": [
+     38,
+     39
+    ]
+   }
+  }
+ ],
+ "dive": [
+  {
+   "window": "accepted-player-back-attack",
+   "rows": 93,
+   "trueSeed": [
+    10,
+    12,
+    9,
+    7,
+    15,
+    13,
+    11,
+    5,
+    4,
+    14,
+    3,
+    21,
+    20,
+    19,
+    18,
+    17,
+    16,
+    23,
+    22,
+    24,
+    25,
+    26,
+    27
+   ],
+   "wordsFreeSeed": [
+    3,
+    4,
+    21,
+    20,
+    5,
+    19,
+    18,
+    17,
+    16,
+    15,
+    14,
+    13,
+    12,
+    11,
+    10,
+    9,
+    7,
+    23,
+    22,
+    24,
+    25,
+    26,
+    27
+   ],
+   "trueSeedResult": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   },
+   "wordsFreeSeedResult": {
+    "rowsDiffering": 6,
+    "residualPixels": 116,
+    "ages": [
+     17,
+     18,
+     19,
+     20,
+     21,
+     22
+    ]
+   }
+  },
+  {
+   "window": "accepted-opponent-front-attack",
+   "rows": 93,
+   "trueSeed": [
+    4,
+    3,
+    15,
+    14,
+    13,
+    7,
+    9,
+    12,
+    10,
+    5,
+    11,
+    21,
+    20,
+    19,
+    18,
+    17,
+    16,
+    23,
+    22,
+    24,
+    25,
+    26,
+    27
+   ],
+   "wordsFreeSeed": [
+    3,
+    4,
+    21,
+    20,
+    5,
+    19,
+    18,
+    17,
+    16,
+    15,
+    14,
+    13,
+    12,
+    11,
+    10,
+    9,
+    7,
+    23,
+    22,
+    24,
+    25,
+    26,
+    27
+   ],
+   "trueSeedResult": {
+    "rowsDiffering": 0,
+    "residualPixels": 0,
+    "ages": []
+   },
+   "wordsFreeSeedResult": {
+    "rowsDiffering": 3,
+    "residualPixels": 61,
+    "ages": [
+     17,
+     18,
+     19
+    ]
+   }
+  }
+ ]
+}
