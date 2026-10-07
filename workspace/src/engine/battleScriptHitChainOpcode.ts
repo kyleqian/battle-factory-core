@@ -2304,8 +2304,9 @@ function createAttackanimationOpcodeHandler(
               String(attackerBattler.friendship),
               String(multihit),
               // Presentation-only Rollout counter 1..5 (rock formula start - timer, read after rolloutdamagecalculation;
-              // docs/rollout-endeavor-prep.md s0.1). Only move 205 carries it; Ice Ball (301) is out of scope.
-              ...(move === 205
+              // docs/rollout-endeavor-prep.md s0.1). Rollout (205) and Ice Ball (301, the same rolloutdamagecalculation timer;
+              // AnimTask_GetIceBallCounter = start - timer - 1, battle_anim_ice.c:1609) carry it.
+              ...(move === 205 || move === 301
                 ? [String((rulesContext.rolloutTimerStartValues[attacker] ?? 0) - attackerBattler.rolloutTimer)]
                 : []),
             ]),

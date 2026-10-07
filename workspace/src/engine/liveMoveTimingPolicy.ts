@@ -213,6 +213,24 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
         "tools/integration/fixtures/d4a-live/meteor-mash-extra-*.json (D4b METAGROSS -> GOLBAT: opponent lag, player no lag)"],
     }],
   },
+  /**
+   * S10A Ice Ball (docs/next-adapters-prep26.md s1.4 H / s4 item 6; tools/integration/fixtures/prep26/iceball-check.json lagRows): 0-step lag rows
+   * (an animationRng stall: VBlank overrun) in 3 of 18 measured counter bodies (accepted player body 4 row 38, accepted bodies 5 row 112 both
+   * sides), none in the other 15 (accepted bodies 1..3, accepted opponent body 4, every GLALIE -> GOLEM / REGISTEEL alternate body): the
+   * dominant phase is no lag. `age` / bodyRows are the counter 0..3 values (counter 4: lag age 112, 132 / 131 rows). A lag row repeats the
+   * previous hardware OAM, holds the sprites and moves the task step one row earlier: a lag window under this policy differs on one row of
+   * the shake / fade. Only the counter-0 body ships live (later counters decline: docs/s10a-random2-order-lend-blocker.md). Also D3 (Random2 shards).
+   */
+  301: {
+    move: "MOVE_ICE_BALL",
+    parameters: [{
+      kind: "optional-lag-age", age: 38, fixedLagAges: [], iterations: 75,
+      alternatives: [{ phase: "event", bodyRows: 77, measured: 3 }, { phase: "no-event", bodyRows: 76, measured: 15 }],
+      chosen: "no-event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/prep26/iceball-check.json lagRows (3 of 18 windows: accepted player b4 [38], accepted b5 [112] x2)",
+        "docs/next-adapters-prep26.md s1.4 / s4 item 6"],
+    }],
+  },
 });
 
 /** The chosen write row of a move's bg-write-row parameter (`age` for "event", `age - 1` for "no-event"), or null without one. */
@@ -261,4 +279,7 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   171,
   // D4 (S10A): Superpower first body (liveSuperpowerInputs.ts; per-side monbg write row; fixtures tools/integration/fixtures/s10a-live/superpower-*).
   276,
+  // S10A: Ice Ball counter 0 (D3 + D4; liveIceBallInputs.ts; Random2 shards from the presentation host, counter-keyed plan; no-lag policy;
+  // fixtures tools/integration/fixtures/s10a-live/ice-ball-*).
+  301,
 ]);

@@ -3888,7 +3888,7 @@
     },
     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
   },
-  "faithfulTimingCount": 8,
+  "faithfulTimingCount": 9,
   "faithfulTimingAdapters": [
     {
       "id": 183,
@@ -4631,6 +4631,53 @@
         "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/d4a-live/nightmare-*.json",
         "node --experimental-strip-types --no-warnings tools/integration/sleepRouteSearch.ts 171 4 1 4000",
         "npx vitest run tests/animation/liveFaithfulTimingAdapters.test.ts tests/animation/liveMoveTimingPolicy.test.ts"
+      ]
+    },
+    {
+      "id": 301,
+      "move": "MOVE_ICE_BALL",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 38,
+          "fixedLagAges": [],
+          "iterations": 75,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 77,
+              "measured": 3
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 76,
+              "measured": 15
+            }
+          ],
+          "chosen": "no-event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [],
+        "rows": 0,
+        "maxPixelsPerRow": 0,
+        "cause": "no counter-0 body has a lag row (prep26 s1.4: the 3 lag windows are accepted player body 4 [row 38] and accepted bodies 5 [row 112], counters 3 / 4, which decline live): no live window is in the other phase. A lag window would differ on one row of the shake / fade (the lag row repeats the previous hardware OAM and moves the task step one row earlier)"
+      },
+      "d3": true,
+      "evidence": [
+        "scope: counter 0 only (request.rolloutCounter 1: the first body of a chain), any known lend with the known-entry occupancy, non-shiny, zero idle rests. Counters 1..4 (rolloutCounter 2..5) DECLINE (fallback): their activation sprite order is the earlier Ice Ball body's Random2-dependent shard y-sort, which needs a words-dependent post-body lend production does not have (resume: docs/s10a-random2-order-lend-blocker.md, design 1 'seam-resolved deferred lend')",
+        "tools/integration/fixtures/d4d2-live-receipt.json",
+        "tools/integration/fixtures/s10a-live/ice-ball-*.json (4 dense counter-0 windows, both orientations: accepted SPHEAL -> REGISTEEL after REGISTEEL's Tackle, prep25 GLALIE -> GOLEM first bodies; presentation host pinned at the probed activation animationRng)",
+        "docs/next-adapters-prep26.md s1 / s4 (assembler + model exact 18/18 windows, 1535 rows, given the H lag rows)",
+        "tools/integration/fixtures/prep26/iceball-check.json lagRows (3 of 18)"
+      ],
+      "proofCommands": [
+        "sh tools/integration/prep26Probes.sh iceball (OUT=PROBEDIR) + tools/integration/s10aRouteProbes: iceBallProbe.py on mechanic-ice-ball-{player-spheal-opponent-onix,opponent-spheal-player-onix}",
+        "python3 -I tools/integration/s10aIceBallFixtures.py PROBEDIR",
+        "node --experimental-strip-types tools/integration/d4aTimingCheck.ts <receipt.json> tools/integration/fixtures/s10a-live/ice-ball-<window>.json",
+        "npx vitest run tests/animation/liveIceBallAdapter.test.ts"
       ]
     }
   ],

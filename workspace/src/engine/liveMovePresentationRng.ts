@@ -63,12 +63,26 @@ export const LIVE_MOVE_RANDOM2_PLANS: Readonly<Record<number, readonly Presentat
     [115, 2], [117, 2], [119, 2], [121, 2], [123, 2], [125, 2], [127, 2], [129, 2], [131, 2], [133, 2]].map(([ageOffset, count]) => Object.freeze({ ageOffset: ageOffset!, count: count! }))),
 });
 
+/**
+ * Move_ICE_BALL (faithful TIMING with d3, liveMoveTimingPolicy.ts 301): AnimIceBallParticle x shards in one frame (step 37), two words each
+ * (randA = (w & 0xff) + 256, randB = w & 0x1ff folded; battle_anim_ice.c:1581-1607). The shard count is the counter's (5 / 7 / 9 / 10 / 10;
+ * AnimTask_GetIceBallCounter = request.rolloutCounter - 1), so the plan is counter-keyed (docs/next-adapters-prep26.md s1.3).
+ */
+export const LIVE_ICE_BALL_RANDOM2_PLANS: readonly (readonly PresentationRngDrawStep[])[] = Object.freeze(
+  [5, 7, 9, 10, 10].map((shards) => Object.freeze([Object.freeze({ ageOffset: 37, count: 2 * shards })])));
+
 /** Faithful-random live adapters (disjoint from LIVE_MOVE_ANIMATION_IDS and from the faithful-timing ids, which keep their D3 plan). */
 export const LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS: readonly number[] = Object.freeze(
   Object.keys(LIVE_MOVE_RANDOM2_PLANS).map(Number).filter((id) => !LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS.includes(id)),
 );
 
-export function liveMoveRandom2Plan(request: Pick<BattleMoveAnimationRequest, "moveId">): readonly PresentationRngDrawStep[] | null {
+export function liveMoveRandom2Plan(
+  request: Pick<BattleMoveAnimationRequest, "moveId"> & Partial<Pick<BattleMoveAnimationRequest, "rolloutCounter">>,
+): readonly PresentationRngDrawStep[] | null {
+  if (request.moveId === 301) {
+    const counter = request.rolloutCounter;
+    return counter !== undefined && counter >= 1 && counter <= 5 ? LIVE_ICE_BALL_RANDOM2_PLANS[counter - 1]! : null;
+  }
   return LIVE_MOVE_RANDOM2_PLANS[request.moveId] ?? null;
 }
 
@@ -91,7 +105,7 @@ export type LiveMovePresentationRngInput = Readonly<{ host: PresentationRngHost 
  */
 export function activateLiveMovePresentationRng(
   host: PresentationRngHost,
-  request: Pick<BattleMoveAnimationRequest, "moveId">,
+  request: Pick<BattleMoveAnimationRequest, "moveId"> & Partial<Pick<BattleMoveAnimationRequest, "rolloutCounter">>,
   key: string,
 ): PresentationRngHost {
   const plan = liveMoveRandom2Plan(request);
