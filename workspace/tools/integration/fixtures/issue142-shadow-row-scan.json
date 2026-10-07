@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 523,
-  "ids": 250,
+  "rows": 529,
+  "ids": 253,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -5573,6 +5573,72 @@
    "move": "SKY_ATTACK",
    "orientation": "opponent",
    "duration": 148,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 329,
+   "move": "SHEER_COLD",
+   "orientation": "player",
+   "duration": 191,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 329,
+   "move": "SHEER_COLD",
+   "orientation": "opponent",
+   "duration": 190,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 226,
+   "move": "BATON_PASS",
+   "orientation": "player",
+   "duration": 53,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 226,
+   "move": "BATON_PASS",
+   "orientation": "opponent",
+   "duration": 53,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 283,
+   "move": "ENDEAVOR",
+   "orientation": "player",
+   "duration": 68,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 283,
+   "move": "ENDEAVOR",
+   "orientation": "opponent",
+   "duration": 68,
    "expected": 0,
    "drawn": [
     0
