@@ -1,0 +1,480 @@
+{
+ "schema": "d4a-live-receipt/v1",
+ "testedCommit": "bf1dc3e4cb1fd07469ee825314abfefd85063671",
+ "testedSrcTree": "57de0763fb93b837b1fc6eacf25786e7c7b3422f",
+ "dirty": false,
+ "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+ "commands": [
+  "python3 tools/integration/d4aScenarios.py",
+  "sh tools/integration/prep22Probes.sh PROBEDIR 1 <accepted + prep25 alternate + d4a extra scenarios>",
+  "python3 tools/integration/d4aFixtures.py PROBEDIR",
+  "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts CHECK.json tools/integration/fixtures/d4a-live/<move>-*.json",
+  "python3 tools/integration/d4aReceipt.py CHECK.json..."
+ ],
+ "phaseTable": [
+  {
+   "id": 183,
+   "move": "MOVE_MACH_PUNCH",
+   "kind": "optional-lag-age",
+   "age": 91,
+   "fixedLagAges": [
+    71,
+    72
+   ],
+   "iterations": 107,
+   "alternatives": [
+    {
+     "phase": "event",
+     "bodyRows": 110,
+     "measured": 5
+    },
+    {
+     "phase": "no-event",
+     "bodyRows": 109,
+     "measured": 3
+    }
+   ],
+   "chosen": "event",
+   "tieRuleUsed": false,
+   "alternatePhaseResidual": {
+    "ages": [
+     92,
+     93,
+     94,
+     95,
+     96,
+     97,
+     98,
+     99,
+     100,
+     101,
+     102,
+     103,
+     104,
+     105,
+     106,
+     107
+    ],
+    "rows": 16,
+    "maxPixelsPerRow": 18252,
+    "cause": "the optional lag at age 91 holds the restore fade (Task_FadeToBg, BLDY) one row: a no-lag window equals the policy body one row earlier from age 92 to the fade end (107); rows 0..91 and 108 are exact"
+   }
+  }
+ ],
+ "summary": {
+  "MACH_PUNCH": {
+   "windows": 8,
+   "selectedPhaseWindows": 5,
+   "selectedPhaseResidualPixels": 0,
+   "otherPhaseWindows": 3,
+   "otherPhaseAffectedAges": [
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107
+   ],
+   "otherPhaseMaxPixelsPerRow": 18252,
+   "freshRunsIdentical": true,
+   "violations": 0
+  }
+ },
+ "windows": [
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/mach-punch-alt-opponent-machamp-golem.json",
+   "move": "MACH_PUNCH",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 110,
+   "expectedDuration": 110,
+   "runs": [
+    {
+     "rows": 110,
+     "exactRows": 110,
+     "residualPixels": 0,
+     "digest": "41005699be2b1169f7af510b7f0a39997edc43a619ba306694bdf08747bbc8b4",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 110,
+     "exactRows": 110,
+     "residualPixels": 0,
+     "digest": "41005699be2b1169f7af510b7f0a39997edc43a619ba306694bdf08747bbc8b4",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/mach-punch-alt-player-machamp-golem.json",
+   "move": "MACH_PUNCH",
+   "measuredPhase": "no-event",
+   "policyPhase": "event",
+   "selectedPhase": false,
+   "window": 109,
+   "expectedDuration": 110,
+   "runs": [
+    {
+     "rows": 109,
+     "exactRows": 93,
+     "residualPixels": 272976,
+     "digest": "fb935b3bf9c909a3aebcecb66435ac4ab3b7e02daec95495c538ddff298d00f3",
+     "affectedAges": [
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107
+     ],
+     "maxPixelsPerRow": 17061
+    },
+    {
+     "rows": 109,
+     "exactRows": 93,
+     "residualPixels": 272976,
+     "digest": "fb935b3bf9c909a3aebcecb66435ac4ab3b7e02daec95495c538ddff298d00f3",
+     "affectedAges": [
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107
+     ],
+     "maxPixelsPerRow": 17061
+    }
+   ],
+   "documentedAges": [
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/mach-punch-extra-opponent-breloom-golbat.json",
+   "move": "MACH_PUNCH",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 110,
+   "expectedDuration": 110,
+   "runs": [
+    {
+     "rows": 110,
+     "exactRows": 110,
+     "residualPixels": 0,
+     "digest": "4a0fc9b1e9110ddd93ebcaa230b246246cda191374c06bbdc5c813173ecb984d",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 110,
+     "exactRows": 110,
+     "residualPixels": 0,
+     "digest": "4a0fc9b1e9110ddd93ebcaa230b246246cda191374c06bbdc5c813173ecb984d",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/mach-punch-extra-opponent-hitmonchan-snorlax.json",
+   "move": "MACH_PUNCH",
+   "measuredPhase": "no-event",
+   "policyPhase": "event",
+   "selectedPhase": false,
+   "window": 109,
+   "expectedDuration": 110,
+   "runs": [
+    {
+     "rows": 109,
+     "exactRows": 93,
+     "residualPixels": 292032,
+     "digest": "c34813dcecdda5beeba0e42acc3dec9854b1f0ec8a868d9322c9b53c20dc10bf",
+     "affectedAges": [
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107
+     ],
+     "maxPixelsPerRow": 18252
+    },
+    {
+     "rows": 109,
+     "exactRows": 93,
+     "residualPixels": 292032,
+     "digest": "c34813dcecdda5beeba0e42acc3dec9854b1f0ec8a868d9322c9b53c20dc10bf",
+     "affectedAges": [
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107
+     ],
+     "maxPixelsPerRow": 18252
+    }
+   ],
+   "documentedAges": [
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/mach-punch-extra-player-breloom-golbat.json",
+   "move": "MACH_PUNCH",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 110,
+   "expectedDuration": 110,
+   "runs": [
+    {
+     "rows": 110,
+     "exactRows": 110,
+     "residualPixels": 0,
+     "digest": "9285f7f90bd61533d69b651bfaee4fcb550923d4108d886b4a7fd5a3380c3907",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 110,
+     "exactRows": 110,
+     "residualPixels": 0,
+     "digest": "9285f7f90bd61533d69b651bfaee4fcb550923d4108d886b4a7fd5a3380c3907",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/mach-punch-extra-player-hitmonchan-snorlax.json",
+   "move": "MACH_PUNCH",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 110,
+   "expectedDuration": 110,
+   "runs": [
+    {
+     "rows": 110,
+     "exactRows": 110,
+     "residualPixels": 0,
+     "digest": "3c9615e65b7f42711f94f9e3c86ec7fc359fb2966a26d278b7517ececb439147",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 110,
+     "exactRows": 110,
+     "residualPixels": 0,
+     "digest": "3c9615e65b7f42711f94f9e3c86ec7fc359fb2966a26d278b7517ececb439147",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/mach-punch-opponent-hitmonchan-player-chansey.json",
+   "move": "MACH_PUNCH",
+   "measuredPhase": "no-event",
+   "policyPhase": "event",
+   "selectedPhase": false,
+   "window": 109,
+   "expectedDuration": 110,
+   "runs": [
+    {
+     "rows": 109,
+     "exactRows": 93,
+     "residualPixels": 288864,
+     "digest": "c89539df498f6ba57a4242d105446029c2d8c79a8235b92993be1ab68fd810d5",
+     "affectedAges": [
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107
+     ],
+     "maxPixelsPerRow": 18054
+    },
+    {
+     "rows": 109,
+     "exactRows": 93,
+     "residualPixels": 288864,
+     "digest": "c89539df498f6ba57a4242d105446029c2d8c79a8235b92993be1ab68fd810d5",
+     "affectedAges": [
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107
+     ],
+     "maxPixelsPerRow": 18054
+    }
+   ],
+   "documentedAges": [
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/mach-punch-player-hitmonchan-opponent-chansey.json",
+   "move": "MACH_PUNCH",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 110,
+   "expectedDuration": 110,
+   "runs": [
+    {
+     "rows": 110,
+     "exactRows": 110,
+     "residualPixels": 0,
+     "digest": "34c95ad7797cf51949854d062d6d9d1bf84036d87d94e12ada4bacb09eae5c17",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 110,
+     "exactRows": 110,
+     "residualPixels": 0,
+     "digest": "34c95ad7797cf51949854d062d6d9d1bf84036d87d94e12ada4bacb09eae5c17",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  }
+ ]
+}
