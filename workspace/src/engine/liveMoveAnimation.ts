@@ -2648,8 +2648,10 @@ export function liveMoveAnimationPresentation(
       // oam1 (prep20 s1.1 + G1): the display plan decodes a hardware-OAM buffer, built here by the production assembler from the
       // anchors, the known-entry allocator/scene constants and the lent activation order carried through the body (full 64-slot
       // SortSprites, dummy keys for free slots). First body only: the known-entry occupancy, allocator slots and the unfaded
-      // composite palette are proven there (every dense fixture); non-shiny (no shiny battle palette); zero idle rests.
-      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      // composite palette are proven there (every dense fixture); non-shiny (no shiny battle palette); zero idle rests. Later bodies
+      // (any known lend) are exact too: 12/12 lb26 fixtures after Tackle / Splash / Psychic / Growl+unit / Swords Dance+unit / Surf, both
+      // sides (docs/later-bodies-curse-oam.md; the unfaded palette / known-entry allocator hold across those predecessors).
+      if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       const activationOrder = spriteOrderWithOccupiedPrefix(
