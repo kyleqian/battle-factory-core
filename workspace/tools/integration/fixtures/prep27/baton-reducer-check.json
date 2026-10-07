@@ -1,0 +1,73 @@
+{
+ "neg": null,
+ "receipt": {
+  "player:AIPOM->ONIX": {
+   "rows": 53,
+   "componentExact": 53,
+   "framebufferExact": 53,
+   "framebufferTried": 53,
+   "rendererError": null,
+   "derivedCenter": {
+    "x": 72,
+    "y": 97
+   },
+   "derivedCorner": {
+    "x": 40,
+    "y": 57
+   },
+   "firstFailures": [],
+   "failureCount": 0
+  },
+  "opponent:AIPOM->ONIX": {
+   "rows": 53,
+   "componentExact": 53,
+   "framebufferExact": 53,
+   "framebufferTried": 53,
+   "rendererError": null,
+   "derivedCenter": {
+    "x": 176,
+    "y": 43
+   },
+   "derivedCorner": {
+    "x": 144,
+    "y": 11
+   },
+   "firstFailures": [],
+   "failureCount": 0
+  },
+  "player:NINJASK->GOLEM": {
+   "rows": 53,
+   "componentExact": 53,
+   "framebufferExact": 0,
+   "framebufferTried": 1,
+   "rendererError": "Error: unsupported staged BATON_PASS pair NINJASK->GOLEM",
+   "derivedCenter": {
+    "x": 72,
+    "y": 96
+   },
+   "derivedCorner": {
+    "x": 40,
+    "y": 56
+   },
+   "firstFailures": [],
+   "failureCount": 0
+  },
+  "opponent:NINJASK->GOLEM": {
+   "rows": 53,
+   "componentExact": 53,
+   "framebufferExact": 0,
+   "framebufferTried": 1,
+   "rendererError": "Error: unsupported staged BATON_PASS pair NINJASK->GOLEM",
+   "derivedCenter": {
+    "x": 176,
+    "y": 40
+   },
+   "derivedCorner": {
+    "x": 144,
+    "y": 8
+   },
+   "firstFailures": [],
+   "failureCount": 0
+  }
+ }
+}
