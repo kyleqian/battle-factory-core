@@ -1,7 +1,7 @@
 {
  "schema": "ns-live-receipt/v1",
- "testedCommit": "577cb973537b4da1d330e1e84c969d106578aad5",
- "testedSrcTree": "54bac4057448ea77bd9702c672f249795556b505",
+ "testedCommit": "31a5e2e54cafc7e7b6b66ac612f2d50eefe15daf",
+ "testedSrcTree": "0fa8e76bb4a595691b4477094218de91973c006b",
  "dirty": false,
  "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
  "commands": [
@@ -732,6 +732,16 @@
    "otherPhaseMaxPixelsPerRow": 17811,
    "freshRunsIdentical": true,
    "violations": 0
+  },
+  "SHOCK_WAVE": {
+   "windows": 6,
+   "selectedPhaseWindows": 6,
+   "selectedPhaseResidualPixels": 0,
+   "otherPhaseWindows": 0,
+   "otherPhaseAffectedAges": [],
+   "otherPhaseMaxPixelsPerRow": 0,
+   "freshRunsIdentical": true,
+   "violations": 0
   }
  },
  "windows": [
@@ -1183,6 +1193,220 @@
    ],
    "documentedAges": [],
    "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/shock-wave-alt-opponent-manectric-wailmer.json",
+   "move": "SHOCK_WAVE",
+   "measuredPhase": null,
+   "selectedPhase": true,
+   "window": 264,
+   "expectedDuration": 264,
+   "runs": [
+    {
+     "rows": 264,
+     "exactRows": 264,
+     "residualPixels": 0,
+     "digest": "229103f165402544acb140f91a5cad72f52da66462be51a58ffdf8c39f85ea49",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 264,
+     "exactRows": 264,
+     "residualPixels": 0,
+     "digest": "229103f165402544acb140f91a5cad72f52da66462be51a58ffdf8c39f85ea49",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/shock-wave-alt-opponent-weezing-snorlax.json",
+   "move": "SHOCK_WAVE",
+   "measuredPhase": null,
+   "selectedPhase": true,
+   "window": 264,
+   "expectedDuration": 264,
+   "runs": [
+    {
+     "rows": 264,
+     "exactRows": 264,
+     "residualPixels": 0,
+     "digest": "5ebaa4ea5379b38a4e6298386a8ba24ead3e5a48dec7400fe23264cd35e6eee3",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 264,
+     "exactRows": 264,
+     "residualPixels": 0,
+     "digest": "5ebaa4ea5379b38a4e6298386a8ba24ead3e5a48dec7400fe23264cd35e6eee3",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/shock-wave-alt-player-manectric-wailmer.json",
+   "move": "SHOCK_WAVE",
+   "measuredPhase": null,
+   "selectedPhase": true,
+   "window": 266,
+   "expectedDuration": 266,
+   "runs": [
+    {
+     "rows": 266,
+     "exactRows": 266,
+     "residualPixels": 0,
+     "digest": "eab1924db07c2d494a44b89a1051042c9b0cf3a007aba0b11b0cebcda3d67778",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 266,
+     "exactRows": 266,
+     "residualPixels": 0,
+     "digest": "eab1924db07c2d494a44b89a1051042c9b0cf3a007aba0b11b0cebcda3d67778",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/shock-wave-alt-player-raichu-weezing.json",
+   "move": "SHOCK_WAVE",
+   "measuredPhase": null,
+   "selectedPhase": true,
+   "window": 267,
+   "expectedDuration": 267,
+   "runs": [
+    {
+     "rows": 267,
+     "exactRows": 267,
+     "residualPixels": 0,
+     "digest": "59026e40c3f423528729a7dd478b0aff2adc88453fef0c27cb067b627986dc0a",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 267,
+     "exactRows": 267,
+     "residualPixels": 0,
+     "digest": "59026e40c3f423528729a7dd478b0aff2adc88453fef0c27cb067b627986dc0a",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/shock-wave-opponent-flaaffy-player-corsola.json",
+   "move": "SHOCK_WAVE",
+   "measuredPhase": null,
+   "selectedPhase": true,
+   "window": 263,
+   "expectedDuration": 263,
+   "runs": [
+    {
+     "rows": 263,
+     "exactRows": 263,
+     "residualPixels": 0,
+     "digest": "f00e9f9b0f7570c6a8f446af4ede2a6d017be4c4d097831324abb5425eac590a",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 263,
+     "exactRows": 263,
+     "residualPixels": 0,
+     "digest": "f00e9f9b0f7570c6a8f446af4ede2a6d017be4c4d097831324abb5425eac590a",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/shock-wave-player-flaaffy-opponent-corsola.json",
+   "move": "SHOCK_WAVE",
+   "measuredPhase": null,
+   "selectedPhase": true,
+   "window": 267,
+   "expectedDuration": 267,
+   "runs": [
+    {
+     "rows": 267,
+     "exactRows": 267,
+     "residualPixels": 0,
+     "digest": "02c252b5c24c45493752d1b86d64d1d0a1752deaa8f681e66b380bbe0d99ecdf",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 267,
+     "exactRows": 267,
+     "residualPixels": 0,
+     "digest": "02c252b5c24c45493752d1b86d64d1d0a1752deaa8f681e66b380bbe0d99ecdf",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
   }
- ]
+ ],
+ "shockWaveReducerChange": {
+  "change": "src/animation/shockWave.ts shockWaveTimingFor derives the timing from the geometry when the input sets derivedTiming (the live builder); absent = the accepted side tables; shockWaveSourceAtAge takes the derived shakeStart",
+  "stagedDigest": {
+   "tool": "npx vite-node tools/integration/shockWaveStagedDigest.ts OUT.json",
+   "beforeCommit": "f61cffc66",
+   "afterCommit": "31a5e2e54cafc7e7b6b66ac612f2d50eefe15daf",
+   "byteIdentical": true,
+   "digests": {
+    "player-back": {
+     "statesDigest": "d2e525c44ae19b00e7d4e868b2c0ef022bca5be53c8ecdfa4778906b8e41a244",
+     "framesDigest": "b7d368c950329821db07695610b22ab670fa4d7963a6a278b1de5b6739cb42de",
+     "ages": 269,
+     "cleanup": 266
+    },
+    "opponent-front": {
+     "statesDigest": "565bbd87bc032d157a0516548f4c18ae74a4f09b193aa19fbe1454abf72fcc72",
+     "framesDigest": "74faee79f46786f3c66aa38827e23935f37c9b0f8fd1d8c4b2baa48e20aabdfb",
+     "ages": 265,
+     "cleanup": 262
+    }
+   }
+  },
+  "actualCore": {
+   "tool": "node --experimental-strip-types tools/compare/shockWaveActualCore.ts --require-exact",
+   "byteIdentical": true,
+   "digest": "8bbc9a85fe452b2b6af19a38d7c67fea6a4687786c2ff102cd34ea24c6919fb6",
+   "rows": 530,
+   "framebufferMatched": 530,
+   "residualPixels": 0
+  },
+  "revertExperiment": "without the derivedTiming opt-in (always deriving), the 530 accepted rows stay 0 px but the tool's synthetic CROBAT / BLISSEY altered control hash changes (66809cf6.. -> 7864716a..; digest 8bbc9a85.. -> e70c17d7..): the opt-in keeps every existing caller on the accepted tables"
+ },
+ "routes": {
+  "NIGHTMARE": {
+   "search": "node --experimental-strip-types tools/integration/sleepRouteSearch.ts 171 4 1 4000",
+   "first": "30/28 HYPNO slots [0 (Hypnosis), 1 (Nightmare)]: 168 ages live, action menu",
+   "also": "166/14 HAUNTER slots [1, 2]",
+   "budget": "71/14 HAUNTER, 96/28 HYPNO exceed the replay budget"
+  },
+  "SHOCK_WAVE": {
+   "search": "node --experimental-strip-types tools/integration/r3ProfileRouteSearch.ts 351 4 1 4000",
+   "first": "7/7 CASTFORM slot 2: 266 ages live, action menu",
+   "also": "27/0 FLAAFFY 267, 122/7 MAGNETON 267",
+   "noBody": "72/0 NOSEPASS"
+  }
+ }
 }
