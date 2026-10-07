@@ -19,6 +19,14 @@ python3 tools/integration/prep29Plans.py "$OUT/r2" "$OUT/receipts/plans.json"
 node --experimental-strip-types tools/integration/prep29PaletteCheck.ts "$OUT/state" "$OUT/receipts/palette-check.json"
 python3 tools/integration/prep29LowestFree.py "$OUT/state" "$OUT/receipts/lowest-free.json" >/dev/null
 python3 tools/integration/prep29LagFrames.py "$OUT/state" "$OUT/r2" "$OUT/receipts/lag-frames.json"
+python3 tools/integration/prep29LusterData.py "$OUT/state" "$OUT/r2" "$OUT/receipts/luster-purge-data.json"
+python3 tools/integration/prep29SpitUpCheck.py "$OUT/state" "$OUT/receipts/moves" "$OUT/receipts/spit-up-check.json" >/dev/null
+# accepted reducers fed only production-derivable inputs vs the ROM per-age effect-sprite rows
+node --experimental-strip-types tools/integration/prep29BonemerangCheck.ts "$OUT/state" "$OUT/receipts/bonemerang-check.json" | tail -8
+node --experimental-strip-types tools/integration/prep29OutrageCheck.ts "$OUT/state" "$OUT/receipts/outrage-check.json" | tail -6
+node --experimental-strip-types tools/integration/prep29RapidSpinCheck.ts "$OUT/state" "$OUT/receipts/rapid-spin-check.json" | tail -4
+node --experimental-strip-types tools/integration/prep29LusterPurgeCheck.ts "$OUT/state" "$OUT/receipts/luster-purge-check.json" | tail -4
+node --experimental-strip-types tools/integration/prep29EruptionWaveCheck.ts "$OUT/state" "$OUT/receipts/eruption-wave-check.json" >/dev/null
 python3 - "$OUT" <<'PYEOF'
 import json, sys, glob
 o = sys.argv[1]; bad = 0; n = 0
