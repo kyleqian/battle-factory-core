@@ -1,7 +1,7 @@
 {
  "schema": "d4b-live-receipt/v1",
- "testedCommit": "0ad30e1c0bdefa8d57fe3a6ebf7c351e3fd43717",
- "testedSrcTree": "42a9ef978a414badffc0b46fde5cc2c1d8114688",
+ "testedCommit": "0693a432c5fd2b38dba905b8ff899fda0f45df68",
+ "testedSrcTree": "85d9048bd690befa6bd27bf8891a9777b75aa546",
  "dirty": false,
  "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
  "commands": [
@@ -146,6 +146,34 @@
     "maxPixelsPerRow": 17211,
     "cause": "optional-lag-age only: without the late restorebg row the final Task_FadeToBg (BLDY 15..0 after LoadDefaultBg) runs one row earlier, so a 176-row window differs on the 16 fade rows 158..173 (the accepted opponent window, 1 of 10); rows 0..157 and 174..175 are exact. bg-write-row: the monbg BGnCNT row (8 policy / 7 other, 3 of 10 windows) is never read by the MEGAHORN renderer branch, so row-7 windows are 0 px"
    }
+  },
+  {
+   "id": 279,
+   "move": "MOVE_REVENGE",
+   "kind": "bg-write-row",
+   "age": 5,
+   "fixedLagAges": [],
+   "iterations": 145,
+   "alternatives": [
+    {
+     "phase": "event",
+     "bodyRows": 145,
+     "measured": 5
+    },
+    {
+     "phase": "no-event",
+     "bodyRows": 145,
+     "measured": 1
+    }
+   ],
+   "chosen": "event",
+   "tieRuleUsed": false,
+   "alternatePhaseResidual": {
+    "ages": [],
+    "rows": 0,
+    "maxPixelsPerRow": 0,
+    "cause": "bg-write-row only: with the monbg BGnCNT write on row 4 MoveBattlerSpriteToBG also writes that row's BG scroll, but the target OBJ is still drawn on row 4 (hidden from row 5), so the REVENGE renderer branch shows no difference: the row-4 window (accepted opponent, 1 of 6) is 0 px under the row-5 policy"
+   }
   }
  ],
  "summary": {
@@ -173,6 +201,16 @@
     173
    ],
    "otherPhaseMaxPixelsPerRow": 17211,
+   "freshRunsIdentical": true,
+   "violations": 0
+  },
+  "REVENGE": {
+   "windows": 6,
+   "selectedPhaseWindows": 5,
+   "selectedPhaseResidualPixels": 0,
+   "otherPhaseWindows": 1,
+   "otherPhaseAffectedAges": [],
+   "otherPhaseMaxPixelsPerRow": 0,
    "freshRunsIdentical": true,
    "violations": 0
   }
@@ -643,6 +681,210 @@
      "exactRows": 177,
      "residualPixels": 0,
      "digest": "ffabf003cfbbaddf7ae571f4864dd8ab495457baa0a7f542724e1ed5e86c4608",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/revenge-alt-opponent-machoke-golem.json",
+   "move": "REVENGE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "bg-write-row": "event"
+   },
+   "policyPhases": {
+    "bg-write-row": "event"
+   },
+   "selectedPhase": true,
+   "window": 145,
+   "expectedDuration": 145,
+   "runs": [
+    {
+     "rows": 145,
+     "exactRows": 145,
+     "residualPixels": 0,
+     "digest": "49ab2753a9600811d761bb9b0f8612c7bc044fc4b751552de1ce9d0381d9e42b",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 145,
+     "exactRows": 145,
+     "residualPixels": 0,
+     "digest": "49ab2753a9600811d761bb9b0f8612c7bc044fc4b751552de1ce9d0381d9e42b",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/revenge-alt-player-machoke-golem.json",
+   "move": "REVENGE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "bg-write-row": "event"
+   },
+   "policyPhases": {
+    "bg-write-row": "event"
+   },
+   "selectedPhase": true,
+   "window": 145,
+   "expectedDuration": 145,
+   "runs": [
+    {
+     "rows": 145,
+     "exactRows": 145,
+     "residualPixels": 0,
+     "digest": "8adf2af458fd1f9e55e4b502fa0716661b8ef985059c377769e412ce11f53fe8",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 145,
+     "exactRows": 145,
+     "residualPixels": 0,
+     "digest": "8adf2af458fd1f9e55e4b502fa0716661b8ef985059c377769e412ce11f53fe8",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/revenge-extra-opponent-hitmonlee-golbat.json",
+   "move": "REVENGE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "bg-write-row": "event"
+   },
+   "policyPhases": {
+    "bg-write-row": "event"
+   },
+   "selectedPhase": true,
+   "window": 145,
+   "expectedDuration": 145,
+   "runs": [
+    {
+     "rows": 145,
+     "exactRows": 145,
+     "residualPixels": 0,
+     "digest": "fdceac450bd45d1ddedc61c172d84624f4bc745e18a0ef98ce8e4c7ef15ecc2d",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 145,
+     "exactRows": 145,
+     "residualPixels": 0,
+     "digest": "fdceac450bd45d1ddedc61c172d84624f4bc745e18a0ef98ce8e4c7ef15ecc2d",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/revenge-extra-player-hitmonlee-golbat.json",
+   "move": "REVENGE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "bg-write-row": "event"
+   },
+   "policyPhases": {
+    "bg-write-row": "event"
+   },
+   "selectedPhase": true,
+   "window": 145,
+   "expectedDuration": 145,
+   "runs": [
+    {
+     "rows": 145,
+     "exactRows": 145,
+     "residualPixels": 0,
+     "digest": "4d3b4f64b5b6f4685f0f2ecc9b9a6c9b2aba0ff196e91a805180a8d67b4caa45",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 145,
+     "exactRows": 145,
+     "residualPixels": 0,
+     "digest": "4d3b4f64b5b6f4685f0f2ecc9b9a6c9b2aba0ff196e91a805180a8d67b4caa45",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/revenge-opponent-qwilfish-player-shuckle.json",
+   "move": "REVENGE",
+   "measuredPhase": "no-event",
+   "measuredPhases": {
+    "bg-write-row": "no-event"
+   },
+   "policyPhases": {
+    "bg-write-row": "event"
+   },
+   "selectedPhase": false,
+   "window": 145,
+   "expectedDuration": 145,
+   "runs": [
+    {
+     "rows": 145,
+     "exactRows": 145,
+     "residualPixels": 0,
+     "digest": "821ca832f1a7c4c9ffc8ea0f79479066e40b5161adfff6adaf6949df4ffb2dcc",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 145,
+     "exactRows": 145,
+     "residualPixels": 0,
+     "digest": "821ca832f1a7c4c9ffc8ea0f79479066e40b5161adfff6adaf6949df4ffb2dcc",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": [],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4a-live/revenge-player-machamp-opponent-shuckle.json",
+   "move": "REVENGE",
+   "measuredPhase": "event",
+   "measuredPhases": {
+    "bg-write-row": "event"
+   },
+   "policyPhases": {
+    "bg-write-row": "event"
+   },
+   "selectedPhase": true,
+   "window": 145,
+   "expectedDuration": 145,
+   "runs": [
+    {
+     "rows": 145,
+     "exactRows": 145,
+     "residualPixels": 0,
+     "digest": "1dfec632613f468f397eca5064d49d2c60fc6c5b8ec26e72699bf37ae84bb7eb",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 145,
+     "exactRows": 145,
+     "residualPixels": 0,
+     "digest": "1dfec632613f468f397eca5064d49d2c60fc6c5b8ec26e72699bf37ae84bb7eb",
      "affectedAges": [],
      "maxPixelsPerRow": 0
     }

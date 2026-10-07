@@ -136,6 +136,8 @@ describe("faithful-timing ordinary routes", () => {
     ["MACH_PUNCH 11/7 HITMONTOP (later body: gate)", 183, 11, 7, 2 as const, 110, false],
     // D4b: r3ProfileRouteSearch.ts 224 3 1 4000 (first candidates: 5/35 RHYDON active, 5/42 RHYDON declined, 23/14 SEAKING slot 1 active).
     ["MEGAHORN 5/35 RHYDON", 224, 5, 35, 0 as const, 177, true],
+    // D4b: r3ProfileRouteSearch.ts 279 3 1 4000 (first candidates: 61/7 PINSIR slot 3 declined, 75/14 and 170/14 QWILFISH active).
+    ["REVENGE 75/14 QWILFISH", 279, 75, 14, 0 as const, 145, true],
   ])("route %s: body reached, following prompt reached, Scene ON/OFF parity", (_name, id, seed, streak, slot, ages, active) => {
     const on = generatedCommandAnimationReplay(seed, "on", [slot], streak);
     const off = generatedCommandAnimationReplay(seed, "off", [slot], streak);
@@ -229,6 +231,72 @@ describe("D4b Megahorn (224) faithful timing", () => {
     const presentation = call(lend);
     expect(presentation).not.toBeNull();
     expect((presentation!.config as any).move).toBe("MEGAHORN");
+    expect(call(undefined)).toBeNull();
+    expect(call({ known: false })).toBeNull();
+    const ot = 416049562, shiny = ((ot >>> 16) ^ (ot & 0xffff)) >>> 0;
+    for (const side of ["player", "opponent"] as const) expect(call(lend, { ...view.field, [side]: { ...view.field[side], personality: shiny } })).toBeNull();
+  });
+});
+
+// D4b faithful timing: Revenge (prep26 source model + oam assembler, liveOamMoves.ts liveRevengeInputs) with the monbg write row from the policy.
+describe("D4b Revenge (279) faithful timing", () => {
+  const rv = NAMES.filter((n) => n.startsWith("revenge-"));
+  type RvFixture = D4Fixture & { timingPhases: Record<"bg-write-row", "event" | "no-event">; monbgCntRow: 4 | 5 };
+  const receiptB = JSON.parse(readFileSync("tools/integration/fixtures/d4b-live-receipt.json", "utf8"));
+
+  it("is a faithful-timing adapter (never scoped exact / faithful random); 145 rows both sides; the status entry is the policy", () => {
+    expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).toContain(279);
+    expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).not.toContain(279);
+    expect(LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS).not.toContain(279);
+    expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[279]).toBe(0);
+    for (const attacker of [0, 1] as const) {
+      const base = { attacker, target: (1 - attacker) as 0 | 1, power: 60, damage: 10, friendship: 70, multihit: 0, turn: 0 };
+      expect(liveMoveAnimationDuration({ ...base, moveId: 279 })).toBe(145);
+    }
+    const entry = (status.faithfulTimingAdapters as { id: number; timingParameters: unknown[]; policyVersion: string; d3: boolean }[]).find((e) => e.id === 279)!;
+    expect(entry.timingParameters).toEqual(LIVE_MOVE_TIMING_POLICY[279]!.parameters.map(({ evidence: _evidence, ...p }) => p));
+    expect(entry.policyVersion).toBe(LIVE_MOVE_TIMING_POLICY_VERSION);
+    expect(entry.d3).toBe(false);
+    expect((status.implementedAdapters as { id: number }[]).some((e) => e.id === 279)).toBe(false);
+  });
+
+  it("the policy counts are the measured monbg rows of the 6 dense windows (prep26 four + the D4b HITMONLEE -> GOLBAT pair)", () => {
+    expect(rv).toHaveLength(6);
+    const fx = rv.map((n) => fixtureAt(n) as RvFixture);
+    for (const side of ["player", "opponent"]) expect(fx.filter((f) => f.attacker.geometry.side === side)).toHaveLength(3);
+    const [row] = LIVE_MOVE_TIMING_POLICY[279]!.parameters;
+    for (const f of fx) {
+      expect(f.denseWindow!.endFrame - f.denseWindow!.startFrame + 1).toBe(145);
+      expect(f.timingPhases["bg-write-row"]).toBe(f.monbgCntRow === 5 ? "event" : "no-event");
+    }
+    expect(row!.alternatives.map((a) => a.measured)).toEqual([fx.filter((f) => f.monbgCntRow === 5).length, fx.filter((f) => f.monbgCntRow === 4).length]);
+    expect([row!.kind, row!.age, row!.chosen, row!.tieRuleUsed]).toEqual(["bg-write-row", 5, "event", false]);
+  });
+
+  it("the receipt: every window exact twice fresh (the row-4 window too: the documented residual is empty)", () => {
+    const documented = (status.faithfulTimingAdapters as { id: number; alternatePhaseResidual: { ages: number[] } }[]).find((e) => e.id === 279)!.alternatePhaseResidual;
+    expect(documented.ages).toEqual([]);
+    const rows = (receiptB.windows as { fixture: string; move: string; selectedPhase: boolean; window: number; expectedDuration: number; violations: string[];
+      runs: { residualPixels: number; digest: string }[] }[]).filter((r) => r.move === "REVENGE");
+    expect(rows.map((r) => r.fixture.replace(`${DIR}/`, "").replace(".json", "")).sort()).toEqual(rv);
+    for (const r of rows) {
+      expect(r.violations).toEqual([]);
+      expect(r.runs.map((run) => run.residualPixels)).toEqual([0, 0]);
+      expect(r.runs[1]!.digest).toBe(r.runs[0]!.digest);
+      expect(r.window).toBe(r.expectedDuration);
+    }
+    expect(rows.filter((r) => r.selectedPhase)).toHaveLength(5);
+  });
+
+  it("gates: known lend required; declines with an unknown order, for a shiny battler and for a non-zero idle rest", () => {
+    const f = fixtureAt("revenge-alt-player-machoke-golem");
+    const { view, effect } = effectOf(f);
+    const call = (order: unknown, field = view.field) => liveMoveAnimationPresentation(effect.request, field, 0, undefined, undefined, order as never);
+    const lend = effect.spriteOrderInput as { known: true; free: number[]; firstBody?: true };
+    expect(lend.known).toBe(true);
+    const presentation = call(lend);
+    expect(presentation).not.toBeNull();
+    expect((presentation!.config as any).move).toBe("REVENGE");
     expect(call(undefined)).toBeNull();
     expect(call({ known: false })).toBeNull();
     const ot = 416049562, shiny = ((ot >>> 16) ^ (ot & 0xffff)) >>> 0;
