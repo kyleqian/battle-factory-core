@@ -1,0 +1,722 @@
+{
+"dive": [
+{
+"scenario": "mechanic-dive-opponent-chinchou-player-onix",
+"body": 0,
+"len": 114,
+"lagAges": [],
+"iterations": 114
+},
+{
+"scenario": "mechanic-dive-opponent-chinchou-player-onix",
+"body": 1,
+"len": 92,
+"lagAges": [
+85,
+86
+],
+"iterations": 90
+},
+{
+"scenario": "mechanic-dive-player-chinchou-opponent-onix",
+"body": 0,
+"len": 117,
+"lagAges": [
+68
+],
+"iterations": 116
+},
+{
+"scenario": "mechanic-dive-player-chinchou-opponent-onix",
+"body": 1,
+"len": 92,
+"lagAges": [
+85,
+86
+],
+"iterations": 90
+},
+{
+"scenario": "prep25-dive-alt-opponent-lanturn-golem",
+"body": 0,
+"len": 114,
+"lagAges": [],
+"iterations": 114
+},
+{
+"scenario": "prep25-dive-alt-opponent-lanturn-golem",
+"body": 1,
+"len": 92,
+"lagAges": [
+85,
+86
+],
+"iterations": 90
+},
+{
+"scenario": "prep25-dive-alt-player-lanturn-golem",
+"body": 0,
+"len": 117,
+"lagAges": [
+68
+],
+"iterations": 116
+},
+{
+"scenario": "prep25-dive-alt-player-lanturn-golem",
+"body": 1,
+"len": 92,
+"lagAges": [
+85,
+86
+],
+"iterations": 90
+}
+],
+"mach-punch": [
+{
+"scenario": "mechanic-mach-punch-opponent-hitmonchan-player-chansey",
+"body": 0,
+"len": 109,
+"lagAges": [
+71,
+72
+],
+"iterations": 107
+},
+{
+"scenario": "mechanic-mach-punch-player-hitmonchan-opponent-chansey",
+"body": 0,
+"len": 110,
+"lagAges": [
+71,
+72,
+91
+],
+"iterations": 107
+},
+{
+"scenario": "prep25-mach-punch-alt-opponent-machamp-golem",
+"body": 0,
+"len": 110,
+"lagAges": [
+71,
+72,
+91
+],
+"iterations": 107
+},
+{
+"scenario": "prep25-mach-punch-alt-player-machamp-golem",
+"body": 0,
+"len": 109,
+"lagAges": [
+71,
+72
+],
+"iterations": 107
+}
+],
+"extrasensory": [
+{
+"scenario": "mechanic-extrasensory-opponent-nuzleaf-player-shuckle",
+"body": 0,
+"len": 160,
+"lagAges": [
+122,
+123
+],
+"iterations": 158
+},
+{
+"scenario": "mechanic-extrasensory-player-nuzleaf-opponent-shuckle",
+"body": 0,
+"len": 160,
+"lagAges": [
+122,
+123
+],
+"iterations": 158
+},
+{
+"scenario": "prep25-extrasensory-alt-opponent-alakazam-golem",
+"body": 0,
+"len": 161,
+"lagAges": [
+122,
+123,
+142
+],
+"iterations": 158
+},
+{
+"scenario": "prep25-extrasensory-alt-player-alakazam-golem",
+"body": 0,
+"len": 160,
+"lagAges": [
+122,
+123
+],
+"iterations": 158
+}
+],
+"ice-ball": [
+{
+"scenario": "mechanic-ice-ball-opponent-spheal-player-onix",
+"body": 0,
+"len": 75,
+"lagAges": [],
+"iterations": 75
+},
+{
+"scenario": "mechanic-ice-ball-opponent-spheal-player-onix",
+"body": 1,
+"len": 75,
+"lagAges": [],
+"iterations": 75
+},
+{
+"scenario": "mechanic-ice-ball-opponent-spheal-player-onix",
+"body": 2,
+"len": 75,
+"lagAges": [],
+"iterations": 75
+},
+{
+"scenario": "mechanic-ice-ball-opponent-spheal-player-onix",
+"body": 3,
+"len": 75,
+"lagAges": [],
+"iterations": 75
+},
+{
+"scenario": "mechanic-ice-ball-opponent-spheal-player-onix",
+"body": 4,
+"len": 131,
+"lagAges": [
+112
+],
+"iterations": 130
+},
+{
+"scenario": "mechanic-ice-ball-opponent-spheal-player-onix",
+"body": 5,
+"len": 75,
+"lagAges": [],
+"iterations": 75
+},
+{
+"scenario": "mechanic-ice-ball-player-spheal-opponent-onix",
+"body": 0,
+"len": 75,
+"lagAges": [],
+"iterations": 75
+},
+{
+"scenario": "mechanic-ice-ball-player-spheal-opponent-onix",
+"body": 1,
+"len": 75,
+"lagAges": [],
+"iterations": 75
+},
+{
+"scenario": "mechanic-ice-ball-player-spheal-opponent-onix",
+"body": 2,
+"len": 75,
+"lagAges": [],
+"iterations": 75
+},
+{
+"scenario": "mechanic-ice-ball-player-spheal-opponent-onix",
+"body": 3,
+"len": 75,
+"lagAges": [
+38
+],
+"iterations": 74
+},
+{
+"scenario": "mechanic-ice-ball-player-spheal-opponent-onix",
+"body": 4,
+"len": 131,
+"lagAges": [
+112
+],
+"iterations": 130
+},
+{
+"scenario": "prep25-ice-ball-alt-opponent-glalie-golem",
+"body": 0,
+"len": 75,
+"lagAges": [],
+"iterations": 75
+},
+{
+"scenario": "prep25-ice-ball-alt-opponent-glalie-golem",
+"body": 1,
+"len": 75,
+"lagAges": [],
+"iterations": 75
+},
+{
+"scenario": "prep25-ice-ball-alt-opponent-glalie-golem",
+"body": 2,
+"len": 75,
+"lagAges": [],
+"iterations": 75
+},
+{
+"scenario": "prep25-ice-ball-alt-player-glalie-golem",
+"body": 0,
+"len": 75,
+"lagAges": [],
+"iterations": 75
+},
+{
+"scenario": "prep25-ice-ball-alt-player-glalie-golem",
+"body": 1,
+"len": 75,
+"lagAges": [],
+"iterations": 75
+},
+{
+"scenario": "prep25-ice-ball-alt-player-glalie-golem",
+"body": 2,
+"len": 75,
+"lagAges": [],
+"iterations": 75
+}
+],
+"flatter": [
+{
+"scenario": "mechanic-flatter-opponent-nidorina-player-onix",
+"body": 0,
+"len": 218,
+"lagAges": [
+68
+],
+"iterations": 217
+},
+{
+"scenario": "mechanic-flatter-player-nidorina-opponent-onix",
+"body": 0,
+"len": 218,
+"lagAges": [
+68
+],
+"iterations": 217
+},
+{
+"scenario": "prep25-flatter-alt-opponent-hypno-golem",
+"body": 0,
+"len": 218,
+"lagAges": [
+68
+],
+"iterations": 217
+},
+{
+"scenario": "prep25-flatter-alt-player-hypno-golem",
+"body": 0,
+"len": 218,
+"lagAges": [
+68
+],
+"iterations": 217
+}
+],
+"nightmare": [
+{
+"scenario": "mechanic-nightmare-opponent-haunter-player-shuckle",
+"body": 0,
+"len": 168,
+"lagAges": [
+21,
+129,
+130,
+149
+],
+"iterations": 164
+},
+{
+"scenario": "mechanic-nightmare-player-haunter-opponent-shuckle",
+"body": 0,
+"len": 168,
+"lagAges": [
+21,
+129,
+130,
+149
+],
+"iterations": 164
+},
+{
+"scenario": "prep25-nightmare-alt-opponent-gengar-golem",
+"body": 0,
+"len": 167,
+"lagAges": [
+21,
+129,
+130
+],
+"iterations": 164
+},
+{
+"scenario": "prep25-nightmare-alt-player-gengar-golem",
+"body": 0,
+"len": 167,
+"lagAges": [
+21,
+129,
+130
+],
+"iterations": 164
+}
+],
+"psywave": [
+{
+"scenario": "mechanic-psywave-opponent-chimecho-player-onix",
+"body": 0,
+"len": 204,
+"lagAges": [
+185
+],
+"iterations": 203
+},
+{
+"scenario": "mechanic-psywave-player-spoink-opponent-onix",
+"body": 0,
+"len": 204,
+"lagAges": [
+185
+],
+"iterations": 203
+},
+{
+"scenario": "prep25-psywave-alt-opponent-alakazam-golem",
+"body": 0,
+"len": 203,
+"lagAges": [],
+"iterations": 203
+},
+{
+"scenario": "prep25-psywave-alt-player-alakazam-golem",
+"body": 0,
+"len": 204,
+"lagAges": [
+185
+],
+"iterations": 203
+}
+],
+"revenge": [
+{
+"scenario": "mechanic-revenge-opponent-qwilfish-player-shuckle",
+"body": 0,
+"len": 144,
+"lagAges": [
+130,
+131
+],
+"iterations": 142
+},
+{
+"scenario": "mechanic-revenge-player-machamp-opponent-shuckle",
+"body": 0,
+"len": 144,
+"lagAges": [
+130,
+131
+],
+"iterations": 142
+},
+{
+"scenario": "prep25-revenge-alt-opponent-machoke-golem",
+"body": 0,
+"len": 144,
+"lagAges": [
+130,
+131
+],
+"iterations": 142
+},
+{
+"scenario": "prep25-revenge-alt-player-machoke-golem",
+"body": 0,
+"len": 144,
+"lagAges": [
+130,
+131
+],
+"iterations": 142
+}
+],
+"snore": [
+{
+"scenario": "mechanic-snore-opponent-sealeo-player-venomoth",
+"body": 0,
+"len": 69,
+"lagAges": [
+67,
+68
+],
+"iterations": 67
+},
+{
+"scenario": "mechanic-snore-player-sealeo-opponent-venomoth",
+"body": 0,
+"len": 69,
+"lagAges": [
+67,
+68
+],
+"iterations": 67
+},
+{
+"scenario": "prep25-snore-alt-opponent-snorlax-golem",
+"body": 0,
+"len": 69,
+"lagAges": [
+67,
+68
+],
+"iterations": 67
+},
+{
+"scenario": "prep25-snore-alt-player-snorlax-golem",
+"body": 0,
+"len": 69,
+"lagAges": [
+67,
+68
+],
+"iterations": 67
+}
+],
+"smog": [
+{
+"scenario": "mechanic-smog-opponent-magby-player-onix",
+"body": 0,
+"len": 305,
+"lagAges": [
+303,
+304
+],
+"iterations": 303
+},
+{
+"scenario": "mechanic-smog-player-magby-opponent-onix",
+"body": 0,
+"len": 305,
+"lagAges": [
+303,
+304
+],
+"iterations": 303
+},
+{
+"scenario": "prep25-smog-alt-opponent-weezing-golem",
+"body": 0,
+"len": 305,
+"lagAges": [
+303,
+304
+],
+"iterations": 303
+},
+{
+"scenario": "prep25-smog-alt-player-weezing-golem",
+"body": 0,
+"len": 305,
+"lagAges": [
+303,
+304
+],
+"iterations": 303
+}
+],
+"sand-tomb": [
+{
+"scenario": "mechanic-sand-tomb-opponent-dugtrio-player-onix",
+"body": 0,
+"len": 123,
+"lagAges": [],
+"iterations": 123
+},
+{
+"scenario": "mechanic-sand-tomb-player-dugtrio-opponent-onix",
+"body": 0,
+"len": 123,
+"lagAges": [],
+"iterations": 123
+},
+{
+"scenario": "prep25-sand-tomb-alt-opponent-sandslash-golem",
+"body": 0,
+"len": 123,
+"lagAges": [],
+"iterations": 123
+},
+{
+"scenario": "prep25-sand-tomb-alt-player-sandslash-golem",
+"body": 0,
+"len": 123,
+"lagAges": [],
+"iterations": 123
+}
+],
+"hyper-voice": [
+{
+"scenario": "mechanic-hyper-voice-opponent-exploud-player-slowking",
+"body": 0,
+"len": 104,
+"lagAges": [],
+"iterations": 104
+},
+{
+"scenario": "mechanic-hyper-voice-player-exploud-opponent-slowking",
+"body": 0,
+"len": 104,
+"lagAges": [],
+"iterations": 104
+},
+{
+"scenario": "prep25-hyper-voice-alt-opponent-loudred-golem",
+"body": 0,
+"len": 104,
+"lagAges": [],
+"iterations": 104
+},
+{
+"scenario": "prep25-hyper-voice-alt-player-loudred-golem",
+"body": 0,
+"len": 104,
+"lagAges": [],
+"iterations": 104
+}
+],
+"sky-attack": [
+{
+"scenario": "mechanic-sky-attack-opponent-fearow-player-shuckle",
+"body": 0,
+"len": 148,
+"lagAges": [
+127,
+128
+],
+"iterations": 146
+},
+{
+"scenario": "mechanic-sky-attack-opponent-fearow-player-shuckle",
+"body": 1,
+"len": 180,
+"lagAges": [
+142,
+143
+],
+"iterations": 178
+},
+{
+"scenario": "mechanic-sky-attack-player-fearow-opponent-shuckle",
+"body": 0,
+"len": 148,
+"lagAges": [
+127,
+128
+],
+"iterations": 146
+},
+{
+"scenario": "mechanic-sky-attack-player-fearow-opponent-shuckle",
+"body": 1,
+"len": 180,
+"lagAges": [
+142,
+143
+],
+"iterations": 178
+},
+{
+"scenario": "prep25-sky-attack-alt-opponent-pidgeot-golem",
+"body": 0,
+"len": 148,
+"lagAges": [
+127,
+128
+],
+"iterations": 146
+},
+{
+"scenario": "prep25-sky-attack-alt-opponent-pidgeot-golem",
+"body": 1,
+"len": 180,
+"lagAges": [
+142,
+143
+],
+"iterations": 178
+},
+{
+"scenario": "prep25-sky-attack-alt-player-pidgeot-golem",
+"body": 0,
+"len": 148,
+"lagAges": [
+127,
+128
+],
+"iterations": 146
+},
+{
+"scenario": "prep25-sky-attack-alt-player-pidgeot-golem",
+"body": 1,
+"len": 180,
+"lagAges": [
+142,
+143
+],
+"iterations": 178
+}
+],
+"superpower": [
+{
+"scenario": "mechanic-superpower-opponent-registeel-player-regirock",
+"body": 0,
+"len": 247,
+"lagAges": [
+244,
+245
+],
+"iterations": 245
+},
+{
+"scenario": "mechanic-superpower-player-nidoqueen-opponent-onix",
+"body": 0,
+"len": 247,
+"lagAges": [
+244,
+245
+],
+"iterations": 245
+},
+{
+"scenario": "prep25-superpower-alt-opponent-machamp-golem",
+"body": 0,
+"len": 247,
+"lagAges": [
+244,
+245
+],
+"iterations": 245
+},
+{
+"scenario": "prep25-superpower-alt-player-machamp-golem",
+"body": 0,
+"len": 247,
+"lagAges": [
+244,
+245
+],
+"iterations": 245
+}
+]
+}
