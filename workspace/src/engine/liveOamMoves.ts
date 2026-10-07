@@ -9,7 +9,7 @@ import paletteData from "../data/gen/live-animation-palette-resources.json" with
 import { KNOWN_ENTRY_NON_BATTLER_SPRITES } from "./liveBgSnapshotMoves.ts";
 import type { LivePaletteComposite } from "./liveMovePaletteComposite.ts";
 import {
-  FURY_CUTTER_ROWS, KNOWN_ENTRY_HEALTHBOX_OAM, buildLiveHardwareOam, carryLiveSpriteOrder, KNOWN_ENTRY_HEALTHBOX_SLOTS, PURSUIT_ROWS, liveFuryCutterHardwareOamRows, livePursuitHardwareOamRows, liveWillOWispHardwareOamRows,
+  FURY_CUTTER_ROWS, KNOWN_ENTRY_HEALTHBOX_OAM, buildLiveHardwareOam, carryLiveSpriteOrder, KNOWN_ENTRY_HEALTHBOX_SLOTS, PURSUIT_ROWS, RETURN_ROWS, liveFuryCutterHardwareOamRows, livePursuitHardwareOamRows, liveReturnHardwareOamRows, liveReturnLives, liveWillOWispHardwareOamRows,
   type LiveOamScene, type LiveSpriteOrderSort, type OamAttr, type WispProgram,
 } from "./liveMoveOamAssembler.ts";
 
@@ -66,6 +66,8 @@ export interface LiveWillOWispArgs {
   readonly spritesAt: (state: number, attackerCenter: Point, targetCenter: Point) => readonly WispProgram[];
   readonly orbPalette: readonly Rgb[];
   readonly firePalette: readonly Rgb[];
+  /** The host's order lend is not the first body's (later bodies: the attacker idle-rest lift is unproven). */
+  readonly laterBody?: boolean;
 }
 export interface LiveWillOWispInputs {
   readonly attackerCenter: Point;
@@ -78,7 +80,7 @@ export interface LiveWillOWispInputs {
 const wispCache = new Map<string, readonly string[][]>();
 
 /**
- * MOVE_WILL_O_WISP (261) live inputs (prep20 s1.1 + G1). Declines (null) when a battler has a non-zero idle rest
+ * MOVE_WILL_O_WISP (261) live inputs (prep20 s1.1 + G1). Declines (null) when the target has a non-zero idle rest (and, on later bodies, the attacker)
  * (Task_UpdateMonBg follows the target's x + x2 and AnimTask_ShakeMon2 restores x2 to 0, unproven for a non-zero rest).
  * Rows: hardware OAM from the assembler; palette = composite + ANIM_TAG_WISP_FIRE (slot 7, OBJ bank 23) loaded on row 2,
  * ANIM_TAG_WISP_ORB (slot 8, bank 24) on row 5, and the monbg copy of the target's OBJ palette into BG bank 8 (opponent
@@ -88,8 +90,9 @@ const wispCache = new Map<string, readonly string[][]>();
  */
 export function liveWillOWispInputs(args: LiveWillOWispArgs): LiveWillOWispInputs | null {
   const { attackerSide, attacker, target } = args;
-  if (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0
-    || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
+  if (target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
+  // The attacker-side idle rest is proven on first bodies only (RATTATA / ONIX opponent attackers, species audit 5); a later body declines.
+  if (args.laterBody && (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0)) return null;
   const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
   // AnimWillOWispOrb: InitSpritePosToAnimAttacker(sprite, FALSE) = the attacker's sBattlerCoords X / Y; AnimWillOWispFire
   // re-anchors on the target's X_2 / Y_PIC_OFFSET (corpora + alternates: orb (72, 80) / (176, 40), fire = target pic point).
@@ -198,8 +201,7 @@ const pursuitBldy = (age: number): { bldcnt: number; bldy: number } => {
  */
 export function livePursuitInputs(args: LivePursuitArgs): LivePursuitInputs | null {
   const { attackerSide, attacker, target } = args;
-  if (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0
-    || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
+  if (target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
   const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
   const attackerObject = battlerObject(attackerSide, attacker), targetObject = battlerObject(targetSide, target);
   const impactCenter = target.picOffsetPoint;
@@ -291,8 +293,7 @@ const furyCache = new Map<string, readonly string[][]>();
  */
 export function liveFuryCutterInputs(args: LiveFuryCutterArgs): { duration: number; animationInputsAt: (age: number) => Record<string, unknown> } | null {
   const { attackerSide, attacker, target } = args;
-  if (attacker.frontIdleRest.x2 !== 0 || attacker.frontIdleRest.y2 !== 0
-    || target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
+  if (target.frontIdleRest.x2 !== 0 || target.frontIdleRest.y2 !== 0) return null;
   const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
   const attackerObject = battlerObject(attackerSide, attacker), targetObject = battlerObject(targetSide, target);
   const key = JSON.stringify([attackerSide, args.counter, attackerObject.attr, targetObject.attr, args.activationOrder]);
@@ -449,6 +450,124 @@ export function liveCurseStatsInputs(args: LiveCurseStatsArgs): LiveCurseStatsIn
         battleBg: model.battleBgAt(row, attackerSprite),
         resources: { nailTileBase: 0, ghostTileBase: 0, nailLoaded: false, ghostLoaded: false, allocator: null },
         order: args.activationOrder, audio: null,
+        liveCounts: { visualTasks: 0, soundTasks: 0, matrixBitmap: 0 }, animationRng: 0, gameplayRng: null, gameplayState: null,
+      };
+    },
+  };
+}
+
+export interface LiveReturnArgs {
+  readonly attackerSide: Side;
+  readonly attackerSpecies: string;
+  readonly targetSpecies: string;
+  readonly attacker: LiveOamBattlerAnchors;
+  readonly target: LiveOamBattlerAnchors;
+  readonly palettes: LivePaletteComposite;
+  readonly activationOrder: readonly number[];
+  readonly sort: LiveSpriteOrderSort;
+}
+const returnCache = new Map<string, ReturnType<typeof liveReturnHardwareOamRows>>();
+/** AnimTask_ShakeMon(target, x, 0, reps, 1) starts [row, reps, x] of ReturnStrongest (return.ts PROGRAMS.strongest). */
+const RETURN_SHAKES = [[67, 8, 6], [101, 8, 6], [120, 8, 6], [142, 8, 6], [157, 8, 6], [172, 8, 6], [187, 8, 6], [202, 8, 6], [217, 24, 8]] as const;
+/** The target x2 per row: x2 = x at the shake's creation, then toggled every delay-1 step, 0 when the shake ends. */
+function returnTargetX2(rows: number, idleX2: number): number[] {
+  const out: number[] = []; let x2 = idleX2;
+  const active: { start: number; data: number[] }[] = [];
+  for (let f = 0; f < rows; f += 1) {
+    for (const [start, reps, x] of RETURN_SHAKES) if (f === start) { x2 = x; active.push({ start, data: [0, reps, 1, 1, x] }); }
+    for (const a of [...active]) {
+      const d = a.data;
+      if (f === a.start) d[3]! -= 1;
+      if (d[3] === 0) { x2 = x2 === 0 ? d[4]! : 0; d[3] = d[2]!; if (--d[1]! === 0) { x2 = 0; active.splice(active.indexOf(a), 1); } }
+      else if (f !== a.start) d[3]! -= 1;
+    }
+    out.push(x2);
+  }
+  return out;
+}
+const returnBlendY = (r: number): number => {
+  const [b1, b2] = [11, 264] as const;
+  return r >= b1 + 6 && r < b2 + 2 ? 6 : r >= b1 + 4 && r < b1 + 6 ? 4 : r >= b1 + 2 && r < b1 + 4 ? 2
+    : r >= b2 + 6 ? 0 : r >= b2 + 4 ? 2 : r >= b2 + 2 ? 4 : 0;
+};
+const blendToBlack = (c: number, y: number): number => {
+  const ch = (s: number) => { const a = c >> s & 31; return (a + (-a * y >> 4)) & 31; };
+  return ch(0) | ch(5) << 5 | ch(10) << 10;
+};
+
+/**
+ * MOVE_RETURN (216) strongest-branch live inputs (prep24 s2): hardware OAM + matrices from the assembler (the Factory's Return
+ * is always friendship 255), palette = composite + ANIM_TAG_IMPACT (OBJ bank 23; unfaded row 1, faded row 2), the BG 2/3
+ * darkening of the two gSimplePaletteBlend helpers (rows 11 / 264) and the monbg copy of the target's OBJ bank (row 4);
+ * registers = S0 + MoveBattlerSpriteToBG / Task_UpdateMonBg (cnt from row 5, scroll 32 - (centre + x2) one row later, x2 =
+ * the AnimTask_ShakeMon programs, cleared on row 280), setalpha 12, 8 (rows 7..276). The monbg BGnCNT write row (4 | 5) is
+ * a VBlank frame phase the renderer never reads (the target is drawn on the BG from age 5): 5.
+ */
+export function liveReturnInputs(args: LiveReturnArgs): { duration: number; animationInputsAt: (age: number) => Record<string, unknown> } | null {
+  const { attackerSide, attacker, target } = args;
+  const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
+  const attackerObject = battlerObject(attackerSide, attacker), targetObject = battlerObject(targetSide, target);
+  const key = JSON.stringify([attackerSide, attacker.frontIdleRest, target.frontIdleRest, target.picOffsetPoint, attackerObject.attr, targetObject.attr, args.activationOrder]);
+  let built = returnCache.get(key);
+  if (!built) {
+    built = liveReturnHardwareOamRows({ attackerSide, attacker: attackerObject, target: targetObject, attackerIdleY2: attacker.frontIdleRest.y2,
+      targetIdle: target.frontIdleRest, scene: KNOWN_ENTRY_SCENE, impactCenter: target.picOffsetPoint, impactTileBase: 305, impactPaletteSlot: 7,
+      freeMatrices: Array.from({ length: 32 }, (_, i) => i).filter((i) => i !== 1 && i !== 2), occupiedSlots: KNOWN_ENTRY_OCCUPIED_SLOTS,
+      activationOrder: args.activationOrder, sort: args.sort });
+    if (returnCache.size > 16) returnCache.clear();
+    returnCache.set(key, built);
+  }
+  const rows = built;
+  const lives = liveReturnLives(KNOWN_ENTRY_OCCUPIED_SLOTS, Array.from({ length: 32 }, (_, i) => i).filter((i) => i !== 1 && i !== 2));
+  const monbgBank = targetSide === "opponent" ? 8 : 9, targetObjBank = targetSide === "opponent" ? 17 : 16;
+  const layer = targetSide === "opponent" ? "bg1" : "bg2";
+  const impactPalette = resourceWords("ANIM_TAG_IMPACT");
+  const x2s = returnTargetX2(RETURN_ROWS, target.frontIdleRest.x2);
+  const paletteAt = (age: number): number[] => {
+    const out = args.palettes.hardware.slice();
+    if (age >= 2) impactPalette.forEach((word, i) => { out[23 * 16 + i] = word; });
+    const y = age >= 13 ? returnBlendY(age) : 0;
+    if (y) for (const bank of [2, 3]) for (let i = 0; i < 16; i += 1) out[bank * 16 + i] = blendToBlack(args.palettes.hardware[bank * 16 + i]!, y);
+    if (age >= 4) for (let i = 0; i < 16; i += 1) out[monbgBank * 16 + i] = out[targetObjBank * 16 + i]!;
+    return out;
+  };
+  const registersAt = (age: number): Record<string, number> => {
+    const registers: Record<string, number> = { ...S0_REGISTERS };
+    if (age >= 1) { registers.win0h = 0; registers.win0v = 0; }
+    if (age >= 5) registers[`${layer}cnt`] = (S0_REGISTERS[`${layer}cnt`]! & ~0xc003 | 0x4000 | 2) & 0xffff;
+    if (age >= 1 && age - 1 >= 4 && age - 1 < 280) {
+      registers[`${layer}hofs`] = (32 - (target.spriteCenter.x + x2s[age - 1]!)) & 0x1ff;
+      registers[`${layer}vofs`] = (32 - (target.spriteCenter.y + target.frontIdleRest.y2)) & 0x1ff;
+    }
+    if (age >= 7 && age < 277) { registers.bldcnt = 16192; registers.bldalpha = 2060; }
+    return registers;
+  };
+  const art = (species: string, object: ReturnType<typeof battlerObject>) =>
+    ({ displaySpecies: species, slot: object.slot, attr: object.attr, subpriority: object.subpriority, matrixNum: 0, matrix: [256, 0, 0, 256] });
+  const dips = lives.filter((l) => l.kind === "dip").map((l) => l.slot);
+  const splats = lives.filter((l) => l.kind === "splat");
+  const traces = lives.filter((l) => l.kind === "trace");
+  return {
+    duration: RETURN_ROWS,
+    animationInputsAt: (age: number) => {
+      const row = Math.min(age, rows.oam.length - 1), palette = paletteAt(age);
+      return {
+        friendship: 255,
+        attackerInitialOffset: attacker.frontIdleRest, targetInitialOffset: target.frontIdleRest,
+        attackerArt: art(args.attackerSpecies, attackerObject), targetArt: art(args.targetSpecies, targetObject),
+        // Task / sprite slots only label the reducer's records (the renderer draws the hardware OAM buffer).
+        taskSlots: { monbg: 1, clearMonbg: 0, shake: Array(9).fill(0), trace: Array(7).fill(0) },
+        motionSlots: { verticalDip: dips, horizontalLunge: 0 },
+        impactAllocations: splats.map((l, sourceCreationOrder) => ({ slot: l.slot, matrixNum: l.matrix, attr: [0, 0, 0], subpriority: attackerObject.subpriority - 2, sourceCreationOrder })),
+        traceAllocations: traces.map((l, sourceCreationOrder) => ({ slot: l.slot, sourceCreationOrder })),
+        spriteOrder: args.activationOrder,
+        buffers: { softwareOam: [], hardwareOam: rows.oam[row]!, softwareMatrices: IDENTITY_MATRICES, hardwareMatrices: rows.matrices[row]! },
+        palette: { unfaded: palette, faded: palette, hardware: palette },
+        registers: registersAt(age),
+        background: { current: null, battle: null, sourceScroll: { x: 0, y: 0 }, layer, monbgTaskData: [], clearTaskData: [] },
+        // ANIM_TAG_IMPACT (10135): known-entry allocation, tile slot 6 range [305, 16], palette slot 7 = OBJ bank 23.
+        resources: { impactTag: 10135, tileSlot: 6, paletteSlot: 7, paletteBank: 23, tileRange: [305, 16], allocator: null },
+        audio: { current: null, attackerPan: attackerSide === "player" ? -64 : 63, targetPan: targetSide === "player" ? -64 : 63 },
         liveCounts: { visualTasks: 0, soundTasks: 0, matrixBitmap: 0 }, animationRng: 0, gameplayRng: null, gameplayState: null,
       };
     },

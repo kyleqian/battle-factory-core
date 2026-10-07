@@ -1,0 +1,39 @@
+{
+ "schema": "return-live-adapter-fixture/v1",
+ "move": "RETURN",
+ "probe": "tools/compare/returnProbe.py",
+ "scenario": "tools/battle-lab/mechanic-return-opponent-dragonair-player-onix.json",
+ "denseWindow": {
+  "startFrame": 78,
+  "endFrame": 359
+ },
+ "windowSource": "window = the scenario's own sourceWindow (activation .. first inactive row, 282 rows) from its direct-mGBA returnProbe.py run",
+ "attacker": {
+  "species": "DRAGONAIR",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703703,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 168,
+  "opponentMaxHp": 168,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0
+ }
+}

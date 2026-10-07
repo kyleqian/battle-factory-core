@@ -25778,6 +25778,15 @@ export function renderSceneOnMovePresentation(
         y: view.attacker.geometry.battlePositionCenter.y - frontPictureOffset,
       });
     }
+    // An elevated opponent TARGET keeps its ground shadow on the activation frame too (SpriteCB_EnemyShadow re-hides it only
+    // once the target leaves for the monbg); same rule as the attacker (docs/next-adapters-prep24.md s2.4).
+    if (moveState.age === 0 && view.target.geometry.side === "opponent" && plan.target) {
+      const frontPictureOffset = (plan.target.attr[0] & 0xff) - 8;
+      drawSourceOpponentEnemyShadow(fb, view.battlers.target.art.displaySpecies, {
+        x: view.target.geometry.battlePositionCenter.x,
+        y: view.target.geometry.battlePositionCenter.y - frontPictureOffset,
+      });
+    }
     const nonObjTarget2 = fb.slice();
     const drawBattler = (battler: typeof view.attacker,
       object: typeof plan.attacker, art: BattlerArt): void => {

@@ -5299,6 +5299,44 @@
     "body": "normal",
     "activation": "window start = the scenario's own first-body activation (prep22 moves/*.json; elevated GOLBAT target dense 0 px in the r3 receipt)"
    }
+  },
+  {
+   "id": 216,
+   "move": "RETURN",
+   "orientation": "player",
+   "variant": "return-live-accepted-player-dragonair-opponent-onix",
+   "activationFrame": 74,
+   "windowStart": 74,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/return-live/accepted-player-dragonair-opponent-onix.json",
+    "scenario": "tools/battle-lab/mechanic-return-player-dragonair-opponent-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own first-body activation (returnProbe.py sourceWindow); elevated PIDGEOT target dense 0 px (return-live-adapter-receipt.json)"
+   }
+  },
+  {
+   "id": 216,
+   "move": "RETURN",
+   "orientation": "opponent",
+   "variant": "return-live-accepted-opponent-dragonair-player-onix",
+   "activationFrame": 78,
+   "windowStart": 78,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/return-live/accepted-opponent-dragonair-player-onix.json",
+    "scenario": "tools/battle-lab/mechanic-return-opponent-dragonair-player-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own first-body activation (returnProbe.py sourceWindow); elevated PIDGEOT target dense 0 px (return-live-adapter-receipt.json)"
+   }
   }
  ]
 }

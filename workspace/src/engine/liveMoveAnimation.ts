@@ -85,11 +85,11 @@ import octazookaAsset from "../animation/assets/octazooka.json" with { type: "js
 import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
 import { liveLovelyKissProfile, liveOctazookaProfile, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
-import { liveCurseStatsInputs, liveFuryCutterInputs, livePursuitInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
+import { liveCurseStatsInputs, liveFuryCutterInputs, livePursuitInputs, liveReturnInputs, liveWillOWispInputs } from "./liveOamMoves.ts";
 import {
   CURSE_STATS_ROWS, curseStatsBattleBgAt, curseStatsPaletteAt, curseStatsRegistersAt, curseStatsSpritesAt, curseStatsTasksAt,
 } from "../animation/curseModel.ts";
-import { FURY_CUTTER_ROWS, PURSUIT_ROWS } from "./liveMoveOamAssembler.ts";
+import { FURY_CUTTER_ROWS, PURSUIT_ROWS, RETURN_ROWS } from "./liveMoveOamAssembler.ts";
 import { willOWispSpritesAtAge, willOWispTimeline } from "../animation/willOWisp.ts";
 import { pursuitTargetOffsetAtAge } from "../animation/pursuit.ts";
 import { sortGbaSpriteOrder } from "../animation/gbaObjCompositor.ts";
@@ -125,6 +125,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // oam1 (docs/next-adapters-prep20.md): production hardware-OAM provider (liveMoveOamAssembler.ts), first body.
   // Fury Cutter: the counter-1 body only (a first body implies furyCutterCounter 1).
   261, 228, 210,
+  // Return (strongest branch, friendship 255: the only one the Factory reaches), first body (docs/next-adapters-prep24.md s2).
+  216,
   // anchor3: source battler anchors (position center, picture height, pic offset).
   86, 87, 107, 116, 203, 207, 263, 339,
   // selectors: request-selected branches and healing anchors.
@@ -313,6 +315,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     315, 318, 244,
     // oam1: Will-O-Wisp, Pursuit (normal body), Fury Cutter (counter 1) activation == window start (row 0; prep18-activation.json).
     261, 228, 210,
+    // Return (strongest): activation == window start (row 0; prep24 / prep18 return probes, both sides).
+    216,
     // curse-live: Curse (stats body) activation == window start (row 0; curseProbe.py sourceWindow, elevated PIDGEOT target dense).
     174,
     // prep22 P1: Lovely Kiss (faithful-random), Spikes, Octazooka windows start at activation (row 0; prep22 moves/*.json, both sides).
@@ -799,6 +803,8 @@ export function liveMoveAnimationDuration(
     case 228: return (request.turn & 1) === 0 ? PURSUIT_ROWS : null;
     // Fury Cutter (oam1): one body = 43 rows (78..120 / 82..124, first inactive age 42 + 1) for every counter.
     case 210: return FURY_CUTTER_ROWS;
+    // Return (strongest branch, friendship 255, Factory-only): 282 rows both sides (0.25% of Factory move slots).
+    case 216: return RETURN_ROWS;
     // Curse (curse-live): MOVE_CURSE's choosetwoturnanim picks CurseStats when gAnimMoveTurn & 1 (BattleScript_EffectCurse
     // setbyte sB_ANIM_TURN 1 for a non-Ghost attacker, battle_scripts_1.s:1491-1492): 176 rows (first inactive age 175 + 1).
     // The Ghost branch (turn 0) declines: its row-26 palette-transfer scanline and BG2 scroll phase are frame-phase inputs.
@@ -2642,8 +2648,10 @@ export function liveMoveAnimationPresentation(
       // oam1 (prep20 s1.1 + G1): the display plan decodes a hardware-OAM buffer, built here by the production assembler from the
       // anchors, the known-entry allocator/scene constants and the lent activation order carried through the body (full 64-slot
       // SortSprites, dummy keys for free slots). First body only: the known-entry occupancy, allocator slots and the unfaded
-      // composite palette are proven there (every dense fixture); non-shiny (no shiny battle palette); zero idle rests.
-      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      // composite palette are proven there (every dense fixture); non-shiny (no shiny battle palette); zero idle rests. Later bodies
+      // (any known lend) are exact too: 12/12 lb26 fixtures after Tackle / Splash / Psychic / Growl+unit / Swords Dance+unit / Surf, both
+      // sides (docs/later-bodies-curse-oam.md; the unfaded palette / known-entry allocator hold across those predecessors).
+      if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       const activationOrder = spriteOrderWithOccupiedPrefix(
@@ -2653,6 +2661,7 @@ export function liveMoveAnimationPresentation(
       const inputs = liveWillOWispInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
         targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
         sort: sortGbaSpriteOrder, orbPalette: willOWispAsset.orb.palette, firePalette: willOWispAsset.fire.palette,
+        laterBody: !spriteOrderInput.firstBody,
         timeline: (a, t) => willOWispTimeline(attacker.geometry.side, a, t),
         spritesAt: (state, a, t) => willOWispSpritesAtAge(state, { attackerSide: attacker.geometry.side, attackerCenter: a, targetCenter: t }) });
       if (inputs === null) return null;
@@ -2725,6 +2734,24 @@ export function liveMoveAnimationPresentation(
         counter: 1, sort: sortGbaSpriteOrder });
       if (inputs === null) return null;
       config = { move: "FURY_CUTTER", attacker, target, fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
+      break;
+    }
+    case 216: {
+      // Return (prep24 s2): the strongest branch only (every Factory mon has friendship 255, so no request plumbing). First body (known-entry
+      // allocator: IMPACT slot 3.., matrices free from 0; S0 BG state), non-shiny; the oam1 idle-rest convention (the model handles the
+      // target's non-zero idle rest, proven on ONIX / GOLEM; the attacker's rest is replaced by the dip y2 and proven zero-or-handled).
+      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const activationOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (palettes === null || activationOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const inputs = liveReturnInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
+        targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
+        sort: sortGbaSpriteOrder });
+      if (inputs === null) return null;
+      config = { move: "RETURN", attacker, target, fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
       break;
     }
     case 237: {
