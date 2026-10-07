@@ -62,6 +62,16 @@ describe("live Fire Punch body-only adapter (7)", () => {
     }
   });
 
+  it("declines for a shiny battler (no shiny palette exists; audit 6), both sides", () => {
+    const shiny = ((416_049_562 >>> 16) ^ (416_049_562 & 0xffff)) << 16 >>> 0;
+    for (const side of ["player", "opponent"] as const) {
+      const f = displayed("ONIX", "GROVYLE") as any;
+      expect(liveMoveAnimationPresentation(request(0), f, 0)).not.toBeNull();
+      f[side] = { ...f[side], personality: shiny };
+      expect(liveMoveAnimationPresentation(request(0), f, 0)).toBeNull();
+    }
+  });
+
   it("renders live species art (alternate pairs, elevated GOLBAT) in both orientations; frames change over the body", () => {
     for (const [a, p, o] of [[0, "HITMONCHAN", "GOLBAT"], [1, "MACHAMP", "GOLBAT"], [0, "SNORLAX", "ALAKAZAM"], [1, "GOLEM", "SNORLAX"]] as const) {
       const f = displayed(p, o), req = request(a);

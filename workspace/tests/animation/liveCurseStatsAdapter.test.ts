@@ -78,9 +78,10 @@ describe("curse-live: MOVE_CURSE live adapter (174)", () => {
     expect(liveMoveAnimationPresentation(request(0), field, 90)).toBeNull();
     const shiny = ((416_049_562 >>> 16) ^ (416_049_562 & 0xffff)) << 16 >>> 0;
     expect(liveMoveAnimationPresentation(request(0), displayed("SNORLAX", "GOLBAT", shiny), 90, undefined, undefined, knownOrder())).toBeNull();
-    // ONIX's front idle rest is x2 = 1 (speciesIdleAnim): an opponent ONIX attacker or target declines.
+    // ONIX's front idle rest is x2 = 1 (speciesIdleAnim): an opponent ONIX ATTACKER declines (unproven); an ONIX TARGET is exact
+    // (docs/live-species-audit-6.md: RATTATA / ONIX targets 176/176, 0 px) and engages.
     expect(liveMoveAnimationPresentation(request(1), displayed("GOLEM", "ONIX"), 90, undefined, undefined, knownOrder())).toBeNull();
-    expect(liveMoveAnimationPresentation(request(0), displayed("GOLEM", "ONIX"), 90, undefined, undefined, knownOrder())).toBeNull();
+    expect(liveMoveAnimationPresentation(request(0), displayed("GOLEM", "ONIX"), 90, undefined, undefined, knownOrder())).not.toBeNull();
   });
 
   it("builds every consumed input of the retained accepted corpora from production inputs (both orientations)", () => {
