@@ -2640,9 +2640,11 @@ export function liveMoveAnimationPresentation(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || lentOrder === null) return null;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
-      config = { move: "MACH_PUNCH", attacker, target, fieldProfile, animationInputs: liveMachPunchInputs({
+      const machPunchInputs = liveMachPunchInputs({
         attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes, spriteOrder: lentOrder, firstBody: true,
-        healthbarPalette: (paletteResources as unknown as { initial: { healthbar: readonly number[] } }).initial.healthbar }) as never };
+        healthbarPalette: (paletteResources as unknown as { initial: { healthbar: readonly number[] } }).initial.healthbar });
+      if (machPunchInputs === null) return null;
+      config = { move: "MACH_PUNCH", attacker, target, fieldProfile, animationInputs: machPunchInputs as never };
       break;
     }
     case 173: {
