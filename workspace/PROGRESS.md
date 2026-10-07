@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-06 (night) — S10A in progress: 226 -> 230 scoped-exact (checkpoint 22:40)
+
+- **State:** S10A, local master; production src at the r2-gates merge: 230 scoped-exact + 10 faithful-random live
+  adapters, 36 accepted bodies remain (census `230+10+0+36=276`). Worker full gates on that code: 1,539 files /
+  12,508 tests, build; supervisor union checks typecheck + smoke 448 + targeted. Opus 5.5 supervisor; Opus/Sonnet
+  5.5 workers. Running: Curse integration (Opus), Megahorn/Return prep24 (side).
+- **Did:** hardware-OAM provider + Will-O-Wisp / Pursuit / Fury Cutter first bodies (oam1); Fire Punch body-only;
+  Overheat any known lend; Psych Up opponent attacker. Evidence: prep22 (Fire Punch split; 6 stale Random2 labels;
+  Lovely Kiss plan), prep23 (Curse source models), species audit 5 (no defects). Details in
+  `ANIMATION_INTEGRATION_PROGRESS.md`.
+- **Next:** Curse fold; Lovely Kiss / Spikes / Octazooka / Signal Beam batch; Megahorn / Return from prep24;
+  Endeavor; prep25 triage of the next tier.
+- **Notes:** oracles 8012/8014 are from 11:29 with oracle code unchanged since (freshness script flags docs-only
+  commits). No DEFERRED entries.
+
+---
+
 ## 2026-10-06 (day) — S10A wind-down: D3 implemented; 218 -> 226 exact + 10 faithful-random live adapters
 
 - **State:** S10A, local master; production `7e7816b98` (src tree `c41c4949`): 226 scoped-exact + 10
@@ -56,33 +73,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-05 (day) — S10A wind-down: 198 -> 218 live adapters; lends across faints/switches; 8 species fixes; elevated renderer
-
-- **State:** S10A, local master; production `24df8af5e` (218 live adapters, 58 accepted bodies
-  remain: 52 Random2 + 6 others). Supervisor final gates on that code: typecheck, 1,525 files / 12,317 tests, build 851 (`final-supervisor-gates-20261005-day.json`). Preview
-  <http://127.0.0.1:5191/> serves `24df8af5e` (four hashes, export, ON->OFF, no errors) (receipt in `tools/integration/fixtures/`). Opus 5.5
-  supervisor; Opus/Sonnet 5.5 workers; 13 integration folds + 15 evidence merges, all re-proved.
-- **Did (production):** sprite-order tracker kept and LENT across opponent KOs (entry-label relabel),
-  player faints + forced switch-in and voluntary switches / cancelled menus (role relabel), Roar /
-  Whirlwind forced switches; allocator re-seeded; +22 order rows (467 bodies). Adapters: Magnitude,
-  Reversal, Pain Split, Rock Blast, Razor Wind, Spark (player) with gBattleMovePower on the request;
-  Leech Seed, Tri Attack, Petal Dance, Destiny Bond, Air Cutter, Foresight, Sky Uppercut, Recycle,
-  Spider Web; Roar, Whirlwind (Scene-ON instant forced removal); Fly, Bounce (attacker hidden across
-  the turn gap); Rollout (counter on the request; Defense Curl bodies decline). Species fixes from swap audits: Leaf Blade, Dragon Rage, Aerial Ace, Rock Throw,
-  Smelling Salt, Light Screen / Future Sight end shadow, Foresight (#144 closed, #145 trimmed).
-  ISSUES #147: elevated opponents were drawn 8 px low without shadow in ordinary resolution frames
-  in BOTH scene modes — fixed (Scene OFF 0/935 -> 919/935; 203 committed traces unchanged).
-- **Did (evidence):** post-KO / player-faint / voluntary-switch audits, census regen, prep10/11,
-  Random2 trackability (NOT trackable), forced-switch continuation (#146), live species audits 1+2,
-  elevated post-body + Scene OFF checks, Rollout/Endeavor prep (both trackable), send-in tail model
-  (338/338).
-- **Next:** ROADMAP S10A "Next (2026-10-05 day)": D3 answer first; then Endeavor, Baton
-  Pass, #146 send-in tail (model ready), #145/#147 remainders, order-coverage gaps.
-- **Notes:** **DEFERRED D3 (OPEN):** Random2 animations (52 moves) cannot be tracked exactly in play;
-  ship a surrogate presentation RNG in a separate claim bucket (recommended) or keep the fallback.
-  The next `run-supervisor.sh` refuses to start until D3 is answered. Soak gates superseded for
-  S10A integration work (ANIMATION_VERIFICATION scoped policy). All worker branches merged and
-  worktrees removed; evidence summaries copied to `.integration/validation/`. A side worker once
-  committed onto master via the shared `/workspace` path suffix and self-repaired (PAPERCUTS).
-
----
