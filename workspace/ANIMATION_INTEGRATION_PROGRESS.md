@@ -26,6 +26,16 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- Folded Opus worker `fb101d18d` as `0b4f5bf83` (src tree `0fa8e76b`): FAITHFUL-TIMING Nightmare (171; prep32 model
+  port; lag at 149 policy; second display-neutral parameter palette-transfer-row 4:4 tie -> 148 by the tie rule; GOLBAT
+  row-0 shadow via the live #142 hook; routes 30/28 HYPNO (Hypnosis first), 166/14 HAUNTER). EXACT Shock Wave (351;
+  prep33 builder; derived timing behind an opt-in `derivedTiming` flag used only by the live builder — staged digests
+  and `shockWaveActualCore` 530/530 unchanged; routes 7/7 CASTFORM, 27/0, 122/7). Worker gates 1,553 files / 12,737
+  tests, build, differential 389. Supervisor: 14 windows x2 fresh via `d4aTimingCheck.ts`, 0 violations (Nightmare
+  no-lag windows only ages 150..165; Shock Wave 6/6 0 px); union typecheck, smoke, 19 targeted files 810/810, own
+  differential vs `3c599fa9e` 389/389. Checker gap found by the worker (other-phase window without documented rows
+  was unchecked) — fix queued in the next step; supervisor reruns all printed per-window px, unaffected.
+  Counts: 248 + 12 + 8 faithful-timing, 8 remaining.
 - prep34 (side, `f69afd93e`, new files only): Extreme Speed (245) X-AGE closed — reducer age 43 at activation in all 4
   windows (ARCANINE->DUGTRIO, new SMEARGLE->GOLEM, both sides), body 321 rows, 8,916/8,916 visible field-rows,
   accepted pair 321/321 rows 0 px; the only missing input is the attacker pic y-offset hard-coded for ARCANINE.
