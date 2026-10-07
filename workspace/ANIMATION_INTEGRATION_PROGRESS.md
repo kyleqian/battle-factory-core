@@ -26,6 +26,15 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- Folded Opus worker `49b31367b` as `af53ffb4a` (src tree `efec2d66`): FAITHFUL-TIMING Psywave (149; prep30 model,
+  `livePsywaveInputs.ts`; late lag at 185, 4 of 6 -> 205 rows; elevated-opponent row-0 shadow via the live #142 row
+  0 hook) and Extrasensory (326; `liveExtrasensoryInputs.ts`; reducer `targetYElevation` input, defaults unchanged;
+  first animation unit of the battle only — activation scanline buffers are intro residue; no lag at 142 (4 of 6)
+  -> 161 rows; scanline split S = 0 with per-window documented residuals: GOLEM P 1,433 px / 22 rows, CROBAT P
+  lag + split 85 rows). Routes 84/7 CHIMECHO, 9/35 EXPLOUD (42/7 STANTLER declines: Intimidate runs first). Worker
+  gates 1,550 files / 12,708 tests, build 867, differential 389. Supervisor: all 12 windows x2 fresh, 0 violations;
+  union typecheck, smoke, 16 targeted files 947/947, own differential vs `d8b2aebdb` 389/389.
+  Counts: 246 + 12 + 6 faithful-timing, 12 remaining.
 - Species audit 9 (side, `5383b9b10`, new files only): Megahorn / Revenge / Mach Punch / Meteor Mash, 154 swap rows
   x2 fresh: 99 rows 0 px, 30 TIMING-PHASE (residual only on the documented rows; with swapped species the fade rows
   reach 19,175 px/row, above the documented per-fixture maximum — the check gates on ages, not px), no new lag class.
