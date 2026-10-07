@@ -1,4 +1,4 @@
-// prep22: accepted reducer (Spikes / Octazooka / Lovely Kiss) fed ONLY production-derivable inputs vs the ROM sprite births of each scenario (accepted P/O + fresh alternates).
+// prep22 (extended: per-age x/y/x2/y2/invisible of every effect sprite vs the ROM spriteSeries): accepted reducer (Spikes / Octazooka / Lovely Kiss) fed ONLY production-derivable inputs vs the ROM sprite births of each scenario (accepted P/O + fresh alternates).
 // Inputs: liveBattlerAnchors (picOffsetPoint = animationCenter, battlePositionCenter) from the displayed species; slots = lowest-free over the known-entry in-use set;
 // sprite subpriority = target battler subpriority - 2 (player 30 / opponent 40); attr2 = (paletteBank << 12) | tile from the measured first-sheet allocation constants.
 // Compared per ROM birth: age (reducer first row listing the slot), slot, x, y, subpriority, attr2.  usage: node --experimental-strip-types tools/integration/prep22ReducerBirths.ts STATE_DIR OUT.json
@@ -65,6 +65,26 @@ for (const f of readdirSync(dir).filter((x) => x.endsWith("-r1.json")).sort()) {
     const same = got ? Object.keys(rom).filter((k) => (got as any)[k] !== (rom as any)[k]) : ["absent"];
     if (same.length === 0) ok += 1; else diffs.push({ i, age, rom, reducer: got, differs: same });
   });
+  // per-age sprite state: ROM effect sprites (all in-use slots outside the known-entry set) vs reducer sprites at the same age
+  let ageRows = 0, ageOk = 0; const ageDiffs: any[] = [];
+  for (const row of body.spriteSeries as any[]) {
+    const age = row[0]; if (age >= E_AGE) continue;
+    const rom = new Map<number, number[]>((row.slice(1) as number[][]).map((s) => [s[0]!, s]));
+    const red = new Map<number, any>((state(age).sprites as any[]).map((s) => [s.slot, s]));
+    ageRows += 1;
+    const slotsSame = rom.size === red.size && [...rom.keys()].every((k) => red.has(k));
+    let same = slotsSame;
+    const detail: any[] = [];
+    if (slotsSame) for (const [slot, r] of rom) {
+      const g = red.get(slot)!;
+      const mism = ["x", "y", "x2", "y2"].filter((k, i) => g[k] !== r[1 + i]);
+      if ((g.invisible ? 1 : 0) !== r[5]) mism.push("invisible");
+      if (mism.length) { same = false; detail.push({ slot, mism, rom: r.slice(1, 6), red: [g.x, g.y, g.x2, g.y2, g.invisible ? 1 : 0] }); }
+    } else detail.push({ romSlots: [...rom.keys()], redSlots: [...red.keys()] });
+    if (same) ageOk += 1; else if (ageDiffs.length < 3) ageDiffs.push({ age, detail });
+  }
+  out[name + "#perAge"] = { ageRows, ageExact: ageOk, firstDiffs: ageDiffs };
+  console.log("   per-age sprite rows", ageRows, "exact", ageOk, ageDiffs.length ? JSON.stringify(ageDiffs[0]).slice(0, 300) : "");
   total += births.length; bad += births.length - ok;
   out[name] = { move: mv, attackerSide, romBirths: births.length, reducerBirths: reducerFirst.length, exactBirths: ok, diffs: diffs.slice(0, 4) };
   console.log(name.slice(-44).padEnd(44), `births ${births.length} reducer ${reducerFirst.length} exact ${ok}`, diffs.length ? JSON.stringify(diffs[0]) : "");

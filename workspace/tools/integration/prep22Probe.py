@@ -96,6 +96,9 @@ def step():
             tb = sym["gTasks"]; taskev.append([f, {str(k): v for k, v in tf.items()}, {str(k): [sg(tb + k * 0x28 + 8 + 2 * j) for j in range(8)] for k in tf}]); prev_tasks = tf
         rg = regs()
         if rg != prev_bg: bgev.append([f, rg]); prev_bg = rg
+    if cur is not None:  # prep22: per-frame in-use sprite (slot, x, y, x2, y2, invisible, oam attr0/1/2) inside the body
+        _b = sym["gSprites"]
+        cur.setdefault("spriteSeries", []).append([f - cur["start"]] + [[i, sg(_b + i * 0x44 + 0x20), sg(_b + i * 0x44 + 0x22), sg(_b + i * 0x44 + 0x24), sg(_b + i * 0x44 + 0x26), u8(_b + i * 0x44 + 0x3e) >> 2 & 1, u16(_b + i * 0x44), u16(_b + i * 0x44 + 2), u16(_b + i * 0x44 + 4)] for i in range(64) if u8(_b + i * 0x44 + 0x3e) & 1 and i not in (0, 1, 2, 6, 8, 60, 61, 62, 63)])
     if cur is not None and f - cur["start"] <= 24:  # prep22: OBJ palette banks (unfaded + faded) per age around the move's load edges
         cur.setdefault("palEarly", []).append([f - cur["start"], banks(sym["gPlttBufferUnfaded"]), banks(sym["gPlttBufferFaded"]), bgb(sym["gPlttBufferUnfaded"])[:8]])
     if ALWAYS or cur is not None:  # sSpriteOrder whenever it changes inside a body (hardware tie-order derivation)

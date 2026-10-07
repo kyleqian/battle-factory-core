@@ -1,4 +1,9 @@
 {
+ "mechanic-lovely-kiss-opponent-jynx-player-onix#perAge": {
+  "ageRows": 151,
+  "ageExact": 151,
+  "firstDiffs": []
+ },
  "mechanic-lovely-kiss-opponent-jynx-player-onix": {
   "move": "lovely-kiss",
   "attackerSide": "opponent",
@@ -6,6 +11,11 @@
   "reducerBirths": 5,
   "exactBirths": 5,
   "diffs": []
+ },
+ "mechanic-lovely-kiss-player-jynx-opponent-onix#perAge": {
+  "ageRows": 151,
+  "ageExact": 151,
+  "firstDiffs": []
  },
  "mechanic-lovely-kiss-player-jynx-opponent-onix": {
   "move": "lovely-kiss",
@@ -15,6 +25,11 @@
   "exactBirths": 5,
   "diffs": []
  },
+ "mechanic-octazooka-opponent-octillery-player-onix#perAge": {
+  "ageRows": 78,
+  "ageExact": 78,
+  "firstDiffs": []
+ },
  "mechanic-octazooka-opponent-octillery-player-onix": {
   "move": "octazooka",
   "attackerSide": "opponent",
@@ -22,6 +37,11 @@
   "reducerBirths": 5,
   "exactBirths": 5,
   "diffs": []
+ },
+ "mechanic-octazooka-player-octillery-opponent-onix#perAge": {
+  "ageRows": 78,
+  "ageExact": 78,
+  "firstDiffs": []
  },
  "mechanic-octazooka-player-octillery-opponent-onix": {
   "move": "octazooka",
@@ -31,6 +51,11 @@
   "exactBirths": 5,
   "diffs": []
  },
+ "mechanic-spikes-opponent-qwilfish-player-onix#perAge": {
+  "ageRows": 112,
+  "ageExact": 112,
+  "firstDiffs": []
+ },
  "mechanic-spikes-opponent-qwilfish-player-onix": {
   "move": "spikes",
   "attackerSide": "opponent",
@@ -38,6 +63,11 @@
   "reducerBirths": 3,
   "exactBirths": 3,
   "diffs": []
+ },
+ "mechanic-spikes-player-qwilfish-opponent-onix#perAge": {
+  "ageRows": 112,
+  "ageExact": 112,
+  "firstDiffs": []
  },
  "mechanic-spikes-player-qwilfish-opponent-onix": {
   "move": "spikes",
@@ -47,6 +77,11 @@
   "exactBirths": 3,
   "diffs": []
  },
+ "prep22-lovely-kiss-alt-opponent-hypno-golem#perAge": {
+  "ageRows": 151,
+  "ageExact": 151,
+  "firstDiffs": []
+ },
  "prep22-lovely-kiss-alt-opponent-hypno-golem": {
   "move": "lovely-kiss",
   "attackerSide": "opponent",
@@ -54,6 +89,11 @@
   "reducerBirths": 5,
   "exactBirths": 5,
   "diffs": []
+ },
+ "prep22-lovely-kiss-alt-player-hypno-golem#perAge": {
+  "ageRows": 151,
+  "ageExact": 151,
+  "firstDiffs": []
  },
  "prep22-lovely-kiss-alt-player-hypno-golem": {
   "move": "lovely-kiss",
@@ -63,6 +103,11 @@
   "exactBirths": 5,
   "diffs": []
  },
+ "prep22-octazooka-alt-opponent-kingler-golem#perAge": {
+  "ageRows": 78,
+  "ageExact": 78,
+  "firstDiffs": []
+ },
  "prep22-octazooka-alt-opponent-kingler-golem": {
   "move": "octazooka",
   "attackerSide": "opponent",
@@ -70,6 +115,11 @@
   "reducerBirths": 5,
   "exactBirths": 5,
   "diffs": []
+ },
+ "prep22-octazooka-alt-player-kingler-golem#perAge": {
+  "ageRows": 78,
+  "ageExact": 78,
+  "firstDiffs": []
  },
  "prep22-octazooka-alt-player-kingler-golem": {
   "move": "octazooka",
@@ -79,6 +129,11 @@
   "exactBirths": 5,
   "diffs": []
  },
+ "prep22-spikes-alt-opponent-forretress-golem#perAge": {
+  "ageRows": 112,
+  "ageExact": 112,
+  "firstDiffs": []
+ },
  "prep22-spikes-alt-opponent-forretress-golem": {
   "move": "spikes",
   "attackerSide": "opponent",
@@ -86,6 +141,11 @@
   "reducerBirths": 3,
   "exactBirths": 3,
   "diffs": []
+ },
+ "prep22-spikes-alt-player-forretress-golem#perAge": {
+  "ageRows": 112,
+  "ageExact": 112,
+  "firstDiffs": []
  },
  "prep22-spikes-alt-player-forretress-golem": {
   "move": "spikes",
