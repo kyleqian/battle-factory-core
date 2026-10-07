@@ -65,7 +65,8 @@ the dominant measured timing as a separately counted claim, like D3's "faithful 
 
 **Safe work continued:** every move whose timing is constant across its measured windows continued on the
 normal exact path (Return, Curse non-Ghost, Fire Punch, Sheer Cold, Hyper Voice, Smog, Sand Tomb, Sky Attack,
-Signal Beam, Spikes, Octazooka, Lovely Kiss, Baton Pass / Endeavor / Dive in progress).
+Signal Beam, Spikes, Octazooka, Lovely Kiss, Baton Pass, Endeavor, Snore, Bonemerang, Rapid Spin, Outrage,
+Luster Purge).
 
 (D3, the Random2 animation decision, was ANSWERED by the user on 2026-10-06:
 option (a) — implement a separate deterministic presentation RNG using the

@@ -35,7 +35,7 @@ separate deterministic presentation RNG for Random2 animations, preserve its
 seed in session exports, and report those live adapters as "faithful random"
 separately from exact claims. S10A below defines the scope and acceptance.
 This resolves D3; no further user approval is needed for that implementation.
-Implemented 2026-10-06: `docs/presentation-rng.md`; 11 faithful-random adapters live (2026-10-07).
+Implemented 2026-10-06: `docs/presentation-rng.md`; 12 faithful-random adapters live (2026-10-07).
 **DEFERRED D4 (OPEN, 2026-10-07):** CPU-load timing animations — see DEFERRED.md; it blocks the next
 `run-supervisor.sh` until answered.
 
@@ -2211,9 +2211,8 @@ fourteen-move physical batch is verified and folded. Helping Hand remains
 unaccepted pending legal doubles staging. No whole-playable arbitrary-history
 framebuffer exactness is claimed.
 
-Next (2026-10-07 morning): 243 scoped-exact live adapters + 11 faithful-random (D3 surrogate) adapters
-(production at the order-rows merge, src tree `34e54570`); 22 accepted bodies remain (2.2% of Factory move
-uses; census `243+11+0+22=276`). The 2026-10-06 night session added the hardware-OAM provider
+Next (2026-10-07 morning): 246 scoped-exact live adapters + 12 faithful-random (D3 surrogate) adapters
+(production src tree `1efb1872`); 18 accepted bodies remain (census `246+12+0+18=276`). The 2026-10-06 night session added the hardware-OAM provider
 (`src/engine/liveMoveOamAssembler.ts`, `liveOamMoves.ts`), source models for Curse / Return / Endeavor, two
 builder families (`liveProfileMoves.ts`, `liveQ2Moves.ts`), 14 production sprite-order plan rows, and fixed
 ISSUES #150 and the idle-x2 part of #151. **DEFERRED D4 is OPEN and blocks the next run until answered:**
@@ -2223,8 +2222,7 @@ or ship them in a separate "faithful timing" bucket. Resume points, in order:
    Revenge, Curse Ghost (models / evidence banked: `docs/next-adapters-prep23..26.md`); #151 Sheer Cold tail and
    Hyper Voice age-59 row (`docs/issue151-diagnosis.md`).
 2. Ready recipes: Dive (faithful-random; `docs/next-adapters-prep25.md` §B.1a anchor split + plan rows);
-   Bonemerang, Rapid Spin, Outrage, Luster Purge (faithful-random plan), then Eruption and Spit Up
-   (`docs/next-adapters-prep29.md`).
+   Eruption (source-derived duration builder) and Spit Up (provider) (`docs/next-adapters-prep29.md`).
 3. Baton Pass flow: opponent instant removal hold 9 -> message E+14 -> ball E+51 (species-keyed tail); the
    player's outgoing healthbox A+48..A+75 (`docs/next-adapters-prep27.md` §1-§4). Endeavor W3 port (declines today).
 4. Providers still missing: Superpower (inventory in prep26), Skill Swap / Shock Wave (graphics host: OAM + VRAM
