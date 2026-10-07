@@ -168,6 +168,10 @@
   unchanged; shadow scan 529 / 0. Worker gates 1,547 files / 12,657 tests, build. Supervisor: reran 6 fixed rows + 3
   regression fixtures 0 px twice fresh; differential 389/389; union typecheck, smoke, 8 files 153/153. Receipt
   `fix151-live-receipt.json`.
+- Species audit 8 (side, `7f93ec44b`, new files only): Baton Pass body, Endeavor, Fire Punch opponent attackers — 141
+  rows x 2 fresh, 135 exact, 6 shiny (decline confirmed with the ROM personality); no species defect. Endeavor is
+  exact when the stale-power register matches the ROM (40 / 0 in these fixtures; 17k-58k px at other values). The
+  verifier cannot pass a target personality, so a target-side shiny decline is untested. Supervisor reran 4 rows.
 
 ## 2026-10-06 (day, wind-down) — D3 implemented: 218 -> 226 exact + 10 faithful-random live adapters
 
