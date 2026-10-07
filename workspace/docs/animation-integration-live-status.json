@@ -3594,6 +3594,23 @@
         "shiny battlers decline",
         "independent arbitrary-species/history framebuffer comparison"
       ]
+    },
+    {
+      "move": "MOVE_ENDEAVOR",
+      "id": 283,
+      "sourceFieldEvidence": "../tools/integration/fixtures/baton-endeavor-live-receipt.json",
+      "liveEvidence": [
+        "Script body (68 rows: 67 active + cleanup, live age 0 = activation) through the accepted reducer with source-relative inputs (docs/next-adapters-prep27.md s0.2/s5): staged reducer age = live age - 8 (script anchors equal in all runs), attacker art / pic yOffset (SetBattlerSpriteYOffsetFromYScale y2) from the live field, droplets around the attacker battlePositionCenter, hitsplats at the target picOffsetPoint with x mirrored by the target side, the opponent attacker's front idle x2, live species art for both battlers; the ONIX/GROVYLE gate stays for staged callers",
+        "staleMovePower = request.power = the engine's battleMovePower register (W1 / W2 rule R / W4 / carry, merged); the Battle TV loop (W3) is not ported: the x2 history host marks the register unknown on any STRINGID_NOTVERYEFFECTIVE / STRINGID_ITDOESNTAFFECT print whose attacker is not the opponent (and on unseen events; carried across battles) and the body declines; never a capture row",
+        "dense full windows zero residual twice fresh through the production live renderer: ONIX <-> GROVYLE (accepted pair, lab), prep27 DIGLETT <-> CHANSEY and ABRA <-> BLISSEY (stale powers 40 player / 0 opponent), DIGLETT -> GOLBAT and GOLBAT -> CHANSEY (elevated GOLBAT: #142 shadow row 0), both orientations (tools/integration/fixtures/baton-endeavor-live)",
+        "routes 58/0 GROVYLE, 38/7 SWELLOW, 52/0 BEEDRILL, 61/0 RATICATE (W1 powers 20 / 65 / 70 / 25 / 60 / 40 / 0): adapter active every age, next prompt reached, Scene ON/OFF logical parity (tools/integration/batonEndeavorRoutes.ts)"
+      ],
+      "remaining": [
+        "W3 is declined, not ported (a player NVE / immune print in the battle, or carried into a later battle, makes every later Endeavor body fall back)",
+        "the HP set / drain, healthbox bounce and flicker after the script are the queue's own commands (not the accepted 141-row staged timing)",
+        "shiny battlers decline",
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3617,7 +3634,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 241,
+  "implementedCount": 242,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 11,

@@ -1,0 +1,40 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "ENDEAVOR",
+ "probe": "tools/compare/poisonFangProbe.py",
+ "scenario": "tools/battle-lab/s10a-endeavor-player-diglett-golbat.json",
+ "denseWindow": {
+  "startFrame": 939,
+  "endFrame": 1006
+ },
+ "windowSource": "window = [activation, activation + 68 - 1]: the first gAnimScriptActive frame of a fresh poisonFangProbe.py 283 run (67 active rows + cleanup)",
+ "attacker": {
+  "species": "DIGLETT",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "requestFields": {
+  "power": 40
+ },
+ "requestFieldsSource": "stale gAnimMovePower read from the ROM (sweetScentProbe animationMovePower)",
+ "note": "elevated GOLBAT (target): the #142 activation-frame shadow row",
+ "fieldProfile": {
+  "playerHp": 15,
+  "playerMaxHp": 85,
+  "opponentHp": 139,
+  "opponentMaxHp": 150,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

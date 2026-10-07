@@ -16,9 +16,19 @@ const out = ROUTES.map((r) => {
   let inBody = false, P: number | null = null;
   const trace: { k: number; cmd: string; attackerSprite: boolean | null; party: boolean; sendOut: number | null }[] = [];
   let attacker: 0 | 1 = 0;
+  const bodyInputs: { attacker: number; power: number; staleMovePowerUnknown: boolean }[] = [];
+  const messages: string[] = []; const seenSegments = new Set<string>(); let lastBodyKey = "";
   const on = generatedCommandAnimationReplay(r.seed, "on", r.slots, r.streak, true, true, (state, frame) => {
     const res = state.battleResolutionPresentation as any;
     const cmd = res?.segments[res.segmentIndex]?.commands[res.commandIndex];
+    if (res) res.segments.forEach((seg: any, i: number) => {
+      const key = `${res.resolutionId.requestId}:${i}`; if (seenSegments.has(key)) return; seenSegments.add(key);
+      for (const e of seg.events) if (e.payload.kind === "message" && /NOTVERYEFFECTIVE|ITDOESNTAFFECT/.test(e.payload.messageId)) messages.push(`${e.payload.messageId}@${e.payload.actionSnapshot?.attacker}`);
+    });
+    if (cmd?.type === "move-animation" && cmd.animation?.moveId === r.move) {
+      const key = `${res.resolutionId.requestId}:${res.segmentIndex}:${res.commandIndex}`;
+      if (key !== lastBodyKey) { lastBodyKey = key; bodyInputs.push({ attacker: cmd.animation.attacker, power: cmd.animation.power, staleMovePowerUnknown: res.liveMoveBattlerX2Input?.staleMovePowerUnknown === true }); }
+    }
     const isBody = cmd?.type === "move-animation" && cmd.animation?.moveId === r.move;
     if (isBody && P === null) { inBody = true; attacker = cmd.animation.attacker; }
     if (inBody && !isBody && P === null) P = frame - 1;
@@ -37,7 +47,7 @@ const out = ROUTES.map((r) => {
     bodies: bodies.map((x) => ({ attacker: x.attacker, player: x.player, opponent: x.opponent, ages: x.ages.length, firstAge: x.ages[0], lastAge: x.ages.at(-1),
       adapterActiveEveryAge: x.adapterActive.every(Boolean) })),
     allBodies: on.animations.map((x) => `${x.moveId}/${x.attacker}:${x.ages.length}:${x.adapterActive.every(Boolean)}`),
-    postBodyChangePoints: change,
+    postBodyChangePoints: change, bodyInputs, w3Messages: messages,
     sceneOnOffParity: { boundariesEqualExceptSceneBitAndEventCounter: JSON.stringify(on.boundaries.map(strip)) === JSON.stringify(off.boundaries.map(strip)),
       facilityEqual: JSON.stringify(on.state.facilityState) === JSON.stringify(off.state.facilityState),
       rngValueEqual: on.state.round.rules.rngValue === off.state.round.rules.rngValue, stalledEqual: on.stalled === off.stalled } };

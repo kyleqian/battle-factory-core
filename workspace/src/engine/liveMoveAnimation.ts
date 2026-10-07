@@ -228,6 +228,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // prep27 (docs/next-adapters-prep27.md s0.1/s4): Baton Pass body (53 rows, constant; the attacker stays hidden after it through
   // liveSemiInvulnerableHideBattler until its switch-out).
   226,
+  // prep27 s0.2/s5: Endeavor script body (68 rows) with the stale register power; declines when the unported Battle TV loop (W3)
+  // may have written the register (liveStaleMovePowerTaintedBy).
+  283,
 ] as const);
 
 /** In-use OBJ slots at a first-body activation (prep14 s1: equal in all 24 probed scenarios). */
@@ -330,6 +333,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     216,
     // prep27: Baton Pass activation == window start (row 0; the dense body probe's first active frame, elevated NINJASK attacker).
     226,
+    // prep27: Endeavor activation == window start (row 0; the dense script window, elevated GOLBAT target / NINJASK attacker).
+    283,
     // curse-live: Curse (stats body) activation == window start (row 0; curseProbe.py sourceWindow, elevated PIDGEOT target dense).
     174,
     // prep22 P1: Lovely Kiss (faithful-random), Spikes, Octazooka windows start at activation (row 0; prep22 moves/*.json, both sides).
@@ -827,6 +832,8 @@ export function liveMoveAnimationDuration(
     case 210: return FURY_CUTTER_ROWS;
     // Baton Pass (prep27 s0.1): 52 active rows + the cleanup row, constant across species, sides and body-start shifts.
     case 226: return 53;
+    // Endeavor (prep27 s0.2): the script body, 67 active rows + the cleanup row (the HP set / drain are later queue commands).
+    case 283: return 68;
     // Return (strongest branch, friendship 255, Factory-only): 282 rows both sides (0.25% of Factory move slots).
     case 216: return RETURN_ROWS;
     // Curse (curse-live): MOVE_CURSE's choosetwoturnanim picks CurseStats when gAnimMoveTurn & 1 (BattleScript_EffectCurse
@@ -1231,6 +1238,20 @@ export function liveMoveAnimationPresentation(
     case 204: config = { move: "CHARM", attacker, target, fieldProfile }; break;
     case 213: config = { move: "ATTRACT", attacker, target, fieldProfile }; break;
     case 227: config = { move: "ENCORE", attacker, target, fieldProfile }; break;
+    case 283: {
+      // prep27 s0.2/s5: the accepted reducer with source-relative inputs (attacker pic yOffset for SetBattlerSpriteYOffsetFromYScale,
+      // droplets around the attacker battlePositionCenter, hitsplats at the target picOffsetPoint mirrored by its side) and the stale
+      // gAnimMovePower = the engine's battleMovePower register (request.power; W1/W2/W4/carry). The Battle TV loop (W3) is not
+      // ported: a possible W3 write declines. HP is unchanged inside the script body. A shiny pair declines (normal palettes).
+      if (battlerX2Input?.staleMovePowerUnknown) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const targetHp = field[target.geometry.side].hp;
+      config = { move: "ENDEAVOR", attacker, target,
+        fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" },
+        animationProfile: { attackerYOffset: art[attacker.geometry.side].coords.yOffset, staleMovePower: request.power,
+          hpDrainFirstAge: Number.POSITIVE_INFINITY, targetStartHp: targetHp, targetEndHp: targetHp } };
+      break;
+    }
     case 226:
       // batonPassAtAge(age, attacker.geometry.animationCenter) = liveBattlerAnchors(...).picOffsetPoint (prep27 s0.1: 53/53 component
       // rows on 4 pairs). The attacker palette blend reads the normal battle palette: a shiny pair declines.

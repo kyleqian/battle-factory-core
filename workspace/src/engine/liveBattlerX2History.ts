@@ -29,7 +29,11 @@ export type LiveBattlerX2State = "idle" | "zeroed" | "unknown";
 export type LiveBattlerX2Side = "player" | "opponent";
 export type LiveBattlerX2History = Readonly<Record<LiveBattlerX2Side, LiveBattlerX2State>>;
 /** Body input: the sides whose battler x2/y2 an earlier body left at 0 (absent = species front-idle rest). */
-export type LiveMoveBattlerX2Input = Readonly<{ zeroed: readonly LiveBattlerX2Side[] }>;
+export type LiveMoveBattlerX2Input = Readonly<{
+  zeroed: readonly LiveBattlerX2Side[];
+  /** Endeavor (283) bodies only: the stale gBattleMovePower may have been written by the unported Battle TV loop (W3). */
+  staleMovePowerUnknown?: true;
+}>;
 
 export type LiveBattlerX2Event =
   | Readonly<{ kind: "send-in"; side: LiveBattlerX2Side }>
@@ -171,8 +175,24 @@ export function liveBattlerX2EventsOf(event: BattleKernelSemanticEvent): readonl
   return [];
 }
 
+/**
+ * Endeavor W3 (docs/next-adapters-prep27.md s0.2 item 3): battle_tv.c TrySetBattleSeminarShow (reached from the player controller's
+ * BattleTv_SetDataBasedOnString for STRINGID_ITDOESNTAFFECT, or STRINGID_NOTVERYEFFECTIVE with the defender alive) overwrites
+ * gBattleMovePower, which a later Endeavor body reads stale for its shake amplitude. Production does not port that loop, so the host
+ * conservatively marks the register unknown on every such print whose attacker is not the opponent (the HP / stage / slot
+ * conditions are not evaluated). Presentation-only; never read by rules, RNG or the queue.
+ */
+export function liveStaleMovePowerTaintedBy(event: BattleKernelSemanticEvent): boolean {
+  const payload = event.payload;
+  return payload.kind === "message"
+    && (payload.messageId === "STRINGID_NOTVERYEFFECTIVE" || payload.messageId === "STRINGID_ITDOESNTAFFECT")
+    && payload.actionSnapshot?.attacker !== 1;
+}
+
 export interface LiveBattlerX2Host {
   readonly history: LiveBattlerX2History;
+  /** Set once the battle's event history may contain a W3 register write (liveStaleMovePowerTaintedBy) or unseen events. */
+  readonly staleMovePowerUnknown?: true;
   /** Next unapplied semantic event of the presented resolution; `drained` once its last segment is applied. */
   readonly cursor: Readonly<{ requestId: number; segmentIndex: number; nextEventIndex: number; drained: boolean }> | null;
 }
@@ -184,13 +204,27 @@ interface ResolutionView {
 }
 
 /** Battle start: both battlers were just sent in (idle). */
-export function createLiveBattlerX2Host(history: LiveBattlerX2History = LIVE_BATTLER_X2_IDLE): LiveBattlerX2Host {
-  return Object.freeze({ history, cursor: null });
+export function createLiveBattlerX2Host(
+  history: LiveBattlerX2History = LIVE_BATTLER_X2_IDLE, staleMovePowerUnknown = false,
+): LiveBattlerX2Host {
+  return Object.freeze({ history, cursor: null, ...(staleMovePowerUnknown ? { staleMovePowerUnknown: true as const } : {}) });
 }
 
-export function invalidateLiveBattlerX2Host(host: LiveBattlerX2Host, reason: string): LiveBattlerX2Host {
+/** `eventsUnseen`: semantic events were skipped (they may hide a W3 print), so the stale register is unknown too. */
+export function invalidateLiveBattlerX2Host(host: LiveBattlerX2Host, reason: string, eventsUnseen = false): LiveBattlerX2Host {
   const history = applyLiveBattlerX2Event(host.history, { kind: "unknown", side: "both", reason });
-  return history === host.history ? host : Object.freeze({ ...host, history });
+  const stale = host.staleMovePowerUnknown === true || eventsUnseen;
+  return history === host.history && stale === (host.staleMovePowerUnknown === true)
+    ? host : Object.freeze({ ...host, history, ...(stale ? { staleMovePowerUnknown: true as const } : {}) });
+}
+
+/** The x2 input of one move body; an Endeavor body also carries the host's stale-power status. */
+export function liveMoveBattlerX2InputForBody(
+  host: LiveBattlerX2Host, request: Readonly<{ moveId: number }>,
+): LiveMoveBattlerX2Input | undefined {
+  const input = liveMoveBattlerX2Input(host.history);
+  if (request.moveId !== 283 || !host.staleMovePowerUnknown) return input;
+  return Object.freeze({ zeroed: input?.zeroed ?? Object.freeze([]), staleMovePowerUnknown: true as const });
 }
 
 /**
@@ -203,10 +237,12 @@ export function advanceLiveBattlerX2Host(
 ): LiveBattlerX2Host {
   const requestId = resolution.resolutionId.requestId;
   let history = host.history;
+  let stale = host.staleMovePowerUnknown === true;
   let cursor = host.cursor;
   if (cursor?.requestId !== requestId) {
     if (cursor !== null && !cursor.drained) {
       history = applyLiveBattlerX2Event(history, { kind: "unknown", side: "both", reason: "previous resolution not fully applied" });
+      stale = true;
     }
     cursor = { requestId, segmentIndex: 0, nextEventIndex: 0, drained: false };
   }
@@ -214,6 +250,7 @@ export function advanceLiveBattlerX2Host(
     let index = from;
     while (index < events.length && (strict ? events[index]!.sequence < limit : events[index]!.sequence <= limit)) {
       for (const event of liveBattlerX2EventsOf(events[index]!)) history = applyLiveBattlerX2Event(history, event);
+      if (liveStaleMovePowerTaintedBy(events[index]!)) stale = true;
       index += 1;
     }
     return index;
@@ -230,8 +267,8 @@ export function advanceLiveBattlerX2Host(
       drained: nextEventIndex >= events.length && cursor.segmentIndex === resolution.segments.length - 1,
     };
   }
-  if (history === host.history && cursor.requestId === host.cursor?.requestId
+  if (history === host.history && stale === (host.staleMovePowerUnknown === true) && cursor.requestId === host.cursor?.requestId
     && cursor.segmentIndex === host.cursor.segmentIndex && cursor.nextEventIndex === host.cursor.nextEventIndex
     && cursor.drained === host.cursor.drained) return host;
-  return Object.freeze({ history, cursor: Object.freeze(cursor) });
+  return Object.freeze({ history, cursor: Object.freeze(cursor), ...(stale ? { staleMovePowerUnknown: true as const } : {}) });
 }

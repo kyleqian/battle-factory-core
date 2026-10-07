@@ -10,7 +10,7 @@
   "src/data/gen/battle-frontier-mons.json",
   "src/data/gen/factory-round-policy.json"
  ],
- "liveStatusImplementedCount": 241,
+ "liveStatusImplementedCount": 242,
  "staleCodesCorrected": [
   "B (sSpriteOrder): was 'first body only'; production now lends the order and tracks it across bodies (liveSpriteOrderHost.ts / spriteOrderProvider.ts, merged cross-body tracker + post-KO rung 1), so B no longer blocks anything; recipe work only (falls back after an unmodelled graphics command)",
   "F-AFFINE / E-TASK: were provider blockers; docs/allocator-plan-v2-evidence.md measured gOamMatrixAllocBitmap 0x6 + no tasks at all 481 known-entry bodies, so the accepted constants gated on the lent order suffice for first bodies (invalidated after a faint/switch)",
@@ -23,7 +23,7 @@
  "inFlightMoves": {},
  "summary": {
   "accepted": 276,
-  "live": 241,
+  "live": 242,
   "faithfulRandom": 11,
   "faithfulRandomMoves": [
    "MOVE_ASTONISH",
@@ -39,25 +39,21 @@
    "MOVE_WISH"
   ],
   "inFlight": 0,
-  "remaining": 24,
+  "remaining": 23,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
   },
   "weightPct": {
-   "live": 93.227,
+   "live": 93.448,
    "faithfulRandom": 3.761,
    "inFlight": 0,
-   "remaining": 2.524
+   "remaining": 2.303
   },
   "remainingByGroup": {
    "MULTI": {
     "moves": 19,
     "weightPct": 1.711
-   },
-   "SMALL-INPUT": {
-    "moves": 1,
-    "weightPct": 0.221
    },
    "OUT": {
     "moves": 1,
@@ -70,14 +66,14 @@
   },
   "remainingByHostClass": {
    "H_BASIC": 1,
-   "H_BUFFER": 19,
+   "H_BUFFER": 18,
    "H_DERIVED": 3,
    "H_RANDOM": 1,
    "H_VARIANT": 3
   },
   "orderFirstBodyOnlyMoves": 16,
   "slotPlanNeededMoves": 18,
-  "sumsTo": "241+11+0+24=276",
+  "sumsTo": "242+11+0+23=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -129,24 +125,6 @@
    "touchingMoves": 1,
    "touchingWeightPct": 0.223,
    "meta": null
-  },
-  {
-   "provider": "E-OUT",
-   "label": "outcome selector from resolution not on the request",
-   "codes": [
-    "E-OUT"
-   ],
-   "aloneMoves": 1,
-   "aloneWeightPct": 0.221,
-   "aloneNames": [
-    "ENDEAVOR"
-   ],
-   "touchingMoves": 3,
-   "touchingWeightPct": 0.432,
-   "meta": {
-    "cost": "per-move plumbing from resolution (secondary-effect / HP / stale-power values)",
-    "claim": "exact outcome data; no RNG ownership"
-   }
   },
   {
    "provider": "C",
@@ -302,6 +280,22 @@
    "meta": null
   },
   {
+   "provider": "E-OUT",
+   "label": "outcome selector from resolution not on the request",
+   "codes": [
+    "E-OUT"
+   ],
+   "aloneMoves": 0,
+   "aloneWeightPct": 0,
+   "aloneNames": [],
+   "touchingMoves": 2,
+   "touchingWeightPct": 0.21,
+   "meta": {
+    "cost": "per-move plumbing from resolution (secondary-effect / HP / stale-power values)",
+    "claim": "exact outcome data; no RNG ownership"
+   }
+  },
+  {
    "provider": "X-DISABLE",
    "label": "DisableStruct counter snapshot on the MOVE_ANIMATION request (fury/rollout/stockpile counters)",
    "codes": [
@@ -405,30 +399,20 @@
   },
   {
    "step": 2,
-   "provider": "E-OUT",
-   "newMoves": 1,
-   "newWeightPct": 0.221,
-   "cumulativeRemainingUnlocked": 2,
-   "newNames": [
-    "ENDEAVOR"
-   ]
-  },
-  {
-   "step": 3,
    "provider": "C",
    "newMoves": 1,
    "newWeightPct": 0.22,
-   "cumulativeRemainingUnlocked": 3,
+   "cumulativeRemainingUnlocked": 2,
    "newNames": [
     "METEOR_MASH"
    ]
   },
   {
-   "step": 4,
+   "step": 3,
    "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
-   "newMoves": 17,
-   "newWeightPct": 1.414,
-   "cumulativeRemainingUnlocked": 20,
+   "newMoves": 15,
+   "newWeightPct": 1.204,
+   "cumulativeRemainingUnlocked": 17,
    "newNames": [
     "BONEMERANG",
     "ERUPTION",
@@ -441,12 +425,21 @@
     "NIGHTMARE",
     "OUTRAGE",
     "PSYWAVE",
-    "RAPID_SPIN",
     "REVENGE",
     "SHOCK_WAVE",
-    "SKILL_SWAP",
     "SNORE",
     "SUPERPOWER"
+   ]
+  },
+  {
+   "step": 4,
+   "provider": "E-OUT",
+   "newMoves": 2,
+   "newWeightPct": 0.21,
+   "cumulativeRemainingUnlocked": 19,
+   "newNames": [
+    "RAPID_SPIN",
+    "SKILL_SWAP"
    ]
   },
   {
@@ -454,7 +447,7 @@
    "provider": "X-DISABLE",
    "newMoves": 2,
    "newWeightPct": 0.147,
-   "cumulativeRemainingUnlocked": 22,
+   "cumulativeRemainingUnlocked": 21,
    "newNames": [
     "ICE_BALL",
     "SPIT_UP"
@@ -465,7 +458,7 @@
    "provider": "X-TWOTURN",
    "newMoves": 1,
    "newWeightPct": 0.187,
-   "cumulativeRemainingUnlocked": 23,
+   "cumulativeRemainingUnlocked": 22,
    "newNames": [
     "DIVE"
    ]
@@ -475,7 +468,7 @@
    "provider": "X-AGE",
    "newMoves": 1,
    "newWeightPct": 0.112,
-   "cumulativeRemainingUnlocked": 24,
+   "cumulativeRemainingUnlocked": 23,
    "newNames": [
     "EXTREME_SPEED"
    ]
@@ -485,7 +478,7 @@
    "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 24,
+   "cumulativeRemainingUnlocked": 23,
    "newNames": []
   },
   {
@@ -493,7 +486,7 @@
    "provider": "D-TILE",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 24,
+   "cumulativeRemainingUnlocked": 23,
    "newNames": []
   },
   {
@@ -501,7 +494,7 @@
    "provider": "D-BG",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 24,
+   "cumulativeRemainingUnlocked": 23,
    "newNames": []
   },
   {
@@ -509,7 +502,7 @@
    "provider": "D-OAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 24,
+   "cumulativeRemainingUnlocked": 23,
    "newNames": []
   },
   {
@@ -517,7 +510,7 @@
    "provider": "D-VRAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 24,
+   "cumulativeRemainingUnlocked": 23,
    "newNames": []
   },
   {
@@ -525,7 +518,7 @@
    "provider": "D-SCAN",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 24,
+   "cumulativeRemainingUnlocked": 23,
    "newNames": []
   },
   {
@@ -533,29 +526,11 @@
    "provider": "F-AUDIO",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 24,
+   "cumulativeRemainingUnlocked": 23,
    "newNames": []
   }
  ],
  "batches": [
-  {
-   "id": "P2",
-   "title": "SMALL-INPUT (derived): one named input / reducer parameter each (docs/next-adapters-prep10.md measures them)",
-   "count": 1,
-   "weightPct": 0.221,
-   "moves": [
-    {
-     "move": "MOVE_ENDEAVOR",
-     "group": "SMALL-INPUT",
-     "providerNeeds": [
-      "E-OUT"
-     ],
-     "orderFirstBodyOnly": false,
-     "weightPct": 0.221,
-     "prep": "activation measured (2 receipts); E-OUT: animationProfile:staleMovePower (HP before/after + stale gAnimMovePower (value left by the previous animation))"
-    }
-   ]
-  },
   {
    "id": "P3",
    "title": "first provider build (derived from the greedy order): X-SUBST",
@@ -1130,123 +1105,6 @@
     "player": "NEEDS-KEYS"
    },
    "group": "MULTI"
-  },
-  {
-   "move": "MOVE_ENDEAVOR",
-   "id": 283,
-   "name": "ENDEAVOR",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0022108843537414964,
-   "config": "src/animation/sceneOnPresentation.ts:1699",
-   "needs": [
-    "E-OUT"
-   ],
-   "blockers": [
-    {
-     "code": "E-OUT",
-     "text": "animationProfile:staleMovePower (HP before/after + stale gAnimMovePower (value left by the previous animation))",
-     "cites": [
-      "src/animation/sceneOnPresentation.ts:1699"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationProfile:attackerYOffset",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    },
-    {
-     "path": "animationProfile:staleMovePower",
-     "classes": [
-      "E-OUT"
-     ],
-     "status": "blocked: E-OUT",
-     "cite": null
-    },
-    {
-     "path": "animationProfile:hpDrainFirstAge",
-     "classes": [
-      "E-OUT"
-     ],
-     "status": "blocked: E-OUT",
-     "cite": null
-    },
-    {
-     "path": "animationProfile:targetStartHp",
-     "classes": [
-      "E-OUT"
-     ],
-     "status": "blocked: E-OUT",
-     "cite": null
-    },
-    {
-     "path": "animationProfile:targetEndHp",
-     "classes": [
-      "E-OUT"
-     ],
-     "status": "blocked: E-OUT",
-     "cite": null
-    },
-    {
-     "path": "moveTextStartAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": false,
-   "orderKind": null,
-   "carrierOccurrences": 4251,
-   "stagedOrientations": "single-or-unnamed",
-   "orderFirstBodyOnly": false,
-   "lentConstants": [],
-   "providerNeeds": [
-    "E-OUT"
-   ],
-   "palettePlan": false,
-   "activationMeasured": true,
-   "activationReceipts": [
-    {
-     "probe": "endeavor-player",
-     "staged": true,
-     "activation": 2339,
-     "scriptFrames": 67,
-     "windowStart": 2345,
-     "windowEnd": 2485,
-     "activationMinusWindowStart": -6,
-     "windowEndMinusScriptEnd": 79,
-     "reducerAgeAtActivation": -8,
-     "note": "second action (after the AI Double Team body)"
-    },
-    {
-     "probe": "endeavor-opponent",
-     "staged": true,
-     "activation": null,
-     "scriptFrames": null,
-     "windowStart": null,
-     "windowEnd": null,
-     "activationMinusWindowStart": null,
-     "windowEndMinusScriptEnd": null,
-     "reducerAgeAtActivation": null,
-     "note": "NOT PRODUCED: the staged AI selected Rock Slide (157) instead; opponent-attacker Endeavor evidence is missing"
-    }
-   ],
-   "ownBodyOrder": {
-    "opponent": "NOT-OBSERVED",
-    "player": "NOT-OBSERVED"
-   },
-   "group": "SMALL-INPUT"
   },
   {
    "move": "MOVE_ERUPTION",

@@ -38,9 +38,10 @@ describe("live Baton Pass (226) body adapter", () => {
     expect((status.implementedAdapters as { id: number }[]).map((e) => e.id)).toContain(226);
   });
 
-  it("covers 6 dense fixtures: AIPOM/ONIX accepted, NINJASK/GOLEM prep27, JOLTEON/GOLBAT, both orientations", () => {
-    expect(NAMES).toHaveLength(6);
-    for (const side of ["player", "opponent"]) expect(NAMES.filter((n) => n.includes(`-${side}-`))).toHaveLength(3);
+  it("covers 7 dense fixtures: AIPOM/ONIX accepted, NINJASK/GOLEM prep27, JOLTEON/GOLBAT both orientations + ONIX (front idle rest) opponent", () => {
+    expect(NAMES).toHaveLength(7);
+    expect(NAMES.filter((n) => n.includes("-player-"))).toHaveLength(3);
+    expect(NAMES.filter((n) => n.includes("-opponent-"))).toHaveLength(4);
   });
 
   it.each(NAMES)("%s: config centre = the live picOffsetPoint anchor and every row renders through the live renderer", (name) => {
@@ -126,6 +127,6 @@ describe("live Baton Pass (226) body adapter", () => {
   }
 });
 
-function renderVisible(res: never): boolean {
-  return (createBattleResolutionPresentationRenderView(res) as any).visibility.player.sprite;
+function renderVisible(res: unknown): boolean {
+  return (createBattleResolutionPresentationRenderView(res as never) as any).visibility.player.sprite;
 }

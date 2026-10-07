@@ -1,0 +1,40 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "ENDEAVOR",
+ "probe": "tools/compare/poisonFangProbe.py",
+ "scenario": "tools/battle-lab/prep27-endeavor-opponent-diglett-chansey.json",
+ "denseWindow": {
+  "startFrame": 80,
+  "endFrame": 147
+ },
+ "windowSource": "window = [activation, activation + 68 - 1]: the first gAnimScriptActive frame of a fresh poisonFangProbe.py 283 run (67 active rows + cleanup); RGB == the prep27 sweetScentProbe Move_ENDEAVOR rows",
+ "attacker": {
+  "species": "DIGLETT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "CHANSEY",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "requestFields": {
+  "power": 0
+ },
+ "requestFieldsSource": "stale gAnimMovePower read from the ROM (sweetScentProbe animationMovePower): first action, register 0",
+ "fieldProfile": {
+  "playerHp": 325,
+  "playerMaxHp": 325,
+  "opponentHp": 85,
+  "opponentMaxHp": 85,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "genderSource": "CHANSEY / BLISSEY are female-only (the lab scenario leaves gender to the personality)"
+}

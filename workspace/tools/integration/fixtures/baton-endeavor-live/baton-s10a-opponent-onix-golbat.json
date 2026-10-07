@@ -1,0 +1,36 @@
+{
+ "schema": "r3-profile-live-adapter-fixture/v1",
+ "move": "BATON_PASS",
+ "probe": "tools/compare/poisonFangProbe.py",
+ "scenario": "tools/battle-lab/s10a-baton-opponent-onix-player-golbat.json",
+ "denseWindow": {
+  "startFrame": 72,
+  "endFrame": 124
+ },
+ "windowSource": "window = [activation, activation + 53 - 1]: the first gAnimScriptActive frame of a fresh poisonFangProbe.py 226 run (52 active rows + cleanup)",
+ "attacker": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 157,
+  "playerMaxHp": 157,
+  "opponentHp": 96,
+  "opponentMaxHp": 96,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "note": "opponent ONIX attacker first (speed EVs): ONIX keeps its species front idle rest through the body"
+}

@@ -5571,6 +5571,44 @@
     "body": "normal",
     "activation": "the dense window starts at the first gAnimScriptActive frame (poisonFangProbe.py 226); elevated opponent measured in-window: NINJASK attacker 53/53 rows 0 px twice fresh (baton-endeavor-live-receipt.json)"
    }
+  },
+  {
+   "id": 283,
+   "move": "ENDEAVOR",
+   "orientation": "player",
+   "variant": "endeavor-player",
+   "activationFrame": 939,
+   "windowStart": 939,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 1006,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/baton-endeavor-live/endeavor-s10a-player-diglett-golbat.json",
+    "scenario": "tools/battle-lab/s10a-endeavor-player-diglett-golbat.json",
+    "body": "normal",
+    "activation": "the dense window starts at the first gAnimScriptActive frame (poisonFangProbe.py 283); elevated opponent measured in-window: GOLBAT target 68/68 rows 0 px twice fresh (baton-endeavor-live-receipt.json)"
+   }
+  },
+  {
+   "id": 283,
+   "move": "ENDEAVOR",
+   "orientation": "opponent",
+   "variant": "endeavor-opponent",
+   "activationFrame": 79,
+   "windowStart": 79,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 146,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/baton-endeavor-live/endeavor-s10a-opponent-golbat-chansey.json",
+    "scenario": "tools/battle-lab/s10a-endeavor-opponent-golbat-chansey.json",
+    "body": "normal",
+    "activation": "the dense window starts at the first gAnimScriptActive frame (poisonFangProbe.py 283); elevated opponent measured in-window: GOLBAT attacker 68/68 rows 0 px twice fresh (baton-endeavor-live-receipt.json)"
+   }
   }
  ]
 }

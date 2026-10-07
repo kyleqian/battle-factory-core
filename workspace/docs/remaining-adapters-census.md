@@ -8,29 +8,28 @@ node tools/integration/censusActivationSummary.mjs                    # fixtures
 tools/integration/censusActivation.sh; tools/integration/censusStagedActivation.sh   # direct-mGBA probes (optional, regenerates the receipts)
 ```
 
-Inputs: `docs/animation-integration-live-status.json` (241 live, 11 faithful random), `docs/animation-integration-readiness.json` + `-merged-readiness.json` (276 accepted, host classes), `tools/integration/fixtures/h-buffer-triage.json` (per-field classes/cites of the 78 H_BUFFER moves; stale config line numbers are re-resolved by symbol), `sprite-order-body-plans-ext.json`, the Level-50 set pools for the usage weight (the model of `tools/integration/spriteOrderPlanCoverageRank.py`: ranges 0..6, 4 moves per set, both sides; `weight` below is the share of all Factory move uses). The script asserts `live (scoped exact) + faithful-random + in-flight + remaining = 276` (faithful-random = the disjoint D3 bucket `faithfulRandomAdapters`, docs/presentation-rng.md) and that every cited `file:line` exists and is non-empty. In-flight = batches the supervisor has running (none; the lists in the script are empty). Helping Hand is the 277th Factory move and is not accepted (not counted).
+Inputs: `docs/animation-integration-live-status.json` (242 live, 11 faithful random), `docs/animation-integration-readiness.json` + `-merged-readiness.json` (276 accepted, host classes), `tools/integration/fixtures/h-buffer-triage.json` (per-field classes/cites of the 78 H_BUFFER moves; stale config line numbers are re-resolved by symbol), `sprite-order-body-plans-ext.json`, the Level-50 set pools for the usage weight (the model of `tools/integration/spriteOrderPlanCoverageRank.py`: ranges 0..6, 4 moves per set, both sides; `weight` below is the share of all Factory move uses). The script asserts `live (scoped exact) + faithful-random + in-flight + remaining = 276` (faithful-random = the disjoint D3 bucket `faithfulRandomAdapters`, docs/presentation-rng.md) and that every cited `file:line` exists and is non-empty. In-flight = batches the supervisor has running (none; the lists in the script are empty). Helping Hand is the 277th Factory move and is not accepted (not counted).
 
 ## 1. Summary
 
 | Bucket | Moves | Weight |
 |---|---:|---:|
 | accepted Factory moves | 276 | 100% |
-| live adapters (scoped exact) | 241 | 93.23% |
+| live adapters (scoped exact) | 242 | 93.45% |
 | faithful-random adapters (ASTONISH, DOUBLE_KICK, FLAIL, HYPER_BEAM, LOVELY_KISS, MUD_SLAP, RAIN_DANCE, SAND_ATTACK, THRASH, WATER_PULSE, WISH) | 11 | 3.76% |
 | in flight (0 order-consumer + 0 prep6) | 0 | 0.00% |
-| **remaining (this census)** | **24** | **2.52%** |
-| check | 241+11+0+24=276 | |
+| **remaining (this census)** | **23** | **2.30%** |
+| check | 242+11+0+23=276 | |
 
 Remaining moves by group:
 
 | Group | Moves | Weight | Meaning |
 |---|---:|---:|---|
-| SMALL-INPUT | 1 | 0.22% | one named production input / reducer parameter |
 | PROVIDER-x | 3 | 0.48% | blocked on exactly one named provider |
 | MULTI | 19 | 1.71% | several providers |
 | OUT | 1 | 0.11% | needs something outside S10A scope |
 
-Remaining by readiness host class (a move can carry several): H_BASIC 1, H_BUFFER 19, H_DERIVED 3, H_RANDOM 1, H_VARIANT 3. Moves whose order input is satisfied only for the battle's first body: 16. Moves that still need a per-move sprite-slot plan row: 18.
+Remaining by readiness host class (a move can carry several): H_BASIC 1, H_BUFFER 18, H_DERIVED 3, H_RANDOM 1, H_VARIANT 3. Moves whose order input is satisfied only for the battle's first body: 16. Moves that still need a per-move sprite-slot plan row: 18.
 
 PROVIDER-x breakdown: D-SCAN (1: MEMENTO); C (1: METEOR_MASH); X-SUBST (1: SUBSTITUTE).
 
@@ -66,12 +65,6 @@ PROVIDER-x breakdown: D-SCAN (1: MEMENTO); C (1: METEOR_MASH); X-SUBST (1: SUBST
 ## 4. Per-move table (103 moves)
 
 Columns: `needs` = provider codes after removing what production supplies (`B(first body)` = also consumes sSpriteOrder, supplied by production for the first body only; legend in section 5). Blockers cite the consumed field (`a/` = `src/animation/`, `e/` = `src/engine/`, `rom/` = `reference/pokeemerald/`). Full text per blocker is in the JSON.
-
-### SMALL-INPUT (1)
-
-| Move (id) | Host class | Weight | needs | Blockers (consumed field @ cite) | Notes / measured |
-|---|---|---:|---|---|---|
-| ENDEAVOR (283) | H_BUFFER | 0.22% | E-OUT | E-OUT: animationProfile:staleMovePower (HP before/after + stale gAnimMovePower (value left by the previous animation)) @ a/sceneOnPresentation.ts:1699 |  Activation/window start: endeavor-player 2339/2345, endeavor-opponent none produced. |
 
 ### PROVIDER-x (3)
 
@@ -120,7 +113,6 @@ Ranked by remaining moves that become fully unlocked when that provider alone is
 | Provider | Alone unlocks | Weight | Touching | Touching weight | Cost / claim | Unlocked moves |
 |---|---:|---:|---:|---:|---|---|
 | X-SUBST | +1 | 0.22% | 1 | 0.22% | persistent Substitute doll sprite state | SUBSTITUTE |
-| E-OUT | +1 | 0.22% | 3 | 0.43% | per-move plumbing from resolution (secondary-effect / HP / stale-power values). exact outcome data; no RNG ownership | ENDEAVOR |
 | C | +1 | 0.22% | 20 | 1.93% | new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4). NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact | METEOR_MASH |
 | X-AGE | +1 | 0.11% | 1 | 0.11% | accepted evidence lacks the early source ages (age basis) | EXTREME_SPEED |
 | D-SCAN | +1 | 0.04% | 3 | 0.18% | gScanlineEffect buffers | MEMENTO |
@@ -131,6 +123,7 @@ Ranked by remaining moves that become fully unlocked when that provider alone is
 | D-OAM | +0 | 0.00% | 9 | 0.99% | software/hardware OAM + affine buffer host | - |
 | D-VRAM | +0 | 0.00% | 4 | 0.51% | BG VRAM snapshots | - |
 | F-AUDIO | +0 | 0.00% | 6 | 0.55% | sound task / pan / current-song state | - |
+| E-OUT | +0 | 0.00% | 2 | 0.21% | per-move plumbing from resolution (secondary-effect / HP / stale-power values). exact outcome data; no RNG ownership | - |
 | X-DISABLE | +0 | 0.00% | 2 | 0.15% | add a DisableStruct counter snapshot to the MOVE_ANIMATION request (rules context already holds the counters). exact (presentation-only copy of rules state) | - |
 | X-TWOTURN | +0 | 0.00% | 1 | 0.19% | hidden-battler state across the two turns in the field art view. exact once the semi-invulnerable state is rendered | - |
 
@@ -139,19 +132,19 @@ Greedy build order (each step = the provider/bundle with the most newly unlocked
 | Step | Provider | New moves | New weight | Cumulative remaining unlocked | Newly unlocked |
 |---:|---|---:|---:|---:|---|
 | 1 | X-SUBST | +1 | 0.22% | 1 | SUBSTITUTE |
-| 2 | E-OUT | +1 | 0.22% | 2 | ENDEAVOR |
-| 3 | C | +1 | 0.22% | 3 | METEOR_MASH |
-| 4 | A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio) | +17 | 1.41% | 20 | BONEMERANG, ERUPTION, EXTRASENSORY, FLATTER, LUSTER_PURGE, MACH_PUNCH, MEGAHORN, MEMENTO, NIGHTMARE, OUTRAGE, PSYWAVE, RAPID_SPIN, REVENGE, SHOCK_WAVE, SKILL_SWAP, SNORE, SUPERPOWER |
-| 5 | X-DISABLE | +2 | 0.15% | 22 | ICE_BALL, SPIT_UP |
-| 6 | X-TWOTURN | +1 | 0.19% | 23 | DIVE |
-| 7 | X-AGE | +1 | 0.11% | 24 | EXTREME_SPEED |
-| 8 | D-PAL | +0 | 0.00% | 24 | - |
-| 9 | D-TILE | +0 | 0.00% | 24 | - |
-| 10 | D-BG | +0 | 0.00% | 24 | - |
-| 11 | D-OAM | +0 | 0.00% | 24 | - |
-| 12 | D-VRAM | +0 | 0.00% | 24 | - |
-| 13 | D-SCAN | +0 | 0.00% | 24 | - |
-| 14 | F-AUDIO | +0 | 0.00% | 24 | - |
+| 2 | C | +1 | 0.22% | 2 | METEOR_MASH |
+| 3 | A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio) | +15 | 1.20% | 17 | BONEMERANG, ERUPTION, EXTRASENSORY, FLATTER, LUSTER_PURGE, MACH_PUNCH, MEGAHORN, MEMENTO, NIGHTMARE, OUTRAGE, PSYWAVE, REVENGE, SHOCK_WAVE, SNORE, SUPERPOWER |
+| 4 | E-OUT | +2 | 0.21% | 19 | RAPID_SPIN, SKILL_SWAP |
+| 5 | X-DISABLE | +2 | 0.15% | 21 | ICE_BALL, SPIT_UP |
+| 6 | X-TWOTURN | +1 | 0.19% | 22 | DIVE |
+| 7 | X-AGE | +1 | 0.11% | 23 | EXTREME_SPEED |
+| 8 | D-PAL | +0 | 0.00% | 23 | - |
+| 9 | D-TILE | +0 | 0.00% | 23 | - |
+| 10 | D-BG | +0 | 0.00% | 23 | - |
+| 11 | D-OAM | +0 | 0.00% | 23 | - |
+| 12 | D-VRAM | +0 | 0.00% | 23 | - |
+| 13 | D-SCAN | +0 | 0.00% | 23 | - |
+| 14 | F-AUDIO | +0 | 0.00% | 23 | - |
 
 Notes:
 - **Random2 is the keystone but non-exact.** It touches the most remaining moves and, after the allocator-v2 and A6 steps, unlocks 1 more; production cannot reconstruct `gRng2Value` (it advances every rendered frame and with every earlier animation's draws, `docs/visual-randomness-prep.md` s4). A presentation LCG is ROM-faithful in distribution and draw order only; the claim boundary (a non-exact presentation class beside the exact one) must be decided before building it. It cannot make a move exact on its own.
@@ -160,14 +153,6 @@ Notes:
 - **A6 graphics host** has no single-provider unlocks beyond 6 moves; the other D-* codes unlock nothing alone.
 
 ## 6. Derived batches (no hard-coded lists)
-
-### P2: SMALL-INPUT (derived): one named input / reducer parameter each (docs/next-adapters-prep10.md measures them)
-
-1 moves, 0.22% of Factory move uses.
-
-| Order | Move | Group | needs | Weight | Measured prep / still needed |
-|---:|---|---|---|---:|---|
-| 1 | ENDEAVOR | SMALL-INPUT | E-OUT | 0.22% | activation measured (2 receipts); E-OUT: animationProfile:staleMovePower (HP before/after + stale gAnimMovePower (value left by the previous animation)) |
 
 ### P3: first provider build (derived from the greedy order): X-SUBST
 
@@ -195,8 +180,6 @@ Direct independent mGBA runs (Scene ON, one fresh run per scenario, `tools/integ
 
 | Move | Probe | Activation | Accepted window | activation - window start | window end - script end | Reducer age at activation | Script frames |
 |---|---|---:|---|---:|---:|---:|---:|
-| ENDEAVOR | endeavor-player (staged) | 2339 | 2345..2485 | -6 | 79 | -8 | 67 |
-| ENDEAVOR | endeavor-opponent (staged) | - | - | - | - | - | - |
 
 Reading: for Aerial Ace / Quick Attack / Feather Dance the accepted dense window starts 31-37 frames BEFORE the script activation and runs 148-198 frames past it (the whole controller timeline), so a live window that starts at the activation frame needs the reducer age at activation (38-44) as its age basis, and ends at the script end; Ice Punch, Sleep Talk, Magnitude, Reversal and the opponent Rock Slide have window start == activation (row 0).
 
