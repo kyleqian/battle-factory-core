@@ -31,11 +31,15 @@
     "orbs": "196/196",
     "hwOamContent": "196/196",
     "battlerAttr": "196/196",
+    "bldRegisters": "179/196",
     "firstInactive": "194/196"
    },
    "mismatchRows": {
     "cursor": [
      "194"
+    ],
+    "bldRegisters": [
+     "177-193"
     ],
     "firstInactive": [
      "194-195"
@@ -71,6 +75,7 @@
     "orbs": "195/195",
     "hwOamContent": "195/195",
     "battlerAttr": "194/195",
+    "bldRegisters": "178/195",
     "firstInactive": "194/195"
    },
    "mismatchRows": {
@@ -79,6 +84,9 @@
     ],
     "battlerAttr": [
      "194"
+    ],
+    "bldRegisters": [
+     "177-193"
     ],
     "firstInactive": [
      "194"
@@ -114,11 +122,15 @@
     "orbs": "196/196",
     "hwOamContent": "196/196",
     "battlerAttr": "196/196",
+    "bldRegisters": "179/196",
     "firstInactive": "194/196"
    },
    "mismatchRows": {
     "cursor": [
      "194"
+    ],
+    "bldRegisters": [
+     "177-193"
     ],
     "firstInactive": [
      "194-195"
@@ -154,6 +166,7 @@
     "orbs": "195/195",
     "hwOamContent": "195/195",
     "battlerAttr": "194/195",
+    "bldRegisters": "178/195",
     "firstInactive": "194/195"
    },
    "mismatchRows": {
@@ -162,6 +175,9 @@
     ],
     "battlerAttr": [
      "194"
+    ],
+    "bldRegisters": [
+     "177-193"
     ],
     "firstInactive": [
      "194"
@@ -197,11 +213,15 @@
     "orbs": "196/196",
     "hwOamContent": "196/196",
     "battlerAttr": "196/196",
+    "bldRegisters": "179/196",
     "firstInactive": "194/196"
    },
    "mismatchRows": {
     "cursor": [
      "194"
+    ],
+    "bldRegisters": [
+     "177-193"
     ],
     "firstInactive": [
      "194-195"
@@ -237,11 +257,15 @@
     "orbs": "196/196",
     "hwOamContent": "196/196",
     "battlerAttr": "196/196",
+    "bldRegisters": "179/196",
     "firstInactive": "194/196"
    },
    "mismatchRows": {
     "cursor": [
      "194"
+    ],
+    "bldRegisters": [
+     "177-193"
     ],
     "firstInactive": [
      "194-195"

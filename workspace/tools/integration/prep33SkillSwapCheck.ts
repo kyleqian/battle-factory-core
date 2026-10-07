@@ -51,6 +51,13 @@ export const battlerAttr33 = (species: number, side: Side): readonly number[] =>
   const x = coordX(side), y = side === "player" ? 80 + yDelta(species, side) : yWithElevation(species, side) + yDelta(species, side);
   return [(y - 32) & 0xff, 0xc000 | ((x - 32) & 0x1ff), side === "player" ? 2417 : 6617];
 };
+/** S: Task_FadeToBg bldcnt / bldy (the merged Psywave program, src/engine/livePsywaveInputs.ts fadeY) with C1 = 4 (SetPsychicBackground)
+ * and C2 = 156 (UnsetPsychicBackground), the restore fade counted in executed frames (the T lag row 176 shifts it by one). */
+export function skillSwapBlend33(r: number, lag: boolean): { bldcnt: number; bldy: number } {
+  const fadeY = (e: number, c: number) => (e < c + 1 || e >= c + 37 ? { bldcnt: 0, bldy: 0 } : { bldcnt: 0xe8, bldy: e <= c + 1 ? 0 : e <= c + 17 ? e - c - 1 : e <= c + 20 ? 16 : 16 - (e - (c + 20)) });
+  const e = (row: number) => row - (lag && row >= 176 ? 1 : 0);
+  return r < 156 ? fadeY(r, 4) : fadeY(e(r - 1) + 1, 156);
+}
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 const report: Json = { schema: "prep33-skill-swap-check/v1", neg: neg ?? null, windows: [] };
 const DEFAULT = ["tools/compare/evidence/skill-swap-player-dense-state.json.gz:player", "tools/compare/evidence/skill-swap-opponent-dense-state.json.gz:opponent"];
@@ -62,7 +69,7 @@ for (const spec of specs.length ? specs : DEFAULT) {
   const lag = fr.some((f, i) => i > 0 && f.animationRng === fr[i - 1]!.animationRng); // T observable: the gRng2 stall row (176)
   const firstInactiveAge = neg === "lag" ? (lag ? 194 : 195) : lag ? 195 : 194;
   const attackerBounds = skillSwapBounds(r0.battlers[side].species, side, neg === "anchor" ? 1 : 0), targetBounds = skillSwapBounds(r0.battlers[ts].species, ts);
-  const fields = ["cursor", "skillTasks", "blendTasks", "orbs", "hwOamContent", "battlerAttr", "firstInactive"] as const;
+  const fields = ["cursor", "skillTasks", "blendTasks", "orbs", "hwOamContent", "battlerAttr", "bldRegisters", "firstInactive"] as const;
   const ok: Record<string, number> = Object.fromEntries(fields.map((f) => [f, 0])), bad: Record<string, number[]> = Object.fromEntries(fields.map((f) => [f, []]));
   const inputsAt = (age: number): SkillSwapLiveInputs => { const row = fr[Math.min(age, fr.length - 1)]!; return {
     attackerSide: side, targetSide: ts, attackerSpecies: speciesName(r0.battlers[side].species), targetSpecies: speciesName(r0.battlers[ts].species),
@@ -101,6 +108,7 @@ for (const spec of specs.length ? specs : DEFAULT) {
     } else ok.hwOamContent += 1;
     // the first inactive row belongs to the battle scene (battler cleanup), as in verifyShockWaveReducer
     mark("battlerAttr", age >= firstInactiveAge || same(row.battlerSprites.attacker.attr, battlerAttr33(r0.battlers[side].species, side)) && same(row.battlerSprites.target.attr, battlerAttr33(r0.battlers[ts].species, ts)));
+    { const m = skillSwapBlend33(age, neg === "lag" ? !lag : lag); mark("bldRegisters", row.registers.bldcnt === m.bldcnt && row.registers.bldy === m.bldy); }
     mark("firstInactive", (age === firstInactiveAge) === (!row.animScriptActive && fr[age - 1]?.animScriptActive === true));
   }
   const compress = (rows: number[]) => { const o: string[] = []; for (let i = 0; i < rows.length;) { let j = i; while (j + 1 < rows.length && rows[j + 1] === rows[j]! + 1) j += 1; o.push(i === j ? `${rows[i]}` : `${rows[i]}-${rows[j]}`); i = j + 1; } return o; };
