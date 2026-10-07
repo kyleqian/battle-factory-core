@@ -1,0 +1,98 @@
+# Next adapters prep 29: Random2 / input measurement of Bonemerang, Eruption, Rapid Spin, Spit Up, Luster Purge, Outrage (S10A, side lane)
+
+Evidence/design only; **new files only** (no tracked file edited, no `src/`, no adapter wiring, no `PROGRESS.md` / `ISSUES.md` change). Every emulator number is a ROM frame from a **direct, independent mGBA run** (Scene ON lab scenarios: the retained accepted `tools/battle-lab/mechanic-<move>-*.json` plus `tools/battle-lab/prep29-*.json` alternates; the shared HTTP oracles were never contacted). Base `1d9731cb2`. Method = `docs/next-adapters-prep25.md` / `prep22.md` (Random2 attribution probe `prep14Probes.sh` = `random2RouteProbe.py --lab --step-anim`; state probe `prep22Probe.py`; assets-only palette composite; lowest-free allocator check; plan replay; accepted reducer fed only production-derivable inputs vs the ROM per-age effect-sprite rows), with a fresh alternate species pair per orientation chosen **before** probing (attacker / target): RHYDON/GOLEM (Bonemerang), TORKOAL/GOLEM (Eruption), STARMIE/GOLEM (Rapid Spin), SEVIPER/GOLEM (Spit Up, one alternate per Stockpile counter 1/2/3), LATIAS/GOLEM (Luster Purge), FLYGON/GOLEM (Outrage).
+
+**Twice-identical.** 32 scenarios (6 moves, accepted P/O + alternate P/O, Spit Up x3 counters) ran twice from fresh processes in the probe stage: state probes full-JSON equal and Random2 probes equal in every field except `finalStateSha1` (`scenario probe pairs 64 differing 0`). The whole `prep29Run.sh` was then run a **second time end to end** into a fresh directory (new probes, new analysis): all 18 receipt files `cmp`-identical to the committed `tools/integration/fixtures/prep29/` (so every number below reproduced across 4 fresh mGBA processes per scenario).
+
+## 0. Results
+
+### 0.1 Verdict table
+
+Weights from `docs/remaining-adapters-census.md` (Level-50 rental model; Outrage is Open-only). "Window" = body length in ROM frames; "rows" = rows of the per-age effect-sprite comparison against the accepted reducer fed derivable inputs only.
+
+| Move (id, weight) | Random2 draws | Body window (scenarios) | Inputs the reducer consumes that production does not build | Verdict | Recipe / merged precedent |
+|---|---|---|---|---|---|
+| **BONEMERANG 155 (0.04%)** | **none** (`RfuMain1+0x10` only, 177 writes, `rng2WritesOutsideRandom2 = []`) | **71** constant in all 4 scenarios x 2 hit bodies (8/8); lag frames at ages 69, 70 (0-step, constant) | all derivable, **measured**: picture centers (`liveBattlerAnchors().picOffsetPoint`), sprite slots (lowest-free, birth-first: 3 / 4 / 4), subpriority (attacker battler sub 30/40 - 2). Reducer output = ROM **70/70 rows x 8 bodies, 3/3 births**. Not derivable by a constant: BG regs / `win0` first-body gate (240,161 in hit 1, 0,0 in hit 2; `bg1` 39936 vs 23554), 1 of 3 task births not lowest-free (task slot table K), monbg tuple (derivable: matches the battler coordinates at activation in 8/8) | **READY-WITH-CHANGE** (LiveInputs builder; `firstBody` gate) | `liveQ2Moves.ts` (`LiveQ2Args {spriteOrder, firstBody}`; Snore / Smog / Hyper Voice family); no hardware-OAM buffers consumed |
+| **OUTRAGE 200 (0.00%, Open-only)** | **none** (119 writes) | **119** constant, 5 bodies in 4 scenarios (alt player has a second, locked-turn body, also 119) | all derivable, **measured**: `attackerPictureOrigin` = `picOffsetPoint`; 23 flame slots by lowest-free simulation (birth-first, flame destroyed in the sprite callbacks of age birth+31); flame subpriority = target battler sub - 2. Reducer output = ROM **118/118 rows x 5 bodies, 23/23 births** (`outrage-check.json`). Measured **constant** (not derived): flame OAM attr `[0, 32768, 31257]` (1 distinct word in 115 births), task slots lowest-free 4/4 (0 bad); activation palette composite 266/266 | **READY-WITH-CHANGE** | `liveQ2Moves.ts` builder; the flame attr is the known-entry allocation constant like Spikes' `attr2(7, 305)` in `liveProfileMoves.ts` |
+| **RAPID SPIN 229 (0.03%)** | **none** (378 writes) | **130** constant in 4/4; lag ages 128, 129 | derivable, **measured**: attacker spin sprite at `battlePositionCenter`, hit splat at the **target `picOffsetPoint`** (the "mixed" anchor; single-anchor choices fail 10-42 rows); `monbg.layer` = bg2 for a player attacker, bg1 for an opponent (the reducer asserts it); sprite slot 3 for both (lowest-free). Reducer output = ROM **129/129 rows x 4, 2/2 births**. Scanline-at-entry state (`srcBuffer 1, state 0`, 2 x 320 banks) is **identical in all 4** (constant known-entry value, needs wiring like Dig's `initialScanline`); `movePower`/`moveDamage` are on the request (`power`, `damage`; ROM `gAnimMovePower` 20, constant); 1 of 7 task births not lowest-free (K) | **READY-WITH-CHANGE** | `liveQ2Moves.ts` + the Dig `initialScanline` carry (`liveMoveAnimation.ts:2620`) |
+| **LUSTER PURGE 295 (0.00%)** | **12 words per body** (6 `AnimHitSplatRandom` x 2, `battle_anim_normal.c:1049-1062`), all in ages **170, 175, 180, 185, 190, 195** (2 words each, 1 sprite each); `RfuMain1` step first | **332** constant in 4/4; lag ages 293, 294, 313 (constant, after the draws) | derivable, **measured**: circle center = attacker `picOffsetPoint`; hit-splat center = target `battlePositionCenter` + (player -1,+2 / opponent +1,+2) (species independent); slots 3 / 4 / 5 / 3 / 4 / 5; the **12 words derive from the activation Random2 value alone** (word j of hit i = `lcg^(170 + 5i + 2i + j)(rng2@A) >> 16`). Reducer + derived words = ROM **331/331 rows x 4** (x2/y2 included); plan replay == accepted corpus `animationRng` both sides | **READY-WITH-PRESENTATION-RNG** | add `{ageOffset: 170 + 5k, count: 2}`, k = 0..5, to `LIVE_MOVE_RANDOM2_PLANS` (`liveMovePresentationRng.ts:26`), hitsplat offsets from words as `miniTwinklingStarFromWords` does; `liveQ2Moves.ts` for the rest (monbg center/position: derivable, 4/4) |
+| **ERUPTION 284 (0.03%)** | **none** (528 / 585 writes) | **475 (player attacker, Camerupt and Torkoal), 493 (opponent Camerupt), 499 (opponent Torkoal)**: NOT CPU timing (0 lag frames in every scenario; the main-loop iteration count itself differs). Deterministic in the attacker geometry: launch-task wave-1 end 99 / 108 / 111 (attacker Y 90 / 51 / 42), wave 2 starts at end1 + 2 and lasts as long as wave 1, fixed 294-row tail: **length = 2 x end1 + 277 (475 / 493 / 499, 4/4)** | the accepted reducer (`eruptionLaunchTimeline`) **derives the wave ends from the live attacker Y**: with ROM Y it returns the ROM launch runs `[19,99][101,181]`, `[19,108][110,199]`, `[19,111][113,205]` exactly (3/3 sides/species). Production does not build: wave start/end ages, `endAge`, allocator snapshot (`loadedAge`/`freedAge`, tile range, palette slot), falling-rock / horizontal-shake / palette / audio profiles (**not measured here**: only the births, lowest-free 25/25 frames and the activation palette composite 266/266). `win0` 240,161 vs 0,0 first-body gate | **READY-WITH-CHANGE** (a source-derived duration builder: wave 1 end from the reducer, wave 2 start = end1 + 2, `endAge = 2*end1 + 277`) | prep24 prototype pattern (evidence replayer -> source-derived builder), `liveProfileMoves.ts` shape for the allocator snapshot |
+| **SPIT UP 255 (0.03%)** | **none** (486-1291 writes over the scenario) | **107** (Stockpile counter 1 and 2), **108** (counter 3: a second lag frame at age 68; lag age 60 in all): constant across 4 scenarios per counter (7 + 4 + 4 bodies); **not CPU variance** | **Stockpile counter needs no new request field**: ROM `animTurn` at the body activation is 2 / 3 / 4 for counter 1 / 2 / 3 (all 15 bodies); `Cmd_stockpiletobasedamage` sets `animTurn = stockpileCounter` (`battle_script_commands.c:6883`) and the engine mirrors it (`battleScriptStockpileOpcode.ts:117`), so `request.turn` (the controller `turn` argument, `Cmd_attackanimation` emits it before its `animTurn++`, :1787-1788) is the counter, 1..3. The census X-DISABLE label is **stale**. The accepted `spitUpAtAge` is an **evidence replayer**: `ownedSprites`, `liveTasks`, `buffers`, `palette`, `registers`, `resources`, `order`, `audio` are returned unchanged for every age, while the ROM body has **5 (counter 1) / 8 (counters 2, 3) distinct per-age sprite sets** (10 / 14 / 18 births): all of those are missing | **NEEDS-PROVIDER** (source-derived prototype for the 3 branches + hardware OAM: `spitUpDisplayPlan` decodes `buffers.hardwareOam`) | prep24 prototype (Megahorn / Return), `liveMoveOamAssembler.ts` / `liveOamMoves.ts`; counter from `request.turn` like Sky Attack's turn bit (no `rolloutCounter`-style field) |
+
+### 0.2 Headline
+
+1. **Five of the six moves draw no Random2.** Bonemerang, Eruption, Rapid Spin, Spit Up, Outrage: in every body of every scenario (including both orientations and the alternate pairs) every gRng2 write is the per-frame `RfuMain1+0x10` step, `rng2WritesOutsideRandom2 = []`. The plan "pure per-frame advance" equals the accepted corpus `animationRng` row for row (`plans.json`, 16 corpus/side entries, activation value == corpus row 0, `planEqualsCorpusPerRow` true for all). The census C labels for Bonemerang / Eruption / Rapid Spin / Spit Up / Outrage are **stale**.
+2. **Luster Purge is the one Random2 move**: 12 words = 6 hitsplats x 2 at ages 170 + 5k, all `AnimHitSplatRandom`; the words are exactly derivable (331/331 rows, x2/y2 included). Its census label "C: visualRandom" is **correct**, and it is a clean READY-WITH-PRESENTATION-RNG move.
+3. **No frame-phase (CPU-timing) variance in any of the six** (feeds nothing into DEFERRED D4): body length is constant across all scenarios of a (move, branch) except Eruption, whose length varies with the attacker geometry (475 / 493 / 499, 0 lag frames, **derivable**, not VBlank phase) and Spit Up, whose 107 / 108 follows the Stockpile counter (the counter-3 body has the extra lag frame at age 68, constant in all 4 counter-3 bodies). The lag frames inside the bodies (Bonemerang 69-70, Rapid Spin 128-129, Spit Up 60 (+68), Luster Purge 293 / 294 / 313) are at identical ages in every scenario; they only shift the Random2 phase of the *next* body, not any draw inside these.
+4. **Four reducers are computing reducers and are exact with production-derivable inputs**: Bonemerang 70/70, Outrage 118/118, Rapid Spin 129/129, Luster Purge 331/331 per-age effect-sprite rows (Eruption: exact wave ends). **Spit Up is the only evidence replayer** (an input-static passthrough) and the only NEEDS-PROVIDER.
+5. Activation palettes (BG banks 2/3/4 + OBJ banks 0/1, unfaded and faded) equal `composeLivePalettes(player, opponent)` in **266/266** checks over all 38 scenario-bodies (`palette-check.json`): the assets-only composite is sufficient for D-PAL at activation (per-age palette fades were not measured).
+
+### 0.3 Suggested batches
+
+- **R1 = Bonemerang + Rapid Spin + Outrage + Luster Purge (0.07% by the census weights)**: one LiveInputs-builder family (`liveQ2Moves.ts`): anchors from `liveBattlerAnchors`, slots by lowest-free simulation (birth-first), task slots from the K tables in `moves/*.json`, known-entry `spriteOrder`, first-body gate for `win0` / BG registers, the monbg tuple from the battler coordinates. Luster Purge adds the Random2 plan row and the word-to-hitsplat mapping (no lag model needed: the draws are 120+ frames before the first lag frame). Rapid Spin additionally needs the Dig-style `initialScanline` (constant at entry). All four reducers are already exact on these inputs.
+- **R2 = Eruption (0.03%)**: a source-derived launch-duration builder (wave 1 end from the reducer given the attacker Y, wave 2 start = end1 + 2, `endAge = 2 end1 + 277`) plus the falling / shake / palette / audio profiles, which this prep did **not** measure beyond births and the activation palette. Test with the alternate species at both sides (the opponent Y changes the length 493 -> 499).
+- **R3 = Spit Up (0.03%)**: needs a source-derived prototype of the red-orb / impact bodies for the three branches and the hardware-OAM provider (like prep24's Megahorn / Return), counter = `request.turn`. Schedule after R1/R2; nothing blocks on a new request field.
+- Order by cost/benefit: R1 first (4 moves, all inputs measured derivable), then R2 and R3.
+
+## A. Random2 attribution (probe `prep14Probes.sh`, x2; `plans.json`, `bodies.json`, `moves/*.json`)
+
+| Move | callers inside anim frames (non-Rfu), whole run | draws in body | plan replay == corpus `animationRng` |
+|---|---|---|---|
+| Bonemerang | none | 0 | 72 / 72 rows (P, O) |
+| Eruption | none | 0 | 476 (P) / 494 (O) rows |
+| Rapid Spin | none | 0 | 131 / 131 |
+| Spit Up | none | 0 | 108 (counters 1, 2), 109 (counter 3), both sides |
+| Luster Purge | `AnimHitSplatRandom+0x48` 6, `+0x60` 6 | 12 = 2 words at ages 170, 175, 180, 185, 190, 195 | 333 / 333 (P, O), activation == row 0 |
+| Outrage | none | 0 | 120 / 120 |
+
+`luster-purge-data.json` (`prep29LusterData.py`): the 6 draw frames x 4 scenarios reproduce the ROM `x2 = Random2() % 48 - 24`, `y2 = Random2() % 24 - 12` of every hitsplat (24/24), `RfuMain1` first in the frame.
+
+## B. Per-move details
+
+### B.1 Bonemerang (155)
+
+Two bodies per scenario (the move hits twice): both 71 rows, 3 sprite births (bone age 10 -> slot 3, impact age 32 -> slot 4, lunge age 51 -> slot 4; the bone is freed in the same frame the lunge is born, so births are **birth-first**: free-first 4/5 frames, birth-first 5/5), 3 task births (1 not lowest-free). `bonemerang-check.json` (`prep29BonemerangCheck.ts`): reducer inputs = `picOffsetPoint` of both battlers, slots 3 / 4 / 4, subpriority = attacker sub - 2 give 70/70 rows and 3/3 births in each of the 8 bodies. `win0` at activation = 240,161 in hit 1 and 0,0 in hit 2 in every scenario (first-body gate), `bg1` 39936 / 23554 likewise. `monbgMatchesBattlerAtActivation` true 8/8.
+
+### B.2 Eruption (284)
+
+`eruption-wave-check.json` (`prep29EruptionWaveCheck.ts`): ROM launch-task runs (slot 0): player `[19,99][101,181]` (Y 90, both species), opponent Camerupt `[19,108][110,199]` (Y 51), opponent Torkoal `[19,111][113,205]` (Y 42). The accepted reducer built from the accepted profile (geometry from the retained corpus) with only `attackerY` and the wave-2 start changed reproduces all three runs; With the wave-2 start held at the corpus value, `attackerY` shifts of 0 / +3 / +9 leave the wave ends unchanged while a lower Y (-9 opponent, -6 player) pushes wave 1 past that fixed start (the runs merge), i.e. the end is a function of the live attacker Y (and the side). Body length = 2 end1 + 277 in 4/4. The attacker is `[72, 90]` (player: both species) and `[176, 51]` / `[176, 42]` (opponent). 22 sprite births (5 spawn ages in ROM-order), 25/25 lowest-free frames either order, 7 task births 0 not lowest-free. Not measured: the species-dependent `battlerYDelta` / `battlerPicHeight` (Camerupt's 10/11 and 64 were reused for Torkoal and still matched).
+
+### B.3 Rapid Spin (229)
+
+130 rows, lag ages 128 / 129. 2 sprite births (spin age 10, hit splat age 53; both slot 3, the spin is freed at 42), 7 task births (1 not lowest-free). `rapid-spin-check.json`: anchor candidates `picOffsetPoint` / `spriteCenter` / `battlePositionCenter` / "mixed": only mixed matches all rows (129/129); the others fail on the hit splat (10 rows, the splat is at the *target* `picOffsetPoint` (72,88) / (176,42) etc.). `monbg` task data matches the battler coordinates (4/4).
+
+### B.4 Spit Up (255)
+
+`spit-up-check.json` (`prep29SpitUpCheck.py`): bodies grouped by ROM `animTurn` at activation: 2 -> 7 bodies, 107 rows, 10 births, 5 distinct per-age sprite sets; 3 -> 4 bodies, 107 rows, 14 births, 8 sets; 4 -> 4 bodies, 108 rows, 18 births, 8 sets. Slot stream constant per `animTurn`; the full spawn signature is constant per (`animTurn`, attacker side). Lowest-free: 6 / 8 / 8 frames all fine (both orders), 3 task births 0 bad. The body signature does not depend on the species pair (Swalot / Blissey vs Seviper / Golem identical).
+
+### B.5 Luster Purge (295)
+
+`luster-purge-check.json` (`prep29LusterPurgeCheck.ts`): derived inputs (circle = attacker `picOffsetPoint`, hit splats at the offset target battle-position center, 12 words from the activation value) give 331/331 rows in all 4 scenarios; with `picOffsetPoint` for the hit splats too it is 296/331 (the 35 rows of the splat window 170-204 fail), i.e. only the splat center needed the (-1,+2) / (+1,+2) constants. 7 sprite births, free-first 8/10 vs birth-first 10/10 frames, 9 task births (1 not lowest-free).
+
+### B.6 Outrage (200)
+
+`outrage-check.json` (`prep29OutrageCheck.ts`): 23 flame births at ages 6, 8, ..., 56 (source `FLAME_BIRTHS`), slots by lowest-free (birth-first); 5 bodies (4 scenarios + the second locked turn of the alternate player scenario), 118/118 rows each and 23/23 births. Flame sprite subpriority = target battler sub - 2 (38 / 28). Free-first fails once (43/44) and birth-first holds 44/44: the destroyed flame's slot is still taken when the same frame's script births.
+
+## C. Which census labels were stale
+
+| Move | census label | measured |
+|---|---|---|
+| Bonemerang | H_BUFFER, C+D-TILE+D-BG+B | no buffers consumed, no Random2 (C stale); anchors / slots / monbg derivable; first-body gate remains |
+| Eruption | H_BUFFER, C+D-PAL+D-TILE+F-AUDIO+B | no Random2 (C stale); palette composite derivable at activation; length is geometry-derived |
+| Rapid Spin | H_BUFFER, C+D-PAL+D-TILE+D-BG+D-SCAN+E-OUT+B | no Random2 (C stale); scanline entry state constant; E-OUT = `request.power` / `damage` |
+| Spit Up | H_BUFFER+H_VARIANT, ... X-DISABLE | no Random2 (C stale); X-DISABLE stale: `request.turn` is the counter; evidence replayer -> prototype |
+| Luster Purge | H_RANDOM, C+D-BG | C correct and exactly derivable; D-BG monbg derivable |
+| Outrage | H_BUFFER, D-TILE+D-PAL+D-BG+C+B | no Random2 (C stale); everything derivable or constant |
+
+## D. Receipts, scripts, reproduction
+
+- Scripts (`tools/integration/prep29*`): `prep29AltScenarios.py` (alternates + `accepted-scenarios.txt`; genders must be species-legal: Starmie `genderless`, Latias `female`), `prep29Analyze.py`, `prep29Bodies.py`, `prep29Plans.py`, `prep29LagFrames.py`, `prep29LowestFree.py`, `prep29PaletteCheck.ts`, `prep29LusterData.py`, `prep29SpitUpCheck.py`, `prep29BonemerangCheck.ts`, `prep29OutrageCheck.ts`, `prep29RapidSpinCheck.ts`, `prep29LusterPurgeCheck.ts`, `prep29EruptionWaveCheck.ts`, `prep29Run.sh`. Scenarios: `tools/battle-lab/prep29-*-alt-*.json` (16).
+- Receipts: `tools/integration/fixtures/prep29/` (compact JSON; no RGB, no mGBA logs).
+- Reproduce (from `workspace/`, direct mGBA only, ~8 minutes, `OUTDIR` must not exist): `sh tools/integration/prep29Run.sh /tmp/p29 && for f in $(cd /tmp/p29/receipts && find . -type f); do cmp /tmp/p29/receipts/$f tools/integration/fixtures/prep29/$f; done` (`analyze.txt` is the captured analysis stdout and has no counterpart in `receipts/`).
+
+## E. Not measured (honest gaps)
+
+- Eruption: falling-rock / horizontal-shake / palette-fade / audio profiles and the allocator snapshot against the ROM per-age state; `battlerYDelta` / `battlerPicHeight` sensitivity per species.
+- Per-age palette fades and register timelines for all six (only the activation palette composite, 266/266, and the activation register set were compared).
+- Matrix-slot lowest-free (the reducers' `*MatrixSlot`) and the task slot tables beyond "lowest-free yes/no per task birth" (`lowest-free.json`: Bonemerang 1, Rapid Spin 1, Luster Purge 1 task birth not lowest-free; Eruption, Spit Up, Outrage 0).
+- No presentation-RNG surrogate run in the web engine (evidence is the exact ROM plan and the derived words).

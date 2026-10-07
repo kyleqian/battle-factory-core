@@ -1,0 +1,380 @@
+{
+"bonemerang": [
+{
+"scenario": "mechanic-bonemerang-opponent-marowak-player-chansey",
+"body": 0,
+"len": 71,
+"lagAges": [
+69,
+70
+],
+"iterations": 69
+},
+{
+"scenario": "mechanic-bonemerang-opponent-marowak-player-chansey",
+"body": 1,
+"len": 71,
+"lagAges": [
+69,
+70
+],
+"iterations": 69
+},
+{
+"scenario": "mechanic-bonemerang-player-marowak-opponent-chansey",
+"body": 0,
+"len": 71,
+"lagAges": [
+69,
+70
+],
+"iterations": 69
+},
+{
+"scenario": "mechanic-bonemerang-player-marowak-opponent-chansey",
+"body": 1,
+"len": 71,
+"lagAges": [
+69,
+70
+],
+"iterations": 69
+},
+{
+"scenario": "prep29-bonemerang-alt-opponent-rhydon-golem",
+"body": 0,
+"len": 71,
+"lagAges": [
+69,
+70
+],
+"iterations": 69
+},
+{
+"scenario": "prep29-bonemerang-alt-opponent-rhydon-golem",
+"body": 1,
+"len": 71,
+"lagAges": [
+69,
+70
+],
+"iterations": 69
+},
+{
+"scenario": "prep29-bonemerang-alt-player-rhydon-golem",
+"body": 0,
+"len": 71,
+"lagAges": [
+69,
+70
+],
+"iterations": 69
+},
+{
+"scenario": "prep29-bonemerang-alt-player-rhydon-golem",
+"body": 1,
+"len": 71,
+"lagAges": [
+69,
+70
+],
+"iterations": 69
+}
+],
+"eruption": [
+{
+"scenario": "mechanic-eruption-opponent-camerupt-player-onix",
+"body": 0,
+"len": 493,
+"lagAges": [],
+"iterations": 493
+},
+{
+"scenario": "mechanic-eruption-player-camerupt-opponent-onix",
+"body": 0,
+"len": 475,
+"lagAges": [],
+"iterations": 475
+},
+{
+"scenario": "prep29-eruption-alt-opponent-torkoal-golem",
+"body": 0,
+"len": 499,
+"lagAges": [],
+"iterations": 499
+},
+{
+"scenario": "prep29-eruption-alt-player-torkoal-golem",
+"body": 0,
+"len": 475,
+"lagAges": [],
+"iterations": 475
+}
+],
+"rapid-spin": [
+{
+"scenario": "mechanic-rapid-spin-opponent-wartortle-player-onix",
+"body": 0,
+"len": 130,
+"lagAges": [
+128,
+129
+],
+"iterations": 128
+},
+{
+"scenario": "mechanic-rapid-spin-player-wartortle-opponent-onix",
+"body": 0,
+"len": 130,
+"lagAges": [
+128,
+129
+],
+"iterations": 128
+},
+{
+"scenario": "prep29-rapid-spin-alt-opponent-starmie-golem",
+"body": 0,
+"len": 130,
+"lagAges": [
+128,
+129
+],
+"iterations": 128
+},
+{
+"scenario": "prep29-rapid-spin-alt-player-starmie-golem",
+"body": 0,
+"len": 130,
+"lagAges": [
+128,
+129
+],
+"iterations": 128
+}
+],
+"spit-up": [
+{
+"scenario": "mechanic-spit-up-opponent-swalot-one-stockpile",
+"body": 0,
+"len": 107,
+"lagAges": [
+60
+],
+"iterations": 106
+},
+{
+"scenario": "mechanic-spit-up-opponent-swalot-one-stockpile",
+"body": 1,
+"len": 107,
+"lagAges": [
+60
+],
+"iterations": 106
+},
+{
+"scenario": "mechanic-spit-up-opponent-swalot-three-stockpile",
+"body": 0,
+"len": 108,
+"lagAges": [
+60,
+68
+],
+"iterations": 106
+},
+{
+"scenario": "mechanic-spit-up-opponent-swalot-two-stockpile",
+"body": 0,
+"len": 107,
+"lagAges": [
+60
+],
+"iterations": 106
+},
+{
+"scenario": "mechanic-spit-up-player-swalot-one-stockpile",
+"body": 0,
+"len": 107,
+"lagAges": [
+60
+],
+"iterations": 106
+},
+{
+"scenario": "mechanic-spit-up-player-swalot-three-stockpile",
+"body": 0,
+"len": 108,
+"lagAges": [
+60,
+68
+],
+"iterations": 106
+},
+{
+"scenario": "mechanic-spit-up-player-swalot-two-stockpile",
+"body": 0,
+"len": 107,
+"lagAges": [
+60
+],
+"iterations": 106
+},
+{
+"scenario": "prep29-spit-up-alt-opponent-seviper-golem-one-stockpile",
+"body": 0,
+"len": 107,
+"lagAges": [
+60
+],
+"iterations": 106
+},
+{
+"scenario": "prep29-spit-up-alt-opponent-seviper-golem-one-stockpile",
+"body": 1,
+"len": 107,
+"lagAges": [
+60
+],
+"iterations": 106
+},
+{
+"scenario": "prep29-spit-up-alt-opponent-seviper-golem-three-stockpile",
+"body": 0,
+"len": 108,
+"lagAges": [
+60,
+68
+],
+"iterations": 106
+},
+{
+"scenario": "prep29-spit-up-alt-opponent-seviper-golem-two-stockpile",
+"body": 0,
+"len": 107,
+"lagAges": [
+60
+],
+"iterations": 106
+},
+{
+"scenario": "prep29-spit-up-alt-opponent-seviper-golem-two-stockpile",
+"body": 1,
+"len": 107,
+"lagAges": [
+60
+],
+"iterations": 106
+},
+{
+"scenario": "prep29-spit-up-alt-player-seviper-golem-one-stockpile",
+"body": 0,
+"len": 107,
+"lagAges": [
+60
+],
+"iterations": 106
+},
+{
+"scenario": "prep29-spit-up-alt-player-seviper-golem-three-stockpile",
+"body": 0,
+"len": 108,
+"lagAges": [
+60,
+68
+],
+"iterations": 106
+},
+{
+"scenario": "prep29-spit-up-alt-player-seviper-golem-two-stockpile",
+"body": 0,
+"len": 107,
+"lagAges": [
+60
+],
+"iterations": 106
+}
+],
+"luster-purge": [
+{
+"scenario": "mechanic-luster-purge-opponent-latios-player-onix",
+"body": 0,
+"len": 332,
+"lagAges": [
+293,
+294,
+313
+],
+"iterations": 329
+},
+{
+"scenario": "mechanic-luster-purge-player-latios-opponent-onix",
+"body": 0,
+"len": 332,
+"lagAges": [
+293,
+294,
+313
+],
+"iterations": 329
+},
+{
+"scenario": "prep29-luster-purge-alt-opponent-latias-golem",
+"body": 0,
+"len": 332,
+"lagAges": [
+293,
+294,
+313
+],
+"iterations": 329
+},
+{
+"scenario": "prep29-luster-purge-alt-player-latias-golem",
+"body": 0,
+"len": 332,
+"lagAges": [
+293,
+294,
+313
+],
+"iterations": 329
+}
+],
+"outrage": [
+{
+"scenario": "mechanic-outrage-opponent-dragonite-player-onix",
+"body": 0,
+"len": 119,
+"lagAges": [],
+"iterations": 119
+},
+{
+"scenario": "mechanic-outrage-player-dragonite-opponent-onix",
+"body": 0,
+"len": 119,
+"lagAges": [],
+"iterations": 119
+},
+{
+"scenario": "prep29-outrage-alt-opponent-flygon-golem",
+"body": 0,
+"len": 119,
+"lagAges": [],
+"iterations": 119
+},
+{
+"scenario": "prep29-outrage-alt-player-flygon-golem",
+"body": 0,
+"len": 119,
+"lagAges": [],
+"iterations": 119
+},
+{
+"scenario": "prep29-outrage-alt-player-flygon-golem",
+"body": 1,
+"len": 119,
+"lagAges": [],
+"iterations": 119
+}
+]
+}
