@@ -5,60 +5,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-06 (in progress) — S10A: presentation RNG merged; Random2 draw plans measured
+## 2026-10-06 (day) — S10A wind-down: D3 implemented; 218 -> 226 exact + 10 faithful-random live adapters
 
-- **State:** S10A, local master `5330218e8`+. Scoped-exact live adapters 226; faithful-random
-  adapters 10 (Double Kick, Astonish, Thrash, Flail, Wish, Hyper Beam, Rain Dance, Water Pulse,
-  Mud-Slap, Sand-Attack). Census 226 + 10 + 0 + 40 = 276. Preview
-  <http://127.0.0.1:5191/> serves `4abe570f9` (browser replay 4 samples, export + mode restart pass,
-  no errors; `playable-preview-4abe570f9-receipt.json`). Opus 5.5 supervisor; Opus/Sonnet 5.5 workers.
-- **Did:** D3 option (a) infrastructure merged (Opus worker): `src/engine/presentationRng.ts`
-  (exact Random2 LCG + jump-ahead), per-battle host `presentationRngHost.ts` (policy
-  `presentation-rng.v1.frame-step.no-lag.battle-stride-2^20`; session seed from crypto /
-  `presentationSeed=` / bench default 0x808DB3EB; one step per presented battle frame, draws
-  exactly once per body key, render read-only), `SessionTrace.presentationRng` export with legacy
-  default, `faithfulRandomCount`/`faithfulRandomAdapters` disjoint from `implementedCount`; doc
-  `docs/presentation-rng.md`. Worker gates 1,527 files / 12,335 tests, build 853; supervisor
-  differential 408/408 byte-identical vs `e45e9c361`, affected tests 42/42, smoke 448 on master.
-  prep12 (side): census regenerated (218 + 0 + 58 = 276; 52 Random2); draw plans for 12 moves
-  reproduce the accepted pinned words exactly (`tools/integration/fixtures/prep12-random2/plans.json`);
-  Ice Beam / Water Spout / Hidden Power draw NO Random2 (stale C label). Supervisor reran Thrash and
-  Wish probes twice: per-frame hashes equal the receipts.
-  R1 (Opus) merged: faithful-random adapters via `src/engine/liveMovePresentationRng.ts` (activation
-  in tick, body key per request/segment/command, render read-only); pinned dense proofs both
-  orientations + alternates zero residual; supervisor reran 4 fixtures twice fresh (0 px) and the 5
-  surrogate routes (active every age, prompt reached, seed + ON/OFF logical parity). Meteor Mash
-  dropped (alternate body is 1 frame longer). prep13 merged: Ice Beam / Water Spout / Hidden Power
-  (no RNG) + Hyper Beam briefable. ISSUES #148 filed (target x2 after a shaking body).
-  R3 (Sonnet) merged: Ice Beam, Water Spout, Hidden Power (Unown letter-form coords) exact; Hyper
-  Beam faithful-random; supervisor reran 4 alternates twice fresh, 0 px. Water Spout middle HP tiers
-  (later bodies) unproven: the tier fixtures lend the first-body order. prep14 (Rain Dance + Water
-  Pulse Random2-ready, Hail no RNG, Overheat/Silver Wind need palettes, Psych Up/Curse later) and the
-  #148 evidence (only ONIX/RATTATA opponents have idle x2 1; per-move reset table; rule == ROM
-  1,927/1,944 activations) merged. Both oracles were killed by a worker's `pkill -f mgba` and
-  restarted by the supervisor at 11:29 (PAPERCUTS).
-  R4 (Sonnet) merged: Rain Dance + Water Pulse faithful-random, Hail exact; supervisor reran 6 fixtures
-  twice fresh (0 px) and 3 routes. prep16 merged: Overheat/Silver Wind first bodies exact with palettes
-  composed from existing assets (230/230; 193-196/196); later bodies need a BG-register tracker.
-  #148 tracker (Opus) merged: presentation-only battler x2 history; ONIX later bodies now exact
-  (Flail 2-5, Double Kick hit 2, Spike Cannon / Fury Swipes later hits, after a send-in); supervisor
-  reran 4 cases twice fresh (0 px; control 118,919 px) and a 451/451 differential. prep17 merged:
-  Meteor Mash's extra frame is a ROM lag frame (stays fallback); Mud-Slap/Sand-Attack ready.
-  P3 (Sonnet) merged: Overheat, Silver Wind, Psych Up (player) exact for the battle's FIRST body with
-  an assets-only palette composite; supervisor reran 6 fixtures (0 px) + 533/533 differential. prep18
-  merged: Dig ready (no RNG); Megahorn / Will-O-Wisp / Fury Cutter / Return / Pursuit need an OAM-buffer
-  reducer port.
-  R5 (Sonnet) merged: Mud-Slap + Sand-Attack faithful-random, Dig exact (both turns; hidden attacker
-  between turns); supervisor reran 4 fixtures (0 px) + 533/533 differential. Species audit 3 (89 swaps
-  of this session's adapters): 3 real defects patch-proven -> ISSUES #149 (Ice Beam / Water Spout drop
-  RATTATA's idle x2; Astonish ignores target elevation); supervisor reproduced Ice Beam 15,990 px -> 0.
-  Audit 4 (Overheat / Silver Wind / Psych Up): no defects.
-  #149 fixed and Rollout Defense Curl bodies live (merged `aaa945463`); Endeavor got only its stale-register
-  plumbing (no adapter; gameplay outcomes identical over 20 soak seeds). prep19 (BG-register history) and
-  prep20 (OAM assemblers for Will-O-Wisp / Pursuit / Fury Cutter / Megahorn) banked for the next session.
-- **Next:** final step in flight: later-body evidence + gate decision for Overheat / Silver Wind / Psych Up.
-- **Notes:** no DEFERRED entries. Oracle freshness FAIL at orient = known false positive (no
-  oracle/ commits since the services started 2026-10-03).
+- **State:** S10A, local master; production `7e7816b98` (src tree `c41c4949`): 226 scoped-exact + 10
+  faithful-random live adapters, 40 accepted bodies remain (6.1% of Factory move uses; census
+  `226+10+0+40=276`). Supervisor final gates on that code: typecheck, 1,536 files / 12,472 tests, build
+  857 (`final-supervisor-gates-20261006.json`). Preview <http://127.0.0.1:5191/> serves `10ad8606c`
+  (same src; 4 samples hash-equal, export + mode restart pass, no errors). Opus 5.5 supervisor;
+  Opus/Sonnet 5.5 workers; 8 integration folds + 12 evidence merges, all re-proved by the supervisor.
+- **Did (production):** D3 option (a): presentation-only Random2 host (`docs/presentation-rng.md`; seed +
+  policy in session exports; legacy default) and a separate faithful-random bucket. Faithful-random:
+  Double Kick, Astonish, Thrash, Flail, Wish, Hyper Beam, Rain Dance, Water Pulse, Mud-Slap, Sand-Attack.
+  Exact: Ice Beam, Water Spout, Hidden Power (Unown forms), Hail, Overheat (first body), Silver Wind,
+  Psych Up (player), Dig. Battler x2 history tracker (#148: ONIX/RATTATA later bodies), assets-only palette
+  composite, first-body gate, Rollout Defense Curl bodies, #149 audit fixes, Endeavor stale-register
+  plumbing (no adapter yet). Gameplay/RNG unchanged (route ON/OFF + seed parity per batch; 20 soak seeds
+  identical master vs the register branch).
+- **Did (evidence):** census regen; prep12-20 (Random2 plans — most "C" labels were stale; Meteor Mash tail
+  = ROM lag frame -> fallback; BG-register history; OAM assemblers for Will-O-Wisp / Pursuit / Fury Cutter /
+  Megahorn); species audits 3 (3 defects, fixed) and 4 (clean).
+- **Next:** ROADMAP S10A "Next (2026-10-06 evening)": OAM-buffer reducer ports first (prep20), then Overheat
+  later bodies, Endeavor adapter, remaining stale-labelled Random2 moves.
+- **Notes:** no DEFERRED entries. Optional user question (not blocking, not filed): Meteor Mash's last-row
+  timing depends on a ROM lag frame; it stays on fallback unless a D3-like timing claim is approved. A
+  worker's `pkill -f mgba` killed both oracles mid-session; restarted 11:29 (PAPERCUTS). Soak gates are
+  superseded for S10A (ANIMATION_VERIFICATION scoped policy). All worker branches merged, worktrees removed;
+  validation summaries copied to `.integration/validation/`.
 
 ---
 

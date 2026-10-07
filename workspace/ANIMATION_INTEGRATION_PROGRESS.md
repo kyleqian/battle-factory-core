@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-06 (in progress) — presentation RNG infrastructure merged; prep12 Random2 plans
+## 2026-10-06 (day, wind-down) — D3 implemented: 218 -> 226 exact + 10 faithful-random live adapters
 
 - Folded Opus worker `08c3c4ce3` as `26b3f525a`: D3 option (a) infrastructure, no adapter consumer
   yet. `src/engine/presentationRng.ts` (Random2 = ISO_RANDOMIZE1 then `>>> 16`, u32 exact, O(log n)
@@ -154,7 +154,18 @@
   Will-O-Wisp, Pursuit, Fury Cutter, Megahorn — OAM rows exact vs corpora and fresh alternates, pixels 0 px
   with the prototype buffer; open input = per-row full 64-slot order; Will-O-Wisp reducer orb math drifts on
   other geometries (port the exact math); supervisor reran prep20Run.sh.
-- In flight: later-body evidence + gate decision for Overheat / Silver Wind / Psych Up (Opus integration).
+- Folded Opus worker `fe582f183` (src tree `c41c4949`) as `7e7816b98`: Silver Wind (both sides) and Psych Up
+  (player) live on LATER bodies when the order lend is known (Silver Wind also needs the known-entry slot
+  occupancy): their history-dependent registers never reach the compositor (reducers overwrite bld* /
+  scroll / bgcnt first; code path + S0 / rule / absurd render test + positive control); 11 later-body
+  fixtures (Tackle, Splash, Psychic, own Silver Wind, stat predecessors) 0 px twice fresh; routes 106 / 160
+  later Silver Wind bodies live. Overheat keeps the first-body gate (only 1 later body per side measured).
+  Worker gates 1,536 files / 12,472 tests, build. Supervisor: dense rerun 4 later-body fixtures 0 px twice
+  fresh; differential 533/533; 5 test files 45/45. Receipt `later-bodies-bg-receipt.json`.
+- Wind-down: supervisor final gates on `7e7816b98`: typecheck, 1,536 files / 12,472 tests, build 857
+  (`final-supervisor-gates-20261006.json`); preview `10ad8606c` verified
+  (`playable-preview-10ad8606c-receipt.json`). Live: 226 scoped-exact + 10 faithful-random; 40 remain.
+  Next: ROADMAP S10A "Next (2026-10-06 evening)".
 
 ## 2026-10-06 — User answered D3: separate deterministic presentation RNG
 
