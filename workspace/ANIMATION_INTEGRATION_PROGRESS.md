@@ -120,6 +120,13 @@
   75/21, 141/21, 29/0, 70/0, 345/21, 543/21, 244/42, 376/42. Worker gates 1,543 files / 12,606 tests, build; shadow
   scan 523 / 0. Supervisor: dense rerun 5 fixtures 0 px r1 == r2; differential 389/389; union typecheck, smoke,
   8 files 196/196. Receipt `q2-live-adapter-receipt.json`.
+- prep27 (side, `a2a84fb46`, new files only): Baton Pass body 53 rows constant, attacker hidden from age 9;
+  `batonPassAtAge` exact from production anchors (component 53/53 x 4 pairs; framebuffer 53/53 AIPOM<->ONIX); ROM flow
+  opponent: removal E+9, message E+14, ball E+51, species-keyed healthbox tail; player: party screen, removal A+76,
+  old healthbox shown A+48..A+75 (production misses those 28 frames; otherwise within +2..+5 frames); production has no
+  opponent-attacker flow. Endeavor: source-relative prototype exact 68/68 rows on 4 fresh pairs; W3 (battle-TV)
+  predicate written from battle_tv.c and reachable on generated routes (decline until ported). Supervisor:
+  `prep27Run.sh` with fresh R1/R2 dirs — probes (RGB incl.) R1 == R2, receipts identical.
 
 ## 2026-10-06 (day, wind-down) — D3 implemented: 218 -> 226 exact + 10 faithful-random live adapters
 
