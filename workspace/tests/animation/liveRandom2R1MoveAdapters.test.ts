@@ -110,8 +110,8 @@ describe("faithful-random live adapters: plans and accounting", () => {
         ({ ageOffset, count }) => ({ ageOffset, count })));
     }
     // Hyper Beam (63) is the prep13 and Rain Dance (240) / Water Pulse (352) the prep14 faithful-random adapters
-    // (tests/animation/livePrep13MoveAdapters.test.ts, liveRandom2R4MoveAdapters.test.ts; Mud-Slap 189 / Sand-Attack 28: liveRandom2R5MoveAdapters.test.ts; Lovely Kiss 142: liveProfileMoveAdapters.test.ts).
-    expect([...LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS].sort((a, b) => a - b)).toEqual([...MOVES.map((m) => m.id), 63, 240, 352, 189, 28, 142].sort((a, b) => a - b));
+    // (tests/animation/livePrep13MoveAdapters.test.ts, liveRandom2R4MoveAdapters.test.ts; Mud-Slap 189 / Sand-Attack 28: liveRandom2R5MoveAdapters.test.ts; Lovely Kiss 142: liveProfileMoveAdapters.test.ts; Luster Purge 295: livePrep29Adapters.test.ts).
+    expect([...LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS].sort((a, b) => a - b)).toEqual([...MOVES.map((m) => m.id), 63, 240, 352, 189, 28, 142, 295].sort((a, b) => a - b));
     for (const id of LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS) {
       expect((LIVE_MOVE_ANIMATION_IDS as readonly number[]).includes(id)).toBe(false);
       expect(liveMoveAnimationDuration({ moveId: id, attacker: 0, target: 1, turn: 0, power: 20, damage: 0, friendship: 70, multihit: 0 })).not.toBeNull();
