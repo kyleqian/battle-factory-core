@@ -24,8 +24,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Did (evidence):** census regen; prep12-20 (Random2 plans — most "C" labels were stale; Meteor Mash tail
   = ROM lag frame -> fallback; BG-register history; OAM assemblers for Will-O-Wisp / Pursuit / Fury Cutter /
   Megahorn); species audits 3 (3 defects, fixed) and 4 (clean).
-- **Next:** ROADMAP S10A "Next (2026-10-06 evening)": OAM-buffer reducer ports first (prep20), then Overheat
-  later bodies, Endeavor adapter, remaining stale-labelled Random2 moves.
+- **Next:** ROADMAP S10A "Next (2026-10-06 evening)": OAM-buffer reducer ports first (prep20), then widen
+  Overheat + add Psych Up opponent (evidence banked at the end: 17 later-body fixtures 0 px with the gate
+  bypassed, `docs/later-bodies-overheat-psychup.md`), Endeavor adapter, remaining stale-labelled moves.
 - **Notes:** no DEFERRED entries. Optional user question (not blocking, not filed): Meteor Mash's last-row
   timing depends on a ROM lag frame; it stays on fallback unless a D3-like timing claim is approved. A
   worker's `pkill -f mgba` killed both oracles mid-session; restarted 11:29 (PAPERCUTS). Soak gates are

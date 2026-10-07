@@ -2220,9 +2220,10 @@ Random2 among the moves probed. Resume points, in order:
    Cutter (counter on the request, Rollout precedent; counter 5 = counter-3 body), Megahorn, then
    Return (strongest branch only). Prototype assemblers are exact; open input = per-row full 64-slot
    order; port Will-O-Wisp's exact orb math (the shipped reducer drifts on other geometries).
-2. Overheat later bodies (needs >=3 later-body predecessors per side; Silver Wind and Psych Up player are
-   already live on later bodies — their history registers never reach the pixels,
-   `later-bodies-bg-receipt.json`). Psych Up opponent attacker has no first-body capture yet.
+2. Widen Overheat (both sides) to later bodies and add the Psych Up opponent attacker: evidence is banked
+   (`docs/later-bodies-overheat-psychup.md`, 17 later-body fixtures 0 px with the first-body gate
+   bypassed; not yet supervisor-reproduced) — gate = known order lend, as Silver Wind / Psych Up player
+   already use (`later-bodies-bg-receipt.json`).
 3. Endeavor adapter: the stale-register plumbing is merged; a source-relative reducer + renderer is
    needed (the staged reducer is GROVYLE/ONIX-specific); W3 (TV loop) is unported -> decline there.
 4. Remaining Random2-labelled moves: re-probe each (expect stale labels) with the prep12/prep14 method.

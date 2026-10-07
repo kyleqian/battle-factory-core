@@ -166,6 +166,11 @@
   (`final-supervisor-gates-20261006.json`); preview `10ad8606c` verified
   (`playable-preview-10ad8606c-receipt.json`). Live: 226 scoped-exact + 10 faithful-random; 40 remain.
   Next: ROADMAP S10A "Next (2026-10-06 evening)".
+- Last evidence merge (side, `877e4485e`, new files only): Overheat (both sides, 5 predecessors each) and
+  Psych Up opponent attacker (first body + 6 later cases) 0 px through the production renderer with the
+  first-body gate temporarily bypassed (src reverted; patch `later-bodies-bg-2/lb21-temp-bypass.patch`);
+  Psych Up opponent inputs listed in `docs/later-bodies-overheat-psychup.md`. Not supervisor-reproduced
+  (wind-down); the gate-widening step must re-prove them.
 
 ## 2026-10-06 — User answered D3: separate deterministic presentation RNG
 
