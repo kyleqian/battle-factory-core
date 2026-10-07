@@ -38,6 +38,27 @@ export function knownFor(rows: Json[], side: "player" | "opponent"): { oam: Supe
   return { oam, model };
 }
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+/** `--order=derived`: SortSprites (sprite.c:372) instead of the lent corpus spriteOrder: priority << 8 | subpriority ascending, then larger signed
+ *  oam.y first (y >= 160 -> y - 256; affine-double 64x64: y > 128 -> y - 256), stable over the previous order; new sprites enter in slot order.
+ *  Subpriorities (K) are the sprites' own (battlers, orb, rocks, fireball: first corpus row of each). */
+export function derivedOrder(rows: Json[], k: SuperpowerKnown31): number[][] {
+  const subOf = (re: RegExp) => { for (const r of rows) { const s = r.sprites.find((x: Json) => re.test(x.template?.symbol ?? "")); if (s) return s.subpriority as number; } return 0; };
+  const sub = { orb: subOf(/SuperpowerOrb/), rock: subOf(/SuperpowerRock/), fire: subOf(/SuperpowerFireball/) }, b = rows[0]!.battlerSprites;
+  const head: number[] = rows[1]!.spriteOrder.slice(0, 6), out: number[][] = []; let prev: number[] = [];
+  for (let st = 0; st < rows.length; st += 1) {
+    const key = new Map<number, [number, number]>(), sy = (y: number, dbl = false) => { let v = y & 0xff; if (v >= 160) v -= 256; if (dbl && v > 128) v -= 256; return v; };
+    key.set(k.attackerSlot, [(k.attackerAttr[2] >> 10 & 3) << 8 | b.attacker.subpriority, sy(k.attackerAttr[0])]); key.set(k.targetSlot, [(k.targetAttr[2] >> 10 & 3) << 8 | b.target.subpriority, sy(k.targetAttr[0])]);
+    for (const sp of superpowerSprites(st, k)) {
+      if (sp.kind === "orb") key.set(sp.slot, [k.orb.prio << 8 | sub.orb, sy(sp.y + sp.y2 - 64, true)]);
+      if (sp.kind === "rock") key.set(sp.slot, [k.rock.prio << 8 | sub.rock, sy(sp.y - 8)]);
+      if (sp.kind === "fireball") key.set(sp.slot, [k.meteor.prio << 8 | sub.fire, sy(sp.y + sp.y2 - 32)]); }
+    const order = [...prev.filter((x) => key.has(x)), ...[...key.keys()].filter((x) => !prev.includes(x)).sort((p, q) => p - q)];
+    order.sort((p, q) => key.get(p)![0] - key.get(q)![0] || key.get(q)![1] - key.get(p)![1]);
+    out.push([...head, ...order]); prev = order;
+  }
+  return out;
+}
+const ORDER = process.argv.find((a) => a.startsWith("--order="))?.slice(8) ?? "lent";
 const OWNED = /Superpower|ShakeMonOrPlatform/;
 export function checkWindow(name: string, rows: Json[], side: "player" | "opponent") {
   const { oam: known0, model: mk0 } = knownFor(rows, side);
@@ -47,8 +68,9 @@ export function checkWindow(name: string, rows: Json[], side: "player" | "oppone
   const out: Json = { name, rows: rows.length, entries: 0, entryMatch: 0, oamRowsExact: 0, matrixRowsExact: 0, badRows: [] as number[], examples: [] as string[], fields: {}, phase: mk.phase,
     anchors: { attacker: known.attackerAnchor, target: known.targetAnchor, freeMatrix: known.freeMatrix } };
   const bump = (f: string, ok: boolean, r: number, extra?: string) => { out.fields[f] ??= { exact: 0, rows: 0 }; out.fields[f].rows += 1; if (ok) out.fields[f].exact += 1; else { out.fields[f].bad ??= []; if (out.fields[f].bad.length < 8) out.fields[f].bad.push(extra ? `${r}:${extra}` : r); } };
+  const derived = ORDER === "derived" ? derivedOrder(rows, known) : null; out.order = ORDER;
   for (let age = 1; age < rows.length; age += 1) {
-    const got = assembleSuperpowerHardwareOam(age, known, (s) => rows[Math.max(s, 0)]!.spriteOrder); let ok = true; const exp: string[] = rows[age]!.hardwareOam;
+    const got = assembleSuperpowerHardwareOam(age, known, (s) => derived ? derived[Math.max(s, 0)]! : rows[Math.max(s, 0)]!.spriteOrder); let ok = true; const exp: string[] = rows[age]!.hardwareOam;
     for (let i = 0; i < 128; i += 1) { out.entries += 1; if (got.oam[i] === exp[i]) out.entryMatch += 1; else { ok = false; if (out.examples.length < 6) out.examples.push(`${age}/${i}: want ${exp[i]} got ${got.oam[i]}`); } }
     if (ok) out.oamRowsExact += 1; else if (out.badRows.length < 24) out.badRows.push(age);
     if (same(got.matrices, rows[age]!.hardwareMatrices)) out.matrixRowsExact += 1;

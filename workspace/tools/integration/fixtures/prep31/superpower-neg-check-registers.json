@@ -65,7 +65,8 @@
     "y": 49
    },
    "freeMatrix": 0
-  }
+  },
+  "order": "lent"
  },
  {
   "name": "accepted-opponent",
@@ -133,6 +134,7 @@
     "y": 99
    },
    "freeMatrix": 0
-  }
+  },
+  "order": "lent"
  }
 ]

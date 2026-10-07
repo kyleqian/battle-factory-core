@@ -55,7 +55,8 @@
     "y": 49
    },
    "freeMatrix": 0
-  }
+  },
+  "order": "lent"
  },
  {
   "name": "accepted-opponent",
@@ -113,7 +114,8 @@
     "y": 99
    },
    "freeMatrix": 0
-  }
+  },
+  "order": "lent"
  },
  {
   "name": "prep25-superpower-alt-player-machamp-golem",
@@ -171,7 +173,8 @@
     "y": 45
    },
    "freeMatrix": 0
-  }
+  },
+  "order": "lent"
  },
  {
   "name": "prep25-superpower-alt-opponent-machamp-golem",
@@ -229,7 +232,8 @@
     "y": 104
    },
    "freeMatrix": 0
-  }
+  },
+  "order": "lent"
  },
  {
   "name": "prep31-superpower-alt-player-machamp-weezing",
@@ -287,7 +291,8 @@
     "y": 36
    },
    "freeMatrix": 0
-  }
+  },
+  "order": "lent"
  },
  {
   "name": "prep31-superpower-alt-opponent-weezing-snorlax",
@@ -345,6 +350,7 @@
     "y": 99
    },
    "freeMatrix": 0
-  }
+  },
+  "order": "lent"
  }
 ]
