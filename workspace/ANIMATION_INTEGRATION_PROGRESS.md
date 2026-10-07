@@ -26,6 +26,12 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- Species audit 9 (side, `5383b9b10`, new files only): Megahorn / Revenge / Mach Punch / Meteor Mash, 154 swap rows
+  x2 fresh: 99 rows 0 px, 30 TIMING-PHASE (residual only on the documented rows; with swapped species the fade rows
+  reach 19,175 px/row, above the documented per-fixture maximum — the check gates on ages, not px), no new lag class.
+  Defect: Mach Punch opponent attacker with an idle rest (ISSUES #152; patch proof 86,089 -> 0 px). Revenge's
+  idle-rest gate too broad for attackers; Meteor Mash player-side FLYGON target unresolved. Supervisor reran the patch
+  proof (3 rows 0 px, identical) and the unpatched ONIX row (86,089 px x2).
 - prep31 (side, `201cdf91c`, new files only): source-derived Superpower (276) and Spit Up (255, Stockpile counters
   1-3 = request.turn) providers. Superpower: every field exact in 6 windows (accepted P/O, MACHAMP->GOLEM,
   MACHAMP->WEEZING elevated, WEEZING->SNORLAX), OAM order derived by SortSprites; pixels 1487/1488 rows — the one

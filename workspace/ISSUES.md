@@ -17,6 +17,20 @@ backlog.
 
 # Open
 
+## #152 — Species audit 9: live Mach Punch idle rest; Meteor Mash player-side FLYGON target (S10A, found 2026-10-07)
+
+Evidence `docs/live-species-audit-9.md`, receipts `tools/integration/fixtures/species-audit-9/` (154 rows, two fresh
+runs each). Supervisor reran the patch proof and the unpatched row.
+- **Mach Punch (183), opponent-side attacker with a nonzero idle rest (ONIX / RATTATA):** the ROM punch task moves the
+  attacker relative to its idle offset and the traces copy it (reset to 0 after age 57); the renderer uses fixed
+  tables (`machPunch.ts:325-330`, `:412`). Unpatched ONIX attacker 86,089 px (ages 51..109); the reverted patch
+  `mach-punch-idle-rest-env.diff` (default knobs) gives 0 px for ONIX and RATTATA, accepted window unchanged.
+- **Mach Punch, opponent-side target with an idle rest:** `targetShakeAtAge` returns 0 instead of the offset; the
+  patch leaves one row (age 60) unexplained -> decline such targets until resolved.
+- **Revenge (279):** the idle-rest decline is too broad for attackers (gate lifted: 0 px); keep it for targets.
+- **Meteor Mash (309), player-side FLYGON target:** star pixels 5-159 px/row on ages 49..189, cause not found.
+- Harness limit: the verifier passes only the attacker's personality, so shiny TARGET declines are unverified.
+
 ## #151 — Species audit 7 remainder: CPU-timing residuals in live Sheer Cold / Hyper Voice (D4 integration pending)
 
 Evidence `docs/live-species-audit-7.md`, diagnosis `docs/issue151-diagnosis.md` (counter evidence, shift tests and
