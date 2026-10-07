@@ -26,6 +26,13 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- prep34 (side, `f69afd93e`, new files only): Extreme Speed (245) X-AGE closed — reducer age 43 at activation in all 4
+  windows (ARCANINE->DUGTRIO, new SMEARGLE->GOLEM, both sides), body 321 rows, 8,916/8,916 visible field-rows,
+  accepted pair 321/321 rows 0 px; the only missing input is the attacker pic y-offset hard-coded for ARCANINE.
+  Memento (262) D-SCAN closed — first-body activation scanline == production FIRST_BODY_SCANLINE (up to a pixel-
+  neutral buffer swap); 8,531/8,532 field-rows; accepted pair 0 px with production-derived inputs; later bodies differ
+  -> first-body gate. Supervisor: `prep34Run.sh` into fresh dirs — probes r1 == r2 (20 scenarios), 21/21 receipts
+  byte-identical.
 - Integration step D4d (Ice Ball + Dive) STOPPED at a measured blocker, evidence merged (`57ca6674e`, no src change):
   Ice Ball counters 1..4 and the Dive attack body start from the previous body's end-of-body sprite order, which
   depends on that body's Random2 words (shard / droplet y-sort before death), so no constant lend exists and the order
