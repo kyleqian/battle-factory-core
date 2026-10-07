@@ -26,6 +26,13 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- prep32 (side, `7ea9671a7`, new files only): Nightmare (171) READY as faithful timing — per-age caller inputs
+  (palettes, registers, battler sprites, SortSprites order, clone / tasks) exact on 22,921 / 22,925 field-rows in 8
+  windows (misses = state-only restore row T); pixels 1348/1349 rows 0 px at the measured phase (GENGAR->GOLBAT row 0
+  = opponent shadow, renderer); order after Hypnosis + SLP: occupied part == known entry. Flatter (260): 114 words
+  derived from the activation Random2 value, registers / palettes / 38 confetti exact in 4 windows, birth split T is
+  display-neutral (0 px all alternatives); NEEDS the hardware OAM / matrix provider. Supervisor: `prep32Run.sh` into
+  fresh dirs — probes r1 == r2, 20/20 receipts byte-identical.
 - Folded Opus worker `49b31367b` as `af53ffb4a` (src tree `efec2d66`): FAITHFUL-TIMING Psywave (149; prep30 model,
   `livePsywaveInputs.ts`; late lag at 185, 4 of 6 -> 205 rows; elevated-opponent row-0 shadow via the live #142 row
   0 hook) and Extrasensory (326; `liveExtrasensoryInputs.ts`; reducer `targetYElevation` input, defaults unchanged;
