@@ -1,0 +1,26 @@
+diff --git a/workspace/src/engine/battleScene.ts b/workspace/src/engine/battleScene.ts
+index 1bd236676..425777393 100644
+--- a/workspace/src/engine/battleScene.ts
++++ b/workspace/src/engine/battleScene.ts
+@@ -19624,12 +19624,19 @@ export function renderSceneOnMovePresentation(
+     const targetIdle = playerToOpponent && bodyState.age < 48
+       ? sceneOnBattlerFrontIdleRest(view.target)
+       : { x2: 0, y2: 0 };
++    // speciesAudit13 probe (S13_REST2=1): an opponent attacker's slide is relative to its front-idle rest until the attacker offset first
++    // returns to 0 after moving (the slide's end); from there it is drawn at the offset alone.
++    const s13Still = (d: { attackerOffset: { x2: number; y2: number } }) => d.attackerOffset.x2 === 0 && d.attackerOffset.y2 === 0;
++    const s13Seq = Array.from({ length: Math.max(0, bodyState.age) + 1 }, (_, a) => sceneOnBodySlamView({ ...bodyState, age: a - 1 }));
++    const s13Returned = s13Seq.some((d, a) => s13Still(d) && s13Seq.slice(0, a).some((x) => !s13Still(x)));
++    const s13Rest = process.env.S13_REST2 === "1" && view.attacker.geometry.side === "opponent" && !s13Returned
++      ? sceneOnBattlerFrontIdleRest(view.attacker) : { x2: 0, y2: 0 };
+     const drawAttacker = () => drawSpriteSheet(
+       fb,
+       lickitung.tileset,
+       lickitung.palette,
+-      view.attacker.geometry.spriteCorner.x + displayed.attackerOffset.x2,
+-      view.attacker.geometry.spriteCorner.y + displayed.attackerOffset.y2,
++      view.attacker.geometry.spriteCorner.x + displayed.attackerOffset.x2 + s13Rest.x2,
++      view.attacker.geometry.spriteCorner.y + displayed.attackerOffset.y2 + s13Rest.y2,
+     );
+     const drawTarget = () => drawSpriteSheet(
+       fb,

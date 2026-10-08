@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkaerodactyl-body-slam-opponent-test.json",
+  "stem": "s13-atkaerodactyl-body-slam-opponent",
+  "kind": "test",
+  "move": "BODY_SLAM",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   350,
+   456
+  ],
+  "rows": 107,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 107,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "a4196cc4fe06b9365ba1f7de7117dd0f9b920e6ec269de3e41d13e9e6723e0e1"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "a4196cc4fe06b9365ba1f7de7117dd0f9b920e6ec269de3e41d13e9e6723e0e1"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]
