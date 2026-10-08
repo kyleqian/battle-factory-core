@@ -491,3 +491,14 @@ describe("rightAlign3GlyphCodes (ConvertIntToDecimalStringN's own STR_CONV_MODE_
     expect(rightAlign3GlyphCodes(0)).toEqual([CHAR_SPACER, CHAR_SPACER, 161]);
   });
 });
+
+describe("UpdateNickInHealthbox NIDORAN rule (battle_interface.c:1929-1930; d4w rung e, species audit 12: 7,008 -> 0 px)", () => {
+  const box = (name: string, gender: "male" | "female" | "none") =>
+    JSON.stringify(composeOpponentHealthbox(assets, { name, level: 50, gender, hpFraction: 1, status: "none" }).pixels);
+  it("an un-nicknamed NIDORAN♀ / NIDORAN♂ prints no gender symbol (gender 100); other species keep it", () => {
+    expect(box("NIDORAN♀", "female")).toBe(box("NIDORAN♀", "none"));
+    expect(box("NIDORAN♂", "male")).toBe(box("NIDORAN♂", "none"));
+    expect(box("NIDORINA", "female")).not.toBe(box("NIDORINA", "none"));
+    expect(box("NIDORINO", "male")).not.toBe(box("NIDORINO", "none"));
+  });
+});

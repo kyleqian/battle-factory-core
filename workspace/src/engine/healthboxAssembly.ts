@@ -480,7 +480,10 @@ function nameGlyphRun(name: string, gender: "male" | "female" | "none"): GlyphRu
     const code = charmap.get(ch);
     if (code !== undefined) run.push({ code });
   }
-  if (gender !== "none") {
+  // UpdateNickInHealthbox (battle_interface.c:1929-1930): an un-nicknamed NIDORAN♀ / NIDORAN♂ (nickname == gSpeciesNames[species]) gets
+  // gender 100 = no symbol, the name already carries it. Battle healthboxes only; Factory mons are never nicknamed, so the displayed name
+  // equals the species name exactly for these two species.
+  if (gender !== "none" && name !== "NIDORAN♀" && name !== "NIDORAN♂") {
     const code = charmap.get(GENDER_SYMBOL_CHAR[gender]);
     if (code !== undefined) run.push({ code, fg: GENDER_SYMBOL_FG[gender] });
   }
