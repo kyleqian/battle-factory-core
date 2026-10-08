@@ -42,8 +42,8 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
   policy phase; likely the documented scanline-split class (prep30 §1.4) but the split line was not measured.
 - **Dive (291) setup turn:** length / droplet draw age / row-68 rule FIXED in `08e1c9c4c` (12 audit-11 species 0 px,
   supervisor reran); TYRANITAR attacker keeps 9 px on ages 63..64 (unresolved; Sand Stream intro?).
-- **New CPU-phase cases (D4 class, not yet in the policy):** Extreme Speed 320 vs 321 rows (lags [312,313] vs
-  [292,313,314]; residual ages 294..309 only); Dive CLAMPERL-after-Tackle lag at age 64 (ages 66..95).
+- **Fixed in `e25fa104c` (2026-10-08):** the Extreme Speed / Dive CLAMPERL CPU-phase cases are D4 policy entries (Extreme
+  Speed, Crunch and Psychic reclassified to faithful timing).
 - **TYRANITAR rows (Dive 4-9 px, Ice Ball 16 / 63 px, Memento 2,537 px at age 140):** unresolved; lags match.
 - **Audit 12 (`docs/live-species-audit-12.md`; Substitute / Skill Swap / Flatter / Eruption, 182 rows):** Substitute
   shiny gate FIXED (`46319b2d9`). Open: (a) every live healthbox draws the gender symbol for an un-nicknamed
@@ -57,11 +57,10 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
   Psychic opponent HAUNTER -> KADABRA 200 px on the pre-activation row (elevated attacker shadow); Quick Attack player
   (5,601 px inside the doll box) and Double-Edge player after an earlier Double-Edge (480 px) unresolved
   (`docs/next-adapters-prep38.md`, `tools/integration/fixtures/dolldef-live-receipt.json`).
-- **Audit 13 (`docs/live-species-audit-13.md`, 2026-10-08):** opponent idle-rest attacker missing its rest in Ice Beam /
-  Thunderbolt / Sludge Bomb (battleScene.ts ~:15801 / ~:27537 / ~:41309; patch `species-audit-13/opponent-attacker-rest-env.diff`
-  -> 0 px); Substitute swaps with a shiny attacker (no shiny gate; `swap-shiny-palette-env.diff`); Ice Ball resting target
-  (no gate, 30k-79k px); new D4 cases Crunch (141 vs 142 rows, 13 / 30) and Psychic (144 vs 145, 2 / 28); unresolved:
-  ONIX attacker 1,091 px/row before its first move (Body Slam / Brick Break / Flamethrower / Attract, doll-free too).
+- **Audit 13 (`docs/live-species-audit-13.md`, 2026-10-08):** FIXED in `e25fa104c`: Ice Beam / Thunderbolt / Sludge (Bomb)
+  opponent idle-rest attacker, shiny swap decline, Crunch / Psychic D4; Ice Ball resting target was already declined. Open:
+  ONIX attacker 1,091 px/row before its first move (Body Slam / Brick Break / Flamethrower / Attract, doll-free too); 15
+  candidate renderers from the static attacker-rest scan (`a13fix-live-receipt.json`), unproven.
 - **Substitute fade (2026-10-08, `fade-live-receipt.json`):** the ROM shows a frozen message-box wait cursor on the fade rows
   after the "took damage" message, which production presents as an automatic (cursorless) message — 37 px / row; the
   fade's claim is scoped outside that footprint (message-host question). Not measured: the ROM wait between that message
