@@ -384,5 +384,17 @@
  ],
  "ruleWindows": "all 52 species-audit-11 Dive derived windows: liveMoveAnimationDuration(request, field) == measured rows (tests/animation/liveDiveSetupAdapter.test.ts)",
  "route": "ordinary route seed 111 slot 0 (CLAMPERL player attacker, pic y 101): setup body 119 rows live every age, attack falls back, reaches action-menu; Scene OFF no bodies (tests/animation/liveDiveSetupAdapter.test.ts)",
- "stagedDive": "tests/animation/diveFramebufferCheckpoint.test.ts 419 rows zero residuals (2 processes); diveProductionBoundary / dive*Checkpoint green"
+ "stagedDive": "tests/animation/diveFramebufferCheckpoint.test.ts 419 rows zero residuals (2 processes); diveProductionBoundary / dive*Checkpoint green",
+ "gates": {
+  "testedCodeCommit": "9fa3b2580947e86296c10dcd2dacf5dd78b8ee93",
+  "testedSrcTree": "807fb60b3736e1a95cadc7a576ad39badd7cd2fb",
+  "targeted": "24 files / 215 tests passed (presentationRng, presentationRngSession, liveStatusImplementedCount, factoryAnimationInventory, playableAnimationIntegration, D4 policy / faithful-timing / issue151, Random2 R1/R4/R5/prep13, every Dive / Dig test)",
+  "typecheck": "pass",
+  "smoke": "8 files / 448 tests passed",
+  "fullSuite": "1561 passed | 44 skipped files; 12812 passed | 223 skipped tests (POKEBENCH_VITEST_MAX_WORKERS=4, --maxWorkers=4, 404.6 s)",
+  "build": "pass",
+  "differential": "compare:differential fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base e8d132581: PASS, 624 captures byte-identical across 3 traces",
+  "diffCheck": "clean",
+  "liveStatus": "unchanged: 249 scoped-exact + 13 faithful-random + 13 faithful-timing; census 249+13+13+0+1=276"
+ }
 }
