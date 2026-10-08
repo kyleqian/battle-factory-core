@@ -8,6 +8,8 @@ import {
   spriteOrderForFirstAllocation, spriteOrderForSlots, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, spriteOrderWithOccupiedPrefix,
   spriteOrderPlanTableFromFixture, createSpriteOrderPlanCursor, applySpriteOrderUnitPlan,
 } from "../src/engine/spriteOrderProvider.ts";
+import { decodeSpriteOrderPlan } from "../src/engine/spriteOrderEventTransform.ts";
+import { SPRITE_ORDER_PRODUCTION_ANIMS, SPRITE_ORDER_PRODUCTION_PLANS } from "../src/engine/spriteOrderProductionPlans.ts";
 
 const RAW = join(import.meta.dirname, "../tools/integration/fixtures/sprite-order-event-raw");
 const RECEIPT = JSON.parse(readFileSync(join(RAW, "../sprite-order-event-model.json"), "utf8"));
@@ -330,5 +332,17 @@ describe("body/gap plan applier: TS replay of sprite-order-body-plans.json (mirr
     expect(blip.order.free.slice(0, 4)).toEqual([3, 4, 21, 20]);
     const pair = applySpriteOrderUnitPlan(cursor, [{ C: [["n", 0, "f"], ["n", 1, "f"]] }, { D: [["n", 1], ["n", 0]], pw: [782, 782] }]);
     expect(pair.order.free.slice(0, 4)).toEqual([4, 3, 21, 20]);
+  });
+
+  it("counts a slot freed and re-taken inside the unit once, at its last creation (prep43 PRZ survivor count)", () => {
+    const cursor = createSpriteOrderPlanCursor(knownEntrySpriteOrderState("ordinary-factory"));
+    // Cf;D0;Cf re-takes the slot n0 freed: `made` lists it twice, but only the second creation is alive.
+    const retaken = applySpriteOrderUnitPlan(cursor, [{ C: [["n", 0, "f"]] }, { D: [["n", 0]] }, { C: [["n", 1, "f"]] }]);
+    expect(retaken.order.known).toBe(true);
+    expect(retaken.survivors[retaken.units - 1]).toEqual([3]);
+    // STATUS_PRZ (docs/next-adapters-prep43.md): sparks alternate slots 3 / 4, one spark (slot 4) survives the unit.
+    const prz = applySpriteOrderUnitPlan(cursor, decodeSpriteOrderPlan(SPRITE_ORDER_PRODUCTION_PLANS[SPRITE_ORDER_PRODUCTION_ANIMS.STATUS_PRZ]!));
+    expect(prz.order.known).toBe(true);
+    expect(prz.survivors[prz.units - 1]).toEqual([4]);
   });
 });
