@@ -86,7 +86,7 @@ describe("Ice Ball (301): a resting opponent-side target declines; the deferred-
   const live = (path: string) => {
     const f = json<F>(path);
     const v = liveView(f, 10);
-    const fx = v.effect as { request: never; paletteInput?: never; spriteAllocatorInput?: never; spriteOrderInput?: never; presentationRng?: never;
+    const fx = v.effect as unknown as { request: never; paletteInput?: never; spriteAllocatorInput?: never; spriteOrderInput?: never; presentationRng?: never;
       battlerX2Input?: never };
     return liveMoveAnimationPresentation(fx.request, v.field, 10, fx.paletteInput, fx.spriteAllocatorInput, fx.spriteOrderInput, fx.presentationRng,
       fx.battlerX2Input) !== null;
