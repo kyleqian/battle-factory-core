@@ -26,6 +26,13 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- prep37 (side, `71de9b745`, new files only): Substitute (164) scoped — body 87 rows 0 px with production-derived inputs
+  (accepted pair, unchanged renderer; other species need the liveField art patch, 0 px PERSIAN<->SLOWBRO); the doll
+  shown on every non-animation frame is source-exact (1993 / 4399 / 2207 Scene OFF / 6898 elevated doll pixels);
+  SUBSTITUTE_TO_MON / MON_TO_SUBSTITUTE 42/40 rows, SUBSTITUTE_FADE 103/101; FINDING: every live adapter draws a
+  subbed defender from species art (wrong while the doll is shown) — production has no doll state; plan = a
+  presentation-only "doll shown" field flag + shared declines + the body adapter. Supervisor: `prep37Run.sh` into
+  fresh dirs — 9/9 receipts byte-identical.
 - Folded Opus worker `a91177f80` as `138f79ad4` (src tree `51b5f3b6`): audit-10 fixes (Extrasensory clone carries the
   attacker idle rest: RATTATA 8,009 -> 0 px; Spit Up gate narrowed to targets: ONIX / RATTATA attackers 0 px; checker:
   a window missing its phase label now FAILS — 146 windows rerun, 0 violations). EXACT Extreme Speed (245; age offset
