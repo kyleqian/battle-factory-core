@@ -1,0 +1,7 @@
+s14plain-rattata-confuse-ray-opponent plain opponent CONFUSE_RAY rows=270 presented=False cell=True px=0/0 identical=True exact=270 bad= max=0 tail - dig=318e91229ebb3407
+s14plain-rattata-confuse-ray-opponent plain opponent CONFUSE_RAY rows=269 presented=False cell=True px=293728/293728 identical=True exact=253 bad=251..266 max=18358 tail - dig=3ed7767f02dcd601
+s14plain-golbat-confuse-ray-opponent plain opponent CONFUSE_RAY rows=270 presented=False cell=True px=0/0 identical=True exact=270 bad= max=0 tail - dig=318e91229ebb3407
+s14plain-golbat-confuse-ray-opponent plain opponent CONFUSE_RAY rows=270 presented=False cell=True px=0/0 identical=True exact=270 bad= max=0 tail - dig=318e91229ebb3407
+s14plain-flygon-confuse-ray-opponent plain opponent CONFUSE_RAY rows=270 presented=False cell=True px=0/0 identical=True exact=270 bad= max=0 tail - dig=318e91229ebb3407
+s14plain-flygon-confuse-ray-opponent plain opponent CONFUSE_RAY rows=270 presented=False cell=True px=0/0 identical=True exact=270 bad= max=0 tail - dig=318e91229ebb3407
+windows=6 identical=6 nonzero=1

@@ -1,0 +1,45 @@
+s14swap-steelix-bite-player swap player BITE rows=126 presented=True cell=True px=0/0 identical=True exact=126 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=4200d98266280b47
+s14swap-steelix-bite-player swap player BITE rows=126 presented=True cell=True px=0/0 identical=True exact=126 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=4200d98266280b47
+s14swap-steelix-bite-player swap player BITE rows=126 presented=True cell=True px=0/0 identical=True exact=126 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=4200d98266280b47
+s14swap-wailord-bite-player swap player BITE rows=126 presented=True cell=True px=0/0 identical=True exact=126 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=4200d98266280b47
+s14swap-wailord-bite-player swap player BITE rows=126 presented=True cell=True px=0/0 identical=True exact=126 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=4200d98266280b47
+s14swap-wailord-bite-player swap player BITE rows=126 presented=True cell=True px=0/0 identical=True exact=126 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=4200d98266280b47
+s14swap-tyranitar-bite-player swap player BITE rows=126 presented=True cell=True px=0/0 identical=True exact=126 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=4200d98266280b47
+s14swap-tyranitar-bite-player swap player BITE rows=126 presented=True cell=True px=0/0 identical=True exact=126 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=4200d98266280b47
+s14swap-tyranitar-bite-player swap player BITE rows=126 presented=True cell=True px=0/0 identical=True exact=126 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=4200d98266280b47
+s14swap-pichu-bite-player plain player BITE rows=41 presented=False cell=True px=52446/52446 identical=True exact=7 bad=1..34 max=2760 tail - dig=a10f977b1d7d2d8e
+s14swap-pichu-bite-player plain player BITE rows=41 presented=False cell=True px=52446/52446 identical=True exact=7 bad=1..34 max=2760 tail - dig=a10f977b1d7d2d8e
+s14swap-pichu-bite-player plain player BITE rows=41 presented=False cell=True px=52446/52446 identical=True exact=7 bad=1..34 max=2760 tail - dig=a10f977b1d7d2d8e
+s14swap-onix-bite-player swap player BITE rows=126 presented=True cell=True px=0/0 identical=True exact=126 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=4200d98266280b47
+s14swap-onix-bite-player swap player BITE rows=126 presented=True cell=True px=0/0 identical=True exact=126 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=4200d98266280b47
+s14swap-onix-bite-player swap player BITE rows=126 presented=True cell=True px=0/0 identical=True exact=126 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=4200d98266280b47
+s14swap-steelix-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-steelix-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-steelix-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-wailord-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-wailord-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-wailord-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-tyranitar-bite-opponent plain player SANDSTORM rows=167 presented=False cell=False px=590770/590770 identical=True exact=0 bad=0..166 max=3580 tail - dig=e0d5de325cfbb2e0
+s14swap-tyranitar-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-tyranitar-bite-opponent plain player SANDSTORM rows=167 presented=False cell=False px=590770/590770 identical=True exact=0 bad=0..166 max=3580 tail - dig=e0d5de325cfbb2e0
+s14swap-tyranitar-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-tyranitar-bite-opponent plain player SANDSTORM rows=167 presented=False cell=False px=590770/590770 identical=True exact=0 bad=0..166 max=3580 tail - dig=e0d5de325cfbb2e0
+s14swap-tyranitar-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-pichu-bite-opponent plain opponent BITE rows=41 presented=False cell=True px=39835/39835 identical=True exact=7 bad=1..34 max=2084 tail - dig=b5b867f6edfbc188
+s14swap-pichu-bite-opponent plain opponent BITE rows=41 presented=False cell=True px=39835/39835 identical=True exact=7 bad=1..34 max=2084 tail - dig=b5b867f6edfbc188
+s14swap-golbat-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-golbat-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-golbat-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-flygon-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-flygon-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-flygon-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-weezing-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-weezing-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-weezing-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-onix-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-onix-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-onix-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-rattata-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-rattata-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+s14swap-rattata-bite-opponent swap opponent BITE rows=122 presented=True cell=True px=0/0 identical=True exact=122 bad= max=0 tail k+1 [0, 0] k+2 [0, 0] dig=a7c1e8c12024c36c
+windows=44 identical=44 nonzero=8
