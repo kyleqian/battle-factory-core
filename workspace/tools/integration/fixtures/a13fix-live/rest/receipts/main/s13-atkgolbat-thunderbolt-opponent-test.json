@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkgolbat-thunderbolt-opponent-test.json",
+  "stem": "s13-atkgolbat-thunderbolt-opponent",
+  "kind": "test",
+  "move": "THUNDERBOLT",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   348,
+   584
+  ],
+  "rows": 237,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 237,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "4d8981f7dfd13abb0f8f93d9e06ed956b1fcabd958aba510313c412fb6d67476"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "4d8981f7dfd13abb0f8f93d9e06ed956b1fcabd958aba510313c412fb6d67476"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

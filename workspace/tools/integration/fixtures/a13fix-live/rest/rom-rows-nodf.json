@@ -1,0 +1,169 @@
+[
+ {
+  "stem": "s13-nodfonix-ice-beam-opponent",
+  "kind": "control",
+  "fixture": "s13-nodfonix-ice-beam-opponent-control.json",
+  "window": [
+   76,
+   278
+  ],
+  "shift": 0,
+  "orderInput": "fixture",
+  "residualPixels": [
+   0,
+   0
+  ],
+  "ageRomSha256": [
+   [
+    0,
+    "f7196d0c1507d2e7f4f0fea74180f1c0d2c930e09a19eeb955afd795bbca5fa8"
+   ],
+   [
+    25,
+    "4dad96655b544058950737c6a426cc2d6d6f2fad5a4627f8c8a128995cd4b3ef"
+   ],
+   [
+    50,
+    "8aa2957f926ca2979e4371eff826f0047e4738209e17885edd4a38fde2314db0"
+   ],
+   [
+    75,
+    "72141c2808442a1cd81ecc8000b5a539aecfcbd006f2816b3877672517f9cbe4"
+   ],
+   [
+    100,
+    "f6eb3e2d4bb730cf2f6b38d7a1221d2da4f4365c5f591af8efaf48649c1bb29e"
+   ],
+   [
+    125,
+    "9022a0568c49255f7533a5ec042c0fa869d24f63ceb916f51aca68672476731d"
+   ],
+   [
+    150,
+    "fb924fa76fd821771e709b668ef7eb5ef76627712209d425b61de01712be755d"
+   ],
+   [
+    175,
+    "2c4df6caa3bc2e8fb97a5def4cef01510f40cbd8c73d4ec49c98bcceca85cd76"
+   ],
+   [
+    200,
+    "f7196d0c1507d2e7f4f0fea74180f1c0d2c930e09a19eeb955afd795bbca5fa8"
+   ],
+   [
+    202,
+    "f7196d0c1507d2e7f4f0fea74180f1c0d2c930e09a19eeb955afd795bbca5fa8"
+   ]
+  ]
+ },
+ {
+  "stem": "s13-nodfonix-thunderbolt-opponent",
+  "kind": "control",
+  "fixture": "s13-nodfonix-thunderbolt-opponent-control.json",
+  "window": [
+   79,
+   315
+  ],
+  "shift": 0,
+  "orderInput": "fixture",
+  "residualPixels": [
+   0,
+   0
+  ],
+  "ageRomSha256": [
+   [
+    0,
+    "308a0e361fa2525608e10c78e1fa81349b83ffc25e14802ba39e7788d109094f"
+   ],
+   [
+    25,
+    "3ec2de5f5a73a6ecc980f80226848353e3bd68f030ff48f54d2a5d9afcab9708"
+   ],
+   [
+    50,
+    "34c65fcbb8777051468b7c3abcedd759f33bfda484b694a5b68f4b01a46d0e0e"
+   ],
+   [
+    75,
+    "1f3b17d6554baef4abd52feeae103ecece3d1036c6b310e475e370aa762ad8a2"
+   ],
+   [
+    100,
+    "3ec2de5f5a73a6ecc980f80226848353e3bd68f030ff48f54d2a5d9afcab9708"
+   ],
+   [
+    125,
+    "b89e6b04b004900095dfc37f906f88b3ade1c590a8982a343b9516bbe93cda3e"
+   ],
+   [
+    150,
+    "3ec2de5f5a73a6ecc980f80226848353e3bd68f030ff48f54d2a5d9afcab9708"
+   ],
+   [
+    175,
+    "7ead0c12f9f8320f5f690e444c948671c5ddeecef0cb9fb4cbd38e949b312cf9"
+   ],
+   [
+    200,
+    "a956ee21dccb9ef82f49950a2c3b1e3646561b8100da5b6efcdce54c0f525bbe"
+   ],
+   [
+    225,
+    "3ec2de5f5a73a6ecc980f80226848353e3bd68f030ff48f54d2a5d9afcab9708"
+   ],
+   [
+    236,
+    "308a0e361fa2525608e10c78e1fa81349b83ffc25e14802ba39e7788d109094f"
+   ]
+  ]
+ },
+ {
+  "stem": "s13-nodfonix-sludge-bomb-opponent",
+  "kind": "control",
+  "fixture": "s13-nodfonix-sludge-bomb-opponent-control.json",
+  "window": [
+   79,
+   247
+  ],
+  "shift": -4,
+  "orderInput": "fixture",
+  "residualPixels": [
+   0,
+   0
+  ],
+  "ageRomSha256": [
+   [
+    -4,
+    "10d5f19f5b0c7debd2c9d4bb882644f7aef00e48afdea3379f3306fa10543d22"
+   ],
+   [
+    21,
+    "2ccfcd6606f8931141c4e17bae39b5a1fdb50c2a3cff63401001b3b6a6c7c5be"
+   ],
+   [
+    46,
+    "21f12a2599d0515617b983a43a2215a5986570520c3cb2c27bfb2848c8543896"
+   ],
+   [
+    71,
+    "5f09757d2464434f1dc23a05ff594ea04e41e616240eaea7b811d7b6aab5fd62"
+   ],
+   [
+    96,
+    "10d5f19f5b0c7debd2c9d4bb882644f7aef00e48afdea3379f3306fa10543d22"
+   ],
+   [
+    121,
+    "8f0a50d7f1f7f6d602ebdeee04f4dc2b10aa2ca4a3ee957ef207a83ccc21c51f"
+   ],
+   [
+    146,
+    "f66270e596c85f3b3864eb628ec6b270d1da9d9f75d1a6193866ba7622713b29"
+   ],
+   [
+    164,
+    "10d5f19f5b0c7debd2c9d4bb882644f7aef00e48afdea3379f3306fa10543d22"
+   ]
+  ]
+ }
+]
