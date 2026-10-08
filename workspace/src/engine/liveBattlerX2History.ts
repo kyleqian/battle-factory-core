@@ -114,7 +114,9 @@ export function applyLiveBattlerX2Event(history: LiveBattlerX2History, event: Li
       next = { ...history, [event.side]: "idle" };
       break;
     case "move-body": {
-      const targetSide = other(event.attackerSide);
+      // MOVE_SUBSTITUTE animates its attacker as gBattleAnimTarget (self-target): the table's target row was measured on the
+      // attacker; the other battler keeps its x2 (subst-swap-live-receipt.json: opponent ONIX at +1 through rows 157..1520).
+      const targetSide = event.moveId === 164 ? event.attackerSide : other(event.attackerSide);
       next = {
         ...history,
         [event.attackerSide]: roleNext(history[event.attackerSide],

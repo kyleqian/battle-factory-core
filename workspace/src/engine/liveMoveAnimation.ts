@@ -1,6 +1,7 @@
 import monPicCoordsData from "../data/gen/mon-pic-coords.json" with { type: "json" };
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
+import { liveSubstituteSwapApplies, substituteSwapBodyField, substituteSwapCompositeDuration } from "./liveSubstituteSwap.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import { battleCommandFieldSpriteOrigin, createBattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 import type { BattleResolutionDisplayedField } from "./battleResolutionPresentation.ts";
@@ -340,7 +341,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // may have written the register (liveStaleMovePowerTaintedBy).
   283,
   // S10A Substitute (docs/next-adapters-prep37.md s1/s3a.4): the BODY (87 rows); the doll is shown after it
-  // (applySubstituteDollCommand) and every adapter declines while either battler is the doll (liveMoveSubstituteDollDeclines).
+  // (applySubstituteDollCommand); adapters decline while the defender is the doll, and present the swaps around a proven body while
+  // only the attacker is (liveMoveSubstituteDollDeclines, liveSubstituteSwap.ts).
   164,
 ] as const);
 
@@ -730,19 +732,25 @@ function liveEruptionProfileFor(field: BattleResolutionDisplayedField, attackerS
 /**
  * S10A Substitute (docs/next-adapters-prep37.md s3b): every live renderer composes both battlers from species art
  * (liveSceneOnBattlerArt), so while the displayed DEFENDER is the Substitute doll the body would draw the mon where the
- * ROM shows the doll (e.g. Tackle's monbg ANIM_TARGET moves the doll), and while the ATTACKER is the doll the ROM first
- * runs SUBSTITUTE_TO_MON / afterwards MON_TO_SUBSTITUTE (42 / 40 rows each, not presented). Both decline to the fallback.
+ * ROM shows the doll (e.g. Tackle's monbg ANIM_TARGET moves the doll): it declines to the fallback. While only the
+ * ATTACKER is the doll the ROM runs SUBSTITUTE_TO_MON, the body on the mon and MON_TO_SUBSTITUTE (liveSubstituteSwap.ts):
+ * presented for the proven bodies (LIVE_SUBSTITUTE_SWAP_BODY_IDS, last hit), every other attacker-doll body declines.
  */
 export function liveMoveSubstituteDollDeclines(
   request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField,
 ): boolean {
-  const side = (battler: number) => (battler === 0 ? field.player : field.opponent);
-  return side(request.attacker).substituteDoll === true || side(request.target).substituteDoll === true;
+  const swap = liveSubstituteSwapApplies(request, field);
+  if (swap !== null) return !swap;
+  return (request.target === 0 ? field.player : field.opponent).substituteDoll === true;
 }
 
 export function liveMoveAnimationDuration(
   request: BattleMoveAnimationRequest, field?: BattleResolutionDisplayedField,
 ): number | null {
+  if (field !== undefined && liveSubstituteSwapApplies(request, field) === true) {
+    const body = liveMoveAnimationDuration(request, substituteSwapBodyField(field, request.attacker === 0 ? 0 : 1));
+    return body === null ? null : substituteSwapCompositeDuration(request.attacker === 0 ? "player" : "opponent", body);
+  }
   if (field !== undefined && liveMoveSubstituteDollDeclines(request, field)) return null;
   switch (request.moveId) {
     // Shock Wave (prep33): activation .. the derived first inactive row (262..266 measured), only defined with the displayed field.
