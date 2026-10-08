@@ -1,0 +1,302 @@
+{
+ "schema": "prep41-counters/v1",
+ "moveId": 237,
+ "optionalLagAge": 64,
+ "method": "tools/integration/speciesAudit2Counters.py via issue151Counters.sh (2 fresh direct-mGBA processes per scenario); lag = playTimeVBlanks pass delta 0",
+ "measured": {
+  "event": 1,
+  "no-event": 9
+ },
+ "allIdentical": true,
+ "windows": [
+  {
+   "fixture": "tools/integration/fixtures/prep13-live/hidden-power-alt-opponent-unown-golem.json",
+   "denseWindow": {
+    "startFrame": 81,
+    "endFrame": 260
+   },
+   "digests": [
+    "20ec154b67c77d1e",
+    "20ec154b67c77d1e"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 81,
+     "firstInactive": 260,
+     "rows": 180,
+     "lagAges": [
+      118
+     ],
+     "phase": "no-event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/prep13-live/hidden-power-alt-opponent-unown-seed305420897.json",
+   "denseWindow": {
+    "startFrame": 81,
+    "endFrame": 260
+   },
+   "digests": [
+    "6e3b2babb3e19be7",
+    "6e3b2babb3e19be7"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 81,
+     "firstInactive": 260,
+     "rows": 180,
+     "lagAges": [
+      118
+     ],
+     "phase": "no-event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/prep13-live/hidden-power-alt-player-unown-golem.json",
+   "denseWindow": {
+    "startFrame": 77,
+    "endFrame": 256
+   },
+   "digests": [
+    "7bc25d9a00504b73",
+    "7bc25d9a00504b73"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 77,
+     "firstInactive": 256,
+     "rows": 180,
+     "lagAges": [
+      118
+     ],
+     "phase": "no-event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/prep13-live/hidden-power-alt-player-unown-seed305420897.json",
+   "denseWindow": {
+    "startFrame": 77,
+    "endFrame": 256
+   },
+   "digests": [
+    "933e1843139278c7",
+    "933e1843139278c7"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 77,
+     "firstInactive": 256,
+     "rows": 180,
+     "lagAges": [
+      118
+     ],
+     "phase": "no-event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/prep13-live/hidden-power-opponent-unown-player-onix.json",
+   "denseWindow": {
+    "startFrame": 81,
+    "endFrame": 260
+   },
+   "digests": [
+    "66dfbaa9a454eda6",
+    "66dfbaa9a454eda6"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 81,
+     "firstInactive": 260,
+     "rows": 180,
+     "lagAges": [
+      118
+     ],
+     "phase": "no-event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/prep13-live/hidden-power-player-unown-opponent-onix.json",
+   "denseWindow": {
+    "startFrame": 77,
+    "endFrame": 256
+   },
+   "digests": [
+    "a8f4a78de91a6453",
+    "a8f4a78de91a6453"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 77,
+     "firstInactive": 256,
+     "rows": 180,
+     "lagAges": [
+      118
+     ],
+     "phase": "no-event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/species-audit-3/derived/golbat-hidden-power-player-unown-opponent-onix.json",
+   "denseWindow": {
+    "startFrame": 231,
+    "endFrame": 410
+   },
+   "digests": [
+    "46025aaabb03a0c6",
+    "46025aaabb03a0c6"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 231,
+     "firstInactive": 411,
+     "rows": 181,
+     "lagAges": [
+      64,
+      119
+     ],
+     "phase": "event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/species-audit-3/derived/golem-hidden-power-opponent-unown-player-onix.json",
+   "denseWindow": {
+    "startFrame": 81,
+    "endFrame": 260
+   },
+   "digests": [
+    "20ec154b67c77d1e",
+    "20ec154b67c77d1e"
+   ],
+   "identical": true,
+   "duplicateOf": "hidden-power-alt-opponent-unown-golem",
+   "bodies": [
+    {
+     "activation": 81,
+     "firstInactive": 260,
+     "rows": 180,
+     "lagAges": [
+      118
+     ],
+     "phase": "no-event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/species-audit-3/derived/golem-hidden-power-player-unown-opponent-onix.json",
+   "denseWindow": {
+    "startFrame": 77,
+    "endFrame": 256
+   },
+   "digests": [
+    "7bc25d9a00504b73",
+    "7bc25d9a00504b73"
+   ],
+   "identical": true,
+   "duplicateOf": "hidden-power-alt-player-unown-golem",
+   "bodies": [
+    {
+     "activation": 77,
+     "firstInactive": 256,
+     "rows": 180,
+     "lagAges": [
+      118
+     ],
+     "phase": "no-event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/species-audit-3/derived/rattata-hidden-power-opponent-unown-player-onix.json",
+   "denseWindow": {
+    "startFrame": 237,
+    "endFrame": 416
+   },
+   "digests": [
+    "ab9870b7c8b894ca",
+    "ab9870b7c8b894ca"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 237,
+     "firstInactive": 416,
+     "rows": 180,
+     "lagAges": [
+      118
+     ],
+     "phase": "no-event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/species-audit-3/derived/rattata-hidden-power-player-unown-opponent-onix.json",
+   "denseWindow": {
+    "startFrame": 235,
+    "endFrame": 414
+   },
+   "digests": [
+    "8cd8ec6aa21e071e",
+    "8cd8ec6aa21e071e"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 235,
+     "firstInactive": 414,
+     "rows": 180,
+     "lagAges": [
+      118
+     ],
+     "phase": "no-event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/species-audit-3/derived/shuckle-hidden-power-player-unown-opponent-onix.json",
+   "denseWindow": {
+    "startFrame": 77,
+    "endFrame": 256
+   },
+   "digests": [
+    "5059cc328dde248f",
+    "5059cc328dde248f"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 77,
+     "firstInactive": 256,
+     "rows": 180,
+     "lagAges": [
+      118
+     ],
+     "phase": "no-event"
+    }
+   ]
+  }
+ ]
+}
