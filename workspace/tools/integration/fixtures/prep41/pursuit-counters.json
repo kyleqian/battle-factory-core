@@ -1,0 +1,682 @@
+{
+ "schema": "prep41-counters/v1",
+ "moveId": 228,
+ "optionalLagAge": 82,
+ "method": "tools/integration/speciesAudit2Counters.py via issue151Counters.sh (2 fresh direct-mGBA processes per scenario); lag = playTimeVBlanks pass delta 0",
+ "measured": {
+  "event": 24,
+  "no-event": 9
+ },
+ "allIdentical": true,
+ "windows": [
+  {
+   "fixture": "tools/integration/fixtures/later-bodies-lb26/pursuit-o-growl.json",
+   "denseWindow": {
+    "startFrame": 346,
+    "endFrame": 448
+   },
+   "digests": [
+    "1094ac55240918d1",
+    "1094ac55240918d1"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 346,
+     "firstInactive": 448,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    },
+    {
+     "activation": 1068,
+     "firstInactive": 1169,
+     "rows": 102,
+     "lagAges": [
+      60,
+      61
+     ],
+     "phase": "no-event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/later-bodies-lb26/pursuit-o-psychic.json",
+   "denseWindow": {
+    "startFrame": 339,
+    "endFrame": 441
+   },
+   "digests": [
+    "3e41491625fe22c0",
+    "3e41491625fe22c0"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 339,
+     "firstInactive": 441,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    },
+    {
+     "activation": 1171,
+     "firstInactive": 1273,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/later-bodies-lb26/pursuit-o-splash.json",
+   "denseWindow": {
+    "startFrame": 316,
+    "endFrame": 418
+   },
+   "digests": [
+    "9aa1a026543552dc",
+    "9aa1a026543552dc"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 316,
+     "firstInactive": 418,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    },
+    {
+     "activation": 1150,
+     "firstInactive": 1251,
+     "rows": 102,
+     "lagAges": [
+      60,
+      61
+     ],
+     "phase": "no-event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/later-bodies-lb26/pursuit-o-surf.json",
+   "denseWindow": {
+    "startFrame": 409,
+    "endFrame": 511
+   },
+   "digests": [
+    "0c86a5bef5adff07",
+    "0c86a5bef5adff07"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 409,
+     "firstInactive": 511,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    },
+    {
+     "activation": 1242,
+     "firstInactive": 1344,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/later-bodies-lb26/pursuit-o-swordsdance.json",
+   "denseWindow": {
+    "startFrame": 379,
+    "endFrame": 480
+   },
+   "digests": [
+    "dc3de150c48e2e25",
+    "dc3de150c48e2e25"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 379,
+     "firstInactive": 480,
+     "rows": 102,
+     "lagAges": [
+      60,
+      61
+     ],
+     "phase": "no-event"
+    },
+    {
+     "activation": 1213,
+     "firstInactive": 1315,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/later-bodies-lb26/pursuit-o-tackle.json",
+   "denseWindow": {
+    "startFrame": 223,
+    "endFrame": 325
+   },
+   "digests": [
+    "7b24890eeded12eb",
+    "7b24890eeded12eb"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 223,
+     "firstInactive": 325,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    },
+    {
+     "activation": 1056,
+     "firstInactive": 1157,
+     "rows": 102,
+     "lagAges": [
+      60,
+      61
+     ],
+     "phase": "no-event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/later-bodies-lb26/pursuit-p-growl.json",
+   "denseWindow": {
+    "startFrame": 342,
+    "endFrame": 443
+   },
+   "digests": [
+    "f1c8a7a25ba834b7",
+    "f1c8a7a25ba834b7"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 342,
+     "firstInactive": 443,
+     "rows": 102,
+     "lagAges": [
+      60,
+      61
+     ],
+     "phase": "no-event"
+    },
+    {
+     "activation": 1176,
+     "firstInactive": 1278,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/later-bodies-lb26/pursuit-p-psychic.json",
+   "denseWindow": {
+    "startFrame": 337,
+    "endFrame": 439
+   },
+   "digests": [
+    "0cd43f5018cc9dd0",
+    "0cd43f5018cc9dd0"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 337,
+     "firstInactive": 439,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    },
+    {
+     "activation": 1171,
+     "firstInactive": 1273,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/later-bodies-lb26/pursuit-p-splash.json",
+   "denseWindow": {
+    "startFrame": 316,
+    "endFrame": 417
+   },
+   "digests": [
+    "bbfaa8c8f1c1be2e",
+    "bbfaa8c8f1c1be2e"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 316,
+     "firstInactive": 417,
+     "rows": 102,
+     "lagAges": [
+      60,
+      61
+     ],
+     "phase": "no-event"
+    },
+    {
+     "activation": 1150,
+     "firstInactive": 1252,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/later-bodies-lb26/pursuit-p-surf.json",
+   "denseWindow": {
+    "startFrame": 407,
+    "endFrame": 509
+   },
+   "digests": [
+    "2ce93c79aae0b3d3",
+    "2ce93c79aae0b3d3"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 407,
+     "firstInactive": 509,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    },
+    {
+     "activation": 1241,
+     "firstInactive": 1343,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/later-bodies-lb26/pursuit-p-swordsdance.json",
+   "denseWindow": {
+    "startFrame": 383,
+    "endFrame": 484
+   },
+   "digests": [
+    "5553a5f9dbe4d9fb",
+    "5553a5f9dbe4d9fb"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 383,
+     "firstInactive": 484,
+     "rows": 102,
+     "lagAges": [
+      60,
+      61
+     ],
+     "phase": "no-event"
+    },
+    {
+     "activation": 1217,
+     "firstInactive": 1319,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/later-bodies-lb26/pursuit-p-tackle.json",
+   "denseWindow": {
+    "startFrame": 222,
+    "endFrame": 324
+   },
+   "digests": [
+    "f3bf368243aae06c",
+    "f3bf368243aae06c"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 222,
+     "firstInactive": 324,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    },
+    {
+     "activation": 1056,
+     "firstInactive": 1158,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/oam1-live/pursuit-alt-opponent-umbreon-player-golem.json",
+   "denseWindow": {
+    "startFrame": 76,
+    "endFrame": 178
+   },
+   "digests": [
+    "f663c8dda5a225e9",
+    "f663c8dda5a225e9"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 76,
+     "firstInactive": 178,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/oam1-live/pursuit-alt-player-umbreon-opponent-golem.json",
+   "denseWindow": {
+    "startFrame": 72,
+    "endFrame": 174
+   },
+   "digests": [
+    "b67c57215db5611b",
+    "b67c57215db5611b"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 72,
+     "firstInactive": 174,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/oam1-live/pursuit-alt2-opponent-sneasel-player-snorlax.json",
+   "denseWindow": {
+    "startFrame": 76,
+    "endFrame": 178
+   },
+   "digests": [
+    "c200077992b13e74",
+    "c200077992b13e74"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 76,
+     "firstInactive": 178,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/oam1-live/pursuit-alt2-player-sneasel-opponent-golbat.json",
+   "denseWindow": {
+    "startFrame": 72,
+    "endFrame": 174
+   },
+   "digests": [
+    "03c81e12297338e6",
+    "03c81e12297338e6"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 72,
+     "firstInactive": 174,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/oam1-live/pursuit-opponent-beedrill-player-shuckle.json",
+   "denseWindow": {
+    "startFrame": 77,
+    "endFrame": 179
+   },
+   "digests": [
+    "d14facfe47e1d227",
+    "d14facfe47e1d227"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 77,
+     "firstInactive": 179,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/oam1-live/pursuit-player-beedrill-opponent-shuckle.json",
+   "denseWindow": {
+    "startFrame": 73,
+    "endFrame": 175
+   },
+   "digests": [
+    "2aa009b19d93db93",
+    "2aa009b19d93db93"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 73,
+     "firstInactive": 175,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/species-audit-5/derived/tyranitar-pursuit-opponent-beedrill-player-shuckle.json",
+   "denseWindow": {
+    "startFrame": 77,
+    "endFrame": 178
+   },
+   "digests": [
+    "9591c43340888061",
+    "9591c43340888061"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 77,
+     "firstInactive": 178,
+     "rows": 102,
+     "lagAges": [
+      60,
+      61
+     ],
+     "phase": "no-event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/species-audit-5/derived/tyranitar-pursuit-player-beedrill-opponent-shuckle.json",
+   "denseWindow": {
+    "startFrame": 73,
+    "endFrame": 175
+   },
+   "digests": [
+    "cec46d7cedea8400",
+    "cec46d7cedea8400"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 73,
+     "firstInactive": 175,
+     "rows": 103,
+     "lagAges": [
+      60,
+      61,
+      82
+     ],
+     "phase": "event"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/species-audit-5/derived/tyranitarA-pursuit-player-beedrill-opponent-shuckle.json",
+   "denseWindow": {
+    "startFrame": 74,
+    "endFrame": 175
+   },
+   "digests": [
+    "3356a5316148202f",
+    "3356a5316148202f"
+   ],
+   "identical": true,
+   "duplicateOf": null,
+   "bodies": [
+    {
+     "activation": 74,
+     "firstInactive": 175,
+     "rows": 102,
+     "lagAges": [
+      60,
+      61
+     ],
+     "phase": "no-event"
+    }
+   ]
+  }
+ ]
+}
