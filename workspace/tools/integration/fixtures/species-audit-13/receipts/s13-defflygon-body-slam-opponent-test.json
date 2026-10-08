@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defflygon-body-slam-opponent-test.json",
+  "stem": "s13-defflygon-body-slam-opponent",
+  "kind": "test",
+  "move": "BODY_SLAM",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   348,
+   454
+  ],
+  "rows": 107,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 107,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "16a48d4254bfbf2666911cf025f22967adaaf9f561abe3d6b81dc8fa38915c9a"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "16a48d4254bfbf2666911cf025f22967adaaf9f561abe3d6b81dc8fa38915c9a"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-deftyranitar-thunderbolt-opponent-test.json",
+  "stem": "s13-deftyranitar-thunderbolt-opponent",
+  "kind": "test",
+  "move": "THUNDERBOLT",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   361,
+   597
+  ],
+  "rows": 237,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 237,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "ccf41c4551781d1b056c53abf05ce96526720a748fb8f8fb37a55fb70d2f7b8a"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "ccf41c4551781d1b056c53abf05ce96526720a748fb8f8fb37a55fb70d2f7b8a"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

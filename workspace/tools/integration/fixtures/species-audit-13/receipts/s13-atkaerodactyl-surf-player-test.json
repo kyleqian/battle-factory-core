@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkaerodactyl-surf-player-test.json",
+  "stem": "s13-atkaerodactyl-surf-player",
+  "kind": "test",
+  "move": "SURF",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   348,
+   491
+  ],
+  "rows": 144,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 144,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "bc7f7f3997cb2c8d73f85f8ecb9d60c077b337c9ff27547665878fec418b64be"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "bc7f7f3997cb2c8d73f85f8ecb9d60c077b337c9ff27547665878fec418b64be"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

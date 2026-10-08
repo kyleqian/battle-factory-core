@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defwailord-body-slam-player-test.json",
+  "stem": "s13-defwailord-body-slam-player",
+  "kind": "test",
+  "move": "BODY_SLAM",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   377,
+   483
+  ],
+  "rows": 107,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 107,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "f88aec59e927728d89feaf3f643783b91dea8252ee43f83ae02c6e9f4065d5db"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "f88aec59e927728d89feaf3f643783b91dea8252ee43f83ae02c6e9f4065d5db"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

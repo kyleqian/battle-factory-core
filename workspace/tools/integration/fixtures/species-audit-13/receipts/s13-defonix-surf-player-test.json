@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defonix-surf-player-test.json",
+  "stem": "s13-defonix-surf-player",
+  "kind": "test",
+  "move": "SURF",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   331,
+   474
+  ],
+  "rows": 144,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 144,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "e17e5afae1165aa1bc4adb7f80318004b870b2ce55411ef16a77535c81bbef12"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "e17e5afae1165aa1bc4adb7f80318004b870b2ce55411ef16a77535c81bbef12"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

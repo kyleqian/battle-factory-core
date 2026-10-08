@@ -1,0 +1,125 @@
+[
+ {
+  "fixture": "s13-atkonix-flamethrower-opponent-test.json",
+  "stem": "s13-atkonix-flamethrower-opponent",
+  "kind": "test",
+  "move": "FLAMETHROWER",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   347,
+   556
+  ],
+  "rows": 210,
+  "orderInput": "fixture",
+  "shift": -15,
+  "liveDuration": 115,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 8728,
+    "exactRows": 202,
+    "digest": "d9d9e323c20f7395bf34f0f73786fb5bd0986fa1ac0c63baad88eb1a5fab58c4"
+   },
+   {
+    "run": 2,
+    "residualPixels": 8728,
+    "exactRows": 202,
+    "digest": "d9d9e323c20f7395bf34f0f73786fb5bd0986fa1ac0c63baad88eb1a5fab58c4"
+   }
+  ],
+  "affectedAges": "0..7",
+  "maxPxRow": 1091,
+  "fieldPx": 8728,
+  "bbox": [
+   149,
+   12,
+   204,
+   71
+  ],
+  "perRow": [
+   [
+    0,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ],
+   [
+    1,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ],
+   [
+    2,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ],
+   [
+    3,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ],
+   [
+    4,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ],
+   [
+    5,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ],
+   [
+    6,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ],
+   [
+    7,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ]
+  ]
+ }
+]

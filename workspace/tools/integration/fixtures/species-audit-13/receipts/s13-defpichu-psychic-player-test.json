@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defpichu-psychic-player-test.json",
+  "stem": "s13-defpichu-psychic-player",
+  "kind": "test",
+  "move": "PSYCHIC",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   333,
+   477
+  ],
+  "rows": 145,
+  "orderInput": "fixture",
+  "shift": -5,
+  "liveDuration": 140,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "29efca49bb54928d7303f0c8a6b2a3d712feb12ea0b6423dfff8604cb21a6c6f"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "29efca49bb54928d7303f0c8a6b2a3d712feb12ea0b6423dfff8604cb21a6c6f"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

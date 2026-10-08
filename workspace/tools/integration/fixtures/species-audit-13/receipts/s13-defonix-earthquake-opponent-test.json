@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defonix-earthquake-opponent-test.json",
+  "stem": "s13-defonix-earthquake-opponent",
+  "kind": "test",
+  "move": "EARTHQUAKE",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   336,
+   543
+  ],
+  "rows": 208,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 198,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "7ffb48b0fd4ebaad214869e6ea5ea2f1d3d8c4d529c85ed7270b81513914e048"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "7ffb48b0fd4ebaad214869e6ea5ea2f1d3d8c4d529c85ed7270b81513914e048"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

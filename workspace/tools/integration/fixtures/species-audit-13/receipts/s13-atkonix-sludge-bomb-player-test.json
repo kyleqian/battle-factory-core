@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkonix-sludge-bomb-player-test.json",
+  "stem": "s13-atkonix-sludge-bomb-player",
+  "kind": "test",
+  "move": "SLUDGE_BOMB",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   350,
+   518
+  ],
+  "rows": 169,
+  "orderInput": "fixture",
+  "shift": -4,
+  "liveDuration": 160,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 169,
+    "digest": "572b264ab9b4ab723a226b6c3329881a1705aed17d7e464fc0405f61ab6bc819"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 169,
+    "digest": "572b264ab9b4ab723a226b6c3329881a1705aed17d7e464fc0405f61ab6bc819"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,331 @@
+s13-atkaerodactyl-attract-opponent test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkaerodactyl-attract-player test rows=435 dur=435 live shift=0 px=19081,19081 identical=True ages=405 maxPxRow=19081 bbox=[0, 0, 239, 111]
+s13-atkaerodactyl-body-slam-opponent test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkaerodactyl-body-slam-player test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkaerodactyl-brick-break-opponent test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkaerodactyl-brick-break-player test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkaerodactyl-crunch-opponent test rows=142 dur=142 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkaerodactyl-crunch-player test rows=141 dur=142 live shift=0 px=305296,305296 identical=True ages=123..138 maxPxRow=19081 bbox=[0, 0, 239, 111]
+s13-atkaerodactyl-earthquake-opponent test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkaerodactyl-earthquake-player test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkaerodactyl-flamethrower-opponent test rows=210 dur=115 live shift=-15 px=200,200 identical=True ages=0 maxPxRow=200 bbox=[160, 65, 191, 72]
+s13-atkaerodactyl-flamethrower-player test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkaerodactyl-ice-beam-opponent test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkaerodactyl-ice-beam-player test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkaerodactyl-psychic-opponent test rows=145 dur=140 live shift=-5 px=200,200 identical=True ages=0 maxPxRow=200 bbox=[160, 65, 191, 72]
+s13-atkaerodactyl-psychic-player test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkaerodactyl-sludge-bomb-opponent test rows=169 dur=160 live shift=-4 px=200,200 identical=True ages=0 maxPxRow=200 bbox=[160, 65, 191, 72]
+s13-atkaerodactyl-sludge-bomb-player test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkaerodactyl-surf-opponent test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkaerodactyl-surf-player test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkaerodactyl-thunderbolt-opponent test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkaerodactyl-thunderbolt-player test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkgolbat-attract-opponent test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkgolbat-attract-player test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkgolbat-body-slam-opponent test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkgolbat-body-slam-player test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkgolbat-brick-break-opponent test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkgolbat-brick-break-player test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkgolbat-crunch-opponent test rows=141 dur=142 live shift=0 px=303616,303616 identical=True ages=123..138 maxPxRow=18976 bbox=[0, 0, 239, 111]
+s13-atkgolbat-crunch-player test rows=142 dur=142 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkgolbat-earthquake-opponent test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkgolbat-earthquake-player test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkgolbat-flamethrower-opponent test rows=210 dur=115 live shift=-15 px=200,200 identical=True ages=0 maxPxRow=200 bbox=[160, 65, 191, 72]
+s13-atkgolbat-flamethrower-player test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkgolbat-ice-beam-opponent test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkgolbat-ice-beam-player test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkgolbat-psychic-opponent test rows=145 dur=140 live shift=-5 px=200,200 identical=True ages=0 maxPxRow=200 bbox=[160, 65, 191, 72]
+s13-atkgolbat-psychic-player test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkgolbat-sludge-bomb-opponent test rows=169 dur=160 live shift=-4 px=200,200 identical=True ages=0 maxPxRow=200 bbox=[160, 65, 191, 72]
+s13-atkgolbat-sludge-bomb-player test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkgolbat-surf-opponent test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkgolbat-surf-player test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkgolbat-thunderbolt-opponent test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkgolbat-thunderbolt-player test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkonix-attract-opponent test rows=435 dur=435 live shift=0 px=6546,6546 identical=True ages=0..5 maxPxRow=1091 bbox=[149, 12, 204, 71]
+s13-atkonix-attract-player test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkonix-body-slam-opponent test rows=107 dur=107 live shift=0 px=40241,40241 identical=True ages=0..36 maxPxRow=1091 bbox=[149, 12, 204, 73]
+s13-atkonix-body-slam-player test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkonix-brick-break-opponent test rows=151 dur=151 live shift=0 px=85098,85098 identical=True ages=0..77 maxPxRow=1091 bbox=[125, 12, 204, 71]
+s13-atkonix-brick-break-player test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkonix-crunch-opponent test rows=142 dur=142 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkonix-crunch-player test rows=142 dur=142 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkonix-earthquake-opponent test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkonix-earthquake-player test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkonix-flamethrower-opponent test rows=210 dur=115 live shift=-15 px=8728,8728 identical=True ages=0..7 maxPxRow=1091 bbox=[149, 12, 204, 71]
+s13-atkonix-flamethrower-player test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkonix-ice-beam-opponent test rows=203 dur=203 live shift=0 px=221473,221473 identical=True ages=0..202 maxPxRow=1091 bbox=[149, 12, 204, 71]
+s13-atkonix-ice-beam-player test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkonix-psychic-opponent test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkonix-psychic-player test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkonix-sludge-bomb-opponent test rows=169 dur=160 live shift=-4 px=182849,182849 identical=True ages=0..168 maxPxRow=1091 bbox=[149, 12, 204, 71]
+s13-atkonix-sludge-bomb-player test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkonix-surf-opponent test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkonix-surf-player test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atkonix-thunderbolt-opponent test rows=237 dur=237 live shift=0 px=258567,258567 identical=True ages=0..236 maxPxRow=1091 bbox=[149, 12, 204, 71]
+s13-atkonix-thunderbolt-player test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-attract-opponent test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-attract-player test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-body-slam-opponent test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-body-slam-player test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-brick-break-opponent test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-brick-break-player test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-crunch-opponent test rows=142 dur=142 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-crunch-player test rows=142 dur=142 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-earthquake-opponent test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-earthquake-player test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-flamethrower-opponent test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-flamethrower-player test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-ice-beam-opponent test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-ice-beam-player test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-psychic-opponent test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-psychic-player test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-sludge-bomb-opponent test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-sludge-bomb-player test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-surf-opponent test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-surf-player test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-thunderbolt-opponent test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-atksteelix-thunderbolt-player test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-attract-opponent test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-attract-player test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-body-slam-opponent test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-body-slam-player test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-brick-break-opponent test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-brick-break-player test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-crunch-opponent test rows=142 dur=142 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-crunch-player test rows=142 dur=142 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-earthquake-opponent test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-earthquake-player test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-flamethrower-opponent test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-flamethrower-player test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-ice-beam-opponent test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-ice-beam-player test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-psychic-opponent test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-psychic-player test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-sludge-bomb-opponent test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-sludge-bomb-player test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-surf-opponent test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-surf-player test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-thunderbolt-opponent test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-ctl-thunderbolt-player test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defflygon-attract-opponent test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defflygon-attract-player test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defflygon-body-slam-opponent test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defflygon-body-slam-player test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defflygon-brick-break-opponent test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defflygon-brick-break-player test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defflygon-crunch-opponent test rows=142 dur=142 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defflygon-crunch-player test rows=142 dur=142 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defflygon-flamethrower-opponent test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defflygon-flamethrower-player test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defflygon-ice-beam-opponent test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defflygon-ice-beam-player test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defflygon-psychic-opponent test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defflygon-psychic-player test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defflygon-sludge-bomb-opponent test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defflygon-sludge-bomb-player test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defflygon-surf-opponent test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defflygon-surf-player test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defgolbat-attract-opponent test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defgolbat-attract-player test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defgolbat-body-slam-opponent test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defgolbat-body-slam-player test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defgolbat-brick-break-opponent test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defgolbat-brick-break-player test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defgolbat-crunch-opponent test rows=142 dur=142 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defgolbat-crunch-player test rows=142 dur=142 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defgolbat-flamethrower-opponent test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defgolbat-flamethrower-player test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defgolbat-ice-beam-opponent test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defgolbat-ice-beam-player test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defgolbat-psychic-opponent test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defgolbat-psychic-player test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defgolbat-sludge-bomb-opponent test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defgolbat-sludge-bomb-player test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defgolbat-surf-opponent test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defgolbat-surf-player test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defgolbat-thunderbolt-opponent test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defgolbat-thunderbolt-player test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defonix-attract-opponent test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defonix-attract-player test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defonix-body-slam-opponent test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defonix-body-slam-player test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defonix-brick-break-opponent test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defonix-brick-break-player test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defonix-crunch-opponent test rows=141 dur=142 live shift=0 px=291312,291312 identical=True ages=123..138 maxPxRow=18207 bbox=[0, 0, 239, 111]
+s13-defonix-crunch-player test rows=141 dur=142 live shift=0 px=292352,292352 identical=True ages=123..138 maxPxRow=18272 bbox=[0, 0, 239, 111]
+s13-defonix-earthquake-opponent test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defonix-earthquake-player test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defonix-flamethrower-opponent test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defonix-flamethrower-player test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defonix-ice-beam-opponent test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defonix-ice-beam-player test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defonix-psychic-opponent test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defonix-psychic-player test rows=144 dur=140 live shift=-5 px=292352,292352 identical=True ages=126..141 maxPxRow=18272 bbox=[0, 0, 239, 111]
+s13-defonix-sludge-bomb-opponent test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defonix-sludge-bomb-player test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defonix-surf-opponent test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defonix-surf-player test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defpichu-attract-opponent test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defpichu-attract-player test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defpichu-body-slam-opponent test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defpichu-body-slam-player test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defpichu-brick-break-opponent test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defpichu-brick-break-player test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defpichu-crunch-opponent test rows=141 dur=142 live shift=0 px=291312,291312 identical=True ages=123..138 maxPxRow=18207 bbox=[0, 0, 239, 111]
+s13-defpichu-crunch-player test rows=141 dur=142 live shift=0 px=292352,292352 identical=True ages=123..138 maxPxRow=18272 bbox=[0, 0, 239, 111]
+s13-defpichu-earthquake-opponent test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defpichu-earthquake-player test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defpichu-flamethrower-opponent test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defpichu-flamethrower-player test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defpichu-ice-beam-opponent test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defpichu-ice-beam-player test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defpichu-psychic-opponent test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defpichu-psychic-player test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defpichu-sludge-bomb-opponent test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defpichu-sludge-bomb-player test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defpichu-surf-opponent test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defpichu-surf-player test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defpichu-thunderbolt-opponent test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defpichu-thunderbolt-player test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defrattata-attract-opponent test rows=435 dur=435 live shift=0 px=18207,18207 identical=True ages=421 maxPxRow=18207 bbox=[0, 0, 239, 111]
+s13-defrattata-attract-player test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defrattata-body-slam-opponent test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defrattata-body-slam-player test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defrattata-brick-break-opponent test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defrattata-brick-break-player test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defrattata-crunch-opponent test rows=141 dur=142 live shift=0 px=291312,291312 identical=True ages=123..138 maxPxRow=18207 bbox=[0, 0, 239, 111]
+s13-defrattata-crunch-player test rows=141 dur=142 live shift=0 px=292352,292352 identical=True ages=123..138 maxPxRow=18272 bbox=[0, 0, 239, 111]
+s13-defrattata-earthquake-opponent test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defrattata-earthquake-player test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defrattata-flamethrower-opponent test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defrattata-flamethrower-player test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defrattata-ice-beam-opponent test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defrattata-ice-beam-player test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defrattata-psychic-opponent test rows=144 dur=140 live shift=-5 px=291312,291312 identical=True ages=126..141 maxPxRow=18207 bbox=[0, 0, 239, 111]
+s13-defrattata-psychic-player test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defrattata-sludge-bomb-opponent test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defrattata-sludge-bomb-player test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defrattata-surf-opponent test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defrattata-surf-player test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defrattata-thunderbolt-opponent test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defrattata-thunderbolt-player test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defsteelix-attract-opponent test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defsteelix-attract-player test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defsteelix-body-slam-opponent test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defsteelix-body-slam-player test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defsteelix-brick-break-opponent test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defsteelix-brick-break-player test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defsteelix-crunch-opponent test rows=142 dur=142 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defsteelix-crunch-player test rows=141 dur=142 live shift=0 px=292352,292352 identical=True ages=123..138 maxPxRow=18272 bbox=[0, 0, 239, 111]
+s13-defsteelix-earthquake-opponent test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defsteelix-earthquake-player test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defsteelix-flamethrower-opponent test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defsteelix-flamethrower-player test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defsteelix-ice-beam-opponent test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defsteelix-ice-beam-player test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defsteelix-psychic-opponent test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defsteelix-psychic-player test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defsteelix-surf-opponent test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defsteelix-surf-player test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-deftyranitar-attract-opponent test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-deftyranitar-attract-player test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-deftyranitar-body-slam-opponent test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-deftyranitar-body-slam-player test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-deftyranitar-brick-break-opponent test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-deftyranitar-brick-break-player test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-deftyranitar-crunch-opponent test rows=141 dur=142 live shift=0 px=291312,291312 identical=True ages=123..138 maxPxRow=18207 bbox=[0, 0, 239, 111]
+s13-deftyranitar-crunch-player test rows=142 dur=142 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-deftyranitar-earthquake-opponent test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-deftyranitar-earthquake-player test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-deftyranitar-flamethrower-opponent test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-deftyranitar-flamethrower-player test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-deftyranitar-ice-beam-opponent test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-deftyranitar-ice-beam-player test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-deftyranitar-sludge-bomb-opponent test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-deftyranitar-sludge-bomb-player test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-deftyranitar-surf-opponent test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-deftyranitar-surf-player test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-deftyranitar-thunderbolt-opponent test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-deftyranitar-thunderbolt-player test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defwailord-attract-opponent test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defwailord-attract-player test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defwailord-body-slam-opponent test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defwailord-body-slam-player test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defwailord-brick-break-opponent test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defwailord-brick-break-player test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defwailord-crunch-opponent test rows=141 dur=142 live shift=0 px=291312,291312 identical=True ages=123..138 maxPxRow=18207 bbox=[0, 0, 239, 111]
+s13-defwailord-crunch-player test rows=141 dur=142 live shift=0 px=292352,292352 identical=True ages=123..138 maxPxRow=18272 bbox=[0, 0, 239, 111]
+s13-defwailord-earthquake-opponent test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defwailord-earthquake-player test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defwailord-flamethrower-opponent test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defwailord-flamethrower-player test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defwailord-ice-beam-opponent test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defwailord-ice-beam-player test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defwailord-psychic-opponent test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defwailord-psychic-player test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defwailord-sludge-bomb-opponent test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defwailord-sludge-bomb-player test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defwailord-surf-opponent test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defwailord-surf-player test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defwailord-thunderbolt-opponent test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defwailord-thunderbolt-player test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defweezing-attract-opponent test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defweezing-attract-player test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defweezing-body-slam-opponent test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defweezing-body-slam-player test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defweezing-brick-break-opponent test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defweezing-brick-break-player test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defweezing-crunch-opponent test rows=142 dur=142 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defweezing-crunch-player test rows=142 dur=142 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defweezing-flamethrower-opponent test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defweezing-flamethrower-player test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defweezing-ice-beam-opponent test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defweezing-ice-beam-player test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defweezing-psychic-opponent test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defweezing-psychic-player test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defweezing-sludge-bomb-opponent test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defweezing-sludge-bomb-player test rows=169 dur=160 live shift=-4 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defweezing-surf-opponent test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defweezing-surf-player test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defweezing-thunderbolt-opponent test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-defweezing-thunderbolt-player test rows=237 dur=237 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-shinysteelixdef-attract-opponent test rows=435 dur=435 live shift=0 px=49,49 identical=True ages=119 maxPxRow=49 bbox=[65, 80, 78, 91]
+s13-shinysteelixdef-attract-player test rows=435 dur=435 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-shinysteelixdef-body-slam-opponent test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-shinysteelixdef-body-slam-player test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-shinysteelixdef-brick-break-opponent test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-shinysteelixdef-brick-break-player test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-shinysteelixdef-crunch-opponent test rows=142 dur=142 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-shinysteelixdef-crunch-player test rows=141 dur=142 live shift=0 px=292352,292352 identical=True ages=123..138 maxPxRow=18272 bbox=[0, 0, 239, 111]
+s13-shinysteelixdef-earthquake-opponent test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-shinysteelixdef-earthquake-player test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-shinysteelixdef-flamethrower-opponent test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-shinysteelixdef-flamethrower-player test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-shinysteelixdef-ice-beam-opponent test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-shinysteelixdef-ice-beam-player test rows=203 dur=203 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-shinysteelixdef-psychic-opponent test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-shinysteelixdef-psychic-player test rows=145 dur=140 live shift=-5 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-shinysteelixdef-surf-opponent test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-shinysteelixdef-surf-player test rows=144 dur=144 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-nodfgolbat-flamethrower-opponent control rows=210 dur=115 live shift=-15 px=200,200 identical=True ages=0 maxPxRow=200 bbox=[160, 65, 191, 72]
+s13-nodfgolbat-flamethrower-opponent test rows=210 dur=115 live shift=-15 px=200,200 identical=True ages=0 maxPxRow=200 bbox=[160, 65, 191, 72]
+s13-nodfgolbat-psychic-opponent control rows=145 dur=140 live shift=-5 px=209,209 identical=True ages=0,100 maxPxRow=200 bbox=[104, 65, 191, 111]
+s13-nodfgolbat-psychic-opponent test rows=145 dur=140 live shift=-5 px=200,200 identical=True ages=0 maxPxRow=200 bbox=[160, 65, 191, 72]
+s13-nodfgolbat-sludge-bomb-opponent control rows=169 dur=160 live shift=-4 px=200,200 identical=True ages=0 maxPxRow=200 bbox=[160, 65, 191, 72]
+s13-nodfgolbat-sludge-bomb-opponent test rows=169 dur=160 live shift=-4 px=200,200 identical=True ages=0 maxPxRow=200 bbox=[160, 65, 191, 72]
+s13-nodfonix-body-slam-opponent control rows=107 dur=107 live shift=0 px=40241,40241 identical=True ages=0..36 maxPxRow=1091 bbox=[149, 12, 204, 73]
+s13-nodfonix-body-slam-opponent test rows=107 dur=107 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-nodfonix-brick-break-opponent control rows=151 dur=151 live shift=0 px=85098,85098 identical=True ages=0..77 maxPxRow=1091 bbox=[125, 12, 204, 71]
+s13-nodfonix-brick-break-opponent test rows=151 dur=151 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-nodfonix-earthquake-opponent control rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-nodfonix-earthquake-opponent test rows=208 dur=198 live shift=0 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-nodfonix-flamethrower-opponent control rows=210 dur=115 live shift=-15 px=8728,8728 identical=True ages=0..7 maxPxRow=1091 bbox=[149, 12, 204, 71]
+s13-nodfonix-flamethrower-opponent test rows=210 dur=115 live shift=-15 px=0,0 identical=True ages=- maxPxRow=0 bbox=None
+s13-nodfonix-ice-beam-opponent control rows=203 dur=203 live shift=0 px=221473,221473 identical=True ages=0..202 maxPxRow=1091 bbox=[149, 12, 204, 71]
+s13-nodfonix-ice-beam-opponent test rows=203 dur=203 live shift=0 px=221473,221473 identical=True ages=0..202 maxPxRow=1091 bbox=[149, 12, 204, 71]
+s13-nodfonix-sludge-bomb-opponent control rows=169 dur=160 live shift=-4 px=182839,182839 identical=True ages=0..168 maxPxRow=1091 bbox=[149, 12, 204, 71]
+s13-nodfonix-sludge-bomb-opponent test rows=169 dur=160 live shift=-4 px=182839,182839 identical=True ages=0..168 maxPxRow=1091 bbox=[149, 12, 204, 71]
+s13-nodfonix-thunderbolt-opponent control rows=237 dur=237 live shift=0 px=258567,258567 identical=True ages=0..236 maxPxRow=1091 bbox=[149, 12, 204, 71]
+s13-nodfonix-thunderbolt-opponent test rows=237 dur=237 live shift=0 px=258567,258567 identical=True ages=0..236 maxPxRow=1091 bbox=[149, 12, 204, 71]
+TOTAL 330 receipts, 284 at 0 px on both fresh runs, 330 with identical run digests

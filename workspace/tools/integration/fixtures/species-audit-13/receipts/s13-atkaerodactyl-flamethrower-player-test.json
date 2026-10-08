@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkaerodactyl-flamethrower-player-test.json",
+  "stem": "s13-atkaerodactyl-flamethrower-player",
+  "kind": "test",
+  "move": "FLAMETHROWER",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   357,
+   566
+  ],
+  "rows": 210,
+  "orderInput": "fixture",
+  "shift": -15,
+  "liveDuration": 115,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "561b8f70764e1f033268d8379045c5b1a1ba909f7b617c11a493154616e27a5c"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "561b8f70764e1f033268d8379045c5b1a1ba909f7b617c11a493154616e27a5c"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

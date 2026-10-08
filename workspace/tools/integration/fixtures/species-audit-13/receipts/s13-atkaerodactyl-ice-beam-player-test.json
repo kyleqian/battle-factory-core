@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkaerodactyl-ice-beam-player-test.json",
+  "stem": "s13-atkaerodactyl-ice-beam-player",
+  "kind": "test",
+  "move": "ICE_BEAM",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   353,
+   555
+  ],
+  "rows": 203,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 203,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "b97e142e3e7c6d7768eba51fa0042b757e87c42e85c9532cf7d6033482aea50c"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "b97e142e3e7c6d7768eba51fa0042b757e87c42e85c9532cf7d6033482aea50c"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

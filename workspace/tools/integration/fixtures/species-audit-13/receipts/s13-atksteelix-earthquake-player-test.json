@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atksteelix-earthquake-player-test.json",
+  "stem": "s13-atksteelix-earthquake-player",
+  "kind": "test",
+  "move": "EARTHQUAKE",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   354,
+   561
+  ],
+  "rows": 208,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 198,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "be63674a3e673734b9579413dbd386da375d473a82395ca8fe22c67b5d32681c"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "be63674a3e673734b9579413dbd386da375d473a82395ca8fe22c67b5d32681c"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

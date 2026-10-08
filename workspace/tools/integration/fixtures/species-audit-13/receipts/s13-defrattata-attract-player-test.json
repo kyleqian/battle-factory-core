@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defrattata-attract-player-test.json",
+  "stem": "s13-defrattata-attract-player",
+  "kind": "test",
+  "move": "ATTRACT",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   334,
+   768
+  ],
+  "rows": 435,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 435,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "a053858b5bc271c4138c5f6ec45a57ebd1562323460639040b227a8345700fc8"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "a053858b5bc271c4138c5f6ec45a57ebd1562323460639040b227a8345700fc8"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

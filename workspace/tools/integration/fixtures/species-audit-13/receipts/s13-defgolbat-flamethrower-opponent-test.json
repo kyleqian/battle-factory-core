@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defgolbat-flamethrower-opponent-test.json",
+  "stem": "s13-defgolbat-flamethrower-opponent",
+  "kind": "test",
+  "move": "FLAMETHROWER",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   350,
+   559
+  ],
+  "rows": 210,
+  "orderInput": "fixture",
+  "shift": -15,
+  "liveDuration": 115,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "92e8790d8b2a6605a7475768c5034902b487085b83c30f8a3184179451a92afb"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "92e8790d8b2a6605a7475768c5034902b487085b83c30f8a3184179451a92afb"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

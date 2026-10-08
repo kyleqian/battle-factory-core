@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-ctl-sludge-bomb-player-test.json",
+  "stem": "s13-ctl-sludge-bomb-player",
+  "kind": "test",
+  "move": "SLUDGE_BOMB",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   353,
+   521
+  ],
+  "rows": 169,
+  "orderInput": "fixture",
+  "shift": -4,
+  "liveDuration": 160,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 169,
+    "digest": "1664e57114f262c52f162df7be663f89a20ee3003360c1086e98aa1457468ecb"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 169,
+    "digest": "1664e57114f262c52f162df7be663f89a20ee3003360c1086e98aa1457468ecb"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

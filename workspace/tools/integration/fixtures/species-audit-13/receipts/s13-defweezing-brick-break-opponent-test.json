@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defweezing-brick-break-opponent-test.json",
+  "stem": "s13-defweezing-brick-break-opponent",
+  "kind": "test",
+  "move": "BRICK_BREAK",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   348,
+   498
+  ],
+  "rows": 151,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 151,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "9a5f74027113e560928a01a137d0f336b6cc61c3f75b033230b71fc183dfef25"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "9a5f74027113e560928a01a137d0f336b6cc61c3f75b033230b71fc183dfef25"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

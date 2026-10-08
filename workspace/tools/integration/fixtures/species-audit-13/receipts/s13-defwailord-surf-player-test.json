@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defwailord-surf-player-test.json",
+  "stem": "s13-defwailord-surf-player",
+  "kind": "test",
+  "move": "SURF",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   371,
+   514
+  ],
+  "rows": 144,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 144,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "f13bbb85d9d509d82dca283efcccbc6871131a63de339c1131c530e4c91c761b"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "f13bbb85d9d509d82dca283efcccbc6871131a63de339c1131c530e4c91c761b"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

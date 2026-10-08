@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkonix-earthquake-opponent-test.json",
+  "stem": "s13-atkonix-earthquake-opponent",
+  "kind": "test",
+  "move": "EARTHQUAKE",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   347,
+   554
+  ],
+  "rows": 208,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 198,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "85d625d27bcd38cbc98442a1993e642b4acf4d66790ae7d226e13ffd605319c6"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "85d625d27bcd38cbc98442a1993e642b4acf4d66790ae7d226e13ffd605319c6"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkaerodactyl-attract-opponent-test.json",
+  "stem": "s13-atkaerodactyl-attract-opponent",
+  "kind": "test",
+  "move": "ATTRACT",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   342,
+   776
+  ],
+  "rows": 435,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 435,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "acadecfd940f965579cae21d0fe8532ae29f78b6cd09e92a2be5db92376d082c"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "acadecfd940f965579cae21d0fe8532ae29f78b6cd09e92a2be5db92376d082c"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

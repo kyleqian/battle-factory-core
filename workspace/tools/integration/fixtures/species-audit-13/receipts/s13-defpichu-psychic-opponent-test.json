@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defpichu-psychic-opponent-test.json",
+  "stem": "s13-defpichu-psychic-opponent",
+  "kind": "test",
+  "move": "PSYCHIC",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   329,
+   473
+  ],
+  "rows": 145,
+  "orderInput": "fixture",
+  "shift": -5,
+  "liveDuration": 140,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "39d8ee9439b77ba84ed382bb0ceeb8bf5df8e09f4a66111db7e2a977fb7bba5b"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "39d8ee9439b77ba84ed382bb0ceeb8bf5df8e09f4a66111db7e2a977fb7bba5b"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

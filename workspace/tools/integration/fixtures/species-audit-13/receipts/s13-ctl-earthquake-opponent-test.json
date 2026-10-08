@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-ctl-earthquake-opponent-test.json",
+  "stem": "s13-ctl-earthquake-opponent",
+  "kind": "test",
+  "move": "EARTHQUAKE",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   350,
+   557
+  ],
+  "rows": 208,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 198,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "cc2d98ee6b05a99b990551defb7ec32136269940ae986e4657d6e33007a79896"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "cc2d98ee6b05a99b990551defb7ec32136269940ae986e4657d6e33007a79896"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

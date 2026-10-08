@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defsteelix-brick-break-opponent-test.json",
+  "stem": "s13-defsteelix-brick-break-opponent",
+  "kind": "test",
+  "move": "BRICK_BREAK",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   350,
+   500
+  ],
+  "rows": 151,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 151,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "a19b2ecf88271f913cfe79bf53e85f387ff74fbaf8dd5760128aa6a0370737bb"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "a19b2ecf88271f913cfe79bf53e85f387ff74fbaf8dd5760128aa6a0370737bb"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atksteelix-brick-break-player-test.json",
+  "stem": "s13-atksteelix-brick-break-player",
+  "kind": "test",
+  "move": "BRICK_BREAK",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   352,
+   502
+  ],
+  "rows": 151,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 151,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "af8b31145b1902a7bc86303fd8fc5e0432068ca1d855db099d3fcb8b71772247"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "af8b31145b1902a7bc86303fd8fc5e0432068ca1d855db099d3fcb8b71772247"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

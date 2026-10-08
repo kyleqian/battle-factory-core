@@ -1,0 +1,50 @@
+{
+ "schema": "prep38-subbed-defender-fixture/v1",
+ "move": "SLUDGE_BOMB",
+ "moveId": 188,
+ "kind": "test",
+ "stem": "s13-atkaerodactyl-sludge-bomb-opponent",
+ "probe": "tools/integration/prep38Probe.py",
+ "scenario": "tools/integration/fixtures/species-audit-13/scenarios/s13-atkaerodactyl-sludge-bomb-opponent.json",
+ "denseWindow": {
+  "startFrame": 352,
+  "endFrame": 520
+ },
+ "attacker": {
+  "species": "AERODACTYL",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "PERSIAN",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "defenderDoll": true,
+ "fieldProfile": {
+  "playerHp": 129,
+  "playerMaxHp": 172,
+  "opponentHp": 187,
+  "opponentMaxHp": 187,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 164,
+   "side": "player"
+  }
+ ],
+ "nonMoveBodiesBefore": [],
+ "doll": {
+  "behindSubstitute": true,
+  "subHP": 43,
+  "tiles": "22a6f54c07e2"
+ }
+}

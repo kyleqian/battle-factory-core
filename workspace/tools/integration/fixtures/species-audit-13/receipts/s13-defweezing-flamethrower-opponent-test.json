@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defweezing-flamethrower-opponent-test.json",
+  "stem": "s13-defweezing-flamethrower-opponent",
+  "kind": "test",
+  "move": "FLAMETHROWER",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   350,
+   559
+  ],
+  "rows": 210,
+  "orderInput": "fixture",
+  "shift": -15,
+  "liveDuration": 115,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "79d7f1547a35dae01d5f9e0d2af0da58e26c9650d56cc47a9fbd44b8aae9769f"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "79d7f1547a35dae01d5f9e0d2af0da58e26c9650d56cc47a9fbd44b8aae9769f"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

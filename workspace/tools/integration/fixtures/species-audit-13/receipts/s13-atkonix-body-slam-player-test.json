@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkonix-body-slam-player-test.json",
+  "stem": "s13-atkonix-body-slam-player",
+  "kind": "test",
+  "move": "BODY_SLAM",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   348,
+   454
+  ],
+  "rows": 107,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 107,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "d9f81ef2e2480bb08c7f15c358139e69f2ff4b2090d904ab2fc05921840b23a7"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "d9f81ef2e2480bb08c7f15c358139e69f2ff4b2090d904ab2fc05921840b23a7"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

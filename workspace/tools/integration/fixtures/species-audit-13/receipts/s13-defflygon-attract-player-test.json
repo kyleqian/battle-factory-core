@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defflygon-attract-player-test.json",
+  "stem": "s13-defflygon-attract-player",
+  "kind": "test",
+  "move": "ATTRACT",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   344,
+   778
+  ],
+  "rows": 435,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 435,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "837f807f94e481fe51cfcccecab4cadf0c46c7477a41df2e10b886935dfecc8e"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "837f807f94e481fe51cfcccecab4cadf0c46c7477a41df2e10b886935dfecc8e"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

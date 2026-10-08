@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-ctl-surf-opponent-test.json",
+  "stem": "s13-ctl-surf-opponent",
+  "kind": "test",
+  "move": "SURF",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   341,
+   484
+  ],
+  "rows": 144,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 144,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "a17ad0321cf2d2505edb20d76be8f2ff111c93d75bce938dad6676ce56e01ad4"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "a17ad0321cf2d2505edb20d76be8f2ff111c93d75bce938dad6676ce56e01ad4"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

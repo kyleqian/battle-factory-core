@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atksteelix-attract-opponent-test.json",
+  "stem": "s13-atksteelix-attract-opponent",
+  "kind": "test",
+  "move": "ATTRACT",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   339,
+   773
+  ],
+  "rows": 435,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 435,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "8b430683a65d9464a262811e6111c5f122e17b56b94a7c1e7e2909f09d26fafb"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "8b430683a65d9464a262811e6111c5f122e17b56b94a7c1e7e2909f09d26fafb"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

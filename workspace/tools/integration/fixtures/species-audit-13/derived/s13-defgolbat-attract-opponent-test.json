@@ -1,0 +1,50 @@
+{
+ "schema": "prep38-subbed-defender-fixture/v1",
+ "move": "ATTRACT",
+ "moveId": 213,
+ "kind": "test",
+ "stem": "s13-defgolbat-attract-opponent",
+ "probe": "tools/integration/prep38Probe.py",
+ "scenario": "tools/integration/fixtures/species-audit-13/scenarios/s13-defgolbat-attract-opponent.json",
+ "denseWindow": {
+  "startFrame": 339,
+  "endFrame": 773
+ },
+ "attacker": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "defenderDoll": true,
+ "fieldProfile": {
+  "playerHp": 137,
+  "playerMaxHp": 182,
+  "opponentHp": 202,
+  "opponentMaxHp": 202,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 164,
+   "side": "player"
+  }
+ ],
+ "nonMoveBodiesBefore": [],
+ "doll": {
+  "behindSubstitute": true,
+  "subHP": 45,
+  "tiles": "22a6f54c07e2"
+ }
+}

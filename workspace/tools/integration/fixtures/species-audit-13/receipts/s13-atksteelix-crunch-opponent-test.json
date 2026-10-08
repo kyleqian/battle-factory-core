@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atksteelix-crunch-opponent-test.json",
+  "stem": "s13-atksteelix-crunch-opponent",
+  "kind": "test",
+  "move": "CRUNCH",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   344,
+   485
+  ],
+  "rows": 142,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 142,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 142,
+    "digest": "ebe3fac869abd6126e65754da3d83ccfb9c6f8dc232dbc8b5b2f7b99d9fa8772"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 142,
+    "digest": "ebe3fac869abd6126e65754da3d83ccfb9c6f8dc232dbc8b5b2f7b99d9fa8772"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

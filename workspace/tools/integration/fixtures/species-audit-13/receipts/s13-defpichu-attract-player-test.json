@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defpichu-attract-player-test.json",
+  "stem": "s13-defpichu-attract-player",
+  "kind": "test",
+  "move": "ATTRACT",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   327,
+   761
+  ],
+  "rows": 435,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 435,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "44d210db8447cbd15e985c5dc2a63cb6a52217f475c244873cbbac48d9185c5c"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "44d210db8447cbd15e985c5dc2a63cb6a52217f475c244873cbbac48d9185c5c"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

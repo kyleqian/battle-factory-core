@@ -1,0 +1,55 @@
+[
+ {
+  "fixture": "s13-nodfgolbat-flamethrower-opponent-control.json",
+  "stem": "s13-nodfgolbat-flamethrower-opponent",
+  "kind": "control",
+  "move": "FLAMETHROWER",
+  "attackerSide": "opponent",
+  "defenderDoll": false,
+  "window": [
+   82,
+   291
+  ],
+  "rows": 210,
+  "orderInput": "fixture",
+  "shift": -15,
+  "liveDuration": 115,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 200,
+    "exactRows": 209,
+    "digest": "d7dd3c90f6472c806f0f15d110fd4d190ccb8e08ec90a2dcdc417bc34a508823"
+   },
+   {
+    "run": 2,
+    "residualPixels": 200,
+    "exactRows": 209,
+    "digest": "d7dd3c90f6472c806f0f15d110fd4d190ccb8e08ec90a2dcdc417bc34a508823"
+   }
+  ],
+  "affectedAges": "0",
+  "maxPxRow": 200,
+  "fieldPx": 200,
+  "bbox": [
+   160,
+   65,
+   191,
+   72
+  ],
+  "perRow": [
+   [
+    0,
+    200,
+    [
+     160,
+     65,
+     191,
+     72
+    ]
+   ]
+  ]
+ }
+]

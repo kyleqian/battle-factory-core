@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-nodfonix-flamethrower-opponent-test.json",
+  "stem": "s13-nodfonix-flamethrower-opponent",
+  "kind": "test",
+  "move": "FLAMETHROWER",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   1746,
+   1955
+  ],
+  "rows": 210,
+  "orderInput": "fixture",
+  "shift": -15,
+  "liveDuration": 115,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "0405655203e3cd0ac3134949ddb3995c7c07ce562051fbfe2f4abd13aecb485b"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "0405655203e3cd0ac3134949ddb3995c7c07ce562051fbfe2f4abd13aecb485b"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

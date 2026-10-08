@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkonix-crunch-player-test.json",
+  "stem": "s13-atkonix-crunch-player",
+  "kind": "test",
+  "move": "CRUNCH",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   345,
+   486
+  ],
+  "rows": 142,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 142,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 142,
+    "digest": "573b020bfbcc58d06e35652e9692f9a71f62cb86187c08792d5002829e031271"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 142,
+    "digest": "573b020bfbcc58d06e35652e9692f9a71f62cb86187c08792d5002829e031271"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defpichu-sludge-bomb-opponent-test.json",
+  "stem": "s13-defpichu-sludge-bomb-opponent",
+  "kind": "test",
+  "move": "SLUDGE_BOMB",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   333,
+   501
+  ],
+  "rows": 169,
+  "orderInput": "fixture",
+  "shift": -4,
+  "liveDuration": 160,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 169,
+    "digest": "2fbe15ec2b3ff58ea4db92014fc4f99a26f2f187c2fc5b494dca2447c8570f3a"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 169,
+    "digest": "2fbe15ec2b3ff58ea4db92014fc4f99a26f2f187c2fc5b494dca2447c8570f3a"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-deftyranitar-ice-beam-player-test.json",
+  "stem": "s13-deftyranitar-ice-beam-player",
+  "kind": "test",
+  "move": "ICE_BEAM",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   362,
+   564
+  ],
+  "rows": 203,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 203,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "6ecbc6a49a16c425c5a31754accf31ef003aad8337055f4d5937b268ea2e3081"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "6ecbc6a49a16c425c5a31754accf31ef003aad8337055f4d5937b268ea2e3081"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

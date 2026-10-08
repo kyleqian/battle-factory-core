@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkonix-crunch-opponent-test.json",
+  "stem": "s13-atkonix-crunch-opponent",
+  "kind": "test",
+  "move": "CRUNCH",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   341,
+   482
+  ],
+  "rows": 142,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 142,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 142,
+    "digest": "952a09fb06d45d4e4b64455f7fd6ba0224e23206c1455864110aedb4faaafe37"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 142,
+    "digest": "952a09fb06d45d4e4b64455f7fd6ba0224e23206c1455864110aedb4faaafe37"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defgolbat-thunderbolt-player-test.json",
+  "stem": "s13-defgolbat-thunderbolt-player",
+  "kind": "test",
+  "move": "THUNDERBOLT",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   353,
+   589
+  ],
+  "rows": 237,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 237,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "25af5e80408d8e61ba3d7c325b90cb26956873a8d3901a886058b1b83938eccf"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "25af5e80408d8e61ba3d7c325b90cb26956873a8d3901a886058b1b83938eccf"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

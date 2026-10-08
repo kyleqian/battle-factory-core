@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defwailord-ice-beam-player-test.json",
+  "stem": "s13-defwailord-ice-beam-player",
+  "kind": "test",
+  "move": "ICE_BEAM",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   376,
+   578
+  ],
+  "rows": 203,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 203,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "169e8059059edbcd611a99da14403347f6fe63a27fd36f705842b972d7f61eb2"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "169e8059059edbcd611a99da14403347f6fe63a27fd36f705842b972d7f61eb2"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

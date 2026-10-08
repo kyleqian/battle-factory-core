@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defonix-flamethrower-opponent-test.json",
+  "stem": "s13-defonix-flamethrower-opponent",
+  "kind": "test",
+  "move": "FLAMETHROWER",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   336,
+   545
+  ],
+  "rows": 210,
+  "orderInput": "fixture",
+  "shift": -15,
+  "liveDuration": 115,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "b7e767221ef744dd9abcb47b9c217ed5eb70a3f66df771f0c25115e347d42315"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "b7e767221ef744dd9abcb47b9c217ed5eb70a3f66df771f0c25115e347d42315"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

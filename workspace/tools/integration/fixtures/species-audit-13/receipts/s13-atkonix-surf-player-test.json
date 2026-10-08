@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkonix-surf-player-test.json",
+  "stem": "s13-atkonix-surf-player",
+  "kind": "test",
+  "move": "SURF",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   342,
+   485
+  ],
+  "rows": 144,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 144,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "d97e6e1da25802c2a46814da316b6d872fba3e3c6822b2045dd82bd581d30666"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "d97e6e1da25802c2a46814da316b6d872fba3e3c6822b2045dd82bd581d30666"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defonix-brick-break-opponent-test.json",
+  "stem": "s13-defonix-brick-break-opponent",
+  "kind": "test",
+  "move": "BRICK_BREAK",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   334,
+   484
+  ],
+  "rows": 151,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 151,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "20a21da5b9513be54a49928b7e844767ec31bc08632eb75af0045c75fec1e9fe"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "20a21da5b9513be54a49928b7e844767ec31bc08632eb75af0045c75fec1e9fe"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

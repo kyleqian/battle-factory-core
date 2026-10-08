@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defpichu-brick-break-opponent-test.json",
+  "stem": "s13-defpichu-brick-break-opponent",
+  "kind": "test",
+  "move": "BRICK_BREAK",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   332,
+   482
+  ],
+  "rows": 151,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 151,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "477af82aa8f8dd401b4700c96d3cfe552dd4566f1c12c58df2f32acba59132e0"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "477af82aa8f8dd401b4700c96d3cfe552dd4566f1c12c58df2f32acba59132e0"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

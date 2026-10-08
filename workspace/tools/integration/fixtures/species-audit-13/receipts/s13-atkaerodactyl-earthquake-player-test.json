@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkaerodactyl-earthquake-player-test.json",
+  "stem": "s13-atkaerodactyl-earthquake-player",
+  "kind": "test",
+  "move": "EARTHQUAKE",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   357,
+   564
+  ],
+  "rows": 208,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 198,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "abd147389feae3de0a350d96ebc20ef7d95238a49a0dacbd34e955f87b2b3e8e"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "abd147389feae3de0a350d96ebc20ef7d95238a49a0dacbd34e955f87b2b3e8e"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

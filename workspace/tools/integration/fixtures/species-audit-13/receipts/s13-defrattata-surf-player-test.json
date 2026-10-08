@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defrattata-surf-player-test.json",
+  "stem": "s13-defrattata-surf-player",
+  "kind": "test",
+  "move": "SURF",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   336,
+   479
+  ],
+  "rows": 144,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 144,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "4bd31dd10c97e643a7a5e834100bdcf120f74a3517fa2ed65155f4d0cada1d44"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "4bd31dd10c97e643a7a5e834100bdcf120f74a3517fa2ed65155f4d0cada1d44"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

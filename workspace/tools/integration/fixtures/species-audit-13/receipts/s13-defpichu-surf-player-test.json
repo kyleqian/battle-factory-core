@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defpichu-surf-player-test.json",
+  "stem": "s13-defpichu-surf-player",
+  "kind": "test",
+  "move": "SURF",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   329,
+   472
+  ],
+  "rows": 144,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 144,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "26f4a3fa53a94002f806474739a288249d2b236dcbe39dfbda925086bd4e777e"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "26f4a3fa53a94002f806474739a288249d2b236dcbe39dfbda925086bd4e777e"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

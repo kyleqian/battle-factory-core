@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defwailord-surf-opponent-test.json",
+  "stem": "s13-defwailord-surf-opponent",
+  "kind": "test",
+  "move": "SURF",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   367,
+   510
+  ],
+  "rows": 144,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 144,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "ff28ff1788fcc92c4e10a1a7a6d277f0a4e04ca49a432b2f0ece68e3bdc18e8f"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "ff28ff1788fcc92c4e10a1a7a6d277f0a4e04ca49a432b2f0ece68e3bdc18e8f"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

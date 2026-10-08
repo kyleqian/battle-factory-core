@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defrattata-flamethrower-player-test.json",
+  "stem": "s13-defrattata-flamethrower-player",
+  "kind": "test",
+  "move": "FLAMETHROWER",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   345,
+   554
+  ],
+  "rows": 210,
+  "orderInput": "fixture",
+  "shift": -15,
+  "liveDuration": 115,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "1666a475f91d87eac4c822938ce943834e0ec1c198c68ebbac37fc7242f7434b"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "1666a475f91d87eac4c822938ce943834e0ec1c198c68ebbac37fc7242f7434b"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkaerodactyl-crunch-opponent-test.json",
+  "stem": "s13-atkaerodactyl-crunch-opponent",
+  "kind": "test",
+  "move": "CRUNCH",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   347,
+   488
+  ],
+  "rows": 142,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 142,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 142,
+    "digest": "68c612f64c227291dc4baac7806ede8e2e3fe6dc6549c8b31d9b2650fed4fb7b"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 142,
+    "digest": "68c612f64c227291dc4baac7806ede8e2e3fe6dc6549c8b31d9b2650fed4fb7b"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

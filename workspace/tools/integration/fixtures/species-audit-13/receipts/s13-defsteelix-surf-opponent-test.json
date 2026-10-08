@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defsteelix-surf-opponent-test.json",
+  "stem": "s13-defsteelix-surf-opponent",
+  "kind": "test",
+  "move": "SURF",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   343,
+   486
+  ],
+  "rows": 144,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 144,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "07c5f3deaa8f93301fa817c0d33ff74e3cf0ea9107b51f6dce238ac1203da1b1"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "07c5f3deaa8f93301fa817c0d33ff74e3cf0ea9107b51f6dce238ac1203da1b1"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

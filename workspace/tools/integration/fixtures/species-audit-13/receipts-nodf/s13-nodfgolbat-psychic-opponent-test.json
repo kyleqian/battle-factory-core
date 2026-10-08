@@ -1,0 +1,55 @@
+[
+ {
+  "fixture": "s13-nodfgolbat-psychic-opponent-test.json",
+  "stem": "s13-nodfgolbat-psychic-opponent",
+  "kind": "test",
+  "move": "PSYCHIC",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   1743,
+   1887
+  ],
+  "rows": 145,
+  "orderInput": "fixture",
+  "shift": -5,
+  "liveDuration": 140,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 200,
+    "exactRows": 144,
+    "digest": "416d553c9ecaddd46e33173f798457e5f2fd24a688860713ebddb0f3c10b65ca"
+   },
+   {
+    "run": 2,
+    "residualPixels": 200,
+    "exactRows": 144,
+    "digest": "416d553c9ecaddd46e33173f798457e5f2fd24a688860713ebddb0f3c10b65ca"
+   }
+  ],
+  "affectedAges": "0",
+  "maxPxRow": 200,
+  "fieldPx": 200,
+  "bbox": [
+   160,
+   65,
+   191,
+   72
+  ],
+  "perRow": [
+   [
+    0,
+    200,
+    [
+     160,
+     65,
+     191,
+     72
+    ]
+   ]
+  ]
+ }
+]

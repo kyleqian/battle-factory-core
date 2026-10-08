@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defwailord-ice-beam-opponent-test.json",
+  "stem": "s13-defwailord-ice-beam-opponent",
+  "kind": "test",
+  "move": "ICE_BEAM",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   372,
+   574
+  ],
+  "rows": 203,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 203,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "fa658e5843e51f51831f4e9ccca878d2586c949e1cdec72b1ebdc9dc3cd61af2"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "fa658e5843e51f51831f4e9ccca878d2586c949e1cdec72b1ebdc9dc3cd61af2"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

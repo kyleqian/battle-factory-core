@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defpichu-flamethrower-player-test.json",
+  "stem": "s13-defpichu-flamethrower-player",
+  "kind": "test",
+  "move": "FLAMETHROWER",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   338,
+   547
+  ],
+  "rows": 210,
+  "orderInput": "fixture",
+  "shift": -15,
+  "liveDuration": 115,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "37684e57d9ac80bfd78e5eee585ef7802b60df0cf814019bfe5ea074b22ab58a"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "37684e57d9ac80bfd78e5eee585ef7802b60df0cf814019bfe5ea074b22ab58a"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

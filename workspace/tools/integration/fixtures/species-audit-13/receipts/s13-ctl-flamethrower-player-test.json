@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-ctl-flamethrower-player-test.json",
+  "stem": "s13-ctl-flamethrower-player",
+  "kind": "test",
+  "move": "FLAMETHROWER",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   354,
+   563
+  ],
+  "rows": 210,
+  "orderInput": "fixture",
+  "shift": -15,
+  "liveDuration": 115,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "73920121a6bd848e8ef7bbd95fa028e11fd59e31dba96c6d9c42957da89df65f"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "73920121a6bd848e8ef7bbd95fa028e11fd59e31dba96c6d9c42957da89df65f"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

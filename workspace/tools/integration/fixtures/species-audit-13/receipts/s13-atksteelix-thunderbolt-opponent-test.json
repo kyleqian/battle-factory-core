@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atksteelix-thunderbolt-opponent-test.json",
+  "stem": "s13-atksteelix-thunderbolt-opponent",
+  "kind": "test",
+  "move": "THUNDERBOLT",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   349,
+   585
+  ],
+  "rows": 237,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 237,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "38cd12fe8a6a761c348c20c303f31f57a35b793aea47485428c177a492c483fc"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "38cd12fe8a6a761c348c20c303f31f57a35b793aea47485428c177a492c483fc"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defweezing-ice-beam-opponent-test.json",
+  "stem": "s13-defweezing-ice-beam-opponent",
+  "kind": "test",
+  "move": "ICE_BEAM",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   346,
+   548
+  ],
+  "rows": 203,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 203,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "4023bd5dba0e00f9eebefbb1c9ad4e69d24e5733149c32fce4ae9573be89f0d0"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "4023bd5dba0e00f9eebefbb1c9ad4e69d24e5733149c32fce4ae9573be89f0d0"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

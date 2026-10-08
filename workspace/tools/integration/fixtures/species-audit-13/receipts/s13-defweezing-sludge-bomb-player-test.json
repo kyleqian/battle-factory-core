@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defweezing-sludge-bomb-player-test.json",
+  "stem": "s13-defweezing-sludge-bomb-player",
+  "kind": "test",
+  "move": "SLUDGE_BOMB",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   353,
+   521
+  ],
+  "rows": 169,
+  "orderInput": "fixture",
+  "shift": -4,
+  "liveDuration": 160,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 169,
+    "digest": "c76d6324adb82100417f6a7afcdb1cb83e2293915f444f8adf4a952d4280fc57"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 169,
+    "digest": "c76d6324adb82100417f6a7afcdb1cb83e2293915f444f8adf4a952d4280fc57"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

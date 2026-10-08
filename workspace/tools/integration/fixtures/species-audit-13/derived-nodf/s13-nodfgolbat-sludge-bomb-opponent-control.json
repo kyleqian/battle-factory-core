@@ -1,0 +1,45 @@
+{
+ "schema": "prep38-subbed-defender-fixture/v1",
+ "move": "SLUDGE_BOMB",
+ "moveId": 188,
+ "kind": "control",
+ "stem": "s13-nodfgolbat-sludge-bomb-opponent",
+ "probe": "tools/integration/prep38Probe.py",
+ "scenario": "tools/integration/fixtures/species-audit-13/scenarios-nodf/s13-nodfgolbat-sludge-bomb-opponent.json",
+ "denseWindow": {
+  "startFrame": 81,
+  "endFrame": 249
+ },
+ "attacker": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "defenderDoll": false,
+ "fieldProfile": {
+  "playerHp": 202,
+  "playerMaxHp": 202,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "precedingBodies": [],
+ "nonMoveBodiesBefore": [],
+ "doll": {
+  "behindSubstitute": false,
+  "subHP": 0,
+  "tiles": "93a4fe11b050"
+ }
+}

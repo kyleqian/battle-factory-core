@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkgolbat-earthquake-opponent-test.json",
+  "stem": "s13-atkgolbat-earthquake-opponent",
+  "kind": "test",
+  "move": "EARTHQUAKE",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   349,
+   556
+  ],
+  "rows": 208,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 198,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "fc951be103fc9a356a9dc096d1ecec5c82f6d1027783a4848224d0be85910f4c"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "fc951be103fc9a356a9dc096d1ecec5c82f6d1027783a4848224d0be85910f4c"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defweezing-body-slam-opponent-test.json",
+  "stem": "s13-defweezing-body-slam-opponent",
+  "kind": "test",
+  "move": "BODY_SLAM",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   347,
+   453
+  ],
+  "rows": 107,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 107,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "0733fe4a68463d364901503dd16539a11c235d034164a134c4ccb23077bea87d"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "0733fe4a68463d364901503dd16539a11c235d034164a134c4ccb23077bea87d"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

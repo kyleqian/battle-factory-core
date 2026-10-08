@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkgolbat-ice-beam-player-test.json",
+  "stem": "s13-atkgolbat-ice-beam-player",
+  "kind": "test",
+  "move": "ICE_BEAM",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   349,
+   551
+  ],
+  "rows": 203,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 203,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "0784b8a99b570912aa5291db6f45fe8d3767794fc2289df6f7f8385962601e4e"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "0784b8a99b570912aa5291db6f45fe8d3767794fc2289df6f7f8385962601e4e"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

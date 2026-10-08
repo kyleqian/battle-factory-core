@@ -1,0 +1,125 @@
+[
+ {
+  "fixture": "s13-nodfonix-flamethrower-opponent-control.json",
+  "stem": "s13-nodfonix-flamethrower-opponent",
+  "kind": "control",
+  "move": "FLAMETHROWER",
+  "attackerSide": "opponent",
+  "defenderDoll": false,
+  "window": [
+   80,
+   289
+  ],
+  "rows": 210,
+  "orderInput": "fixture",
+  "shift": -15,
+  "liveDuration": 115,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 8728,
+    "exactRows": 202,
+    "digest": "3c9a7bb5ff69e740844c9e82e153c85b62b733ba6cdc9c0e5dff7a2914c1b59b"
+   },
+   {
+    "run": 2,
+    "residualPixels": 8728,
+    "exactRows": 202,
+    "digest": "3c9a7bb5ff69e740844c9e82e153c85b62b733ba6cdc9c0e5dff7a2914c1b59b"
+   }
+  ],
+  "affectedAges": "0..7",
+  "maxPxRow": 1091,
+  "fieldPx": 8728,
+  "bbox": [
+   149,
+   12,
+   204,
+   71
+  ],
+  "perRow": [
+   [
+    0,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ],
+   [
+    1,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ],
+   [
+    2,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ],
+   [
+    3,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ],
+   [
+    4,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ],
+   [
+    5,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ],
+   [
+    6,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ],
+   [
+    7,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ]
+  ]
+ }
+]

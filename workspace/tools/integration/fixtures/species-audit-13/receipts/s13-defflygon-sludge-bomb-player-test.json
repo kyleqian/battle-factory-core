@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defflygon-sludge-bomb-player-test.json",
+  "stem": "s13-defflygon-sludge-bomb-player",
+  "kind": "test",
+  "move": "SLUDGE_BOMB",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   354,
+   522
+  ],
+  "rows": 169,
+  "orderInput": "fixture",
+  "shift": -4,
+  "liveDuration": 160,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 169,
+    "digest": "f001a1030d8feddf1fac60ecf010c160ba756cc4c047a67cf8a4086344712621"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 169,
+    "digest": "f001a1030d8feddf1fac60ecf010c160ba756cc4c047a67cf8a4086344712621"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

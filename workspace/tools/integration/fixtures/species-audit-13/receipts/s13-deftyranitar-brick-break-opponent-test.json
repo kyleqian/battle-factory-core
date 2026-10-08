@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-deftyranitar-brick-break-opponent-test.json",
+  "stem": "s13-deftyranitar-brick-break-opponent",
+  "kind": "test",
+  "move": "BRICK_BREAK",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   360,
+   510
+  ],
+  "rows": 151,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 151,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "5ca3899adc1c98892fb37f46632829a379835b56551c0072c11fc3e1e467e69a"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "5ca3899adc1c98892fb37f46632829a379835b56551c0072c11fc3e1e467e69a"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

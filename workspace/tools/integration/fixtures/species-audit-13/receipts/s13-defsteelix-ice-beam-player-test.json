@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defsteelix-ice-beam-player-test.json",
+  "stem": "s13-defsteelix-ice-beam-player",
+  "kind": "test",
+  "move": "ICE_BEAM",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   352,
+   554
+  ],
+  "rows": 203,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 203,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "a815763c609c6d6aafa3917870fbbeb7829c898843e90be9661ddc9a60541646"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "a815763c609c6d6aafa3917870fbbeb7829c898843e90be9661ddc9a60541646"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

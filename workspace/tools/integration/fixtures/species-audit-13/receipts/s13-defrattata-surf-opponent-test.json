@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defrattata-surf-opponent-test.json",
+  "stem": "s13-defrattata-surf-opponent",
+  "kind": "test",
+  "move": "SURF",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   332,
+   475
+  ],
+  "rows": 144,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 144,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "a49643842ed8f811cd600cdfa7dec9374f5f6e295cd6fd719e15dd737faf67ca"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "a49643842ed8f811cd600cdfa7dec9374f5f6e295cd6fd719e15dd737faf67ca"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

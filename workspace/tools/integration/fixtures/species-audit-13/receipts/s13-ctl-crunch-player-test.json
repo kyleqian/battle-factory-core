@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-ctl-crunch-player-test.json",
+  "stem": "s13-ctl-crunch-player",
+  "kind": "test",
+  "move": "CRUNCH",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   348,
+   489
+  ],
+  "rows": 142,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 142,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 142,
+    "digest": "3886951570c857a364ee67eb152eb2ef5369a7dc61934241939448db4b3e6352"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 142,
+    "digest": "3886951570c857a364ee67eb152eb2ef5369a7dc61934241939448db4b3e6352"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

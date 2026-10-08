@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defonix-ice-beam-opponent-test.json",
+  "stem": "s13-defonix-ice-beam-opponent",
+  "kind": "test",
+  "move": "ICE_BEAM",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   332,
+   534
+  ],
+  "rows": 203,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 203,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "6cdedc8c3d8f01e75288e81a99642b5d5132217986054f6be03be0cc2e23a9a7"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "6cdedc8c3d8f01e75288e81a99642b5d5132217986054f6be03be0cc2e23a9a7"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

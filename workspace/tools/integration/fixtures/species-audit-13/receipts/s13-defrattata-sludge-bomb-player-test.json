@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defrattata-sludge-bomb-player-test.json",
+  "stem": "s13-defrattata-sludge-bomb-player",
+  "kind": "test",
+  "move": "SLUDGE_BOMB",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   344,
+   512
+  ],
+  "rows": 169,
+  "orderInput": "fixture",
+  "shift": -4,
+  "liveDuration": 160,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 169,
+    "digest": "ab59e18f5b356c064b43080a263def28ecfd691740fb4e6cd6999bccbc5c22c9"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 169,
+    "digest": "ab59e18f5b356c064b43080a263def28ecfd691740fb4e6cd6999bccbc5c22c9"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

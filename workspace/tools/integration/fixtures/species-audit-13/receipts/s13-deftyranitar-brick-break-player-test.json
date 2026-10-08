@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-deftyranitar-brick-break-player-test.json",
+  "stem": "s13-deftyranitar-brick-break-player",
+  "kind": "test",
+  "move": "BRICK_BREAK",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   364,
+   514
+  ],
+  "rows": 151,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 151,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "188e037ea5ea88d3f4a995f39682468f6cd6d86367bcd6636697c22cd51ba39b"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "188e037ea5ea88d3f4a995f39682468f6cd6d86367bcd6636697c22cd51ba39b"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

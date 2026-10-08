@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defonix-surf-opponent-test.json",
+  "stem": "s13-defonix-surf-opponent",
+  "kind": "test",
+  "move": "SURF",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   327,
+   470
+  ],
+  "rows": 144,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 144,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "66a2025c156b70d03acd3dfbb10b8749a5ccf337269f55445f1659552a21985b"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "66a2025c156b70d03acd3dfbb10b8749a5ccf337269f55445f1659552a21985b"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

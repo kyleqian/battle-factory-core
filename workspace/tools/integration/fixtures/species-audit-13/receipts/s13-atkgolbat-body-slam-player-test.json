@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkgolbat-body-slam-player-test.json",
+  "stem": "s13-atkgolbat-body-slam-player",
+  "kind": "test",
+  "move": "BODY_SLAM",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   350,
+   456
+  ],
+  "rows": 107,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 107,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "fc6c693d7e9cc33983ab96a222b45f30ec8b24267198d848c4f8db89a0fb432f"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "fc6c693d7e9cc33983ab96a222b45f30ec8b24267198d848c4f8db89a0fb432f"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

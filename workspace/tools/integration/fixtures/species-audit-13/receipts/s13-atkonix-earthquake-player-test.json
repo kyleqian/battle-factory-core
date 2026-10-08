@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkonix-earthquake-player-test.json",
+  "stem": "s13-atkonix-earthquake-player",
+  "kind": "test",
+  "move": "EARTHQUAKE",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   351,
+   558
+  ],
+  "rows": 208,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 198,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "f76be1a875ff2f463e4b3e0c890ca97eb690cbdb815c32b8d793dcf84c0e74e9"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "f76be1a875ff2f463e4b3e0c890ca97eb690cbdb815c32b8d793dcf84c0e74e9"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

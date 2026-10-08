@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defwailord-thunderbolt-player-test.json",
+  "stem": "s13-defwailord-thunderbolt-player",
+  "kind": "test",
+  "move": "THUNDERBOLT",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   379,
+   615
+  ],
+  "rows": 237,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 237,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "de59f5cf066c4820f36f0c7973448df057e787d8c44ae56ff82404e678d32c12"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "de59f5cf066c4820f36f0c7973448df057e787d8c44ae56ff82404e678d32c12"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defgolbat-attract-player-test.json",
+  "stem": "s13-defgolbat-attract-player",
+  "kind": "test",
+  "move": "ATTRACT",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   343,
+   777
+  ],
+  "rows": 435,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 435,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "4ac1ba299679580600cb0373f133c2a1b1ae331a4233b138620f7d6810b2425b"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "4ac1ba299679580600cb0373f133c2a1b1ae331a4233b138620f7d6810b2425b"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defrattata-brick-break-opponent-test.json",
+  "stem": "s13-defrattata-brick-break-opponent",
+  "kind": "test",
+  "move": "BRICK_BREAK",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   339,
+   489
+  ],
+  "rows": 151,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 151,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "7e85d304ba210b1721382c0aef56f8db8083a8bd6f657a8b207157079a62c068"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "7e85d304ba210b1721382c0aef56f8db8083a8bd6f657a8b207157079a62c068"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

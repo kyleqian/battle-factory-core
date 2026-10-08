@@ -1,0 +1,55 @@
+[
+ {
+  "fixture": "s13-nodfgolbat-sludge-bomb-opponent-test.json",
+  "stem": "s13-nodfgolbat-sludge-bomb-opponent",
+  "kind": "test",
+  "move": "SLUDGE_BOMB",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   1747,
+   1915
+  ],
+  "rows": 169,
+  "orderInput": "fixture",
+  "shift": -4,
+  "liveDuration": 160,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 200,
+    "exactRows": 168,
+    "digest": "ce72b09078611eb2e686f0608c9cd55aaf222bc2649060af8981b02ebad86f77"
+   },
+   {
+    "run": 2,
+    "residualPixels": 200,
+    "exactRows": 168,
+    "digest": "ce72b09078611eb2e686f0608c9cd55aaf222bc2649060af8981b02ebad86f77"
+   }
+  ],
+  "affectedAges": "0",
+  "maxPxRow": 200,
+  "fieldPx": 200,
+  "bbox": [
+   160,
+   65,
+   191,
+   72
+  ],
+  "perRow": [
+   [
+    0,
+    200,
+    [
+     160,
+     65,
+     191,
+     72
+    ]
+   ]
+  ]
+ }
+]

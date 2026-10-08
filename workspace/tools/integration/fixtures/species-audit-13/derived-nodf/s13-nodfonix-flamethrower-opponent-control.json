@@ -1,0 +1,45 @@
+{
+ "schema": "prep38-subbed-defender-fixture/v1",
+ "move": "FLAMETHROWER",
+ "moveId": 53,
+ "kind": "control",
+ "stem": "s13-nodfonix-flamethrower-opponent",
+ "probe": "tools/integration/prep38Probe.py",
+ "scenario": "tools/integration/fixtures/species-audit-13/scenarios-nodf/s13-nodfonix-flamethrower-opponent.json",
+ "denseWindow": {
+  "startFrame": 80,
+  "endFrame": 289
+ },
+ "attacker": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "defenderDoll": false,
+ "fieldProfile": {
+  "playerHp": 202,
+  "playerMaxHp": 202,
+  "opponentHp": 142,
+  "opponentMaxHp": 142,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "precedingBodies": [],
+ "nonMoveBodiesBefore": [],
+ "doll": {
+  "behindSubstitute": false,
+  "subHP": 0,
+  "tiles": "93a4fe11b050"
+ }
+}

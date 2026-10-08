@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-ctl-ice-beam-opponent-test.json",
+  "stem": "s13-ctl-ice-beam-opponent",
+  "kind": "test",
+  "move": "ICE_BEAM",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   346,
+   548
+  ],
+  "rows": 203,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 203,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "d10bd8a9da3fdd4888fff3a5e92e85b5d4d735940cbc90117d2813e68ef3a5d1"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "d10bd8a9da3fdd4888fff3a5e92e85b5d4d735940cbc90117d2813e68ef3a5d1"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

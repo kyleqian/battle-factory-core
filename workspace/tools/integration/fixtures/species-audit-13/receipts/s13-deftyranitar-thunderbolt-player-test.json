@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-deftyranitar-thunderbolt-player-test.json",
+  "stem": "s13-deftyranitar-thunderbolt-player",
+  "kind": "test",
+  "move": "THUNDERBOLT",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   365,
+   601
+  ],
+  "rows": 237,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 237,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "f03c2478dde206da768bdd0998ab8584a742c212346c188cfe2cc91c58d82f9b"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "f03c2478dde206da768bdd0998ab8584a742c212346c188cfe2cc91c58d82f9b"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

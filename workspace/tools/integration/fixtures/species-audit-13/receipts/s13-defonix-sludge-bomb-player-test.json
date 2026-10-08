@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defonix-sludge-bomb-player-test.json",
+  "stem": "s13-defonix-sludge-bomb-player",
+  "kind": "test",
+  "move": "SLUDGE_BOMB",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   339,
+   507
+  ],
+  "rows": 169,
+  "orderInput": "fixture",
+  "shift": -4,
+  "liveDuration": 160,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 169,
+    "digest": "8e06422912e3300b7f4e5183f54d2e12b199517ef0346e2a0abf62b7db39d8ee"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 169,
+    "digest": "8e06422912e3300b7f4e5183f54d2e12b199517ef0346e2a0abf62b7db39d8ee"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,55 @@
+[
+ {
+  "fixture": "s13-atkaerodactyl-attract-player-test.json",
+  "stem": "s13-atkaerodactyl-attract-player",
+  "kind": "test",
+  "move": "ATTRACT",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   346,
+   780
+  ],
+  "rows": 435,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 435,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 19081,
+    "exactRows": 434,
+    "digest": "dbaf30d0ae4f1b90a734d94dc9c381b43d9c4abbf7c2f7741a973877b0328702"
+   },
+   {
+    "run": 2,
+    "residualPixels": 19081,
+    "exactRows": 434,
+    "digest": "dbaf30d0ae4f1b90a734d94dc9c381b43d9c4abbf7c2f7741a973877b0328702"
+   }
+  ],
+  "affectedAges": "405",
+  "maxPxRow": 19081,
+  "fieldPx": 19081,
+  "bbox": [
+   0,
+   0,
+   239,
+   111
+  ],
+  "perRow": [
+   [
+    405,
+    19081,
+    [
+     0,
+     0,
+     239,
+     111
+    ]
+   ]
+  ]
+ }
+]

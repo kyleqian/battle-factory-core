@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defweezing-attract-opponent-test.json",
+  "stem": "s13-defweezing-attract-opponent",
+  "kind": "test",
+  "move": "ATTRACT",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   339,
+   773
+  ],
+  "rows": 435,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 435,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "948170f97f1f1999728f18072266824e2dc49ee24e63dce54cc51cfc1829139a"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "948170f97f1f1999728f18072266824e2dc49ee24e63dce54cc51cfc1829139a"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

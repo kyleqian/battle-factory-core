@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defgolbat-brick-break-player-test.json",
+  "stem": "s13-defgolbat-brick-break-player",
+  "kind": "test",
+  "move": "BRICK_BREAK",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   352,
+   502
+  ],
+  "rows": 151,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 151,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "f570145f92188552d72f9f55e36fce845595d066a129e9559d74e84231df13ef"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "f570145f92188552d72f9f55e36fce845595d066a129e9559d74e84231df13ef"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

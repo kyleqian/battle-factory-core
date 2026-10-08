@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkonix-ice-beam-player-test.json",
+  "stem": "s13-atkonix-ice-beam-player",
+  "kind": "test",
+  "move": "ICE_BEAM",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   347,
+   549
+  ],
+  "rows": 203,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 203,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "aa0513c65a3cc366cc909d29265b31b5fa8648d61dce0de5bddd93351f49543c"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "aa0513c65a3cc366cc909d29265b31b5fa8648d61dce0de5bddd93351f49543c"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]
