@@ -91,7 +91,7 @@ import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "j
 import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
 import spitUpRedOrbAsset from "../animation/assets/spit-up-red-orb.json" with { type: "json" };
 import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
-import { liveMoveBgWriteRow, liveMoveCounterTimingParameter, liveMovePaletteTransferRow, liveMoveTimingBodyRows, liveMoveTimingParameter } from "./liveMoveTimingPolicy.ts";
+import { liveMoveBgWriteRow, liveMoveCounterTimingParameter, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveTimingBodyRows, liveMoveTimingParameter } from "./liveMoveTimingPolicy.ts";
 import { resolveSpriteOrderDeferredLend } from "./spriteOrderEventTransform.ts";
 import { liveSpitUpDuration, liveSpitUpInputs, type SpitUpCounter } from "./liveSpitUpInputs.ts";
 import { SUPERPOWER_ROWS, liveSuperpowerInputs } from "./liveSuperpowerInputs.ts";
