@@ -152,4 +152,4 @@ sh tools/integration/speciesAudit13IceBallRun.sh /tmp/s13/ibrec 10 /tmp/s13/ibde
 Timings: about 8 min for the 620 defender probes (15 jobs), 70 s per defender checker pass, 3 min for the swap probes and 1.5 min for the Ice Ball windows.
 
 ## 4. Gates
-See the commit message of the final commit (npm test / build). The commit range adds new files only. `git status src` was clean at every commit.
+`npm test` passed on 5713d177e: 1565 files passed / 44 skipped, 12,888 tests passed / 223 skipped, 569.7 s. `npm run build` passed. `git diff --check 5b131e7d5..HEAD` is clean. The commit range adds new files only (`git diff --diff-filter=AM --name-status` = A only). `git status src` was clean at every commit.
