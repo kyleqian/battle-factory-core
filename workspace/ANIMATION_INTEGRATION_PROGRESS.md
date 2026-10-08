@@ -12,6 +12,15 @@
   Worker gates 1,563 files / 12,823 tests, build 873, differential 624. Supervisor: `substSwapRun.sh` into fresh dirs —
   probes r1 == r2 (13 scenarios), 21 windows x2 runs 0 px, GOLEM-player residual == non-subbed control, negatives fail;
   union typecheck, smoke 448, 9 targeted files 128/128, own differential vs `bb4dc2558` 624/624. Logs `.integration/validation/swap-20261008/`.
+- prep38 (side, `25ec41356`, new files only; merged `8834a5f9e`): live adapters with a subbed DEFENDER. With the doll
+  as the defender's art (patch v1: hit / effect anchors stay on the species, sprite corner = doll corner without
+  elevation, idle rest 0, opponent shadow hidden; negative controls fail) 27 (move, side) cells are 0 px, weight 22.55
+  (Earthquake, Psychic, Surf, Attract, Brick Break, Sludge Bomb, Crunch, Body Slam, Flamethrower, Bite, Mega Kick both
+  sides; Aerial Ace / Shadow Ball p; Rock Slide / Quick Attack / Double-Edge o). NEEDS-ORDER 5.8 (move 164 is listed as
+  ownership-changing in the order tracker; order-neutral -> Giga Drain, Mud-Slap, Ice Beam, Thunderbolt, Megahorn 0 px),
+  NEEDS-ART-LOOKUP 3.9 (direct species-art reads), Swagger / stat-down moves blocked by source. Supervisor:
+  `prep38Run.sh` into fresh dirs — 743 receipt records identical on residual / digests / rows (committed copies trim
+  per-row detail only).
 
 ## 2026-10-07 (day) — S10A finish run: D4 implemented; census complete 250 + 13 + 13 + 0 = 276
 
