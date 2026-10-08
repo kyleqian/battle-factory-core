@@ -23,7 +23,8 @@ import {
 import { battleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import type { LiveMoveSpriteOrderInput } from "../../src/engine/liveMoveSpriteAllocator.ts";
 import {
-  applySpriteOrderUnitPlan, createSpriteOrderPlanCursor, knownEntrySpriteOrderState, spriteOrderPlanTableFromFixture,
+  KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, applySpriteOrderUnitPlan, createSpriteOrderPlanCursor, knownEntrySpriteOrderState,
+  spriteOrderPlanTableFromFixture,
   type SpriteOrderPlan,
 } from "../../src/engine/spriteOrderProvider.ts";
 import {
@@ -236,6 +237,8 @@ export function fixtureIceBallChain(f: Fixture, request: BattleMoveAnimationRequ
     host = pinned;
     if (k < values.length - 1) order = advanceLiveSpriteOrderHost(order, resolution, Number.POSITIVE_INFINITY);
   });
+  // POKEBENCH_LIVE_ICEBALL_CHAIN=entry-lend: negative control, the words-free known-entry lend instead of the deferred lend.
+  if (process.env.POKEBENCH_LIVE_ICEBALL_CHAIN === "entry-lend") lend = { known: true, free: KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER };
   cached = { spriteOrderInput: lend, presentationRng: { host: Object.freeze({ ...host, bodies: Object.freeze(bodies) }), key } };
   chainLends.set(chain, cached);
   return cached;

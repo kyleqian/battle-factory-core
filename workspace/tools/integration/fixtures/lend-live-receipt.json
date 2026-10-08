@@ -9,7 +9,8 @@
   "python3 -I tools/integration/lendIceBallFixtures.py /tmp/lend-ib",
   "OUT=/tmp/lend-d4a sh tools/integration/lendIceBallWindows.sh",
   "OUT=/tmp/lend-d4a2 sh tools/integration/lendIceBallWindows.sh",
-  "python3 -I tools/integration/lendLiveReceipt.py /tmp/lend-d4a /tmp/lend-d4a2"
+  "POKEBENCH_LIVE_ICEBALL_CHAIN=entry-lend OUT=/tmp/lend-neg sh tools/integration/lendIceBallWindows.sh",
+  "python3 -I tools/integration/lendLiveReceipt.py /tmp/lend-d4a /tmp/lend-d4a2 /tmp/lend-neg"
  ],
  "declined": [
   "prep25 GLALIE -> GOLEM player bodies 4..5 (counters 3..4): after GOLEM faints and REGISTEEL is sent in (battler slot 5); the deferred lend declines after a KO / send-in (not modelled)"
@@ -50,6 +51,10 @@
     ],
     "violations": [],
     "digestEqual": true
+   },
+   "negativeEntryLend": {
+    "residualPixels": 0,
+    "affectedAges": []
    }
   },
   {
@@ -87,6 +92,13 @@
     ],
     "violations": [],
     "digestEqual": true
+   },
+   "negativeEntryLend": {
+    "residualPixels": 24,
+    "affectedAges": [
+     38,
+     39
+    ]
    }
   },
   {
@@ -124,6 +136,13 @@
     ],
     "violations": [],
     "digestEqual": true
+   },
+   "negativeEntryLend": {
+    "residualPixels": 35,
+    "affectedAges": [
+     38,
+     39
+    ]
    }
   },
   {
@@ -161,6 +180,12 @@
     ],
     "violations": [],
     "digestEqual": true
+   },
+   "negativeEntryLend": {
+    "residualPixels": 16,
+    "affectedAges": [
+     39
+    ]
    }
   },
   {
@@ -198,6 +223,14 @@
     ],
     "violations": [],
     "digestEqual": true
+   },
+   "negativeEntryLend": {
+    "residualPixels": 68,
+    "affectedAges": [
+     39,
+     40,
+     41
+    ]
    }
   },
   {
@@ -235,6 +268,13 @@
     ],
     "violations": [],
     "digestEqual": true
+   },
+   "negativeEntryLend": {
+    "residualPixels": 11,
+    "affectedAges": [
+     39,
+     41
+    ]
    }
   },
   {
@@ -272,6 +312,15 @@
     ],
     "violations": [],
     "digestEqual": true
+   },
+   "negativeEntryLend": {
+    "residualPixels": 96,
+    "affectedAges": [
+     39,
+     40,
+     41,
+     42
+    ]
    }
   },
   {
@@ -309,6 +358,13 @@
     ],
     "violations": [],
     "digestEqual": true
+   },
+   "negativeEntryLend": {
+    "residualPixels": 26,
+    "affectedAges": [
+     38,
+     39
+    ]
    }
   },
   {
@@ -346,6 +402,12 @@
     ],
     "violations": [],
     "digestEqual": true
+   },
+   "negativeEntryLend": {
+    "residualPixels": 20,
+    "affectedAges": [
+     39
+    ]
    }
   },
   {
@@ -383,6 +445,13 @@
     ],
     "violations": [],
     "digestEqual": true
+   },
+   "negativeEntryLend": {
+    "residualPixels": 2,
+    "affectedAges": [
+     39,
+     40
+    ]
    }
   },
   {
@@ -510,6 +579,40 @@
     ],
     "violations": [],
     "digestEqual": true
+   },
+   "negativeEntryLend": {
+    "residualPixels": 55636,
+    "affectedAges": [
+     38,
+     39,
+     40,
+     41,
+     42,
+     43,
+     44,
+     45,
+     46,
+     47,
+     48,
+     49,
+     50,
+     51,
+     52,
+     53,
+     54,
+     55,
+     56,
+     57,
+     58,
+     60,
+     62,
+     64,
+     66,
+     68,
+     70,
+     72,
+     74
+    ]
    }
   },
   {
@@ -547,7 +650,20 @@
     ],
     "violations": [],
     "digestEqual": true
+   },
+   "negativeEntryLend": {
+    "residualPixels": 60,
+    "affectedAges": [
+     39,
+     40,
+     41
+    ]
    }
   }
- ]
+ ],
+ "negativeControl": {
+  "what": "POKEBENCH_LIVE_ICEBALL_CHAIN=entry-lend: the words-free known-entry lend instead of the deferred lend",
+  "windowsDiffering": 11
+ },
+ "note": "both passes ran at testedCommit (src tree above); the negative control ran at 5538db124 + the env-gated harness control only (same src tree)"
 }
