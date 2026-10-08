@@ -23,12 +23,14 @@ import {
   liveSpriteOrderBattlersPresent,
   liveSpriteOrderHostOrder,
   liveSpriteAllocatorReseedable,
+  markLiveSpriteOrderDeferredBody,
   openLiveSpriteOrderHostPartyMenu,
   reseedLiveSpriteAllocatorAfterSendOut,
   returnLiveSpriteOrderHostFromPartyMenu,
   seedLiveSpriteOrderHostFromBattleStart,
   type LiveSpriteOrderHost,
 } from "./liveSpriteOrderHost.ts";
+import { liveMovePresentationRngBodyKey } from "./liveMovePresentationRng.ts";
 import {
   advanceLiveBattlerX2Host, applyLiveBattlerX2Event, createLiveBattlerX2Host, invalidateLiveBattlerX2Host,
   liveBattlerX2EventsOf, liveMoveBattlerX2InputForBody, liveStaleMovePowerTaintedBy, LIVE_BATTLER_X2_IDLE, type LiveBattlerX2Host,
@@ -2353,7 +2355,12 @@ function prepareResolutionPalette(
       const spritePrepared = prepareLiveMoveSpriteAllocator(spriteHost, command.animation);
       spriteHost = spritePrepared.next;
       spriteInput = spritePrepared.input;
-      if (orderHost) spriteOrderInput = lendLiveSpriteOrder(orderHost, command.animation.moveId);
+      if (orderHost) {
+        spriteOrderInput = lendLiveSpriteOrder(orderHost, command.animation.moveId);
+        // Multi-body Random2 move (Ice Ball): record the word-free deferred-lend marker (body key + its lend) for its later bodies.
+        orderHost = markLiveSpriteOrderDeferredBody(orderHost, spriteOrderInput, command.animation,
+          liveMovePresentationRngBodyKey(resolution));
+      }
     } else if (retainedSprites?.commandKey === commandKey) {
       spriteInput = resolution.liveMoveSpriteAllocatorInput;
       spriteOrderInput = resolution.liveMoveSpriteOrderInput;
