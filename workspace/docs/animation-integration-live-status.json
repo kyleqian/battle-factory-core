@@ -5025,16 +5025,16 @@
   },
   "unadaptedNotes": {},
   "verifiedPreview": {
-    "commit": "dc21cd1db52f17473bf17c1ef27e08a5fcbfc6b0",
-    "build": "dc21cd1db 2026-10-07",
+    "commit": "2a3f8398c16896539f6c11efad2979d5ab656449",
+    "build": "2a3f8398c 2026-10-07",
     "url": "http://127.0.0.1:5191/",
     "implementedAdapters": 250,
     "faithfulRandomAdapters": 13,
     "faithfulTimingAdapters": 13,
-    "fullTest": "Supervisor 1562 files / 12815 tests passed on 8d064d26c (src 7d28da92; later commits docs-only)",
+    "fullTest": "Supervisor 1562 files / 12816 tests passed on 46319b2d9 (src e1a47502; later commits docs-only)",
     "buildModules": 872,
     "browser": "Four canvas and saved PNG hashes on the canonical ordinary route; session export; ON -> OFF restart; no page errors",
-    "receipt": "../tools/integration/fixtures/playable-preview-dc21cd1db-receipt.json",
+    "receipt": "../tools/integration/fixtures/playable-preview-2a3f8398c-receipt.json",
     "availability": "Local Mac service on 127.0.0.1:5191; hcloud retired."
   },
   "productionProviders": {

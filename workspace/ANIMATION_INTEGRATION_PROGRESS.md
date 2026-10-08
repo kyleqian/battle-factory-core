@@ -26,6 +26,10 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- Final: production src tree `e1a47502` (`46319b2d9`, Substitute shiny gate); supervisor final gates typecheck, 1,562
+  files / 12,816 tests, build 872, differential 624/624 (`final-supervisor-gates-20261007-evening.json`). Preview
+  refreshed: `2a3f8398c` served at :5191 (250 + 13 + 13), 4 samples hash-equal, mode control + session export passed,
+  no browser errors (`playable-preview-2a3f8398c-receipt.json`; live status `verifiedPreview`).
 - Species audit 12 (side, `84823ff14`, new files only): Substitute / Skill Swap / Flatter / Eruption, 182 rows x2 fresh:
   144 0 px, 12 TIMING-PHASE (Skill Swap ages 177..192), declines confirmed; defects: Substitute had no shiny gate
   (shiny STEELIX 12-14k px on ages 0..10) — FIXED by the supervisor in `46319b2d9` (shared gate + test that fails

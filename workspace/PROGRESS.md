@@ -10,8 +10,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **State:** local master, production src tree `e1a47502` (`46319b2d9`): 250 scoped-exact + 13 faithful-random +
   13 faithful-timing live adapters; 0 accepted Factory bodies without a live adapter (census `250+13+13+0+0=276`).
   Final independent gates on that code: typecheck, 1,562 files / 12,816 tests, build 872, differential 624/624
-  (`final-supervisor-gates-20261007-evening.json`). Preview <http://127.0.0.1:5191/> serves `dc21cd1db` (4 samples
-  hash-equal, session export + ON->OFF restart passed, no errors; `playable-preview-dc21cd1db-receipt.json`).
+  (`final-supervisor-gates-20261007-evening.json`). Preview <http://127.0.0.1:5191/> serves `2a3f8398c` (4 samples
+  hash-equal, session export + ON->OFF restart passed, no errors; `playable-preview-2a3f8398c-receipt.json`).
 - **Did:** D4 faithful timing (`src/engine/liveMoveTimingPolicy.ts`, disjoint accounting, checker that fails on
   undocumented residuals / missing phase labels). New adapters: timing — Mach Punch, Megahorn, Revenge, Meteor Mash
   (D3), Psywave, Extrasensory, Superpower, Nightmare, Ice Ball counter 0 (D3), Dive setup (D3), Skill Swap; exact —
