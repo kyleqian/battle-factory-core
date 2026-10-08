@@ -40128,11 +40128,12 @@ export function renderSceneOnMovePresentation(
     const diveState = state as SceneOnMovePresentationState<SceneOnDiveConfig>;
     const view = sceneOnDiveView(diveState);
     // Dive's ordinary objects use the preceding software OAM/matrix row.
-    // Player-back setup age 68 is the independently measured reused-affine
-    // exception: both complete buffers expose source age 66 instead.
+    // Player-back setup splash birth + 1 (first inactive - 49: age 68 at the
+    // measured 117) is the independently measured reused-affine exception:
+    // both complete buffers expose source age - 2 (66) instead (species audit 11).
     const sourceAge = diveState.config.body === "setup" && (diveState.config.setupRow68ReusedAffine ?? true)
-      && view.attacker.geometry.side === "player" && diveState.age === 68
-      ? 66 : diveState.age - 1;
+      && view.attacker.geometry.side === "player" && diveState.age === diveState.config.animationProfile.firstInactiveAge - 49
+      ? diveState.age - 2 : diveState.age - 1;
     const displayed = sceneOnDiveView({ ...diveState, age: sourceAge });
     const playerAttacker = view.attacker.geometry.side === "player";
     type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;

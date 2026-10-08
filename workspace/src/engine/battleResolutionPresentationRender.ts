@@ -1,12 +1,12 @@
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import {
-  liveMovePresentationRngBodyKey, liveMoveRandom2Plan, type LiveMovePresentationRngInput,
+  liveMovePresentationRngBodyKey, liveMoveRandom2Plan, type LiveMovePresentationRngInput, type LiveMoveRandom2PlanContext,
 } from "./liveMovePresentationRng.ts";
 import type { PresentationRngHost } from "./presentationRngHost.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import {
-  liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows, liveSemiInvulnerableHideBattler,
+  liveDiveSetupSplashBirth, liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows, liveSemiInvulnerableHideBattler,
 } from "./liveMoveAnimation.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import {
@@ -839,6 +839,28 @@ function applyCompletedCommand(
     return replaceFieldBattler(field, command.battler, command.incoming);
   }
   throw new Error("battle resolution renderer received an unknown command");
+}
+
+/** The current command's displayed field: the segment's field after its completed commands (as the duration / completion checks see it). */
+function currentCommandField(state: BattleResolutionPresentationState): BattleResolutionDisplayedField {
+  const segment = currentSegment(state);
+  let field = state.field;
+  for (let index = 0; index < state.commandIndex; index += 1) {
+    field = applyCompletedCommand(field, segment.commands[index]!);
+  }
+  return field;
+}
+
+/**
+ * Field-derived Random2 plan inputs of the presented move body (tickLiveMovePresentationRngSession's planContext, core.ts): the Dive setup
+ * splash birth from the attacker's ball rule on the displayed field (species audit 11).
+ */
+export function liveMoveRandom2PlanContextAt(
+  state: BattleResolutionPresentationState,
+  request: BattleMoveAnimationRequest,
+): LiveMoveRandom2PlanContext {
+  if (request.moveId !== 291 || (request.turn & 1) !== 0) return {};
+  return { diveSetupSplashBirth: liveDiveSetupSplashBirth(currentCommandField(state), request.attacker === 0 ? "player" : "opponent") };
 }
 
 function currentSegment(state: BattleResolutionPresentationState) {

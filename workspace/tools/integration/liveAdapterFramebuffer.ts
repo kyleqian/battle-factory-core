@@ -13,7 +13,7 @@ import speciesNames from "../../src/data/gen/species-names.json" with { type: "j
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";
-import { liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";
+import { liveDiveSetupSplashBirth, liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";
 import { createKnownEntrySpriteAllocatorProvider } from "../../src/engine/knownEntrySpriteAllocator.ts";
 import { prepareLiveMoveSpriteAllocator, prepareLiveMoveSpriteOrder } from "../../src/engine/liveMoveSpriteAllocator.ts";
 import { bonemerangHit2Free, digUnleashLend } from "../../src/engine/liveSpriteOrderHost.ts";
@@ -26,7 +26,7 @@ import {
 } from "../../src/engine/spriteOrderEventTransform.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import {
-  activateLiveMovePresentationRng, liveMovePresentationRngBodyKey, liveMoveRandom2Plan, type LiveMovePresentationRngInput,
+  activateLiveMovePresentationRng, liveMovePresentationRngBodyKey, liveMoveRandom2Plan, type LiveMovePresentationRngInput, type LiveMoveRandom2PlanContext,
 } from "../../src/engine/liveMovePresentationRng.ts";
 import { createPresentationRngHostAt } from "../../src/engine/presentationRngHost.ts";
 import {
@@ -187,7 +187,7 @@ export function fixturePostKoLend(f: Fixture, request: BattleMoveAnimationReques
 }
 
 /** Pinned controlled-body host for a Random2 fixture body, activated through the production seam at host frame 0. */
-export function fixturePresentationRng(f: Fixture, request: BattleMoveAnimationRequest): LiveMovePresentationRngInput | undefined {
+export function fixturePresentationRng(f: Fixture, request: BattleMoveAnimationRequest, context?: LiveMoveRandom2PlanContext): LiveMovePresentationRngInput | undefined {
   if (liveMoveRandom2Plan(request) === null) return undefined;
   const pinned = f.presentationRngActivation;
   if (!pinned || !Number.isInteger(pinned.value) || pinned.value < 0 || pinned.value > 0xffffffff) {
@@ -195,7 +195,7 @@ export function fixturePresentationRng(f: Fixture, request: BattleMoveAnimationR
   }
   const key = liveMovePresentationRngBodyKey({ resolutionId: { requestId: 0 }, segmentIndex: 0, commandIndex: 0 });
   const host = activateLiveMovePresentationRng(
-    createPresentationRngHostAt(createPresentationRngState(pinned.value, "pinned")), request, key);
+    createPresentationRngHostAt(createPresentationRngState(pinned.value, "pinned")), request, key, context);
   return { host, key };
 }
 
@@ -304,7 +304,8 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
         : postKo ? postKo.spriteOrderInput
           : f.digUnleashAfterSetup ? digUnleashLend()
           : withFirstBody(f, prepareLiveMoveSpriteOrder(fixtureSpriteOrder(f, request).order, request).input),
-      ...(liveMoveRandom2Plan(request) === null ? {} : { presentationRng: fixturePresentationRng(f, request) }),
+      ...(liveMoveRandom2Plan(request) === null ? {} : { presentationRng: fixturePresentationRng(f, request, request.moveId === 291
+        && (request.turn & 1) === 0 ? { diveSetupSplashBirth: liveDiveSetupSplashBirth(field, attacker === 0 ? "player" : "opponent") } : undefined) }),
       ...(fixtureBattlerX2Input(f) === undefined ? {} : { battlerX2Input: fixtureBattlerX2Input(f) }),
     },
     visibility: { player: { sprite: true, healthbox: true }, opponent: { sprite: true, healthbox: true } },
