@@ -5,19 +5,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-07 (day) — S10A finish run IN PROGRESS (checkpoint 15:00)
+## 2026-10-07 (day) — S10A finish run: D4 implemented; census COMPLETE 250 + 13 + 13 + 0 = 276
 
-- **State:** local master `3ff2d2e54`, production src tree `0fa8e76b`: 248 scoped-exact + 12 faithful-random +
-  8 faithful-timing, 8 accepted bodies remaining (census `248+12+8+0+8=276`). Opus 5.5 supervisor and workers.
-- **Did:** D4 accounting + `src/engine/liveMoveTimingPolicy.ts`; faithful timing Mach Punch, Megahorn, Revenge,
-  Meteor Mash (D3), Psywave, Extrasensory, Superpower, Nightmare; exact Spit Up, Shock Wave; species audit 9 (Mach
-  Punch idle-rest defect fixed, Revenge gate narrowed; ISSUES #152 remainder). Evidence prep30-34 merged. Every fold
-  re-proved by the supervisor (all timing windows rerun twice fresh, own differential, union typecheck/smoke/targeted).
-- **Next:** in flight — Ice Ball first body + Dive setup turn + #151 Sheer Cold / Hyper Voice accounting; side prep35
-  (Skill Swap + Flatter sprite providers). Queue: Extreme Speed + Memento (ready, prep34), Skill Swap + Flatter,
-  Pursuit / Hidden Power / Ghost Curse widening; Ice Ball later bodies + Dive attack need a deferred post-body order
-  lend (`docs/s10a-random2-order-lend-blocker.md`); Eruption and Substitute need prep.
-- **Notes:** no open DEFERRED entries. Briefs `/tmp/s10a-1007/`; validation logs `.integration/validation/*-20261007/`.
+- **State:** local master, production src tree `7d28da92` (`8d064d26c`): 250 scoped-exact + 13 faithful-random +
+  13 faithful-timing live adapters; 0 accepted Factory bodies without a live adapter (census `250+13+13+0+0=276`).
+  Final independent gates on that code: typecheck, 1,562 files / 12,815 tests, build 872, differential 624/624
+  (`final-supervisor-gates-20261007-evening.json`). Preview <http://127.0.0.1:5191/> serves `dc21cd1db` (4 samples
+  hash-equal, session export + ON->OFF restart passed, no errors; `playable-preview-dc21cd1db-receipt.json`).
+- **Did:** D4 faithful timing (`src/engine/liveMoveTimingPolicy.ts`, disjoint accounting, checker that fails on
+  undocumented residuals / missing phase labels). New adapters: timing — Mach Punch, Megahorn, Revenge, Meteor Mash
+  (D3), Psywave, Extrasensory, Superpower, Nightmare, Ice Ball counter 0 (D3), Dive setup (D3), Skill Swap; exact —
+  Spit Up, Shock Wave, Extreme Speed, Memento, Eruption, Substitute body; random — Flatter. #151 closed by
+  reclassifying Sheer Cold / Hyper Voice to faithful timing. Presentation-only Substitute doll field state + shared
+  declines. Species audits 9-11: Mach Punch / Extrasensory idle rest, Revenge / Spit Up gates, Dive setup length —
+  all fixed. Evidence prep30-37. 12 integration folds + 13 evidence merges, each re-proved by the supervisor (every
+  claimed window rerun twice fresh, own differential, union checks); zero reverted folds.
+- **Next:** ROADMAP S10A "Next (2026-10-07 evening)": Substitute swaps / fade; deferred post-body order lend (Ice Ball
+  counters 1..4, Dive attack); ISSUES #152 remainder + new D4 lag cases (Extreme Speed, Dive CLAMPERL); audit Skill
+  Swap / Flatter / Eruption / Substitute; D4 widening (Pursuit later bodies, Hidden Power, Ghost Curse).
+- **Notes:** no DEFERRED entries. S10A stage box left open on purpose: every accepted body now has a live adapter,
+  but many are scoped (first body / known lend / declines) and the resume list is real continuation work. Decision
+  recorded: the engine/animation boundary ratchet now lets `battleCommandFieldArt.ts` import the static doll asset
+  (presentation only). New ISSUES #153 (Scene OFF skips the Substitute body; kernel-owned). Soak gates superseded for
+  S10A (ANIMATION_VERIFICATION scoped policy). All worker branches merged, worktrees removed; logs
+  `.integration/validation/*-20261007*/`.
 
 ---
 
@@ -68,36 +79,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   bucket (recommended). The next `run-supervisor.sh` refuses to start until D4 is answered. Soak gates are
   superseded for S10A (ANIMATION_VERIFICATION scoped policy). All worker branches merged, worktrees removed;
   supervisor validation logs in `.integration/validation/*-2026100{6,7}/`.
-
----
-
-## 2026-10-06 (day) — S10A wind-down: D3 implemented; 218 -> 226 exact + 10 faithful-random live adapters
-
-- **State:** S10A, local master; production `7e7816b98` (src tree `c41c4949`): 226 scoped-exact + 10
-  faithful-random live adapters, 40 accepted bodies remain (6.1% of Factory move uses; census
-  `226+10+0+40=276`). Supervisor final gates on that code: typecheck, 1,536 files / 12,472 tests, build
-  857 (`final-supervisor-gates-20261006.json`). Preview <http://127.0.0.1:5191/> serves `10ad8606c`
-  (same src; 4 samples hash-equal, export + mode restart pass, no errors). Opus 5.5 supervisor;
-  Opus/Sonnet 5.5 workers; 8 integration folds + 12 evidence merges, all re-proved by the supervisor.
-- **Did (production):** D3 option (a): presentation-only Random2 host (`docs/presentation-rng.md`; seed +
-  policy in session exports; legacy default) and a separate faithful-random bucket. Faithful-random:
-  Double Kick, Astonish, Thrash, Flail, Wish, Hyper Beam, Rain Dance, Water Pulse, Mud-Slap, Sand-Attack.
-  Exact: Ice Beam, Water Spout, Hidden Power (Unown forms), Hail, Overheat (first body), Silver Wind,
-  Psych Up (player), Dig. Battler x2 history tracker (#148: ONIX/RATTATA later bodies), assets-only palette
-  composite, first-body gate, Rollout Defense Curl bodies, #149 audit fixes, Endeavor stale-register
-  plumbing (no adapter yet). Gameplay/RNG unchanged (route ON/OFF + seed parity per batch; 20 soak seeds
-  identical master vs the register branch).
-- **Did (evidence):** census regen; prep12-20 (Random2 plans — most "C" labels were stale; Meteor Mash tail
-  = ROM lag frame -> fallback; BG-register history; OAM assemblers for Will-O-Wisp / Pursuit / Fury Cutter /
-  Megahorn); species audits 3 (3 defects, fixed) and 4 (clean).
-- **Next:** ROADMAP S10A "Next (2026-10-06 evening)": OAM-buffer reducer ports first (prep20), then widen
-  Overheat + add Psych Up opponent (evidence banked at the end: 17 later-body fixtures 0 px with the gate
-  bypassed, `docs/later-bodies-overheat-psychup.md`), Endeavor adapter, remaining stale-labelled moves.
-- **Notes:** no DEFERRED entries. Optional user question (not blocking, not filed): Meteor Mash's last-row
-  timing depends on a ROM lag frame; it stays on fallback unless a D3-like timing claim is approved. A
-  worker's `pkill -f mgba` killed both oracles mid-session; restarted 11:29 (PAPERCUTS). Soak gates are
-  superseded for S10A (ANIMATION_VERIFICATION scoped policy). All worker branches merged, worktrees removed;
-  validation summaries copied to `.integration/validation/`.
-
----
-

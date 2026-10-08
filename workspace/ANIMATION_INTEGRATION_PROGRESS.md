@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-07 (day) — S10A finish run: D4 faithful timing implemented
+## 2026-10-07 (day) — S10A finish run: D4 implemented; census complete 250 + 13 + 13 + 0 = 276
 
 - Folded Opus worker `6e4142713` (fast-forward; src tree `57de0763`): D4 accounting + policy.
   `src/engine/liveMoveTimingPolicy.ts` (`live-move-timing.v1.dominant-measured-phase.tie-no-optional-event`;
@@ -26,6 +26,9 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- Preview refreshed: `dc21cd1db` served at :5191 (250 + 13 + 13), 4 samples hash-equal (renderer / canvas / PNG),
+  mode control + session export passed, no browser errors (`playable-preview-dc21cd1db-receipt.json`); live status
+  `verifiedPreview` updated.
 - Folded Opus worker `b5f011e99` as `8d064d26c` (src tree `7d28da92`): EXACT Substitute body (164; 87 rows; renderer
   branch generalised under liveField with live battler art, doll at the attacker corner + the body's own x2; staged
   GOLEM/ONIX digests byte-identical; the first frame after the body shows the doll; route 11/35 JYNX live every age,
