@@ -5,6 +5,7 @@ import {
 import type { PresentationRngHost } from "./presentationRngHost.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
+import { liveSubstituteSwapApplies, substituteSwapTailFieldArt } from "./liveSubstituteSwap.ts";
 import {
   liveDiveSetupSplashBirth, liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows, liveSemiInvulnerableHideBattler,
 } from "./liveMoveAnimation.ts";
@@ -1010,6 +1011,28 @@ function postBodyShadowHiddenAt(
   return false;
 }
 
+/**
+ * S10A tail row (liveSubstituteSwap.ts substituteSwapTailX2): the attacker side whose doll is latched one row at the swap-back's
+ * last moving x2, on the first row of the command right after a presented Substitute swap composite (same segment), while that
+ * attacker is still shown as the doll. Presentation only.
+ */
+function substituteSwapTailSideAt(
+  state: BattleResolutionPresentationState,
+  segment: ReturnType<typeof currentSegment>,
+  field: BattleResolutionDisplayedField,
+): "player" | "opponent" | null {
+  if (state.lifecycle.phase !== "presenting" || state.lifecycle.phaseElapsed !== 0 || state.commandIndex === 0) return null;
+  const previous = segment.commands[state.commandIndex - 1];
+  if (previous?.type !== "move-animation" || !previous.animation) return null;
+  let before = state.field;
+  for (let index = 0; index < state.commandIndex - 1; index += 1) before = applyCompletedCommand(before, segment.commands[index]!);
+  if (liveSubstituteSwapApplies(previous.animation, before) !== true || liveMoveAnimationDuration(previous.animation, before) === null) {
+    return null;
+  }
+  const side = previous.animation.attacker === 0 ? "player" : "opponent";
+  return field[side].substituteDoll === true ? side : null;
+}
+
 function healthboxParams(
   battler: BattleCommandFieldBattler,
   targetHp?: number,
@@ -1431,7 +1454,10 @@ export function createBattleResolutionPresentationRenderView(
   const opponentFaint = effect?.type === "faint" && effect.battler === 1
     ? effect
     : null;
-  const fieldArt = createBattleCommandFieldArtView(field);
+  const tailSide = substituteSwapTailSideAt(state, segment, field);
+  const fieldArt = tailSide === null
+    ? createBattleCommandFieldArtView(field)
+    : substituteSwapTailFieldArt(createBattleCommandFieldArtView(field), tailSide);
   const playerHit = effect?.type === "hit" && effect.battler === 0
     ? effect
     : null;

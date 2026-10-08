@@ -15,7 +15,7 @@
  * x2 -105..0 / 0..100, the load on row 21 / 20 (VRAM switch visible at 23 / 22 while the sprite is off screen), one idle
  * row before the body. The display shows each row's OAM two rows late (task x2 after BuildOamBuffer).
  */
-import { createBattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
+import { createBattleCommandFieldArtView, type BattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 import type { BattleCommandFieldBattler } from "./battleCommandPresentation.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "./battleResolutionPresentation.ts";
@@ -75,13 +75,75 @@ export function substituteSwapScriptRows(side: Side): number {
 }
 
 /**
- * Move bodies proven dense through swap + idle + body + swap-back with a subbed attacker (subst-swap-live-receipt.json):
- * Headbutt (29; GOLEM / ZIGZAGOON player, GOLEM / ONIX (idle rest +1) opponent) and Body Slam (34; PERSIAN<->SLOWBRO both
- * sides, elevated GOLBAT opponent attacker and target). Bodies whose adapter window does not start at activation (e.g. Bite's 26 rows) cannot be
- * framed. Every other attacker-doll body keeps declining (the whole command falls back), including multi-hit and two-turn
- * bodies.
+ * (move id, attacker side) cells proven dense through swap + idle + body + swap-back with a subbed attacker:
+ * - subst-swap-live-receipt.json: Headbutt (29; GOLEM / ZIGZAGOON player, GOLEM / ONIX (idle rest +1) opponent), Body Slam
+ *   (34; PERSIAN<->SLOWBRO both sides, elevated GOLBAT opponent attacker and target) and Leech Seed (73);
+ * - attdoll-live-receipt.json (docs/next-adapters-prep40.md s1, fresh direct-mGBA PERSIAN<->SLOWBRO windows): the bodies whose
+ *   adapter window is the ROM body (activation .. first inactive row).
+ * Every other attacker-doll cell keeps declining (the whole command falls back), including multi-hit and two-turn bodies.
  */
-export const LIVE_SUBSTITUTE_SWAP_BODY_IDS: ReadonlySet<number> = new Set([29, 34, 73]);
+const BOTH: readonly Side[] = Object.freeze(["player", "opponent"]);
+export const LIVE_SUBSTITUTE_SWAP_BODY_CELLS: ReadonlyMap<number, readonly Side[]> = new Map<number, readonly Side[]>([
+  [29, BOTH], [34, BOTH], [73, BOTH],
+  // prep40 one-batch: production's own adapter window, 0 px on every row.
+  [8, BOTH], // Ice Punch
+  [25, BOTH], // Mega Kick
+  [38, BOTH], // Double-Edge
+  [56, BOTH], // Hydro Pump
+  [57, BOTH], // Surf
+  [86, BOTH], // Thunder Wave
+  [109, BOTH], // Confuse Ray
+  [157, Object.freeze(["opponent"] as const)], // Rock Slide (the adapter is opponent-only)
+  [213, BOTH], // Attract
+  [242, BOTH], // Crunch
+  [263, BOTH], // Facade
+  [280, BOTH], // Brick Break
+  [317, BOTH], // Rock Tomb
+  [332, Object.freeze(["player"] as const)], // Aerial Ace (opponent: the doll-free control's own 1 px, not an accepted scope)
+  // prep40 NEEDS-BODY-FRAMING: framed by the ROM body (LIVE_SUBSTITUTE_SWAP_BODY_FRAMING), 0 px on every row.
+  [89, BOTH], // Earthquake
+  [94, Object.freeze(["player"] as const)], // Psychic (opponent: the doll-free control's own 9 px, not an accepted scope)
+  [188, BOTH], // Sludge Bomb
+  [53, BOTH], // Flamethrower
+  [92, BOTH], // Toxic
+  [44, BOTH], // Bite
+  [7, BOTH], // Fire Punch
+  [153, BOTH], // Explosion
+  // prep40 NEEDS-ORDER: order-dependent bodies, exact with the Substitute body's order-neutral lend (spriteOrderEventTransform.ts);
+  // with no lend (a history the order tracker cannot place, doll-free too) the body rows decline to the static mon field. Mud-Slap
+  // (D3) needs the first-body lend production does not make: declined.
+  [58, BOTH], // Ice Beam
+  [85, BOTH], // Thunderbolt
+  [202, BOTH], // Giga Drain
+  [315, BOTH], // Overheat
+  [69, BOTH], // Seismic Toss (request.damage = gAnimMoveDmg)
+  [224, BOTH], // Megahorn (D4: the shipped phase; liveMoveTimingPolicy.ts)
+]);
+export const LIVE_SUBSTITUTE_SWAP_BODY_IDS: ReadonlySet<number> = new Set(LIVE_SUBSTITUTE_SWAP_BODY_CELLS.keys());
+
+export type SubstituteSwapBodyFraming = Readonly<{ rows: number; shift: number }>;
+/**
+ * The ROM body inside the composite (docs/next-adapters-prep40.md s1.1): the swap-back starts at the body's FIRST INACTIVE row
+ * (*DoMoveAnimation state 2 waits for the script), not after the adapter's visual length. `rows` = activation .. first inactive
+ * row (both sides measured equal); body row r shows adapter age r + `shift` (the adapter's age 0 is `-shift` rows after
+ * activation: prep38's calibrated doll-free shifts). Body rows outside the adapter's window draw what the adapter draws there
+ * (the static mon field, as the doll-free path). Absent = the adapter window is the ROM body (rows = duration, shift 0).
+ */
+export const LIVE_SUBSTITUTE_SWAP_BODY_FRAMING: ReadonlyMap<number, SubstituteSwapBodyFraming> = new Map([
+  [89, { rows: 208, shift: 0 }], // Earthquake (adapter 198)
+  [94, { rows: 145, shift: -5 }], // Psychic (adapter 140)
+  [188, { rows: 169, shift: -4 }], // Sludge Bomb (adapter 160)
+  [53, { rows: 210, shift: -15 }], // Flamethrower (adapter 115)
+  [92, { rows: 231, shift: -7 }], // Toxic (adapter 219)
+  [44, { rows: 41, shift: -10 }], // Bite (adapter 26)
+  [7, { rows: 102, shift: 0 }], // Fire Punch (adapter 101: one row short of the first inactive row)
+  [153, { rows: 217, shift: -4 }], // Explosion (adapter 212)
+].map(([id, framing]) => [id as number, Object.freeze(framing as SubstituteSwapBodyFraming)]));
+
+/** The composite's body framing for a request whose adapter duration is `adapterDuration`. */
+export function substituteSwapBodyFraming(moveId: number, adapterDuration: number): SubstituteSwapBodyFraming {
+  return LIVE_SUBSTITUTE_SWAP_BODY_FRAMING.get(moveId) ?? Object.freeze({ rows: adapterDuration, shift: 0 });
+}
 
 function battlerOf(field: BattleResolutionDisplayedField, battler: number): BattleCommandFieldBattler {
   return battler === 0 ? field.player : field.opponent;
@@ -107,7 +169,7 @@ export function liveSubstituteSwapApplies(
   if (battlerOf(field, request.attacker).substituteDoll !== true) return null;
   return request.target !== request.attacker
     && battlerOf(field, request.target).substituteDoll !== true
-    && LIVE_SUBSTITUTE_SWAP_BODY_IDS.has(request.moveId)
+    && (LIVE_SUBSTITUTE_SWAP_BODY_CELLS.get(request.moveId) ?? []).includes(request.attacker === 0 ? "player" : "opponent")
     && request.multihit < 2;
 }
 
@@ -142,6 +204,22 @@ export function substituteSwapFrameAt(side: Side, bodyDuration: number, age: num
   return Object.freeze({ kind: "swap", ...swapOut[Math.min(row, swapOut.length - 1)]!, afterBody: true });
 }
 
+/**
+ * The row right after a presented composite (docs/next-adapters-prep40.md s2; the next command's first row): the ROM still shows
+ * the attacker's doll at the swap-back's last moving x2 (task row scriptRows - 1: -5 player / +5 opponent; the 2-row OAM latch),
+ * settled from the row after. The composite itself ends at the swap-back's first inactive row: the next command's own timing
+ * (its first visible change) is unchanged, so this is a one-row latch on that command, never a longer composite.
+ */
+export function substituteSwapTailX2(side: Side): number {
+  return substituteSwapRows(side, false)[substituteSwapScriptRows(side) - 1]!.x2;
+}
+
+/** The field art of the tail row: the attacker's (doll) sprite at substituteSwapTailX2. */
+export function substituteSwapTailFieldArt(art: BattleCommandFieldArtView, side: Side): BattleCommandFieldArtView {
+  const moved = Object.freeze({ ...art[side], origin: Object.freeze({ x: art[side].origin.x + substituteSwapTailX2(side), y: art[side].origin.y }) });
+  return Object.freeze(side === "player" ? { player: moved, opponent: art.opponent } : { player: art.player, opponent: moved });
+}
+
 export type SubstituteSwapView =
   | Readonly<{ kind: "swap"; view: BattleResolutionPresentationRenderView }>
   | Readonly<{ kind: "body"; view: BattleResolutionPresentationRenderView }>;
@@ -157,9 +235,11 @@ export function liveSubstituteSwapView(view: BattleResolutionPresentationRenderV
   if (effect?.type !== "move" || liveSubstituteSwapApplies(effect.request, view.field) !== true) return null;
   const attacker = effect.request.attacker === 0 ? 0 : 1, side: Side = attacker === 0 ? "player" : "opponent";
   const bodyField = substituteSwapBodyField(view.field, attacker);
-  const bodyDuration = liveMoveAnimationDuration(effect.request, bodyField);
-  if (bodyDuration === null) return null;
-  const frame = substituteSwapFrameAt(side, bodyDuration, effect.age);
+  const adapterDuration = liveMoveAnimationDuration(effect.request, bodyField);
+  if (adapterDuration === null) return null;
+  const framing = substituteSwapBodyFraming(effect.request.moveId, adapterDuration);
+  const swapFrame = substituteSwapFrameAt(side, framing.rows, effect.age);
+  const frame = swapFrame.kind === "body" ? Object.freeze({ kind: "body" as const, age: swapFrame.age + framing.shift }) : swapFrame;
   if (frame.kind === "body") {
     const zeroed = effect.battlerX2Input?.zeroed ?? [];
     return Object.freeze({ kind: "body", view: Object.freeze({

@@ -58,7 +58,7 @@ describe("Substitute swap task (AnimTask_SwapMonSpriteToFromSubstitute)", () => 
 
 describe("live adapters with a Substitute doll", () => {
   it("a subbed ATTACKER's proven body is presented with the swaps; the defender doll and unproven bodies still decline", () => {
-    expect([...LIVE_SUBSTITUTE_SWAP_BODY_IDS].sort((a, b) => a - b)).toEqual([29, 34, 73]);
+    expect([29, 34, 73].every((id) => LIVE_SUBSTITUTE_SWAP_BODY_IDS.has(id))).toBe(true);
     const plain = field(false, false);
     for (const [moveId, body] of [[29, 48], [34, 107], [73, 141]] as const) {
       expect(liveMoveAnimationDuration(req(moveId, 0), plain)).toBe(body);
@@ -73,10 +73,10 @@ describe("live adapters with a Substitute doll", () => {
       // A multi-hit chain's non-final hit (multihit >= 2): no MON_TO_SUBSTITUTE in the source; not proven, declined.
       expect(liveMoveAnimationDuration(req(moveId, 0, { multihit: 2 }), field(true, false))).toBeNull();
     }
-    // Unproven bodies keep declining while the attacker is the doll (Sludge Bomb live without the doll).
-    expect(liveMoveAnimationDuration(req(188, 0), plain)).not.toBeNull();
-    expect(liveMoveAnimationDuration(req(188, 0), field(true, false))).toBeNull();
-    expect(liveMoveAnimationPresentation(req(188, 0), field(true, false), 0)).toBeNull();
+    // Unproven bodies keep declining while the attacker is the doll (Swagger live without the doll; prep40: pair residual).
+    expect(liveMoveAnimationDuration(req(207, 0), plain)).not.toBeNull();
+    expect(liveMoveAnimationDuration(req(207, 0), field(true, false))).toBeNull();
+    expect(liveMoveAnimationPresentation(req(207, 0), field(true, false), 0)).toBeNull();
     // Self-targeted requests by the doll's battler are defender-doll requests.
     expect(liveMoveAnimationDuration({ ...req(29, 0), target: 0 }, field(true, false))).toBeNull();
   });
