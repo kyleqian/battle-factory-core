@@ -57,6 +57,11 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
   Psychic opponent HAUNTER -> KADABRA 200 px on the pre-activation row (elevated attacker shadow); Quick Attack player
   (5,601 px inside the doll box) and Double-Edge player after an earlier Double-Edge (480 px) unresolved
   (`docs/next-adapters-prep38.md`, `tools/integration/fixtures/dolldef-live-receipt.json`).
+- **Audit 13 (`docs/live-species-audit-13.md`, 2026-10-08):** opponent idle-rest attacker missing its rest in Ice Beam /
+  Thunderbolt / Sludge Bomb (battleScene.ts ~:15801 / ~:27537 / ~:41309; patch `species-audit-13/opponent-attacker-rest-env.diff`
+  -> 0 px); Substitute swaps with a shiny attacker (no shiny gate; `swap-shiny-palette-env.diff`); Ice Ball resting target
+  (no gate, 30k-79k px); new D4 cases Crunch (141 vs 142 rows, 13 / 30) and Psychic (144 vs 145, 2 / 28); unresolved:
+  ONIX attacker 1,091 px/row before its first move (Body Slam / Brick Break / Flamethrower / Attract, doll-free too).
 - Harness limit: the verifier passes only the attacker's personality, so shiny TARGET declines are unverified.
 
 ## #148 — Battler x2 history: unknown-history remainder (main bug FIXED 2026-10-06)

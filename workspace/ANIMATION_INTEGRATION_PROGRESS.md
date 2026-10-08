@@ -12,6 +12,14 @@
   Worker gates 1,563 files / 12,823 tests, build 873, differential 624. Supervisor: `substSwapRun.sh` into fresh dirs —
   probes r1 == r2 (13 scenarios), 21 windows x2 runs 0 px, GOLEM-player residual == non-subbed control, negatives fail;
   union typecheck, smoke 448, 9 targeted files 128/128, own differential vs `bb4dc2558` 624/624. Logs `.integration/validation/swap-20261008/`.
+- Species audit 13 (side, `e90b5da7f`, new files only; merged `1361019d3`): defender doll 330 windows (11 moves x 2 sides;
+  defenders STEELIX / WAILORD / TYRANITAR / PICHU / GOLBAT / FLYGON / WEEZING / ONIX / RATTATA / shiny STEELIX), swaps 67
+  scenarios, Ice Ball 28 windows; the doll itself exact for every defender species. DEFECTS (patch proofs 0 px): opponent
+  idle-rest ATTACKER drawn without its rest in the Ice Beam / Thunderbolt / Sludge Bomb renderers (ONIX 221k / 259k / 183k
+  px, with or without the doll — pre-existing); swaps with a SHINY attacker (no shiny gate). Ice Ball resting target (ONIX /
+  RATTATA) 30k-79k px, no gate. New D4 cases: Crunch 13 / 30 windows 141 rows, Psychic 2 / 28 windows 144 rows. Supervisor:
+  defender set re-probed fresh — 310 + 20 receipts byte-identical, summary identical; rest patch proof 0 px x3; swap
+  receipts 134 byte-identical.
 - Folded Opus worker `d6eb7d564` as `3d3873a57` (src tree `4af0870a`): subbed-ATTACKER swaps widened per (move, attacker side)
   (`LIVE_SUBSTITUTE_SWAP_BODY_CELLS`): the prep40 one-batch (14 bodies, 26 cells), ROM body framing
   (`LIVE_SUBSTITUTE_SWAP_BODY_FRAMING`: first inactive row + activation shift; Earthquake, Psychic p, Sludge Bomb,
