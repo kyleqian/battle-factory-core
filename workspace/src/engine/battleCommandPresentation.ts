@@ -37,6 +37,7 @@ import {
   BATTLE_SCRIPT_STATUS1_POISON,
   BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS1_TOXIC_POISON,
+  BATTLE_SCRIPT_STATUS2_MASKS,
 } from "./battleScriptSourceConstants.ts";
 import type { HealthboxContentParams } from "./healthboxAssembly.ts";
 import { getMonGender, type MonGender } from "./monGender.ts";
@@ -88,6 +89,14 @@ export type BattleCommandFieldBattler = Readonly<{
    * rules or RNG; Transform leaves it unchanged (battleScriptRulesContext.ts:365).
    */
   personality?: number;
+  /**
+   * Presentation-only "shown as the Substitute doll" (prep37 s2-3). Not the ROM behindSubstitute bit: at a command
+   * boundary it equals STATUS2_SUBSTITUTE (the body / MON_TO_SUBSTITUTE have completed); inside a resolution the
+   * display queue sets it after a Substitute body and clears it at the fade / faint / switch-out
+   * (battleResolutionPresentationRender.ts applySubstituteDollCommand). Read only by the field art view and the live
+   * adapter gate; never by rules, RNG or the queue. Absent = the mon is shown.
+   */
+  substituteDoll?: true;
 }>;
 
 export type BattleCommandPresentationPhase =
@@ -373,6 +382,8 @@ function fieldBattler(
   // these diverge from the party mirror mid-battle).
   return Object.freeze({
     ...battleCommandFieldBattlerFromPartyMember(side, battlerId, partyIndex, partyMember),
+    // At a reducer boundary the doll is up exactly while the gameplay bit is (read, never written here).
+    ...((active.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_SUBSTITUTE) !== 0 ? { substituteDoll: true as const } : {}),
     hp: active.hp,
     maxHP: active.maxHP,
     status: battleCommandUiStatusFromStatus1(active.status1),

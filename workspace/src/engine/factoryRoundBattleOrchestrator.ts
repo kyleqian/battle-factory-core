@@ -97,6 +97,7 @@ import {
 } from "./battleResolutionPresentation.ts";
 import {
   applyLiveSemiInvulnerableCommand,
+  applySubstituteDollCommand,
   BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES,
   createBattleResolutionPresentationRenderView,
   LIVE_SEMI_INVULNERABLE_NONE,
@@ -1921,7 +1922,14 @@ function commitCompletedResolutionCommand(
   resolution: BattleResolutionPresentationState,
   command: BattleResolutionPresentationCommand,
 ): FactoryBattlePresentationBoundaries {
-  const committed = commitCompletedResolutionCommandDisplay(boundaries, resolution, command);
+  const displayed = commitCompletedResolutionCommandDisplay(boundaries, resolution, command);
+  // Presentation-only Substitute doll (applySubstituteDollCommand): the ledger field mirrors the resolution's display.
+  const dollField = { player: displayed[0].field, opponent: displayed[1].field };
+  const dollAfter = applySubstituteDollCommand(dollField, command);
+  const committed = dollAfter === dollField ? displayed : Object.freeze([
+    Object.freeze({ ...displayed[0], field: dollAfter.player }),
+    Object.freeze({ ...displayed[1], field: dollAfter.opponent }),
+  ]) as unknown as FactoryBattlePresentationBoundaries;
   const before = liveSemiInvulnerableHiddenOf(committed);
   const after = applyLiveSemiInvulnerableCommand(before, command);
   if (after === before) return committed;

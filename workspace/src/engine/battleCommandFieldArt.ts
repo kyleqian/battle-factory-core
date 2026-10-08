@@ -2,6 +2,7 @@ import enemyElevations from "../data/gen/enemy-mon-elevations.json" with { type:
 import backSpritesData from "../assets/gen/battle-back-sprites.json" with { type: "json" };
 import frontSpritesData from "../assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
 import monPicCoordsData from "../data/gen/mon-pic-coords.json" with { type: "json" };
+import substituteDollAsset from "../animation/assets/substitute.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
 import type { BattleCommandPresentationState } from "./battleCommandPresentation.ts";
 import type { RgbColor } from "./bg.ts";
@@ -30,6 +31,12 @@ export type BattleCommandFieldArtBattler = Readonly<{
   coords: BattleCommandMonPicCoords;
   /** Unelevated canvas origin; use battleCommandFieldSpriteOrigin for scanout. */
   origin: Readonly<{ x: number; y: number }>;
+  /**
+   * Set when the field battler is shown as the Substitute doll (BattleCommandFieldBattler.substituteDoll): `pic` is the
+   * doll sheet + palette, `origin` the doll corner, the species elevation does not apply and the opponent's shadow is
+   * hidden. `species` / `speciesSymbol` / `coords` stay the mon's.
+   */
+  substituteDoll?: true;
 }>;
 
 export type BattleCommandFieldArtView = Readonly<{
@@ -58,9 +65,30 @@ const coords = monPicCoordsData as CoordsAsset;
  * (:72-79, all 0, normal form modelled) for a player CASTFORM instead of gMonBackPicCoords y_offset (13). */
 const SOURCE_BACK_Y_DELTA: Readonly<Record<string, number>> = { CASTFORM: 0 };
 
+type SubstituteDollAsset = Readonly<{
+  front: BattleCommandMonPicTileset;
+  back: BattleCommandMonPicTileset;
+  palette: readonly RgbColor[];
+}>;
+const substituteDoll = substituteDollAsset as unknown as SubstituteDollAsset;
+const SUBSTITUTE_DOLL_PIC = Object.freeze({
+  player: Object.freeze({ tileset: substituteDoll.back, palette: substituteDoll.palette }),
+  opponent: Object.freeze({ tileset: substituteDoll.front, palette: substituteDoll.palette }),
+});
+/**
+ * Doll corner: sBattlerCoords x (72 / 176) - 32 and GetSubstituteSpriteDefault_Y (battle_anim_mons.c:332:
+ * BATTLER_COORD_Y + 17 player / + 16 opponent = 97 / 56) - 32; species independent and never elevated
+ * (prep37 field.json: 1993 / 4399 / 2207 Scene OFF / 6898 elevated GOLBAT doll pixels exact at these corners).
+ */
+const SUBSTITUTE_DOLL_ORIGIN = Object.freeze({
+  player: Object.freeze({ x: 40, y: 65 }),
+  opponent: Object.freeze({ x: 144, y: 24 }),
+});
+
 function fieldArtBattler(
   species: number,
   side: "player" | "opponent",
+  doll = false,
 ): BattleCommandFieldArtBattler {
   const speciesSymbol = speciesSymbolById.get(species);
   if (speciesSymbol === undefined) {
@@ -78,6 +106,12 @@ function fieldArtBattler(
     );
   }
 
+  if (doll) {
+    return Object.freeze({
+      species, speciesSymbol, pic: SUBSTITUTE_DOLL_PIC[side], coords: picCoords, origin: SUBSTITUTE_DOLL_ORIGIN[side],
+      substituteDoll: true as const,
+    });
+  }
   // GetBattlerSpriteCoord(BATTLER_COORD_X_2/Y_PIC_OFFSET) places both
   // 64×64 OBJ canvases at fixed X origins; the source pic-coordinate table
   // supplies the species-specific resting Y offset inside that canvas.
@@ -103,8 +137,8 @@ export function createBattleCommandFieldArtView(
   field: BattleCommandPresentationState["field"],
 ): BattleCommandFieldArtView {
   return Object.freeze({
-    player: fieldArtBattler(field.player.species, "player"),
-    opponent: fieldArtBattler(field.opponent.species, "opponent"),
+    player: fieldArtBattler(field.player.species, "player", field.player.substituteDoll === true),
+    opponent: fieldArtBattler(field.opponent.species, "opponent", field.opponent.substituteDoll === true),
   });
 }
 
@@ -118,8 +152,17 @@ export function battleCommandFieldSpriteOrigin(
 ): Readonly<{ x: number; y: number }> {
   return {
     x: battler.origin.x,
-    y: battler.origin.y - (side === "opponent"
-      ? (enemyElevations as Readonly<Record<string, number>>)[battler.speciesSymbol] ?? 0
-      : 0),
+    y: battler.origin.y - battleCommandFieldArtElevation(battler, side),
   };
+}
+
+/** gEnemyMonElevation of the displayed opponent; 0 for the player and for the Substitute doll (prep37: elevated GOLBAT's
+ * doll at (144, 24), 6898 / 6898 rows). */
+export function battleCommandFieldArtElevation(
+  battler: BattleCommandFieldArtBattler,
+  side: "player" | "opponent",
+): number {
+  return side === "opponent" && battler.substituteDoll !== true
+    ? (enemyElevations as Readonly<Record<string, number>>)[battler.speciesSymbol] ?? 0
+    : 0;
 }
