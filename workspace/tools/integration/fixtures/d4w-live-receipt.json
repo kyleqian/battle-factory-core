@@ -1,0 +1,844 @@
+{
+ "schema": "d4w-live-receipt/v1",
+ "sections": {
+  "pursuit": {
+   "method": "tools/integration/d4wDense.sh (one tools/integration/d4aTimingCheck.ts process per fixture = 2 fresh direct-mGBA probe processes through the production live renderer), run twice from fresh processes (4 renders per window)",
+   "windows": 33,
+   "policyPhaseWindows": 24,
+   "policyPhaseZeroPx": 24,
+   "otherPhaseWindows": 9,
+   "ok": true,
+   "failures": [],
+   "table": [
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-alt-opponent-umbreon-player-golem.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-alt-player-umbreon-opponent-golem.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-alt2-opponent-sneasel-player-snorlax.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-alt2-player-sneasel-opponent-golbat.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-o-growl.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-o-psychic.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-o-splash.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-o-surf.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-o-swordsdance.json",
+     "move": "PURSUIT",
+     "measuredPhase": "no-event",
+     "policyPhase": "event",
+     "selectedPhase": false,
+     "rows": 102,
+     "duration": 103,
+     "px": [
+      289856,
+      289856,
+      289856,
+      289856
+     ],
+     "affectedAges": "84..99 (16)",
+     "maxPixelsPerRow": 18116,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-o-tackle.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-p-growl.json",
+     "move": "PURSUIT",
+     "measuredPhase": "no-event",
+     "policyPhase": "event",
+     "selectedPhase": false,
+     "rows": 102,
+     "duration": 103,
+     "px": [
+      286096,
+      286096,
+      286096,
+      286096
+     ],
+     "affectedAges": "84..99 (16)",
+     "maxPixelsPerRow": 17881,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-p-psychic.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-p-splash.json",
+     "move": "PURSUIT",
+     "measuredPhase": "no-event",
+     "policyPhase": "event",
+     "selectedPhase": false,
+     "rows": 102,
+     "duration": 103,
+     "px": [
+      286096,
+      286096,
+      286096,
+      286096
+     ],
+     "affectedAges": "84..99 (16)",
+     "maxPixelsPerRow": 17881,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-p-surf.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-p-swordsdance.json",
+     "move": "PURSUIT",
+     "measuredPhase": "no-event",
+     "policyPhase": "event",
+     "selectedPhase": false,
+     "rows": 102,
+     "duration": 103,
+     "px": [
+      286096,
+      286096,
+      286096,
+      286096
+     ],
+     "affectedAges": "84..99 (16)",
+     "maxPixelsPerRow": 17881,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-p-tackle.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-o-growl.json",
+     "move": "PURSUIT",
+     "measuredPhase": "no-event",
+     "policyPhase": "event",
+     "selectedPhase": false,
+     "rows": 102,
+     "duration": 103,
+     "px": [
+      289856,
+      289856,
+      289856,
+      289856
+     ],
+     "affectedAges": "84..99 (16)",
+     "maxPixelsPerRow": 18116,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-o-psychic.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-o-splash.json",
+     "move": "PURSUIT",
+     "measuredPhase": "no-event",
+     "policyPhase": "event",
+     "selectedPhase": false,
+     "rows": 102,
+     "duration": 103,
+     "px": [
+      289856,
+      289856,
+      289856,
+      289856
+     ],
+     "affectedAges": "84..99 (16)",
+     "maxPixelsPerRow": 18116,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-o-surf.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-o-swordsdance.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-o-tackle.json",
+     "move": "PURSUIT",
+     "measuredPhase": "no-event",
+     "policyPhase": "event",
+     "selectedPhase": false,
+     "rows": 102,
+     "duration": 103,
+     "px": [
+      289856,
+      289856,
+      289856,
+      289856
+     ],
+     "affectedAges": "84..99 (16)",
+     "maxPixelsPerRow": 18116,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-p-growl.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-p-psychic.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-p-splash.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-p-surf.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-p-swordsdance.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-p-tackle.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-opponent-beedrill-player-shuckle.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-player-beedrill-opponent-shuckle.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-tyranitar-pursuit-opponent-beedrill-player-shuckle.json",
+     "move": "PURSUIT",
+     "measuredPhase": "no-event",
+     "policyPhase": "event",
+     "selectedPhase": false,
+     "rows": 102,
+     "duration": 103,
+     "px": [
+      276528,
+      276528,
+      276528,
+      276528
+     ],
+     "affectedAges": "84..99 (16)",
+     "maxPixelsPerRow": 17283,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-tyranitar-pursuit-player-beedrill-opponent-shuckle.json",
+     "move": "PURSUIT",
+     "measuredPhase": "event",
+     "policyPhase": "event",
+     "selectedPhase": true,
+     "rows": 103,
+     "duration": 103,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/pursuit-tyranitarA-pursuit-player-beedrill-opponent-shuckle.json",
+     "move": "PURSUIT",
+     "measuredPhase": "no-event",
+     "policyPhase": "event",
+     "selectedPhase": false,
+     "rows": 102,
+     "duration": 103,
+     "px": [
+      284768,
+      284768,
+      284768,
+      284768
+     ],
+     "affectedAges": "84..99 (16)",
+     "maxPixelsPerRow": 17798,
+     "digestsIdentical": true,
+     "violations": []
+    }
+   ]
+  },
+  "hidden-power": {
+   "method": "tools/integration/d4wDense.sh (one tools/integration/d4aTimingCheck.ts process per fixture = 2 fresh direct-mGBA probe processes through the production live renderer), run twice from fresh processes (4 renders per window)",
+   "windows": 10,
+   "policyPhaseWindows": 9,
+   "policyPhaseZeroPx": 9,
+   "otherPhaseWindows": 1,
+   "ok": true,
+   "failures": [],
+   "table": [
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/hp-alt-opponent-unown-golem.json",
+     "move": "HIDDEN_POWER",
+     "measuredPhase": "no-event",
+     "policyPhase": "no-event",
+     "selectedPhase": true,
+     "rows": 180,
+     "duration": 180,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/hp-alt-opponent-unown-seed305420897.json",
+     "move": "HIDDEN_POWER",
+     "measuredPhase": "no-event",
+     "policyPhase": "no-event",
+     "selectedPhase": true,
+     "rows": 180,
+     "duration": 180,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/hp-alt-player-unown-golem.json",
+     "move": "HIDDEN_POWER",
+     "measuredPhase": "no-event",
+     "policyPhase": "no-event",
+     "selectedPhase": true,
+     "rows": 180,
+     "duration": 180,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/hp-alt-player-unown-seed305420897.json",
+     "move": "HIDDEN_POWER",
+     "measuredPhase": "no-event",
+     "policyPhase": "no-event",
+     "selectedPhase": true,
+     "rows": 180,
+     "duration": 180,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/hp-golbat-hidden-power-player-unown-opponent-onix.json",
+     "move": "HIDDEN_POWER",
+     "measuredPhase": "event",
+     "policyPhase": "no-event",
+     "selectedPhase": false,
+     "rows": 181,
+     "duration": 180,
+     "px": [
+      72040,
+      72040,
+      72040,
+      72040
+     ],
+     "affectedAges": "65..179 (84)",
+     "maxPixelsPerRow": 2489,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/hp-opponent-unown-player-onix.json",
+     "move": "HIDDEN_POWER",
+     "measuredPhase": "no-event",
+     "policyPhase": "no-event",
+     "selectedPhase": true,
+     "rows": 180,
+     "duration": 180,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/hp-player-unown-opponent-onix.json",
+     "move": "HIDDEN_POWER",
+     "measuredPhase": "no-event",
+     "policyPhase": "no-event",
+     "selectedPhase": true,
+     "rows": 180,
+     "duration": 180,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/hp-rattata-hidden-power-opponent-unown-player-onix.json",
+     "move": "HIDDEN_POWER",
+     "measuredPhase": "no-event",
+     "policyPhase": "no-event",
+     "selectedPhase": true,
+     "rows": 180,
+     "duration": 180,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/hp-rattata-hidden-power-player-unown-opponent-onix.json",
+     "move": "HIDDEN_POWER",
+     "measuredPhase": "no-event",
+     "policyPhase": "no-event",
+     "selectedPhase": true,
+     "rows": 180,
+     "duration": 180,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    },
+    {
+     "fixture": "tools/integration/fixtures/d4w-live/hp-shuckle-hidden-power-player-unown-opponent-onix.json",
+     "move": "HIDDEN_POWER",
+     "measuredPhase": "no-event",
+     "policyPhase": "no-event",
+     "selectedPhase": true,
+     "rows": 180,
+     "duration": 180,
+     "px": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "affectedAges": "-",
+     "maxPixelsPerRow": 0,
+     "digestsIdentical": true,
+     "violations": []
+    }
+   ]
+  }
+ }
+}

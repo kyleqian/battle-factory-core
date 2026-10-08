@@ -128,6 +128,40 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
     }],
   },
   /**
+   * S10A Pursuit normal body (docs/next-adapters-prep41.md s1; tools/integration/fixtures/prep41/pursuit-counters.json): main-loop pass counters
+   * (speciesAudit2Counters.py, two fresh runs identical) show fixed lag frames at ages 60, 61 in every body and an optional lag at age 82 (before
+   * the restorebg fade back): present in 24 of 33 measured bodies (the 6 oam1-live first bodies, the TYRANITAR target control, 8 of 12 lb26
+   * first Pursuit bodies after another body, 9 of 12 lb26 second Pursuit bodies), absent in 9 (TYRANITAR player attacker / player target,
+   * lb26 p-growl / p-splash / p-swordsdance / o-swordsdance, lb26 second bodies o-growl / o-splash / o-tackle). 103 rows with it (activation ..
+   * first inactive), 102 without; wrong phase moves the fade-back BLDY / palette steps one row earlier on ages 84..99 (~17.3k-18.0k px per row).
+   */
+  228: {
+    move: "MOVE_PURSUIT",
+    parameters: [{
+      kind: "optional-lag-age", age: 82, fixedLagAges: [60, 61], iterations: 100,
+      alternatives: [{ phase: "event", bodyRows: 103, measured: 24 }, { phase: "no-event", bodyRows: 102, measured: 9 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/prep41/pursuit-counters.json (lag at 82: 24 of 33)", "docs/next-adapters-prep41.md s1",
+        "tools/integration/fixtures/species-audit-5/counters/tyranitar-pursuit-lag.txt", "docs/later-bodies-curse-oam.md (lb26: 8 of 12 103-row bodies)"],
+    }],
+  },
+  /**
+   * S10A Hidden Power, Unown attacker (docs/next-adapters-prep41.md s2; tools/integration/fixtures/prep41/hidden-power-counters.json): a fixed lag
+   * at age 118 in every body and an optional lag at age 64 in 1 of 10 measured bodies (species-audit-3 UNOWN -> GOLBAT after a Tackle; the later
+   * fixed lag then lands at 119): 180 rows without it (activation .. first inactive), 181 with it; wrong phase shows every changing row from
+   * age 65 one frame early (docs/live-species-audit-3.md s2.4).
+   */
+  237: {
+    move: "MOVE_HIDDEN_POWER",
+    parameters: [{
+      kind: "optional-lag-age", age: 64, fixedLagAges: [118], iterations: 179,
+      alternatives: [{ phase: "event", bodyRows: 181, measured: 1 }, { phase: "no-event", bodyRows: 180, measured: 9 }],
+      chosen: "no-event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/prep41/hidden-power-counters.json (lag at 64: 1 of 10)", "docs/next-adapters-prep41.md s2",
+        "tools/integration/fixtures/species-audit-3/counters/hidden-power-lag.txt"],
+    }],
+  },
+  /**
    * D4b Megahorn (docs/next-adapters-prep24.md s0.2 H / s1.3: 6 windows accepted P/O, HERACROSS -> GOLEM P/O, HERACROSS -> ONIX P/O; the D4b
    * tie-break: 4 more windows chosen before probing, RHYDON -> GOLBAT and NIDOKING -> SNORLAX both orientations, tools/integration/d4aScenarios.py,
    * measured by the same prep22 probe from each scenario's own activation, tools/integration/fixtures/d4a-live/megahorn-*.json).
@@ -463,6 +497,12 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   // a13fix (reclassified from scoped exact, #151 precedent): Crunch, Psychic, Extreme Speed gained a measured optional-lag parameter
   // (species audits 11 / 13); their exact fixtures stay valid in scope; durations read liveMoveTimingBodyRows.
   242, 94, 245,
+  // S10A (prep41, reclassified from scoped exact): Pursuit normal body, any known lend (the first-body gate is lifted; lag at 82, 103 rows;
+  // exact fixtures tools/integration/fixtures/oam1-live/pursuit-*, alternate-phase windows tools/integration/fixtures/prep41/windows/pursuit-*).
+  228,
+  // S10A (prep41, reclassified from scoped exact): Hidden Power, Unown attacker (no lag at 64, 180 rows; exact fixtures
+  // tools/integration/fixtures/prep13-live/hidden-power-*, the alternate-phase GOLBAT window tools/integration/fixtures/prep41/windows/hp-*).
+  237,
 ]);
 
 /**

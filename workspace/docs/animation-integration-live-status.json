@@ -3290,20 +3290,6 @@
       ]
     },
     {
-      "move": "MOVE_HIDDEN_POWER",
-      "id": 237,
-      "sourceFieldEvidence": "../tools/integration/fixtures/prep13-live-adapter-receipt.json",
-      "liveEvidence": [
-        "dense 180/180 zero residual twice fresh, all six Unown bodies: accepted UNOWN_H player / UNOWN_E opponent -> ONIX, UNOWN -> GOLEM alternates (both orientations), and a second personality (UNOWN_F player / UNOWN_G opponent -> ONIX); the attacker sprite origin and orbit centre come from the personality's LETTER-form pic coords (hiddenPowerUnownFormIndex), the eighth scatter orb y from the target's pic-offset anchor",
-        "no ordinary-input route: FRONTIER_MON_UNOWN is never a generated rental (prep13 s2); Unown opponents are not searched"
-      ],
-      "remaining": [
-        "Unown attacker only (the reducer's uninitialised eighth orb is Unown-specific; any other attacker declines to the scene-off view); letter forms 26/27 (!, ?) decline",
-        "declines unless the tracked sprite order is lent",
-        "independent arbitrary-species/history framebuffer comparison"
-      ]
-    },
-    {
       "move": "MOVE_HAIL",
       "id": 258,
       "sourceFieldEvidence": "../tools/integration/fixtures/random2-r4-live-receipt.json",
@@ -3397,23 +3383,6 @@
         "later bodies: exact on any known lend (12/12 lb26 fixtures after Tackle / Splash / Psychic / Growl+unit / Swords Dance+unit / Surf, both sides, 0 px twice fresh on the unpatched code); an unknown lend declines",
         "shiny battlers and a target with a non-zero front idle rest decline; an attacker with a non-zero idle rest (RATTATA / ONIX opponent attackers, species audit 5) runs on first bodies only (6/6 rows 0 px; later-body combination unproven)",
         "singles |dx| is fixed by the static sBattlerCoords X_2 (105 / 104): other dx is exercised by unit tests only",
-        "independent arbitrary-species/history framebuffer comparison"
-      ]
-    },
-    {
-      "move": "MOVE_PURSUIT",
-      "id": 228,
-      "sourceFieldEvidence": "../tools/integration/fixtures/oam1-live-adapter-receipt.json",
-      "liveEvidence": [
-        "Production hardware-OAM provider (liveMoveOamAssembler.ts livePursuitHardwareOamRows): IMPACT hit splat (slot 3, matrix 0 at scale 372 folded into the pad words, tile 305, palette slot 7), target absent from the builds of states [5, 58], carried full 64-slot order; rows 1..102 string-equal to the retained corpora and the UMBREON->GOLEM alternates",
-        "palette / BLDY / monbg / power-shake registers from the source schedule (BG_DARK bank-2 palette rows 27..83, BLDY ramps 8..43 / 64..100, hit-splat blend 47..58, Task_UpdateMonBg scroll with AnimTask_ShakeTargetBasedOnMovePowerOrDmg x2)",
-        "dense 103/103 zero residual twice fresh through the production live renderer, normal body: BEEDRILL->SHUCKLE accepted both orientations, UMBREON->GOLEM alternates both orientations, SNEASEL->GOLBAT (elevated target) / SNEASEL->SNORLAX (new scenarios; window = each scenario's own activation + 0)",
-        "ordinary routes 52/0 BEEDRILL slot 1 and 38/14 SWELLOW slot 2 (first body): adapter active every age, following prompt reached, ON/OFF rules/RNG/boundary equal"
-      ],
-      "remaining": [
-        "the switch-interception body (request.turn & 1) declines to the scene-off view: its allocator (IMPACT slot 5 / matrix 2 / tile 405 / palette slot 6), healthbox block and slot set follow the party-menu unit and are not yet provided by the production hosts",
-        "first body only; later bodies decline (4 of 12 lb26 later-body fixtures are one frame short from age 84: lag-schedule class)",
-        "shiny battlers and a target with a non-zero front idle rest decline (the attacker-side decline is lifted: RATTATA / ONIX opponent and player attackers 0 px twice fresh)",
         "independent arbitrary-species/history framebuffer comparison"
       ]
     },
@@ -3773,7 +3742,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 247,
+  "implementedCount": 245,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 13,
@@ -3950,7 +3919,7 @@
     },
     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
   },
-  "faithfulTimingCount": 16,
+  "faithfulTimingCount": 18,
   "faithfulTimingAdapters": [
     {
       "id": 183,
@@ -5385,6 +5354,244 @@
       "proofCommands": [
         "DERIVED=tools/integration/fixtures/a13fix-live/extreme-speed/derived sh tools/integration/speciesAudit9Run.sh RECDIR 14 '*'",
         "npx vitest run tests/animation/liveSpeciesAudit13Fixes.test.ts"
+      ]
+    },
+    {
+      "id": 228,
+      "move": "MOVE_PURSUIT",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 82,
+          "fixedLagAges": [
+            60,
+            61
+          ],
+          "iterations": 100,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 103,
+              "measured": 24
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 102,
+              "measured": 9
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          84,
+          85,
+          86,
+          87,
+          88,
+          89,
+          90,
+          91,
+          92,
+          93,
+          94,
+          95,
+          96,
+          97,
+          98,
+          99
+        ],
+        "rows": 16,
+        "maxPixelsPerRow": 18116,
+        "cause": "optional-lag-age 82 absent (102-row ROM body; 9 of 33 measured bodies): the restorebg Task_FadeToBg fade back (BLDY 16 -> 0) and its palette steps run one row earlier than the policy's 103-row phase, so each of ages 84..99 shows the next BLDY step (whole field); ages 0..83 and 100..102 exact (docs/next-adapters-prep41.md s1.2)"
+      },
+      "d3": false,
+      "evidence": [
+        "reclassified from scoped exact (S10A prep41 D4 widening, #151 precedent: the adapter gained a measured CPU-phase parameter); the existing exact fixture proofs stay valid in their proved scope",
+        "scoped-exact liveEvidence: Production hardware-OAM provider (liveMoveOamAssembler.ts livePursuitHardwareOamRows): IMPACT hit splat (slot 3, matrix 0 at scale 372 folded into the pad words, tile 305, palette slot 7), target absent from the builds of states [5, 58], carried full 64-slot order; rows 1..102 string-equal to the retained corpora and the UMBREON->GOLEM alternates",
+        "scoped-exact liveEvidence: palette / BLDY / monbg / power-shake registers from the source schedule (BG_DARK bank-2 palette rows 27..83, BLDY ramps 8..43 / 64..100, hit-splat blend 47..58, Task_UpdateMonBg scroll with AnimTask_ShakeTargetBasedOnMovePowerOrDmg x2)",
+        "scoped-exact liveEvidence: dense 103/103 zero residual twice fresh through the production live renderer, normal body: BEEDRILL->SHUCKLE accepted both orientations, UMBREON->GOLEM alternates both orientations, SNEASEL->GOLBAT (elevated target) / SNEASEL->SNORLAX (new scenarios; window = each scenario's own activation + 0)",
+        "scoped-exact liveEvidence: ordinary routes 52/0 BEEDRILL slot 1 and 38/14 SWELLOW slot 2 (first body): adapter active every age, following prompt reached, ON/OFF rules/RNG/boundary equal",
+        "sourceFieldEvidence: ../tools/integration/fixtures/oam1-live-adapter-receipt.json",
+        "docs/next-adapters-prep41.md s1 + tools/integration/fixtures/prep41/pursuit-counters.json (main-loop pass counters, 33 bodies, two fresh runs identical: lag at 82 in 24, absent in 9; fixed lags 60, 61 in all)",
+        "the first-body gate is lifted (any known lend; prep41 s1.4): the known-entry allocator IMPACT slot 3 / matrix 0 / tile 305 / palette slot 7 and the S0 BG state hold after Tackle / Splash / Psychic / Growl+stat / Swords Dance+stat / Surf bodies (lb26) and after the attacker's own earlier Pursuit (lb26 turn-2 bodies)",
+        "tools/integration/fixtures/d4w-live/pursuit-*.json (dense windows = each scenario's own body from the fresh counters run) through the production live renderer; receipt tools/integration/fixtures/d4w-live-receipt.json",
+        "scoped-exact remaining (kept): the switch-interception body (request.turn & 1) declines to the scene-off view: its allocator (IMPACT slot 5 / matrix 2 / tile 405 / palette slot 6), healthbox block and slot set follow the party-menu unit and are not yet provided by the production hosts; shiny battlers and a target with a non-zero front idle rest decline (the attacker-side decline is lifted: RATTATA / ONIX opponent and player attackers 0 px twice fresh); independent arbitrary-species/history framebuffer comparison"
+      ],
+      "proofCommands": [
+        "OUT=SCRATCH sh tools/integration/issue151Counters.sh SCRATCH/counters 8 <tools/integration/prep41Run.sh PF list> && python3 tools/integration/prep41Counters.py SCRATCH/counters 228 82 SCRATCH/pursuit-counters.json <PF list>",
+        "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/d4w-live/pursuit-*.json (one process per fixture)",
+        "npx vitest run tests/animation/liveOam1MoveAdapters.test.ts tests/animation/liveD4wWidening.test.ts"
+      ]
+    },
+    {
+      "id": 237,
+      "move": "MOVE_HIDDEN_POWER",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 64,
+          "fixedLagAges": [
+            118
+          ],
+          "iterations": 179,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 181,
+              "measured": 1
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 180,
+              "measured": 9
+            }
+          ],
+          "chosen": "no-event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          82,
+          83,
+          84,
+          85,
+          86,
+          87,
+          88,
+          89,
+          90,
+          91,
+          92,
+          93,
+          94,
+          95,
+          96,
+          97,
+          98,
+          99,
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112,
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143,
+          144,
+          145,
+          146,
+          147,
+          148,
+          149,
+          150,
+          151,
+          152,
+          153,
+          154,
+          155,
+          156,
+          157,
+          158,
+          159,
+          160,
+          161,
+          162,
+          163,
+          164,
+          165,
+          166,
+          167,
+          168,
+          169,
+          170,
+          171,
+          172,
+          173,
+          174,
+          175,
+          176,
+          177,
+          178,
+          179
+        ],
+        "rows": 84,
+        "maxPixelsPerRow": 2489,
+        "cause": "optional-lag-age 64 present (181-row ROM body; species-audit-3 UNOWN -> GOLBAT after a Tackle, 1 of 10 measured bodies): the orbiting / scatter orbs advance one row early against the lagged ROM from age 65; 84 of the ages 65..179 differ (static rows and the first inactive row exact; docs/next-adapters-prep41.md s2.2)"
+      },
+      "d3": false,
+      "evidence": [
+        "reclassified from scoped exact (S10A prep41 D4 widening, #151 precedent: the adapter gained a measured CPU-phase parameter); the existing exact fixture proofs stay valid in their proved scope",
+        "scoped-exact liveEvidence: dense 180/180 zero residual twice fresh, all six Unown bodies: accepted UNOWN_H player / UNOWN_E opponent -> ONIX, UNOWN -> GOLEM alternates (both orientations), and a second personality (UNOWN_F player / UNOWN_G opponent -> ONIX); the attacker sprite origin and orbit centre come from the personality's LETTER-form pic coords (hiddenPowerUnownFormIndex), the eighth scatter orb y from the target's pic-offset anchor",
+        "scoped-exact liveEvidence: no ordinary-input route: FRONTIER_MON_UNOWN is never a generated rental (prep13 s2); Unown opponents are not searched",
+        "sourceFieldEvidence: ../tools/integration/fixtures/prep13-live-adapter-receipt.json",
+        "docs/next-adapters-prep41.md s2 + tools/integration/fixtures/prep41/hidden-power-counters.json (12 fixtures / 10 unique bodies, two fresh runs identical: fixed lag 118 in all no-lag bodies, optional lag 64 in 1)",
+        "reclassification only: no adapter / renderer change (Unown attacker + known lend gate unchanged)",
+        "tools/integration/fixtures/d4w-live/hp-*.json through the production live renderer; receipt tools/integration/fixtures/d4w-live-receipt.json",
+        "scoped-exact remaining (kept): Unown attacker only (the reducer's uninitialised eighth orb is Unown-specific; any other attacker declines to the scene-off view); letter forms 26/27 (!, ?) decline; declines unless the tracked sprite order is lent; independent arbitrary-species/history framebuffer comparison"
+      ],
+      "proofCommands": [
+        "OUT=SCRATCH sh tools/integration/issue151Counters.sh SCRATCH/hpcounters 8 <tools/integration/prep41Run.sh HF list> && python3 tools/integration/prep41Counters.py SCRATCH/hpcounters 237 64 SCRATCH/hidden-power-counters.json <HF list>",
+        "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/d4w-live/hp-*.json (one process per fixture)",
+        "npx vitest run tests/animation/livePrep13MoveAdapters.test.ts tests/animation/liveD4wWidening.test.ts"
       ]
     }
   ],

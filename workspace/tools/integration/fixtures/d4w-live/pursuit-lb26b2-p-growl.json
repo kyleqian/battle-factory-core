@@ -1,0 +1,41 @@
+{
+ "sourceFixture": "tools/integration/fixtures/later-bodies-lb26/pursuit-p-growl.json",
+ "denseWindow": {
+  "startFrame": 1176,
+  "endFrame": 1278
+ },
+ "timingPhase": "event",
+ "fieldProfile": {
+  "playerHp": 182,
+  "playerMaxHp": 182,
+  "opponentHp": 151,
+  "opponentMaxHp": 168,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 45,
+   "side": "opponent"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statAnimation": 21
+  },
+  {
+   "moveId": 228,
+   "side": "player"
+  },
+  {
+   "moveId": 45,
+   "side": "opponent"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statAnimation": 21
+  }
+ ],
+ "timingEvidence": "pursuit-counters.json: body 1 lag ages [60, 61, 82] (103 rows), counters r0 == r1 True"
+}

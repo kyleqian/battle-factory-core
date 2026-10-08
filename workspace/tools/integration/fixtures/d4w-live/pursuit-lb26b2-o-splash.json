@@ -1,0 +1,31 @@
+{
+ "sourceFixture": "tools/integration/fixtures/later-bodies-lb26/pursuit-o-splash.json",
+ "denseWindow": {
+  "startFrame": 1150,
+  "endFrame": 1251
+ },
+ "timingPhase": "no-event",
+ "fieldProfile": {
+  "playerHp": 150,
+  "playerMaxHp": 168,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 150,
+   "side": "player"
+  },
+  {
+   "moveId": 228,
+   "side": "opponent"
+  },
+  {
+   "moveId": 150,
+   "side": "player"
+  }
+ ],
+ "timingEvidence": "pursuit-counters.json: body 1 lag ages [60, 61] (102 rows), counters r0 == r1 True"
+}

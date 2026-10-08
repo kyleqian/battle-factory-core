@@ -1,0 +1,31 @@
+{
+ "sourceFixture": "tools/integration/fixtures/later-bodies-lb26/pursuit-o-psychic.json",
+ "denseWindow": {
+  "startFrame": 1171,
+  "endFrame": 1273
+ },
+ "timingPhase": "event",
+ "fieldProfile": {
+  "playerHp": 149,
+  "playerMaxHp": 168,
+  "opponentHp": 128,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 94,
+   "side": "player"
+  },
+  {
+   "moveId": 228,
+   "side": "opponent"
+  },
+  {
+   "moveId": 94,
+   "side": "player"
+  }
+ ],
+ "timingEvidence": "pursuit-counters.json: body 1 lag ages [60, 61, 82] (103 rows), counters r0 == r1 True"
+}

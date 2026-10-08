@@ -11,6 +11,7 @@ import {
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../../src/engine/liveMoveSpriteAllocator.ts";
 import { knownEntrySpriteOrderState } from "../../src/engine/spriteOrderProvider.ts";
+import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS } from "../../src/engine/liveMoveTimingPolicy.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 import { readFileSync } from "node:fs";
 import plans from "../../tools/integration/fixtures/prep12-random2/plans.json" with { type: "json" };
@@ -66,9 +67,11 @@ const rulesWithoutSceneMarker = (v: { rules: any }) => {
 describe("live prep13 move adapters", () => {
   it("registers Ice Beam, Water Spout and Hidden Power with the accepted durations and shadow rows", () => {
     for (const id of [58, 323, 237]) {
-      expect(LIVE_MOVE_ANIMATION_IDS).toContain(id);
+      // d4w (prep41 s2): Hidden Power reclassified to faithful timing (no lag at 64, 180 rows); same adapter, other bucket.
+      expect(id === 237 ? LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS : LIVE_MOVE_ANIMATION_IDS).toContain(id);
       expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[id]).toBe(0);
     }
+    expect(LIVE_MOVE_ANIMATION_IDS).not.toContain(237);
     for (const a of [0, 1] as const) expect(liveMoveAnimationDuration(request(58, a))).toBe(203);
     for (const a of [0, 1] as const) expect(liveMoveAnimationDuration(request(237, a))).toBe(180);
     // Water Spout's body length depends on the attacker's party HP and picture height: no field, no duration.

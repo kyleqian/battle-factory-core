@@ -10,7 +10,7 @@ import { join } from "node:path";
 import { verifyLiveAdapterFramebuffer } from "./liveAdapterFramebuffer.ts";
 import { LIVE_MOVE_TIMING_POLICY, type LiveMoveTimingParameterKind, type LiveMoveTimingPhase } from "../../src/engine/liveMoveTimingPolicy.ts";
 
-const IDS: Record<string, number> = { MACH_PUNCH: 183, NIGHTMARE: 171, MEGAHORN: 224, REVENGE: 279, METEOR_MASH: 309, PSYWAVE: 149, EXTRASENSORY: 326, SUPERPOWER: 276, SHOCK_WAVE: 351, ICE_BALL: 301, DIVE: 291, SHEER_COLD: 329, HYPER_VOICE: 304, EXTREME_SPEED: 245, MEMENTO: 262, SKILL_SWAP: 285, FLATTER: 260 };
+const IDS: Record<string, number> = { MACH_PUNCH: 183, NIGHTMARE: 171, MEGAHORN: 224, REVENGE: 279, METEOR_MASH: 309, PSYWAVE: 149, EXTRASENSORY: 326, SUPERPOWER: 276, SHOCK_WAVE: 351, ICE_BALL: 301, DIVE: 291, SHEER_COLD: 329, HYPER_VOICE: 304, EXTREME_SPEED: 245, MEMENTO: 262, SKILL_SWAP: 285, FLATTER: 260, PURSUIT: 228, HIDDEN_POWER: 237, CONFUSE_RAY: 109 };
 const [outPath, ...paths] = process.argv.slice(2);
 const status = JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8"));
 // A move whose other-phase residual differs per window (D4c Extrasensory: the scanout split) documents it per fixture
@@ -24,7 +24,9 @@ const documented = (id: number, fixture: string): number[] => {
 const out: Record<string, unknown>[] = [];
 let failed = false;
 for (const path of paths) {
-  const fixture = JSON.parse(readFileSync(path, "utf8")) as { move: string; timingPhase: LiveMoveTimingPhase;
+  // A wrapper fixture (prep41 windows: { sourceFixture, denseWindow, timingPhase }) overlays its banked source fixture.
+  const raw = JSON.parse(readFileSync(path, "utf8")) as { sourceFixture?: string };
+  const fixture = { ...(raw.sourceFixture ? JSON.parse(readFileSync(raw.sourceFixture, "utf8")) : {}), ...raw } as { move: string; timingPhase: LiveMoveTimingPhase;
     timingPhases?: Partial<Record<LiveMoveTimingParameterKind, LiveMoveTimingPhase>>; attacker: { geometry: { side: "player" | "opponent" } };
     requestFields?: { rolloutCounter?: number } };
   const id = IDS[fixture.move]!;

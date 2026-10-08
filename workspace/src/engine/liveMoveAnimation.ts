@@ -107,7 +107,7 @@ import megaHornAsset from "../animation/assets/mega-horn-horn-hit-2.json" with {
 import {
   CURSE_STATS_ROWS, curseStatsBattleBgAt, curseStatsPaletteAt, curseStatsRegistersAt, curseStatsSpritesAt, curseStatsTasksAt,
 } from "../animation/curseModel.ts";
-import { FLATTER_ROWS, FURY_CUTTER_ROWS, PURSUIT_ROWS, RETURN_ROWS } from "./liveMoveOamAssembler.ts";
+import { FLATTER_ROWS, FURY_CUTTER_ROWS, RETURN_ROWS } from "./liveMoveOamAssembler.ts";
 import { willOWispSpritesAtAge, willOWispTimeline } from "../animation/willOWisp.ts";
 import { skillSwapAtAge, type SkillSwapLiveInputs } from "../animation/skillSwap.ts";
 import skillSwapOrbAsset from "../animation/assets/skill-swap-bluegreen-orb.json" with { type: "json" };
@@ -236,8 +236,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // prep29 R1 (B.6): Outrage first body (S0 registers).
   200,
   // oam1 (docs/next-adapters-prep20.md): production hardware-OAM provider (liveMoveOamAssembler.ts), first body.
-  // Fury Cutter: the counter-1 body only (a first body implies furyCutterCounter 1).
-  261, 228, 210,
+  // Fury Cutter: the counter-1 body only (a first body implies furyCutterCounter 1). Pursuit reclassified to faithful timing (prep41,
+  // liveMoveTimingPolicy.ts 228); its exact first-body fixtures stay valid in scope.
+  261, 210,
   // Return (strongest branch, friendship 255: the only one the Factory reaches), first body (docs/next-adapters-prep24.md s2).
   216,
   // Spit Up, all three Stockpile counters (docs/next-adapters-prep31.md s2 / s3; liveSpitUpInputs.ts): any known lend.
@@ -328,8 +329,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // prep13 (docs/next-adapters-prep13.md s1.1-1.2): Ice Beam (geometry from the anchors; lent-order gate), Water Spout
   // (party HP tier + picture height + per-side rain seed; lent-order gate).
   58, 323,
-  // prep13 s1.3: Hidden Power (Unown attacker only: the reducer's uninitialised eighth orb is Unown-specific; lent-order gate).
-  237,
+  // prep13 s1.3: Hidden Power (Unown attacker only): reclassified to faithful timing (prep41, liveMoveTimingPolicy.ts 237); its exact
+  // fixtures stay valid in scope.
   // prep14 s1.7: Hail (no RNG; the target table is derived from the anchors).
   258,
   // prep16 s2.1/2.2 + lb21: Overheat, Silver Wind (known order lend; assets-only palette composite; !shiny).
@@ -1160,7 +1161,9 @@ export function liveMoveAnimationDuration(
     case 189: return 51; // Mud-Slap A..A+50 (prep17: 77..127 / 81..131 / alt 72..122).
     case 28: return 58; // Sand-Attack A..A+57 (78..135 / 82..139 / alt 73..130).
     case 63: return 280; // Hyper Beam faithful-random body 79..358 / 83..362 (prep13 s0.1; reducer first inactive age 279).
-    case 237: return 180; // Hidden Power 77..256 / 81..260 (prep13 s0.1, first inactive age 179).
+    // Hidden Power 77..256 / 81..260 (prep13 s0.1, first inactive age 179): faithful timing (prep41), 179 iterations + the fixed lag at 118
+    // without the optional lag at 64 (policy: no lag, 9 of 10; the other phase is 181 rows).
+    case 237: return liveMoveTimingBodyRows(237);
     case 240: return 187; // Rain Dance 213..399 / 211..397 (prep14 s2).
     case 352: return 160; // Water Pulse 77..236 / 81..240 (prep14 s2, first inactive age 159).
     case 258: return 158; // Hail 64..221 (prep14 s2).
@@ -1170,9 +1173,10 @@ export function liveMoveAnimationDuration(
     case 58: return 203; // Ice Beam 75..277 / 79..281 (prep13 s0.1; reducer first inactive age 202).
     // Will-O-Wisp (oam1): first inactive age + 1 of the source timeline from the static sBattlerCoords X_2 anchors (|dx| 105 /
     // 104 in singles; the orb translation duration is |dx|): 214 / 213 rows (76..289 / 80..292).
-    // Pursuit normal body (oam1): 103 rows (73..175 / 77..179), PURSUIT_FIRST_INACTIVE_AGE 102 + 1. The switch-interception
+    // Pursuit normal body (oam1): 103 rows (73..175 / 77..179), PURSUIT_FIRST_INACTIVE_AGE 102 + 1 = faithful timing (prep41): 100 iterations +
+    // fixed lags 60, 61 + the policy's optional lag at 82 (24 of 33; the other phase is 102 rows). The switch-interception
     // body (request.turn & 1) declines (scene-off view): its allocator/healthbox scene follows a party-menu unit.
-    case 228: return (request.turn & 1) === 0 ? PURSUIT_ROWS : null;
+    case 228: return (request.turn & 1) === 0 ? liveMoveTimingBodyRows(228) : null;
     // Fury Cutter (oam1): one body = 43 rows (78..120 / 82..124, first inactive age 42 + 1) for every counter.
     case 210: return FURY_CUTTER_ROWS;
     // Baton Pass (prep27 s0.1): 52 active rows + the cleanup row, constant across species, sides and body-start shifts.
@@ -3295,10 +3299,11 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 228: {
-      // oam1 (prep20 s1.2): normal body only (request.turn & 1 = 0), first body (known-entry allocator: IMPACT slot 3 / matrix 0 /
-      // tile 305 / palette slot 7; S0 BG state under the BG_DARK fade), non-shiny, zero idle rests. Hardware OAM + matrices from
+      // oam1 (prep20 s1.2): normal body only (request.turn & 1 = 0), any known lend (prep41: the known-entry allocator IMPACT slot 3 /
+      // matrix 0 / tile 305 / palette slot 7 and the S0 BG state under the BG_DARK fade also hold after Tackle / Splash / Psychic / Growl /
+      // Swords Dance / Surf bodies; the body length is the D4 policy's lag phase), non-shiny, zero idle rests. Hardware OAM + matrices from
       // the assembler; palette / BLDY / monbg / shake registers from the source schedule (liveOamMoves.ts livePursuitInputs).
-      if ((request.turn & 1) !== 0 || !spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      if ((request.turn & 1) !== 0 || !spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       const activationOrder = spriteOrderWithOccupiedPrefix(
