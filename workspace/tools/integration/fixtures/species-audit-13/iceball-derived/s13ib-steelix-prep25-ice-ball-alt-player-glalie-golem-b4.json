@@ -1,0 +1,59 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "ICE_BALL",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-13/iceball-scenarios/s13ib-steelix-prep25-ice-ball-alt-player-glalie-golem.json",
+ "denseWindow": {
+  "startFrame": 1284,
+  "endFrame": 1359
+ },
+ "windowSource": "window = [activation, activation + 75] (counter-3 body through the first inactive row; lag rows []) from a fresh iceBallProbe.py run",
+ "timingPhase": "no-event",
+ "attacker": {
+  "species": "GLALIE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "STEELIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019030,
+ "fieldProfile": {
+  "playerHp": 144,
+  "playerMaxHp": 187,
+  "opponentHp": 22,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 240,
+  "rolloutCounter": 4
+ },
+ "presentationRngActivation": {
+  "value": 3246862922,
+  "source": "iceBallProbe.py bodies[3][0].animationRng (activation frame 1284)"
+ },
+ "iceBallChain": {
+  "foeFirst": false,
+  "earlier": [
+   {
+    "value": 3668811069,
+    "source": "iceBallProbe.py bodies[0][0].animationRng (activation frame 75)"
+   },
+   {
+    "value": 233282250,
+    "source": "iceBallProbe.py bodies[1][0].animationRng (activation frame 412)"
+   },
+   {
+    "value": 3272021036,
+    "source": "iceBallProbe.py bodies[2][0].animationRng (activation frame 764)"
+   }
+  ]
+ }
+}

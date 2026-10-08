@@ -1,0 +1,38 @@
+s13ib-lunatone-prep25-ice-ball-alt-player-glalie-golem b2 {'startFrame': 408, 'endFrame': 483} lag [] 177 164
+s13ib-lunatone-prep25-ice-ball-alt-player-glalie-golem b3 {'startFrame': 754, 'endFrame': 829} lag [] 166 139
+s13ib-lunatone-prep25-ice-ball-alt-player-glalie-golem b4 {'startFrame': 1253, 'endFrame': 1328} lag [] 156 39
+s13ib-lunatone-prep25-ice-ball-alt-player-glalie-golem b5 post-KO (battler slots [6, 5] ): not written, declines
+s13ib-weezing-prep25-ice-ball-alt-player-glalie-golem b2 {'startFrame': 413, 'endFrame': 488} lag [] 172 158
+s13ib-weezing-prep25-ice-ball-alt-player-glalie-golem b3 {'startFrame': 765, 'endFrame': 840} lag [] 156 131
+s13ib-weezing-prep25-ice-ball-alt-player-glalie-golem b4 {'startFrame': 1280, 'endFrame': 1355} lag [] 141 19
+s13ib-weezing-prep25-ice-ball-alt-player-glalie-golem b5 post-KO (battler slots [6, 5] ): not written, declines
+s13ib-steelix-prep25-ice-ball-alt-player-glalie-golem b2 {'startFrame': 412, 'endFrame': 487} lag [] 173 168
+s13ib-steelix-prep25-ice-ball-alt-player-glalie-golem b3 {'startFrame': 764, 'endFrame': 839} lag [] 158 140
+s13ib-steelix-prep25-ice-ball-alt-player-glalie-golem b4 {'startFrame': 1284, 'endFrame': 1359} lag [] 144 22
+s13ib-steelix-prep25-ice-ball-alt-player-glalie-golem b5 post-KO (battler slots [6, 5] ): not written, declines
+s13ib-wailord-prep25-ice-ball-alt-player-glalie-golem b2 {'startFrame': 496, 'endFrame': 571} lag [] 172 269
+s13ib-wailord-prep25-ice-ball-alt-player-glalie-golem b3 {'startFrame': 926, 'endFrame': 1001} lag [] 156 253
+s13ib-wailord-prep25-ice-ball-alt-player-glalie-golem b4 {'startFrame': 1489, 'endFrame': 1564} lag [] 141 182
+s13ib-wailord-prep25-ice-ball-alt-player-glalie-golem b5 {'startFrame': 1963, 'endFrame': 2095} lag [112] 125 122
+s13ib-tyranitar-prep25-ice-ball-alt-player-glalie-golem b2 {'startFrame': 840, 'endFrame': 915} lag [] 156 196
+s13ib-tyranitar-prep25-ice-ball-alt-player-glalie-golem b3 {'startFrame': 1618, 'endFrame': 1693} lag [] 123 174
+s13ib-tyranitar-prep25-ice-ball-alt-player-glalie-golem b4 {'startFrame': 2543, 'endFrame': 2618} lag [] 92 82
+s13ib-tyranitar-prep25-ice-ball-alt-player-glalie-golem b5 {'startFrame': 3378, 'endFrame': 3510} lag [112] 59 3
+s13ib-rattata-prep25-ice-ball-alt-player-glalie-golem b2 {'startFrame': 419, 'endFrame': 494} lag [] 171 118
+s13ib-rattata-prep25-ice-ball-alt-player-glalie-golem b3 {'startFrame': 782, 'endFrame': 857} lag [] 154 81
+s13ib-rattata-prep25-ice-ball-alt-player-glalie-golem b4 post-KO (battler slots [6, 5] ): not written, declines
+s13ib-onix-prep25-ice-ball-alt-player-glalie-golem b2 {'startFrame': 509, 'endFrame': 584} lag [] 178 108
+s13ib-onix-prep25-ice-ball-alt-player-glalie-golem b3 {'startFrame': 978, 'endFrame': 1053} lag [] 168 40
+s13ib-onix-prep25-ice-ball-alt-player-glalie-golem b4 post-KO (battler slots [6, 5] ): not written, declines
+s13ib-steelix-prep25-ice-ball-alt-opponent-glalie-golem b2 {'startFrame': 1012, 'endFrame': 1087} lag [] 167 173
+s13ib-steelix-prep25-ice-ball-alt-opponent-glalie-golem b3 chain reset (gDynamicBasePower [30, 60, 30, 60, 120] ): not written
+s13ib-wailord-prep25-ice-ball-alt-opponent-glalie-golem b2 {'startFrame': 1012, 'endFrame': 1087} lag [] 269 173
+s13ib-wailord-prep25-ice-ball-alt-opponent-glalie-golem b3 chain reset (gDynamicBasePower [30, 60, 30, 60, 120] ): not written
+s13ib-tyranitar-prep25-ice-ball-alt-opponent-glalie-golem b2 {'startFrame': 1012, 'endFrame': 1087} lag [] 195 156
+s13ib-tyranitar-prep25-ice-ball-alt-opponent-glalie-golem b3 chain reset (gDynamicBasePower [30, 60, 30, 60, 120] ): not written
+s13ib-rattata-prep25-ice-ball-alt-opponent-glalie-golem b2 {'startFrame': 1012, 'endFrame': 1087} lag [] 117 172
+s13ib-rattata-prep25-ice-ball-alt-opponent-glalie-golem b3 chain reset (gDynamicBasePower [30, 60, 30, 60, 120] ): not written
+s13ib-golbat-mechanic-ice-ball-player-spheal-opponent-onix b2 {'startFrame': 661, 'endFrame': 736} lag [] 137 161
+s13ib-golbat-mechanic-ice-ball-player-spheal-opponent-onix b3 {'startFrame': 1218, 'endFrame': 1293} lag [] 94 120
+s13ib-golbat-mechanic-ice-ball-player-spheal-opponent-onix b4 {'startFrame': 1700, 'endFrame': 1775} lag [] 75 51
+s13ib-golbat-mechanic-ice-ball-player-spheal-opponent-onix b5 post-KO (battler slots [6, 5] ): not written, declines

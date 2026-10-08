@@ -1,0 +1,55 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "ICE_BALL",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-13/iceball-scenarios/s13ib-weezing-prep25-ice-ball-alt-player-glalie-golem.json",
+ "denseWindow": {
+  "startFrame": 765,
+  "endFrame": 840
+ },
+ "windowSource": "window = [activation, activation + 75] (counter-2 body through the first inactive row; lag rows []) from a fresh iceBallProbe.py run",
+ "timingPhase": "no-event",
+ "attacker": {
+  "species": "GLALIE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "WEEZING",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019030,
+ "fieldProfile": {
+  "playerHp": 156,
+  "playerMaxHp": 187,
+  "opponentHp": 131,
+  "opponentMaxHp": 172,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 120,
+  "rolloutCounter": 3
+ },
+ "presentationRngActivation": {
+  "value": 4163985199,
+  "source": "iceBallProbe.py bodies[2][0].animationRng (activation frame 765)"
+ },
+ "iceBallChain": {
+  "foeFirst": false,
+  "earlier": [
+   {
+    "value": 3668811069,
+    "source": "iceBallProbe.py bodies[0][0].animationRng (activation frame 75)"
+   },
+   {
+    "value": 2130891893,
+    "source": "iceBallProbe.py bodies[1][0].animationRng (activation frame 413)"
+   }
+  ]
+ }
+}

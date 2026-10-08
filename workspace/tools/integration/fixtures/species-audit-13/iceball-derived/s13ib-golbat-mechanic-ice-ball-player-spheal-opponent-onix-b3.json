@@ -1,0 +1,55 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "ICE_BALL",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-13/iceball-scenarios/s13ib-golbat-mechanic-ice-ball-player-spheal-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 1218,
+  "endFrame": 1293
+ },
+ "windowSource": "window = [activation, activation + 75] (counter-2 body through the first inactive row; lag rows []) from a fresh iceBallProbe.py run",
+ "timingPhase": "no-event",
+ "attacker": {
+  "species": "SPHEAL",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019030,
+ "fieldProfile": {
+  "playerHp": 94,
+  "playerMaxHp": 177,
+  "opponentHp": 120,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 120,
+  "rolloutCounter": 3
+ },
+ "presentationRngActivation": {
+  "value": 1294842166,
+  "source": "iceBallProbe.py bodies[2][0].animationRng (activation frame 1218)"
+ },
+ "iceBallChain": {
+  "foeFirst": true,
+  "earlier": [
+   {
+    "value": 2354516896,
+    "source": "iceBallProbe.py bodies[0][0].animationRng (activation frame 226)"
+   },
+   {
+    "value": 438091864,
+    "source": "iceBallProbe.py bodies[1][0].animationRng (activation frame 661)"
+   }
+  ]
+ }
+}

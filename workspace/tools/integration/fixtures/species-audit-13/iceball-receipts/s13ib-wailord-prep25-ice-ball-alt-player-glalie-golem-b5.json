@@ -1,0 +1,31 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-13/iceball-derived/s13ib-wailord-prep25-ice-ball-alt-player-glalie-golem-b5.json",
+  "move": "ICE_BALL",
+  "measuredPhase": "event",
+  "policyPhase": "event",
+  "selectedPhase": true,
+  "window": 133,
+  "expectedDuration": 133,
+  "runs": [
+   {
+    "rows": 133,
+    "exactRows": 133,
+    "residualPixels": 0,
+    "digest": "cae84b9a7009267cebc0fcb0edb0a159f4ca924262733b0eeb778c2f56ba855f",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 133,
+    "exactRows": 133,
+    "residualPixels": 0,
+    "digest": "cae84b9a7009267cebc0fcb0edb0a159f4ca924262733b0eeb778c2f56ba855f",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

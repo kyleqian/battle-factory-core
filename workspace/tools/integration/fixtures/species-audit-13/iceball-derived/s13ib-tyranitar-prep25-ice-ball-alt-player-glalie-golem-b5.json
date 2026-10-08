@@ -1,0 +1,63 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "ICE_BALL",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-13/iceball-scenarios/s13ib-tyranitar-prep25-ice-ball-alt-player-glalie-golem.json",
+ "denseWindow": {
+  "startFrame": 3378,
+  "endFrame": 3510
+ },
+ "windowSource": "window = [activation, activation + 132] (counter-4 body through the first inactive row; lag rows [112]) from a fresh iceBallProbe.py run",
+ "timingPhase": "event",
+ "attacker": {
+  "species": "GLALIE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "TYRANITAR",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019030,
+ "fieldProfile": {
+  "playerHp": 59,
+  "playerMaxHp": 187,
+  "opponentHp": 3,
+  "opponentMaxHp": 207,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 480,
+  "rolloutCounter": 5
+ },
+ "presentationRngActivation": {
+  "value": 431870206,
+  "source": "iceBallProbe.py bodies[4][0].animationRng (activation frame 3378)"
+ },
+ "iceBallChain": {
+  "foeFirst": false,
+  "earlier": [
+   {
+    "value": 802476527,
+    "source": "iceBallProbe.py bodies[0][0].animationRng (activation frame 75)"
+   },
+   {
+    "value": 3241064687,
+    "source": "iceBallProbe.py bodies[1][0].animationRng (activation frame 840)"
+   },
+   {
+    "value": 2353572294,
+    "source": "iceBallProbe.py bodies[2][0].animationRng (activation frame 1618)"
+   },
+   {
+    "value": 1228271406,
+    "source": "iceBallProbe.py bodies[3][0].animationRng (activation frame 2543)"
+   }
+  ]
+ }
+}
