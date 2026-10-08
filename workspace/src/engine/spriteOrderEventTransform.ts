@@ -133,8 +133,14 @@ export const KNOWN_ENTRY_OCCUPANT_ROLES: SpriteOrderOccupantRoles = Object.freez
 /** Healthbox other half + bar per side (63,62 / 61,60 in every creation path): fixed labels. */
 const HEALTHBOX_HALVES: readonly number[] = Object.freeze([60, 61, 62, 63]);
 
-/** Moves whose bodies hand the battler sprite to another graphics owner (§2 "substitute / transform"): invalidate. */
-const OWNERSHIP_CHANGING_MOVES: ReadonlySet<number> = new Set([144, 164]);
+/**
+ * Moves whose bodies hand the battler sprite to another graphics owner (§2 "transform"): invalidate. The Substitute body (164) is
+ * order-neutral: Move_SUBSTITUTE is playsewithpan + createvisualtask AnimTask_MonToSubstitute, which rotscales the battler's own
+ * OBJ and reloads its tiles in place (LoadBattleMonGfxAndAnimate -> BattleLoadSubstituteOrMonSpriteGfx: LZDecompressVram into the
+ * battler's sprite gfx; no CreateSprite / DestroySprite), so it applies its measured EXACT empty plan (the ext table's 164 bodies;
+ * docs/next-adapters-prep38.md s1 NEEDS-ORDER: the drop-164 lend makes Giga Drain / Mud-Slap / Ice Beam / Thunderbolt / Megahorn exact).
+ */
+const OWNERSHIP_CHANGING_MOVES: ReadonlySet<number> = new Set([144]);
 const PROMPT_CREATE: SpriteOrderPlan = Object.freeze([{ C: [["n", 0, "f"], ["n", 1, "f"]] }]);
 const BLIP: SpriteOrderPlan = Object.freeze([{ C: [["n", 0, "f"]] }, { D: [["n", 0]] }]);
 const CARRY: SpriteOrderPlan = Object.freeze([{ D: [["c", 1, 0]] }]);

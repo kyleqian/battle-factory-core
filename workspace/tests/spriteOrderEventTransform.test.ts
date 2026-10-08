@@ -42,7 +42,9 @@ describe("production sprite-order plan table (generated, pinned)", () => {
         expect(plan, key).toEqual(merged.plan);
         continue;
       }
-      if (row.verdict !== "EXACT-PLAN" || move === "144" || move === "164") {
+      // Transform (144) hands the battler sprite to another owner: refused. Substitute (164) is order-neutral (no createsprite in
+      // Move_SUBSTITUTE; its measured EXACT plan is empty).
+      if (row.verdict !== "EXACT-PLAN" || move === "144") {
         expect(plan, key).toBeNull();
         continue;
       }
@@ -50,7 +52,9 @@ describe("production sprite-order plan table (generated, pinned)", () => {
       expect(plan, key).toEqual(row.plan);
       expect(decodeSpriteOrderPlan(encodeSpriteOrderPlan(row.plan as never))).toEqual(row.plan);
     }
-    expect(exact).toBe(379);
+    expect(exact).toBe(381);
+    expect(spriteOrderProductionBodyPlan(164, "player")).toEqual([]);
+    expect(spriteOrderProductionBodyPlan(164, "opponent")).toEqual([]);
   });
 
   it("stat classes equal every observed per-argument plan; unobserved multiple +-2 refuses", () => {
@@ -89,7 +93,7 @@ describe("sprite-order presentation-event transform", () => {
     for (const event of [
       { kind: "hit-animation", targetVisible: false },
       { kind: "move-animation", moveId: 288, attackerSide: "player" },
-      { kind: "move-animation", moveId: 164, attackerSide: "player" },
+      { kind: "move-animation", moveId: 144, attackerSide: "player" },
       { kind: "status-animation", status: "CONFUSION" },
       { kind: "status-animation", status: "BRN" },
       { kind: "general-animation", animation: "HAIL_CONTINUES" },

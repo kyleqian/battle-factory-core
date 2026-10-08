@@ -760,6 +760,9 @@ export const LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS: ReadonlyMap<number, readonly (
   [25, ["player", "opponent"]], // Mega Kick
   [98, ["opponent"]], // Quick Attack (player: unresolved residual inside the doll box)
   [38, ["opponent"]], // Double-Edge (player: unresolved history residual)
+  // Order-dependent bodies: exact with the Substitute body's order-neutral lend (spriteOrderEventTransform.ts).
+  [202, ["player", "opponent"]], // Giga Drain
+  [189, ["player", "opponent"]], // Mud-Slap (D3)
 ].map(([id, sides]) => [id as number, Object.freeze(sides as ("player" | "opponent")[])]));
 
 /**

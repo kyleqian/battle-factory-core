@@ -8,7 +8,9 @@ import {
   LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS, liveBattlerAnchors, liveMoveAnimationDuration, liveMoveAnimationPresentation,
   liveMoveSubstituteDollDeclines,
 } from "../src/engine/liveMoveAnimation.ts";
-import { dolldefRowSha, type DolldefFixture } from "../tools/integration/dolldefLiveCheck.ts";
+import { applySpriteOrderPresentationEvent, createSpriteOrderTracker, spriteOrderTrackerLend } from "../src/engine/spriteOrderEventTransform.ts";
+import { knownEntrySpriteOrderState } from "../src/engine/spriteOrderProvider.ts";
+import { dolldefRowSha, dolldefView, type DolldefFixture } from "../tools/integration/dolldefLiveCheck.ts";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
 
 // S10A Substitute, DEFENDER shown as the doll (docs/next-adapters-prep38.md; tools/integration/fixtures/dolldef-live-receipt.json):
@@ -24,6 +26,8 @@ const field = (playerDoll: boolean, opponentDoll: boolean, opponent = 80): Battl
 const req = (moveId: number, attacker: 0 | 1): BattleMoveAnimationRequest =>
   ({ moveId, attacker, target: attacker === 0 ? 1 : 0, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0 }) as BattleMoveAnimationRequest;
 const defenderDoll = (attacker: 0 | 1) => (attacker === 0 ? field(false, true) : field(true, false));
+const FIXTURES = "tools/integration/fixtures/dolldef-live";
+const fixture = (stem: string) => JSON.parse(readFileSync(`${FIXTURES}/${stem}.json`, "utf8")) as DolldefFixture;
 
 describe("defender shown as the Substitute doll: proven cells live, everything else declines", () => {
   it("the proven-cell allowlist is exactly the prep38 v1 batch (27 cells)", () => {
@@ -33,7 +37,9 @@ describe("defender shown as the Substitute doll: proven cells live, everything e
       "25:opponent", "25:player", "280:opponent", "280:player", "332:player", "34:opponent", "34:player", "38:opponent",
       "44:opponent", "44:player", "53:opponent", "53:player", "57:opponent", "57:player", "89:opponent", "89:player",
       "94:opponent", "94:player", "98:opponent",
-    ]);
+      // Order-dependent cells, exact with the Substitute body's order-neutral lend (Giga Drain, Mud-Slap D3).
+      "189:opponent", "189:player", "202:opponent", "202:player",
+    ].sort());
   });
   it("a proven cell keeps its doll-free duration; unproven orientations / moves and both-doll bodies decline", () => {
     for (const [moveId, sides] of LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS) for (const side of sides) {
@@ -45,7 +51,7 @@ describe("defender shown as the Substitute doll: proven cells live, everything e
     }
     // Unproven orientations (residuals: Aerial Ace / Shadow Ball opponent = the doll-free control's, Quick Attack / Double-Edge player
     // unresolved) and unproven moves (Ice Beam, Thunderbolt, Megahorn: species-art lookups; Giga Drain, Mud-Slap: order) decline.
-    for (const [moveId, attacker] of [[332, 1], [247, 1], [98, 0], [38, 0], [58, 0], [58, 1], [85, 0], [224, 1], [202, 0], [189, 1], [29, 0]] as const) {
+    for (const [moveId, attacker] of [[332, 1], [247, 1], [98, 0], [38, 0], [58, 0], [58, 1], [85, 0], [224, 1], [29, 0]] as const) {
       expect(liveMoveAnimationDuration(req(moveId, attacker), field(false, false))).not.toBeNull();
       expect(liveMoveSubstituteDollDeclines(req(moveId, attacker), defenderDoll(attacker))).toBe(true);
       expect(liveMoveAnimationDuration(req(moveId, attacker), defenderDoll(attacker))).toBeNull();
@@ -73,13 +79,31 @@ describe("defender shown as the Substitute doll: proven cells live, everything e
   });
 });
 
-const FIXTURES = "tools/integration/fixtures/dolldef-live";
-const fixture = (stem: string) => JSON.parse(readFileSync(`${FIXTURES}/${stem}.json`, "utf8")) as DolldefFixture;
+describe("the Substitute body is order-neutral in the sprite-order tracker", () => {
+  it("Move_SUBSTITUTE (no createsprite) applies its empty EXACT plan: the lend after it equals the lend before; Transform still refuses", () => {
+    const known = createSpriteOrderTracker(knownEntrySpriteOrderState("ordinary-factory"));
+    for (const side of ["player", "opponent"] as const) {
+      const after = applySpriteOrderPresentationEvent(known, { kind: "move-animation", moveId: 164, attackerSide: side });
+      expect(after.cursor.order.known).toBe(true);
+      expect(spriteOrderTrackerLend(after)).toEqual(spriteOrderTrackerLend(known));
+      expect(applySpriteOrderPresentationEvent(known, { kind: "move-animation", moveId: 144, attackerSide: side }).cursor.order.known).toBe(false);
+    }
+  });
+  it("a defender-first Giga Drain / Mud-Slap after [Substitute] gets the production order lend (no withheld order input)", () => {
+    for (const stem of ["prep38-df-giga-drain-player", "prep38-df-giga-drain-opponent", "prep38-df-mud-slap-player", "prep38-df-mud-slap-opponent"]) {
+      const f = fixture(stem);
+      expect(f.precedingBodies).toEqual([{ moveId: 164, side: f.target.geometry.side }]);
+      const v = dolldefView(f, 0);
+      expect((v.effect as { spriteOrderInput?: unknown }).spriteOrderInput, stem).toBeDefined();
+    }
+  });
+});
+
 
 describe("dense direct-mGBA windows through the production live renderer (committed ROM RGB sha256 per row)", () => {
   it("every committed fixture is a defender-doll TEST body of a proven cell", () => {
     const stems = readdirSync(FIXTURES).filter((n) => n.endsWith(".json"));
-    expect(stems.length).toBeGreaterThanOrEqual(37);
+    expect(stems.length).toBeGreaterThanOrEqual(41);
     for (const n of stems) {
       const f = fixture(n.replace(/\.json$/, ""));
       expect(f.defenderDoll).toBe(true);
