@@ -26,6 +26,10 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- Species audit 11 (side, `e2a181c9d`, new files only): Dive / Extreme Speed / Ice Ball / Memento, 176 rows x2 fresh:
+  139 0 px, 16 declines confirmed by gate lifts, DEFECT: Dive setup length hard-coded (most attacker species ~23-27k
+  px; patch proof 0 px — reproduced by the supervisor), new lag cases (Extreme Speed 320/321; Dive CLAMPERL), TYRANITAR
+  rows unresolved. ISSUES #152. Skill Swap / Flatter not audited (not on master when it started).
 - Folded Opus worker `37a376a0c` as `f4da9d7aa` (src tree `452c09b4`): FAITHFUL-TIMING Skill Swap (285; prep35 model;
   lag at 176, 4 of 6 -> 196 rows; display-neutral restore row 175; 6 windows; route 8/7 VENOMOTH), FAITHFUL-RANDOM
   Flatter (260; 114 words from the presentation host; prep35 OAM provider; live-view healthbox fade generalised from
