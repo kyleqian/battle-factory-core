@@ -1,0 +1,69 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "EXTREME_SPEED",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-11/scenarios/tyranitarA-extreme-speed-alt-player-smeargle-golem.json",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 399
+ },
+ "windowSource": "speciesAudit11: window = [activation, activation + 321 - 1] of the swapped scenario's own first EXTREME_SPEED body (2 fresh prep22Probe.py runs agree)",
+ "attacker": {
+  "species": "TYRANITAR",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019025,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 176,
+  "playerMaxHp": 176,
+  "opponentHp": 156,
+  "opponentMaxHp": 156,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "speciesAudit11": {
+  "acceptedFixture": "tools/integration/fixtures/s10a-live/extreme-speed-alt-player-smeargle-golem.json",
+  "swappedSide": "player",
+  "bodies": [
+   [
+    245,
+    79,
+    399,
+    0
+   ],
+   [
+    106,
+    593,
+    694,
+    1
+   ],
+   [
+    0,
+    698,
+    773,
+    1
+   ]
+  ],
+  "bodyIndex": 0,
+  "rows": 321,
+  "personality": [
+   2349019025,
+   1793699975
+  ],
+  "freshProbeRunsAgree": true
+ },
+ "timingPhase": "event",
+ "timingPhaseSource": "a13fix: the ROM body length of this window (321 rows: optional lag at 292 present; species-audit-11 counters: 321-row windows lag [292, 313, 314], 320-row [312, 313])"
+}

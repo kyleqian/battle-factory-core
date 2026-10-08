@@ -1,0 +1,169 @@
+[
+ {
+  "stem": "s13-atkonix-ice-beam-opponent",
+  "kind": "test",
+  "fixture": "s13-atkonix-ice-beam-opponent-test.json",
+  "window": [
+   343,
+   545
+  ],
+  "shift": 0,
+  "orderInput": "fixture",
+  "residualPixels": [
+   0,
+   0
+  ],
+  "ageRomSha256": [
+   [
+    0,
+    "1306b90f0f850c08ba018db9d31d399c37a3019c904858d8afc4ae185baa27ef"
+   ],
+   [
+    25,
+    "951fc907a91f559a57d334ef2eeca10b66b35f3df010be7e610f55f6098f4430"
+   ],
+   [
+    50,
+    "2dcd10911b2ef77000a2181818df95c227affca523ed45311aaf1b777f4770f9"
+   ],
+   [
+    75,
+    "f4be4eb155e739041022850ea66b3ed6a27c3825badfc8155a3ae7c119479b2d"
+   ],
+   [
+    100,
+    "7510f2a01fecf862443c58f02b33c1104bf875f6f6c9224f510ba6b0d93da296"
+   ],
+   [
+    125,
+    "79af2543d6c0a27b43e2dec3f06c43cc7480da181c82f7a5c783a90d32d7877f"
+   ],
+   [
+    150,
+    "dc5221b4f07794ddbea318ccd285434d555d0217cd3b05f90e1ee127ce8bdb71"
+   ],
+   [
+    175,
+    "44455a894eae6c5a711cc80d0dced6e8d97714b7e5b1a62da2f67c9c3ee50827"
+   ],
+   [
+    200,
+    "1306b90f0f850c08ba018db9d31d399c37a3019c904858d8afc4ae185baa27ef"
+   ],
+   [
+    202,
+    "1306b90f0f850c08ba018db9d31d399c37a3019c904858d8afc4ae185baa27ef"
+   ]
+  ]
+ },
+ {
+  "stem": "s13-atkonix-thunderbolt-opponent",
+  "kind": "test",
+  "fixture": "s13-atkonix-thunderbolt-opponent-test.json",
+  "window": [
+   346,
+   582
+  ],
+  "shift": 0,
+  "orderInput": "fixture",
+  "residualPixels": [
+   0,
+   0
+  ],
+  "ageRomSha256": [
+   [
+    0,
+    "7bd3247866bb39136da28498b379a9bfe8cf5b9c3658525050ee7fad003923e5"
+   ],
+   [
+    25,
+    "1b76204c46b78f3a6988b856c5e9ddb9f67eb701ac40485a0cd5b0d7b86fecdc"
+   ],
+   [
+    50,
+    "f95fb5132605ebf10d3f915074d2851c65a043013a8a4e30b871985f621a8c50"
+   ],
+   [
+    75,
+    "44d39069b67355d4b6ec32bf9c23f9c00e3aef4e497c0f7ff43d2ed55f64fdf8"
+   ],
+   [
+    100,
+    "1b76204c46b78f3a6988b856c5e9ddb9f67eb701ac40485a0cd5b0d7b86fecdc"
+   ],
+   [
+    125,
+    "27981e1536bae8fa41ea45ed7f2978eced94fcdc7b3692b1f19e78fe6585aecc"
+   ],
+   [
+    150,
+    "1b76204c46b78f3a6988b856c5e9ddb9f67eb701ac40485a0cd5b0d7b86fecdc"
+   ],
+   [
+    175,
+    "3d9eb4c3f681036e23f5e7c6ebfae728192795ec74ae993eb1af3c6f9a80b39b"
+   ],
+   [
+    200,
+    "bc1dc3c2aa3f3819fbbf2f71e9534e292cf03a40260ba01a2c89a72439a2cedb"
+   ],
+   [
+    225,
+    "1b76204c46b78f3a6988b856c5e9ddb9f67eb701ac40485a0cd5b0d7b86fecdc"
+   ],
+   [
+    236,
+    "7bd3247866bb39136da28498b379a9bfe8cf5b9c3658525050ee7fad003923e5"
+   ]
+  ]
+ },
+ {
+  "stem": "s13-atkonix-sludge-bomb-opponent",
+  "kind": "test",
+  "fixture": "s13-atkonix-sludge-bomb-opponent-test.json",
+  "window": [
+   346,
+   514
+  ],
+  "shift": -4,
+  "orderInput": "fixture",
+  "residualPixels": [
+   0,
+   0
+  ],
+  "ageRomSha256": [
+   [
+    -4,
+    "e96c38ce62df60d9d104c8780e3035cf3dfbd4969f65b00d8e76e448f1388ab4"
+   ],
+   [
+    21,
+    "abfaf832ea934179158e96fb9c13e0671a0d413914c57bce3370458185d0bfb0"
+   ],
+   [
+    46,
+    "e6be1ddd3345a488dade6fc70bd8e52bede1554b8277447b54568bc0b09de616"
+   ],
+   [
+    71,
+    "47d31ba0fc906244c7003988423e827dbe4ab882b571bb40e1da68a8d34c4f61"
+   ],
+   [
+    96,
+    "e96c38ce62df60d9d104c8780e3035cf3dfbd4969f65b00d8e76e448f1388ab4"
+   ],
+   [
+    121,
+    "b2caaa6a6e7595cfcd02d384d7ce07de8784e6361d178ca6a040d2fb98d6aa72"
+   ],
+   [
+    146,
+    "34f3eea6f29bb41b6b46f8aa3613b5c1bd854ce81cdfa87fd93e58b429556b46"
+   ],
+   [
+    164,
+    "e96c38ce62df60d9d104c8780e3035cf3dfbd4969f65b00d8e76e448f1388ab4"
+   ]
+  ]
+ }
+]

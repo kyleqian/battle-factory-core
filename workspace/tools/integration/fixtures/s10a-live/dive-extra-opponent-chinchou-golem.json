@@ -8,7 +8,8 @@
   "endFrame": 331
  },
  "windowSource": "window = [activation, activation + 115 - 1] (the setup body + its first inactive row) from a fresh prep22Probes.sh run",
- "timingPhase": null,
+ "timingPhase": "no-event",
+ "timingPhaseSource": "a13fix: optional-lag-age 64 (opponent setup) absent, issue151Counters.sh 2 fresh runs identical (lag ages [])",
  "attacker": {
   "species": "CHINCHOU",
   "geometry": {

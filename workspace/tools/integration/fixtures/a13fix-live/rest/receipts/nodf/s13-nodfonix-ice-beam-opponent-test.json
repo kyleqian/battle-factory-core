@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-nodfonix-ice-beam-opponent-test.json",
+  "stem": "s13-nodfonix-ice-beam-opponent",
+  "kind": "test",
+  "move": "ICE_BEAM",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   1742,
+   1944
+  ],
+  "rows": 203,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 203,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "8fca3f4396649299801960f7b133786a0357d6e8e5b59f24c4296dd6a749b99e"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "8fca3f4396649299801960f7b133786a0357d6e8e5b59f24c4296dd6a749b99e"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

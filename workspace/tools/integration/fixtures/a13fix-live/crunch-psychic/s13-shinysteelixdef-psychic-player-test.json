@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-shinysteelixdef-psychic-player-test.json",
+  "stem": "s13-shinysteelixdef-psychic-player",
+  "kind": "test",
+  "move": "PSYCHIC",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   351,
+   495
+  ],
+  "rows": 145,
+  "orderInput": "fixture",
+  "shift": -5,
+  "liveDuration": 140,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "d28e7c7b84112fe2c99fa3a855ed551f10aa45a85ee206303ba3928b27dc2dca"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "d28e7c7b84112fe2c99fa3a855ed551f10aa45a85ee206303ba3928b27dc2dca"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

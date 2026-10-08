@@ -1,0 +1,3 @@
+dive-alt-opponent-lanturn-golem: window 53-167 digests d90901889ad8fe2a d90901889ad8fe2a identical True lag ages []
+dive-extra-opponent-chinchou-golem: window 217-331 digests ec90d531aa1cffac ec90d531aa1cffac identical True lag ages []
+dive-opponent-chinchou-player-onix: window 196-310 digests ecdc9d61356d7a13 ecdc9d61356d7a13 identical True lag ages []

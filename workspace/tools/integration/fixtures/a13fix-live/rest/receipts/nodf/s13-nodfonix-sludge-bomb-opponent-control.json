@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-nodfonix-sludge-bomb-opponent-control.json",
+  "stem": "s13-nodfonix-sludge-bomb-opponent",
+  "kind": "control",
+  "move": "SLUDGE_BOMB",
+  "attackerSide": "opponent",
+  "defenderDoll": false,
+  "window": [
+   79,
+   247
+  ],
+  "rows": 169,
+  "orderInput": "fixture",
+  "shift": -4,
+  "liveDuration": 160,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 169,
+    "digest": "8ea208e8ea154cfe97dd49e13dee8a2ea646b09027f695ac0cbebdfe48c239af"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 169,
+    "digest": "8ea208e8ea154cfe97dd49e13dee8a2ea646b09027f695ac0cbebdfe48c239af"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

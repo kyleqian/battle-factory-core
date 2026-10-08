@@ -15795,12 +15795,15 @@ export function renderSceneOnMovePresentation(
       view.target.geometry.spriteCorner.x + targetX2 + (iceBeamState.age < 39 ? iceBeamState.config.targetIdleX2 ?? 0 : 0),
       view.target.geometry.spriteCorner.y,
     );
+    // A live opponent attacker keeps its front idle rest all window (no ICE_BEAM step writes the attacker's x2; audit 13).
+    const attackerIdle = liveField && view.attacker.geometry.side === "opponent"
+      ? sceneOnBattlerFrontIdleRest(view.attacker) : { x2: 0, y2: 0 };
     const drawAttacker = () => drawSpriteSheet(
       fb,
       attackerArt.tileset,
       attackerArt.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
     );
     // monbg copies the target to BG1/BG2 and removes its live OBJ. The copy
     // is the eligible target-2 layer sampled by semi-transparent crystals.
@@ -27532,11 +27535,14 @@ export function renderSceneOnMovePresentation(
       preceding.targetPaletteY);
     const items: Array<{ subpriority: number; y: number; slot: number; order: number;
       draw: () => void }> = [];
+    // A live opponent attacker keeps its front idle rest all window (no THUNDERBOLT step writes the attacker's x2; audit 13).
+    const attackerIdle = liveField && view.attacker.geometry.side === "opponent"
+      ? sceneOnBattlerFrontIdleRest(view.attacker) : { x2: 0, y2: 0 };
     items.push({ subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
       y: view.attacker.geometry.animationCenter.y, slot: 6, order: -2,
       draw: () => drawSpriteSheet(fb, tilesFor(attackerArt, view.attacker.geometry.side),
-        attackerArt.palette, view.attacker.geometry.spriteCorner.x,
-        view.attacker.geometry.spriteCorner.y) });
+        attackerArt.palette, view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+        view.attacker.geometry.spriteCorner.y + attackerIdle.y2) });
     items.push({ subpriority: view.target.geometry.side === "player" ? 30 : 40,
       y: view.target.geometry.animationCenter.y, slot: 8, order: -1,
       draw: () => drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side),
@@ -41303,12 +41309,15 @@ export function renderSceneOnMovePresentation(
         if (sprite.kind === "projectile") drawSludgeSprite(sprite);
       }
     };
+    // A live opponent attacker keeps its front idle rest all window (no SLUDGE / SLUDGE_BOMB step writes the attacker's x2; audit 13).
+    const attackerIdle = liveField && view.attacker.geometry.side === "opponent"
+      ? sceneOnBattlerFrontIdleRest(view.attacker) : { x2: 0, y2: 0 };
     const drawGrimer = () => drawSpriteSheet(
         fb,
         attackerSprite.tileset,
         attackerSprite.palette,
-        view.attacker.geometry.spriteCorner.x,
-        view.attacker.geometry.spriteCorner.y,
+        view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+        view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
       );
     // SortSprites' side-relative battler subpriority puts the player-back
     // attacker over its launch, but the opponent-front launch over Grimer.

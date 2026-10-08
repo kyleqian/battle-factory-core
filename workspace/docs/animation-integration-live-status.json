@@ -363,19 +363,6 @@
       ]
     },
     {
-      "move": "MOVE_PSYCHIC",
-      "id": 94,
-      "liveEvidence": [
-        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: psychic-player, psychic-opponent, psychic-golbat-player, df-psychic-kadabra-golbat-player, df-psychic-haunter-kadabra-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts). The HAUNTER -> KADABRA window differs only on the pre-activation row (age -5: the elevated HAUNTER attacker's shadow, not the doll).",
-        "S10A ATTACKER shown as the Substitute doll (docs/next-adapters-prep40.md; LIVE_SUBSTITUTE_SWAP_BODY_CELLS, attacker side player): SUBSTITUTE_TO_MON + idle + body + MON_TO_SUBSTITUTE presented live; framed by the ROM body (LIVE_SUBSTITUTE_SWAP_BODY_FRAMING: 145 rows activation .. first inactive, adapter age = body row -5). Dense composite windows from fresh direct-mGBA prep40 probes, two fresh passes x2 runs byte-identical, through the production live renderer: 1 of 1 windows (230 rows) 0 px; the tail row (the next command's first row) 0 px with the doll latched at x2 -5 / +5 (receipt tools/integration/fixtures/attdoll-live-receipt.json; tests/substituteSwapAttdollCells.test.ts)."
-      ],
-      "sourceFieldEvidence": "../tools/integration/fixtures/status-batch-live-framebuffer-receipt.json",
-      "remaining": [
-        "independent arbitrary-species/history framebuffer comparison",
-        "ordinary command-input replay"
-      ]
-    },
-    {
       "move": "MOVE_HYPNOSIS",
       "id": 95,
       "liveEvidence": [],
@@ -666,19 +653,6 @@
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison",
         "ordinary command-input replay"
-      ]
-    },
-    {
-      "move": "MOVE_CRUNCH",
-      "id": 242,
-      "liveEvidence": [
-        "seed 7 MAWILE -> VOLBEAT twice",
-        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: crunch-player, crunch-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts).",
-        "S10A ATTACKER shown as the Substitute doll (docs/next-adapters-prep40.md; LIVE_SUBSTITUTE_SWAP_BODY_CELLS, attacker side player + opponent): SUBSTITUTE_TO_MON + idle + body + MON_TO_SUBSTITUTE presented live. Dense composite windows from fresh direct-mGBA prep40 probes, two fresh passes x2 runs byte-identical, through the production live renderer: 4 of 4 windows (896 rows) 0 px; the tail row (the next command's first row) 0 px with the doll latched at x2 -5 / +5 (receipt tools/integration/fixtures/attdoll-live-receipt.json; tests/substituteSwapAttdollCells.test.ts)."
-      ],
-      "sourceFieldEvidence": "../tools/integration/fixtures/live-contact-source-field-receipt.json",
-      "remaining": [
-        "independent arbitrary-species/history framebuffer comparison"
       ]
     },
     {
@@ -3726,21 +3700,6 @@
       ]
     },
     {
-      "move": "MOVE_EXTREME_SPEED",
-      "id": 245,
-      "sourceFieldEvidence": "../tools/integration/fixtures/em-live-receipt.json",
-      "liveEvidence": [
-        "docs/next-adapters-prep34.md s1: the unchanged reducer src/animation/extremeSpeed.ts at reducer age 43 on the activation row (live age 0 = activation, animationAgeOffset 43, both sides, both species pairs), duration 321 rows; the attacker pic-coords yOffset is the A input of the stretch y2 (SceneOnExtremeSpeedConfig.attackerYOffset from the art view's coords.yOffset; absent = the accepted ARCANINE 6 / 2); hit-splat anchor = the target sprite centre; no Random2, lag or history input; never a capture row",
-        "renderer: battleScene.ts EXTREME_SPEED branch with live-field gates, live battler art at the field sprite corners, healthboxes / message under !liveField; staged / accepted outputs byte-identical (tools/integration/s10aStagedDigest.ts at dc0283345 == at the change)",
-        "dense full windows zero residual twice fresh through the production live renderer from each scenario's own activation, both orientations: accepted ARCANINE -> DUGTRIO P / O, prep34 SMEARGLE -> GOLEM P / O, elevated opponent target SMEARGLE -> GOLBAT P (#142 shadow row 0) (5 windows, 1605 / 1605 rows; tools/integration/fixtures/s10a-live/extreme-speed-*.json)",
-        "ordinary route 182/21 ARCANINE (slot 1): live every age (321), following prompt reached, Scene ON/OFF gameplay / RNG / facility parity (tests/animation/liveExtremeSpeedMementoAdapters.test.ts)"
-      ],
-      "remaining": [
-        "shiny battlers and non-zero idle rests on either battler decline (no rest window measured; the impact program writes the target x2)",
-        "doubles / contest paths not covered"
-      ]
-    },
-    {
       "move": "MOVE_MEMENTO",
       "id": 262,
       "sourceFieldEvidence": "../tools/integration/fixtures/em-live-receipt.json",
@@ -3814,7 +3773,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 250,
+  "implementedCount": 247,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 13,
@@ -3991,7 +3950,7 @@
     },
     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
   },
-  "faithfulTimingCount": 13,
+  "faithfulTimingCount": 16,
   "faithfulTimingAdapters": [
     {
       "id": 183,
@@ -4935,10 +4894,38 @@
           "chosen": "event",
           "tieRuleUsed": false,
           "side": "player"
+        },
+        {
+          "kind": "optional-lag-age",
+          "age": 64,
+          "fixedLagAges": [],
+          "iterations": 115,
+          "side": "opponent",
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 115,
+              "measured": 1
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 115,
+              "measured": 6
+            }
+          ],
+          "chosen": "no-event",
+          "tieRuleUsed": false
         }
       ],
       "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
       "alternatePhaseResidual": {
+        "windows": {
+          "clamperlA-dive-opponent-chinchou-player-onix": {
+            "ages": [66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95],
+            "rows": 30,
+            "cause": "optional-lag-age 64 (opponent setup; a13fix, ISSUES #152): CLAMPERL after a Tackle lags at 64, the splash / droplet rows 66..95 run one row late; the setup still ends on row 115"
+          }
+        },
         "ages": [
           68
         ],
@@ -5191,6 +5178,213 @@
         "python3 tools/integration/s10aLiveFixtures.py PROBEDIR SKILL_SWAP",
         "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/s10a-live/skill-swap-*.json",
         "npx vitest run tests/animation/liveSkillSwapFlatterAdapters.test.ts tests/animation/liveMoveTimingPolicy.test.ts"
+      ]
+    },
+    {
+      "id": 242,
+      "move": "MOVE_CRUNCH",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 121,
+          "fixedLagAges": [
+            98,
+            99
+          ],
+          "iterations": 139,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 142,
+              "measured": 17
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 141,
+              "measured": 13
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138
+        ],
+        "rows": 16,
+        "maxPixelsPerRow": 19081,
+        "cause": "optional-lag-age 121 absent (141-row ROM body; species audit 13: 13 of 30 defender-doll windows): the closing fade runs one row earlier than the policy's 142-row phase, full field (0..239 x 0..111); tools/integration/fixtures/a13fix-live/crunch-psychic (fresh, 2 runs identical)"
+      },
+      "d3": false,
+      "evidence": [
+        "reclassified from scoped exact (a13fix, #151 precedent: the adapter gained a measured CPU-phase parameter); the existing exact fixture proofs stay valid in their proved scope",
+        "scoped-exact liveEvidence: seed 7 MAWILE -> VOLBEAT twice",
+        "scoped-exact liveEvidence: S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: crunch-player, crunch-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts).",
+        "scoped-exact liveEvidence: S10A ATTACKER shown as the Substitute doll (docs/next-adapters-prep40.md; LIVE_SUBSTITUTE_SWAP_BODY_CELLS, attacker side player + opponent): SUBSTITUTE_TO_MON + idle + body + MON_TO_SUBSTITUTE presented live. Dense composite windows from fresh direct-mGBA prep40 probes, two fresh passes x2 runs byte-identical, through the production live renderer: 4 of 4 windows (896 rows) 0 px; the tail row (the next command's first row) 0 px with the doll latched at x2 -5 / +5 (receipt tools/integration/fixtures/attdoll-live-receipt.json; tests/substituteSwapAttdollCells.test.ts).",
+        "sourceFieldEvidence: ../tools/integration/fixtures/live-contact-source-field-receipt.json",
+        "scoped-exact remaining: independent arbitrary-species/history framebuffer comparison",
+        "tools/integration/fixtures/a13fix-live-receipt.json"
+      ],
+      "proofCommands": [
+        "OUT=PROBEDIR SC=tools/integration/fixtures/species-audit-13/scenarios JOBS=15 sh tools/integration/speciesAudit13Probes.sh <the 30 s13-*-crunch-* stems>",
+        "python3 tools/integration/speciesAudit13Fixtures.py PROBEDIR tools/integration/fixtures/species-audit-13/scenarios DERIVED tools/integration/fixtures/species-audit-13/personality.tsv",
+        "PROBES=PROBEDIR REC=RECDIR P=14 sh tools/integration/speciesAudit13CheckAll.sh DERIVED/s13-*-crunch-*.json",
+        "npx vitest run tests/animation/liveSpeciesAudit13Fixes.test.ts"
+      ]
+    },
+    {
+      "id": 94,
+      "move": "MOVE_PSYCHIC",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 124,
+          "fixedLagAges": [
+            101,
+            102
+          ],
+          "iterations": 142,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 145,
+              "measured": 26
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 144,
+              "measured": 2
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141
+        ],
+        "rows": 16,
+        "maxPixelsPerRow": 18272,
+        "cause": "optional-lag-age 124 absent (144-row ROM body; species audit 13: 2 of 28 windows, ONIX player-side / RATTATA opponent-side doll): the closing fade runs one row earlier than the policy's 145-row phase; ages are ROM body rows from activation (speciesAudit13Check.ts rows; the adapter's own ages are 5 less, 121..136, LIVE_SUBSTITUTE_SWAP_BODY_FRAMING 94); tools/integration/fixtures/a13fix-live/crunch-psychic"
+      },
+      "d3": false,
+      "evidence": [
+        "reclassified from scoped exact (a13fix, #151 precedent: the adapter gained a measured CPU-phase parameter); the existing exact fixture proofs stay valid in their proved scope",
+        "scoped-exact liveEvidence: S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: psychic-player, psychic-opponent, psychic-golbat-player, df-psychic-kadabra-golbat-player, df-psychic-haunter-kadabra-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts). The HAUNTER -> KADABRA window differs only on the pre-activation row (age -5: the elevated HAUNTER attacker's shadow, not the doll).",
+        "scoped-exact liveEvidence: S10A ATTACKER shown as the Substitute doll (docs/next-adapters-prep40.md; LIVE_SUBSTITUTE_SWAP_BODY_CELLS, attacker side player): SUBSTITUTE_TO_MON + idle + body + MON_TO_SUBSTITUTE presented live; framed by the ROM body (LIVE_SUBSTITUTE_SWAP_BODY_FRAMING: 145 rows activation .. first inactive, adapter age = body row -5). Dense composite windows from fresh direct-mGBA prep40 probes, two fresh passes x2 runs byte-identical, through the production live renderer: 1 of 1 windows (230 rows) 0 px; the tail row (the next command's first row) 0 px with the doll latched at x2 -5 / +5 (receipt tools/integration/fixtures/attdoll-live-receipt.json; tests/substituteSwapAttdollCells.test.ts).",
+        "sourceFieldEvidence: ../tools/integration/fixtures/status-batch-live-framebuffer-receipt.json",
+        "scoped-exact remaining: independent arbitrary-species/history framebuffer comparison",
+        "scoped-exact remaining: ordinary command-input replay",
+        "tools/integration/fixtures/a13fix-live-receipt.json"
+      ],
+      "proofCommands": [
+        "OUT=PROBEDIR SC=tools/integration/fixtures/species-audit-13/scenarios JOBS=15 sh tools/integration/speciesAudit13Probes.sh <the 28 s13-*-psychic-* stems>",
+        "python3 tools/integration/speciesAudit13Fixtures.py PROBEDIR tools/integration/fixtures/species-audit-13/scenarios DERIVED tools/integration/fixtures/species-audit-13/personality.tsv",
+        "PROBES=PROBEDIR REC=RECDIR P=14 sh tools/integration/speciesAudit13CheckAll.sh DERIVED/s13-*-psychic-*.json",
+        "npx vitest run tests/animation/liveSpeciesAudit13Fixes.test.ts"
+      ]
+    },
+    {
+      "id": 245,
+      "move": "MOVE_EXTREME_SPEED",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 292,
+          "fixedLagAges": [
+            312,
+            313
+          ],
+          "iterations": 318,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 321,
+              "measured": 38
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 320,
+              "measured": 4
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          294,
+          295,
+          296,
+          297,
+          298,
+          299,
+          300,
+          301,
+          302,
+          303,
+          304,
+          305,
+          306,
+          307,
+          308,
+          309
+        ],
+        "rows": 16,
+        "maxPixelsPerRow": 17094,
+        "cause": "optional-lag-age 292 absent (320-row ROM body, lags [312, 313] instead of [292, 313, 314]; species audit 11: 4 of 42 windows): rows 294..309 one row early; tools/integration/fixtures/a13fix-live/extreme-speed"
+      },
+      "d3": false,
+      "evidence": [
+        "reclassified from scoped exact (a13fix, #151 precedent: the adapter gained a measured CPU-phase parameter); the existing exact fixture proofs stay valid in their proved scope",
+        "scoped-exact liveEvidence: docs/next-adapters-prep34.md s1: the unchanged reducer src/animation/extremeSpeed.ts at reducer age 43 on the activation row (live age 0 = activation, animationAgeOffset 43, both sides, both species pairs), duration 321 rows; the attacker pic-coords yOffset is the A input of the stretch y2 (SceneOnExtremeSpeedConfig.attackerYOffset from the art view's coords.yOffset; absent = the accepted ARCANINE 6 / 2); hit-splat anchor = the target sprite centre; no Random2, lag or history input; never a capture row",
+        "scoped-exact liveEvidence: renderer: battleScene.ts EXTREME_SPEED branch with live-field gates, live battler art at the field sprite corners, healthboxes / message under !liveField; staged / accepted outputs byte-identical (tools/integration/s10aStagedDigest.ts at dc0283345 == at the change)",
+        "scoped-exact liveEvidence: dense full windows zero residual twice fresh through the production live renderer from each scenario's own activation, both orientations: accepted ARCANINE -> DUGTRIO P / O, prep34 SMEARGLE -> GOLEM P / O, elevated opponent target SMEARGLE -> GOLBAT P (#142 shadow row 0) (5 windows, 1605 / 1605 rows; tools/integration/fixtures/s10a-live/extreme-speed-*.json)",
+        "scoped-exact liveEvidence: ordinary route 182/21 ARCANINE (slot 1): live every age (321), following prompt reached, Scene ON/OFF gameplay / RNG / facility parity (tests/animation/liveExtremeSpeedMementoAdapters.test.ts)",
+        "sourceFieldEvidence: ../tools/integration/fixtures/em-live-receipt.json",
+        "scoped-exact remaining: shiny battlers and non-zero idle rests on either battler decline (no rest window measured; the impact program writes the target x2)",
+        "scoped-exact remaining: doubles / contest paths not covered",
+        "tools/integration/fixtures/a13fix-live-receipt.json"
+      ],
+      "proofCommands": [
+        "DERIVED=tools/integration/fixtures/a13fix-live/extreme-speed/derived sh tools/integration/speciesAudit9Run.sh RECDIR 14 '*'",
+        "npx vitest run tests/animation/liveSpeciesAudit13Fixes.test.ts"
       ]
     }
   ],

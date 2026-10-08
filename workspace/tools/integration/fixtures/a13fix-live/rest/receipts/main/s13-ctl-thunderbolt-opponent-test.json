@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-ctl-thunderbolt-opponent-test.json",
+  "stem": "s13-ctl-thunderbolt-opponent",
+  "kind": "test",
+  "move": "THUNDERBOLT",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   349,
+   585
+  ],
+  "rows": 237,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 237,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "3895cadb61730679abc9fc700c65248c6b91b2081a0dc011cd532e64a722578e"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "3895cadb61730679abc9fc700c65248c6b91b2081a0dc011cd532e64a722578e"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

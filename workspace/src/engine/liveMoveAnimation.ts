@@ -203,9 +203,9 @@ const liveIceBallCounter = (rolloutCounter: number | undefined): 0 | 1 | 2 | 3 |
 
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   2, 5, 9, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 42, 43, 44, 47, 48, 49, 50,
-  51, 55, 65, 66, 67, 68, 74, 75, 78, 79, 83, 92, 93, 94, 95, 97, 101, 103, 105, 106, 108, 109, 112, 113,
+  51, 55, 65, 66, 67, 68, 74, 75, 78, 79, 83, 92, 93, 95, 97, 101, 103, 105, 106, 108, 109, 112, 113,
   114, 115, 122, 124, 131, 136, 147, 148, 151, 154, 156, 158, 162, 163, 172, 178, 180, 182, 186, 188, 201, 204,
-  208, 211, 213, 223, 227, 231, 232, 235, 242, 243, 246, 247, 257, 264, 272, 277, 280, 281, 287, 290, 302,
+  208, 211, 213, 223, 227, 231, 232, 235, 243, 246, 247, 257, 264, 272, 277, 280, 281, 287, 290, 302,
   305, 306, 319, 320, 321, 325, 334, 335, 336, 337, 342, 343, 347,
   56, 61, 197, 238, 259, 294, 341,
   // prep11 (docs/next-adapters-prep11.md): Leech Seed main body.
@@ -224,6 +224,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // prep22 P3: Signal Beam first body (the WIN0 first-body registers and the lent order are the first-body inputs).
   324,
   // prep22 P3: Sheer Cold first body: reclassified to faithful timing (#151, liveMoveTimingPolicy.ts 329); its exact fixtures stay valid in scope.
+  // Psychic (94) and Crunch (242): reclassified to faithful timing (a13fix, species audit 13 optional lags at 124 / 121, liveMoveTimingPolicy.ts);
+  // their exact fixtures stay valid in scope.
   // Q2 (docs/next-adapters-prep25.md s0.2 / C): zero-Random2 bodies through liveQ2Moves.ts: Smog, Sand Tomb, Sky Attack
   // (charge + strike); Hyper Voice reclassified to faithful timing (#151, liveMoveTimingPolicy.ts 304). Snore (prep28: a known lend after Sleep Powder + its sleep status animations; any unknown lend declines).
   123, 328, 143, 173,
@@ -240,8 +242,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   216,
   // Spit Up, all three Stockpile counters (docs/next-adapters-prep31.md s2 / s3; liveSpitUpInputs.ts): any known lend.
   255,
-  // Extreme Speed (docs/next-adapters-prep34.md s1): reducer age 43 at activation, 321 rows; no Random2 / lag / history input.
-  245,
+  // Extreme Speed (docs/next-adapters-prep34.md s1; reducer age 43 at activation, 321 rows): reclassified to faithful timing (a13fix, the
+  // optional lag at 292, liveMoveTimingPolicy.ts 245); its exact fixtures stay valid in scope.
   // Memento first body (docs/next-adapters-prep34.md s2): production-derived battler inputs + the first-body scanline entry; 175..179 rows.
   262,
   // Shock Wave (docs/next-adapters-prep33.md s1 / s3; liveOamMoves.ts liveShockWaveInputs): the reducer's geometry-derived timing, any known lend.
@@ -811,7 +813,8 @@ export function liveMoveAnimationDuration(
       return inputs === null ? null : waterSpoutTimeline(inputs).length;
     }
     case 2: return KARATE_CHOP_FRAME_COUNT;
-    case 245: return 321; // Extreme Speed: activation .. first inactive row (prep34 s1.1, both sides, both species pairs).
+    // Extreme Speed: activation .. first inactive row (prep34 s1.1); faithful timing (a13fix): the policy's dominant 321-row phase (lag at 292).
+    case 245: return liveMoveTimingBodyRows(245);
     // Memento (prep34 s2.3): the body length depends on the shadow geometry (175..179 rows measured), only defined with the displayed field.
     case 262: return field === undefined ? null : reduceMemento(liveMementoReducerConfig(field, request.attacker === 0 ? "player" : "opponent")).length;
     case 9: return THUNDER_PUNCH_MOVE_BODY_LAST_AGE + 1;
@@ -850,7 +853,9 @@ export function liveMoveAnimationDuration(
     case 83: return 104; // Fire Spin source window through target-shake cleanup.
     case 92: return 219; // Toxic's bubbles through the source-owned cleanup.
     case 93:
-    case 94: return 140; // Psychic-background fade-out through inactive cleanup.
+    // Psychic-background fade-out through inactive cleanup: the ROM body (policy 145 rows, lag at 124; faithful timing, a13fix) less the 5 rows
+    // before the adapter's age 0 (LIVE_SUBSTITUTE_SWAP_BODY_FRAMING 94 shift -5) = 140.
+    case 94: return liveMoveTimingBodyRows(94)! - 5;
     case 95:
       return request.attacker === 0
         ? HYPNOSIS_PLAYER_FRAME_COUNT
@@ -926,7 +931,7 @@ export function liveMoveAnimationDuration(
     case 204: return CHARM_BODY_FRAME_COUNT;
     case 213: return ATTRACT_FRAME_COUNT;
     case 227: return ENCORE_END_AGE + 1;
-    case 242: return 142; // Crunch dark-background body through cleanup.
+    case 242: return liveMoveTimingBodyRows(242); // Crunch dark-background body through cleanup (faithful timing, a13fix: 142 rows, lag at 121).
     case 246: return 128; // ancientPowerAtAge: active through 126, cleanup at 127.
     case 247: return SHADOW_BALL_END_AGE + 1;
     case 264:

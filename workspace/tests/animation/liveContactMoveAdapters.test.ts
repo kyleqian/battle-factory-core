@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
+import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS } from "../../src/engine/liveMoveTimingPolicy.ts";
 import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";
 import { battleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import {
@@ -87,7 +88,10 @@ function renderRoute(moveId: number, attacker: 0 | 1, age: number): string {
 
 describe("live contact and multi-hit move adapters", () => {
   it("registers each accepted Factory body through source-relative cleanup", () => {
-    expect(LIVE_MOVE_ANIMATION_IDS).toEqual(expect.arrayContaining(cases.map(row => row.id)));
+    // Psychic (94) / Crunch (242): faithful timing since a13fix (liveMoveTimingPolicy.ts), the same live bodies.
+    expect(LIVE_MOVE_ANIMATION_IDS).toEqual(expect.arrayContaining(cases.map(row => row.id).filter(id => !LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS.includes(id))));
+    expect(cases.map(row => row.id).filter(id => !(LIVE_MOVE_ANIMATION_IDS as readonly number[]).includes(id))
+      .every(id => LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS.includes(id))).toBe(true);
     for (const row of cases) {
       for (const attacker of [0, 1] as const) {
         const receipt = request(row.id, attacker, row.id === 154 ? 5 : 0);

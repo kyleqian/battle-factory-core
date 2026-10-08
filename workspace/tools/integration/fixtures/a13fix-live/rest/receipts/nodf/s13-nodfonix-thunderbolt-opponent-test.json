@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-nodfonix-thunderbolt-opponent-test.json",
+  "stem": "s13-nodfonix-thunderbolt-opponent",
+  "kind": "test",
+  "move": "THUNDERBOLT",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   1745,
+   1981
+  ],
+  "rows": 237,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 237,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "623a711bf415bb8e691d431dd9eec106d29115e1dee08763ca4070252df1d54d"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "623a711bf415bb8e691d431dd9eec106d29115e1dee08763ca4070252df1d54d"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

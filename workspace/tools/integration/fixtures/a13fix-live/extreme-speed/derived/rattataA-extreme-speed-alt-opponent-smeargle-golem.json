@@ -1,0 +1,69 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "EXTREME_SPEED",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-11/scenarios/rattataA-extreme-speed-alt-opponent-smeargle-golem.json",
+ "denseWindow": {
+  "startFrame": 81,
+  "endFrame": 401
+ },
+ "windowSource": "speciesAudit11: window = [activation, activation + 321 - 1] of the swapped scenario's own first EXTREME_SPEED body (2 fresh prep22Probe.py runs agree)",
+ "attacker": {
+  "species": "RATTATA",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793699975,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 156,
+  "playerMaxHp": 156,
+  "opponentHp": 106,
+  "opponentMaxHp": 106,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "speciesAudit11": {
+  "acceptedFixture": "tools/integration/fixtures/s10a-live/extreme-speed-alt-opponent-smeargle-golem.json",
+  "swappedSide": "opponent",
+  "bodies": [
+   [
+    245,
+    81,
+    401,
+    1
+   ],
+   [
+    106,
+    590,
+    691,
+    0
+   ],
+   [
+    0,
+    695,
+    770,
+    0
+   ]
+  ],
+  "bodyIndex": 0,
+  "rows": 321,
+  "personality": [
+   2349019025,
+   1793699975
+  ],
+  "freshProbeRunsAgree": true
+ },
+ "timingPhase": "event",
+ "timingPhaseSource": "a13fix: the ROM body length of this window (321 rows: optional lag at 292 present; species-audit-11 counters: 321-row windows lag [292, 313, 314], 320-row [312, 313])"
+}

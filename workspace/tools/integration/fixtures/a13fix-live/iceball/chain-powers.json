@@ -1,0 +1,175 @@
+{
+ "source": "tools/integration/lendIceBallProbes.sh (fresh direct mGBA, r1 == r2 byte-identical), bodies[k][0].dynamicBasePower (gDynamicBasePower) and battler sprite slots",
+ "scenarios": {
+  "prep25-ice-ball-alt-opponent-glalie-golem": [
+   {
+    "body": 1,
+    "activationFrame": 79,
+    "dynamicBasePower": 30,
+    "spriteIds": [
+     6,
+     8
+    ]
+   },
+   {
+    "body": 2,
+    "activationFrame": 1012,
+    "dynamicBasePower": 60,
+    "spriteIds": [
+     6,
+     8
+    ]
+   },
+   {
+    "body": 3,
+    "activationFrame": 1946,
+    "dynamicBasePower": 120,
+    "spriteIds": [
+     6,
+     8
+    ]
+   }
+  ],
+  "prep25-ice-ball-alt-player-glalie-golem": [
+   {
+    "body": 1,
+    "activationFrame": 75,
+    "dynamicBasePower": 30,
+    "spriteIds": [
+     6,
+     8
+    ]
+   },
+   {
+    "body": 2,
+    "activationFrame": 544,
+    "dynamicBasePower": 60,
+    "spriteIds": [
+     6,
+     8
+    ]
+   },
+   {
+    "body": 3,
+    "activationFrame": 1072,
+    "dynamicBasePower": 120,
+    "spriteIds": [
+     6,
+     8
+    ]
+   },
+   {
+    "body": 4,
+    "activationFrame": 4370,
+    "dynamicBasePower": 240,
+    "spriteIds": [
+     6,
+     5
+    ]
+   },
+   {
+    "body": 5,
+    "activationFrame": 4835,
+    "dynamicBasePower": 480,
+    "spriteIds": [
+     6,
+     5
+    ]
+   }
+  ],
+  "mechanic-ice-ball-player-spheal-opponent-onix": [
+   {
+    "body": 1,
+    "activationFrame": 228,
+    "dynamicBasePower": 30,
+    "spriteIds": [
+     6,
+     8
+    ]
+   },
+   {
+    "body": 2,
+    "activationFrame": 654,
+    "dynamicBasePower": 60,
+    "spriteIds": [
+     6,
+     8
+    ]
+   },
+   {
+    "body": 3,
+    "activationFrame": 1187,
+    "dynamicBasePower": 120,
+    "spriteIds": [
+     6,
+     8
+    ]
+   },
+   {
+    "body": 4,
+    "activationFrame": 1629,
+    "dynamicBasePower": 240,
+    "spriteIds": [
+     6,
+     8
+    ]
+   },
+   {
+    "body": 5,
+    "activationFrame": 2099,
+    "dynamicBasePower": 480,
+    "spriteIds": [
+     6,
+     8
+    ]
+   }
+  ],
+  "mechanic-ice-ball-opponent-spheal-player-onix": [
+   {
+    "body": 1,
+    "activationFrame": 229,
+    "dynamicBasePower": 30,
+    "spriteIds": [
+     6,
+     8
+    ]
+   },
+   {
+    "body": 2,
+    "activationFrame": 1161,
+    "dynamicBasePower": 60,
+    "spriteIds": [
+     6,
+     8
+    ]
+   },
+   {
+    "body": 3,
+    "activationFrame": 2106,
+    "dynamicBasePower": 120,
+    "spriteIds": [
+     6,
+     8
+    ]
+   },
+   {
+    "body": 4,
+    "activationFrame": 3040,
+    "dynamicBasePower": 240,
+    "spriteIds": [
+     6,
+     8
+    ]
+   },
+   {
+    "body": 5,
+    "activationFrame": 3964,
+    "dynamicBasePower": 480,
+    "spriteIds": [
+     6,
+     8
+    ]
+   }
+  ]
+ }
+}

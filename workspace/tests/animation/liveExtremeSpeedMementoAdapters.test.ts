@@ -50,17 +50,18 @@ const routeParity = (seed: number, choices: Choices, streak: number, id: number,
 
 describe("Extreme Speed (245) live adapter (scoped exact)", () => {
   const names = namesOf("extreme-speed-");
-  it("is a scoped-exact adapter (never faithful random / timing; no timing policy); 321 rows both sides; row-0 #142 shadow", () => {
-    expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).toContain(245);
+  it("is a faithful-timing adapter (a13fix: the optional lag at 292, 321-row dominant phase; never faithful random); 321 rows both sides; row-0 #142 shadow", () => {
+    expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).not.toContain(245);
     expect(LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS).not.toContain(245);
-    expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).not.toContain(245);
-    expect(LIVE_MOVE_TIMING_POLICY[245]).toBeUndefined();
+    expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).toContain(245);
+    expect(LIVE_MOVE_TIMING_POLICY[245]!.parameters.map((p) => [p.kind, p.age, p.chosen])).toEqual([["optional-lag-age", 292, "event"]]);
     expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[245]).toBe(0);
     for (const attacker of [0, 1] as const) {
       const base = { attacker, target: (1 - attacker) as 0 | 1, power: 80, damage: 10, friendship: 70, multihit: 0, turn: 0 };
       expect(liveMoveAnimationDuration({ ...base, moveId: 245 })).toBe(321);
     }
-    expect((status.implementedAdapters as { id: number }[]).some((e) => e.id === 245)).toBe(true);
+    expect((status.implementedAdapters as { id: number }[]).some((e) => e.id === 245)).toBe(false);
+    expect((status.faithfulTimingAdapters as { id: number }[]).some((e) => e.id === 245)).toBe(true);
   });
 
   it("5 windows (accepted ARCANINE -> DUGTRIO + prep34 SMEARGLE -> GOLEM both orientations, elevated GOLBAT target) from each own activation", () => {

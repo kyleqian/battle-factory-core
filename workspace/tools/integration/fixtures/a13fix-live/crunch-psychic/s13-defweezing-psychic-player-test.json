@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defweezing-psychic-player-test.json",
+  "stem": "s13-defweezing-psychic-player",
+  "kind": "test",
+  "move": "PSYCHIC",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   349,
+   493
+  ],
+  "rows": 145,
+  "orderInput": "fixture",
+  "shift": -5,
+  "liveDuration": 140,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "b136d3f7be0b691ce3d418d89c091f1a0f373bd5f99e207a8624e09ef601c1f2"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "b136d3f7be0b691ce3d418d89c091f1a0f373bd5f99e207a8624e09ef601c1f2"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

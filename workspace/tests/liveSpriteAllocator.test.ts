@@ -169,9 +169,9 @@ describe("net-zero move history persistence", () => {
       expect(scenarios.length).toBeGreaterThan(0);
       expect(scenarios.every((s: { netZero: boolean }) => s.netZero)).toBe(true);
     }
-    const live = new Set<number>(JSON.parse(readFileSync(
-      "docs/animation-integration-live-status.json", "utf8",
-    )).implementedAdapters.map((a: { id: number }) => a.id));
+    const status = JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8"));
+    // Live = scoped exact + faithful timing (Crunch / Psychic / Extreme Speed were reclassified by a13fix; still the same live bodies).
+    const live = new Set<number>([...status.implementedAdapters, ...status.faithfulTimingAdapters].map((a: { id: number }) => a.id));
     // Every audited id is a live adapter; later (unaudited) adapters stay out.
     for (const id of LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS) expect(live.has(id)).toBe(true);
     for (const id of [203, 116, 263, 107, 87, 86, 207, 339]) {

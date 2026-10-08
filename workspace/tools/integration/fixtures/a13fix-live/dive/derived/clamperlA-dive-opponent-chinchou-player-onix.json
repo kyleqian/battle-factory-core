@@ -1,0 +1,86 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "DIVE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-11/scenarios/clamperlA-dive-opponent-chinchou-player-onix.json",
+ "denseWindow": {
+  "startFrame": 187,
+  "endFrame": 301
+ },
+ "windowSource": "speciesAudit11: window = [activation, activation + 115 - 1] of the swapped scenario's own first DIVE body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "event",
+ "attacker": {
+  "species": "CLAMPERL",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703950,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 129,
+  "playerMaxHp": 129,
+  "opponentHp": 89,
+  "opponentMaxHp": 98,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "messageLines": [
+  "",
+  ""
+ ],
+ "presentationRngActivation": {
+  "value": 1872771412,
+  "source": "prep22Probe.py rng2Series[188] stepped back once (activation frame 187)"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "player"
+  }
+ ],
+ "speciesAudit11": {
+  "acceptedFixture": "tools/integration/fixtures/s10a-live/dive-opponent-chinchou-player-onix.json",
+  "swappedSide": "opponent",
+  "bodies": [
+   [
+    33,
+    68,
+    109,
+    0
+   ],
+   [
+    291,
+    187,
+    301,
+    1
+   ],
+   [
+    291,
+    764,
+    856,
+    1
+   ]
+  ],
+  "bodyIndex": 1,
+  "rows": 115,
+  "personality": [
+   2349015248,
+   1793703950
+  ],
+  "freshProbeRunsAgree": true
+ },
+ "timingPhaseSource": "a13fix: species-audit-11 counters.txt clamperlA-dive-opponent: lag ages [64] (2 fresh runs identical)"
+}
