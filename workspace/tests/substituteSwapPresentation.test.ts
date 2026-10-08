@@ -73,10 +73,10 @@ describe("live adapters with a Substitute doll", () => {
       // A multi-hit chain's non-final hit (multihit >= 2): no MON_TO_SUBSTITUTE in the source; not proven, declined.
       expect(liveMoveAnimationDuration(req(moveId, 0, { multihit: 2 }), field(true, false))).toBeNull();
     }
-    // Unproven bodies keep declining while the attacker is the doll (Sludge Bomb live without the doll).
-    expect(liveMoveAnimationDuration(req(188, 0), plain)).not.toBeNull();
-    expect(liveMoveAnimationDuration(req(188, 0), field(true, false))).toBeNull();
-    expect(liveMoveAnimationPresentation(req(188, 0), field(true, false), 0)).toBeNull();
+    // Unproven bodies keep declining while the attacker is the doll (Swagger live without the doll; prep40: pair residual).
+    expect(liveMoveAnimationDuration(req(207, 0), plain)).not.toBeNull();
+    expect(liveMoveAnimationDuration(req(207, 0), field(true, false))).toBeNull();
+    expect(liveMoveAnimationPresentation(req(207, 0), field(true, false), 0)).toBeNull();
     // Self-targeted requests by the doll's battler are defender-doll requests.
     expect(liveMoveAnimationDuration({ ...req(29, 0), target: 0 }, field(true, false))).toBeNull();
   });

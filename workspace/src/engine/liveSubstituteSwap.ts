@@ -100,8 +100,41 @@ export const LIVE_SUBSTITUTE_SWAP_BODY_CELLS: ReadonlyMap<number, readonly Side[
   [280, BOTH], // Brick Break
   [317, BOTH], // Rock Tomb
   [332, Object.freeze(["player"] as const)], // Aerial Ace (opponent: the doll-free control's own 1 px, not an accepted scope)
+  // prep40 NEEDS-BODY-FRAMING: framed by the ROM body (LIVE_SUBSTITUTE_SWAP_BODY_FRAMING), 0 px on every row.
+  [89, BOTH], // Earthquake
+  [94, Object.freeze(["player"] as const)], // Psychic (opponent: the doll-free control's own 9 px, not an accepted scope)
+  [188, BOTH], // Sludge Bomb
+  [53, BOTH], // Flamethrower
+  [92, BOTH], // Toxic
+  [44, BOTH], // Bite
+  [7, BOTH], // Fire Punch
+  [153, BOTH], // Explosion
 ]);
 export const LIVE_SUBSTITUTE_SWAP_BODY_IDS: ReadonlySet<number> = new Set(LIVE_SUBSTITUTE_SWAP_BODY_CELLS.keys());
+
+export type SubstituteSwapBodyFraming = Readonly<{ rows: number; shift: number }>;
+/**
+ * The ROM body inside the composite (docs/next-adapters-prep40.md s1.1): the swap-back starts at the body's FIRST INACTIVE row
+ * (*DoMoveAnimation state 2 waits for the script), not after the adapter's visual length. `rows` = activation .. first inactive
+ * row (both sides measured equal); body row r shows adapter age r + `shift` (the adapter's age 0 is `-shift` rows after
+ * activation: prep38's calibrated doll-free shifts). Body rows outside the adapter's window draw what the adapter draws there
+ * (the static mon field, as the doll-free path). Absent = the adapter window is the ROM body (rows = duration, shift 0).
+ */
+export const LIVE_SUBSTITUTE_SWAP_BODY_FRAMING: ReadonlyMap<number, SubstituteSwapBodyFraming> = new Map([
+  [89, { rows: 208, shift: 0 }], // Earthquake (adapter 198)
+  [94, { rows: 145, shift: -5 }], // Psychic (adapter 140)
+  [188, { rows: 169, shift: -4 }], // Sludge Bomb (adapter 160)
+  [53, { rows: 210, shift: -15 }], // Flamethrower (adapter 115)
+  [92, { rows: 231, shift: -7 }], // Toxic (adapter 219)
+  [44, { rows: 41, shift: -10 }], // Bite (adapter 26)
+  [7, { rows: 102, shift: 0 }], // Fire Punch (adapter 101: one row short of the first inactive row)
+  [153, { rows: 217, shift: -4 }], // Explosion (adapter 212)
+].map(([id, framing]) => [id as number, Object.freeze(framing as SubstituteSwapBodyFraming)]));
+
+/** The composite's body framing for a request whose adapter duration is `adapterDuration`. */
+export function substituteSwapBodyFraming(moveId: number, adapterDuration: number): SubstituteSwapBodyFraming {
+  return LIVE_SUBSTITUTE_SWAP_BODY_FRAMING.get(moveId) ?? Object.freeze({ rows: adapterDuration, shift: 0 });
+}
 
 function battlerOf(field: BattleResolutionDisplayedField, battler: number): BattleCommandFieldBattler {
   return battler === 0 ? field.player : field.opponent;
@@ -177,9 +210,11 @@ export function liveSubstituteSwapView(view: BattleResolutionPresentationRenderV
   if (effect?.type !== "move" || liveSubstituteSwapApplies(effect.request, view.field) !== true) return null;
   const attacker = effect.request.attacker === 0 ? 0 : 1, side: Side = attacker === 0 ? "player" : "opponent";
   const bodyField = substituteSwapBodyField(view.field, attacker);
-  const bodyDuration = liveMoveAnimationDuration(effect.request, bodyField);
-  if (bodyDuration === null) return null;
-  const frame = substituteSwapFrameAt(side, bodyDuration, effect.age);
+  const adapterDuration = liveMoveAnimationDuration(effect.request, bodyField);
+  if (adapterDuration === null) return null;
+  const framing = substituteSwapBodyFraming(effect.request.moveId, adapterDuration);
+  const swapFrame = substituteSwapFrameAt(side, framing.rows, effect.age);
+  const frame = swapFrame.kind === "body" ? Object.freeze({ kind: "body" as const, age: swapFrame.age + framing.shift }) : swapFrame;
   if (frame.kind === "body") {
     const zeroed = effect.battlerX2Input?.zeroed ?? [];
     return Object.freeze({ kind: "body", view: Object.freeze({

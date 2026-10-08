@@ -1,7 +1,7 @@
 import monPicCoordsData from "../data/gen/mon-pic-coords.json" with { type: "json" };
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
-import { liveSubstituteSwapApplies, substituteSwapBodyField, substituteSwapCompositeDuration } from "./liveSubstituteSwap.ts";
+import { liveSubstituteSwapApplies, substituteSwapBodyField, substituteSwapBodyFraming, substituteSwapCompositeDuration } from "./liveSubstituteSwap.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import { battleCommandFieldSpeciesSpriteOrigin, battleCommandFieldSpriteOrigin, createBattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 import type { BattleResolutionDisplayedField } from "./battleResolutionPresentation.ts";
@@ -792,7 +792,8 @@ export function liveMoveAnimationDuration(
 ): number | null {
   if (field !== undefined && liveSubstituteSwapApplies(request, field) === true) {
     const body = liveMoveAnimationDuration(request, substituteSwapBodyField(field, request.attacker === 0 ? 0 : 1));
-    return body === null ? null : substituteSwapCompositeDuration(request.attacker === 0 ? "player" : "opponent", body);
+    return body === null ? null
+      : substituteSwapCompositeDuration(request.attacker === 0 ? "player" : "opponent", substituteSwapBodyFraming(request.moveId, body).rows);
   }
   if (field !== undefined && liveMoveSubstituteDollDeclines(request, field)) return null;
   switch (request.moveId) {
