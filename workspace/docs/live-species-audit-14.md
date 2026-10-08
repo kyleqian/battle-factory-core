@@ -13,7 +13,7 @@ patch was env-gated, applied in place and reverted, and `git status src` was cle
 
 **Totals:**
 - 219 swapped scenarios: 565 checked windows, of which 453 are swap composites.
-- 64 doll-free control scenarios: 223 windows.
+- 80 doll-free control scenarios: 276 windows.
 - 28 fade scenarios: 34 fade windows.
 - 16 lag-counter windows.
 - Every scenario's two fresh runs are byte-identical, and every receipt's per-row digests agree over r1 / r2.
