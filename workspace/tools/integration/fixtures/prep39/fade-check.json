@@ -1,0 +1,487 @@
+{
+ "schema": "prep39-fade-check/v1",
+ "ioLag": 1,
+ "neg": null,
+ "results": [
+  {
+   "probe": "prep37-on-player-persian-slowbro-r1.json",
+   "profile": "battle-scene-on",
+   "side": "player",
+   "fading": "PERSIAN",
+   "other": "SLOWBRO",
+   "frames": [
+    2400,
+    2503
+   ],
+   "rows": 104,
+   "dense": true,
+   "otherIdleRestX2": 0,
+   "verdict": "policy-exact",
+   "frozenCursorYOffset": 1,
+   "fallback": {
+    "dollHoldFieldPx": 83187,
+    "monHoldFieldPx": 210988
+   },
+   "componentRows": 104,
+   "componentMiss": [],
+   "zeroPxRows": 104,
+   "totalPx": 0,
+   "fieldBandPx": 0,
+   "messageBoxPx": 0,
+   "nonZero": [],
+   "perRowDigest": "714c1a38f9f1688a",
+   "romWindowSha256": "4dfda72edb41b514"
+  },
+  {
+   "probe": "prep37-on-opponent-persian-slowbro-r1.json",
+   "profile": "battle-scene-on",
+   "side": "opponent",
+   "fading": "PERSIAN",
+   "other": "SLOWBRO",
+   "frames": [
+    2368,
+    2469
+   ],
+   "rows": 102,
+   "dense": true,
+   "otherIdleRestX2": 0,
+   "verdict": "policy-exact",
+   "frozenCursorYOffset": 2,
+   "fallback": {
+    "dollHoldFieldPx": 72436,
+    "monHoldFieldPx": 158838
+   },
+   "componentRows": 102,
+   "componentMiss": [],
+   "zeroPxRows": 102,
+   "totalPx": 0,
+   "fieldBandPx": 0,
+   "messageBoxPx": 0,
+   "nonZero": [],
+   "perRowDigest": "ab98d8b05e513bb0",
+   "romWindowSha256": "2d7c04144310bf08"
+  },
+  {
+   "probe": "prep37-off-player-persian-slowbro-r1.json",
+   "profile": "battle-scene-off",
+   "side": "player",
+   "fading": "PERSIAN",
+   "other": "SLOWBRO",
+   "frames": [
+    2400,
+    2503
+   ],
+   "rows": 104,
+   "dense": true,
+   "otherIdleRestX2": 0,
+   "verdict": "policy-exact",
+   "frozenCursorYOffset": 1,
+   "fallback": {
+    "dollHoldFieldPx": 83187,
+    "monHoldFieldPx": 210988
+   },
+   "componentRows": 104,
+   "componentMiss": [],
+   "zeroPxRows": 104,
+   "totalPx": 0,
+   "fieldBandPx": 0,
+   "messageBoxPx": 0,
+   "nonZero": [],
+   "perRowDigest": "714c1a38f9f1688a",
+   "romWindowSha256": "4dfda72edb41b514"
+  },
+  {
+   "probe": "prep37-on-opponent-golbat-slowbro-r1.json",
+   "profile": "battle-scene-on",
+   "side": "opponent",
+   "fading": "GOLBAT",
+   "other": "SLOWBRO",
+   "frames": [
+    3790,
+    3891
+   ],
+   "rows": 102,
+   "dense": true,
+   "otherIdleRestX2": 0,
+   "verdict": "alternate-phase-attributed",
+   "frozenCursorYOffset": 1,
+   "fallback": {
+    "dollHoldFieldPx": 72555,
+    "monHoldFieldPx": 165383
+   },
+   "componentRows": 101,
+   "componentMiss": [
+    {
+     "age": 61,
+     "fields": [
+      "bldcnt-one-row-early",
+      "bldalpha-one-row-early"
+     ]
+    }
+   ],
+   "zeroPxRows": 102,
+   "totalPx": 0,
+   "fieldBandPx": 0,
+   "messageBoxPx": 0,
+   "nonZero": [],
+   "perRowDigest": "ab98d8b05e513bb0",
+   "romWindowSha256": "621338ada20924cf"
+  },
+  {
+   "probe": "prep37-on-opponent-golbat-slowbro-r1.json",
+   "profile": "battle-scene-on",
+   "side": "opponent",
+   "fading": "GOLBAT",
+   "other": "SLOWBRO",
+   "frames": [
+    8056,
+    8157
+   ],
+   "rows": 102,
+   "dense": true,
+   "otherIdleRestX2": 0,
+   "verdict": "policy-exact",
+   "frozenCursorYOffset": 1,
+   "fallback": {
+    "dollHoldFieldPx": 72555,
+    "monHoldFieldPx": 165383
+   },
+   "componentRows": 102,
+   "componentMiss": [],
+   "zeroPxRows": 102,
+   "totalPx": 0,
+   "fieldBandPx": 0,
+   "messageBoxPx": 0,
+   "nonZero": [],
+   "perRowDigest": "ab98d8b05e513bb0",
+   "romWindowSha256": "7097c66376e321bf"
+  },
+  {
+   "probe": "prep39-on-player-persian-onix-r1.json",
+   "profile": "battle-scene-on",
+   "side": "player",
+   "fading": "PERSIAN",
+   "other": "ONIX",
+   "frames": [
+    3822,
+    3925
+   ],
+   "rows": 104,
+   "dense": true,
+   "otherIdleRestX2": 0,
+   "verdict": "alternate-phase-attributed",
+   "frozenCursorYOffset": 0,
+   "fallback": {
+    "dollHoldFieldPx": 83187,
+    "monHoldFieldPx": 210988
+   },
+   "componentRows": 102,
+   "componentMiss": [
+    {
+     "age": 27,
+     "fields": [
+      "bldalpha-one-row-early"
+     ]
+    },
+    {
+     "age": 45,
+     "fields": [
+      "bldalpha-one-row-early"
+     ]
+    }
+   ],
+   "alternatePhase": [
+    {
+     "age": 27,
+     "px": 271,
+     "splitScanlines": [
+      0,
+      101
+     ]
+    },
+    {
+     "age": 45,
+     "px": 271,
+     "splitScanlines": [
+      0,
+      101
+     ]
+    }
+   ],
+   "zeroPxRows": 102,
+   "totalPx": 542,
+   "fieldBandPx": 542,
+   "messageBoxPx": 0,
+   "nonZero": [
+    {
+     "age": 27,
+     "frame": 3849,
+     "px": 271,
+     "bbox": [
+      56,
+      101,
+      86,
+      111
+     ]
+    },
+    {
+     "age": 45,
+     "frame": 3867,
+     "px": 271,
+     "bbox": [
+      56,
+      101,
+      86,
+      111
+     ]
+    }
+   ],
+   "perRowDigest": "459c16a42c729cff",
+   "romWindowSha256": "9f8cc56d3c3f8828"
+  },
+  {
+   "probe": "prep39-on-opponent-rattata-slowbro-r1.json",
+   "profile": "battle-scene-on",
+   "side": "opponent",
+   "fading": "RATTATA",
+   "other": "SLOWBRO",
+   "frames": [
+    2368,
+    2469
+   ],
+   "rows": 102,
+   "dense": true,
+   "otherIdleRestX2": 0,
+   "verdict": "policy-exact",
+   "frozenCursorYOffset": 2,
+   "fallback": {
+    "dollHoldFieldPx": 63466,
+    "monHoldFieldPx": 66342
+   },
+   "componentRows": 102,
+   "componentMiss": [],
+   "zeroPxRows": 102,
+   "totalPx": 0,
+   "fieldBandPx": 0,
+   "messageBoxPx": 0,
+   "nonZero": [],
+   "perRowDigest": "ab98d8b05e513bb0",
+   "romWindowSha256": "2325fe9e7af7a2e7"
+  },
+  {
+   "probe": "prep39-on-opponent-rattata-slowbro-r1.json",
+   "profile": "battle-scene-on",
+   "side": "opponent",
+   "fading": "RATTATA",
+   "other": "SLOWBRO",
+   "frames": [
+    5212,
+    5313
+   ],
+   "rows": 102,
+   "dense": true,
+   "otherIdleRestX2": 0,
+   "verdict": "policy-exact",
+   "frozenCursorYOffset": 2,
+   "fallback": {
+    "dollHoldFieldPx": 63466,
+    "monHoldFieldPx": 66342
+   },
+   "componentRows": 102,
+   "componentMiss": [],
+   "zeroPxRows": 102,
+   "totalPx": 0,
+   "fieldBandPx": 0,
+   "messageBoxPx": 0,
+   "nonZero": [],
+   "perRowDigest": "ab98d8b05e513bb0",
+   "romWindowSha256": "faa547b88c4cdfd4"
+  },
+  {
+   "probe": "prep39-on-opponent-rattata-slowbro-r1.json",
+   "profile": "battle-scene-on",
+   "side": "opponent",
+   "fading": "RATTATA",
+   "other": "SLOWBRO",
+   "frames": [
+    8056,
+    8157
+   ],
+   "rows": 102,
+   "dense": true,
+   "otherIdleRestX2": 0,
+   "verdict": "policy-exact",
+   "frozenCursorYOffset": 2,
+   "fallback": {
+    "dollHoldFieldPx": 63466,
+    "monHoldFieldPx": 66342
+   },
+   "componentRows": 102,
+   "componentMiss": [],
+   "zeroPxRows": 102,
+   "totalPx": 0,
+   "fieldBandPx": 0,
+   "messageBoxPx": 0,
+   "nonZero": [],
+   "perRowDigest": "ab98d8b05e513bb0",
+   "romWindowSha256": "e796f796222d9496"
+  },
+  {
+   "probe": "prep39-on-player-golem-onix-r1.json",
+   "profile": "battle-scene-on",
+   "side": "player",
+   "fading": "GOLEM",
+   "other": "ONIX",
+   "frames": [
+    946,
+    1049
+   ],
+   "rows": 104,
+   "dense": true,
+   "otherIdleRestX2": 0,
+   "verdict": "policy-exact",
+   "frozenCursorYOffset": null,
+   "messageOverride": [
+    "",
+    ""
+   ],
+   "fallback": {
+    "dollHoldFieldPx": 74734,
+    "monHoldFieldPx": 135489
+   },
+   "componentRows": 104,
+   "componentMiss": [],
+   "zeroPxRows": 104,
+   "totalPx": 0,
+   "fieldBandPx": 0,
+   "messageBoxPx": 0,
+   "nonZero": [],
+   "perRowDigest": "714c1a38f9f1688a",
+   "romWindowSha256": "44c46f0b2c66068e"
+  },
+  {
+   "probe": "prep39-on-opponent-golem-onix-r1.json",
+   "profile": "battle-scene-on",
+   "side": "opponent",
+   "fading": "GOLEM",
+   "other": "ONIX",
+   "frames": [
+    946,
+    1047
+   ],
+   "rows": 102,
+   "dense": true,
+   "otherIdleRestX2": 0,
+   "verdict": "policy-exact",
+   "frozenCursorYOffset": 1,
+   "fallback": {
+    "dollHoldFieldPx": 77641,
+    "monHoldFieldPx": 221325
+   },
+   "componentRows": 102,
+   "componentMiss": [],
+   "zeroPxRows": 102,
+   "totalPx": 0,
+   "fieldBandPx": 0,
+   "messageBoxPx": 0,
+   "nonZero": [],
+   "perRowDigest": "ab98d8b05e513bb0",
+   "romWindowSha256": "645997e60e88c43a"
+  },
+  {
+   "probe": "prep39-on-opponent-golem-onix-r1.json",
+   "profile": "battle-scene-on",
+   "side": "opponent",
+   "fading": "GOLEM",
+   "other": "ONIX",
+   "frames": [
+    2368,
+    2469
+   ],
+   "rows": 102,
+   "dense": true,
+   "otherIdleRestX2": 0,
+   "verdict": "policy-exact",
+   "frozenCursorYOffset": 1,
+   "fallback": {
+    "dollHoldFieldPx": 77641,
+    "monHoldFieldPx": 221325
+   },
+   "componentRows": 102,
+   "componentMiss": [],
+   "zeroPxRows": 102,
+   "totalPx": 0,
+   "fieldBandPx": 0,
+   "messageBoxPx": 0,
+   "nonZero": [],
+   "perRowDigest": "ab98d8b05e513bb0",
+   "romWindowSha256": "1d28295443a68d0d"
+  },
+  {
+   "probe": "prep39-on-opponent-golem-onix-r1.json",
+   "profile": "battle-scene-on",
+   "side": "opponent",
+   "fading": "GOLEM",
+   "other": "ONIX",
+   "frames": [
+    3790,
+    3891
+   ],
+   "rows": 102,
+   "dense": true,
+   "otherIdleRestX2": 0,
+   "verdict": "alternate-phase-attributed",
+   "frozenCursorYOffset": 1,
+   "fallback": {
+    "dollHoldFieldPx": 77641,
+    "monHoldFieldPx": 221325
+   },
+   "componentRows": 101,
+   "componentMiss": [
+    {
+     "age": 61,
+     "fields": [
+      "bldcnt-one-row-early",
+      "bldalpha-one-row-early"
+     ]
+    }
+   ],
+   "zeroPxRows": 102,
+   "totalPx": 0,
+   "fieldBandPx": 0,
+   "messageBoxPx": 0,
+   "nonZero": [],
+   "perRowDigest": "ab98d8b05e513bb0",
+   "romWindowSha256": "d2e82ff06f90120e"
+  },
+  {
+   "probe": "prep39-on-opponent-golem-onix-r1.json",
+   "profile": "battle-scene-on",
+   "side": "opponent",
+   "fading": "GOLEM",
+   "other": "ONIX",
+   "frames": [
+    5212,
+    5313
+   ],
+   "rows": 102,
+   "dense": true,
+   "otherIdleRestX2": 0,
+   "verdict": "policy-exact",
+   "frozenCursorYOffset": 1,
+   "fallback": {
+    "dollHoldFieldPx": 77641,
+    "monHoldFieldPx": 221325
+   },
+   "componentRows": 102,
+   "componentMiss": [],
+   "zeroPxRows": 102,
+   "totalPx": 0,
+   "fieldBandPx": 0,
+   "messageBoxPx": 0,
+   "nonZero": [],
+   "perRowDigest": "ab98d8b05e513bb0",
+   "romWindowSha256": "1b2f423cbfd0afd7"
+  }
+ ]
+}
