@@ -6,7 +6,9 @@
  */
 import { createHash } from "node:crypto";
 import { generatedCommandAnimationReplay } from "../generatedCommandAnimationReplay.ts";
-import { createBattleResolutionPresentationRenderView } from "../../../src/engine/battleResolutionPresentationRender.ts";
+import {
+  createBattleResolutionPresentationRenderView, liveMoveRandom2PlanContextAt,
+} from "../../../src/engine/battleResolutionPresentationRender.ts";
 import { renderBattleResolutionLiveView } from "../../../src/engine/battleScene.ts";
 import { liveMoveAnimationPresentation } from "../../../src/engine/liveMoveAnimation.ts";
 import {
@@ -27,7 +29,7 @@ export function random2Route(
   const bodies = new Map<string, Random2RouteBody>();
   const fb = new Uint8Array(240 * 160 * 4);
   const run = generatedCommandAnimationReplay(seed, battleScene, slots, streak, false, true, (state) => {
-    session = tickLiveMovePresentationRngSession(session, state);
+    session = tickLiveMovePresentationRngSession(session, state, liveMoveRandom2PlanContextAt);
     const r = state.battleResolutionPresentation;
     if (r?.lifecycle.phase !== "presenting") return;
     const command = r.segments[r.segmentIndex]?.commands[r.commandIndex];

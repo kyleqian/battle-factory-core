@@ -5,7 +5,8 @@ import type { SceneOnDiveConfig } from "../../src/animation/sceneOnPresentation.
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import {
-  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation, liveSemiInvulnerableHideBattler,
+  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveDiveSetupSplashBirth, liveMoveAnimationDuration, liveMoveAnimationPresentation,
+  liveSemiInvulnerableHideBattler,
 } from "../../src/engine/liveMoveAnimation.ts";
 import {
   LIVE_DIVE_RANDOM2_PLANS, LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS, liveMoveRandom2Plan,
@@ -64,6 +65,28 @@ describe("S10A Dive (291) setup body: faithful timing with D3", () => {
       .toBe("DIVE");
     expect(liveMoveAnimationPresentation(request(0, 0), view.field, 30, undefined, e.spriteAllocatorInput, undefined, e.presentationRng)).toBeNull();
     expect(liveMoveAnimationPresentation(request(0, 0), view.field, 30, undefined, e.spriteAllocatorInput, e.spriteOrderInput, undefined)).toBeNull();
+  });
+
+  it("species audit 11: the setup length follows the attacker's ball rule on the displayed field (52 measured windows); words and row 68 follow the splash", () => {
+    const AUDIT = "tools/integration/fixtures/species-audit-11/derived";
+    const names = readdirSync(AUDIT).filter((n) => n.includes("-dive-"));
+    expect(names).toHaveLength(52);
+    const lengths = new Set<number>();
+    for (const n of names) {
+      const f = JSON.parse(readFileSync(`${AUDIT}/${n}`, "utf8")) as Fixture & { denseWindow: { startFrame: number; endFrame: number } };
+      const view = liveView(f, 0), r = (view.effect as unknown as { request: BattleMoveAnimationRequest }).request;
+      const rows = f.denseWindow.endFrame - f.denseWindow.startFrame + 1, side = r.attacker === 0 ? "player" : "opponent";
+      expect(liveMoveAnimationDuration(r, view.field), n).toBe(rows);
+      expect(liveDiveSetupSplashBirth(view.field, side), n).toBe(rows - 51);
+      expect(liveMoveRandom2Plan(r, { diveSetupSplashBirth: rows - 51 }), n).toEqual([{ ageOffset: rows - 51, count: 20 }]);
+      const shown = presentationOf(f, 0); // shiny attackers decline (palette)
+      if (shown !== null) expect((shown.config as SceneOnDiveConfig).animationProfile.firstInactiveAge, n).toBe(rows - 1);
+      lengths.add(rows);
+    }
+    expect([...lengths].sort()).toEqual([112, 113, 115, 118, 119]);
+    // The default measured attackers keep today's plan object (no field: the side's measured default).
+    expect(liveMoveRandom2Plan(request(0, 0), { diveSetupSplashBirth: 67 })).toBe(LIVE_DIVE_RANDOM2_PLANS.setup.player);
+    expect(liveMoveRandom2Plan(request(0, 1), { diveSetupSplashBirth: 40 })).toBe(LIVE_DIVE_RANDOM2_PLANS.attack);
   });
 
   it("the Random2 plan: setup 20 words at 67 (player) / 64 (opponent); attack 20 at 16 then 4 at 30, 34, ..., 62 (56 words)", () => {
@@ -147,7 +170,8 @@ describe("S10A Dive (291) setup body: faithful timing with D3", () => {
     const dives = a.bodies.filter((body) => body.moveId === 291 && body.attacker === 0);
     expect(dives.length).toBeGreaterThanOrEqual(2);
     const setup = dives.find((d) => (d.turn & 1) === 0)!, attack = dives.find((d) => (d.turn & 1) === 1)!;
-    expect(setup.ages).toEqual(Array.from({ length: 118 }, (_, age) => age));
+    // The route's attacker is CLAMPERL (Y_PIC_OFFSET y 101): the ball rule gives 119 rows, as measured (species audit 11 clamperlA, 0 px).
+    expect(setup.ages).toEqual(Array.from({ length: 119 }, (_, age) => age));
     expect(setup.active.every(Boolean)).toBe(true);
     expect(setup.provenance).toBe("surrogate");
     expect(setup.words).toHaveLength(20);

@@ -77,7 +77,8 @@ export const LIVE_ICE_BALL_RANDOM2_PLANS: readonly (readonly PresentationRngDraw
 
 /**
  * Move_DIVE (faithful TIMING with d3, liveMoveTimingPolicy.ts 291): the setup body sprays 10 AnimSprayWaterDroplet in one frame (two words each, battle_anim_flying.c:1106-1107) at the splash birth
- * (first inactive - 50 = 67 player attacker / 64 opponent attacker); the attack body 10 droplets at +16, then 2 AnimSmallDriftingBubbles x 2
+ * (first inactive - 50; these defaults 67 player attacker / 64 opponent attacker are the measured prep25 attackers, the live seam keys the
+ * birth to the attacker's ball rule through LiveMoveRandom2PlanContext, species audit 11); the attack body 10 droplets at +16, then 2 AnimSmallDriftingBubbles x 2
  * words (battle_anim_water.c:1032-1033) at +30, +34, ..., +62 (docs/next-adapters-prep25.md s0.2, plans.json; 56 words). Turn-keyed and
  * side-keyed (request.turn & 1, request.attacker).
  */
@@ -94,12 +95,22 @@ export const LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS: readonly number[] = Object
   Object.keys(LIVE_MOVE_RANDOM2_PLANS).map(Number).filter((id) => !LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS.includes(id)),
 );
 
+/**
+ * Field-derived plan inputs the request alone does not carry: the Dive setup splash birth from the displayed field (liveDiveSetupSplashBirth,
+ * liveMoveAnimation.ts; the ball rule over the attacker's Y_PIC_OFFSET). Absent: the side's measured default (67 / 64).
+ */
+export type LiveMoveRandom2PlanContext = Readonly<{ diveSetupSplashBirth?: number }>;
+
 export function liveMoveRandom2Plan(
   request: Pick<BattleMoveAnimationRequest, "moveId"> & Partial<Pick<BattleMoveAnimationRequest, "rolloutCounter" | "turn" | "attacker">>,
+  context?: LiveMoveRandom2PlanContext,
 ): readonly PresentationRngDrawStep[] | null {
   if (request.moveId === 291) {
     if (request.turn === undefined || request.attacker === undefined) return null;
-    return (request.turn & 1) === 1 ? LIVE_DIVE_RANDOM2_PLANS.attack : LIVE_DIVE_RANDOM2_PLANS.setup[request.attacker === 0 ? "player" : "opponent"];
+    if ((request.turn & 1) === 1) return LIVE_DIVE_RANDOM2_PLANS.attack;
+    const plan = LIVE_DIVE_RANDOM2_PLANS.setup[request.attacker === 0 ? "player" : "opponent"];
+    const splashBirth = context?.diveSetupSplashBirth;
+    return splashBirth === undefined || splashBirth === plan[0]!.ageOffset ? plan : [{ ageOffset: splashBirth, count: 20 }];
   }
   if (request.moveId === 301) {
     const counter = request.rolloutCounter;
@@ -129,8 +140,9 @@ export function activateLiveMovePresentationRng(
   host: PresentationRngHost,
   request: Pick<BattleMoveAnimationRequest, "moveId"> & Partial<Pick<BattleMoveAnimationRequest, "rolloutCounter" | "turn" | "attacker">>,
   key: string,
+  context?: LiveMoveRandom2PlanContext,
 ): PresentationRngHost {
-  const plan = liveMoveRandom2Plan(request);
+  const plan = liveMoveRandom2Plan(request, context);
   return plan === null ? host : activatePresentationRngBody(host, key, plan).host;
 }
 
@@ -143,7 +155,7 @@ export function liveMovePresentationRngWords(input: LiveMovePresentationRngInput
  * The presentation seam's per-tick update (core.ts tick, after the logical frame): step the session for the presented
  * battle (`activeBattleCallStart` identity edge; null = no battle on screen), then, on the activation frame (live age
  * 0) of a presented move command with a Random2 plan, activate that body once. Reads only the presentation queue's
- * command identity and age, never gameplay RNG.
+ * command identity, age and displayed field (`planContext`, core.ts: liveMoveRandom2PlanContextAt), never gameplay RNG.
  */
 export function tickLiveMovePresentationRngSession(
   session: PresentationRngSession,
@@ -151,6 +163,7 @@ export function tickLiveMovePresentationRngSession(
     activeBattleCallStart?: number | null;
     battleResolutionPresentation?: BattleResolutionPresentationState | null;
   }> | null,
+  planContext?: (resolution: BattleResolutionPresentationState, request: BattleMoveAnimationRequest) => LiveMoveRandom2PlanContext,
 ): PresentationRngSession {
   const stepped = tickPresentationRngSession(session, orchestrator?.activeBattleCallStart ?? null);
   const host = stepped.host;
@@ -160,7 +173,8 @@ export function tickLiveMovePresentationRngSession(
   }
   const command = resolution.segments[resolution.segmentIndex]?.commands[resolution.commandIndex];
   if (command?.type !== "move-animation" || !command.animation) return stepped;
-  const activated = activateLiveMovePresentationRng(host, command.animation, liveMovePresentationRngBodyKey(resolution));
+  const activated = activateLiveMovePresentationRng(host, command.animation, liveMovePresentationRngBodyKey(resolution),
+    planContext?.(resolution, command.animation));
   return activated === host ? stepped : Object.freeze({ ...stepped, host: activated });
 }
 

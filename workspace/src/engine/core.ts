@@ -684,6 +684,7 @@ import {
 import { CANONICAL_DESTIN_PRESENTATION } from "./factoryTrainerPresentation.ts";
 import {
   createBattleResolutionPresentationRenderView,
+  liveMoveRandom2PlanContextAt,
   renderBattleResolutionPresentation,
 } from "./battleResolutionPresentationRender.ts";
 import {
@@ -969,6 +970,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   const presentationRng = tickLiveMovePresentationRngSession(
     state.presentationRng ?? createPresentationRngSession(),
     next.factoryRoundBattleOrchestrator ?? null,
+    liveMoveRandom2PlanContextAt,
   );
   return next.presentationRng === presentationRng ? next : { ...next, presentationRng };
 }
