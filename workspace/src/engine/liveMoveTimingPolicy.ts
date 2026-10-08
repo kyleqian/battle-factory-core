@@ -403,3 +403,34 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   // fixtures tools/integration/fixtures/s10a-live/ice-ball-*).
   301,
 ]);
+
+/**
+ * Status-animation CPU-phase parameters (not move bodies, never counted as faithful-timing adapters). S10A General_SubstituteFade
+ * (liveSubstituteFade.ts; docs/next-adapters-prep39.md s3; fade-live-receipt.json): the VBlank copy of BLDALPHA / BLDCNT lands one
+ * row early on a minority of steps. The live renderer ships the dominant phase ("event" = the later row, the source write row r
+ * read after r + 1; "no-event" = the I/O already holds the write after row r).
+ * - each BLDALPHA step (k = 1..16 on RAM rows 6, 9, .., 51): 222 of 224 measured steps (14 windows x 16) on the later row; 2 one
+ *   row early, both in prep39-on-player-persian-onix @3822 (display rows 27 and 45, 271 px each: the documented alternate rows);
+ * - blendoff (RAM row 61): 12 of 14 windows on the later row; 2 one row early (GOLBAT @3790, GOLEM opponent @3790), 0 px (eva is
+ *   0 from row 52 and the BG copy is gone).
+ */
+export const LIVE_STATUS_ANIMATION_TIMING_POLICY: Readonly<Record<string, Readonly<{
+  animation: string; parameters: readonly LiveMoveTimingParameter[];
+}>>> = Object.freeze({
+  SUBSTITUTE_FADE: {
+    animation: "General_SubstituteFade",
+    parameters: [{
+      kind: "bg-write-row", age: 6, fixedLagAges: [], iterations: 103,
+      alternatives: [{ phase: "event", bodyRows: 103, measured: 222 }, { phase: "no-event", bodyRows: 103, measured: 2 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/fade-live-receipt.json (alpha steps: 222 later / 2 early, rows 27 / 45 of persian-onix @3822)",
+        "tools/integration/fixtures/prep39/fade-check.json componentMiss bldalpha-one-row-early", "docs/next-adapters-prep39.md s3"],
+    }, {
+      kind: "bg-write-row", age: 62, fixedLagAges: [], iterations: 103,
+      alternatives: [{ phase: "event", bodyRows: 103, measured: 12 }, { phase: "no-event", bodyRows: 103, measured: 2 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/prep39/fade-check.json componentMiss bldcnt-one-row-early (golbat @3790, golem opponent @3790; 0 px)",
+        "docs/next-adapters-prep39.md s3"],
+    }],
+  },
+});

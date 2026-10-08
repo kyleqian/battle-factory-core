@@ -11,3 +11,9 @@ ARGS=""
 for s in $ALL; do ARGS="$ARGS $OUT/$s-r1.json:$OUT/$s-r1-rgb"; done
 python3 tools/integration/prep39ProbeDigest.py "$OUT" "$REC/probes.json"
 npx vite-node tools/integration/fadeLiveCheck.ts $ARGS --out="$REC/fade-live-check.json" | tail -${TAIL:-1}
+# negative controls on every window: each must FAIL (one row late, no fade command, no x2 history)
+for n in age+1 no-fade no-x2; do
+  npx vite-node tools/integration/fadeLiveCheck.ts $ARGS --neg=$n --out="$REC/fade-neg-$n.json" | tail -1 | grep -q '^FAIL$' || { echo "negative $n did not fail"; exit 1; }
+done
+echo "negatives: age+1 no-fade no-x2 all FAIL"
+echo "receipts in $REC"

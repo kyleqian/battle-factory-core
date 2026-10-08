@@ -24,6 +24,7 @@ import type { BattleResolutionDisplayedField } from "./battleResolutionPresentat
 import type { BattleResolutionPresentationRenderView } from "./battleResolutionPresentationRender.ts";
 import { liveBattlerAnchors } from "./liveMoveAnimation.ts";
 import { substituteSwapRows } from "./liveSubstituteSwap.ts";
+import { LIVE_STATUS_ANIMATION_TIMING_POLICY } from "./liveMoveTimingPolicy.ts";
 
 type Side = "player" | "opponent";
 
@@ -64,9 +65,12 @@ export function substituteFadeWhiteBgr555(color: number, coefficient: number): n
 type RamRow = Readonly<{ bgCopy: boolean; obj: "doll" | "zero" | "mon"; objInvisible: boolean; x2: number;
   blend: boolean; eva: number; evb: number; white: number }>;
 
+/** The policy's phase of the I/O copy: "event" reads the previous row's write (one row), "no-event" the same row's. */
+const IO_LAG = Object.freeze(LIVE_STATUS_ANIMATION_TIMING_POLICY.SUBSTITUTE_FADE!.parameters.map((p) => (p.chosen === "event" ? 1 : 0)));
+
 function ramRow(side: Side, r: number): RamRow {
-  const ioK = alphaK(r - 1);
-  const blend = r - 1 >= FADE_TASK_ROW && r - 1 < SWAP_ROW;
+  const ioK = alphaK(r - IO_LAG[0]!);
+  const blend = r - 1 >= FADE_TASK_ROW && r - IO_LAG[1]! < SWAP_ROW;
   const swap = substituteSwapRows(side, true);
   const j = r - SWAP_ROW;
   const loadRow = swap.findIndex((row) => !row.doll);
@@ -88,7 +92,10 @@ export type SubstituteFadeLayer =
   | Readonly<{ kind: "none" }>
   | Readonly<{ kind: "mon"; x2: number }>;
 
-/** The fading battler's displayed layer at command age `age` (the dominant VBlank phase, liveMoveTimingPolicy.ts). */
+/**
+ * The fading battler's displayed layer at command age `age`, in the dominant VBlank phase of every BLDALPHA step and of the
+ * blendoff (liveMoveTimingPolicy.ts LIVE_STATUS_ANIMATION_TIMING_POLICY.SUBSTITUTE_FADE: "event", the later row).
+ */
 export function substituteFadeLayerAt(side: Side, age: number): SubstituteFadeLayer {
   if (age < 2) return Object.freeze({ kind: "doll" as const });
   const oam = ramRow(side, age - 2);

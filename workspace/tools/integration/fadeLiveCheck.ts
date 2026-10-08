@@ -25,6 +25,7 @@ import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts"
 import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { applyLiveBattlerX2Event, LIVE_BATTLER_X2_IDLE, liveMoveBattlerX2Input } from "../../src/engine/liveBattlerX2History.ts";
 import { substituteFadeDuration, substituteFadeScriptRows } from "../../src/engine/liveSubstituteFade.ts";
+import { dominantLiveMoveTimingPhase, LIVE_STATUS_ANIMATION_TIMING_POLICY } from "../../src/engine/liveMoveTimingPolicy.ts";
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
 
 const FADE = "General_SubstituteFade";
@@ -47,8 +48,9 @@ const MESSAGE_OVERRIDES: Record<string, { lines: [string, string]; cursor: false
   "prep39-on-player-golem-onix@946": { lines: ["", ""], cursor: false },
 };
 /**
- * Documented alternate VBlank phase rows (docs/next-adapters-prep39.md s3; D4, not the shipped phase): BLDALPHA's step one
- * row early on rows 27 and 45 of this window (271 px each). The blendoff-one-row-early windows are 0 px (eva 0 from row 52).
+ * Documented alternate VBlank phase rows (docs/next-adapters-prep39.md s3; liveMoveTimingPolicy.ts
+ * LIVE_STATUS_ANIMATION_TIMING_POLICY.SUBSTITUTE_FADE "no-event", not the shipped phase): BLDALPHA's step one row early on rows
+ * 27 and 45 of this window (271 px each). The blendoff-one-row-early windows are 0 px (eva 0 from row 52).
  */
 const ALTERNATE_PHASE_ROWS: Record<string, readonly number[]> = { "prep39-on-player-persian-onix@3822": [27, 45] };
 
@@ -172,6 +174,13 @@ for (const input of inputs) {
     console.log(`${verdict} ${result.window} ${probe.profile} ${side} ${fading} vs ${result.other} rows ${window.length} dense=${dense} 0px ${best.zero}/${window.length} outside-cursor ${best.total} (cursor box ${best.cursorBoxPx})${best.nonZero.length ? " first " + JSON.stringify(best.nonZero.slice(0, 6)) : ""}`);
   }
 }
+// The documented rows are exactly the policy's measured alternate-phase alpha steps, and the shipped phase is the dominant one.
+const alphaPolicy = LIVE_STATUS_ANIMATION_TIMING_POLICY.SUBSTITUTE_FADE!.parameters[0]!;
+const alternateRows = results.reduce((n, r) => n + r.nonZero.length, 0);
+const alternateMeasured = alphaPolicy.alternatives.find((a) => a.phase !== alphaPolicy.chosen)!.measured;
+const policyOk = dominantLiveMoveTimingPhase(alphaPolicy.alternatives).phase === alphaPolicy.chosen && (neg !== undefined || alternateRows === alternateMeasured);
+if (!policyOk) failed = true;
+console.log(`policy: alpha-step phase ${alphaPolicy.chosen} (dominant), alternate-phase residual rows ${alternateRows} vs policy no-event ${alternateMeasured}`);
 writeFileSync(out, `${JSON.stringify({ schema: "fade-live-check/v1", neg: neg ?? null, results }, null, 1)}\n`);
 console.log(failed ? "FAIL" : `PASS: ${results.length} windows (${results.filter((r) => r.verdict === "policy-exact").length} policy-exact; the rest residual only on documented alternate-phase rows)`);
 if (failed && !neg) process.exitCode = 1;
