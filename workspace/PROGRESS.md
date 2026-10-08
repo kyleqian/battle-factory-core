@@ -5,20 +5,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-08 (overnight, in progress) — S10A continuation: Substitute presentation + deferred order lend
+## 2026-10-08 (overnight) — S10A: Substitute presentation, deferred order lend, live-share census, order plans; 245 + 13 + 18
 
-- **State:** local master; production src tree `d15bc413` (`c826d5b40`): 250 scoped-exact + 13 faithful-random +
-  13 faithful-timing (census 276 unchanged; tonight's work widens existing adapters and adds status animations).
-  Preview <http://127.0.0.1:5191/> serves `cabb751a1` (receipt `playable-preview-cabb751a1-receipt.json`). Opus 5.5
-  supervisor; Opus 5.5 workers (`-m opus`) on two lanes; every fold re-proved by the supervisor from fresh probes.
-- **Did so far:** Substitute swaps (SUBSTITUTE_TO_MON / MON_TO_SUBSTITUTE) live around 53 (move, side) cells used by a
-  subbed attacker (one-row tail latch included); 37 cells live while the DEFENDER is the doll; the Substitute fade live
-  (cursor footprint excluded); Substitute body order-neutral in the order tracker; seam-resolved deferred sprite-order
-  lend -> Ice Ball counters 1..4 live. Evidence: prep38 / prep39 / prep40, species audit 13 (3 defect classes + 2 new
-  CPU-phase cases, recorded in ISSUES #152).
-- **In flight:** integration — audit-13 fixes + D4 entries (Crunch, Psychic, Extreme Speed, Dive CLAMPERL; may move
-  exact -> faithful timing); side — prep41 D4 widening readiness (Pursuit later bodies, Ghost Curse, Hidden Power).
-- **Notes:** no DEFERRED entries. Detail in ANIMATION_INTEGRATION_PROGRESS.md top entry.
+- **State:** local master, production src tree `e3fc2240` (`65dec33c2`): 245 scoped-exact + 13 faithful-random +
+  18 faithful-timing (census `245+13+18+0+0=276`; exact fell from 250 only by honest D4 reclassification of Crunch,
+  Psychic, Extreme Speed, Pursuit, Hidden Power). Supervisor final gates on that code: typecheck, 1,573 files / 12,958
+  tests, build 874, differential 624/624 (`final-supervisor-gates-20261008.json`). Preview <http://127.0.0.1:5191/>
+  serves `a7896ad37` (4 samples hash-equal, export + restart, no errors; `playable-preview-a7896ad37-receipt.json`).
+  Ordinary-play live share (new census, 1000 battles): 77.7 % of move animations by count, 78.8 % by frames
+  (72.6 / 75.2 % at src `d15bc413` mid-session); gameplay command sequence identical (200 battles, 5,334 commands).
+- **Did (production, 9 folds, each re-proved from fresh probes):** Substitute swaps live around 53 subbed-attacker
+  cells (+ tail latch, shiny decline); 37 defender-doll cells; the fade (cursor footprint excluded); Substitute body
+  order-neutral; seam-resolved deferred sprite-order lend -> Ice Ball counters 1..4; audit-13/14 fixes (idle-rest
+  opponent attacker in Ice Beam / Thunderbolt / Sludge (Bomb) / Confuse Ray / Bite, fade row-0 shadow); D4 entries
+  (Crunch, Psychic, Extreme Speed, Dive CLAMPERL, Pursuit later bodies, Hidden Power); Flatter / Skill Swap gates;
+  NIDORAN healthbox symbol; missing sides (Double Team opp, Faint Attack opp, Rock Slide player); prep43 order plans
+  (CONFUSION, PRZ survivor fix, Leech Seed drain, sandstorm, Dig / Brick Break turn-keyed).
+- **Did (evidence, 8 merges):** prep38 / prep39 / prep40 / prep41 / prep43, species audits 13 / 14, live-share census
+  (`tools/integration/liveShareCensus.ts`, `docs/live-share-census.md`).
+- **Next:** ROADMAP S10A "Next (2026-10-08 morning)": rerun the census, then the remaining order-host stops (Giga Drain,
+  hail, rain, locked turns, opponent return to ball), allocator history (Protect / screens), ISSUES #152 remainder,
+  Substitute remainder, Ghost Curse provider / Dive attack.
+- **Notes:** no DEFERRED entries. Soak gates superseded for S10A (ANIMATION_VERIFICATION scoped policy). All worker
+  branches merged, worktrees removed; logs `.integration/validation/*-20261008/` (raw probe dumps pruned).
 
 ---
 
