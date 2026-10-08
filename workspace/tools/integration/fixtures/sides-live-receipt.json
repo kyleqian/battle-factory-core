@@ -1,0 +1,189 @@
+{
+ "schema": "sides-live-receipt/v1",
+ "testedCommit": "055f624c7655a95cfd960828c92a21c25def6f73",
+ "testedSrcTree": "92d40b927432cbc7378209f649644727da408fbb",
+ "dirty": false,
+ "command": "node --experimental-strip-types --no-warnings tools/integration/sidesLiveReceipt.ts tools/integration/fixtures/sides-live-receipt.json tools/integration/fixtures/s10a-live/double-team-alt-opponent-delcatty-player-golem.json tools/integration/fixtures/s10a-live/double-team-alt-opponent-golbat-player-golem.json tools/integration/fixtures/s10a-live/double-team-alt-player-onix-opponent-golbat.json tools/integration/fixtures/s10a-live/double-team-opponent-grovyle-player-onix.json tools/integration/fixtures/prep7-double-team-player.json",
+ "windows": [
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/double-team-alt-opponent-delcatty-player-golem.json",
+   "ok": true,
+   "invocationA": [
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "9f718de3a59a57bb5987b5fe89069279b989eaec92a2a85ea0d04504c0d33ad0"
+    },
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "9f718de3a59a57bb5987b5fe89069279b989eaec92a2a85ea0d04504c0d33ad0"
+    }
+   ],
+   "invocationB": [
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "9f718de3a59a57bb5987b5fe89069279b989eaec92a2a85ea0d04504c0d33ad0"
+    },
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "9f718de3a59a57bb5987b5fe89069279b989eaec92a2a85ea0d04504c0d33ad0"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/double-team-alt-opponent-golbat-player-golem.json",
+   "ok": true,
+   "invocationA": [
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "02fb517cd0f20f718b4e6dea46be8f467a8a70d55d0bf9a0d0e5edcf42c79833"
+    },
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "02fb517cd0f20f718b4e6dea46be8f467a8a70d55d0bf9a0d0e5edcf42c79833"
+    }
+   ],
+   "invocationB": [
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "02fb517cd0f20f718b4e6dea46be8f467a8a70d55d0bf9a0d0e5edcf42c79833"
+    },
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "02fb517cd0f20f718b4e6dea46be8f467a8a70d55d0bf9a0d0e5edcf42c79833"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/double-team-alt-player-onix-opponent-golbat.json",
+   "ok": true,
+   "invocationA": [
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "9ddf370cb440942d4e15db34d1bd9875a68b882d71192e949b7c70ec884f3543"
+    },
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "9ddf370cb440942d4e15db34d1bd9875a68b882d71192e949b7c70ec884f3543"
+    }
+   ],
+   "invocationB": [
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "9ddf370cb440942d4e15db34d1bd9875a68b882d71192e949b7c70ec884f3543"
+    },
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "9ddf370cb440942d4e15db34d1bd9875a68b882d71192e949b7c70ec884f3543"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/double-team-opponent-grovyle-player-onix.json",
+   "ok": true,
+   "invocationA": [
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "0bcb96eed71fbedf5fd976924b4dc82fa288c2c1e65ec4128f3887ac8c2c3c2b"
+    },
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "0bcb96eed71fbedf5fd976924b4dc82fa288c2c1e65ec4128f3887ac8c2c3c2b"
+    }
+   ],
+   "invocationB": [
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "0bcb96eed71fbedf5fd976924b4dc82fa288c2c1e65ec4128f3887ac8c2c3c2b"
+    },
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "0bcb96eed71fbedf5fd976924b4dc82fa288c2c1e65ec4128f3887ac8c2c3c2b"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/prep7-double-team-player.json",
+   "ok": true,
+   "invocationA": [
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "2adc18f1edc0ebf4a7b166cb20f1ac8b6cf02c7f5f21d66491a757555551ab03"
+    },
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "2adc18f1edc0ebf4a7b166cb20f1ac8b6cf02c7f5f21d66491a757555551ab03"
+    }
+   ],
+   "invocationB": [
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "2adc18f1edc0ebf4a7b166cb20f1ac8b6cf02c7f5f21d66491a757555551ab03"
+    },
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "2adc18f1edc0ebf4a7b166cb20f1ac8b6cf02c7f5f21d66491a757555551ab03"
+    }
+   ]
+  }
+ ]
+}
