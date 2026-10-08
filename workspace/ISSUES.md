@@ -46,8 +46,7 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
   Speed, Crunch and Psychic reclassified to faithful timing).
 - **TYRANITAR rows (Dive 4-9 px, Ice Ball 16 / 63 px, Memento 2,537 px at age 140):** unresolved; lags match.
 - **Audit 12 (`docs/live-species-audit-12.md`; Substitute / Skill Swap / Flatter / Eruption, 182 rows):** Substitute
-  shiny gate FIXED (`46319b2d9`). Open: (a) every live healthbox draws the gender symbol for an un-nicknamed
-  NIDORAN F / M; the ROM's UpdateNickInHealthbox omits it (`healthboxAssembly.ts` ~:483 `nameGlyphRun`; patch proof
+  shiny gate FIXED (`46319b2d9`). Open: (a) FIXED `2ba4da4a3` (NIDORAN healthbox gender symbol); the ROM's UpdateNickInHealthbox omits it (`healthboxAssembly.ts` ~:483 `nameGlyphRun`; patch proof
   7,008 -> 0 px, 32 px every row) — check canonical traces before changing; (b) Flatter's elevated-opponent decline
   is over-strict (registering 260 on the #142 row-0 hook makes FLYGON / GOLBAT / SHEDINJA / WEEZING 0 px); (c) Skill
   Swap's idle-rest gate is over-strict (ONIX / RATTATA 0 px lifted); (d) Skill Swap ALAKAZAM opponent other-phase row
@@ -66,14 +65,10 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
   fade's claim is scoped outside that footprint (message-host question). Not measured: the ROM wait between that message
   and the fade, fades on a non-target (recoil), multi-hit or Baton Pass / switch fades, Scene OFF within the Substitute's
   own resolution (#153).
-- **Audit 14 (`docs/live-species-audit-14.md`, 2026-10-08):** fade shadow row 0 with an elevated other opponent
-  (`fade-shadow-row0-env.diff`); Confuse Ray / Bite idle-rest opponent attacker (`confuse-ray-attacker-rest-env.diff`,
-  `bite-attacker-rest-env.diff`); new D4 case Confuse Ray (268 vs 269 body rows); unresolved Double-Edge row 33 with an
-  idle-rest opponent attacker (410 / 1,091 px), Attract GOLBAT one full-field row.
-- Harness limit: the verifier passes only the attacker's personality, so shiny TARGET declines are unverified.
-
-## #148 — Battler x2 history: unknown-history remainder (main bug FIXED 2026-10-06)
-
+- **Audit 14 (`docs/live-species-audit-14.md`, 2026-10-08):** FIXED in `2ba4da4a3`: fade row-0 shadow, Confuse Ray / Bite
+  idle-rest opponent attacker. Open: Confuse Ray CPU phase (optional lag at 249 or 250 by history; 270 vs 269 rows, 9 : 3 —
+  `tools/integration/fixtures/d4w-cr/`; needs a probe of where the lag lands), Double-Edge row 33 with an idle-rest opponent
+  attacker (410 / 1,091 px), Attract GOLBAT one full-field row.
 - **Fixed:** `src/engine/liveBattlerX2History.ts` (merged `de0e887`-era master) tracks per battler
   idle | zeroed | unknown from the measured per-move/role table (`docs/x2-history-148.md`), resets on
   send-in, and feeds `liveBattlerAnchors(...).frontIdleRest` + every renderer species-rest read.

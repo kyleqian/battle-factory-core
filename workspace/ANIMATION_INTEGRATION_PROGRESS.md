@@ -12,6 +12,18 @@
   Worker gates 1,563 files / 12,823 tests, build 873, differential 624. Supervisor: `substSwapRun.sh` into fresh dirs —
   probes r1 == r2 (13 scenarios), 21 windows x2 runs 0 px, GOLEM-player residual == non-subbed control, negatives fail;
   union typecheck, smoke 448, 9 targeted files 128/128, own differential vs `bb4dc2558` 624/624. Logs `.integration/validation/swap-20261008/`.
+- Folded Opus worker `fd0f539dd` as `2ba4da4a3` (src tree `15be9e2a`): (a) Pursuit (228) later bodies FAITHFUL TIMING (lag at
+  82, fixed 60 / 61; 24 : 9 -> lag, 103 rows; first-body gate lifted, body 2 after the attacker's own Pursuit proven with 12
+  turn-2 windows); (b) Hidden Power (237, Unown) FAITHFUL TIMING (lag 64, fixed 118; 1 : 9 -> no lag, 180 rows); (c) audit-14
+  fixes: Confuse Ray / Bite opponent idle-rest attacker (ONIX 294,419 / RATTATA 110,700; 10,660 / 28,366 -> 0 px), fade row-0
+  shadow of an elevated non-doll opponent (200 -> 0); Confuse Ray D4 entry NOT landed (its optional lag lands at 249 or 250:
+  one policy age would mislabel windows; 270 rows already the dominant length); (d) Flatter on the #142 row-0 hook (elevated
+  decline dropped; 26 windows 0 px), Skill Swap idle-rest gate lifted, documented max 18,778; (e) NIDORAN F / M battle
+  healthbox: no gender symbol when un-nicknamed (battle_interface.c:1929-1930; 7,008 -> 0 px; no committed trace shows a
+  NIDORAN). Census `245+13+18+0+0=276`. Worker gates 1,570 files / 12,936 tests, build, differential 624, 204 timing
+  fixtures 0 violations. Supervisor: `d4wDense.sh` over all 43 d4w-live fixtures fresh — 33 policy-phase 0 px, 10
+  other-phase only on documented ages (Pursuit 84..99, Hidden Power 65..179), 0 violations; NIDORAN F player / opponent
+  windows 219 / 219 rows 0 px twice fresh; union typecheck, smoke 448, 13 targeted files 262/262, own differential vs `e25fa104c` 624/624. Logs `.integration/validation/d4w-20261008/`.
 - Live-share census (side, `589156d65`, new files only): `tools/integration/liveShareCensus.ts` plays 1000 ordinary Scene ON
   battles (generated rentals, all-slot move policy) and classifies every move-animation / fade command by the production
   gate that fired. On src `d15bc413`: 72.56 % live by count, 75.15 % by presented frames (seeds 50000..: 75.12 / 76.13);
