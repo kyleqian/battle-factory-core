@@ -95,7 +95,7 @@ import { SUPERPOWER_ROWS, liveSuperpowerInputs } from "./liveSuperpowerInputs.ts
 import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
 import { liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSheerColdRestoreFadeEndAge, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
-import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs, liveShockWaveInputs, liveSkillSwapInputs, FIRST_BODY_SCANLINE } from "./liveOamMoves.ts";
+import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs, liveShockWaveInputs, liveSkillSwapInputs, liveFlatterInputs, FIRST_BODY_SCANLINE } from "./liveOamMoves.ts";
 import shockWaveAsset from "../animation/assets/shock-wave.json" with { type: "json" };
 import { shockWaveTimingFor } from "../animation/shockWave.ts";
 import revengeScratchAsset from "../animation/assets/revenge-purple-scratch-swipe.json" with { type: "json" };
@@ -104,10 +104,12 @@ import megaHornAsset from "../animation/assets/mega-horn-horn-hit-2.json" with {
 import {
   CURSE_STATS_ROWS, curseStatsBattleBgAt, curseStatsPaletteAt, curseStatsRegistersAt, curseStatsSpritesAt, curseStatsTasksAt,
 } from "../animation/curseModel.ts";
-import { FURY_CUTTER_ROWS, PURSUIT_ROWS, RETURN_ROWS } from "./liveMoveOamAssembler.ts";
+import { FLATTER_ROWS, FURY_CUTTER_ROWS, PURSUIT_ROWS, RETURN_ROWS } from "./liveMoveOamAssembler.ts";
 import { willOWispSpritesAtAge, willOWispTimeline } from "../animation/willOWisp.ts";
 import { skillSwapAtAge, type SkillSwapLiveInputs } from "../animation/skillSwap.ts";
 import skillSwapOrbAsset from "../animation/assets/skill-swap-bluegreen-orb.json" with { type: "json" };
+import { flatterAtAge, type FlatterLiveInputs } from "../animation/flatter.ts";
+import flatterAsset from "../animation/assets/flatter.json" with { type: "json" };
 import { pursuitTargetOffsetAtAge } from "../animation/pursuit.ts";
 import { sortGbaSpriteOrder } from "../animation/gbaObjCompositor.ts";
 import willOWispAsset from "../animation/assets/will-o-wisp.json" with { type: "json" };
@@ -991,6 +993,8 @@ export function liveMoveAnimationDuration(
     case 276: return SUPERPOWER_ROWS;
     // Faithful timing (D4c): Psywave 204 rows + the policy's optional late lag at task row 185 (dominant measured phase, 205 rows both sides).
     case 149: return liveMoveTimingBodyRows(149);
+    // Faithful random (S10A, prep32 / prep35): Flatter 218 steps + the first inactive row = 219 rows both sides (no CPU-phase field).
+    case 260: return FLATTER_ROWS;
     // Faithful timing (S10A, prep35): Skill Swap 195 rows (activation .. first inactive) + the policy's optional lag at row 176 (196 rows both sides).
     case 285: return liveMoveTimingBodyRows(285);
     // Faithful timing (D4c): Extrasensory 161 rows (activation .. first inactive) without the optional lag at task row 142 (policy: no lag, 4 of 6).
@@ -3326,6 +3330,41 @@ export function liveMoveAnimationPresentation(
       const withCenters = (battler: SceneOnPresentationBattler, anchors: typeof attackerAnchors): SceneOnPresentationBattler => ({
         ...battler, geometry: { ...battler.geometry, animationCenter: anchors.spriteCenter, battlePositionCenter: anchors.picOffsetPoint } });
       config = { move: "PSYWAVE", attacker: withCenters(attacker, attackerAnchors), target: withCenters(target, targetAnchors),
+        fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
+      break;
+    }
+    case 260: {
+      // S10A faithful random: Flatter (prep35 s2 / s3 item 2; liveOamMoves.ts liveFlatterInputs). The 114 confetti words from the presentation
+      // host only (null = not activated -> scene-off fallback). First body (the activation registers are S0, WIN0 240 / 161), known lend,
+      // known-entry allocator (spotlight 305 / confetti 433, palette slots 7 / 8), non-shiny. An elevated opponent declines: its row-0 shadow
+      // (the pre-activation latch) is unmeasured for Flatter (prep35 s4).
+      const rng = liveMovePresentationRngWords(presentationRngInput);
+      if (rng === null || rng.words.length !== 114) return null;
+      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (art.opponent.origin.y !== battleCommandFieldSpriteOrigin(art.opponent, "opponent").y) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const activationOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (palettes === null || activationOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const attackerSide = attacker.geometry.side, targetSide = target.geometry.side;
+      const asset = flatterAsset as unknown as Record<"spotlight" | "confetti", { palette: { r: number; g: number; b: number }[] }>;
+      const inputs = liveFlatterInputs({ attackerSide, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
+        sort: sortGbaSpriteOrder, words: rng.words, animationRng: rng.activationValue,
+        spotlightPalette: asset.spotlight.palette, confettiPalette: asset.confetti.palette,
+        stateAt: (state, programInput) => {
+          const st = flatterAtAge(state, { ...(programInput as unknown as FlatterLiveInputs), attackerSide, targetSide,
+            attackerSpecies: art[attackerSide].speciesSymbol, targetSpecies: art[targetSide].speciesSymbol });
+          return { spotlight: st.spotlight, verticalDipSlots: st.verticalDips.map((d) => d.slot), confetti: st.confetti,
+            targetDipY2: st.battlers.target.offset.y2 - targetAnchors.frontIdleRest.y2 };
+        } });
+      if (inputs === null) return null;
+      // The FLATTER view rebuilds attackerCenter / targetCenter from geometry.animationCenter (prep35 papercut): set them to the live anchors
+      // (attacker sprite centre, target BATTLER_COORD_X / _Y), as verifyFlatterReducer.ts flatterConfigFor.
+      const withCenter = (battler: SceneOnPresentationBattler, c: { x: number; y: number }): SceneOnPresentationBattler => ({
+        ...battler, geometry: { ...battler.geometry, spriteCorner: { x: c.x - 32, y: c.y - 32 }, animationCenter: c, battlePositionCenter: c } });
+      config = { move: "FLATTER", attacker: withCenter(attacker, inputs.attackerCenter), target: withCenter(target, inputs.targetCenter),
         fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
       break;
     }

@@ -39,7 +39,10 @@ SS_CASES = [("skill-swap-player-girafarig-opponent-shuckle", "mechanic-skill-swa
 FL_CASES = [("flatter-player-nidorina-opponent-onix", "mechanic-flatter-player-nidorina-opponent-onix", "player"),
             ("flatter-opponent-nidorina-player-onix", "mechanic-flatter-opponent-nidorina-player-onix", "opponent"),
             ("flatter-alt-player-hypno-golem", "prep25-flatter-alt-player-hypno-golem", "player"),
-            ("flatter-alt-opponent-hypno-golem", "prep25-flatter-alt-opponent-hypno-golem", "opponent")]
+            ("flatter-alt-opponent-hypno-golem", "prep25-flatter-alt-opponent-hypno-golem", "opponent"),
+            # extra pinned activation values (the accepted / prep25 scenarios with 13 / 29 idle frames before the first input: still the first body)
+            ("flatter-pin-player-nidorina-opponent-onix-pad13", "sf-flatter-pin-player-nidorina-opponent-onix-pad13", "player"),
+            ("flatter-pin-opponent-hypno-golem-pad29", "sf-flatter-pin-opponent-hypno-golem-pad29", "opponent")]
 LCG_INV = pow(1103515245, -1, 2 ** 32)
 for side in ("player", "opponent"):
     for word, counter in COUNTERS.items():

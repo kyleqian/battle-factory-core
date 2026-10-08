@@ -1,7 +1,7 @@
 {
  "schema": "sf-live-receipt/v1",
- "testedCommit": "138f79ad4b8b0b7fcb49d0d59bc7e8e76dd00e18",
- "testedSrcTree": "51b5f3b601dc8a7fe9642a4bf953d5d601bb7250",
+ "testedCommit": "5b3b9fb726369d16b92eab3f7192621d12f38d0e",
+ "testedSrcTree": "227645512b6189d4553495cb3629717e0d889035",
  "dirty": true,
  "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
  "commands": [
@@ -990,6 +990,16 @@
   }
  ],
  "summary": {
+  "FLATTER": {
+   "windows": 6,
+   "selectedPhaseWindows": 6,
+   "selectedPhaseResidualPixels": 0,
+   "otherPhaseWindows": 0,
+   "otherPhaseAffectedAges": [],
+   "otherPhaseMaxPixelsPerRow": 0,
+   "freshRunsIdentical": true,
+   "violations": 0
+  },
   "SKILL_SWAP": {
    "windows": 6,
    "selectedPhaseWindows": 3,
@@ -1336,6 +1346,168 @@
      "exactRows": 196,
      "residualPixels": 0,
      "digest": "4d185b3524d77f7c8eb6ea252d698d130ffe081f995529e85713ab69d239f76e",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/flatter-alt-opponent-hypno-golem.json",
+   "move": "FLATTER",
+   "selectedPhase": true,
+   "window": 219,
+   "expectedDuration": 219,
+   "runs": [
+    {
+     "rows": 219,
+     "exactRows": 219,
+     "residualPixels": 0,
+     "digest": "90f4f9624da6264ef66c2da3a3cce014183a3cd8682cd24dabb249f5a8f37ddc",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 219,
+     "exactRows": 219,
+     "residualPixels": 0,
+     "digest": "90f4f9624da6264ef66c2da3a3cce014183a3cd8682cd24dabb249f5a8f37ddc",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/flatter-alt-player-hypno-golem.json",
+   "move": "FLATTER",
+   "selectedPhase": true,
+   "window": 219,
+   "expectedDuration": 219,
+   "runs": [
+    {
+     "rows": 219,
+     "exactRows": 219,
+     "residualPixels": 0,
+     "digest": "5db50bc643b5034413aac76b98120efac16366ef2c9fc21445b7f29403debe85",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 219,
+     "exactRows": 219,
+     "residualPixels": 0,
+     "digest": "5db50bc643b5034413aac76b98120efac16366ef2c9fc21445b7f29403debe85",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/flatter-opponent-nidorina-player-onix.json",
+   "move": "FLATTER",
+   "selectedPhase": true,
+   "window": 219,
+   "expectedDuration": 219,
+   "runs": [
+    {
+     "rows": 219,
+     "exactRows": 219,
+     "residualPixels": 0,
+     "digest": "08864b44c23648d4184ca8384fed2f7425ae4d36f6d80f786fddd371c65f1a8f",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 219,
+     "exactRows": 219,
+     "residualPixels": 0,
+     "digest": "08864b44c23648d4184ca8384fed2f7425ae4d36f6d80f786fddd371c65f1a8f",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/flatter-pin-opponent-hypno-golem-pad29.json",
+   "move": "FLATTER",
+   "selectedPhase": true,
+   "window": 219,
+   "expectedDuration": 219,
+   "runs": [
+    {
+     "rows": 219,
+     "exactRows": 219,
+     "residualPixels": 0,
+     "digest": "835d52df0d9572c3bddf911e0303901b390f82728bdd95ae68117e486f472d0f",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 219,
+     "exactRows": 219,
+     "residualPixels": 0,
+     "digest": "835d52df0d9572c3bddf911e0303901b390f82728bdd95ae68117e486f472d0f",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/flatter-pin-player-nidorina-opponent-onix-pad13.json",
+   "move": "FLATTER",
+   "selectedPhase": true,
+   "window": 219,
+   "expectedDuration": 219,
+   "runs": [
+    {
+     "rows": 219,
+     "exactRows": 219,
+     "residualPixels": 0,
+     "digest": "8ef596d2ed1c61bdaf66a47bd7712c7fcd030f1a85bc3e559140dad5d8c5ef7e",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 219,
+     "exactRows": 219,
+     "residualPixels": 0,
+     "digest": "8ef596d2ed1c61bdaf66a47bd7712c7fcd030f1a85bc3e559140dad5d8c5ef7e",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/flatter-player-nidorina-opponent-onix.json",
+   "move": "FLATTER",
+   "selectedPhase": true,
+   "window": 219,
+   "expectedDuration": 219,
+   "runs": [
+    {
+     "rows": 219,
+     "exactRows": 219,
+     "residualPixels": 0,
+     "digest": "d1a83c14b9bbddd2054330a14f805f2f5fc2ef7c67a3cf48a8f915d812d1ef61",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 219,
+     "exactRows": 219,
+     "residualPixels": 0,
+     "digest": "d1a83c14b9bbddd2054330a14f805f2f5fc2ef7c67a3cf48a8f915d812d1ef61",
      "affectedAges": [],
      "maxPixelsPerRow": 0
     }

@@ -901,3 +901,78 @@ export function liveSkillSwapHardwareOamRows(input: LiveSkillSwapOamInputs): {
   }
   return { oam, matrices, softwareMatrices, orders };
 }
+
+/**
+ * Move_FLATTER (docs/next-adapters-prep35.md s2.2; ported 1:1 from tools/integration/prep35FlatterModel.ts flatterOamRows35). Per build: the
+ * scene occupants, the battlers (target y2 = the reducer's VerticalDip offset), the spotlight (affine double, OBJ window, hidden while
+ * `flags & 4`), the two invisible VerticalDip sort keys (priority 3, attacker subpriority - 2, y 160) and the 38 confetti (subpriority 3, the
+ * createsprite floor). One carryLiveSpriteOrder pass per executed build. Script-created sprites are in the build of their creation frame;
+ * hardware row r = build of state r - 1, except the confetti burst: one main-loop iteration spans the VBlanks of rows 65..67 with no
+ * BuildOamBuffer, so rows 66..68 repeat row 65's latch (build of state 64) and row 69 is the build of state 68 (measured, 4 of 4 windows).
+ */
+export const FLATTER_ROWS = 219;
+export const liveFlatterBuildState = (row: number): number => (row >= 66 && row <= 68 ? 64 : row - 1);
+/** The reducer state a build reads (flatter.ts flatterAtAge, passed in by the seam). */
+export interface LiveFlatterBuildSprites {
+  readonly spotlight: Readonly<{ slot: number; x: number; y: number; matrixNum: number; matrix: readonly [number, number, number, number]; flags: number }> | null;
+  readonly verticalDipSlots: readonly number[];
+  readonly confetti: readonly Readonly<{ slot: number; x: number; y: number; x2: number; y2: number }>[];
+  /** Target dip offset relative to its idle rest (the reducer's target offset y2 - the initial y2). */
+  readonly targetDipY2: number;
+}
+export interface LiveFlatterOamInputs {
+  readonly attacker: LiveOamBattler;
+  readonly target: LiveOamBattler;
+  readonly scene: LiveOamScene;
+  readonly spotlightAttr2: number;
+  readonly spotlightSubpriority: number;
+  /** Confetti tile base (ANIM_TAG_CONFETTI tile range) and palette slot; the per-confetti tile offsets by slot. */
+  readonly confettiTileBase: number;
+  readonly confettiPaletteSlot: number;
+  readonly confettiTileOffsets: ReadonlyMap<number, number>;
+  readonly activationOrder: readonly number[];
+  readonly sort: LiveSpriteOrderSort;
+  readonly stateAt: (state: number) => LiveFlatterBuildSprites;
+}
+export function liveFlatterHardwareOamRows(input: LiveFlatterOamInputs): {
+  oam: string[][]; matrices: (readonly [number, number, number, number])[][]; orders: number[][];
+} {
+  type Mat = readonly [number, number, number, number];
+  const build = (f: number): { sprites: LiveOamSprite[]; matrices: Mat[] } => {
+    const matrices = Array.from({ length: 32 }, () => IDENTITY as Mat);
+    const sprites: LiveOamSprite[] = input.scene.occupants.map((o) => ({ ...o, oamY: o.attr[0] & 0xff }));
+    const st = f >= 0 ? input.stateAt(f) : null;
+    for (const [b, y2] of [[input.attacker, 0], [input.target, st?.targetDipY2 ?? 0]] as const) {
+      const attr: OamAttr = [b.attr[0] & 0xff00 | (b.attr[0] + y2) & 0xff, b.attr[1], b.attr[2]];
+      sprites.push({ slot: b.slot, attr, subpriority: b.subpriority, visible: true, oamY: attr[0] & 0xff });
+    }
+    if (!st) return { sprites, matrices };
+    if (st.spotlight) {
+      const s = st.spotlight, attr: OamAttr = [0x0b00 | (s.y - 64) & 0xff, 0xc000 | s.matrixNum << 9 | (s.x - 64) & 0x1ff, input.spotlightAttr2];
+      sprites.push({ slot: s.slot, attr, subpriority: input.spotlightSubpriority, visible: (s.flags & 4) === 0, oamY: attr[0] & 0xff });
+      matrices[s.matrixNum] = s.matrix;
+    }
+    for (const slot of st.verticalDipSlots) sprites.push({ slot, attr: [160, 304, 0xffff], subpriority: input.attacker.subpriority - 2, visible: false, oamY: 160 });
+    for (const c of st.confetti) {
+      const attr: OamAttr = [(c.y + c.y2 - 4) & 0xff, (c.x + c.x2 - 4) & 0x1ff,
+        (input.confettiTileBase + input.confettiTileOffsets.get(c.slot)!) | 2 << 10 | input.confettiPaletteSlot << 12];
+      sprites.push({ slot: c.slot, attr, subpriority: 3, visible: true, oamY: attr[0] & 0xff });
+    }
+    return { sprites, matrices };
+  };
+  // order after build f; one pass per executed build (no build inside the burst)
+  const orderAfter = new Map<number, number[]>(); let order: readonly number[] = input.activationOrder;
+  orderAfter.set(-1, [...order]);
+  const builds = new Map<number, ReturnType<typeof build>>();
+  for (const f of [...new Set(Array.from({ length: FLATTER_ROWS }, (_, r) => liveFlatterBuildState(r)))].filter((f) => f >= 0).sort((x, y) => x - y)) {
+    const b = build(f); builds.set(f, b);
+    order = carryLiveSpriteOrder(order, b.sprites, input.sort); orderAfter.set(f, [...order]);
+  }
+  const oam: string[][] = [], matrices: Mat[][] = [], orders: number[][] = [];
+  for (let r = 0; r < FLATTER_ROWS; r += 1) {
+    const f = liveFlatterBuildState(r), b = builds.get(f) ?? build(f);
+    oam.push(buildLiveHardwareOam(orderAfter.get(f)!, b.sprites, input.scene.healthbox, b.matrices));
+    matrices.push(b.matrices); orders.push(orderAfter.get(f)!);
+  }
+  return { oam, matrices, orders };
+}

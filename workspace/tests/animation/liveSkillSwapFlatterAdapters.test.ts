@@ -3,11 +3,15 @@ import { describe, expect, it } from "vitest";
 import {
   LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation,
 } from "../../src/engine/liveMoveAnimation.ts";
-import { LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS } from "../../src/engine/liveMovePresentationRng.ts";
+import { LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS, LIVE_MOVE_RANDOM2_PLANS } from "../../src/engine/liveMovePresentationRng.ts";
+import { presentationRngPlanWords } from "../../src/engine/presentationRngHost.ts";
+import { createPresentationRngState } from "../../src/engine/presentationRng.ts";
 import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS, LIVE_MOVE_TIMING_POLICY, LIVE_MOVE_TIMING_POLICY_VERSION } from "../../src/engine/liveMoveTimingPolicy.ts";
 import { liveSkillSwapOrbLives, liveSkillSwapOrbScale } from "../../src/engine/liveMoveOamAssembler.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
-import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
+import { fixturePresentationRng, liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
+import { random2Route } from "../../tools/integration/random2R1/routeHarness.ts";
+import { flatterConfetti } from "../../tools/integration/prep32FlatterModel.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 import { orbLives35, orbScale35 } from "../../tools/integration/prep35SkillSwapModel.ts";
 
@@ -15,7 +19,7 @@ import { orbLives35, orbScale35 } from "../../tools/integration/prep35SkillSwapM
 // tools/integration/fixtures/s10a-live/skill-swap-*.json, receipt tools/integration/fixtures/sf-live-receipt.json (tools/integration/d4aTimingCheck.ts:
 // zero residual in the policy phase, only the documented rows in the other phase).
 const DIR = "tools/integration/fixtures/s10a-live";
-type LiveFixture = Fixture & { timingPhase?: "event" | "no-event"; timingPhases?: Record<string, "event" | "no-event">; restoreRow?: number };
+type LiveFixture = Fixture & { presentationRngActivation?: { value: number; source: string }; timingPhase?: "event" | "no-event"; timingPhases?: Record<string, "event" | "no-event">; restoreRow?: number };
 const fixtureAt = (name: string) => JSON.parse(readFileSync(`${DIR}/${name}.json`, "utf8")) as LiveFixture;
 const NAMES = readdirSync(DIR).filter((n) => n.endsWith(".json")).map((n) => n.slice(0, -5)).sort();
 const status = JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8"));
@@ -131,5 +135,134 @@ describe("S10A Skill Swap (285) faithful timing", () => {
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expectOnOffParity(on, off);
+  }, 240000);
+});
+
+// S10A Flatter (260, faithful random, D3) from the prep32 words / registers / palettes + the prep35 OAM provider (docs/next-adapters-prep35.md
+// s3 item 2). Controlled bodies: the 114 words pinned at each window's ROM activation value (tools/integration/fixtures/s10a-live/flatter-*.json);
+// two extra windows (sf-flatter-pin-*: idle frames before the first input) pin other activation values. Ordinary play draws surrogate words.
+describe("S10A Flatter (260) faithful random", () => {
+  const fl = NAMES.filter((n) => n.startsWith("flatter-"));
+  const activationOf = (name: string) => fixtureAt(name).presentationRngActivation!.value;
+
+  it("is a faithful-random adapter (never scoped exact / faithful timing); plan 65 + 114 words; 219 rows both sides; the status entry", () => {
+    expect(LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS).toContain(260);
+    expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).not.toContain(260);
+    expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).not.toContain(260);
+    expect(LIVE_MOVE_TIMING_POLICY[260]).toBeUndefined();
+    expect(LIVE_MOVE_RANDOM2_PLANS[260]).toEqual([{ ageOffset: 65, count: 114 }]);
+    for (const attacker of [0, 1] as const) {
+      const base = { attacker, target: (1 - attacker) as 0 | 1, power: 0, damage: 0, friendship: 70, multihit: 0, turn: 0 };
+      expect(liveMoveAnimationDuration({ ...base, moveId: 260 })).toBe(219);
+    }
+    const entry = (status.faithfulRandomAdapters as { id: number; provenance: string; pinnedProofs: string[]; surrogateRoutes: string[] }[]).find((e) => e.id === 260)!;
+    expect(entry.pinnedProofs).toEqual(["tools/integration/fixtures/sf-live-receipt.json"]);
+    expect(entry.surrogateRoutes).toHaveLength(1);
+    expect((status.implementedAdapters as { id: number }[]).some((e) => e.id === 260)).toBe(false);
+  });
+
+  it("the production plan reproduces the prep32 source words (65 per-frame steps, then 3 draws per confetti) at every pinned activation", () => {
+    expect(fl).toHaveLength(6);
+    const occupied = [0, 1, 2, 6, 8, 60, 61, 62, 63, 3, 5]; // the scene, the spotlight (3) and the second dip (5) at the burst
+    for (const name of fl) {
+      const value = activationOf(name);
+      const words = presentationRngPlanWords(createPresentationRngState(value, "pinned"), LIVE_MOVE_RANDOM2_PLANS[260]!);
+      expect(words.provenance).toBe("pinned");
+      expect([...words.words]).toEqual(flatterConfetti(value, occupied).words);
+    }
+  });
+
+  it("5 distinct pinned activation values exercise both signs of data[0] / data[1], all 12 tile offsets and both sides", () => {
+    const values = [...new Set(fl.map(activationOf))];
+    expect(values).toHaveLength(5);
+    const occupied = [0, 1, 2, 6, 8, 60, 61, 62, 63, 3, 5];
+    const confetti = values.map((v) => flatterConfetti(v, occupied).confetti);
+    const all = confetti.flat();
+    for (const [base, field] of [[0x5e0, "data0"], [0x480, "data1"]] as const) {
+      expect(all.some((c) => c[field] > base)).toBe(true);
+      expect(all.some((c) => c[field] < base)).toBe(true);
+    }
+    expect(new Set(all.map((c) => c.tileOffset)).size).toBe(12);
+    expect(new Set(all.map((c) => c.side))).toEqual(new Set([0, 1]));
+    // the two extra pins (sf-flatter-pin-*) differ from every scenario activation's confetti
+    const extra = ["flatter-pin-player-nidorina-opponent-onix-pad13", "flatter-pin-opponent-hypno-golem-pad29"].map(activationOf);
+    for (const v of extra) expect(values.filter((w) => w !== v).every((w) => JSON.stringify(flatterConfetti(w, occupied).confetti) !== JSON.stringify(flatterConfetti(v, occupied).confetti))).toBe(true);
+  });
+
+  it("the receipt: all 6 pinned windows exact on every row twice fresh, window = the live duration", () => {
+    const rows = (receipt.windows as ReceiptWindow[]).filter((r) => r.move === "FLATTER");
+    expect(rows.map((r) => r.fixture.replace(`${DIR}/`, "").replace(".json", "")).sort()).toEqual(fl);
+    for (const r of rows) {
+      expect(r.violations).toEqual([]);
+      expect(r.selectedPhase).toBe(true);
+      expect(r.runs.map((run) => run.residualPixels)).toEqual([0, 0]);
+      expect(r.runs[1]!.digest).toBe(r.runs[0]!.digest);
+      expect(r.window).toBe(219);
+      expect(r.expectedDuration).toBe(219);
+    }
+    for (const side of ["player", "opponent"]) expect(fl.filter((n) => fixtureAt(n).attacker.geometry.side === side)).toHaveLength(3);
+  });
+
+  it("gates: words from the presentation host, first body, known lend; declines without words, with an unknown order, after an earlier body, for a shiny battler, for an elevated opponent", () => {
+    for (const name of ["flatter-player-nidorina-opponent-onix", "flatter-opponent-nidorina-player-onix"]) {
+      const f = fixtureAt(name);
+      const { view, effect } = effectOf(f);
+      const rng = fixturePresentationRng(f, effect.request);
+      const call = (order: unknown, field = view.field, words = rng) => liveMoveAnimationPresentation(effect.request, field, 0, undefined, undefined, order as never, words);
+      const lend = effect.spriteOrderInput as { known: true; free: number[]; firstBody: boolean };
+      expect(lend.known).toBe(true);
+      expect(lend.firstBody).toBe(true);
+      const presentation = call(lend);
+      expect(presentation).not.toBeNull();
+      expect((presentation!.config as any).move).toBe("FLATTER");
+      // the live anchors reach the view (prep35 papercut: the FLATTER view rebuilds the centres from geometry.animationCenter)
+      const side = f.attacker.geometry.side;
+      // attacker = its sprite centre (X_2, sprite y), target = BATTLER_COORD_X / _Y (no elevation)
+      const center = (presentation!.config as any).attacker.geometry.animationCenter, corner = (presentation!.config as any).attacker.geometry.spriteCorner;
+      expect(center.x).toBe(side === "player" ? 72 : 176);
+      expect(corner).toEqual({ x: center.x - 32, y: center.y - 32 });
+      expect((presentation!.config as any).target.geometry.animationCenter).toEqual(side === "player" ? { x: 176, y: 40 } : { x: 72, y: 80 });
+      expect(liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, lend as never, undefined)).toBeNull();
+      expect(call(undefined)).toBeNull();
+      expect(call({ known: false })).toBeNull();
+      expect(call({ ...lend, firstBody: false })).toBeNull();
+      const ot = 416049562, shiny = ((ot >>> 16) ^ (ot & 0xffff)) >>> 0;
+      for (const s of ["player", "opponent"] as const) expect(call(lend, { ...view.field, [s]: { ...view.field[s], personality: shiny } })).toBeNull();
+      // GOLBAT (elevated): its row-0 shadow latch is unmeasured for Flatter, so the body declines; GOLEM engages.
+      expect(call(lend, { ...view.field, opponent: { ...view.field.opponent, species: 42, speciesSymbol: "GOLBAT", name: "GOLBAT" } as never })).toBeNull();
+      expect(call(lend, { ...view.field, opponent: { ...view.field.opponent, species: 76, speciesSymbol: "GOLEM", name: "GOLEM" } as never })).not.toBeNull();
+    }
+  });
+
+  // tools/integration/r3ProfileRouteSearch.ts 260 3 1 4000 + the D3 harness (first candidates: 51/0 NIDORINA slot 3 active on every age; 92/0 NIDORINA
+  // slot 3 declines: the opponent's Light Screen is an earlier unit, so the first-body gate keeps the scene-off view, logic unchanged).
+  it("D3 route 51/0 NIDORINA: live every age with surrogate words; two presentation seeds and Scene OFF keep gameplay / RNG / facility; same seed -> same frames", () => {
+    const SEED_A = 0x1234abcd, SEED_B = 0xfeed0042;
+    const a = random2Route(51, "on", [3], 0, SEED_A), a2 = random2Route(51, "on", [3], 0, SEED_A);
+    const b = random2Route(51, "on", [3], 0, SEED_B), off = random2Route(51, "off", [3], 0, SEED_A);
+    const bodies = a.bodies.filter((body) => body.moveId === 260 && body.attacker === 0);
+    expect(bodies).toHaveLength(1);
+    expect(bodies[0]!.ages).toEqual(Array.from({ length: 219 }, (_, age) => age));
+    expect(bodies[0]!.active.every(Boolean)).toBe(true);
+    expect(bodies[0]!.provenance).toBe("surrogate");
+    expect(bodies[0]!.words).toHaveLength(114);
+    expect(a.run.stalled).toBe(false);
+    expect(a.run.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    expect(a2.bodies).toEqual(a.bodies);
+    const bBody = b.bodies.filter((body) => body.moveId === 260)[0]!;
+    expect(bBody.words).not.toEqual(bodies[0]!.words);
+    expect(bBody.frameDigests).not.toEqual(bodies[0]!.frameDigests);
+    expect(off.bodies).toEqual([]);
+    const rules = (value: (typeof a.run.boundaries)[number]) => ({
+      ...value.rules, rulesContext: { ...value.rules.rulesContext, hitMarker: value.rules.rulesContext.hitMarker & ~0x80 } });
+    expect(b.run.boundaries).toEqual(a.run.boundaries);
+    expect(off.run.boundaries).toHaveLength(a.run.boundaries.length);
+    for (let i = 0; i < a.run.boundaries.length; i += 1) {
+      expect(rules(off.run.boundaries[i]!)).toEqual(rules(a.run.boundaries[i]!));
+      expect(off.run.boundaries[i]!.rng).toEqual(a.run.boundaries[i]!.rng);
+    }
+    expect(b.run.state.facilityState).toEqual(a.run.state.facilityState);
+    expect(off.run.state.facilityState).toEqual(a.run.state.facilityState);
+    expect(off.run.state.round.rules.rngValue).toBe(a.run.state.round.rules.rngValue);
   }, 240000);
 });

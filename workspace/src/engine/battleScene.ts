@@ -55117,24 +55117,34 @@ export function renderBattleResolutionLiveView(
   // values, so retain that OBJ-targeted BLDY on the replacement canvases.
   // The priority-zero healthboxes eclipse the spotlight's priority-two OBJ
   // window, so source still fades their pixels when the window overlaps.
+  // Flatter's AnimTask_HardwarePaletteFade likewise writes BLDCNT 0xf8 (OBJ
+  // target) with the same priority-zero eclipse of its OBJ-window spotlight
+  // (docs/next-adapters-prep35.md s2; the staged FLATTER branch darkens its
+  // healthboxes with the plan brightness outside WIN1).
   const encore = presentation.config.move === "ENCORE"
     ? sceneOnEncoreView(presentation)
     : null;
+  const flatter = presentation.config.move === "FLATTER"
+    ? sceneOnFlatterDisplayPlan(presentation as SceneOnMovePresentationState<SceneOnFlatterConfig>)
+    : null;
+  const healthboxFade = encore
+    ? { bldy: encore.bldy, win1: encore.win1Enabled }
+    : flatter ? { bldy: flatter.brightness, win1: flatter.win1Enabled && flatter.win1DisablesEffects } : null;
   const fadeEncoreHealthbox = <T extends {
     readonly width: number;
     readonly height: number;
     readonly pixels: readonly (RgbColor | null)[];
   }>(content: T, origin: Readonly<{ x: number; y: number }>): T => {
-    if (!encore || encore.bldy === 0) return content;
+    if (!healthboxFade || healthboxFade.bldy === 0) return content;
     return {
       ...content,
       pixels: content.pixels.map((color, index) => {
         if (!color) return null;
         const y = origin.y + Math.floor(index / content.width);
-        if (encore.win1Enabled && y >= 120) return color;
+        if (healthboxFade.win1 && y >= 120) return color;
         const packed = mgbaDarkenColor(
           color.r | (color.g << 8) | (color.b << 16),
-          encore.bldy,
+          healthboxFade.bldy,
         );
         return {
           r: packed & 0xff,
