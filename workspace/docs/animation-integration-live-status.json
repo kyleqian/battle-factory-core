@@ -3704,6 +3704,21 @@
         "later bodies decline (the scanline entry after an earlier scanline body differs, prep34 s2.2); shiny battlers decline",
         "doubles / contest paths not covered"
       ]
+    },
+    {
+      "move": "MOVE_ERUPTION",
+      "id": 284,
+      "sourceFieldEvidence": "../tools/integration/fixtures/prep36/eruption-check-pixels.json",
+      "liveEvidence": [
+        "Profile builder src/engine/liveProfileMoves.ts liveEruptionProfile (docs/next-adapters-prep36.md s2, ported 1:1 from tools/integration/prep36EruptionModel.ts eruptionProfile36): anchors from liveBattlerAnchors, the attacker's pic-coords y_offset (battlerYDelta; the accepted extractor's BARBOACH constant is not used), the known-entry scene / allocator / task slots, the asset palette composite + eruption-warm-rock.json, the host's lent 64-slot activation order (L); the schedule (E1, wave 2 at E1 + 2, E2, falling / shake / audio / closing ages, endAge = E2 + 294) through the UNCHANGED launch reducer (eruptionLaunchTimeline, passed in by the seam); never a capture row",
+        "duration liveMoveAnimationDuration(284) = endAge + 1 from the displayed field (476 / 482 / 494 / 500 rows by attacker geometry); gates: known lend, non-shiny pair, composite, attacker idle rest 0 (prep36 s1.4: the ONIX idle-rest attacker misses rows 0-20 / one launch row; CAMERUPT, the only Factory user, rests at 0); no first-body gate (the branch reads no BG / WIN register)",
+        "dense full windows zero residual twice fresh through the production live renderer, both orientations: accepted BARBOACH (species 323, the scenarios' \"camerupt\") -> ONIX P / O, prep29 TORKOAL -> GOLEM P / O, prep36 CAMERUPT -> GOLEM P / O, STEELIX -> GOLEM P, CAMERUPT -> WEEZING P (elevated target), WEEZING -> GOLEM O (elevated attacker) (9 windows, 4374 rows; tools/integration/fixtures/s10a-live/eruption-*.json, receipt tools/integration/fixtures/sf-live-receipt.json); row 0 of the elevated WEEZING windows via the live #142 hook",
+        "ordinary route 88/14 CAMERUPT (slot 1): live every age (476), following prompt, Scene ON/OFF gameplay / RNG / facility parity (tests/animation/liveSkillSwapFlatterAdapters.test.ts)"
+      ],
+      "remaining": [
+        "later bodies with a non-known-entry allocator (a second Eruption in one battle), shiny battlers, doubles and a status-animation-active attacker are not probed (prep36 s3)",
+        "an attacker with a non-zero front idle rest declines (scene-off view; outside the Factory)"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3727,7 +3742,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 248,
+  "implementedCount": 249,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 13,

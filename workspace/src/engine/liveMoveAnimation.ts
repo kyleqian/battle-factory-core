@@ -93,8 +93,8 @@ import { liveMoveBgWriteRow, liveMoveOptionalLagAge, liveMovePaletteTransferRow,
 import { liveSpitUpDuration, liveSpitUpInputs, type SpitUpCounter } from "./liveSpitUpInputs.ts";
 import { SUPERPOWER_ROWS, liveSuperpowerInputs } from "./liveSuperpowerInputs.ts";
 import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
-import { liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSheerColdRestoreFadeEndAge, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
-import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
+import { liveEruptionProfile, liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSheerColdRestoreFadeEndAge, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
+import { KNOWN_ENTRY_NON_BATTLER_SPRITES, battlerSprite, liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
 import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs, liveShockWaveInputs, liveSkillSwapInputs, liveFlatterInputs, FIRST_BODY_SCANLINE } from "./liveOamMoves.ts";
 import shockWaveAsset from "../animation/assets/shock-wave.json" with { type: "json" };
 import { shockWaveTimingFor } from "../animation/shockWave.ts";
@@ -109,6 +109,9 @@ import { willOWispSpritesAtAge, willOWispTimeline } from "../animation/willOWisp
 import { skillSwapAtAge, type SkillSwapLiveInputs } from "../animation/skillSwap.ts";
 import skillSwapOrbAsset from "../animation/assets/skill-swap-bluegreen-orb.json" with { type: "json" };
 import { flatterAtAge, type FlatterLiveInputs } from "../animation/flatter.ts";
+import { eruptionLaunchTimeline, type EruptionLaunchProfile } from "../animation/eruptionLaunch.ts";
+import { ERUPTION_FALLING_ROCK_SOURCE_CALLS } from "../animation/eruptionFallingRock.ts";
+import eruptionWarmRockAsset from "../animation/assets/eruption-warm-rock.json" with { type: "json" };
 import flatterAsset from "../animation/assets/flatter.json" with { type: "json" };
 import { pursuitTargetOffsetAtAge } from "../animation/pursuit.ts";
 import { sortGbaSpriteOrder } from "../animation/gbaObjCompositor.ts";
@@ -222,6 +225,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   262,
   // Shock Wave (docs/next-adapters-prep33.md s1 / s3; liveOamMoves.ts liveShockWaveInputs): the reducer's geometry-derived timing, any known lend.
   351,
+  // S10A: Eruption (prep36 source-derived profile, liveProfileMoves.ts liveEruptionProfile; scoped exact, no D3 / D4 parameter).
+  284,
   // anchor3: source battler anchors (position center, picture height, pic offset).
   86, 87, 107, 116, 203, 207, 263, 339,
   // selectors: request-selected branches and healing anchors.
@@ -450,6 +455,9 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // D4c faithful timing: Psywave windows start at activation (row 0; d4a-live/psywave-*.json). The live hook draws an elevated opponent's
     // shadow whichever role it has (ESPEON -> CROBAT player window: 200 px at age 0 otherwise, docs/next-adapters-prep30.md s2.4).
     149,
+    // S10A: Eruption windows start at activation (row 0; s10a-live/eruption-*.json). The live hook draws an elevated opponent's shadow whichever
+    // role it has (CAMERUPT -> WEEZING player / WEEZING -> GOLEM opponent: 195 px at age 0 otherwise, prep36 s0.2).
+    284,
     // S10A faithful timing: Skill Swap windows start at activation (row 0; s10a-live/skill-swap-*.json). The live hook draws an elevated
     // opponent's shadow whichever role it has (ESPEON -> WEEZING player / WEEZING -> SNORLAX opponent: 195 px at age 0 otherwise, prep35 s1.3).
     285,
@@ -666,11 +674,47 @@ function liveShockWaveTiming(field: BattleResolutionDisplayedField, attackerSide
     targetBattlePosition: target.battlePositionCenter, derivedTiming: true });
 }
 
+const eruptionProfileCache = new Map<string, ReturnType<typeof liveEruptionProfile>>();
+/**
+ * MOVE_ERUPTION's source-derived profile (docs/next-adapters-prep36.md s2; liveProfileMoves.ts liveEruptionProfile) from the displayed field: the
+ * anchors, the attacker's pic-coords y_offset, the asset composite, the known-entry scene and the lent activation order (the schedule depends on
+ * the attacker sprite y only). Null without a composite. Memoised (the launch reducer runs twice per profile).
+ */
+function liveEruptionProfileFor(field: BattleResolutionDisplayedField, attackerSide: "player" | "opponent", activationOrder: readonly number[]) {
+  const art = createBattleCommandFieldArtView(field);
+  const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+  if (palettes === null) return null;
+  const anchors = { player: liveBattlerAnchors("player", art), opponent: liveBattlerAnchors("opponent", art) };
+  const key = JSON.stringify([attackerSide, art.player.speciesSymbol, art.opponent.speciesSymbol, anchors, activationOrder]);
+  let profile = eruptionProfileCache.get(key);
+  if (profile === undefined) {
+    profile = liveEruptionProfile({ attackerSide, anchors, attackerYDelta: art[attackerSide].coords.yOffset, palettes,
+      warmRockPalette: (eruptionWarmRockAsset as unknown as { palette: { r: number; g: number; b: number }[] }).palette,
+      sceneSprites: KNOWN_ENTRY_NON_BATTLER_SPRITES.map((s) => ({ slot: s.slot, attr: s.attr as readonly number[], subpriority: s.subpriority })),
+      battlerSprites: { player: battlerSprite("player", anchors.player), opponent: battlerSprite("opponent", anchors.opponent) },
+      activationOrder, animationRng: 0,
+      launchLifetime: (launch, sourceOffset) => {
+        const frame = eruptionLaunchTimeline(launch as unknown as EruptionLaunchProfile).find((fr) => fr.task !== null && fr.source?.offset === sourceOffset);
+        if (!frame?.task) throw new Error(`Eruption launch wave ${sourceOffset} has no task`);
+        return frame.task.lifetime;
+      },
+      fallingCalls: ERUPTION_FALLING_ROCK_SOURCE_CALLS });
+    if (eruptionProfileCache.size > 16) eruptionProfileCache.clear();
+    eruptionProfileCache.set(key, profile);
+  }
+  return profile;
+}
+
 export function liveMoveAnimationDuration(
   request: BattleMoveAnimationRequest, field?: BattleResolutionDisplayedField,
 ): number | null {
   switch (request.moveId) {
     // Shock Wave (prep33): activation .. the derived first inactive row (262..266 measured), only defined with the displayed field.
+    // Eruption (prep36 s2): the first inactive row = E2 + 294 from the attacker sprite y (476..500 rows measured), only defined with the field.
+    case 284: {
+      const profile = field === undefined ? null : liveEruptionProfileFor(field, request.attacker === 0 ? "player" : "opponent", []);
+      return profile === null ? null : profile.endAge + 1;
+    }
     case 351: return field === undefined ? null : liveShockWaveTiming(field, request.attacker === 0 ? "player" : "opponent").cleanupAge + 1;
     // Water Spout (prep13 s1.2): the body length depends on the attacker's party HP and picture height (accepted rows
     // 278 full HP / 276 KINGDRA player-back / 270..201 at lower HP tiers), so it is only defined with the displayed field.
@@ -3548,6 +3592,21 @@ export function liveMoveAnimationPresentation(
           orbitMatrixNums: matrices.slice(0, 6), scatterMatrixNums: matrices.slice(6),
           uninitializedScatterY: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).picOffsetPoint.y,
           attackerPersonality: personality, animationRngSeed: 0 } };
+      break;
+    }
+    case 284: {
+      // Eruption (prep36 s2; liveProfileMoves.ts liveEruptionProfile): the Spikes gates (known lend, non-shiny, the assets-only composite) plus a
+      // zero attacker idle rest (the launch task zeroes x2: an idle-rest attacker misses rows 0-20 / one launch row, prep36 s1.4; CAMERUPT, the
+      // only Factory user, rests at 0). No first-body gate: the branch reads no BG / WIN register (prep36 s1.1).
+      if (!spriteOrderInput?.known) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (attackerAnchors.frontIdleRest.x2 !== 0 || attackerAnchors.frontIdleRest.y2 !== 0) return null;
+      const order = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (order === null) return null;
+      const animationProfile = liveEruptionProfileFor(field, attacker.geometry.side, order);
+      if (animationProfile === null) return null;
+      config = { move: "ERUPTION", attacker, target, fieldProfile, animationProfile: animationProfile as never };
       break;
     }
     case 323: {

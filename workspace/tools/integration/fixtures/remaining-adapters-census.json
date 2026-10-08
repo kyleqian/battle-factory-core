@@ -10,7 +10,7 @@
   "src/data/gen/battle-frontier-mons.json",
   "src/data/gen/factory-round-policy.json"
  ],
- "liveStatusImplementedCount": 248,
+ "liveStatusImplementedCount": 249,
  "staleCodesCorrected": [
   "B (sSpriteOrder): was 'first body only'; production now lends the order and tracks it across bodies (liveSpriteOrderHost.ts / spriteOrderProvider.ts, merged cross-body tracker + post-KO rung 1), so B no longer blocks anything; recipe work only (falls back after an unmodelled graphics command)",
   "F-AFFINE / E-TASK: were provider blockers; docs/allocator-plan-v2-evidence.md measured gOamMatrixAllocBitmap 0x6 + no tasks at all 481 known-entry bodies, so the accepted constants gated on the lent order suffice for first bodies (invalidated after a faint/switch)",
@@ -23,7 +23,7 @@
  "inFlightMoves": {},
  "summary": {
   "accepted": 276,
-  "live": 248,
+  "live": 249,
   "faithfulRandom": 13,
   "faithfulRandomMoves": [
    "MOVE_ASTONISH",
@@ -57,35 +57,30 @@
    "MOVE_SUPERPOWER"
   ],
   "inFlight": 0,
-  "remaining": 2,
+  "remaining": 1,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
   },
   "weightPct": {
-   "live": 93.738,
+   "live": 93.772,
    "faithfulRandom": 3.84,
    "faithfulTiming": 1.678,
    "inFlight": 0,
-   "remaining": 0.257
+   "remaining": 0.223
   },
   "remainingByGroup": {
-   "MULTI": {
-    "moves": 1,
-    "weightPct": 0.034
-   },
    "PROVIDER-x": {
     "moves": 1,
     "weightPct": 0.223
    }
   },
   "remainingByHostClass": {
-   "H_BASIC": 1,
-   "H_BUFFER": 1
+   "H_BASIC": 1
   },
-  "orderFirstBodyOnlyMoves": 1,
-  "slotPlanNeededMoves": 1,
-  "sumsTo": "248+13+13+0+2=276",
+  "orderFirstBodyOnlyMoves": 0,
+  "slotPlanNeededMoves": 0,
+  "sumsTo": "249+13+13+0+1=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -147,8 +142,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 1,
-   "touchingWeightPct": 0.034,
+   "touchingMoves": 0,
+   "touchingWeightPct": 0,
    "meta": {
     "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
     "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
@@ -163,8 +158,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 1,
-   "touchingWeightPct": 0.034,
+   "touchingMoves": 0,
+   "touchingWeightPct": 0,
    "meta": {
     "cost": "extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves)",
     "claim": "exact for audited plan rows from a known entry; actual status animations/switches invalidate"
@@ -179,8 +174,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 1,
-   "touchingWeightPct": 0.034,
+   "touchingMoves": 0,
+   "touchingWeightPct": 0,
    "meta": null
   },
   {
@@ -244,8 +239,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 1,
-   "touchingWeightPct": 0.034,
+   "touchingMoves": 0,
+   "touchingWeightPct": 0,
    "meta": null
   },
   {
@@ -382,8 +377,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 1,
-   "touchingWeightPct": 0.034,
+   "touchingMoves": 0,
+   "touchingWeightPct": 0,
    "meta": {
     "cost": "new large host (docs/animation-integration-readiness.md A6)",
     "claim": "only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today"
@@ -400,48 +395,6 @@
    "newNames": [
     "SUBSTITUTE"
    ]
-  },
-  {
-   "step": 2,
-   "provider": "C",
-   "newMoves": 0,
-   "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 1,
-   "newNames": []
-  },
-  {
-   "step": 3,
-   "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
-   "newMoves": 1,
-   "newWeightPct": 0.034,
-   "cumulativeRemainingUnlocked": 2,
-   "newNames": [
-    "ERUPTION"
-   ]
-  },
-  {
-   "step": 4,
-   "provider": "D-PAL",
-   "newMoves": 0,
-   "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 2,
-   "newNames": []
-  },
-  {
-   "step": 5,
-   "provider": "D-TILE",
-   "newMoves": 0,
-   "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 2,
-   "newNames": []
-  },
-  {
-   "step": 6,
-   "provider": "F-AUDIO",
-   "newMoves": 0,
-   "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 2,
-   "newNames": []
   }
  ],
  "batches": [
@@ -465,190 +418,6 @@
   }
  ],
  "rows": [
-  {
-   "move": "MOVE_ERUPTION",
-   "id": 284,
-   "name": "ERUPTION",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0003401360544217687,
-   "config": "src/animation/sceneOnPresentation.ts:3920",
-   "needs": [
-    "B",
-    "C",
-    "E-TASK",
-    "D-PAL",
-    "D-TILE",
-    "F-AUDIO"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationProfile:launch (Eruption{Launch,FallingRock,HorizontalShake}Profile: allocator snapshots, taskSlot, startingAnimationRng (eruption*.ts))",
-     "cites": [
-      "src/animation/eruption.ts:64"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationProfile:launch (Eruption{Launch,FallingRock,HorizontalShake}Profile: allocator snapshots, taskSlot, startingAnimationRng (eruption*.ts))",
-     "cites": [
-      "src/animation/eruption.ts:64"
-     ]
-    },
-    {
-     "code": "E-TASK",
-     "text": "animationProfile:launch (Eruption{Launch,FallingRock,HorizontalShake}Profile: allocator snapshots, taskSlot, startingAnimationRng (eruption*.ts))",
-     "cites": [
-      "src/animation/eruption.ts:64"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "animationProfile:palette (EruptionPaletteProfile: palette snapshots + tags at age 0 (eruptionPalette.ts:26))",
-     "cites": [
-      "src/animation/eruption.ts:67"
-     ]
-    },
-    {
-     "code": "D-TILE",
-     "text": "animationProfile:launch (Eruption{Launch,FallingRock,HorizontalShake}Profile: allocator snapshots, taskSlot, startingAnimationRng (eruption*.ts))",
-     "cites": [
-      "src/animation/eruption.ts:64"
-     ]
-    },
-    {
-     "code": "F-AUDIO",
-     "text": "animationProfile:audio (EruptionAudioProfile {taskSlot,commandAge,...} (eruptionAudio.ts:23))",
-     "cites": [
-      "src/animation/eruption.ts:68"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationProfile:orientation",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/eruption.ts:62"
-    },
-    {
-     "path": "animationProfile:endAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/eruption.ts:63"
-    },
-    {
-     "path": "animationProfile:launch",
-     "classes": [
-      "A-SLOT",
-      "B",
-      "C",
-      "E-TASK",
-      "D-TILE"
-     ],
-     "status": "blocked: C+E-TASK+D-TILE",
-     "cite": "src/animation/eruption.ts:64"
-    },
-    {
-     "path": "animationProfile:falling",
-     "classes": [
-      "A-SLOT",
-      "B",
-      "C",
-      "E-TASK",
-      "D-TILE"
-     ],
-     "status": "blocked: C+E-TASK+D-TILE",
-     "cite": "src/animation/eruption.ts:65"
-    },
-    {
-     "path": "animationProfile:horizontalShake",
-     "classes": [
-      "A-SLOT",
-      "B",
-      "C",
-      "E-TASK",
-      "D-TILE"
-     ],
-     "status": "blocked: C+E-TASK+D-TILE",
-     "cite": "src/animation/eruption.ts:66"
-    },
-    {
-     "path": "animationProfile:palette",
-     "classes": [
-      "D-PAL",
-      "A-SLOT"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/eruption.ts:67"
-    },
-    {
-     "path": "animationProfile:audio",
-     "classes": [
-      "F-AUDIO",
-      "E-TASK"
-     ],
-     "status": "blocked: F-AUDIO+E-TASK",
-     "cite": "src/animation/eruption.ts:68"
-    },
-    {
-     "path": "animationProfile:gameplayRng",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/eruption.ts:69"
-    },
-    {
-     "path": "animationProfile:immutableGameplayState",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/eruption.ts:71"
-    },
-    {
-     "path": "animationProfile:spriteOrder",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/eruption.ts:72"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "full",
-   "carrierOccurrences": 511,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "B",
-    "E-TASK"
-   ],
-   "providerNeeds": [
-    "C",
-    "D-PAL",
-    "D-TILE",
-    "F-AUDIO"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "MULTI"
-  },
   {
    "move": "MOVE_SUBSTITUTE",
    "id": 164,

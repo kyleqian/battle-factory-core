@@ -9,7 +9,8 @@ Skill Swap 285 (D4 faithful timing, prep35): optional-lag-age 176 ("event" = 196
 ("event" = the bank-2 restore on row 176) = the prep35 measurement tools/integration/fixtures/prep35/skillswap-check-pixels.json windows[].T.restoreRow.
 Flatter 260 (D3 faithful random, prep32 / prep35): 219 rows; the presentation host is pinned to the ROM gRng2Value at the activation frame
 (rng2Series[A + 1] stepped back once, as d4aFixtures.py Meteor Mash).
-usage: s10aLiveFixtures.py PROBEDIR [SPIT_UP|SUPERPOWER|SKILL_SWAP|FLATTER]   -> tools/integration/fixtures/s10a-live/*.json"""
+Eruption 284 (scoped exact, prep36): window = [activation, first inactive row] = endAge + 1 rows (476 / 482 / 494 / 500, attacker geometry).
+usage: s10aLiveFixtures.py PROBEDIR [SPIT_UP|SUPERPOWER|SKILL_SWAP|FLATTER|ERUPTION]   -> tools/integration/fixtures/s10a-live/*.json"""
 import json, sys
 from pathlib import Path
 R = Path(__file__).resolve().parents[2]
@@ -43,6 +44,17 @@ FL_CASES = [("flatter-player-nidorina-opponent-onix", "mechanic-flatter-player-n
             # extra pinned activation values (the accepted / prep25 scenarios with 13 / 29 idle frames before the first input: still the first body)
             ("flatter-pin-player-nidorina-opponent-onix-pad13", "sf-flatter-pin-player-nidorina-opponent-onix-pad13", "player"),
             ("flatter-pin-opponent-hypno-golem-pad29", "sf-flatter-pin-opponent-hypno-golem-pad29", "opponent")]
+# Eruption: the accepted "camerupt" scenarios stage species 323 (BARBOACH, prep36 s0.1); prep36 CAMERUPT is internal 340. The ONIX idle-rest
+# attacker window (prep36-eruption-alt-opponent-onix-golem) declines by the attacker idle-rest gate and has no dense fixture.
+ER_CASES = [("eruption-player-barboach-opponent-onix", "mechanic-eruption-player-camerupt-opponent-onix", "player"),
+            ("eruption-opponent-barboach-player-onix", "mechanic-eruption-opponent-camerupt-player-onix", "opponent"),
+            ("eruption-alt-player-torkoal-golem", "prep29-eruption-alt-player-torkoal-golem", "player"),
+            ("eruption-alt-opponent-torkoal-golem", "prep29-eruption-alt-opponent-torkoal-golem", "opponent"),
+            ("eruption-alt-player-camerupt-golem", "prep36-eruption-alt-player-camerupt-golem", "player"),
+            ("eruption-alt-opponent-camerupt-golem", "prep36-eruption-alt-opponent-camerupt-golem", "opponent"),
+            ("eruption-alt-player-steelix-golem", "prep36-eruption-alt-player-steelix-golem", "player"),
+            ("eruption-alt-player-camerupt-weezing", "prep36-eruption-alt-player-camerupt-weezing", "player"),
+            ("eruption-alt-opponent-weezing-golem", "prep36-eruption-alt-opponent-weezing-golem", "opponent")]
 LCG_INV = pow(1103515245, -1, 2 ** 32)
 for side in ("player", "opponent"):
     for word, counter in COUNTERS.items():
@@ -60,7 +72,8 @@ out.mkdir(exist_ok=True)
 ALL = ([("SPIT_UP", 255, *c) for c in CASES] if not ONLY or "SPIT_UP" in ONLY else []) + \
       ([("SUPERPOWER", 276, t, sc, sd, None) for t, sc, sd in SP_CASES] if not ONLY or "SUPERPOWER" in ONLY else []) + \
       ([("SKILL_SWAP", 285, t, sc, sd, None) for t, sc, sd in SS_CASES] if not ONLY or "SKILL_SWAP" in ONLY else []) + \
-      ([("FLATTER", 260, t, sc, sd, None) for t, sc, sd in FL_CASES] if not ONLY or "FLATTER" in ONLY else [])
+      ([("FLATTER", 260, t, sc, sd, None) for t, sc, sd in FL_CASES] if not ONLY or "FLATTER" in ONLY else []) + \
+      ([("ERUPTION", 284, t, sc, sd, None) for t, sc, sd in ER_CASES] if not ONLY or "ERUPTION" in ONLY else [])
 for move, mid, tag, scen, side, counter in ALL:
     p1, p2 = (json.loads((D / f"{scen}-r{r}.json").read_text()) for r in (1, 2))
     key = lambda p: [(b["move"], b["start"], b["end"], b["atActivation"]["attacker"]) for b in p["bodies"]]
@@ -71,7 +84,8 @@ for move, mid, tag, scen, side, counter in ALL:
     assert side_of(body) == side, (scen, "side")
     A, E = body["start"], body["end"]
     rows = E - A + 1
-    assert rows == {"SPIT_UP": 109 if counter == 3 else 108, "SUPERPOWER": 248, "SKILL_SWAP": rows if rows in (195, 196) else -1, "FLATTER": 219}[move], (scen, rows)
+    assert rows == {"SPIT_UP": 109 if counter == 3 else 108, "SUPERPOWER": 248, "SKILL_SWAP": rows if rows in (195, 196) else -1, "FLATTER": 219,
+                    "ERUPTION": rows if rows in (476, 482, 494, 500) else -1}[move], (scen, rows)
     m = body["atActivation"]["mons"]
     foe = "opponent" if side == "player" else "player"
     sp = {"player": m[0], "opponent": m[1]}
@@ -85,6 +99,7 @@ for move, mid, tag, scen, side, counter in ALL:
             "palette-transfer-row": "event" if PREP35_RESTORE_ROW[scen] == 176 else "no-event"}, "restoreRow": PREP35_RESTORE_ROW[scen]} if move == "SKILL_SWAP" else
            {"presentationRngActivation": {"value": ((dict((f, v) for f, v in p1["rng2Series"])[A + 1] - 24691) * LCG_INV) & 0xFFFFFFFF,
             "source": f"prep22Probe.py rng2Series[{A + 1}] stepped back once (activation frame {A})"}} if move == "FLATTER" else
+           {} if move == "ERUPTION" else
            {"timingPhase": "event" if PREP31_MONBG_ROW[scen] == 11 else "no-event", "timingPhases": {"bg-write-row": "event" if PREP31_MONBG_ROW[scen] == 11 else "no-event"},
             "monbgCntRow": PREP31_MONBG_ROW[scen]}),
         "attacker": {"species": name(sp[side]), "geometry": {"side": side}},

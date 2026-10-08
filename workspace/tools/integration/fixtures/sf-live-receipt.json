@@ -1,7 +1,7 @@
 {
  "schema": "sf-live-receipt/v1",
- "testedCommit": "5b3b9fb726369d16b92eab3f7192621d12f38d0e",
- "testedSrcTree": "227645512b6189d4553495cb3629717e0d889035",
+ "testedCommit": "f1100895324f98569c25b138c65e36c0734fdb44",
+ "testedSrcTree": "43b8cb410de8f747dc2b1c865b07e002794df453",
  "dirty": true,
  "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
  "commands": [
@@ -990,6 +990,16 @@
   }
  ],
  "summary": {
+  "ERUPTION": {
+   "windows": 9,
+   "selectedPhaseWindows": 9,
+   "selectedPhaseResidualPixels": 0,
+   "otherPhaseWindows": 0,
+   "otherPhaseAffectedAges": [],
+   "otherPhaseMaxPixelsPerRow": 0,
+   "freshRunsIdentical": true,
+   "violations": 0
+  },
   "FLATTER": {
    "windows": 6,
    "selectedPhaseWindows": 6,
@@ -1508,6 +1518,249 @@
      "exactRows": 219,
      "residualPixels": 0,
      "digest": "d1a83c14b9bbddd2054330a14f805f2f5fc2ef7c67a3cf48a8f915d812d1ef61",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/eruption-alt-opponent-camerupt-golem.json",
+   "move": "ERUPTION",
+   "selectedPhase": true,
+   "window": 494,
+   "expectedDuration": 494,
+   "runs": [
+    {
+     "rows": 494,
+     "exactRows": 494,
+     "residualPixels": 0,
+     "digest": "b0dac4beedd3af6338fd238c7c0a57c411ab344ca897e3b1fa7817549fa4a08e",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 494,
+     "exactRows": 494,
+     "residualPixels": 0,
+     "digest": "b0dac4beedd3af6338fd238c7c0a57c411ab344ca897e3b1fa7817549fa4a08e",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/eruption-alt-opponent-torkoal-golem.json",
+   "move": "ERUPTION",
+   "selectedPhase": true,
+   "window": 500,
+   "expectedDuration": 500,
+   "runs": [
+    {
+     "rows": 500,
+     "exactRows": 500,
+     "residualPixels": 0,
+     "digest": "f279921dd74dfff330a625adcb9163e0e83f273e82b3b5cfa477fe41774a170f",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 500,
+     "exactRows": 500,
+     "residualPixels": 0,
+     "digest": "f279921dd74dfff330a625adcb9163e0e83f273e82b3b5cfa477fe41774a170f",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/eruption-alt-opponent-weezing-golem.json",
+   "move": "ERUPTION",
+   "selectedPhase": true,
+   "window": 500,
+   "expectedDuration": 500,
+   "runs": [
+    {
+     "rows": 500,
+     "exactRows": 500,
+     "residualPixels": 0,
+     "digest": "80deb13b20a88adb0ef73b337b27dc196c7648c681f290d2a7f106c7691ebc48",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 500,
+     "exactRows": 500,
+     "residualPixels": 0,
+     "digest": "80deb13b20a88adb0ef73b337b27dc196c7648c681f290d2a7f106c7691ebc48",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/eruption-alt-player-camerupt-golem.json",
+   "move": "ERUPTION",
+   "selectedPhase": true,
+   "window": 476,
+   "expectedDuration": 476,
+   "runs": [
+    {
+     "rows": 476,
+     "exactRows": 476,
+     "residualPixels": 0,
+     "digest": "e6b7710b1e6312821ae512babad6eb2beafe77a29d3ff3293aeac484e3ed008d",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 476,
+     "exactRows": 476,
+     "residualPixels": 0,
+     "digest": "e6b7710b1e6312821ae512babad6eb2beafe77a29d3ff3293aeac484e3ed008d",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/eruption-alt-player-camerupt-weezing.json",
+   "move": "ERUPTION",
+   "selectedPhase": true,
+   "window": 476,
+   "expectedDuration": 476,
+   "runs": [
+    {
+     "rows": 476,
+     "exactRows": 476,
+     "residualPixels": 0,
+     "digest": "0f2bc0bf48935f0896680cd372d733c32354e0b40bdc2b28ad6aca607b439ddb",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 476,
+     "exactRows": 476,
+     "residualPixels": 0,
+     "digest": "0f2bc0bf48935f0896680cd372d733c32354e0b40bdc2b28ad6aca607b439ddb",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/eruption-alt-player-steelix-golem.json",
+   "move": "ERUPTION",
+   "selectedPhase": true,
+   "window": 482,
+   "expectedDuration": 482,
+   "runs": [
+    {
+     "rows": 482,
+     "exactRows": 482,
+     "residualPixels": 0,
+     "digest": "c4cb0d74dc67a28fcb51791c1907c21fbbf374aca752203960e67cb506bce1ff",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 482,
+     "exactRows": 482,
+     "residualPixels": 0,
+     "digest": "c4cb0d74dc67a28fcb51791c1907c21fbbf374aca752203960e67cb506bce1ff",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/eruption-alt-player-torkoal-golem.json",
+   "move": "ERUPTION",
+   "selectedPhase": true,
+   "window": 476,
+   "expectedDuration": 476,
+   "runs": [
+    {
+     "rows": 476,
+     "exactRows": 476,
+     "residualPixels": 0,
+     "digest": "4a6930fd3eaf5d4e774a240e51d3d75bd8376282e7d00f30c0698fbd668d1ef2",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 476,
+     "exactRows": 476,
+     "residualPixels": 0,
+     "digest": "4a6930fd3eaf5d4e774a240e51d3d75bd8376282e7d00f30c0698fbd668d1ef2",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/eruption-opponent-barboach-player-onix.json",
+   "move": "ERUPTION",
+   "selectedPhase": true,
+   "window": 494,
+   "expectedDuration": 494,
+   "runs": [
+    {
+     "rows": 494,
+     "exactRows": 494,
+     "residualPixels": 0,
+     "digest": "6f21c8c2440e7d0e5e1c86acdfac0665f73c355aa662332388d0e90782a10a47",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 494,
+     "exactRows": 494,
+     "residualPixels": 0,
+     "digest": "6f21c8c2440e7d0e5e1c86acdfac0665f73c355aa662332388d0e90782a10a47",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/eruption-player-barboach-opponent-onix.json",
+   "move": "ERUPTION",
+   "selectedPhase": true,
+   "window": 476,
+   "expectedDuration": 476,
+   "runs": [
+    {
+     "rows": 476,
+     "exactRows": 476,
+     "residualPixels": 0,
+     "digest": "23ba03c8054edbb76cc08c0b2cfd6486fd3eb13cc9eee6919633db198b45ed05",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 476,
+     "exactRows": 476,
+     "residualPixels": 0,
+     "digest": "23ba03c8054edbb76cc08c0b2cfd6486fd3eb13cc9eee6919633db198b45ed05",
      "affectedAges": [],
      "maxPixelsPerRow": 0
     }

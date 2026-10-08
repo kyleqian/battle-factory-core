@@ -1,0 +1,36 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "ERUPTION",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep36-eruption-alt-player-camerupt-weezing.json",
+ "denseWindow": {
+  "startFrame": 240,
+  "endFrame": 715
+ },
+ "windowSource": "window = [activation, first inactive row] of this scenario's first ERUPTION body (476 rows) from 2 fresh prep22Probes.sh runs (bodies agree)",
+ "attacker": {
+  "species": "CAMERUPT",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "WEEZING",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015431,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 145,
+  "playerMaxHp": 145,
+  "opponentHp": 172,
+  "opponentMaxHp": 172,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

@@ -266,3 +266,81 @@ describe("S10A Flatter (260) faithful random", () => {
     expect(off.run.state.round.rules.rngValue).toBe(a.run.state.round.rules.rngValue);
   }, 240000);
 });
+
+// S10A Eruption (284, scoped exact) from the prep36 source-derived profile (docs/next-adapters-prep36.md s2; liveProfileMoves.ts liveEruptionProfile).
+describe("S10A Eruption (284) scoped exact", () => {
+  const er = NAMES.filter((n) => n.startsWith("eruption-"));
+
+  it("is a scoped-exact adapter (never faithful random / timing); the duration is the derived endAge + 1 per attacker geometry", () => {
+    expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).toContain(284);
+    expect(LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS).not.toContain(284);
+    expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).not.toContain(284);
+    expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[284]).toBe(0);
+    expect((status.implementedAdapters as { id: number }[]).filter((e) => e.id === 284)).toHaveLength(1);
+    expect(liveMoveAnimationDuration({ moveId: 284, attacker: 0, target: 1, power: 150, damage: 1, friendship: 70, multihit: 0, turn: 0 })).toBeNull();
+    for (const name of er) {
+      const f = fixtureAt(name);
+      const { view, effect } = effectOf(f);
+      expect(liveMoveAnimationDuration(effect.request, view.field)).toBe(f.denseWindow!.endFrame - f.denseWindow!.startFrame + 1);
+    }
+  });
+
+  it("the live profile equals the prep36 source model (eruptionProfile36) for every window's species pair and lent order", async () => {
+    const { eruptionProfile36 } = await import("../../tools/integration/prep36EruptionModel.ts");
+    for (const name of er) {
+      const f = fixtureAt(name);
+      const { view, effect } = effectOf(f);
+      const lend = effect.spriteOrderInput as { known: true; free: number[] };
+      const presentation = liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, lend as never)!;
+      const live = (presentation.config as any).animationProfile;
+      const model = eruptionProfile36({ attackerSide: f.attacker.geometry.side, playerSpecies: view.field.player.species, opponentSpecies: view.field.opponent.species,
+        activationOrder: live.spriteOrder.initialOrder, animationRng: 0, gameplayRng: 0 });
+      expect(JSON.parse(JSON.stringify(live))).toEqual(JSON.parse(JSON.stringify(model)));
+    }
+  });
+
+  it("the receipt: 9 windows (accepted, prep29, prep36 incl. real CAMERUPT both sides and the elevated WEEZING windows) exact on every row twice fresh", () => {
+    const rows = (receipt.windows as ReceiptWindow[]).filter((r) => r.move === "ERUPTION");
+    expect(rows.map((r) => r.fixture.replace(`${DIR}/`, "").replace(".json", "")).sort()).toEqual(er);
+    expect(er).toHaveLength(9);
+    for (const r of rows) {
+      expect(r.violations).toEqual([]);
+      expect(r.runs.map((run) => run.residualPixels)).toEqual([0, 0]);
+      expect(r.runs[1]!.digest).toBe(r.runs[0]!.digest);
+      expect(r.window).toBe(r.expectedDuration);
+    }
+    expect(rows.reduce((n, r) => n + r.window, 0)).toBe(4374);
+  });
+
+  it("gates: known lend; declines with an unknown order, for a shiny battler, for an attacker with a front idle rest; any later known lend engages", () => {
+    for (const name of ["eruption-alt-player-camerupt-golem", "eruption-alt-opponent-camerupt-golem"]) {
+      const f = fixtureAt(name);
+      const { view, effect } = effectOf(f);
+      const call = (order: unknown, field = view.field) => liveMoveAnimationPresentation(effect.request, field, 0, undefined, undefined, order as never);
+      const lend = effect.spriteOrderInput as { known: true; free: number[]; firstBody: boolean };
+      const presentation = call(lend);
+      expect((presentation!.config as any).move).toBe("ERUPTION");
+      expect(call({ ...lend, firstBody: !lend.firstBody })).not.toBeNull();
+      expect(call(undefined)).toBeNull();
+      expect(call({ known: false })).toBeNull();
+      const ot = 416049562, shiny = ((ot >>> 16) ^ (ot & 0xffff)) >>> 0;
+      for (const side of ["player", "opponent"] as const) expect(call(lend, { ...view.field, [side]: { ...view.field[side], personality: shiny } })).toBeNull();
+      // ONIX (front idle rest x2 1): declines as the attacker (prep36 s1.4), engages as the target (the accepted ONIX target is 0 px).
+      const onix = { species: 95, speciesSymbol: "ONIX", name: "ONIX" };
+      if (f.attacker.geometry.side === "opponent") expect(call(lend, { ...view.field, opponent: { ...view.field.opponent, ...onix } as never })).toBeNull();
+      else expect(call(lend, { ...view.field, opponent: { ...view.field.opponent, ...onix } as never })).not.toBeNull();
+    }
+  });
+
+  // tools/integration/r3ProfileRouteSearch.ts 284 3 1 4000 (first candidates: 88/14, 211/14, 306/14 CAMERUPT slot 1, all active, 476 rows).
+  it("route 88/14 CAMERUPT: Eruption live on every age, following prompt reached, Scene ON/OFF parity", () => {
+    const on = generatedCommandAnimationReplay(88, "on", [1], 14);
+    const off = generatedCommandAnimationReplay(88, "off", [1], 14);
+    const bodies = on.animations.filter((a) => a.moveId === 284 && a.attacker === 0);
+    expect(bodies).toHaveLength(1);
+    expect(bodies[0]!.ages).toEqual(Array.from({ length: 476 }, (_, age) => age));
+    expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
+    expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    expectOnOffParity(on, off);
+  }, 240000);
+});
