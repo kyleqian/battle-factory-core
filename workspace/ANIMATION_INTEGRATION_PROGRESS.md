@@ -12,6 +12,14 @@
   Worker gates 1,563 files / 12,823 tests, build 873, differential 624. Supervisor: `substSwapRun.sh` into fresh dirs —
   probes r1 == r2 (13 scenarios), 21 windows x2 runs 0 px, GOLEM-player residual == non-subbed control, negatives fail;
   union typecheck, smoke 448, 9 targeted files 128/128, own differential vs `bb4dc2558` 624/624. Logs `.integration/validation/swap-20261008/`.
+- prep40 (side, `2e72fdd7f`, new files only): live adapters used by a subbed ATTACKER inside the production swap composite
+  (75 scenarios x2 fresh, two passes byte-identical; no swap row ever carried a residual). 28 cells 0 px (17.04); one-batch
+  14 ids (26 cells, 16.49). NEEDS-BODY-FRAMING 12.25 (swap-back starts at the body's ROM first inactive row: Earthquake,
+  Psychic p, Sludge Bomb, Flamethrower, Toxic, Bite, Fire Punch, Explosion -> 0 px), NEEDS-ORDER 6.82 (no order input after
+  the attacker's own Substitute body; Seismic Toss also needs damage), Roar target x2, Dig hidden attacker, Double Kick split.
+  Tail row: the ROM shows the doll at x2 -5 / +5 on the row after the window (draw it on the next command's first row).
+  Faint / switch-out: swap-in first (42 / 40 rows, same rows as substituteSwapRows). Supervisor: `prep40Run.sh` into fresh
+  dirs — probes r1 == r2 (75), summary.txt / summary.json byte-identical to the committed receipts.
 - Folded Opus worker `bb93398be` as `3a6f9e20a` (src tree `70fd1474`): seam-resolved DEFERRED sprite-order lend (design 1 of
   `docs/s10a-random2-order-lend-blocker.md`): the order host records a word-free marker at an Ice Ball body (presentation
   body key, request fields, its own lend — known-entry free order or itself deferred — and the order events after it);
