@@ -1,0 +1,80 @@
+move           side         wt win rows body    D       prodPx r1/r2     aligned(rows:shift px)        drop164 | firstbody       ctrl   fallback tail k1 today/longer  verdict
+EARTHQUAKE     player    2.261   2  293  207  198     [80689, 80689]                    208:0 0            80689/0 80689/0          0    1278780                600/0  NEEDS-BODY-FRAMING
+EARTHQUAKE     opponent  2.261   2  289  207  198     [60370, 60370]                    208:0 0            60370/0 60370/0          -    1095981                679/0  NEEDS-BODY-FRAMING
+AERIAL_ACE     player    1.108   2  135   49   50             [0, 0]                          -                    0/- 0/-          0     285329                600/0  EXACT-WITH-SWAPS
+AERIAL_ACE     opponent  1.108   2  131   49   50             [1, 1]                     50:0 1                    1/1 1/1          -     241442                679/0  UNRESOLVED
+SHADOW_BALL    player    1.106   1  240  154  148 [1466412, 1466412]                155:-5 9148  1466412/9148 1466412/9148     280700    2904841                600/0  UNRESOLVED
+SHADOW_BALL    opponent  1.106   3  236  154  148 [1495359, 1495359]                   155:-5 0        1495359/0 1495359/0          -    2879343                679/0  NEEDS-BODY-FRAMING
+PSYCHIC        player    1.078   1  230  144  140 [2518090, 2518090]                   145:-5 0        2518090/0 2518090/0          0    2737793                600/0  NEEDS-BODY-FRAMING
+PSYCHIC        opponent  1.078   2  226  144  140 [2553025, 2553025]                   145:-5 9        2553025/9 2553025/9          9    2704428                679/0  PAIR-RESIDUAL
+ROCK_SLIDE     opponent  1.058   1  219  137  138             [0, 0]                          -                    0/- 0/-          0     524699                679/0  EXACT-WITH-SWAPS
+SURF           player    1.029   1  229  143  144             [0, 0]                          -                    0/- 0/-          0    2243319                600/0  EXACT-WITH-SWAPS
+SURF           opponent  1.029   2  225  143  144             [0, 0]                          -                    0/- 0/-          0    1775579                679/0  EXACT-WITH-SWAPS
+ICE_BEAM       player    0.990   1  288  202  203 [3354472, 3354472]              203:0 3354472                    0/- 0/-    3354472    3843572                600/0  NEEDS-ORDER
+ICE_BEAM       opponent  0.990   3  284  202  203 [3448882, 3448882]              203:0 3448882                    0/- 0/-          -    3815067                679/0  NEEDS-ORDER
+DOUBLE_EDGE    player    0.869   2  226  140  141             [0, 0]                          -                    0/- 0/-          0     966926                600/0  EXACT-WITH-SWAPS
+DOUBLE_EDGE    opponent  0.869   2  222  140  141             [0, 0]                          -                    0/- 0/-          0     903852                679/0  EXACT-WITH-SWAPS
+CONFUSE_RAY    player    0.828   2  355  269  270             [0, 0]                          -                    0/- 0/-          -    5004083                600/0  EXACT-WITH-SWAPS
+CONFUSE_RAY    opponent  0.828   1  351  269  270             [0, 0]                          -                    0/- 0/-          -    4997538                679/0  EXACT-WITH-SWAPS
+THUNDERBOLT    player    0.809   1  322  236  237 [3885044, 3885044]              237:0 3885044                    0/- 0/-    3885044    4437654                600/0  NEEDS-ORDER
+THUNDERBOLT    opponent  0.809   3  318  236  237 [4010925, 4010925]              237:0 4010925                    0/- 0/-          -    4420444                679/0  NEEDS-ORDER
+ATTRACT        player    0.746   1  520  434  435             [0, 0]                          -                    0/- 0/-          -    5854212                600/0  EXACT-WITH-SWAPS
+ATTRACT        opponent  0.746   1  516  434  435             [0, 0]                          -                    0/- 0/-          -    5786107                679/0  EXACT-WITH-SWAPS
+BRICK_BREAK    player    0.730   1  236  150  151             [0, 0]                          -                    0/- 0/-          0    1413106                600/0  EXACT-WITH-SWAPS
+BRICK_BREAK    opponent  0.730   2  232  150  151             [0, 0]                          -                    0/- 0/-          0    1360192                679/0  EXACT-WITH-SWAPS
+SLUDGE_BOMB    player    0.728   1  254  168  160   [199754, 199754]                   169:-4 0          199754/0 199754/0          0     606988                600/0  NEEDS-BODY-FRAMING
+SLUDGE_BOMB    opponent  0.728   2  250  168  160   [176825, 176825]                   169:-4 0          176825/0 176825/0          0     522120                679/0  NEEDS-BODY-FRAMING
+THUNDER_WAVE   player    0.693   1  205  119  120             [0, 0]                          -                    0/- 0/-          -    2180121                600/0  EXACT-WITH-SWAPS
+THUNDER_WAVE   opponent  0.693   1  201  119  120             [0, 0]                          -                    0/- 0/-          -    2156090                679/0  EXACT-WITH-SWAPS
+GIGA_DRAIN     player    0.688   2  315  229  230 [3457368, 3457368]              230:0 3457368                    0/- 0/-    3457368    3986674                600/0  NEEDS-ORDER
+GIGA_DRAIN     opponent  0.688   2  311  229  230 [3569195, 3569195]              230:0 3569195                    0/- 0/-          -    3963023                679/0  NEEDS-ORDER
+ROAR           player    0.592   2  185   99   99   [120473, 120473]                100:0 87444  120473/87444 120473/87444          0     551252            2682/2082  UNRESOLVED
+ROAR           opponent  0.592   2  185  103  104     [81760, 81760]                104:0 81760    81760/81760 81760/81760          0     508531            2723/2044  UNRESOLVED
+CRUNCH         player    0.531   1  227  141  142             [0, 0]                          -                    0/- 0/-          0    2570548                600/0  EXACT-WITH-SWAPS
+CRUNCH         opponent  0.531   3  223  141  142             [0, 0]                          -                    0/- 0/-          -    2545027                679/0  EXACT-WITH-SWAPS
+FAINT_ATTACK   player    0.476   2  310  224  221 [1481978, 1481978]              225:-4 271552 1481978/271552 1481978/271552     271552    4167498                600/0  PAIR-RESIDUAL
+FLAMETHROWER   player    0.476   1  295  209  115   [509219, 509219]                  210:-15 0          509219/0 509219/0          0     648684                600/0  NEEDS-BODY-FRAMING
+FLAMETHROWER   opponent  0.476   3  291  209  115   [444037, 444037]                  210:-15 0          444037/0 444037/0          -     540914                679/0  NEEDS-BODY-FRAMING
+QUICK_ATTACK   player    0.474   1  118   32   33     [18092, 18092]                 33:0 18092    18092/18092 18092/18092      18092     200487                600/0  PAIR-RESIDUAL
+QUICK_ATTACK   opponent  0.474   2  114   32   33             [1, 1]                     33:0 1                    1/1 1/1          1     163397                679/0  PAIR-RESIDUAL
+TOXIC          player    0.464   1  316  230  219   [128729, 128729]                   231:-7 0          128729/0 128729/0          -     581921                600/0  NEEDS-BODY-FRAMING
+TOXIC          opponent  0.464   1  312  230  219   [105873, 105873]                   231:-7 0          105873/0 105873/0          -     481085                679/0  NEEDS-BODY-FRAMING
+BITE           player    0.455   1  126   40   26   [145077, 145077]                   41:-10 0          145077/0 145077/0          0     219436                600/0  NEEDS-BODY-FRAMING
+BITE           opponent  0.455   3  122   40   26   [109375, 109375]                   41:-10 0          109375/0 109375/0          -     176333                679/0  NEEDS-BODY-FRAMING
+MEGA_KICK      player    0.438   1  245  159  160             [0, 0]                          -                    0/- 0/-          0    2965703                600/0  EXACT-WITH-SWAPS
+MEGA_KICK      opponent  0.438   1  241  159  160             [0, 0]                          -                    0/- 0/-          -    2937015                679/0  EXACT-WITH-SWAPS
+OVERHEAT       player    0.384   1  315  229  230 [3216067, 3216067]              230:0 3216067                    0/- 0/-    3216067    3415775                600/0  NEEDS-ORDER
+OVERHEAT       opponent  0.384   2  311  229  230 [3205545, 3205545]              230:0 3205545                    0/- 0/-    3205545    3370717                679/0  NEEDS-ORDER
+ROCK_TOMB      player    0.364   1  259  173  174             [0, 0]                          -                    0/- 0/-          0     826844                600/0  EXACT-WITH-SWAPS
+ROCK_TOMB      opponent  0.364   1  255  173  174             [0, 0]                          -                    0/- 0/-          -     693775                679/0  EXACT-WITH-SWAPS
+ICE_PUNCH      player    0.349   1  269  183  184             [0, 0]                          -                    0/- 0/-          0    3404039                600/0  EXACT-WITH-SWAPS
+ICE_PUNCH      opponent  0.349   3  265  183  184             [0, 0]                          -                    0/- 0/-          -    3372818                679/0  EXACT-WITH-SWAPS
+SWAGGER        player    0.345   1  254  168  161   [160373, 160373]               169:-7 42900  160373/42900 160373/42900      42900     477519                600/0  PAIR-RESIDUAL
+SWAGGER        opponent  0.345   0  NO-WINDOW  ""
+FIRE_PUNCH     player    0.334   1  187  101  101     [30947, 30947]                    102:0 0            30947/0 30947/0          0     483001                600/0  NEEDS-BODY-FRAMING
+FIRE_PUNCH     opponent  0.334   3  183  101  101     [27928, 27928]                    102:0 0            27928/0 27928/0          -     415713                679/0  NEEDS-BODY-FRAMING
+HYDRO_PUMP     player    0.311   1  226  140  141             [0, 0]                          -                    0/- 0/-          0     607342                600/0  EXACT-WITH-SWAPS
+HYDRO_PUMP     opponent  0.311   1  222  140  141             [0, 0]                          -                    0/- 0/-          -     520072                679/0  EXACT-WITH-SWAPS
+FACADE         player    0.274   1  166   80   81             [0, 0]                          -                    0/- 0/-          0     275509                600/0  EXACT-WITH-SWAPS
+FACADE         opponent  0.274   2  162   80   81             [0, 0]                          -                    0/- 0/-          0     227589                679/0  EXACT-WITH-SWAPS
+SEISMIC_TOSS   player    0.124   2  313  227  228 [3533896, 3533896]              228:0 3533896                    0/- 0/-    3533896    4070190                600/0  NEEDS-ORDER
+SEISMIC_TOSS   opponent  0.124   2  309  227  228 [3647873, 3647873]              228:0 3647873                    0/- 0/-          -    4047576                679/0  NEEDS-ORDER
+MUD_SLAP       player    0.270   1  137   51   51     [96372, 96372]                 52:0 65425        96372/65425 30947/0      61247     265449                600/0  NEEDS-ORDER+BODY-FRAMING
+MUD_SLAP       opponent  0.270   3  133   51   51     [92662, 92662]                 52:0 64734        92662/64734 27928/0          -     226596                679/0  NEEDS-ORDER+BODY-FRAMING
+MEGAHORN       player    0.147   1  262  176  177 [2888848, 2888848]              177:0 2888848                    0/- 0/-    2888848    3251036                600/0  NEEDS-ORDER
+MEGAHORN       opponent  0.147   3  258  176  177 [2961549, 2961549]              177:0 2961549                    0/- 0/-          -    3223702                679/0  NEEDS-ORDER
+DOUBLE_KICK    player    0.222   2  226  140  MULTIHIT  [{"script": "Special_SubstituteToMon", "rows": 42, "x2": [-5, -10, -15, -20, -25, -30, -35, -40, -45, -50, -55, -60, -65, -70, -75, -80, -85, -90, -95, -100, -105], "shows": ["doll", "mon"]}, {"script": null, "rows": 1, "x2": [0], "shows": ["mon"]}, {"script": "Move_", "rows": 35, "x2": [0], "shows"
+DOUBLE_KICK    opponent  0.222   1  222  140  MULTIHIT  [{"script": "Special_SubstituteToMon", "rows": 40, "x2": [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100], "shows": ["doll", "mon"]}, {"script": null, "rows": 1, "x2": [0], "shows": ["mon"]}, {"script": "Move_", "rows": 35, "x2": [0], "shows": ["mon"]}, {"script": nul
+DIG t0         player    0.375   2  280  194  195   [398113, 398113]               195:0 398113  398113/398113 34926/34926     363187     289133              619/619  UNRESOLVED
+DIG t1         player    0.375   2  153   67   68   [105524, 105524]                68:0 105524 105524/105524 105524/105524      72449     195816                600/0  UNRESOLVED
+DIG t0         opponent  0.375   2  276  194  195   [357073, 357073]               195:0 357073  357073/357073 24621/24621          -     281506              604/604  UNRESOLVED
+DIG t1         opponent  0.375   2  149   67   68     [85853, 85853]                 68:0 85853    85853/85853 85853/85853          -     171125                679/0  UNRESOLVED
+SOLAR_BEAM t0  player    0.274   1  193  107  108             [0, 0]                          -                    0/- 0/-          0     321378                600/0  EXACT-WITH-SWAPS
+SOLAR_BEAM t1  player    0.274   1  323  237  160 [2460637, 2460637]            238:-23 1689668 2460637/1689668 2460637/1689668    1670601    4587489                600/0  UNRESOLVED
+SOLAR_BEAM t0  opponent  0.274   1  189  107  108             [0, 0]                          -                    0/- 0/-          0     265579                679/0  EXACT-WITH-SWAPS
+SOLAR_BEAM t1  opponent  0.274   0  NO-WINDOW  ""
+EXPLOSION      player    0.316   1  302  216  212 [1103475, 1103475]                   217:-4 0        1103475/0 1103475/0          -    3190397                600/0  NEEDS-BODY-FRAMING
+ROAR           player    0.592   0  NO-WINDOW  ""
+EXPLOSION      opponent  0.316   1  298  216  212 [1134590, 1134590]                   217:-4 0        1134590/0 1134590/0          -    3138921                679/0  NEEDS-BODY-FRAMING
+ROAR           opponent  0.592   0  NO-WINDOW  ""
+SUBSTITUTE     player    0.112   0  NO-WINDOW  [{"frame": 1979, "swapInRows": 42, "next": "Special_SwitchOutPlayerMon", "x2": [-5, -10, -15, -20, -25, -30, -35, -40, -45, -50, -55, -60, -65, -70, -75, -80, -85, -90, -95, -100, -105, -105, -100, -9

@@ -32,9 +32,19 @@ def px(m):
 
 
 table = []
+units = []
 for stem, move, mid, side, *_ in stems:
+    for turn in ((0, 1) if move in ("DIG", "SOLAR_BEAM") else (None,)):
+        units.append((stem, move, mid, side, turn))
+for stem, move, mid, side, turn in units:
     mid = int(mid)
-    pat, fb, dr = load("patched", stem), load("fallback", stem), load("drop164", stem)
+    pat, fb = load("patched", stem), load("fallback", stem)
+    if turn is not None:
+        move = f"{move} t{turn}"
+        keep_turn = lambda rs, t=turn: None if rs is None else [r for r in rs if r.get("turn", 0) == t or r["kind"] == "swap-without-body"]  # noqa: E731
+        pat, fb = keep_turn(pat), keep_turn(fb)
+    else:
+        keep_turn = lambda rs: rs  # noqa: E731
     if pat is None:
         table.append({"stem": stem, "move": move, "side": side, "weight": wt(mid), "verdict": "NOT-RUN"}); continue
     swaps = [r for r in pat if r["kind"].startswith("swap") and r.get("moveId") == mid]
@@ -67,20 +77,30 @@ for stem, move, mid, side, *_ in stems:
                           for r in swaps if "aligned" in r]
     if fb:
         row["fallbackPx"] = [px(r["prod"]) for r in fb if r["kind"].startswith("swap") and r.get("moveId") == mid]
-    if dr:
-        dsw = [r for r in dr if r["kind"].startswith("swap") and r.get("moveId") == mid]
-        row["drop164"] = [{"order": r["orderInput"], "prodPx": px(r["prod"]),
-                           **({"alignedShift": r["aligned"]["shift"], "alignedPx": r["aligned"]["px"]} if "aligned" in r else {})} for r in dsw]
+    for mode, key in (("drop164", "drop164"), ("firstbody", "firstBody")):
+        dd = keep_turn(load(mode, stem))
+        if dd:
+            dsw = [r for r in dd if r["kind"] == "swap" and r.get("moveId") == mid and "prod" in r]
+            row[key] = [{"order": r["orderInput"], "prodPx": px(r["prod"]),
+                         **({"alignedShift": r["aligned"]["shift"], "alignedPx": r["aligned"]["px"]} if "aligned" in r else {})} for r in dsw]
     row["controls"] = [{"rows": r["rows"], "adapterDuration": r["adapterDuration"], "prodPx": px(r["prod"]),
                         **({"shift": r["aligned"]["shift"], "alignedPx": r["aligned"]["px"], "badAges": r["aligned"]["badAges"]} if "aligned" in r else {})}
                        for r in plains]
+    row["windowsDetail"] = [{"frame": r["frame"], "turn": r.get("turn"), "romBodyRows": r["romBodyRows"], "prodPx": px(r["prod"]),
+                             **({"alignedShift": r["aligned"]["shift"], "alignedPx": r["aligned"]["px"], "alignedBadAges": r["aligned"]["badAges"]} if "aligned" in r else {}),
+                             "romChangesAfter": r.get("romChangesAfter")} for r in swaps]
     row["tail"] = [{"k1Today": [x["px"] for x in r["tail"]["rowK1"]["today"]], "k1OneRowLonger": [x["px"] for x in r["tail"]["rowK1"]["oneRowLonger"]],
                     "k2Today": [x["px"] for x in r["tail"]["rowK2"]["today"]], "k1Bbox": r["tail"]["rowK1"]["today"][0]["bbox"]}
                    for r in swaps if "tail" in r]
     prod0 = all(p == [0, 0] for p in row["prodPx"])
-    al0 = all(a["px"] == [0, 0] for a in row.get("aligned", [])) and len(row.get("aligned", [])) == len(swaps)
-    d0 = row.get("drop164") and all(d["prodPx"] == [0, 0] or d.get("alignedPx") == [0, 0] for d in row["drop164"])
-    dprod0 = row.get("drop164") and all(d["prodPx"] == [0, 0] for d in row["drop164"])
+    # body framing: judged on the FIRST window (history [164, defender body]); later windows reported per window
+    al0 = bool(row.get("aligned")) and "aligned" in w0 and row["aligned"][0]["px"] == [0, 0]
+    # NEEDS-ORDER: the FIRST window (history [164, defender body]) is 0 px with an order lend (later windows' histories have no lend
+    # even doll-free; reported per window)
+    lend0 = lambda k: bool(row.get(k)) and (row[k][0]["prodPx"] == [0, 0] or row[k][0].get("alignedPx") == [0, 0])  # noqa: E731
+    d0 = lend0("drop164") or lend0("firstBody")
+    dprod0 = any(row.get(k) and row[k][0]["prodPx"] == [0, 0] for k in ("drop164", "firstBody"))
+    row["orderLend"] = "drop-164" if lend0("drop164") else "first-body" if lend0("firstBody") else None
     ctrl_px = [c.get("alignedPx", c["prodPx"])[0] for c in row["controls"]]
     if not allid:
         v = "UNRESOLVED (r1 != r2)"
@@ -100,14 +120,15 @@ for stem, move, mid, side, *_ in stems:
     table.append(row)
 
 (REC / "summary.json").write_text(json.dumps(table, indent=1) + "\n")
-print(f"{'move':14} {'side':8} {'wt':>6} {'win':>3} {'rows':>4} {'body':>4} {'D':>4} {'prodPx r1/r2':>18} {'aligned(rows:shift px)':>26} {'drop164':>18} {'ctrl':>10} {'fallback':>10} {'tail k1 today/longer':>20}  verdict")
+print(f"{'move':14} {'side':8} {'wt':>6} {'win':>3} {'rows':>4} {'body':>4} {'D':>4} {'prodPx r1/r2':>18} {'aligned(rows:shift px)':>26} {'drop164 | firstbody':>26} {'ctrl':>10} {'fallback':>10} {'tail k1 today/longer':>20}  verdict")
 for r in table:
     if "rows" not in r:
         print(f"{r['move']:14} {r['side']:8} {r['weight']:6.3f} {r.get('windows', 0):3}  {r['verdict']}  {json.dumps(r.get('swapWithoutBody', ''))[:200]}"); continue
     al = r.get("aligned", [{}])[0]
     alS = f"{al.get('framingRows')}:{al.get('shift')} {al.get('px', ['', ''])[0]}" if al else "-"
     d = r.get("drop164", [{}])[0] if r.get("drop164") else {}
-    dS = f"{d.get('order')} {d.get('prodPx', [''])[0]}/{d.get('alignedPx', ['-'])[0]}" if d else "-"
+    f1 = r.get("firstBody", [{}])[0] if r.get("firstBody") else {}
+    dS = (f"{d.get('prodPx', [''])[0]}/{d.get('alignedPx', ['-'])[0]}" if d else "-") + " " + (f"{f1.get('prodPx', [''])[0]}/{f1.get('alignedPx', ['-'])[0]}" if f1 else "-")
     c = r["controls"][0] if r["controls"] else None
     cS = f"{c.get('alignedPx', c['prodPx'])[0]}" if c else "-"
     if not r["prodPx"]:
@@ -115,4 +136,4 @@ for r in table:
     t = r["tail"][0] if r["tail"] else None
     tS = f"{t['k1Today'][0]}/{t['k1OneRowLonger'][0]}" if t else "-"
     fbS = str(r.get("fallbackPx", [[None]])[0][0])
-    print(f"{r['move']:14} {r['side']:8} {r['weight']:6.3f} {r['windows']:3} {r['rows']:4} {r['romBodyRows']:4} {str(r['adapterDuration']):>4} {str(r['prodPx'][0]):>18} {alS:>26} {dS:>18} {cS:>10} {fbS:>10} {tS:>20}  {r['verdict']}")
+    print(f"{r['move']:14} {r['side']:8} {r['weight']:6.3f} {r['windows']:3} {r['rows']:4} {r['romBodyRows']:4} {str(r['adapterDuration']):>4} {str(r['prodPx'][0]):>18} {alS:>26} {dS:>26} {cS:>10} {fbS:>10} {tS:>20}  {r['verdict']}")

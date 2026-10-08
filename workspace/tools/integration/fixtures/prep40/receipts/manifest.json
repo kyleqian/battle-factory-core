@@ -1,0 +1,1076 @@
+{
+ "schema": "prep40-manifest/v1",
+ "probes": {
+  "prep40-earthquake-player": {
+   "pass1": [
+    "fc71d0ecd1666c7b",
+    "fc71d0ecd1666c7b"
+   ],
+   "pass2": [
+    "fc71d0ecd1666c7b",
+    "fc71d0ecd1666c7b"
+   ]
+  },
+  "prep40-earthquake-opponent": {
+   "pass1": [
+    "dd34ef5d7dc588e1",
+    "dd34ef5d7dc588e1"
+   ],
+   "pass2": [
+    "dd34ef5d7dc588e1",
+    "dd34ef5d7dc588e1"
+   ]
+  },
+  "prep40-aerial-ace-player": {
+   "pass1": [
+    "4d2a61d3b5a0f138",
+    "4d2a61d3b5a0f138"
+   ],
+   "pass2": [
+    "4d2a61d3b5a0f138",
+    "4d2a61d3b5a0f138"
+   ]
+  },
+  "prep40-aerial-ace-opponent": {
+   "pass1": [
+    "88fff26f90bb45e5",
+    "88fff26f90bb45e5"
+   ],
+   "pass2": [
+    "88fff26f90bb45e5",
+    "88fff26f90bb45e5"
+   ]
+  },
+  "prep40-shadow-ball-player": {
+   "pass1": [
+    "c3f1702625e6d022",
+    "c3f1702625e6d022"
+   ],
+   "pass2": [
+    "c3f1702625e6d022",
+    "c3f1702625e6d022"
+   ]
+  },
+  "prep40-shadow-ball-opponent": {
+   "pass1": [
+    "a82825655ee1a92d",
+    "a82825655ee1a92d"
+   ],
+   "pass2": [
+    "a82825655ee1a92d",
+    "a82825655ee1a92d"
+   ]
+  },
+  "prep40-psychic-player": {
+   "pass1": [
+    "015ce71adc1f0cf8",
+    "015ce71adc1f0cf8"
+   ],
+   "pass2": [
+    "015ce71adc1f0cf8",
+    "015ce71adc1f0cf8"
+   ]
+  },
+  "prep40-psychic-opponent": {
+   "pass1": [
+    "13faa41e86373268",
+    "13faa41e86373268"
+   ],
+   "pass2": [
+    "13faa41e86373268",
+    "13faa41e86373268"
+   ]
+  },
+  "prep40-rock-slide-opponent": {
+   "pass1": [
+    "4c88063a1f381dcf",
+    "4c88063a1f381dcf"
+   ],
+   "pass2": [
+    "4c88063a1f381dcf",
+    "4c88063a1f381dcf"
+   ]
+  },
+  "prep40-surf-player": {
+   "pass1": [
+    "4181cb5611ad3135",
+    "4181cb5611ad3135"
+   ],
+   "pass2": [
+    "4181cb5611ad3135",
+    "4181cb5611ad3135"
+   ]
+  },
+  "prep40-surf-opponent": {
+   "pass1": [
+    "9167934fe1ee8ac6",
+    "9167934fe1ee8ac6"
+   ],
+   "pass2": [
+    "9167934fe1ee8ac6",
+    "9167934fe1ee8ac6"
+   ]
+  },
+  "prep40-ice-beam-player": {
+   "pass1": [
+    "6c8be15e740a1675",
+    "6c8be15e740a1675"
+   ],
+   "pass2": [
+    "6c8be15e740a1675",
+    "6c8be15e740a1675"
+   ]
+  },
+  "prep40-ice-beam-opponent": {
+   "pass1": [
+    "57142b54b0c63d47",
+    "57142b54b0c63d47"
+   ],
+   "pass2": [
+    "57142b54b0c63d47",
+    "57142b54b0c63d47"
+   ]
+  },
+  "prep40-double-edge-player": {
+   "pass1": [
+    "e91009fec60dcfb7",
+    "e91009fec60dcfb7"
+   ],
+   "pass2": [
+    "e91009fec60dcfb7",
+    "e91009fec60dcfb7"
+   ]
+  },
+  "prep40-double-edge-opponent": {
+   "pass1": [
+    "a3d800c9e27035d1",
+    "a3d800c9e27035d1"
+   ],
+   "pass2": [
+    "a3d800c9e27035d1",
+    "a3d800c9e27035d1"
+   ]
+  },
+  "prep40-confuse-ray-player": {
+   "pass1": [
+    "2581aa055fcb09c1",
+    "2581aa055fcb09c1"
+   ],
+   "pass2": [
+    "2581aa055fcb09c1",
+    "2581aa055fcb09c1"
+   ]
+  },
+  "prep40-confuse-ray-opponent": {
+   "pass1": [
+    "93aebfcf7b9ec127",
+    "93aebfcf7b9ec127"
+   ],
+   "pass2": [
+    "93aebfcf7b9ec127",
+    "93aebfcf7b9ec127"
+   ]
+  },
+  "prep40-thunderbolt-player": {
+   "pass1": [
+    "9c8b2a899a80ea30",
+    "9c8b2a899a80ea30"
+   ],
+   "pass2": [
+    "9c8b2a899a80ea30",
+    "9c8b2a899a80ea30"
+   ]
+  },
+  "prep40-thunderbolt-opponent": {
+   "pass1": [
+    "b316cbf79d67e02f",
+    "b316cbf79d67e02f"
+   ],
+   "pass2": [
+    "b316cbf79d67e02f",
+    "b316cbf79d67e02f"
+   ]
+  },
+  "prep40-attract-player": {
+   "pass1": [
+    "9064708ec9a8a5f1",
+    "9064708ec9a8a5f1"
+   ],
+   "pass2": [
+    "9064708ec9a8a5f1",
+    "9064708ec9a8a5f1"
+   ]
+  },
+  "prep40-attract-opponent": {
+   "pass1": [
+    "af0c45a3e5754ab4",
+    "af0c45a3e5754ab4"
+   ],
+   "pass2": [
+    "af0c45a3e5754ab4",
+    "af0c45a3e5754ab4"
+   ]
+  },
+  "prep40-brick-break-player": {
+   "pass1": [
+    "ef6dd75f9bcd1b82",
+    "ef6dd75f9bcd1b82"
+   ],
+   "pass2": [
+    "ef6dd75f9bcd1b82",
+    "ef6dd75f9bcd1b82"
+   ]
+  },
+  "prep40-brick-break-opponent": {
+   "pass1": [
+    "cc51d1bc3202071e",
+    "cc51d1bc3202071e"
+   ],
+   "pass2": [
+    "cc51d1bc3202071e",
+    "cc51d1bc3202071e"
+   ]
+  },
+  "prep40-sludge-bomb-player": {
+   "pass1": [
+    "b89a03df1a404731",
+    "b89a03df1a404731"
+   ],
+   "pass2": [
+    "b89a03df1a404731",
+    "b89a03df1a404731"
+   ]
+  },
+  "prep40-sludge-bomb-opponent": {
+   "pass1": [
+    "52c0a1b5c7ded9a9",
+    "52c0a1b5c7ded9a9"
+   ],
+   "pass2": [
+    "52c0a1b5c7ded9a9",
+    "52c0a1b5c7ded9a9"
+   ]
+  },
+  "prep40-thunder-wave-player": {
+   "pass1": [
+    "dd66a318845139a8",
+    "dd66a318845139a8"
+   ],
+   "pass2": [
+    "dd66a318845139a8",
+    "dd66a318845139a8"
+   ]
+  },
+  "prep40-thunder-wave-opponent": {
+   "pass1": [
+    "4ed27e3c46b18ef8",
+    "4ed27e3c46b18ef8"
+   ],
+   "pass2": [
+    "4ed27e3c46b18ef8",
+    "4ed27e3c46b18ef8"
+   ]
+  },
+  "prep40-giga-drain-player": {
+   "pass1": [
+    "165ccebe6222b123",
+    "165ccebe6222b123"
+   ],
+   "pass2": [
+    "165ccebe6222b123",
+    "165ccebe6222b123"
+   ]
+  },
+  "prep40-giga-drain-opponent": {
+   "pass1": [
+    "5444d806512bb958",
+    "5444d806512bb958"
+   ],
+   "pass2": [
+    "5444d806512bb958",
+    "5444d806512bb958"
+   ]
+  },
+  "prep40-roar-player": {
+   "pass1": [
+    "6ba4de1bd0671ac0",
+    "6ba4de1bd0671ac0"
+   ],
+   "pass2": [
+    "6ba4de1bd0671ac0",
+    "6ba4de1bd0671ac0"
+   ]
+  },
+  "prep40-roar-opponent": {
+   "pass1": [
+    "35fabbb02c16075d",
+    "35fabbb02c16075d"
+   ],
+   "pass2": [
+    "35fabbb02c16075d",
+    "35fabbb02c16075d"
+   ]
+  },
+  "prep40-crunch-player": {
+   "pass1": [
+    "9d8729a8e34e77ed",
+    "9d8729a8e34e77ed"
+   ],
+   "pass2": [
+    "9d8729a8e34e77ed",
+    "9d8729a8e34e77ed"
+   ]
+  },
+  "prep40-crunch-opponent": {
+   "pass1": [
+    "3ea30b769cdc3fae",
+    "3ea30b769cdc3fae"
+   ],
+   "pass2": [
+    "3ea30b769cdc3fae",
+    "3ea30b769cdc3fae"
+   ]
+  },
+  "prep40-faint-attack-player": {
+   "pass1": [
+    "41a40dcd59d0e203",
+    "41a40dcd59d0e203"
+   ],
+   "pass2": [
+    "41a40dcd59d0e203",
+    "41a40dcd59d0e203"
+   ]
+  },
+  "prep40-flamethrower-player": {
+   "pass1": [
+    "b42130a9df208882",
+    "b42130a9df208882"
+   ],
+   "pass2": [
+    "b42130a9df208882",
+    "b42130a9df208882"
+   ]
+  },
+  "prep40-flamethrower-opponent": {
+   "pass1": [
+    "6c9c1d1b50390b41",
+    "6c9c1d1b50390b41"
+   ],
+   "pass2": [
+    "6c9c1d1b50390b41",
+    "6c9c1d1b50390b41"
+   ]
+  },
+  "prep40-quick-attack-player": {
+   "pass1": [
+    "1e67f0ecb21bf0fc",
+    "1e67f0ecb21bf0fc"
+   ],
+   "pass2": [
+    "1e67f0ecb21bf0fc",
+    "1e67f0ecb21bf0fc"
+   ]
+  },
+  "prep40-quick-attack-opponent": {
+   "pass1": [
+    "e2a5c23fcd9b3af7",
+    "e2a5c23fcd9b3af7"
+   ],
+   "pass2": [
+    "e2a5c23fcd9b3af7",
+    "e2a5c23fcd9b3af7"
+   ]
+  },
+  "prep40-toxic-player": {
+   "pass1": [
+    "a11ab28922c4fcdf",
+    "a11ab28922c4fcdf"
+   ],
+   "pass2": [
+    "a11ab28922c4fcdf",
+    "a11ab28922c4fcdf"
+   ]
+  },
+  "prep40-toxic-opponent": {
+   "pass1": [
+    "93a367be1a72a923",
+    "93a367be1a72a923"
+   ],
+   "pass2": [
+    "93a367be1a72a923",
+    "93a367be1a72a923"
+   ]
+  },
+  "prep40-bite-player": {
+   "pass1": [
+    "a9c380399c7a64c2",
+    "a9c380399c7a64c2"
+   ],
+   "pass2": [
+    "a9c380399c7a64c2",
+    "a9c380399c7a64c2"
+   ]
+  },
+  "prep40-bite-opponent": {
+   "pass1": [
+    "1577694e91109eff",
+    "1577694e91109eff"
+   ],
+   "pass2": [
+    "1577694e91109eff",
+    "1577694e91109eff"
+   ]
+  },
+  "prep40-mega-kick-player": {
+   "pass1": [
+    "79275ceacbebab79",
+    "79275ceacbebab79"
+   ],
+   "pass2": [
+    "79275ceacbebab79",
+    "79275ceacbebab79"
+   ]
+  },
+  "prep40-mega-kick-opponent": {
+   "pass1": [
+    "ee47d83b9354247e",
+    "ee47d83b9354247e"
+   ],
+   "pass2": [
+    "ee47d83b9354247e",
+    "ee47d83b9354247e"
+   ]
+  },
+  "prep40-overheat-player": {
+   "pass1": [
+    "26db3147d2e9e540",
+    "26db3147d2e9e540"
+   ],
+   "pass2": [
+    "26db3147d2e9e540",
+    "26db3147d2e9e540"
+   ]
+  },
+  "prep40-overheat-opponent": {
+   "pass1": [
+    "42d50bf6d1250144",
+    "42d50bf6d1250144"
+   ],
+   "pass2": [
+    "42d50bf6d1250144",
+    "42d50bf6d1250144"
+   ]
+  },
+  "prep40-rock-tomb-player": {
+   "pass1": [
+    "ad759ac0cf3c3ff1",
+    "ad759ac0cf3c3ff1"
+   ],
+   "pass2": [
+    "ad759ac0cf3c3ff1",
+    "ad759ac0cf3c3ff1"
+   ]
+  },
+  "prep40-rock-tomb-opponent": {
+   "pass1": [
+    "d63cff307ee88b99",
+    "d63cff307ee88b99"
+   ],
+   "pass2": [
+    "d63cff307ee88b99",
+    "d63cff307ee88b99"
+   ]
+  },
+  "prep40-ice-punch-player": {
+   "pass1": [
+    "26997c7b0c1188f5",
+    "26997c7b0c1188f5"
+   ],
+   "pass2": [
+    "26997c7b0c1188f5",
+    "26997c7b0c1188f5"
+   ]
+  },
+  "prep40-ice-punch-opponent": {
+   "pass1": [
+    "1ddcfebb5d64d11c",
+    "1ddcfebb5d64d11c"
+   ],
+   "pass2": [
+    "1ddcfebb5d64d11c",
+    "1ddcfebb5d64d11c"
+   ]
+  },
+  "prep40-swagger-player": {
+   "pass1": [
+    "e3d414070e80cab6",
+    "e3d414070e80cab6"
+   ],
+   "pass2": [
+    "e3d414070e80cab6",
+    "e3d414070e80cab6"
+   ]
+  },
+  "prep40-swagger-opponent": {
+   "pass1": [
+    "b9c90483a293fbcb",
+    "b9c90483a293fbcb"
+   ],
+   "pass2": [
+    "b9c90483a293fbcb",
+    "b9c90483a293fbcb"
+   ]
+  },
+  "prep40-fire-punch-player": {
+   "pass1": [
+    "bcac5efc1ef086ae",
+    "bcac5efc1ef086ae"
+   ],
+   "pass2": [
+    "bcac5efc1ef086ae",
+    "bcac5efc1ef086ae"
+   ]
+  },
+  "prep40-fire-punch-opponent": {
+   "pass1": [
+    "1d0c2841e41b4343",
+    "1d0c2841e41b4343"
+   ],
+   "pass2": [
+    "1d0c2841e41b4343",
+    "1d0c2841e41b4343"
+   ]
+  },
+  "prep40-hydro-pump-player": {
+   "pass1": [
+    "352290062dbe2835",
+    "352290062dbe2835"
+   ],
+   "pass2": [
+    "352290062dbe2835",
+    "352290062dbe2835"
+   ]
+  },
+  "prep40-hydro-pump-opponent": {
+   "pass1": [
+    "c221a381f8824546",
+    "c221a381f8824546"
+   ],
+   "pass2": [
+    "c221a381f8824546",
+    "c221a381f8824546"
+   ]
+  },
+  "prep40-facade-player": {
+   "pass1": [
+    "084de51bdab9174a",
+    "084de51bdab9174a"
+   ],
+   "pass2": [
+    "084de51bdab9174a",
+    "084de51bdab9174a"
+   ]
+  },
+  "prep40-facade-opponent": {
+   "pass1": [
+    "66d81a1f32a98d18",
+    "66d81a1f32a98d18"
+   ],
+   "pass2": [
+    "66d81a1f32a98d18",
+    "66d81a1f32a98d18"
+   ]
+  },
+  "prep40-seismic-toss-player": {
+   "pass1": [
+    "4819e07397ad31c0",
+    "4819e07397ad31c0"
+   ],
+   "pass2": [
+    "4819e07397ad31c0",
+    "4819e07397ad31c0"
+   ]
+  },
+  "prep40-seismic-toss-opponent": {
+   "pass1": [
+    "151d4e850476e43d",
+    "151d4e850476e43d"
+   ],
+   "pass2": [
+    "151d4e850476e43d",
+    "151d4e850476e43d"
+   ]
+  },
+  "prep40-mud-slap-player": {
+   "pass1": [
+    "d89e54b448bfe985",
+    "d89e54b448bfe985"
+   ],
+   "pass2": [
+    "d89e54b448bfe985",
+    "d89e54b448bfe985"
+   ]
+  },
+  "prep40-mud-slap-opponent": {
+   "pass1": [
+    "17cf3c1fb1a4d9f4",
+    "17cf3c1fb1a4d9f4"
+   ],
+   "pass2": [
+    "17cf3c1fb1a4d9f4",
+    "17cf3c1fb1a4d9f4"
+   ]
+  },
+  "prep40-megahorn-player": {
+   "pass1": [
+    "e346558da137c190",
+    "e346558da137c190"
+   ],
+   "pass2": [
+    "e346558da137c190",
+    "e346558da137c190"
+   ]
+  },
+  "prep40-megahorn-opponent": {
+   "pass1": [
+    "4c8b6a0c40f19b9a",
+    "4c8b6a0c40f19b9a"
+   ],
+   "pass2": [
+    "4c8b6a0c40f19b9a",
+    "4c8b6a0c40f19b9a"
+   ]
+  },
+  "prep40-double-kick-player": {
+   "pass1": [
+    "966ebb6730f2aa66",
+    "966ebb6730f2aa66"
+   ],
+   "pass2": [
+    "966ebb6730f2aa66",
+    "966ebb6730f2aa66"
+   ]
+  },
+  "prep40-double-kick-opponent": {
+   "pass1": [
+    "6d0d9469ed8f6f7d",
+    "6d0d9469ed8f6f7d"
+   ],
+   "pass2": [
+    "6d0d9469ed8f6f7d",
+    "6d0d9469ed8f6f7d"
+   ]
+  },
+  "prep40-dig-player": {
+   "pass1": [
+    "ed3fcc6852416477",
+    "ed3fcc6852416477"
+   ],
+   "pass2": [
+    "ed3fcc6852416477",
+    "ed3fcc6852416477"
+   ]
+  },
+  "prep40-dig-opponent": {
+   "pass1": [
+    "2a9e70b838d3cc56",
+    "2a9e70b838d3cc56"
+   ],
+   "pass2": [
+    "2a9e70b838d3cc56",
+    "2a9e70b838d3cc56"
+   ]
+  },
+  "prep40-solar-beam-player": {
+   "pass1": [
+    "8fd26d47f46294d0",
+    "8fd26d47f46294d0"
+   ],
+   "pass2": [
+    "8fd26d47f46294d0",
+    "8fd26d47f46294d0"
+   ]
+  },
+  "prep40-solar-beam-opponent": {
+   "pass1": [
+    "805ad535e9e5ac3c",
+    "805ad535e9e5ac3c"
+   ],
+   "pass2": [
+    "805ad535e9e5ac3c",
+    "805ad535e9e5ac3c"
+   ]
+  },
+  "prep40-faint-explosion-player": {
+   "pass1": [
+    "30ba31d518fb6c7a",
+    "30ba31d518fb6c7a"
+   ],
+   "pass2": [
+    "30ba31d518fb6c7a",
+    "30ba31d518fb6c7a"
+   ]
+  },
+  "prep40-roared-player": {
+   "pass1": [
+    "ad1d09434c338018",
+    "ad1d09434c338018"
+   ],
+   "pass2": [
+    "ad1d09434c338018",
+    "ad1d09434c338018"
+   ]
+  },
+  "prep40-faint-explosion-opponent": {
+   "pass1": [
+    "560fd84b8c23f1d7",
+    "560fd84b8c23f1d7"
+   ],
+   "pass2": [
+    "560fd84b8c23f1d7",
+    "560fd84b8c23f1d7"
+   ]
+  },
+  "prep40-roared-opponent": {
+   "pass1": [
+    "927877b385b9020e",
+    "927877b385b9020e"
+   ],
+   "pass2": [
+    "927877b385b9020e",
+    "927877b385b9020e"
+   ]
+  },
+  "prep40-switch-player": {
+   "pass1": [
+    "cf2105869f4e569f",
+    "cf2105869f4e569f"
+   ],
+   "pass2": [
+    "cf2105869f4e569f",
+    "cf2105869f4e569f"
+   ]
+  }
+ },
+ "checkReceipts": {
+  "patched/prep40-earthquake-player": "511a61a84ad7807c",
+  "patched/prep40-earthquake-opponent": "3cee61d8632ee572",
+  "patched/prep40-aerial-ace-player": "6ff375d899ad5e9f",
+  "patched/prep40-aerial-ace-opponent": "b2122b63c1f95e5a",
+  "patched/prep40-shadow-ball-player": "98f4508e18414853",
+  "patched/prep40-shadow-ball-opponent": "b1886078e1cd7565",
+  "patched/prep40-psychic-player": "7cf63459f8ec6704",
+  "patched/prep40-psychic-opponent": "604f5e8ca57c60a0",
+  "patched/prep40-rock-slide-opponent": "84f0a4ef1ddba516",
+  "patched/prep40-surf-player": "5967b5c55d0235b7",
+  "patched/prep40-surf-opponent": "e824ef36a2dc6dee",
+  "patched/prep40-ice-beam-player": "bc13d3bb32341bcf",
+  "patched/prep40-ice-beam-opponent": "641c7fe3a7527964",
+  "patched/prep40-double-edge-player": "1288d1280a3d3168",
+  "patched/prep40-double-edge-opponent": "a656337066904f05",
+  "patched/prep40-confuse-ray-player": "802b53343d85de96",
+  "patched/prep40-confuse-ray-opponent": "be7e3d5e28611bc7",
+  "patched/prep40-thunderbolt-player": "8986b34ca401168c",
+  "patched/prep40-thunderbolt-opponent": "bf2876360e0b654e",
+  "patched/prep40-attract-player": "eb714292932123b2",
+  "patched/prep40-attract-opponent": "891f8d0f40799229",
+  "patched/prep40-brick-break-player": "102ce73c620602bf",
+  "patched/prep40-brick-break-opponent": "aeb26adde24c025f",
+  "patched/prep40-sludge-bomb-player": "ab057e1531730314",
+  "patched/prep40-sludge-bomb-opponent": "631676335b71fa6d",
+  "patched/prep40-thunder-wave-player": "c948206749483b2f",
+  "patched/prep40-thunder-wave-opponent": "7798a17b6653f18e",
+  "patched/prep40-giga-drain-player": "9e2f5a77e10d4877",
+  "patched/prep40-giga-drain-opponent": "385b5c02e977b09b",
+  "patched/prep40-roar-player": "e43ce3c7505a0738",
+  "patched/prep40-roar-opponent": "798cdf666b088df5",
+  "patched/prep40-crunch-player": "a56878a40c17ca56",
+  "patched/prep40-crunch-opponent": "8b7ac462b10fad17",
+  "patched/prep40-faint-attack-player": "05073443f53dd85e",
+  "patched/prep40-flamethrower-player": "8c88a8d11c3cc647",
+  "patched/prep40-flamethrower-opponent": "8ec018705698eaea",
+  "patched/prep40-quick-attack-player": "33ee3c90dc0e0287",
+  "patched/prep40-quick-attack-opponent": "8c46a54004fba762",
+  "patched/prep40-toxic-player": "edeb5d6c9b577005",
+  "patched/prep40-toxic-opponent": "e4fa477f09172156",
+  "patched/prep40-bite-player": "9a1fc7bc08914d26",
+  "patched/prep40-bite-opponent": "fde7ab0982c9f568",
+  "patched/prep40-mega-kick-player": "b849c56ddc175607",
+  "patched/prep40-mega-kick-opponent": "a7f5d9c01b7c90fb",
+  "patched/prep40-overheat-player": "7317538902f93076",
+  "patched/prep40-overheat-opponent": "b3b799d2298aecba",
+  "patched/prep40-rock-tomb-player": "212f9ad950dd2875",
+  "patched/prep40-rock-tomb-opponent": "6310df33295fc520",
+  "patched/prep40-ice-punch-player": "673c3f26dde4dfd7",
+  "patched/prep40-ice-punch-opponent": "12bb699d5f8d47e8",
+  "patched/prep40-swagger-player": "3b0b4c6d1c6c6d8e",
+  "patched/prep40-swagger-opponent": "431a30794fcc1dd9",
+  "patched/prep40-fire-punch-player": "34c9c852c69059bb",
+  "patched/prep40-fire-punch-opponent": "fe6e51f37d11ddac",
+  "patched/prep40-hydro-pump-player": "648f34c420627f0e",
+  "patched/prep40-hydro-pump-opponent": "67c35d67b876bdbd",
+  "patched/prep40-facade-player": "832abe235cd32d17",
+  "patched/prep40-facade-opponent": "1e522dea1b4a21e1",
+  "patched/prep40-seismic-toss-player": "12a6ae198c97d0ed",
+  "patched/prep40-seismic-toss-opponent": "f1d87a035f074f35",
+  "patched/prep40-mud-slap-player": "a254063fa0064c1f",
+  "patched/prep40-mud-slap-opponent": "35ac4490b6207f41",
+  "patched/prep40-megahorn-player": "87fe380e6e3d639e",
+  "patched/prep40-megahorn-opponent": "0695223b8012f55d",
+  "patched/prep40-double-kick-player": "4f0405227343a02e",
+  "patched/prep40-double-kick-opponent": "33ced9bcf6fdf37c",
+  "patched/prep40-dig-player": "6547d1a8fba1db65",
+  "patched/prep40-dig-opponent": "5576c0e522c18429",
+  "patched/prep40-solar-beam-player": "4fea40cd32358981",
+  "patched/prep40-solar-beam-opponent": "bfcfab515fd36588",
+  "patched/prep40-faint-explosion-player": "49e94024aa1ad862",
+  "patched/prep40-roared-player": "5808792a759916c4",
+  "patched/prep40-faint-explosion-opponent": "9443ad7065aeb17a",
+  "patched/prep40-roared-opponent": "3932b80020fb26f4",
+  "patched/prep40-switch-player": "43ea36a2873618a1",
+  "fallback/prep40-earthquake-player": "35d589b885966bd0",
+  "fallback/prep40-earthquake-opponent": "f7fc0249e629a492",
+  "fallback/prep40-aerial-ace-player": "24b011429593324b",
+  "fallback/prep40-aerial-ace-opponent": "9e1dadc9f589939b",
+  "fallback/prep40-shadow-ball-player": "9e483fc5cfd5c535",
+  "fallback/prep40-shadow-ball-opponent": "28d29bd646d683b2",
+  "fallback/prep40-psychic-player": "22fff7a971895f13",
+  "fallback/prep40-psychic-opponent": "21689d78d832164f",
+  "fallback/prep40-rock-slide-opponent": "140ff6f275bbdb08",
+  "fallback/prep40-surf-player": "808f5493846ca341",
+  "fallback/prep40-surf-opponent": "73bf60756234850d",
+  "fallback/prep40-ice-beam-player": "88c329bdf5a54bb2",
+  "fallback/prep40-ice-beam-opponent": "8386a59d897150a8",
+  "fallback/prep40-double-edge-player": "d16cae7b4438f948",
+  "fallback/prep40-double-edge-opponent": "75164557d70c96e8",
+  "fallback/prep40-confuse-ray-player": "e7d7c736dbcb36f7",
+  "fallback/prep40-confuse-ray-opponent": "a5e5b05a32ed0fe5",
+  "fallback/prep40-thunderbolt-player": "89bb25dacea8587d",
+  "fallback/prep40-thunderbolt-opponent": "fd05b52a82dc4ad0",
+  "fallback/prep40-attract-player": "1edb637b4bf254f7",
+  "fallback/prep40-attract-opponent": "ff4ca596cba9ac2c",
+  "fallback/prep40-brick-break-player": "b7533f3fcb2cdb2a",
+  "fallback/prep40-brick-break-opponent": "6b536e3a1e0cc6a6",
+  "fallback/prep40-sludge-bomb-player": "aa55af2326199671",
+  "fallback/prep40-sludge-bomb-opponent": "5318b36a593295d7",
+  "fallback/prep40-thunder-wave-player": "af284ee2b663140c",
+  "fallback/prep40-thunder-wave-opponent": "6bfdcee1f6378ca5",
+  "fallback/prep40-giga-drain-player": "b162afb8c85967d8",
+  "fallback/prep40-giga-drain-opponent": "a076dcf94e230f0e",
+  "fallback/prep40-roar-player": "e62724257a31284f",
+  "fallback/prep40-roar-opponent": "30552784c284a1fd",
+  "fallback/prep40-crunch-player": "4ef6b8bd18b415a8",
+  "fallback/prep40-crunch-opponent": "766ca31a0a3bb5ee",
+  "fallback/prep40-faint-attack-player": "cf0fa7a1703ce745",
+  "fallback/prep40-flamethrower-player": "35f253144eb917d0",
+  "fallback/prep40-flamethrower-opponent": "3e8d6f141b69c048",
+  "fallback/prep40-quick-attack-player": "aae87fcfebfdb97f",
+  "fallback/prep40-quick-attack-opponent": "6c371c957e0f8b9a",
+  "fallback/prep40-toxic-player": "ed86411b0627147a",
+  "fallback/prep40-toxic-opponent": "50e0e96c131e06b7",
+  "fallback/prep40-bite-player": "d5570b8b1d9a5379",
+  "fallback/prep40-bite-opponent": "24b0fb6f9692da28",
+  "fallback/prep40-mega-kick-player": "5bcbc209f8752f7f",
+  "fallback/prep40-mega-kick-opponent": "0e1c7ece3a74ab29",
+  "fallback/prep40-overheat-player": "f35cc3ef2536c9bc",
+  "fallback/prep40-overheat-opponent": "7b4b5bf23e7f3c97",
+  "fallback/prep40-rock-tomb-player": "b72327f84174eab4",
+  "fallback/prep40-rock-tomb-opponent": "34ed0ee01a48ab42",
+  "fallback/prep40-ice-punch-player": "c0adebaa915aafb6",
+  "fallback/prep40-ice-punch-opponent": "07fa3283a522f090",
+  "fallback/prep40-swagger-player": "11d3e4994e7fedbb",
+  "fallback/prep40-swagger-opponent": "e35d82b12fae311c",
+  "fallback/prep40-fire-punch-player": "698802e61b99b019",
+  "fallback/prep40-fire-punch-opponent": "e1bbd74ec9010c22",
+  "fallback/prep40-hydro-pump-player": "a1b0b393d20bc16a",
+  "fallback/prep40-hydro-pump-opponent": "aaaba5d8d4bab549",
+  "fallback/prep40-facade-player": "343b7bcbeef07cc5",
+  "fallback/prep40-facade-opponent": "5a05c587e35d56a4",
+  "fallback/prep40-seismic-toss-player": "df02bf42202d8865",
+  "fallback/prep40-seismic-toss-opponent": "68361b6d1174a1ae",
+  "fallback/prep40-mud-slap-player": "c50074d53b2c95e9",
+  "fallback/prep40-mud-slap-opponent": "f64b4c15e83cf05c",
+  "fallback/prep40-megahorn-player": "3a5a55ebcb68873b",
+  "fallback/prep40-megahorn-opponent": "50f6039ca8d9ac87",
+  "fallback/prep40-double-kick-player": "ca542e5b5d3b2b17",
+  "fallback/prep40-double-kick-opponent": "e9dc8f2488fb5b6d",
+  "fallback/prep40-dig-player": "88038100baedc450",
+  "fallback/prep40-dig-opponent": "5b7a951066d29a0a",
+  "fallback/prep40-solar-beam-player": "34569c2ba0456935",
+  "fallback/prep40-solar-beam-opponent": "22f9afb78457ec5e",
+  "fallback/prep40-faint-explosion-player": "08b70b15d4c1acd2",
+  "fallback/prep40-roared-player": "0befb910cfbafbf4",
+  "fallback/prep40-faint-explosion-opponent": "c5b9fc667f007372",
+  "fallback/prep40-roared-opponent": "08dc25c75622b834",
+  "fallback/prep40-switch-player": "f35d673e01d96ac4",
+  "drop164/prep40-earthquake-player": "65ad32b0fac21a50",
+  "drop164/prep40-earthquake-opponent": "ebc44be879d6d158",
+  "drop164/prep40-aerial-ace-player": "9e990c377c35209b",
+  "drop164/prep40-aerial-ace-opponent": "b87385e35ccbb67e",
+  "drop164/prep40-shadow-ball-player": "b6150d2c8acfbc18",
+  "drop164/prep40-shadow-ball-opponent": "4e659293924b1478",
+  "drop164/prep40-psychic-player": "aed37f4629d3c113",
+  "drop164/prep40-psychic-opponent": "acea5e4702b6184e",
+  "drop164/prep40-rock-slide-opponent": "8b37ca0ba1eac19a",
+  "drop164/prep40-surf-player": "5876f39fccfe35d7",
+  "drop164/prep40-surf-opponent": "d308ace53bbdcfc7",
+  "drop164/prep40-ice-beam-player": "c80e655633ffe5df",
+  "drop164/prep40-ice-beam-opponent": "80dd85f8a413c1bf",
+  "drop164/prep40-double-edge-player": "ff97dc056b61d45e",
+  "drop164/prep40-double-edge-opponent": "5086c46bf0f6eca1",
+  "drop164/prep40-confuse-ray-player": "e60a3575bcbd39de",
+  "drop164/prep40-confuse-ray-opponent": "8b6549a0b9bfea8c",
+  "drop164/prep40-thunderbolt-player": "2dd9f069468130e4",
+  "drop164/prep40-thunderbolt-opponent": "20e82c12c90b0d3d",
+  "drop164/prep40-attract-player": "191f5a06f953a1f2",
+  "drop164/prep40-attract-opponent": "64c6423917d8d8df",
+  "drop164/prep40-brick-break-player": "eb0f90390833abb4",
+  "drop164/prep40-brick-break-opponent": "e0dd2056f046b55d",
+  "drop164/prep40-sludge-bomb-player": "dcc01a23817267ac",
+  "drop164/prep40-sludge-bomb-opponent": "4b6e9a68340b5f44",
+  "drop164/prep40-thunder-wave-player": "35d5596a52d04769",
+  "drop164/prep40-thunder-wave-opponent": "85389b1de4f61272",
+  "drop164/prep40-giga-drain-player": "e8a0b9fc41a0a247",
+  "drop164/prep40-giga-drain-opponent": "524834b7bced4e72",
+  "drop164/prep40-roar-player": "3ff682adc2558a70",
+  "drop164/prep40-roar-opponent": "c15788266e513a36",
+  "drop164/prep40-crunch-player": "374b4ec94856f280",
+  "drop164/prep40-crunch-opponent": "1f56404d27425802",
+  "drop164/prep40-faint-attack-player": "536c7cf4b127d36f",
+  "drop164/prep40-flamethrower-player": "c1bca4c32c5bc6e1",
+  "drop164/prep40-flamethrower-opponent": "db780b72a4d908a4",
+  "drop164/prep40-quick-attack-player": "d76e5375c7275a46",
+  "drop164/prep40-quick-attack-opponent": "9dbd5520297bce7a",
+  "drop164/prep40-toxic-player": "bc54b1488960a4b8",
+  "drop164/prep40-toxic-opponent": "2f71b0744bde45cd",
+  "drop164/prep40-bite-player": "ddeabbbaa083a6be",
+  "drop164/prep40-bite-opponent": "c59e93533cab1b2b",
+  "drop164/prep40-mega-kick-player": "c967ebaabc1d0965",
+  "drop164/prep40-mega-kick-opponent": "2003e251171e5458",
+  "drop164/prep40-overheat-player": "7f5909ea480ecec8",
+  "drop164/prep40-overheat-opponent": "9f18944e6400859e",
+  "drop164/prep40-rock-tomb-player": "afa58495eacdbf0b",
+  "drop164/prep40-rock-tomb-opponent": "01977bf7b1187573",
+  "drop164/prep40-ice-punch-player": "95fadd94ae676b70",
+  "drop164/prep40-ice-punch-opponent": "7a33f9fb7014f9c5",
+  "drop164/prep40-swagger-player": "69d49cb93102c19e",
+  "drop164/prep40-swagger-opponent": "385eed386c1a1c9a",
+  "drop164/prep40-fire-punch-player": "35422a9e1e75b02e",
+  "drop164/prep40-fire-punch-opponent": "eb624509c4825840",
+  "drop164/prep40-hydro-pump-player": "2de923ddb25774dd",
+  "drop164/prep40-hydro-pump-opponent": "eb88944e922e3880",
+  "drop164/prep40-facade-player": "bdddc5c90ec242c9",
+  "drop164/prep40-facade-opponent": "3522538eb51b345b",
+  "drop164/prep40-seismic-toss-player": "19fc5e8a3206e99d",
+  "drop164/prep40-seismic-toss-opponent": "28e1b0aa92cc61e8",
+  "drop164/prep40-mud-slap-player": "f743c683e5991e54",
+  "drop164/prep40-mud-slap-opponent": "db59d5952bd29354",
+  "drop164/prep40-megahorn-player": "73cd2172b1db635e",
+  "drop164/prep40-megahorn-opponent": "e548486942d5de38",
+  "drop164/prep40-double-kick-player": "3b2498e895b0b5ca",
+  "drop164/prep40-double-kick-opponent": "89c9c0da24f7c01c",
+  "drop164/prep40-dig-player": "d5044e76f7cfaa6a",
+  "drop164/prep40-dig-opponent": "b9d87e5bbb9adb0f",
+  "drop164/prep40-solar-beam-player": "81c9460a969160e0",
+  "drop164/prep40-solar-beam-opponent": "3d43b8ce8907d019",
+  "drop164/prep40-faint-explosion-player": "2f517f0ae749fbb3",
+  "drop164/prep40-roared-player": "d6a4939b3afca2c1",
+  "drop164/prep40-faint-explosion-opponent": "bb0bf2326dfdab87",
+  "drop164/prep40-roared-opponent": "993006fe21f27d9b",
+  "drop164/prep40-switch-player": "bf48b0f947156964",
+  "firstbody/prep40-earthquake-player": "13c2f0b38fb30da4",
+  "firstbody/prep40-earthquake-opponent": "5a17ab71b7f6c163",
+  "firstbody/prep40-aerial-ace-player": "d4d56d7863a5b9f6",
+  "firstbody/prep40-aerial-ace-opponent": "57428f951dd91007",
+  "firstbody/prep40-shadow-ball-player": "950302135a324a74",
+  "firstbody/prep40-shadow-ball-opponent": "aa0a44ac87c89fe4",
+  "firstbody/prep40-psychic-player": "88bf7ed05eb140d0",
+  "firstbody/prep40-psychic-opponent": "b8dab06132f6b99c",
+  "firstbody/prep40-rock-slide-opponent": "bb23e1662c3d2bc3",
+  "firstbody/prep40-surf-player": "8c9c3d6e83e95263",
+  "firstbody/prep40-surf-opponent": "3a7df9e34b8e61eb",
+  "firstbody/prep40-ice-beam-player": "964c4abbbe7055e0",
+  "firstbody/prep40-ice-beam-opponent": "881959eb4ec32601",
+  "firstbody/prep40-double-edge-player": "3c588baef0777dfb",
+  "firstbody/prep40-double-edge-opponent": "38aa1ec97e9947c2",
+  "firstbody/prep40-confuse-ray-player": "7c1c959434143e01",
+  "firstbody/prep40-confuse-ray-opponent": "63c5d183e3e40f8f",
+  "firstbody/prep40-thunderbolt-player": "df45b060e820dd4a",
+  "firstbody/prep40-thunderbolt-opponent": "54f5167707afe32e",
+  "firstbody/prep40-attract-player": "a3361315835b5fda",
+  "firstbody/prep40-attract-opponent": "32457661e951cf97",
+  "firstbody/prep40-brick-break-player": "77e5964fc205540a",
+  "firstbody/prep40-brick-break-opponent": "8373ed5888ccec0e",
+  "firstbody/prep40-sludge-bomb-player": "84600d39a3cf0895",
+  "firstbody/prep40-sludge-bomb-opponent": "27030698e0102b13",
+  "firstbody/prep40-thunder-wave-player": "526424b443a1cf33",
+  "firstbody/prep40-thunder-wave-opponent": "de441f09e83d8dfe",
+  "firstbody/prep40-giga-drain-player": "52d2430249cfd60c",
+  "firstbody/prep40-giga-drain-opponent": "20ba5a54dfdbb469",
+  "firstbody/prep40-roar-player": "857647fc85c9a570",
+  "firstbody/prep40-roar-opponent": "0bae90a6db14dd5b",
+  "firstbody/prep40-crunch-player": "546c107056b4a5f8",
+  "firstbody/prep40-crunch-opponent": "b06d4e5c456dd561",
+  "firstbody/prep40-faint-attack-player": "c318bc97f1e52341",
+  "firstbody/prep40-flamethrower-player": "87fbfb4c1566cd35",
+  "firstbody/prep40-flamethrower-opponent": "1fe61967c7c2630c",
+  "firstbody/prep40-quick-attack-player": "3ffa96f3736f950d",
+  "firstbody/prep40-quick-attack-opponent": "0a6d45a0e4c351fc",
+  "firstbody/prep40-toxic-player": "a08e6f7073764edd",
+  "firstbody/prep40-toxic-opponent": "695f15f2d03408c9",
+  "firstbody/prep40-bite-player": "13f4c3acbbdf0ea9",
+  "firstbody/prep40-bite-opponent": "90e8793281090fa1",
+  "firstbody/prep40-mega-kick-player": "d0c67f960d1c4dc0",
+  "firstbody/prep40-mega-kick-opponent": "cc7e7be989588420",
+  "firstbody/prep40-overheat-player": "58f9ab2af97b4cad",
+  "firstbody/prep40-overheat-opponent": "2a9eaf291c789122",
+  "firstbody/prep40-rock-tomb-player": "565594c460fe95e9",
+  "firstbody/prep40-rock-tomb-opponent": "b44c9cd45eefbe26",
+  "firstbody/prep40-ice-punch-player": "7ac106072d0c4f0a",
+  "firstbody/prep40-ice-punch-opponent": "32c6d8d2379a27f3",
+  "firstbody/prep40-swagger-player": "8f435bb04f1c9ad6",
+  "firstbody/prep40-swagger-opponent": "8f837095c090ebc3",
+  "firstbody/prep40-fire-punch-player": "80cd0efa42304b14",
+  "firstbody/prep40-fire-punch-opponent": "d79dc97744acbb36",
+  "firstbody/prep40-hydro-pump-player": "080f26351c013a86",
+  "firstbody/prep40-hydro-pump-opponent": "f004877f80a5c004",
+  "firstbody/prep40-facade-player": "b0cecfdd5e83240c",
+  "firstbody/prep40-facade-opponent": "138a436dfbb1341d",
+  "firstbody/prep40-seismic-toss-player": "35088ed829454e55",
+  "firstbody/prep40-seismic-toss-opponent": "fdf68ad78a36f395",
+  "firstbody/prep40-mud-slap-player": "90ed804fc79d25a7",
+  "firstbody/prep40-mud-slap-opponent": "02ed9d4b13c31296",
+  "firstbody/prep40-megahorn-player": "eac00514e071b3b5",
+  "firstbody/prep40-megahorn-opponent": "82aa299b389c6eab",
+  "firstbody/prep40-double-kick-player": "ed66e05bd9bf3b67",
+  "firstbody/prep40-double-kick-opponent": "8dcba5b377ee3e4d",
+  "firstbody/prep40-dig-player": "7673a395c9983902",
+  "firstbody/prep40-dig-opponent": "ebb81d2adce3feb2",
+  "firstbody/prep40-solar-beam-player": "816b949822556578",
+  "firstbody/prep40-solar-beam-opponent": "1b5711cebb2055a6",
+  "firstbody/prep40-faint-explosion-player": "f53d01f49ec8888c",
+  "firstbody/prep40-roared-player": "54d11f5d1c619bba",
+  "firstbody/prep40-faint-explosion-opponent": "1b5230e4641ef195",
+  "firstbody/prep40-roared-opponent": "a6c58364706cf639",
+  "firstbody/prep40-switch-player": "6b2dee355f479b51"
+ },
+ "plainWindowRomChangesAfter": {
+  "[0, 0, 0, 0, 1436]": 45,
+  "[0, 0, 0, 0, 0]": 10,
+  "[0, 0, 0, 0, 2526]": 3,
+  "[0, 0, 0, 0, 3384]": 3,
+  "[0, 0, 0, 0, 1703]": 2,
+  "[0, 0, 0, 0, 1696]": 2,
+  "[0, 0, 0, 0, 1708]": 1,
+  "[0, 0, 0, 0, 1764]": 1,
+  "[0, 0, 0, 0, 1688]": 1,
+  "[0, 0, 0, 0, 1697]": 1,
+  "[0, 0, 0, 0, 1707]": 1,
+  "[0, 0, 0, 0, 1704]": 1,
+  "[0, 0, 0, 0, 1706]": 1,
+  "[0, 0, 0, 0, 1709]": 1,
+  "[0, 0, 0, 0, 1716]": 1,
+  "[0, 0, 0, 0, 1682]": 1
+ },
+ "note": "every probe: 2 fresh runs x 2 passes byte-identical; every check receipt byte-identical across passes"
+}

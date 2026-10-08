@@ -91,6 +91,15 @@ function swapOnlyPixels(stem: string, runs: { rows: Row[]; rgb: string }[], rows
     standInFieldBadRows: ranges(per[0]!.map((x, n) => [n, x[1]!] as const).filter((x) => x[1] > 0).map((x) => x[0])) };
 }
 
+function damageAfter(rows: Row[], from: number, target: number): number {
+  const hp0 = rows[from]!.battlers[target]!.hp;
+  for (let n = from; n < Math.min(rows.length, from + 600); n++) {
+    const hp = rows[n]!.battlers[target]!.hp;
+    if (hp !== hp0) return Math.max(0, hp0 - hp);
+  }
+  return 0;
+}
+
 const results: Record<string, unknown>[] = [];
 for (const stem of stems) {
   const runs = [1, 2].map((r) => ({ rows: (JSON.parse(readFileSync(`${outDir}/${stem}-r${r}.json`, "utf8")) as { frames: Row[] }).frames, rgb: `${outDir}/${stem}-r${r}-rgb` }));
@@ -150,7 +159,10 @@ for (const stem of stems) {
         playerGender: genders.player as "male", opponentGender: genders.opponent as "male" },
       precedingBodies: opt.order === "drop-164" ? pre.filter((u) => u.moveId !== 164) : pre,
       displayedStatus: { player: statusOf(rows[i]!.battlers[0].status1), opponent: statusOf(rows[i]!.battlers[1].status1) },
-      ...(turn ? { requestFields: { turn } } : {}),
+      // request.damage = gAnimMoveDmg (AnimTask_GetSeismicTossDamageLevel reads it): the target's next HP drop after the body
+      requestFields: { ...(turn ? { turn } : {}), damage: damageAfter(rows, bodyEnd, 1 - attacker) },
+      // BattleScriptFirstChargingTurn prints STRINGID_EMPTYSTRING3 (no "used X!") before a two-turn move's first-turn body
+      ...(["DIG", "SOLAR_BEAM", "FLY"].includes(move) && turn === 0 ? { messageLines: ["", ""] } : {}),
       presentationRngActivation: { value: unstep(rows[a + 1]!.rng2), source: "prep40Probe.py gRng2Value at activation + 1, stepped back once" },
     } as Fixture;
     let orderInput = opt.order ?? "fixture";
@@ -159,7 +171,7 @@ for (const stem of stems) {
       try { return fn(); } finally { delete process.env.POKEBENCH_LIVE_ORDER_INPUT; }
     };
     let declinedNoAdapter = false;
-    try { liveView(fixture, 0); } catch (e) {
+    try { withOrder(() => liveView(fixture, 0)); } catch (e) {
       const m = String(e);
       if (m.includes("Sprite order unknown")) orderInput = "none";
       else if (m.includes("No live adapter")) declinedNoAdapter = true;
@@ -232,11 +244,16 @@ for (const stem of stems) {
         return fb;
       };
       const scan: [number, number][] = [];
-      for (let s = -24; s <= 24; s++) scan.push([s, window.reduce((sum, _, age) => sum + diff(rgbs[0]![age]!, at(s, age)).px, 0)]);
+      for (let s = -24; s <= 24; s++) {
+        try { scan.push([s, window.reduce((sum, _, age) => sum + diff(rgbs[0]![age]!, at(s, age)).px, 0)]); } catch { /* adapter rejects this age range */ }
+      }
       const best = [...scan].sort((x, y) => x[1] - y[1] || Math.abs(x[0]) - Math.abs(y[0]))[0]!;
       entry.aligned = { framingRows: kind === "plain" ? null : bodyRows, shift: best[0], ...measure((age) => at(best[0], age)),
         zeroShifts: scan.filter((x) => x[1] === 0).map((x) => x[0]) };
     }
+    entry.romChangesAfter = [0, 1, 2, 3, 4].map((n) => {
+      try { const x = diff(rgbOf(runs[0]!.rgb, rows[k + n]!), (() => { const b = rgbOf(runs[0]!.rgb, rows[k + n + 1]!); const o = new Uint8Array(240 * 160 * 4); for (let p = 0; p < 240 * 160; p++) { o[p * 4] = b[p * 3]!; o[p * 4 + 1] = b[p * 3 + 1]!; o[p * 4 + 2] = b[p * 3 + 2]!; } return o; })()); return x.px; } catch { return null; }
+    });
     if (kind !== "plain" && rows[k + 2]) {
       // tail rows k+1, k+2: production today = the settled doll (the next command's first row; effect null) vs one row longer.
       const settled = (() => { const v = make(0); const fb = new Uint8Array(240 * 160 * 4); renderBattleResolutionLiveView(fb, { ...v, effect: null }); return fb; })();
