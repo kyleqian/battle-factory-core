@@ -164,8 +164,13 @@ options (a temp tsconfig extending the workspace one with `"files"` = the two sc
 
 - **return to ball** (13k): not probed. The host invalidates on a `B_SCR_OP_VARIOUS` / `RETURNATKTOBALL` / `RETURNTOBALL` visibility
   receipt that is neither Roar/Whirlwind's forced switch-out nor the voluntary switch (`liveSpriteOrderHost.ts:333`); 10 commands on
-  seeds 0..199 (Sand-Attack, Ice Beam, Silver Wind, ...). Next step: classify those receipts (Baton Pass / end-of-battle) and reuse
-  `spriteOrderRecallPlanText`.
+  seeds 0..199 (Sand-Attack, Ice Beam, Silver Wind, ...). Source-level hypothesis (unprobed): the main producer is the Factory AI's
+  own voluntary switch — `BattleScript_ActionSwitch`'s `returnatktoball` for battler 1 — because `isVoluntaryPlayerSwitchOut`
+  (`liveSpriteOrderHost.ts:266-273`) accepts battler 0 only; Baton Pass and a switch after an earlier `MOVE_ANIMATION` in the segment
+  (Pursuit) fall through the same way. Continuing would be the opponent analogue of `switch-out` (`spriteOrderRecallPlanText` with the
+  opponent battler slot, if `Special_SwitchOutOpponentMon` allocates like the player's) + `switch-in-start/-finish {opponent}`, which
+  needs ROM evidence. One attempt: a Scene-ON variant of `mechanic-factory-ai-switch-receipt-a-off.json` (+900 idle frames, A == B)
+  did not switch within the trace (bodies Swift / Water Gun only), so no plan is claimed.
 - **Retained locked-action continuation** (the real "without an action prompt" cases, now also Dig's next stop): orchestrator work.
 - The census is one input policy, battle 1 of a challenge per seed, 200 seeds; per-unit gains are lower bounds of the unit's share
   because each unit's commands may stop at the *next* unplanned unit (the "still fallback" column in `census-delta-seeds0-199.json`:
