@@ -12,6 +12,7 @@ import { PRESENT_DAMAGE_FRAME_COUNT, PRESENT_HEAL_FRAME_COUNT } from "../animati
 import { SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE, SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE } from "../animation/solarBeam.ts";
 import { reduceMemento, type MementoBattlerConfig, type MementoConfig } from "../animation/memento.ts";
 import { HOWL_FRAME_COUNT } from "../animation/howl.ts";
+import { SUBSTITUTE_FRAME_COUNT } from "../animation/substitute.ts";
 import { dragonRageFireSpitGeometryFor } from "../animation/dragonRage.ts";
 import { TAIL_WHIP_FRAME_COUNT } from "../animation/tailWhip.ts";
 import { CONFUSE_RAY_FRAME_COUNT } from "../animation/confuseRay.ts";
@@ -338,6 +339,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // prep27 s0.2/s5: Endeavor script body (68 rows) with the stale register power; declines when the unported Battle TV loop (W3)
   // may have written the register (liveStaleMovePowerTaintedBy).
   283,
+  // S10A Substitute (docs/next-adapters-prep37.md s1/s3a.4): the BODY (87 rows); the doll is shown after it
+  // (applySubstituteDollCommand) and every adapter declines while either battler is the doll (liveMoveSubstituteDollDeclines).
+  164,
 ] as const);
 
 /** In-use OBJ slots at a first-body activation (prep14 s1: equal in all 24 probed scenarios). */
@@ -491,6 +495,9 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // Memento (prep34 s2.5): live age 0 = activation (s10a-live/memento-*.json; elevated GOLBAT target window). An elevated opponent-side
     // attacker (WEEZING) is at HP 0 already, so the hook's IsBattlerSpritePresent gate leaves its shadow hidden (battleScene.ts).
     262,
+    // Substitute body (prep37 s1): live age 0 = activation (elevated GOLBAT attacker: 200 px at age 0 otherwise). No shadow return
+    // after it: the doll keeps the shadow hidden (battle_gfx_sfx_util.c:1220; battleCommandFieldArt.ts).
+    164,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -915,6 +922,7 @@ export function liveMoveAnimationDuration(
     // Blizzard accepted windows: 214..585 player-back, 213..573 opponent-front (Guillotine precedent).
     case 59: return request.attacker === 0 ? 372 : 361;
     case 252: return 86; // Fake Out accepted window (78..163 / 82..167).
+    case 164: return SUBSTITUTE_FRAME_COUNT; // Substitute body: activation .. first inactive row (prep37 s1, every pair and both sides).
     case 322: return 241; // Cosmic Power accepted window (294..534).
     // H_BUFFER S1 accepted windows (docs/h-buffer-s1-prep.md).
     case 212: return 171; // Mean Look (71..241 / 75..245).
@@ -1728,6 +1736,7 @@ export function liveMoveAnimationPresentation(
         targetPictureYOffset: liveBattlerCoordAttrs(target.geometry.side, art).yOffset };
       break;
     case 322: config = { move: "COSMIC_POWER", attacker, target, fieldProfile }; break;
+    case 164: config = { move: "SUBSTITUTE", attacker, target, fieldProfile }; break;
     case 212:
       // meanLookFramebuffer.ts:124: the eye is created from ANIM_ATTACKER, so the profile carries its subpriority.
       config = { move: "MEAN_LOOK", attacker, target, fieldProfile,

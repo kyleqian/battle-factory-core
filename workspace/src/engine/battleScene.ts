@@ -18564,15 +18564,17 @@ export function renderSceneOnMovePresentation(
       ...substituteState,
       age: substituteState.age - 2,
     });
+    // Live (prep37 s1 / prep37RendererPatch.ts): any displayed pair; the doll
+    // geometry is species independent (GetSubstituteSpriteDefault_Y - 32).
     const playerToOpponent =
-      view.attacker.species === "GOLEM"
+      (liveField || view.attacker.species === "GOLEM")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "GOLEM"
+      (liveField || view.attacker.species === "GOLEM")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -18584,25 +18586,29 @@ export function renderSceneOnMovePresentation(
     const golemSource = playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GOLEM!
       : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GOLEM!;
-    const golem = playerToOpponent ? golemSource : {
+    const golem = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent ? golemSource : {
       ...golemSource,
       tileset: subTileset(golemSource.tileset, 0, 8),
     };
     const onixSource = playerToOpponent
       ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!
       : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
-    const onix = playerToOpponent ? {
+    const onix = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent ? {
       ...onixSource,
       tileset: subTileset(onixSource.tileset, 0, 8),
     } : onixSource;
+    // The mon is drawn at its front-idle rest; the doll's x2 is the task's own
+    // write (200, then 0), so the doll never carries the rest.
+    const liveIdle = (battler: typeof view.attacker) => liveField && battler.geometry.side === "opponent"
+      ? sceneOnBattlerFrontIdleRest(battler) : { x2: 0, y2: 0 };
 
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     drawSpriteSheet(
       fb,
       onix.tileset,
       onix.palette,
-      view.target.geometry.spriteCorner.x,
-      view.target.geometry.spriteCorner.y,
+      view.target.geometry.spriteCorner.x + liveIdle(view.target).x2,
+      view.target.geometry.spriteCorner.y + liveIdle(view.target).y2,
     );
 
     if (substituteState.age <= 11) {
@@ -18612,8 +18618,8 @@ export function renderSceneOnMovePresentation(
             fb,
             golem.tileset,
             golem.palette,
-            view.attacker.geometry.spriteCorner.x,
-            view.attacker.geometry.spriteCorner.y,
+            view.attacker.geometry.spriteCorner.x + liveIdle(view.attacker).x2,
+            view.attacker.geometry.spriteCorner.y + liveIdle(view.attacker).y2,
             affineDisplayed.sprite.matrix.a,
             affineDisplayed.sprite.matrix.d,
             0,
@@ -18626,8 +18632,8 @@ export function renderSceneOnMovePresentation(
             fb,
             golem.tileset,
             golem.palette,
-            view.attacker.geometry.spriteCorner.x,
-            view.attacker.geometry.spriteCorner.y,
+            view.attacker.geometry.spriteCorner.x + liveIdle(view.attacker).x2,
+            view.attacker.geometry.spriteCorner.y + liveIdle(view.attacker).y2,
           );
         }
       }
@@ -18641,6 +18647,8 @@ export function renderSceneOnMovePresentation(
       );
     }
 
+    // Live: the host draws the HUD and the move-used text from the field.
+    if (liveField) return;
     drawSendOutHealthbox(
       fb,
       0,
