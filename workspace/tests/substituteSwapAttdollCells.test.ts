@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
 import type { BattleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "../src/engine/battleResolutionPresentation.ts";
+import { createBattleResolutionPresentationRenderView } from "../src/engine/battleResolutionPresentationRender.ts";
 import { liveMoveAnimationDuration } from "../src/engine/liveMoveAnimation.ts";
 import {
   LIVE_SUBSTITUTE_SWAP_BODY_CELLS, LIVE_SUBSTITUTE_SWAP_BODY_FRAMING, LIVE_SUBSTITUTE_SWAP_BODY_IDS, liveSubstituteSwapView,
+  substituteSwapTailFieldArt, substituteSwapTailX2,
 } from "../src/engine/liveSubstituteSwap.ts";
+import { createBattleCommandFieldArtView } from "../src/engine/battleCommandFieldArt.ts";
+import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
 
 // S10A attacker-doll widening (docs/next-adapters-prep40.md s1; tools/integration/fixtures/attdoll-live-receipt.json): the subbed
 // ATTACKER's body is presented with SUBSTITUTE_TO_MON / MON_TO_SUBSTITUTE only for the proven (move, attacker side) cells.
@@ -84,4 +88,67 @@ describe("attacker-doll swap cells (prep40)", () => {
     for (const moveId of [247, 207, 185]) expect(LIVE_SUBSTITUTE_SWAP_BODY_IDS.has(moveId)).toBe(false);
     expect(liveMoveAnimationDuration(req(94, 1), field(false, true))).toBeNull();
   });
+  it("rung c: the tail row latches the doll at the swap-back's last moving x2 (-5 / +5), not a longer composite", () => {
+    expect(substituteSwapTailX2("player")).toBe(-5);
+    expect(substituteSwapTailX2("opponent")).toBe(5);
+    const art = createBattleCommandFieldArtView(field(true, false));
+    expect(substituteSwapTailFieldArt(art, "player").player.origin).toEqual({ x: art.player.origin.x - 5, y: art.player.origin.y });
+    expect(substituteSwapTailFieldArt(art, "player").opponent).toBe(art.opponent);
+    // The composite length is unchanged (swap-in + idle + body + swap-back + its first inactive row).
+    expect(liveMoveAnimationDuration(req(57, 0), field(true, false))).toBe(144 + 85);
+  });
+});
+
+const rulesWithoutSceneMarker = (v: { rules: any }) => {
+  const rc = v.rules.rulesContext;
+  return { ...v.rules, rulesContext: { ...rc, hitMarker: rc.hitMarker & ~0x80 } };
+};
+
+describe("ordinary route: a subbed attacker's framed Toxic with the swaps", () => {
+  it("SHUCKLE 243/35 [Substitute, Attract, Toxic, Double Team]: framed composite, tail-row latch, next prompt, Scene ON/OFF parity", () => {
+    const seen = { ages: 0, duration: null as number | null, kinds: new Set<string>(), bodyAges: [] as number[], tail: [] as number[] };
+    let after: { side: "player"; settledX: number } | null = null;
+    const on = generatedCommandAnimationReplay(243, "on", [0, 2], 35, true, true, (state) => {
+      const r = state.battleResolutionPresentation;
+      if (r?.lifecycle.phase !== "presenting") return;
+      const command = r.segments[r.segmentIndex]!.commands[r.commandIndex];
+      const view = createBattleResolutionPresentationRenderView(r);
+      if (command?.type === "move-animation" && command.animation?.moveId === 92) {
+        expect(view.field.player.substituteDoll).toBe(true);
+        seen.duration = liveMoveAnimationDuration(command.animation, view.field);
+        const swap = liveSubstituteSwapView(view)!;
+        seen.kinds.add(swap.kind);
+        if (swap.kind === "body") seen.bodyAges.push((swap.view.effect as { age: number }).age);
+        seen.ages += 1;
+        after = { side: "player", settledX: createBattleCommandFieldArtView(view.field).player.origin.x };
+        return;
+      }
+      if (after !== null && seen.tail.length < 2) {
+        // The next command's first two rows: the doll at x2 -5 (tail latch), then settled.
+        expect(view.field.player.substituteDoll).toBe(true);
+        seen.tail.push(view.fieldArt.player.origin.x - after.settledX);
+      }
+    });
+    const off = generatedCommandAnimationReplay(243, "off", [0, 2], 35, true, true);
+    // Toxic's ROM body (activation .. first inactive) 231 rows + the player swaps 85 = 316 (the adapter alone is 219 rows).
+    expect(seen.duration).toBe(316);
+    expect(seen.ages).toBe(316);
+    expect([...seen.kinds].sort()).toEqual(["body", "swap"]);
+    // Body rows 1..230 show adapter ages -6..223 (shift -7).
+    expect(seen.bodyAges[0]).toBe(-6);
+    expect(seen.bodyAges.at(-1)).toBe(223);
+    expect(seen.tail).toEqual([-5, 0]);
+    expect(on.requests.map((q) => `${q.moveId}:${q.attacker}->${q.target}`)).toContain("92:0->1");
+    expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    expect(off.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    expect(on.stalled).toBe(off.stalled);
+    expect(off.boundaries).toHaveLength(on.boundaries.length);
+    for (let i = 0; i < on.boundaries.length; i += 1) {
+      expect(rulesWithoutSceneMarker(on.boundaries[i]!)).toEqual(rulesWithoutSceneMarker(off.boundaries[i]!));
+      expect(on.boundaries[i]!.rng).toEqual(off.boundaries[i]!.rng);
+      expect(on.boundaries[i]!.boundary).toEqual(off.boundaries[i]!.boundary);
+    }
+    expect(on.state.facilityState).toEqual(off.state.facilityState);
+    expect(on.state.round.rules.rngValue).toBe(off.state.round.rules.rngValue);
+  }, 240000);
 });

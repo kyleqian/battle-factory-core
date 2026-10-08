@@ -15,7 +15,7 @@
  * x2 -105..0 / 0..100, the load on row 21 / 20 (VRAM switch visible at 23 / 22 while the sprite is off screen), one idle
  * row before the body. The display shows each row's OAM two rows late (task x2 after BuildOamBuffer).
  */
-import { createBattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
+import { createBattleCommandFieldArtView, type BattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 import type { BattleCommandFieldBattler } from "./battleCommandPresentation.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "./battleResolutionPresentation.ts";
@@ -193,6 +193,22 @@ export function substituteSwapFrameAt(side: Side, bodyDuration: number, age: num
   const row = k - 2;
   if (row < 0) return Object.freeze({ kind: "swap", x2: 0, doll: false, afterBody: true });
   return Object.freeze({ kind: "swap", ...swapOut[Math.min(row, swapOut.length - 1)]!, afterBody: true });
+}
+
+/**
+ * The row right after a presented composite (docs/next-adapters-prep40.md s2; the next command's first row): the ROM still shows
+ * the attacker's doll at the swap-back's last moving x2 (task row scriptRows - 1: -5 player / +5 opponent; the 2-row OAM latch),
+ * settled from the row after. The composite itself ends at the swap-back's first inactive row: the next command's own timing
+ * (its first visible change) is unchanged, so this is a one-row latch on that command, never a longer composite.
+ */
+export function substituteSwapTailX2(side: Side): number {
+  return substituteSwapRows(side, false)[substituteSwapScriptRows(side) - 1]!.x2;
+}
+
+/** The field art of the tail row: the attacker's (doll) sprite at substituteSwapTailX2. */
+export function substituteSwapTailFieldArt(art: BattleCommandFieldArtView, side: Side): BattleCommandFieldArtView {
+  const moved = Object.freeze({ ...art[side], origin: Object.freeze({ x: art[side].origin.x + substituteSwapTailX2(side), y: art[side].origin.y }) });
+  return Object.freeze(side === "player" ? { player: moved, opponent: art.opponent } : { player: art.player, opponent: moved });
 }
 
 export type SubstituteSwapView =
