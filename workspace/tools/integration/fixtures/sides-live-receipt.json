@@ -1,171 +1,78 @@
 {
- "schema": "sides-live-receipt/v1",
- "testedCommit": "055f624c7655a95cfd960828c92a21c25def6f73",
- "testedSrcTree": "92d40b927432cbc7378209f649644727da408fbb",
- "dirty": false,
- "command": "node --experimental-strip-types --no-warnings tools/integration/sidesLiveReceipt.ts tools/integration/fixtures/sides-live-receipt.json tools/integration/fixtures/s10a-live/double-team-alt-opponent-delcatty-player-golem.json tools/integration/fixtures/s10a-live/double-team-alt-opponent-golbat-player-golem.json tools/integration/fixtures/s10a-live/double-team-alt-player-onix-opponent-golbat.json tools/integration/fixtures/s10a-live/double-team-opponent-grovyle-player-onix.json tools/integration/fixtures/prep7-double-team-player.json",
+ "schema": "sides-live-receipt/v2",
+ "lastRun": {
+  "testedCommit": "7f19760dfc325c85ebef68db3d790d9f8c161dfe",
+  "testedSrcTree": "09b0062ae11635537bfb0b651f7be0a850f9bc55",
+  "dirty": false
+ },
+ "command": "node --experimental-strip-types --no-warnings tools/integration/sidesLiveReceipt.ts tools/integration/fixtures/sides-live-receipt.json <fixtures>",
+ "probes": "JOBS=6 sh tools/integration/prep22Probes.sh PROBEDIR 2 <tools/battle-lab/s10aside-*.json keys> (fixture windows from the agreeing runs)",
  "windows": [
   {
-   "fixture": "tools/integration/fixtures/s10a-live/double-team-alt-opponent-delcatty-player-golem.json",
+   "fixture": "tools/integration/fixtures/prep6-faint-attack-player.json",
    "ok": true,
+   "testedCommit": "7f19760dfc325c85ebef68db3d790d9f8c161dfe",
+   "testedSrcTree": "09b0062ae11635537bfb0b651f7be0a850f9bc55",
+   "dirty": false,
    "invocationA": [
     {
-     "rows": 230,
-     "exactRows": 230,
+     "rows": 221,
+     "exactRows": 221,
      "residualPixels": 0,
-     "expectedDuration": 230,
-     "digest": "9f718de3a59a57bb5987b5fe89069279b989eaec92a2a85ea0d04504c0d33ad0"
+     "expectedDuration": 221,
+     "digest": "edad69e3483e38de9a0862fb6c85243867e3b5b058b4b526c9376aee0ac932a5",
+     "affectedAges": []
     },
     {
-     "rows": 230,
-     "exactRows": 230,
+     "rows": 221,
+     "exactRows": 221,
      "residualPixels": 0,
-     "expectedDuration": 230,
-     "digest": "9f718de3a59a57bb5987b5fe89069279b989eaec92a2a85ea0d04504c0d33ad0"
+     "expectedDuration": 221,
+     "digest": "edad69e3483e38de9a0862fb6c85243867e3b5b058b4b526c9376aee0ac932a5",
+     "affectedAges": []
     }
    ],
    "invocationB": [
     {
-     "rows": 230,
-     "exactRows": 230,
+     "rows": 221,
+     "exactRows": 221,
      "residualPixels": 0,
-     "expectedDuration": 230,
-     "digest": "9f718de3a59a57bb5987b5fe89069279b989eaec92a2a85ea0d04504c0d33ad0"
+     "expectedDuration": 221,
+     "digest": "edad69e3483e38de9a0862fb6c85243867e3b5b058b4b526c9376aee0ac932a5",
+     "affectedAges": []
     },
     {
-     "rows": 230,
-     "exactRows": 230,
+     "rows": 221,
+     "exactRows": 221,
      "residualPixels": 0,
-     "expectedDuration": 230,
-     "digest": "9f718de3a59a57bb5987b5fe89069279b989eaec92a2a85ea0d04504c0d33ad0"
-    }
-   ]
-  },
-  {
-   "fixture": "tools/integration/fixtures/s10a-live/double-team-alt-opponent-golbat-player-golem.json",
-   "ok": true,
-   "invocationA": [
-    {
-     "rows": 230,
-     "exactRows": 230,
-     "residualPixels": 0,
-     "expectedDuration": 230,
-     "digest": "02fb517cd0f20f718b4e6dea46be8f467a8a70d55d0bf9a0d0e5edcf42c79833"
-    },
-    {
-     "rows": 230,
-     "exactRows": 230,
-     "residualPixels": 0,
-     "expectedDuration": 230,
-     "digest": "02fb517cd0f20f718b4e6dea46be8f467a8a70d55d0bf9a0d0e5edcf42c79833"
-    }
-   ],
-   "invocationB": [
-    {
-     "rows": 230,
-     "exactRows": 230,
-     "residualPixels": 0,
-     "expectedDuration": 230,
-     "digest": "02fb517cd0f20f718b4e6dea46be8f467a8a70d55d0bf9a0d0e5edcf42c79833"
-    },
-    {
-     "rows": 230,
-     "exactRows": 230,
-     "residualPixels": 0,
-     "expectedDuration": 230,
-     "digest": "02fb517cd0f20f718b4e6dea46be8f467a8a70d55d0bf9a0d0e5edcf42c79833"
-    }
-   ]
-  },
-  {
-   "fixture": "tools/integration/fixtures/s10a-live/double-team-alt-player-onix-opponent-golbat.json",
-   "ok": true,
-   "invocationA": [
-    {
-     "rows": 230,
-     "exactRows": 230,
-     "residualPixels": 0,
-     "expectedDuration": 230,
-     "digest": "9ddf370cb440942d4e15db34d1bd9875a68b882d71192e949b7c70ec884f3543"
-    },
-    {
-     "rows": 230,
-     "exactRows": 230,
-     "residualPixels": 0,
-     "expectedDuration": 230,
-     "digest": "9ddf370cb440942d4e15db34d1bd9875a68b882d71192e949b7c70ec884f3543"
-    }
-   ],
-   "invocationB": [
-    {
-     "rows": 230,
-     "exactRows": 230,
-     "residualPixels": 0,
-     "expectedDuration": 230,
-     "digest": "9ddf370cb440942d4e15db34d1bd9875a68b882d71192e949b7c70ec884f3543"
-    },
-    {
-     "rows": 230,
-     "exactRows": 230,
-     "residualPixels": 0,
-     "expectedDuration": 230,
-     "digest": "9ddf370cb440942d4e15db34d1bd9875a68b882d71192e949b7c70ec884f3543"
-    }
-   ]
-  },
-  {
-   "fixture": "tools/integration/fixtures/s10a-live/double-team-opponent-grovyle-player-onix.json",
-   "ok": true,
-   "invocationA": [
-    {
-     "rows": 230,
-     "exactRows": 230,
-     "residualPixels": 0,
-     "expectedDuration": 230,
-     "digest": "0bcb96eed71fbedf5fd976924b4dc82fa288c2c1e65ec4128f3887ac8c2c3c2b"
-    },
-    {
-     "rows": 230,
-     "exactRows": 230,
-     "residualPixels": 0,
-     "expectedDuration": 230,
-     "digest": "0bcb96eed71fbedf5fd976924b4dc82fa288c2c1e65ec4128f3887ac8c2c3c2b"
-    }
-   ],
-   "invocationB": [
-    {
-     "rows": 230,
-     "exactRows": 230,
-     "residualPixels": 0,
-     "expectedDuration": 230,
-     "digest": "0bcb96eed71fbedf5fd976924b4dc82fa288c2c1e65ec4128f3887ac8c2c3c2b"
-    },
-    {
-     "rows": 230,
-     "exactRows": 230,
-     "residualPixels": 0,
-     "expectedDuration": 230,
-     "digest": "0bcb96eed71fbedf5fd976924b4dc82fa288c2c1e65ec4128f3887ac8c2c3c2b"
+     "expectedDuration": 221,
+     "digest": "edad69e3483e38de9a0862fb6c85243867e3b5b058b4b526c9376aee0ac932a5",
+     "affectedAges": []
     }
    ]
   },
   {
    "fixture": "tools/integration/fixtures/prep7-double-team-player.json",
    "ok": true,
+   "testedCommit": "7f19760dfc325c85ebef68db3d790d9f8c161dfe",
+   "testedSrcTree": "09b0062ae11635537bfb0b651f7be0a850f9bc55",
+   "dirty": false,
    "invocationA": [
     {
      "rows": 230,
      "exactRows": 230,
      "residualPixels": 0,
      "expectedDuration": 230,
-     "digest": "2adc18f1edc0ebf4a7b166cb20f1ac8b6cf02c7f5f21d66491a757555551ab03"
+     "digest": "2adc18f1edc0ebf4a7b166cb20f1ac8b6cf02c7f5f21d66491a757555551ab03",
+     "affectedAges": []
     },
     {
      "rows": 230,
      "exactRows": 230,
      "residualPixels": 0,
      "expectedDuration": 230,
-     "digest": "2adc18f1edc0ebf4a7b166cb20f1ac8b6cf02c7f5f21d66491a757555551ab03"
+     "digest": "2adc18f1edc0ebf4a7b166cb20f1ac8b6cf02c7f5f21d66491a757555551ab03",
+     "affectedAges": []
     }
    ],
    "invocationB": [
@@ -174,14 +81,578 @@
      "exactRows": 230,
      "residualPixels": 0,
      "expectedDuration": 230,
-     "digest": "2adc18f1edc0ebf4a7b166cb20f1ac8b6cf02c7f5f21d66491a757555551ab03"
+     "digest": "2adc18f1edc0ebf4a7b166cb20f1ac8b6cf02c7f5f21d66491a757555551ab03",
+     "affectedAges": []
     },
     {
      "rows": 230,
      "exactRows": 230,
      "residualPixels": 0,
      "expectedDuration": 230,
-     "digest": "2adc18f1edc0ebf4a7b166cb20f1ac8b6cf02c7f5f21d66491a757555551ab03"
+     "digest": "2adc18f1edc0ebf4a7b166cb20f1ac8b6cf02c7f5f21d66491a757555551ab03",
+     "affectedAges": []
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/prep7-rock-slide-opponent.json",
+   "ok": true,
+   "testedCommit": "7f19760dfc325c85ebef68db3d790d9f8c161dfe",
+   "testedSrcTree": "09b0062ae11635537bfb0b651f7be0a850f9bc55",
+   "dirty": false,
+   "invocationA": [
+    {
+     "rows": 138,
+     "exactRows": 138,
+     "residualPixels": 0,
+     "expectedDuration": 138,
+     "digest": "ee4fb04b8216a08245071f854c868b0660b4e4ffd5c6c66d9528a8cf62b1283e",
+     "affectedAges": []
+    },
+    {
+     "rows": 138,
+     "exactRows": 138,
+     "residualPixels": 0,
+     "expectedDuration": 138,
+     "digest": "ee4fb04b8216a08245071f854c868b0660b4e4ffd5c6c66d9528a8cf62b1283e",
+     "affectedAges": []
+    }
+   ],
+   "invocationB": [
+    {
+     "rows": 138,
+     "exactRows": 138,
+     "residualPixels": 0,
+     "expectedDuration": 138,
+     "digest": "ee4fb04b8216a08245071f854c868b0660b4e4ffd5c6c66d9528a8cf62b1283e",
+     "affectedAges": []
+    },
+    {
+     "rows": 138,
+     "exactRows": 138,
+     "residualPixels": 0,
+     "expectedDuration": 138,
+     "digest": "ee4fb04b8216a08245071f854c868b0660b4e4ffd5c6c66d9528a8cf62b1283e",
+     "affectedAges": []
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/double-team-alt-opponent-delcatty-player-golem.json",
+   "ok": true,
+   "testedCommit": "7f19760dfc325c85ebef68db3d790d9f8c161dfe",
+   "testedSrcTree": "09b0062ae11635537bfb0b651f7be0a850f9bc55",
+   "dirty": false,
+   "invocationA": [
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "9f718de3a59a57bb5987b5fe89069279b989eaec92a2a85ea0d04504c0d33ad0",
+     "affectedAges": []
+    },
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "9f718de3a59a57bb5987b5fe89069279b989eaec92a2a85ea0d04504c0d33ad0",
+     "affectedAges": []
+    }
+   ],
+   "invocationB": [
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "9f718de3a59a57bb5987b5fe89069279b989eaec92a2a85ea0d04504c0d33ad0",
+     "affectedAges": []
+    },
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "9f718de3a59a57bb5987b5fe89069279b989eaec92a2a85ea0d04504c0d33ad0",
+     "affectedAges": []
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/double-team-alt-opponent-golbat-player-golem.json",
+   "ok": true,
+   "testedCommit": "7f19760dfc325c85ebef68db3d790d9f8c161dfe",
+   "testedSrcTree": "09b0062ae11635537bfb0b651f7be0a850f9bc55",
+   "dirty": false,
+   "invocationA": [
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "02fb517cd0f20f718b4e6dea46be8f467a8a70d55d0bf9a0d0e5edcf42c79833",
+     "affectedAges": []
+    },
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "02fb517cd0f20f718b4e6dea46be8f467a8a70d55d0bf9a0d0e5edcf42c79833",
+     "affectedAges": []
+    }
+   ],
+   "invocationB": [
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "02fb517cd0f20f718b4e6dea46be8f467a8a70d55d0bf9a0d0e5edcf42c79833",
+     "affectedAges": []
+    },
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "02fb517cd0f20f718b4e6dea46be8f467a8a70d55d0bf9a0d0e5edcf42c79833",
+     "affectedAges": []
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/double-team-alt-player-onix-opponent-golbat.json",
+   "ok": true,
+   "testedCommit": "7f19760dfc325c85ebef68db3d790d9f8c161dfe",
+   "testedSrcTree": "09b0062ae11635537bfb0b651f7be0a850f9bc55",
+   "dirty": false,
+   "invocationA": [
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "9ddf370cb440942d4e15db34d1bd9875a68b882d71192e949b7c70ec884f3543",
+     "affectedAges": []
+    },
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "9ddf370cb440942d4e15db34d1bd9875a68b882d71192e949b7c70ec884f3543",
+     "affectedAges": []
+    }
+   ],
+   "invocationB": [
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "9ddf370cb440942d4e15db34d1bd9875a68b882d71192e949b7c70ec884f3543",
+     "affectedAges": []
+    },
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "9ddf370cb440942d4e15db34d1bd9875a68b882d71192e949b7c70ec884f3543",
+     "affectedAges": []
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/double-team-opponent-grovyle-player-onix.json",
+   "ok": true,
+   "testedCommit": "7f19760dfc325c85ebef68db3d790d9f8c161dfe",
+   "testedSrcTree": "09b0062ae11635537bfb0b651f7be0a850f9bc55",
+   "dirty": false,
+   "invocationA": [
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "0bcb96eed71fbedf5fd976924b4dc82fa288c2c1e65ec4128f3887ac8c2c3c2b",
+     "affectedAges": []
+    },
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "0bcb96eed71fbedf5fd976924b4dc82fa288c2c1e65ec4128f3887ac8c2c3c2b",
+     "affectedAges": []
+    }
+   ],
+   "invocationB": [
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "0bcb96eed71fbedf5fd976924b4dc82fa288c2c1e65ec4128f3887ac8c2c3c2b",
+     "affectedAges": []
+    },
+    {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "expectedDuration": 230,
+     "digest": "0bcb96eed71fbedf5fd976924b4dc82fa288c2c1e65ec4128f3887ac8c2c3c2b",
+     "affectedAges": []
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/faint-attack-alt-opponent-delcatty-player-golem.json",
+   "ok": true,
+   "testedCommit": "7f19760dfc325c85ebef68db3d790d9f8c161dfe",
+   "testedSrcTree": "09b0062ae11635537bfb0b651f7be0a850f9bc55",
+   "dirty": false,
+   "documented": {
+    "ages": [
+     203,
+     204,
+     205,
+     206,
+     207,
+     208,
+     209,
+     210,
+     211,
+     212,
+     213,
+     214,
+     215,
+     216,
+     217,
+     218
+    ],
+    "reason": "restore-fade tail one frame earlier (body 225 frames vs 226): the known battle-lab restore-fade phase of Faint Attack"
+   },
+   "invocationA": [
+    {
+     "rows": 221,
+     "exactRows": 205,
+     "residualPixels": 297920,
+     "expectedDuration": 221,
+     "digest": "4d64b7788e6a7a153e3c90acc76a5ff5ad4d4b97a8743067ace53e8b5c6e546f",
+     "affectedAges": [
+      203,
+      204,
+      205,
+      206,
+      207,
+      208,
+      209,
+      210,
+      211,
+      212,
+      213,
+      214,
+      215,
+      216,
+      217,
+      218
+     ]
+    },
+    {
+     "rows": 221,
+     "exactRows": 205,
+     "residualPixels": 297920,
+     "expectedDuration": 221,
+     "digest": "4d64b7788e6a7a153e3c90acc76a5ff5ad4d4b97a8743067ace53e8b5c6e546f",
+     "affectedAges": [
+      203,
+      204,
+      205,
+      206,
+      207,
+      208,
+      209,
+      210,
+      211,
+      212,
+      213,
+      214,
+      215,
+      216,
+      217,
+      218
+     ]
+    }
+   ],
+   "invocationB": [
+    {
+     "rows": 221,
+     "exactRows": 205,
+     "residualPixels": 297920,
+     "expectedDuration": 221,
+     "digest": "4d64b7788e6a7a153e3c90acc76a5ff5ad4d4b97a8743067ace53e8b5c6e546f",
+     "affectedAges": [
+      203,
+      204,
+      205,
+      206,
+      207,
+      208,
+      209,
+      210,
+      211,
+      212,
+      213,
+      214,
+      215,
+      216,
+      217,
+      218
+     ]
+    },
+    {
+     "rows": 221,
+     "exactRows": 205,
+     "residualPixels": 297920,
+     "expectedDuration": 221,
+     "digest": "4d64b7788e6a7a153e3c90acc76a5ff5ad4d4b97a8743067ace53e8b5c6e546f",
+     "affectedAges": [
+      203,
+      204,
+      205,
+      206,
+      207,
+      208,
+      209,
+      210,
+      211,
+      212,
+      213,
+      214,
+      215,
+      216,
+      217,
+      218
+     ]
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/faint-attack-alt-opponent-golbat-player-golem.json",
+   "ok": true,
+   "testedCommit": "7f19760dfc325c85ebef68db3d790d9f8c161dfe",
+   "testedSrcTree": "09b0062ae11635537bfb0b651f7be0a850f9bc55",
+   "dirty": false,
+   "invocationA": [
+    {
+     "rows": 221,
+     "exactRows": 221,
+     "residualPixels": 0,
+     "expectedDuration": 221,
+     "digest": "345ef22eb72696e24fb229429d9a0924f7c34661e5538df6e8bbe8f09a4d7c2e",
+     "affectedAges": []
+    },
+    {
+     "rows": 221,
+     "exactRows": 221,
+     "residualPixels": 0,
+     "expectedDuration": 221,
+     "digest": "345ef22eb72696e24fb229429d9a0924f7c34661e5538df6e8bbe8f09a4d7c2e",
+     "affectedAges": []
+    }
+   ],
+   "invocationB": [
+    {
+     "rows": 221,
+     "exactRows": 221,
+     "residualPixels": 0,
+     "expectedDuration": 221,
+     "digest": "345ef22eb72696e24fb229429d9a0924f7c34661e5538df6e8bbe8f09a4d7c2e",
+     "affectedAges": []
+    },
+    {
+     "rows": 221,
+     "exactRows": 221,
+     "residualPixels": 0,
+     "expectedDuration": 221,
+     "digest": "345ef22eb72696e24fb229429d9a0924f7c34661e5538df6e8bbe8f09a4d7c2e",
+     "affectedAges": []
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/faint-attack-opponent-grovyle-player-onix.json",
+   "ok": true,
+   "testedCommit": "7f19760dfc325c85ebef68db3d790d9f8c161dfe",
+   "testedSrcTree": "09b0062ae11635537bfb0b651f7be0a850f9bc55",
+   "dirty": false,
+   "invocationA": [
+    {
+     "rows": 221,
+     "exactRows": 221,
+     "residualPixels": 0,
+     "expectedDuration": 221,
+     "digest": "bf73984bc1df347e691eab4c8e2564cdff05e06937ade7aecab5a1377b828575",
+     "affectedAges": []
+    },
+    {
+     "rows": 221,
+     "exactRows": 221,
+     "residualPixels": 0,
+     "expectedDuration": 221,
+     "digest": "bf73984bc1df347e691eab4c8e2564cdff05e06937ade7aecab5a1377b828575",
+     "affectedAges": []
+    }
+   ],
+   "invocationB": [
+    {
+     "rows": 221,
+     "exactRows": 221,
+     "residualPixels": 0,
+     "expectedDuration": 221,
+     "digest": "bf73984bc1df347e691eab4c8e2564cdff05e06937ade7aecab5a1377b828575",
+     "affectedAges": []
+    },
+    {
+     "rows": 221,
+     "exactRows": 221,
+     "residualPixels": 0,
+     "expectedDuration": 221,
+     "digest": "bf73984bc1df347e691eab4c8e2564cdff05e06937ade7aecab5a1377b828575",
+     "affectedAges": []
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/rock-slide-alt-player-golem-opponent-delcatty.json",
+   "ok": true,
+   "testedCommit": "7f19760dfc325c85ebef68db3d790d9f8c161dfe",
+   "testedSrcTree": "09b0062ae11635537bfb0b651f7be0a850f9bc55",
+   "dirty": false,
+   "invocationA": [
+    {
+     "rows": 138,
+     "exactRows": 138,
+     "residualPixels": 0,
+     "expectedDuration": 138,
+     "digest": "3cd08343d6e4d3a450e8b1d2393746cf99545f7349c22bbf2914e45498353dcf",
+     "affectedAges": []
+    },
+    {
+     "rows": 138,
+     "exactRows": 138,
+     "residualPixels": 0,
+     "expectedDuration": 138,
+     "digest": "3cd08343d6e4d3a450e8b1d2393746cf99545f7349c22bbf2914e45498353dcf",
+     "affectedAges": []
+    }
+   ],
+   "invocationB": [
+    {
+     "rows": 138,
+     "exactRows": 138,
+     "residualPixels": 0,
+     "expectedDuration": 138,
+     "digest": "3cd08343d6e4d3a450e8b1d2393746cf99545f7349c22bbf2914e45498353dcf",
+     "affectedAges": []
+    },
+    {
+     "rows": 138,
+     "exactRows": 138,
+     "residualPixels": 0,
+     "expectedDuration": 138,
+     "digest": "3cd08343d6e4d3a450e8b1d2393746cf99545f7349c22bbf2914e45498353dcf",
+     "affectedAges": []
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/rock-slide-alt-player-onix-opponent-golbat.json",
+   "ok": true,
+   "testedCommit": "7f19760dfc325c85ebef68db3d790d9f8c161dfe",
+   "testedSrcTree": "09b0062ae11635537bfb0b651f7be0a850f9bc55",
+   "dirty": false,
+   "invocationA": [
+    {
+     "rows": 138,
+     "exactRows": 138,
+     "residualPixels": 0,
+     "expectedDuration": 138,
+     "digest": "253a3d4399c597ddd7a3e91504f861e8e6ef52e1aafe323837e5ac75674be0cb",
+     "affectedAges": []
+    },
+    {
+     "rows": 138,
+     "exactRows": 138,
+     "residualPixels": 0,
+     "expectedDuration": 138,
+     "digest": "253a3d4399c597ddd7a3e91504f861e8e6ef52e1aafe323837e5ac75674be0cb",
+     "affectedAges": []
+    }
+   ],
+   "invocationB": [
+    {
+     "rows": 138,
+     "exactRows": 138,
+     "residualPixels": 0,
+     "expectedDuration": 138,
+     "digest": "253a3d4399c597ddd7a3e91504f861e8e6ef52e1aafe323837e5ac75674be0cb",
+     "affectedAges": []
+    },
+    {
+     "rows": 138,
+     "exactRows": 138,
+     "residualPixels": 0,
+     "expectedDuration": 138,
+     "digest": "253a3d4399c597ddd7a3e91504f861e8e6ef52e1aafe323837e5ac75674be0cb",
+     "affectedAges": []
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/rock-slide-player-onix-opponent-grovyle.json",
+   "ok": true,
+   "testedCommit": "7f19760dfc325c85ebef68db3d790d9f8c161dfe",
+   "testedSrcTree": "09b0062ae11635537bfb0b651f7be0a850f9bc55",
+   "dirty": false,
+   "invocationA": [
+    {
+     "rows": 138,
+     "exactRows": 138,
+     "residualPixels": 0,
+     "expectedDuration": 138,
+     "digest": "b5a4a2771cae03b681dc07fa0ced4cbbbd4dca2bd9e7ada8bb4da9d8e6a7237d",
+     "affectedAges": []
+    },
+    {
+     "rows": 138,
+     "exactRows": 138,
+     "residualPixels": 0,
+     "expectedDuration": 138,
+     "digest": "b5a4a2771cae03b681dc07fa0ced4cbbbd4dca2bd9e7ada8bb4da9d8e6a7237d",
+     "affectedAges": []
+    }
+   ],
+   "invocationB": [
+    {
+     "rows": 138,
+     "exactRows": 138,
+     "residualPixels": 0,
+     "expectedDuration": 138,
+     "digest": "b5a4a2771cae03b681dc07fa0ced4cbbbd4dca2bd9e7ada8bb4da9d8e6a7237d",
+     "affectedAges": []
+    },
+    {
+     "rows": 138,
+     "exactRows": 138,
+     "residualPixels": 0,
+     "expectedDuration": 138,
+     "digest": "b5a4a2771cae03b681dc07fa0ced4cbbbd4dca2bd9e7ada8bb4da9d8e6a7237d",
+     "affectedAges": []
     }
    ]
   }
