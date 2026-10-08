@@ -180,3 +180,10 @@ sh tools/integration/speciesAudit14FadeRun.sh /tmp/s14/fp /tmp/s14/fsc /tmp/s14/
   `fs.readFileSync` + `syncBuiltinESMExports`.
 - The `speciesAudit13Swap*` tools use prep37Probe.py, which has no gRng2Value / status1. The widened cells need prep40Probe.py
   (`speciesAudit14SwapProbes.sh`).
+
+## 5. Gates
+- `npm test` passed on 54bc5c3f8 + the totals doc commit (db17cc2d5): 1567 files passed / 44 skipped, 12,902 tests passed / 223 skipped,
+  543.6 s.
+- `npm run build` passed.
+- `git diff --check 3e57c8a50..HEAD` is clean, and the commit range adds new files only (`--diff-filter=AM` = A only).
+- `git status src` was clean at every commit.
