@@ -1,0 +1,31 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/a13fix-live/extreme-speed/derived/shedinjaA-extreme-speed-alt-opponent-smeargle-golem.json",
+  "move": "EXTREME_SPEED",
+  "measuredPhase": "event",
+  "policyPhase": "event",
+  "selectedPhase": true,
+  "window": 321,
+  "expectedDuration": 321,
+  "runs": [
+   {
+    "rows": 321,
+    "exactRows": 321,
+    "residualPixels": 0,
+    "digest": "5a422236e7de80ce483f4950bbbcdb370bacd9fe7d50985dbcba766aaef835d2",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 321,
+    "exactRows": 321,
+    "residualPixels": 0,
+    "digest": "5a422236e7de80ce483f4950bbbcdb370bacd9fe7d50985dbcba766aaef835d2",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defrattata-psychic-player-test.json",
+  "stem": "s13-defrattata-psychic-player",
+  "kind": "test",
+  "move": "PSYCHIC",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   340,
+   484
+  ],
+  "rows": 145,
+  "orderInput": "fixture",
+  "shift": -5,
+  "liveDuration": 140,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "a70f909ec5ef833d4b407aa2248d101b87b10798b3aedea3e002b368f52f378f"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "a70f909ec5ef833d4b407aa2248d101b87b10798b3aedea3e002b368f52f378f"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

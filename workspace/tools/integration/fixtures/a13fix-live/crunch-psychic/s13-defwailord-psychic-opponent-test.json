@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defwailord-psychic-opponent-test.json",
+  "stem": "s13-defwailord-psychic-opponent",
+  "kind": "test",
+  "move": "PSYCHIC",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   371,
+   515
+  ],
+  "rows": 145,
+  "orderInput": "fixture",
+  "shift": -5,
+  "liveDuration": 140,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "acd17f97e196bb2a9c565384b65432fbf3d1273d2f972a5877f3d2377c068cc8"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "acd17f97e196bb2a9c565384b65432fbf3d1273d2f972a5877f3d2377c068cc8"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

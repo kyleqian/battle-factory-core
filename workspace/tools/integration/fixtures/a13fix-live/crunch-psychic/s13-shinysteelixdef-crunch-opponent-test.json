@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-shinysteelixdef-crunch-opponent-test.json",
+  "stem": "s13-shinysteelixdef-crunch-opponent",
+  "kind": "test",
+  "move": "CRUNCH",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   346,
+   487
+  ],
+  "rows": 142,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 142,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 142,
+    "digest": "e13b308342c74068808d9a4b19460468de5de650274390889bcf0db3f089193e"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 142,
+    "digest": "e13b308342c74068808d9a4b19460468de5de650274390889bcf0db3f089193e"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

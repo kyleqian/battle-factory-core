@@ -1,0 +1,31 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/a13fix-live/extreme-speed/derived/pichu-extreme-speed-alt-opponent-smeargle-golem.json",
+  "move": "EXTREME_SPEED",
+  "measuredPhase": "event",
+  "policyPhase": "event",
+  "selectedPhase": true,
+  "window": 321,
+  "expectedDuration": 321,
+  "runs": [
+   {
+    "rows": 321,
+    "exactRows": 321,
+    "residualPixels": 0,
+    "digest": "4f8796653b4cadee1cfae4898897c98b6f89f4ec7b6e8784a2a386a4342d5159",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 321,
+    "exactRows": 321,
+    "residualPixels": 0,
+    "digest": "4f8796653b4cadee1cfae4898897c98b6f89f4ec7b6e8784a2a386a4342d5159",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

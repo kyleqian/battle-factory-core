@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defweezing-crunch-opponent-test.json",
+  "stem": "s13-defweezing-crunch-opponent",
+  "kind": "test",
+  "move": "CRUNCH",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   344,
+   485
+  ],
+  "rows": 142,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 142,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 142,
+    "digest": "edf27fd2ba3e0228ff963ec85cffbe5d74f9d6b8bf7e2044c327bd7c9becae7d"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 142,
+    "digest": "edf27fd2ba3e0228ff963ec85cffbe5d74f9d6b8bf7e2044c327bd7c9becae7d"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

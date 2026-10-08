@@ -1,0 +1,31 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/a13fix-live/extreme-speed/derived/shedinjaA-extreme-speed-alt-player-smeargle-golem.json",
+  "move": "EXTREME_SPEED",
+  "measuredPhase": "event",
+  "policyPhase": "event",
+  "selectedPhase": true,
+  "window": 321,
+  "expectedDuration": 321,
+  "runs": [
+   {
+    "rows": 321,
+    "exactRows": 321,
+    "residualPixels": 0,
+    "digest": "77f928d86e68c6b78d0064b112b2ac69dfe68f1945f1e73e9b715cf7832ae685",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 321,
+    "exactRows": 321,
+    "residualPixels": 0,
+    "digest": "77f928d86e68c6b78d0064b112b2ac69dfe68f1945f1e73e9b715cf7832ae685",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

@@ -1,0 +1,31 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/a13fix-live/extreme-speed/derived/golbat-extreme-speed-alt-opponent-smeargle-golem.json",
+  "move": "EXTREME_SPEED",
+  "measuredPhase": "event",
+  "policyPhase": "event",
+  "selectedPhase": true,
+  "window": 321,
+  "expectedDuration": 321,
+  "runs": [
+   {
+    "rows": 321,
+    "exactRows": 321,
+    "residualPixels": 0,
+    "digest": "eb8209eb231bc2d28932763ea6275269e64e39f80e09505855ff2b7be8d1261d",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 321,
+    "exactRows": 321,
+    "residualPixels": 0,
+    "digest": "eb8209eb231bc2d28932763ea6275269e64e39f80e09505855ff2b7be8d1261d",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

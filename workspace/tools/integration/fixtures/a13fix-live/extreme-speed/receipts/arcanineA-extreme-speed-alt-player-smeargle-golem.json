@@ -1,0 +1,82 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/a13fix-live/extreme-speed/derived/arcanineA-extreme-speed-alt-player-smeargle-golem.json",
+  "move": "EXTREME_SPEED",
+  "measuredPhase": "no-event",
+  "policyPhase": "event",
+  "selectedPhase": false,
+  "window": 320,
+  "expectedDuration": 321,
+  "runs": [
+   {
+    "rows": 320,
+    "exactRows": 304,
+    "residualPixels": 272816,
+    "digest": "4d104526ff1dcb268c383d61127f6b0dbeb2ae4ec00d4afa941d208dbb7bde8a",
+    "affectedAges": [
+     294,
+     295,
+     296,
+     297,
+     298,
+     299,
+     300,
+     301,
+     302,
+     303,
+     304,
+     305,
+     306,
+     307,
+     308,
+     309
+    ],
+    "maxPixelsPerRow": 17051
+   },
+   {
+    "rows": 320,
+    "exactRows": 304,
+    "residualPixels": 272816,
+    "digest": "4d104526ff1dcb268c383d61127f6b0dbeb2ae4ec00d4afa941d208dbb7bde8a",
+    "affectedAges": [
+     294,
+     295,
+     296,
+     297,
+     298,
+     299,
+     300,
+     301,
+     302,
+     303,
+     304,
+     305,
+     306,
+     307,
+     308,
+     309
+    ],
+    "maxPixelsPerRow": 17051
+   }
+  ],
+  "documentedAges": [
+   294,
+   295,
+   296,
+   297,
+   298,
+   299,
+   300,
+   301,
+   302,
+   303,
+   304,
+   305,
+   306,
+   307,
+   308,
+   309
+  ],
+  "violations": []
+ }
+]

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atksteelix-psychic-opponent-test.json",
+  "stem": "s13-atksteelix-psychic-opponent",
+  "kind": "test",
+  "move": "PSYCHIC",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   345,
+   489
+  ],
+  "rows": 145,
+  "orderInput": "fixture",
+  "shift": -5,
+  "liveDuration": 140,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "9670eb75cc3f2d30b9a9ce6abcdd6d004a41a4b922925bc40c1c7534af06cacd"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "9670eb75cc3f2d30b9a9ce6abcdd6d004a41a4b922925bc40c1c7534af06cacd"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

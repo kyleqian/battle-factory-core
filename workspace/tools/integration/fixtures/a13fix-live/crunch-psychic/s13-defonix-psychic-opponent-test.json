@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defonix-psychic-opponent-test.json",
+  "stem": "s13-defonix-psychic-opponent",
+  "kind": "test",
+  "move": "PSYCHIC",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   331,
+   475
+  ],
+  "rows": 145,
+  "orderInput": "fixture",
+  "shift": -5,
+  "liveDuration": 140,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "d93a08d6bb775f74d089665545e1efd2c141677a8741b125bb677efe168d4452"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "d93a08d6bb775f74d089665545e1efd2c141677a8741b125bb677efe168d4452"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

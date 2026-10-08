@@ -296,6 +296,64 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
       chosen: "event", tieRuleUsed: false,
       evidence: ["tools/integration/fixtures/d4d2-live-receipt.json dive-* player windows (row 68 source 66: 4, source 67: 2)",
         "tools/compare/fixtures/dive-evidence.json (accepted player-back setup row 68: source 66)"],
+    }, {
+      // Species audit 11 / ISSUES #152 (a13fix): an optional main-loop lag at age 64 of an OPPONENT-attacker setup (CLAMPERL after a Tackle,
+      // lag ages [64]); the other 6 counted opponent setups have none. The setup still ends on the same row (115 body rows in both phases:
+      // the lag is absorbed before the first inactive row), so only the splash / droplet rows 66..95 run one row late. Not rendered.
+      kind: "optional-lag-age", age: 64, fixedLagAges: [], iterations: 115, side: "opponent",
+      alternatives: [{ phase: "event", bodyRows: 115, measured: 1 }, { phase: "no-event", bodyRows: 115, measured: 6 }],
+      chosen: "no-event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/species-audit-11/counters.txt (opponent dive setups: clamperlA lag [64]; tyranitar, tyranitarA, luvdiscA, "
+        + "dive-opponent-chinchou-player-onix, dive-extra-opponent-chinchou-golem none)",
+        "tools/integration/fixtures/a13fix-live/counters.txt (fresh: s10a-live dive-alt-opponent-lanturn-golem none; the two chinchou fixtures none again)",
+        "tools/integration/fixtures/a13fix-live-receipt.json dive"],
+    }],
+  },
+  /**
+   * a13fix (species audit 13, docs/live-species-audit-13.md LAG FRAME): Crunch's dark-background body has fixed lags at 98 / 99 and an
+   * optional main-loop lag at age 121 (the closing fade one row later): 142 body rows with it, 141 without. Wrong phase: the closing fade
+   * rows 123..138 only (~18.2k-19.1k px per row, full field).
+   */
+  242: {
+    move: "MOVE_CRUNCH",
+    parameters: [{
+      kind: "optional-lag-age", age: 121, fixedLagAges: [98, 99], iterations: 139,
+      alternatives: [{ phase: "event", bodyRows: 142, measured: 17 }, { phase: "no-event", bodyRows: 141, measured: 13 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/species-audit-13/receipts (30 defender-doll Crunch windows: 142 rows 17, 141 rows 13)",
+        "tools/integration/fixtures/species-audit-13/counters.txt (142-row windows lag [98, 99, 121]; 141-row windows [98, 99])",
+        "tools/integration/fixtures/a13fix-live-receipt.json crunch"],
+    }],
+  },
+  /**
+   * a13fix (species audit 13 LAG FRAME): Psychic's background body has fixed lags at 101 / 102 and an optional lag at ROM body age 124:
+   * 145 rows with it, 144 without (the adapter window starts 5 rows after activation, LIVE_SUBSTITUTE_SWAP_BODY_FRAMING 94). Wrong phase: rows
+   * 126..141 only (the closing fade).
+   */
+  94: {
+    move: "MOVE_PSYCHIC",
+    parameters: [{
+      kind: "optional-lag-age", age: 124, fixedLagAges: [101, 102], iterations: 142,
+      alternatives: [{ phase: "event", bodyRows: 145, measured: 26 }, { phase: "no-event", bodyRows: 144, measured: 2 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/species-audit-13/receipts (28 defender-doll Psychic windows: 145 rows 26, 144 rows 2)",
+        "tools/integration/fixtures/species-audit-13/counters.txt (145-row windows lag [101, 102, 124]; 144-row windows [101, 102])",
+        "tools/integration/fixtures/a13fix-live-receipt.json psychic"],
+    }],
+  },
+  /**
+   * a13fix (species audit 11 / ISSUES #152): Extreme Speed has an optional main-loop lag at age 292 before its fixed lag pair (312 / 313
+   * without it, 313 / 314 with it): 321 body rows with it, 320 without. Wrong phase: rows 294..309 only.
+   */
+  245: {
+    move: "MOVE_EXTREME_SPEED",
+    parameters: [{
+      kind: "optional-lag-age", age: 292, fixedLagAges: [312, 313], iterations: 318,
+      alternatives: [{ phase: "event", bodyRows: 321, measured: 38 }, { phase: "no-event", bodyRows: 320, measured: 4 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/species-audit-11/receipts (42 Extreme Speed windows: 321 rows 38, 320 rows 4)",
+        "tools/integration/fixtures/species-audit-11/counters.txt (321-row windows lag [292, 313, 314]; 320-row windows [312, 313])",
+        "tools/integration/fixtures/a13fix-live-receipt.json extreme-speed"],
     }],
   },
   /**
@@ -402,6 +460,9 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   // S10A: Ice Ball counter 0 (D3 + D4; liveIceBallInputs.ts; Random2 shards from the presentation host, counter-keyed plan; no-lag policy;
   // fixtures tools/integration/fixtures/s10a-live/ice-ball-*).
   301,
+  // a13fix (reclassified from scoped exact, #151 precedent): Crunch, Psychic, Extreme Speed gained a measured optional-lag parameter
+  // (species audits 11 / 13); their exact fixtures stay valid in scope; durations read liveMoveTimingBodyRows.
+  242, 94, 245,
 ]);
 
 /**

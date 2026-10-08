@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkgolbat-psychic-player-test.json",
+  "stem": "s13-atkgolbat-psychic-player",
+  "kind": "test",
+  "move": "PSYCHIC",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   348,
+   492
+  ],
+  "rows": 145,
+  "orderInput": "fixture",
+  "shift": -5,
+  "liveDuration": 140,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "4f85a5182462384003a36208cf4227f910c8e5c26ce6ada675014ce52e116dfd"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "4f85a5182462384003a36208cf4227f910c8e5c26ce6ada675014ce52e116dfd"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

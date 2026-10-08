@@ -31,6 +31,10 @@ Implements the accounting and policy of `docs/faithful-timing.md` (D4, approved 
 | PSYWAVE 149 | optional lag at task row 185 (restorebg Fade 2: VRAM row 184 / palette 185 split) | - | 204 | lag 205: 4, no lag 204: 2 | lag (205 rows) | no |
 | SKILL_SWAP 285 | optional lag at row 176 (UnsetPsychicBackground's Task_FadeToBg counts executed frames) | - | 195 | lag 196: 4, no lag 195: 2 | lag (196 rows) | no |
 | SKILL_SWAP 285 | palette-transfer-row: the bank-2 restore on row 176 / 175 (display-neutral, BLDY 16) | - | 195 | row 176: 1, row 175: 5 | row 175 | no |
+| CRUNCH 242 | optional lag at age 121 (closing fade; a13fix, species audit 13) | 98, 99 | 139 | lag 142: 17, no lag 141: 13 | lag (142 rows) | no |
+| PSYCHIC 94 | optional lag at ROM body age 124 (closing fade; adapter window = ROM rows 5..144) | 101, 102 | 142 | lag 145: 26, no lag 144: 2 | lag (145 rows) | no |
+| EXTREME_SPEED 245 | optional lag at age 292 (before the fixed pair 312 / 313, which then land on 313 / 314) | 312, 313 | 318 | lag 321: 38, no lag 320: 4 | lag (321 rows) | no |
+| DIVE 291 (opponent setup) | optional lag at age 64 (absorbed: 115 rows either way; rows 66..95 one row late) | - | 115 | lag: 1, no lag: 6 | no lag | no |
 
 Measurements: `tools/integration/fixtures/prep25/lag-frames.json` (2 of 4 each, a tie) + the D4a tie-break
 `tools/integration/fixtures/d4a/lag-frames-tiebreak.json` (4 more scenarios per move by the same method, 3 of 4 with the lag each).
@@ -71,3 +75,12 @@ monbg BGnCNT write row from `regEvents`, cross-checked on the six prep24 windows
 Mach Punch trace palette: OBJ bank 9's unfaded contents at a first body are the known-entry healthbar palette
 (`live-animation-palette-resources.json` `initial.healthbar`, tag 55044), equal in all 8 Mach Punch and 8 Nightmare D4a/prep25 state probes
 (two trainers, any species); the attacker's battler palette is NOT what the trace shows.
+
+## a13fix reclassification (species audits 11 / 13)
+
+Crunch (242), Psychic (94) and Extreme Speed (245) moved from scoped exact to faithful timing (#151 precedent): their optional lags
+(table above) are measured, the shipped phase is the dominant one (the durations the adapters already had: 142 / 140 + 5 / 321, now read
+from `liveMoveTimingBodyRows`), and their exact fixtures stay valid in scope. Census: 247 scoped exact + 13 faithful random + 16 faithful
+timing = 276. Dive's opponent-setup lag at 64 is a second Dive parameter (no count change). Proof: `tools/integration/fixtures/a13fix-live-receipt.json`
+(Crunch / Psychic 58 fresh audit-13 windows, Extreme Speed 42 fresh audit-11 windows, the CLAMPERL Dive window; policy phase 0 px, other phase
+only on the documented rows), `tests/animation/liveSpeciesAudit13Fixes.test.ts`.

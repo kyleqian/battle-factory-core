@@ -3,7 +3,8 @@ import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";
-import { liveMoveAnimationPresentation } from "../../src/engine/liveMoveAnimation.ts";
+import { LIVE_MOVE_ANIMATION_IDS, liveMoveAnimationDuration, liveMoveAnimationPresentation } from "../../src/engine/liveMoveAnimation.ts";
+import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS, LIVE_MOVE_TIMING_POLICY, dominantLiveMoveTimingPhase } from "../../src/engine/liveMoveTimingPolicy.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 
 // Species audit 13 (docs/live-species-audit-13.md) fixes. ROM pins: tools/integration/a13fixRomRows.py over two fresh direct-mGBA runs per
@@ -113,5 +114,73 @@ describe("Ice Ball (301): a resting opponent-side target declines; the deferred-
       const power = rom[f.scenario.split("/").pop()!.replace(/\.json$/, "")]!.find((b) => b.body === body)!.dynamicBasePower;
       expect([n, f.requestFields.power, f.requestFields.rolloutCounter]).toEqual([n, power, Math.log2(power / 30) + 1]);
     }
+  });
+});
+
+describe("D4 (a13fix): Crunch / Psychic / Extreme Speed / Dive optional lags in the timing policy (measured, dominant phase)", () => {
+  const rows = (id: number) => LIVE_MOVE_TIMING_POLICY[id]!.parameters.find((p) => p.kind === "optional-lag-age")!;
+  it("policy entries: Crunch 142 (lag 121; 17 vs 13), Psychic 145 (lag 124; 26 vs 2), Extreme Speed 321 (lag 292; 38 vs 4), Dive opponent no lag at 64", () => {
+    expect([rows(242).age, rows(242).chosen, rows(242).alternatives.map((a) => [a.bodyRows, a.measured])]).toEqual([121, "event", [[142, 17], [141, 13]]]);
+    expect([rows(94).age, rows(94).chosen, rows(94).alternatives.map((a) => [a.bodyRows, a.measured])]).toEqual([124, "event", [[145, 26], [144, 2]]]);
+    expect([rows(245).age, rows(245).chosen, rows(245).alternatives.map((a) => [a.bodyRows, a.measured])]).toEqual([292, "event", [[321, 38], [320, 4]]]);
+    const dive = rows(291);
+    expect([dive.age, dive.side, dive.chosen, dive.alternatives.map((a) => [a.bodyRows, a.measured])]).toEqual([64, "opponent", "no-event", [[115, 1], [115, 6]]]);
+    for (const id of [242, 94, 245, 291]) {
+      for (const p of LIVE_MOVE_TIMING_POLICY[id]!.parameters) expect(dominantLiveMoveTimingPhase(p.alternatives).phase).toBe(p.chosen);
+    }
+    expect([242, 94, 245, 291].every((id) => LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS.includes(id))).toBe(true);
+    expect([242, 94, 245].some((id) => (LIVE_MOVE_ANIMATION_IDS as readonly number[]).includes(id))).toBe(false);
+  });
+  it("the adapters' durations are the policy's dominant phase (Psychic: the ROM body less the 5-row framing shift)", () => {
+    const plain = { player: { species: 1 }, opponent: { species: 4 } } as never;
+    const req = (moveId: number) => ({ moveId, attacker: 0, target: 1, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0 }) as never;
+    expect([242, 94, 245].map((id) => liveMoveAnimationDuration(req(id), plain))).toEqual([142, 140, 321]);
+  });
+  type CheckRow = { stem: string; move: string; window: [number, number]; identical: boolean; runs: { residualPixels: number }[]; affectedAges: string };
+  const ageRange = (s: string) => s === "" ? [] : s.split(",").flatMap((r) => {
+    const [a, b] = r.split("..").map(Number); return Array.from({ length: (b ?? a!) - a! + 1 }, (_, i) => a! + i);
+  });
+  const status = json<{ faithfulTimingAdapters: { id: number; alternatePhaseResidual: { ages?: number[]; windows?: Record<string, { ages: number[] }> } }[] }>(
+    "docs/animation-integration-live-status.json").faithfulTimingAdapters;
+  const documented = (id: number) => status.find((e) => e.id === id)!.alternatePhaseResidual;
+  it("Crunch / Psychic: 58 fresh audit-13 windows: policy phase 0 px (Psychic GOLBAT / AERODACTYL: the documented row-0 shadow only); other phase on the documented rows only", () => {
+    const all = readdirSync(`${FIX}/crunch-psychic`).flatMap((n) => json<CheckRow[]>(`${FIX}/crunch-psychic/${n}`));
+    expect(all).toHaveLength(58);
+    const tally: Record<string, number> = {};
+    for (const w of all) {
+      const id = w.move === "CRUNCH" ? 242 : 94, n = w.window[1] - w.window[0] + 1, policy = rows(id).alternatives[0]!.bodyRows;
+      tally[`${w.move} ${n}`] = (tally[`${w.move} ${n}`] ?? 0) + 1;
+      expect([w.stem, w.identical, w.runs[0]!.residualPixels === w.runs[1]!.residualPixels]).toEqual([w.stem, true, true]);
+      if (n === policy) {
+        const shadow = /atk(golbat|aerodactyl)-psychic-opponent/.test(w.stem);
+        expect([w.stem, w.runs[0]!.residualPixels, w.affectedAges]).toEqual([w.stem, shadow ? 200 : 0, shadow ? "0" : ""]);
+      } else {
+        expect(ageRange(w.affectedAges).every((a) => documented(id).ages!.includes(a))).toBe(true);
+        expect(ageRange(w.affectedAges)).toHaveLength(16);
+      }
+    }
+    expect(tally).toEqual({ "CRUNCH 142": 17, "CRUNCH 141": 13, "PSYCHIC 145": 26, "PSYCHIC 144": 2 });
+  });
+  type TimingReceipt = { selectedPhase: boolean; window: number; violations: string[]; runs: { residualPixels: number; digest: string; affectedAges: number[] }[] };
+  it("Extreme Speed: 42 fresh audit-11 windows: 34 policy-phase 0 px, 2 other-phase on ages 294..309 only, 6 declines (ONIX / RATTATA rest, shiny)", () => {
+    const dir = `${FIX}/extreme-speed/receipts`;
+    const all = readdirSync(dir).map((n) => [n, json<TimingReceipt[]>(`${dir}/${n}`)[0]!] as const);
+    expect(all).toHaveLength(42);
+    // Declines (liveEngaged false, the fallback field): an opponent-side idle-rest ONIX / RATTATA (target or attacker) and a shiny attacker.
+    const declined = all.filter(([n]) => /^((onix|rattata)-extreme-speed-alt-player|(onixA|rattataA)-extreme-speed-alt-opponent|shinysteelixA-)/.test(n));
+    expect(declined).toHaveLength(6);
+    for (const [n, r] of all) {
+      expect([n, r.runs[0]!.digest]).toEqual([n, r.runs[1]!.digest]);
+      if (declined.some(([d]) => d === n)) continue;
+      expect([n, r.violations]).toEqual([n, []]);
+      if (r.selectedPhase) expect([n, r.window, r.runs[0]!.residualPixels]).toEqual([n, 321, 0]);
+      else expect([n, r.window, r.runs[0]!.affectedAges]).toEqual([n, 320, Array.from({ length: 16 }, (_, i) => 294 + i)]);
+    }
+    expect(all.filter(([, r]) => r.selectedPhase && r.violations.length === 0)).toHaveLength(34);
+  });
+  it("Dive: the CLAMPERL-after-Tackle opponent setup (lag at 64) differs only on its documented rows 66..95", () => {
+    const r = json<TimingReceipt[]>(`${FIX}/dive/receipts/clamperlA-dive-opponent-chinchou-player-onix.json`)[0]!;
+    expect([r.selectedPhase, r.window, r.violations, r.runs.map((x) => x.residualPixels)]).toEqual([false, 115, [], [16525, 16525]]);
+    expect(r.runs[0]!.affectedAges).toEqual(documented(291).windows!["clamperlA-dive-opponent-chinchou-player-onix"]!.ages);
   });
 });

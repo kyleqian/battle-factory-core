@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-ctl-psychic-opponent-test.json",
+  "stem": "s13-ctl-psychic-opponent",
+  "kind": "test",
+  "move": "PSYCHIC",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   345,
+   489
+  ],
+  "rows": 145,
+  "orderInput": "fixture",
+  "shift": -5,
+  "liveDuration": 140,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "c591ff46012339e2c0abe0ae50803a2a660914e46a58e18ff45be94df2573b20"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "c591ff46012339e2c0abe0ae50803a2a660914e46a58e18ff45be94df2573b20"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

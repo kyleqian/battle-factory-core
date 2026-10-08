@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defgolbat-crunch-player-test.json",
+  "stem": "s13-defgolbat-crunch-player",
+  "kind": "test",
+  "move": "CRUNCH",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   348,
+   489
+  ],
+  "rows": 142,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 142,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 142,
+    "digest": "071ed334d9fc00c20700cc4babda62cff464a3d745f30d4a16acdf3d86949efb"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 142,
+    "digest": "071ed334d9fc00c20700cc4babda62cff464a3d745f30d4a16acdf3d86949efb"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

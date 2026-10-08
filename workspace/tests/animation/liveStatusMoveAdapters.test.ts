@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS } from "../../src/engine/liveMoveTimingPolicy.ts";
 import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";
 import {
   renderBattleResolutionLiveView,
@@ -98,7 +99,10 @@ function routeHash(
 
 describe("live status, psychic, and ghost move adapters", () => {
   it("registers each complete source-owned body with its bilateral cleanup length", () => {
-    expect(LIVE_MOVE_ANIMATION_IDS).toEqual(expect.arrayContaining(cases.map(row => row.id)));
+    // Psychic (94) / Crunch (242): faithful timing since a13fix (liveMoveTimingPolicy.ts), the same live bodies.
+    expect(LIVE_MOVE_ANIMATION_IDS).toEqual(expect.arrayContaining(cases.map(row => row.id).filter(id => !LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS.includes(id))));
+    expect(cases.map(row => row.id).filter(id => !(LIVE_MOVE_ANIMATION_IDS as readonly number[]).includes(id))
+      .every(id => LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS.includes(id))).toBe(true);
     for (const row of cases) {
       expect(liveMoveAnimationDuration(request(row.id, 0)), row.move)
         .toBe(row.playerDuration);

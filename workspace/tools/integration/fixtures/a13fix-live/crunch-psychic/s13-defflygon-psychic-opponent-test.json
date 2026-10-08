@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defflygon-psychic-opponent-test.json",
+  "stem": "s13-defflygon-psychic-opponent",
+  "kind": "test",
+  "move": "PSYCHIC",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   346,
+   490
+  ],
+  "rows": 145,
+  "orderInput": "fixture",
+  "shift": -5,
+  "liveDuration": 140,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "a1f8bc2dddc27b5bb3d9f49f8a708c91db977cc7e9e929c79ee19fd6d79e39a7"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "a1f8bc2dddc27b5bb3d9f49f8a708c91db977cc7e9e929c79ee19fd6d79e39a7"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]
