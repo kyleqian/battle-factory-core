@@ -77,6 +77,13 @@ JOBS = [
     ("WEATHER_VAR", "sand-ply-long", 201, "mechanic-sandstorm-player-phanpy-opponent-onix", ("extend", 900)),
     ("WEATHER_VAR", "sand-opp-long", 201, "mechanic-sandstorm-opponent-phanpy-player-onix", ("extend", 900)),
     ("WEATHER_VAR", "sand-ply-snorlax-long", 201, "mechanic-sandstorm-player-phanpy-opponent-onix", ("extend", 900, "opponent", 143)),
+    # third batch: the PRZ / Brick Break / Leech Seed traces run on so a body edge follows the unit (cross-unit replay)
+    ("PRZ", "prz-tw-opp-long", 86, "mechanic-thunder-wave-player-flaaffy-opponent-shuckle", ("extend", 600)),
+    ("PRZ", "prz-tw-ply-long", 86, "mechanic-thunder-wave-opponent-flaaffy-player-shuckle", ("extend", 600)),
+    ("PRZ", "prz-ss-opp-long", 78, "mechanic-stun-spore-player-hoppip-opponent-onix", ("extend", 600)),
+    ("BODY280", "bb-ply-long", 280, "mechanic-brick-break-player-lombre-opponent-onix", ("extend", 600)),
+    ("BODY280", "bbn-opp-long", 280, "mechanic-brick-break-normal-opponent-lombre-player-onix", ("extend", 600)),
+    ("LEECH", "ls-ply-long", 73, "mechanic-leech-seed-player-exeggcute-opponent-onix", ("extend", 600)),
 ]
 
 

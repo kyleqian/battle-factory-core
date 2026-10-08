@@ -1,6 +1,6 @@
 {
  "schema": "prep43-check/v1",
- "jobs": 57,
+ "jobs": 63,
  "notIdenticalAB": 0,
  "plans": {
   "status CONFUSION": "Cfffff;D1,2,0,3,4",
@@ -15,23 +15,25 @@
  },
  "results": {
   "body 280 screen": {
-   "instances": 3,
-   "matched": 3,
-   "framesChecked": 54,
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 72,
    "jobs": [
     "bb-opp",
     "bb-ply",
+    "bb-ply-long",
     "bb-ply-snorlax"
    ],
    "mismatches": [],
    "carries": 0
   },
   "body 280 normal": {
-   "instances": 3,
-   "matched": 3,
-   "framesChecked": 42,
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 56,
    "jobs": [
     "bbn-opp",
+    "bbn-opp-long",
     "bbn-ply",
     "bbn-ply-snorlax"
    ],
@@ -114,38 +116,42 @@
    "carries": 0
   },
   "general LEECH_SEED_DRAIN": {
-   "instances": 6,
-   "matched": 6,
-   "framesChecked": 156,
+   "instances": 7,
+   "matched": 7,
+   "framesChecked": 182,
    "jobs": [
     "ls-opp",
     "ls-opp-golbat",
     "ls-opp-snorlax",
     "ls-ply",
     "ls-ply-golbat",
+    "ls-ply-long",
     "ls-ply-snorlax"
    ],
    "mismatches": [],
    "carries": 0
   },
   "status PRZ": {
-   "instances": 10,
-   "matched": 10,
-   "framesChecked": 160,
+   "instances": 13,
+   "matched": 13,
+   "framesChecked": 208,
    "jobs": [
     "prz-glare-opp",
     "prz-glare-ply",
     "prz-ss-opp",
+    "prz-ss-opp-long",
     "prz-ss-ply",
     "prz-tw-opp-golbat",
+    "prz-tw-opp-long",
     "prz-tw-opp-shuckle",
     "prz-tw-opp-snorlax",
     "prz-tw-ply-golbat",
+    "prz-tw-ply-long",
     "prz-tw-ply-shuckle",
     "prz-tw-ply-snorlax"
    ],
    "mismatches": [],
-   "carries": 10
+   "carries": 13
   },
   "general SANDSTORM_CONTINUES": {
    "instances": 3,
