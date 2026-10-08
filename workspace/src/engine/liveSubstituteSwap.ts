@@ -109,6 +109,15 @@ export const LIVE_SUBSTITUTE_SWAP_BODY_CELLS: ReadonlyMap<number, readonly Side[
   [44, BOTH], // Bite
   [7, BOTH], // Fire Punch
   [153, BOTH], // Explosion
+  // prep40 NEEDS-ORDER: order-dependent bodies, exact with the Substitute body's order-neutral lend (spriteOrderEventTransform.ts);
+  // with no lend (a history the order tracker cannot place, doll-free too) the body rows decline to the static mon field. Mud-Slap
+  // (D3) needs the first-body lend production does not make: declined.
+  [58, BOTH], // Ice Beam
+  [85, BOTH], // Thunderbolt
+  [202, BOTH], // Giga Drain
+  [315, BOTH], // Overheat
+  [69, BOTH], // Seismic Toss (request.damage = gAnimMoveDmg)
+  [224, BOTH], // Megahorn (D4: the shipped phase; liveMoveTimingPolicy.ts)
 ]);
 export const LIVE_SUBSTITUTE_SWAP_BODY_IDS: ReadonlySet<number> = new Set(LIVE_SUBSTITUTE_SWAP_BODY_CELLS.keys());
 

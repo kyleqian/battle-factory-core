@@ -88,6 +88,17 @@ describe("attacker-doll swap cells (prep40)", () => {
     for (const moveId of [247, 207, 185]) expect(LIVE_SUBSTITUTE_SWAP_BODY_IDS.has(moveId)).toBe(false);
     expect(liveMoveAnimationDuration(req(94, 1), field(false, true))).toBeNull();
   });
+  it("rung d: order-dependent bodies (the Substitute body is order-neutral) are presented at their own adapter length", () => {
+    for (const [moveId, adapter] of [[58, 203], [85, 237], [202, 230], [315, 230], [69, 228], [224, 177]] as const) {
+      expect([...LIVE_SUBSTITUTE_SWAP_BODY_CELLS.get(moveId)!]).toEqual(["player", "opponent"]);
+      expect(LIVE_SUBSTITUTE_SWAP_BODY_FRAMING.has(moveId)).toBe(false);
+      expect(liveMoveAnimationDuration(req(moveId, 0, { damage: 50 }), field(true, false))).toBe(adapter + 85);
+      expect(liveMoveAnimationDuration(req(moveId, 1, { damage: 50 }), field(false, true))).toBe(adapter + 81);
+    }
+    // Mud-Slap needs the first-body order lend (not production's): declined.
+    expect(liveMoveAnimationDuration(req(189, 0), field(false, false))).toBe(51);
+    expect(liveMoveAnimationDuration(req(189, 0), field(true, false))).toBeNull();
+  });
   it("rung c: the tail row latches the doll at the swap-back's last moving x2 (-5 / +5), not a longer composite", () => {
     expect(substituteSwapTailX2("player")).toBe(-5);
     expect(substituteSwapTailX2("opponent")).toBe(5);
