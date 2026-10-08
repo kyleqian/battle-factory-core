@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { BattleCommandFieldBattler } from "../src/engine/battleCommandPresentation.ts";
 import type { BattleResolutionDisplayedField } from "../src/engine/battleResolutionPresentation.ts";
@@ -9,6 +10,7 @@ import { applyLiveBattlerX2Event, LIVE_BATTLER_X2_IDLE, liveBattlerX2EventsOf } 
 import {
   substituteFadeDuration, substituteFadeLayerAt, substituteFadeRenderView, substituteFadeScriptRows,
 } from "../src/engine/liveSubstituteFade.ts";
+import { dominantLiveMoveTimingPhase, LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS, LIVE_MOVE_TIMING_POLICY, LIVE_STATUS_ANIMATION_TIMING_POLICY } from "../src/engine/liveMoveTimingPolicy.ts";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
 
 // S10A Substitute fade (docs/next-adapters-prep39.md; receipt tools/integration/fixtures/fade-live-receipt.json, ROM pixels through
@@ -92,6 +94,39 @@ describe("the fade command in the presentation queue (rung a)", () => {
     const events = liveBattlerX2EventsOf({ sequence: 1, payload: { kind: "animation", animationId: "SUBSTITUTE_FADE", battler: 1, target: 1 } } as never);
     expect(events).toEqual([{ kind: "substitute-fade", side: "opponent" }]);
     expect(applyLiveBattlerX2Event(LIVE_BATTLER_X2_IDLE, events[0]!)).toEqual({ player: "idle", opponent: "zeroed" });
+  });
+});
+
+describe("D4 policy: the fade's documented alternate VBlank phases (rung c)", () => {
+  const policy = LIVE_STATUS_ANIMATION_TIMING_POLICY.SUBSTITUTE_FADE!;
+  it("ships the dominant phase of each BLDALPHA step and of the blendoff (the later row; 222 / 2 steps, 12 / 2 windows)", () => {
+    expect(policy.animation).toBe("General_SubstituteFade");
+    expect(policy.parameters.map((p) => [p.kind, p.age, p.chosen, p.alternatives.map((a) => a.measured)])).toEqual([
+      ["bg-write-row", 6, "event", [222, 2]], ["bg-write-row", 62, "event", [12, 2]],
+    ]);
+    for (const p of policy.parameters) expect(dominantLiveMoveTimingPhase(p.alternatives)).toEqual({ phase: p.chosen, tie: false });
+    // The shipped phase: BLDALPHA (16 - k, k) reads the previous row's step (row 7 = k 1; the early phase would show k 2 on row 9).
+    expect(substituteFadeLayerAt("player", 9)).toMatchObject({ eva: 15, evb: 1 });
+    expect(substituteFadeLayerAt("player", 10)).toMatchObject({ eva: 14, evb: 2 });
+  });
+
+  it("a status animation, not a move body: no faithful-timing adapter or move policy entry is added (counts unchanged)", () => {
+    expect(Object.keys(LIVE_MOVE_TIMING_POLICY)).not.toContain("164");
+    expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).not.toContain(164);
+  });
+
+  it("the committed receipt's residual rows are exactly the policy's documented alternate-phase steps", () => {
+    const receipt = JSON.parse(readFileSync("tools/integration/fixtures/fade-live-receipt.json", "utf8")) as {
+      passes: { results: { window: string; verdict: string; totalPx: number; nonZero: { age: number; px: number }[] }[] }[];
+    };
+    for (const pass of receipt.passes) {
+      expect(pass.results).toHaveLength(14);
+      const residual = pass.results.filter((r) => r.totalPx > 0);
+      expect(residual.map((r) => [r.window, r.verdict, r.nonZero.map((n) => [n.age, n.px])])).toEqual([
+        ["prep39-on-player-persian-onix@3822", "alternate-phase-documented", [[27, 271], [45, 271]]],
+      ]);
+      expect(residual.flatMap((r) => r.nonZero)).toHaveLength(policy.parameters[0]!.alternatives[1]!.measured);
+    }
   });
 });
 
