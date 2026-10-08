@@ -78,7 +78,7 @@ for (const input of inputs) {
   } as never);
   let component = 0, zeroRows = 0, totalPx = 0;
   let thrown: string | null = null;
-  const rows: { age: number; px: number }[] = [];
+  const rows: { age: number; px: number; bbox: number[] }[] = [];
   const digest = createHash("sha256");
   for (const [age, row] of window.entries()) {
     const expected = substituteAtAge(age, attackerSide).sprite;
@@ -94,13 +94,18 @@ for (const input of inputs) {
     } catch (error) { thrown = String((error as Error).message); break; }
     const rom = inflateSync(readFileSync(join(rgbDir!, `${String(row.frame).padStart(5, "0")}.rgb.z`)));
     let px = 0;
+    const box = [240, 160, -1, -1];
     for (let p = 0; p < 240 * 160; p += 1) {
-      if (app[p * 4] !== rom[p * 3] || app[p * 4 + 1] !== rom[p * 3 + 1] || app[p * 4 + 2] !== rom[p * 3 + 2]) px += 1;
+      if (app[p * 4] !== rom[p * 3] || app[p * 4 + 1] !== rom[p * 3 + 1] || app[p * 4 + 2] !== rom[p * 3 + 2]) {
+        px += 1;
+        const x = p % 240, y = Math.floor(p / 240);
+        box[0] = Math.min(box[0]!, x); box[1] = Math.min(box[1]!, y); box[2] = Math.max(box[2]!, x); box[3] = Math.max(box[3]!, y);
+      }
     }
     digest.update(rom);
     if (px === 0) zeroRows += 1;
     totalPx += px;
-    if (px) rows.push({ age, px });
+    if (px) rows.push({ age, px, bbox: box });
   }
   results.push({
     probe: probePath!.split("/").pop(), profile: probe.profile, attackerSide,

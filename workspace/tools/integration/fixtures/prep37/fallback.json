@@ -550,6 +550,226 @@
     }
    },
    "cheapest": "pre"
+  },
+  {
+   "probe": "prep37-on-opponent-golbat-slowbro-r1.json",
+   "subbed": "opponent",
+   "window": "body",
+   "from": 76,
+   "rows": 88,
+   "band": [
+    15,
+    89
+   ],
+   "holds": {
+    "pre": {
+     "rowsWithResidual": 87,
+     "px": 135278
+    },
+    "post": {
+     "rowsWithResidual": 69,
+     "px": 58816
+    }
+   },
+   "cheapest": "post"
+  },
+  {
+   "probe": "prep37-on-opponent-golbat-slowbro-r1.json",
+   "subbed": "opponent",
+   "window": "other-move",
+   "from": 346,
+   "rows": 43,
+   "band": [
+    15,
+    89
+   ],
+   "holds": {
+    "pre": {
+     "rowsWithResidual": 18,
+     "px": 11381
+    },
+    "post": {
+     "rowsWithResidual": 18,
+     "px": 11381
+    }
+   },
+   "cheapest": "pre"
+  },
+  {
+   "probe": "prep37-on-opponent-golbat-slowbro-r1.json",
+   "subbed": "opponent",
+   "window": "other-move",
+   "from": 1667,
+   "rows": 43,
+   "band": [
+    15,
+    89
+   ],
+   "holds": {
+    "pre": {
+     "rowsWithResidual": 18,
+     "px": 11381
+    },
+    "post": {
+     "rowsWithResidual": 18,
+     "px": 11381
+    }
+   },
+   "cheapest": "pre"
+  },
+  {
+   "probe": "prep37-on-opponent-golbat-slowbro-r1.json",
+   "subbed": "opponent",
+   "window": "other-move",
+   "from": 3089,
+   "rows": 43,
+   "band": [
+    15,
+    89
+   ],
+   "holds": {
+    "pre": {
+     "rowsWithResidual": 18,
+     "px": 11381
+    },
+    "post": {
+     "rowsWithResidual": 18,
+     "px": 11381
+    }
+   },
+   "cheapest": "pre"
+  },
+  {
+   "probe": "prep37-on-opponent-golbat-slowbro-r1.json",
+   "subbed": "opponent",
+   "window": "fade",
+   "from": 3790,
+   "rows": 103,
+   "band": [
+    15,
+    89
+   ],
+   "holds": {
+    "pre": {
+     "rowsWithResidual": 98,
+     "px": 73412
+    },
+    "post": {
+     "rowsWithResidual": 103,
+     "px": 171438
+    }
+   },
+   "cheapest": "pre"
+  },
+  {
+   "probe": "prep37-on-opponent-golbat-slowbro-r1.json",
+   "subbed": "opponent",
+   "window": "body",
+   "from": 4342,
+   "rows": 88,
+   "band": [
+    15,
+    89
+   ],
+   "holds": {
+    "pre": {
+     "rowsWithResidual": 87,
+     "px": 135278
+    },
+    "post": {
+     "rowsWithResidual": 69,
+     "px": 58816
+    }
+   },
+   "cheapest": "post"
+  },
+  {
+   "probe": "prep37-on-opponent-golbat-slowbro-r1.json",
+   "subbed": "opponent",
+   "window": "other-move",
+   "from": 4612,
+   "rows": 43,
+   "band": [
+    15,
+    89
+   ],
+   "holds": {
+    "pre": {
+     "rowsWithResidual": 18,
+     "px": 11381
+    },
+    "post": {
+     "rowsWithResidual": 18,
+     "px": 11381
+    }
+   },
+   "cheapest": "pre"
+  },
+  {
+   "probe": "prep37-on-opponent-golbat-slowbro-r1.json",
+   "subbed": "opponent",
+   "window": "other-move",
+   "from": 5933,
+   "rows": 43,
+   "band": [
+    15,
+    89
+   ],
+   "holds": {
+    "pre": {
+     "rowsWithResidual": 18,
+     "px": 11381
+    },
+    "post": {
+     "rowsWithResidual": 18,
+     "px": 11381
+    }
+   },
+   "cheapest": "pre"
+  },
+  {
+   "probe": "prep37-on-opponent-golbat-slowbro-r1.json",
+   "subbed": "opponent",
+   "window": "other-move",
+   "from": 7355,
+   "rows": 43,
+   "band": [
+    15,
+    89
+   ],
+   "holds": {
+    "pre": {
+     "rowsWithResidual": 18,
+     "px": 11381
+    },
+    "post": {
+     "rowsWithResidual": 18,
+     "px": 11381
+    }
+   },
+   "cheapest": "pre"
+  },
+  {
+   "probe": "prep37-on-opponent-golbat-slowbro-r1.json",
+   "subbed": "opponent",
+   "window": "fade",
+   "from": 8056,
+   "rows": 103,
+   "band": [
+    15,
+    89
+   ],
+   "holds": {
+    "pre": {
+     "rowsWithResidual": 98,
+     "px": 73412
+    },
+    "post": {
+     "rowsWithResidual": 103,
+     "px": 171438
+    }
+   },
+   "cheapest": "pre"
   }
  ]
 }

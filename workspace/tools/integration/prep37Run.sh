@@ -8,7 +8,7 @@ mkdir -p "$REC"
 [ -n "$SKIP_PROBES" ] || sh tools/integration/prep37Probes.sh 2>&1 | grep -v "Segmentation fault"
 M=$OUT/mechanic-substitute; Q=$OUT/prep37
 ACC="$M-player-golem-opponent-onix-r1.json:$M-player-golem-opponent-onix-r1-rgb $M-opponent-golem-player-onix-r1.json:$M-opponent-golem-player-onix-r1-rgb"
-ALT="$Q-on-player-persian-slowbro-r1.json:$Q-on-player-persian-slowbro-r1-rgb $Q-on-opponent-persian-slowbro-r1.json:$Q-on-opponent-persian-slowbro-r1-rgb $Q-off-player-persian-slowbro-r1.json:$Q-off-player-persian-slowbro-r1-rgb"
+ALT="$Q-on-player-persian-slowbro-r1.json:$Q-on-player-persian-slowbro-r1-rgb $Q-on-opponent-persian-slowbro-r1.json:$Q-on-opponent-persian-slowbro-r1-rgb $Q-off-player-persian-slowbro-r1.json:$Q-off-player-persian-slowbro-r1-rgb $Q-on-opponent-golbat-slowbro-r1.json:$Q-on-opponent-golbat-slowbro-r1-rgb"
 python3 tools/integration/prep37ProbeDigest.py "$OUT" "$REC/probes.json"
 SCR=$(mktemp -d "${TMPDIR:-/tmp}/prep37-patch-XXXXXX")
 # item 1: body (87 rows) with production-derived inputs

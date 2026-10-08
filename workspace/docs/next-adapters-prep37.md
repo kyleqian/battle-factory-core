@@ -12,13 +12,15 @@ processes and `cmp`-identical (`tools/integration/fixtures/prep37/probes.json`, 
    renderer is 87/87 rows 0 px on the accepted GOLEM<->ONIX pair (both orientations); it throws for any other pair. A copy
    with the GOLEM/ONIX art + names swapped for `liveSceneOnBattlerArt` / displayed species (`prep37RendererPatch.ts`) is
    87/87 rows 0 px on all 5 windows (accepted pair x2, fresh PERSIAN<->SLOWBRO x2 Scene ON, + Scene OFF). Negative
-   controls fail (`body-neg-*.json`).
+   controls fail (`body-neg-*.json`). An ELEVATED subbed opponent (GOLBAT) is 86/87: row 0 carries the idle field's enemy
+   shadow (200 px, bbox 160..191 x 65..72) — the known #142 row-0 shadow class that the live seam's shadow-row hook owns.
 2. **Persistent state (measured, 3 staged battles, 8.5k rows each):** after the body the subbed battler's OBJ shows the
    source doll on every idle row — VRAM tile block == gSubstituteDoll{Back,Front}Gfx, hardware palette bank ==
    gSubstituteDollPal, sprite x = 72 / 176, y = 97 / 56 (GetSubstituteSpriteDefault_Y), x2 = 0 — and every opaque doll
    pixel at the derived corner (40,65) / (144,24) matches the ROM frame: **1993/1993 (player, ON), 4399/4399 (opponent, ON,
-   two subs), 2207/2207 (player, OFF)** visible idle rows. Same bounce (player y2 0/1/2 during action selection) and hit
-   blink (4 x 4 invisible rows) as the mon; opponent shadow hidden on all 4479 doll rows. Status windows: SUBSTITUTE_TO_MON
+   two subs), 2207/2207 (player, OFF), 6898/6898 (elevated GOLBAT opponent, two subs: the doll ignores the elevation)**
+   visible idle rows. Same bounce (player y2 0/1/2 during action selection) and hit
+   blink (4 x 4 invisible rows) as the mon; opponent shadow hidden on all 4479 / 7008 doll rows. Status windows: SUBSTITUTE_TO_MON
    42 rows (player) / 40 (opponent), doll -> mon at row 23 / 22; MON_TO_SUBSTITUTE 42 / 40, mon -> doll at row 23 / 22;
    SUBSTITUTE_FADE 103 / 101 rows (doll tiles zeroed at row 53, mon back at 84 / 83; behindSubstitute cleared at row 52).
    **Scene OFF:** the body and the fade play exactly as in Scene ON (window digests identical), the swaps never run (no move
@@ -57,6 +59,10 @@ Check `body-unchanged.json` (production `render(engine)`, inputs derived as abov
 Check `body-patched.json` (`prep37RendererPatch.ts`: a copy of battleScene.ts with only the species gate -> side gate,
 GOLEM/ONIX sheets -> `liveSceneOnBattlerArt`, names -> displayed species): **all 5 windows 87/87 rows 0 px** (accepted
 pair both orientations unchanged; PERSIAN->SLOWBRO player + opponent Scene ON; player Scene OFF).
+Elevated opponent (`prep37-on-opponent-golbat-slowbro`, GOLBAT elevation 8, all four moves Substitute): 86/87 rows 0 px;
+row 0 = 200 px at 160..191 x 65..72, the enemy shadow the idle field still shows on the activation row (OAM latch), i.e.
+the #142 class owned by `LIVE_MOVE_OPPONENT_SHADOW_ROW` (liveMoveAnimation.ts:340) — the live adapter declares row 0 and,
+unlike other bodies, NO shadow return after the body (the doll keeps it hidden; battle_gfx_sfx_util.c:1220).
 Negative controls (`body-neg-*.json`) fail as required: age+1 (47 / 51 rows 0 px), doll corner row +1 (34 / 38),
 opponent idle rest 0 (GOLEM->ONIX player 0/87 — ONIX rests at x2 = +1; the PERSIAN/SLOWBRO pair rests at 0 so it does
 not exercise this input).
@@ -70,7 +76,8 @@ Scenarios (`tools/battle-lab/prep37-*.json`, all-new species pair, Factory legal
 (fast, 252 HP EV; [Substitute, Tackle x3]) vs SLOWBRO (speed IV 0; Tackle x4). `on-player`: player PERSIAN subs on turn 1,
 uses Tackle on turns 2..6 (menu RIGHT once), SLOWBRO tackles the doll; the doll breaks on hit 3 (turn 3). `on-opponent`:
 mirrored, the Factory AI picks Substitute on turn 1 and again after the break (second body at row 5765 — identical). `off-player`
-= `on-player` under the Scene OFF bootstrap. Messages in these battles wait for a button, so each turn is preceded by four
+= `on-player` under the Scene OFF bootstrap. `on-opponent-golbat`: an elevated opponent (GOLBAT, all moves Substitute,
+so it subs, fails to re-sub while the doll is up, and subs again after each break: 2 bodies, 6 hits, 2 fades). Messages in these battles wait for a button, so each turn is preceded by four
 B presses (harmless at the action menu). Every frame recorded (`prep37Probe.py`; anim script label, tasks, both battler
 sprites, VRAM tile digest, OBJ palette bank, behindSubstitute / flag_x8 / special / table flags, shadow, substituteHP).
 
@@ -81,6 +88,7 @@ Check `field.json` (`prep37Field.py`), idle rows (no anim script) with behindSub
 | on-player | 2033 | 2032 | 2032 | 2032 | n/a | 1993 / 1993 |
 | on-opponent | 4479 | 4477 | 4477 | 4477 | 4479 | 4399 / 4399 |
 | off-player | 2240 | 2240 | 2240 | 2240 | n/a | 2207 / 2207 |
+| on-opponent-golbat (elevated 8) | 7008 | 7008 | 7008 | 7008 | 7008 | 6898 / 6898 |
 
 The 1 / 2 non-doll rows are the single idle row between SUBSTITUTE_TO_MON and the move body (e.g. row 1566): the bit is
 set but the mon is shown — **the presentation flag must be "doll shown", not the ROM's behindSubstitute bit**. Pixel rule:
@@ -122,8 +130,8 @@ the adapters' own bodies are not wrong; the 42/40-row swaps around them are what
 2. `src/engine/battleCommandFieldArt.ts:61-100` `fieldArtBattler`: when the flag is set return `pic` = `substitute.json`
    back (player) / front (opponent) sheet + palette and `origin` = (40, 65) / (144, 24) (source-derived:
    GetSubstituteSpriteDefault_Y - 32, battle_anim_mons.c:332); keep the species `coords`. `battleCommandFieldSpriteOrigin`
-   (:115) must not subtract the species elevation for the doll, and the opponent shadow is hidden (measured on 4479 rows;
-   elevated species not staged here).
+   (:115) must not subtract the species elevation for the doll (measured: elevated GOLBAT doll at (144,24), 6898/6898
+   rows), and the opponent shadow is hidden while the doll is shown (4479 + 7008 rows).
 3. Setter/clearer in the presentation queue (the side that consumes `BattleMoveAnimationRequest` and the `SUBSTITUTE_FADE`
    animation event emitted at `battleScriptStatbuffchangeOpcode.ts:255`): set after body row 86 of a move-164 request
    (Scene ON and OFF — the body plays in both); clear at fade row 84 / 83 (show zero tiles rows 53..83 or fall back);
@@ -151,7 +159,7 @@ Source-derived: doll y, palette bank/graphics, swap and fade programs, Scene OFF
 :4013), bit lifetime. Measured: every row count, the swap/fade graphics ages, the x2 ranges, the doll pixels, bounce and
 blink, ON/OFF window identity, the fallback costs.
 
-Not reached: an elevated subbed opponent (shadow + elevation-free doll origin as pixels), a switch-out / Baton Pass / faint
+Not reached: a switch-out / Baton Pass / faint
 while subbed (source only above), multi-hit (`multihit < 2`) and two-turn moves by a subbed attacker, and whether
 production's Scene OFF path currently presents the 87-row body and the 103-row fade at all.
 

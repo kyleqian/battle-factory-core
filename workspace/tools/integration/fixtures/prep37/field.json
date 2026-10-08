@@ -1876,6 +1876,798 @@
      }
     ]
    }
+  },
+  {
+   "probe": "prep37-on-opponent-golbat-slowbro-r1.json",
+   "profile": "battle-scene-on",
+   "subbed": "opponent",
+   "dollDigestExpected": "a57703bc75df1e6a",
+   "monDigest": "74a4f4c3c9a9ddb0",
+   "phaseWindows": [
+    {
+     "from": 76,
+     "to": 161,
+     "frames": 86,
+     "value": "body",
+     "graphicsByAge": [
+      [
+       0,
+       "mon"
+      ],
+      [
+       12,
+       "doll"
+      ]
+     ],
+     "subbedX2": [
+      0,
+      200
+     ],
+     "subbedInvisibleAges": [
+      9,
+      10
+     ],
+     "subbedY": [
+      35,
+      56
+     ],
+     "tasks": [
+      "AnimTask_MonToSubstitute",
+      "AnimTask_MonToSubstituteDoll"
+     ],
+     "sha256": "e97296564d6f0a79"
+    },
+    {
+     "from": 346,
+     "to": 386,
+     "frames": 41,
+     "value": "other-move",
+     "graphicsByAge": [
+      [
+       0,
+       "doll"
+      ]
+     ],
+     "subbedX2": [
+      0,
+      3
+     ],
+     "subbedInvisibleAges": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25
+     ],
+     "subbedY": [
+      56
+     ],
+     "tasks": [
+      "AnimTask_ShakeMon_Step",
+      "Task_ClearMonBg",
+      "Task_UpdateMonBg"
+     ],
+     "sha256": "53363bdcfaf74932"
+    },
+    {
+     "from": 1667,
+     "to": 1707,
+     "frames": 41,
+     "value": "other-move",
+     "graphicsByAge": [
+      [
+       0,
+       "doll"
+      ]
+     ],
+     "subbedX2": [
+      0,
+      3
+     ],
+     "subbedInvisibleAges": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25
+     ],
+     "subbedY": [
+      56
+     ],
+     "tasks": [
+      "AnimTask_ShakeMon_Step",
+      "Task_ClearMonBg",
+      "Task_UpdateMonBg"
+     ],
+     "sha256": "53363bdcfaf74932"
+    },
+    {
+     "from": 3089,
+     "to": 3129,
+     "frames": 41,
+     "value": "other-move",
+     "graphicsByAge": [
+      [
+       0,
+       "doll"
+      ]
+     ],
+     "subbedX2": [
+      0,
+      3
+     ],
+     "subbedInvisibleAges": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25
+     ],
+     "subbedY": [
+      56
+     ],
+     "tasks": [
+      "AnimTask_ShakeMon_Step",
+      "Task_ClearMonBg",
+      "Task_UpdateMonBg"
+     ],
+     "sha256": "53363bdcfaf74932"
+    },
+    {
+     "from": 3790,
+     "to": 3890,
+     "frames": 101,
+     "value": "fade",
+     "graphicsByAge": [
+      [
+       0,
+       "doll"
+      ],
+      [
+       53,
+       "other"
+      ],
+      [
+       83,
+       "mon"
+      ]
+     ],
+     "subbedX2": [
+      0,
+      100
+     ],
+     "subbedInvisibleAges": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54
+     ],
+     "subbedY": [
+      35,
+      56
+     ],
+     "tasks": [
+      "AnimTask_BlendSpriteColor_Step2",
+      "AnimTask_SubstituteFadeToInvisible",
+      "AnimTask_SwapMonSpriteToFromSubstitute",
+      "Task_ClearBitWhenBattleTableAnimDone",
+      "Task_ClearMonBg",
+      "Task_UpdateMonBg"
+     ],
+     "sha256": "64901ec31ce16ccc"
+    },
+    {
+     "from": 4342,
+     "to": 4427,
+     "frames": 86,
+     "value": "body",
+     "graphicsByAge": [
+      [
+       0,
+       "mon"
+      ],
+      [
+       12,
+       "doll"
+      ]
+     ],
+     "subbedX2": [
+      0,
+      200
+     ],
+     "subbedInvisibleAges": [
+      9,
+      10
+     ],
+     "subbedY": [
+      35,
+      56
+     ],
+     "tasks": [
+      "AnimTask_MonToSubstitute",
+      "AnimTask_MonToSubstituteDoll"
+     ],
+     "sha256": "80272a509d741346"
+    },
+    {
+     "from": 4612,
+     "to": 4652,
+     "frames": 41,
+     "value": "other-move",
+     "graphicsByAge": [
+      [
+       0,
+       "doll"
+      ]
+     ],
+     "subbedX2": [
+      0,
+      3
+     ],
+     "subbedInvisibleAges": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25
+     ],
+     "subbedY": [
+      56
+     ],
+     "tasks": [
+      "AnimTask_ShakeMon_Step",
+      "Task_ClearMonBg",
+      "Task_UpdateMonBg"
+     ],
+     "sha256": "8384f2a4baa3904e"
+    },
+    {
+     "from": 5933,
+     "to": 5973,
+     "frames": 41,
+     "value": "other-move",
+     "graphicsByAge": [
+      [
+       0,
+       "doll"
+      ]
+     ],
+     "subbedX2": [
+      0,
+      3
+     ],
+     "subbedInvisibleAges": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25
+     ],
+     "subbedY": [
+      56
+     ],
+     "tasks": [
+      "AnimTask_ShakeMon_Step",
+      "Task_ClearMonBg",
+      "Task_UpdateMonBg"
+     ],
+     "sha256": "8384f2a4baa3904e"
+    },
+    {
+     "from": 7355,
+     "to": 7395,
+     "frames": 41,
+     "value": "other-move",
+     "graphicsByAge": [
+      [
+       0,
+       "doll"
+      ]
+     ],
+     "subbedX2": [
+      0,
+      3
+     ],
+     "subbedInvisibleAges": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25
+     ],
+     "subbedY": [
+      56
+     ],
+     "tasks": [
+      "AnimTask_ShakeMon_Step",
+      "Task_ClearMonBg",
+      "Task_UpdateMonBg"
+     ],
+     "sha256": "8384f2a4baa3904e"
+    },
+    {
+     "from": 8056,
+     "to": 8156,
+     "frames": 101,
+     "value": "fade",
+     "graphicsByAge": [
+      [
+       0,
+       "doll"
+      ],
+      [
+       53,
+       "other"
+      ],
+      [
+       83,
+       "mon"
+      ]
+     ],
+     "subbedX2": [
+      0,
+      100
+     ],
+     "subbedInvisibleAges": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54
+     ],
+     "subbedY": [
+      35,
+      56
+     ],
+     "tasks": [
+      "AnimTask_BlendSpriteColor_Step2",
+      "AnimTask_SubstituteFadeToInvisible",
+      "AnimTask_SwapMonSpriteToFromSubstitute",
+      "Task_ClearBitWhenBattleTableAnimDone",
+      "Task_ClearMonBg",
+      "Task_UpdateMonBg"
+     ],
+     "sha256": "0d42d8c5131096ab"
+    }
+   ],
+   "behindSubstituteRuns": [
+    {
+     "from": 76,
+     "to": 162,
+     "frames": 87,
+     "value": 0
+    },
+    {
+     "from": 163,
+     "to": 3841,
+     "frames": 3679,
+     "value": 1
+    },
+    {
+     "from": 3842,
+     "to": 4428,
+     "frames": 587,
+     "value": 0
+    },
+    {
+     "from": 4429,
+     "to": 8107,
+     "frames": 3679,
+     "value": 1
+    },
+    {
+     "from": 8108,
+     "to": 8532,
+     "frames": 425,
+     "value": 0
+    }
+   ],
+   "graphicsRuns": [
+    {
+     "from": 76,
+     "to": 87,
+     "frames": 12,
+     "value": "mon"
+    },
+    {
+     "from": 88,
+     "to": 3842,
+     "frames": 3755,
+     "value": "doll"
+    },
+    {
+     "from": 3843,
+     "to": 3872,
+     "frames": 30,
+     "value": "605db3fdbaff4ba1"
+    },
+    {
+     "from": 3873,
+     "to": 4353,
+     "frames": 481,
+     "value": "mon"
+    },
+    {
+     "from": 4354,
+     "to": 8108,
+     "frames": 3755,
+     "value": "doll"
+    },
+    {
+     "from": 8109,
+     "to": 8138,
+     "frames": 30,
+     "value": "605db3fdbaff4ba1"
+    },
+    {
+     "from": 8139,
+     "to": 8532,
+     "frames": 394,
+     "value": "mon"
+    }
+   ],
+   "idleBehindSubstitute": {
+    "idleBehindSubFrames": 7008,
+    "gfx": 7008,
+    "pos": 7008,
+    "pal": 7008,
+    "shadowHidden": 7008,
+    "visible": 6898,
+    "pxExactVisible": 6898,
+    "pxMismatchFrames": [],
+    "y2Histogram": {
+     "0": 7008
+    },
+    "invisibleRuns": [
+     {
+      "from": 392,
+      "to": 395,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 400,
+      "to": 403,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 408,
+      "to": 411,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 416,
+      "to": 419,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 1713,
+      "to": 1716,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 1721,
+      "to": 1724,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 1729,
+      "to": 1732,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 1737,
+      "to": 1740,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 3135,
+      "to": 3138,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 3143,
+      "to": 3146,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 3151,
+      "to": 3154,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 3159,
+      "to": 3162,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 4658,
+      "to": 4661,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 4666,
+      "to": 4669,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 4674,
+      "to": 4677,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 4682,
+      "to": 4685,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 5979,
+      "to": 5982,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 5987,
+      "to": 5990,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 5995,
+      "to": 5998,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 6003,
+      "to": 6006,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 7401,
+      "to": 7404,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 7409,
+      "to": 7412,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 7417,
+      "to": 7420,
+      "frames": 4,
+      "value": 1
+     },
+     {
+      "from": 7425,
+      "to": 7428,
+      "frames": 4,
+      "value": 1
+     }
+    ]
+   }
   }
  ]
 }

@@ -137,6 +137,44 @@
    "totalPx": 0,
    "nonZeroRows": [],
    "romWindowSha256": "d85bf6dba6021dd8d3b3a6797a669dda382dcdc87e343d92d0b3147e6ecea133"
+  },
+  {
+   "probe": "prep37-on-opponent-golbat-slowbro-r1.json",
+   "profile": "battle-scene-on",
+   "attackerSide": "opponent",
+   "pair": "GOLBAT->SLOWBRO",
+   "bodyFrames": {
+    "start": 76,
+    "endFirstInactive": 162
+   },
+   "dense": true,
+   "derived": {
+    "attacker": {
+     "x": 144,
+     "y": 3
+    },
+    "target": {
+     "x": 40,
+     "y": 58
+    }
+   },
+   "rendererThrew": null,
+   "componentRows": 87,
+   "zeroPxRows": 86,
+   "totalPx": 200,
+   "nonZeroRows": [
+    {
+     "age": 0,
+     "px": 200,
+     "bbox": [
+      160,
+      65,
+      191,
+      72
+     ]
+    }
+   ],
+   "romWindowSha256": "6274e8390b5a525768c70993b5670eda0c39aafad665531e4a6164ccdcc11ffe"
   }
  ]
 }
