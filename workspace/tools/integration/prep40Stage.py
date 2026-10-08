@@ -81,5 +81,12 @@ for move, mid in MOVES:
 for side in ("player", "opponent"):
     stage(f"prep40-faint-explosion-{side}", "EXPLOSION", 153, side, (164, 153, 153, 153) if side == "player" else (164, 164, 164, 153), turns=3)
     stage(f"prep40-roared-{side}", "ROAR", 46, side, (164, 164, 164, 164), defender_moves=(46, 46, 46, 46), turns=2)
+# Voluntary switch-out of the subbed player PERSIAN on turn 2 (POKeMON, slot 2, SHIFT): DoSwitchOutAnimation's SUBSTITUTE_TO_MON (:2249).
+stage("prep40-switch-player", "SUBSTITUTE", 164, "player", (164, 164, 164, 164), turns=1)
+sw = json.loads((OUT / "prep40-switch-player.json").read_text())
+sw["trace"]["segments"] += ([{"frames": 2, "buttons": ["DOWN"]}, {"frames": 30, "buttons": []}, {"frames": 2, "buttons": ["A"]}, {"frames": 90, "buttons": []},
+                             {"frames": 2, "buttons": ["DOWN"]}, {"frames": 30, "buttons": []}, {"frames": 2, "buttons": ["A"]}, {"frames": 30, "buttons": []},
+                             {"frames": 2, "buttons": ["A"]}, {"frames": 900, "buttons": []}] + [{"frames": 2, "buttons": ["B"]}, {"frames": 120, "buttons": []}] * 4)
+(OUT / "prep40-switch-player.json").write_text(json.dumps(sw, separators=(",", ":")) + "\n")
 (OUT / "list.tsv").write_text("".join("\t".join(map(str, r)) + "\n" for r in rows))
 print(len(rows), "scenarios ->", OUT)

@@ -72,3 +72,4 @@ prep40-faint-explosion-player	EXPLOSION	153	player	PERSIAN	SLOWBRO
 prep40-roared-player	ROAR	46	player	PERSIAN	SLOWBRO
 prep40-faint-explosion-opponent	EXPLOSION	153	opponent	PERSIAN	SLOWBRO
 prep40-roared-opponent	ROAR	46	opponent	PERSIAN	SLOWBRO
+prep40-switch-player	SUBSTITUTE	164	player	PERSIAN	SLOWBRO
