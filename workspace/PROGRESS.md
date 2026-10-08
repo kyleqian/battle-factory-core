@@ -5,6 +5,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-08 (overnight, in progress) — S10A continuation: Substitute presentation + deferred order lend
+
+- **State:** local master; production src tree `ab030259` (`f1b672ca1`): 250 scoped-exact + 13 faithful-random +
+  13 faithful-timing (unchanged census 276). Opus 5.5 supervisor; Opus 5.5 workers (`-m opus`) on two lanes.
+- **Did so far:** Substitute swap status animations live around a subbed attacker's proven body (Headbutt, Body Slam,
+  Leech Seed); supervisor reran 21 windows x2 fresh 0 px, union green. prep38 evidence: 27 (move, side) cells exact
+  with a subbed DEFENDER drawn as the doll (weight 22.55) + order / art-lookup classes; reproduced (743 records).
+- **In flight:** integration — seam-resolved deferred sprite-order lend + Ice Ball counters 1..4 (+ Dive attack);
+  side — prep40 attacker-doll widening sweep. Queued: doll-defender batch, ISSUES #152 quick wins, Substitute fade.
+- **Notes:** no DEFERRED entries. Detail in ANIMATION_INTEGRATION_PROGRESS.md top entry.
+
+---
+
 ## 2026-10-07 (day) — S10A finish run: D4 implemented; census COMPLETE 250 + 13 + 13 + 0 = 276
 
 - **State:** local master, production src tree `e1a47502` (`46319b2d9`): 250 scoped-exact + 13 faithful-random +
@@ -52,30 +65,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** gameplay/RNG and Factory acceptance stay unchanged. Exact fixture
   scopes remain distinct from faithful timing; D3+D4 consumers count once.
   This checkpoint records approval; the actual supervisor launch follows it.
-
----
-
-## 2026-10-06 (night) — S10A wind-down: 226 -> 246 scoped-exact, 10 -> 12 faithful-random; D4 OPEN
-
-- **State:** S10A, local master; production src tree `1efb1872` (prep29 R1 merge): 246 scoped-exact + 12
-  faithful-random live adapters, 18 accepted bodies remain (census `246+12+0+18=276`). Supervisor final gates on
-  that code: typecheck, 1,548 files / 12,665 tests, build 862 (`final-supervisor-gates-20261007.json`). Preview <http://127.0.0.1:5191/> refreshed on this src at wind-down (receipt
-  `playable-preview-d01f11d1e-receipt.json`; serves `d01f11d1e`: 4 samples hash-equal, export + mode restart, no errors).
-  Opus 5.5 supervisor; Opus / Sonnet 5.5 workers; 11 integration folds + 14 evidence merges, all re-proved by the
-  supervisor (dense reruns twice fresh, differential on 2-3 traces, reruns of every evidence script).
-- **Did (production):** hardware-OAM provider + Will-O-Wisp / Pursuit / Fury Cutter / Return; source models for
-  Curse (non-Ghost) and Endeavor; Fire Punch body; Baton Pass body; profile builders (Spikes, Octazooka, Signal Beam,
-  Sheer Cold, Lovely Kiss faithful-random) and Q2 builders (Hyper Voice, Smog, Sand Tomb, Sky Attack both turns,
-  Snore); Bonemerang, Rapid Spin, Outrage, Luster Purge (faithful-random); Overheat any known lend; Psych Up opponent; Will-O-Wisp later bodies; 14 sprite-order plan rows
-  (corpus replay known 1210 -> 1285, 0 mismatches). ISSUES #150 fixed; #151 idle-x2 class fixed. Gameplay / RNG
-  unchanged (route ON/OFF parity per batch; differential byte-identical at every fold).
-- **Did (evidence):** prep22-29 (Fire Punch split, Curse / Megahorn / Return / Ice Ball / Revenge / Endeavor models,
-  Baton Pass flow, 26 moves triaged — most "C" labels stale), lb26 later bodies, order-plan gaps (prep28), species
-  audits 5-8 (4 defect classes found and fixed), #151 diagnosis.
-- **Next:** ROADMAP S10A "Next (2026-10-07 morning)": answer D4 first; then Dive, Eruption, Baton Pass flow,
-  remaining providers.
-- **Notes:** **DEFERRED D4 (OPEN):** about 1.3% of Factory move uses animate with timing that depends on emulator CPU
-  load (lag frames / VBlank phase) and cannot meet the scoped-exact bar; fallback vs a separate "faithful timing"
-  bucket (recommended). The next `run-supervisor.sh` refuses to start until D4 is answered. Soak gates are
-  superseded for S10A (ANIMATION_VERIFICATION scoped policy). All worker branches merged, worktrees removed;
-  supervisor validation logs in `.integration/validation/*-2026100{6,7}/`.
