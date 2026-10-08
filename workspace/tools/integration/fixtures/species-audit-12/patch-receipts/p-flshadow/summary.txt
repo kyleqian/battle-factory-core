@@ -1,0 +1,12 @@
+  [S12_FL=1] weezing-flatter-player-nidorina-opponent-onix 219/219 px 0 dur 219 identical true
+  [S12_FL=1] golbat-flatter-player-nidorina-opponent-onix 219/219 px 0 dur 219 identical true
+  [S12_FL=1] flygon-flatter-player-nidorina-opponent-onix 219/219 px 0 dur 219 identical true
+  [S12_FL=1] flatter-opponent-nidorina-player-onix 219/219 px 0 dur 219 identical true
+  [S12_FL=1] steelix-flatter-player-nidorina-opponent-onix 219/219 px 0 dur 219 identical true
+  [S12_FL=1] golbatA-flatter-opponent-nidorina-player-onix 219/219 px 0 dur 219 identical true
+  [S12_FL=1] flygonA-flatter-opponent-nidorina-player-onix 219/219 px 0 dur 219 identical true
+  [S12_FL=1] flatter-player-nidorina-opponent-onix 219/219 px 0 dur 219 identical true
+  [S12_FL=1] flatter-alt-opponent-hypno-golem 219/219 px 0 dur 219 identical true
+  [S12_FL=1] shedinjaA-flatter-opponent-nidorina-player-onix 219/219 px 0 dur 219 identical true
+  [S12_FL=1] shedinja-flatter-player-nidorina-opponent-onix 219/219 px 0 dur 219 identical true
+  [S12_FL=1] weezingA-flatter-opponent-nidorina-player-onix 219/219 px 0 dur 219 identical true

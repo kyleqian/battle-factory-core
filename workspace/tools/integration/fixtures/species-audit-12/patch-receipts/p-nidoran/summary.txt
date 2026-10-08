@@ -1,0 +1,5 @@
+  [S12_NIDORAN=1] nidoranfA-flatter-player-nidorina-opponent-onix 219/219 px 0 dur 219 identical true (re-run alone: the S12_NIDORAN=0 control job overwrote the first receipt by stem)
+  [S12_NIDORAN=1] nidoranfA-flatter-opponent-nidorina-player-onix 219/219 px 0 dur 219 identical true
+  [S12_NIDORAN=1] nidorinoA-flatter-player-nidorina-opponent-onix 219/219 px 0 dur 219 identical true
+  [S12_NIDORAN=1] flatter-player-nidorina-opponent-onix 219/219 px 0 dur 219 identical true
+  [S12_NIDORAN=0] nidoranfA-flatter-player-nidorina-opponent-onix 0/219 px 7008 dur 219 identical true (control; = the unpatched receipt)

@@ -1,0 +1,15 @@
+  [S12_LIFT=1] flygon-flatter-player-nidorina-opponent-onix 218/219 px 200 dur 219 identical true
+  [S12_LIFT=1] shinysteelixA-skill-swap-player-girafarig-opponent-shuckle 0/196 px 357832 dur 196 identical true
+  [S12_LIFT=1] onixA-eruption-opponent-barboach-player-onix 478/500 px 23976 dur 500 identical true
+  [S12_LIFT=1] shinysteelixA-skill-swap-opponent-girafarig-player-shuckle 0/196 px 385151 dur 196 identical true
+  [S12_LIFT=1] rattataA-skill-swap-opponent-girafarig-player-shuckle 196/196 px 0 dur 196 identical true
+  [S12_LIFT=1] rattata-skill-swap-player-girafarig-opponent-shuckle 196/196 px 0 dur 196 identical true
+  [S12_LIFT=1] shinysteelixA-flatter-player-nidorina-opponent-onix 0/219 px 402414 dur 219 identical true
+  [S12_LIFT=1] rattataA-eruption-opponent-barboach-player-onix 472/494 px 9005 dur 494 identical true
+  [S12_LIFT=1] weezingA-flatter-opponent-nidorina-player-onix 218/219 px 195 dur 219 identical true
+  [S12_LIFT=1] eruption-player-barboach-opponent-onix 476/476 px 0 dur 476 identical true
+  [S12_LIFT=1] skill-swap-player-girafarig-opponent-shuckle 196/196 px 0 dur 196 identical true
+  [S12_LIFT=1] onixA-skill-swap-opponent-girafarig-player-shuckle 196/196 px 0 dur 196 identical true
+  [S12_LIFT=1] onix-skill-swap-player-girafarig-opponent-shuckle 196/196 px 0 dur 196 identical true
+  [S12_LIFT=1] flatter-player-nidorina-opponent-onix 219/219 px 0 dur 219 identical true
+  [S12_LIFT=1] shinysteelixA-eruption-player-barboach-opponent-onix 0/482 px 801830 dur 482 identical true
