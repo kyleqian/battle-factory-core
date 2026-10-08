@@ -95,7 +95,7 @@ import { SUPERPOWER_ROWS, liveSuperpowerInputs } from "./liveSuperpowerInputs.ts
 import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
 import { liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSheerColdRestoreFadeEndAge, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
-import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs, liveShockWaveInputs, FIRST_BODY_SCANLINE } from "./liveOamMoves.ts";
+import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs, liveShockWaveInputs, liveSkillSwapInputs, FIRST_BODY_SCANLINE } from "./liveOamMoves.ts";
 import shockWaveAsset from "../animation/assets/shock-wave.json" with { type: "json" };
 import { shockWaveTimingFor } from "../animation/shockWave.ts";
 import revengeScratchAsset from "../animation/assets/revenge-purple-scratch-swipe.json" with { type: "json" };
@@ -106,6 +106,8 @@ import {
 } from "../animation/curseModel.ts";
 import { FURY_CUTTER_ROWS, PURSUIT_ROWS, RETURN_ROWS } from "./liveMoveOamAssembler.ts";
 import { willOWispSpritesAtAge, willOWispTimeline } from "../animation/willOWisp.ts";
+import { skillSwapAtAge, type SkillSwapLiveInputs } from "../animation/skillSwap.ts";
+import skillSwapOrbAsset from "../animation/assets/skill-swap-bluegreen-orb.json" with { type: "json" };
 import { pursuitTargetOffsetAtAge } from "../animation/pursuit.ts";
 import { sortGbaSpriteOrder } from "../animation/gbaObjCompositor.ts";
 import willOWispAsset from "../animation/assets/will-o-wisp.json" with { type: "json" };
@@ -446,6 +448,9 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // D4c faithful timing: Psywave windows start at activation (row 0; d4a-live/psywave-*.json). The live hook draws an elevated opponent's
     // shadow whichever role it has (ESPEON -> CROBAT player window: 200 px at age 0 otherwise, docs/next-adapters-prep30.md s2.4).
     149,
+    // S10A faithful timing: Skill Swap windows start at activation (row 0; s10a-live/skill-swap-*.json). The live hook draws an elevated
+    // opponent's shadow whichever role it has (ESPEON -> WEEZING player / WEEZING -> SNORLAX opponent: 195 px at age 0 otherwise, prep35 s1.3).
+    285,
     // D4c faithful timing: Extrasensory windows start at activation (row 0; d4a-live/extrasensory-*.json; elevated CROBAT opponent in both roles).
     326,
     // D4b faithful timing + D3: Meteor Mash windows start at activation (row 0; prep12 plans.json acceptedWindowStartMinusActivation 0).
@@ -986,6 +991,8 @@ export function liveMoveAnimationDuration(
     case 276: return SUPERPOWER_ROWS;
     // Faithful timing (D4c): Psywave 204 rows + the policy's optional late lag at task row 185 (dominant measured phase, 205 rows both sides).
     case 149: return liveMoveTimingBodyRows(149);
+    // Faithful timing (S10A, prep35): Skill Swap 195 rows (activation .. first inactive) + the policy's optional lag at row 176 (196 rows both sides).
+    case 285: return liveMoveTimingBodyRows(285);
     // Faithful timing (D4c): Extrasensory 161 rows (activation .. first inactive) without the optional lag at task row 142 (policy: no lag, 4 of 6).
     case 326: return liveMoveTimingBodyRows(326);
     // Faithful timing (D4b, + D3 Random2): Meteor Mash 213 + the policy's restore lag L (row 195) + the first inactive row = 215 both sides.
@@ -3319,6 +3326,37 @@ export function liveMoveAnimationPresentation(
       const withCenters = (battler: SceneOnPresentationBattler, anchors: typeof attackerAnchors): SceneOnPresentationBattler => ({
         ...battler, geometry: { ...battler.geometry, animationCenter: anchors.spriteCenter, battlePositionCenter: anchors.picOffsetPoint } });
       config = { move: "PSYWAVE", attacker: withCenters(attacker, attackerAnchors), target: withCenters(target, targetAnchors),
+        fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
+      break;
+    }
+    case 285: {
+      // S10A faithful timing: Skill Swap (prep35 s1 / s3 item 1; liveOamMoves.ts liveSkillSwapInputs). Known lend (the lent 64-slot order is the
+      // L input; every measured window is a first body), known-entry allocator (BLUEGREEN_ORB tile 305, palette slot 7, orb (slot, matrix) pairs
+      // over the known entry), non-shiny, zero idle rests (the battler OBJ and the trajectory bounds are the rest-free sprite / pic points).
+      // Both CPU-phase bits come from the timing policy (lag at 176; the display-neutral bank-2 restore row).
+      if (!spriteOrderInput?.known) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const activationOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      const restoreRow = liveMovePaletteTransferRow(285);
+      if (palettes === null || activationOrder === null || restoreRow === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const zeroRest = (a: typeof attackerAnchors) => a.frontIdleRest.x2 === 0 && a.frontIdleRest.y2 === 0;
+      if (!zeroRest(attackerAnchors) || !zeroRest(targetAnchors)) return null;
+      const attackerSide = attacker.geometry.side, targetSide = target.geometry.side;
+      const rgb555 = (c: { r: number; g: number; b: number }) => (c.r >> 3) | (c.g >> 3) << 5 | (c.b >> 3) << 10;
+      const inputs = liveSkillSwapInputs({ attackerSide, attacker: attackerAnchors, target: targetAnchors,
+        attackerPicSize: liveBattlerCoordAttrs(attackerSide, art), targetPicSize: liveBattlerCoordAttrs(targetSide, art), palettes, activationOrder,
+        sort: sortGbaSpriteOrder, orbPalette: (skillSwapOrbAsset as unknown as { orb: { palette: { r: number; g: number; b: number }[] } }).orb.palette.map(rgb555),
+        orbsAt: (state, programInput) => skillSwapAtAge(state, { ...(programInput as unknown as SkillSwapLiveInputs), attackerSide, targetSide,
+          attackerSpecies: "", targetSpecies: "" }).orbs,
+        lag: liveMoveOptionalLagAge(285) === 176, restoreRow });
+      // The SKILL_SWAP seam centres are the battler sprite centres; the corner is centre - 32 (the branch draws the battlers from the OAM).
+      const withCenter = (battler: SceneOnPresentationBattler, anchors: typeof attackerAnchors): SceneOnPresentationBattler => ({
+        ...battler, geometry: { ...battler.geometry, spriteCorner: { x: anchors.spriteCenter.x - 32, y: anchors.spriteCenter.y - 32 },
+          animationCenter: anchors.spriteCenter, battlePositionCenter: anchors.battlePositionCenter } });
+      config = { move: "SKILL_SWAP", attacker: withCenter(attacker, attackerAnchors), target: withCenter(target, targetAnchors),
         fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
       break;
     }

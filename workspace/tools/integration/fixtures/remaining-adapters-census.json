@@ -39,7 +39,7 @@
    "MOVE_WATER_PULSE",
    "MOVE_WISH"
   ],
-  "faithfulTiming": 12,
+  "faithfulTiming": 13,
   "faithfulTimingMoves": [
    "MOVE_DIVE",
    "MOVE_EXTRASENSORY",
@@ -52,10 +52,11 @@
    "MOVE_PSYWAVE",
    "MOVE_REVENGE",
    "MOVE_SHEER_COLD",
+   "MOVE_SKILL_SWAP",
    "MOVE_SUPERPOWER"
   ],
   "inFlight": 0,
-  "remaining": 4,
+  "remaining": 3,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
@@ -63,14 +64,14 @@
   "weightPct": {
    "live": 93.738,
    "faithfulRandom": 3.761,
-   "faithfulTiming": 1.501,
+   "faithfulTiming": 1.678,
    "inFlight": 0,
-   "remaining": 0.513
+   "remaining": 0.337
   },
   "remainingByGroup": {
    "MULTI": {
-    "moves": 3,
-    "weightPct": 0.29
+    "moves": 2,
+    "weightPct": 0.113
    },
    "PROVIDER-x": {
     "moves": 1,
@@ -79,11 +80,11 @@
   },
   "remainingByHostClass": {
    "H_BASIC": 1,
-   "H_BUFFER": 3
+   "H_BUFFER": 2
   },
-  "orderFirstBodyOnlyMoves": 3,
-  "slotPlanNeededMoves": 3,
-  "sumsTo": "248+12+12+0+4=276",
+  "orderFirstBodyOnlyMoves": 2,
+  "slotPlanNeededMoves": 2,
+  "sumsTo": "248+12+13+0+3=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -145,8 +146,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 3,
-   "touchingWeightPct": 0.29,
+   "touchingMoves": 2,
+   "touchingWeightPct": 0.113,
    "meta": {
     "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
     "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
@@ -161,8 +162,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 3,
-   "touchingWeightPct": 0.29,
+   "touchingMoves": 2,
+   "touchingWeightPct": 0.113,
    "meta": {
     "cost": "extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves)",
     "claim": "exact for audited plan rows from a known entry; actual status animations/switches invalidate"
@@ -177,8 +178,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 3,
-   "touchingWeightPct": 0.29,
+   "touchingMoves": 2,
+   "touchingWeightPct": 0.113,
    "meta": null
   },
   {
@@ -190,8 +191,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 2,
-   "touchingWeightPct": 0.256,
+   "touchingMoves": 1,
+   "touchingWeightPct": 0.079,
    "meta": null
   },
   {
@@ -203,8 +204,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 2,
-   "touchingWeightPct": 0.256,
+   "touchingMoves": 1,
+   "touchingWeightPct": 0.079,
    "meta": null
   },
   {
@@ -216,8 +217,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 1,
-   "touchingWeightPct": 0.176,
+   "touchingMoves": 0,
+   "touchingWeightPct": 0,
    "meta": null
   },
   {
@@ -242,8 +243,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 3,
-   "touchingWeightPct": 0.29,
+   "touchingMoves": 2,
+   "touchingWeightPct": 0.113,
    "meta": null
   },
   {
@@ -255,8 +256,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 1,
-   "touchingWeightPct": 0.176,
+   "touchingMoves": 0,
+   "touchingWeightPct": 0,
    "meta": {
     "cost": "per-move plumbing from resolution (secondary-effect / HP / stale-power values)",
     "claim": "exact outcome data; no RNG ownership"
@@ -380,8 +381,8 @@
    "aloneMoves": 0,
    "aloneWeightPct": 0,
    "aloneNames": [],
-   "touchingMoves": 3,
-   "touchingWeightPct": 0.29,
+   "touchingMoves": 2,
+   "touchingWeightPct": 0.113,
    "meta": {
     "cost": "new large host (docs/animation-integration-readiness.md A6)",
     "claim": "only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today"
@@ -420,60 +421,42 @@
   },
   {
    "step": 4,
-   "provider": "E-OUT",
-   "newMoves": 1,
-   "newWeightPct": 0.176,
-   "cumulativeRemainingUnlocked": 4,
-   "newNames": [
-    "SKILL_SWAP"
-   ]
-  },
-  {
-   "step": 5,
    "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 4,
+   "cumulativeRemainingUnlocked": 3,
+   "newNames": []
+  },
+  {
+   "step": 5,
+   "provider": "D-TILE",
+   "newMoves": 0,
+   "newWeightPct": 0,
+   "cumulativeRemainingUnlocked": 3,
    "newNames": []
   },
   {
    "step": 6,
-   "provider": "D-TILE",
+   "provider": "D-BG",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 4,
+   "cumulativeRemainingUnlocked": 3,
    "newNames": []
   },
   {
    "step": 7,
-   "provider": "D-BG",
+   "provider": "D-OAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 4,
+   "cumulativeRemainingUnlocked": 3,
    "newNames": []
   },
   {
    "step": 8,
-   "provider": "D-OAM",
-   "newMoves": 0,
-   "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 4,
-   "newNames": []
-  },
-  {
-   "step": 9,
-   "provider": "D-VRAM",
-   "newMoves": 0,
-   "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 4,
-   "newNames": []
-  },
-  {
-   "step": 10,
    "provider": "F-AUDIO",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 4,
+   "cumulativeRemainingUnlocked": 3,
    "newNames": []
   }
  ],
@@ -1130,505 +1113,6 @@
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
-   },
-   "group": "MULTI"
-  },
-  {
-   "move": "MOVE_SKILL_SWAP",
-   "id": 285,
-   "name": "SKILL SWAP",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0017644557823129248,
-   "config": "src/animation/sceneOnPresentation.ts:2719",
-   "needs": [
-    "B",
-    "C",
-    "F-AFFINE",
-    "E-TASK",
-    "D-PAL",
-    "D-TILE",
-    "D-BG",
-    "D-OAM",
-    "D-VRAM",
-    "E-OUT",
-    "F-AUDIO"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationInputs:spriteOrder (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/skillSwap.ts:81"
-     ]
-    },
-    {
-     "code": "C",
-     "text": "animationInputs:animationRng (presentation Random2 (gRng2Value))",
-     "cites": [
-      "src/animation/skillSwap.ts:120"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationInputs:attackerSprite (battler sprite record {slot,x,y,x2,y2,subpriority,oamPriority,matrixNum,matrix}: battler owner slot + battler matrix)",
-     "cites": [
-      "src/animation/skillSwap.ts:73"
-     ]
-    },
-    {
-     "code": "E-TASK",
-     "text": "animationInputs:taskSlots (CreateTask slot / live task table)",
-     "cites": [
-      "src/animation/skillSwap.ts:75"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "animationInputs:palette (palette host / resource plan)",
-     "cites": [
-      "src/animation/skillSwap.ts:87"
-     ]
-    },
-    {
-     "code": "D-TILE",
-     "text": "animationInputs:resources (OBJ tile/palette resource allocator)",
-     "cites": [
-      "src/animation/skillSwap.ts:98"
-     ]
-    },
-    {
-     "code": "D-BG",
-     "text": "animationInputs:registers (BG regs / monbg / BLDCNT state)",
-     "cites": [
-      "src/animation/skillSwap.ts:92"
-     ]
-    },
-    {
-     "code": "D-OAM",
-     "text": "animationInputs:orbAllocations (orb slots + live OAM words)",
-     "cites": [
-      "src/animation/skillSwap.ts:77"
-     ]
-    },
-    {
-     "code": "D-VRAM",
-     "text": "animationInputs:background.currentVram (BG VRAM snapshot)",
-     "cites": [
-      "src/animation/skillSwap.ts:94"
-     ]
-    },
-    {
-     "code": "E-OUT",
-     "text": "animationInputs:abilityOutcome (abilities after swap (resolution))",
-     "cites": [
-      "src/animation/skillSwap.ts:124"
-     ]
-    },
-    {
-     "code": "F-AUDIO",
-     "text": "animationInputs:audio (sound task state)",
-     "cites": [
-      "src/animation/skillSwap.ts:115"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationInputs:attackerBounds",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/skillSwap.ts:71"
-    },
-    {
-     "path": "animationInputs:targetBounds",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/skillSwap.ts:72"
-    },
-    {
-     "path": "animationInputs:attackerSprite",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/skillSwap.ts:73"
-    },
-    {
-     "path": "animationInputs:targetSprite",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/skillSwap.ts:74"
-    },
-    {
-     "path": "animationInputs:taskSlots",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/skillSwap.ts:75"
-    },
-    {
-     "path": "animationInputs:orbAllocations",
-     "classes": [
-      "A-SLOT",
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/skillSwap.ts:77"
-    },
-    {
-     "path": "animationInputs:orbOam",
-     "classes": [
-      "A-SLOT",
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/skillSwap.ts:79"
-    },
-    {
-     "path": "animationInputs:spriteOrder",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/skillSwap.ts:81"
-    },
-    {
-     "path": "animationInputs:softwareOam",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/skillSwap.ts:83"
-    },
-    {
-     "path": "animationInputs:hardwareOam",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/skillSwap.ts:84"
-    },
-    {
-     "path": "animationInputs:softwareMatrices",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/skillSwap.ts:85"
-    },
-    {
-     "path": "animationInputs:hardwareMatrices",
-     "classes": [
-      "D-OAM"
-     ],
-     "status": "blocked: D-OAM",
-     "cite": "src/animation/skillSwap.ts:86"
-    },
-    {
-     "path": "animationInputs:palette",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/skillSwap.ts:87"
-    },
-    {
-     "path": "animationInputs:palette.unfaded",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/skillSwap.ts:88"
-    },
-    {
-     "path": "animationInputs:palette.faded",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/skillSwap.ts:89"
-    },
-    {
-     "path": "animationInputs:palette.hardware",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/skillSwap.ts:90"
-    },
-    {
-     "path": "animationInputs:registers",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/skillSwap.ts:92"
-    },
-    {
-     "path": "animationInputs:background",
-     "classes": [
-      "D-BG"
-     ],
-     "status": "blocked: D-BG",
-     "cite": "src/animation/skillSwap.ts:93"
-    },
-    {
-     "path": "animationInputs:background.currentVram",
-     "classes": [
-      "D-VRAM"
-     ],
-     "status": "blocked: D-VRAM",
-     "cite": "src/animation/skillSwap.ts:94"
-    },
-    {
-     "path": "animationInputs:background.battleVram",
-     "classes": [
-      "D-VRAM"
-     ],
-     "status": "blocked: D-VRAM",
-     "cite": "src/animation/skillSwap.ts:95"
-    },
-    {
-     "path": "animationInputs:background.psychicVram",
-     "classes": [
-      "D-VRAM"
-     ],
-     "status": "blocked: D-VRAM",
-     "cite": "src/animation/skillSwap.ts:96"
-    },
-    {
-     "path": "animationInputs:resources",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/skillSwap.ts:98"
-    },
-    {
-     "path": "animationInputs:resources.tag",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/skillSwap.ts:99"
-    },
-    {
-     "path": "animationInputs:resources.tileSlot",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/skillSwap.ts:100"
-    },
-    {
-     "path": "animationInputs:resources.paletteAllocatorSlot",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/skillSwap.ts:101"
-    },
-    {
-     "path": "animationInputs:resources.paletteBank",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/skillSwap.ts:102"
-    },
-    {
-     "path": "animationInputs:resources.tileRange",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/skillSwap.ts:103"
-    },
-    {
-     "path": "animationInputs:resources.allocator",
-     "classes": [
-      "D-TILE"
-     ],
-     "status": "blocked: D-TILE",
-     "cite": "src/animation/skillSwap.ts:104"
-    },
-    {
-     "path": "animationInputs:sharedTaskData",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/skillSwap.ts:107"
-    },
-    {
-     "path": "animationInputs:sharedTaskData.fadeToPsychic",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/skillSwap.ts:108"
-    },
-    {
-     "path": "animationInputs:sharedTaskData.loopReversal",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/skillSwap.ts:109"
-    },
-    {
-     "path": "animationInputs:sharedTaskData.restoreFade",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/skillSwap.ts:110"
-    },
-    {
-     "path": "animationInputs:targetBlendPaletteStart",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/skillSwap.ts:113"
-    },
-    {
-     "path": "animationInputs:attackerBlendPaletteStart",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/skillSwap.ts:114"
-    },
-    {
-     "path": "animationInputs:audio",
-     "classes": [
-      "F-AUDIO"
-     ],
-     "status": "blocked: F-AUDIO",
-     "cite": "src/animation/skillSwap.ts:115"
-    },
-    {
-     "path": "animationInputs:audio.current",
-     "classes": [
-      "F-AUDIO"
-     ],
-     "status": "blocked: F-AUDIO",
-     "cite": "src/animation/skillSwap.ts:116"
-    },
-    {
-     "path": "animationInputs:audio.attackerPan",
-     "classes": [
-      "F-AUDIO"
-     ],
-     "status": "blocked: F-AUDIO",
-     "cite": "src/animation/skillSwap.ts:117"
-    },
-    {
-     "path": "animationInputs:liveCounts",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/skillSwap.ts:119"
-    },
-    {
-     "path": "animationInputs:animationRng",
-     "classes": [
-      "C"
-     ],
-     "status": "blocked: C",
-     "cite": "src/animation/skillSwap.ts:120"
-    },
-    {
-     "path": "animationInputs:firstInactiveAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/skillSwap.ts:122"
-    },
-    {
-     "path": "animationInputs:abilityOutcome",
-     "classes": [
-      "E-OUT"
-     ],
-     "status": "blocked: E-OUT",
-     "cite": "src/animation/skillSwap.ts:124"
-    },
-    {
-     "path": "animationInputs:abilityOutcome.playerAbilityAfterSwap",
-     "classes": [
-      "E-OUT"
-     ],
-     "status": "blocked: E-OUT",
-     "cite": "src/animation/skillSwap.ts:125"
-    },
-    {
-     "path": "animationInputs:abilityOutcome.opponentAbilityAfterSwap",
-     "classes": [
-      "E-OUT"
-     ],
-     "status": "blocked: E-OUT",
-     "cite": "src/animation/skillSwap.ts:126"
-    },
-    {
-     "path": "animationInputs:gameplayRng",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/skillSwap.ts:128"
-    },
-    {
-     "path": "animationInputs:gameplayState",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/skillSwap.ts:129"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "full",
-   "carrierOccurrences": 2973,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "lentConstants": [
-    "B",
-    "F-AFFINE",
-    "E-TASK"
-   ],
-   "providerNeeds": [
-    "C",
-    "D-PAL",
-    "D-TILE",
-    "D-BG",
-    "D-OAM",
-    "D-VRAM",
-    "E-OUT",
-    "F-AUDIO"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
    },
    "group": "MULTI"
   },

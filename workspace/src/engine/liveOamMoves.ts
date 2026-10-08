@@ -13,6 +13,7 @@ import { KNOWN_ENTRY_NON_BATTLER_SPRITES } from "./liveBgSnapshotMoves.ts";
 import type { LivePaletteComposite } from "./liveMovePaletteComposite.ts";
 import {
   FURY_CUTTER_ROWS, KNOWN_ENTRY_HEALTHBOX_OAM, buildLiveHardwareOam, carryLiveSpriteOrder, KNOWN_ENTRY_HEALTHBOX_SLOTS, PURSUIT_ROWS, RETURN_ROWS, liveFuryCutterHardwareOamRows, liveMegahornHardwareOamRows, livePursuitHardwareOamRows, liveReturnHardwareOamRows, liveReturnLives, liveRevengeHardwareOamRows, liveWillOWispHardwareOamRows, livePsywaveHardwareOamRows, livePsywaveRingAttr, liveExtrasensoryCloneStep, liveExtrasensoryHardwareOamRows,
+  SKILL_SWAP_ORB, SKILL_SWAP_ORB_PAIRS, liveSkillSwapHardwareOamRows, liveSkillSwapOrbLives, type LiveSkillSwapOrbPosition,
   type LiveOamScene, type LiveSpriteOrderSort, type OamAttr, type WispProgram,
 } from "./liveMoveOamAssembler.ts";
 import { liveMegahornBodyRows, liveMegahornRows } from "./liveMegahornInputs.ts";
@@ -20,6 +21,7 @@ import { LIVE_REVENGE_ROWS, liveRevengeRows } from "./liveRevengeInputs.ts";
 import { livePsywaveRowCount, livePsywaveRows } from "./livePsywaveInputs.ts";
 import { GBA_SINE_TABLE_256 } from "./battleMenu.ts";
 import { liveExtrasensoryRowCount, liveExtrasensoryRows } from "./liveExtrasensoryInputs.ts";
+import { liveSkillSwapBlend, liveSkillSwapPalettes, liveSkillSwapRowCount } from "./liveSkillSwapInputs.ts";
 import {
   liveNightmareBattlers, liveNightmareClone, liveNightmareFirstInactive, liveNightmareMonbgBg, liveNightmareMonbgOrigin, liveNightmareOrders,
   liveNightmarePalettes, liveNightmareRegisters, type LiveNightmareKnown, type LiveNightmarePhase, type LiveNightmareSprite,
@@ -1052,5 +1054,86 @@ export function liveShockWaveInputs(args: LiveShockWaveInputArgs): Record<string
     registers: { ...S0_REGISTERS }, animationRngSeed: 0, gameplayRng: null,
     // The reducer derives the body timing from the seam geometry (docs/next-adapters-prep33.md s0.2), not the accepted side tables.
     derivedTiming: true,
+  };
+}
+
+export interface LiveSkillSwapInputArgs {
+  readonly attackerSide: Side;
+  readonly attacker: LiveOamBattlerAnchors;
+  readonly target: LiveOamBattlerAnchors;
+  /** GetBattlerSpriteCoordAttr width / height (the species pic coords; liveMoveAnimation.ts liveBattlerCoordAttrs). */
+  readonly attackerPicSize: Readonly<{ width: number; height: number }>;
+  readonly targetPicSize: Readonly<{ width: number; height: number }>;
+  readonly palettes: LivePaletteComposite;
+  readonly activationOrder: readonly number[];
+  readonly sort: LiveSpriteOrderSort;
+  /** gBattleAnimSpritePal_BluegreenOrb as BGR555 words (src/animation/assets/skill-swap-bluegreen-orb.json, passed in by the seam). */
+  readonly orbPalette: readonly number[];
+  /** Seam-provided skillSwap.ts skillSwapAtAge orbs for the orb program input built here (positions only). */
+  readonly orbsAt: (state: number, programInput: Record<string, unknown>) => readonly LiveSkillSwapOrbPosition[];
+  /** D4 policy (liveMoveTimingPolicy.ts MOVE_SKILL_SWAP): the optional lag at row 176 and the bank-2 restore row (175 / 176). */
+  readonly lag: boolean;
+  readonly restoreRow: number;
+}
+/** ANIM_TAG_BLUEGREEN_ORB (10251) at the known entry: tile slot 6 = tiles 305..308, palette slot 7 (OBJ bank 23). */
+const SKILL_SWAP_RESOURCES = Object.freeze({ tag: 10251, tileSlot: 6, paletteAllocatorSlot: 7, paletteBank: 23, tileRange: [305, 4] as const, allocator: null });
+/** K (prep33 SS_K, 6/6 windows): task slots of the two AnimTask_SkillSwap / BlendMonInAndOut legs and the shared fades. */
+const SKILL_SWAP_TASK_SLOTS = Object.freeze({ fadeToPsychic: 0, psychicBackground: 1, targetOrbs: 0, targetBlend: 2, loopReversal: 3, attackerOrbs: 4, attackerBlend: 5, restoreFade: 0 });
+const skillSwapCache = new Map<string, ReturnType<typeof liveSkillSwapHardwareOamRows>>();
+
+/**
+ * MOVE_SKILL_SWAP (285) live inputs (docs/next-adapters-prep35.md s1 / s3 item 1; faithful timing). Hardware OAM (128 entries, SortSprites
+ * order carried from the lent activation order), the 32 hardware / software matrices and the orb program from the assembler; palettes and
+ * bldcnt / bldy from liveSkillSwapInputs.ts with the activation palette = the asset composite and the registers = S0 (the renderer branch
+ * reads only bldy and the hardware palette). Trajectory bounds = GetBattlerSpriteCoordAttr LEFT / RIGHT / TOP / BOTTOM around X_2 /
+ * Y_PIC_OFFSET (battle_anim_mons.c:2273-2280). The ability outcome is not an input: the animation only runs on the success path.
+ */
+export function liveSkillSwapInputs(args: LiveSkillSwapInputArgs): { duration: number; animationInputsAt: (age: number) => Record<string, unknown> } {
+  const { attackerSide, attacker, target } = args;
+  const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
+  const attackerObject = battlerObject(attackerSide, attacker), targetObject = battlerObject(targetSide, target);
+  const rows = liveSkillSwapRowCount(args.lag), firstInactiveAge = rows - 1;
+  const bounds = (anchors: LiveOamBattlerAnchors, size: Readonly<{ width: number; height: number }>) => ({
+    left: anchors.picOffsetPoint.x - size.width / 2, right: anchors.picOffsetPoint.x + size.width / 2,
+    top: anchors.picOffsetPoint.y - size.height / 2, bottom: anchors.picOffsetPoint.y + size.height / 2 });
+  const sprite = (object: ReturnType<typeof battlerObject>) =>
+    ({ slot: object.slot, x: 0, y: 0, x2: 0, y2: 0, attr: object.attr, subpriority: object.subpriority, matrixNum: 0, matrix: [256, 0, 0, 256] });
+  const lives = liveSkillSwapOrbLives();
+  const base = {
+    attackerBounds: bounds(attacker, args.attackerPicSize), targetBounds: bounds(target, args.targetPicSize),
+    attackerSprite: sprite(attackerObject), targetSprite: sprite(targetObject), taskSlots: SKILL_SWAP_TASK_SLOTS,
+    orbAllocations: [...lives].sort((l, r) => l.order - r.order).map((l) => ({ slot: l.slot, matrixNum: l.matrixNum, sourceCreationOrder: l.order })),
+    orbOam: SKILL_SWAP_ORB_PAIRS.map(([slot]) => ({ slot, attr: [0, 0, SKILL_SWAP_ORB.attr2] as const, subpriority: SKILL_SWAP_ORB.subpriority })),
+    background: { currentVram: null, battleVram: null, psychicVram: null }, resources: SKILL_SWAP_RESOURCES,
+    sharedTaskData: { fadeToPsychic: [], loopReversal: [], restoreFade: [] },
+    targetBlendPaletteStart: (targetSide === "player" ? 16 : 17) * 16 + 1, attackerBlendPaletteStart: (attackerSide === "player" ? 16 : 17) * 16 + 1,
+    audio: { current: null, attackerPan: attackerSide === "player" ? -64 : 63 }, liveCounts: { visualTasks: 0, soundTasks: 0 }, animationRng: 0,
+    firstInactiveAge, abilityOutcome: { playerAbilityAfterSwap: -1, opponentAbilityAfterSwap: -1 }, gameplayRng: null, gameplayState: null,
+  };
+  const key = JSON.stringify([attackerSide, base.attackerBounds, base.targetBounds, attackerObject.attr, targetObject.attr, args.activationOrder, rows]);
+  let built = skillSwapCache.get(key);
+  if (!built) {
+    // The orb program needs only positions: the reducer looks up the (identity) software matrices and the orb OAM slots.
+    const programInput = { ...base, spriteOrder: [], softwareOam: [], hardwareOam: [], softwareMatrices: IDENTITY_MATRICES, hardwareMatrices: [],
+      palette: { unfaded: [], faded: [], hardware: [] }, registers: {} };
+    built = liveSkillSwapHardwareOamRows({ attacker: attackerObject, target: targetObject, scene: KNOWN_ENTRY_SCENE, lives,
+      activationOrder: args.activationOrder, sort: args.sort, orbsAt: (state) => args.orbsAt(state, programInput), rows });
+    if (skillSwapCache.size > 16) skillSwapCache.clear();
+    skillSwapCache.set(key, built);
+  }
+  const display = built;
+  const palettes = liveSkillSwapPalettes({ attackerSide, palette0: args.palettes, orbPalette: args.orbPalette,
+    psychicPalette: (psychicBgAsset as { palette: readonly Rgb[] }).palette.map(bgr555), rows, restoreRow: args.restoreRow });
+  return {
+    duration: rows,
+    animationInputsAt: (age: number) => {
+      const row = Math.min(age, firstInactiveAge), p = palettes[row]!;
+      return {
+        ...base, spriteOrder: display.orders[row]!, softwareOam: display.oam[row]!, hardwareOam: display.oam[row]!,
+        softwareMatrices: display.softwareMatrices[row]!, hardwareMatrices: display.matrices[row]!,
+        palette: { unfaded: p.unfaded, faded: p.faded, hardware: p.hardware },
+        registers: { ...S0_REGISTERS, ...liveSkillSwapBlend(age, args.lag) },
+      };
+    },
   };
 }

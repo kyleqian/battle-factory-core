@@ -3889,7 +3889,7 @@
     },
     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
   },
-  "faithfulTimingCount": 12,
+  "faithfulTimingCount": 13,
   "faithfulTimingAdapters": [
     {
       "id": 183,
@@ -4867,6 +4867,100 @@
         "python3 -I tools/integration/d4d2Fixtures.py",
         "node --experimental-strip-types tools/integration/d4aTimingCheck.ts <receipt.json> tools/integration/fixtures/d4d2-live/hyper-voice-*.json",
         "npx vitest run tests/animation/liveIssue151Timing.test.ts"
+      ]
+    },
+    {
+      "id": 285,
+      "move": "MOVE_SKILL_SWAP",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 176,
+          "fixedLagAges": [],
+          "iterations": 195,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 196,
+              "measured": 4
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 195,
+              "measured": 2
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        },
+        {
+          "kind": "palette-transfer-row",
+          "age": 176,
+          "fixedLagAges": [],
+          "iterations": 195,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 196,
+              "measured": 1
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 196,
+              "measured": 5
+            }
+          ],
+          "chosen": "no-event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          177,
+          178,
+          179,
+          180,
+          181,
+          182,
+          183,
+          184,
+          185,
+          186,
+          187,
+          188,
+          189,
+          190,
+          191,
+          192
+        ],
+        "rows": 16,
+        "maxPixelsPerRow": 18649,
+        "cause": "optional-lag-age: the restore Task_FadeToBg counts executed frames, so a no-lag window draws its BLDY fade-out (UnsetPsychicBackground, C2 = 156) one row early against the lag policy on rows 177..192 (accepted GIRAFARIG -> SHUCKLE opponent 298,384 px, prep22 ALAKAZAM -> GOLEM opponent 293,344 px: 2 of 6 windows; = the prep35 flipped-phase numbers); palette-transfer-row: display-neutral (BLDY 16 on rows 175..177 darkens BG bank 2 to black in both phases), so the restore-176 window is documented with no residual row (windows)",
+        "windows": {
+          "skill-swap-alt-player-alakazam-golem": {
+            "ages": [],
+            "rows": 0,
+            "pixels": 0,
+            "maxPixelsPerRow": 0,
+            "cause": "palette-transfer-row only (restore row 176 under the 175 policy; the lag splits its restoring iteration): display-neutral, no residual allowed"
+          }
+        }
+      },
+      "d3": false,
+      "evidence": [
+        "tools/integration/fixtures/sf-live-receipt.json",
+        "tools/integration/fixtures/s10a-live/skill-swap-*.json (6 dense windows, both orientations: accepted GIRAFARIG -> SHUCKLE, prep22 ALAKAZAM -> GOLEM, prep33 ESPEON -> WEEZING player (elevated target) / WEEZING -> SNORLAX opponent (elevated attacker); every window a first body)",
+        "docs/next-adapters-prep35.md s0-s3 + tools/integration/fixtures/prep35/skillswap-check-pixels.json: hardware OAM rows 1..end / 32 matrices / 64-slot order / palettes / bld exact in 6 windows; T lag 176 in 4 of 6, restore row 175 in 5 of 6 (re-measured by the sf probes: identical body lengths)",
+        "row-0 elevated-opponent shadow (prep35 s1.3): drawn by the live #142 hook (liveMoveAnimation.ts LIVE_MOVE_OPPONENT_SHADOW_ROW[285] = 0) whichever role the opponent has; both WEEZING windows row 0 are 0 px",
+        "the reducer's state-only orb affineAnimation label (skillSwap.ts `(ordinal + 1) & 3`, source `ordinal & 3`) is not read by the live path: the provider derives the matrices from the source index (prep35 s1.2); left unchanged",
+        "tests/animation/liveSkillSwapFlatterAdapters.test.ts (Skill Swap: registration, policy counts, dense receipt, gates, ordinary route Scene ON/OFF parity)"
+      ],
+      "proofCommands": [
+        "sh tools/integration/prep22Probes.sh PROBEDIR 2 mechanic-skill-swap-player-girafarig-opponent-shuckle mechanic-skill-swap-opponent-girafarig-player-shuckle prep22-skill-swap-alt-player-alakazam-golem prep22-skill-swap-alt-opponent-alakazam-golem prep33-skill-swap-alt-player-espeon-weezing prep33-skill-swap-alt-opponent-weezing-snorlax",
+        "python3 tools/integration/s10aLiveFixtures.py PROBEDIR SKILL_SWAP",
+        "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/s10a-live/skill-swap-*.json",
+        "npx vitest run tests/animation/liveSkillSwapFlatterAdapters.test.ts tests/animation/liveMoveTimingPolicy.test.ts"
       ]
     }
   ],
