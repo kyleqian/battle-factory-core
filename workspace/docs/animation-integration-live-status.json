@@ -4688,32 +4688,154 @@
           "age": 38,
           "fixedLagAges": [],
           "iterations": 75,
+          "rolloutCounter": 1,
           "alternatives": [
             {
               "phase": "event",
               "bodyRows": 77,
-              "measured": 3
+              "measured": 0
             },
             {
               "phase": "no-event",
               "bodyRows": 76,
-              "measured": 15
+              "measured": 4
             }
           ],
           "chosen": "no-event",
+          "tieRuleUsed": false
+        },
+        {
+          "kind": "optional-lag-age",
+          "age": 38,
+          "fixedLagAges": [],
+          "iterations": 75,
+          "rolloutCounter": 2,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 77,
+              "measured": 0
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 76,
+              "measured": 4
+            }
+          ],
+          "chosen": "no-event",
+          "tieRuleUsed": false
+        },
+        {
+          "kind": "optional-lag-age",
+          "age": 38,
+          "fixedLagAges": [],
+          "iterations": 75,
+          "rolloutCounter": 3,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 77,
+              "measured": 0
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 76,
+              "measured": 4
+            }
+          ],
+          "chosen": "no-event",
+          "tieRuleUsed": false
+        },
+        {
+          "kind": "optional-lag-age",
+          "age": 38,
+          "fixedLagAges": [],
+          "iterations": 75,
+          "rolloutCounter": 4,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 77,
+              "measured": 1
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 76,
+              "measured": 2
+            }
+          ],
+          "chosen": "no-event",
+          "tieRuleUsed": false
+        },
+        {
+          "kind": "optional-lag-age",
+          "age": 112,
+          "fixedLagAges": [],
+          "iterations": 131,
+          "rolloutCounter": 5,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 133,
+              "measured": 2
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 132,
+              "measured": 1
+            }
+          ],
+          "chosen": "event",
           "tieRuleUsed": false
         }
       ],
       "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
       "alternatePhaseResidual": {
         "ages": [],
-        "rows": 0,
-        "maxPixelsPerRow": 0,
-        "cause": "no counter-0 body has a lag row (prep26 s1.4: the 3 lag windows are accepted player body 4 [row 38] and accepted bodies 5 [row 112], counters 3 / 4, which decline live): no live window is in the other phase. A lag window would differ on one row of the shake / fade (the lag row repeats the previous hardware OAM and moves the task step one row earlier)"
+        "windows": {
+          "ice-ball-player-spheal-opponent-registeel-b4": {
+            "ages": [
+              38,
+              39,
+              40,
+              41,
+              42,
+              43,
+              44,
+              45,
+              46,
+              47,
+              48,
+              49,
+              50,
+              51,
+              52,
+              53,
+              54,
+              55,
+              56,
+              57,
+              58,
+              60,
+              62,
+              64,
+              66,
+              68,
+              70,
+              72,
+              74
+            ]
+          }
+        },
+        "rows": 29,
+        "maxPixelsPerRow": 3155,
+        "cause": "optional-lag-age, counter 3 (body 4; policy no lag, 2 of 3): the accepted SPHEAL player body 4 has a 0-step lag row at 38 (an animationRng stall: VBlank overrun). The ROM repeats row 37's hardware OAM on row 38 and every later sprite step lands one row later; the policy renders the lag-free program, so the chunk / shards / shake differ from row 38 until the last shard dies (ages 38..58 every row, then the shake toggles on even ages to 74): 29 rows, max 3155 px/row, 55632 px (two fresh runs identical). Counter 4's lag row 112 is the policy phase (2 of 3); its no-lag window (GLALIE player body 5) follows a KO and declines. Counters 0..2: no lag measured."
       },
       "d3": true,
       "evidence": [
-        "scope: counter 0 only (request.rolloutCounter 1: the first body of a chain), any known lend with the known-entry occupancy, non-shiny, zero idle rests. Counters 1..4 (rolloutCounter 2..5) DECLINE (fallback): their activation sprite order is the earlier Ice Ball body's Random2-dependent shard y-sort, which needs a words-dependent post-body lend production does not have (resume: docs/s10a-random2-order-lend-blocker.md, design 1 'seam-resolved deferred lend')",
+        "scope: every counter body (request.rolloutCounter 1..5, AnimTask_GetIceBallCounter = rolloutCounter - 1), non-shiny, zero idle rests. Counter 0 takes any known lend with the known-entry occupancy; counters 1..4 take the SEAM-RESOLVED DEFERRED LEND (docs/s10a-random2-order-lend-blocker.md design 1): the logical order host records a word-free marker at each Ice Ball body (liveSpriteOrderHost markLiveSpriteOrderDeferredBody: presentation body key, request counter / side, its own lend, the order units that follow) and the render seam resolves it (resolveSpriteOrderDeferredLend: carry the earlier body's activation order through that body with its recorded presentation words, liveIceBallInputs postBodyFree, then replay the units with the production plans). A KO / send-in / switch / party menu / invalidation between the bodies DECLINES (not modelled: the GLALIE -> GOLEM player bodies 4..5 after GOLEM faints). Lag rows per counter (liveMoveTimingPolicy.ts 301): none for counters 0..3, row 112 for counter 4 (133 rows)",
+        "tools/integration/fixtures/lend-live-receipt.json (12 deferred-lend windows: accepted SPHEAL -> REGISTEEL bodies 2..5 both sides, GLALIE -> GOLEM bodies 2..3 both sides; 11 policy-phase windows 0 px, 1 other-phase window residual only on the documented rows)",
+        "tools/integration/fixtures/lend-live/ice-ball-*.json (iceBallChain: every chain body's words pinned from the scenario's own probed activation animationRng)",
         "tools/integration/fixtures/d4d2-live-receipt.json",
         "tools/integration/fixtures/s10a-live/ice-ball-*.json (4 dense counter-0 windows, both orientations: accepted SPHEAL -> REGISTEEL after REGISTEEL's Tackle, prep25 GLALIE -> GOLEM first bodies; presentation host pinned at the probed activation animationRng)",
         "docs/next-adapters-prep26.md s1 / s4 (assembler + model exact 18/18 windows, 1535 rows, given the H lag rows)",
@@ -4723,7 +4845,11 @@
         "sh tools/integration/prep26Probes.sh iceball (OUT=PROBEDIR) + tools/integration/s10aRouteProbes: iceBallProbe.py on mechanic-ice-ball-{player-spheal-opponent-onix,opponent-spheal-player-onix}",
         "python3 -I tools/integration/s10aIceBallFixtures.py PROBEDIR",
         "node --experimental-strip-types tools/integration/d4aTimingCheck.ts <receipt.json> tools/integration/fixtures/s10a-live/ice-ball-<window>.json",
-        "npx vitest run tests/animation/liveIceBallAdapter.test.ts"
+        "npx vitest run tests/animation/liveIceBallAdapter.test.ts",
+        "OUT=/tmp/lend-ib sh tools/integration/lendIceBallProbes.sh (4 scenarios x2 fresh, cmp'd)",
+        "python3 -I tools/integration/lendIceBallFixtures.py /tmp/lend-ib",
+        "OUT=/tmp/lend-d4a sh tools/integration/lendIceBallWindows.sh (one d4aTimingCheck process per lend-live fixture)",
+        "npx vitest run tests/spriteOrderDeferredLend.test.ts tests/animation/liveIceBallAdapter.test.ts"
       ]
     },
     {

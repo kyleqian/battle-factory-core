@@ -16,7 +16,12 @@ import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandF
 import { liveDiveSetupSplashBirth, liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";
 import { createKnownEntrySpriteAllocatorProvider } from "../../src/engine/knownEntrySpriteAllocator.ts";
 import { prepareLiveMoveSpriteAllocator, prepareLiveMoveSpriteOrder } from "../../src/engine/liveMoveSpriteAllocator.ts";
-import { bonemerangHit2Free, digUnleashLend } from "../../src/engine/liveSpriteOrderHost.ts";
+import {
+  advanceLiveSpriteOrderHost, beginLiveSpriteOrderTurn, bonemerangHit2Free, createLiveSpriteOrderHost, digUnleashLend, lendLiveSpriteOrder,
+  markLiveSpriteOrderDeferredBody, type LiveSpriteOrderHost,
+} from "../../src/engine/liveSpriteOrderHost.ts";
+import { battleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
+import type { LiveMoveSpriteOrderInput } from "../../src/engine/liveMoveSpriteAllocator.ts";
 import {
   applySpriteOrderUnitPlan, createSpriteOrderPlanCursor, knownEntrySpriteOrderState, spriteOrderPlanTableFromFixture,
   type SpriteOrderPlan,
@@ -92,6 +97,14 @@ export interface Fixture {
   precedingX2Events?: LiveBattlerX2Event[];
   /** Dig unleash body after its setup (prep18 s1.1): the production host lends the post-setup order (`digUnleashLend`). */
   digUnleashAfterSetup?: boolean;
+  /**
+   * Ice Ball counter body k > 0 (docs/s10a-random2-order-lend-blocker.md design 1): the chain's earlier bodies' probed activation values
+   * (counters 0..k-1, the scenario's own animationRng at each body's row 0) and whether the foe's Tackle runs first each turn (accepted
+   * SPHEAL: REGISTEEL is faster) or after the Ice Ball (GLALIE). The harness drives the PRODUCTION order host through the history (prompt
+   * cycle, bodies, visible hit blips; the marker at each Ice Ball body) and lends what it lends: the deferred lend, resolved by the seam with
+   * the pinned host holding every chain body's words.
+   */
+  iceBallChain?: { earlier: { value: number; source: string }[]; foeFirst: boolean };
   /**
    * Faithful-random (Random2) bodies: the oracle-pinned presentation stream value at the activation frame (gRng2Value
    * after the first anim-active frame, from a direct-mGBA probe of this scenario; provenance "pinned"). The harness
@@ -184,6 +197,48 @@ export function fixturePostKoLend(f: Fixture, request: BattleMoveAnimationReques
     postKoLends.set(f.precedingTurns, lend);
   }
   return lend;
+}
+
+const chainLends = new WeakMap<object, { spriteOrderInput: LiveMoveSpriteOrderInput | undefined; presentationRng: LiveMovePresentationRngInput }>();
+/** Production order host lend + pinned presentation host of an Ice Ball chain fixture body (iceBallChain). */
+export function fixtureIceBallChain(f: Fixture, request: BattleMoveAnimationRequest) {
+  const chain = f.iceBallChain!;
+  let cached = chainLends.get(chain);
+  if (cached) return cached;
+  const battler = request.attacker as 0 | 1, foe = (1 - battler) as 0 | 1;
+  const ev = (sequence: number, kind: string, extra: object) =>
+    Object.freeze({ sequence, payload: { kind, ...extra }, provenance: undefined }) as unknown as BattleKernelSemanticEvent;
+  const move = (seq: number, who: 0 | 1, args: string[]) => ev(seq, "animation", { animationId: "MOVE_ANIMATION", battler: who, target: 1 - who, arguments: args });
+  const hit = (seq: number, target: 0 | 1) => ev(seq, "animation", { animationId: "HIT_ANIMATION", battler: target, target, arguments: [] });
+  const values = [...chain.earlier.map((e) => e.value), f.presentationRngActivation!.value];
+  let order: LiveSpriteOrderHost = createLiveSpriteOrderHost(knownEntrySpriteOrderState("battle-lab-ordinary-singles"));
+  let host = createPresentationRngHostAt(createPresentationRngState(values[0]!, "pinned"));
+  const bodies: (typeof host.bodies)[number][] = [];
+  let lend: LiveMoveSpriteOrderInput | undefined;
+  let key = "";
+  values.forEach((value, k) => {
+    const counter = k + 1;
+    const iceArgs = ["301", "0", String(30 << k), "0", "70", "0", String(counter)];
+    const foeBody = [move(10 * k, foe, ["33", "0", "35", "0", "70", "0"]), hit(10 * k + 1, battler)];
+    const iceBody = [move(10 * k + 2, battler, iceArgs), hit(10 * k + 3, foe)];
+    const events = chain.foeFirst ? [...foeBody, ...iceBody] : [...iceBody, ...foeBody];
+    order = beginLiveSpriteOrderTurn(order, k + 1, true);
+    const resolution = { resolutionId: { requestId: k + 1 }, segmentIndex: 0, segments: [{ events }] };
+    const commandIndex = events.findIndex((e) => (e.payload as { arguments?: string[] }).arguments?.[0] === "301");
+    order = advanceLiveSpriteOrderHost(order, resolution, events[commandIndex]!.sequence, true);
+    const req = battleMoveAnimationRequest(battler, foe, iceArgs);
+    lend = lendLiveSpriteOrder(order, 301);
+    key = liveMovePresentationRngBodyKey({ resolutionId: { requestId: k + 1 }, segmentIndex: 0, commandIndex });
+    order = markLiveSpriteOrderDeferredBody(order, lend, req, key);
+    // Each chain body's words: the pinned activation value of that body (fixture provenance), activated through the production seam.
+    const pinned = activateLiveMovePresentationRng(createPresentationRngHostAt(createPresentationRngState(value, "pinned")), req, key);
+    bodies.push(...pinned.bodies);
+    host = pinned;
+    if (k < values.length - 1) order = advanceLiveSpriteOrderHost(order, resolution, Number.POSITIVE_INFINITY);
+  });
+  cached = { spriteOrderInput: lend, presentationRng: { host: Object.freeze({ ...host, bodies: Object.freeze(bodies) }), key } };
+  chainLends.set(chain, cached);
+  return cached;
 }
 
 /** Pinned controlled-body host for a Random2 fixture body, activated through the production seam at host frame 0. */
@@ -301,10 +356,11 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
       // production does there (known-entry F, checked against the allocator occupancy), never from capture rows.
       // POKEBENCH_LIVE_ORDER_INPUT=none withholds it (order-independent adapters must stay exact without a host order).
       spriteOrderInput: process.env.POKEBENCH_LIVE_ORDER_INPUT === "none" ? undefined
+        : f.iceBallChain ? fixtureIceBallChain(f, request).spriteOrderInput
         : postKo ? postKo.spriteOrderInput
           : f.digUnleashAfterSetup ? digUnleashLend()
           : withFirstBody(f, prepareLiveMoveSpriteOrder(fixtureSpriteOrder(f, request).order, request).input),
-      ...(liveMoveRandom2Plan(request) === null ? {} : { presentationRng: fixturePresentationRng(f, request, request.moveId === 291
+      ...(liveMoveRandom2Plan(request) === null ? {} : { presentationRng: f.iceBallChain ? fixtureIceBallChain(f, request).presentationRng : fixturePresentationRng(f, request, request.moveId === 291
         && (request.turn & 1) === 0 ? { diveSetupSplashBirth: liveDiveSetupSplashBirth(field, attacker === 0 ? "player" : "opponent") } : undefined) }),
       ...(fixtureBattlerX2Input(f) === undefined ? {} : { battlerX2Input: fixtureBattlerX2Input(f) }),
     },

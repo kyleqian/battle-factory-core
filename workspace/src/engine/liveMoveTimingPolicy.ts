@@ -54,6 +54,8 @@ export type LiveMoveTimingParameter = Readonly<{
   evidence: readonly string[];
   /** Attacker side this parameter applies to (absent = both sides): a phase measured per side (Superpower's monbg write row). */
   side?: "player" | "opponent";
+  /** Rollout-counter body this parameter applies to (absent = every body): Ice Ball's lag rows are measured per counter body. */
+  rolloutCounter?: number;
 }>;
 
 export type LiveMoveTimingEntry = Readonly<{ move: string; parameters: readonly LiveMoveTimingParameter[] }>;
@@ -298,21 +300,34 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
   },
   /**
    * S10A Ice Ball (docs/next-adapters-prep26.md s1.4 H / s4 item 6; tools/integration/fixtures/prep26/iceball-check.json lagRows): 0-step lag rows
-   * (an animationRng stall: VBlank overrun) in 3 of 18 measured counter bodies (accepted player body 4 row 38, accepted bodies 5 row 112 both
-   * sides), none in the other 15 (accepted bodies 1..3, accepted opponent body 4, every GLALIE -> GOLEM / REGISTEEL alternate body): the
-   * dominant phase is no lag. `age` / bodyRows are the counter 0..3 values (counter 4: lag age 112, 132 / 131 rows). A lag row repeats the
-   * previous hardware OAM, holds the sprites and moves the task step one row earlier: a lag window under this policy differs on one row of
-   * the shake / fade. Only the counter-0 body ships live (later counters decline: docs/s10a-random2-order-lend-blocker.md). Also D3 (Random2 shards).
+   * (an animationRng stall: VBlank overrun), measured PER COUNTER BODY (request.rolloutCounter 1..5; 18 bodies): none in any counter 0..2 body
+   * (accepted SPHEAL player / opponent + GLALIE -> GOLEM player / opponent: 4 each), counter 3 (body 4) row 38 in 1 of 3 (accepted player; not
+   * accepted opponent, not GLALIE player), counter 4 (body 5) row 112 in 2 of 3 (accepted player and opponent; not GLALIE player). Dominant:
+   * no lag for counters 0..3, the row-112 lag for counter 4. A lag row repeats the previous hardware OAM, holds the sprites and moves the task
+   * step one row earlier. Later counters take the seam-resolved deferred lend (docs/s10a-random2-order-lend-blocker.md design 1). Also D3.
    */
   301: {
     move: "MOVE_ICE_BALL",
-    parameters: [{
-      kind: "optional-lag-age", age: 38, fixedLagAges: [], iterations: 75,
-      alternatives: [{ phase: "event", bodyRows: 77, measured: 3 }, { phase: "no-event", bodyRows: 76, measured: 15 }],
-      chosen: "no-event", tieRuleUsed: false,
-      evidence: ["tools/integration/fixtures/prep26/iceball-check.json lagRows (3 of 18 windows: accepted player b4 [38], accepted b5 [112] x2)",
-        "docs/next-adapters-prep26.md s1.4 / s4 item 6"],
-    }],
+    parameters: [
+      ...[1, 2, 3].map((rolloutCounter) => ({
+        kind: "optional-lag-age" as const, age: 38, fixedLagAges: [], iterations: 75, rolloutCounter,
+        alternatives: [{ phase: "event" as const, bodyRows: 77, measured: 0 }, { phase: "no-event" as const, bodyRows: 76, measured: 4 }] as const,
+        chosen: "no-event" as const, tieRuleUsed: false,
+        evidence: ["tools/integration/fixtures/prep26/iceball-check.json lagRows (counter body: no lag in 4 of 4 windows)"],
+      })),
+      {
+        kind: "optional-lag-age", age: 38, fixedLagAges: [], iterations: 75, rolloutCounter: 4,
+        alternatives: [{ phase: "event", bodyRows: 77, measured: 1 }, { phase: "no-event", bodyRows: 76, measured: 2 }],
+        chosen: "no-event", tieRuleUsed: false,
+        evidence: ["tools/integration/fixtures/prep26/iceball-check.json lagRows (body 4: accepted player [38]; accepted opponent, GLALIE player none)"],
+      },
+      {
+        kind: "optional-lag-age", age: 112, fixedLagAges: [], iterations: 131, rolloutCounter: 5,
+        alternatives: [{ phase: "event", bodyRows: 133, measured: 2 }, { phase: "no-event", bodyRows: 132, measured: 1 }],
+        chosen: "event", tieRuleUsed: false,
+        evidence: ["tools/integration/fixtures/prep26/iceball-check.json lagRows (body 5: accepted player [112], accepted opponent [112]; GLALIE player none)"],
+      },
+    ],
   },
 });
 
@@ -341,6 +356,11 @@ export function liveMoveTimingParameter(moveId: number, kind: LiveMoveTimingPara
 export function liveMoveOptionalLagAge(moveId: number): number | null {
   const p = liveMoveTimingParameter(moveId, "optional-lag-age");
   return p !== null && p.chosen === "event" ? p.age : null;
+}
+
+/** Rollout-counter parameter of a move (Ice Ball: one optional-lag parameter per counter body), or null. */
+export function liveMoveCounterTimingParameter(moveId: number, kind: LiveMoveTimingParameterKind, rolloutCounter: number): LiveMoveTimingParameter | null {
+  return LIVE_MOVE_TIMING_POLICY[moveId]?.parameters.find((p) => p.kind === kind && p.rolloutCounter === rolloutCounter) ?? null;
 }
 
 /** Body rows in the chosen phase of the move's optional-lag parameter (null without one). */

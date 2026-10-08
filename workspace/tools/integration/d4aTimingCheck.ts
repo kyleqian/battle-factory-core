@@ -25,14 +25,17 @@ const out: Record<string, unknown>[] = [];
 let failed = false;
 for (const path of paths) {
   const fixture = JSON.parse(readFileSync(path, "utf8")) as { move: string; timingPhase: LiveMoveTimingPhase;
-    timingPhases?: Partial<Record<LiveMoveTimingParameterKind, LiveMoveTimingPhase>>; attacker: { geometry: { side: "player" | "opponent" } } };
+    timingPhases?: Partial<Record<LiveMoveTimingParameterKind, LiveMoveTimingPhase>>; attacker: { geometry: { side: "player" | "opponent" } };
+    requestFields?: { rolloutCounter?: number } };
   const id = IDS[fixture.move]!;
   // Every policy parameter of the move: the window is in the selected phase iff each measured phase equals the policy's choice
   // (a fixture without timingPhases measured only the optional lag).
   const measured = fixture.timingPhases ?? { "optional-lag-age": fixture.timingPhase };
   // A per-side parameter (Superpower's monbg write row) applies to the fixture's attacker side only.
   // A scoped-exact move (no policy entry, e.g. Shock Wave) has no CPU-phase parameter: every window is in the "selected" phase (zero residual, duration).
-  const parameters = (LIVE_MOVE_TIMING_POLICY[id]?.parameters ?? []).filter((p) => p.side === undefined || p.side === fixture.attacker.geometry.side);
+  // A per-counter parameter (Ice Ball's lag rows per rollout-counter body) applies to the fixture's request.rolloutCounter only.
+  const parameters = (LIVE_MOVE_TIMING_POLICY[id]?.parameters ?? []).filter((p) => (p.side === undefined || p.side === fixture.attacker.geometry.side)
+    && (p.rolloutCounter === undefined || p.rolloutCounter === fixture.requestFields?.rolloutCounter));
   const policyPhases = Object.fromEntries(parameters.map((p) => [p.kind, p.chosen]));
   const results = verifyLiveAdapterFramebuffer(path);
   const runs = results.map((r) => {
