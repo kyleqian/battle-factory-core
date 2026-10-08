@@ -7,13 +7,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-10-08 (overnight, in progress) — S10A continuation: Substitute presentation + deferred order lend
 
-- **State:** local master; production src tree `ab030259` (`f1b672ca1`): 250 scoped-exact + 13 faithful-random +
-  13 faithful-timing (unchanged census 276). Opus 5.5 supervisor; Opus 5.5 workers (`-m opus`) on two lanes.
-- **Did so far:** Substitute swap status animations live around a subbed attacker's proven body (Headbutt, Body Slam,
-  Leech Seed); supervisor reran 21 windows x2 fresh 0 px, union green. prep38 evidence: 27 (move, side) cells exact
-  with a subbed DEFENDER drawn as the doll (weight 22.55) + order / art-lookup classes; reproduced (743 records).
-- **In flight:** integration — seam-resolved deferred sprite-order lend + Ice Ball counters 1..4 (+ Dive attack);
-  side — prep40 attacker-doll widening sweep. Queued: doll-defender batch, ISSUES #152 quick wins, Substitute fade.
+- **State:** local master; production src tree `d15bc413` (`c826d5b40`): 250 scoped-exact + 13 faithful-random +
+  13 faithful-timing (census 276 unchanged; tonight's work widens existing adapters and adds status animations).
+  Preview <http://127.0.0.1:5191/> serves `cabb751a1` (receipt `playable-preview-cabb751a1-receipt.json`). Opus 5.5
+  supervisor; Opus 5.5 workers (`-m opus`) on two lanes; every fold re-proved by the supervisor from fresh probes.
+- **Did so far:** Substitute swaps (SUBSTITUTE_TO_MON / MON_TO_SUBSTITUTE) live around 53 (move, side) cells used by a
+  subbed attacker (one-row tail latch included); 37 cells live while the DEFENDER is the doll; the Substitute fade live
+  (cursor footprint excluded); Substitute body order-neutral in the order tracker; seam-resolved deferred sprite-order
+  lend -> Ice Ball counters 1..4 live. Evidence: prep38 / prep39 / prep40, species audit 13 (3 defect classes + 2 new
+  CPU-phase cases, recorded in ISSUES #152).
+- **In flight:** integration — audit-13 fixes + D4 entries (Crunch, Psychic, Extreme Speed, Dive CLAMPERL; may move
+  exact -> faithful timing); side — prep41 D4 widening readiness (Pursuit later bodies, Ghost Curse, Hidden Power).
 - **Notes:** no DEFERRED entries. Detail in ANIMATION_INTEGRATION_PROGRESS.md top entry.
 
 ---
