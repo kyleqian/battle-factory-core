@@ -105,7 +105,7 @@ describe("S10A Skill Swap (285) faithful timing", () => {
     expect(rows.filter((r) => r.runs[0]!.residualPixels === 0)).toHaveLength(4);
   });
 
-  it("gates: known lend required; declines with an unknown order, for a shiny battler and for a non-zero idle rest", () => {
+  it("gates: known lend required; declines with an unknown order and for a shiny battler; an idle-rest battler engages (ISSUES #152)", () => {
     for (const name of ["skill-swap-player-girafarig-opponent-shuckle", "skill-swap-opponent-girafarig-player-shuckle"]) {
       const f = fixtureAt(name);
       const { view, effect } = effectOf(f);
@@ -119,8 +119,9 @@ describe("S10A Skill Swap (285) faithful timing", () => {
       expect(call({ known: false })).toBeNull();
       const ot = 416049562, shiny = ((ot >>> 16) ^ (ot & 0xffff)) >>> 0;
       for (const side of ["player", "opponent"] as const) expect(call(lend, { ...view.field, [side]: { ...view.field[side], personality: shiny } })).toBeNull();
-      // An opponent with a front idle rest (ONIX): the battler OBJ / trajectory bounds are the rest-free points, so the body declines.
-      expect(call(lend, { ...view.field, opponent: { ...view.field.opponent, species: 95, speciesSymbol: "ONIX", name: "ONIX" } as never })).toBeNull();
+      // An opponent with a front idle rest (ONIX) engages (species audit 12: ONIX / RATTATA attacker and target, both sides, 0 px fresh;
+      // tools/integration/fixtures/d4w-152).
+      expect(call(lend, { ...view.field, opponent: { ...view.field.opponent, species: 95, speciesSymbol: "ONIX", name: "ONIX" } as never })).not.toBeNull();
       expect(call(lend, { ...view.field, opponent: { ...view.field.opponent, species: 76, speciesSymbol: "GOLEM", name: "GOLEM" } as never })).not.toBeNull();
     }
   });
@@ -203,7 +204,7 @@ describe("S10A Flatter (260) faithful random", () => {
     for (const side of ["player", "opponent"]) expect(fl.filter((n) => fixtureAt(n).attacker.geometry.side === side)).toHaveLength(3);
   });
 
-  it("gates: words from the presentation host, first body, known lend; declines without words, with an unknown order, after an earlier body, for a shiny battler, for an elevated opponent", () => {
+  it("gates: words from the presentation host, first body, known lend; declines without words, with an unknown order, after an earlier body, for a shiny battler; an elevated opponent engages (ISSUES #152)", () => {
     for (const name of ["flatter-player-nidorina-opponent-onix", "flatter-opponent-nidorina-player-onix"]) {
       const f = fixtureAt(name);
       const { view, effect } = effectOf(f);
@@ -228,8 +229,9 @@ describe("S10A Flatter (260) faithful random", () => {
       expect(call({ ...lend, firstBody: false })).toBeNull();
       const ot = 416049562, shiny = ((ot >>> 16) ^ (ot & 0xffff)) >>> 0;
       for (const s of ["player", "opponent"] as const) expect(call(lend, { ...view.field, [s]: { ...view.field[s], personality: shiny } })).toBeNull();
-      // GOLBAT (elevated): its row-0 shadow latch is unmeasured for Flatter, so the body declines; GOLEM engages.
-      expect(call(lend, { ...view.field, opponent: { ...view.field.opponent, species: 42, speciesSymbol: "GOLBAT", name: "GOLBAT" } as never })).toBeNull();
+      // GOLBAT (elevated): its row-0 shadow is drawn by the #142 hook (species audit 12: FLYGON / GOLBAT / SHEDINJA / WEEZING 0 px both roles).
+      expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[260]).toBe(0);
+      expect(call(lend, { ...view.field, opponent: { ...view.field.opponent, species: 42, speciesSymbol: "GOLBAT", name: "GOLBAT" } as never })).not.toBeNull();
       expect(call(lend, { ...view.field, opponent: { ...view.field.opponent, species: 76, speciesSymbol: "GOLEM", name: "GOLEM" } as never })).not.toBeNull();
     }
   });

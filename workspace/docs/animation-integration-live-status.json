@@ -5123,8 +5123,8 @@
           192
         ],
         "rows": 16,
-        "maxPixelsPerRow": 18649,
-        "cause": "optional-lag-age: the restore Task_FadeToBg counts executed frames, so a no-lag window draws its BLDY fade-out (UnsetPsychicBackground, C2 = 156) one row early against the lag policy on rows 177..192 (accepted GIRAFARIG -> SHUCKLE opponent 298,384 px, prep22 ALAKAZAM -> GOLEM opponent 293,344 px: 2 of 6 windows; = the prep35 flipped-phase numbers); palette-transfer-row: display-neutral (BLDY 16 on rows 175..177 darkens BG bank 2 to black in both phases), so the restore-176 window is documented with no residual row (windows)",
+        "maxPixelsPerRow": 18778,
+        "cause": "optional-lag-age: the restore Task_FadeToBg counts executed frames, so a no-lag window draws its BLDY fade-out (UnsetPsychicBackground, C2 = 156) one row early against the lag policy on rows 177..192 (accepted GIRAFARIG -> SHUCKLE opponent 298,384 px, prep22 ALAKAZAM -> GOLEM opponent 293,344 px: 2 of 6 windows; = the prep35 flipped-phase numbers; the max per row is the species-audit-12 ALAKAZAM opponent swap window, 18,778 px/row (300,448 px, ages 177..192), re-measured fresh by d4w, not the accepted 18,649); palette-transfer-row: display-neutral (BLDY 16 on rows 175..177 darkens BG bank 2 to black in both phases), so the restore-176 window is documented with no residual row (windows)",
         "windows": {
           "skill-swap-alt-player-alakazam-golem": {
             "ages": [],
@@ -5137,6 +5137,7 @@
       },
       "d3": false,
       "evidence": [
+        "d4w (ISSUES #152, species audit 12): the zero-idle-rest gate is lifted. Fresh direct-mGBA runs (2 per window, identical) through the production renderer: ONIX / RATTATA attacker and target, both sides, 6 policy-phase windows 0 px, 2 other-phase windows only ages 177..192; the 6 accepted s10a-live Skill Swap windows unchanged (tools/integration/fixtures/d4w-152; tests/animation/liveSkillSwapFlatterAdapters.test.ts)",
         "tools/integration/fixtures/sf-live-receipt.json",
         "tools/integration/fixtures/s10a-live/skill-swap-*.json (6 dense windows, both orientations: accepted GIRAFARIG -> SHUCKLE, prep22 ALAKAZAM -> GOLEM, prep33 ESPEON -> WEEZING player (elevated target) / WEEZING -> SNORLAX opponent (elevated attacker); every window a first body)",
         "docs/next-adapters-prep35.md s0-s3 + tools/integration/fixtures/prep35/skillswap-check-pixels.json: hardware OAM rows 1..end / 32 matrices / 64-slot order / palettes / bld exact in 6 windows; T lag 176 in 4 of 6, restore row 175 in 5 of 6 (re-measured by the sf probes: identical body lengths)",

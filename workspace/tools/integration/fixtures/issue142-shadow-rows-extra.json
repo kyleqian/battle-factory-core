@@ -6605,6 +6605,50 @@
    "requestFields": {
     "turn": 0
    }
+  },
+  {
+   "id": 260,
+   "move": "FLATTER",
+   "orientation": "player",
+   "variant": "s12-weezing-flatter-player-nidorina-opponent-onix",
+   "activationFrame": 70,
+   "windowStart": 70,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/species-audit-12/derived/weezing-flatter-player-nidorina-opponent-onix.json",
+    "scenario": "tools/integration/fixtures/species-audit-12/scenarios/weezing-flatter-player-nidorina-opponent-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (species audit 12 prep22 probes; d4w: the elevated FLYGON / GOLBAT / SHEDINJA / WEEZING opponent is 0 px from row 0 in both roles via the live hook, tools/integration/fixtures/d4w-152)"
+   },
+   "requestFields": {
+    "turn": 0
+   }
+  },
+  {
+   "id": 260,
+   "move": "FLATTER",
+   "orientation": "opponent",
+   "variant": "s12-weezingA-flatter-opponent-nidorina-player-onix",
+   "activationFrame": 73,
+   "windowStart": 73,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/species-audit-12/derived/weezingA-flatter-opponent-nidorina-player-onix.json",
+    "scenario": "tools/integration/fixtures/species-audit-12/scenarios/weezingA-flatter-opponent-nidorina-player-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (species audit 12 prep22 probes; d4w: the elevated FLYGON / GOLBAT / SHEDINJA / WEEZING opponent is 0 px from row 0 in both roles via the live hook, tools/integration/fixtures/d4w-152)"
+   },
+   "requestFields": {
+    "turn": 0
+   }
   }
  ]
 }

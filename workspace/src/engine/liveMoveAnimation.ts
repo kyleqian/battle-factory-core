@@ -508,6 +508,9 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // Substitute body (prep37 s1): live age 0 = activation (elevated GOLBAT attacker: 200 px at age 0 otherwise). No shadow return
     // after it: the doll keeps the shadow hidden (battle_gfx_sfx_util.c:1220; battleCommandFieldArt.ts).
     164,
+    // Flatter (species audit 12 / ISSUES #152): an elevated opponent's row-0 shadow (the pre-activation latch) through the same hook
+    // (FLYGON / GOLBAT / SHEDINJA / WEEZING either role 0 px; tools/integration/fixtures/d4w-152).
+    260,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -3495,13 +3498,12 @@ export function liveMoveAnimationPresentation(
     case 260: {
       // S10A faithful random: Flatter (prep35 s2 / s3 item 2; liveOamMoves.ts liveFlatterInputs). The 114 confetti words from the presentation
       // host only (null = not activated -> scene-off fallback). First body (the activation registers are S0, WIN0 240 / 161), known lend,
-      // known-entry allocator (spotlight 305 / confetti 433, palette slots 7 / 8), non-shiny. An elevated opponent declines: its row-0 shadow
-      // (the pre-activation latch) is unmeasured for Flatter (prep35 s4).
+      // known-entry allocator (spotlight 305 / confetti 433, palette slots 7 / 8), non-shiny. An elevated opponent's row-0 shadow (the
+      // pre-activation latch) is drawn by the #142 hook (LIVE_MOVE_OPPONENT_SHADOW_ROW[260] = 0; species audit 12, ISSUES #152).
       const rng = liveMovePresentationRngWords(presentationRngInput);
       if (rng === null || rng.words.length !== 114) return null;
       if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      if (art.opponent.origin.y !== battleCommandFieldSpriteOrigin(art.opponent, "opponent").y) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -3530,8 +3532,9 @@ export function liveMoveAnimationPresentation(
     case 285: {
       // S10A faithful timing: Skill Swap (prep35 s1 / s3 item 1; liveOamMoves.ts liveSkillSwapInputs). Known lend (the lent 64-slot order is the
       // L input; every measured window is a first body), known-entry allocator (BLUEGREEN_ORB tile 305, palette slot 7, orb (slot, matrix) pairs
-      // over the known entry), non-shiny, zero idle rests (the battler OBJ and the trajectory bounds are the rest-free sprite / pic points).
-      // Both CPU-phase bits come from the timing policy (lag at 176; the display-neutral bank-2 restore row).
+      // over the known entry), non-shiny. Idle-rest battlers engage (species audit 12, ISSUES #152: ONIX / RATTATA attacker and target, both
+      // sides, 0 px; the swap programs write absolute x2 / positions before any rest shows). Both CPU-phase bits come from the timing policy
+      // (lag at 176; the display-neutral bank-2 restore row).
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
@@ -3540,8 +3543,6 @@ export function liveMoveAnimationPresentation(
       const restoreRow = liveMovePaletteTransferRow(285);
       if (palettes === null || activationOrder === null || restoreRow === null) return null;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
-      const zeroRest = (a: typeof attackerAnchors) => a.frontIdleRest.x2 === 0 && a.frontIdleRest.y2 === 0;
-      if (!zeroRest(attackerAnchors) || !zeroRest(targetAnchors)) return null;
       const attackerSide = attacker.geometry.side, targetSide = target.geometry.side;
       const rgb555 = (c: { r: number; g: number; b: number }) => (c.r >> 3) | (c.g >> 3) << 5 | (c.b >> 3) << 10;
       const inputs = liveSkillSwapInputs({ attackerSide, attacker: attackerAnchors, target: targetAnchors,

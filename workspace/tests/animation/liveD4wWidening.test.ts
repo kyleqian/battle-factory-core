@@ -78,3 +78,27 @@ describe("d4w: Hidden Power (237, Unown) optional lag at 64", () => {
     expect(e.alternatePhaseResidual.ages).toEqual(Array.from({ length: 115 }, (_, i) => 65 + i));
   });
 });
+
+describe("d4w: ISSUES #152 quick wins (species audit 12) through the production renderer", () => {
+  type Dense = { fixture: string; rows: number; residualPixels: number; identical: boolean; badRows: [number, number, number, number, number][] };
+  const dense = (stem: string) => read(`tools/integration/fixtures/d4w-152/${stem}.json`) as Dense;
+  const stems = readFileSync(join(root, "tools/integration/fixtures/d4w-152/summary.txt"), "utf8").trim().split("\n").map((l) => l.split(" ")[0]!);
+  it("Flatter: every window (elevated FLYGON / GOLBAT / SHEDINJA / WEEZING either role, accepted, alternates) 219/219 rows 0 px, 2 fresh runs identical", () => {
+    const flatter = stems.filter((s) => s.includes("flatter"));
+    expect(flatter).toHaveLength(26);
+    for (const s of flatter) expect([s, dense(s).rows, dense(s).residualPixels, dense(s).identical]).toEqual([s, 219, 0, true]);
+  });
+  it("Skill Swap: ONIX / RATTATA idle-rest windows engage; policy phase 0 px, no-lag windows only on 177..192 with the documented max 18,778 px/row", () => {
+    const swap = stems.filter((s) => s.includes("skill-swap"));
+    expect(swap).toHaveLength(15);
+    const residual = status.faithfulTimingAdapters.find((x: { id: number }) => x.id === 285).alternatePhaseResidual;
+    let max = 0;
+    for (const s of swap) {
+      const d = dense(s);
+      expect(d.identical).toBe(true);
+      if (d.rows === 196) expect([s, d.residualPixels]).toEqual([s, 0]);
+      else for (const [age, , px] of d.badRows) { expect(residual.ages).toContain(age); max = Math.max(max, px); }
+    }
+    expect([max, residual.maxPixelsPerRow]).toEqual([18778, 18778]);
+  });
+});
