@@ -2230,8 +2230,9 @@ Use the census to rank work. Resume points, in order:
 1. The remaining order-host stops (`docs/next-adapters-prep43.md`): Giga Drain body
    (species geometry), hail WEATHER_VAR (battler coordinates), RAIN_CONTINUES (Random2 words; the deferred lend is keyed by move
    body), the locked-turn continuation in the orchestrator, the opponent's voluntary return to ball.
-2. Allocator history (9 % of fallback frames: Protect / Light Screen / Reflect / Barrier / Magic Coat / Mirror Coat) — plans
-   for the bodies that drop the allocator host (`docs/allocator-plan-v2-evidence.md`).
+2. Allocator history (Protect / Light Screen / Reflect / Barrier / Magic Coat / Mirror Coat): land prep44's 50 audited
+   NET-ZERO move ids (`docs/next-adapters-prep44.md`; +0.9 pp live by count on seeds 0..299), then the status-animation
+   invalidators (sleep / confusion / poison) and the long tail — fallbacks need the WHOLE invalidator chain cleared.
 3. ISSUES #152: the idle-rest opponent-attacker class (15 candidate renderers from the a13fix static scan), Confuse Ray and
    Faint Attack CPU phases, Extrasensory split rows, Double-Edge / Attract rows, TYRANITAR rows.
 4. Substitute remainder: swaps before faint / switch-out (43 / 41 leading rows), Roar target x2, Dig hidden attacker,

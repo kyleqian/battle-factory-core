@@ -21,10 +21,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (Crunch, Psychic, Extreme Speed, Dive CLAMPERL, Pursuit later bodies, Hidden Power); Flatter / Skill Swap gates;
   NIDORAN healthbox symbol; missing sides (Double Team opp, Faint Attack opp, Rock Slide player); prep43 order plans
   (CONFUSION, PRZ survivor fix, Leech Seed drain, sandstorm, Dig / Brick Break turn-keyed).
-- **Did (evidence, 8 merges):** prep38 / prep39 / prep40 / prep41 / prep43, species audits 13 / 14, live-share census
-  (`tools/integration/liveShareCensus.ts`, `docs/live-share-census.md`).
+- **Did (evidence, 9 merges):** prep38 / prep39 / prep40 / prep41 / prep43 / prep44 (50 allocator NET-ZERO bodies ready,
+  +0.9 pp), species audits 13 / 14, live-share census (`tools/integration/liveShareCensus.ts`, `docs/live-share-census.md`).
 - **Next:** ROADMAP S10A "Next (2026-10-08 morning)": rerun the census, then the remaining order-host stops (Giga Drain,
-  hail, rain, locked turns, opponent return to ball), allocator history (Protect / screens), ISSUES #152 remainder,
+  hail, rain, locked turns, opponent return to ball), land prep44's allocator NET-ZERO ids, ISSUES #152 remainder,
   Substitute remainder, Ghost Curse provider / Dive attack.
 - **Notes:** no DEFERRED entries. Soak gates superseded for S10A (ANIMATION_VERIFICATION scoped policy). All worker
   branches merged, worktrees removed; logs `.integration/validation/*-20261008/` (raw probe dumps pruned).

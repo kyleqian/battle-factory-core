@@ -5,6 +5,14 @@
 - Final: production src tree `e3fc2240` (`65dec33c2`); supervisor final gates on the union typecheck, 1,573 files / 12,958
   tests, build 874, differential 624 / 624 vs `1a7b687f0` (`final-supervisor-gates-20261008.json`). Census
   `245+13+18+0+0=276` (Crunch, Psychic, Extreme Speed, Pursuit, Hidden Power moved scoped exact -> faithful timing).
+- prep44 (side, `96bb34b16`, new files only; after the final gates — evidence only): allocator-history gaps. Allocator
+  fallbacks come from CHAINS of invalidating units (only 38 / 232 single-cause; the history only returns at a post-KO
+  reseed). 50 move bodies audited NET-ZERO (both orientations, twice fresh, 103 pairs identical); appending them to
+  LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS (liveMoveSpriteAllocator.ts ~:64; pin tests/liveSpriteAllocator.test.ts) raises
+  census seeds 0..299 81.54 -> 82.48 % by count, 80.19 -> 80.87 % by frames, 0 regressions, identical gameplay commands
+  (chain predictor matches both measured patches). Not audited: status animations (sleep / confusion / poison: 39 cmds /
+  4,428 frames; separate orchestrator path ~:2391), Future Sight, long tail; post-KO summary + switch-in reseed blocked
+  by order-host state. Supervisor: `prep44Run.sh` into fresh dirs — all 10 receipts byte-identical.
 - Folded Opus worker `3ef6f4d19` as `f1b672ca1` (src tree `ab030259`): Substitute STATUS animations SUBSTITUTE_TO_MON /
   MON_TO_SUBSTITUTE presented live around a subbed ATTACKER's proven body (`src/engine/liveSubstituteSwap.ts`: source
   AnimTask_SwapMonSpriteToFromSubstitute, x2 5 per row, 42 / 40 script rows, graphics load row 21 / 20, one idle row,
