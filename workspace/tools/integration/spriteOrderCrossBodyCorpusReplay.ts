@@ -51,7 +51,17 @@ function applyGap(tracker: SpriteOrderTracker, windows: readonly Window[]): { tr
   return { tracker: next, shape: shape.join("+") || "empty" };
 }
 
-export function replayCrossBodyCorpus() {
+/** liveSpriteOrderHost.ts's MOVE_ANIMATION key: an odd choosetwoturnanim turn of Sky Attack / Dig / Brick Break is 10000 + move id. */
+function hostMoveId(mv: number, turn: number): number {
+  return (turn & 1) === 1 && (mv === 91 || mv === 143 || mv === 280) ? 10000 + mv : mv;
+}
+
+/**
+ * `turnKeyed` (prep43, docs/next-adapters-prep43.md): the move-animation event carries the host's choosetwoturnanim key. The tables
+ * have no request turn, so Dig's turn is its occurrence parity per attacker side in the scenario (setup, unleash, ...) and Brick
+ * Break's is "a screen was broken" = not a `-normal-` scenario. Without it (the original replay) Dig's unleash is fed the setup plan.
+ */
+export function replayCrossBodyCorpus(options: Readonly<{ turnKeyed?: boolean }> = {}) {
   const scenarios = [...read("sprite-order-body-events.json").scenarios, ...read("sprite-order-body-events-ext.json").scenarios];
   let edges = 0, known = 0, exact = 0, mismatched = 0, firstEdges = 0, laterKnown = 0, skipped = 0;
   const mismatches: { file: string; unit: number; mv: number }[] = [];
@@ -63,6 +73,7 @@ export function replayCrossBodyCorpus() {
     if (JSON.stringify(scenario.freeAtFirstEdge) !== JSON.stringify(KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER)) { skipped += 1; continue; }
     let tracker = createSpriteOrderTracker(knownEntrySpriteOrderState("battle-lab-ordinary-singles"));
     let firstEdge = true;
+    const occurrences = new Map<string, number>();
     scenario.units.forEach((unit, index) => {
       if (unit.kind === "gap") {
         const applied = applyGap(tracker, unit.windows);
@@ -88,16 +99,22 @@ export function replayCrossBodyCorpus() {
       }
       firstEdge = false;
       const side = ownerSide(scenario, mv);
+      let turn = 0;
+      if (options.turnKeyed && side !== null && mv === 91) {
+        turn = occurrences.get(`${mv}:${side}`) ?? 0;
+        occurrences.set(`${mv}:${side}`, turn + 1);
+      }
+      if (options.turnKeyed && mv === 280) turn = scenario.file.includes("-normal-") ? 0 : 1;
       tracker = applySpriteOrderPresentationEvent(tracker, mv === 0 || side === null
         ? { kind: "invalidate", reason: "mv-0 / unattributed body" }
-        : { kind: "move-animation", moveId: mv, attackerSide: side });
+        : { kind: "move-animation", moveId: hostMoveId(mv, turn), attackerSide: side });
     });
   }
   return { scenarios: scenarios.length, skipped, edges, firstEdges, known, laterKnown, exact, mismatched, mismatches, gapShapes, otherSamples };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const result = replayCrossBodyCorpus();
+  const result = replayCrossBodyCorpus({ turnKeyed: process.argv.includes("--turn-keyed") });
   const { otherSamples, ...summary } = result;
   console.log(JSON.stringify({ ...summary, mismatches: result.mismatches.slice(0, 10) }));
   const counts = new Map<string, number>();

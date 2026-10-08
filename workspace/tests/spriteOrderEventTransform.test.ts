@@ -4,7 +4,7 @@ import {
   applySpriteOrderPresentationEvent, createSpriteOrderTracker, decodeSpriteOrderPlan, spriteOrderProductionBodyPlan,
   spriteOrderStatAnimationPlan, spriteOrderStatusAnimationName, spriteOrderTrackerLend, type SpriteOrderPresentationEvent,
 } from "../src/engine/spriteOrderEventTransform.ts";
-import { SPRITE_ORDER_PRODUCTION_BODIES, SPRITE_ORDER_PRODUCTION_PLANS } from "../src/engine/spriteOrderProductionPlans.ts";
+import { SPRITE_ORDER_PRODUCTION_ANIMS, SPRITE_ORDER_PRODUCTION_BODIES, SPRITE_ORDER_PRODUCTION_PLANS } from "../src/engine/spriteOrderProductionPlans.ts";
 import {
   KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, applySpriteOrderUnitPlan, createSpriteOrderPlanCursor, knownEntrySpriteOrderState,
 } from "../src/engine/spriteOrderProvider.ts";
@@ -21,8 +21,9 @@ describe("production sprite-order plan table (generated, pinned)", () => {
   it("regenerates byte-identically from the evidence JSON", () => {
     const committed = readFileSync(new URL("../src/engine/spriteOrderProductionPlans.ts", import.meta.url), "utf8");
     expect(renderSpriteOrderProductionTableFromFixtures()).toBe(committed);
-    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(485);
-    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(196);
+    // + prep43 (fixtures/prep43/plan-rows.json, appended): Dig 91 / 10091, Brick Break 280 / 10280 bodies, 5 plans.
+    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(493);
+    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(201);
   });
 
   it("decodes every EXACT-PLAN (move, side) body of the ext table to the fixture plan", () => {
@@ -31,6 +32,7 @@ describe("production sprite-order plan table (generated, pinned)", () => {
     const extra: Record<string, { verdict: string; plan: unknown; tier?: string }> = {
       ...fixture("sprite-order-policy-gaps/relative-y-plans.json").bodies, ...fixture("sprite-order-body-plans-rely.json").bodies,
       ...fixture("prep28/plan-rows.json").bodies, ...fixture("prep28/plan-rows-sky-attack.json").bodies,
+      ...fixture("prep43/plan-rows.json").bodies,
     };
     let exact = 0;
     for (const [key, row] of Object.entries(bodies)) {
@@ -94,7 +96,7 @@ describe("sprite-order presentation-event transform", () => {
       { kind: "hit-animation", targetVisible: false },
       { kind: "move-animation", moveId: 288, attackerSide: "player" },
       { kind: "move-animation", moveId: 144, attackerSide: "player" },
-      { kind: "status-animation", status: "CONFUSION" },
+      { kind: "status-animation", status: "CURSED" },
       { kind: "status-animation", status: "BRN" },
       { kind: "general-animation", animation: "HAIL_CONTINUES" },
       { kind: "general-animation", animation: "STATUS_SLP" },
@@ -113,6 +115,42 @@ describe("sprite-order presentation-event transform", () => {
       spriteOrderProductionBodyPlan(104, "opponent"));
     expect(tracker.cursor.order.free).toEqual(direct.order.free);
     expect(spriteOrderTrackerLend(tracker)).toEqual(direct.order.free);
+  });
+
+  it("prep43 EXACT plans: CONFUSION, LEECH_SEED_DRAIN, SANDSTORM_CONTINUES (= Sandstorm 201), Dig / Brick Break per choosetwoturnanim branch", () => {
+    const rows = fixture("prep43/plan-rows.json") as { bodies: Record<string, { plan: unknown }>; anims: Record<string, { plan: unknown }> };
+    const text = (plan: unknown) => encodeSpriteOrderPlan(plan as never);
+    const at = (name: string) => SPRITE_ORDER_PRODUCTION_PLANS[SPRITE_ORDER_PRODUCTION_ANIMS[name]!];
+    expect(at("STATUS_CONFUSION")).toBe("Cfffff;D1,2,0,3,4");
+    expect(at("LEECH_SEED_DRAIN")).toBe("Cf;D0;Cf;Cf;Cf;Cf;Cf;D1;Cf;D2;Cf;Cf;D3;D5;D4;D6;D7;D8;Cf;Cf;Cf;D9;Cf;D10;D11;D12");
+    expect(at("SANDSTORM_CONTINUES")).toBe(text(spriteOrderProductionBodyPlan(201, "player")));
+    expect(SPRITE_ORDER_PRODUCTION_ANIMS.HAIL_CONTINUES).toBeUndefined();
+    expect(SPRITE_ORDER_PRODUCTION_ANIMS.RAIN_CONTINUES).toBeUndefined();
+    for (const side of ["player", "opponent"] as const) {
+      expect(text(spriteOrderProductionBodyPlan(91, side))).toBe("Cff;Cffff;D3,2,5,4;Cffff;D7,6,9,8;Cffff;D11,10,13,12;Cffff;D15,14,17,16;Cffff;D19,18,21,20;D1,0");
+      expect(text(spriteOrderProductionBodyPlan(10091, side))).toBe("Cff;Cf;D2;D1,0");
+      expect(text(spriteOrderProductionBodyPlan(280, side))).toBe("Cf;Cf/D0;D1;Cf;Cf;D2;D3;Cf;D4;Cff;D5;D6;Cf;D7");
+      expect(text(spriteOrderProductionBodyPlan(10280, side))).toBe("Cf;Cf;Cf/D0;D2;Cf;Cf;D3;D4;Cf;D5;Cff;D1;D6;D7;Cffff;D10,11,8,9;Cf;D12");
+      expect(spriteOrderProductionBodyPlan(202, side)).toBeNull(); // Giga Drain: species-geometry key (blocked)
+    }
+    for (const [key, row] of Object.entries(rows.bodies)) {
+      const [move, side] = key.split(":") as [string, "player" | "opponent"];
+      expect(spriteOrderProductionBodyPlan(Number(move), side), key).toEqual(row.plan);
+    }
+    // The tracker applies each unit exactly like the plan applier from the known entry and stays known (one survivor at most).
+    const direct = (plan: unknown) => applySpriteOrderUnitPlan(createSpriteOrderPlanCursor(knownEntrySpriteOrderState("ordinary-factory")), plan as never);
+    for (const [event, plan] of [
+      [{ kind: "status-animation", status: "CONFUSION" }, rows.anims["Status:B_ANIM_STATUS_CONFUSION"]!.plan],
+      [{ kind: "general-animation", animation: "LEECH_SEED_DRAIN" }, rows.anims["General:B_ANIM_LEECH_SEED_DRAIN"]!.plan],
+      [{ kind: "general-animation", animation: "SANDSTORM_CONTINUES" }, rows.anims["General:B_ANIM_SANDSTORM_CONTINUES"]!.plan],
+      [{ kind: "move-animation", moveId: 10280, attackerSide: "opponent" }, rows.bodies["10280:opponent"]!.plan],
+    ] as const) {
+      const tracker = run([event as SpriteOrderPresentationEvent]);
+      expect(tracker.cursor.order.known, JSON.stringify(event)).toBe(true);
+      expect(tracker.cursor.order.free, JSON.stringify(event)).toEqual(direct(plan).order.free);
+    }
+    // STATUS_PRZ (re-taken spark slots) keeps the order known: one survivor, carried.
+    expect(run([{ kind: "status-animation", status: "PRZ" }]).cursor.order.known).toBe(true);
   });
 
   it("maps status animations as InitAndLaunchChosenStatusAnimation does", () => {
@@ -177,11 +215,19 @@ describe("strict real-route replay (docs/sprite-order-real-route.md events; no r
   });
 
   it("BattleLab corpus (committed + ext event tables): every edge the transform knows is exact", () => {
-    const corpus = replayCrossBodyCorpus();
+    // Turn-keyed like the host (Dig / Brick Break choosetwoturnanim branch, prep43): known 1130 -> 1136, all exact.
+    const corpus = replayCrossBodyCorpus({ turnKeyed: true });
     expect({ scenarios: corpus.scenarios, skipped: corpus.skipped, edges: corpus.edges, mismatched: corpus.mismatched })
       .toEqual({ scenarios: 573, skipped: 19, edges: 1366, mismatched: 0 });
     expect(corpus.exact).toBe(corpus.known);
-    expect(corpus.known).toBe(1130);
-    expect(corpus.laterKnown).toBe(576);
+    expect(corpus.known).toBe(1136);
+    expect(corpus.laterKnown).toBe(582);
+    // Without the turn key the Dig unleash body is fed the setup plan: exactly the edge after it (unit 5) in the two Dig scenarios.
+    const unkeyed = replayCrossBodyCorpus();
+    expect({ known: unkeyed.known, exact: unkeyed.exact, mismatched: unkeyed.mismatched }).toEqual({ known: 1136, exact: 1134, mismatched: 2 });
+    expect(unkeyed.mismatches).toEqual([
+      { file: "91-mechanic-dig-opponent-vibrava-player-chansey-0.json", unit: 5, mv: 45 },
+      { file: "91-mechanic-dig-player-vibrava-opponent-chansey-0.json", unit: 5, mv: 45 },
+    ]);
   });
 });

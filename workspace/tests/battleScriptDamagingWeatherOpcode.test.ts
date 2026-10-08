@@ -420,5 +420,25 @@ describe("production damaging-weather opcode dispatch (screens/weather registrat
       if (result.kind !== "advanced") throw new Error("expected advance");
       expect(result.state.scheduler.pendingControllerBattlers).toContain(0);
     });
+
+    it("carries sB_ANIM_ARG1's continue-animation id (sandstorm 12 / hail 13) as the presentation argument; gameplay state is identical", () => {
+      const step = (weather: number) => {
+        const { result } = stepAtProgramCounter(pc, context({ weather }));
+        if (result.kind !== "advanced") throw new Error("expected advance");
+        return result;
+      };
+      type AnimationEvent = { kind: string; animationId?: string; arguments?: readonly string[] };
+      const animationArguments = (result: ReturnType<typeof step>) => (result.state.events as readonly unknown[])
+        .map(event => ((event as { payload?: AnimationEvent }).payload ?? event) as AnimationEvent)
+        .filter(event => event.kind === "animation").map(event => [event.animationId, event.arguments]);
+      const sandstorm = step(1 << 3), hail = step(1 << 7), clear = step(0);
+      expect(animationArguments(sandstorm)).toEqual([["WEATHER_VAR", ["12"]]]);
+      expect(animationArguments(hail)).toEqual([["WEATHER_VAR", ["13"]]]);
+      expect(animationArguments(clear)).toEqual([["WEATHER_VAR", []]]);
+      // The argument is the only difference: the machine state (rules, scheduler, program counter) does not depend on it.
+      const withoutEvents = (result: ReturnType<typeof step>) => ({ ...result.state, events: [], rulesContext: { ...result.state.rulesContext, weather: 0 } });
+      expect(withoutEvents(sandstorm)).toEqual(withoutEvents(clear));
+      expect(withoutEvents(hail)).toEqual(withoutEvents(clear));
+    });
   });
 });

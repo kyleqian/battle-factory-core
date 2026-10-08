@@ -4,9 +4,11 @@
  * the pure transform of spriteOrderEventTransform.ts, in event-sequence order, each event exactly once:
  *
  *   player command submitted from the action menu   action-prompt + actions-committed (bounce pair)
- *   animation MOVE_ANIMATION                         move-animation (moveId, attacker side)
+ *   animation MOVE_ANIMATION                         move-animation (moveId, attacker side; an odd request turn of
+ *                                                    Sky Attack / Dig / Brick Break is 10000 + moveId: choosetwoturnanim)
  *   animation HIT_ANIMATION                          hit-animation (target visibility from the toggles below)
  *   animation STATS_CHANGE                           stat-animation (B_ANIM_STATS_CHANGE argument)
+ *   animation WEATHER_VAR argument 12 / 13           general-animation SANDSTORM_CONTINUES / HAIL_CONTINUES
  *   any other animation id                           general-animation (HELD_ITEM_EFFECT / SUN_CONTINUES / ...)
  *   status-animation                                 status-animation (InitAndLaunchChosenStatusAnimation name)
  *   set-battler-sprite-visibility                    hiding (semi-invulnerable) or a return-to-ball receipt invalidates,
@@ -112,6 +114,8 @@ export function markLiveSpriteOrderDeferredBody(
     ...(body.turn === undefined ? {} : { turn: body.turn }), activation }) });
 }
 
+/** Moves whose script branches with choosetwoturnanim on `gAnimMoveTurn & 1` (Sky Attack strike, Dig unleash, Brick Break screen broken). */
+const TWO_TURN_ANIM_MOVE_IDS: ReadonlySet<number> = new Set([91, 143, 280]);
 const RECALL_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_VARIOUS", "B_SCR_OP_RETURNATKTOBALL", "B_SCR_OP_RETURNTOBALL"]);
 /** Order events that count as a presentation unit for the first-body gate (every body, faint, switch and recall). */
 const BODY_UNIT_EVENTS: ReadonlySet<string> = new Set([
@@ -306,7 +310,9 @@ function orderEventOf(
     switch (payload.animationId) {
       case "MOVE_ANIMATION": {
         const request = battleMoveAnimationRequest(battler, payload.target, payload.arguments);
-        return { event: { kind: "move-animation", moveId: request.moveId === 143 && request.turn === 1 ? 10143 : request.moveId, attackerSide: battler === 0 ? "player" : "opponent" } };
+        // choosetwoturnanim (gAnimMoveTurn & 1) branches: Sky Attack's strike, Dig's unleash, Brick Break's shattered screen.
+        const secondBranch = (request.turn & 1) === 1 && TWO_TURN_ANIM_MOVE_IDS.has(request.moveId);
+        return { event: { kind: "move-animation", moveId: secondBranch ? 10000 + request.moveId : request.moveId, attackerSide: battler === 0 ? "player" : "opponent" } };
       }
       case "HIT_ANIMATION":
         return { event: { kind: "hit-animation", targetVisible: !hidden[battler] } };
@@ -318,6 +324,11 @@ function orderEventOf(
       case "SCENE_OFF_ATTACK_PAUSE":
         return { event: { kind: "invalidate", reason: "scene-off attack pause" } };
       default:
+        // playanimation_var sB_ANIM_ARG1 (BattleScript_DamagingWeatherContinues): B_ANIM_SANDSTORM_CONTINUES 12 / B_ANIM_HAIL_CONTINUES 13.
+        if (payload.animationId === "WEATHER_VAR") {
+          const argument = payload.arguments[0];
+          return { event: { kind: "general-animation", animation: argument === "12" ? "SANDSTORM_CONTINUES" : argument === "13" ? "HAIL_CONTINUES" : "WEATHER_VAR" } };
+        }
         return { event: { kind: "general-animation", animation: payload.animationId } };
     }
   }

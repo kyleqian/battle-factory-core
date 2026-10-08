@@ -72,6 +72,15 @@ function requireAttacker(rules: BattleScriptRulesContext): 0 | 1 | 2 | 3 {
 }
 
 /**
+ * The animation id `sB_ANIM_ARG1` carries into `BattleScript_DamagingWeatherContinues`' `playanimation_var` (the end-turn handler
+ * stamps it from the weather: `include/constants/battle_anim.h` B_ANIM_SANDSTORM_CONTINUES 12 / B_ANIM_HAIL_CONTINUES 13).
+ * Presentation payload only (the live sprite-order host keys the continue animation on it); gameplay never reads it.
+ */
+function damagingWeatherAnimationArguments(weather: number): readonly string[] {
+  return Object.freeze((weather & B_WEATHER_SANDSTORM) !== 0 ? ["12"] : (weather & B_WEATHER_HAIL) !== 0 ? ["13"] : []);
+}
+
+/**
  * `Cmd_playanimation_var` (`battle_script_commands.c:4046-4076`). Both
  * concrete call sites (`BattleScript_DamagingWeatherContinues`,
  * `OverworldWeatherStarts`) share the exact shape `[BS_ATTACKER,
@@ -129,7 +138,7 @@ function createPlayanimationVarHandler(
             kind: "animation" as const,
             animationId: "WEATHER_VAR",
             battler,
-            arguments: Object.freeze([]),
+            arguments: damagingWeatherAnimationArguments(context.state.rulesContext.weather),
           }),
         ]),
       },

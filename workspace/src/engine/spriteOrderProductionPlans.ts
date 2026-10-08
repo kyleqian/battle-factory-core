@@ -200,6 +200,11 @@ export const SPRITE_ORDER_PRODUCTION_PLANS: readonly string[] = Object.freeze([
   "Cf;Cf;D0;Cf;D1;Cf;D2;Cf;D3;Cf;D4;Cf;D5;Cf;D6",
   "Cf;Cf;D0",
   "Cf",
+  "Cff;Cffff;D3,2,5,4;Cffff;D7,6,9,8;Cffff;D11,10,13,12;Cffff;D15,14,17,16;Cffff;D19,18,21,20;D1,0",
+  "Cf;Cf/D0;D1;Cf;Cf;D2;D3;Cf;D4;Cff;D5;D6;Cf;D7",
+  "Cf;Cf;Cf/D0;D2;Cf;Cf;D3;D4;Cf;D5;Cff;D1;D6;D7;Cffff;D10,11,8,9;Cf;D12",
+  "Cf;D0;Cf;Cf;Cf;Cf;Cf;D1;Cf;D2;Cf;Cf;D3;D5;D4;D6;D7;D8;Cf;Cf;Cf;D9;Cf;D10;D11;D12",
+  "Cfffff;D1,2,0,3,4",
 ]);
 
 /** `<moveId>:<attacker side>` -> plan index; EXACT-PLAN bodies only (NEEDS-KEYS / NOT-OBSERVED are absent = invalidate). */
@@ -265,6 +270,7 @@ export const SPRITE_ORDER_PRODUCTION_BODIES: Readonly<Record<string, number>> = 
   "337:player": 180, "339:opponent": 1, "339:player": 1, "341:opponent": 32, "341:player": 32, "342:opponent": 181, "342:player": 181, "343:opponent": 45,
   "343:player": 45, "345:player": 182, "347:opponent": 183, "347:player": 183, "348:opponent": 184, "348:player": 185, "349:player": 186, "350:opponent": 187,
   "350:player": 187, "352:opponent": 188, "352:player": 189, "10143:opponent": 1, "10143:player": 1,
+  "91:opponent": 196, "91:player": 196, "280:opponent": 197, "280:player": 197, "10091:opponent": 6, "10091:player": 6, "10280:opponent": 198, "10280:player": 198,
 });
 
 /** Mid-battle (non-move) animations -> plan index. STATS_CHANGE_CLASS_1 = args 15..28 (+-1) and 55/57 (multiple +1/-1),
@@ -272,8 +278,11 @@ export const SPRITE_ORDER_PRODUCTION_BODIES: Readonly<Record<string, number>> = 
 export const SPRITE_ORDER_PRODUCTION_ANIMS: Readonly<Record<string, number>> = Object.freeze({
   FOCUS_PUNCH_SETUP: 190,
   HELD_ITEM_EFFECT: 191,
+  LEECH_SEED_DRAIN: 199,
+  SANDSTORM_CONTINUES: 107,
   STATS_CHANGE_CLASS_1: 1,
   STATS_CHANGE_CLASS_2: 195,
+  STATUS_CONFUSION: 200,
   STATUS_INFATUATION: 192,
   STATUS_PRZ: 193,
   STATUS_PSN: 9,
