@@ -26,6 +26,16 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- Folded Opus worker `37a376a0c` as `f4da9d7aa` (src tree `452c09b4`): FAITHFUL-TIMING Skill Swap (285; prep35 model;
+  lag at 176, 4 of 6 -> 196 rows; display-neutral restore row 175; 6 windows; route 8/7 VENOMOTH), FAITHFUL-RANDOM
+  Flatter (260; 114 words from the presentation host; prep35 OAM provider; live-view healthbox fade generalised from
+  Encore — the ROM darkens the healthboxes with the sprite blend; declines elevated opponents (row-0 shadow unmeasured);
+  6 windows incl. two extra pinned activation values; route 51/0 NIDORINA, two seeds, ON/OFF parity), EXACT Eruption
+  (284; prep36 profile; 9 windows 4,374 rows 0 px; route 88/14 CAMERUPT). Worker gates 1,559 files / 12,799 tests,
+  build, differential 389. Supervisor: all 21 windows x2 fresh (Skill Swap no-lag windows only ages 177..192; others
+  0 px; Eruption 9/9 0 px); union typecheck, smoke, 9 targeted files 181/181, own differential vs `aa200ea71`
+  389/389. Counts: 249 scoped-exact + 13 faithful-random + 13 faithful-timing, 1 remaining
+  (Substitute).
 - prep37 (side, `71de9b745`, new files only): Substitute (164) scoped — body 87 rows 0 px with production-derived inputs
   (accepted pair, unchanged renderer; other species need the liveField art patch, 0 px PERSIAN<->SLOWBRO); the doll
   shown on every non-animation frame is source-exact (1993 / 4399 / 2207 Scene OFF / 6898 elevated doll pixels);
