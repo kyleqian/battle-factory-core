@@ -1,7 +1,10 @@
 # Animation integration progress
 
-## 2026-10-08 (overnight) — S10A continuation: Substitute swaps live, doll-defender evidence, deferred order lend
+## 2026-10-08 (overnight) — S10A: Substitute presentation live, deferred order lend, live-share census, sprite-order plans; 245 + 13 + 18
 
+- Final: production src tree `e3fc2240` (`65dec33c2`); supervisor final gates on the union typecheck, 1,573 files / 12,958
+  tests, build 874, differential 624 / 624 vs `1a7b687f0` (`final-supervisor-gates-20261008.json`). Census
+  `245+13+18+0+0=276` (Crunch, Psychic, Extreme Speed, Pursuit, Hidden Power moved scoped exact -> faithful timing).
 - Folded Opus worker `3ef6f4d19` as `f1b672ca1` (src tree `ab030259`): Substitute STATUS animations SUBSTITUTE_TO_MON /
   MON_TO_SUBSTITUTE presented live around a subbed ATTACKER's proven body (`src/engine/liveSubstituteSwap.ts`: source
   AnimTask_SwapMonSpriteToFromSubstitute, x2 5 per row, 42 / 40 script rows, graphics load row 21 / 20, one idle row,
@@ -12,6 +15,17 @@
   Worker gates 1,563 files / 12,823 tests, build 873, differential 624. Supervisor: `substSwapRun.sh` into fresh dirs —
   probes r1 == r2 (13 scenarios), 21 windows x2 runs 0 px, GOLEM-player residual == non-subbed control, negatives fail;
   union typecheck, smoke 448, 9 targeted files 128/128, own differential vs `bb4dc2558` 624/624. Logs `.integration/validation/swap-20261008/`.
+- Folded Opus worker `bfdddfcce` (SIDE lane with a narrow production grant, disjoint from the sides step) as `65dec33c2`
+  (union src tree `e3fc2240`): the prep43 sprite-order plans — PRZ survivor count (each slot counted at its last creation),
+  STATUS_CONFUSION `Cfffff;D1,2,0,3,4`, LEECH_SEED_DRAIN, SANDSTORM_CONTINUES (WEATHER_VAR argument 12 / 13 now carried by the
+  weather animation event, derived from the weather bits; gameplay state identical), Dig / Brick Break turn-keyed (10000 +
+  id, as Sky Attack); generated table appended (493 bodies / 201 plans, no index moved). Census seeds 0..199: 75.72 -> 78.18 %
+  live by count, 75.98 -> 79.28 % by frames, +131 commands, 0 live -> fallback, identical command set and battle digest.
+  Corpus replay turn-keyed known 1130 -> 1136, 0 mismatches. 8 existing test pins moved because more bodies now lend
+  (listed in the worker report; post-KO Rock Tomb lend checked against the ROM free order). Worker gates 1,570 files /
+  12,941 tests, build; differential not run by the worker. Supervisor: census seeds 0..199 on the branch — report sha256
+  `ab5ff1ec` identical to the worker's "after"; turn-keyed corpus replay 1136 / 1136 exact, 0 mismatches; final union gates
+  below.
 - Folded Opus worker `06413ac53` as `1a7b687f0` (src tree `09b0062a`): the missing ATTACKER SIDES — Double Team (104) opponent
   (230 rows; opponent battler drawn at its front idle rest; new #142 gap rows 158..161 for an elevated opponent in either
   role), Faint Attack (185) opponent (221 rows; roles by attacker / target), Rock Slide (157) player (138 rows). 13 windows
