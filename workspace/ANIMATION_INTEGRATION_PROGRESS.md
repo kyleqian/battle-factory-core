@@ -26,6 +26,20 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- Folded Opus worker `a91177f80` as `138f79ad4` (src tree `51b5f3b6`): audit-10 fixes (Extrasensory clone carries the
+  attacker idle rest: RATTATA 8,009 -> 0 px; Spit Up gate narrowed to targets: ONIX / RATTATA attackers 0 px; checker:
+  a window missing its phase label now FAILS — 146 windows rerun, 0 violations). EXACT Extreme Speed (245; age offset
+  43, attacker pic y-offset from the art view, hit-splat anchor = target sprite centre; 5 windows incl. elevated
+  GOLBAT; route 182/21 ARCANINE) and Memento (262; first body only; `liveMementoReducerConfig` from the field;
+  FIRST_BODY_SCANLINE; the shared #142 hook now skips the row-0 shadow of an opponent at HP 0, as the ROM does; route
+  259/28 WEEZING faints -> forced replacement -> next prompt). Staged digests identical. Worker gates 1,558 files /
+  12,782 tests, build, differential 389; timing regression 156 windows 0 violations. Supervisor: 10 new windows + the
+  two audit-10 fixed rows x2 fresh 0 px; union typecheck, smoke, 9 targeted files 178/178, own differential vs
+  `2b31a6151` 389/389. Counts: 248 + 12 + 12, 4 remaining.
+- prep36 (side, `dbaaab075`, new files only): Eruption (284) READY-WITH-CHANGE as scoped exact — source-derived profile
+  (launch / falling rock / shake, sort keys, palettes) exact on every row of 10 windows; pixels 1,946/1,946 accepted +
+  prep29 rows 0 px, 4,850/4,874 overall (row 0 shadow x2; ONIX idle-rest attacker -> decline); no Random2, no CPU-phase
+  field. Supervisor: `prep36Run.sh` into fresh dirs — 8/8 receipts byte-identical.
 - Folded Opus worker `7074ed95d` as `dc0283345` (src tree `797960f7`): checker fix (other-phase windows without
   documented rows must be 0 px; all 55 timing fixtures rerun, 0 violations). FAITHFUL-TIMING + D3 Ice Ball counter 0
   (301; `liveIceBallInputs.ts`; policy no lag, 15 of 18; counters 1..4 decline — order-lend blocker; the hit-chain
