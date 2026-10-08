@@ -12,6 +12,16 @@
   Worker gates 1,563 files / 12,823 tests, build 873, differential 624. Supervisor: `substSwapRun.sh` into fresh dirs —
   probes r1 == r2 (13 scenarios), 21 windows x2 runs 0 px, GOLEM-player residual == non-subbed control, negatives fail;
   union typecheck, smoke 448, 9 targeted files 128/128, own differential vs `bb4dc2558` 624/624. Logs `.integration/validation/swap-20261008/`.
+- Folded Opus worker `06413ac53` as `1a7b687f0` (src tree `09b0062a`): the missing ATTACKER SIDES — Double Team (104) opponent
+  (230 rows; opponent battler drawn at its front idle rest; new #142 gap rows 158..161 for an elevated opponent in either
+  role), Faint Attack (185) opponent (221 rows; roles by attacker / target), Rock Slide (157) player (138 rows). 13 windows
+  incl. the existing-side controls, all 0 px except Faint Attack DELCATTY -> GOLEM (297,920 px on ages 203..218 only: a
+  one-frame-shorter body, the restore fade lands early — the same tail as the recorded MURKROW alternate; pinned by test).
+  Routes 3014/14 (Double Team), 186/0 (Faint Attack), 4/7 (Rock Slide) live, ON/OFF parity. Counts unchanged. Differential
+  presentation-rng-playable-live-bodies-seeded-on frame 3622 now differs (9,461 px): an opponent Double Team body that
+  used to fall back is live (revert of the gate restores 173 / 173). Worker gates 1,573 files / 12,953 tests, build.
+  Supervisor: `sidesLiveReceipt.ts` rerun — 13 windows x 2 invocations x 2 fresh runs identical to the committed receipt;
+  union typecheck, smoke 448, 9 targeted files 128/128, own differential vs `2ba4da4a3`: 623 / 624 byte-identical, the one difference exactly frame 3622 (9,461 px) as attributed. Logs `.integration/validation/sides-20261008/`.
 - prep43 (side, `39c6dff36`, new files only; merged `4172ef604`): sprite-order EXACT plans for the census's top order-host
   stops: CONFUSION (`Cfffff;D1,2,0,3,4`, 17 / 17 ROM checks), PRZ (a survivor-count bug in spriteOrderProvider.ts ~:407: the
   alternating spark slots were counted four times; existing plan + carry 13 / 13 exact), Dig setup / unleash and Brick Break
