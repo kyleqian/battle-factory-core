@@ -62,6 +62,11 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
   -> 0 px); Substitute swaps with a shiny attacker (no shiny gate; `swap-shiny-palette-env.diff`); Ice Ball resting target
   (no gate, 30k-79k px); new D4 cases Crunch (141 vs 142 rows, 13 / 30) and Psychic (144 vs 145, 2 / 28); unresolved:
   ONIX attacker 1,091 px/row before its first move (Body Slam / Brick Break / Flamethrower / Attract, doll-free too).
+- **Substitute fade (2026-10-08, `fade-live-receipt.json`):** the ROM shows a frozen message-box wait cursor on the fade rows
+  after the "took damage" message, which production presents as an automatic (cursorless) message — 37 px / row; the
+  fade's claim is scoped outside that footprint (message-host question). Not measured: the ROM wait between that message
+  and the fade, fades on a non-target (recoil), multi-hit or Baton Pass / switch fades, Scene OFF within the Substitute's
+  own resolution (#153).
 - Harness limit: the verifier passes only the attacker's personality, so shiny TARGET declines are unverified.
 
 ## #148 — Battler x2 history: unknown-history remainder (main bug FIXED 2026-10-06)

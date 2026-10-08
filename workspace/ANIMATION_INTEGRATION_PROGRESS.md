@@ -12,6 +12,18 @@
   Worker gates 1,563 files / 12,823 tests, build 873, differential 624. Supervisor: `substSwapRun.sh` into fresh dirs —
   probes r1 == r2 (13 scenarios), 21 windows x2 runs 0 px, GOLEM-player residual == non-subbed control, negatives fail;
   union typecheck, smoke 448, 9 targeted files 128/128, own differential vs `bb4dc2558` 624/624. Logs `.integration/validation/swap-20261008/`.
+- Folded Opus worker `f5d6883f0` as `c826d5b40` (src tree `d15bc413`): General_SubstituteFade presented live as a
+  presentation-only `substitute-fade` command (`src/engine/liveSubstituteFade.ts`; 106 player / 104 opponent rows = script
+  rows + first inactive row + 2-row OAM tail; Scene ON and OFF), inserted before the "faded" message; BG-copy alpha + white
+  blend renderer branch; doll cleared at the fade's start; x2 history zeroes the fading side; elevated shadow back at script
+  rows + 2; D4 policy `LIVE_STATUS_ANIMATION_TIMING_POLICY.SUBSTITUTE_FADE` (alpha step later row 222 / 2 early, blendoff
+  12 / 2). 14 windows / 1,464 rows: 13 at 0 px, PERSIAN -> ONIX 542 px only on documented rows 27 / 45, Scene OFF 0 px —
+  claim scoped OUTSIDE the message-box wait-cursor footprint (the ROM shows a frozen cursor on the fade rows after the
+  automatic "took damage" message; 37 px / row, 50,246 px total; message-host question, ISSUES #152). Route JYNX 11/35:
+  Sludge Bomb breaks the doll, fade 106 rows, next prompt with the mon shown, ON/OFF parity. Not an accepted body: counts
+  unchanged. Worker gates 1,567 files / 12,902 tests, build 874, differential 624, 161 timing fixtures 0 violations, swap /
+  dolldef evidence unchanged. Supervisor: `fadeLiveRun.sh` into fresh dirs — probes r1 == r2 (8), 14 / 14 window results
+  identical to the committed receipt, negatives fail; union typecheck, smoke 448, 10 targeted files 194/194, own differential vs `3d3873a57` 624/624. Logs `.integration/validation/fade-20261008/`.
 - Species audit 13 (side, `e90b5da7f`, new files only; merged `1361019d3`): defender doll 330 windows (11 moves x 2 sides;
   defenders STEELIX / WAILORD / TYRANITAR / PICHU / GOLBAT / FLYGON / WEEZING / ONIX / RATTATA / shiny STEELIX), swaps 67
   scenarios, Ice Ball 28 windows; the doll itself exact for every defender species. DEFECTS (patch proofs 0 px): opponent
