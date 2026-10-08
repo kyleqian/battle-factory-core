@@ -51,7 +51,7 @@ describe("S10A Substitute body (164) scoped exact", () => {
       expect(f.denseWindow!.endFrame - f.denseWindow!.startFrame + 1).toBe(87);
       for (let age = 0; age < 87; age += 1) {
         const view = liveView(f, age);
-        const effect = view.effect as { request: never; age: number };
+        const effect = view.effect as unknown as { request: never; age: number };
         const presentation = liveMoveAnimationPresentation(effect.request, view.field, effect.age);
         expect((presentation!.config as { move: string }).move).toBe("SUBSTITUTE");
       }
