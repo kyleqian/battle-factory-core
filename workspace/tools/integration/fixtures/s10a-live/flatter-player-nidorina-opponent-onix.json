@@ -1,0 +1,40 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "FLATTER",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-flatter-player-nidorina-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 70,
+  "endFrame": 288
+ },
+ "windowSource": "window = [activation, first inactive row] of this scenario's first FLATTER body (219 rows) from 2 fresh prep22Probes.sh runs (bodies agree)",
+ "presentationRngActivation": {
+  "value": 370756553,
+  "source": "prep22Probe.py rng2Series[71] stepped back once (activation frame 70)"
+ },
+ "attacker": {
+  "species": "NIDORINA",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015437,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 177,
+  "playerMaxHp": 177,
+  "opponentHp": 142,
+  "opponentMaxHp": 142,
+  "playerGender": "female",
+  "opponentGender": "male"
+ }
+}

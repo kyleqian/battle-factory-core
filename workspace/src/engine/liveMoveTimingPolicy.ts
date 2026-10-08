@@ -103,6 +103,29 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
     }],
   },
   /**
+   * S10A Skill Swap (docs/next-adapters-prep35.md s0.4 T / s1.4; tools/integration/fixtures/prep35/skillswap-check-pixels.json windows[].T;
+   * prep33 s0.3): (a) an optional lag at row 176 (the restore Task_FadeToBg counts executed frames) in 4 of 6 measured windows (accepted
+   * player, ALAKAZAM -> GOLEM player, ESPEON -> WEEZING player, WEEZING -> SNORLAX opponent), absent in the accepted opponent and ALAKAZAM ->
+   * GOLEM opponent: 196 body rows with it, 195 without; wrong phase moves the restore fade on rows 177..192. (b) UnsetPsychicBackground's
+   * bank-2 restore lands on row 175 in 5 of 6 windows and on row 176 in ALAKAZAM -> GOLEM player (whose restoring iteration the lag splits).
+   * Display-neutral: BLDY 16 on rows 175..177 darkens bank 2 to black in both phases.
+   */
+  285: {
+    move: "MOVE_SKILL_SWAP",
+    parameters: [{
+      kind: "optional-lag-age", age: 176, fixedLagAges: [], iterations: 195,
+      alternatives: [{ phase: "event", bodyRows: 196, measured: 4 }, { phase: "no-event", bodyRows: 195, measured: 2 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/prep35/skillswap-check-pixels.json windows[].T.lagRow176 (4 of 6)", "docs/next-adapters-prep35.md s1.4",
+        "tools/integration/fixtures/s10a-live/skill-swap-*.json (the same 6 windows re-probed fresh)"],
+    }, {
+      kind: "palette-transfer-row", age: 176, fixedLagAges: [], iterations: 195,
+      alternatives: [{ phase: "event", bodyRows: 196, measured: 1 }, { phase: "no-event", bodyRows: 196, measured: 5 }],
+      chosen: "no-event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/prep35/skillswap-check-pixels.json windows[].T.restoreRow (175: 5, 176: 1)", "docs/next-adapters-prep35.md s1.4"],
+    }],
+  },
+  /**
    * D4b Megahorn (docs/next-adapters-prep24.md s0.2 H / s1.3: 6 windows accepted P/O, HERACROSS -> GOLEM P/O, HERACROSS -> ONIX P/O; the D4b
    * tie-break: 4 more windows chosen before probing, RHYDON -> GOLBAT and NIDOKING -> SNORLAX both orientations, tools/integration/d4aScenarios.py,
    * measured by the same prep22 probe from each scenario's own activation, tools/integration/fixtures/d4a-live/megahorn-*.json).
@@ -353,6 +376,9 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   // S10A: Dive SETUP body (D3 + D4; Random2 droplets from the presentation host; the player row-68 OAM transfer phase; liveMoveAnimation.ts 291;
   // fixtures tools/integration/fixtures/s10a-live/dive-*).
   291,
+  // S10A: Skill Swap, known lend (liveOamMoves.ts liveSkillSwapInputs + liveSkillSwapInputs.ts; lag at 176; fixtures
+  // tools/integration/fixtures/s10a-live/skill-swap-*).
+  285,
   // S10A: Ice Ball counter 0 (D3 + D4; liveIceBallInputs.ts; Random2 shards from the presentation host, counter-keyed plan; no-lag policy;
   // fixtures tools/integration/fixtures/s10a-live/ice-ball-*).
   301,

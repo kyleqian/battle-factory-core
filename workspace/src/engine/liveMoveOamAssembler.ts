@@ -815,3 +815,164 @@ export function liveExtrasensoryHardwareOamRows(input: LiveExtrasensoryOamInputs
   }
   return { oam, matrices, orders };
 }
+
+/**
+ * Move_SKILL_SWAP (docs/next-adapters-prep35.md s1.2; ported 1:1 from tools/integration/prep35SkillSwapModel.ts orbLives35 / orbScale35 /
+ * orbMatrix35 / skillSwapDisplayRows35). 24 orbs (12 per leg from rows 42 / 60, one every 7 rows, each alive 16 AnimateSprite calls and
+ * destroyed + FreeOamMatrix on the 17th), (slot, matrix) by chronological lowest-free over the known-entry pairs; the affine anim is
+ * StartSpriteAffineAnim(sprite, task->data[2] & 3) with data[2] = the leg ordinal before its increment (battle_anim_psychic.c:925-930).
+ * Task-created orbs are born after that frame's BuildOamBuffer: build f sees the orbs with spawn < f, hardware row r = build of frame r - 1.
+ */
+export const SKILL_SWAP_ORB_PAIRS: readonly (readonly [number, number])[] = Object.freeze([[3, 0], [4, 3], [5, 4], [7, 5], [9, 6]] as const);
+export const SKILL_SWAP_ORB = Object.freeze({ legStart: { target: 42, attacker: 60 } as const, cadence: 7, life: 16, attr2: 31025, subpriority: 0 });
+export interface LiveSkillSwapOrbLife { readonly leg: "target" | "attacker"; readonly ordinal: number; readonly order: number; readonly spawn: number;
+  readonly slot: number; readonly matrixNum: number; readonly anim: number }
+export function liveSkillSwapOrbLives(): LiveSkillSwapOrbLife[] {
+  const all: { leg: "target" | "attacker"; ordinal: number; order: number; spawn: number; slot: number; matrixNum: number; anim: number }[] = [];
+  for (const leg of ["target", "attacker"] as const) for (let o = 0; o < 12; o += 1)
+    all.push({ leg, ordinal: o, order: (leg === "target" ? 0 : 12) + o, spawn: SKILL_SWAP_ORB.legStart[leg] + o * SKILL_SWAP_ORB.cadence, slot: -1, matrixNum: -1, anim: o & 3 });
+  const live: { pair: number; end: number }[] = [];
+  for (const orb of [...all].sort((l, r) => l.spawn - r.spawn || l.order - r.order)) {
+    for (let i = live.length - 1; i >= 0; i -= 1) if (live[i]!.end < orb.spawn) live.splice(i, 1);
+    const used = new Set(live.map((l) => l.pair)), pair = SKILL_SWAP_ORB_PAIRS.findIndex((_, i) => !used.has(i));
+    live.push({ pair, end: orb.spawn + SKILL_SWAP_ORB.life }); [orb.slot, orb.matrixNum] = SKILL_SWAP_ORB_PAIRS[pair]!;
+  }
+  return all;
+}
+/** sAffineAnims_SkillSwapOrb (battle_anim_psychic.c:308-348): [scale delta / absolute, duration] or a jump target. */
+const SKILL_SWAP_AFFINE: readonly (readonly (readonly ["frame", number, number] | readonly ["jump", number])[])[] = [
+  [["frame", -8, 8], ["frame", 8, 8], ["jump", 0]],
+  [["frame", 0xf0, 0], ["frame", -8, 6], ["frame", 8, 8], ["frame", -8, 2], ["jump", 1]],
+  [["frame", 0xd0, 0], ["frame", -8, 4], ["frame", 8, 8], ["frame", -8, 4], ["jump", 1]],
+  [["frame", 0xb0, 0], ["frame", -8, 2], ["frame", 8, 8], ["frame", -8, 6], ["jump", 1]],
+];
+/** sprite.c affine engine: the xScale (= yScale) after `steps` AnimateSprite calls (BeginAffineAnim on the first; a duration-0 frame is absolute). */
+export function liveSkillSwapOrbScale(anim: number, steps: number): number {
+  const cmds = SKILL_SWAP_AFFINE[anim]!; let scale = 0x100, cmd = 0, delay = 0;
+  const apply = (c: number) => { const f = cmds[c]! as readonly ["frame", number, number]; if (f[2]) { scale += f[1]; delay = f[2] - 1; } else { scale = f[1]; delay = 0; } };
+  for (let n = 1; n <= steps; n += 1) {
+    if (n === 1) { cmd = 0; apply(0); continue; }
+    if (delay) { scale += (cmds[cmd]! as readonly ["frame", number, number])[1]; delay -= 1; continue; }
+    cmd += 1; if (cmds[cmd]![0] === "jump") cmd = (cmds[cmd] as readonly ["jump", number])[1];
+    apply(cmd);
+  }
+  return scale;
+}
+/** Orb position of one reducer state (skillSwap.ts skillSwapAtAge orbs, passed in by the seam). */
+export interface LiveSkillSwapOrbPosition { readonly sourceCreationOrder: number; readonly x: number; readonly y: number; readonly x2: number; readonly y2: number }
+export interface LiveSkillSwapOamInputs {
+  readonly attacker: LiveOamBattler;
+  readonly target: LiveOamBattler;
+  readonly scene: LiveOamScene;
+  readonly lives: readonly LiveSkillSwapOrbLife[];
+  readonly activationOrder: readonly number[];
+  readonly sort: LiveSpriteOrderSort;
+  readonly orbsAt: (state: number) => readonly LiveSkillSwapOrbPosition[];
+  readonly rows: number;
+}
+export function liveSkillSwapHardwareOamRows(input: LiveSkillSwapOamInputs): {
+  oam: string[][]; matrices: (readonly [number, number, number, number])[][]; softwareMatrices: (readonly [number, number, number, number])[][]; orders: number[][];
+} {
+  const atBuild = (f: number): { sprites: LiveOamSprite[]; matrices: (readonly [number, number, number, number])[] } => {
+    const sprites: LiveOamSprite[] = input.scene.occupants.map((o) => ({ ...o, oamY: o.attr[0] & 0xff }));
+    for (const b of [input.attacker, input.target]) sprites.push({ ...b, visible: true, oamY: b.attr[0] & 0xff });
+    const matrices = Array.from({ length: 32 }, () => IDENTITY as readonly [number, number, number, number]);
+    if (f < 0) return { sprites, matrices };
+    const orbs = input.orbsAt(f);
+    for (const l of input.lives) {
+      const n = f - l.spawn; if (n < 1 || n > SKILL_SWAP_ORB.life) continue;
+      const o = orbs.find((x) => x.sourceCreationOrder === l.order)!;
+      const attr: OamAttr = [0x0100 | (o.y + o.y2 - 8) & 0xff, 0x4000 | l.matrixNum << 9 | (o.x + o.x2 - 8) & 0x1ff, SKILL_SWAP_ORB.attr2];
+      sprites.push({ slot: l.slot, attr, subpriority: SKILL_SWAP_ORB.subpriority, visible: true, oamY: attr[0] & 0xff });
+      const p = Math.trunc(0x10000 / liveSkillSwapOrbScale(l.anim, n)); // ConvertScaleParam + ObjAffineSet at rotation 0
+      matrices[l.matrixNum] = [p, 0, 0, p];
+    }
+    return { sprites, matrices };
+  };
+  const oam: string[][] = [], matrices: (readonly [number, number, number, number])[][] = [], softwareMatrices: (readonly [number, number, number, number])[][] = [], orders: number[][] = [];
+  let order: readonly number[] = input.activationOrder, previous = atBuild(-1);
+  for (let row = 0; row < input.rows; row += 1) {
+    oam.push(buildLiveHardwareOam(order, previous.sprites, input.scene.healthbox, previous.matrices));
+    matrices.push(previous.matrices);
+    previous = atBuild(row);
+    softwareMatrices.push(previous.matrices);
+    order = carryLiveSpriteOrder(order, previous.sprites, input.sort);
+    orders.push([...order]);
+  }
+  return { oam, matrices, softwareMatrices, orders };
+}
+
+/**
+ * Move_FLATTER (docs/next-adapters-prep35.md s2.2; ported 1:1 from tools/integration/prep35FlatterModel.ts flatterOamRows35). Per build: the
+ * scene occupants, the battlers (target y2 = the reducer's VerticalDip offset), the spotlight (affine double, OBJ window, hidden while
+ * `flags & 4`), the two invisible VerticalDip sort keys (priority 3, attacker subpriority - 2, y 160) and the 38 confetti (subpriority 3, the
+ * createsprite floor). One carryLiveSpriteOrder pass per executed build. Script-created sprites are in the build of their creation frame;
+ * hardware row r = build of state r - 1, except the confetti burst: one main-loop iteration spans the VBlanks of rows 65..67 with no
+ * BuildOamBuffer, so rows 66..68 repeat row 65's latch (build of state 64) and row 69 is the build of state 68 (measured, 4 of 4 windows).
+ */
+export const FLATTER_ROWS = 219;
+export const liveFlatterBuildState = (row: number): number => (row >= 66 && row <= 68 ? 64 : row - 1);
+/** The reducer state a build reads (flatter.ts flatterAtAge, passed in by the seam). */
+export interface LiveFlatterBuildSprites {
+  readonly spotlight: Readonly<{ slot: number; x: number; y: number; matrixNum: number; matrix: readonly [number, number, number, number]; flags: number }> | null;
+  readonly verticalDipSlots: readonly number[];
+  readonly confetti: readonly Readonly<{ slot: number; x: number; y: number; x2: number; y2: number }>[];
+  /** Target dip offset relative to its idle rest (the reducer's target offset y2 - the initial y2). */
+  readonly targetDipY2: number;
+}
+export interface LiveFlatterOamInputs {
+  readonly attacker: LiveOamBattler;
+  readonly target: LiveOamBattler;
+  readonly scene: LiveOamScene;
+  readonly spotlightAttr2: number;
+  readonly spotlightSubpriority: number;
+  /** Confetti tile base (ANIM_TAG_CONFETTI tile range) and palette slot; the per-confetti tile offsets by slot. */
+  readonly confettiTileBase: number;
+  readonly confettiPaletteSlot: number;
+  readonly confettiTileOffsets: ReadonlyMap<number, number>;
+  readonly activationOrder: readonly number[];
+  readonly sort: LiveSpriteOrderSort;
+  readonly stateAt: (state: number) => LiveFlatterBuildSprites;
+}
+export function liveFlatterHardwareOamRows(input: LiveFlatterOamInputs): {
+  oam: string[][]; matrices: (readonly [number, number, number, number])[][]; orders: number[][];
+} {
+  type Mat = readonly [number, number, number, number];
+  const build = (f: number): { sprites: LiveOamSprite[]; matrices: Mat[] } => {
+    const matrices = Array.from({ length: 32 }, () => IDENTITY as Mat);
+    const sprites: LiveOamSprite[] = input.scene.occupants.map((o) => ({ ...o, oamY: o.attr[0] & 0xff }));
+    const st = f >= 0 ? input.stateAt(f) : null;
+    for (const [b, y2] of [[input.attacker, 0], [input.target, st?.targetDipY2 ?? 0]] as const) {
+      const attr: OamAttr = [b.attr[0] & 0xff00 | (b.attr[0] + y2) & 0xff, b.attr[1], b.attr[2]];
+      sprites.push({ slot: b.slot, attr, subpriority: b.subpriority, visible: true, oamY: attr[0] & 0xff });
+    }
+    if (!st) return { sprites, matrices };
+    if (st.spotlight) {
+      const s = st.spotlight, attr: OamAttr = [0x0b00 | (s.y - 64) & 0xff, 0xc000 | s.matrixNum << 9 | (s.x - 64) & 0x1ff, input.spotlightAttr2];
+      sprites.push({ slot: s.slot, attr, subpriority: input.spotlightSubpriority, visible: (s.flags & 4) === 0, oamY: attr[0] & 0xff });
+      matrices[s.matrixNum] = s.matrix;
+    }
+    for (const slot of st.verticalDipSlots) sprites.push({ slot, attr: [160, 304, 0xffff], subpriority: input.attacker.subpriority - 2, visible: false, oamY: 160 });
+    for (const c of st.confetti) {
+      const attr: OamAttr = [(c.y + c.y2 - 4) & 0xff, (c.x + c.x2 - 4) & 0x1ff,
+        (input.confettiTileBase + input.confettiTileOffsets.get(c.slot)!) | 2 << 10 | input.confettiPaletteSlot << 12];
+      sprites.push({ slot: c.slot, attr, subpriority: 3, visible: true, oamY: attr[0] & 0xff });
+    }
+    return { sprites, matrices };
+  };
+  // order after build f; one pass per executed build (no build inside the burst)
+  const orderAfter = new Map<number, number[]>(); let order: readonly number[] = input.activationOrder;
+  orderAfter.set(-1, [...order]);
+  const builds = new Map<number, ReturnType<typeof build>>();
+  for (const f of [...new Set(Array.from({ length: FLATTER_ROWS }, (_, r) => liveFlatterBuildState(r)))].filter((f) => f >= 0).sort((x, y) => x - y)) {
+    const b = build(f); builds.set(f, b);
+    order = carryLiveSpriteOrder(order, b.sprites, input.sort); orderAfter.set(f, [...order]);
+  }
+  const oam: string[][] = [], matrices: Mat[][] = [], orders: number[][] = [];
+  for (let r = 0; r < FLATTER_ROWS; r += 1) {
+    const f = liveFlatterBuildState(r), b = builds.get(f) ?? build(f);
+    oam.push(buildLiveHardwareOam(orderAfter.get(f)!, b.sprites, input.scene.healthbox, b.matrices));
+    matrices.push(b.matrices); orders.push(orderAfter.get(f)!);
+  }
+  return { oam, matrices, orders };
+}

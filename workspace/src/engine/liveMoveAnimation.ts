@@ -93,9 +93,9 @@ import { liveMoveBgWriteRow, liveMoveOptionalLagAge, liveMovePaletteTransferRow,
 import { liveSpitUpDuration, liveSpitUpInputs, type SpitUpCounter } from "./liveSpitUpInputs.ts";
 import { SUPERPOWER_ROWS, liveSuperpowerInputs } from "./liveSuperpowerInputs.ts";
 import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
-import { liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSheerColdRestoreFadeEndAge, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
-import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
-import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs, liveShockWaveInputs, FIRST_BODY_SCANLINE } from "./liveOamMoves.ts";
+import { liveEruptionProfile, liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSheerColdRestoreFadeEndAge, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
+import { KNOWN_ENTRY_NON_BATTLER_SPRITES, battlerSprite, liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
+import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs, liveShockWaveInputs, liveSkillSwapInputs, liveFlatterInputs, FIRST_BODY_SCANLINE } from "./liveOamMoves.ts";
 import shockWaveAsset from "../animation/assets/shock-wave.json" with { type: "json" };
 import { shockWaveTimingFor } from "../animation/shockWave.ts";
 import revengeScratchAsset from "../animation/assets/revenge-purple-scratch-swipe.json" with { type: "json" };
@@ -104,8 +104,15 @@ import megaHornAsset from "../animation/assets/mega-horn-horn-hit-2.json" with {
 import {
   CURSE_STATS_ROWS, curseStatsBattleBgAt, curseStatsPaletteAt, curseStatsRegistersAt, curseStatsSpritesAt, curseStatsTasksAt,
 } from "../animation/curseModel.ts";
-import { FURY_CUTTER_ROWS, PURSUIT_ROWS, RETURN_ROWS } from "./liveMoveOamAssembler.ts";
+import { FLATTER_ROWS, FURY_CUTTER_ROWS, PURSUIT_ROWS, RETURN_ROWS } from "./liveMoveOamAssembler.ts";
 import { willOWispSpritesAtAge, willOWispTimeline } from "../animation/willOWisp.ts";
+import { skillSwapAtAge, type SkillSwapLiveInputs } from "../animation/skillSwap.ts";
+import skillSwapOrbAsset from "../animation/assets/skill-swap-bluegreen-orb.json" with { type: "json" };
+import { flatterAtAge, type FlatterLiveInputs } from "../animation/flatter.ts";
+import { eruptionLaunchTimeline, type EruptionLaunchProfile } from "../animation/eruptionLaunch.ts";
+import { ERUPTION_FALLING_ROCK_SOURCE_CALLS } from "../animation/eruptionFallingRock.ts";
+import eruptionWarmRockAsset from "../animation/assets/eruption-warm-rock.json" with { type: "json" };
+import flatterAsset from "../animation/assets/flatter.json" with { type: "json" };
 import { pursuitTargetOffsetAtAge } from "../animation/pursuit.ts";
 import { sortGbaSpriteOrder } from "../animation/gbaObjCompositor.ts";
 import willOWispAsset from "../animation/assets/will-o-wisp.json" with { type: "json" };
@@ -218,6 +225,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   262,
   // Shock Wave (docs/next-adapters-prep33.md s1 / s3; liveOamMoves.ts liveShockWaveInputs): the reducer's geometry-derived timing, any known lend.
   351,
+  // S10A: Eruption (prep36 source-derived profile, liveProfileMoves.ts liveEruptionProfile; scoped exact, no D3 / D4 parameter).
+  284,
   // anchor3: source battler anchors (position center, picture height, pic offset).
   86, 87, 107, 116, 203, 207, 263, 339,
   // selectors: request-selected branches and healing anchors.
@@ -446,6 +455,12 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // D4c faithful timing: Psywave windows start at activation (row 0; d4a-live/psywave-*.json). The live hook draws an elevated opponent's
     // shadow whichever role it has (ESPEON -> CROBAT player window: 200 px at age 0 otherwise, docs/next-adapters-prep30.md s2.4).
     149,
+    // S10A: Eruption windows start at activation (row 0; s10a-live/eruption-*.json). The live hook draws an elevated opponent's shadow whichever
+    // role it has (CAMERUPT -> WEEZING player / WEEZING -> GOLEM opponent: 195 px at age 0 otherwise, prep36 s0.2).
+    284,
+    // S10A faithful timing: Skill Swap windows start at activation (row 0; s10a-live/skill-swap-*.json). The live hook draws an elevated
+    // opponent's shadow whichever role it has (ESPEON -> WEEZING player / WEEZING -> SNORLAX opponent: 195 px at age 0 otherwise, prep35 s1.3).
+    285,
     // D4c faithful timing: Extrasensory windows start at activation (row 0; d4a-live/extrasensory-*.json; elevated CROBAT opponent in both roles).
     326,
     // D4b faithful timing + D3: Meteor Mash windows start at activation (row 0; prep12 plans.json acceptedWindowStartMinusActivation 0).
@@ -659,11 +674,47 @@ function liveShockWaveTiming(field: BattleResolutionDisplayedField, attackerSide
     targetBattlePosition: target.battlePositionCenter, derivedTiming: true });
 }
 
+const eruptionProfileCache = new Map<string, ReturnType<typeof liveEruptionProfile>>();
+/**
+ * MOVE_ERUPTION's source-derived profile (docs/next-adapters-prep36.md s2; liveProfileMoves.ts liveEruptionProfile) from the displayed field: the
+ * anchors, the attacker's pic-coords y_offset, the asset composite, the known-entry scene and the lent activation order (the schedule depends on
+ * the attacker sprite y only). Null without a composite. Memoised (the launch reducer runs twice per profile).
+ */
+function liveEruptionProfileFor(field: BattleResolutionDisplayedField, attackerSide: "player" | "opponent", activationOrder: readonly number[]) {
+  const art = createBattleCommandFieldArtView(field);
+  const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+  if (palettes === null) return null;
+  const anchors = { player: liveBattlerAnchors("player", art), opponent: liveBattlerAnchors("opponent", art) };
+  const key = JSON.stringify([attackerSide, art.player.speciesSymbol, art.opponent.speciesSymbol, anchors, activationOrder]);
+  let profile = eruptionProfileCache.get(key);
+  if (profile === undefined) {
+    profile = liveEruptionProfile({ attackerSide, anchors, attackerYDelta: art[attackerSide].coords.yOffset, palettes,
+      warmRockPalette: (eruptionWarmRockAsset as unknown as { palette: { r: number; g: number; b: number }[] }).palette,
+      sceneSprites: KNOWN_ENTRY_NON_BATTLER_SPRITES.map((s) => ({ slot: s.slot, attr: s.attr as readonly number[], subpriority: s.subpriority })),
+      battlerSprites: { player: battlerSprite("player", anchors.player), opponent: battlerSprite("opponent", anchors.opponent) },
+      activationOrder, animationRng: 0,
+      launchLifetime: (launch, sourceOffset) => {
+        const frame = eruptionLaunchTimeline(launch as unknown as EruptionLaunchProfile).find((fr) => fr.task !== null && fr.source?.offset === sourceOffset);
+        if (!frame?.task) throw new Error(`Eruption launch wave ${sourceOffset} has no task`);
+        return frame.task.lifetime;
+      },
+      fallingCalls: ERUPTION_FALLING_ROCK_SOURCE_CALLS });
+    if (eruptionProfileCache.size > 16) eruptionProfileCache.clear();
+    eruptionProfileCache.set(key, profile);
+  }
+  return profile;
+}
+
 export function liveMoveAnimationDuration(
   request: BattleMoveAnimationRequest, field?: BattleResolutionDisplayedField,
 ): number | null {
   switch (request.moveId) {
     // Shock Wave (prep33): activation .. the derived first inactive row (262..266 measured), only defined with the displayed field.
+    // Eruption (prep36 s2): the first inactive row = E2 + 294 from the attacker sprite y (476..500 rows measured), only defined with the field.
+    case 284: {
+      const profile = field === undefined ? null : liveEruptionProfileFor(field, request.attacker === 0 ? "player" : "opponent", []);
+      return profile === null ? null : profile.endAge + 1;
+    }
     case 351: return field === undefined ? null : liveShockWaveTiming(field, request.attacker === 0 ? "player" : "opponent").cleanupAge + 1;
     // Water Spout (prep13 s1.2): the body length depends on the attacker's party HP and picture height (accepted rows
     // 278 full HP / 276 KINGDRA player-back / 270..201 at lower HP tiers), so it is only defined with the displayed field.
@@ -986,6 +1037,10 @@ export function liveMoveAnimationDuration(
     case 276: return SUPERPOWER_ROWS;
     // Faithful timing (D4c): Psywave 204 rows + the policy's optional late lag at task row 185 (dominant measured phase, 205 rows both sides).
     case 149: return liveMoveTimingBodyRows(149);
+    // Faithful random (S10A, prep32 / prep35): Flatter 218 steps + the first inactive row = 219 rows both sides (no CPU-phase field).
+    case 260: return FLATTER_ROWS;
+    // Faithful timing (S10A, prep35): Skill Swap 195 rows (activation .. first inactive) + the policy's optional lag at row 176 (196 rows both sides).
+    case 285: return liveMoveTimingBodyRows(285);
     // Faithful timing (D4c): Extrasensory 161 rows (activation .. first inactive) without the optional lag at task row 142 (policy: no lag, 4 of 6).
     case 326: return liveMoveTimingBodyRows(326);
     // Faithful timing (D4b, + D3 Random2): Meteor Mash 213 + the policy's restore lag L (row 195) + the first inactive row = 215 both sides.
@@ -3322,6 +3377,72 @@ export function liveMoveAnimationPresentation(
         fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
       break;
     }
+    case 260: {
+      // S10A faithful random: Flatter (prep35 s2 / s3 item 2; liveOamMoves.ts liveFlatterInputs). The 114 confetti words from the presentation
+      // host only (null = not activated -> scene-off fallback). First body (the activation registers are S0, WIN0 240 / 161), known lend,
+      // known-entry allocator (spotlight 305 / confetti 433, palette slots 7 / 8), non-shiny. An elevated opponent declines: its row-0 shadow
+      // (the pre-activation latch) is unmeasured for Flatter (prep35 s4).
+      const rng = liveMovePresentationRngWords(presentationRngInput);
+      if (rng === null || rng.words.length !== 114) return null;
+      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (art.opponent.origin.y !== battleCommandFieldSpriteOrigin(art.opponent, "opponent").y) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const activationOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (palettes === null || activationOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const attackerSide = attacker.geometry.side, targetSide = target.geometry.side;
+      const asset = flatterAsset as unknown as Record<"spotlight" | "confetti", { palette: { r: number; g: number; b: number }[] }>;
+      const inputs = liveFlatterInputs({ attackerSide, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
+        sort: sortGbaSpriteOrder, words: rng.words, animationRng: rng.activationValue,
+        spotlightPalette: asset.spotlight.palette, confettiPalette: asset.confetti.palette,
+        stateAt: (state, programInput) => {
+          const st = flatterAtAge(state, { ...(programInput as unknown as FlatterLiveInputs), attackerSide, targetSide,
+            attackerSpecies: art[attackerSide].speciesSymbol, targetSpecies: art[targetSide].speciesSymbol });
+          return { spotlight: st.spotlight, verticalDipSlots: st.verticalDips.map((d) => d.slot), confetti: st.confetti,
+            targetDipY2: st.battlers.target.offset.y2 - targetAnchors.frontIdleRest.y2 };
+        } });
+      if (inputs === null) return null;
+      // The FLATTER view rebuilds attackerCenter / targetCenter from geometry.animationCenter (prep35 papercut): set them to the live anchors
+      // (attacker sprite centre, target BATTLER_COORD_X / _Y), as verifyFlatterReducer.ts flatterConfigFor.
+      const withCenter = (battler: SceneOnPresentationBattler, c: { x: number; y: number }): SceneOnPresentationBattler => ({
+        ...battler, geometry: { ...battler.geometry, spriteCorner: { x: c.x - 32, y: c.y - 32 }, animationCenter: c, battlePositionCenter: c } });
+      config = { move: "FLATTER", attacker: withCenter(attacker, inputs.attackerCenter), target: withCenter(target, inputs.targetCenter),
+        fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
+      break;
+    }
+    case 285: {
+      // S10A faithful timing: Skill Swap (prep35 s1 / s3 item 1; liveOamMoves.ts liveSkillSwapInputs). Known lend (the lent 64-slot order is the
+      // L input; every measured window is a first body), known-entry allocator (BLUEGREEN_ORB tile 305, palette slot 7, orb (slot, matrix) pairs
+      // over the known entry), non-shiny, zero idle rests (the battler OBJ and the trajectory bounds are the rest-free sprite / pic points).
+      // Both CPU-phase bits come from the timing policy (lag at 176; the display-neutral bank-2 restore row).
+      if (!spriteOrderInput?.known) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const activationOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      const restoreRow = liveMovePaletteTransferRow(285);
+      if (palettes === null || activationOrder === null || restoreRow === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const zeroRest = (a: typeof attackerAnchors) => a.frontIdleRest.x2 === 0 && a.frontIdleRest.y2 === 0;
+      if (!zeroRest(attackerAnchors) || !zeroRest(targetAnchors)) return null;
+      const attackerSide = attacker.geometry.side, targetSide = target.geometry.side;
+      const rgb555 = (c: { r: number; g: number; b: number }) => (c.r >> 3) | (c.g >> 3) << 5 | (c.b >> 3) << 10;
+      const inputs = liveSkillSwapInputs({ attackerSide, attacker: attackerAnchors, target: targetAnchors,
+        attackerPicSize: liveBattlerCoordAttrs(attackerSide, art), targetPicSize: liveBattlerCoordAttrs(targetSide, art), palettes, activationOrder,
+        sort: sortGbaSpriteOrder, orbPalette: (skillSwapOrbAsset as unknown as { orb: { palette: { r: number; g: number; b: number }[] } }).orb.palette.map(rgb555),
+        orbsAt: (state, programInput) => skillSwapAtAge(state, { ...(programInput as unknown as SkillSwapLiveInputs), attackerSide, targetSide,
+          attackerSpecies: "", targetSpecies: "" }).orbs,
+        lag: liveMoveOptionalLagAge(285) === 176, restoreRow });
+      // The SKILL_SWAP seam centres are the battler sprite centres; the corner is centre - 32 (the branch draws the battlers from the OAM).
+      const withCenter = (battler: SceneOnPresentationBattler, anchors: typeof attackerAnchors): SceneOnPresentationBattler => ({
+        ...battler, geometry: { ...battler.geometry, spriteCorner: { x: anchors.spriteCenter.x - 32, y: anchors.spriteCenter.y - 32 },
+          animationCenter: anchors.spriteCenter, battlePositionCenter: anchors.battlePositionCenter } });
+      config = { move: "SKILL_SWAP", attacker: withCenter(attacker, attackerAnchors), target: withCenter(target, targetAnchors),
+        fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
+      break;
+    }
     case 326: {
       // D4c faithful timing: Extrasensory (prep30 s1 / s3; liveOamMoves.ts liveExtrasensoryInputs). The scanline buffers at activation are history
       // (the battle intro's residue): only the battle's FIRST animation unit is proven to start from them (every measured window is a first body),
@@ -3471,6 +3592,21 @@ export function liveMoveAnimationPresentation(
           orbitMatrixNums: matrices.slice(0, 6), scatterMatrixNums: matrices.slice(6),
           uninitializedScatterY: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).picOffsetPoint.y,
           attackerPersonality: personality, animationRngSeed: 0 } };
+      break;
+    }
+    case 284: {
+      // Eruption (prep36 s2; liveProfileMoves.ts liveEruptionProfile): the Spikes gates (known lend, non-shiny, the assets-only composite) plus a
+      // zero attacker idle rest (the launch task zeroes x2: an idle-rest attacker misses rows 0-20 / one launch row, prep36 s1.4; CAMERUPT, the
+      // only Factory user, rests at 0). No first-body gate: the branch reads no BG / WIN register (prep36 s1.1).
+      if (!spriteOrderInput?.known) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (attackerAnchors.frontIdleRest.x2 !== 0 || attackerAnchors.frontIdleRest.y2 !== 0) return null;
+      const order = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (order === null) return null;
+      const animationProfile = liveEruptionProfileFor(field, attacker.geometry.side, order);
+      if (animationProfile === null) return null;
+      config = { move: "ERUPTION", attacker, target, fieldProfile, animationProfile: animationProfile as never };
       break;
     }
     case 323: {

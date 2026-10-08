@@ -6473,6 +6473,94 @@
     "body": "normal",
     "activation": "window start = the scenario's own source activation frame (prep22Probes.sh, 2 fresh runs; docs/next-adapters-prep34.md; em-live-receipt.json)"
    }
+  },
+  {
+   "id": 285,
+   "move": "SKILL_SWAP",
+   "orientation": "player",
+   "variant": "s10a-skill-swap-alt-player-espeon-weezing",
+   "activationFrame": 70,
+   "windowStart": 70,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/s10a-live/skill-swap-alt-player-espeon-weezing.json",
+    "scenario": "tools/battle-lab/prep33-skill-swap-alt-player-espeon-weezing.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep22Probes.sh; sf live receipt; the elevated WEEZING opponent is 0 px from row 0 in both roles via the live hook, docs/next-adapters-prep35.md s1.3)"
+   },
+   "requestFields": {
+    "turn": 0
+   }
+  },
+  {
+   "id": 285,
+   "move": "SKILL_SWAP",
+   "orientation": "opponent",
+   "variant": "s10a-skill-swap-alt-opponent-weezing-snorlax",
+   "activationFrame": 75,
+   "windowStart": 75,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/s10a-live/skill-swap-alt-opponent-weezing-snorlax.json",
+    "scenario": "tools/battle-lab/prep33-skill-swap-alt-opponent-weezing-snorlax.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep22Probes.sh; sf live receipt; the elevated WEEZING opponent is 0 px from row 0 in both roles via the live hook, docs/next-adapters-prep35.md s1.3)"
+   },
+   "requestFields": {
+    "turn": 0
+   }
+  },
+  {
+   "id": 284,
+   "move": "ERUPTION",
+   "orientation": "player",
+   "variant": "s10a-eruption-alt-player-camerupt-weezing",
+   "activationFrame": 240,
+   "windowStart": 240,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/s10a-live/eruption-alt-player-camerupt-weezing.json",
+    "scenario": "tools/battle-lab/prep36-eruption-alt-player-camerupt-weezing.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep22Probes.sh; sf live receipt; the elevated WEEZING opponent is 0 px from row 0 in both roles via the live hook, docs/next-adapters-prep36.md s0.2)"
+   },
+   "requestFields": {
+    "turn": 0
+   }
+  },
+  {
+   "id": 284,
+   "move": "ERUPTION",
+   "orientation": "opponent",
+   "variant": "s10a-eruption-alt-opponent-weezing-golem",
+   "activationFrame": 79,
+   "windowStart": 79,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/s10a-live/eruption-alt-opponent-weezing-golem.json",
+    "scenario": "tools/battle-lab/prep36-eruption-alt-opponent-weezing-golem.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own source activation frame (prep22Probes.sh; sf live receipt; the elevated WEEZING opponent is 0 px from row 0 in both roles via the live hook, docs/next-adapters-prep36.md s0.2)"
+   },
+   "requestFields": {
+    "turn": 0
+   }
   }
  ]
 }

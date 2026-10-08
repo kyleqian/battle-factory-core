@@ -56,6 +56,10 @@ export const LIVE_MOVE_RANDOM2_PLANS: Readonly<Record<number, readonly Presentat
   // Move_WATER_PULSE: six ring emissions (ages 86, 93, 100, 101, 108, 115) x 2 words (randomY, randomX;
   // battle_anim_water.c:1574-1575). The reducer replays them from the activation state alone.
   352: Object.freeze([86, 93, 100, 101, 108, 115].map((ageOffset) => Object.freeze({ ageOffset, count: 2 }))),
+  // Move_FLATTER (S10A; docs/next-adapters-prep32.md s2 / prep35 s3 item 2): the script's confetti burst on the frame +65 (the 65 RfuMain1 steps are
+  // the per-frame advance), 19 x CreateFlatterConfetti = 38 AnimFlatterConfetti, three words each in source order (w0 % 12 tile, w1 & 0x1ff
+  // data[0], w2 & 0xff data[1]; battle_anim_effects_3.c:3033-3060).
+  260: Object.freeze([Object.freeze({ ageOffset: 65, count: 114 })]),
   // Move_METEOR_MASH (D4b; faithful TIMING with d3, liveMoveTimingPolicy.ts, so not in LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS): 48 AnimMiniTwinklingStar
   // spawns, (& 3 -> tile, & 7 signed -> y) each (battle_anim_effects_3.c:2147, :2153), in the prep12 plan's frame groups (plans.json meteor-mash).
   309: Object.freeze([[48, 2], [50, 2], [52, 2], [54, 2], [56, 2], [58, 2], [60, 4], [62, 4], [64, 4], [66, 4], [68, 4], [70, 4], [72, 4], [74, 4],

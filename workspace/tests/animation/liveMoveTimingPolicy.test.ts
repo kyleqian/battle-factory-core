@@ -73,6 +73,7 @@ describe("live move timing policy (D4)", () => {
     expect(liveMoveOptionalLagAge(279)).toBeNull();
     expect([liveMoveOptionalLagAge(309), liveMoveTimingBodyRows(309), liveMoveBgWriteRow(309)]).toEqual([195, 215, null]);
     expect([liveMoveOptionalLagAge(149), liveMoveTimingBodyRows(149), liveMoveBgWriteRow(149)]).toEqual([185, 205, null]);
+    expect([liveMoveOptionalLagAge(285), liveMoveTimingBodyRows(285), liveMoveBgWriteRow(285)]).toEqual([176, 196, null]);
     expect([liveMoveOptionalLagAge(326), liveMoveTimingBodyRows(326), liveMoveBgWriteRow(326)]).toEqual([null, 161, null]);
     expect(liveMoveTimingParameter(326, "scanline-split-line")!.chosen).toBe("no-event");
   });

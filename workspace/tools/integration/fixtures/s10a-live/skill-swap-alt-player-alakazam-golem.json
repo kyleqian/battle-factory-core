@@ -1,0 +1,42 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "SKILL_SWAP",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep22-skill-swap-alt-player-alakazam-golem.json",
+ "denseWindow": {
+  "startFrame": 72,
+  "endFrame": 267
+ },
+ "windowSource": "window = [activation, first inactive row] of this scenario's first SKILL_SWAP body (196 rows) from 2 fresh prep22Probes.sh runs (bodies agree)",
+ "timingPhase": "event",
+ "timingPhases": {
+  "optional-lag-age": "event",
+  "palette-transfer-row": "event"
+ },
+ "restoreRow": 176,
+ "attacker": {
+  "species": "ALAKAZAM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019094,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 162,
+  "playerMaxHp": 162,
+  "opponentHp": 187,
+  "opponentMaxHp": 187,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

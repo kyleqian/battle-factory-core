@@ -1,0 +1,42 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "SKILL_SWAP",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-skill-swap-player-girafarig-opponent-shuckle.json",
+ "denseWindow": {
+  "startFrame": 73,
+  "endFrame": 268
+ },
+ "windowSource": "window = [activation, first inactive row] of this scenario's first SKILL_SWAP body (196 rows) from 2 fresh prep22Probes.sh runs (bodies agree)",
+ "timingPhase": "event",
+ "timingPhases": {
+  "optional-lag-age": "event",
+  "palette-transfer-row": "no-event"
+ },
+ "restoreRow": 175,
+ "attacker": {
+  "species": "GIRAFARIG",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SHUCKLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019094,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 177,
+  "playerMaxHp": 177,
+  "opponentHp": 127,
+  "opponentMaxHp": 127,
+  "playerGender": "male",
+  "opponentGender": "female"
+ }
+}

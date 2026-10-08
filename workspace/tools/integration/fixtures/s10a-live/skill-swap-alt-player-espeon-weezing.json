@@ -1,0 +1,42 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "SKILL_SWAP",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep33-skill-swap-alt-player-espeon-weezing.json",
+ "denseWindow": {
+  "startFrame": 70,
+  "endFrame": 265
+ },
+ "windowSource": "window = [activation, first inactive row] of this scenario's first SKILL_SWAP body (196 rows) from 2 fresh prep22Probes.sh runs (bodies agree)",
+ "timingPhase": "event",
+ "timingPhases": {
+  "optional-lag-age": "event",
+  "palette-transfer-row": "no-event"
+ },
+ "restoreRow": 175,
+ "attacker": {
+  "species": "ESPEON",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "WEEZING",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019094,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 172,
+  "playerMaxHp": 172,
+  "opponentHp": 172,
+  "opponentMaxHp": 172,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

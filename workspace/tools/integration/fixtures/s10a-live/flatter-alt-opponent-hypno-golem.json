@@ -1,0 +1,40 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "FLATTER",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep25-flatter-alt-opponent-hypno-golem.json",
+ "denseWindow": {
+  "startFrame": 71,
+  "endFrame": 289
+ },
+ "windowSource": "window = [activation, first inactive row] of this scenario's first FLATTER body (219 rows) from 2 fresh prep22Probes.sh runs (bodies agree)",
+ "presentationRngActivation": {
+  "value": 1989536647,
+  "source": "prep22Probe.py rng2Series[72] stepped back once (activation frame 71)"
+ },
+ "attacker": {
+  "species": "HYPNO",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703662,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 187,
+  "playerMaxHp": 187,
+  "opponentHp": 192,
+  "opponentMaxHp": 192,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

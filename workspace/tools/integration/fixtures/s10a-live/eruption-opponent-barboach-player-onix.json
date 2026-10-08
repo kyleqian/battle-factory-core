@@ -1,0 +1,42 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "ERUPTION",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-eruption-opponent-camerupt-player-onix.json",
+ "denseWindow": {
+  "startFrame": 221,
+  "endFrame": 714
+ },
+ "windowSource": "window = [activation, first inactive row] of this scenario's first ERUPTION body (494 rows) from 2 fresh prep22Probes.sh runs (bodies agree)",
+ "attacker": {
+  "species": "BARBOACH",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703681,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 109,
+  "opponentMaxHp": 125,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "player"
+  }
+ ]
+}

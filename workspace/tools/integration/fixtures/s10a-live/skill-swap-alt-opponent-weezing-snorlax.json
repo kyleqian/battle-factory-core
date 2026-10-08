@@ -1,0 +1,42 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "SKILL_SWAP",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep33-skill-swap-alt-opponent-weezing-snorlax.json",
+ "denseWindow": {
+  "startFrame": 75,
+  "endFrame": 270
+ },
+ "windowSource": "window = [activation, first inactive row] of this scenario's first SKILL_SWAP body (196 rows) from 2 fresh prep22Probes.sh runs (bodies agree)",
+ "timingPhase": "event",
+ "timingPhases": {
+  "optional-lag-age": "event",
+  "palette-transfer-row": "no-event"
+ },
+ "restoreRow": 175,
+ "attacker": {
+  "species": "WEEZING",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 2027808494,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 267,
+  "playerMaxHp": 267,
+  "opponentHp": 172,
+  "opponentMaxHp": 172,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

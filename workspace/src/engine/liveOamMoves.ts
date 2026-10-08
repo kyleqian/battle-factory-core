@@ -13,6 +13,8 @@ import { KNOWN_ENTRY_NON_BATTLER_SPRITES } from "./liveBgSnapshotMoves.ts";
 import type { LivePaletteComposite } from "./liveMovePaletteComposite.ts";
 import {
   FURY_CUTTER_ROWS, KNOWN_ENTRY_HEALTHBOX_OAM, buildLiveHardwareOam, carryLiveSpriteOrder, KNOWN_ENTRY_HEALTHBOX_SLOTS, PURSUIT_ROWS, RETURN_ROWS, liveFuryCutterHardwareOamRows, liveMegahornHardwareOamRows, livePursuitHardwareOamRows, liveReturnHardwareOamRows, liveReturnLives, liveRevengeHardwareOamRows, liveWillOWispHardwareOamRows, livePsywaveHardwareOamRows, livePsywaveRingAttr, liveExtrasensoryCloneStep, liveExtrasensoryHardwareOamRows,
+  SKILL_SWAP_ORB, SKILL_SWAP_ORB_PAIRS, liveSkillSwapHardwareOamRows, liveSkillSwapOrbLives, type LiveSkillSwapOrbPosition,
+  FLATTER_ROWS, liveFlatterHardwareOamRows, type LiveFlatterBuildSprites,
   type LiveOamScene, type LiveSpriteOrderSort, type OamAttr, type WispProgram,
 } from "./liveMoveOamAssembler.ts";
 import { liveMegahornBodyRows, liveMegahornRows } from "./liveMegahornInputs.ts";
@@ -20,6 +22,7 @@ import { LIVE_REVENGE_ROWS, liveRevengeRows } from "./liveRevengeInputs.ts";
 import { livePsywaveRowCount, livePsywaveRows } from "./livePsywaveInputs.ts";
 import { GBA_SINE_TABLE_256 } from "./battleMenu.ts";
 import { liveExtrasensoryRowCount, liveExtrasensoryRows } from "./liveExtrasensoryInputs.ts";
+import { liveSkillSwapBlend, liveSkillSwapPalettes, liveSkillSwapRowCount } from "./liveSkillSwapInputs.ts";
 import {
   liveNightmareBattlers, liveNightmareClone, liveNightmareFirstInactive, liveNightmareMonbgBg, liveNightmareMonbgOrigin, liveNightmareOrders,
   liveNightmarePalettes, liveNightmareRegisters, type LiveNightmareKnown, type LiveNightmarePhase, type LiveNightmareSprite,
@@ -1052,5 +1055,201 @@ export function liveShockWaveInputs(args: LiveShockWaveInputArgs): Record<string
     registers: { ...S0_REGISTERS }, animationRngSeed: 0, gameplayRng: null,
     // The reducer derives the body timing from the seam geometry (docs/next-adapters-prep33.md s0.2), not the accepted side tables.
     derivedTiming: true,
+  };
+}
+
+export interface LiveSkillSwapInputArgs {
+  readonly attackerSide: Side;
+  readonly attacker: LiveOamBattlerAnchors;
+  readonly target: LiveOamBattlerAnchors;
+  /** GetBattlerSpriteCoordAttr width / height (the species pic coords; liveMoveAnimation.ts liveBattlerCoordAttrs). */
+  readonly attackerPicSize: Readonly<{ width: number; height: number }>;
+  readonly targetPicSize: Readonly<{ width: number; height: number }>;
+  readonly palettes: LivePaletteComposite;
+  readonly activationOrder: readonly number[];
+  readonly sort: LiveSpriteOrderSort;
+  /** gBattleAnimSpritePal_BluegreenOrb as BGR555 words (src/animation/assets/skill-swap-bluegreen-orb.json, passed in by the seam). */
+  readonly orbPalette: readonly number[];
+  /** Seam-provided skillSwap.ts skillSwapAtAge orbs for the orb program input built here (positions only). */
+  readonly orbsAt: (state: number, programInput: Record<string, unknown>) => readonly LiveSkillSwapOrbPosition[];
+  /** D4 policy (liveMoveTimingPolicy.ts MOVE_SKILL_SWAP): the optional lag at row 176 and the bank-2 restore row (175 / 176). */
+  readonly lag: boolean;
+  readonly restoreRow: number;
+}
+/** ANIM_TAG_BLUEGREEN_ORB (10251) at the known entry: tile slot 6 = tiles 305..308, palette slot 7 (OBJ bank 23). */
+const SKILL_SWAP_RESOURCES = Object.freeze({ tag: 10251, tileSlot: 6, paletteAllocatorSlot: 7, paletteBank: 23, tileRange: [305, 4] as const, allocator: null });
+/** K (prep33 SS_K, 6/6 windows): task slots of the two AnimTask_SkillSwap / BlendMonInAndOut legs and the shared fades. */
+const SKILL_SWAP_TASK_SLOTS = Object.freeze({ fadeToPsychic: 0, psychicBackground: 1, targetOrbs: 0, targetBlend: 2, loopReversal: 3, attackerOrbs: 4, attackerBlend: 5, restoreFade: 0 });
+const skillSwapCache = new Map<string, ReturnType<typeof liveSkillSwapHardwareOamRows>>();
+
+/**
+ * MOVE_SKILL_SWAP (285) live inputs (docs/next-adapters-prep35.md s1 / s3 item 1; faithful timing). Hardware OAM (128 entries, SortSprites
+ * order carried from the lent activation order), the 32 hardware / software matrices and the orb program from the assembler; palettes and
+ * bldcnt / bldy from liveSkillSwapInputs.ts with the activation palette = the asset composite and the registers = S0 (the renderer branch
+ * reads only bldy and the hardware palette). Trajectory bounds = GetBattlerSpriteCoordAttr LEFT / RIGHT / TOP / BOTTOM around X_2 /
+ * Y_PIC_OFFSET (battle_anim_mons.c:2273-2280). The ability outcome is not an input: the animation only runs on the success path.
+ */
+export function liveSkillSwapInputs(args: LiveSkillSwapInputArgs): { duration: number; animationInputsAt: (age: number) => Record<string, unknown> } {
+  const { attackerSide, attacker, target } = args;
+  const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
+  const attackerObject = battlerObject(attackerSide, attacker), targetObject = battlerObject(targetSide, target);
+  const rows = liveSkillSwapRowCount(args.lag), firstInactiveAge = rows - 1;
+  const bounds = (anchors: LiveOamBattlerAnchors, size: Readonly<{ width: number; height: number }>) => ({
+    left: anchors.picOffsetPoint.x - size.width / 2, right: anchors.picOffsetPoint.x + size.width / 2,
+    top: anchors.picOffsetPoint.y - size.height / 2, bottom: anchors.picOffsetPoint.y + size.height / 2 });
+  const sprite = (object: ReturnType<typeof battlerObject>) =>
+    ({ slot: object.slot, x: 0, y: 0, x2: 0, y2: 0, attr: object.attr, subpriority: object.subpriority, matrixNum: 0, matrix: [256, 0, 0, 256] });
+  const lives = liveSkillSwapOrbLives();
+  const base = {
+    attackerBounds: bounds(attacker, args.attackerPicSize), targetBounds: bounds(target, args.targetPicSize),
+    attackerSprite: sprite(attackerObject), targetSprite: sprite(targetObject), taskSlots: SKILL_SWAP_TASK_SLOTS,
+    orbAllocations: [...lives].sort((l, r) => l.order - r.order).map((l) => ({ slot: l.slot, matrixNum: l.matrixNum, sourceCreationOrder: l.order })),
+    orbOam: SKILL_SWAP_ORB_PAIRS.map(([slot]) => ({ slot, attr: [0, 0, SKILL_SWAP_ORB.attr2] as const, subpriority: SKILL_SWAP_ORB.subpriority })),
+    background: { currentVram: null, battleVram: null, psychicVram: null }, resources: SKILL_SWAP_RESOURCES,
+    sharedTaskData: { fadeToPsychic: [], loopReversal: [], restoreFade: [] },
+    targetBlendPaletteStart: (targetSide === "player" ? 16 : 17) * 16 + 1, attackerBlendPaletteStart: (attackerSide === "player" ? 16 : 17) * 16 + 1,
+    audio: { current: null, attackerPan: attackerSide === "player" ? -64 : 63 }, liveCounts: { visualTasks: 0, soundTasks: 0 }, animationRng: 0,
+    firstInactiveAge, abilityOutcome: { playerAbilityAfterSwap: -1, opponentAbilityAfterSwap: -1 }, gameplayRng: null, gameplayState: null,
+  };
+  const key = JSON.stringify([attackerSide, base.attackerBounds, base.targetBounds, attackerObject.attr, targetObject.attr, args.activationOrder, rows]);
+  let built = skillSwapCache.get(key);
+  if (!built) {
+    // The orb program needs only positions: the reducer looks up the (identity) software matrices and the orb OAM slots.
+    const programInput = { ...base, spriteOrder: [], softwareOam: [], hardwareOam: [], softwareMatrices: IDENTITY_MATRICES, hardwareMatrices: [],
+      palette: { unfaded: [], faded: [], hardware: [] }, registers: {} };
+    built = liveSkillSwapHardwareOamRows({ attacker: attackerObject, target: targetObject, scene: KNOWN_ENTRY_SCENE, lives,
+      activationOrder: args.activationOrder, sort: args.sort, orbsAt: (state) => args.orbsAt(state, programInput), rows });
+    if (skillSwapCache.size > 16) skillSwapCache.clear();
+    skillSwapCache.set(key, built);
+  }
+  const display = built;
+  const palettes = liveSkillSwapPalettes({ attackerSide, palette0: args.palettes, orbPalette: args.orbPalette,
+    psychicPalette: (psychicBgAsset as { palette: readonly Rgb[] }).palette.map(bgr555), rows, restoreRow: args.restoreRow });
+  return {
+    duration: rows,
+    animationInputsAt: (age: number) => {
+      const row = Math.min(age, firstInactiveAge), p = palettes[row]!;
+      return {
+        ...base, spriteOrder: display.orders[row]!, softwareOam: display.oam[row]!, hardwareOam: display.oam[row]!,
+        softwareMatrices: display.softwareMatrices[row]!, hardwareMatrices: display.matrices[row]!,
+        palette: { unfaded: p.unfaded, faded: p.faded, hardware: p.hardware },
+        registers: { ...S0_REGISTERS, ...liveSkillSwapBlend(age, args.lag) },
+      };
+    },
+  };
+}
+
+export interface LiveFlatterInputArgs {
+  readonly attackerSide: Side;
+  readonly attacker: LiveOamBattlerAnchors;
+  readonly target: LiveOamBattlerAnchors;
+  readonly palettes: LivePaletteComposite;
+  readonly activationOrder: readonly number[];
+  readonly sort: LiveSpriteOrderSort;
+  /** The body's 114 presentation-host words (plan LIVE_MOVE_RANDOM2_PLANS[260]) and the host state at activation. */
+  readonly words: readonly number[];
+  readonly animationRng: number;
+  /** flatter.json spotlight / confetti palettes (src/animation/assets/flatter.json, passed in by the seam). */
+  readonly spotlightPalette: readonly Rgb[];
+  readonly confettiPalette: readonly Rgb[];
+  /** Seam-provided flatter.ts flatterAtAge over the program input built here. */
+  readonly stateAt: (state: number, programInput: Record<string, unknown>) => LiveFlatterBuildSprites;
+}
+/** K (prep35 FL35): spotlight tile slot 6 = [305, 64], confetti slot 7 = [433, 12], palette slots 7 / 8, spotlight matrix 0; slots lowest free. */
+const FLATTER_K = Object.freeze({ spotlightTileSlot: 6, confettiTileSlot: 7, spotlightTiles: [305, 64] as const, confettiTiles: [433, 12] as const,
+  spotlightPaletteSlot: 7, confettiPaletteSlot: 8, spotlightMatrix: 0, burstRow: 65, confettiEnd: 97 });
+const flatterCache = new Map<string, ReturnType<typeof liveFlatterHardwareOamRows>>();
+const lowestFreeSlot = (occupied: Iterable<number>) => { const used = new Set(occupied); let slot = 0; while (used.has(slot)) slot += 1; return slot; };
+
+/**
+ * Move_FLATTER register file of a row (prep32 flatterRegisters; S0 activation registers): row 1 WIN0H / WIN0V = 0; CreateSpotlight 7
+ * (DISPCNT | OBJWIN, WININ); AnimTask_HardwarePaletteFade BLDY 1..10 every 4 rows from 8 (BLDCNT 0xf8 8..216); spotlight init 49 (WINOUT);
+ * spotlight destroy 175 (WINOUT, DISPCNT ^ WIN0); fade-out BLDY 9..0 every 4 rows from 177; RemoveSpotlight 218.
+ */
+function liveFlatterRegisters(row: number): Record<string, number> {
+  const r0 = S0_REGISTERS, reg: Record<string, number> = { ...r0 };
+  if (row >= 1) { reg.win0h = 0; reg.win0v = 0; }
+  if (row >= 7 && row < 218) { reg.dispcnt = r0.dispcnt! | 0x4000; reg.winin = 0x1f3f; }
+  if (row >= 8 && row < 217) reg.bldcnt = 0xf8;
+  if (row >= 8 && row <= 44) reg.bldy = 1 + Math.floor((row - 8) / 4);
+  else if (row > 44 && row < 177) reg.bldy = 10;
+  else if (row >= 177 && row <= 213) reg.bldy = 9 - Math.floor((row - 177) / 4);
+  if (row >= 49 && row < 175) reg.winout = 0x1f3f;
+  if (row >= 175 && row < 218) reg.dispcnt = (r0.dispcnt! | 0x4000) ^ 0x8000;
+  if (row >= 218) reg.dispcnt = (r0.dispcnt! ^ 0x8000) & ~0x4000;
+  return reg;
+}
+
+/**
+ * MOVE_FLATTER (260) live inputs (docs/next-adapters-prep35.md s2 / s3 item 2; faithful random, D3). The 38 confetti from the body's 114
+ * presentation-host words (prep32 flatterConfetti: 3 words per confetti in source order, tile += w0 % 12, data[0] = 0x5e0 +/- (w1 & 0x1ff),
+ * data[1] = 0x480 +/- (w2 & 0xff), sides alternating attacker / target; slots lowest free after the scene, the spotlight and the second dip),
+ * the hardware OAM / matrices / carried order from the assembler (sprite states from the seam's reducer), the prep32 registers (S0) and
+ * palettes (composite + the spotlight sheet on row 1 / confetti on row 4; hardware = the previous row's faded). Battler OBJ = sprite centre +
+ * idle rest; attackerCenter = the attacker sprite centre, targetCenter = BATTLER_COORD_X / _Y (no elevation), targetSpriteOrigin = the target
+ * sprite centre (prep35 s2.1). Production values only; never a capture row.
+ */
+export function liveFlatterInputs(args: LiveFlatterInputArgs): { duration: number; attackerCenter: Point; targetCenter: Point;
+  animationInputsAt: (age: number) => Record<string, unknown> } | null {
+  if (args.words.length !== 114) return null;
+  const { attackerSide, attacker, target } = args;
+  const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
+  const attackerObject = battlerObject(attackerSide, attacker), targetObject = battlerObject(targetSide, target);
+  const spotlightSlot = lowestFreeSlot(KNOWN_ENTRY_OCCUPIED_SLOTS), dip1 = lowestFreeSlot([...KNOWN_ENTRY_OCCUPIED_SLOTS, spotlightSlot]);
+  const dip2 = lowestFreeSlot([...KNOWN_ENTRY_OCCUPIED_SLOTS, spotlightSlot, dip1]);
+  // occupied at the burst (row 65): the scene, the spotlight and the second dip (the first is destroyed on row 64)
+  const used = new Set([...KNOWN_ENTRY_OCCUPIED_SLOTS, spotlightSlot, dip2]);
+  const confetti = Array.from({ length: 38 }, (_, i) => {
+    const w0 = args.words[3 * i]!, r1 = args.words[3 * i + 1]! & 0x1ff, r2 = args.words[3 * i + 2]! & 0xff;
+    const slot = lowestFreeSlot(used); used.add(slot);
+    const side = i & 1, state = { x: side === 0 ? -8 : 248, y: 104, x2: 0, y2: 0,
+      data: [r1 & 1 ? 0x5e0 + r1 : 0x5e0 - r1, r2 & 1 ? 0x480 + r2 : 0x480 - r2, side, 0], flags: 1, callback: "AnimFlatterConfetti_Step" };
+    return { slot, start: FLATTER_K.burstRow, end: FLATTER_K.confettiEnd, initial: state, initialized: state, tileOffset: w0 % 12 };
+  });
+  const attackerCenter = attacker.spriteCenter, targetCenter = target.battlePositionCenter;
+  const art = (object: ReturnType<typeof battlerObject>) =>
+    ({ slot: object.slot, attr: object.attr, subpriority: object.subpriority, matrixNum: 0, matrix: [256, 0, 0, 256] });
+  const spotlightAttr2 = FLATTER_K.spotlightTiles[0] | 2 << 10 | FLATTER_K.spotlightPaletteSlot << 12;
+  const base = {
+    targetSpriteOrigin: target.spriteCenter, attackerInitialOffset: attacker.frontIdleRest, targetInitialOffset: target.frontIdleRest,
+    attackerArt: art(attackerObject), targetArt: art(targetObject),
+    spotlight: { slot: spotlightSlot, attr: [0, 0, spotlightAttr2], subpriority: targetObject.subpriority - 2, matrixNum: FLATTER_K.spotlightMatrix },
+    verticalDipSlots: [dip1, dip2], confetti, taskSlots: { hardwarePaletteFade: 0 },
+    resources: { spotlightTag: 10227, confettiTag: 10240, spotlightTileSlot: FLATTER_K.spotlightTileSlot, spotlightPaletteSlot: FLATTER_K.spotlightPaletteSlot,
+      confettiTileSlot: FLATTER_K.confettiTileSlot, confettiPaletteSlot: FLATTER_K.confettiPaletteSlot,
+      allocator: { tileRanges: Array.from({ length: 64 }, (_, i) => i === FLATTER_K.spotlightTileSlot ? FLATTER_K.spotlightTiles
+        : i === FLATTER_K.confettiTileSlot ? FLATTER_K.confettiTiles : [0, 0]) } },
+    audio: { current: null, attackerPan: attackerSide === "player" ? -64 : 63, targetPan: targetSide === "player" ? -63 : 63 },
+    liveCounts: { visualTasks: 0, soundTasks: 0, matrixBitmap: 0 }, animationRng: args.animationRng, gameplayRng: null, gameplayState: null,
+  };
+  const key = JSON.stringify([attackerSide, attackerCenter, targetCenter, target.spriteCenter, attacker.frontIdleRest, target.frontIdleRest, args.activationOrder, args.words]);
+  let built = flatterCache.get(key);
+  if (!built) {
+    const programInput = { ...base, attackerCenter, targetCenter, spriteOrder: args.activationOrder,
+      buffers: { softwareOam: [], hardwareOam: [], softwareMatrices: [], hardwareMatrices: [] }, palette: { unfaded: [], faded: [], hardware: [] }, registers: {} };
+    built = liveFlatterHardwareOamRows({ attacker: attackerObject, target: targetObject, scene: KNOWN_ENTRY_SCENE, spotlightAttr2,
+      spotlightSubpriority: targetObject.subpriority - 2, confettiTileBase: FLATTER_K.confettiTiles[0], confettiPaletteSlot: FLATTER_K.confettiPaletteSlot,
+      confettiTileOffsets: new Map(confetti.map((c) => [c.slot, c.tileOffset])), activationOrder: args.activationOrder, sort: args.sort,
+      stateAt: (state) => args.stateAt(state, programInput) });
+    if (flatterCache.size > 16) flatterCache.clear();
+    flatterCache.set(key, built);
+  }
+  const rows = built;
+  const loads = [{ row: 1, bank: FLATTER_K.spotlightPaletteSlot, words: args.spotlightPalette.map(bgr555) },
+    { row: 4, bank: FLATTER_K.confettiPaletteSlot, words: args.confettiPalette.map(bgr555) }];
+  const loaded = (r: number, from: readonly number[]) => {
+    const out = [...from]; for (const l of loads) if (r >= l.row) for (let i = 0; i < 16; i += 1) out[(16 + l.bank) * 16 + i] = l.words[i]!; return out; };
+  return {
+    duration: FLATTER_ROWS, attackerCenter, targetCenter,
+    animationInputsAt: (age: number) => {
+      const row = Math.min(age, FLATTER_ROWS - 1);
+      return {
+        ...base, spriteOrder: rows.orders[row]!,
+        buffers: { softwareOam: rows.oam[row]!, hardwareOam: rows.oam[row]!, softwareMatrices: rows.matrices[row]!, hardwareMatrices: rows.matrices[row]! },
+        palette: { unfaded: loaded(row, args.palettes.unfaded), faded: loaded(row, args.palettes.faded),
+          hardware: row === 0 ? [...args.palettes.hardware] : loaded(row - 1, args.palettes.faded) },
+        registers: liveFlatterRegisters(row),
+      };
+    },
   };
 }

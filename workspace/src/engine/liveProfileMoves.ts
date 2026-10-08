@@ -202,3 +202,93 @@ export function liveSheerColdInputs(input: {
 export function liveSheerColdRestoreFadeEndAge(attackerSide: "player" | "opponent"): number {
   return 188 + (liveMoveTimingSidePhase(329, "optional-lag-age", attackerSide) === "event" ? 1 : 0);
 }
+
+type EruptionSide = "player" | "opponent";
+/** Anchors of one battler (liveMoveAnimation.ts liveBattlerAnchors). */
+export type LiveEruptionAnchors = Readonly<{ picOffsetPoint: Readonly<{ x: number; y: number }>; spriteCenter: Readonly<{ x: number; y: number }>;
+  frontIdleRest: Readonly<{ x2: number; y2: number }> }>;
+/** K (prep36 ER36, equal in 10/10 windows) and S (Move_ERUPTION script cadence, battle_anim_scripts.s:3805-3828) constants. */
+const ERUPTION = Object.freeze({
+  tag: 10201, tileRange: [537, 84] as [number, number], paletteSlot: 7,
+  paletteTags: [65535, 65535, 65535, 65535, 54322, 55039, 55044, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535],
+  occupied: [0, 1, 2, 6, 8, 60, 61, 62, 63], matrixNum: { player: 1, opponent: 2 } as Record<EruptionSide, number>,
+  battlerSub: { player: 30, opponent: 40 } as Record<EruptionSide, number>,
+  launchTask: 0, companionTask: 1, platformTask: 0, battlerTask: 1, audioTask: 2,
+  wave1Start: 19, companionWait: 59, wave2Gap: 2, fallingAfterE2: 34, shakeAfterFalling: 23, audioAfterFalling: 24, closingAfterFalling: 106, endAfterE2: 294,
+});
+export interface LiveEruptionProfileInput {
+  readonly attackerSide: EruptionSide;
+  readonly anchors: Readonly<Record<EruptionSide, LiveEruptionAnchors>>;
+  /** GetBattlerYDeltaFromSpriteId: the attacker's pic-coords y_offset (art view coords.yOffset). */
+  readonly attackerYDelta: number;
+  readonly palettes: LivePaletteComposite;
+  readonly warmRockPalette: readonly Rgb[];
+  /** Known-entry scene occupants (liveBgSnapshotMoves.ts KNOWN_ENTRY_NON_BATTLER_SPRITES) and the battler OBJ (battlerSprite) for the sort keys. */
+  readonly sceneSprites: readonly Readonly<{ slot: number; attr: readonly number[]; subpriority: number }>[];
+  readonly battlerSprites: Readonly<Record<EruptionSide, Readonly<{ slot: number; attr: readonly number[]; subpriority: number }>>>;
+  readonly activationOrder: readonly number[];
+  readonly animationRng: number;
+  /** Seam-provided eruptionLaunch.ts eruptionLaunchTimeline: the task lifetime of the wave whose source offset is given. */
+  readonly launchLifetime: (launch: Record<string, unknown>, sourceOffset: 33 | 46) => readonly [number, number];
+  /** Seam-provided eruptionFallingRock.ts ERUPTION_FALLING_ROCK_SOURCE_CALLS. */
+  readonly fallingCalls: unknown;
+}
+/**
+ * `Move_ERUPTION` (docs/next-adapters-prep36.md s0-s2; ported 1:1 from tools/integration/prep36EruptionModel.ts eruptionProfile36): the complete
+ * EruptionAnimationProfile from production facts. The schedule comes from the UNCHANGED launch reducer: wave 1's task end E1 (wave 2 parked),
+ * wave 2 at E1 + 2 and its end E2; falling rocks at E2 + 34, HorizontalShake + 23, loopsewithpan + 24, closing blend + 106, end E2 + 294.
+ * The gameplay RNG field is a reducer pass-through (never read by the renderer): 0, presentation never sees gameplay RNG.
+ */
+export function liveEruptionProfile(input: LiveEruptionProfileInput): Record<string, unknown> & { endAge: number } {
+  const side = input.attackerSide, tside: EruptionSide = side === "player" ? "opponent" : "player";
+  const A = input.anchors[side], T = input.anchors[tside];
+  const freeAtEntry = Array.from({ length: 64 }, (_, s) => s).filter((s) => !ERUPTION.occupied.includes(s));
+  const geometry = { attackerSpriteSlot: side === "player" ? 6 : 8, attackerX: A.spriteCenter.x, attackerY: A.spriteCenter.y,
+    centerToCornerVecY: -64, battlerPicHeight: 64, battlerYDelta: input.attackerYDelta, matrixNum: ERUPTION.matrixNum[side],
+    ...(A.frontIdleRest.x2 || A.frontIdleRest.y2 ? { initialX2: A.frontIdleRest.x2, initialY2: A.frontIdleRest.y2 } : {}) };
+  const allocator = (freeSpriteSlots: readonly number[], endAge: number) => ({ freeSpriteSlots, tileTag: ERUPTION.tag, paletteTag: ERUPTION.tag,
+    tileRange: ERUPTION.tileRange, tileRangeBeforeLoad: [0, 0] as [number, number], paletteSlot: ERUPTION.paletteSlot, loadedAge: 1, freedAge: endAge });
+  const launchFor = (wave2Start: number, endAge: number) => ({
+    side, geometry, allocator: allocator(freeAtEntry, endAge), taskSlot: ERUPTION.launchTask,
+    waves: [
+      { taskStartAge: ERUPTION.wave1Start, sourceOffset: 33, companionTaskSlot: ERUPTION.companionTask, companionTaskEndAge: ERUPTION.wave1Start + ERUPTION.companionWait },
+      { taskStartAge: wave2Start, sourceOffset: 46, companionTaskSlot: ERUPTION.companionTask, companionTaskEndAge: wave2Start + ERUPTION.companionWait },
+    ],
+    startingAnimationRng: input.animationRng, endAge,
+  });
+  const e1 = input.launchLifetime(launchFor(900, 1200), 33)[1];
+  const wave2Start = e1 + ERUPTION.wave2Gap;
+  const e2 = input.launchLifetime(launchFor(wave2Start, 1200), 46)[1];
+  const endAge = e2 + ERUPTION.endAfterE2, creationAge = e2 + ERUPTION.fallingAfterE2;
+  const resources = { tileTag: ERUPTION.tag, paletteTag: ERUPTION.tag, tileRangeBeforeLoad: [0, 0] as [number, number], tileRange: ERUPTION.tileRange,
+    paletteSlot: ERUPTION.paletteSlot, loadedAge: 1, freedAge: endAge };
+  const signedY = (attr0: number) => ((attr0 & 0xff) >= 160 ? (attr0 & 0xff) - 256 : attr0 & 0xff);
+  const scene = [...input.sceneSprites, input.battlerSprites.player, input.battlerSprites.opponent].sort((a, b) => a.slot - b.slot);
+  const keys = [...scene, input.battlerSprites[side], input.battlerSprites[tside]].map((s) => ({
+    slot: s.slot, priority: ((s.attr[2]! >> 10) & 3) as 0 | 1 | 2 | 3, subpriority: s.subpriority, y: signedY(s.attr[0]!) }));
+  // AnimTask_EruptionLaunchRocks_Step zeroes the attacker x2 and restores y (battle_anim_fire.c:845, 899): at the shake creation the attacker
+  // carries no idle rest; the target keeps its species rest.
+  const shakeBattler = (s: EruptionSide) => ({ battlerId: s === "player" ? 0 : 1, side: s, spriteSlot: s === "player" ? 6 : 8,
+    x: input.anchors[s].spriteCenter.x, y: input.anchors[s].spriteCenter.y,
+    initialX2: s === side ? 0 : input.anchors[s].frontIdleRest.x2, initialY2: s === side ? 0 : input.anchors[s].frontIdleRest.y2 });
+  const orientation = side === "player" ? "player-back" : "opponent-front";
+  return {
+    orientation, endAge, launch: launchFor(wave2Start, endAge),
+    falling: { creationAge, endAge, calls: input.fallingCalls,
+      geometry: { oamCenterOffsetX: 16, oamCenterOffsetY: 16, subpriority: 3, oamPriority: 2, horizontalFlip: true },
+      allocator: allocator(freeAtEntry.slice(0, 6), endAge), startingAnimationRng: input.animationRng },
+    horizontalShake: { orientation, taskCreationAge: creationAge + ERUPTION.shakeAfterFalling, endAge, platformTaskSlot: ERUPTION.platformTask,
+      battlerTaskSlot: ERUPTION.battlerTask, platformInitialX: 0, battlers: [shakeBattler("player"), shakeBattler("opponent")],
+      startingAnimationRng: input.animationRng, gameplayRng: 0, resources },
+    palette: { closingCommandAge: creationAge + ERUPTION.closingAfterFalling, cleanupAge: endAge,
+      attackerBattler: side === "player" ? 0 : 1, targetBattler: side === "player" ? 1 : 0, visiblePartnerBattlers: [],
+      paletteSpriteSlots: { opening: freeAtEntry[0]!, closing: freeAtEntry[0]! },
+      geometry: { x: T.picOffsetPoint.x, y: T.picOffsetPoint.y, openingSubpriority: ERUPTION.battlerSub[side] - 2, closingSubpriority: 3 },
+      warmRockPaletteSlot: ERUPTION.paletteSlot, paletteTagsAtAge0: ERUPTION.paletteTags,
+      unfadedPaletteAtAge0: input.palettes.unfaded, fadedPaletteAtAge0: input.palettes.faded, hardwarePaletteAtAge0: input.palettes.hardware,
+      warmRockPalette: input.warmRockPalette.map(bgr555) },
+    audio: { commandAge: creationAge + ERUPTION.audioAfterFalling, endAge, taskSlot: ERUPTION.audioTask, attackerSide: side, targetSide: tside },
+    gameplayRng: 0,
+    spriteOrder: { initialOrder: input.activationOrder, initialKeys: keys },
+  };
+}
