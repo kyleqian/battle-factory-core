@@ -8,6 +8,22 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Live-integration tooling gaps hit repeatedly on 2026-10-07 (S10A finish run)
+
+- **What / cost:** (1) plain `npx tsc` / `npx vitest run` on ~20+ files runs out of the default 4 GB heap — use
+  `npm run typecheck` / `npm test --` or `NODE_OPTIONS=--max-old-space-size=8192` (5 workers, ~1 min each);
+  (2) `r3ProfileRouteSearch.ts` cannot see Random2 bodies (no presentation host) and does not allow the self-KO stall
+  (~3 min x2); (3) `prep22Probe.py` stops before long bodies (Eruption) finish (~2 min); (4) `issue151Patch.sh`
+  writes receipts to `$OUT/<fixture stem>`, so a patched run and an env-off control overwrite each other (~3 min);
+  (5) accepted scenario names lie about species (Psywave "spoink/chimecho" play LUVDISC / SWABLU; Eruption
+  "camerupt" stages BARBOACH; battle-lab `species` uses internal ids, CHIMECHO = 411) (~2-4 min x3); (6) tools that
+  export helpers also run their CLI main when imported through vite-node (`argv[1]` guard) (~2-3 min x2); (7) the
+  live view redraws controller healthboxes after every move branch, so each sprite-targeting blend needs a per-move
+  fade (Encore, Flatter) (~6 min); (8) the safety layer refuses inline `xargs sh -c '...'` — use wrapper scripts.
+- **Hits:** 1 session, ~40 min total across workers.
+- **Fix:** default the heap in the npm scripts; give the route searchers a presentation host + stall budget; fixture
+  generators read species from the probe state, not the scenario name; a shared blend-register healthbox rule.
+
 ## A worker's `pkill -f mgba` kills BOTH shared oracle services
 
 - **What:** the oracle services' command lines contain the mGBA venv path, so an integration
@@ -1121,8 +1137,10 @@ Per entry:
   "(1 trace)" with a nonsense combined filename instead of erroring.
   Flagged by the 2026-08-03 typeref slice-2 worker; same zsh trap class
   as the 2026-08-01 session's word-splitting note.
-- **Hits:** 5 (as a worker-facing papercut; the trap class itself is
-  previously known; 2026-10-07: prep25 ~10 min, audit 8 ~6 min, #151 diagnosis ~1 min).
+- **Hits:** 13 (as a worker-facing papercut; the trap class itself is
+  previously known; 2026-10-07: prep25 ~10 min, audit 8 ~6 min, #151 diagnosis ~1 min; 2026-10-07 day: prep30 ~3,
+  prep33 ~2, audit 9 ~6, audit 10 ~1, R5 ~2, D4d2 ~1, divefix ~1, audit 11 / prep34 ~1 each; zsh also fails on
+  `echo ===` — `=word` expansion).
 - **Cost each:** ~5 min; 2026-10-03 allocator worker lost ~1 min on a probe loop.
 - **Workaround:** `${=ARGS}` for explicit splitting, or arrays
   (`"${traces[@]}"`), or pass files via xargs.
