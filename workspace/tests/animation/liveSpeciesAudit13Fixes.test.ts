@@ -55,3 +55,27 @@ describe("Ice Beam / Thunderbolt / Sludge Bomb: a live opponent attacker keeps i
     expect(fix).toBe(base);
   });
 });
+
+describe("Substitute swaps: a SHINY subbed attacker declines (audit 13 SPECIES-DEFECT 2; receipts a13fixSwapCheck.sh, 2 fresh runs each)", () => {
+  type SwapResult = { productionDuration: number | null; residualPixels: number; digest: string };
+  const swap = (stem: string, run: 1 | 2) =>
+    json<{ results: SwapResult[] }>(`${FIX}/swap-shiny/${stem}-r${run}.json`).results;
+  const cases = [["opponent-persian-slowbro-bodyslam", 0], ["player-persian-slowbro-bodyslam", 0], ["opponent-persian-slowbro-leechseed", 0],
+    ["player-persian-slowbro-leechseed", 0], ["opponent-golem-onix-headbutt", 1156], ["player-zigzagoon-onix-headbutt", 133]] as const;
+  it("non-shiny STEELIX swaps are unchanged (audit 13 residuals: 0 px, Headbutt body 1,156 / 133 = the doll-free controls)", () => {
+    for (const [base, px] of cases) {
+      const [r1, r2] = [swap(`s13swap-steelix-on-${base}`, 1), swap(`s13swap-steelix-on-${base}`, 2)];
+      for (const [i, x] of r1.entries()) {
+        expect([base, x.productionDuration !== null, x.residualPixels, r2[i]!.digest]).toEqual([base, true, px, x.digest]);
+      }
+    }
+  });
+  it("shiny STEELIX swaps (both sides, 14 windows: the audit doc says 15, its swap-summary.txt lists 14) now decline: no live duration, the whole command falls back", () => {
+    let windows = 0;
+    for (const [base] of cases) {
+      const [r1, r2] = [swap(`s13swap-shinysteelix-on-${base}`, 1), swap(`s13swap-shinysteelix-on-${base}`, 2)];
+      for (const [i, x] of r1.entries()) { expect([base, x.productionDuration, r2[i]!.digest]).toEqual([base, null, x.digest]); windows++; }
+    }
+    expect(windows).toBe(14);
+  });
+});

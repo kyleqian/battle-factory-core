@@ -80,6 +80,22 @@ describe("live adapters with a Substitute doll", () => {
     // Self-targeted requests by the doll's battler are defender-doll requests.
     expect(liveMoveAnimationDuration({ ...req(29, 0), target: 0 }, field(true, false))).toBeNull();
   });
+  it("a SHINY battler declines the swaps (audit 13 defect 2: the ROM shows the shiny palette, the swap rows / body art have none)", () => {
+    // ROM shiny personalities of the audit's STEELIX attackers (species-audit-13/swap-personality.tsv), Factory OT 416049562.
+    const SHINY_OPPONENT = 3251286175, SHINY_PLAYER = 1586573250, PLAIN = 0x12345678;
+    const withPersonality = (f: BattleResolutionDisplayedField, player: number, opponent: number) =>
+      ({ player: { ...f.player, personality: player }, opponent: { ...f.opponent, personality: opponent } }) as BattleResolutionDisplayedField;
+    for (const [moveId, body] of [[29, 48], [34, 107], [73, 141]] as const) {
+      expect(liveMoveAnimationDuration(req(moveId, 0), withPersonality(field(true, false), PLAIN, PLAIN))).toBe(body + 85);
+      expect(liveMoveAnimationDuration(req(moveId, 1), withPersonality(field(false, true), PLAIN, PLAIN))).toBe(body + 81);
+      // Shiny subbed attacker (either side) and a shiny target: the whole command falls back.
+      expect(liveMoveAnimationDuration(req(moveId, 0), withPersonality(field(true, false), SHINY_PLAYER, PLAIN))).toBeNull();
+      expect(liveMoveAnimationDuration(req(moveId, 1), withPersonality(field(false, true), PLAIN, SHINY_OPPONENT))).toBeNull();
+      expect(liveMoveAnimationDuration(req(moveId, 0), withPersonality(field(true, false), PLAIN, SHINY_OPPONENT))).toBeNull();
+      expect(liveMoveSubstituteDollDeclines(req(moveId, 0), withPersonality(field(true, false), SHINY_PLAYER, PLAIN))).toBe(true);
+      expect(liveMoveAnimationPresentation(req(moveId, 1), withPersonality(field(false, true), PLAIN, SHINY_OPPONENT), 0)).toBeNull();
+    }
+  });
   it("swap rows draw the doll / mon at the task x2; body rows run the adapter on the mon with the attacker's x2 zeroed", () => {
     const base = { healthboxes: {}, message: null, visibility: {}, waitCursor: null } as never;
     const view = (age: number) => ({ ...(base as object), field: field(true, false),

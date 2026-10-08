@@ -22,6 +22,7 @@ import type { BattleResolutionDisplayedField } from "./battleResolutionPresentat
 import type { BattleResolutionPresentationRenderView } from "./battleResolutionPresentationRender.ts";
 import { applyLiveBattlerX2Event, liveMoveBattlerX2Input, type LiveBattlerX2History, type LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import { liveBattlerAnchors, liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
+import { liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
 
 type Side = "player" | "opponent";
 
@@ -161,7 +162,10 @@ export function substituteSwapBodyField(
 
 /**
  * Whether a move-animation request is presented with the swaps: the attacker is displayed as the doll, the target is not,
- * the body is proven, and it is the last (or only) hit. Null = not a subbed-attacker body.
+ * the body is proven, it is the last (or only) hit, and neither battler is shiny. Null = not a subbed-attacker body.
+ * Shiny: the ROM brings the mon back from the doll in its shiny palette, but the swap rows (Scene OFF field art) and the body art
+ * have no shiny palette (docs/live-species-audit-13.md defect 2: shiny STEELIX 133k..322k px), so the swaps decline as the other
+ * S10A adapters' shiny gates do (both battlers).
  */
 export function liveSubstituteSwapApplies(
   request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField,
@@ -170,7 +174,8 @@ export function liveSubstituteSwapApplies(
   return request.target !== request.attacker
     && battlerOf(field, request.target).substituteDoll !== true
     && (LIVE_SUBSTITUTE_SWAP_BODY_CELLS.get(request.moveId) ?? []).includes(request.attacker === 0 ? "player" : "opponent")
-    && request.multihit < 2;
+    && request.multihit < 2
+    && !liveBattlerIsShiny(field.player.personality) && !liveBattlerIsShiny(field.opponent.personality);
 }
 
 /** Whole presented length: swap-in script rows + idle row + body (activation .. first inactive row) + swap-back + its first inactive row. */
