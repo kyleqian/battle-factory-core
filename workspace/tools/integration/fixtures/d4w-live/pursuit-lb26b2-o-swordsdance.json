@@ -1,0 +1,41 @@
+{
+ "sourceFixture": "tools/integration/fixtures/later-bodies-lb26/pursuit-o-swordsdance.json",
+ "denseWindow": {
+  "startFrame": 1213,
+  "endFrame": 1315
+ },
+ "timingPhase": "event",
+ "fieldProfile": {
+  "playerHp": 150,
+  "playerMaxHp": 168,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 14,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "player",
+   "statAnimation": 39
+  },
+  {
+   "moveId": 228,
+   "side": "opponent"
+  },
+  {
+   "moveId": 14,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "player",
+   "statAnimation": 39
+  }
+ ],
+ "timingEvidence": "pursuit-counters.json: body 1 lag ages [60, 61, 82] (103 rows), counters r0 == r1 True"
+}

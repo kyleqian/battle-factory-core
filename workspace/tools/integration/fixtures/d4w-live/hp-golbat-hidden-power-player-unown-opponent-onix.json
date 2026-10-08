@@ -1,0 +1,9 @@
+{
+ "sourceFixture": "tools/integration/fixtures/species-audit-3/derived/golbat-hidden-power-player-unown-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 231,
+  "endFrame": 411
+ },
+ "timingPhase": "event",
+ "timingEvidence": "hidden-power-counters.json: body 0 lag ages [64, 119] (181 rows), counters r0 == r1 True"
+}

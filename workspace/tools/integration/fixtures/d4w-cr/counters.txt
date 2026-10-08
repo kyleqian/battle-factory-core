@@ -1,0 +1,8 @@
+s14plain-flygon-confuse-ray-opponent-a3410: window 3410-3679 digests eb5977902349ef4a eb5977902349ef4a identical True lag ages [26, 229, 230, 250]
+s14plain-flygon-confuse-ray-opponent-a78: window 78-347 digests eb5977902349ef4a eb5977902349ef4a identical True lag ages [26, 229, 230, 249]
+s14plain-golbat-confuse-ray-opponent-a3410: window 3410-3679 digests eeddbcdb616f1545 eeddbcdb616f1545 identical True lag ages [26, 229, 230, 250]
+s14plain-golbat-confuse-ray-opponent-a78: window 78-347 digests eeddbcdb616f1545 eeddbcdb616f1545 identical True lag ages [26, 229, 230, 249]
+s14plain-onix-confuse-ray-opponent-a3408: window 3408-3677 digests 2c5c5b6fa15809b7 2c5c5b6fa15809b7 identical True lag ages [26, 229, 230, 249]
+s14plain-onix-confuse-ray-opponent-a76: window 76-345 digests 2c5c5b6fa15809b7 2c5c5b6fa15809b7 identical True lag ages [26, 229, 230, 249]
+s14plain-rattata-confuse-ray-opponent-a3411: window 3411-3679 digests 8f5421096fc800dd 8f5421096fc800dd identical True lag ages [26, 229, 230]
+s14plain-rattata-confuse-ray-opponent-a79: window 79-348 digests 8f5421096fc800dd 8f5421096fc800dd identical True lag ages [26, 229, 230, 249]

@@ -1,0 +1,31 @@
+{
+ "sourceFixture": "tools/integration/fixtures/later-bodies-lb26/pursuit-o-tackle.json",
+ "denseWindow": {
+  "startFrame": 1056,
+  "endFrame": 1157
+ },
+ "timingPhase": "no-event",
+ "fieldProfile": {
+  "playerHp": 149,
+  "playerMaxHp": 168,
+  "opponentHp": 147,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "player"
+  },
+  {
+   "moveId": 228,
+   "side": "opponent"
+  },
+  {
+   "moveId": 33,
+   "side": "player"
+  }
+ ],
+ "timingEvidence": "pursuit-counters.json: body 1 lag ages [60, 61] (102 rows), counters r0 == r1 True"
+}

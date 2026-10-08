@@ -1,0 +1,41 @@
+{
+ "sourceFixture": "tools/integration/fixtures/later-bodies-lb26/pursuit-o-growl.json",
+ "denseWindow": {
+  "startFrame": 1068,
+  "endFrame": 1169
+ },
+ "timingPhase": "no-event",
+ "fieldProfile": {
+  "playerHp": 149,
+  "playerMaxHp": 168,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 45,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "player",
+   "statAnimation": 21
+  },
+  {
+   "moveId": 228,
+   "side": "opponent"
+  },
+  {
+   "moveId": 45,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "player",
+   "statAnimation": 21
+  }
+ ],
+ "timingEvidence": "pursuit-counters.json: body 1 lag ages [60, 61] (102 rows), counters r0 == r1 True"
+}

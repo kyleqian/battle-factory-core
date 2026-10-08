@@ -9,6 +9,7 @@ import {
 import { carryLiveSpriteOrder, type LiveOamSprite } from "../../src/engine/liveMoveOamAssembler.ts";
 import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../../src/engine/liveMoveSpriteAllocator.ts";
 import { knownEntrySpriteOrderState } from "../../src/engine/spriteOrderProvider.ts";
+import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS } from "../../src/engine/liveMoveTimingPolicy.ts";
 import { willOWispTimeline } from "../../src/animation/willOWisp.ts";
 import { sortGbaSpriteOrder } from "../../src/animation/gbaObjCompositor.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
@@ -121,7 +122,9 @@ describe("oam1 production hardware-OAM provider: MOVE_WILL_O_WISP", () => {
 
 describe("oam1 production hardware-OAM provider: MOVE_PURSUIT", () => {
   it("registers the normal body (103 rows, activation shadow row) and declines the switch-interception body", () => {
-    expect(LIVE_MOVE_ANIMATION_IDS).toContain(228);
+    // d4w (prep41): reclassified to faithful timing (lag at 82, 103 rows = the policy's event phase).
+    expect(LIVE_MOVE_ANIMATION_IDS).not.toContain(228);
+    expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).toContain(228);
     expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[228]).toBe(0);
     for (const a of [0, 1] as const) expect(liveMoveAnimationDuration(request(228, a))).toBe(103);
     expect(liveMoveAnimationDuration(request(228, 1, { turn: 1 }))).toBeNull();
@@ -129,8 +132,10 @@ describe("oam1 production hardware-OAM provider: MOVE_PURSUIT", () => {
     expect(liveMoveAnimationPresentation(request(228, 0, { power: 40 }), field, 47, undefined, undefined, firstBodyOrder())?.config.move).toBe("PURSUIT");
     expect(liveMoveAnimationPresentation(request(228, 0, { power: 40, turn: 1 }), field, 47, undefined, undefined, firstBodyOrder())).toBeNull();
     expect(liveMoveAnimationPresentation(request(228, 0, { power: 40 }), field, 47)).toBeNull();
+    // d4w (prep41 s1.4): the first-body gate is lifted; any known lend engages (later bodies proved dense, tools/integration/fixtures/d4w-live).
     const later = prepareLiveMoveSpriteOrder(knownEntrySpriteOrderState("ordinary-factory"), request(228, 0)).input!;
-    expect(liveMoveAnimationPresentation(request(228, 0, { power: 40 }), field, 47, undefined, undefined, later)).toBeNull();
+    expect(later.firstBody).toBeUndefined();
+    expect(liveMoveAnimationPresentation(request(228, 0, { power: 40 }), field, 47, undefined, undefined, later)?.config.move).toBe("PURSUIT");
   });
 
   it("builds the retained corpus hardware OAM (entries + matrix pad words) on every body row, both accepted orientations", () => {

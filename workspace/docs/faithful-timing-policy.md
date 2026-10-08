@@ -84,3 +84,13 @@ from `liveMoveTimingBodyRows`), and their exact fixtures stay valid in scope. Ce
 timing = 276. Dive's opponent-setup lag at 64 is a second Dive parameter (no count change). Proof: `tools/integration/fixtures/a13fix-live-receipt.json`
 (Crunch / Psychic 58 fresh audit-13 windows, Extreme Speed 42 fresh audit-11 windows, the CLAMPERL Dive window; policy phase 0 px, other phase
 only on the documented rows), `tests/animation/liveSpeciesAudit13Fixes.test.ts`.
+
+## d4w reclassification (prep41 D4 widening)
+
+Pursuit (228) and Hidden Power (237, Unown attacker) moved from scoped exact to faithful timing (docs/next-adapters-prep41.md s1 / s2):
+Pursuit `optional-lag-age` 82 (fixed lags 60, 61; 24 lag : 9 no-lag of 33 measured bodies -> lag, 103 rows) with the first-body gate lifted
+(any known lend; the turn-2 body after the attacker's own earlier Pursuit is proved too); Hidden Power `optional-lag-age` 64 (fixed lag 118;
+1 lag : 9 no-lag -> no lag, 180 rows; no renderer change). Census: 245 scoped exact + 13 faithful random + 18 faithful timing = 276. Proof:
+`tools/integration/fixtures/d4w-live-receipt.json` (fresh prep41 counters byte-identical to the banked receipts; 33 Pursuit windows incl. 12
+lb26 second bodies (`d4wBody2Windows.py`, HP from the probe's stageFacts) and 10 Hidden Power windows, `d4wDense.sh` twice fresh: policy
+phase 0 px, other phase only ages 84..99 / 65..179), `tests/animation/liveD4wWidening.test.ts`.
