@@ -1,5 +1,18 @@
 # Animation integration progress
 
+## 2026-10-08 (overnight) — S10A continuation: Substitute swaps live, doll-defender evidence, deferred order lend
+
+- Folded Opus worker `3ef6f4d19` as `f1b672ca1` (src tree `ab030259`): Substitute STATUS animations SUBSTITUTE_TO_MON /
+  MON_TO_SUBSTITUTE presented live around a subbed ATTACKER's proven body (`src/engine/liveSubstituteSwap.ts`: source
+  AnimTask_SwapMonSpriteToFromSubstitute, x2 5 per row, 42 / 40 script rows, graphics load row 21 / 20, one idle row,
+  2-row OAM latch; swap-back only on the last hit). Proven bodies Headbutt (29), Body Slam (34), Leech Seed (73); every
+  other attacker-doll body and every defender-doll body still declines. x2-history fix: Substitute animates its own
+  user, so the other battler keeps its idle rest (ONIX +1). Not an accepted body: counts unchanged 250 + 13 + 13.
+  Open: the row after the swap-back (600 / 679 px, ROM still 5 px out), swaps before faint / switch-out, the fade.
+  Worker gates 1,563 files / 12,823 tests, build 873, differential 624. Supervisor: `substSwapRun.sh` into fresh dirs —
+  probes r1 == r2 (13 scenarios), 21 windows x2 runs 0 px, GOLEM-player residual == non-subbed control, negatives fail;
+  union typecheck, smoke 448, 9 targeted files 128/128, own differential vs `bb4dc2558` 624/624. Logs `.integration/validation/swap-20261008/`.
+
 ## 2026-10-07 (day) — S10A finish run: D4 implemented; census complete 250 + 13 + 13 + 0 = 276
 
 - Folded Opus worker `6e4142713` (fast-forward; src tree `57de0763`): D4 accounting + policy.
