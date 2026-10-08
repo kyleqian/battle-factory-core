@@ -1059,9 +1059,9 @@ export function liveMoveAnimationDuration(
     // The window ends 4 frames after the script end (124/128); duration = rows + ageOffset (the Dragon Breath convention).
     case 282: return 48;
     // Faint Attack: 221 rows (2344..2564 player attacker), reducer ages 0..220 (faintAttack.ts LAST_ANIMATION_OWNED_AGE);
-    // the window starts 4 frames after the script activation (row -4, no #142 shadow row). Only the player-attacker
-    // orientation has accepted evidence (prep6 s0): an opponent attacker returns null (no adapter, scene-off view).
-    case 185: return request.attacker === 0 ? 221 : null;
+    // the window starts 4 frames after the script activation (row -4, no #142 shadow row). Both attacker sides (prep6 s0 player;
+    // S10A sides opponent).
+    case 185: return 221;
     // Swallow: per stockpile branch (request.turn = gBattleScripting.animTurn = stockpileCounter, prep6 s2.1) and side:
     // player 163/178/193 (1247..1409 ...), opponent 161/176/191 (= 148 + 15 turn / 146 + 15 turn), every window end = script end.
     case 256:
@@ -2285,7 +2285,7 @@ export function liveMoveAnimationPresentation(
     // the config (known seed shapes give 0 differing frames, prep6 s2.3), so there is no order input to lend.
     case 282: config = { move: "KNOCK_OFF", attacker, target, fieldProfile }; break;
     case 185:
-      if (attacker.geometry.side !== "player") return null;
+      // Either attacker side (S10A sides: the opponent attacker's dense windows, tools/integration/fixtures/s10a-live/faint-attack-*.json).
       // The canonical ONIX_TO_GROVYLE profile = the source-age constants (prep6 s2.1: spriteCorners and the target's
       // hit-splat centre derive exactly); the move text and HP chrome come from the live view under liveField.
       config = { move: "FAINT_ATTACK", attacker, target, animationProfile: FAINT_ATTACK_ANIMATION_PROFILE,

@@ -84,12 +84,14 @@ describe("S10A sides: Double Team (104) opponent attacker", () => {
 
   it("the receipt proves every window 0 px in two invocations x two fresh runs, plus the unchanged player-attacker fixture", () => {
     const receipt = JSON.parse(readFileSync(RECEIPT, "utf8"));
-    expect(receipt.schema).toBe("sides-live-receipt/v1");
-    expect(receipt.dirty).toBe(false);
-    const fixtures = receipt.windows.map((w: { fixture: string }) => w.fixture);
-    expect(fixtures).toEqual([...NAMES.map((n) => `${DIR}/${n}`), "tools/integration/fixtures/prep7-double-team-player.json"]);
-    for (const w of receipt.windows) {
+    expect(receipt.schema).toBe("sides-live-receipt/v2");
+    const windows = receipt.windows.filter((w: { fixture: string }) => w.fixture.includes("double-team"));
+    expect(windows.map((w: { fixture: string }) => w.fixture).sort()).toEqual(
+      [...NAMES.map((n) => `${DIR}/${n}`), "tools/integration/fixtures/prep7-double-team-player.json"].sort());
+    for (const w of windows) {
       expect(w.ok, w.fixture).toBe(true);
+      expect(w.dirty, w.fixture).toBe(false);
+      expect(w.documented, w.fixture).toBeUndefined();
       const runs = [...w.invocationA, ...w.invocationB];
       expect(runs).toHaveLength(4);
       for (const r of runs) expect(r, w.fixture).toMatchObject({ rows: 230, exactRows: 230, residualPixels: 0, expectedDuration: 230, digest: runs[0].digest });

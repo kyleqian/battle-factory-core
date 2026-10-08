@@ -22,7 +22,7 @@ const cases = [
   { id: 230, move: "SWEET_SCENT", duration: [175, 175], shadow: 0, alt: ["VICTREEBEL", "ONIX"], route: { seed: 31, move: 3 as const, streak: 0 } },
   { id: 120, move: "SELF_DESTRUCT", duration: [113, 113], shadow: undefined, alt: ["FORRETRESS", "ONIX"], route: { seed: 56, move: 3 as const, streak: 14 } },
   { id: 282, move: "KNOCK_OFF", duration: [48, 48], shadow: undefined, alt: ["SABLEYE", "ONIX"], route: { seed: 15, move: 2 as const, streak: 7 } },
-  { id: 185, move: "FAINT_ATTACK", duration: [221, null], shadow: undefined, alt: ["MURKROW", "ONIX"], route: { seed: 0, move: 1 as const, streak: 7 } },
+  { id: 185, move: "FAINT_ATTACK", duration: [221, 221], shadow: undefined, alt: ["MURKROW", "ONIX"], route: { seed: 0, move: 1 as const, streak: 7 } },
 ];
 
 function displayed(player: string, opponent: string): BattleResolutionDisplayedField {
@@ -102,8 +102,8 @@ describe("live prep6 move adapters", () => {
     // Pictures follow the species.
     const alt = displayed("SWALOT", "ONIX");
     expect(cfg(alt, 256, 0, 1).attackerPictureOffset).toEqual(liveBattlerAnchors("player", createBattleCommandFieldArtView(alt)).picOffsetPoint);
-    // Faint Attack: player attacker only.
-    expect(liveMoveAnimationPresentation(request(185, 1), displayed("ONIX", "GROVYLE"), 0)).toBeNull();
+    // Faint Attack: either attacker side (S10A sides).
+    expect(liveMoveAnimationPresentation(request(185, 1), displayed("ONIX", "GROVYLE"), 0)).not.toBeNull();
     expect(liveMoveAnimationPresentation(request(185, 0), displayed("ONIX", "GROVYLE"), 0)).not.toBeNull();
     // Sweet Scent's accepted rows start at reducer age -4 (sweetScentFramebuffer.ts); the others map age 1:1.
     expect(liveMoveAnimationPresentation(request(230, 0), displayed("WEEPINBELL", "ONIX"), 10)!.age).toBe(6);

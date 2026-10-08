@@ -50029,17 +50029,18 @@ export function renderSceneOnMovePresentation(
     const { attacker, target } = view;
     const player = attacker.geometry.side === "player" ? attacker : target;
     const opponent = attacker.geometry.side === "opponent" ? attacker : target;
+    // Live: either attacker side (S10A sides); staged: player ONIX -> GROVYLE only.
     if (
-      (!liveField && (player.species !== "ONIX" || opponent.species !== "GROVYLE"))
-      || attacker.geometry.side !== "player"
+      (!liveField && (player.species !== "ONIX" || opponent.species !== "GROVYLE" || attacker.geometry.side !== "player"))
+      || attacker.geometry.side === target.geometry.side
     ) {
       throw new Error(
         `unsupported staged FAINT_ATTACK pair ${attacker.species}->${target.species}`,
       );
     }
 
-    const liveOpponentArt = liveField ? liveSceneOnBattlerArt(opponent) : null;
-    const liveAttackerArt = liveField ? liveSceneOnBattlerArt(player) : null;
+    const liveTargetArt = liveField ? liveSceneOnBattlerArt(target) : null;
+    const liveAttackerArt = liveField ? liveSceneOnBattlerArt(attacker) : null;
     if (liveField) {
       // Live field: `fadetobg BG_DARK` swaps BG3 to the dark screenblock/charblock/palette bank 2 (the CRUNCH
       // recipe) and Task_FadeToBg's BLDCNT 0x00E8 darkens BG3 + backdrop only; battlers are OBJ and unaffected.
@@ -50069,19 +50070,25 @@ export function renderSceneOnMovePresentation(
       });
     }
 
-    // ShakeMon's first write zeroes the target's front-idle residual (CRUNCH): the baseline holds until the hit.
-    const targetIdle = liveField && view.age < state.config.animationProfile.hitsplatFirstVisibleAge
-      ? sceneOnBattlerFrontIdleRest(opponent) : { x2: 0, y2: 0 };
-    drawSpriteSheet(
+    // ShakeMon's first write zeroes an opponent-side target's front-idle residual (CRUNCH): the baseline holds until the hit.
+    // An opponent-side attacker keeps its residual until the elliptical task's first absolute x2/y2 write.
+    const profile = state.config.animationProfile;
+    const targetIdle = liveField && target.geometry.side === "opponent" && view.age < profile.hitsplatFirstVisibleAge
+      ? sceneOnBattlerFrontIdleRest(target) : { x2: 0, y2: 0 };
+    const attackerIdle = liveField && attacker.geometry.side === "opponent" && view.age < profile.lungeFirstVisibleAge
+      ? sceneOnBattlerFrontIdleRest(attacker) : { x2: 0, y2: 0 };
+    const drawTarget = () => drawSpriteSheet(
       fb,
-      liveOpponentArt ? liveOpponentArt.tileset : grovyleFrontSprite.tileset,
-      liveOpponentArt ? liveOpponentArt.palette : grovyleFrontSprite.palette,
-      opponent.geometry.spriteCorner.x + view.targetShakeX2 + targetIdle.x2,
-      opponent.geometry.spriteCorner.y + targetIdle.y2,
+      liveTargetArt ? liveTargetArt.tileset : grovyleFrontSprite.tileset,
+      liveTargetArt ? liveTargetArt.palette : grovyleFrontSprite.palette,
+      target.geometry.spriteCorner.x + view.targetShakeX2 + targetIdle.x2,
+      target.geometry.spriteCorner.y + targetIdle.y2,
     );
+    // The opponent-side battler is drawn first (the player side is in front).
+    if (target.geometry.side === "opponent") drawTarget();
     if (view.attackerEva > 0) {
-      const x = player.geometry.spriteCorner.x + view.attackerOffset.x2;
-      const y = player.geometry.spriteCorner.y + view.attackerOffset.y2;
+      const x = attacker.geometry.spriteCorner.x + view.attackerOffset.x2 + attackerIdle.x2;
+      const y = attacker.geometry.spriteCorner.y + view.attackerOffset.y2 + attackerIdle.y2;
       if (view.attackerEva === 16) {
         drawSpriteSheet(
           fb,
@@ -50102,6 +50109,7 @@ export function renderSceneOnMovePresentation(
         );
       }
     }
+    if (target.geometry.side === "player") drawTarget();
     if (view.hitsplatVisible) {
       drawSpriteSheetAffineStretchBlendedOverFb(
         fb,

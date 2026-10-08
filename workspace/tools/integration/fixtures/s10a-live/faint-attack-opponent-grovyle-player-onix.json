@@ -1,0 +1,36 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "FAINT_ATTACK",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/s10aside-faint-attack-opponent-grovyle-player-onix.json",
+ "denseWindow": {
+  "startFrame": 85,
+  "endFrame": 305
+ },
+ "windowSource": "window = [activation + 4, activation + 224] of this scenario's first FAINT_ATTACK body (activation 81, script end 306; the player-attacker convention: row -4, 221 rows) from 2 fresh prep22Probes.sh runs (bodies agree)",
+ "attacker": {
+  "species": "GROVYLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703653,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 157,
+  "opponentMaxHp": 157,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

@@ -2491,14 +2491,15 @@
         "../tools/integration/fixtures/prep6-live-adapter-receipt.json"
       ],
       "liveEvidence": [
-        "dense source framebuffer, PLAYER attacker only, twice fresh, zero residual, 221 rows (prep6-faint-attack-player.json via the staged probe wrapper tools/integration/prep6FaintAttackProbe.py); live BG_DARK background via the CRUNCH recipe; opponent attacker has no accepted evidence and returns null (fallback)",
+        "dense source framebuffer, PLAYER attacker only, twice fresh, zero residual, 221 rows (prep6-faint-attack-player.json via the staged probe wrapper tools/integration/prep6FaintAttackProbe.py); live BG_DARK background via the CRUNCH recipe",
+        "S10A sides: OPPONENT attacker added (liveMoveAnimationDuration(185) = 221 both sides; battleScene.ts FAINT_ATTACK live gate either side: roles by attacker / target, the opponent-side battler drawn first, an opponent-side attacker at its front idle rest until the elliptical task's first absolute x2/y2 write, ShakeMon2 on the target). Dense windows activation + 4 .. + 224 (row -4, no #142 activation row) from fresh direct-mGBA prep22Probe runs of tools/battle-lab/s10aside-faint-attack-*.json through the production live renderer, two invocations x two fresh runs: accepted-style GROVYLE -> ONIX 0 px and alternate elevated GOLBAT -> GOLEM 0 px; DELCATTY -> GOLEM differs only on ages 203..218 (its body is one frame shorter, the battle-lab restore-fade tail phase also seen on the player-side MURKROW alternate); the prep6 player fixture re-run (tools/integration/fixtures/s10a-live/faint-attack-*.json, receipt tools/integration/fixtures/sides-live-receipt.json; tests/animation/liveFaintAttackSides.test.ts)",
+        "ordinary route seed 186 / streak 0 / slots [0,0,0]: the opponent's Faint Attack (3rd body) adapter active 221/221, action-menu, ON/OFF rules/RNG/facility equal",
         "ordinary route seed 0 / streak 7 / move index 1 (DELCATTY): adapter active 221/221, action-menu, ON/OFF rules/RNG equal",
         "alternate species MURKROW player attacker dense proof (window start derived from the alternate scenario's source activation + the accepted offset; altSpecies9.py): 205/221 exact, 16 tail rows (286,928 px, ages 203..218) = the restore-fade phase; the control with the ACCEPTED pair in the same battle-lab context shows the same rows (281,024 px), so it is a lab-vs-staged-probe one-frame difference of the script, not a species effect"
       ],
       "palettePlan": "no plan, history invalidates",
       "remaining": [
-        "opponent-attacker orientation (no accepted evidence)",
-        "restore-fade tail in a battle-lab context differs by one frame from the accepted staged evidence",
+                "restore-fade tail in a battle-lab context differs by one frame from the accepted staged evidence (either attacker side: a body one frame shorter shifts ages 203..218)",
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
