@@ -12,6 +12,13 @@
   Worker gates 1,563 files / 12,823 tests, build 873, differential 624. Supervisor: `substSwapRun.sh` into fresh dirs —
   probes r1 == r2 (13 scenarios), 21 windows x2 runs 0 px, GOLEM-player residual == non-subbed control, negatives fail;
   union typecheck, smoke 448, 9 targeted files 128/128, own differential vs `bb4dc2558` 624/624. Logs `.integration/validation/swap-20261008/`.
+- prep39 (side, `2d19ac6ed`, new files only): General_SubstituteFade source model READY-WITH-CHANGE through the production
+  compositor: 14 windows / 1,436 rows (GOLEM<->ONIX both sides, PERSIAN<->SLOWBRO, Scene OFF, RATTATA, elevated GOLBAT):
+  11 policy-exact 0 px, 3 alternate-phase (alpha step / blendoff one row early; 2 x 271 px) attributed; 5 negatives fail.
+  Rows 2-51 BG copy with alpha every 3 rows + white blend per row, 52-84/83 invisible, slide back = substituteSwapRows
+  verbatim from row 61. Port plan: a 103 / 101-row fade command at substituteFades.at before the 'faded' message; missing
+  input = the dismissed message's frozen wait cursor. Supervisor: `prep39Run.sh` into fresh dirs — probes r1 == r2,
+  all 7 receipts byte-identical to the committed ones.
 - Folded Opus worker `2acaacb5d` as `c554ffc20` (src tree `ccde138a`): DEFENDER shown as the Substitute doll — prep38 v1 in
   production behind `LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS` (37 proven (move, attacker side) cells, weight ~28.4: the 27 v1
   cells + Giga Drain / Mud-Slap (D3) via the order-neutral Substitute body + Ice Beam / Thunderbolt / Megahorn (D4) via
