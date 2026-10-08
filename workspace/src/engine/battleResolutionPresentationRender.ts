@@ -561,6 +561,8 @@ function sendInWhiteCoefficientAtFrame(frame: number): number {
 
 export type BattleResolutionRenderEffect =
   | Readonly<{ type: "move"; request: BattleMoveAnimationRequest; age: number; paletteInput?: LiveMovePaletteInput; spriteAllocatorInput?: LiveMoveSpriteAllocatorInput; spriteOrderInput?: LiveMoveSpriteOrderInput; presentationRng?: LiveMovePresentationRngInput; battlerX2Input?: LiveMoveBattlerX2Input }>
+  /** S10A Substitute fade (liveSubstituteFade.ts): command age; the other battler's rest from the tracked x2 history. */
+  | Readonly<{ type: "substitute-fade"; battler: 0 | 1; age: number; battlerX2Input?: LiveMoveBattlerX2Input }>
   | Readonly<{
       type: "hit";
       battler: 0 | 1;
@@ -778,15 +780,19 @@ function withSubstituteDoll(
 
 /**
  * Presentation-only Substitute doll at a command's START (prep37 s2-3): the ROM swaps the doll back to the mon
- * (SUBSTITUTE_TO_MON) before a faint or a switch-out's return to ball (battle_controller_player.c:2249, 2412), and the
- * fade (not presented: fallback) ends on the mon before STRINGID_PKMNSUBSTITUTEFADED prints. A switch-in's send-in
- * shows the mon; a Baton Pass carry re-shows the doll only once the switch-in completes.
+ * (SUBSTITUTE_TO_MON) before a faint or a switch-out's return to ball (battle_controller_player.c:2249, 2412). The fade
+ * (General_SubstituteFade, liveSubstituteFade.ts) clears it at its own command's start and draws the battler itself on
+ * every row; it ends on the mon before STRINGID_PKMNSUBSTITUTEFADED prints (that message's clear is the fallback when no
+ * fade command precedes it). A switch-in's send-in shows the mon; a Baton Pass carry re-shows the doll only once the
+ * switch-in completes.
  */
 export function substituteDollAtCommandStart(
   field: BattleResolutionDisplayedField,
   command: BattleResolutionPresentationCommand,
 ): BattleResolutionDisplayedField {
-  if (command.type === "faint" || command.type === "switch-out") return withSubstituteDoll(field, command.battler, false);
+  if (command.type === "faint" || command.type === "switch-out" || command.type === "substitute-fade") {
+    return withSubstituteDoll(field, command.battler, false);
+  }
   if (command.type === "message" && command.substituteFadeBattler !== undefined) {
     return withSubstituteDoll(field, command.substituteFadeBattler, false);
   }
@@ -835,6 +841,7 @@ function applyCompletedCommand(
     || command.type === "switch-out"
     || command.type === "turn-end"
     || command.type === "trainer-slide"
+    || command.type === "substitute-fade"
   ) return field;
   if (command.type === "switch-in") {
     return replaceFieldBattler(field, command.battler, command.incoming);
@@ -934,6 +941,7 @@ export function battleResolutionCommandDuration(
     case "turn-end":
       return command.timing.minimumFrames;
     case "trainer-slide":
+    case "substitute-fade":
       return command.timing.minimumFrames;
   }
 }
@@ -1002,6 +1010,8 @@ function postBodyShadowHiddenAt(
   let rows = state.lifecycle.phaseElapsed + 1;
   for (let index = state.commandIndex - 1; index >= 0; index -= 1) {
     const completed = segment.commands[index]!;
+    // A presented Substitute fade owns the shadow through its own tail (liveSubstituteFade.ts): visible after it.
+    if (completed.type === "substitute-fade") return false;
     if (completed.type === "move-animation") {
       if (!completed.animation || liveMoveAnimationDuration(completed.animation, fields[index]!) === null) return false;
       return rows <= liveMoveOpponentShadowPostBodyHideRows(completed.animation);
@@ -1250,6 +1260,8 @@ export function createBattleResolutionPresentationRenderView(
   let hpTarget: Readonly<{ battler: 0 | 1; to: number }> | null = null;
   let waitCursor: Readonly<{ age: number }> | null = null;
   let activeTrainerSlide: Readonly<{ battler: 0 | 1; offscreenX2: number }> | null = null;
+  // S10A fade: presented only over a battler shown as the doll at its start (else the ordinary field for its rows).
+  const fadePresented = command?.type === "substitute-fade" && fieldBattler(field, command.battler).substituteDoll === true;
   if (
     command !== null
     && (state.lifecycle.phase === "presenting"
@@ -1320,6 +1332,11 @@ export function createBattleResolutionPresentationRenderView(
         ...(liveMoveRandom2Plan(command.animation) === null ? {} : {
           presentationRng: Object.freeze({ host: presentationRngHost ?? null, key: liveMovePresentationRngBodyKey(state) }),
         }),
+      });
+    } else if (command.type === "substitute-fade" && fadePresented) {
+      effect = Object.freeze({
+        type: "substitute-fade", battler: command.battler, age: state.lifecycle.phaseElapsed,
+        ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
       });
     } else if (command.type === "hit-animation") {
       effect = Object.freeze({

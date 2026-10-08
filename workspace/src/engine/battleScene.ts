@@ -1,5 +1,6 @@
 import { liveMoveAnimationPresentation, liveMoveOpponentShadowRow, liveMoveOpponentShadowReturn } from "./liveMoveAnimation.ts";
 import { liveSubstituteSwapView } from "./liveSubstituteSwap.ts";
+import { substituteFadeRenderView, substituteFadeWhiteBgr555, type SubstituteFadeBgCopy } from "./liveSubstituteFade.ts";
 // S6 scene-assembly + send-out engine slices: the BATTLE-SCENE ASSEMBLY
 // window (tools/compare/traces-groundtruth/battle1-scene-dense.json, trace
 // ticks 1040-1295) plus the SEND-OUT window (battle1-sendout-dense.json,
@@ -54520,6 +54521,31 @@ function whiteFadeFieldPaletteRows(
   );
 }
 
+/**
+ * S10A Substitute fade BG copy (monbg + AnimTask_SubstituteFadeToInvisible): the doll pic at its corner (no elevation),
+ * recoloured by the source white BlendPalette and alpha-blended (BLDALPHA eva / evb; mGBA _mix on expanded components, as
+ * blendChannel) over the field drawn so far; rows y >= 112 belong to the message window drawn after it.
+ */
+function drawSubstituteFadeBgCopy(fb: Uint8Array, copy: SubstituteFadeBgCopy): void {
+  const pic = copy.art.pic as unknown as { tileset: Tileset; palette: readonly RgbColor[] };
+  const colors = pic.palette.map((c) => mgbaColorFromBgr555(substituteFadeWhiteBgr555((c.r >> 3) | ((c.g >> 3) << 5) | ((c.b >> 3) << 10), copy.white)));
+  const { columns, tiles } = pic.tileset as unknown as { columns: number; tiles: readonly (readonly number[])[] };
+  const x0 = copy.art.origin.x, y0 = copy.art.origin.y - battleCommandFieldArtElevation(copy.art, copy.side);
+  for (let ty = 0; ty < 8; ty++) for (let tx = 0; tx < 8; tx++) {
+    const tile = tiles[ty * columns + tx];
+    if (!tile) continue;
+    for (let py = 0; py < 8; py++) for (let px = 0; px < 8; px++) {
+      const idx = tile[py * 8 + px]!;
+      if (idx === 0) continue;
+      const x = x0 + tx * 8 + px, y = y0 + ty * 8 + py;
+      if (x < 0 || x >= 240 || y < 0 || y >= 112) continue;
+      const o = (y * 240 + x) * 4, c = colors[idx]!;
+      const src = [c & 0xff, (c >>> 8) & 0xff, (c >>> 16) & 0xff];
+      for (let k = 0; k < 3; k++) fb[o + k] = copy.blend ? blendChannel(src[k]!, fb[o + k]!, copy.eva, copy.evb) : src[k]!;
+    }
+  }
+}
+
 export function renderBattleResolutionSceneOffView(
   fb: Uint8Array,
   view: BattleResolutionPresentationRenderView,
@@ -54553,6 +54579,10 @@ export function renderBattleResolutionSceneOffView(
     );
     return;
   }
+  // S10A Substitute fade (liveSubstituteFade.ts): the fading battler's layer per row; the BG copy blends below the
+  // healthboxes and the message window. Scene ON and OFF alike.
+  const fade = substituteFadeRenderView(view);
+  if (fade) view = fade.view;
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
   const faint = view.effect?.type === "faint" ? view.effect : null;
   const hit = view.effect?.type === "hit" ? view.effect : null;
@@ -54675,6 +54705,7 @@ export function renderBattleResolutionSceneOffView(
       );
     }
   }
+  if (fade?.bgCopy) drawSubstituteFadeBgCopy(fb, fade.bgCopy);
   if (view.visibility.opponent.healthbox) {
     drawSendOutHealthbox(
       fb,
