@@ -4,7 +4,8 @@
 0..3, + 1 when the body measured a lag row) / 132 rows (counter 4, + 1 with its lag row). timingPhase = the body's measured lag (a 0-step
 animationRng stall). Presentation words are pinned per chain body from the scenario's own probed activation values (bodies[k][0].animationRng):
 the current body in presentationRngActivation, the earlier ones in iceBallChain.earlier. Post-KO bodies (a replacement battler slot) are not
-written: the deferred lend declines after a KO / send-in (not modelled).
+written: the deferred lend declines after a KO / send-in (not modelled). Body k is written only while every body 0..k has the ROM's
+gDynamicBasePower 30 << j (the counter label; a reset chain stops there, as speciesAudit13IceBallFixtures.py).
 usage: lendIceBallFixtures.py PROBEDIR   (PROBEDIR holds <scenario>-r1.json)   -> tools/integration/fixtures/lend-live/ice-ball-*.json"""
 import json, sys
 from pathlib import Path
@@ -27,6 +28,9 @@ for tag, scen, side, foe_first in CASES:
         rows = bodies[k]; r0 = rows[0]; A = r0["frame"]
         if r0["animationBattlers"]["spriteIds"][:2] != [6, 8]:
             print(tag, f"b{k + 1}", "post-KO (battler slots", r0["animationBattlers"]["spriteIds"][:2], "): not written, declines"); continue
+        # Body k is counter k only while the ROM's chain has not reset (species audit 13: a chain can reset, gDynamicBasePower 30, 60, 30, ..).
+        if any(bodies[j][0]["dynamicBasePower"] != 30 << j for j in range(k + 1)):
+            print(tag, f"b{k + 1}", "chain reset (gDynamicBasePower", [x[0]["dynamicBasePower"] for x in bodies], "): not written"); break
         lag = [i for i in range(1, len(rows)) if rows[i]["animationRng"] == rows[i - 1]["animationRng"]]
         n = (76 if k < 4 else 132) + len(lag)
         b = r0["battlers"]; foe = "opponent" if side == "player" else "player"

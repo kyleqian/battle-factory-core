@@ -1,8 +1,9 @@
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";
+import { liveMoveAnimationPresentation } from "../../src/engine/liveMoveAnimation.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 
 // Species audit 13 (docs/live-species-audit-13.md) fixes. ROM pins: tools/integration/a13fixRomRows.py over two fresh direct-mGBA runs per
@@ -77,5 +78,40 @@ describe("Substitute swaps: a SHINY subbed attacker declines (audit 13 SPECIES-D
       for (const [i, x] of r1.entries()) { expect([base, x.productionDuration, r2[i]!.digest]).toEqual([base, null, x.digest]); windows++; }
     }
     expect(windows).toBe(14);
+  });
+});
+
+describe("Ice Ball (301): a resting opponent-side target declines; the deferred-lend counter labels match the ROM chain", () => {
+  const live = (path: string) => {
+    const f = json<F>(path);
+    const v = liveView(f, 10);
+    const fx = v.effect as { request: never; paletteInput?: never; spriteAllocatorInput?: never; spriteOrderInput?: never; presentationRng?: never;
+      battlerX2Input?: never };
+    return liveMoveAnimationPresentation(fx.request, v.field, 10, fx.paletteInput, fx.spriteAllocatorInput, fx.spriteOrderInput, fx.presentationRng,
+      fx.battlerX2Input) !== null;
+  };
+  const dir = `${A13}/iceball-derived`;
+  it("ONIX / RATTATA opponent-side targets (audit 13 'Unresolved' 30k-79k px = the fallback field) decline via liveIceBallInputs' rest gate", () => {
+    for (const stem of ["onix-prep25-ice-ball-alt-player-glalie-golem-b2", "onix-prep25-ice-ball-alt-player-glalie-golem-b3",
+      "rattata-prep25-ice-ball-alt-player-glalie-golem-b2", "rattata-prep25-ice-ball-alt-player-glalie-golem-b3"]) {
+      expect([stem, live(`${dir}/s13ib-${stem}.json`)]).toEqual([stem, false]);
+    }
+  });
+  it("rest-0 targets of the same chains (and the player-side RATTATA, rest 0) stay live", () => {
+    for (const stem of ["steelix-prep25-ice-ball-alt-player-glalie-golem-b2", "wailord-prep25-ice-ball-alt-player-glalie-golem-b3",
+      "weezing-prep25-ice-ball-alt-player-glalie-golem-b4", "rattata-prep25-ice-ball-alt-opponent-glalie-golem-b2"]) {
+      expect([stem, live(`${dir}/s13ib-${stem}.json`)]).toEqual([stem, true]);
+    }
+  });
+  it("every lend-live fixture's power / rolloutCounter equals the ROM's gDynamicBasePower of that body (no chain reset; b3 = counter 2)", () => {
+    const rom = json<{ scenarios: Record<string, { body: number; dynamicBasePower: number }[]> }>(`${FIX}/iceball/chain-powers.json`).scenarios;
+    const fixtures = readdirSync("tools/integration/fixtures/lend-live").filter((n) => n.endsWith(".json"));
+    expect(fixtures).toHaveLength(12);
+    for (const n of fixtures) {
+      const f = json<{ scenario: string; requestFields: { power: number; rolloutCounter: number } }>(`tools/integration/fixtures/lend-live/${n}`);
+      const body = Number(n.match(/-b(\d)\.json$/)![1]);
+      const power = rom[f.scenario.split("/").pop()!.replace(/\.json$/, "")]!.find((b) => b.body === body)!.dynamicBasePower;
+      expect([n, f.requestFields.power, f.requestFields.rolloutCounter]).toEqual([n, power, Math.log2(power / 30) + 1]);
+    }
   });
 });
