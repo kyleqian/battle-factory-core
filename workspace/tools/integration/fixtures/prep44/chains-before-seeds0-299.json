@@ -968,30 +968,5 @@
    "cumulativeCommands": 104,
    "cumulativeFrames": 11446
   }
- ],
- "clearedIds": [
-  24,
-  57,
-  58,
-  60,
-  73,
-  85,
-  89,
-  98,
-  104,
-  157,
-  185,
-  189,
-  196,
-  203,
-  225,
-  240,
-  263,
-  266,
-  322,
-  332,
-  352
- ],
- "predictedUnlockCommands": 31,
- "predictedUnlockFrames": 3204
+ ]
 }
