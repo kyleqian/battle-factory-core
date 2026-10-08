@@ -1,0 +1,36 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "ROCK_SLIDE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/s10aside-rock-slide-player-onix-opponent-grovyle.json",
+ "denseWindow": {
+  "startFrame": 74,
+  "endFrame": 211
+ },
+ "windowSource": "window = [activation + 0, activation + 137] of this scenario's first ROCK_SLIDE body (activation 74, script end 211; the opponent-attacker convention: row 0, activation .. first inactive script row, 138 rows) from 2 fresh prep22Probes.sh runs (bodies agree)",
+ "attacker": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GROVYLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015428,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 157,
+  "opponentMaxHp": 157,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

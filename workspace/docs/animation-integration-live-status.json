@@ -2610,7 +2610,9 @@
         "../tools/integration/fixtures/prep7-live-adapter-receipt.json"
       ],
       "liveEvidence": [
-        "dense source framebuffer, OPPONENT attacker only, twice fresh, zero residual, 138 rows (prep7-rock-slide-opponent.json via the staged probe wrapper), with the provider order (first body) and with the order withheld (POKEBENCH_LIVE_ORDER_INPUT=none); player attacker has no accepted evidence and returns null (fallback)",
+        "dense source framebuffer, OPPONENT attacker only, twice fresh, zero residual, 138 rows (prep7-rock-slide-opponent.json via the staged probe wrapper), with the provider order (first body) and with the order withheld (POKEBENCH_LIVE_ORDER_INPUT=none)",
+        "S10A sides: PLAYER attacker added (liveMoveAnimationDuration(157) = 138 both sides; battleScene.ts ROCK_SLIDE live gate either side: the opponent-side battler drawn first at its front idle rest (an opponent-side target until AnimTask_ShakeMon's first absolute y2 write), the target shake on whichever side is the target). Dense windows activation .. first inactive script row (row 0) from fresh direct-mGBA prep22Probe runs of tools/battle-lab/s10aside-rock-slide-*.json through the production live renderer, two invocations x two fresh runs, 0 px every row: accepted-style ONIX -> GROVYLE, alternate GOLEM -> DELCATTY, ONIX -> elevated GOLBAT target (#142 row 0 through the shared hook); the prep7 opponent fixture re-run 0 px (tools/integration/fixtures/s10a-live/rock-slide-*.json, receipt tools/integration/fixtures/sides-live-receipt.json; tests/animation/liveRockSlideSides.test.ts)",
+        "ordinary route seed 4 / streak 7 / slot 0: the player's Rock Slide (2nd body, after the foe's Light Screen) adapter active 138/138, action-menu, ON/OFF rules/RNG/facility equal",
         "ordinary route: the opponent's ONIX seed 134 / streak 0, player presses move 0: adapter active 138/138, action-menu, ON/OFF rules/RNG equal",
         "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side opponent (the adapter is opponent-only); LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: rock-slide-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts).",
         "S10A ATTACKER shown as the Substitute doll (docs/next-adapters-prep40.md; LIVE_SUBSTITUTE_SWAP_BODY_CELLS, attacker side opponent): SUBSTITUTE_TO_MON + idle + body + MON_TO_SUBSTITUTE presented live. Dense composite windows from fresh direct-mGBA prep40 probes, two fresh passes x2 runs byte-identical, through the production live renderer: 1 of 1 windows (219 rows) 0 px; the tail row (the next command's first row) 0 px with the doll latched at x2 -5 / +5 (receipt tools/integration/fixtures/attdoll-live-receipt.json; tests/substituteSwapAttdollCells.test.ts)."
@@ -2618,10 +2620,9 @@
       "palettePlan": "no plan, history invalidates",
       "spriteOrder": "spriteOrderSeed = provider order (known-entry occupied prefix + F) when the tracked order is known, else the accepted known-entry literal; pixel-neutral (0/40 seeds, both measured equal here)",
       "remaining": [
-        "player-attacker orientation (no accepted evidence)",
-        "37 rows after the 137-frame script are target hit flash and HUD (queue commands)",
-        "no alternate-species dense proof",
-        "unknown entry/status/switch/summary/substitute/transform histories",
+                "37 rows after the 137-frame script are target hit flash and HUD (queue commands)",
+        "no alternate-species dense proof for the opponent attacker (the player attacker has GOLEM -> DELCATTY)",
+                "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
     },

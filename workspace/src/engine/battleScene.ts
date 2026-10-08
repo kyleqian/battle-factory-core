@@ -49848,34 +49848,38 @@ export function renderSceneOnMovePresentation(
     const player = attacker.geometry.side === "player" ? attacker : target;
     const opponent = attacker.geometry.side === "opponent" ? attacker : target;
     if (
-      (!liveField && (player.species !== "ONIX" || opponent.species !== "GROVYLE"))
-      || attacker.geometry.side !== "opponent"
+      (!liveField && (player.species !== "ONIX" || opponent.species !== "GROVYLE" || attacker.geometry.side !== "opponent"))
+      || attacker.geometry.side === target.geometry.side
     ) {
       throw new Error(
         `unsupported staged ROCK_SLIDE pair ${attacker.species}->${target.species}`,
       );
     }
 
-    // The live adapter is opponent-attacker only (no accepted player-attacker evidence): the attacker's art, corner and
-    // settled front idle offset follow the displayed species.
-    const attackerArt = liveField ? liveSceneOnBattlerArt(opponent) : grovyleFrontSprite;
-    const targetArt = liveField ? liveSceneOnBattlerArt(player) : onixBackSprite;
-    const attackerIdle = liveField ? sceneOnBattlerFrontIdleRest(opponent) : { x2: 0, y2: 0 };
+    // Live: either attacker side (S10A sides); art, corners and the opponent-side battler's settled front idle offset follow the
+    // displayed species. An opponent-side target keeps its offset until AnimTask_ShakeMon's first absolute y2 write.
+    const opponentArt = liveField ? liveSceneOnBattlerArt(opponent) : grovyleFrontSprite;
+    const playerArt = liveField ? liveSceneOnBattlerArt(player) : onixBackSprite;
+    const opponentIdle = liveField && (opponent === attacker || view.age < state.config.animationProfile.targetShakeStartAge)
+      ? sceneOnBattlerFrontIdleRest(opponent) : { x2: 0, y2: 0 };
+    const targetY2 = (side: "player" | "opponent") => target.geometry.side === side ? view.targetY2 : 0;
     drawStaticBgShiftedY(fb, view.bg3Y);
-    drawSpriteSheet(
-      fb,
-      attackerArt.tileset,
-      attackerArt.palette,
-      opponent.geometry.spriteCorner.x + attackerIdle.x2,
-      opponent.geometry.spriteCorner.y + attackerIdle.y2,
-    );
-    if (!view.targetInvisible) {
+    if (opponent === attacker || !view.targetInvisible) {
       drawSpriteSheet(
         fb,
-        targetArt.tileset,
-        targetArt.palette,
+        opponentArt.tileset,
+        opponentArt.palette,
+        opponent.geometry.spriteCorner.x + opponentIdle.x2,
+        opponent.geometry.spriteCorner.y + opponentIdle.y2 + targetY2("opponent"),
+      );
+    }
+    if (player === attacker || !view.targetInvisible) {
+      drawSpriteSheet(
+        fb,
+        playerArt.tileset,
+        playerArt.palette,
         player.geometry.spriteCorner.x,
-        player.geometry.spriteCorner.y + view.targetY2,
+        player.geometry.spriteCorner.y + targetY2("player"),
       );
     }
     for (const rock of view.rocks) {

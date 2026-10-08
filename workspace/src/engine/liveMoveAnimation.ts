@@ -1073,9 +1073,9 @@ export function liveMoveAnimationDuration(
     case 313: return 87; // Fake Tears 80..166 / 76..162: the first displayed row is one after activation (row -1, no shadow row), 83 script + 4 clear rows.
     // Sleep Talk accepted windows start at activation and end at the first inactive script row (1356..1541 / 4570..4758).
     case 214: return request.attacker === 0 ? 186 : 189;
-    // Rock Slide, opponent attacker only (no accepted player-attacker evidence): activation..first inactive script row
-    // (1967..2104); the 37 later accepted rows are the target hit flash (hitFlashAnchorAge 141) and controller HUD.
-    case 157: return request.attacker === 1 ? 138 : null;
+    // Rock Slide: activation..first inactive script row (1967..2104); the 37 later accepted rows are the target hit flash
+    // (hitFlashAnchorAge 141) and controller HUD. Both attacker sides (S10A sides: player attacker, s10a-live/rock-slide-*.json).
+    case 157: return 138;
     case 129: return request.attacker === 1 ? 80 : 78; // Swift 73..152 / 69..146 (prep8 s2.2): activation..script end.
     case 271: return 225; // Trick 70..294 / 66..290.
     // Magnitude 411..585 (power 70, 174 frames) / 191..397 (power 110, 206 frames): the reducer's first inactive age.
@@ -2357,7 +2357,6 @@ export function liveMoveAnimationPresentation(
     // `sleep`, prep7-sleep-talk-field.json). The called move is an ordinary second request (Metronome precedent).
     case 214: config = { move: "SLEEP_TALK", attacker, target }; break;
     case 157:
-      if (attacker.geometry.side !== "opponent") return null;
       // The reducer is seed-independent (0/40 arbitrary seeds, prep7 s2.3): the 64-entry spriteOrderSeed is the provider
       // order (known-entry occupied prefix + F) when the tracked order is known and the accepted known-entry literal
       // otherwise (both equal the observed order at a first body); the first-found pixel result is the same either way.

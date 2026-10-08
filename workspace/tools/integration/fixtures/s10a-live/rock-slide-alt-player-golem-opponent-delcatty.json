@@ -1,0 +1,36 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "ROCK_SLIDE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/s10aside-rock-slide-player-golem-opponent-delcatty.json",
+ "denseWindow": {
+  "startFrame": 78,
+  "endFrame": 215
+ },
+ "windowSource": "window = [activation + 0, activation + 137] of this scenario's first ROCK_SLIDE body (activation 78, script end 215; the opponent-attacker convention: row 0, activation .. first inactive script row, 138 rows) from 2 fresh prep22Probes.sh runs (bodies agree)",
+ "attacker": {
+  "species": "DELCATTY",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015503,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 177,
+  "playerMaxHp": 177,
+  "opponentHp": 187,
+  "opponentMaxHp": 187,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}
