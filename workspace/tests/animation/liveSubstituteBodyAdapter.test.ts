@@ -58,6 +58,20 @@ describe("S10A Substitute body (164) scoped exact", () => {
     }
   });
 
+  // Species audit 12 (docs/live-species-audit-12.md): a shiny attacker was drawn without its shiny palette on ages 0..10.
+  it("declines a shiny battler on either side (as the other live adapters do)", () => {
+    const OT = 416049562, SHINY = ((OT >>> 16) ^ (OT & 0xffff)) >>> 0;
+    for (const name of NAMES.slice(0, 2)) {
+      const view = liveView(fixtureAt(name), 0);
+      const effect = view.effect as unknown as { request: never; age: number };
+      const call = (field = view.field) => liveMoveAnimationPresentation(effect.request, field, effect.age);
+      expect(call()).not.toBeNull();
+      for (const side of ["player", "opponent"] as const) {
+        expect(call({ ...view.field, [side]: { ...view.field[side], personality: SHINY } } as never)).toBeNull();
+      }
+    }
+  });
+
   // tools/integration/substRouteScan.ts (r3ProfileRouteSearch.ts 164 16 1 4000): seed 11 / streak 35, rentals[0] JYNX subs on turn 1 (slot 3).
   it("route 11/35 JYNX: the body is live on every age, the doll is shown from the next command on, Scene ON/OFF parity", () => {
     let bodyKey: string | null = null;

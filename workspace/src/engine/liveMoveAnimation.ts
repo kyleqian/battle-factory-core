@@ -1736,7 +1736,12 @@ export function liveMoveAnimationPresentation(
         targetPictureYOffset: liveBattlerCoordAttrs(target.geometry.side, art).yOffset };
       break;
     case 322: config = { move: "COSMIC_POWER", attacker, target, fieldProfile }; break;
-    case 164: config = { move: "SUBSTITUTE", attacker, target, fieldProfile }; break;
+    case 164:
+      // Species audit 12: before the doll appears (ages 0..10) the body draws the attacker without its shiny palette
+      // (shiny STEELIX 12,471 / 13,778 px); decline shiny battlers as the other live adapters do.
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      config = { move: "SUBSTITUTE", attacker, target, fieldProfile };
+      break;
     case 212:
       // meanLookFramebuffer.ts:124: the eye is created from ANIM_ATTACKER, so the profile carries its subpriority.
       config = { move: "MEAN_LOOK", attacker, target, fieldProfile,
