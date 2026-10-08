@@ -12,6 +12,12 @@
   Worker gates 1,563 files / 12,823 tests, build 873, differential 624. Supervisor: `substSwapRun.sh` into fresh dirs —
   probes r1 == r2 (13 scenarios), 21 windows x2 runs 0 px, GOLEM-player residual == non-subbed control, negatives fail;
   union typecheck, smoke 448, 9 targeted files 128/128, own differential vs `bb4dc2558` 624/624. Logs `.integration/validation/swap-20261008/`.
+- Live-share census (side, `589156d65`, new files only): `tools/integration/liveShareCensus.ts` plays 1000 ordinary Scene ON
+  battles (generated rentals, all-slot move policy) and classifies every move-animation / fade command by the production
+  gate that fired. On src `d15bc413`: 72.56 % live by count, 75.15 % by presented frames (seeds 50000..: 75.12 / 76.13);
+  the sprite-order lend causes 72 % of fallback frames (17.9 % of all move frames): host stopped at the CONFUSION status
+  animation (97k), PRZ survivors (61k), Giga Drain / Dig bodies, WEATHER_VAR / RAIN_CONTINUES; allocator history 9 %
+  (Protect / screens). `docs/live-share-census.md`. Supervisor: seeds 0..999 rerun — report byte-identical (afd335f3).
 - Folded Opus worker `fd65a52a0` as `e25fa104c` (src tree `9a1e8a70`): audit-13 fixes. (a) Ice Beam / Thunderbolt / Sludge
   (Bomb) draw a live opponent attacker at its tracked front idle rest (ONIX 221,473 / 258,567 / 182,849 -> 0 px; 41 committed
   fixtures render-identical; static scan lists 15 more candidate renderers, unproven). (b) Substitute swaps decline a shiny
