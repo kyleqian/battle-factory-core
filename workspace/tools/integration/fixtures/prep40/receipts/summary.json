@@ -1,0 +1,14415 @@
+[
+ {
+  "stem": "prep40-earthquake-player",
+  "move": "EARTHQUAKE",
+  "moveId": 89,
+  "side": "player",
+  "weight": 2.261,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 293,
+  "swapInRows": 42,
+  "romBodyRows": 207,
+  "swapBackRows": 42,
+  "adapterDuration": 198,
+  "productionDuration": 283,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    80689,
+    80689
+   ],
+   [
+    80689,
+    80689
+   ]
+  ],
+  "prodExactRows": [
+   242,
+   242
+  ],
+  "prodBadAges": [
+   "242..292"
+  ],
+  "aligned": [
+   {
+    "framingRows": 208,
+    "shift": 0,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     0
+    ],
+    "badAges": [],
+    "firstBad": []
+   },
+   {
+    "framingRows": 208,
+    "shift": 0,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     0
+    ],
+    "badAges": [],
+    "firstBad": []
+   }
+  ],
+  "fallbackPx": [
+   [
+    1278780,
+    1278780
+   ],
+   [
+    1278780,
+    1278780
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     80689,
+     80689
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     80689,
+     80689
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     80689,
+     80689
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     80689,
+     80689
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 208,
+    "adapterDuration": 198,
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1776,
+    "turn": 0,
+    "romBodyRows": 207,
+    "prodPx": [
+     80689,
+     80689
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   },
+   {
+    "frame": 3474,
+    "turn": 0,
+    "romBodyRows": 207,
+    "prodPx": [
+     80689,
+     80689
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   },
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-BODY-FRAMING"
+ },
+ {
+  "stem": "prep40-earthquake-opponent",
+  "move": "EARTHQUAKE",
+  "moveId": 89,
+  "side": "opponent",
+  "weight": 2.261,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 289,
+  "swapInRows": 40,
+  "romBodyRows": 207,
+  "swapBackRows": 40,
+  "adapterDuration": 198,
+  "productionDuration": 279,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    60370,
+    60370
+   ],
+   [
+    60370,
+    60370
+   ]
+  ],
+  "prodExactRows": [
+   240,
+   240
+  ],
+  "prodBadAges": [
+   "240..288"
+  ],
+  "aligned": [
+   {
+    "framingRows": 208,
+    "shift": 0,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     0
+    ],
+    "badAges": [],
+    "firstBad": []
+   },
+   {
+    "framingRows": 208,
+    "shift": 0,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     0
+    ],
+    "badAges": [],
+    "firstBad": []
+   }
+  ],
+  "fallbackPx": [
+   [
+    1095981,
+    1095981
+   ],
+   [
+    1095981,
+    1095981
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     60370,
+     60370
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     60370,
+     60370
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     60370,
+     60370
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     60370,
+     60370
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1748,
+    "turn": 0,
+    "romBodyRows": 207,
+    "prodPx": [
+     60370,
+     60370
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 3414,
+    "turn": 0,
+    "romBodyRows": 207,
+    "prodPx": [
+     60370,
+     60370
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1693
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-BODY-FRAMING"
+ },
+ {
+  "stem": "prep40-aerial-ace-player",
+  "move": "AERIAL_ACE",
+  "moveId": 332,
+  "side": "player",
+  "weight": 1.108,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 135,
+  "swapInRows": 42,
+  "romBodyRows": 49,
+  "swapBackRows": 42,
+  "adapterDuration": 50,
+  "productionDuration": 135,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   135,
+   135
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    285329,
+    285329
+   ],
+   [
+    285329,
+    285329
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 50,
+    "adapterDuration": 50,
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1772,
+    "turn": 0,
+    "romBodyRows": 49,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   },
+   {
+    "frame": 3470,
+    "turn": 0,
+    "romBodyRows": 49,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   },
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-aerial-ace-opponent",
+  "move": "AERIAL_ACE",
+  "moveId": 332,
+  "side": "opponent",
+  "weight": 1.108,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 131,
+  "swapInRows": 40,
+  "romBodyRows": 49,
+  "swapBackRows": 40,
+  "adapterDuration": 50,
+  "productionDuration": 131,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ]
+  ],
+  "prodExactRows": [
+   130,
+   130
+  ],
+  "prodBadAges": [
+   "51"
+  ],
+  "aligned": [
+   {
+    "framingRows": 50,
+    "shift": 0,
+    "px": [
+     1,
+     1
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "51"
+    ],
+    "firstBad": [
+     [
+      51,
+      1,
+      [
+       138,
+       74,
+       138,
+       74
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 50,
+    "shift": 0,
+    "px": [
+     1,
+     1
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "51"
+    ],
+    "firstBad": [
+     [
+      51,
+      1,
+      [
+       138,
+       74,
+       138,
+       74
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    241442,
+    241442
+   ],
+   [
+    241442,
+    241442
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     1,
+     1
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     1,
+     1
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     1,
+     1
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     1,
+     1
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     1,
+     1
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     1,
+     1
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     1,
+     1
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     1,
+     1
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1744,
+    "turn": 0,
+    "romBodyRows": 49,
+    "prodPx": [
+     1,
+     1
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     1,
+     1
+    ],
+    "alignedBadAges": [
+     "51"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 3410,
+    "turn": 0,
+    "romBodyRows": 49,
+    "prodPx": [
+     1,
+     1
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     1,
+     1
+    ],
+    "alignedBadAges": [
+     "51"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1707
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": null,
+  "verdict": "UNRESOLVED"
+ },
+ {
+  "stem": "prep40-shadow-ball-player",
+  "move": "SHADOW_BALL",
+  "moveId": 247,
+  "side": "player",
+  "weight": 1.106,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 240,
+  "swapInRows": 42,
+  "romBodyRows": 154,
+  "swapBackRows": 42,
+  "adapterDuration": 148,
+  "productionDuration": 233,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    1466412,
+    1466412
+   ]
+  ],
+  "prodExactRows": [
+   64
+  ],
+  "prodBadAges": [
+   "44..83",
+   "99..145",
+   "147",
+   "149",
+   "151",
+   "153",
+   "155..239"
+  ],
+  "aligned": [
+   {
+    "framingRows": 155,
+    "shift": -5,
+    "px": [
+     9148,
+     9148
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "112",
+     "114",
+     "116",
+     "118..142"
+    ],
+    "firstBad": [
+     [
+      112,
+      270,
+      [
+       86,
+       65,
+       116,
+       97
+      ]
+     ],
+     [
+      114,
+      313,
+      [
+       92,
+       62,
+       122,
+       94
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    2904841,
+    2904841
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     1466412,
+     1466412
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     9148,
+     9148
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     1466412,
+     1466412
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     9148,
+     9148
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 156,
+    "adapterDuration": 148,
+    "prodPx": [
+     1416204,
+     1416204
+    ],
+    "shift": -5,
+    "alignedPx": [
+     280700,
+     280700
+    ],
+    "badAges": [
+     "69",
+     "71",
+     "73",
+     "75..99",
+     "137..152"
+    ]
+   },
+   {
+    "rows": 156,
+    "adapterDuration": 148,
+    "prodPx": [
+     1416204,
+     1416204
+    ],
+    "shift": -5,
+    "alignedPx": [
+     280700,
+     280700
+    ],
+    "badAges": [
+     "69",
+     "71",
+     "73",
+     "75..99",
+     "137..152"
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1775,
+    "turn": 0,
+    "romBodyRows": 154,
+    "prodPx": [
+     1466412,
+     1466412
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     9148,
+     9148
+    ],
+    "alignedBadAges": [
+     "112",
+     "114",
+     "116",
+     "118..142"
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": null,
+  "verdict": "UNRESOLVED"
+ },
+ {
+  "stem": "prep40-shadow-ball-opponent",
+  "move": "SHADOW_BALL",
+  "moveId": 247,
+  "side": "opponent",
+  "weight": 1.106,
+  "windows": 3,
+  "kind": "swap",
+  "rows": 236,
+  "swapInRows": 40,
+  "romBodyRows": 154,
+  "swapBackRows": 40,
+  "adapterDuration": 148,
+  "productionDuration": 229,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    1495359,
+    1495359
+   ],
+   [
+    1514706,
+    1514706
+   ],
+   [
+    1495359,
+    1495359
+   ]
+  ],
+  "prodExactRows": [
+   63,
+   62,
+   63
+  ],
+  "prodBadAges": [
+   "42..81",
+   "97..143",
+   "145",
+   "147",
+   "149",
+   "151",
+   "153..213",
+   "215..235"
+  ],
+  "aligned": [
+   {
+    "framingRows": 155,
+    "shift": -5,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     -5
+    ],
+    "badAges": [],
+    "firstBad": []
+   },
+   {
+    "framingRows": 156,
+    "shift": -5,
+    "px": [
+     280624,
+     280624
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "178..193"
+    ],
+    "firstBad": [
+     [
+      178,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      179,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 155,
+    "shift": -5,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     -5
+    ],
+    "badAges": [],
+    "firstBad": []
+   }
+  ],
+  "fallbackPx": [
+   [
+    2879343,
+    2879343
+   ],
+   [
+    2898216,
+    2898216
+   ],
+   [
+    2879343,
+    2879343
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     1495359,
+     1495359
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     1514706,
+     1514706
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     280624,
+     280624
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     1495359,
+     1495359
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     1495359,
+     1495359
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     1514706,
+     1514706
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     280624,
+     280624
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     1495359,
+     1495359
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1747,
+    "turn": 0,
+    "romBodyRows": 154,
+    "prodPx": [
+     1495359,
+     1495359
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 3413,
+    "turn": 0,
+    "romBodyRows": 155,
+    "prodPx": [
+     1514706,
+     1514706
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     280624,
+     280624
+    ],
+    "alignedBadAges": [
+     "178..193"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1706
+    ]
+   },
+   {
+    "frame": 5079,
+    "turn": 0,
+    "romBodyRows": 154,
+    "prodPx": [
+     1495359,
+     1495359
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1712
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-BODY-FRAMING"
+ },
+ {
+  "stem": "prep40-psychic-player",
+  "move": "PSYCHIC",
+  "moveId": 94,
+  "side": "player",
+  "weight": 1.078,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 230,
+  "swapInRows": 42,
+  "romBodyRows": 144,
+  "swapBackRows": 42,
+  "adapterDuration": 140,
+  "productionDuration": 225,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    2518090,
+    2518090
+   ]
+  ],
+  "prodExactRows": [
+   44
+  ],
+  "prodBadAges": [
+   "44..229"
+  ],
+  "aligned": [
+   {
+    "framingRows": 145,
+    "shift": -5,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     -5
+    ],
+    "badAges": [],
+    "firstBad": []
+   }
+  ],
+  "fallbackPx": [
+   [
+    2737793,
+    2737793
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     2518090,
+     2518090
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     2518090,
+     2518090
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 145,
+    "adapterDuration": 140,
+    "prodPx": [
+     2457243,
+     2457243
+    ],
+    "shift": -5,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "badAges": []
+   },
+   {
+    "rows": 145,
+    "adapterDuration": 140,
+    "prodPx": [
+     2457243,
+     2457243
+    ],
+    "shift": -5,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "badAges": []
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1771,
+    "turn": 0,
+    "romBodyRows": 144,
+    "prodPx": [
+     2518090,
+     2518090
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-BODY-FRAMING"
+ },
+ {
+  "stem": "prep40-psychic-opponent",
+  "move": "PSYCHIC",
+  "moveId": 94,
+  "side": "opponent",
+  "weight": 1.078,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 226,
+  "swapInRows": 40,
+  "romBodyRows": 144,
+  "swapBackRows": 40,
+  "adapterDuration": 140,
+  "productionDuration": 221,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    2553025,
+    2553025
+   ],
+   [
+    2553025,
+    2553025
+   ]
+  ],
+  "prodExactRows": [
+   45,
+   45
+  ],
+  "prodBadAges": [
+   "42..203",
+   "207..225"
+  ],
+  "aligned": [
+   {
+    "framingRows": 145,
+    "shift": -5,
+    "px": [
+     9,
+     9
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "141"
+    ],
+    "firstBad": [
+     [
+      141,
+      9,
+      [
+       104,
+       85,
+       104,
+       111
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 145,
+    "shift": -5,
+    "px": [
+     9,
+     9
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "141"
+    ],
+    "firstBad": [
+     [
+      141,
+      9,
+      [
+       104,
+       85,
+       104,
+       111
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    2704428,
+    2704428
+   ],
+   [
+    2704428,
+    2704428
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     2553025,
+     2553025
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     9,
+     9
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     2553025,
+     2553025
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     9,
+     9
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     2553025,
+     2553025
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     9,
+     9
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     2553025,
+     2553025
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     9,
+     9
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 145,
+    "adapterDuration": 140,
+    "prodPx": [
+     2506566,
+     2506566
+    ],
+    "shift": -5,
+    "alignedPx": [
+     9,
+     9
+    ],
+    "badAges": [
+     "100"
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1743,
+    "turn": 0,
+    "romBodyRows": 144,
+    "prodPx": [
+     2553025,
+     2553025
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     9,
+     9
+    ],
+    "alignedBadAges": [
+     "141"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 3409,
+    "turn": 0,
+    "romBodyRows": 144,
+    "prodPx": [
+     2553025,
+     2553025
+    ],
+    "alignedShift": -5,
+    "alignedPx": [
+     9,
+     9
+    ],
+    "alignedBadAges": [
+     "141"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1707
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": null,
+  "verdict": "PAIR-RESIDUAL"
+ },
+ {
+  "stem": "prep40-rock-slide-opponent",
+  "move": "ROCK_SLIDE",
+  "moveId": 157,
+  "side": "opponent",
+  "weight": 1.058,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 219,
+  "swapInRows": 40,
+  "romBodyRows": 137,
+  "swapBackRows": 40,
+  "adapterDuration": 138,
+  "productionDuration": 219,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   219
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    524699,
+    524699
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 138,
+    "adapterDuration": 138,
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 3412,
+    "turn": 0,
+    "romBodyRows": 137,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-surf-player",
+  "move": "SURF",
+  "moveId": 57,
+  "side": "player",
+  "weight": 1.029,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 229,
+  "swapInRows": 42,
+  "romBodyRows": 143,
+  "swapBackRows": 42,
+  "adapterDuration": 144,
+  "productionDuration": 229,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   229
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    2243319,
+    2243319
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 144,
+    "adapterDuration": 144,
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "rows": 144,
+    "adapterDuration": 144,
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1767,
+    "turn": 0,
+    "romBodyRows": 143,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-surf-opponent",
+  "move": "SURF",
+  "moveId": 57,
+  "side": "opponent",
+  "weight": 1.029,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 225,
+  "swapInRows": 40,
+  "romBodyRows": 143,
+  "swapBackRows": 40,
+  "adapterDuration": 144,
+  "productionDuration": 225,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   225,
+   225
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    1775579,
+    1775579
+   ],
+   [
+    1775579,
+    1775579
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 144,
+    "adapterDuration": 144,
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1739,
+    "turn": 0,
+    "romBodyRows": 143,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 3405,
+    "turn": 0,
+    "romBodyRows": 143,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1690
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-ice-beam-player",
+  "move": "ICE_BEAM",
+  "moveId": 58,
+  "side": "player",
+  "weight": 0.99,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 288,
+  "swapInRows": 42,
+  "romBodyRows": 202,
+  "swapBackRows": 42,
+  "adapterDuration": 203,
+  "productionDuration": 288,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    3354472,
+    3354472
+   ]
+  ],
+  "prodExactRows": [
+   107
+  ],
+  "prodBadAges": [
+   "53..233"
+  ],
+  "aligned": [
+   {
+    "framingRows": 203,
+    "shift": 0,
+    "px": [
+     3354472,
+     3354472
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "53..233"
+    ],
+    "firstBad": [
+     [
+      53,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      54,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    3843572,
+    3843572
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 203,
+    "adapterDuration": 203,
+    "prodPx": [
+     3354472,
+     3354472
+    ],
+    "shift": 0,
+    "alignedPx": [
+     3354472,
+     3354472
+    ],
+    "badAges": [
+     "10..190"
+    ]
+   },
+   {
+    "rows": 203,
+    "adapterDuration": 203,
+    "prodPx": [
+     3354472,
+     3354472
+    ],
+    "shift": 0,
+    "alignedPx": [
+     3354472,
+     3354472
+    ],
+    "badAges": [
+     "10..190"
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1772,
+    "turn": 0,
+    "romBodyRows": 202,
+    "prodPx": [
+     3354472,
+     3354472
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     3354472,
+     3354472
+    ],
+    "alignedBadAges": [
+     "53..233"
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-ORDER"
+ },
+ {
+  "stem": "prep40-ice-beam-opponent",
+  "move": "ICE_BEAM",
+  "moveId": 58,
+  "side": "opponent",
+  "weight": 0.99,
+  "windows": 3,
+  "kind": "swap",
+  "rows": 284,
+  "swapInRows": 40,
+  "romBodyRows": 202,
+  "swapBackRows": 40,
+  "adapterDuration": 203,
+  "productionDuration": 284,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    3448882,
+    3448882
+   ],
+   [
+    3448882,
+    3448882
+   ],
+   [
+    3448882,
+    3448882
+   ]
+  ],
+  "prodExactRows": [
+   103,
+   103,
+   103
+  ],
+  "prodBadAges": [
+   "51..231"
+  ],
+  "aligned": [
+   {
+    "framingRows": 203,
+    "shift": 0,
+    "px": [
+     3448882,
+     3448882
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "51..231"
+    ],
+    "firstBad": [
+     [
+      51,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      52,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 203,
+    "shift": 0,
+    "px": [
+     3448882,
+     3448882
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "51..231"
+    ],
+    "firstBad": [
+     [
+      51,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      52,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 203,
+    "shift": 0,
+    "px": [
+     3448882,
+     3448882
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "51..231"
+    ],
+    "firstBad": [
+     [
+      51,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      52,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    3815067,
+    3815067
+   ],
+   [
+    3815067,
+    3815067
+   ],
+   [
+    3815067,
+    3815067
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1744,
+    "turn": 0,
+    "romBodyRows": 202,
+    "prodPx": [
+     3448882,
+     3448882
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     3448882,
+     3448882
+    ],
+    "alignedBadAges": [
+     "51..231"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 3410,
+    "turn": 0,
+    "romBodyRows": 202,
+    "prodPx": [
+     3448882,
+     3448882
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     3448882,
+     3448882
+    ],
+    "alignedBadAges": [
+     "51..231"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1764
+    ]
+   },
+   {
+    "frame": 5076,
+    "turn": 0,
+    "romBodyRows": 202,
+    "prodPx": [
+     3448882,
+     3448882
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     3448882,
+     3448882
+    ],
+    "alignedBadAges": [
+     "51..231"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1773
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-ORDER"
+ },
+ {
+  "stem": "prep40-double-edge-player",
+  "move": "DOUBLE_EDGE",
+  "moveId": 38,
+  "side": "player",
+  "weight": 0.869,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 226,
+  "swapInRows": 42,
+  "romBodyRows": 140,
+  "swapBackRows": 42,
+  "adapterDuration": 141,
+  "productionDuration": 226,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   226,
+   226
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    966926,
+    966926
+   ],
+   [
+    966926,
+    966926
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 141,
+    "adapterDuration": 141,
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1775,
+    "turn": 0,
+    "romBodyRows": 140,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   },
+   {
+    "frame": 3473,
+    "turn": 0,
+    "romBodyRows": 140,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   },
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-double-edge-opponent",
+  "move": "DOUBLE_EDGE",
+  "moveId": 38,
+  "side": "opponent",
+  "weight": 0.869,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 222,
+  "swapInRows": 40,
+  "romBodyRows": 140,
+  "swapBackRows": 40,
+  "adapterDuration": 141,
+  "productionDuration": 222,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   222,
+   222
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    903852,
+    903852
+   ],
+   [
+    903852,
+    903852
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 141,
+    "adapterDuration": 141,
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1747,
+    "turn": 0,
+    "romBodyRows": 140,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 3413,
+    "turn": 0,
+    "romBodyRows": 140,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1708
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-confuse-ray-player",
+  "move": "CONFUSE_RAY",
+  "moveId": 109,
+  "side": "player",
+  "weight": 0.828,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 355,
+  "swapInRows": 42,
+  "romBodyRows": 269,
+  "swapBackRows": 42,
+  "adapterDuration": 270,
+  "productionDuration": 355,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   355,
+   355
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    5004083,
+    5004083
+   ],
+   [
+    5004083,
+    5004083
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1772,
+    "turn": 0,
+    "romBodyRows": 269,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "frame": 5168,
+    "turn": 0,
+    "romBodyRows": 269,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     0
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   },
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-confuse-ray-opponent",
+  "move": "CONFUSE_RAY",
+  "moveId": 109,
+  "side": "opponent",
+  "weight": 0.828,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 351,
+  "swapInRows": 40,
+  "romBodyRows": 269,
+  "swapBackRows": 40,
+  "adapterDuration": 270,
+  "productionDuration": 351,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   351
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    4997538,
+    4997538
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 3410,
+    "turn": 0,
+    "romBodyRows": 269,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     0
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-thunderbolt-player",
+  "move": "THUNDERBOLT",
+  "moveId": 85,
+  "side": "player",
+  "weight": 0.809,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 322,
+  "swapInRows": 42,
+  "romBodyRows": 236,
+  "swapBackRows": 42,
+  "adapterDuration": 237,
+  "productionDuration": 322,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    3885044,
+    3885044
+   ]
+  ],
+  "prodExactRows": [
+   97
+  ],
+  "prodBadAges": [
+   "54..278"
+  ],
+  "aligned": [
+   {
+    "framingRows": 237,
+    "shift": 0,
+    "px": [
+     3885044,
+     3885044
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "54..278"
+    ],
+    "firstBad": [
+     [
+      54,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      55,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    4437654,
+    4437654
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 237,
+    "adapterDuration": 237,
+    "prodPx": [
+     3885044,
+     3885044
+    ],
+    "shift": 0,
+    "alignedPx": [
+     3885044,
+     3885044
+    ],
+    "badAges": [
+     "11..235"
+    ]
+   },
+   {
+    "rows": 237,
+    "adapterDuration": 237,
+    "prodPx": [
+     3885044,
+     3885044
+    ],
+    "shift": 0,
+    "alignedPx": [
+     3885044,
+     3885044
+    ],
+    "badAges": [
+     "11..235"
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1775,
+    "turn": 0,
+    "romBodyRows": 236,
+    "prodPx": [
+     3885044,
+     3885044
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     3885044,
+     3885044
+    ],
+    "alignedBadAges": [
+     "54..278"
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-ORDER"
+ },
+ {
+  "stem": "prep40-thunderbolt-opponent",
+  "move": "THUNDERBOLT",
+  "moveId": 85,
+  "side": "opponent",
+  "weight": 0.809,
+  "windows": 3,
+  "kind": "swap",
+  "rows": 318,
+  "swapInRows": 40,
+  "romBodyRows": 236,
+  "swapBackRows": 40,
+  "adapterDuration": 237,
+  "productionDuration": 318,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    4010925,
+    4010925
+   ],
+   [
+    4010925,
+    4010925
+   ],
+   [
+    4010925,
+    4010925
+   ]
+  ],
+  "prodExactRows": [
+   93,
+   93,
+   93
+  ],
+  "prodBadAges": [
+   "52..276"
+  ],
+  "aligned": [
+   {
+    "framingRows": 237,
+    "shift": 0,
+    "px": [
+     4010925,
+     4010925
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "52..276"
+    ],
+    "firstBad": [
+     [
+      52,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      53,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 237,
+    "shift": 0,
+    "px": [
+     4010925,
+     4010925
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "52..276"
+    ],
+    "firstBad": [
+     [
+      52,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      53,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 237,
+    "shift": 0,
+    "px": [
+     4010925,
+     4010925
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "52..276"
+    ],
+    "firstBad": [
+     [
+      52,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      53,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    4420444,
+    4420444
+   ],
+   [
+    4420444,
+    4420444
+   ],
+   [
+    4420444,
+    4420444
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1747,
+    "turn": 0,
+    "romBodyRows": 236,
+    "prodPx": [
+     4010925,
+     4010925
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     4010925,
+     4010925
+    ],
+    "alignedBadAges": [
+     "52..276"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 3413,
+    "turn": 0,
+    "romBodyRows": 236,
+    "prodPx": [
+     4010925,
+     4010925
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     4010925,
+     4010925
+    ],
+    "alignedBadAges": [
+     "52..276"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1707
+    ]
+   },
+   {
+    "frame": 5079,
+    "turn": 0,
+    "romBodyRows": 236,
+    "prodPx": [
+     4010925,
+     4010925
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     4010925,
+     4010925
+    ],
+    "alignedBadAges": [
+     "52..276"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1691
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-ORDER"
+ },
+ {
+  "stem": "prep40-attract-player",
+  "move": "ATTRACT",
+  "moveId": 213,
+  "side": "player",
+  "weight": 0.746,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 520,
+  "swapInRows": 42,
+  "romBodyRows": 434,
+  "swapBackRows": 42,
+  "adapterDuration": 435,
+  "productionDuration": 520,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   520
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    5854212,
+    5854212
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1765,
+    "turn": 0,
+    "romBodyRows": 434,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     698,
+     32
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-attract-opponent",
+  "move": "ATTRACT",
+  "moveId": 213,
+  "side": "opponent",
+  "weight": 0.746,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 516,
+  "swapInRows": 40,
+  "romBodyRows": 434,
+  "swapBackRows": 40,
+  "adapterDuration": 435,
+  "productionDuration": 516,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   516
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    5786107,
+    5786107
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1737,
+    "turn": 0,
+    "romBodyRows": 434,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     822,
+     46
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-brick-break-player",
+  "move": "BRICK_BREAK",
+  "moveId": 280,
+  "side": "player",
+  "weight": 0.73,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 236,
+  "swapInRows": 42,
+  "romBodyRows": 150,
+  "swapBackRows": 42,
+  "adapterDuration": 151,
+  "productionDuration": 236,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   236
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    1413106,
+    1413106
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 151,
+    "adapterDuration": 151,
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "rows": 151,
+    "adapterDuration": 151,
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1774,
+    "turn": 0,
+    "romBodyRows": 150,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     0
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-brick-break-opponent",
+  "move": "BRICK_BREAK",
+  "moveId": 280,
+  "side": "opponent",
+  "weight": 0.73,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 232,
+  "swapInRows": 40,
+  "romBodyRows": 150,
+  "swapBackRows": 40,
+  "adapterDuration": 151,
+  "productionDuration": 232,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   232,
+   232
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    1360192,
+    1360192
+   ],
+   [
+    1360192,
+    1360192
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "none",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 151,
+    "adapterDuration": 151,
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1746,
+    "turn": 0,
+    "romBodyRows": 150,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "frame": 3412,
+    "turn": 0,
+    "romBodyRows": 150,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     0
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-sludge-bomb-player",
+  "move": "SLUDGE_BOMB",
+  "moveId": 188,
+  "side": "player",
+  "weight": 0.728,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 254,
+  "swapInRows": 42,
+  "romBodyRows": 168,
+  "swapBackRows": 42,
+  "adapterDuration": 160,
+  "productionDuration": 245,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    199754,
+    199754
+   ]
+  ],
+  "prodExactRows": [
+   46
+  ],
+  "prodBadAges": [
+   "44..139",
+   "142..253"
+  ],
+  "aligned": [
+   {
+    "framingRows": 169,
+    "shift": -4,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     -4
+    ],
+    "badAges": [],
+    "firstBad": []
+   }
+  ],
+  "fallbackPx": [
+   [
+    606988,
+    606988
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     199754,
+     199754
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     199754,
+     199754
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 169,
+    "adapterDuration": 160,
+    "prodPx": [
+     122048,
+     122048
+    ],
+    "shift": -4,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "badAges": []
+   },
+   {
+    "rows": 169,
+    "adapterDuration": 160,
+    "prodPx": [
+     122048,
+     122048
+    ],
+    "shift": -4,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "badAges": []
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1775,
+    "turn": 0,
+    "romBodyRows": 168,
+    "prodPx": [
+     199754,
+     199754
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-BODY-FRAMING"
+ },
+ {
+  "stem": "prep40-sludge-bomb-opponent",
+  "move": "SLUDGE_BOMB",
+  "moveId": 188,
+  "side": "opponent",
+  "weight": 0.728,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 250,
+  "swapInRows": 40,
+  "romBodyRows": 168,
+  "swapBackRows": 40,
+  "adapterDuration": 160,
+  "productionDuration": 241,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    176825,
+    176825
+   ],
+   [
+    176825,
+    176825
+   ]
+  ],
+  "prodExactRows": [
+   44,
+   44
+  ],
+  "prodBadAges": [
+   "42..137",
+   "140..249"
+  ],
+  "aligned": [
+   {
+    "framingRows": 169,
+    "shift": -4,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     -4
+    ],
+    "badAges": [],
+    "firstBad": []
+   },
+   {
+    "framingRows": 169,
+    "shift": -4,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     -4
+    ],
+    "badAges": [],
+    "firstBad": []
+   }
+  ],
+  "fallbackPx": [
+   [
+    522120,
+    522120
+   ],
+   [
+    522120,
+    522120
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     176825,
+     176825
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     176825,
+     176825
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     176825,
+     176825
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     176825,
+     176825
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 169,
+    "adapterDuration": 160,
+    "prodPx": [
+     118754,
+     118754
+    ],
+    "shift": -4,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "badAges": []
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1747,
+    "turn": 0,
+    "romBodyRows": 168,
+    "prodPx": [
+     176825,
+     176825
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 3413,
+    "turn": 0,
+    "romBodyRows": 168,
+    "prodPx": [
+     176825,
+     176825
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1771
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-BODY-FRAMING"
+ },
+ {
+  "stem": "prep40-thunder-wave-player",
+  "move": "THUNDER_WAVE",
+  "moveId": 86,
+  "side": "player",
+  "weight": 0.693,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 205,
+  "swapInRows": 42,
+  "romBodyRows": 119,
+  "swapBackRows": 42,
+  "adapterDuration": 120,
+  "productionDuration": 205,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   205
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    2180121,
+    2180121
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1776,
+    "turn": 0,
+    "romBodyRows": 119,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     0
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-thunder-wave-opponent",
+  "move": "THUNDER_WAVE",
+  "moveId": 86,
+  "side": "opponent",
+  "weight": 0.693,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 201,
+  "swapInRows": 40,
+  "romBodyRows": 119,
+  "swapBackRows": 40,
+  "adapterDuration": 120,
+  "productionDuration": 201,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   201
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    2156090,
+    2156090
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1748,
+    "turn": 0,
+    "romBodyRows": 119,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     0
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-giga-drain-player",
+  "move": "GIGA_DRAIN",
+  "moveId": 202,
+  "side": "player",
+  "weight": 0.688,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 315,
+  "swapInRows": 42,
+  "romBodyRows": 229,
+  "swapBackRows": 42,
+  "adapterDuration": 230,
+  "productionDuration": 315,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    3457368,
+    3457368
+   ],
+   [
+    3457368,
+    3457368
+   ]
+  ],
+  "prodExactRows": [
+   113,
+   113
+  ],
+  "prodBadAges": [
+   "59..260"
+  ],
+  "aligned": [
+   {
+    "framingRows": 230,
+    "shift": 0,
+    "px": [
+     3457368,
+     3457368
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "59..260"
+    ],
+    "firstBad": [
+     [
+      59,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      60,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 230,
+    "shift": 0,
+    "px": [
+     3457368,
+     3457368
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "59..260"
+    ],
+    "firstBad": [
+     [
+      59,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      60,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    3986674,
+    3986674
+   ],
+   [
+    3986674,
+    3986674
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "none",
+    "prodPx": [
+     3457368,
+     3457368
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     3457368,
+     3457368
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 230,
+    "adapterDuration": 230,
+    "prodPx": [
+     3457368,
+     3457368
+    ],
+    "shift": 0,
+    "alignedPx": [
+     3457368,
+     3457368
+    ],
+    "badAges": [
+     "16..217"
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1771,
+    "turn": 0,
+    "romBodyRows": 229,
+    "prodPx": [
+     3457368,
+     3457368
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     3457368,
+     3457368
+    ],
+    "alignedBadAges": [
+     "59..260"
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   },
+   {
+    "frame": 3469,
+    "turn": 0,
+    "romBodyRows": 229,
+    "prodPx": [
+     3457368,
+     3457368
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     3457368,
+     3457368
+    ],
+    "alignedBadAges": [
+     "59..260"
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   },
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-ORDER"
+ },
+ {
+  "stem": "prep40-giga-drain-opponent",
+  "move": "GIGA_DRAIN",
+  "moveId": 202,
+  "side": "opponent",
+  "weight": 0.688,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 311,
+  "swapInRows": 40,
+  "romBodyRows": 229,
+  "swapBackRows": 40,
+  "adapterDuration": 230,
+  "productionDuration": 311,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    3569195,
+    3569195
+   ],
+   [
+    3569195,
+    3569195
+   ]
+  ],
+  "prodExactRows": [
+   109,
+   109
+  ],
+  "prodBadAges": [
+   "57..258"
+  ],
+  "aligned": [
+   {
+    "framingRows": 230,
+    "shift": 0,
+    "px": [
+     3569195,
+     3569195
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "57..258"
+    ],
+    "firstBad": [
+     [
+      57,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      58,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 230,
+    "shift": 0,
+    "px": [
+     3569195,
+     3569195
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "57..258"
+    ],
+    "firstBad": [
+     [
+      57,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      58,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    3963023,
+    3963023
+   ],
+   [
+    3963023,
+    3963023
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "none",
+    "prodPx": [
+     3569195,
+     3569195
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     3569195,
+     3569195
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1743,
+    "turn": 0,
+    "romBodyRows": 229,
+    "prodPx": [
+     3569195,
+     3569195
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     3569195,
+     3569195
+    ],
+    "alignedBadAges": [
+     "57..258"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 3409,
+    "turn": 0,
+    "romBodyRows": 229,
+    "prodPx": [
+     3569195,
+     3569195
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     3569195,
+     3569195
+    ],
+    "alignedBadAges": [
+     "57..258"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1704
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-ORDER"
+ },
+ {
+  "stem": "prep40-roar-player",
+  "move": "ROAR",
+  "moveId": 46,
+  "side": "player",
+  "weight": 0.592,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 185,
+  "swapInRows": 42,
+  "romBodyRows": 99,
+  "swapBackRows": 42,
+  "adapterDuration": 99,
+  "productionDuration": 184,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    120473,
+    120473
+   ],
+   [
+    98500,
+    98500
+   ]
+  ],
+  "prodExactRows": [
+   142,
+   142
+  ],
+  "prodBadAges": [
+   "142..184"
+  ],
+  "aligned": [
+   {
+    "framingRows": 100,
+    "shift": 0,
+    "px": [
+     87444,
+     87444
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "143..184"
+    ],
+    "firstBad": [
+     [
+      143,
+      2082,
+      [
+       144,
+       25,
+       206,
+       71
+      ]
+     ],
+     [
+      144,
+      2082,
+      [
+       144,
+       25,
+       206,
+       71
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 100,
+    "shift": 0,
+    "px": [
+     65982,
+     65982
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "143..184"
+    ],
+    "firstBad": [
+     [
+      143,
+      1571,
+      [
+       154,
+       20,
+       202,
+       71
+      ]
+     ],
+     [
+      144,
+      1571,
+      [
+       154,
+       20,
+       202,
+       71
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    551252,
+    551252
+   ],
+   [
+    500009,
+    500009
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     120473,
+     120473
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     87444,
+     87444
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     98500,
+     98500
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     65982,
+     65982
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     120473,
+     120473
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     87444,
+     87444
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     98500,
+     98500
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     65982,
+     65982
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 100,
+    "adapterDuration": 99,
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 2679,
+    "turn": 0,
+    "romBodyRows": 99,
+    "prodPx": [
+     120473,
+     120473
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     87444,
+     87444
+    ],
+    "alignedBadAges": [
+     "143..184"
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     2526
+    ]
+   },
+   {
+    "frame": 4377,
+    "turn": 0,
+    "romBodyRows": 99,
+    "prodPx": [
+     98500,
+     98500
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     65982,
+     65982
+    ],
+    "alignedBadAges": [
+     "143..184"
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     2526
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     2682,
+     2682
+    ],
+    "k1OneRowLonger": [
+     2082,
+     2082
+    ],
+    "k2Today": [
+     2082,
+     2082
+    ],
+    "k1Bbox": [
+     51,
+     25,
+     206,
+     111
+    ]
+   },
+   {
+    "k1Today": [
+     2171,
+     2171
+    ],
+    "k1OneRowLonger": [
+     1571,
+     1571
+    ],
+    "k2Today": [
+     1571,
+     1571
+    ],
+    "k1Bbox": [
+     51,
+     20,
+     202,
+     111
+    ]
+   }
+  ],
+  "orderLend": null,
+  "verdict": "UNRESOLVED"
+ },
+ {
+  "stem": "prep40-roar-opponent",
+  "move": "ROAR",
+  "moveId": 46,
+  "side": "opponent",
+  "weight": 0.592,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 185,
+  "swapInRows": 40,
+  "romBodyRows": 103,
+  "swapBackRows": 40,
+  "adapterDuration": 104,
+  "productionDuration": 185,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    81760,
+    81760
+   ],
+   [
+    61960,
+    61960
+   ]
+  ],
+  "prodExactRows": [
+   145,
+   145
+  ],
+  "prodBadAges": [
+   "145..184"
+  ],
+  "aligned": [
+   {
+    "framingRows": 104,
+    "shift": 0,
+    "px": [
+     81760,
+     81760
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "145..184"
+    ],
+    "firstBad": [
+     [
+      145,
+      2044,
+      [
+       40,
+       68,
+       103,
+       111
+      ]
+     ],
+     [
+      146,
+      2044,
+      [
+       40,
+       68,
+       103,
+       111
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 104,
+    "shift": 0,
+    "px": [
+     61960,
+     61960
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "145..184"
+    ],
+    "firstBad": [
+     [
+      145,
+      1549,
+      [
+       49,
+       62,
+       94,
+       111
+      ]
+     ],
+     [
+      146,
+      1549,
+      [
+       49,
+       62,
+       94,
+       111
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    508531,
+    508531
+   ],
+   [
+    455440,
+    455440
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     81760,
+     81760
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     81760,
+     81760
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     61960,
+     61960
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     61960,
+     61960
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     81760,
+     81760
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     81760,
+     81760
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     61960,
+     61960
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     61960,
+     61960
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 104,
+    "adapterDuration": 104,
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1894,
+    "turn": 0,
+    "romBodyRows": 103,
+    "prodPx": [
+     81760,
+     81760
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     81760,
+     81760
+    ],
+    "alignedBadAges": [
+     "145..184"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     3384
+    ]
+   },
+   {
+    "frame": 4317,
+    "turn": 0,
+    "romBodyRows": 103,
+    "prodPx": [
+     61960,
+     61960
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     61960,
+     61960
+    ],
+    "alignedBadAges": [
+     "145..184"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     3384
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     2723,
+     2723
+    ],
+    "k1OneRowLonger": [
+     2044,
+     2044
+    ],
+    "k2Today": [
+     2044,
+     2044
+    ],
+    "k1Bbox": [
+     40,
+     40,
+     195,
+     111
+    ]
+   },
+   {
+    "k1Today": [
+     2228,
+     2228
+    ],
+    "k1OneRowLonger": [
+     1549,
+     1549
+    ],
+    "k2Today": [
+     1549,
+     1549
+    ],
+    "k1Bbox": [
+     49,
+     40,
+     195,
+     111
+    ]
+   }
+  ],
+  "orderLend": null,
+  "verdict": "UNRESOLVED"
+ },
+ {
+  "stem": "prep40-crunch-player",
+  "move": "CRUNCH",
+  "moveId": 242,
+  "side": "player",
+  "weight": 0.531,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 227,
+  "swapInRows": 42,
+  "romBodyRows": 141,
+  "swapBackRows": 42,
+  "adapterDuration": 142,
+  "productionDuration": 227,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   227
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    2570548,
+    2570548
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 142,
+    "adapterDuration": 142,
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "rows": 141,
+    "adapterDuration": 142,
+    "prodPx": [
+     271552,
+     271552
+    ],
+    "shift": 0,
+    "alignedPx": [
+     271552,
+     271552
+    ],
+    "badAges": [
+     "123..138"
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1770,
+    "turn": 0,
+    "romBodyRows": 141,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-crunch-opponent",
+  "move": "CRUNCH",
+  "moveId": 242,
+  "side": "opponent",
+  "weight": 0.531,
+  "windows": 3,
+  "kind": "swap",
+  "rows": 223,
+  "swapInRows": 40,
+  "romBodyRows": 141,
+  "swapBackRows": 40,
+  "adapterDuration": 142,
+  "productionDuration": 223,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   223,
+   223,
+   223
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    2545027,
+    2545027
+   ],
+   [
+    2545027,
+    2545027
+   ],
+   [
+    2545027,
+    2545027
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1742,
+    "turn": 0,
+    "romBodyRows": 141,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 3408,
+    "turn": 0,
+    "romBodyRows": 141,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1708
+    ]
+   },
+   {
+    "frame": 5074,
+    "turn": 0,
+    "romBodyRows": 141,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1696
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-faint-attack-player",
+  "move": "FAINT_ATTACK",
+  "moveId": 185,
+  "side": "player",
+  "weight": 0.476,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 310,
+  "swapInRows": 42,
+  "romBodyRows": 224,
+  "swapBackRows": 42,
+  "adapterDuration": 221,
+  "productionDuration": 306,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    1481978,
+    1481978
+   ],
+   [
+    1481978,
+    1481978
+   ]
+  ],
+  "prodExactRows": [
+   110,
+   110
+  ],
+  "prodBadAges": [
+   "48..85",
+   "87..121",
+   "130..133",
+   "140..143",
+   "146..149",
+   "190..223",
+   "227..245",
+   "247..288",
+   "290..309"
+  ],
+  "aligned": [
+   {
+    "framingRows": 225,
+    "shift": -4,
+    "px": [
+     271552,
+     271552
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "250..265"
+    ],
+    "firstBad": [
+     [
+      250,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      251,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 225,
+    "shift": -4,
+    "px": [
+     271552,
+     271552
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "250..265"
+    ],
+    "firstBad": [
+     [
+      250,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      251,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    4167498,
+    4167498
+   ],
+   [
+    4167498,
+    4167498
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     1481978,
+     1481978
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     271552,
+     271552
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     1481978,
+     1481978
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     271552,
+     271552
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     1481978,
+     1481978
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     271552,
+     271552
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     1481978,
+     1481978
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     271552,
+     271552
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 225,
+    "adapterDuration": 221,
+    "prodPx": [
+     1424981,
+     1424981
+    ],
+    "shift": -4,
+    "alignedPx": [
+     271552,
+     271552
+    ],
+    "badAges": [
+     "207..222"
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1774,
+    "turn": 0,
+    "romBodyRows": 224,
+    "prodPx": [
+     1481978,
+     1481978
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     271552,
+     271552
+    ],
+    "alignedBadAges": [
+     "250..265"
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   },
+   {
+    "frame": 3472,
+    "turn": 0,
+    "romBodyRows": 224,
+    "prodPx": [
+     1481978,
+     1481978
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     271552,
+     271552
+    ],
+    "alignedBadAges": [
+     "250..265"
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   },
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": null,
+  "verdict": "PAIR-RESIDUAL"
+ },
+ {
+  "stem": "prep40-flamethrower-player",
+  "move": "FLAMETHROWER",
+  "moveId": 53,
+  "side": "player",
+  "weight": 0.476,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 295,
+  "swapInRows": 42,
+  "romBodyRows": 209,
+  "swapBackRows": 42,
+  "adapterDuration": 115,
+  "productionDuration": 200,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    509219,
+    509219
+   ]
+  ],
+  "prodExactRows": [
+   44
+  ],
+  "prodBadAges": [
+   "44..294"
+  ],
+  "aligned": [
+   {
+    "framingRows": 210,
+    "shift": -15,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     -15
+    ],
+    "badAges": [],
+    "firstBad": []
+   }
+  ],
+  "fallbackPx": [
+   [
+    648684,
+    648684
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     509219,
+     509219
+    ],
+    "alignedShift": -15,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     509219,
+     509219
+    ],
+    "alignedShift": -15,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 210,
+    "adapterDuration": 115,
+    "prodPx": [
+     253045,
+     253045
+    ],
+    "shift": -15,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "badAges": []
+   },
+   {
+    "rows": 210,
+    "adapterDuration": 115,
+    "prodPx": [
+     253045,
+     253045
+    ],
+    "shift": -15,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "badAges": []
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1776,
+    "turn": 0,
+    "romBodyRows": 209,
+    "prodPx": [
+     509219,
+     509219
+    ],
+    "alignedShift": -15,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-BODY-FRAMING"
+ },
+ {
+  "stem": "prep40-flamethrower-opponent",
+  "move": "FLAMETHROWER",
+  "moveId": 53,
+  "side": "opponent",
+  "weight": 0.476,
+  "windows": 3,
+  "kind": "swap",
+  "rows": 291,
+  "swapInRows": 40,
+  "romBodyRows": 209,
+  "swapBackRows": 40,
+  "adapterDuration": 115,
+  "productionDuration": 196,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    444037,
+    444037
+   ],
+   [
+    444037,
+    444037
+   ],
+   [
+    444037,
+    444037
+   ]
+  ],
+  "prodExactRows": [
+   42,
+   42,
+   42
+  ],
+  "prodBadAges": [
+   "42..290"
+  ],
+  "aligned": [
+   {
+    "framingRows": 210,
+    "shift": -15,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     -15
+    ],
+    "badAges": [],
+    "firstBad": []
+   },
+   {
+    "framingRows": 210,
+    "shift": -15,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     -15
+    ],
+    "badAges": [],
+    "firstBad": []
+   },
+   {
+    "framingRows": 210,
+    "shift": -15,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     -15
+    ],
+    "badAges": [],
+    "firstBad": []
+   }
+  ],
+  "fallbackPx": [
+   [
+    540914,
+    540914
+   ],
+   [
+    540914,
+    540914
+   ],
+   [
+    540914,
+    540914
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     444037,
+     444037
+    ],
+    "alignedShift": -15,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     444037,
+     444037
+    ],
+    "alignedShift": -15,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     444037,
+     444037
+    ],
+    "alignedShift": -15,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     444037,
+     444037
+    ],
+    "alignedShift": -15,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     444037,
+     444037
+    ],
+    "alignedShift": -15,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     444037,
+     444037
+    ],
+    "alignedShift": -15,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1748,
+    "turn": 0,
+    "romBodyRows": 209,
+    "prodPx": [
+     444037,
+     444037
+    ],
+    "alignedShift": -15,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 3414,
+    "turn": 0,
+    "romBodyRows": 209,
+    "prodPx": [
+     444037,
+     444037
+    ],
+    "alignedShift": -15,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1773
+    ]
+   },
+   {
+    "frame": 5080,
+    "turn": 0,
+    "romBodyRows": 209,
+    "prodPx": [
+     444037,
+     444037
+    ],
+    "alignedShift": -15,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1766
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-BODY-FRAMING"
+ },
+ {
+  "stem": "prep40-quick-attack-player",
+  "move": "QUICK_ATTACK",
+  "moveId": 98,
+  "side": "player",
+  "weight": 0.474,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 118,
+  "swapInRows": 42,
+  "romBodyRows": 32,
+  "swapBackRows": 42,
+  "adapterDuration": 33,
+  "productionDuration": 118,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    18092,
+    18092
+   ]
+  ],
+  "prodExactRows": [
+   99
+  ],
+  "prodBadAges": [
+   "57..75"
+  ],
+  "aligned": [
+   {
+    "framingRows": 33,
+    "shift": 0,
+    "px": [
+     18092,
+     18092
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "57..75"
+    ],
+    "firstBad": [
+     [
+      57,
+      902,
+      [
+       148,
+       25,
+       211,
+       71
+      ]
+     ],
+     [
+      58,
+      875,
+      [
+       143,
+       25,
+       206,
+       71
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    200487,
+    200487
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     18092,
+     18092
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     18092,
+     18092
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     18092,
+     18092
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     18092,
+     18092
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 33,
+    "adapterDuration": 33,
+    "prodPx": [
+     18092,
+     18092
+    ],
+    "shift": 0,
+    "alignedPx": [
+     18092,
+     18092
+    ],
+    "badAges": [
+     "14..32"
+    ]
+   },
+   {
+    "rows": 33,
+    "adapterDuration": 33,
+    "prodPx": [
+     18092,
+     18092
+    ],
+    "shift": 0,
+    "alignedPx": [
+     18092,
+     18092
+    ],
+    "badAges": [
+     "14..32"
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1774,
+    "turn": 0,
+    "romBodyRows": 32,
+    "prodPx": [
+     18092,
+     18092
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     18092,
+     18092
+    ],
+    "alignedBadAges": [
+     "57..75"
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": null,
+  "verdict": "PAIR-RESIDUAL"
+ },
+ {
+  "stem": "prep40-quick-attack-opponent",
+  "move": "QUICK_ATTACK",
+  "moveId": 98,
+  "side": "opponent",
+  "weight": 0.474,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 114,
+  "swapInRows": 40,
+  "romBodyRows": 32,
+  "swapBackRows": 40,
+  "adapterDuration": 33,
+  "productionDuration": 114,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ]
+  ],
+  "prodExactRows": [
+   113,
+   113
+  ],
+  "prodBadAges": [
+   "50"
+  ],
+  "aligned": [
+   {
+    "framingRows": 33,
+    "shift": 0,
+    "px": [
+     1,
+     1
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "50"
+    ],
+    "firstBad": [
+     [
+      50,
+      1,
+      [
+       138,
+       74,
+       138,
+       74
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 33,
+    "shift": 0,
+    "px": [
+     1,
+     1
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "50"
+    ],
+    "firstBad": [
+     [
+      50,
+      1,
+      [
+       138,
+       74,
+       138,
+       74
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    163397,
+    163397
+   ],
+   [
+    163397,
+    163397
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     1,
+     1
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     1,
+     1
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     1,
+     1
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     1,
+     1
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     1,
+     1
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     1,
+     1
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     1,
+     1
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     1,
+     1
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 33,
+    "adapterDuration": 33,
+    "prodPx": [
+     1,
+     1
+    ],
+    "shift": 0,
+    "alignedPx": [
+     1,
+     1
+    ],
+    "badAges": [
+     "9"
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1746,
+    "turn": 0,
+    "romBodyRows": 32,
+    "prodPx": [
+     1,
+     1
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     1,
+     1
+    ],
+    "alignedBadAges": [
+     "50"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 3412,
+    "turn": 0,
+    "romBodyRows": 32,
+    "prodPx": [
+     1,
+     1
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     1,
+     1
+    ],
+    "alignedBadAges": [
+     "50"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1707
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": null,
+  "verdict": "PAIR-RESIDUAL"
+ },
+ {
+  "stem": "prep40-toxic-player",
+  "move": "TOXIC",
+  "moveId": 92,
+  "side": "player",
+  "weight": 0.464,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 316,
+  "swapInRows": 42,
+  "romBodyRows": 230,
+  "swapBackRows": 42,
+  "adapterDuration": 219,
+  "productionDuration": 304,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    128729,
+    128729
+   ]
+  ],
+  "prodExactRows": [
+   55
+  ],
+  "prodBadAges": [
+   "44..189",
+   "201..315"
+  ],
+  "aligned": [
+   {
+    "framingRows": 231,
+    "shift": -7,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     -7
+    ],
+    "badAges": [],
+    "firstBad": []
+   }
+  ],
+  "fallbackPx": [
+   [
+    581921,
+    581921
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     128729,
+     128729
+    ],
+    "alignedShift": -7,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     128729,
+     128729
+    ],
+    "alignedShift": -7,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1770,
+    "turn": 0,
+    "romBodyRows": 230,
+    "prodPx": [
+     128729,
+     128729
+    ],
+    "alignedShift": -7,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     0
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-BODY-FRAMING"
+ },
+ {
+  "stem": "prep40-toxic-opponent",
+  "move": "TOXIC",
+  "moveId": 92,
+  "side": "opponent",
+  "weight": 0.464,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 312,
+  "swapInRows": 40,
+  "romBodyRows": 230,
+  "swapBackRows": 40,
+  "adapterDuration": 219,
+  "productionDuration": 300,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    105873,
+    105873
+   ]
+  ],
+  "prodExactRows": [
+   53
+  ],
+  "prodBadAges": [
+   "42..187",
+   "199..311"
+  ],
+  "aligned": [
+   {
+    "framingRows": 231,
+    "shift": -7,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     -7
+    ],
+    "badAges": [],
+    "firstBad": []
+   }
+  ],
+  "fallbackPx": [
+   [
+    481085,
+    481085
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     105873,
+     105873
+    ],
+    "alignedShift": -7,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     105873,
+     105873
+    ],
+    "alignedShift": -7,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 3408,
+    "turn": 0,
+    "romBodyRows": 230,
+    "prodPx": [
+     105873,
+     105873
+    ],
+    "alignedShift": -7,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     0
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-BODY-FRAMING"
+ },
+ {
+  "stem": "prep40-bite-player",
+  "move": "BITE",
+  "moveId": 44,
+  "side": "player",
+  "weight": 0.455,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 126,
+  "swapInRows": 42,
+  "romBodyRows": 40,
+  "swapBackRows": 42,
+  "adapterDuration": 26,
+  "productionDuration": 111,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    145077,
+    145077
+   ]
+  ],
+  "prodExactRows": [
+   44
+  ],
+  "prodBadAges": [
+   "44..125"
+  ],
+  "aligned": [
+   {
+    "framingRows": 41,
+    "shift": -10,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     -10
+    ],
+    "badAges": [],
+    "firstBad": []
+   }
+  ],
+  "fallbackPx": [
+   [
+    219436,
+    219436
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     145077,
+     145077
+    ],
+    "alignedShift": -10,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     145077,
+     145077
+    ],
+    "alignedShift": -10,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 41,
+    "adapterDuration": 26,
+    "prodPx": [
+     52446,
+     52446
+    ],
+    "shift": -10,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "badAges": []
+   },
+   {
+    "rows": 41,
+    "adapterDuration": 26,
+    "prodPx": [
+     52446,
+     52446
+    ],
+    "shift": -10,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "badAges": []
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1768,
+    "turn": 0,
+    "romBodyRows": 40,
+    "prodPx": [
+     145077,
+     145077
+    ],
+    "alignedShift": -10,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-BODY-FRAMING"
+ },
+ {
+  "stem": "prep40-bite-opponent",
+  "move": "BITE",
+  "moveId": 44,
+  "side": "opponent",
+  "weight": 0.455,
+  "windows": 3,
+  "kind": "swap",
+  "rows": 122,
+  "swapInRows": 40,
+  "romBodyRows": 40,
+  "swapBackRows": 40,
+  "adapterDuration": 26,
+  "productionDuration": 107,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    109375,
+    109375
+   ],
+   [
+    109375,
+    109375
+   ],
+   [
+    109375,
+    109375
+   ]
+  ],
+  "prodExactRows": [
+   42,
+   42,
+   42
+  ],
+  "prodBadAges": [
+   "42..121"
+  ],
+  "aligned": [
+   {
+    "framingRows": 41,
+    "shift": -10,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     -10
+    ],
+    "badAges": [],
+    "firstBad": []
+   },
+   {
+    "framingRows": 41,
+    "shift": -10,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     -10
+    ],
+    "badAges": [],
+    "firstBad": []
+   },
+   {
+    "framingRows": 41,
+    "shift": -10,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     -10
+    ],
+    "badAges": [],
+    "firstBad": []
+   }
+  ],
+  "fallbackPx": [
+   [
+    176333,
+    176333
+   ],
+   [
+    176333,
+    176333
+   ],
+   [
+    176333,
+    176333
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     109375,
+     109375
+    ],
+    "alignedShift": -10,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     109375,
+     109375
+    ],
+    "alignedShift": -10,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     109375,
+     109375
+    ],
+    "alignedShift": -10,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     109375,
+     109375
+    ],
+    "alignedShift": -10,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     109375,
+     109375
+    ],
+    "alignedShift": -10,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     109375,
+     109375
+    ],
+    "alignedShift": -10,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1740,
+    "turn": 0,
+    "romBodyRows": 40,
+    "prodPx": [
+     109375,
+     109375
+    ],
+    "alignedShift": -10,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 3406,
+    "turn": 0,
+    "romBodyRows": 40,
+    "prodPx": [
+     109375,
+     109375
+    ],
+    "alignedShift": -10,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1704
+    ]
+   },
+   {
+    "frame": 5072,
+    "turn": 0,
+    "romBodyRows": 40,
+    "prodPx": [
+     109375,
+     109375
+    ],
+    "alignedShift": -10,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1696
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-BODY-FRAMING"
+ },
+ {
+  "stem": "prep40-mega-kick-player",
+  "move": "MEGA_KICK",
+  "moveId": 25,
+  "side": "player",
+  "weight": 0.438,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 245,
+  "swapInRows": 42,
+  "romBodyRows": 159,
+  "swapBackRows": 42,
+  "adapterDuration": 160,
+  "productionDuration": 245,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   245
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    2965703,
+    2965703
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 160,
+    "adapterDuration": 160,
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1771,
+    "turn": 0,
+    "romBodyRows": 159,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-mega-kick-opponent",
+  "move": "MEGA_KICK",
+  "moveId": 25,
+  "side": "opponent",
+  "weight": 0.438,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 241,
+  "swapInRows": 40,
+  "romBodyRows": 159,
+  "swapBackRows": 40,
+  "adapterDuration": 160,
+  "productionDuration": 241,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   241
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    2937015,
+    2937015
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 3409,
+    "turn": 0,
+    "romBodyRows": 159,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-overheat-player",
+  "move": "OVERHEAT",
+  "moveId": 315,
+  "side": "player",
+  "weight": 0.384,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 315,
+  "swapInRows": 42,
+  "romBodyRows": 229,
+  "swapBackRows": 42,
+  "adapterDuration": 230,
+  "productionDuration": 315,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    3216067,
+    3216067
+   ]
+  ],
+  "prodExactRows": [
+   105
+  ],
+  "prodBadAges": [
+   "56..265"
+  ],
+  "aligned": [
+   {
+    "framingRows": 230,
+    "shift": 0,
+    "px": [
+     3216067,
+     3216067
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "56..265"
+    ],
+    "firstBad": [
+     [
+      56,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      57,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    3415775,
+    3415775
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 230,
+    "adapterDuration": 230,
+    "prodPx": [
+     3216067,
+     3216067
+    ],
+    "shift": 0,
+    "alignedPx": [
+     3216067,
+     3216067
+    ],
+    "badAges": [
+     "13..222"
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1772,
+    "turn": 0,
+    "romBodyRows": 229,
+    "prodPx": [
+     3216067,
+     3216067
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     3216067,
+     3216067
+    ],
+    "alignedBadAges": [
+     "56..265"
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-ORDER"
+ },
+ {
+  "stem": "prep40-overheat-opponent",
+  "move": "OVERHEAT",
+  "moveId": 315,
+  "side": "opponent",
+  "weight": 0.384,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 311,
+  "swapInRows": 40,
+  "romBodyRows": 229,
+  "swapBackRows": 40,
+  "adapterDuration": 230,
+  "productionDuration": 311,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    3205545,
+    3205545
+   ],
+   [
+    3205545,
+    3205545
+   ]
+  ],
+  "prodExactRows": [
+   101,
+   101
+  ],
+  "prodBadAges": [
+   "54..263"
+  ],
+  "aligned": [
+   {
+    "framingRows": 230,
+    "shift": 0,
+    "px": [
+     3205545,
+     3205545
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "54..263"
+    ],
+    "firstBad": [
+     [
+      54,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      55,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 230,
+    "shift": 0,
+    "px": [
+     3205545,
+     3205545
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "54..263"
+    ],
+    "firstBad": [
+     [
+      54,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      55,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    3370717,
+    3370717
+   ],
+   [
+    3370717,
+    3370717
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 230,
+    "adapterDuration": 230,
+    "prodPx": [
+     3205545,
+     3205545
+    ],
+    "shift": 0,
+    "alignedPx": [
+     3205545,
+     3205545
+    ],
+    "badAges": [
+     "13..222"
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1744,
+    "turn": 0,
+    "romBodyRows": 229,
+    "prodPx": [
+     3205545,
+     3205545
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     3205545,
+     3205545
+    ],
+    "alignedBadAges": [
+     "54..263"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 3410,
+    "turn": 0,
+    "romBodyRows": 229,
+    "prodPx": [
+     3205545,
+     3205545
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     3205545,
+     3205545
+    ],
+    "alignedBadAges": [
+     "54..263"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1706
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-ORDER"
+ },
+ {
+  "stem": "prep40-rock-tomb-player",
+  "move": "ROCK_TOMB",
+  "moveId": 317,
+  "side": "player",
+  "weight": 0.364,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 259,
+  "swapInRows": 42,
+  "romBodyRows": 173,
+  "swapBackRows": 42,
+  "adapterDuration": 174,
+  "productionDuration": 259,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   259
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    826844,
+    826844
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 174,
+    "adapterDuration": 174,
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1773,
+    "turn": 0,
+    "romBodyRows": 173,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-rock-tomb-opponent",
+  "move": "ROCK_TOMB",
+  "moveId": 317,
+  "side": "opponent",
+  "weight": 0.364,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 255,
+  "swapInRows": 40,
+  "romBodyRows": 173,
+  "swapBackRows": 40,
+  "adapterDuration": 174,
+  "productionDuration": 255,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   255
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    693775,
+    693775
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 3411,
+    "turn": 0,
+    "romBodyRows": 173,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-ice-punch-player",
+  "move": "ICE_PUNCH",
+  "moveId": 8,
+  "side": "player",
+  "weight": 0.349,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 269,
+  "swapInRows": 42,
+  "romBodyRows": 183,
+  "swapBackRows": 42,
+  "adapterDuration": 184,
+  "productionDuration": 269,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   269
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    3404039,
+    3404039
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 184,
+    "adapterDuration": 184,
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "rows": 184,
+    "adapterDuration": 184,
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1773,
+    "turn": 0,
+    "romBodyRows": 183,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-ice-punch-opponent",
+  "move": "ICE_PUNCH",
+  "moveId": 8,
+  "side": "opponent",
+  "weight": 0.349,
+  "windows": 3,
+  "kind": "swap",
+  "rows": 265,
+  "swapInRows": 40,
+  "romBodyRows": 183,
+  "swapBackRows": 40,
+  "adapterDuration": 184,
+  "productionDuration": 265,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   265,
+   265,
+   265
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    3372818,
+    3372818
+   ],
+   [
+    3372818,
+    3372818
+   ],
+   [
+    3372818,
+    3372818
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "none",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "none",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1745,
+    "turn": 0,
+    "romBodyRows": 183,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 3411,
+    "turn": 0,
+    "romBodyRows": 183,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1780
+    ]
+   },
+   {
+    "frame": 5077,
+    "turn": 0,
+    "romBodyRows": 183,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1767
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-swagger-player",
+  "move": "SWAGGER",
+  "moveId": 207,
+  "side": "player",
+  "weight": 0.345,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 254,
+  "swapInRows": 42,
+  "romBodyRows": 168,
+  "swapBackRows": 42,
+  "adapterDuration": 161,
+  "productionDuration": 246,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    160373,
+    160373
+   ]
+  ],
+  "prodExactRows": [
+   65
+  ],
+  "prodBadAges": [
+   "45..152",
+   "173..253"
+  ],
+  "aligned": [
+   {
+    "framingRows": 169,
+    "shift": -7,
+    "px": [
+     42900,
+     42900
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "53",
+     "55",
+     "57",
+     "59..91",
+     "93",
+     "95",
+     "97"
+    ],
+    "firstBad": [
+     [
+      53,
+      715,
+      [
+       42,
+       60,
+       103,
+       111
+      ]
+     ],
+     [
+      55,
+      734,
+      [
+       40,
+       58,
+       105,
+       110
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    477519,
+    477519
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     160373,
+     160373
+    ],
+    "alignedShift": -7,
+    "alignedPx": [
+     42900,
+     42900
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     160373,
+     160373
+    ],
+    "alignedShift": -7,
+    "alignedPx": [
+     42900,
+     42900
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 169,
+    "adapterDuration": 161,
+    "prodPx": [
+     86682,
+     86682
+    ],
+    "shift": -7,
+    "alignedPx": [
+     42900,
+     42900
+    ],
+    "badAges": [
+     "10",
+     "12",
+     "14",
+     "16..48",
+     "50",
+     "52",
+     "54"
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1766,
+    "turn": 0,
+    "romBodyRows": 168,
+    "prodPx": [
+     160373,
+     160373
+    ],
+    "alignedShift": -7,
+    "alignedPx": [
+     42900,
+     42900
+    ],
+    "alignedBadAges": [
+     "53",
+     "55",
+     "57",
+     "59..91",
+     "93",
+     "95",
+     "97"
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     0
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": null,
+  "verdict": "PAIR-RESIDUAL"
+ },
+ {
+  "stem": "prep40-swagger-opponent",
+  "move": "SWAGGER",
+  "moveId": 207,
+  "side": "opponent",
+  "weight": 0.345,
+  "windows": 0,
+  "verdict": "NO-WINDOW"
+ },
+ {
+  "stem": "prep40-fire-punch-player",
+  "move": "FIRE_PUNCH",
+  "moveId": 7,
+  "side": "player",
+  "weight": 0.334,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 187,
+  "swapInRows": 42,
+  "romBodyRows": 101,
+  "swapBackRows": 42,
+  "adapterDuration": 101,
+  "productionDuration": 186,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    30947,
+    30947
+   ]
+  ],
+  "prodExactRows": [
+   149
+  ],
+  "prodBadAges": [
+   "145..165",
+   "170..186"
+  ],
+  "aligned": [
+   {
+    "framingRows": 102,
+    "shift": 0,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     0
+    ],
+    "badAges": [],
+    "firstBad": []
+   }
+  ],
+  "fallbackPx": [
+   [
+    483001,
+    483001
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     30947,
+     30947
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     30947,
+     30947
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 102,
+    "adapterDuration": 101,
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "rows": 102,
+    "adapterDuration": 101,
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1774,
+    "turn": 0,
+    "romBodyRows": 101,
+    "prodPx": [
+     30947,
+     30947
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-BODY-FRAMING"
+ },
+ {
+  "stem": "prep40-fire-punch-opponent",
+  "move": "FIRE_PUNCH",
+  "moveId": 7,
+  "side": "opponent",
+  "weight": 0.334,
+  "windows": 3,
+  "kind": "swap",
+  "rows": 183,
+  "swapInRows": 40,
+  "romBodyRows": 101,
+  "swapBackRows": 40,
+  "adapterDuration": 101,
+  "productionDuration": 182,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    27928,
+    27928
+   ],
+   [
+    27928,
+    27928
+   ],
+   [
+    27928,
+    27928
+   ]
+  ],
+  "prodExactRows": [
+   150,
+   150,
+   150
+  ],
+  "prodBadAges": [
+   "143..160",
+   "168..182"
+  ],
+  "aligned": [
+   {
+    "framingRows": 102,
+    "shift": 0,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     0
+    ],
+    "badAges": [],
+    "firstBad": []
+   },
+   {
+    "framingRows": 102,
+    "shift": 0,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     0
+    ],
+    "badAges": [],
+    "firstBad": []
+   },
+   {
+    "framingRows": 102,
+    "shift": 0,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     0
+    ],
+    "badAges": [],
+    "firstBad": []
+   }
+  ],
+  "fallbackPx": [
+   [
+    415713,
+    415713
+   ],
+   [
+    415713,
+    415713
+   ],
+   [
+    415713,
+    415713
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     27928,
+     27928
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     27928,
+     27928
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     27928,
+     27928
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     27928,
+     27928
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     27928,
+     27928
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     27928,
+     27928
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1746,
+    "turn": 0,
+    "romBodyRows": 101,
+    "prodPx": [
+     27928,
+     27928
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 3412,
+    "turn": 0,
+    "romBodyRows": 101,
+    "prodPx": [
+     27928,
+     27928
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1774
+    ]
+   },
+   {
+    "frame": 5078,
+    "turn": 0,
+    "romBodyRows": 101,
+    "prodPx": [
+     27928,
+     27928
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1763
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-BODY-FRAMING"
+ },
+ {
+  "stem": "prep40-hydro-pump-player",
+  "move": "HYDRO_PUMP",
+  "moveId": 56,
+  "side": "player",
+  "weight": 0.311,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 226,
+  "swapInRows": 42,
+  "romBodyRows": 140,
+  "swapBackRows": 42,
+  "adapterDuration": 141,
+  "productionDuration": 226,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   226
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    607342,
+    607342
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 141,
+    "adapterDuration": 141,
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1772,
+    "turn": 0,
+    "romBodyRows": 140,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-hydro-pump-opponent",
+  "move": "HYDRO_PUMP",
+  "moveId": 56,
+  "side": "opponent",
+  "weight": 0.311,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 222,
+  "swapInRows": 40,
+  "romBodyRows": 140,
+  "swapBackRows": 40,
+  "adapterDuration": 141,
+  "productionDuration": 222,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   222
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    520072,
+    520072
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 3410,
+    "turn": 0,
+    "romBodyRows": 140,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-facade-player",
+  "move": "FACADE",
+  "moveId": 263,
+  "side": "player",
+  "weight": 0.274,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 166,
+  "swapInRows": 42,
+  "romBodyRows": 80,
+  "swapBackRows": 42,
+  "adapterDuration": 81,
+  "productionDuration": 166,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   166
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    275509,
+    275509
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 81,
+    "adapterDuration": 81,
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "rows": 81,
+    "adapterDuration": 81,
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1770,
+    "turn": 0,
+    "romBodyRows": 80,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-facade-opponent",
+  "move": "FACADE",
+  "moveId": 263,
+  "side": "opponent",
+  "weight": 0.274,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 162,
+  "swapInRows": 40,
+  "romBodyRows": 80,
+  "swapBackRows": 40,
+  "adapterDuration": 81,
+  "productionDuration": 162,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   162,
+   162
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    227589,
+    227589
+   ],
+   [
+    227589,
+    227589
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 81,
+    "adapterDuration": 81,
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1742,
+    "turn": 0,
+    "romBodyRows": 80,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 3408,
+    "turn": 0,
+    "romBodyRows": 80,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1696
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-seismic-toss-player",
+  "move": "SEISMIC_TOSS",
+  "moveId": 69,
+  "side": "player",
+  "weight": 0.124,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 313,
+  "swapInRows": 42,
+  "romBodyRows": 227,
+  "swapBackRows": 42,
+  "adapterDuration": 228,
+  "productionDuration": 313,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    3533896,
+    3533896
+   ],
+   [
+    3533896,
+    3533896
+   ]
+  ],
+  "prodExactRows": [
+   107,
+   107
+  ],
+  "prodBadAges": [
+   "58..263"
+  ],
+  "aligned": [
+   {
+    "framingRows": 228,
+    "shift": 0,
+    "px": [
+     3533896,
+     3533896
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "58..263"
+    ],
+    "firstBad": [
+     [
+      58,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      59,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 228,
+    "shift": 0,
+    "px": [
+     3533896,
+     3533896
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "58..263"
+    ],
+    "firstBad": [
+     [
+      58,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      59,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    4070190,
+    4070190
+   ],
+   [
+    4070190,
+    4070190
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 228,
+    "adapterDuration": 228,
+    "prodPx": [
+     3533896,
+     3533896
+    ],
+    "shift": 0,
+    "alignedPx": [
+     3533896,
+     3533896
+    ],
+    "badAges": [
+     "15..220"
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1774,
+    "turn": 0,
+    "romBodyRows": 227,
+    "prodPx": [
+     3533896,
+     3533896
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     3533896,
+     3533896
+    ],
+    "alignedBadAges": [
+     "58..263"
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   },
+   {
+    "frame": 3472,
+    "turn": 0,
+    "romBodyRows": 227,
+    "prodPx": [
+     3533896,
+     3533896
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     3533896,
+     3533896
+    ],
+    "alignedBadAges": [
+     "58..263"
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   },
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-ORDER"
+ },
+ {
+  "stem": "prep40-seismic-toss-opponent",
+  "move": "SEISMIC_TOSS",
+  "moveId": 69,
+  "side": "opponent",
+  "weight": 0.124,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 309,
+  "swapInRows": 40,
+  "romBodyRows": 227,
+  "swapBackRows": 40,
+  "adapterDuration": 228,
+  "productionDuration": 309,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    3647873,
+    3647873
+   ],
+   [
+    3647873,
+    3647873
+   ]
+  ],
+  "prodExactRows": [
+   103,
+   103
+  ],
+  "prodBadAges": [
+   "56..261"
+  ],
+  "aligned": [
+   {
+    "framingRows": 228,
+    "shift": 0,
+    "px": [
+     3647873,
+     3647873
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "56..261"
+    ],
+    "firstBad": [
+     [
+      56,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      57,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 228,
+    "shift": 0,
+    "px": [
+     3647873,
+     3647873
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "56..261"
+    ],
+    "firstBad": [
+     [
+      56,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      57,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    4047576,
+    4047576
+   ],
+   [
+    4047576,
+    4047576
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1746,
+    "turn": 0,
+    "romBodyRows": 227,
+    "prodPx": [
+     3647873,
+     3647873
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     3647873,
+     3647873
+    ],
+    "alignedBadAges": [
+     "56..261"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 5078,
+    "turn": 0,
+    "romBodyRows": 227,
+    "prodPx": [
+     3647873,
+     3647873
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     3647873,
+     3647873
+    ],
+    "alignedBadAges": [
+     "56..261"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1711
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-ORDER"
+ },
+ {
+  "stem": "prep40-mud-slap-player",
+  "move": "MUD_SLAP",
+  "moveId": 189,
+  "side": "player",
+  "weight": 0.27,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 137,
+  "swapInRows": 42,
+  "romBodyRows": 51,
+  "swapBackRows": 42,
+  "adapterDuration": 51,
+  "productionDuration": 136,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    96372,
+    96372
+   ]
+  ],
+  "prodExactRows": [
+   53
+  ],
+  "prodBadAges": [
+   "48..93",
+   "95..115",
+   "120..136"
+  ],
+  "aligned": [
+   {
+    "framingRows": 52,
+    "shift": 0,
+    "px": [
+     65425,
+     65425
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "48..93"
+    ],
+    "firstBad": [
+     [
+      48,
+      1464,
+      [
+       38,
+       62,
+       102,
+       111
+      ]
+     ],
+     [
+      49,
+      1938,
+      [
+       35,
+       62,
+       102,
+       111
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    265449,
+    265449
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     96372,
+     96372
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     65425,
+     65425
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     30947,
+     30947
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 52,
+    "adapterDuration": 51,
+    "prodPx": [
+     61247,
+     61247
+    ],
+    "shift": 0,
+    "alignedPx": [
+     61247,
+     61247
+    ],
+    "badAges": [
+     "5..50"
+    ]
+   },
+   {
+    "rows": 52,
+    "adapterDuration": 51,
+    "prodPx": [
+     61775,
+     61775
+    ],
+    "shift": 0,
+    "alignedPx": [
+     61775,
+     61775
+    ],
+    "badAges": [
+     "5..50"
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1772,
+    "turn": 0,
+    "romBodyRows": 51,
+    "prodPx": [
+     96372,
+     96372
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     65425,
+     65425
+    ],
+    "alignedBadAges": [
+     "48..93"
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "first-body",
+  "verdict": "NEEDS-ORDER+BODY-FRAMING"
+ },
+ {
+  "stem": "prep40-mud-slap-opponent",
+  "move": "MUD_SLAP",
+  "moveId": 189,
+  "side": "opponent",
+  "weight": 0.27,
+  "windows": 3,
+  "kind": "swap",
+  "rows": 133,
+  "swapInRows": 40,
+  "romBodyRows": 51,
+  "swapBackRows": 40,
+  "adapterDuration": 51,
+  "productionDuration": 132,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    92662,
+    92662
+   ],
+   [
+    87937,
+    87937
+   ],
+   [
+    89773,
+    89773
+   ]
+  ],
+  "prodExactRows": [
+   54,
+   54,
+   54
+  ],
+  "prodBadAges": [
+   "46..91",
+   "93..110",
+   "118..132"
+  ],
+  "aligned": [
+   {
+    "framingRows": 52,
+    "shift": 0,
+    "px": [
+     64734,
+     64734
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "46..91"
+    ],
+    "firstBad": [
+     [
+      46,
+      1342,
+      [
+       150,
+       25,
+       205,
+       71
+      ]
+     ],
+     [
+      47,
+      1594,
+      [
+       150,
+       25,
+       208,
+       71
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 52,
+    "shift": 0,
+    "px": [
+     60009,
+     60009
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "46..91"
+    ],
+    "firstBad": [
+     [
+      46,
+      1342,
+      [
+       150,
+       25,
+       205,
+       71
+      ]
+     ],
+     [
+      47,
+      1594,
+      [
+       150,
+       25,
+       208,
+       71
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 52,
+    "shift": 0,
+    "px": [
+     61845,
+     61845
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "46..91"
+    ],
+    "firstBad": [
+     [
+      46,
+      1342,
+      [
+       150,
+       25,
+       205,
+       71
+      ]
+     ],
+     [
+      47,
+      1594,
+      [
+       150,
+       25,
+       208,
+       71
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    226596,
+    226596
+   ],
+   [
+    221882,
+    221882
+   ],
+   [
+    223734,
+    223734
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     92662,
+     92662
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     64734,
+     64734
+    ]
+   },
+   {
+    "order": "none",
+    "prodPx": [
+     87937,
+     87937
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     60009,
+     60009
+    ]
+   },
+   {
+    "order": "none",
+    "prodPx": [
+     89773,
+     89773
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     61845,
+     61845
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     27928,
+     27928
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     27928,
+     27928
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     27928,
+     27928
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1744,
+    "turn": 0,
+    "romBodyRows": 51,
+    "prodPx": [
+     92662,
+     92662
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     64734,
+     64734
+    ],
+    "alignedBadAges": [
+     "46..91"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 3410,
+    "turn": 0,
+    "romBodyRows": 51,
+    "prodPx": [
+     87937,
+     87937
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     60009,
+     60009
+    ],
+    "alignedBadAges": [
+     "46..91"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1699
+    ]
+   },
+   {
+    "frame": 5076,
+    "turn": 0,
+    "romBodyRows": 51,
+    "prodPx": [
+     89773,
+     89773
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     61845,
+     61845
+    ],
+    "alignedBadAges": [
+     "46..91"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1707
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "first-body",
+  "verdict": "NEEDS-ORDER+BODY-FRAMING"
+ },
+ {
+  "stem": "prep40-megahorn-player",
+  "move": "MEGAHORN",
+  "moveId": 224,
+  "side": "player",
+  "weight": 0.147,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 262,
+  "swapInRows": 42,
+  "romBodyRows": 176,
+  "swapBackRows": 42,
+  "adapterDuration": 177,
+  "productionDuration": 262,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    2888848,
+    2888848
+   ]
+  ],
+  "prodExactRows": [
+   100
+  ],
+  "prodBadAges": [
+   "55..216"
+  ],
+  "aligned": [
+   {
+    "framingRows": 177,
+    "shift": 0,
+    "px": [
+     2888848,
+     2888848
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "55..216"
+    ],
+    "firstBad": [
+     [
+      55,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      56,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    3251036,
+    3251036
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 177,
+    "adapterDuration": 177,
+    "prodPx": [
+     2888848,
+     2888848
+    ],
+    "shift": 0,
+    "alignedPx": [
+     2888848,
+     2888848
+    ],
+    "badAges": [
+     "12..173"
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1770,
+    "turn": 0,
+    "romBodyRows": 176,
+    "prodPx": [
+     2888848,
+     2888848
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     2888848,
+     2888848
+    ],
+    "alignedBadAges": [
+     "55..216"
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-ORDER"
+ },
+ {
+  "stem": "prep40-megahorn-opponent",
+  "move": "MEGAHORN",
+  "moveId": 224,
+  "side": "opponent",
+  "weight": 0.147,
+  "windows": 3,
+  "kind": "swap",
+  "rows": 258,
+  "swapInRows": 40,
+  "romBodyRows": 176,
+  "swapBackRows": 40,
+  "adapterDuration": 177,
+  "productionDuration": 258,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    2961549,
+    2961549
+   ],
+   [
+    2971259,
+    2971259
+   ],
+   [
+    2961549,
+    2961549
+   ]
+  ],
+  "prodExactRows": [
+   96,
+   64,
+   96
+  ],
+  "prodBadAges": [
+   "53..214"
+  ],
+  "aligned": [
+   {
+    "framingRows": 177,
+    "shift": 0,
+    "px": [
+     2961549,
+     2961549
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "53..214"
+    ],
+    "firstBad": [
+     [
+      53,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      54,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 176,
+    "shift": 0,
+    "px": [
+     2944010,
+     2944010
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "53..213"
+    ],
+    "firstBad": [
+     [
+      53,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      54,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 177,
+    "shift": 0,
+    "px": [
+     2961549,
+     2961549
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "53..214"
+    ],
+    "firstBad": [
+     [
+      53,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      54,
+      17539,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    3223702,
+    3223702
+   ],
+   [
+    3204829,
+    3204829
+   ],
+   [
+    3223702,
+    3223702
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     307873,
+     307873
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     280624,
+     280624
+    ]
+   },
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     307873,
+     307873
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     280624,
+     280624
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1742,
+    "turn": 0,
+    "romBodyRows": 176,
+    "prodPx": [
+     2961549,
+     2961549
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     2961549,
+     2961549
+    ],
+    "alignedBadAges": [
+     "53..214"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 3408,
+    "turn": 0,
+    "romBodyRows": 175,
+    "prodPx": [
+     2971259,
+     2971259
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     2944010,
+     2944010
+    ],
+    "alignedBadAges": [
+     "53..213"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1710
+    ]
+   },
+   {
+    "frame": 5074,
+    "turn": 0,
+    "romBodyRows": 176,
+    "prodPx": [
+     2961549,
+     2961549
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     2961549,
+     2961549
+    ],
+    "alignedBadAges": [
+     "53..214"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1685
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-ORDER"
+ },
+ {
+  "stem": "prep40-double-kick-player",
+  "move": "DOUBLE_KICK",
+  "moveId": 24,
+  "side": "player",
+  "weight": 0.222,
+  "windows": 2,
+  "kind": "swap-multihit",
+  "rows": 226,
+  "romBodyRows": 140,
+  "adapterDuration": null,
+  "prodPx": [],
+  "controls": [
+   {
+    "rows": 36,
+    "adapterDuration": 36,
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "rows": 36,
+    "adapterDuration": 36,
+    "prodPx": [
+     31248,
+     31248
+    ]
+   }
+  ],
+  "tail": [],
+  "segments": [
+   {
+    "script": "Special_SubstituteToMon",
+    "rows": 42,
+    "x2": [
+     -5,
+     -10,
+     -15,
+     -20,
+     -25,
+     -30,
+     -35,
+     -40,
+     -45,
+     -50,
+     -55,
+     -60,
+     -65,
+     -70,
+     -75,
+     -80,
+     -85,
+     -90,
+     -95,
+     -100,
+     -105
+    ],
+    "shows": [
+     "doll",
+     "mon"
+    ]
+   },
+   {
+    "script": null,
+    "rows": 1,
+    "x2": [
+     0
+    ],
+    "shows": [
+     "mon"
+    ]
+   },
+   {
+    "script": "Move_",
+    "rows": 35,
+    "x2": [
+     0
+    ],
+    "shows": [
+     "mon"
+    ]
+   },
+   {
+    "script": null,
+    "rows": 70,
+    "x2": [
+     0
+    ],
+    "shows": [
+     "mon"
+    ]
+   },
+   {
+    "script": "Move_",
+    "rows": 35,
+    "x2": [
+     0
+    ],
+    "shows": [
+     "mon"
+    ]
+   },
+   {
+    "script": "Special_MonToSubstitute",
+    "rows": 42,
+    "x2": [
+     -5,
+     -10,
+     -15,
+     -20,
+     -25,
+     -30,
+     -35,
+     -40,
+     -45,
+     -50,
+     -55,
+     -60,
+     -65,
+     -70,
+     -75,
+     -80,
+     -85,
+     -90,
+     -95,
+     -100,
+     -105
+    ],
+    "shows": [
+     "mon",
+     "doll"
+    ]
+   },
+   {
+    "script": null,
+    "rows": 1,
+    "x2": [
+     0
+    ],
+    "shows": [
+     "doll"
+    ]
+   }
+  ],
+  "verdict": "MULTIHIT"
+ },
+ {
+  "stem": "prep40-double-kick-opponent",
+  "move": "DOUBLE_KICK",
+  "moveId": 24,
+  "side": "opponent",
+  "weight": 0.222,
+  "windows": 1,
+  "kind": "swap-multihit",
+  "rows": 222,
+  "romBodyRows": 140,
+  "adapterDuration": null,
+  "prodPx": [],
+  "controls": [
+   {
+    "rows": 36,
+    "adapterDuration": 36,
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "rows": 36,
+    "adapterDuration": 36,
+    "prodPx": [
+     34884,
+     34884
+    ]
+   },
+   {
+    "rows": 36,
+    "adapterDuration": 36,
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "rows": 36,
+    "adapterDuration": 36,
+    "prodPx": [
+     34884,
+     34884
+    ]
+   }
+  ],
+  "tail": [],
+  "segments": [
+   {
+    "script": "Special_SubstituteToMon",
+    "rows": 40,
+    "x2": [
+     5,
+     10,
+     15,
+     20,
+     25,
+     30,
+     35,
+     40,
+     45,
+     50,
+     55,
+     60,
+     65,
+     70,
+     75,
+     80,
+     85,
+     90,
+     95,
+     100
+    ],
+    "shows": [
+     "doll",
+     "mon"
+    ]
+   },
+   {
+    "script": null,
+    "rows": 1,
+    "x2": [
+     0
+    ],
+    "shows": [
+     "mon"
+    ]
+   },
+   {
+    "script": "Move_",
+    "rows": 35,
+    "x2": [
+     0
+    ],
+    "shows": [
+     "mon"
+    ]
+   },
+   {
+    "script": null,
+    "rows": 70,
+    "x2": [
+     0
+    ],
+    "shows": [
+     "mon"
+    ]
+   },
+   {
+    "script": "Move_",
+    "rows": 35,
+    "x2": [
+     0
+    ],
+    "shows": [
+     "mon"
+    ]
+   },
+   {
+    "script": "Special_MonToSubstitute",
+    "rows": 40,
+    "x2": [
+     5,
+     10,
+     15,
+     20,
+     25,
+     30,
+     35,
+     40,
+     45,
+     50,
+     55,
+     60,
+     65,
+     70,
+     75,
+     80,
+     85,
+     90,
+     95,
+     100
+    ],
+    "shows": [
+     "mon",
+     "doll"
+    ]
+   },
+   {
+    "script": null,
+    "rows": 1,
+    "x2": [
+     0
+    ],
+    "shows": [
+     "doll"
+    ]
+   }
+  ],
+  "verdict": "MULTIHIT"
+ },
+ {
+  "stem": "prep40-dig-player",
+  "move": "DIG t0",
+  "moveId": 91,
+  "side": "player",
+  "weight": 0.375,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 280,
+  "swapInRows": 42,
+  "romBodyRows": 194,
+  "swapBackRows": 42,
+  "adapterDuration": 195,
+  "productionDuration": 280,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    398113,
+    398113
+   ],
+   [
+    398113,
+    398113
+   ]
+  ],
+  "prodExactRows": [
+   56,
+   56
+  ],
+  "prodBadAges": [
+   "51..258",
+   "264..279"
+  ],
+  "aligned": [
+   {
+    "framingRows": 195,
+    "shift": 0,
+    "px": [
+     398113,
+     398113
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "51..258",
+     "264..279"
+    ],
+    "firstBad": [
+     [
+      51,
+      206,
+      [
+       43,
+       106,
+       97,
+       111
+      ]
+     ],
+     [
+      52,
+      206,
+      [
+       43,
+       106,
+       97,
+       111
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 195,
+    "shift": 0,
+    "px": [
+     398113,
+     398113
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "51..258",
+     "264..279"
+    ],
+    "firstBad": [
+     [
+      51,
+      206,
+      [
+       43,
+       106,
+       97,
+       111
+      ]
+     ],
+     [
+      52,
+      206,
+      [
+       43,
+       106,
+       97,
+       111
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    289133,
+    289133
+   ],
+   [
+    289133,
+    289133
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     398113,
+     398113
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     398113,
+     398113
+    ]
+   },
+   {
+    "order": "none",
+    "prodPx": [
+     398113,
+     398113
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     398113,
+     398113
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     34926,
+     34926
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     34926,
+     34926
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     34926,
+     34926
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     34926,
+     34926
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 195,
+    "adapterDuration": 195,
+    "prodPx": [
+     363187,
+     363187
+    ],
+    "shift": 0,
+    "alignedPx": [
+     363187,
+     363187
+    ],
+    "badAges": [
+     "8..194"
+    ]
+   },
+   {
+    "rows": 195,
+    "adapterDuration": 195,
+    "prodPx": [
+     363187,
+     363187
+    ],
+    "shift": 0,
+    "alignedPx": [
+     363187,
+     363187
+    ],
+    "badAges": [
+     "8..194"
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1751,
+    "turn": 0,
+    "romBodyRows": 194,
+    "prodPx": [
+     398113,
+     398113
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     398113,
+     398113
+    ],
+    "alignedBadAges": [
+     "51..258",
+     "264..279"
+    ],
+    "romChangesAfter": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "frame": 3449,
+    "turn": 0,
+    "romBodyRows": 194,
+    "prodPx": [
+     398113,
+     398113
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     398113,
+     398113
+    ],
+    "alignedBadAges": [
+     "51..258",
+     "264..279"
+    ],
+    "romChangesAfter": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     619,
+     619
+    ],
+    "k1OneRowLonger": [
+     619,
+     619
+    ],
+    "k2Today": [
+     619,
+     619
+    ],
+    "k1Bbox": [
+     56,
+     81,
+     86,
+     111
+    ]
+   },
+   {
+    "k1Today": [
+     619,
+     619
+    ],
+    "k1OneRowLonger": [
+     619,
+     619
+    ],
+    "k2Today": [
+     619,
+     619
+    ],
+    "k1Bbox": [
+     56,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": null,
+  "verdict": "UNRESOLVED"
+ },
+ {
+  "stem": "prep40-dig-player",
+  "move": "DIG t1",
+  "moveId": 91,
+  "side": "player",
+  "weight": 0.375,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 153,
+  "swapInRows": 42,
+  "romBodyRows": 67,
+  "swapBackRows": 42,
+  "adapterDuration": 68,
+  "productionDuration": 153,
+  "orderInput": "none",
+  "turn": 1,
+  "turns": [
+   1
+  ],
+  "prodPx": [
+   [
+    105524,
+    105524
+   ],
+   [
+    105524,
+    105524
+   ]
+  ],
+  "prodExactRows": [
+   52,
+   52
+  ],
+  "prodBadAges": [
+   "0..18",
+   "24..105"
+  ],
+  "aligned": [
+   {
+    "framingRows": 68,
+    "shift": 0,
+    "px": [
+     105524,
+     105524
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "0..18",
+     "24..105"
+    ],
+    "firstBad": [
+     [
+      0,
+      619,
+      [
+       56,
+       81,
+       86,
+       111
+      ]
+     ],
+     [
+      1,
+      619,
+      [
+       56,
+       81,
+       86,
+       111
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 68,
+    "shift": 0,
+    "px": [
+     105524,
+     105524
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "0..18",
+     "24..105"
+    ],
+    "firstBad": [
+     [
+      0,
+      619,
+      [
+       56,
+       81,
+       86,
+       111
+      ]
+     ],
+     [
+      1,
+      619,
+      [
+       56,
+       81,
+       86,
+       111
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    195816,
+    195816
+   ],
+   [
+    195816,
+    195816
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "none",
+    "prodPx": [
+     105524,
+     105524
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     105524,
+     105524
+    ]
+   },
+   {
+    "order": "none",
+    "prodPx": [
+     105524,
+     105524
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     105524,
+     105524
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     105524,
+     105524
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     105524,
+     105524
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     105524,
+     105524
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     105524,
+     105524
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 68,
+    "adapterDuration": 68,
+    "prodPx": [
+     72449,
+     72449
+    ],
+    "shift": 0,
+    "alignedPx": [
+     72449,
+     72449
+    ],
+    "badAges": [
+     "0..62"
+    ]
+   },
+   {
+    "rows": 68,
+    "adapterDuration": 68,
+    "prodPx": [
+     72449,
+     72449
+    ],
+    "shift": 0,
+    "alignedPx": [
+     72449,
+     72449
+    ],
+    "badAges": [
+     "0..62"
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 2346,
+    "turn": 1,
+    "romBodyRows": 67,
+    "prodPx": [
+     105524,
+     105524
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     105524,
+     105524
+    ],
+    "alignedBadAges": [
+     "0..18",
+     "24..105"
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   },
+   {
+    "frame": 4044,
+    "turn": 1,
+    "romBodyRows": 67,
+    "prodPx": [
+     105524,
+     105524
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     105524,
+     105524
+    ],
+    "alignedBadAges": [
+     "0..18",
+     "24..105"
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   },
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": null,
+  "verdict": "UNRESOLVED"
+ },
+ {
+  "stem": "prep40-dig-opponent",
+  "move": "DIG t0",
+  "moveId": 91,
+  "side": "opponent",
+  "weight": 0.375,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 276,
+  "swapInRows": 40,
+  "romBodyRows": 194,
+  "swapBackRows": 40,
+  "adapterDuration": 195,
+  "productionDuration": 276,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    357073,
+    357073
+   ],
+   [
+    357073,
+    357073
+   ]
+  ],
+  "prodExactRows": [
+   57,
+   57
+  ],
+  "prodBadAges": [
+   "49..253",
+   "262..275"
+  ],
+  "aligned": [
+   {
+    "framingRows": 195,
+    "shift": 0,
+    "px": [
+     357073,
+     357073
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "49..253",
+     "262..275"
+    ],
+    "firstBad": [
+     [
+      49,
+      329,
+      [
+       144,
+       66,
+       206,
+       73
+      ]
+     ],
+     [
+      50,
+      329,
+      [
+       144,
+       66,
+       206,
+       73
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 195,
+    "shift": 0,
+    "px": [
+     357073,
+     357073
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "49..253",
+     "262..275"
+    ],
+    "firstBad": [
+     [
+      49,
+      329,
+      [
+       144,
+       66,
+       206,
+       73
+      ]
+     ],
+     [
+      50,
+      329,
+      [
+       144,
+       66,
+       206,
+       73
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    281506,
+    281506
+   ],
+   [
+    281506,
+    281506
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     357073,
+     357073
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     357073,
+     357073
+    ]
+   },
+   {
+    "order": "none",
+    "prodPx": [
+     357073,
+     357073
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     357073,
+     357073
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     24621,
+     24621
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     24621,
+     24621
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     24621,
+     24621
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     24621,
+     24621
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1719,
+    "turn": 0,
+    "romBodyRows": 194,
+    "prodPx": [
+     357073,
+     357073
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     357073,
+     357073
+    ],
+    "alignedBadAges": [
+     "49..253",
+     "262..275"
+    ],
+    "romChangesAfter": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "frame": 5051,
+    "turn": 0,
+    "romBodyRows": 194,
+    "prodPx": [
+     357073,
+     357073
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     357073,
+     357073
+    ],
+    "alignedBadAges": [
+     "49..253",
+     "262..275"
+    ],
+    "romChangesAfter": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     604,
+     604
+    ],
+    "k1OneRowLonger": [
+     604,
+     604
+    ],
+    "k2Today": [
+     604,
+     604
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     190,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     604,
+     604
+    ],
+    "k1OneRowLonger": [
+     604,
+     604
+    ],
+    "k2Today": [
+     604,
+     604
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     190,
+     71
+    ]
+   }
+  ],
+  "orderLend": null,
+  "verdict": "UNRESOLVED"
+ },
+ {
+  "stem": "prep40-dig-opponent",
+  "move": "DIG t1",
+  "moveId": 91,
+  "side": "opponent",
+  "weight": 0.375,
+  "windows": 2,
+  "kind": "swap",
+  "rows": 149,
+  "swapInRows": 40,
+  "romBodyRows": 67,
+  "swapBackRows": 40,
+  "adapterDuration": 68,
+  "productionDuration": 149,
+  "orderInput": "none",
+  "turn": 1,
+  "turns": [
+   1
+  ],
+  "prodPx": [
+   [
+    85853,
+    85853
+   ],
+   [
+    85853,
+    85853
+   ]
+  ],
+  "prodExactRows": [
+   53,
+   53
+  ],
+  "prodBadAges": [
+   "0..16",
+   "25..103"
+  ],
+  "aligned": [
+   {
+    "framingRows": 68,
+    "shift": 0,
+    "px": [
+     85853,
+     85853
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "0..16",
+     "25..103"
+    ],
+    "firstBad": [
+     [
+      0,
+      604,
+      [
+       161,
+       40,
+       190,
+       71
+      ]
+     ],
+     [
+      1,
+      604,
+      [
+       161,
+       40,
+       190,
+       71
+      ]
+     ]
+    ]
+   },
+   {
+    "framingRows": 68,
+    "shift": 0,
+    "px": [
+     85853,
+     85853
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "0..16",
+     "25..103"
+    ],
+    "firstBad": [
+     [
+      0,
+      604,
+      [
+       161,
+       40,
+       190,
+       71
+      ]
+     ],
+     [
+      1,
+      604,
+      [
+       161,
+       40,
+       190,
+       71
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    171125,
+    171125
+   ],
+   [
+    171125,
+    171125
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "none",
+    "prodPx": [
+     85853,
+     85853
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     85853,
+     85853
+    ]
+   },
+   {
+    "order": "none",
+    "prodPx": [
+     85853,
+     85853
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     85853,
+     85853
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     85853,
+     85853
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     85853,
+     85853
+    ]
+   },
+   {
+    "order": "first-body",
+    "prodPx": [
+     85853,
+     85853
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     85853,
+     85853
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 3410,
+    "turn": 1,
+    "romBodyRows": 67,
+    "prodPx": [
+     85853,
+     85853
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     85853,
+     85853
+    ],
+    "alignedBadAges": [
+     "0..16",
+     "25..103"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1716
+    ]
+   },
+   {
+    "frame": 6742,
+    "turn": 1,
+    "romBodyRows": 67,
+    "prodPx": [
+     85853,
+     85853
+    ],
+    "alignedShift": 0,
+    "alignedPx": [
+     85853,
+     85853
+    ],
+    "alignedBadAges": [
+     "0..16",
+     "25..103"
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     1707
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   },
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": null,
+  "verdict": "UNRESOLVED"
+ },
+ {
+  "stem": "prep40-solar-beam-player",
+  "move": "SOLAR_BEAM t0",
+  "moveId": 76,
+  "side": "player",
+  "weight": 0.274,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 193,
+  "swapInRows": 42,
+  "romBodyRows": 107,
+  "swapBackRows": 42,
+  "adapterDuration": 108,
+  "productionDuration": 193,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   193
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    321378,
+    321378
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 108,
+    "adapterDuration": 108,
+    "prodPx": [
+     0,
+     0
+    ]
+   },
+   {
+    "rows": 108,
+    "adapterDuration": 108,
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1750,
+    "turn": 0,
+    "romBodyRows": 107,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     0
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-solar-beam-player",
+  "move": "SOLAR_BEAM t1",
+  "moveId": 76,
+  "side": "player",
+  "weight": 0.274,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 323,
+  "swapInRows": 42,
+  "romBodyRows": 237,
+  "swapBackRows": 42,
+  "adapterDuration": 160,
+  "productionDuration": 245,
+  "orderInput": "none",
+  "turn": 1,
+  "turns": [
+   1
+  ],
+  "prodPx": [
+   [
+    2460637,
+    2460637
+   ]
+  ],
+  "prodExactRows": [
+   47
+  ],
+  "prodBadAges": [
+   "47..322"
+  ],
+  "aligned": [
+   {
+    "framingRows": 238,
+    "shift": -23,
+    "px": [
+     1689668,
+     1689668
+    ],
+    "zeroShifts": [],
+    "badAges": [
+     "49..269"
+    ],
+    "firstBad": [
+     [
+      49,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      50,
+      16972,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   }
+  ],
+  "fallbackPx": [
+   [
+    4587489,
+    4587489
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "none",
+    "prodPx": [
+     2460637,
+     2460637
+    ],
+    "alignedShift": -23,
+    "alignedPx": [
+     1689668,
+     1689668
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     2460637,
+     2460637
+    ],
+    "alignedShift": -23,
+    "alignedPx": [
+     1689668,
+     1689668
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 238,
+    "adapterDuration": 160,
+    "prodPx": [
+     2242811,
+     2242811
+    ],
+    "shift": -23,
+    "alignedPx": [
+     1670601,
+     1670601
+    ],
+    "badAges": [
+     "6..225"
+    ]
+   },
+   {
+    "rows": 238,
+    "adapterDuration": 160,
+    "prodPx": [
+     2261878,
+     2261878
+    ],
+    "shift": -23,
+    "alignedPx": [
+     1689668,
+     1689668
+    ],
+    "badAges": [
+     "6..226"
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 2709,
+    "turn": 1,
+    "romBodyRows": 237,
+    "prodPx": [
+     2460637,
+     2460637
+    ],
+    "alignedShift": -23,
+    "alignedPx": [
+     1689668,
+     1689668
+    ],
+    "alignedBadAges": [
+     "49..269"
+    ],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     1436
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": null,
+  "verdict": "UNRESOLVED"
+ },
+ {
+  "stem": "prep40-solar-beam-opponent",
+  "move": "SOLAR_BEAM t0",
+  "moveId": 76,
+  "side": "opponent",
+  "weight": 0.274,
+  "windows": 1,
+  "kind": "swap",
+  "rows": 189,
+  "swapInRows": 40,
+  "romBodyRows": 107,
+  "swapBackRows": 40,
+  "adapterDuration": 108,
+  "productionDuration": 189,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    0,
+    0
+   ]
+  ],
+  "prodExactRows": [
+   189
+  ],
+  "prodBadAges": [],
+  "fallbackPx": [
+   [
+    265579,
+    265579
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [
+   {
+    "rows": 108,
+    "adapterDuration": 108,
+    "prodPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "windowsDetail": [
+   {
+    "frame": 1718,
+    "turn": 0,
+    "romBodyRows": 107,
+    "prodPx": [
+     0,
+     0
+    ],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     0
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "EXACT-WITH-SWAPS"
+ },
+ {
+  "stem": "prep40-solar-beam-opponent",
+  "move": "SOLAR_BEAM t1",
+  "moveId": 76,
+  "side": "opponent",
+  "weight": 0.274,
+  "windows": 0,
+  "verdict": "NO-WINDOW"
+ },
+ {
+  "stem": "prep40-faint-explosion-player",
+  "move": "EXPLOSION",
+  "moveId": 153,
+  "side": "player",
+  "weight": 0.316,
+  "windows": 1,
+  "swapWithoutBody": [
+   {
+    "frame": 2353,
+    "swapInRows": 42,
+    "next": null,
+    "x2": [
+     -5,
+     -10,
+     -15,
+     -20,
+     -25,
+     -30,
+     -35,
+     -40,
+     -45,
+     -50,
+     -55,
+     -60,
+     -65,
+     -70,
+     -75,
+     -80,
+     -85,
+     -90,
+     -95,
+     -100,
+     -105,
+     -105,
+     -100,
+     -95,
+     -90,
+     -85,
+     -80,
+     -75,
+     -70,
+     -65,
+     -60,
+     -55,
+     -50,
+     -45,
+     -40,
+     -35,
+     -30,
+     -25,
+     -20,
+     -15,
+     -10,
+     -5,
+     0,
+     0,
+     0
+    ],
+    "tileSwitchRow": 23,
+    "hpAfter": 0
+   }
+  ],
+  "kind": "swap",
+  "rows": 302,
+  "swapInRows": 42,
+  "romBodyRows": 216,
+  "swapBackRows": 42,
+  "adapterDuration": 212,
+  "productionDuration": 297,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    1103475,
+    1103475
+   ]
+  ],
+  "prodExactRows": [
+   99
+  ],
+  "prodBadAges": [
+   "44..140",
+   "195..254",
+   "256..301"
+  ],
+  "aligned": [
+   {
+    "framingRows": 217,
+    "shift": -4,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     -4
+    ],
+    "badAges": [],
+    "firstBad": []
+   }
+  ],
+  "fallbackPx": [
+   [
+    3190397,
+    3190397
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     1103475,
+     1103475
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     1103475,
+     1103475
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1770,
+    "turn": 0,
+    "romBodyRows": 216,
+    "prodPx": [
+     1103475,
+     1103475
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     600,
+     600,
+     0,
+     0,
+     0
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     600,
+     600
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     51,
+     81,
+     86,
+     111
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-BODY-FRAMING"
+ },
+ {
+  "stem": "prep40-roared-player",
+  "move": "ROAR",
+  "moveId": 46,
+  "side": "player",
+  "weight": 0.592,
+  "windows": 0,
+  "verdict": "NO-WINDOW"
+ },
+ {
+  "stem": "prep40-faint-explosion-opponent",
+  "move": "EXPLOSION",
+  "moveId": 153,
+  "side": "opponent",
+  "weight": 0.316,
+  "windows": 1,
+  "swapWithoutBody": [
+   {
+    "frame": 2335,
+    "swapInRows": 40,
+    "next": null,
+    "x2": [
+     5,
+     10,
+     15,
+     20,
+     25,
+     30,
+     35,
+     40,
+     45,
+     50,
+     55,
+     60,
+     65,
+     70,
+     75,
+     80,
+     85,
+     90,
+     95,
+     100,
+     100,
+     95,
+     90,
+     85,
+     80,
+     75,
+     70,
+     65,
+     60,
+     55,
+     50,
+     45,
+     40,
+     35,
+     30,
+     25,
+     20,
+     15,
+     10,
+     5,
+     0,
+     0,
+     0
+    ],
+    "tileSwitchRow": 22,
+    "hpAfter": 0
+   }
+  ],
+  "kind": "swap",
+  "rows": 298,
+  "swapInRows": 40,
+  "romBodyRows": 216,
+  "swapBackRows": 40,
+  "adapterDuration": 212,
+  "productionDuration": 293,
+  "orderInput": "none",
+  "turn": 0,
+  "turns": [
+   0
+  ],
+  "prodPx": [
+   [
+    1134590,
+    1134590
+   ]
+  ],
+  "prodExactRows": [
+   100
+  ],
+  "prodBadAges": [
+   "42..138",
+   "193..252",
+   "254..275",
+   "279..297"
+  ],
+  "aligned": [
+   {
+    "framingRows": 217,
+    "shift": -4,
+    "px": [
+     0,
+     0
+    ],
+    "zeroShifts": [
+     -4
+    ],
+    "badAges": [],
+    "firstBad": []
+   }
+  ],
+  "fallbackPx": [
+   [
+    3138921,
+    3138921
+   ]
+  ],
+  "drop164": [
+   {
+    "order": "drop-164",
+    "prodPx": [
+     1134590,
+     1134590
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "firstBody": [
+   {
+    "order": "first-body",
+    "prodPx": [
+     1134590,
+     1134590
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     0,
+     0
+    ]
+   }
+  ],
+  "controls": [],
+  "windowsDetail": [
+   {
+    "frame": 1742,
+    "turn": 0,
+    "romBodyRows": 216,
+    "prodPx": [
+     1134590,
+     1134590
+    ],
+    "alignedShift": -4,
+    "alignedPx": [
+     0,
+     0
+    ],
+    "alignedBadAges": [],
+    "romChangesAfter": [
+     679,
+     679,
+     0,
+     0,
+     0
+    ]
+   }
+  ],
+  "tail": [
+   {
+    "k1Today": [
+     679,
+     679
+    ],
+    "k1OneRowLonger": [
+     0,
+     0
+    ],
+    "k2Today": [
+     0,
+     0
+    ],
+    "k1Bbox": [
+     161,
+     40,
+     195,
+     71
+    ]
+   }
+  ],
+  "orderLend": "drop-164",
+  "verdict": "NEEDS-BODY-FRAMING"
+ },
+ {
+  "stem": "prep40-roared-opponent",
+  "move": "ROAR",
+  "moveId": 46,
+  "side": "opponent",
+  "weight": 0.592,
+  "windows": 0,
+  "verdict": "NO-WINDOW"
+ },
+ {
+  "stem": "prep40-switch-player",
+  "move": "SUBSTITUTE",
+  "moveId": 164,
+  "side": "player",
+  "weight": 0.112,
+  "windows": 0,
+  "swapWithoutBody": [
+   {
+    "frame": 1979,
+    "swapInRows": 42,
+    "next": "Special_SwitchOutPlayerMon",
+    "x2": [
+     -5,
+     -10,
+     -15,
+     -20,
+     -25,
+     -30,
+     -35,
+     -40,
+     -45,
+     -50,
+     -55,
+     -60,
+     -65,
+     -70,
+     -75,
+     -80,
+     -85,
+     -90,
+     -95,
+     -100,
+     -105,
+     -105,
+     -100,
+     -95,
+     -90,
+     -85,
+     -80,
+     -75,
+     -70,
+     -65,
+     -60,
+     -55,
+     -50,
+     -45,
+     -40,
+     -35,
+     -30,
+     -25,
+     -20,
+     -15,
+     -10,
+     -5,
+     0,
+     0,
+     0
+    ],
+    "tileSwitchRow": 23,
+    "hpAfter": 129
+   }
+  ],
+  "verdict": "NO-WINDOW"
+ }
+]
