@@ -100,7 +100,7 @@ index 9dbb3cd84..d51b362d8 100644
 +    }],
 +  },
 +  /**
-+   * S10A Hidden Power, Unown attacker (docs/next-adapters-prep41.md s3; tools/integration/fixtures/prep41/hidden-power-counters.json): a fixed lag
++   * S10A Hidden Power, Unown attacker (docs/next-adapters-prep41.md s2; tools/integration/fixtures/prep41/hidden-power-counters.json): a fixed lag
 +   * at age 118 in every body and an optional lag at age 64 in 1 of 10 measured bodies (species-audit-3 UNOWN -> GOLBAT after a Tackle; the later
 +   * fixed lag then lands at 119): 180 rows without it (activation .. first inactive), 181 with it; wrong phase shows every changing row from
 +   * age 65 one frame early (docs/live-species-audit-3.md s2.4).
@@ -111,7 +111,7 @@ index 9dbb3cd84..d51b362d8 100644
 +      kind: "optional-lag-age", age: 64, fixedLagAges: [118], iterations: 179,
 +      alternatives: [{ phase: "event", bodyRows: 181, measured: 1 }, { phase: "no-event", bodyRows: 180, measured: 9 }],
 +      chosen: "no-event", tieRuleUsed: false,
-+      evidence: ["tools/integration/fixtures/prep41/hidden-power-counters.json (lag at 64: 1 of 10)", "docs/next-adapters-prep41.md s3",
++      evidence: ["tools/integration/fixtures/prep41/hidden-power-counters.json (lag at 64: 1 of 10)", "docs/next-adapters-prep41.md s2",
 +        "tools/integration/fixtures/species-audit-3/counters/hidden-power-lag.txt"],
 +    }],
 +  },
