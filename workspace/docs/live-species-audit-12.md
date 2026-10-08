@@ -102,3 +102,6 @@ sh tools/integration/issue151Patch.sh $PWD/$W/flatter-elevated-shadow-env.diff /
 sh tools/integration/issue151Counters.sh /tmp/s12/counters 10 $D/alakazamA-skill-swap-opponent-girafarig-player-shuckle.json \
   tools/integration/fixtures/s10a-live/skill-swap-player-girafarig-opponent-shuckle.json         # full list: counters.txt
 ```
+
+## 4. Gates
+`npm test` passed on 1107ded23: 1562 files passed / 44 skipped, 12,815 tests passed / 223 skipped, 410.9 s. `npm run build` passed. `git diff --check 060e4729a..HEAD` is clean. The commit range adds new files only, and `git status src` was clean at every commit.
