@@ -4,7 +4,9 @@
  * Only rows with 0 <= r + shift < the adapter duration are compared (the rows outside belong to the neighbouring commands); both fresh
  * runs, per-row px digests. Fixture inputs exactly as attdollLiveCheck.ts (HP, status1, genders, preceding bodies, D3 activation value,
  * request.damage). usage: node --experimental-strip-types --no-warnings tools/integration/speciesAudit14PlainShift.ts
- *   --out=<json> <probe dir> <scenario dir> <stem>@<activation frame> ...
+ *   --out=<json> [--pins=<json>] <probe dir> <scenario dir> <stem>@<activation frame> ...
+ * --pins (d4w): also write, per target, the fixture built here and the run-1 ROM RGB888 sha256 of every compared row ([age, sha256]),
+ * the pins tests/animation/liveD4wWidening.test.ts renders the production live view against.
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
@@ -21,6 +23,8 @@ type B = { species: number; hp: number; maxHP: number; status1: number };
 type Row = { frame: number; sha256: string; script: string | null; animAttacker: number; rng2: number; battlers: [B, B] };
 const args = process.argv.slice(2);
 const out = args.find((a) => a.startsWith("--out="))?.slice(6);
+const pinsOut = args.find((a) => a.startsWith("--pins="))?.slice(7);
+const pins: Record<string, unknown>[] = [];
 const [probeDir, scDir, ...targets] = args.filter((a) => !a.startsWith("--")) as [string, string, ...string[]];
 const moveIds: Record<string, number> = Object.fromEntries(moveData.moves.map((m) => [m.move.replace(/^MOVE_/, ""), m.id]));
 const speciesName = (id: number) => speciesStats.species.find((s) => s.id === id)!.name.replace(/^SPECIES_/, "");
@@ -58,6 +62,15 @@ for (const t of targets) {
   const v0 = liveView(fixture, 0);
   const D = liveMoveAnimationDuration((v0.effect as { request: BattleMoveAnimationRequest }).request, v0.field)!;
   const shift = LIVE_SUBSTITUTE_SWAP_BODY_FRAMING.get(moveId)?.shift ?? 0;
+  if (pinsOut) {
+    const ageRomSha256: [number, string][] = [];
+    for (let r = 0; r <= end - a; r++) {
+      const age = r + shift; if (age < 0 || age >= D) continue;
+      const rgb = inflateSync(readFileSync(`${runs[0]!.rgb}/${String(rows[a + r]!.frame).padStart(5, "0")}.rgb.z`));
+      ageRomSha256.push([age, createHash("sha256").update(rgb).digest("hex")]);
+    }
+    pins.push({ stem, activation: Number(act), fixture, ageRomSha256 });
+  }
   const per = runs.map((run) => {
     const px: [number, number][] = [];
     for (let r = 0; r <= end - a; r++) {
@@ -75,3 +88,4 @@ for (const t of targets) {
   console.log(`${stem}@${act} ${move} ${side} shift ${shift} D ${D} romBody ${res.romBodyRows} compared ${res.comparedRows} px ${res.px.join("/")} identical ${res.digests[0] === res.digests[1]} bad ${JSON.stringify(res.badRows)}`);
 }
 if (out) writeFileSync(out, `${JSON.stringify({ schema: "s14-plain-shift/v1", results })}\n`);
+if (pinsOut) writeFileSync(pinsOut, `${JSON.stringify(pins)}\n`);

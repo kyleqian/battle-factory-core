@@ -28708,12 +28708,15 @@ export function renderSceneOnMovePresentation(
         + targetBaseline.y2 + displayed.targetOffset.y2,
     );
     const nonObjTarget2 = fb.slice();
+    // A live opponent attacker keeps its front idle rest all window (no BITE step writes the attacker's x2; audit 14).
+    const attackerIdle = liveField && view.attacker.geometry.side === "opponent"
+      ? sceneOnBattlerFrontIdleRest(view.attacker) : { x2: 0, y2: 0 };
     drawSpriteSheet(
       fb,
       meowth.tileset,
       meowth.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
     );
 
     // `BuildOamBuffer` sorts these equal-priority sprites in reverse
@@ -44055,12 +44058,15 @@ export function renderSceneOnMovePresentation(
     );
     if (view.monBgActive) drawTarget();
     const nonObjTarget2 = fb.slice();
+    // A live opponent attacker keeps its front idle rest all window (no CONFUSE_RAY step writes the attacker's x2; audit 14).
+    const attackerIdle = liveField && view.attacker.geometry.side === "opponent"
+      ? sceneOnBattlerFrontIdleRest(view.attacker) : { x2: 0, y2: 0 };
     const drawAttacker = () => drawSpriteSheet(
       fb,
       chinchou.tileset,
       chinchou.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
     );
     if (!view.monBgActive) drawTarget();
     if (opponentToPlayer) drawAttacker();

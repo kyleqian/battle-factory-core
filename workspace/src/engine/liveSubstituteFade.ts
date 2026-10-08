@@ -152,7 +152,10 @@ export function substituteFadeRenderView(view: BattleResolutionPresentationRende
     // SpriteCB_EnemyShadow: the shadow stays hidden through the row after the first inactive row (measured elevated GOLBAT:
     // back on screen at script rows + 2, the command's last row).
     view: Object.freeze({ ...view, field, fieldArt, effect: null, visibility,
-      postBodyShadowHidden: effect.age < substituteFadeScriptRows(side) + 2 }),
+      postBodyShadowHidden: effect.age < substituteFadeScriptRows(side) + 2
+        // A non-doll opponent OTHER battler's shadow is still on screen on the activation row (one-frame display lag, the #142
+        // mechanism; species audit 14: elevated GOLBAT / FLYGON other battler of a player fade, 200 -> 0 px on row 0).
+        && !(effect.age === 0 && side === "player") }),
     bgCopy,
   });
 }

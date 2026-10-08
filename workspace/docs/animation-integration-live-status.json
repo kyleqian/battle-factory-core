@@ -210,6 +210,7 @@
       "move": "MOVE_BITE",
       "id": 44,
       "liveEvidence": [
+        "d4w (species audit 14 SPECIES-DEFECT 3): a live OPPONENT attacker is drawn at its tracked front idle rest (battleScene.ts BITE attacker + sceneOnBattlerFrontIdleRest). Fresh direct-mGBA prep40 probes (r1 == r2), calibrated shift -10 (speciesAudit14PlainShift.ts): RATTATA @75 10,660 -> 0 px, ONIX @72 28,366 -> 0 px; later bodies and GOLBAT / FLYGON controls 0 px; the 4 committed dolldef-live Bite fixtures render byte-identically with / without the fix (tools/integration/fixtures/d4w-rest/; tests/animation/liveSpeciesAudit14Fixes.test.ts)",
         "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: bite-player, bite-opponent, df-bite-meowth-magneton-player, df-bite-meowth-magneton-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts).",
         "S10A ATTACKER shown as the Substitute doll (docs/next-adapters-prep40.md; LIVE_SUBSTITUTE_SWAP_BODY_CELLS, attacker side player + opponent): SUBSTITUTE_TO_MON + idle + body + MON_TO_SUBSTITUTE presented live; framed by the ROM body (LIVE_SUBSTITUTE_SWAP_BODY_FRAMING: 41 rows activation .. first inactive, adapter age = body row -10). Dense composite windows from fresh direct-mGBA prep40 probes, two fresh passes x2 runs byte-identical, through the production live renderer: 4 of 4 windows (492 rows) 0 px; the tail row (the next command's first row) 0 px with the doll latched at x2 -5 / +5 (receipt tools/integration/fixtures/attdoll-live-receipt.json; tests/substituteSwapAttdollCells.test.ts)."
       ],
@@ -429,6 +430,7 @@
       "move": "MOVE_CONFUSE_RAY",
       "id": 109,
       "liveEvidence": [
+        "d4w (species audit 14 SPECIES-DEFECT 2): a live OPPONENT attacker is drawn at its tracked front idle rest all window (battleScene.ts CONFUSE_RAY drawAttacker + sceneOnBattlerFrontIdleRest; the ROM writes no attacker x2). Fresh direct-mGBA prep40 probes (r1 == r2), production check twice: idle-rest first bodies ONIX 294,419 -> 0 px, RATTATA 110,700 -> 0 px (270 / 270 rows); GOLBAT / FLYGON controls and later bodies unchanged (tools/integration/fixtures/d4w-rest/; tests/animation/liveSpeciesAudit14Fixes.test.ts)",
         "opening-draft input: HAUNTER -> GROVYLE",
         "generated seed 54 command input: HAUNTER -> WAILMER",
         "generated seed 65: MAGBY -> TENTACOOL",

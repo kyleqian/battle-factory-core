@@ -1,0 +1,13 @@
+tools/integration/fixtures/issue142-shadow-row-scan.json	error	-	TypeError: Cannot read properties of undefined (reading 'geometry')
+tools/integration/fixtures/altspecies2-before.json	error	-	TypeError: Cannot read properties of undefined (reading 'geometry')
+tools/integration/fixtures/altspecies3-results.json	error	-	TypeError: Cannot read properties of undefined (reading 'geometry')
+tools/integration/fixtures/altspecies2-bite-player-meowth-opponent-magneton.json	error	-	TypeError: Cannot read properties of undefined (reading 'geometry')
+tools/integration/fixtures/altspecies3-bite-player-meowth-opponent-magneton.json	error	-	TypeError: Cannot read properties of undefined (reading 'geometry')
+tools/integration/fixtures/issue142-shadow-rows.json	error	-	TypeError: Cannot read properties of undefined (reading 'geometry')
+tools/integration/fixtures/altspecies3-derivation.json	error	-	TypeError: Cannot read properties of undefined (reading 'geometry')
+tools/integration/fixtures/confuse-ray-player-chinchou-opponent-onix.json	error	-	TypeError: Cannot read properties of undefined (reading 'geometry')
+tools/integration/fixtures/confuse-ray-opponent-chinchou-player-onix.json	error	-	TypeError: Cannot read properties of undefined (reading 'geometry')
+tools/integration/fixtures/dolldef-live/prep38-bite-opponent.json	live	26	7058a32d3565e215943e031abb6c008a
+tools/integration/fixtures/dolldef-live/prep38-df-bite-meowth-magneton-opponent.json	live	26	52a65e743a64fec452b54d08ce5d0be2
+tools/integration/fixtures/dolldef-live/prep38-df-bite-meowth-magneton-player.json	live	26	fe5ded206a2714d12cb4610e5fa3e7de
+tools/integration/fixtures/dolldef-live/prep38-bite-player.json	live	26	4fc0ccd5b0dd3ce013fc22d3fe25a380
