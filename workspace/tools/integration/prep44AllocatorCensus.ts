@@ -46,6 +46,32 @@ type OrchestratorState = ReturnType<typeof createFactoryRoundBattleOrchestrator>
 const allocatorKnown = (s: OrchestratorState) => s.liveMoveSpriteAllocatorHost === undefined ? "absent"
   : s.liveMoveSpriteAllocatorHost.battleCallStart !== s.activeBattleCallStart ? "stale" : s.liveMoveSpriteAllocatorHost.host.historyKnown;
 // The unit that took the host known -> unknown between `before` and `after` (one step), in the orchestrator's reason order.
+// Shadow of the same rules for the CHAIN (every unit that would invalidate a known host, once the host is already unknown):
+// evaluated at each resolution command activation with a private event cursor (the palette host's scan discipline).
+interface ShadowCursor { key: string; segment: string; nextEventIndex: number }
+function shadowUnits(after: OrchestratorState, cursor: ShadowCursor): string[] {
+  const r = after.battleResolutionPresentation;
+  if (r?.lifecycle.phase !== "presenting") return [];
+  const segmentKey = `${r.resolutionId.requestId}:${r.segmentIndex}`, key = `${segmentKey}:${r.commandIndex}`;
+  if (key === cursor.key) return [];
+  cursor.key = key;
+  if (cursor.segment !== segmentKey) { cursor.segment = segmentKey; cursor.nextEventIndex = 0; }
+  const segment = r.segments[r.segmentIndex]!, command = segment.commands[r.commandIndex], units: string[] = [];
+  if (command?.type === "move-animation" && command.animation) {
+    const id = command.animation.moveId;
+    if (!ALLOCATOR_PLAN_IDS.has(id) && !ALLOCATOR_NET_ZERO.has(id)) units.push(`body ${nameOf.get(id) ?? `#${id}`} (no plan, not net-zero)`);
+  } else if (command !== undefined && (command.type === "move-animation" || command.type === "switch-out" || command.type === "switch-in"
+    || command.type === "party-summary" || command.type === "trainer-slide" || (command.type === "sprite-visibility" && command.recall))) {
+    units.push(`command ${command.type}${command.type === "sprite-visibility" ? " recall" : ""}`);
+  }
+  const isFinal = command === undefined || r.commandIndex === segment.commands.length - 1;
+  const through = isFinal ? Number.POSITIVE_INFINITY : command !== undefined && "eventSequence" in command ? command.eventSequence : Number.POSITIVE_INFINITY;
+  while (cursor.nextEventIndex < segment.events.length && segment.events[cursor.nextEventIndex]!.sequence <= through) {
+    const p = segment.events[cursor.nextEventIndex++]!.payload;
+    if (p.kind === "status-animation") units.push(`status animation ${spriteOrderStatusAnimationName(p.isStatus2 !== 0, p.status) ?? `status ${p.isStatus2}/${p.status}`}`);
+  }
+  return units;
+}
 function allocatorInvalidatingUnit(before: OrchestratorState, after: OrchestratorState): string {
   if (after.battlePartySelect && !before.battlePartySelect) return "party menu open (ResetSpriteData)";
   const r = after.battleResolutionPresentation;
@@ -101,6 +127,8 @@ interface CommandRecord {
   battle: number; kind: "move" | "substitute-fade"; moveId: number; move: string; side: "player" | "opponent";
   attacker: string; target: string; status: "live" | "fallback" | "partial"; frames: number; liveFrames: number;
   swapFrames: number; duration: number | null; decline: (Decline & { detail?: string }) | null;
+  /** prep44: every invalidating unit since the allocator host was last known (first = decline.detail's unit). */
+  allocatorChain?: string[];
 }
 interface BattleRecord { battle: number; seed: number; streak: number; frames: number; end: "terminal" | "stalled" | "error"; error?: string; turns: number;
   stalledAt?: string }
@@ -123,7 +151,8 @@ function playBattle(battle: number, seed: number, streak: number): void {
   // battle is the session's first), feeding the faithful-random adapters exactly as createInitialState / render do.
   let rng = createPresentationRngSession();
   let frame = 0, ended = false, turns = 0, commandKey = "", current: CommandRecord | null = null;
-  let allocatorCause: string | null = null;
+  let allocatorCause: string | null = null, allocatorChain: string[] = [];
+  const shadow: ShadowCursor = { key: "", segment: "", nextEventIndex: 0 };
   const slotUses = [0, 0, 0, 0];
   const owned = () => Boolean(state.battleStartIntro || state.battleResolutionPresentation || state.battleCommandPresentation);
   const observe = () => {
@@ -178,6 +207,7 @@ function playBattle(battle: number, seed: number, streak: number): void {
             if (rec.decline.reason === "sprite allocator history unknown") {
               const known = allocatorKnown(state);
               rec.decline.detail = `allocator: ${known === false ? allocatorCause ?? "unknown before any tracked step" : `host ${known}`}`;
+              rec.allocatorChain = [...new Set(allocatorChain)];
             }
             if (rec.decline.reason === "sprite-order lend unknown") {
               const host = state.liveMoveSpriteAllocatorHost?.orderHost;
@@ -203,12 +233,16 @@ function playBattle(battle: number, seed: number, streak: number): void {
     if (state.battleStartIntro) state = advanceFactoryRoundBattleStartIntro(state, new Set(buttons));
     else if (state.battleResolutionPresentation) state = advanceFactoryRoundBattleResolution(state, new Set(buttons));
     else if (state.battleCommandPresentation) state = advanceFactoryRoundBattleCommand(state, new Set(buttons));
-    const knownAfter = allocatorKnown(state);
-    if (knownAfter === true) allocatorCause = null;
+    const knownAfter = allocatorKnown(state), units = shadowUnits(state, shadow);
+    if (state.battlePartySelect && !before.battlePartySelect) units.push("party menu open (ResetSpriteData)");
+    if (state.battleResolutionPresentation?.lifecycle.phase === "presenting-switch-in"
+      && before.battleResolutionPresentation?.lifecycle.phase !== "presenting-switch-in") units.push("forced switch-in (allocator not reseedable)");
+    if (knownAfter === true) { allocatorCause = null; allocatorChain = []; }
     else if (knownAfter === false && allocatorKnown(before) === true) {
       allocatorCause = allocatorInvalidatingUnit(before, state);
       allocatorInvalidations.set(allocatorCause, (allocatorInvalidations.get(allocatorCause) ?? 0) + 1);
-    }
+      allocatorChain = [allocatorCause, ...units.filter((u) => u !== allocatorCause)];
+    } else if (knownAfter === false) allocatorChain.push(...units.filter((u) => !allocatorChain.includes(u)));
     rng = tickLiveMovePresentationRngSession(rng, state, liveMoveRandom2PlanContextAt);
     observe();
     if (!owned()) ended = true;
