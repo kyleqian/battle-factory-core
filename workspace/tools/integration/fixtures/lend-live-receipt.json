@@ -1,8 +1,8 @@
 {
  "schema": "lend-live-receipt/v1",
  "design": "docs/s10a-random2-order-lend-blocker.md design 1 (seam-resolved deferred lend)",
- "testedCommit": "8411455d1daa5e9ec7483c4202bbb0fd1ff576bd",
- "testedSrcTree": "85c1f1bdd136fcbe0ae8977a1b5a146cef8bf96c",
+ "testedCommit": "f6f8c72ff5f05aa843755e0b45212e0247398287",
+ "testedSrcTree": "70fd147416659dedc69be274508a560b61766a15",
  "dirtySrc": false,
  "commands": [
   "OUT=/tmp/lend-ib sh tools/integration/lendIceBallProbes.sh",
@@ -10,7 +10,7 @@
   "OUT=/tmp/lend-d4a sh tools/integration/lendIceBallWindows.sh",
   "OUT=/tmp/lend-d4a2 sh tools/integration/lendIceBallWindows.sh",
   "POKEBENCH_LIVE_ICEBALL_CHAIN=entry-lend OUT=/tmp/lend-neg sh tools/integration/lendIceBallWindows.sh",
-  "python3 -I tools/integration/lendLiveReceipt.py /tmp/lend-d4a /tmp/lend-d4a2 /tmp/lend-neg"
+  "python3 -I tools/integration/lendLiveReceipt.py /tmp/lend-d4a-final /tmp/lend-d4a2-final /tmp/lend-neg-final"
  ],
  "declined": [
   "prep25 GLALIE -> GOLEM player bodies 4..5 (counters 3..4): after GOLEM faints and REGISTEEL is sent in (battler slot 5); the deferred lend declines after a KO / send-in (not modelled)"
@@ -665,5 +665,5 @@
   "what": "POKEBENCH_LIVE_ICEBALL_CHAIN=entry-lend: the words-free known-entry lend instead of the deferred lend",
   "windowsDiffering": 11
  },
- "note": "both passes ran at testedCommit (src tree above); the negative control ran at 5538db124 + the env-gated harness control only (same src tree)"
+ "note": "pass 1 = this receipt's windows inside the full d4a regression (OUT=/tmp/d4a-all P=12 sh tools/integration/d4aRegressionAll.sh, 161 fixtures, 0 violations; tools/integration/fixtures/lend-live-d4a-regression.json); pass 2 = lendIceBallWindows.sh; both at testedCommit"
 }
