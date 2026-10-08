@@ -2,7 +2,7 @@
 """prep43: raw sSpriteOrder probe rows (prep43Probe.py) -> compact unit receipts (pure python3, no mGBA).
 
 usage (from workspace/): prep43Extract.py <out-dir> <units.json>
-For every job: run A and run B must be byte-identical (sha256 recorded). Units are split as spriteOrderBodyPlans.py does
+For every job: run A and run B must be byte-identical files (sha256 of run A's rows recorded). Units are split as spriteOrderBodyPlans.py does
 (body = a gAnimScriptActive interval from its rising edge, gap = up to the next rising edge). Per unit: the free order F at its
 first frame, every allocation window {f, C [[slot, f|e]] in creation order, D [slots in sSpriteOrder order], F after}, the number
 of frames inside the unit where F changed without an allocation (must be 0), and the observed plan text in the production
@@ -85,8 +85,10 @@ if __name__ == "__main__":
         a, b = OUT / "raw" / f"{job}-A.json", OUT / "raw" / f"{job}-B.json"
         if not a.exists():
             continue
-        ha, hb = (hashlib.sha256(p.read_bytes()).hexdigest() if p.exists() else None for p in (a, b))
-        entry = {"unit": unit, "move": move, "base": base, "variant": variant, "shaA": ha, "identicalAB": ha == hb}
+        # the raw file embeds the scenario path (OUT-dependent): hash its rows, and require A == B byte-identical as files
+        same = b.exists() and a.read_bytes() == b.read_bytes()
+        rows = hashlib.sha256(json.dumps(json.loads(a.read_text())["rows"], separators=(",", ":")).encode()).hexdigest()
+        entry = {"unit": unit, "move": move, "base": base, "variant": variant, "rowsSha256A": rows, "identicalAB": same}
         entry.update(units_of(job, a))
         result["jobs"][job] = entry
     Path(sys.argv[2]).write_text(json.dumps(result, separators=(",", ":"), sort_keys=True) + "\n")
