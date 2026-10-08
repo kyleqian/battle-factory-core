@@ -155,6 +155,10 @@ OUT=/tmp/p43-repro REC=/tmp/p43-rec sh tools/integration/prep43Run.sh   # ~5 min
 ```
 
 Reproduced once into fresh dirs before commit: all 10 JSON receipts `same` (fresh probes A/B, three fresh census runs), src reverted.
+`tools/` is outside the tsconfig include: `prep43Check.ts` / `prep43CorpusReplay.ts` were checked separately with the project's strict
+options (a temp tsconfig extending the workspace one with `"files"` = the two scripts and `typeRoots` = the workspace `@types`;
+`NODE_OPTIONS=--max-old-space-size=8192 ./node_modules/.bin/tsc -p <it>`: exit 0). Gates on the committed (clean-src) tree:
+`npm test` 1568 files / 12920 tests passed (44 / 223 skipped), `npm run build` green, `git diff --check` clean.
 
 ## Not reached / caveats
 

@@ -57,7 +57,7 @@ function edge(t: Tally, tracker: SpriteOrderTracker, observed: number[] | undefi
 }
 
 /** Host move id (liveSpriteOrderHost.ts MOVE_ANIMATION mapping) from the move, side and the scenario's turn evidence. */
-function hostMoveId(file: string, mv: number, turn: number): number {
+function hostMoveId(mv: number, turn: number): number {
   if (mv === 143 && turn === 1) return 10143;
   if ((mv === 91 || mv === 280) && (turn & 1) === 1) return 10000 + mv;
   return mv;
@@ -82,7 +82,7 @@ function replayCorpus(): Tally & { skipped: number } {
       if (mv === 280) turn = scenario.file.includes("-normal-") ? 0 : 1;
       tracker = applySpriteOrderPresentationEvent(tracker, mv === 0 || side === null
         ? { kind: "invalidate", reason: "mv-0 / unattributed body" }
-        : { kind: "move-animation", moveId: hostMoveId(scenario.file, mv, turn), attackerSide: side });
+        : { kind: "move-animation", moveId: hostMoveId(mv, turn), attackerSide: side });
     });
   }
   return { ...t, skipped };
@@ -136,7 +136,7 @@ function replayProbes(): Tally & { jobs: number; perLabel: Record<string, { edge
         let turn = 0;
         if (mv === 91) { turn = occurrences.get(unit.label) ?? 0; occurrences.set(unit.label, turn + 1); }
         if (mv === 280) turn = job.base.includes("-normal-") ? 0 : 1;
-        event = { kind: "move-animation", moveId: hostMoveId(name, mv, turn), attackerSide: side };
+        event = { kind: "move-animation", moveId: hostMoveId(mv, turn), attackerSide: side };
       } else event = mv0Event(job, unit.label);
       tracker = applySpriteOrderPresentationEvent(tracker, event);
     });
