@@ -1,0 +1,36 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/shedinjaA-dive-player-chinchou-opponent-onix.json",
+  "move": "DIVE",
+  "measuredPhase": "event",
+  "measuredPhases": {
+   "oam-transfer-row": "event"
+  },
+  "policyPhases": {
+   "oam-transfer-row": "event"
+  },
+  "selectedPhase": true,
+  "window": 118,
+  "expectedDuration": 118,
+  "runs": [
+   {
+    "rows": 118,
+    "exactRows": 118,
+    "residualPixels": 0,
+    "digest": "2a9dd6fdf8f7202085854b28c0b87fc775bf9eab96e4ce525bbb89941d980181",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 118,
+    "exactRows": 118,
+    "residualPixels": 0,
+    "digest": "2a9dd6fdf8f7202085854b28c0b87fc775bf9eab96e4ce525bbb89941d980181",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

@@ -1,0 +1,29 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/pichu-extreme-speed-alt-opponent-smeargle-golem.json",
+  "move": "EXTREME_SPEED",
+  "selectedPhase": true,
+  "window": 321,
+  "expectedDuration": 321,
+  "runs": [
+   {
+    "rows": 321,
+    "exactRows": 321,
+    "residualPixels": 0,
+    "digest": "4f8796653b4cadee1cfae4898897c98b6f89f4ec7b6e8784a2a386a4342d5159",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 321,
+    "exactRows": 321,
+    "residualPixels": 0,
+    "digest": "4f8796653b4cadee1cfae4898897c98b6f89f4ec7b6e8784a2a386a4342d5159",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

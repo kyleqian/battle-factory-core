@@ -1,0 +1,29 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/weezing-extreme-speed-alt-player-smeargle-golem.json",
+  "move": "EXTREME_SPEED",
+  "selectedPhase": true,
+  "window": 321,
+  "expectedDuration": 321,
+  "runs": [
+   {
+    "rows": 321,
+    "exactRows": 321,
+    "residualPixels": 0,
+    "digest": "ebc8a10055b5ed5e006f08335316be47c754f22930ea6dc6b3d7a3bd81e9b1b7",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 321,
+    "exactRows": 321,
+    "residualPixels": 0,
+    "digest": "ebc8a10055b5ed5e006f08335316be47c754f22930ea6dc6b3d7a3bd81e9b1b7",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

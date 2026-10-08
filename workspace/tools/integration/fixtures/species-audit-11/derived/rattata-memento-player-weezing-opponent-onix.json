@@ -1,0 +1,61 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "MEMENTO",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-11/scenarios/rattata-memento-player-weezing-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 70,
+  "endFrame": 251
+ },
+ "windowSource": "speciesAudit11: window = [activation, activation + 182 - 1] of the swapped scenario's own first MEMENTO body (2 fresh prep22Probe.py runs agree)",
+ "attacker": {
+  "species": "WEEZING",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "RATTATA",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019078,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 0,
+  "playerMaxHp": 172,
+  "opponentHp": 105,
+  "opponentMaxHp": 105,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "speciesAudit11": {
+  "acceptedFixture": "tools/integration/fixtures/s10a-live/memento-player-weezing-opponent-onix.json",
+  "swappedSide": "opponent",
+  "bodies": [
+   [
+    262,
+    70,
+    251,
+    0
+   ],
+   [
+    0,
+    256,
+    345,
+    0
+   ]
+  ],
+  "bodyIndex": 0,
+  "rows": 182,
+  "personality": [
+   2349019078,
+   1793700002
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

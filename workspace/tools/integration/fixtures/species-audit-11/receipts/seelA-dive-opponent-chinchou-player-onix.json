@@ -1,0 +1,30 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/seelA-dive-opponent-chinchou-player-onix.json",
+  "move": "DIVE",
+  "measuredPhase": null,
+  "selectedPhase": true,
+  "window": 115,
+  "expectedDuration": 115,
+  "runs": [
+   {
+    "rows": 115,
+    "exactRows": 115,
+    "residualPixels": 0,
+    "digest": "ff42e8b9abf9a902c3a3ac3d90d5ab6f2c5fd85cd2f984460a1f9c7fd697be1e",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 115,
+    "exactRows": 115,
+    "residualPixels": 0,
+    "digest": "ff42e8b9abf9a902c3a3ac3d90d5ab6f2c5fd85cd2f984460a1f9c7fd697be1e",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

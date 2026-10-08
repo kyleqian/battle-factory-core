@@ -1,0 +1,29 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/golbat-memento-player-weezing-opponent-onix.json",
+  "move": "MEMENTO",
+  "selectedPhase": true,
+  "window": 177,
+  "expectedDuration": 177,
+  "runs": [
+   {
+    "rows": 177,
+    "exactRows": 177,
+    "residualPixels": 0,
+    "digest": "dd251db0abf47a8327037fc51fb53dddc4c877ca28cedbd91f1c5154154da40d",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 177,
+    "exactRows": 177,
+    "residualPixels": 0,
+    "digest": "dd251db0abf47a8327037fc51fb53dddc4c877ca28cedbd91f1c5154154da40d",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

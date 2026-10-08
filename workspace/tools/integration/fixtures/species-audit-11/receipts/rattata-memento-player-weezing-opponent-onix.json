@@ -1,0 +1,29 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/rattata-memento-player-weezing-opponent-onix.json",
+  "move": "MEMENTO",
+  "selectedPhase": true,
+  "window": 182,
+  "expectedDuration": 182,
+  "runs": [
+   {
+    "rows": 182,
+    "exactRows": 182,
+    "residualPixels": 0,
+    "digest": "272a3aa1b926393b070f94bb4f15a873613465ccc6d5998cd1d0b166e4b77a59",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 182,
+    "exactRows": 182,
+    "residualPixels": 0,
+    "digest": "272a3aa1b926393b070f94bb4f15a873613465ccc6d5998cd1d0b166e4b77a59",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

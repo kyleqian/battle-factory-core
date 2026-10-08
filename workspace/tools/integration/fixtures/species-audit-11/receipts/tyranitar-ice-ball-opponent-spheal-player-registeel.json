@@ -1,0 +1,31 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/tyranitar-ice-ball-opponent-spheal-player-registeel.json",
+  "move": "ICE_BALL",
+  "measuredPhase": "no-event",
+  "policyPhase": "no-event",
+  "selectedPhase": true,
+  "window": 76,
+  "expectedDuration": 76,
+  "runs": [
+   {
+    "rows": 76,
+    "exactRows": 76,
+    "residualPixels": 0,
+    "digest": "ff0f53aa0b8961aa3ee1cd170af70dccdfeaedf084455ff439fdd8ebc74c26ab",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 76,
+    "exactRows": 76,
+    "residualPixels": 0,
+    "digest": "ff0f53aa0b8961aa3ee1cd170af70dccdfeaedf084455ff439fdd8ebc74c26ab",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

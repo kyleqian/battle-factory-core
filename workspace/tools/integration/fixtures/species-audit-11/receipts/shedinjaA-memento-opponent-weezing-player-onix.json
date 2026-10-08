@@ -1,0 +1,29 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/shedinjaA-memento-opponent-weezing-player-onix.json",
+  "move": "MEMENTO",
+  "selectedPhase": true,
+  "window": 177,
+  "expectedDuration": 177,
+  "runs": [
+   {
+    "rows": 177,
+    "exactRows": 177,
+    "residualPixels": 0,
+    "digest": "a9fc61200ed277deb1fc07033bc97347e701437f2df5c60df000250177a1c8e8",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 177,
+    "exactRows": 177,
+    "residualPixels": 0,
+    "digest": "a9fc61200ed277deb1fc07033bc97347e701437f2df5c60df000250177a1c8e8",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

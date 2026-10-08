@@ -1,0 +1,31 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/wailordA-ice-ball-player-spheal-opponent-registeel.json",
+  "move": "ICE_BALL",
+  "measuredPhase": "no-event",
+  "policyPhase": "no-event",
+  "selectedPhase": true,
+  "window": 76,
+  "expectedDuration": 76,
+  "runs": [
+   {
+    "rows": 76,
+    "exactRows": 76,
+    "residualPixels": 0,
+    "digest": "b154dfc56d9975fe04128ebffbc9ea50d078b33992441df24f1869a7d505a663",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 76,
+    "exactRows": 76,
+    "residualPixels": 0,
+    "digest": "b154dfc56d9975fe04128ebffbc9ea50d078b33992441df24f1869a7d505a663",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

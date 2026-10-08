@@ -1,0 +1,29 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/flygonA-extreme-speed-alt-opponent-smeargle-golem.json",
+  "move": "EXTREME_SPEED",
+  "selectedPhase": true,
+  "window": 321,
+  "expectedDuration": 321,
+  "runs": [
+   {
+    "rows": 321,
+    "exactRows": 321,
+    "residualPixels": 0,
+    "digest": "24961aef1dba14b6badeb2ccacd845e175a4fcd7b5e53c3405b983ed45a641e7",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 321,
+    "exactRows": 321,
+    "residualPixels": 0,
+    "digest": "24961aef1dba14b6badeb2ccacd845e175a4fcd7b5e53c3405b983ed45a641e7",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

@@ -1,0 +1,31 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/golbat-ice-ball-player-spheal-opponent-registeel.json",
+  "move": "ICE_BALL",
+  "measuredPhase": "no-event",
+  "policyPhase": "no-event",
+  "selectedPhase": true,
+  "window": 76,
+  "expectedDuration": 76,
+  "runs": [
+   {
+    "rows": 76,
+    "exactRows": 76,
+    "residualPixels": 0,
+    "digest": "774400b647812361b701f7e65b75213a62c33062a360bfc97240ba744f7eb195",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 76,
+    "exactRows": 76,
+    "residualPixels": 0,
+    "digest": "774400b647812361b701f7e65b75213a62c33062a360bfc97240ba744f7eb195",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

@@ -1,0 +1,61 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "MEMENTO",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-11/scenarios/shedinjaA-memento-opponent-weezing-player-onix.json",
+ "denseWindow": {
+  "startFrame": 75,
+  "endFrame": 251
+ },
+ "windowSource": "speciesAudit11: window = [activation, activation + 177 - 1] of the swapped scenario's own first MEMENTO body (2 fresh prep22Probe.py runs agree)",
+ "attacker": {
+  "species": "SHEDINJA",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793700003,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 110,
+  "playerMaxHp": 110,
+  "opponentHp": 0,
+  "opponentMaxHp": 1,
+  "playerGender": "male",
+  "opponentGender": "none"
+ },
+ "speciesAudit11": {
+  "acceptedFixture": "tools/integration/fixtures/s10a-live/memento-opponent-weezing-player-onix.json",
+  "swappedSide": "opponent",
+  "bodies": [
+   [
+    262,
+    75,
+    251,
+    1
+   ],
+   [
+    0,
+    256,
+    345,
+    1
+   ]
+  ],
+  "bodyIndex": 0,
+  "rows": 177,
+  "personality": [
+   2349019077,
+   1793700003
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

@@ -1,0 +1,107 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "ICE_BALL",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-11/scenarios/pichuA-ice-ball-player-spheal-opponent-registeel.json",
+ "denseWindow": {
+  "startFrame": 74,
+  "endFrame": 149
+ },
+ "windowSource": "speciesAudit11: window = [activation, activation + 76 - 1] of the swapped scenario's own first ICE_BALL body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "no-event",
+ "attacker": {
+  "species": "PICHU",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "REGISTEEL",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019030,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 127,
+  "playerMaxHp": 127,
+  "opponentHp": 187,
+  "opponentMaxHp": 187,
+  "playerGender": "male",
+  "opponentGender": "none"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 30,
+  "rolloutCounter": 1
+ },
+ "presentationRngActivation": {
+  "value": 119564722,
+  "source": "prep22Probe.py rng2Series[75] stepped back once (activation frame 74)"
+ },
+ "speciesAudit11": {
+  "acceptedFixture": "tools/integration/fixtures/s10a-live/ice-ball-player-spheal-opponent-registeel.json",
+  "swappedSide": "player",
+  "bodies": [
+   [
+    301,
+    74,
+    149,
+    0
+   ],
+   [
+    33,
+    333,
+    374,
+    1
+   ],
+   [
+    301,
+    510,
+    585,
+    0
+   ],
+   [
+    33,
+    771,
+    812,
+    1
+   ],
+   [
+    301,
+    952,
+    1027,
+    0
+   ],
+   [
+    33,
+    1217,
+    1258,
+    1
+   ],
+   [
+    301,
+    1393,
+    1468,
+    0
+   ],
+   [
+    33,
+    1666,
+    1707,
+    1
+   ]
+  ],
+  "bodyIndex": 0,
+  "rows": 76,
+  "personality": [
+   2349019030,
+   1793700275
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

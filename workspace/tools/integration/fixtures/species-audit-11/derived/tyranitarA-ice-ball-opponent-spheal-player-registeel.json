@@ -1,0 +1,215 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "ICE_BALL",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-11/scenarios/tyranitarA-ice-ball-opponent-spheal-player-registeel.json",
+ "denseWindow": {
+  "startFrame": 984,
+  "endFrame": 1059
+ },
+ "windowSource": "speciesAudit11: window = [activation, activation + 76 - 1] of the swapped scenario's own first ICE_BALL body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "no-event",
+ "attacker": {
+  "species": "TYRANITAR",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "REGISTEEL",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793700280,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 187,
+  "playerMaxHp": 187,
+  "opponentHp": 207,
+  "opponentMaxHp": 207,
+  "playerGender": "none",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 30,
+  "rolloutCounter": 1
+ },
+ "presentationRngActivation": {
+  "value": 3666101058,
+  "source": "prep22Probe.py rng2Series[985] stepped back once (activation frame 984)"
+ },
+ "speciesAudit11": {
+  "acceptedFixture": "tools/integration/fixtures/s10a-live/ice-ball-opponent-spheal-player-registeel.json",
+  "swappedSide": "opponent",
+  "bodies": [
+   [
+    301,
+    984,
+    1059,
+    1
+   ],
+   [
+    33,
+    1240,
+    1281,
+    0
+   ],
+   [
+    0,
+    1517,
+    1683,
+    0
+   ],
+   [
+    301,
+    1949,
+    2024,
+    1
+   ],
+   [
+    33,
+    2210,
+    2251,
+    0
+   ],
+   [
+    0,
+    2487,
+    2653,
+    0
+   ],
+   [
+    33,
+    3046,
+    3087,
+    0
+   ],
+   [
+    0,
+    3323,
+    3489,
+    0
+   ],
+   [
+    301,
+    3818,
+    3893,
+    1
+   ],
+   [
+    33,
+    4074,
+    4115,
+    0
+   ],
+   [
+    0,
+    4351,
+    4517,
+    0
+   ],
+   [
+    301,
+    4751,
+    4826,
+    1
+   ],
+   [
+    33,
+    5011,
+    5052,
+    0
+   ],
+   [
+    0,
+    5288,
+    5454,
+    0
+   ],
+   [
+    301,
+    5685,
+    5760,
+    1
+   ],
+   [
+    33,
+    6052,
+    6093,
+    0
+   ],
+   [
+    0,
+    6329,
+    6495,
+    0
+   ],
+   [
+    301,
+    6619,
+    6694,
+    1
+   ],
+   [
+    33,
+    6907,
+    6948,
+    0
+   ],
+   [
+    0,
+    7184,
+    7350,
+    0
+   ],
+   [
+    301,
+    7553,
+    7684,
+    1
+   ],
+   [
+    33,
+    7931,
+    7972,
+    0
+   ],
+   [
+    0,
+    8208,
+    8374,
+    0
+   ],
+   [
+    301,
+    8488,
+    8563,
+    1
+   ],
+   [
+    33,
+    8744,
+    8785,
+    0
+   ],
+   [
+    0,
+    9021,
+    9187,
+    0
+   ]
+  ],
+  "bodyIndex": 0,
+  "rows": 76,
+  "personality": [
+   2349018900,
+   1793700280
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

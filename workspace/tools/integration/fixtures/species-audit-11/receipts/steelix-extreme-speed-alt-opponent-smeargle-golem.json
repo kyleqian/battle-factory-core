@@ -1,0 +1,29 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/steelix-extreme-speed-alt-opponent-smeargle-golem.json",
+  "move": "EXTREME_SPEED",
+  "selectedPhase": true,
+  "window": 321,
+  "expectedDuration": 321,
+  "runs": [
+   {
+    "rows": 321,
+    "exactRows": 321,
+    "residualPixels": 0,
+    "digest": "72c34487035aef0dbb73fbb4a95d4571a003e78c1a0a6ffa24db1d7463ed53e9",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 321,
+    "exactRows": 321,
+    "residualPixels": 0,
+    "digest": "72c34487035aef0dbb73fbb4a95d4571a003e78c1a0a6ffa24db1d7463ed53e9",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

@@ -1,0 +1,31 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/flygon-ice-ball-opponent-spheal-player-registeel.json",
+  "move": "ICE_BALL",
+  "measuredPhase": "no-event",
+  "policyPhase": "no-event",
+  "selectedPhase": true,
+  "window": 76,
+  "expectedDuration": 76,
+  "runs": [
+   {
+    "rows": 76,
+    "exactRows": 76,
+    "residualPixels": 0,
+    "digest": "b2dddd2f838b68a9af41972bcc25a9f66b1894f3b93b4a3cf49cbc83bf52484e",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 76,
+    "exactRows": 76,
+    "residualPixels": 0,
+    "digest": "b2dddd2f838b68a9af41972bcc25a9f66b1894f3b93b4a3cf49cbc83bf52484e",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

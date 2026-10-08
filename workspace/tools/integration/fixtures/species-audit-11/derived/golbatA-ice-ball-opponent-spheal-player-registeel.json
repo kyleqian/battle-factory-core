@@ -1,0 +1,173 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "ICE_BALL",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-11/scenarios/golbatA-ice-ball-opponent-spheal-player-registeel.json",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 154
+ },
+ "windowSource": "speciesAudit11: window = [activation, activation + 76 - 1] of the swapped scenario's own first ICE_BALL body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "no-event",
+ "attacker": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "REGISTEEL",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793700280,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 187,
+  "playerMaxHp": 187,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "none",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 30,
+  "rolloutCounter": 1
+ },
+ "presentationRngActivation": {
+  "value": 1614213648,
+  "source": "prep22Probe.py rng2Series[80] stepped back once (activation frame 79)"
+ },
+ "speciesAudit11": {
+  "acceptedFixture": "tools/integration/fixtures/s10a-live/ice-ball-opponent-spheal-player-registeel.json",
+  "swappedSide": "opponent",
+  "bodies": [
+   [
+    301,
+    79,
+    154,
+    1
+   ],
+   [
+    33,
+    334,
+    375,
+    0
+   ],
+   [
+    301,
+    1012,
+    1087,
+    1
+   ],
+   [
+    33,
+    1270,
+    1311,
+    0
+   ],
+   [
+    33,
+    2106,
+    2147,
+    0
+   ],
+   [
+    301,
+    2881,
+    2956,
+    1
+   ],
+   [
+    33,
+    3136,
+    3177,
+    0
+   ],
+   [
+    301,
+    3814,
+    3889,
+    1
+   ],
+   [
+    33,
+    4072,
+    4113,
+    0
+   ],
+   [
+    301,
+    4748,
+    4823,
+    1
+   ],
+   [
+    33,
+    5105,
+    5146,
+    0
+   ],
+   [
+    301,
+    5682,
+    5757,
+    1
+   ],
+   [
+    33,
+    5960,
+    6001,
+    0
+   ],
+   [
+    301,
+    6616,
+    6747,
+    1
+   ],
+   [
+    33,
+    6975,
+    7016,
+    0
+   ],
+   [
+    301,
+    7551,
+    7626,
+    1
+   ],
+   [
+    33,
+    7806,
+    7847,
+    0
+   ],
+   [
+    301,
+    8484,
+    8559,
+    1
+   ],
+   [
+    33,
+    8742,
+    8783,
+    0
+   ]
+  ],
+  "bodyIndex": 0,
+  "rows": 76,
+  "personality": [
+   2349018900,
+   1793700280
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

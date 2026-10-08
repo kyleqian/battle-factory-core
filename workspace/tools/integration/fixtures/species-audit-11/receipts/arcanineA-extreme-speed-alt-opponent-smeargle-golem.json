@@ -1,0 +1,29 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/arcanineA-extreme-speed-alt-opponent-smeargle-golem.json",
+  "move": "EXTREME_SPEED",
+  "selectedPhase": true,
+  "window": 321,
+  "expectedDuration": 321,
+  "runs": [
+   {
+    "rows": 321,
+    "exactRows": 321,
+    "residualPixels": 0,
+    "digest": "359ae2448a15b69a4565a78388ac27fa8af70a8dc21a771cc8efbf5e707e26dc",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 321,
+    "exactRows": 321,
+    "residualPixels": 0,
+    "digest": "359ae2448a15b69a4565a78388ac27fa8af70a8dc21a771cc8efbf5e707e26dc",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

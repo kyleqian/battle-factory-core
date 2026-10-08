@@ -1,0 +1,14 @@
+  [-] clamperlA-dive-player-chinchou-opponent-onix 119/119 px 0 dur 119 identical true
+  [-] dive-alt-player-lanturn-golem 118/118 px 0 dur 118 identical true
+  [-] dive-extra-player-chinchou-golbat 117/118 px 284 dur 118 identical true
+  [-] dive-extra-player-chinchou-golem 117/118 px 284 dur 118 identical true
+  [-] dive-extra-player-chinchou-golem-prep11 118/118 px 0 dur 118 identical true
+  [-] dive-extra-player-chinchou-shuckle 118/118 px 0 dur 118 identical true
+  [-] dive-opponent-chinchou-player-onix 115/115 px 0 dur 115 identical true
+  [-] dive-player-chinchou-opponent-onix 118/118 px 0 dur 118 identical true
+  [-] flygonA-dive-player-chinchou-opponent-onix 118/118 px 0 dur 118 identical true
+  [-] golbatA-dive-opponent-chinchou-player-onix 112/112 px 0 dur 112 identical true
+  [-] onixA-dive-opponent-chinchou-player-onix 113/113 px 0 dur 113 identical true
+  [-] rattataA-dive-player-chinchou-opponent-onix 119/119 px 0 dur 119 identical true
+  [-] steelixA-dive-player-chinchou-opponent-onix 118/118 px 0 dur 118 identical true
+  [-] wailordA-dive-player-chinchou-opponent-onix 119/119 px 0 dur 119 identical true

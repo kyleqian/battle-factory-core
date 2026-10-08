@@ -1,0 +1,89 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "ICE_BALL",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-11/scenarios/steelix-ice-ball-player-spheal-opponent-registeel.json",
+ "denseWindow": {
+  "startFrame": 75,
+  "endFrame": 150
+ },
+ "windowSource": "speciesAudit11: window = [activation, activation + 76 - 1] of the swapped scenario's own first ICE_BALL body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "no-event",
+ "attacker": {
+  "species": "SPHEAL",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "STEELIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019030,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 177,
+  "playerMaxHp": 177,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 30,
+  "rolloutCounter": 1
+ },
+ "presentationRngActivation": {
+  "value": 3668811069,
+  "source": "prep22Probe.py rng2Series[76] stepped back once (activation frame 75)"
+ },
+ "speciesAudit11": {
+  "acceptedFixture": "tools/integration/fixtures/s10a-live/ice-ball-player-spheal-opponent-registeel.json",
+  "swappedSide": "opponent",
+  "bodies": [
+   [
+    301,
+    75,
+    150,
+    0
+   ],
+   [
+    33,
+    258,
+    299,
+    1
+   ],
+   [
+    301,
+    421,
+    496,
+    0
+   ],
+   [
+    33,
+    621,
+    662,
+    1
+   ],
+   [
+    301,
+    786,
+    861,
+    0
+   ]
+  ],
+  "bodyIndex": 0,
+  "rows": 76,
+  "personality": [
+   2349019030,
+   1793700275
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

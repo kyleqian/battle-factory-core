@@ -1,0 +1,91 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "DIVE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-11/scenarios/steelixA-dive-opponent-chinchou-player-onix.json",
+ "denseWindow": {
+  "startFrame": 267,
+  "endFrame": 379
+ },
+ "windowSource": "speciesAudit11: window = [activation, activation + 113 - 1] of the swapped scenario's own first DIVE body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": null,
+ "attacker": {
+  "species": "STEELIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703950,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 129,
+  "playerMaxHp": 129,
+  "opponentHp": 137,
+  "opponentMaxHp": 138,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "messageLines": [
+  "",
+  ""
+ ],
+ "presentationRngActivation": {
+  "value": 2515912021,
+  "source": "prep22Probe.py rng2Series[268] stepped back once (activation frame 267)"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "player"
+  }
+ ],
+ "speciesAudit11": {
+  "acceptedFixture": "tools/integration/fixtures/s10a-live/dive-opponent-chinchou-player-onix.json",
+  "swappedSide": "opponent",
+  "bodies": [
+   [
+    33,
+    68,
+    109,
+    0
+   ],
+   [
+    291,
+    267,
+    379,
+    1
+   ],
+   [
+    291,
+    763,
+    855,
+    1
+   ],
+   [
+    0,
+    1098,
+    1309,
+    0
+   ]
+  ],
+  "bodyIndex": 1,
+  "rows": 113,
+  "personality": [
+   2349015248,
+   1793703950
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

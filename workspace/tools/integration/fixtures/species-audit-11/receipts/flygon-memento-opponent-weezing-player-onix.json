@@ -1,0 +1,29 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/flygon-memento-opponent-weezing-player-onix.json",
+  "move": "MEMENTO",
+  "selectedPhase": true,
+  "window": 175,
+  "expectedDuration": 175,
+  "runs": [
+   {
+    "rows": 175,
+    "exactRows": 175,
+    "residualPixels": 0,
+    "digest": "41accabe27c4eccf9ab754b2ac6027999b05050587982a48173276e01087185d",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 175,
+    "exactRows": 175,
+    "residualPixels": 0,
+    "digest": "41accabe27c4eccf9ab754b2ac6027999b05050587982a48173276e01087185d",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]
