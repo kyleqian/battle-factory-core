@@ -2963,9 +2963,12 @@
         "../tools/integration/fixtures/prep9-live-adapter-receipt.json"
       ],
       "liveEvidence": [
-        "dense source framebuffer, both orientations, twice fresh, zero residual, 230 rows, player attacker only (prep7-double-team-player.json, first-body lab run ONIX -> GROVYLE, window 71..300 = activation 70 + 1; the staged post-AI-body history of the accepted fixture cannot be replayed by the plan applier): row -1, no #142 shadow row; opponent attacker returns null (no accepted evidence)",
+        "dense source framebuffer, twice fresh, zero residual, 230 rows, player attacker (prep7-double-team-player.json, first-body lab run ONIX -> GROVYLE, window 71..300 = activation 70 + 1; the staged post-AI-body history of the accepted fixture cannot be replayed by the plan applier): row -1, no #142 shadow row",
         "ordinary route seed 0 / streak 7 / index 2 (DELCATTY, first body, stat command no longer invalidates the order): adapter active every age, ON/OFF rules/RNG equal; action-menu reached",
-        "alternate species: no alternate-species dense proof (alternate carrier render-only)"
+        "alternate species: no alternate-species dense proof (alternate carrier render-only)",
+        "S10A sides: OPPONENT attacker added (liveMoveAnimationDuration(104) = 230 both sides; battleScene.ts DOUBLE_TEAM live gate either side, an opponent-side battler at its front idle rest, the clones keep its y2). Dense windows activation + 1 .. + 230 (row -1, no #142 activation row) from fresh direct-mGBA prep22Probe runs of tools/battle-lab/s10aside-double-team-*.json through the production live renderer, two invocations x two fresh runs, 0 px every row: accepted pair GROVYLE -> ONIX, alternate DELCATTY -> GOLEM, elevated GOLBAT opponent attacker, and the player attacker ONIX -> elevated GOLBAT target; the prep7 player fixture re-run 0 px (tools/integration/fixtures/s10a-live/double-team-*.json, receipt tools/integration/fixtures/sides-live-receipt.json; tests/animation/liveDoubleTeamSides.test.ts)",
+        "S10A sides #142: an elevated opponent's shadow is shown on rows 158..161 (script end .. General_StatsChange activation, SpriteCB_EnemyShadow) in either role (LIVE_MOVE_OPPONENT_SHADOW_GAP_ROWS[104]; GOLBAT 200 px x 4 rows otherwise, measured on the opponent-attacker window)",
+        "ordinary route seed 3014 / streak 14 / index 2: the opponent's first body is Double Team, adapter active 230/230, action-menu, ON/OFF rules/RNG/facility equal"
       ],
       "palettePlan": "no plan, history invalidates",
       "spriteOrder": "gate: lent tracked order known, else null. frontClone = 'b' when slot 4 precedes slot 3 in the lend (first body), 'a' otherwise (the post-AI-body history)",

@@ -526,6 +526,14 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
 export const LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS: Readonly<Record<number, number>> = Object.freeze({ 113: 2, 248: 2 });
 
 /**
+ * Interior rows [first, last] of a live window on which the elevated-opponent shadow is shown between the move script's end and
+ * a following in-window unit: `SpriteCB_EnemyShadow` re-shows it one display frame after the script ends and hides it one frame
+ * after the next script activates. Double Team: script end row 157, General_StatsChange activation row 161 (S10A sides, elevated
+ * GOLBAT either role: 200 px on rows 158..161 otherwise; tools/integration/fixtures/s10a-live/double-team-*.json).
+ */
+export const LIVE_MOVE_OPPONENT_SHADOW_GAP_ROWS: Readonly<Record<number, readonly [number, number]>> = Object.freeze({ 104: [158, 161] });
+
+/**
  * ISSUES #147: ordinary rows after a live body on which the elevated-opponent shadow stays hidden, keyed by attacker side
  * then move id. `SpriteCB_EnemyShadow` re-shows the shadow one display frame after the ROM script ends; these accepted
  * windows end d = scriptEnd - E frames before it, so the shadow returns on E + d + 1
@@ -545,8 +553,10 @@ export function liveMoveOpponentShadowPostBodyHideRows(request: BattleMoveAnimat
   return LIVE_MOVE_OPPONENT_SHADOW_POST_BODY_HIDE_ROWS[request.attacker === 0 ? "player" : "opponent"][request.moveId] ?? 0;
 }
 
-/** True when `age` is on one of the final return rows of a request (see LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS). */
+/** True when `age` is on one of the final return rows or interior gap rows of a request (LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS / _GAP_ROWS). */
 export function liveMoveOpponentShadowReturn(request: BattleMoveAnimationRequest, age: number): boolean {
+  const gap = LIVE_MOVE_OPPONENT_SHADOW_GAP_ROWS[request.moveId];
+  if (gap !== undefined && age >= gap[0] && age <= gap[1]) return true;
   const rows = LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS[request.moveId];
   if (rows === undefined) return false;
   const duration = liveMoveAnimationDuration(request);
@@ -1085,8 +1095,9 @@ export function liveMoveAnimationDuration(
     case 85: return 237; // Thunderbolt 83..319 / 79..315.
     case 254: return 99; // Stockpile 205..303 / 207..305 (after a Peck body).
     case 192: return 112; // Zap Cannon 84..195 / 80..191.
-    // Double Team 71..300 (first-body lab run, activation 70; player attacker only, no accepted opponent evidence): row -1.
-    case 104: return request.attacker === 0 ? 230 : null;
+    // Double Team 71..300 (first-body lab run, activation 70): row -1. Opponent attacker 78..307 (S10A sides: activation 77, same
+    // 230 rows; tools/integration/fixtures/s10a-live/double-team-opponent-*.json).
+    case 104: return 230;
     // Feather Dance: activation..script end (79..246 / 83..250); the controller's stat banner and messages that follow are
     // queue commands (prep7 s2.2). The reducer is relative to the printer, +44 at the activation frame.
     case 297: return 168;

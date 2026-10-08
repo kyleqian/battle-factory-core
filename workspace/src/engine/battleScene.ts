@@ -49740,11 +49740,10 @@ export function renderSceneOnMovePresentation(
   if (state.config.move === "DOUBLE_TEAM") {
     const view = sceneOnDoubleTeamView(state);
     const { attacker, target } = view;
-    // The live adapter is player-attacker only (no accepted opponent-attacker evidence): art follows the displayed species.
+    // Live: either attacker side (S10A sides), art follows the displayed species; staged: player ONIX -> GROVYLE only.
     if (
-      (!liveField && (attacker.species !== "ONIX" || target.species !== "GROVYLE"))
-      || attacker.geometry.side !== "player"
-      || target.geometry.side !== "opponent"
+      (!liveField && (attacker.species !== "ONIX" || target.species !== "GROVYLE" || attacker.geometry.side !== "player"))
+      || attacker.geometry.side === target.geometry.side
     ) {
       throw new Error(
         `unsupported staged DOUBLE_TEAM pair ${attacker.species}->${target.species}`,
@@ -49759,7 +49758,11 @@ export function renderSceneOnMovePresentation(
     );
     const targetArt = liveField ? liveSceneOnBattlerArt(target) : grovyleFrontSprite;
     const attackerArt = liveField ? liveSceneOnBattlerArt(attacker) : onixBackSprite;
-    const targetIdle = liveField ? sceneOnBattlerFrontIdleRest(target) : { x2: 0, y2: 0 };
+    // Only an opponent-side battler has a settled front idle offset; the clones copy the attacker's y2 (CloneBattlerSpriteWithBlend)
+    // and AnimDoubleTeam overwrites x2.
+    const restOf = (b: typeof target) => liveField && b.geometry.side === "opponent" ? sceneOnBattlerFrontIdleRest(b) : { x2: 0, y2: 0 };
+    const targetIdle = restOf(target);
+    const attackerIdle = restOf(attacker);
     drawSpriteSheet(
       fb,
       targetArt.tileset,
@@ -49774,7 +49777,7 @@ export function renderSceneOnMovePresentation(
         attackerArt.tileset,
         palette,
         attacker.geometry.spriteCorner.x + offset,
-        attacker.geometry.spriteCorner.y,
+        attacker.geometry.spriteCorner.y + attackerIdle.y2,
         12,
         8,
       );
@@ -49790,8 +49793,8 @@ export function renderSceneOnMovePresentation(
         fb,
         attackerArt.tileset,
         attackerArt.palette,
-        attacker.geometry.spriteCorner.x,
-        attacker.geometry.spriteCorner.y,
+        attacker.geometry.spriteCorner.x + attackerIdle.x2,
+        attacker.geometry.spriteCorner.y + attackerIdle.y2,
       );
     }
     if (view.statsBanner) {
