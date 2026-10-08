@@ -46,8 +46,9 @@ describe("attacker-doll swap cells (prep40)", () => {
     // Aerial Ace opponent: the doll-free control's own 1 px is not an accepted scope, so the subbed opponent still declines.
     expect(liveMoveAnimationDuration(req(332, 1), field(false, false))).toBe(50);
     expect(liveMoveAnimationDuration(req(332, 1), field(false, true))).toBeNull();
-    // Rock Slide: no player adapter at all.
-    expect(liveMoveAnimationDuration(req(157, 0), field(false, false))).toBeNull();
+    // Rock Slide: the plain player attacker is live (S10A sides, 138 rows); a subbed player attacker is not a proven swap cell.
+    expect(liveMoveAnimationDuration(req(157, 0), field(false, false))).toBe(138);
+    expect(liveMoveAnimationDuration(req(157, 0), field(true, false))).toBeNull();
     // Multi-hit, both dolls and unproven bodies keep declining.
     expect(liveMoveAnimationDuration(req(57, 0, { multihit: 2 }), field(true, false))).toBeNull();
     expect(liveMoveAnimationDuration(req(57, 0), field(true, true))).toBeNull();
