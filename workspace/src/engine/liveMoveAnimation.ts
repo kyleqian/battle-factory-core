@@ -82,7 +82,7 @@ import { waterSpoutTimeline, type WaterSpoutLiveInputs } from "../animation/wate
 import { hiddenPowerUnownFormIndex } from "../animation/hiddenPower.ts";
 import type { FlailPower } from "../animation/flail.ts";
 import type { HailProfile } from "../animation/hail.ts";
-import { composeLivePalettes, liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
+import { composeLiveFieldPalettes, composeLivePalettes, liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
 import lovelyKissAsset from "../animation/assets/lovely-kiss.json" with { type: "json" };
 import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
 import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
@@ -763,6 +763,10 @@ export const LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS: ReadonlyMap<number, readonly (
   // Order-dependent bodies: exact with the Substitute body's order-neutral lend (spriteOrderEventTransform.ts).
   [202, ["player", "opponent"]], // Giga Drain
   [189, ["player", "opponent"]], // Mud-Slap (D3)
+  // Renderer-local art lookups routed to the doll (+ Megahorn's doll palette bank; composeLiveFieldPalettes), with the order lend.
+  [58, ["player", "opponent"]], // Ice Beam
+  [85, ["player", "opponent"]], // Thunderbolt
+  [224, ["player", "opponent"]], // Megahorn (D4)
 ].map(([id, sides]) => [id as number, Object.freeze(sides as ("player" | "opponent")[])]));
 
 /**
@@ -3385,7 +3389,8 @@ export function liveMoveAnimationPresentation(
       // palette slots 7 / 8, matrices 0 / 3), non-shiny, the attacker's idle rest zero. Both CPU-phase bits come from the timing policy.
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      // A defender shown as the Substitute doll: its OBJ bank holds the doll palette (the monbg draws the doll with it).
+      const palettes = composeLiveFieldPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || activationOrder === null) return null;

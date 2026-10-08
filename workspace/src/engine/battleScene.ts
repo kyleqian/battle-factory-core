@@ -14884,11 +14884,16 @@ export function renderGeneratedBattleCommandPresentation(
  * particles, palette effects, healthboxes, and text are assembled from
  * explicit geometry/profile inputs; no canonical battle clock participates.
  */
+/** The doll sheet + palette while the side's displayed battler is the Substitute doll in a live body (liveSubstituteDollSides), else null. */
+function liveSubstituteDollArt(side: "player" | "opponent"): { tileset: Tileset; palette: RgbColor[]; frame2: Tileset } | null {
+  if (!liveSubstituteDollSides[side]) return null;
+  const sheet = (side === "player" ? substituteAsset.back : substituteAsset.front) as unknown as Tileset;
+  return { tileset: sheet, palette: substituteAsset.palette as unknown as RgbColor[], frame2: sheet };
+}
+
 function liveSceneOnBattlerArt(battler: { species: string; geometry: { side: "player" | "opponent" } }) {
-  if (liveSubstituteDollSides[battler.geometry.side]) {
-    const sheet = (battler.geometry.side === "player" ? substituteAsset.back : substituteAsset.front) as unknown as Tileset;
-    return { tileset: sheet, palette: substituteAsset.palette as unknown as RgbColor[], frame2: sheet };
-  }
+  const doll = liveSubstituteDollArt(battler.geometry.side);
+  if (doll) return doll;
   const source = battler.geometry.side === "player"
     ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
     : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
@@ -15738,6 +15743,8 @@ export function renderSceneOnMovePresentation(
       readonly tileset: Tileset;
       readonly palette: RgbColor[];
     } => {
+      const doll = liveSubstituteDollArt(battler.geometry.side);
+      if (doll) return doll;
       if (battler.geometry.side === "player") {
         const source = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[
           battler.species
@@ -25397,6 +25404,8 @@ export function renderSceneOnMovePresentation(
     const view = sceneOnMegaHornView(moveState), plan = megaHornDisplayPlan(view);
     type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
     const artFor = (battler: typeof view.attacker, displaySpecies: string): BattlerArt => {
+      const doll = liveSubstituteDollArt(battler.geometry.side);
+      if (doll) return doll;
       const found = battler.geometry.side === "player"
         ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[displaySpecies]
         : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[displaySpecies];
@@ -27500,6 +27509,8 @@ export function renderSceneOnMovePresentation(
     }
     type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
     const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const doll = liveSubstituteDollArt(battler.geometry.side);
+      if (doll) return doll;
       const art = battler.geometry.side === "player"
         ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
         : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];

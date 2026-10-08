@@ -77,15 +77,15 @@ describe("live adapters decline while the Substitute doll is shown", () => {
     const req = (attacker: 0 | 1, moveId = 188): BattleMoveAnimationRequest => ({ moveId, attacker, target: attacker === 0 ? 1 : 0, turn: 0 } as unknown as BattleMoveAnimationRequest);
     expect(LIVE_MOVE_ANIMATION_IDS).toContain(188);
     for (const attacker of [0, 1] as const) {
-      for (const moveId of [188, 58]) {
+      for (const moveId of [188, 29]) {
         expect(liveMoveSubstituteDollDeclines(req(attacker, moveId), plain)).toBe(false);
         expect(liveMoveAnimationDuration(req(attacker, moveId), plain)).not.toBeNull();
       }
       for (const flagged of ["player", "opponent"] as const) {
         const field = { ...plain, [flagged]: { ...plain[flagged], substituteDoll: true } } as BattleResolutionDisplayedField;
         const defenderDoll = (flagged === "player") !== (attacker === 0);
-        // Sludge Bomb (188) is a proven defender-doll cell on both sides (prep38); Ice Beam (58) is not.
-        for (const moveId of defenderDoll ? [58] : [188, 58]) {
+        // Sludge Bomb (188) is a proven defender-doll cell on both sides (prep38); Headbutt (29) is not.
+        for (const moveId of defenderDoll ? [29] : [188, 29]) {
           expect(liveMoveSubstituteDollDeclines(req(attacker, moveId), field)).toBe(true);
           expect(liveMoveAnimationDuration(req(attacker, moveId), field)).toBeNull();
           expect(liveMoveAnimationPresentation(req(attacker, moveId), field, 0)).toBeNull();

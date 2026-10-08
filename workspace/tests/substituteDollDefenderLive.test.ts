@@ -39,6 +39,8 @@ describe("defender shown as the Substitute doll: proven cells live, everything e
       "94:opponent", "94:player", "98:opponent",
       // Order-dependent cells, exact with the Substitute body's order-neutral lend (Giga Drain, Mud-Slap D3).
       "189:opponent", "189:player", "202:opponent", "202:player",
+      // Renderer-local art lookups routed to the doll (Ice Beam, Thunderbolt; Megahorn D4 + the doll palette bank).
+      "58:opponent", "58:player", "85:opponent", "85:player", "224:opponent", "224:player",
     ].sort());
   });
   it("a proven cell keeps its doll-free duration; unproven orientations / moves and both-doll bodies decline", () => {
@@ -50,8 +52,8 @@ describe("defender shown as the Substitute doll: proven cells live, everything e
       expect(liveMoveAnimationDuration(req(moveId, attacker), field(true, true))).toBeNull();
     }
     // Unproven orientations (residuals: Aerial Ace / Shadow Ball opponent = the doll-free control's, Quick Attack / Double-Edge player
-    // unresolved) and unproven moves (Ice Beam, Thunderbolt, Megahorn: species-art lookups; Giga Drain, Mud-Slap: order) decline.
-    for (const [moveId, attacker] of [[332, 1], [247, 1], [98, 0], [38, 0], [58, 0], [58, 1], [85, 0], [224, 1], [29, 0]] as const) {
+    // unresolved) and unmeasured moves (Headbutt, Leech Seed) decline.
+    for (const [moveId, attacker] of [[332, 1], [247, 1], [98, 0], [38, 0], [29, 0], [29, 1], [73, 0], [73, 1]] as const) {
       expect(liveMoveAnimationDuration(req(moveId, attacker), field(false, false))).not.toBeNull();
       expect(liveMoveSubstituteDollDeclines(req(moveId, attacker), defenderDoll(attacker))).toBe(true);
       expect(liveMoveAnimationDuration(req(moveId, attacker), defenderDoll(attacker))).toBeNull();
@@ -103,7 +105,7 @@ describe("the Substitute body is order-neutral in the sprite-order tracker", () 
 describe("dense direct-mGBA windows through the production live renderer (committed ROM RGB sha256 per row)", () => {
   it("every committed fixture is a defender-doll TEST body of a proven cell", () => {
     const stems = readdirSync(FIXTURES).filter((n) => n.endsWith(".json"));
-    expect(stems.length).toBeGreaterThanOrEqual(41);
+    expect(stems.length).toBeGreaterThanOrEqual(53);
     for (const n of stems) {
       const f = fixture(n.replace(/\.json$/, ""));
       expect(f.defenderDoll).toBe(true);
