@@ -1,0 +1,36 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/tyranitar-dive-opponent-chinchou-player-onix.json",
+  "move": "DIVE",
+  "measuredPhase": null,
+  "selectedPhase": true,
+  "window": 115,
+  "expectedDuration": 115,
+  "runs": [
+   {
+    "rows": 115,
+    "exactRows": 114,
+    "residualPixels": 4,
+    "digest": "5eed27a291cd2435aefc2b075c325dda1c877356454bc3843e871aa017197e83",
+    "affectedAges": [
+     65
+    ],
+    "maxPixelsPerRow": 4
+   },
+   {
+    "rows": 115,
+    "exactRows": 114,
+    "residualPixels": 4,
+    "digest": "5eed27a291cd2435aefc2b075c325dda1c877356454bc3843e871aa017197e83",
+    "affectedAges": [
+     65
+    ],
+    "maxPixelsPerRow": 4
+   }
+  ],
+  "documentedAges": null,
+  "violations": [
+   "selected phase residual 4 px on ages 65"
+  ]
+ }
+]

@@ -1,0 +1,36 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/weezingA-dive-player-chinchou-opponent-onix.json",
+  "move": "DIVE",
+  "measuredPhase": "event",
+  "measuredPhases": {
+   "oam-transfer-row": "event"
+  },
+  "policyPhases": {
+   "oam-transfer-row": "event"
+  },
+  "selectedPhase": true,
+  "window": 118,
+  "expectedDuration": 118,
+  "runs": [
+   {
+    "rows": 118,
+    "exactRows": 118,
+    "residualPixels": 0,
+    "digest": "f8189e9f4bbebe3d886856d6ee2d57a0852a6a7cb7d2d652f15afd9d51d7cd2c",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 118,
+    "exactRows": 118,
+    "residualPixels": 0,
+    "digest": "f8189e9f4bbebe3d886856d6ee2d57a0852a6a7cb7d2d652f15afd9d51d7cd2c",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

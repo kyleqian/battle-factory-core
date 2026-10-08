@@ -1,0 +1,30 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/steelix-dive-opponent-chinchou-player-onix.json",
+  "move": "DIVE",
+  "measuredPhase": null,
+  "selectedPhase": true,
+  "window": 115,
+  "expectedDuration": 115,
+  "runs": [
+   {
+    "rows": 115,
+    "exactRows": 115,
+    "residualPixels": 0,
+    "digest": "7411563480d255dc6bc5ef0fc888109a4674c791043c92a364ca6f2ecb627540",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 115,
+    "exactRows": 115,
+    "residualPixels": 0,
+    "digest": "7411563480d255dc6bc5ef0fc888109a4674c791043c92a364ca6f2ecb627540",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

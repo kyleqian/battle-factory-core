@@ -1,0 +1,35 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/tyranitar-memento-player-weezing-opponent-onix.json",
+  "move": "MEMENTO",
+  "selectedPhase": true,
+  "window": 178,
+  "expectedDuration": 178,
+  "runs": [
+   {
+    "rows": 178,
+    "exactRows": 177,
+    "residualPixels": 2537,
+    "digest": "d2401c6fe551567394209fd81500e03fdfdb4e9c9a189a1680970f87b7fc800a",
+    "affectedAges": [
+     140
+    ],
+    "maxPixelsPerRow": 2537
+   },
+   {
+    "rows": 178,
+    "exactRows": 177,
+    "residualPixels": 2537,
+    "digest": "d2401c6fe551567394209fd81500e03fdfdb4e9c9a189a1680970f87b7fc800a",
+    "affectedAges": [
+     140
+    ],
+    "maxPixelsPerRow": 2537
+   }
+  ],
+  "documentedAges": null,
+  "violations": [
+   "selected phase residual 2537 px on ages 140"
+  ]
+ }
+]

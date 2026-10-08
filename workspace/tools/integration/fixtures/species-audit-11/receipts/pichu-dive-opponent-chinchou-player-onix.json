@@ -1,0 +1,30 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/pichu-dive-opponent-chinchou-player-onix.json",
+  "move": "DIVE",
+  "measuredPhase": null,
+  "selectedPhase": true,
+  "window": 115,
+  "expectedDuration": 115,
+  "runs": [
+   {
+    "rows": 115,
+    "exactRows": 115,
+    "residualPixels": 0,
+    "digest": "99025db6c9eddc1bf68a0e43e83463d35037ee33659d69253eeb6e4a29624700",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 115,
+    "exactRows": 115,
+    "residualPixels": 0,
+    "digest": "99025db6c9eddc1bf68a0e43e83463d35037ee33659d69253eeb6e4a29624700",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

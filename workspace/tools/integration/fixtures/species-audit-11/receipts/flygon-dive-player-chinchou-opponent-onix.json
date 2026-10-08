@@ -1,0 +1,36 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/flygon-dive-player-chinchou-opponent-onix.json",
+  "move": "DIVE",
+  "measuredPhase": "event",
+  "measuredPhases": {
+   "oam-transfer-row": "event"
+  },
+  "policyPhases": {
+   "oam-transfer-row": "event"
+  },
+  "selectedPhase": true,
+  "window": 118,
+  "expectedDuration": 118,
+  "runs": [
+   {
+    "rows": 118,
+    "exactRows": 118,
+    "residualPixels": 0,
+    "digest": "c12e7cbe923dabf18e06a78916da9bd20d1ed691f513b5af2d1fe9d7afd8f1f1",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 118,
+    "exactRows": 118,
+    "residualPixels": 0,
+    "digest": "c12e7cbe923dabf18e06a78916da9bd20d1ed691f513b5af2d1fe9d7afd8f1f1",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

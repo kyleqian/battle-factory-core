@@ -1,0 +1,29 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/steelix-memento-player-weezing-opponent-onix.json",
+  "move": "MEMENTO",
+  "selectedPhase": true,
+  "window": 178,
+  "expectedDuration": 178,
+  "runs": [
+   {
+    "rows": 178,
+    "exactRows": 178,
+    "residualPixels": 0,
+    "digest": "cf812d8e6ac171287372bd185546b7ccbd729598ba1ff122ae43d9f7a8abc0c8",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 178,
+    "exactRows": 178,
+    "residualPixels": 0,
+    "digest": "cf812d8e6ac171287372bd185546b7ccbd729598ba1ff122ae43d9f7a8abc0c8",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

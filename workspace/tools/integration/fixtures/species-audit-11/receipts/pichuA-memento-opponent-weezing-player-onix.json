@@ -1,0 +1,29 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/pichuA-memento-opponent-weezing-player-onix.json",
+  "move": "MEMENTO",
+  "selectedPhase": true,
+  "window": 179,
+  "expectedDuration": 179,
+  "runs": [
+   {
+    "rows": 179,
+    "exactRows": 179,
+    "residualPixels": 0,
+    "digest": "969cc63edb0c6151e8d62839ce417ca812c3a8409c2d11f36514b954cc72f46a",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 179,
+    "exactRows": 179,
+    "residualPixels": 0,
+    "digest": "969cc63edb0c6151e8d62839ce417ca812c3a8409c2d11f36514b954cc72f46a",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

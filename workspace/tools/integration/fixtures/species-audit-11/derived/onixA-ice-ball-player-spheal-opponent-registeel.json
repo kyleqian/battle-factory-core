@@ -1,0 +1,119 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "ICE_BALL",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-11/scenarios/onixA-ice-ball-player-spheal-opponent-registeel.json",
+ "denseWindow": {
+  "startFrame": 73,
+  "endFrame": 148
+ },
+ "windowSource": "speciesAudit11: window = [activation, activation + 76 - 1] of the swapped scenario's own first ICE_BALL body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "no-event",
+ "attacker": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "REGISTEEL",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019030,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 187,
+  "opponentMaxHp": 187,
+  "playerGender": "male",
+  "opponentGender": "none"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 30,
+  "rolloutCounter": 1
+ },
+ "presentationRngActivation": {
+  "value": 2024241883,
+  "source": "prep22Probe.py rng2Series[74] stepped back once (activation frame 73)"
+ },
+ "speciesAudit11": {
+  "acceptedFixture": "tools/integration/fixtures/s10a-live/ice-ball-player-spheal-opponent-registeel.json",
+  "swappedSide": "player",
+  "bodies": [
+   [
+    301,
+    73,
+    148,
+    0
+   ],
+   [
+    33,
+    331,
+    372,
+    1
+   ],
+   [
+    301,
+    563,
+    638,
+    0
+   ],
+   [
+    33,
+    823,
+    864,
+    1
+   ],
+   [
+    301,
+    1055,
+    1130,
+    0
+   ],
+   [
+    33,
+    1407,
+    1448,
+    1
+   ],
+   [
+    301,
+    1639,
+    1714,
+    0
+   ],
+   [
+    33,
+    1909,
+    1950,
+    1
+   ],
+   [
+    301,
+    2141,
+    2271,
+    0
+   ],
+   [
+    33,
+    2484,
+    2525,
+    1
+   ]
+  ],
+  "bodyIndex": 0,
+  "rows": 76,
+  "personality": [
+   2349019030,
+   1793700275
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

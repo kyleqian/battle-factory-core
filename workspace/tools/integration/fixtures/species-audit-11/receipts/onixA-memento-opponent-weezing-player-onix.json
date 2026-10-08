@@ -1,0 +1,29 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/onixA-memento-opponent-weezing-player-onix.json",
+  "move": "MEMENTO",
+  "selectedPhase": true,
+  "window": 176,
+  "expectedDuration": 176,
+  "runs": [
+   {
+    "rows": 176,
+    "exactRows": 176,
+    "residualPixels": 0,
+    "digest": "9b109a9d2e7c503fa5298e462139b9eeeedbbd8e21fc5287f961b8895142bbe9",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 176,
+    "exactRows": 176,
+    "residualPixels": 0,
+    "digest": "9b109a9d2e7c503fa5298e462139b9eeeedbbd8e21fc5287f961b8895142bbe9",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

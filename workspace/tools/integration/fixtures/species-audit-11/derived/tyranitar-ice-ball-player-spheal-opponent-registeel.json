@@ -1,0 +1,125 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "ICE_BALL",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-11/scenarios/tyranitar-ice-ball-player-spheal-opponent-registeel.json",
+ "denseWindow": {
+  "startFrame": 238,
+  "endFrame": 313
+ },
+ "windowSource": "speciesAudit11: window = [activation, activation + 76 - 1] of the swapped scenario's own first ICE_BALL body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "no-event",
+ "attacker": {
+  "species": "SPHEAL",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "TYRANITAR",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019030,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 148,
+  "playerMaxHp": 177,
+  "opponentHp": 207,
+  "opponentMaxHp": 207,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 30,
+  "rolloutCounter": 1
+ },
+ "presentationRngActivation": {
+  "value": 1295497942,
+  "source": "prep22Probe.py rng2Series[239] stepped back once (activation frame 238)"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ],
+ "speciesAudit11": {
+  "acceptedFixture": "tools/integration/fixtures/s10a-live/ice-ball-player-spheal-opponent-registeel.json",
+  "swappedSide": "opponent",
+  "bodies": [
+   [
+    33,
+    77,
+    118,
+    1
+   ],
+   [
+    301,
+    238,
+    313,
+    0
+   ],
+   [
+    0,
+    469,
+    635,
+    0
+   ],
+   [
+    33,
+    855,
+    896,
+    1
+   ],
+   [
+    301,
+    1015,
+    1090,
+    0
+   ],
+   [
+    0,
+    1259,
+    1425,
+    0
+   ],
+   [
+    33,
+    1645,
+    1686,
+    1
+   ],
+   [
+    301,
+    1918,
+    1993,
+    0
+   ],
+   [
+    0,
+    2182,
+    2348,
+    0
+   ],
+   [
+    33,
+    2568,
+    2609,
+    1
+   ]
+  ],
+  "bodyIndex": 1,
+  "rows": 76,
+  "personality": [
+   2349019030,
+   1793700275
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

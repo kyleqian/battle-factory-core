@@ -1,0 +1,30 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/rattata-dive-opponent-chinchou-player-onix.json",
+  "move": "DIVE",
+  "measuredPhase": null,
+  "selectedPhase": true,
+  "window": 115,
+  "expectedDuration": 115,
+  "runs": [
+   {
+    "rows": 115,
+    "exactRows": 115,
+    "residualPixels": 0,
+    "digest": "0abf16938778dc61d67ecfb3e643517b46c341f6e81b4a31e8c510d62ff7035d",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 115,
+    "exactRows": 115,
+    "residualPixels": 0,
+    "digest": "0abf16938778dc61d67ecfb3e643517b46c341f6e81b4a31e8c510d62ff7035d",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

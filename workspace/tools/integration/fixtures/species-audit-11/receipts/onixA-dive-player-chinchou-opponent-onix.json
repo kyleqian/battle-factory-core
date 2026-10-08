@@ -1,0 +1,36 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/onixA-dive-player-chinchou-opponent-onix.json",
+  "move": "DIVE",
+  "measuredPhase": "event",
+  "measuredPhases": {
+   "oam-transfer-row": "event"
+  },
+  "policyPhases": {
+   "oam-transfer-row": "event"
+  },
+  "selectedPhase": true,
+  "window": 118,
+  "expectedDuration": 118,
+  "runs": [
+   {
+    "rows": 118,
+    "exactRows": 118,
+    "residualPixels": 0,
+    "digest": "84416c4fe56db7e7870b6e516c1fedde32fac31892334f61e4ae2bc725bd9692",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 118,
+    "exactRows": 118,
+    "residualPixels": 0,
+    "digest": "84416c4fe56db7e7870b6e516c1fedde32fac31892334f61e4ae2bc725bd9692",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

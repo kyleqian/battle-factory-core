@@ -1,0 +1,67 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "EXTREME_SPEED",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-11/scenarios/pichuA-extreme-speed-alt-player-smeargle-golem.json",
+ "denseWindow": {
+  "startFrame": 75,
+  "endFrame": 395
+ },
+ "windowSource": "speciesAudit11: window = [activation, activation + 321 - 1] of the swapped scenario's own first EXTREME_SPEED body (2 fresh prep22Probe.py runs agree)",
+ "attacker": {
+  "species": "PICHU",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019025,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 96,
+  "playerMaxHp": 96,
+  "opponentHp": 156,
+  "opponentMaxHp": 156,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "speciesAudit11": {
+  "acceptedFixture": "tools/integration/fixtures/s10a-live/extreme-speed-alt-player-smeargle-golem.json",
+  "swappedSide": "player",
+  "bodies": [
+   [
+    245,
+    75,
+    395,
+    0
+   ],
+   [
+    106,
+    579,
+    680,
+    1
+   ],
+   [
+    0,
+    684,
+    759,
+    1
+   ]
+  ],
+  "bodyIndex": 0,
+  "rows": 321,
+  "personality": [
+   2349019025,
+   1793699975
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

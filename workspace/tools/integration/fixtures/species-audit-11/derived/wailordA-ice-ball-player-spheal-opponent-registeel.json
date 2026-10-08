@@ -1,0 +1,119 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "ICE_BALL",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-11/scenarios/wailordA-ice-ball-player-spheal-opponent-registeel.json",
+ "denseWindow": {
+  "startFrame": 76,
+  "endFrame": 151
+ },
+ "windowSource": "speciesAudit11: window = [activation, activation + 76 - 1] of the swapped scenario's own first ICE_BALL body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": "no-event",
+ "attacker": {
+  "species": "WAILORD",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "REGISTEEL",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019030,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 277,
+  "playerMaxHp": 277,
+  "opponentHp": 187,
+  "opponentMaxHp": 187,
+  "playerGender": "male",
+  "opponentGender": "none"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 30,
+  "rolloutCounter": 1
+ },
+ "presentationRngActivation": {
+  "value": 3668811069,
+  "source": "prep22Probe.py rng2Series[77] stepped back once (activation frame 76)"
+ },
+ "speciesAudit11": {
+  "acceptedFixture": "tools/integration/fixtures/s10a-live/ice-ball-player-spheal-opponent-registeel.json",
+  "swappedSide": "player",
+  "bodies": [
+   [
+    301,
+    76,
+    151,
+    0
+   ],
+   [
+    33,
+    337,
+    378,
+    1
+   ],
+   [
+    301,
+    500,
+    575,
+    0
+   ],
+   [
+    33,
+    765,
+    806,
+    1
+   ],
+   [
+    301,
+    930,
+    1005,
+    0
+   ],
+   [
+    33,
+    1301,
+    1342,
+    1
+   ],
+   [
+    301,
+    1464,
+    1539,
+    0
+   ],
+   [
+    33,
+    1751,
+    1792,
+    1
+   ],
+   [
+    301,
+    1916,
+    2046,
+    0
+   ],
+   [
+    33,
+    2295,
+    2336,
+    1
+   ]
+  ],
+  "bodyIndex": 0,
+  "rows": 76,
+  "personality": [
+   2349019030,
+   1793700275
+  ],
+  "freshProbeRunsAgree": true
+ }
+}

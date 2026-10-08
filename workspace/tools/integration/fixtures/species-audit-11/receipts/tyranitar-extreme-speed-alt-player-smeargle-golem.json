@@ -1,0 +1,66 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/tyranitar-extreme-speed-alt-player-smeargle-golem.json",
+  "move": "EXTREME_SPEED",
+  "selectedPhase": true,
+  "window": 320,
+  "expectedDuration": 321,
+  "runs": [
+   {
+    "rows": 320,
+    "exactRows": 304,
+    "residualPixels": 273504,
+    "digest": "3e5851a2f98f5d2597cffa0af326f55f11c794255dfa299b523920546afd2333",
+    "affectedAges": [
+     294,
+     295,
+     296,
+     297,
+     298,
+     299,
+     300,
+     301,
+     302,
+     303,
+     304,
+     305,
+     306,
+     307,
+     308,
+     309
+    ],
+    "maxPixelsPerRow": 17094
+   },
+   {
+    "rows": 320,
+    "exactRows": 304,
+    "residualPixels": 273504,
+    "digest": "3e5851a2f98f5d2597cffa0af326f55f11c794255dfa299b523920546afd2333",
+    "affectedAges": [
+     294,
+     295,
+     296,
+     297,
+     298,
+     299,
+     300,
+     301,
+     302,
+     303,
+     304,
+     305,
+     306,
+     307,
+     308,
+     309
+    ],
+    "maxPixelsPerRow": 17094
+   }
+  ],
+  "documentedAges": null,
+  "violations": [
+   "selected phase residual 273504 px on ages 294,295,296,297,298,299,300,301,302,303,304,305,306,307,308,309",
+   "duration 321 != window 320"
+  ]
+ }
+]

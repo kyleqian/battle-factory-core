@@ -1,0 +1,29 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/wailord-memento-opponent-weezing-player-onix.json",
+  "move": "MEMENTO",
+  "selectedPhase": true,
+  "window": 180,
+  "expectedDuration": 180,
+  "runs": [
+   {
+    "rows": 180,
+    "exactRows": 180,
+    "residualPixels": 0,
+    "digest": "db8b85d90d6f882057f0549dd71d4d61781a89f6369bb5757cb474ba448c74b4",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 180,
+    "exactRows": 180,
+    "residualPixels": 0,
+    "digest": "db8b85d90d6f882057f0549dd71d4d61781a89f6369bb5757cb474ba448c74b4",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

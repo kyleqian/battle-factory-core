@@ -1,0 +1,30 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-11/derived/wailord-dive-opponent-chinchou-player-onix.json",
+  "move": "DIVE",
+  "measuredPhase": null,
+  "selectedPhase": true,
+  "window": 115,
+  "expectedDuration": 115,
+  "runs": [
+   {
+    "rows": 115,
+    "exactRows": 115,
+    "residualPixels": 0,
+    "digest": "628b7e8722f2c779782465def44b69d982d7594933cce513dd1a49a090aeb996",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 115,
+    "exactRows": 115,
+    "residualPixels": 0,
+    "digest": "628b7e8722f2c779782465def44b69d982d7594933cce513dd1a49a090aeb996",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

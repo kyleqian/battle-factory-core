@@ -1,0 +1,91 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "DIVE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-11/scenarios/flygon-dive-opponent-chinchou-player-onix.json",
+ "denseWindow": {
+  "startFrame": 213,
+  "endFrame": 327
+ },
+ "windowSource": "speciesAudit11: window = [activation, activation + 115 - 1] of the swapped scenario's own first DIVE body (2 fresh prep22Probe.py runs agree)",
+ "timingPhase": null,
+ "attacker": {
+  "species": "CHINCHOU",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "FLYGON",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703950,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 174,
+  "playerMaxHp": 174,
+  "opponentHp": 105,
+  "opponentMaxHp": 138,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "messageLines": [
+  "",
+  ""
+ ],
+ "presentationRngActivation": {
+  "value": 802476527,
+  "source": "prep22Probe.py rng2Series[214] stepped back once (activation frame 213)"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "player"
+  }
+ ],
+ "speciesAudit11": {
+  "acceptedFixture": "tools/integration/fixtures/s10a-live/dive-opponent-chinchou-player-onix.json",
+  "swappedSide": "player",
+  "bodies": [
+   [
+    33,
+    70,
+    111,
+    0
+   ],
+   [
+    291,
+    213,
+    327,
+    1
+   ],
+   [
+    291,
+    768,
+    860,
+    1
+   ],
+   [
+    0,
+    944,
+    1155,
+    0
+   ]
+  ],
+  "bodyIndex": 1,
+  "rows": 115,
+  "personality": [
+   2349015248,
+   1793703950
+  ],
+  "freshProbeRunsAgree": true
+ }
+}
