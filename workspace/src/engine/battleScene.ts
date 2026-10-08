@@ -1,4 +1,5 @@
 import { liveMoveAnimationPresentation, liveMoveOpponentShadowRow, liveMoveOpponentShadowReturn } from "./liveMoveAnimation.ts";
+import { liveSubstituteSwapView } from "./liveSubstituteSwap.ts";
 // S6 scene-assembly + send-out engine slices: the BATTLE-SCENE ASSEMBLY
 // window (tools/compare/traces-groundtruth/battle1-scene-dense.json, trace
 // ticks 1040-1295) plus the SEND-OUT window (battle1-sendout-dense.json,
@@ -55100,6 +55101,15 @@ export function renderSceneOffTurnView(
 export function renderBattleResolutionLiveView(
   fb: Uint8Array, view: BattleResolutionPresentationRenderView,
 ): void {
+  // S10A Substitute swaps (liveSubstituteSwap.ts): a subbed attacker's proven body is framed by SUBSTITUTE_TO_MON and
+  // MON_TO_SUBSTITUTE; swap rows draw the ordinary field with the attacker's doll / mon at the task's x2.
+  const swap = liveSubstituteSwapView(view);
+  if (swap?.kind === "swap") {
+    renderBattleResolutionSceneOffView(fb, swap.view);
+    return;
+  }
+  const subbedOpponentAttacker = swap !== null && view.effect?.type === "move" && view.effect.request.attacker === 1;
+  if (swap) view = swap.view;
   const effect = view.effect;
   const presentation = effect?.type === "move"
     ? liveMoveAnimationPresentation(
@@ -55114,7 +55124,7 @@ export function renderBattleResolutionLiveView(
   const shadowRow = effect?.type === "move" ? liveMoveOpponentShadowRow(effect.request) : null;
   // SpriteCB_EnemyShadow (battle_gfx_sfx_util.c:1209) hides the shadow while !IsBattlerSpritePresent (HP 0: a self-KO attacker after
   // setatkhptozero, e.g. Memento's opponent-side WEEZING, prep34 s2.5 windows 0 px only without the shadow).
-  liveOpponentShadow.species = effect?.type === "move" && view.field.opponent.hp !== 0
+  liveOpponentShadow.species = effect?.type === "move" && view.field.opponent.hp !== 0 && !subbedOpponentAttacker
     && (effect.age === shadowRow || liveMoveOpponentShadowReturn(effect.request, effect.age))
     ? view.fieldArt.opponent.speciesSymbol : null;
   liveOpponentShadow.suppressAdHoc = effect?.type === "move" && effect.age === 0;
