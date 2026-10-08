@@ -28,9 +28,9 @@ const cases: { id: number; move: string; duration: Orders; shadow: number | unde
   // Sleep Talk needs a sleeping attacker: Seaking seed 3014 / streak 14 (prep7 s2.5): turn 1/2 the opponent plays Double Team and
   // Sleep Powder, the player's Sleep Talk (index 2) pressed three times fires on turn 3; the called move is an ordinary second request.
   { id: 214, move: "SLEEP_TALK", duration: [186, 189], shadow: 0, alt: ["WHISCASH", "ONIX"], route: { seed: 3014, move: 2, streak: 14, turns: 3, stall: true } },
-  // Rock Slide: opponent attacker only (no accepted player-attacker evidence: no adapter there, Faint Attack precedent). Route =
+  // Rock Slide: both attacker sides (S10A sides added the player attacker, tests/animation/liveRockSlideSides.test.ts). Route =
   // the opponent's Onix (seed 134, streak 0, player presses slot 0; first body, order known, prep7 s2.5).
-  { id: 157, move: "ROCK_SLIDE", duration: [null, 138], shadow: 0, alt: ["DUGTRIO", "ONIX"], route: { seed: 134, move: 0, streak: 0, attacker: 1 } },
+  { id: 157, move: "ROCK_SLIDE", duration: [138, 138], shadow: 0, alt: ["DUGTRIO", "ONIX"], route: { seed: 134, move: 0, streak: 0, attacker: 1 } },
   // Order consumers (first-body gate, known tracked order only). Routes: prep7 s2.5 (Charizard 8/21/0 slot 0; Kingdra 4/35/2).
   { id: 126, move: "FIRE_BLAST", duration: [197, 197], shadow: 0, alt: ["NINETALES", "ONIX"], route: { seed: 8, move: 0, streak: 21 }, order: true },
   { id: 349, move: "DRAGON_DANCE", duration: [142, 142], shadow: 0, alt: ["KINGDRA", "ONIX"], route: { seed: 4, move: 2, streak: 35 }, order: true },
@@ -81,8 +81,8 @@ describe("live prep7 move adapters", () => {
       expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[c.id]).toBe(c.shadow);
       for (const a of [0, 1] as const) expect(liveMoveAnimationDuration(request(c.id, a)), `${c.move} ${a}`).toBe(c.duration[a]);
     }
-    // Rock Slide has no player-attacker adapter.
-    expect(liveMoveAnimationPresentation(request(157, 0), displayed("ONIX", "GROVYLE"), 0)).toBeNull();
+    // Rock Slide: either attacker side (S10A sides).
+    expect(liveMoveAnimationPresentation(request(157, 0), displayed("ONIX", "GROVYLE"), 0)).not.toBeNull();
     expect(liveMoveAnimationPresentation(request(157, 1), displayed("ONIX", "GROVYLE"), 0)).not.toBeNull();
   });
 

@@ -526,6 +526,14 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
 export const LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS: Readonly<Record<number, number>> = Object.freeze({ 113: 2, 248: 2 });
 
 /**
+ * Interior rows [first, last] of a live window on which the elevated-opponent shadow is shown between the move script's end and
+ * a following in-window unit: `SpriteCB_EnemyShadow` re-shows it one display frame after the script ends and hides it one frame
+ * after the next script activates. Double Team: script end row 157, General_StatsChange activation row 161 (S10A sides, elevated
+ * GOLBAT either role: 200 px on rows 158..161 otherwise; tools/integration/fixtures/s10a-live/double-team-*.json).
+ */
+export const LIVE_MOVE_OPPONENT_SHADOW_GAP_ROWS: Readonly<Record<number, readonly [number, number]>> = Object.freeze({ 104: [158, 161] });
+
+/**
  * ISSUES #147: ordinary rows after a live body on which the elevated-opponent shadow stays hidden, keyed by attacker side
  * then move id. `SpriteCB_EnemyShadow` re-shows the shadow one display frame after the ROM script ends; these accepted
  * windows end d = scriptEnd - E frames before it, so the shadow returns on E + d + 1
@@ -545,8 +553,10 @@ export function liveMoveOpponentShadowPostBodyHideRows(request: BattleMoveAnimat
   return LIVE_MOVE_OPPONENT_SHADOW_POST_BODY_HIDE_ROWS[request.attacker === 0 ? "player" : "opponent"][request.moveId] ?? 0;
 }
 
-/** True when `age` is on one of the final return rows of a request (see LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS). */
+/** True when `age` is on one of the final return rows or interior gap rows of a request (LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS / _GAP_ROWS). */
 export function liveMoveOpponentShadowReturn(request: BattleMoveAnimationRequest, age: number): boolean {
+  const gap = LIVE_MOVE_OPPONENT_SHADOW_GAP_ROWS[request.moveId];
+  if (gap !== undefined && age >= gap[0] && age <= gap[1]) return true;
   const rows = LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS[request.moveId];
   if (rows === undefined) return false;
   const duration = liveMoveAnimationDuration(request);
@@ -1049,9 +1059,9 @@ export function liveMoveAnimationDuration(
     // The window ends 4 frames after the script end (124/128); duration = rows + ageOffset (the Dragon Breath convention).
     case 282: return 48;
     // Faint Attack: 221 rows (2344..2564 player attacker), reducer ages 0..220 (faintAttack.ts LAST_ANIMATION_OWNED_AGE);
-    // the window starts 4 frames after the script activation (row -4, no #142 shadow row). Only the player-attacker
-    // orientation has accepted evidence (prep6 s0): an opponent attacker returns null (no adapter, scene-off view).
-    case 185: return request.attacker === 0 ? 221 : null;
+    // the window starts 4 frames after the script activation (row -4, no #142 shadow row). Both attacker sides (prep6 s0 player;
+    // S10A sides opponent).
+    case 185: return 221;
     // Swallow: per stockpile branch (request.turn = gBattleScripting.animTurn = stockpileCounter, prep6 s2.1) and side:
     // player 163/178/193 (1247..1409 ...), opponent 161/176/191 (= 148 + 15 turn / 146 + 15 turn), every window end = script end.
     case 256:
@@ -1063,9 +1073,9 @@ export function liveMoveAnimationDuration(
     case 313: return 87; // Fake Tears 80..166 / 76..162: the first displayed row is one after activation (row -1, no shadow row), 83 script + 4 clear rows.
     // Sleep Talk accepted windows start at activation and end at the first inactive script row (1356..1541 / 4570..4758).
     case 214: return request.attacker === 0 ? 186 : 189;
-    // Rock Slide, opponent attacker only (no accepted player-attacker evidence): activation..first inactive script row
-    // (1967..2104); the 37 later accepted rows are the target hit flash (hitFlashAnchorAge 141) and controller HUD.
-    case 157: return request.attacker === 1 ? 138 : null;
+    // Rock Slide: activation..first inactive script row (1967..2104); the 37 later accepted rows are the target hit flash
+    // (hitFlashAnchorAge 141) and controller HUD. Both attacker sides (S10A sides: player attacker, s10a-live/rock-slide-*.json).
+    case 157: return 138;
     case 129: return request.attacker === 1 ? 80 : 78; // Swift 73..152 / 69..146 (prep8 s2.2): activation..script end.
     case 271: return 225; // Trick 70..294 / 66..290.
     // Magnitude 411..585 (power 70, 174 frames) / 191..397 (power 110, 206 frames): the reducer's first inactive age.
@@ -1085,8 +1095,9 @@ export function liveMoveAnimationDuration(
     case 85: return 237; // Thunderbolt 83..319 / 79..315.
     case 254: return 99; // Stockpile 205..303 / 207..305 (after a Peck body).
     case 192: return 112; // Zap Cannon 84..195 / 80..191.
-    // Double Team 71..300 (first-body lab run, activation 70; player attacker only, no accepted opponent evidence): row -1.
-    case 104: return request.attacker === 0 ? 230 : null;
+    // Double Team 71..300 (first-body lab run, activation 70): row -1. Opponent attacker 78..307 (S10A sides: activation 77, same
+    // 230 rows; tools/integration/fixtures/s10a-live/double-team-opponent-*.json).
+    case 104: return 230;
     // Feather Dance: activation..script end (79..246 / 83..250); the controller's stat banner and messages that follow are
     // queue commands (prep7 s2.2). The reducer is relative to the printer, +44 at the activation frame.
     case 297: return 168;
@@ -2274,7 +2285,7 @@ export function liveMoveAnimationPresentation(
     // the config (known seed shapes give 0 differing frames, prep6 s2.3), so there is no order input to lend.
     case 282: config = { move: "KNOCK_OFF", attacker, target, fieldProfile }; break;
     case 185:
-      if (attacker.geometry.side !== "player") return null;
+      // Either attacker side (S10A sides: the opponent attacker's dense windows, tools/integration/fixtures/s10a-live/faint-attack-*.json).
       // The canonical ONIX_TO_GROVYLE profile = the source-age constants (prep6 s2.1: spriteCorners and the target's
       // hit-splat centre derive exactly); the move text and HP chrome come from the live view under liveField.
       config = { move: "FAINT_ATTACK", attacker, target, animationProfile: FAINT_ATTACK_ANIMATION_PROFILE,
@@ -2346,7 +2357,6 @@ export function liveMoveAnimationPresentation(
     // `sleep`, prep7-sleep-talk-field.json). The called move is an ordinary second request (Metronome precedent).
     case 214: config = { move: "SLEEP_TALK", attacker, target }; break;
     case 157:
-      if (attacker.geometry.side !== "opponent") return null;
       // The reducer is seed-independent (0/40 arbitrary seeds, prep7 s2.3): the 64-entry spriteOrderSeed is the provider
       // order (known-entry occupied prefix + F) when the tracked order is known and the accepted known-entry literal
       // otherwise (both equal the observed order at a first body); the first-found pixel result is the same either way.

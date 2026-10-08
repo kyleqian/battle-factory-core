@@ -24,7 +24,7 @@ const cases: { id: number; move: string; duration: Pair; shadowRow: 0 | undefine
   { id: 72, move: "MEGA_DRAIN", duration: [218, 218], shadowRow: 0, alt: ["TANGELA", "ONIX"], route: { seed: 29, moves: [0], streak: 7 } },
   { id: 71, move: "ABSORB", duration: [194, 194], shadowRow: undefined, alt: ["LOMBRE", "ONIX"], route: { seed: 23, moves: [3], streak: 0 } },
   { id: 138, move: "DREAM_EATER", duration: [266, 267], shadowRow: 0, alt: ["JYNX", "ONIX"], route: { seed: 41, moves: [1, 2], streak: 14 } },
-  { id: 104, move: "DOUBLE_TEAM", duration: [230, null], shadowRow: undefined, alt: ["DELCATTY", "ONIX"], route: { seed: 0, moves: [2], streak: 7 } },
+  { id: 104, move: "DOUBLE_TEAM", duration: [230, 230], shadowRow: undefined, alt: ["DELCATTY", "ONIX"], route: { seed: 0, moves: [2], streak: 7 } },
   { id: 297, move: "FEATHER_DANCE", duration: [168, 168], shadowRow: 0, alt: ["PIDGEOT", "ONIX"], route: { seed: 3, moves: [2], streak: 0 } },
 ];
 
@@ -74,7 +74,7 @@ describe("live prep9 move adapters", () => {
     }
   });
 
-  it("gates every adapter on the lent tracked order; Double Team declines the opponent attacker", () => {
+  it("gates every adapter on the lent tracked order; Double Team is live for either attacker side (S10A sides)", () => {
     for (const c of cases) for (const a of [0, 1] as const) {
       if (c.duration[a] === null) continue;
       const field = a === 0 ? displayed(c.alt[0], c.alt[1]) : displayed(c.alt[1], c.alt[0]);
@@ -82,7 +82,7 @@ describe("live prep9 move adapters", () => {
       expect(cfg(field, request(c.id, a), { known: false } as never), `${c.move} ${a}`).toBeNull();
       expect(cfg(field, request(c.id, a), knownOrder(c.id)), `${c.move} ${a}`).not.toBeNull();
     }
-    expect(cfg(displayed("ONIX", "GROVYLE"), request(104, 1), knownOrder(104))).toBeNull();
+    expect(cfg(displayed("ONIX", "GROVYLE"), request(104, 1), knownOrder(104))).not.toBeNull();
   });
 
   it("derives the configs from the allocator constants, the production anchors and the lent order (prep9 s2)", () => {
