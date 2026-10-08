@@ -26,7 +26,7 @@ for Substitute instead, so under Scene OFF the doll only appears from the next p
 logical outcome measured to change). Gameplay-kernel owned: needs a main-lane fix with Scene OFF frame-timing proof.
 Evidence: `docs/next-adapters-prep37.md`, `tools/integration/fixtures/subst-live-receipt.json`.
 
-## #152 — Species audits 9-12 remainder: NIDORAN healthbox symbol, idle-rest / elevation gates, Extrasensory split rows, new lag cases (S10A, 2026-10-07)
+## #152 — Species audits 9-14 remainder: idle-rest attacker class, Extrasensory split rows, Confuse Ray CPU phase, TYRANITAR rows (S10A, 2026-10-07)
 
 Evidence `docs/live-species-audit-9.md`, receipts `tools/integration/fixtures/species-audit-9/`. FIXED in `a7402719b`
 (supervisor reran x2 fresh): Mach Punch opponent attacker with an idle rest (ONIX 86,089 -> 0 px, RATTATA 36,222 -> 0)
@@ -45,12 +45,9 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 - **Fixed in `e25fa104c` (2026-10-08):** the Extreme Speed / Dive CLAMPERL CPU-phase cases are D4 policy entries (Extreme
   Speed, Crunch and Psychic reclassified to faithful timing).
 - **TYRANITAR rows (Dive 4-9 px, Ice Ball 16 / 63 px, Memento 2,537 px at age 140):** unresolved; lags match.
-- **Audit 12 (`docs/live-species-audit-12.md`; Substitute / Skill Swap / Flatter / Eruption, 182 rows):** Substitute
-  shiny gate FIXED (`46319b2d9`). Open: (a) FIXED `2ba4da4a3` (NIDORAN healthbox gender symbol); the ROM's UpdateNickInHealthbox omits it (`healthboxAssembly.ts` ~:483 `nameGlyphRun`; patch proof
-  7,008 -> 0 px, 32 px every row) — check canonical traces before changing; (b) Flatter's elevated-opponent decline
-  is over-strict (registering 260 on the #142 row-0 hook makes FLYGON / GOLBAT / SHEDINJA / WEEZING 0 px); (c) Skill
-  Swap's idle-rest gate is over-strict (ONIX / RATTATA 0 px lifted); (d) Skill Swap ALAKAZAM opponent other-phase row
-  peaks at 18,778 px vs documented max 18,649 (checker gates on ages only); TYRANITAR Flatter 2 / 96 px unresolved.
+- **Audit 12 (`docs/live-species-audit-12.md`):** FIXED: Substitute shiny gate (`46319b2d9`); NIDORAN F / M healthbox gender
+  symbol, Flatter elevated-opponent gate (#142 row-0 hook), Skill Swap idle-rest gate and its documented other-phase max
+  (`2ba4da4a3`). Open: TYRANITAR Flatter 2 / 96 px unresolved.
 - **Doll-free controls from prep38 / dolldef (2026-10-08):** Shadow Ball (247) PERSIAN -> SLOWBRO player 304,556 px (rows 69..99 +
   the 156-row tail phase rows 137..152; also in the doll-free control, so a pre-existing Shadow Ball limit for that pair);
   Psychic opponent HAUNTER -> KADABRA 200 px on the pre-activation row (elevated attacker shadow); Quick Attack player
