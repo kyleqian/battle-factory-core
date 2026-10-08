@@ -6561,6 +6561,50 @@
    "requestFields": {
     "turn": 0
    }
+  },
+  {
+   "id": 164,
+   "move": "SUBSTITUTE",
+   "orientation": "player",
+   "variant": "s10a-substitute-player-golem-opponent-onix",
+   "activationFrame": 291,
+   "windowStart": 291,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/s10a-live/substitute-player-golem-opponent-onix.json",
+    "scenario": "tools/battle-lab/mechanic-substitute-player-golem-opponent-onix.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own Move_SUBSTITUTE activation frame (prep37Probes.sh twice fresh; subst-body live receipt; the elevated GOLBAT opponent attacker is 0 px from row 0 via the live hook, docs/next-adapters-prep37.md s1)"
+   },
+   "requestFields": {
+    "turn": 0
+   }
+  },
+  {
+   "id": 164,
+   "move": "SUBSTITUTE",
+   "orientation": "opponent",
+   "variant": "s10a-substitute-alt-opponent-golbat-slowbro",
+   "activationFrame": 76,
+   "windowStart": 76,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/s10a-live/substitute-alt-opponent-golbat-slowbro.json",
+    "scenario": "tools/battle-lab/prep37-on-opponent-golbat-slowbro.json",
+    "body": "normal",
+    "activation": "window start = the scenario's own Move_SUBSTITUTE activation frame (prep37Probes.sh twice fresh; subst-body live receipt; the elevated GOLBAT opponent attacker is 0 px from row 0 via the live hook, docs/next-adapters-prep37.md s1)"
+   },
+   "requestFields": {
+    "turn": 0
+   }
   }
  ]
 }

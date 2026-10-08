@@ -3719,6 +3719,21 @@
         "later bodies with a non-known-entry allocator (a second Eruption in one battle), shiny battlers, doubles and a status-animation-active attacker are not probed (prep36 s3)",
         "an attacker with a non-zero front idle rest declines (scene-off view; outside the Factory)"
       ]
+    },
+    {
+      "move": "MOVE_SUBSTITUTE",
+      "id": 164,
+      "sourceFieldEvidence": "../tools/integration/fixtures/prep37/body-patched.json",
+      "liveEvidence": [
+        "BODY only (docs/next-adapters-prep37.md s1/s3a.4): battleScene.ts SUBSTITUTE branch generalised under liveField exactly as tools/integration/prep37RendererPatch.ts (side gate instead of the GOLEM/ONIX gate, battler art = liveSceneOnBattlerArt, the mon drawn at its front-idle rest, the doll at the attacker corner + the task's own x2 and row 65 / 24 = GetSubstituteSpriteDefault_Y - 32, HUD and text from the live host); staged (liveField = false) outputs byte-identical (tools/integration/substBodyStagedDigest.ts, base == change)",
+        "duration liveMoveAnimationDuration(164) = SUBSTITUTE_FRAME_COUNT = 87 (activation .. first inactive row, every pair and both sides); #142 row 0 (elevated GOLBAT attacker: 200 px at age 0 otherwise); no shadow return after the body: the completed body shows the doll (applySubstituteDollCommand), which hides the opponent shadow",
+        "dense full windows zero residual twice fresh through the production live renderer: accepted GOLEM -> ONIX P / O, PERSIAN -> SLOWBRO P / O (Scene ON) and P (Scene OFF scenario), elevated GOLBAT -> SLOWBRO O (6 windows, 522 rows; tools/integration/fixtures/s10a-live/substitute-*.json, receipt tools/integration/fixtures/subst-body-live-receipt.json)",
+        "ordinary route: the body live every age, the doll shown on the following prompt, Scene ON/OFF gameplay / RNG / facility parity (tests/animation/liveSubstituteBodyAdapter.test.ts)"
+      ],
+      "remaining": [
+        "the SUBSTITUTE_TO_MON / MON_TO_SUBSTITUTE swaps and SUBSTITUTE_FADE stay on the fallback (prep37 s3c costs); every adapter declines while either battler is the doll (liveMoveSubstituteDollDeclines)",
+        "production Scene OFF does not play the body (ISSUES #153, kernel-owned); doubles not covered"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3742,7 +3757,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 249,
+  "implementedCount": 250,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 13,
@@ -5086,7 +5101,7 @@
         "receipt": "../tools/integration/fixtures/playerfaint-lend-receipt.json"
       },
       "voluntaryLend": {
-        "claim": "Lends after a cancelled voluntary party menu and after a voluntary switch (docs/voluntary-switch-lend-audit.md \u00a74): battle-reshow with both battlers sets the occupant roles from the reshowBoth survivors n2/n5/n8 (ROM 2/3/4, 45 edges, 0 mismatches); the player's voluntary recall (B_SCR_OP_RETURNATKTOBALL of battler 0 before any body of the segment; the synthesized-voluntary-switch receipt) maps to the promoted switch-out recall unit and keeps the roles; the allocator host is re-seeded at the cancel return (orchestrator returnOrderHostFromPartyMenu) and after the voluntary switch-in (existing switch-in path). No consumer code changed. Measured twice fresh through the production lend (voluntaryLendDense.ts, two batches, identical digests): 13 of the 15 voluntary drafts exact, 2132 rows, 0 px, adapters active every row (Sunny Day P x3, Swift O x4, Thunderbolt O, Giga Drain O, Heal Bell P x3, Light Screen P as the first body after a cancel via the re-seeded allocator). Generated seed-16 routes with {switch: 1|2} / cancel-party: bodies before the menu byte-identical to master, RNG/boundaries equal master, ON/OFF parity, next prompt, 10 post-menu bodies newly lent.",
+        "claim": "Lends after a cancelled voluntary party menu and after a voluntary switch (docs/voluntary-switch-lend-audit.md §4): battle-reshow with both battlers sets the occupant roles from the reshowBoth survivors n2/n5/n8 (ROM 2/3/4, 45 edges, 0 mismatches); the player's voluntary recall (B_SCR_OP_RETURNATKTOBALL of battler 0 before any body of the segment; the synthesized-voluntary-switch receipt) maps to the promoted switch-out recall unit and keeps the roles; the allocator host is re-seeded at the cancel return (orchestrator returnOrderHostFromPartyMenu) and after the voluntary switch-in (existing switch-in path). No consumer code changed. Measured twice fresh through the production lend (voluntaryLendDense.ts, two batches, identical digests): 13 of the 15 voluntary drafts exact, 2132 rows, 0 px, adapters active every row (Sunny Day P x3, Swift O x4, Thunderbolt O, Giga Drain O, Heal Bell P x3, Light Screen P as the first body after a cancel via the re-seeded allocator). Generated seed-16 routes with {switch: 1|2} / cancel-party: bodies before the menu byte-identical to master, RNG/boundaries equal master, ON/OFF parity, next prompt, 10 post-menu bodies newly lent.",
         "caveats": "Light Screen in a later turn after Sunny Day / Swift bodies (@3153, @2432) still declines: the allocator history is lost after non-net-zero bodies (not voluntary-specific); its order lend is defined and equals the role lend. Opponent AI switches (RETURNATKTOBALL battler 1), a recall after a body (Pursuit), Baton Pass and B_SCR_OP_VARIOUS keep invalidating (unprobed). A cancel with a hidden battler invalidates. Not whole-playable arbitrary-history exactness.",
         "receipt": "../tools/integration/fixtures/voluntary-lend-receipt.json"
       }

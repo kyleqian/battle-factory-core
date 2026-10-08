@@ -10,7 +10,7 @@
   "src/data/gen/battle-frontier-mons.json",
   "src/data/gen/factory-round-policy.json"
  ],
- "liveStatusImplementedCount": 249,
+ "liveStatusImplementedCount": 250,
  "staleCodesCorrected": [
   "B (sSpriteOrder): was 'first body only'; production now lends the order and tracks it across bodies (liveSpriteOrderHost.ts / spriteOrderProvider.ts, merged cross-body tracker + post-KO rung 1), so B no longer blocks anything; recipe work only (falls back after an unmodelled graphics command)",
   "F-AFFINE / E-TASK: were provider blockers; docs/allocator-plan-v2-evidence.md measured gOamMatrixAllocBitmap 0x6 + no tasks at all 481 known-entry bodies, so the accepted constants gated on the lent order suffice for first bodies (invalidated after a faint/switch)",
@@ -23,7 +23,7 @@
  "inFlightMoves": {},
  "summary": {
   "accepted": 276,
-  "live": 249,
+  "live": 250,
   "faithfulRandom": 13,
   "faithfulRandomMoves": [
    "MOVE_ASTONISH",
@@ -57,30 +57,23 @@
    "MOVE_SUPERPOWER"
   ],
   "inFlight": 0,
-  "remaining": 1,
+  "remaining": 0,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
   },
   "weightPct": {
-   "live": 93.772,
+   "live": 93.995,
    "faithfulRandom": 3.84,
    "faithfulTiming": 1.678,
    "inFlight": 0,
-   "remaining": 0.223
+   "remaining": 0
   },
-  "remainingByGroup": {
-   "PROVIDER-x": {
-    "moves": 1,
-    "weightPct": 0.223
-   }
-  },
-  "remainingByHostClass": {
-   "H_BASIC": 1
-  },
+  "remainingByGroup": {},
+  "remainingByHostClass": {},
   "orderFirstBodyOnlyMoves": 0,
   "slotPlanNeededMoves": 0,
-  "sumsTo": "249+13+13+0+1=276",
+  "sumsTo": "250+13+13+0+0=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -118,21 +111,6 @@
   ]
  },
  "ranking": [
-  {
-   "provider": "X-SUBST",
-   "label": "persistent Substitute doll sprite state",
-   "codes": [
-    "X-SUBST"
-   ],
-   "aloneMoves": 1,
-   "aloneWeightPct": 0.223,
-   "aloneNames": [
-    "SUBSTITUTE"
-   ],
-   "touchingMoves": 1,
-   "touchingWeightPct": 0.223,
-   "meta": null
-  },
   {
    "provider": "C",
    "label": "Random2 surrogate (presentation-only gRng2Value stream)",
@@ -292,6 +270,19 @@
    }
   },
   {
+   "provider": "X-SUBST",
+   "label": "persistent Substitute doll sprite state",
+   "codes": [
+    "X-SUBST"
+   ],
+   "aloneMoves": 0,
+   "aloneWeightPct": 0,
+   "aloneNames": [],
+   "touchingMoves": 0,
+   "touchingWeightPct": 0,
+   "meta": null
+  },
+  {
    "provider": "X-POWER",
    "label": "dynamic gBattleMovePower / gDynamicBasePower on the MOVE_ANIMATION request (production emits the static move-table power)",
    "codes": [
@@ -385,79 +376,7 @@
    }
   }
  ],
- "greedy": [
-  {
-   "step": 1,
-   "provider": "X-SUBST",
-   "newMoves": 1,
-   "newWeightPct": 0.223,
-   "cumulativeRemainingUnlocked": 1,
-   "newNames": [
-    "SUBSTITUTE"
-   ]
-  }
- ],
- "batches": [
-  {
-   "id": "P3",
-   "title": "first provider build (derived from the greedy order): X-SUBST",
-   "count": 1,
-   "weightPct": 0.223,
-   "moves": [
-    {
-     "move": "MOVE_SUBSTITUTE",
-     "group": "PROVIDER-X-SUBST",
-     "providerNeeds": [
-      "X-SUBST"
-     ],
-     "orderFirstBodyOnly": false,
-     "weightPct": 0.223,
-     "prep": "no activation receipt; X-SUBST: body ends with the battler shown as the doll (AnimTask_MonToSubstitute); field art view has no behind-substitute state"
-    }
-   ]
-  }
- ],
- "rows": [
-  {
-   "move": "MOVE_SUBSTITUTE",
-   "id": 164,
-   "name": "SUBSTITUTE",
-   "hostClass": [
-    "H_BASIC"
-   ],
-   "weightShare": 0.0022321428571428566,
-   "config": "src/animation/sceneOnPresentation.ts:3729",
-   "needs": [
-    "X-SUBST"
-   ],
-   "blockers": [
-    {
-     "code": "X-SUBST",
-     "text": "body ends with the battler shown as the doll (AnimTask_MonToSubstitute); field art view has no behind-substitute state",
-     "cites": [
-      "reference/pokeemerald/data/battle_scripts_1.s:1085-1103",
-      "src/engine/battleCommandFieldArt.ts:1",
-      "src/animation/sceneOnPresentation.ts:3729"
-     ]
-    }
-   ],
-   "notes": [
-    "persistent doll sprite after the body"
-   ],
-   "staleCorrections": [],
-   "orderFirstBodyOnly": false,
-   "lentConstants": [],
-   "providerNeeds": [
-    "X-SUBST"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "PROVIDER-X-SUBST"
-  }
- ]
+ "greedy": [],
+ "batches": [],
+ "rows": []
 }

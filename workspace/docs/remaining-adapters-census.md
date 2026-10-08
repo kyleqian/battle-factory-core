@@ -8,29 +8,28 @@ node tools/integration/censusActivationSummary.mjs                    # fixtures
 tools/integration/censusActivation.sh; tools/integration/censusStagedActivation.sh   # direct-mGBA probes (optional, regenerates the receipts)
 ```
 
-Inputs: `docs/animation-integration-live-status.json` (249 live, 13 faithful random, 13 faithful timing), `docs/animation-integration-readiness.json` + `-merged-readiness.json` (276 accepted, host classes), `tools/integration/fixtures/h-buffer-triage.json` (per-field classes/cites of the 78 H_BUFFER moves; stale config line numbers are re-resolved by symbol), `sprite-order-body-plans-ext.json`, the Level-50 set pools for the usage weight (the model of `tools/integration/spriteOrderPlanCoverageRank.py`: ranges 0..6, 4 moves per set, both sides; `weight` below is the share of all Factory move uses). The script asserts `live (scoped exact) + faithful-random + faithful-timing + in-flight + remaining = 276` (faithful-random = the disjoint D3 bucket `faithfulRandomAdapters`, docs/presentation-rng.md; faithful-timing = the disjoint D4 bucket `faithfulTimingAdapters`, docs/faithful-timing.md, where a D3+D4 adapter is counted once with `d3: true`) and that every cited `file:line` exists and is non-empty. In-flight = batches the supervisor has running (none; the lists in the script are empty). Helping Hand is the 277th Factory move and is not accepted (not counted).
+Inputs: `docs/animation-integration-live-status.json` (250 live, 13 faithful random, 13 faithful timing), `docs/animation-integration-readiness.json` + `-merged-readiness.json` (276 accepted, host classes), `tools/integration/fixtures/h-buffer-triage.json` (per-field classes/cites of the 78 H_BUFFER moves; stale config line numbers are re-resolved by symbol), `sprite-order-body-plans-ext.json`, the Level-50 set pools for the usage weight (the model of `tools/integration/spriteOrderPlanCoverageRank.py`: ranges 0..6, 4 moves per set, both sides; `weight` below is the share of all Factory move uses). The script asserts `live (scoped exact) + faithful-random + faithful-timing + in-flight + remaining = 276` (faithful-random = the disjoint D3 bucket `faithfulRandomAdapters`, docs/presentation-rng.md; faithful-timing = the disjoint D4 bucket `faithfulTimingAdapters`, docs/faithful-timing.md, where a D3+D4 adapter is counted once with `d3: true`) and that every cited `file:line` exists and is non-empty. In-flight = batches the supervisor has running (none; the lists in the script are empty). Helping Hand is the 277th Factory move and is not accepted (not counted).
 
 ## 1. Summary
 
 | Bucket | Moves | Weight |
 |---|---:|---:|
 | accepted Factory moves | 276 | 100% |
-| live adapters (scoped exact) | 249 | 93.77% |
+| live adapters (scoped exact) | 250 | 94.00% |
 | faithful-random adapters (ASTONISH, DOUBLE_KICK, FLAIL, FLATTER, HYPER_BEAM, LOVELY_KISS, LUSTER_PURGE, MUD_SLAP, RAIN_DANCE, SAND_ATTACK, THRASH, WATER_PULSE, WISH) | 13 | 3.84% |
 | faithful-timing adapters (DIVE, EXTRASENSORY, HYPER_VOICE, ICE_BALL, MACH_PUNCH, MEGAHORN, METEOR_MASH, NIGHTMARE, PSYWAVE, REVENGE, SHEER_COLD, SKILL_SWAP, SUPERPOWER) | 13 | 1.68% |
 | in flight (0 order-consumer + 0 prep6) | 0 | 0.00% |
-| **remaining (this census)** | **1** | **0.22%** |
-| check | 249+13+13+0+1=276 | |
+| **remaining (this census)** | **0** | **0.00%** |
+| check | 250+13+13+0+0=276 | |
 
 Remaining moves by group:
 
 | Group | Moves | Weight | Meaning |
 |---|---:|---:|---|
-| PROVIDER-x | 1 | 0.22% | blocked on exactly one named provider |
 
-Remaining by readiness host class (a move can carry several): H_BASIC 1. Moves whose order input is satisfied only for the battle's first body: 0. Moves that still need a per-move sprite-slot plan row: 0.
+Remaining by readiness host class (a move can carry several): . Moves whose order input is satisfied only for the battle's first body: 0. Moves that still need a per-move sprite-slot plan row: 0.
 
-PROVIDER-x breakdown: X-SUBST (1: SUBSTITUTE).
+PROVIDER-x breakdown: .
 
 ## 2. What production derives today
 
@@ -65,12 +64,6 @@ PROVIDER-x breakdown: X-SUBST (1: SUBSTITUTE).
 
 Columns: `needs` = provider codes after removing what production supplies (`B(first body)` = also consumes sSpriteOrder, supplied by production for the first body only; legend in section 5). Blockers cite the consumed field (`a/` = `src/animation/`, `e/` = `src/engine/`, `rom/` = `reference/pokeemerald/`). Full text per blocker is in the JSON.
 
-### PROVIDER-x (1)
-
-| Move (id) | Host class | Weight | needs | Blockers (consumed field @ cite) | Notes / measured |
-|---|---|---:|---|---|---|
-| SUBSTITUTE (164) | H_BASIC | 0.22% | X-SUBST | X-SUBST: body ends with the battler shown as the doll (AnimTask_MonToSubstitute); field art view has no behind-substitute state @ rom/data/battle_scripts_1.s:1085-1103, e/battleCommandFieldArt.ts:1, a/sceneOnPresentation.ts:3729 | persistent doll sprite after the body |
-
 ## 5. Provider ranking
 
 Codes: `B` sSpriteOrder: SATISFIED by the lend (src/engine/liveSpriteOrderHost.ts + spriteOrderProvider.ts) incl. the cross-body tracker while the history is modelled; falls back after an unmodelled graphics command; `C` Random2 surrogate (presentation-only gRng2Value stream); `F-AFFINE` affine matrix allocator (AllocOamMatrix ids / matrixBitmap); `E-TASK` task-slot allocator (CreateTask slots / live task table); `D-PAL` palette snapshot provider (unfaded/faded/hardware per move plan); `D-TILE` OBJ tile / palette-bank resource allocator; `D-BG` BG regs / BLDCNT / monbg state; `D-OAM` software/hardware OAM + affine buffer host; `D-VRAM` BG VRAM snapshots; `D-SCAN` gScanlineEffect buffers; `F-AUDIO` sound task / pan / current-song state; `E-OUT` outcome selector from resolution not on the request; `X-DISABLE` DisableStruct counter snapshot on the MOVE_ANIMATION request (fury/rollout/stockpile counters); `X-SWITCH` switch / forced-switch flow owner (post-body field, return-to-ball, slide-off); `X-SUBST` persistent Substitute doll sprite state; `X-POWER` dynamic gBattleMovePower / gDynamicBasePower on the MOVE_ANIMATION request (production emits the static move-table power); `X-AGE` accepted evidence lacks the early source ages (age basis); `X-REDUCER` accepted reducer hard-codes values production can derive; reducer parameterization needed; `X-SCHED` scheduler/callback-advance state; `X-TWOTURN` semi-invulnerable two-turn state (hidden battler between turns).
@@ -79,13 +72,11 @@ Ranked by remaining moves that become fully unlocked when that provider alone is
 
 | Provider | Alone unlocks | Weight | Touching | Touching weight | Cost / claim | Unlocked moves |
 |---|---:|---:|---:|---:|---|---|
-| X-SUBST | +1 | 0.22% | 1 | 0.22% | persistent Substitute doll sprite state | SUBSTITUTE |
 
 Greedy build order (each step = the provider/bundle with the most newly unlocked remaining moves given the earlier steps):
 
 | Step | Provider | New moves | New weight | Cumulative remaining unlocked | Newly unlocked |
 |---:|---|---:|---:|---:|---|
-| 1 | X-SUBST | +1 | 0.22% | 1 | SUBSTITUTE |
 
 Notes:
 - **Random2 is the keystone but non-exact.** It touches the most remaining moves and, after the allocator-v2 and A6 steps, unlocks ? more; production cannot reconstruct `gRng2Value` (it advances every rendered frame and with every earlier animation's draws, `docs/visual-randomness-prep.md` s4). A presentation LCG is ROM-faithful in distribution and draw order only; the claim boundary (a non-exact presentation class beside the exact one) must be decided before building it. It cannot make a move exact on its own.
@@ -94,14 +85,6 @@ Notes:
 - **A6 graphics host** has no single-provider unlocks beyond 6 moves; the other D-* codes unlock nothing alone.
 
 ## 6. Derived batches (no hard-coded lists)
-
-### P3: first provider build (derived from the greedy order): X-SUBST
-
-1 moves, 0.22% of Factory move uses.
-
-| Order | Move | Group | needs | Weight | Measured prep / still needed |
-|---:|---|---|---|---:|---|
-| 1 | SUBSTITUTE | PROVIDER-X-SUBST | X-SUBST | 0.22% | no activation receipt; X-SUBST: body ends with the battler shown as the doll (AnimTask_MonToSubstitute); field art view has no behind-substitute state |
 
 Batches are derived each run: P1 = READY-NOW, P2 = SMALL-INPUT (measured in `docs/next-adapters-prep10.md`), P3 = the first greedy provider.
 
