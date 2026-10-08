@@ -1,7 +1,7 @@
 # prep37 — MOVE_SUBSTITUTE (164): body inputs + persistent doll field state (X-SUBST)
 
 Side-lane evidence/design only (new files; no src change). Direct mGBA runs, every relied-on probe twice from fresh
-processes and `cmp`-identical (`tools/integration/fixtures/prep37/probes.json`, 5 scenarios). Reproduce with
+processes and `cmp`-identical (`tools/integration/fixtures/prep37/probes.json`, 6 scenarios). Reproduce with
 `OUT=<fresh dir> REC=<dir> sh tools/integration/prep37Run.sh` (receipts byte-identical across two checker passes).
 
 ## Results first
@@ -11,7 +11,7 @@ processes and `cmp`-identical (`tools/integration/fixtures/prep37/probes.json`, 
    `substitute.json` doll sheets/palette, source doll row 65 / 24). With those derived inputs the UNCHANGED production
    renderer is 87/87 rows 0 px on the accepted GOLEM<->ONIX pair (both orientations); it throws for any other pair. A copy
    with the GOLEM/ONIX art + names swapped for `liveSceneOnBattlerArt` / displayed species (`prep37RendererPatch.ts`) is
-   87/87 rows 0 px on all 5 windows (accepted pair x2, fresh PERSIAN<->SLOWBRO x2 Scene ON, + Scene OFF). Negative
+   87/87 rows 0 px on all 5 non-elevated windows (accepted pair x2, fresh PERSIAN<->SLOWBRO x2 Scene ON, + Scene OFF). Negative
    controls fail (`body-neg-*.json`). An ELEVATED subbed opponent (GOLBAT) is 86/87: row 0 carries the idle field's enemy
    shadow (200 px, bbox 160..191 x 65..72) — the known #142 row-0 shadow class that the live seam's shadow-row hook owns.
 2. **Persistent state (measured, 3 staged battles, 8.5k rows each):** after the body the subbed battler's OBJ shows the
@@ -57,7 +57,7 @@ Check `body-unchanged.json` (production `render(engine)`, inputs derived as abov
   the unchanged renderer **throws** `unsupported staged SUBSTITUTE pair PERSIAN->SLOWBRO`.
 
 Check `body-patched.json` (`prep37RendererPatch.ts`: a copy of battleScene.ts with only the species gate -> side gate,
-GOLEM/ONIX sheets -> `liveSceneOnBattlerArt`, names -> displayed species): **all 5 windows 87/87 rows 0 px** (accepted
+GOLEM/ONIX sheets -> `liveSceneOnBattlerArt`, names -> displayed species): **all 5 non-elevated windows 87/87 rows 0 px** (6th: elevated GOLBAT 86/87, below) (accepted
 pair both orientations unchanged; PERSIAN->SLOWBRO player + opponent Scene ON; player Scene OFF).
 Elevated opponent (`prep37-on-opponent-golbat-slowbro`, GOLBAT elevation 8, all four moves Substitute): 86/87 rows 0 px;
 row 0 = 200 px at 160..191 x 65..72, the enemy shadow the idle field still shows on the activation row (OAM latch), i.e.
