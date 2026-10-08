@@ -705,9 +705,23 @@ function liveEruptionProfileFor(field: BattleResolutionDisplayedField, attackerS
   return profile;
 }
 
+/**
+ * S10A Substitute (docs/next-adapters-prep37.md s3b): every live renderer composes both battlers from species art
+ * (liveSceneOnBattlerArt), so while the displayed DEFENDER is the Substitute doll the body would draw the mon where the
+ * ROM shows the doll (e.g. Tackle's monbg ANIM_TARGET moves the doll), and while the ATTACKER is the doll the ROM first
+ * runs SUBSTITUTE_TO_MON / afterwards MON_TO_SUBSTITUTE (42 / 40 rows each, not presented). Both decline to the fallback.
+ */
+export function liveMoveSubstituteDollDeclines(
+  request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField,
+): boolean {
+  const side = (battler: number) => (battler === 0 ? field.player : field.opponent);
+  return side(request.attacker).substituteDoll === true || side(request.target).substituteDoll === true;
+}
+
 export function liveMoveAnimationDuration(
   request: BattleMoveAnimationRequest, field?: BattleResolutionDisplayedField,
 ): number | null {
+  if (field !== undefined && liveMoveSubstituteDollDeclines(request, field)) return null;
   switch (request.moveId) {
     // Shock Wave (prep33): activation .. the derived first inactive row (262..266 measured), only defined with the displayed field.
     // Eruption (prep36 s2): the first inactive row = E2 + 294 from the attacker sprite y (476..500 rows measured), only defined with the field.

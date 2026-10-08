@@ -145,7 +145,7 @@ describe("Substitute doll on ordinary routes", () => {
       expect(prompt.lifecycle.phase).toBe("action-menu");
       expect(prompt.field.player.substituteDoll).toBe(true);
       expect(prompt.field.opponent.substituteDoll).toBeUndefined();
-      const status2 = run.state.battle.rules.rulesContext.battlers[0]!.status2;
+      const status2 = run.state.battle!.rules.rulesContext.battlers[0]!.status2;
       expect(status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_SUBSTITUTE).not.toBe(0);
       expect(seen[0]).toBe("00@prompt");
       // Scene ON: set inside the first resolution (after the body); Scene OFF has no body request, so from the next prompt.
