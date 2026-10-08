@@ -156,6 +156,20 @@ export function battleCommandFieldSpriteOrigin(
   };
 }
 
+/**
+ * The species' own corner (battleCommandFieldSpriteOrigin of the mon, elevation included) also while the battler is shown as the
+ * Substitute doll: GetBattlerSpriteCoord / GetBattlerSpriteFinal_Y read the species pic coords and elevation, never the doll OBJ
+ * (docs/next-adapters-prep38.md s2: doll-corner anchors break Attract, Bite, Body Slam, Brick Break, Crunch, Faint Attack).
+ */
+export function battleCommandFieldSpeciesSpriteOrigin(
+  battler: BattleCommandFieldArtBattler,
+  side: "player" | "opponent",
+): Readonly<{ x: number; y: number }> {
+  return battler.substituteDoll === true
+    ? battleCommandFieldSpriteOrigin(fieldArtBattler(battler.species, side), side)
+    : battleCommandFieldSpriteOrigin(battler, side);
+}
+
 /** gEnemyMonElevation of the displayed opponent; 0 for the player and for the Substitute doll (prep37: elevated GOLBAT's
  * doll at (144, 24), 6898 / 6898 rows). */
 export function battleCommandFieldArtElevation(

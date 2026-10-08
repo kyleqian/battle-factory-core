@@ -4309,6 +4309,12 @@ function drawSpriteSheetWindowed(
 const liveOpponentShadow: { species: string | null; suppressAdHoc: boolean } = {
   species: null, suppressAdHoc: false,
 };
+/**
+ * Sides whose displayed battler is the Substitute doll during a live body (armed by renderBattleResolutionLiveView from the
+ * displayed field; only proven defender-doll cells reach a renderer, liveMoveSubstituteDollDeclines): liveSceneOnBattlerArt
+ * returns the doll sheet + palette for them (docs/next-adapters-prep38.md s3 v1).
+ */
+const liveSubstituteDollSides = { player: false, opponent: false };
 
 export function drawTileBg(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, subpalettes: RgbColor[][]): void {
   drawTileBgBase(fb, tileset, tilemap, subpalettes);
@@ -14879,6 +14885,10 @@ export function renderGeneratedBattleCommandPresentation(
  * explicit geometry/profile inputs; no canonical battle clock participates.
  */
 function liveSceneOnBattlerArt(battler: { species: string; geometry: { side: "player" | "opponent" } }) {
+  if (liveSubstituteDollSides[battler.geometry.side]) {
+    const sheet = (battler.geometry.side === "player" ? substituteAsset.back : substituteAsset.front) as unknown as Tileset;
+    return { tileset: sheet, palette: substituteAsset.palette as unknown as RgbColor[], frame2: sheet };
+  }
   const source = battler.geometry.side === "player"
     ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
     : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
@@ -55124,7 +55134,12 @@ export function renderBattleResolutionLiveView(
   const shadowRow = effect?.type === "move" ? liveMoveOpponentShadowRow(effect.request) : null;
   // SpriteCB_EnemyShadow (battle_gfx_sfx_util.c:1209) hides the shadow while !IsBattlerSpritePresent (HP 0: a self-KO attacker after
   // setatkhptozero, e.g. Memento's opponent-side WEEZING, prep34 s2.5 windows 0 px only without the shadow).
+  // A defender shown as the Substitute doll (prep38 s3 v1): drawn from the doll art, never with the opponent shadow (the doll
+  // hides an elevated GOLBAT's row-0 shadow).
+  liveSubstituteDollSides.player = view.field.player.substituteDoll === true;
+  liveSubstituteDollSides.opponent = view.field.opponent.substituteDoll === true;
   liveOpponentShadow.species = effect?.type === "move" && view.field.opponent.hp !== 0 && !subbedOpponentAttacker
+    && !liveSubstituteDollSides.opponent
     && (effect.age === shadowRow || liveMoveOpponentShadowReturn(effect.request, effect.age))
     ? view.fieldArt.opponent.speciesSymbol : null;
   liveOpponentShadow.suppressAdHoc = effect?.type === "move" && effect.age === 0;
@@ -55133,6 +55148,8 @@ export function renderBattleResolutionLiveView(
   } finally {
     liveOpponentShadow.species = null;
     liveOpponentShadow.suppressAdHoc = false;
+    liveSubstituteDollSides.player = false;
+    liveSubstituteDollSides.opponent = false;
   }
   // Encore's hardware fade targets OBJ as well as BG3. The live seam
   // replaces the staged healthboxes below with their controller-owned
