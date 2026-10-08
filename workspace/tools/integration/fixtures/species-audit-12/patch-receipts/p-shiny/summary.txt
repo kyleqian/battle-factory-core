@@ -1,0 +1,4 @@
+  [S12_SHINY=STEELIX] shinysteelixA-substitute-player-golem-opponent-onix 87/87 px 0 dur 87 identical true
+  [S12_SHINY=STEELIX] shinysteelixA-substitute-opponent-golem-player-onix 87/87 px 0 dur 87 identical true
+  [S12_SHINY=none] steelixA-substitute-player-golem-opponent-onix 87/87 px 0 dur 87 identical true
+  [S12_SHINY=none] substitute-player-golem-opponent-onix 87/87 px 0 dur 87 identical true
