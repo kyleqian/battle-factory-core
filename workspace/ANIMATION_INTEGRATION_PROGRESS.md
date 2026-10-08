@@ -12,6 +12,16 @@
   Worker gates 1,563 files / 12,823 tests, build 873, differential 624. Supervisor: `substSwapRun.sh` into fresh dirs —
   probes r1 == r2 (13 scenarios), 21 windows x2 runs 0 px, GOLEM-player residual == non-subbed control, negatives fail;
   union typecheck, smoke 448, 9 targeted files 128/128, own differential vs `bb4dc2558` 624/624. Logs `.integration/validation/swap-20261008/`.
+- Folded Opus worker `fd65a52a0` as `e25fa104c` (src tree `9a1e8a70`): audit-13 fixes. (a) Ice Beam / Thunderbolt / Sludge
+  (Bomb) draw a live opponent attacker at its tracked front idle rest (ONIX 221,473 / 258,567 / 182,849 -> 0 px; 41 committed
+  fixtures render-identical; static scan lists 15 more candidate renderers, unproven). (b) Substitute swaps decline a shiny
+  battler. (c) Ice Ball resting target already declined (`liveIceBallInputs.ts:147`; test pins it); lend-live counter labels
+  confirmed (chain 30 / 60 / 120). (d) D4 policy: Crunch (lag 121: 17 : 13), Psychic (124: 26 : 2), Extreme Speed (292:
+  38 : 4), Dive opponent setup (64: 6 no-lag : 1). ACCOUNTING: Crunch, Psychic, Extreme Speed move scoped exact -> faithful
+  timing: census `247+13+16+0+0=276`. Worker gates 1,568 files / 12,920 tests, build 874, differential 624, 161 timing
+  fixtures 0 violations; swap / attdoll / dolldef / lend evidence unchanged except the intended shiny decline. Supervisor:
+  the 12 ONIX-attacker windows (Ice Beam, Thunderbolt, Sludge Bomb, Crunch, Psychic, Earthquake, both sides) through the
+  fixed code with MY fresh audit-13 probes — all 0 px, r1 == r2; union typecheck, smoke 448, 14 targeted files 298/298, own differential vs `c826d5b40` 624/624. Logs `.integration/validation/a13fix-20261008/`.
 - Species audit 14 (side, `c997a4710`, new files only): subbed-attacker swap grid 219 scenarios / 565 windows (418 / 430
   presented composites 0 px; tail latch 430 / 430) + fade 28 scenarios / 34 windows (32 exact). DEFECTS (patch proofs 0 px):
   fade with an elevated OTHER opponent keeps its shadow on row 0 (200 px; liveSubstituteFade.ts ~:155); Confuse Ray (ONIX
