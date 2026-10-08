@@ -1,0 +1,553 @@
+{
+ "schema": "lend-live-receipt/v1",
+ "design": "docs/s10a-random2-order-lend-blocker.md design 1 (seam-resolved deferred lend)",
+ "testedCommit": "8411455d1daa5e9ec7483c4202bbb0fd1ff576bd",
+ "testedSrcTree": "85c1f1bdd136fcbe0ae8977a1b5a146cef8bf96c",
+ "dirtySrc": false,
+ "commands": [
+  "OUT=/tmp/lend-ib sh tools/integration/lendIceBallProbes.sh",
+  "python3 -I tools/integration/lendIceBallFixtures.py /tmp/lend-ib",
+  "OUT=/tmp/lend-d4a sh tools/integration/lendIceBallWindows.sh",
+  "OUT=/tmp/lend-d4a2 sh tools/integration/lendIceBallWindows.sh",
+  "python3 -I tools/integration/lendLiveReceipt.py /tmp/lend-d4a /tmp/lend-d4a2"
+ ],
+ "declined": [
+  "prep25 GLALIE -> GOLEM player bodies 4..5 (counters 3..4): after GOLEM faints and REGISTEEL is sent in (battler slot 5); the deferred lend declines after a KO / send-in (not modelled)"
+ ],
+ "windows": [
+  {
+   "fixture": "tools/integration/fixtures/lend-live/ice-ball-alt-opponent-glalie-golem-b2.json",
+   "move": "ICE_BALL",
+   "measuredPhase": "no-event",
+   "policyPhase": "no-event",
+   "selectedPhase": true,
+   "window": 76,
+   "expectedDuration": 76,
+   "documentedAges": null,
+   "violations": [],
+   "runs": [
+    {
+     "rows": 76,
+     "exactRows": 76,
+     "residualPixels": 0,
+     "digest": "11e00a21f148be4914ad8e1dafa0538bcb4b97fd1e06af3f9f332abfbae71624",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 76,
+     "exactRows": 76,
+     "residualPixels": 0,
+     "digest": "11e00a21f148be4914ad8e1dafa0538bcb4b97fd1e06af3f9f332abfbae71624",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "secondPass": {
+    "residualPixels": [
+     0,
+     0
+    ],
+    "violations": [],
+    "digestEqual": true
+   }
+  },
+  {
+   "fixture": "tools/integration/fixtures/lend-live/ice-ball-alt-opponent-glalie-golem-b3.json",
+   "move": "ICE_BALL",
+   "measuredPhase": "no-event",
+   "policyPhase": "no-event",
+   "selectedPhase": true,
+   "window": 76,
+   "expectedDuration": 76,
+   "documentedAges": null,
+   "violations": [],
+   "runs": [
+    {
+     "rows": 76,
+     "exactRows": 76,
+     "residualPixels": 0,
+     "digest": "ae070118f27ab1f6befdebea9bb73c49312d79fcd09dbfc83bb59846d57b26fd",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 76,
+     "exactRows": 76,
+     "residualPixels": 0,
+     "digest": "ae070118f27ab1f6befdebea9bb73c49312d79fcd09dbfc83bb59846d57b26fd",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "secondPass": {
+    "residualPixels": [
+     0,
+     0
+    ],
+    "violations": [],
+    "digestEqual": true
+   }
+  },
+  {
+   "fixture": "tools/integration/fixtures/lend-live/ice-ball-alt-player-glalie-golem-b2.json",
+   "move": "ICE_BALL",
+   "measuredPhase": "no-event",
+   "policyPhase": "no-event",
+   "selectedPhase": true,
+   "window": 76,
+   "expectedDuration": 76,
+   "documentedAges": null,
+   "violations": [],
+   "runs": [
+    {
+     "rows": 76,
+     "exactRows": 76,
+     "residualPixels": 0,
+     "digest": "e938d37ac6d56708c72fa6234dda4dcab263596a74a54e7d017224d8e2358703",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 76,
+     "exactRows": 76,
+     "residualPixels": 0,
+     "digest": "e938d37ac6d56708c72fa6234dda4dcab263596a74a54e7d017224d8e2358703",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "secondPass": {
+    "residualPixels": [
+     0,
+     0
+    ],
+    "violations": [],
+    "digestEqual": true
+   }
+  },
+  {
+   "fixture": "tools/integration/fixtures/lend-live/ice-ball-alt-player-glalie-golem-b3.json",
+   "move": "ICE_BALL",
+   "measuredPhase": "no-event",
+   "policyPhase": "no-event",
+   "selectedPhase": true,
+   "window": 76,
+   "expectedDuration": 76,
+   "documentedAges": null,
+   "violations": [],
+   "runs": [
+    {
+     "rows": 76,
+     "exactRows": 76,
+     "residualPixels": 0,
+     "digest": "89ddfd0f77e5bedf9d2ca8cec9c0fda57cb929bab5c7abaf4146eca757497b93",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 76,
+     "exactRows": 76,
+     "residualPixels": 0,
+     "digest": "89ddfd0f77e5bedf9d2ca8cec9c0fda57cb929bab5c7abaf4146eca757497b93",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "secondPass": {
+    "residualPixels": [
+     0,
+     0
+    ],
+    "violations": [],
+    "digestEqual": true
+   }
+  },
+  {
+   "fixture": "tools/integration/fixtures/lend-live/ice-ball-opponent-spheal-player-registeel-b2.json",
+   "move": "ICE_BALL",
+   "measuredPhase": "no-event",
+   "policyPhase": "no-event",
+   "selectedPhase": true,
+   "window": 76,
+   "expectedDuration": 76,
+   "documentedAges": null,
+   "violations": [],
+   "runs": [
+    {
+     "rows": 76,
+     "exactRows": 76,
+     "residualPixels": 0,
+     "digest": "52a13b11403697f7a983b0d91dfa1151b82eedac09b5dc239a577c0d4208dff0",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 76,
+     "exactRows": 76,
+     "residualPixels": 0,
+     "digest": "52a13b11403697f7a983b0d91dfa1151b82eedac09b5dc239a577c0d4208dff0",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "secondPass": {
+    "residualPixels": [
+     0,
+     0
+    ],
+    "violations": [],
+    "digestEqual": true
+   }
+  },
+  {
+   "fixture": "tools/integration/fixtures/lend-live/ice-ball-opponent-spheal-player-registeel-b3.json",
+   "move": "ICE_BALL",
+   "measuredPhase": "no-event",
+   "policyPhase": "no-event",
+   "selectedPhase": true,
+   "window": 76,
+   "expectedDuration": 76,
+   "documentedAges": null,
+   "violations": [],
+   "runs": [
+    {
+     "rows": 76,
+     "exactRows": 76,
+     "residualPixels": 0,
+     "digest": "24227545e0cc359da862c9a4c33298844e20c88d2865616a5d050202bc3a2aa3",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 76,
+     "exactRows": 76,
+     "residualPixels": 0,
+     "digest": "24227545e0cc359da862c9a4c33298844e20c88d2865616a5d050202bc3a2aa3",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "secondPass": {
+    "residualPixels": [
+     0,
+     0
+    ],
+    "violations": [],
+    "digestEqual": true
+   }
+  },
+  {
+   "fixture": "tools/integration/fixtures/lend-live/ice-ball-opponent-spheal-player-registeel-b4.json",
+   "move": "ICE_BALL",
+   "measuredPhase": "no-event",
+   "policyPhase": "no-event",
+   "selectedPhase": true,
+   "window": 76,
+   "expectedDuration": 76,
+   "documentedAges": null,
+   "violations": [],
+   "runs": [
+    {
+     "rows": 76,
+     "exactRows": 76,
+     "residualPixels": 0,
+     "digest": "9e582eaa1a06c088d211f4d38373d62ccc0db1ab3c1e7e10d36687eb1ad8acca",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 76,
+     "exactRows": 76,
+     "residualPixels": 0,
+     "digest": "9e582eaa1a06c088d211f4d38373d62ccc0db1ab3c1e7e10d36687eb1ad8acca",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "secondPass": {
+    "residualPixels": [
+     0,
+     0
+    ],
+    "violations": [],
+    "digestEqual": true
+   }
+  },
+  {
+   "fixture": "tools/integration/fixtures/lend-live/ice-ball-opponent-spheal-player-registeel-b5.json",
+   "move": "ICE_BALL",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 133,
+   "expectedDuration": 133,
+   "documentedAges": null,
+   "violations": [],
+   "runs": [
+    {
+     "rows": 133,
+     "exactRows": 133,
+     "residualPixels": 0,
+     "digest": "c6a2e52207dc22d9776ed015107a4c5e2fbda810cf5fa752ba016f65fbd9374b",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 133,
+     "exactRows": 133,
+     "residualPixels": 0,
+     "digest": "c6a2e52207dc22d9776ed015107a4c5e2fbda810cf5fa752ba016f65fbd9374b",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "secondPass": {
+    "residualPixels": [
+     0,
+     0
+    ],
+    "violations": [],
+    "digestEqual": true
+   }
+  },
+  {
+   "fixture": "tools/integration/fixtures/lend-live/ice-ball-player-spheal-opponent-registeel-b2.json",
+   "move": "ICE_BALL",
+   "measuredPhase": "no-event",
+   "policyPhase": "no-event",
+   "selectedPhase": true,
+   "window": 76,
+   "expectedDuration": 76,
+   "documentedAges": null,
+   "violations": [],
+   "runs": [
+    {
+     "rows": 76,
+     "exactRows": 76,
+     "residualPixels": 0,
+     "digest": "43af3d2062956bd5a02ae6a57425fe735a4be8bba55ed91e2f041b3ea52cbbdf",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 76,
+     "exactRows": 76,
+     "residualPixels": 0,
+     "digest": "43af3d2062956bd5a02ae6a57425fe735a4be8bba55ed91e2f041b3ea52cbbdf",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "secondPass": {
+    "residualPixels": [
+     0,
+     0
+    ],
+    "violations": [],
+    "digestEqual": true
+   }
+  },
+  {
+   "fixture": "tools/integration/fixtures/lend-live/ice-ball-player-spheal-opponent-registeel-b3.json",
+   "move": "ICE_BALL",
+   "measuredPhase": "no-event",
+   "policyPhase": "no-event",
+   "selectedPhase": true,
+   "window": 76,
+   "expectedDuration": 76,
+   "documentedAges": null,
+   "violations": [],
+   "runs": [
+    {
+     "rows": 76,
+     "exactRows": 76,
+     "residualPixels": 0,
+     "digest": "16a29fcfec80038a56914b04ac81b4647cc55b3defa0b525d6bdade948eeb326",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 76,
+     "exactRows": 76,
+     "residualPixels": 0,
+     "digest": "16a29fcfec80038a56914b04ac81b4647cc55b3defa0b525d6bdade948eeb326",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "secondPass": {
+    "residualPixels": [
+     0,
+     0
+    ],
+    "violations": [],
+    "digestEqual": true
+   }
+  },
+  {
+   "fixture": "tools/integration/fixtures/lend-live/ice-ball-player-spheal-opponent-registeel-b4.json",
+   "move": "ICE_BALL",
+   "measuredPhase": "event",
+   "policyPhase": "no-event",
+   "selectedPhase": false,
+   "window": 77,
+   "expectedDuration": 76,
+   "documentedAges": [
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    60,
+    62,
+    64,
+    66,
+    68,
+    70,
+    72,
+    74
+   ],
+   "violations": [],
+   "runs": [
+    {
+     "rows": 77,
+     "exactRows": 48,
+     "residualPixels": 55632,
+     "digest": "c3ac6a2a21bec6cb35b6035c6253207ba17a589a32685dd999acfbace10b82c9",
+     "affectedAges": [
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      60,
+      62,
+      64,
+      66,
+      68,
+      70,
+      72,
+      74
+     ],
+     "maxPixelsPerRow": 3155
+    },
+    {
+     "rows": 77,
+     "exactRows": 48,
+     "residualPixels": 55632,
+     "digest": "c3ac6a2a21bec6cb35b6035c6253207ba17a589a32685dd999acfbace10b82c9",
+     "affectedAges": [
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      60,
+      62,
+      64,
+      66,
+      68,
+      70,
+      72,
+      74
+     ],
+     "maxPixelsPerRow": 3155
+    }
+   ],
+   "secondPass": {
+    "residualPixels": [
+     55632,
+     55632
+    ],
+    "violations": [],
+    "digestEqual": true
+   }
+  },
+  {
+   "fixture": "tools/integration/fixtures/lend-live/ice-ball-player-spheal-opponent-registeel-b5.json",
+   "move": "ICE_BALL",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "window": 133,
+   "expectedDuration": 133,
+   "documentedAges": null,
+   "violations": [],
+   "runs": [
+    {
+     "rows": 133,
+     "exactRows": 133,
+     "residualPixels": 0,
+     "digest": "bdeb87f69f6f8590c40e3fc3ccf9c9ecc400cf833b1d47457bd16f722c4318f2",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    },
+    {
+     "rows": 133,
+     "exactRows": 133,
+     "residualPixels": 0,
+     "digest": "bdeb87f69f6f8590c40e3fc3ccf9c9ecc400cf833b1d47457bd16f722c4318f2",
+     "affectedAges": [],
+     "maxPixelsPerRow": 0
+    }
+   ],
+   "secondPass": {
+    "residualPixels": [
+     0,
+     0
+    ],
+    "violations": [],
+    "digestEqual": true
+   }
+  }
+ ]
+}
