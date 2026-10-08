@@ -1,0 +1,2667 @@
+{
+ "schema": "prep44-allocator-net-zero/v1",
+ "profile": "battle-scene-on",
+ "definition": "docs/allocator-net-zero-audit.md (unchanged probe)",
+ "referenceSha256": {
+  "pokeemerald.gba": "a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af",
+  "pokeemerald.elf": "3a8aa584d7985c5a74ab10bb6eebd0c41b7c314ba8e423266727563c37f7727b"
+ },
+ "toolSha256": {
+  "tools/compare/allocatorNetZeroProbe.py": "1fc87ca651fe23a8beea555d8c88b94d583e7bb1d242c6b6e828b8710d24135d",
+  "tools/integration/prep44Probe.py": "4e359bf5895963ab9471491e58b765b506e62709b47cc63e9a7bd34c845b3e1b"
+ },
+ "scenarioSha256": {
+  "mechanic-follow-me-player-togetic-opponent-onix": "15b7395739ea583e87eefac04cc9350a6b55acece495d7c757072d3e94bc1246",
+  "mechanic-follow-me-opponent-togetic-player-onix": "e45ea058fd4b2e4a52882a6e4ba2cad50ebf6e20b35ab453f3cc2f7e7a970de9",
+  "s10aside-double-team-player-onix-opponent-golbat": "065d134d0c53488e123067f77cfadd5e160551c8bec9e56a4d18b79d393970ad",
+  "s10aside-double-team-opponent-grovyle-player-onix": "cba96c6c0e955c379c53b949e7ac5c05e1c53da746ca2d9846d417fc019127a1",
+  "mechanic-ice-beam-player-delcatty-opponent-shuckle": "909dd1e0655ec744b9b9822f78cbfc44cfd0309024eb1892d9b813ad32fcb033",
+  "mechanic-ice-beam-opponent-delcatty-player-shuckle": "ee4a9e13a37680c8bffba9fb597c134cc555632e64a11aba59145a1a0db0bb05",
+  "mechanic-dragon-breath-player-onix-opponent-murkrow": "d94a5dad988df8d2f93a68e85ee263683de8f6b80f9e745cf3680abd8c08c339",
+  "mechanic-dragon-breath-opponent-onix-player-murkrow": "e26a5b464a982c8a803248ebd9d1c3e1d326497585e8e3b0ac2b62e57bbf07bf",
+  "fixtures/prep44/scenarios/dragon-breath-opponent-long": "01b6e6c494614519055526d1365e9ef6c655b923866db461f6b62220021c382c",
+  "mechanic-aerial-ace-player-pidgeotto-onix": "6c6e4dc534a0379ccde13e0a87f64b0e701d4e6e0ce292d13f27c606cbefaaa8",
+  "mechanic-aerial-ace-pidgeotto-onix": "18bab0086cd362a76d9b4d098b15859a9bc15429e411c3b40f89033e6db4d487",
+  "mechanic-quick-attack-player-pidgeotto-onix": "89641a29fc0b250556b35de78ae1195929a3440d87e812c5239abfada4fcf7c7",
+  "mechanic-quick-attack-pidgeotto-onix": "f6f8530b3455c402696705535e23047065cd20471c248356e2006303419a42e2",
+  "mechanic-cosmic-power-player-lunatone-opponent-onix": "bfcd46081e4f02f10553252e99be018c36558b600f44dd47e2131b592a4e966a",
+  "mechanic-cosmic-power-opponent-lunatone-player-onix": "021081167e2cb084078581ea78b83ace49c0cd8fbaa6bebb00b7ba559e1ae5ef",
+  "s10aside-rock-slide-player-onix-opponent-grovyle": "593902569cc46c34351c7d4750f17b0b58a087323a94cb7bde7001ec6adaaa0b",
+  "fixtures/prep44/scenarios/rock-slide-opponent-onix-player-grovyle": "dcef66f8ef64ce0a657ab38900bc5b62b926f62aa5d69a2fabcb48c1f4359f16",
+  "mechanic-icy-wind-player-swinub-opponent-onix": "c00ac32ecc74d9cc393ba012598d78a1ecdc2f14237e54f130e9c38f90400584",
+  "mechanic-icy-wind-opponent-swinub-player-onix": "d7daaeb65d94fd83f1f47752c228112a3ed62d00877bca80ef097191603293b0",
+  "mechanic-water-pulse-player-lombre-opponent-onix": "bac1e3defb5de7b2b8a3777342eb6543077363b4bfd6adff18c183e2a5d3f9c3",
+  "mechanic-water-pulse-opponent-lombre-player-onix": "0e84ada54bf5165a74465ca3f0069f1659942736efb2140efddf1d287f7a4ef1",
+  "mechanic-thunderbolt-player-delcatty-opponent-shuckle": "51043ef4626d6da25656a6814ff6986658e812b6b815473efe849e4d37f98ab7",
+  "mechanic-thunderbolt-opponent-delcatty-player-shuckle": "5b8822af72cf74dbd30e3756f7128b0c35fd2dd49f58b99d71b3f45d66884bf7",
+  "species-audit-golem-prep6-faint-attack-alt-base": "970a70f4f828cc55a62278f35f605f23380e688c27beec2d5fa1d2f0a12208f8",
+  "s10aside-faint-attack-opponent-grovyle-player-onix": "4117adee846afc111022609ba9c37925d7205ecc1be6d5e7a3d79fd07683d010",
+  "mechanic-leech-seed-player-exeggcute-opponent-onix": "0e52e79d02c223436d73fccc3359dc2a47749ec40623ff3d7b83e0ce8869fdd9",
+  "mechanic-leech-seed-opponent-exeggcute-player-onix": "6b65c703100796a09abca58b33049550ea93faad5c4d0a3d53d711c0c783f468",
+  "mechanic-endure-player-eevee-opponent-onix": "b8f2116d21c0ac2ed5e94861d9084ef72ed64e4cbdf31672272de61dd17ed109",
+  "mechanic-endure-opponent-eevee-player-onix": "a201c16a2a3231609277f5fddc443aedbdcc56306e47028aedf1b80b57393ff3",
+  "mechanic-earthquake-player-dugtrio-opponent-onix": "1759938d72eaf0d22fada9acf2b2be0bccf72ff0ca4ce4b61dcae819bd924099",
+  "mechanic-earthquake-opponent-dugtrio-player-onix": "23aff2eb8996a6a09d99b05b93a4f9a8bd027076ac86b2115574520ab336ebd3",
+  "mechanic-facade-player-azumarill-opponent-onix": "7d198c51cc1a65da58f8b8e4c20908ab3e07dc0db2a49e7560e87d237606e9b3",
+  "mechanic-facade-opponent-azumarill-player-onix": "14a4b4e4e288571ab196bb7a60963e7de42c3cbe11d68dfd218a50d7da460e2b",
+  "mechanic-surf-player-wartortle-opponent-shuckle": "4f1bd6a8e632fb09fc76216bef648492885a631530b1ee98b77d97babdf51948",
+  "mechanic-surf-opponent-wartortle-player-shuckle": "3fef1ba84dab8b6fc562c33a867f32d1c344b45686f25e9b71ab0b943f3a5651",
+  "mechanic-rain-dance-player-wooper-opponent-onix": "6f7ec0e7d18f784fc5e3f0935ca5f59e216fb4e9707e826aa4d95a646708c3ab",
+  "mechanic-rain-dance-opponent-wooper-player-onix": "b2f55c5f1b20156c517274b2133df78a5bd29b1dd3d86b4d4ca6e825abe962a8",
+  "mechanic-mud-slap-player-pidgeotto-onix": "3db90a68e025dbfcc150029253ecbab90403719dde3b4fb0572011f59e23e724",
+  "mechanic-mud-slap-pidgeotto-onix": "265207f90a58386ea4f530171e0e1a167b4c802fcd4d0a49f443e74fcae1c4e9",
+  "mechanic-double-kick-player-nidorina-opponent-onix": "c271bbc116acfc986d269225a46222b95ad66200338272f5a6b2f4ecf18c79ea",
+  "mechanic-double-kick-opponent-nidorina-player-onix": "d73c59835ff4391998a55920223276ad0719ecfc5973d97aac845a9f1e2e9b15",
+  "mechanic-psybeam-player-spinda-opponent-onix": "ee0be16f34a0e431327767f85678825a17afeb486e1afc49e2c45f6f06e8eabe",
+  "mechanic-psybeam-opponent-spinda-player-onix": "85f606b30a83b65ff6cff7e8cf0071f54af23c87ff0728958faab691d6b4c056"
+ },
+ "summary": {
+  "NET-ZERO": [
+   24,
+   57,
+   58,
+   60,
+   73,
+   85,
+   89,
+   98,
+   104,
+   157,
+   185,
+   189,
+   196,
+   203,
+   225,
+   240,
+   263,
+   266,
+   322,
+   332,
+   352
+  ],
+  "NOT-NET-ZERO": [],
+  "notAudited": {}
+ },
+ "moves": {
+  "266": {
+   "name": "FOLLOW_ME",
+   "scenarios": [
+    {
+     "scenario": "mechanic-follow-me-player-togetic-opponent-onix",
+     "orientation": "player",
+     "rawSha256": [
+      "957c4b82f333d680e28cf41ca5c37b321af787b76e72e87eb03f5e3c3189e954",
+      "957c4b82f333d680e28cf41ca5c37b321af787b76e72e87eb03f5e3c3189e954"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       266,
+       69,
+       253
+      ],
+      [
+       225,
+       408,
+       500
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 69,
+       "cleanup": 253,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 6,
+       "destroyed": 6,
+       "lateChanges": 0,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "mechanic-follow-me-opponent-togetic-player-onix",
+     "orientation": "opponent",
+     "rawSha256": [
+      "73322275b0db6985ec0c0b928f84b8393ad473ccc7aa48796f600ef9cdb6754f",
+      "73322275b0db6985ec0c0b928f84b8393ad473ccc7aa48796f600ef9cdb6754f"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       266,
+       73,
+       257
+      ],
+      [
+       157,
+       410,
+       null
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 73,
+       "cleanup": 257,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 6,
+       "destroyed": 6,
+       "lateChanges": 0,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  },
+  "104": {
+   "name": "DOUBLE_TEAM",
+   "scenarios": [
+    {
+     "scenario": "s10aside-double-team-player-onix-opponent-golbat",
+     "orientation": "player",
+     "rawSha256": [
+      "0baeec3dc8f44afe79b821d3d87a7334de2353b0161667e961685e4b780fa094",
+      "0baeec3dc8f44afe79b821d3d87a7334de2353b0161667e961685e4b780fa094"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       104,
+       70,
+       228
+      ],
+      [
+       0,
+       232,
+       307
+      ],
+      [
+       33,
+       440,
+       481
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 70,
+       "cleanup": 228,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "s10aside-double-team-opponent-grovyle-player-onix",
+     "orientation": "opponent",
+     "rawSha256": [
+      "9b267b2e2127a0ff7178495af1beabe999476e0828785466b6b621ee70a3cb19",
+      "9b267b2e2127a0ff7178495af1beabe999476e0828785466b6b621ee70a3cb19"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       104,
+       77,
+       235
+      ],
+      [
+       0,
+       239,
+       314
+      ],
+      [
+       150,
+       442,
+       557
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 77,
+       "cleanup": 235,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  },
+  "58": {
+   "name": "ICE_BEAM",
+   "scenarios": [
+    {
+     "scenario": "mechanic-ice-beam-player-delcatty-opponent-shuckle",
+     "orientation": "player",
+     "rawSha256": [
+      "475a2ceb5eaa08d50d8234a6def7d5f7e779486179329d8c88beee45caf933f5",
+      "475a2ceb5eaa08d50d8234a6def7d5f7e779486179329d8c88beee45caf933f5"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       58,
+       75,
+       277
+      ],
+      [
+       33,
+       380,
+       421
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 75,
+       "cleanup": 277,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 92,
+       "destroyed": 92,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "mechanic-ice-beam-opponent-delcatty-player-shuckle",
+     "orientation": "opponent",
+     "rawSha256": [
+      "f384c7ef817ea532843ba85e4fed5d46bc8b911ce6a7d6c253cc7795749522d5",
+      "f384c7ef817ea532843ba85e4fed5d46bc8b911ce6a7d6c253cc7795749522d5"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       58,
+       79,
+       281
+      ],
+      [
+       33,
+       381,
+       422
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 79,
+       "cleanup": 281,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 92,
+       "destroyed": 92,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  },
+  "225": {
+   "name": "DRAGONBREATH",
+   "scenarios": [
+    {
+     "scenario": "mechanic-dragon-breath-player-onix-opponent-murkrow",
+     "orientation": "player",
+     "rawSha256": [
+      "6cffaa5cdf5a888b082f50cec9121ae6cc726e82a08e5f6fec61e4c9efce3a59",
+      "6cffaa5cdf5a888b082f50cec9121ae6cc726e82a08e5f6fec61e4c9efce3a59"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       259,
+       72,
+       248
+      ],
+      [
+       225,
+       391,
+       483
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 391,
+       "cleanup": 483,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 22,
+       "destroyed": 22,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "mechanic-dragon-breath-opponent-onix-player-murkrow",
+     "orientation": "opponent",
+     "rawSha256": [
+      "8e59db9d32d92a479a3888b773ee362c2667d2ce9bb0fc6c737fbd8d29571791",
+      "8e59db9d32d92a479a3888b773ee362c2667d2ce9bb0fc6c737fbd8d29571791"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       185,
+       77,
+       301
+      ],
+      [
+       225,
+       445,
+       null
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 445,
+       "cleanup": null,
+       "baseline": null,
+       "end": null,
+       "created": null,
+       "destroyed": null,
+       "lateChanges": 0,
+       "netZero": false
+      }
+     ],
+     "status": "window-incomplete"
+    },
+    {
+     "scenario": "fixtures/prep44/scenarios/dragon-breath-opponent-long",
+     "orientation": "opponent",
+     "rawSha256": [
+      "174e27b4a6d514dce1a0d05bf555d61e23fe65925c396e140aa823dee6f702a6",
+      "174e27b4a6d514dce1a0d05bf555d61e23fe65925c396e140aa823dee6f702a6"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       185,
+       77,
+       301
+      ],
+      [
+       225,
+       445,
+       537
+      ],
+      [
+       0,
+       613,
+       651
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 445,
+       "cleanup": 537,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 22,
+       "destroyed": 22,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  },
+  "332": {
+   "name": "AERIAL_ACE",
+   "scenarios": [
+    {
+     "scenario": "mechanic-aerial-ace-player-pidgeotto-onix",
+     "orientation": "player",
+     "rawSha256": [
+      "f02f95625be08a182decfec91050b3bdfb247f4e795892b4ba4083df5d092406",
+      "f02f95625be08a182decfec91050b3bdfb247f4e795892b4ba4083df5d092406"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       332,
+       77,
+       126
+      ],
+      [
+       225,
+       319,
+       411
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 77,
+       "cleanup": 126,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 8,
+       "destroyed": 8,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "mechanic-aerial-ace-pidgeotto-onix",
+     "orientation": "opponent",
+     "rawSha256": [
+      "405fac3dd0e3d570f65752040a747665e84490be6de5955a6efe0ab1b1ae854f",
+      "405fac3dd0e3d570f65752040a747665e84490be6de5955a6efe0ab1b1ae854f"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       332,
+       81,
+       130
+      ],
+      [
+       157,
+       317,
+       454
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 81,
+       "cleanup": 130,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 8,
+       "destroyed": 8,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  },
+  "98": {
+   "name": "QUICK_ATTACK",
+   "scenarios": [
+    {
+     "scenario": "mechanic-quick-attack-player-pidgeotto-onix",
+     "orientation": "player",
+     "rawSha256": [
+      "74eab80939fd3e13037c4f8513c9e2962a622dd3ccf41991f7d61cfd6bd241aa",
+      "74eab80939fd3e13037c4f8513c9e2962a622dd3ccf41991f7d61cfd6bd241aa"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       98,
+       79,
+       111
+      ],
+      [
+       225,
+       301,
+       393
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 79,
+       "cleanup": 111,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 5,
+       "destroyed": 5,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "mechanic-quick-attack-pidgeotto-onix",
+     "orientation": "opponent",
+     "rawSha256": [
+      "f06094715d95618d8cd6a760eea5a38134f1d8701c18a2c5e0971b0d7c2abb36",
+      "f06094715d95618d8cd6a760eea5a38134f1d8701c18a2c5e0971b0d7c2abb36"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       98,
+       83,
+       115
+      ],
+      [
+       157,
+       299,
+       436
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 83,
+       "cleanup": 115,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 5,
+       "destroyed": 5,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  },
+  "322": {
+   "name": "COSMIC_POWER",
+   "scenarios": [
+    {
+     "scenario": "mechanic-cosmic-power-player-lunatone-opponent-onix",
+     "orientation": "player",
+     "rawSha256": [
+      "2923dd1dfe9e9da59c5ae69ecd0a08310fa9e260bec73576742ff343c621590f",
+      "2923dd1dfe9e9da59c5ae69ecd0a08310fa9e260bec73576742ff343c621590f"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       72,
+       113
+      ],
+      [
+       322,
+       294,
+       534
+      ],
+      [
+       0,
+       538,
+       613
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 294,
+       "cleanup": 534,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 4,
+       "destroyed": 4,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "mechanic-cosmic-power-opponent-lunatone-player-onix",
+     "orientation": "opponent",
+     "rawSha256": [
+      "d89e06954786c2b49eef71e750a7f6e8c0b1a8f958005c24380d00b47ad2681c",
+      "d89e06954786c2b49eef71e750a7f6e8c0b1a8f958005c24380d00b47ad2681c"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       68,
+       109
+      ],
+      [
+       322,
+       294,
+       534
+      ],
+      [
+       0,
+       538,
+       613
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 294,
+       "cleanup": 534,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 4,
+       "destroyed": 4,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  },
+  "157": {
+   "name": "ROCK_SLIDE",
+   "scenarios": [
+    {
+     "scenario": "s10aside-rock-slide-player-onix-opponent-grovyle",
+     "orientation": "player",
+     "rawSha256": [
+      "497cff58aa8819f15e30b8b5f0d76dd9248eb95be69b3323645ed757be293f77",
+      "497cff58aa8819f15e30b8b5f0d76dd9248eb95be69b3323645ed757be293f77"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       157,
+       74,
+       211
+      ],
+      [
+       150,
+       328,
+       443
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 74,
+       "cleanup": 211,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 81,
+       "destroyed": 81,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "fixtures/prep44/scenarios/rock-slide-opponent-onix-player-grovyle",
+     "orientation": "opponent",
+     "rawSha256": [
+      "46573eb2b3aef305f27bae1af666ddd62968408d02d15f828e387bb8904b8ecf",
+      "46573eb2b3aef305f27bae1af666ddd62968408d02d15f828e387bb8904b8ecf"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       157,
+       78,
+       215
+      ],
+      [
+       150,
+       330,
+       445
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 78,
+       "cleanup": 215,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 81,
+       "destroyed": 81,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  },
+  "196": {
+   "name": "ICY_WIND",
+   "scenarios": [
+    {
+     "scenario": "mechanic-icy-wind-player-swinub-opponent-onix",
+     "orientation": "player",
+     "rawSha256": [
+      "473e9d6a74f165453d5397db27fcf4285c9f7fe318d41283af9d9b5b2a406f04",
+      "473e9d6a74f165453d5397db27fcf4285c9f7fe318d41283af9d9b5b2a406f04"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       72,
+       113
+      ],
+      [
+       196,
+       220,
+       506
+      ],
+      [
+       0,
+       722,
+       797
+      ],
+      [
+       0,
+       892,
+       1103
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 220,
+       "cleanup": 506,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 53,
+       "destroyed": 53,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "mechanic-icy-wind-opponent-swinub-player-onix",
+     "orientation": "opponent",
+     "rawSha256": [
+      "987821facc02b78d25f05c2f79a9e74c6bb79a9442f06e275d86c6b98896ac4b",
+      "987821facc02b78d25f05c2f79a9e74c6bb79a9442f06e275d86c6b98896ac4b"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       68,
+       109
+      ],
+      [
+       196,
+       220,
+       506
+      ],
+      [
+       0,
+       725,
+       800
+      ],
+      [
+       0,
+       891,
+       1102
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 220,
+       "cleanup": 506,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 53,
+       "destroyed": 53,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  },
+  "352": {
+   "name": "WATER_PULSE",
+   "scenarios": [
+    {
+     "scenario": "mechanic-water-pulse-player-lombre-opponent-onix",
+     "orientation": "player",
+     "rawSha256": [
+      "3c89c326c80fbb731b0ec7bdb304e81dff68fa1e01beba8e15ddaaec9425b4f5",
+      "3c89c326c80fbb731b0ec7bdb304e81dff68fa1e01beba8e15ddaaec9425b4f5"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       352,
+       77,
+       236
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 77,
+       "cleanup": 236,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 22,
+       "destroyed": 22,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "mechanic-water-pulse-opponent-lombre-player-onix",
+     "orientation": "opponent",
+     "rawSha256": [
+      "eef73dbf51d71e1743f0ec72391d31055add6f85239247e506e7fb38c9616180",
+      "eef73dbf51d71e1743f0ec72391d31055add6f85239247e506e7fb38c9616180"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       352,
+       81,
+       240
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 81,
+       "cleanup": 240,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 22,
+       "destroyed": 22,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  },
+  "85": {
+   "name": "THUNDERBOLT",
+   "scenarios": [
+    {
+     "scenario": "mechanic-thunderbolt-player-delcatty-opponent-shuckle",
+     "orientation": "player",
+     "rawSha256": [
+      "d23ca8fdb0445868ec300cd61573e096b55a9264b5eb98fa92ae20a7bfe9ed03",
+      "d23ca8fdb0445868ec300cd61573e096b55a9264b5eb98fa92ae20a7bfe9ed03"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       85,
+       79,
+       315
+      ],
+      [
+       33,
+       423,
+       464
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 79,
+       "cleanup": 315,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 37,
+       "destroyed": 37,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "mechanic-thunderbolt-opponent-delcatty-player-shuckle",
+     "orientation": "opponent",
+     "rawSha256": [
+      "ce563202c47b9a553785e1a07316b8080cf136892d8ddb4214fe0cfbcfb5a6c1",
+      "ce563202c47b9a553785e1a07316b8080cf136892d8ddb4214fe0cfbcfb5a6c1"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       85,
+       83,
+       319
+      ],
+      [
+       33,
+       424,
+       465
+      ],
+      [
+       0,
+       541,
+       637
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 83,
+       "cleanup": 319,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 37,
+       "destroyed": 37,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  },
+  "185": {
+   "name": "FAINT_ATTACK",
+   "scenarios": [
+    {
+     "scenario": "species-audit-golem-prep6-faint-attack-alt-base",
+     "orientation": "player",
+     "rawSha256": [
+      "2447d4168d58aa6ecdcbf88ace04f2c569f88e53d949e851957da4c9482e7cb1",
+      "2447d4168d58aa6ecdcbf88ace04f2c569f88e53d949e851957da4c9482e7cb1"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       185,
+       76,
+       300
+      ],
+      [
+       33,
+       421,
+       462
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 76,
+       "cleanup": 300,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "s10aside-faint-attack-opponent-grovyle-player-onix",
+     "orientation": "opponent",
+     "rawSha256": [
+      "6d845b2a88a0e2b7aff205cea1046621572a3f633c504fae76e57017d64e507a",
+      "6d845b2a88a0e2b7aff205cea1046621572a3f633c504fae76e57017d64e507a"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       185,
+       81,
+       306
+      ],
+      [
+       150,
+       419,
+       534
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 81,
+       "cleanup": 306,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  },
+  "73": {
+   "name": "LEECH_SEED",
+   "scenarios": [
+    {
+     "scenario": "mechanic-leech-seed-player-exeggcute-opponent-onix",
+     "orientation": "player",
+     "rawSha256": [
+      "943a8f36d02649e3d452a595da3454bb9542ce6d17bc700211f25950ed6206c3",
+      "943a8f36d02649e3d452a595da3454bb9542ce6d17bc700211f25950ed6206c3"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       72,
+       113
+      ],
+      [
+       73,
+       246,
+       386
+      ],
+      [
+       0,
+       485,
+       691
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 246,
+       "cleanup": 386,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 15,
+       "destroyed": 15,
+       "lateChanges": 0,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "mechanic-leech-seed-opponent-exeggcute-player-onix",
+     "orientation": "opponent",
+     "rawSha256": [
+      "1b5e9c701c2baa155a6d8a6d70d837e7233885048d108fc5bd9459225f84d44e",
+      "1b5e9c701c2baa155a6d8a6d70d837e7233885048d108fc5bd9459225f84d44e"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       68,
+       109
+      ],
+      [
+       73,
+       245,
+       385
+      ],
+      [
+       0,
+       480,
+       686
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 245,
+       "cleanup": 385,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 15,
+       "destroyed": 15,
+       "lateChanges": 0,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  },
+  "203": {
+   "name": "ENDURE",
+   "scenarios": [
+    {
+     "scenario": "mechanic-endure-player-eevee-opponent-onix",
+     "orientation": "player",
+     "rawSha256": [
+      "5fc26a851f12ce2af3d7d34f43828bf4c103eedbc42f4b801d8e692cf48e6d55",
+      "5fc26a851f12ce2af3d7d34f43828bf4c103eedbc42f4b801d8e692cf48e6d55"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       203,
+       64,
+       185
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 64,
+       "cleanup": 185,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 15,
+       "destroyed": 15,
+       "lateChanges": 0,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "mechanic-endure-opponent-eevee-player-onix",
+     "orientation": "opponent",
+     "rawSha256": [
+      "7e5a080a970e04d5c6ace8fc223833310ffa5ad5705a0f8983d13eaf5fc7f089",
+      "7e5a080a970e04d5c6ace8fc223833310ffa5ad5705a0f8983d13eaf5fc7f089"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       203,
+       68,
+       189
+      ],
+      [
+       33,
+       317,
+       358
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 68,
+       "cleanup": 189,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 15,
+       "destroyed": 15,
+       "lateChanges": 0,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  },
+  "89": {
+   "name": "EARTHQUAKE",
+   "scenarios": [
+    {
+     "scenario": "mechanic-earthquake-player-dugtrio-opponent-onix",
+     "orientation": "player",
+     "rawSha256": [
+      "3cd92a6bce0580b2bea0d6ef5aef3a55a71e89e88b87e3d4784de0215e6a5b2d",
+      "3cd92a6bce0580b2bea0d6ef5aef3a55a71e89e88b87e3d4784de0215e6a5b2d"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       89,
+       79,
+       286
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 79,
+       "cleanup": 286,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 4,
+       "destroyed": 4,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "mechanic-earthquake-opponent-dugtrio-player-onix",
+     "orientation": "opponent",
+     "rawSha256": [
+      "c2cb48ca3db144df470602ae4b8c2922ff13d73e4d4be1c285af1059c42e9bb3",
+      "c2cb48ca3db144df470602ae4b8c2922ff13d73e4d4be1c285af1059c42e9bb3"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       89,
+       83,
+       290
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 83,
+       "cleanup": 290,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 4,
+       "destroyed": 4,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  },
+  "263": {
+   "name": "FACADE",
+   "scenarios": [
+    {
+     "scenario": "mechanic-facade-player-azumarill-opponent-onix",
+     "orientation": "player",
+     "rawSha256": [
+      "b6bc74f035236e67b3a641e2b888c6f90f6a89d9b7021979aa5cea6313d9bed4",
+      "b6bc74f035236e67b3a641e2b888c6f90f6a89d9b7021979aa5cea6313d9bed4"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       72,
+       113
+      ],
+      [
+       263,
+       212,
+       292
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 212,
+       "cleanup": 292,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 24,
+       "destroyed": 24,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "mechanic-facade-opponent-azumarill-player-onix",
+     "orientation": "opponent",
+     "rawSha256": [
+      "c6e80942479139498789a5a92ab044855d59e9a20af4a900658344c1d41e3074",
+      "c6e80942479139498789a5a92ab044855d59e9a20af4a900658344c1d41e3074"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       68,
+       109
+      ],
+      [
+       263,
+       212,
+       292
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 212,
+       "cleanup": 292,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 24,
+       "destroyed": 24,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  },
+  "57": {
+   "name": "SURF",
+   "scenarios": [
+    {
+     "scenario": "mechanic-surf-player-wartortle-opponent-shuckle",
+     "orientation": "player",
+     "rawSha256": [
+      "fa89f95866bb043ac1d6c35ebc4c75b1efd178d6cc4205eec060857245efb74e",
+      "fa89f95866bb043ac1d6c35ebc4c75b1efd178d6cc4205eec060857245efb74e"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       57,
+       72,
+       215
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 72,
+       "cleanup": 215,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 0,
+       "destroyed": 0,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "mechanic-surf-opponent-wartortle-player-shuckle",
+     "orientation": "opponent",
+     "rawSha256": [
+      "09d326f7cf1773b0b06e547439a62fdd3f55d714e9a163b2a19807a151014abd",
+      "09d326f7cf1773b0b06e547439a62fdd3f55d714e9a163b2a19807a151014abd"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       57,
+       76,
+       219
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 76,
+       "cleanup": 219,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 0,
+       "destroyed": 0,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  },
+  "240": {
+   "name": "RAIN_DANCE",
+   "scenarios": [
+    {
+     "scenario": "mechanic-rain-dance-player-wooper-opponent-onix",
+     "orientation": "player",
+     "rawSha256": [
+      "79b1c584bf529d4a951960a2be3aef4861a3bd555dbce6974a7f308cae837a87",
+      "79b1c584bf529d4a951960a2be3aef4861a3bd555dbce6974a7f308cae837a87"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       72,
+       113
+      ],
+      [
+       240,
+       213,
+       399
+      ],
+      [
+       0,
+       595,
+       715
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 213,
+       "cleanup": 399,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 158,
+       "destroyed": 158,
+       "lateChanges": 0,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "mechanic-rain-dance-opponent-wooper-player-onix",
+     "orientation": "opponent",
+     "rawSha256": [
+      "89c1715996cfc5621d965393eadae9b1761e4ec435b5cbf6fe1eb51159fedae8",
+      "89c1715996cfc5621d965393eadae9b1761e4ec435b5cbf6fe1eb51159fedae8"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       68,
+       109
+      ],
+      [
+       240,
+       211,
+       397
+      ],
+      [
+       0,
+       593,
+       713
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 211,
+       "cleanup": 397,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 158,
+       "destroyed": 158,
+       "lateChanges": 0,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  },
+  "189": {
+   "name": "MUD_SLAP",
+   "scenarios": [
+    {
+     "scenario": "mechanic-mud-slap-player-pidgeotto-onix",
+     "orientation": "player",
+     "rawSha256": [
+      "81d8847003cdb2342da5e4644d3aa3ee4005d8a60736814e6f3a119284e0ab27",
+      "81d8847003cdb2342da5e4644d3aa3ee4005d8a60736814e6f3a119284e0ab27"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       189,
+       77,
+       128
+      ],
+      [
+       0,
+       270,
+       345
+      ],
+      [
+       225,
+       487,
+       579
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 77,
+       "cleanup": 128,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 63,
+       "destroyed": 63,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "mechanic-mud-slap-pidgeotto-onix",
+     "orientation": "opponent",
+     "rawSha256": [
+      "59b5ac256b84ad8c1901fccbf4db250d6a76ad75ee7ad551c0534b135c0e245d",
+      "59b5ac256b84ad8c1901fccbf4db250d6a76ad75ee7ad551c0534b135c0e245d"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       189,
+       81,
+       132
+      ],
+      [
+       0,
+       275,
+       350
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 81,
+       "cleanup": 132,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 63,
+       "destroyed": 63,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  },
+  "24": {
+   "name": "DOUBLE_KICK",
+   "scenarios": [
+    {
+     "scenario": "mechanic-double-kick-player-nidorina-opponent-onix",
+     "orientation": "player",
+     "rawSha256": [
+      "b80d9aecfe2f50fc401794ee8947a7363c82fe4c92468dea1947897669bb903c",
+      "b80d9aecfe2f50fc401794ee8947a7363c82fe4c92468dea1947897669bb903c"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       72,
+       113
+      ],
+      [
+       24,
+       227,
+       262
+      ],
+      [
+       24,
+       355,
+       390
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 227,
+       "cleanup": 262,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "lateChanges": 1,
+       "netZero": true
+      },
+      {
+       "activation": 355,
+       "cleanup": 390,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "mechanic-double-kick-opponent-nidorina-player-onix",
+     "orientation": "opponent",
+     "rawSha256": [
+      "b5dff25c6626fa7a94483f4541015d914f9960c362610069334d55c5e6cf3e4d",
+      "b5dff25c6626fa7a94483f4541015d914f9960c362610069334d55c5e6cf3e4d"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       68,
+       109
+      ],
+      [
+       24,
+       227,
+       262
+      ],
+      [
+       24,
+       355,
+       390
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 227,
+       "cleanup": 262,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "lateChanges": 1,
+       "netZero": true
+      },
+      {
+       "activation": 355,
+       "cleanup": 390,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  },
+  "60": {
+   "name": "PSYBEAM",
+   "scenarios": [
+    {
+     "scenario": "mechanic-psybeam-player-spinda-opponent-onix",
+     "orientation": "player",
+     "rawSha256": [
+      "9485e7dceffeee8f9638cf9103e6f6adb6b8a9c2d0f3f418d9620ba3c8348ef0",
+      "9485e7dceffeee8f9638cf9103e6f6adb6b8a9c2d0f3f418d9620ba3c8348ef0"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       72,
+       113
+      ],
+      [
+       60,
+       213,
+       372
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 213,
+       "cleanup": 372,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 22,
+       "destroyed": 22,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "scenario": "mechanic-psybeam-opponent-spinda-player-onix",
+     "orientation": "opponent",
+     "rawSha256": [
+      "b7425811c621494ed1b631804b6b18cdec162ec0d420c4b9faafd3d58f35626a",
+      "b7425811c621494ed1b631804b6b18cdec162ec0d420c4b9faafd3d58f35626a"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       68,
+       109
+      ],
+      [
+       60,
+       213,
+       372
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 213,
+       "cleanup": 372,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 22,
+       "destroyed": 22,
+       "lateChanges": 1,
+       "netZero": true
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ],
+   "verdict": "NET-ZERO"
+  }
+ }
+}
