@@ -37,9 +37,9 @@ import { createKnownEntrySpriteAllocatorProvider, type KnownEntryRoute } from ".
 import type { LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import type { LiveSpriteAllocatorHost } from "./liveSpriteAllocator.ts";
 import {
-  KNOWN_ENTRY_BATTLER_SLOTS, applySpriteOrderPresentationEvent, createSpriteOrderTracker, invalidateSpriteOrderTracker,
-  spriteOrderStatusAnimationName, spriteOrderTrackerLend, spriteOrderTrackerRoleIsomorphic,
-  type SpriteOrderPresentationEvent, type SpriteOrderTracker,
+  KNOWN_ENTRY_BATTLER_SLOTS, KNOWN_ENTRY_OCCUPANT_ROLES, applySpriteOrderPresentationEvent, createSpriteOrderTracker,
+  invalidateSpriteOrderTracker, spriteOrderStatusAnimationName, spriteOrderTrackerLend, spriteOrderTrackerRoleIsomorphic,
+  type SpriteOrderDeferredLend, type SpriteOrderPresentationEvent, type SpriteOrderTracker,
 } from "./spriteOrderEventTransform.ts";
 import {
   invalidateSpriteOrderState, knownEntryPrePromptSpriteOrderState, knownEntrySpriteOrderState, type SpriteOrderState,
@@ -62,6 +62,54 @@ export interface LiveSpriteOrderHost {
   readonly digSetup?: Readonly<{ units: number }>;
   /** prep29: the battle's first unit was a Bonemerang hit 1 (move-animation 155 at `bodies` 0); `units` = the body counter right after it (hit 2 lend gate). */
   readonly bonemerangHit1?: Readonly<{ units: number }>;
+  /**
+   * Deferred-lend marker of a multi-body Random2 move (docs/s10a-random2-order-lend-blocker.md design 1; markLiveSpriteOrderDeferredBody):
+   * `deferredBody` is set at the earlier body's lend and consumed by that body's own move-animation event, which starts `deferred` (the
+   * tracker invalidates there: no constant plan). Every later order event appends to `deferred.units` while the tracker stays unknown.
+   * Word-free: keys, request fields, free orders and order events only.
+   */
+  readonly deferredBody?: Omit<SpriteOrderDeferredLend, "units">;
+  readonly deferred?: SpriteOrderDeferredLend;
+}
+
+/** Multi-body Random2 moves whose later bodies take a deferred lend from an earlier body of the same move (Ice Ball 301). */
+export const DEFERRED_LEND_MOVE_IDS: readonly number[] = Object.freeze([301]);
+
+/** Append order events to a pending deferred lend (no-op without one). */
+function withDeferredUnits(host: LiveSpriteOrderHost, units: readonly SpriteOrderPresentationEvent[]): LiveSpriteOrderHost {
+  if (host.deferred === undefined || units.length === 0) return host;
+  return Object.freeze({ ...host, deferred: Object.freeze({ ...host.deferred, units: Object.freeze([...host.deferred.units, ...units]) }) });
+}
+/** Drop the deferred marker (the tracker was revived by a party-menu reset, or a new known order replaces it). */
+function withoutDeferred(host: LiveSpriteOrderHost): LiveSpriteOrderHost {
+  if (host.deferred === undefined && host.deferredBody === undefined) return host;
+  const { deferred: _d, deferredBody: _b, ...rest } = host;
+  return Object.freeze(rest);
+}
+
+/**
+ * Record the deferred-lend marker at a DEFERRED_LEND_MOVE_IDS body's activation edge (orchestrator, right after lendLiveSpriteOrder): its
+ * presentation body key, request fields and its own lend, which must be a known-entry-occupancy free order (battler slots and occupant
+ * roles the entry ones: the lend is the raw free order) or itself deferred. Anything else records nothing (later bodies decline).
+ */
+export function markLiveSpriteOrderDeferredBody(
+  host: LiveSpriteOrderHost, lend: LiveMoveSpriteOrderInput | undefined,
+  body: Readonly<{ moveId: number; attacker: number; rolloutCounter?: number; turn?: number }>, key: string,
+): LiveSpriteOrderHost {
+  if (!DEFERRED_LEND_MOVE_IDS.includes(body.moveId) || lend === undefined || (body.attacker !== 0 && body.attacker !== 1)) return host;
+  let activation: SpriteOrderDeferredLend["activation"];
+  if (lend.deferred !== undefined) activation = Object.freeze({ deferred: lend.deferred });
+  else {
+    const { battlerSlots, occupantRoles } = host.tracker;
+    const atEntry = battlerSlots.player === KNOWN_ENTRY_BATTLER_SLOTS.player && battlerSlots.opponent === KNOWN_ENTRY_BATTLER_SLOTS.opponent
+      && occupantRoles !== null && JSON.stringify(occupantRoles) === JSON.stringify(KNOWN_ENTRY_OCCUPANT_ROLES);
+    if (!atEntry || !host.tracker.cursor.order.known) return host;
+    activation = Object.freeze({ free: lend.free });
+  }
+  return Object.freeze({ ...host, deferredBody: Object.freeze({
+    key, moveId: body.moveId, attackerSide: body.attacker === 0 ? "player" as const : "opponent" as const,
+    ...(body.rolloutCounter === undefined ? {} : { rolloutCounter: body.rolloutCounter }),
+    ...(body.turn === undefined ? {} : { turn: body.turn }), activation }) });
 }
 
 const RECALL_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_VARIOUS", "B_SCR_OP_RETURNATKTOBALL", "B_SCR_OP_RETURNTOBALL"]);
@@ -99,7 +147,7 @@ export function seedLiveSpriteOrderHostFromBattleStart(events: readonly BattleKe
 }
 
 export function invalidateLiveSpriteOrderHost(host: LiveSpriteOrderHost, reason: string): LiveSpriteOrderHost {
-  if (!host.tracker.cursor.order.known) return host;
+  if (!host.tracker.cursor.order.known) return withDeferredUnits(host, [{ kind: "invalidate", reason }]);
   return Object.freeze({ ...host, tracker: invalidateSpriteOrderTracker(host.tracker, reason) });
 }
 
@@ -114,7 +162,7 @@ export function liveSpriteOrderHostOrder(host: LiveSpriteOrderHost): SpriteOrder
  */
 export function openLiveSpriteOrderHostPartyMenu(host: LiveSpriteOrderHost): LiveSpriteOrderHost {
   return Object.freeze({
-    ...host,
+    ...withoutDeferred(host),
     tracker: applySpriteOrderPresentationEvent(host.tracker, { kind: "party-menu-reset" }),
     bodies: (host.bodies ?? 0) + 1,
     cursor: host.cursor === null || host.cursor.drained ? host.cursor : Object.freeze({ ...host.cursor, drained: true }),
@@ -133,7 +181,7 @@ export function returnLiveSpriteOrderHostFromPartyMenu(
   const tracker = !battlers.opponent ? invalidateSpriteOrderTracker(reset, "reshow without the opponent battler")
     : host.hidden[0] || host.hidden[1] ? invalidateSpriteOrderTracker(reset, "reshow with a hidden battler")
       : applySpriteOrderPresentationEvent(reset, { kind: "battle-reshow", playerBattlerPresent: battlers.player });
-  return Object.freeze({ ...host, tracker, bodies: (host.bodies ?? 0) + 1 });
+  return Object.freeze({ ...withoutDeferred(host), tracker, bodies: (host.bodies ?? 0) + 1 });
 }
 
 /**
@@ -175,6 +223,7 @@ export function beginLiveSpriteOrderTurn(
   if (!fromPartyMenu) {
     tracker = applySpriteOrderPresentationEvent(tracker, { kind: "action-prompt" });
     tracker = applySpriteOrderPresentationEvent(tracker, { kind: "actions-committed" });
+    if (!tracker.cursor.order.known) next = withDeferredUnits(next, [{ kind: "action-prompt" }, { kind: "actions-committed" }]);
   }
   return Object.freeze({ ...next, tracker, promptRequestId: requestId });
 }
@@ -313,10 +362,21 @@ export function advanceLiveSpriteOrderHost(
   let bodies = host.bodies ?? 0;
   let digSetup = host.digSetup;
   let bonemerangHit1 = host.bonemerangHit1;
+  let deferredBody = host.deferredBody;
+  let deferred = host.deferred;
+  const record = (event: SpriteOrderPresentationEvent | undefined) => {
+    if (event !== undefined && deferred !== undefined) deferred = Object.freeze({ ...deferred, units: Object.freeze([...deferred.units, event]) });
+  };
   let cursor = host.cursor;
   if (cursor?.requestId !== requestId) {
-    if (cursor !== null && !cursor.drained) tracker = invalidateSpriteOrderTracker(tracker, "previous resolution not fully applied");
-    if (host.promptRequestId !== requestId) tracker = invalidateSpriteOrderTracker(tracker, "resolution without a modelled prompt cycle");
+    if (cursor !== null && !cursor.drained) {
+      tracker = invalidateSpriteOrderTracker(tracker, "previous resolution not fully applied");
+      record({ kind: "invalidate", reason: "previous resolution not fully applied" });
+    }
+    if (host.promptRequestId !== requestId) {
+      tracker = invalidateSpriteOrderTracker(tracker, "resolution without a modelled prompt cycle");
+      record({ kind: "invalidate", reason: "resolution without a modelled prompt cycle" });
+    }
     cursor = { requestId, segmentIndex: 0, nextEventIndex: 0, drained: false };
   }
   const apply = (events: readonly BattleKernelSemanticEvent[], from: number, limit: number, strict: boolean) => {
@@ -326,6 +386,18 @@ export function advanceLiveSpriteOrderHost(
       if (mapped.hidden) hidden = mapped.hidden;
       if (mapped.event) tracker = applySpriteOrderPresentationEvent(tracker, mapped.event);
       if (mapped.then) tracker = applySpriteOrderPresentationEvent(tracker, mapped.then);
+      // Deferred lend: the marked body's own event starts it (the tracker invalidates there); later events are its units while the order is
+      // unknown; a revived (known) tracker drops it.
+      if (mapped.event?.kind === "move-animation" && deferredBody !== undefined && mapped.event.moveId === deferredBody.moveId
+        && mapped.event.attackerSide === deferredBody.attackerSide) {
+        deferred = tracker.cursor.order.known ? undefined : Object.freeze({ ...deferredBody, units: Object.freeze([]) });
+        deferredBody = undefined;
+      } else if (tracker.cursor.order.known) {
+        deferred = undefined;
+      } else {
+        record(mapped.event);
+        record(mapped.then);
+      }
       const wasFirstBody = bodies === 0;
       if (mapped.event && BODY_UNIT_EVENTS.has(mapped.event.kind)) bodies += 1;
       if (mapped.event?.kind === "move-animation" && mapped.event.moveId === 91 && wasFirstBody) digSetup = Object.freeze({ units: bodies });
@@ -347,10 +419,13 @@ export function advanceLiveSpriteOrderHost(
       drained: nextEventIndex >= events.length && cursor.segmentIndex === resolution.segments.length - 1,
     };
   }
-  if (tracker === host.tracker && bodies === (host.bodies ?? 0) && digSetup === host.digSetup && bonemerangHit1 === host.bonemerangHit1 && hidden === host.hidden && cursor.requestId === host.cursor?.requestId
+  if (tracker === host.tracker && bodies === (host.bodies ?? 0) && digSetup === host.digSetup && bonemerangHit1 === host.bonemerangHit1
+    && deferred === host.deferred && deferredBody === host.deferredBody && hidden === host.hidden && cursor.requestId === host.cursor?.requestId
     && cursor.segmentIndex === host.cursor.segmentIndex && cursor.nextEventIndex === host.cursor.nextEventIndex
     && cursor.drained === host.cursor.drained) return host;
-  return Object.freeze({ ...host, tracker, hidden, bodies, ...(digSetup === undefined ? {} : { digSetup }), ...(bonemerangHit1 === undefined ? {} : { bonemerangHit1 }), cursor: Object.freeze(cursor) });
+  const { deferred: _d, deferredBody: _b, ...rest } = host;
+  return Object.freeze({ ...rest, tracker, hidden, bodies, ...(digSetup === undefined ? {} : { digSetup }), ...(bonemerangHit1 === undefined ? {} : { bonemerangHit1 }),
+    ...(deferredBody === undefined ? {} : { deferredBody }), ...(deferred === undefined ? {} : { deferred }), cursor: Object.freeze(cursor) });
 }
 
 /**
@@ -393,6 +468,11 @@ const BONEMERANG_HIT2_FREE: readonly number[] = Object.freeze([
 export function lendLiveSpriteOrder(host: LiveSpriteOrderHost, moveId?: number): LiveMoveSpriteOrderInput | undefined {
   if (moveId === 91 && host.digSetup !== undefined && (host.bodies ?? 0) >= host.digSetup.units && (host.bodies ?? 0) <= host.digSetup.units + 1) {
     return digUnleashLend();
+  }
+  // A later body of a DEFERRED_LEND_MOVE_IDS move after an earlier one (unknown tracker): the word-free deferred lend; the render seam
+  // resolves it (resolveSpriteOrderDeferredLend). `free` is empty so that no other consumer can read it as an order.
+  if (!host.tracker.cursor.order.known && host.deferred !== undefined && moveId === host.deferred.moveId) {
+    return Object.freeze({ known: true as const, free: Object.freeze([]), deferred: host.deferred });
   }
   const free = spriteOrderTrackerLend(host.tracker);
   if (free === null) return undefined;

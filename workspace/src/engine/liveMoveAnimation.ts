@@ -91,7 +91,8 @@ import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "j
 import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
 import spitUpRedOrbAsset from "../animation/assets/spit-up-red-orb.json" with { type: "json" };
 import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
-import { liveMoveBgWriteRow, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveTimingBodyRows, liveMoveTimingParameter } from "./liveMoveTimingPolicy.ts";
+import { liveMoveBgWriteRow, liveMoveCounterTimingParameter, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveTimingBodyRows, liveMoveTimingParameter } from "./liveMoveTimingPolicy.ts";
+import { resolveSpriteOrderDeferredLend } from "./spriteOrderEventTransform.ts";
 import { liveSpitUpDuration, liveSpitUpInputs, type SpitUpCounter } from "./liveSpitUpInputs.ts";
 import { SUPERPOWER_ROWS, liveSuperpowerInputs } from "./liveSuperpowerInputs.ts";
 import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
@@ -191,11 +192,14 @@ function liveDiveSetupProfile(side: "player" | "opponent", words: readonly numbe
     droplets, impacts: [], spriteOrderSeed: activationOrder.filter((slot) => slots.includes(slot)) };
 }
 
-/** Ice Ball's D4 lag rows: the timing policy's optional lag (liveMoveTimingPolicy.ts 301; the dominant phase has none). */
-function liveIceBallLagRows(): number[] {
-  const age = liveMoveOptionalLagAge(301);
-  return age === null ? [] : [age];
+/** Ice Ball's D4 lag rows of a counter body (request.rolloutCounter 1..5): the policy's per-counter optional lag (liveMoveTimingPolicy.ts 301). */
+function liveIceBallLagRows(rolloutCounter: number): number[] {
+  const p = liveMoveCounterTimingParameter(301, "optional-lag-age", rolloutCounter);
+  return p !== null && p.chosen === "event" ? [p.age] : [];
 }
+const liveIceBallCounter = (rolloutCounter: number | undefined): 0 | 1 | 2 | 3 | 4 | null =>
+  rolloutCounter !== undefined && Number.isInteger(rolloutCounter) && rolloutCounter >= 1 && rolloutCounter <= 5
+    ? (rolloutCounter - 1) as 0 | 1 | 2 | 3 | 4 : null;
 
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   2, 5, 9, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 42, 43, 44, 47, 48, 49, 50,
@@ -1092,10 +1096,13 @@ export function liveMoveAnimationDuration(
     case 326: return liveMoveTimingBodyRows(326);
     // Faithful timing (D4b, + D3 Random2): Meteor Mash 213 + the policy's restore lag L (row 195) + the first inactive row = 215 both sides.
     case 309: return liveMoveTimingBodyRows(309);
-    // Faithful timing (S10A, + D3 Random2): Ice Ball counter 0 (request.rolloutCounter 1, AnimTask_GetIceBallCounter = rolloutCounter - 1) only:
-    // 75 steps + the first inactive row, the policy's lag rows (none: dominant no-lag phase, liveMoveTimingPolicy.ts 301). Counters 1..4 follow an
-    // earlier Ice Ball body whose Random2 shard sort decides their activation order (docs/s10a-random2-order-lend-blocker.md): no live body.
-    case 301: return request.rolloutCounter === 1 ? liveIceBallEnd(0) + 1 + liveIceBallLagRows().length : null;
+    // Faithful timing (S10A, + D3 Random2): Ice Ball counter c = request.rolloutCounter - 1 (AnimTask_GetIceBallCounter): the counter's steps +
+    // the first inactive row + the policy's per-counter lag rows (liveMoveTimingPolicy.ts 301: none for counters 0..3, row 112 for counter 4).
+    // Counters 1..4 render from the seam-resolved deferred lend of the earlier body (docs/s10a-random2-order-lend-blocker.md design 1).
+    case 301: {
+      const counter = liveIceBallCounter(request.rolloutCounter);
+      return counter === null ? null : liveIceBallEnd(counter) + 1 + liveIceBallLagRows(counter + 1).length;
+    }
     case 295: return 332; // Luster Purge (prep29 B.5: 332 rows, constant in all four scenarios; faithful-random, plan rows in liveMovePresentationRng.ts).
     case 200: return 119; // Outrage (prep29 B.6: 119 rows, constant in all five bodies).
     case 229: return 130; // Rapid Spin (prep29 B.3: 130 rows, constant in all four scenarios).
@@ -3593,19 +3600,38 @@ export function liveMoveAnimationPresentation(
       // follow an earlier Ice Ball body whose words-dependent shard sort is the activation order: docs/s10a-random2-order-lend-blocker.md,
       // they decline). Hardware OAM / matrices / palettes / registers / tasks from liveIceBallInputs.ts over the lent order (any known lend
       // with the known-entry occupancy), the presentation host's words (2 per shard at step 37) and the policy's lag rows. Non-shiny.
-      if (request.rolloutCounter !== 1 || !spriteOrderInput?.known) return null;
+      // Counters 1..4: the lend is the deferred marker of the earlier Ice Ball body (liveSpriteOrderHost markLiveSpriteOrderDeferredBody);
+      // resolved here, render-pure: carry the earlier body's activation order through it with ITS recorded words (this program, read-only
+      // host lookup by its body key), then replay the order units that followed with the production plans. A KO / send-in / switch /
+      // invalidation in between, or an earlier body that is not an Ice Ball of the same battlers, declines.
+      const counter = liveIceBallCounter(request.rolloutCounter);
+      if (counter === null || !spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const rng = liveMovePresentationRngWords(presentationRngInput);
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
-      const activationOrder = spriteOrderWithOccupiedPrefix(
-        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
-      if (rng === null || palettes === null || activationOrder === null) return null;
+      if (rng === null || palettes === null) return null;
+      const iceBallArgs = (side: "player" | "opponent", c: 0 | 1 | 2 | 3 | 4, words: NonNullable<typeof rng>, activationOrder: readonly number[]) => {
+        const foe = side === "player" ? "opponent" as const : "player" as const;
+        return liveIceBallInputs({ counter: c, attackerSide: side, attackerSpecies: art[side].speciesSymbol, targetSpecies: art[foe].speciesSymbol,
+          attacker: liveBattlerAnchors(side, art, battlerX2Input), target: liveBattlerAnchors(foe, art, battlerX2Input), palettes, activationOrder,
+          words: words.words, activationValue: words.activationValue, lagRows: liveIceBallLagRows(c + 1), sort: sortGbaSpriteOrder,
+          linear: { deltaQ8: linearTranslationDeltaQ8, offsetAfterCallbacks: linearTranslationOffsetAfterCallbacks },
+          chunkPalette: iceBallAsset.chunk.palette, icePalette: icyWindAsset.background.palette });
+      };
+      const withPrefix = (free: readonly number[]) =>
+        spriteOrderWithOccupiedPrefix({ known: true as const, free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      const lentFree = spriteOrderInput.deferred === undefined ? spriteOrderInput.free
+        : resolveSpriteOrderDeferredLend(spriteOrderInput.deferred, (body, activationFree) => {
+          const c = liveIceBallCounter(body.rolloutCounter);
+          const words = liveMovePresentationRngWords({ host: presentationRngInput?.host ?? null, key: body.key });
+          const order = withPrefix(activationFree);
+          if (body.moveId !== 301 || c === null || words === null || order === null) return null;
+          return iceBallArgs(body.attackerSide, c, words, order)?.postBodyFree ?? null;
+        });
+      const activationOrder = lentFree === null ? null : withPrefix(lentFree);
+      if (activationOrder === null) return null;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
-      const inputs = liveIceBallInputs({ counter: 0, attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
-        targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
-        words: rng.words, activationValue: rng.activationValue, lagRows: liveIceBallLagRows(), sort: sortGbaSpriteOrder,
-        linear: { deltaQ8: linearTranslationDeltaQ8, offsetAfterCallbacks: linearTranslationOffsetAfterCallbacks },
-        chunkPalette: iceBallAsset.chunk.palette, icePalette: icyWindAsset.background.palette });
+      const inputs = iceBallArgs(attacker.geometry.side, counter, rng, activationOrder);
       if (inputs === null) return null;
       // The ICE_BALL seam centres are the Y_PIC_OFFSET points (the chunk / shard anchors); the renderer reads battlePositionCenter only for
       // the age-0 enemy shadow (y - (attr0 y - 8)), so it is the battler sprite centre (shadow y 40), as the CURSE seam.

@@ -490,3 +490,51 @@ export function spriteOrderTrackerPostUnitView(tracker: SpriteOrderTracker): Rea
   if (!order.known || tracker.promptPair !== null) return null;
   return Object.freeze({ free: order.free, occupied, battlerSlots: tracker.battlerSlots, occupantRoles: tracker.occupantRoles });
 }
+
+/**
+ * Deferred lend (docs/s10a-random2-order-lend-blocker.md design 1, "seam-resolved"): a multi-body Random2 move's earlier body (Ice Ball's
+ * shard y-sort, Dive's setup droplets) leaves a free order that depends on that body's presentation Random2 words, which the logical order
+ * host never reads. The host records this word-free marker instead of a free order: the earlier body's presentation body key
+ * (liveMovePresentationRngBodyKey) and request fields, its own activation lend (a known-entry-occupancy free order, or itself deferred) and
+ * the order events applied since (`units`, the transform's own events). Only the render seam resolves it
+ * (resolveSpriteOrderDeferredLend), reading the earlier body's recorded words to carry the order through it.
+ */
+export interface SpriteOrderDeferredLend {
+  readonly key: string;
+  readonly moveId: number;
+  readonly attackerSide: SpriteOrderSide;
+  /** Ice Ball: the earlier body's request.rolloutCounter (1..5). */
+  readonly rolloutCounter?: number;
+  /** Dive: the earlier body's request.turn. */
+  readonly turn?: number;
+  readonly activation: Readonly<{ free: readonly number[] }> | Readonly<{ deferred: SpriteOrderDeferredLend }>;
+  readonly units: readonly SpriteOrderPresentationEvent[];
+}
+
+/**
+ * Units a deferred lend may replay: body / animation / prompt units that keep the occupancy (a KO, a send-in, a switch, a party menu, a
+ * slide or an invalidation was not modelled by the design's check, tools/integration/s10aLendChainCheck.ts: the lend declines).
+ */
+const DEFERRED_REPLAY_UNITS: ReadonlySet<SpriteOrderPresentationEvent["kind"]> = new Set([
+  "action-prompt", "actions-committed", "move-menu", "move-animation", "hit-animation", "stat-animation", "status-animation", "general-animation"]);
+
+/**
+ * Render-seam resolution of a deferred lend (pure; the caller supplies `carryBody`, which reads the earlier body's recorded presentation
+ * words and returns the free order after the body from its activation free order, or null). Recurses through a deferred activation, then
+ * replays `units` with the production plans from the known-entry roles and battler slots and returns spriteOrderTrackerLend. Null (the
+ * consumer declines) when any step is unknown or a unit outside DEFERRED_REPLAY_UNITS followed the body.
+ */
+export function resolveSpriteOrderDeferredLend(
+  deferred: SpriteOrderDeferredLend,
+  carryBody: (body: SpriteOrderDeferredLend, activationFree: readonly number[]) => readonly number[] | null,
+): readonly number[] | null {
+  if (deferred.units.some((unit) => !DEFERRED_REPLAY_UNITS.has(unit.kind))) return null;
+  const activationFree = "deferred" in deferred.activation
+    ? resolveSpriteOrderDeferredLend(deferred.activation.deferred, carryBody) : deferred.activation.free;
+  if (activationFree === null) return null;
+  const post = carryBody(deferred, activationFree);
+  if (post === null) return null;
+  let tracker = createSpriteOrderTracker({ known: true, free: post, pendingDestroyed: [] });
+  for (const unit of deferred.units) tracker = applySpriteOrderPresentationEvent(tracker, unit);
+  return spriteOrderTrackerLend(tracker);
+}

@@ -1,0 +1,63 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "ICE_BALL",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-ice-ball-opponent-spheal-player-onix.json",
+ "denseWindow": {
+  "startFrame": 3964,
+  "endFrame": 4096
+ },
+ "windowSource": "window = [activation, activation + 132] (counter-4 body through the first inactive row; lag rows [112]) from a fresh iceBallProbe.py run",
+ "timingPhase": "event",
+ "attacker": {
+  "species": "SPHEAL",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "REGISTEEL",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793700280,
+ "fieldProfile": {
+  "playerHp": 101,
+  "playerMaxHp": 187,
+  "opponentHp": 118,
+  "opponentMaxHp": 177,
+  "playerGender": "none",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 480,
+  "rolloutCounter": 5
+ },
+ "presentationRngActivation": {
+  "value": 3779721043,
+  "source": "iceBallProbe.py bodies[4][0].animationRng (activation frame 3964)"
+ },
+ "iceBallChain": {
+  "foeFirst": true,
+  "earlier": [
+   {
+    "value": 3958737796,
+    "source": "iceBallProbe.py bodies[0][0].animationRng (activation frame 229)"
+   },
+   {
+    "value": 3692667517,
+    "source": "iceBallProbe.py bodies[1][0].animationRng (activation frame 1161)"
+   },
+   {
+    "value": 2401981319,
+    "source": "iceBallProbe.py bodies[2][0].animationRng (activation frame 2106)"
+   },
+   {
+    "value": 2985637816,
+    "source": "iceBallProbe.py bodies[3][0].animationRng (activation frame 3040)"
+   }
+  ]
+ }
+}

@@ -4,6 +4,7 @@ import {
   type LiveSpriteAllocatorHost, type LiveSpriteOwner,
 } from "./liveSpriteAllocator.ts";
 import { invalidateSpriteOrderState, type SpriteOrderState } from "./spriteOrderProvider.ts";
+import type { SpriteOrderDeferredLend } from "./spriteOrderEventTransform.ts";
 
 export interface LiveMoveSpriteAllocatorInput {
   readonly historyKnown: true;
@@ -140,6 +141,11 @@ export interface LiveMoveSpriteOrderInput {
   readonly afterDigSetup?: true;
   /** prep29: the previous unit was the battle's first body, a Bonemerang hit 1 (nothing since): hit 2's BG registers are hit 1's split values. */
   readonly afterBonemerangHit1?: true;
+  /**
+   * Deferred lend (liveSpriteOrderHost markLiveSpriteOrderDeferredBody; docs/s10a-random2-order-lend-blocker.md design 1): the order is the
+   * earlier body's words-dependent end state, resolved only at the render seam (resolveSpriteOrderDeferredLend); `free` is then empty.
+   */
+  readonly deferred?: SpriteOrderDeferredLend;
 }
 
 /**

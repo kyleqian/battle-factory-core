@@ -1,0 +1,55 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "ICE_BALL",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep25-ice-ball-alt-player-glalie-golem.json",
+ "denseWindow": {
+  "startFrame": 1072,
+  "endFrame": 1147
+ },
+ "windowSource": "window = [activation, activation + 75] (counter-2 body through the first inactive row; lag rows []) from a fresh iceBallProbe.py run",
+ "timingPhase": "no-event",
+ "attacker": {
+  "species": "GLALIE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019030,
+ "fieldProfile": {
+  "playerHp": 151,
+  "playerMaxHp": 187,
+  "opponentHp": 10,
+  "opponentMaxHp": 187,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 120,
+  "rolloutCounter": 3
+ },
+ "presentationRngActivation": {
+  "value": 2965626227,
+  "source": "iceBallProbe.py bodies[2][0].animationRng (activation frame 1072)"
+ },
+ "iceBallChain": {
+  "foeFirst": false,
+  "earlier": [
+   {
+    "value": 469952876,
+    "source": "iceBallProbe.py bodies[0][0].animationRng (activation frame 75)"
+   },
+   {
+    "value": 3741368105,
+    "source": "iceBallProbe.py bodies[1][0].animationRng (activation frame 544)"
+   }
+  ]
+ }
+}

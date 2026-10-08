@@ -16,9 +16,11 @@ import { liveBattlerIsShiny } from "../../src/engine/liveMovePaletteComposite.ts
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { random2Route } from "../../tools/integration/random2R1/routeHarness.ts";
 
-// S10A Ice Ball (301), counter 0 only (docs/next-adapters-prep26.md s1 / s4; scope cut: docs/s10a-random2-order-lend-blocker.md). Faithful timing
-// (D4: the lag rows are a CPU phase, dominant no lag) with D3 (Random2 shards from the presentation host). Dense windows:
-// tools/integration/fixtures/s10a-live/ice-ball-*.json (receipt tools/integration/fixtures/d4d2-live-receipt.json, d4aTimingCheck.ts).
+// S10A Ice Ball (301), every counter body (docs/next-adapters-prep26.md s1 / s4). Faithful timing (D4: the lag rows are a CPU phase, per-counter
+// dominant phase) with D3 (Random2 shards from the presentation host). Counters 1..4 take the seam-resolved deferred lend
+// (docs/s10a-random2-order-lend-blocker.md design 1). Dense windows: tools/integration/fixtures/s10a-live/ice-ball-*.json (counter 0; receipt
+// tools/integration/fixtures/d4d2-live-receipt.json) and tools/integration/fixtures/lend-live/ice-ball-*.json (counters 1..4; receipt
+// tools/integration/fixtures/lend-live-receipt.json), d4aTimingCheck.ts.
 const DIR = "tools/integration/fixtures/s10a-live";
 const NAMES = readdirSync(DIR).filter((n) => n.startsWith("ice-ball-") && n.endsWith(".json")).map((n) => n.slice(0, -5)).sort();
 const fixtureAt = (name: string) => JSON.parse(readFileSync(`${DIR}/${name}.json`, "utf8")) as Fixture & { timingPhase: string };
@@ -36,7 +38,11 @@ const presentationOf = (f: Fixture, age: number, activationValue?: number) => {
     e.battlerX2Input);
 };
 
-describe("S10A Ice Ball (301) counter 0: faithful timing with D3", () => {
+const LEND_DIR = "tools/integration/fixtures/lend-live";
+const LEND_NAMES = readdirSync(LEND_DIR).filter((n) => n.startsWith("ice-ball-") && n.endsWith(".json")).map((n) => n.slice(0, -5)).sort();
+const lendFixtureAt = (name: string) => JSON.parse(readFileSync(`${LEND_DIR}/${name}.json`, "utf8")) as Fixture & { timingPhase: string };
+
+describe("S10A Ice Ball (301): faithful timing with D3", () => {
   it("counts once, in faithful timing with d3 (never faithful random / scoped exact); the status entry is the policy", () => {
     expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).toContain(301);
     expect(LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS).not.toContain(301);
@@ -49,27 +55,78 @@ describe("S10A Ice Ball (301) counter 0: faithful timing with D3", () => {
     expect((status.faithfulRandomAdapters as { id: number }[]).some((e) => e.id === 301)).toBe(false);
   });
 
-  it("the policy: lag rows in 3 of 18 measured counter bodies (prep26 iceball-check.json) -> no lag; counter 0 is 76 rows both sides", () => {
-    const check = JSON.parse(readFileSync("tools/integration/fixtures/prep26/iceball-check.json", "utf8")) as { lagRows: number[] }[];
+  it("the policy, per counter body: lag rows measured in prep26 iceball-check.json (counter 3: 1 of 3, counter 4: 2 of 3, else none)", () => {
+    const check = JSON.parse(readFileSync("tools/integration/fixtures/prep26/iceball-check.json", "utf8")) as { name: string; lagRows: number[] }[];
     expect(check).toHaveLength(18);
-    const lag = check.filter((w) => w.lagRows.length > 0).length;
-    const [p] = LIVE_MOVE_TIMING_POLICY[301]!.parameters;
-    expect(p!.alternatives.map((a) => a.measured)).toEqual([lag, check.length - lag]);
-    expect(dominantLiveMoveTimingPhase(p!.alternatives).phase).toBe("no-event");
-    expect(p!.chosen).toBe("no-event");
-    for (const attacker of [0, 1] as const) expect(liveMoveAnimationDuration(base(attacker, 1))).toBe(76);
+    const params = LIVE_MOVE_TIMING_POLICY[301]!.parameters;
+    expect(params.map((p) => p.rolloutCounter)).toEqual([1, 2, 3, 4, 5]);
+    for (const p of params) {
+      // The probed windows of this counter body; GLALIE player bodies 4..5 are post-KO (decline) but still measured.
+      const windows = check.filter((w) => w.name.endsWith(`-b${p.rolloutCounter}`));
+      const lag = windows.filter((w) => w.lagRows.length > 0);
+      expect(p.alternatives.map((a) => a.measured), `counter ${p.rolloutCounter! - 1}`).toEqual([lag.length, windows.length - lag.length]);
+      for (const w of lag) expect(w.lagRows).toEqual([p.age]);
+      expect(p.chosen).toBe(dominantLiveMoveTimingPhase(p.alternatives).phase);
+      expect(p.tieRuleUsed).toBe(false);
+    }
+    expect(params.map((p) => p.chosen)).toEqual(["no-event", "no-event", "no-event", "no-event", "event"]);
+    for (const attacker of [0, 1] as const) {
+      expect([1, 2, 3, 4, 5].map((c) => liveMoveAnimationDuration(base(attacker, c)))).toEqual([76, 76, 76, 76, 133]);
+    }
   });
 
-  it("counters 1..4 (rolloutCounter 2..5) and a request without the counter decline: no duration, no presentation (fallback)", () => {
-    const f = fixtureAt("ice-ball-alt-player-glalie-golem");
-    const view = liveView(f, 10);
-    const e = view.effect as unknown as { spriteAllocatorInput: never; spriteOrderInput: never; presentationRng: never };
-    for (const counter of [undefined, 2, 3, 4, 5]) {
-      for (const attacker of [0, 1] as const) expect(liveMoveAnimationDuration(base(attacker, counter))).toBeNull();
-      expect(liveMoveAnimationPresentation(base(0, counter), view.field, 10, undefined, e.spriteAllocatorInput, e.spriteOrderInput, e.presentationRng)).toBeNull();
+  it("declines without a counter, without a lend, without the earlier body's words, and after a KO / send-in / invalidation between the bodies", () => {
+    for (const counter of [undefined, 0, 6]) for (const attacker of [0, 1] as const) expect(liveMoveAnimationDuration(base(attacker, counter))).toBeNull();
+    const f = lendFixtureAt("ice-ball-player-spheal-opponent-registeel-b3");
+    const view = liveView(f, 40);
+    const e = view.effect as unknown as { request: BattleMoveAnimationRequest; spriteAllocatorInput: never; battlerX2Input: never;
+      spriteOrderInput: { known: true; free: number[]; deferred: { units: object[]; activation: object } };
+      presentationRng: { host: { bodies: { key: string }[] }; key: string } };
+    const present = (order: unknown, rng: unknown = e.presentationRng) => liveMoveAnimationPresentation(e.request, view.field, 40, undefined,
+      e.spriteAllocatorInput, order as never, rng as never, e.battlerX2Input);
+    expect(e.spriteOrderInput.free).toEqual([]);
+    expect(present(e.spriteOrderInput)?.config.move).toBe("ICE_BALL");
+    expect(present(undefined)).toBeNull();
+    // The host without the earlier bodies' words (only the current body): the carry is unknown.
+    const own = { ...e.presentationRng, host: { ...e.presentationRng.host, bodies: e.presentationRng.host.bodies.filter((b) => b.key === e.presentationRng.key) } };
+    expect(present(e.spriteOrderInput, own)).toBeNull();
+    const d = e.spriteOrderInput.deferred;
+    for (const unit of [{ kind: "faint", side: "opponent" }, { kind: "next-mon-send-out" }, { kind: "switch-out" }, { kind: "invalidate", reason: "x" }]) {
+      expect(present({ ...e.spriteOrderInput, deferred: { ...d, units: [...d.units, unit] } }), unit.kind).toBeNull();
+      expect(present({ ...e.spriteOrderInput, deferred: { ...d, activation: { deferred: { ...(d.activation as { deferred: { units: object[] } }).deferred,
+        units: [unit] } } } }), `nested ${unit.kind}`).toBeNull();
     }
-    expect(liveMoveAnimationPresentation(base(0, 1), view.field, 10, undefined, e.spriteAllocatorInput, e.spriteOrderInput, e.presentationRng)?.config.move)
-      .toBe("ICE_BALL");
+  });
+
+  it("deferred-lend windows: counters 1..4 (accepted bodies 2..5 both sides, GLALIE -> GOLEM bodies 2..3 both sides) through the production renderer", () => {
+    expect(LEND_NAMES).toHaveLength(12);
+    const receipt = JSON.parse(readFileSync("tools/integration/fixtures/lend-live-receipt.json", "utf8"));
+    const rows = receipt.windows as { fixture: string; selectedPhase: boolean; window: number; expectedDuration: number; violations: string[];
+      runs: { residualPixels: number; digest: string; affectedAges: number[] }[] }[];
+    expect(rows.map((r) => r.fixture.replace(`${LEND_DIR}/`, "").replace(".json", "")).sort()).toEqual(LEND_NAMES);
+    const documented = (status.faithfulTimingAdapters as { id: number; alternatePhaseResidual: { windows: Record<string, { ages: number[] }> } }[])
+      .find((x) => x.id === 301)!.alternatePhaseResidual.windows;
+    for (const r of rows) {
+      const name = r.fixture.replace(`${LEND_DIR}/`, "").replace(".json", "");
+      expect(r.violations, name).toEqual([]);
+      expect(r.runs).toHaveLength(2);
+      expect(r.runs[1]!.digest).toBe(r.runs[0]!.digest);
+      if (r.selectedPhase) {
+        expect(r.runs.map((run) => run.residualPixels), name).toEqual([0, 0]);
+        expect(r.window).toBe(r.expectedDuration);
+      } else {
+        expect(name).toBe("ice-ball-player-spheal-opponent-registeel-b4");
+        expect(r.runs[0]!.affectedAges).toEqual(documented[name]!.ages);
+      }
+    }
+    expect(rows.filter((r) => !r.selectedPhase)).toHaveLength(1);
+    for (const n of LEND_NAMES) {
+      const f = lendFixtureAt(n) as Fixture & { iceBallChain: { earlier: { value: number }[] } };
+      const counter = f.requestFields!.rolloutCounter!;
+      expect(f.iceBallChain.earlier).toHaveLength(counter - 1);
+      expect(Number.isInteger(f.presentationRngActivation!.value)).toBe(true);
+      expect(presentationOf(f, 40)?.config.move).toBe("ICE_BALL");
+    }
   });
 
   it("the Random2 plan is counter-keyed: 2 words per shard at step 37 (5 / 7 / 9 / 10 / 10 shards)", () => {
@@ -146,17 +203,51 @@ describe("S10A Ice Ball (301) counter 0: faithful timing with D3", () => {
     }
   });
 
-  it("ordinary route seed 1 DELIBIRD slot 1: chain body 1 live every age, later bodies fall back; two presentation seeds and Scene OFF keep gameplay / RNG / facility", () => {
+  it("ordinary route seed 152 slot 1: an Ice Ball chain of 4 bodies, every body live every age (deferred lends), next prompt; replay equal; two presentation seeds and Scene OFF keep gameplay / RNG / facility", () => {
+    const SEED_A = 0x1234abcd, SEED_B = 0xfeed0042;
+    const a = random2Route(152, "on", [1, 1, 1, 1], 0, SEED_A), a2 = random2Route(152, "on", [1, 1, 1, 1], 0, SEED_A);
+    const b = random2Route(152, "on", [1, 1, 1, 1], 0, SEED_B), off = random2Route(152, "off", [1, 1, 1, 1], 0, SEED_A);
+    const chain = a.bodies.filter((body) => body.moveId === 301 && body.attacker === 0);
+    expect(chain.length).toBeGreaterThanOrEqual(3);
+    chain.forEach((body, k) => {
+      expect(body.ages, `body ${k + 1}`).toEqual(Array.from({ length: k === 4 ? 133 : 76 }, (_, age) => age));
+      expect(body.active.every(Boolean), `body ${k + 1}`).toBe(true);
+      expect(body.provenance).toBe("surrogate");
+      expect(body.words).toHaveLength(2 * [5, 7, 9, 10, 10][k]!);
+    });
+    // Another presentation seed draws other words: the later bodies' words-dependent activation orders and frames differ, still live.
+    const chainB = b.bodies.filter((body) => body.moveId === 301 && body.attacker === 0);
+    expect(chainB.length).toBe(chain.length);
+    expect(chainB.every((body) => body.active.every(Boolean))).toBe(true);
+    expect(chainB[1]!.frameDigests).not.toEqual(chain[1]!.frameDigests);
+    expect(a.run.stalled).toBe(false);
+    expect(a.run.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    expect(a2.bodies).toEqual(a.bodies);
+    expect(off.bodies).toEqual([]);
+    const rules = (value: (typeof a.run.boundaries)[number]) => ({
+      ...value.rules, rulesContext: { ...value.rules.rulesContext, hitMarker: value.rules.rulesContext.hitMarker & ~0x80 } });
+    expect(b.run.boundaries).toEqual(a.run.boundaries);
+    expect(off.run.boundaries).toHaveLength(a.run.boundaries.length);
+    for (let i = 0; i < a.run.boundaries.length; i += 1) {
+      expect(rules(off.run.boundaries[i]!)).toEqual(rules(a.run.boundaries[i]!));
+      expect(off.run.boundaries[i]!.rng).toEqual(a.run.boundaries[i]!.rng);
+    }
+    expect(b.run.state.facilityState).toEqual(a.run.state.facilityState);
+    expect(off.run.state.facilityState).toEqual(a.run.state.facilityState);
+    expect(off.run.state.round.rules.rngValue).toBe(a.run.state.round.rules.rngValue);
+  }, 240000);
+
+  it("ordinary route seed 1 DELIBIRD slot 1: chain bodies 1..2 live every age; body 3 follows the opponent's KO + send-in and body 4 nests it: both fall back; two presentation seeds and Scene OFF keep gameplay / RNG / facility", () => {
     const SEED_A = 0x1234abcd, SEED_B = 0xfeed0042;
     const a = random2Route(1, "on", [1, 1, 1], 0, SEED_A), a2 = random2Route(1, "on", [1, 1, 1], 0, SEED_A);
     const b = random2Route(1, "on", [1, 1, 1], 0, SEED_B), off = random2Route(1, "off", [1, 1, 1], 0, SEED_A);
     const chain = a.bodies.filter((body) => body.moveId === 301 && body.attacker === 0);
-    expect(chain.length).toBeGreaterThanOrEqual(2);
+    expect(chain.length).toBeGreaterThanOrEqual(4);
     expect(chain[0]!.ages).toEqual(Array.from({ length: 76 }, (_, age) => age));
-    expect(chain[0]!.active.every(Boolean)).toBe(true);
     expect(chain[0]!.provenance).toBe("surrogate");
     expect(chain[0]!.words).toHaveLength(10);
-    for (const later of chain.slice(1)) {
+    expect(chain.slice(0, 2).map((body) => body.active.every(Boolean))).toEqual([true, true]);
+    for (const later of chain.slice(2, 4)) {
       expect(later.active.some(Boolean)).toBe(false);
       expect(later.ages.length).toBeGreaterThan(0);
     }

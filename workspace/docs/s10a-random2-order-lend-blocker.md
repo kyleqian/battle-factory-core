@@ -89,3 +89,36 @@ npx vite-node tools/integration/s10aLendChainCheck.ts OUT2.json \
   /tmp/s10a-ib/prep25-ice-ball-alt-player-glalie-golem-r1.json:player /tmp/s10a-ib/prep25-ice-ball-alt-opponent-glalie-golem-r1.json:opponent
 cmp OUT2.json tools/integration/fixtures/s10a-live/blockers/lend-chain-check.json
 ```
+
+## Resolution (Ice Ball): design 1 implemented
+
+S10A integration worker, 2026-10-08, base `f1b672ca1`. Ice Ball counters 1..4 now render live from the seam-resolved deferred lend; Dive's attack
+body still declines (not started; the remaining work is listed below).
+
+- **Logical side (word-free).** `markLiveSpriteOrderDeferredBody` (`src/engine/liveSpriteOrderHost.ts`) runs in the orchestrator right after
+  `lendLiveSpriteOrder` for a `DEFERRED_LEND_MOVE_IDS` body (301). It records the body's presentation key, its request counter and side, and its
+  own lend. That lend is either a known-entry-occupancy free order or itself deferred, so a chain nests. The body's move-animation event starts
+  `deferred`; every later order event appends to `deferred.units` while the tracker is unknown. The next 301 body gets
+  `{ known: true, free: [], deferred }`. A party-menu reset drops the marker.
+- **Render seam (render-pure).** `resolveSpriteOrderDeferredLend` (`src/engine/spriteOrderEventTransform.ts`) works in three steps:
+  1. It resolves the activation recursively.
+  2. It calls the move's carry. For Ice Ball this is `liveIceBallInputs(...).postBodyFree`, the adapter's own program run with the earlier
+     body's recorded words, read by key from the presentation host.
+  3. It replays the units with the production plans and returns `spriteOrderTrackerLend`.
+
+  A KO, send-in, switch, party menu, slide or invalidation in the units declines.
+- **Timing (D4).** The 301 policy is per counter body (`rolloutCounter`): no lag for counters 0..3, and lag row 112 for counter 4 (2 of 3
+  measured; 133 rows).
+- **Proof.**
+  - `tests/spriteOrderDeferredLend.test.ts`: the production marker and resolver against the accepted ROM corpora, 8/8 transitions exact.
+  - `tools/integration/fixtures/lend-live-receipt.json`: 12 dense windows, 2 passes x 2 fresh. 11 policy-phase windows are 0 px. The accepted
+    player body 4 is in the other phase (lag row 38), with 55,632 px on ages 38..74 only. The words-free entry-lend control differs in 11 of 12.
+  - Routes: seed 152 has 4 live chain bodies; seed 1's body 3 follows a KO + send-in and declines.
+- **Dive attack (291), remaining.** Four pieces of work remain:
+  1. Add 291 setup bodies to `DEFERRED_LEND_MOVE_IDS`, with a "setup first, nothing since" gate. The units would be the attacker hide's
+     invalidation and the locked turn's prompt-less resolution, so the replay must accept exactly those as order-neutral (the Dig gate).
+  2. Write a carry through the setup body from `diveAtAge` sprite states (`src/animation/dive.ts`), using the setup words and
+     `carryLiveSpriteOrder`.
+  3. Write an attack-body profile builder: matrices `[0,3,4,5]`, `spriteOrderSeed` from the resolved order, and droplet / bubble velocities
+     from the 56 attack words. Hide the attacker until attack age 83.
+  4. Build the prep25 attack-body fixtures (4) and a route.

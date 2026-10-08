@@ -80,6 +80,11 @@ export interface LiveIceBallInputs {
   readonly duration: number;
   /** `animationInputs` of the ICE_BALL config at a live age. */
   readonly animationInputsAt: (age: number) => Record<string, unknown>;
+  /**
+   * Free order after the body: the activation order carried through every row (the shards' SortSprites y-sort), the known-entry occupied
+   * slots removed. The deferred lend of the next Ice Ball body starts here (resolveSpriteOrderDeferredLend; render-seam only).
+   */
+  readonly postBodyFree: readonly number[];
 }
 
 interface Program {
@@ -128,7 +133,7 @@ const fadeY = (e: number, c: number): { cnt: number; y: number } => {
 };
 const fadeState = (e: number, c: number): number => e < c || e >= c + FADE_LEN ? 0 : e <= c + 17 ? 1 : e === c + 18 ? 2 : 3;
 
-const oamCache = new Map<string, Readonly<{ oam: readonly string[][]; matrices: readonly (readonly Matrix[])[] }>>();
+const oamCache = new Map<string, Readonly<{ oam: readonly string[][]; matrices: readonly (readonly Matrix[])[]; finalOrder: readonly number[] }>>();
 
 /**
  * Live inputs of one Ice Ball counter body. Declines (null) when the words do not cover the shards, when an idle rest is non-zero (the
@@ -197,7 +202,7 @@ export function liveIceBallInputs(args: LiveIceBallArgs): LiveIceBallInputs | nu
       previous = spritesAt(row);
       order = carryLiveSpriteOrder(order, previous.sprites, args.sort);
     }
-    built = { oam, matrices };
+    built = { oam, matrices, finalOrder: order };
     if (oamCache.size > 16) oamCache.clear();
     oamCache.set(key, built);
   }
@@ -216,6 +221,7 @@ export function liveIceBallInputs(args: LiveIceBallArgs): LiveIceBallInputs | nu
     ({ displaySpecies: species, slot: slotOf(side), attr, subpriority: BATTLER_SUBPRIORITY[side] });
   return {
     duration: rows,
+    postBodyFree: Object.freeze(hardware.finalOrder.filter((slot) => !KNOWN_ENTRY_OCCUPIED_SLOTS.includes(slot))),
     animationInputsAt: (age: number) => {
       const r = Math.min(Math.max(age, 0), rows - 1);
       const e = stepOf(r, program.taskLagRows), eHw = stepOf(Math.max(r - 1, 0), program.taskLagRows);
