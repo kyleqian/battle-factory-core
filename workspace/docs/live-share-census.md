@@ -187,7 +187,9 @@ node --experimental-strip-types --no-warnings tools/integration/liveShareCensus.
 ```
 
 `tools/` is outside the `tsconfig.json` include (`src`, `tests`), so `npm run typecheck` does not cover these scripts; they run
-under `node --experimental-strip-types`.
+under `node --experimental-strip-types`. Checked separately with the project's strict options (exit 0, no diagnostics): a temp
+tsconfig outside the repo that `extends` the workspace `tsconfig.json` with `"files"` = the two scripts, then
+`NODE_OPTIONS=--max-old-space-size=8192 ./node_modules/.bin/tsc -p <that tsconfig>`.
 
 ## Limitations
 
