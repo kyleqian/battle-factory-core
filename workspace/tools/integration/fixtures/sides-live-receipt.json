@@ -656,5 +656,16 @@
     }
    ]
   }
- ]
+ ],
+ "gates": {
+  "testedCommit": "36ee7db1bbaebb0e6dfd37038d237d8345367793",
+  "testedSrcTree": "09b0062ae11635537bfb0b651f7be0a850f9bc55",
+  "targeted": "11 files / 161 tests passed (new sides tests + livePrep6/7/9 + liveShadowRows + liveStatusImplementedCount + factoryAnimationInventory + animationBoundaryRatchet + playableAnimationIntegration)",
+  "typecheck": "exit 0",
+  "smoke": "8 files / 448 tests passed",
+  "fullSuite": "PATH=$PWD/tools/autonomy/bin:$PATH POKEBENCH_VITEST_MAX_WORKERS=4 npm test -- --maxWorkers=4: 1573 passed / 44 skipped files, 12953 passed / 223 skipped tests (a first run at 20bd99578 failed only tests/substituteSwapAttdollCells.test.ts:50, the pinned 'no player Rock Slide adapter', fixed in 36ee7db1b)",
+  "build": "exit 0",
+  "differential": "fight-submenu 235/235, battle1-postwin-next-prompt 216/216, presentation-rng-playable-live-bodies-seeded-on 172/173 vs 2ba4da4a3: frame 3622 (9461 px) = an opponent Double Team body now live; reverting only liveMoveAnimationDuration case 104 to player-only gives 173/173 byte-identical",
+  "diffCheck": "clean"
+ }
 }
