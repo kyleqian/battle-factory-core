@@ -839,6 +839,300 @@
      "violations": []
     }
    ]
+  },
+  "c-audit14": {
+   "fixes": "battleScene.ts CONFUSE_RAY / BITE: sceneOnBattlerFrontIdleRest(view.attacker) for a live opponent attacker; liveSubstituteFade.ts: postBodyShadowHidden false on age 0 of a player fade",
+   "method": "fresh direct-mGBA prep40 / prep39 probes (speciesAudit14SwapProbes.sh / speciesAudit14FadeProbes.sh, 2 fresh runs each, r1 == r2 byte-identical; staged scenarios match the audit-14 sha256 pins), production checks speciesAudit14SwapCheck.ts / speciesAudit14PlainShift.ts / fadeLiveCheck.ts",
+   "confuseRay": {
+    "s14plain-onix-confuse-ray-opponent@76": "294,419 -> 0 px (270/270)",
+    "s14plain-rattata-confuse-ray-opponent@79": "110,700 -> 0 px (270/270)",
+    "controls": "ONIX @3408, GOLBAT / FLYGON @78 / @3410: 0 px; RATTATA @3411 = the 269-row LAG FRAME window (ages 251..266 only, 293,728 px, unchanged class)"
+   },
+   "bite": {
+    "s14plain-rattata-bite-opponent@75": "10,660 -> 0 px",
+    "s14plain-onix-bite-opponent@72": "28,366 -> 0 px",
+    "controls": "RATTATA / ONIX later bodies (3 each), GOLBAT / FLYGON @74 / @1740: 0 px (shift -10, 26 compared rows)"
+   },
+   "fade": "34 / 34 windows policy-exact twice (r1 == r2), byte-identical to species-audit-14 fade-receipts/patch-fade-r1.txt (GOLBAT / FLYGON other battler 200 -> 0 px on row 0); fadeLiveCheck's trailing set-level 'alternate rows 0 vs 2' line is the prep39-set cross-check (the audit's patched receipt has it too)",
+   "renderIdentity": "tools/integration/fixtures/d4w-rest/render-identity-{base,fix}.tsv: the 4 committed dolldef-live Bite fixtures byte-identical with / without",
+   "evidence": "tools/integration/fixtures/d4w-rest/ (rom-rows.json pins, plain-shift.json, bite-shift.json, plain-check-summary.txt, fade-r1/r2.txt)",
+   "confuseRayD4": {
+    "landed": false,
+    "reason": "the optional lag is not single-aged: fresh counters (tools/integration/fixtures/d4w-cr/counters.txt, 8 doll-free bodies, 2 runs identical) show [26,229,230,249] in 5 bodies (270 rows, 0 px), [26,229,230,250] in GOLBAT / FLYGON @3410 (270 rows, 0 px) and [26,229,230] in RATTATA @3411 (269 rows, residual 251..266); audit 14 has PICHU player @1771 with a lag at 250 but a 268-ROM-row residual window. A one-age optional-lag-age 249 entry would mislabel windows; needs a lag-position probe. By window length: 270-row 9 (7 fresh + 2 audit-14) : 269-row 3 (1 + 2) -> today's 270-row duration is the dominant phase. Confuse Ray stays scoped exact (no accounting change)."
+   }
+  },
+  "d-issue152": {
+   "fixes": "liveMoveAnimation.ts: LIVE_MOVE_OPPONENT_SHADOW_ROW[260] = 0 + Flatter elevated-opponent decline dropped; Skill Swap zero-idle-rest gate dropped; live status Skill Swap alternatePhaseResidual.maxPixelsPerRow 18649 -> 18778",
+   "method": "speciesAuditDense.ts (verifyLiveAdapterFramebuffer, 2 fresh direct-mGBA runs per window, digests identical) through production",
+   "flatter": "26 windows (species-audit-12 FLYGON / GOLBAT / SHEDINJA / WEEZING / STEELIX, player + opponent attacker, both roles; 6 accepted s10a-live) 219/219 rows 0 px",
+   "skillSwap": "ONIX / RATTATA attacker + target both sides: 6 x 196/196 0 px, 2 x 195-row no-lag windows only ages 177..192 (283,840 / 293,328); accepted s10a-live 6 windows unchanged (4 x 0 px; 298,384 / 293,344 on 177..192); ALAKAZAM swap opponent 300,448 px, max 18,778 px/row on 177..192",
+   "evidence": "tools/integration/fixtures/d4w-152/ (per-window receipts + summary.txt)"
+  },
+  "e-nidoran": {
+   "fix": "healthboxAssembly.ts nameGlyphRun: no gender symbol for an un-nicknamed NIDORAN♀ / NIDORAN♂ (battle_interface.c:1929-1930)",
+   "windows": "species-audit-12 nidoranfA-flatter-player 7,008 -> 0 px (219/219); nidoranfA-flatter-opponent, nidorinoA-flatter-player, accepted flatter-player-nidorina-opponent-onix 0 px (2 fresh runs identical)",
+   "evidence": "tools/integration/fixtures/d4w-nidoran/",
+   "otherFixtures": "no other committed live fixture / trace under tools/integration/fixtures or tools/compare names a NIDORAN battler"
   }
- }
+ },
+ "windows": [
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-alt-opponent-umbreon-player-golem.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-alt-player-umbreon-opponent-golem.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-alt2-opponent-sneasel-player-snorlax.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-alt2-player-sneasel-opponent-golbat.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-o-growl.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-o-psychic.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-o-splash.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-o-surf.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-o-swordsdance.json",
+   "move": "PURSUIT",
+   "selectedPhase": false,
+   "measuredPhase": "no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-o-tackle.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-p-growl.json",
+   "move": "PURSUIT",
+   "selectedPhase": false,
+   "measuredPhase": "no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-p-psychic.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-p-splash.json",
+   "move": "PURSUIT",
+   "selectedPhase": false,
+   "measuredPhase": "no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-p-surf.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-p-swordsdance.json",
+   "move": "PURSUIT",
+   "selectedPhase": false,
+   "measuredPhase": "no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26-p-tackle.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-o-growl.json",
+   "move": "PURSUIT",
+   "selectedPhase": false,
+   "measuredPhase": "no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-o-psychic.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-o-splash.json",
+   "move": "PURSUIT",
+   "selectedPhase": false,
+   "measuredPhase": "no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-o-surf.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-o-swordsdance.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-o-tackle.json",
+   "move": "PURSUIT",
+   "selectedPhase": false,
+   "measuredPhase": "no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-p-growl.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-p-psychic.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-p-splash.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-p-surf.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-p-swordsdance.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-lb26b2-p-tackle.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-opponent-beedrill-player-shuckle.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-player-beedrill-opponent-shuckle.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-tyranitar-pursuit-opponent-beedrill-player-shuckle.json",
+   "move": "PURSUIT",
+   "selectedPhase": false,
+   "measuredPhase": "no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-tyranitar-pursuit-player-beedrill-opponent-shuckle.json",
+   "move": "PURSUIT",
+   "selectedPhase": true,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/pursuit-tyranitarA-pursuit-player-beedrill-opponent-shuckle.json",
+   "move": "PURSUIT",
+   "selectedPhase": false,
+   "measuredPhase": "no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/hp-alt-opponent-unown-golem.json",
+   "move": "HIDDEN_POWER",
+   "selectedPhase": true,
+   "measuredPhase": "no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/hp-alt-opponent-unown-seed305420897.json",
+   "move": "HIDDEN_POWER",
+   "selectedPhase": true,
+   "measuredPhase": "no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/hp-alt-player-unown-golem.json",
+   "move": "HIDDEN_POWER",
+   "selectedPhase": true,
+   "measuredPhase": "no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/hp-alt-player-unown-seed305420897.json",
+   "move": "HIDDEN_POWER",
+   "selectedPhase": true,
+   "measuredPhase": "no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/hp-golbat-hidden-power-player-unown-opponent-onix.json",
+   "move": "HIDDEN_POWER",
+   "selectedPhase": false,
+   "measuredPhase": "event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/hp-opponent-unown-player-onix.json",
+   "move": "HIDDEN_POWER",
+   "selectedPhase": true,
+   "measuredPhase": "no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/hp-player-unown-opponent-onix.json",
+   "move": "HIDDEN_POWER",
+   "selectedPhase": true,
+   "measuredPhase": "no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/hp-rattata-hidden-power-opponent-unown-player-onix.json",
+   "move": "HIDDEN_POWER",
+   "selectedPhase": true,
+   "measuredPhase": "no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/hp-rattata-hidden-power-player-unown-opponent-onix.json",
+   "move": "HIDDEN_POWER",
+   "selectedPhase": true,
+   "measuredPhase": "no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4w-live/hp-shuckle-hidden-power-player-unown-opponent-onix.json",
+   "move": "HIDDEN_POWER",
+   "selectedPhase": true,
+   "measuredPhase": "no-event"
+  }
+ ]
 }
