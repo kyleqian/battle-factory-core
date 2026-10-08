@@ -18,7 +18,7 @@ S10A's mission and scoped acceptance policy control this stage's work queue.
   with scoped checks for subsequent tooling changes.
 - Resume the latest ledger and ROADMAP S10A's ordered steps. D3 option (a) was
   approved and implemented on 2026-10-06 (presentation RNG host, seed export,
-  separate faithful-random accounting). Production (src tree `7d28da92`, 2026-10-07 evening) has 250 scoped-exact
+  separate faithful-random accounting). Production (src tree `e1a47502`, 2026-10-07 evening) has 250 scoped-exact
   + 13 faithful-random + 13 faithful-timing live adapters; reuse its recorded green baseline when code
   and environment match. Pick bounded batches.
 - Continue accepted-move adapters and source-derived host providers. Preserve

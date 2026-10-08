@@ -2216,7 +2216,7 @@ fourteen-move physical batch is verified and folded. Helping Hand remains
 unaccepted pending legal doubles staging. No whole-playable arbitrary-history
 framebuffer exactness is claimed.
 
-Next (2026-10-07 evening): 250 scoped-exact + 13 faithful-random + 13 faithful-timing live adapters (production src tree `7d28da92`);
+Next (2026-10-07 evening): 250 scoped-exact + 13 faithful-random + 13 faithful-timing live adapters (production src tree `e1a47502`);
 no accepted Factory body remains without a live adapter (census `250+13+13+0+0=276`). The 2026-10-07 day session implemented D4 (timing policy module, disjoint
 faithful-timing accounting), integrated the banked recipes and providers, reclassified #151 (Sheer Cold, Hyper Voice)
 to faithful timing, added the presentation-only Substitute doll field state with shared adapter declines, and fixed
@@ -2227,8 +2227,8 @@ history); the inventory names each gate. Resume points, in order:
 2. Deferred post-body sprite-order lend for multi-body Random2 moves: Ice Ball counters 1..4 and the Dive attack body
    decline today (`docs/s10a-random2-order-lend-blocker.md`; render-seam replay design checked 12/12 transitions).
 3. ISSUES #152 remainder: Mach Punch idle-rest targets, Extrasensory opponent-target scanline-split rows, new D4 lag cases
-   (Extreme Speed 320/321, Dive CLAMPERL) -> policy entries, TYRANITAR rows; species audit of Skill Swap / Flatter /
-   Eruption / Substitute (not yet audited).
+   (Extreme Speed 320/321, Dive CLAMPERL) -> policy entries, TYRANITAR rows; audit-12 NIDORAN healthbox gender symbol and the over-strict
+   Flatter elevated / Skill Swap idle-rest gates.
 4. D4 widening of live adapters: Pursuit later bodies (lb26), Hidden Power GOLBAT lag, Ghost-type Curse (prep23); Baton
    Pass flow (prep27); Endeavor W3.
 5. Sprite-order coverage (66 NEEDS-KEYS cells), status animations (Confusion / TURN_TRAP), #148 `unknown`, #146.

@@ -7,9 +7,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-10-07 (day) — S10A finish run: D4 implemented; census COMPLETE 250 + 13 + 13 + 0 = 276
 
-- **State:** local master, production src tree `7d28da92` (`8d064d26c`): 250 scoped-exact + 13 faithful-random +
+- **State:** local master, production src tree `e1a47502` (`46319b2d9`): 250 scoped-exact + 13 faithful-random +
   13 faithful-timing live adapters; 0 accepted Factory bodies without a live adapter (census `250+13+13+0+0=276`).
-  Final independent gates on that code: typecheck, 1,562 files / 12,815 tests, build 872, differential 624/624
+  Final independent gates on that code: typecheck, 1,562 files / 12,816 tests, build 872, differential 624/624
   (`final-supervisor-gates-20261007-evening.json`). Preview <http://127.0.0.1:5191/> serves `dc21cd1db` (4 samples
   hash-equal, session export + ON->OFF restart passed, no errors; `playable-preview-dc21cd1db-receipt.json`).
 - **Did:** D4 faithful timing (`src/engine/liveMoveTimingPolicy.ts`, disjoint accounting, checker that fails on
@@ -17,12 +17,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (D3), Psywave, Extrasensory, Superpower, Nightmare, Ice Ball counter 0 (D3), Dive setup (D3), Skill Swap; exact —
   Spit Up, Shock Wave, Extreme Speed, Memento, Eruption, Substitute body; random — Flatter. #151 closed by
   reclassifying Sheer Cold / Hyper Voice to faithful timing. Presentation-only Substitute doll field state + shared
-  declines. Species audits 9-11: Mach Punch / Extrasensory idle rest, Revenge / Spit Up gates, Dive setup length —
-  all fixed. Evidence prep30-37. 12 integration folds + 13 evidence merges, each re-proved by the supervisor (every
+  declines. Species audits 9-12: Mach Punch / Extrasensory idle rest, Revenge / Spit Up gates, Dive setup length,
+  Substitute shiny gate — all fixed (NIDORAN healthbox symbol + two over-strict gates open in #152). Evidence prep30-37. 12 integration folds + 13 evidence merges, each re-proved by the supervisor (every
   claimed window rerun twice fresh, own differential, union checks); zero reverted folds.
 - **Next:** ROADMAP S10A "Next (2026-10-07 evening)": Substitute swaps / fade; deferred post-body order lend (Ice Ball
-  counters 1..4, Dive attack); ISSUES #152 remainder + new D4 lag cases (Extreme Speed, Dive CLAMPERL); audit Skill
-  Swap / Flatter / Eruption / Substitute; D4 widening (Pursuit later bodies, Hidden Power, Ghost Curse).
+  counters 1..4, Dive attack); ISSUES #152 remainder (NIDORAN healthbox symbol, Flatter / Skill Swap gates) + new D4 lag cases (Extreme Speed, Dive
+  CLAMPERL); D4 widening (Pursuit later bodies, Hidden Power, Ghost Curse).
 - **Notes:** no DEFERRED entries. S10A stage box left open on purpose: every accepted body now has a live adapter,
   but many are scoped (first body / known lend / declines) and the resume list is real continuation work. Decision
   recorded: the engine/animation boundary ratchet now lets `battleCommandFieldArt.ts` import the static doll asset

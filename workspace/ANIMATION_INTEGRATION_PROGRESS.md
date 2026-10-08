@@ -26,6 +26,11 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- Species audit 12 (side, `84823ff14`, new files only): Substitute / Skill Swap / Flatter / Eruption, 182 rows x2 fresh:
+  144 0 px, 12 TIMING-PHASE (Skill Swap ages 177..192), declines confirmed; defects: Substitute had no shiny gate
+  (shiny STEELIX 12-14k px on ages 0..10) — FIXED by the supervisor in `46319b2d9` (shared gate + test that fails
+  without it); NIDORAN F / M healthbox gender symbol in every live view (open, ISSUES #152); Flatter elevated and
+  Skill Swap idle-rest gates over-strict (coverage). Newly proven: Substitute ONIX / RATTATA attackers 0 px.
 - Preview refreshed: `dc21cd1db` served at :5191 (250 + 13 + 13), 4 samples hash-equal (renderer / canvas / PNG),
   mode control + session export passed, no browser errors (`playable-preview-dc21cd1db-receipt.json`); live status
   `verifiedPreview` updated.

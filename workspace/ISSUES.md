@@ -26,7 +26,7 @@ for Substitute instead, so under Scene OFF the doll only appears from the next p
 logical outcome measured to change). Gameplay-kernel owned: needs a main-lane fix with Scene OFF frame-timing proof.
 Evidence: `docs/next-adapters-prep37.md`, `tools/integration/fixtures/subst-live-receipt.json`.
 
-## #152 — Species audits 9-11 remainder: Dive setup length, idle-rest gaps, Extrasensory split rows, new lag cases (S10A, 2026-10-07)
+## #152 — Species audits 9-12 remainder: NIDORAN healthbox symbol, idle-rest / elevation gates, Extrasensory split rows, new lag cases (S10A, 2026-10-07)
 
 Evidence `docs/live-species-audit-9.md`, receipts `tools/integration/fixtures/species-audit-9/`. FIXED in `a7402719b`
 (supervisor reran x2 fresh): Mach Punch opponent attacker with an idle rest (ONIX 86,089 -> 0 px, RATTATA 36,222 -> 0)
@@ -48,6 +48,13 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 - **New CPU-phase cases (D4 class, not yet in the policy):** Extreme Speed 320 vs 321 rows (lags [312,313] vs
   [292,313,314]; residual ages 294..309 only); Dive CLAMPERL-after-Tackle lag at age 64 (ages 66..95).
 - **TYRANITAR rows (Dive 4-9 px, Ice Ball 16 / 63 px, Memento 2,537 px at age 140):** unresolved; lags match.
+- **Audit 12 (`docs/live-species-audit-12.md`; Substitute / Skill Swap / Flatter / Eruption, 182 rows):** Substitute
+  shiny gate FIXED (`46319b2d9`). Open: (a) every live healthbox draws the gender symbol for an un-nicknamed
+  NIDORAN F / M; the ROM's UpdateNickInHealthbox omits it (`healthboxAssembly.ts` ~:483 `nameGlyphRun`; patch proof
+  7,008 -> 0 px, 32 px every row) — check canonical traces before changing; (b) Flatter's elevated-opponent decline
+  is over-strict (registering 260 on the #142 row-0 hook makes FLYGON / GOLBAT / SHEDINJA / WEEZING 0 px); (c) Skill
+  Swap's idle-rest gate is over-strict (ONIX / RATTATA 0 px lifted); (d) Skill Swap ALAKAZAM opponent other-phase row
+  peaks at 18,778 px vs documented max 18,649 (checker gates on ages only); TYRANITAR Flatter 2 / 96 px unresolved.
 - Harness limit: the verifier passes only the attacker's personality, so shiny TARGET declines are unverified.
 
 ## #148 — Battler x2 history: unknown-history remainder (main bug FIXED 2026-10-06)
