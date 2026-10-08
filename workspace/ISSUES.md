@@ -36,11 +36,8 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 - **Meteor Mash (309), player-side FLYGON target:** not a production defect — the derived audit fixture's pinned
   Random2 activation is 4 steps late (offset scan: 0 px only at -4, equal to the GOLBAT sibling's value); why the two
   FLYGON probes record 4 extra steps is unexplained. Corrected fixture `fixtures/s10a-part0/meteor-mash-flygon/`.
-- **Extrasensory (326), opponent-side attacker with an idle x2 rest (audit 10, `docs/live-species-audit-10.md`):** the
-  ROM clone copies the attacker's x2 rest; the live clone uses `spriteCenter` without it (`liveOamMoves.ts` ~:847-850).
-  Patch `species-audit-10/extrasensory-clone-rest-env.diff`: RATTATA 8,009 -> 0 px (supervisor reran; env-off 8,009).
-- **Spit Up (255):** the attacker idle-rest gate is too strict (gate lifted: ONIX / RATTATA attackers 0 px); keep the
-  target half.
+- **Fixed in `138f79ad4` (audit 10):** the Extrasensory clone now carries the attacker's idle x2 rest (RATTATA 8,009 -> 0 px)
+  and the Spit Up idle-rest gate is narrowed to targets (ONIX / RATTATA attackers 0 px; `tests/animation/liveSpeciesAudit10Fixes.test.ts`).
 - **Extrasensory opponent-side targets FLYGON / GOLBAT / WAILORD:** 18,345 / 8,318 / 162 px on ages 43..117 in the
   policy phase; likely the documented scanline-split class (prep30 §1.4) but the split line was not measured.
 - **Dive (291) setup turn:** length / droplet draw age / row-68 rule FIXED in `08e1c9c4c` (12 audit-11 species 0 px,
