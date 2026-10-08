@@ -216,14 +216,14 @@ describe("live Q2 ordinary routes", () => {
     parityOf(on, off);
   }, 240000);
 
-  // Searched seeds 0..4000 (streak 0..42 step 7, rentals[0] knows the move): HYPER_VOICE 9/21 follows an unplanned predecessor, so the tracked
-  // order is unknown and the adapter declines on every age (gate); logic unchanged.
-  it("route HYPER_VOICE 9/21 after an unplanned predecessor: the unknown lend declines the whole body (gate), logic unchanged", () => {
+  // Searched seeds 0..4000 (streak 0..42 step 7, rentals[0] knows the move): HYPER_VOICE 9/21 followed an unplanned predecessor (declined).
+  // prep43: the predecessor unit is now planned, so the tracked order is known and the body renders live (ON/OFF parity unchanged).
+  it("route HYPER_VOICE 9/21 after a predecessor planned since prep43: the body renders live, logic unchanged", () => {
     const on = generatedCommandAnimationReplay(9, "on", [0], 21);
     const off = generatedCommandAnimationReplay(9, "off", [0], 21);
     const bodies = on.animations.filter((a) => a.moveId === 304 && a.attacker === 0);
     expect(bodies).toHaveLength(1);
-    expect(bodies[0]!.adapterActive.some(Boolean)).toBe(false);
+    expect(bodies[0]!.adapterActive.some(Boolean)).toBe(true);
     parityOf(on, off);
   }, 240000);
 });
