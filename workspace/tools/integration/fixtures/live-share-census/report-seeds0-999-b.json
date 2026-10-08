@@ -16,6 +16,26 @@
   "terminal": 997,
   "stalled": 3,
   "errors": [],
+  "stalls": [
+   {
+    "seed": 434,
+    "streak": 21,
+    "turns": 339,
+    "at": "resolution presenting"
+   },
+   {
+    "seed": 796,
+    "streak": 34,
+    "turns": 369,
+    "at": "resolution presenting"
+   },
+   {
+    "seed": 881,
+    "streak": 38,
+    "turns": 269,
+    "at": "resolution presenting"
+   }
+  ],
   "frames": 14440643,
   "playerTurns": 20644
  },
@@ -64,9 +84,9 @@
   },
   {
    "reason": "presentation: unclassified (case-local gate)",
-   "count": 314,
-   "frames": 74956,
-   "distinctMoves": 7
+   "count": 247,
+   "frames": 62032,
+   "distinctMoves": 5
   },
   {
    "reason": "duration: no adapter (no liveMoveAnimationDuration case)",
@@ -75,16 +95,16 @@
    "distinctMoves": 8
   },
   {
-   "reason": "duration: no opponent-attacker adapter",
-   "count": 808,
-   "frames": 25856,
-   "distinctMoves": 3
+   "reason": "presentation: later-body (order lend not a first body)",
+   "count": 192,
+   "frames": 33592,
+   "distinctMoves": 11
   },
   {
-   "reason": "presentation: later-body (order lend not a first body)",
-   "count": 125,
-   "frames": 20668,
-   "distinctMoves": 9
+   "reason": "duration: no opponent-attacker adapter",
+   "count": 821,
+   "frames": 26272,
+   "distinctMoves": 3
   },
   {
    "reason": "duration: no player-attacker adapter",
@@ -111,27 +131,21 @@
    "distinctMoves": 1
   },
   {
+   "reason": "presentation: battler has a status condition",
+   "count": 9,
+   "frames": 1731,
+   "distinctMoves": 2
+  },
+  {
    "reason": "duration: attacker doll: self-target body",
    "count": 48,
    "frames": 1536,
    "distinctMoves": 4
   },
   {
-   "reason": "presentation: gate: (field.player.status ?? \"none\") !== \"none\"",
-   "count": 8,
-   "frames": 1516,
-   "distinctMoves": 2
-  },
-  {
    "reason": "presentation: stale move power unknown",
    "count": 12,
    "frames": 816,
-   "distinctMoves": 1
-  },
-  {
-   "reason": "duration: unclassified duration null",
-   "count": 13,
-   "frames": 416,
    "distinctMoves": 1
   },
   {
@@ -144,12 +158,6 @@
    "reason": "duration: unsupported turn 0",
    "count": 7,
    "frames": 224,
-   "distinctMoves": 1
-  },
-  {
-   "reason": "presentation: gate: (field.opponent.status ?? \"none\") !== \"none\"",
-   "count": 1,
-   "frames": 215,
    "distinctMoves": 1
   },
   {
@@ -2034,8 +2042,8 @@
    "side": "opponent",
    "reason": "no opponent-attacker adapter",
    "gate": "liveMoveAnimation.ts:1080",
-   "count": 512,
-   "frames": 16384,
+   "count": 525,
+   "frames": 16800,
    "weightPct": 1.72,
    "details": []
   },
@@ -2196,8 +2204,8 @@
    "side": "opponent",
    "reason": "no opponent-attacker adapter",
    "gate": "liveMoveAnimation.ts:1080",
-   "count": 512,
-   "frames": 16384,
+   "count": 525,
+   "frames": 16800,
    "weightPct": 1.72,
    "details": []
   },
@@ -2515,13 +2523,13 @@
    "details": []
   }
  ],
- "bucketCount": 250,
+ "bucketCount": 248,
  "sanity": {
   "sampledLiveFrames": 29213,
   "renderedOk": 29213,
   "renderThrows": [],
   "renderThrowCount": 0
  },
- "battleDigest": "34216e2b3d9348cbacaf167dba516866ba8787cf2276009db5b251d6208dcfd1",
- "commandDigest": "7cb2b89b74d36cac158f1575198444337c7558c87a886ad06b30f677e15a1834"
+ "battleDigest": "a2da35ce857d076ee1dde9f4381476bc2af88abbc4d6b8f9bd751855e49fed75",
+ "commandDigest": "80ff252bf15f81b092cc946784fcd075f08334ec60067b0dae59b4ec5e8f764f"
 }

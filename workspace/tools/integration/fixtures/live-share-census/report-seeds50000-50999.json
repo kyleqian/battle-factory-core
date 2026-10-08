@@ -16,6 +16,14 @@
   "terminal": 999,
   "stalled": 1,
   "errors": [],
+  "stalls": [
+   {
+    "seed": 50996,
+    "streak": 29,
+    "turns": 303,
+    "at": "resolution presenting"
+   }
+  ],
   "frames": 14083687,
   "playerTurns": 19792
  },
@@ -64,21 +72,21 @@
   },
   {
    "reason": "presentation: unclassified (case-local gate)",
-   "count": 282,
-   "frames": 67321,
-   "distinctMoves": 7
-  },
-  {
-   "reason": "duration: no opponent-attacker adapter",
-   "count": 614,
-   "frames": 19648,
-   "distinctMoves": 3
+   "count": 222,
+   "frames": 55762,
+   "distinctMoves": 5
   },
   {
    "reason": "presentation: later-body (order lend not a first body)",
-   "count": 124,
-   "frames": 18820,
-   "distinctMoves": 8
+   "count": 184,
+   "frames": 30379,
+   "distinctMoves": 10
+  },
+  {
+   "reason": "duration: no opponent-attacker adapter",
+   "count": 618,
+   "frames": 19776,
+   "distinctMoves": 3
   },
   {
    "reason": "duration: no adapter (no liveMoveAnimationDuration case)",
@@ -93,6 +101,12 @@
    "distinctMoves": 1
   },
   {
+   "reason": "presentation: battler has a status condition",
+   "count": 24,
+   "frames": 4663,
+   "distinctMoves": 2
+  },
+  {
    "reason": "duration: unsupported turn 1",
    "count": 95,
    "frames": 3040,
@@ -103,18 +117,6 @@
    "count": 83,
    "frames": 2656,
    "distinctMoves": 7
-  },
-  {
-   "reason": "presentation: gate: (field.player.status ?? \"none\") !== \"none\"",
-   "count": 13,
-   "frames": 2595,
-   "distinctMoves": 2
-  },
-  {
-   "reason": "presentation: gate: (field.opponent.status ?? \"none\") !== \"none\"",
-   "count": 11,
-   "frames": 2068,
-   "distinctMoves": 2
   },
   {
    "reason": "duration: defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)",
@@ -145,12 +147,6 @@
    "count": 4,
    "frames": 128,
    "distinctMoves": 3
-  },
-  {
-   "reason": "duration: unclassified duration null",
-   "count": 4,
-   "frames": 128,
-   "distinctMoves": 1
   }
  ],
  "orderHostStateWhenLendUnknown": [
@@ -2026,6 +2022,17 @@
    ]
   },
   {
+   "move": "DOUBLE TEAM",
+   "moveId": 104,
+   "side": "opponent",
+   "reason": "no opponent-attacker adapter",
+   "gate": "liveMoveAnimation.ts:1080",
+   "count": 400,
+   "frames": 12800,
+   "weightPct": 1.72,
+   "details": []
+  },
+  {
    "move": "STRUGGLE",
    "moveId": 165,
    "side": "opponent",
@@ -2034,17 +2041,6 @@
    "count": 400,
    "frames": 12800,
    "weightPct": 0,
-   "details": []
-  },
-  {
-   "move": "DOUBLE TEAM",
-   "moveId": 104,
-   "side": "opponent",
-   "reason": "no opponent-attacker adapter",
-   "gate": "liveMoveAnimation.ts:1080",
-   "count": 396,
-   "frames": 12672,
-   "weightPct": 1.72,
    "details": []
   },
   {
@@ -2151,6 +2147,17 @@
  ],
  "topBucketsByCount": [
   {
+   "move": "DOUBLE TEAM",
+   "moveId": 104,
+   "side": "opponent",
+   "reason": "no opponent-attacker adapter",
+   "gate": "liveMoveAnimation.ts:1080",
+   "count": 400,
+   "frames": 12800,
+   "weightPct": 1.72,
+   "details": []
+  },
+  {
    "move": "STRUGGLE",
    "moveId": 165,
    "side": "opponent",
@@ -2159,17 +2166,6 @@
    "count": 400,
    "frames": 12800,
    "weightPct": 0,
-   "details": []
-  },
-  {
-   "move": "DOUBLE TEAM",
-   "moveId": 104,
-   "side": "opponent",
-   "reason": "no opponent-attacker adapter",
-   "gate": "liveMoveAnimation.ts:1080",
-   "count": 396,
-   "frames": 12672,
-   "weightPct": 1.72,
    "details": []
   },
   {
@@ -2486,13 +2482,13 @@
    ]
   }
  ],
- "bucketCount": 231,
+ "bucketCount": 227,
  "sanity": {
   "sampledLiveFrames": 29993,
   "renderedOk": 29993,
   "renderThrows": [],
   "renderThrowCount": 0
  },
- "battleDigest": "3aedda6161d2b40923e9cdf742a8a30c04f10f87ad0cb037d6ea4486e19f064f",
- "commandDigest": "aa6ad6302030d5d1d95ea02c4b83a10b119a5c24712f2efe072cd074c46a4ff9"
+ "battleDigest": "62b1eb1faf4da96177b5ec3cac524a662e47961d3c88f6ef0cecfe17cca6201e",
+ "commandDigest": "e47b769ef48434828f8e513949cbe846eeaa0e632badbd04b992ffc47d3d5234"
 }
