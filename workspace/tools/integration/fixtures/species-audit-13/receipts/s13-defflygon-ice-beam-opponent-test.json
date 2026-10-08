@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defflygon-ice-beam-opponent-test.json",
+  "stem": "s13-defflygon-ice-beam-opponent",
+  "kind": "test",
+  "move": "ICE_BEAM",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   347,
+   549
+  ],
+  "rows": 203,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 203,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "98362a2baa76630d751d8ab7b8e9341f2eb6fe3ee69435f9f4d8c9ed35e3d5fc"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "98362a2baa76630d751d8ab7b8e9341f2eb6fe3ee69435f9f4d8c9ed35e3d5fc"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

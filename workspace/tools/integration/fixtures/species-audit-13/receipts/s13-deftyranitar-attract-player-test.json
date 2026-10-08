@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-deftyranitar-attract-player-test.json",
+  "stem": "s13-deftyranitar-attract-player",
+  "kind": "test",
+  "move": "ATTRACT",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   355,
+   789
+  ],
+  "rows": 435,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 435,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "b995566780b34d0101cb2af2ede0072d76e66cdc82e763ab710c4e812ca694c9"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "b995566780b34d0101cb2af2ede0072d76e66cdc82e763ab710c4e812ca694c9"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

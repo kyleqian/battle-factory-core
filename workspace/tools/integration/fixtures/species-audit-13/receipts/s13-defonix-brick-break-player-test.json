@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defonix-brick-break-player-test.json",
+  "stem": "s13-defonix-brick-break-player",
+  "kind": "test",
+  "move": "BRICK_BREAK",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   338,
+   488
+  ],
+  "rows": 151,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 151,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "d21e27817e10c2b71cd741ce25d0378262911e15a3d8a6b5b2535f8336d08a90"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "d21e27817e10c2b71cd741ce25d0378262911e15a3d8a6b5b2535f8336d08a90"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

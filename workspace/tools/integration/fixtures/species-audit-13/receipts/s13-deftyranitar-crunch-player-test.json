@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-deftyranitar-crunch-player-test.json",
+  "stem": "s13-deftyranitar-crunch-player",
+  "kind": "test",
+  "move": "CRUNCH",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   360,
+   501
+  ],
+  "rows": 142,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 142,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 142,
+    "digest": "2cbcc5d97bcf5968d75fb0cb0e8f599aa9fbb40dc39ab9296985f78cbb05c0c1"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 142,
+    "digest": "2cbcc5d97bcf5968d75fb0cb0e8f599aa9fbb40dc39ab9296985f78cbb05c0c1"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

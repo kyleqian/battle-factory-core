@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defweezing-thunderbolt-opponent-test.json",
+  "stem": "s13-defweezing-thunderbolt-opponent",
+  "kind": "test",
+  "move": "THUNDERBOLT",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   349,
+   585
+  ],
+  "rows": 237,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 237,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "072483ae91a0dcbc4dd2855ee9f5023cbebac1dbd08e8fdf56f86229326184de"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "072483ae91a0dcbc4dd2855ee9f5023cbebac1dbd08e8fdf56f86229326184de"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

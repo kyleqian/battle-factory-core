@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-shinysteelixdef-brick-break-player-test.json",
+  "stem": "s13-shinysteelixdef-brick-break-player",
+  "kind": "test",
+  "move": "BRICK_BREAK",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   354,
+   504
+  ],
+  "rows": 151,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 151,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "ab2fffbf0a00db6700263034a62e288f1dcb494cacabfa0019123d5acbb82025"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "ab2fffbf0a00db6700263034a62e288f1dcb494cacabfa0019123d5acbb82025"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

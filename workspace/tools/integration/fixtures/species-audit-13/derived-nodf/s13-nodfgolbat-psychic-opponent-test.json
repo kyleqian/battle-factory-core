@@ -1,0 +1,54 @@
+{
+ "schema": "prep38-subbed-defender-fixture/v1",
+ "move": "PSYCHIC",
+ "moveId": 94,
+ "kind": "test",
+ "stem": "s13-nodfgolbat-psychic-opponent",
+ "probe": "tools/integration/prep38Probe.py",
+ "scenario": "tools/integration/fixtures/species-audit-13/scenarios-nodf/s13-nodfgolbat-psychic-opponent.json",
+ "denseWindow": {
+  "startFrame": 1743,
+  "endFrame": 1887
+ },
+ "attacker": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "defenderDoll": true,
+ "fieldProfile": {
+  "playerHp": 141,
+  "playerMaxHp": 202,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 94,
+   "side": "opponent"
+  },
+  {
+   "moveId": 164,
+   "side": "player"
+  }
+ ],
+ "nonMoveBodiesBefore": [],
+ "doll": {
+  "behindSubstitute": true,
+  "subHP": 50,
+  "tiles": "22a6f54c07e2"
+ }
+}

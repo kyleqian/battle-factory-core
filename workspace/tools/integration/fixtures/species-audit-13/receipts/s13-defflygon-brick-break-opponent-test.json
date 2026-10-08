@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defflygon-brick-break-opponent-test.json",
+  "stem": "s13-defflygon-brick-break-opponent",
+  "kind": "test",
+  "move": "BRICK_BREAK",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   349,
+   499
+  ],
+  "rows": 151,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 151,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "3ef777819130f134c654c3d43d244f4da6141939328f892d2fdcbb85a3b644df"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "3ef777819130f134c654c3d43d244f4da6141939328f892d2fdcbb85a3b644df"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

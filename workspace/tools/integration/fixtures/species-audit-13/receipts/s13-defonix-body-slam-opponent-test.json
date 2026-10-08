@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defonix-body-slam-opponent-test.json",
+  "stem": "s13-defonix-body-slam-opponent",
+  "kind": "test",
+  "move": "BODY_SLAM",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   333,
+   439
+  ],
+  "rows": 107,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 107,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "73095ab8f157bd29260ecca7dae2ccfdc7b15f0836aae094e1df7d53b0dceff8"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "73095ab8f157bd29260ecca7dae2ccfdc7b15f0836aae094e1df7d53b0dceff8"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

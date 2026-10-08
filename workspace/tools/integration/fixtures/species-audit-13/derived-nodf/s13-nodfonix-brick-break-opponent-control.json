@@ -1,0 +1,45 @@
+{
+ "schema": "prep38-subbed-defender-fixture/v1",
+ "move": "BRICK_BREAK",
+ "moveId": 280,
+ "kind": "control",
+ "stem": "s13-nodfonix-brick-break-opponent",
+ "probe": "tools/integration/prep38Probe.py",
+ "scenario": "tools/integration/fixtures/species-audit-13/scenarios-nodf/s13-nodfonix-brick-break-opponent.json",
+ "denseWindow": {
+  "startFrame": 78,
+  "endFrame": 228
+ },
+ "attacker": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "defenderDoll": false,
+ "fieldProfile": {
+  "playerHp": 202,
+  "playerMaxHp": 202,
+  "opponentHp": 142,
+  "opponentMaxHp": 142,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "precedingBodies": [],
+ "nonMoveBodiesBefore": [],
+ "doll": {
+  "behindSubstitute": false,
+  "subHP": 0,
+  "tiles": "93a4fe11b050"
+ }
+}

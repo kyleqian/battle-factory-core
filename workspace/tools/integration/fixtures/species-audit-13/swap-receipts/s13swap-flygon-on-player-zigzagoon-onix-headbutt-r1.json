@@ -1,0 +1,47 @@
+{
+ "schema": "subst-swap-live-check/v1",
+ "results": [
+  {
+   "probe": "s13swap-flygon-on-player-zigzagoon-onix-headbutt-r1.json",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "ONIX",
+   "move": "HEADBUTT",
+   "startFrame": 1527,
+   "endFrame": 1659,
+   "rows": 133,
+   "productionDuration": 133,
+   "kind": "swap",
+   "swapInRows": 42,
+   "bodyRows": 48,
+   "exactRows": 133,
+   "residualPixels": 0,
+   "digest": "cf1ed154c115c412",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 0,
+   "bodyPerRowDigest": "e9efd8e3bbd95bcd",
+   "firstMismatches": []
+  },
+  {
+   "probe": "s13swap-flygon-on-player-zigzagoon-onix-headbutt-r1.json",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "ONIX",
+   "move": "HEADBUTT",
+   "startFrame": 2981,
+   "endFrame": 3113,
+   "rows": 133,
+   "productionDuration": 133,
+   "kind": "swap",
+   "swapInRows": 42,
+   "bodyRows": 48,
+   "exactRows": 133,
+   "residualPixels": 0,
+   "digest": "cf1ed154c115c412",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 0,
+   "bodyPerRowDigest": "e9efd8e3bbd95bcd",
+   "firstMismatches": []
+  }
+ ]
+}

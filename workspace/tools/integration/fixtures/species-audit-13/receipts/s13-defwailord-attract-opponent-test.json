@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defwailord-attract-opponent-test.json",
+  "stem": "s13-defwailord-attract-opponent",
+  "kind": "test",
+  "move": "ATTRACT",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   365,
+   799
+  ],
+  "rows": 435,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 435,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "29052ab270f312ece425e711cf931ab63f940e72b7483744dcac6ffb54178769"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "29052ab270f312ece425e711cf931ab63f940e72b7483744dcac6ffb54178769"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defpichu-ice-beam-player-test.json",
+  "stem": "s13-defpichu-ice-beam-player",
+  "kind": "test",
+  "move": "ICE_BEAM",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   334,
+   536
+  ],
+  "rows": 203,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 203,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "097074033e61064fc18d019ac0ab8904d1ae05ea2a705dd89268a1aba9efc238"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "097074033e61064fc18d019ac0ab8904d1ae05ea2a705dd89268a1aba9efc238"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

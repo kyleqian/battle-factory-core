@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-deftyranitar-flamethrower-opponent-test.json",
+  "stem": "s13-deftyranitar-flamethrower-opponent",
+  "kind": "test",
+  "move": "FLAMETHROWER",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   362,
+   571
+  ],
+  "rows": 210,
+  "orderInput": "fixture",
+  "shift": -15,
+  "liveDuration": 115,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "e04bce92a6ade097c1176b06578a8147ec2e5c5263351c5d39353543929fd57f"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "e04bce92a6ade097c1176b06578a8147ec2e5c5263351c5d39353543929fd57f"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

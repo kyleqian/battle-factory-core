@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkonix-thunderbolt-player-test.json",
+  "stem": "s13-atkonix-thunderbolt-player",
+  "kind": "test",
+  "move": "THUNDERBOLT",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   350,
+   586
+  ],
+  "rows": 237,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 237,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "9329ad52cfb17902f97bf470e0ec062d4a0449081362cfb776bfc570e0d38547"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "9329ad52cfb17902f97bf470e0ec062d4a0449081362cfb776bfc570e0d38547"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-deftyranitar-earthquake-player-test.json",
+  "stem": "s13-deftyranitar-earthquake-player",
+  "kind": "test",
+  "move": "EARTHQUAKE",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   366,
+   573
+  ],
+  "rows": 208,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 198,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "bc63e2479c632cd295bc67f1c7dfde2a6e433e4af89f6e26ad56da2269e17104"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "bc63e2479c632cd295bc67f1c7dfde2a6e433e4af89f6e26ad56da2269e17104"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

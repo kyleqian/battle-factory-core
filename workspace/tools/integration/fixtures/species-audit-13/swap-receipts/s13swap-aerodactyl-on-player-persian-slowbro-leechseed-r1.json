@@ -1,0 +1,26 @@
+{
+ "schema": "subst-swap-live-check/v1",
+ "results": [
+  {
+   "probe": "s13swap-aerodactyl-on-player-persian-slowbro-leechseed-r1.json",
+   "side": "player",
+   "attacker": "AERODACTYL",
+   "target": "SLOWBRO",
+   "move": "LEECH_SEED",
+   "startFrame": 1560,
+   "endFrame": 1785,
+   "rows": 226,
+   "productionDuration": 226,
+   "kind": "swap",
+   "swapInRows": 42,
+   "bodyRows": 141,
+   "exactRows": 226,
+   "residualPixels": 0,
+   "digest": "d798a1ab50abff60",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 0,
+   "bodyPerRowDigest": "30a1b1fffa95332e",
+   "firstMismatches": []
+  }
+ ]
+}

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defsteelix-psychic-opponent-test.json",
+  "stem": "s13-defsteelix-psychic-opponent",
+  "kind": "test",
+  "move": "PSYCHIC",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   347,
+   491
+  ],
+  "rows": 145,
+  "orderInput": "fixture",
+  "shift": -5,
+  "liveDuration": 140,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "c521a42d8de5a96e13d818c8f2f0790d7f90c86ab50e2f3c4129c87e2efac0e1"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "c521a42d8de5a96e13d818c8f2f0790d7f90c86ab50e2f3c4129c87e2efac0e1"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

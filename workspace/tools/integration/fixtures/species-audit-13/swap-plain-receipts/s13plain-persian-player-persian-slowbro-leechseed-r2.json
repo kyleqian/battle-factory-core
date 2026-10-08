@@ -1,0 +1,26 @@
+{
+ "schema": "subst-swap-live-check/v1",
+ "results": [
+  {
+   "probe": "s13plain-persian-player-persian-slowbro-leechseed-r2.json",
+   "side": "player",
+   "attacker": "PERSIAN",
+   "target": "SLOWBRO",
+   "move": "LEECH_SEED",
+   "startFrame": 104,
+   "endFrame": 244,
+   "rows": 141,
+   "productionDuration": 141,
+   "kind": "plain-control",
+   "swapInRows": -1,
+   "bodyRows": 99,
+   "exactRows": 141,
+   "residualPixels": 0,
+   "digest": "beb39a2a5851c82a",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 0,
+   "bodyPerRowDigest": "30a1b1fffa95332e",
+   "firstMismatches": []
+  }
+ ]
+}

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defrattata-body-slam-player-test.json",
+  "stem": "s13-defrattata-body-slam-player",
+  "kind": "test",
+  "move": "BODY_SLAM",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   342,
+   448
+  ],
+  "rows": 107,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 107,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "77533274ec3b4c19698f43a30792d3d3926c4637a0678fb1a7c971c175e7d565"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "77533274ec3b4c19698f43a30792d3d3926c4637a0678fb1a7c971c175e7d565"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

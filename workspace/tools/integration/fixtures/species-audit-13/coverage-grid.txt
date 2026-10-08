@@ -1,0 +1,14 @@
+# defender-doll windows: cell = player-attacker / opponent-attacker px (run 1 = run 2 everywhere); ok = 0 px; — = not staged (type / Levitate immunity: no body)
+# ctl = SLOWBRO -> PERSIAN; defX = SLOWBRO -> X (X shown as the doll); atkX = X -> PERSIAN; shinysteelixdef = SLOWBRO -> shiny STEELIX
+move | ctl | defsteelix | defwailord | deftyranitar | defpichu | defgolbat | defflygon | defweezing | defonix | defrattata | atkonix | atkgolbat | atkaerodactyl | atksteelix | shinysteelixdef
+ATTRACT | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/18207 | ok/6546 | ok/ok | 19081/ok | ok/ok | ok/49
+BODY_SLAM | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/40241 | ok/ok | ok/ok | ok/ok | ok/ok
+BRICK_BREAK | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/85098 | ok/ok | ok/ok | ok/ok | ok/ok
+CRUNCH | ok/ok | 292352/ok | 292352/291312 | ok/291312 | 292352/291312 | ok/ok | ok/ok | ok/ok | 292352/291312 | 292352/291312 | ok/ok | ok/303616 | 305296/ok | ok/ok | 292352/ok
+EARTHQUAKE | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | —/— | —/— | —/— | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok
+FLAMETHROWER | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/8728 | ok/200 | ok/200 | ok/ok | ok/ok
+ICE_BEAM | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/221473 | ok/ok | ok/ok | ok/ok | ok/ok
+PSYCHIC | ok/ok | ok/ok | ok/ok | —/— | ok/ok | ok/ok | ok/ok | ok/ok | 292352/ok | ok/291312 | ok/ok | ok/200 | ok/200 | ok/ok | ok/ok
+SLUDGE_BOMB | ok/ok | —/— | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/182849 | ok/200 | ok/200 | ok/ok | —/—
+SURF | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok | ok/ok
+THUNDERBOLT | ok/ok | —/— | ok/ok | ok/ok | ok/ok | ok/ok | —/— | ok/ok | —/— | ok/ok | ok/258567 | ok/ok | ok/ok | ok/ok | —/—

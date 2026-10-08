@@ -1,0 +1,50 @@
+{
+ "schema": "prep38-subbed-defender-fixture/v1",
+ "move": "FLAMETHROWER",
+ "moveId": 53,
+ "kind": "test",
+ "stem": "s13-defpichu-flamethrower-player",
+ "probe": "tools/integration/prep38Probe.py",
+ "scenario": "tools/integration/fixtures/species-audit-13/scenarios/s13-defpichu-flamethrower-player.json",
+ "denseWindow": {
+  "startFrame": 338,
+  "endFrame": 547
+ },
+ "attacker": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "PICHU",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "defenderDoll": true,
+ "fieldProfile": {
+  "playerHp": 202,
+  "playerMaxHp": 202,
+  "opponentHp": 96,
+  "opponentMaxHp": 127,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 164,
+   "side": "opponent"
+  }
+ ],
+ "nonMoveBodiesBefore": [],
+ "doll": {
+  "behindSubstitute": true,
+  "subHP": 31,
+  "tiles": "a57703bc75df"
+ }
+}

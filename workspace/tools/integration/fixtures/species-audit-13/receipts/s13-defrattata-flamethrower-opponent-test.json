@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defrattata-flamethrower-opponent-test.json",
+  "stem": "s13-defrattata-flamethrower-opponent",
+  "kind": "test",
+  "move": "FLAMETHROWER",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   341,
+   550
+  ],
+  "rows": 210,
+  "orderInput": "fixture",
+  "shift": -15,
+  "liveDuration": 115,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "e0c2f11f50cf726c00ca2b96c0c94fe4e6402807b6aa6e6a35e3712044c37289"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "e0c2f11f50cf726c00ca2b96c0c94fe4e6402807b6aa6e6a35e3712044c37289"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

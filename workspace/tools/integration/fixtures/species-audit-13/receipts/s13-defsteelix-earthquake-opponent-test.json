@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defsteelix-earthquake-opponent-test.json",
+  "stem": "s13-defsteelix-earthquake-opponent",
+  "kind": "test",
+  "move": "EARTHQUAKE",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   352,
+   559
+  ],
+  "rows": 208,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 198,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "4bd58d634bcf9dfe4ebf29c3374cee8c909ff4e820ef59e64bf2915049eee28e"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "4bd58d634bcf9dfe4ebf29c3374cee8c909ff4e820ef59e64bf2915049eee28e"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

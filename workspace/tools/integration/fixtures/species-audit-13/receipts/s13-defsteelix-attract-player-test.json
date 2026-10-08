@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defsteelix-attract-player-test.json",
+  "stem": "s13-defsteelix-attract-player",
+  "kind": "test",
+  "move": "ATTRACT",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   345,
+   779
+  ],
+  "rows": 435,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 435,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "b9c2c960e26b0dafe0bbda7e36f42c74ec991a2773d82568de2efeba25b6f1c7"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "b9c2c960e26b0dafe0bbda7e36f42c74ec991a2773d82568de2efeba25b6f1c7"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

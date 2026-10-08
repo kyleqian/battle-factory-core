@@ -1,0 +1,33 @@
+{
+ "schema": "subst-swap-live-check/v1",
+ "results": [
+  {
+   "probe": "s13plain-flygon-player-persian-slowbro-leechseed-r1.json",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "SLOWBRO",
+   "move": "LEECH_SEED",
+   "startFrame": 103,
+   "endFrame": 243,
+   "rows": 141,
+   "productionDuration": 141,
+   "kind": "plain-control",
+   "swapInRows": -1,
+   "bodyRows": 99,
+   "exactRows": 140,
+   "residualPixels": 32,
+   "digest": "093eba509cdeedf8",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 32,
+   "bodyPerRowDigest": "723615056a64cccd",
+   "firstMismatches": [
+    {
+     "age": 40,
+     "frame": 143,
+     "px": 32,
+     "bbox": "135,37,140,45"
+    }
+   ]
+  }
+ ]
+}

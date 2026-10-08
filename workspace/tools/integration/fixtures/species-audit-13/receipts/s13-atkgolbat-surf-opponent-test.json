@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkgolbat-surf-opponent-test.json",
+  "stem": "s13-atkgolbat-surf-opponent",
+  "kind": "test",
+  "move": "SURF",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   340,
+   483
+  ],
+  "rows": 144,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 144,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "c8ef2019599e3d50788af606023a80d9082760b9520a40fb03e5bdcdb3d016bb"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "c8ef2019599e3d50788af606023a80d9082760b9520a40fb03e5bdcdb3d016bb"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

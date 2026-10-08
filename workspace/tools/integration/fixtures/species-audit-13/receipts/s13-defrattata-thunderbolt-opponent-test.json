@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defrattata-thunderbolt-opponent-test.json",
+  "stem": "s13-defrattata-thunderbolt-opponent",
+  "kind": "test",
+  "move": "THUNDERBOLT",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   340,
+   576
+  ],
+  "rows": 237,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 237,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "64e7d3eeba3050cd8f2c5ff61f27c5b3affd5f6624b6704de4df59e9b04a421c"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "64e7d3eeba3050cd8f2c5ff61f27c5b3affd5f6624b6704de4df59e9b04a421c"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

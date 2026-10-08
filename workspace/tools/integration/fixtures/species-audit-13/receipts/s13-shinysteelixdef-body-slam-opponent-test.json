@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-shinysteelixdef-body-slam-opponent-test.json",
+  "stem": "s13-shinysteelixdef-body-slam-opponent",
+  "kind": "test",
+  "move": "BODY_SLAM",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   349,
+   455
+  ],
+  "rows": 107,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 107,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "22a32a147ea9c515d0886e8cdfda25848055bb3fd3a2204b79822f66a635b88d"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "22a32a147ea9c515d0886e8cdfda25848055bb3fd3a2204b79822f66a635b88d"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

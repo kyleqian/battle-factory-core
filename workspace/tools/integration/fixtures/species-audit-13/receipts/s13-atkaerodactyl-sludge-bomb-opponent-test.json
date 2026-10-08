@@ -1,0 +1,55 @@
+[
+ {
+  "fixture": "s13-atkaerodactyl-sludge-bomb-opponent-test.json",
+  "stem": "s13-atkaerodactyl-sludge-bomb-opponent",
+  "kind": "test",
+  "move": "SLUDGE_BOMB",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   352,
+   520
+  ],
+  "rows": 169,
+  "orderInput": "fixture",
+  "shift": -4,
+  "liveDuration": 160,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 200,
+    "exactRows": 168,
+    "digest": "d41e9c3b60912a1f42df6c0e84d1cdb3376173ff483a3dda21c3ab0105ec75ce"
+   },
+   {
+    "run": 2,
+    "residualPixels": 200,
+    "exactRows": 168,
+    "digest": "d41e9c3b60912a1f42df6c0e84d1cdb3376173ff483a3dda21c3ab0105ec75ce"
+   }
+  ],
+  "affectedAges": "0",
+  "maxPxRow": 200,
+  "fieldPx": 200,
+  "bbox": [
+   160,
+   65,
+   191,
+   72
+  ],
+  "perRow": [
+   [
+    0,
+    200,
+    [
+     160,
+     65,
+     191,
+     72
+    ]
+   ]
+  ]
+ }
+]

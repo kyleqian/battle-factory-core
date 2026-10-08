@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-ctl-brick-break-opponent-test.json",
+  "stem": "s13-ctl-brick-break-opponent",
+  "kind": "test",
+  "move": "BRICK_BREAK",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   348,
+   498
+  ],
+  "rows": 151,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 151,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "aea2f620b161d8ef679245e21d3809b55eaa4395bdf2da4277fdf34f575835c6"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "aea2f620b161d8ef679245e21d3809b55eaa4395bdf2da4277fdf34f575835c6"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

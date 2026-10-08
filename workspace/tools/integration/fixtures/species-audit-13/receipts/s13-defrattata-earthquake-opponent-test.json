@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defrattata-earthquake-opponent-test.json",
+  "stem": "s13-defrattata-earthquake-opponent",
+  "kind": "test",
+  "move": "EARTHQUAKE",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   341,
+   548
+  ],
+  "rows": 208,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 198,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "e633e553bd096105a0d7a0bc9b375f9202cd508809854b525f3872e200f6e596"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "e633e553bd096105a0d7a0bc9b375f9202cd508809854b525f3872e200f6e596"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

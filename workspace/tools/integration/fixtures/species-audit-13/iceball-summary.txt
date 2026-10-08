@@ -1,0 +1,28 @@
+s13ib-golbat-mechanic-ice-ball-player-spheal-opponent-onix-b2 {"phase":"no-event","selected":true,"rows":76,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}
+s13ib-golbat-mechanic-ice-ball-player-spheal-opponent-onix-b3 {"phase":"no-event","selected":true,"rows":76,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}
+s13ib-golbat-mechanic-ice-ball-player-spheal-opponent-onix-b4 {"phase":"no-event","selected":true,"rows":76,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}
+s13ib-lunatone-prep25-ice-ball-alt-player-glalie-golem-b2 {"phase":"no-event","selected":true,"rows":76,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}
+s13ib-lunatone-prep25-ice-ball-alt-player-glalie-golem-b3 {"phase":"no-event","selected":true,"rows":76,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}
+s13ib-lunatone-prep25-ice-ball-alt-player-glalie-golem-b4 {"phase":"no-event","selected":true,"rows":76,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}
+s13ib-onix-prep25-ice-ball-alt-player-glalie-golem-b2 {"phase":"no-event","selected":true,"rows":76,"px":[48017,48017],"ages":"8..57 (50)","maxPxRow":2015,"violations":["selected phase residual 48017 px on ages 8,9,10,11,12,13,14,..."]}
+s13ib-onix-prep25-ice-ball-alt-player-glalie-golem-b3 {"phase":"no-event","selected":true,"rows":76,"px":[78804,78804],"ages":"8..65 (58)","maxPxRow":2395,"violations":["selected phase residual 78804 px on ages 8,9,10,11,12,13,14,..."]}
+s13ib-rattata-prep25-ice-ball-alt-opponent-glalie-golem-b2 {"phase":"no-event","selected":true,"rows":76,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}
+s13ib-rattata-prep25-ice-ball-alt-player-glalie-golem-b2 {"phase":"no-event","selected":true,"rows":76,"px":[30686,30686],"ages":"8..57 (50)","maxPxRow":981,"violations":["selected phase residual 30686 px on ages 8,9,10,11,12,13,14,..."]}
+s13ib-rattata-prep25-ice-ball-alt-player-glalie-golem-b3 {"phase":"no-event","selected":true,"rows":76,"px":[44870,44870],"ages":"8..65 (58)","maxPxRow":1202,"violations":["selected phase residual 44870 px on ages 8,9,10,11,12,13,14,..."]}
+s13ib-steelix-prep25-ice-ball-alt-opponent-glalie-golem-b2 {"phase":"no-event","selected":true,"rows":76,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}
+s13ib-steelix-prep25-ice-ball-alt-player-glalie-golem-b2 {"phase":"no-event","selected":true,"rows":76,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}
+s13ib-steelix-prep25-ice-ball-alt-player-glalie-golem-b3 {"phase":"no-event","selected":true,"rows":76,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}
+s13ib-steelix-prep25-ice-ball-alt-player-glalie-golem-b4 {"phase":"no-event","selected":true,"rows":76,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}
+s13ib-tyranitar-prep25-ice-ball-alt-opponent-glalie-golem-b2 {"phase":"no-event","selected":true,"rows":76,"px":[2,2],"ages":"39..39 (1)","maxPxRow":2,"violations":["selected phase residual 2 px on ages 39..."]}
+s13ib-tyranitar-prep25-ice-ball-alt-player-glalie-golem-b2 {"phase":"no-event","selected":true,"rows":76,"px":[40,40],"ages":"40..41 (2)","maxPxRow":20,"violations":["selected phase residual 40 px on ages 40,41..."]}
+s13ib-tyranitar-prep25-ice-ball-alt-player-glalie-golem-b3 {"phase":"no-event","selected":true,"rows":76,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}
+s13ib-tyranitar-prep25-ice-ball-alt-player-glalie-golem-b4 {"phase":"no-event","selected":true,"rows":76,"px":[11,11],"ages":"39..41 (3)","maxPxRow":5,"violations":["selected phase residual 11 px on ages 39,40,41..."]}
+s13ib-tyranitar-prep25-ice-ball-alt-player-glalie-golem-b5 {"phase":"event","selected":true,"rows":133,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}
+s13ib-wailord-prep25-ice-ball-alt-opponent-glalie-golem-b2 {"phase":"no-event","selected":true,"rows":76,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}
+s13ib-wailord-prep25-ice-ball-alt-player-glalie-golem-b2 {"phase":"no-event","selected":true,"rows":76,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}
+s13ib-wailord-prep25-ice-ball-alt-player-glalie-golem-b3 {"phase":"no-event","selected":true,"rows":76,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}
+s13ib-wailord-prep25-ice-ball-alt-player-glalie-golem-b4 {"phase":"no-event","selected":true,"rows":76,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}
+s13ib-wailord-prep25-ice-ball-alt-player-glalie-golem-b5 {"phase":"event","selected":true,"rows":133,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}
+s13ib-weezing-prep25-ice-ball-alt-player-glalie-golem-b2 {"phase":"no-event","selected":true,"rows":76,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}
+s13ib-weezing-prep25-ice-ball-alt-player-glalie-golem-b3 {"phase":"no-event","selected":true,"rows":76,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}
+s13ib-weezing-prep25-ice-ball-alt-player-glalie-golem-b4 {"phase":"no-event","selected":true,"rows":76,"px":[0,0],"ages":"-","maxPxRow":0,"violations":[]}

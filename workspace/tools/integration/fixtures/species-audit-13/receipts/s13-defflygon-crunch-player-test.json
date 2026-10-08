@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defflygon-crunch-player-test.json",
+  "stem": "s13-defflygon-crunch-player",
+  "kind": "test",
+  "move": "CRUNCH",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   349,
+   490
+  ],
+  "rows": 142,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 142,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 142,
+    "digest": "410e19ec938467a5b5d270cdda453c16f377b5e7df999b97235ee13594083eab"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 142,
+    "digest": "410e19ec938467a5b5d270cdda453c16f377b5e7df999b97235ee13594083eab"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

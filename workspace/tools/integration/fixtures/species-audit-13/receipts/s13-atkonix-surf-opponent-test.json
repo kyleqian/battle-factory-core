@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkonix-surf-opponent-test.json",
+  "stem": "s13-atkonix-surf-opponent",
+  "kind": "test",
+  "move": "SURF",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   338,
+   481
+  ],
+  "rows": 144,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 144,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "8d5130b86534eed27f8ba68218d40337083a87f62ed7bce058165897b7979490"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "8d5130b86534eed27f8ba68218d40337083a87f62ed7bce058165897b7979490"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

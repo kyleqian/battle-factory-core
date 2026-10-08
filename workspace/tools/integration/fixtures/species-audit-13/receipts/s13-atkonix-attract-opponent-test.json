@@ -1,0 +1,105 @@
+[
+ {
+  "fixture": "s13-atkonix-attract-opponent-test.json",
+  "stem": "s13-atkonix-attract-opponent",
+  "kind": "test",
+  "move": "ATTRACT",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   336,
+   770
+  ],
+  "rows": 435,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 435,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 6546,
+    "exactRows": 429,
+    "digest": "dae80b3a7a6335588522038249f1eb1787cf216e5110d71b556c9f7a0548b69e"
+   },
+   {
+    "run": 2,
+    "residualPixels": 6546,
+    "exactRows": 429,
+    "digest": "dae80b3a7a6335588522038249f1eb1787cf216e5110d71b556c9f7a0548b69e"
+   }
+  ],
+  "affectedAges": "0..5",
+  "maxPxRow": 1091,
+  "fieldPx": 6546,
+  "bbox": [
+   149,
+   12,
+   204,
+   71
+  ],
+  "perRow": [
+   [
+    0,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ],
+   [
+    1,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ],
+   [
+    2,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ],
+   [
+    3,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ],
+   [
+    4,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ],
+   [
+    5,
+    1091,
+    [
+     149,
+     12,
+     204,
+     71
+    ]
+   ]
+  ]
+ }
+]

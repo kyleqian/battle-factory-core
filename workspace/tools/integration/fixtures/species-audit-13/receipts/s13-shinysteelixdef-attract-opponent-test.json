@@ -1,0 +1,55 @@
+[
+ {
+  "fixture": "s13-shinysteelixdef-attract-opponent-test.json",
+  "stem": "s13-shinysteelixdef-attract-opponent",
+  "kind": "test",
+  "move": "ATTRACT",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   341,
+   775
+  ],
+  "rows": 435,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 435,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 49,
+    "exactRows": 434,
+    "digest": "c8a074e64498ee2021cad752a140c2440dde703b0f91271efedfccc954308f47"
+   },
+   {
+    "run": 2,
+    "residualPixels": 49,
+    "exactRows": 434,
+    "digest": "c8a074e64498ee2021cad752a140c2440dde703b0f91271efedfccc954308f47"
+   }
+  ],
+  "affectedAges": "119",
+  "maxPxRow": 49,
+  "fieldPx": 49,
+  "bbox": [
+   65,
+   80,
+   78,
+   91
+  ],
+  "perRow": [
+   [
+    119,
+    49,
+    [
+     65,
+     80,
+     78,
+     91
+    ]
+   ]
+  ]
+ }
+]

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defpichu-earthquake-opponent-test.json",
+  "stem": "s13-defpichu-earthquake-opponent",
+  "kind": "test",
+  "move": "EARTHQUAKE",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   334,
+   541
+  ],
+  "rows": 208,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 198,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "2aff69c66625ddcc9936bf9292ca0f4f58972bc59156792d42fe56c7a5f60954"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "2aff69c66625ddcc9936bf9292ca0f4f58972bc59156792d42fe56c7a5f60954"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

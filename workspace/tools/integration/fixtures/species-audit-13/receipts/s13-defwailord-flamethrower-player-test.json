@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defwailord-flamethrower-player-test.json",
+  "stem": "s13-defwailord-flamethrower-player",
+  "kind": "test",
+  "move": "FLAMETHROWER",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   380,
+   589
+  ],
+  "rows": 210,
+  "orderInput": "fixture",
+  "shift": -15,
+  "liveDuration": 115,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "bf8c9278b6a66aa66fdbae68ca73465711be3cffb99be97e00485f859f902dad"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "bf8c9278b6a66aa66fdbae68ca73465711be3cffb99be97e00485f859f902dad"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,50 @@
+{
+ "schema": "prep38-subbed-defender-fixture/v1",
+ "move": "FLAMETHROWER",
+ "moveId": 53,
+ "kind": "test",
+ "stem": "s13-atkaerodactyl-flamethrower-player",
+ "probe": "tools/integration/prep38Probe.py",
+ "scenario": "tools/integration/fixtures/species-audit-13/scenarios/s13-atkaerodactyl-flamethrower-player.json",
+ "denseWindow": {
+  "startFrame": 357,
+  "endFrame": 566
+ },
+ "attacker": {
+  "species": "AERODACTYL",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "PERSIAN",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "defenderDoll": true,
+ "fieldProfile": {
+  "playerHp": 187,
+  "playerMaxHp": 187,
+  "opponentHp": 129,
+  "opponentMaxHp": 172,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 164,
+   "side": "opponent"
+  }
+ ],
+ "nonMoveBodiesBefore": [],
+ "doll": {
+  "behindSubstitute": true,
+  "subHP": 43,
+  "tiles": "a57703bc75df"
+ }
+}

@@ -1,0 +1,50 @@
+{
+ "schema": "prep38-subbed-defender-fixture/v1",
+ "move": "ICE_BEAM",
+ "moveId": 58,
+ "kind": "test",
+ "stem": "s13-defwailord-ice-beam-opponent",
+ "probe": "tools/integration/prep38Probe.py",
+ "scenario": "tools/integration/fixtures/species-audit-13/scenarios/s13-defwailord-ice-beam-opponent.json",
+ "denseWindow": {
+  "startFrame": 372,
+  "endFrame": 574
+ },
+ "attacker": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "WAILORD",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "defenderDoll": true,
+ "fieldProfile": {
+  "playerHp": 208,
+  "playerMaxHp": 277,
+  "opponentHp": 202,
+  "opponentMaxHp": 202,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 164,
+   "side": "player"
+  }
+ ],
+ "nonMoveBodiesBefore": [],
+ "doll": {
+  "behindSubstitute": true,
+  "subHP": 69,
+  "tiles": "22a6f54c07e2"
+ }
+}

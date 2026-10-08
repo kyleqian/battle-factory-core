@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-nodfonix-earthquake-opponent-control.json",
+  "stem": "s13-nodfonix-earthquake-opponent",
+  "kind": "control",
+  "move": "EARTHQUAKE",
+  "attackerSide": "opponent",
+  "defenderDoll": false,
+  "window": [
+   80,
+   287
+  ],
+  "rows": 208,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 198,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "5b1eb6c22ee3632c9c9fada5539380e91765632c1c955203dda07633ee920bcc"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "5b1eb6c22ee3632c9c9fada5539380e91765632c1c955203dda07633ee920bcc"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

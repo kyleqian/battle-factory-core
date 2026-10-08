@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defrattata-earthquake-player-test.json",
+  "stem": "s13-defrattata-earthquake-player",
+  "kind": "test",
+  "move": "EARTHQUAKE",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   345,
+   552
+  ],
+  "rows": 208,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 198,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "b07c1f44a54b8e9c3443faa4c881575e0c4664e30d2ddde43aaf653664ce9500"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "b07c1f44a54b8e9c3443faa4c881575e0c4664e30d2ddde43aaf653664ce9500"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

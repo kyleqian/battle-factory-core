@@ -1,0 +1,52 @@
+{
+ "schema": "prep38-subbed-defender-fixture/v1",
+ "move": "ICE_BEAM",
+ "moveId": 58,
+ "kind": "test",
+ "stem": "s13-shinysteelixdef-ice-beam-player",
+ "probe": "tools/integration/prep38Probe.py",
+ "scenario": "tools/integration/fixtures/species-audit-13/scenarios/s13-shinysteelixdef-ice-beam-player.json",
+ "denseWindow": {
+  "startFrame": 352,
+  "endFrame": 554
+ },
+ "attacker": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "STEELIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "defenderDoll": true,
+ "fieldProfile": {
+  "playerHp": 202,
+  "playerMaxHp": 202,
+  "opponentHp": 137,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 164,
+   "side": "opponent"
+  }
+ ],
+ "nonMoveBodiesBefore": [],
+ "doll": {
+  "behindSubstitute": true,
+  "subHP": 45,
+  "tiles": "a57703bc75df"
+ },
+ "attackerPersonality": 2349019075,
+ "targetPersonality": 3251286175
+}

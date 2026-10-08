@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defpichu-ice-beam-opponent-test.json",
+  "stem": "s13-defpichu-ice-beam-opponent",
+  "kind": "test",
+  "move": "ICE_BEAM",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   330,
+   532
+  ],
+  "rows": 203,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 203,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "291b06bac6189266e8eb7abdae3ac9969e394bfc9580896f93d911833f66bc84"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "291b06bac6189266e8eb7abdae3ac9969e394bfc9580896f93d911833f66bc84"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

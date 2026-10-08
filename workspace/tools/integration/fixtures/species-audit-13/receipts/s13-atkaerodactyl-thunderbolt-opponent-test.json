@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkaerodactyl-thunderbolt-opponent-test.json",
+  "stem": "s13-atkaerodactyl-thunderbolt-opponent",
+  "kind": "test",
+  "move": "THUNDERBOLT",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   352,
+   588
+  ],
+  "rows": 237,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 237,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "103dc17dd53b8c901d6f20968b33e7c9191dcd65f0dc468d8e6ba6e354107216"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "103dc17dd53b8c901d6f20968b33e7c9191dcd65f0dc468d8e6ba6e354107216"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

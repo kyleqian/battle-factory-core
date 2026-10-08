@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atksteelix-body-slam-opponent-test.json",
+  "stem": "s13-atksteelix-body-slam-opponent",
+  "kind": "test",
+  "move": "BODY_SLAM",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   347,
+   453
+  ],
+  "rows": 107,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 107,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "25f05513d083ef43e3dd2f37b5d79bf7b54e246ff9f27c372e0257df84db38e8"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "25f05513d083ef43e3dd2f37b5d79bf7b54e246ff9f27c372e0257df84db38e8"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

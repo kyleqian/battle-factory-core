@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defpichu-surf-opponent-test.json",
+  "stem": "s13-defpichu-surf-opponent",
+  "kind": "test",
+  "move": "SURF",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   325,
+   468
+  ],
+  "rows": 144,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 144,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "695a20ad5378b4e16576fa345ff7c12dc1009f637875a1b247a0b04e8bd7f4c3"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "695a20ad5378b4e16576fa345ff7c12dc1009f637875a1b247a0b04e8bd7f4c3"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

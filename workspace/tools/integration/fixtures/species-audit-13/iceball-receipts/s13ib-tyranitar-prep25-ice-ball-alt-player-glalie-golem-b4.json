@@ -1,0 +1,41 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-13/iceball-derived/s13ib-tyranitar-prep25-ice-ball-alt-player-glalie-golem-b4.json",
+  "move": "ICE_BALL",
+  "measuredPhase": "no-event",
+  "policyPhase": "no-event",
+  "selectedPhase": true,
+  "window": 76,
+  "expectedDuration": 76,
+  "runs": [
+   {
+    "rows": 76,
+    "exactRows": 73,
+    "residualPixels": 11,
+    "digest": "01f48233cc9c7f6e8eb6d9031417810ed835dce7cae112a5ca505c4484a4a986",
+    "affectedAges": [
+     39,
+     40,
+     41
+    ],
+    "maxPixelsPerRow": 5
+   },
+   {
+    "rows": 76,
+    "exactRows": 73,
+    "residualPixels": 11,
+    "digest": "01f48233cc9c7f6e8eb6d9031417810ed835dce7cae112a5ca505c4484a4a986",
+    "affectedAges": [
+     39,
+     40,
+     41
+    ],
+    "maxPixelsPerRow": 5
+   }
+  ],
+  "documentedAges": null,
+  "violations": [
+   "selected phase residual 11 px on ages 39,40,41"
+  ]
+ }
+]

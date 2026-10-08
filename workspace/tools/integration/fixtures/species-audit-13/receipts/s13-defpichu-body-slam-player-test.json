@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defpichu-body-slam-player-test.json",
+  "stem": "s13-defpichu-body-slam-player",
+  "kind": "test",
+  "move": "BODY_SLAM",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   335,
+   441
+  ],
+  "rows": 107,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 107,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "f22dbb3e4671201366f8bacf44b9abb23a800a12e9c5becd67686da9a3b2b5ee"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "f22dbb3e4671201366f8bacf44b9abb23a800a12e9c5becd67686da9a3b2b5ee"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

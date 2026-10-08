@@ -1,0 +1,925 @@
+{
+ "schema": "subst-swap-live-check/v1",
+ "results": [
+  {
+   "probe": "s13swap-tyranitar-on-opponent-golem-onix-headbutt-r1.json",
+   "side": "opponent",
+   "attacker": "TYRANITAR",
+   "target": "ONIX",
+   "move": "HEADBUTT",
+   "startFrame": 1502,
+   "endFrame": 1630,
+   "rows": 129,
+   "productionDuration": 129,
+   "kind": "swap",
+   "swapInRows": 40,
+   "bodyRows": 48,
+   "exactRows": 102,
+   "residualPixels": 686,
+   "digest": "7b00689691a0f820",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 686,
+   "bodyPerRowDigest": "4c78c5228d3a8ce1",
+   "firstMismatches": [
+    {
+     "age": 54,
+     "frame": 1556,
+     "px": 6,
+     "bbox": "155,21,220,46"
+    },
+    {
+     "age": 55,
+     "frame": 1557,
+     "px": 15,
+     "bbox": "153,25,220,46"
+    },
+    {
+     "age": 56,
+     "frame": 1558,
+     "px": 21,
+     "bbox": "152,31,220,46"
+    },
+    {
+     "age": 57,
+     "frame": 1559,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 58,
+     "frame": 1560,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 59,
+     "frame": 1561,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 60,
+     "frame": 1562,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 61,
+     "frame": 1563,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 62,
+     "frame": 1564,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 63,
+     "frame": 1565,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 64,
+     "frame": 1566,
+     "px": 28,
+     "bbox": "148,33,217,46"
+    },
+    {
+     "age": 65,
+     "frame": 1567,
+     "px": 28,
+     "bbox": "145,33,214,46"
+    },
+    {
+     "age": 66,
+     "frame": 1568,
+     "px": 28,
+     "bbox": "142,33,211,46"
+    },
+    {
+     "age": 67,
+     "frame": 1569,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 68,
+     "frame": 1570,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 69,
+     "frame": 1571,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 70,
+     "frame": 1572,
+     "px": 28,
+     "bbox": "137,33,206,46"
+    },
+    {
+     "age": 71,
+     "frame": 1573,
+     "px": 28,
+     "bbox": "137,33,206,46"
+    },
+    {
+     "age": 72,
+     "frame": 1574,
+     "px": 28,
+     "bbox": "141,33,210,46"
+    },
+    {
+     "age": 73,
+     "frame": 1575,
+     "px": 28,
+     "bbox": "141,33,210,46"
+    },
+    {
+     "age": 74,
+     "frame": 1576,
+     "px": 28,
+     "bbox": "137,33,206,46"
+    },
+    {
+     "age": 75,
+     "frame": 1577,
+     "px": 28,
+     "bbox": "137,33,206,46"
+    },
+    {
+     "age": 76,
+     "frame": 1578,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 77,
+     "frame": 1579,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 78,
+     "frame": 1580,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 79,
+     "frame": 1581,
+     "px": 19,
+     "bbox": "141,29,208,46"
+    },
+    {
+     "age": 80,
+     "frame": 1582,
+     "px": 9,
+     "bbox": "142,23,208,46"
+    }
+   ]
+  },
+  {
+   "probe": "s13swap-tyranitar-on-opponent-golem-onix-headbutt-r1.json",
+   "side": "opponent",
+   "attacker": "TYRANITAR",
+   "target": "ONIX",
+   "move": "HEADBUTT",
+   "startFrame": 2924,
+   "endFrame": 3052,
+   "rows": 129,
+   "productionDuration": 129,
+   "kind": "swap",
+   "swapInRows": 40,
+   "bodyRows": 48,
+   "exactRows": 102,
+   "residualPixels": 686,
+   "digest": "7b00689691a0f820",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 686,
+   "bodyPerRowDigest": "4c78c5228d3a8ce1",
+   "firstMismatches": [
+    {
+     "age": 54,
+     "frame": 2978,
+     "px": 6,
+     "bbox": "155,21,220,46"
+    },
+    {
+     "age": 55,
+     "frame": 2979,
+     "px": 15,
+     "bbox": "153,25,220,46"
+    },
+    {
+     "age": 56,
+     "frame": 2980,
+     "px": 21,
+     "bbox": "152,31,220,46"
+    },
+    {
+     "age": 57,
+     "frame": 2981,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 58,
+     "frame": 2982,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 59,
+     "frame": 2983,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 60,
+     "frame": 2984,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 61,
+     "frame": 2985,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 62,
+     "frame": 2986,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 63,
+     "frame": 2987,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 64,
+     "frame": 2988,
+     "px": 28,
+     "bbox": "148,33,217,46"
+    },
+    {
+     "age": 65,
+     "frame": 2989,
+     "px": 28,
+     "bbox": "145,33,214,46"
+    },
+    {
+     "age": 66,
+     "frame": 2990,
+     "px": 28,
+     "bbox": "142,33,211,46"
+    },
+    {
+     "age": 67,
+     "frame": 2991,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 68,
+     "frame": 2992,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 69,
+     "frame": 2993,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 70,
+     "frame": 2994,
+     "px": 28,
+     "bbox": "137,33,206,46"
+    },
+    {
+     "age": 71,
+     "frame": 2995,
+     "px": 28,
+     "bbox": "137,33,206,46"
+    },
+    {
+     "age": 72,
+     "frame": 2996,
+     "px": 28,
+     "bbox": "141,33,210,46"
+    },
+    {
+     "age": 73,
+     "frame": 2997,
+     "px": 28,
+     "bbox": "141,33,210,46"
+    },
+    {
+     "age": 74,
+     "frame": 2998,
+     "px": 28,
+     "bbox": "137,33,206,46"
+    },
+    {
+     "age": 75,
+     "frame": 2999,
+     "px": 28,
+     "bbox": "137,33,206,46"
+    },
+    {
+     "age": 76,
+     "frame": 3000,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 77,
+     "frame": 3001,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 78,
+     "frame": 3002,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 79,
+     "frame": 3003,
+     "px": 19,
+     "bbox": "141,29,208,46"
+    },
+    {
+     "age": 80,
+     "frame": 3004,
+     "px": 9,
+     "bbox": "142,23,208,46"
+    }
+   ]
+  },
+  {
+   "probe": "s13swap-tyranitar-on-opponent-golem-onix-headbutt-r1.json",
+   "side": "opponent",
+   "attacker": "TYRANITAR",
+   "target": "ONIX",
+   "move": "HEADBUTT",
+   "startFrame": 4346,
+   "endFrame": 4474,
+   "rows": 129,
+   "productionDuration": 129,
+   "kind": "swap",
+   "swapInRows": 40,
+   "bodyRows": 48,
+   "exactRows": 102,
+   "residualPixels": 686,
+   "digest": "7b00689691a0f820",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 686,
+   "bodyPerRowDigest": "4c78c5228d3a8ce1",
+   "firstMismatches": [
+    {
+     "age": 54,
+     "frame": 4400,
+     "px": 6,
+     "bbox": "155,21,220,46"
+    },
+    {
+     "age": 55,
+     "frame": 4401,
+     "px": 15,
+     "bbox": "153,25,220,46"
+    },
+    {
+     "age": 56,
+     "frame": 4402,
+     "px": 21,
+     "bbox": "152,31,220,46"
+    },
+    {
+     "age": 57,
+     "frame": 4403,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 58,
+     "frame": 4404,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 59,
+     "frame": 4405,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 60,
+     "frame": 4406,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 61,
+     "frame": 4407,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 62,
+     "frame": 4408,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 63,
+     "frame": 4409,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 64,
+     "frame": 4410,
+     "px": 28,
+     "bbox": "148,33,217,46"
+    },
+    {
+     "age": 65,
+     "frame": 4411,
+     "px": 28,
+     "bbox": "145,33,214,46"
+    },
+    {
+     "age": 66,
+     "frame": 4412,
+     "px": 28,
+     "bbox": "142,33,211,46"
+    },
+    {
+     "age": 67,
+     "frame": 4413,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 68,
+     "frame": 4414,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 69,
+     "frame": 4415,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 70,
+     "frame": 4416,
+     "px": 28,
+     "bbox": "137,33,206,46"
+    },
+    {
+     "age": 71,
+     "frame": 4417,
+     "px": 28,
+     "bbox": "137,33,206,46"
+    },
+    {
+     "age": 72,
+     "frame": 4418,
+     "px": 28,
+     "bbox": "141,33,210,46"
+    },
+    {
+     "age": 73,
+     "frame": 4419,
+     "px": 28,
+     "bbox": "141,33,210,46"
+    },
+    {
+     "age": 74,
+     "frame": 4420,
+     "px": 28,
+     "bbox": "137,33,206,46"
+    },
+    {
+     "age": 75,
+     "frame": 4421,
+     "px": 28,
+     "bbox": "137,33,206,46"
+    },
+    {
+     "age": 76,
+     "frame": 4422,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 77,
+     "frame": 4423,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 78,
+     "frame": 4424,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 79,
+     "frame": 4425,
+     "px": 19,
+     "bbox": "141,29,208,46"
+    },
+    {
+     "age": 80,
+     "frame": 4426,
+     "px": 9,
+     "bbox": "142,23,208,46"
+    }
+   ]
+  },
+  {
+   "probe": "s13swap-tyranitar-on-opponent-golem-onix-headbutt-r1.json",
+   "side": "opponent",
+   "attacker": "TYRANITAR",
+   "target": "ONIX",
+   "move": "HEADBUTT",
+   "startFrame": 5768,
+   "endFrame": 5896,
+   "rows": 129,
+   "productionDuration": 129,
+   "kind": "swap",
+   "swapInRows": 40,
+   "bodyRows": 48,
+   "exactRows": 102,
+   "residualPixels": 686,
+   "digest": "7b00689691a0f820",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 686,
+   "bodyPerRowDigest": "4c78c5228d3a8ce1",
+   "firstMismatches": [
+    {
+     "age": 54,
+     "frame": 5822,
+     "px": 6,
+     "bbox": "155,21,220,46"
+    },
+    {
+     "age": 55,
+     "frame": 5823,
+     "px": 15,
+     "bbox": "153,25,220,46"
+    },
+    {
+     "age": 56,
+     "frame": 5824,
+     "px": 21,
+     "bbox": "152,31,220,46"
+    },
+    {
+     "age": 57,
+     "frame": 5825,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 58,
+     "frame": 5826,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 59,
+     "frame": 5827,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 60,
+     "frame": 5828,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 61,
+     "frame": 5829,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 62,
+     "frame": 5830,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 63,
+     "frame": 5831,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 64,
+     "frame": 5832,
+     "px": 28,
+     "bbox": "148,33,217,46"
+    },
+    {
+     "age": 65,
+     "frame": 5833,
+     "px": 28,
+     "bbox": "145,33,214,46"
+    },
+    {
+     "age": 66,
+     "frame": 5834,
+     "px": 28,
+     "bbox": "142,33,211,46"
+    },
+    {
+     "age": 67,
+     "frame": 5835,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 68,
+     "frame": 5836,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 69,
+     "frame": 5837,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 70,
+     "frame": 5838,
+     "px": 28,
+     "bbox": "137,33,206,46"
+    },
+    {
+     "age": 71,
+     "frame": 5839,
+     "px": 28,
+     "bbox": "137,33,206,46"
+    },
+    {
+     "age": 72,
+     "frame": 5840,
+     "px": 28,
+     "bbox": "141,33,210,46"
+    },
+    {
+     "age": 73,
+     "frame": 5841,
+     "px": 28,
+     "bbox": "141,33,210,46"
+    },
+    {
+     "age": 74,
+     "frame": 5842,
+     "px": 28,
+     "bbox": "137,33,206,46"
+    },
+    {
+     "age": 75,
+     "frame": 5843,
+     "px": 28,
+     "bbox": "137,33,206,46"
+    },
+    {
+     "age": 76,
+     "frame": 5844,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 77,
+     "frame": 5845,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 78,
+     "frame": 5846,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 79,
+     "frame": 5847,
+     "px": 19,
+     "bbox": "141,29,208,46"
+    },
+    {
+     "age": 80,
+     "frame": 5848,
+     "px": 9,
+     "bbox": "142,23,208,46"
+    }
+   ]
+  },
+  {
+   "probe": "s13swap-tyranitar-on-opponent-golem-onix-headbutt-r1.json",
+   "side": "opponent",
+   "attacker": "TYRANITAR",
+   "target": "ONIX",
+   "move": "HEADBUTT",
+   "startFrame": 7190,
+   "endFrame": 7318,
+   "rows": 129,
+   "productionDuration": 129,
+   "kind": "swap",
+   "swapInRows": 40,
+   "bodyRows": 48,
+   "exactRows": 102,
+   "residualPixels": 686,
+   "digest": "7b00689691a0f820",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 686,
+   "bodyPerRowDigest": "4c78c5228d3a8ce1",
+   "firstMismatches": [
+    {
+     "age": 54,
+     "frame": 7244,
+     "px": 6,
+     "bbox": "155,21,220,46"
+    },
+    {
+     "age": 55,
+     "frame": 7245,
+     "px": 15,
+     "bbox": "153,25,220,46"
+    },
+    {
+     "age": 56,
+     "frame": 7246,
+     "px": 21,
+     "bbox": "152,31,220,46"
+    },
+    {
+     "age": 57,
+     "frame": 7247,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 58,
+     "frame": 7248,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 59,
+     "frame": 7249,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 60,
+     "frame": 7250,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 61,
+     "frame": 7251,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 62,
+     "frame": 7252,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 63,
+     "frame": 7253,
+     "px": 28,
+     "bbox": "151,33,220,46"
+    },
+    {
+     "age": 64,
+     "frame": 7254,
+     "px": 28,
+     "bbox": "148,33,217,46"
+    },
+    {
+     "age": 65,
+     "frame": 7255,
+     "px": 28,
+     "bbox": "145,33,214,46"
+    },
+    {
+     "age": 66,
+     "frame": 7256,
+     "px": 28,
+     "bbox": "142,33,211,46"
+    },
+    {
+     "age": 67,
+     "frame": 7257,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 68,
+     "frame": 7258,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 69,
+     "frame": 7259,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 70,
+     "frame": 7260,
+     "px": 28,
+     "bbox": "137,33,206,46"
+    },
+    {
+     "age": 71,
+     "frame": 7261,
+     "px": 28,
+     "bbox": "137,33,206,46"
+    },
+    {
+     "age": 72,
+     "frame": 7262,
+     "px": 28,
+     "bbox": "141,33,210,46"
+    },
+    {
+     "age": 73,
+     "frame": 7263,
+     "px": 28,
+     "bbox": "141,33,210,46"
+    },
+    {
+     "age": 74,
+     "frame": 7264,
+     "px": 28,
+     "bbox": "137,33,206,46"
+    },
+    {
+     "age": 75,
+     "frame": 7265,
+     "px": 28,
+     "bbox": "137,33,206,46"
+    },
+    {
+     "age": 76,
+     "frame": 7266,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 77,
+     "frame": 7267,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 78,
+     "frame": 7268,
+     "px": 28,
+     "bbox": "139,33,208,46"
+    },
+    {
+     "age": 79,
+     "frame": 7269,
+     "px": 19,
+     "bbox": "141,29,208,46"
+    },
+    {
+     "age": 80,
+     "frame": 7270,
+     "px": 9,
+     "bbox": "142,23,208,46"
+    }
+   ]
+  }
+ ]
+}

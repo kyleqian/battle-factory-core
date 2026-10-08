@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atksteelix-flamethrower-player-test.json",
+  "stem": "s13-atksteelix-flamethrower-player",
+  "kind": "test",
+  "move": "FLAMETHROWER",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   354,
+   563
+  ],
+  "rows": 210,
+  "orderInput": "fixture",
+  "shift": -15,
+  "liveDuration": 115,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "4335118e055b630e5d20bb3182c78dda6b1540438f0d636dc65a013d08424d39"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "4335118e055b630e5d20bb3182c78dda6b1540438f0d636dc65a013d08424d39"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

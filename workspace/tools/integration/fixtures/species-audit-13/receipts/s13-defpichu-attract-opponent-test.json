@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defpichu-attract-opponent-test.json",
+  "stem": "s13-defpichu-attract-opponent",
+  "kind": "test",
+  "move": "ATTRACT",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   323,
+   757
+  ],
+  "rows": 435,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 435,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "12917d5aacbf75dd74223a7729b2d41cb7767c548e3faaaefed54886ae8cded2"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "12917d5aacbf75dd74223a7729b2d41cb7767c548e3faaaefed54886ae8cded2"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

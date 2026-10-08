@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkaerodactyl-ice-beam-opponent-test.json",
+  "stem": "s13-atkaerodactyl-ice-beam-opponent",
+  "kind": "test",
+  "move": "ICE_BEAM",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   349,
+   551
+  ],
+  "rows": 203,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 203,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "f49c49daf24ad5f84e291969479af15ddbf4bc05cc598abc302218ec1ca6258c"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "f49c49daf24ad5f84e291969479af15ddbf4bc05cc598abc302218ec1ca6258c"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

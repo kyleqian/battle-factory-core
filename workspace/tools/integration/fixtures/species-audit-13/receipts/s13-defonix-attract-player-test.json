@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defonix-attract-player-test.json",
+  "stem": "s13-defonix-attract-player",
+  "kind": "test",
+  "move": "ATTRACT",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   329,
+   763
+  ],
+  "rows": 435,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 435,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "8e34032ed04c59eac2ae7d559ff0fc7bdc01b2d47867e06e22d6e7de7d48513e"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "8e34032ed04c59eac2ae7d559ff0fc7bdc01b2d47867e06e22d6e7de7d48513e"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

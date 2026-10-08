@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defgolbat-body-slam-opponent-test.json",
+  "stem": "s13-defgolbat-body-slam-opponent",
+  "kind": "test",
+  "move": "BODY_SLAM",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   347,
+   453
+  ],
+  "rows": 107,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 107,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "d66d2480cc4cb1fc5a9c138b18eddd745068c53d3bd96b8ce83a1afcd5042e3c"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "d66d2480cc4cb1fc5a9c138b18eddd745068c53d3bd96b8ce83a1afcd5042e3c"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,50 @@
+{
+ "schema": "prep38-subbed-defender-fixture/v1",
+ "move": "SURF",
+ "moveId": 57,
+ "kind": "test",
+ "stem": "s13-defweezing-surf-player",
+ "probe": "tools/integration/prep38Probe.py",
+ "scenario": "tools/integration/fixtures/species-audit-13/scenarios/s13-defweezing-surf-player.json",
+ "denseWindow": {
+  "startFrame": 345,
+  "endFrame": 488
+ },
+ "attacker": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "WEEZING",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "defenderDoll": true,
+ "fieldProfile": {
+  "playerHp": 202,
+  "playerMaxHp": 202,
+  "opponentHp": 129,
+  "opponentMaxHp": 172,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 164,
+   "side": "opponent"
+  }
+ ],
+ "nonMoveBodiesBefore": [],
+ "doll": {
+  "behindSubstitute": true,
+  "subHP": 43,
+  "tiles": "a57703bc75df"
+ }
+}

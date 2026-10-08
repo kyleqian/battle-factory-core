@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atksteelix-sludge-bomb-opponent-test.json",
+  "stem": "s13-atksteelix-sludge-bomb-opponent",
+  "kind": "test",
+  "move": "SLUDGE_BOMB",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   349,
+   517
+  ],
+  "rows": 169,
+  "orderInput": "fixture",
+  "shift": -4,
+  "liveDuration": 160,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 169,
+    "digest": "42a39eb6732fa89c8f0fb4b2283fd8425a91c6720d70e7e6936d0e641d1647ce"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 169,
+    "digest": "42a39eb6732fa89c8f0fb4b2283fd8425a91c6720d70e7e6936d0e641d1647ce"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

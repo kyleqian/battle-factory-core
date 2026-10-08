@@ -1,0 +1,55 @@
+[
+ {
+  "fixture": "s13-atkaerodactyl-psychic-opponent-test.json",
+  "stem": "s13-atkaerodactyl-psychic-opponent",
+  "kind": "test",
+  "move": "PSYCHIC",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   348,
+   492
+  ],
+  "rows": 145,
+  "orderInput": "fixture",
+  "shift": -5,
+  "liveDuration": 140,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 200,
+    "exactRows": 144,
+    "digest": "40859baf3db6fa513fe2e7cd815f33bb18375caa1c24de2e767a21200d80a0e3"
+   },
+   {
+    "run": 2,
+    "residualPixels": 200,
+    "exactRows": 144,
+    "digest": "40859baf3db6fa513fe2e7cd815f33bb18375caa1c24de2e767a21200d80a0e3"
+   }
+  ],
+  "affectedAges": "0",
+  "maxPxRow": 200,
+  "fieldPx": 200,
+  "bbox": [
+   160,
+   65,
+   191,
+   72
+  ],
+  "perRow": [
+   [
+    0,
+    200,
+    [
+     160,
+     65,
+     191,
+     72
+    ]
+   ]
+  ]
+ }
+]

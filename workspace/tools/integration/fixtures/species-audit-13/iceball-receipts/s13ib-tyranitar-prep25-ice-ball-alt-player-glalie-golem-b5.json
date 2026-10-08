@@ -1,0 +1,31 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-13/iceball-derived/s13ib-tyranitar-prep25-ice-ball-alt-player-glalie-golem-b5.json",
+  "move": "ICE_BALL",
+  "measuredPhase": "event",
+  "policyPhase": "event",
+  "selectedPhase": true,
+  "window": 133,
+  "expectedDuration": 133,
+  "runs": [
+   {
+    "rows": 133,
+    "exactRows": 133,
+    "residualPixels": 0,
+    "digest": "347b044d7d96e3ffebaacd45938053a63111ac012e2c1f8fe1186849dfe216d8",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 133,
+    "exactRows": 133,
+    "residualPixels": 0,
+    "digest": "347b044d7d96e3ffebaacd45938053a63111ac012e2c1f8fe1186849dfe216d8",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

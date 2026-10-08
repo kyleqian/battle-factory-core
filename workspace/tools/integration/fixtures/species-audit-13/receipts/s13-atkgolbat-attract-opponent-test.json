@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkgolbat-attract-opponent-test.json",
+  "stem": "s13-atkgolbat-attract-opponent",
+  "kind": "test",
+  "move": "ATTRACT",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   338,
+   772
+  ],
+  "rows": 435,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 435,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "b27a05b585f93288c2cee72346923934e6d96337c221575b6fec6cc965d775f8"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "b27a05b585f93288c2cee72346923934e6d96337c221575b6fec6cc965d775f8"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

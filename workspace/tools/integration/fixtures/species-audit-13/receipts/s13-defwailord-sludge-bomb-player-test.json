@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defwailord-sludge-bomb-player-test.json",
+  "stem": "s13-defwailord-sludge-bomb-player",
+  "kind": "test",
+  "move": "SLUDGE_BOMB",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   379,
+   547
+  ],
+  "rows": 169,
+  "orderInput": "fixture",
+  "shift": -4,
+  "liveDuration": 160,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 169,
+    "digest": "8d651fa83b4caa97af6ad1a66a1abea2c92266e2533688469ab3a99fc87714c9"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 169,
+    "digest": "8d651fa83b4caa97af6ad1a66a1abea2c92266e2533688469ab3a99fc87714c9"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

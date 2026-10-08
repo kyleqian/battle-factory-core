@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-deftyranitar-earthquake-opponent-test.json",
+  "stem": "s13-deftyranitar-earthquake-opponent",
+  "kind": "test",
+  "move": "EARTHQUAKE",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   362,
+   569
+  ],
+  "rows": 208,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 198,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "54bb9edc623b6a85f024b01e827e1c82db32017e0e8872b5dcbbc20b441351a8"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "54bb9edc623b6a85f024b01e827e1c82db32017e0e8872b5dcbbc20b441351a8"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

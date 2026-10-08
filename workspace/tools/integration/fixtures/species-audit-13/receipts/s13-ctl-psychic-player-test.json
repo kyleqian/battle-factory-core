@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-ctl-psychic-player-test.json",
+  "stem": "s13-ctl-psychic-player",
+  "kind": "test",
+  "move": "PSYCHIC",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   349,
+   493
+  ],
+  "rows": 145,
+  "orderInput": "fixture",
+  "shift": -5,
+  "liveDuration": 140,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "659cb6298a2b5b3652ca0e76cd500bf3fb48d0a1074661e6805f4d619a6f0a53"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "659cb6298a2b5b3652ca0e76cd500bf3fb48d0a1074661e6805f4d619a6f0a53"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

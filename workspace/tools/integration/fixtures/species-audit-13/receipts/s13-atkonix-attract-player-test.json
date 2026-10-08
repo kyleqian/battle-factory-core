@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkonix-attract-player-test.json",
+  "stem": "s13-atkonix-attract-player",
+  "kind": "test",
+  "move": "ATTRACT",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   340,
+   774
+  ],
+  "rows": 435,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 435,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "49ce0e638c0600580e5038a2e063b25bc6f39e932fd4c3242047db4f84ffb431"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "49ce0e638c0600580e5038a2e063b25bc6f39e932fd4c3242047db4f84ffb431"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

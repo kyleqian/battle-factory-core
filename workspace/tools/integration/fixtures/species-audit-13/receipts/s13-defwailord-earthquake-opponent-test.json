@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defwailord-earthquake-opponent-test.json",
+  "stem": "s13-defwailord-earthquake-opponent",
+  "kind": "test",
+  "move": "EARTHQUAKE",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   376,
+   583
+  ],
+  "rows": 208,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 198,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "7183eaebe6b9163e778a9226391aff0435c3846477b5befee66dd9bfe3f92f6f"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 208,
+    "digest": "7183eaebe6b9163e778a9226391aff0435c3846477b5befee66dd9bfe3f92f6f"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,349 @@
+{
+ "schema": "subst-swap-live-check/v1",
+ "results": [
+  {
+   "probe": "s13swap-wailord-on-player-zigzagoon-onix-headbutt-r2.json",
+   "side": "player",
+   "attacker": "WAILORD",
+   "target": "ONIX",
+   "move": "HEADBUTT",
+   "startFrame": 1528,
+   "endFrame": 1660,
+   "rows": 133,
+   "productionDuration": 133,
+   "kind": "swap",
+   "swapInRows": 42,
+   "bodyRows": 48,
+   "exactRows": 108,
+   "residualPixels": 25,
+   "digest": "6c62a82e707c1a9d",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 25,
+   "bodyPerRowDigest": "d50dfa24c33e0368",
+   "firstMismatches": [
+    {
+     "age": 57,
+     "frame": 1585,
+     "px": 1,
+     "bbox": "27,111,27,111"
+    },
+    {
+     "age": 58,
+     "frame": 1586,
+     "px": 1,
+     "bbox": "27,111,27,111"
+    },
+    {
+     "age": 59,
+     "frame": 1587,
+     "px": 1,
+     "bbox": "27,111,27,111"
+    },
+    {
+     "age": 60,
+     "frame": 1588,
+     "px": 1,
+     "bbox": "27,111,27,111"
+    },
+    {
+     "age": 61,
+     "frame": 1589,
+     "px": 1,
+     "bbox": "27,111,27,111"
+    },
+    {
+     "age": 62,
+     "frame": 1590,
+     "px": 1,
+     "bbox": "27,111,27,111"
+    },
+    {
+     "age": 63,
+     "frame": 1591,
+     "px": 1,
+     "bbox": "27,111,27,111"
+    },
+    {
+     "age": 64,
+     "frame": 1592,
+     "px": 1,
+     "bbox": "27,111,27,111"
+    },
+    {
+     "age": 65,
+     "frame": 1593,
+     "px": 1,
+     "bbox": "27,111,27,111"
+    },
+    {
+     "age": 66,
+     "frame": 1594,
+     "px": 1,
+     "bbox": "30,111,30,111"
+    },
+    {
+     "age": 67,
+     "frame": 1595,
+     "px": 1,
+     "bbox": "33,111,33,111"
+    },
+    {
+     "age": 68,
+     "frame": 1596,
+     "px": 1,
+     "bbox": "36,111,36,111"
+    },
+    {
+     "age": 69,
+     "frame": 1597,
+     "px": 1,
+     "bbox": "39,111,39,111"
+    },
+    {
+     "age": 70,
+     "frame": 1598,
+     "px": 1,
+     "bbox": "39,111,39,111"
+    },
+    {
+     "age": 71,
+     "frame": 1599,
+     "px": 1,
+     "bbox": "39,111,39,111"
+    },
+    {
+     "age": 72,
+     "frame": 1600,
+     "px": 1,
+     "bbox": "37,111,37,111"
+    },
+    {
+     "age": 73,
+     "frame": 1601,
+     "px": 1,
+     "bbox": "37,111,37,111"
+    },
+    {
+     "age": 74,
+     "frame": 1602,
+     "px": 1,
+     "bbox": "41,111,41,111"
+    },
+    {
+     "age": 75,
+     "frame": 1603,
+     "px": 1,
+     "bbox": "41,111,41,111"
+    },
+    {
+     "age": 76,
+     "frame": 1604,
+     "px": 1,
+     "bbox": "37,111,37,111"
+    },
+    {
+     "age": 77,
+     "frame": 1605,
+     "px": 1,
+     "bbox": "37,111,37,111"
+    },
+    {
+     "age": 78,
+     "frame": 1606,
+     "px": 1,
+     "bbox": "39,111,39,111"
+    },
+    {
+     "age": 79,
+     "frame": 1607,
+     "px": 1,
+     "bbox": "39,111,39,111"
+    },
+    {
+     "age": 80,
+     "frame": 1608,
+     "px": 1,
+     "bbox": "39,111,39,111"
+    },
+    {
+     "age": 81,
+     "frame": 1609,
+     "px": 1,
+     "bbox": "39,111,39,111"
+    }
+   ]
+  },
+  {
+   "probe": "s13swap-wailord-on-player-zigzagoon-onix-headbutt-r2.json",
+   "side": "player",
+   "attacker": "WAILORD",
+   "target": "ONIX",
+   "move": "HEADBUTT",
+   "startFrame": 2982,
+   "endFrame": 3114,
+   "rows": 133,
+   "productionDuration": 133,
+   "kind": "swap",
+   "swapInRows": 42,
+   "bodyRows": 48,
+   "exactRows": 108,
+   "residualPixels": 25,
+   "digest": "6c62a82e707c1a9d",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 25,
+   "bodyPerRowDigest": "d50dfa24c33e0368",
+   "firstMismatches": [
+    {
+     "age": 57,
+     "frame": 3039,
+     "px": 1,
+     "bbox": "27,111,27,111"
+    },
+    {
+     "age": 58,
+     "frame": 3040,
+     "px": 1,
+     "bbox": "27,111,27,111"
+    },
+    {
+     "age": 59,
+     "frame": 3041,
+     "px": 1,
+     "bbox": "27,111,27,111"
+    },
+    {
+     "age": 60,
+     "frame": 3042,
+     "px": 1,
+     "bbox": "27,111,27,111"
+    },
+    {
+     "age": 61,
+     "frame": 3043,
+     "px": 1,
+     "bbox": "27,111,27,111"
+    },
+    {
+     "age": 62,
+     "frame": 3044,
+     "px": 1,
+     "bbox": "27,111,27,111"
+    },
+    {
+     "age": 63,
+     "frame": 3045,
+     "px": 1,
+     "bbox": "27,111,27,111"
+    },
+    {
+     "age": 64,
+     "frame": 3046,
+     "px": 1,
+     "bbox": "27,111,27,111"
+    },
+    {
+     "age": 65,
+     "frame": 3047,
+     "px": 1,
+     "bbox": "27,111,27,111"
+    },
+    {
+     "age": 66,
+     "frame": 3048,
+     "px": 1,
+     "bbox": "30,111,30,111"
+    },
+    {
+     "age": 67,
+     "frame": 3049,
+     "px": 1,
+     "bbox": "33,111,33,111"
+    },
+    {
+     "age": 68,
+     "frame": 3050,
+     "px": 1,
+     "bbox": "36,111,36,111"
+    },
+    {
+     "age": 69,
+     "frame": 3051,
+     "px": 1,
+     "bbox": "39,111,39,111"
+    },
+    {
+     "age": 70,
+     "frame": 3052,
+     "px": 1,
+     "bbox": "39,111,39,111"
+    },
+    {
+     "age": 71,
+     "frame": 3053,
+     "px": 1,
+     "bbox": "39,111,39,111"
+    },
+    {
+     "age": 72,
+     "frame": 3054,
+     "px": 1,
+     "bbox": "37,111,37,111"
+    },
+    {
+     "age": 73,
+     "frame": 3055,
+     "px": 1,
+     "bbox": "37,111,37,111"
+    },
+    {
+     "age": 74,
+     "frame": 3056,
+     "px": 1,
+     "bbox": "41,111,41,111"
+    },
+    {
+     "age": 75,
+     "frame": 3057,
+     "px": 1,
+     "bbox": "41,111,41,111"
+    },
+    {
+     "age": 76,
+     "frame": 3058,
+     "px": 1,
+     "bbox": "37,111,37,111"
+    },
+    {
+     "age": 77,
+     "frame": 3059,
+     "px": 1,
+     "bbox": "37,111,37,111"
+    },
+    {
+     "age": 78,
+     "frame": 3060,
+     "px": 1,
+     "bbox": "39,111,39,111"
+    },
+    {
+     "age": 79,
+     "frame": 3061,
+     "px": 1,
+     "bbox": "39,111,39,111"
+    },
+    {
+     "age": 80,
+     "frame": 3062,
+     "px": 1,
+     "bbox": "39,111,39,111"
+    },
+    {
+     "age": 81,
+     "frame": 3063,
+     "px": 1,
+     "bbox": "39,111,39,111"
+    }
+   ]
+  }
+ ]
+}

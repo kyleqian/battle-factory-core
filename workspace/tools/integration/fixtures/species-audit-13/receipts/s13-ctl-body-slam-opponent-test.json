@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-ctl-body-slam-opponent-test.json",
+  "stem": "s13-ctl-body-slam-opponent",
+  "kind": "test",
+  "move": "BODY_SLAM",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   347,
+   453
+  ],
+  "rows": 107,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 107,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "c197ee56a95259cae352e990524e7bc0e6412a304b3d4222fe3862f8798af5b7"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "c197ee56a95259cae352e990524e7bc0e6412a304b3d4222fe3862f8798af5b7"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

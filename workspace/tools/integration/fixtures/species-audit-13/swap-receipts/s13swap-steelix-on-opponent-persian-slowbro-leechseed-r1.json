@@ -1,0 +1,26 @@
+{
+ "schema": "subst-swap-live-check/v1",
+ "results": [
+  {
+   "probe": "s13swap-steelix-on-opponent-persian-slowbro-leechseed-r1.json",
+   "side": "opponent",
+   "attacker": "STEELIX",
+   "target": "SLOWBRO",
+   "move": "LEECH_SEED",
+   "startFrame": 1529,
+   "endFrame": 1750,
+   "rows": 222,
+   "productionDuration": 222,
+   "kind": "swap",
+   "swapInRows": 40,
+   "bodyRows": 141,
+   "exactRows": 222,
+   "residualPixels": 0,
+   "digest": "992a7b613f83cf52",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 0,
+   "bodyPerRowDigest": "30a1b1fffa95332e",
+   "firstMismatches": []
+  }
+ ]
+}

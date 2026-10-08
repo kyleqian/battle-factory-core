@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defwailord-brick-break-opponent-test.json",
+  "stem": "s13-defwailord-brick-break-opponent",
+  "kind": "test",
+  "move": "BRICK_BREAK",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   374,
+   524
+  ],
+  "rows": 151,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 151,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "0a38fbfbbb1333d83adfbd807a194056e7e740b939a25a18bf555195f94fcbfd"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "0a38fbfbbb1333d83adfbd807a194056e7e740b939a25a18bf555195f94fcbfd"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

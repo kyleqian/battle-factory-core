@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkonix-flamethrower-player-test.json",
+  "stem": "s13-atkonix-flamethrower-player",
+  "kind": "test",
+  "move": "FLAMETHROWER",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   351,
+   560
+  ],
+  "rows": 210,
+  "orderInput": "fixture",
+  "shift": -15,
+  "liveDuration": 115,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "246dbe9e3517bb07e4d9928aa12c408db6aeb542f0191122f4db65a03f9302c3"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "246dbe9e3517bb07e4d9928aa12c408db6aeb542f0191122f4db65a03f9302c3"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-shinysteelixdef-flamethrower-player-test.json",
+  "stem": "s13-shinysteelixdef-flamethrower-player",
+  "kind": "test",
+  "move": "FLAMETHROWER",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   356,
+   565
+  ],
+  "rows": 210,
+  "orderInput": "fixture",
+  "shift": -15,
+  "liveDuration": 115,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "e3440efe6c840b37bdb43f7b483d1166999e21e4013903f4ded18612b3cdd56e"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "e3440efe6c840b37bdb43f7b483d1166999e21e4013903f4ded18612b3cdd56e"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

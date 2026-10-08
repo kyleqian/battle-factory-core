@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-nodfonix-brick-break-opponent-test.json",
+  "stem": "s13-nodfonix-brick-break-opponent",
+  "kind": "test",
+  "move": "BRICK_BREAK",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   1744,
+   1894
+  ],
+  "rows": 151,
+  "orderInput": "none",
+  "shift": 0,
+  "liveDuration": 151,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "b80563e98b780ff9a49bd849a0910b7e12bd61012437388f9ea9491e481e9828"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "b80563e98b780ff9a49bd849a0910b7e12bd61012437388f9ea9491e481e9828"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

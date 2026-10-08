@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defgolbat-psychic-player-test.json",
+  "stem": "s13-defgolbat-psychic-player",
+  "kind": "test",
+  "move": "PSYCHIC",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   349,
+   493
+  ],
+  "rows": 145,
+  "orderInput": "fixture",
+  "shift": -5,
+  "liveDuration": 140,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "fce8e54f8fe36b095fd93d696d8ba4400d2ea645b3cae151eda63d7e366800a1"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "fce8e54f8fe36b095fd93d696d8ba4400d2ea645b3cae151eda63d7e366800a1"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

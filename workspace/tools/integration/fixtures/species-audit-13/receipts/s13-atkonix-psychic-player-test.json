@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkonix-psychic-player-test.json",
+  "stem": "s13-atkonix-psychic-player",
+  "kind": "test",
+  "move": "PSYCHIC",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   346,
+   490
+  ],
+  "rows": 145,
+  "orderInput": "fixture",
+  "shift": -5,
+  "liveDuration": 140,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "daebd61e4354859e12090e45ec40ff591b59f49b844931aa1806a47036ca1fef"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 145,
+    "digest": "daebd61e4354859e12090e45ec40ff591b59f49b844931aa1806a47036ca1fef"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

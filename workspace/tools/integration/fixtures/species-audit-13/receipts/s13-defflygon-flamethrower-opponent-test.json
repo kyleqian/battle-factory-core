@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defflygon-flamethrower-opponent-test.json",
+  "stem": "s13-defflygon-flamethrower-opponent",
+  "kind": "test",
+  "move": "FLAMETHROWER",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   351,
+   560
+  ],
+  "rows": 210,
+  "orderInput": "fixture",
+  "shift": -15,
+  "liveDuration": 115,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "42d63e59a1b8aaf828050db29909773ddf3fcbd3bca448055bd040581455cbc2"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 210,
+    "digest": "42d63e59a1b8aaf828050db29909773ddf3fcbd3bca448055bd040581455cbc2"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

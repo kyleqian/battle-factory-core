@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defrattata-ice-beam-player-test.json",
+  "stem": "s13-defrattata-ice-beam-player",
+  "kind": "test",
+  "move": "ICE_BEAM",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   341,
+   543
+  ],
+  "rows": 203,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 203,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "ed9215548010d86565e99d16add13ba481e29a6172d98f371fc0b29e27818a8c"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "ed9215548010d86565e99d16add13ba481e29a6172d98f371fc0b29e27818a8c"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

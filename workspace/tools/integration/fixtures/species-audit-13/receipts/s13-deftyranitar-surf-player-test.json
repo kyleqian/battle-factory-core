@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-deftyranitar-surf-player-test.json",
+  "stem": "s13-deftyranitar-surf-player",
+  "kind": "test",
+  "move": "SURF",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   357,
+   500
+  ],
+  "rows": 144,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 144,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "e1fda7880e8b07e43a0674d0b63856d1d3ceda9cce5bc2a1818e795a28ce38e7"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "e1fda7880e8b07e43a0674d0b63856d1d3ceda9cce5bc2a1818e795a28ce38e7"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,337 @@
+{
+ "schema": "subst-swap-live-check/v1",
+ "results": [
+  {
+   "probe": "s13plain-aerodactyl-player-golem-onix-headbutt-r2.json",
+   "side": "player",
+   "attacker": "AERODACTYL",
+   "target": "ONIX",
+   "move": "HEADBUTT",
+   "startFrame": 78,
+   "endFrame": 125,
+   "rows": 48,
+   "productionDuration": 48,
+   "kind": "plain-control",
+   "swapInRows": -1,
+   "bodyRows": 6,
+   "exactRows": 24,
+   "residualPixels": 113,
+   "digest": "aa019ef5e8cf54c1",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 113,
+   "bodyPerRowDigest": "72315e27f424047b",
+   "firstMismatches": [
+    {
+     "age": 14,
+     "frame": 92,
+     "px": 1,
+     "bbox": "27,111,27,111"
+    },
+    {
+     "age": 15,
+     "frame": 93,
+     "px": 2,
+     "bbox": "26,111,27,111"
+    },
+    {
+     "age": 16,
+     "frame": 94,
+     "px": 5,
+     "bbox": "25,110,27,111"
+    },
+    {
+     "age": 17,
+     "frame": 95,
+     "px": 5,
+     "bbox": "25,110,27,111"
+    },
+    {
+     "age": 18,
+     "frame": 96,
+     "px": 5,
+     "bbox": "25,110,27,111"
+    },
+    {
+     "age": 19,
+     "frame": 97,
+     "px": 5,
+     "bbox": "25,110,27,111"
+    },
+    {
+     "age": 20,
+     "frame": 98,
+     "px": 5,
+     "bbox": "25,110,27,111"
+    },
+    {
+     "age": 21,
+     "frame": 99,
+     "px": 5,
+     "bbox": "25,110,27,111"
+    },
+    {
+     "age": 22,
+     "frame": 100,
+     "px": 5,
+     "bbox": "25,110,27,111"
+    },
+    {
+     "age": 23,
+     "frame": 101,
+     "px": 5,
+     "bbox": "28,110,30,111"
+    },
+    {
+     "age": 24,
+     "frame": 102,
+     "px": 5,
+     "bbox": "31,110,33,111"
+    },
+    {
+     "age": 25,
+     "frame": 103,
+     "px": 5,
+     "bbox": "34,110,36,111"
+    },
+    {
+     "age": 26,
+     "frame": 104,
+     "px": 5,
+     "bbox": "37,110,39,111"
+    },
+    {
+     "age": 27,
+     "frame": 105,
+     "px": 5,
+     "bbox": "37,110,39,111"
+    },
+    {
+     "age": 28,
+     "frame": 106,
+     "px": 5,
+     "bbox": "37,110,39,111"
+    },
+    {
+     "age": 29,
+     "frame": 107,
+     "px": 5,
+     "bbox": "35,110,37,111"
+    },
+    {
+     "age": 30,
+     "frame": 108,
+     "px": 5,
+     "bbox": "35,110,37,111"
+    },
+    {
+     "age": 31,
+     "frame": 109,
+     "px": 5,
+     "bbox": "39,110,41,111"
+    },
+    {
+     "age": 32,
+     "frame": 110,
+     "px": 5,
+     "bbox": "39,110,41,111"
+    },
+    {
+     "age": 33,
+     "frame": 111,
+     "px": 5,
+     "bbox": "35,110,37,111"
+    },
+    {
+     "age": 34,
+     "frame": 112,
+     "px": 5,
+     "bbox": "35,110,37,111"
+    },
+    {
+     "age": 35,
+     "frame": 113,
+     "px": 5,
+     "bbox": "37,110,39,111"
+    },
+    {
+     "age": 36,
+     "frame": 114,
+     "px": 5,
+     "bbox": "37,110,39,111"
+    },
+    {
+     "age": 37,
+     "frame": 115,
+     "px": 5,
+     "bbox": "37,110,39,111"
+    }
+   ]
+  },
+  {
+   "probe": "s13plain-aerodactyl-player-golem-onix-headbutt-r2.json",
+   "side": "player",
+   "attacker": "AERODACTYL",
+   "target": "ONIX",
+   "move": "HEADBUTT",
+   "startFrame": 1500,
+   "endFrame": 1547,
+   "rows": 48,
+   "productionDuration": 48,
+   "kind": "plain-control",
+   "swapInRows": -1,
+   "bodyRows": 6,
+   "exactRows": 24,
+   "residualPixels": 113,
+   "digest": "aa019ef5e8cf54c1",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 113,
+   "bodyPerRowDigest": "72315e27f424047b",
+   "firstMismatches": [
+    {
+     "age": 14,
+     "frame": 1514,
+     "px": 1,
+     "bbox": "27,111,27,111"
+    },
+    {
+     "age": 15,
+     "frame": 1515,
+     "px": 2,
+     "bbox": "26,111,27,111"
+    },
+    {
+     "age": 16,
+     "frame": 1516,
+     "px": 5,
+     "bbox": "25,110,27,111"
+    },
+    {
+     "age": 17,
+     "frame": 1517,
+     "px": 5,
+     "bbox": "25,110,27,111"
+    },
+    {
+     "age": 18,
+     "frame": 1518,
+     "px": 5,
+     "bbox": "25,110,27,111"
+    },
+    {
+     "age": 19,
+     "frame": 1519,
+     "px": 5,
+     "bbox": "25,110,27,111"
+    },
+    {
+     "age": 20,
+     "frame": 1520,
+     "px": 5,
+     "bbox": "25,110,27,111"
+    },
+    {
+     "age": 21,
+     "frame": 1521,
+     "px": 5,
+     "bbox": "25,110,27,111"
+    },
+    {
+     "age": 22,
+     "frame": 1522,
+     "px": 5,
+     "bbox": "25,110,27,111"
+    },
+    {
+     "age": 23,
+     "frame": 1523,
+     "px": 5,
+     "bbox": "28,110,30,111"
+    },
+    {
+     "age": 24,
+     "frame": 1524,
+     "px": 5,
+     "bbox": "31,110,33,111"
+    },
+    {
+     "age": 25,
+     "frame": 1525,
+     "px": 5,
+     "bbox": "34,110,36,111"
+    },
+    {
+     "age": 26,
+     "frame": 1526,
+     "px": 5,
+     "bbox": "37,110,39,111"
+    },
+    {
+     "age": 27,
+     "frame": 1527,
+     "px": 5,
+     "bbox": "37,110,39,111"
+    },
+    {
+     "age": 28,
+     "frame": 1528,
+     "px": 5,
+     "bbox": "37,110,39,111"
+    },
+    {
+     "age": 29,
+     "frame": 1529,
+     "px": 5,
+     "bbox": "35,110,37,111"
+    },
+    {
+     "age": 30,
+     "frame": 1530,
+     "px": 5,
+     "bbox": "35,110,37,111"
+    },
+    {
+     "age": 31,
+     "frame": 1531,
+     "px": 5,
+     "bbox": "39,110,41,111"
+    },
+    {
+     "age": 32,
+     "frame": 1532,
+     "px": 5,
+     "bbox": "39,110,41,111"
+    },
+    {
+     "age": 33,
+     "frame": 1533,
+     "px": 5,
+     "bbox": "35,110,37,111"
+    },
+    {
+     "age": 34,
+     "frame": 1534,
+     "px": 5,
+     "bbox": "35,110,37,111"
+    },
+    {
+     "age": 35,
+     "frame": 1535,
+     "px": 5,
+     "bbox": "37,110,39,111"
+    },
+    {
+     "age": 36,
+     "frame": 1536,
+     "px": 5,
+     "bbox": "37,110,39,111"
+    },
+    {
+     "age": 37,
+     "frame": 1537,
+     "px": 5,
+     "bbox": "37,110,39,111"
+    }
+   ]
+  }
+ ]
+}

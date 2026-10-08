@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-deftyranitar-body-slam-opponent-test.json",
+  "stem": "s13-deftyranitar-body-slam-opponent",
+  "kind": "test",
+  "move": "BODY_SLAM",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   359,
+   465
+  ],
+  "rows": 107,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 107,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "d8775429f010c5ff6d815082d27452cb547217bd844f5b6f23e165821d91cdd0"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 107,
+    "digest": "d8775429f010c5ff6d815082d27452cb547217bd844f5b6f23e165821d91cdd0"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

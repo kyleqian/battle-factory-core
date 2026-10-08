@@ -1,0 +1,50 @@
+{
+ "schema": "prep38-subbed-defender-fixture/v1",
+ "move": "PSYCHIC",
+ "moveId": 94,
+ "kind": "test",
+ "stem": "s13-defwailord-psychic-player",
+ "probe": "tools/integration/prep38Probe.py",
+ "scenario": "tools/integration/fixtures/species-audit-13/scenarios/s13-defwailord-psychic-player.json",
+ "denseWindow": {
+  "startFrame": 375,
+  "endFrame": 519
+ },
+ "attacker": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "WAILORD",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "defenderDoll": true,
+ "fieldProfile": {
+  "playerHp": 202,
+  "playerMaxHp": 202,
+  "opponentHp": 208,
+  "opponentMaxHp": 277,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 164,
+   "side": "opponent"
+  }
+ ],
+ "nonMoveBodiesBefore": [],
+ "doll": {
+  "behindSubstitute": true,
+  "subHP": 69,
+  "tiles": "a57703bc75df"
+ }
+}

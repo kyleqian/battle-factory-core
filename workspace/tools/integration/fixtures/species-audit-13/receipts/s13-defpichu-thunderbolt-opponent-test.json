@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defpichu-thunderbolt-opponent-test.json",
+  "stem": "s13-defpichu-thunderbolt-opponent",
+  "kind": "test",
+  "move": "THUNDERBOLT",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   333,
+   569
+  ],
+  "rows": 237,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 237,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "6bbd24a60ed8d0fdf8156eb50c7f9c3779df33b84fc81a17653d36d348cd9ccc"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "6bbd24a60ed8d0fdf8156eb50c7f9c3779df33b84fc81a17653d36d348cd9ccc"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

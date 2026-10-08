@@ -1,0 +1,349 @@
+{
+ "schema": "subst-swap-live-check/v1",
+ "results": [
+  {
+   "probe": "s13swap-tyranitar-on-player-zigzagoon-onix-headbutt-r1.json",
+   "side": "player",
+   "attacker": "TYRANITAR",
+   "target": "ONIX",
+   "move": "HEADBUTT",
+   "startFrame": 1530,
+   "endFrame": 1662,
+   "rows": 133,
+   "productionDuration": 133,
+   "kind": "swap",
+   "swapInRows": 42,
+   "bodyRows": 48,
+   "exactRows": 108,
+   "residualPixels": 571,
+   "digest": "df9801d59d9fac88",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 571,
+   "bodyPerRowDigest": "b5071493f0feaae4",
+   "firstMismatches": [
+    {
+     "age": 57,
+     "frame": 1587,
+     "px": 2,
+     "bbox": "27,103,27,104"
+    },
+    {
+     "age": 58,
+     "frame": 1588,
+     "px": 13,
+     "bbox": "26,103,27,111"
+    },
+    {
+     "age": 59,
+     "frame": 1589,
+     "px": 25,
+     "bbox": "24,102,27,111"
+    },
+    {
+     "age": 60,
+     "frame": 1590,
+     "px": 25,
+     "bbox": "24,102,27,111"
+    },
+    {
+     "age": 61,
+     "frame": 1591,
+     "px": 25,
+     "bbox": "24,102,27,111"
+    },
+    {
+     "age": 62,
+     "frame": 1592,
+     "px": 25,
+     "bbox": "24,102,27,111"
+    },
+    {
+     "age": 63,
+     "frame": 1593,
+     "px": 25,
+     "bbox": "24,102,27,111"
+    },
+    {
+     "age": 64,
+     "frame": 1594,
+     "px": 25,
+     "bbox": "24,102,27,111"
+    },
+    {
+     "age": 65,
+     "frame": 1595,
+     "px": 25,
+     "bbox": "24,102,27,111"
+    },
+    {
+     "age": 66,
+     "frame": 1596,
+     "px": 25,
+     "bbox": "27,102,30,111"
+    },
+    {
+     "age": 67,
+     "frame": 1597,
+     "px": 25,
+     "bbox": "30,102,33,111"
+    },
+    {
+     "age": 68,
+     "frame": 1598,
+     "px": 25,
+     "bbox": "33,102,36,111"
+    },
+    {
+     "age": 69,
+     "frame": 1599,
+     "px": 25,
+     "bbox": "36,102,39,111"
+    },
+    {
+     "age": 70,
+     "frame": 1600,
+     "px": 25,
+     "bbox": "36,102,39,111"
+    },
+    {
+     "age": 71,
+     "frame": 1601,
+     "px": 25,
+     "bbox": "36,102,39,111"
+    },
+    {
+     "age": 72,
+     "frame": 1602,
+     "px": 25,
+     "bbox": "34,102,37,111"
+    },
+    {
+     "age": 73,
+     "frame": 1603,
+     "px": 25,
+     "bbox": "34,102,37,111"
+    },
+    {
+     "age": 74,
+     "frame": 1604,
+     "px": 25,
+     "bbox": "38,102,41,111"
+    },
+    {
+     "age": 75,
+     "frame": 1605,
+     "px": 25,
+     "bbox": "38,102,41,111"
+    },
+    {
+     "age": 76,
+     "frame": 1606,
+     "px": 25,
+     "bbox": "34,102,37,111"
+    },
+    {
+     "age": 77,
+     "frame": 1607,
+     "px": 25,
+     "bbox": "34,102,37,111"
+    },
+    {
+     "age": 78,
+     "frame": 1608,
+     "px": 25,
+     "bbox": "36,102,39,111"
+    },
+    {
+     "age": 79,
+     "frame": 1609,
+     "px": 25,
+     "bbox": "36,102,39,111"
+    },
+    {
+     "age": 80,
+     "frame": 1610,
+     "px": 25,
+     "bbox": "36,102,39,111"
+    },
+    {
+     "age": 81,
+     "frame": 1611,
+     "px": 6,
+     "bbox": "38,104,39,109"
+    }
+   ]
+  },
+  {
+   "probe": "s13swap-tyranitar-on-player-zigzagoon-onix-headbutt-r1.json",
+   "side": "player",
+   "attacker": "TYRANITAR",
+   "target": "ONIX",
+   "move": "HEADBUTT",
+   "startFrame": 2984,
+   "endFrame": 3116,
+   "rows": 133,
+   "productionDuration": 133,
+   "kind": "swap",
+   "swapInRows": 42,
+   "bodyRows": 48,
+   "exactRows": 108,
+   "residualPixels": 571,
+   "digest": "df9801d59d9fac88",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 571,
+   "bodyPerRowDigest": "b5071493f0feaae4",
+   "firstMismatches": [
+    {
+     "age": 57,
+     "frame": 3041,
+     "px": 2,
+     "bbox": "27,103,27,104"
+    },
+    {
+     "age": 58,
+     "frame": 3042,
+     "px": 13,
+     "bbox": "26,103,27,111"
+    },
+    {
+     "age": 59,
+     "frame": 3043,
+     "px": 25,
+     "bbox": "24,102,27,111"
+    },
+    {
+     "age": 60,
+     "frame": 3044,
+     "px": 25,
+     "bbox": "24,102,27,111"
+    },
+    {
+     "age": 61,
+     "frame": 3045,
+     "px": 25,
+     "bbox": "24,102,27,111"
+    },
+    {
+     "age": 62,
+     "frame": 3046,
+     "px": 25,
+     "bbox": "24,102,27,111"
+    },
+    {
+     "age": 63,
+     "frame": 3047,
+     "px": 25,
+     "bbox": "24,102,27,111"
+    },
+    {
+     "age": 64,
+     "frame": 3048,
+     "px": 25,
+     "bbox": "24,102,27,111"
+    },
+    {
+     "age": 65,
+     "frame": 3049,
+     "px": 25,
+     "bbox": "24,102,27,111"
+    },
+    {
+     "age": 66,
+     "frame": 3050,
+     "px": 25,
+     "bbox": "27,102,30,111"
+    },
+    {
+     "age": 67,
+     "frame": 3051,
+     "px": 25,
+     "bbox": "30,102,33,111"
+    },
+    {
+     "age": 68,
+     "frame": 3052,
+     "px": 25,
+     "bbox": "33,102,36,111"
+    },
+    {
+     "age": 69,
+     "frame": 3053,
+     "px": 25,
+     "bbox": "36,102,39,111"
+    },
+    {
+     "age": 70,
+     "frame": 3054,
+     "px": 25,
+     "bbox": "36,102,39,111"
+    },
+    {
+     "age": 71,
+     "frame": 3055,
+     "px": 25,
+     "bbox": "36,102,39,111"
+    },
+    {
+     "age": 72,
+     "frame": 3056,
+     "px": 25,
+     "bbox": "34,102,37,111"
+    },
+    {
+     "age": 73,
+     "frame": 3057,
+     "px": 25,
+     "bbox": "34,102,37,111"
+    },
+    {
+     "age": 74,
+     "frame": 3058,
+     "px": 25,
+     "bbox": "38,102,41,111"
+    },
+    {
+     "age": 75,
+     "frame": 3059,
+     "px": 25,
+     "bbox": "38,102,41,111"
+    },
+    {
+     "age": 76,
+     "frame": 3060,
+     "px": 25,
+     "bbox": "34,102,37,111"
+    },
+    {
+     "age": 77,
+     "frame": 3061,
+     "px": 25,
+     "bbox": "34,102,37,111"
+    },
+    {
+     "age": 78,
+     "frame": 3062,
+     "px": 25,
+     "bbox": "36,102,39,111"
+    },
+    {
+     "age": 79,
+     "frame": 3063,
+     "px": 25,
+     "bbox": "36,102,39,111"
+    },
+    {
+     "age": 80,
+     "frame": 3064,
+     "px": 25,
+     "bbox": "36,102,39,111"
+    },
+    {
+     "age": 81,
+     "frame": 3065,
+     "px": 6,
+     "bbox": "38,104,39,109"
+    }
+   ]
+  }
+ ]
+}

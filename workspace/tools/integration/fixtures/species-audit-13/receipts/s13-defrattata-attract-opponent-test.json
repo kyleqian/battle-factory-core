@@ -1,0 +1,55 @@
+[
+ {
+  "fixture": "s13-defrattata-attract-opponent-test.json",
+  "stem": "s13-defrattata-attract-opponent",
+  "kind": "test",
+  "move": "ATTRACT",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   330,
+   764
+  ],
+  "rows": 435,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 435,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 18207,
+    "exactRows": 434,
+    "digest": "1ddd8f7cb7fce052b33d2b93ce1c8636e824269e21fa23004ba5f5661bf76b8b"
+   },
+   {
+    "run": 2,
+    "residualPixels": 18207,
+    "exactRows": 434,
+    "digest": "1ddd8f7cb7fce052b33d2b93ce1c8636e824269e21fa23004ba5f5661bf76b8b"
+   }
+  ],
+  "affectedAges": "421",
+  "maxPxRow": 18207,
+  "fieldPx": 18207,
+  "bbox": [
+   0,
+   0,
+   239,
+   111
+  ],
+  "perRow": [
+   [
+    421,
+    18207,
+    [
+     0,
+     0,
+     239,
+     111
+    ]
+   ]
+  ]
+ }
+]

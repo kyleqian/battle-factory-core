@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defweezing-ice-beam-player-test.json",
+  "stem": "s13-defweezing-ice-beam-player",
+  "kind": "test",
+  "move": "ICE_BEAM",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   350,
+   552
+  ],
+  "rows": 203,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 203,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "3e3f79a9b042c830714e20114f40371a57ff4fcd9f9dd2c264c17be9fc7408cb"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "3e3f79a9b042c830714e20114f40371a57ff4fcd9f9dd2c264c17be9fc7408cb"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

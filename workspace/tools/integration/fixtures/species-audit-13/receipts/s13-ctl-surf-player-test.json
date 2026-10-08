@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-ctl-surf-player-test.json",
+  "stem": "s13-ctl-surf-player",
+  "kind": "test",
+  "move": "SURF",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   345,
+   488
+  ],
+  "rows": 144,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 144,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "5106002e8dd43b56e24b9f910528ad266f5f1a9fa66111d6b8db475fc261055c"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "5106002e8dd43b56e24b9f910528ad266f5f1a9fa66111d6b8db475fc261055c"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

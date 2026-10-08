@@ -1,0 +1,47 @@
+{
+ "schema": "subst-swap-live-check/v1",
+ "results": [
+  {
+   "probe": "s13swap-shinysteelix-on-player-persian-slowbro-bodyslam-r2.json",
+   "side": "player",
+   "attacker": "STEELIX",
+   "target": "SLOWBRO",
+   "move": "BODY_SLAM",
+   "startFrame": 1529,
+   "endFrame": 1720,
+   "rows": 192,
+   "productionDuration": 192,
+   "kind": "swap",
+   "swapInRows": 42,
+   "bodyRows": 107,
+   "exactRows": 192,
+   "residualPixels": 0,
+   "digest": "9e9f9f7b1261a479",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 0,
+   "bodyPerRowDigest": "9af200d64096ad5b",
+   "firstMismatches": []
+  },
+  {
+   "probe": "s13swap-shinysteelix-on-player-persian-slowbro-bodyslam-r2.json",
+   "side": "player",
+   "attacker": "STEELIX",
+   "target": "SLOWBRO",
+   "move": "BODY_SLAM",
+   "startFrame": 2983,
+   "endFrame": 3174,
+   "rows": 192,
+   "productionDuration": 192,
+   "kind": "swap",
+   "swapInRows": 42,
+   "bodyRows": 107,
+   "exactRows": 192,
+   "residualPixels": 0,
+   "digest": "9e9f9f7b1261a479",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 0,
+   "bodyPerRowDigest": "9af200d64096ad5b",
+   "firstMismatches": []
+  }
+ ]
+}

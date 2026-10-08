@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defflygon-surf-opponent-test.json",
+  "stem": "s13-defflygon-surf-opponent",
+  "kind": "test",
+  "move": "SURF",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   342,
+   485
+  ],
+  "rows": 144,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 144,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "1c3cb80c87749e475c87725d2f234d4428e14aa7d3708728b9b16fd697d2c88d"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "1c3cb80c87749e475c87725d2f234d4428e14aa7d3708728b9b16fd697d2c88d"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

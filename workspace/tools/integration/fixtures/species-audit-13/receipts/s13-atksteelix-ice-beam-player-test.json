@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atksteelix-ice-beam-player-test.json",
+  "stem": "s13-atksteelix-ice-beam-player",
+  "kind": "test",
+  "move": "ICE_BEAM",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   350,
+   552
+  ],
+  "rows": 203,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 203,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "c931a39d3bc236b961775fe80245f65f2dcf4be3d067271ea80cdd15867ed62c"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 203,
+    "digest": "c931a39d3bc236b961775fe80245f65f2dcf4be3d067271ea80cdd15867ed62c"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atksteelix-thunderbolt-player-test.json",
+  "stem": "s13-atksteelix-thunderbolt-player",
+  "kind": "test",
+  "move": "THUNDERBOLT",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   353,
+   589
+  ],
+  "rows": 237,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 237,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "dbfea19844a14122b18fd63b155fd1510000b1dc8db1f865b5ae08bdf75caa29"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 237,
+    "digest": "dbfea19844a14122b18fd63b155fd1510000b1dc8db1f865b5ae08bdf75caa29"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

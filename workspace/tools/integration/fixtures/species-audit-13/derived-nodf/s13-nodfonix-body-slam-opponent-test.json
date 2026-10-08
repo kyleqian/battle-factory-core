@@ -1,0 +1,56 @@
+{
+ "schema": "prep38-subbed-defender-fixture/v1",
+ "move": "BODY_SLAM",
+ "moveId": 34,
+ "kind": "test",
+ "stem": "s13-nodfonix-body-slam-opponent",
+ "probe": "tools/integration/prep38Probe.py",
+ "scenario": "tools/integration/fixtures/species-audit-13/scenarios-nodf/s13-nodfonix-body-slam-opponent.json",
+ "denseWindow": {
+  "startFrame": 1743,
+  "endFrame": 1849
+ },
+ "attacker": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "defenderDoll": true,
+ "fieldProfile": {
+  "playerHp": 139,
+  "playerMaxHp": 202,
+  "opponentHp": 142,
+  "opponentMaxHp": 142,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "displayedStatus": {
+  "player": "paralysis",
+  "opponent": "none"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 34,
+   "side": "opponent"
+  },
+  {
+   "moveId": 164,
+   "side": "player"
+  }
+ ],
+ "nonMoveBodiesBefore": [
+  "Status_Paralysis"
+ ],
+ "doll": {
+  "behindSubstitute": true,
+  "subHP": 50,
+  "tiles": "22a6f54c07e2"
+ }
+}

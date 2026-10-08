@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkaerodactyl-brick-break-opponent-test.json",
+  "stem": "s13-atkaerodactyl-brick-break-opponent",
+  "kind": "test",
+  "move": "BRICK_BREAK",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   351,
+   501
+  ],
+  "rows": 151,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 151,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "3d37cd908e291e7ffaded60c629135cd14e455aa5061f4e4db3682b41748a979"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "3d37cd908e291e7ffaded60c629135cd14e455aa5061f4e4db3682b41748a979"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

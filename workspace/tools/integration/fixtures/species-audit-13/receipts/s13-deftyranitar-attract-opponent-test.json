@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-deftyranitar-attract-opponent-test.json",
+  "stem": "s13-deftyranitar-attract-opponent",
+  "kind": "test",
+  "move": "ATTRACT",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   351,
+   785
+  ],
+  "rows": 435,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 435,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "53279c4f47782cbed037ddc3ce61c0f19538b9466ebbab2e058128a0f2c11feb"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 435,
+    "digest": "53279c4f47782cbed037ddc3ce61c0f19538b9466ebbab2e058128a0f2c11feb"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-atkonix-brick-break-player-test.json",
+  "stem": "s13-atkonix-brick-break-player",
+  "kind": "test",
+  "move": "BRICK_BREAK",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   349,
+   499
+  ],
+  "rows": 151,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 151,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "dac1f3c6736d184efaf9241c4d489b00bedc80b3f1c7b780ac7645825f9ca466"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 151,
+    "digest": "dac1f3c6736d184efaf9241c4d489b00bedc80b3f1c7b780ac7645825f9ca466"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

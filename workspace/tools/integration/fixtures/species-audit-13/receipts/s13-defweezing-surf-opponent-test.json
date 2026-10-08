@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "s13-defweezing-surf-opponent-test.json",
+  "stem": "s13-defweezing-surf-opponent",
+  "kind": "test",
+  "move": "SURF",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   341,
+   484
+  ],
+  "rows": 144,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 144,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "3753b64c702a0713848a837275367ea96c8a4b1e324716418e618afc713b36aa"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 144,
+    "digest": "3753b64c702a0713848a837275367ea96c8a4b1e324716418e618afc713b36aa"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]
