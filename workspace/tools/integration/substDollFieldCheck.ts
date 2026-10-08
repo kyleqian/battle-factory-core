@@ -24,6 +24,8 @@ type Frame = { frame: number; script: string | null; animAttacker: number; battl
 
 const args = process.argv.slice(2);
 const outArg = args.find((a) => a.startsWith("--out="))?.slice(6);
+// Negative controls (must FAIL): the doll corner one row low, or the mon's elevation applied to the doll.
+const neg = args.find((a) => a.startsWith("--neg="))?.slice(6);
 const results = [];
 let failed = false;
 for (const spec of args.filter((a) => !a.startsWith("--"))) {
@@ -43,7 +45,9 @@ for (const spec of args.filter((a) => !a.startsWith("--"))) {
   } as never);
   const art = createBattleCommandFieldArtView(field)[side];
   if (art.substituteDoll !== true) throw new Error(`${probePath}: production field did not show the doll`);
-  const corner = battleCommandFieldSpriteOrigin(art, side);
+  const base = battleCommandFieldSpriteOrigin(art, side);
+  const corner = neg === "dollY+1" ? { x: base.x, y: base.y + 1 }
+    : neg === "elevation" ? { x: base.x, y: base.y - (side === "opponent" && before.opponent.species === 42 ? 8 : 0) } : base;
   const cols = art.pic.tileset.columns;
   const pixels: [number, number, readonly [number, number, number]][] = [];
   art.pic.tileset.tiles.forEach((tile, t) => tile.forEach((index, i) => {
@@ -89,7 +93,7 @@ for (const spec of args.filter((a) => !a.startsWith("--"))) {
   results.push(result);
   console.log(`${result.probe} ${side} corner (${corner.x},${corner.y}) rows ${rows.length} [${result.firstRow}..${result.lastRow}] px ${comparedPx} mismatch ${mismatchPx} (${mismatchRows} rows)`);
 }
-const receipt = { schema: "subst-doll-field/v1", results };
+const receipt = { schema: "subst-doll-field/v1", ...(neg ? { negativeControl: neg } : {}), results };
 if (outArg) writeFileSync(outArg, `${JSON.stringify(receipt, null, 1)}\n`);
 if (failed) {
   console.error("FAIL: a doll band row differs (or no rows)");
