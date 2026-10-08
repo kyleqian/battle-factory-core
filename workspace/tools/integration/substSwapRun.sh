@@ -10,7 +10,7 @@ CHECK="node --experimental-strip-types --no-warnings tools/integration/substSwap
 # Production supplies no sprite-order lend after these histories (the tracker does not know Substitute); every proven body
 # must be exact without one.
 export POKEBENCH_LIVE_ORDER_INPUT=none
-EXACT="subswap-on-opponent-golem-onix-headbutt subswap-on-player-zigzagoon-onix-headbutt subswap-on-opponent-onix-golem-headbutt subswap-on-player-persian-slowbro-bodyslam subswap-on-opponent-persian-slowbro-bodyslam subswap-on-opponent-golbat-slowbro-bodyslam subswap-on-player-persian-slowbro-leechseed subswap-on-opponent-persian-slowbro-leechseed"
+EXACT="subswap-on-opponent-golem-onix-headbutt subswap-on-player-zigzagoon-onix-headbutt subswap-on-opponent-onix-golem-headbutt subswap-on-player-persian-slowbro-bodyslam subswap-on-opponent-persian-slowbro-bodyslam subswap-on-opponent-golbat-slowbro-bodyslam subswap-on-player-persian-slowbro-leechseed subswap-on-opponent-persian-slowbro-leechseed subswap-on-player-persian-golbat-bodyslam"
 for r in 1 2; do
   specs=""; for s in $EXACT; do specs="$specs $OUT/$s-r$r.json:$OUT/$s-r$r-rgb"; done
   $CHECK --out="$REC/exact-r$r.json" $specs > "$REC/exact-r$r.out"

@@ -120,7 +120,7 @@ for (const spec of args.filter((a) => !a.startsWith("--"))) {
       perRow.push(px);
       residual += px;
       if (px === 0) exact++;
-      else if (firstMismatches.length < 80) firstMismatches.push({ age, frame: row.frame, px, bbox: box.join(",") });
+      else if (firstMismatches.length < 200) firstMismatches.push({ age, frame: row.frame, px, bbox: box.join(",") });
     });
     // Body rows of the composite (body ages 1 .. D-1; age 0 shows the swap tail) vs a plain control window (ages 1 .. D-1).
     const bodyFrom = plain ? 1 : substituteSwapScriptRows(side) + 2;

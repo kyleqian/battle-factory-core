@@ -88,6 +88,10 @@ describe("live adapters with a Substitute doll", () => {
     expect(swap.view.effect).toBeNull();
     expect(swap.view.fieldArt.player.substituteDoll).toBe(true);
     expect(swap.view.fieldArt.player.origin).toEqual({ x: 40 - 5 * 9, y: 65 });
+    // An elevated opponent target's shadow: the idle latch on swap row 0, hidden on later swap rows (anim script active).
+    expect((liveSubstituteSwapView(view(0))!.view as { postBodyShadowHidden?: boolean }).postBodyShadowHidden).toBeUndefined();
+    expect((swap.view as { postBodyShadowHidden?: boolean }).postBodyShadowHidden).toBe(true);
+    expect((liveSubstituteSwapView(view(43 + 47 + 1))!.view as { postBodyShadowHidden?: boolean }).postBodyShadowHidden).toBe(true);
     const body = liveSubstituteSwapView(view(50))!;
     expect(body.kind).toBe("body");
     expect(body.view.field.player.substituteDoll).toBeUndefined();

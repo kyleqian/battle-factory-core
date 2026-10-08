@@ -77,7 +77,7 @@ export function substituteSwapScriptRows(side: Side): number {
 /**
  * Move bodies proven dense through swap + idle + body + swap-back with a subbed attacker (subst-swap-live-receipt.json):
  * Headbutt (29; GOLEM / ZIGZAGOON player, GOLEM / ONIX (idle rest +1) opponent) and Body Slam (34; PERSIAN<->SLOWBRO both
- * sides, elevated GOLBAT opponent). Bodies whose adapter window does not start at activation (e.g. Bite's 26 rows) cannot be
+ * sides, elevated GOLBAT opponent attacker and target). Bodies whose adapter window does not start at activation (e.g. Bite's 26 rows) cannot be
  * framed. Every other attacker-doll body keeps declining (the whole command falls back), including multi-hit and two-turn
  * bodies.
  */
@@ -148,8 +148,8 @@ export type SubstituteSwapView =
 
 /**
  * The live renderer's view of a composite age (renderBattleResolutionLiveView): a swap row is the ordinary field with the
- * attacker drawn as the doll or the mon at x2 (an opponent's shadow stays hidden: SpriteCB_EnemyShadow while
- * behindSubstitute); a body row is the adapter's view on the mon field at the body age, the attacker's x2 zeroed by the
+ * attacker drawn as the doll or the mon at x2 (the opponent's shadow hidden: SpriteCB_EnemyShadow while behindSubstitute or
+ * gAnimScriptActive; measured on an elevated GOLBAT target: rows 1..43 and every swap-back row); a body row is the adapter's view on the mon field at the body age, the attacker's x2 zeroed by the
  * task (an opponent's front idle rest does not survive the swap). Null = not a presented subbed-attacker body.
  */
 export function liveSubstituteSwapView(view: BattleResolutionPresentationRenderView): SubstituteSwapView | null {
@@ -171,6 +171,9 @@ export function liveSubstituteSwapView(view: BattleResolutionPresentationRenderV
   }
   const field = frame.doll ? view.field : bodyField;
   const art = createBattleCommandFieldArtView(field);
+  // SpriteCB_EnemyShadow hides an elevated opponent's shadow while any anim script (the swap specials too) is active or the
+  // battler is behind a substitute: displayed from swap row 1 (row 0 still shows the idle latch) through every swap-back row.
+  const shadowHidden = side === "opponent" || effect.age >= 1;
   const moved = Object.freeze({ ...art[side], origin: Object.freeze({ x: art[side].origin.x + frame.x2, y: art[side].origin.y }) });
   // A player attacker's opponent target keeps its tracked front idle rest (as the body adapters draw it; e.g. ONIX +1), after
   // the body the body's own end state (liveBattlerX2History: e.g. Headbutt resets the target to 0).
@@ -185,7 +188,7 @@ export function liveSubstituteSwapView(view: BattleResolutionPresentationRenderV
   return Object.freeze({ kind: "swap", view: Object.freeze({
     ...view, field, effect: null,
     fieldArt: Object.freeze(side === "player" ? { player: moved, opponent: target } : { player: target, opponent: moved }),
-    ...(side === "opponent" ? { postBodyShadowHidden: true } : {}),
+    ...(shadowHidden ? { postBodyShadowHidden: true } : {}),
   }) });
 }
 
