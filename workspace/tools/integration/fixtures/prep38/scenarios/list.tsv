@@ -59,6 +59,7 @@ prep38-df-bite-meowth-magneton-player	BITE	44	player	MEOWTH	MAGNETON
 prep38-df-bite-meowth-magneton-opponent	BITE	44	opponent	MEOWTH	MAGNETON
 prep38-df-quick-attack-pidgeotto-onix-player	QUICK_ATTACK	98	player	PIDGEOTTO	ONIX
 prep38-df-quick-attack-pidgeotto-onix-opponent	QUICK_ATTACK	98	opponent	PIDGEOTTO	ONIX
+prep38-df-double-team-onix-grovyle-player	DOUBLE_TEAM	104	player	ONIX	GROVYLE
 prep38-df-giga-drain-player	GIGA_DRAIN	202	player	SLOWBRO	PERSIAN
 prep38-df-giga-drain-opponent	GIGA_DRAIN	202	opponent	SLOWBRO	PERSIAN
 prep38-df-mud-slap-player	MUD_SLAP	189	player	SLOWBRO	PERSIAN
@@ -69,3 +70,7 @@ prep38-df-thunderbolt-player	THUNDERBOLT	85	player	SLOWBRO	PERSIAN
 prep38-df-thunderbolt-opponent	THUNDERBOLT	85	opponent	SLOWBRO	PERSIAN
 prep38-df-megahorn-player	MEGAHORN	224	player	SLOWBRO	PERSIAN
 prep38-df-megahorn-opponent	MEGAHORN	224	opponent	SLOWBRO	PERSIAN
+prep38-df-double-team-player	DOUBLE_TEAM	104	player	SLOWBRO	PERSIAN
+prep38-df-double-team-opponent	DOUBLE_TEAM	104	opponent	SLOWBRO	PERSIAN
+prep38-df-double-edge-player	DOUBLE_EDGE	38	player	SLOWBRO	PERSIAN
+prep38-df-double-edge-opponent	DOUBLE_EDGE	38	opponent	SLOWBRO	PERSIAN

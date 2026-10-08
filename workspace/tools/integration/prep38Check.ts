@@ -106,7 +106,7 @@ for (const path of paths) {
   const ranges: string[] = [];
   for (const x of bad) { const last = ranges.at(-1); const m = last?.match(/^(\d+)(?:\.\.(\d+))?$/);
     if (m && Number(m[2] ?? m[1]) === x.age - 1) ranges[ranges.length - 1] = `${m[1]}..${x.age}`; else ranges.push(String(x.age)); }
-  const entry = { fixture: path, stem: f.stem, kind: f.kind, move: f.move, attackerSide: f.attacker.geometry.side, defenderDoll: f.defenderDoll,
+  const entry = { fixture: path.split("/").pop(), stem: f.stem, kind: f.kind, move: f.move, attackerSide: f.attacker.geometry.side, defenderDoll: f.defenderDoll,
     window: [A, E], rows: r0.rows.length, orderInput, shift, ...(K ? { calibration: scan.filter(([, px]) => px === Math.min(...scan.map((x) => x[1]))) } : {}), liveDuration: duration, liveEngaged: live, identical: runs.every((r) => r.digest === r0.digest),
     runs: runs.map((r) => ({ run: r.run, residualPixels: r.residualPixels, exactRows: r.exactRows, digest: r.digest })),
     affectedAges: ranges.join(","), maxPxRow: Math.max(0, ...bad.map((x) => x.px)), fieldPx: bad.reduce((a, x) => a + x.field, 0), bbox,

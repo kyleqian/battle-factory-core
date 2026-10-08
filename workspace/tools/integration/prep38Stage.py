@@ -26,14 +26,16 @@ GENDERLESS = {"MAGNETON"}
 # Second batch (`df-` stems), all DEFENDER-FIRST (the X body on the doll is the battle's second body, after the defender's Substitute):
 # (a) the moves whose PERSIAN <-> SLOWBRO control body is not exact, on their ACCEPTED live pairs (attacker -> target per side);
 # (b) the moves whose production order is unknown after [X, SUBSTITUTE] (Giga Drain, Mud-Slap) plus the three whose target is drawn
-#     outside liveSceneOnBattlerArt (Ice Beam, Thunderbolt, Megahorn), on SLOWBRO -> PERSIAN (PERSIAN at speed IV 0 still outruns SLOWBRO).
+#     outside liveSceneOnBattlerArt (Ice Beam, Thunderbolt, Megahorn), plus Double Team / Double-Edge (residual with an [X, SUBSTITUTE]
+#     history), on SLOWBRO -> PERSIAN (PERSIAN at speed IV 0 still outruns SLOWBRO).
 ACCEPTED = [("PSYCHIC", 94, {"player": ("KADABRA", "GOLBAT"), "opponent": ("HAUNTER", "KADABRA")}),
             ("SHADOW_BALL", 247, {"player": ("SABLEYE", "MAGNETON"), "opponent": ("GOLBAT", "SABLEYE")}),
             ("FAINT_ATTACK", 185, {"player": ("MURKROW", "ONIX"), "opponent": ("MURKROW", "ONIX")}),
             ("FLAMETHROWER", 53, {"player": ("HOUNDOUR", "MURKROW"), "opponent": ("HOUNDOUR", "MURKROW")}),
             ("BITE", 44, {"player": ("MEOWTH", "MAGNETON"), "opponent": ("MEOWTH", "MAGNETON")}),
-            ("QUICK_ATTACK", 98, {"player": ("PIDGEOTTO", "ONIX"), "opponent": ("PIDGEOTTO", "ONIX")})]
-ORDER = [("GIGA_DRAIN", 202), ("MUD_SLAP", 189), ("ICE_BEAM", 58), ("THUNDERBOLT", 85), ("MEGAHORN", 224)]
+            ("QUICK_ATTACK", 98, {"player": ("PIDGEOTTO", "ONIX"), "opponent": ("PIDGEOTTO", "ONIX")}),
+            ("DOUBLE_TEAM", 104, {"player": ("ONIX", "GROVYLE")})]
+ORDER = [("GIGA_DRAIN", 202), ("MUD_SLAP", 189), ("ICE_BEAM", 58), ("THUNDERBOLT", 85), ("MEGAHORN", 224), ("DOUBLE_TEAM", 104), ("DOUBLE_EDGE", 38)]
 
 
 def mon(species, moves, speed_fast, gender="male"):
