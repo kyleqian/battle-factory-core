@@ -842,5 +842,19 @@
     }
    ]
   }
- ]
+ ],
+ "gates": {
+  "testedCommit": "65d73130b",
+  "srcTree": "d15bc413",
+  "targeted": "14 files / 253 tests (substituteFadePresentation, substituteSwapPresentation, substituteDollFieldState, substituteDollAdapterDecline, substituteDollDefenderLive, liveShadowRows, liveStatusImplementedCount, animation/factoryAnimationInventory, animation/animationBoundaryRatchet, playableAnimationIntegration, battleResolutionAdapter, battleResolutionAdapterIntegration, battleResolutionPresentation, substituteSwapAttdollCells)",
+  "typecheck": "pass",
+  "smoke": "8 files / 448 tests",
+  "fullSuite": "1567 files passed, 44 skipped / 12902 tests passed, 223 skipped (four workers)",
+  "build": "pass, 874 modules (+1: src/engine/liveSubstituteFade.ts)",
+  "differential": "624 / 624 captures byte-identical across fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on vs 3d3873a57",
+  "d4aRegression": "161 fixtures, 0 violations, 0 nonzero exits",
+  "substSwap": "substSwapRun.sh fresh: probes r1 == r2 (13 scenarios); 21 exact windows x2 runs residual 0; GOLEM-player swap rows 0, body == control; negatives fail",
+  "dolldef": "dolldefLiveCheck over tools/integration/fixtures/dolldef-live (53): 50 every row exact, the other 3 exactly the documented non-doll residuals (HAUNTER -> KADABRA age -5, Quick Attack opponent age 9, Shadow Ball player 44 ages 64..147)",
+  "diffCheck": "clean"
+ }
 }
