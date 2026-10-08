@@ -1,0 +1,547 @@
+{
+ "schema": "prep37-body-check/v1",
+ "renderer": "patched",
+ "neg": "age0+1",
+ "results": [
+  {
+   "probe": "mechanic-substitute-player-golem-opponent-onix-r1.json",
+   "profile": "battle-scene-on",
+   "attackerSide": "player",
+   "pair": "GOLEM->ONIX",
+   "bodyFrames": {
+    "start": 291,
+    "endFirstInactive": 377
+   },
+   "dense": true,
+   "derived": {
+    "attacker": {
+     "x": 40,
+     "y": 64
+    },
+    "target": {
+     "x": 145,
+     "y": 10
+    }
+   },
+   "rendererThrew": null,
+   "componentRows": 87,
+   "zeroPxRows": 47,
+   "totalPx": 18231,
+   "nonZeroRows": [
+    {
+     "age": 2,
+     "px": 802
+    },
+    {
+     "age": 3,
+     "px": 489
+    },
+    {
+     "age": 4,
+     "px": 362
+    },
+    {
+     "age": 5,
+     "px": 259
+    },
+    {
+     "age": 6,
+     "px": 211
+    },
+    {
+     "age": 7,
+     "px": 198
+    },
+    {
+     "age": 8,
+     "px": 165
+    },
+    {
+     "age": 9,
+     "px": 137
+    },
+    {
+     "age": 10,
+     "px": 334
+    },
+    {
+     "age": 33,
+     "px": 58
+    },
+    {
+     "age": 34,
+     "px": 289
+    },
+    {
+     "age": 35,
+     "px": 386
+    },
+    {
+     "age": 36,
+     "px": 338
+    },
+    {
+     "age": 37,
+     "px": 225
+    },
+    {
+     "age": 38,
+     "px": 263
+    },
+    {
+     "age": 39,
+     "px": 484
+    },
+    {
+     "age": 40,
+     "px": 740
+    },
+    {
+     "age": 41,
+     "px": 894
+    },
+    {
+     "age": 42,
+     "px": 919
+    },
+    {
+     "age": 43,
+     "px": 862
+    }
+   ],
+   "romWindowSha256": "0bf9b4728f0e18d68a3d9ce4f476aaaa96748326cd80c0f91ae080b065d8ecfc"
+  },
+  {
+   "probe": "mechanic-substitute-opponent-golem-player-onix-r1.json",
+   "profile": "battle-scene-on",
+   "attackerSide": "opponent",
+   "pair": "GOLEM->ONIX",
+   "bodyFrames": {
+    "start": 311,
+    "endFirstInactive": 397
+   },
+   "dense": true,
+   "derived": {
+    "attacker": {
+     "x": 144,
+     "y": 13
+    },
+    "target": {
+     "x": 40,
+     "y": 48
+    }
+   },
+   "rendererThrew": null,
+   "componentRows": 87,
+   "zeroPxRows": 51,
+   "totalPx": 22134,
+   "nonZeroRows": [
+    {
+     "age": 2,
+     "px": 1559
+    },
+    {
+     "age": 3,
+     "px": 1111
+    },
+    {
+     "age": 4,
+     "px": 895
+    },
+    {
+     "age": 5,
+     "px": 715
+    },
+    {
+     "age": 6,
+     "px": 607
+    },
+    {
+     "age": 7,
+     "px": 577
+    },
+    {
+     "age": 8,
+     "px": 512
+    },
+    {
+     "age": 9,
+     "px": 471
+    },
+    {
+     "age": 10,
+     "px": 752
+    },
+    {
+     "age": 37,
+     "px": 11
+    },
+    {
+     "age": 38,
+     "px": 265
+    },
+    {
+     "age": 39,
+     "px": 523
+    },
+    {
+     "age": 40,
+     "px": 764
+    },
+    {
+     "age": 41,
+     "px": 853
+    },
+    {
+     "age": 42,
+     "px": 899
+    },
+    {
+     "age": 43,
+     "px": 848
+    },
+    {
+     "age": 44,
+     "px": 678
+    },
+    {
+     "age": 45,
+     "px": 635
+    },
+    {
+     "age": 46,
+     "px": 633
+    },
+    {
+     "age": 47,
+     "px": 579
+    }
+   ],
+   "romWindowSha256": "e31e3d019340d182dd30f26b92bd2ca11407fba05ea584aa8607327b1ca60b6f"
+  },
+  {
+   "probe": "prep37-on-player-persian-slowbro-r1.json",
+   "profile": "battle-scene-on",
+   "attackerSide": "player",
+   "pair": "PERSIAN->SLOWBRO",
+   "bodyFrames": {
+    "start": 73,
+    "endFirstInactive": 159
+   },
+   "dense": true,
+   "derived": {
+    "attacker": {
+     "x": 40,
+     "y": 55
+    },
+    "target": {
+     "x": 144,
+     "y": 16
+    }
+   },
+   "rendererThrew": null,
+   "componentRows": 87,
+   "zeroPxRows": 47,
+   "totalPx": 21353,
+   "nonZeroRows": [
+    {
+     "age": 2,
+     "px": 1391
+    },
+    {
+     "age": 3,
+     "px": 979
+    },
+    {
+     "age": 4,
+     "px": 762
+    },
+    {
+     "age": 5,
+     "px": 597
+    },
+    {
+     "age": 6,
+     "px": 487
+    },
+    {
+     "age": 7,
+     "px": 465
+    },
+    {
+     "age": 8,
+     "px": 389
+    },
+    {
+     "age": 9,
+     "px": 377
+    },
+    {
+     "age": 10,
+     "px": 632
+    },
+    {
+     "age": 33,
+     "px": 58
+    },
+    {
+     "age": 34,
+     "px": 289
+    },
+    {
+     "age": 35,
+     "px": 386
+    },
+    {
+     "age": 36,
+     "px": 338
+    },
+    {
+     "age": 37,
+     "px": 225
+    },
+    {
+     "age": 38,
+     "px": 263
+    },
+    {
+     "age": 39,
+     "px": 484
+    },
+    {
+     "age": 40,
+     "px": 740
+    },
+    {
+     "age": 41,
+     "px": 894
+    },
+    {
+     "age": 42,
+     "px": 919
+    },
+    {
+     "age": 43,
+     "px": 862
+    }
+   ],
+   "romWindowSha256": "d85bf6dba6021dd8d3b3a6797a669dda382dcdc87e343d92d0b3147e6ecea133"
+  },
+  {
+   "probe": "prep37-on-opponent-persian-slowbro-r1.json",
+   "profile": "battle-scene-on",
+   "attackerSide": "opponent",
+   "pair": "PERSIAN->SLOWBRO",
+   "bodyFrames": {
+    "start": 77,
+    "endFirstInactive": 163
+   },
+   "dense": true,
+   "derived": {
+    "attacker": {
+     "x": 144,
+     "y": 15
+    },
+    "target": {
+     "x": 40,
+     "y": 58
+    }
+   },
+   "rendererThrew": null,
+   "componentRows": 87,
+   "zeroPxRows": 51,
+   "totalPx": 20385,
+   "nonZeroRows": [
+    {
+     "age": 2,
+     "px": 1195
+    },
+    {
+     "age": 3,
+     "px": 848
+    },
+    {
+     "age": 4,
+     "px": 669
+    },
+    {
+     "age": 5,
+     "px": 534
+    },
+    {
+     "age": 6,
+     "px": 475
+    },
+    {
+     "age": 7,
+     "px": 441
+    },
+    {
+     "age": 8,
+     "px": 380
+    },
+    {
+     "age": 9,
+     "px": 383
+    },
+    {
+     "age": 10,
+     "px": 525
+    },
+    {
+     "age": 37,
+     "px": 11
+    },
+    {
+     "age": 38,
+     "px": 265
+    },
+    {
+     "age": 39,
+     "px": 523
+    },
+    {
+     "age": 40,
+     "px": 764
+    },
+    {
+     "age": 41,
+     "px": 853
+    },
+    {
+     "age": 42,
+     "px": 899
+    },
+    {
+     "age": 43,
+     "px": 848
+    },
+    {
+     "age": 44,
+     "px": 678
+    },
+    {
+     "age": 45,
+     "px": 635
+    },
+    {
+     "age": 46,
+     "px": 633
+    },
+    {
+     "age": 47,
+     "px": 579
+    }
+   ],
+   "romWindowSha256": "6f5771784881169bcd216d66a6945c610990c579d5c30de0b3be4bbbed5c4740"
+  },
+  {
+   "probe": "prep37-off-player-persian-slowbro-r1.json",
+   "profile": "battle-scene-off",
+   "attackerSide": "player",
+   "pair": "PERSIAN->SLOWBRO",
+   "bodyFrames": {
+    "start": 73,
+    "endFirstInactive": 159
+   },
+   "dense": true,
+   "derived": {
+    "attacker": {
+     "x": 40,
+     "y": 55
+    },
+    "target": {
+     "x": 144,
+     "y": 16
+    }
+   },
+   "rendererThrew": null,
+   "componentRows": 87,
+   "zeroPxRows": 47,
+   "totalPx": 21353,
+   "nonZeroRows": [
+    {
+     "age": 2,
+     "px": 1391
+    },
+    {
+     "age": 3,
+     "px": 979
+    },
+    {
+     "age": 4,
+     "px": 762
+    },
+    {
+     "age": 5,
+     "px": 597
+    },
+    {
+     "age": 6,
+     "px": 487
+    },
+    {
+     "age": 7,
+     "px": 465
+    },
+    {
+     "age": 8,
+     "px": 389
+    },
+    {
+     "age": 9,
+     "px": 377
+    },
+    {
+     "age": 10,
+     "px": 632
+    },
+    {
+     "age": 33,
+     "px": 58
+    },
+    {
+     "age": 34,
+     "px": 289
+    },
+    {
+     "age": 35,
+     "px": 386
+    },
+    {
+     "age": 36,
+     "px": 338
+    },
+    {
+     "age": 37,
+     "px": 225
+    },
+    {
+     "age": 38,
+     "px": 263
+    },
+    {
+     "age": 39,
+     "px": 484
+    },
+    {
+     "age": 40,
+     "px": 740
+    },
+    {
+     "age": 41,
+     "px": 894
+    },
+    {
+     "age": 42,
+     "px": 919
+    },
+    {
+     "age": 43,
+     "px": 862
+    }
+   ],
+   "romWindowSha256": "d85bf6dba6021dd8d3b3a6797a669dda382dcdc87e343d92d0b3147e6ecea133"
+  }
+ ]
+}

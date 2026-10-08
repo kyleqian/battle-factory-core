@@ -1,0 +1,40 @@
+{
+ "schema": "prep37-probes/v1",
+ "probes": {
+  "mechanic-substitute-opponent-golem-player-onix": {
+   "sha256": "a6d1c7cc24db12c84ceb028b98722c5c6fe510144cf2b7d4aaba99cdb74e7add",
+   "r1EqualsR2": true,
+   "frames": 635,
+   "profile": "battle-scene-on",
+   "bootstrap": "factory.json"
+  },
+  "mechanic-substitute-player-golem-opponent-onix": {
+   "sha256": "feb3f2cad75d13f5dc79335b35858b120f46c385a60564c744678726fad5c460",
+   "r1EqualsR2": true,
+   "frames": 635,
+   "profile": "battle-scene-on",
+   "bootstrap": "factory.json"
+  },
+  "prep37-off-player-persian-slowbro": {
+   "sha256": "eb14408739a67ae68cde03eaf3d4b3d91545899f7b85f595ab84563330afe3f7",
+   "r1EqualsR2": true,
+   "frames": 8565,
+   "profile": "battle-scene-off",
+   "bootstrap": "factory-battle-scene-off.json"
+  },
+  "prep37-on-opponent-persian-slowbro": {
+   "sha256": "be7b24ca05671cb26961cb66c13c262e5f728a70acc8a5578d5b2f66f7d77926",
+   "r1EqualsR2": true,
+   "frames": 8533,
+   "profile": "battle-scene-on",
+   "bootstrap": "factory.json"
+  },
+  "prep37-on-player-persian-slowbro": {
+   "sha256": "2b75db5bf91673ac1145592b5379fece4998bcdc08151c6be0a4b275fb80fb6b",
+   "r1EqualsR2": true,
+   "frames": 8565,
+   "profile": "battle-scene-on",
+   "bootstrap": "factory.json"
+  }
+ }
+}
