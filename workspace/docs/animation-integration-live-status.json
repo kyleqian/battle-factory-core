@@ -5182,18 +5182,19 @@
   },
   "unadaptedNotes": {},
   "verifiedPreview": {
-    "commit": "2a3f8398c16896539f6c11efad2979d5ab656449",
-    "build": "2a3f8398c 2026-10-07",
+    "commit": "cabb751a127b03ae3b4b88379aba0ba6f5f6f61d",
+    "build": "cabb751a1 2026-10-08",
     "url": "http://127.0.0.1:5191/",
     "implementedAdapters": 250,
     "faithfulRandomAdapters": 13,
     "faithfulTimingAdapters": 13,
-    "fullTest": "Supervisor 1562 files / 12816 tests passed on 46319b2d9 (src e1a47502; later commits docs-only)",
-    "buildModules": 872,
+    "fullTest": "Worker 1565 files / 12888 tests passed on 8ab80463d (src ccde138a = the served src); supervisor union typecheck, smoke 448, targeted files and differential 624/624 on each fold",
+    "buildModules": 873,
     "browser": "Four canvas and saved PNG hashes on the canonical ordinary route; session export; ON -> OFF restart; no page errors",
-    "receipt": "../tools/integration/fixtures/playable-preview-2a3f8398c-receipt.json",
+    "receipt": "../tools/integration/fixtures/playable-preview-cabb751a1-receipt.json",
     "availability": "Local Mac service on 127.0.0.1:5191; hcloud retired."
   },
+
   "productionProviders": {
     "spritePaletteHistory": {
       "sourceCommit": "c8f2a79e9",
