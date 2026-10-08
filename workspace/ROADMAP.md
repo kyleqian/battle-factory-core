@@ -2224,9 +2224,10 @@ seam-resolved deferred sprite-order lend (Ice Ball counters 1..4), fixed the spe
 missing attacker sides of Double Team / Faint Attack / Rock Slide, landed the prep43 sprite-order plans (CONFUSION, PRZ survivor fix, Leech Seed drain,
 sandstorm, Dig / Brick Break turn-keyed: +2.5 pp live by count, +3.3 pp by frames on seeds 0..199), and built the ORDINARY-PLAY LIVE-SHARE CENSUS
 (`tools/integration/liveShareCensus.ts`, `docs/live-share-census.md`): on src `d15bc413` 72.6 % of move-animation commands
-(75.2 % of frames) ran live in 1000 ordinary battles; the sprite-order lend caused 72 % of the fallback frames. Use the census
-to rank work. Resume points, in order:
-1. Rerun the census on the current tree, then the remaining order-host stops (`docs/next-adapters-prep43.md`): Giga Drain body
+(75.2 % of frames) ran live in 1000 ordinary battles; on the final src `e3fc2240` 77.7 % (78.8 % of frames;
+`tools/integration/fixtures/live-share-census/report-seeds0-999-final-20261008.json`, gameplay command sequence unchanged).
+Use the census to rank work. Resume points, in order:
+1. The remaining order-host stops (`docs/next-adapters-prep43.md`): Giga Drain body
    (species geometry), hail WEATHER_VAR (battler coordinates), RAIN_CONTINUES (Random2 words; the deferred lend is keyed by move
    body), the locked-turn continuation in the orchestrator, the opponent's voluntary return to ball.
 2. Allocator history (9 % of fallback frames: Protect / Light Screen / Reflect / Barrier / Magic Coat / Mirror Coat) — plans
