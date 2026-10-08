@@ -16,4 +16,10 @@ npx vite-node tools/integration/prep37BodyCheck.ts $ACC $ALT --renderer=unchange
 npx vite-node tools/integration/prep37BodyCheck.ts $ACC $ALT --renderer=patched --scratch=$SCR --out=$REC/body-patched.json
 for n in age0+1 dollY+1 idleRest0; do npx vite-node tools/integration/prep37BodyCheck.ts $ACC $ALT --renderer=patched --scratch=$SCR --neg=$n --out=$REC/body-neg-$n.json > /dev/null; done
 rm -rf "$SCR"
+# item 2: persistent field state + status-animation windows (Scene ON both orientations, Scene OFF player)
+python3 tools/integration/prep37Field.py $REC/field.json $ALT
+# item 3(c): static-fallback pixel cost per status window (ROM frames only)
+python3 tools/integration/prep37Fallback.py $REC/field.json $REC/fallback.json $ALT > /dev/null
+# item 3(b): live adapters vs a doll defender (source scan)
+npx vite-node tools/integration/prep37Adapters.ts --out=$REC/adapters.json > /dev/null
 echo "receipts in $REC"

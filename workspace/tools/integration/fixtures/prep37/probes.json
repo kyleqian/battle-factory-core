@@ -2,35 +2,35 @@
  "schema": "prep37-probes/v1",
  "probes": {
   "mechanic-substitute-opponent-golem-player-onix": {
-   "sha256": "a6d1c7cc24db12c84ceb028b98722c5c6fe510144cf2b7d4aaba99cdb74e7add",
+   "sha256": "0937d5250c5ac872f9495d720f74f3846666886393a8edc6623d4955c08e9ed6",
    "r1EqualsR2": true,
    "frames": 635,
    "profile": "battle-scene-on",
    "bootstrap": "factory.json"
   },
   "mechanic-substitute-player-golem-opponent-onix": {
-   "sha256": "feb3f2cad75d13f5dc79335b35858b120f46c385a60564c744678726fad5c460",
+   "sha256": "8b587b3f0858eb3cb5fdf1c34966496a68a8550b880b78b2028dcd66b30fcbbd",
    "r1EqualsR2": true,
    "frames": 635,
    "profile": "battle-scene-on",
    "bootstrap": "factory.json"
   },
   "prep37-off-player-persian-slowbro": {
-   "sha256": "eb14408739a67ae68cde03eaf3d4b3d91545899f7b85f595ab84563330afe3f7",
+   "sha256": "bd00836fe65257d571e795d4385a6461e1a78f148ec393d233852ff9f9e4b570",
    "r1EqualsR2": true,
    "frames": 8565,
    "profile": "battle-scene-off",
    "bootstrap": "factory-battle-scene-off.json"
   },
   "prep37-on-opponent-persian-slowbro": {
-   "sha256": "be7b24ca05671cb26961cb66c13c262e5f728a70acc8a5578d5b2f66f7d77926",
+   "sha256": "31f77c7be097a32a62603d769307635684146219cce6397e520fb8179cd3387e",
    "r1EqualsR2": true,
    "frames": 8533,
    "profile": "battle-scene-on",
    "bootstrap": "factory.json"
   },
   "prep37-on-player-persian-slowbro": {
-   "sha256": "2b75db5bf91673ac1145592b5379fece4998bcdc08151c6be0a4b275fb80fb6b",
+   "sha256": "49aa9724ad0cdcaff81b7ceec275a6abafb89028a2f7f296a86d2821b045107b",
    "r1EqualsR2": true,
    "frames": 8565,
    "profile": "battle-scene-on",

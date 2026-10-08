@@ -96,7 +96,7 @@ def main() -> None:
             "behindSubstitute": bool(u16(battler_data) & 4), "flagX8": bool(u16(battler_data) & 8),
             "specialAnimActive": bool(u8(hb) & 0x40), "animFromTableActive": bool(u8(hb) & 0x20),
             "statusAnimActive": bool(u8(hb) & 0x10), "battlerIsBouncing": bool(u8(hb) & 4),
-            "shadow": (lambda s: {"invisible": s["invisible"], "inUse": s["inUse"], "x": s["x"], "x2": s["x2"]})(sprite(u8(hb + 9))),
+            "shadow": (lambda s: {"invisible": s["invisible"], "inUse": s["inUse"], "x": s["x"], "x2": s["x2"]})(sprite(u8(hb + 7))),
             "species": u16(mon), "hp": u16(mon + 0x28), "maxHP": u16(mon + 0x2C), "status2": u32(mon + 0x50),
             "substituteHP": u8(disable + b * disable_size + 10),
         }
