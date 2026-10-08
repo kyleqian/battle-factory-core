@@ -43,11 +43,8 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
   target half.
 - **Extrasensory opponent-side targets FLYGON / GOLBAT / WAILORD:** 18,345 / 8,318 / 162 px on ages 43..117 in the
   policy phase; likely the documented scanline-split class (prep30 §1.4) but the split line was not measured.
-- **Dive (291) setup turn, most attacker species (audit 11, `docs/live-species-audit-11.md`):** the ROM setup length
-  follows the attacker's Y_PIC_OFFSET (ball rises until above y = -32, pauses 22 frames, falls); production
-  hard-codes 117 / 114, which also shifts the droplets' Random2 draw age and the row-68 rule. 12 species ~22-27k px;
-  patch `species-audit-11/dive-setup-length-words-row68.diff` gives 0 px, accepted unchanged (supervisor reran:
-  CLOYSTER 24,351 -> 0, FLYGON / RATTATA 0, accepted P/O 0). TYRANITAR residual 9 px unresolved (Sand Stream intro?).
+- **Dive (291) setup turn:** length / droplet draw age / row-68 rule FIXED in `08e1c9c4c` (12 audit-11 species 0 px,
+  supervisor reran); TYRANITAR attacker keeps 9 px on ages 63..64 (unresolved; Sand Stream intro?).
 - **New CPU-phase cases (D4 class, not yet in the policy):** Extreme Speed 320 vs 321 rows (lags [312,313] vs
   [292,313,314]; residual ages 294..309 only); Dive CLAMPERL-after-Tackle lag at age 64 (ages 66..95).
 - **TYRANITAR rows (Dive 4-9 px, Ice Ball 16 / 63 px, Memento 2,537 px at age 140):** unresolved; lags match.

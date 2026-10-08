@@ -26,6 +26,13 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- Folded Opus worker `99f569157` as `08e1c9c4c` (src tree `807fb60b`): Dive setup length from the attacker's ball rule
+  (`picOffsetPoint.y` on the displayed field; callers without a field keep 117 / 114), droplet Random2 draw age keyed to
+  the splash birth via a `LiveMoveRandom2PlanContext` passed from `core.ts` (words still only from the presentation
+  host), row-68 rule at firstInactive - 49; the seed-111 route's CLAMPERL setup is now 119 rows (audit-measured).
+  Extreme Speed reclassification (new lag case) deferred. Worker gates 1,561 files / 12,812 tests, build, differential
+  624. Supervisor: 4 audit-11 rows (CLOYSTER, GOLBAT, WAILORD, CLAMPERL) + all 9 s10a-live Dive windows x2 fresh —
+  0 px, the two documented no-event windows exactly 284 px on row 68.
 - Folded Opus worker `dce515c0c` as `e8d132581` (src tree `9df94a55`): Substitute parts 1-2 (body adapter not reached).
   Presentation-only `substituteDoll` field flag read from STATUS2_SUBSTITUTE at reducer boundaries (gameplay never
   written); field art draws the source doll at (40,65) / (144,24), no elevation, opponent shadow hidden; set after a
