@@ -1,0 +1,169 @@
+{
+ "schema": "prep43-check/v1",
+ "jobs": 63,
+ "notIdenticalAB": 0,
+ "plans": {
+  "status CONFUSION": "Cfffff;D1,2,0,3,4",
+  "status PRZ": "Cf;Cf;D0;Cf;D1;Cf;D2;Cf;D3;Cf;D4;Cf;D5;Cf;D6",
+  "general LEECH_SEED_DRAIN": "Cf;D0;Cf;Cf;Cf;Cf;Cf;D1;Cf;D2;Cf;Cf;D3;D5;D4;D6;D7;D8;Cf;Cf;Cf;D9;Cf;D10;D11;D12",
+  "general SANDSTORM_CONTINUES": "Cf;Cf;Cf;Cf;D0;Cf;D1;D2;Cf;Cf;D3;D5;D4;D6",
+  "body 91 turn 0 (setup)": "Cff;Cffff;D3,2,5,4;Cffff;D7,6,9,8;Cffff;D11,10,13,12;Cffff;D15,14,17,16;Cffff;D19,18,21,20;D1,0",
+  "body 91 turn 1 (unleash)": "Cff;Cf;D2;D1,0",
+  "body 280 normal": "Cf;Cf/D0;D1;Cf;Cf;D2;D3;Cf;D4;Cff;D5;D6;Cf;D7",
+  "body 280 screen": "Cf;Cf;Cf/D0;D2;Cf;Cf;D3;D4;Cf;D5;Cff;D1;D6;D7;Cffff;D10,11,8,9;Cf;D12",
+  "body 202": "Cf;D0;Cf;D1;Cfff;Cfff;Cfff;Cfff;Cfff;D2;Cfff;D5,6;D3;Cfff;D8,10;D4;Cfff;D12,13;D7,9;D16;D11;D17,19;D14;D15;D21;D18;D23,24;D20;D22;D25;Cf;Cf;Cf;D26;Cf;D27;D28;D29;Cf;D30"
+ },
+ "results": {
+  "body 280 screen": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 72,
+   "jobs": [
+    "bb-opp",
+    "bb-ply",
+    "bb-ply-long",
+    "bb-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 280 normal": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 56,
+   "jobs": [
+    "bbn-opp",
+    "bbn-opp-long",
+    "bbn-ply",
+    "bbn-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "status CONFUSION": {
+   "instances": 17,
+   "matched": 17,
+   "framesChecked": 34,
+   "jobs": [
+    "conf-dizzy-ply",
+    "conf-opp-diglett",
+    "conf-opp-golbat",
+    "conf-opp-onix",
+    "conf-opp-snorlax",
+    "conf-ply-diglett",
+    "conf-ply-golbat",
+    "conf-ply-onix",
+    "conf-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 91 turn 0 (setup)": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 48,
+   "jobs": [
+    "dig-opp-snorlax",
+    "dig-opp-vibrava",
+    "dig-ply-snorlax",
+    "dig-ply-vibrava"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 91 turn 1 (unleash)": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 16,
+   "jobs": [
+    "dig-opp-snorlax",
+    "dig-opp-vibrava",
+    "dig-ply-snorlax",
+    "dig-ply-vibrava"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 202": {
+   "instances": 10,
+   "matched": 9,
+   "framesChecked": 400,
+   "jobs": [
+    "gd-opp-atk-diglett",
+    "gd-opp-atk-golbat",
+    "gd-opp-golbat",
+    "gd-opp-onix",
+    "gd-opp-snorlax",
+    "gd-ply-atk-diglett",
+    "gd-ply-atk-golbat",
+    "gd-ply-golbat",
+    "gd-ply-onix",
+    "gd-ply-snorlax"
+   ],
+   "mismatches": [
+    {
+     "job": "gd-opp-atk-diglett",
+     "frame": 2084,
+     "observedPlan": "Cf;D0;Cf;D1;Cfff;Cfff;Cfff;Cfff;Cfff;D2;Cfff;D5,6;D3;Cfff;D8,10;D4;Cfff;D12,13;D9,7;D16;D11;D17,19;D14;D15;D21;D18;D23,24;D20;D22;D25;Cf;Cf;Cf;D26;Cf;D27;D28;D29;Cf;D30",
+     "problems": [
+      "window 18 f2185: created / destroyed 10,12/10,12 F !=",
+      "window 19 f2190: created / destroyed 19/19 F !=",
+      "window 20 f2194: created / destroyed 14/14 F !=",
+      "window 21 f2196: created / destroyed 3,21/3,21 F !="
+     ]
+    }
+   ],
+   "carries": 0
+  },
+  "general LEECH_SEED_DRAIN": {
+   "instances": 7,
+   "matched": 7,
+   "framesChecked": 182,
+   "jobs": [
+    "ls-opp",
+    "ls-opp-golbat",
+    "ls-opp-snorlax",
+    "ls-ply",
+    "ls-ply-golbat",
+    "ls-ply-long",
+    "ls-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "status PRZ": {
+   "instances": 13,
+   "matched": 13,
+   "framesChecked": 208,
+   "jobs": [
+    "prz-glare-opp",
+    "prz-glare-ply",
+    "prz-ss-opp",
+    "prz-ss-opp-long",
+    "prz-ss-ply",
+    "prz-tw-opp-golbat",
+    "prz-tw-opp-long",
+    "prz-tw-opp-shuckle",
+    "prz-tw-opp-snorlax",
+    "prz-tw-ply-golbat",
+    "prz-tw-ply-long",
+    "prz-tw-ply-shuckle",
+    "prz-tw-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 13
+  },
+  "general SANDSTORM_CONTINUES": {
+   "instances": 3,
+   "matched": 3,
+   "framesChecked": 42,
+   "jobs": [
+    "sand-opp-long",
+    "sand-ply-long",
+    "sand-ply-snorlax-long"
+   ],
+   "mismatches": [],
+   "carries": 0
+  }
+ }
+}
