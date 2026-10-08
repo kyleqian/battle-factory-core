@@ -33,7 +33,7 @@ import {
 import { liveMovePresentationRngBodyKey } from "./liveMovePresentationRng.ts";
 import {
   advanceLiveBattlerX2Host, applyLiveBattlerX2Event, createLiveBattlerX2Host, invalidateLiveBattlerX2Host,
-  liveBattlerX2EventsOf, liveMoveBattlerX2InputForBody, liveStaleMovePowerTaintedBy, LIVE_BATTLER_X2_IDLE, type LiveBattlerX2Host,
+  liveBattlerX2EventsOf, liveMoveBattlerX2Input, liveMoveBattlerX2InputForBody, liveStaleMovePowerTaintedBy, LIVE_BATTLER_X2_IDLE, type LiveBattlerX2Host,
   type LiveMoveBattlerX2Input,
 } from "./liveBattlerX2History.ts";
 import {
@@ -2341,6 +2341,10 @@ function prepareResolutionPalette(
   if (command?.type === "move-animation" && command.animation && x2Host) {
     battlerX2Input = retainedX2?.commandKey === commandKey
       ? resolution.liveMoveBattlerX2Input : liveMoveBattlerX2InputForBody(x2Host, command.animation);
+  } else if (command?.type === "substitute-fade" && x2Host) {
+    // S10A fade (liveSubstituteFade.ts): the other battler's tracked rest at the fade's start.
+    battlerX2Input = retainedX2?.commandKey === commandKey
+      ? resolution.liveMoveBattlerX2Input : liveMoveBattlerX2Input(x2Host.history);
   }
   if (x2Host) {
     x2Host = advanceLiveBattlerX2Host(x2Host, resolution, isFinalCommand ? Number.POSITIVE_INFINITY : commandSequence);

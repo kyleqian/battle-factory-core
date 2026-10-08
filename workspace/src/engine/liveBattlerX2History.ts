@@ -18,6 +18,7 @@
  *     shakes its target) except a two-turn move's charge turn (keep), otherwise keep            (§0.6 fallback)
  *   HIT_ANIMATION, STATS_CHANGE, weather-continues animations                                  keep (blink / measured)
  *   any other general or status animation on a battler                                         that side := unknown
+ *   SUBSTITUTE_FADE (General_SubstituteFade's trailing swap task ends at x2 0)                 that side := zeroed
  *   faint-animation                                                                            keep (send-in resets)
  *   party-menu return, unapplied events, battle advanced without a presented resolution        both := unknown
  */
@@ -38,6 +39,8 @@ export type LiveMoveBattlerX2Input = Readonly<{
 export type LiveBattlerX2Event =
   | Readonly<{ kind: "send-in"; side: LiveBattlerX2Side }>
   | Readonly<{ kind: "move-body"; moveId: number; attackerSide: LiveBattlerX2Side; turn?: number }>
+  /** General_SubstituteFade: its trailing AnimTask_SwapMonSpriteToFromSubstitute ends at x2 0 (measured RATTATA, rest +1). */
+  | Readonly<{ kind: "substitute-fade"; side: LiveBattlerX2Side }>
   | Readonly<{ kind: "unknown"; side: LiveBattlerX2Side | "both"; reason: string }>;
 
 /**
@@ -125,6 +128,9 @@ export function applyLiveBattlerX2Event(history: LiveBattlerX2History, event: Li
       };
       break;
     }
+    case "substitute-fade":
+      next = { ...history, [event.side]: "zeroed" };
+      break;
     case "unknown":
       next = event.side === "both" ? { player: "unknown", opponent: "unknown" } : { ...history, [event.side]: "unknown" };
       break;
@@ -167,6 +173,7 @@ export function liveBattlerX2EventsOf(event: BattleKernelSemanticEvent): readonl
       }
     }
     if (KEEP_ANIMATIONS.has(payload.animationId)) return [];
+    if (payload.animationId === "SUBSTITUTE_FADE") return [{ kind: "substitute-fade", side }];
     const target = sideOf(payload.target);
     const unknown = (at: LiveBattlerX2Side): LiveBattlerX2Event => ({ kind: "unknown", side: at, reason: payload.animationId });
     return target === null || target === side ? [unknown(side)] : [unknown(side), unknown(target)];

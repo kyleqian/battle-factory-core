@@ -41,6 +41,7 @@ import {
   type BattleIntroStringEntry,
 } from "../data/battleIntroStrings.ts";
 import { loadBattleScriptProgram } from "./battleScriptProgram.ts";
+import { substituteFadeDuration } from "./liveSubstituteFade.ts";
 
 const FACTORY_ITEM_NAME_BY_ID = new Map(
   (frontierHeldItemsData.entries as readonly Readonly<{
@@ -130,7 +131,8 @@ export type BattleResolutionPresentationCommand =
       /**
        * Presentation-only: B_ANIM_SUBSTITUTE_FADE (battle_scripts_1.s BattleScript_SubstituteFade) ran for this battler
        * right before this message (STRINGID_PKMNSUBSTITUTEFADED). The ROM fade ends on the mon (prep37: row 84 / 83), so
-       * the Substitute doll is no longer shown from this message on. The fade body itself is not presented (fallback).
+       * the Substitute doll is no longer shown from this message on. The fade itself is the preceding "substitute-fade"
+       * command (liveSubstituteFade.ts); this tag stays the doll clear's fallback.
        */
       substituteFadeBattler?: 0 | 1;
     }>
@@ -258,6 +260,16 @@ export type BattleResolutionPresentationCommand =
   | Readonly<{
       type: "turn-end";
       timing: BattleTurnEndTiming;
+    }>
+  | Readonly<{
+      /**
+       * S10A: General_SubstituteFade (B_ANIM_SUBSTITUTE_FADE; liveSubstituteFade.ts), presentation-only, Scene ON and OFF:
+       * script rows + first inactive row + 2-row OAM tail (106 player / 104 opponent).
+       */
+      type: "substitute-fade";
+      eventSequence: number;
+      battler: 0 | 1;
+      timing: Readonly<{ minimumFrames: number }>;
     }>
   | Readonly<{
       /** `Cmd_trainerslidein`/`Cmd_trainerslideout` -- generic across any trainer/outcome, see `TRAINER_SLIDE_TIMING`. */
@@ -3252,7 +3264,7 @@ export function projectBattleResolutionCommands(
   // the battler slot's CURRENT occupant, never a stale pre-switch one
   // (ISSUES #115).
   let currentField: BattleResolutionDisplayedField = field;
-  const substituteFades: { at: number; battler: 0 | 1 }[] = [];
+  const substituteFades: { at: number; battler: 0 | 1; sequence: number }[] = [];
 
   for (let index = 0; index < events.length; index += 1) {
     const event = events[index]!;
@@ -3368,7 +3380,9 @@ export function projectBattleResolutionCommands(
       continue;
     }
     if (payload.kind === "animation" && payload.animationId === "SUBSTITUTE_FADE") {
-      substituteFades.push({ at: commands.length, battler: singlesBattler(payload.battler ?? -1, "substitute fade") });
+      substituteFades.push({
+        at: commands.length, battler: singlesBattler(payload.battler ?? -1, "substitute fade"), sequence: event.sequence,
+      });
       continue;
     }
     if (
@@ -3716,6 +3730,14 @@ export function projectBattleResolutionCommands(
     if (message?.type === "message") {
       commands[at] = Object.freeze({ ...message, substituteFadeBattler: fade.battler });
     }
+  }
+  // The fade command itself, after whatever the queue last showed (the dismissed STRINGID_SUBSTITUTEDMG) and before the
+  // "faded" message; inserted last-first so earlier insertion points stay valid.
+  for (const fade of [...substituteFades].reverse()) {
+    commands.splice(fade.at, 0, Object.freeze({
+      type: "substitute-fade" as const, eventSequence: fade.sequence, battler: fade.battler,
+      timing: Object.freeze({ minimumFrames: substituteFadeDuration(fade.battler === 0 ? "player" : "opponent") }),
+    }));
   }
   if (!commands.some(
     (command) => command.type === "message" && command.advance === "button",

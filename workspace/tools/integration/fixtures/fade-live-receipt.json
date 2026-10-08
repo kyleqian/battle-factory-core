@@ -1,0 +1,860 @@
+{
+ "schema": "fade-live-receipt/v1",
+ "codeCommit": "fe1c66343",
+ "srcTree": "d15bc413",
+ "method": "fresh direct-mGBA prep39 probes (prep39Probes.sh: every scenario twice from fresh processes, json + rgb cmp'd), then tools/integration/fadeLiveCheck.ts twice (production createBattleResolutionPresentationRenderView + renderBattleResolutionLiveView, every row of every fade window: script rows + first inactive row + 2-row OAM tail)",
+ "claim": "pixels outside the wait-cursor footprint (the queue presents STRINGID_SUBSTITUTEDMG as an automatic message: the ROM's frozen cursor is the message host's, reported as cursorBoxPx)",
+ "summary": {
+  "windows": 14,
+  "rows": 1464,
+  "policyExact": 13,
+  "alternatePhaseDocumented": 1,
+  "failed": 0,
+  "outsideCursorPx": 542,
+  "cursorBoxPx": 50246,
+  "sceneOff": [
+   {
+    "window": "prep37-off-player-persian-slowbro@2400",
+    "totalPx": 0
+   }
+  ]
+ },
+ "passesByteIdentical": {
+  "probes.json": {
+   "identical": true,
+   "sha256": "5af3e02d2ac742e3"
+  },
+  "fade-live-check.json": {
+   "identical": true,
+   "sha256": "e033de0aabcc2236"
+  },
+  "fade-neg-age+1.json": {
+   "identical": true,
+   "sha256": "1f4a41085f8c4adc"
+  },
+  "fade-neg-no-fade.json": {
+   "identical": true,
+   "sha256": "2e3ef4e547ad4091"
+  },
+  "fade-neg-no-x2.json": {
+   "identical": true,
+   "sha256": "a2d7a550ecbf90f5"
+  }
+ },
+ "negatives": {
+  "age+1": {
+   "failingWindows": 14,
+   "windows": 14
+  },
+  "no-fade": {
+   "failingWindows": 14,
+   "windows": 14
+  },
+  "no-x2": {
+   "failingWindows": 2,
+   "windows": 14
+  }
+ },
+ "passes": [
+  {
+   "results": [
+    {
+     "window": "prep37-on-player-persian-slowbro@2400",
+     "profile": "battle-scene-on",
+     "side": "player",
+     "fading": "PERSIAN",
+     "other": "SLOWBRO",
+     "frames": [
+      2400,
+      2505
+     ],
+     "rows": 106,
+     "dense": true,
+     "otherX2Zeroed": [
+      "player",
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 106,
+     "totalPx": 0,
+     "cursorBoxPx": 3922,
+     "wholeFramePx": 3922,
+     "nonZero": [],
+     "perRowDigest": "9af200d64096ad5b",
+     "romWindowSha256": "1d422abaa0d4c0f1"
+    },
+    {
+     "window": "prep37-on-opponent-persian-slowbro@2368",
+     "profile": "battle-scene-on",
+     "side": "opponent",
+     "fading": "PERSIAN",
+     "other": "SLOWBRO",
+     "frames": [
+      2368,
+      2471
+     ],
+     "rows": 104,
+     "dense": true,
+     "otherX2Zeroed": [
+      "player",
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 0,
+     "cursorBoxPx": 3848,
+     "wholeFramePx": 3848,
+     "nonZero": [],
+     "perRowDigest": "714c1a38f9f1688a",
+     "romWindowSha256": "28e96b58e0e53bb9"
+    },
+    {
+     "window": "prep37-off-player-persian-slowbro@2400",
+     "profile": "battle-scene-off",
+     "side": "player",
+     "fading": "PERSIAN",
+     "other": "SLOWBRO",
+     "frames": [
+      2400,
+      2505
+     ],
+     "rows": 106,
+     "dense": true,
+     "otherX2Zeroed": [
+      "player"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 106,
+     "totalPx": 0,
+     "cursorBoxPx": 3922,
+     "wholeFramePx": 3922,
+     "nonZero": [],
+     "perRowDigest": "9af200d64096ad5b",
+     "romWindowSha256": "1d422abaa0d4c0f1"
+    },
+    {
+     "window": "prep37-on-opponent-golbat-slowbro@3790",
+     "profile": "battle-scene-on",
+     "side": "opponent",
+     "fading": "GOLBAT",
+     "other": "SLOWBRO",
+     "frames": [
+      3790,
+      3893
+     ],
+     "rows": 104,
+     "dense": true,
+     "otherX2Zeroed": [
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 0,
+     "cursorBoxPx": 3848,
+     "wholeFramePx": 3848,
+     "nonZero": [],
+     "perRowDigest": "714c1a38f9f1688a",
+     "romWindowSha256": "e7e8c244c5e242b5"
+    },
+    {
+     "window": "prep37-on-opponent-golbat-slowbro@8056",
+     "profile": "battle-scene-on",
+     "side": "opponent",
+     "fading": "GOLBAT",
+     "other": "SLOWBRO",
+     "frames": [
+      8056,
+      8159
+     ],
+     "rows": 104,
+     "dense": true,
+     "otherX2Zeroed": [
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 0,
+     "cursorBoxPx": 3848,
+     "wholeFramePx": 3848,
+     "nonZero": [],
+     "perRowDigest": "714c1a38f9f1688a",
+     "romWindowSha256": "771f15b09c79ee03"
+    },
+    {
+     "window": "prep39-on-player-persian-onix@3822",
+     "profile": "battle-scene-on",
+     "side": "player",
+     "fading": "PERSIAN",
+     "other": "ONIX",
+     "frames": [
+      3822,
+      3927
+     ],
+     "rows": 106,
+     "dense": true,
+     "otherX2Zeroed": [
+      "player",
+      "opponent"
+     ],
+     "verdict": "alternate-phase-documented",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 542,
+     "cursorBoxPx": 3922,
+     "wholeFramePx": 4464,
+     "nonZero": [
+      {
+       "age": 27,
+       "frame": 3849,
+       "px": 271,
+       "bbox": [
+        56,
+        101,
+        86,
+        111
+       ]
+      },
+      {
+       "age": 45,
+       "frame": 3867,
+       "px": 271,
+       "bbox": [
+        56,
+        101,
+        86,
+        111
+       ]
+      }
+     ],
+     "documentedAlternatePhaseRows": [
+      27,
+      45
+     ],
+     "perRowDigest": "d60f8aabe2bb0eac",
+     "romWindowSha256": "0ef05e766cb61697"
+    },
+    {
+     "window": "prep39-on-opponent-rattata-slowbro@2368",
+     "profile": "battle-scene-on",
+     "side": "opponent",
+     "fading": "RATTATA",
+     "other": "SLOWBRO",
+     "frames": [
+      2368,
+      2471
+     ],
+     "rows": 104,
+     "dense": true,
+     "otherX2Zeroed": [
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 0,
+     "cursorBoxPx": 3848,
+     "wholeFramePx": 3848,
+     "nonZero": [],
+     "perRowDigest": "714c1a38f9f1688a",
+     "romWindowSha256": "1c549b30a5e06afb"
+    },
+    {
+     "window": "prep39-on-opponent-rattata-slowbro@5212",
+     "profile": "battle-scene-on",
+     "side": "opponent",
+     "fading": "RATTATA",
+     "other": "SLOWBRO",
+     "frames": [
+      5212,
+      5315
+     ],
+     "rows": 104,
+     "dense": true,
+     "otherX2Zeroed": [
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 0,
+     "cursorBoxPx": 3848,
+     "wholeFramePx": 3848,
+     "nonZero": [],
+     "perRowDigest": "714c1a38f9f1688a",
+     "romWindowSha256": "3d84982a0833feb6"
+    },
+    {
+     "window": "prep39-on-opponent-rattata-slowbro@8056",
+     "profile": "battle-scene-on",
+     "side": "opponent",
+     "fading": "RATTATA",
+     "other": "SLOWBRO",
+     "frames": [
+      8056,
+      8159
+     ],
+     "rows": 104,
+     "dense": true,
+     "otherX2Zeroed": [
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 0,
+     "cursorBoxPx": 3848,
+     "wholeFramePx": 3848,
+     "nonZero": [],
+     "perRowDigest": "714c1a38f9f1688a",
+     "romWindowSha256": "866f3c73ab0688e4"
+    },
+    {
+     "window": "prep39-on-player-golem-onix@946",
+     "profile": "battle-scene-on",
+     "side": "player",
+     "fading": "GOLEM",
+     "other": "ONIX",
+     "frames": [
+      946,
+      1051
+     ],
+     "rows": 106,
+     "dense": true,
+     "otherX2Zeroed": [
+      "player",
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "messageOverride": [
+      "",
+      ""
+     ],
+     "cursorFootprintPx": 0,
+     "zeroPxRows": 106,
+     "totalPx": 0,
+     "cursorBoxPx": 0,
+     "wholeFramePx": 0,
+     "nonZero": [],
+     "perRowDigest": "9af200d64096ad5b",
+     "romWindowSha256": "457b0461bc51172a"
+    },
+    {
+     "window": "prep39-on-opponent-golem-onix@946",
+     "profile": "battle-scene-on",
+     "side": "opponent",
+     "fading": "GOLEM",
+     "other": "ONIX",
+     "frames": [
+      946,
+      1049
+     ],
+     "rows": 104,
+     "dense": true,
+     "otherX2Zeroed": [
+      "player",
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 0,
+     "cursorBoxPx": 3848,
+     "wholeFramePx": 3848,
+     "nonZero": [],
+     "perRowDigest": "714c1a38f9f1688a",
+     "romWindowSha256": "4ef8d639d64343d2"
+    },
+    {
+     "window": "prep39-on-opponent-golem-onix@2368",
+     "profile": "battle-scene-on",
+     "side": "opponent",
+     "fading": "GOLEM",
+     "other": "ONIX",
+     "frames": [
+      2368,
+      2471
+     ],
+     "rows": 104,
+     "dense": true,
+     "otherX2Zeroed": [
+      "player",
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 0,
+     "cursorBoxPx": 3848,
+     "wholeFramePx": 3848,
+     "nonZero": [],
+     "perRowDigest": "714c1a38f9f1688a",
+     "romWindowSha256": "994742a33023e44d"
+    },
+    {
+     "window": "prep39-on-opponent-golem-onix@3790",
+     "profile": "battle-scene-on",
+     "side": "opponent",
+     "fading": "GOLEM",
+     "other": "ONIX",
+     "frames": [
+      3790,
+      3893
+     ],
+     "rows": 104,
+     "dense": true,
+     "otherX2Zeroed": [
+      "player",
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 0,
+     "cursorBoxPx": 3848,
+     "wholeFramePx": 3848,
+     "nonZero": [],
+     "perRowDigest": "714c1a38f9f1688a",
+     "romWindowSha256": "6b8141aa21202bf2"
+    },
+    {
+     "window": "prep39-on-opponent-golem-onix@5212",
+     "profile": "battle-scene-on",
+     "side": "opponent",
+     "fading": "GOLEM",
+     "other": "ONIX",
+     "frames": [
+      5212,
+      5315
+     ],
+     "rows": 104,
+     "dense": true,
+     "otherX2Zeroed": [
+      "player",
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 0,
+     "cursorBoxPx": 3848,
+     "wholeFramePx": 3848,
+     "nonZero": [],
+     "perRowDigest": "714c1a38f9f1688a",
+     "romWindowSha256": "9b5b0a777130895f"
+    }
+   ]
+  },
+  {
+   "results": [
+    {
+     "window": "prep37-on-player-persian-slowbro@2400",
+     "profile": "battle-scene-on",
+     "side": "player",
+     "fading": "PERSIAN",
+     "other": "SLOWBRO",
+     "frames": [
+      2400,
+      2505
+     ],
+     "rows": 106,
+     "dense": true,
+     "otherX2Zeroed": [
+      "player",
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 106,
+     "totalPx": 0,
+     "cursorBoxPx": 3922,
+     "wholeFramePx": 3922,
+     "nonZero": [],
+     "perRowDigest": "9af200d64096ad5b",
+     "romWindowSha256": "1d422abaa0d4c0f1"
+    },
+    {
+     "window": "prep37-on-opponent-persian-slowbro@2368",
+     "profile": "battle-scene-on",
+     "side": "opponent",
+     "fading": "PERSIAN",
+     "other": "SLOWBRO",
+     "frames": [
+      2368,
+      2471
+     ],
+     "rows": 104,
+     "dense": true,
+     "otherX2Zeroed": [
+      "player",
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 0,
+     "cursorBoxPx": 3848,
+     "wholeFramePx": 3848,
+     "nonZero": [],
+     "perRowDigest": "714c1a38f9f1688a",
+     "romWindowSha256": "28e96b58e0e53bb9"
+    },
+    {
+     "window": "prep37-off-player-persian-slowbro@2400",
+     "profile": "battle-scene-off",
+     "side": "player",
+     "fading": "PERSIAN",
+     "other": "SLOWBRO",
+     "frames": [
+      2400,
+      2505
+     ],
+     "rows": 106,
+     "dense": true,
+     "otherX2Zeroed": [
+      "player"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 106,
+     "totalPx": 0,
+     "cursorBoxPx": 3922,
+     "wholeFramePx": 3922,
+     "nonZero": [],
+     "perRowDigest": "9af200d64096ad5b",
+     "romWindowSha256": "1d422abaa0d4c0f1"
+    },
+    {
+     "window": "prep37-on-opponent-golbat-slowbro@3790",
+     "profile": "battle-scene-on",
+     "side": "opponent",
+     "fading": "GOLBAT",
+     "other": "SLOWBRO",
+     "frames": [
+      3790,
+      3893
+     ],
+     "rows": 104,
+     "dense": true,
+     "otherX2Zeroed": [
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 0,
+     "cursorBoxPx": 3848,
+     "wholeFramePx": 3848,
+     "nonZero": [],
+     "perRowDigest": "714c1a38f9f1688a",
+     "romWindowSha256": "e7e8c244c5e242b5"
+    },
+    {
+     "window": "prep37-on-opponent-golbat-slowbro@8056",
+     "profile": "battle-scene-on",
+     "side": "opponent",
+     "fading": "GOLBAT",
+     "other": "SLOWBRO",
+     "frames": [
+      8056,
+      8159
+     ],
+     "rows": 104,
+     "dense": true,
+     "otherX2Zeroed": [
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 0,
+     "cursorBoxPx": 3848,
+     "wholeFramePx": 3848,
+     "nonZero": [],
+     "perRowDigest": "714c1a38f9f1688a",
+     "romWindowSha256": "771f15b09c79ee03"
+    },
+    {
+     "window": "prep39-on-player-persian-onix@3822",
+     "profile": "battle-scene-on",
+     "side": "player",
+     "fading": "PERSIAN",
+     "other": "ONIX",
+     "frames": [
+      3822,
+      3927
+     ],
+     "rows": 106,
+     "dense": true,
+     "otherX2Zeroed": [
+      "player",
+      "opponent"
+     ],
+     "verdict": "alternate-phase-documented",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 542,
+     "cursorBoxPx": 3922,
+     "wholeFramePx": 4464,
+     "nonZero": [
+      {
+       "age": 27,
+       "frame": 3849,
+       "px": 271,
+       "bbox": [
+        56,
+        101,
+        86,
+        111
+       ]
+      },
+      {
+       "age": 45,
+       "frame": 3867,
+       "px": 271,
+       "bbox": [
+        56,
+        101,
+        86,
+        111
+       ]
+      }
+     ],
+     "documentedAlternatePhaseRows": [
+      27,
+      45
+     ],
+     "perRowDigest": "d60f8aabe2bb0eac",
+     "romWindowSha256": "0ef05e766cb61697"
+    },
+    {
+     "window": "prep39-on-opponent-rattata-slowbro@2368",
+     "profile": "battle-scene-on",
+     "side": "opponent",
+     "fading": "RATTATA",
+     "other": "SLOWBRO",
+     "frames": [
+      2368,
+      2471
+     ],
+     "rows": 104,
+     "dense": true,
+     "otherX2Zeroed": [
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 0,
+     "cursorBoxPx": 3848,
+     "wholeFramePx": 3848,
+     "nonZero": [],
+     "perRowDigest": "714c1a38f9f1688a",
+     "romWindowSha256": "1c549b30a5e06afb"
+    },
+    {
+     "window": "prep39-on-opponent-rattata-slowbro@5212",
+     "profile": "battle-scene-on",
+     "side": "opponent",
+     "fading": "RATTATA",
+     "other": "SLOWBRO",
+     "frames": [
+      5212,
+      5315
+     ],
+     "rows": 104,
+     "dense": true,
+     "otherX2Zeroed": [
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 0,
+     "cursorBoxPx": 3848,
+     "wholeFramePx": 3848,
+     "nonZero": [],
+     "perRowDigest": "714c1a38f9f1688a",
+     "romWindowSha256": "3d84982a0833feb6"
+    },
+    {
+     "window": "prep39-on-opponent-rattata-slowbro@8056",
+     "profile": "battle-scene-on",
+     "side": "opponent",
+     "fading": "RATTATA",
+     "other": "SLOWBRO",
+     "frames": [
+      8056,
+      8159
+     ],
+     "rows": 104,
+     "dense": true,
+     "otherX2Zeroed": [
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 0,
+     "cursorBoxPx": 3848,
+     "wholeFramePx": 3848,
+     "nonZero": [],
+     "perRowDigest": "714c1a38f9f1688a",
+     "romWindowSha256": "866f3c73ab0688e4"
+    },
+    {
+     "window": "prep39-on-player-golem-onix@946",
+     "profile": "battle-scene-on",
+     "side": "player",
+     "fading": "GOLEM",
+     "other": "ONIX",
+     "frames": [
+      946,
+      1051
+     ],
+     "rows": 106,
+     "dense": true,
+     "otherX2Zeroed": [
+      "player",
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "messageOverride": [
+      "",
+      ""
+     ],
+     "cursorFootprintPx": 0,
+     "zeroPxRows": 106,
+     "totalPx": 0,
+     "cursorBoxPx": 0,
+     "wholeFramePx": 0,
+     "nonZero": [],
+     "perRowDigest": "9af200d64096ad5b",
+     "romWindowSha256": "457b0461bc51172a"
+    },
+    {
+     "window": "prep39-on-opponent-golem-onix@946",
+     "profile": "battle-scene-on",
+     "side": "opponent",
+     "fading": "GOLEM",
+     "other": "ONIX",
+     "frames": [
+      946,
+      1049
+     ],
+     "rows": 104,
+     "dense": true,
+     "otherX2Zeroed": [
+      "player",
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 0,
+     "cursorBoxPx": 3848,
+     "wholeFramePx": 3848,
+     "nonZero": [],
+     "perRowDigest": "714c1a38f9f1688a",
+     "romWindowSha256": "4ef8d639d64343d2"
+    },
+    {
+     "window": "prep39-on-opponent-golem-onix@2368",
+     "profile": "battle-scene-on",
+     "side": "opponent",
+     "fading": "GOLEM",
+     "other": "ONIX",
+     "frames": [
+      2368,
+      2471
+     ],
+     "rows": 104,
+     "dense": true,
+     "otherX2Zeroed": [
+      "player",
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 0,
+     "cursorBoxPx": 3848,
+     "wholeFramePx": 3848,
+     "nonZero": [],
+     "perRowDigest": "714c1a38f9f1688a",
+     "romWindowSha256": "994742a33023e44d"
+    },
+    {
+     "window": "prep39-on-opponent-golem-onix@3790",
+     "profile": "battle-scene-on",
+     "side": "opponent",
+     "fading": "GOLEM",
+     "other": "ONIX",
+     "frames": [
+      3790,
+      3893
+     ],
+     "rows": 104,
+     "dense": true,
+     "otherX2Zeroed": [
+      "player",
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 0,
+     "cursorBoxPx": 3848,
+     "wholeFramePx": 3848,
+     "nonZero": [],
+     "perRowDigest": "714c1a38f9f1688a",
+     "romWindowSha256": "6b8141aa21202bf2"
+    },
+    {
+     "window": "prep39-on-opponent-golem-onix@5212",
+     "profile": "battle-scene-on",
+     "side": "opponent",
+     "fading": "GOLEM",
+     "other": "ONIX",
+     "frames": [
+      5212,
+      5315
+     ],
+     "rows": 104,
+     "dense": true,
+     "otherX2Zeroed": [
+      "player",
+      "opponent"
+     ],
+     "verdict": "policy-exact",
+     "cursorFootprintPx": 51,
+     "zeroPxRows": 104,
+     "totalPx": 0,
+     "cursorBoxPx": 3848,
+     "wholeFramePx": 3848,
+     "nonZero": [],
+     "perRowDigest": "714c1a38f9f1688a",
+     "romWindowSha256": "9b5b0a777130895f"
+    }
+   ]
+  }
+ ],
+ "gates": {
+  "testedCommit": "65d73130b",
+  "srcTree": "d15bc413",
+  "targeted": "14 files / 253 tests (substituteFadePresentation, substituteSwapPresentation, substituteDollFieldState, substituteDollAdapterDecline, substituteDollDefenderLive, liveShadowRows, liveStatusImplementedCount, animation/factoryAnimationInventory, animation/animationBoundaryRatchet, playableAnimationIntegration, battleResolutionAdapter, battleResolutionAdapterIntegration, battleResolutionPresentation, substituteSwapAttdollCells)",
+  "typecheck": "pass",
+  "smoke": "8 files / 448 tests",
+  "fullSuite": "1567 files passed, 44 skipped / 12902 tests passed, 223 skipped (four workers)",
+  "build": "pass, 874 modules (+1: src/engine/liveSubstituteFade.ts)",
+  "differential": "624 / 624 captures byte-identical across fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on vs 3d3873a57",
+  "d4aRegression": "161 fixtures, 0 violations, 0 nonzero exits",
+  "substSwap": "substSwapRun.sh fresh: probes r1 == r2 (13 scenarios); 21 exact windows x2 runs residual 0; GOLEM-player swap rows 0, body == control; negatives fail",
+  "dolldef": "dolldefLiveCheck over tools/integration/fixtures/dolldef-live (53): 50 every row exact, the other 3 exactly the documented non-doll residuals (HAUNTER -> KADABRA age -5, Quick Attack opponent age 9, Shadow Ball player 44 ages 64..147)",
+  "diffCheck": "clean"
+ }
+}
