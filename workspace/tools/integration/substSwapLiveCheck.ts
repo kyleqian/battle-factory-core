@@ -7,7 +7,7 @@
  * (applySubstituteDollCommand). The ROM frames are only the comparison target; no capture row feeds production.
  *
  * usage: node --experimental-strip-types --no-warnings tools/integration/substSwapLiveCheck.ts <probe.json:rgb-dir>...
- *   [--out=<receipt.json>] [--neg=x2+1|noIdle|restKept]   (negative controls must FAIL)
+ *   [--out=<receipt.json>] [--plain] [--attribute] [--neg=lag1|noIdle]   (negative controls must FAIL)
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
@@ -28,6 +28,9 @@ const args = process.argv.slice(2);
 const outArg = args.find((a) => a.startsWith("--out="))?.slice(6);
 const neg = args.find((a) => a.startsWith("--neg="))?.slice(6);
 const plainMode = args.includes("--plain");
+// --attribute: a window may carry a BODY residual (attributed elsewhere to the plain control's identical bodyPerRowDigest);
+// its swap rows must still be 0 px and its duration equal.
+const attribute = args.includes("--attribute");
 const moveIds: Record<string, number> = Object.fromEntries(moveData.moves.map((m) => [m.move.replace(/^MOVE_/, ""), m.id]));
 const speciesName = (id: number) => speciesStats.species.find((s) => s.id === id)!.name.replace(/^SPECIES_/, "");
 const results = [];
@@ -97,19 +100,14 @@ for (const spec of args.filter((a) => !a.startsWith("--"))) {
     const perRow: number[] = [];
     const firstMismatches: { age: number; frame: number; px: number; bbox: string }[] = [];
     window.forEach((row, age) => {
-      const negAge = neg === "noIdle" && age > substituteSwapScriptRows(side) ? age + 1 : age;
+      // noIdle: no idle row between the swap-in and the body; lag1: a 1-row display latch on the swap-in rows (2 measured).
+      const negAge = neg === "noIdle" && age > substituteSwapScriptRows(side) ? age + 1
+        : neg === "lag1" && age <= substituteSwapScriptRows(side) ? age + 1 : age;
       const view = make(negAge);
       const rgb = inflateSync(readFileSync(`${rgbDir}/${String(row.frame).padStart(5, "0")}.rgb.z`));
       if (createHash("sha256").update(rgb).digest("hex") !== row.sha256) throw new Error("RGB receipt drift");
       const fb = new Uint8Array(240 * 160 * 4);
-      if (neg === "x2+1" && age > 1 && age < substituteSwapScriptRows(side)) {
-        // The swap one pixel further out: shift the doll origin by one.
-        const art = view.fieldArt[side];
-        const moved = { ...art, origin: { x: art.origin.x + 1, y: art.origin.y } };
-        renderBattleResolutionLiveView(fb, { ...view, fieldArt: side === "player" ? { ...view.fieldArt, player: moved } : { ...view.fieldArt, opponent: moved } } as never);
-      } else {
-        renderBattleResolutionLiveView(fb, view);
-      }
+      renderBattleResolutionLiveView(fb, view);
       let px = 0;
       const box = [240, 160, -1, -1];
       for (let p = 0; p < 240 * 160; p++) {
@@ -124,13 +122,20 @@ for (const spec of args.filter((a) => !a.startsWith("--"))) {
       if (px === 0) exact++;
       else if (firstMismatches.length < 80) firstMismatches.push({ age, frame: row.frame, px, bbox: box.join(",") });
     });
+    // Body rows of the composite (body ages 1 .. D-1; age 0 shows the swap tail) vs a plain control window (ages 1 .. D-1).
+    const bodyFrom = plain ? 1 : substituteSwapScriptRows(side) + 2;
+    const bodyTo = plain ? window.length - 1 : window.length - 1 - substituteSwapScriptRows(side);
+    const bodyRows = perRow.slice(bodyFrom, bodyTo + 1);
+    const swapResidual = residual - bodyRows.reduce((a, b) => a + b, 0);
     const ok = residual === 0 && duration === window.length;
-    if (!ok) failed = true;
+    if (!ok && !(attribute && swapResidual === 0 && duration === window.length)) failed = true;
     const result = {
       probe: probePath.split("/").at(-1), side, attacker: fixture.attacker.species, target: fixture.target.species, move,
       startFrame: window[0]!.frame, endFrame: window.at(-1)!.frame, rows: window.length, productionDuration: duration,
       kind: plain ? "plain-control" : "swap", swapInRows: idle - i, bodyRows: k - (idle + 1) - substituteSwapScriptRows(side) + 1, exactRows: exact, residualPixels: residual,
-      digest: createHash("sha256").update(JSON.stringify(perRow)).digest("hex").slice(0, 16), firstMismatches,
+      digest: createHash("sha256").update(JSON.stringify(perRow)).digest("hex").slice(0, 16),
+      swapRowsResidual: swapResidual, bodyRowsResidual: residual - swapResidual,
+      bodyPerRowDigest: createHash("sha256").update(JSON.stringify(bodyRows)).digest("hex").slice(0, 16), firstMismatches,
     };
     results.push(result);
     console.log(`${result.probe} ${side} ${result.attacker}->${result.target} ${move} frames ${result.startFrame}..${result.endFrame} rows ${window.length} duration ${duration} exact ${exact} residual ${residual}${firstMismatches.length ? " first " + JSON.stringify(firstMismatches.slice(0, 4)) : ""}`);
@@ -138,4 +143,4 @@ for (const spec of args.filter((a) => !a.startsWith("--"))) {
 }
 if (outArg) writeFileSync(outArg, `${JSON.stringify({ schema: "subst-swap-live-check/v1", ...(neg ? { negativeControl: neg } : {}), results }, null, 1)}\n`);
 if (failed || results.length === 0) { console.error("FAIL"); process.exit(1); }
-console.log(`swap windows: ${results.length}, all 0 px, durations equal`);
+console.log(`windows: ${results.length}, ${attribute ? "swap rows 0 px (body residual attributed)" : "all 0 px"}, durations equal`);

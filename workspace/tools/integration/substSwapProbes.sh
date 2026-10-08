@@ -6,7 +6,7 @@ set -e
 [ -n "$OUT" ] || { echo "OUT=<dir> required"; exit 2; }
 export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
 mkdir -p "$OUT"
-ALL="subswap-on-player-golem-onix-headbutt subswap-on-opponent-golem-onix-headbutt subswap-on-player-zigzagoon-onix-headbutt subswap-on-opponent-onix-golem-headbutt subswap-ctrl-player-golem-onix-headbutt subswap-on-player-persian-slowbro-bodyslam subswap-on-opponent-persian-slowbro-bodyslam subswap-on-opponent-golbat-slowbro-bodyslam"
+ALL="subswap-ctrl-player-golem-onix-headbutt subswap-on-opponent-golbat-slowbro-bodyslam subswap-on-opponent-golem-onix-headbutt subswap-on-opponent-onix-golem-headbutt subswap-on-opponent-persian-slowbro-bodyslam subswap-on-opponent-persian-slowbro-leechseed subswap-on-opponent-persian-slowbro-seismictoss subswap-on-player-golem-onix-headbutt subswap-on-player-persian-slowbro-bodyslam subswap-on-player-persian-slowbro-leechseed subswap-on-player-persian-slowbro-seismictoss subswap-on-player-zigzagoon-onix-headbutt"
 for s in ${*:-$ALL}; do
   for r in 1 2; do
     [ ! -e "$OUT/$s-r$r.json" ] || { echo "refusing to reuse $OUT/$s-r$r.json"; exit 2; }
