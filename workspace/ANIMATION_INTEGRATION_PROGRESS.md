@@ -12,6 +12,12 @@
   Worker gates 1,563 files / 12,823 tests, build 873, differential 624. Supervisor: `substSwapRun.sh` into fresh dirs —
   probes r1 == r2 (13 scenarios), 21 windows x2 runs 0 px, GOLEM-player residual == non-subbed control, negatives fail;
   union typecheck, smoke 448, 9 targeted files 128/128, own differential vs `bb4dc2558` 624/624. Logs `.integration/validation/swap-20261008/`.
+- prep41 (side, `de32f06ad`, new files only): D4 widening readiness. Pursuit (228) later bodies READY as faithful timing
+  (optional-lag-age 82, fixed lags 60 / 61; 24 lag : 9 no-lag -> lag, 103 rows; 21 windows through the patched production
+  renderer: 15 policy-phase 0 px, 6 other-phase only on ages 84..99). Hidden Power (237, Unown) READY as a reclassification
+  (optional-lag-age 64, fixed lag 118; 1 : 9 -> no lag, 180 rows; UNOWN -> GOLBAT other phase ages 65..179). Ghost Curse
+  BLOCKED not by D4 (line 14 in 5 / 8; production has no Ghost-branch provider; port plan §4.3). Accounting if both land:
+  exact -2, faithful timing +2. Supervisor: `prep41Run.sh` into fresh dirs — all 7 receipts byte-identical.
 - Folded Opus worker `f5d6883f0` as `c826d5b40` (src tree `d15bc413`): General_SubstituteFade presented live as a
   presentation-only `substitute-fade` command (`src/engine/liveSubstituteFade.ts`; 106 player / 104 opponent rows = script
   rows + first inactive row + 2-row OAM tail; Scene ON and OFF), inserted before the "faded" message; BG-copy alpha + white
