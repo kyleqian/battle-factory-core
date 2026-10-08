@@ -1,0 +1,557 @@
+{
+ "schema": "subst-swap-live-check/v1",
+ "results": [
+  {
+   "probe": "s13swap-shinysteelix-on-opponent-golem-onix-headbutt-r1.json",
+   "side": "opponent",
+   "attacker": "STEELIX",
+   "target": "ONIX",
+   "move": "HEADBUTT",
+   "startFrame": 4344,
+   "endFrame": 4472,
+   "rows": 129,
+   "productionDuration": 129,
+   "kind": "swap",
+   "swapInRows": 40,
+   "bodyRows": 48,
+   "exactRows": 102,
+   "residualPixels": 1156,
+   "digest": "094e9927d4d23aea",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 1156,
+   "bodyPerRowDigest": "b0c9d3bc6f9336c1",
+   "firstMismatches": [
+    {
+     "age": 54,
+     "frame": 4398,
+     "px": 4,
+     "bbox": "220,50,220,53"
+    },
+    {
+     "age": 55,
+     "frame": 4399,
+     "px": 13,
+     "bbox": "200,11,221,54"
+    },
+    {
+     "age": 56,
+     "frame": 4400,
+     "px": 30,
+     "bbox": "194,13,222,63"
+    },
+    {
+     "age": 57,
+     "frame": 4401,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 58,
+     "frame": 4402,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 59,
+     "frame": 4403,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 60,
+     "frame": 4404,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 61,
+     "frame": 4405,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 62,
+     "frame": 4406,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 63,
+     "frame": 4407,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 64,
+     "frame": 4408,
+     "px": 49,
+     "bbox": "189,14,219,66"
+    },
+    {
+     "age": 65,
+     "frame": 4409,
+     "px": 49,
+     "bbox": "186,14,216,66"
+    },
+    {
+     "age": 66,
+     "frame": 4410,
+     "px": 49,
+     "bbox": "183,14,213,66"
+    },
+    {
+     "age": 67,
+     "frame": 4411,
+     "px": 49,
+     "bbox": "180,14,210,66"
+    },
+    {
+     "age": 68,
+     "frame": 4412,
+     "px": 49,
+     "bbox": "180,14,210,66"
+    },
+    {
+     "age": 69,
+     "frame": 4413,
+     "px": 49,
+     "bbox": "180,14,210,66"
+    },
+    {
+     "age": 70,
+     "frame": 4414,
+     "px": 49,
+     "bbox": "178,14,208,66"
+    },
+    {
+     "age": 71,
+     "frame": 4415,
+     "px": 49,
+     "bbox": "178,14,208,66"
+    },
+    {
+     "age": 72,
+     "frame": 4416,
+     "px": 49,
+     "bbox": "182,14,212,66"
+    },
+    {
+     "age": 73,
+     "frame": 4417,
+     "px": 49,
+     "bbox": "182,14,212,66"
+    },
+    {
+     "age": 74,
+     "frame": 4418,
+     "px": 49,
+     "bbox": "178,14,208,66"
+    },
+    {
+     "age": 75,
+     "frame": 4419,
+     "px": 49,
+     "bbox": "178,14,208,66"
+    },
+    {
+     "age": 76,
+     "frame": 4420,
+     "px": 49,
+     "bbox": "180,14,210,66"
+    },
+    {
+     "age": 77,
+     "frame": 4421,
+     "px": 49,
+     "bbox": "180,14,210,66"
+    },
+    {
+     "age": 78,
+     "frame": 4422,
+     "px": 49,
+     "bbox": "180,14,210,66"
+    },
+    {
+     "age": 79,
+     "frame": 4423,
+     "px": 23,
+     "bbox": "184,13,210,61"
+    },
+    {
+     "age": 80,
+     "frame": 4424,
+     "px": 8,
+     "bbox": "208,50,209,54"
+    }
+   ]
+  },
+  {
+   "probe": "s13swap-shinysteelix-on-opponent-golem-onix-headbutt-r1.json",
+   "side": "opponent",
+   "attacker": "STEELIX",
+   "target": "ONIX",
+   "move": "HEADBUTT",
+   "startFrame": 5766,
+   "endFrame": 5894,
+   "rows": 129,
+   "productionDuration": 129,
+   "kind": "swap",
+   "swapInRows": 40,
+   "bodyRows": 48,
+   "exactRows": 102,
+   "residualPixels": 1156,
+   "digest": "094e9927d4d23aea",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 1156,
+   "bodyPerRowDigest": "b0c9d3bc6f9336c1",
+   "firstMismatches": [
+    {
+     "age": 54,
+     "frame": 5820,
+     "px": 4,
+     "bbox": "220,50,220,53"
+    },
+    {
+     "age": 55,
+     "frame": 5821,
+     "px": 13,
+     "bbox": "200,11,221,54"
+    },
+    {
+     "age": 56,
+     "frame": 5822,
+     "px": 30,
+     "bbox": "194,13,222,63"
+    },
+    {
+     "age": 57,
+     "frame": 5823,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 58,
+     "frame": 5824,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 59,
+     "frame": 5825,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 60,
+     "frame": 5826,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 61,
+     "frame": 5827,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 62,
+     "frame": 5828,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 63,
+     "frame": 5829,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 64,
+     "frame": 5830,
+     "px": 49,
+     "bbox": "189,14,219,66"
+    },
+    {
+     "age": 65,
+     "frame": 5831,
+     "px": 49,
+     "bbox": "186,14,216,66"
+    },
+    {
+     "age": 66,
+     "frame": 5832,
+     "px": 49,
+     "bbox": "183,14,213,66"
+    },
+    {
+     "age": 67,
+     "frame": 5833,
+     "px": 49,
+     "bbox": "180,14,210,66"
+    },
+    {
+     "age": 68,
+     "frame": 5834,
+     "px": 49,
+     "bbox": "180,14,210,66"
+    },
+    {
+     "age": 69,
+     "frame": 5835,
+     "px": 49,
+     "bbox": "180,14,210,66"
+    },
+    {
+     "age": 70,
+     "frame": 5836,
+     "px": 49,
+     "bbox": "178,14,208,66"
+    },
+    {
+     "age": 71,
+     "frame": 5837,
+     "px": 49,
+     "bbox": "178,14,208,66"
+    },
+    {
+     "age": 72,
+     "frame": 5838,
+     "px": 49,
+     "bbox": "182,14,212,66"
+    },
+    {
+     "age": 73,
+     "frame": 5839,
+     "px": 49,
+     "bbox": "182,14,212,66"
+    },
+    {
+     "age": 74,
+     "frame": 5840,
+     "px": 49,
+     "bbox": "178,14,208,66"
+    },
+    {
+     "age": 75,
+     "frame": 5841,
+     "px": 49,
+     "bbox": "178,14,208,66"
+    },
+    {
+     "age": 76,
+     "frame": 5842,
+     "px": 49,
+     "bbox": "180,14,210,66"
+    },
+    {
+     "age": 77,
+     "frame": 5843,
+     "px": 49,
+     "bbox": "180,14,210,66"
+    },
+    {
+     "age": 78,
+     "frame": 5844,
+     "px": 49,
+     "bbox": "180,14,210,66"
+    },
+    {
+     "age": 79,
+     "frame": 5845,
+     "px": 23,
+     "bbox": "184,13,210,61"
+    },
+    {
+     "age": 80,
+     "frame": 5846,
+     "px": 8,
+     "bbox": "208,50,209,54"
+    }
+   ]
+  },
+  {
+   "probe": "s13swap-shinysteelix-on-opponent-golem-onix-headbutt-r1.json",
+   "side": "opponent",
+   "attacker": "STEELIX",
+   "target": "ONIX",
+   "move": "HEADBUTT",
+   "startFrame": 7188,
+   "endFrame": 7316,
+   "rows": 129,
+   "productionDuration": 129,
+   "kind": "swap",
+   "swapInRows": 40,
+   "bodyRows": 48,
+   "exactRows": 102,
+   "residualPixels": 1156,
+   "digest": "094e9927d4d23aea",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 1156,
+   "bodyPerRowDigest": "b0c9d3bc6f9336c1",
+   "firstMismatches": [
+    {
+     "age": 54,
+     "frame": 7242,
+     "px": 4,
+     "bbox": "220,50,220,53"
+    },
+    {
+     "age": 55,
+     "frame": 7243,
+     "px": 13,
+     "bbox": "200,11,221,54"
+    },
+    {
+     "age": 56,
+     "frame": 7244,
+     "px": 30,
+     "bbox": "194,13,222,63"
+    },
+    {
+     "age": 57,
+     "frame": 7245,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 58,
+     "frame": 7246,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 59,
+     "frame": 7247,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 60,
+     "frame": 7248,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 61,
+     "frame": 7249,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 62,
+     "frame": 7250,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 63,
+     "frame": 7251,
+     "px": 49,
+     "bbox": "192,14,222,66"
+    },
+    {
+     "age": 64,
+     "frame": 7252,
+     "px": 49,
+     "bbox": "189,14,219,66"
+    },
+    {
+     "age": 65,
+     "frame": 7253,
+     "px": 49,
+     "bbox": "186,14,216,66"
+    },
+    {
+     "age": 66,
+     "frame": 7254,
+     "px": 49,
+     "bbox": "183,14,213,66"
+    },
+    {
+     "age": 67,
+     "frame": 7255,
+     "px": 49,
+     "bbox": "180,14,210,66"
+    },
+    {
+     "age": 68,
+     "frame": 7256,
+     "px": 49,
+     "bbox": "180,14,210,66"
+    },
+    {
+     "age": 69,
+     "frame": 7257,
+     "px": 49,
+     "bbox": "180,14,210,66"
+    },
+    {
+     "age": 70,
+     "frame": 7258,
+     "px": 49,
+     "bbox": "178,14,208,66"
+    },
+    {
+     "age": 71,
+     "frame": 7259,
+     "px": 49,
+     "bbox": "178,14,208,66"
+    },
+    {
+     "age": 72,
+     "frame": 7260,
+     "px": 49,
+     "bbox": "182,14,212,66"
+    },
+    {
+     "age": 73,
+     "frame": 7261,
+     "px": 49,
+     "bbox": "182,14,212,66"
+    },
+    {
+     "age": 74,
+     "frame": 7262,
+     "px": 49,
+     "bbox": "178,14,208,66"
+    },
+    {
+     "age": 75,
+     "frame": 7263,
+     "px": 49,
+     "bbox": "178,14,208,66"
+    },
+    {
+     "age": 76,
+     "frame": 7264,
+     "px": 49,
+     "bbox": "180,14,210,66"
+    },
+    {
+     "age": 77,
+     "frame": 7265,
+     "px": 49,
+     "bbox": "180,14,210,66"
+    },
+    {
+     "age": 78,
+     "frame": 7266,
+     "px": 49,
+     "bbox": "180,14,210,66"
+    },
+    {
+     "age": 79,
+     "frame": 7267,
+     "px": 23,
+     "bbox": "184,13,210,61"
+    },
+    {
+     "age": 80,
+     "frame": 7268,
+     "px": 8,
+     "bbox": "208,50,209,54"
+    }
+   ]
+  }
+ ]
+}

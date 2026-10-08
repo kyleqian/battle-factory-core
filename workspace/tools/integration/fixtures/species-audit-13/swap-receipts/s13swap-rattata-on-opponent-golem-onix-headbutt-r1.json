@@ -1,0 +1,26 @@
+{
+ "schema": "subst-swap-live-check/v1",
+ "results": [
+  {
+   "probe": "s13swap-rattata-on-opponent-golem-onix-headbutt-r1.json",
+   "side": "opponent",
+   "attacker": "RATTATA",
+   "target": "ONIX",
+   "move": "HEADBUTT",
+   "startFrame": 7188,
+   "endFrame": 7316,
+   "rows": 129,
+   "productionDuration": 129,
+   "kind": "swap",
+   "swapInRows": 40,
+   "bodyRows": 48,
+   "exactRows": 129,
+   "residualPixels": 0,
+   "digest": "4cb3a4ab53216c82",
+   "swapRowsResidual": 0,
+   "bodyRowsResidual": 0,
+   "bodyPerRowDigest": "e9efd8e3bbd95bcd",
+   "firstMismatches": []
+  }
+ ]
+}

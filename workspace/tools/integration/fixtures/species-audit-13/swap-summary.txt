@@ -1,0 +1,54 @@
+s13swap-aerodactyl-on-opponent-persian-slowbro-bodyslam windows=5 identical=True BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages=
+s13swap-flygon-on-opponent-persian-slowbro-bodyslam windows=4 identical=True BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages=
+s13swap-steelix-on-opponent-persian-slowbro-bodyslam windows=5 identical=True BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages=
+s13swap-wailord-on-opponent-persian-slowbro-bodyslam windows=4 identical=True BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages=
+s13swap-tyranitar-on-opponent-persian-slowbro-bodyslam windows=3 identical=True BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages=
+s13swap-pichu-on-opponent-persian-slowbro-bodyslam windows=1 identical=True BODY_SLAM rows=188 dur=None px=0/0 ages=
+s13swap-onix-on-opponent-persian-slowbro-bodyslam windows=5 identical=True BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages=
+s13swap-rattata-on-opponent-persian-slowbro-bodyslam windows=2 identical=True BODY_SLAM rows=188 dur=None px=0/0 ages= | BODY_SLAM rows=188 dur=None px=0/0 ages=
+s13swap-shinysteelix-on-opponent-persian-slowbro-bodyslam windows=5 identical=True BODY_SLAM rows=188 dur=None px=256915/256915 ages= | BODY_SLAM rows=188 dur=None px=256915/256915 ages= | BODY_SLAM rows=188 dur=None px=256915/256915 ages= | BODY_SLAM rows=188 dur=None px=256915/256915 ages= | BODY_SLAM rows=188 dur=None px=256915/256915 ages=
+s13swap-aerodactyl-on-player-persian-slowbro-bodyslam windows=2 identical=True BODY_SLAM rows=192 dur=None px=0/0 ages= | BODY_SLAM rows=192 dur=None px=0/0 ages=
+s13swap-flygon-on-player-persian-slowbro-bodyslam windows=2 identical=True BODY_SLAM rows=192 dur=None px=0/0 ages= | BODY_SLAM rows=192 dur=None px=0/0 ages=
+s13swap-steelix-on-player-persian-slowbro-bodyslam windows=2 identical=True BODY_SLAM rows=192 dur=None px=0/0 ages= | BODY_SLAM rows=192 dur=None px=0/0 ages=
+s13swap-wailord-on-player-persian-slowbro-bodyslam windows=2 identical=True BODY_SLAM rows=192 dur=None px=0/0 ages= | BODY_SLAM rows=192 dur=None px=0/0 ages=
+s13swap-tyranitar-on-player-persian-slowbro-bodyslam windows=1 identical=True BODY_SLAM rows=192 dur=None px=0/0 ages=
+s13swap-pichu-on-player-persian-slowbro-bodyslam windows=0 identical=True
+s13swap-onix-on-player-persian-slowbro-bodyslam windows=2 identical=True BODY_SLAM rows=192 dur=None px=0/0 ages= | BODY_SLAM rows=192 dur=None px=0/0 ages=
+s13swap-rattata-on-player-persian-slowbro-bodyslam windows=1 identical=True BODY_SLAM rows=192 dur=None px=0/0 ages=
+s13swap-shinysteelix-on-player-persian-slowbro-bodyslam windows=2 identical=True BODY_SLAM rows=192 dur=None px=243663/243663 ages= | BODY_SLAM rows=192 dur=None px=243663/243663 ages=
+s13swap-aerodactyl-on-opponent-persian-slowbro-leechseed windows=1 identical=True LEECH_SEED rows=222 dur=None px=0/0 ages=
+s13swap-flygon-on-opponent-persian-slowbro-leechseed windows=1 identical=True LEECH_SEED rows=222 dur=None px=0/0 ages=
+s13swap-steelix-on-opponent-persian-slowbro-leechseed windows=1 identical=True LEECH_SEED rows=222 dur=None px=0/0 ages=
+s13swap-wailord-on-opponent-persian-slowbro-leechseed windows=1 identical=True LEECH_SEED rows=222 dur=None px=0/0 ages=
+s13swap-tyranitar-on-opponent-persian-slowbro-leechseed windows=1 identical=True LEECH_SEED rows=222 dur=None px=0/0 ages=
+s13swap-pichu-on-opponent-persian-slowbro-leechseed windows=0 identical=True
+s13swap-onix-on-opponent-persian-slowbro-leechseed windows=1 identical=True LEECH_SEED rows=222 dur=None px=0/0 ages=
+s13swap-rattata-on-opponent-persian-slowbro-leechseed windows=1 identical=True LEECH_SEED rows=222 dur=None px=0/0 ages=
+s13swap-shinysteelix-on-opponent-persian-slowbro-leechseed windows=1 identical=True LEECH_SEED rows=222 dur=None px=322374/322374 ages=
+s13swap-aerodactyl-on-player-persian-slowbro-leechseed windows=1 identical=True LEECH_SEED rows=226 dur=None px=0/0 ages=
+s13swap-flygon-on-player-persian-slowbro-leechseed windows=1 identical=True LEECH_SEED rows=226 dur=None px=32/32 ages=
+s13swap-steelix-on-player-persian-slowbro-leechseed windows=1 identical=True LEECH_SEED rows=226 dur=None px=0/0 ages=
+s13swap-wailord-on-player-persian-slowbro-leechseed windows=1 identical=True LEECH_SEED rows=226 dur=None px=0/0 ages=
+s13swap-tyranitar-on-player-persian-slowbro-leechseed windows=1 identical=True LEECH_SEED rows=226 dur=None px=0/0 ages=
+s13swap-pichu-on-player-persian-slowbro-leechseed windows=0 identical=True
+s13swap-onix-on-player-persian-slowbro-leechseed windows=1 identical=True LEECH_SEED rows=226 dur=None px=0/0 ages=
+s13swap-rattata-on-player-persian-slowbro-leechseed windows=1 identical=True LEECH_SEED rows=226 dur=None px=0/0 ages=
+s13swap-shinysteelix-on-player-persian-slowbro-leechseed windows=1 identical=True LEECH_SEED rows=226 dur=None px=307546/307546 ages=
+s13swap-aerodactyl-on-opponent-golem-onix-headbutt windows=3 identical=True HEADBUTT rows=129 dur=None px=1838/1838 ages= | HEADBUTT rows=129 dur=None px=1838/1838 ages= | HEADBUTT rows=129 dur=None px=1838/1838 ages=
+s13swap-flygon-on-opponent-golem-onix-headbutt windows=0 identical=True
+s13swap-steelix-on-opponent-golem-onix-headbutt windows=3 identical=True HEADBUTT rows=129 dur=None px=1156/1156 ages= | HEADBUTT rows=129 dur=None px=1156/1156 ages= | HEADBUTT rows=129 dur=None px=1156/1156 ages=
+s13swap-wailord-on-opponent-golem-onix-headbutt windows=0 identical=True
+s13swap-tyranitar-on-opponent-golem-onix-headbutt windows=5 identical=True HEADBUTT rows=129 dur=None px=686/686 ages= | HEADBUTT rows=129 dur=None px=686/686 ages= | HEADBUTT rows=129 dur=None px=686/686 ages= | HEADBUTT rows=129 dur=None px=686/686 ages= | HEADBUTT rows=129 dur=None px=686/686 ages=
+s13swap-pichu-on-opponent-golem-onix-headbutt windows=0 identical=True
+s13swap-onix-on-opponent-golem-onix-headbutt windows=3 identical=True HEADBUTT rows=129 dur=None px=0/0 ages= | HEADBUTT rows=129 dur=None px=0/0 ages= | HEADBUTT rows=129 dur=None px=0/0 ages=
+s13swap-rattata-on-opponent-golem-onix-headbutt windows=1 identical=True HEADBUTT rows=129 dur=None px=0/0 ages=
+s13swap-shinysteelix-on-opponent-golem-onix-headbutt windows=3 identical=True HEADBUTT rows=129 dur=None px=141163/141163 ages= | HEADBUTT rows=129 dur=None px=141163/141163 ages= | HEADBUTT rows=129 dur=None px=141163/141163 ages=
+s13swap-aerodactyl-on-player-zigzagoon-onix-headbutt windows=2 identical=True HEADBUTT rows=133 dur=None px=113/113 ages= | HEADBUTT rows=133 dur=None px=113/113 ages=
+s13swap-flygon-on-player-zigzagoon-onix-headbutt windows=2 identical=True HEADBUTT rows=133 dur=None px=0/0 ages= | HEADBUTT rows=133 dur=None px=0/0 ages=
+s13swap-steelix-on-player-zigzagoon-onix-headbutt windows=2 identical=True HEADBUTT rows=133 dur=None px=133/133 ages= | HEADBUTT rows=133 dur=None px=133/133 ages=
+s13swap-wailord-on-player-zigzagoon-onix-headbutt windows=2 identical=True HEADBUTT rows=133 dur=None px=25/25 ages= | HEADBUTT rows=133 dur=None px=25/25 ages=
+s13swap-tyranitar-on-player-zigzagoon-onix-headbutt windows=2 identical=True HEADBUTT rows=133 dur=None px=571/571 ages= | HEADBUTT rows=133 dur=None px=571/571 ages=
+s13swap-pichu-on-player-zigzagoon-onix-headbutt windows=1 identical=True HEADBUTT rows=133 dur=None px=0/0 ages=
+s13swap-onix-on-player-zigzagoon-onix-headbutt windows=2 identical=True HEADBUTT rows=133 dur=None px=473/473 ages= | HEADBUTT rows=133 dur=None px=473/473 ages=
+s13swap-rattata-on-player-zigzagoon-onix-headbutt windows=1 identical=True HEADBUTT rows=133 dur=None px=0/0 ages=
+s13swap-shinysteelix-on-player-zigzagoon-onix-headbutt windows=2 identical=True HEADBUTT rows=133 dur=None px=133589/133589 ages= | HEADBUTT rows=133 dur=None px=133589/133589 ages=
