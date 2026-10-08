@@ -26,6 +26,18 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- Folded Opus worker `dce515c0c` as `e8d132581` (src tree `9df94a55`): Substitute parts 1-2 (body adapter not reached).
+  Presentation-only `substituteDoll` field flag read from STATUS2_SUBSTITUTE at reducer boundaries (gameplay never
+  written); field art draws the source doll at (40,65) / (144,24), no elevation, opponent shadow hidden; set after a
+  completed Substitute body, cleared at the "substitute faded" message, faint, switch-out and ordinary switch-in
+  (Baton Pass keeps it). Every live adapter now DECLINES while the attacker's or defender's doll is shown (they drew the
+  defender from species art). Explosion route test moved from 17/35 (opponent subs first, now declines) to 35/35.
+  Boundary ratchet widened narrowly: `battleCommandFieldArt.ts` may import the static doll asset `substitute.json`
+  (supervisor-accepted, presentation-only). Found ISSUES #153 (Scene OFF skips the body). Worker gates 1,561 files /
+  12,811 tests, build, differential 624. Supervisor: prep37 probes fresh + `substDollFieldCheck.ts` twice — doll band
+  0 px on 1993 / 4399 / 2207 (Scene OFF) / 6898 rows, r1 == r2; union typecheck, smoke, 7 targeted files 42/42, own differential vs `3571855b0` 624/624.
+  Counts unchanged: 249 + 13 + 13,
+  1 remaining (Substitute body).
 - Species audit 11 (side, `e2a181c9d`, new files only): Dive / Extreme Speed / Ice Ball / Memento, 176 rows x2 fresh:
   139 0 px, 16 declines confirmed by gate lifts, DEFECT: Dive setup length hard-coded (most attacker species ~23-27k
   px; patch proof 0 px — reproduced by the supervisor), new lag cases (Extreme Speed 320/321; Dive CLAMPERL), TYRANITAR

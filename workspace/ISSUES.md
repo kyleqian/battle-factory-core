@@ -17,6 +17,15 @@ backlog.
 
 # Open
 
+## #153 — Scene OFF skips the Substitute body (kernel attackanimation port vs source; S10A, found 2026-10-07)
+
+Source plays Substitute (and Transform) through `Cmd_attackanimation` even when battle animations are off
+(`battle_script_commands.c:1748` exempts them; prep37 measured the 87-row body and the 103-row fade identically under
+Scene OFF). The kernel's attackanimation port (`battleScriptHitChainOpcode.ts` ~:2224) takes the no-animation pause
+for Substitute instead, so under Scene OFF the doll only appears from the next prompt (presentation timing only; no
+logical outcome measured to change). Gameplay-kernel owned: needs a main-lane fix with Scene OFF frame-timing proof.
+Evidence: `docs/next-adapters-prep37.md`, `tools/integration/fixtures/subst-live-receipt.json`.
+
 ## #152 — Species audits 9-11 remainder: Dive setup length, idle-rest gaps, Extrasensory split rows, new lag cases (S10A, 2026-10-07)
 
 Evidence `docs/live-species-audit-9.md`, receipts `tools/integration/fixtures/species-audit-9/`. FIXED in `a7402719b`
