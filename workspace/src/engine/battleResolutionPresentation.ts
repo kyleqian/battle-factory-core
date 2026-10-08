@@ -127,6 +127,12 @@ export type BattleResolutionPresentationCommand =
        */
       noCursor: boolean;
       timing: BattleMessageTiming;
+      /**
+       * Presentation-only: B_ANIM_SUBSTITUTE_FADE (battle_scripts_1.s BattleScript_SubstituteFade) ran for this battler
+       * right before this message (STRINGID_PKMNSUBSTITUTEFADED). The ROM fade ends on the mon (prep37: row 84 / 83), so
+       * the Substitute doll is no longer shown from this message on. The fade body itself is not presented (fallback).
+       */
+      substituteFadeBattler?: 0 | 1;
     }>
   | Readonly<{
       type: "move-animation";
@@ -3246,6 +3252,7 @@ export function projectBattleResolutionCommands(
   // the battler slot's CURRENT occupant, never a stale pre-switch one
   // (ISSUES #115).
   let currentField: BattleResolutionDisplayedField = field;
+  const substituteFades: { at: number; battler: 0 | 1 }[] = [];
 
   for (let index = 0; index < events.length; index += 1) {
     const event = events[index]!;
@@ -3358,6 +3365,10 @@ export function projectBattleResolutionCommands(
         direction: payload.kind === "trainer-slide-in" ? "in" as const : "out" as const,
         timing: TRAINER_SLIDE_TIMING,
       }));
+      continue;
+    }
+    if (payload.kind === "animation" && payload.animationId === "SUBSTITUTE_FADE") {
+      substituteFades.push({ at: commands.length, battler: singlesBattler(payload.battler ?? -1, "substitute fade") });
       continue;
     }
     if (
@@ -3698,6 +3709,13 @@ export function projectBattleResolutionCommands(
     throw new Error(
       "battle resolution switch has no switch-in-animation presentation marker",
     );
+  }
+  for (const fade of substituteFades) {
+    const at = commands.findIndex((command, index) => index >= fade.at && command.type === "message");
+    const message = commands[at];
+    if (message?.type === "message") {
+      commands[at] = Object.freeze({ ...message, substituteFadeBattler: fade.battler });
+    }
   }
   if (!commands.some(
     (command) => command.type === "message" && command.advance === "button",

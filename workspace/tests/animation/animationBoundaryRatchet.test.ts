@@ -80,6 +80,10 @@ describe("animation/engine boundary ratchet", () => {
       join("src", "engine", "liveMoveAnimation.ts"),
       // Integration-owned persistent palette inputs; presentation only.
       join("src", "engine", "liveMoveAnimationPalette.ts"),
+      // S10A Substitute doll field state (docs/next-adapters-prep37.md s3a): the static source doll sheets + palette
+      // (gSubstituteDoll{Front,Back}Gfx / gSubstituteDollPal, src/animation/assets/substitute.json) only; presentation
+      // field art, never imported by battle rules or AI.
+      join("src", "engine", "battleCommandFieldArt.ts"),
     ]);
     const violations: string[] = [];
     for (const file of collectTsFiles("src")) {

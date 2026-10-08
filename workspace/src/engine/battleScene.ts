@@ -814,6 +814,7 @@ import {
   type BattleCommandPresentationRenderView,
 } from "./battleCommandPresentationRender.ts";
 import type { BattleCommandFieldArtBattler, BattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
+import { battleCommandFieldArtElevation } from "./battleCommandFieldArt.ts";
 import type {
   BattleResolutionRenderEffect,
   BattleResolutionPresentationRenderView,
@@ -5168,6 +5169,8 @@ function drawGeneratedOpponentShadow(
   fb: Uint8Array,
   fieldArt: BattleCommandFieldArtView,
 ): void {
+  // The doll hides the battler's shadow (battle_gfx_sfx_util.c:1220; prep37: 4479 + 7008 doll rows).
+  if (fieldArt.opponent.substituteDoll) return;
   if (
     !elevatedEnemyShadowSpecies.has(
       `SPECIES_${fieldArt.opponent.speciesSymbol}`,
@@ -5261,7 +5264,7 @@ export function drawGeneratedOpponentRelease(
   const origin = {
     x: fieldView.fieldArt.opponent.origin.x,
     y: fieldView.fieldArt.opponent.origin.y
-      - enemyMonElevation(fieldView.fieldArt.opponent.speciesSymbol),
+      - battleCommandFieldArtElevation(fieldView.fieldArt.opponent, "opponent"),
   };
   if (coeff === 0) {
     // Battle Scene OFF never launches the front-sprite animation task
@@ -5666,7 +5669,7 @@ export function renderGeneratedBattleStartPlayerRelease(
     fieldView.fieldArt.opponent.pic.palette as RgbColor[],
     fieldView.fieldArt.opponent.origin.x,
     fieldView.fieldArt.opponent.origin.y
-      - enemyMonElevation(fieldView.fieldArt.opponent.speciesSymbol),
+      - battleCommandFieldArtElevation(fieldView.fieldArt.opponent, "opponent"),
   );
   const throwFrame = brendanThrowFrame(playerVisualT);
   if (playerVisualT < BRENDAN_THROW_START_TICK) {
@@ -8120,7 +8123,7 @@ export function drawBattle2ActionMenuWindow(
         fieldArt.opponent.pic.tileset as Tileset,
         fieldArt.opponent.pic.palette as RgbColor[],
         fieldArt.opponent.origin.x,
-        fieldArt.opponent.origin.y - enemyMonElevation(fieldArt.opponent.speciesSymbol),
+        fieldArt.opponent.origin.y - battleCommandFieldArtElevation(fieldArt.opponent, "opponent"),
       );
     }
   } else {
@@ -54344,7 +54347,7 @@ function drawMidBattleSwitchInSprite(
         materializeLocal
       ] ?? 0;
       const originY = state.side === "opponent"
-        ? art.origin.y - enemyMonElevation(art.speciesSymbol)
+        ? art.origin.y - battleCommandFieldArtElevation(art, "opponent")
         : art.origin.y;
       if (state.side === "opponent") {
         // Same source release reducer as the generated battle-start opponent:
@@ -54382,7 +54385,7 @@ function drawMidBattleSwitchInSprite(
         paletteOverride ?? (art.pic.palette as RgbColor[]),
         art.origin.x,
         state.side === "opponent"
-          ? art.origin.y - enemyMonElevation(art.speciesSymbol)
+          ? art.origin.y - battleCommandFieldArtElevation(art, "opponent")
           : art.origin.y,
       );
     }
@@ -54601,7 +54604,7 @@ export function renderBattleResolutionSceneOffView(
         view.fieldArt.opponent.pic.palette as RgbColor[],
         view.fieldArt.opponent.origin.x,
         view.fieldArt.opponent.origin.y
-          - enemyMonElevation(view.fieldArt.opponent.speciesSymbol)
+          - battleCommandFieldArtElevation(view.fieldArt.opponent, "opponent")
           + faint.sink.y2,
         faint.sink.keptRows,
       );
@@ -54614,7 +54617,7 @@ export function renderBattleResolutionSceneOffView(
         view.fieldArt.opponent.pic.tileset as Tileset,
         view.fieldArt.opponent.pic.palette as RgbColor[],
         view.fieldArt.opponent.origin.x,
-        view.fieldArt.opponent.origin.y - enemyMonElevation(view.fieldArt.opponent.speciesSymbol),
+        view.fieldArt.opponent.origin.y - battleCommandFieldArtElevation(view.fieldArt.opponent, "opponent"),
       );
     }
   }

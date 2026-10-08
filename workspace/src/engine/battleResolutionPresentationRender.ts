@@ -764,10 +764,56 @@ function withDisplayedStatus(
   );
 }
 
+function withSubstituteDoll(
+  field: BattleResolutionDisplayedField,
+  battler: 0 | 1,
+  doll: boolean,
+): BattleResolutionDisplayedField {
+  const current = fieldBattler(field, battler);
+  if ((current.substituteDoll === true) === doll) return field;
+  const { substituteDoll: _shown, ...mon } = current;
+  return replaceFieldBattler(field, battler, Object.freeze(doll ? { ...mon, substituteDoll: true as const } : mon));
+}
+
+/**
+ * Presentation-only Substitute doll at a command's START (prep37 s2-3): the ROM swaps the doll back to the mon
+ * (SUBSTITUTE_TO_MON) before a faint or a switch-out's return to ball (battle_controller_player.c:2249, 2412), and the
+ * fade (not presented: fallback) ends on the mon before STRINGID_PKMNSUBSTITUTEFADED prints. A switch-in's send-in
+ * shows the mon; a Baton Pass carry re-shows the doll only once the switch-in completes.
+ */
+export function substituteDollAtCommandStart(
+  field: BattleResolutionDisplayedField,
+  command: BattleResolutionPresentationCommand,
+): BattleResolutionDisplayedField {
+  if (command.type === "faint" || command.type === "switch-out") return withSubstituteDoll(field, command.battler, false);
+  if (command.type === "message" && command.substituteFadeBattler !== undefined) {
+    return withSubstituteDoll(field, command.substituteFadeBattler, false);
+  }
+  return field;
+}
+
+/**
+ * Presentation-only Substitute doll after a COMPLETED command: a completed Substitute body (move 164's
+ * MOVE_ANIMATION request; the ROM's doll latch is body row 86, behindSubstitute at 87) shows its attacker as the doll;
+ * a switch-in shows its incoming battler as the settled field does (a Baton Pass carry keeps STATUS2_SUBSTITUTE, so
+ * the incoming snapshot is a doll; any other switch-in clears it). Never read by rules, RNG or the queue.
+ */
+export function applySubstituteDollCommand(
+  field: BattleResolutionDisplayedField,
+  command: BattleResolutionPresentationCommand,
+): BattleResolutionDisplayedField {
+  const started = substituteDollAtCommandStart(field, command);
+  if (command.type === "move-animation" && command.animation?.moveId === 164) {
+    return withSubstituteDoll(started, command.battler, true);
+  }
+  return started;
+}
+
 function applyCompletedCommand(
   field: BattleResolutionDisplayedField,
   command: BattleResolutionPresentationCommand,
 ): BattleResolutionDisplayedField {
+  field = applySubstituteDollCommand(field, command);
   if (command.type === "hp") {
     return withDisplayedHp(field, command.battler, command.to);
   }
@@ -1101,11 +1147,11 @@ export function createBattleResolutionPresentationRenderView(
         "battle resolution switch-in lifecycle requires message and switch commands",
       );
     }
-    field = replaceFieldBattler(
+    field = withSubstituteDoll(replaceFieldBattler(
       field,
       switchCommand.battler,
       switchCommand.incoming,
-    );
+    ), switchCommand.battler, false);
     latestMessage = message.lines;
     switchIn = Object.freeze({
       elapsed: state.lifecycle.phaseElapsed,
@@ -1159,6 +1205,14 @@ export function createBattleResolutionPresentationRenderView(
   let hpTarget: Readonly<{ battler: 0 | 1; to: number }> | null = null;
   let waitCursor: Readonly<{ age: number }> | null = null;
   let activeTrainerSlide: Readonly<{ battler: 0 | 1; offscreenX2: number }> | null = null;
+  if (
+    command !== null
+    && (state.lifecycle.phase === "presenting"
+      || state.lifecycle.phase === "awaiting-message-dismiss"
+      || state.lifecycle.phase === "forced-party-handoff")
+  ) {
+    field = substituteDollAtCommandStart(field, command);
+  }
 
   if (
     (
@@ -1291,7 +1345,7 @@ export function createBattleResolutionPresentationRenderView(
     } else if (command.type === "switch-in") {
       // The incoming mon is already the field battler; the mid-battle
       // switch-in view holds its visible onset until the ball-release emerge.
-      field = replaceFieldBattler(field, command.battler, command.incoming);
+      field = withSubstituteDoll(replaceFieldBattler(field, command.battler, command.incoming), command.battler, false);
       midBattleSwitchIn = midBattleSwitchInAt(
         state.lifecycle.phaseElapsed,
         command.battler,
