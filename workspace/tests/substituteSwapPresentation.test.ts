@@ -58,7 +58,7 @@ describe("Substitute swap task (AnimTask_SwapMonSpriteToFromSubstitute)", () => 
 
 describe("live adapters with a Substitute doll", () => {
   it("a subbed ATTACKER's proven body is presented with the swaps; the defender doll and unproven bodies still decline", () => {
-    expect([...LIVE_SUBSTITUTE_SWAP_BODY_IDS].sort((a, b) => a - b)).toEqual([29, 34, 73]);
+    expect([29, 34, 73].every((id) => LIVE_SUBSTITUTE_SWAP_BODY_IDS.has(id))).toBe(true);
     const plain = field(false, false);
     for (const [moveId, body] of [[29, 48], [34, 107], [73, 141]] as const) {
       expect(liveMoveAnimationDuration(req(moveId, 0), plain)).toBe(body);

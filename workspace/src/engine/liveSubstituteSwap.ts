@@ -75,13 +75,33 @@ export function substituteSwapScriptRows(side: Side): number {
 }
 
 /**
- * Move bodies proven dense through swap + idle + body + swap-back with a subbed attacker (subst-swap-live-receipt.json):
- * Headbutt (29; GOLEM / ZIGZAGOON player, GOLEM / ONIX (idle rest +1) opponent) and Body Slam (34; PERSIAN<->SLOWBRO both
- * sides, elevated GOLBAT opponent attacker and target). Bodies whose adapter window does not start at activation (e.g. Bite's 26 rows) cannot be
- * framed. Every other attacker-doll body keeps declining (the whole command falls back), including multi-hit and two-turn
- * bodies.
+ * (move id, attacker side) cells proven dense through swap + idle + body + swap-back with a subbed attacker:
+ * - subst-swap-live-receipt.json: Headbutt (29; GOLEM / ZIGZAGOON player, GOLEM / ONIX (idle rest +1) opponent), Body Slam
+ *   (34; PERSIAN<->SLOWBRO both sides, elevated GOLBAT opponent attacker and target) and Leech Seed (73);
+ * - attdoll-live-receipt.json (docs/next-adapters-prep40.md s1, fresh direct-mGBA PERSIAN<->SLOWBRO windows): the bodies whose
+ *   adapter window is the ROM body (activation .. first inactive row).
+ * Every other attacker-doll cell keeps declining (the whole command falls back), including multi-hit and two-turn bodies.
  */
-export const LIVE_SUBSTITUTE_SWAP_BODY_IDS: ReadonlySet<number> = new Set([29, 34, 73]);
+const BOTH: readonly Side[] = Object.freeze(["player", "opponent"]);
+export const LIVE_SUBSTITUTE_SWAP_BODY_CELLS: ReadonlyMap<number, readonly Side[]> = new Map<number, readonly Side[]>([
+  [29, BOTH], [34, BOTH], [73, BOTH],
+  // prep40 one-batch: production's own adapter window, 0 px on every row.
+  [8, BOTH], // Ice Punch
+  [25, BOTH], // Mega Kick
+  [38, BOTH], // Double-Edge
+  [56, BOTH], // Hydro Pump
+  [57, BOTH], // Surf
+  [86, BOTH], // Thunder Wave
+  [109, BOTH], // Confuse Ray
+  [157, Object.freeze(["opponent"] as const)], // Rock Slide (the adapter is opponent-only)
+  [213, BOTH], // Attract
+  [242, BOTH], // Crunch
+  [263, BOTH], // Facade
+  [280, BOTH], // Brick Break
+  [317, BOTH], // Rock Tomb
+  [332, Object.freeze(["player"] as const)], // Aerial Ace (opponent: the doll-free control's own 1 px, not an accepted scope)
+]);
+export const LIVE_SUBSTITUTE_SWAP_BODY_IDS: ReadonlySet<number> = new Set(LIVE_SUBSTITUTE_SWAP_BODY_CELLS.keys());
 
 function battlerOf(field: BattleResolutionDisplayedField, battler: number): BattleCommandFieldBattler {
   return battler === 0 ? field.player : field.opponent;
@@ -107,7 +127,7 @@ export function liveSubstituteSwapApplies(
   if (battlerOf(field, request.attacker).substituteDoll !== true) return null;
   return request.target !== request.attacker
     && battlerOf(field, request.target).substituteDoll !== true
-    && LIVE_SUBSTITUTE_SWAP_BODY_IDS.has(request.moveId)
+    && (LIVE_SUBSTITUTE_SWAP_BODY_CELLS.get(request.moveId) ?? []).includes(request.attacker === 0 ? "player" : "opponent")
     && request.multihit < 2;
 }
 
