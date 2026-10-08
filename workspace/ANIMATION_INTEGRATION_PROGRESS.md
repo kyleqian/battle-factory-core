@@ -12,6 +12,14 @@
   Worker gates 1,563 files / 12,823 tests, build 873, differential 624. Supervisor: `substSwapRun.sh` into fresh dirs —
   probes r1 == r2 (13 scenarios), 21 windows x2 runs 0 px, GOLEM-player residual == non-subbed control, negatives fail;
   union typecheck, smoke 448, 9 targeted files 128/128, own differential vs `bb4dc2558` 624/624. Logs `.integration/validation/swap-20261008/`.
+- prep43 (side, `39c6dff36`, new files only; merged `4172ef604`): sprite-order EXACT plans for the census's top order-host
+  stops: CONFUSION (`Cfffff;D1,2,0,3,4`, 17 / 17 ROM checks), PRZ (a survivor-count bug in spriteOrderProvider.ts ~:407: the
+  alternating spark slots were counted four times; existing plan + carry 13 / 13 exact), Dig setup / unleash and Brick Break
+  normal / shattered keyed by turn, LEECH_SEED_DRAIN, sandstorm WEATHER_VAR; BLOCKED: Giga Drain (species geometry), hail
+  (battler coordinates), RAIN_CONTINUES (Random2 words, not covered by the deferred lend), locked-turn continuation
+  (orchestrator), return to ball (not reached). Temp patch (4 files): census seeds 0..199 75.68 -> 78.10 % by count, 75.95
+  -> 79.22 % by frames, 0 regressions, identical command set; corpus replay known 1130 -> 1136, 0 mismatches. Supervisor:
+  `prep43Run.sh` into fresh dirs — all 10 receipts byte-identical.
 - Folded Opus worker `fd0f539dd` as `2ba4da4a3` (src tree `15be9e2a`): (a) Pursuit (228) later bodies FAITHFUL TIMING (lag at
   82, fixed 60 / 61; 24 : 9 -> lag, 103 rows; first-body gate lifted, body 2 after the attacker's own Pursuit proven with 12
   turn-2 windows); (b) Hidden Power (237, Unown) FAITHFUL TIMING (lag 64, fixed 118; 1 : 9 -> no lag, 180 rows); (c) audit-14
