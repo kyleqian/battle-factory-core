@@ -404,7 +404,8 @@ export function applySpriteOrderUnitPlan(
     }
   }
   const survivors = [...cursor.survivors];
-  survivors[unit] = Object.freeze(made.filter(slot => occupied.has(slot)));
+  // A slot freed and re-taken inside the unit appears once per creation in `made`: only its last creation can be alive.
+  survivors[unit] = Object.freeze(made.filter((slot, index) => occupied.has(slot) && made.lastIndexOf(slot) === index));
   return Object.freeze({
     order: make(true, free, cursor.order.pendingDestroyed),
     occupied: Object.freeze([...occupied].sort((left, right) => left - right)),

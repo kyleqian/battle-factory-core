@@ -1,0 +1,1709 @@
+{
+ "schema": "sprite-order-body-plans/rows-v1",
+ "note": "prep43 EXACT plans (docs/next-adapters-prep43.md; receipts units.json / check.json in this directory). 10091 / 10280 = 10000 + move id: liveSpriteOrderHost.ts maps an odd MOVE_ANIMATION request.turn (choosetwoturnanim, gAnimMoveTurn & 1) of Dig / Brick Break to them, like Sky Attack's 10143. anims: SPRITE_ORDER_PRODUCTION_ANIMS rows replacing the gap-causes NEEDS-KEYS / absent rows.",
+ "bodies": {
+  "91:player": {
+   "verdict": "EXACT-PLAN",
+   "rule": "Dig setup (choosetwoturnanim turn 0)",
+   "tier": "confirmed",
+   "evidence": "setup 4/4 (both sides, Chansey / Snorlax defender)",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ],
+      [
+       "n",
+       3,
+       "f"
+      ],
+      [
+       "n",
+       4,
+       "f"
+      ],
+      [
+       "n",
+       5,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ],
+      [
+       "n",
+       2
+      ],
+      [
+       "n",
+       5
+      ],
+      [
+       "n",
+       4
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       6,
+       "f"
+      ],
+      [
+       "n",
+       7,
+       "f"
+      ],
+      [
+       "n",
+       8,
+       "f"
+      ],
+      [
+       "n",
+       9,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       7
+      ],
+      [
+       "n",
+       6
+      ],
+      [
+       "n",
+       9
+      ],
+      [
+       "n",
+       8
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       10,
+       "f"
+      ],
+      [
+       "n",
+       11,
+       "f"
+      ],
+      [
+       "n",
+       12,
+       "f"
+      ],
+      [
+       "n",
+       13,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       11
+      ],
+      [
+       "n",
+       10
+      ],
+      [
+       "n",
+       13
+      ],
+      [
+       "n",
+       12
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       14,
+       "f"
+      ],
+      [
+       "n",
+       15,
+       "f"
+      ],
+      [
+       "n",
+       16,
+       "f"
+      ],
+      [
+       "n",
+       17,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       15
+      ],
+      [
+       "n",
+       14
+      ],
+      [
+       "n",
+       17
+      ],
+      [
+       "n",
+       16
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       18,
+       "f"
+      ],
+      [
+       "n",
+       19,
+       "f"
+      ],
+      [
+       "n",
+       20,
+       "f"
+      ],
+      [
+       "n",
+       21,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       19
+      ],
+      [
+       "n",
+       18
+      ],
+      [
+       "n",
+       21
+      ],
+      [
+       "n",
+       20
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ],
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ]
+  },
+  "91:opponent": {
+   "verdict": "EXACT-PLAN",
+   "rule": "Dig setup (choosetwoturnanim turn 0)",
+   "tier": "confirmed",
+   "evidence": "setup 4/4 (both sides, Chansey / Snorlax defender)",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ],
+      [
+       "n",
+       3,
+       "f"
+      ],
+      [
+       "n",
+       4,
+       "f"
+      ],
+      [
+       "n",
+       5,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ],
+      [
+       "n",
+       2
+      ],
+      [
+       "n",
+       5
+      ],
+      [
+       "n",
+       4
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       6,
+       "f"
+      ],
+      [
+       "n",
+       7,
+       "f"
+      ],
+      [
+       "n",
+       8,
+       "f"
+      ],
+      [
+       "n",
+       9,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       7
+      ],
+      [
+       "n",
+       6
+      ],
+      [
+       "n",
+       9
+      ],
+      [
+       "n",
+       8
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       10,
+       "f"
+      ],
+      [
+       "n",
+       11,
+       "f"
+      ],
+      [
+       "n",
+       12,
+       "f"
+      ],
+      [
+       "n",
+       13,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       11
+      ],
+      [
+       "n",
+       10
+      ],
+      [
+       "n",
+       13
+      ],
+      [
+       "n",
+       12
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       14,
+       "f"
+      ],
+      [
+       "n",
+       15,
+       "f"
+      ],
+      [
+       "n",
+       16,
+       "f"
+      ],
+      [
+       "n",
+       17,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       15
+      ],
+      [
+       "n",
+       14
+      ],
+      [
+       "n",
+       17
+      ],
+      [
+       "n",
+       16
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       18,
+       "f"
+      ],
+      [
+       "n",
+       19,
+       "f"
+      ],
+      [
+       "n",
+       20,
+       "f"
+      ],
+      [
+       "n",
+       21,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       19
+      ],
+      [
+       "n",
+       18
+      ],
+      [
+       "n",
+       21
+      ],
+      [
+       "n",
+       20
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ],
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ]
+  },
+  "10091:player": {
+   "verdict": "EXACT-PLAN",
+   "rule": "Dig unleash (choosetwoturnanim turn 1), key = 10000 + move id",
+   "tier": "confirmed",
+   "evidence": "unleash 4/4 (both sides, Chansey / Snorlax defender)",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ],
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ]
+  },
+  "10091:opponent": {
+   "verdict": "EXACT-PLAN",
+   "rule": "Dig unleash (choosetwoturnanim turn 1), key = 10000 + move id",
+   "tier": "confirmed",
+   "evidence": "unleash 4/4 (both sides, Chansey / Snorlax defender)",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ],
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ]
+  },
+  "280:player": {
+   "verdict": "EXACT-PLAN",
+   "rule": "Brick Break, no screen broken (choosetwoturnanim turn 0)",
+   "tier": "confirmed",
+   "evidence": "normal 4/4 (both sides, Onix / Snorlax)",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ],
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       4,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       4
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       5,
+       "f"
+      ],
+      [
+       "n",
+       6,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       5
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       6
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       7,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       7
+      ]
+     ]
+    }
+   ]
+  },
+  "280:opponent": {
+   "verdict": "EXACT-PLAN",
+   "rule": "Brick Break, no screen broken (choosetwoturnanim turn 0)",
+   "tier": "confirmed",
+   "evidence": "normal 4/4 (both sides, Onix / Snorlax)",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ],
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       4,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       4
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       5,
+       "f"
+      ],
+      [
+       "n",
+       6,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       5
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       6
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       7,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       7
+      ]
+     ]
+    }
+   ]
+  },
+  "10280:player": {
+   "verdict": "EXACT-PLAN",
+   "rule": "Brick Break, screen shattered (Cmd_removelightscreenreflect turn 1), key = 10000 + move id",
+   "tier": "confirmed",
+   "evidence": "shattered 4/4 (both sides, Onix / Snorlax)",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ],
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       4,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       4
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       5,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       5
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       6,
+       "f"
+      ],
+      [
+       "n",
+       7,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       6
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       7
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       8,
+       "f"
+      ],
+      [
+       "n",
+       9,
+       "f"
+      ],
+      [
+       "n",
+       10,
+       "f"
+      ],
+      [
+       "n",
+       11,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       10
+      ],
+      [
+       "n",
+       11
+      ],
+      [
+       "n",
+       8
+      ],
+      [
+       "n",
+       9
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       12,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       12
+      ]
+     ]
+    }
+   ]
+  },
+  "10280:opponent": {
+   "verdict": "EXACT-PLAN",
+   "rule": "Brick Break, screen shattered (Cmd_removelightscreenreflect turn 1), key = 10000 + move id",
+   "tier": "confirmed",
+   "evidence": "shattered 4/4 (both sides, Onix / Snorlax)",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ],
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       4,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       4
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       5,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       5
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       6,
+       "f"
+      ],
+      [
+       "n",
+       7,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       6
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       7
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       8,
+       "f"
+      ],
+      [
+       "n",
+       9,
+       "f"
+      ],
+      [
+       "n",
+       10,
+       "f"
+      ],
+      [
+       "n",
+       11,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       10
+      ],
+      [
+       "n",
+       11
+      ],
+      [
+       "n",
+       8
+      ],
+      [
+       "n",
+       9
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       12,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       12
+      ]
+     ]
+    }
+   ]
+  }
+ },
+ "anims": {
+  "Status:B_ANIM_STATUS_CONFUSION": {
+   "verdict": "EXACT-PLAN",
+   "rule": "Status_Confusion: five ducks destroyed on one frame, last sort [1,2,0,3,4] on both sides (source: battle_anim_normal.c AnimConfusionDuck_Step)",
+   "tier": "confirmed",
+   "evidence": "17/17 (both sides; Onix, Snorlax, Golbat, Diglett)",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ],
+      [
+       "n",
+       2,
+       "f"
+      ],
+      [
+       "n",
+       3,
+       "f"
+      ],
+      [
+       "n",
+       4,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ],
+      [
+       "n",
+       2
+      ],
+      [
+       "n",
+       0
+      ],
+      [
+       "n",
+       3
+      ],
+      [
+       "n",
+       4
+      ]
+     ]
+    }
+   ]
+  },
+  "General:B_ANIM_LEECH_SEED_DRAIN": {
+   "verdict": "EXACT-PLAN",
+   "rule": "General_LeechSeedDrain: goto Move_ABSORB (orb core)",
+   "tier": "confirmed",
+   "evidence": "7/7 (both sides; Onix, Snorlax, Golbat seeded)",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       4,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       5,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       6,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       7,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       8,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       5
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       4
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       6
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       7
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       8
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       9,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       10,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       11,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       9
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       12,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       10
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       11
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       12
+      ]
+     ]
+    }
+   ]
+  },
+  "General:B_ANIM_SANDSTORM_CONTINUES": {
+   "verdict": "EXACT-PLAN",
+   "rule": "General_Sandstorm: goto Move_SANDSTORM (= body 201 plan); WEATHER_VAR argument 12 in the host",
+   "tier": "confirmed",
+   "evidence": "3/3 (both sides, Onix / Snorlax)",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       4,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       5,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       6,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       5
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       4
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       6
+      ]
+     ]
+    }
+   ]
+  }
+ }
+}

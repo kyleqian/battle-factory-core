@@ -129,7 +129,10 @@ describe("post-KO entry-label lend (rung 2, presentation-only)", () => {
       expect(fixture.precedingTurns, path).toEqual(JSON.parse(JSON.stringify(postkoTurnsToEdge(key, index))));
       const lend = replayPostKoTurnsThroughHost(fixture.precedingTurns as never);
       const edge = modelCheck(key).edges[index]!;
-      expect(lend.spriteOrderInput?.free, path).toEqual(edge.rung2Lend ? referenceRelabel(edge.rung2Lend) : undefined);
+      // An edge the reference model left unlent may be lent once its predecessor is planned (prep43: Thunderbolt's PRZ unit before
+      // postko-rock-tomb-player's edge): the lend must then equal the ROM's free order at the edge, relabelled.
+      expect(lend.spriteOrderInput?.free, path).toEqual(edge.rung2Lend ? referenceRelabel(edge.rung2Lend)
+        : lend.spriteOrderInput === undefined ? undefined : referenceRelabel((edge as unknown as { rom: View }).rom));
       const whatif = relabels.find(name => path.endsWith(`postko-${name.replace(/^whatif-|\.whatif-relabel\.json$/g, "")}.json`));
       if (whatif) {
         const receipt = JSON.parse(readFileSync(FX + whatif, "utf8")) as { lendFree: number[]; rows: number; exactRows: number };

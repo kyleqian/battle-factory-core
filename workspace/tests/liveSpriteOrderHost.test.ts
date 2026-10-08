@@ -5,11 +5,12 @@ import {
   KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, invalidateSpriteOrderState, knownEntrySpriteOrderState,
 } from "../src/engine/spriteOrderProvider.ts";
 import {
-  advanceLiveSpriteOrderHost, beginLiveSpriteOrderTurn, createLiveSpriteOrderHost, liveSpriteOrderBattlersPresent,
+  advanceLiveSpriteOrderHost, beginLiveSpriteOrderTurn, createLiveSpriteOrderHost, lendLiveSpriteOrder, liveSpriteOrderBattlersPresent,
   openLiveSpriteOrderHostPartyMenu, returnLiveSpriteOrderHostFromPartyMenu, seedLiveSpriteOrderHostFromBattleStart,
   type LiveSpriteOrderHost,
 } from "../src/engine/liveSpriteOrderHost.ts";
 import type { BattleKernelSemanticEvent } from "../src/engine/battleDecisionBoundary.ts";
+import { applySpriteOrderPresentationEvent, createSpriteOrderTracker, type SpriteOrderPresentationEvent } from "../src/engine/spriteOrderEventTransform.ts";
 import { battleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
 import { ORDER_CONSUMER_MOVES, predictLentOrders, predictTrackers, scanRoute } from "../tools/integration/orderCrossBodyRouteScan.ts";
 import { evidenceEvents, maskSlotsOf, productionReplay } from "../tools/integration/spriteOrderBattleUnitsReplay.ts";
@@ -20,7 +21,9 @@ type Replay = ReturnType<typeof generatedCommandAnimationReplay>;
 // known pre-body tracker (35 of 80 without the battle units).
 // hostKnown 477 -> 524, laterAfter 47 -> 51: Roar/Whirlwind forced switch-out + send-in units keep the tracker known
 // (docs/forced-switch-continuation.md §2.4); declines and mismatches unchanged.
-const SWEEP_PIN = { compared: 863, hostKnown: 524, declines: 27, laterAfter: 51 };
+// prep43 plans: hostKnown 524 -> 626, laterAfter 51 -> 63; declines 27 -> 63 = edges the pure transform now knows past a planned unit
+// that the host still refuses (its host-only invalidations, e.g. the retained locked-action continuation); still 0 mismatches.
+const SWEEP_PIN = { compared: 863, hostKnown: 626, declines: 63, laterAfter: 63 };
 const bodies = (run: Replay) => run.commands.filter(row => row.type === "move-animation");
 
 function expectRulesEqual(on: Replay, off: Replay): void {
@@ -102,7 +105,8 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
     }
     // laterKnown 34 -> 44: the 10 post-KO bodies of seeds 8 (2), 10 (1) and 11 (7, five after a second opponent KO) now lend.
     // laterKnown 44 -> 48: the 4 bodies after a Roar/Whirlwind forced switch-out + send-in now lend (same pure prediction).
-    expect({ later, laterKnown, postKoLent }).toEqual({ later: 80, laterKnown: 48, postKoLent: 10 });
+    // laterKnown 48 -> 56: prep43 plans (CONFUSION / LEECH_SEED_DRAIN / sandstorm / Dig / Brick Break, the PRZ survivor count).
+    expect({ later, laterKnown, postKoLent }).toEqual({ later: 80, laterKnown: 56, postKoLent: 10 });
     expect(laterUnknownAfterKnown).toBeGreaterThan(0);
     expect(invalidatedBattles).toBeGreaterThan(0);
   }, 120000);
@@ -129,7 +133,8 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
         if (after.preBody.get(body.sequence)?.cursor.order.known) laterAfter += 1;
       }
     }
-    expect({ mismatches, later, laterBefore }).toEqual({ mismatches: 0, later: 80, laterBefore: 35 });
+    // laterBefore 35 -> 47: prep43 plans (same pure prediction, 0 mismatches).
+    expect({ mismatches, later, laterBefore }).toEqual({ mismatches: 0, later: 80, laterBefore: 47 });
     expect({ compared, hostKnown, declines, laterAfter }).toEqual(SWEEP_PIN);
   }, 120000);
 
@@ -233,13 +238,21 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
       expect(route.phase).toBe("action-menu");
       expectRulesEqual(route.on, generatedCommandAnimationReplay(seed, "off", slots));
     }
-    // Seed 16 [slot 1, Grudge]: an earlier body has no EXACT plan -> Grudge declines (scene-off fallback).
-    const declined = scanRoute(16, [1, 3]);
-    const grudge = declined.bodies.find(row => row.moveId === 288)!;
+    // Seed 16 [slot 1, Grudge]: Confuse Ray's confusion status unit used to end the tracker (Grudge declined); STATUS_CONFUSION is
+    // EXACT since prep43 (docs/next-adapters-prep43.md), so Grudge is now a known, agreeing later body.
+    const confused = scanRoute(16, [1, 3]);
+    const grudge = confused.bodies.find(row => row.moveId === 288)!;
     expect(grudge.index).toBeGreaterThan(0);
-    expect(grudge.known).toBe(false);
-    expect(declined.consumers.find(row => row.moveId === 288)!.activeAny).toBe(false);
+    expect(grudge.known && !grudge.mismatch).toBe(true);
     expect(ORDER_CONSUMER_MOVES[288]).toBe("GRUDGE");
+    // After a body without an EXACT plan (Giga Drain 202: species-geometry key) the host lends nothing: the consumer declines.
+    const ev = (sequence: number, kind: string, extra: object = {}) =>
+      Object.freeze({ sequence, payload: { kind, ...extra }, provenance: undefined }) as unknown as BattleKernelSemanticEvent;
+    const host = advanceLiveSpriteOrderHost(Object.freeze({ ...createLiveSpriteOrderHost(knownEntrySpriteOrderState("ordinary-factory")), promptRequestId: 2 }),
+      { resolutionId: { requestId: 2 }, segmentIndex: 0, segments: [{ events: [
+        ev(1, "animation", { animationId: "MOVE_ANIMATION", battler: 1, target: 0, arguments: ["202", "0", "0", "0", "0", "0"] })] }] },
+      Number.POSITIVE_INFINITY);
+    expect(lendLiveSpriteOrder(host, 288)).toBeUndefined();
   }, 120000);
 
   // docs/voluntary-switch-lend-audit.md §4: reshowBoth roles, the voluntary recall as the switch-out unit, allocator re-seeded after the
@@ -249,7 +262,8 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
       { slots: [{ switch: 1 }, 0], post: ["113LA", "61L"] }, // Light Screen: re-seeded after the voluntary switch-in
       { slots: ["cancel-party", 0], post: ["113LA", "325L"] }, // Light Screen: re-seeded at the cancel return
       { slots: [0, { switch: 1 }, 0], pre: ["113LA", "325L"], post: ["129L", "129L", "61L"] },
-      { slots: [{ switch: 2 }, 0, 0], post: ["113LA", "129L", "209L", "9-", "209-"] }, // 209 (no EXACT plan) ends the tracker
+      // Spark's PRZ status unit used to end the tracker ("4 survivors", the prep43 survivor-count fix): the later bodies now lend.
+      { slots: [{ switch: 2 }, 0, 0], post: ["113LA", "129L", "209L", "9L", "209L"] },
     ] as const;
     for (const { slots, post, ...route } of routes) {
       const on = generatedCommandAnimationReplay(16, "on", slots);
@@ -312,4 +326,40 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
     expect(on.animations.slice(0, 2).map(row => [row.moveId, row.ages.length > 0 && row.adapterActive.every(Boolean)])).toEqual([[290, true], [332, true]]);
     expect(off.commands.every(row => row.spriteOrderInput === undefined)).toBe(true);
   }, 120000);
+});
+
+describe("order host event keys (prep43)", () => {
+  const ev = (sequence: number, kind: string, extra: object = {}) =>
+    Object.freeze({ sequence, payload: { kind, ...extra }, provenance: undefined }) as unknown as BattleKernelSemanticEvent;
+  const after = (events: readonly BattleKernelSemanticEvent[]) => {
+    const host: LiveSpriteOrderHost = Object.freeze({ ...createLiveSpriteOrderHost(knownEntrySpriteOrderState("ordinary-factory")), promptRequestId: 3 });
+    return advanceLiveSpriteOrderHost(host, { resolutionId: { requestId: 3 }, segmentIndex: 0, segments: [{ events }] }, Number.POSITIVE_INFINITY).tracker;
+  };
+  const expected = (event: SpriteOrderPresentationEvent) =>
+    applySpriteOrderPresentationEvent(createSpriteOrderTracker(knownEntrySpriteOrderState("ordinary-factory")), event);
+  const move = (moveId: number, turn: number, battler: 0 | 1) =>
+    ev(10, "animation", { animationId: "MOVE_ANIMATION", battler, target: 1 - battler, arguments: [`${moveId}`, `${turn}`, "0", "0", "0", "0"] });
+
+  it("an odd choosetwoturnanim turn of Dig / Brick Break (like Sky Attack) keys the body 10000 + move id", () => {
+    for (const [moveId, turn, key] of [[91, 0, 91], [91, 1, 10091], [280, 0, 280], [280, 1, 10280], [143, 1, 10143], [143, 0, 143]] as const) {
+      for (const battler of [0, 1] as const) {
+        const tracker = after([move(moveId, turn, battler)]);
+        const want = expected({ kind: "move-animation", moveId: key, attackerSide: battler === 0 ? "player" : "opponent" });
+        expect(tracker.cursor.order.known, `${moveId}/${turn}`).toBe(true);
+        expect(tracker.cursor.order.free, `${moveId}/${turn}`).toEqual(want.cursor.order.free);
+      }
+    }
+    // The two Brick Break branches allocate differently: the key is load-bearing.
+    expect(after([move(280, 1, 1)]).cursor.order.free).not.toEqual(after([move(280, 0, 1)]).cursor.order.free);
+  });
+
+  it("WEATHER_VAR with sB_ANIM_ARG1 12 is SANDSTORM_CONTINUES (planned); 13 HAIL_CONTINUES and no argument stay unknown", () => {
+    const weather = (args: readonly string[]) => after([ev(10, "animation", { animationId: "WEATHER_VAR", battler: 0, target: 0, arguments: args })]);
+    const sandstorm = weather(["12"]);
+    expect(sandstorm.cursor.order.known).toBe(true);
+    expect(sandstorm.cursor.order.free).toEqual(expected({ kind: "general-animation", animation: "SANDSTORM_CONTINUES" }).cursor.order.free);
+    expect(weather(["13"]).cursor.order.known).toBe(false);
+    expect(weather(["13"]).invalidReason).toContain("HAIL_CONTINUES");
+    expect(weather([]).cursor.order.known).toBe(false);
+  });
 });

@@ -146,15 +146,17 @@ describe("live order-consumer adapters: Grudge (while the tracked order is known
     expectRulesEqual(on, off);
   }, 120000);
 
-  it("declines (scene-off fallback) when an earlier body has no EXACT plan (seed 16, slots [1, 3])", () => {
+  // Before prep43 the Confuse Ray confusion status unit before Grudge had no EXACT plan and Grudge declined here; STATUS_CONFUSION is EXACT
+  // now (host == pure transform on this route: tests/liveSpriteOrderHost.test.ts). The decline gate itself: liveSpriteOrderHost.test.ts (Giga Drain).
+  it("renders live once the earlier confusion unit is planned (seed 16, slots [1, 3]; declined before prep43)", () => {
     const on = generatedCommandAnimationReplay(16, "on", [1, 3], 0);
     const off = generatedCommandAnimationReplay(16, "off", [1, 3], 0);
     const body = on.animations.find(a => a.moveId === 288 && a.attacker === 0)!;
     expect(body.ages).toEqual(Array.from({ length: 209 }, (_, age) => age));
-    expect(body.adapterActive.some(Boolean)).toBe(false);
+    expect(body.adapterActive.some(Boolean)).toBe(true);
     const grudge = on.commands.find(row => row.type === "move-animation"
       && (row.command as { animation?: { moveId: number } }).animation?.moveId === 288)!;
-    expect(grudge.spriteOrderInput).toBeUndefined();
+    expect(grudge.spriteOrderInput).toBeDefined();
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expectRulesEqual(on, off);
   }, 120000);
