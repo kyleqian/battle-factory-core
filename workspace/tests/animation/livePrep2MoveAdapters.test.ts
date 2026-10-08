@@ -22,7 +22,9 @@ const cases = [
   { id: 252, move: "FAKE_OUT", duration: 86, shadow: true, alt: ["LOMBRE", "ONIX"], route: { seed: 23, slot: 1 as const, streak: 0 } },
   { id: 322, move: "COSMIC_POWER", duration: 241, shadow: true, alt: ["SOLROCK", "ONIX"], route: { seed: 26, slot: 1 as const, streak: 7 } },
   { id: 248, move: "FUTURE_SIGHT", duration: 114, shadow: false, alt: ["ABSOL", "ONIX"], route: { seed: 11, slot: 2 as const, streak: 0 } },
-  { id: 153, move: "EXPLOSION", duration: 212, shadow: false, alt: ["FORRETRESS", "ONIX"], route: { seed: 17, slot: 0 as const, streak: 35 } },
+  // S10A Substitute: the former route 17/35 FORRETRESS hits the opponent's Substitute doll (164:1->1 first), so the shared gate
+  // declines it (asserted below); 35/35 STEELIX is the first live candidate of r3ProfileRouteSearch.ts 153 8 1 4000 (stall allowed).
+  { id: 153, move: "EXPLOSION", duration: 212, shadow: false, alt: ["FORRETRESS", "ONIX"], route: { seed: 35, slot: 3 as const, streak: 35 } },
 ];
 
 function displayed(player: string, opponent: string): BattleResolutionDisplayedField {
@@ -142,6 +144,17 @@ describe("live prep2 move adapters", () => {
     expect(on.stalled).toBe(true);
     expect(off.stalled).toBe(true);
     expect(on.state.battleForcedPartySelect).toBeTruthy();
+    expect(rulesWithoutSceneMarker(on.state.battle as never)).toEqual(rulesWithoutSceneMarker(off.state.battle as never));
+    expect(on.state.battle!.rng).toEqual(off.state.battle!.rng);
+  }, 120000);
+
+  it("Explosion into a Substitute doll (route 17/35 FORRETRESS): the body declines to the fallback; ON/OFF rules and RNG equal", () => {
+    const on = generatedCommandAnimationReplay(17, "on", [0], 35, true);
+    const off = generatedCommandAnimationReplay(17, "off", [0], 35, true);
+    expect(on.requests.map((q) => `${q.moveId}:${q.attacker}->${q.target}`)).toEqual(["164:1->1", "153:0->1"]);
+    expect(on.animations.find(a => a.moveId === 153)).toBeUndefined();
+    expect(on.stalled).toBe(true);
+    expect(off.stalled).toBe(true);
     expect(rulesWithoutSceneMarker(on.state.battle as never)).toEqual(rulesWithoutSceneMarker(off.state.battle as never));
     expect(on.state.battle!.rng).toEqual(off.state.battle!.rng);
   }, 120000);
