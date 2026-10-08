@@ -35,14 +35,14 @@ separate deterministic presentation RNG for Random2 animations, preserve its
 seed in session exports, and report those live adapters as "faithful random"
 separately from exact claims. S10A below defines the scope and acceptance.
 This resolves D3; no further user approval is needed for that implementation.
-Implemented 2026-10-06: `docs/presentation-rng.md`; 12 faithful-random adapters live (2026-10-07).
+Implemented 2026-10-06: `docs/presentation-rng.md`; 13 faithful-random adapters live (2026-10-07 evening).
 **User decision D4, 2026-10-07:** option (b) is approved. Implement deterministic
 dominant measured CPU-load timing in a separate "faithful timing" category;
 see `docs/faithful-timing.md` and ANIMATION_VERIFICATION.md. This also covers
 further evidenced lag-frame / VBlank-phase cases without asking again. The user
 authorized unblocking and finishing S10A; prioritize remaining adapters and
 ordinary-play continuation, batch shared mechanisms and reuse valid evidence.
-This decision adds no live adapter credit; implementation remains next-run work.
+Implemented 2026-10-07: `src/engine/liveMoveTimingPolicy.ts` + `docs/faithful-timing-policy.md`; 13 faithful-timing adapters live.
 
 ## Operational notes
 
@@ -2216,28 +2216,23 @@ fourteen-move physical batch is verified and folded. Helping Hand remains
 unaccepted pending legal doubles staging. No whole-playable arbitrary-history
 framebuffer exactness is claimed.
 
-Next (2026-10-07 morning): 246 scoped-exact live adapters + 12 faithful-random (D3 surrogate) adapters
-(production src tree `1efb1872`); 18 accepted bodies remain (census `246+12+0+18=276`). The 2026-10-06 night session added the hardware-OAM provider
-(`src/engine/liveMoveOamAssembler.ts`, `liveOamMoves.ts`), source models for Curse / Return / Endeavor, two
-builder families (`liveProfileMoves.ts`, `liveQ2Moves.ts`), 14 production sprite-order plan rows, and fixed
-ISSUES #150 and the idle-x2 part of #151. **D4 option (b) is approved (2026-10-07):**
-ship dominant measured CPU-load timing in a separate "faithful timing" bucket
-under `docs/faithful-timing.md`; no open user decision blocks launch. Finish the
-remaining accepted bodies and ordinary-play continuations before new exploratory
-campaigns. Resume points, in order:
-1. Implement D4 claim accounting and deterministic timing consumers: Megahorn, Meteor Mash, Mach Punch, Extrasensory, Nightmare, Psywave, Flatter, Ice Ball,
-   Revenge, Curse Ghost (models / evidence banked: `docs/next-adapters-prep23..26.md`); #151 Sheer Cold tail and
-   Hyper Voice age-59 row (`docs/issue151-diagnosis.md`).
-2. Ready recipes: Dive (faithful-random; `docs/next-adapters-prep25.md` §B.1a anchor split + plan rows);
-   Eruption (source-derived duration builder) and Spit Up (provider) (`docs/next-adapters-prep29.md`).
-3. Baton Pass flow: opponent instant removal hold 9 -> message E+14 -> ball E+51 (species-keyed tail); the
-   player's outgoing healthbox A+48..A+75 (`docs/next-adapters-prep27.md` §1-§4). Endeavor W3 port (declines today).
-4. Providers still missing: Superpower (inventory in prep26), Skill Swap / Shock Wave (graphics host: OAM + VRAM
-   + BG registers), Substitute (doll state), Memento (scanline buffer), Extreme Speed (early ages unevidenced).
-5. Sprite-order coverage: 66 NEEDS-KEYS cells + 14 inconclusive (`docs/sprite-order-plan-gaps-28.md`) limit
-   later bodies; Confusion / TURN_TRAP status animations; #148 `unknown`; #146 send-in tail.
-6. Species-swap audit after every adapter batch (audits 5-8 this session found 4 real defect classes) and a
-   verifier fix so a target personality reaches the shiny gate.
+Next (2026-10-07 evening): 250 scoped-exact + 13 faithful-random + 13 faithful-timing live adapters (production src tree `7d28da92`);
+no accepted Factory body remains without a live adapter (census `250+13+13+0+0=276`). The 2026-10-07 day session implemented D4 (timing policy module, disjoint
+faithful-timing accounting), integrated the banked recipes and providers, reclassified #151 (Sheer Cold, Hyper Voice)
+to faithful timing, added the presentation-only Substitute doll field state with shared adapter declines, and fixed
+four species-audit defect classes. Many adapters are scoped (first body, known order lend, declines for unmodelled
+history); the inventory names each gate. Resume points, in order:
+1. Substitute status animations (SUBSTITUTE_TO_MON / MON_TO_SUBSTITUTE swaps: one task + a graphics swap; then the
+   fade) — adapters decline while a doll is shown until they are presented; ISSUES #153 (Scene OFF skips the body).
+2. Deferred post-body sprite-order lend for multi-body Random2 moves: Ice Ball counters 1..4 and the Dive attack body
+   decline today (`docs/s10a-random2-order-lend-blocker.md`; render-seam replay design checked 12/12 transitions).
+3. ISSUES #152 remainder: Mach Punch idle-rest targets, Extrasensory opponent-target scanline-split rows, new D4 lag cases
+   (Extreme Speed 320/321, Dive CLAMPERL) -> policy entries, TYRANITAR rows; species audit of Skill Swap / Flatter /
+   Eruption / Substitute (not yet audited).
+4. D4 widening of live adapters: Pursuit later bodies (lb26), Hidden Power GOLBAT lag, Ghost-type Curse (prep23); Baton
+   Pass flow (prep27); Endeavor W3.
+5. Sprite-order coverage (66 NEEDS-KEYS cells), status animations (Confusion / TURN_TRAP), #148 `unknown`, #146.
+6. Species-swap audit after every adapter batch (audits 9-11 found 4 defect classes, all fixed or gated).
 Validate new adapters with alternate-species dense proofs whose windows come from
 the source activation frame, not only the accepted fixture species.
 Latest progress supersedes this starting checkpoint as verified work lands.

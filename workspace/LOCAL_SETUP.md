@@ -17,8 +17,8 @@ bash tools/integration/start-local-preview.sh
 
 For hot reload use `npm run dev` (port 5173). The browser app needs neither the
 server nor the ROM/oracle at runtime. The current live adapter count is
-in `ANIMATION_INTEGRATION_PROGRESS.md` (246 scoped-exact + 12 faithful-random of 276
-accepted Factory bodies on 2026-10-07).
+in `ANIMATION_INTEGRATION_PROGRESS.md` (250 scoped-exact + 13 faithful-random + 13 faithful-timing of 276
+accepted Factory bodies on 2026-10-07 evening).
 Helping Hand is the sole unaccepted Factory move, pending legal doubles staging.
 Whole-playable arbitrary-history framebuffer exactness remains unclaimed.
 

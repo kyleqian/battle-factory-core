@@ -26,6 +26,14 @@
   (policy-phase windows 0 px; Megahorn early-fade accepted O only ages 158..173, Meteor Mash no-lag windows only
   196..211); union typecheck, smoke 448, 19 targeted files 779/779, own differential vs `ae9f3c623` 389/389.
   Counts: 246 + 12 + 4 faithful-timing, 14 remaining.
+- Folded Opus worker `b5f011e99` as `8d064d26c` (src tree `7d28da92`): EXACT Substitute body (164; 87 rows; renderer
+  branch generalised under liveField with live battler art, doll at the attacker corner + the body's own x2; staged
+  GOLEM/ONIX digests byte-identical; the first frame after the body shows the doll; route 11/35 JYNX live every age,
+  ON/OFF parity). 6 windows (accepted P/O, PERSIAN<->SLOWBRO both sides, Scene OFF ROM body, elevated GOLBAT) 0 px.
+  Status animations (swaps / fade) stay on fallback; Scene OFF never plays the body (ISSUES #153). Worker gates 1,562
+  files / 12,815 tests, build, differential 624. Supervisor: 6 windows x2 fresh 0 px; final independent gates on `8d064d26c` (src `7d28da92`): typecheck,
+  1,562 files / 12,815 tests, build 872, differential 624/624 (`final-supervisor-gates-20261007-evening.json`).
+  CENSUS COMPLETE: 250 scoped-exact + 13 faithful-random + 13 faithful-timing + 0 remaining = 276.
 - Folded Opus worker `99f569157` as `08e1c9c4c` (src tree `807fb60b`): Dive setup length from the attacker's ball rule
   (`picOffsetPoint.y` on the displayed field; callers without a field keep 117 / 114), droplet Random2 draw age keyed to
   the splash birth via a `LiveMoveRandom2PlanContext` passed from `core.ts` (words still only from the presentation
