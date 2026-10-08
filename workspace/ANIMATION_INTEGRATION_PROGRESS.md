@@ -12,6 +12,20 @@
   Worker gates 1,563 files / 12,823 tests, build 873, differential 624. Supervisor: `substSwapRun.sh` into fresh dirs —
   probes r1 == r2 (13 scenarios), 21 windows x2 runs 0 px, GOLEM-player residual == non-subbed control, negatives fail;
   union typecheck, smoke 448, 9 targeted files 128/128, own differential vs `bb4dc2558` 624/624. Logs `.integration/validation/swap-20261008/`.
+- Folded Opus worker `d6eb7d564` as `3d3873a57` (src tree `4af0870a`): subbed-ATTACKER swaps widened per (move, attacker side)
+  (`LIVE_SUBSTITUTE_SWAP_BODY_CELLS`): the prep40 one-batch (14 bodies, 26 cells), ROM body framing
+  (`LIVE_SUBSTITUTE_SWAP_BODY_FRAMING`: first inactive row + activation shift; Earthquake, Psychic p, Sludge Bomb,
+  Flamethrower, Toxic, Bite, Fire Punch, Explosion), the order-dependent bodies via the order-neutral Substitute lend (Ice
+  Beam, Thunderbolt, Giga Drain, Overheat, Seismic Toss, Megahorn D4) — 53 cells; one-row tail latch (doll at x2 -5 / +5 on
+  the next command's first row, same segment; composite length unchanged). 84 windows / 21,821 rows, 81 at 0 px; the 3
+  others are not swap-related (Giga Drain after [164, 33, 202, 33]: no order lend, falls back as doll-free; Megahorn
+  opponent 175-row ROM body = the D4 phase not shipped). Still declining: Mud-Slap (first-body lend), Shadow Ball (154 / 155
+  phase; player control residual), Solar Beam (turn gate), Roar (target x2 +98), Dig (hidden attacker), multi-hit split,
+  faint / switch-out swap-in, doll-free-control residual cells. Route SHUCKLE 243/35 subbed Toxic 316-row composite, ON/OFF
+  parity. Counts unchanged. Worker gates 1,566 files / 12,893 tests, build 873, differential 624, 161 timing fixtures 0
+  violations, 21 swap windows rerun 0. Supervisor: `attdollRun.sh` into fresh dirs — probes r1 == r2 (59; one exit-138
+  teardown papercut, output complete), all 84 windows identical to the committed receipt (px, digests, tail rows; tail latch
+  84/84 0 px vs 600 / 679 without); union typecheck, smoke 448, 12 targeted files 204/204, own differential vs `c554ffc20` 624/624. Logs `.integration/validation/attdoll-20261008/`.
 - prep39 (side, `2d19ac6ed`, new files only): General_SubstituteFade source model READY-WITH-CHANGE through the production
   compositor: 14 windows / 1,436 rows (GOLEM<->ONIX both sides, PERSIAN<->SLOWBRO, Scene OFF, RATTATA, elevated GOLBAT):
   11 policy-exact 0 px, 3 alternate-phase (alpha step / blendoff one row early; 2 x 271 px) attributed; 5 negatives fail.
