@@ -94,7 +94,9 @@
       "move": "MOVE_MEGA_KICK",
       "id": 25,
       "sourceFieldEvidence": "../tools/integration/fixtures/physical-batch-live-adapter-receipt.json",
-      "liveEvidence": [],
+      "liveEvidence": [
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: mega-kick-player, mega-kick-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts)."
+      ],
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison",
         "ordinary command-input replay"
@@ -126,7 +128,8 @@
       "id": 34,
       "sourceFieldEvidence": "../tools/integration/fixtures/physical2a-live-adapter-receipt.json",
       "liveEvidence": [
-        "seed 4 / streak 14: MAGCARGO -> WAILMER, both ordinary orientations; second command fully paralyzed; ON/OFF rules and RNG equal"
+        "seed 4 / streak 14: MAGCARGO -> WAILMER, both ordinary orientations; second command fully paralyzed; ON/OFF rules and RNG equal",
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: body-slam-player, body-slam-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts)."
       ],
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison"
@@ -149,7 +152,8 @@
       "id": 38,
       "sourceFieldEvidence": "../tools/integration/fixtures/physical2a-live-adapter-receipt.json",
       "liveEvidence": [
-        "seed 11 / streak 14: HITMONTOP -> WIGGLYTUFF; recoil queue completion and ON/OFF parity"
+        "seed 11 / streak 14: HITMONTOP -> WIGGLYTUFF; recoil queue completion and ON/OFF parity",
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side opponent only; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: double-edge-opponent, df-double-edge-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts). The player side declines (an unresolved history residual after an earlier Double-Edge)."
       ],
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison",
@@ -203,7 +207,9 @@
     {
       "move": "MOVE_BITE",
       "id": 44,
-      "liveEvidence": [],
+      "liveEvidence": [
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: bite-player, bite-opponent, df-bite-meowth-magneton-player, df-bite-meowth-magneton-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts)."
+      ],
       "remaining": [
         "independent arbitrary-species framebuffer comparison",
         "ordinary command-input replay"
@@ -354,7 +360,9 @@
     {
       "move": "MOVE_PSYCHIC",
       "id": 94,
-      "liveEvidence": [],
+      "liveEvidence": [
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: psychic-player, psychic-opponent, psychic-golbat-player, df-psychic-kadabra-golbat-player, df-psychic-haunter-kadabra-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts). The HAUNTER -> KADABRA window differs only on the pre-activation row (age -5: the elevated HAUNTER attacker's shadow, not the doll)."
+      ],
       "sourceFieldEvidence": "../tools/integration/fixtures/status-batch-live-framebuffer-receipt.json",
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison",
@@ -614,7 +622,9 @@
       "move": "MOVE_ATTRACT",
       "id": 213,
       "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
-      "liveEvidence": [],
+      "liveEvidence": [
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: attract-player, attract-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts)."
+      ],
       "remaining": [
         "independent arbitrary-species/history comparison",
         "ordinary command-input replay"
@@ -654,7 +664,8 @@
       "move": "MOVE_CRUNCH",
       "id": 242,
       "liveEvidence": [
-        "seed 7 MAWILE -> VOLBEAT twice"
+        "seed 7 MAWILE -> VOLBEAT twice",
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: crunch-player, crunch-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts)."
       ],
       "sourceFieldEvidence": "../tools/integration/fixtures/live-contact-source-field-receipt.json",
       "remaining": [
@@ -674,7 +685,9 @@
     {
       "move": "MOVE_SHADOW_BALL",
       "id": 247,
-      "liveEvidence": [],
+      "liveEvidence": [
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side player only; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: df-shadow-ball-sableye-magneton-player, shadow-ball-player (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts). The PERSIAN -> SLOWBRO window carries only the doll-free control's own residual (ages 64..94) and the 156-row tail phase (132..147); the accepted SABLEYE -> MAGNETON pair is exact. The opponent side declines (the doll-free control's tail-phase residual is not an accepted scope)."
+      ],
       "sourceFieldEvidence": "../tools/integration/fixtures/status-batch-live-framebuffer-receipt.json",
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison",
@@ -694,7 +707,8 @@
       "move": "MOVE_BRICK_BREAK",
       "id": 280,
       "liveEvidence": [
-        "seed 23 player LOMBRE -> FARFETCHD twice"
+        "seed 23 player LOMBRE -> FARFETCHD twice",
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: brick-break-player, brick-break-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts)."
       ],
       "remaining": [
         "independent arbitrary-species framebuffer comparison"
@@ -1106,7 +1120,8 @@
       ],
       "liveEvidence": [
         "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
-        "generated command seed 8 slot 2 streak 14: complete body with attacker 0, ON/OFF rules/RNG equal"
+        "generated command seed 8 slot 2 streak 14: complete body with attacker 0, ON/OFF rules/RNG equal",
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: sludge-bomb-player, sludge-bomb-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts)."
       ],
       "palettePlan": "no plan, history invalidates",
       "remaining": [
@@ -1688,7 +1703,8 @@
         "../tools/integration/fixtures/anchor4-live-adapter-receipt.json"
       ],
       "liveEvidence": [
-        "dense source framebuffer, both orientations, twice fresh x2 batches, zero residual, rows = accepted window (anchor4-earthquake-*.json)"
+        "dense source framebuffer, both orientations, twice fresh x2 batches, zero residual, rows = accepted window (anchor4-earthquake-*.json)",
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: earthquake-player, earthquake-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts)."
       ],
       "palettePlan": "no plan, history invalidates",
       "remaining": [
@@ -1872,7 +1888,8 @@
       ],
       "liveEvidence": [
         "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep2-surf-*.json)",
-        "alternate-species dense proof twice fresh, zero residual (altspecies3-surf-player-sealeo-opponent-shuckle.json, window 69..212)"
+        "alternate-species dense proof twice fresh, zero residual (altspecies3-surf-player-sealeo-opponent-shuckle.json, window 69..212)",
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: surf-player, surf-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts)."
       ],
       "palettePlan": "no plan, history invalidates",
       "remaining": [
@@ -2257,7 +2274,8 @@
       ],
       "liveEvidence": [
         "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (order-consumer-flamethrower-*.json, 126 rows incl. 11 negative-age rows, ageOffset -11, duration 115)",
-        "ordinary route seed 22 / streak 21 / move slot 0 (MAGMAR; a LATER body: the opponent's Quick Attack is the first, so no host order is lent): adapter active 115/115, action-menu, ON/OFF rules/RNG equal; alternate carrier HOUNDOUR (rental set 119) dense 126/126 both orientations x2 exact (altspecies9-flamethrower-*.json); order withheld (ascending seed) also exact"
+        "ordinary route seed 22 / streak 21 / move slot 0 (MAGMAR; a LATER body: the opponent's Quick Attack is the first, so no host order is lent): adapter active 115/115, action-menu, ON/OFF rules/RNG equal; alternate carrier HOUNDOUR (rental set 119) dense 126/126 both orientations x2 exact (altspecies9-flamethrower-*.json); order withheld (ascending seed) also exact",
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: flamethrower-player, flamethrower-opponent, df-flamethrower-houndour-murkrow-player, df-flamethrower-houndour-murkrow-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts)."
       ],
       "palettePlan": "no plan, history invalidates",
       "spriteOrder": "order-independent (docs/order-consumer-prep.md section 0): renders with or without a host order; flames are one per sort window so the seed is pixel-neutral (provider seed when known, ascending slots otherwise; 0/130 ages change for 5 alternative seeds)",
@@ -2500,7 +2518,8 @@
         "dense source framebuffer, both orientations, twice fresh, zero residual, 50 rows from the ACTIVATION frame (prep7-aerial-ace-*.json): the accepted 236/232-row windows begin 35/31 rows earlier with idle body rows owned by the queue's preceding message command; live age 0 = activation = reducer age 42 (animationAgeOffset 42, both orientations); the 151-row hit/HP/text tail is queue commands",
         "ordinary route seed 3 / streak 0 / move index 0 (PIDGEOTTO): adapter active 50/50, action-menu, ON/OFF rules/RNG equal",
         "alternate species dense proofs twice fresh: CHARIZARD player attacker 50/50 and DELIBIRD opponent attacker 50/50 zero residual, DRAGONAIR lab controls player 50/50; CHARIZARD / DRAGONAIR opponent attackers 48/50 (14 / 51 px at ages 10-11 on the opponent platform clip row y 74: the live clip is the absolute terrain row, the ROM shows those pixels)",
-        "species targets (#145 D2, settled target x = frontIdleRest.x2): GOLEM / GOLBAT / SHUCKLE lab targets 50/50 twice fresh zero residual (previously 15/50 GOLEM); accepted ONIX fixtures unchanged"
+        "species targets (#145 D2, settled target x = frontIdleRest.x2): GOLEM / GOLBAT / SHUCKLE lab targets 50/50 twice fresh zero residual (previously 15/50 GOLEM); accepted ONIX fixtures unchanged",
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side player only; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: aerial-ace-player (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts). The opponent side declines (the doll-free control's own 1 px is not an accepted scope)."
       ],
       "palettePlan": "no plan, history invalidates",
       "spriteOrder": "order-independent (0/40 seeds)",
@@ -2518,7 +2537,8 @@
       ],
       "liveEvidence": [
         "dense source framebuffer, both orientations, twice fresh, zero residual, 33 rows from the ACTIVATION frame (prep7-quick-attack-*.json; accepted windows start 37/33 rows earlier, queue message rows); live age 0 = activation = reducer age 44",
-        "ordinary route seed 3 / streak 0 / move index 1 (PIDGEOTTO): adapter active 33/33, action-menu, ON/OFF rules/RNG equal"
+        "ordinary route seed 3 / streak 0 / move index 1 (PIDGEOTTO): adapter active 33/33, action-menu, ON/OFF rules/RNG equal",
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side opponent only; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: quick-attack-opponent, df-quick-attack-pidgeotto-onix-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts). The PERSIAN -> SLOWBRO window has the doll-free control's own 1 px (age 9); the player side declines (unresolved residual inside the doll box)."
       ],
       "palettePlan": "no plan, history invalidates",
       "spriteOrder": "afterimage slots are labels: 0 equal-key pairs (prep7-quick-attack-tie.json), 0/40 seeds",
@@ -2593,7 +2613,8 @@
       ],
       "liveEvidence": [
         "dense source framebuffer, OPPONENT attacker only, twice fresh, zero residual, 138 rows (prep7-rock-slide-opponent.json via the staged probe wrapper), with the provider order (first body) and with the order withheld (POKEBENCH_LIVE_ORDER_INPUT=none); player attacker has no accepted evidence and returns null (fallback)",
-        "ordinary route: the opponent's ONIX seed 134 / streak 0, player presses move 0: adapter active 138/138, action-menu, ON/OFF rules/RNG equal"
+        "ordinary route: the opponent's ONIX seed 134 / streak 0, player presses move 0: adapter active 138/138, action-menu, ON/OFF rules/RNG equal",
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side opponent (the adapter is opponent-only); LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow. Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: rock-slide-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts)."
       ],
       "palettePlan": "no plan, history invalidates",
       "spriteOrder": "spriteOrderSeed = provider order (known-entry occupied prefix + F) when the tracked order is known, else the accepted known-entry literal; pixel-neutral (0/40 seeds, both measured equal here)",
@@ -2786,7 +2807,8 @@
       "liveEvidence": [
         "dense source framebuffer, both orientations, twice fresh, zero residual, 237 rows both orientations (prep8-*.json): window start = activation frame, row 0 (docs/next-adapters-prep8.md)",
         "ordinary route seed 0 / streak 14 / index 2 (DELCATTY): adapter active every age, ON/OFF rules/RNG equal (scene bit 0x80 excluded); action-menu reached",
-        "alternate species: MINUN player and opponent attackers 237/237 each, window start derived from the alternate scenario's source activation (76 / 80); CASTFORM differs by a constant 400/800-px block inside the Castform sprite (species art/idle frame, not the move body) and is not claimed"
+        "alternate species: MINUN player and opponent attackers 237/237 each, window start derived from the alternate scenario's source activation (76 / 80); CASTFORM differs by a constant 400/800-px block inside the Castform sprite (species art/idle frame, not the move body) and is not claimed",
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md v1 + v2; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the renderer's own battler-art lookup returns the doll sheet + palette for the doll side (battleScene.ts liveSubstituteDollArt), hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow; the order input is the production tracker's lend (the defender's Substitute body is order-neutral). Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer, all 0 px: thunderbolt-player, thunderbolt-opponent, df-thunderbolt-player, df-thunderbolt-opponent (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts)."
       ],
       "palettePlan": "no plan, history invalidates (allocator constants valid only while the known-order gate holds)",
       "spriteOrder": "gate: lent tracked order known (spriteOrderInput.known), else null. orders = slot indices in the lent order (pixel-neutral on the accepted species); ad-hoc age-0 shadow draw retired under liveField",
@@ -2843,7 +2865,8 @@
       "liveEvidence": [
         "dense source framebuffer, both orientations, twice fresh, zero residual, 230 rows both orientations (prep9-giga-drain-*.json): window start = activation frame, row 0 (docs/next-adapters-prep9.md)",
         "ordinary route seed 8 / streak 14 / index 3 (VENOMOTH, first body, order known): adapter active every age, ON/OFF rules/RNG equal (scene bit 0x80 excluded); action-menu reached",
-        "alternate species: VENUSAUR (first body) and TANGELA (after Tackle) player and opponent attackers 230/230 (prep9-alt-giga-drain-*.json)"
+        "alternate species: VENUSAUR (first body) and TANGELA (after Tackle) player and opponent attackers 230/230 (prep9-alt-giga-drain-*.json)",
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow; the order input is the production tracker's lend after the defender's Substitute body, now order-neutral (spriteOrderEventTransform.ts: Move_SUBSTITUTE creates no sprite; its measured EXACT plan is empty; corpus replay 573 scenarios / 1366 edges, known 1130 unchanged, 0 mismatches). Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: df-giga-drain-player, df-giga-drain-opponent (defender-first [164] history; tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts). After the attacker's own earlier Giga Drain the order is unknown and the body declines (as without the doll)."
       ],
       "palettePlan": "no plan, history invalidates (the D-PAL label is stale: no palette snapshot is consumed; docs/next-adapters-prep9.md s0/s1: the blend schedules are age-derived from battleBg.palette and species art)",
       "spriteOrder": "gate: lent tracked order known (spriteOrderInput.known), else null. orderSeed (17 slots) = spriteOrderForSlots(lend, [3,4,5,7,9,10..21]); allocator constants (hitsplat 3, orbs, stars, paletteController 3) == ROM first-free replay 12/12 histories; pixel-neutral over 4 order variants",
@@ -3243,7 +3266,8 @@
       "sourceFieldEvidence": "../tools/integration/fixtures/prep13-live-adapter-receipt.json",
       "liveEvidence": [
         "dense 203/203 zero residual twice fresh through the production live renderer: NINCADA -> SHUCKLE accepted both orientations + LAPRAS -> GOLEM alternate both orientations (window = each scenario's own activation + 0)",
-        "ordinary routes 0/14 DELCATTY slot 3 and 1/14 DUNSPARCE slot 0 (first body, order known): adapter active every age, following prompt reached, ON/OFF rules/RNG/boundary equal"
+        "ordinary routes 0/14 DELCATTY slot 3 and 1/14 DUNSPARCE slot 0 (first body, order known): adapter active every age, following prompt reached, ON/OFF rules/RNG/boundary equal",
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md v1 + v2; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the renderer's own battler-art lookup returns the doll sheet + palette for the doll side (battleScene.ts liveSubstituteDollArt), hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow; the order input is the production tracker's lend (the defender's Substitute body is order-neutral). Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer, all 0 px: ice-beam-player, ice-beam-opponent (after the attacker's own Ice Beam), df-ice-beam-player, df-ice-beam-opponent (defender-first [164]) (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts)."
       ],
       "remaining": [
         "declines (scene-off fallback) unless the tracked sprite order is lent (first body / tracked)",
@@ -3732,7 +3756,7 @@
         "STATUS ANIMATIONS SUBSTITUTE_TO_MON / MON_TO_SUBSTITUTE (Scene ON) presented live around a subbed ATTACKER's proven body (src/engine/liveSubstituteSwap.ts; AnimTask_SwapMonSpriteToFromSubstitute model: x2 5 per row, 42 / 40 script rows, gfx load row 21 / 20, idle row, 2-row OAM latch; composite = body + 85 player / + 81 opponent rows; MON_TO_SUBSTITUTE only on the last hit, multihit < 2). Not an accepted body: inventory / census counts unchanged. Proven bodies Headbutt (29), Body Slam (34), Leech Seed (73): 21 dense windows (3,501 rows) zero residual through the production live renderer, both orientations, each scenario twice fresh, two independent passes byte-identical (ZIGZAGOON player, GOLEM / ONIX-idle-rest opponent, PERSIAN <-> SLOWBRO both sides, elevated GOLBAT as opponent attacker and as the player's target); receipt tools/integration/fixtures/subst-swap-live-receipt.json; route MEGANIUM 103/28 [Substitute, Leech Seed] presented live and back to the prompt with the doll shown, Scene ON/OFF parity (tests/substituteSwapPresentation.test.ts)"
       ],
       "remaining": [
-        "SUBSTITUTE_FADE stays on the fallback (prep37 s3c costs); the swaps before a subbed battler's faint / switch-out are not presented (the doll is cleared at the command start); adapters decline while the DEFENDER is the doll, and while the ATTACKER is the doll for every body outside LIVE_SUBSTITUTE_SWAP_BODY_IDS (unproven: e.g. Bite / Toxic, whose adapter windows do not start at activation, Seismic Toss, multi-hit non-final hits, two-turn bodies) (liveMoveSubstituteDollDeclines)",
+        "SUBSTITUTE_FADE stays on the fallback (prep37 s3c costs); the swaps before a subbed battler's faint / switch-out are not presented (the doll is cleared at the command start); adapters decline while the DEFENDER is the doll outside the proven defender-doll cells (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS, prep38 v1: the doll art, species anchors, doll corner, rest 0, no shadow; tools/integration/fixtures/dolldef-live-receipt.json), and while both are dolls, and while the ATTACKER is the doll for every body outside LIVE_SUBSTITUTE_SWAP_BODY_IDS (unproven: e.g. Bite / Toxic, whose adapter windows do not start at activation, Seismic Toss, multi-hit non-final hits, two-turn bodies) (liveMoveSubstituteDollDeclines)",
         "the row after the swap-back window (the next command's first row) still shows the doll 5 px out in the ROM (OAM latch); production draws it settled (600 / 679 px on that single row, player / opponent)",
         "Headbutt by a GOLEM player attacker carries the adapter's own pre-existing 92 px (body ages 15..38, rows 110..111), identical per row with and without the doll (subswap-ctrl-player-golem-onix-headbutt)",
         "production Scene OFF does not play the body (ISSUES #153, kernel-owned); doubles not covered"
@@ -3871,6 +3895,9 @@
       ],
       "surrogateRoutes": [
         "random2-r5/mud-slap/seed9-streak14-slot2-1turn (tests/animation/liveRandom2R5MoveAdapters.test.ts)"
+      ],
+      "liveEvidence": [
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md, v1 in production; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the doll sheet + palette as the defender's live art, hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow; the order input is the production tracker's lend after the defender's Substitute body, now order-neutral (spriteOrderEventTransform.ts: Move_SUBSTITUTE creates no sprite; its measured EXACT plan is empty; corpus replay 573 scenarios / 1366 edges, known 1130 unchanged, 0 mismatches). Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer: df-mud-slap-player, df-mud-slap-opponent (defender-first [164] history; D3 words pinned from the probe: gRng2Value at activation + 1 stepped back once; tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts). After the attacker's own earlier Mud-Slap the order is unknown and the body declines (as without the doll)."
       ]
     },
     {
@@ -4075,7 +4102,8 @@
         "tools/integration/fixtures/d4b-live-receipt.json",
         "tools/integration/fixtures/d4a-live/megahorn-*.json (10 dense windows, both orientations: accepted SEAKING -> ONIX, prep18 HERACROSS -> GOLEM, prep24 HERACROSS -> ONIX, D4b tie-break RHYDON -> GOLBAT / NIDOKING -> SNORLAX; each fixture records its measured phases)",
         "docs/next-adapters-prep24.md s0.2 H / s1.3 (prep24: endLate 5 of 6 late; monbgCntRow 3:3) + the D4b tie-break windows (4 of 4 late, row 8): totals late 9 of 10, row 8 7 of 10",
-        "tests/animation/liveFaithfulTimingAdapters.test.ts (D4b Megahorn: registration, dense receipt, gates, ordinary route Scene ON/OFF parity)"
+        "tests/animation/liveFaithfulTimingAdapters.test.ts (D4b Megahorn: registration, dense receipt, gates, ordinary route Scene ON/OFF parity)",
+        "S10A DEFENDER shown as the Substitute doll (docs/next-adapters-prep38.md v1 + v2 + v3; attacker side player + opponent; LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): the renderer's own battler-art lookup returns the doll sheet + palette for the doll side (battleScene.ts liveSubstituteDollArt); the doll palette in the doll side's OBJ bank 16 / 17 (liveMovePaletteComposite.ts composeLiveFieldPalettes: the monbg draws the doll tiles with it; 0 / 177 exact rows with the species palette), hit / effect anchors on the species corner, the doll corner without elevation, idle rest 0, no opponent shadow; the order input is the production tracker's lend (the defender's Substitute body is order-neutral). Dense windows from fresh direct-mGBA prep38 probes (each scenario's own activation), twice fresh, through the production live renderer, all 0 px: megahorn-player, megahorn-opponent, df-megahorn-player, df-megahorn-opponent, all four 177 rows = the policy duration (policy phase; tools/integration/d4aTimingCheck.ts cannot drive a defender-doll window: verifyLiveAdapterFramebuffer has no doll input, so the per-window px come from tools/integration/prep38Check.ts) (tools/integration/fixtures/dolldef-live/prep38-*.json; receipt tools/integration/fixtures/dolldef-live-receipt.json; tests/substituteDollDefenderLive.test.ts)."
       ],
       "proofCommands": [
         "python3 tools/integration/d4aScenarios.py && sh tools/integration/prep22Probes.sh PROBEDIR 1 mechanic-megahorn-player-seaking-opponent-onix mechanic-megahorn-opponent-seaking-player-onix prep18-megahorn-alt-heracross-golem prep18-megahorn-altopp-heracross-golem prep24-megahorn-alt-heracross-onix prep24-megahorn-altopp-heracross-onix d4a-megahorn-extra-player-rhydon-golbat d4a-megahorn-extra-opponent-rhydon-golbat d4a-megahorn-extra-player-nidoking-snorlax d4a-megahorn-extra-opponent-nidoking-snorlax",

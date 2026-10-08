@@ -27,6 +27,26 @@ export function composeLivePalettes(playerSpecies: string, opponentSpecies: stri
   return Object.freeze({ unfaded: out.slice(), faded: out.slice(), hardware: out.slice() });
 }
 
+/**
+ * composeLivePalettes for the displayed field art: a battler shown as the Substitute doll has gSubstituteDollPal in its OBJ bank
+ * (16 player / 17 opponent; BattleLoadSubstituteOrMonSpriteGfx). docs/next-adapters-prep38.md s1 NEEDS-PALETTE-COMPOSITE: Megahorn's
+ * monbg draws the doll tiles with that bank (95k..105k px with the species palette, 0 px with the doll's).
+ */
+export function composeLiveFieldPalettes(art: Readonly<Record<"player" | "opponent", Readonly<{
+  speciesSymbol: string; substituteDoll?: true; pic: Readonly<{ palette: readonly Rgb[] }>;
+}>>>): LivePaletteComposite | null {
+  const composite = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+  if (composite === null || (art.player.substituteDoll !== true && art.opponent.substituteDoll !== true)) return composite;
+  const patch = (words: readonly number[]) => {
+    const out = words.slice();
+    for (const side of ["player", "opponent"] as const) {
+      if (art[side].substituteDoll === true) art[side].pic.palette.forEach((c, i) => { out[(side === "player" ? 16 : 17) * 16 + i] = bgr555(c); });
+    }
+    return out;
+  };
+  return Object.freeze({ unfaded: patch(composite.unfaded), faded: patch(composite.faded), hardware: patch(composite.hardware) });
+}
+
 /** Factory mons are created with OT_ID_PRESET = the player's trainer id (factoryAnchorSession ANCHOR_FACTORY_METADATA). */
 const FACTORY_OT_ID = 416_049_562;
 

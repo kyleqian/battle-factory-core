@@ -3,7 +3,7 @@ import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import { liveSubstituteSwapApplies, substituteSwapBodyField, substituteSwapCompositeDuration } from "./liveSubstituteSwap.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
-import { battleCommandFieldSpriteOrigin, createBattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
+import { battleCommandFieldSpeciesSpriteOrigin, battleCommandFieldSpriteOrigin, createBattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 import type { BattleResolutionDisplayedField } from "./battleResolutionPresentation.ts";
 import type {
   SceneOnMovePresentationState, SceneOnMoveConfig, SceneOnPresentationBattler,
@@ -82,7 +82,7 @@ import { waterSpoutTimeline, type WaterSpoutLiveInputs } from "../animation/wate
 import { hiddenPowerUnownFormIndex } from "../animation/hiddenPower.ts";
 import type { FlailPower } from "../animation/flail.ts";
 import type { HailProfile } from "../animation/hail.ts";
-import { composeLivePalettes, liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
+import { composeLiveFieldPalettes, composeLivePalettes, liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
 import lovelyKissAsset from "../animation/assets/lovely-kiss.json" with { type: "json" };
 import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
 import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
@@ -345,8 +345,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // may have written the register (liveStaleMovePowerTaintedBy).
   283,
   // S10A Substitute (docs/next-adapters-prep37.md s1/s3a.4): the BODY (87 rows); the doll is shown after it
-  // (applySubstituteDollCommand); adapters decline while the defender is the doll, and present the swaps around a proven body while
-  // only the attacker is (liveMoveSubstituteDollDeclines, liveSubstituteSwap.ts).
+  // (applySubstituteDollCommand); adapters decline while the defender is the doll outside the proven defender-doll cells
+  // (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS, drawn on the doll), and present the swaps around a proven body while only the attacker is
+  // (liveMoveSubstituteDollDeclines, liveSubstituteSwap.ts).
   164,
 ] as const);
 
@@ -587,16 +588,18 @@ export function liveBattlerAnchors(
   x2Input?: LiveMoveBattlerX2Input,
 ): LiveBattlerAnchors {
   const origin = battleCommandFieldSpriteOrigin(art[battler], battler);
+  // A battler shown as the Substitute doll (prep38 s2/s3): Y_PIC_OFFSET reads the species, the OBJ is the doll at rest 0.
+  const doll = art[battler].substituteDoll === true, species = battleCommandFieldSpeciesSpriteOrigin(art[battler], battler);
   return {
     picOffsetPoint: {
-      x: origin.x + 32,
-      y: Math.min(104, origin.y + 32 + (battler === "player" ? 8 : 0)),
+      x: species.x + 32,
+      y: Math.min(104, species.y + 32 + (battler === "player" ? 8 : 0)),
     },
     spriteCenter: { x: origin.x + 32, y: origin.y + 32 },
     battlePositionCenter: battler === "player" ? { x: 72, y: 80 } : { x: 176, y: 40 },
     pictureHeight: 64 - 2 * art[battler].coords.yOffset,
     // The species rest until a body runs an absolute-reset task on the battler (liveBattlerX2History.ts, ISSUES #148).
-    frontIdleRest: battler === "opponent"
+    frontIdleRest: battler === "opponent" && !doll
       ? liveTrackedFrontIdleRest(battler, speciesFrontIdleRestOffsetOrZero(art[battler].speciesSymbol), x2Input)
       : { x2: 0, y2: 0 },
   };
@@ -734,18 +737,54 @@ function liveEruptionProfileFor(field: BattleResolutionDisplayedField, attackerS
 }
 
 /**
- * S10A Substitute (docs/next-adapters-prep37.md s3b): every live renderer composes both battlers from species art
- * (liveSceneOnBattlerArt), so while the displayed DEFENDER is the Substitute doll the body would draw the mon where the
- * ROM shows the doll (e.g. Tackle's monbg ANIM_TARGET moves the doll): it declines to the fallback. While only the
- * ATTACKER is the doll the ROM runs SUBSTITUTE_TO_MON, the body on the mon and MON_TO_SUBSTITUTE (liveSubstituteSwap.ts):
- * presented for the proven bodies (LIVE_SUBSTITUTE_SWAP_BODY_IDS, last hit), every other attacker-doll body declines.
+ * S10A Substitute, DEFENDER shown as the doll (docs/next-adapters-prep38.md s1 / s3 v1): the (move id, attacker side) cells
+ * proven 0 px on dense direct-mGBA windows with the doll as the defender's live art (liveSceneOnBattlerArt), the effect / hit
+ * anchors on the species corner, the doll corner without elevation, idle rest 0 and no opponent shadow
+ * (tools/integration/fixtures/dolldef-live-receipt.json). Every other defender-doll body declines: some read species art
+ * directly (Ice Beam, Thunderbolt, Megahorn), compose the species palette into the doll bank (Megahorn) or are unmeasured.
+ */
+export const LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS: ReadonlyMap<number, readonly ("player" | "opponent")[]> = new Map([
+  [89, ["player", "opponent"]], // Earthquake
+  [332, ["player"]], // Aerial Ace (opponent: the doll-free control's own 1 px, not an accepted scope)
+  [94, ["player", "opponent"]], // Psychic (+ elevated GOLBAT doll)
+  [57, ["player", "opponent"]], // Surf
+  [157, ["opponent"]], // Rock Slide (the adapter is opponent-only)
+  [247, ["player"]], // Shadow Ball (opponent: the 156-row tail phase of the doll-free control)
+  [213, ["player", "opponent"]], // Attract
+  [280, ["player", "opponent"]], // Brick Break
+  [188, ["player", "opponent"]], // Sludge Bomb
+  [242, ["player", "opponent"]], // Crunch
+  [34, ["player", "opponent"]], // Body Slam
+  [53, ["player", "opponent"]], // Flamethrower
+  [44, ["player", "opponent"]], // Bite
+  [25, ["player", "opponent"]], // Mega Kick
+  [98, ["opponent"]], // Quick Attack (player: unresolved residual inside the doll box)
+  [38, ["opponent"]], // Double-Edge (player: unresolved history residual)
+  // Order-dependent bodies: exact with the Substitute body's order-neutral lend (spriteOrderEventTransform.ts).
+  [202, ["player", "opponent"]], // Giga Drain
+  [189, ["player", "opponent"]], // Mud-Slap (D3)
+  // Renderer-local art lookups routed to the doll (+ Megahorn's doll palette bank; composeLiveFieldPalettes), with the order lend.
+  [58, ["player", "opponent"]], // Ice Beam
+  [85, ["player", "opponent"]], // Thunderbolt
+  [224, ["player", "opponent"]], // Megahorn (D4)
+].map(([id, sides]) => [id as number, Object.freeze(sides as ("player" | "opponent")[])]));
+
+/**
+ * S10A Substitute (docs/next-adapters-prep37.md s3b, prep38): while the displayed DEFENDER is the Substitute doll the body
+ * runs only for a proven cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS), drawn on the doll; every other body declines to the
+ * fallback (a species-art renderer would draw the mon where the ROM shows the doll). While only the ATTACKER is the doll the
+ * ROM runs SUBSTITUTE_TO_MON, the body on the mon and MON_TO_SUBSTITUTE (liveSubstituteSwap.ts): presented for the proven
+ * bodies (LIVE_SUBSTITUTE_SWAP_BODY_IDS, last hit), every other attacker-doll body declines, as does every body with both
+ * battlers shown as dolls.
  */
 export function liveMoveSubstituteDollDeclines(
   request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField,
 ): boolean {
   const swap = liveSubstituteSwapApplies(request, field);
   if (swap !== null) return !swap;
-  return (request.target === 0 ? field.player : field.opponent).substituteDoll === true;
+  if ((request.target === 0 ? field.player : field.opponent).substituteDoll !== true) return false;
+  return request.target === request.attacker
+    || !(LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS.get(request.moveId) ?? []).includes(request.attacker === 0 ? "player" : "opponent");
 }
 
 export function liveMoveAnimationDuration(
@@ -1197,17 +1236,21 @@ export function liveMoveAnimationPresentation(
   const battler = (side: "player" | "opponent"): SceneOnPresentationBattler => {
     const origin = battleCommandFieldSpriteOrigin(art[side], side);
     // ISSUES #148: a battler an earlier body left at x2/y2 0 is drawn there by the renderer's species-rest readers.
+    // A defender shown as the Substitute doll (prep38 s3 v1): the doll OBJ at its own corner and rest 0, the effect anchors
+    // on the species corner (GetBattlerSpriteCoord); the renderer draws the doll art (liveSceneOnBattlerArt).
+    const doll = art[side].substituteDoll === true;
     const rest = liveBattlerAnchors(side, art).frontIdleRest, tracked = liveBattlerAnchors(side, art, battlerX2Input).frontIdleRest;
+    const center = battleCommandFieldSpeciesSpriteOrigin(art[side], side);
     return {
-      ...(tracked.x2 === rest.x2 && tracked.y2 === rest.y2 ? {} : { liveIdleRest: tracked }),
+      ...(doll ? { liveIdleRest: { x2: 0, y2: 0 } } : tracked.x2 === rest.x2 && tracked.y2 === rest.y2 ? {} : { liveIdleRest: tracked }),
       species: art[side].speciesSymbol,
       geometry: {
         side, spriteCorner: origin,
         // GetBattlerSpriteFinal_Y(..., TRUE): player effects add 8 and
         // clamp to 104; the field origin already includes opponent elevation.
         animationCenter: {
-          x: origin.x + 32,
-          y: Math.min(104, origin.y + 32 + (side === "player" ? 8 : 0)),
+          x: center.x + 32,
+          y: Math.min(104, center.y + 32 + (side === "player" ? 8 : 0)),
         },
         battlePositionCenter: {
           x: side === "player" ? 72 : 176,
@@ -3346,7 +3389,8 @@ export function liveMoveAnimationPresentation(
       // palette slots 7 / 8, matrices 0 / 3), non-shiny, the attacker's idle rest zero. Both CPU-phase bits come from the timing policy.
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      // A defender shown as the Substitute doll: its OBJ bank holds the doll palette (the monbg draws the doll with it).
+      const palettes = composeLiveFieldPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || activationOrder === null) return null;

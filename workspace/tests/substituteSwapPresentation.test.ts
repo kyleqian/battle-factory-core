@@ -65,9 +65,10 @@ describe("live adapters with a Substitute doll", () => {
       expect(liveMoveAnimationDuration(req(moveId, 0), field(true, false))).toBe(body + 85);
       expect(liveMoveAnimationDuration(req(moveId, 1), field(false, true))).toBe(body + 81);
       expect(liveMoveSubstituteDollDeclines(req(moveId, 0), field(true, false))).toBe(false);
-      // Defender doll (either direction) and both dolls: declined.
-      expect(liveMoveAnimationDuration(req(moveId, 0), field(false, true))).toBeNull();
-      expect(liveMoveAnimationDuration(req(moveId, 1), field(true, false))).toBeNull();
+      // Defender doll (either direction): declined, except Body Slam, a proven defender-doll cell on both sides (prep38; drawn on the
+      // doll, tests/substituteDollDefenderLive.test.ts). Both dolls: declined.
+      expect(liveMoveAnimationDuration(req(moveId, 0), field(false, true))).toBe(moveId === 34 ? body : null);
+      expect(liveMoveAnimationDuration(req(moveId, 1), field(true, false))).toBe(moveId === 34 ? body : null);
       expect(liveMoveAnimationDuration(req(moveId, 0), field(true, true))).toBeNull();
       // A multi-hit chain's non-final hit (multihit >= 2): no MON_TO_SUBSTITUTE in the source; not proven, declined.
       expect(liveMoveAnimationDuration(req(moveId, 0, { multihit: 2 }), field(true, false))).toBeNull();

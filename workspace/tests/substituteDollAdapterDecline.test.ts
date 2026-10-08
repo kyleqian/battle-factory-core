@@ -3,12 +3,14 @@ import type { BattleMoveAnimationRequest } from "../src/engine/battleMoveAnimati
 import type { BattleResolutionDisplayedField } from "../src/engine/battleResolutionPresentation.ts";
 import { createBattleResolutionPresentationRenderView } from "../src/engine/battleResolutionPresentationRender.ts";
 import {
-  LIVE_MOVE_ANIMATION_IDS, liveMoveAnimationDuration, liveMoveAnimationPresentation, liveMoveSubstituteDollDeclines,
+  LIVE_MOVE_ANIMATION_IDS, LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS, liveMoveAnimationDuration, liveMoveAnimationPresentation,
+  liveMoveSubstituteDollDeclines,
 } from "../src/engine/liveMoveAnimation.ts";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
 
 // S10A Substitute part 2 (docs/next-adapters-prep37.md s3b): every live adapter declines (fallback) while the displayed
-// defender or attacker is the Substitute doll. Routes from tools/integration/substRouteScan.ts over the
+// defender or attacker is the Substitute doll, except the proven defender-doll cells (prep38, LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS,
+// tests/substituteDollDefenderLive.test.ts) and the attacker swaps (tests/substituteSwapPresentation.test.ts). Routes from tools/integration/substRouteScan.ts over the
 // r3ProfileRouteSearch.ts 164 16 1 4000 candidates (rentals[0] knows Substitute; turn 1 = Substitute, then slot + 1).
 const withoutDolls = (f: BattleResolutionDisplayedField): BattleResolutionDisplayedField => {
   const { substituteDoll: _p, ...player } = f.player;
@@ -16,7 +18,7 @@ const withoutDolls = (f: BattleResolutionDisplayedField): BattleResolutionDispla
   return { player, opponent };
 };
 
-type Seen = { request: string; direction: "attacker" | "defender" | null; declined: boolean; liveWithoutDoll: boolean; ages: number };
+type Seen = { request: string; direction: "attacker" | "defender" | null; provenCell: boolean; declined: boolean; liveWithoutDoll: boolean; ages: number };
 function route(seed: number, streak: number, slots: readonly (0 | 1 | 2 | 3)[], scene: "on" | "off") {
   const seen: Seen[] = [];
   let key = "";
@@ -34,6 +36,8 @@ function route(seed: number, streak: number, slots: readonly (0 | 1 | 2 | 3)[], 
       seen.push({
         request: `${a.moveId}:${a.attacker}->${a.target}`,
         direction: doll(a.attacker) ? "attacker" : doll(a.target) ? "defender" : null,
+        provenCell: !doll(a.attacker) && a.target !== a.attacker
+          && (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS.get(a.moveId) ?? []).includes(a.attacker === 0 ? "player" : "opponent"),
         declined: liveMoveAnimationDuration(a, view.field) === null,
         liveWithoutDoll: liveMoveAnimationDuration(a, withoutDolls(view.field)) !== null,
         ages: 0,
@@ -66,41 +70,50 @@ function expectParity(on: ReturnType<typeof route>["run"], off: ReturnType<typeo
 }
 
 describe("live adapters decline while the Substitute doll is shown", () => {
-  it("unit: either side flagged declines every request direction (duration and presentation)", () => {
+  it("unit: either side flagged declines every request direction (duration and presentation) outside the proven defender cells", () => {
     const { run } = route(11, 35, [3], "on");
     const mon = run.state.battleCommandPresentation!.field;
     const plain = withoutDolls(mon);
-    const req = (attacker: 0 | 1): BattleMoveAnimationRequest => ({ moveId: 188, attacker, target: attacker === 0 ? 1 : 0, turn: 0 } as unknown as BattleMoveAnimationRequest);
+    const req = (attacker: 0 | 1, moveId = 188): BattleMoveAnimationRequest => ({ moveId, attacker, target: attacker === 0 ? 1 : 0, turn: 0 } as unknown as BattleMoveAnimationRequest);
     expect(LIVE_MOVE_ANIMATION_IDS).toContain(188);
     for (const attacker of [0, 1] as const) {
-      expect(liveMoveSubstituteDollDeclines(req(attacker), plain)).toBe(false);
-      expect(liveMoveAnimationDuration(req(attacker), plain)).not.toBeNull();
+      for (const moveId of [188, 29]) {
+        expect(liveMoveSubstituteDollDeclines(req(attacker, moveId), plain)).toBe(false);
+        expect(liveMoveAnimationDuration(req(attacker, moveId), plain)).not.toBeNull();
+      }
       for (const flagged of ["player", "opponent"] as const) {
         const field = { ...plain, [flagged]: { ...plain[flagged], substituteDoll: true } } as BattleResolutionDisplayedField;
-        expect(liveMoveSubstituteDollDeclines(req(attacker), field)).toBe(true);
-        expect(liveMoveAnimationDuration(req(attacker), field)).toBeNull();
-        expect(liveMoveAnimationPresentation(req(attacker), field, 0)).toBeNull();
+        const defenderDoll = (flagged === "player") !== (attacker === 0);
+        // Sludge Bomb (188) is a proven defender-doll cell on both sides (prep38); Headbutt (29) is not.
+        for (const moveId of defenderDoll ? [29] : [188, 29]) {
+          expect(liveMoveSubstituteDollDeclines(req(attacker, moveId), field)).toBe(true);
+          expect(liveMoveAnimationDuration(req(attacker, moveId), field)).toBeNull();
+          expect(liveMoveAnimationPresentation(req(attacker, moveId), field, 0)).toBeNull();
+        }
+        if (defenderDoll) expect(liveMoveSubstituteDollDeclines(req(attacker), field)).toBe(false);
       }
     }
   }, 240000);
 
   it.each([
-    // Defender: the opponent's Sludge Bomb (live 188) hits the player's doll; the doll breaks (fade message) the same turn.
+    // Defender: the opponent's Sludge Bomb (live 188, a proven defender-doll cell: drawn on the doll) hits the player's doll; the doll
+    // breaks (fade message) the same turn.
     ["JYNX 11/35 defender", 11, 35, [3, 0, 0] as const, "188:1->0", "defender" as const],
     // Attacker (player): CRADILY subs on turn 1 (after the opponent's Rain Dance), then Solar Beam (live 76) from behind the doll.
     ["CRADILY 144/35 player attacker", 144, 35, [0, 1, 1] as const, "76:0->1", "attacker" as const],
     // Attacker (opponent): the opponent JYNX subs too and uses Solar Beam (live 76) from behind its doll.
     ["JYNX 87/35 opponent attacker", 87, 35, [3, 0, 0] as const, "76:1->0", "attacker" as const],
-  ])("route %s: the live body declines to the fallback, the battle reaches the next prompt, Scene ON/OFF parity", (_n, seed, streak, slots, request, direction) => {
+  ])("route %s: the live body declines to the fallback unless it is a proven defender cell, the battle reaches the next prompt, Scene ON/OFF parity", (_n, seed, streak, slots, request, direction) => {
     const on = route(seed, streak, slots, "on");
     const off = route(seed, streak, slots, "off");
     const hit = on.seen.find((s) => s.request === request && s.direction === direction)!;
     expect(hit).toBeDefined();
-    expect(hit.declined).toBe(true);
+    expect(hit.declined).toBe(!hit.provenCell);
+    expect(hit.provenCell).toBe(direction === "defender");
     // The same request with the doll removed would have been live: the decline is the doll's.
     expect(hit.liveWithoutDoll).toBe(true);
-    // Every doll-involved body declined; every other live body is unaffected by the gate.
-    for (const s of on.seen) expect(s.direction === null ? true : s.declined).toBe(true);
+    // Every doll-involved body outside the proven defender cells declined; every other live body is unaffected by the gate.
+    for (const s of on.seen) expect(s.direction === null ? true : s.declined === !s.provenCell).toBe(true);
     expect(on.run.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(off.run.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expectParity(on.run, off.run);
