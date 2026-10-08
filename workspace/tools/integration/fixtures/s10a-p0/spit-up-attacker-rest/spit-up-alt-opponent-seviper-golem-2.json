@@ -1,0 +1,29 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/s10a-live/spit-up-alt-opponent-seviper-golem-2.json",
+  "move": "SPIT_UP",
+  "selectedPhase": true,
+  "window": 108,
+  "expectedDuration": 108,
+  "runs": [
+   {
+    "rows": 108,
+    "exactRows": 108,
+    "residualPixels": 0,
+    "digest": "6588354ad106dc6a64c3ae310142b5e7d44ec103549236c17797435ecc049d95",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 108,
+    "exactRows": 108,
+    "residualPixels": 0,
+    "digest": "6588354ad106dc6a64c3ae310142b5e7d44ec103549236c17797435ecc049d95",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

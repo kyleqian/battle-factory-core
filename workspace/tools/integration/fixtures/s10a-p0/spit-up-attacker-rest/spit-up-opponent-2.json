@@ -1,0 +1,29 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/s10a-live/spit-up-opponent-2.json",
+  "move": "SPIT_UP",
+  "selectedPhase": true,
+  "window": 108,
+  "expectedDuration": 108,
+  "runs": [
+   {
+    "rows": 108,
+    "exactRows": 108,
+    "residualPixels": 0,
+    "digest": "a942d5aee2c248da4658cf1ddd01f23e8ce2de83d59628b96aa85d720fbc5cfc",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 108,
+    "exactRows": 108,
+    "residualPixels": 0,
+    "digest": "a942d5aee2c248da4658cf1ddd01f23e8ce2de83d59628b96aa85d720fbc5cfc",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

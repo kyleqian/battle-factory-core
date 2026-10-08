@@ -1,0 +1,29 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/s10a-live/spit-up-player-2.json",
+  "move": "SPIT_UP",
+  "selectedPhase": true,
+  "window": 108,
+  "expectedDuration": 108,
+  "runs": [
+   {
+    "rows": 108,
+    "exactRows": 108,
+    "residualPixels": 0,
+    "digest": "4425abc42ef6bbaaf862557f08e9f7b01ecf3edba01e82e78c6ad33d1f42ea35",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   },
+   {
+    "rows": 108,
+    "exactRows": 108,
+    "residualPixels": 0,
+    "digest": "4425abc42ef6bbaaf862557f08e9f7b01ecf3edba01e82e78c6ad33d1f42ea35",
+    "affectedAges": [],
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "documentedAges": null,
+  "violations": []
+ }
+]

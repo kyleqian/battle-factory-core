@@ -10,6 +10,7 @@ import type {
 import { GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE } from "../animation/sceneOnPresentation.ts";
 import { PRESENT_DAMAGE_FRAME_COUNT, PRESENT_HEAL_FRAME_COUNT } from "../animation/present.ts";
 import { SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE, SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE } from "../animation/solarBeam.ts";
+import { reduceMemento, type MementoBattlerConfig, type MementoConfig } from "../animation/memento.ts";
 import { HOWL_FRAME_COUNT } from "../animation/howl.ts";
 import { dragonRageFireSpitGeometryFor } from "../animation/dragonRage.ts";
 import { TAIL_WHIP_FRAME_COUNT } from "../animation/tailWhip.ts";
@@ -94,7 +95,7 @@ import { SUPERPOWER_ROWS, liveSuperpowerInputs } from "./liveSuperpowerInputs.ts
 import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
 import { liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSheerColdRestoreFadeEndAge, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
-import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs, liveShockWaveInputs } from "./liveOamMoves.ts";
+import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs, liveShockWaveInputs, FIRST_BODY_SCANLINE } from "./liveOamMoves.ts";
 import shockWaveAsset from "../animation/assets/shock-wave.json" with { type: "json" };
 import { shockWaveTimingFor } from "../animation/shockWave.ts";
 import revengeScratchAsset from "../animation/assets/revenge-purple-scratch-swipe.json" with { type: "json" };
@@ -211,6 +212,10 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   216,
   // Spit Up, all three Stockpile counters (docs/next-adapters-prep31.md s2 / s3; liveSpitUpInputs.ts): any known lend.
   255,
+  // Extreme Speed (docs/next-adapters-prep34.md s1): reducer age 43 at activation, 321 rows; no Random2 / lag / history input.
+  245,
+  // Memento first body (docs/next-adapters-prep34.md s2): production-derived battler inputs + the first-body scanline entry; 175..179 rows.
+  262,
   // Shock Wave (docs/next-adapters-prep33.md s1 / s3; liveOamMoves.ts liveShockWaveInputs): the reducer's geometry-derived timing, any known lend.
   351,
   // anchor3: source battler anchors (position center, picture height, pic offset).
@@ -451,6 +456,11 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     291,
     // Sheer Cold (ISSUES #151, species audit 7 elevated FLYGON / GOLBAT opponent, both orientations): activation == window start (row 0).
     329,
+    // Extreme Speed (prep34 s1.5): live age 0 = activation (s10a-live/extreme-speed-*.json; elevated GOLBAT target window).
+    245,
+    // Memento (prep34 s2.5): live age 0 = activation (s10a-live/memento-*.json; elevated GOLBAT target window). An elevated opponent-side
+    // attacker (WEEZING) is at HP 0 already, so the hook's IsBattlerSpritePresent gate leaves its shadow hidden (battleScene.ts).
+    262,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -550,6 +560,30 @@ export function liveBattlerAnchors(
 }
 
 /**
+ * MOVE_MEMENTO reducer config from the displayed field (docs/next-adapters-prep34.md s2.4): x = the battler sprite x; shadowTop =
+ * GetBattlerSpriteCoordAttr(TOP) - 7 = Y_PIC_OFFSET - height / 2 - 7 (picOffsetPoint: player sprite y + 8 clamped at 104); shadowBottom = the
+ * battle-position y + 31; bgX / bgY = 32 - (x + x2), 32 - (y + y2) (MoveBattlerSpriteToBG; x2 = an opponent front sprite's idle rest); BG /
+ * priority rank / palette per side (K). Activation = the battle's FIRST animation body: the scanline entry is the intro residue
+ * FIRST_BODY_SCANLINE (equal up to a display-neutral bank relabel) and WIN0 240 / 161.
+ */
+export function liveMementoReducerConfig(
+  field: BattleResolutionDisplayedField, attackerSide: "player" | "opponent", x2Input?: LiveMoveBattlerX2Input,
+): MementoConfig {
+  const art = createBattleCommandFieldArtView(field);
+  const battler = (side: "player" | "opponent"): MementoBattlerConfig => {
+    const anchors = liveBattlerAnchors(side, art, x2Input), opponent = side === "opponent";
+    return { battlerId: opponent ? 1 : 0, side, bg: opponent ? "BG1" : "BG2", bgPriorityRank: opponent ? 1 : 2, x: anchors.spriteCenter.x,
+      shadowTop: anchors.picOffsetPoint.y - (liveBattlerCoordAttrs(side, art).height >> 1) - 7, shadowBottom: anchors.battlePositionCenter.y + 31,
+      bgX: 32 - (anchors.spriteCenter.x + anchors.frontIdleRest.x2), bgY: 32 - (anchors.spriteCenter.y + anchors.frontIdleRest.y2),
+      bgPaletteId: opponent ? 8 : 9 };
+  };
+  return { attacker: battler(attackerSide), target: battler(attackerSide === "player" ? "opponent" : "player"),
+    initialScanlineSourceBuffer: FIRST_BODY_SCANLINE.srcBuffer as 0 | 1,
+    initialScanlineBuffers: FIRST_BODY_SCANLINE.buffers as unknown as readonly [readonly number[], readonly number[]],
+    initialWindow: { win0h: 240, win0v: 161 } };
+}
+
+/**
  * `GetBattlerSpriteCoordAttr` width/height/yOffset (battle_anim_mons.c:2151-2280): the species pic coords
  * the field art view already carries (back table for the player, front for the opponent).
  */
@@ -638,6 +672,9 @@ export function liveMoveAnimationDuration(
       return inputs === null ? null : waterSpoutTimeline(inputs).length;
     }
     case 2: return KARATE_CHOP_FRAME_COUNT;
+    case 245: return 321; // Extreme Speed: activation .. first inactive row (prep34 s1.1, both sides, both species pairs).
+    // Memento (prep34 s2.3): the body length depends on the shadow geometry (175..179 rows measured), only defined with the displayed field.
+    case 262: return field === undefined ? null : reduceMemento(liveMementoReducerConfig(field, request.attacker === 0 ? "player" : "opponent")).length;
     case 9: return THUNDER_PUNCH_MOVE_BODY_LAST_AGE + 1;
     case 5: return 160; // Mega Punch source body through first inactive row.
     case 11: return 42; // Vice Grip source body through first inactive row.
@@ -2029,6 +2066,30 @@ export function liveMoveAnimationPresentation(
     // The attacker's displayed HP is already 0 at the event (setatkhptozero precedes attackanimation; prep6 s2.1),
     // the same displayed-field path as Explosion; the live seam reads it from the field.
     case 120: config = { move: "SELF_DESTRUCT", attacker, target, fieldProfile }; break;
+    case 262: {
+      // Memento (docs/next-adapters-prep34.md s2.5): the battle's first animation body only (the scanline entry is the intro residue; a later
+      // body after a scanline body differs), non-shiny (live battler art draws normal palettes). The attacker's self-KO / stat drops are
+      // gameplay-owned and never read inside the body; the HUD shows the displayed HP 0 (prep6 Self-Destruct path) under the live field.
+      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      config = { move: "MEMENTO", attacker, target,
+        fieldProfile: { playerHp: field.player.hp, playerMaxHp: field.player.maxHP, opponentHp: field.opponent.hp, opponentMaxHp: field.opponent.maxHP },
+        reducer: liveMementoReducerConfig(field, attacker.geometry.side, battlerX2Input) };
+      break;
+    }
+    case 245: {
+      // Extreme Speed (docs/next-adapters-prep34.md s1.4 / s1.5): reducer age 43 at the activation row (live age 0), both sides; the attacker's
+      // pic-coords yOffset is the A input of the stretch y2. The renderer draws the live battler art at the field corners: zero idle rests
+      // (the impact program writes the target x2 absolutely; no rest window was measured) and non-shiny battlers (normal palettes).
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const targetRest = liveBattlerAnchors(target.geometry.side, art, battlerX2Input).frontIdleRest;
+      if (attackerAnchors.frontIdleRest.x2 !== 0 || attackerAnchors.frontIdleRest.y2 !== 0 || targetRest.x2 !== 0 || targetRest.y2 !== 0) return null;
+      // The hit splats' anchor is the target battler sprite (x, y) on both sides (prep34 s1.4 A: DUGTRIO (72, 91), GOLEM (72, 96)).
+      config = { move: "EXTREME_SPEED", attacker, target: affineCenterBattler(target), animationAgeOffset: 43,
+        attackerYOffset: liveBattlerCoordAttrs(attacker.geometry.side, art).yOffset,
+        fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" } };
+      break;
+    }
     case 256: {
       // Stockpile count = request.turn (measured 1/2/3, prep6-swallow-probe.json). The attacker's affine centre is the
       // OBJ/sprite centre (affineCenterBattler), not the pic point; the pic point and coords.yOffset are separate inputs.

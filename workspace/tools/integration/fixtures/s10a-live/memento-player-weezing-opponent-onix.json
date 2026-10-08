@@ -1,0 +1,36 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "MEMENTO",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-memento-player-weezing-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 70,
+  "endFrame": 247
+ },
+ "windowSource": "window = [activation, first inactive row] of this scenario's first MEMENTO body (178 rows) from 2 fresh prep22Probes.sh runs (bodies agree)",
+ "attacker": {
+  "species": "WEEZING",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019078,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 0,
+  "playerMaxHp": 172,
+  "opponentHp": 110,
+  "opponentMaxHp": 110,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

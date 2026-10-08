@@ -1,0 +1,90 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/species-audit-10/derived/onixA-extrasensory-opponent-nuzleaf-player-shuckle.json",
+  "move": "EXTRASENSORY",
+  "measuredPhase": "event",
+  "policyPhase": "no-event",
+  "measuredPhases": {
+   "optional-lag-age": "event",
+   "scanline-split-line": "no-event"
+  },
+  "policyPhases": {
+   "optional-lag-age": "no-event",
+   "scanline-split-line": "no-event"
+  },
+  "selectedPhase": false,
+  "window": 162,
+  "expectedDuration": 161,
+  "runs": [
+   {
+    "rows": 162,
+    "exactRows": 146,
+    "residualPixels": 293216,
+    "digest": "2afa744d448bd6a096c68116d712009078bdd39f46cb51f9942df733d2bc72be",
+    "affectedAges": [
+     143,
+     144,
+     145,
+     146,
+     147,
+     148,
+     149,
+     150,
+     151,
+     152,
+     153,
+     154,
+     155,
+     156,
+     157,
+     158
+    ],
+    "maxPixelsPerRow": 18326
+   },
+   {
+    "rows": 162,
+    "exactRows": 146,
+    "residualPixels": 293216,
+    "digest": "2afa744d448bd6a096c68116d712009078bdd39f46cb51f9942df733d2bc72be",
+    "affectedAges": [
+     143,
+     144,
+     145,
+     146,
+     147,
+     148,
+     149,
+     150,
+     151,
+     152,
+     153,
+     154,
+     155,
+     156,
+     157,
+     158
+    ],
+    "maxPixelsPerRow": 18326
+   }
+  ],
+  "documentedAges": [
+   143,
+   144,
+   145,
+   146,
+   147,
+   148,
+   149,
+   150,
+   151,
+   152,
+   153,
+   154,
+   155,
+   156,
+   157,
+   158
+  ],
+  "violations": []
+ }
+]

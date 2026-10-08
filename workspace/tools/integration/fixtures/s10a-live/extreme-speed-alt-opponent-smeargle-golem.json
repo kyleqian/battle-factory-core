@@ -1,0 +1,36 @@
+{
+ "schema": "d4a-live-adapter-fixture/v1",
+ "move": "EXTREME_SPEED",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep34-extreme-speed-alt-opponent-smeargle-golem.json",
+ "denseWindow": {
+  "startFrame": 82,
+  "endFrame": 402
+ },
+ "windowSource": "window = [activation, first inactive row] of this scenario's first EXTREME_SPEED body (321 rows) from 2 fresh prep22Probes.sh runs (bodies agree)",
+ "attacker": {
+  "species": "SMEARGLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793699975,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 156,
+  "playerMaxHp": 156,
+  "opponentHp": 131,
+  "opponentMaxHp": 131,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

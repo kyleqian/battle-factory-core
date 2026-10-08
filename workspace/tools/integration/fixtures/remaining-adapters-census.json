@@ -10,7 +10,7 @@
   "src/data/gen/battle-frontier-mons.json",
   "src/data/gen/factory-round-policy.json"
  ],
- "liveStatusImplementedCount": 246,
+ "liveStatusImplementedCount": 248,
  "staleCodesCorrected": [
   "B (sSpriteOrder): was 'first body only'; production now lends the order and tracks it across bodies (liveSpriteOrderHost.ts / spriteOrderProvider.ts, merged cross-body tracker + post-KO rung 1), so B no longer blocks anything; recipe work only (falls back after an unmodelled graphics command)",
   "F-AFFINE / E-TASK: were provider blockers; docs/allocator-plan-v2-evidence.md measured gOamMatrixAllocBitmap 0x6 + no tasks at all 481 known-entry bodies, so the accepted constants gated on the lent order suffice for first bodies (invalidated after a faint/switch)",
@@ -23,7 +23,7 @@
  "inFlightMoves": {},
  "summary": {
   "accepted": 276,
-  "live": 246,
+  "live": 248,
   "faithfulRandom": 12,
   "faithfulRandomMoves": [
    "MOVE_ASTONISH",
@@ -55,40 +55,35 @@
    "MOVE_SUPERPOWER"
   ],
   "inFlight": 0,
-  "remaining": 6,
+  "remaining": 4,
   "inFlightBreakdown": {
    "orderConsumerBatch": 0,
    "prep6Ready": 0
   },
   "weightPct": {
-   "live": 93.589,
+   "live": 93.738,
    "faithfulRandom": 3.761,
    "faithfulTiming": 1.501,
    "inFlight": 0,
-   "remaining": 0.662
+   "remaining": 0.513
   },
   "remainingByGroup": {
    "MULTI": {
     "moves": 3,
     "weightPct": 0.29
    },
-   "OUT": {
-    "moves": 1,
-    "weightPct": 0.112
-   },
    "PROVIDER-x": {
-    "moves": 2,
-    "weightPct": 0.26
+    "moves": 1,
+    "weightPct": 0.223
    }
   },
   "remainingByHostClass": {
    "H_BASIC": 1,
-   "H_BUFFER": 3,
-   "H_DERIVED": 2
+   "H_BUFFER": 3
   },
   "orderFirstBodyOnlyMoves": 3,
   "slotPlanNeededMoves": 3,
-  "sumsTo": "246+12+12+0+6=276",
+  "sumsTo": "248+12+12+0+4=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },
@@ -140,60 +135,6 @@
    "touchingMoves": 1,
    "touchingWeightPct": 0.223,
    "meta": null
-  },
-  {
-   "provider": "X-AGE",
-   "label": "accepted evidence lacks the early source ages (age basis)",
-   "codes": [
-    "X-AGE"
-   ],
-   "aloneMoves": 1,
-   "aloneWeightPct": 0.112,
-   "aloneNames": [
-    "EXTREME_SPEED"
-   ],
-   "touchingMoves": 1,
-   "touchingWeightPct": 0.112,
-   "meta": null
-  },
-  {
-   "provider": "D-SCAN",
-   "label": "gScanlineEffect buffers",
-   "codes": [
-    "D-SCAN"
-   ],
-   "aloneMoves": 1,
-   "aloneWeightPct": 0.037,
-   "aloneNames": [
-    "MEMENTO"
-   ],
-   "touchingMoves": 1,
-   "touchingWeightPct": 0.037,
-   "meta": null
-  },
-  {
-   "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
-   "label": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
-   "codes": [
-    "D-OAM",
-    "D-VRAM",
-    "D-SCAN",
-    "D-BG",
-    "D-PAL",
-    "D-TILE",
-    "F-AUDIO"
-   ],
-   "aloneMoves": 1,
-   "aloneWeightPct": 0.037,
-   "aloneNames": [
-    "MEMENTO"
-   ],
-   "touchingMoves": 4,
-   "touchingWeightPct": 0.327,
-   "meta": {
-    "cost": "new large host (docs/animation-integration-readiness.md A6)",
-    "claim": "only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today"
-   }
   },
   {
    "provider": "C",
@@ -280,6 +221,19 @@
    "meta": null
   },
   {
+   "provider": "D-SCAN",
+   "label": "gScanlineEffect buffers",
+   "codes": [
+    "D-SCAN"
+   ],
+   "aloneMoves": 0,
+   "aloneWeightPct": 0,
+   "aloneNames": [],
+   "touchingMoves": 0,
+   "touchingWeightPct": 0,
+   "meta": null
+  },
+  {
    "provider": "F-AUDIO",
    "label": "sound task / pan / current-song state",
    "codes": [
@@ -357,6 +311,19 @@
    }
   },
   {
+   "provider": "X-AGE",
+   "label": "accepted evidence lacks the early source ages (age basis)",
+   "codes": [
+    "X-AGE"
+   ],
+   "aloneMoves": 0,
+   "aloneWeightPct": 0,
+   "aloneNames": [],
+   "touchingMoves": 0,
+   "touchingWeightPct": 0,
+   "meta": null
+  },
+  {
    "provider": "X-REDUCER",
    "label": "accepted reducer hard-codes values production can derive; reducer parameterization needed",
    "codes": [
@@ -397,6 +364,28 @@
     "cost": "hidden-battler state across the two turns in the field art view",
     "claim": "exact once the semi-invulnerable state is rendered"
    }
+  },
+  {
+   "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
+   "label": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
+   "codes": [
+    "D-OAM",
+    "D-VRAM",
+    "D-SCAN",
+    "D-BG",
+    "D-PAL",
+    "D-TILE",
+    "F-AUDIO"
+   ],
+   "aloneMoves": 0,
+   "aloneWeightPct": 0,
+   "aloneNames": [],
+   "touchingMoves": 3,
+   "touchingWeightPct": 0.29,
+   "meta": {
+    "cost": "new large host (docs/animation-integration-readiness.md A6)",
+    "claim": "only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today"
+   }
   }
  ],
  "greedy": [
@@ -412,99 +401,79 @@
   },
   {
    "step": 2,
-   "provider": "X-AGE",
-   "newMoves": 1,
-   "newWeightPct": 0.112,
-   "cumulativeRemainingUnlocked": 2,
-   "newNames": [
-    "EXTREME_SPEED"
-   ]
-  },
-  {
-   "step": 3,
-   "provider": "D-SCAN",
-   "newMoves": 1,
-   "newWeightPct": 0.037,
-   "cumulativeRemainingUnlocked": 3,
-   "newNames": [
-    "MEMENTO"
-   ]
-  },
-  {
-   "step": 4,
    "provider": "C",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 3,
+   "cumulativeRemainingUnlocked": 1,
    "newNames": []
   },
   {
-   "step": 5,
+   "step": 3,
    "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
    "newMoves": 2,
    "newWeightPct": 0.113,
-   "cumulativeRemainingUnlocked": 5,
+   "cumulativeRemainingUnlocked": 3,
    "newNames": [
     "ERUPTION",
     "FLATTER"
    ]
   },
   {
-   "step": 6,
+   "step": 4,
    "provider": "E-OUT",
    "newMoves": 1,
    "newWeightPct": 0.176,
-   "cumulativeRemainingUnlocked": 6,
+   "cumulativeRemainingUnlocked": 4,
    "newNames": [
     "SKILL_SWAP"
    ]
   },
   {
-   "step": 7,
+   "step": 5,
    "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 6,
+   "cumulativeRemainingUnlocked": 4,
+   "newNames": []
+  },
+  {
+   "step": 6,
+   "provider": "D-TILE",
+   "newMoves": 0,
+   "newWeightPct": 0,
+   "cumulativeRemainingUnlocked": 4,
+   "newNames": []
+  },
+  {
+   "step": 7,
+   "provider": "D-BG",
+   "newMoves": 0,
+   "newWeightPct": 0,
+   "cumulativeRemainingUnlocked": 4,
    "newNames": []
   },
   {
    "step": 8,
-   "provider": "D-TILE",
+   "provider": "D-OAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 6,
+   "cumulativeRemainingUnlocked": 4,
    "newNames": []
   },
   {
    "step": 9,
-   "provider": "D-BG",
+   "provider": "D-VRAM",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 6,
+   "cumulativeRemainingUnlocked": 4,
    "newNames": []
   },
   {
    "step": 10,
-   "provider": "D-OAM",
-   "newMoves": 0,
-   "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 6,
-   "newNames": []
-  },
-  {
-   "step": 11,
-   "provider": "D-VRAM",
-   "newMoves": 0,
-   "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 6,
-   "newNames": []
-  },
-  {
-   "step": 12,
    "provider": "F-AUDIO",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 6,
+   "cumulativeRemainingUnlocked": 4,
    "newNames": []
   }
  ],
@@ -537,7 +506,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0003401360544217687,
-   "config": "src/animation/sceneOnPresentation.ts:3915",
+   "config": "src/animation/sceneOnPresentation.ts:3920",
    "needs": [
     "B",
     "C",
@@ -714,46 +683,6 @@
    "group": "MULTI"
   },
   {
-   "move": "MOVE_EXTREME_SPEED",
-   "id": 245,
-   "name": "EXTREMESPEED",
-   "hostClass": [
-    "H_DERIVED"
-   ],
-   "weightShare": 0.0011160714285714283,
-   "config": "src/animation/sceneOnPresentation.ts:1501",
-   "needs": [
-    "X-AGE"
-   ],
-   "blockers": [
-    {
-     "code": "X-AGE",
-     "text": "evidence covers ages 48..350 only (window starts mid-body: activation 78, window 87, ageOffset 48, row 39); ages 0..47 never accepted; 1 rental species (Arcanine)",
-     "cites": [
-      "src/animation/sceneOnPresentation.ts:1501",
-      "src/animation/extremeSpeed.ts:1"
-     ]
-    }
-   ],
-   "notes": [
-    "OUT: needs animation-lane dense evidence for the first 48 source ages (docs/next-adapters-prep2.md row 20)"
-   ],
-   "staleCorrections": [],
-   "orderFirstBodyOnly": false,
-   "lentConstants": [],
-   "providerNeeds": [
-    "X-AGE"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "OUT"
-  },
-  {
    "move": "MOVE_FLATTER",
    "id": 260,
    "name": "FLATTER",
@@ -761,7 +690,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0007936507936507934,
-   "config": "src/animation/sceneOnPresentation.ts:2870",
+   "config": "src/animation/sceneOnPresentation.ts:2875",
    "needs": [
     "B",
     "C",
@@ -1205,46 +1134,6 @@
    "group": "MULTI"
   },
   {
-   "move": "MOVE_MEMENTO",
-   "id": 262,
-   "name": "MEMENTO",
-   "hostClass": [
-    "H_DERIVED"
-   ],
-   "weightShare": 0.0003720238095238094,
-   "config": "src/animation/sceneOnPresentation.ts:1984",
-   "needs": [
-    "D-SCAN"
-   ],
-   "blockers": [
-    {
-     "code": "D-SCAN",
-     "text": "reducer.initialScanlineSourceBuffer / initialScanlineBuffers[2][320] captured from RAM (HDMA scanline state)",
-     "cites": [
-      "src/animation/memento.ts:31-32",
-      "src/animation/memento.ts:269"
-     ]
-    }
-   ],
-   "notes": [
-    "self-KO displayed HP 0 is the same input proven for Self-Destruct (prep6); the scanline buffer has no production owner"
-   ],
-   "staleCorrections": [],
-   "orderFirstBodyOnly": false,
-   "lentConstants": [],
-   "providerNeeds": [
-    "D-SCAN"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "PROVIDER-D-SCAN"
-  },
-  {
    "move": "MOVE_SKILL_SWAP",
    "id": 285,
    "name": "SKILL SWAP",
@@ -1252,7 +1141,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0017644557823129248,
-   "config": "src/animation/sceneOnPresentation.ts:2714",
+   "config": "src/animation/sceneOnPresentation.ts:2719",
    "needs": [
     "B",
     "C",
@@ -1751,7 +1640,7 @@
     "H_BASIC"
    ],
    "weightShare": 0.0022321428571428566,
-   "config": "src/animation/sceneOnPresentation.ts:3724",
+   "config": "src/animation/sceneOnPresentation.ts:3729",
    "needs": [
     "X-SUBST"
    ],
@@ -1762,7 +1651,7 @@
      "cites": [
       "reference/pokeemerald/data/battle_scripts_1.s:1085-1103",
       "src/engine/battleCommandFieldArt.ts:1",
-      "src/animation/sceneOnPresentation.ts:3724"
+      "src/animation/sceneOnPresentation.ts:3729"
      ]
     }
    ],

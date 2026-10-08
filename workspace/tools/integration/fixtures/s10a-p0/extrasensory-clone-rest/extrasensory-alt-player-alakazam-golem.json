@@ -1,0 +1,108 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/d4a-live/extrasensory-alt-player-alakazam-golem.json",
+  "move": "EXTRASENSORY",
+  "measuredPhase": "no-event",
+  "policyPhase": "no-event",
+  "measuredPhases": {
+   "optional-lag-age": "no-event",
+   "scanline-split-line": "event"
+  },
+  "policyPhases": {
+   "optional-lag-age": "no-event",
+   "scanline-split-line": "no-event"
+  },
+  "selectedPhase": false,
+  "window": 161,
+  "expectedDuration": 161,
+  "runs": [
+   {
+    "rows": 161,
+    "exactRows": 139,
+    "residualPixels": 1433,
+    "digest": "a9366c95fe27b26302c47675fd6d6d775a84c889f4189b22f6a0aba368a32b3a",
+    "affectedAges": [
+     43,
+     61,
+     70,
+     95,
+     97,
+     98,
+     99,
+     100,
+     101,
+     102,
+     103,
+     104,
+     105,
+     106,
+     107,
+     108,
+     109,
+     110,
+     114,
+     115,
+     116,
+     117
+    ],
+    "maxPixelsPerRow": 151
+   },
+   {
+    "rows": 161,
+    "exactRows": 139,
+    "residualPixels": 1433,
+    "digest": "a9366c95fe27b26302c47675fd6d6d775a84c889f4189b22f6a0aba368a32b3a",
+    "affectedAges": [
+     43,
+     61,
+     70,
+     95,
+     97,
+     98,
+     99,
+     100,
+     101,
+     102,
+     103,
+     104,
+     105,
+     106,
+     107,
+     108,
+     109,
+     110,
+     114,
+     115,
+     116,
+     117
+    ],
+    "maxPixelsPerRow": 151
+   }
+  ],
+  "documentedAges": [
+   43,
+   61,
+   70,
+   95,
+   97,
+   98,
+   99,
+   100,
+   101,
+   102,
+   103,
+   104,
+   105,
+   106,
+   107,
+   108,
+   109,
+   110,
+   114,
+   115,
+   116,
+   117
+  ],
+  "violations": []
+ }
+]
