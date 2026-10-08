@@ -31,5 +31,5 @@ for f in sorted((REC / "derived").glob("*-test.json")):
     rows.append(out)
 hdr = ["stem", "weight", "rows", "shift"] + COLS + ["v3ages"]
 print("\t".join(hdr))
-for r in rows: print("\t".join(str(r.get(k, "")) for k in hdr))
+for r in rows: print("\t".join(str(r.get(k, "")) for k in hdr).rstrip())
 (REC / "summary.json").write_text(json.dumps(rows, indent=1) + "\n")
