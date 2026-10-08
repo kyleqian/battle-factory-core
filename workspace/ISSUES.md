@@ -52,6 +52,11 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
   is over-strict (registering 260 on the #142 row-0 hook makes FLYGON / GOLBAT / SHEDINJA / WEEZING 0 px); (c) Skill
   Swap's idle-rest gate is over-strict (ONIX / RATTATA 0 px lifted); (d) Skill Swap ALAKAZAM opponent other-phase row
   peaks at 18,778 px vs documented max 18,649 (checker gates on ages only); TYRANITAR Flatter 2 / 96 px unresolved.
+- **Doll-free controls from prep38 / dolldef (2026-10-08):** Shadow Ball (247) PERSIAN -> SLOWBRO player 304,556 px (rows 69..99 +
+  the 156-row tail phase rows 137..152; also in the doll-free control, so a pre-existing Shadow Ball limit for that pair);
+  Psychic opponent HAUNTER -> KADABRA 200 px on the pre-activation row (elevated attacker shadow); Quick Attack player
+  (5,601 px inside the doll box) and Double-Edge player after an earlier Double-Edge (480 px) unresolved
+  (`docs/next-adapters-prep38.md`, `tools/integration/fixtures/dolldef-live-receipt.json`).
 - Harness limit: the verifier passes only the attacker's personality, so shiny TARGET declines are unverified.
 
 ## #148 — Battler x2 history: unknown-history remainder (main bug FIXED 2026-10-06)
