@@ -66,6 +66,13 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
   idle-rest opponent attacker. Open: Confuse Ray CPU phase (optional lag at 249 or 250 by history; 270 vs 269 rows, 9 : 3 —
   `tools/integration/fixtures/d4w-cr/`; needs a probe of where the lag lands), Double-Edge row 33 with an idle-rest opponent
   attacker (410 / 1,091 px), Attract GOLBAT one full-field row.
+- **Faint Attack (185) alternate tails (2026-10-08, `sides-live-receipt.json`):** DELCATTY -> GOLEM opponent body is one frame
+  shorter (225 vs 226), so the restore fade lands one row early (297,920 px on ages 203..218; the player-side MURKROW
+  alternate shows the same) — a D4 CPU-phase candidate (count the phases, then a policy entry).
+- Harness limit: the verifier passes only the attacker's personality, so shiny TARGET declines are unverified.
+
+## #148 — Battler x2 history: unknown-history remainder (main bug FIXED 2026-10-06)
+
 - **Fixed:** `src/engine/liveBattlerX2History.ts` (merged `de0e887`-era master) tracks per battler
   idle | zeroed | unknown from the measured per-move/role table (`docs/x2-history-148.md`), resets on
   send-in, and feeds `liveBattlerAnchors(...).frontIdleRest` + every renderer species-rest read.
