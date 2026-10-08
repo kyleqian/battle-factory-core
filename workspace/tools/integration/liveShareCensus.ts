@@ -57,7 +57,8 @@ interface CommandRecord {
   attacker: string; target: string; status: "live" | "fallback" | "partial"; frames: number; liveFrames: number;
   swapFrames: number; duration: number | null; decline: (Decline & { detail?: string }) | null;
 }
-interface BattleRecord { battle: number; seed: number; streak: number; frames: number; end: "terminal" | "stalled" | "error"; error?: string; turns: number }
+interface BattleRecord { battle: number; seed: number; streak: number; frames: number; end: "terminal" | "stalled" | "error"; error?: string; turns: number;
+  stalledAt?: string }
 
 const commands: CommandRecord[] = [];
 const battles: BattleRecord[] = [];
@@ -196,7 +197,12 @@ function playBattle(battle: number, seed: number, streak: number): void {
     end = String(e).includes("frame budget") ? "stalled" : "error";
     if (end === "error") error = String(e).slice(0, 160);
   }
-  battles.push({ battle, seed, streak, frames: frame, end, turns, ...(error ? { error } : {}) });
+  const stalledAt = end !== "stalled" ? undefined : [
+    state.battleResolutionPresentation ? `resolution ${state.battleResolutionPresentation.lifecycle.phase}` : null,
+    state.battleCommandPresentation ? `command ${state.battleCommandPresentation.lifecycle.phase}` : null,
+    state.battlePartySelect ? "party select" : null, state.battleForcedPartySelect ? "forced party select" : null,
+  ].filter(Boolean).join(", ");
+  battles.push({ battle, seed, streak, frames: frame, end, turns, ...(error ? { error } : {}), ...(stalledAt !== undefined ? { stalledAt } : {}) });
 }
 
 const started = Date.now();
@@ -252,6 +258,7 @@ const report = {
     presentationRng: "core.ts tick seam replicated: createPresentationRngSession() default seed, fresh per battle" },
   battles: { played: battles.length, terminal: battles.filter((b) => b.end === "terminal").length, stalled: battles.filter((b) => b.end === "stalled").length,
     errors: battles.filter((b) => b.end === "error").map((b) => ({ seed: b.seed, streak: b.streak, error: b.error })),
+    stalls: battles.filter((b) => b.end === "stalled").map((b) => ({ seed: b.seed, streak: b.streak, turns: b.turns, at: b.stalledAt })),
     frames: battles.reduce((a, b) => a + b.frames, 0), playerTurns: battles.reduce((a, b) => a + b.turns, 0) },
   overall: {
     commands: commands.length, live: commands.filter((c) => c.status === "live").length, partial: commands.filter((c) => c.status === "partial").length,

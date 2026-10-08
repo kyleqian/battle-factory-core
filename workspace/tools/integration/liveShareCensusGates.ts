@@ -31,26 +31,35 @@ function lineOf(lines: readonly string[], needle: string, from = 1): number {
 const cite = (file: string, line: number) => `${file.replace("src/engine/", "")}:${line}`;
 
 // ---- source index ------------------------------------------------------------------------------------------------------------
-interface Gate { line: number; cond: string | null }
+/** `nested`: the gate's `if` sits inside a branch of the case (deeper than the case body), so whether it runs is unknown. */
+interface Gate { line: number; cond: string | null; nested: boolean; prelude: readonly { name: string; expr: string }[] }
 function caseBlocks(fnNeedle: string): { labels: Map<number, number>; gates: Map<number, Gate[]>; start: number; end: number } {
   const fn = lineOf(lmaLines, fnNeedle);
   const start = lineOf(lmaLines, "  switch (request.moveId) {", fn);
   let end = start;
   for (let i = start; i < lmaLines.length; i++) if (lmaLines[i] === "  }") { end = i + 1; break; }
   const labels = new Map<number, number>(), gates = new Map<number, Gate[]>();
-  let pending: number[] = [], body = false, block: Gate[] = [];
+  let pending: number[] = [], body = false, block: Gate[] = [], consts: { name: string; expr: string }[] = [];
   const close = () => { for (const id of pending) gates.set(id, block); };
   for (let n = start + 1; n < end; n++) {
     const text = lmaLines[n - 1]!;
     const m = /^    ((?:case \d+:\s*)+)(.*)$/.exec(text);
     if (m) {
-      if (body) { close(); pending = []; block = []; body = false; }
+      if (body) { close(); pending = []; block = []; consts = []; body = false; }
       for (const id of m[1]!.match(/\d+/g)!.map(Number)) { pending.push(id); labels.set(id, n); }
       if (m[2]!.trim() === "") continue;
     }
-    if (/^    default:/.test(text)) { close(); pending = []; block = []; body = false; continue; }
+    if (/^    default:/.test(text)) { close(); pending = []; block = []; consts = []; body = false; continue; }
     body = true;
-    if (text.includes("return null")) block.push({ line: n, cond: gateCondition(n) });
+    // Single-line case-body consts (the case's own base indent) are evaluated before its gates when they only read scope values.
+    const c = /^      const (\w+) = (.*);\s*$/.exec(text);
+    if (c) consts.push({ name: c[1]!, expr: c[2]! });
+    if (text.includes("return null")) {
+      let ifLine = n;
+      while (ifLine > n - 5 && !lmaLines[ifLine - 1]!.includes("if (")) ifLine--;
+      block.push({ line: n, cond: gateCondition(n), nested: !/^      (if \(|\S)/.test(lmaLines[ifLine - 1]!) || /^      [}\]]/.test(lmaLines[ifLine - 1]!),
+        prelude: [...consts] });
+    }
   }
   close();
   return { labels, gates, start, end };
@@ -105,6 +114,7 @@ function label(d: string): string {
   if (/request\.friendship/.test(d)) return "friendship branch";
   if (/request\.damage/.test(d)) return "damage range";
   if (/request\.turn/.test(d)) return "turn";
+  if (/field\.(player|opponent)\.status/.test(d)) return "battler has a status condition";
   return `gate: ${d.replace(/\s+/g, " ").slice(0, 60)}`;
 }
 
@@ -113,9 +123,8 @@ export interface PresentationInputs {
   paletteInput?: unknown; spriteAllocatorInput?: unknown; spriteOrderInput?: unknown; presentationRngInput?: unknown; battlerX2Input?: unknown;
 }
 /** Evaluate one disjunct with only the presentation function's parameters / pre-switch consts in scope: true / false / "opaque". */
-function evalDisjunct(d: string, x: PresentationInputs): boolean | "opaque" {
-  // attacker / target are full battler objects in production; only their geometry.side is reproduced here.
-  if (/\b(attacker|target)\.(?!geometry\.side)/.test(d.replace(/request\.(attacker|target)/g, ""))) return "opaque";
+const readsBattlerObject = (d: string) => /\b(attacker|target)\.(?!geometry\.side)/.test(d.replace(/request\.(attacker|target)/g, ""));
+function gateScope(x: PresentationInputs, prelude: Gate["prelude"]): Record<string, unknown> {
   const attackerSide = x.request.attacker === 0 ? "player" : "opponent", targetSide = attackerSide === "player" ? "opponent" : "player";
   const art = createBattleCommandFieldArtView(x.field);
   const scope: Record<string, unknown> = {
@@ -125,6 +134,16 @@ function evalDisjunct(d: string, x: PresentationInputs): boolean | "opaque" {
     attacker: { geometry: { side: attackerSide } }, target: { geometry: { side: targetSide } },
     attackerAnchors: liveBattlerAnchors(attackerSide, art, x.battlerX2Input as never),
   };
+  for (const { name, expr } of prelude) {
+    if (readsBattlerObject(expr)) continue;
+    try { scope[name] = new Function(...Object.keys(scope), `"use strict"; return (${expr});`)(...Object.values(scope)); } catch { /* not in scope: stays opaque */ }
+  }
+  return scope;
+}
+/** Evaluate one disjunct with only the presentation function's parameters / pre-switch consts / evaluable case consts in scope. */
+function evalDisjunct(d: string, scope: Record<string, unknown>): boolean | "opaque" {
+  // attacker / target are full battler objects in production; only their geometry.side is reproduced here.
+  if (readsBattlerObject(d)) return "opaque";
   try {
     return Boolean(new Function(...Object.keys(scope), `"use strict"; return (${d});`)(...Object.values(scope)));
   } catch {
@@ -159,7 +178,10 @@ export function classifyDurationDecline(request: BattleMoveAnimationRequest, fie
   const caseLine = DURATION.labels.get(request.moveId);
   if (caseLine === undefined) return { stage: "duration", reason: `${prefix}no adapter (no liveMoveAnimationDuration case)`, gate: cite(LMA, DURATION.end) };
   const at = cite(LMA, caseLine);
-  const live = (r: BattleMoveAnimationRequest) => { try { return liveMoveAnimationDuration(r, field) !== null; } catch { return false; } };
+  // With the displayed field, or field-free (the doll gates do not run without a field).
+  const live = (r: BattleMoveAnimationRequest) => {
+    try { return liveMoveAnimationDuration(r, field) !== null || liveMoveAnimationDuration(r) !== null; } catch { return false; }
+  };
   if (live({ ...request, attacker: request.attacker === 0 ? 1 : 0, target: request.target === 0 ? 1 : 0 })) {
     return { stage: "duration", reason: `${prefix}no ${sideOf(request)}-attacker adapter`, gate: at };
   }
@@ -180,9 +202,11 @@ export function classifyPresentationDecline(x: PresentationInputs): Decline {
   if (!gates) return { stage: "presentation", reason: "no presentation case (switch default)", gate: cite(LMA, PRESENTATION.end) };
   for (const g of gates) {
     if (g.cond === null) return { stage: "presentation", reason: "unclassified (unconditional / opaque return null)", gate: cite(LMA, g.line) };
+    if (g.nested) return { stage: "presentation", reason: "unclassified (branch-local gate)", gate: cite(LMA, g.line) };
+    const scope = gateScope(x, g.prelude);
     let opaque = false;
     for (const d of disjuncts(g.cond)) {
-      const v = evalDisjunct(d, x);
+      const v = evalDisjunct(d, scope);
       if (v === true) return { stage: "presentation", reason: label(d), gate: cite(LMA, g.line) };
       if (v === "opaque") opaque = true;
     }
