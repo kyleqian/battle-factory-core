@@ -12,6 +12,13 @@
   Worker gates 1,563 files / 12,823 tests, build 873, differential 624. Supervisor: `substSwapRun.sh` into fresh dirs —
   probes r1 == r2 (13 scenarios), 21 windows x2 runs 0 px, GOLEM-player residual == non-subbed control, negatives fail;
   union typecheck, smoke 448, 9 targeted files 128/128, own differential vs `bb4dc2558` 624/624. Logs `.integration/validation/swap-20261008/`.
+- Species audit 14 (side, `c997a4710`, new files only): subbed-attacker swap grid 219 scenarios / 565 windows (418 / 430
+  presented composites 0 px; tail latch 430 / 430) + fade 28 scenarios / 34 windows (32 exact). DEFECTS (patch proofs 0 px):
+  fade with an elevated OTHER opponent keeps its shadow on row 0 (200 px; liveSubstituteFade.ts ~:155); Confuse Ray (ONIX
+  294,419 / RATTATA 110,700) and Bite (10,660 / 28,366) draw an idle-rest opponent attacker without its rest (audit-13
+  class; doll-free bodies). D4: Crunch 141 vs 140 body rows confirmed in composites; NEW Confuse Ray 269 vs 268 (ages
+  251..266). Supervisor: fade set re-probed fresh — r1 / r2 receipts semantically identical, txt byte-identical; Confuse
+  Ray rest patch proof summary byte-identical.
 - prep41 (side, `de32f06ad`, new files only): D4 widening readiness. Pursuit (228) later bodies READY as faithful timing
   (optional-lag-age 82, fixed lags 60 / 61; 24 lag : 9 no-lag -> lag, 103 rows; 21 windows through the patched production
   renderer: 15 policy-phase 0 px, 6 other-phase only on ages 84..99). Hidden Power (237, Unown) READY as a reclassification

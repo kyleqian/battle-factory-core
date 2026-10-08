@@ -67,6 +67,10 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
   fade's claim is scoped outside that footprint (message-host question). Not measured: the ROM wait between that message
   and the fade, fades on a non-target (recoil), multi-hit or Baton Pass / switch fades, Scene OFF within the Substitute's
   own resolution (#153).
+- **Audit 14 (`docs/live-species-audit-14.md`, 2026-10-08):** fade shadow row 0 with an elevated other opponent
+  (`fade-shadow-row0-env.diff`); Confuse Ray / Bite idle-rest opponent attacker (`confuse-ray-attacker-rest-env.diff`,
+  `bite-attacker-rest-env.diff`); new D4 case Confuse Ray (268 vs 269 body rows); unresolved Double-Edge row 33 with an
+  idle-rest opponent attacker (410 / 1,091 px), Attract GOLBAT one full-field row.
 - Harness limit: the verifier passes only the attacker's personality, so shiny TARGET declines are unverified.
 
 ## #148 — Battler x2 history: unknown-history remainder (main bug FIXED 2026-10-06)
