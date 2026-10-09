@@ -212,7 +212,9 @@ const liveIceBallCounter = (rolloutCounter: number | undefined): 0 | 1 | 2 | 3 |
 
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   2, 5, 9, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 42, 43, 44, 47, 48, 49, 50,
-  51, 55, 65, 66, 67, 68, 74, 75, 78, 79, 83, 92, 93, 95, 97, 101, 103, 105, 106, 108, 112, 113,
+  51, 55, 65, 66, 67, 68, 74, 75, 78, 79, 83, 92, 93, 95, 97, 101, 103, 105, 106, 108, 112,
+  // Light Screen 113 reclassified to faithful timing (lsbz, liveMoveTimingPolicy.ts 113, the opponent's row-59 BLDALPHA write phase);
+  // its exact fixtures stay valid in scope.
   114, 115, 122, 124, 131, 136, 147, 148, 151, 154, 156, 158, 162, 163, 172, 178, 180, 182, 186, 188, 201, 204,
   208, 211, 213, 223, 227, 231, 232, 235, 243, 246, 247, 257, 264, 272, 277, 280, 281, 287, 290, 302,
   305, 306, 319, 320, 321, 325, 334, 335, 336, 337, 342, 343, 347,
@@ -728,7 +730,7 @@ const effectOrderProvable = new Map<string, boolean>();
  */
 function provableEffectOrder(moveId: 196 | 59, side: "player" | "opponent", duration: number,
   geometry: Parameters<typeof icyWindEffectOamOrderAtAge>[2] | Parameters<typeof blizzardEffectOamOrderAtAge>[2]): boolean {
-  const key = `${moveId}/${side}/${JSON.stringify(geometry)}`;
+  const key = `${moveId}/${side}/${duration}/${JSON.stringify(geometry)}`;
   let ok = effectOrderProvable.get(key);
   if (ok === undefined) {
     try {
@@ -742,6 +744,25 @@ function provableEffectOrder(moveId: 196 | 59, side: "player" | "opponent", dura
 }
 /** Blizzard's live window ends 164 rows after its impact start (accepted 208 + 164 = 372 player, 197 + 164 = 361 opponent). */
 const BLIZZARD_IMPACT_TO_WINDOW_END = 164;
+/**
+ * S10A lsbz: Blizzard's live window from the displayed field's geometry. The impact start is the reducers' traveling-particle replay
+ * (blizzardImpactStartAge: `waitforvisualfinish` releases when the last snowball / large crystal destroys itself) at the case-59
+ * geometry (attacker / target picOffsetPoint, x2-independent); everything after it (impact crystals, the restorebg fade, the optional
+ * lag at impact + 139 and the fixed pair impact + 160 / + 161 of the policy phase) is relative to it, so the window is impact + 164 rows.
+ * Player geometries are all 208 (372 rows); the opponent's 194..206 (358..370 rows; fresh counters tools/integration/fixtures/
+ * lsbz-live-receipt.json blizzard). Without a field: the accepted geometries (372 / 361).
+ */
+function liveBlizzardDuration(field: BattleResolutionDisplayedField | undefined, side: "player" | "opponent"): number {
+  if (field === undefined) return side === "player" ? 372 : 361;
+  const art = createBattleCommandFieldArtView(field);
+  const geometry = { attackerCenter: liveBattlerAnchors(side, art).picOffsetPoint,
+    targetCenter: liveBattlerAnchors(side === "player" ? "opponent" : "player", art).picOffsetPoint };
+  const key = `${side}/${JSON.stringify(geometry)}`;
+  let duration = blizzardDurationCache.get(key);
+  if (duration === undefined) blizzardDurationCache.set(key, duration = blizzardImpactStartAge(side, geometry) + BLIZZARD_IMPACT_TO_WINDOW_END);
+  return duration;
+}
+const blizzardDurationCache = new Map<string, number>();
 
 /** Free OBJ slots over the known-entry in-use set [0,1,2,6,8,60..63] (prep13 s1.2 launchSpriteSlots), ascending. */
 const KNOWN_ENTRY_FREE_SPRITE_SLOTS: readonly number[] = Object.freeze(
@@ -1053,8 +1074,8 @@ export function liveMoveAnimationDuration(
     case 137: return 213; // Glare accepted window (GLARE_SOURCE_FRAME_COUNT).
     case 57: case 330: return SURF_WAVE_FRAME_COUNT; // Surf / Muddy Water accepted window (144 rows).
     case 196: return 287; // Icy Wind accepted window (220..506).
-    // Blizzard accepted windows: 214..585 player-back, 213..573 opponent-front (Guillotine precedent).
-    case 59: return request.attacker === 0 ? 372 : 361;
+    // Blizzard accepted windows: 214..585 player-back, 213..573 opponent-front (Guillotine precedent); any geometry: impact start + 164 (lsbz).
+    case 59: return liveBlizzardDuration(field, request.attacker === 0 ? "player" : "opponent");
     case 252: return 86; // Fake Out accepted window (78..163 / 82..167).
     case 164: return SUBSTITUTE_FRAME_COUNT; // Substitute body: activation .. first inactive row (prep37 s1, every pair and both sides).
     case 322: return 241; // Cosmic Power accepted window (294..534).
@@ -1615,6 +1636,8 @@ export function liveMoveAnimationPresentation(
           wall: spriteAllocatorInput.wall,
           sparkles: spriteAllocatorInput.sparkles,
         },
+        // lsbz (D4, liveMoveTimingPolicy.ts 113): the opponent's age-52 BLDALPHA write phase; the dominant phase lands it at once (no hold).
+        opponentBlendHold: liveMoveTimingSidePhase(113, "bg-write-row", attacker.geometry.side) === "event",
       };
       break;
     case 112: case 115: case 182: case 243: case 277: {
@@ -1906,7 +1929,7 @@ export function liveMoveAnimationPresentation(
       const geometry = { attackerCenter: attackerAnchors.picOffsetPoint, targetCenter: targetAnchors.picOffsetPoint };
       const icyGeometry = { ...geometry, spikeTargetCenter: targetAnchors.battlePositionCenter };
       if (!provableEffectOrder(request.moveId as 196 | 59, attacker.geometry.side,
-        liveMoveAnimationDuration(request)!, request.moveId === 196 ? icyGeometry : geometry)) return null;
+        liveMoveAnimationDuration(request, field)!, request.moveId === 196 ? icyGeometry : geometry)) return null;
       config = request.moveId === 196
         ? { move: "ICY_WIND", attacker, target, fieldProfile, effectGeometry: icyGeometry }
         : { move: "BLIZZARD", attacker, target, fieldProfile, effectGeometry: geometry };

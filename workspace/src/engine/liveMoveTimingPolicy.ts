@@ -416,6 +416,12 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
    * with it (the live windows), 371 / 360 without. Wrong phase: the fade-in tail rows 338..353 only. The geometry-shifted opponent controls
    * (ARBOK -> CATERPIE lag [337, 358, 359], WEEZING -> BLASTOISE [335, 356, 357]) are impact-start != 197 bodies (declined by
    * provableEffectOrder) and are not counted. The player's fixed pair without the lag (367 / 368) is the opponent's shape (never measured).
+   * S10A lsbz (ISSUES #152 "Blizzard (59) opponent pairs whose impact-start age is not 197"): the opponent's ages are impact-relative: the
+   * optional lag at impact + 139 and the fixed pair impact + 160 / + 161 (+ 159 / + 160 without it), the body impact + 164 / + 163 rows, where
+   * impact = blizzardImpactStartAge at the pair's geometry (194..206; the values below are impact 197's). The live window follows it
+   * (liveMoveAnimation.ts liveBlizzardDuration). Fresh counters over a 24-pair grid (tools/integration/fixtures/lsbz/blizzard-counters.json,
+   * predictions committed first) match that shape on every pair, lag in 16, none in 8; with the d4tails impact-197 bodies (3 : 1) and the
+   * geoice controls ARBOK -> CATERPIE / WEEZING -> BLASTOISE (both lag) the opponent counts 21 : 9.
    */
   59: {
     move: "MOVE_BLIZZARD",
@@ -426,9 +432,11 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
       evidence: ["tools/integration/fixtures/d4tails/counters.json (Blizzard player: lag [347, 368, 369] in 7 of 7)", "tools/integration/fixtures/d4tails-live-receipt.json blizzard"],
     }, {
       kind: "optional-lag-age", age: 336, fixedLagAges: [356, 357], iterations: 358, side: "opponent",
-      alternatives: [{ phase: "event", bodyRows: 361, measured: 3 }, { phase: "no-event", bodyRows: 360, measured: 1 }],
+      alternatives: [{ phase: "event", bodyRows: 361, measured: 21 }, { phase: "no-event", bodyRows: 360, measured: 9 }],
       chosen: "event", tieRuleUsed: false,
       evidence: ["tools/integration/fixtures/d4tails/counters.json (Blizzard opponent impact 197: lag [336, 357, 358] in 3 of 4; BLASTOISE -> BLASTOISE [356, 357])",
+        "tools/integration/fixtures/lsbz/blizzard-counters.json (24 grid pairs, impact 194..206: lag [impact + 139, + 160, + 161] in 16, [impact + 159, + 160] in 8)",
+        "tools/integration/fixtures/lsbz-live-receipt.json blizzard",
         "tools/integration/fixtures/geoice-live-receipt.json (BLASTOISE -> BLASTOISE 360-row ROM body: tail 338..353 only)", "tools/integration/fixtures/d4tails-live-receipt.json blizzard"],
     }],
   },
@@ -478,6 +486,27 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
       chosen: "event", tieRuleUsed: false,
       evidence: ["tools/integration/fixtures/d4tails/counters.json (Faint Attack opponent: lag at 205 in GOLBAT -> GOLEM, GROVYLE -> ONIX; none in DELCATTY -> GOLEM)",
         "tools/integration/fixtures/sides-live-receipt.json", "tools/integration/fixtures/fa185-live-receipt.json"],
+    }],
+  },
+  /**
+   * S10A lsbz (ISSUES #152 "Light Screen (113) opponent attacker, row 59"; docs/live-audit-15-chains.md s1 TIMING-PHASE): an OPPONENT
+   * attacker's BLDALPHA step written at body row 59 (reducer age 52, wall anchor + 7; eva 9 -> 8) either reaches the I/O register at once
+   * ("no-event": row 59 shows 8/8) or is buffered by SetGpuReg (VCOUNT outside VBlank; sGpuRegWaitingList [0x52]) and lands one frame late,
+   * under the row-60 write ("event": row 59 repeats 9/7). Lag ages [68, 69] are identical in both phases (issue151Counters), so it is a
+   * VBlank-write CPU phase, not a lag frame; the body is 88 rows either way. Measured windows (audit 15, two fresh runs each): no-event 9
+   * (SNORLAX / CHANSEY after Double Team, Faint Attack, Hydro Pump, Ice Beam, Swift; EXEGGCUTE / ONIX first body and after Double Team,
+   * Faint Attack, Swift), event 2 (the SNORLAX / CHANSEY first body; the accepted EXEGGCUTE / ONIX after-Tackle fixture). Player attacker:
+   * direct in all 3 measured windows (no parameter). Wrong phase: row 59 only (2,658 px).
+   */
+  113: {
+    move: "MOVE_LIGHT_SCREEN",
+    parameters: [{
+      kind: "bg-write-row", age: 60, fixedLagAges: [68, 69], iterations: 86, side: "opponent",
+      alternatives: [{ phase: "event", bodyRows: 88, measured: 2 }, { phase: "no-event", bodyRows: 88, measured: 9 }],
+      chosen: "no-event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/audit-15/receipts/vblank/table.txt (BLDALPHA I/O vs buffer at row 59: hold [0x52] in ctl / acc-tackle, direct in 5)",
+        "tools/integration/fixtures/audit-15/receipts/main (9 live opponent windows 2,658 px on row 59 only under the hold; patch-ls-nohold 12 / 13 live windows 0 px)",
+        "tools/integration/fixtures/audit-15/receipts/vblank/lag-counters.txt (lag ages [68, 69] in both phases)", "tools/integration/fixtures/lsbz-live-receipt.json light-screen"],
     }],
   },
   /**
@@ -600,6 +629,9 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   // S10A fa185 (reclassified from scoped exact): Faint Attack, per-side optional lag at 205 (player no lag: the restore fade-in one row earlier,
   // faintAttack.ts faintAttackRestoreProfile; opponent lag); fixtures tools/integration/fixtures/fa185/windows/*.
   185,
+  // S10A lsbz (reclassified from scoped exact): Light Screen, the opponent's row-59 BLDALPHA write phase (no hold; lightScreen.ts
+  // opponentBlendHold); fixtures tools/integration/fixtures/lsbz/windows/light-screen-*.
+  113,
 ]);
 
 /**

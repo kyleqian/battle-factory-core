@@ -1,0 +1,71 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-altaria-aggron.json",
+ "attacker": {
+  "species": "ALTARIA",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "AGGRON",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 145,
+  "playerMaxHp": 145,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent ALTARIA -> AGGRON",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 438,
+  "ageOffset": 0
+ },
+ "schema": "lsbz-blizzard-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 79,
+  "altInterval": {
+   "move": 59,
+   "start": 79,
+   "end": 438
+  },
+  "offset": 0
+ },
+ "lsbz": {
+  "impactStartAge": 196,
+  "prediction": {
+   "counterBodyRowsWithLag": 359,
+   "counterBodyRowsWithoutLag": 358,
+   "lagAgesWithLag": [
+    335,
+    356,
+    357
+   ],
+   "lagAgesWithoutLag": [
+    355,
+    356
+   ],
+   "liveWindowRows": 360,
+   "policyPhase": "event"
+  },
+  "geometry": {
+   "attackerCenter": {
+    "x": 176,
+    "y": 34
+   },
+   "targetCenter": {
+    "x": 72,
+    "y": 95
+   }
+  }
+ }
+}

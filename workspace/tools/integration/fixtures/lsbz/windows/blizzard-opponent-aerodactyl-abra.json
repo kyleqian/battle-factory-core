@@ -1,0 +1,12 @@
+{
+ "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-aerodactyl-abra.json",
+ "move": "BLIZZARD",
+ "denseWindow": {
+  "startFrame": 82,
+  "endFrame": 439,
+  "ageOffset": 0
+ },
+ "timingPhase": "no-event",
+ "impactStartAge": 195,
+ "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aerodactyl-abra.json: body 358 rows, lag ages [354, 355], r0 == r1; impact 195"
+}

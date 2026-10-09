@@ -1,0 +1,12 @@
+{
+ "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-abra-anorith.json",
+ "move": "BLIZZARD",
+ "denseWindow": {
+  "startFrame": 76,
+  "endFrame": 439,
+  "ageOffset": 0
+ },
+ "timingPhase": "no-event",
+ "impactStartAge": 201,
+ "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-abra-anorith.json: body 364 rows, lag ages [360, 361], r0 == r1; impact 201"
+}

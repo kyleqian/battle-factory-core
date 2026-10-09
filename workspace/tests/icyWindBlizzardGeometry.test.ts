@@ -84,19 +84,22 @@ describe("S10A geoice: Icy Wind / Blizzard OAM slots derived from the allocator 
     }
   });
 
-  it("the seam is live at the dense pairs and declines a Blizzard geometry whose impact start misses the live window", () => {
+  it("the seam is live at the dense pairs and at a Blizzard geometry whose impact start is not the accepted 197 (lsbz: geometry-derived window)", () => {
     for (const name of ["icy-wind-player-onix-golbat", "icy-wind-opponent-masquerain-onix", "blizzard-player-charizard-golbat",
       "blizzard-opponent-zubat-nidoking"]) {
       const view = liveView(fixture(name), 0);
       const e = view.effect as unknown as { request: BattleMoveAnimationRequest };
       expect(liveMoveAnimationPresentation(e.request, view.field, 0), name).not.toBeNull();
     }
-    // ARBOK -> CATERPIE (opponent): impact start 198 -> the ROM body is 361 rows from activation (controls/derivation.json), the live
-    // window ends at 197 + 164 = 361 rows of the accepted 197 geometry -> the seam declines (scene-off view).
+    // ARBOK -> CATERPIE (opponent): impact start 198 -> the ROM body is 361 rows from activation to the last active row
+    // (controls/derivation.json). S10A lsbz: the live window is geometry-derived (impact + 164 = 362 rows), so the seam is live
+    // (before lsbz it ended at the accepted 197 + 164 = 361 and declined); without a field the accepted 361 stays.
     const arbok = fixture("controls/blizzard-opponent-arbok-caterpie");
     expect(blizzardImpactStartAge("opponent", geoiceGeometry("opponent", "ARBOK", "CATERPIE"))).toBe(198);
     const view = liveView(arbok, 0);
-    expect(liveMoveAnimationPresentation((view.effect as unknown as { request: BattleMoveAnimationRequest }).request, view.field, 0)).toBeNull();
+    const arbokRequest = (view.effect as unknown as { request: BattleMoveAnimationRequest }).request;
+    expect(liveMoveAnimationPresentation(arbokRequest, view.field, 0)).not.toBeNull();
+    expect(liveMoveAnimationDuration(arbokRequest, view.field)).toBe(362);
     expect(liveMoveAnimationDuration(request(59, 1))).toBe(361);
     const derivation = JSON.parse(readFileSync(`${DIR}/controls/derivation.json`, "utf8")) as { case: string; altInterval: { start: number; end: number } }[];
     const interval = derivation.find(d => d.case === "blizzard-opponent-arbok-caterpie")!.altInterval;

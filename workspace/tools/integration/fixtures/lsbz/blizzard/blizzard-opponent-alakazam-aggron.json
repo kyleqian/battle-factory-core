@@ -1,0 +1,71 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-alakazam-aggron.json",
+ "attacker": {
+  "species": "ALAKAZAM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "AGGRON",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 145,
+  "playerMaxHp": 145,
+  "opponentHp": 162,
+  "opponentMaxHp": 162,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent ALAKAZAM -> AGGRON",
+ "denseWindow": {
+  "startFrame": 80,
+  "endFrame": 443,
+  "ageOffset": 0
+ },
+ "schema": "lsbz-blizzard-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 80,
+  "altInterval": {
+   "move": 59,
+   "start": 80,
+   "end": 443
+  },
+  "offset": 0
+ },
+ "lsbz": {
+  "impactStartAge": 200,
+  "prediction": {
+   "counterBodyRowsWithLag": 363,
+   "counterBodyRowsWithoutLag": 362,
+   "lagAgesWithLag": [
+    339,
+    360,
+    361
+   ],
+   "lagAgesWithoutLag": [
+    359,
+    360
+   ],
+   "liveWindowRows": 364,
+   "policyPhase": "event"
+  },
+  "geometry": {
+   "attackerCenter": {
+    "x": 176,
+    "y": 44
+   },
+   "targetCenter": {
+    "x": 72,
+    "y": 95
+   }
+  }
+ }
+}

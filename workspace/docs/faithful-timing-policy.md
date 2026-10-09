@@ -37,7 +37,8 @@ Implements the accounting and policy of `docs/faithful-timing.md` (D4, approved 
 | DIVE 291 (opponent setup) | optional lag at age 64 (absorbed: 115 rows either way; rows 66..95 one row late) | - | 115 | lag: 1, no lag: 6 | no lag | no |
 | ICY_WIND 196 | optional lag at age 261 (restorebg LoadDefaultBg frame overruns VBlank) | 241, 242 | 284 | lag 287: 11, no lag 286: 4 | lag (287 rows) | no |
 | BLIZZARD 59 (player) | optional lag at age 347 (before the fixed pair 368 / 369) | 367, 368 | 369 | lag 372: 7, no lag 371: 0 | lag (372 rows) | no |
-| BLIZZARD 59 (opponent, impact 197) | optional lag at age 336 (before the fixed pair 357 / 358; 356 / 357 without it) | 356, 357 | 358 | lag 361: 3, no lag 360: 1 | lag (361 rows) | no |
+| BLIZZARD 59 (opponent; impact 197 shown, every age / row count shifted by impact - 197) | optional lag at age 336 = impact + 139 (before the fixed pair 357 / 358; 356 / 357 without it) | 356, 357 | 358 | lag 361: 21, no lag 360: 9 | lag (impact + 164 rows) | no |
+| LIGHT_SCREEN 113 (opponent) | bg-write-row: the row-59 BLDALPHA step (eva 9 -> 8) direct / buffered under the row-60 write (a hold) | 68, 69 | 86 | hold: 2, direct: 9 (88 rows either way) | direct, no hold (row 59) | no |
 | CONFUSE_RAY 109 | optional lag at age 249 (250 in some histories; both precede the fade's first changed row 251) | 26, 229, 230 | 266 | lag 270: 11, no lag 269: 3 (production window lengths) | lag (270 rows) | no |
 
 Measurements: `tools/integration/fixtures/prep25/lag-frames.json` (2 of 4 each, a tie) + the D4a tie-break
@@ -129,3 +130,31 @@ earlier age unchanged), and `liveMoveAnimationDuration(185)` = 220 player / 221 
 faithful timing = 276. Proof: `tools/integration/fixtures/fa185-live-receipt.json` (10 windows `tools/integration/fixtures/fa185/windows`,
 d4aTimingCheck twice fresh: 8 policy-phase 0 px (6 player at 220 rows, 2 opponent at 221); DELCATTY -> GOLEM opponent (no lag) and the
 accepted prep6 player body (lag) only on ages 203..218), `tests/animation/liveFa185Timing.test.ts`.
+
+## lsbz: Light Screen opponent row-59 BLDALPHA write phase (S10A, ISSUES #152 "Light Screen (113) opponent attacker, row 59")
+
+Light Screen (113) moved from scoped exact to faithful timing with an opponent-side `bg-write-row` entry (age 60 = the late row; chosen
+no-event = row 59). Audit 15 (`docs/live-audit-15-chains.md` s1, `receipts/vblank/table.txt`, two fresh runs each) showed the opponent's
+row-59 BLDALPHA step (reducer age 52, wall anchor + 7; eva 9 -> 8) either reaching the I/O register at once (9 windows: SNORLAX / CHANSEY
+after Double Team, Faint Attack, Hydro Pump, Ice Beam, Swift; EXEGGCUTE / ONIX first body and after Double Team, Faint Attack, Swift) or
+buffered by `SetGpuReg` (VCOUNT outside VBlank, `sGpuRegWaitingList` [0x52]) and lost under the row-60 write (2: the SNORLAX / CHANSEY
+first body, the accepted EXEGGCUTE / ONIX after-Tackle fixture); lag ages [68, 69] in both. `lightScreen.ts` `specialScreenAtAge`
+`opponentBlendHold` (default true = the accepted corpus, so the Factory acceptance reducer is unchanged); `liveMoveAnimation.ts` case 113
+passes the policy phase (no hold). Census: 240 scoped exact + 13 faithful random + 23 faithful timing = 276. Proof:
+`tools/integration/fixtures/lsbz-live-receipt.json` (19 windows `tools/integration/fixtures/lsbz/windows/light-screen-*`, full 88 rows,
+d4aTimingCheck twice fresh: 9 opponent policy-phase + 8 player windows 0 px; the 2 hold windows only on row 59, 2,658 px),
+`tests/animation/liveLsbzTiming.test.ts`.
+
+## lsbz (B): Blizzard opponent at any impact start (S10A, ISSUES #152 "Blizzard (59) opponent pairs whose impact-start age is not 197")
+
+The live window is geometry-derived: `liveMoveAnimationDuration(59)` = `blizzardImpactStartAge(side, geometry) + 164` from the displayed
+field (`liveMoveAnimation.ts` `liveBlizzardDuration`; geometry = the case-59 attacker / target `picOffsetPoint`; the case-59 gate now passes
+the field). The impact start is the traveling-particle callback replay geoice uses (`waitforvisualfinish` releases when the last snowball /
+large crystal has destroyed itself); every later step (impact crystals, the restorebg fade, the optional lag at impact + 139, the fixed
+pair impact + 160 / + 161) is relative to it. Player geometries are all impact 208 (372 rows, unchanged); opponent 194..206 (358..370).
+Proof: 25-pair grid with predictions committed before any probe (`tools/integration/lsbzBlizzardGrid.ts`,
+`fixtures/lsbz/blizzard-grid-predictions.json`), 24 staged (`lsbzBlizzardStage.py`; BALTOY -> HUNTAIL's probe crashed); fresh counters
+twice (`fixtures/lsbz/blizzard-counters.json`) match the predicted shape on every pair (lag 16, none 8 -> the opponent count 21 : 9);
+d4aTimingCheck twice fresh over 25 windows (`fixtures/lsbz/windows/blizzard-*`, + WEEZING -> BLASTOISE): 17 lag windows 0 px at impact +
+164 rows, the 8 no-lag windows only on impact + 141 .. + 156 (`alternatePhaseResidual.windows`). No count change. Receipt
+`tools/integration/fixtures/lsbz-live-receipt.json` `blizzard`; `tests/animation/liveLsbzBlizzard.test.ts`.

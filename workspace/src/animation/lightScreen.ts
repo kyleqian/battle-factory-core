@@ -59,12 +59,20 @@ function sparkleAtAge(
 /**
  * Source-relative reducer for Move_LIGHT_SCREEN. Age zero is the creation
  * pass of gLightScreenWallSpriteTemplate; the body is inactive after age 73.
+ *
+ * `opponentBlendHold`: an opponent-side Light Screen's age-52 BLDALPHA write
+ * (eva 8) is either applied at once or buffered by SetGpuReg (VCOUNT outside
+ * VBlank) and lost under the age-53 write, so age 52 repeats eva 9. That is a
+ * CPU-load VBlank-write phase (docs/live-audit-15-chains.md s1); the accepted
+ * corpus shows the hold (the default), the live adapter passes the D4 policy
+ * phase (liveMoveTimingPolicy.ts 113).
  */
 export function specialScreenAtAge(
   age: number,
   attackerCenter: Readonly<{ x: number; y: number }>,
   side: LightScreenSide,
   kind: SpecialScreenKind,
+  opponentBlendHold = true,
 ): LightScreenState {
   const wallLive = age >= 0 && age <= 63;
   const sparkles = SPARKLE_ARGS.flatMap((_, index) => {
@@ -76,7 +84,7 @@ export function specialScreenAtAge(
     const eva = age <= 1 ? 0
       : age <= 14 ? age - 1
         : age <= 47 ? 13
-          : kind === "light-screen" && side === "opponent" && age === 52 ? 9
+          : kind === "light-screen" && side === "opponent" && age === 52 && opponentBlendHold ? 9
             : age <= 60 ? 60 - age : 0;
     alpha = { eva, evb: 16 - eva };
   }
@@ -99,8 +107,9 @@ export function lightScreenAtAge(
   age: number,
   attackerCenter: Readonly<{ x: number; y: number }>,
   side: LightScreenSide,
+  opponentBlendHold = true,
 ): LightScreenState {
-  return specialScreenAtAge(age, attackerCenter, side, "light-screen");
+  return specialScreenAtAge(age, attackerCenter, side, "light-screen", opponentBlendHold);
 }
 
 /**

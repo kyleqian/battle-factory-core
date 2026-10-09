@@ -1,0 +1,71 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-altaria-anorith.json",
+ "attacker": {
+  "species": "ALTARIA",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ANORITH",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 120,
+  "playerMaxHp": 120,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent ALTARIA -> ANORITH",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 437,
+  "ageOffset": 0
+ },
+ "schema": "lsbz-blizzard-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 79,
+  "altInterval": {
+   "move": 59,
+   "start": 79,
+   "end": 437
+  },
+  "offset": 0
+ },
+ "lsbz": {
+  "impactStartAge": 195,
+  "prediction": {
+   "counterBodyRowsWithLag": 358,
+   "counterBodyRowsWithoutLag": 357,
+   "lagAgesWithLag": [
+    334,
+    355,
+    356
+   ],
+   "lagAgesWithoutLag": [
+    354,
+    355
+   ],
+   "liveWindowRows": 359,
+   "policyPhase": "event"
+  },
+  "geometry": {
+   "attackerCenter": {
+    "x": 176,
+    "y": 34
+   },
+   "targetCenter": {
+    "x": 72,
+    "y": 104
+   }
+  }
+ }
+}

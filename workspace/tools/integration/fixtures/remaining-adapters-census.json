@@ -10,7 +10,7 @@
   "src/data/gen/battle-frontier-mons.json",
   "src/data/gen/factory-round-policy.json"
  ],
- "liveStatusImplementedCount": 241,
+ "liveStatusImplementedCount": 240,
  "staleCodesCorrected": [
   "B (sSpriteOrder): was 'first body only'; production now lends the order and tracks it across bodies (liveSpriteOrderHost.ts / spriteOrderProvider.ts, merged cross-body tracker + post-KO rung 1), so B no longer blocks anything; recipe work only (falls back after an unmodelled graphics command)",
   "F-AFFINE / E-TASK: were provider blockers; docs/allocator-plan-v2-evidence.md measured gOamMatrixAllocBitmap 0x6 + no tasks at all 481 known-entry bodies, so the accepted constants gated on the lent order suffice for first bodies (invalidated after a faint/switch)",
@@ -23,7 +23,7 @@
  "inFlightMoves": {},
  "summary": {
   "accepted": 276,
-  "live": 241,
+  "live": 240,
   "faithfulRandom": 13,
   "faithfulRandomMoves": [
    "MOVE_ASTONISH",
@@ -40,7 +40,7 @@
    "MOVE_WATER_PULSE",
    "MOVE_WISH"
   ],
-  "faithfulTiming": 22,
+  "faithfulTiming": 23,
   "faithfulTimingMoves": [
    "MOVE_BLIZZARD",
    "MOVE_CONFUSE_RAY",
@@ -53,6 +53,7 @@
    "MOVE_HYPER_VOICE",
    "MOVE_ICE_BALL",
    "MOVE_ICY_WIND",
+   "MOVE_LIGHT_SCREEN",
    "MOVE_MACH_PUNCH",
    "MOVE_MEGAHORN",
    "MOVE_METEOR_MASH",
@@ -72,9 +73,9 @@
    "prep6Ready": 0
   },
   "weightPct": {
-   "live": 86.772,
+   "live": 85.957,
    "faithfulRandom": 3.84,
-   "faithfulTiming": 8.901,
+   "faithfulTiming": 9.715,
    "inFlight": 0,
    "remaining": 0
   },
@@ -82,7 +83,7 @@
   "remainingByHostClass": {},
   "orderFirstBodyOnlyMoves": 0,
   "slotPlanNeededMoves": 0,
-  "sumsTo": "241+13+22+0+0=276",
+  "sumsTo": "240+13+23+0+0=276",
   "triageCiteDrift": 0,
   "triageCiteDriftList": []
  },

@@ -1,0 +1,71 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-masquerain-ariados.json",
+ "attacker": {
+  "species": "MASQUERAIN",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ARIADOS",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 145,
+  "playerMaxHp": 145,
+  "opponentHp": 177,
+  "opponentMaxHp": 177,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent MASQUERAIN -> ARIADOS",
+ "denseWindow": {
+  "startFrame": 82,
+  "endFrame": 439,
+  "ageOffset": 0
+ },
+ "schema": "lsbz-blizzard-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 82,
+  "altInterval": {
+   "move": 59,
+   "start": 82,
+   "end": 439
+  },
+  "offset": 0
+ },
+ "lsbz": {
+  "impactStartAge": 194,
+  "prediction": {
+   "counterBodyRowsWithLag": 357,
+   "counterBodyRowsWithoutLag": 356,
+   "lagAgesWithLag": [
+    333,
+    354,
+    355
+   ],
+   "lagAgesWithoutLag": [
+    353,
+    354
+   ],
+   "liveWindowRows": 358,
+   "policyPhase": "event"
+  },
+  "geometry": {
+   "attackerCenter": {
+    "x": 176,
+    "y": 31
+   },
+   "targetCenter": {
+    "x": 72,
+    "y": 99
+   }
+  }
+ }
+}

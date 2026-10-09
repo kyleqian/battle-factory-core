@@ -99,13 +99,15 @@ describe("live prep2 move adapters", () => {
       .toEqual(liveBattlerAnchors("player", createBattleCommandFieldArtView(alt)).picOffsetPoint);
   });
 
-  it("derives the particle slots at any geometry; falls back only where Blizzard's impact start misses the live window", () => {
+  it("derives the particle slots at any geometry; Blizzard's live window follows its geometry-derived impact start", () => {
     // S10A geoice (docs/icy-wind-blizzard-geometry.md): the slots come from the replay, so the pair the retained table did not
-    // cover (PORYGON -> TOGETIC) is live; Blizzard opponent ARBOK -> CATERPIE has impact start 198 (window 361 != 197 + 164).
+    // cover (PORYGON -> TOGETIC) is live; Blizzard opponent ARBOK -> CATERPIE has impact start 198: before S10A lsbz the fixed
+    // 361-row window (197 + 164) declined it; the window is now impact + 164 = 362 rows from the displayed field.
     expect(liveMoveAnimationPresentation(request(196, 0), displayed("SWINUB", "ONIX"), 0)).not.toBeNull();
     expect(liveMoveAnimationPresentation(request(196, 0), displayed("PORYGON", "TOGETIC"), 0)).not.toBeNull();
     expect(() => render(displayed("PORYGON", "TOGETIC"), 196, 0, 100)).not.toThrow();
-    expect(liveMoveAnimationPresentation(request(59, 1), displayed("CATERPIE", "ARBOK"), 0)).toBeNull();
+    expect(liveMoveAnimationDuration(request(59, 1), displayed("CATERPIE", "ARBOK"))).toBe(362);
+    expect(liveMoveAnimationPresentation(request(59, 1), displayed("CATERPIE", "ARBOK"), 0)).not.toBeNull();
     expect(() => render(displayed("CATERPIE", "ARBOK"), 59, 1, 100)).not.toThrow();
   });
 

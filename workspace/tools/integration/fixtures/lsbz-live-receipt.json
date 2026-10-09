@@ -1,0 +1,1768 @@
+{
+ "schema": "lsbz-live-receipt/v1",
+ "step": "S10A lsbz: ISSUES #152 timing items: (A) Light Screen (113) opponent row-59 BLDALPHA write phase -> faithful timing; (B) Blizzard (59) opponent geometry-derived duration",
+ "testedSrcTree": "e7a2c279bd07de67bd58c9342e000168640f59d5",
+ "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+ "lightScreen": {
+  "policy": {
+   "opponent": {
+    "kind": "bg-write-row",
+    "age": 60,
+    "hold": 2,
+    "direct": 9,
+    "chosen": "no-event",
+    "bodyRows": 88
+   },
+   "player": "no parameter (direct in 3 of 3)"
+  },
+  "mechanism": "Move_LIGHT_SCREEN's AnimDefensiveWall alpha fade: an OPPONENT attacker's BLDALPHA step written at body row 59 (reducer age 52; eva 9 -> 8) reaches the I/O register at once (no-event, the dominant phase) or is buffered by SetGpuReg (VCOUNT outside VBlank, sGpuRegWaitingList [0x52]) and lost under the row-60 write (event: row 59 repeats 9/7). Lag ages [68, 69] in both phases (audit-15 receipts/vblank/lag-counters.txt); the body is 88 rows either way. lightScreen.ts specialScreenAtAge opponentBlendHold (default true = the accepted corpus); liveMoveAnimation.ts case 113 passes the policy phase (false).",
+  "summary": {
+   "fixtures": 19,
+   "policyPhase": 17,
+   "policyPhaseZeroPx": 17,
+   "otherPhase": 2,
+   "otherPhaseOnlyDocumented": 2,
+   "violations": 0,
+   "digestsIdentical": true
+  },
+  "perSide": {
+   "player": {
+    "fixtures": 8,
+    "policyPhase": 8,
+    "policyPhaseZeroPx": 8,
+    "otherPhase": 0,
+    "otherPhaseOnlyDocumented": 0,
+    "violations": 0,
+    "digestsIdentical": true
+   },
+   "opponent": {
+    "fixtures": 11,
+    "policyPhase": 9,
+    "policyPhaseZeroPx": 9,
+    "otherPhase": 2,
+    "otherPhaseOnlyDocumented": 2,
+    "violations": 0,
+    "digestsIdentical": true
+   }
+  },
+  "declined": [
+   "audit-15 acc-tackle / tackle / brn light-screen-opp: production decline (allocator host unknown after Tackle / Status_Burn), fallback, no live claim"
+  ]
+ },
+ "blizzard": {
+  "rule": "liveMoveAnimationDuration(59) = blizzardImpactStartAge(side, geometry) + 164 (liveMoveAnimation.ts liveBlizzardDuration; geometry = the case-59 attacker / target picOffsetPoint)",
+  "source": "Move_BLIZZARD: the traveling snowballs / large crystals (AnimMoveTwisterParticle-style travel callbacks) destroy themselves when they reach the target; `waitforvisualfinish` releases at the first age with none left (blizzard.ts blizzardImpactStartAge: the same callback replay geoice uses, at the pair's geometry), and every later script step (impact crystals, monbg / restorebg fade, the optional restore lag at impact + 139, the fixed pair impact + 160 / + 161) is relative to it (blizzard.ts scriptOffsetAtAge / backgroundBlendY / cleanupAge = impact + 163), so the body is impact + 164 rows in the lag phase (impact + 163 without). Player geometries are all impact 208 (372 rows, unchanged); opponent 194..206 (358..370).",
+  "grid": "tools/integration/fixtures/lsbz/blizzard-grid-predictions.json (25 pairs, predictions committed in a5bc9b8e6 before any probe)",
+  "counters": "tools/integration/fixtures/lsbz/blizzard-counters.json (24 pairs x 2 fresh direct-mGBA runs, r0 == r1; lag 16 : none 8, every pair the predicted shape)",
+  "summary": {
+   "fixtures": 25,
+   "policyPhase": 17,
+   "policyPhaseZeroPx": 17,
+   "otherPhase": 8,
+   "otherPhaseOnlyDocumented": 8,
+   "violations": 0,
+   "digestsIdentical": true
+  },
+  "excluded": [
+   "blizzard-opponent-baltoy-huntail (impact 205): the staging activation probe crashed (run-mgba-probe exit 139, no output); not staged",
+   "geoice control ARBOK -> CATERPIE (impact 198): its body matches the rule (362 rows, lag [337, 358, 359]) and the adapter is live, but every row 0..361 differs by the same static 133 px (bbox x 98..221 y 33..103; ROM 4a425a / 526b5a vs live 5ad684 / 73ffad): a battler palette region identical at every age, outside the Blizzard program; not a window here"
+  ]
+ },
+ "windows": [
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-abra-absol.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-abra-absol.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "ABRA -> ABSOL",
+   "measuredPhase": "event",
+   "selectedPhase": true,
+   "rows": 368,
+   "expectedDuration": 368,
+   "denseWindow": {
+    "startFrame": 76,
+    "endFrame": 443,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-abra-absol.json: body 368 rows, lag ages [343, 364, 365], r0 == r1; impact 204"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-abra-aggron.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-abra-aggron.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "ABRA -> AGGRON",
+   "measuredPhase": "event",
+   "selectedPhase": true,
+   "rows": 367,
+   "expectedDuration": 367,
+   "denseWindow": {
+    "startFrame": 76,
+    "endFrame": 442,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-abra-aggron.json: body 367 rows, lag ages [342, 363, 364], r0 == r1; impact 203"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-abra-anorith.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-abra-anorith.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "ABRA -> ANORITH",
+   "measuredPhase": "no-event",
+   "selectedPhase": false,
+   "rows": 364,
+   "expectedDuration": 365,
+   "denseWindow": {
+    "startFrame": 76,
+    "endFrame": 439,
+    "ageOffset": 0
+   },
+   "px": [
+    309136,
+    309136,
+    309136,
+    309136
+   ],
+   "affectedAges": [
+    342,
+    343,
+    344,
+    345,
+    346,
+    347,
+    348,
+    349,
+    350,
+    351,
+    352,
+    353,
+    354,
+    355,
+    356,
+    357
+   ],
+   "maxPixelsPerRow": 19321,
+   "digestsIdentical": true,
+   "documentedAges": [
+    342,
+    343,
+    344,
+    345,
+    346,
+    347,
+    348,
+    349,
+    350,
+    351,
+    352,
+    353,
+    354,
+    355,
+    356,
+    357
+   ],
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-abra-anorith.json: body 364 rows, lag ages [360, 361], r0 == r1; impact 201"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-abra-ariados.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-abra-ariados.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "ABRA -> ARIADOS",
+   "measuredPhase": "no-event",
+   "selectedPhase": false,
+   "rows": 365,
+   "expectedDuration": 366,
+   "denseWindow": {
+    "startFrame": 76,
+    "endFrame": 440,
+    "ageOffset": 0
+   },
+   "px": [
+    298544,
+    298544,
+    298544,
+    298544
+   ],
+   "affectedAges": [
+    343,
+    344,
+    345,
+    346,
+    347,
+    348,
+    349,
+    350,
+    351,
+    352,
+    353,
+    354,
+    355,
+    356,
+    357,
+    358
+   ],
+   "maxPixelsPerRow": 18659,
+   "digestsIdentical": true,
+   "documentedAges": [
+    343,
+    344,
+    345,
+    346,
+    347,
+    348,
+    349,
+    350,
+    351,
+    352,
+    353,
+    354,
+    355,
+    356,
+    357,
+    358
+   ],
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-abra-ariados.json: body 365 rows, lag ages [361, 362], r0 == r1; impact 202"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-absol-aggron.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-absol-aggron.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "ABSOL -> AGGRON",
+   "measuredPhase": "event",
+   "selectedPhase": true,
+   "rows": 362,
+   "expectedDuration": 362,
+   "denseWindow": {
+    "startFrame": 77,
+    "endFrame": 438,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-absol-aggron.json: body 362 rows, lag ages [337, 358, 359], r0 == r1; impact 198"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-absol-ampharos.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-absol-ampharos.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "ABSOL -> AMPHAROS",
+   "measuredPhase": "no-event",
+   "selectedPhase": false,
+   "rows": 362,
+   "expectedDuration": 363,
+   "denseWindow": {
+    "startFrame": 77,
+    "endFrame": 438,
+    "ageOffset": 0
+   },
+   "px": [
+    283568,
+    283568,
+    283568,
+    283568
+   ],
+   "affectedAges": [
+    340,
+    341,
+    342,
+    343,
+    344,
+    345,
+    346,
+    347,
+    348,
+    349,
+    350,
+    351,
+    352,
+    353,
+    354,
+    355
+   ],
+   "maxPixelsPerRow": 17723,
+   "digestsIdentical": true,
+   "documentedAges": [
+    340,
+    341,
+    342,
+    343,
+    344,
+    345,
+    346,
+    347,
+    348,
+    349,
+    350,
+    351,
+    352,
+    353,
+    354,
+    355
+   ],
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-absol-ampharos.json: body 362 rows, lag ages [358, 359], r0 == r1; impact 199"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-absol-ariados.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-absol-ariados.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "ABSOL -> ARIADOS",
+   "measuredPhase": "event",
+   "selectedPhase": true,
+   "rows": 361,
+   "expectedDuration": 361,
+   "denseWindow": {
+    "startFrame": 77,
+    "endFrame": 437,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-absol-ariados.json: body 361 rows, lag ages [336, 357, 358], r0 == r1; impact 197"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-aerodactyl-abra.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-aerodactyl-abra.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "AERODACTYL -> ABRA",
+   "measuredPhase": "no-event",
+   "selectedPhase": false,
+   "rows": 358,
+   "expectedDuration": 359,
+   "denseWindow": {
+    "startFrame": 82,
+    "endFrame": 439,
+    "ageOffset": 0
+   },
+   "px": [
+    282576,
+    282576,
+    282576,
+    282576
+   ],
+   "affectedAges": [
+    336,
+    337,
+    338,
+    339,
+    340,
+    341,
+    342,
+    343,
+    344,
+    345,
+    346,
+    347,
+    348,
+    349,
+    350,
+    351
+   ],
+   "maxPixelsPerRow": 17661,
+   "digestsIdentical": true,
+   "documentedAges": [
+    336,
+    337,
+    338,
+    339,
+    340,
+    341,
+    342,
+    343,
+    344,
+    345,
+    346,
+    347,
+    348,
+    349,
+    350,
+    351
+   ],
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aerodactyl-abra.json: body 358 rows, lag ages [354, 355], r0 == r1; impact 195"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-aerodactyl-absol.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-aerodactyl-absol.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "AERODACTYL -> ABSOL",
+   "measuredPhase": "event",
+   "selectedPhase": true,
+   "rows": 360,
+   "expectedDuration": 360,
+   "denseWindow": {
+    "startFrame": 82,
+    "endFrame": 441,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aerodactyl-absol.json: body 360 rows, lag ages [335, 356, 357], r0 == r1; impact 196"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-aggron-aron.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-aggron-aron.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "AGGRON -> ARON",
+   "measuredPhase": "event",
+   "selectedPhase": true,
+   "rows": 361,
+   "expectedDuration": 361,
+   "denseWindow": {
+    "startFrame": 78,
+    "endFrame": 438,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aggron-aron.json: body 361 rows, lag ages [336, 357, 358], r0 == r1; impact 197"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-aggron-steelix.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-aggron-steelix.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "AGGRON -> STEELIX",
+   "measuredPhase": "no-event",
+   "selectedPhase": false,
+   "rows": 362,
+   "expectedDuration": 363,
+   "denseWindow": {
+    "startFrame": 78,
+    "endFrame": 439,
+    "ageOffset": 0
+   },
+   "px": [
+    262976,
+    262976,
+    262976,
+    262976
+   ],
+   "affectedAges": [
+    340,
+    341,
+    342,
+    343,
+    344,
+    345,
+    346,
+    347,
+    348,
+    349,
+    350,
+    351,
+    352,
+    353,
+    354,
+    355
+   ],
+   "maxPixelsPerRow": 16436,
+   "digestsIdentical": true,
+   "documentedAges": [
+    340,
+    341,
+    342,
+    343,
+    344,
+    345,
+    346,
+    347,
+    348,
+    349,
+    350,
+    351,
+    352,
+    353,
+    354,
+    355
+   ],
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aggron-steelix.json: body 362 rows, lag ages [358, 359], r0 == r1; impact 199"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-aipom-absol.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-aipom-absol.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "AIPOM -> ABSOL",
+   "measuredPhase": "no-event",
+   "selectedPhase": false,
+   "rows": 363,
+   "expectedDuration": 364,
+   "denseWindow": {
+    "startFrame": 77,
+    "endFrame": 439,
+    "ageOffset": 0
+   },
+   "px": [
+    297680,
+    297680,
+    297680,
+    297680
+   ],
+   "affectedAges": [
+    341,
+    342,
+    343,
+    344,
+    345,
+    346,
+    347,
+    348,
+    349,
+    350,
+    351,
+    352,
+    353,
+    354,
+    355,
+    356
+   ],
+   "maxPixelsPerRow": 18605,
+   "digestsIdentical": true,
+   "documentedAges": [
+    341,
+    342,
+    343,
+    344,
+    345,
+    346,
+    347,
+    348,
+    349,
+    350,
+    351,
+    352,
+    353,
+    354,
+    355,
+    356
+   ],
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aipom-absol.json: body 363 rows, lag ages [359, 360], r0 == r1; impact 200"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-aipom-anorith.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-aipom-anorith.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "AIPOM -> ANORITH",
+   "measuredPhase": "event",
+   "selectedPhase": true,
+   "rows": 362,
+   "expectedDuration": 362,
+   "denseWindow": {
+    "startFrame": 77,
+    "endFrame": 438,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aipom-anorith.json: body 362 rows, lag ages [337, 358, 359], r0 == r1; impact 198"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-aipom-beautifly.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-aipom-beautifly.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "AIPOM -> BEAUTIFLY",
+   "measuredPhase": "event",
+   "selectedPhase": true,
+   "rows": 365,
+   "expectedDuration": 365,
+   "denseWindow": {
+    "startFrame": 77,
+    "endFrame": 441,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aipom-beautifly.json: body 365 rows, lag ages [340, 361, 362], r0 == r1; impact 201"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-alakazam-aggron.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-alakazam-aggron.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "ALAKAZAM -> AGGRON",
+   "measuredPhase": "event",
+   "selectedPhase": true,
+   "rows": 364,
+   "expectedDuration": 364,
+   "denseWindow": {
+    "startFrame": 80,
+    "endFrame": 443,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-alakazam-aggron.json: body 364 rows, lag ages [339, 360, 361], r0 == r1; impact 200"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-altaria-aggron.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-altaria-aggron.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "ALTARIA -> AGGRON",
+   "measuredPhase": "event",
+   "selectedPhase": true,
+   "rows": 360,
+   "expectedDuration": 360,
+   "denseWindow": {
+    "startFrame": 79,
+    "endFrame": 438,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-altaria-aggron.json: body 360 rows, lag ages [335, 356, 357], r0 == r1; impact 196"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-altaria-anorith.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-altaria-anorith.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "ALTARIA -> ANORITH",
+   "measuredPhase": "event",
+   "selectedPhase": true,
+   "rows": 359,
+   "expectedDuration": 359,
+   "denseWindow": {
+    "startFrame": 79,
+    "endFrame": 437,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-altaria-anorith.json: body 359 rows, lag ages [334, 355, 356], r0 == r1; impact 195"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-anorith-ampharos.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-anorith-ampharos.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "ANORITH -> AMPHAROS",
+   "measuredPhase": "no-event",
+   "selectedPhase": false,
+   "rows": 366,
+   "expectedDuration": 367,
+   "denseWindow": {
+    "startFrame": 79,
+    "endFrame": 444,
+    "ageOffset": 0
+   },
+   "px": [
+    291984,
+    291984,
+    291984,
+    291984
+   ],
+   "affectedAges": [
+    344,
+    345,
+    346,
+    347,
+    348,
+    349,
+    350,
+    351,
+    352,
+    353,
+    354,
+    355,
+    356,
+    357,
+    358,
+    359
+   ],
+   "maxPixelsPerRow": 18249,
+   "digestsIdentical": true,
+   "documentedAges": [
+    344,
+    345,
+    346,
+    347,
+    348,
+    349,
+    350,
+    351,
+    352,
+    353,
+    354,
+    355,
+    356,
+    357,
+    358,
+    359
+   ],
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-anorith-ampharos.json: body 366 rows, lag ages [362, 363], r0 == r1; impact 203"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-anorith-armaldo.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-anorith-armaldo.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "ANORITH -> ARMALDO",
+   "measuredPhase": "event",
+   "selectedPhase": true,
+   "rows": 366,
+   "expectedDuration": 366,
+   "denseWindow": {
+    "startFrame": 79,
+    "endFrame": 444,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-anorith-armaldo.json: body 366 rows, lag ages [341, 362, 363], r0 == r1; impact 202"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-aron-azurill.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-aron-azurill.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "ARON -> AZURILL",
+   "measuredPhase": "no-event",
+   "selectedPhase": false,
+   "rows": 369,
+   "expectedDuration": 370,
+   "denseWindow": {
+    "startFrame": 76,
+    "endFrame": 444,
+    "ageOffset": 0
+   },
+   "px": [
+    304624,
+    304624,
+    304624,
+    304624
+   ],
+   "affectedAges": [
+    347,
+    348,
+    349,
+    350,
+    351,
+    352,
+    353,
+    354,
+    355,
+    356,
+    357,
+    358,
+    359,
+    360,
+    361,
+    362
+   ],
+   "maxPixelsPerRow": 19039,
+   "digestsIdentical": true,
+   "documentedAges": [
+    347,
+    348,
+    349,
+    350,
+    351,
+    352,
+    353,
+    354,
+    355,
+    356,
+    357,
+    358,
+    359,
+    360,
+    361,
+    362
+   ],
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aron-azurill.json: body 369 rows, lag ages [365, 366], r0 == r1; impact 206"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-aron-cascoon.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-aron-cascoon.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "ARON -> CASCOON",
+   "measuredPhase": "event",
+   "selectedPhase": true,
+   "rows": 369,
+   "expectedDuration": 369,
+   "denseWindow": {
+    "startFrame": 76,
+    "endFrame": 444,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aron-cascoon.json: body 369 rows, lag ages [344, 365, 366], r0 == r1; impact 205"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-azurill-igglybuff.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-azurill-igglybuff.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "AZURILL -> IGGLYBUFF",
+   "measuredPhase": "event",
+   "selectedPhase": true,
+   "rows": 368,
+   "expectedDuration": 368,
+   "denseWindow": {
+    "startFrame": 79,
+    "endFrame": 446,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-azurill-igglybuff.json: body 368 rows, lag ages [343, 364, 365], r0 == r1; impact 204"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-bellossom-cradily.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-bellossom-cradily.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "BELLOSSOM -> CRADILY",
+   "measuredPhase": "event",
+   "selectedPhase": true,
+   "rows": 370,
+   "expectedDuration": 370,
+   "denseWindow": {
+    "startFrame": 81,
+    "endFrame": 450,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-bellossom-cradily.json: body 370 rows, lag ages [345, 366, 367], r0 == r1; impact 206"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-masquerain-ariados.json",
+   "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-masquerain-ariados.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "MASQUERAIN -> ARIADOS",
+   "measuredPhase": "event",
+   "selectedPhase": true,
+   "rows": 358,
+   "expectedDuration": 358,
+   "denseWindow": {
+    "startFrame": 82,
+    "endFrame": 439,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-masquerain-ariados.json: body 358 rows, lag ages [333, 354, 355], r0 == r1; impact 194"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/blizzard-opponent-weezing-blastoise.json",
+   "sourceFixture": "tools/integration/fixtures/geoice/controls/blizzard-opponent-weezing-blastoise.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "pair": "WEEZING -> BLASTOISE",
+   "measuredPhase": "event",
+   "selectedPhase": true,
+   "rows": 360,
+   "expectedDuration": 360,
+   "denseWindow": {
+    "startFrame": 79,
+    "endFrame": 438,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "lsbz counters tools/integration/fixtures/geoice/controls/scenarios/blizzard-opponent-weezing-blastoise.json: body 360 rows, lag ages [335, 356, 357], r0 == r1; impact 196"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-acc-ctl-light-screen-opp.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/acc-ctl-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "EXEGGCUTE -> ONIX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 79,
+    "endFrame": 166,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "audit-15 receipts/main: production hold 2658 px (ages 59..59), r1 == r2; vblank row 59 no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-acc-double-team-light-screen-opp.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/acc-double-team-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "EXEGGCUTE -> ONIX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 445,
+    "endFrame": 532,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "audit-15 receipts/main: production hold 2658 px (ages 59..59), r1 == r2; vblank row 59 no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-acc-faint-attack-light-screen-opp.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/acc-faint-attack-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "EXEGGCUTE -> ONIX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 519,
+    "endFrame": 606,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "audit-15 receipts/main: production hold 2658 px (ages 59..59), r1 == r2"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-acc-swift-light-screen-opp.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/acc-swift-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "EXEGGCUTE -> ONIX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 254,
+    "endFrame": 341,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "audit-15 receipts/main: production hold 2658 px (ages 59..59), r1 == r2"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-ctl-light-screen-opp.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/ctl-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "CHANSEY -> SNORLAX",
+   "measuredPhase": "event",
+   "selectedPhase": false,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 77,
+    "endFrame": 164,
+    "ageOffset": 0
+   },
+   "px": [
+    2658,
+    2658,
+    2658,
+    2658
+   ],
+   "affectedAges": [
+    59
+   ],
+   "maxPixelsPerRow": 2658,
+   "digestsIdentical": true,
+   "documentedAges": [
+    59
+   ],
+   "violations": [],
+   "timingEvidence": "audit-15 receipts/main: production hold 0 px (ages -), r1 == r2; vblank row 59 event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-ctl-light-screen-ply.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/ctl-light-screen-ply-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "pair": "CHANSEY -> SNORLAX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 73,
+    "endFrame": 160,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "player attacker (no timing parameter): audit-15 receipts/main 0 px, r1 == r2; vblank row 59 direct"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-double-team-light-screen-opp.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/double-team-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "CHANSEY -> SNORLAX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 449,
+    "endFrame": 536,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "audit-15 receipts/main: production hold 2658 px (ages 59..59), r1 == r2; vblank row 59 no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-double-team-light-screen-ply.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/double-team-light-screen-ply-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "pair": "CHANSEY -> SNORLAX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 453,
+    "endFrame": 540,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "player attacker (no timing parameter): audit-15 receipts/main 0 px, r1 == r2; vblank row 59 direct"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-faint-attack-light-screen-opp.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/faint-attack-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "CHANSEY -> SNORLAX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 407,
+    "endFrame": 494,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "audit-15 receipts/main: production hold 2658 px (ages 59..59), r1 == r2; vblank row 59 no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-faint-attack-light-screen-ply.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/faint-attack-light-screen-ply-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "pair": "CHANSEY -> SNORLAX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 410,
+    "endFrame": 497,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "player attacker (no timing parameter): audit-15 receipts/main 0 px, r1 == r2; vblank row 59 direct"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-hydro-pump-light-screen-opp.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/hydro-pump-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "CHANSEY -> SNORLAX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 334,
+    "endFrame": 421,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "audit-15 receipts/main: production hold 2658 px (ages 59..59), r1 == r2"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-ice-beam-light-screen-opp.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/ice-beam-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "CHANSEY -> SNORLAX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 391,
+    "endFrame": 478,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "audit-15 receipts/main: production hold 2658 px (ages 59..59), r1 == r2"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-swift-light-screen-opp.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/swift-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "CHANSEY -> SNORLAX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 432,
+    "endFrame": 519,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "audit-15 receipts/main: production hold 2658 px (ages 59..59), r1 == r2; vblank row 59 no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-accepted-opponent.json",
+   "sourceFixture": "tools/compare/fixtures/light-screen-opponent-exeggcute-player-onix.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "EXEGGCUTE -> ONIX",
+   "measuredPhase": "event",
+   "selectedPhase": false,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 213,
+    "endFrame": 300,
+    "ageOffset": 0
+   },
+   "px": [
+    2658,
+    2658,
+    2658,
+    2658
+   ],
+   "affectedAges": [
+    59
+   ],
+   "maxPixelsPerRow": 2658,
+   "digestsIdentical": true,
+   "documentedAges": [
+    59
+   ],
+   "violations": [],
+   "timingEvidence": "accepted EXEGGCUTE / ONIX after Tackle: 0 px under the hold (88 rows); audit-15 patch-ls-nohold 0 -> 2,658 px on row 59; vblank acc-tackle row 59 buffered [0x52]"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-derived-golbat-live-slowpoke-player.json",
+   "sourceFixture": "tools/integration/fixtures/species-audit/derived-golbat/light-screen-live-slowpoke-player.json",
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "pair": "SLOWPOKE -> GOLBAT",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 322,
+    "endFrame": 409,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "player attacker (no timing parameter): accepted / species-audit window, 0 px"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-derived-live-slowpoke-player.json",
+   "sourceFixture": "tools/integration/fixtures/species-audit/derived/light-screen-live-slowpoke-player.json",
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "pair": "SLOWPOKE -> GOLEM",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 334,
+    "endFrame": 421,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "player attacker (no timing parameter): accepted / species-audit window, 0 px"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-derived-shuckle-live-slowpoke-player.json",
+   "sourceFixture": "tools/integration/fixtures/species-audit/derived-shuckle/light-screen-live-slowpoke-player.json",
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "pair": "SLOWPOKE -> SHUCKLE",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 74,
+    "endFrame": 161,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "player attacker (no timing parameter): accepted / species-audit window, 0 px"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-live-player.json",
+   "sourceFixture": "tools/compare/fixtures/light-screen-player-exeggcute-opponent-onix.json",
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "pair": "EXEGGCUTE -> ONIX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 303,
+    "endFrame": 390,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "player attacker (no timing parameter): accepted / species-audit window, 0 px"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-live-slowpoke-player.json",
+   "sourceFixture": "tools/integration/fixtures/light-screen-live-slowpoke-player.json",
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "pair": "SLOWPOKE -> ONIX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 306,
+    "endFrame": 393,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "player attacker (no timing parameter): accepted / species-audit window, 0 px"
+  }
+ ],
+ "summary": {
+  "fixtures": 44,
+  "policyPhase": 34,
+  "policyPhaseZeroPx": 34,
+  "otherPhase": 10,
+  "otherPhaseOnlyDocumented": 10,
+  "violations": 0,
+  "digestsIdentical": true
+ },
+ "commands": [
+  "python3 -I tools/integration/lsbzWindows.py",
+  "OUT=SCRATCH/checkA P=10 sh tools/integration/lsbzTimingCheck.sh; OUT=SCRATCH/checkB P=10 sh tools/integration/lsbzTimingCheck.sh",
+  "python3 -I tools/integration/lsbzReceipt.py SCRATCH/checkA SCRATCH/checkB $(git rev-parse HEAD:workspace/src) [key=file.json ...]"
+ ],
+ "liveShareCensus": {
+  "seeds": "0..299",
+  "streak": "i * 11 % 49",
+  "base": "0a74c111a (src cc1fcc8a)",
+  "final": "src e7a2c279 (f19cb383b; the route-test commit changes no src)",
+  "command": "node --experimental-strip-types --no-warnings tools/integration/liveShareCensus.ts --seeds=0..299 --out=<r>.json --commands=<r>.jsonl (base from `git archive 0a74c111a:workspace src tools/integration/liveShareCensus*.ts tools/lib package.json tsconfig.json`); python3 -I tools/integration/prep43CensusDelta.py <base>.json <base>.jsonl <final>.json <final>.jsonl <delta>.json",
+  "sha256": {
+   "base.json": "2b8af20df61e6a8cb5a1beda4ae644b538e6b3ff6d3020cd7878e2231e80e2ba",
+   "base.jsonl": "7b4e3608e5d92027204a5780690ce4e168a1bec0fa389b8655d3c02fcf7d59f6",
+   "final.json": "6b2ce0fbc6c868b9ad281e9b5ea1c9295210fcd731f4732d698466ba2584625d",
+   "final.jsonl": "87e6ff136d5eb5d75e3f46cca83e883a08d5300580535000b944d39ca28618d2",
+   "delta.json": "c39cf4b981ef69441932389fc2671a1e2fc588079b2b1a1bd612d7bb92e05b13"
+  },
+  "commands": 7970,
+  "liveCount": [
+   7440,
+   7445
+  ],
+  "liveCountPct": [
+   93.35,
+   93.41
+  ],
+  "liveFrames": [
+   1105852,
+   1107662
+  ],
+  "liveFramePct": [
+   94.66,
+   94.82
+  ],
+  "regressions": 0,
+  "changedCommands": [
+   {
+    "battle": 87,
+    "move": "BLIZZARD",
+    "side": "opponent",
+    "pair": "WALREIN -> JYNX",
+    "before": [
+     "fallback",
+     361
+    ],
+    "after": [
+     "live",
+     362
+    ]
+   },
+   {
+    "battle": 87,
+    "move": "BLIZZARD",
+    "side": "opponent",
+    "pair": "WALREIN -> JYNX",
+    "before": [
+     "fallback",
+     361
+    ],
+    "after": [
+     "live",
+     362
+    ]
+   },
+   {
+    "battle": 87,
+    "move": "BLIZZARD",
+    "side": "opponent",
+    "pair": "WALREIN -> JYNX",
+    "before": [
+     "fallback",
+     361
+    ],
+    "after": [
+     "live",
+     362
+    ]
+   },
+   {
+    "battle": 87,
+    "move": "BLIZZARD",
+    "side": "opponent",
+    "pair": "WALREIN -> JYNX",
+    "before": [
+     "fallback",
+     361
+    ],
+    "after": [
+     "live",
+     362
+    ]
+   },
+   {
+    "battle": 87,
+    "move": "BLIZZARD",
+    "side": "opponent",
+    "pair": "WALREIN -> JYNX",
+    "before": [
+     "fallback",
+     361
+    ],
+    "after": [
+     "live",
+     362
+    ]
+   }
+  ],
+  "commandSequenceSha256": {
+   "base": "4151a0efc04650318e43c50d8c61690f8674d793c0ef34843310b39c1486f414",
+   "final": "4151a0efc04650318e43c50d8c61690f8674d793c0ef34843310b39c1486f414",
+   "identical": true
+  },
+  "battleDigest": {
+   "base": "069618f1095e9d975b768c4c1b316969f4ca84fcf84683f9bf4427a46833afe0",
+   "final": "0fd00eae207814985372c1a3cd6433d10485bdf1379b558c56395db3f5579137",
+   "identical": false,
+   "note": "the battle record differs ONLY in the presented-frame total (frames 4093168 -> 4093172: the 5 Blizzard bodies now run their geometry-derived 362-row live window); played / terminal / stalled / errors / playerTurns identical",
+   "gameplayFieldsIdentical": true
+  },
+  "commandDigestNote": "commandDigest differs: the 5 changed commands plus decline `gate` file:line cites shifted by the liveMoveAnimation.ts insertions (510 records differ only in that cite)",
+  "pairingMismatches": 5,
+  "pairingMismatchNote": "prep43CensusDelta pairs (battle, kind, move, side, frames): the 5 Blizzard commands' presented frames 361 -> 362"
+ },
+ "d4aRegressionAll": {
+  "fixtures": 286,
+  "policyPhase": 218,
+  "otherPhase": 68,
+  "violations": 0,
+  "nonzeroExit": 0,
+  "testedSrcTree": "e7a2c279bd07de67bd58c9342e000168640f59d5",
+  "command": "OUT=SCRATCH/d4a-all P=12 sh tools/integration/d4aRegressionAll.sh"
+ },
+ "routes": {
+  "test": "tests/animation/liveLsbzTiming.test.ts 'lsbz ordinary routes'",
+  "routes": [
+   {
+    "move": "LIGHT_SCREEN",
+    "seed": 81,
+    "streak": 9,
+    "slots": [
+     0
+    ],
+    "attacker": "opponent PILOSWINE",
+    "rows": 88,
+    "adapterActive": "88/88",
+    "followingPrompt": "action-menu",
+    "sceneOnOffParity": "rules (minus the scene hitMarker bit) / RNG / boundary / facility equal"
+   },
+   {
+    "move": "BLIZZARD",
+    "seed": 87,
+    "streak": 26,
+    "slots": [
+     0
+    ],
+    "attacker": "opponent WALREIN -> JYNX (impact 198)",
+    "rows": 362,
+    "adapterActive": "362/362 (fallback 361 on 0a74c111a)",
+    "followingPrompt": "action-menu",
+    "sceneOnOffParity": "rules (minus the scene hitMarker bit) / RNG / boundary / facility equal"
+   }
+  ]
+ },
+ "gates": {
+  "testedCommit": "f86e34412 (src e7a2c279bd07de67bd58c9342e000168640f59d5; HEAD after it only adds this receipt section)",
+  "targeted": "25 files / 332 tests (Light Screen / Blizzard / wall / allocator / order-host / lend / timing / inventory / playable files, --maxWorkers=4): 331 pass + the pinned ARBOK -> CATERPIE decline in livePrep2MoveAdapters.test.ts failed (the behaviour lsbz lifts) -> updated (f86e34412), that file rerun alone 13 / 13",
+  "typecheck": "npm run typecheck: exit 0",
+  "smoke": "npm run test:smoke: 8 files / 448 tests passed",
+  "fullSuite": "PATH=$PWD/tools/autonomy/bin:$PATH POKEBENCH_VITEST_MAX_WORKERS=4 npm test -- --maxWorkers=4: 1,586 files passed | 44 skipped (1,630); 13,058 tests passed | 223 skipped (13,281); 494.98 s",
+  "build": "npm run build: exit 0 (built in 11.62 s)",
+  "differential": "npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 0a74c111a: PASS, 624 captures byte-identical across 3 traces",
+  "diffCheck": "git diff --check: clean"
+ }
+}

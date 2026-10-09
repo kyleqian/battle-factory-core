@@ -1,0 +1,12 @@
+{
+ "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-aipom-beautifly.json",
+ "move": "BLIZZARD",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 441,
+  "ageOffset": 0
+ },
+ "timingPhase": "event",
+ "impactStartAge": 201,
+ "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aipom-beautifly.json: body 365 rows, lag ages [340, 361, 362], r0 == r1; impact 201"
+}

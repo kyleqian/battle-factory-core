@@ -1,0 +1,877 @@
+{
+ "schema": "lsbz-blizzard-grid/v1",
+ "rule": "liveMoveAnimationDuration(59, opponent) = blizzardImpactStartAge(opponent, geometry) + 164",
+ "factorySpecies": 376,
+ "impactDistribution": {
+  "player": {
+   "208": 141376
+  },
+  "opponent": {
+   "194": 245,
+   "195": 2629,
+   "196": 5571,
+   "197": 11872,
+   "198": 14574,
+   "199": 15833,
+   "200": 10830,
+   "201": 25379,
+   "202": 13749,
+   "203": 11689,
+   "204": 11175,
+   "205": 5442,
+   "206": 12388
+  }
+ },
+ "grid": [
+  {
+   "attacker": "MASQUERAIN",
+   "target": "ARIADOS",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 31
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 99
+    }
+   },
+   "speed": [
+    60,
+    40
+   ],
+   "impactStartAge": 194,
+   "prediction": {
+    "counterBodyRowsWithLag": 357,
+    "counterBodyRowsWithoutLag": 356,
+    "lagAgesWithLag": [
+     333,
+     354,
+     355
+    ],
+    "lagAgesWithoutLag": [
+     353,
+     354
+    ],
+    "liveWindowRows": 358,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "AERODACTYL",
+   "target": "ABRA",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 34
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 99
+    }
+   },
+   "speed": [
+    130,
+    90
+   ],
+   "impactStartAge": 195,
+   "prediction": {
+    "counterBodyRowsWithLag": 358,
+    "counterBodyRowsWithoutLag": 357,
+    "lagAgesWithLag": [
+     334,
+     355,
+     356
+    ],
+    "lagAgesWithoutLag": [
+     354,
+     355
+    ],
+    "liveWindowRows": 359,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "ALTARIA",
+   "target": "ANORITH",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 34
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 104
+    }
+   },
+   "speed": [
+    80,
+    75
+   ],
+   "impactStartAge": 195,
+   "prediction": {
+    "counterBodyRowsWithLag": 358,
+    "counterBodyRowsWithoutLag": 357,
+    "lagAgesWithLag": [
+     334,
+     355,
+     356
+    ],
+    "lagAgesWithoutLag": [
+     354,
+     355
+    ],
+    "liveWindowRows": 359,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "AERODACTYL",
+   "target": "ABSOL",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 34
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 91
+    }
+   },
+   "speed": [
+    130,
+    75
+   ],
+   "impactStartAge": 196,
+   "prediction": {
+    "counterBodyRowsWithLag": 359,
+    "counterBodyRowsWithoutLag": 358,
+    "lagAgesWithLag": [
+     335,
+     356,
+     357
+    ],
+    "lagAgesWithoutLag": [
+     355,
+     356
+    ],
+    "liveWindowRows": 360,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "ALTARIA",
+   "target": "AGGRON",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 34
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 95
+    }
+   },
+   "speed": [
+    80,
+    50
+   ],
+   "impactStartAge": 196,
+   "prediction": {
+    "counterBodyRowsWithLag": 359,
+    "counterBodyRowsWithoutLag": 358,
+    "lagAgesWithLag": [
+     335,
+     356,
+     357
+    ],
+    "lagAgesWithoutLag": [
+     355,
+     356
+    ],
+    "liveWindowRows": 360,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "ABSOL",
+   "target": "ARIADOS",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 40
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 99
+    }
+   },
+   "speed": [
+    75,
+    40
+   ],
+   "impactStartAge": 197,
+   "prediction": {
+    "counterBodyRowsWithLag": 360,
+    "counterBodyRowsWithoutLag": 359,
+    "lagAgesWithLag": [
+     336,
+     357,
+     358
+    ],
+    "lagAgesWithoutLag": [
+     356,
+     357
+    ],
+    "liveWindowRows": 361,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "AGGRON",
+   "target": "ARON",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 40
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 104
+    }
+   },
+   "speed": [
+    50,
+    30
+   ],
+   "impactStartAge": 197,
+   "prediction": {
+    "counterBodyRowsWithLag": 360,
+    "counterBodyRowsWithoutLag": 359,
+    "lagAgesWithLag": [
+     336,
+     357,
+     358
+    ],
+    "lagAgesWithoutLag": [
+     356,
+     357
+    ],
+    "liveWindowRows": 361,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "ABSOL",
+   "target": "AGGRON",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 40
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 95
+    }
+   },
+   "speed": [
+    75,
+    50
+   ],
+   "impactStartAge": 198,
+   "prediction": {
+    "counterBodyRowsWithLag": 361,
+    "counterBodyRowsWithoutLag": 360,
+    "lagAgesWithLag": [
+     337,
+     358,
+     359
+    ],
+    "lagAgesWithoutLag": [
+     357,
+     358
+    ],
+    "liveWindowRows": 362,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "AIPOM",
+   "target": "ANORITH",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 43
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 104
+    }
+   },
+   "speed": [
+    85,
+    75
+   ],
+   "impactStartAge": 198,
+   "prediction": {
+    "counterBodyRowsWithLag": 361,
+    "counterBodyRowsWithoutLag": 360,
+    "lagAgesWithLag": [
+     337,
+     358,
+     359
+    ],
+    "lagAgesWithoutLag": [
+     357,
+     358
+    ],
+    "liveWindowRows": 362,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "ABSOL",
+   "target": "AMPHAROS",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 40
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 89
+    }
+   },
+   "speed": [
+    75,
+    55
+   ],
+   "impactStartAge": 199,
+   "prediction": {
+    "counterBodyRowsWithLag": 362,
+    "counterBodyRowsWithoutLag": 361,
+    "lagAgesWithLag": [
+     338,
+     359,
+     360
+    ],
+    "lagAgesWithoutLag": [
+     358,
+     359
+    ],
+    "liveWindowRows": 363,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "AGGRON",
+   "target": "STEELIX",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 40
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 88
+    }
+   },
+   "speed": [
+    50,
+    30
+   ],
+   "impactStartAge": 199,
+   "prediction": {
+    "counterBodyRowsWithLag": 362,
+    "counterBodyRowsWithoutLag": 361,
+    "lagAgesWithLag": [
+     338,
+     359,
+     360
+    ],
+    "lagAgesWithoutLag": [
+     358,
+     359
+    ],
+    "liveWindowRows": 363,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "AIPOM",
+   "target": "ABSOL",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 43
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 91
+    }
+   },
+   "speed": [
+    85,
+    75
+   ],
+   "impactStartAge": 200,
+   "prediction": {
+    "counterBodyRowsWithLag": 363,
+    "counterBodyRowsWithoutLag": 362,
+    "lagAgesWithLag": [
+     339,
+     360,
+     361
+    ],
+    "lagAgesWithoutLag": [
+     359,
+     360
+    ],
+    "liveWindowRows": 364,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "ALAKAZAM",
+   "target": "AGGRON",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 44
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 95
+    }
+   },
+   "speed": [
+    120,
+    50
+   ],
+   "impactStartAge": 200,
+   "prediction": {
+    "counterBodyRowsWithLag": 363,
+    "counterBodyRowsWithoutLag": 362,
+    "lagAgesWithLag": [
+     339,
+     360,
+     361
+    ],
+    "lagAgesWithoutLag": [
+     359,
+     360
+    ],
+    "liveWindowRows": 364,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "ABRA",
+   "target": "ANORITH",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 51
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 104
+    }
+   },
+   "speed": [
+    90,
+    75
+   ],
+   "impactStartAge": 201,
+   "prediction": {
+    "counterBodyRowsWithLag": 364,
+    "counterBodyRowsWithoutLag": 363,
+    "lagAgesWithLag": [
+     340,
+     361,
+     362
+    ],
+    "lagAgesWithoutLag": [
+     360,
+     361
+    ],
+    "liveWindowRows": 365,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "AIPOM",
+   "target": "BEAUTIFLY",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 43
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 88
+    }
+   },
+   "speed": [
+    85,
+    65
+   ],
+   "impactStartAge": 201,
+   "prediction": {
+    "counterBodyRowsWithLag": 364,
+    "counterBodyRowsWithoutLag": 363,
+    "lagAgesWithLag": [
+     340,
+     361,
+     362
+    ],
+    "lagAgesWithoutLag": [
+     360,
+     361
+    ],
+    "liveWindowRows": 365,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "ABRA",
+   "target": "ARIADOS",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 51
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 99
+    }
+   },
+   "speed": [
+    90,
+    40
+   ],
+   "impactStartAge": 202,
+   "prediction": {
+    "counterBodyRowsWithLag": 365,
+    "counterBodyRowsWithoutLag": 364,
+    "lagAgesWithLag": [
+     341,
+     362,
+     363
+    ],
+    "lagAgesWithoutLag": [
+     361,
+     362
+    ],
+    "liveWindowRows": 366,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "ANORITH",
+   "target": "ARMALDO",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 48
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 93
+    }
+   },
+   "speed": [
+    75,
+    45
+   ],
+   "impactStartAge": 202,
+   "prediction": {
+    "counterBodyRowsWithLag": 365,
+    "counterBodyRowsWithoutLag": 364,
+    "lagAgesWithLag": [
+     341,
+     362,
+     363
+    ],
+    "lagAgesWithoutLag": [
+     361,
+     362
+    ],
+    "liveWindowRows": 366,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "ABRA",
+   "target": "AGGRON",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 51
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 95
+    }
+   },
+   "speed": [
+    90,
+    50
+   ],
+   "impactStartAge": 203,
+   "prediction": {
+    "counterBodyRowsWithLag": 366,
+    "counterBodyRowsWithoutLag": 365,
+    "lagAgesWithLag": [
+     342,
+     363,
+     364
+    ],
+    "lagAgesWithoutLag": [
+     362,
+     363
+    ],
+    "liveWindowRows": 367,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "ANORITH",
+   "target": "AMPHAROS",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 48
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 89
+    }
+   },
+   "speed": [
+    75,
+    55
+   ],
+   "impactStartAge": 203,
+   "prediction": {
+    "counterBodyRowsWithLag": 366,
+    "counterBodyRowsWithoutLag": 365,
+    "lagAgesWithLag": [
+     342,
+     363,
+     364
+    ],
+    "lagAgesWithoutLag": [
+     362,
+     363
+    ],
+    "liveWindowRows": 367,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "ABRA",
+   "target": "ABSOL",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 51
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 91
+    }
+   },
+   "speed": [
+    90,
+    75
+   ],
+   "impactStartAge": 204,
+   "prediction": {
+    "counterBodyRowsWithLag": 367,
+    "counterBodyRowsWithoutLag": 366,
+    "lagAgesWithLag": [
+     343,
+     364,
+     365
+    ],
+    "lagAgesWithoutLag": [
+     363,
+     364
+    ],
+    "liveWindowRows": 368,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "AZURILL",
+   "target": "IGGLYBUFF",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 55
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 99
+    }
+   },
+   "speed": [
+    20,
+    15
+   ],
+   "impactStartAge": 204,
+   "prediction": {
+    "counterBodyRowsWithLag": 367,
+    "counterBodyRowsWithoutLag": 366,
+    "lagAgesWithLag": [
+     343,
+     364,
+     365
+    ],
+    "lagAgesWithoutLag": [
+     363,
+     364
+    ],
+    "liveWindowRows": 368,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "ARON",
+   "target": "CASCOON",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 60
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 104
+    }
+   },
+   "speed": [
+    30,
+    15
+   ],
+   "impactStartAge": 205,
+   "prediction": {
+    "counterBodyRowsWithLag": 368,
+    "counterBodyRowsWithoutLag": 367,
+    "lagAgesWithLag": [
+     344,
+     365,
+     366
+    ],
+    "lagAgesWithoutLag": [
+     364,
+     365
+    ],
+    "liveWindowRows": 369,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "BALTOY",
+   "target": "HUNTAIL",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 52
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 90
+    }
+   },
+   "speed": [
+    55,
+    52
+   ],
+   "impactStartAge": 205,
+   "prediction": {
+    "counterBodyRowsWithLag": 368,
+    "counterBodyRowsWithoutLag": 367,
+    "lagAgesWithLag": [
+     344,
+     365,
+     366
+    ],
+    "lagAgesWithoutLag": [
+     364,
+     365
+    ],
+    "liveWindowRows": 369,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "ARON",
+   "target": "AZURILL",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 60
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 98
+    }
+   },
+   "speed": [
+    30,
+    20
+   ],
+   "impactStartAge": 206,
+   "prediction": {
+    "counterBodyRowsWithLag": 369,
+    "counterBodyRowsWithoutLag": 368,
+    "lagAgesWithLag": [
+     345,
+     366,
+     367
+    ],
+    "lagAgesWithoutLag": [
+     365,
+     366
+    ],
+    "liveWindowRows": 370,
+    "policyPhase": "event"
+   }
+  },
+  {
+   "attacker": "BELLOSSOM",
+   "target": "CRADILY",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 54
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 92
+    }
+   },
+   "speed": [
+    50,
+    43
+   ],
+   "impactStartAge": 206,
+   "prediction": {
+    "counterBodyRowsWithLag": 369,
+    "counterBodyRowsWithoutLag": 368,
+    "lagAgesWithLag": [
+     345,
+     366,
+     367
+    ],
+    "lagAgesWithoutLag": [
+     365,
+     366
+    ],
+    "liveWindowRows": 370,
+    "policyPhase": "event"
+   }
+  }
+ ]
+}

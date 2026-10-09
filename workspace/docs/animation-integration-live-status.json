@@ -427,25 +427,6 @@
       ]
     },
     {
-      "move": "MOVE_LIGHT_SCREEN",
-      "id": 113,
-      "sourceFieldEvidence": [
-        "../tools/integration/fixtures/light-screen-live-adapter-receipt.json",
-        "../tools/integration/fixtures/light-screen-live-player.json",
-        "../tools/integration/fixtures/light-screen-live-opponent.json",
-        "../tools/integration/fixtures/light-screen-live-slowpoke-player.json"
-      ],
-      "liveEvidence": [
-        "dense script activation through inactive cleanup/following controller display, both Exeggcute orientations twice and complete Slowpoke twice",
-        "generated command seeds 2/27/45/59/84/114: success then already-active failure, self target, complete text/body and next prompt",
-        "species targets (#145b, elevated-opponent shadow returns on the last 2 rows, LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS): GOLBAT 88/88 twice fresh zero residual (was 86/88); accepted fixtures unchanged. Ordinary route seed 2 / slot 3: active 88/88, ON/OFF parity"
-      ],
-      "remaining": [
-        "unknown entry/status/switch/summary/substitute/transform histories",
-        "whole-playable arbitrary-history framebuffer exactness"
-      ]
-    },
-    {
       "move": "MOVE_HAZE",
       "id": 114,
       "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
@@ -3684,7 +3665,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 241,
+  "implementedCount": 240,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 13,
@@ -3861,7 +3842,7 @@
     },
     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
   },
-  "faithfulTimingCount": 22,
+  "faithfulTimingCount": 23,
   "faithfulTimingAdapters": [
     {
       "id": 183,
@@ -5654,12 +5635,12 @@
             {
               "phase": "event",
               "bodyRows": 361,
-              "measured": 3
+              "measured": 21
             },
             {
               "phase": "no-event",
               "bodyRows": 360,
-              "measured": 1
+              "measured": 9
             }
           ],
           "chosen": "event",
@@ -5688,10 +5669,173 @@
         ],
         "rows": 16,
         "maxPixelsPerRow": 16415,
+        "windows": {
+          "blizzard-opponent-abra-anorith": {
+            "ages": [
+              342,
+              343,
+              344,
+              345,
+              346,
+              347,
+              348,
+              349,
+              350,
+              351,
+              352,
+              353,
+              354,
+              355,
+              356,
+              357
+            ]
+          },
+          "blizzard-opponent-abra-ariados": {
+            "ages": [
+              343,
+              344,
+              345,
+              346,
+              347,
+              348,
+              349,
+              350,
+              351,
+              352,
+              353,
+              354,
+              355,
+              356,
+              357,
+              358
+            ]
+          },
+          "blizzard-opponent-absol-ampharos": {
+            "ages": [
+              340,
+              341,
+              342,
+              343,
+              344,
+              345,
+              346,
+              347,
+              348,
+              349,
+              350,
+              351,
+              352,
+              353,
+              354,
+              355
+            ]
+          },
+          "blizzard-opponent-aerodactyl-abra": {
+            "ages": [
+              336,
+              337,
+              338,
+              339,
+              340,
+              341,
+              342,
+              343,
+              344,
+              345,
+              346,
+              347,
+              348,
+              349,
+              350,
+              351
+            ]
+          },
+          "blizzard-opponent-aggron-steelix": {
+            "ages": [
+              340,
+              341,
+              342,
+              343,
+              344,
+              345,
+              346,
+              347,
+              348,
+              349,
+              350,
+              351,
+              352,
+              353,
+              354,
+              355
+            ]
+          },
+          "blizzard-opponent-aipom-absol": {
+            "ages": [
+              341,
+              342,
+              343,
+              344,
+              345,
+              346,
+              347,
+              348,
+              349,
+              350,
+              351,
+              352,
+              353,
+              354,
+              355,
+              356
+            ]
+          },
+          "blizzard-opponent-anorith-ampharos": {
+            "ages": [
+              344,
+              345,
+              346,
+              347,
+              348,
+              349,
+              350,
+              351,
+              352,
+              353,
+              354,
+              355,
+              356,
+              357,
+              358,
+              359
+            ]
+          },
+          "blizzard-opponent-aron-azurill": {
+            "ages": [
+              347,
+              348,
+              349,
+              350,
+              351,
+              352,
+              353,
+              354,
+              355,
+              356,
+              357,
+              358,
+              359,
+              360,
+              361,
+              362
+            ]
+          }
+        },
         "cause": "opponent optional-lag-age 336 absent (360-row ROM body; BLASTOISE -> BLASTOISE, 1 of 4 impact-197 opponent bodies; its fixed lag pair lands on 356 / 357 instead of 357 / 358): the restorebg fade-in runs one frame early on ages 338..353 (262,640 px); every row before 338 is exact. No player-side window in the other phase was measured (7 of 7 with the lag at 347)"
       },
       "d3": false,
       "evidence": [
+        "S10A lsbz (ISSUES #152 'Blizzard (59) opponent pairs whose impact-start age is not 197'): the live window is geometry-derived, liveMoveAnimationDuration(59) = blizzardImpactStartAge(side, case-59 picOffsetPoint geometry) + 164 (liveMoveAnimation.ts liveBlizzardDuration; player 208 for every Factory pair -> 372 unchanged; opponent 194..206 -> 358..370), so provableEffectOrder no longer declines impact != 197. Grid tools/integration/fixtures/lsbz/blizzard-grid-predictions.json (25 opponent pairs, impact 194..206, predictions committed before any probe; BALTOY -> HUNTAIL probe crashed, not staged): fresh counters (d4tailsCounters.sh, r0 == r1, tools/integration/fixtures/lsbz/blizzard-counters.json) give exactly the predicted shape on all 24: lag [impact + 139, + 160, + 161] in 16 (body impact + 164 rows), [impact + 159, + 160] in 8 (impact + 163); with the d4tails opponent bodies (impact 197: 3 : 1; WEEZING -> BLASTOISE 196 and ARBOK -> CATERPIE 198 lag) the opponent parameter counts 21 : 9 -> lag (age / fixed lags / body rows above are the impact-197 values, shifted by impact - 197 per geometry). tools/integration/fixtures/lsbz/windows/blizzard-*.json through the production live renderer (d4aTimingCheck.ts, twice fresh): 17 lag windows 0 px at impact + 164 rows; the 8 no-lag windows only on impact + 141 .. + 156 (alternatePhaseResidual.windows); receipt tools/integration/fixtures/lsbz-live-receipt.json",
         "reclassified from scoped exact (S10A d4tails, #151 precedent: the adapter gained a measured CPU-phase parameter, per side); the existing exact fixture proofs stay valid in their proved scope",
         "tools/integration/fixtures/d4tails/counters.json (d4tailsCounters.sh: 46 scenarios, two fresh direct-mGBA runs each, r0 == r1 everywhere): Blizzard player lag [347, 368, 369] in 7 of 7 bodies; opponent impact-197 lag [336, 357, 358] in 3 of 4, BLASTOISE -> BLASTOISE [356, 357]; the geometry-shifted opponent controls ARBOK -> CATERPIE [337, 358, 359] / WEEZING -> BLASTOISE [335, 356, 357] are impact-start != 197 bodies (declined, out of scope, not counted)",
         "tools/integration/fixtures/d4tails/windows/{prep2-blizzard-*,blizzard-*}.json through the production live renderer (d4aTimingCheck.ts, one process per fixture, twice fresh): 10 lag windows (7 player, 3 opponent) 0 px at 372 / 361 rows, BLASTOISE -> BLASTOISE only on the documented ages; receipt tools/integration/fixtures/d4tails-live-receipt.json",
@@ -5888,6 +6032,62 @@
         "python3 tools/integration/fa185Windows.py",
         "OUT=SCRATCH/check P=6 sh tools/integration/fa185TimingCheck.sh",
         "npx vitest run tests/animation/liveFa185Timing.test.ts tests/animation/liveFaintAttackSides.test.ts tests/animation/faintAttack.test.ts tests/animation/livePrep6MoveAdapters.test.ts"
+      ]
+    },
+    {
+      "id": 113,
+      "move": "MOVE_LIGHT_SCREEN",
+      "timingParameters": [
+        {
+          "kind": "bg-write-row",
+          "age": 60,
+          "fixedLagAges": [
+            68,
+            69
+          ],
+          "iterations": 86,
+          "side": "opponent",
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 88,
+              "measured": 2
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 88,
+              "measured": 9
+            }
+          ],
+          "chosen": "no-event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          59
+        ],
+        "rows": 1,
+        "maxPixelsPerRow": 2658,
+        "cause": "opponent attacker, the BLDALPHA step written at body row 59 (reducer age 52, eva 9 -> 8) buffered by SetGpuReg (VCOUNT outside VBlank, sGpuRegWaitingList [0x52]) and lost under the row-60 write, so the ROM repeats eva 9 / evb 7 on row 59 (lightScreen.ts opponentBlendHold): the SNORLAX / CHANSEY first body and the accepted EXEGGCUTE / ONIX after-Tackle fixture, 2,658 px on row 59 only; lag ages [68, 69] identical in both phases; every other row exact"
+      },
+      "d3": false,
+      "evidence": [
+        "reclassified from scoped exact (S10A lsbz, #151 precedent: the adapter gained a measured VBlank-write CPU-phase parameter, opponent attacker only; the live adapter renders the dominant phase, liveMoveAnimation.ts case 113 opponentBlendHold = the policy phase, no hold); the existing exact fixture proofs stay valid in their proved scope (player side; the accepted after-Tackle opponent body is now the documented other phase)",
+        "docs/live-audit-15-chains.md s1 TIMING-PHASE (two fresh runs each): BLDALPHA I/O vs buffer at row 59 (receipts/vblank/table.txt) buffered in the SNORLAX / CHANSEY first body and the EXEGGCUTE / ONIX after-Tackle route, direct in 5 more; 9 of 11 opponent windows direct (no hold) by pixels",
+        "tools/integration/fixtures/lsbz/windows/light-screen-*.json through the production live renderer (d4aTimingCheck.ts, one process per fixture, twice fresh, full 88-row windows): opponent policy-phase windows 0 px, the 2 other-phase windows only on row 59; player windows 0 px; receipt tools/integration/fixtures/lsbz-live-receipt.json",
+        "scoped-exact liveEvidence: dense script activation through inactive cleanup/following controller display, both Exeggcute orientations twice and complete Slowpoke twice",
+        "scoped-exact liveEvidence: generated command seeds 2/27/45/59/84/114: success then already-active failure, self target, complete text/body and next prompt",
+        "scoped-exact liveEvidence: species targets (#145b, elevated-opponent shadow returns on the last 2 rows, LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS): GOLBAT 88/88 twice fresh zero residual (was 86/88); accepted fixtures unchanged. Ordinary route seed 2 / slot 3: active 88/88, ON/OFF parity",
+        "scoped-exact remaining (kept): unknown entry/status/switch/summary/substitute/transform histories",
+        "scoped-exact remaining (kept): whole-playable arbitrary-history framebuffer exactness",
+        "sourceFieldEvidence: ../tools/integration/fixtures/light-screen-live-adapter-receipt.json, ../tools/integration/fixtures/light-screen-live-player.json, ../tools/integration/fixtures/light-screen-live-opponent.json, ../tools/integration/fixtures/light-screen-live-slowpoke-player.json"
+      ],
+      "proofCommands": [
+        "python3 tools/integration/lsbzWindows.py",
+        "OUT=SCRATCH/check P=8 sh tools/integration/lsbzTimingCheck.sh light-screen",
+        "npx vitest run tests/animation/liveLsbzTiming.test.ts tests/animation/lightScreen.test.ts"
       ]
     }
   ],

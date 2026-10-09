@@ -1,0 +1,71 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aron-cascoon.json",
+ "attacker": {
+  "species": "ARON",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "CASCOON",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 125,
+  "playerMaxHp": 125,
+  "opponentHp": 157,
+  "opponentMaxHp": 157,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent ARON -> CASCOON",
+ "denseWindow": {
+  "startFrame": 76,
+  "endFrame": 444,
+  "ageOffset": 0
+ },
+ "schema": "lsbz-blizzard-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 76,
+  "altInterval": {
+   "move": 59,
+   "start": 76,
+   "end": 444
+  },
+  "offset": 0
+ },
+ "lsbz": {
+  "impactStartAge": 205,
+  "prediction": {
+   "counterBodyRowsWithLag": 368,
+   "counterBodyRowsWithoutLag": 367,
+   "lagAgesWithLag": [
+    344,
+    365,
+    366
+   ],
+   "lagAgesWithoutLag": [
+    364,
+    365
+   ],
+   "liveWindowRows": 369,
+   "policyPhase": "event"
+  },
+  "geometry": {
+   "attackerCenter": {
+    "x": 176,
+    "y": 60
+   },
+   "targetCenter": {
+    "x": 72,
+    "y": 104
+   }
+  }
+ }
+}

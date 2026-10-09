@@ -1,0 +1,71 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aron-azurill.json",
+ "attacker": {
+  "species": "ARON",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "AZURILL",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 125,
+  "playerMaxHp": 125,
+  "opponentHp": 157,
+  "opponentMaxHp": 157,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent ARON -> AZURILL",
+ "denseWindow": {
+  "startFrame": 76,
+  "endFrame": 445,
+  "ageOffset": 0
+ },
+ "schema": "lsbz-blizzard-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 76,
+  "altInterval": {
+   "move": 59,
+   "start": 76,
+   "end": 444
+  },
+  "offset": 0
+ },
+ "lsbz": {
+  "impactStartAge": 206,
+  "prediction": {
+   "counterBodyRowsWithLag": 369,
+   "counterBodyRowsWithoutLag": 368,
+   "lagAgesWithLag": [
+    345,
+    366,
+    367
+   ],
+   "lagAgesWithoutLag": [
+    365,
+    366
+   ],
+   "liveWindowRows": 370,
+   "policyPhase": "event"
+  },
+  "geometry": {
+   "attackerCenter": {
+    "x": 176,
+    "y": 60
+   },
+   "targetCenter": {
+    "x": 72,
+    "y": 98
+   }
+  }
+ }
+}

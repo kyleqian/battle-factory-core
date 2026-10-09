@@ -1,0 +1,71 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aggron-steelix.json",
+ "attacker": {
+  "species": "AGGRON",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "STEELIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 150,
+  "playerMaxHp": 150,
+  "opponentHp": 177,
+  "opponentMaxHp": 177,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent AGGRON -> STEELIX",
+ "denseWindow": {
+  "startFrame": 78,
+  "endFrame": 440,
+  "ageOffset": 0
+ },
+ "schema": "lsbz-blizzard-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 78,
+  "altInterval": {
+   "move": 59,
+   "start": 78,
+   "end": 439
+  },
+  "offset": 0
+ },
+ "lsbz": {
+  "impactStartAge": 199,
+  "prediction": {
+   "counterBodyRowsWithLag": 362,
+   "counterBodyRowsWithoutLag": 361,
+   "lagAgesWithLag": [
+    338,
+    359,
+    360
+   ],
+   "lagAgesWithoutLag": [
+    358,
+    359
+   ],
+   "liveWindowRows": 363,
+   "policyPhase": "event"
+  },
+  "geometry": {
+   "attackerCenter": {
+    "x": 176,
+    "y": 40
+   },
+   "targetCenter": {
+    "x": 72,
+    "y": 88
+   }
+  }
+ }
+}

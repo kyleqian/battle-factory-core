@@ -1,0 +1,12 @@
+{
+ "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-anorith-ampharos.json",
+ "move": "BLIZZARD",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 444,
+  "ageOffset": 0
+ },
+ "timingPhase": "no-event",
+ "impactStartAge": 203,
+ "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-anorith-ampharos.json: body 366 rows, lag ages [362, 363], r0 == r1; impact 203"
+}

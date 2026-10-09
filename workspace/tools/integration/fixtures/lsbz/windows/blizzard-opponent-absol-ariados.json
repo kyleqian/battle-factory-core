@@ -1,0 +1,12 @@
+{
+ "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-absol-ariados.json",
+ "move": "BLIZZARD",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 437,
+  "ageOffset": 0
+ },
+ "timingPhase": "event",
+ "impactStartAge": 197,
+ "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-absol-ariados.json: body 361 rows, lag ages [336, 357, 358], r0 == r1; impact 197"
+}

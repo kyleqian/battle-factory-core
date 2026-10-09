@@ -1937,6 +1937,8 @@ export interface SceneOnLightScreenConfig {
     readonly wall: number;
     readonly sparkles: readonly number[];
   }>;
+  /** Opponent-side age-52 BLDALPHA hold (lightScreen.ts); absent = the accepted corpus phase (hold). */
+  readonly opponentBlendHold?: boolean;
 }
 
 export interface SceneOnBarrierConfig {
@@ -7522,6 +7524,7 @@ export function sceneOnLightScreenView(
       state.age,
       state.config.attacker.geometry.battlePositionCenter,
       state.config.attacker.geometry.side,
+      state.config.opponentBlendHold ?? true,
     ),
   };
 }

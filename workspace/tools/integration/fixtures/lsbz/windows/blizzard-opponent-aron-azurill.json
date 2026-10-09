@@ -1,0 +1,12 @@
+{
+ "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-aron-azurill.json",
+ "move": "BLIZZARD",
+ "denseWindow": {
+  "startFrame": 76,
+  "endFrame": 444,
+  "ageOffset": 0
+ },
+ "timingPhase": "no-event",
+ "impactStartAge": 206,
+ "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aron-azurill.json: body 369 rows, lag ages [365, 366], r0 == r1; impact 206"
+}

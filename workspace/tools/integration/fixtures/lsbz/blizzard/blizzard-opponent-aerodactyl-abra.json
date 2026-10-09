@@ -1,0 +1,71 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aerodactyl-abra.json",
+ "attacker": {
+  "species": "AERODACTYL",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ABRA",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 100,
+  "playerMaxHp": 100,
+  "opponentHp": 187,
+  "opponentMaxHp": 187,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent AERODACTYL -> ABRA",
+ "denseWindow": {
+  "startFrame": 82,
+  "endFrame": 440,
+  "ageOffset": 0
+ },
+ "schema": "lsbz-blizzard-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 82,
+  "altInterval": {
+   "move": 59,
+   "start": 82,
+   "end": 439
+  },
+  "offset": 0
+ },
+ "lsbz": {
+  "impactStartAge": 195,
+  "prediction": {
+   "counterBodyRowsWithLag": 358,
+   "counterBodyRowsWithoutLag": 357,
+   "lagAgesWithLag": [
+    334,
+    355,
+    356
+   ],
+   "lagAgesWithoutLag": [
+    354,
+    355
+   ],
+   "liveWindowRows": 359,
+   "policyPhase": "event"
+  },
+  "geometry": {
+   "attackerCenter": {
+    "x": 176,
+    "y": 34
+   },
+   "targetCenter": {
+    "x": 72,
+    "y": 99
+   }
+  }
+ }
+}

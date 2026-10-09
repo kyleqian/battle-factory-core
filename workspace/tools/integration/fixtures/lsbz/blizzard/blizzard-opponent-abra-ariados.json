@@ -1,0 +1,71 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-abra-ariados.json",
+ "attacker": {
+  "species": "ABRA",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ARIADOS",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 145,
+  "playerMaxHp": 145,
+  "opponentHp": 132,
+  "opponentMaxHp": 132,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent ABRA -> ARIADOS",
+ "denseWindow": {
+  "startFrame": 76,
+  "endFrame": 441,
+  "ageOffset": 0
+ },
+ "schema": "lsbz-blizzard-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 76,
+  "altInterval": {
+   "move": 59,
+   "start": 76,
+   "end": 440
+  },
+  "offset": 0
+ },
+ "lsbz": {
+  "impactStartAge": 202,
+  "prediction": {
+   "counterBodyRowsWithLag": 365,
+   "counterBodyRowsWithoutLag": 364,
+   "lagAgesWithLag": [
+    341,
+    362,
+    363
+   ],
+   "lagAgesWithoutLag": [
+    361,
+    362
+   ],
+   "liveWindowRows": 366,
+   "policyPhase": "event"
+  },
+  "geometry": {
+   "attackerCenter": {
+    "x": 176,
+    "y": 51
+   },
+   "targetCenter": {
+    "x": 72,
+    "y": 99
+   }
+  }
+ }
+}

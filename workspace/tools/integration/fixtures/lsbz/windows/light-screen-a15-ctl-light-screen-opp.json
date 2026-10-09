@@ -1,0 +1,14 @@
+{
+ "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/ctl-light-screen-opp-c0.json",
+ "move": "LIGHT_SCREEN",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 164,
+  "ageOffset": 0
+ },
+ "timingPhase": "event",
+ "timingPhases": {
+  "bg-write-row": "event"
+ },
+ "timingEvidence": "audit-15 receipts/main: production hold 0 px (ages -), r1 == r2; vblank row 59 event"
+}
