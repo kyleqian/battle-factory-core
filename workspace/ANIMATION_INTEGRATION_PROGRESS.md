@@ -1,5 +1,26 @@
 # Animation integration progress
 
+## 2026-10-09 (overnight) — S10A: allocator NET-ZERO ids landed; sprite-order chains + next plan tier (in progress)
+
+- Folded Sonnet worker `a56a4baaf` as `3092cf05f` (src tree `df965113`): prep44's 50 audited allocator NET-ZERO bodies appended
+  to LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS (Future Sight 248 kept out: only its setup body was measured); pin extended to the
+  prep44 receipt (window-incomplete rows need an audited row of the same orientation; both orientations audited per id). Pins
+  that moved because an earlier body is now audited: Light Screen seed 27 (after Faint Attack 185), wall seed 67 Reflect (after
+  Quick Attack 98), voluntary slot2@2432 (after Swift 129) — fallback -> exact adapter. Census seeds 0..299: 81.54 -> 82.48 %
+  live by count, 80.19 -> 80.87 % by frames (+75 / +8017), 0 regressions, command sequence identical. Worker gates 1,573 files /
+  12,958 tests, build, differential 624/624 vs `2d29f058e`. Supervisor: id set == prep44 tier-2 diff set; census rerun byte-
+  identical to the committed after-report (`c4d8255e`); touched tests 52/52, smoke 448.
+- prep45 (side, `2312014bb`, new files only; merged `0e5dfdc5c`): sprite-ORDER invalidator chains + the next plan tier. Order
+  chains are mostly short (523 / 954 declines single-unit; the forced party menu is the only revival seen). 18 units EXACT per
+  frame against fresh probes (108 jobs x2, all A == B): BRN, TURN_TRAP keyed by the wrapped move (Fire Spin / Whirlpool / Sand
+  Tomb / Bind-Wrap; Clamp not probed), WISH_HEAL, INGRAIN_HEAL (= Leech Seed drain plan), FUTURE_SIGHT_HIT (empty), Hydro Pump,
+  Reversal, Solar Beam keyed by turn, Perish Song, Dragon Dance side-keyed, other sides of Softboiled / Overheat / Magical Leaf /
+  Moonlight. WORDS-DEPENDENT: Sand-Attack, Mud-Slap (AnimDirtScatter), Dive. GEOMETRY-KEYED: Attract, Mega Drain, Dream Eater,
+  Blizzard (+ Giga Drain, hail). NOT REACHED: FRZ, ITEM_KNOCKOFF, return to ball (Scene ON AI switch not reached in 4 tries).
+  Temp patch census seeds 0..299 (base `2d29f058e`): 81.54 -> 83.73 % by count, 80.19 -> 83.23 % by frames (+174 / +35,614),
+  0 regressions, identical commands + digest; predictor 0 unpredicted live; corpus 1136 -> 1143 / 213 -> 241, 0 mismatches.
+  Supervisor: `prep45Run.sh` into fresh dirs — all 12 receipts byte-identical (216 probe runs, 0 A/B differ).
+
 ## 2026-10-08 (overnight) — S10A: Substitute presentation live, deferred order lend, live-share census, sprite-order plans; 245 + 13 + 18
 
 - Final: production src tree `e3fc2240` (`65dec33c2`); supervisor final gates on the union typecheck, 1,573 files / 12,958
