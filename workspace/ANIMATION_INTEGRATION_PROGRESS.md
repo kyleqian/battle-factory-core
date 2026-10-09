@@ -96,6 +96,8 @@
   0 regressions, identical commands + digest; rain route ON/OFF + two presentation seeds identical logic. Worker gates 1,577 files /
   12,995 tests, build, differential 624/624. Supervisor: the 6 dense windows rerun fresh — 0 px, digests in the receipt; merge with
   order47 conflicted only in tools/integration/orderCrossBodyRouteScan.ts (kept both flags) -> fresh union gates below.
+- Supervisor union gates on `0209f0d22` (src `1fb74f37`): census seeds 0..299 89.10 % live by count / 89.76 % by frames,
+  typecheck, full suite 1,579 files / 13,002 tests, build, differential 624/624 vs `447e309aa` (`union-gates-0209f0d22.json`).
 
 ## 2026-10-08 (overnight) — S10A: Substitute presentation live, deferred order lend, live-share census, sprite-order plans; 245 + 13 + 18
 
