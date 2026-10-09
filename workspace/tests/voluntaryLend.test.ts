@@ -166,9 +166,10 @@ describe("voluntary drafts through the production harness replay (postkoHostRepl
       expect(lend.spriteOrderInput?.free, path).toEqual(edge.roleLend);
       if (fixture.move === "LIGHT_SCREEN") allocator[`${path.split("voluntary-")[1]}@${fixture.edgeRiseFrame}`] = lend.spriteAllocatorInput !== undefined;
     }
-    // allocator history is lost after non-net-zero bodies (Sunny Day 241, Swift 129) before the later Light Screens (§3.1 caveat)
+    // allocator history is lost after non-net-zero bodies (Sunny Day 241) before the later Light Screens (§3.1 caveat);
+    // s10a: Swift 129 is audited net-zero by the prep44 receipt, so slot2@2432 is no longer blocked by Swift and keeps its history
     expect(allocator).toEqual({ "light-screen-player-cancel.json@325": true, "light-screen-player.json@3153": false,
-      "light-screen-player-slot2.json@2432": false });
+      "light-screen-player-slot2.json@2432": true });
   });
 });
 
