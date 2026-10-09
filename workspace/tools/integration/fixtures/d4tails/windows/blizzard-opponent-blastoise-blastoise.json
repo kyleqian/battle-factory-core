@@ -1,0 +1,11 @@
+{
+ "sourceFixture": "tools/integration/fixtures/geoice/blizzard-opponent-blastoise-blastoise.json",
+ "move": "BLIZZARD",
+ "denseWindow": {
+  "startFrame": 81,
+  "endFrame": 440,
+  "ageOffset": 0
+ },
+ "timingPhase": "no-event",
+ "timingEvidence": "d4tails counters blizzard-opponent-blastoise-blastoise: body 360 rows, lag ages [356, 357], r0 == r1"
+}

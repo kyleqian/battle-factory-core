@@ -1,0 +1,1059 @@
+[
+ {
+  "scenario": "tools/integration/fixtures/geoice/scenarios/blizzard-opponent-blastoise-blastoise.json",
+  "digests": [
+   "103de667b3a55420",
+   "103de667b3a55420"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 81,
+    "lastActive": 439,
+    "bodyRows": 359,
+    "lagAges": [
+     356,
+     357
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/scenarios/blizzard-opponent-blastoise-ivysaur.json",
+  "digests": [
+   "25f295527c733460",
+   "25f295527c733460"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 81,
+    "lastActive": 440,
+    "bodyRows": 360,
+    "lagAges": [
+     336,
+     357,
+     358
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/scenarios/blizzard-opponent-zubat-nidoking.json",
+  "digests": [
+   "1b9a2d9dce704526",
+   "1b9a2d9dce704526"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 77,
+    "lastActive": 436,
+    "bodyRows": 360,
+    "lagAges": [
+     336,
+     357,
+     358
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/scenarios/blizzard-player-bulbasaur-hoppip.json",
+  "digests": [
+   "8aa277e98c620b2d",
+   "8aa277e98c620b2d"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 77,
+    "lastActive": 447,
+    "bodyRows": 371,
+    "lagAges": [
+     347,
+     368,
+     369
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/scenarios/blizzard-player-charizard-golbat.json",
+  "digests": [
+   "e81dc68746abd70e",
+   "e81dc68746abd70e"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 77,
+    "lastActive": 447,
+    "bodyRows": 371,
+    "lagAges": [
+     347,
+     368,
+     369
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/scenarios/blizzard-player-onix-masquerain.json",
+  "digests": [
+   "fa51c4e87d9b1d87",
+   "fa51c4e87d9b1d87"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 72,
+    "lastActive": 442,
+    "bodyRows": 371,
+    "lagAges": [
+     347,
+     368,
+     369
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/scenarios/blizzard-player-wartortle-hoppip.json",
+  "digests": [
+   "8aa277e98c620b2d",
+   "8aa277e98c620b2d"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 77,
+    "lastActive": 447,
+    "bodyRows": 371,
+    "lagAges": [
+     347,
+     368,
+     369
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/scenarios/icy-wind-opponent-fearow-weedle.json",
+  "digests": [
+   "39fc87fdb08f45b3",
+   "39fc87fdb08f45b3"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "ICY_WIND",
+    "activation": 78,
+    "lastActive": 363,
+    "bodyRows": 286,
+    "lagAges": [
+     241,
+     242,
+     261
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/scenarios/icy-wind-opponent-kadabra-bulbasaur.json",
+  "digests": [
+   "f6dc745fca635900",
+   "f6dc745fca635900"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "ICY_WIND",
+    "activation": 79,
+    "lastActive": 364,
+    "bodyRows": 286,
+    "lagAges": [
+     241,
+     242,
+     261
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/scenarios/icy-wind-opponent-masquerain-onix.json",
+  "digests": [
+   "b81af1a2c6c4573c",
+   "b81af1a2c6c4573c"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "ICY_WIND",
+    "activation": 82,
+    "lastActive": 367,
+    "bodyRows": 286,
+    "lagAges": [
+     241,
+     242,
+     261
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/scenarios/icy-wind-opponent-zubat-butterfree.json",
+  "digests": [
+   "16fd0c17e39abc1c",
+   "16fd0c17e39abc1c"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "ICY_WIND",
+    "activation": 77,
+    "lastActive": 361,
+    "bodyRows": 285,
+    "lagAges": [
+     241,
+     242
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/scenarios/icy-wind-player-bulbasaur-metapod.json",
+  "digests": [
+   "f4ac1ec27b6f1f10",
+   "f4ac1ec27b6f1f10"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "ICY_WIND",
+    "activation": 77,
+    "lastActive": 361,
+    "bodyRows": 285,
+    "lagAges": [
+     241,
+     242
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/scenarios/icy-wind-player-fearow-charizard.json",
+  "digests": [
+   "2cbd5b8094d6d223",
+   "2cbd5b8094d6d223"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "ICY_WIND",
+    "activation": 74,
+    "lastActive": 359,
+    "bodyRows": 286,
+    "lagAges": [
+     241,
+     242,
+     261
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/scenarios/icy-wind-player-onix-golbat.json",
+  "digests": [
+   "e5b7672a22a63185",
+   "e5b7672a22a63185"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "ICY_WIND",
+    "activation": 72,
+    "lastActive": 357,
+    "bodyRows": 286,
+    "lagAges": [
+     241,
+     242,
+     261
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/scenarios/icy-wind-player-venusaur-luvdisc.json",
+  "digests": [
+   "a88899709dc8f876",
+   "a88899709dc8f876"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "ICY_WIND",
+    "activation": 76,
+    "lastActive": 361,
+    "bodyRows": 286,
+    "lagAges": [
+     241,
+     242,
+     261
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/controls/scenarios/blizzard-opponent-arbok-caterpie.json",
+  "digests": [
+   "5e3e66110c5e1138",
+   "5e3e66110c5e1138"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 77,
+    "lastActive": 437,
+    "bodyRows": 361,
+    "lagAges": [
+     337,
+     358,
+     359
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/controls/scenarios/blizzard-opponent-weezing-blastoise.json",
+  "digests": [
+   "508cf89a1255f87b",
+   "508cf89a1255f87b"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 79,
+    "lastActive": 437,
+    "bodyRows": 359,
+    "lagAges": [
+     335,
+     356,
+     357
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/controls/scenarios/blizzard-player-bulbasaur-metapod.json",
+  "digests": [
+   "185bbbe118bb890c",
+   "185bbbe118bb890c"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 77,
+    "lastActive": 447,
+    "bodyRows": 371,
+    "lagAges": [
+     347,
+     368,
+     369
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/controls/scenarios/blizzard-player-charizard-wartortle.json",
+  "digests": [
+   "9fd529d289769d67",
+   "9fd529d289769d67"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 77,
+    "lastActive": 447,
+    "bodyRows": 371,
+    "lagAges": [
+     347,
+     368,
+     369
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/controls/scenarios/icy-wind-opponent-luvdisc-bulbasaur.json",
+  "digests": [
+   "462088a2594c6d3b",
+   "462088a2594c6d3b"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "ICY_WIND",
+    "activation": 79,
+    "lastActive": 364,
+    "bodyRows": 286,
+    "lagAges": [
+     241,
+     242,
+     261
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/controls/scenarios/icy-wind-opponent-zubat-onix.json",
+  "digests": [
+   "43b6cca378f684af",
+   "43b6cca378f684af"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "ICY_WIND",
+    "activation": 77,
+    "lastActive": 361,
+    "bodyRows": 285,
+    "lagAges": [
+     241,
+     242
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/controls/scenarios/icy-wind-player-onix-masquerain.json",
+  "digests": [
+   "7b0aec3ba8dd1c16",
+   "7b0aec3ba8dd1c16"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "ICY_WIND",
+    "activation": 72,
+    "lastActive": 356,
+    "bodyRows": 285,
+    "lagAges": [
+     241,
+     242
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/geoice/controls/scenarios/icy-wind-player-rattata-charizard.json",
+  "digests": [
+   "6c6fa923b4880d95",
+   "6c6fa923b4880d95"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "ICY_WIND",
+    "activation": 75,
+    "lastActive": 360,
+    "bodyRows": 286,
+    "lagAges": [
+     241,
+     242,
+     261
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/mechanic-icy-wind-player-swinub-opponent-onix.json",
+  "digests": [
+   "34e347b96e992cc8",
+   "34e347b96e992cc8"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "ICY_WIND",
+    "activation": 220,
+    "lastActive": 505,
+    "bodyRows": 286,
+    "lagAges": [
+     241,
+     242,
+     261
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/mechanic-icy-wind-opponent-swinub-player-onix.json",
+  "digests": [
+   "ae2bf9b4d7fd3fd4",
+   "ae2bf9b4d7fd3fd4"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "ICY_WIND",
+    "activation": 220,
+    "lastActive": 505,
+    "bodyRows": 286,
+    "lagAges": [
+     241,
+     242,
+     261
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/mechanic-blizzard-player-pelipper-opponent-onix.json",
+  "digests": [
+   "794cd60d4330427e",
+   "794cd60d4330427e"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 214,
+    "lastActive": 584,
+    "bodyRows": 371,
+    "lagAges": [
+     347,
+     368,
+     369
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/mechanic-blizzard-opponent-pelipper-player-onix.json",
+  "digests": [
+   "c02f71a259a0fe37",
+   "c02f71a259a0fe37"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 213,
+    "lastActive": 572,
+    "bodyRows": 360,
+    "lagAges": [
+     336,
+     357,
+     358
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/altspecies3-scenarios/icy-wind-opponent-poliwhirl-player-onix.json",
+  "digests": [
+   "1562a9aa786bcb9a",
+   "1562a9aa786bcb9a"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "ICY_WIND",
+    "activation": 81,
+    "lastActive": 366,
+    "bodyRows": 286,
+    "lagAges": [
+     241,
+     242,
+     261
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/s10aside-faint-attack-opponent-delcatty-player-golem.json",
+  "digests": [
+   "37ccb25689a044a6",
+   "37ccb25689a044a6"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "FAINT_ATTACK",
+    "activation": 82,
+    "lastActive": 305,
+    "bodyRows": 224,
+    "lagAges": [
+     80,
+     81,
+     108,
+     109,
+     182,
+     183
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/s10aside-faint-attack-opponent-golbat-player-golem.json",
+  "digests": [
+   "4aa7bbc03831c8d8",
+   "4aa7bbc03831c8d8"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "FAINT_ATTACK",
+    "activation": 80,
+    "lastActive": 304,
+    "bodyRows": 225,
+    "lagAges": [
+     80,
+     81,
+     108,
+     109,
+     182,
+     183,
+     205
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/s10aside-faint-attack-opponent-grovyle-player-onix.json",
+  "digests": [
+   "10e61cec2aae91b2",
+   "10e61cec2aae91b2"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "FAINT_ATTACK",
+    "activation": 81,
+    "lastActive": 305,
+    "bodyRows": 225,
+    "lagAges": [
+     80,
+     81,
+     108,
+     109,
+     182,
+     183,
+     205
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/altspecies3-scenarios/faint-attack-player-murkrow-opponent-onix.json",
+  "digests": [
+   "7305d3ed0082a82e",
+   "7305d3ed0082a82e"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "FAINT_ATTACK",
+    "activation": 77,
+    "lastActive": 300,
+    "bodyRows": 224,
+    "lagAges": [
+     80,
+     81,
+     108,
+     109,
+     182,
+     183
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/altspecies3-scenarios/faint-attack-player-onix-opponent-grovyle.json",
+  "digests": [
+   "1ae1d2aa08934284",
+   "1ae1d2aa08934284"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "FAINT_ATTACK",
+    "activation": 297,
+    "lastActive": 520,
+    "bodyRows": 224,
+    "lagAges": [
+     80,
+     81,
+     108,
+     109,
+     182,
+     183
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/d4w-cr/scenarios/s14plain-flygon-confuse-ray-opponent.json",
+  "digests": [
+   "eb5977902349ef4a",
+   "eb5977902349ef4a"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "CONFUSE_RAY",
+    "activation": 78,
+    "lastActive": 346,
+    "bodyRows": 269,
+    "lagAges": [
+     26,
+     229,
+     230,
+     249
+    ]
+   },
+   {
+    "move": "CONFUSE_RAY",
+    "activation": 3410,
+    "lastActive": 3678,
+    "bodyRows": 269,
+    "lagAges": [
+     26,
+     229,
+     230,
+     250
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/d4w-cr/scenarios/s14plain-golbat-confuse-ray-opponent.json",
+  "digests": [
+   "eeddbcdb616f1545",
+   "eeddbcdb616f1545"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "CONFUSE_RAY",
+    "activation": 78,
+    "lastActive": 346,
+    "bodyRows": 269,
+    "lagAges": [
+     26,
+     229,
+     230,
+     249
+    ]
+   },
+   {
+    "move": "CONFUSE_RAY",
+    "activation": 3410,
+    "lastActive": 3678,
+    "bodyRows": 269,
+    "lagAges": [
+     26,
+     229,
+     230,
+     250
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/d4w-cr/scenarios/s14plain-onix-confuse-ray-opponent.json",
+  "digests": [
+   "2c5c5b6fa15809b7",
+   "2c5c5b6fa15809b7"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "CONFUSE_RAY",
+    "activation": 76,
+    "lastActive": 344,
+    "bodyRows": 269,
+    "lagAges": [
+     26,
+     229,
+     230,
+     249
+    ]
+   },
+   {
+    "move": "CONFUSE_RAY",
+    "activation": 3408,
+    "lastActive": 3676,
+    "bodyRows": 269,
+    "lagAges": [
+     26,
+     229,
+     230,
+     249
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/d4w-cr/scenarios/s14plain-rattata-confuse-ray-opponent.json",
+  "digests": [
+   "8f5421096fc800dd",
+   "8f5421096fc800dd"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "CONFUSE_RAY",
+    "activation": 79,
+    "lastActive": 347,
+    "bodyRows": 269,
+    "lagAges": [
+     26,
+     229,
+     230,
+     249
+    ]
+   },
+   {
+    "move": "CONFUSE_RAY",
+    "activation": 3411,
+    "lastActive": 3678,
+    "bodyRows": 268,
+    "lagAges": [
+     26,
+     229,
+     230
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/prep11-audit-golem-prep6-faint-attack-alt-base.json",
+  "digests": [
+   "73ea133f2d4669f6",
+   "73ea133f2d4669f6"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "FAINT_ATTACK",
+    "activation": 76,
+    "lastActive": 299,
+    "bodyRows": 224,
+    "lagAges": [
+     80,
+     81,
+     108,
+     109,
+     182,
+     183
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/species-audit-golbat-prep6-faint-attack-alt-base.json",
+  "digests": [
+   "5181a57a6d944f23",
+   "5181a57a6d944f23"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "FAINT_ATTACK",
+    "activation": 76,
+    "lastActive": 299,
+    "bodyRows": 224,
+    "lagAges": [
+     80,
+     81,
+     108,
+     109,
+     182,
+     183
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/species-audit-golem-prep6-faint-attack-alt-base.json",
+  "digests": [
+   "73ea133f2d4669f6",
+   "73ea133f2d4669f6"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "FAINT_ATTACK",
+    "activation": 76,
+    "lastActive": 299,
+    "bodyRows": 224,
+    "lagAges": [
+     80,
+     81,
+     108,
+     109,
+     182,
+     183
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/species-audit-shuckle-prep6-faint-attack-alt-base.json",
+  "digests": [
+   "4771943b85e9d777",
+   "4771943b85e9d777"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "FAINT_ATTACK",
+    "activation": 76,
+    "lastActive": 299,
+    "bodyRows": 224,
+    "lagAges": [
+     80,
+     81,
+     108,
+     109,
+     182,
+     183
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/species-audit-14/swap-scenarios/s14swap-onix-confuse-ray-opponent.json",
+  "digests": [
+   "06bb978df3d61fa5",
+   "06bb978df3d61fa5"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "CONFUSE_RAY",
+    "activation": 3448,
+    "lastActive": 3715,
+    "bodyRows": 268,
+    "lagAges": [
+     26,
+     229,
+     230
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/species-audit-14/swap-scenarios/s14swap-pichu-confuse-ray-player.json",
+  "digests": [
+   "abc6fc7d05b97c38",
+   "abc6fc7d05b97c38"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "CONFUSE_RAY",
+    "activation": 1771,
+    "lastActive": 2039,
+    "bodyRows": 269,
+    "lagAges": [
+     26,
+     229,
+     230,
+     250
+    ]
+   },
+   {
+    "move": "CONFUSE_RAY",
+    "activation": 5167,
+    "lastActive": 5435,
+    "bodyRows": 269,
+    "lagAges": [
+     26,
+     229,
+     230,
+     249
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/species-audit-14/swap-scenarios/s14swap-steelix-confuse-ray-opponent.json",
+  "digests": [
+   "92b4be957cda160c",
+   "92b4be957cda160c"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "CONFUSE_RAY",
+    "activation": 3451,
+    "lastActive": 3719,
+    "bodyRows": 269,
+    "lagAges": [
+     26,
+     229,
+     230,
+     249
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/mechanic-confuse-ray-player-chinchou-opponent-onix.json",
+  "digests": [
+   "c760f728e0811287",
+   "c760f728e0811287"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "CONFUSE_RAY",
+    "activation": 76,
+    "lastActive": 344,
+    "bodyRows": 269,
+    "lagAges": [
+     26,
+     229,
+     230,
+     249
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/mechanic-confuse-ray-opponent-chinchou-player-onix.json",
+  "digests": [
+   "4d3e34e2aaf9774d",
+   "4d3e34e2aaf9774d"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "CONFUSE_RAY",
+    "activation": 80,
+    "lastActive": 348,
+    "bodyRows": 269,
+    "lagAges": [
+     26,
+     229,
+     230,
+     249
+    ]
+   }
+  ]
+ }
+]
