@@ -98,6 +98,25 @@
   gates53 row A 0..999 258 / 42,054 -> 208 / 32,186. Parity: census battle 40 across Scene ON, a second presentation seed and Scene OFF
   (47 decision snapshots). Worker gates 1,589 files / 13,074 tests, build, differential 624/624. Supervisor: `words57Run.sh` into fresh
   dirs — 24/24 A == B, 47/47 exact, all receipts byte-identical; census rerun +14 / +2,968, 0 regressions, digest identical.
+- Supervisor union gates on `108aae871` (src `8d3b44bb`; + aud56 + words57): typecheck, full suite 1,590 files / 13,096 tests, build,
+  differential 624/624 vs `ccc4774c4`, census seeds 0..299 94.40 % / 95.68 % (report sha256 `8477f8ca` == words57's after-report; +139 /
+  +18,154 vs `ccc4774c4`, 0 regressions, command sequence identical).
+- Folded Opus worker `da056b892` (SIDE lane, narrow production grant: move live cases only) as `b986bb5b2` (src tree `64e91f1d`): later58 —
+  LATER-BODY gates narrowed to "known lend AND (first body OR both species idle rests {0,0})" for Signal Beam, Mach Punch (D4), Sheer Cold
+  (D4), Extrasensory (opponent attacker, D4), Sky Attack charge (a later charge starts with WIN0 (0,0), the ROM value), Bonemerang (hits 1
+  and 2), Outrage, Fury Cutter counter 1 (request power 10 / 15). At every later activation probed (after Quick Attack, Growl + stat,
+  Splash, the move's own body; both sides, two pairs; 166/166 runs A == B, explicit lab seeds) the allocator / tasks / matrices equal the
+  first body's and the differing register history is never read; the battler idle rest is the remaining history, hence the rest guard
+  (an opponent ONIX after its own Quick Attack would be 40,367 px off). Windows 0 px (D4 moves: policy phase 0 px, other phase only on
+  documented rows; d4aTimingCheck 77 fixtures 0 violations). Left declining: Extrasensory player (undocumented 18..298k px residual),
+  Memento (reads the scanline entry), Fury Cutter counter 2+, Sheer Cold after its own body (always a KO). Census seeds 0..299 vs
+  `ad247cc0d`: 94.23 -> 94.63 % by count, 95.42 -> 95.77 % by frames (+32 / +4,013), 0 regressions, identical commands + digest.
+  TIMING NOTE (supervisor decision, reversible): Sheer Cold and Extrasensory with an OPPONENT attacker measured the lag phase at every later
+  body (5/5, 11/11) while their D4 policy (first bodies) picks no-lag, so those later bodies render the documented other phase (16 tail
+  rows, ~17-19k px each). Kept (documented other phase, checker clean); next step keys the phase by first / later body. Also reported:
+  the Sky Attack strike measured 181 rows in 14 / 24 probes vs production 180 (possible D4 case). Worker gates 1,590 files / 13,117 tests,
+  build, differential 624/624. Supervisor: later58Check rerun fresh for Signal Beam / Bonemerang / Outrage — 94/94 rows identical to the
+  receipts; census rerun +32 / +4,013, 0 regressions, digest identical.
 
 ## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
 
