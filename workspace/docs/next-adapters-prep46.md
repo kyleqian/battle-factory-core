@@ -254,7 +254,10 @@ This was done twice. The first run reused the probe outputs, with census receipt
 
 ## Not reached / caveats
 
-- **Dive 291** was not reached: no probes and no carry. The prep45 scan and the s10a blocker doc are unchanged.
+- **Dive 291** was not reached: no probes and no carry. The prep45 scan and the s10a blocker doc are unchanged. Dive's next consumer is its
+  own attack body, reached on the locked-turn path, which is out of scope for this step. The setup-body carry would follow the Rain Dance
+  pattern: the live setup adapter already builds a slot-level profile (`src/animation/dive.ts`, `liveMoveAnimation.ts` case 291), and
+  the remaining steps are s10a design steps 1-4.
 - **RAIN_CONTINUES** is evidence plus design only. The predicted +82 commands / +16,266 frames over the patch are not measured.
 - **Species.** The attacker species is fixed per unit (Pidgeotto / Wooper); the defender lead varies, two per side. The dirt geometry
   depends on both pic points through the production `liveBattlerAnchors`, so the attacker is covered only through the side.
