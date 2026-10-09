@@ -41,8 +41,9 @@ import type { LiveSpriteAllocatorHost } from "./liveSpriteAllocator.ts";
 import {
   KNOWN_ENTRY_BATTLER_SLOTS, KNOWN_ENTRY_OCCUPANT_ROLES, applySpriteOrderPresentationEvent, createSpriteOrderTracker,
   invalidateSpriteOrderTracker, spriteOrderStatusAnimationName, spriteOrderTrackerLend, spriteOrderTrackerRoleIsomorphic,
-  type SpriteOrderDeferredLend, type SpriteOrderPresentationEvent, type SpriteOrderTracker,
+  SPRITE_ORDER_GEOMETRY_KEYED_BODIES, type SpriteOrderDeferredLend, type SpriteOrderPresentationEvent, type SpriteOrderTracker,
 } from "./spriteOrderEventTransform.ts";
+import type { SpriteOrderBodyGeometry } from "./spriteOrderGigaDrainPlan.ts";
 import {
   invalidateSpriteOrderState, knownEntryPrePromptSpriteOrderState, knownEntrySpriteOrderState, type SpriteOrderState,
 } from "./spriteOrderProvider.ts";
@@ -354,6 +355,9 @@ function orderEventOf(
   return {};
 }
 
+/** The displayed species at the move-animation command of (segment, event sequence); undefined when unknown. */
+export type SpriteOrderBodyGeometryAt = (segmentIndex: number, sequence: number) => SpriteOrderBodyGeometry | undefined;
+
 interface ResolutionView {
   readonly resolutionId: Readonly<{ requestId: number }>;
   readonly segmentIndex: number;
@@ -366,6 +370,7 @@ interface ResolutionView {
  */
 export function advanceLiveSpriteOrderHost(
   host: LiveSpriteOrderHost, resolution: ResolutionView, throughSequence: number, before = false,
+  bodyGeometryAt?: SpriteOrderBodyGeometryAt,
 ): LiveSpriteOrderHost {
   const requestId = resolution.resolutionId.requestId;
   let tracker = host.tracker;
@@ -390,10 +395,15 @@ export function advanceLiveSpriteOrderHost(
     }
     cursor = { requestId, segmentIndex: 0, nextEventIndex: 0, drained: false };
   }
-  const apply = (events: readonly BattleKernelSemanticEvent[], from: number, limit: number, strict: boolean) => {
+  const apply = (segmentIndex: number, events: readonly BattleKernelSemanticEvent[], from: number, limit: number, strict: boolean) => {
     let index = from;
     while (index < events.length && (strict ? events[index]!.sequence < limit : events[index]!.sequence <= limit)) {
-      const mapped = orderEventOf(events, index, hidden);
+      let mapped = orderEventOf(events, index, hidden);
+      // gdgeo: a geometry-keyed body (Giga Drain) carries the displayed species of its own command; unknown -> no plan (invalidates).
+      if (mapped.event?.kind === "move-animation" && SPRITE_ORDER_GEOMETRY_KEYED_BODIES.has(mapped.event.moveId)) {
+        const geometry = bodyGeometryAt?.(segmentIndex, events[index]!.sequence);
+        if (geometry !== undefined) mapped = { ...mapped, event: Object.freeze({ ...mapped.event, geometry }) };
+      }
       if (mapped.hidden) hidden = mapped.hidden;
       if (mapped.event) tracker = applySpriteOrderPresentationEvent(tracker, mapped.event);
       if (mapped.then) tracker = applySpriteOrderPresentationEvent(tracker, mapped.then);
@@ -419,12 +429,12 @@ export function advanceLiveSpriteOrderHost(
   };
   while (cursor.segmentIndex < resolution.segmentIndex) {
     const events = resolution.segments[cursor.segmentIndex]?.events ?? [];
-    apply(events, cursor.nextEventIndex, Number.POSITIVE_INFINITY, false);
+    apply(cursor.segmentIndex, events, cursor.nextEventIndex, Number.POSITIVE_INFINITY, false);
     cursor = { requestId, segmentIndex: cursor.segmentIndex + 1, nextEventIndex: 0, drained: false };
   }
   if (cursor.segmentIndex === resolution.segmentIndex) {
     const events = resolution.segments[cursor.segmentIndex]?.events ?? [];
-    const nextEventIndex = apply(events, cursor.nextEventIndex, throughSequence, before);
+    const nextEventIndex = apply(cursor.segmentIndex, events, cursor.nextEventIndex, throughSequence, before);
     cursor = {
       requestId, segmentIndex: cursor.segmentIndex, nextEventIndex,
       drained: nextEventIndex >= events.length && cursor.segmentIndex === resolution.segments.length - 1,

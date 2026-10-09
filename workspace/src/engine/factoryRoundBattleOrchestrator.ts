@@ -29,6 +29,7 @@ import {
   returnLiveSpriteOrderHostFromPartyMenu,
   seedLiveSpriteOrderHostFromBattleStart,
   type LiveSpriteOrderHost,
+  type SpriteOrderBodyGeometryAt,
 } from "./liveSpriteOrderHost.ts";
 import { liveMovePresentationRngBodyKey } from "./liveMovePresentationRng.ts";
 import {
@@ -100,6 +101,7 @@ import {
 import {
   applyLiveSemiInvulnerableCommand,
   applySubstituteDollCommand,
+  battleResolutionMoveAnimationField,
   BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES,
   createBattleResolutionPresentationRenderView,
   LIVE_SEMI_INVULNERABLE_NONE,
@@ -253,6 +255,21 @@ export type FactoryFacilityState = Readonly<{
 }>;
 
 /** Reads a tier's "have I heard the personality speech this session" bit (see FactoryFacilityState.heardBrainSpeech's own doc) - defaults false so every existing caller that never touched this field reads as "first encounter", matching the real flag's own default (no symbol yet -> bit unset). */
+
+/**
+ * S10A gdgeo: the displayed species at a resolution segment's move-animation command (the field the live renderer draws the body
+ * on), the key of the Giga Drain sprite-order plan (spriteOrderGigaDrainPlan.ts); undefined when the segment has no such command.
+ */
+function liveSpriteOrderBodyGeometryAt(
+  resolution: Readonly<{ segments: readonly Parameters<typeof battleResolutionMoveAnimationField>[0][] }>,
+): SpriteOrderBodyGeometryAt {
+  return (segmentIndex, sequence) => {
+    const segment = resolution.segments[segmentIndex];
+    const field = segment === undefined ? null : battleResolutionMoveAnimationField(segment, sequence);
+    return field === null ? undefined : Object.freeze({ playerSpecies: field.player.species, opponentSpecies: field.opponent.species });
+  };
+}
+
 export function factoryHeardBrainSpeech(
   facilityState: FactoryFacilityState,
   tier: "silver" | "gold",
@@ -2233,7 +2250,7 @@ function prepareResolutionPalette(
         && command.battler === state.battleForcedPartySelect?.request.battler
       );
       const settled = advanceLiveSpriteOrderHost(
-        host, resolution, Number.NEGATIVE_INFINITY, true,
+        host, resolution, Number.NEGATIVE_INFINITY, true, liveSpriteOrderBodyGeometryAt(resolution),
       );
       if (selected?.type !== "switch-in") {
         return invalidateLiveSpriteOrderHost(settled, "switch-in presentation without a typed switch-in");
@@ -2246,6 +2263,7 @@ function prepareResolutionPalette(
         commands.indexOf(selected) === commands.length - 1
           ? Number.POSITIVE_INFINITY
           : selected.eventSequence,
+        false, liveSpriteOrderBodyGeometryAt(resolution),
       );
     };
     return Object.freeze({
@@ -2331,7 +2349,8 @@ function prepareResolutionPalette(
   // Event-driven order (liveSpriteOrderHost.ts): apply every semantic event
   // strictly before this command, lend the order to a move body at its
   // activation edge, then apply the command's own event (the body plan).
-  if (orderHost) orderHost = advanceLiveSpriteOrderHost(orderHost, resolution, commandSequence, true);
+  const bodyGeometryAt = liveSpriteOrderBodyGeometryAt(resolution);
+  if (orderHost) orderHost = advanceLiveSpriteOrderHost(orderHost, resolution, commandSequence, true, bodyGeometryAt);
   // Battler x2 history (liveBattlerX2History.ts): the same event cursor discipline; a body reads the history at its
   // activation edge, then its own event (the body's end-state class) applies.
   const retainedX2 = state.liveBattlerX2Host?.battleCallStart === state.activeBattleCallStart
@@ -2379,7 +2398,7 @@ function prepareResolutionPalette(
   }
   if (orderHost) {
     orderHost = advanceLiveSpriteOrderHost(
-      orderHost, resolution, isFinalCommand ? Number.POSITIVE_INFINITY : commandSequence,
+      orderHost, resolution, isFinalCommand ? Number.POSITIVE_INFINITY : commandSequence, false, bodyGeometryAt,
     );
   }
   // A modelled opponent faint + next-mon summary + send-out leaves the
