@@ -1,9 +1,9 @@
-// plans48: per-frame ROM check of the proposed order plans against the plans48 unit receipts (prep48Extract.py) -- prep45Check.ts's
+// plans48: per-frame ROM check of the proposed order plans against the plans48 unit receipts (plans48Extract.py) -- prep45Check.ts's
 // method and checkUnit unchanged (copied: that script runs at import): the production plan cursor (applySpriteOrderUnitPlan,
 // decodeSpriteOrderPlan) applies the plan prefix through every allocation window from the ROM F at the unit start; created / destroyed
 // slots and F must equal the ROM after every window; a single survivor must be destroyed by the very next allocation window (carry).
 // Controls: the existing STATUS_SLP plan on the sleep units of the Nightmare jobs.
-// usage: node --experimental-strip-types tools/integration/prep48Check.ts <units.json> <out.json>
+// usage: node --experimental-strip-types tools/integration/plans48Check.ts <units.json> <out.json>
 import { readFileSync, writeFileSync } from "node:fs";
 import { decodeSpriteOrderPlan } from "../../src/engine/spriteOrderEventTransform.ts";
 import { applySpriteOrderUnitPlan, createSpriteOrderPlanCursor } from "../../src/engine/spriteOrderProvider.ts";

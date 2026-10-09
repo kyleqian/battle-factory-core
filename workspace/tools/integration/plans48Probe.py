@@ -2,7 +2,7 @@
 """plans48 direct-mGBA sSpriteOrder probes for the tail of the sprite-order host stops (docs/next-adapters-plans48.md; never the
 HTTP oracles).
 
-usage (from workspace/, PYTHONPATH = the libmgba-py checkout): prep48Probe.py <out-dir> [--jobs J=12] [--only <unit,...>]
+usage (from workspace/, PYTHONPATH = the libmgba-py checkout): plans48Probe.py <out-dir> [--jobs J=12] [--only <unit,...>]
 Each job = (unit, id, move, base scenario, ops): an existing tools/battle-lab scenario, or a variant of it written to
 <out-dir>/scenarios/<id>.json. ops (applied in order): ("extend", N) appends N idle frames (end-turn unit / next body);
 ("species", side, sp) replaces that side's party lead species; ("moves", side, mv) sets that side's lead moves to 4x mv (parties
@@ -122,7 +122,7 @@ JOBS += [
 TURN = [{"frames": 2, "buttons": ["A"]}, {"frames": 30, "buttons": []}, {"frames": 2, "buttons": ["A"]}, {"frames": 900, "buttons": []}]
 
 # Dream Eater 138 species grid (predictions recorded BEFORE these ran: fixtures/plans48/dream-eater-prediction.json, from
-# prep48DreamEaterPredict.ts). (attacker, defender); the attacker's Sing puts the defender to sleep first.
+# plans48DreamEaterPredict.ts). (attacker, defender); the attacker's Sing puts the defender to sleep first.
 DE_P, DE_O = "mechanic-dream-eater-player-wigglytuff-opponent-onix", "mechanic-dream-eater-opponent-wigglytuff-player-onix"
 DE_GRID = {"player": [(40, 95), (50, 42), (172, 131), (208, 50)],
            "opponent": [(40, 95), (50, 143), (172, 42), (143, 172), (40, 131), (50, 95), (95, 42), (208, 131)]}

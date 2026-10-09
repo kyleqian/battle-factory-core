@@ -22,8 +22,8 @@ CURSED, Grudge player. 4 commands behind "gate: lowestFree.length !== 6" also we
 The remaining declines of the cleared chains stop at "later-body (order lend not a first body)" (consumer gate), "unclassified
 (case-local gate)", SUBSTITUTE_FADE, Shock Wave and Outrage.
 
-**Per-unit verdicts.** Probes are `prep48Probe.py`: direct mGBA, never the HTTP oracles. Every job ran twice in fresh processes;
-291 jobs, all A == B. The per-frame check is `prep48Check.ts`, using prep45Check's `checkUnit` unchanged: the production cursor
+**Per-unit verdicts.** Probes are `plans48Probe.py`: direct mGBA, never the HTTP oracles. Every job ran twice in fresh processes;
+291 jobs, all A == B. The per-frame check is `plans48Check.ts`, using prep45Check's `checkUnit` unchanged: the production cursor
 applies the plan prefix through every allocation window, and created / destroyed / F must equal the ROM after each one. A single
 survivor must be destroyed by the next allocation window, which is the carry.
 
@@ -120,7 +120,7 @@ Greedy gain over the non-excluded units:
 
 ## Production change
 
-**Plans.** `fixtures/plans48/plan-rows.json` is rows-v1, written by `prep48PlanRows.ts` from `check.json`. It is appended after
+**Plans.** `fixtures/plans48/plan-rows.json` is rows-v1, written by `plans48PlanRows.ts` from `check.json`. It is appended after
 prep45's rows in `spriteOrderProductionTable.ts`, and the table is regenerated, never hand-edited.
 - bodies 508 → 525, plans 212 → 219, anims 20 → 24.
 - No base index moved.
@@ -173,12 +173,12 @@ New tests:
 ## Reproduce
 
     export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python tools/integration/prep48Probe.py /tmp/p48/probe --jobs 12   # ~4 min
-    python3 tools/integration/prep48Extract.py /tmp/p48/probe /tmp/p48/units.json            # == fixtures/plans48/units.json
-    node --experimental-strip-types tools/integration/prep48Check.ts /tmp/p48/units.json /tmp/p48/check.json   # == check.json
-    node --experimental-strip-types tools/integration/prep48PlanRows.ts tools/integration/fixtures/plans48/check.json /tmp/rows.json
+    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python tools/integration/plans48Probe.py /tmp/p48/probe --jobs 12   # ~4 min
+    python3 tools/integration/plans48Extract.py /tmp/p48/probe /tmp/p48/units.json            # == fixtures/plans48/units.json
+    node --experimental-strip-types tools/integration/plans48Check.ts /tmp/p48/units.json /tmp/p48/check.json   # == check.json
+    node --experimental-strip-types tools/integration/plans48PlanRows.ts tools/integration/fixtures/plans48/check.json /tmp/rows.json
     node --experimental-strip-types tools/integration/spriteOrderProductionTable.ts && git diff --exit-code src  # table regenerates
-    node --experimental-strip-types tools/integration/prep48DreamEaterPredict.ts /tmp/de.json   # == dream-eater-prediction.json
+    node --experimental-strip-types tools/integration/plans48DreamEaterPredict.ts /tmp/de.json   # == dream-eater-prediction.json
     node --experimental-strip-types tools/integration/prep45CorpusReplay.ts /tmp/replay.json
     node --experimental-strip-types tools/integration/liveShareCensus.ts --seeds=0..299 --out=/tmp/after.json --commands=/tmp/after.jsonl
     python3 tools/integration/prep43CensusDelta.py <before.json> <before.jsonl> /tmp/after.json /tmp/after.jsonl /tmp/delta.json

@@ -1,8 +1,8 @@
 // plans48: fixtures/plans48/plan-rows.json (sprite-order-body-plans/rows-v1, the format of fixtures/prep45/plan-rows.json) from the
-// proven plans of prep48Check.ts (check.json), for the production table: tools/integration/spriteOrderProductionTable.ts appends it
+// proven plans of plans48Check.ts (check.json), for the production table: tools/integration/spriteOrderProductionTable.ts appends it
 // after prep45's rows. Bodies of both sides (Grudge: player only, the opponent plan is already in the base table; Razor Leaf: opponent
 // only, the player plan is already there with the identical text); anims keyed Status:B_ANIM_STATUS_<name> / General:B_ANIM_<name>.
-// usage: node --experimental-strip-types tools/integration/prep48PlanRows.ts <check.json> <plan-rows.json>
+// usage: node --experimental-strip-types tools/integration/plans48PlanRows.ts <check.json> <plan-rows.json>
 import { readFileSync, writeFileSync } from "node:fs";
 import { decodeSpriteOrderPlan } from "../../src/engine/spriteOrderEventTransform.ts";
 

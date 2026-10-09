@@ -11,7 +11,7 @@
   "note": "census + corpus replay on this src tree; later commits change tools/tests/docs only"
  },
  "probes": {
-  "tool": "tools/integration/prep48Probe.py (direct mGBA via prep43Probe.run; every job twice in fresh processes)",
+  "tool": "tools/integration/plans48Probe.py (direct mGBA via prep43Probe.run; every job twice in fresh processes)",
   "jobs": 291,
   "identicalAB": 291,
   "unitsSha256": "638fb5ab3d251d7b4c1ef52e7c16091801805b8c75b50474a98e456f340d1532",

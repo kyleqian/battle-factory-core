@@ -195,7 +195,7 @@ describe("sprite-order presentation-event transform", () => {
 
   it("plans48 EXACT plans: FRZ / NIGHTMARE / CURSED / ITEM_KNOCKOFF, Ice Punch, Razor Leaf, Snore, Struggle, Grudge, Razor Wind / Present per branch, Attract", () => {
     // ROM receipts (fixtures/plans48/units.json: direct mGBA, every job twice fresh, A == B): every probed instance of a landed unit
-    // has the production plan text, per side; check.json is the per-frame check of the same plans (prep48Check.ts).
+    // has the production plan text, per side; check.json is the per-frame check of the same plans (plans48Check.ts).
     const rows = fixture("plans48/plan-rows.json") as { bodies: Record<string, { plan: unknown }>; anims: Record<string, { plan: unknown }> };
     const units = fixture("plans48/units.json") as { jobs: Record<string, { unit: string; identicalAB: boolean; units: { kind: string; label: string; plan: string; truncated: boolean }[] }> };
     const check = fixture("plans48/check.json") as { notIdenticalAB: number; results: Record<string, { instances: number; matched: number }>;

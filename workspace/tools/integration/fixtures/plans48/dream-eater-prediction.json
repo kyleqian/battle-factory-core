@@ -1,6 +1,6 @@
 {
  "schema": "plans48-dream-eater-prediction/v1",
- "recordedBefore": "the plans48 Dream Eater species-grid probes (prep48Probe.py BODY138 jobs) were run",
+ "recordedBefore": "the plans48 Dream Eater species-grid probes (plans48Probe.py BODY138 jobs) were run",
  "plans": [
   "Cfff;Cfff;Cfff;Cfff;Cfff;D0;Cfff;D3,4;D1;Cfff;D6,8;D2;Cfff;D10,11;D5,7;D14;D9;D15,17;D12;D13;D19;D16;D21,22;D18;D20;D23;Cf;Cf;Cf;D24;Cf;D25;D26;D27",
   "Cfff;Cfff;Cfff;Cfff;Cfff;D0;Cfff;D3,4;D1;Cfff;D6,8;D2;Cfff;D10,11;D7,5;D14;D9;D15,17;D12;D13;D19;D16;D21,22;D18;D20;D23;Cf;Cf;Cf;D24;Cf;D25;D26;D27"

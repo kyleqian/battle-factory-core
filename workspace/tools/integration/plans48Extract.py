@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""plans48: raw sSpriteOrder probe rows (prep48Probe.py) -> compact unit receipts (pure python3, no mGBA).
+"""plans48: raw sSpriteOrder probe rows (plans48Probe.py) -> compact unit receipts (pure python3, no mGBA).
 
-usage (from workspace/): prep48Extract.py <out-dir> <units.json>
-prep45Extract.py driven by prep48Probe.JOBS (prep43Extract's unit split and plan encoding; run A == run B byte-identical required).
+usage (from workspace/): plans48Extract.py <out-dir> <units.json>
+prep45Extract.py driven by plans48Probe.JOBS (prep43Extract's unit split and plan encoding; run A == run B byte-identical required).
 mv-0 bodies are labelled by the job's unit (status NIGHTMARE / status CURSED / general ITEM_KNOCKOFF / status FRZ); move bodies by
 `body <mv>:<attacker side>`. FRZ seed-sweep jobs without a freeze keep only their metadata (froze: false). Prints, per label, the distinct observed plans and their instance counts.
 """
@@ -12,7 +12,7 @@ from pathlib import Path
 
 sys.path.insert(0, "tools/integration")
 import prep43Extract as X
-import prep48Probe as J
+import plans48Probe as J
 
 X.J = J
 X.MV0_LABEL = {"NIGHTMARE": "status NIGHTMARE", "CURSED": "status CURSED", "ITEM_KNOCKOFF": "general ITEM_KNOCKOFF", "FRZ": "status FRZ", "SUBSTITUTE_FADE": "general SUBSTITUTE_FADE"}
