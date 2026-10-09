@@ -19,7 +19,13 @@ history.
   marked `window-incomplete` carry no `netZero`), so the pin test needs per-receipt code (~10 min); (5)
   `generatedCommandAnimationReplay` records no semantic events with Scene OFF, so ON/OFF parity can compare rules / RNG /
   boundaries but not the event queue itself (~10 min).
-- **Hits:** 1 session, ~40 min across three workers.
+  (6) two parallel workers both named their tools `prep48*` (an evidence step and the tail-plans step), so the second branch
+  collided on `tools/integration/prep48Probe.py` — the supervisor renamed one to `plans48*` before merging (~10 min); brief every
+  step with its OWN tool prefix; (7) the battle lab cannot set a starting status, so FRZ staging needed an Ice Beam seed sweep
+  (~20 min); (8) `prep48DigFixtures.py` hard-coded the healthbox status to none (false 190 px/row residuals, ~5 min); (9) the full
+  suite (~11 min on a loaded box) exceeds the Bash tool's 600 s foreground limit — workers must run it in the background and read
+  the log (~2 min).
+- **Hits:** 1 session, ~80 min across six workers.
 - **Fix:** default census runs to a progress line + document `timeout: 300000`; export one order-event-key helper from
   `liveSpriteOrderHost.ts` and import it in the tools; one shared receipt reader for net-zero audits.
 
