@@ -283,3 +283,51 @@ export function gigaDrainSpritesBackToFrontAtAge(
     .map((owner) => byOwner.get(owner))
     .filter((sprite): sprite is GigaDrainSprite => sprite !== undefined);
 }
+
+/**
+ * The body's sprite-order plan (production encoding of spriteOrderEventTransform.ts decodeSpriteOrderPlan) for the given live
+ * geometry, derived from this module's own timeline (docs/giga-drain-geometry-order.md). Every frame whose sprite set changes is
+ * one allocation window: the palette-blend controller sprite (`simple_palette_blend`, AnimSimplePaletteBlend), the hitsplat, the
+ * 24 AnimAbsorptionOrb orbs and the healing stars, created in script order (all CreateSprite first-free: "f"). A same-frame destroy
+ * group is listed in sSpriteOrder order: DestroySprite resets a sprite to sDummySprite (equal keys), so the group keeps the order
+ * of the last SortSprites (sprite.c) in which its members were live. SortSprites is a stable insertion sort on the priority word
+ * (equal for every orb) and then oam.y descending, so two orbs swap only when their oam.y differ; oam.y = y + y2 - 8 (16x16
+ * centre-to-corner), an 8-bit value read as negative from DISPLAY_HEIGHT. A new sprite enters behind the live ones (its slot is in
+ * the dummy tail) in creation order. The orbs' y comes from the attacker / target picture coordinates through the
+ * InitAnimArcTranslation fixed-point arithmetic, so same-frame orb pairs (equal end frame, different start / period) can order
+ * either way with the battlers' geometry.
+ */
+export function gigaDrainSpriteOrderPlanText(
+  targetCenter: Readonly<{ x: number; y: number }>,
+  attackerCenter: Readonly<{ x: number; y: number }>,
+  attackerSide: "player" | "opponent",
+  healingCenter: Readonly<{ x: number; y: number }> = attackerCenter,
+): string {
+  const oamY = (sprite: GigaDrainSprite) => {
+    const raw = (sprite.y + sprite.y2 + (sprite.kind === "orb" ? -8 : sprite.kind === "hitsplat" ? -32 : -16)) & 0xff;
+    return raw >= 160 ? raw - 256 : raw;
+  };
+  const created = new Map<number, number>();
+  let order: number[] = [];
+  let live = new Map<number, number>();
+  const windows: string[] = [];
+  for (let age = 0; age <= GIGA_DRAIN_BODY_LAST_AGE + 1; age += 1) {
+    const state = gigaDrainAtAge(age, targetCenter, attackerCenter, attackerSide, healingCenter);
+    const now = new Map<number, number>(state.sprites.map(sprite => [spriteOwner(sprite), oamY(sprite)]));
+    // The palette-blend controller sprite: one per simple_palette_blend command (fade in, fade out); it never sorts against the orbs.
+    if (age <= GIGA_DRAIN_BODY_LAST_AGE && state.paletteControllerActive) now.set(age < 100 ? 1 : 2, 0);
+    const destroyed = order.filter(owner => !now.has(owner));
+    const made = [...now.keys()].filter(owner => !live.has(owner));
+    order = order.filter(owner => now.has(owner));
+    for (const owner of made) { created.set(owner, created.size); order.push(owner); }
+    // Stable sort: priority word equal, then oam.y descending.
+    order = order.map((owner, index) => ({ owner, index, y: now.get(owner)! }))
+      .sort((left, right) => right.y - left.y || left.index - right.index).map(entry => entry.owner);
+    const parts: string[] = [];
+    if (made.length) parts.push(`C${"f".repeat(made.length)}`);
+    if (destroyed.length) parts.push(`D${destroyed.map(owner => created.get(owner)).join(",")}`);
+    if (parts.length) windows.push(parts.join("/"));
+    live = now;
+  }
+  return windows.join(";");
+}
