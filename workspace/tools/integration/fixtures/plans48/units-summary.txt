@@ -1,9 +1,16 @@
-243 jobs; 0 A/B differ
+263 jobs; 0 A/B differ
 BODY13        body 13:opponent         2 plan(s): 3x [Cfff;D0,2,1] rw-opp,rw-opp-golbat,rw-opp-snorlax || 3x [Cf;Cf;Cf;D0;D1;D2] rw-opp,rw-opp-golbat,rw-opp-snorlax
 BODY13        body 13:player           2 plan(s): 3x [Cfff;D0,2,1] rw-ply,rw-ply-snorlax,rw-ply-golbat || 3x [Cf;Cf;Cf;D0;D1;D2] rw-ply,rw-ply-snorlax,rw-ply-golbat
 BODY13        body 33:opponent         1 plan(s): 6x [Cf;Cf;D0;D1] rw-ply,rw-ply,rw-ply-snorlax,rw-ply-snorlax,rw-ply-golbat,rw-ply-golbat
 BODY13        body 33:player           1 plan(s): 5x [Cf;Cf;D0;D1] rw-opp,rw-opp,rw-opp-golbat,rw-opp-golbat,rw-opp-snorlax
 BODY13        mv-0                     1 plan(s): 7x [Cf;Cf;D0;Cf;D2;D1] rw-ply,rw-ply-snorlax,rw-ply-snorlax,rw-opp,rw-opp-golbat,rw-ply-golbat,rw-opp-snorlax
+BODY138       body 138:opponent        2 plan(s): 4x [Cfff;Cfff;Cfff;Cfff;Cfff;D0;Cfff;D3,4;D1;Cfff;D6,8;D2;Cfff;D10,11;D7,5;D14;D9;D15,17;D12;D13;D19;D16...] de-opp-40-131,de-opp-50-95,de-opp-208-131,de-opp-208-131 || 3x [Cfff;Cfff;Cfff;Cfff;Cfff;D0;Cfff;D3,4;D1;Cfff;D6,8;D2;Cfff;D10,11;D5,7;D14;D9;D15,17;D12;D13;D19;D16...] de-opp-40-95,de-opp-50-143,de-opp-172-42
+BODY138       body 138:player          1 plan(s): 3x [Cfff;Cfff;Cfff;Cfff;Cfff;D0;Cfff;D3,4;D1;Cfff;D6,8;D2;Cfff;D10,11;D5,7;D14;D9;D15,17;D12;D13;D19;D16...] de-ply-40-95,de-ply-50-42,de-ply-172-131
+BODY138       body 33:opponent         1 plan(s): 4x [Cf;Cf;D0;D1] de-ply-40-95,de-ply-172-131,de-ply-208-50,de-ply-208-50
+BODY138       body 33:player           1 plan(s): 15x [Cf;Cf;D0;D1] de-opp-40-95,de-opp-40-95,de-opp-50-143,de-opp-172-42,de-opp-172-42,de-opp-143-172,de-opp-143-172,de-opp-143-172,de-opp-40-131,de-opp-40-131,de-opp-50-95,de-opp-95-42,de-opp-95-42,de-opp-95-42,de-opp-208-131
+BODY138       body 47:opponent         1 plan(s): 3x [Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;D0;D1;D2;D3;D4;D5;D6;D7;D8;D9;D10;D11] de-ply-40-95,de-ply-50-42,de-ply-172-131
+BODY138       body 47:player           2 plan(s): 6x [Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;D0;D1;D2;D3;D4;D5;D6;D7;D8;D9;D10;D11] de-opp-40-95,de-opp-50-143,de-opp-172-42,de-opp-40-131,de-opp-50-95,de-opp-208-131 || 1x [Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;D0;Cf;D1;D2;D3;D4;D5;D6;D7;D8;D9;D10;D11] de-opp-95-42
+BODY138       mv-0                     2 plan(s): 21x [Cf;Cf;D0] de-ply-40-95,de-ply-40-95,de-ply-50-42,de-ply-50-42,de-ply-50-42,de-ply-172-131,de-ply-172-131,de-opp-40-95,de-opp-40-95,de-opp-50-143,de-opp-50-143,de-opp-172-42,de-opp-172-42,de-opp-40-131,de-opp-40-131,de-opp-50-95,de-opp-50-95,de-opp-95-42,de-opp-208-131,de-opp-208-131,de-opp-208-131 || 4x [Cf;Cf;Cf;D0;D1] de-opp-40-95,de-opp-40-95,de-opp-40-131,de-opp-40-131
 BODY173       body 173:opponent        1 plan(s): 3x [Cffff;D0;D1,3,2;Cffff;D4;D5,7,6] sn-opp,sn-opp-golbat,sn-opp-snorlax
 BODY173       body 173:player          1 plan(s): 3x [Cffff;D0;D1,3,2;Cffff;D4;D5,7,6] sn-ply,sn-ply-snorlax,sn-ply-golbat
 BODY173       body 79:opponent         1 plan(s): 3x [Cfff;Cffff;Cffff;Cffff;D2,1,0;D6,4,3,5;D7,9,10,8;D13,12,14,11] sn-ply,sn-ply-snorlax,sn-ply-golbat
@@ -55,3 +62,7 @@ NIGHTMARE     body 171:player          1 plan(s): 3x [Cf;D0] nm-ply,nm-ply-snorl
 NIGHTMARE     body 95:opponent         1 plan(s): 3x [Cff;Cff;Cff;D0,1;D2,3;D4,5] nm-ply,nm-ply-snorlax,nm-ply-golbat
 NIGHTMARE     body 95:player           1 plan(s): 3x [Cff;Cff;Cff;D0,1;D2,3;D4,5] nm-opp,nm-opp-golbat,nm-opp-snorlax
 NIGHTMARE     status NIGHTMARE         2 plan(s): 15x [Cf;Cf;D0] nm-ply,nm-ply,nm-ply,nm-ply-snorlax,nm-ply-snorlax,nm-ply-snorlax,nm-opp,nm-opp,nm-opp-golbat,nm-opp-golbat,nm-ply-golbat,nm-ply-golbat,nm-ply-golbat,nm-opp-snorlax,nm-opp-snorlax || 6x [Cf;D0] nm-ply,nm-ply-snorlax,nm-opp,nm-opp-golbat,nm-ply-golbat,nm-opp-snorlax
+SUBSTITUTE_FADE body 157:opponent        1 plan(s): 4x [Cff;Cf;Cf;D0;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;D1;Cf;D2;Cf;D3;Cf;D4;Cf;D5;Cf;D6;Cf;D7;Cf;D8;D9;D10;D11;D...] sf-pla-42-s1,sf-pla-42-s2,sf-pla-169-s1,sf-pla-169-s2
+SUBSTITUTE_FADE body 157:player          1 plan(s): 4x [Cff;Cf;Cf;D0;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;D1;Cf;D2;Cf;D3;Cf;D4;Cf;D5;Cf;D6;Cf;D7;Cf;D8;D9;D10;D11;D...] sf-opp-42-s1,sf-opp-42-s2,sf-opp-169-s1,sf-opp-169-s2
+SUBSTITUTE_FADE body 164:opponent        1 plan(s): 4x [] sf-opp-42-s1,sf-opp-42-s2,sf-opp-169-s1,sf-opp-169-s2
+SUBSTITUTE_FADE body 164:player          1 plan(s): 4x [] sf-pla-42-s1,sf-pla-42-s2,sf-pla-169-s1,sf-pla-169-s2

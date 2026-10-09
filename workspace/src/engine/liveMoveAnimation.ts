@@ -42,6 +42,7 @@ import { DOUBLE_EDGE_FRAME_COUNT } from "../animation/doubleEdge.ts";
 import { speciesFrontIdleRestOffsetOrZero } from "../animation/speciesIdleAnim.ts";
 import { liveTrackedFrontIdleRest, type LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import { digAtAge } from "../animation/dig.ts";
+import { dreamEaterSpriteOrderPlanText } from "../animation/dreamEater.ts";
 import { gigaDrainSpriteOrderPlanText } from "../animation/gigaDrain.ts";
 import { megaDrainSpriteOrderPlanText } from "../animation/megaDrain.ts";
 import { FAINT_ATTACK_ANIMATION_PROFILE } from "../animation/faintAttack.ts";
@@ -655,13 +656,14 @@ export function liveMoveAbsorptionOrbCenters(
 
 /**
  * S10A gdgeo: the sprite-order plan text (spriteOrderEventTransform.ts encoding) of a geometry-keyed body at the displayed species:
- * Giga Drain (202) / Mega Drain (72), from the renderers' own timelines (gigaDrain.ts / megaDrain.ts through
- * absorptionOrbSpriteOrderPlan.ts). Null for any other move or a species without a battle picture.
+ * Giga Drain (202) / Mega Drain (72) / Dream Eater (138, plans48), from the renderers' own timelines (gigaDrain.ts / megaDrain.ts /
+ * dreamEater.ts through absorptionOrbSpriteOrderPlan.ts). Null for any other move or a species without a battle picture.
  */
 export function liveMoveGeometrySpriteOrderPlanText(
   moveId: number, attackerSide: "player" | "opponent", species: LiveMoveBodySpecies,
 ): string | null {
-  const planText = moveId === 202 ? gigaDrainSpriteOrderPlanText : moveId === 72 ? megaDrainSpriteOrderPlanText : null;
+  const planText = moveId === 202 ? gigaDrainSpriteOrderPlanText : moveId === 72 ? megaDrainSpriteOrderPlanText
+    : moveId === 138 ? dreamEaterSpriteOrderPlanText : null;
   const centers = planText === null ? null : liveMoveAbsorptionOrbCenters(attackerSide, species);
   return centers === null ? null : planText!(centers.target, centers.attacker, attackerSide, centers.attacker);
 }

@@ -45,6 +45,7 @@ function planLabel(job: Job, unit: Unit, seen: Map<string, number>): string | nu
   const mv = Number(m[1]);
   if ([8, 75, 173].includes(mv)) return `body ${mv}`;
   if (mv === 213) return "body 213";
+  if (mv === 138 && job.unit === "BODY138") return "body 138 (predicted)";
   if (mv === 288) return `body 288:${m[2]}`;
   if (mv === 13 || mv === 19) return count(String(mv)) === 0 ? `body ${mv} turn 0 (setup)` : `body ${mv} turn 1 (unleash)`;
   return null;
@@ -88,6 +89,8 @@ function checkUnit(unit: Unit, next: Unit | undefined, text: string) {
 const input = JSON.parse(readFileSync(process.argv[2]!, "utf8")) as { jobs: Record<string, Job> };
 const results: Record<string, { instances: number; matched: number; framesChecked: number; jobs: string[]; mismatches: { job: string; frame: number; observedPlan: string; problems: string[] }[]; carries: number }> = {};
 let notIdentical = 0;
+const dreamEater = JSON.parse(readFileSync(new URL("./fixtures/plans48/dream-eater-prediction.json", import.meta.url), "utf8")) as { plans: string[]; predictions: Record<string, number> };
+const dreamEaterResults: { job: string; predicted: number; exact: boolean }[] = [];
 const attract: { job: string; split: string; endStateEqualsA: boolean; schedule: string }[] = [];
 for (const [name, job] of Object.entries(input.jobs)) {
   if (!job.identicalAB) notIdentical += 1;
@@ -99,7 +102,10 @@ for (const [name, job] of Object.entries(input.jobs)) {
     const entry = results[label] ??= { instances: 0, matched: 0, framesChecked: 0, jobs: [], mismatches: [], carries: 0 };
     // the carry's next allocation window is in the gap unit or the next body: search the following units
     const next = job.units.slice(index + 1).find(u => u.windows.length > 0);
-    let checked = checkUnit(unit, next, PREP48_PLANS[label]!);
+    // Dream Eater: each instance against the plan PREDICTED for its species pair before the probes ran (dream-eater-prediction.json)
+    const text = label === "body 138 (predicted)" ? dreamEater.plans[dreamEater.predictions[name]!]! : PREP48_PLANS[label]!;
+    let checked = checkUnit(unit, next, text);
+    if (label === "body 138 (predicted)") dreamEaterResults.push({ job: name, predicted: dreamEater.predictions[name]!, exact: checked.problems.length === 0 });
     if (label === "body 213") {
       // per-frame exact against A or B; the free order after the unit must equal plan A's (the production plan) from the ROM start
       const start = createSpriteOrderPlanCursor({ known: true, free: unit.F0, pendingDestroyed: [] });
@@ -134,10 +140,12 @@ for (const job of Object.values(input.jobs)) for (const unit of job.units) {
   }
 }
 const out = { schema: "prep48-check/v1", jobs: Object.keys(input.jobs).length, notIdenticalAB: notIdentical, plans: PREP48_PLANS, results,
-  attract: { instances: attract, boundaryEquivalence: { starts, equivalent } } };
+  attract: { instances: attract, boundaryEquivalence: { starts, equivalent } },
+  dreamEater: { reached: dreamEaterResults, notReached: Object.keys(dreamEater.predictions).filter(job => !dreamEaterResults.some(r => r.job === job)) } };
 writeFileSync(process.argv[3]!, JSON.stringify(out, null, 1) + "\n");
 for (const [label, r] of Object.entries(results)) {
   console.log(`${label}: ${r.matched}/${r.instances} instances exact, ${r.framesChecked} allocation frames, ${r.carries} carries, jobs ${r.jobs.length}`);
   for (const m of r.mismatches) console.log(`   MISMATCH ${m.job} @${m.frame}: ${m.problems.join(" | ")}`);
 }
+console.log(`Dream Eater: ${dreamEaterResults.filter(r => r.exact).length}/${dreamEaterResults.length} instances exact against the pre-recorded prediction (predicted plan 1 = the flip: ${dreamEaterResults.filter(r => r.predicted === 1).map(r => r.job).join(",")}); not reached: ${out.dreamEater.notReached.join(",") || "none"}`);
 console.log(`Attract: splits ${JSON.stringify(Object.fromEntries(["A", "B", "none"].map(k => [k, attract.filter(a => a.split === k).length])))}, end state == A ${attract.filter(a => a.endStateEqualsA).length}/${attract.length}, schedules ${new Set(attract.map(a => a.schedule.split(",").slice(0, 4).join(","))).size} distinct (first 4 windows), A == B at the boundary ${equivalent}/${starts} starts`);

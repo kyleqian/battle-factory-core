@@ -3,6 +3,7 @@ import {
   linearTranslationDeltaQ8,
   linearTranslationOffsetAfterCallbacks,
 } from "./animLinearTranslation.ts";
+import { absorptionBodySpriteOrderPlanText } from "./absorptionOrbSpriteOrderPlan.ts";
 import { scaleMonAndRestoreAtAge } from "./bind.ts";
 import { GIGA_DRAIN_ORB_GROUPS } from "./gigaDrain.ts";
 import {
@@ -166,6 +167,20 @@ export function dreamEaterTargetOamOffsetAtSourceAge(
     y2: age < 48 ? targetRestOffset.y2
       : age >= 78 && age <= 126 ? absorbShake.y2 : 0,
   };
+}
+
+/**
+ * The body's sprite-order plan at the live geometry (absorptionOrbSpriteOrderPlan.ts, this module's timeline): DreamEaterAbsorb's
+ * orbs and HealingEffect's stars; no hitsplat and no simple_palette_blend controller sprite (the psychic background is a BG fade).
+ */
+export function dreamEaterSpriteOrderPlanText(
+  targetCenter: Readonly<{ x: number; y: number }>,
+  attackerCenter: Readonly<{ x: number; y: number }>,
+  attackerSide: "player" | "opponent",
+  healingCenter: Readonly<{ x: number; y: number }> = attackerCenter,
+): string {
+  return absorptionBodySpriteOrderPlanText(DREAM_EATER_PSYCHIC_BG_LAST_AGE, age => ({
+    sprites: dreamEaterAtAge(age, targetCenter, attackerCenter, attackerSide, healingCenter).sprites, paletteControllerActive: false }));
 }
 
 /** Complete source-owned Move_DREAM_EATER body at a source-relative age. */

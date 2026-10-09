@@ -112,6 +112,23 @@ AT_PAIRS = [(133, 95), (133, 42), (133, 143), (133, 208), (143, 95), (172, 42), 
 JOBS += [("BODY213", f"at-ply-{a}-{d}", 213, AT_P, (("species", "player", a), ("species", "opponent", d))) for a, d in AT_PAIRS]
 JOBS += [("BODY213", f"at-opp-{a}-{d}", 213, AT_O, (("species", "opponent", a), ("species", "player", d))) for a, d in AT_PAIRS]
 
+# SUBSTITUTE_FADE (General_SubstituteFade when a substitute breaks): the faster subbed flier (Golbat 42 / Crobat 169) uses Substitute,
+# then the slower Rhydon 112's Rock Slide 157 (2x STAB) breaks it in the same turn (two lab seeds: Rock Slide's 90 % accuracy)
+SU_P, SU_O = "mechanic-substitute-player-golem-opponent-onix", "mechanic-substitute-opponent-golem-player-onix"
+JOBS += [
+    ("SUBSTITUTE_FADE", f"sf-{side[:3]}-{sp}-s{seed}", 164, base, (("species", side, sp), ("species", other, 112), ("moves", other, 157), ("seed", seed), E))
+    for side, other, base in (("player", "opponent", SU_P), ("opponent", "player", SU_O)) for sp in (42, 169) for seed in (1, 2)
+]
+TURN = [{"frames": 2, "buttons": ["A"]}, {"frames": 30, "buttons": []}, {"frames": 2, "buttons": ["A"]}, {"frames": 900, "buttons": []}]
+
+# Dream Eater 138 species grid (predictions recorded BEFORE these ran: fixtures/plans48/dream-eater-prediction.json, from
+# prep48DreamEaterPredict.ts). (attacker, defender); the attacker's Sing puts the defender to sleep first.
+DE_P, DE_O = "mechanic-dream-eater-player-wigglytuff-opponent-onix", "mechanic-dream-eater-opponent-wigglytuff-player-onix"
+DE_GRID = {"player": [(40, 95), (50, 42), (172, 131), (208, 50)],
+           "opponent": [(40, 95), (50, 143), (172, 42), (143, 172), (40, 131), (50, 95), (95, 42), (208, 131)]}
+JOBS += [("BODY138", f"de-ply-{a}-{d}", 138, DE_P, (("species", "player", a), ("species", "opponent", d))) for a, d in DE_GRID["player"]]
+JOBS += [("BODY138", f"de-opp-{a}-{d}", 138, DE_O, (("species", "opponent", a), ("species", "player", d))) for a, d in DE_GRID["opponent"]]
+
 
 def scenario(out: Path, job) -> Path:
     unit, ident, move, base, ops = job
@@ -122,6 +139,9 @@ def scenario(out: Path, job) -> Path:
     for op in ops:
         if op[0] == "extend":
             data["trace"]["segments"].append({"frames": op[1], "buttons": []})
+            data["trace"].pop("captureFrames", None)
+        elif op[0] == "turns":  # N more FIGHT -> first move turns (A, wait, A, idle), as prep45Probe.py
+            data["trace"]["segments"] += [dict(seg) for _ in range(op[1]) for seg in TURN]
             data["trace"].pop("captureFrames", None)
         elif op[0] == "seed":
             data["seed"] = op[1]

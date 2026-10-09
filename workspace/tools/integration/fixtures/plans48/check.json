@@ -1,6 +1,6 @@
 {
  "schema": "prep48-check/v1",
- "jobs": 243,
+ "jobs": 263,
  "notIdenticalAB": 0,
  "plans": {
   "body 8": "Cf;D0;Cffff;Cffff;Cff;D1,4,2,3;D9;D10;D5,8,6,7;Cf;Cf;Cf;Cf;Cf;Cf;Cf;D11;D12;D13;D14;D15;D16;D17;Cf;D18",
@@ -59,6 +59,24 @@
     "cu-ply",
     "cu-ply-golbat",
     "cu-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 138 (predicted)": {
+   "instances": 10,
+   "matched": 10,
+   "framesChecked": 340,
+   "jobs": [
+    "de-opp-172-42",
+    "de-opp-208-131",
+    "de-opp-40-131",
+    "de-opp-40-95",
+    "de-opp-50-143",
+    "de-opp-50-95",
+    "de-ply-172-131",
+    "de-ply-40-95",
+    "de-ply-50-42"
    ],
    "mismatches": [],
    "carries": 0
@@ -385,5 +403,64 @@
    "starts": 3618,
    "equivalent": 3618
   }
+ },
+ "dreamEater": {
+  "reached": [
+   {
+    "job": "de-opp-172-42",
+    "predicted": 0,
+    "exact": true
+   },
+   {
+    "job": "de-opp-208-131",
+    "predicted": 1,
+    "exact": true
+   },
+   {
+    "job": "de-opp-208-131",
+    "predicted": 1,
+    "exact": true
+   },
+   {
+    "job": "de-opp-40-131",
+    "predicted": 1,
+    "exact": true
+   },
+   {
+    "job": "de-opp-40-95",
+    "predicted": 0,
+    "exact": true
+   },
+   {
+    "job": "de-opp-50-143",
+    "predicted": 0,
+    "exact": true
+   },
+   {
+    "job": "de-opp-50-95",
+    "predicted": 1,
+    "exact": true
+   },
+   {
+    "job": "de-ply-172-131",
+    "predicted": 0,
+    "exact": true
+   },
+   {
+    "job": "de-ply-40-95",
+    "predicted": 0,
+    "exact": true
+   },
+   {
+    "job": "de-ply-50-42",
+    "predicted": 0,
+    "exact": true
+   }
+  ],
+  "notReached": [
+   "de-ply-208-50",
+   "de-opp-143-172",
+   "de-opp-95-42"
+  ]
  }
 }
