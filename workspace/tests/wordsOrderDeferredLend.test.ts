@@ -21,7 +21,7 @@ import {
   applySpriteOrderPresentationEvent, createSpriteOrderTracker, resolveSpriteOrderDeferredLend, spriteOrderTrackerLend, type SpriteOrderDeferredLend,
 } from "../src/engine/spriteOrderEventTransform.ts";
 import {
-  KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, knownEntrySpriteOrderState, spriteOrderWithOccupiedPrefix,
+  KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, knownEntrySpriteOrderState, spriteOrderWithOccupiedPrefix,
 } from "../src/engine/spriteOrderProvider.ts";
 import { generalAnimationPresentationRngKey, isWordsOrderDeferredUnit } from "../src/engine/wordsOrderUnits.ts";
 
@@ -170,7 +170,7 @@ function driveJob(name: string, job: Job) {
         return;
       }
       host = advanceLiveSpriteOrderHost(host, resolution, event.sequence, true);
-      const payload = event.payload as unknown as { battler: number; target: number; arguments: string[] };
+      const payload = event.payload as unknown as { battler: 0 | 1; target: 0 | 1; arguments: string[] };
       const request = battleMoveAnimationRequest(payload.battler, payload.target, payload.arguments);
       const lend = lendLiveSpriteOrder(host, request.moveId);
       checks.push({ label: `${name} ${unit.mv} f${unit.frame}`, lend, rom: unit.F0 });
