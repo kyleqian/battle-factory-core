@@ -16,7 +16,7 @@ BASE = json.loads(Path("tools/battle-lab/prep18-return-altopp-snorlax-golem.json
 OUT = Path(sys.argv[1]); OUT.mkdir(parents=True, exist_ok=True)
 MOVES = {"CONFUSE_RAY": 109, "SPORE": 147, "THUNDER_WAVE": 86, "SLUDGE_BOMB": 188, "WILL_O_WISP": 261, "SEISMIC_TOSS": 69, "ICE_BALL": 301,
          "FUTURE_SIGHT": 248, "PURSUIT": 228, "PERISH_SONG": 195, "OUTRAGE": 200, "COUNTER": 68, "LIGHT_SCREEN": 113, "REFLECT": 115,
-         "PROTECT": 182, "THUNDERBOLT": 85, "ICE_BEAM": 58, "DOUBLE_TEAM": 104, "SWIFT": 129, "BLIZZARD": 59, "SIGNAL_BEAM": 324, "BONEMERANG": 155, "SUNNY_DAY": 241}
+         "PROTECT": 182, "THUNDERBOLT": 85, "ICE_BEAM": 58, "DOUBLE_TEAM": 104, "SWIFT": 129, "BLIZZARD": 59, "SIGNAL_BEAM": 324, "BONEMERANG": 155, "SUNNY_DAY": 241, "BLAZE_KICK": 299, "HEAL_BELL": 215}
 # name: (unit move, consumer move, consumer side, prompt cycles)
 CHAINS = {
     # priority 1: a status animation (infliction and / or the afflicted battler's move attempt) -> allocator consumer
@@ -64,6 +64,15 @@ CHAINS = {
     "outrage-ice-beam-ply": ("OUTRAGE", "ICE_BEAM", "player", 4),
     "outrage-double-team-ply": ("OUTRAGE", "DOUBLE_TEAM", "player", 4),
     "outrage-double-team-opp": ("OUTRAGE", "DOUBLE_TEAM", "opponent", 4),
+    # order-SENSITIVE consumers (audit 15: Blaze Kick / Heal Bell discriminate the lend)
+    "outrage-blaze-kick-ply": ("OUTRAGE", "BLAZE_KICK", "player", 4),
+    "outrage-blaze-kick-opp": ("OUTRAGE", "BLAZE_KICK", "opponent", 4),
+    "outrage-heal-bell-ply": ("OUTRAGE", "HEAL_BELL", "player", 4),
+    "outrage-heal-bell-opp": ("OUTRAGE", "HEAL_BELL", "opponent", 4),
+    "ctl-blaze-kick-ply": ("COUNTER", "BLAZE_KICK", "player", 2),
+    "ctl-blaze-kick-opp": ("COUNTER", "BLAZE_KICK", "opponent", 2),
+    "ctl-heal-bell-ply": ("COUNTER", "HEAL_BELL", "player", 2),
+    "ctl-heal-bell-opp": ("COUNTER", "HEAL_BELL", "opponent", 2),
     # no-unit controls: the consumer is the battle's first body
     "ctl-light-screen-ply": ("COUNTER", "LIGHT_SCREEN", "player", 2),
     "ctl-light-screen-opp": ("COUNTER", "LIGHT_SCREEN", "opponent", 2),
@@ -132,6 +141,17 @@ for name, (move, pred, side) in LATER.items():
     s["trace"] = trace(3)
     assert s["seed"] == 305420349
     (OUT / f"{name}.json").write_text(json.dumps(s, indent=1) + "\n")
+# priority 3: FOCUS_BAND (plans51 EXACT unit + its carried slide sprite) -> the holder's own next body, an order consumer. plans51's stagings
+# (tools/integration/plans51Probe.py fb-*): Dragonite's Outrage OHKOs a Focus Band (196) CATERPIE holder; the 10 % roll fired on lab seeds
+# 2 / 4 / 12 / 19 (holder opponent) and 12 / 13 / 17 (holder player). Only the holder's move changes here (Tackle -> Swift / Thunderbolt).
+for holder, base in (("opponent", "mechanic-outrage-player-dragonite-opponent-onix"), ("player", "mechanic-outrage-opponent-dragonite-player-onix")):
+    for seed in ((2, 4, 12, 19) if holder == "opponent" else (12, 13, 17)):
+        for move, tag in (("SWIFT", "swift"), ("THUNDERBOLT", "thunderbolt"), ("BLAZE_KICK", "blaze-kick"), ("HEAL_BELL", "heal-bell")):
+            s = json.loads(Path(f"tools/battle-lab/{base}.json").read_text())
+            m = s["overrides"]["parties"][holder][0]
+            m.update({"species": 10, "item": 196, "moves": [MOVES[move]] * 4})
+            s["seed"] = seed
+            (OUT / f"fb-{tag}-{holder[:3]}-s{seed}.json").write_text(json.dumps(s, indent=1) + "\n")
 # ISSUES #152: the ARBOK -> CATERPIE geoice control field (tools/integration/fixtures/geoice/controls/scenarios/, lab seed 305419897) with
 # ARBOK's Blizzard x4 replaced by another first-body live adapter; CATERPIE (Tackle, speed 0) moves second, so ARBOK's body is the first.
 G = json.loads(Path("tools/integration/fixtures/geoice/controls/scenarios/blizzard-opponent-arbok-caterpie.json").read_text())
