@@ -81,6 +81,21 @@
   Dig route. prep47 checks byte-identical to its receipts. Pins moved: route sweep hostKnown 646 -> 709 (declines 63 -> 0),
   voluntaryLend opponent recall. Worker gates 1,578 files / 12,988 tests, build, differential 624/624. Supervisor: census rerun
   byte-identical (`06803fca`); clean merge -> touched tests 36/36, smoke 448.
+- Folded Opus worker `3c3fad60c` as `0209f0d22` (union src tree `1fb74f37`): prep46 live — a GENERALIZED seam-resolved deferred
+  sprite-order lend after Random2-words units (Sand-Attack 28, Mud-Slap 189, Rain Dance 240) and the RAIN_CONTINUES general
+  animation. Reducers export their own sort loops (renderer and carry share them); the Mud-Slap 4/3 start rule is replaced by the
+  slide-helper carry (second Mud-Slap bodies now live; first bodies' draw order unchanged at every age); any consumer takes a words
+  marker's lend (Ice Ball keeps its own rule), resolved at the render seam (memoized). RAIN_CONTINUES: per-event NON-CONSUMING
+  sub-stream read (supervisor decision: no policy bump; all existing move-body words identical in 40/40 schedules; the 80-draw
+  shortfall is documented in docs/presentation-rng.md). ACCOUNTING: a live command whose adapter reads a lend resolved through a
+  words marker carries `faithfulRandomHistory` (counted separately by the census; adapter counts unchanged). Tier-1: carry 26/26
+  vs RAM-read words, 18 production deferred lends == ROM activation orders. Dense windows with RAM words pinned (test-only hook):
+  Sand-Attack / Mud-Slap second bodies 5/5 and Ice Beam after Rain Dance + General_Rain 203/203 rows, 0 px twice fresh. Census
+  seeds 0..299 on `553cef6b5`: 86.37 -> 88.12 % by count, 86.73 -> 88.56 % by frames (+139 / +21,327), of which faithful-random
+  history 128 commands / 21,283 frames (incl. 7 previously-live Flamethrower / Rock Slide commands now reading the resolved lend);
+  0 regressions, identical commands + digest; rain route ON/OFF + two presentation seeds identical logic. Worker gates 1,577 files /
+  12,995 tests, build, differential 624/624. Supervisor: the 6 dense windows rerun fresh — 0 px, digests in the receipt; merge with
+  order47 conflicted only in tools/integration/orderCrossBodyRouteScan.ts (kept both flags) -> fresh union gates below.
 
 ## 2026-10-08 (overnight) — S10A: Substitute presentation live, deferred order lend, live-share census, sprite-order plans; 245 + 13 + 18
 
