@@ -165,10 +165,10 @@ That is x2-tracker work, not done here.
   - The pixel argument for Dig (source band rule + blank monbg map + renderer inputs) and for Return (renderer reads only
     body-written registers) does not depend on the predecessor. Only the order lend and the x2 rest do, and both are production
     trackers: the order host's correctness is its own receipts' claim, and x2 is guarded.
-- **The two-run check covers different things.**
-  - The census receipts reproduced byte-identically in two full `prep48Run.sh` passes.
-  - The probe and pixel receipts (`probes.json`, `*-check-after.json`) were produced by one pass. Within that pass every scenario ran
-    twice fresh (20/20 r1 == r2) and every fixture's two fresh runs agree (78/78). A second full probe pass was not run (time).
+- **Reproduction.** Every receipt reproduced byte-identically in a second independent pass:
+  - the census receipts in two full `prep48Run.sh` census passes;
+  - `probes.json`, `*-check-{before,after}.json` and the 78 fixtures in two probe passes into fresh `OUT` directories.
+  - Within each pass every scenario ran twice fresh (20/20 r1 == r2), and every fixture's two fresh check runs agree (78/78).
 - An earlier `/tmp/p48` scratch directory collided with a sibling worker's files. Every receipt here comes from the unique scratch
   `/tmp/p48side-031528`.
 
