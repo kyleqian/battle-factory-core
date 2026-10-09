@@ -1,0 +1,12 @@
+{
+ "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-aggron-steelix.json",
+ "move": "BLIZZARD",
+ "denseWindow": {
+  "startFrame": 78,
+  "endFrame": 439,
+  "ageOffset": 0
+ },
+ "timingPhase": "no-event",
+ "impactStartAge": 199,
+ "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aggron-steelix.json: body 362 rows, lag ages [358, 359], r0 == r1; impact 199"
+}

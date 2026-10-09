@@ -1,0 +1,71 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-absol-ariados.json",
+ "attacker": {
+  "species": "ABSOL",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ARIADOS",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 145,
+  "playerMaxHp": 145,
+  "opponentHp": 172,
+  "opponentMaxHp": 172,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent ABSOL -> ARIADOS",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 437,
+  "ageOffset": 0
+ },
+ "schema": "lsbz-blizzard-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 59,
+   "start": 77,
+   "end": 437
+  },
+  "offset": 0
+ },
+ "lsbz": {
+  "impactStartAge": 197,
+  "prediction": {
+   "counterBodyRowsWithLag": 360,
+   "counterBodyRowsWithoutLag": 359,
+   "lagAgesWithLag": [
+    336,
+    357,
+    358
+   ],
+   "lagAgesWithoutLag": [
+    356,
+    357
+   ],
+   "liveWindowRows": 361,
+   "policyPhase": "event"
+  },
+  "geometry": {
+   "attackerCenter": {
+    "x": 176,
+    "y": 40
+   },
+   "targetCenter": {
+    "x": 72,
+    "y": 99
+   }
+  }
+ }
+}

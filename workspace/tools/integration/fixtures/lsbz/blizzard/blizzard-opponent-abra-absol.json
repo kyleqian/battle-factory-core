@@ -1,0 +1,71 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-abra-absol.json",
+ "attacker": {
+  "species": "ABRA",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ABSOL",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 140,
+  "playerMaxHp": 140,
+  "opponentHp": 132,
+  "opponentMaxHp": 132,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent ABRA -> ABSOL",
+ "denseWindow": {
+  "startFrame": 76,
+  "endFrame": 443,
+  "ageOffset": 0
+ },
+ "schema": "lsbz-blizzard-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 76,
+  "altInterval": {
+   "move": 59,
+   "start": 76,
+   "end": 443
+  },
+  "offset": 0
+ },
+ "lsbz": {
+  "impactStartAge": 204,
+  "prediction": {
+   "counterBodyRowsWithLag": 367,
+   "counterBodyRowsWithoutLag": 366,
+   "lagAgesWithLag": [
+    343,
+    364,
+    365
+   ],
+   "lagAgesWithoutLag": [
+    363,
+    364
+   ],
+   "liveWindowRows": 368,
+   "policyPhase": "event"
+  },
+  "geometry": {
+   "attackerCenter": {
+    "x": 176,
+    "y": 51
+   },
+   "targetCenter": {
+    "x": 72,
+    "y": 91
+   }
+  }
+ }
+}

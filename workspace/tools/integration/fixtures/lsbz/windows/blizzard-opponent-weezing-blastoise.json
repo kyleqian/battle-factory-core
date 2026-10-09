@@ -1,0 +1,12 @@
+{
+ "sourceFixture": "tools/integration/fixtures/geoice/controls/blizzard-opponent-weezing-blastoise.json",
+ "move": "BLIZZARD",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 438,
+  "ageOffset": 0
+ },
+ "timingPhase": "event",
+ "impactStartAge": 196,
+ "timingEvidence": "lsbz counters tools/integration/fixtures/geoice/controls/scenarios/blizzard-opponent-weezing-blastoise.json: body 360 rows, lag ages [335, 356, 357], r0 == r1; impact 196"
+}

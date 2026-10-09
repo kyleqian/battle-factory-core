@@ -1,0 +1,498 @@
+[
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-abra-absol.json",
+  "digests": [
+   "cbec09ce996f732e",
+   "cbec09ce996f732e"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 76,
+    "lastActive": 442,
+    "bodyRows": 367,
+    "lagAges": [
+     343,
+     364,
+     365
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-abra-aggron.json",
+  "digests": [
+   "331aa2dea231af5a",
+   "331aa2dea231af5a"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 76,
+    "lastActive": 441,
+    "bodyRows": 366,
+    "lagAges": [
+     342,
+     363,
+     364
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-abra-anorith.json",
+  "digests": [
+   "a0e20d7c6ae595f4",
+   "a0e20d7c6ae595f4"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 76,
+    "lastActive": 438,
+    "bodyRows": 363,
+    "lagAges": [
+     360,
+     361
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-abra-ariados.json",
+  "digests": [
+   "89bd3142165caa18",
+   "89bd3142165caa18"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 76,
+    "lastActive": 439,
+    "bodyRows": 364,
+    "lagAges": [
+     361,
+     362
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-absol-aggron.json",
+  "digests": [
+   "f3b7fd44cbfde1ae",
+   "f3b7fd44cbfde1ae"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 77,
+    "lastActive": 437,
+    "bodyRows": 361,
+    "lagAges": [
+     337,
+     358,
+     359
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-absol-ampharos.json",
+  "digests": [
+   "4f663a3f7cb595bf",
+   "4f663a3f7cb595bf"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 77,
+    "lastActive": 437,
+    "bodyRows": 361,
+    "lagAges": [
+     358,
+     359
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-absol-ariados.json",
+  "digests": [
+   "77586adf34da724d",
+   "77586adf34da724d"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 77,
+    "lastActive": 436,
+    "bodyRows": 360,
+    "lagAges": [
+     336,
+     357,
+     358
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aerodactyl-abra.json",
+  "digests": [
+   "6e0e7eb4dd79a822",
+   "6e0e7eb4dd79a822"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 82,
+    "lastActive": 438,
+    "bodyRows": 357,
+    "lagAges": [
+     354,
+     355
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aerodactyl-absol.json",
+  "digests": [
+   "b42d62c22e2e0331",
+   "b42d62c22e2e0331"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 82,
+    "lastActive": 440,
+    "bodyRows": 359,
+    "lagAges": [
+     335,
+     356,
+     357
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aggron-aron.json",
+  "digests": [
+   "01937da017df2f95",
+   "01937da017df2f95"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 78,
+    "lastActive": 437,
+    "bodyRows": 360,
+    "lagAges": [
+     336,
+     357,
+     358
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aggron-steelix.json",
+  "digests": [
+   "fba088c500638e69",
+   "fba088c500638e69"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 78,
+    "lastActive": 438,
+    "bodyRows": 361,
+    "lagAges": [
+     358,
+     359
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aipom-absol.json",
+  "digests": [
+   "54c893cb7cc79388",
+   "54c893cb7cc79388"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 77,
+    "lastActive": 438,
+    "bodyRows": 362,
+    "lagAges": [
+     359,
+     360
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aipom-anorith.json",
+  "digests": [
+   "0c006d726fa0d887",
+   "0c006d726fa0d887"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 77,
+    "lastActive": 437,
+    "bodyRows": 361,
+    "lagAges": [
+     337,
+     358,
+     359
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aipom-beautifly.json",
+  "digests": [
+   "83cfe78acf76406c",
+   "83cfe78acf76406c"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 77,
+    "lastActive": 440,
+    "bodyRows": 364,
+    "lagAges": [
+     340,
+     361,
+     362
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-alakazam-aggron.json",
+  "digests": [
+   "4e9103fee16cb62a",
+   "4e9103fee16cb62a"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 80,
+    "lastActive": 442,
+    "bodyRows": 363,
+    "lagAges": [
+     339,
+     360,
+     361
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-altaria-aggron.json",
+  "digests": [
+   "70870d380b25e573",
+   "70870d380b25e573"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 79,
+    "lastActive": 437,
+    "bodyRows": 359,
+    "lagAges": [
+     335,
+     356,
+     357
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-altaria-anorith.json",
+  "digests": [
+   "c073c715995d8430",
+   "c073c715995d8430"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 79,
+    "lastActive": 436,
+    "bodyRows": 358,
+    "lagAges": [
+     334,
+     355,
+     356
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-anorith-ampharos.json",
+  "digests": [
+   "a4fde49fbe05ac80",
+   "a4fde49fbe05ac80"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 79,
+    "lastActive": 443,
+    "bodyRows": 365,
+    "lagAges": [
+     362,
+     363
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-anorith-armaldo.json",
+  "digests": [
+   "385257f8c0f79fa4",
+   "385257f8c0f79fa4"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 79,
+    "lastActive": 443,
+    "bodyRows": 365,
+    "lagAges": [
+     341,
+     362,
+     363
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aron-azurill.json",
+  "digests": [
+   "aff3b910b70b1ebc",
+   "aff3b910b70b1ebc"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 76,
+    "lastActive": 443,
+    "bodyRows": 368,
+    "lagAges": [
+     365,
+     366
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aron-cascoon.json",
+  "digests": [
+   "defa6adcf6b36f8c",
+   "defa6adcf6b36f8c"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 76,
+    "lastActive": 443,
+    "bodyRows": 368,
+    "lagAges": [
+     344,
+     365,
+     366
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-azurill-igglybuff.json",
+  "digests": [
+   "6d801abe2fc53075",
+   "6d801abe2fc53075"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 79,
+    "lastActive": 445,
+    "bodyRows": 367,
+    "lagAges": [
+     343,
+     364,
+     365
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-bellossom-cradily.json",
+  "digests": [
+   "65068378e3562ffc",
+   "65068378e3562ffc"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 81,
+    "lastActive": 449,
+    "bodyRows": 369,
+    "lagAges": [
+     345,
+     366,
+     367
+    ]
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-masquerain-ariados.json",
+  "digests": [
+   "b349f6984cd83ab6",
+   "b349f6984cd83ab6"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "BLIZZARD",
+    "activation": 82,
+    "lastActive": 438,
+    "bodyRows": 357,
+    "lagAges": [
+     333,
+     354,
+     355
+    ]
+   }
+  ]
+ }
+]

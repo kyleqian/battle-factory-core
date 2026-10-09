@@ -1,0 +1,12 @@
+{
+ "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-aipom-anorith.json",
+ "move": "BLIZZARD",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 438,
+  "ageOffset": 0
+ },
+ "timingPhase": "event",
+ "impactStartAge": 198,
+ "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aipom-anorith.json: body 362 rows, lag ages [337, 358, 359], r0 == r1; impact 198"
+}

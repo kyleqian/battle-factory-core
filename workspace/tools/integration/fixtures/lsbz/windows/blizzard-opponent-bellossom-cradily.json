@@ -1,0 +1,12 @@
+{
+ "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-bellossom-cradily.json",
+ "move": "BLIZZARD",
+ "denseWindow": {
+  "startFrame": 81,
+  "endFrame": 450,
+  "ageOffset": 0
+ },
+ "timingPhase": "event",
+ "impactStartAge": 206,
+ "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-bellossom-cradily.json: body 370 rows, lag ages [345, 366, 367], r0 == r1; impact 206"
+}

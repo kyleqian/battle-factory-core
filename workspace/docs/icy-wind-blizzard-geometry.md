@@ -71,7 +71,8 @@ opponent commands (impact start != 197) and the other moves' case-local gates. A
 - Blizzard's ORDER-HOST body plan (opponent side, geometry-keyed; `order host: no EXACT plan: body 59:opponent`, 10 commands /
   1,826 frames) is unchanged. Next instrument: the replay's post-body free order (dummy keys of the destroyed particles) against
   ROM `sSpriteOrder` after the body per geoice Blizzard probe, prep45Check-style, then a geometry-keyed plan text as gdgeo.
-- Blizzard opponent at impact start != 197: needs a geometry-derived live duration (`liveMoveAnimationDuration` has no geometry).
+- Blizzard opponent at impact start != 197: DONE in S10A lsbz (`liveMoveAnimationDuration(59)` = impact start + 164 from the displayed
+  field; `docs/faithful-timing-policy.md` "lsbz (B)").
 - The restorebg lag phase needs a CPU-load model (D4 policy) to become exact on every pair.
 
 Reproduce: `python3 tools/integration/geoiceStage.py [--controls]`, then per fixture

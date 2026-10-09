@@ -54,6 +54,22 @@ receipt = {
         "perSide": {s: summary([w for w in ls if w["side"] == s]) for s in ("player", "opponent")},
         "declined": ["audit-15 acc-tackle / tackle / brn light-screen-opp: production decline (allocator host unknown after Tackle / Status_Burn), fallback, no live claim"],
     },
+    "blizzard": {
+        "rule": "liveMoveAnimationDuration(59) = blizzardImpactStartAge(side, geometry) + 164 (liveMoveAnimation.ts liveBlizzardDuration; geometry = the case-59 attacker / target picOffsetPoint)",
+        "source": ("Move_BLIZZARD: the traveling snowballs / large crystals (AnimMoveTwisterParticle-style travel callbacks) destroy themselves when they "
+                   "reach the target; `waitforvisualfinish` releases at the first age with none left (blizzard.ts blizzardImpactStartAge: the same "
+                   "callback replay geoice uses, at the pair's geometry), and every later script step (impact crystals, monbg / restorebg fade, the "
+                   "optional restore lag at impact + 139, the fixed pair impact + 160 / + 161) is relative to it (blizzard.ts scriptOffsetAtAge / "
+                   "backgroundBlendY / cleanupAge = impact + 163), so the body is impact + 164 rows in the lag phase (impact + 163 without). Player "
+                   "geometries are all impact 208 (372 rows, unchanged); opponent 194..206 (358..370)."),
+        "grid": "tools/integration/fixtures/lsbz/blizzard-grid-predictions.json (25 pairs, predictions committed in a5bc9b8e6 before any probe)",
+        "counters": "tools/integration/fixtures/lsbz/blizzard-counters.json (24 pairs x 2 fresh direct-mGBA runs, r0 == r1; lag 16 : none 8, every pair the predicted shape)",
+        "summary": summary([w for w in windows if w["move"] == "BLIZZARD"]),
+        "excluded": ["blizzard-opponent-baltoy-huntail (impact 205): the staging activation probe crashed (run-mgba-probe exit 139, no output); not staged",
+                     "geoice control ARBOK -> CATERPIE (impact 198): its body matches the rule (362 rows, lag [337, 358, 359]) and the adapter is live, but "
+                     "every row 0..361 differs by the same static 133 px (bbox x 98..221 y 33..103; ROM 4a425a / 526b5a vs live 5ad684 / 73ffad): a battler "
+                     "palette region identical at every age, outside the Blizzard program; not a window here"],
+    },
     "windows": windows,
     "summary": summary(windows),
     "commands": ["python3 -I tools/integration/lsbzWindows.py",

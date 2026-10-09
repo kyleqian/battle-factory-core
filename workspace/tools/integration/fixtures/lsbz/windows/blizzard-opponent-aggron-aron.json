@@ -1,0 +1,12 @@
+{
+ "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-aggron-aron.json",
+ "move": "BLIZZARD",
+ "denseWindow": {
+  "startFrame": 78,
+  "endFrame": 438,
+  "ageOffset": 0
+ },
+ "timingPhase": "event",
+ "impactStartAge": 197,
+ "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aggron-aron.json: body 361 rows, lag ages [336, 357, 358], r0 == r1; impact 197"
+}

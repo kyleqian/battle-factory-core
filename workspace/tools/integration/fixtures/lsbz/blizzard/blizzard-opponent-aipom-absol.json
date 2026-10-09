@@ -1,0 +1,71 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aipom-absol.json",
+ "attacker": {
+  "species": "AIPOM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ABSOL",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 140,
+  "playerMaxHp": 140,
+  "opponentHp": 162,
+  "opponentMaxHp": 162,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent AIPOM -> ABSOL",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 440,
+  "ageOffset": 0
+ },
+ "schema": "lsbz-blizzard-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 59,
+   "start": 77,
+   "end": 439
+  },
+  "offset": 0
+ },
+ "lsbz": {
+  "impactStartAge": 200,
+  "prediction": {
+   "counterBodyRowsWithLag": 363,
+   "counterBodyRowsWithoutLag": 362,
+   "lagAgesWithLag": [
+    339,
+    360,
+    361
+   ],
+   "lagAgesWithoutLag": [
+    359,
+    360
+   ],
+   "liveWindowRows": 364,
+   "policyPhase": "event"
+  },
+  "geometry": {
+   "attackerCenter": {
+    "x": 176,
+    "y": 43
+   },
+   "targetCenter": {
+    "x": 72,
+    "y": 91
+   }
+  }
+ }
+}

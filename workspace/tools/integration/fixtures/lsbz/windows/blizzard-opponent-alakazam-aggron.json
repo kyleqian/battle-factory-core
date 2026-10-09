@@ -1,0 +1,12 @@
+{
+ "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-alakazam-aggron.json",
+ "move": "BLIZZARD",
+ "denseWindow": {
+  "startFrame": 80,
+  "endFrame": 443,
+  "ageOffset": 0
+ },
+ "timingPhase": "event",
+ "impactStartAge": 200,
+ "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-alakazam-aggron.json: body 364 rows, lag ages [339, 360, 361], r0 == r1; impact 200"
+}

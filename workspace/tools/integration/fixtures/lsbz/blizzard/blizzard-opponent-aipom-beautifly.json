@@ -1,0 +1,71 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-aipom-beautifly.json",
+ "attacker": {
+  "species": "AIPOM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "BEAUTIFLY",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 135,
+  "playerMaxHp": 135,
+  "opponentHp": 162,
+  "opponentMaxHp": 162,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent AIPOM -> BEAUTIFLY",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 441,
+  "ageOffset": 0
+ },
+ "schema": "lsbz-blizzard-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 59,
+   "start": 77,
+   "end": 441
+  },
+  "offset": 0
+ },
+ "lsbz": {
+  "impactStartAge": 201,
+  "prediction": {
+   "counterBodyRowsWithLag": 364,
+   "counterBodyRowsWithoutLag": 363,
+   "lagAgesWithLag": [
+    340,
+    361,
+    362
+   ],
+   "lagAgesWithoutLag": [
+    360,
+    361
+   ],
+   "liveWindowRows": 365,
+   "policyPhase": "event"
+  },
+  "geometry": {
+   "attackerCenter": {
+    "x": 176,
+    "y": 43
+   },
+   "targetCenter": {
+    "x": 72,
+    "y": 88
+   }
+  }
+ }
+}

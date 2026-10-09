@@ -1,0 +1,71 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-absol-ampharos.json",
+ "attacker": {
+  "species": "ABSOL",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "AMPHAROS",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 165,
+  "playerMaxHp": 165,
+  "opponentHp": 172,
+  "opponentMaxHp": 172,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent ABSOL -> AMPHAROS",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 439,
+  "ageOffset": 0
+ },
+ "schema": "lsbz-blizzard-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 59,
+   "start": 77,
+   "end": 438
+  },
+  "offset": 0
+ },
+ "lsbz": {
+  "impactStartAge": 199,
+  "prediction": {
+   "counterBodyRowsWithLag": 362,
+   "counterBodyRowsWithoutLag": 361,
+   "lagAgesWithLag": [
+    338,
+    359,
+    360
+   ],
+   "lagAgesWithoutLag": [
+    358,
+    359
+   ],
+   "liveWindowRows": 363,
+   "policyPhase": "event"
+  },
+  "geometry": {
+   "attackerCenter": {
+    "x": 176,
+    "y": 40
+   },
+   "targetCenter": {
+    "x": 72,
+    "y": 89
+   }
+  }
+ }
+}

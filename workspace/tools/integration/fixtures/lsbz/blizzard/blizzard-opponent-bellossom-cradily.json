@@ -1,0 +1,71 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-bellossom-cradily.json",
+ "attacker": {
+  "species": "BELLOSSOM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "CRADILY",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 161,
+  "playerMaxHp": 161,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent BELLOSSOM -> CRADILY",
+ "denseWindow": {
+  "startFrame": 81,
+  "endFrame": 450,
+  "ageOffset": 0
+ },
+ "schema": "lsbz-blizzard-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 81,
+  "altInterval": {
+   "move": 59,
+   "start": 81,
+   "end": 450
+  },
+  "offset": 0
+ },
+ "lsbz": {
+  "impactStartAge": 206,
+  "prediction": {
+   "counterBodyRowsWithLag": 369,
+   "counterBodyRowsWithoutLag": 368,
+   "lagAgesWithLag": [
+    345,
+    366,
+    367
+   ],
+   "lagAgesWithoutLag": [
+    365,
+    366
+   ],
+   "liveWindowRows": 370,
+   "policyPhase": "event"
+  },
+  "geometry": {
+   "attackerCenter": {
+    "x": 176,
+    "y": 54
+   },
+   "targetCenter": {
+    "x": 72,
+    "y": 92
+   }
+  }
+ }
+}

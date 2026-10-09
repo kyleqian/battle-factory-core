@@ -63,12 +63,13 @@ describe("d4tails: Icy Wind (196) optional lag at 261", () => {
 });
 
 describe("d4tails: Blizzard (59) optional lag, per side", () => {
-  it("is a per-side faithful-timing entry: player lag 347 (7 : 0, 372 rows), opponent lag 336 (3 : 1, 361 rows)", () => {
+  it("is a per-side faithful-timing entry: player lag 347 (7 : 0, 372 rows), opponent lag 336 at impact 197 (21 : 9 with lsbz, 361 rows)", () => {
     const [player, opponent] = LIVE_MOVE_TIMING_POLICY[59]!.parameters;
     expect(player).toMatchObject({ kind: "optional-lag-age", age: 347, side: "player", chosen: "event", iterations: 369 });
     expect(player!.alternatives).toEqual([{ phase: "event", bodyRows: 372, measured: 7 }, { phase: "no-event", bodyRows: 371, measured: 0 }]);
     expect(opponent).toMatchObject({ kind: "optional-lag-age", age: 336, fixedLagAges: [356, 357], side: "opponent", chosen: "event", iterations: 358 });
-    expect(opponent!.alternatives).toEqual([{ phase: "event", bodyRows: 361, measured: 3 }, { phase: "no-event", bodyRows: 360, measured: 1 }]);
+    // lsbz widened the opponent count with the impact-shifted grid (24 pairs: 16 : 8) and the geoice controls (2 : 0): 21 : 9.
+    expect(opponent!.alternatives).toEqual([{ phase: "event", bodyRows: 361, measured: 21 }, { phase: "no-event", bodyRows: 360, measured: 9 }]);
     expect(liveMoveTimingSidePhase(59, "optional-lag-age", "player")).toBe("event");
     expect(liveMoveTimingSidePhase(59, "optional-lag-age", "opponent")).toBe("event");
     expect(liveMoveAnimationDuration(request(59, 0))).toBe(player!.alternatives[0].bodyRows);

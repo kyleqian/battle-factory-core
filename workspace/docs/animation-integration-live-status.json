@@ -5635,12 +5635,12 @@
             {
               "phase": "event",
               "bodyRows": 361,
-              "measured": 3
+              "measured": 21
             },
             {
               "phase": "no-event",
               "bodyRows": 360,
-              "measured": 1
+              "measured": 9
             }
           ],
           "chosen": "event",
@@ -5669,10 +5669,173 @@
         ],
         "rows": 16,
         "maxPixelsPerRow": 16415,
+        "windows": {
+          "blizzard-opponent-abra-anorith": {
+            "ages": [
+              342,
+              343,
+              344,
+              345,
+              346,
+              347,
+              348,
+              349,
+              350,
+              351,
+              352,
+              353,
+              354,
+              355,
+              356,
+              357
+            ]
+          },
+          "blizzard-opponent-abra-ariados": {
+            "ages": [
+              343,
+              344,
+              345,
+              346,
+              347,
+              348,
+              349,
+              350,
+              351,
+              352,
+              353,
+              354,
+              355,
+              356,
+              357,
+              358
+            ]
+          },
+          "blizzard-opponent-absol-ampharos": {
+            "ages": [
+              340,
+              341,
+              342,
+              343,
+              344,
+              345,
+              346,
+              347,
+              348,
+              349,
+              350,
+              351,
+              352,
+              353,
+              354,
+              355
+            ]
+          },
+          "blizzard-opponent-aerodactyl-abra": {
+            "ages": [
+              336,
+              337,
+              338,
+              339,
+              340,
+              341,
+              342,
+              343,
+              344,
+              345,
+              346,
+              347,
+              348,
+              349,
+              350,
+              351
+            ]
+          },
+          "blizzard-opponent-aggron-steelix": {
+            "ages": [
+              340,
+              341,
+              342,
+              343,
+              344,
+              345,
+              346,
+              347,
+              348,
+              349,
+              350,
+              351,
+              352,
+              353,
+              354,
+              355
+            ]
+          },
+          "blizzard-opponent-aipom-absol": {
+            "ages": [
+              341,
+              342,
+              343,
+              344,
+              345,
+              346,
+              347,
+              348,
+              349,
+              350,
+              351,
+              352,
+              353,
+              354,
+              355,
+              356
+            ]
+          },
+          "blizzard-opponent-anorith-ampharos": {
+            "ages": [
+              344,
+              345,
+              346,
+              347,
+              348,
+              349,
+              350,
+              351,
+              352,
+              353,
+              354,
+              355,
+              356,
+              357,
+              358,
+              359
+            ]
+          },
+          "blizzard-opponent-aron-azurill": {
+            "ages": [
+              347,
+              348,
+              349,
+              350,
+              351,
+              352,
+              353,
+              354,
+              355,
+              356,
+              357,
+              358,
+              359,
+              360,
+              361,
+              362
+            ]
+          }
+        },
         "cause": "opponent optional-lag-age 336 absent (360-row ROM body; BLASTOISE -> BLASTOISE, 1 of 4 impact-197 opponent bodies; its fixed lag pair lands on 356 / 357 instead of 357 / 358): the restorebg fade-in runs one frame early on ages 338..353 (262,640 px); every row before 338 is exact. No player-side window in the other phase was measured (7 of 7 with the lag at 347)"
       },
       "d3": false,
       "evidence": [
+        "S10A lsbz (ISSUES #152 'Blizzard (59) opponent pairs whose impact-start age is not 197'): the live window is geometry-derived, liveMoveAnimationDuration(59) = blizzardImpactStartAge(side, case-59 picOffsetPoint geometry) + 164 (liveMoveAnimation.ts liveBlizzardDuration; player 208 for every Factory pair -> 372 unchanged; opponent 194..206 -> 358..370), so provableEffectOrder no longer declines impact != 197. Grid tools/integration/fixtures/lsbz/blizzard-grid-predictions.json (25 opponent pairs, impact 194..206, predictions committed before any probe; BALTOY -> HUNTAIL probe crashed, not staged): fresh counters (d4tailsCounters.sh, r0 == r1, tools/integration/fixtures/lsbz/blizzard-counters.json) give exactly the predicted shape on all 24: lag [impact + 139, + 160, + 161] in 16 (body impact + 164 rows), [impact + 159, + 160] in 8 (impact + 163); with the d4tails opponent bodies (impact 197: 3 : 1; WEEZING -> BLASTOISE 196 and ARBOK -> CATERPIE 198 lag) the opponent parameter counts 21 : 9 -> lag (age / fixed lags / body rows above are the impact-197 values, shifted by impact - 197 per geometry). tools/integration/fixtures/lsbz/windows/blizzard-*.json through the production live renderer (d4aTimingCheck.ts, twice fresh): 17 lag windows 0 px at impact + 164 rows; the 8 no-lag windows only on impact + 141 .. + 156 (alternatePhaseResidual.windows); receipt tools/integration/fixtures/lsbz-live-receipt.json",
         "reclassified from scoped exact (S10A d4tails, #151 precedent: the adapter gained a measured CPU-phase parameter, per side); the existing exact fixture proofs stay valid in their proved scope",
         "tools/integration/fixtures/d4tails/counters.json (d4tailsCounters.sh: 46 scenarios, two fresh direct-mGBA runs each, r0 == r1 everywhere): Blizzard player lag [347, 368, 369] in 7 of 7 bodies; opponent impact-197 lag [336, 357, 358] in 3 of 4, BLASTOISE -> BLASTOISE [356, 357]; the geometry-shifted opponent controls ARBOK -> CATERPIE [337, 358, 359] / WEEZING -> BLASTOISE [335, 356, 357] are impact-start != 197 bodies (declined, out of scope, not counted)",
         "tools/integration/fixtures/d4tails/windows/{prep2-blizzard-*,blizzard-*}.json through the production live renderer (d4aTimingCheck.ts, one process per fixture, twice fresh): 10 lag windows (7 player, 3 opponent) 0 px at 372 / 361 rows, BLASTOISE -> BLASTOISE only on the documented ages; receipt tools/integration/fixtures/d4tails-live-receipt.json",

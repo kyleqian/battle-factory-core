@@ -1,0 +1,12 @@
+{
+ "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-abra-aggron.json",
+ "move": "BLIZZARD",
+ "denseWindow": {
+  "startFrame": 76,
+  "endFrame": 442,
+  "ageOffset": 0
+ },
+ "timingPhase": "event",
+ "impactStartAge": 203,
+ "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-abra-aggron.json: body 367 rows, lag ages [342, 363, 364], r0 == r1; impact 203"
+}

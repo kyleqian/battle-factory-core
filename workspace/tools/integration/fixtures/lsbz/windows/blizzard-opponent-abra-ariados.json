@@ -1,0 +1,12 @@
+{
+ "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-abra-ariados.json",
+ "move": "BLIZZARD",
+ "denseWindow": {
+  "startFrame": 76,
+  "endFrame": 440,
+  "ageOffset": 0
+ },
+ "timingPhase": "no-event",
+ "impactStartAge": 202,
+ "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-abra-ariados.json: body 365 rows, lag ages [361, 362], r0 == r1; impact 202"
+}

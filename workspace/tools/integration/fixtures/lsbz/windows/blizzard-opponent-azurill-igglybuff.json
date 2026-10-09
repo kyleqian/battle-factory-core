@@ -1,0 +1,12 @@
+{
+ "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-azurill-igglybuff.json",
+ "move": "BLIZZARD",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 446,
+  "ageOffset": 0
+ },
+ "timingPhase": "event",
+ "impactStartAge": 204,
+ "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-azurill-igglybuff.json: body 368 rows, lag ages [343, 364, 365], r0 == r1; impact 204"
+}

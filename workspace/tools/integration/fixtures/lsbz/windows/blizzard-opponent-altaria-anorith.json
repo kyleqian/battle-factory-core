@@ -1,0 +1,12 @@
+{
+ "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-altaria-anorith.json",
+ "move": "BLIZZARD",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 437,
+  "ageOffset": 0
+ },
+ "timingPhase": "event",
+ "impactStartAge": 195,
+ "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-altaria-anorith.json: body 359 rows, lag ages [334, 355, 356], r0 == r1; impact 195"
+}

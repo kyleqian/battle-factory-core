@@ -1,0 +1,726 @@
+[
+ {
+  "case": "blizzard-opponent-masquerain-ariados",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "MASQUERAIN",
+  "target": "ARIADOS",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 82,
+  "altInterval": {
+   "move": 59,
+   "start": 82,
+   "end": 439
+  },
+  "derivedStart": 82,
+  "fieldProfile": {
+   "playerHp": 145,
+   "playerMaxHp": 145,
+   "opponentHp": 177,
+   "opponentMaxHp": 177,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 194,
+  "denseWindow": {
+   "startFrame": 82,
+   "endFrame": 439,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-aerodactyl-abra",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "AERODACTYL",
+  "target": "ABRA",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 82,
+  "altInterval": {
+   "move": 59,
+   "start": 82,
+   "end": 439
+  },
+  "derivedStart": 82,
+  "fieldProfile": {
+   "playerHp": 100,
+   "playerMaxHp": 100,
+   "opponentHp": 187,
+   "opponentMaxHp": 187,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 195,
+  "denseWindow": {
+   "startFrame": 82,
+   "endFrame": 440,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-altaria-anorith",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "ALTARIA",
+  "target": "ANORITH",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 79,
+  "altInterval": {
+   "move": 59,
+   "start": 79,
+   "end": 437
+  },
+  "derivedStart": 79,
+  "fieldProfile": {
+   "playerHp": 120,
+   "playerMaxHp": 120,
+   "opponentHp": 182,
+   "opponentMaxHp": 182,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 195,
+  "denseWindow": {
+   "startFrame": 79,
+   "endFrame": 437,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-aerodactyl-absol",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "AERODACTYL",
+  "target": "ABSOL",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 82,
+  "altInterval": {
+   "move": 59,
+   "start": 82,
+   "end": 441
+  },
+  "derivedStart": 82,
+  "fieldProfile": {
+   "playerHp": 140,
+   "playerMaxHp": 140,
+   "opponentHp": 187,
+   "opponentMaxHp": 187,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 196,
+  "denseWindow": {
+   "startFrame": 82,
+   "endFrame": 441,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-altaria-aggron",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "ALTARIA",
+  "target": "AGGRON",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 79,
+  "altInterval": {
+   "move": 59,
+   "start": 79,
+   "end": 438
+  },
+  "derivedStart": 79,
+  "fieldProfile": {
+   "playerHp": 145,
+   "playerMaxHp": 145,
+   "opponentHp": 182,
+   "opponentMaxHp": 182,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 196,
+  "denseWindow": {
+   "startFrame": 79,
+   "endFrame": 438,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-absol-ariados",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "ABSOL",
+  "target": "ARIADOS",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 59,
+   "start": 77,
+   "end": 437
+  },
+  "derivedStart": 77,
+  "fieldProfile": {
+   "playerHp": 145,
+   "playerMaxHp": 145,
+   "opponentHp": 172,
+   "opponentMaxHp": 172,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 197,
+  "denseWindow": {
+   "startFrame": 77,
+   "endFrame": 437,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-aggron-aron",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "AGGRON",
+  "target": "ARON",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 78,
+  "altInterval": {
+   "move": 59,
+   "start": 78,
+   "end": 438
+  },
+  "derivedStart": 78,
+  "fieldProfile": {
+   "playerHp": 125,
+   "playerMaxHp": 125,
+   "opponentHp": 177,
+   "opponentMaxHp": 177,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 197,
+  "denseWindow": {
+   "startFrame": 78,
+   "endFrame": 438,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-absol-aggron",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "ABSOL",
+  "target": "AGGRON",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 59,
+   "start": 77,
+   "end": 438
+  },
+  "derivedStart": 77,
+  "fieldProfile": {
+   "playerHp": 145,
+   "playerMaxHp": 145,
+   "opponentHp": 172,
+   "opponentMaxHp": 172,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 198,
+  "denseWindow": {
+   "startFrame": 77,
+   "endFrame": 438,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-aipom-anorith",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "AIPOM",
+  "target": "ANORITH",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 59,
+   "start": 77,
+   "end": 438
+  },
+  "derivedStart": 77,
+  "fieldProfile": {
+   "playerHp": 120,
+   "playerMaxHp": 120,
+   "opponentHp": 162,
+   "opponentMaxHp": 162,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 198,
+  "denseWindow": {
+   "startFrame": 77,
+   "endFrame": 438,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-absol-ampharos",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "ABSOL",
+  "target": "AMPHAROS",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 59,
+   "start": 77,
+   "end": 438
+  },
+  "derivedStart": 77,
+  "fieldProfile": {
+   "playerHp": 165,
+   "playerMaxHp": 165,
+   "opponentHp": 172,
+   "opponentMaxHp": 172,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 199,
+  "denseWindow": {
+   "startFrame": 77,
+   "endFrame": 439,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-aggron-steelix",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "AGGRON",
+  "target": "STEELIX",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 78,
+  "altInterval": {
+   "move": 59,
+   "start": 78,
+   "end": 439
+  },
+  "derivedStart": 78,
+  "fieldProfile": {
+   "playerHp": 150,
+   "playerMaxHp": 150,
+   "opponentHp": 177,
+   "opponentMaxHp": 177,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 199,
+  "denseWindow": {
+   "startFrame": 78,
+   "endFrame": 440,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-aipom-absol",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "AIPOM",
+  "target": "ABSOL",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 59,
+   "start": 77,
+   "end": 439
+  },
+  "derivedStart": 77,
+  "fieldProfile": {
+   "playerHp": 140,
+   "playerMaxHp": 140,
+   "opponentHp": 162,
+   "opponentMaxHp": 162,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 200,
+  "denseWindow": {
+   "startFrame": 77,
+   "endFrame": 440,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-alakazam-aggron",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "ALAKAZAM",
+  "target": "AGGRON",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 80,
+  "altInterval": {
+   "move": 59,
+   "start": 80,
+   "end": 443
+  },
+  "derivedStart": 80,
+  "fieldProfile": {
+   "playerHp": 145,
+   "playerMaxHp": 145,
+   "opponentHp": 162,
+   "opponentMaxHp": 162,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 200,
+  "denseWindow": {
+   "startFrame": 80,
+   "endFrame": 443,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-abra-anorith",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "ABRA",
+  "target": "ANORITH",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 76,
+  "altInterval": {
+   "move": 59,
+   "start": 76,
+   "end": 439
+  },
+  "derivedStart": 76,
+  "fieldProfile": {
+   "playerHp": 120,
+   "playerMaxHp": 120,
+   "opponentHp": 132,
+   "opponentMaxHp": 132,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 201,
+  "denseWindow": {
+   "startFrame": 76,
+   "endFrame": 440,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-aipom-beautifly",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "AIPOM",
+  "target": "BEAUTIFLY",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 59,
+   "start": 77,
+   "end": 441
+  },
+  "derivedStart": 77,
+  "fieldProfile": {
+   "playerHp": 135,
+   "playerMaxHp": 135,
+   "opponentHp": 162,
+   "opponentMaxHp": 162,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 201,
+  "denseWindow": {
+   "startFrame": 77,
+   "endFrame": 441,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-abra-ariados",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "ABRA",
+  "target": "ARIADOS",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 76,
+  "altInterval": {
+   "move": 59,
+   "start": 76,
+   "end": 440
+  },
+  "derivedStart": 76,
+  "fieldProfile": {
+   "playerHp": 145,
+   "playerMaxHp": 145,
+   "opponentHp": 132,
+   "opponentMaxHp": 132,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 202,
+  "denseWindow": {
+   "startFrame": 76,
+   "endFrame": 441,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-anorith-armaldo",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "ANORITH",
+  "target": "ARMALDO",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 79,
+  "altInterval": {
+   "move": 59,
+   "start": 79,
+   "end": 444
+  },
+  "derivedStart": 79,
+  "fieldProfile": {
+   "playerHp": 150,
+   "playerMaxHp": 150,
+   "opponentHp": 152,
+   "opponentMaxHp": 152,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 202,
+  "denseWindow": {
+   "startFrame": 79,
+   "endFrame": 444,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-abra-aggron",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "ABRA",
+  "target": "AGGRON",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 76,
+  "altInterval": {
+   "move": 59,
+   "start": 76,
+   "end": 442
+  },
+  "derivedStart": 76,
+  "fieldProfile": {
+   "playerHp": 145,
+   "playerMaxHp": 145,
+   "opponentHp": 132,
+   "opponentMaxHp": 132,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 203,
+  "denseWindow": {
+   "startFrame": 76,
+   "endFrame": 442,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-anorith-ampharos",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "ANORITH",
+  "target": "AMPHAROS",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 79,
+  "altInterval": {
+   "move": 59,
+   "start": 79,
+   "end": 444
+  },
+  "derivedStart": 79,
+  "fieldProfile": {
+   "playerHp": 165,
+   "playerMaxHp": 165,
+   "opponentHp": 152,
+   "opponentMaxHp": 152,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 203,
+  "denseWindow": {
+   "startFrame": 79,
+   "endFrame": 445,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-abra-absol",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "ABRA",
+  "target": "ABSOL",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 76,
+  "altInterval": {
+   "move": 59,
+   "start": 76,
+   "end": 443
+  },
+  "derivedStart": 76,
+  "fieldProfile": {
+   "playerHp": 140,
+   "playerMaxHp": 140,
+   "opponentHp": 132,
+   "opponentMaxHp": 132,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 204,
+  "denseWindow": {
+   "startFrame": 76,
+   "endFrame": 443,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-azurill-igglybuff",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "AZURILL",
+  "target": "IGGLYBUFF",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 79,
+  "altInterval": {
+   "move": 59,
+   "start": 79,
+   "end": 446
+  },
+  "derivedStart": 79,
+  "fieldProfile": {
+   "playerHp": 165,
+   "playerMaxHp": 165,
+   "opponentHp": 157,
+   "opponentMaxHp": 157,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 204,
+  "denseWindow": {
+   "startFrame": 79,
+   "endFrame": 446,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-aron-cascoon",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "ARON",
+  "target": "CASCOON",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 76,
+  "altInterval": {
+   "move": 59,
+   "start": 76,
+   "end": 444
+  },
+  "derivedStart": 76,
+  "fieldProfile": {
+   "playerHp": 125,
+   "playerMaxHp": 125,
+   "opponentHp": 157,
+   "opponentMaxHp": 157,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 205,
+  "denseWindow": {
+   "startFrame": 76,
+   "endFrame": 444,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-baltoy-huntail",
+  "skipped": "RuntimeError: run-mgba-probe: output is missing or invalid JSON; exit 139; log: /Users/kyle/Developer/pokebench/pokeemerald-factory-core/workspace/.worktrees/integration-20261009-120456/workspace/.integration/valid"
+ },
+ {
+  "case": "blizzard-opponent-aron-azurill",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "ARON",
+  "target": "AZURILL",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 76,
+  "altInterval": {
+   "move": 59,
+   "start": 76,
+   "end": 444
+  },
+  "derivedStart": 76,
+  "fieldProfile": {
+   "playerHp": 125,
+   "playerMaxHp": 125,
+   "opponentHp": 157,
+   "opponentMaxHp": 157,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 206,
+  "denseWindow": {
+   "startFrame": 76,
+   "endFrame": 445,
+   "ageOffset": 0
+  }
+ },
+ {
+  "case": "blizzard-opponent-bellossom-cradily",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "BELLOSSOM",
+  "target": "CRADILY",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 81,
+  "altInterval": {
+   "move": 59,
+   "start": 81,
+   "end": 450
+  },
+  "derivedStart": 81,
+  "fieldProfile": {
+   "playerHp": 161,
+   "playerMaxHp": 161,
+   "opponentHp": 182,
+   "opponentMaxHp": 182,
+   "playerGender": "male",
+   "opponentGender": "male"
+  },
+  "impactStartAge": 206,
+  "denseWindow": {
+   "startFrame": 81,
+   "endFrame": 450,
+   "ageOffset": 0
+  }
+ }
+]

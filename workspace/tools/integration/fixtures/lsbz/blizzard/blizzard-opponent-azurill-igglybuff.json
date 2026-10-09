@@ -1,0 +1,71 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-azurill-igglybuff.json",
+ "attacker": {
+  "species": "AZURILL",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "IGGLYBUFF",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 165,
+  "playerMaxHp": 165,
+  "opponentHp": 157,
+  "opponentMaxHp": 157,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent AZURILL -> IGGLYBUFF",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 446,
+  "ageOffset": 0
+ },
+ "schema": "lsbz-blizzard-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 79,
+  "altInterval": {
+   "move": 59,
+   "start": 79,
+   "end": 446
+  },
+  "offset": 0
+ },
+ "lsbz": {
+  "impactStartAge": 204,
+  "prediction": {
+   "counterBodyRowsWithLag": 367,
+   "counterBodyRowsWithoutLag": 366,
+   "lagAgesWithLag": [
+    343,
+    364,
+    365
+   ],
+   "lagAgesWithoutLag": [
+    363,
+    364
+   ],
+   "liveWindowRows": 368,
+   "policyPhase": "event"
+  },
+  "geometry": {
+   "attackerCenter": {
+    "x": 176,
+    "y": 55
+   },
+   "targetCenter": {
+    "x": 72,
+    "y": 99
+   }
+  }
+ }
+}

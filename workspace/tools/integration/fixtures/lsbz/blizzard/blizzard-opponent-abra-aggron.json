@@ -1,0 +1,71 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-abra-aggron.json",
+ "attacker": {
+  "species": "ABRA",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "AGGRON",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 145,
+  "playerMaxHp": 145,
+  "opponentHp": 132,
+  "opponentMaxHp": 132,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent ABRA -> AGGRON",
+ "denseWindow": {
+  "startFrame": 76,
+  "endFrame": 442,
+  "ageOffset": 0
+ },
+ "schema": "lsbz-blizzard-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 76,
+  "altInterval": {
+   "move": 59,
+   "start": 76,
+   "end": 442
+  },
+  "offset": 0
+ },
+ "lsbz": {
+  "impactStartAge": 203,
+  "prediction": {
+   "counterBodyRowsWithLag": 366,
+   "counterBodyRowsWithoutLag": 365,
+   "lagAgesWithLag": [
+    342,
+    363,
+    364
+   ],
+   "lagAgesWithoutLag": [
+    362,
+    363
+   ],
+   "liveWindowRows": 367,
+   "policyPhase": "event"
+  },
+  "geometry": {
+   "attackerCenter": {
+    "x": 176,
+    "y": 51
+   },
+   "targetCenter": {
+    "x": 72,
+    "y": 95
+   }
+  }
+ }
+}

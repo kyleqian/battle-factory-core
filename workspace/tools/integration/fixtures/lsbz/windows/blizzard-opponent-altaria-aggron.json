@@ -1,0 +1,12 @@
+{
+ "sourceFixture": "tools/integration/fixtures/lsbz/blizzard/blizzard-opponent-altaria-aggron.json",
+ "move": "BLIZZARD",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 438,
+  "ageOffset": 0
+ },
+ "timingPhase": "event",
+ "impactStartAge": 196,
+ "timingEvidence": "lsbz counters tools/integration/fixtures/lsbz/blizzard/scenarios/blizzard-opponent-altaria-aggron.json: body 360 rows, lag ages [335, 356, 357], r0 == r1; impact 196"
+}
