@@ -98,6 +98,15 @@
   order47 conflicted only in tools/integration/orderCrossBodyRouteScan.ts (kept both flags) -> fresh union gates below.
 - Supervisor union gates on `0209f0d22` (src `1fb74f37`): census seeds 0..299 89.10 % live by count / 89.76 % by frames,
   typecheck, full suite 1,579 files / 13,002 tests, build, differential 624/624 vs `447e309aa` (`union-gates-0209f0d22.json`).
+- prep48 (side, `f598262cd`, new files only): LATER-BODY gates. Dig setup: the protected history (monbg BGxCNT, scanline lines
+  above the attacker band, active buffer) differs at later bodies but never reaches the renderer's pixels; Dig unleash after a
+  later setup: the host lend == ROM order 17/17; Return: registers it does not write are never read, the allocator was identical at
+  every probed activation, but battler x2 rests are real history the x2 tracker gets wrong for ONIX / RATTATA (Quick Attack /
+  Return rows) -> later bodies need both species rests {0,0}. 20 scenarios x2 fresh (predecessors Quick Attack, Growl, Splash, own
+  body); Dig 21/21 + 21/21 and Return 29/29 windows 0 px through the production renderer. Temp patch census seeds 0..299 on
+  `bef14a1ee`: 87.31 -> 88.96 % by count, 87.92 -> 89.83 % by frames (+131 / +22,306), 0 regressions; later-body declines 161 -> 30.
+  Supervisor: `prep48Run.sh` into fresh dirs — all receipts + 78 window fixtures byte-identical. Open supervisor concern for the
+  fold: allocator constants after a NON-net-zero predecessor (not probed).
 
 ## 2026-10-08 (overnight) — S10A: Substitute presentation live, deferred order lend, live-share census, sprite-order plans; 245 + 13 + 18
 
