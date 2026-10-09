@@ -131,9 +131,9 @@ export function predictLentOrders(run: Replay, entryKnown: boolean, invalidReque
   const lent = new Map<number, readonly number[] | null>();
   const forced: ForcedContext = { segment: "", moveTarget: null, forced: null };
   let request: number | null = null;
-  // A later segment of the same request (player locked-action follow-up: no prompt) applies no prompt cycle. The
-  // host additionally declines after a retained opponent-locked continuation (a real prompt it does not model); the
-  // prediction does not see that boundary, so `hostDeclines` disagreements are the host being more conservative.
+  // A later segment of the same request (player locked-action follow-up: no prompt) applies no prompt cycle. A retained
+  // opponent-locked continuation keeps its request id; the host applies the player's prompt cycle at its turn boundary
+  // (prep47 (A)), which this prediction does not model as a separate boundary.
   for (const row of run.semanticEvents) {
     const event = row.event as SemanticEvent;
     if (row.requestId !== request) {
@@ -160,11 +160,11 @@ export function scanRoute(seed: number, slots: readonly (0 | 1 | 2 | 3)[]) {
     const command = row.command as { eventSequence: number; animation?: { moveId: number; attacker: number } };
     // prep18: the Dig unleash is lent a measured post-setup constant (digUnleashLend), not the tracker's order (the setup's own
     // attacker hide invalidates the tracker); it is a separate lend and is not part of the tracker-vs-pure-transform invariant.
-    if (command.animation?.moveId === 91 && JSON.stringify(row.spriteOrderInput) === JSON.stringify(digUnleashLend().free)) {
-      row = { ...row, spriteOrderInput: undefined };
-    }
+    const digUnleashConstant = command.animation?.moveId === 91
+      && JSON.stringify(row.spriteOrderInput) === JSON.stringify(digUnleashLend().free);
+    if (digUnleashConstant) row = { ...row, spriteOrderInput: undefined };
     return {
-      index, sequence: command.eventSequence, moveId: command.animation?.moveId ?? 0, side: command.animation?.attacker === 0 ? "player" : "opponent",
+      index, digUnleashConstant, sequence: command.eventSequence, moveId: command.animation?.moveId ?? 0, side: command.animation?.attacker === 0 ? "player" : "opponent",
       known: row.spriteOrderInput !== undefined, predicted: predicted.get(command.eventSequence) ?? null,
       agrees: JSON.stringify(row.spriteOrderInput ?? null) === JSON.stringify(predicted.get(command.eventSequence) ?? null),
       /** Host lent an order that differs from the prediction (must never happen). */

@@ -32,8 +32,8 @@
  * Party menu (docs/sprite-order-uncovered-units.md §2 rule (d)): opening it is a ResetSpriteData (party-menu-reset,
  * which revives an invalid order); returning applies reset + battle-reshow (variant from whether the player battler
  * sprite exists; a hidden battler or a missing opponent battler invalidates). The orchestrator additionally
- * invalidates on a locked player action (no prompt), a retained locked-action continuation, and any resolution whose
- * events were not all applied.
+ * invalidates on a locked player action (no prompt) and any resolution whose events were not all applied; a retained
+ * locked-action continuation applies the player's prompt cycle at its turn boundary (docs/next-adapters-prep47.md).
  */
 import type { BattleKernelSemanticEvent } from "./battleDecisionBoundary.ts";
 import { battleMoveAnimationRequest } from "./battleMoveAnimation.ts";
@@ -210,8 +210,8 @@ export function liveSpriteOrderBattlersPresent(
 
 /**
  * The player submitted request `requestId` from the action menu: the bounce pair was created at the prompt and is
- * destroyed at commit, before the turn's first body. `promptShown` false (a locked action, a retained locked-action
- * continuation) invalidates. A previous resolution whose events were not all applied invalidates.
+ * destroyed at commit, before the turn's first body (for a retained locked-action continuation: before the appended
+ * continuation segment's first event). `promptShown` false (a locked player action) invalidates. A previous resolution whose events were not all applied invalidates.
  * `fromPartyMenu`: the decision was chosen in the voluntary party menu, which erased the prompt's bounce pair; its
  * return (reset + reshow with both battlers) replaces the prompt cycle (ROM: reshow, then the turn's first body).
  */

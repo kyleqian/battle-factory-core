@@ -17,14 +17,16 @@ import { evidenceEvents, maskSlotsOf, productionReplay } from "../tools/integrat
 
 type Replay = ReturnType<typeof generatedCommandAnimationReplay>;
 // 20-battle sweep: command edges compared host vs pure, host known, host declines where pure is known (all 27 = seed 17,
-// "command resolution without an action prompt": the locked-action continuation the host refuses), later bodies with a
+// "command resolution without an action prompt": the locked-action continuation the host refused before prep47), later bodies with a
 // known pre-body tracker (35 of 80 without the battle units).
 // hostKnown 477 -> 524, laterAfter 47 -> 51: Roar/Whirlwind forced switch-out + send-in units keep the tracker known
 // (docs/forced-switch-continuation.md §2.4); declines and mismatches unchanged.
 // prep43 plans: hostKnown 524 -> 626, laterAfter 51 -> 63; declines 27 -> 63 = edges the pure transform now knows past a planned unit
 // that the host still refuses (its host-only invalidations, e.g. the retained locked-action continuation); still 0 mismatches.
 // prep45 plans + TURN_TRAP / Solar Beam keys: hostKnown 626 -> 646, laterAfter 63 -> 65; declines and mismatches unchanged.
-const SWEEP_PIN = { compared: 863, hostKnown: 646, declines: 63, laterAfter: 65 };
+// prep47 (A): a retained opponent locked-action continuation applies the player's prompt cycle at its turn boundary instead
+// of invalidating: hostKnown 646 -> 709, declines 63 -> 0 (every former decline now equals the pure transform; 0 mismatches).
+const SWEEP_PIN = { compared: 863, hostKnown: 709, declines: 0, laterAfter: 65 };
 const bodies = (run: Replay) => run.commands.filter(row => row.type === "move-animation");
 
 function expectRulesEqual(on: Replay, off: Replay): void {
@@ -75,8 +77,8 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
     let later = 0, laterKnown = 0, laterUnknownAfterKnown = 0, invalidatedBattles = 0, postKoLent = 0;
     for (let seed = 0; seed < 20; seed += 1) {
       const route = scanRoute(seed, [0, 0, 0]);
-      // The host may decline where the pure prediction is known (retained locked-action continuation, e.g. Rollout:
-      // predictLentOrders documents this); it must never lend an order the prediction does not.
+      // The host may decline where the pure prediction is known (a consumer gate, a host-only invalidation); it must never
+      // lend an order the prediction does not.
       for (const body of route.bodies) expect(body.mismatch || (!body.agrees && body.known), `seed ${seed} body ${body.index}`).toBe(false);
       later += route.bodies.filter(body => body.index > 0).length;
       laterKnown += route.bodies.filter(body => body.index > 0 && body.known).length;
@@ -97,10 +99,12 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
       }
       const ko = events.find(event => event.payload.kind === "switch-in-animation" && event.payload.battler === 1);
       if (ko) postKoLent += route.bodies.filter(body => body.sequence > ko.sequence && body.known).length;
-      // Once unknown, never known again in the same battle (no resync).
-      const firstUnknown = route.bodies.findIndex(body => !body.known);
+      // Once unknown, never known again in the same battle (no resync). The Dig unleash's measured constant lend is masked
+      // as unknown above and is not a tracker body (prep47 (A): seed 0's opponent Dig continuation keeps the tracker known).
+      const tracked = route.bodies.filter(body => !body.digUnleashConstant);
+      const firstUnknown = tracked.findIndex(body => !body.known);
       if (firstUnknown >= 0) {
-        expect(route.bodies.slice(firstUnknown).every(body => !body.known)).toBe(true);
+        expect(tracked.slice(firstUnknown).every(body => !body.known)).toBe(true);
         if (firstUnknown > 0) laterUnknownAfterKnown += 1;
       }
     }
@@ -108,7 +112,9 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
     // laterKnown 44 -> 48: the 4 bodies after a Roar/Whirlwind forced switch-out + send-in now lend (same pure prediction).
     // laterKnown 48 -> 56: prep43 plans (CONFUSION / LEECH_SEED_DRAIN / sandstorm / Dig / Brick Break, the PRZ survivor count).
     // laterKnown 56 -> 58: prep45 plans + the host's TURN_TRAP / Solar Beam keys (mirrored in orderCrossBodyRouteScan.ts's prediction).
-    expect({ later, laterKnown, postKoLent }).toEqual({ later: 80, laterKnown: 58, postKoLent: 10 });
+    // laterKnown 58 -> 64, postKoLent 10 -> 12: prep47 (A), the bodies after a retained opponent locked-action continuation
+    // (the player's prompt cycle at the turn boundary) now lend (same pure prediction).
+    expect({ later, laterKnown, postKoLent }).toEqual({ later: 80, laterKnown: 64, postKoLent: 12 });
     expect(laterUnknownAfterKnown).toBeGreaterThan(0);
     expect(invalidatedBattles).toBeGreaterThan(0);
   }, 120000);
