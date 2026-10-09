@@ -9,6 +9,8 @@
  *   animation HIT_ANIMATION                          hit-animation (target visibility from the toggles below)
  *   animation STATS_CHANGE                           stat-animation (B_ANIM_STATS_CHANGE argument)
  *   animation WEATHER_VAR argument 12 / 13           general-animation SANDSTORM_CONTINUES / HAIL_CONTINUES
+ *   animation TURN_TRAP argument = wrapped move      general-animation TURN_TRAP_FIRE_SPIN 83 / _WHIRLPOOL 250 / _SAND_TOMB 328 /
+ *                                                    _BIND 20, 35 (Wrap); anything else (Clamp 128) stays TURN_TRAP (no plan)
  *   any other animation id                           general-animation (HELD_ITEM_EFFECT / SUN_CONTINUES / ...)
  *   status-animation                                 status-animation (InitAndLaunchChosenStatusAnimation name)
  *   set-battler-sprite-visibility                    hiding (semi-invulnerable) or a return-to-ball receipt invalidates,
@@ -114,8 +116,8 @@ export function markLiveSpriteOrderDeferredBody(
     ...(body.turn === undefined ? {} : { turn: body.turn }), activation }) });
 }
 
-/** Moves whose script branches with choosetwoturnanim on `gAnimMoveTurn & 1` (Sky Attack strike, Dig unleash, Brick Break screen broken). */
-const TWO_TURN_ANIM_MOVE_IDS: ReadonlySet<number> = new Set([91, 143, 280]);
+/** Moves whose script branches with choosetwoturnanim on `gAnimMoveTurn & 1` (Solar Beam unleash, Sky Attack strike, Dig unleash, Brick Break screen broken). */
+const TWO_TURN_ANIM_MOVE_IDS: ReadonlySet<number> = new Set([76, 91, 143, 280]);
 const RECALL_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_VARIOUS", "B_SCR_OP_RETURNATKTOBALL", "B_SCR_OP_RETURNTOBALL"]);
 /** Order events that count as a presentation unit for the first-body gate (every body, faint, switch and recall). */
 const BODY_UNIT_EVENTS: ReadonlySet<string> = new Set([
@@ -325,6 +327,12 @@ function orderEventOf(
         return { event: { kind: "invalidate", reason: "scene-off attack pause" } };
       default:
         // playanimation_var sB_ANIM_ARG1 (BattleScript_DamagingWeatherContinues): B_ANIM_SANDSTORM_CONTINUES 12 / B_ANIM_HAIL_CONTINUES 13.
+        // General_TurnTrap -> AnimTask_GetTrappedMoveAnimId (battle_anim_throw.c:2486): the trapped battler's wrapped move picks the branch.
+        if (payload.animationId === "TURN_TRAP") {
+          const move = Number(payload.arguments[0]);
+          return { event: { kind: "general-animation", animation: move === 83 ? "TURN_TRAP_FIRE_SPIN" : move === 250 ? "TURN_TRAP_WHIRLPOOL"
+            : move === 328 ? "TURN_TRAP_SAND_TOMB" : move === 20 || move === 35 ? "TURN_TRAP_BIND" : "TURN_TRAP" } };
+        }
         if (payload.animationId === "WEATHER_VAR") {
           const argument = payload.arguments[0];
           return { event: { kind: "general-animation", animation: argument === "12" ? "SANDSTORM_CONTINUES" : argument === "13" ? "HAIL_CONTINUES" : "WEATHER_VAR" } };

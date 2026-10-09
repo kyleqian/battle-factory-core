@@ -30,11 +30,20 @@ function mapEvent(event: SemanticEvent, hidden: boolean[], units = true, forced?
     const battler = p.battler as 0 | 1;
     if (p.animationId === "MOVE_ANIMATION") {
       if (forced) forced.moveTarget = p.target === battler ? null : p.target as number;
-      return [{ kind: "move-animation", moveId: battleMoveAnimationRequest(battler, p.target as number | undefined, p.arguments as string[]).moveId,
+      const request = battleMoveAnimationRequest(battler, p.target as number | undefined, p.arguments as string[]);
+      // The host's choosetwoturnanim key (liveSpriteOrderHost.ts TWO_TURN_ANIM_MOVE_IDS): an odd turn is 10000 + move id.
+      const secondBranch = (request.turn & 1) === 1 && [76, 91, 143, 280].includes(request.moveId);
+      return [{ kind: "move-animation", moveId: secondBranch ? 10000 + request.moveId : request.moveId,
         attackerSide: battler === 0 ? "player" : "opponent" }];
     }
     if (p.animationId === "HIT_ANIMATION") return [{ kind: "hit-animation", targetVisible: !hidden[battler] }];
     if (p.animationId === "STATS_CHANGE") return [{ kind: "stat-animation", argument: Number((p.arguments as string[])[0]) }];
+    // The host's TURN_TRAP key (prep45): the trapped battler's wrapped move picks General_TurnTrap's branch.
+    if (p.animationId === "TURN_TRAP") {
+      const move = Number((p.arguments as string[])[0]);
+      return [{ kind: "general-animation", animation: move === 83 ? "TURN_TRAP_FIRE_SPIN" : move === 250 ? "TURN_TRAP_WHIRLPOOL"
+        : move === 328 ? "TURN_TRAP_SAND_TOMB" : move === 20 || move === 35 ? "TURN_TRAP_BIND" : "TURN_TRAP" }];
+    }
     return [{ kind: "general-animation", animation: String(p.animationId) }];
   }
   if (p.kind === "status-animation") {

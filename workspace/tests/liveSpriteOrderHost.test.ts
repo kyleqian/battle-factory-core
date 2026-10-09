@@ -23,7 +23,8 @@ type Replay = ReturnType<typeof generatedCommandAnimationReplay>;
 // (docs/forced-switch-continuation.md §2.4); declines and mismatches unchanged.
 // prep43 plans: hostKnown 524 -> 626, laterAfter 51 -> 63; declines 27 -> 63 = edges the pure transform now knows past a planned unit
 // that the host still refuses (its host-only invalidations, e.g. the retained locked-action continuation); still 0 mismatches.
-const SWEEP_PIN = { compared: 863, hostKnown: 626, declines: 63, laterAfter: 63 };
+// prep45 plans + TURN_TRAP / Solar Beam keys: hostKnown 626 -> 646, laterAfter 63 -> 65; declines and mismatches unchanged.
+const SWEEP_PIN = { compared: 863, hostKnown: 646, declines: 63, laterAfter: 65 };
 const bodies = (run: Replay) => run.commands.filter(row => row.type === "move-animation");
 
 function expectRulesEqual(on: Replay, off: Replay): void {
@@ -106,7 +107,8 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
     // laterKnown 34 -> 44: the 10 post-KO bodies of seeds 8 (2), 10 (1) and 11 (7, five after a second opponent KO) now lend.
     // laterKnown 44 -> 48: the 4 bodies after a Roar/Whirlwind forced switch-out + send-in now lend (same pure prediction).
     // laterKnown 48 -> 56: prep43 plans (CONFUSION / LEECH_SEED_DRAIN / sandstorm / Dig / Brick Break, the PRZ survivor count).
-    expect({ later, laterKnown, postKoLent }).toEqual({ later: 80, laterKnown: 56, postKoLent: 10 });
+    // laterKnown 56 -> 58: prep45 plans + the host's TURN_TRAP / Solar Beam keys (mirrored in orderCrossBodyRouteScan.ts's prediction).
+    expect({ later, laterKnown, postKoLent }).toEqual({ later: 80, laterKnown: 58, postKoLent: 10 });
     expect(laterUnknownAfterKnown).toBeGreaterThan(0);
     expect(invalidatedBattles).toBeGreaterThan(0);
   }, 120000);
@@ -133,8 +135,8 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
         if (after.preBody.get(body.sequence)?.cursor.order.known) laterAfter += 1;
       }
     }
-    // laterBefore 35 -> 47: prep43 plans (same pure prediction, 0 mismatches).
-    expect({ mismatches, later, laterBefore }).toEqual({ mismatches: 0, later: 80, laterBefore: 47 });
+    // laterBefore 35 -> 47: prep43 plans (same pure prediction, 0 mismatches). 47 -> 49: prep45 plans + TURN_TRAP / Solar Beam keys.
+    expect({ mismatches, later, laterBefore }).toEqual({ mismatches: 0, later: 80, laterBefore: 49 });
     expect({ compared, hostKnown, declines, laterAfter }).toEqual(SWEEP_PIN);
   }, 120000);
 
@@ -340,8 +342,9 @@ describe("order host event keys (prep43)", () => {
   const move = (moveId: number, turn: number, battler: 0 | 1) =>
     ev(10, "animation", { animationId: "MOVE_ANIMATION", battler, target: 1 - battler, arguments: [`${moveId}`, `${turn}`, "0", "0", "0", "0"] });
 
-  it("an odd choosetwoturnanim turn of Dig / Brick Break (like Sky Attack) keys the body 10000 + move id", () => {
-    for (const [moveId, turn, key] of [[91, 0, 91], [91, 1, 10091], [280, 0, 280], [280, 1, 10280], [143, 1, 10143], [143, 0, 143]] as const) {
+  it("an odd choosetwoturnanim turn of Dig / Brick Break / Solar Beam (like Sky Attack) keys the body 10000 + move id", () => {
+    for (const [moveId, turn, key] of [[91, 0, 91], [91, 1, 10091], [280, 0, 280], [280, 1, 10280], [143, 1, 10143], [143, 0, 143],
+      [76, 0, 76], [76, 1, 10076], [76, 2, 76]] as const) {
       for (const battler of [0, 1] as const) {
         const tracker = after([move(moveId, turn, battler)]);
         const want = expected({ kind: "move-animation", moveId: key, attackerSide: battler === 0 ? "player" : "opponent" });
@@ -351,6 +354,8 @@ describe("order host event keys (prep43)", () => {
     }
     // The two Brick Break branches allocate differently: the key is load-bearing.
     expect(after([move(280, 1, 1)]).cursor.order.free).not.toEqual(after([move(280, 0, 1)]).cursor.order.free);
+    // prep45: so do Solar Beam's charge (SolarBeamSetUp) and unleash (SolarBeamUnleash).
+    expect(after([move(76, 1, 0)]).cursor.order.free).not.toEqual(after([move(76, 0, 0)]).cursor.order.free);
   });
 
   it("WEATHER_VAR with sB_ANIM_ARG1 12 is SANDSTORM_CONTINUES (planned); 13 HAIL_CONTINUES and no argument stay unknown", () => {
@@ -361,5 +366,25 @@ describe("order host event keys (prep43)", () => {
     expect(weather(["13"]).cursor.order.known).toBe(false);
     expect(weather(["13"]).invalidReason).toContain("HAIL_CONTINUES");
     expect(weather([]).cursor.order.known).toBe(false);
+  });
+
+  it("TURN_TRAP is keyed by the trapped battler's wrapped move (prep45); Clamp and an unknown argument stay unplanned", () => {
+    const trap = (args: readonly string[], battler: 0 | 1) => after([ev(10, "animation", { animationId: "TURN_TRAP", battler, target: battler, arguments: args })]);
+    for (const [move, animation] of [[83, "TURN_TRAP_FIRE_SPIN"], [250, "TURN_TRAP_WHIRLPOOL"], [328, "TURN_TRAP_SAND_TOMB"],
+      [20, "TURN_TRAP_BIND"], [35, "TURN_TRAP_BIND"]] as const) {
+      for (const battler of [0, 1] as const) {
+        const tracker = trap([`${move}`], battler);
+        expect(tracker.cursor.order.known, `${move}/${battler}`).toBe(true);
+        expect(tracker.cursor.order.free, `${move}/${battler}`).toEqual(expected({ kind: "general-animation", animation }).cursor.order.free);
+      }
+    }
+    // The four branches allocate differently (Fire Spin vs Bind): the key is load-bearing.
+    expect(trap(["83"], 0).cursor.order.free).not.toEqual(trap(["35"], 0).cursor.order.free);
+    for (const args of [["128"], ["0"], []]) {
+      const tracker = trap(args, 1);
+      expect(tracker.cursor.order.known, JSON.stringify(args)).toBe(false);
+      expect(tracker.invalidReason, JSON.stringify(args)).toContain("TURN_TRAP");
+      expect(tracker.invalidReason, JSON.stringify(args)).not.toContain("TURN_TRAP_");
+    }
   });
 });

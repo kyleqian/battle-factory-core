@@ -3,7 +3,8 @@
 //   bodies: tools/integration/fixtures/sprite-order-body-plans-ext.json (committed + ext table, docs/sprite-order-plan-coverage.md)
 //   extra bodies: fixtures/sprite-order-policy-gaps/relative-y-plans.json (283/313 proposal B) + sprite-order-body-plans-rely.json (tier "confirmed" rows only)
 //   anims:  tools/integration/fixtures/sprite-order-gap-causes.json midBattleAnimations (docs/sprite-order-gap-causes.md §1 Q3)
-//   appended (indexed after the base table): fixtures/prep43/plan-rows.json bodies + anims (docs/next-adapters-prep43.md)
+//   appended (indexed after the base table): fixtures/prep43/plan-rows.json bodies + anims (docs/next-adapters-prep43.md),
+//     then fixtures/prep45/plan-rows.json bodies + anims (docs/next-adapters-prep45.md)
 //   run: node --experimental-strip-types tools/integration/spriteOrderProductionTable.ts   (rewrites the module)
 // tests/spriteOrderEventTransform.test.ts regenerates the module text from the JSON and pins it byte-for-byte.
 import { readFileSync, writeFileSync } from "node:fs";
@@ -43,7 +44,7 @@ export const SOURCE_CONFIRMED_ABS_INVARIANT: ReadonlySet<string> = new Set(
     .concat(["135:player", "236:player"]));
 
 /** Extra EXACT-PLAN body rows merged after the ext table (policy-gaps relative-y rows; rely rows of tier "confirmed" + source-confirmed abs-invariant). */
-/** `appended` row sets (prep43 plan-rows.json: bodies + anims) are indexed after the whole base table and their bodies listed after its
+/** `appended` row sets (prep43, then prep45 plan-rows.json: bodies + anims) are indexed after the whole base table and their bodies listed after its
  * bodies, so every existing plan index and line stays put; each row must replace a non-EXACT (or absent) row. */
 export function renderSpriteOrderProductionTable(ext: { bodies: Record<string, Row> }, gapCauses: {
   midBattleAnimations: { anims: Record<string, Row> };
@@ -154,7 +155,7 @@ export function renderSpriteOrderProductionTableFromFixtures(): string {
   return renderSpriteOrderProductionTable(fixture("sprite-order-body-plans-ext.json"), fixture("sprite-order-gap-causes.json"), [
     fixture("sprite-order-policy-gaps/relative-y-plans.json").bodies, fixture("sprite-order-body-plans-rely.json").bodies,
     fixture("prep28/plan-rows.json").bodies, fixture("prep28/plan-rows-sky-attack.json").bodies,
-  ], [fixture("prep43/plan-rows.json")]);
+  ], [fixture("prep43/plan-rows.json"), fixture("prep45/plan-rows.json")]);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

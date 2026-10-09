@@ -208,10 +208,9 @@ describe("live Q2 ordinary routes", () => {
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     if (id === 143) {
       expect(bodies[1]!.ages).toEqual(Array.from({ length: 180 }, (_, age) => age));
-      // 376: Thunder Wave in between (planned) -> known lend -> adapter active every age. 244: Ice Beam after the opponent's Dragon Dance (349:opponent
-      // is NEEDS-KEYS) leaves the order unknown, so the strike declines on every age (gate); logic unchanged.
-      if (seed === 376) expect(bodies[1]!.adapterActive.every(Boolean)).toBe(true);
-      else expect(bodies[1]!.adapterActive.some(Boolean)).toBe(false);
+      // 376: Thunder Wave in between (planned) -> known lend -> adapter active every age. 244: Ice Beam after the opponent's Dragon Dance;
+      // 349:opponent was NEEDS-KEYS (strike declined every age) and is planned since prep45 (side-keyed), so the strike lends too.
+      expect(bodies[1]!.adapterActive.every(Boolean)).toBe(true);
     }
     parityOf(on, off);
   }, 240000);

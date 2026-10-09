@@ -51,15 +51,16 @@ function applyGap(tracker: SpriteOrderTracker, windows: readonly Window[]): { tr
   return { tracker: next, shape: shape.join("+") || "empty" };
 }
 
-/** liveSpriteOrderHost.ts's MOVE_ANIMATION key: an odd choosetwoturnanim turn of Sky Attack / Dig / Brick Break is 10000 + move id. */
+/** liveSpriteOrderHost.ts's MOVE_ANIMATION key: an odd choosetwoturnanim turn of Solar Beam / Sky Attack / Dig / Brick Break is 10000 + move id. */
 function hostMoveId(mv: number, turn: number): number {
-  return (turn & 1) === 1 && (mv === 91 || mv === 143 || mv === 280) ? 10000 + mv : mv;
+  return (turn & 1) === 1 && (mv === 76 || mv === 91 || mv === 143 || mv === 280) ? 10000 + mv : mv;
 }
 
 /**
  * `turnKeyed` (prep43, docs/next-adapters-prep43.md): the move-animation event carries the host's choosetwoturnanim key. The tables
  * have no request turn, so Dig's turn is its occurrence parity per attacker side in the scenario (setup, unleash, ...) and Brick
  * Break's is "a screen was broken" = not a `-normal-` scenario. Without it (the original replay) Dig's unleash is fed the setup plan.
+ * prep45 (docs/next-adapters-prep45.md): Solar Beam (76) is keyed like Dig, by occurrence parity per attacker side.
  */
 export function replayCrossBodyCorpus(options: Readonly<{ turnKeyed?: boolean }> = {}) {
   const scenarios = [...read("sprite-order-body-events.json").scenarios, ...read("sprite-order-body-events-ext.json").scenarios];
@@ -100,7 +101,7 @@ export function replayCrossBodyCorpus(options: Readonly<{ turnKeyed?: boolean }>
       firstEdge = false;
       const side = ownerSide(scenario, mv);
       let turn = 0;
-      if (options.turnKeyed && side !== null && mv === 91) {
+      if (options.turnKeyed && side !== null && (mv === 76 || mv === 91)) {
         turn = occurrences.get(`${mv}:${side}`) ?? 0;
         occurrences.set(`${mv}:${side}`, turn + 1);
       }

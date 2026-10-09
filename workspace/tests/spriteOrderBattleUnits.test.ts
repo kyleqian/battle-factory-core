@@ -38,20 +38,24 @@ describe("production sprite-order battle units (faint / summary / send-out / swi
     expect(KNOWN_ENTRY_BATTLER_SLOTS).toEqual({ player: 6, opponent: 8 });
   });
 
-  it("strict evidence streams reproduce the replay edge for edge (route 84/84/0, lab 25/25/0, units 18/18 + 22/22)", () => {
+  it("strict evidence streams reproduce the replay edge for edge (route 86/86/0, lab 25/25/0, units 20/20 + 22/22)", () => {
     for (const name of names) {
       // Same production body table as the evidence replay tool (strict, "modelled", not isolated).
       const row = replay(name, "modelled");
       const ours = productionReplay(name);
       expect(ours.edges, name).toEqual(row.edges.map(({ frame, kind, known, exact, occupiedMatch }) => ({ frame, kind, known, exact, occupiedMatch })));
       expect(ours.unitChecks, name).toEqual(row.unitCheckRows.map(({ frame, unit, exact, occupiedMatch }) => ({ frame, unit, exact, occupiedMatch })));
-      // Against the committed receipt: identical, except anim edges the grown production body table now keeps known (exact).
+      // Against the committed receipt: identical, except anim edges the grown production body table now keeps known (exact), and
+      // (prep45) move edges past a newly planned unit (exact).
       const committed = receipt.results.find(result => result.trace === name && result.mode === "modelled" && !result.isolated)!;
       ours.edges.forEach((edge, index) => {
         const old = committed.edges[index]!;
         expect(edge.frame, name).toBe(old.frame);
         if (old.known) expect({ known: edge.known, exact: edge.exact, occupiedMatch: edge.occupiedMatch }, `${name}@${edge.frame}`).toEqual({ known: true, exact: old.exact, occupiedMatch: old.occupiedMatch });
-        else if (edge.known) expect({ kind: edge.kind, exact: edge.exact, occupiedMatch: edge.occupiedMatch }, `${name}@${edge.frame}`).toEqual({ kind: "anim", exact: true, occupiedMatch: true });
+        else if (edge.known) {
+          expect(["anim", "move"], `${name}@${edge.frame}`).toContain(edge.kind);
+          expect({ exact: edge.exact, occupiedMatch: edge.occupiedMatch }, `${name}@${edge.frame}`).toEqual({ exact: true, occupiedMatch: true });
+        }
       });
       // Unit checks: every committed row is reproduced; rows beyond the receipt are unit checks that bodies planned after it (the 22
       // source-confirmed abs-invariant rows, docs/sprite-order-absinv-source-check.md) keep known, and each must be exact.
@@ -61,7 +65,8 @@ describe("production sprite-order battle units (faint / summary / send-out / swi
     }
     const route = (name: string) => !name.startsWith("lab:");
     // Receipt: route animKnown 22 (turn17 BRN anim at 21412 is now known + exact: 7:player joined the production table after the receipt).
-    expect(totals(route)).toEqual({ edges: 91, known: 84, exact: 84, mismatched: 0, occupiedMismatch: 0, animKnown: 23, animMismatched: 0, units: 18, unitExact: 18, unitOccupiedMismatch: 0 });
+    // prep45 plans (turn17: a newly planned unit and the move edge after it): known 84 -> 86, animKnown 23 -> 24, units 18 -> 20, all exact.
+    expect(totals(route)).toEqual({ edges: 91, known: 86, exact: 86, mismatched: 0, occupiedMismatch: 0, animKnown: 24, animMismatched: 0, units: 20, unitExact: 20, unitOccupiedMismatch: 0 });
     expect(totals(name => !route(name))).toEqual({ edges: 27, known: 25, exact: 25, mismatched: 0, occupiedMismatch: 0, animKnown: 6, animMismatched: 0, units: 22, unitExact: 22, unitOccupiedMismatch: 0 });
     // The live host keeps the voluntary recall invalidating (provisional): only issue135's two post-recall bodies drop.
     expect(totals(name => !route(name), false)).toMatchObject({ edges: 27, known: 23, exact: 23, mismatched: 0, occupiedMismatch: 0 });
