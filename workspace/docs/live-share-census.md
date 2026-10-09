@@ -4,6 +4,19 @@ How often ordinary Battle Factory play (Scene ON) shows a **live adapter** for a
 which production gate made each fallback. Tooling + evidence only: `tools/integration/liveShareCensus.ts` (driver) and
 `tools/integration/liveShareCensusGates.ts` (classifier); no `src/` change, no oracle. Production tree as of master `4efff4321`.
 
+## Latest (2026-10-09, production src `f7cf9a74`)
+
+| seeds | commands | live | partial | fallback | **live by count** | **live by frames** | faithful-random history (count / frames) |
+|---|---:|---:|---:|---:|---:|---:|---|
+| 0..999 (`report-seeds0-999-final-20261009.json`, two runs byte-identical, sha256 `d5c2fd39`) | 27518 | 24005 | 5 | 3508 | **87.23 %** | **91.13 %** | 423 / 71,311 (1.54 % / 1.81 %) |
+| 50000..50999 (`report-seeds50000-50999-final-20261009.json`) | 27041 | | | | 88.38 % | 90.47 % | 417 / 69,486 (1.54 % / 1.76 %) |
+
+Session start (src `e3fc2240`, 2026-10-08): 77.68 % / 78.76 % on seeds 0..999. Gameplay command sequence and battle digest were
+identical at every fold in between (per-fold census deltas on seeds 0..299 in each step's receipt). Remaining fallback frames on
+seeds 0..999 by reason: sprite-order lend unknown 157,046 (960 commands), case-local gates 63,043 (343), sprite allocator history
+unknown 59,150 (572), no adapter (Struggle, not a rental move) 33,792 (1,056), later-body 19,855 (167), Substitute cells ~6k.
+The sections below describe the instrument and the first (2026-10-08) results.
+
 ## Results (seeds 0..999, 1000 battles; receipts `tools/integration/fixtures/live-share-census/`)
 
 | scope | commands | live | partial | fallback | presented frames | live frames | **live share by count** | **live share by frames** |

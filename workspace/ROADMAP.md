@@ -2216,29 +2216,32 @@ fourteen-move physical batch is verified and folded. Helping Hand remains
 unaccepted pending legal doubles staging. No whole-playable arbitrary-history
 framebuffer exactness is claimed.
 
-Next (2026-10-08 morning): 245 scoped-exact + 13 faithful-random + 18 faithful-timing live adapters (production src tree `e3fc2240`);
-no accepted Factory body remains without a live adapter (census `245+13+18+0+0=276`; the exact count fell from 250 by honest D4
-reclassification of Crunch, Psychic, Extreme Speed, Pursuit and Hidden Power). The 2026-10-08 overnight session presented the
-Substitute status animations live (swaps around 53 subbed-attacker cells, 37 defender-doll cells, the fade), added the
-seam-resolved deferred sprite-order lend (Ice Ball counters 1..4), fixed the species-audit 13 / 14 defect classes, added the
-missing attacker sides of Double Team / Faint Attack / Rock Slide, landed the prep43 sprite-order plans (CONFUSION, PRZ survivor fix, Leech Seed drain,
-sandstorm, Dig / Brick Break turn-keyed: +2.5 pp live by count, +3.3 pp by frames on seeds 0..199), and built the ORDINARY-PLAY LIVE-SHARE CENSUS
-(`tools/integration/liveShareCensus.ts`, `docs/live-share-census.md`): on src `d15bc413` 72.6 % of move-animation commands
-(75.2 % of frames) ran live in 1000 ordinary battles; on the final src `e3fc2240` 77.7 % (78.8 % of frames;
-`tools/integration/fixtures/live-share-census/report-seeds0-999-final-20261008.json`, gameplay command sequence unchanged).
-Use the census to rank work. Resume points, in order:
-1. The remaining order-host stops (`docs/next-adapters-prep43.md`): Giga Drain body
-   (species geometry), hail WEATHER_VAR (battler coordinates), RAIN_CONTINUES (Random2 words; the deferred lend is keyed by move
-   body), the locked-turn continuation in the orchestrator, the opponent's voluntary return to ball.
-2. Allocator history (Protect / Light Screen / Reflect / Barrier / Magic Coat / Mirror Coat): land prep44's 50 audited
-   NET-ZERO move ids (`docs/next-adapters-prep44.md`; +0.9 pp live by count on seeds 0..299), then the status-animation
-   invalidators (sleep / confusion / poison) and the long tail — fallbacks need the WHOLE invalidator chain cleared.
-3. ISSUES #152: the idle-rest opponent-attacker class (15 candidate renderers from the a13fix static scan), Confuse Ray and
-   Faint Attack CPU phases, Extrasensory split rows, Double-Edge / Attract rows, TYRANITAR rows.
-4. Substitute remainder: swaps before faint / switch-out (43 / 41 leading rows), Roar target x2, Dig hidden attacker,
-   multi-hit split, Solar Beam turn gate, more swap / defender-doll cells; the fade's frozen message cursor; ISSUES #153.
-5. Ghost-type Curse provider (prep41 §4.3), Dive attack body (deferred lend), Baton Pass flow (prep27), Endeavor W3.
-6. Species-swap audit after every adapter batch (audits 13 / 14 found 5 defect classes, all fixed or gated).
+Next (2026-10-09 morning): 242 scoped-exact + 13 faithful-random + 21 faithful-timing live adapters (census `242+13+21+0+0=276`;
+Icy Wind, Blizzard and Confuse Ray moved to faithful timing by counter-evidenced D4 accounting). The 2026-10-09 overnight session
+widened the HISTORIES in which existing adapters play live (no new adapters): prep44's allocator NET-ZERO ids; sprite-order
+invalidator chains + 18 + 20 more EXACT / keyed order plans (BRN, TURN_TRAP by wrapped move, WISH / INGRAIN heal, FRZ, NIGHTMARE,
+ITEM_KNOCKOFF, Hydro Pump, Reversal, Solar Beam / Razor Wind by turn, Present by branch, Ice Punch, Attract, ...); GEOMETRY-KEYED
+order computed from the renderers' own timelines (Giga Drain, Mega Drain, Dream Eater); Icy Wind / Blizzard at any species geometry;
+the retained locked-action prompt cycle, battle-start seeds (Trace, double Intimidate) and the opponent's voluntary recall; a
+generalized seam-resolved deferred lend after Random2-words units (Sand-Attack, Mud-Slap, Rain Dance, RAIN_CONTINUES as a
+non-consuming sub-stream) with per-command faithful-random-history accounting; Dig / Return at later bodies. Ordinary-play census
+(`tools/integration/fixtures/live-share-census/report-seeds0-999-final-20261009.json`, src `f7cf9a74`): **87.23 % of
+move-animation commands / 91.13 % of frames live** (session start 77.68 / 78.76), of which faithful-random history 1.54 % / 1.81 %;
+seeds 50000..: 88.38 / 90.47; gameplay command sequence and battle digest identical at every fold. Resume points, by census frames:
+1. Sprite-order host stops (157k frames on seeds 0..999): recalls other than the AI voluntary switch ("return to ball": the
+   end-of-battle return, Baton Pass, player recalls — 19.7k), the post-KO next-mon summary / reshow units (22.5k), Shock Wave
+   (opponent geometry), SUBSTITUTE_FADE and FOCUS_BAND (not reached in probes), Fury Cutter (needs the hit count on the event),
+   Bounce / Fly / Dive later units, hail + HAIL_CONTINUES and Blizzard bodies (geometry), Water Spout (needs attacker HP).
+2. Allocator history (59k): Protect / Light Screen after status animations (SLP / CONFUSION / PSN: the crossedUnknownGraphics path)
+   and the post-KO reseed; FUTURE_SIGHT's hit.
+3. Case-local gates (63k): Blizzard opponent pairs whose impact age is not 197 (geometry-derived duration), Flatter words, Water
+   Pulse, Double Team's slot gate after a deferred lend, Dig.
+4. Later bodies (20k): the x2-tracker rows (Quick Attack attacker, Return target "unknown") that keep ONIX / RATTATA later Dig /
+   Return declining; Extrasensory, Signal Beam, Sheer Cold, Mach Punch, Memento, Sky Attack, Bonemerang, Fury Cutter.
+5. ISSUES #152 remainder: Faint Attack's player-side dominant short body (side-keyed restore-fade row + D4 entry), Double-Edge /
+   Attract rows, TYRANITAR rows; Substitute remainder; Ghost-type Curse provider; Dive attack body; Baton Pass flow; Endeavor W3.
+6. A live audit after every batch — tonight's chain audit (docs/live-audit-15-chains.md) checks consumers after the new units.
+Struggle (1,056 commands / 33.8k frames in the census) is not a Factory rental move and stays outside the 276 accepted bodies.
 Validate new adapters with alternate-species dense proofs whose windows come from
 the source activation frame, not only the accepted fixture species.
 Latest progress supersedes this starting checkpoint as verified work lands.
