@@ -1,0 +1,2083 @@
+{
+ "schema": "prep50-status-net-zero-audit/v1",
+ "knownEntry": [
+  0,
+  1,
+  2,
+  6,
+  8,
+  60,
+  61,
+  62,
+  63
+ ],
+ "probe": "tools/integration/prep50StatusProbe.py (two fresh direct-mGBA processes per scenario)",
+ "summary": [
+  {
+   "label": "Status_Sleep",
+   "labelAddress": "0x82d7df3",
+   "scenarios": 8,
+   "pairsIdentical": 8,
+   "bodies": {
+    "player": 6,
+    "opponent": 6
+   },
+   "netZeroBodies": 12,
+   "knownEntryBodies": 12,
+   "truncated": 0,
+   "createdDestroyed": [
+    "2/2"
+   ],
+   "verdict": "NET-ZERO"
+  },
+  {
+   "label": "Status_Confusion",
+   "labelAddress": "0x82d7d85",
+   "scenarios": 12,
+   "pairsIdentical": 12,
+   "bodies": {
+    "player": 6,
+    "opponent": 8
+   },
+   "netZeroBodies": 14,
+   "knownEntryBodies": 14,
+   "truncated": 0,
+   "createdDestroyed": [
+    "5/5"
+   ],
+   "verdict": "NET-ZERO"
+  },
+  {
+   "label": "Status_Poison",
+   "labelAddress": "0x82d7d5a",
+   "scenarios": 6,
+   "pairsIdentical": 6,
+   "bodies": {
+    "player": 7,
+    "opponent": 8
+   },
+   "netZeroBodies": 15,
+   "knownEntryBodies": 15,
+   "truncated": 2,
+   "createdDestroyed": [
+    "0/0"
+   ],
+   "verdict": "NET-ZERO"
+  },
+  {
+   "label": "Status_Paralysis",
+   "labelAddress": "0x82d7e1f",
+   "scenarios": 6,
+   "pairsIdentical": 6,
+   "bodies": {
+    "player": 3,
+    "opponent": 3
+   },
+   "netZeroBodies": 6,
+   "knownEntryBodies": 6,
+   "truncated": 0,
+   "createdDestroyed": [
+    "16/16"
+   ],
+   "verdict": "NET-ZERO"
+  },
+  {
+   "label": "Status_Burn",
+   "labelAddress": "0x82d7d8e",
+   "scenarios": 3,
+   "pairsIdentical": 3,
+   "bodies": {
+    "player": 2,
+    "opponent": 4
+   },
+   "netZeroBodies": 6,
+   "knownEntryBodies": 6,
+   "truncated": 0,
+   "createdDestroyed": [
+    "12/12"
+   ],
+   "verdict": "NET-ZERO"
+  }
+ ],
+ "scenarios": [
+  {
+   "label": "Status_Sleep",
+   "scenario": "mechanic-lovely-kiss-player-jynx-opponent-onix",
+   "pairIdentical": true,
+   "framesRun": 734,
+   "bodies": [
+    {
+     "side": "opponent",
+     "activation": 230,
+     "cleanup": 326,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 2,
+     "destroyed": 2,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "opponent",
+     "activation": 518,
+     "cleanup": 614,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 2,
+     "destroyed": 2,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Sleep",
+   "scenario": "mechanic-lovely-kiss-opponent-jynx-player-onix",
+   "pairIdentical": true,
+   "framesRun": 734,
+   "bodies": [
+    {
+     "side": "player",
+     "activation": 234,
+     "cleanup": 330,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 2,
+     "destroyed": 2,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "player",
+     "activation": 514,
+     "cleanup": 610,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 2,
+     "destroyed": 2,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Sleep",
+   "scenario": "mechanic-hypnosis-player-politoed-opponent-onix",
+   "pairIdentical": true,
+   "framesRun": 934,
+   "bodies": [
+    {
+     "side": "opponent",
+     "activation": 247,
+     "cleanup": 343,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 2,
+     "destroyed": 2,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "opponent",
+     "activation": 535,
+     "cleanup": 631,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 2,
+     "destroyed": 2,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Sleep",
+   "scenario": "mechanic-hypnosis-opponent-politoed-player-onix",
+   "pairIdentical": true,
+   "framesRun": 934,
+   "bodies": [
+    {
+     "side": "player",
+     "activation": 250,
+     "cleanup": 346,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 2,
+     "destroyed": 2,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "player",
+     "activation": 530,
+     "cleanup": 626,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 2,
+     "destroyed": 2,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Sleep",
+   "scenario": "mechanic-snore-player-sealeo-opponent-venomoth",
+   "pairIdentical": true,
+   "framesRun": 1234,
+   "bodies": [
+    {
+     "side": "player",
+     "activation": 280,
+     "cleanup": 376,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 2,
+     "destroyed": 2,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "player",
+     "activation": 565,
+     "cleanup": 661,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 2,
+     "destroyed": 2,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Sleep",
+   "scenario": "mechanic-snore-opponent-sealeo-player-venomoth",
+   "pairIdentical": true,
+   "framesRun": 1234,
+   "bodies": [
+    {
+     "side": "opponent",
+     "activation": 276,
+     "cleanup": 372,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 2,
+     "destroyed": 2,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "opponent",
+     "activation": 569,
+     "cleanup": 665,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 2,
+     "destroyed": 2,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Sleep",
+   "scenario": "mechanic-rest-player-teddiursa-opponent-onix",
+   "pairIdentical": true,
+   "framesRun": 734,
+   "bodies": []
+  },
+  {
+   "label": "Status_Sleep",
+   "scenario": "mechanic-rest-opponent-teddiursa-player-onix",
+   "pairIdentical": true,
+   "framesRun": 734,
+   "bodies": []
+  },
+  {
+   "label": "Status_Confusion",
+   "scenario": "mechanic-confuse-ray-player-chinchou-opponent-onix",
+   "pairIdentical": true,
+   "framesRun": 834,
+   "bodies": [
+    {
+     "side": "opponent",
+     "activation": 350,
+     "cleanup": 449,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 5,
+     "destroyed": 5,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "opponent",
+     "activation": 641,
+     "cleanup": 740,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 5,
+     "destroyed": 5,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Confusion",
+   "scenario": "mechanic-confuse-ray-opponent-chinchou-player-onix",
+   "pairIdentical": true,
+   "framesRun": 834,
+   "bodies": [
+    {
+     "side": "player",
+     "activation": 354,
+     "cleanup": 453,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 5,
+     "destroyed": 5,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "player",
+     "activation": 637,
+     "cleanup": 736,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 5,
+     "destroyed": 5,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Confusion",
+   "scenario": "mechanic-petal-dance-player-gloom-opponent-onix",
+   "pairIdentical": true,
+   "framesRun": 934,
+   "bodies": []
+  },
+  {
+   "label": "Status_Confusion",
+   "scenario": "mechanic-petal-dance-opponent-gloom-player-onix",
+   "pairIdentical": true,
+   "framesRun": 934,
+   "bodies": []
+  },
+  {
+   "label": "Status_Confusion",
+   "scenario": "mechanic-outrage-player-dragonite-opponent-onix",
+   "pairIdentical": true,
+   "framesRun": 1234,
+   "bodies": []
+  },
+  {
+   "label": "Status_Confusion",
+   "scenario": "mechanic-outrage-opponent-dragonite-player-onix",
+   "pairIdentical": true,
+   "framesRun": 1234,
+   "bodies": []
+  },
+  {
+   "label": "Status_Confusion",
+   "scenario": "mechanic-supersonic-player-loudred-opponent-onix",
+   "pairIdentical": true,
+   "framesRun": 734,
+   "bodies": [
+    {
+     "side": "opponent",
+     "activation": 149,
+     "cleanup": 248,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 5,
+     "destroyed": 5,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "opponent",
+     "activation": 440,
+     "cleanup": 539,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 5,
+     "destroyed": 5,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Confusion",
+   "scenario": "mechanic-supersonic-opponent-loudred-player-onix",
+   "pairIdentical": true,
+   "framesRun": 734,
+   "bodies": [
+    {
+     "side": "player",
+     "activation": 153,
+     "cleanup": 252,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 5,
+     "destroyed": 5,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "player",
+     "activation": 436,
+     "cleanup": 535,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 5,
+     "destroyed": 5,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Confusion",
+   "scenario": "mechanic-sweet-kiss-player-luvdisc-opponent-onix",
+   "pairIdentical": true,
+   "framesRun": 734,
+   "bodies": [
+    {
+     "side": "opponent",
+     "activation": 237,
+     "cleanup": 336,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 5,
+     "destroyed": 5,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "opponent",
+     "activation": 528,
+     "cleanup": 627,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 5,
+     "destroyed": 5,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Confusion",
+   "scenario": "mechanic-sweet-kiss-opponent-luvdisc-player-onix",
+   "pairIdentical": true,
+   "framesRun": 734,
+   "bodies": [
+    {
+     "side": "player",
+     "activation": 241,
+     "cleanup": 340,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 5,
+     "destroyed": 5,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "player",
+     "activation": 524,
+     "cleanup": 623,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 5,
+     "destroyed": 5,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Confusion",
+   "scenario": "prep11-audit-golem-next-teeter-dance-player",
+   "pairIdentical": true,
+   "framesRun": 734,
+   "bodies": [
+    {
+     "side": "opponent",
+     "activation": 257,
+     "cleanup": 356,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 5,
+     "destroyed": 5,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "opponent",
+     "activation": 551,
+     "cleanup": 650,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 5,
+     "destroyed": 5,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Confusion",
+   "scenario": "prep12-thrash-alt-snorlax-golem",
+   "pairIdentical": true,
+   "framesRun": 934,
+   "bodies": []
+  },
+  {
+   "label": "Status_Poison",
+   "scenario": "mechanic-toxic-player-clamperl-opponent-onix",
+   "pairIdentical": true,
+   "framesRun": 734,
+   "bodies": [
+    {
+     "side": "opponent",
+     "activation": 447,
+     "cleanup": 517,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "opponent",
+     "activation": 720,
+     "cleanup": null,
+     "error": "no cleanup within trace"
+    }
+   ]
+  },
+  {
+   "label": "Status_Poison",
+   "scenario": "mechanic-toxic-opponent-clamperl-player-onix",
+   "pairIdentical": true,
+   "framesRun": 734,
+   "bodies": [
+    {
+     "side": "player",
+     "activation": 447,
+     "cleanup": 517,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "player",
+     "activation": 712,
+     "cleanup": null,
+     "error": "no cleanup within trace"
+    }
+   ]
+  },
+  {
+   "label": "Status_Poison",
+   "scenario": "mechanic-water-spout-tiers-player-wailmer-opponent-shuckle-toxic",
+   "pairIdentical": true,
+   "framesRun": 5492,
+   "bodies": [
+    {
+     "side": "player",
+     "activation": 799,
+     "cleanup": 869,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "player",
+     "activation": 1072,
+     "cleanup": 1142,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "player",
+     "activation": 2012,
+     "cleanup": 2082,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "player",
+     "activation": 2947,
+     "cleanup": 3017,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "player",
+     "activation": 3878,
+     "cleanup": 3948,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "player",
+     "activation": 4810,
+     "cleanup": 4880,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Poison",
+   "scenario": "mechanic-water-spout-tiers-opponent-wailmer-player-shuckle-toxic",
+   "pairIdentical": true,
+   "framesRun": 5912,
+   "bodies": [
+    {
+     "side": "opponent",
+     "activation": 898,
+     "cleanup": 968,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "opponent",
+     "activation": 1179,
+     "cleanup": 1249,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "opponent",
+     "activation": 2130,
+     "cleanup": 2200,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "opponent",
+     "activation": 3071,
+     "cleanup": 3141,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "opponent",
+     "activation": 4003,
+     "cleanup": 4073,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "opponent",
+     "activation": 4935,
+     "cleanup": 5005,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "opponent",
+     "activation": 5824,
+     "cleanup": 5894,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Poison",
+   "scenario": "mechanic-sludge-player-grimer-opponent-onix",
+   "pairIdentical": true,
+   "framesRun": 734,
+   "bodies": []
+  },
+  {
+   "label": "Status_Poison",
+   "scenario": "mechanic-sludge-opponent-grimer-player-onix",
+   "pairIdentical": true,
+   "framesRun": 734,
+   "bodies": []
+  },
+  {
+   "label": "Status_Paralysis",
+   "scenario": "mechanic-stun-spore-player-hoppip-opponent-onix",
+   "pairIdentical": true,
+   "framesRun": 1034,
+   "bodies": [
+    {
+     "side": "opponent",
+     "activation": 578,
+     "cleanup": 616,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 16,
+     "destroyed": 16,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Paralysis",
+   "scenario": "mechanic-stun-spore-opponent-hoppip-player-onix",
+   "pairIdentical": true,
+   "framesRun": 1034,
+   "bodies": [
+    {
+     "side": "player",
+     "activation": 583,
+     "cleanup": 621,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 16,
+     "destroyed": 16,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Paralysis",
+   "scenario": "mechanic-thunder-wave-player-flaaffy-opponent-shuckle",
+   "pairIdentical": true,
+   "framesRun": 434,
+   "bodies": [
+    {
+     "side": "opponent",
+     "activation": 203,
+     "cleanup": 241,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 16,
+     "destroyed": 16,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Paralysis",
+   "scenario": "mechanic-thunder-wave-opponent-flaaffy-player-shuckle",
+   "pairIdentical": true,
+   "framesRun": 434,
+   "bodies": [
+    {
+     "side": "player",
+     "activation": 207,
+     "cleanup": 245,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 16,
+     "destroyed": 16,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Paralysis",
+   "scenario": "mechanic-glare-player-dunsparce-opponent-shuckle",
+   "pairIdentical": true,
+   "framesRun": 534,
+   "bodies": [
+    {
+     "side": "opponent",
+     "activation": 291,
+     "cleanup": 329,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 16,
+     "destroyed": 16,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Paralysis",
+   "scenario": "mechanic-glare-opponent-dunsparce-player-shuckle",
+   "pairIdentical": true,
+   "framesRun": 534,
+   "bodies": [
+    {
+     "side": "player",
+     "activation": 295,
+     "cleanup": 333,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 16,
+     "destroyed": 16,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Burn",
+   "scenario": "mechanic-will-o-wisp-player-shuppet-opponent-shuckle",
+   "pairIdentical": true,
+   "framesRun": 1034,
+   "bodies": [
+    {
+     "side": "opponent",
+     "activation": 294,
+     "cleanup": 332,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 12,
+     "destroyed": 12,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "opponent",
+     "activation": 779,
+     "cleanup": 817,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 12,
+     "destroyed": 12,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Burn",
+   "scenario": "mechanic-will-o-wisp-opponent-shuppet-player-shuckle",
+   "pairIdentical": true,
+   "framesRun": 1034,
+   "bodies": [
+    {
+     "side": "player",
+     "activation": 297,
+     "cleanup": 335,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 12,
+     "destroyed": 12,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "player",
+     "activation": 770,
+     "cleanup": 808,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 12,
+     "destroyed": 12,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  },
+  {
+   "label": "Status_Burn",
+   "scenario": "prep18-will-o-wisp-alt-banette-golem",
+   "pairIdentical": true,
+   "framesRun": 1034,
+   "bodies": [
+    {
+     "side": "opponent",
+     "activation": 295,
+     "cleanup": 333,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 12,
+     "destroyed": 12,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    },
+    {
+     "side": "opponent",
+     "activation": 774,
+     "cleanup": 812,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 12,
+     "destroyed": 12,
+     "lateChanges": 0,
+     "netZero": true,
+     "knownEntry": true
+    }
+   ]
+  }
+ ]
+}
