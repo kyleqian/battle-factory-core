@@ -563,20 +563,56 @@ const DEFERRED_REPLAY_UNITS: ReadonlySet<SpriteOrderPresentationEvent["kind"]> =
   "action-prompt", "actions-committed", "move-menu", "move-animation", "hit-animation", "stat-animation", "status-animation", "general-animation"]);
 
 /**
+ * words57 (docs/next-adapters-words57.md): battle units a marker that opts in (`replayBattleUnits`) may also replay, with the production
+ * plans from the known-entry battler slots 6 / 8 and roles 0 / 1 / 2 the replay tracker starts with. The lend is in entry labels and the
+ * replay commutes with the entry-label relabel rho, so the replay in entry labels lends what the real-slot host would. ROM-checked per
+ * allocation window and per frame after Sand-Attack / Mud-Slap / Rain Dance / RAIN_CONTINUES (tools/integration/words57Chain.ts, 45/45
+ * chains): an opponent faint + next-mon summary + send-out, the Factory AI's recall (switch-out of the opponent) + summary + send-out, and
+ * a Roar / Whirlwind forced switch-out of either side + its send-in. A player faint or the player's recall (both reach a party menu,
+ * which drops the marker) and every other unit still decline.
+ */
+const DEFERRED_REPLAY_BATTLE_UNITS: ReadonlySet<SpriteOrderPresentationEvent["kind"]> = new Set([
+  "party-summary-next", "party-summary-hide", "next-mon-send-out", "forced-switch-out", "switch-in-start", "switch-in-finish"]);
+
+function deferredReplayable(unit: SpriteOrderPresentationEvent, battleUnits: boolean): boolean {
+  if (DEFERRED_REPLAY_UNITS.has(unit.kind)) return true;
+  if (!battleUnits) return false;
+  if (unit.kind === "faint" || unit.kind === "switch-out") return unit.side === "opponent";
+  return DEFERRED_REPLAY_BATTLE_UNITS.has(unit.kind);
+}
+
+/** A unit after which a battler sprite shows another mon (the displayed species may differ from the earlier body's). */
+const replacesBattler = (unit: SpriteOrderPresentationEvent) => unit.kind === "next-mon-send-out" || unit.kind === "switch-in-finish";
+
+/**
+ * Carry of a deferred body (resolveSpriteOrderDeferredLend): the free order after the body from its activation free order, or null.
+ * `battlerReplacedSince`: a replayed unit after this body showed another mon on a battler (send-out / switch-in), so the consumer's
+ * displayed field is not the body's (a carry that reads battler geometry must decline: the marker is species-free).
+ */
+export type SpriteOrderDeferredCarry = (
+  body: SpriteOrderDeferredLend, activationFree: readonly number[], battlerReplacedSince: boolean,
+) => readonly number[] | null;
+
+/**
  * Render-seam resolution of a deferred lend (pure; the caller supplies `carryBody`, which reads the earlier body's recorded presentation
  * words and returns the free order after the body from its activation free order, or null). Recurses through a deferred activation, then
  * replays `units` with the production plans from the known-entry roles and battler slots and returns spriteOrderTrackerLend. Null (the
- * consumer declines) when any step is unknown or a unit outside DEFERRED_REPLAY_UNITS followed the body.
+ * consumer declines) when any step is unknown or a unit outside DEFERRED_REPLAY_UNITS followed the body; a marker for which
+ * `options.replayBattleUnits` holds also replays DEFERRED_REPLAY_BATTLE_UNITS (words57).
  */
 export function resolveSpriteOrderDeferredLend(
   deferred: SpriteOrderDeferredLend,
-  carryBody: (body: SpriteOrderDeferredLend, activationFree: readonly number[]) => readonly number[] | null,
+  carryBody: SpriteOrderDeferredCarry,
+  options: Readonly<{ replayBattleUnits?: (marker: SpriteOrderDeferredLend) => boolean }> = {},
+  battlerReplacedAfter = false,
 ): readonly number[] | null {
-  if (deferred.units.some((unit) => !DEFERRED_REPLAY_UNITS.has(unit.kind))) return null;
+  const battleUnits = options.replayBattleUnits?.(deferred) ?? false;
+  if (deferred.units.some((unit) => !deferredReplayable(unit, battleUnits))) return null;
+  const replaced = battlerReplacedAfter || deferred.units.some(replacesBattler);
   const activationFree = "deferred" in deferred.activation
-    ? resolveSpriteOrderDeferredLend(deferred.activation.deferred, carryBody) : deferred.activation.free;
+    ? resolveSpriteOrderDeferredLend(deferred.activation.deferred, carryBody, options, replaced) : deferred.activation.free;
   if (activationFree === null) return null;
-  const post = carryBody(deferred, activationFree);
+  const post = carryBody(deferred, activationFree, replaced);
   if (post === null) return null;
   let tracker = createSpriteOrderTracker({ known: true, free: post, pendingDestroyed: [] });
   for (const unit of deferred.units) tracker = applySpriteOrderPresentationEvent(tracker, unit);

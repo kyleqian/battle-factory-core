@@ -15,7 +15,7 @@
  * label space through a real -> label map: the identity for a chain that starts at the known entry (reported: `identityMap`); a nested
  * words body after a KO starts in entry labels (the lend's rho), composed onto the map; created slots pair in creation order.
  * At every move body (a consumer of the deferred lend) the replay's lend must equal the ROM activation free order, mapped.
- * usage: node --experimental-strip-types tools/integration/words57Chain.ts <units.json> <out.json>
+ * usage: node --experimental-strip-types tools/integration/words57Chain.ts <units.json> <out.json> [<lend-vectors.json>]
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import {
@@ -48,6 +48,8 @@ export interface ChainRow {
   battleUnits: string[]; speciesInferred?: Record<Side, number>; carry: { frames: number; frameMismatch: number; windows: number; windowMismatch: number; postExact: boolean }; verdict: string;
 }
 
+const vectors: Record<string, unknown>[] = [];
+const wordsByKey: Record<string, { activationValue: number; draws: number[][] }> = {};
 function checkJob(name: string, job: Job): ChainRow[] {
   const rows: ChainRow[] = [];
   const parties = Object.fromEntries((["player", "opponent"] as const).map((s) => [s, job.species[s]]));
@@ -56,6 +58,10 @@ function checkJob(name: string, job: Job): ChainRow[] {
     raw.overrides.parties[s].some((m: { moves: number[] }) => m.moves.includes(mv)));
   let tracker: SpriteOrderTracker | null = null; // real-label replay (ROM slots; the per-window / per-frame check)
   let prod: SpriteOrderTracker | null = null; // production's replay (resolveSpriteOrderDeferredLend: entry labels from the lend)
+  // the production-shaped deferred marker (liveSpriteOrderHost: a words body opens one, nested on the pending one; every later order event
+  // is a unit) and the RAM-read words per marker key: emitted at every consumer as a test vector (tests/words57DeferredBattleUnits.test.ts)
+  let marker: { key: string; moveId: number; attackerSide: Side; generalAnimation?: string; activation: unknown; units: SpriteOrderPresentationEvent[] } | null = null;
+  const unitEvent = (event: SpriteOrderPresentationEvent) => { marker?.units.push(event); };
   let map = new Map<number, number>(); // ROM real slot -> tracker label
   let row: ChainRow | null = null;
   let modelFree: number[] = [];
@@ -111,6 +117,7 @@ function checkJob(name: string, job: Job): ChainRow[] {
       }
       tracker = next; modelFree = [...next.cursor.order.free];
       if (event !== null && prod !== null) prod = applySpriteOrderPresentationEvent(prod, event);
+      if (event !== null) unitEvent(event);
       row!.steps.push(label);
     }
     const sorted = (xs: readonly number[]) => [...xs].sort((l, r) => l - r);
@@ -186,6 +193,11 @@ function checkJob(name: string, job: Job): ChainRow[] {
     const toLabel = (slot: number) => { const real = mapSlot(slot); if (rhoInverse === null) return real;
       for (const [label, r] of rhoInverse) if (r === real) return label; return real; };
     const words = unit.mv === 0 ? "RAIN_CONTINUES" : String(unit.mv);
+    const key = `words57:${name}:${unit.frame}`;
+    wordsByKey[key] = { activationValue: unit.activationValue!, draws: unit.draws! };
+    const activation = nested && marker !== null ? { deferred: JSON.parse(JSON.stringify(marker)) } : { free: unit.F0 };
+    marker = { key, moveId: unit.mv!, attackerSide: unit.mv === 0 ? "player" : job.wordsSide,
+      ...(unit.mv === 0 ? { generalAnimation: "RAIN_CONTINUES" } : {}), activation, units: [] };
     row = { job: name, words: `${words} f${unit.frame}`, activation: nested ? "nested" : "rom-entry", identityMap: identity, steps: [`carry ${words}`],
       windows: 0, windowMismatch: [], frames: 0, frameMismatch: 0, consumers: [], battleUnits: [],
       carry: { frames: 0, frameMismatch: 0, windows: 0, windowMismatch: 0, postExact: false }, verdict: "" };
@@ -220,6 +232,7 @@ function checkJob(name: string, job: Job): ChainRow[] {
   };
 
   let skip = -1;
+  void unitEvent;
   job.units.forEach((unit, index) => {
     if (index === skip) return;
     const rainJob = job.move === 240;
@@ -233,6 +246,9 @@ function checkJob(name: string, job: Job): ChainRow[] {
       const prodLend = prod === null ? null : spriteOrderTrackerLend(prod);
       const exact = lend !== null && view !== null && same(view.free, mapList(unit.F0)) && prodLend !== null && same(prodLend, lend);
       row.consumers.push({ body: `${unit.mv}`, frame: unit.frame, exact, afterBattleUnit: afterBattle });
+      if (marker !== null) vectors.push({ job: name, consumer: `${unit.mv} f${unit.frame}`, afterBattleUnit: afterBattle,
+        species: { player: parties.player![0]!, opponent: parties.opponent![0]! }, rom: { F0: unit.F0, mask0: unit.mask0 },
+        replayLend: lend, marker: JSON.parse(JSON.stringify(marker)) });
       const sides = moveSides(unit.mv!);
       let used = -1;
       for (const side of sides) {
@@ -271,6 +287,7 @@ function checkJob(name: string, job: Job): ChainRow[] {
       }
       tracker = sequential; row.steps.push("switch-out opponent", "party-summary-next");
       if (prod !== null) prod = applySpriteOrderPresentationEvent(applySpriteOrderPresentationEvent(prod, { kind: "switch-out", side: "opponent" }), { kind: "party-summary-next" });
+      unitEvent({ kind: "switch-out", side: "opponent" }); unitEvent({ kind: "party-summary-next" });
       row.battleUnits.push("switch-out opponent", "party-summary-next");
       if (used < 0) { close(); tracker = null; prod = null; return; }
       gapWindows(wins.slice(used), true);
@@ -297,6 +314,7 @@ function checkJob(name: string, job: Job): ChainRow[] {
       if (summaryPending) {
         tracker = applySpriteOrderPresentationEvent(tracker, { kind: "party-summary-hide" });
         if (prod !== null) prod = applySpriteOrderPresentationEvent(prod, { kind: "party-summary-hide" });
+        unitEvent({ kind: "party-summary-hide" });
         row.steps.push("party-summary-hide");
         used = apply({ kind: "next-mon-send-out" }, plan(SPRITE_ORDER_UNIT_PLAN_TEXTS.nextSendOut), wins.slice(k), "next-mon-send-out");
         summaryPending = false; afterBattle = true; row.battleUnits.push("party-summary-hide", "next-mon-send-out");
@@ -315,6 +333,7 @@ function checkJob(name: string, job: Job): ChainRow[] {
       } else if (w.C.length === 0 && tracker.promptPair !== null && same(mapList(w.D).sort((a, b) => a - b), [...tracker.promptPair].sort((a, b) => a - b))) {
         const ev = applySpriteOrderPresentationEvent(tracker, { kind: "actions-committed" });
         if (prod !== null) prod = applySpriteOrderPresentationEvent(prod, { kind: "actions-committed" });
+        unitEvent({ kind: "actions-committed" });
         row.windows += 1;
         if (!same(ev.cursor.order.free, mapList(w.F))) row.windowMismatch.push(`actions-committed f${w.f}: F !=`);
         tracker = ev; timeline.push([w.f, [...ev.cursor.order.free]]); row.steps.push("actions-committed"); used = 1;
@@ -349,6 +368,12 @@ const summary = {
   jobsIdenticalAB: Object.values(input.jobs).filter((j) => j.identicalAB).length, jobs: Object.keys(input.jobs).length,
 };
 writeFileSync(process.argv[3]!, `${JSON.stringify({ schema: "words57-chain/v1", summary, chains: rows }, null, 1)}\n`);
+if (process.argv[4]) {
+  // test vectors: every consumer's production-shaped marker, the ROM consumer order / occupancy, and the RAM-read words per key
+  const used = new Set(vectors.flatMap((v) => JSON.stringify(v.marker).match(/words57:[^"]+/g) ?? []));
+  writeFileSync(process.argv[4], `${JSON.stringify({ schema: "words57-lend-vectors/v1", vectors,
+    words: Object.fromEntries(Object.entries(wordsByKey).filter(([k]) => used.has(k))) })}\n`);
+}
 for (const r of rows) {
   console.log(r.verdict, r.job, r.words, r.activation, r.identityMap ? "id" : "rho", `carry ${r.carry.frames - r.carry.frameMismatch}/${r.carry.frames}fr post ${r.carry.postExact}`,
     `windows ${r.windows - r.windowMismatch.length}/${r.windows}`, `frames ${r.frames} (${r.frameMismatch} mism)`,

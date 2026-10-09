@@ -11,5 +11,5 @@ T=tools/integration; F=$T/fixtures/words57; N="node --experimental-strip-types -
 mkdir -p "$OUT" "$REC"
 if [ -z "$SKIP_PROBES" ]; then $PY $T/words57Probe.py "$OUT" | tee "$REC/probes.txt"; fi
 python3 $T/words57Extract.py "$OUT" "$OUT/units.json" > "$REC/units-summary.txt"
-WORDS57_OUT="$OUT" $N $T/words57Chain.ts "$OUT/units.json" "$REC/chain.json" | tail -1
-for f in "$REC"/chain.json "$REC"/units-summary.txt; do cmp -s "$f" "$F/$(basename "$f")" && echo "same  $(basename "$f")" || echo "DIFF  $(basename "$f")"; done
+WORDS57_OUT="$OUT" $N $T/words57Chain.ts "$OUT/units.json" "$REC/chain.json" "$REC/words57-lend-vectors.json" | tail -1
+for f in "$REC"/chain.json "$REC"/units-summary.txt "$REC"/words57-lend-vectors.json; do cmp -s "$f" "$F/$(basename "$f")" && echo "same  $(basename "$f")" || echo "DIFF  $(basename "$f")"; done
