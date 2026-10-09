@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-09 (day, IN PROGRESS) — S10A: allocator tail + Light Screen / Blizzard timing; census 0..299 92.66 -> 94.23 % / 94.12 -> 95.42 %
+
+- **State (checkpoint 14:00):** local master `f821ac5b3`, production src tree `93d0f033`. Census `240+13+23+0+0=276` (Light Screen
+  scoped exact -> faithful timing). Union gates on `bb0415c82` (13,062 tests, build, differential 624/624); alloc52 folded on the
+  worker's own tested tree (13,070 tests). Session-start census seeds 0..999 on `ccc4774c4`: 87.95 % / 92.09 %.
+- **Did:** alloc50 (prep50 status animations allocator net-zero, +55 / +6,302), plans51 (Outrage + FOCUS_BAND order plans, +5 /
+  +1,062), lsbz (Light Screen opponent D4 + Blizzard geometry-derived window, +5 / +1,810), prep52 evidence + alloc52 (40 ids + 4
+  statuses, +60 / +6,012). Every fold re-proved by the supervisor (census reruns, check / probe reruns). ISSUES #154 (staged probe
+  trajectories differ across batches), #155 (Eruption 284 opponent plan wrong for an elevated attacker), #156 (general / hit / stat
+  animations assumed allocator net-zero without receipts).
+- **In flight:** gates53 (integration: case-local consumer gates), aud56 (side: #156 audit, fail-closed).
+- **Next:** plans54 (Fury Cutter / Water Spout / hail seam inputs; brief banked in `.integration/validation/plans54-20261009b/`),
+  Dive / Fly / Bounce semi-invulnerable order units, live audit 16, final 0..999 census + preview at wind-down.
+
+---
+
 ## 2026-10-09 (overnight) — S10A: host histories widened; ordinary-play live share 77.7 -> 87.2 % of commands (91.1 % of frames); 241 + 13 + 22
 
 - **State:** local master, production src tree `dde58985` (`c99a40a0a`). Census `241+13+22+0+0=276` (Icy Wind, Blizzard, Confuse
