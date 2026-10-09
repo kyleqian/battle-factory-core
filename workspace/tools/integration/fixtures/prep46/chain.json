@@ -1,0 +1,254 @@
+{
+ "schema": "prep46-chain/v1",
+ "chains": [
+  {
+   "job": "ms-opp-lickitung",
+   "body": "189 f2087",
+   "identicalAB": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20"
+   ],
+   "boundaries": 4,
+   "boundaryMismatch": 0,
+   "consumer": "body 21 f2423",
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ms-opp-onix",
+   "body": "189 f2087",
+   "identicalAB": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "action-prompt+actions-committed"
+   ],
+   "boundaries": 4,
+   "boundaryMismatch": 0,
+   "consumer": "body 189 f2821",
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ms-opp-onix",
+   "body": "189 f2821",
+   "identicalAB": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "action-prompt"
+   ],
+   "boundaries": 3,
+   "boundaryMismatch": 0,
+   "consumer": null,
+   "verdict": "no consumer in trace"
+  },
+  {
+   "job": "ms-ply-nosepass",
+   "body": "189 f2083",
+   "identicalAB": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20"
+   ],
+   "boundaries": 4,
+   "boundaryMismatch": 0,
+   "consumer": "body 86 f2505",
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ms-ply-onix",
+   "body": "189 f2083",
+   "identicalAB": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20"
+   ],
+   "boundaries": 4,
+   "boundaryMismatch": 0,
+   "consumer": "body 225 f2493",
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ms-ply-onix",
+   "body": "189 f2817",
+   "identicalAB": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20"
+   ],
+   "boundaries": 4,
+   "boundaryMismatch": 0,
+   "consumer": "body 225 f3227",
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rd-opp-onix",
+   "body": "240 f2217",
+   "identicalAB": true,
+   "steps": [
+    "carry 240",
+    "carry General_Rain",
+    "action-prompt+actions-committed"
+   ],
+   "boundaries": 4,
+   "boundaryMismatch": 0,
+   "consumer": "body 33 f3308",
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rd-opp-snorlax",
+   "body": "240 f2245",
+   "identicalAB": true,
+   "steps": [
+    "carry 240",
+    "carry General_Rain",
+    "action-prompt+actions-committed"
+   ],
+   "boundaries": 4,
+   "boundaryMismatch": 0,
+   "consumer": "body 33 f3311",
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rd-ply-onix",
+   "body": "240 f2219",
+   "identicalAB": true,
+   "steps": [
+    "carry 240",
+    "carry General_Rain",
+    "action-prompt+actions-committed"
+   ],
+   "boundaries": 4,
+   "boundaryMismatch": 0,
+   "consumer": "body 33 f3312",
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rd-ply-snorlax",
+   "body": "240 f2251",
+   "identicalAB": true,
+   "steps": [
+    "carry 240",
+    "carry General_Rain",
+    "action-prompt+actions-committed"
+   ],
+   "boundaries": 4,
+   "boundaryMismatch": 0,
+   "consumer": "body 33 f3315",
+   "verdict": "EXACT"
+  },
+  {
+   "job": "sa-opp-lickitung",
+   "body": "28 f2088",
+   "identicalAB": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20"
+   ],
+   "boundaries": 4,
+   "boundaryMismatch": 0,
+   "consumer": "body 21 f2358",
+   "verdict": "EXACT"
+  },
+  {
+   "job": "sa-opp-lickitung",
+   "body": "28 f2822",
+   "identicalAB": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20"
+   ],
+   "boundaries": 4,
+   "boundaryMismatch": 0,
+   "consumer": "body 21 f3092",
+   "verdict": "EXACT"
+  },
+  {
+   "job": "sa-opp-onix",
+   "body": "28 f2088",
+   "identicalAB": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20"
+   ],
+   "boundaries": 4,
+   "boundaryMismatch": 0,
+   "consumer": "body 157 f2356",
+   "verdict": "EXACT"
+  },
+  {
+   "job": "sa-opp-onix",
+   "body": "28 f2822",
+   "identicalAB": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20",
+    "action-prompt"
+   ],
+   "boundaries": 3,
+   "boundaryMismatch": 0,
+   "consumer": null,
+   "verdict": "no consumer in trace"
+  },
+  {
+   "job": "sa-ply-nosepass",
+   "body": "28 f2084",
+   "identicalAB": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20",
+    "action-prompt+actions-committed"
+   ],
+   "boundaries": 4,
+   "boundaryMismatch": 0,
+   "consumer": "body 28 f2818",
+   "verdict": "EXACT"
+  },
+  {
+   "job": "sa-ply-nosepass",
+   "body": "28 f2818",
+   "identicalAB": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20"
+   ],
+   "boundaries": 4,
+   "boundaryMismatch": 0,
+   "consumer": "body 201 f3095",
+   "verdict": "EXACT"
+  },
+  {
+   "job": "sa-ply-onix",
+   "body": "28 f2084",
+   "identicalAB": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20"
+   ],
+   "boundaries": 4,
+   "boundaryMismatch": 0,
+   "consumer": "body 225 f2362",
+   "verdict": "EXACT"
+  },
+  {
+   "job": "sa-ply-onix",
+   "body": "28 f3022",
+   "identicalAB": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20",
+    "action-prompt"
+   ],
+   "boundaries": 3,
+   "boundaryMismatch": 0,
+   "consumer": null,
+   "verdict": "no consumer in trace"
+  }
+ ]
+}
