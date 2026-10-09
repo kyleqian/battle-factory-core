@@ -162,9 +162,15 @@ function reseedRecord(kind: string, before: OrchestratorState, after: Orchestrat
   const k = `${kind}: allocator ${allocatorKnown(before)} -> ${allocatorKnown(after)}; ${!t ? "no order host"
     : `lastUnit=${t.lastUnit ?? "none"} roles=${t.occupantRoles === null ? "null" : "known"} iso=${spriteOrderTrackerRoleIsomorphic(t)} order=${t.invalidReason ?? "valid"}`}`;
   allocatorReseeds.set(k, (allocatorReseeds.get(k) ?? 0) + 1);
+  if (allocatorKnown(after) !== true) lastFailedReseed = k;
 }
+// prep52 --reseed-detail (off by default, so default receipts are unchanged): each allocator decline also carries the last switch-in
+// reseed record that left the host unknown (reset whenever the host is known again) -> report.allocatorResidualReseedBlockers.
+const RESEED_DETAIL = process.argv.includes("--reseed-detail");
+let lastFailedReseed: string | null = null;
 
 function playBattle(battle: number, seed: number, streak: number): void {
+  lastFailedReseed = null;
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
     id: `live-share-census-${seed}-${streak}`, rngValue: seed, battleScene: "on",
     factoryWinStreak: streak, playerTrainerId: 416049562,
@@ -234,6 +240,7 @@ function playBattle(battle: number, seed: number, streak: number): void {
               const known = allocatorKnown(state);
               rec.decline.detail = `allocator: ${known === false ? allocatorCause ?? "unknown before any tracked step" : `host ${known}`}`;
               rec.allocatorChain = [...new Set(allocatorChain)];
+              if (RESEED_DETAIL) (rec as { allocatorLastFailedReseed?: string | null }).allocatorLastFailedReseed = lastFailedReseed;
             }
             if (rec.decline.reason === "sprite-order lend unknown") {
               const host = state.liveMoveSpriteAllocatorHost?.orderHost;
@@ -272,7 +279,7 @@ function playBattle(battle: number, seed: number, streak: number): void {
     if (state.battlePartySelect && !before.battlePartySelect) units.push("party menu open (ResetSpriteData)");
     if (state.battleResolutionPresentation?.lifecycle.phase === "presenting-switch-in"
       && before.battleResolutionPresentation?.lifecycle.phase !== "presenting-switch-in") units.push("forced switch-in (allocator not reseedable)");
-    if (knownAfter === true) { allocatorCause = null; allocatorChain = []; }
+    if (knownAfter === true) { allocatorCause = null; allocatorChain = []; lastFailedReseed = null; }
     else if (knownAfter === false && allocatorKnown(before) === true) {
       allocatorCause = allocatorInvalidatingUnit(before, state);
       allocatorInvalidations.set(allocatorCause, (allocatorInvalidations.get(allocatorCause) ?? 0) + 1);
