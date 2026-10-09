@@ -86,6 +86,18 @@
   Worker gates 1,589 files / 13,092 tests, build, differential 624/624. Supervisor: aud56Probe full rerun (186 runs) + extract —
   every audit field byte-identical to the committed receipt; union src == the worker's tested tree -> touched tests 61/61, smoke 448.
   Finding -> ISSUES #157 (weather-continuing event battler vs the ROM's battler 0).
+- Folded Opus worker `8ec1a4fb1` as `108aae871` (union src tree `8d3b44bb`): words57 — the words-deferred order lend now REPLAYS PAST
+  battle units (opponent faint, party summary next / hide, next-mon send-out, the opponent's recall, forced switch-out + switch-in on
+  either side) for Rain Dance / RAIN_CONTINUES markers (opt-in `LIVE_WORDS_ORDER_DEFERRED_REPLAY`); the replay tracker's entry-label
+  roles give the real-slot lend 66/66 (`words57RhoCheck.ts`). ROM chain check: 24 jobs x2 fresh, explicit lab seed, 47/47 chains exact
+  (27 through battle units, 30/30 consumers after a battle unit; 161,079 frames). Sand-Attack / Mud-Slap stay declining after a send-in:
+  their carry reads the CONSUMER's field and one species change moves the post-body order in 32 / 1,008 trials -> the marker must record
+  the body's displayed species (orchestrator call site; next step words59). Census seeds 0..299 vs `a860ded6a`: 94.23 -> 94.40 % by
+  count, 95.42 -> 95.68 % by frames (+14 / +2,968), faithful-random history 153 / 25,599 -> 172 / 29,188 (incl. 5 already-live
+  order-independent Flamethrower / Rock Slide commands that now read the resolved lend), 0 regressions, identical commands + digest;
+  gates53 row A 0..999 258 / 42,054 -> 208 / 32,186. Parity: census battle 40 across Scene ON, a second presentation seed and Scene OFF
+  (47 decision snapshots). Worker gates 1,589 files / 13,074 tests, build, differential 624/624. Supervisor: `words57Run.sh` into fresh
+  dirs — 24/24 A == B, 47/47 exact, all receipts byte-identical; census rerun +14 / +2,968, 0 regressions, digest identical.
 
 ## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
 
