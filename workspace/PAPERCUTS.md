@@ -8,6 +8,21 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Sprite-order / census tooling gaps hit on 2026-10-09 (S10A overnight)
+
+- **What / cost:** (1) the 300-seed `liveShareCensus.ts` run takes ~110-120 s — exactly the Bash tool's default timeout, so
+  runs get auto-backgrounded unless the call passes an explicit timeout (~1 min, several workers); (2) the host's order-event
+  keys (TURN_TRAP by wrapped move, choosetwoturnanim turn keys) are re-implemented in `orderCrossBodyRouteScan.ts`,
+  `spriteOrderCrossBodyCorpusReplay.ts` and `prep45OrderCensus.ts`, so every new key needs hand-syncing in three tools (~15 min);
+  (3) `prep43Probe.py` species variants only work for scenarios that set full parties; swapping a Factory set id hits rental-range
+  / repeated-held-item legality errors (~3 min); (4) the three allocator net-zero receipts use different schemas (prep44 rows
+  marked `window-incomplete` carry no `netZero`), so the pin test needs per-receipt code (~10 min); (5)
+  `generatedCommandAnimationReplay` records no semantic events with Scene OFF, so ON/OFF parity can compare rules / RNG /
+  boundaries but not the event queue itself (~10 min).
+- **Hits:** 1 session, ~40 min across three workers.
+- **Fix:** default census runs to a progress line + document `timeout: 300000`; export one order-event-key helper from
+  `liveSpriteOrderHost.ts` and import it in the tools; one shared receipt reader for net-zero audits.
+
 ## Live-integration tooling gaps hit repeatedly on 2026-10-07 (S10A finish run)
 
 - **What / cost:** (1) plain `npx tsc` / `npx vitest run` on ~20+ files runs out of the default 4 GB heap — use
