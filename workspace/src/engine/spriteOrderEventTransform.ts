@@ -8,7 +8,8 @@
  *   actions committed            D[the pair, FDERIVED = F order at creation] (EndBounceEffect)
  *   move menu / cancel / cursor  no-op
  *   move-animation body          EXACT plan of (moveId, attacker side) from SPRITE_ORDER_PRODUCTION_BODIES, else invalidate;
- *                                Giga Drain (202): the geometry-keyed plan of the event's species (spriteOrderGigaDrainPlan.ts)
+ *                                Giga Drain (202) / Mega Drain (72): the geometry-keyed plan of the event's species
+ *                                (spriteOrderGigaDrainPlan.ts)
  *   hit-animation, target shown  blip: C[f]; D[n0] (DoHitAnimHealthboxEffect); a hidden target is unproven -> invalidate
  *   stat animation               +-1 / multiple: C[f]; D[n0]; +-2: C[f] and the carried D at the next boundary
  *   status animation             PSN / PRZ / SLP / INFATUATION plans; any other status -> invalidate
@@ -50,7 +51,9 @@
  * Any unit whose guard fails or whose plan does not resolve invalidates. Once invalid the tracker stays invalid
  * until a fresh known entry or a party-menu reset; it never guesses.
  */
-import { gigaDrainSpriteOrderPlanForGeometry, type SpriteOrderBodyGeometry } from "./spriteOrderGigaDrainPlan.ts";
+import {
+  gigaDrainSpriteOrderPlanForGeometry, megaDrainSpriteOrderPlanForGeometry, type SpriteOrderBodyGeometry,
+} from "./spriteOrderGigaDrainPlan.ts";
 import {
   KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, applySpriteOrderUnitPlan, createSpriteOrderPlanCursor,
   initSpriteOrderState,
@@ -189,18 +192,23 @@ function planAt(index: number | undefined): SpriteOrderPlan | null {
 }
 
 /** EXACT body plan of `(moveId, attacker side)`, or null (NEEDS-KEYS / not observed / substitute / transform). */
-const GIGA_DRAIN_MOVE_ID = 202;
-/** Move bodies whose plan is keyed by the battlers' geometry: the host attaches `geometry` to their move-animation event. */
-export const SPRITE_ORDER_GEOMETRY_KEYED_BODIES: ReadonlySet<number> = new Set([GIGA_DRAIN_MOVE_ID]);
-const gigaDrainPlans = new Map<string, SpriteOrderPlan | null>();
-/** Body 202's decoded plan at the geometry (memoised per side and species pair); null when a species has no battle picture. */
-export function spriteOrderGigaDrainBodyPlan(side: "player" | "opponent", geometry: SpriteOrderBodyGeometry): SpriteOrderPlan | null {
-  const key = `${side}:${geometry.playerSpecies}:${geometry.opponentSpecies}`;
-  if (!gigaDrainPlans.has(key)) {
-    const text = gigaDrainSpriteOrderPlanForGeometry(side, geometry);
-    gigaDrainPlans.set(key, text === null ? null : decodeSpriteOrderPlan(text));
+/** Geometry-keyed move bodies (Giga Drain 202, Mega Drain 72: same-frame orb destroys order by the battlers' geometry,
+ * spriteOrderGigaDrainPlan.ts): the host attaches `geometry` to their move-animation event. */
+const GEOMETRY_PLAN_TEXT: ReadonlyMap<number, typeof gigaDrainSpriteOrderPlanForGeometry> = new Map([
+  [202, gigaDrainSpriteOrderPlanForGeometry], [72, megaDrainSpriteOrderPlanForGeometry],
+]);
+export const SPRITE_ORDER_GEOMETRY_KEYED_BODIES: ReadonlySet<number> = new Set(GEOMETRY_PLAN_TEXT.keys());
+const geometryPlans = new Map<string, SpriteOrderPlan | null>();
+/** A geometry-keyed body's decoded plan (memoised per move, side and species pair); null when a species has no battle picture. */
+export function spriteOrderGeometryBodyPlan(
+  moveId: number, side: "player" | "opponent", geometry: SpriteOrderBodyGeometry,
+): SpriteOrderPlan | null {
+  const key = `${moveId}:${side}:${geometry.playerSpecies}:${geometry.opponentSpecies}`;
+  if (!geometryPlans.has(key)) {
+    const text = GEOMETRY_PLAN_TEXT.get(moveId)?.(side, geometry) ?? null;
+    geometryPlans.set(key, text === null ? null : decodeSpriteOrderPlan(text));
   }
-  return gigaDrainPlans.get(key)!;
+  return geometryPlans.get(key)!;
 }
 
 export function spriteOrderProductionBodyPlan(moveId: number, side: "player" | "opponent"): SpriteOrderPlan | null {
@@ -416,9 +424,9 @@ export function applySpriteOrderPresentationEvent(
     }
     case "move-animation":
       if (tracker.promptPair !== null) return invalidateSpriteOrderTracker(tracker, "body while the prompt pair lives");
-      // Giga Drain: same-frame orb destroys order by the battlers' geometry (spriteOrderGigaDrainPlan.ts); no geometry -> no plan.
-      return applyPlan(tracker, event.moveId === GIGA_DRAIN_MOVE_ID
-        ? event.geometry === undefined ? null : spriteOrderGigaDrainBodyPlan(event.attackerSide, event.geometry)
+      // Giga Drain / Mega Drain: same-frame orb destroys order by the battlers' geometry (spriteOrderGigaDrainPlan.ts); no geometry -> no plan.
+      return applyPlan(tracker, SPRITE_ORDER_GEOMETRY_KEYED_BODIES.has(event.moveId)
+        ? event.geometry === undefined ? null : spriteOrderGeometryBodyPlan(event.moveId, event.attackerSide, event.geometry)
         : spriteOrderProductionBodyPlan(event.moveId, event.attackerSide),
       `body ${event.moveId}:${event.attackerSide}`, "body");
     case "hit-animation":

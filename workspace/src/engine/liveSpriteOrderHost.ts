@@ -399,7 +399,7 @@ export function advanceLiveSpriteOrderHost(
     let index = from;
     while (index < events.length && (strict ? events[index]!.sequence < limit : events[index]!.sequence <= limit)) {
       let mapped = orderEventOf(events, index, hidden);
-      // gdgeo: a geometry-keyed body (Giga Drain) carries the displayed species of its own command; unknown -> no plan (invalidates).
+      // gdgeo: a geometry-keyed body (Giga Drain / Mega Drain) carries the displayed species of its own command; unknown -> no plan.
       if (mapped.event?.kind === "move-animation" && SPRITE_ORDER_GEOMETRY_KEYED_BODIES.has(mapped.event.moveId)) {
         const geometry = bodyGeometryAt?.(segmentIndex, events[index]!.sequence);
         if (geometry !== undefined) mapped = { ...mapped, event: Object.freeze({ ...mapped.event, geometry }) };

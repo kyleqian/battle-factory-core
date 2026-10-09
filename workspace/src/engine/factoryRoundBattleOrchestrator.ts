@@ -258,7 +258,7 @@ export type FactoryFacilityState = Readonly<{
 
 /**
  * S10A gdgeo: the displayed species at a resolution segment's move-animation command (the field the live renderer draws the body
- * on), the key of the Giga Drain sprite-order plan (spriteOrderGigaDrainPlan.ts); undefined when the segment has no such command.
+ * on), the key of the Giga Drain / Mega Drain sprite-order plans (spriteOrderGigaDrainPlan.ts); undefined without such a command.
  */
 function liveSpriteOrderBodyGeometryAt(
   resolution: Readonly<{ segments: readonly Parameters<typeof battleResolutionMoveAnimationField>[0][] }>,

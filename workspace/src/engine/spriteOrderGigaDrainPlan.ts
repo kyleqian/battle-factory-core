@@ -1,7 +1,8 @@
-// S10A gdgeo (docs/giga-drain-geometry-order.md): the Giga Drain body's (202) sprite-order plan is keyed by the battlers' live
-// geometry. The plan comes from src/animation/gigaDrain.ts's own timeline (gigaDrainSpriteOrderPlanText: the renderer's orb
-// arithmetic), at the attacker / target picture coordinates the live adapter uses (liveMoveAnimation.ts `case 202`: the target's
-// animationCenter and the attacker's picOffsetPoint, both GetBattlerSpriteCoord X_2 / Y_PIC_OFFSET of the species corner).
+// S10A gdgeo (docs/giga-drain-geometry-order.md): the Giga Drain (202) and Mega Drain (72) bodies' sprite-order plans are keyed by
+// the battlers' live geometry. Each plan comes from its renderer's own timeline (gigaDrain.ts / megaDrain.ts through
+// absorptionOrbSpriteOrderPlan.ts: the renderer's orb arithmetic), at the attacker / target picture coordinates the live adapter
+// uses (liveMoveAnimation.ts `case 202` / `case 72`: the target's animationCenter and the attacker's picOffsetPoint, both
+// GetBattlerSpriteCoord X_2 / Y_PIC_OFFSET of the species corner).
 import { gigaDrainSpriteOrderPlanText } from "../animation/gigaDrain.ts";
 import { megaDrainSpriteOrderPlanText } from "../animation/megaDrain.ts";
 import { battleCommandFieldSpeciesSpriteOrigin, createBattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
