@@ -198,3 +198,7 @@ Caveats:
 | `npm run build` | pass |
 | `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 2dcdd5883` | PASS, 624 / 624 byte-identical |
 | `git diff --check` | clean |
+
+**Fresh reproduction** (after the gates, `/tmp/p48-repro`, all 292 jobs × 2 fresh processes, 0 A/B differ): every one of the 291
+committed jobs' unit receipts is byte-identical to `fixtures/plans48/units.json`. The only addition is `fz-opp-s27`, which completed
+both runs this time (A == B, no freeze). Every `check.json` label's instances / matched counts are identical.
