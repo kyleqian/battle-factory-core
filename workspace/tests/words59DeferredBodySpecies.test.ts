@@ -116,3 +116,28 @@ describe("words59: the marker records the body species for the dirt units only",
     }
   });
 });
+
+describe("words59: order-dependent-consumer probes (tools/integration/words59Run.sh; Water Pulse / Silver Wind / Tackle after a dirt body + KO + send-out)", () => {
+  const W59 = JSON.parse(readFileSync("tools/integration/fixtures/words59/words59-lend-vectors.json", "utf8")) as typeof FIXTURE;
+  it("every consumer resolves to the ROM order with the body species; the species-free marker declines past the send-out", () => {
+    const tally = { vectors: 0, pastReplacement: 0 };
+    for (const v of W59.vectors) {
+      const label = `${v.job} ${v.consumer}`;
+      const byKey = new Map<string, PresentationRngWords>();
+      for (const m of markers(v.marker)) {
+        const ram = W59.words[m.key]!;
+        const words = presentationRngPlanWords(createPresentationRngState(ram.activationValue, "pinned"), planOf(m));
+        expect(words.words, m.key).toEqual(ram.draws.flatMap((row) => row.slice(1)));
+        byKey.set(m.key, words);
+      }
+      const carry = liveWordsOrderDeferredCarry((key) => byKey.get(key) ?? null, anchorsOf(v.species));
+      tally.vectors += 1;
+      expect(resolveSpriteOrderDeferredLend(withBodySpecies(v.marker, v.species, () => v.species), carry, LIVE_WORDS_ORDER_DEFERRED_REPLAY), label)
+        .toEqual(romLend(v.rom));
+      if (!dirtBeforeReplacement(v.marker)) continue;
+      tally.pastReplacement += 1;
+      expect(resolveSpriteOrderDeferredLend(v.marker, carry, LIVE_WORDS_ORDER_DEFERRED_REPLAY), label).toBeNull();
+    }
+    expect(tally).toEqual({ vectors: 16, pastReplacement: 11 });
+  });
+});

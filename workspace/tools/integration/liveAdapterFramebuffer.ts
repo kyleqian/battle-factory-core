@@ -117,7 +117,7 @@ export interface Fixture {
    * unit's activation) seeds a pinned host whose words follow the production law (body activation / non-consuming sub-stream) under the
    * unit's production key; the render seam reads them by key, exactly as in play. Production never reads capture rows.
    */
-  wordsChain?: { turns: (readonly (string | number)[])[][]; words: { value: number; source: string }[] };
+  wordsChain?: { turns: (readonly (string | number | Readonly<{ player: number; opponent: number }>)[])[][]; words: { value: number; source: string }[] };
   /**
    * Faithful-random (Random2) bodies: the oracle-pinned presentation stream value at the activation frame (gRng2Value
    * after the first anim-active frame, from a direct-mGBA probe of this scenario; provenance "pinned"). The harness
@@ -317,7 +317,10 @@ export function fixtureWordsChain(f: Fixture): { spriteOrderInput: LiveMoveSprit
         if (liveMoveRandom2Plan(req) !== null) bodies.push(...activateLiveMovePresentationRng(pinned(f.presentationRngActivation!.value), req, bodyKey).bodies);
         return;
       }
-      order = markLiveSpriteOrderDeferredBody(order, bodyLend, req, bodyKey);
+      // words59: a body step may carry the species displayed at the body (["body", move, side, { player, opponent }]), recorded in the
+      // marker as the orchestrator records it (the dirt carry's anchors past a send-out)
+      const bodySpecies = step[3] as { player: number; opponent: number } | undefined;
+      order = markLiveSpriteOrderDeferredBody(order, bodyLend, req, bodyKey, bodySpecies);
       if ([28, 189, 240].includes(req.moveId)) bodies.push(...activateLiveMovePresentationRng(pinned(words.shift()!.value), req, bodyKey).bodies);
     });
     if (t < lastTurn) order = advanceLiveSpriteOrderHost(order, resolution, Number.POSITIVE_INFINITY);
