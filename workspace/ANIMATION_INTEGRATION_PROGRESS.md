@@ -44,6 +44,15 @@
 - Supervisor union gates on `45a5832f7` (src `21729666`): census seeds 0..299 85.71 % live by count / 85.41 % by frames (session
   start 81.54 / 80.19), typecheck, full suite 1,575 files / 12,973 tests, build, differential 624/624 vs `8095eb86c`
   (`tools/integration/fixtures/union-gates-45a5832f7.json`).
+- prep46 (side, `613328387`, new files only): WORDS-DEPENDENT order units. With RAM-read Random2 words (gRng2Value per frame),
+  the carry through the body's own sprite program is exact for Sand-Attack 28 (8 bodies, 120/120 allocation windows), Mud-Slap
+  189 (6, 90/90), Rain Dance 240 (4, 320/320) and RAIN_CONTINUES (General_Rain; new drop program, 8, 320/320); 15/15 chains to the
+  next consumer exact (12 jobs x2 fresh, all A == B). RAIN_CONTINUES can take words as a NON-CONSUMING per-event read (existing
+  move-body words byte-identical in 40/40 schedules; a consuming read moves 240/320 bodies and would need a policy bump). Temp
+  patch (generalized deferred lend for any consumer after 28 / 189 / 240; seam resolve memoized) census seeds 0..299 on
+  `04187aeb7`: 84.73 -> 85.17 % by count, 83.97 -> 84.36 % by frames (+35 / +4,550), 0 regressions; with RAIN_CONTINUES predicted
+  +162 / +26,931. CLAIM: such consumers are faithful random (their order depends on surrogate words) — a fold needs per-command
+  accounting. Dive not reached. Supervisor: `prep46Run.sh` into fresh dirs — all 13 receipts byte-identical.
 
 ## 2026-10-08 (overnight) — S10A: Substitute presentation live, deferred order lend, live-share census, sprite-order plans; 245 + 13 + 18
 
