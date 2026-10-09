@@ -225,9 +225,12 @@ also holds on the other side. This is independent confirmation of the probes.
   by design.
 
 **A production fold must also:**
-- Regenerate the table rather than hand-edit it. `tools/integration/spriteOrderProductionTable.ts` appends fixture rows (prep43:
-  `fixtures/prep43/plan-rows.json`, line 157). Add an equivalent `fixtures/prep45/plan-rows.json` (rows-v1) built from
-  `check.json`'s plans and append it, so the indices match the patch.
+- Regenerate the table rather than hand-edit it. Append `fixtures/prep45/plan-rows.json` (rows-v1, written by
+  `prep45PlanRows.ts` from `check.json`: 15 bodies and 8 anims) after `prep43/plan-rows.json` in
+  `tools/integration/spriteOrderProductionTable.ts:157`.
+  - `prep45PlanRowsVerify.ts` renders the table that way. Its key → plan-text mapping is identical to the temporary patch's: 508
+    bodies, 20 anims, 213 plans; receipt `plan-rows-verify-map.json`.
+  - Only the indices differ: the renderer puts appended bodies before anims.
 - Update the pins in `tests/spriteOrderEventTransform.test.ts:25-26`: BODIES 493 → 508, PLANS 201 → 213. The anim assertions
   (`:123-131`) gain the new names.
 - Update `tests/liveSpriteOrderHost.test.ts:344`, the choosetwoturnanim table, with `[76, 1, 10076]`.
@@ -298,6 +301,8 @@ Files (`tools/integration/`):
 - `prep45Check.ts` — per-frame check.
 - `prep45RandomScan.py` — source scan.
 - `prep45CorpusReplay.ts` — replays.
+- `prep45PlanRows.ts` / `prep45PlanRowsVerify.ts` — rows-v1 for the generator, and the check of the regenerated table against the
+  patch.
 - `prep45Run.sh` — reproduction.
 - `prep43CensusDelta.py` — pairing and delta; existing, unchanged.
 
@@ -305,6 +310,7 @@ Receipts (`fixtures/prep45/`), with `.gitattributes` `*.diff -whitespace`:
 - `census-{before,after-all}-seeds0-299.json`, `census-delta-all-seeds0-299.json`
 - `chains-{before,after-all}-seeds0-299.json`, `chains-predict-all.json`
 - `units.json`, `units-summary.txt`, `check.json`, `random-scan.txt`
+- `plan-rows.json`, `plan-rows-verify-map.json`
 - `replay-{before,after}.json`
 - `prep45-temp-src.diff`
 
