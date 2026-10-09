@@ -1,0 +1,43 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/geoice/controls/scenarios/blizzard-player-bulbasaur-metapod.json",
+ "attacker": {
+  "species": "BULBASAUR",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "METAPOD",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 152,
+  "playerMaxHp": 152,
+  "opponentHp": 125,
+  "opponentMaxHp": 125,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "player BULBASAUR -> METAPOD",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 448,
+  "ageOffset": 0
+ },
+ "schema": "geoice-live-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-player.json",
+  "acceptedActivation": 214,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 59,
+   "start": 77,
+   "end": 448
+  },
+  "offset": 0
+ }
+}

@@ -72,7 +72,7 @@ import { BIND_ANIMATION_PROFILE } from "../animation/bind.ts";
 import { WRAP_ANIMATION_PROFILE } from "../animation/wrap.ts";
 import { CANONICAL_DRAGON_BREATH_FIRE_GEOMETRY } from "../animation/dragonBreath.ts";
 import { icyWindEffectOamOrderAtAge } from "../animation/icyWind.ts";
-import { blizzardEffectOamOrderAtAge } from "../animation/blizzard.ts";
+import { blizzardEffectOamOrderAtAge, blizzardImpactStartAge } from "../animation/blizzard.ts";
 import { YAWN_CLEANUP_AGE } from "../animation/yawn.ts";
 import { ROCK_THROW_ANIMATION_PROFILE } from "../animation/rockThrow.ts";
 import { perishSongNoteOrderFromFree } from "../animation/perishSong.ts";
@@ -698,11 +698,12 @@ export function liveBattlerCoordAttrs(
 
 const effectOrderProvable = new Map<string, boolean>();
 /**
- * Icy Wind / Blizzard replay source CreateSprite/SortSprites against the retained OAM slot table, which
- * their reducers verify and throw on (icyWind.ts:257, blizzard.ts:562). The table was captured at the
- * accepted geometry; a species pair whose pic points sort the particles differently is not proven, so
- * the live seam returns null (the scene-off view) instead of throwing mid-battle. The result depends on
- * the geometry only and is cached per (move, side, geometry).
+ * S10A geoice (docs/icy-wind-blizzard-geometry.md): Icy Wind / Blizzard DERIVE their effect OAM slots and draw order from the
+ * reducers' own replay of source CreateSprite (lowest free slot) / DestroySprite / SortSprites at the displayed geometry
+ * (icyWind.ts / blizzard.ts `*OamReplay`). Declines (the scene-off view) only where that replay or the window is not covered:
+ * the replay's slot pool exhausted (throws), or a Blizzard geometry whose traveling particles clean up on another age than
+ * the fixed live window (impact start + 164 != liveMoveAnimationDuration: the opponent side's impact start moves 194..206 with
+ * the species pair). Depends on the geometry only; cached per (move, side, geometry).
  */
 function provableEffectOrder(moveId: 196 | 59, side: "player" | "opponent", duration: number,
   geometry: Parameters<typeof icyWindEffectOamOrderAtAge>[2] | Parameters<typeof blizzardEffectOamOrderAtAge>[2]): boolean {
@@ -712,12 +713,14 @@ function provableEffectOrder(moveId: 196 | 59, side: "player" | "opponent", dura
     try {
       if (moveId === 196) icyWindEffectOamOrderAtAge(duration - 1, side, geometry as Parameters<typeof icyWindEffectOamOrderAtAge>[2]);
       else blizzardEffectOamOrderAtAge(duration - 1, side, geometry);
-      ok = true;
+      ok = moveId === 196 || blizzardImpactStartAge(side, geometry) + BLIZZARD_IMPACT_TO_WINDOW_END === duration;
     } catch { ok = false; }
     effectOrderProvable.set(key, ok);
   }
   return ok;
 }
+/** Blizzard's live window ends 164 rows after its impact start (accepted 208 + 164 = 372 player, 197 + 164 = 361 opponent). */
+const BLIZZARD_IMPACT_TO_WINDOW_END = 164;
 
 /** Free OBJ slots over the known-entry in-use set [0,1,2,6,8,60..63] (prep13 s1.2 launchSpriteSlots), ascending. */
 const KNOWN_ENTRY_FREE_SPRITE_SLOTS: readonly number[] = Object.freeze(

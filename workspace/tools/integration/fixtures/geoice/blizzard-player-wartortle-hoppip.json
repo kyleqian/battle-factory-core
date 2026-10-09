@@ -1,0 +1,43 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/geoice/scenarios/blizzard-player-wartortle-hoppip.json",
+ "attacker": {
+  "species": "WARTORTLE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "HOPPIP",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 166,
+  "playerMaxHp": 166,
+  "opponentHp": 110,
+  "opponentMaxHp": 110,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "player WARTORTLE -> HOPPIP",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 448,
+  "ageOffset": 0
+ },
+ "schema": "geoice-live-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-player.json",
+  "acceptedActivation": 214,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 59,
+   "start": 77,
+   "end": 448
+  },
+  "offset": 0
+ }
+}

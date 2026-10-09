@@ -97,11 +97,14 @@ describe("live prep2 move adapters", () => {
       .toEqual(liveBattlerAnchors("player", createBattleCommandFieldArtView(alt)).picOffsetPoint);
   });
 
-  it("falls back to the scene-off view where the retained particle slot table is not proven", () => {
-    // icyWind.ts:257 / blizzard.ts:562 throw when the replayed SortSprites order allocates other slots.
+  it("derives the particle slots at any geometry; falls back only where Blizzard's impact start misses the live window", () => {
+    // S10A geoice (docs/icy-wind-blizzard-geometry.md): the slots come from the replay, so the pair the retained table did not
+    // cover (PORYGON -> TOGETIC) is live; Blizzard opponent ARBOK -> CATERPIE has impact start 198 (window 361 != 197 + 164).
     expect(liveMoveAnimationPresentation(request(196, 0), displayed("SWINUB", "ONIX"), 0)).not.toBeNull();
-    expect(liveMoveAnimationPresentation(request(196, 0), displayed("PORYGON", "TOGETIC"), 0)).toBeNull();
+    expect(liveMoveAnimationPresentation(request(196, 0), displayed("PORYGON", "TOGETIC"), 0)).not.toBeNull();
     expect(() => render(displayed("PORYGON", "TOGETIC"), 196, 0, 100)).not.toThrow();
+    expect(liveMoveAnimationPresentation(request(59, 1), displayed("CATERPIE", "ARBOK"), 0)).toBeNull();
+    expect(() => render(displayed("CATERPIE", "ARBOK"), 59, 1, 100)).not.toThrow();
   });
 
   it("renders every move with an alternate carrier in both orientations without fixture-species throws", () => {

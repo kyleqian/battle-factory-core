@@ -1,0 +1,43 @@
+{
+ "move": "ICY_WIND",
+ "probe": "tools/compare/icyWindProbe.py",
+ "scenario": "tools/integration/fixtures/geoice/scenarios/icy-wind-player-bulbasaur-metapod.json",
+ "attacker": {
+  "species": "BULBASAUR",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "METAPOD",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 120,
+  "playerMaxHp": 120,
+  "opponentHp": 125,
+  "opponentMaxHp": 125,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "player BULBASAUR -> METAPOD",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 363,
+  "ageOffset": 0
+ },
+ "schema": "geoice-live-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-icy-wind-player.json",
+  "acceptedActivation": 220,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 196,
+   "start": 77,
+   "end": 362
+  },
+  "offset": 0
+ }
+}

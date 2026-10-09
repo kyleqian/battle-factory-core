@@ -1,0 +1,43 @@
+{
+ "move": "ICY_WIND",
+ "probe": "tools/compare/icyWindProbe.py",
+ "scenario": "tools/integration/fixtures/geoice/scenarios/icy-wind-player-venusaur-luvdisc.json",
+ "attacker": {
+  "species": "VENUSAUR",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "LUVDISC",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 155,
+  "playerMaxHp": 155,
+  "opponentHp": 118,
+  "opponentMaxHp": 118,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "player VENUSAUR -> LUVDISC",
+ "denseWindow": {
+  "startFrame": 76,
+  "endFrame": 362,
+  "ageOffset": 0
+ },
+ "schema": "geoice-live-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-icy-wind-player.json",
+  "acceptedActivation": 220,
+  "altActivation": 76,
+  "altInterval": {
+   "move": 196,
+   "start": 76,
+   "end": 362
+  },
+  "offset": 0
+ }
+}

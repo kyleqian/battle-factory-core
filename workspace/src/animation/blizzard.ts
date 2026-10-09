@@ -336,18 +336,18 @@ function advanceSnowball(sprite: MutableFastParticle, side: BlizzardAttackerSide
   }
 }
 
-const BLIZZARD_SNOWBALL_OAM_SLOTS = [3, 5, 9, 11, 13, 15, 17, 19, 21, 23, 25, 4, 7, 10] as const;
 const BLIZZARD_LARGE_CRYSTAL_Y = [0, -10, 10, -20, 15, -20, 20, 0, -10, 10, -20, 15, -20, 20] as const;
-const BLIZZARD_LARGE_CRYSTAL_OAM_SLOTS = {
-  player: [4, 7, 10, 12, 14, 16, 18, 20, 22, 24, 26, 27, 28, 29],
-  opponent: [4, 7, 10, 12, 14, 16, 18, 20, 22, 24, 26, 27, 28, 12],
-} as const;
+// OAM slots are DERIVED by the allocator replay (blizzardOamReplay), never stored: at the accepted PELIPPER / ONIX geometry it
+// reproduces the retained capture (tests/blizzardGeometry.test.ts keeps that table); other species geometry moves the slots.
+type BlizzardSlotOf = (owner: number) => number;
+const NO_SLOT: BlizzardSlotOf = () => -1;
 
 function snowballAtAge(
   callIndex: number,
   age: number,
   side: BlizzardAttackerSide,
   geometry: BlizzardGeometry,
+  slotOf: BlizzardSlotOf = NO_SLOT,
 ): BlizzardSnowballState | null {
   const localAge = age - BLIZZARD_SNOWBALL_CALLS[callIndex]!.sourceAge;
   if (localAge < 0) return null;
@@ -356,7 +356,7 @@ function snowballAtAge(
   if (sprite.destroyed) return null;
   return {
     callIndex,
-    oamSlot: BLIZZARD_SNOWBALL_OAM_SLOTS[callIndex]!,
+    oamSlot: slotOf(blizzardEffectOwner("snowball", callIndex)),
     callback: sprite.callback as BlizzardSnowballCallback,
     x: sprite.x, y: sprite.y, x2: sprite.x2, y2: sprite.y2,
     data: sprite.data as unknown as BlizzardSnowballState["data"],
@@ -412,8 +412,9 @@ function advanceLargeCrystal(sprite: MutableFastParticle): void {
 function largeCrystalAtAge(
   callIndex: number,
   age: number,
-  side: BlizzardAttackerSide,
+  _side: BlizzardAttackerSide,
   geometry: BlizzardGeometry,
+  slotOf: BlizzardSlotOf = NO_SLOT,
 ): BlizzardLargeCrystalState | null {
   const localAge = age - BLIZZARD_SNOWBALL_CALLS[callIndex]!.sourceAge;
   if (localAge < 0) return null;
@@ -422,7 +423,7 @@ function largeCrystalAtAge(
   if (sprite.destroyed) return null;
   return {
     callIndex,
-    oamSlot: BLIZZARD_LARGE_CRYSTAL_OAM_SLOTS[side][callIndex]!,
+    oamSlot: slotOf(blizzardEffectOwner("traveling", callIndex)),
     callback: "AnimWiggleParticleTowardsTarget",
     x: sprite.x, y: sprite.y, x2: sprite.x2, y2: sprite.y2,
     data: sprite.data as unknown as BlizzardLargeCrystalState["data"],
@@ -454,7 +455,6 @@ export const BLIZZARD_IMPACT_CRYSTALS: readonly BlizzardImpactCrystalCall[] = [
 ] as const;
 
 const BLIZZARD_IMPACT_CREATE_OFFSETS = [0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60] as const;
-const BLIZZARD_IMPACT_OAM_SLOTS = [3, 4, 5, 7, 9, 10, 11, 3, 4, 5, 7] as const;
 
 /** The move-owned projection of the live pre-Blizzard `sSpriteOrder`. */
 export const BLIZZARD_EFFECT_SPRITE_ORDER_SEED = [
@@ -519,35 +519,32 @@ function blizzardEffectOrderKey(
 }
 
 /**
- * Replays Blizzard's source CreateSprite/DestroySprite lifecycle and the
- * stable `SortSprites` pass. This is a source-relative OAM order, not an
- * age-indexed painter table.
+ * Replays Blizzard's source CreateSprite/DestroySprite lifecycle (CreateSprite
+ * takes the lowest free slot of the pool) and the stable `SortSprites` pass,
+ * advanced through `age` and cached per (side, geometry). This is a
+ * source-relative OAM order and slot assignment, not an age-indexed painter
+ * table. Throws only when the pool is exhausted.
  */
-export function blizzardEffectOamOrderAtAge(
+function blizzardOamReplay(
   age: number,
   side: BlizzardAttackerSide,
   geometry: BlizzardGeometry,
-): readonly BlizzardEffectOamEntry[] {
-  if (!Number.isInteger(age)) throw new RangeError(`Blizzard age must be an integer, got ${age}`);
-  if (age < 0) return [];
-  const cacheKey = `${side}:${geometry.attackerCenter.x},${geometry.attackerCenter.y}`
+  orderSeed: readonly number[] = BLIZZARD_EFFECT_SPRITE_ORDER_SEED,
+): BlizzardOamOrderCache {
+  const cacheKey = `${orderSeed.join(",")}:${side}:${geometry.attackerCenter.x},${geometry.attackerCenter.y}`
     + `:${geometry.targetCenter.x},${geometry.targetCenter.y}`;
   let cache = blizzardOamOrderCache.get(cacheKey);
   if (!cache) {
     cache = {
-      scheduler: createSpriteOrderState(
-        BLIZZARD_EFFECT_SPRITE_ORDER_SEED,
-        BLIZZARD_EFFECT_SPRITE_ORDER_SEED,
-      ),
+      scheduler: createSpriteOrderState(BLIZZARD_EFFECT_SPRITE_ORDER_SEED, orderSeed),
       nextAge: 0,
       orders: new Map(),
+      slots: new Map(),
     };
     blizzardOamOrderCache.set(cacheKey, cache);
   }
-  const cached = cache.orders.get(age);
-  if (cached) return cached;
   for (let tick = cache.nextAge; tick <= age; tick += 1) {
-    const frame = blizzardAtAge(tick, side, geometry);
+    const frame = blizzardFrameAtAge(tick, side, geometry, NO_SLOT);
     const desired = blizzardEffectEntries(frame);
     const desiredOwners = new Set(desired.map((entry) =>
       blizzardEffectOwner(entry.kind, entry.callIndex)));
@@ -556,12 +553,7 @@ export function blizzardEffectOamOrderAtAge(
       const key = blizzardEffectOrderKey(entry, frame);
       if (spriteSlotForOwner(cache.scheduler, owner) === null) {
         cache.scheduler = createOrderedSprite(cache.scheduler, owner, key);
-        const allocated = spriteSlotForOwner(cache.scheduler, owner);
-        if (allocated !== entry.oamSlot) {
-          throw new Error(
-            `Blizzard ${entry.kind} ${entry.callIndex} allocated slot ${allocated}, expected ${entry.oamSlot}`,
-          );
-        }
+        cache.slots.set(owner, spriteSlotForOwner(cache.scheduler, owner)!);
       } else {
         cache.scheduler = updateOrderedSprite(cache.scheduler, owner, key);
       }
@@ -581,18 +573,35 @@ export function blizzardEffectOamOrderAtAge(
     const order = cache.scheduler.order.flatMap((slot) => {
       const owner = ownerBySlot.get(slot);
       const entry = owner === undefined ? undefined : entryByOwner.get(owner);
-      return entry ? [entry] : [];
+      return entry ? [{ ...entry, oamSlot: slot }] : [];
     });
     cache.orders.set(tick, order);
     cache.nextAge = tick + 1;
   }
-  return cache.orders.get(age)!;
+  return cache;
+}
+
+/**
+ * The software-OAM order at `age`, each entry carrying its derived slot. `orderSeed` (a permutation of the pool) only exists for
+ * the history experiment (tests/icyWindBlizzardGeometry.test.ts): slots never depend on it.
+ */
+export function blizzardEffectOamOrderAtAge(
+  age: number,
+  side: BlizzardAttackerSide,
+  geometry: BlizzardGeometry,
+  orderSeed: readonly number[] = BLIZZARD_EFFECT_SPRITE_ORDER_SEED,
+): readonly BlizzardEffectOamEntry[] {
+  if (!Number.isInteger(age)) throw new RangeError(`Blizzard age must be an integer, got ${age}`);
+  if (age < 0) return [];
+  return blizzardOamReplay(age, side, geometry, orderSeed).orders.get(age)!;
 }
 
 interface BlizzardOamOrderCache {
   scheduler: SpriteOrderState;
   nextAge: number;
   readonly orders: Map<number, readonly BlizzardEffectOamEntry[]>;
+  /** Effect owner -> the slot CreateSprite gave it (fixed for the sprite's lifetime). */
+  readonly slots: Map<number, number>;
 }
 
 const blizzardOamOrderCache = new Map<string, BlizzardOamOrderCache>();
@@ -603,6 +612,7 @@ function impactCrystalAtAge(
   side: BlizzardAttackerSide,
   geometry: BlizzardGeometry,
   impactStartAge: number,
+  slotOf: BlizzardSlotOf,
 ): BlizzardImpactCrystalState | null {
   const localAge = age - impactStartAge - BLIZZARD_IMPACT_CREATE_OFFSETS[callIndex]!;
   if (localAge < 0 || localAge >= 37) return null;
@@ -613,7 +623,7 @@ function impactCrystalAtAge(
   const flickerAge = localAge - 17;
   return {
     callIndex,
-    oamSlot: BLIZZARD_IMPACT_OAM_SLOTS[callIndex]!,
+    oamSlot: slotOf(blizzardEffectOwner("impact", callIndex)),
     kind: call.kind,
     callback: localAge <= 16
       ? "RunStoredCallbackWhenAffineAnimEnds"
@@ -693,25 +703,35 @@ function scriptOffsetAtAge(age: number, impactStartAge: number): number | null {
   return 79;
 }
 
-/** Complete source-relative Move_BLIZZARD reducer. */
+/** Complete source-relative Move_BLIZZARD reducer. OAM slots come from the allocator replay. */
 export function blizzardAtAge(
   age: number,
   side: BlizzardAttackerSide,
   geometry: BlizzardGeometry,
 ): BlizzardState {
   if (!Number.isInteger(age)) throw new RangeError(`Blizzard age must be an integer, got ${age}`);
+  const slots = age < 0 ? new Map<number, number>() : blizzardOamReplay(age, side, geometry).slots;
+  return blizzardFrameAtAge(age, side, geometry, (owner) => slots.get(owner)!);
+}
+
+function blizzardFrameAtAge(
+  age: number,
+  side: BlizzardAttackerSide,
+  geometry: BlizzardGeometry,
+  slotOf: BlizzardSlotOf,
+): BlizzardState {
   const impactStartAge = blizzardImpactStartAge(side, geometry);
   const cleanupAge = impactStartAge + 163;
   const snowballs = age < 0 ? [] : BLIZZARD_SNOWBALL_CALLS.flatMap((_, callIndex) => {
-    const state = snowballAtAge(callIndex, age, side, geometry);
+    const state = snowballAtAge(callIndex, age, side, geometry, slotOf);
     return state ? [state] : [];
   });
   const largeCrystals = age < 0 ? [] : BLIZZARD_SNOWBALL_CALLS.flatMap((_, callIndex) => {
-    const state = largeCrystalAtAge(callIndex, age, side, geometry);
+    const state = largeCrystalAtAge(callIndex, age, side, geometry, slotOf);
     return state ? [state] : [];
   });
   const impactCrystals = age < impactStartAge ? [] : BLIZZARD_IMPACT_CRYSTALS.flatMap((_, callIndex) => {
-    const state = impactCrystalAtAge(callIndex, age, side, geometry, impactStartAge);
+    const state = impactCrystalAtAge(callIndex, age, side, geometry, impactStartAge, slotOf);
     return state ? [state] : [];
   });
   const impactLocal = age - impactStartAge;

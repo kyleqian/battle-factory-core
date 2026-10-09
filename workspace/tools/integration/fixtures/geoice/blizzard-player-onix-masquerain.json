@@ -1,0 +1,43 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/geoice/scenarios/blizzard-player-onix-masquerain.json",
+ "attacker": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "MASQUERAIN",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 145,
+  "opponentMaxHp": 145,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "player ONIX -> MASQUERAIN",
+ "denseWindow": {
+  "startFrame": 72,
+  "endFrame": 443,
+  "ageOffset": 0
+ },
+ "schema": "geoice-live-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-player.json",
+  "acceptedActivation": 214,
+  "altActivation": 72,
+  "altInterval": {
+   "move": 59,
+   "start": 72,
+   "end": 443
+  },
+  "offset": 0
+ }
+}

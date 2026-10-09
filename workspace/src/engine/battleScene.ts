@@ -17032,27 +17032,12 @@ export function renderSceneOnMovePresentation(
         view.attacker.geometry.side,
         blizzardState.config.effectGeometry,
       );
-      const topY = (entry: (typeof effectOrder)[number]): number => {
-        if (entry.kind === "snowball") {
-          const sprite = displayed.snowballs.find(
-            ({ callIndex }) => callIndex === entry.callIndex,
-          )!;
-          return sprite.y + sprite.y2 - 4;
-        }
-        const sprite = displayed.largeCrystals.find(
-          ({ callIndex }) => callIndex === entry.callIndex,
-        )!;
-        return sprite.y + sprite.y2 - 8;
-      };
-      // Player Pelipper shares subpriority 0 with the particles. Its fixed
-      // slot precedes every move allocation on an exact Y tie. Opponent
-      // Pelipper has subpriority 8 and therefore follows all particles.
-      const attackerTopY = view.attacker.geometry.spriteCorner.y;
-      const attackerOrderIndex = playerToOpponent
-        ? effectOrder.findIndex((entry) => topY(entry) <= attackerTopY)
-        : effectOrder.length;
-      const attackerInsert = attackerOrderIndex < 0
-        ? effectOrder.length : attackerOrderIndex;
+      // The particles' priority word (priority 2, subpriority 3 for a player
+      // attacker) is below the attacker battler's (player subpriority 30,
+      // ROM gSprites[].subpriority, geoice probes), so SortSprites puts the
+      // attacker after every particle whatever its y; the opponent attacker
+      // likewise follows all particles.
+      const attackerInsert = effectOrder.length;
       const effectOamIndex = new Map(effectOrder.map((entry, index) => [
         `${entry.kind}:${entry.callIndex}`,
         9 + index + (index >= attackerInsert ? 1 : 0),

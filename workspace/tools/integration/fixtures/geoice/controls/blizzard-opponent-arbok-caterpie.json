@@ -1,0 +1,43 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/geoice/controls/scenarios/blizzard-opponent-arbok-caterpie.json",
+ "attacker": {
+  "species": "ARBOK",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "CATERPIE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 120,
+  "playerMaxHp": 120,
+  "opponentHp": 167,
+  "opponentMaxHp": 167,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent ARBOK -> CATERPIE",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 437,
+  "ageOffset": 0
+ },
+ "schema": "geoice-live-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 59,
+   "start": 77,
+   "end": 438
+  },
+  "offset": 0
+ }
+}
