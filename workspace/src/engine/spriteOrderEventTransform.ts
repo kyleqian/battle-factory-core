@@ -7,7 +7,9 @@
  *   action prompt shown          C[two lowest free] (DoBounceEffect pair; idempotent while the pair lives)
  *   actions committed            D[the pair, FDERIVED = F order at creation] (EndBounceEffect)
  *   move menu / cancel / cursor  no-op
- *   move-animation body          EXACT plan of (moveId, attacker side) from SPRITE_ORDER_PRODUCTION_BODIES, else invalidate
+ *   move-animation body          EXACT plan of (moveId, attacker side) from SPRITE_ORDER_PRODUCTION_BODIES, else invalidate;
+ *                                Giga Drain (202) / Mega Drain (72): the event's geometry plan (the displayed species,
+ *                                liveMoveAnimation.ts liveMoveGeometrySpriteOrderPlanText), else invalidate
  *   hit-animation, target shown  blip: C[f]; D[n0] (DoHitAnimHealthboxEffect); a hidden target is unproven -> invalidate
  *   stat animation               +-1 / multiple: C[f]; D[n0]; +-2: C[f] and the carried D at the next boundary
  *   status animation             PSN / PRZ / SLP / INFATUATION plans; any other status -> invalidate
@@ -63,7 +65,7 @@ export type SpriteOrderPresentationEvent =
   | Readonly<{ kind: "action-prompt" }>
   | Readonly<{ kind: "actions-committed" }>
   | Readonly<{ kind: "move-menu" }>
-  | Readonly<{ kind: "move-animation"; moveId: number; attackerSide: "player" | "opponent" }>
+  | Readonly<{ kind: "move-animation"; moveId: number; attackerSide: "player" | "opponent"; geometryPlan?: string }>
   | Readonly<{ kind: "hit-animation"; targetVisible: boolean }>
   | Readonly<{ kind: "stat-animation"; argument: number }>
   | Readonly<{ kind: "status-animation"; status: string }>
@@ -187,6 +189,16 @@ function planAt(index: number | undefined): SpriteOrderPlan | null {
 }
 
 /** EXACT body plan of `(moveId, attacker side)`, or null (NEEDS-KEYS / not observed / substitute / transform). */
+/** Geometry-keyed move bodies (Giga Drain 202, Mega Drain 72: same-frame orb destroys order by the battlers' geometry): the host
+ * attaches the body's plan text computed at the displayed species (`geometryPlan`, liveMoveAnimation.ts
+ * liveMoveGeometrySpriteOrderPlanText) to their move-animation event. */
+export const SPRITE_ORDER_GEOMETRY_KEYED_BODIES: ReadonlySet<number> = new Set([202, 72]);
+const geometryPlans = new Map<string, SpriteOrderPlan>();
+const decodeGeometryPlan = (text: string): SpriteOrderPlan => {
+  if (!geometryPlans.has(text)) geometryPlans.set(text, decodeSpriteOrderPlan(text));
+  return geometryPlans.get(text)!;
+};
+
 export function spriteOrderProductionBodyPlan(moveId: number, side: "player" | "opponent"): SpriteOrderPlan | null {
   if (OWNERSHIP_CHANGING_MOVES.has(moveId)) return null;
   return planAt(Object.hasOwn(SPRITE_ORDER_PRODUCTION_BODIES, `${moveId}:${side}`)
@@ -400,8 +412,11 @@ export function applySpriteOrderPresentationEvent(
     }
     case "move-animation":
       if (tracker.promptPair !== null) return invalidateSpriteOrderTracker(tracker, "body while the prompt pair lives");
-      return applyPlan(tracker, spriteOrderProductionBodyPlan(event.moveId, event.attackerSide),
-        `body ${event.moveId}:${event.attackerSide}`, "body");
+      // Giga Drain / Mega Drain: same-frame orb destroys order by the battlers' geometry; no geometry plan -> no plan (invalidates).
+      return applyPlan(tracker, SPRITE_ORDER_GEOMETRY_KEYED_BODIES.has(event.moveId)
+        ? event.geometryPlan === undefined ? null : decodeGeometryPlan(event.geometryPlan)
+        : spriteOrderProductionBodyPlan(event.moveId, event.attackerSide),
+      `body ${event.moveId}:${event.attackerSide}`, "body");
     case "hit-animation":
       return event.targetVisible ? applyPlan(tracker, BLIP, "hit-animation blip")
         : invalidateSpriteOrderTracker(tracker, "hit-animation on a hidden target (unproven)");

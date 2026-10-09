@@ -3,6 +3,7 @@ import {
   linearTranslationDeltaQ8,
   linearTranslationOffsetAfterCallbacks,
 } from "./animLinearTranslation.ts";
+import { absorptionBodySpriteOrderPlanText } from "./absorptionOrbSpriteOrderPlan.ts";
 import { healingBlueStarsAtAge } from "./recover.ts";
 import {
   createOrderedSprite,
@@ -282,4 +283,15 @@ export function gigaDrainSpritesBackToFrontAtAge(
   return spriteOwnersBackToFront(order)
     .map((owner) => byOwner.get(owner))
     .filter((sprite): sprite is GigaDrainSprite => sprite !== undefined);
+}
+
+/** The body's sprite-order plan at the live geometry (absorptionOrbSpriteOrderPlan.ts, this module's timeline). */
+export function gigaDrainSpriteOrderPlanText(
+  targetCenter: Readonly<{ x: number; y: number }>,
+  attackerCenter: Readonly<{ x: number; y: number }>,
+  attackerSide: "player" | "opponent",
+  healingCenter: Readonly<{ x: number; y: number }> = attackerCenter,
+): string {
+  return absorptionBodySpriteOrderPlanText(GIGA_DRAIN_BODY_LAST_AGE,
+    age => gigaDrainAtAge(age, targetCenter, attackerCenter, attackerSide, healingCenter));
 }

@@ -9,12 +9,21 @@
 //      bodies mapped to the order event the host emits for them in that job (status CONFUSION / PRZ, general LEECH_SEED_DRAIN, the
 //      sandstorm job's WEATHER_VAR with argument 12 = SANDSTORM_CONTINUES, hail 13, rain RAIN_CONTINUES); a ROM carry (the first gap
 //      window destroying a unit's single survivor) is the transform's own immediate carry and is not replayed again as a gap window.
+//  gdgeo (docs/giga-drain-geometry-order.md): every Giga Drain (202) / Mega Drain (72) move-animation event carries its plan at the
+//      scenario's lead species as `geometryPlan` (the production host attaches the plan at the displayed species of the body's
+//      command); on a src without liveMoveGeometrySpriteOrderPlanText no plan is attached, so the same tool measures before / after. (c) / (d) the gdgeo Giga Drain / Mega Drain probe grids
+//      (fixtures/gdgeo/units.json, md-units.json), as (b).
 // usage: node --experimental-strip-types tools/integration/prep43CorpusReplay.ts <out.json>
 import { readFileSync, writeFileSync } from "node:fs";
 import {
   applySpriteOrderPresentationEvent, createSpriteOrderTracker, type SpriteOrderPresentationEvent, type SpriteOrderTracker,
 } from "../../src/engine/spriteOrderEventTransform.ts";
 import { KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, knownEntrySpriteOrderState } from "../../src/engine/spriteOrderProvider.ts";
+import * as live from "../../src/engine/liveMoveAnimation.ts";
+
+/** gdgeo: the production plan text of a geometry-keyed body (absent on a src without it: the event then carries none). */
+const geometryPlanText = (live as unknown as { liveMoveGeometrySpriteOrderPlanText?: (moveId: number, side: "player" | "opponent",
+  species: { playerSpecies: number; opponentSpecies: number }) => string | null }).liveMoveGeometrySpriteOrderPlanText;
 
 interface Window { f: number; C?: [number, string][]; D?: number[] }
 interface CorpusUnit { kind: "gap" | "body"; windows: Window[]; mv?: number; observedFreeAtEdge?: number[]; truncated?: boolean }
@@ -56,6 +65,28 @@ function edge(t: Tally, tracker: SpriteOrderTracker, observed: number[] | undefi
   else { t.mismatched += 1; t.mismatches.push({ file, unit, mv }); }
 }
 
+/** Lead species of a BattleLab scenario (`tools/battle-lab/<base>.json`) after a prep43 / gdgeo variant; null when not found. */
+function leadSpecies(base: string, variant: unknown): { playerSpecies: number; opponentSpecies: number } | null {
+  let scenario;
+  try { scenario = JSON.parse(readFileSync(new URL(`../battle-lab/${base}.json`, import.meta.url), "utf8")); } catch { return null; }
+  const parties = scenario.overrides?.parties;
+  if (!parties) return null;
+  let playerSpecies = parties.player[0].species as number, opponentSpecies = parties.opponent[0].species as number;
+  const v = (Array.isArray(variant) ? variant : []) as (string | number)[];
+  if (v[0] === "both") return { playerSpecies: v[1] as number, opponentSpecies: v[2] as number };
+  for (let i = v[0] === "extend" ? 2 : 0; i + 1 < v.length; i += 2) {
+    if (v[i] === "player") playerSpecies = v[i + 1] as number; else if (v[i] === "opponent") opponentSpecies = v[i + 1] as number;
+  }
+  return { playerSpecies, opponentSpecies };
+}
+
+/** The production body event, with the Giga Drain geometry when the species are known. */
+function bodyEvent(moveId: number, attackerSide: Side, geometry: ReturnType<typeof leadSpecies>): SpriteOrderPresentationEvent {
+  const geometryPlan = geometry === null ? null : geometryPlanText?.(moveId, attackerSide, geometry) ?? null;
+  return geometryPlan !== null ? { kind: "move-animation", moveId, attackerSide, geometryPlan } as SpriteOrderPresentationEvent
+    : { kind: "move-animation", moveId, attackerSide };
+}
+
 /** Host move id (liveSpriteOrderHost.ts MOVE_ANIMATION mapping) from the move, side and the scenario's turn evidence. */
 function hostMoveId(mv: number, turn: number): number {
   if (mv === 143 && turn === 1) return 10143;
@@ -82,7 +113,7 @@ function replayCorpus(): Tally & { skipped: number } {
       if (mv === 280) turn = scenario.file.includes("-normal-") ? 0 : 1;
       tracker = applySpriteOrderPresentationEvent(tracker, mv === 0 || side === null
         ? { kind: "invalidate", reason: "mv-0 / unattributed body" }
-        : { kind: "move-animation", moveId: hostMoveId(mv, turn), attackerSide: side });
+        : bodyEvent(hostMoveId(mv, turn), side, leadSpecies(scenario.file.replace(/^\d+-/, "").replace(/-\d+\.json$/, ""), null)));
     });
   }
   return { ...t, skipped };
@@ -90,7 +121,7 @@ function replayCorpus(): Tally & { skipped: number } {
 
 interface ProbeWindow { f: number; C: [number, string][]; D: number[]; F: number[] }
 interface ProbeUnit { kind: "gap" | "body"; label: string; F0: number[]; truncated: boolean; windows: ProbeWindow[]; survivorSlots: number[] }
-interface ProbeJob { unit: string; base: string; units: ProbeUnit[] }
+interface ProbeJob { unit: string; base: string; variant?: unknown; units: ProbeUnit[] }
 
 function mv0Event(job: ProbeJob, label: string): SpriteOrderPresentationEvent {
   if (label === "status CONFUSION") return { kind: "status-animation", status: "CONFUSION" };
@@ -101,8 +132,8 @@ function mv0Event(job: ProbeJob, label: string): SpriteOrderPresentationEvent {
   return { kind: "invalidate", reason: `unidentified mv-0 body (${job.unit})` };
 }
 
-function replayProbes(): Tally & { jobs: number; perLabel: Record<string, { edgesAfter: number; knownAfter: number }> } {
-  const jobs = read("prep43/units.json").jobs as Record<string, ProbeJob>;
+function replayProbes(file = "prep43/units.json"): Tally & { jobs: number; perLabel: Record<string, { edgesAfter: number; knownAfter: number }> } {
+  const jobs = read(file).jobs as Record<string, ProbeJob>;
   const t = tally();
   const perLabel: Record<string, { edgesAfter: number; knownAfter: number }> = {};
   for (const [name, job] of Object.entries(jobs)) {
@@ -136,7 +167,7 @@ function replayProbes(): Tally & { jobs: number; perLabel: Record<string, { edge
         let turn = 0;
         if (mv === 91) { turn = occurrences.get(unit.label) ?? 0; occurrences.set(unit.label, turn + 1); }
         if (mv === 280) turn = job.base.includes("-normal-") ? 0 : 1;
-        event = { kind: "move-animation", moveId: hostMoveId(mv, turn), attackerSide: side };
+        event = bodyEvent(hostMoveId(mv, turn), side, leadSpecies(job.base, job.variant));
       } else event = mv0Event(job, unit.label);
       tracker = applySpriteOrderPresentationEvent(tracker, event);
     });
@@ -146,9 +177,13 @@ function replayProbes(): Tally & { jobs: number; perLabel: Record<string, { edge
 
 const corpus = replayCorpus();
 const probes = replayProbes();
-const out = { schema: "prep43-corpus-replay/v1", corpus, probes };
+const gdgeo = replayProbes("gdgeo/units.json");
+const mdgeo = replayProbes("gdgeo/md-units.json");
+const out = { schema: "prep43-corpus-replay/v1", corpus, probes, gdgeo, mdgeo };
 writeFileSync(process.argv[2]!, JSON.stringify(out, null, 1) + "\n");
 const line = (name: string, r: Tally) => `${name}: edges ${r.edges} known ${r.known} exact ${r.exact} mismatched ${r.mismatched}${r.mismatches.length ? " " + JSON.stringify(r.mismatches.slice(0, 6)) : ""}`;
 console.log(line("corpus (turn-keyed)", corpus));
 console.log(line("prep43 probes", probes));
+console.log(line("gdgeo probes", gdgeo));
+console.log(line("mdgeo probes", mdgeo));
 console.log(JSON.stringify(probes.perLabel));

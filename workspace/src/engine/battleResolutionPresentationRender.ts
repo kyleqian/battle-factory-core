@@ -849,6 +849,23 @@ function applyCompletedCommand(
   throw new Error("battle resolution renderer received an unknown command");
 }
 
+/**
+ * The displayed field at the segment's move-animation command of `eventSequence` (the segment's field after the commands before it,
+ * as currentCommandField builds the presented command's field), or null when the segment has no such command. S10A gdgeo: the
+ * sprite-order host keys the Giga Drain / Mega Drain body plans by these species (liveMoveAnimation.ts liveMoveGeometrySpriteOrderPlanText).
+ */
+export function battleResolutionMoveAnimationField(
+  segment: Readonly<{ field: BattleResolutionDisplayedField; commands: readonly BattleResolutionPresentationCommand[] }>,
+  eventSequence: number,
+): BattleResolutionDisplayedField | null {
+  let field = segment.field;
+  for (const command of segment.commands) {
+    if (command.type === "move-animation" && command.eventSequence === eventSequence) return field;
+    field = applyCompletedCommand(field, command);
+  }
+  return null;
+}
+
 /** The current command's displayed field: the segment's field after its completed commands (as the duration / completion checks see it). */
 function currentCommandField(state: BattleResolutionPresentationState): BattleResolutionDisplayedField {
   const segment = currentSegment(state);
