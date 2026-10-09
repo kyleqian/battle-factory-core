@@ -5,7 +5,8 @@ import type { BattleKernelSemanticEvent } from "../src/engine/battleDecisionBoun
 import { battleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
 import { liveBattlerAnchors } from "../src/engine/liveMoveAnimation.ts";
 import {
-  activateLiveMovePresentationRng, GENERAL_RAIN_RANDOM2_PLAN, LIVE_MOVE_RANDOM2_PLANS, liveMovePresentationRngBodyKey, tickLiveMovePresentationRngSession,
+  activateLiveMovePresentationRng, GENERAL_RAIN_RANDOM2_PLAN, LIVE_MOVE_RANDOM2_PLANS, liveMovePresentationRngBodyKey, liveMoveRandom2Plan,
+  tickLiveMovePresentationRngSession,
 } from "../src/engine/liveMovePresentationRng.ts";
 import {
   advanceLiveSpriteOrderHost, beginLiveSpriteOrderTurn, createLiveSpriteOrderHost, DEFERRED_LEND_MOVE_IDS, lendLiveSpriteOrder,
@@ -24,6 +25,8 @@ import {
   KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, knownEntrySpriteOrderState, spriteOrderWithOccupiedPrefix,
 } from "../src/engine/spriteOrderProvider.ts";
 import { generalAnimationPresentationRngKey, isWordsOrderDeferredUnit } from "../src/engine/wordsOrderUnits.ts";
+import { PRESENTATION_RNG_POLICY_V1, presentationRngFromTrace, presentationRngTraceMetadata } from "../src/engine/presentationRngHost.ts";
+import { words46Route } from "../tools/integration/words46RouteScan.ts";
 
 // S10A words46 (docs/next-adapters-prep46.md): the generalized seam-resolved deferred lend after Random2-words order units, against the prep46
 // probe units (tools/integration/fixtures/words46/prep46-units.json: ROM sSpriteOrder free order F0 at every unit edge, RAM-read words; 12 jobs
@@ -401,3 +404,47 @@ describe("words46: RAIN_CONTINUES non-consuming sub-stream (presentation RNG)", 
     expect(presentationRngBodyWords(again.host, key)).toEqual(presentationRngBodyWords(session.host, key));
   });
 });
+
+describe("words46: ordinary rain route (generated rentals, production seams)", () => {
+  // seed 19, slot 2 every turn (tools/integration/words46RouteScan.ts): an opponent Dive body goes live through the RAIN_CONTINUES marker.
+  const SLOTS = [2, 2, 2, 2, 2, 2, 2, 2] as const;
+  const rulesWithoutSceneMarker = (v: { rules: any }) => ({ ...v.rules, rulesContext: { ...v.rules.rulesContext, hitMarker: v.rules.rulesContext.hitMarker & ~0x80 } });
+  it("live through the rain marker; logic / RNG identical across presentation seeds and Scene ON/OFF; replay and export round trip reproduce the frames", () => {
+    const A = words46Route(19, "on", SLOTS, 0x1234abcd, true), B = words46Route(19, "on", SLOTS, 0xfeed0042);
+    const off = words46Route(19, "off", SLOTS, 0x1234abcd);
+    const rainFrames = A.flagged.filter((f) => f.rain);
+    expect(rainFrames.length).toBeGreaterThan(100);
+    expect(new Set(rainFrames.map((f) => `${f.moveId}/${f.attacker}`))).toEqual(new Set(["291/1"]));
+    expect(rainFrames.map((f) => f.age)).toEqual(Array.from({ length: rainFrames.length }, (_, age) => age));
+    // a different presentation seed: different words, the same logic
+    expect(B.run.boundaries).toEqual(A.run.boundaries);
+    expect(B.run.state.facilityState).toEqual(A.run.state.facilityState);
+    expect(B.run.state.round.rules.rngValue).toBe(A.run.state.round.rules.rngValue);
+    expect(off.run.boundaries).toHaveLength(A.run.boundaries.length);
+    for (let i = 0; i < A.run.boundaries.length; i += 1) {
+      expect(rulesWithoutSceneMarker(off.run.boundaries[i]!)).toEqual(rulesWithoutSceneMarker(A.run.boundaries[i]!));
+      expect(off.run.boundaries[i]!.rng).toEqual(A.run.boundaries[i]!.rng);
+      expect(off.run.boundaries[i]!.boundary).toEqual(A.run.boundaries[i]!.boundary);
+    }
+    expect(off.run.state.round.rules.rngValue).toBe(A.run.state.round.rules.rngValue);
+    expect(off.run.state.facilityState).toEqual(A.run.state.facilityState);
+    // the production tick seam recorded the RAIN_CONTINUES sub-stream(s) the resolution read
+    expect(A.session.host?.bodies.some((b) => b.key.startsWith("general:"))).toBe(true);
+    // export round trip (seed + policy, docs/presentation-rng.md) and replay: identical frames
+    const exported = presentationRngTraceMetadata(A.session);
+    expect(exported.policy).toBe(PRESENTATION_RNG_POLICY_V1);
+    const replayed = words46Route(19, "on", SLOTS, presentationRngFromTrace({ presentationRng: exported }).seed, true);
+    expect(replayed.flagged).toEqual(A.flagged);
+  }, 240000);
+});
+
+describe("words46: render-view presentationRng pass-through (non-Random2 consumer)", () => {
+  it("seed 3 / slot 0: Rock Slide (no Random2 plan) after Sand-Attack gets the presentation host from the render view and resolves the lend", () => {
+    const { flagged } = words46Route(3, "on", [0, 0, 0, 0, 0, 0, 0, 0]);
+    const rockSlide = flagged.filter((f) => f.moveId === 157);
+    expect(liveMoveRandom2Plan({ moveId: 157 })).toBeNull();
+    expect(rockSlide.length).toBeGreaterThan(0);
+    expect(rockSlide.every((f) => f.hostPassed)).toBe(true);
+  }, 120000);
+});
+
