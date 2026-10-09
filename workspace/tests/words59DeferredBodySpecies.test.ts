@@ -22,7 +22,7 @@ const FIXTURE = JSON.parse(readFileSync("tools/integration/fixtures/words57/word
   vectors: Vector[]; words: Record<string, { activationValue: number; draws: number[][] }> };
 const CHAIN = JSON.parse(readFileSync("tools/integration/fixtures/words57/chain.json", "utf8")) as {
   chains: { job: string; words: string; speciesInferred?: Record<Side, number> }[] };
-const INFERRED = new Map(CHAIN.chains.filter((row) => row.speciesInferred !== undefined)
+const INFERRED = new Map<string, Record<Side, number>>(CHAIN.chains.filter((row) => row.speciesInferred !== undefined)
   .map((row) => [`words57:${row.job}:${row.words.split(" f")[1]}`, row.speciesInferred!] as const));
 
 const isDirt = (m: SpriteOrderDeferredLend) => m.moveId === 28 || m.moveId === 189;

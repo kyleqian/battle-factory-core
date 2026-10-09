@@ -185,8 +185,13 @@ export function tickLiveMovePresentationRngSession(
   if (command === undefined) return stepped;
   // General-animation anchor (prep46 s2): a RAIN_CONTINUES event is presented with the first command at or after it (it has no command
   // of its own); record its non-consuming sub-stream once per event key. The shared stream is not advanced.
+  // words59: a RAIN_CONTINUES after the resolution's LAST command (the end-turn rain after the turn's final message) has no command at or
+  // after it; it is recorded at that final command's activation, where the order host applies the segment's trailing events and marks
+  // it (factoryRoundBattleOrchestrator isFinalCommand). Trailing events of an earlier segment keep the next segment's first command.
+  const finalCommand = resolution.segmentIndex === resolution.segments.length - 1
+    && resolution.commandIndex === resolution.segments[resolution.segmentIndex]!.commands.length - 1;
   let recorded = host;
-  const through = "eventSequence" in command ? command.eventSequence : Number.POSITIVE_INFINITY;
+  const through = !finalCommand && "eventSequence" in command ? command.eventSequence : Number.POSITIVE_INFINITY;
   for (let segmentIndex = 0; segmentIndex <= resolution.segmentIndex; segmentIndex += 1) {
     for (const event of resolution.segments[segmentIndex]?.events ?? []) {
       if (segmentIndex === resolution.segmentIndex && event.sequence > through) break;
