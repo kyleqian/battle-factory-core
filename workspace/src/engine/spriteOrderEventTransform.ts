@@ -529,7 +529,7 @@ export interface SpriteOrderDeferredLend {
   /** Dive: the earlier body's request.turn. */
   readonly turn?: number;
   /**
-   * A general-animation words unit (RAIN_CONTINUES, General_Rain; liveWordsOrderCarry.ts): `key` is its per-event presentation key and
+   * A general-animation words unit (RAIN_CONTINUES, General_Rain; liveWordsUnitPostFree in liveMoveAnimation.ts): `key` is its per-event presentation key and
    * `moveId` is 0 (no move body).
    */
   readonly generalAnimation?: string;

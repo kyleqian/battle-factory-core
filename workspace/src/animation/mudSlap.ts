@@ -68,7 +68,7 @@ function candidatesAtAge(
  * The source `sSpriteOrder` after the mud phase's `SortSprites` insertion
  * passes through `age` (from `profile.spriteOrderSeed`): one loop shared by
  * the draw order and the post-body order carry
- * (src/engine/liveWordsOrderCarry.ts, mudSlapMudSpriteOrderAtAge).
+ * (liveWordsUnitPostFree in src/engine/liveMoveAnimation.ts, via mudSlapMudSpriteOrderAtAge).
  */
 function mudSpriteOrderAtAge(
   age: number,

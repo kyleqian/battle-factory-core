@@ -151,7 +151,7 @@ because the policy cycles all four slots until PP runs out in long battles.
 
 After a Random2-words order unit (Sand-Attack, Mud-Slap, Rain Dance, RAIN_CONTINUES) the order host lends a word-free deferred
 marker to any consumer. The render seam resolves it with that unit's surrogate presentation words
-(docs/next-adapters-prep46.md, `src/engine/liveWordsOrderCarry.ts`). Such a command is live, but its order history is
+(docs/next-adapters-prep46.md, `liveWordsUnitPostFree` in `src/engine/liveMoveAnimation.ts`). Such a command is live, but its order history is
 **faithful random** (ANIMATION_VERIFICATION.md D3), not scoped exact:
 
 - Per frame, the census reads the production presentation's `faithfulRandomHistory` flag. It is set only when the adapter read

@@ -81,7 +81,7 @@ function sandAttackDirtCandidatesAtAge(
  * the source dummy key/y, so a later wave enters at its real live seed
  * position rather than an invented creation order. The draw order of
  * `sandAttackDirtAtAge` and the post-body order carry
- * (src/engine/liveWordsOrderCarry.ts) both read this one loop.
+ * (liveWordsUnitPostFree in src/engine/liveMoveAnimation.ts) both read this one loop.
  */
 export function sandAttackDirtSpriteOrderAtAge(
   age: number,

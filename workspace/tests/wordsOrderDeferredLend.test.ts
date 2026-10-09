@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { GENERAL_RAIN_SPAWN_AGES } from "../src/animation/rainDance.ts";
 import { createBattleCommandFieldArtView } from "../src/engine/battleCommandFieldArt.ts";
 import type { BattleKernelSemanticEvent } from "../src/engine/battleDecisionBoundary.ts";
 import { battleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
@@ -12,7 +13,7 @@ import {
   advanceLiveSpriteOrderHost, beginLiveSpriteOrderTurn, createLiveSpriteOrderHost, DEFERRED_LEND_MOVE_IDS, lendLiveSpriteOrder,
   markLiveSpriteOrderDeferredBody, type LiveSpriteOrderHost,
 } from "../src/engine/liveSpriteOrderHost.ts";
-import { liveDirtScatterProfile, liveWordsUnitPostFree } from "../src/engine/liveWordsOrderCarry.ts";
+import { liveDirtScatterProfile, liveWordsUnitPostFree } from "../src/engine/liveMoveAnimation.ts";
 import { createPresentationRngState } from "../src/engine/presentationRng.ts";
 import {
   advancePresentationRngHost, createPresentationRngHost, createPresentationRngSession, presentationRngBodyWords, presentationRngPlanWords,
@@ -53,6 +54,11 @@ const unitOf = (unit: Unit, side: Side): Pick<SpriteOrderDeferredLend, "moveId" 
 const sideOf = (job: Job) => job.attackerSide;
 
 describe("words46: words-unit carry through the production programs (ROM F0 + RAM words)", () => {
+  it("GENERAL_RAIN_RANDOM2_PLAN draws at the drop program's spawn ages (rainDance.ts), 4 words each", () => {
+    expect(GENERAL_RAIN_RANDOM2_PLAN.map((step) => step.ageOffset)).toEqual(GENERAL_RAIN_SPAWN_AGES);
+    expect(GENERAL_RAIN_RANDOM2_PLAN.every((step) => step.count === 4)).toBe(true);
+  });
+
   it("the production words law reproduces every RAM-read draw row (ages and words) from the RAM activation value", () => {
     let bodies = 0, words = 0;
     for (const [name, job] of Object.entries(JOBS)) {

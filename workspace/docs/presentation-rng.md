@@ -98,7 +98,7 @@ All functions are pure and return frozen values (`presentationRngHost.ts`):
 
 `RAIN_CONTINUES` (General_Rain, `battle_anim_scripts.s`) draws 80 Random2 words: 20 spawns at ages 17 + 3k, 4 words each
 (`GENERAL_RAIN_RANDOM2_PLAN`, `liveMovePresentationRng.ts`; RAM-measured in docs/next-adapters-prep46.md §1). No live adapter
-renders it; only the sprite-order carry after it reads the words (`liveWordsOrderCarry.ts`).
+renders it; only the sprite-order carry after it reads the words (`liveWordsUnitPostFree`, `liveMoveAnimation.ts`).
 
 - **Non-consuming per-event read.** `recordPresentationRngSubStream(host, key, plan)` (`presentationRngHost.ts`) records
   `presentationRngPlanWords(host.state, plan)` under `general:<request>:<segment>:<event sequence>` and schedules nothing.

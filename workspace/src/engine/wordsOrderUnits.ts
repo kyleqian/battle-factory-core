@@ -1,7 +1,7 @@
 /**
  * Words-dependent sprite-order units (S10A prep46; docs/next-adapters-prep46.md): Sand-Attack 28, Mud-Slap 189, Rain Dance 240 and the
  * RAIN_CONTINUES general animation (General_Rain) leave a free order that depends on their own Random2 words. The order host records a
- * word-free deferred-lend marker for them that ANY later consumer may take; the render seam resolves it (liveWordsOrderCarry.ts). A
+ * word-free deferred-lend marker for them that ANY later consumer may take; the render seam resolves it (liveWordsUnitPostFree, liveMoveAnimation.ts). A
  * command whose lend resolved through such a marker is a faithful-random claim for that command (ANIMATION_VERIFICATION.md D3).
  */
 import type { SpriteOrderDeferredLend } from "./spriteOrderEventTransform.ts";

@@ -13,7 +13,6 @@
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS } from "./liveMoveTimingPolicy.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
-import { GENERAL_RAIN_SPAWN_AGES } from "../animation/rainDance.ts";
 import { generalAnimationPresentationRngKey, WORDS_ORDER_GENERAL_ANIMATION } from "./wordsOrderUnits.ts";
 import {
   activatePresentationRngBody,
@@ -99,7 +98,7 @@ export const LIVE_DIVE_RANDOM2_PLANS: Readonly<{ setup: Readonly<Record<"player"
  * (recordPresentationRngSubStream): only the sprite-order carry after it reads the words; no live adapter renders General_Rain.
  */
 export const GENERAL_RAIN_RANDOM2_PLAN: readonly PresentationRngDrawStep[] = Object.freeze(
-  GENERAL_RAIN_SPAWN_AGES.map((ageOffset) => Object.freeze({ ageOffset, count: 4 })));
+  Array.from({ length: 20 }, (_, k) => Object.freeze({ ageOffset: 17 + 3 * k, count: 4 }))); // == rainDance.ts GENERAL_RAIN_SPAWN_AGES (tested)
 
 /** Faithful-random live adapters (disjoint from LIVE_MOVE_ANIMATION_IDS and from the faithful-timing ids, which keep their D3 plan). */
 export const LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS: readonly number[] = Object.freeze(
