@@ -63,6 +63,16 @@
   86.73 % by frames (+53 / +15,466), 0 regressions, identical commands + digest. Worker gates 1,576 files / 12,981 tests, build,
   differential 624/624. Supervisor: 4 new pairs rerun fresh through liveAdapterFramebuffer.ts — 0 px, digests identical to the
   receipt; clean merge on unchanged master src -> touched tests 28/28, smoke 448.
+- prep47 (side, `ad5fc19d0`, new files only): ORCHESTRATOR-side order stops. (A) "command resolution without an action prompt"
+  is always an OPPONENT locked action (Dig 89, Petal Dance 25, Rollout 5, Solar Beam 3, Ice Ball 1 first-unit commands) retained
+  across a player command; the ROM shows the player's ordinary prompt bounce pair at each turn boundary between the locked bodies
+  (26 jobs x2 fresh; 36/36 boundaries, 37/37 prompt windows, 114/114 next-body orders exact) -> patch `promptShown = !playerLocked`.
+  (B) battle-start seeds: Trace / prevented-Intimidate messages = known entry, Intimidate on both sides / + Trace = pre-prompt +
+  one stat plan per triple (17 jobs x2, 56/56 windows exact). (C) the Factory AI voluntary switch reached in Scene ON (Perish Song
+  timer): the opponent recall = the player's recall plan on slot 8, exact 3/3 (census +0 today). Temp patches census seeds 0..299
+  on `e5c6a32ec`: 85.71 -> 86.65 % by count, 85.41 -> 86.59 % by frames (+75 / +13,882), 0 regressions, identical commands +
+  digest; next stop the Dig unleash later-body gate (59 commands / 7,314 frames). Supervisor: `prep47Run.sh` into fresh dirs —
+  all 22 receipts byte-identical.
 
 ## 2026-10-08 (overnight) — S10A: Substitute presentation live, deferred order lend, live-share census, sprite-order plans; 245 + 13 + 18
 
