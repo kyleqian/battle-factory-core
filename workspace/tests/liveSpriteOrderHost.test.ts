@@ -245,7 +245,7 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
     expect(grudge.index).toBeGreaterThan(0);
     expect(grudge.known && !grudge.mismatch).toBe(true);
     expect(ORDER_CONSUMER_MOVES[288]).toBe("GRUDGE");
-    // After a body without an EXACT plan (Giga Drain 202 without its body geometry: no bodyGeometryAt resolver, gdgeo) the host
+    // After a body without an EXACT plan (Giga Drain 202 without its geometry plan: no bodyPlanAt resolver, gdgeo) the host
     // lends nothing: the consumer declines.
     const ev = (sequence: number, kind: string, extra: object = {}) =>
       Object.freeze({ sequence, payload: { kind, ...extra }, provenance: undefined }) as unknown as BattleKernelSemanticEvent;

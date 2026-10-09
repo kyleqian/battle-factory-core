@@ -1,4 +1,4 @@
-// gdgeo: the body-202 geometry model (src/engine/spriteOrderGigaDrainPlan.ts) against the observed ROM plans of a prep43-format
+// gdgeo: the body-202 / body-72 geometry model (liveMoveAnimation.ts liveMoveGeometrySpriteOrderPlanText) against the observed ROM plans of a prep43-format
 // units.json (prep43Extract.py). usage: node --experimental-strip-types tools/integration/gdgeoModelCheck.ts <units.json> [<out.json>]
 // Per job: the scenario's lead species (base scenario + variant), the model plan, the observed body-202 plan, equal or not; with a
 // gdgeoMechanism.py receipt as 3rd argument also the ROM oam.y of every multi-destroy group's orbs at their last live frame vs the

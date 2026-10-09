@@ -1,4 +1,4 @@
-// gdgeo: per-frame ROM check of the geometry-keyed body-202 plan (src/engine/spriteOrderGigaDrainPlan.ts) with the production plan
+// gdgeo: per-frame ROM check of the geometry-keyed body-202 / 72 plans (liveMoveAnimation.ts liveMoveGeometrySpriteOrderPlanText) with the production plan
 // cursor, exactly as prep43Check.ts checkUnit: from the ROM free order F at the unit start apply the plan prefix through window k and
 // require the created slots, the destroyed slots and F after window k to equal ROM window k (every allocation frame), and no stray F
 // change. Inputs are prep43-format units.json files (prep43Extract.py / gdgeoExtract.py); species from the job's scenario + variant.
