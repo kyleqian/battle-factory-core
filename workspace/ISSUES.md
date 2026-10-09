@@ -74,6 +74,13 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 - **Blizzard (59) opponent pairs whose impact-start age is not 197** (194..206 by geometry) DECLINE (fixed live duration 361;
   ARBOK -> CATERPIE runs 361 rows where age-197 pairs run 360; their lags shift by one row). Resume: a geometry-derived duration.
   (The Icy Wind / Blizzard / Confuse Ray short-body CPU phase is a D4 policy entry since `7993b02fd`.)
+- **Light Screen (113) opponent attacker, row 59 (audit 15, 2026-10-09, `docs/live-audit-15-chains.md`):** production hard-codes a
+  one-row BLDALPHA hold (`src/animation/lightScreen.ts:79`, reducer age 52) that the ROM shows only when the blend write stays
+  buffered (SNORLAX / CHANSEY first body; the accepted EXEGGCUTE / ONIX after-Tackle route); in 9 of 10 live opponent windows the
+  write lands at once (2,658 px on row 59). Lag frames [68, 69] identical in both phases: a species- and history-dependent
+  VBlank-write CPU phase. Resume: D4 policy entry with the dominant phase (no hold; patch `fixtures/audit-15/patches/
+  light-screen-opp-no-hold-env.diff`: 12/13 live windows 0 px) and the accepted fixture as the documented other phase -> Light Screen
+  moves scoped exact -> faithful timing.
 - Harness limit: the verifier passes only the attacker's personality, so shiny TARGET declines are unverified.
 
 ## #148 — Battler x2 history: unknown-history remainder (main bug FIXED 2026-10-06)

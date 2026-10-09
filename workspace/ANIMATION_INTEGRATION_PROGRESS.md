@@ -144,6 +144,15 @@
   affected ages), 0 violations; a stale main-tree `.git/index.lock` (no holder) blocked the first merge attempt and was removed.
 - Supervisor union gates on `7993b02fd` (src `f7cf9a74`): census seeds 0..299 92.01 % / 93.38 % (accounting-only change), typecheck,
   full suite 1,582 files / 13,027 tests, build, differential 624/624 vs `c7c909657` (`union-gates-7993b02fd.json`).
+- Live audit 15 (side, `2a5e4748c`, new files only): CHAIN routes that became live tonight. 65 scenarios / 142 consumer windows
+  (BRN, Fire Spin trap, Hydro Pump, Solar Beam unleash, Petal Dance / Dig continuations, Icy Wind, Ice Beam, Double Team, Faint
+  Attack, Swift, Giga Drain -> Blaze Kick / Heal Bell / Flamethrower / Thunderbolt / Reflect / Protect / Light Screen; two species
+  pairs), every window twice fresh: NO species / history defect; 130 / 139 live windows 0 px (33 of them lend-discriminating: the
+  first-body lend would leave 4-66 px); the one residual class is the Light Screen opponent row-59 VBlank-write CPU phase (ISSUES
+  #152, D4 candidate). Correct declines: Light Screen after Will-O-Wisp + burn / Tackle (allocator unknown). Supervisor:
+  `audit15Run.sh` into fresh dirs — main + entry-lend receipts byte-identical.
+- Final ordinary-play census on src `f7cf9a74` (seeds 0..999, two runs byte-identical): 87.23 % live by count / 91.13 % by frames
+  (session start 77.68 / 78.76); seeds 50000..: 88.38 / 90.47 (`docs/live-share-census.md` "Latest").
 
 ## 2026-10-08 (overnight) — S10A: Substitute presentation live, deferred order lend, live-share census, sprite-order plans; 245 + 13 + 18
 
