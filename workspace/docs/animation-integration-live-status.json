@@ -3377,10 +3377,11 @@
       "sourceFieldEvidence": "../tools/integration/fixtures/random2-r5-live-receipt.json",
       "liveEvidence": [
         "No RNG (prep18: Dig draws no Random2). Dense full windows through the production live renderer, both bodies (setup 195 rows, unleash 68 rows, window = [activation, activation + rows - 1]), both attacker sides, twice fresh, 0 px: accepted VIBRAVA -> CHANSEY player and opponent attacker, FLYGON -> GOLEM alternates on both attacker sides (tools/integration/fixtures/prep18-live/*.json, 16 runs x2).",
-        "Setup requires the battle's first body (BG registers/scanline = measured constant S0); unleash requires the host lend afterDigSetup (setup was the first unit, nothing since but its own attacker hide): post-setup order constant and the scanline chained from the setup reducer's end state; both gates fall back to the scene-off view otherwise.",
-        "Ordinary route, hidden attacker between turns, prompt reached, ON/OFF parity: see the receipt (random2-r5-live-receipt.json dig)."
+        "Gate (prep48 / later48): any known order lend. The first setup and the unleash right after it (host lend afterDigSetup: the post-setup order constant, the scanline chained from the setup reducer's end state) as before; a later setup, or an unleash after one, takes the order host's lend while both battlers' species front-idle rests are {0,0}. A later body's monbg BGxCNT / retained scanline lines never reach the pixels (docs/next-adapters-prep48.md); the ROM tile bitmap / palette tags / matrix bitmap / tasks equal the first body at all 50 later48 activations, including after allocator-non-net-zero predecessors (Will-O-Wisp, Toxic + Status_Burn / Status_Poison).",
+        "Later-body dense windows through the production live renderer, twice fresh, 0 px: prep48 42/42 (38 not the battle's first body; after Quick Attack + hit, Growl + stat-down, the own unleash) and later48 32/32 (both sides, VIBRAVA/CHANSEY + FLYGON/GOLEM), tools/integration/fixtures/later48-live-receipt.json; 5 windows pinned per row (tests/animation/later48LiveGates.test.ts).",
+        "Ordinary route, hidden attacker between turns, prompt reached, ON/OFF parity: see the receipt (random2-r5-live-receipt.json dig); seed 9 / streak 7 / slot 1 POLITOED: a later setup live every age, Scene ON/OFF rules / RNG / boundaries equal (tests/animation/liveDigAdapter.test.ts)."
       ],
-      "remaining": "Unleash after any intervening animation body / party-menu unit, a Dig setup that is not the battle's first body, and the Dig hit-flash/HUD queue commands are not proved; those decline to the scene-off view."
+      "remaining": "A later body with an opponent ONIX / RATTATA (non-zero species rest: the x2 tracker reads the ROM's zeroed rest as the rest) declines, as does an unknown lend; the Dig hit-flash/HUD queue commands are not proved; those decline to the scene-off view."
     },
     {
       "move": "MOVE_WILL_O_WISP",
@@ -3506,10 +3507,11 @@
         "Strongest branch only (friendship 255, the only Return the Factory reaches: every Factory mon has friendship 255, so no request plumbing): hardware OAM + matrices from the production assembler (src/engine/liveMoveOamAssembler.ts liveReturnHardwareOamRows: attacker vertical dips, monbg target absence, 13 hit splats, 7 blended trace clones, invisible dip / palette-blend helpers keyed into the carried 64-slot order); registers / palette / target shake from liveReturnInputs (src/engine/liveOamMoves.ts); event schedule = src/animation/return.ts PROGRAMS.strongest; never a capture row",
         "dense 282-row windows zero residual twice fresh through the production live renderer, both orientations: accepted DRAGONAIR/ONIX, SNORLAX->GOLEM, SNORLAX->PIDGEOT (elevated target), SCYTHER->GOLBAT (elevated target, smaller attacker); each window from its own activation frame",
         "the RETURN renderer branch now draws the age-0 enemy shadow for an elevated opponent TARGET (staged accepted windows 282/282 x2 unchanged; live rows use the shared #142 hook, row 0)",
-        "ordinary routes 24/14 PIDGEOT and 51/28 EXEGGUTOR (first body): adapter active every age, next prompt reached, ON/OFF rules/RNG/boundary equal"
+        "ordinary routes 24/14 PIDGEOT and 51/28 EXEGGUTOR (first body): adapter active every age, next prompt reached, ON/OFF rules/RNG/boundary equal",
+        "later bodies (prep48 / later48): any known lend while both species front-idle rests are {0,0}; the known-entry allocator (IMPACT slot 3.., matrices free from 0) is the ROM state at every probed activation, after audited net-zero predecessors or not (Growl, Splash, the own Return, Will-O-Wisp, Toxic + Status_Burn / Status_Poison); 282-row windows twice fresh 0 px: prep48 29/29 live (21 later), later48 16/16 live (8 later), tools/integration/fixtures/later48-live-receipt.json; 3 later windows pinned per row (tests/animation/later48LiveGates.test.ts)"
       ],
       "remaining": [
-        "first body only (known-entry allocator slots / matrices, S0 registers): later bodies decline to the scene-off fallback",
+        "a later body with an opponent ONIX / RATTATA (non-zero species rest; ROM x2 1 -> 0 after Quick Attack / Return, read as the rest by the x2 tracker) declines to the scene-off fallback (prep48 7 + later48 2 ONIX windows declined)",
         "shiny battlers decline; the weak / medium / strong branches (friendship < 201) are Factory-unreachable and not provided",
         "the monbg BGnCNT write row (4 | 5) is a VBlank phase the renderer never reads (target drawn on the BG from age 5)",
         "independent arbitrary-species/history framebuffer comparison"
