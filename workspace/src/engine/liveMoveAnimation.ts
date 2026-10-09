@@ -3110,9 +3110,12 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 183: {
-      // D4a faithful timing: Mach Punch, first body only (prep25 B.5: WIN0 (240, 161) and the S0 BG3HOFS / blend registers in all four first bodies;
-      // the trace / splat / fist slots are the known-entry lowest-free slots). The optional late lag is the timing policy's phase.
-      if (spriteOrderInput?.known !== true || spriteOrderInput.firstBody !== true) return null;
+      // D4a faithful timing: Mach Punch (prep25 B.5: WIN0 (240, 161) and the S0 BG3HOFS / blend registers in all four first bodies; the trace /
+      // splat / fist slots are the known-entry lowest-free slots). The optional late lag is the timing policy's phase. later58
+      // (docs/next-adapters-later58.md): at a LATER body BG3HOFS / BLDCNT / BLDALPHA / BLDY are still S0 and the allocator (tile bitmap, palette
+      // tags incl. the healthbar trace bank 9, matrices, tasks) is the first body's; WIN0 / BGnCNT / DISPCNT history is unread. The later
+      // windows are exact in the policy phase and differ only on the documented lag rows in the other. Later: both species rests {0,0}.
+      if (spriteOrderInput?.known !== true || (spriteOrderInput.firstBody !== true && !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       const lentOrder = spriteOrderWithOccupiedPrefix(
@@ -3120,8 +3123,8 @@ export function liveMoveAnimationPresentation(
       if (palettes === null || lentOrder === null) return null;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const machPunchInputs = liveMachPunchInputs({
-        attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes, spriteOrder: lentOrder, firstBody: true,
-        healthbarPalette: (paletteResources as unknown as { initial: { healthbar: readonly number[] } }).initial.healthbar });
+        attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes, spriteOrder: lentOrder,
+        firstBody: spriteOrderInput.firstBody === true, healthbarPalette: (paletteResources as unknown as { initial: { healthbar: readonly number[] } }).initial.healthbar });
       if (machPunchInputs === null) return null;
       config = { move: "MACH_PUNCH", attacker, target, fieldProfile, animationInputs: machPunchInputs as never };
       break;

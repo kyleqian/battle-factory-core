@@ -49,3 +49,20 @@ describe("later58 Signal Beam 324 at a later body", () => {
     expect(liveMoveAnimationPresentation((view.effect as unknown as { request: BattleMoveAnimationRequest }).request, view.field, 0)).toBeNull();
   });
 });
+
+describe("later58 Mach Punch 183 at a later body (D4a: the policy's lag phase)", () => {
+  it.each(pinnedOf("MACH_PUNCH"))("%s: live, every pinned row equals the ROM frame", expectPinnedRows, 180000);
+
+  it("later bodies after Quick Attack / Growl / Splash / its own body are live on rest-free battlers; the target-rest guard stays", () => {
+    for (const name of ["mach-punch-pla-hitmonchan-chansey-qa-1", "mach-punch-opp-machamp-golem-growl-2", "mach-punch-pla-machamp-golem-splash-2"]) {
+      expect(presentation(fixture(name))?.config.move).toBe("MACH_PUNCH");
+    }
+    const later = fixture("mach-punch-pla-hitmonchan-chansey-qa-1");
+    expect(presentation({ ...later, target: { ...later.target, species: "ONIX" } })).toBeNull();
+    // An ONIX attacker (opponent, rest x2 1): the first body engages (species audit 9), a later body declines (both rests {0,0} required).
+    const opp = fixture("mach-punch-opp-hitmonchan-chansey-splash-1");
+    expect(presentation({ ...opp, attacker: { ...opp.attacker, species: "ONIX" } })).toBeNull();
+    const first = fixture("mach-punch-opp-hitmonchan-chansey-splash-0");
+    expect(presentation({ ...first, attacker: { ...first.attacker, species: "ONIX" } })?.config.move).toBe("MACH_PUNCH");
+  });
+});

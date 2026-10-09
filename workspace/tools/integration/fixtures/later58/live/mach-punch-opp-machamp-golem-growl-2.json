@@ -1,0 +1,68 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "MACH_PUNCH",
+ "bodyIndex": 2,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later58/scenarios/mach-punch-opp-machamp-golem-growl.json",
+ "denseWindow": {
+  "startFrame": 2347,
+  "endFrame": 2456
+ },
+ "attacker": {
+  "species": "MACHAMP",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703528,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 71,
+  "playerMaxHp": 187,
+  "opponentHp": 197,
+  "opponentMaxHp": 197,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "timingPhase": "event",
+ "precedingBodies": [
+  {
+   "moveId": 183,
+   "side": "opponent"
+  },
+  {
+   "moveId": 45,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statAnimation": 22
+  },
+  {
+   "moveId": 183,
+   "side": "opponent"
+  },
+  {
+   "moveId": 45,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statAnimation": 22
+  }
+ ]
+}

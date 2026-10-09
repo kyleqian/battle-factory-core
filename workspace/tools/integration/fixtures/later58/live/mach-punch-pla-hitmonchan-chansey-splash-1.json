@@ -1,0 +1,50 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "MACH_PUNCH",
+ "bodyIndex": 1,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later58/scenarios/mach-punch-pla-hitmonchan-chansey-splash.json",
+ "denseWindow": {
+  "startFrame": 1212,
+  "endFrame": 1321
+ },
+ "attacker": {
+  "species": "HITMONCHAN",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "CHANSEY",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015328,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 157,
+  "playerMaxHp": 157,
+  "opponentHp": 8,
+  "opponentMaxHp": 357,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "timingPhase": "event",
+ "precedingBodies": [
+  {
+   "moveId": 183,
+   "side": "player"
+  },
+  {
+   "moveId": 150,
+   "side": "opponent"
+  }
+ ]
+}
