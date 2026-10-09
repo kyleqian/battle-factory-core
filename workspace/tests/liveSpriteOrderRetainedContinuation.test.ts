@@ -61,4 +61,21 @@ describe("retained locked-action continuation keeps the sprite-order host known 
     }
     expect(continuation[0]!.spriteOrderInput).toEqual(after.tracker.cursor.order.free);
   }, 60000);
+
+  it("generated seed 0 (retained opponent Dig continuation): Scene ON / OFF gameplay parity (rules, RNG, boundaries)", () => {
+    const on = generatedCommandAnimationReplay(0, "on", [0, 0, 0], 0, true);
+    const off = generatedCommandAnimationReplay(0, "off", [0, 0, 0], 0, true);
+    expect(on.boundaries.length).toBeGreaterThan(2);
+    expect(on.boundaries).toHaveLength(off.boundaries.length);
+    for (let index = 0; index < on.boundaries.length; index += 1) {
+      const a = on.boundaries[index]!, b = off.boundaries[index]!;
+      expect(a.rng).toEqual(b.rng);
+      const { hitMarker: am, ...ar } = a.rules.rulesContext;
+      const { hitMarker: bm, ...br } = b.rules.rulesContext;
+      expect(ar).toEqual(br);
+      expect(am ^ bm).toBe(0x80); // HITMARKER_NO_ANIMATIONS
+      expect(a.boundary).toEqual(b.boundary);
+    }
+    expect(off.commands.every(row => row.spriteOrderInput === undefined)).toBe(true);
+  }, 60000);
 });
