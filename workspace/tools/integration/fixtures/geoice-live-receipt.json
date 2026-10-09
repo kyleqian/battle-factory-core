@@ -1890,5 +1890,19 @@
    "liveCountPctBefore": 85.71,
    "liveCountPctAfter": 86.37
   }
+ },
+ "acceptedFixtures": {
+  "evidenceDir": ".integration/validation/geoice-accepted",
+  "note": "liveAdapterFramebuffer.ts two fresh runs each on the final code; every digest equals tools/integration/fixtures/prep2-live-adapter-receipt.json",
+  "windows": {
+   "prep2-icy-wind-player": "aa03a84df7b5",
+   "prep2-icy-wind-opponent": "5bb444f52a53",
+   "prep2-blizzard-player": "94e34819d486",
+   "prep2-blizzard-opponent": "768af0578289",
+   "altspecies3-icy-wind-opponent-poliwhirl-player-onix": "9f6a88159f75"
+  },
+  "allZeroResidual": true,
+  "r1EqualsR2": true,
+  "digestsEqualPrep2Receipt": true
  }
 }
