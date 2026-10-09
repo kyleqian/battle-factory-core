@@ -94,6 +94,8 @@ JOBS = [
      [mon(PIDGEOTTO, moves=(WHIRLWIND,) * 4)] + [mon(ONIX), mon(SNORLAX)], [None, None]),
     ("rain-ai-mrmime", 240, "player", "ai-switch", [mon(MR_MIME, moves=(PERISH, RD, SWIFT, SWIFT))] + BENCH_P,
      [mon(SNORLAX)] + BENCH_O, [None, "RIGHT", "DOWN", None]),
+    ("rain-sun-ko-slowpoke", 240, "player", "ko", [mon(SLOWPOKE, moves=(RD, SWIFT, SWIFT, SWIFT), speed_iv=0)] + BENCH_P,
+     [mon(SANDSHREW, 20, (SD,) * 4)] + [mon(ONIX), mon(SNORLAX)], [None, "RIGHT", None, None]),
     ("rain-sun-ko-snorlax", 240, "player", "ko", [mon(SNORLAX, moves=(RD, SWIFT, SWIFT, SWIFT), speed_iv=0)] + BENCH_P,
      [mon(PIDGEOTTO, 18, (SD,) * 4)] + BENCH_O, [None, "RIGHT", None]),
     # Rain Dance (player) -> RAIN_CONTINUES; turn 2 Swift KO + summary + send-out, then RAIN_CONTINUES again (its activation = the first

@@ -284,6 +284,17 @@ export function fixtureWordsChain(f: Fixture): { spriteOrderInput: LiveMoveSprit
       if (step[0] === "hit") return ev(seq, "animation", { animationId: "HIT_ANIMATION", battler: who(step[1]), target: who(step[1]), arguments: [] });
       if (step[0] === "stat") return ev(seq, "animation", { animationId: "STATS_CHANGE", battler: who(step[1]), target: who(step[1]), arguments: [String(step[2] ?? 20)] });
       if (step[0] === "rain") return ev(seq, "animation", { animationId: "RAIN_CONTINUES", battler: 0, target: 0, arguments: [] });
+      // words57: battle units after a words unit (an opponent KO + next-mon summary / hide / send-out; the Factory AI's DoSwitchOut summary,
+      // which the host applies as the opponent's recall + summary) and other general animations (SUN_CONTINUES)
+      if (step[0] === "faint") return ev(seq, "faint-animation", { battler: who(step[1]) });
+      if (step[0] === "summary") return ev(seq, "draw-party-status-summary", { battler: 1 });
+      if (step[0] === "aisummary") {
+        return Object.freeze({ sequence: seq, payload: { kind: "draw-party-status-summary", battler: 1 },
+          provenance: { sourceLabel: "BattleScript_DoSwitchOut" } }) as unknown as BattleKernelSemanticEvent;
+      }
+      if (step[0] === "hide") return ev(seq, "hide-party-status-summary", { battler: 1 });
+      if (step[0] === "sendout") return ev(seq, "switch-in-animation", { battler: 1, partyIndex: Number(step[1] ?? 1) });
+      if (step[0] === "general") return ev(seq, "animation", { animationId: String(step[1]), battler: 0, target: 0, arguments: [] });
       throw new Error(`wordsChain step ${JSON.stringify(step)}`);
     });
     const resolution = { resolutionId: { requestId }, segmentIndex: 0, segments: [{ events }] };

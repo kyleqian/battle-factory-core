@@ -80,7 +80,7 @@ describe("words57: the words-deferred replay past battle units (ROM vectors)", (
         expect(resolveSpriteOrderDeferredLend(vector.marker, carry), label).toBeNull();
       } else tally.resolvedWithoutBattleUnits += 1;
     }
-    expect({ ...tally, kinds: [...tally.kinds].sort() }).toEqual({ vectors: 74, resolvedThroughBattleUnits: 9, resolvedWithoutBattleUnits: 38,
+    expect({ ...tally, kinds: [...tally.kinds].sort() }).toEqual({ vectors: 79, resolvedThroughBattleUnits: 11, resolvedWithoutBattleUnits: 41,
       dirtDeclines: 27, kinds: ["faint opponent", "forced-switch-out opponent", "forced-switch-out player", "next-mon-send-out",
         "party-summary-hide", "party-summary-next", "switch-in-finish opponent", "switch-in-finish player", "switch-in-start opponent",
         "switch-in-start player", "switch-out opponent"] });
