@@ -16,7 +16,7 @@ BASE = json.loads(Path("tools/battle-lab/prep18-return-altopp-snorlax-golem.json
 OUT = Path(sys.argv[1]); OUT.mkdir(parents=True, exist_ok=True)
 MOVES = {"CONFUSE_RAY": 109, "SPORE": 147, "THUNDER_WAVE": 86, "SLUDGE_BOMB": 188, "WILL_O_WISP": 261, "SEISMIC_TOSS": 69, "ICE_BALL": 301,
          "FUTURE_SIGHT": 248, "PURSUIT": 228, "PERISH_SONG": 195, "OUTRAGE": 200, "COUNTER": 68, "LIGHT_SCREEN": 113, "REFLECT": 115,
-         "PROTECT": 182, "THUNDERBOLT": 85, "ICE_BEAM": 58, "DOUBLE_TEAM": 104, "SWIFT": 129, "BLIZZARD": 59, "SIGNAL_BEAM": 324, "BONEMERANG": 155, "SUNNY_DAY": 241, "BLAZE_KICK": 299, "HEAL_BELL": 215}
+         "PROTECT": 182, "THUNDERBOLT": 85, "ICE_BEAM": 58, "DOUBLE_TEAM": 104, "SWIFT": 129, "BLIZZARD": 59, "SIGNAL_BEAM": 324, "BONEMERANG": 155, "SUNNY_DAY": 241, "BLAZE_KICK": 299, "HEAL_BELL": 215, "ATTRACT": 213}
 # name: (unit move, consumer move, consumer side, prompt cycles)
 CHAINS = {
     # priority 1: a status animation (infliction and / or the afflicted battler's move attempt) -> allocator consumer
@@ -37,6 +37,9 @@ CHAINS = {
     "psn-reflect-ply": ("SLUDGE_BOMB", "REFLECT", "player", 5),
     "brn-light-screen-opp": ("WILL_O_WISP", "LIGHT_SCREEN", "opponent", 3),
     "frz-light-screen-ply": ("ICE_BEAM", "LIGHT_SCREEN", "player", 6),
+    "inf-light-screen-ply": ("ATTRACT", "LIGHT_SCREEN", "player", 4),
+    "inf-light-screen-opp": ("ATTRACT", "LIGHT_SCREEN", "opponent", 4),
+    "inf-reflect-ply": ("ATTRACT", "REFLECT", "player", 4),
     "frz-reflect-ply": ("ICE_BEAM", "REFLECT", "player", 6),
     "psn-protect-ply": ("SLUDGE_BOMB", "PROTECT", "player", 5),
     "brn-reflect-ply": ("WILL_O_WISP", "REFLECT", "player", 3),

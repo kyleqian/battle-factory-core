@@ -5,6 +5,7 @@ feeds the production hosts), extended to today's units:
   Move_X               -> MOVE_ANIMATION [moveId, gAnimMoveTurn, power, dmg>0, 70, 0] (+ HIT_ANIMATION on the target when its HP drops);
   Status_Sleep / _Poison / _Burn / _Freeze / _Paralysis -> status-animation (status1 = the afflicted battler's ROM status1 at activation
                           when it names the same animation, else 0x1 / 0x8 / 0x10 / 0x20 / 0x40);
+  Status_Infatuation   -> status-animation isStatus2 (STATUS2_INFATUATION bit 0x00010000);
   Status_Confusion     -> status-animation isStatus2 (1); + HIT_ANIMATION on the afflicted battler when its HP drops before the next body
                           (the confusion self-hit's hitanimation BS_ATTACKER; no animation script, so the probe records no body);
   General_FocusBand    -> animation FOCUS_BAND on the holder; General_HeldItemEffect -> HELD_ITEM_EFFECT (a berry curing the status);
@@ -28,9 +29,9 @@ MOVES = {"Move_CONFUSE_RAY": 109, "Move_SPORE": 147, "Move_THUNDER_WAVE": 86, "M
          "Move_SEISMIC_TOSS": 69, "Move_ICE_BALL": 301, "Move_FUTURE_SIGHT": 248, "Move_PURSUIT": 228, "Move_PERISH_SONG": 195,
          "Move_OUTRAGE": 200, "Move_LIGHT_SCREEN": 113, "Move_REFLECT": 115, "Move_PROTECT": 182, "Move_THUNDERBOLT": 85,
          "Move_ICE_BEAM": 58, "Move_DOUBLE_TEAM": 104, "Move_SWIFT": 129, "Move_TACKLE": 33, "Move_BLIZZARD": 59, "Move_SIGNAL_BEAM": 324,
-         "Move_BONEMERANG": 155, "Move_SUNNY_DAY": 241, "Move_BLAZE_KICK": 299, "Move_HEAL_BELL": 215}
+         "Move_BONEMERANG": 155, "Move_SUNNY_DAY": 241, "Move_BLAZE_KICK": 299, "Move_HEAL_BELL": 215, "Move_ATTRACT": 213}
 POWER = {109: 0, 147: 0, 86: 0, 188: 90, 261: 0, 69: 1, 301: 30, 248: 80, 228: 40, 195: 0, 200: 90, 113: 0, 115: 0, 182: 0, 85: 95,
-         58: 95, 104: 0, 129: 60, 33: 35, 59: 120, 324: 75, 155: 50, 241: 0, 299: 85, 215: 0}
+         58: 95, 104: 0, 129: 60, 33: 35, 59: 120, 324: 75, 155: 50, 241: 0, 299: 85, 215: 0, 213: 0}
 CONSUMERS = {113: "LIGHT_SCREEN", 115: "REFLECT", 182: "PROTECT", 85: "THUNDERBOLT", 58: "ICE_BEAM", 104: "DOUBLE_TEAM", 129: "SWIFT", 59: "BLIZZARD", 299: "BLAZE_KICK", 215: "HEAL_BELL"}
 STATUS1 = {"Status_Sleep": (0x1, "SLP"), "Status_Poison": (0x8, "PSN"), "Status_Burn": (0x10, "BRN"), "Status_Freeze": (0x20, "FRZ"),
            "Status_Paralysis": (0x40, "PRZ")}
@@ -118,6 +119,8 @@ for probe in sorted(probe_dir.glob("*.json")):
             turns[t].append({"kind": "status-animation", "battler": atk, "isStatus2": 1, "status": 1})
             if nxt is not None and nxt[atk]["hp"] < at[atk]["hp"]:
                 turns[t].append({"kind": "animation", "animationId": "HIT_ANIMATION", "battler": atk, "target": atk, "arguments": []})
+        elif label == "Status_Infatuation":
+            turns[t].append({"kind": "status-animation", "battler": atk, "isStatus2": 1, "status": 0x00010000})
         elif label == "General_FutureSightHit":
             turns[t].append({"kind": "animation", "animationId": "FUTURE_SIGHT_HIT", "battler": atk, "target": b["target"], "arguments": []})
         elif label == "General_HeldItemEffect":

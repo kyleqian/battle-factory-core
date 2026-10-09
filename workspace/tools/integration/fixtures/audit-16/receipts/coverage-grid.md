@@ -43,6 +43,9 @@
 | i152-arbok-thunderbolt | THUNDERBOLT | opponent | ARBOK/CATERPIE | 1/1 | 0 | - |
 | ice-ball-light-screen-ply | LIGHT_SCREEN | player | CHANSEY/SNORLAX | 1/1 | 0 | - |
 | ice-ball-reflect-ply | REFLECT | player | CHANSEY/SNORLAX | 1/1 | 0 | - |
+| inf-light-screen-opp | LIGHT_SCREEN | opponent | CHANSEY/SNORLAX | 1/1 | 0 | - |
+| inf-light-screen-ply | LIGHT_SCREEN | player | CHANSEY/SNORLAX | 1/1 | 0 | - |
+| inf-reflect-ply | REFLECT | player | CHANSEY/SNORLAX | 1/1 | 0 | - |
 | later-bonemerang-dt-opp | BONEMERANG | opponent | SNORLAX/CHANSEY | 4/4 | 0 | - |
 | later-bonemerang-dt-ply | BONEMERANG | player | SNORLAX/CHANSEY | 4/4 | 0 | - |
 | later-bonemerang-prz-opp | BONEMERANG | opponent | SNORLAX/CHANSEY | 4/4 | 0 | - |
@@ -108,4 +111,4 @@
 | slp-protect-ply | PROTECT | player | CHANSEY/SNORLAX | 2/2 | 0 | - |
 | slp-reflect-ply | REFLECT | player | CHANSEY/SNORLAX | 1/1 | 0 | - |
 
-TOTAL windows 236: 0 px 211 (discr 13), declined 0, non-zero 25; chain and entry r1 == r2 in 236 / 236
+TOTAL windows 239: 0 px 214 (discr 13), declined 0, non-zero 25; chain and entry r1 == r2 in 239 / 239

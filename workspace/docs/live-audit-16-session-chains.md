@@ -11,10 +11,10 @@ allocator / order host, and compares every row with fresh ROM frames. The folds 
 Master is b986bb5b2 (production src tree 64e91f1d). Every run was direct mGBA (`prep48Probe.py`); no shared oracle was touched. No src
 edit was made (no DEFECT needed a patch proof). Evidence is in `tools/integration/fixtures/audit-16/`.
 
-**Totals.** 119 scenarios (117 with a consumer window), **236 consumer windows**, 236 live, 0 declined. Every window ran in two fresh probe processes with identical
+**Totals.** 122 scenarios (120 with a consumer window), **239 consumer windows**, 239 live, 0 declined. Every window ran in two fresh probe processes with identical
 per-row digests (chain AND entry-lend renders). A from-scratch reproduction (`audit16Run.sh`: stage == committed, derive == committed,
-two more fresh runs) gave the same digests and px on every window (`receipts/repro-check.txt`).
-- **211 / 236 windows are 0 px on every row.**
+two more fresh runs) gave the same digests and px on 236 windows (the 3 INFATUATION windows, added last, ran once: `receipts/repro-check.txt`).
+- **214 / 239 windows are 0 px on every row.**
 - **No SPECIES- or HISTORY-DEFECT was found in any chain.** Every non-zero chain row is either a documented D4 BLDALPHA phase with
   counter evidence (9 Light Screen windows, both species pairs, both sides), a checker-framing ARTIFACT (2 Blaze Kick rows), or the consumer's OWN first-body residual,
   reproduced exactly by its no-unit control (Double Team on CHANSEY / ARBOK, 14 windows: UNRESOLVED, not chain-related).
@@ -45,7 +45,7 @@ two more fresh runs) gave the same digests and px on every window (`receipts/rep
 | **Double Team 104 on CHANSEY**, both sides: no-unit controls c0 / c1 and every Outrage chain (5 + 4) | 188,618 / 188,775 (player) and 236,200 / 236,281 (opponent) px, rows 5..57 | At the ACCEPTED framing (prep7: production age 0 = ROM activation + 1; the accepted ONIX -> GROVYLE route through this checker: **0 px**, `receipts/onix-dt/`). CHANSEY's clone motion is one frame AHEAD of production: framed at activation it is exact except row 2 (1,809 / 1,566 px; `receipts/dt-offset-1/` keeps that trial). Lag ages are [133, 134] for CHANSEY, ARBOK and ONIX alike; the monbg BG writes are buffered at row 1 in all of them (waiting [12, 24, 26] / [10, 20, 22]). The chain rows equal their no-unit control (to within 157 px between the first-body and later-body lends); the entry-lend control is 200,690 / 245,755 px, so the chain lend is the better one | **UNRESOLVED**, the consumer's own first-body residual (not a chain defect). Species-dependent 1-frame phase of the clone program with no lag-frame or BLDALPHA counter explaining it. Production renders it live (`liveMoveAnimation.ts:2805`, no side / species gate) |
 | **Double Team on ARBOK** (opponent, first body, #152 field) | 49,405 px, ages 6..45 (393,765 at the activation framing) | Same counters as CHANSEY (lag [133, 134]) | **UNRESOLVED**, same class as above (not chain-related) |
 | **Blaze Kick 299, player holder CATERPIE after FOCUS_BAND** (seeds 12, 13) | 200 px on **age −10 only** (bbox x 160..191 y 65..72, ROM 526b63 vs live bdbd9c) | Age −10 is the ROM activation row, 10 rows before Blaze Kick's accepted window (the checker's ageOffset −10 framing, audit 15). The bbox is the opponent DRAGONITE's shadow strip; Blaze Kick lists no shadow row (its window starts after activation). The entry control has the same row; the 4 opponent-holder windows (DRAGONITE on the player side: no opponent shadow) are 0 px | **ARTIFACT** (checker window starts before the adapter's window) |
-| Status chains -> Light Screen / Reflect / Protect, both sides | 0 px (24 of 28 windows; the other 4 are the Light Screen phase above) | The audit-15 harness (`postkoHostReplay.ts`) still invalidates the allocator on EVERY status animation: it would have DECLINED all 28 (`harnessAllocator: false`). This audit's replay follows today's orchestrator (`factoryRoundBattleOrchestrator.ts:2329`) | **EXACT** (newly live routes). Harness note: `replayPostKoTurnsThroughHost` is stale for alloc50 / alloc52 and has no geometry callback |
+| Status chains -> Light Screen / Reflect / Protect, both sides | 0 px (27 of 31 windows; the other 4 are the Light Screen phase above) | The audit-15 harness (`postkoHostReplay.ts`) still invalidates the allocator on EVERY status animation: it would have DECLINED all 31 (`harnessAllocator: false`). This audit's replay follows today's orchestrator (`factoryRoundBattleOrchestrator.ts:2329`) | **EXACT** (newly live routes). Harness note: `replayPostKoTurnsThroughHost` is stale for alloc50 / alloc52 and has no geometry callback |
 | Every chain on an allocator consumer (Light Screen / Reflect / Protect) | 0 px, entry-lend control also 0 | A net-zero unit leaves the allocator equal to the first-body entry by construction, so the entry control cannot discriminate; the rows prove the post-unit render (status icon, HP bar, x2, message box, BG, the lent allocator) | **EXACT, lend-neutral** |
 
 ## 2. Coverage (`receipts/coverage-grid.md`; `python3 tools/integration/audit16Coverage.py <receipts>`)
@@ -60,6 +60,7 @@ AFTER the unit; "discr" = 0-px windows whose entry-lend control is non-zero.
 | **PRZ** (Thunder Wave + Status_Paralysis) | Light Screen opp 1/1, ply 0/1 (PHASE r19); Reflect ply 1/1; Protect ply 1/1 |
 | **PSN** (Sludge Bomb + Status_Poison; seeds 1 / 3) | Light Screen ply 1/1; Reflect ply 1/1; Protect ply 3/3 (after 1..3 end-turn PSN animations) |
 | **FRZ** (Ice Beam + Status_Freeze x7, thaw; seed 3) | Light Screen ply 1/1; Reflect ply 1/1 |
+| **INFATUATION** (Attract + Status_Infatuation x1..3) | Light Screen ply 1/1, opp 1/1; Reflect ply 1/1 |
 | **BRN** (Will-O-Wisp + Status_Burn) | Light Screen opp 1/1 (a DECLINE in audit 15); Reflect ply 1/1 |
 | Seismic Toss (net-zero, prep52) | Light Screen ply 1/1, opp 1/1; Reflect ply 1/1; Protect ply 1/1 |
 | Ice Ball (body 1) | Light Screen ply 1/1; Reflect ply 1/1 |
@@ -73,8 +74,8 @@ AFTER the unit; "discr" = 0-px windows whose entry-lend control is non-zero.
 | #152 ARBOK -> CATERPIE (first body) | Blizzard 1/1, Swift 1/1, Thunderbolt 1/1; Double Team 0/1 (UNRESOLVED) |
 | controls (first body; c1 = after the consumer's own earlier body) | Light Screen ply 1/1, opp 0/1 (PHASE); Reflect 2/2; Protect 1/1; Thunderbolt 4/4; Ice Beam 2/2; Blaze Kick 3/3 (discr 1); Heal Bell 4/4; Double Team 0/4 (UNRESOLVED) |
 
-Headlines: allocator consumer after a status animation **28 windows, 24 exact, 4 PHASE** (all 6 audited statuses that a singles staging
-reaches); after a newly net-zero body **29 / 32** (3 PHASE); after Outrage **55 / 66** (9 Double Team UNRESOLVED, 2 Blaze Kick ARTIFACT);
+Headlines: allocator consumer after a status animation **31 windows, 27 exact, 4 PHASE** (SLP, CONFUSION, PSN, PRZ, BRN, FRZ,
+INFATUATION); after a newly net-zero body **29 / 32** (3 PHASE); after Outrage **55 / 66** (9 Double Team UNRESOLVED, 2 Blaze Kick ARTIFACT);
 after FOCUS_BAND **25 / 27** (2 ARTIFACT); later58 later bodies **50 / 50**. Species pairs: SNORLAX / CHANSEY, EXEGGCUTE / ONIX (the accepted Light Screen pairs, both sides), DRAGONITE / CATERPIE,
 ARBOK / CATERPIE (+ the accepted ONIX / GROVYLE Double Team route as framing reference).
 
@@ -83,7 +84,7 @@ ARBOK / CATERPIE (+ the accepted ONIX / GROVYLE Double Team route as framing ref
 - **words57** (Rain Dance + an opponent KO + summary + send-out -> an order-dependent consumer): not staged. It needs the words-deferred
   lend (pinned Random2 words) and the faint / summary / send-out events in this audit's replay; `audit16Check.ts` models neither.
 - **SLP on the opponent side with CHANSEY**: the AI switches it out (24 seeds swept); reached with EXEGGCUTE / ONIX instead.
-- **INFATUATION / CURSED / NIGHTMARE** status animations and **Magic Coat / Mirror Coat / Barrier** consumers.
+- **CURSED / NIGHTMARE** status animations and **Magic Coat / Mirror Coat / Barrier** consumers.
 - **later58 after a switch-in** predecessor, and Mach Punch / Sheer Cold / Extrasensory / Sky Attack / Fury Cutter at later bodies.
 - **Two species pairs for the chains** (the second only for Light Screen), + two for the special rows. Consumers were chosen by priority / order sensitivity; the census
   was not consulted per unit.
@@ -91,11 +92,11 @@ ARBOK / CATERPIE (+ the accepted ONIX / GROVYLE Double Team route as framing ref
 
 ## 3. Method
 
-1. `audit16Stage.py` builds 119 battle-lab scenarios (explicit lab seed in each; ISSUES #154): the audit-15 SNORLAX / CHANSEY leads, the
+1. `audit16Stage.py` builds 122 battle-lab scenarios (explicit lab seed in each; ISSUES #154): the audit-15 SNORLAX / CHANSEY leads, the
    unit / consumer one move x4 each, 2..6 prompt cycles; FOCUS_BAND reuses plans51's Outrage stagings and seeds with the holder's move
    replaced; `audit16Sweep.py` picked the PSN / FRZ seeds; the #152 rows reuse the geoice control scenario with ARBOK's move replaced.
 2. `audit16Probes.sh` runs `prep48Probe.py` once per scenario; `audit16Fixtures.py` turns the history up to each consumer body into
-   kernel payloads, one turn per action prompt (audit 15's recipe plus: Status_Sleep / Poison / Freeze, the confusion self-hit,
+   kernel payloads, one turn per action prompt (audit 15's recipe plus: Status_Sleep / Poison / Freeze / Infatuation, the confusion self-hit,
    FUTURE_SIGHT_HIT, FOCUS_BAND, SUN_CONTINUES, HELD_ITEM_EFFECT; later58 moves as consumers at every body, `-cu<k>`; Double Team framed at activation + 1
    and Blaze Kick at −10 as the accepted fixtures frame them; Bonemerang hit 2 with the blank message box).
 3. `audit16Check.ts` (one scenario per process) replays the history through the production hosts AS THE ORCHESTRATOR DOES TODAY:
@@ -122,7 +123,7 @@ python3 tools/integration/audit16Sweep.py <dir> 1 24 psn-light-screen-ply ...   
 
 ## 5. Receipts (`tools/integration/fixtures/audit-16/`)
 
-`scenarios/` (119; `slp-light-screen-opp` and `fb-blaze-kick-pla-s17` yield no consumer window: AI switch-out / no holder body after the band within the trace), `fixtures/` (236 windows, `precedingTurns`), `ablation/` (the #152 HP / personality variants; the ONIX Double Team
+`scenarios/` (122; `slp-light-screen-opp` and `fb-blaze-kick-pla-s17` yield no consumer window: AI switch-out / no holder body after the band within the trace), `fixtures/` (239 windows, `precedingTurns`), `ablation/` (the #152 HP / personality variants; the ONIX Double Team
 reference at both framings), and `receipts/`:
 - `main/`: per-scenario check JSON (chain + entry: live / order / allocator, rows, px, r1 / r2 digests, residual rows with bbox and a
   ROM / live colour sample, the audit-15 harness's allocator decision), `summary.txt`;
