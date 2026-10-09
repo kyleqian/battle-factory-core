@@ -8,7 +8,8 @@ import {
 } from "../src/engine/liveSpriteAllocator.ts";
 import { createKnownEntrySpriteAllocatorProvider } from "../src/engine/knownEntrySpriteAllocator.ts";
 import {
-  LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS, prepareLiveMoveSpriteAllocator,
+  LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS, LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS,
+  prepareLiveMoveSpriteAllocator,
 } from "../src/engine/liveMoveSpriteAllocator.ts";
 
 const move = (identity: string, index = 0): LiveSpriteOwner => ({ kind: "move", identity, index });
@@ -218,5 +219,19 @@ describe("net-zero move history persistence", () => {
     }
     const unknown = invalidateLiveSpriteAllocatorHost(firstMove);
     expect(prepareLiveMoveSpriteAllocator(unknown, req(2)).next.historyKnown).toBe(false);
+  });
+});
+
+describe("net-zero status animations", () => {
+  it("pins the set to the prep50 receipt's NET-ZERO labels", () => {
+    const receipt = JSON.parse(readFileSync("tools/integration/fixtures/prep50/status-net-zero-audit.json", "utf8"));
+    const names: Record<string, string> = {
+      Status_Sleep: "SLP", Status_Confusion: "CONFUSION", Status_Poison: "PSN",
+      Status_Paralysis: "PRZ", Status_Burn: "BRN",
+    };
+    const audited = (receipt.summary as { label: string; verdict: string }[])
+      .filter(row => row.verdict === "NET-ZERO").map(row => names[row.label]);
+    expect(audited).toHaveLength(5);
+    expect([...LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS].sort()).toEqual([...audited].sort());
   });
 });

@@ -4,7 +4,9 @@ import {
   type LiveMovePaletteHost, type LiveMovePaletteInput,
 } from "./liveMoveAnimationPalette.ts";
 import { createKnownEntrySpriteAllocatorProvider } from "./knownEntrySpriteAllocator.ts";
+import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
 import {
+  LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS,
   prepareLiveMoveSpriteAllocator,
   type LiveMoveSpriteAllocatorInput,
   type LiveMoveSpriteOrderInput,
@@ -2312,14 +2314,20 @@ function prepareResolutionPalette(
     ? command.eventSequence
     : Number.POSITIVE_INFINITY;
   let scannedEventIndex = nextEventIndex;
+  // Status animations not audited allocator net-zero (the palette host still invalidates on every one).
+  let crossedAllocatorUnknown = false;
   const scanThrough = (throughSequence: number): boolean => {
     let crossedUnknownGraphics = false;
     while (
       scannedEventIndex < segment.events.length
       && segment.events[scannedEventIndex]!.sequence <= throughSequence
     ) {
-      if (segment.events[scannedEventIndex]!.payload.kind === "status-animation") {
+      const payload = segment.events[scannedEventIndex]!.payload;
+      if (payload.kind === "status-animation") {
         crossedUnknownGraphics = true;
+        if (!LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS.has(
+          spriteOrderStatusAnimationName(payload.isStatus2 !== 0, payload.status) ?? "",
+        )) crossedAllocatorUnknown = true;
       }
       scannedEventIndex += 1;
     }
@@ -2413,7 +2421,7 @@ function prepareResolutionPalette(
   if (spriteHost && orderHost && command?.type === "switch-in") {
     spriteHost = reseedLiveSpriteAllocatorAfterSendOut(spriteHost, orderHost);
   }
-  if ((hasTrailingUnknownGraphics || crossedUnknownGraphics) && spriteHost) {
+  if (crossedAllocatorUnknown && spriteHost) {
     spriteHost = invalidateLiveSpriteAllocatorHost(spriteHost);
   }
   // The active command's palette input was captured above. Any unprojected
