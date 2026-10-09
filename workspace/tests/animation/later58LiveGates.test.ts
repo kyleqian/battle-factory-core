@@ -110,3 +110,14 @@ describe("later58 Sky Attack 143: a later charge", () => {
     expect(presentation({ ...later, target: { ...later.target, species: "ONIX" } })).toBeNull();
   });
 });
+
+describe("later58 Bonemerang 155: later hits", () => {
+  it.each(pinnedOf("BONEMERANG"))("%s: live, every pinned row equals the ROM frame", expectPinnedRows, 180000);
+
+  it("later hits 1 and 2 after Quick Attack / Growl / Splash / its own hits are live on rest-free battlers; an ONIX later hit declines", () => {
+    for (const name of ["bonemerang-pla-marowak-chansey-qa-0", "bonemerang-pla-marowak-chansey-qa-1", "bonemerang-opp-marowak-chansey-growl-2",
+      "bonemerang-opp-rhydon-golem-qa-1"]) expect(presentation(fixture(name))?.config.move).toBe("BONEMERANG");
+    const later = fixture("bonemerang-pla-marowak-chansey-qa-0");
+    expect(presentation({ ...later, target: { ...later.target, species: "ONIX" } })).toBeNull();
+  });
+});

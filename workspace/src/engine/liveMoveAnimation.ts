@@ -3067,8 +3067,12 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 155: {
-      // prep29 R1: Bonemerang. Hit 1 is the first body (S0 registers); hit 2 only directly after a first-body hit 1 (a later body declines).
-      if (!spriteOrderInput?.known || (spriteOrderInput.firstBody !== true && spriteOrderInput.afterBonemerangHit1 !== true)) return null;
+      // prep29 R1: Bonemerang. Hit 1 is the first body (S0 registers); hit 2 directly after a first-body hit 1. later58
+      // (docs/next-adapters-later58.md): a LATER hit 1 / hit 2 (after Quick Attack / Growl / Splash / its own hits) starts from history BG1CNT /
+      // BG2CNT (0x9c01, 0x5c02, 0x1c00 / 0x5e02) the pixels never show (the builder's split base), with the first body's allocator; the
+      // battler x2 rests are read, so a later hit needs both species rests {0,0}.
+      if (!spriteOrderInput?.known
+        || (spriteOrderInput.firstBody !== true && spriteOrderInput.afterBonemerangHit1 !== true && !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
