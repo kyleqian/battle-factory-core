@@ -229,9 +229,11 @@ also holds on the other side. This is independent confirmation of the probes.
   `prep45PlanRows.ts` from `check.json`: 15 bodies and 8 anims) after `prep43/plan-rows.json` in
   `tools/integration/spriteOrderProductionTable.ts:157`.
   - `prep45PlanRowsVerify.ts` renders the table that way. Its key → plan-text mapping is identical to the temporary patch's: 508
-    bodies, 20 anims, 213 plans; receipt `plan-rows-verify-map.json`.
+    bodies, 20 anims; receipt `plan-rows-verify-map.json`.
   - Only the indices differ: the renderer puts appended bodies before anims.
-- Update the pins in `tests/spriteOrderEventTransform.test.ts:25-26`: BODIES 493 → 508, PLANS 201 → 213. The anim assertions
+- Update the pins in `tests/spriteOrderEventTransform.test.ts:25-26`: BODIES 493 → 508, PLANS 201 → 212. The regenerated count is 212,
+  not 213: BRN's text `Cf;Cf;Cf;D0;D1` equals STATUS_INFATUATION's existing index 192 and the generator dedupes it. The hand
+  patch's index 201 is that duplicate. The anim assertions
   (`:123-131`) gain the new names.
 - Update `tests/liveSpriteOrderHost.test.ts:344`, the choosetwoturnanim table, with `[76, 1, 10076]`.
 - Add a kernel test that the `TURN_TRAP` event carries `wrappedMove`. The only existing `TURN_TRAP` test fixture
