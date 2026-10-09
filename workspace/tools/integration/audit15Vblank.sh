@@ -6,8 +6,10 @@ export PYTHONPATH=${PYTHONPATH:-/Users/kyle/Developer/pokebench/vendor/libmgba-p
 PY=${PY:-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python}
 S=tools/integration/fixtures/audit-15/scenarios
 for spec in "double-team-light-screen-opp 449" "ctl-light-screen-opp 77" "double-team-light-screen-ply 453" "ctl-light-screen-ply 73" \
-            "faint-attack-light-screen-ply 410"; do
+            "faint-attack-light-screen-ply 410" "acc-ctl-light-screen-opp 79" "acc-tackle-light-screen-opp 213" "acc-double-team-light-screen-opp 445" \
+            "faint-attack-light-screen-opp 0" "swift-light-screen-opp 0"; do
   set -- $spec
+  [ "$2" = 0 ] && set -- "$1" "$(python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['denseWindow']['startFrame'])" tools/integration/fixtures/audit-15/fixtures/$1-c0.json)"
   for r in 1 2; do
     ( python3 tools/run-mgba-probe.py "$OUT/$1-r$r.json" -- $PY tools/integration/audit15VblankProbe.py "$S/$1.json" "$OUT/$1-r$r.json" \
         $(($2 + 50)) $(($2 + 64)) > /dev/null 2>&1; rm -f "$OUT/$1-r$r.json.log" ) &

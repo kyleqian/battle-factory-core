@@ -5,7 +5,11 @@ from pathlib import Path
 
 D = Path(sys.argv[1])
 ACT = {"double-team-light-screen-opp": 449, "ctl-light-screen-opp": 77, "double-team-light-screen-ply": 453, "ctl-light-screen-ply": 73,
-       "faint-attack-light-screen-ply": 410}
+       "faint-attack-light-screen-ply": 410, "acc-ctl-light-screen-opp": 79, "acc-tackle-light-screen-opp": 213,
+       "acc-double-team-light-screen-opp": 445}
+FX = Path("tools/integration/fixtures/audit-15/fixtures")
+for extra in ("faint-attack-light-screen-opp", "swift-light-screen-opp"):
+    ACT[extra] = json.loads((FX / f"{extra}-c0.json").read_text())["denseWindow"]["startFrame"]
 for n, a in ACT.items():
     r1, r2 = (json.loads((D / f"{n}-r{r}.json").read_text()) for r in (1, 2))
     print(f"== {n} (activation {a}) r1==r2 {r1 == r2}")

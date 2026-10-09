@@ -2,7 +2,7 @@
 """Live audit 15: liveAdapterFramebuffer.ts fixtures for every CONSUMER body of the audit-15 chain / control scenarios (prep48Probe.py output).
 
 usage: audit15Fixtures.py <probe-dir> <fixture-dir>
-Each consumer body (the CHANSEY lead's move; Flamethrower / Light Screen / Reflect / Thunderbolt) becomes one fixture whose `precedingTurns`
+Each consumer body (the consumer lead's move; Flamethrower / Light Screen / Reflect / Thunderbolt) becomes one fixture whose `precedingTurns`
 is the battle's semantic event history up to and including that body, one turn per action prompt (prompt cycle t = probe frames
 [1334 t, 1334 (t+1)), the scenario trace's turn length), in the kernel payload forms the orchestrator feeds the PRODUCTION hosts
 (postkoHostReplay.ts: liveSpriteOrderHost + the allocator seam; liveBattlerX2EventsOf for the x2 history):
@@ -23,11 +23,11 @@ probe_dir, out_dir = Path(sys.argv[1]), Path(sys.argv[2])
 out_dir.mkdir(parents=True, exist_ok=True)
 SCEN = Path("tools/integration/fixtures/audit-15/scenarios")
 TURN = 1334
-SPECIES = {113: "CHANSEY", 143: "SNORLAX"}
+SPECIES = {113: "CHANSEY", 143: "SNORLAX", 102: "EXEGGCUTE", 95: "ONIX"}
 MOVES = {"Move_WILL_O_WISP": 261, "Move_FLAMETHROWER": 53, "Move_HYDRO_PUMP": 56, "Move_FIRE_SPIN": 83, "Move_PETAL_DANCE": 80, "Move_DIG": 91,
          "Move_DOUBLE_TEAM": 104, "Move_LIGHT_SCREEN": 113, "Move_ICE_BEAM": 58, "Move_REFLECT": 115, "Move_FAINT_ATTACK": 185,
-         "Move_SWIFT": 129, "Move_THUNDERBOLT": 85, "Move_ICY_WIND": 196}
-POWER = {261: 0, 53: 95, 56: 120, 83: 15, 80: 70, 91: 60, 104: 0, 113: 0, 58: 95, 115: 0, 185: 60, 129: 60, 85: 95, 196: 55}
+         "Move_SWIFT": 129, "Move_THUNDERBOLT": 85, "Move_ICY_WIND": 196, "Move_TACKLE": 33}
+POWER = {261: 0, 53: 95, 56: 120, 83: 15, 80: 70, 91: 60, 104: 0, 113: 0, 58: 95, 115: 0, 185: 60, 129: 60, 85: 95, 196: 55, 33: 35}
 CONSUMERS = {53: "FLAMETHROWER", 113: "LIGHT_SCREEN", 115: "REFLECT", 85: "THUNDERBOLT"}
 STATUS1 = {"Status_Burn": 0x10, "Status_Paralysis": 0x40}
 # production age 0 relative to the ROM activation row (the accepted fixtures' framing: Flamethrower denseWindow activation+4 / ageOffset -11)
@@ -44,7 +44,7 @@ for probe in sorted(probe_dir.glob("*.json")):
     name = probe.stem
     scen = json.loads((SCEN / d["scenario"]).read_text())
     parties = scen["overrides"]["parties"]
-    consumer_side = "player" if parties["player"][0]["species"] == 113 else "opponent"
+    consumer_side = "player" if parties["player"][0]["moves"][0] in CONSUMERS else "opponent"
     consumer_battler = 0 if consumer_side == "player" else 1
     genders = {side: parties[side][0]["gender"] for side in ("player", "opponent")}
     bodies = d["bodies"]

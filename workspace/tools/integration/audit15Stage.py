@@ -14,7 +14,7 @@ from pathlib import Path
 BASE = json.loads(Path("tools/battle-lab/prep18-return-altopp-snorlax-golem.json").read_text())
 OUT = Path(sys.argv[1]); OUT.mkdir(parents=True, exist_ok=True)
 MOVES = {"WILL_O_WISP": 261, "FLAMETHROWER": 53, "HYDRO_PUMP": 56, "FIRE_SPIN": 83, "PETAL_DANCE": 80, "DIG": 91, "DOUBLE_TEAM": 104,
-         "LIGHT_SCREEN": 113, "ICE_BEAM": 58, "REFLECT": 115, "FAINT_ATTACK": 185, "COUNTER": 68, "SWIFT": 129, "THUNDERBOLT": 85, "ICY_WIND": 196}
+         "LIGHT_SCREEN": 113, "ICE_BEAM": 58, "REFLECT": 115, "FAINT_ATTACK": 185, "COUNTER": 68, "SWIFT": 129, "THUNDERBOLT": 85, "ICY_WIND": 196, "TACKLE": 33}
 # name: (unit move, consumer move, consumer side)
 CHAINS = {
     "brn-flamethrower-ply": ("WILL_O_WISP", "FLAMETHROWER", "player"),
@@ -44,6 +44,7 @@ CHAINS = {
     "fire-spin-thunderbolt-ply": ("FIRE_SPIN", "THUNDERBOLT", "player"),
     "brn-thunderbolt-ply": ("WILL_O_WISP", "THUNDERBOLT", "player"),
     "double-team-thunderbolt-ply": ("DOUBLE_TEAM", "THUNDERBOLT", "player"),
+    "tackle-light-screen-opp": ("TACKLE", "LIGHT_SCREEN", "opponent"),
     # controls: the consumer is the battle's first body (Counter fails: no body)
     "ctl-reflect-opp": ("COUNTER", "REFLECT", "opponent"),
     "ctl-flamethrower-ply": ("COUNTER", "FLAMETHROWER", "player"),
@@ -75,6 +76,20 @@ for name, (unit, consumer, side) in CHAINS.items():
             m["item"] = 0
     seg = []
     for turn in range(3):
+        seg += [{"frames": 2, "buttons": ["A"]}, {"frames": 30, "buttons": []}, {"frames": 2, "buttons": ["A"]},
+                {"frames": 1300, "buttons": []}]
+    s["trace"] = {"segments": seg}
+    (OUT / f"{name}.json").write_text(json.dumps(s, indent=1) + "\n")
+# third batch: the ACCEPTED opponent Light Screen pair (tools/battle-lab/mechanic-light-screen-opponent-exeggcute-player-onix.json: player ONIX
+# Tackle x4 is faster, so the accepted window is a LATER body after Tackle + hit); only the player lead's move changes (Counter = control).
+ACC = json.loads(Path("tools/battle-lab/mechanic-light-screen-opponent-exeggcute-player-onix.json").read_text())
+for name, unit in (("acc-tackle-light-screen-opp", "TACKLE"), ("acc-double-team-light-screen-opp", "DOUBLE_TEAM"),
+                   ("acc-faint-attack-light-screen-opp", "FAINT_ATTACK"), ("acc-swift-light-screen-opp", "SWIFT"),
+                   ("acc-ctl-light-screen-opp", "COUNTER")):
+    s = json.loads(json.dumps(ACC))
+    s["overrides"]["parties"]["player"][0]["moves"] = [MOVES[unit]] * 4
+    seg = []
+    for turn in range(2):
         seg += [{"frames": 2, "buttons": ["A"]}, {"frames": 30, "buttons": []}, {"frames": 2, "buttons": ["A"]},
                 {"frames": 1300, "buttons": []}]
     s["trace"] = {"segments": seg}
