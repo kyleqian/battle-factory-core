@@ -1,0 +1,51 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "SHEER_COLD",
+ "bodyIndex": 0,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-dewgong-chansey-growl-s2.json",
+ "denseWindow": {
+  "startFrame": 1209,
+  "endFrame": 1398
+ },
+ "attacker": {
+  "species": "DEWGONG",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "CHANSEY",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019030,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 184,
+  "playerMaxHp": 184,
+  "opponentHp": 357,
+  "opponentMaxHp": 357,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "timingPhase": "no-event",
+ "precedingBodies": [
+  {
+   "moveId": 45,
+   "side": "opponent"
+  },
+  {
+   "moveId": 0,
+   "side": "player",
+   "statAnimation": 22
+  }
+ ]
+}

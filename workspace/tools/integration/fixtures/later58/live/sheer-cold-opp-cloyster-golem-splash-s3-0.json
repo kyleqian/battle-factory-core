@@ -1,0 +1,40 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "SHEER_COLD",
+ "bodyIndex": 0,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-cloyster-golem-splash-s3.json",
+ "denseWindow": {
+  "startFrame": 80,
+  "endFrame": 269
+ },
+ "attacker": {
+  "species": "CLOYSTER",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 2027808505,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 187,
+  "playerMaxHp": 187,
+  "opponentHp": 144,
+  "opponentMaxHp": 144,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "timingPhase": "no-event"
+}

@@ -1,0 +1,49 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "BONEMERANG",
+ "bodyIndex": 1,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later58/scenarios/bonemerang-pla-marowak-chansey-splash.json",
+ "denseWindow": {
+  "startFrame": 414,
+  "endFrame": 484
+ },
+ "attacker": {
+  "species": "MAROWAK",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "CHANSEY",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015703,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 167,
+  "playerMaxHp": 167,
+  "opponentHp": 166,
+  "opponentMaxHp": 357,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 1
+ },
+ "messageLines": [
+  "",
+  ""
+ ],
+ "precedingBodies": [
+  {
+   "moveId": 155,
+   "side": "player"
+  }
+ ]
+}

@@ -1,0 +1,62 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "SKY_ATTACK",
+ "bodyIndex": 2,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later58/scenarios/sky-attack-opp-pidgeot-golem-growl.json",
+ "denseWindow": {
+  "startFrame": 2318,
+  "endFrame": 2465
+ },
+ "attacker": {
+  "species": "PIDGEOT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703675,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 165,
+  "playerMaxHp": 187,
+  "opponentHp": 158,
+  "opponentMaxHp": 158,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "messageLines": [
+  "",
+  ""
+ ],
+ "precedingBodies": [
+  {
+   "moveId": 143,
+   "side": "opponent"
+  },
+  {
+   "moveId": 45,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statAnimation": 22
+  },
+  {
+   "moveId": 10143,
+   "side": "opponent"
+  }
+ ]
+}

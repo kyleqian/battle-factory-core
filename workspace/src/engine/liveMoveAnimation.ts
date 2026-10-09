@@ -3034,9 +3034,12 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 324: {
-      // prep22 P3 (docs/next-adapters-prep22.md s B.5): Signal Beam, first body only (WIN0 (240, 161) is the battle's first-body reset and the
-      // painter order is the lent known-entry order); a later body declines. Non-shiny, the assets-only composite palette.
-      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      // prep22 P3 (docs/next-adapters-prep22.md s B.5): Signal Beam. Non-shiny, the assets-only composite palette, the lent order. later58
+      // (docs/next-adapters-later58.md): at a LATER body the ROM's WIN0 is (0, 0), not the first-body (240, 161) the inputs carry at age 0,
+      // and BGnCNT / DISPCNT / BG1VOFS are history, but no pixel reads them (WININ = WINOUT); the allocator (tile bitmap, palette tags,
+      // matrices, tasks) is the first body's at every later activation. The one history the pixels read besides the order is the battler
+      // x2 rest, so a later body declines unless both species rests are {0,0} (an opponent ONIX after its Quick Attack: 40,367 px).
+      if (!spriteOrderInput?.known || (!spriteOrderInput.firstBody && !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       const lentOrder = spriteOrderWithOccupiedPrefix(
@@ -3049,8 +3052,11 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 329: {
-      // prep22 P3: Sheer Cold, first body only (the activation BG registers and the lent order are the first-body inputs); a later body declines.
-      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      // prep22 P3: Sheer Cold (the activation BG registers are the reducer defaults; the lent order). later58 (docs/next-adapters-later58.md): at a
+      // LATER body WIN0 / BGnCNT / DISPCNT / BG1VOFS are history the pixels never read (the body writes the monbg layer and the fades it shows)
+      // and the allocator (tile bitmap, palette tags, matrices, tasks) is the first body's; later windows are exact in the policy's age-171 phase
+      // and differ only on the documented BLDY tail rows in the other. The target / attacker rests are read: later, both species rests {0,0}.
+      if (!spriteOrderInput?.known || (!spriteOrderInput.firstBody && !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -3065,8 +3071,10 @@ export function liveMoveAnimationPresentation(
     case 143: {
       // prep25 Q2 / prep28: Sky Attack charge (first body: WIN0 (240, 161) is the battle's first-body reset) and strike (turn bit 1, 180 rows,
       // WIN0 (0, 0) after the charge). The order host keys the strike 10143 (request.turn), so the tracker lends the strike its own free order.
+      // later58 (docs/next-adapters-later58.md): a LATER charge starts with WIN0 (0, 0) like the strike; its BGnCNT / DISPCNT / BG1VOFS history
+      // is unread and the allocator is the first body's. The battler x2 rests are read: a later charge needs both species rests {0,0}.
       const strike = (request.turn & 1) === 1;
-      if (!spriteOrderInput?.known || (!strike && !spriteOrderInput.firstBody)) return null;
+      if (!spriteOrderInput?.known || (!strike && !spriteOrderInput.firstBody && !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       const lentOrder = spriteOrderWithOccupiedPrefix(
@@ -3074,14 +3082,18 @@ export function liveMoveAnimationPresentation(
       if (palettes === null || lentOrder === null) return null;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       config = { move: "SKY_ATTACK", body: strike ? "unleash" : "setup", attacker, target, fieldProfile, animationInputs: liveSkyAttackInputs({
-        attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes, spriteOrder: lentOrder, firstBody: !strike,
-        impactPalette: (paletteResources.resources as Record<string, { colors: readonly number[] }>).ANIM_TAG_IMPACT!.colors,
+        attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes, spriteOrder: lentOrder,
+        firstBody: !strike && spriteOrderInput.firstBody === true, impactPalette: (paletteResources.resources as Record<string, { colors: readonly number[] }>).ANIM_TAG_IMPACT!.colors,
         birdPalette: skyAttackAsset.bird.palette.map((c) => (c.r >> 3) | (c.g >> 3) << 5 | (c.b >> 3) << 10) }) as never };
       break;
     }
     case 155: {
-      // prep29 R1: Bonemerang. Hit 1 is the first body (S0 registers); hit 2 only directly after a first-body hit 1 (a later body declines).
-      if (!spriteOrderInput?.known || (spriteOrderInput.firstBody !== true && spriteOrderInput.afterBonemerangHit1 !== true)) return null;
+      // prep29 R1: Bonemerang. Hit 1 is the first body (S0 registers); hit 2 directly after a first-body hit 1. later58
+      // (docs/next-adapters-later58.md): a LATER hit 1 / hit 2 (after Quick Attack / Growl / Splash / its own hits) starts from history BG1CNT /
+      // BG2CNT (0x9c01, 0x5c02, 0x1c00 / 0x5e02) the pixels never show (the builder's split base), with the first body's allocator; the
+      // battler x2 rests are read, so a later hit needs both species rests {0,0}.
+      if (!spriteOrderInput?.known
+        || (spriteOrderInput.firstBody !== true && spriteOrderInput.afterBonemerangHit1 !== true && !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -3110,8 +3122,10 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 200: {
-      // prep29 R1 / B.6: Outrage, first body only (the S0 registers; a later body declines).
-      if (spriteOrderInput?.known !== true || spriteOrderInput.firstBody !== true) return null;
+      // prep29 R1 / B.6: Outrage (the S0 registers). later58 (docs/next-adapters-later58.md): a LATER body (after Quick Attack / Growl / Splash /
+      // its own rampage turn) starts from history WIN0 / BGnCNT / DISPCNT / BG1VOFS that no pixel reads, with the first body's allocator; the
+      // battler x2 rests are read, so a later body needs both species rests {0,0}.
+      if (spriteOrderInput?.known !== true || (spriteOrderInput.firstBody !== true && !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       const lentOrder = spriteOrderWithOccupiedPrefix(
@@ -3128,9 +3142,12 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 183: {
-      // D4a faithful timing: Mach Punch, first body only (prep25 B.5: WIN0 (240, 161) and the S0 BG3HOFS / blend registers in all four first bodies;
-      // the trace / splat / fist slots are the known-entry lowest-free slots). The optional late lag is the timing policy's phase.
-      if (spriteOrderInput?.known !== true || spriteOrderInput.firstBody !== true) return null;
+      // D4a faithful timing: Mach Punch (prep25 B.5: WIN0 (240, 161) and the S0 BG3HOFS / blend registers in all four first bodies; the trace /
+      // splat / fist slots are the known-entry lowest-free slots). The optional late lag is the timing policy's phase. later58
+      // (docs/next-adapters-later58.md): at a LATER body BG3HOFS / BLDCNT / BLDALPHA / BLDY are still S0 and the allocator (tile bitmap, palette
+      // tags incl. the healthbar trace bank 9, matrices, tasks) is the first body's; WIN0 / BGnCNT / DISPCNT history is unread. The later
+      // windows are exact in the policy phase and differ only on the documented lag rows in the other. Later: both species rests {0,0}.
+      if (spriteOrderInput?.known !== true || (spriteOrderInput.firstBody !== true && !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       const lentOrder = spriteOrderWithOccupiedPrefix(
@@ -3138,8 +3155,8 @@ export function liveMoveAnimationPresentation(
       if (palettes === null || lentOrder === null) return null;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const machPunchInputs = liveMachPunchInputs({
-        attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes, spriteOrder: lentOrder, firstBody: true,
-        healthbarPalette: (paletteResources as unknown as { initial: { healthbar: readonly number[] } }).initial.healthbar });
+        attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes, spriteOrder: lentOrder,
+        firstBody: spriteOrderInput.firstBody === true, healthbarPalette: (paletteResources as unknown as { initial: { healthbar: readonly number[] } }).initial.healthbar });
       if (machPunchInputs === null) return null;
       config = { move: "MACH_PUNCH", attacker, target, fieldProfile, animationInputs: machPunchInputs as never };
       break;
@@ -3476,8 +3493,12 @@ export function liveMoveAnimationPresentation(
       // oam1 (prep20 s1.3): counter-1 body only. No counter reaches the request (MOVE_ANIMATION carries none for 210), but a
       // first body implies it: furyCutterCounter starts at 0 for a sent-in battler, a successful Fury Cutter always plays its
       // body (so none ran before) and a miss resets it; Cmd_furycuttercalc then sets 1. Counters 2..5 are never first bodies
-      // and also need the gComplexPaletteBlend palette provider: they decline. Non-shiny, zero idle rests.
-      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      // and also need the gComplexPaletteBlend palette provider: they decline. Non-shiny, zero idle rests. later58
+      // (docs/next-adapters-later58.md): at a LATER body the counter is read from the request's power (gBattleMovePower after
+      // damagecalc = 10 << (counter - 1), x 1.5 under SWARM): 10 / 15 is counter 1, whose body is exact after Quick Attack / Growl /
+      // Splash (the history it starts from is unread); both species rests must be {0,0}. After its own body the order lend is unknown.
+      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput.firstBody && (!liveBattlersRestFree(art) || (request.power !== 10 && request.power !== 15))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       const activationOrder = spriteOrderWithOccupiedPrefix(
@@ -3715,9 +3736,13 @@ export function liveMoveAnimationPresentation(
     }
     case 326: {
       // D4c faithful timing: Extrasensory (prep30 s1 / s3; liveOamMoves.ts liveExtrasensoryInputs). The scanline buffers at activation are history
-      // (the battle intro's residue): only the battle's FIRST animation unit is proven to start from them (every measured window is a first body),
-      // so a later body declines (an earlier scanline body may have left other buffers). Known-entry allocator, non-shiny, zero target idle rest.
-      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      // (the battle intro's residue). Known-entry allocator, non-shiny, zero target idle rest. later58 (docs/next-adapters-later58.md): an
+      // OPPONENT attacker's later body (player target: the distortion write lands before the target's lines) is exact on rows 0..142 after
+      // Quick Attack / Growl / Splash / its own body (65 displayed scanline lines then differ from the residue, unread) and differs only on
+      // the documented lag rows 143..158; it needs both species rests {0,0}. A PLAYER attacker's later body (opponent target) declines: the
+      // scanout split moved by the history (18 px after a Quick Attack alone, 54..298k px after other predecessors) is not modelled.
+      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput.firstBody && (attacker.geometry.side !== "opponent" || !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       const activationOrder = spriteOrderWithOccupiedPrefix(

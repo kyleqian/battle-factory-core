@@ -81,14 +81,18 @@ describe("live prep29 builders and gates", () => {
     expect(inputs.monbg).toMatchObject({ layer: "bg2", bgX: -40, bgY: -56, inBg2: true, battlerId: 0 });
   });
 
-  it("gates: Bonemerang and Outrage need a first body (Bonemerang hit 2 only after a first-body hit 1); an unknown lend declines all four", () => {
+  // later58 moved this pin: a later Bonemerang hit (no firstBody / hit-1 marker) is live while both species rests are {0,0} and declines with
+  // an opponent ONIX (docs/next-adapters-later58.md).
+  it("gates: Bonemerang later hits need rest-free battlers, Outrage needs a first body here (ONIX); an unknown lend declines all four", () => {
     const hit1 = fixtureAt("bonemerang-player-marowak-opponent-chansey-hit1");
     const hit2 = fixtureAt("bonemerang-player-marowak-opponent-chansey-hit2");
     expect(configOf(hit1)).not.toBeNull();
     expect(configOf(hit2)).not.toBeNull();
     const known = { known: true as const, free: bonemerangHit2Free() };
-    expect(configOf(hit2, undefined, known)).toBeNull(); // a later body without the hit-1 marker declines
-    expect(configOf(hit1, undefined, known)).toBeNull(); // not the battle's first body
+    expect(configOf(hit2, undefined, known)).not.toBeNull(); // a later hit 2 without the hit-1 marker: rest-free battlers
+    expect(configOf(hit1, undefined, known)).not.toBeNull(); // a later hit 1
+    expect(configOf({ ...hit1, target: { ...hit1.target, species: "ONIX" } }, undefined, known)).toBeNull();
+    expect(configOf({ ...hit2, target: { ...hit2.target, species: "ONIX" } }, undefined, known)).toBeNull();
     const outrage = fixtureAt("outrage-player-dragonite-opponent-onix");
     expect(configOf(outrage)).not.toBeNull();
     expect(configOf(outrage, undefined, { ...known, free: (liveView(outrage, 0).effect as any).spriteOrderInput.free })).toBeNull();

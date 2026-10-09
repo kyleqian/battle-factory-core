@@ -1,0 +1,49 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "BONEMERANG",
+ "bodyIndex": 1,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later58/scenarios/bonemerang-opp-rhydon-golem-growl.json",
+ "denseWindow": {
+  "startFrame": 307,
+  "endFrame": 377
+ },
+ "attacker": {
+  "species": "RHYDON",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703303,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 106,
+  "playerMaxHp": 187,
+  "opponentHp": 212,
+  "opponentMaxHp": 212,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 1
+ },
+ "messageLines": [
+  "",
+  ""
+ ],
+ "precedingBodies": [
+  {
+   "moveId": 155,
+   "side": "opponent"
+  }
+ ]
+}

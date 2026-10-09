@@ -1,0 +1,53 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "OUTRAGE",
+ "bodyIndex": 2,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later58/scenarios/outrage-pla-dragonite-onix-splash.json",
+ "denseWindow": {
+  "startFrame": 1994,
+  "endFrame": 2112
+ },
+ "attacker": {
+  "species": "DRAGONITE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349018756,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 158,
+  "playerMaxHp": 166,
+  "opponentHp": 4,
+  "opponentMaxHp": 110,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "precedingBodies": [
+  {
+   "moveId": 200,
+   "side": "player"
+  },
+  {
+   "moveId": 200,
+   "side": "player"
+  },
+  {
+   "moveId": 33,
+   "side": "opponent"
+  }
+ ]
+}

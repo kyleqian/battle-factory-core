@@ -1,0 +1,50 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "EXTRASENSORY",
+ "bodyIndex": 1,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later58/scenarios/extrasensory-opp-alakazam-golem-splash.json",
+ "denseWindow": {
+  "startFrame": 1219,
+  "endFrame": 1380
+ },
+ "attacker": {
+  "species": "ALAKAZAM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 2027808500,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 78,
+  "playerMaxHp": 187,
+  "opponentHp": 162,
+  "opponentMaxHp": 162,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "timingPhase": "event",
+ "timingPhases": {
+  "optional-lag-age": "event",
+  "scanline-split-line": "no-event"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 326,
+   "side": "opponent"
+  }
+ ]
+}

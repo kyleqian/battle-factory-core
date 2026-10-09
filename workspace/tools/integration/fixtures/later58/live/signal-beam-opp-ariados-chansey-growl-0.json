@@ -1,0 +1,39 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "SIGNAL_BEAM",
+ "bodyIndex": 0,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later58/scenarios/signal-beam-opp-ariados-chansey-growl.json",
+ "denseWindow": {
+  "startFrame": 82,
+  "endFrame": 225
+ },
+ "attacker": {
+  "species": "ARIADOS",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "CHANSEY",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793700015,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 357,
+  "playerMaxHp": 357,
+  "opponentHp": 146,
+  "opponentMaxHp": 146,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ }
+}

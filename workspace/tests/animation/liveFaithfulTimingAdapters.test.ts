@@ -133,7 +133,8 @@ describe("Mach Punch dense windows (D4 check)", () => {
 });
 
 describe("Mach Punch gates", () => {
-  it("first body only; declines (scene-off fallback) without the lend, with an unknown order, after an earlier body, and for a shiny battler", () => {
+  // later58 moved this pin: after an earlier body the lend is live while both species rests are {0,0} (docs/next-adapters-later58.md).
+  it("declines (scene-off fallback) without the lend, with an unknown order and for a shiny battler; a later body only on rest-free battlers", () => {
     const f = fixtureAt("mach-punch-alt-player-machamp-golem");
     const { view, effect } = effectOf(f);
     const call = (order: unknown, field = view.field) => liveMoveAnimationPresentation(effect.request, field, 0, undefined, undefined, order as never);
@@ -144,7 +145,7 @@ describe("Mach Punch gates", () => {
     expect((presentation!.config as any).animationInputs.optionalLateLag).toBe(true);
     expect((presentation!.config as any).animationInputs.tracePalette).toEqual({ bank: 9, bgr555: (paletteData as any).initial.healthbar });
     const { firstBody: _drop, ...later } = first;
-    expect(call(later)).toBeNull();
+    expect(call(later)).not.toBeNull();
     expect(call(undefined)).toBeNull();
     expect(call({ known: false })).toBeNull();
     const ot = 416049562, shiny = ((ot >>> 16) ^ (ot & 0xffff)) >>> 0;
@@ -168,12 +169,13 @@ describe("faithful-timing ordinary routes", () => {
     return { ...v.rules, rulesContext: { ...rc, hitMarker: rc.hitMarker & ~0x80 } };
   };
   // route = generated rentals, party member 0 knows the move, one turn (tools/integration/r3ProfileRouteSearch.ts 183 4 1 4000, seeds ascending:
-  // 11/7 and 39/7 HITMONTOP: Mach Punch is the first MOVE body but Intimidate's switch-in stat animation is an earlier unit, so the first-body gate
-  // declines the whole body (scene-off view, logic unchanged); 48/7 and 48/14 HITMONCHAN reach the body as the battle's first unit).
+  // 11/7 and 39/7 HITMONTOP: Mach Punch is the first MOVE body but Intimidate's switch-in stat animation is an earlier unit; until later58 the
+  // first-body gate declined it, now the later lend is live on rest-free battlers (docs/next-adapters-later58.md); 48/7 and 48/14 HITMONCHAN
+  // reach the body as the battle's first unit).
   it.each([
     ["MACH_PUNCH 48/7 HITMONCHAN", 183, 48, 7, 0 as const, 110, true],
     ["MACH_PUNCH 48/14 HITMONCHAN", 183, 48, 14, 1 as const, 110, true],
-    ["MACH_PUNCH 11/7 HITMONTOP (later body: gate)", 183, 11, 7, 2 as const, 110, false],
+    ["MACH_PUNCH 11/7 HITMONTOP (later body after Intimidate: later58)", 183, 11, 7, 2 as const, 110, true],
     // D4b: r3ProfileRouteSearch.ts 224 3 1 4000 (first candidates: 5/35 RHYDON active, 5/42 RHYDON declined, 23/14 SEAKING slot 1 active).
     ["MEGAHORN 5/35 RHYDON", 224, 5, 35, 0 as const, 177, true],
     // D4b: r3ProfileRouteSearch.ts 279 3 1 4000 (first candidates: 61/7 PINSIR slot 3 declined, 75/14 and 170/14 QWILFISH active).
