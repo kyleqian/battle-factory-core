@@ -17,6 +17,31 @@ backlog.
 
 # Open
 
+## #155 — Eruption (284) opponent sprite-order plan is wrong for an elevated attacker (S10A, found 2026-10-09 by plans51)
+
+The production order table's `284:opponent` EXACT plan (base table, prep-era) matched 3 of 4 fresh ROM opponent instances in
+plans51's grid but not GOLBAT -> ONIX: the ROM has 23 allocation windows, the plan 25 (`AnimTask_EruptionLaunchRocks` destroy
+groups split / merge with the attacker geometry; the player side also has 2 ROM plans over 4 pairs). Production lends the
+post-Eruption order from that plan, so a later live body after an elevated opponent's Eruption could draw with a wrong tie order.
+No census command mis-carried on seeds 0..299 (Eruption is rare), but the EXACT claim is wrong in that geometry.
+Evidence: `docs/next-adapters-plans51.md` (Eruption), `tools/integration/fixtures/plans51/units.json` `er-*` jobs.
+Resume: make 284 GEOMETRY-KEYED from the renderer's own rock timeline (the absorption-orb / gdgeo precedent) or invalidate the
+order host after Eruption when the attacker's geometry is not one of the proven plan's; prove on the plans51 er-* grid.
+
+## #154 — Staged lab probe trajectories differ between batches run at different times (S10A, found 2026-10-09)
+
+plans51's Outrage jobs (`tools/integration/plans51Probe.py`, BODY200; base scenarios `tools/battle-lab/mechanic-outrage-*.json`,
+pinned lab seed 305420201) gave A == B inside every batch, but the worker's 11:40 batch and three supervisor batches at 12:2x
+(same worktree, byte-identical scenario files, same tool sha, vendor ROM / ELF / libmgba-py unchanged) differ: the last pre-battle
+sprite "clear" frame is 1165 vs 1189 (player-attacker jobs) / 1154 vs 1195 (opponent), the battle starts at the same frame
+(Outrage body at n 2082 in both), and the player-side battles then diverge (ou-ply-149-95: 291 vs 193 rows — the worker saw Onix's
+Tackle and a second Outrage, the reruns did not). The FOCUS_BAND jobs (explicit "seed" op) reproduced byte-identically across the
+same two times. Not the oracle symbols cache, the output-dir path, or the concurrency mix (solo / 8-job / 12-job reruns all agree
+with each other). The Outrage plan is EXACT on both sample sets (147/147 worker, 10/10 fresh), so plans51's landing stands; the
+hazard is that "two fresh runs identical" inside one batch does not prove cross-session reproducibility for these stagings.
+Resume: rerun one ou-ply job at several wall-clock times and diff `lab.prepare`'s staged state (gRngValue, party structs, the
+frame count to CB2_InitBattle); check whether the lab seed is applied before or after a frame-dependent step.
+
 ## #153 — Scene OFF skips the Substitute body (kernel attackanimation port vs source; S10A, found 2026-10-07)
 
 Source plays Substitute (and Transform) through `Cmd_attackanimation` even when battle animations are off
