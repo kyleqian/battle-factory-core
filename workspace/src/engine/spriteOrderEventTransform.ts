@@ -78,7 +78,7 @@ export type SpriteOrderPresentationEvent =
   | Readonly<{ kind: "switch-in-finish"; side?: SpriteOrderSide }>
   | Readonly<{ kind: "forced-switch-out"; side: SpriteOrderSide }>
   | Readonly<{ kind: "party-menu-reset" }>
-  | Readonly<{ kind: "battle-reshow"; playerBattlerPresent: boolean }>
+  | Readonly<{ kind: "battle-reshow"; playerBattlerPresent: boolean; opponentBattlerPresent?: boolean }>
   | Readonly<{ kind: "switch-out"; side?: SpriteOrderSide }>
   | Readonly<{ kind: "trainer-slide-end" }>
   | Readonly<{ kind: "invalidate"; reason: string }>;
@@ -277,6 +277,11 @@ function applyPlan(
   return Object.freeze({ ...tracker, cursor, lastUnit: unit });
 }
 
+/**
+ * prep49: the forced party menu's reshow with neither battler sprite (a double KO: Explosion / recoil; CreateBattlerSprite skips a
+ * fainted mon, the healthboxes and the enemy shadow are created regardless): both healthboxes, then the shadow (ROM 4/4, 8 runs).
+ */
+const RESHOW_NEITHER_PLAN_TEXT = "Cfee;Cfee;Cf";
 const UNIT_PLANS: Readonly<Record<keyof typeof SPRITE_ORDER_UNIT_PLAN_TEXTS, SpriteOrderPlan>> = Object.freeze(
   Object.fromEntries(Object.entries(SPRITE_ORDER_UNIT_PLAN_TEXTS).map(([key, text]) => [key, decodeSpriteOrderPlan(text)])),
 ) as never;
@@ -353,6 +358,16 @@ function applyBattleUnit(
     }
     case "battle-reshow": {
       if (tracker.lastUnit !== "reset") return fail("reshow without a party-menu reset directly before it");
+      if (event.opponentBattlerPresent === false) {
+        if (event.playerBattlerPresent) return fail("reshow without the opponent battler");
+        // reshowNeither survivors: n0..n2 / n3..n5 player / opponent healthbox, n6 shadow.
+        const neither = applyUnit(tracker, decodeSpriteOrderPlan(RESHOW_NEITHER_PLAN_TEXT));
+        if (!neither) return fail("reshow: plan did not resolve");
+        const kept = lastSurvivors(neither);
+        return withUnit(tracker, neither, "reshow", { player: null, opponent: null }, Object.freeze({
+          healthboxMain: Object.freeze({ player: kept[0]!, opponent: kept[3]! }), shadow: kept[6]!,
+        }));
+      }
       const cursor = applyUnit(tracker, event.playerBattlerPresent ? UNIT_PLANS.reshowBoth : UNIT_PLANS.reshowPlayerGone);
       if (!cursor) return fail("reshow: plan did not resolve");
       const survivors = lastSurvivors(cursor);
