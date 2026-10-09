@@ -95,7 +95,7 @@ import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
 import spitUpRedOrbAsset from "../animation/assets/spit-up-red-orb.json" with { type: "json" };
 import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
 import { liveMoveBgWriteRow, liveMoveCounterTimingParameter, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveTimingBodyRows, liveMoveTimingParameter, liveMoveTimingSidePhase } from "./liveMoveTimingPolicy.ts";
-import { resolveSpriteOrderDeferredLend, type SpriteOrderDeferredLend } from "./spriteOrderEventTransform.ts";
+import { resolveSpriteOrderDeferredLend, type SpriteOrderDeferredCarry, type SpriteOrderDeferredLend } from "./spriteOrderEventTransform.ts";
 import type { PresentationRngHost, PresentationRngWords } from "./presentationRngHost.ts";
 import { isWordsOrderDeferredUnit, WORDS_ORDER_GENERAL_ANIMATION } from "./wordsOrderUnits.ts";
 import { mudSlapMudSpriteOrderAtAge, MUD_SLAP_MUD_FIRST_DISPLAY_AGE, type MudSlapAnimationProfile } from "../animation/mudSlap.ts";
@@ -1332,6 +1332,29 @@ export function liveSemiInvulnerableHideBattler(request: BattleMoveAnimationRequ
 }
 
 /**
+ * words57: the words-lend resolution's replay options: a words marker (Sand-Attack / Mud-Slap / Rain Dance / RAIN_CONTINUES) also replays
+ * the ROM-checked battle units (resolveSpriteOrderDeferredLend DEFERRED_REPLAY_BATTLE_UNITS: an opponent KO + summary + send-out, the
+ * Factory AI's recall + summary + send-out, a Roar / Whirlwind forced switch-out + send-in; docs/next-adapters-words57.md).
+ */
+export const LIVE_WORDS_ORDER_DEFERRED_REPLAY = Object.freeze({ replayBattleUnits: isWordsOrderDeferredUnit });
+
+/**
+ * words57: the words-lend carry (liveWordsUnitPostFree with the unit's words by key). Sand-Attack / Mud-Slap aim the dirt at both battlers'
+ * pic points (liveDirtScatterProfile), which `anchors` take from the CONSUMER's displayed field: after a send-out / switch-in showed another
+ * mon on a battler, that field is not the body's and the species-free marker cannot restore it (the post-body order depends on it,
+ * tools/integration/words57Chain.ts species sweep), so the carry declines. Rain Dance / General_Rain drops are species-free.
+ */
+export function liveWordsOrderDeferredCarry(
+  wordsOf: (key: string) => PresentationRngWords | null, anchors: Readonly<Record<WordsSide, WordsPoint>>,
+): SpriteOrderDeferredCarry {
+  return (unit, activationFree, battlerReplacedSince) => {
+    if (!isWordsOrderDeferredUnit(unit)) return null;
+    if (battlerReplacedSince && unit.generalAnimation === undefined && unit.moveId !== 240) return null;
+    return liveWordsUnitPostFree(unit, activationFree, wordsOf(unit.key), anchors);
+  };
+}
+
+/**
  * prep46: render-seam resolution of a words-unit deferred lend, memoized per deferred-lend object and presentation-host body list (both
  * immutable; a body list changes only when a body / sub-stream is recorded, so a repaint never re-carries and a pinned host never reads
  * another host's result). Pure: the memo holds what resolveSpriteOrderDeferredLend returns for those inputs.
@@ -1340,11 +1363,9 @@ const WORDS_LEND_RESOLVED = new WeakMap<object, WeakMap<object, readonly number[
 function resolveWordsOrderLend(
   deferred: SpriteOrderDeferredLend, host: PresentationRngHost | null, art: ReturnType<typeof createBattleCommandFieldArtView>,
 ): readonly number[] | null {
-  const resolve = () => resolveSpriteOrderDeferredLend(deferred, (unit, activationFree) => {
-    if (!isWordsOrderDeferredUnit(unit)) return null;
-    const anchors = { player: liveBattlerAnchors("player", art).picOffsetPoint, opponent: liveBattlerAnchors("opponent", art).picOffsetPoint };
-    return liveWordsUnitPostFree(unit, activationFree, liveMovePresentationRngWords({ host, key: unit.key }), anchors);
-  });
+  const anchors = { player: liveBattlerAnchors("player", art).picOffsetPoint, opponent: liveBattlerAnchors("opponent", art).picOffsetPoint };
+  const resolve = () => resolveSpriteOrderDeferredLend(deferred,
+    liveWordsOrderDeferredCarry((key) => liveMovePresentationRngWords({ host, key }), anchors), LIVE_WORDS_ORDER_DEFERRED_REPLAY);
   if (host === null) return resolve();
   let byBodies = WORDS_LEND_RESOLVED.get(deferred);
   if (byBodies === undefined) WORDS_LEND_RESOLVED.set(deferred, byBodies = new WeakMap());

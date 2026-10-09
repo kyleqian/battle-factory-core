@@ -1,0 +1,2166 @@
+{
+ "schema": "words57-chain/v1",
+ "summary": {
+  "chains": 47,
+  "exact": 47,
+  "chainsThroughBattleUnits": 27,
+  "exactThroughBattleUnits": 27,
+  "framesChecked": 161079,
+  "windowsChecked": 3454,
+  "consumersAfterBattleUnit": 30,
+  "consumersAfterBattleUnitExact": 30,
+  "jobsIdenticalAB": 24,
+  "jobs": 24
+ },
+ "chains": [
+  {
+   "job": "ai-ms-opp-lapras",
+   "words": "189 f2613",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "action-prompt",
+    "actions-committed",
+    "body 129:player",
+    "hit-animation"
+   ],
+   "windows": 18,
+   "windowMismatch": [],
+   "frames": 1973,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 4534,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ai-ms-opp-lapras",
+   "words": "189 f4722",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "action-prompt",
+    "actions-committed",
+    "body 129:player",
+    "hit-animation"
+   ],
+   "windows": 18,
+   "windowMismatch": [],
+   "frames": 2298,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 6968,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ai-ms-opp-lapras",
+   "words": "189 f7157",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "action-prompt",
+    "actions-committed",
+    "switch-out + summary (ROM interleave)",
+    "switch-out opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "body 129:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 129:player",
+    "hit-animation",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 107,
+   "windowMismatch": [],
+   "frames": 5004,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 9796,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "129",
+     "frame": 11836,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "33",
+     "frame": 12094,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "switch-out opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ai-ms-ply-electrode",
+   "words": "189 f4539",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 6,
+   "windowMismatch": [],
+   "frames": 2343,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ai-ms-ply-electrode",
+   "words": "189 f6973",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "switch-out + summary (ROM interleave)",
+    "switch-out opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "windows": 80,
+   "windowMismatch": [],
+   "frames": 2620,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "33",
+     "frame": 7313,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [
+    "switch-out opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ai-ms-ply-electrode",
+   "words": "189 f9801",
+   "activation": "nested",
+   "identityMap": false,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 6,
+   "windowMismatch": [],
+   "frames": 1949,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT",
+   "speciesInferred": {
+    "player": 101,
+    "opponent": 95
+   }
+  },
+  {
+   "job": "ai-ms-ply-electrode",
+   "words": "189 f11841",
+   "activation": "nested",
+   "identityMap": false,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 11,
+   "windowMismatch": [],
+   "frames": 649,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "33",
+     "frame": 12330,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT",
+   "speciesInferred": {
+    "player": 101,
+    "opponent": 95
+   }
+  },
+  {
+   "job": "ai-sa-opp-snorlax",
+   "words": "28 f2613",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20",
+    "action-prompt",
+    "actions-committed",
+    "body 129:player",
+    "hit-animation"
+   ],
+   "windows": 16,
+   "windowMismatch": [],
+   "frames": 1965,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 4533,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 58,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ai-sa-opp-snorlax",
+   "words": "28 f4727",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20",
+    "action-prompt",
+    "actions-committed",
+    "body 129:player",
+    "hit-animation"
+   ],
+   "windows": 16,
+   "windowMismatch": [],
+   "frames": 2285,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 6967,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 58,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ai-sa-opp-snorlax",
+   "words": "28 f7159",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20",
+    "action-prompt",
+    "actions-committed",
+    "switch-out + summary (ROM interleave)",
+    "switch-out opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "body 129:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 129:player",
+    "hit-animation",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 105,
+   "windowMismatch": [],
+   "frames": 4935,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 9789,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "129",
+     "frame": 11835,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "33",
+     "frame": 12024,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "switch-out opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 58,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ai-sa-ply-mrmime",
+   "words": "28 f4539",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 4,
+   "windowMismatch": [],
+   "frames": 2336,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 58,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ai-sa-ply-mrmime",
+   "words": "28 f6973",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20",
+    "action-prompt",
+    "actions-committed",
+    "switch-out + summary (ROM interleave)",
+    "switch-out opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "windows": 72,
+   "windowMismatch": [],
+   "frames": 2619,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [
+    "switch-out opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 58,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ai-sa-ply-mrmime",
+   "words": "28 f9795",
+   "activation": "nested",
+   "identityMap": false,
+   "steps": [
+    "carry 28",
+    "stat-animation 20",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 4,
+   "windowMismatch": [],
+   "frames": 1948,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 58,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT",
+   "speciesInferred": {
+    "player": 122,
+    "opponent": 108
+   }
+  },
+  {
+   "job": "ai-sa-ply-mrmime",
+   "words": "28 f11841",
+   "activation": "nested",
+   "identityMap": false,
+   "steps": [
+    "carry 28",
+    "stat-animation 20",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 9,
+   "windowMismatch": [],
+   "frames": 349,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "33",
+     "frame": 12121,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 58,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT",
+   "speciesInferred": {
+    "player": 122,
+    "opponent": 108
+   }
+  },
+  {
+   "job": "fs-ms-opp-whirlwind",
+   "words": "189 f2087",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "body 18:player",
+    "forced-switch-out opponent",
+    "switch-in-start opponent",
+    "switch-in-finish opponent",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 51,
+   "windowMismatch": [],
+   "frames": 5081,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "18",
+     "frame": 2426,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "33",
+     "frame": 6917,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "forced-switch-out opponent",
+    "switch-in-start opponent",
+    "switch-in-finish opponent"
+   ],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "fs-ms-ply-roar",
+   "words": "189 f2253",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "action-prompt",
+    "actions-committed",
+    "body 46:player",
+    "forced-switch-out opponent",
+    "switch-in-start opponent",
+    "switch-in-finish opponent",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "body 46:player",
+    "forced-switch-out opponent",
+    "switch-in-start opponent",
+    "switch-in-finish opponent"
+   ],
+   "windows": 94,
+   "windowMismatch": [],
+   "frames": 7392,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "46",
+     "frame": 4694,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "33",
+     "frame": 9375,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "46",
+     "frame": 9526,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "forced-switch-out opponent",
+    "switch-in-start opponent",
+    "switch-in-finish opponent",
+    "forced-switch-out opponent",
+    "switch-in-start opponent",
+    "switch-in-finish opponent"
+   ],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "fs-ms-ply-roared",
+   "words": "189 f2080",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "body 46:opponent",
+    "forced-switch-out player",
+    "switch-in-start player",
+    "switch-in-finish player",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 53,
+   "windowMismatch": [],
+   "frames": 5088,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "46",
+     "frame": 2511,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "33",
+     "frame": 6914,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "forced-switch-out player",
+    "switch-in-start player",
+    "switch-in-finish player"
+   ],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "fs-sa-opp-whirlwind",
+   "words": "28 f2086",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20",
+    "body 18:player",
+    "forced-switch-out opponent",
+    "switch-in-start opponent",
+    "switch-in-finish opponent",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 49,
+   "windowMismatch": [],
+   "frames": 5049,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "18",
+     "frame": 2357,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "33",
+     "frame": 6914,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "forced-switch-out opponent",
+    "switch-in-start opponent",
+    "switch-in-finish opponent"
+   ],
+   "carry": {
+    "frames": 58,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "fs-sa-ply-roar",
+   "words": "28 f2082",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 46:player",
+    "forced-switch-out opponent",
+    "switch-in-start opponent",
+    "switch-in-finish opponent",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "body 46:player",
+    "forced-switch-out opponent",
+    "switch-in-start opponent",
+    "switch-in-finish opponent"
+   ],
+   "windows": 98,
+   "windowMismatch": [],
+   "frames": 7550,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "33",
+     "frame": 2352,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "46",
+     "frame": 4689,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "33",
+     "frame": 9375,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "46",
+     "frame": 9520,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "forced-switch-out opponent",
+    "switch-in-start opponent",
+    "switch-in-finish opponent",
+    "forced-switch-out opponent",
+    "switch-in-start opponent",
+    "switch-in-finish opponent"
+   ],
+   "carry": {
+    "frames": 58,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "fs-sa-ply-roared",
+   "words": "28 f2082",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20",
+    "body 46:opponent",
+    "forced-switch-out player",
+    "switch-in-start player",
+    "switch-in-finish player",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 51,
+   "windowMismatch": [],
+   "frames": 5079,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "46",
+     "frame": 2358,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "33",
+     "frame": 6914,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "forced-switch-out player",
+    "switch-in-start player",
+    "switch-in-finish player"
+   ],
+   "carry": {
+    "frames": 58,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ko-ms-opp-pidgeotto",
+   "words": "189 f2085",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "body 129:player",
+    "hit-animation",
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "body 129:player",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 75,
+   "windowMismatch": [],
+   "frames": 5155,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 2418,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "33",
+     "frame": 6951,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "129",
+     "frame": 7097,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ko-ms-opp-sandshrew",
+   "words": "189 f2087",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "body 129:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 18,
+   "windowMismatch": [],
+   "frames": 2339,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 2422,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ko-ms-opp-sandshrew",
+   "words": "189 f4521",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "body 129:player",
+    "hit-animation",
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "action-prompt"
+   ],
+   "windows": 55,
+   "windowMismatch": [],
+   "frames": 2655,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 4856,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ko-ms-ply-pidgeotto",
+   "words": "189 f2081",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 129:player",
+    "hit-animation",
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "action-prompt",
+    "actions-committed",
+    "body 129:player",
+    "hit-animation",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 83,
+   "windowMismatch": [],
+   "frames": 7602,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "33",
+     "frame": 2527,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "129",
+     "frame": 4532,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "129",
+     "frame": 9400,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "33",
+     "frame": 9608,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ko-ms-ply-wooper",
+   "words": "189 f2080",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 129:player",
+    "hit-animation",
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "body 129:player",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 83,
+   "windowMismatch": [],
+   "frames": 7647,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "33",
+     "frame": 2513,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "129",
+     "frame": 4531,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "33",
+     "frame": 9402,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "129",
+     "frame": 9543,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ko-sa-opp-pidgeotto",
+   "words": "28 f2086",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20",
+    "body 129:player",
+    "hit-animation",
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "body 129:player",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 73,
+   "windowMismatch": [],
+   "frames": 5148,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 2353,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "33",
+     "frame": 6951,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "129",
+     "frame": 7098,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 58,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ko-sa-opp-sandshrew",
+   "words": "28 f2088",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20",
+    "body 129:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 16,
+   "windowMismatch": [],
+   "frames": 2331,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 2357,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 58,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ko-sa-opp-sandshrew",
+   "words": "28 f4522",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20",
+    "body 129:player",
+    "hit-animation",
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "action-prompt"
+   ],
+   "windows": 53,
+   "windowMismatch": [],
+   "frames": 2647,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 4791,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 58,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ko-sa-ply-pidgeotto",
+   "words": "28 f2082",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 129:player",
+    "hit-animation",
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "action-prompt",
+    "actions-committed",
+    "body 129:player",
+    "hit-animation",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 81,
+   "windowMismatch": [],
+   "frames": 7596,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "33",
+     "frame": 2352,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "129",
+     "frame": 4532,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "129",
+     "frame": 9400,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "33",
+     "frame": 9610,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 58,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ko-sa-ply-sandshrew",
+   "words": "28 f2084",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 129:player",
+    "hit-animation",
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "action-prompt",
+    "actions-committed",
+    "body 129:player",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 75,
+   "windowMismatch": [],
+   "frames": 7655,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "33",
+     "frame": 2364,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "129",
+     "frame": 4534,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "129",
+     "frame": 9560,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 58,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rain-ai-mrmime",
+   "words": "240 f4533",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 240",
+    "body 33:player",
+    "hit-animation"
+   ],
+   "windows": 6,
+   "windowMismatch": [],
+   "frames": 207,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "33",
+     "frame": 4859,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 186,
+    "frameMismatch": 0,
+    "windows": 80,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rain-ai-mrmime",
+   "words": "RAIN_CONTINUES f5081",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry RAIN_CONTINUES",
+    "action-prompt",
+    "actions-committed",
+    "body 129:player",
+    "hit-animation",
+    "body 33:player",
+    "hit-animation"
+   ],
+   "windows": 20,
+   "windowMismatch": [],
+   "frames": 2043,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 6989,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "33",
+     "frame": 7177,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 120,
+    "frameMismatch": 0,
+    "windows": 40,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rain-ai-mrmime",
+   "words": "RAIN_CONTINUES f7399",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry RAIN_CONTINUES",
+    "action-prompt",
+    "actions-committed",
+    "switch-out + summary (ROM interleave)",
+    "switch-out opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "body 129:player",
+    "hit-animation"
+   ],
+   "windows": 82,
+   "windowMismatch": [],
+   "frames": 2395,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 9811,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "switch-out opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 120,
+    "frameMismatch": 0,
+    "windows": 40,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rain-ai-mrmime",
+   "words": "RAIN_CONTINUES f10052",
+   "activation": "nested",
+   "identityMap": false,
+   "steps": [
+    "carry RAIN_CONTINUES",
+    "action-prompt",
+    "actions-committed",
+    "body 129:player",
+    "hit-animation",
+    "body 33:player",
+    "hit-animation",
+    "forced-switch-out player"
+   ],
+   "windows": 21,
+   "windowMismatch": [],
+   "frames": 2138,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 11857,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "33",
+     "frame": 12045,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [
+    "forced-switch-out player"
+   ],
+   "carry": {
+    "frames": 120,
+    "frameMismatch": 0,
+    "windows": 40,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rain-ko-slowpoke",
+   "words": "240 f2215",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 240"
+   ],
+   "windows": 0,
+   "windowMismatch": [],
+   "frames": 1,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 186,
+    "frameMismatch": 0,
+    "windows": 80,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rain-ko-slowpoke",
+   "words": "RAIN_CONTINUES f2597",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry RAIN_CONTINUES",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "body 129:player",
+    "hit-animation"
+   ],
+   "windows": 20,
+   "windowMismatch": [],
+   "frames": 2057,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "33",
+     "frame": 4539,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "129",
+     "frame": 4671,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 120,
+    "frameMismatch": 0,
+    "windows": 40,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rain-ko-slowpoke",
+   "words": "RAIN_CONTINUES f4939",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry RAIN_CONTINUES",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "body 129:player",
+    "hit-animation",
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "windows": 58,
+   "windowMismatch": [],
+   "frames": 4494,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "33",
+     "frame": 6973,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "129",
+     "frame": 7105,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 120,
+    "frameMismatch": 0,
+    "windows": 40,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rain-ko-slowpoke",
+   "words": "RAIN_CONTINUES f9764",
+   "activation": "nested",
+   "identityMap": false,
+   "steps": [
+    "carry RAIN_CONTINUES",
+    "action-prompt"
+   ],
+   "windows": 1,
+   "windowMismatch": [],
+   "frames": 13,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 120,
+    "frameMismatch": 0,
+    "windows": 40,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rain-roar-snorlax",
+   "words": "240 f2216",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 240"
+   ],
+   "windows": 0,
+   "windowMismatch": [],
+   "frames": 1,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 186,
+    "frameMismatch": 0,
+    "windows": 80,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rain-roar-snorlax",
+   "words": "RAIN_CONTINUES f2598",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry RAIN_CONTINUES",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "body 46:player",
+    "forced-switch-out opponent",
+    "switch-in-start opponent",
+    "switch-in-finish opponent"
+   ],
+   "windows": 48,
+   "windowMismatch": [],
+   "frames": 2123,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "33",
+     "frame": 4534,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "46",
+     "frame": 4672,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [
+    "forced-switch-out opponent",
+    "switch-in-start opponent",
+    "switch-in-finish opponent"
+   ],
+   "carry": {
+    "frames": 120,
+    "frameMismatch": 0,
+    "windows": 40,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rain-roar-snorlax",
+   "words": "RAIN_CONTINUES f7001",
+   "activation": "nested",
+   "identityMap": false,
+   "steps": [
+    "carry RAIN_CONTINUES",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "body 46:player",
+    "forced-switch-out opponent",
+    "switch-in-start opponent",
+    "switch-in-finish opponent"
+   ],
+   "windows": 48,
+   "windowMismatch": [],
+   "frames": 2602,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "33",
+     "frame": 9407,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "46",
+     "frame": 9553,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [
+    "forced-switch-out opponent",
+    "switch-in-start opponent",
+    "switch-in-finish opponent"
+   ],
+   "carry": {
+    "frames": 120,
+    "frameMismatch": 0,
+    "windows": 40,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rain-sun-ko-slowpoke",
+   "words": "240 f2380",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 240"
+   ],
+   "windows": 0,
+   "windowMismatch": [],
+   "frames": 1,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 186,
+    "frameMismatch": 0,
+    "windows": 80,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rain-sun-ko-slowpoke",
+   "words": "RAIN_CONTINUES f2762",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry RAIN_CONTINUES",
+    "action-prompt",
+    "actions-committed",
+    "body 241:opponent",
+    "body 129:player",
+    "hit-animation",
+    "general SUN_CONTINUES",
+    "action-prompt",
+    "actions-committed",
+    "body 129:player",
+    "hit-animation",
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "general SUN_CONTINUES",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "body 129:player",
+    "hit-animation",
+    "general SUN_CONTINUES",
+    "action-prompt"
+   ],
+   "windows": 119,
+   "windowMismatch": [],
+   "frames": 9580,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "241",
+     "frame": 4538,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "129",
+     "frame": 4836,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "129",
+     "frame": 7133,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "33",
+     "frame": 11836,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "129",
+     "frame": 11976,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 120,
+    "frameMismatch": 0,
+    "windows": 40,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rain-sun-ko-snorlax",
+   "words": "240 f2377",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 240"
+   ],
+   "windows": 0,
+   "windowMismatch": [],
+   "frames": 1,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 186,
+    "frameMismatch": 0,
+    "windows": 80,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rain-sun-ko-snorlax",
+   "words": "RAIN_CONTINUES f2759",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry RAIN_CONTINUES",
+    "action-prompt",
+    "actions-committed",
+    "body 241:opponent",
+    "body 129:player",
+    "hit-animation",
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "general SUN_CONTINUES",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "body 129:player",
+    "hit-animation",
+    "general SUN_CONTINUES",
+    "action-prompt"
+   ],
+   "windows": 97,
+   "windowMismatch": [],
+   "frames": 7123,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "241",
+     "frame": 4536,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "129",
+     "frame": 4833,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "33",
+     "frame": 9407,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "129",
+     "frame": 9554,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 120,
+    "frameMismatch": 0,
+    "windows": 40,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rain-whirlwinded-slowpoke",
+   "words": "240 f2077",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 240",
+    "body 18:opponent",
+    "forced-switch-out player",
+    "switch-in-start player",
+    "switch-in-finish player"
+   ],
+   "windows": 38,
+   "windowMismatch": [],
+   "frames": 326,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "18",
+     "frame": 2406,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [
+    "forced-switch-out player",
+    "switch-in-start player",
+    "switch-in-finish player"
+   ],
+   "carry": {
+    "frames": 186,
+    "frameMismatch": 0,
+    "windows": 80,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "rain-whirlwinded-slowpoke",
+   "words": "RAIN_CONTINUES f4545",
+   "activation": "nested",
+   "identityMap": false,
+   "steps": [
+    "carry RAIN_CONTINUES",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "body 18:opponent",
+    "forced-switch-out player",
+    "switch-in-start player",
+    "switch-in-finish player"
+   ],
+   "windows": 46,
+   "windowMismatch": [],
+   "frames": 2616,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "33",
+     "frame": 6946,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "18",
+     "frame": 7098,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [
+    "forced-switch-out player",
+    "switch-in-start player",
+    "switch-in-finish player"
+   ],
+   "carry": {
+    "frames": 120,
+    "frameMismatch": 0,
+    "windows": 40,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  }
+ ]
+}
