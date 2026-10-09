@@ -1,6 +1,6 @@
 #!/bin/sh
 # prep47 reproduction (run from workspace/ of a clean checkout; direct mGBA processes only, never the shared HTTP oracles).
-#   OUT=/tmp/p47-repro REC=/tmp/p47-rec sh tools/integration/prep47Run.sh   # ~11 min: probes (46 jobs x 2 fresh, ~1 min), census x4, replays
+#   OUT=/tmp/p47-repro REC=/tmp/p47-rec sh tools/integration/prep47Run.sh   # ~9 min: probes (46 jobs x 2 fresh, ~1 min), census x4, replays
 #   SKIP_PROBES=1 ...   reuse $OUT/{a,b,c}/raw;   SKIP_CENSUS=1 ...   skip the four 300-battle census runs (and the chain / delta receipts)
 # Writes receipts into $REC; compare with tools/integration/fixtures/prep47/ (the loop at the end prints same/DIFF per file).
 # The src experiments are applied from the committed .diff files and ALWAYS reverted; `git status --short src` must print nothing.
