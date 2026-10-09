@@ -65,27 +65,18 @@ function candidatesAtAge(
 }
 
 /**
- * MUD SLAP's own `gMudSlapMudSpriteTemplate` program: six waves of five
- * 16x16 frame-1 sprites. It shares `AnimDirtScatter` translation semantics
- * with SAND ATTACK, but its geometry, script arguments, resolved velocities,
- * and lifetime are modeled as an independent move component.
+ * The source `sSpriteOrder` after the mud phase's `SortSprites` insertion
+ * passes through `age` (from `profile.spriteOrderSeed`): one loop shared by
+ * the draw order and the post-body order carry
+ * (src/engine/liveWordsOrderCarry.ts, mudSlapMudSpriteOrderAtAge).
  */
-function orderedMudAtAge(
+function mudSpriteOrderAtAge(
   age: number,
   attackerCenter: Readonly<{ x: number; y: number }>,
   attackerSide: MudSandAttackerSide,
   profile: Readonly<MudSlapAnimationProfile>,
   firstWaveAge: number,
-): readonly MudSlapMudSprite[] {
-  const current = candidatesAtAge(
-    age,
-    attackerCenter,
-    attackerSide,
-    profile,
-    firstWaveAge,
-  );
-  if (current.length === 0) return current;
-
+): readonly number[] {
   const order = profile.spriteOrderSeed.slice();
   for (
     let sortAge = firstWaveAge;
@@ -122,6 +113,42 @@ function orderedMudAtAge(
       }
     }
   }
+  return order;
+}
+
+/** The mud phase's `sSpriteOrder` at `age` on the `mudSlapMudAtAge` latch. */
+export function mudSlapMudSpriteOrderAtAge(
+  age: number,
+  attackerCenter: Readonly<{ x: number; y: number }>,
+  attackerSide: MudSandAttackerSide,
+  profile: Readonly<MudSlapAnimationProfile>,
+): readonly number[] {
+  return mudSpriteOrderAtAge(age, attackerCenter, attackerSide, profile, MUD_SLAP_MUD_FIRST_DISPLAY_AGE);
+}
+
+/**
+ * MUD SLAP's own `gMudSlapMudSpriteTemplate` program: six waves of five
+ * 16x16 frame-1 sprites. It shares `AnimDirtScatter` translation semantics
+ * with SAND ATTACK, but its geometry, script arguments, resolved velocities,
+ * and lifetime are modeled as an independent move component.
+ */
+function orderedMudAtAge(
+  age: number,
+  attackerCenter: Readonly<{ x: number; y: number }>,
+  attackerSide: MudSandAttackerSide,
+  profile: Readonly<MudSlapAnimationProfile>,
+  firstWaveAge: number,
+): readonly MudSlapMudSprite[] {
+  const current = candidatesAtAge(
+    age,
+    attackerCenter,
+    attackerSide,
+    profile,
+    firstWaveAge,
+  );
+  if (current.length === 0) return current;
+
+  const order = mudSpriteOrderAtAge(age, attackerCenter, attackerSide, profile, firstWaveAge);
   return current.slice().sort(
     (a, b) => order.indexOf(b.slot) - order.indexOf(a.slot),
   );

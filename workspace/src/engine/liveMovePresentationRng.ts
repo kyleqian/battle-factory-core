@@ -13,9 +13,12 @@
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS } from "./liveMoveTimingPolicy.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
+import { GENERAL_RAIN_SPAWN_AGES } from "../animation/rainDance.ts";
+import { generalAnimationPresentationRngKey, WORDS_ORDER_GENERAL_ANIMATION } from "./wordsOrderUnits.ts";
 import {
   activatePresentationRngBody,
   presentationRngBodyWords,
+  recordPresentationRngSubStream,
   tickPresentationRngSession,
   type PresentationRngDrawStep,
   type PresentationRngHost,
@@ -89,6 +92,14 @@ export const LIVE_DIVE_RANDOM2_PLANS: Readonly<{ setup: Readonly<Record<"player"
   attack: Object.freeze([Object.freeze({ ageOffset: 16, count: 20 }),
     ...Array.from({ length: 9 }, (_, k) => Object.freeze({ ageOffset: 30 + 4 * k, count: 4 }))]),
 });
+
+/**
+ * General_Rain (B_ANIM_RAIN_CONTINUES): two AnimTask_CreateRaindrops tasks, 20 spawn frames (ages 17 + 3k, RAM-measured) x 4 words (x0, y0,
+ * x1, y1; battle_anim_water.c:495-496; docs/next-adapters-prep46.md s1). Read as a NON-CONSUMING per-event sub-stream at the tick seam
+ * (recordPresentationRngSubStream): only the sprite-order carry after it reads the words; no live adapter renders General_Rain.
+ */
+export const GENERAL_RAIN_RANDOM2_PLAN: readonly PresentationRngDrawStep[] = Object.freeze(
+  GENERAL_RAIN_SPAWN_AGES.map((ageOffset) => Object.freeze({ ageOffset, count: 4 })));
 
 /** Faithful-random live adapters (disjoint from LIVE_MOVE_ANIMATION_IDS and from the faithful-timing ids, which keep their D3 plan). */
 export const LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS: readonly number[] = Object.freeze(
@@ -172,9 +183,22 @@ export function tickLiveMovePresentationRngSession(
     return stepped;
   }
   const command = resolution.segments[resolution.segmentIndex]?.commands[resolution.commandIndex];
-  if (command?.type !== "move-animation" || !command.animation) return stepped;
-  const activated = activateLiveMovePresentationRng(host, command.animation, liveMovePresentationRngBodyKey(resolution),
-    planContext?.(resolution, command.animation));
+  if (command === undefined) return stepped;
+  // General-animation anchor (prep46 s2): a RAIN_CONTINUES event is presented with the first command at or after it (it has no command
+  // of its own); record its non-consuming sub-stream once per event key. The shared stream is not advanced.
+  let recorded = host;
+  const through = "eventSequence" in command ? command.eventSequence : Number.POSITIVE_INFINITY;
+  for (let segmentIndex = 0; segmentIndex <= resolution.segmentIndex; segmentIndex += 1) {
+    for (const event of resolution.segments[segmentIndex]?.events ?? []) {
+      if (segmentIndex === resolution.segmentIndex && event.sequence > through) break;
+      if (event.payload.kind !== "animation" || (event.payload as { animationId?: string }).animationId !== WORDS_ORDER_GENERAL_ANIMATION) continue;
+      recorded = recordPresentationRngSubStream(recorded,
+        generalAnimationPresentationRngKey(resolution.resolutionId.requestId, segmentIndex, event.sequence), GENERAL_RAIN_RANDOM2_PLAN);
+    }
+  }
+  const activated = command.type !== "move-animation" || !command.animation ? recorded
+    : activateLiveMovePresentationRng(recorded, command.animation, liveMovePresentationRngBodyKey(resolution),
+      planContext?.(resolution, command.animation));
   return activated === host ? stepped : Object.freeze({ ...stepped, host: activated });
 }
 

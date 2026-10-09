@@ -94,7 +94,10 @@ import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
 import spitUpRedOrbAsset from "../animation/assets/spit-up-red-orb.json" with { type: "json" };
 import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
 import { liveMoveBgWriteRow, liveMoveCounterTimingParameter, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveTimingBodyRows, liveMoveTimingParameter } from "./liveMoveTimingPolicy.ts";
-import { resolveSpriteOrderDeferredLend } from "./spriteOrderEventTransform.ts";
+import { resolveSpriteOrderDeferredLend, type SpriteOrderDeferredLend } from "./spriteOrderEventTransform.ts";
+import type { PresentationRngHost } from "./presentationRngHost.ts";
+import { DIRT_ANIMATION_AGE_OFFSET, liveDirtScatterProfile, liveWordsUnitPostFree } from "./liveWordsOrderCarry.ts";
+import { isWordsOrderDeferredUnit } from "./wordsOrderUnits.ts";
 import { liveSpitUpDuration, liveSpitUpInputs, type SpitUpCounter } from "./liveSpitUpInputs.ts";
 import { SUPERPOWER_ROWS, liveSuperpowerInputs } from "./liveSuperpowerInputs.ts";
 import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
@@ -127,7 +130,7 @@ import { liveIceBallEnd, liveIceBallInputs } from "./liveIceBallInputs.ts";
 import type { DiveProfile } from "../animation/dive.ts";
 import { linearTranslationDeltaQ8, linearTranslationOffsetAfterCallbacks } from "../animation/animLinearTranslation.ts";
 import {
-  dirtScatterOffsetFromWord, dirtScatterSlots, hyperBeamOrbFromWords, linearTranslationStep, liveMovePresentationRngWords, miniTwinklingStarFromWords, type LiveMovePresentationRngInput,
+  hyperBeamOrbFromWords, liveMovePresentationRngWords, miniTwinklingStarFromWords, type LiveMovePresentationRngInput,
 } from "./liveMovePresentationRng.ts";
 
 
@@ -1287,6 +1290,27 @@ export function liveSemiInvulnerableHideBattler(request: BattleMoveAnimationRequ
     && liveMoveAnimationDuration(request) !== null ? request.attacker : null;
 }
 
+/**
+ * prep46: render-seam resolution of a words-unit deferred lend, memoized per deferred-lend object and presentation-host body list (both
+ * immutable; a body list changes only when a body / sub-stream is recorded, so a repaint never re-carries and a pinned host never reads
+ * another host's result). Pure: the memo holds what resolveSpriteOrderDeferredLend returns for those inputs.
+ */
+const WORDS_LEND_RESOLVED = new WeakMap<object, WeakMap<object, readonly number[] | null>>();
+function resolveWordsOrderLend(
+  deferred: SpriteOrderDeferredLend, host: PresentationRngHost | null, art: ReturnType<typeof createBattleCommandFieldArtView>,
+): readonly number[] | null {
+  const resolve = () => resolveSpriteOrderDeferredLend(deferred, (unit, activationFree) => {
+    if (!isWordsOrderDeferredUnit(unit)) return null;
+    const anchors = { player: liveBattlerAnchors("player", art).picOffsetPoint, opponent: liveBattlerAnchors("opponent", art).picOffsetPoint };
+    return liveWordsUnitPostFree(unit, activationFree, liveMovePresentationRngWords({ host, key: unit.key }), anchors);
+  });
+  if (host === null) return resolve();
+  let byBodies = WORDS_LEND_RESOLVED.get(deferred);
+  if (byBodies === undefined) WORDS_LEND_RESOLVED.set(deferred, byBodies = new WeakMap());
+  if (!byBodies.has(host.bodies)) byBodies.set(host.bodies, resolve());
+  return byBodies.get(host.bodies)!;
+}
+
 export function liveMoveAnimationPresentation(
   request: BattleMoveAnimationRequest,
   field: BattleResolutionDisplayedField,
@@ -1299,6 +1323,16 @@ export function liveMoveAnimationPresentation(
 ): SceneOnMovePresentationState | null {
   if (liveMoveAnimationDuration(request, field) === null) return null;
   const art = createBattleCommandFieldArtView(field);
+  // prep46: after a words-dependent order unit (Sand-Attack / Mud-Slap / Rain Dance / RAIN_CONTINUES) ANY consumer's lend is the
+  // word-free deferred marker; resolve it here, render-pure: carry the unit's activation order through the unit with ITS recorded
+  // presentation words (read by key), then replay the units since with the production plans. Null leaves no lend (the consumer declines
+  // as before). A resolved lend makes this command's order history faithful random (D3): `faithfulRandomHistory` on the result.
+  let faithfulRandomHistory = false;
+  if (spriteOrderInput?.deferred !== undefined && isWordsOrderDeferredUnit(spriteOrderInput.deferred)) {
+    const resolved = resolveWordsOrderLend(spriteOrderInput.deferred, presentationRngInput?.host ?? null, art);
+    spriteOrderInput = resolved === null ? undefined : Object.freeze({ known: true as const, free: resolved });
+    faithfulRandomHistory = resolved !== null;
+  }
   const battler = (side: "player" | "opponent"): SceneOnPresentationBattler => {
     const origin = battleCommandFieldSpriteOrigin(art[side], side);
     // ISSUES #148: a battler an earlier body left at x2/y2 0 is drawn there by the renderer's species-rest readers.
@@ -3158,37 +3192,27 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 189: case 28: {
-      // prep17 s0.2 (faithful random): 30 dirt sprites x (xWord, yWord) from the host's six 10-word rows. Source = the attacker's
-      // pic point + (+-15, +15), destination = the target's pic point + the AnimDirtScatter offsets (both are the anchors the
-      // production field already provides); steps = InitAnimLinearTranslation over 20 frames. Slots = lowest-free over the
-      // computed lifetimes (two transient slot-3 helpers). The lent order is the activation order (Sand) / the pre-wave-1
-      // order (Mud: the transients swap slots 4/3), identical across bodies. Unknown tracked order -> null.
+      // prep17 s0.2 (faithful random): 30 dirt sprites x (xWord, yWord) from the host's six 10-word rows (liveDirtScatterProfile:
+      // the attacker / target pic points the production field provides, InitAnimLinearTranslation steps, lowest-free slots). The
+      // reducer's seed is the lent activation order carried through the two invisible slide helpers before the first dirt sort
+      // (prep46 s1: exact on every body, including the second Mud-Slap bodies the former "4 then 3 -> swap" rule declined).
+      // Unknown tracked order -> null.
       const draws = liveMovePresentationRngWords(presentationRngInput)?.draws;
-      if (draws === undefined || draws.length !== 6 || draws.some((row) => row.length !== 10) || !spriteOrderInput?.known) return null;
+      if (draws === undefined || !spriteOrderInput?.known) return null;
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (lentOrder === null) return null;
       const mud = request.moveId === 189;
-      let spriteOrderSeed: readonly number[] = lentOrder;
-      if (mud) {
-        const at = lentOrder.indexOf(4);
-        if (lentOrder[at + 1] !== 3) return null;
-        spriteOrderSeed = lentOrder.map((slot, index) => index === at ? 3 : index === at + 1 ? 4 : slot);
-      }
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
-      const playerAttacker = attacker.geometry.side === "player";
-      const source = { x: attackerAnchors.picOffsetPoint.x + (playerAttacker ? 15 : -15), y: attackerAnchors.picOffsetPoint.y + 15 };
-      const words = draws.flat();
-      const slots = dirtScatterSlots(mud ? [[4, 8], [9, 11]] : [[7, 11], [12, 14]], mud ? 9 : 12, [0, 1, 2, 6, 8, 60, 61, 62, 63]);
-      const seeds = slots.map((slot, i) => ({ slot,
-        xStep: linearTranslationStep(targetAnchors.picOffsetPoint.x + dirtScatterOffsetFromWord(words[2 * i]!) - source.x, 20),
-        yStep: linearTranslationStep(targetAnchors.picOffsetPoint.y + dirtScatterOffsetFromWord(words[2 * i + 1]!) - source.y, 20) }));
-      const common = { attacker, target, animationAgeOffset: mud ? 42 : 43, moveTextStartAge: 0,
+      const profile = liveDirtScatterProfile(mud ? 189 : 28, attacker.geometry.side, lentOrder, draws,
+        attackerAnchors.picOffsetPoint, targetAnchors.picOffsetPoint);
+      if (profile === null) return null;
+      const common = { attacker, target, animationAgeOffset: DIRT_ANIMATION_AGE_OFFSET[mud ? "mud" : "sand"], moveTextStartAge: 0,
         fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" as const } };
       config = mud
-        ? { move: "MUD_SLAP", ...common, animationProfile: { mud: seeds, spriteOrderSeed } }
+        ? { move: "MUD_SLAP", ...common, animationProfile: { mud: profile.dirt, spriteOrderSeed: profile.spriteOrderSeed } }
         // The accuracy banner and result text are controller-owned HUD after the 58-row body (never-reached ages here).
-        : { move: "SAND_ATTACK", ...common, animationProfile: { dirt: seeds, spriteOrderSeed },
+        : { move: "SAND_ATTACK", ...common, animationProfile: { dirt: profile.dirt, spriteOrderSeed: profile.spriteOrderSeed },
             controllerProfile: { accuracyStageBefore: 0, accuracyStageAfter: 0, resultTextFirstAge: 1_000_000, currentMoveResetAge: 1_000_000 } };
       break;
     }
@@ -3824,5 +3848,5 @@ export function liveMoveAnimationPresentation(
   const setupAge = request.moveId === 230 ? 4 : 0;
   // Feather Dance: the reducer age is the printer-relative age, 44 at the activation frame (prep7 s2.2).
   return { config, age: wallAnchorOffset ? age - wallAnchorOffset : shineBody ? age - 1
-    : request.moveId === 297 ? age + 44 : age - setupAge };
+    : request.moveId === 297 ? age + 44 : age - setupAge, ...(faithfulRandomHistory ? { faithfulRandomHistory: true as const } : {}) };
 }

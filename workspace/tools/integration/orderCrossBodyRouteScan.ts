@@ -163,8 +163,12 @@ export function scanRoute(seed: number, slots: readonly (0 | 1 | 2 | 3)[]) {
     if (command.animation?.moveId === 91 && JSON.stringify(row.spriteOrderInput) === JSON.stringify(digUnleashLend().free)) {
       row = { ...row, spriteOrderInput: undefined };
     }
+    // Deferred-lend markers (Ice Ball; prep46 words units: any consumer) are word-free markers the render seam resolves
+    // (resolveSpriteOrderDeferredLend), not tracker orders: also outside this invariant, counted as `deferred`.
+    const deferred = row.spriteOrderDeferred === true;
+    if (deferred) row = { ...row, spriteOrderInput: undefined };
     return {
-      index, sequence: command.eventSequence, moveId: command.animation?.moveId ?? 0, side: command.animation?.attacker === 0 ? "player" : "opponent",
+      index, sequence: command.eventSequence, deferred, moveId: command.animation?.moveId ?? 0, side: command.animation?.attacker === 0 ? "player" : "opponent",
       known: row.spriteOrderInput !== undefined, predicted: predicted.get(command.eventSequence) ?? null,
       agrees: JSON.stringify(row.spriteOrderInput ?? null) === JSON.stringify(predicted.get(command.eventSequence) ?? null),
       /** Host lent an order that differs from the prediction (must never happen). */

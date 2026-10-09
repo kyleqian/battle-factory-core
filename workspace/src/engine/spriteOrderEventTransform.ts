@@ -528,6 +528,11 @@ export interface SpriteOrderDeferredLend {
   readonly rolloutCounter?: number;
   /** Dive: the earlier body's request.turn. */
   readonly turn?: number;
+  /**
+   * A general-animation words unit (RAIN_CONTINUES, General_Rain; liveWordsOrderCarry.ts): `key` is its per-event presentation key and
+   * `moveId` is 0 (no move body).
+   */
+  readonly generalAnimation?: string;
   readonly activation: Readonly<{ free: readonly number[] }> | Readonly<{ deferred: SpriteOrderDeferredLend }>;
   readonly units: readonly SpriteOrderPresentationEvent[];
 }

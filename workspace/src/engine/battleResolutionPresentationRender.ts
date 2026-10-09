@@ -1346,7 +1346,9 @@ export function createBattleResolutionPresentationRenderView(
         spriteAllocatorInput: state.liveMoveSpriteAllocatorInput,
         spriteOrderInput: state.liveMoveSpriteOrderInput,
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
-        ...(liveMoveRandom2Plan(command.animation) === null ? {} : {
+        // A Random2 body reads its own words; a deferred order lend (prep46: any consumer after a words unit) reads the earlier unit's
+        // recorded words by its key at the seam, so a non-Random2 consumer gets the host too.
+        ...(liveMoveRandom2Plan(command.animation) === null && state.liveMoveSpriteOrderInput?.deferred === undefined ? {} : {
           presentationRng: Object.freeze({ host: presentationRngHost ?? null, key: liveMovePresentationRngBodyKey(state) }),
         }),
       });

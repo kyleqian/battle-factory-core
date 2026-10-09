@@ -45,14 +45,8 @@ export function sandAttackAttackerX2AtAge(
   );
 }
 
-/**
- * Source `AnimDirtScatter`: six waves of five 8x8 sprites, all launched from
- * attacker coord2 plus the mirrored x=15/y=15 script arguments. The supplied
- * Q8.8 steps are the already-resolved animation RNG outcome; this display
- * reducer neither advances RNG nor owns battle state.
- */
-export function sandAttackDirtAtAge(
-  age: number,
+function sandAttackDirtCandidatesAtAge(
+  candidateAge: number,
   attackerCenter: Readonly<{ x: number; y: number }>,
   attackerSide: SandAttackSide,
   profile: Readonly<SandAttackAnimationProfile>,
@@ -61,7 +55,7 @@ export function sandAttackDirtAtAge(
     x: attackerCenter.x + (attackerSide === "player" ? 15 : -15),
     y: attackerCenter.y + 15,
   };
-  const candidatesAt = (candidateAge: number) => profile.dirt
+  return profile.dirt
     .map((seed, index): SandAttackDirtSprite | null => {
       const wave = Math.floor(index / 5);
       const firstDisplayAge =
@@ -79,13 +73,22 @@ export function sandAttackDirtAtAge(
       };
     })
     .filter((sprite): sprite is SandAttackDirtSprite => sprite !== null);
+}
 
-  const current = candidatesAt(age);
-  if (current.length === 0) return current;
-
-  // Faithful `SortSprites` insertion passes. Inactive slots retain the
-  // source dummy key/y, so a later wave enters at its real live seed
-  // position rather than an invented creation order.
+/**
+ * The source `sSpriteOrder` after the dirt phase's `SortSprites` insertion
+ * passes through `age` (from `profile.spriteOrderSeed`). Inactive slots retain
+ * the source dummy key/y, so a later wave enters at its real live seed
+ * position rather than an invented creation order. The draw order of
+ * `sandAttackDirtAtAge` and the post-body order carry
+ * (src/engine/liveWordsOrderCarry.ts) both read this one loop.
+ */
+export function sandAttackDirtSpriteOrderAtAge(
+  age: number,
+  attackerCenter: Readonly<{ x: number; y: number }>,
+  attackerSide: SandAttackSide,
+  profile: Readonly<SandAttackAnimationProfile>,
+): readonly number[] {
   const order = profile.spriteOrderSeed.slice();
   for (
     let sortAge = SAND_ATTACK_DIRT_FIRST_DISPLAY_AGE;
@@ -94,7 +97,7 @@ export function sandAttackDirtAtAge(
   ) {
     const packed = new Array<number>(64).fill((3 << 8) | 255);
     const y = new Array<number>(64).fill(-96);
-    for (const sprite of candidatesAt(sortAge)) {
+    for (const sprite of sandAttackDirtCandidatesAtAge(sortAge, attackerCenter, attackerSide, profile)) {
       packed[sprite.slot] = (2 << 8) | 2;
       y[sprite.slot] = sprite.y - 4;
     }
@@ -116,6 +119,25 @@ export function sandAttackDirtAtAge(
       }
     }
   }
+  return order;
+}
+
+/**
+ * Source `AnimDirtScatter`: six waves of five 8x8 sprites, all launched from
+ * attacker coord2 plus the mirrored x=15/y=15 script arguments. The supplied
+ * Q8.8 steps are the already-resolved animation RNG outcome; this display
+ * reducer neither advances RNG nor owns battle state.
+ */
+export function sandAttackDirtAtAge(
+  age: number,
+  attackerCenter: Readonly<{ x: number; y: number }>,
+  attackerSide: SandAttackSide,
+  profile: Readonly<SandAttackAnimationProfile>,
+): readonly SandAttackDirtSprite[] {
+  const current = sandAttackDirtCandidatesAtAge(age, attackerCenter, attackerSide, profile);
+  if (current.length === 0) return current;
+  // Faithful `SortSprites` insertion passes (sandAttackDirtSpriteOrderAtAge).
+  const order = sandAttackDirtSpriteOrderAtAge(age, attackerCenter, attackerSide, profile);
   return current.slice().sort(
     (a, b) => order.indexOf(b.slot) - order.indexOf(a.slot),
   );
