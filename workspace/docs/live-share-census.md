@@ -147,6 +147,32 @@ because the policy cycles all four slots until PP runs out in long battles.
 | Dive turn 1, Curse (Ghost) turn 0 | duration cases 291 / 174 (`unsupported turn`) | the Dive attack body / Curse Ghost branch (71 commands) | comments at the duration cases |
 | Substitute | `liveSubstituteSwap.ts:170-173`, `liveMoveAnimation.ts:780-788` | more swap body cells (Dream Eater, Solar Beam, Lovely Kiss, Focus Punch, Grass Whistle, Sing) and defender-doll cells (18 moves, 89 commands) | `docs/next-adapters-prep37.md`, `prep38.md`, `tools/integration/fixtures/dolldef-live-receipt.json` |
 
+## Faithful-random history (S10A words46)
+
+After a Random2-words order unit (Sand-Attack, Mud-Slap, Rain Dance, RAIN_CONTINUES) the order host lends a word-free deferred
+marker to any consumer. The render seam resolves it with that unit's surrogate presentation words
+(docs/next-adapters-prep46.md, `src/engine/liveWordsOrderCarry.ts`). Such a command is live, but its order history is
+**faithful random** (ANIMATION_VERIFICATION.md D3), not scoped exact:
+
+- Per frame, the census reads the production presentation's `faithfulRandomHistory` flag. It is set only when the adapter read
+  the resolved lend.
+- `faithfulRandomHistoryFrames` is recorded on each command.
+- `overall.faithfulRandomHistory` reports `commands` (live commands with the flag), `frames`, both shares, and the live share
+  without them.
+- These commands remain in `live` / `liveFrames`. The bucket is a separate claim beside them, not a subtraction from the census.
+
+Seeds 0..299, master `553cef6b5` vs words46 (`tools/integration/fixtures/words46/census/`):
+
+| | live by count | live by frames | faithful-random history |
+|---|---|---|---|
+| `553cef6b5` | 6884 / 7970 = 86.37 % | 1013245 / 1168273 = 86.73 % | (no flag) |
+| words46 | 7023 = 88.12 % (+139) | 1034572 = 88.56 % (+21,327) | 128 commands (1.61 %) / 21,283 frames (1.82 %) |
+
+- There are 0 live -> fallback regressions and 0 pairing mismatches, and the battle digest is identical.
+- 121 of the 139 newly live commands are in the bucket.
+- The other 18 are Mud-Slap bodies made live by the slide-helper seed. Mud-Slap is a faithful-random adapter already.
+- 7 commands that were live before (Flamethrower 4, Rock Slide 3) read the resolved lend now, so they moved into the bucket.
+
 ## Method
 
 - **Battles.** Battle *i* uses `seed = from + i`, `streak = (i * 11) % 49` (every streak 0..48, challenges 0..6, ~20 battles
