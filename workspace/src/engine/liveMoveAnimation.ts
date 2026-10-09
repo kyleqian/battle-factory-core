@@ -3031,8 +3031,11 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 329: {
-      // prep22 P3: Sheer Cold, first body only (the activation BG registers and the lent order are the first-body inputs); a later body declines.
-      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      // prep22 P3: Sheer Cold (the activation BG registers are the reducer defaults; the lent order). later58 (docs/next-adapters-later58.md): at a
+      // LATER body WIN0 / BGnCNT / DISPCNT / BG1VOFS are history the pixels never read (the body writes the monbg layer and the fades it shows)
+      // and the allocator (tile bitmap, palette tags, matrices, tasks) is the first body's; later windows are exact in the policy's age-171 phase
+      // and differ only on the documented BLDY tail rows in the other. The target / attacker rests are read: later, both species rests {0,0}.
+      if (!spriteOrderInput?.known || (!spriteOrderInput.firstBody && !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);

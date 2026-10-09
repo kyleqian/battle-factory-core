@@ -59,13 +59,20 @@ describe("live Sheer Cold (329) first-body adapter", () => {
     }
   });
 
-  it("declines a later body, an unknown order and a shiny battler (first-body gate)", () => {
+  // later58 moved this pin: a later body (no firstBody) is live while both species rests are {0,0} and declines with an opponent ONIX
+  // (docs/next-adapters-later58.md; tools/integration/fixtures/later58-live-receipt.json).
+  it("declines an unknown order and a shiny battler; a later body only on rest-free battlers (later58)", () => {
     const f = fixtureAt("sheer-cold-player-dewgong-opponent-chansey");
     const view = liveView(f, 0);
     const effect = view.effect as unknown as { request: BattleMoveAnimationRequest; spriteOrderInput: object };
     const call = (order: unknown, field = view.field) => liveMoveAnimationPresentation(effect.request, field, 0, undefined, undefined, order as never);
     expect(call(effect.spriteOrderInput)).not.toBeNull();
-    expect(call({ ...effect.spriteOrderInput, firstBody: undefined })).toBeNull();
+    expect(call({ ...effect.spriteOrderInput, firstBody: undefined })).not.toBeNull();
+    const onix = liveView({ ...f, target: { ...f.target, species: "ONIX" } }, 0);
+    const onixEffect = onix.effect as unknown as { request: BattleMoveAnimationRequest; spriteOrderInput: object };
+    expect(liveMoveAnimationPresentation(onixEffect.request, onix.field, 0, undefined, undefined, onixEffect.spriteOrderInput as never)).not.toBeNull();
+    expect(liveMoveAnimationPresentation(onixEffect.request, onix.field, 0, undefined, undefined,
+      { ...onixEffect.spriteOrderInput, firstBody: undefined } as never)).toBeNull();
     expect(call(undefined)).toBeNull();
     expect(call({ known: false })).toBeNull();
     const shiny = ((416_049_562 >>> 16) ^ (416_049_562 & 0xffff)) >>> 0;

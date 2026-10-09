@@ -25,7 +25,7 @@ GATES = {
 PINS = {
     "SIGNAL_BEAM": ["signal-beam-pla-venomoth-golem-growl-2.json", "signal-beam-opp-ariados-chansey-qa-1.json"],
     "MACH_PUNCH": ["mach-punch-pla-hitmonchan-chansey-splash-1.json", "mach-punch-opp-machamp-golem-growl-2.json"],
-    "SHEER_COLD": ["sheer-cold-pla-dewgong-chansey-qa-0.json", "sheer-cold-opp-dewgong-chansey-growl-0.json"],
+    "SHEER_COLD": ["sheer-cold-pla-dewgong-chansey-qa-0.json", "sheer-cold-opp-dewgong-chansey-splash-s1-0.json"],
     "EXTRASENSORY": ["extrasensory-opp-nuzleaf-shuckle-splash-2.json", "extrasensory-opp-alakazam-golem-qa-1.json"],
 }
 def alloc_components(later):

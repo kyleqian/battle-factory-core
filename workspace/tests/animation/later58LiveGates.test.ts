@@ -66,3 +66,17 @@ describe("later58 Mach Punch 183 at a later body (D4a: the policy's lag phase)",
     expect(presentation({ ...first, attacker: { ...first.attacker, species: "ONIX" } })?.config.move).toBe("MACH_PUNCH");
   });
 });
+
+describe("later58 Sheer Cold 329 at a later body (D4: the per-side age-171 policy phase)", () => {
+  it.each(pinnedOf("SHEER_COLD"))("%s: live, every pinned row equals the ROM frame", expectPinnedRows, 180000);
+
+  it("later bodies after Quick Attack / Growl / Splash are live on rest-free battlers; an ONIX on either side declines a later body", () => {
+    for (const name of ["sheer-cold-pla-dewgong-chansey-qa-0", "sheer-cold-pla-cloyster-golem-growl-s2-0", "sheer-cold-opp-cloyster-golem-qa-0",
+      "sheer-cold-opp-dewgong-chansey-splash-s1-0"]) expect(presentation(fixture(name))?.config.move).toBe("SHEER_COLD");
+    const later = fixture("sheer-cold-pla-dewgong-chansey-qa-0");
+    expect(presentation({ ...later, target: { ...later.target, species: "ONIX" } })).toBeNull();
+    const first = fixture("sheer-cold-pla-dewgong-chansey-growl-0");
+    expect(first.precedingBodies).toBeUndefined();
+    expect(presentation({ ...first, target: { ...first.target, species: "ONIX" } })?.config.move).toBe("SHEER_COLD");
+  });
+});
