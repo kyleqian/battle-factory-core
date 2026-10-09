@@ -274,14 +274,16 @@ function followsForcedSwitchOut(events: readonly BattleKernelSemanticEvent[], in
 }
 
 /**
- * The player's voluntary switch-out (BattleScript_ActionSwitch `returnatktoball`, docs/voluntary-switch-lend-audit.md §2.3):
- * a RETURNATKTOBALL hide of battler 0 before any move body of the segment. The opponent's AI switch (battler 1) and a
- * recall after a body (Pursuit's switch-out damage) are unprobed and keep invalidating.
+ * A voluntary switch-out of `battler`: a RETURNATKTOBALL hide of it before any move body of the segment. Battler 0 is the
+ * player's (BattleScript_ActionSwitch `returnatktoball`, docs/voluntary-switch-lend-audit.md §2.3), battler 1 the Factory
+ * AI's (BattleScript_DoSwitchOut `returnatktoball`, docs/next-adapters-prep47.md (C): the same recall plan with the opponent
+ * battler, 3/3 exact at the next body edge). A recall after a body (Pursuit's switch-out damage) is unprobed and keeps
+ * invalidating.
  */
-function isVoluntaryPlayerSwitchOut(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
+function isVoluntarySwitchOut(events: readonly BattleKernelSemanticEvent[], index: number, battler: 0 | 1): boolean {
   const event = events[index]!;
   const payload = event.payload;
-  if (payload.kind !== "set-battler-sprite-visibility" || !payload.invisible || payload.battler !== 0
+  if (payload.kind !== "set-battler-sprite-visibility" || !payload.invisible || payload.battler !== battler
     || event.provenance?.opcodeName !== "B_SCR_OP_RETURNATKTOBALL") return false;
   return !events.slice(0, index).some(({ payload: earlier }) =>
     earlier.kind === "animation" && earlier.animationId === "MOVE_ANIMATION");
@@ -357,7 +359,8 @@ function orderEventOf(
     if (isForcedSwitchOut(events, index)) {
       return { event: { kind: "forced-switch-out", side: payload.battler === 0 ? "player" : "opponent" } };
     }
-    if (isVoluntaryPlayerSwitchOut(events, index)) return { event: { kind: "switch-out" } };
+    if (isVoluntarySwitchOut(events, index, 0)) return { event: { kind: "switch-out" } };
+    if (isVoluntarySwitchOut(events, index, 1)) return { event: { kind: "switch-out", side: "opponent" } };
     if (RECALL_OPCODES.has(event.provenance?.opcodeName ?? "")) return { event: { kind: "invalidate", reason: "return to ball" } };
     if (payload.battler !== 0 && payload.battler !== 1) return { event: { kind: "invalidate", reason: "visibility battler" } };
     const next: [boolean, boolean] = [hidden[0], hidden[1]];
