@@ -1,0 +1,252 @@
+{
+ "schema": "audit16-chain-check/v1",
+ "scenario": "outrage-ice-beam-ply",
+ "probeExit": [
+  0,
+  0
+ ],
+ "rows": [
+  {
+   "fixture": "outrage-ice-beam-ply-c0.json",
+   "move": "ICE_BEAM",
+   "side": "player",
+   "species": "CHANSEY/SNORLAX",
+   "units": 2,
+   "history": [
+    "200@1 HIT_ANIMATION@0 58@0"
+   ],
+   "window": {
+    "startFrame": 311,
+    "endFrame": 513
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "harnessAllocator": false,
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "invalidatedBy": [],
+    "rows": 203,
+    "exactRows": 203,
+    "px": 0,
+    "digests": [
+     "d660c17c208a4f28",
+     "d660c17c208a4f28"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "invalidatedBy": [],
+    "rows": 203,
+    "exactRows": 203,
+    "px": 0,
+    "digests": [
+     "d660c17c208a4f28",
+     "d660c17c208a4f28"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "outrage-ice-beam-ply-c1.json",
+   "move": "ICE_BEAM",
+   "side": "player",
+   "species": "CHANSEY/SNORLAX",
+   "units": 6,
+   "history": [
+    "200@1 HIT_ANIMATION@0 58@0 HIT_ANIMATION@1",
+    "200@1 HIT_ANIMATION@0 58@0"
+   ],
+   "window": {
+    "startFrame": 1647,
+    "endFrame": 1849
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "harnessAllocator": false,
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "invalidatedBy": [],
+    "rows": 203,
+    "exactRows": 203,
+    "px": 0,
+    "digests": [
+     "d660c17c208a4f28",
+     "d660c17c208a4f28"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "invalidatedBy": [],
+    "rows": 203,
+    "exactRows": 203,
+    "px": 0,
+    "digests": [
+     "d660c17c208a4f28",
+     "d660c17c208a4f28"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "outrage-ice-beam-ply-c2.json",
+   "move": "ICE_BEAM",
+   "side": "player",
+   "species": "CHANSEY/SNORLAX",
+   "units": 10,
+   "history": [
+    "200@1 HIT_ANIMATION@0 58@0 HIT_ANIMATION@1",
+    "200@1 HIT_ANIMATION@0 58@0 HIT_ANIMATION@1",
+    "200@1 HIT_ANIMATION@0 58@0"
+   ],
+   "window": {
+    "startFrame": 3081,
+    "endFrame": 3283
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "harnessAllocator": false,
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "invalidatedBy": [],
+    "rows": 203,
+    "exactRows": 203,
+    "px": 0,
+    "digests": [
+     "d660c17c208a4f28",
+     "d660c17c208a4f28"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "invalidatedBy": [],
+    "rows": 203,
+    "exactRows": 203,
+    "px": 0,
+    "digests": [
+     "d660c17c208a4f28",
+     "d660c17c208a4f28"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "outrage-ice-beam-ply-c3.json",
+   "move": "ICE_BEAM",
+   "side": "player",
+   "species": "CHANSEY/SNORLAX",
+   "units": 16,
+   "history": [
+    "200@1 HIT_ANIMATION@0 58@0 HIT_ANIMATION@1",
+    "200@1 HIT_ANIMATION@0 58@0 HIT_ANIMATION@1",
+    "200@1 HIT_ANIMATION@0 58@0 HIT_ANIMATION@1 status:CONFUSION@1",
+    "status:CONFUSION@1 200@1 HIT_ANIMATION@0 58@0"
+   ],
+   "window": {
+    "startFrame": 4509,
+    "endFrame": 4711
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "harnessAllocator": false,
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "invalidatedBy": [],
+    "rows": 203,
+    "exactRows": 203,
+    "px": 0,
+    "digests": [
+     "d660c17c208a4f28",
+     "d660c17c208a4f28"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "invalidatedBy": [],
+    "rows": 203,
+    "exactRows": 203,
+    "px": 0,
+    "digests": [
+     "d660c17c208a4f28",
+     "d660c17c208a4f28"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

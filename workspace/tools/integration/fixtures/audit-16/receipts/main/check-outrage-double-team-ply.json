@@ -1,0 +1,1020 @@
+{
+ "schema": "audit16-chain-check/v1",
+ "scenario": "outrage-double-team-ply",
+ "probeExit": [
+  0,
+  0
+ ],
+ "rows": [
+  {
+   "fixture": "outrage-double-team-ply-c0.json",
+   "move": "DOUBLE_TEAM",
+   "side": "player",
+   "species": "CHANSEY/SNORLAX",
+   "units": 2,
+   "history": [
+    "200@1 HIT_ANIMATION@0 104@0"
+   ],
+   "window": {
+    "startFrame": 309,
+    "endFrame": 467
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "harnessAllocator": false,
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "invalidatedBy": [],
+    "rows": 159,
+    "exactRows": 158,
+    "px": 1809,
+    "digests": [
+     "a5bab112fcc2e499",
+     "a5bab112fcc2e499"
+    ],
+    "residualRows": [
+     [
+      2,
+      1809
+     ]
+    ],
+    "detail": [
+     {
+      "age": 2,
+      "px": 1809,
+      "bbox": [
+       43,
+       101,
+       71,
+       111
+      ],
+      "sample": "68,71 rom f77373 live b39498"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "invalidatedBy": [],
+    "rows": 159,
+    "exactRows": 60,
+    "px": 40736,
+    "digests": [
+     "78caa118cceb5c3c",
+     "78caa118cceb5c3c"
+    ],
+    "residualRows": [
+     [
+      2,
+      1809
+     ],
+     [
+      6,
+      284
+     ],
+     [
+      7,
+      284
+     ],
+     [
+      8,
+      284
+     ],
+     [
+      9,
+      284
+     ],
+     [
+      10,
+      284
+     ],
+     [
+      11,
+      284
+     ],
+     [
+      12,
+      451
+     ],
+     [
+      13,
+      451
+     ],
+     [
+      14,
+      523
+     ],
+     [
+      15,
+      523
+     ],
+     [
+      16,
+      574
+     ],
+     [
+      17,
+      617
+     ],
+     [
+      18,
+      628
+     ],
+     [
+      19,
+      624
+     ],
+     [
+      20,
+      615
+     ],
+     [
+      21,
+      607
+     ],
+     [
+      22,
+      596
+     ],
+     [
+      23,
+      583
+     ],
+     [
+      24,
+      565
+     ],
+     [
+      25,
+      565
+     ],
+     [
+      26,
+      552
+     ],
+     [
+      27,
+      552
+     ],
+     [
+      28,
+      532
+     ],
+     [
+      29,
+      552
+     ],
+     [
+      30,
+      565
+     ],
+     [
+      31,
+      583
+     ],
+     [
+      32,
+      607
+     ],
+     [
+      33,
+      624
+     ],
+     [
+      34,
+      574
+     ],
+     [
+      35,
+      284
+     ],
+     [
+      36,
+      523
+     ],
+     [
+      37,
+      624
+     ],
+     [
+      38,
+      596
+     ],
+     [
+      39,
+      552
+     ],
+     [
+      40,
+      454
+     ],
+     [
+      41,
+      357
+     ],
+     [
+      42,
+      248
+     ],
+     [
+      43,
+      248
+     ],
+     [
+      44,
+      248
+     ]
+    ],
+    "detail": [
+     {
+      "age": 2,
+      "px": 1809,
+      "bbox": [
+       43,
+       101,
+       71,
+       111
+      ],
+      "sample": "68,71 rom f77373 live b39498"
+     },
+     {
+      "age": 6,
+      "px": 284,
+      "bbox": [
+       43,
+       100,
+       71,
+       111
+      ],
+      "sample": "68,71 rom b39498 live a08785"
+     },
+     {
+      "age": 7,
+      "px": 284,
+      "bbox": [
+       43,
+       100,
+       71,
+       111
+      ],
+      "sample": "68,71 rom b39498 live a08785"
+     },
+     {
+      "age": 8,
+      "px": 284,
+      "bbox": [
+       43,
+       100,
+       71,
+       111
+      ],
+      "sample": "68,71 rom b39498 live a08785"
+     },
+     {
+      "age": 9,
+      "px": 284,
+      "bbox": [
+       43,
+       100,
+       71,
+       111
+      ],
+      "sample": "68,71 rom b39498 live a08785"
+     },
+     {
+      "age": 10,
+      "px": 284,
+      "bbox": [
+       43,
+       100,
+       71,
+       111
+      ],
+      "sample": "68,71 rom b39498 live a08785"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "outrage-double-team-ply-c1.json",
+   "move": "DOUBLE_TEAM",
+   "side": "player",
+   "species": "CHANSEY/SNORLAX",
+   "units": 4,
+   "history": [
+    "200@1 HIT_ANIMATION@0 104@0 STATS_CHANGE@0",
+    "104@0"
+   ],
+   "window": {
+    "startFrame": 1571,
+    "endFrame": 1729
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "harnessAllocator": false,
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "invalidatedBy": [],
+    "rows": 159,
+    "exactRows": 158,
+    "px": 1809,
+    "digests": [
+     "a5bab112fcc2e499",
+     "a5bab112fcc2e499"
+    ],
+    "residualRows": [
+     [
+      2,
+      1809
+     ]
+    ],
+    "detail": [
+     {
+      "age": 2,
+      "px": 1809,
+      "bbox": [
+       43,
+       101,
+       71,
+       111
+      ],
+      "sample": "68,71 rom f77373 live b39498"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "invalidatedBy": [],
+    "rows": 159,
+    "exactRows": 60,
+    "px": 40736,
+    "digests": [
+     "78caa118cceb5c3c",
+     "78caa118cceb5c3c"
+    ],
+    "residualRows": [
+     [
+      2,
+      1809
+     ],
+     [
+      6,
+      284
+     ],
+     [
+      7,
+      284
+     ],
+     [
+      8,
+      284
+     ],
+     [
+      9,
+      284
+     ],
+     [
+      10,
+      284
+     ],
+     [
+      11,
+      284
+     ],
+     [
+      12,
+      451
+     ],
+     [
+      13,
+      451
+     ],
+     [
+      14,
+      523
+     ],
+     [
+      15,
+      523
+     ],
+     [
+      16,
+      574
+     ],
+     [
+      17,
+      617
+     ],
+     [
+      18,
+      628
+     ],
+     [
+      19,
+      624
+     ],
+     [
+      20,
+      615
+     ],
+     [
+      21,
+      607
+     ],
+     [
+      22,
+      596
+     ],
+     [
+      23,
+      583
+     ],
+     [
+      24,
+      565
+     ],
+     [
+      25,
+      565
+     ],
+     [
+      26,
+      552
+     ],
+     [
+      27,
+      552
+     ],
+     [
+      28,
+      532
+     ],
+     [
+      29,
+      552
+     ],
+     [
+      30,
+      565
+     ],
+     [
+      31,
+      583
+     ],
+     [
+      32,
+      607
+     ],
+     [
+      33,
+      624
+     ],
+     [
+      34,
+      574
+     ],
+     [
+      35,
+      284
+     ],
+     [
+      36,
+      523
+     ],
+     [
+      37,
+      624
+     ],
+     [
+      38,
+      596
+     ],
+     [
+      39,
+      552
+     ],
+     [
+      40,
+      454
+     ],
+     [
+      41,
+      357
+     ],
+     [
+      42,
+      248
+     ],
+     [
+      43,
+      248
+     ],
+     [
+      44,
+      248
+     ]
+    ],
+    "detail": [
+     {
+      "age": 2,
+      "px": 1809,
+      "bbox": [
+       43,
+       101,
+       71,
+       111
+      ],
+      "sample": "68,71 rom f77373 live b39498"
+     },
+     {
+      "age": 6,
+      "px": 284,
+      "bbox": [
+       43,
+       100,
+       71,
+       111
+      ],
+      "sample": "68,71 rom b39498 live a08785"
+     },
+     {
+      "age": 7,
+      "px": 284,
+      "bbox": [
+       43,
+       100,
+       71,
+       111
+      ],
+      "sample": "68,71 rom b39498 live a08785"
+     },
+     {
+      "age": 8,
+      "px": 284,
+      "bbox": [
+       43,
+       100,
+       71,
+       111
+      ],
+      "sample": "68,71 rom b39498 live a08785"
+     },
+     {
+      "age": 9,
+      "px": 284,
+      "bbox": [
+       43,
+       100,
+       71,
+       111
+      ],
+      "sample": "68,71 rom b39498 live a08785"
+     },
+     {
+      "age": 10,
+      "px": 284,
+      "bbox": [
+       43,
+       100,
+       71,
+       111
+      ],
+      "sample": "68,71 rom b39498 live a08785"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "outrage-double-team-ply-c2.json",
+   "move": "DOUBLE_TEAM",
+   "side": "player",
+   "species": "CHANSEY/SNORLAX",
+   "units": 6,
+   "history": [
+    "200@1 HIT_ANIMATION@0 104@0 STATS_CHANGE@0",
+    "104@0 STATS_CHANGE@0",
+    "104@0"
+   ],
+   "window": {
+    "startFrame": 2905,
+    "endFrame": 3063
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "harnessAllocator": false,
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "invalidatedBy": [],
+    "rows": 159,
+    "exactRows": 158,
+    "px": 1809,
+    "digests": [
+     "a5bab112fcc2e499",
+     "a5bab112fcc2e499"
+    ],
+    "residualRows": [
+     [
+      2,
+      1809
+     ]
+    ],
+    "detail": [
+     {
+      "age": 2,
+      "px": 1809,
+      "bbox": [
+       43,
+       101,
+       71,
+       111
+      ],
+      "sample": "68,71 rom f77373 live b39498"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "invalidatedBy": [],
+    "rows": 159,
+    "exactRows": 60,
+    "px": 40736,
+    "digests": [
+     "78caa118cceb5c3c",
+     "78caa118cceb5c3c"
+    ],
+    "residualRows": [
+     [
+      2,
+      1809
+     ],
+     [
+      6,
+      284
+     ],
+     [
+      7,
+      284
+     ],
+     [
+      8,
+      284
+     ],
+     [
+      9,
+      284
+     ],
+     [
+      10,
+      284
+     ],
+     [
+      11,
+      284
+     ],
+     [
+      12,
+      451
+     ],
+     [
+      13,
+      451
+     ],
+     [
+      14,
+      523
+     ],
+     [
+      15,
+      523
+     ],
+     [
+      16,
+      574
+     ],
+     [
+      17,
+      617
+     ],
+     [
+      18,
+      628
+     ],
+     [
+      19,
+      624
+     ],
+     [
+      20,
+      615
+     ],
+     [
+      21,
+      607
+     ],
+     [
+      22,
+      596
+     ],
+     [
+      23,
+      583
+     ],
+     [
+      24,
+      565
+     ],
+     [
+      25,
+      565
+     ],
+     [
+      26,
+      552
+     ],
+     [
+      27,
+      552
+     ],
+     [
+      28,
+      532
+     ],
+     [
+      29,
+      552
+     ],
+     [
+      30,
+      565
+     ],
+     [
+      31,
+      583
+     ],
+     [
+      32,
+      607
+     ],
+     [
+      33,
+      624
+     ],
+     [
+      34,
+      574
+     ],
+     [
+      35,
+      284
+     ],
+     [
+      36,
+      523
+     ],
+     [
+      37,
+      624
+     ],
+     [
+      38,
+      596
+     ],
+     [
+      39,
+      552
+     ],
+     [
+      40,
+      454
+     ],
+     [
+      41,
+      357
+     ],
+     [
+      42,
+      248
+     ],
+     [
+      43,
+      248
+     ],
+     [
+      44,
+      248
+     ]
+    ],
+    "detail": [
+     {
+      "age": 2,
+      "px": 1809,
+      "bbox": [
+       43,
+       101,
+       71,
+       111
+      ],
+      "sample": "68,71 rom f77373 live b39498"
+     },
+     {
+      "age": 6,
+      "px": 284,
+      "bbox": [
+       43,
+       100,
+       71,
+       111
+      ],
+      "sample": "68,71 rom b39498 live a08785"
+     },
+     {
+      "age": 7,
+      "px": 284,
+      "bbox": [
+       43,
+       100,
+       71,
+       111
+      ],
+      "sample": "68,71 rom b39498 live a08785"
+     },
+     {
+      "age": 8,
+      "px": 284,
+      "bbox": [
+       43,
+       100,
+       71,
+       111
+      ],
+      "sample": "68,71 rom b39498 live a08785"
+     },
+     {
+      "age": 9,
+      "px": 284,
+      "bbox": [
+       43,
+       100,
+       71,
+       111
+      ],
+      "sample": "68,71 rom b39498 live a08785"
+     },
+     {
+      "age": 10,
+      "px": 284,
+      "bbox": [
+       43,
+       100,
+       71,
+       111
+      ],
+      "sample": "68,71 rom b39498 live a08785"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "outrage-double-team-ply-c3.json",
+   "move": "DOUBLE_TEAM",
+   "side": "player",
+   "species": "CHANSEY/SNORLAX",
+   "units": 10,
+   "history": [
+    "200@1 HIT_ANIMATION@0 104@0 STATS_CHANGE@0",
+    "104@0 STATS_CHANGE@0",
+    "104@0 STATS_CHANGE@0 status:CONFUSION@1",
+    "status:CONFUSION@1 104@0"
+   ],
+   "window": {
+    "startFrame": 4432,
+    "endFrame": 4590
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "harnessAllocator": false,
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "invalidatedBy": [],
+    "rows": 159,
+    "exactRows": 158,
+    "px": 1809,
+    "digests": [
+     "a5bab112fcc2e499",
+     "a5bab112fcc2e499"
+    ],
+    "residualRows": [
+     [
+      2,
+      1809
+     ]
+    ],
+    "detail": [
+     {
+      "age": 2,
+      "px": 1809,
+      "bbox": [
+       43,
+       101,
+       71,
+       111
+      ],
+      "sample": "68,71 rom f77373 live b39498"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "invalidatedBy": [],
+    "rows": 159,
+    "exactRows": 158,
+    "px": 1809,
+    "digests": [
+     "a5bab112fcc2e499",
+     "a5bab112fcc2e499"
+    ],
+    "residualRows": [
+     [
+      2,
+      1809
+     ]
+    ],
+    "detail": [
+     {
+      "age": 2,
+      "px": 1809,
+      "bbox": [
+       43,
+       101,
+       71,
+       111
+      ],
+      "sample": "68,71 rom f77373 live b39498"
+     }
+    ]
+   }
+  }
+ ]
+}
