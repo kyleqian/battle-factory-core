@@ -23,10 +23,10 @@ describe("production sprite-order plan table (generated, pinned)", () => {
     expect(renderSpriteOrderProductionTableFromFixtures()).toBe(committed);
     // + prep43 (fixtures/prep43/plan-rows.json, appended): Dig 91 / 10091, Brick Break 280 / 10280 bodies, 5 plans.
     // + prep45 (fixtures/prep45/plan-rows.json, appended): 15 bodies, 11 plans (BRN's text = STATUS_INFATUATION's, deduped).
-    // + plans48 (fixtures/plans48/plan-rows.json, appended): 10 bodies, 4 plans (FRZ / NIGHTMARE / CURSED = "Cf;D0", ITEM_KNOCKOFF = "Cf",
+    // + plans48 (fixtures/plans48/plan-rows.json, appended): 12 bodies, 5 plans (FRZ / NIGHTMARE / CURSED = "Cf;D0", ITEM_KNOCKOFF = "Cf",
     //   Razor Leaf opponent = the 75:player text, Razor Wind's unleash = Leech Seed's text: deduped).
-    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(518);
-    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(216);
+    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(520);
+    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(217);
   });
 
   it("decodes every EXACT-PLAN (move, side) body of the ext table to the fixture plan", () => {
@@ -193,12 +193,13 @@ describe("sprite-order presentation-event transform", () => {
     expect(run([{ kind: "general-animation", animation: "TURN_TRAP" }]).cursor.order.known).toBe(false);
   });
 
-  it("plans48 EXACT plans: FRZ / NIGHTMARE / CURSED / ITEM_KNOCKOFF, Ice Punch, Razor Leaf, Snore, Grudge, Razor Wind per branch", () => {
+  it("plans48 EXACT plans: FRZ / NIGHTMARE / CURSED / ITEM_KNOCKOFF, Ice Punch, Razor Leaf, Snore, Grudge, Razor Wind per branch, Attract", () => {
     // ROM receipts (fixtures/plans48/units.json: direct mGBA, every job twice fresh, A == B): every probed instance of a landed unit
     // has the production plan text, per side; check.json is the per-frame check of the same plans (prep48Check.ts).
     const rows = fixture("plans48/plan-rows.json") as { bodies: Record<string, { plan: unknown }>; anims: Record<string, { plan: unknown }> };
     const units = fixture("plans48/units.json") as { jobs: Record<string, { unit: string; identicalAB: boolean; units: { kind: string; label: string; plan: string; truncated: boolean }[] }> };
-    const check = fixture("plans48/check.json") as { notIdenticalAB: number; results: Record<string, { instances: number; matched: number }> };
+    const check = fixture("plans48/check.json") as { notIdenticalAB: number; results: Record<string, { instances: number; matched: number }>;
+      attract: { instances: { split: string; endStateEqualsA: boolean }[]; boundaryEquivalence: { starts: number; equivalent: number } } };
     const text = (plan: unknown) => encodeSpriteOrderPlan(plan as never);
     const at = (name: string) => SPRITE_ORDER_PRODUCTION_PLANS[SPRITE_ORDER_PRODUCTION_ANIMS[name]!];
     expect(check.notIdenticalAB).toBe(0);
@@ -216,6 +217,7 @@ describe("sprite-order presentation-event transform", () => {
         else if (unit.label === "general ITEM_KNOCKOFF") seen("ITEM_KNOCKOFF", unit.plan);
         else if (body && [8, 75, 173, 288].includes(Number(body[1]))) seen(`${body[1]}:${body[2]}`, unit.plan);
         else if (body && Number(body[1]) === 13) seen(`${razorWind++ === 0 ? 13 : 10013}:${body[2]}`, unit.plan);
+        else if (body && Number(body[1]) === 213) seen("213", unit.plan);
       }
     }
     for (const name of ["STATUS_FRZ", "STATUS_NIGHTMARE", "STATUS_CURSED", "ITEM_KNOCKOFF"]) expect([...observed.get(name)!], name).toEqual([at(name)]);
@@ -229,6 +231,14 @@ describe("sprite-order presentation-event transform", () => {
       const [move, side] = key.split(":") as [string, "player" | "opponent"];
       expect(spriteOrderProductionBodyPlan(Number(move), side), key).toEqual(row.plan);
     }
+    // Attract (18 instances, 9 species pairs per side): the ROM shows the production plan A or B = one rising heart fewer before the
+    // frame boundary (the 8 createsprite commands run in one script frame); A and B leave the same order after the unit from any start.
+    const attractA = text(spriteOrderProductionBodyPlan(213, "player"));
+    expect(text(spriteOrderProductionBodyPlan(213, "opponent"))).toBe(attractA);
+    expect([...observed.get("213")!].sort()).toEqual([attractA, attractA.replace(";Cff;Cffffff;", ";Cf;Cfffffff;")].sort());
+    expect(check.attract.instances).toHaveLength(18);
+    expect(check.attract.instances.every(instance => instance.endStateEqualsA && instance.split !== "none")).toBe(true);
+    expect(check.attract.boundaryEquivalence.equivalent).toBe(check.attract.boundaryEquivalence.starts);
     // Grudge stays side-keyed (4 attacker species per side, one plan each); Razor Wind's branches allocate differently.
     expect(text(spriteOrderProductionBodyPlan(288, "player"))).not.toBe(text(spriteOrderProductionBodyPlan(288, "opponent")));
     expect(text(spriteOrderProductionBodyPlan(10013, "player"))).not.toBe(text(spriteOrderProductionBodyPlan(13, "player")));
@@ -237,6 +247,7 @@ describe("sprite-order presentation-event transform", () => {
       { kind: "status-animation", status: "FRZ" }, { kind: "status-animation", status: "NIGHTMARE" }, { kind: "status-animation", status: "CURSED" },
       { kind: "general-animation", animation: "ITEM_KNOCKOFF" }, { kind: "move-animation", moveId: 8, attackerSide: "player" },
       { kind: "move-animation", moveId: 173, attackerSide: "opponent" }, { kind: "move-animation", moveId: 10013, attackerSide: "opponent" },
+      { kind: "move-animation", moveId: 213, attackerSide: "player" },
     ] as const) expect(run([event as SpriteOrderPresentationEvent]).cursor.order.known, JSON.stringify(event)).toBe(true);
     // Not landed (docs/next-adapters-plans48.md): Shock Wave (2 opponent-side plans over 4 species), Fly (hidden attacker), Clamp.
     expect(spriteOrderProductionBodyPlan(351, "opponent")).toBeNull();

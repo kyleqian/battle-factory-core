@@ -30,6 +30,9 @@ export const PREP48_PLANS: Readonly<Record<string, string>> = Object.freeze({
   "body 13 turn 1 (unleash)": "Cf;Cf;Cf;D0;D1;D2",
   "body 19 turn 0 (setup)": "Cf;D0",
   "body 19 turn 1 (unleash)": "Cf;Cf;D0;D1",
+  // Attract: the production plan (A); the ROM also shows B = one rising heart fewer before the frame boundary (attract-prediction.json)
+  "body 213": "Cf;D0;Cffffff;D3,5,6,1,4,2;Cff;Cffffff;D7;D8;D9;D11;D10;D12;D14;D13",
+  "body 213 (split B)": "Cf;D0;Cffffff;D3,5,6,1,4,2;Cf;Cfffffff;D7;D8;D9;D11;D10;D12;D14;D13",
 });
 
 /** Which proposed plan a probed unit is checked against (null = not a plans48 plan unit). */
@@ -41,6 +44,7 @@ function planLabel(job: Job, unit: Unit, seen: Map<string, number>): string | nu
   if (!m) return null;
   const mv = Number(m[1]);
   if ([8, 75, 173].includes(mv)) return `body ${mv}`;
+  if (mv === 213) return "body 213";
   if (mv === 288) return `body 288:${m[2]}`;
   if (mv === 13 || mv === 19) return count(String(mv)) === 0 ? `body ${mv} turn 0 (setup)` : `body ${mv} turn 1 (unleash)`;
   return null;
@@ -84,6 +88,7 @@ function checkUnit(unit: Unit, next: Unit | undefined, text: string) {
 const input = JSON.parse(readFileSync(process.argv[2]!, "utf8")) as { jobs: Record<string, Job> };
 const results: Record<string, { instances: number; matched: number; framesChecked: number; jobs: string[]; mismatches: { job: string; frame: number; observedPlan: string; problems: string[] }[]; carries: number }> = {};
 let notIdentical = 0;
+const attract: { job: string; split: string; endStateEqualsA: boolean; schedule: string }[] = [];
 for (const [name, job] of Object.entries(input.jobs)) {
   if (!job.identicalAB) notIdentical += 1;
   const seen = new Map<string, number>();
@@ -94,7 +99,17 @@ for (const [name, job] of Object.entries(input.jobs)) {
     const entry = results[label] ??= { instances: 0, matched: 0, framesChecked: 0, jobs: [], mismatches: [], carries: 0 };
     // the carry's next allocation window is in the gap unit or the next body: search the following units
     const next = job.units.slice(index + 1).find(u => u.windows.length > 0);
-    const checked = checkUnit(unit, next, PREP48_PLANS[label]!);
+    let checked = checkUnit(unit, next, PREP48_PLANS[label]!);
+    if (label === "body 213") {
+      // per-frame exact against A or B; the free order after the unit must equal plan A's (the production plan) from the ROM start
+      const start = createSpriteOrderPlanCursor({ known: true, free: unit.F0, pendingDestroyed: [] });
+      const endA = applySpriteOrderUnitPlan(start, decodeSpriteOrderPlan(PREP48_PLANS["body 213"]!));
+      const romEnd = unit.windows.at(-1)!.F;
+      const split = checked.problems.length === 0 ? "A" : (checked = checkUnit(unit, next, PREP48_PLANS["body 213 (split B)"]!)).problems.length === 0 ? "B" : "none";
+      const schedule = unit.windows.map(w => w.f - unit.frame).join(",");
+      attract.push({ job: name, split, endStateEqualsA: same(endA.order.free, romEnd), schedule });
+      if (!same(endA.order.free, romEnd)) checked.problems.push("free order after the unit != plan A's");
+    }
     entry.instances += 1;
     entry.framesChecked += checked.frames;
     if (checked.carry) entry.carries += 1;
@@ -103,9 +118,26 @@ for (const [name, job] of Object.entries(input.jobs)) {
     else entry.mismatches.push({ job: name, frame: unit.frame, observedPlan: unit.plan, problems: checked.problems.slice(0, 4) });
   });
 }
-const out = { schema: "prep48-check/v1", jobs: Object.keys(input.jobs).length, notIdenticalAB: notIdentical, plans: PREP48_PLANS, results };
+// Attract: A and B are boundary-equivalent from any start order (every ROM start order, and 200 random permutations of its free slots)
+let starts = 0, equivalent = 0, seed = 48;
+const rand = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x80000000;
+for (const job of Object.values(input.jobs)) for (const unit of job.units) {
+  if (unit.label !== "body 213:None" && !unit.label.startsWith("body 213:")) continue;
+  for (let k = 0; k <= 200; k++) {
+    const free = [...unit.F0];
+    if (k > 0) for (let i = free.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [free[i], free[j]] = [free[j]!, free[i]!]; }
+    const start = createSpriteOrderPlanCursor({ known: true, free, pendingDestroyed: [] });
+    const a = applySpriteOrderUnitPlan(start, decodeSpriteOrderPlan(PREP48_PLANS["body 213"]!));
+    const b = applySpriteOrderUnitPlan(start, decodeSpriteOrderPlan(PREP48_PLANS["body 213 (split B)"]!));
+    starts += 1;
+    if (a.order.known && b.order.known && same(a.order.free, b.order.free) && same(a.occupied, b.occupied)) equivalent += 1;
+  }
+}
+const out = { schema: "prep48-check/v1", jobs: Object.keys(input.jobs).length, notIdenticalAB: notIdentical, plans: PREP48_PLANS, results,
+  attract: { instances: attract, boundaryEquivalence: { starts, equivalent } } };
 writeFileSync(process.argv[3]!, JSON.stringify(out, null, 1) + "\n");
 for (const [label, r] of Object.entries(results)) {
   console.log(`${label}: ${r.matched}/${r.instances} instances exact, ${r.framesChecked} allocation frames, ${r.carries} carries, jobs ${r.jobs.length}`);
   for (const m of r.mismatches) console.log(`   MISMATCH ${m.job} @${m.frame}: ${m.problems.join(" | ")}`);
 }
+console.log(`Attract: splits ${JSON.stringify(Object.fromEntries(["A", "B", "none"].map(k => [k, attract.filter(a => a.split === k).length])))}, end state == A ${attract.filter(a => a.endStateEqualsA).length}/${attract.length}, schedules ${new Set(attract.map(a => a.schedule.split(",").slice(0, 4).join(","))).size} distinct (first 4 windows), A == B at the boundary ${equivalent}/${starts} starts`);

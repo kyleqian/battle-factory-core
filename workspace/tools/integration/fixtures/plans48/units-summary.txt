@@ -1,4 +1,4 @@
-225 jobs; 0 A/B differ
+243 jobs; 0 A/B differ
 BODY13        body 13:opponent         2 plan(s): 3x [Cfff;D0,2,1] rw-opp,rw-opp-golbat,rw-opp-snorlax || 3x [Cf;Cf;Cf;D0;D1;D2] rw-opp,rw-opp-golbat,rw-opp-snorlax
 BODY13        body 13:player           2 plan(s): 3x [Cfff;D0,2,1] rw-ply,rw-ply-snorlax,rw-ply-golbat || 3x [Cf;Cf;Cf;D0;D1;D2] rw-ply,rw-ply-snorlax,rw-ply-golbat
 BODY13        body 33:opponent         1 plan(s): 6x [Cf;Cf;D0;D1] rw-ply,rw-ply,rw-ply-snorlax,rw-ply-snorlax,rw-ply-golbat,rw-ply-golbat
@@ -15,6 +15,9 @@ BODY19        body 19:player           2 plan(s): 2x [Cf;D0] fl-ply,fl-ply-nosep
 BODY19        body 201:opponent        1 plan(s): 1x [Cf;Cf;Cf;Cf;D0;Cf;D1;D2;Cf;Cf;D3;D5;D4;D6] fl-ply-nosepass
 BODY19        body 20:opponent         1 plan(s): 1x [] fl-ply
 BODY19        body 21:player           1 plan(s): 1x [Cf;Cf;D0;Cfff;D3;D4;D2,1;Cf;D5] fl-opp-lickitung
+BODY213       body 213:None            2 plan(s): 10x [Cf;D0;Cffffff;D3,5,6,1,4,2;Cf;Cfffffff;D7;D8;D9;D11;D10;D12;D14;D13] at-ply-133-95,at-ply-133-143,at-ply-133-208,at-ply-172-42,at-ply-42-208,at-ply-172-95,at-ply-94-131,at-opp-143-95,at-opp-42-208,at-opp-94-131 || 8x [Cf;D0;Cffffff;D3,5,6,1,4,2;Cff;Cffffff;D7;D8;D9;D11;D10;D12;D14;D13] at-ply-133-42,at-ply-143-95,at-opp-133-95,at-opp-133-42,at-opp-133-143,at-opp-133-208,at-opp-172-42,at-opp-172-95
+BODY213       body 33:None             1 plan(s): 16x [Cf;Cf;D0;D1] at-ply-133-95,at-ply-133-42,at-ply-133-143,at-ply-133-208,at-ply-143-95,at-ply-172-42,at-ply-42-208,at-ply-172-95,at-opp-133-95,at-opp-133-42,at-opp-133-143,at-opp-133-208,at-opp-143-95,at-opp-172-42,at-opp-42-208,at-opp-172-95
+BODY213       mv-0                     1 plan(s): 14x [Cf;Cf;Cf;D0;D1] at-ply-133-95,at-ply-133-143,at-ply-133-208,at-ply-172-42,at-ply-42-208,at-ply-172-95,at-ply-94-131,at-opp-133-95,at-opp-133-143,at-opp-133-208,at-opp-172-42,at-opp-42-208,at-opp-172-95,at-opp-94-131
 BODY288       body 288:opponent        1 plan(s): 8x [Cffffff;D3,2,1,4,5,0] gr-opp,gr-opp,gr-opp-golbat,gr-opp-golbat,gr-opp-snorlax,gr-opp-snorlax,gr-opp-onix,gr-opp-onix
 BODY288       body 288:player          1 plan(s): 8x [Cffffff;D3,4,5,2,0,1] gr-ply,gr-ply,gr-ply-snorlax,gr-ply-snorlax,gr-ply-golbat,gr-ply-golbat,gr-ply-pichu,gr-ply-pichu
 BODY288       body 33:opponent         1 plan(s): 6x [Cf;Cf;D0;D1] gr-ply-snorlax,gr-ply-snorlax,gr-ply-golbat,gr-ply-golbat,gr-ply-pichu,gr-ply-pichu

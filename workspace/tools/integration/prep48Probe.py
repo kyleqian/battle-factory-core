@@ -106,6 +106,12 @@ JOBS += [("FRZ", f"fz-ply-snorlax-s{s}", 58, "mechanic-ice-beam-player-delcatty-
 JOBS += [("FRZ", f"fz-opp-s{s}", 58, "mechanic-ice-beam-opponent-delcatty-player-shuckle", (("seed", s),)) for s in FRZ_SEEDS]
 JOBS += [("FRZ", f"fz-opp-golbat-s{s}", 58, "mechanic-ice-beam-opponent-delcatty-player-shuckle", (("seed", s), ("species", "player", 42))) for s in FRZ_SEEDS]
 
+# Attract 213 species grid (predictions recorded BEFORE these ran: fixtures/plans48/attract-prediction.json). (attacker, defender)
+AT_P, AT_O = "mechanic-attract-player-eevee-opponent-onix", "mechanic-attract-opponent-eevee-player-onix"
+AT_PAIRS = [(133, 95), (133, 42), (133, 143), (133, 208), (143, 95), (172, 42), (42, 208), (172, 95), (94, 131)]
+JOBS += [("BODY213", f"at-ply-{a}-{d}", 213, AT_P, (("species", "player", a), ("species", "opponent", d))) for a, d in AT_PAIRS]
+JOBS += [("BODY213", f"at-opp-{a}-{d}", 213, AT_O, (("species", "opponent", a), ("species", "player", d))) for a, d in AT_PAIRS]
+
 
 def scenario(out: Path, job) -> Path:
     unit, ident, move, base, ops = job

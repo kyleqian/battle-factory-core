@@ -1,6 +1,6 @@
 {
  "schema": "prep48-check/v1",
- "jobs": 225,
+ "jobs": 243,
  "notIdenticalAB": 0,
  "plans": {
   "body 8": "Cf;D0;Cffff;Cffff;Cff;D1,4,2,3;D9;D10;D5,8,6,7;Cf;Cf;Cf;Cf;Cf;Cf;Cf;D11;D12;D13;D14;D15;D16;D17;Cf;D18",
@@ -16,9 +16,38 @@
   "body 13 turn 0 (setup)": "Cfff;D0,2,1",
   "body 13 turn 1 (unleash)": "Cf;Cf;Cf;D0;D1;D2",
   "body 19 turn 0 (setup)": "Cf;D0",
-  "body 19 turn 1 (unleash)": "Cf;Cf;D0;D1"
+  "body 19 turn 1 (unleash)": "Cf;Cf;D0;D1",
+  "body 213": "Cf;D0;Cffffff;D3,5,6,1,4,2;Cff;Cffffff;D7;D8;D9;D11;D10;D12;D14;D13",
+  "body 213 (split B)": "Cf;D0;Cffffff;D3,5,6,1,4,2;Cf;Cfffffff;D7;D8;D9;D11;D10;D12;D14;D13"
  },
  "results": {
+  "body 213": {
+   "instances": 18,
+   "matched": 18,
+   "framesChecked": 252,
+   "jobs": [
+    "at-opp-133-143",
+    "at-opp-133-208",
+    "at-opp-133-42",
+    "at-opp-133-95",
+    "at-opp-143-95",
+    "at-opp-172-42",
+    "at-opp-172-95",
+    "at-opp-42-208",
+    "at-opp-94-131",
+    "at-ply-133-143",
+    "at-ply-133-208",
+    "at-ply-133-42",
+    "at-ply-133-95",
+    "at-ply-143-95",
+    "at-ply-172-42",
+    "at-ply-172-95",
+    "at-ply-42-208",
+    "at-ply-94-131"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
   "status CURSED": {
    "instances": 6,
    "matched": 6,
@@ -239,6 +268,122 @@
    ],
    "mismatches": [],
    "carries": 0
+  }
+ },
+ "attract": {
+  "instances": [
+   {
+    "job": "at-opp-133-143",
+    "split": "A",
+    "endStateEqualsA": true,
+    "schedule": "21,116,117,157,160,161,257,279,282,312,316,332,342,347"
+   },
+   {
+    "job": "at-opp-133-208",
+    "split": "A",
+    "endStateEqualsA": true,
+    "schedule": "21,116,117,157,160,161,257,279,282,312,316,332,342,347"
+   },
+   {
+    "job": "at-opp-133-42",
+    "split": "A",
+    "endStateEqualsA": true,
+    "schedule": "21,116,117,157,160,161,257,279,282,312,316,332,342,347"
+   },
+   {
+    "job": "at-opp-133-95",
+    "split": "A",
+    "endStateEqualsA": true,
+    "schedule": "21,116,117,157,160,161,257,279,282,312,316,332,342,347"
+   },
+   {
+    "job": "at-opp-143-95",
+    "split": "B",
+    "endStateEqualsA": true,
+    "schedule": "21,116,117,157,160,161,257,279,282,312,316,332,342,347"
+   },
+   {
+    "job": "at-opp-172-42",
+    "split": "A",
+    "endStateEqualsA": true,
+    "schedule": "21,116,117,157,160,161,257,279,282,312,316,332,342,347"
+   },
+   {
+    "job": "at-opp-172-95",
+    "split": "A",
+    "endStateEqualsA": true,
+    "schedule": "21,116,117,157,160,161,257,279,282,312,316,332,342,347"
+   },
+   {
+    "job": "at-opp-42-208",
+    "split": "B",
+    "endStateEqualsA": true,
+    "schedule": "21,116,117,157,160,161,257,279,282,312,316,332,342,347"
+   },
+   {
+    "job": "at-opp-94-131",
+    "split": "B",
+    "endStateEqualsA": true,
+    "schedule": "21,116,117,157,160,161,257,279,282,312,316,332,342,347"
+   },
+   {
+    "job": "at-ply-133-143",
+    "split": "B",
+    "endStateEqualsA": true,
+    "schedule": "21,116,117,157,160,161,257,279,282,312,316,332,342,347"
+   },
+   {
+    "job": "at-ply-133-208",
+    "split": "B",
+    "endStateEqualsA": true,
+    "schedule": "21,116,117,157,160,161,257,279,282,312,316,332,342,347"
+   },
+   {
+    "job": "at-ply-133-42",
+    "split": "A",
+    "endStateEqualsA": true,
+    "schedule": "21,116,117,157,160,161,257,279,282,312,316,332,342,347"
+   },
+   {
+    "job": "at-ply-133-95",
+    "split": "B",
+    "endStateEqualsA": true,
+    "schedule": "21,116,117,157,160,161,257,279,282,312,316,332,342,347"
+   },
+   {
+    "job": "at-ply-143-95",
+    "split": "A",
+    "endStateEqualsA": true,
+    "schedule": "21,116,117,157,160,161,257,279,282,312,316,332,342,347"
+   },
+   {
+    "job": "at-ply-172-42",
+    "split": "B",
+    "endStateEqualsA": true,
+    "schedule": "21,116,117,157,160,161,257,279,282,312,316,332,342,347"
+   },
+   {
+    "job": "at-ply-172-95",
+    "split": "B",
+    "endStateEqualsA": true,
+    "schedule": "21,116,117,157,160,161,257,279,282,312,316,332,342,347"
+   },
+   {
+    "job": "at-ply-42-208",
+    "split": "B",
+    "endStateEqualsA": true,
+    "schedule": "21,116,117,157,160,161,257,279,282,312,316,332,342,347"
+   },
+   {
+    "job": "at-ply-94-131",
+    "split": "B",
+    "endStateEqualsA": true,
+    "schedule": "21,116,117,157,160,161,257,279,282,312,316,332,342,347"
+   }
+  ],
+  "boundaryEquivalence": {
+   "starts": 3618,
+   "equivalent": 3618
   }
  }
 }

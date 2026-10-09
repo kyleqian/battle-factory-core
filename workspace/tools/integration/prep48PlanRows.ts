@@ -19,6 +19,7 @@ both(8, "body 8", "Ice Punch, both sides identical");
 bodies["75:opponent"] = row("body 75", "Razor Leaf: the base table's 75:player plan, identical on the opponent side");
 both(173, "body 173", "Snore, both sides identical");
 bodies["288:player"] = row("body 288:player", "Grudge, player attacker (side-keyed: AnimTask_GrudgeFlames orbit; the opponent plan is already in the base table)");
+both(213, "body 213", "Attract, both sides: the ROM shows plan A or B (one rising heart of the single-script-frame burst before / after the probe's frame boundary, no species key); A == B at the unit boundary from every start order (check.json attract)");
 both(13, "body 13 turn 0 (setup)", "Razor Wind charge (choosetwoturnanim turn 0)");
 both(10013, "body 13 turn 1 (unleash)", "Razor Wind unleash (choosetwoturnanim turn 1; liveSpriteOrderHost maps an odd turn of 13 to 10013)");
 const anims: Record<string, unknown> = {

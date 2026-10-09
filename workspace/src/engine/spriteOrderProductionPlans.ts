@@ -219,6 +219,7 @@ export const SPRITE_ORDER_PRODUCTION_PLANS: readonly string[] = Object.freeze([
   "Cf;D0;Cffff;Cffff;Cff;D1,4,2,3;D9;D10;D5,8,6,7;Cf;Cf;Cf;Cf;Cf;Cf;Cf;D11;D12;D13;D14;D15;D16;D17;Cf;D18",
   "Cfff;D0,2,1",
   "Cffff;D0;D1,3,2;Cffff;D4;D5,7,6",
+  "Cf;D0;Cffffff;D3,5,6,1,4,2;Cff;Cffffff;D7;D8;D9;D11;D10;D12;D14;D13",
   "Cffffff;D3,4,5,2,0,1",
 ]);
 
@@ -288,8 +289,8 @@ export const SPRITE_ORDER_PRODUCTION_BODIES: Readonly<Record<string, number>> = 
   "91:opponent": 196, "91:player": 196, "280:opponent": 197, "280:player": 197, "10091:opponent": 6, "10091:player": 6, "10280:opponent": 198, "10280:player": 198,
   "56:opponent": 201, "56:player": 201, "76:opponent": 202, "76:player": 202, "135:opponent": 79, "179:opponent": 203, "179:player": 203, "195:opponent": 204,
   "195:player": 204, "236:opponent": 128, "315:player": 171, "345:opponent": 182, "349:opponent": 205, "10076:opponent": 206, "10076:player": 206, "8:opponent": 212,
-  "8:player": 212, "13:opponent": 213, "13:player": 213, "75:opponent": 46, "173:opponent": 214, "173:player": 214, "288:player": 215, "10013:opponent": 45,
-  "10013:player": 45,
+  "8:player": 212, "13:opponent": 213, "13:player": 213, "75:opponent": 46, "173:opponent": 214, "173:player": 214, "213:opponent": 215, "213:player": 215,
+  "288:player": 216, "10013:opponent": 45, "10013:player": 45,
 });
 
 /** Mid-battle (non-move) animations -> plan index. STATS_CHANGE_CLASS_1 = args 15..28 (+-1) and 55/57 (multiple +1/-1),
