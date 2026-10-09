@@ -73,12 +73,14 @@ describe("ordinary playable animation queue", () => {
   });
 
   it("plays Light Screen from six generated rentals, preserves text/self-target, and resumes after repeat failure", () => {
-    // Seeds 27/84 ([3,3]) and 2 ([0,3]) play a non-live, unaudited move (185,
+    // Seeds 84 ([3,3]) and 2 ([0,3]) play a non-live, unaudited move (185,
     // 318, 209) before Light Screen, so allocator history is unknown and the generic bounded
     // fallback renders; 2/45/59/114 ([3,3]) have Light Screen as the first move
-    // body with known entry history (exact adapter).
+    // body with known entry history (exact adapter). s10a: seed 27 plays Faint Attack 185 first, which the
+    // prep44 receipt audited net-zero, so it now renders with the exact adapter (was fallback); 84 (318) and
+    // 2 [0,3] (209) stay fallback.
     const routes: ReadonlyArray<readonly [number, readonly (0 | 1 | 2 | 3)[], boolean]> = [
-      [2, [3, 3], true], [27, [3, 3], false], [45, [3, 3], true],
+      [2, [3, 3], true], [27, [3, 3], true], [45, [3, 3], true],
       [59, [3, 3], true], [84, [3, 3], false], [114, [3, 3], true],
       [2, [0, 3], false],
     ];
