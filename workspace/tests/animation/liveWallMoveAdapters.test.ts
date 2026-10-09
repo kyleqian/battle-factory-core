@@ -27,11 +27,12 @@ const field = (() => {
 // [seed, slot, factory win streak, move, expects exact adapter].
 // Exact routes have the wall move as the battle's first move body (known
 // allocator entry history); fallback routes play an unproved animation first.
+// alloc50: seed 58 (streak 14) flipped to exact; it crosses a status animation now audited allocator net-zero (prep50).
 const routes: ReadonlyArray<readonly [number, 0 | 1 | 2 | 3, number, number, boolean]> = [
   [21, 3, 0, 112, true], [82, 0, 0, 112, true], [10, 0, 0, 112, false], [67, 2, 0, 112, true],
   [87, 2, 0, 277, true], [447, 0, 0, 277, true], [260, 0, 0, 277, false],
   [38, 3, 0, 182, true], [118, 0, 0, 182, true], [20, 0, 0, 182, false], [64, 2, 0, 182, false],
-  [17, 3, 14, 115, true], [58, 3, 14, 115, false],
+  [17, 3, 14, 115, true], [58, 3, 14, 115, true],
   [231, 1, 0, 243, false],
   // s10a: seed 67 flipped to exact — it plays Quick Attack 98 first, audited net-zero by the prep44 receipt.
   // Seed 345 plays Bubble Beam 61 first; 61 is audited net-zero (allocator-net-zero-audit-ext.json),
@@ -69,7 +70,7 @@ describe("wall-family live adapters", () => {
     expect(command.spriteInputHistoryKnown === true).toBe(exact);
     const firstIndex = on.requests.findIndex(request => request.moveId === moveId);
     // Exact routes either start the battle's body list or follow audited net-zero bodies.
-    if (exact && seed !== 345 && seed !== 67) expect(firstIndex).toBe(0);
+    if (exact && seed !== 345 && seed !== 67 && seed !== 58) expect(firstIndex).toBe(0);
     else expect(firstIndex).toBeGreaterThan(0);
     if (seed === 345) expect(on.requests[0]!.moveId).toBe(61);
     if (seed === 67) expect(on.requests.map(request => request.moveId)).toEqual([98, 112]);

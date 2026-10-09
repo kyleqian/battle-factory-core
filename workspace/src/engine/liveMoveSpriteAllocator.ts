@@ -71,6 +71,13 @@ export const LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS: readonly number[] = Object
   347, 352,
 ]);
 const NET_ZERO_MOVES: ReadonlySet<number> = new Set(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS);
+/**
+ * Status animations (spriteOrderStatusAnimationName) audited net-zero for the sprite allocator: every complete script body
+ * (keyed on the status script, both sides, >= 2 afflicted species, two fresh direct-mGBA runs) has baseline == end == the
+ * known entry and created == destroyed (tools/integration/fixtures/prep50/status-net-zero-audit.json). FRZ and the status2
+ * animations other than CONFUSION are not audited and still invalidate the host.
+ */
+export const LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS: ReadonlySet<string> = new Set(["SLP", "CONFUSION", "PSN", "PRZ", "BRN"]);
 
 /**
  * Applies the source `createsprite`/callback destruction order for an audited

@@ -130,13 +130,17 @@ describe("ordinary playable animation queue", () => {
     // exact adapter renders. Seeds 45/47 play Bubble Beam 61 first; it is now
     // audited net-zero (allocator-net-zero-audit-ext.json), so Light Screen
     // renders with the exact adapter (no other unaudited body intervenes).
-    // Routes where a status animation or switch-in intervenes (seeds 50, 62,
-    // 59 [0,3]) stay fallback: status/switch invalidation is unchanged.
+    // Seeds 50 and 62 cross a status animation before Light Screen. It was
+    // fallback while any status animation invalidated the allocator host; SLP,
+    // CONFUSION, PSN, PRZ and BRN are now audited net-zero
+    // (tools/integration/fixtures/prep50/status-net-zero-audit.json), so the
+    // exact adapter renders. FRZ / status2 / switch-in invalidation is unchanged
+    // (tests/alloc50StatusAllocator.test.ts).
     const routes: ReadonlyArray<readonly [number, number, readonly (0 | 1 | 2 | 3)[], boolean]> = [
       [182, 20, [3, 3], true], [182, 20, [2, 3], true],
       [113, 59, [1, 3], true], [113, 2, [1, 3], true],
       [113, 47, [0, 3], true], [113, 45, [0, 3], true],
-      [113, 50, [2, 3], false], [113, 62, [1, 3], false],
+      [113, 50, [2, 3], true], [113, 62, [1, 3], true],
     ];
     for (const [moveId, seed, slots, exact] of routes) {
       const on = generatedCommandAnimationReplay(seed, "on", slots);
