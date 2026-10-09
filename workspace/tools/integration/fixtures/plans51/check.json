@@ -1,0 +1,31 @@
+{
+ "schema": "plans51-check/v1",
+ "jobs": 8,
+ "notIdenticalAB": 0,
+ "plans": {
+  "body 200": "Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf/D0;Cf/D1;D2;D3;Cf;D4;Cf;D5;Cf;D6;Cf;D7;Cf;D8;Cf;Cf;D9;D10;D11;D12;D13;D14;D15;D16;D17;D18;D19;D20;D21;D22"
+ },
+ "results": {
+  "body 200": {
+   "instances": 14,
+   "matched": 14,
+   "framesChecked": 616,
+   "sides": [
+    "opponent",
+    "player"
+   ],
+   "jobs": [
+    "ou-opp-143-42",
+    "ou-opp-149-143",
+    "ou-opp-149-95",
+    "ou-opp-42-95",
+    "ou-ply-143-42",
+    "ou-ply-149-143",
+    "ou-ply-149-95",
+    "ou-ply-42-95"
+   ],
+   "mismatches": [],
+   "carries": 0
+  }
+ }
+}
