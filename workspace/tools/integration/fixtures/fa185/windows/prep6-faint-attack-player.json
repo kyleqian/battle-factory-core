@@ -1,0 +1,11 @@
+{
+ "sourceFixture": "tools/integration/fixtures/prep6-faint-attack-player.json",
+ "move": "FAINT_ATTACK",
+ "denseWindow": {
+  "startFrame": 2344,
+  "endFrame": 2564,
+  "ageOffset": 0
+ },
+ "timingPhase": "event",
+ "timingEvidence": "accepted staged prep6 body (not counter-instrumentable): 0 px under the long body on all 221 rows (d4tails-live-receipt.json faintAttack.perSide.player)"
+}

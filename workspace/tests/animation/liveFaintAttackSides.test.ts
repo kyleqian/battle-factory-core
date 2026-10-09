@@ -15,10 +15,10 @@ const fixtureAt = (n: string) => JSON.parse(readFileSync(`${DIR}/${n}`, "utf8"))
 const strip = (v: { rules: any }) => ({ ...v.rules, rulesContext: { ...v.rules.rulesContext, hitMarker: v.rules.rulesContext.hitMarker & ~0x80 } });
 
 describe("S10A sides: Faint Attack (185) opponent attacker", () => {
-  it("is live for both attacker sides with the same 221-row window and no #142 activation row", () => {
+  it("is live for both attacker sides (fa185 faithful timing: 220-row player / 221-row opponent window) and no #142 activation row", () => {
     for (const attacker of [0, 1] as const) {
       const req = { moveId: 185, attacker, target: (1 - attacker) as 0 | 1, power: 0, damage: 0, friendship: 70, multihit: 0, turn: 0 };
-      expect(liveMoveAnimationDuration(req as BattleMoveAnimationRequest)).toBe(221);
+      expect(liveMoveAnimationDuration(req as BattleMoveAnimationRequest)).toBe(attacker === 0 ? 220 : 221);
     }
     expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[185]).toBeUndefined();
   });

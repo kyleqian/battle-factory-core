@@ -1,0 +1,11 @@
+{
+ "sourceFixture": "tools/integration/fixtures/s10a-live/faint-attack-alt-opponent-delcatty-player-golem.json",
+ "move": "FAINT_ATTACK",
+ "denseWindow": {
+  "startFrame": 86,
+  "endFrame": 305,
+  "ageOffset": 0
+ },
+ "timingPhase": "no-event",
+ "timingEvidence": "d4tails counters tools/battle-lab/s10aside-faint-attack-opponent-delcatty-player-golem.json: body 225 rows, lag ages [80, 81, 108, 109, 182, 183], r0 == r1"
+}

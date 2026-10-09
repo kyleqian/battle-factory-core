@@ -1,0 +1,11 @@
+{
+ "sourceFixture": "tools/integration/fixtures/species-audit/staged/golem-prep6-faint-attack-alt-base.json",
+ "move": "FAINT_ATTACK",
+ "denseWindow": {
+  "startFrame": 80,
+  "endFrame": 299,
+  "ageOffset": 0
+ },
+ "timingPhase": "no-event",
+ "timingEvidence": "d4tails counters tools/battle-lab/species-audit-golem-prep6-faint-attack-alt-base.json: body 225 rows, lag ages [80, 81, 108, 109, 182, 183], r0 == r1"
+}

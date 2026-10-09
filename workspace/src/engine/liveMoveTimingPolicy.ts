@@ -454,6 +454,33 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
     }],
   },
   /**
+   * S10A fa185 (ISSUES #152 "Faint Attack (185) short bodies"; tools/integration/fixtures/d4tails/counters.json, d4tails-live-receipt.json
+   * faintAttack): fixed lags 80, 81, 108, 109, 182, 183 in all 9 counted bodies and an optional lag at 205, PER SIDE. It is the restorebg
+   * Task_FadeToBg state-2 frame (battle_anim.c:1163-1175: LoadDefaultBg -> DrawMainBattleBackground's VRAM decompress, then the fade-in
+   * BeginHardwarePaletteFade(0xE8, 0, 16, 0, 1) in the same task step) overrunning VBlank while the screen is black, so the default-BG
+   * swap, the 16-step fade-in, the task's destroy (state 3, :1181-1185), waitbgfadein (:1243) and `end` move together: 226 body rows
+   * (activation .. first inactive) with it, 225 without. Opponent attacker: present 2 (GOLBAT -> GOLEM, GROVYLE -> ONIX) : absent 1
+   * (DELCATTY -> GOLEM) -> lag. Player attacker: absent in 6 (altspecies3 MURKROW -> ONIX, ONIX -> GROVYLE; 4 prep6-alt-base species
+   * audits) : the accepted prep6 body (a staged probe, long by pixels) 1 -> no lag. Wrong phase: the restore fade-in rows 203..218 only
+   * (faintAttack.ts faintAttackRestoreProfile).
+   */
+  185: {
+    move: "MOVE_FAINT_ATTACK",
+    parameters: [{
+      kind: "optional-lag-age", age: 205, fixedLagAges: [80, 81, 108, 109, 182, 183], iterations: 219, side: "player",
+      alternatives: [{ phase: "event", bodyRows: 226, measured: 1 }, { phase: "no-event", bodyRows: 225, measured: 6 }],
+      chosen: "no-event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/d4tails/counters.json (Faint Attack player: no lag at 205 in 6 of 6 instrumented bodies)",
+        "tools/integration/fixtures/prep6-faint-attack-player.json (accepted staged body: 0 px under the long body)", "tools/integration/fixtures/fa185-live-receipt.json"],
+    }, {
+      kind: "optional-lag-age", age: 205, fixedLagAges: [80, 81, 108, 109, 182, 183], iterations: 219, side: "opponent",
+      alternatives: [{ phase: "event", bodyRows: 226, measured: 2 }, { phase: "no-event", bodyRows: 225, measured: 1 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/d4tails/counters.json (Faint Attack opponent: lag at 205 in GOLBAT -> GOLEM, GROVYLE -> ONIX; none in DELCATTY -> GOLEM)",
+        "tools/integration/fixtures/sides-live-receipt.json", "tools/integration/fixtures/fa185-live-receipt.json"],
+    }],
+  },
+  /**
    * S10A Ice Ball (docs/next-adapters-prep26.md s1.4 H / s4 item 6; tools/integration/fixtures/prep26/iceball-check.json lagRows): 0-step lag rows
    * (an animationRng stall: VBlank overrun), measured PER COUNTER BODY (request.rolloutCounter 1..5; 18 bodies): none in any counter 0..2 body
    * (accepted SPHEAL player / opponent + GLALIE -> GOLEM player / opponent: 4 each), counter 3 (body 4) row 38 in 1 of 3 (accepted player; not
@@ -570,6 +597,9 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   // Confuse Ray gained a measured optional-lag parameter; their exact fixtures (prep2-*, geoice, accepted Confuse Ray) stay valid in scope;
   // alternate-phase windows tools/integration/fixtures/d4tails/windows/*.
   196, 59, 109,
+  // S10A fa185 (reclassified from scoped exact): Faint Attack, per-side optional lag at 205 (player no lag: the restore fade-in one row earlier,
+  // faintAttack.ts faintAttackRestoreProfile; opponent lag); fixtures tools/integration/fixtures/fa185/windows/*.
+  185,
 ]);
 
 /**

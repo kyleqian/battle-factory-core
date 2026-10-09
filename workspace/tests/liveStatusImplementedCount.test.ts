@@ -22,8 +22,8 @@ describe("animation-integration live status count", () => {
     // 248 - Sheer Cold / Hyper Voice reclassified to faithful timing (ISSUES #151 D4 accounting); 249 with S10A Eruption (284);
     // 250 with the S10A Substitute body (164); 247 - Crunch / Psychic / Extreme Speed reclassified to faithful timing (a13fix);
     // 245 - Pursuit / Hidden Power reclassified to faithful timing (d4w, prep41 D4 widening); 242 - Icy Wind / Blizzard / Confuse Ray
-    // reclassified to faithful timing (d4tails).
-    expect(status.implementedCount).toBe(242);
+    // reclassified to faithful timing (d4tails); 241 - Faint Attack reclassified to faithful timing (fa185, per-side restore lag).
+    expect(status.implementedCount).toBe(241);
     expect(status.playableExactCount).toBe(0);
     const faithful = status.faithfulRandomAdapters as { id: number; move: string; policy: string; provenance: string }[];
     expect(status.faithfulRandomCount).toBe(faithful.length);

@@ -119,10 +119,10 @@ describe("d4tails: Confuse Ray (109) optional lag at 249 (or 250)", () => {
   });
 });
 
-describe("d4tails: Faint Attack (185) not landed", () => {
-  it("stays scoped exact: its player-side dominant phase is the short body (a renderer change)", () => {
-    expect(LIVE_MOVE_TIMING_POLICY[185]).toBeUndefined();
-    expect(LIVE_MOVE_ANIMATION_IDS).toContain(185);
+describe("d4tails: Faint Attack (185) measured, not landed here", () => {
+  it("was left scoped exact by d4tails (its player-side dominant phase is the short body); fa185 lands it (liveFa185Timing.test.ts)", () => {
+    expect(LIVE_MOVE_TIMING_POLICY[185]!.parameters.map((p) => [p.side, p.chosen])).toEqual([["player", "no-event"], ["opponent", "event"]]);
+    expect(LIVE_MOVE_ANIMATION_IDS).not.toContain(185);
     const fa = bodies("FAINT_ATTACK");
     for (const b of fa) expect(b.lagAges.slice(0, 6)).toEqual([80, 81, 108, 109, 182, 183]);
     expect(fa.map((b) => b.bodyRows === 225 ? "long" : "short").sort()).toEqual([...Array(2).fill("long"), ...Array(7).fill("short")]);
