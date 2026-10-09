@@ -4214,6 +4214,31 @@
           ],
           "chosen": "no-event",
           "tieRuleUsed": false
+        },
+        {
+          "kind": "optional-lag-age",
+          "age": 142,
+          "fixedLagAges": [
+            122,
+            123
+          ],
+          "iterations": 161,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 162,
+              "measured": 11
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 161,
+              "measured": 0
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false,
+          "side": "opponent",
+          "body": "later"
         }
       ],
       "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
@@ -4890,6 +4915,31 @@
           "chosen": "no-event",
           "tieRuleUsed": false,
           "side": "opponent"
+        },
+        {
+          "kind": "optional-lag-age",
+          "age": 171,
+          "fixedLagAges": [
+            151,
+            152
+          ],
+          "iterations": 188,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 191,
+              "measured": 5
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 190,
+              "measured": 0
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false,
+          "side": "opponent",
+          "body": "later"
         }
       ],
       "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",

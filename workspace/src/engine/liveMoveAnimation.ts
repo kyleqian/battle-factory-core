@@ -94,7 +94,7 @@ import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "j
 import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
 import spitUpRedOrbAsset from "../animation/assets/spit-up-red-orb.json" with { type: "json" };
 import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
-import { liveMoveBgWriteRow, liveMoveCounterTimingParameter, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveTimingBodyRows, liveMoveTimingParameter, liveMoveTimingSidePhase } from "./liveMoveTimingPolicy.ts";
+import { liveMoveBgWriteRow, liveMoveCounterTimingParameter, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveTimingBodyOf, liveMoveTimingBodyRows, liveMoveTimingParameter, liveMoveTimingSidePhase, type LiveMoveTimingBody } from "./liveMoveTimingPolicy.ts";
 import { resolveSpriteOrderDeferredLend, type SpriteOrderDeferredCarry, type SpriteOrderDeferredLend } from "./spriteOrderEventTransform.ts";
 import type { PresentationRngHost, PresentationRngWords } from "./presentationRngHost.ts";
 import { isWordsOrderDeferredUnit, WORDS_ORDER_GENERAL_ANIMATION } from "./wordsOrderUnits.ts";
@@ -887,11 +887,15 @@ export function liveMoveSubstituteDollDeclines(
     || !(LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS.get(request.moveId) ?? []).includes(request.attacker === 0 ? "player" : "opponent");
 }
 
+/**
+ * The presented body rows of a live move body (null: no live duration). `bodyClass` is the order host lend's body class
+ * (liveMoveTimingBodyOf; default "first"): d4later's body-keyed D4 parameters (Sheer Cold 329 / Extrasensory 326 opponent later bodies).
+ */
 export function liveMoveAnimationDuration(
-  request: BattleMoveAnimationRequest, field?: BattleResolutionDisplayedField,
+  request: BattleMoveAnimationRequest, field?: BattleResolutionDisplayedField, bodyClass: LiveMoveTimingBody = "first",
 ): number | null {
   if (field !== undefined && liveSubstituteSwapApplies(request, field) === true) {
-    const body = liveMoveAnimationDuration(request, substituteSwapBodyField(field, request.attacker === 0 ? 0 : 1));
+    const body = liveMoveAnimationDuration(request, substituteSwapBodyField(field, request.attacker === 0 ? 0 : 1), bodyClass);
     return body === null ? null
       : substituteSwapCompositeDuration(request.attacker === 0 ? "player" : "opponent", substituteSwapBodyFraming(request.moveId, body).rows);
   }
@@ -1218,7 +1222,7 @@ export function liveMoveAnimationDuration(
     // Signal Beam first body: signalBeamFirstInactiveAge = 18 + |pan target - initial| = 145 (player attacker) / 144 (opponent), prep22 s0.2.
     case 324: return request.attacker === 0 ? 145 : 144;
     // Sheer Cold first body (faithful timing, #151): restore fade end (policy: per-side age-171 lag) + 2 = 191 rows (player attacker) / 190 (opponent).
-    case 329: return liveSheerColdRestoreFadeEndAge(request.attacker === 0 ? "player" : "opponent") + 2;
+    case 329: return liveSheerColdRestoreFadeEndAge(request.attacker === 0 ? "player" : "opponent", bodyClass) + 2;
     // Sky Attack (prep25): charge 148 rows / strike 180 rows, selected by gAnimMoveTurn bit 0 like Razor Wind / Solar Beam.
     // Faithful timing (D4, liveMoveTimingPolicy.ts; not LIVE_MOVE_ANIMATION_IDS): Mach Punch 107 iterations + fixed lags 71, 72 + the policy's
     // optional late lag at 91 (dominant measured phase, 110 rows; the other phase is 109 rows).
@@ -1238,8 +1242,9 @@ export function liveMoveAnimationDuration(
     case 260: return FLATTER_ROWS;
     // Faithful timing (S10A, prep35): Skill Swap 195 rows (activation .. first inactive) + the policy's optional lag at row 176 (196 rows both sides).
     case 285: return liveMoveTimingBodyRows(285);
-    // Faithful timing (D4c): Extrasensory 161 rows (activation .. first inactive) without the optional lag at task row 142 (policy: no lag, 4 of 6).
-    case 326: return liveMoveTimingBodyRows(326);
+    // Faithful timing (D4c): Extrasensory 161 rows (activation .. first inactive) without the optional lag at task row 142 (policy: no lag, 4 of 6);
+    // d4later: an opponent attacker's later body takes the lag (162 rows, 11 of 11).
+    case 326: return liveMoveTimingBodyRows(326, request.attacker === 0 ? "player" : "opponent", bodyClass);
     // Faithful timing (D4b, + D3 Random2): Meteor Mash 213 + the policy's restore lag L (row 195) + the first inactive row = 215 both sides.
     case 309: return liveMoveTimingBodyRows(309);
     // Faithful timing (S10A, + D3 Random2): Ice Ball counter c = request.rolloutCounter - 1 (AnimTask_GetIceBallCounter): the counter's steps +
@@ -3081,7 +3086,7 @@ export function liveMoveAnimationPresentation(
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       config = { move: "SHEER_COLD", attacker, target, fieldProfile,
         animationInputs: liveSheerColdInputs({ attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors,
-          spriteOrder: lentOrder }) as never,
+          spriteOrder: lentOrder, body: liveMoveTimingBodyOf(spriteOrderInput) }) as never,
         idleRest: { attacker: attackerAnchors.frontIdleRest, target: targetAnchors.frontIdleRest } };
       break;
     }
@@ -3769,7 +3774,7 @@ export function liveMoveAnimationPresentation(
       const inputs = liveExtrasensoryInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
         targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors,
         attackerPictureHeight: pictureHeight(attacker.geometry.side), palettes, activationOrder, sort: sortGbaSpriteOrder,
-        lateLag: liveMoveOptionalLagAge(326) !== null });
+        lateLag: liveMoveOptionalLagAge(326, attacker.geometry.side, liveMoveTimingBodyOf(spriteOrderInput)) !== null });
       if (inputs === null) return null;
       // The EXTRASENSORY seam centres are the battler sprite centres (gSprites x / y).
       const withCenter = (battler: SceneOnPresentationBattler, center: { x: number; y: number }): SceneOnPresentationBattler => ({

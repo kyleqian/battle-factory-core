@@ -32,7 +32,9 @@ for (const [id, move, prefix, accepted] of [[329, "SHEER_COLD", "sheer-cold-", "
 
     it("the policy counts are the banked measured phases of the checked windows (per side where measured per side)", () => {
       const ws = wrappers(prefix);
-      for (const p of LIVE_MOVE_TIMING_POLICY[id]!.parameters) {
+      // The issue151 windows are all first bodies: the d4later body-keyed later-body parameter (opponent 329) is counted by
+      // tests/animation/d4laterTiming.test.ts (tools/integration/fixtures/d4later/counters.json).
+      for (const p of LIVE_MOVE_TIMING_POLICY[id]!.parameters.filter((q) => q.body === undefined)) {
         const scoped = ws.filter((w) => p.side === undefined || w.attacker.geometry.side === p.side);
         const shiny = id === 329 ? (p.side === "player" ? 1 : 2) : 0; // the declined shiny STEELIX windows count in the banked table (#151 s1)
         expect(scoped.filter((w) => w.timingPhase === "event").length + (id === 329 && p.side === "player" ? shiny : 0)).toBe(p.alternatives[0]!.measured);

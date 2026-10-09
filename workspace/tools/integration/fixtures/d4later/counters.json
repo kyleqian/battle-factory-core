@@ -1,0 +1,2892 @@
+[
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/extrasensory-opp-alakazam-golem-growl.json",
+  "digests": [
+   "a3dc7318ba188e64",
+   "a3dc7318ba188e64"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "EXTRASENSORY",
+    "activation": 85,
+    "lastActive": 245,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "EXTRASENSORY",
+    "activation": 1219,
+    "lastActive": 1379,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 1,
+    "firstBody": false,
+    "part": 1
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/extrasensory-opp-alakazam-golem-qa.json",
+  "digests": [
+   "48a8905d3d1e003e",
+   "48a8905d3d1e003e"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "EXTRASENSORY",
+    "activation": 242,
+    "lastActive": 402,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 1,
+    "firstBody": false,
+    "part": 0
+   },
+   {
+    "move": "EXTRASENSORY",
+    "activation": 1374,
+    "lastActive": 1534,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 3,
+    "firstBody": false,
+    "part": 1
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/extrasensory-opp-alakazam-golem-splash.json",
+  "digests": [
+   "5d9aea7ca5884b70",
+   "5d9aea7ca5884b70"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "EXTRASENSORY",
+    "activation": 85,
+    "lastActive": 245,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "EXTRASENSORY",
+    "activation": 1219,
+    "lastActive": 1379,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 1,
+    "firstBody": false,
+    "part": 1
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/extrasensory-opp-nuzleaf-shuckle-growl.json",
+  "digests": [
+   "b82dd43056b5970a",
+   "b82dd43056b5970a"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "EXTRASENSORY",
+    "activation": 84,
+    "lastActive": 243,
+    "bodyRows": 160,
+    "lagAges": [
+     121,
+     122
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "EXTRASENSORY",
+    "activation": 1218,
+    "lastActive": 1378,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 3,
+    "firstBody": false,
+    "part": 1
+   },
+   {
+    "move": "EXTRASENSORY",
+    "activation": 2352,
+    "lastActive": 2512,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 6,
+    "firstBody": false,
+    "part": 2
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/extrasensory-opp-nuzleaf-shuckle-qa.json",
+  "digests": [
+   "8961c68e566c4e19",
+   "8961c68e566c4e19"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "EXTRASENSORY",
+    "activation": 218,
+    "lastActive": 378,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 1,
+    "firstBody": false,
+    "part": 0
+   },
+   {
+    "move": "EXTRASENSORY",
+    "activation": 1352,
+    "lastActive": 1512,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 3,
+    "firstBody": false,
+    "part": 1
+   },
+   {
+    "move": "EXTRASENSORY",
+    "activation": 2486,
+    "lastActive": 2646,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 5,
+    "firstBody": false,
+    "part": 2
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/extrasensory-opp-nuzleaf-shuckle-splash.json",
+  "digests": [
+   "02df64827868e2a9",
+   "02df64827868e2a9"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "EXTRASENSORY",
+    "activation": 84,
+    "lastActive": 243,
+    "bodyRows": 160,
+    "lagAges": [
+     121,
+     122
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "EXTRASENSORY",
+    "activation": 1218,
+    "lastActive": 1378,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 2,
+    "firstBody": false,
+    "part": 1
+   },
+   {
+    "move": "EXTRASENSORY",
+    "activation": 2352,
+    "lastActive": 2512,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 4,
+    "firstBody": false,
+    "part": 2
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/extrasensory-pla-alakazam-golem-growl.json",
+  "digests": [
+   "7212f4dfa4d868ff",
+   "7212f4dfa4d868ff"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "EXTRASENSORY",
+    "activation": 81,
+    "lastActive": 240,
+    "bodyRows": 160,
+    "lagAges": [
+     121,
+     122
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "EXTRASENSORY",
+    "activation": 1215,
+    "lastActive": 1375,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 3,
+    "firstBody": false,
+    "part": 1
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/extrasensory-pla-alakazam-golem-qa.json",
+  "digests": [
+   "f82f1e96fe6d1966",
+   "f82f1e96fe6d1966"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "EXTRASENSORY",
+    "activation": 243,
+    "lastActive": 402,
+    "bodyRows": 160,
+    "lagAges": [
+     121,
+     122
+    ],
+    "priorAnimRuns": 1,
+    "firstBody": false,
+    "part": 0
+   },
+   {
+    "move": "EXTRASENSORY",
+    "activation": 1378,
+    "lastActive": 1538,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 3,
+    "firstBody": false,
+    "part": 1
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/extrasensory-pla-alakazam-golem-splash.json",
+  "digests": [
+   "b1214be1de4443c5",
+   "b1214be1de4443c5"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "EXTRASENSORY",
+    "activation": 81,
+    "lastActive": 240,
+    "bodyRows": 160,
+    "lagAges": [
+     121,
+     122
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "EXTRASENSORY",
+    "activation": 1215,
+    "lastActive": 1375,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 2,
+    "firstBody": false,
+    "part": 1
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/extrasensory-pla-nuzleaf-shuckle-growl.json",
+  "digests": [
+   "3b0ae89aecdbc7c9",
+   "3b0ae89aecdbc7c9"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "EXTRASENSORY",
+    "activation": 80,
+    "lastActive": 239,
+    "bodyRows": 160,
+    "lagAges": [
+     121,
+     122
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "EXTRASENSORY",
+    "activation": 1214,
+    "lastActive": 1374,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 3,
+    "firstBody": false,
+    "part": 1
+   },
+   {
+    "move": "EXTRASENSORY",
+    "activation": 2348,
+    "lastActive": 2508,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 6,
+    "firstBody": false,
+    "part": 2
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/extrasensory-pla-nuzleaf-shuckle-qa.json",
+  "digests": [
+   "e410184471db159e",
+   "e410184471db159e"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "EXTRASENSORY",
+    "activation": 218,
+    "lastActive": 377,
+    "bodyRows": 160,
+    "lagAges": [
+     121,
+     122
+    ],
+    "priorAnimRuns": 1,
+    "firstBody": false,
+    "part": 0
+   },
+   {
+    "move": "EXTRASENSORY",
+    "activation": 1352,
+    "lastActive": 1511,
+    "bodyRows": 160,
+    "lagAges": [
+     121,
+     122
+    ],
+    "priorAnimRuns": 3,
+    "firstBody": false,
+    "part": 1
+   },
+   {
+    "move": "EXTRASENSORY",
+    "activation": 2486,
+    "lastActive": 2646,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 5,
+    "firstBody": false,
+    "part": 2
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/extrasensory-pla-nuzleaf-shuckle-splash.json",
+  "digests": [
+   "3b9279fc305d297d",
+   "3b9279fc305d297d"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "EXTRASENSORY",
+    "activation": 80,
+    "lastActive": 239,
+    "bodyRows": 160,
+    "lagAges": [
+     121,
+     122
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "EXTRASENSORY",
+    "activation": 1214,
+    "lastActive": 1374,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 2,
+    "firstBody": false,
+    "part": 1
+   },
+   {
+    "move": "EXTRASENSORY",
+    "activation": 2348,
+    "lastActive": 2508,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 4,
+    "firstBody": false,
+    "part": 2
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-cloyster-golem-growl-s1.json",
+  "digests": [
+   "64bb172209362cf5",
+   "64bb172209362cf5"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 2348,
+    "lastActive": 2538,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 4,
+    "firstBody": false,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-cloyster-golem-growl-s2.json",
+  "digests": [
+   "fd7b604cb3be8039",
+   "fd7b604cb3be8039"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-cloyster-golem-growl-s3.json",
+  "digests": [
+   "bd9e58006e05b94e",
+   "bd9e58006e05b94e"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 80,
+    "lastActive": 269,
+    "bodyRows": 190,
+    "lagAges": [
+     151,
+     152
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-cloyster-golem-growl-s4.json",
+  "digests": [
+   "94c6d8728374f236",
+   "94c6d8728374f236"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-cloyster-golem-growl-s5.json",
+  "digests": [
+   "fd7b604cb3be8039",
+   "fd7b604cb3be8039"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-cloyster-golem-growl-s6.json",
+  "digests": [
+   "fd7b604cb3be8039",
+   "fd7b604cb3be8039"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-cloyster-golem-growl.json",
+  "digests": [
+   "bd9e58006e05b94e",
+   "bd9e58006e05b94e"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 80,
+    "lastActive": 269,
+    "bodyRows": 190,
+    "lagAges": [
+     151,
+     152
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-cloyster-golem-qa.json",
+  "digests": [
+   "d0763f6f18300085",
+   "d0763f6f18300085"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 2480,
+    "lastActive": 2670,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 3,
+    "firstBody": false,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-cloyster-golem-splash-s1.json",
+  "digests": [
+   "9c0315acd0449fd5",
+   "9c0315acd0449fd5"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-cloyster-golem-splash-s2.json",
+  "digests": [
+   "9c0315acd0449fd5",
+   "9c0315acd0449fd5"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-cloyster-golem-splash-s3.json",
+  "digests": [
+   "bd9e58006e05b94e",
+   "bd9e58006e05b94e"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 80,
+    "lastActive": 269,
+    "bodyRows": 190,
+    "lagAges": [
+     151,
+     152
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-cloyster-golem-splash-s4.json",
+  "digests": [
+   "580482b43b4d1f5f",
+   "580482b43b4d1f5f"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-cloyster-golem-splash-s5.json",
+  "digests": [
+   "9c0315acd0449fd5",
+   "9c0315acd0449fd5"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-cloyster-golem-splash-s6.json",
+  "digests": [
+   "9c0315acd0449fd5",
+   "9c0315acd0449fd5"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-cloyster-golem-splash.json",
+  "digests": [
+   "bd9e58006e05b94e",
+   "bd9e58006e05b94e"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 80,
+    "lastActive": 269,
+    "bodyRows": 190,
+    "lagAges": [
+     151,
+     152
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-dewgong-chansey-growl-s1.json",
+  "digests": [
+   "d987408ffadf749c",
+   "d987408ffadf749c"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 1213,
+    "lastActive": 1403,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 2,
+    "firstBody": false,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-dewgong-chansey-growl-s2.json",
+  "digests": [
+   "a56ed22b3724be80",
+   "a56ed22b3724be80"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-dewgong-chansey-growl-s3.json",
+  "digests": [
+   "7990e09222c18af0",
+   "7990e09222c18af0"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 79,
+    "lastActive": 268,
+    "bodyRows": 190,
+    "lagAges": [
+     151,
+     152
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-dewgong-chansey-growl-s4.json",
+  "digests": [
+   "7990e09222c18af0",
+   "7990e09222c18af0"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 79,
+    "lastActive": 268,
+    "bodyRows": 190,
+    "lagAges": [
+     151,
+     152
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-dewgong-chansey-growl-s5.json",
+  "digests": [
+   "a56ed22b3724be80",
+   "a56ed22b3724be80"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-dewgong-chansey-growl-s6.json",
+  "digests": [
+   "7990e09222c18af0",
+   "7990e09222c18af0"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 79,
+    "lastActive": 268,
+    "bodyRows": 190,
+    "lagAges": [
+     151,
+     152
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-dewgong-chansey-growl.json",
+  "digests": [
+   "7990e09222c18af0",
+   "7990e09222c18af0"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 79,
+    "lastActive": 268,
+    "bodyRows": 190,
+    "lagAges": [
+     151,
+     152
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-dewgong-chansey-qa.json",
+  "digests": [
+   "962920ab95372c25",
+   "962920ab95372c25"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-dewgong-chansey-splash-s1.json",
+  "digests": [
+   "c3649cc4453b15c8",
+   "c3649cc4453b15c8"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 2347,
+    "lastActive": 2537,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 2,
+    "firstBody": false,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-dewgong-chansey-splash-s2.json",
+  "digests": [
+   "c3649cc4453b15c8",
+   "c3649cc4453b15c8"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 2347,
+    "lastActive": 2537,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 2,
+    "firstBody": false,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-dewgong-chansey-splash-s3.json",
+  "digests": [
+   "7990e09222c18af0",
+   "7990e09222c18af0"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 79,
+    "lastActive": 268,
+    "bodyRows": 190,
+    "lagAges": [
+     151,
+     152
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-dewgong-chansey-splash-s4.json",
+  "digests": [
+   "7990e09222c18af0",
+   "7990e09222c18af0"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 79,
+    "lastActive": 268,
+    "bodyRows": 190,
+    "lagAges": [
+     151,
+     152
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-dewgong-chansey-splash-s5.json",
+  "digests": [
+   "9c0315acd0449fd5",
+   "9c0315acd0449fd5"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-dewgong-chansey-splash-s6.json",
+  "digests": [
+   "7990e09222c18af0",
+   "7990e09222c18af0"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 79,
+    "lastActive": 268,
+    "bodyRows": 190,
+    "lagAges": [
+     151,
+     152
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-opp-dewgong-chansey-splash.json",
+  "digests": [
+   "7990e09222c18af0",
+   "7990e09222c18af0"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 79,
+    "lastActive": 268,
+    "bodyRows": 190,
+    "lagAges": [
+     151,
+     152
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-cloyster-golem-growl-s1.json",
+  "digests": [
+   "03023fdb5a37ec71",
+   "03023fdb5a37ec71"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-cloyster-golem-growl-s2.json",
+  "digests": [
+   "b34296e5191f7c38",
+   "b34296e5191f7c38"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 1210,
+    "lastActive": 1400,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 2,
+    "firstBody": false,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-cloyster-golem-growl-s3.json",
+  "digests": [
+   "d782999d1bd6166e",
+   "d782999d1bd6166e"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-cloyster-golem-growl-s4.json",
+  "digests": [
+   "3973082beff38a9b",
+   "3973082beff38a9b"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-cloyster-golem-growl-s5.json",
+  "digests": [
+   "9e75be64b781415d",
+   "9e75be64b781415d"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-cloyster-golem-growl-s6.json",
+  "digests": [
+   "b5b5cedaa826fffe",
+   "b5b5cedaa826fffe"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 76,
+    "lastActive": 266,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-cloyster-golem-growl.json",
+  "digests": [
+   "82c396b37e46501e",
+   "82c396b37e46501e"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 76,
+    "lastActive": 266,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-cloyster-golem-qa.json",
+  "digests": [
+   "d33015f161931788",
+   "d33015f161931788"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-cloyster-golem-splash-s1.json",
+  "digests": [
+   "572b2086a3bf10d9",
+   "572b2086a3bf10d9"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-cloyster-golem-splash-s2.json",
+  "digests": [
+   "9281510e667ee9b5",
+   "9281510e667ee9b5"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 76,
+    "lastActive": 266,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-cloyster-golem-splash-s3.json",
+  "digests": [
+   "71ba3a86120ae62f",
+   "71ba3a86120ae62f"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 76,
+    "lastActive": 266,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-cloyster-golem-splash-s4.json",
+  "digests": [
+   "ba1fe33debf22a23",
+   "ba1fe33debf22a23"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 76,
+    "lastActive": 266,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "SHEER_COLD",
+    "activation": 2344,
+    "lastActive": 2534,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 1,
+    "firstBody": false,
+    "part": 1
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-cloyster-golem-splash-s5.json",
+  "digests": [
+   "bf1612f63848c9dc",
+   "bf1612f63848c9dc"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-cloyster-golem-splash-s6.json",
+  "digests": [
+   "b5b5cedaa826fffe",
+   "b5b5cedaa826fffe"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 76,
+    "lastActive": 266,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-cloyster-golem-splash.json",
+  "digests": [
+   "36efbfa2c661ce02",
+   "36efbfa2c661ce02"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 76,
+    "lastActive": 266,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-dewgong-chansey-growl-s1.json",
+  "digests": [
+   "487d7ff61a58cc6a",
+   "487d7ff61a58cc6a"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-dewgong-chansey-growl-s2.json",
+  "digests": [
+   "cfb717c1cace50a2",
+   "cfb717c1cace50a2"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 1209,
+    "lastActive": 1398,
+    "bodyRows": 190,
+    "lagAges": [
+     151,
+     152
+    ],
+    "priorAnimRuns": 2,
+    "firstBody": false,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-dewgong-chansey-growl-s3.json",
+  "digests": [
+   "9a482c4016245bd2",
+   "9a482c4016245bd2"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-dewgong-chansey-growl-s4.json",
+  "digests": [
+   "1761b05220e4ec9b",
+   "1761b05220e4ec9b"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-dewgong-chansey-growl-s5.json",
+  "digests": [
+   "1761b05220e4ec9b",
+   "1761b05220e4ec9b"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-dewgong-chansey-growl-s6.json",
+  "digests": [
+   "991d0b9771b76d37",
+   "991d0b9771b76d37"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 75,
+    "lastActive": 265,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-dewgong-chansey-growl.json",
+  "digests": [
+   "8e15e4646c90573b",
+   "8e15e4646c90573b"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 75,
+    "lastActive": 265,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-dewgong-chansey-qa.json",
+  "digests": [
+   "82d4c4f1ceb875a0",
+   "82d4c4f1ceb875a0"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 210,
+    "lastActive": 400,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 1,
+    "firstBody": false,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-dewgong-chansey-splash-s1.json",
+  "digests": [
+   "572b2086a3bf10d9",
+   "572b2086a3bf10d9"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-dewgong-chansey-splash-s2.json",
+  "digests": [
+   "614fd8782785fc94",
+   "614fd8782785fc94"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 75,
+    "lastActive": 265,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-dewgong-chansey-splash-s3.json",
+  "digests": [
+   "6de329acecfbdec8",
+   "6de329acecfbdec8"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 75,
+    "lastActive": 265,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-dewgong-chansey-splash-s4.json",
+  "digests": [
+   "a081f610e6ca5609",
+   "a081f610e6ca5609"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 75,
+    "lastActive": 265,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "SHEER_COLD",
+    "activation": 2343,
+    "lastActive": 2533,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 1,
+    "firstBody": false,
+    "part": 1
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-dewgong-chansey-splash-s5.json",
+  "digests": [
+   "bf1612f63848c9dc",
+   "bf1612f63848c9dc"
+  ],
+  "r0EqualsR1": true,
+  "bodies": []
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-dewgong-chansey-splash-s6.json",
+  "digests": [
+   "991d0b9771b76d37",
+   "991d0b9771b76d37"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 75,
+    "lastActive": 265,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sheer-cold-pla-dewgong-chansey-splash.json",
+  "digests": [
+   "afb910ada2365a8b",
+   "afb910ada2365a8b"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SHEER_COLD",
+    "activation": 75,
+    "lastActive": 265,
+    "bodyRows": 191,
+    "lagAges": [
+     151,
+     152,
+     171
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sky-attack-opp-fearow-shuckle-growl.json",
+  "digests": [
+   "96c356abefd72525",
+   "96c356abefd72525"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SKY_ATTACK",
+    "activation": 50,
+    "lastActive": 197,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 1219,
+    "lastActive": 1399,
+    "bodyRows": 181,
+    "lagAges": [
+     141,
+     142,
+     161
+    ],
+    "priorAnimRuns": 3,
+    "firstBody": false,
+    "part": 1
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 2318,
+    "lastActive": 2465,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 4,
+    "firstBody": false,
+    "part": 2
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 3487,
+    "lastActive": 3667,
+    "bodyRows": 181,
+    "lagAges": [
+     141,
+     142,
+     161
+    ],
+    "priorAnimRuns": 7,
+    "firstBody": false,
+    "part": 3
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sky-attack-opp-fearow-shuckle-qa.json",
+  "digests": [
+   "96549c73525b601b",
+   "96549c73525b601b"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SKY_ATTACK",
+    "activation": 187,
+    "lastActive": 334,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 1,
+    "firstBody": false,
+    "part": 0
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 1350,
+    "lastActive": 1529,
+    "bodyRows": 180,
+    "lagAges": [
+     141,
+     142
+    ],
+    "priorAnimRuns": 3,
+    "firstBody": false,
+    "part": 1
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 2455,
+    "lastActive": 2602,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 5,
+    "firstBody": false,
+    "part": 2
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 3619,
+    "lastActive": 3799,
+    "bodyRows": 181,
+    "lagAges": [
+     141,
+     142,
+     161
+    ],
+    "priorAnimRuns": 7,
+    "firstBody": false,
+    "part": 3
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sky-attack-opp-fearow-shuckle-splash.json",
+  "digests": [
+   "4d7b81b3772d3f83",
+   "4d7b81b3772d3f83"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SKY_ATTACK",
+    "activation": 50,
+    "lastActive": 197,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 1219,
+    "lastActive": 1399,
+    "bodyRows": 181,
+    "lagAges": [
+     141,
+     142,
+     161
+    ],
+    "priorAnimRuns": 2,
+    "firstBody": false,
+    "part": 1
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 2318,
+    "lastActive": 2465,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 4,
+    "firstBody": false,
+    "part": 2
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 3487,
+    "lastActive": 3667,
+    "bodyRows": 181,
+    "lagAges": [
+     141,
+     142,
+     161
+    ],
+    "priorAnimRuns": 6,
+    "firstBody": false,
+    "part": 3
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sky-attack-opp-pidgeot-golem-growl.json",
+  "digests": [
+   "2e5b58bacb18155a",
+   "2e5b58bacb18155a"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SKY_ATTACK",
+    "activation": 50,
+    "lastActive": 197,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 1220,
+    "lastActive": 1399,
+    "bodyRows": 180,
+    "lagAges": [
+     141,
+     142
+    ],
+    "priorAnimRuns": 3,
+    "firstBody": false,
+    "part": 1
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 2318,
+    "lastActive": 2465,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 4,
+    "firstBody": false,
+    "part": 2
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 3488,
+    "lastActive": 3667,
+    "bodyRows": 180,
+    "lagAges": [
+     141,
+     142
+    ],
+    "priorAnimRuns": 7,
+    "firstBody": false,
+    "part": 3
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sky-attack-opp-pidgeot-golem-qa.json",
+  "digests": [
+   "e5d9be1c41b55e89",
+   "e5d9be1c41b55e89"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SKY_ATTACK",
+    "activation": 198,
+    "lastActive": 345,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 1,
+    "firstBody": false,
+    "part": 0
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 1366,
+    "lastActive": 1545,
+    "bodyRows": 180,
+    "lagAges": [
+     141,
+     142
+    ],
+    "priorAnimRuns": 3,
+    "firstBody": false,
+    "part": 1
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 2468,
+    "lastActive": 2615,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 5,
+    "firstBody": false,
+    "part": 2
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 3637,
+    "lastActive": 3817,
+    "bodyRows": 181,
+    "lagAges": [
+     141,
+     142,
+     161
+    ],
+    "priorAnimRuns": 7,
+    "firstBody": false,
+    "part": 3
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sky-attack-opp-pidgeot-golem-splash.json",
+  "digests": [
+   "2aca0491f24b6991",
+   "2aca0491f24b6991"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SKY_ATTACK",
+    "activation": 50,
+    "lastActive": 197,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 1220,
+    "lastActive": 1399,
+    "bodyRows": 180,
+    "lagAges": [
+     141,
+     142
+    ],
+    "priorAnimRuns": 2,
+    "firstBody": false,
+    "part": 1
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 2318,
+    "lastActive": 2465,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 4,
+    "firstBody": false,
+    "part": 2
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 3488,
+    "lastActive": 3667,
+    "bodyRows": 180,
+    "lagAges": [
+     141,
+     142
+    ],
+    "priorAnimRuns": 6,
+    "firstBody": false,
+    "part": 3
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sky-attack-pla-fearow-shuckle-growl.json",
+  "digests": [
+   "5c57318907fa9072",
+   "5c57318907fa9072"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SKY_ATTACK",
+    "activation": 50,
+    "lastActive": 197,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 614,
+    "lastActive": 794,
+    "bodyRows": 181,
+    "lagAges": [
+     141,
+     142,
+     161
+    ],
+    "priorAnimRuns": 3,
+    "firstBody": false,
+    "part": 1
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 2286,
+    "lastActive": 2433,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 6,
+    "firstBody": false,
+    "part": 2
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 2850,
+    "lastActive": 3030,
+    "bodyRows": 181,
+    "lagAges": [
+     141,
+     142,
+     161
+    ],
+    "priorAnimRuns": 9,
+    "firstBody": false,
+    "part": 3
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 3452,
+    "lastActive": 3599,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 10,
+    "firstBody": false,
+    "part": 4
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 4016,
+    "lastActive": 4196,
+    "bodyRows": 181,
+    "lagAges": [
+     141,
+     142,
+     161
+    ],
+    "priorAnimRuns": 13,
+    "firstBody": false,
+    "part": 5
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sky-attack-pla-fearow-shuckle-qa.json",
+  "digests": [
+   "eaa927483421e48a",
+   "eaa927483421e48a"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SKY_ATTACK",
+    "activation": 191,
+    "lastActive": 338,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 1,
+    "firstBody": false,
+    "part": 0
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 888,
+    "lastActive": 1067,
+    "bodyRows": 180,
+    "lagAges": [
+     141,
+     142
+    ],
+    "priorAnimRuns": 3,
+    "firstBody": false,
+    "part": 1
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 2318,
+    "lastActive": 2465,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 4,
+    "firstBody": false,
+    "part": 2
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 2779,
+    "lastActive": 2959,
+    "bodyRows": 181,
+    "lagAges": [
+     141,
+     142,
+     161
+    ],
+    "priorAnimRuns": 5,
+    "firstBody": false,
+    "part": 3
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 3452,
+    "lastActive": 3599,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 6,
+    "firstBody": false,
+    "part": 4
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 4477,
+    "lastActive": 4657,
+    "bodyRows": 181,
+    "lagAges": [
+     141,
+     142,
+     161
+    ],
+    "priorAnimRuns": 9,
+    "firstBody": false,
+    "part": 5
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sky-attack-pla-fearow-shuckle-splash.json",
+  "digests": [
+   "424073ab1fe1beaf",
+   "424073ab1fe1beaf"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SKY_ATTACK",
+    "activation": 50,
+    "lastActive": 197,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 595,
+    "lastActive": 774,
+    "bodyRows": 180,
+    "lagAges": [
+     141,
+     142
+    ],
+    "priorAnimRuns": 2,
+    "firstBody": false,
+    "part": 1
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 1184,
+    "lastActive": 1331,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 4,
+    "firstBody": false,
+    "part": 2
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 1729,
+    "lastActive": 1909,
+    "bodyRows": 181,
+    "lagAges": [
+     141,
+     142,
+     161
+    ],
+    "priorAnimRuns": 6,
+    "firstBody": false,
+    "part": 3
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 2318,
+    "lastActive": 2465,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 8,
+    "firstBody": false,
+    "part": 4
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 2863,
+    "lastActive": 3043,
+    "bodyRows": 181,
+    "lagAges": [
+     141,
+     142,
+     161
+    ],
+    "priorAnimRuns": 10,
+    "firstBody": false,
+    "part": 5
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sky-attack-pla-pidgeot-golem-growl.json",
+  "digests": [
+   "e1a723ef43aa0528",
+   "e1a723ef43aa0528"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SKY_ATTACK",
+    "activation": 50,
+    "lastActive": 197,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 626,
+    "lastActive": 806,
+    "bodyRows": 181,
+    "lagAges": [
+     141,
+     142,
+     161
+    ],
+    "priorAnimRuns": 3,
+    "firstBody": false,
+    "part": 1
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 2318,
+    "lastActive": 2465,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 6,
+    "firstBody": false,
+    "part": 2
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 2894,
+    "lastActive": 3073,
+    "bodyRows": 180,
+    "lagAges": [
+     141,
+     142
+    ],
+    "priorAnimRuns": 9,
+    "firstBody": false,
+    "part": 3
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sky-attack-pla-pidgeot-golem-qa.json",
+  "digests": [
+   "a24ecd80963d3891",
+   "a24ecd80963d3891"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SKY_ATTACK",
+    "activation": 201,
+    "lastActive": 348,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 1,
+    "firstBody": false,
+    "part": 0
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 898,
+    "lastActive": 1078,
+    "bodyRows": 181,
+    "lagAges": [
+     141,
+     142,
+     161
+    ],
+    "priorAnimRuns": 3,
+    "firstBody": false,
+    "part": 1
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 2318,
+    "lastActive": 2465,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 4,
+    "firstBody": false,
+    "part": 2
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 2781,
+    "lastActive": 2961,
+    "bodyRows": 181,
+    "lagAges": [
+     141,
+     142,
+     161
+    ],
+    "priorAnimRuns": 5,
+    "firstBody": false,
+    "part": 3
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 3452,
+    "lastActive": 3599,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 6,
+    "firstBody": false,
+    "part": 4
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 4481,
+    "lastActive": 4661,
+    "bodyRows": 181,
+    "lagAges": [
+     141,
+     142,
+     161
+    ],
+    "priorAnimRuns": 9,
+    "firstBody": false,
+    "part": 5
+   }
+  ]
+ },
+ {
+  "scenario": "tools/integration/fixtures/later58/scenarios/sky-attack-pla-pidgeot-golem-splash.json",
+  "digests": [
+   "23b9f7d6af7b5470",
+   "23b9f7d6af7b5470"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SKY_ATTACK",
+    "activation": 50,
+    "lastActive": 197,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 595,
+    "lastActive": 774,
+    "bodyRows": 180,
+    "lagAges": [
+     141,
+     142
+    ],
+    "priorAnimRuns": 2,
+    "firstBody": false,
+    "part": 1
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 2318,
+    "lastActive": 2465,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 4,
+    "firstBody": false,
+    "part": 2
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 2863,
+    "lastActive": 3043,
+    "bodyRows": 181,
+    "lagAges": [
+     141,
+     142,
+     161
+    ],
+    "priorAnimRuns": 6,
+    "firstBody": false,
+    "part": 3
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/prep25-extrasensory-alt-opponent-alakazam-golem.json",
+  "digests": [
+   "a1040cbd7a2afefe",
+   "a1040cbd7a2afefe"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "EXTRASENSORY",
+    "activation": 85,
+    "lastActive": 245,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/prep30-extrasensory-alt-opponent-espeon-crobat.json",
+  "digests": [
+   "0bfb18f5d20f2724",
+   "0bfb18f5d20f2724"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "EXTRASENSORY",
+    "activation": 83,
+    "lastActive": 242,
+    "bodyRows": 160,
+    "lagAges": [
+     121,
+     122
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/prep25-extrasensory-alt-player-alakazam-golem.json",
+  "digests": [
+   "adc1fc0b8156a5e4",
+   "adc1fc0b8156a5e4"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "EXTRASENSORY",
+    "activation": 81,
+    "lastActive": 240,
+    "bodyRows": 160,
+    "lagAges": [
+     121,
+     122
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/prep30-extrasensory-alt-player-espeon-crobat.json",
+  "digests": [
+   "262a6f2188393013",
+   "262a6f2188393013"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "EXTRASENSORY",
+    "activation": 79,
+    "lastActive": 239,
+    "bodyRows": 161,
+    "lagAges": [
+     121,
+     122,
+     141
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/mechanic-extrasensory-opponent-nuzleaf-player-shuckle.json",
+  "digests": [
+   "33853cfe1c3d9612",
+   "33853cfe1c3d9612"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "EXTRASENSORY",
+    "activation": 84,
+    "lastActive": 243,
+    "bodyRows": 160,
+    "lagAges": [
+     121,
+     122
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/mechanic-extrasensory-player-nuzleaf-opponent-shuckle.json",
+  "digests": [
+   "3dd662bc3d39b10a",
+   "3dd662bc3d39b10a"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "EXTRASENSORY",
+    "activation": 80,
+    "lastActive": 239,
+    "bodyRows": 160,
+    "lagAges": [
+     121,
+     122
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/prep25-sky-attack-alt-opponent-pidgeot-golem.json",
+  "digests": [
+   "0405c5f2c3a41951",
+   "0405c5f2c3a41951"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SKY_ATTACK",
+    "activation": 50,
+    "lastActive": 197,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 820,
+    "lastActive": 999,
+    "bodyRows": 180,
+    "lagAges": [
+     141,
+     142
+    ],
+    "priorAnimRuns": 2,
+    "firstBody": false,
+    "part": 1
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/prep25-sky-attack-alt-player-pidgeot-golem.json",
+  "digests": [
+   "bbb4ad1a06edf373",
+   "bbb4ad1a06edf373"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SKY_ATTACK",
+    "activation": 50,
+    "lastActive": 197,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 595,
+    "lastActive": 774,
+    "bodyRows": 180,
+    "lagAges": [
+     141,
+     142
+    ],
+    "priorAnimRuns": 2,
+    "firstBody": false,
+    "part": 1
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/q2-sky-attack-extra-opponent-fearow-golbat.json",
+  "digests": [
+   "a2f9008342d4e23b",
+   "a2f9008342d4e23b"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SKY_ATTACK",
+    "activation": 50,
+    "lastActive": 197,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 819,
+    "lastActive": 998,
+    "bodyRows": 180,
+    "lagAges": [
+     141,
+     142
+    ],
+    "priorAnimRuns": 2,
+    "firstBody": false,
+    "part": 1
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/q2-sky-attack-extra-opponent-pidgeot-snorlax.json",
+  "digests": [
+   "bbd252b9dcee388d",
+   "bbd252b9dcee388d"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SKY_ATTACK",
+    "activation": 50,
+    "lastActive": 197,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 820,
+    "lastActive": 999,
+    "bodyRows": 180,
+    "lagAges": [
+     141,
+     142
+    ],
+    "priorAnimRuns": 2,
+    "firstBody": false,
+    "part": 1
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/q2-sky-attack-extra-player-fearow-golbat.json",
+  "digests": [
+   "98d4f51b10fa1236",
+   "98d4f51b10fa1236"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SKY_ATTACK",
+    "activation": 50,
+    "lastActive": 197,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 594,
+    "lastActive": 773,
+    "bodyRows": 180,
+    "lagAges": [
+     141,
+     142
+    ],
+    "priorAnimRuns": 2,
+    "firstBody": false,
+    "part": 1
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/q2-sky-attack-extra-player-pidgeot-snorlax.json",
+  "digests": [
+   "071ef863121a06e2",
+   "071ef863121a06e2"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SKY_ATTACK",
+    "activation": 50,
+    "lastActive": 197,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 597,
+    "lastActive": 776,
+    "bodyRows": 180,
+    "lagAges": [
+     141,
+     142
+    ],
+    "priorAnimRuns": 2,
+    "firstBody": false,
+    "part": 1
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/mechanic-sky-attack-opponent-fearow-player-shuckle.json",
+  "digests": [
+   "6e85a6984f450db6",
+   "6e85a6984f450db6"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SKY_ATTACK",
+    "activation": 50,
+    "lastActive": 197,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 819,
+    "lastActive": 998,
+    "bodyRows": 180,
+    "lagAges": [
+     141,
+     142
+    ],
+    "priorAnimRuns": 2,
+    "firstBody": false,
+    "part": 1
+   }
+  ]
+ },
+ {
+  "scenario": "tools/battle-lab/mechanic-sky-attack-player-fearow-opponent-shuckle.json",
+  "digests": [
+   "4d10833b57b39ade",
+   "4d10833b57b39ade"
+  ],
+  "r0EqualsR1": true,
+  "bodies": [
+   {
+    "move": "SKY_ATTACK",
+    "activation": 50,
+    "lastActive": 197,
+    "bodyRows": 148,
+    "lagAges": [
+     126,
+     127
+    ],
+    "priorAnimRuns": 0,
+    "firstBody": true,
+    "part": 0
+   },
+   {
+    "move": "SKY_ATTACK",
+    "activation": 595,
+    "lastActive": 774,
+    "bodyRows": 180,
+    "lagAges": [
+     141,
+     142
+    ],
+    "priorAnimRuns": 2,
+    "firstBody": false,
+    "part": 1
+   }
+  ]
+ }
+]
