@@ -326,9 +326,13 @@ function createPlayanimationOpcodeHandler(
     // The three emitting branches (1, 3, 5) all share this shape: mark the
     // active battler for controller exec and advance.
     const emitAnimation = () => {
-      const eventArguments = animType.readsAnimArg1
-        ? Object.freeze([String(context.state.rulesContext.animArg1)])
-        : Object.freeze([]);
+      // B_ANIM_TURN_TRAP's sB_ANIM_ARG1/2 is the trapped battler's wrappedMove (battle_util.c:1599-1600, ENDTURN_WRAP); the end-turn
+      // wrap tick does not stamp animArg1, so the event carries the wrapped move directly (presentation payload only; prep45).
+      const eventArguments = animType.animationId === "TURN_TRAP"
+        ? Object.freeze([String(context.state.rulesContext.battlers[battler]?.wrappedMove ?? 0)])
+        : animType.readsAnimArg1
+          ? Object.freeze([String(context.state.rulesContext.animArg1)])
+          : Object.freeze([]);
       return transitionBattleScriptCommand(
         context,
         Object.freeze({ kind: "advance" }),

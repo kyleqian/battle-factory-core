@@ -338,6 +338,34 @@ describe("primary-effect stat-change route (Cmd_statbuffchange + SETGRAPHICALSTA
     });
   });
 
+  describe("B_ANIM_TURN_TRAP carries the trapped battler's wrappedMove (prep45 order key; battle_util.c:1599-1600)", () => {
+    it("BattleScript_WrapTurnDmg's playanimation BS_ATTACKER emits [wrappedMove], not the stale animArg1; rules state is untouched", () => {
+      const found = program.instructions.find(
+        (i) => i.opcodeName === "B_SCR_OP_PLAYANIMATION" && i.source.label === "BattleScript_WrapTurnDmg",
+      );
+      expect(found, "BattleScript_WrapTurnDmg's playanimation instruction").toBeDefined();
+      expect(found!.operands[1]?.expression).toBe("B_ANIM_TURN_TRAP");
+      for (const [attacker, wrappedMove] of [[0, 35], [1, 83], [0, 250], [1, 328], [1, 128]] as const) {
+        const execution = createBattleScriptStatusRulesExecution(program, "BattleScript_EffectAttackUp2", context(), 1, externalPorts());
+        const [b0, b1, b2, b3] = execution.state.rulesContext.battlers;
+        const wrap = (entry: typeof b0, index: number) => Object.freeze({ ...entry, wrappedMove: index === attacker ? wrappedMove : 20 });
+        const rulesContext: BattleScriptRulesContext = Object.freeze({
+          ...execution.state.rulesContext,
+          animArg1: 39,
+          selectorRoles: Object.freeze({ ...execution.state.rulesContext.selectorRoles, attacker, target: attacker === 0 ? 1 as const : 0 as const }),
+          battlers: Object.freeze([wrap(b0, 0), wrap(b1, 1), wrap(b2, 2), wrap(b3, 3)] as const),
+        });
+        const patched = Object.freeze({ ...execution.state, programCounter: found!.programCounter, rulesContext });
+        const result = stepBattleScriptMachine(program, patched, execution.handlers);
+        if (result.kind === "halted") throw new Error("expected no halt");
+        expect(result.state.events.find((e) => e.kind === "animation"), `${attacker}/${wrappedMove}`)
+          .toMatchObject({ animationId: "TURN_TRAP", battler: attacker, arguments: [String(wrappedMove)] });
+        // Presentation payload only: the rules context (animArg1 included) is not written.
+        expect(result.state.rulesContext).toBe(rulesContext);
+      }
+    });
+  });
+
   describe("B_ANIM_FOCUS_PUNCH_SETUP (dispatch-queue item 7: Focus Punch's charge-up no longer halts the machine)", () => {
     const FOCUS_PUNCH_SETUP_INSTRUCTION = () =>
       program.instructions.find(
