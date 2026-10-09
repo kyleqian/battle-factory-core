@@ -339,6 +339,24 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
     }],
   },
   /**
+   * S10A d4later Sky Attack STRIKE body (gAnimMoveTurn 1; docs/next-adapters-d4later.md; tools/integration/fixtures/d4later/counters.json, main-loop
+   * pass counters twice fresh): fixed lag frames at ages 141, 142 in every strike and an optional lag at age 161 (activation .. last active: 181
+   * rows with it, 180 without). Measured 18 : 18 over 36 strikes (8 accepted q2-live / prep25 first strikes: none; 28 later58 strikes: 18 with
+   * it, the battle's first strike 5 of 12, a later strike 13 of 16; both sides, FEAROW / PIDGEOT): a tie -> the source iteration count (no
+   * lag, 180 rows: the accepted strike). The charge body (148 rows, lags 126, 127) has no optional lag.
+   */
+  143: {
+    move: "MOVE_SKY_ATTACK",
+    parameters: [{
+      kind: "optional-lag-age", age: 161, fixedLagAges: [141, 142], iterations: 178,
+      alternatives: [{ phase: "event", bodyRows: 181, measured: 18 }, { phase: "no-event", bodyRows: 180, measured: 18 }],
+      chosen: "no-event", tieRuleUsed: true,
+      evidence: ["tools/integration/fixtures/d4later/counters.json (strikes: age-161 lag 18 of 36)",
+        "tools/integration/fixtures/d4later/d4-timing-sky-attack.json (policy-phase strikes 0 px, other-phase strikes on the documented rows)",
+        "docs/next-adapters-d4later.md"],
+    }],
+  },
+  /**
    * S10A Dive SETUP body, player attacker (tools/integration/fixtures/s10a-live/dive-*.json, d4d2-live-receipt.json): the splash reuses the
    * ball's affine matrix at age 67; on row 68 the hardware OAM shows the source state of age 66 (the renderer's measured reused-affine
    * exception, battleScene.ts DIVE) in 4 of 6 measured player windows (accepted CHINCHOU -> ONIX, prep25 LANTURN -> GOLEM, CHINCHOU -> SHUCKLE,
@@ -676,6 +694,10 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   // S10A lsbz (reclassified from scoped exact): Light Screen, the opponent's row-59 BLDALPHA write phase (no hold; lightScreen.ts
   // opponentBlendHold); fixtures tools/integration/fixtures/lsbz/windows/light-screen-*.
   113,
+  // S10A d4later (reclassified from scoped exact, #151 precedent; no adapter / renderer change): Sky Attack, the strike's optional lag at 161
+  // (18 : 18 tie -> no lag, 180 rows); exact fixtures tools/integration/fixtures/q2-live/sky-attack-*, other-phase strikes
+  // tools/integration/fixtures/d4later/windows/sky-attack-strike-*.
+  143,
 ]);
 
 /**

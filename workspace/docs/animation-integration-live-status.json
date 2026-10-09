@@ -3454,21 +3454,6 @@
       ]
     },
     {
-      "move": "MOVE_SKY_ATTACK",
-      "id": 143,
-      "sourceFieldEvidence": "../tools/integration/fixtures/q2-live-adapter-receipt.json",
-      "liveEvidence": [
-        "CHARGE body (request.turn bit 0, 148 rows), first body only (WIN0 (240, 161) is the battle's first-body reset) with the lent known-entry order, non-shiny; STRIKE body (turn bit 1, 180 rows, WIN0 (0, 0) after the charge) with the tracker's lent order: the order host keys the strike 10143 by request.turn (prep28 plan rows: charge plan empty, strike Cf;D0), so a known lend after the charge exists; an unknown lend declines (ordinary route 244/42: Ice Beam after the opponent's NEEDS-KEYS Dragon Dance leaves the strike declined; 376/42: strike active every age)",
-        "dense full windows (148 rows charge, blank text box like the Solar Beam setup; 180 rows strike after the charge + the opponent's Splash) zero residual twice fresh through the production live renderer on the accepted pair, the prep25 alternate and a GOLBAT / SNORLAX-target pair, both orientations; builder src/engine/liveQ2Moves.ts (no capture row is read; equals the accepted corpus-built inputs, tools/integration/q2InputsCompare.ts)",
-        "ISSUES #151 (species audit 7, tools/integration/fixtures/fix151-live-receipt.json): the attacker's AnimTask_HorizontalShake writes x2 from its second frame and zeroes it at the end (battle_anim_ground.c:666-705); the target monbg copy is drawn at x + x2 (Task_UpdateMonBg): RATTATA opponent target / attacker 0 px twice fresh (were 52,119 / 16,400 px); every other non-shiny species-audit-7 Sky Attack row exact"
-      ],
-      "remaining": [
-        "later-body charges decline; a strike whose history leaves the lent order unknown declines",
-        "shiny battlers decline",
-        "independent arbitrary-species/history framebuffer comparison"
-      ]
-    },
-    {
       "move": "MOVE_SNORE",
       "id": 173,
       "sourceFieldEvidence": "../tools/integration/fixtures/q2-live-adapter-receipt.json",
@@ -3665,7 +3650,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 240,
+  "implementedCount": 239,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 13,
@@ -3842,7 +3827,7 @@
     },
     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
   },
-  "faithfulTimingCount": 23,
+  "faithfulTimingCount": 24,
   "faithfulTimingAdapters": [
     {
       "id": 183,
@@ -6138,6 +6123,77 @@
         "python3 tools/integration/lsbzWindows.py",
         "OUT=SCRATCH/check P=8 sh tools/integration/lsbzTimingCheck.sh light-screen",
         "npx vitest run tests/animation/liveLsbzTiming.test.ts tests/animation/lightScreen.test.ts"
+      ]
+    },
+    {
+      "id": 143,
+      "move": "MOVE_SKY_ATTACK",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 161,
+          "fixedLagAges": [
+            141,
+            142
+          ],
+          "iterations": 178,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 181,
+              "measured": 18
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 180,
+              "measured": 18
+            }
+          ],
+          "chosen": "no-event",
+          "tieRuleUsed": true
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          163,
+          164,
+          165,
+          166,
+          167,
+          168,
+          169,
+          170,
+          171,
+          172,
+          173,
+          174,
+          175,
+          176,
+          177,
+          178
+        ],
+        "rows": 16,
+        "maxPixelsPerRow": 18993,
+        "cause": "the strike's optional lag at age 161 (a main-loop iteration that produces no step, measured by the playTime pass counter): with it the strike runs 181 rows and its restore fade one row later, so the other phase differs by one fade step on ages 163..178 (FEAROW -> SHUCKLE opponent strike 1 294,896 px, player strike 2 303,888 px, two fresh runs identical)"
+      },
+      "d3": false,
+      "evidence": [
+        "reclassified from scoped exact (S10A d4later, #151 precedent: the STRIKE gained a measured CPU-phase parameter; no adapter / renderer change: the 18 : 18 tie selects the no-lag source iteration count, 180 rows = the accepted strike; liveMoveAnimationDuration(143 strike) = liveMoveTimingBodyRows(143))",
+        "tools/integration/fixtures/d4later/counters.json (d4laterCounters.sh, two fresh direct-mGBA runs each, explicit lab seeds, r0 == r1 98/98): every strike lags at 141, 142; the optional lag at 161 in 18 of 36 strikes (accepted q2-live / prep25 first strikes 0 of 8; later58 scenarios: the battle's first strike 5 of 12, a later strike 13 of 16; both sides, FEAROW / PIDGEOT); the charge (148 rows) has none",
+        "tools/integration/fixtures/d4later/windows/*.json through the production live renderer (d4aTimingCheck.ts, twice fresh): 9 policy-phase strikes 0 px at 180 rows (the 8 accepted strikes + later58 FEAROW -> SHUCKLE player strike 1); 2 other-phase strikes (181 rows: FEAROW -> SHUCKLE opponent strike 1, player strike 2) only on ages 163..178",
+        "scoped-exact liveEvidence: CHARGE body (request.turn bit 0, 148 rows), first body only (WIN0 (240, 161) is the battle's first-body reset) with the lent known-entry order, non-shiny; STRIKE body (turn bit 1, 180 rows, WIN0 (0, 0) after the charge) with the tracker's lent order: the order host keys the strike 10143 by request.turn (prep28 plan rows: charge plan empty, strike Cf;D0), so a known lend after the charge exists; an unknown lend declines (ordinary route 244/42: Ice Beam after the opponent's NEEDS-KEYS Dragon Dance leaves the strike declined; 376/42: strike active every age)",
+        "scoped-exact liveEvidence: dense full windows (148 rows charge, blank text box like the Solar Beam setup; 180 rows strike after the charge + the opponent's Splash) zero residual twice fresh through the production live renderer on the accepted pair, the prep25 alternate and a GOLBAT / SNORLAX-target pair, both orientations; builder src/engine/liveQ2Moves.ts (no capture row is read; equals the accepted corpus-built inputs, tools/integration/q2InputsCompare.ts)",
+        "scoped-exact liveEvidence: ISSUES #151 (species audit 7, tools/integration/fixtures/fix151-live-receipt.json): the attacker's AnimTask_HorizontalShake writes x2 from its second frame and zeroes it at the end (battle_anim_ground.c:666-705); the target monbg copy is drawn at x + x2 (Task_UpdateMonBg): RATTATA opponent target / attacker 0 px twice fresh (were 52,119 / 16,400 px); every other non-shiny species-audit-7 Sky Attack row exact",
+        "scoped-exact remaining (kept): later-body charges decline; a strike whose history leaves the lent order unknown declines",
+        "scoped-exact remaining (kept): shiny battlers decline",
+        "scoped-exact remaining (kept): independent arbitrary-species/history framebuffer comparison",
+        "sourceFieldEvidence: ../tools/integration/fixtures/q2-live-adapter-receipt.json"
+      ],
+      "proofCommands": [
+        "OUT=SCRATCH JOBS=14 sh tools/integration/d4laterCounters.sh SCRATCH/counters 14 SCRATCH/counters.json <later58 sheer-cold / extrasensory / sky-attack scenarios + the accepted extrasensory / sky-attack scenarios> (docs/next-adapters-d4later.md)",
+        "POKEBENCH_LIVE_PROBE_SHARE=1 node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts SCRATCH/d4-sky.json tools/integration/fixtures/d4later/windows/*.json",
+        "npx vitest run tests/animation/d4laterTiming.test.ts tests/animation/liveQ2Adapters.test.ts"
       ]
     }
   ],

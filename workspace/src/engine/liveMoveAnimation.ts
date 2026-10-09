@@ -237,9 +237,10 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // prep22 P3: Sheer Cold first body: reclassified to faithful timing (#151, liveMoveTimingPolicy.ts 329); its exact fixtures stay valid in scope.
   // Psychic (94) and Crunch (242): reclassified to faithful timing (a13fix, species audit 13 optional lags at 124 / 121, liveMoveTimingPolicy.ts);
   // their exact fixtures stay valid in scope.
-  // Q2 (docs/next-adapters-prep25.md s0.2 / C): zero-Random2 bodies through liveQ2Moves.ts: Smog, Sand Tomb, Sky Attack
-  // (charge + strike); Hyper Voice reclassified to faithful timing (#151, liveMoveTimingPolicy.ts 304). Snore (prep28: a known lend after Sleep Powder + its sleep status animations; any unknown lend declines).
-  123, 328, 143, 173,
+  // Q2 (docs/next-adapters-prep25.md s0.2 / C): zero-Random2 bodies through liveQ2Moves.ts: Smog, Sand Tomb; Sky Attack 143 (charge + strike)
+  // reclassified to faithful timing (d4later, liveMoveTimingPolicy.ts 143, the strike's optional lag at 161); its exact fixtures stay valid in
+  // scope; Hyper Voice reclassified to faithful timing (#151, liveMoveTimingPolicy.ts 304). Snore (prep28: a known lend after Sleep Powder + its sleep status animations; any unknown lend declines).
+  123, 328, 173,
   // prep29 R1 (docs/next-adapters-prep29.md B.1): Bonemerang, both hit bodies (hit 1 first body, hit 2 after hit 1 through the lent order).
   155,
   // prep29 R1 (B.3): Rapid Spin (any known lend; the entry scanline is the constant S0 banks).
@@ -1259,7 +1260,9 @@ export function liveMoveAnimationDuration(
     case 229: return 130; // Rapid Spin (prep29 B.3: 130 rows, constant in all four scenarios).
     case 155: return 71; // Bonemerang (prep29 B.1: 71 rows per hit body, constant in all 8 bodies).
     case 173: return 69; // Snore (prep25: 69 rows, constant across the scenarios; no Random2).
-    case 143: return (request.turn & 1) === 0 ? 148 : 180; // charge 148 rows, strike 180 (the strike needs the 10143 order-plan lend, see case 143)
+    // charge 148 rows; strike: faithful timing (d4later, liveMoveTimingPolicy.ts 143): 180 rows without the optional lag at 161 (18 : 18 tie ->
+    // the source iteration count). The strike needs the 10143 order-plan lend, see case 143.
+    case 143: return (request.turn & 1) === 0 ? 148 : liveMoveTimingBodyRows(143);
     case 328: return 123; // Sand Tomb (prep25: constant across the four scenarios).
     case 123: return 305; // Smog (prep25: constant across the four scenarios).
     case 304: return 104; // Hyper Voice (prep25: constant across the four scenarios).
