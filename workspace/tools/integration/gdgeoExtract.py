@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """gdgeo: raw probe rows (gdgeoProbe.py) -> prep43-format unit receipts, through prep43Extract.units_of with gdgeoProbe's JOBS.
 
-usage (from workspace/): gdgeoExtract.py <out-dir> <units.json>   (pure python3, no mGBA; A == B byte-identical required per job)
+usage (from workspace/): gdgeoExtract.py <out-dir> <units.json> [--md]   (pure python3, no mGBA; A == B byte-identical required per job)
 """
 import hashlib, json, sys
 from pathlib import Path
@@ -11,6 +11,8 @@ import prep43Extract as X
 import gdgeoProbe as G
 
 if __name__ == "__main__":
+    if "--md" in sys.argv:  # the Mega Drain job set (prep43Extract.units_of reads J.JOBS)
+        G.JOBS, G.PREDICTED = G.MD_JOBS, G.MD_PREDICTED
     X.J = G
     X.OUT = Path(sys.argv[1])
     result = {"schema": "prep43-units/v1", "jobs": {}}

@@ -3,6 +3,7 @@ import {
   linearTranslationDeltaQ8,
   linearTranslationOffsetAfterCallbacks,
 } from "./animLinearTranslation.ts";
+import { absorptionBodySpriteOrderPlanText } from "./absorptionOrbSpriteOrderPlan.ts";
 import { healingBlueStarsAtAge } from "./recover.ts";
 import {
   createOrderedSprite,
@@ -297,4 +298,15 @@ export function megaDrainSpritesBackToFrontAtAge(
   return spriteOwnersBackToFront(order)
     .map((owner) => byOwner.get(owner))
     .filter((sprite): sprite is MegaDrainSprite => sprite !== undefined);
+}
+
+/** The body's sprite-order plan at the live geometry (absorptionOrbSpriteOrderPlan.ts, this module's timeline). */
+export function megaDrainSpriteOrderPlanText(
+  targetCenter: Readonly<{ x: number; y: number }>,
+  attackerCenter: Readonly<{ x: number; y: number }>,
+  attackerSide: "player" | "opponent",
+  healingCenter: Readonly<{ x: number; y: number }> = attackerCenter,
+): string {
+  return absorptionBodySpriteOrderPlanText(MEGA_DRAIN_BODY_LAST_AGE,
+    age => megaDrainAtAge(age, targetCenter, attackerCenter, attackerSide, healingCenter));
 }

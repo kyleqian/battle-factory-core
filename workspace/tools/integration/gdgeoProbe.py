@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """gdgeo direct-mGBA sSpriteOrder probes: the Giga Drain body (202) over a species-pair grid (docs/giga-drain-geometry-order.md).
 
-usage (from workspace/, PYTHONPATH = the libmgba-py checkout): gdgeoProbe.py <out-dir> [--jobs J=12]
+usage (from workspace/, PYTHONPATH = the libmgba-py checkout): gdgeoProbe.py <out-dir> [--jobs J=12] [--md]
+(--md: the Mega Drain (72) job set MD_JOBS / MD_PREDICTED instead of the Giga Drain grid)
 Each job = the prep43 Giga Drain BattleLab scenario of the attacker side with BOTH lead species replaced (player lead, opponent lead;
 moves, items and everything else unchanged), written to <out-dir>/scenarios/<id>.json; every job runs twice in separate fresh mGBA
 processes (tools/compare/spriteOrderEventProbe.py through tools/run-mgba-probe.py) -> <out-dir>/raw/<id>-A.json / -B.json, exactly as
@@ -47,6 +48,29 @@ JOBS = [
     ("GD", "gdg-opp-diglett-golbat", 202, OPP, ("both", GOLBAT, DIGLETT)),      # 94 / 58, d 36
     ("GD", "gdg-opp-bulbasaur-bulbasaur", 202, OPP, ("both", BULBASAUR, BULBASAUR)),  # 104 / 54, d 50
 ]
+# Mega Drain (72), the same orb family (MegaDrainAbsorbEffect): its same-frame orb pair (plan n5 / n6, end age 95) per the model
+MPLY = "mechanic-mega-drain-player-skiploom-opponent-onix"
+MOPP = "mechanic-mega-drain-opponent-skiploom-player-onix"
+SKIPLOOM, SKARMORY = 188, 227
+MD_JOBS = [
+    ("MD", "mdg-ply-skiploom-onix", 72, MPLY, ("both", SKIPLOOM, ONIX)),        # 101 / 42 (elevated 12 opp. is the target), d 59
+    ("MD", "mdg-ply-roselia-gyarados", 72, MPLY, ("both", ROSELIA, GYARADOS)),  # 96 / 48, d 48
+    ("MD", "mdg-ply-magikarp-shuckle", 72, MPLY, ("both", MAGIKARP, SHUCKLE)),  # 97 / 49, d 48
+    ("MD", "mdg-ply-roselia-shuckle", 72, MPLY, ("both", ROSELIA, SHUCKLE)),    # 96 / 49, d 47
+    ("MD", "mdg-ply-onix-flygon", 72, MPLY, ("both", ONIX, FLYGON)),            # 88 / 34, d 54
+    ("MD", "mdg-ply-diglett-diglett", 72, MPLY, ("both", DIGLETT, DIGLETT)),    # 104 / 58, d 46
+    ("MD", "mdg-opp-skiploom-onix", 72, MOPP, ("both", ONIX, SKIPLOOM)),        # 88 / 43 (elevated), d 45
+    ("MD", "mdg-opp-roselia-onix", 72, MOPP, ("both", ONIX, ROSELIA)),          # 88 / 48, d 40
+    ("MD", "mdg-opp-diglett-onix", 72, MOPP, ("both", ONIX, DIGLETT)),          # 88 / 58, d 30
+    ("MD", "mdg-opp-bulbasaur-bulbasaur", 72, MOPP, ("both", BULBASAUR, BULBASAUR)),  # 104 / 54, d 50
+    ("MD", "mdg-opp-shuckle-roselia", 72, MOPP, ("both", ROSELIA, SHUCKLE)),    # 96 / 49, d 47
+    ("MD", "mdg-opp-skarmory-diglett", 72, MOPP, ("both", DIGLETT, SKARMORY)),  # 104 / 40, d 64
+    ("MD", "mdg-opp-golbat-onix", 72, MOPP, ("both", ONIX, GOLBAT)),            # 88 / 35 (elevated), d 53
+    ("MD", "mdg-opp-flygon-bulbasaur", 72, MOPP, ("both", BULBASAUR, FLYGON)),  # 104 / 34 (elevated), d 70
+]
+_MD_NEWER = ("mdg-ply-roselia-gyarados", "mdg-ply-magikarp-shuckle", "mdg-opp-skiploom-onix", "mdg-opp-diglett-onix",
+             "mdg-opp-golbat-onix", "mdg-opp-flygon-bulbasaur")
+MD_PREDICTED = {j[1]: ("newer-first (D6,5)" if j[1] in _MD_NEWER else "older-first (D5,6)") for j in MD_JOBS}
 _MAJ = "majority"
 _FLIP = "flip window 18 (D9,7)"
 PREDICTED = {j[1]: (_FLIP if any(s in j[1] for s in ("roselia-gyarados", "magikarp-shuckle", "golbat-wobbuffet", "opp-diglett-onix",
@@ -85,9 +109,10 @@ if __name__ == "__main__":
     argv = sys.argv[1:]
     out = Path(argv[0])
     jobs = int(argv[argv.index("--jobs") + 1]) if "--jobs" in argv else 12
-    for job in JOBS:
+    selected = MD_JOBS if "--md" in argv else JOBS
+    for job in selected:
         scenario(out, job)
     with ThreadPoolExecutor(jobs) as ex:
-        results = list(ex.map(run, [(out, j, r) for j in JOBS for r in ("A", "B")]))
+        results = list(ex.map(run, [(out, j, r) for j in selected for r in ("A", "B")]))
     missing = [f"{i}-{r}" for i, r, ok in results if not ok]
     print(len(results), "probe runs;", "missing:", missing or "none")

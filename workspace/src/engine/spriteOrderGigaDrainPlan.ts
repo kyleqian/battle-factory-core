@@ -3,6 +3,7 @@
 // arithmetic), at the attacker / target picture coordinates the live adapter uses (liveMoveAnimation.ts `case 202`: the target's
 // animationCenter and the attacker's picOffsetPoint, both GetBattlerSpriteCoord X_2 / Y_PIC_OFFSET of the species corner).
 import { gigaDrainSpriteOrderPlanText } from "../animation/gigaDrain.ts";
+import { megaDrainSpriteOrderPlanText } from "../animation/megaDrain.ts";
 import { battleCommandFieldSpeciesSpriteOrigin, createBattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 
 /** The species shown on each side at the body (a Substitute doll still anchors on its species: GetBattlerSpriteCoord). */
@@ -36,4 +37,12 @@ export function gigaDrainSpriteOrderPlanForGeometry(
 ): string | null {
   const centers = gigaDrainOrderCenters(attackerSide, geometry);
   return centers === null ? null : gigaDrainSpriteOrderPlanText(centers.target, centers.attacker, attackerSide, centers.attacker);
+}
+
+/** Body 72's (Mega Drain: the same orb family, MegaDrainAbsorbEffect) plan text for the attacker side and the two species. */
+export function megaDrainSpriteOrderPlanForGeometry(
+  attackerSide: "player" | "opponent", geometry: SpriteOrderBodyGeometry,
+): string | null {
+  const centers = gigaDrainOrderCenters(attackerSide, geometry);
+  return centers === null ? null : megaDrainSpriteOrderPlanText(centers.target, centers.attacker, attackerSide, centers.attacker);
 }
