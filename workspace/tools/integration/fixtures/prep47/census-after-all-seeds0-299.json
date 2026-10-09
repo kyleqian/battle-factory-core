@@ -1458,6 +1458,308 @@
   "reviveAndInvalidateInOneStep": 0,
   "hostLevelReasons": {}
  },
+ "returnToBallCases": [
+  {
+   "recall": "B_SCR_OP_RETURNTOBALL battler 0 | no earlier move body",
+   "count": 13
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move EARTHQUAKE by battler 1",
+   "count": 13
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move DOUBLE-EDGE by battler 1",
+   "count": 9
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move AERIAL ACE by battler 1",
+   "count": 8
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move PSYCHIC by battler 1",
+   "count": 8
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move SURF by battler 1",
+   "count": 6
+  },
+  {
+   "recall": "B_SCR_OP_RETURNTOBALL battler 1 | after move BATON PASS by battler 1",
+   "count": 5
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move BRICK BREAK by battler 1",
+   "count": 5
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move CROSS CHOP by battler 1",
+   "count": 5
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move ICE BEAM by battler 1",
+   "count": 5
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move ROCK SLIDE by battler 1",
+   "count": 5
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move CRUNCH by battler 1",
+   "count": 4
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move DRAGONBREATH by battler 1",
+   "count": 4
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move FAINT ATTACK by battler 1",
+   "count": 4
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move FIRE BLAST by battler 1",
+   "count": 3
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move MEGAHORN by battler 1",
+   "count": 3
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move METAL CLAW by battler 1",
+   "count": 3
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move OVERHEAT by battler 1",
+   "count": 3
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move SHADOW BALL by battler 1",
+   "count": 3
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move SLUDGE BOMB by battler 1",
+   "count": 3
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move DIG by battler 1",
+   "count": 2
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move FACADE by battler 1",
+   "count": 2
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move GIGA DRAIN by battler 1",
+   "count": 2
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move HYDRO PUMP by battler 1",
+   "count": 2
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move ICE PUNCH by battler 1",
+   "count": 2
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move MEMENTO by battler 0",
+   "count": 2
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move PSYBEAM by battler 1",
+   "count": 2
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move PURSUIT by battler 1",
+   "count": 2
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move QUICK ATTACK by battler 1",
+   "count": 2
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move ROCK TOMB by battler 1",
+   "count": 2
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move SILVER WIND by battler 1",
+   "count": 2
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move SPARK by battler 1",
+   "count": 2
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move WATER GUN by battler 1",
+   "count": 2
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | no earlier move body",
+   "count": 2
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move ANCIENTPOWER by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move AURORA BEAM by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move BODY SLAM by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move BRICK BREAK by battler 0",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move COUNTER by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move ERUPTION by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move FIRE PUNCH by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move FISSURE by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move FLAMETHROWER by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move FLY by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move FOCUS PUNCH by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move ICE BALL by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move ICY WIND by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move MIRROR COAT by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move MUD SHOT by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move MUD-SLAP by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move NEEDLE ARM by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move PROTECT by battler 0",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move PROTECT by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move PSYWAVE by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move RAZOR LEAF by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move ROLLING KICK by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move ROLLOUT by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move SCARY FACE by battler 0",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move SEISMIC TOSS by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move SHEER COLD by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move SHOCK WAVE by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move SLAM by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move SLASH by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move SLUDGE by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move SOFTBOILED by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move SOLARBEAM by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move STEEL WING by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move STRUGGLE by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move SUBMISSION by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move SURF by battler 0",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move SWEET SCENT by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move THUNDERBOLT by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move THUNDERPUNCH by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move TRIPLE KICK by battler 1",
+   "count": 1
+  },
+  {
+   "recall": "B_SCR_OP_VARIOUS battler 1 | after move WHIRLPOOL by battler 0",
+   "count": 1
+  }
+ ],
  "withoutPromptCases": [
   {
    "battle": 0,

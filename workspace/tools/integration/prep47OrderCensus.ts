@@ -180,6 +180,7 @@ const withoutPromptCases: WithoutPromptCase[] = [];
 interface BattleStartSeed { battle: number; known: boolean; invalidReason: string | null; replayMatches: boolean; events: string[];
   abilities: [number, number]; species: [number, number] }
 const battleStartSeeds: BattleStartSeed[] = [];
+const returnToBallCases = new Map<string, number>();
 const compactEvent = (e: BattleKernelSemanticEvent) => {
   const p = e.payload as Record<string, unknown> & { kind: string };
   const bits = [p.kind];
@@ -336,6 +337,15 @@ function playBattle(battle: number, seed: number, streak: number): void {
         const events = res.segments[seg]?.events ?? [];
         if (idx >= events.length) { seg++; idx = 0; continue; }
         const m = orderEventOf(events, idx, hiddenShadow);
+        if (m.event?.kind === "invalidate" && m.event.reason === "return to ball") {
+          // prep47 (C): the recall's opcode / battler and the segment context (which BattleScript recalled).
+          const ev = events[idx]!, p = ev.payload as { battler?: number };
+          const prior = events.slice(0, idx);
+          const lastMove = [...prior].reverse().find((e) => e.payload.kind === "animation" && e.payload.animationId === "MOVE_ANIMATION");
+          const key = `${ev.provenance?.opcodeName ?? "?"} battler ${p.battler} | ${lastMove ? `after move ${nameOf.get(battleMoveAnimationRequest(
+            (lastMove.payload as { battler: number }).battler, (lastMove.payload as { target: number }).target, (lastMove.payload as { arguments: readonly string[] }).arguments).moveId) ?? "?"} by battler ${(lastMove.payload as { battler: number }).battler}` : "no earlier move body"}`;
+          returnToBallCases.set(key, (returnToBallCases.get(key) ?? 0) + 1);
+        }
         if (m.hidden) hiddenShadow = m.hidden;
         const p = events[idx]!.payload;
         decorate = p.kind === "animation" && p.animationId === "TURN_TRAP" && (p.battler === 0 || p.battler === 1)
@@ -584,6 +594,7 @@ const report = {
   orderInvalidationsAll: [...orderInvalidations].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([unit, count]) => ({ unit, count })),
   orderRecoveriesAll: [...orderRecoveries].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([by, count]) => ({ by, count })),
   orderShadowAgreement: shadowAgreement,
+  returnToBallCases: [...returnToBallCases].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([recall, count]) => ({ recall, count })),
   withoutPromptCases,
   withoutPromptByClass: (() => {
     const m = new Map<string, { cls: string; cases: number; firstUnitCount: number; firstUnitFrames: number; involvedCount: number; involvedFrames: number }>();

@@ -5,10 +5,18 @@
 //   recall(o8)+summary+send-in: the opponent analogue of the player's recall plan (spriteOrderRecallPlanText with the opponent battler,
 //     slot 8 at the known entry) with the next-mon summary (SPRITE_ORDER_UNIT_PLAN_TEXTS.summary) created in the window of its 5th
 //     destroy, then the observed send-in tail;
-//   ...+nextSendOut: the same recall + summary, then the existing post-KO SPRITE_ORDER_UNIT_PLAN_TEXTS.nextSendOut (control).
+//   ...+nextSendOut: the same recall + summary, then the existing post-KO SPRITE_ORDER_UNIT_PLAN_TEXTS.nextSendOut (control);
+//   sequential: the whole recall, the summary, the send-in as separate windows (the kernel's event order; final edge only).
+// productionEvents: the src transform fed the order events a host would map from BattleScript_DoSwitchOut (returnatktoball battler 1,
+// drawpartystatussummary 1, hidepartystatussummary 1, switchinanim 1): switch-out {side: opponent}, party-summary-next,
+// party-summary-hide, next-mon-send-out, from F0 at the known-entry battler slots; "exact" when the free order equals the next body's
+// first-frame F (master src: switch-out has no side and recalls the player battler -> "unknown").
 // usage: node --experimental-strip-types tools/integration/prep47AiSwitchCheck.ts <ai-switch-units.json> <out.json>
 import { readFileSync, writeFileSync } from "node:fs";
-import { decodeSpriteOrderPlan, SPRITE_ORDER_UNIT_PLAN_TEXTS, spriteOrderRecallPlanText } from "../../src/engine/spriteOrderEventTransform.ts";
+import {
+  applySpriteOrderPresentationEvent, createSpriteOrderTracker, decodeSpriteOrderPlan, SPRITE_ORDER_UNIT_PLAN_TEXTS, spriteOrderRecallPlanText,
+  type SpriteOrderPresentationEvent,
+} from "../../src/engine/spriteOrderEventTransform.ts";
 import { applySpriteOrderUnitPlan, createSpriteOrderPlanCursor } from "../../src/engine/spriteOrderProvider.ts";
 
 interface Win { f: number; C: [number, string][]; D: number[]; F: number[] }
@@ -27,6 +35,9 @@ const observedSendIn = "Cff;Cf;Dc1.6,c1.5,c1.4,c1.3,c1.2,c1.1,c1.0;Cf;Cf;Cf;Cf;C
 const CANDIDATES: Record<string, string> = {
   "recall(o8)+summary+send-in": `${recallWithSummary};${shift(observedSendIn, 23, 16)}`,
   "recall(o8)+summary+nextSendOut": `${recallWithSummary};${shift(SPRITE_ORDER_UNIT_PLAN_TEXTS.nextSendOut, 23, 16)}`,
+  // the kernel's event order as separate units: the whole recall, then the summary in its own window, then the send-in (a window
+  // more than the ROM; judged by the final edge only)
+  "recall(o8);summary;send-in (sequential)": `${recall.join(";")};${SPRITE_ORDER_UNIT_PLAN_TEXTS.summary};${shift(observedSendIn, 23, 16)}`,
 };
 
 function check(job: Job, text: string) {
@@ -45,21 +56,29 @@ function check(job: Job, text: string) {
     if (ok) exact += 1; else firstMismatch ??= k;
   }
   const edge = cursor.order.known && plan.length === windows.length && same(cursor.order.free, job.nextBodyF0!);
-  return { windows: windows.length, planWindows: plan.length, exact, firstMismatch, nextBodyEdgeExact: edge };
+  const whole = applySpriteOrderUnitPlan(start, plan);
+  const finalEdgeExact = whole.order.known && same(whole.order.free, job.nextBodyF0!);
+  return { windows: windows.length, planWindows: plan.length, exact, firstMismatch, nextBodyEdgeExact: edge, finalEdgeExact };
 }
 
 const result: Record<string, unknown> = {};
-const totals: Record<string, { jobs: number; allWindowsExact: number; edgeExact: number }> = {};
+const totals: Record<string, { jobs: number; allWindowsExact: number; edgeExact: number; finalEdgeExact: number }> = {};
 for (const [id, job] of Object.entries(jobs).sort(([l], [r]) => l.localeCompare(r))) {
   if (!job.windows) { result[id] = { reached: false }; continue; }
   const checks: Record<string, unknown> = {};
   for (const [name, text] of Object.entries(CANDIDATES)) {
     const c = check(job, text);
     checks[name] = c;
-    const t = (totals[name] ??= { jobs: 0, allWindowsExact: 0, edgeExact: 0 });
+    const t = (totals[name] ??= { jobs: 0, allWindowsExact: 0, edgeExact: 0, finalEdgeExact: 0 });
     t.jobs += 1; if (c.exact === c.windows && c.planWindows === c.windows) t.allWindowsExact += 1; if (c.nextBodyEdgeExact) t.edgeExact += 1;
+    if (c.finalEdgeExact) t.finalEdgeExact += 1;
   }
-  result[id] = { reached: true, identicalAB: job.identicalAB, observedEqualsCandidate: job.plan === CANDIDATES["recall(o8)+summary+send-in"], checks };
+  let tracker = createSpriteOrderTracker({ known: true, free: job.F0!, pendingDestroyed: [] });
+  for (const event of [{ kind: "switch-out", side: "opponent" }, { kind: "party-summary-next" }, { kind: "party-summary-hide" },
+    { kind: "next-mon-send-out" }] as SpriteOrderPresentationEvent[]) tracker = applySpriteOrderPresentationEvent(tracker, event);
+  const productionEvents = !tracker.cursor.order.known ? `unknown (${tracker.invalidReason})`
+    : same(tracker.cursor.order.free, job.nextBodyF0!) ? "exact" : "mismatch";
+  result[id] = { reached: true, productionEvents, identicalAB: job.identicalAB, observedEqualsCandidate: job.plan === CANDIDATES["recall(o8)+summary+send-in"], checks };
 }
 writeFileSync(output, JSON.stringify({ schema: "prep47-ai-switch-check/v1", candidates: CANDIDATES, totals, jobs: result }, null, 1) + "\n");
 console.log(JSON.stringify(totals));
