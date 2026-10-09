@@ -114,8 +114,8 @@ export function markLiveSpriteOrderDeferredBody(
     ...(body.turn === undefined ? {} : { turn: body.turn }), activation }) });
 }
 
-/** Moves whose script branches with choosetwoturnanim on `gAnimMoveTurn & 1` (Sky Attack strike, Dig unleash, Brick Break screen broken). */
-const TWO_TURN_ANIM_MOVE_IDS: ReadonlySet<number> = new Set([91, 143, 280]);
+/** Moves whose script branches with choosetwoturnanim on `gAnimMoveTurn & 1` (Solar Beam unleash, Sky Attack strike, Dig unleash, Brick Break screen broken). */
+const TWO_TURN_ANIM_MOVE_IDS: ReadonlySet<number> = new Set([76, 91, 143, 280]);
 const RECALL_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_VARIOUS", "B_SCR_OP_RETURNATKTOBALL", "B_SCR_OP_RETURNTOBALL"]);
 /** Order events that count as a presentation unit for the first-body gate (every body, faint, switch and recall). */
 const BODY_UNIT_EVENTS: ReadonlySet<string> = new Set([

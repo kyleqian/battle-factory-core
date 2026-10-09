@@ -340,8 +340,9 @@ describe("order host event keys (prep43)", () => {
   const move = (moveId: number, turn: number, battler: 0 | 1) =>
     ev(10, "animation", { animationId: "MOVE_ANIMATION", battler, target: 1 - battler, arguments: [`${moveId}`, `${turn}`, "0", "0", "0", "0"] });
 
-  it("an odd choosetwoturnanim turn of Dig / Brick Break (like Sky Attack) keys the body 10000 + move id", () => {
-    for (const [moveId, turn, key] of [[91, 0, 91], [91, 1, 10091], [280, 0, 280], [280, 1, 10280], [143, 1, 10143], [143, 0, 143]] as const) {
+  it("an odd choosetwoturnanim turn of Dig / Brick Break / Solar Beam (like Sky Attack) keys the body 10000 + move id", () => {
+    for (const [moveId, turn, key] of [[91, 0, 91], [91, 1, 10091], [280, 0, 280], [280, 1, 10280], [143, 1, 10143], [143, 0, 143],
+      [76, 0, 76], [76, 1, 10076], [76, 2, 76]] as const) {
       for (const battler of [0, 1] as const) {
         const tracker = after([move(moveId, turn, battler)]);
         const want = expected({ kind: "move-animation", moveId: key, attackerSide: battler === 0 ? "player" : "opponent" });
@@ -351,6 +352,8 @@ describe("order host event keys (prep43)", () => {
     }
     // The two Brick Break branches allocate differently: the key is load-bearing.
     expect(after([move(280, 1, 1)]).cursor.order.free).not.toEqual(after([move(280, 0, 1)]).cursor.order.free);
+    // prep45: so do Solar Beam's charge (SolarBeamSetUp) and unleash (SolarBeamUnleash).
+    expect(after([move(76, 1, 0)]).cursor.order.free).not.toEqual(after([move(76, 0, 0)]).cursor.order.free);
   });
 
   it("WEATHER_VAR with sB_ANIM_ARG1 12 is SANDSTORM_CONTINUES (planned); 13 HAIL_CONTINUES and no argument stay unknown", () => {
