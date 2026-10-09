@@ -25,8 +25,9 @@ describe("production sprite-order plan table (generated, pinned)", () => {
     // + prep45 (fixtures/prep45/plan-rows.json, appended): 15 bodies, 11 plans (BRN's text = STATUS_INFATUATION's, deduped).
     // + plans48 (fixtures/plans48/plan-rows.json, appended): 17 bodies, 7 plans (FRZ / NIGHTMARE / CURSED = "Cf;D0", ITEM_KNOCKOFF = "Cf",
     //   Razor Leaf / Struggle opponent = the 75:player / 165:player texts, Razor Wind's unleash = Leech Seed's text: deduped).
-    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(525);
-    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(219);
+    // + plans51 (fixtures/plans51/plan-rows.json, appended): Outrage 200 both sides + FOCUS_BAND, 2 plans (docs/next-adapters-plans51.md).
+    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(527);
+    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(221);
   });
 
   it("decodes every EXACT-PLAN (move, side) body of the ext table to the fixture plan", () => {
@@ -36,6 +37,7 @@ describe("production sprite-order plan table (generated, pinned)", () => {
       ...fixture("sprite-order-policy-gaps/relative-y-plans.json").bodies, ...fixture("sprite-order-body-plans-rely.json").bodies,
       ...fixture("prep28/plan-rows.json").bodies, ...fixture("prep28/plan-rows-sky-attack.json").bodies,
       ...fixture("prep43/plan-rows.json").bodies, ...fixture("prep45/plan-rows.json").bodies, ...fixture("plans48/plan-rows.json").bodies,
+      ...fixture("plans51/plan-rows.json").bodies,
     };
     let exact = 0;
     for (const [key, row] of Object.entries(bodies)) {
