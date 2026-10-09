@@ -23,7 +23,8 @@ type Replay = ReturnType<typeof generatedCommandAnimationReplay>;
 // (docs/forced-switch-continuation.md §2.4); declines and mismatches unchanged.
 // prep43 plans: hostKnown 524 -> 626, laterAfter 51 -> 63; declines 27 -> 63 = edges the pure transform now knows past a planned unit
 // that the host still refuses (its host-only invalidations, e.g. the retained locked-action continuation); still 0 mismatches.
-const SWEEP_PIN = { compared: 863, hostKnown: 626, declines: 63, laterAfter: 63 };
+// prep45 plans + TURN_TRAP / Solar Beam keys: hostKnown 626 -> 646, laterAfter 63 -> 65; declines and mismatches unchanged.
+const SWEEP_PIN = { compared: 863, hostKnown: 646, declines: 63, laterAfter: 65 };
 const bodies = (run: Replay) => run.commands.filter(row => row.type === "move-animation");
 
 function expectRulesEqual(on: Replay, off: Replay): void {
@@ -106,7 +107,8 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
     // laterKnown 34 -> 44: the 10 post-KO bodies of seeds 8 (2), 10 (1) and 11 (7, five after a second opponent KO) now lend.
     // laterKnown 44 -> 48: the 4 bodies after a Roar/Whirlwind forced switch-out + send-in now lend (same pure prediction).
     // laterKnown 48 -> 56: prep43 plans (CONFUSION / LEECH_SEED_DRAIN / sandstorm / Dig / Brick Break, the PRZ survivor count).
-    expect({ later, laterKnown, postKoLent }).toEqual({ later: 80, laterKnown: 56, postKoLent: 10 });
+    // laterKnown 56 -> 58: prep45 plans + the host's TURN_TRAP / Solar Beam keys (mirrored in orderCrossBodyRouteScan.ts's prediction).
+    expect({ later, laterKnown, postKoLent }).toEqual({ later: 80, laterKnown: 58, postKoLent: 10 });
     expect(laterUnknownAfterKnown).toBeGreaterThan(0);
     expect(invalidatedBattles).toBeGreaterThan(0);
   }, 120000);
@@ -133,8 +135,8 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
         if (after.preBody.get(body.sequence)?.cursor.order.known) laterAfter += 1;
       }
     }
-    // laterBefore 35 -> 47: prep43 plans (same pure prediction, 0 mismatches).
-    expect({ mismatches, later, laterBefore }).toEqual({ mismatches: 0, later: 80, laterBefore: 47 });
+    // laterBefore 35 -> 47: prep43 plans (same pure prediction, 0 mismatches). 47 -> 49: prep45 plans + TURN_TRAP / Solar Beam keys.
+    expect({ mismatches, later, laterBefore }).toEqual({ mismatches: 0, later: 80, laterBefore: 49 });
     expect({ compared, hostKnown, declines, laterAfter }).toEqual(SWEEP_PIN);
   }, 120000);
 

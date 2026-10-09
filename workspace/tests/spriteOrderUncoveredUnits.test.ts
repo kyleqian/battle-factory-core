@@ -88,8 +88,8 @@ describe("uncovered sprite-order units: strict replay with the units modelled", 
   it("route baseline reproduces the Endeavor/Fake Tears strict count 44/44/0 of 91", () => {
     expect(sum("baseline", false, route)).toMatchObject({ edges: 91, known: 44, exact: 44, mismatched: 0, occupied: 0 });
   });
-  it("route with units modelled: 84/84/0 strict, 91/91/0 isolated, every unit check exact", () => {
-    expect(sum("modelled", false, route)).toMatchObject({ edges: 91, known: 84, exact: 84, mismatched: 0, occupied: 0, units: 18, unitMismatched: 0, unitOccupied: 0 });
+  it("route with units modelled: 86/86/0 strict (prep45 plans; was 84), 91/91/0 isolated, every unit check exact", () => {
+    expect(sum("modelled", false, route)).toMatchObject({ edges: 91, known: 86, exact: 86, mismatched: 0, occupied: 0, units: 20, unitMismatched: 0, unitOccupied: 0 });
     expect(sum("modelled", true, route)).toMatchObject({ edges: 91, known: 91, exact: 91, mismatched: 0, occupied: 0, units: 26, unitMismatched: 0, unitOccupied: 0 });
   });
   it("BattleLab KO / switch scenarios: 25/25/0 strict (baseline 15), 27/27/0 isolated", () => {
