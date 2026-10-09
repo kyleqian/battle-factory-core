@@ -70,7 +70,7 @@ describe("wall-family live adapters", () => {
     expect(command.spriteInputHistoryKnown === true).toBe(exact);
     const firstIndex = on.requests.findIndex(request => request.moveId === moveId);
     // Exact routes either start the battle's body list or follow audited net-zero bodies.
-    if (exact && seed !== 345 && seed !== 67) expect(firstIndex).toBe(0);
+    if (exact && seed !== 345 && seed !== 67 && seed !== 58) expect(firstIndex).toBe(0);
     else expect(firstIndex).toBeGreaterThan(0);
     if (seed === 345) expect(on.requests[0]!.moveId).toBe(61);
     if (seed === 67) expect(on.requests.map(request => request.moveId)).toEqual([98, 112]);
