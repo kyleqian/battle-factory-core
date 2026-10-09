@@ -1,0 +1,194 @@
+[
+ {
+  "case": "icy-wind-player-onix-masquerain",
+  "move": 196,
+  "side": "player",
+  "attacker": "ONIX",
+  "target": "MASQUERAIN",
+  "acceptedStart": 220,
+  "acceptedActivation": 220,
+  "altActivation": 72,
+  "altInterval": {
+   "move": 196,
+   "start": 72,
+   "end": 357
+  },
+  "derivedStart": 72,
+  "fieldProfile": {
+   "playerHp": 110,
+   "playerMaxHp": 110,
+   "opponentHp": 145,
+   "opponentMaxHp": 145,
+   "playerGender": "male",
+   "opponentGender": "male"
+  }
+ },
+ {
+  "case": "icy-wind-player-rattata-charizard",
+  "move": 196,
+  "side": "player",
+  "attacker": "RATTATA",
+  "target": "CHARIZARD",
+  "acceptedStart": 220,
+  "acceptedActivation": 220,
+  "altActivation": 75,
+  "altInterval": {
+   "move": 196,
+   "start": 75,
+   "end": 361
+  },
+  "derivedStart": 75,
+  "fieldProfile": {
+   "playerHp": 105,
+   "playerMaxHp": 105,
+   "opponentHp": 153,
+   "opponentMaxHp": 153,
+   "playerGender": "male",
+   "opponentGender": "male"
+  }
+ },
+ {
+  "case": "icy-wind-opponent-zubat-onix",
+  "move": 196,
+  "side": "opponent",
+  "attacker": "ZUBAT",
+  "target": "ONIX",
+  "acceptedStart": 220,
+  "acceptedActivation": 220,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 196,
+   "start": 77,
+   "end": 362
+  },
+  "derivedStart": 77,
+  "fieldProfile": {
+   "playerHp": 110,
+   "playerMaxHp": 110,
+   "opponentHp": 115,
+   "opponentMaxHp": 115,
+   "playerGender": "male",
+   "opponentGender": "male"
+  }
+ },
+ {
+  "case": "icy-wind-opponent-luvdisc-bulbasaur",
+  "move": 196,
+  "side": "opponent",
+  "attacker": "LUVDISC",
+  "target": "BULBASAUR",
+  "acceptedStart": 220,
+  "acceptedActivation": 220,
+  "altActivation": 79,
+  "altInterval": {
+   "move": 196,
+   "start": 79,
+   "end": 365
+  },
+  "derivedStart": 79,
+  "fieldProfile": {
+   "playerHp": 120,
+   "playerMaxHp": 120,
+   "opponentHp": 118,
+   "opponentMaxHp": 118,
+   "playerGender": "male",
+   "opponentGender": "male"
+  }
+ },
+ {
+  "case": "blizzard-player-charizard-wartortle",
+  "move": 59,
+  "side": "player",
+  "attacker": "CHARIZARD",
+  "target": "WARTORTLE",
+  "acceptedStart": 214,
+  "acceptedActivation": 214,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 59,
+   "start": 77,
+   "end": 448
+  },
+  "derivedStart": 77,
+  "fieldProfile": {
+   "playerHp": 185,
+   "playerMaxHp": 185,
+   "opponentHp": 134,
+   "opponentMaxHp": 134,
+   "playerGender": "male",
+   "opponentGender": "male"
+  }
+ },
+ {
+  "case": "blizzard-player-bulbasaur-metapod",
+  "move": 59,
+  "side": "player",
+  "attacker": "BULBASAUR",
+  "target": "METAPOD",
+  "acceptedStart": 214,
+  "acceptedActivation": 214,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 59,
+   "start": 77,
+   "end": 448
+  },
+  "derivedStart": 77,
+  "fieldProfile": {
+   "playerHp": 152,
+   "playerMaxHp": 152,
+   "opponentHp": 125,
+   "opponentMaxHp": 125,
+   "playerGender": "male",
+   "opponentGender": "male"
+  }
+ },
+ {
+  "case": "blizzard-opponent-weezing-blastoise",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "WEEZING",
+  "target": "BLASTOISE",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 79,
+  "altInterval": {
+   "move": 59,
+   "start": 79,
+   "end": 438
+  },
+  "derivedStart": 79,
+  "fieldProfile": {
+   "playerHp": 154,
+   "playerMaxHp": 154,
+   "opponentHp": 172,
+   "opponentMaxHp": 172,
+   "playerGender": "male",
+   "opponentGender": "male"
+  }
+ },
+ {
+  "case": "blizzard-opponent-arbok-caterpie",
+  "move": 59,
+  "side": "opponent",
+  "attacker": "ARBOK",
+  "target": "CATERPIE",
+  "acceptedStart": 213,
+  "acceptedActivation": 213,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 59,
+   "start": 77,
+   "end": 438
+  },
+  "derivedStart": 77,
+  "fieldProfile": {
+   "playerHp": 120,
+   "playerMaxHp": 120,
+   "opponentHp": 167,
+   "opponentMaxHp": 167,
+   "playerGender": "male",
+   "opponentGender": "male"
+  }
+ }
+]

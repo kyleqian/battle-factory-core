@@ -1,0 +1,43 @@
+{
+ "move": "ICY_WIND",
+ "probe": "tools/compare/icyWindProbe.py",
+ "scenario": "tools/integration/fixtures/geoice/scenarios/icy-wind-opponent-zubat-butterfree.json",
+ "attacker": {
+  "species": "ZUBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "BUTTERFREE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 135,
+  "playerMaxHp": 135,
+  "opponentHp": 115,
+  "opponentMaxHp": 115,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent ZUBAT -> BUTTERFREE",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 363,
+  "ageOffset": 0
+ },
+ "schema": "geoice-live-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-icy-wind-opponent.json",
+  "acceptedActivation": 220,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 196,
+   "start": 77,
+   "end": 362
+  },
+  "offset": 0
+ }
+}

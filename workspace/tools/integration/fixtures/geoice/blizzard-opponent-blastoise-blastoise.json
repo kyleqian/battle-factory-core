@@ -1,0 +1,43 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/geoice/scenarios/blizzard-opponent-blastoise-blastoise.json",
+ "attacker": {
+  "species": "BLASTOISE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "BLASTOISE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 154,
+  "playerMaxHp": 154,
+  "opponentHp": 186,
+  "opponentMaxHp": 186,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent BLASTOISE -> BLASTOISE",
+ "denseWindow": {
+  "startFrame": 81,
+  "endFrame": 441,
+  "ageOffset": 0
+ },
+ "schema": "geoice-live-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 81,
+  "altInterval": {
+   "move": 59,
+   "start": 81,
+   "end": 440
+  },
+  "offset": 0
+ }
+}

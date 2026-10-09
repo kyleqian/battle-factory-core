@@ -1,0 +1,43 @@
+{
+ "move": "ICY_WIND",
+ "probe": "tools/compare/icyWindProbe.py",
+ "scenario": "tools/integration/fixtures/geoice/scenarios/icy-wind-opponent-fearow-weedle.json",
+ "attacker": {
+  "species": "FEAROW",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "WEEDLE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 115,
+  "playerMaxHp": 115,
+  "opponentHp": 140,
+  "opponentMaxHp": 140,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent FEAROW -> WEEDLE",
+ "denseWindow": {
+  "startFrame": 78,
+  "endFrame": 364,
+  "ageOffset": 0
+ },
+ "schema": "geoice-live-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-icy-wind-opponent.json",
+  "acceptedActivation": 220,
+  "altActivation": 78,
+  "altInterval": {
+   "move": 196,
+   "start": 78,
+   "end": 364
+  },
+  "offset": 0
+ }
+}

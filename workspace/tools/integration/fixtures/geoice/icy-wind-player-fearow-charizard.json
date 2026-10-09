@@ -1,0 +1,43 @@
+{
+ "move": "ICY_WIND",
+ "probe": "tools/compare/icyWindProbe.py",
+ "scenario": "tools/integration/fixtures/geoice/scenarios/icy-wind-player-fearow-charizard.json",
+ "attacker": {
+  "species": "FEAROW",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "CHARIZARD",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 140,
+  "playerMaxHp": 140,
+  "opponentHp": 153,
+  "opponentMaxHp": 153,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "player FEAROW -> CHARIZARD",
+ "denseWindow": {
+  "startFrame": 74,
+  "endFrame": 360,
+  "ageOffset": 0
+ },
+ "schema": "geoice-live-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-icy-wind-player.json",
+  "acceptedActivation": 220,
+  "altActivation": 74,
+  "altInterval": {
+   "move": 196,
+   "start": 74,
+   "end": 360
+  },
+  "offset": 0
+ }
+}

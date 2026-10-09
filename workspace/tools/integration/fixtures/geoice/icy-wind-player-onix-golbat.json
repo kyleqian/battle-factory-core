@@ -1,0 +1,43 @@
+{
+ "move": "ICY_WIND",
+ "probe": "tools/compare/icyWindProbe.py",
+ "scenario": "tools/integration/fixtures/geoice/scenarios/icy-wind-player-onix-golbat.json",
+ "attacker": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 110,
+  "playerMaxHp": 110,
+  "opponentHp": 150,
+  "opponentMaxHp": 150,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "player ONIX -> GOLBAT",
+ "denseWindow": {
+  "startFrame": 72,
+  "endFrame": 358,
+  "ageOffset": 0
+ },
+ "schema": "geoice-live-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-icy-wind-player.json",
+  "acceptedActivation": 220,
+  "altActivation": 72,
+  "altInterval": {
+   "move": 196,
+   "start": 72,
+   "end": 358
+  },
+  "offset": 0
+ }
+}

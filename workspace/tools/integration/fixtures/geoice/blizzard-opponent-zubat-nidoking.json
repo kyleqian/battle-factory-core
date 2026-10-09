@@ -1,0 +1,43 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/geoice/scenarios/blizzard-opponent-zubat-nidoking.json",
+ "attacker": {
+  "species": "ZUBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "NIDOKING",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 156,
+  "playerMaxHp": 156,
+  "opponentHp": 147,
+  "opponentMaxHp": 147,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent ZUBAT -> NIDOKING",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 437,
+  "ageOffset": 0
+ },
+ "schema": "geoice-live-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 59,
+   "start": 77,
+   "end": 437
+  },
+  "offset": 0
+ }
+}

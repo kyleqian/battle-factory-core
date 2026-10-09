@@ -1,0 +1,43 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/geoice/scenarios/blizzard-player-charizard-golbat.json",
+ "attacker": {
+  "species": "CHARIZARD",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 185,
+  "playerMaxHp": 185,
+  "opponentHp": 150,
+  "opponentMaxHp": 150,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "player CHARIZARD -> GOLBAT",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 448,
+  "ageOffset": 0
+ },
+ "schema": "geoice-live-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-player.json",
+  "acceptedActivation": 214,
+  "altActivation": 77,
+  "altInterval": {
+   "move": 59,
+   "start": 77,
+   "end": 448
+  },
+  "offset": 0
+ }
+}

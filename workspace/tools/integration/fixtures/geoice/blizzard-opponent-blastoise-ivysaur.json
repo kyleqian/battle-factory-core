@@ -1,0 +1,43 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/geoice/scenarios/blizzard-opponent-blastoise-ivysaur.json",
+ "attacker": {
+  "species": "BLASTOISE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "IVYSAUR",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 135,
+  "playerMaxHp": 135,
+  "opponentHp": 186,
+  "opponentMaxHp": 186,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent BLASTOISE -> IVYSAUR",
+ "denseWindow": {
+  "startFrame": 81,
+  "endFrame": 441,
+  "ageOffset": 0
+ },
+ "schema": "geoice-live-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 81,
+  "altInterval": {
+   "move": 59,
+   "start": 81,
+   "end": 441
+  },
+  "offset": 0
+ }
+}

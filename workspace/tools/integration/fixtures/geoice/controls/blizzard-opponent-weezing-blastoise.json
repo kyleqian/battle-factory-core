@@ -1,0 +1,43 @@
+{
+ "move": "BLIZZARD",
+ "probe": "tools/compare/blizzardProbe.py",
+ "scenario": "tools/integration/fixtures/geoice/controls/scenarios/blizzard-opponent-weezing-blastoise.json",
+ "attacker": {
+  "species": "WEEZING",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "BLASTOISE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 154,
+  "playerMaxHp": 154,
+  "opponentHp": 172,
+  "opponentMaxHp": 172,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent WEEZING -> BLASTOISE",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 439,
+  "ageOffset": 0
+ },
+ "schema": "geoice-live-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+  "acceptedActivation": 213,
+  "altActivation": 79,
+  "altInterval": {
+   "move": 59,
+   "start": 79,
+   "end": 438
+  },
+  "offset": 0
+ }
+}

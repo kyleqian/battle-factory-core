@@ -1,0 +1,43 @@
+{
+ "move": "ICY_WIND",
+ "probe": "tools/compare/icyWindProbe.py",
+ "scenario": "tools/integration/fixtures/geoice/controls/scenarios/icy-wind-opponent-luvdisc-bulbasaur.json",
+ "attacker": {
+  "species": "LUVDISC",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "BULBASAUR",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 120,
+  "playerMaxHp": 120,
+  "opponentHp": 118,
+  "opponentMaxHp": 118,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent LUVDISC -> BULBASAUR",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 365,
+  "ageOffset": 0
+ },
+ "schema": "geoice-live-fixture/v1",
+ "geoice": {
+  "baseFixture": "tools/integration/fixtures/prep2-icy-wind-opponent.json",
+  "acceptedActivation": 220,
+  "altActivation": 79,
+  "altInterval": {
+   "move": 196,
+   "start": 79,
+   "end": 365
+  },
+  "offset": 0
+ }
+}
