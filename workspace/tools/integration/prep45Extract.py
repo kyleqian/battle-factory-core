@@ -15,7 +15,8 @@ import prep43Extract as X
 import prep45Probe as J
 
 X.J = J
-X.MV0_LABEL = {"BRN": "status BRN", "TURN_TRAP": "general TURN_TRAP", "WISH_HEAL": "general WISH_HEAL", "INGRAIN_HEAL": "general INGRAIN_HEAL"}
+X.MV0_LABEL = {"BRN": "status BRN", "TURN_TRAP": "general TURN_TRAP", "WISH_HEAL": "general WISH_HEAL", "INGRAIN_HEAL": "general INGRAIN_HEAL",
+               "ITEM_KNOCKOFF": "general ITEM_KNOCKOFF", "FUTURE_SIGHT_HIT": "general FUTURE_SIGHT_HIT"}
 
 if __name__ == "__main__":
     OUT = Path(sys.argv[1])

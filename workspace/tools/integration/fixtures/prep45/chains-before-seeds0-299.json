@@ -110,16 +110,6 @@
    "soloFrames": 4914
   },
   {
-   "unit": "general animation TURN_TRAP",
-   "excluded": null,
-   "firstCommands": 33,
-   "firstFrames": 5946,
-   "involvedCommands": 60,
-   "involvedFrames": 8661,
-   "soloCommands": 24,
-   "soloFrames": 4572
-  },
-  {
    "unit": "general animation WISH_HEAL",
    "excluded": null,
    "firstCommands": 34,
@@ -220,6 +210,16 @@
    "soloFrames": 2118
   },
   {
+   "unit": "general animation TURN_TRAP WRAP",
+   "excluded": null,
+   "firstCommands": 17,
+   "firstFrames": 3131,
+   "involvedCommands": 21,
+   "involvedFrames": 3972,
+   "soloCommands": 12,
+   "soloFrames": 2302
+  },
+  {
    "unit": "general animation SUBSTITUTE_FADE",
    "excluded": null,
    "firstCommands": 11,
@@ -298,6 +298,16 @@
    "involvedFrames": 5249,
    "soloCommands": 8,
    "soloFrames": 1306
+  },
+  {
+   "unit": "general animation TURN_TRAP WHIRLPOOL",
+   "excluded": null,
+   "firstCommands": 9,
+   "firstFrames": 1765,
+   "involvedCommands": 27,
+   "involvedFrames": 2914,
+   "soloCommands": 8,
+   "soloFrames": 1714
   },
   {
    "unit": "body 210 FURY_CUTTER",
@@ -430,6 +440,16 @@
    "soloFrames": 76
   },
   {
+   "unit": "general animation TURN_TRAP BIND",
+   "excluded": null,
+   "firstCommands": 4,
+   "firstFrames": 552,
+   "involvedCommands": 5,
+   "involvedFrames": 796,
+   "soloCommands": 1,
+   "soloFrames": 58
+  },
+  {
    "unit": "general animation FOCUS_BAND",
    "excluded": null,
    "firstCommands": 3,
@@ -438,6 +458,16 @@
    "involvedFrames": 533,
    "soloCommands": 2,
    "soloFrames": 337
+  },
+  {
+   "unit": "general animation TURN_TRAP FIRE_SPIN",
+   "excluded": null,
+   "firstCommands": 3,
+   "firstFrames": 498,
+   "involvedCommands": 7,
+   "involvedFrames": 979,
+   "soloCommands": 3,
+   "soloFrames": 498
   },
   {
    "unit": "body 19 FLY",
@@ -630,170 +660,188 @@
    "cumulativeFrames": 15963
   },
   {
-   "add": "general animation TURN_TRAP",
-   "gainFrames": 4790,
-   "cumulativeCommands": 118,
-   "cumulativeFrames": 20753
-  },
-  {
    "add": "body 189 MUD_SLAP",
-   "gainFrames": 4973,
-   "cumulativeCommands": 155,
-   "cumulativeFrames": 25726
+   "gainFrames": 4602,
+   "cumulativeCommands": 127,
+   "cumulativeFrames": 20565
   },
   {
    "add": "body 213 ATTRACT",
    "gainFrames": 4509,
-   "cumulativeCommands": 179,
-   "cumulativeFrames": 30235
+   "cumulativeCommands": 151,
+   "cumulativeFrames": 25074
   },
   {
    "add": "body 179 REVERSAL",
    "gainFrames": 3301,
-   "cumulativeCommands": 192,
-   "cumulativeFrames": 33536
-  },
-  {
-   "add": "body 72 MEGA_DRAIN",
-   "gainFrames": 3090,
-   "cumulativeCommands": 212,
-   "cumulativeFrames": 36626
-  },
-  {
-   "add": "general animation WISH_HEAL",
-   "gainFrames": 3050,
-   "cumulativeCommands": 233,
-   "cumulativeFrames": 39676
-  },
-  {
-   "add": "body 345 MAGICAL_LEAF",
-   "gainFrames": 2956,
-   "cumulativeCommands": 254,
-   "cumulativeFrames": 42632
-  },
-  {
-   "add": "body 76 SOLAR_BEAM",
-   "gainFrames": 2916,
-   "cumulativeCommands": 270,
-   "cumulativeFrames": 45548
+   "cumulativeCommands": 164,
+   "cumulativeFrames": 28375
   },
   {
    "add": "body 135 SOFT_BOILED",
    "gainFrames": 2752,
-   "cumulativeCommands": 282,
-   "cumulativeFrames": 48300
+   "cumulativeCommands": 176,
+   "cumulativeFrames": 31127
+  },
+  {
+   "add": "body 76 SOLAR_BEAM",
+   "gainFrames": 2679,
+   "cumulativeCommands": 191,
+   "cumulativeFrames": 33806
+  },
+  {
+   "add": "body 72 MEGA_DRAIN",
+   "gainFrames": 2570,
+   "cumulativeCommands": 208,
+   "cumulativeFrames": 36376
+  },
+  {
+   "add": "general animation WISH_HEAL",
+   "gainFrames": 2890,
+   "cumulativeCommands": 225,
+   "cumulativeFrames": 39266
+  },
+  {
+   "add": "body 345 MAGICAL_LEAF",
+   "gainFrames": 2956,
+   "cumulativeCommands": 246,
+   "cumulativeFrames": 42222
   },
   {
    "add": "body 315 OVERHEAT",
    "gainFrames": 2517,
-   "cumulativeCommands": 294,
-   "cumulativeFrames": 50817
+   "cumulativeCommands": 258,
+   "cumulativeFrames": 44739
+  },
+  {
+   "add": "general animation TURN_TRAP WRAP",
+   "gainFrames": 2495,
+   "cumulativeCommands": 271,
+   "cumulativeFrames": 47234
   },
   {
    "add": "general animation INGRAIN_HEAL",
    "gainFrames": 2377,
-   "cumulativeCommands": 306,
-   "cumulativeFrames": 53194
+   "cumulativeCommands": 283,
+   "cumulativeFrames": 49611
   },
   {
    "add": "body 195 PERISH_SONG",
    "gainFrames": 2355,
-   "cumulativeCommands": 319,
-   "cumulativeFrames": 55549
+   "cumulativeCommands": 296,
+   "cumulativeFrames": 51966
   },
   {
    "add": "body 349 DRAGON_DANCE",
    "gainFrames": 2295,
-   "cumulativeCommands": 331,
-   "cumulativeFrames": 57844
+   "cumulativeCommands": 308,
+   "cumulativeFrames": 54261
   },
   {
    "add": "status animation FRZ",
    "gainFrames": 2524,
-   "cumulativeCommands": 344,
-   "cumulativeFrames": 60368
+   "cumulativeCommands": 321,
+   "cumulativeFrames": 56785
   },
   {
    "add": "body 236 MOONLIGHT",
    "gainFrames": 2058,
-   "cumulativeCommands": 354,
-   "cumulativeFrames": 62426
+   "cumulativeCommands": 331,
+   "cumulativeFrames": 58843
+  },
+  {
+   "add": "general animation TURN_TRAP WHIRLPOOL",
+   "gainFrames": 1969,
+   "cumulativeCommands": 344,
+   "cumulativeFrames": 60812
   },
   {
    "add": "body 210 FURY_CUTTER",
    "gainFrames": 1717,
-   "cumulativeCommands": 371,
-   "cumulativeFrames": 64143
+   "cumulativeCommands": 361,
+   "cumulativeFrames": 62529
   },
   {
    "add": "body 291 DIVE",
    "gainFrames": 1499,
-   "cumulativeCommands": 380,
-   "cumulativeFrames": 65642
+   "cumulativeCommands": 370,
+   "cumulativeFrames": 64028
   },
   {
    "add": "general animation ITEM_KNOCKOFF",
    "gainFrames": 1522,
-   "cumulativeCommands": 392,
-   "cumulativeFrames": 67164
+   "cumulativeCommands": 382,
+   "cumulativeFrames": 65550
   },
   {
    "add": "general animation HAIL_CONTINUES",
    "gainFrames": 1425,
-   "cumulativeCommands": 403,
-   "cumulativeFrames": 68589
+   "cumulativeCommands": 393,
+   "cumulativeFrames": 66975
   },
   {
    "add": "body 258 HAIL",
    "gainFrames": 4092,
-   "cumulativeCommands": 432,
-   "cumulativeFrames": 72681
+   "cumulativeCommands": 422,
+   "cumulativeFrames": 71067
   },
   {
    "add": "body 301 ICE_BALL",
    "gainFrames": 3025,
-   "cumulativeCommands": 467,
-   "cumulativeFrames": 75706
+   "cumulativeCommands": 457,
+   "cumulativeFrames": 74092
   },
   {
    "add": "body 59 BLIZZARD",
    "gainFrames": 1826,
-   "cumulativeCommands": 477,
-   "cumulativeFrames": 77532
+   "cumulativeCommands": 467,
+   "cumulativeFrames": 75918
   },
   {
    "add": "body 8 ICE_PUNCH",
    "gainFrames": 1401,
-   "cumulativeCommands": 482,
-   "cumulativeFrames": 78933
+   "cumulativeCommands": 472,
+   "cumulativeFrames": 77319
   },
   {
    "add": "general animation FUTURE_SIGHT_HIT",
    "gainFrames": 1387,
-   "cumulativeCommands": 488,
-   "cumulativeFrames": 80320
+   "cumulativeCommands": 478,
+   "cumulativeFrames": 78706
   },
   {
    "add": "body 323 WATER_SPOUT",
    "gainFrames": 1112,
-   "cumulativeCommands": 492,
-   "cumulativeFrames": 81432
+   "cumulativeCommands": 482,
+   "cumulativeFrames": 79818
   },
   {
    "add": "general animation SUBSTITUTE_FADE",
    "gainFrames": 1068,
-   "cumulativeCommands": 497,
-   "cumulativeFrames": 82500
+   "cumulativeCommands": 487,
+   "cumulativeFrames": 80886
   },
   {
    "add": "body 138 DREAM_EATER",
    "gainFrames": 2019,
-   "cumulativeCommands": 506,
-   "cumulativeFrames": 84519
+   "cumulativeCommands": 496,
+   "cumulativeFrames": 82905
   },
   {
    "add": "status animation NIGHTMARE",
    "gainFrames": 890,
+   "cumulativeCommands": 500,
+   "cumulativeFrames": 83795
+  },
+  {
+   "add": "general animation TURN_TRAP FIRE_SPIN",
+   "gainFrames": 818,
+   "cumulativeCommands": 505,
+   "cumulativeFrames": 84613
+  },
+  {
+   "add": "general animation TURN_TRAP BIND",
+   "gainFrames": 796,
    "cumulativeCommands": 510,
    "cumulativeFrames": 85409
   },
@@ -832,24 +880,6 @@
    "gainFrames": 533,
    "cumulativeCommands": 537,
    "cumulativeFrames": 89571
-  },
-  {
-   "add": "body 260 FLATTER",
-   "gainFrames": 377,
-   "cumulativeCommands": 541,
-   "cumulativeFrames": 89948
-  },
-  {
-   "add": "body 19 FLY",
-   "gainFrames": 376,
-   "cumulativeCommands": 543,
-   "cumulativeFrames": 90324
-  },
-  {
-   "add": "body 165 STRUGGLE",
-   "gainFrames": 282,
-   "cumulativeCommands": 544,
-   "cumulativeFrames": 90606
   }
  ],
  "greedyAll": [
@@ -914,94 +944,94 @@
    "cumulativeFrames": 73402
   },
   {
-   "add": "general animation TURN_TRAP",
-   "gainFrames": 5161,
-   "cumulativeCommands": 437,
-   "cumulativeFrames": 78563
-  },
-  {
    "add": "body 213 ATTRACT",
    "gainFrames": 4773,
-   "cumulativeCommands": 463,
-   "cumulativeFrames": 83336
+   "cumulativeCommands": 435,
+   "cumulativeFrames": 78175
   },
   {
    "add": "general animation INGRAIN_HEAL",
-   "gainFrames": 3987,
-   "cumulativeCommands": 482,
-   "cumulativeFrames": 87323
+   "gainFrames": 3480,
+   "cumulativeCommands": 451,
+   "cumulativeFrames": 81655
   },
   {
    "add": "body 76 SOLAR_BEAM",
    "gainFrames": 3307,
-   "cumulativeCommands": 500,
-   "cumulativeFrames": 90630
-  },
-  {
-   "add": "general animation WISH_HEAL",
-   "gainFrames": 3390,
-   "cumulativeCommands": 525,
-   "cumulativeFrames": 94020
-  },
-  {
-   "add": "body 72 MEGA_DRAIN",
-   "gainFrames": 4304,
-   "cumulativeCommands": 551,
-   "cumulativeFrames": 98324
-  },
-  {
-   "add": "body 8 ICE_PUNCH",
-   "gainFrames": 3506,
-   "cumulativeCommands": 565,
-   "cumulativeFrames": 101830
+   "cumulativeCommands": 469,
+   "cumulativeFrames": 84962
   },
   {
    "add": "body 179 REVERSAL",
    "gainFrames": 3301,
-   "cumulativeCommands": 578,
-   "cumulativeFrames": 105131
+   "cumulativeCommands": 482,
+   "cumulativeFrames": 88263
+  },
+  {
+   "add": "body 8 ICE_PUNCH",
+   "gainFrames": 3269,
+   "cumulativeCommands": 495,
+   "cumulativeFrames": 91532
+  },
+  {
+   "add": "general animation WISH_HEAL",
+   "gainFrames": 3230,
+   "cumulativeCommands": 516,
+   "cumulativeFrames": 94762
+  },
+  {
+   "add": "body 72 MEGA_DRAIN",
+   "gainFrames": 3784,
+   "cumulativeCommands": 539,
+   "cumulativeFrames": 98546
   },
   {
    "add": "body 349 DRAGON_DANCE",
    "gainFrames": 3089,
-   "cumulativeCommands": 593,
-   "cumulativeFrames": 108220
+   "cumulativeCommands": 554,
+   "cumulativeFrames": 101635
   },
   {
    "add": "status animation FRZ",
    "gainFrames": 3214,
-   "cumulativeCommands": 609,
-   "cumulativeFrames": 111434
+   "cumulativeCommands": 570,
+   "cumulativeFrames": 104849
+  },
+  {
+   "add": "general animation TURN_TRAP WRAP",
+   "gainFrames": 3002,
+   "cumulativeCommands": 586,
+   "cumulativeFrames": 107851
   },
   {
    "add": "body 135 SOFT_BOILED",
    "gainFrames": 2976,
-   "cumulativeCommands": 622,
-   "cumulativeFrames": 114410
+   "cumulativeCommands": 599,
+   "cumulativeFrames": 110827
   },
   {
    "add": "body 345 MAGICAL_LEAF",
    "gainFrames": 2956,
-   "cumulativeCommands": 643,
-   "cumulativeFrames": 117366
+   "cumulativeCommands": 620,
+   "cumulativeFrames": 113783
   },
   {
    "add": "body 195 PERISH_SONG",
    "gainFrames": 2815,
-   "cumulativeCommands": 658,
-   "cumulativeFrames": 120181
+   "cumulativeCommands": 635,
+   "cumulativeFrames": 116598
   },
   {
    "add": "body 236 MOONLIGHT",
    "gainFrames": 2546,
-   "cumulativeCommands": 670,
-   "cumulativeFrames": 122727
+   "cumulativeCommands": 647,
+   "cumulativeFrames": 119144
   },
   {
    "add": "body 315 OVERHEAT",
    "gainFrames": 2517,
-   "cumulativeCommands": 682,
-   "cumulativeFrames": 125244
+   "cumulativeCommands": 659,
+   "cumulativeFrames": 121661
   }
  ]
 }

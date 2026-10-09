@@ -22,9 +22,9 @@ def norm(u):
     if m:
         i = int(m.group(1)); base = i - 10000 if i > 10000 else i
         return f"body {i} {moves.get(base, '?')}{' (2nd branch)' if i > 10000 else ''}"
-    m = re.fullmatch(r"no EXACT plan: (general|status) animation (\S+)", u)
+    m = re.fullmatch(r"no EXACT plan: (general|status) animation (\S+)(?: \(wrapped ([^)]+)\))?", u)
     if m:
-        return f"{m.group(1)} animation {m.group(2)}"
+        return f"{m.group(1)} animation {m.group(2)}" + (f" {m.group(3).replace(' ', '_')}" if m.group(3) else "")
     return u
 
 # Units owned by other steps (the prep45 brief): Giga Drain geometry, Rain Dance / RAIN_CONTINUES words, the retained locked-action

@@ -213,10 +213,13 @@ function playBattle(battle: number, seed: number, streak: number): void {
     hiddenShadow = hb.hidden;
     let revived = false;
     const add = (unit: string, requestId: number, segmentIndex: number, sequence: number) => { chain.push({ unit, requestId, segmentIndex, sequence }); };
+    // TURN_TRAP units are named with the trapped battler's wrapped move (General_TurnTrap branches on it; the kernel event's argument is
+    // not the trap move), so the chain predictor can tell the planned trap kinds from the others. Naming only.
+    let decorate = "";
     const apply = (ev: SpriteOrderPresentationEvent | undefined, requestId: number, segmentIndex: number, sequence: number) => {
       if (!ev || !shadow || !shadow.cursor.order.known) return;
       const next = applySpriteOrderPresentationEvent(shadow, ev);
-      if (next.cursor.order.known) shadow = next; else add(next.invalidReason ?? "?", requestId, segmentIndex, sequence);
+      if (next.cursor.order.known) shadow = next; else add(`${next.invalidReason ?? "?"}${decorate}`, requestId, segmentIndex, sequence);
     };
     // The prompt cycle (beginLiveSpriteOrderTurn; promptShown as factoryRoundBattleOrchestrator.ts ~:1828-1837).
     if (ha.promptRequestId !== null && ha.promptRequestId !== hb.promptRequestId) {
@@ -259,6 +262,9 @@ function playBattle(battle: number, seed: number, streak: number): void {
         if (idx >= events.length) { seg++; idx = 0; continue; }
         const m = orderEventOf(events, idx, hiddenShadow);
         if (m.hidden) hiddenShadow = m.hidden;
+        const p = events[idx]!.payload;
+        decorate = p.kind === "animation" && p.animationId === "TURN_TRAP" && (p.battler === 0 || p.battler === 1)
+          ? ` (wrapped ${nameOf.get(after.battle?.rules.rulesContext.battlers[p.battler]?.wrappedMove ?? -1) ?? "?"})` : "";
         apply(m.event, cur.requestId, seg, events[idx]!.sequence);
         apply(m.then, cur.requestId, seg, events[idx]!.sequence);
         idx++;
@@ -275,7 +281,7 @@ function playBattle(battle: number, seed: number, streak: number): void {
     } else if (knownBefore || revived || (ha.tracker !== hb.tracker && ha.tracker.invalidReason !== hb.tracker.invalidReason)) {
       const reason = ha.tracker.invalidReason ?? "?";
       count(orderInvalidations, reason);
-      if (chain[0]?.unit === reason) shadowAgreement.firstUnitMatched++;
+      if (chain[0]?.unit === reason || chain[0]?.unit.startsWith(`${reason} (wrapped `)) shadowAgreement.firstUnitMatched++;
       else {
         if (!knownBefore && !revived) { shadowAgreement.reviveAndInvalidateInOneStep++; chain = []; }
         else shadowAgreement.firstUnitHostLevel++;

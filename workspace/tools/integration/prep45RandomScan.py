@@ -3,7 +3,7 @@
 
 usage (from workspace/): prep45RandomScan.py <script label> ...
 Follows call / goto / jumpargeq / choosetwoturnanim subroutines, expands the createsprite-wrapping macros of
-asm/macros/battle_anim_script.inc, maps every sprite template to its callback and every visual task to its function, and reports
+asm/macros/battle_anim_script.inc, maps every sprite template to its callback and every visual task to its function (and every template a callee creates with CreateSprite), and reports
 any callee (sprite callbacks, StoreSpriteCallbackInData6, CreateTask, task func reassignments; depth <= 4) whose body calls Random2 /
 Random. "none" = no draw site reachable from the script by these edges.
 """
@@ -44,6 +44,10 @@ def scan(name, depth=0, seen=None):
     if name in seen or depth > 4: return []
     seen.add(name); f, b = func(name); hits = []
     if "Random2" in b or "Random()" in b: hits.append(f"{name} ({f.split('/')[-1]})")
+    ALL = "".join(C.values())
+    for t in set(re.findall(r"CreateSprite(?:AndAnimate)?\(&(g\w+Template)", b)):
+        m = re.search(r"const struct SpriteTemplate " + t + r"\b[^;]*?\.callback = (\w+)", ALL, re.S)
+        if m: hits += scan(m.group(1), depth + 1, seen)
     for callee in set(re.findall(r"callback\s*=\s*(\w+)|StoreSpriteCallbackInData6\(sprite, (\w+)\)|CreateTask\((\w+)|gTasks\[taskId\]\.func\s*=\s*(\w+)", b)):
         for c in callee:
             if c: hits += scan(c, depth + 1, seen)

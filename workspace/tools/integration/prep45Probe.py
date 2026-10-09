@@ -4,7 +4,7 @@
 usage (from workspace/, PYTHONPATH = the libmgba-py checkout): prep45Probe.py <out-dir> [--jobs J=10] [--only <unit,...>]
 Each job = (unit, id, move, base scenario, variant): an existing tools/battle-lab scenario, or a variant of it written to
 <out-dir>/scenarios/<id>.json. Variants: ("extend", N, ...) appends N idle frames (so an end-turn unit / next body follows);
-(side, species) replaces that side's party lead species (overrides.parties); ("set", side, setId) replaces that side's first Factory
+("turns", N, ...) appends N more FIGHT -> first-move turns; (side, species) replaces that side's party lead species (overrides.parties); ("set", side, setId) replaces that side's first Factory
 set id (scenarios whose overrides only patch battlers.<side>.moves). Every job runs twice in separate fresh mGBA processes
 (tools/compare/spriteOrderEventProbe.py through tools/run-mgba-probe.py, prep43Probe.run) -> <out-dir>/raw/<id>-A.json / -B.json.
 """
@@ -102,7 +102,52 @@ JOBS = [
     ("BODY349", "dd-ply-snorlax", 349, "mechanic-dragon-dance-player-dragonair-opponent-onix", ("player", 143)),
     ("BODY349", "dd-opp", 349, "mechanic-dragon-dance-opponent-dragonair-player-onix", None),
     ("BODY349", "dd-opp-golbat", 349, "mechanic-dragon-dance-opponent-dragonair-player-onix", ("opponent", 42)),
+    # ---- tier 2 (greedy order after tier 1) ----
+    # WISH_HEAL: the heal is at the end of the NEXT turn -> one more FIGHT turn appended ("turns", N)
+    ("WISH_HEAL", "wh2-ply", 273, "mechanic-wish-player-illumise-opponent-onix", ("turns", 1)),
+    ("WISH_HEAL", "wh2-ply-snorlax", 273, "mechanic-wish-player-illumise-opponent-onix", ("turns", 1, "player", 143)),
+    ("WISH_HEAL", "wh2-opp", 273, "mechanic-wish-opponent-illumise-player-onix", ("turns", 1)),
+    ("WISH_HEAL", "wh2-opp-golbat", 273, "mechanic-wish-opponent-illumise-player-onix", ("turns", 1, "opponent", 42)),
+    # TURN_TRAP Wrap / Bind (Status_BindWrap)
+    ("TURN_TRAP", "tt-wr-ply", 35, "mechanic-wrap-player-tentacool-opponent-onix", E),
+    ("TURN_TRAP", "tt-wr-ply-snorlax", 35, "mechanic-wrap-player-tentacool-opponent-onix", E + ("opponent", 143)),
+    ("TURN_TRAP", "tt-wr-opp", 35, "mechanic-wrap-opponent-tentacool-player-onix", E),
+    ("TURN_TRAP", "tt-wr-opp-golbat", 35, "mechanic-wrap-opponent-tentacool-player-onix", E + ("player", 42)),
+    ("TURN_TRAP", "tt-bd-ply", 20, "mechanic-bind-player-onix-opponent-murkrow", E),
+    ("TURN_TRAP", "tt-bd-opp", 20, "mechanic-bind-opponent-onix-player-murkrow", E),
+    # Moonlight 236 (self-target: the attacker's species varied)
+    ("BODY236", "ml2-ply", 236, "mechanic-moonlight-player-gloom-opponent-onix", None),
+    ("BODY236", "ml2-ply-snorlax", 236, "mechanic-moonlight-player-gloom-opponent-onix", ("player", 143)),
+    ("BODY236", "ml2-opp", 236, "mechanic-moonlight-opponent-gloom-player-onix", None),
+    ("BODY236", "ml2-opp-golbat", 236, "mechanic-moonlight-opponent-gloom-player-onix", ("opponent", 42)),
+    # ITEM_KNOCKOFF (General_ItemKnockoff on the target)
+    ("ITEM_KNOCKOFF", "ko-ply", 282, "mechanic-knock-off-shuppet-onix", E),
+    ("ITEM_KNOCKOFF", "ko-ply-snorlax", 282, "mechanic-knock-off-shuppet-onix", E + ("opponent", 143)),
+    ("ITEM_KNOCKOFF", "ko-opp", 282, "mechanic-knock-off-opponent-shuppet-player-onix", E),
+    ("ITEM_KNOCKOFF", "ko-opp-golbat", 282, "mechanic-knock-off-opponent-shuppet-player-onix", E + ("player", 42)),
+    # Blizzard 59 / Water Spout 323 / Dream Eater 138
+    ("BODY59", "bz-ply", 59, "mechanic-blizzard-player-pelipper-opponent-onix", None),
+    ("BODY59", "bz-ply-snorlax", 59, "mechanic-blizzard-player-pelipper-opponent-onix", ("opponent", 143)),
+    ("BODY59", "bz-opp", 59, "mechanic-blizzard-opponent-pelipper-player-onix", None),
+    ("BODY59", "bz-opp-golbat", 59, "mechanic-blizzard-opponent-pelipper-player-onix", ("player", 42)),
+    ("BODY323", "ws-ply", 323, "mechanic-water-spout-player-wailmer-opponent-shuckle", None),
+    ("BODY323", "ws-ply-snorlax", 323, "mechanic-water-spout-player-wailmer-opponent-shuckle", ("opponent", 143)),
+    ("BODY323", "ws-opp", 323, "mechanic-water-spout-opponent-wailmer-player-shuckle", None),
+    ("BODY323", "ws-opp-golbat", 323, "mechanic-water-spout-opponent-wailmer-player-shuckle", ("player", 42)),
+    ("BODY138", "de-ply", 138, "mechanic-dream-eater-player-wigglytuff-opponent-onix", None),
+    ("BODY138", "de-ply-snorlax", 138, "mechanic-dream-eater-player-wigglytuff-opponent-onix", ("opponent", 143)),
+    ("BODY138", "de-opp", 138, "mechanic-dream-eater-opponent-wigglytuff-player-onix", None),
+    ("BODY138", "de-opp-golbat", 138, "mechanic-dream-eater-opponent-wigglytuff-player-onix", ("player", 42)),
+    # second opponent-side species for Moonlight / Softboiled (the Golbat variants above did not use the move)
+    ("BODY236", "ml2-opp-snorlax", 236, "mechanic-moonlight-opponent-gloom-player-onix", ("opponent", 143)),
+    ("BODY135", "sbo-opp-snorlax", 135, "mechanic-soft-boiled-opponent-chansey-player-onix", ("opponent", 143)),
+    # FUTURE_SIGHT_HIT: the hit lands at the end of the turn two turns later -> two more FIGHT turns
+    ("FUTURE_SIGHT_HIT", "fs-ply", 248, "mechanic-future-sight-kadabra-onix", ("turns", 2)),
+    ("FUTURE_SIGHT_HIT", "fs-ply-snorlax", 248, "mechanic-future-sight-kadabra-onix", ("turns", 2, "opponent", 143)),
+    ("FUTURE_SIGHT_HIT", "fs-opp", 248, "mechanic-future-sight-opponent-kadabra-player-onix", ("turns", 2)),
+    ("FUTURE_SIGHT_HIT", "fs-opp-golbat", 248, "mechanic-future-sight-opponent-kadabra-player-onix", ("turns", 2, "player", 42)),
 ]
+TURN = [{"frames": 2, "buttons": ["A"]}, {"frames": 30, "buttons": []}, {"frames": 2, "buttons": ["A"]}, {"frames": 900, "buttons": []}]
 
 
 def scenario(out: Path, job) -> Path:
@@ -113,6 +158,9 @@ def scenario(out: Path, job) -> Path:
     data = json.loads(path.read_text())
     if variant[0] == "extend":
         data["trace"]["segments"].append({"frames": variant[1], "buttons": []})
+        variant = variant[2:]
+    elif variant[0] == "turns":  # N more FIGHT -> first move turns (A, wait, A, idle)
+        data["trace"]["segments"] += [dict(seg) for _ in range(variant[1]) for seg in TURN]
         variant = variant[2:]
     if variant and variant[0] == "set":
         data["playerSetIds" if variant[1] == "player" else "opponentSetIds"][0] = variant[2]

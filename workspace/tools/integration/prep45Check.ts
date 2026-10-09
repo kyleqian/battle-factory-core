@@ -32,21 +32,27 @@ export const PREP45_PLANS: Readonly<Record<string, string>> = Object.freeze({
   "body 195": "Cffffffffffffff;Cfff;Cf;D17;D14,13,15,12,11,10,0,9,1,8,2,7,3,4,6,5;D16;Cf;D18",
   "body 349:player": "Cfffff;Cf;D2,5,1,3,0,4",
   "body 349:opponent": "Cfffff;Cf;D0,4,2,5,1,3",
+  // tier 2
+  "general WISH_HEAL": "Cf;Cf;D0;D1;Cf;Cf;Cf;D2;Cf;D3;D4",
+  "general TURN_TRAP BIND": "Cf;Cf;D0,1",
+  "general FUTURE_SIGHT_HIT": "",
+  "body 236": "Cf;D0;Cf;Cf;Cf;Cf;Cf;Cf;D2,3,4,5,6,1;Cf;Cf;Cf;D7;Cf;D8;D9;D10",
 });
 
 /** Which proposed plan a probed unit is checked against (null = not a prep45 plan unit). */
 function planLabel(job: Job, unit: Unit, seen: Map<string, number>): string | null {
   const count = (key: string) => { const n = seen.get(key) ?? 0; seen.set(key, n + 1); return n; };
-  if (unit.label === "status BRN" || unit.label === "general INGRAIN_HEAL") return unit.label;
+  if (["status BRN", "general INGRAIN_HEAL", "general WISH_HEAL", "general FUTURE_SIGHT_HIT"].includes(unit.label)) return unit.label;
   if (unit.label === "general TURN_TRAP") {
     // Leftovers (General_HeldItemEffect, ENDTURN_ITEMS1) precedes the trap damage in the Sand Tomb jobs: check it against the existing plan.
     if (unit.plan === PREP45_PLANS["general HELD_ITEM_EFFECT (existing)"]) return "general HELD_ITEM_EFFECT (existing)";
-    return `general TURN_TRAP ${job.base.includes("fire-spin") ? "FIRE_SPIN" : job.base.includes("whirlpool") ? "WHIRLPOOL" : "SAND_TOMB"}`;
+    return `general TURN_TRAP ${job.base.includes("fire-spin") ? "FIRE_SPIN" : job.base.includes("whirlpool") ? "WHIRLPOOL"
+      : job.base.includes("sand-tomb") ? "SAND_TOMB" : "BIND"}`;
   }
   const m = /^body (\d+):(\w+)$/.exec(unit.label);
   if (!m) return null;
   const mv = Number(m[1]);
-  if ([56, 179, 345, 135, 315, 195].includes(mv)) return `body ${mv}`;
+  if ([56, 179, 345, 135, 315, 195, 236].includes(mv)) return `body ${mv}`;
   if (mv === 349) return `body 349:${m[2]}`;
   if (mv === 76) return count("76") === 0 ? "body 76 turn 0 (setup)" : "body 76 turn 1 (unleash)";
   return null;

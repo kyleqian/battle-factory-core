@@ -1141,32 +1141,6 @@
    ]
   },
   {
-   "unit": "no EXACT plan: general animation TURN_TRAP",
-   "count": 33,
-   "frames": 5946,
-   "invalidations": 16,
-   "bodies": [
-    "4x PETAL DANCE/player",
-    "4x THUNDERBOLT/opponent",
-    "3x HEAL BELL/opponent",
-    "2x DIG/opponent",
-    "2x MEGA DRAIN/player",
-    "2x MUD-SLAP/opponent",
-    "2x PSYWAVE/player",
-    "2x SAND-ATTACK/player",
-    "2x SILVER WIND/player",
-    "2x SWIFT/player",
-    "1x AIR CUTTER/opponent",
-    "1x DOUBLE TEAM/player",
-    "1x EXTRASENSORY/opponent",
-    "1x FURY CUTTER/opponent",
-    "1x GRUDGE/opponent",
-    "1x HEAL BELL/player",
-    "1x MACH PUNCH/opponent",
-    "1x PETAL DANCE/opponent"
-   ]
-  },
-  {
    "unit": "no EXACT plan: general animation WISH_HEAL",
    "count": 34,
    "frames": 5445,
@@ -1288,6 +1262,23 @@
     "2x CURSE/player",
     "1x DOUBLE TEAM/player",
     "1x DRAGON DANCE/opponent"
+   ]
+  },
+  {
+   "unit": "no EXACT plan: general animation TURN_TRAP (wrapped WRAP)",
+   "count": 17,
+   "frames": 3131,
+   "invalidations": 0,
+   "bodies": [
+    "4x PETAL DANCE/player",
+    "4x THUNDERBOLT/opponent",
+    "2x DIG/opponent",
+    "2x SWIFT/player",
+    "1x DOUBLE TEAM/player",
+    "1x EXTRASENSORY/opponent",
+    "1x FURY CUTTER/opponent",
+    "1x MACH PUNCH/opponent",
+    "1x PETAL DANCE/opponent"
    ]
   },
   {
@@ -1449,6 +1440,19 @@
    "bodies": [
     "6x ICE BEAM/player",
     "4x LOVELY KISS/player"
+   ]
+  },
+  {
+   "unit": "no EXACT plan: general animation TURN_TRAP (wrapped WHIRLPOOL)",
+   "count": 9,
+   "frames": 1765,
+   "invalidations": 0,
+   "bodies": [
+    "3x HEAL BELL/opponent",
+    "2x MUD-SLAP/opponent",
+    "2x PSYWAVE/player",
+    "1x GRUDGE/opponent",
+    "1x HEAL BELL/player"
    ]
   },
   {
@@ -1671,6 +1675,16 @@
    ]
   },
   {
+   "unit": "no EXACT plan: general animation TURN_TRAP (wrapped BIND)",
+   "count": 4,
+   "frames": 552,
+   "invalidations": 0,
+   "bodies": [
+    "2x MEGA DRAIN/player",
+    "2x SAND-ATTACK/player"
+   ]
+  },
+  {
    "unit": "no EXACT plan: general animation FOCUS_BAND",
    "count": 3,
    "frames": 533,
@@ -1688,6 +1702,16 @@
    "invalidations": 1,
    "bodies": [
     "10x MUD-SLAP/opponent"
+   ]
+  },
+  {
+   "unit": "no EXACT plan: general animation TURN_TRAP (wrapped FIRE SPIN)",
+   "count": 3,
+   "frames": 498,
+   "invalidations": 0,
+   "bodies": [
+    "2x SILVER WIND/player",
+    "1x AIR CUTTER/opponent"
    ]
   },
   {
@@ -2831,5 +2855,5 @@
   "renderThrowCount": 0
  },
  "battleDigest": "bb30f5726abcfc19fe820215008f4b77073f5612af0330e1db104d558f747998",
- "commandDigest": "abc737d5b24aae62fd850acb1108a06864cc6e7afca2ea7e21b26dfe48a66933"
+ "commandDigest": "933610786412dc91dd2157b70e11b16e3003282f869c33d9f62221084bf48c55"
 }

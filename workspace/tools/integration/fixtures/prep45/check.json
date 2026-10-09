@@ -1,6 +1,6 @@
 {
  "schema": "prep45-check/v1",
- "jobs": 68,
+ "jobs": 104,
  "notIdenticalAB": 0,
  "plans": {
   "status BRN": "Cf;Cf;Cf;D0;D1",
@@ -18,7 +18,11 @@
   "body 315": "Cf;D0;Cf;D1;Cffffffff;Cffffffff;Cffffffff;D4,3,5,2,6,9,7,8;D12,13,11,14,10,17,15,16;D20,19,21,18,22,23,25,24;Cf;Cf;D26;D27;Cf;D28;Cf;Cf;D29;D30;Cf;D31;Cf;D32",
   "body 195": "Cffffffffffffff;Cfff;Cf;D17;D14,13,15,12,11,10,0,9,1,8,2,7,3,4,6,5;D16;Cf;D18",
   "body 349:player": "Cfffff;Cf;D2,5,1,3,0,4",
-  "body 349:opponent": "Cfffff;Cf;D0,4,2,5,1,3"
+  "body 349:opponent": "Cfffff;Cf;D0,4,2,5,1,3",
+  "general WISH_HEAL": "Cf;Cf;D0;D1;Cf;Cf;Cf;D2;Cf;D3;D4",
+  "general TURN_TRAP BIND": "Cf;Cf;D0,1",
+  "general FUTURE_SIGHT_HIT": "",
+  "body 236": "Cf;D0;Cf;Cf;Cf;Cf;Cf;Cf;D2,3,4,5,6,1;Cf;Cf;Cf;D7;Cf;D8;D9;D10"
  },
  "results": {
   "status BRN": {
@@ -52,6 +56,19 @@
    "jobs": [
     "dd-ply",
     "dd-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "general FUTURE_SIGHT_HIT": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 0,
+   "jobs": [
+    "fs-opp",
+    "fs-opp-golbat",
+    "fs-ply",
+    "fs-ply-snorlax"
    ],
    "mismatches": [],
    "carries": 0
@@ -91,6 +108,19 @@
     "ml-opp-onix",
     "ml-ply-onix",
     "ml-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 236": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 68,
+   "jobs": [
+    "ml2-opp",
+    "ml2-opp-snorlax",
+    "ml2-ply",
+    "ml2-ply-snorlax"
    ],
    "mismatches": [],
    "carries": 0
@@ -161,13 +191,29 @@
    "carries": 0
   },
   "body 135": {
-   "instances": 3,
-   "matched": 3,
-   "framesChecked": 42,
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 56,
    "jobs": [
     "sbo-opp",
+    "sbo-opp-snorlax",
     "sbo-ply",
     "sbo-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "general TURN_TRAP BIND": {
+   "instances": 6,
+   "matched": 6,
+   "framesChecked": 18,
+   "jobs": [
+    "tt-bd-opp",
+    "tt-bd-ply",
+    "tt-wr-opp",
+    "tt-wr-opp-golbat",
+    "tt-wr-ply",
+    "tt-wr-ply-snorlax"
    ],
    "mismatches": [],
    "carries": 0
@@ -217,6 +263,19 @@
    ],
    "mismatches": [],
    "carries": 0
+  },
+  "general WISH_HEAL": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 48,
+   "jobs": [
+    "wh2-opp",
+    "wh2-opp-golbat",
+    "wh2-ply",
+    "wh2-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 4
   }
  }
 }
