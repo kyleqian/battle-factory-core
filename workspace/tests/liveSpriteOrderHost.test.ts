@@ -554,6 +554,20 @@ describe("order host prep49 stops: Baton Pass recall, the AI's DoSwitchOut summa
     }
   });
 
+  it("route seed 71 (Aipom Baton Pass, party screen answered): the next body (Mega Drain) lends a known order, adapter active; ON/OFF parity", () => {
+    const on = generatedCommandAnimationReplay(71, "on", [2, 0], 0, false, true);
+    const off = generatedCommandAnimationReplay(71, "off", [2, 0], 0, false, true);
+    expectRulesEqual(on, off);
+    expect(on.state.round.rules.rngValue).toBe(off.state.round.rules.rngValue);
+    expect(JSON.stringify(on.state.facilityState)).toBe(JSON.stringify(off.state.facilityState));
+    // Before prep49 the Baton Pass returntoball invalidated the order host and Mega Drain fell back.
+    expect(on.animations.map(row => [row.moveId, row.attacker, row.adapterActive.length > 0 && row.adapterActive.every(Boolean)]))
+      .toEqual([[226, 0, true], [72, 0, true]]);
+    expect(bodies(on).map(row => row.spriteOrderInput !== undefined)).toEqual([true, true]);
+    expect(off.commands.every(row => row.spriteOrderInput === undefined)).toBe(true);
+    expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+  }, 120000);
+
   it("a reshow with the player battler but not the opponent's stays unobserved: invalidate", () => {
     const host = returnLiveSpriteOrderHostFromPartyMenu(hostAt(KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER), { player: true, opponent: false });
     expect(host.tracker.cursor.order.known).toBe(false);
