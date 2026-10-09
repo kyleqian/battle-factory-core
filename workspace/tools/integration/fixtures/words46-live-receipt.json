@@ -184,7 +184,7 @@
   "seeds": "0..299",
   "tool": "tools/integration/liveShareCensus.ts (base: git-archive copy of 553cef6b5)",
   "beforeSha256": "d4bb7e1c8461f97a6562e9f929c6dab72e2d7fd61cd3ca5c34650531ed22ee3f",
-  "afterSha256": "828fc28aad5b749b4d285812831f12ffa3d82a2f3219515f586fa4d3b8568111",
+  "afterSha256": "c63ad76b3f850a0984076cf0ed227b5a7264839878e3817cf9bd7bc2db98b64f",
   "liveByCount": [
    86.37,
    88.12
@@ -224,7 +224,8 @@
   "previouslyLiveNowFlagged": {
    "FLAMETHROWER": 4,
    "ROCK SLIDE": 3
-  }
+  },
+  "afterRunOn": "38d1c08af (tested src tree); an earlier run on 63e9c7320 differed only in classifier gate line numbers (liveMoveAnimation.ts:<line>) and the command digest that hashes them"
  },
  "unchanged": {
   "spriteOrderDeferredLendTest": "3/3",
