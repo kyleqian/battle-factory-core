@@ -22,6 +22,10 @@ ctl-thunderbolt-opp-c0.json              THUNDERBOLT  opponent units=0   live=1 
 ctl-thunderbolt-opp-c1.json              THUNDERBOLT  opponent units=2   live=1 order=1 alloc=0 harnessAlloc=False rows=237 exact=237 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
 ctl-thunderbolt-ply-c0.json              THUNDERBOLT  player   units=0   live=1 order=1 alloc=0 harnessAlloc=False rows=237 exact=237 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
 ctl-thunderbolt-ply-c1.json              THUNDERBOLT  player   units=2   live=1 order=1 alloc=0 harnessAlloc=False rows=237 exact=237 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+frz-light-screen-ply-c0.json             LIGHT_SCREEN player   units=2   live=1 order=1 alloc=1 harnessAlloc=True  rows=86 exact=86 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+frz-light-screen-ply-c1.json             LIGHT_SCREEN player   units=17  live=1 order=1 alloc=1 harnessAlloc=False rows=86 exact=86 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+frz-reflect-ply-c0.json                  REFLECT      player   units=2   live=1 order=1 alloc=1 harnessAlloc=True  rows=79 exact=79 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+frz-reflect-ply-c1.json                  REFLECT      player   units=17  live=1 order=1 alloc=1 harnessAlloc=False rows=79 exact=79 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
 future-sight-light-screen-opp-c0.json    LIGHT_SCREEN opponent units=1   live=1 order=1 alloc=1 harnessAlloc=True  rows=86 exact=86 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
 future-sight-light-screen-ply-c0.json    LIGHT_SCREEN player   units=1   live=1 order=1 alloc=1 harnessAlloc=True  rows=86 exact=85 px=2473 r1==r2=1 ages=59..59 | entry live=1 px=2473 r1==r2=1 win=1
 future-sight-protect-ply-c0.json         PROTECT      player   units=0   live=1 order=1 alloc=1 harnessAlloc=True  rows=123 exact=123 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
@@ -133,8 +137,12 @@ prz-protect-ply-c0.json                  PROTECT      player   units=0   live=1 
 prz-protect-ply-c1.json                  PROTECT      player   units=1   live=1 order=1 alloc=1 harnessAlloc=True  rows=123 exact=123 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
 prz-protect-ply-c2.json                  PROTECT      player   units=4   live=1 order=1 alloc=1 harnessAlloc=False rows=123 exact=123 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
 prz-reflect-ply-c0.json                  REFLECT      player   units=3   live=1 order=1 alloc=1 harnessAlloc=False rows=79 exact=79 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
-psn-light-screen-ply-c0.json             LIGHT_SCREEN player   units=2   live=1 order=1 alloc=1 harnessAlloc=True  rows=86 exact=86 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
-psn-reflect-ply-c0.json                  REFLECT      player   units=2   live=1 order=1 alloc=1 harnessAlloc=True  rows=79 exact=79 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+psn-light-screen-ply-c0.json             LIGHT_SCREEN player   units=3   live=1 order=1 alloc=1 harnessAlloc=False rows=86 exact=86 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+psn-protect-ply-c0.json                  PROTECT      player   units=0   live=1 order=1 alloc=1 harnessAlloc=True  rows=123 exact=123 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+psn-protect-ply-c1.json                  PROTECT      player   units=5   live=1 order=1 alloc=1 harnessAlloc=False rows=123 exact=123 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+psn-protect-ply-c2.json                  PROTECT      player   units=7   live=1 order=1 alloc=1 harnessAlloc=False rows=123 exact=123 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+psn-protect-ply-c3.json                  PROTECT      player   units=9   live=1 order=1 alloc=1 harnessAlloc=False rows=123 exact=123 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+psn-reflect-ply-c0.json                  REFLECT      player   units=3   live=1 order=1 alloc=1 harnessAlloc=False rows=79 exact=79 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
 pursuit-light-screen-ply-c0.json         LIGHT_SCREEN player   units=2   live=1 order=1 alloc=1 harnessAlloc=True  rows=86 exact=86 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
 pursuit-reflect-ply-c0.json              REFLECT      player   units=2   live=1 order=1 alloc=1 harnessAlloc=True  rows=79 exact=79 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
 seismic-toss-light-screen-opp-c0.json    LIGHT_SCREEN opponent units=2   live=1 order=1 alloc=1 harnessAlloc=True  rows=86 exact=86 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1

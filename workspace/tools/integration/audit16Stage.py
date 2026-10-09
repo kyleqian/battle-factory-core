@@ -36,6 +36,9 @@ CHAINS = {
     "psn-light-screen-ply": ("SLUDGE_BOMB", "LIGHT_SCREEN", "player", 5),
     "psn-reflect-ply": ("SLUDGE_BOMB", "REFLECT", "player", 5),
     "brn-light-screen-opp": ("WILL_O_WISP", "LIGHT_SCREEN", "opponent", 3),
+    "frz-light-screen-ply": ("ICE_BEAM", "LIGHT_SCREEN", "player", 6),
+    "frz-reflect-ply": ("ICE_BEAM", "REFLECT", "player", 6),
+    "psn-protect-ply": ("SLUDGE_BOMB", "PROTECT", "player", 5),
     "brn-reflect-ply": ("WILL_O_WISP", "REFLECT", "player", 3),
     # priority 2: prep52's newly net-zero bodies -> allocator consumer
     "seismic-toss-light-screen-ply": ("SEISMIC_TOSS", "LIGHT_SCREEN", "player", 3),
@@ -75,6 +78,11 @@ CHAINS = {
 }
 
 
+# lab seeds picked by audit16Sweep.py (seeds 1..24): the first seed whose ROM route puts the chance-based status animation before the consumer
+# (Sludge Bomb PSN 30 %, Ice Beam FRZ 10 %). A sleeping opponent CHANSEY was switched out by the AI on every swept seed (not staged).
+SEEDS = {"psn-light-screen-ply": 1, "psn-reflect-ply": 1, "psn-protect-ply": 3, "frz-light-screen-ply": 3, "frz-reflect-ply": 3}
+
+
 def lead(member: dict, species: int, move: int, fast: bool) -> dict:
     m = json.loads(json.dumps(member))
     m.update({"species": species, "moves": [move] * 4, "item": 0, "nature": 3 if fast else 7, "friendship": 70,
@@ -102,6 +110,7 @@ for name, (unit, consumer, side, cycles) in CHAINS.items():
             m["item"] = 0
     s["trace"] = trace(cycles)
     assert s["seed"] == 305420349
+    s["seed"] = SEEDS.get(name, s["seed"])
     (OUT / f"{name}.json").write_text(json.dumps(s, indent=1) + "\n")
 # priority 4 (later58): Signal Beam / Bonemerang (SNORLAX, faster) at LATER bodies after a CHANSEY predecessor OUTSIDE later58's probe set
 # (Quick Attack / Growl / Splash / own body): Thunder Wave + its PRZ animation (a status move), Double Team + stat (a stat boost), Sunny Day

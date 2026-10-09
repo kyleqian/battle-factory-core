@@ -22,6 +22,10 @@ ctl-thunderbolt-opp-c0.json units 0
 ctl-thunderbolt-opp-c1.json units 2
 ctl-thunderbolt-ply-c0.json units 0
 ctl-thunderbolt-ply-c1.json units 2
+frz-light-screen-ply-c0.json units 2
+frz-light-screen-ply-c1.json units 17
+frz-reflect-ply-c0.json units 2
+frz-reflect-ply-c1.json units 17
 future-sight-light-screen-opp-c0.json units 1
 future-sight-light-screen-ply-c0.json units 1
 future-sight-protect-ply-c0.json units 0
@@ -133,8 +137,12 @@ prz-protect-ply-c0.json units 0
 prz-protect-ply-c1.json units 1
 prz-protect-ply-c2.json units 4
 prz-reflect-ply-c0.json units 3
-psn-light-screen-ply-c0.json units 2
-psn-reflect-ply-c0.json units 2
+psn-light-screen-ply-c0.json units 3
+psn-protect-ply-c0.json units 0
+psn-protect-ply-c1.json units 5
+psn-protect-ply-c2.json units 7
+psn-protect-ply-c3.json units 9
+psn-reflect-ply-c0.json units 3
 pursuit-light-screen-ply-c0.json units 2
 pursuit-reflect-ply-c0.json units 2
 seismic-toss-light-screen-opp-c0.json units 2
