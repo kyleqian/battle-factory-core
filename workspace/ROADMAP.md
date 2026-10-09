@@ -2216,8 +2216,8 @@ fourteen-move physical batch is verified and folded. Helping Hand remains
 unaccepted pending legal doubles staging. No whole-playable arbitrary-history
 framebuffer exactness is claimed.
 
-Next (2026-10-09 morning): 242 scoped-exact + 13 faithful-random + 21 faithful-timing live adapters (census `242+13+21+0+0=276`;
-Icy Wind, Blizzard and Confuse Ray moved to faithful timing by counter-evidenced D4 accounting). The 2026-10-09 overnight session
+Next (2026-10-09 morning): 241 scoped-exact + 13 faithful-random + 22 faithful-timing live adapters (census `241+13+22+0+0=276`;
+Icy Wind, Blizzard, Confuse Ray and Faint Attack moved to faithful timing by counter-evidenced D4 accounting). The 2026-10-09 overnight session
 widened the HISTORIES in which existing adapters play live (no new adapters): prep44's allocator NET-ZERO ids; sprite-order
 invalidator chains + 18 + 20 more EXACT / keyed order plans (BRN, TURN_TRAP by wrapped move, WISH / INGRAIN heal, FRZ, NIGHTMARE,
 ITEM_KNOCKOFF, Hydro Pump, Reversal, Solar Beam / Razor Wind by turn, Present by branch, Ice Punch, Attract, ...); GEOMETRY-KEYED
@@ -2228,8 +2228,9 @@ non-consuming sub-stream) with per-command faithful-random-history accounting; D
 (`tools/integration/fixtures/live-share-census/report-seeds0-999-final-20261009.json`, src `f7cf9a74`): **87.23 % of
 move-animation commands / 91.13 % of frames live** (session start 77.68 / 78.76), of which faithful-random history 1.54 % / 1.81 %;
 seeds 50000..: 88.38 / 90.47; gameplay command sequence and battle digest identical at every fold. Resume points, by census frames:
-1. Sprite-order host stops (157k frames on seeds 0..999): recalls other than the AI voluntary switch ("return to ball": the
-   end-of-battle return, Baton Pass, player recalls — 19.7k), the post-KO next-mon summary / reshow units (22.5k), Shock Wave
+1. Sprite-order host stops (157k frames on seeds 0..999). FIRST land prep49 (`docs/next-adapters-prep49.md`, banked and
+   supervisor-reproduced: Baton Pass recalls, the AI voluntary switch's next-mon summary, the double-KO reshow; +52 commands /
+   +8,685 frames on seeds 0..299; the end-of-battle loss return needs no change). Then Shock Wave
    (opponent geometry), SUBSTITUTE_FADE and FOCUS_BAND (not reached in probes), Fury Cutter (needs the hit count on the event),
    Bounce / Fly / Dive later units, hail + HAIL_CONTINUES and Blizzard bodies (geometry), Water Spout (needs attacker HP).
 2. Allocator history (59k): Protect / Light Screen after status animations (SLP / CONFUSION / PSN: the crossedUnknownGraphics path)
@@ -2238,9 +2239,10 @@ seeds 50000..: 88.38 / 90.47; gameplay command sequence and battle digest identi
    Pulse, Double Team's slot gate after a deferred lend, Dig.
 4. Later bodies (20k): the x2-tracker rows (Quick Attack attacker, Return target "unknown") that keep ONIX / RATTATA later Dig /
    Return declining; Extrasensory, Signal Beam, Sheer Cold, Mach Punch, Memento, Sky Attack, Bonemerang, Fury Cutter.
-5. ISSUES #152 remainder: Faint Attack's player-side dominant short body (side-keyed restore-fade row + D4 entry), Double-Edge /
-   Attract rows, TYRANITAR rows; Substitute remainder; Ghost-type Curse provider; Dive attack body; Baton Pass flow; Endeavor W3.
-6. A live audit after every batch — tonight's chain audit (docs/live-audit-15-chains.md) checks consumers after the new units.
+5. ISSUES #152 remainder: Light Screen opponent row-59 VBlank-write phase (D4 entry with the no-hold dominant phase; patch banked
+   by audit 15), Double-Edge / Attract rows, TYRANITAR rows; Substitute remainder; Ghost-type Curse provider; Dive attack body; Baton Pass flow; Endeavor W3.
+6. A live audit after every batch — audit 15 (docs/live-audit-15-chains.md: 142 chain windows, no species / history defect) did
+   not reach the deferred lend after words units, battle-start seeds or Giga Drain predicted-flip pairs.
 Struggle (1,056 commands / 33.8k frames in the census) is not a Factory rental move and stays outside the 276 accepted bodies.
 Validate new adapters with alternate-species dense proofs whose windows come from
 the source activation frame, not only the accepted fixture species.

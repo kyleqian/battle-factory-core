@@ -25,6 +25,10 @@ history.
   (~20 min); (8) `prep48DigFixtures.py` hard-coded the healthbox status to none (false 190 px/row residuals, ~5 min); (9) the full
   suite (~11 min on a loaded box) exceeds the Bash tool's 600 s foreground limit — workers must run it in the background and read
   the log (~2 min).
+  (10) `replayPostKoTurnsThroughHost` takes no `bodyPlanAt` and has no pre-prompt battle-start segment, so chain fixtures decline
+  after Giga / Mega Drain and cannot express battle-start seeds (audit 15 wrote a parallel replay, ~8 min); (11) staged
+  species-audit / prep11 prep6-alt-base fixtures keep the 2344 frame window while their probe uses battle-lab frame numbers
+  (~3 min); (12) multi-file vitest runs need an explicit Bash `timeout` (the 120 s default backgrounds them, ~2 min).
 - **Hits:** 1 session, ~80 min across six workers.
 - **Fix:** default census runs to a progress line + document `timeout: 300000`; export one order-event-key helper from
   `liveSpriteOrderHost.ts` and import it in the tools; one shared receipt reader for net-zero audits.

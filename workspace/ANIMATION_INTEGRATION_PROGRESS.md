@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-09 (overnight) — S10A: allocator NET-ZERO ids landed; sprite-order chains + next plan tier (in progress)
+## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
 
 - Folded Sonnet worker `a56a4baaf` as `3092cf05f` (src tree `df965113`): prep44's 50 audited allocator NET-ZERO bodies appended
   to LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS (Future Sight 248 kept out: only its setup body was measured); pin extended to the
@@ -153,6 +153,24 @@
   `audit15Run.sh` into fresh dirs — main + entry-lend receipts byte-identical.
 - Final ordinary-play census on src `f7cf9a74` (seeds 0..999, two runs byte-identical): 87.23 % live by count / 91.13 % by frames
   (session start 77.68 / 78.76); seeds 50000..: 88.38 / 90.47 (`docs/live-share-census.md` "Latest").
+- Folded Opus worker `4240b9553` as `8c2a210fc` (src tree `f1f2de08`): Faint Attack (185) per-side restore lag derived from source
+  (`Task_FadeToBg` state 2 redraws the BG and starts the fade-in in one step; the optional lag at age 205 is that decompress frame
+  running past VBlank while the screen is black): player attacker no lag -> 220 rows (1 : 6 measured), opponent lag -> 221 rows
+  (2 : 1); `faintAttackRestoreProfile`. 10 windows x4 runs: policy phase 0 px both sides; other phase only on ages 203..218
+  (DELCATTY -> GOLEM 297,920 px, the accepted prep6 player body 281,024 px — now the documented other phase). Faint Attack scoped
+  exact -> faithful timing: census 241+13+22+0+0=276. d4a regression 243 fixtures 0 violations; worker gates 1,583 files /
+  13,031 tests, build, differential 624/624. Supervisor: fa185TimingCheck rerun fresh — all 10 windows == receipt.
+- prep49 (side, `23e921292`, new files only; banked for the next session): the remaining largest order stops classified from
+  script labels — "return to ball" = player Baton Pass (13 stops, 33 / 5,035: EXACT via the returntoball skip path), opponent Baton
+  Pass (EXACT), and the end-of-battle loss return (124; no change needed); "next-mon summary while the opponent battler is tracked" =
+  the Factory AI voluntary switch (the kernel's returnatktoball emits no visibility event — why prep47's opponent recall never fired;
+  EXACT at the next body edge); "reshow without the opponent battler" = double KO (new reshow plan `Cfee;Cfee;Cf`, EXACT). 8 jobs x2
+  fresh. Temp patch census seeds 0..299 on `239618051`: 92.01 -> 92.66 % by count, 93.38 -> 94.12 % by frames (+52 / +8,685), 0
+  regressions. Supervisor: `prep49Run.sh` into fresh dirs — all 10 receipts byte-identical.
+- Supervisor FINAL gates on `8c2a210fc` (src `f1f2de08`): typecheck, full suite 1,583 files / 13,031 tests, build, differential
+  624/624 vs `239618051`, census seeds 0..299 92.01 % / 93.38 % (`final-supervisor-gates-20261009.json`). Preview
+  <http://127.0.0.1:5191/> serves `478f735bb` (4 samples hash-equal, session export + ON->OFF restart, no errors;
+  `playable-preview-478f735bb-receipt.json`).
 
 ## 2026-10-08 (overnight) — S10A: Substitute presentation live, deferred order lend, live-share census, sprite-order plans; 245 + 13 + 18
 

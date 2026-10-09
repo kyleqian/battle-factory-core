@@ -65,15 +65,10 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 - **Audit 14 (`docs/live-species-audit-14.md`, 2026-10-08):** FIXED in `2ba4da4a3`: fade row-0 shadow, Confuse Ray / Bite
   idle-rest opponent attacker; the Confuse Ray CPU phase is a D4 policy entry since `7993b02fd` (d4tails). Open: Double-Edge row 33
   with an idle-rest opponent attacker (410 / 1,091 px), Attract GOLBAT one full-field row.
-- **Faint Attack (185) short bodies (counted 2026-10-09, `d4tails-live-receipt.json` `faintAttack`):** the short body lacks the
-  optional lag at age 205 (fixed lags 80, 81, 108, 109, 182, 183). Opponent side 2 lag : 1 short; PLAYER side 6 short : 1 long
-  (the accepted prep6 body is the long one) — so on the player side the dominant phase is the SHORT body, and the live adapter
-  renders the long body on both sides (the restore fade lands one row late on most player-side pairs; 297,920 px on ages 203..218
-  for DELCATTY -> GOLEM). Stays scoped exact for the accepted scope. Resume: a side-keyed restore-fade row in the renderer + a D4
-  policy entry (moves Faint Attack to faithful timing).
 - **Blizzard (59) opponent pairs whose impact-start age is not 197** (194..206 by geometry) DECLINE (fixed live duration 361;
   ARBOK -> CATERPIE runs 361 rows where age-197 pairs run 360; their lags shift by one row). Resume: a geometry-derived duration.
-  (The Icy Wind / Blizzard / Confuse Ray short-body CPU phase is a D4 policy entry since `7993b02fd`.)
+  (The Icy Wind / Blizzard / Confuse Ray short-body CPU phase is a D4 policy entry since `7993b02fd`; Faint Attack per side since
+  `8c2a210fc`.)
 - **Light Screen (113) opponent attacker, row 59 (audit 15, 2026-10-09, `docs/live-audit-15-chains.md`):** production hard-codes a
   one-row BLDALPHA hold (`src/animation/lightScreen.ts:79`, reducer age 52) that the ROM shows only when the blend write stays
   buffered (SNORLAX / CHANSEY first body; the accepted EXEGGCUTE / ONIX after-Tackle route); in 9 of 10 live opponent windows the
