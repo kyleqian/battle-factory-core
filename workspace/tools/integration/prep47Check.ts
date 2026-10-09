@@ -6,11 +6,28 @@
 // must equal the next), a 1-sprite create + paired destroy is the hit blip (hit-animation; F after the pair). Anything else stops the
 // gap ("other"). The tracker's free order after the gap must equal the next unit's first-frame ROM free order (edge exact).
 // Spans: between consecutive bodies of the job's locked move on the locked side, the number of prompt pairs (P) and the gap tokens.
+// Host: every prompt pair of an opponent-locked job also goes through the production host entry points (hostBoundary below).
 // usage: node --experimental-strip-types tools/integration/prep47Check.ts <units.json> <out.json>
 import { readFileSync, writeFileSync } from "node:fs";
 import {
   applySpriteOrderPresentationEvent, createSpriteOrderTracker, type SpriteOrderPresentationEvent, type SpriteOrderTracker,
 } from "../../src/engine/spriteOrderEventTransform.ts";
+import { advanceLiveSpriteOrderHost, beginLiveSpriteOrderTurn, createLiveSpriteOrderHost, type LiveSpriteOrderHost } from "../../src/engine/liveSpriteOrderHost.ts";
+
+/**
+ * Host-level replay of one retained continuation boundary (factoryRoundBattleOrchestrator.ts beginCommandResolution with a retained owner):
+ * the order host sits on the retained resolution (request 7) with its last segment drained and the tracker at the ROM free order F0 of
+ * the boundary gap (after any hit blip of the gap); the intervening command's beginLiveSpriteOrderTurn(host, 7, promptShown) then the
+ * appended continuation segment's advance (no events here). Returns the free order, or null when unknown.
+ */
+function hostBoundary(free: readonly number[], promptShown: boolean): readonly number[] | null {
+  const base = createLiveSpriteOrderHost({ known: true, free, pendingDestroyed: [] });
+  const host: LiveSpriteOrderHost = Object.freeze({ ...base, promptRequestId: 7,
+    cursor: Object.freeze({ requestId: 7, segmentIndex: 0, nextEventIndex: 0, drained: true }) });
+  const begun = beginLiveSpriteOrderTurn(host, 7, promptShown);
+  const advanced = advanceLiveSpriteOrderHost(begun, { resolutionId: { requestId: 7 }, segmentIndex: 1, segments: [{ events: [] }, { events: [] }] }, 0);
+  return advanced.tracker.cursor.order.known ? advanced.tracker.cursor.order.free : null;
+}
 
 interface Win { f: number; C: [number, string][]; D: number[]; F: number[] }
 interface Unit { kind: string; label: string; frame: number; F0: number[]; truncated: boolean; strayFChanges: number; windows: Win[] }
@@ -24,7 +41,9 @@ const occupiedOf = (t: SpriteOrderTracker) => sorted(t.cursor.occupied);
 
 const result: Record<string, unknown> = {};
 const totals = { jobs: 0, identicalAB: 0, gaps: 0, promptPairs: 0, promptPairsExact: 0, hitBlips: 0, hitBlipsExact: 0, otherWindows: 0,
-  edgesChecked: 0, edgesExact: 0, spans: 0, spansAsExpected: 0 };
+  edgesChecked: 0, edgesExact: 0, spans: 0, spansAsExpected: 0,
+  // every opponent-locked boundary prompt pair through the host: promptShown true (patch) / false (master: retained -> invalidates)
+  hostBoundaries: 0, hostExactPromptShown: 0, hostKnownPromptHidden: 0 };
 for (const [id, job] of Object.entries(jobs).sort(([l], [r]) => l.localeCompare(r))) {
   totals.jobs += 1; if (job.identicalAB) totals.identicalAB += 1;
   const lockedSide = job.unit.startsWith("OPP_") ? "opponent" : "player";
@@ -56,6 +75,13 @@ for (const [id, job] of Object.entries(jobs).sort(([l], [r]) => l.localeCompare(
       const paired = n !== undefined && n.C.length === 0 && w.D.length === 0 && same(sorted(n.D), sorted(made)) && w.C.every(([, m]) => m === "f");
       if (paired && made.length === 2) {
         totals.promptPairs += 1; pairs += 1; text += "P";
+        if (lockedSide === "opponent" && tracker.cursor.order.known) {
+          totals.hostBoundaries += 1;
+          const shown = hostBoundary(tracker.cursor.order.free, true);
+          if (shown !== null && same(shown, n!.F)) totals.hostExactPromptShown += 1;
+          else problems.push(`gap ${index} f${w.f}: host boundary (promptShown) != ROM`);
+          if (hostBoundary(tracker.cursor.order.free, false) !== null) totals.hostKnownPromptHidden += 1;
+        }
         const a = step({ kind: "action-prompt" }, w, "created");
         const b = step({ kind: "actions-committed" }, n!, "destroyed");
         if (a && b) totals.promptPairsExact += 1;

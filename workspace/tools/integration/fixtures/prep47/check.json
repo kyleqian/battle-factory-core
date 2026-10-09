@@ -12,7 +12,10 @@
   "edgesChecked": 114,
   "edgesExact": 114,
   "spans": 36,
-  "spansAsExpected": 36
+  "spansAsExpected": 36,
+  "hostBoundaries": 36,
+  "hostExactPromptShown": 36,
+  "hostKnownPromptHidden": 0
  },
  "jobs": {
   "dig-opp": {
