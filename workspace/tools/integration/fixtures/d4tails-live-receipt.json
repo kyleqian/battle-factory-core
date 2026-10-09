@@ -1,0 +1,1132 @@
+{
+ "schema": "d4tails-live-receipt/v1",
+ "step": "S10A d4tails: D4 accounting of the short-body / early fade-restore CPU-phase class (Icy Wind, Blizzard, Faint Attack) and the Confuse Ray phase",
+ "testedSrcTree": "b6c517910f838554d6f94bc6c597c4032148884c",
+ "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+ "counters": {
+  "file": "tools/integration/fixtures/d4tails/counters.json",
+  "scenarios": 46,
+  "allR0EqualsR1": true,
+  "icyWind": {
+   "bodies": 15,
+   "lag261": 11,
+   "fixed": [
+    241,
+    242
+   ]
+  },
+  "blizzard": {
+   "bodies": 13,
+   "playerLag347": 7,
+   "opponentLag336": 3,
+   "opponentNoLag": 1,
+   "geometryShifted": "ARBOK -> CATERPIE [337, 358, 359], WEEZING -> BLASTOISE [335, 356, 357] (impact start != 197; declined; not counted)"
+  }
+ },
+ "windows": [
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/altspecies3-icy-wind-opponent-poliwhirl-player-onix.json",
+   "move": "ICY_WIND",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 287,
+   "expectedDuration": 287,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/blizzard-opponent-blastoise-blastoise.json",
+   "move": "BLIZZARD",
+   "measuredPhase": "no-event",
+   "policyPhase": "event",
+   "selectedPhase": false,
+   "rows": 360,
+   "expectedDuration": 361,
+   "px": [
+    262640,
+    262640,
+    262640,
+    262640
+   ],
+   "affectedAges": [
+    338,
+    339,
+    340,
+    341,
+    342,
+    343,
+    344,
+    345,
+    346,
+    347,
+    348,
+    349,
+    350,
+    351,
+    352,
+    353
+   ],
+   "maxPixelsPerRow": 16415,
+   "digestsIdentical": true,
+   "documentedAges": [
+    338,
+    339,
+    340,
+    341,
+    342,
+    343,
+    344,
+    345,
+    346,
+    347,
+    348,
+    349,
+    350,
+    351,
+    352,
+    353
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/blizzard-opponent-blastoise-ivysaur.json",
+   "move": "BLIZZARD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 361,
+   "expectedDuration": 361,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/blizzard-opponent-zubat-nidoking.json",
+   "move": "BLIZZARD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 361,
+   "expectedDuration": 361,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/blizzard-player-bulbasaur-hoppip.json",
+   "move": "BLIZZARD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 372,
+   "expectedDuration": 372,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/blizzard-player-bulbasaur-metapod.json",
+   "move": "BLIZZARD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 372,
+   "expectedDuration": 372,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/blizzard-player-charizard-golbat.json",
+   "move": "BLIZZARD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 372,
+   "expectedDuration": 372,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/blizzard-player-charizard-wartortle.json",
+   "move": "BLIZZARD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 372,
+   "expectedDuration": 372,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/blizzard-player-onix-masquerain.json",
+   "move": "BLIZZARD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 372,
+   "expectedDuration": 372,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/blizzard-player-wartortle-hoppip.json",
+   "move": "BLIZZARD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 372,
+   "expectedDuration": 372,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/confuse-ray-opponent-chinchou-player-onix.json",
+   "move": "CONFUSE_RAY",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 270,
+   "expectedDuration": 270,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/confuse-ray-player-chinchou-opponent-onix.json",
+   "move": "CONFUSE_RAY",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 270,
+   "expectedDuration": 270,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/icy-wind-opponent-fearow-weedle.json",
+   "move": "ICY_WIND",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 287,
+   "expectedDuration": 287,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/icy-wind-opponent-kadabra-bulbasaur.json",
+   "move": "ICY_WIND",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 287,
+   "expectedDuration": 287,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/icy-wind-opponent-luvdisc-bulbasaur.json",
+   "move": "ICY_WIND",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 287,
+   "expectedDuration": 287,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/icy-wind-opponent-masquerain-onix.json",
+   "move": "ICY_WIND",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 287,
+   "expectedDuration": 287,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/icy-wind-opponent-zubat-butterfree.json",
+   "move": "ICY_WIND",
+   "measuredPhase": "no-event",
+   "policyPhase": "event",
+   "selectedPhase": false,
+   "rows": 286,
+   "expectedDuration": 287,
+   "px": [
+    330022,
+    330022,
+    330022,
+    330022
+   ],
+   "affectedAges": [
+    263,
+    264,
+    265,
+    266,
+    267,
+    268,
+    269,
+    270,
+    271,
+    272,
+    273,
+    274,
+    275,
+    276,
+    277,
+    278,
+    280,
+    285
+   ],
+   "maxPixelsPerRow": 19001,
+   "digestsIdentical": true,
+   "documentedAges": [
+    263,
+    264,
+    265,
+    266,
+    267,
+    268,
+    269,
+    270,
+    271,
+    272,
+    273,
+    274,
+    275,
+    276,
+    277,
+    278,
+    280,
+    285
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/icy-wind-opponent-zubat-onix.json",
+   "move": "ICY_WIND",
+   "measuredPhase": "no-event",
+   "policyPhase": "event",
+   "selectedPhase": false,
+   "rows": 286,
+   "expectedDuration": 287,
+   "px": [
+    334630,
+    334630,
+    334630,
+    334630
+   ],
+   "affectedAges": [
+    263,
+    264,
+    265,
+    266,
+    267,
+    268,
+    269,
+    270,
+    271,
+    272,
+    273,
+    274,
+    275,
+    276,
+    277,
+    278,
+    280,
+    285
+   ],
+   "maxPixelsPerRow": 19257,
+   "digestsIdentical": true,
+   "documentedAges": [
+    263,
+    264,
+    265,
+    266,
+    267,
+    268,
+    269,
+    270,
+    271,
+    272,
+    273,
+    274,
+    275,
+    276,
+    277,
+    278,
+    280,
+    285
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/icy-wind-player-bulbasaur-metapod.json",
+   "move": "ICY_WIND",
+   "measuredPhase": "no-event",
+   "policyPhase": "event",
+   "selectedPhase": false,
+   "rows": 286,
+   "expectedDuration": 287,
+   "px": [
+    349057,
+    349057,
+    349057,
+    349057
+   ],
+   "affectedAges": [
+    263,
+    264,
+    265,
+    266,
+    267,
+    268,
+    269,
+    270,
+    271,
+    272,
+    273,
+    274,
+    275,
+    276,
+    277,
+    278,
+    280,
+    285
+   ],
+   "maxPixelsPerRow": 20321,
+   "digestsIdentical": true,
+   "documentedAges": [
+    263,
+    264,
+    265,
+    266,
+    267,
+    268,
+    269,
+    270,
+    271,
+    272,
+    273,
+    274,
+    275,
+    276,
+    277,
+    278,
+    280,
+    285
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/icy-wind-player-fearow-charizard.json",
+   "move": "ICY_WIND",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 287,
+   "expectedDuration": 287,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/icy-wind-player-onix-golbat.json",
+   "move": "ICY_WIND",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 287,
+   "expectedDuration": 287,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/icy-wind-player-onix-masquerain.json",
+   "move": "ICY_WIND",
+   "measuredPhase": "no-event",
+   "policyPhase": "event",
+   "selectedPhase": false,
+   "rows": 286,
+   "expectedDuration": 287,
+   "px": [
+    329305,
+    329305,
+    329305,
+    329305
+   ],
+   "affectedAges": [
+    263,
+    264,
+    265,
+    266,
+    267,
+    268,
+    269,
+    270,
+    271,
+    272,
+    273,
+    274,
+    275,
+    276,
+    277,
+    278,
+    280,
+    285
+   ],
+   "maxPixelsPerRow": 19618,
+   "digestsIdentical": true,
+   "documentedAges": [
+    263,
+    264,
+    265,
+    266,
+    267,
+    268,
+    269,
+    270,
+    271,
+    272,
+    273,
+    274,
+    275,
+    276,
+    277,
+    278,
+    280,
+    285
+   ],
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/icy-wind-player-rattata-charizard.json",
+   "move": "ICY_WIND",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 287,
+   "expectedDuration": 287,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/icy-wind-player-venusaur-luvdisc.json",
+   "move": "ICY_WIND",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 287,
+   "expectedDuration": 287,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/prep2-blizzard-opponent.json",
+   "move": "BLIZZARD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 361,
+   "expectedDuration": 361,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/prep2-blizzard-player.json",
+   "move": "BLIZZARD",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 372,
+   "expectedDuration": 372,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/prep2-icy-wind-opponent.json",
+   "move": "ICY_WIND",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 287,
+   "expectedDuration": 287,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/d4tails/windows/prep2-icy-wind-player.json",
+   "move": "ICY_WIND",
+   "measuredPhase": "event",
+   "policyPhase": "event",
+   "selectedPhase": true,
+   "rows": 287,
+   "expectedDuration": 287,
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": []
+  }
+ ],
+ "summary": {
+  "ICY_WIND": {
+   "windows": 15,
+   "policyPhaseZeroPx": 11,
+   "otherPhase": 4,
+   "violations": 0
+  },
+  "BLIZZARD": {
+   "windows": 11,
+   "policyPhaseZeroPx": 10,
+   "otherPhase": 1,
+   "violations": 0
+  },
+  "CONFUSE_RAY": {
+   "windows": 2,
+   "policyPhaseZeroPx": 2,
+   "otherPhase": 0,
+   "violations": 0
+  }
+ },
+ "confuseRay": {
+  "method": "uninstrumented production windows: tools/integration/speciesAudit14SwapProbes.sh + speciesAudit14SwapRun.sh (prep40Probe, attdollLiveCheck.ts unchanged) on the d4w-cr s14plain and audit-14 s14swap Confuse Ray scenarios, two passes x two fresh runs; plus d4aTimingCheck on the accepted CHINCHOU P / O windows",
+  "passesIdentical": true,
+  "long": 11,
+  "longZeroPx": 11,
+  "short": 3,
+  "shortBodies": [
+   {
+    "window": "s14plain-rattata-confuse-ray-opponent (plain, opponent)",
+    "rows": 269,
+    "bodyRows": 269,
+    "px": [
+     293728,
+     293728
+    ],
+    "r1EqualsR2": true,
+    "bad": "251..266",
+    "maxPixelsPerRow": 18358,
+    "bodyAges": "251..266"
+   },
+   {
+    "window": "s14swap-onix-confuse-ray-opponent (swap, opponent)",
+    "compositeRows": 350,
+    "bodyRows": 269,
+    "px": [
+     305949,
+     305949
+    ],
+    "r1EqualsR2": true,
+    "bad": "292..307,311..329,336..349",
+    "maxPixelsPerRow": 17036,
+    "bodyAges": "251..266",
+    "note": "composite rows 292..307 = body ages 251..266 (offset 41); the swap-back rows 311..329, 336..349 run one row early too (docs/live-species-audit-14.md)"
+   },
+   {
+    "window": "s14swap-pichu-confuse-ray-player (plain, player)",
+    "rows": 269,
+    "bodyRows": 269,
+    "px": [
+     283824,
+     283824
+    ],
+    "r1EqualsR2": true,
+    "bad": "251..266",
+    "maxPixelsPerRow": 17739,
+    "bodyAges": "251..266"
+   }
+  ],
+  "productionWindows": [
+   {
+    "window": "s14plain-flygon-confuse-ray-opponent (plain, opponent)",
+    "rows": 270,
+    "bodyRows": 270,
+    "px": [
+     0,
+     0
+    ],
+    "r1EqualsR2": true,
+    "bad": "",
+    "maxPixelsPerRow": 0
+   },
+   {
+    "window": "s14plain-flygon-confuse-ray-opponent (plain, opponent)",
+    "rows": 270,
+    "bodyRows": 270,
+    "px": [
+     0,
+     0
+    ],
+    "r1EqualsR2": true,
+    "bad": "",
+    "maxPixelsPerRow": 0
+   },
+   {
+    "window": "s14plain-golbat-confuse-ray-opponent (plain, opponent)",
+    "rows": 270,
+    "bodyRows": 270,
+    "px": [
+     0,
+     0
+    ],
+    "r1EqualsR2": true,
+    "bad": "",
+    "maxPixelsPerRow": 0
+   },
+   {
+    "window": "s14plain-golbat-confuse-ray-opponent (plain, opponent)",
+    "rows": 270,
+    "bodyRows": 270,
+    "px": [
+     0,
+     0
+    ],
+    "r1EqualsR2": true,
+    "bad": "",
+    "maxPixelsPerRow": 0
+   },
+   {
+    "window": "s14plain-onix-confuse-ray-opponent (plain, opponent)",
+    "rows": 270,
+    "bodyRows": 270,
+    "px": [
+     0,
+     0
+    ],
+    "r1EqualsR2": true,
+    "bad": "",
+    "maxPixelsPerRow": 0
+   },
+   {
+    "window": "s14plain-onix-confuse-ray-opponent (plain, opponent)",
+    "rows": 270,
+    "bodyRows": 270,
+    "px": [
+     0,
+     0
+    ],
+    "r1EqualsR2": true,
+    "bad": "",
+    "maxPixelsPerRow": 0
+   },
+   {
+    "window": "s14plain-rattata-confuse-ray-opponent (plain, opponent)",
+    "rows": 270,
+    "bodyRows": 270,
+    "px": [
+     0,
+     0
+    ],
+    "r1EqualsR2": true,
+    "bad": "",
+    "maxPixelsPerRow": 0
+   },
+   {
+    "window": "s14plain-rattata-confuse-ray-opponent (plain, opponent)",
+    "rows": 269,
+    "bodyRows": 269,
+    "px": [
+     293728,
+     293728
+    ],
+    "r1EqualsR2": true,
+    "bad": "251..266",
+    "maxPixelsPerRow": 18358,
+    "bodyAges": "251..266"
+   },
+   {
+    "window": "s14swap-onix-confuse-ray-opponent (swap, opponent)",
+    "compositeRows": 350,
+    "bodyRows": 269,
+    "px": [
+     305949,
+     305949
+    ],
+    "r1EqualsR2": true,
+    "bad": "292..307,311..329,336..349",
+    "maxPixelsPerRow": 17036,
+    "bodyAges": "251..266",
+    "note": "composite rows 292..307 = body ages 251..266 (offset 41); the swap-back rows 311..329, 336..349 run one row early too (docs/live-species-audit-14.md)"
+   },
+   {
+    "window": "s14swap-pichu-confuse-ray-player (plain, player)",
+    "rows": 269,
+    "bodyRows": 269,
+    "px": [
+     283824,
+     283824
+    ],
+    "r1EqualsR2": true,
+    "bad": "251..266",
+    "maxPixelsPerRow": 17739,
+    "bodyAges": "251..266"
+   },
+   {
+    "window": "s14swap-pichu-confuse-ray-player (plain, player)",
+    "rows": 270,
+    "bodyRows": 270,
+    "px": [
+     0,
+     0
+    ],
+    "r1EqualsR2": true,
+    "bad": "",
+    "maxPixelsPerRow": 0
+   },
+   {
+    "window": "s14swap-steelix-confuse-ray-opponent (swap, opponent)",
+    "compositeRows": 351,
+    "bodyRows": 270,
+    "px": [
+     0,
+     0
+    ],
+    "r1EqualsR2": true,
+    "bad": "",
+    "maxPixelsPerRow": 0
+   }
+  ],
+  "lagPosition": "instrumented counters: 249 in 9 bodies, 250 in 3 (FLYGON / GOLBAT opponent @3410, PICHU player @1771), none in 2; the 270-row @3410 bodies (counted lag 250) are 0 px, so 249 vs 250 is display-neutral",
+  "instrumentCaveat": "PICHU player @1771 counts a lag at 250 and 270 rows under the counter instrument (PlayTimeCounter_Update enabled every pass) but runs 269 rows in the uninstrumented production probe (residual 251..266): the phase of a window is its uninstrumented ROM body length; the counters are mechanism evidence"
+ },
+ "faintAttack": {
+  "landed": false,
+  "class": "same CPU-phase class: fixed lags 80, 81, 108, 109, 182, 183 in all 9 bodies; the optional lag at 205 present -> 226 body rows, absent -> 225 (the restore fade one row early, ages 203..218)",
+  "bodies": [
+   {
+    "scenario": "tools/battle-lab/s10aside-faint-attack-opponent-delcatty-player-golem.json",
+    "bodyRows": 225,
+    "lagAges": [
+     80,
+     81,
+     108,
+     109,
+     182,
+     183
+    ]
+   },
+   {
+    "scenario": "tools/battle-lab/s10aside-faint-attack-opponent-golbat-player-golem.json",
+    "bodyRows": 226,
+    "lagAges": [
+     80,
+     81,
+     108,
+     109,
+     182,
+     183,
+     205
+    ]
+   },
+   {
+    "scenario": "tools/battle-lab/s10aside-faint-attack-opponent-grovyle-player-onix.json",
+    "bodyRows": 226,
+    "lagAges": [
+     80,
+     81,
+     108,
+     109,
+     182,
+     183,
+     205
+    ]
+   },
+   {
+    "scenario": "tools/integration/fixtures/altspecies3-scenarios/faint-attack-player-murkrow-opponent-onix.json",
+    "bodyRows": 225,
+    "lagAges": [
+     80,
+     81,
+     108,
+     109,
+     182,
+     183
+    ]
+   },
+   {
+    "scenario": "tools/integration/fixtures/altspecies3-scenarios/faint-attack-player-onix-opponent-grovyle.json",
+    "bodyRows": 225,
+    "lagAges": [
+     80,
+     81,
+     108,
+     109,
+     182,
+     183
+    ]
+   },
+   {
+    "scenario": "tools/battle-lab/prep11-audit-golem-prep6-faint-attack-alt-base.json",
+    "bodyRows": 225,
+    "lagAges": [
+     80,
+     81,
+     108,
+     109,
+     182,
+     183
+    ]
+   },
+   {
+    "scenario": "tools/battle-lab/species-audit-golbat-prep6-faint-attack-alt-base.json",
+    "bodyRows": 225,
+    "lagAges": [
+     80,
+     81,
+     108,
+     109,
+     182,
+     183
+    ]
+   },
+   {
+    "scenario": "tools/battle-lab/species-audit-golem-prep6-faint-attack-alt-base.json",
+    "bodyRows": 225,
+    "lagAges": [
+     80,
+     81,
+     108,
+     109,
+     182,
+     183
+    ]
+   },
+   {
+    "scenario": "tools/battle-lab/species-audit-shuckle-prep6-faint-attack-alt-base.json",
+    "bodyRows": 225,
+    "lagAges": [
+     80,
+     81,
+     108,
+     109,
+     182,
+     183
+    ]
+   }
+  ],
+  "perSide": {
+   "opponent": {
+    "lag": 2,
+    "noLag": 1,
+    "note": "GOLBAT -> GOLEM, GROVYLE -> ONIX lag; DELCATTY -> GOLEM none"
+   },
+   "player": {
+    "lag": 0,
+    "noLag": 6,
+    "note": "MURKROW -> ONIX, ONIX -> GROVYLE (altspecies3; prep6 receipt 286,928 / 281,024 px on the tail) and the 4 banked species-audit prep6-alt-base bodies: none; the accepted prep6 player body (staged probe, not counter-instrumentable) is 0 px under the live long body, i.e. lag (1 by pixels)"
+   }
+  },
+  "reason": "the player-side dominant phase is NO lag (6 : 1), but the live adapter renders the long (lag) body on both sides (liveMoveAnimationDuration(185) = 221 from activation + 4); a faithful player-side policy needs the adapter to end the player restore fade one row earlier, a presentation change outside this grant (renderer change not expected) -> not landed, Faint Attack stays scoped exact"
+ },
+ "census": "245+13+18 -> 242+13+21 (node tools/integration/remainingAdaptersCensus.mjs --write --doc)",
+ "commands": [
+  "sh tools/integration/d4tailsCounters.sh SCRATCH/counters 12 SCRATCH/counters.json $(cat tools/integration/fixtures/d4tails/scenarios.txt)",
+  "python3 -I tools/integration/d4tailsWindows.py",
+  "OUT=SCRATCH/checkA P=10 sh tools/integration/d4tailsTimingCheck.sh; OUT=SCRATCH/checkB P=10 sh tools/integration/d4tailsTimingCheck.sh",
+  "OUT=SCRATCH/crprobe SC=<dir: d4w-cr/scenarios/*.json + species-audit-14/swap-scenarios/s14swap-*confuse-ray*.json + fixtures/d4tails/confuse-ray-production/list.tsv> sh tools/integration/speciesAudit14SwapProbes.sh; sh tools/integration/speciesAudit14SwapRun.sh SCRATCH/crprobe <dir> SCRATCH/crrec 8",
+  "python3 -I tools/integration/d4tailsReceipt.py SCRATCH/checkA SCRATCH/checkB $(git rev-parse HEAD:workspace/src)"
+ ]
+}

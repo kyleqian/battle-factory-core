@@ -35,6 +35,10 @@ Implements the accounting and policy of `docs/faithful-timing.md` (D4, approved 
 | PSYCHIC 94 | optional lag at ROM body age 124 (closing fade; adapter window = ROM rows 5..144) | 101, 102 | 142 | lag 145: 26, no lag 144: 2 | lag (145 rows) | no |
 | EXTREME_SPEED 245 | optional lag at age 292 (before the fixed pair 312 / 313, which then land on 313 / 314) | 312, 313 | 318 | lag 321: 38, no lag 320: 4 | lag (321 rows) | no |
 | DIVE 291 (opponent setup) | optional lag at age 64 (absorbed: 115 rows either way; rows 66..95 one row late) | - | 115 | lag: 1, no lag: 6 | no lag | no |
+| ICY_WIND 196 | optional lag at age 261 (restorebg LoadDefaultBg frame overruns VBlank) | 241, 242 | 284 | lag 287: 11, no lag 286: 4 | lag (287 rows) | no |
+| BLIZZARD 59 (player) | optional lag at age 347 (before the fixed pair 368 / 369) | 367, 368 | 369 | lag 372: 7, no lag 371: 0 | lag (372 rows) | no |
+| BLIZZARD 59 (opponent, impact 197) | optional lag at age 336 (before the fixed pair 357 / 358; 356 / 357 without it) | 356, 357 | 358 | lag 361: 3, no lag 360: 1 | lag (361 rows) | no |
+| CONFUSE_RAY 109 | optional lag at age 249 (250 in some histories; both precede the fade's first changed row 251) | 26, 229, 230 | 266 | lag 270: 11, no lag 269: 3 (production window lengths) | lag (270 rows) | no |
 
 Measurements: `tools/integration/fixtures/prep25/lag-frames.json` (2 of 4 each, a tie) + the D4a tie-break
 `tools/integration/fixtures/d4a/lag-frames-tiebreak.json` (4 more scenarios per move by the same method, 3 of 4 with the lag each).
@@ -94,3 +98,21 @@ Pursuit `optional-lag-age` 82 (fixed lags 60, 61; 24 lag : 9 no-lag of 33 measur
 `tools/integration/fixtures/d4w-live-receipt.json` (fresh prep41 counters byte-identical to the banked receipts; 33 Pursuit windows incl. 12
 lb26 second bodies (`d4wBody2Windows.py`, HP from the probe's stageFacts) and 10 Hidden Power windows, `d4wDense.sh` twice fresh: policy
 phase 0 px, other phase only ages 84..99 / 65..179), `tests/animation/liveD4wWidening.test.ts`.
+
+## d4tails reclassification (S10A, ISSUES #152 short bodies / audit-14 Confuse Ray)
+
+Icy Wind (196), Blizzard (59) and Confuse Ray (109) moved from scoped exact to faithful timing (#151 precedent; no adapter / renderer
+change: the shipped phase is the long body the adapters already rendered, 287 / 372 + 361 / 270 rows). Fresh counters
+(`tools/integration/d4tailsCounters.sh`, 46 scenarios x 2 fresh direct-mGBA runs, r0 == r1, `fixtures/d4tails/counters.json`) show each
+short body is the same CPU-phase class: the identical fixed lags plus one absent optional lag, every earlier row exact (no geometry or script
+difference). Blizzard is per side (player 7 : 0; opponent impact-197 3 : 1; the impact-start != 197 controls ARBOK -> CATERPIE /
+WEEZING -> BLASTOISE are geometry, declined and not counted). Confuse Ray's lag lands at 249 or 250 by history; both are display-neutral
+(270-row @3410 bodies counted at 250 are 0 px), and the counter instrument itself can add this borderline lag (PICHU @1771: 270 rows
+instrumented, 269 in the production probe), so its phase counts are uninstrumented window lengths. Census: 242 scoped exact + 13 faithful
+random + 21 faithful timing = 276. Proof: `tools/integration/fixtures/d4tails-live-receipt.json` (28 d4aTimingCheck windows twice fresh:
+23 policy phase 0 px; Icy Wind other phase only 18 of ages 263..285, Blizzard BLASTOISE -> BLASTOISE 338..353; Confuse Ray production
+windows 11 long 0 px, 3 short only body ages 251..266), `tests/animation/liveD4tailsTiming.test.ts`.
+
+Faint Attack (185) is the same class (fixed lags 80, 81, 108, 109, 182, 183; optional 205: 226 / 225 rows) but is NOT landed: its
+player-side dominant phase is no lag (6 counted short bodies : the accepted prep6 body, long by pixels), while the live adapter renders the
+long body on both sides; a faithful player-side policy needs the restore fade one row earlier there (a presentation change). Opponent 2 : 1.

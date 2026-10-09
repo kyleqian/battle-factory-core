@@ -212,7 +212,7 @@ const liveIceBallCounter = (rolloutCounter: number | undefined): 0 | 1 | 2 | 3 |
 
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   2, 5, 9, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 42, 43, 44, 47, 48, 49, 50,
-  51, 55, 65, 66, 67, 68, 74, 75, 78, 79, 83, 92, 93, 95, 97, 101, 103, 105, 106, 108, 109, 112, 113,
+  51, 55, 65, 66, 67, 68, 74, 75, 78, 79, 83, 92, 93, 95, 97, 101, 103, 105, 106, 108, 112, 113,
   114, 115, 122, 124, 131, 136, 147, 148, 151, 154, 156, 158, 162, 163, 172, 178, 180, 182, 186, 188, 201, 204,
   208, 211, 213, 223, 227, 231, 232, 235, 243, 246, 247, 257, 264, 272, 277, 280, 281, 287, 290, 302,
   305, 306, 319, 320, 321, 325, 334, 335, 336, 337, 342, 343, 347,
@@ -276,8 +276,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   135,
   // prep2 (docs/next-adapters-prep2.md s2): Surf + Muddy Water share one branch.
   57, 330,
-  // prep2: anchor-derived effect geometry.
-  196, 59,
+  // prep2: anchor-derived effect geometry: Icy Wind / Blizzard reclassified to faithful timing (d4tails, liveMoveTimingPolicy.ts 196 / 59;
+  // Confuse Ray 109 likewise); their exact fixtures stay valid in scope.
   // prep2: pic-coord yOffset (Fake Out); plain recipe (Cosmic Power).
   252, 322,
   // prep2: Future Sight turn-1 body only (the delayed hit is a separate playanimation, battle_scripts_1.s:3519).

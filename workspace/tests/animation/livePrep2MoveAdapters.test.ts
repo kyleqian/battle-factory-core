@@ -11,6 +11,7 @@ import {
 } from "../../src/engine/liveMoveAnimation.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS } from "../../src/engine/liveMoveTimingPolicy.ts";
 
 // docs/next-adapters-prep2.md s2: accepted dense windows (rows); shadow row 0 iff the window starts at activation
 // (Explosion -4 and Future Sight -5 start after it and have no row). alt = an alternate carrier pair for the render test.
@@ -64,7 +65,8 @@ const rulesWithoutSceneMarker = (v: { rules: any }) => {
 describe("live prep2 move adapters", () => {
   it("registers the eight moves with the accepted durations and shadow rows", () => {
     for (const c of cases) {
-      expect(LIVE_MOVE_ANIMATION_IDS).toContain(c.id);
+      // Icy Wind / Blizzard: reclassified to faithful timing (d4tails, liveMoveTimingPolicy.ts 196 / 59); the exact prep2 proofs stay in scope.
+      expect(c.id === 196 || c.id === 59 ? LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS : LIVE_MOVE_ANIMATION_IDS).toContain(c.id);
       for (const a of [0, 1] as const) {
         // Blizzard's accepted windows are 372 rows (player-back) / 361 (opponent-front), the Guillotine precedent.
         const expected = c.id === 59 && a === 1 ? 361 : c.duration;

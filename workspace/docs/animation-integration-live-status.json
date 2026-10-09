@@ -427,20 +427,6 @@
       ]
     },
     {
-      "move": "MOVE_CONFUSE_RAY",
-      "id": 109,
-      "liveEvidence": [
-        "d4w (species audit 14 SPECIES-DEFECT 2): a live OPPONENT attacker is drawn at its tracked front idle rest all window (battleScene.ts CONFUSE_RAY drawAttacker + sceneOnBattlerFrontIdleRest; the ROM writes no attacker x2). Fresh direct-mGBA prep40 probes (r1 == r2), production check twice: idle-rest first bodies ONIX 294,419 -> 0 px, RATTATA 110,700 -> 0 px (270 / 270 rows); GOLBAT / FLYGON controls and later bodies unchanged (tools/integration/fixtures/d4w-rest/; tests/animation/liveSpeciesAudit14Fixes.test.ts)",
-        "opening-draft input: HAUNTER -> GROVYLE",
-        "generated seed 54 command input: HAUNTER -> WAILMER",
-        "generated seed 65: MAGBY -> TENTACOOL",
-        "S10A ATTACKER shown as the Substitute doll (docs/next-adapters-prep40.md; LIVE_SUBSTITUTE_SWAP_BODY_CELLS, attacker side player + opponent): SUBSTITUTE_TO_MON + idle + body + MON_TO_SUBSTITUTE presented live. Dense composite windows from fresh direct-mGBA prep40 probes, two fresh passes x2 runs byte-identical, through the production live renderer: 3 of 3 windows (1061 rows) 0 px; the tail row (the next command's first row) 0 px with the doll latched at x2 -5 / +5 (receipt tools/integration/fixtures/attdoll-live-receipt.json; tests/substituteSwapAttdollCells.test.ts)."
-      ],
-      "remaining": [
-        "independent arbitrary-species framebuffer comparison"
-      ]
-    },
-    {
       "move": "MOVE_LIGHT_SCREEN",
       "id": 113,
       "sourceFieldEvidence": [
@@ -1902,44 +1888,6 @@
       "remaining": [
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
-      ]
-    },
-    {
-      "move": "MOVE_ICY_WIND",
-      "id": 196,
-      "sourceFieldEvidence": [
-        "../tools/integration/fixtures/prep2-live-adapter-receipt.json"
-      ],
-      "liveEvidence": [
-        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep2-icy-wind-*.json)",
-        "alternate-species dense proof twice fresh, zero residual (altspecies3-icy-wind-opponent-poliwhirl-player-onix.json, window 81..367)",
-        "geoice: OAM slots / order derived from the CreateSprite / SortSprites replay at any species geometry; 8 previously declined pairs (4 per side) twice fresh, 6 zero residual on every row, 2 one row shorter in the ROM (restorebg lag phase, ages 263..285 only); ROM gSprites / sSpriteOrder equal on every row (../tools/integration/fixtures/geoice-live-receipt.json)"
-      ],
-      "palettePlan": "no plan, history invalidates",
-      "remaining": [
-        "unknown entry/status/switch/summary/substitute/transform histories",
-        "whole-playable arbitrary-history framebuffer exactness",
-        "species-dependent restorebg lag phase: some pairs' ROM body is one row shorter (fade-in tail one frame early; also at previously live pairs), not predicted",
-        "scene-off fallback only when the replay's slot pool is exhausted (provableEffectOrder)"
-      ]
-    },
-    {
-      "move": "MOVE_BLIZZARD",
-      "id": 59,
-      "sourceFieldEvidence": [
-        "../tools/integration/fixtures/prep2-live-adapter-receipt.json"
-      ],
-      "liveEvidence": [
-        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep2-blizzard-*.json)",
-        "geoice: OAM slots / order derived from the CreateSprite / SortSprites replay at any species geometry, player attacker after every particle (subpriority 30 vs 3); 7 previously declined pairs (4 player, 3 opponent) twice fresh, 6 zero residual on every row, 1 one row shorter in the ROM (restorebg lag phase, ages 338..353 only); ROM gSprites / sSpriteOrder equal on every row (../tools/integration/fixtures/geoice-live-receipt.json)"
-      ],
-      "palettePlan": "no plan, history invalidates",
-      "remaining": [
-        "unknown entry/status/switch/summary/substitute/transform histories",
-        "whole-playable arbitrary-history framebuffer exactness",
-        "species-dependent restorebg lag phase: some pairs' ROM body is one row shorter (fade-in tail one frame early), not predicted",
-        "scene-off fallback where the geometry's impact start + 164 != the fixed live window (opponent impact start 194..206) or the slot pool is exhausted (provableEffectOrder)",
-        "order-host body plan (opponent side, geometry-keyed) not derived"
       ]
     },
     {
@@ -3754,7 +3702,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 245,
+  "implementedCount": 242,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 13,
@@ -3931,7 +3879,7 @@
     },
     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
   },
-  "faithfulTimingCount": 18,
+  "faithfulTimingCount": 21,
   "faithfulTimingAdapters": [
     {
       "id": 183,
@@ -5605,6 +5553,254 @@
         "OUT=SCRATCH sh tools/integration/issue151Counters.sh SCRATCH/hpcounters 8 <tools/integration/prep41Run.sh HF list> && python3 tools/integration/prep41Counters.py SCRATCH/hpcounters 237 64 SCRATCH/hidden-power-counters.json <HF list>",
         "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/d4w-live/hp-*.json (one process per fixture)",
         "npx vitest run tests/animation/livePrep13MoveAdapters.test.ts tests/animation/liveD4wWidening.test.ts"
+      ]
+    },
+    {
+      "id": 196,
+      "move": "MOVE_ICY_WIND",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 261,
+          "fixedLagAges": [
+            241,
+            242
+          ],
+          "iterations": 284,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 287,
+              "measured": 11
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 286,
+              "measured": 4
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          263,
+          264,
+          265,
+          266,
+          267,
+          268,
+          269,
+          270,
+          271,
+          272,
+          273,
+          274,
+          275,
+          276,
+          277,
+          278,
+          280,
+          285
+        ],
+        "rows": 18,
+        "maxPixelsPerRow": 20321,
+        "cause": "optional-lag-age 261 absent (286-row ROM body; BULBASAUR -> METAPOD P, ONIX -> MASQUERAIN P, ZUBAT -> BUTTERFREE O, ZUBAT -> ONIX O: 4 of 15 measured bodies): Task_FadeToBg state 2 (LoadDefaultBg + the fade-in) runs one frame early, so 18 of the fade-in tail ages 263..285 differ (329,305..349,057 px per window); every row before 263 is exact"
+      },
+      "d3": false,
+      "evidence": [
+        "reclassified from scoped exact (S10A d4tails, #151 precedent: the adapter gained a measured CPU-phase parameter); the existing exact fixture proofs stay valid in their proved scope",
+        "tools/integration/fixtures/d4tails/counters.json (d4tailsCounters.sh: 46 scenarios, two fresh direct-mGBA runs each, r0 == r1 everywhere): Icy Wind fixed lags 241, 242 in all 15 bodies; optional lag 261 in 11 (5 : 2 player, 6 : 2 opponent); short and long bodies differ only by that lag (no geometry / script difference: every earlier row is exact)",
+        "tools/integration/fixtures/d4tails/windows/{prep2-icy-wind-*,altspecies3-icy-wind-*,icy-wind-*}.json through the production live renderer (d4aTimingCheck.ts, one process per fixture, twice fresh): 11 lag windows 287/287 0 px, 4 no-lag windows only on the documented ages; receipt tools/integration/fixtures/d4tails-live-receipt.json",
+        "reclassification only: no adapter / renderer change (liveMoveAnimationDuration(196) = 287 = liveMoveTimingBodyRows(196))",
+        "scoped-exact liveEvidence: dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep2-icy-wind-*.json)",
+        "scoped-exact liveEvidence: alternate-species dense proof twice fresh, zero residual (altspecies3-icy-wind-opponent-poliwhirl-player-onix.json, window 81..367)",
+        "scoped-exact liveEvidence: geoice: OAM slots / order derived from the CreateSprite / SortSprites replay at any species geometry; 8 previously declined pairs (4 per side) twice fresh, 6 zero residual on every row, 2 one row shorter in the ROM (restorebg lag phase, ages 263..285 only); ROM gSprites / sSpriteOrder equal on every row (../tools/integration/fixtures/geoice-live-receipt.json)",
+        "scoped-exact remaining (kept): unknown entry/status/switch/summary/substitute/transform histories",
+        "scoped-exact remaining (kept): whole-playable arbitrary-history framebuffer exactness",
+        "scoped-exact remaining (kept): species-dependent restorebg lag phase: some pairs' ROM body is one row shorter (fade-in tail one frame early; also at previously live pairs), not predicted",
+        "scoped-exact remaining (kept): scene-off fallback only when the replay's slot pool is exhausted (provableEffectOrder)",
+        "sourceFieldEvidence: ../tools/integration/fixtures/prep2-live-adapter-receipt.json"
+      ],
+      "proofCommands": [
+        "sh tools/integration/d4tailsCounters.sh SCRATCH/counters 12 SCRATCH/counters.json $(cat tools/integration/fixtures/d4tails/scenarios.txt)",
+        "python3 tools/integration/d4tailsWindows.py",
+        "OUT=SCRATCH/check P=10 sh tools/integration/d4tailsTimingCheck.sh",
+        "npx vitest run tests/animation/liveD4tailsTiming.test.ts tests/animation/livePrep2MoveAdapters.test.ts tests/icyWindBlizzardGeometry.test.ts"
+      ]
+    },
+    {
+      "id": 59,
+      "move": "MOVE_BLIZZARD",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 347,
+          "fixedLagAges": [
+            367,
+            368
+          ],
+          "iterations": 369,
+          "side": "player",
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 372,
+              "measured": 7
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 371,
+              "measured": 0
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        },
+        {
+          "kind": "optional-lag-age",
+          "age": 336,
+          "fixedLagAges": [
+            356,
+            357
+          ],
+          "iterations": 358,
+          "side": "opponent",
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 361,
+              "measured": 3
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 360,
+              "measured": 1
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          338,
+          339,
+          340,
+          341,
+          342,
+          343,
+          344,
+          345,
+          346,
+          347,
+          348,
+          349,
+          350,
+          351,
+          352,
+          353
+        ],
+        "rows": 16,
+        "maxPixelsPerRow": 16415,
+        "cause": "opponent optional-lag-age 336 absent (360-row ROM body; BLASTOISE -> BLASTOISE, 1 of 4 impact-197 opponent bodies; its fixed lag pair lands on 356 / 357 instead of 357 / 358): the restorebg fade-in runs one frame early on ages 338..353 (262,640 px); every row before 338 is exact. No player-side window in the other phase was measured (7 of 7 with the lag at 347)"
+      },
+      "d3": false,
+      "evidence": [
+        "reclassified from scoped exact (S10A d4tails, #151 precedent: the adapter gained a measured CPU-phase parameter, per side); the existing exact fixture proofs stay valid in their proved scope",
+        "tools/integration/fixtures/d4tails/counters.json (d4tailsCounters.sh: 46 scenarios, two fresh direct-mGBA runs each, r0 == r1 everywhere): Blizzard player lag [347, 368, 369] in 7 of 7 bodies; opponent impact-197 lag [336, 357, 358] in 3 of 4, BLASTOISE -> BLASTOISE [356, 357]; the geometry-shifted opponent controls ARBOK -> CATERPIE [337, 358, 359] / WEEZING -> BLASTOISE [335, 356, 357] are impact-start != 197 bodies (declined, out of scope, not counted)",
+        "tools/integration/fixtures/d4tails/windows/{prep2-blizzard-*,blizzard-*}.json through the production live renderer (d4aTimingCheck.ts, one process per fixture, twice fresh): 10 lag windows (7 player, 3 opponent) 0 px at 372 / 361 rows, BLASTOISE -> BLASTOISE only on the documented ages; receipt tools/integration/fixtures/d4tails-live-receipt.json",
+        "reclassification only: no adapter / renderer change (liveMoveAnimationDuration(59) = 372 player / 361 opponent = the per-side policy body rows)",
+        "scoped-exact liveEvidence: dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep2-blizzard-*.json)",
+        "scoped-exact liveEvidence: geoice: OAM slots / order derived from the CreateSprite / SortSprites replay at any species geometry, player attacker after every particle (subpriority 30 vs 3); 7 previously declined pairs (4 player, 3 opponent) twice fresh, 6 zero residual on every row, 1 one row shorter in the ROM (restorebg lag phase, ages 338..353 only); ROM gSprites / sSpriteOrder equal on every row (../tools/integration/fixtures/geoice-live-receipt.json)",
+        "scoped-exact remaining (kept): unknown entry/status/switch/summary/substitute/transform histories",
+        "scoped-exact remaining (kept): whole-playable arbitrary-history framebuffer exactness",
+        "scoped-exact remaining (kept): species-dependent restorebg lag phase: some pairs' ROM body is one row shorter (fade-in tail one frame early), not predicted",
+        "scoped-exact remaining (kept): scene-off fallback where the geometry's impact start + 164 != the fixed live window (opponent impact start 194..206) or the slot pool is exhausted (provableEffectOrder)",
+        "scoped-exact remaining (kept): order-host body plan (opponent side, geometry-keyed) not derived",
+        "sourceFieldEvidence: ../tools/integration/fixtures/prep2-live-adapter-receipt.json"
+      ],
+      "proofCommands": [
+        "sh tools/integration/d4tailsCounters.sh SCRATCH/counters 12 SCRATCH/counters.json $(cat tools/integration/fixtures/d4tails/scenarios.txt)",
+        "python3 tools/integration/d4tailsWindows.py",
+        "OUT=SCRATCH/check P=10 sh tools/integration/d4tailsTimingCheck.sh",
+        "npx vitest run tests/animation/liveD4tailsTiming.test.ts tests/animation/livePrep2MoveAdapters.test.ts tests/icyWindBlizzardGeometry.test.ts"
+      ]
+    },
+    {
+      "id": 109,
+      "move": "MOVE_CONFUSE_RAY",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 249,
+          "fixedLagAges": [
+            26,
+            229,
+            230
+          ],
+          "iterations": 266,
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 270,
+              "measured": 11
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 269,
+              "measured": 3
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          251,
+          252,
+          253,
+          254,
+          255,
+          256,
+          257,
+          258,
+          259,
+          260,
+          261,
+          262,
+          263,
+          264,
+          265,
+          266
+        ],
+        "rows": 16,
+        "maxPixelsPerRow": 18358,
+        "cause": "optional-lag-age 249 absent (269-row ROM body; RATTATA opponent @3411 293,728 px, PICHU player @1771 283,824 px, ONIX opponent swap composite @3448 305,949 px incl. the swap-back rows one row early: 3 of 14 measured bodies): the closing fade runs one row early on body ages 251..266. The lag lands at 249 or 250 by history (both 0 px: FLYGON / GOLBAT @3410); the counter instrument can add it (PICHU @1771 counts 270 rows instrumented, 269 in the production probe), so a window's phase is its uninstrumented ROM length"
+      },
+      "d3": false,
+      "evidence": [
+        "reclassified from scoped exact (S10A d4tails, #151 precedent: the adapter gained a measured CPU-phase parameter); the existing exact fixture proofs stay valid in their proved scope",
+        "tools/integration/fixtures/d4tails/counters.json (d4tailsCounters.sh: 46 scenarios, two fresh direct-mGBA runs each, r0 == r1 everywhere): Confuse Ray fixed lags 26, 229, 230 in all 14 bodies; optional lag at 249 in 9, at 250 in 3, none in 2 (instrumented)",
+        "production windows (uninstrumented; attdollLiveCheck.ts via speciesAudit14SwapCheck.ts on d4w-cr s14plain + audit-14 s14swap scenarios, two fresh passes x 2 runs identical; d4aTimingCheck.ts on the accepted CHINCHOU P / O): 270 rows 0 px in 11 bodies, 269 rows in 3 (residual body ages 251..266 only); receipt tools/integration/fixtures/d4tails-live-receipt.json",
+        "reclassification only: no adapter / renderer change (liveMoveAnimationDuration(109) = CONFUSE_RAY_FRAME_COUNT 270 = liveMoveTimingBodyRows(109))",
+        "scoped-exact liveEvidence: d4w (species audit 14 SPECIES-DEFECT 2): a live OPPONENT attacker is drawn at its tracked front idle rest all window (battleScene.ts CONFUSE_RAY drawAttacker + sceneOnBattlerFrontIdleRest; the ROM writes no attacker x2). Fresh direct-mGBA prep40 probes (r1 == r2), production check twice: idle-rest first bodies ONIX 294,419 -> 0 px, RATTATA 110,700 -> 0 px (270 / 270 rows); GOLBAT / FLYGON controls and later bodies unchanged (tools/integration/fixtures/d4w-rest/; tests/animation/liveSpeciesAudit14Fixes.test.ts)",
+        "scoped-exact liveEvidence: opening-draft input: HAUNTER -> GROVYLE",
+        "scoped-exact liveEvidence: generated seed 54 command input: HAUNTER -> WAILMER",
+        "scoped-exact liveEvidence: generated seed 65: MAGBY -> TENTACOOL",
+        "scoped-exact liveEvidence: S10A ATTACKER shown as the Substitute doll (docs/next-adapters-prep40.md; LIVE_SUBSTITUTE_SWAP_BODY_CELLS, attacker side player + opponent): SUBSTITUTE_TO_MON + idle + body + MON_TO_SUBSTITUTE presented live. Dense composite windows from fresh direct-mGBA prep40 probes, two fresh passes x2 runs byte-identical, through the production live renderer: 3 of 3 windows (1061 rows) 0 px; the tail row (the next command's first row) 0 px with the doll latched at x2 -5 / +5 (receipt tools/integration/fixtures/attdoll-live-receipt.json; tests/substituteSwapAttdollCells.test.ts).",
+        "scoped-exact remaining (kept): independent arbitrary-species framebuffer comparison"
+      ],
+      "proofCommands": [
+        "sh tools/integration/d4tailsCounters.sh SCRATCH/counters 12 SCRATCH/counters.json $(cat tools/integration/fixtures/d4tails/scenarios.txt)",
+        "OUT=SCRATCH/probe SC=<d4w-cr + audit-14 Confuse Ray scenario dir with list.tsv> sh tools/integration/speciesAudit14SwapProbes.sh && sh tools/integration/speciesAudit14SwapRun.sh SCRATCH/probe <scenario dir> SCRATCH/receipts",
+        "OUT=SCRATCH/check P=10 sh tools/integration/d4tailsTimingCheck.sh (confuse-ray-*-chinchou-* windows)",
+        "npx vitest run tests/animation/liveD4tailsTiming.test.ts tests/animation/liveSpeciesAudit14Fixes.test.ts"
       ]
     }
   ],

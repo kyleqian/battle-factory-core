@@ -391,6 +391,69 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
     }],
   },
   /**
+   * S10A d4tails (ISSUES #152 "Icy Wind (196) / Blizzard (59) short bodies"; tools/integration/fixtures/d4tails/counters.json): fresh
+   * main-loop pass counters (d4tailsCounters.sh, two runs identical) show fixed lags at 241 / 242 in every Icy Wind body and an optional lag
+   * at 261 (the restorebg LoadDefaultBg frame overruns VBlank) in 11 of 15 measured bodies: present in the prep2 accepted SWINUB P / O, the
+   * altspecies3 POLIWHIRL opponent and 8 geoice pairs, absent in BULBASAUR -> METAPOD P, ONIX -> MASQUERAIN P, ZUBAT -> BUTTERFREE O, ZUBAT ->
+   * ONIX O (5 : 2 player, 6 : 2 opponent). 287 body rows with it (activation .. first inactive), 286 without. Wrong phase: Task_FadeToBg's
+   * state 2 one frame early, the BG fade-in tail rows 263..285 only (docs/icy-wind-blizzard-geometry.md).
+   */
+  196: {
+    move: "MOVE_ICY_WIND",
+    parameters: [{
+      kind: "optional-lag-age", age: 261, fixedLagAges: [241, 242], iterations: 284,
+      alternatives: [{ phase: "event", bodyRows: 287, measured: 11 }, { phase: "no-event", bodyRows: 286, measured: 4 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/d4tails/counters.json (Icy Wind: lag at 261 in 11 of 15 bodies; fixed 241, 242 in all)",
+        "tools/integration/fixtures/geoice-live-receipt.json (the 286-row ROM bodies differ only on the restorebg tail)", "tools/integration/fixtures/d4tails-live-receipt.json icy-wind"],
+    }],
+  },
+  /**
+   * S10A d4tails (ISSUES #152; tools/integration/fixtures/d4tails/counters.json): Blizzard's optional lag before the closing restorebg fade, PER
+   * SIDE (the player window is 11 rows longer): player age 347 (fixed lags 368 / 369 after it) in 7 of 7 measured bodies (prep2 accepted
+   * PELIPPER, 6 geoice pairs); opponent age 336 in 3 of 4 impact-197 bodies (prep2 accepted PELIPPER, BLASTOISE -> IVYSAUR, ZUBAT -> NIDOKING),
+   * absent in BLASTOISE -> BLASTOISE, whose fixed pair then lands on 356 / 357 instead of 357 / 358 (the Extreme Speed shape). 372 / 361 rows
+   * with it (the live windows), 371 / 360 without. Wrong phase: the fade-in tail rows 338..353 only. The geometry-shifted opponent controls
+   * (ARBOK -> CATERPIE lag [337, 358, 359], WEEZING -> BLASTOISE [335, 356, 357]) are impact-start != 197 bodies (declined by
+   * provableEffectOrder) and are not counted. The player's fixed pair without the lag (367 / 368) is the opponent's shape (never measured).
+   */
+  59: {
+    move: "MOVE_BLIZZARD",
+    parameters: [{
+      kind: "optional-lag-age", age: 347, fixedLagAges: [367, 368], iterations: 369, side: "player",
+      alternatives: [{ phase: "event", bodyRows: 372, measured: 7 }, { phase: "no-event", bodyRows: 371, measured: 0 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/d4tails/counters.json (Blizzard player: lag [347, 368, 369] in 7 of 7)", "tools/integration/fixtures/d4tails-live-receipt.json blizzard"],
+    }, {
+      kind: "optional-lag-age", age: 336, fixedLagAges: [356, 357], iterations: 358, side: "opponent",
+      alternatives: [{ phase: "event", bodyRows: 361, measured: 3 }, { phase: "no-event", bodyRows: 360, measured: 1 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/d4tails/counters.json (Blizzard opponent impact 197: lag [336, 357, 358] in 3 of 4; BLASTOISE -> BLASTOISE [356, 357])",
+        "tools/integration/fixtures/geoice-live-receipt.json (BLASTOISE -> BLASTOISE 360-row ROM body: tail 338..353 only)", "tools/integration/fixtures/d4tails-live-receipt.json blizzard"],
+    }],
+  },
+  /**
+   * S10A d4tails (ISSUES #152 audit 14 "Confuse Ray CPU phase"; docs/live-species-audit-14.md LAG FRAME): fixed lags at 26, 229, 230 and an
+   * optional lag before the closing fade: 270 body rows with it, 269 without (CONFUSE_RAY_FRAME_COUNT = 270). The counters place it at 249 in
+   * most bodies and at 250 in three (FLYGON / GOLBAT opponent @3410, PICHU player @1771); both precede the fade's first changed row 251, so the
+   * position is display-neutral (the 270-row FLYGON / GOLBAT @3410 windows are 0 px). The counter instrument itself (it runs
+   * PlayTimeCounter_Update every pass) can add this borderline lag: PICHU @1771 counts 270 rows instrumented but runs 269 in the uninstrumented
+   * production probe (residual 251..266). The phase of a window is therefore its uninstrumented ROM body length. Measured (production probes,
+   * d4tails-live-receipt.json confuseRay; 14 bodies: d4w-cr 8, audit-14 swap 4, accepted CHINCHOU P / O): 270 rows in 11; 269 in RATTATA
+   * opponent @3411, ONIX opponent @3448 (counters [26, 229, 230]) and PICHU player @1771. Wrong phase: the fade rows 251..266 only.
+   */
+  109: {
+    move: "MOVE_CONFUSE_RAY",
+    parameters: [{
+      kind: "optional-lag-age", age: 249, fixedLagAges: [26, 229, 230], iterations: 266,
+      alternatives: [{ phase: "event", bodyRows: 270, measured: 11 }, { phase: "no-event", bodyRows: 269, measured: 3 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/d4tails/counters.json (Confuse Ray: lag at 249 in 9, at 250 in 3, none in 2 of 14 instrumented bodies)",
+        "tools/integration/fixtures/d4w-cr/counters.txt", "tools/integration/fixtures/species-audit-14/counters.txt",
+        "tools/integration/fixtures/d4tails-live-receipt.json confuseRay (production window lengths)"],
+    }],
+  },
+  /**
    * S10A Ice Ball (docs/next-adapters-prep26.md s1.4 H / s4 item 6; tools/integration/fixtures/prep26/iceball-check.json lagRows): 0-step lag rows
    * (an animationRng stall: VBlank overrun), measured PER COUNTER BODY (request.rolloutCounter 1..5; 18 bodies): none in any counter 0..2 body
    * (accepted SPHEAL player / opponent + GLALIE -> GOLEM player / opponent: 4 each), counter 3 (body 4) row 38 in 1 of 3 (accepted player; not
@@ -503,6 +566,10 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   // S10A (prep41, reclassified from scoped exact): Hidden Power, Unown attacker (no lag at 64, 180 rows; exact fixtures
   // tools/integration/fixtures/prep13-live/hidden-power-*, the alternate-phase GOLBAT window tools/integration/fixtures/prep41/windows/hp-*).
   237,
+  // S10A d4tails (reclassified from scoped exact, #151 precedent; no adapter / renderer change): Icy Wind, Blizzard (per-side lag) and
+  // Confuse Ray gained a measured optional-lag parameter; their exact fixtures (prep2-*, geoice, accepted Confuse Ray) stay valid in scope;
+  // alternate-phase windows tools/integration/fixtures/d4tails/windows/*.
+  196, 59, 109,
 ]);
 
 /**
