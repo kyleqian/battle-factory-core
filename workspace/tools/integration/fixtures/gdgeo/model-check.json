@@ -3,6 +3,7 @@
  "rows": [
   {
    "job": "gdg-opp-bulbasaur-bulbasaur",
+   "move": 202,
    "side": "opponent",
    "player": 1,
    "opponent": 1,
@@ -14,6 +15,7 @@
   },
   {
    "job": "gdg-opp-diglett-golbat",
+   "move": 202,
    "side": "opponent",
    "player": 42,
    "opponent": 50,
@@ -25,6 +27,7 @@
   },
   {
    "job": "gdg-opp-diglett-onix",
+   "move": 202,
    "side": "opponent",
    "player": 95,
    "opponent": 50,
@@ -36,6 +39,7 @@
   },
   {
    "job": "gdg-opp-flygon-bulbasaur",
+   "move": 202,
    "side": "opponent",
    "player": 1,
    "opponent": 334,
@@ -47,6 +51,7 @@
   },
   {
    "job": "gdg-opp-flygon-onix",
+   "move": 202,
    "side": "opponent",
    "player": 95,
    "opponent": 334,
@@ -58,6 +63,7 @@
   },
   {
    "job": "gdg-opp-golbat-onix",
+   "move": 202,
    "side": "opponent",
    "player": 95,
    "opponent": 42,
@@ -69,6 +75,7 @@
   },
   {
    "job": "gdg-opp-onix-diglett",
+   "move": 202,
    "side": "opponent",
    "player": 50,
    "opponent": 95,
@@ -80,6 +87,7 @@
   },
   {
    "job": "gdg-opp-roselia-onix",
+   "move": 202,
    "side": "opponent",
    "player": 95,
    "opponent": 363,
@@ -91,6 +99,7 @@
   },
   {
    "job": "gdg-opp-roselia-snorlax",
+   "move": 202,
    "side": "opponent",
    "player": 143,
    "opponent": 363,
@@ -102,6 +111,7 @@
   },
   {
    "job": "gdg-opp-roselia-wobbuffet",
+   "move": 202,
    "side": "opponent",
    "player": 202,
    "opponent": 363,
@@ -113,6 +123,7 @@
   },
   {
    "job": "gdg-opp-shuckle-golbat",
+   "move": 202,
    "side": "opponent",
    "player": 42,
    "opponent": 213,
@@ -124,6 +135,7 @@
   },
   {
    "job": "gdg-opp-snorlax-zangoose",
+   "move": 202,
    "side": "opponent",
    "player": 380,
    "opponent": 143,
@@ -135,6 +147,7 @@
   },
   {
    "job": "gdg-ply-bulbasaur-flygon",
+   "move": 202,
    "side": "player",
    "player": 1,
    "opponent": 334,
@@ -146,6 +159,7 @@
   },
   {
    "job": "gdg-ply-diglett-diglett",
+   "move": 202,
    "side": "player",
    "player": 50,
    "opponent": 50,
@@ -157,6 +171,7 @@
   },
   {
    "job": "gdg-ply-golbat-wobbuffet",
+   "move": 202,
    "side": "player",
    "player": 42,
    "opponent": 202,
@@ -168,6 +183,7 @@
   },
   {
    "job": "gdg-ply-magikarp-gyarados",
+   "move": 202,
    "side": "player",
    "player": 129,
    "opponent": 130,
@@ -179,6 +195,7 @@
   },
   {
    "job": "gdg-ply-magikarp-shuckle",
+   "move": 202,
    "side": "player",
    "player": 129,
    "opponent": 213,
@@ -190,6 +207,7 @@
   },
   {
    "job": "gdg-ply-onix-diglett",
+   "move": 202,
    "side": "player",
    "player": 95,
    "opponent": 50,
@@ -201,6 +219,7 @@
   },
   {
    "job": "gdg-ply-onix-flygon",
+   "move": 202,
    "side": "player",
    "player": 95,
    "opponent": 334,
@@ -212,6 +231,7 @@
   },
   {
    "job": "gdg-ply-onix-golbat",
+   "move": 202,
    "side": "player",
    "player": 95,
    "opponent": 42,
@@ -223,6 +243,7 @@
   },
   {
    "job": "gdg-ply-roselia-gyarados",
+   "move": 202,
    "side": "player",
    "player": 363,
    "opponent": 130,
@@ -234,6 +255,7 @@
   },
   {
    "job": "gdg-ply-roselia-onix",
+   "move": 202,
    "side": "player",
    "player": 363,
    "opponent": 95,
@@ -245,6 +267,7 @@
   },
   {
    "job": "gdg-ply-roselia-shuckle",
+   "move": 202,
    "side": "player",
    "player": 363,
    "opponent": 213,
@@ -256,6 +279,7 @@
   },
   {
    "job": "gdg-ply-snorlax-diglett",
+   "move": 202,
    "side": "player",
    "player": 143,
    "opponent": 50,

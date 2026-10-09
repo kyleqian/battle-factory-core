@@ -5,7 +5,8 @@
 // model's orb y (gigaDrainAtAge) at the orb's last live age.
 import { readFileSync, writeFileSync } from "node:fs";
 import { GIGA_DRAIN_ORB_FIRST_AGE, GIGA_DRAIN_ORB_GROUPS, GIGA_DRAIN_ORB_GROUP_SPAWN_PERIOD, gigaDrainAtAge } from "../../src/animation/gigaDrain.ts";
-import { gigaDrainOrderCenters, gigaDrainSpriteOrderPlanForGeometry } from "../../src/engine/spriteOrderGigaDrainPlan.ts";
+import { MEGA_DRAIN_ORB_FIRST_AGE, MEGA_DRAIN_ORB_PAIRS, MEGA_DRAIN_ORB_PAIR_SPAWN_PERIOD, megaDrainAtAge } from "../../src/animation/megaDrain.ts";
+import { gigaDrainOrderCenters, gigaDrainSpriteOrderPlanForGeometry, megaDrainSpriteOrderPlanForGeometry } from "../../src/engine/spriteOrderGigaDrainPlan.ts";
 
 interface Unit { kind: string; label: string; plan: string; truncated: boolean }
 interface Job { base: string; variant: unknown; units: Unit[]; identicalAB: boolean; predicted?: string }
@@ -14,12 +15,15 @@ interface Group { frame: number; orderBefore: number[]; keys: Record<string, num
 const mechanism = process.argv[4] ? (JSON.parse(readFileSync(process.argv[4], "utf8")) as { jobs: Record<string, Group[]> }).jobs : null;
 let yChecked = 0, yBad = 0;
 /** Model oam.y of plan sprite n (0 controller, 1 hitsplat, 2.. orbs) at its last live age. */
-function modelOrbY(side: "player" | "opponent", player: number, opponent: number, n: number): number | null {
+function modelOrbY(move: number, side: "player" | "opponent", player: number, opponent: number, n: number): number | null {
   const centers = gigaDrainOrderCenters(side, { playerSpecies: player, opponentSpecies: opponent })!;
-  const orb = n - 2, args = GIGA_DRAIN_ORB_GROUPS[Math.floor(orb / 3)]?.[orb % 3];
+  const groups: readonly (readonly { wavePeriod: number }[])[] = move === 72 ? MEGA_DRAIN_ORB_PAIRS : GIGA_DRAIN_ORB_GROUPS;
+  const size = groups[0]!.length, orb = n - 2, args = groups[Math.floor(orb / size)]?.[orb % size];
   if (args === undefined) return null;
-  const age = GIGA_DRAIN_ORB_FIRST_AGE + Math.floor(orb / 3) * GIGA_DRAIN_ORB_GROUP_SPAWN_PERIOD + args.wavePeriod - 1;
-  const sprite = gigaDrainAtAge(age, centers.target, centers.attacker, side, centers.attacker).sprites.find(s => s.kind === "orb" && s.spawnIndex === orb);
+  const age = (move === 72 ? MEGA_DRAIN_ORB_FIRST_AGE : GIGA_DRAIN_ORB_FIRST_AGE)
+    + Math.floor(orb / size) * (move === 72 ? MEGA_DRAIN_ORB_PAIR_SPAWN_PERIOD : GIGA_DRAIN_ORB_GROUP_SPAWN_PERIOD) + args.wavePeriod - 1;
+  const sprite = (move === 72 ? megaDrainAtAge : gigaDrainAtAge)(age, centers.target, centers.attacker, side, centers.attacker).sprites
+    .find(s => s.kind === "orb" && s.spawnIndex === orb);
   if (!sprite) return null;
   const raw = (sprite.y + sprite.y2 - 8) & 0xff;
   return raw >= 160 ? raw - 256 : raw;
@@ -28,7 +32,7 @@ export const MAJORITY = "Cf;D0;Cf;D1;Cfff;Cfff;Cfff;Cfff;Cfff;D2;Cfff;D5,6;D3;Cf
 const rows = [];
 let bad = 0;
 for (const [name, job] of Object.entries(input.jobs)) {
-  const units = job.units.filter(u => u.kind === "body" && u.label.startsWith("body 202:") && !u.truncated);
+  const units = job.units.filter(u => u.kind === "body" && /^body (202|72):/.test(u.label) && !u.truncated);
   if (units.length === 0) continue;
   const scenario = JSON.parse(readFileSync(`tools/battle-lab/${job.base}.json`, "utf8"));
   const parties = scenario.overrides.parties;
@@ -39,13 +43,14 @@ for (const [name, job] of Object.entries(input.jobs)) {
     if (variant[i] === "player") player = variant[i + 1] as number; else if (variant[i] === "opponent") opponent = variant[i + 1] as number;
   }
   for (const unit of units) {
-    const side = unit.label.endsWith(":player") ? "player" : "opponent";
-    const model = gigaDrainSpriteOrderPlanForGeometry(side, { playerSpecies: player, opponentSpecies: opponent });
+    const side = unit.label.endsWith(":player") ? "player" : "opponent", move = unit.label.startsWith("body 72:") ? 72 : 202;
+    const model = (move === 72 ? megaDrainSpriteOrderPlanForGeometry : gigaDrainSpriteOrderPlanForGeometry)(side, { playerSpecies: player, opponentSpecies: opponent });
     const ok = model === unit.plan;
     if (!ok) bad += 1;
-    const observedClass = unit.plan === MAJORITY ? "majority" : unit.plan === MAJORITY.replace("D7,9", "D9,7") ? "flip window 18 (D9,7)" : "other";
+    const observedClass = move === 72 ? (unit.plan.includes("D5,6") ? "older-first (D5,6)" : unit.plan.includes("D6,5") ? "newer-first (D6,5)" : "other")
+      : unit.plan === MAJORITY ? "majority" : unit.plan === MAJORITY.replace("D7,9", "D9,7") ? "flip window 18 (D9,7)" : "other";
     if (job.predicted !== undefined && job.predicted !== observedClass) bad += 1;
-    rows.push({ job: name, side, player, opponent, identicalAB: job.identicalAB, observedClass, predicted: job.predicted ?? null, model, match: ok });
+    rows.push({ job: name, move, side, player, opponent, identicalAB: job.identicalAB, observedClass, predicted: job.predicted ?? null, model, match: ok });
     console.log(`${ok ? "OK " : "BAD"} ${name} ${side} player ${player} opponent ${opponent} observed ${observedClass} predicted ${job.predicted ?? "-"} AB ${job.identicalAB}`);
     if (!ok) console.log(`   observed ${unit.plan}\n   model    ${model}`);
     // multi-destroy windows: the observed D tokens are n-indices in sSpriteOrder order, the mechanism group lists slots in that order
@@ -57,7 +62,7 @@ for (const [name, job] of Object.entries(input.jobs)) {
         const group = groups[k];
         if (!group) return;
         ns.forEach((n, i) => {
-          const rom = group.keys[String(group.orderBefore[i])]![2]!, model = modelOrbY(side, player, opponent, n);
+          const rom = group.keys[String(group.orderBefore[i])]![2]!, model = modelOrbY(move, side, player, opponent, n);
           yChecked += 1;
           if (rom !== model) { yBad += 1; console.log(`   y mismatch f${group.frame} n${n}: rom ${rom} model ${model}`); }
         });
@@ -65,7 +70,7 @@ for (const [name, job] of Object.entries(input.jobs)) {
     }
   }
 }
-console.log(`${rows.length - bad}/${rows.length} body-202 units: model == observed${mechanism ? `; last-sort orb y: ${yChecked - yBad}/${yChecked} model == ROM oam.y` : ""}`);
+console.log(`${rows.length - bad}/${rows.length} body-202 / body-72 units: model == observed${mechanism ? `; last-sort orb y: ${yChecked - yBad}/${yChecked} model == ROM oam.y` : ""}`);
 bad += yBad;
 if (process.argv[3]) writeFileSync(process.argv[3], JSON.stringify({ schema: "gdgeo-model-check/v1", rows }, null, 1) + "\n");
 process.exitCode = bad === 0 ? 0 : 1;

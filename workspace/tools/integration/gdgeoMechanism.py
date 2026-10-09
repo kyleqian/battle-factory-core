@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""gdgeo mechanism receipt: for every body-202 destroy window that frees two or more slots at once, the SortSprites keys of the
+"""gdgeo mechanism receipt: for every body-202 (Giga Drain) / body-72 (Mega Drain) destroy window that frees two or more slots at once, the SortSprites keys of the
 destroyed sprites at the last frame they were live (spriteOrderEventProbe.py keeps keys on the frame before a mask change:
 [oam.priority, subpriority, oam.y, affineMode, size, shape, invisible]) and their order in sSpriteOrder before / after the destroy.
 
@@ -17,7 +17,7 @@ def groups(path):
         keys = row[6] if len(row) > 6 else None
         mask = int(mask_hex, 16)
         order = list(bytes.fromhex(order_hex))
-        if prev is not None and act and mv == 202:
+        if prev is not None and act and mv in (202, 72):
             gone = [s for s in range(64) if prev["mask"] >> s & 1 and not mask >> s & 1]
             if len(gone) >= 2 and prev["keys"] is not None:
                 before = [s for s in prev["order"] if s in gone]

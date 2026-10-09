@@ -6,7 +6,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { decodeSpriteOrderPlan } from "../../src/engine/spriteOrderEventTransform.ts";
 import { applySpriteOrderUnitPlan, createSpriteOrderPlanCursor } from "../../src/engine/spriteOrderProvider.ts";
-import { gigaDrainSpriteOrderPlanForGeometry } from "../../src/engine/spriteOrderGigaDrainPlan.ts";
+import { gigaDrainSpriteOrderPlanForGeometry, megaDrainSpriteOrderPlanForGeometry } from "../../src/engine/spriteOrderGigaDrainPlan.ts";
 
 interface Win { f: number; C: [number, string][]; D: number[]; F: number[] }
 interface Unit { kind: string; label: string; frame: number; F0: number[]; truncated: boolean; strayFChanges: number; plan: string; windows: Win[] }
@@ -47,24 +47,24 @@ function checkUnit(unit: Unit, text: string) {
   return { problems, frames };
 }
 
-const rows: { job: string; side: string; player: number; opponent: number; frames: number; problems: string[] }[] = [];
+const rows: { job: string; move: number; side: string; player: number; opponent: number; frames: number; problems: string[] }[] = [];
 for (const file of process.argv.slice(3)) {
   const input = JSON.parse(readFileSync(file, "utf8")) as { jobs: Record<string, Job> };
   for (const [name, job] of Object.entries(input.jobs)) {
     for (const unit of job.units) {
-      if (unit.kind !== "body" || unit.truncated || !unit.label.startsWith("body 202:")) continue;
-      const side = unit.label.endsWith(":player") ? "player" : "opponent";
+      if (unit.kind !== "body" || unit.truncated || !/^body (202|72):/.test(unit.label)) continue;
+      const side = unit.label.endsWith(":player") ? "player" : "opponent", move = unit.label.startsWith("body 72:") ? 72 : 202;
       const [player, opponent] = species(job);
-      const text = gigaDrainSpriteOrderPlanForGeometry(side, { playerSpecies: player, opponentSpecies: opponent })!;
+      const text = (move === 72 ? megaDrainSpriteOrderPlanForGeometry : gigaDrainSpriteOrderPlanForGeometry)(side, { playerSpecies: player, opponentSpecies: opponent })!;
       const { problems, frames } = checkUnit(unit, text);
       if (!job.identicalAB) problems.push("A != B");
-      rows.push({ job: name, side, player, opponent, frames, problems });
+      rows.push({ job: name, move, side, player, opponent, frames, problems });
     }
   }
 }
 const exact = rows.filter(r => r.problems.length === 0).length;
 writeFileSync(process.argv[2]!, JSON.stringify({ schema: "gdgeo-check/v1", instances: rows.length, exact,
   framesChecked: rows.reduce((n, r) => n + r.frames, 0), rows }, null, 1) + "\n");
-console.log(`body 202 (geometry plan): ${exact}/${rows.length} instances exact, ${rows.reduce((n, r) => n + r.frames, 0)} allocation frames`);
+console.log(`body 202 / 72 (geometry plan): ${exact}/${rows.length} instances exact, ${rows.reduce((n, r) => n + r.frames, 0)} allocation frames`);
 for (const r of rows) if (r.problems.length) console.log(`   MISMATCH ${r.job}: ${r.problems.slice(0, 4).join(" | ")}`);
 process.exitCode = exact === rows.length ? 0 : 1;
