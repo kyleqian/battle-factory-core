@@ -32,8 +32,8 @@
  * Party menu (docs/sprite-order-uncovered-units.md §2 rule (d)): opening it is a ResetSpriteData (party-menu-reset,
  * which revives an invalid order); returning applies reset + battle-reshow (variant from whether the player battler
  * sprite exists; a hidden battler or a missing opponent battler invalidates). The orchestrator additionally
- * invalidates on a locked player action (no prompt), a retained locked-action continuation, and any resolution whose
- * events were not all applied.
+ * invalidates on a locked player action (no prompt) and any resolution whose events were not all applied; a retained
+ * locked-action continuation applies the player's prompt cycle at its turn boundary (docs/next-adapters-prep47.md).
  */
 import type { BattleKernelSemanticEvent } from "./battleDecisionBoundary.ts";
 import { battleMoveAnimationRequest } from "./battleMoveAnimation.ts";
@@ -131,25 +131,34 @@ export function createLiveSpriteOrderHost(order: SpriteOrderState): LiveSpriteOr
 }
 
 /**
- * Order seed from the battle-start script events (docs/sprite-order-policy-gaps.md §2, proposal C). No events: the
- * known entry. Exactly one Intimidate triple (stat-stage-change, one STATS_CHANGE animation with a modelled stat
- * argument, message): the pre-prompt entry state plus the stat-animation plan; the first prompt cycle then applies as
- * usual. Anything else is unknown history.
+ * Order seed from the battle-start script events (docs/sprite-order-policy-gaps.md §2, proposal C; docs/next-adapters-prep47.md (B)).
+ * The events must be a sequence of Intimidate triples (stat-stage-change, one STATS_CHANGE animation with a modelled stat argument,
+ * message) and ROM-checked message-only units (Trace's STRINGID_PKMNTRACED, a prevented Intimidate's STRINGID_PREVENTEDFROMWORKING:
+ * no sprite allocation). Without a triple: the known entry (also no events). With triples: the pre-prompt entry state plus one
+ * stat-animation plan per triple, in order; the first prompt cycle then applies as usual. Anything else is unknown history.
  */
+const BATTLE_START_SEED_MESSAGES: ReadonlySet<string> = new Set(["STRINGID_PKMNTRACED", "STRINGID_PREVENTEDFROMWORKING"]);
 export function seedLiveSpriteOrderHostFromBattleStart(events: readonly BattleKernelSemanticEvent[]): LiveSpriteOrderHost {
   const known = knownEntrySpriteOrderState("ordinary-factory");
-  if (events.length === 0) return createLiveSpriteOrderHost(known);
   const invalid = () => createLiveSpriteOrderHost(invalidateSpriteOrderState(known));
-  if (events.length !== 3) return invalid();
-  const [stat, animation, message] = events as [BattleKernelSemanticEvent, BattleKernelSemanticEvent, BattleKernelSemanticEvent];
-  const payload = animation.payload;
-  if (stat.payload.kind !== "stat-stage-change" || message.payload.kind !== "message"
-    || payload.kind !== "animation" || payload.animationId !== "STATS_CHANGE" || payload.arguments.length !== 1
-    || Number(payload.arguments[0]) !== 22) return invalid();
+  const stats: number[] = [];
+  for (let index = 0; index < events.length;) {
+    const [stat, animation, message] = events.slice(index, index + 3);
+    const payload = animation?.payload;
+    if (stat?.payload.kind === "stat-stage-change" && message?.payload.kind === "message" && payload?.kind === "animation"
+      && payload.animationId === "STATS_CHANGE" && payload.arguments.length === 1 && Number(payload.arguments[0]) === 22) {
+      stats.push(22);
+      index += 3;
+      continue;
+    }
+    const lone = events[index]!.payload;
+    if (lone.kind !== "message" || !BATTLE_START_SEED_MESSAGES.has(lone.messageId)) return invalid();
+    index += 1;
+  }
+  if (stats.length === 0) return createLiveSpriteOrderHost(known);
   const host = createLiveSpriteOrderHost(knownEntryPrePromptSpriteOrderState("ordinary-factory"));
-  return Object.freeze({
-    ...host, tracker: applySpriteOrderPresentationEvent(host.tracker, { kind: "stat-animation", argument: 22 }), bodies: 1,
-  });
+  const tracker = stats.reduce((t, argument) => applySpriteOrderPresentationEvent(t, { kind: "stat-animation", argument }), host.tracker);
+  return Object.freeze({ ...host, tracker, bodies: stats.length });
 }
 
 export function invalidateLiveSpriteOrderHost(host: LiveSpriteOrderHost, reason: string): LiveSpriteOrderHost {
@@ -210,8 +219,8 @@ export function liveSpriteOrderBattlersPresent(
 
 /**
  * The player submitted request `requestId` from the action menu: the bounce pair was created at the prompt and is
- * destroyed at commit, before the turn's first body. `promptShown` false (a locked action, a retained locked-action
- * continuation) invalidates. A previous resolution whose events were not all applied invalidates.
+ * destroyed at commit, before the turn's first body (for a retained locked-action continuation: before the appended
+ * continuation segment's first event). `promptShown` false (a locked player action) invalidates. A previous resolution whose events were not all applied invalidates.
  * `fromPartyMenu`: the decision was chosen in the voluntary party menu, which erased the prompt's bounce pair; its
  * return (reset + reshow with both battlers) replaces the prompt cycle (ROM: reshow, then the turn's first body).
  */
@@ -265,14 +274,16 @@ function followsForcedSwitchOut(events: readonly BattleKernelSemanticEvent[], in
 }
 
 /**
- * The player's voluntary switch-out (BattleScript_ActionSwitch `returnatktoball`, docs/voluntary-switch-lend-audit.md §2.3):
- * a RETURNATKTOBALL hide of battler 0 before any move body of the segment. The opponent's AI switch (battler 1) and a
- * recall after a body (Pursuit's switch-out damage) are unprobed and keep invalidating.
+ * A voluntary switch-out of `battler`: a RETURNATKTOBALL hide of it before any move body of the segment. Battler 0 is the
+ * player's (BattleScript_ActionSwitch `returnatktoball`, docs/voluntary-switch-lend-audit.md §2.3), battler 1 the Factory
+ * AI's (BattleScript_DoSwitchOut `returnatktoball`, docs/next-adapters-prep47.md (C): the same recall plan with the opponent
+ * battler, 3/3 exact at the next body edge). A recall after a body (Pursuit's switch-out damage) is unprobed and keeps
+ * invalidating.
  */
-function isVoluntaryPlayerSwitchOut(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
+function isVoluntarySwitchOut(events: readonly BattleKernelSemanticEvent[], index: number, battler: 0 | 1): boolean {
   const event = events[index]!;
   const payload = event.payload;
-  if (payload.kind !== "set-battler-sprite-visibility" || !payload.invisible || payload.battler !== 0
+  if (payload.kind !== "set-battler-sprite-visibility" || !payload.invisible || payload.battler !== battler
     || event.provenance?.opcodeName !== "B_SCR_OP_RETURNATKTOBALL") return false;
   return !events.slice(0, index).some(({ payload: earlier }) =>
     earlier.kind === "animation" && earlier.animationId === "MOVE_ANIMATION");
@@ -348,7 +359,8 @@ function orderEventOf(
     if (isForcedSwitchOut(events, index)) {
       return { event: { kind: "forced-switch-out", side: payload.battler === 0 ? "player" : "opponent" } };
     }
-    if (isVoluntaryPlayerSwitchOut(events, index)) return { event: { kind: "switch-out" } };
+    if (isVoluntarySwitchOut(events, index, 0)) return { event: { kind: "switch-out" } };
+    if (isVoluntarySwitchOut(events, index, 1)) return { event: { kind: "switch-out", side: "opponent" } };
     if (RECALL_OPCODES.has(event.provenance?.opcodeName ?? "")) return { event: { kind: "invalidate", reason: "return to ball" } };
     if (payload.battler !== 0 && payload.battler !== 1) return { event: { kind: "invalidate", reason: "visibility battler" } };
     const next: [boolean, boolean] = [hidden[0], hidden[1]];

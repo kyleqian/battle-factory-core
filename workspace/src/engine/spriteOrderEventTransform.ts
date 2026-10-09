@@ -79,7 +79,7 @@ export type SpriteOrderPresentationEvent =
   | Readonly<{ kind: "forced-switch-out"; side: SpriteOrderSide }>
   | Readonly<{ kind: "party-menu-reset" }>
   | Readonly<{ kind: "battle-reshow"; playerBattlerPresent: boolean }>
-  | Readonly<{ kind: "switch-out" }>
+  | Readonly<{ kind: "switch-out"; side?: SpriteOrderSide }>
   | Readonly<{ kind: "trainer-slide-end" }>
   | Readonly<{ kind: "invalidate"; reason: string }>;
 
@@ -367,9 +367,12 @@ function applyBattleUnit(
         }));
     }
     case "switch-out": {
-      if (slots.player === null) return fail("recall: player battler slot unknown");
-      const cursor = applyUnit(tracker, decodeSpriteOrderPlan(spriteOrderRecallPlanText(slots.player)));
-      return cursor ? withUnit(tracker, cursor, "recall", { ...slots, player: null }) : fail("recall: plan did not resolve");
+      // prep47 (C): the Factory AI's voluntary recall is the same plan with the opponent battler (side "opponent").
+      const side = event.side ?? "player";
+      const slot = slots[side];
+      if (slot === null) return fail(`recall: ${side} battler slot unknown`);
+      const cursor = applyUnit(tracker, decodeSpriteOrderPlan(spriteOrderRecallPlanText(slot)));
+      return cursor ? withUnit(tracker, cursor, "recall", { ...slots, [side]: null }) : fail("recall: plan did not resolve");
     }
     case "trainer-slide-end": {
       const cursor = applyUnit(tracker, UNIT_PLANS.trainerSlide);

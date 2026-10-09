@@ -1132,8 +1132,9 @@ function startCurrentBattle(
           battleCallStart: callStart,
           commandKey: "",
           host: createKnownEntrySpriteAllocatorProvider("ordinary-factory").firstMove,
-          // Battle-start script events: none = the known entry, exactly one Intimidate = pre-prompt state + stat
-          // animation, anything else is unknown history (liveSpriteOrderHost.ts seedLiveSpriteOrderHostFromBattleStart).
+          // Battle-start script events: Intimidate triples (pre-prompt state + one stat animation each) and Trace /
+          // prevented-Intimidate messages (no allocation), none = the known entry; anything else is unknown history
+          // (liveSpriteOrderHost.ts seedLiveSpriteOrderHostFromBattleStart).
           order: liveSpriteOrderHostOrder(battleStartOrderHost),
           orderHost: battleStartOrderHost,
         })
@@ -1717,8 +1718,11 @@ function withOrderHost<T extends OrderHostCarrier>(sprites: T, orderHost: LiveSp
 /**
  * The submitted command came from the action prompt: its bounce pair is
  * created and destroyed before the turn's first body (gap-causes §2). A
- * locked player action shows no prompt and a retained locked-action
- * continuation interleaves a second prompt mid-resolution: both invalidate.
+ * locked player action shows no prompt (invalidates). A retained
+ * locked-action continuation shows the player's ordinary prompt at the turn
+ * boundary, between the retained resolution's last applied segment and the
+ * appended continuation segment (HandleTurnActionSelectionState skips only
+ * the locked battler; docs/next-adapters-prep47.md).
  */
 function beginOrderTurn(
   state: FactoryRoundBattleOrchestratorState,
@@ -1851,7 +1855,7 @@ function beginCommandResolution(
   // A voluntary switch is only submitted from the party menu (its return
   // replaces the action prompt's bounce cycle).
   const liveMoveSpriteAllocatorHost = beginOrderTurn(
-    state, resolution.resolutionId.requestId, retained === null && !playerLocked,
+    state, resolution.resolutionId.requestId, !playerLocked,
     presentation.pendingDecision?.kind === "switch",
   );
   return Object.freeze({
