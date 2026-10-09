@@ -94,7 +94,12 @@ import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
 import spitUpRedOrbAsset from "../animation/assets/spit-up-red-orb.json" with { type: "json" };
 import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
 import { liveMoveBgWriteRow, liveMoveCounterTimingParameter, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveTimingBodyRows, liveMoveTimingParameter } from "./liveMoveTimingPolicy.ts";
-import { resolveSpriteOrderDeferredLend } from "./spriteOrderEventTransform.ts";
+import { resolveSpriteOrderDeferredLend, type SpriteOrderDeferredLend } from "./spriteOrderEventTransform.ts";
+import type { PresentationRngHost, PresentationRngWords } from "./presentationRngHost.ts";
+import { isWordsOrderDeferredUnit, WORDS_ORDER_GENERAL_ANIMATION } from "./wordsOrderUnits.ts";
+import { mudSlapMudSpriteOrderAtAge, MUD_SLAP_MUD_FIRST_DISPLAY_AGE, type MudSlapAnimationProfile } from "../animation/mudSlap.ts";
+import { generalRainDropsAtAge, GENERAL_RAIN_LAST_DROP_AGE, GENERAL_RAIN_SPAWN_AGES, rainDanceAtAge, rainDropSortKeys, RAIN_DANCE_WINDOW_ROWS } from "../animation/rainDance.ts";
+import { sandAttackDirtSpriteOrderAtAge, SAND_ATTACK_DIRT_FIRST_DISPLAY_AGE, type SandAttackAnimationProfile } from "../animation/sandAttack.ts";
 import { liveSpitUpDuration, liveSpitUpInputs, type SpitUpCounter } from "./liveSpitUpInputs.ts";
 import { SUPERPOWER_ROWS, liveSuperpowerInputs } from "./liveSuperpowerInputs.ts";
 import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
@@ -109,7 +114,7 @@ import megaHornAsset from "../animation/assets/mega-horn-horn-hit-2.json" with {
 import {
   CURSE_STATS_ROWS, curseStatsBattleBgAt, curseStatsPaletteAt, curseStatsRegistersAt, curseStatsSpritesAt, curseStatsTasksAt,
 } from "../animation/curseModel.ts";
-import { FLATTER_ROWS, FURY_CUTTER_ROWS, RETURN_ROWS } from "./liveMoveOamAssembler.ts";
+import { carryLiveSpriteOrder, FLATTER_ROWS, FURY_CUTTER_ROWS, RETURN_ROWS, type LiveOamSprite } from "./liveMoveOamAssembler.ts";
 import { willOWispSpritesAtAge, willOWispTimeline } from "../animation/willOWisp.ts";
 import { skillSwapAtAge, type SkillSwapLiveInputs } from "../animation/skillSwap.ts";
 import skillSwapOrbAsset from "../animation/assets/skill-swap-bluegreen-orb.json" with { type: "json" };
@@ -127,7 +132,8 @@ import { liveIceBallEnd, liveIceBallInputs } from "./liveIceBallInputs.ts";
 import type { DiveProfile } from "../animation/dive.ts";
 import { linearTranslationDeltaQ8, linearTranslationOffsetAfterCallbacks } from "../animation/animLinearTranslation.ts";
 import {
-  dirtScatterOffsetFromWord, dirtScatterSlots, hyperBeamOrbFromWords, linearTranslationStep, liveMovePresentationRngWords, miniTwinklingStarFromWords, type LiveMovePresentationRngInput,
+  dirtScatterOffsetFromWord, dirtScatterSlots, hyperBeamOrbFromWords, linearTranslationStep, liveMovePresentationRngWords, miniTwinklingStarFromWords,
+  type LiveMovePresentationRngInput,
 } from "./liveMovePresentationRng.ts";
 
 
@@ -1287,6 +1293,27 @@ export function liveSemiInvulnerableHideBattler(request: BattleMoveAnimationRequ
     && liveMoveAnimationDuration(request) !== null ? request.attacker : null;
 }
 
+/**
+ * prep46: render-seam resolution of a words-unit deferred lend, memoized per deferred-lend object and presentation-host body list (both
+ * immutable; a body list changes only when a body / sub-stream is recorded, so a repaint never re-carries and a pinned host never reads
+ * another host's result). Pure: the memo holds what resolveSpriteOrderDeferredLend returns for those inputs.
+ */
+const WORDS_LEND_RESOLVED = new WeakMap<object, WeakMap<object, readonly number[] | null>>();
+function resolveWordsOrderLend(
+  deferred: SpriteOrderDeferredLend, host: PresentationRngHost | null, art: ReturnType<typeof createBattleCommandFieldArtView>,
+): readonly number[] | null {
+  const resolve = () => resolveSpriteOrderDeferredLend(deferred, (unit, activationFree) => {
+    if (!isWordsOrderDeferredUnit(unit)) return null;
+    const anchors = { player: liveBattlerAnchors("player", art).picOffsetPoint, opponent: liveBattlerAnchors("opponent", art).picOffsetPoint };
+    return liveWordsUnitPostFree(unit, activationFree, liveMovePresentationRngWords({ host, key: unit.key }), anchors);
+  });
+  if (host === null) return resolve();
+  let byBodies = WORDS_LEND_RESOLVED.get(deferred);
+  if (byBodies === undefined) WORDS_LEND_RESOLVED.set(deferred, byBodies = new WeakMap());
+  if (!byBodies.has(host.bodies)) byBodies.set(host.bodies, resolve());
+  return byBodies.get(host.bodies)!;
+}
+
 export function liveMoveAnimationPresentation(
   request: BattleMoveAnimationRequest,
   field: BattleResolutionDisplayedField,
@@ -1299,6 +1326,20 @@ export function liveMoveAnimationPresentation(
 ): SceneOnMovePresentationState | null {
   if (liveMoveAnimationDuration(request, field) === null) return null;
   const art = createBattleCommandFieldArtView(field);
+  // prep46: after a words-dependent order unit (Sand-Attack / Mud-Slap / Rain Dance / RAIN_CONTINUES) ANY consumer's lend is the
+  // word-free deferred marker; resolve it here, render-pure: carry the unit's activation order through the unit with ITS recorded
+  // presentation words (read by key), then replay the units since with the production plans. Null leaves no lend (the consumer declines
+  // as before). A resolved lend makes this command's order history faithful random (D3): `faithfulRandomHistory` on the result.
+  // The claim is per command and only when the adapter reads the resolved lend (an order-independent adapter, e.g. Slam, keeps its scoped
+  // exact claim): the resolved input records the read in this call's local flag (render-pure).
+  let faithfulRandomHistory = false;
+  if (spriteOrderInput?.deferred !== undefined && isWordsOrderDeferredUnit(spriteOrderInput.deferred)) {
+    const resolved = resolveWordsOrderLend(spriteOrderInput.deferred, presentationRngInput?.host ?? null, art);
+    spriteOrderInput = resolved === null ? undefined : Object.freeze({
+      get known() { faithfulRandomHistory = true; return true as const; },
+      get free() { faithfulRandomHistory = true; return resolved; },
+    });
+  }
   const battler = (side: "player" | "opponent"): SceneOnPresentationBattler => {
     const origin = battleCommandFieldSpriteOrigin(art[side], side);
     // ISSUES #148: a battler an earlier body left at x2/y2 0 is drawn there by the renderer's species-rest readers.
@@ -3158,37 +3199,27 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 189: case 28: {
-      // prep17 s0.2 (faithful random): 30 dirt sprites x (xWord, yWord) from the host's six 10-word rows. Source = the attacker's
-      // pic point + (+-15, +15), destination = the target's pic point + the AnimDirtScatter offsets (both are the anchors the
-      // production field already provides); steps = InitAnimLinearTranslation over 20 frames. Slots = lowest-free over the
-      // computed lifetimes (two transient slot-3 helpers). The lent order is the activation order (Sand) / the pre-wave-1
-      // order (Mud: the transients swap slots 4/3), identical across bodies. Unknown tracked order -> null.
+      // prep17 s0.2 (faithful random): 30 dirt sprites x (xWord, yWord) from the host's six 10-word rows (liveDirtScatterProfile:
+      // the attacker / target pic points the production field provides, InitAnimLinearTranslation steps, lowest-free slots). The
+      // reducer's seed is the lent activation order carried through the two invisible slide helpers before the first dirt sort
+      // (prep46 s1: exact on every body, including the second Mud-Slap bodies the former "4 then 3 -> swap" rule declined).
+      // Unknown tracked order -> null.
       const draws = liveMovePresentationRngWords(presentationRngInput)?.draws;
-      if (draws === undefined || draws.length !== 6 || draws.some((row) => row.length !== 10) || !spriteOrderInput?.known) return null;
+      if (draws === undefined || !spriteOrderInput?.known) return null;
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (lentOrder === null) return null;
       const mud = request.moveId === 189;
-      let spriteOrderSeed: readonly number[] = lentOrder;
-      if (mud) {
-        const at = lentOrder.indexOf(4);
-        if (lentOrder[at + 1] !== 3) return null;
-        spriteOrderSeed = lentOrder.map((slot, index) => index === at ? 3 : index === at + 1 ? 4 : slot);
-      }
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
-      const playerAttacker = attacker.geometry.side === "player";
-      const source = { x: attackerAnchors.picOffsetPoint.x + (playerAttacker ? 15 : -15), y: attackerAnchors.picOffsetPoint.y + 15 };
-      const words = draws.flat();
-      const slots = dirtScatterSlots(mud ? [[4, 8], [9, 11]] : [[7, 11], [12, 14]], mud ? 9 : 12, [0, 1, 2, 6, 8, 60, 61, 62, 63]);
-      const seeds = slots.map((slot, i) => ({ slot,
-        xStep: linearTranslationStep(targetAnchors.picOffsetPoint.x + dirtScatterOffsetFromWord(words[2 * i]!) - source.x, 20),
-        yStep: linearTranslationStep(targetAnchors.picOffsetPoint.y + dirtScatterOffsetFromWord(words[2 * i + 1]!) - source.y, 20) }));
-      const common = { attacker, target, animationAgeOffset: mud ? 42 : 43, moveTextStartAge: 0,
+      const profile = liveDirtScatterProfile(mud ? 189 : 28, attacker.geometry.side, lentOrder, draws,
+        attackerAnchors.picOffsetPoint, targetAnchors.picOffsetPoint);
+      if (profile === null) return null;
+      const common = { attacker, target, animationAgeOffset: DIRT_ANIMATION_AGE_OFFSET[mud ? "mud" : "sand"], moveTextStartAge: 0,
         fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" as const } };
       config = mud
-        ? { move: "MUD_SLAP", ...common, animationProfile: { mud: seeds, spriteOrderSeed } }
+        ? { move: "MUD_SLAP", ...common, animationProfile: { mud: profile.dirt, spriteOrderSeed: profile.spriteOrderSeed } }
         // The accuracy banner and result text are controller-owned HUD after the 58-row body (never-reached ages here).
-        : { move: "SAND_ATTACK", ...common, animationProfile: { dirt: seeds, spriteOrderSeed },
+        : { move: "SAND_ATTACK", ...common, animationProfile: { dirt: profile.dirt, spriteOrderSeed: profile.spriteOrderSeed },
             controllerProfile: { accuracyStageBefore: 0, accuracyStageAfter: 0, resultTextFirstAge: 1_000_000, currentMoveResetAge: 1_000_000 } };
       break;
     }
@@ -3824,5 +3855,115 @@ export function liveMoveAnimationPresentation(
   const setupAge = request.moveId === 230 ? 4 : 0;
   // Feather Dance: the reducer age is the printer-relative age, 44 at the activation frame (prep7 s2.2).
   return { config, age: wallAnchorOffset ? age - wallAnchorOffset : shineBody ? age - 1
-    : request.moveId === 297 ? age + 44 : age - setupAge };
+    : request.moveId === 297 ? age + 44 : age - setupAge, ...(faithfulRandomHistory ? { faithfulRandomHistory: true as const } : {}) };
+}
+
+/**
+ * S10A words46 (formerly liveWordsOrderCarry.ts; here because src/engine consumes src/animation only from the pinned seam modules).
+ * Words-dependent sprite-order units (S10A prep46; docs/next-adapters-prep46.md): the free order after Sand-Attack 28, Mud-Slap 189,
+ * Rain Dance 240 and the RAIN_CONTINUES general animation (General_Rain) depends on the unit's own Random2 words. The order host stays
+ * word-free (a deferred-lend marker, liveSpriteOrderHost.ts); the render seam resolves the lend by carrying the activation order through
+ * the unit with the unit's recorded presentation words (resolveSpriteOrderDeferredLend). Every rule below was checked per frame against
+ * the ROM with RAM-read words (prep46 s1: Sand 464/464, Mud 306/306, Rain Dance 744/744, General_Rain 960/960 frames).
+ *
+ * The dirt profile (slots, Q8.8 steps, the slide-helper seed order) is built here once for the live adapter (liveMoveAnimation.ts case
+ * 189 / 28) and the carry; the dirt-phase order is the reducers' own SortSprites loop (sandAttackDirtSpriteOrderAtAge /
+ * mudSlapMudSpriteOrderAtAge), the drops' keys are rainDropSortKeys.
+ */
+type WordsPoint = Readonly<{ x: number; y: number }>;
+type WordsSide = "player" | "opponent";
+
+/** The known-entry in-use slots the dirt / drop allocators skip (liveMoveAnimation.ts KNOWN_ENTRY_IN_USE_SPRITE_SLOTS). */
+const WORDS_ENTRY_IN_USE: readonly number[] = Object.freeze([0, 1, 2, 6, 8, 60, 61, 62, 63]);
+const WORDS_UNCONSUMED_PALETTE: readonly number[] = Object.freeze(new Array<number>(512).fill(0));
+
+const DIRT_TRANSIENTS: Readonly<Record<"mud" | "sand", readonly (readonly [number, number])[]>> = Object.freeze({
+  mud: Object.freeze([Object.freeze([4, 8] as const), Object.freeze([9, 11] as const)]),
+  sand: Object.freeze([Object.freeze([7, 11] as const), Object.freeze([12, 14] as const)]),
+});
+/** Live body rows (liveMoveAnimationDuration) and the reducers' animationAgeOffset (the live adapter's config). */
+const DIRT_ROWS = Object.freeze({ mud: 51, sand: 58 });
+export const DIRT_ANIMATION_AGE_OFFSET = Object.freeze({ mud: 42, sand: 43 });
+
+/**
+ * Sand-Attack / Mud-Slap profile from the body's six 10-word rows: 30 dirt sprites (slot, Q8.8 steps) and the reducer's seed order.
+ * Source = the attacker's pic point + (+-15, +15), destination = the target's pic point + the AnimDirtScatter offsets, steps =
+ * InitAnimLinearTranslation over 20 frames, slots = lowest-free over the computed lifetimes (two transient slot-3 helpers).
+ * The seed is the lent activation order (known-entry prefix) carried through the frames before the first dirt sort, where the two
+ * invisible slide helpers (`createsprite gSlideMonToOffsetSpriteTemplate, ANIM_ATTACKER, 2`: slot 3, priority 3, subpriority = the
+ * attacker battler's 30 / 40 - 2, oam.y 160) move slot 3 ahead of the free slots (prep46 s1; replaces Mud's "4 then 3 -> swap" rule,
+ * which declined on second Mud-Slap bodies).
+ */
+export function liveDirtScatterProfile(
+  moveId: 28 | 189, attackerSide: WordsSide, activationOrder: readonly number[], draws: readonly (readonly number[])[],
+  attackerPic: WordsPoint, targetPic: WordsPoint,
+): Readonly<{ dirt: SandAttackAnimationProfile["dirt"]; spriteOrderSeed: readonly number[] }> | null {
+  if (draws.length !== 6 || draws.some((row) => row.length !== 10)) return null;
+  const mud = moveId === 189, kind = mud ? "mud" as const : "sand" as const;
+  const playerAttacker = attackerSide === "player";
+  const source = { x: attackerPic.x + (playerAttacker ? 15 : -15), y: attackerPic.y + 15 };
+  const words = draws.flat();
+  const transients = DIRT_TRANSIENTS[kind];
+  const slots = dirtScatterSlots(transients, mud ? 9 : 12, WORDS_ENTRY_IN_USE);
+  const dirt = slots.map((slot, i) => ({ slot,
+    xStep: linearTranslationStep(targetPic.x + dirtScatterOffsetFromWord(words[2 * i]!) - source.x, 20),
+    yStep: linearTranslationStep(targetPic.y + dirtScatterOffsetFromWord(words[2 * i + 1]!) - source.y, 20) }));
+  const first = mud ? MUD_SLAP_MUD_FIRST_DISPLAY_AGE : SAND_ATTACK_DIRT_FIRST_DISPLAY_AGE;
+  const helperSubpriority = (playerAttacker ? 30 : 40) - 2;
+  let order: readonly number[] = activationOrder;
+  // reducer age = live age + animationAgeOffset + 1 (the source latch, mudSlapSourceMudAtAge); the helpers are carried before the first sort
+  for (let age = 0; age + DIRT_ANIMATION_AGE_OFFSET[kind] + 1 < first; age += 1) {
+    const helpers: LiveOamSprite[] = transients.filter(([from, to]) => age >= from && age < to)
+      .map(() => ({ slot: 3, attr: [0x00a0, 0, 3 << 10] as never, subpriority: helperSubpriority, visible: false, oamY: 160 }) as LiveOamSprite);
+    order = carryLiveSpriteOrder(order, helpers, sortGbaSpriteOrder);
+  }
+  return Object.freeze({ dirt: Object.freeze(dirt), spriteOrderSeed: Object.freeze([...order]) });
+}
+
+const wordsPrefixed = (free: readonly number[]) =>
+  spriteOrderWithOccupiedPrefix({ known: true as const, free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+const wordsFreeOf = (order: readonly number[]) => Object.freeze(order.filter((slot) => !KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER.includes(slot)));
+
+/** Free order after a Rain Dance / General_Rain drop program (SortSprites per frame over the drops' keys). */
+function carryDrops(order: readonly number[], rows: number, dropsAt: (age: number) => Parameters<typeof rainDropSortKeys>[0]): readonly number[] {
+  let carried = order;
+  for (let age = 0; age < rows; age += 1) {
+    carried = carryLiveSpriteOrder(carried, rainDropSortKeys(dropsAt(age)).map((key) => ({ ...key, visible: true }) as unknown as LiveOamSprite),
+      sortGbaSpriteOrder);
+  }
+  return carried;
+}
+
+/**
+ * Post-unit free order of a words-dependent order unit from its activation free order (entry labels) and the unit's recorded
+ * presentation words (render-pure); null when the unit is not a words unit or its words / order are unavailable. Anchors are the
+ * displayed battlers' Y_PIC_OFFSET points (liveBattlerAnchors; only the dirt units read them).
+ */
+export function liveWordsUnitPostFree(
+  unit: Pick<SpriteOrderDeferredLend, "moveId" | "attackerSide" | "generalAnimation">, activationFree: readonly number[],
+  words: PresentationRngWords | null, anchors: Readonly<Record<WordsSide, WordsPoint>>,
+): readonly number[] | null {
+  const start = wordsPrefixed(activationFree);
+  if (start === null || words === null) return null;
+  if (unit.generalAnimation === WORDS_ORDER_GENERAL_ANIMATION) {
+    if (words.draws.length !== GENERAL_RAIN_SPAWN_AGES.length) return null;
+    return wordsFreeOf(carryDrops(start, GENERAL_RAIN_LAST_DROP_AGE + 1, (age) => generalRainDropsAtAge(age, words.draws, WORDS_ENTRY_IN_USE)));
+  }
+  if (unit.generalAnimation !== undefined) return null;
+  if (unit.moveId === 240) {
+    const profile = { animationRngAtAge0: words.activationValue, occupiedSpriteSlots: WORDS_ENTRY_IN_USE, unfadedPaletteBeforeLoad: WORDS_UNCONSUMED_PALETTE,
+      fadedPaletteBeforeLoad: WORDS_UNCONSUMED_PALETTE, hardwarePaletteAtAge0: WORDS_UNCONSUMED_PALETTE, unfadedPaletteAfterLoad: WORDS_UNCONSUMED_PALETTE,
+      fadedPaletteAfterLoad: WORDS_UNCONSUMED_PALETTE };
+    return wordsFreeOf(carryDrops(start, RAIN_DANCE_WINDOW_ROWS, (age) => rainDanceAtAge(age, profile).drops));
+  }
+  if (unit.moveId !== 28 && unit.moveId !== 189) return null;
+  const foe: WordsSide = unit.attackerSide === "player" ? "opponent" : "player";
+  const profile = liveDirtScatterProfile(unit.moveId, unit.attackerSide, start, words.draws, anchors[unit.attackerSide], anchors[foe]);
+  if (profile === null) return null;
+  const mud = unit.moveId === 189, kind = mud ? "mud" as const : "sand" as const;
+  const lastReducerAge = DIRT_ROWS[kind] - 1 + DIRT_ANIMATION_AGE_OFFSET[kind] + 1;
+  const order = mud
+    ? mudSlapMudSpriteOrderAtAge(lastReducerAge, anchors[unit.attackerSide], unit.attackerSide, { mud: profile.dirt, spriteOrderSeed: profile.spriteOrderSeed } as MudSlapAnimationProfile)
+    : sandAttackDirtSpriteOrderAtAge(lastReducerAge, anchors[unit.attackerSide], unit.attackerSide, profile);
+  return wordsFreeOf(order);
 }

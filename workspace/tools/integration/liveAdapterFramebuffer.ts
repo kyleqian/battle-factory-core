@@ -32,9 +32,11 @@ import {
 } from "../../src/engine/spriteOrderEventTransform.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import {
-  activateLiveMovePresentationRng, liveMovePresentationRngBodyKey, liveMoveRandom2Plan, type LiveMovePresentationRngInput, type LiveMoveRandom2PlanContext,
+  activateLiveMovePresentationRng, GENERAL_RAIN_RANDOM2_PLAN, liveMovePresentationRngBodyKey, liveMoveRandom2Plan, type LiveMovePresentationRngInput,
+  type LiveMoveRandom2PlanContext,
 } from "../../src/engine/liveMovePresentationRng.ts";
-import { createPresentationRngHostAt } from "../../src/engine/presentationRngHost.ts";
+import { createPresentationRngHostAt, recordPresentationRngSubStream } from "../../src/engine/presentationRngHost.ts";
+import { generalAnimationPresentationRngKey } from "../../src/engine/wordsOrderUnits.ts";
 import {
   LIVE_BATTLER_X2_IDLE, applyLiveBattlerX2Event, liveBattlerX2EventsOf, liveMoveBattlerX2Input, type LiveBattlerX2Event,
   type LiveMoveBattlerX2Input,
@@ -106,6 +108,16 @@ export interface Fixture {
    * the pinned host holding every chain body's words.
    */
   iceBallChain?: { earlier: { value: number; source: string }[]; foeFirst: boolean };
+  /**
+   * S10A words46 (docs/next-adapters-prep46.md): a consumer after Random2-words order units. `turns` is the order-relevant history from the
+   * battle entry, one list per prompt cycle: ["body", moveId, side] (a move body lent + marked as the orchestrator does), ["hit", side],
+   * ["stat", side, argument], ["rain"] (B_ANIM_RAIN_CONTINUES); the LAST body step is the fixture's own body. The harness drives the PRODUCTION
+   * order host through it and lends what it lends (the word-free deferred marker). TEST-ONLY PIN HOOK: each earlier words unit's probed
+   * activation value (`words`, in order: Sand-Attack / Mud-Slap / Rain Dance bodies and RAIN_CONTINUES events, RAM-read gRng2Value at the
+   * unit's activation) seeds a pinned host whose words follow the production law (body activation / non-consuming sub-stream) under the
+   * unit's production key; the render seam reads them by key, exactly as in play. Production never reads capture rows.
+   */
+  wordsChain?: { turns: (readonly (string | number)[])[][]; words: { value: number; source: string }[] };
   /**
    * Faithful-random (Random2) bodies: the oracle-pinned presentation stream value at the activation frame (gRng2Value
    * after the first anim-active frame, from a direct-mGBA probe of this scenario; provenance "pinned"). The harness
@@ -244,6 +256,69 @@ export function fixtureIceBallChain(f: Fixture, request: BattleMoveAnimationRequ
   return cached;
 }
 
+const wordsChainLends = new WeakMap<object, { spriteOrderInput: LiveMoveSpriteOrderInput | undefined; presentationRng: LiveMovePresentationRngInput }>();
+/** Production order host lend + pinned presentation host of a words46 consumer fixture (wordsChain). */
+export function fixtureWordsChain(f: Fixture): { spriteOrderInput: LiveMoveSpriteOrderInput | undefined; presentationRng: LiveMovePresentationRngInput } {
+  const chain = f.wordsChain!;
+  const cached = wordsChainLends.get(chain);
+  if (cached) return cached;
+  const ev = (sequence: number, kind: string, extra: object) =>
+    Object.freeze({ sequence, payload: { kind, ...extra }, provenance: undefined }) as unknown as BattleKernelSemanticEvent;
+  const who = (side: unknown): 0 | 1 => side === "player" ? 0 : 1;
+  let order: LiveSpriteOrderHost = createLiveSpriteOrderHost(knownEntrySpriteOrderState("battle-lab-ordinary-singles"));
+  const bodies: ReturnType<typeof createPresentationRngHostAt>["bodies"][number][] = [];
+  const pinned = (value: number) => createPresentationRngHostAt(createPresentationRngState(value, "pinned"));
+  const words = [...chain.words];
+  let lend: LiveMoveSpriteOrderInput | undefined;
+  let key = "";
+  const lastTurn = chain.turns.length - 1;
+  chain.turns.forEach((steps, t) => {
+    const requestId = t + 1;
+    order = beginLiveSpriteOrderTurn(order, requestId, true);
+    const events = steps.map((step, i) => {
+      const seq = 10 * requestId + i;
+      if (step[0] === "body") {
+        const b = who(step[2]);
+        return ev(seq, "animation", { animationId: "MOVE_ANIMATION", battler: b, target: 1 - b, arguments: [String(step[1]), "0", "40", "10", "70", "0"] });
+      }
+      if (step[0] === "hit") return ev(seq, "animation", { animationId: "HIT_ANIMATION", battler: who(step[1]), target: who(step[1]), arguments: [] });
+      if (step[0] === "stat") return ev(seq, "animation", { animationId: "STATS_CHANGE", battler: who(step[1]), target: who(step[1]), arguments: [String(step[2] ?? 20)] });
+      if (step[0] === "rain") return ev(seq, "animation", { animationId: "RAIN_CONTINUES", battler: 0, target: 0, arguments: [] });
+      throw new Error(`wordsChain step ${JSON.stringify(step)}`);
+    });
+    const resolution = { resolutionId: { requestId }, segmentIndex: 0, segments: [{ events }] };
+    const lastBody = steps.map((s) => s[0]).lastIndexOf("body");
+    steps.forEach((step, commandIndex) => {
+      const event = events[commandIndex]!;
+      if (step[0] === "rain") {
+        const value = words.shift()!.value;
+        bodies.push(...recordPresentationRngSubStream(pinned(value), generalAnimationPresentationRngKey(requestId, 0, event.sequence), GENERAL_RAIN_RANDOM2_PLAN).bodies);
+        return;
+      }
+      if (step[0] !== "body") return;
+      order = advanceLiveSpriteOrderHost(order, resolution, event.sequence, true);
+      const payload = event.payload as unknown as { battler: 0 | 1; target: 0 | 1; arguments: string[] };
+      const req = battleMoveAnimationRequest(payload.battler, payload.target, payload.arguments);
+      const bodyLend = lendLiveSpriteOrder(order, req.moveId);
+      const bodyKey = liveMovePresentationRngBodyKey({ resolutionId: { requestId }, segmentIndex: 0, commandIndex });
+      if (t === lastTurn && commandIndex === lastBody) {
+        lend = bodyLend; key = bodyKey;
+        if (liveMoveRandom2Plan(req) !== null) bodies.push(...activateLiveMovePresentationRng(pinned(f.presentationRngActivation!.value), req, bodyKey).bodies);
+        return;
+      }
+      order = markLiveSpriteOrderDeferredBody(order, bodyLend, req, bodyKey);
+      if ([28, 189, 240].includes(req.moveId)) bodies.push(...activateLiveMovePresentationRng(pinned(words.shift()!.value), req, bodyKey).bodies);
+    });
+    if (t < lastTurn) order = advanceLiveSpriteOrderHost(order, resolution, Number.POSITIVE_INFINITY);
+  });
+  if (words.length !== 0) throw new Error("wordsChain: unused words");
+  // POKEBENCH_LIVE_WORDS_CHAIN=entry-lend: negative control, the words-free known-entry lend instead of the deferred lend.
+  if (process.env.POKEBENCH_LIVE_WORDS_CHAIN === "entry-lend") lend = { known: true, free: KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER };
+  const result = { spriteOrderInput: lend, presentationRng: { host: Object.freeze({ ...pinned(0), bodies: Object.freeze(bodies) }), key } };
+  wordsChainLends.set(chain, result);
+  return result;
+}
+
 /** Pinned controlled-body host for a Random2 fixture body, activated through the production seam at host frame 0. */
 export function fixturePresentationRng(f: Fixture, request: BattleMoveAnimationRequest, context?: LiveMoveRandom2PlanContext): LiveMovePresentationRngInput | undefined {
   if (liveMoveRandom2Plan(request) === null) return undefined;
@@ -359,11 +434,14 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
       // production does there (known-entry F, checked against the allocator occupancy), never from capture rows.
       // POKEBENCH_LIVE_ORDER_INPUT=none withholds it (order-independent adapters must stay exact without a host order).
       spriteOrderInput: process.env.POKEBENCH_LIVE_ORDER_INPUT === "none" ? undefined
+        : f.wordsChain ? fixtureWordsChain(f).spriteOrderInput
         : f.iceBallChain ? fixtureIceBallChain(f, request).spriteOrderInput
         : postKo ? postKo.spriteOrderInput
           : f.digUnleashAfterSetup ? digUnleashLend()
           : withFirstBody(f, prepareLiveMoveSpriteOrder(fixtureSpriteOrder(f, request).order, request).input),
-      ...(liveMoveRandom2Plan(request) === null ? {} : { presentationRng: f.iceBallChain ? fixtureIceBallChain(f, request).presentationRng : fixturePresentationRng(f, request, request.moveId === 291
+      // words46: the render view passes the presentation host to any consumer of a deferred lend (battleResolutionPresentationRender.ts).
+      ...(f.wordsChain ? { presentationRng: fixtureWordsChain(f).presentationRng }
+        : liveMoveRandom2Plan(request) === null ? {} : { presentationRng: f.iceBallChain ? fixtureIceBallChain(f, request).presentationRng : fixturePresentationRng(f, request, request.moveId === 291
         && (request.turn & 1) === 0 ? { diveSetupSplashBirth: liveDiveSetupSplashBirth(field, attacker === 0 ? "player" : "opponent") } : undefined) }),
       ...(fixtureBattlerX2Input(f) === undefined ? {} : { battlerX2Input: fixtureBattlerX2Input(f) }),
     },

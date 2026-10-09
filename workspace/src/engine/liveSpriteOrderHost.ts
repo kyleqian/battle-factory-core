@@ -40,6 +40,7 @@ import { battleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import { createKnownEntrySpriteAllocatorProvider, type KnownEntryRoute } from "./knownEntrySpriteAllocator.ts";
 import type { LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import type { LiveSpriteAllocatorHost } from "./liveSpriteAllocator.ts";
+import { generalAnimationPresentationRngKey, isWordsOrderDeferredUnit, WORDS_ORDER_GENERAL_ANIMATION, WORDS_ORDER_UNIT_MOVE_IDS } from "./wordsOrderUnits.ts";
 import {
   KNOWN_ENTRY_BATTLER_SLOTS, KNOWN_ENTRY_OCCUPANT_ROLES, applySpriteOrderPresentationEvent, createSpriteOrderTracker,
   invalidateSpriteOrderTracker, spriteOrderStatusAnimationName, spriteOrderTrackerLend, spriteOrderTrackerRoleIsomorphic,
@@ -76,8 +77,13 @@ export interface LiveSpriteOrderHost {
   readonly deferred?: SpriteOrderDeferredLend;
 }
 
-/** Multi-body Random2 moves whose later bodies take a deferred lend from an earlier body of the same move (Ice Ball 301). */
-export const DEFERRED_LEND_MOVE_IDS: readonly number[] = Object.freeze([301]);
+/**
+ * Random2 move bodies that record a deferred-lend marker: Ice Ball 301 (its later bodies take the lend; Ice Ball markers lend only to
+ * Ice Ball) and the words-dependent order units Sand-Attack 28, Mud-Slap 189, Rain Dance 240 (WORDS_ORDER_UNIT_MOVE_IDS; ANY later
+ * consumer takes their lend, docs/next-adapters-prep46.md). The RAIN_CONTINUES general animation marks itself per event
+ * (advanceLiveSpriteOrderHost).
+ */
+export const DEFERRED_LEND_MOVE_IDS: readonly number[] = Object.freeze([301, ...WORDS_ORDER_UNIT_MOVE_IDS]);
 
 /** Append order events to a pending deferred lend (no-op without one). */
 function withDeferredUnits(host: LiveSpriteOrderHost, units: readonly SpriteOrderPresentationEvent[]): LiveSpriteOrderHost {
@@ -107,7 +113,9 @@ export function markLiveSpriteOrderDeferredBody(
     const { battlerSlots, occupantRoles } = host.tracker;
     const atEntry = battlerSlots.player === KNOWN_ENTRY_BATTLER_SLOTS.player && battlerSlots.opponent === KNOWN_ENTRY_BATTLER_SLOTS.opponent
       && occupantRoles !== null && JSON.stringify(occupantRoles) === JSON.stringify(KNOWN_ENTRY_OCCUPANT_ROLES);
-    if (!atEntry || !host.tracker.cursor.order.known) return host;
+    // A words unit's lend is already in entry labels (spriteOrderTrackerLend rho), so its carry and the replay run in entry labels
+    // also after a KO + send-in (role-isomorphic occupancy; prep46 s3); Ice Ball keeps the entry-occupancy rule.
+    if ((!atEntry && !WORDS_ORDER_UNIT_MOVE_IDS.includes(body.moveId)) || !host.tracker.cursor.order.known) return host;
     activation = Object.freeze({ free: lend.free });
   }
   return Object.freeze({ ...host, deferredBody: Object.freeze({
@@ -428,11 +436,25 @@ export function advanceLiveSpriteOrderHost(
         if (geometryPlan !== undefined) mapped = { ...mapped, event: Object.freeze({ ...mapped.event, geometryPlan }) };
       }
       if (mapped.hidden) hidden = mapped.hidden;
+      // RAIN_CONTINUES (General_Rain) is a words-dependent order unit: a marker keyed per event, whose activation is the known lend or
+      // the pending words chain (prep46 s2). Word-free: the render seam reads its non-consuming sub-stream words by this key.
+      let rainActivation: SpriteOrderDeferredLend["activation"] | undefined;
+      if (mapped.event?.kind === "general-animation" && mapped.event.animation === WORDS_ORDER_GENERAL_ANIMATION) {
+        const lend = spriteOrderTrackerLend(tracker);
+        rainActivation = lend !== null ? Object.freeze({ free: lend })
+          : deferred !== undefined && isWordsOrderDeferredUnit(deferred) ? Object.freeze({ deferred }) : undefined;
+      }
       if (mapped.event) tracker = applySpriteOrderPresentationEvent(tracker, mapped.event);
       if (mapped.then) tracker = applySpriteOrderPresentationEvent(tracker, mapped.then);
       // Deferred lend: the marked body's own event starts it (the tracker invalidates there); later events are its units while the order is
       // unknown; a revived (known) tracker drops it.
-      if (mapped.event?.kind === "move-animation" && deferredBody !== undefined && mapped.event.moveId === deferredBody.moveId
+      if (rainActivation !== undefined && !tracker.cursor.order.known) {
+        const battler = events[index]!.payload.kind === "animation" ? (events[index]!.payload as { battler?: number }).battler : undefined;
+        deferred = Object.freeze({
+          key: generalAnimationPresentationRngKey(requestId, segmentIndex, events[index]!.sequence), moveId: 0,
+          attackerSide: battler === 1 ? "opponent" as const : "player" as const, generalAnimation: WORDS_ORDER_GENERAL_ANIMATION,
+          activation: rainActivation, units: Object.freeze([]) });
+      } else if (mapped.event?.kind === "move-animation" && deferredBody !== undefined && mapped.event.moveId === deferredBody.moveId
         && mapped.event.attackerSide === deferredBody.attackerSide) {
         deferred = tracker.cursor.order.known ? undefined : Object.freeze({ ...deferredBody, units: Object.freeze([]) });
         deferredBody = undefined;
@@ -515,7 +537,13 @@ export function lendLiveSpriteOrder(host: LiveSpriteOrderHost, moveId?: number):
   }
   // A later body of a DEFERRED_LEND_MOVE_IDS move after an earlier one (unknown tracker): the word-free deferred lend; the render seam
   // resolves it (resolveSpriteOrderDeferredLend). `free` is empty so that no other consumer can read it as an order.
-  if (!host.tracker.cursor.order.known && host.deferred !== undefined && moveId === host.deferred.moveId) {
+  // After a words-dependent order unit (Sand-Attack / Mud-Slap / Rain Dance / RAIN_CONTINUES) ANY consumer takes it (prep46), honouring
+  // POSTKO_LEND_EXCLUDED_MOVE_IDS; an Ice Ball marker lends only to Ice Ball.
+  if (!host.tracker.cursor.order.known && host.deferred !== undefined
+    && (moveId === host.deferred.moveId || isWordsOrderDeferredUnit(host.deferred))) {
+    const { player, opponent } = host.tracker.battlerSlots;
+    const atEntry = player === KNOWN_ENTRY_BATTLER_SLOTS.player && opponent === KNOWN_ENTRY_BATTLER_SLOTS.opponent;
+    if (!atEntry && moveId !== undefined && POSTKO_LEND_EXCLUDED_MOVE_IDS.includes(moveId)) return undefined;
     return Object.freeze({ known: true as const, free: Object.freeze([]), deferred: host.deferred });
   }
   const free = spriteOrderTrackerLend(host.tracker);

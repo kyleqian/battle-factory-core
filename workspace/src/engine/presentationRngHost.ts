@@ -202,6 +202,22 @@ export function activatePresentationRngBody(
 }
 
 /**
+ * Record a NON-CONSUMING per-event sub-stream (tick only; S10A prep46 s2, supervisor decision): its words follow the source law inside
+ * the animation (per-frame step, then the plan's draws in source order) from the host's current state, but nothing is scheduled into
+ * the shared stream, so every other body's words are unchanged. Deviation from the ROM step count: the stream after it is
+ * sum(plan counts) draws short (docs/presentation-rng.md "General_Rain sub-stream"). Exactly once per key, like activatePresentationRngBody.
+ */
+export function recordPresentationRngSubStream(
+  host: PresentationRngHost,
+  key: string,
+  plan: readonly PresentationRngDrawStep[],
+): PresentationRngHost {
+  if (host.bodies.some((body) => body.key === key)) return host;
+  const record: PresentationRngBodyRecord = Object.freeze({ key, activationFrame: host.frame, words: presentationRngPlanWords(host.state, plan) });
+  return Object.freeze({ ...host, bodies: Object.freeze([...host.bodies, record]) });
+}
+
+/**
  * Session-level presentation RNG state (EngineState.presentationRng). The session seed and policy
  * are what session exports persist; `battleKey` is only an edge detector for "a new battle
  * started" and never feeds the seed.

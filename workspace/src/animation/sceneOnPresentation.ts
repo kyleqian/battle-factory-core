@@ -4603,6 +4603,12 @@ export interface SceneOnMovePresentationState<
   readonly age: number;
   readonly config: TConfig;
   /**
+   * Presentation claim flag (S10A prep46): the live seam resolved this command's sprite order through a words-dependent order unit's
+   * deferred lend (an earlier Sand-Attack / Mud-Slap / Rain Dance / RAIN_CONTINUES carried with its surrogate presentation words), so this
+   * command is faithful random (ANIMATION_VERIFICATION.md D3), never oracle-exact, whatever its adapter's own claim. Not a render input.
+   */
+  readonly faithfulRandomHistory?: true;
+  /**
    * Optional CPU/VCOUNT interval supplied by the presentation scheduler.
    * This is hardware timing only: it neither identifies a move nor owns task
    * callbacks, battle state, input, or outcomes.

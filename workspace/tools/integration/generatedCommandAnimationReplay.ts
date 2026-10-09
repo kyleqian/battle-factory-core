@@ -60,6 +60,8 @@ export function generatedCommandAnimationReplay(
     spriteInputHistoryKnown: boolean | undefined;
     retainedSpriteHistoryKnown: boolean | undefined;
     spriteOrderInput: readonly number[] | undefined;
+    /** The lend is a word-free deferred-lend marker (Ice Ball; prep46 words units), resolved at the render seam; `spriteOrderInput` is then []. */
+    spriteOrderDeferred?: true;
     retainedSpriteOrderKnown: boolean | undefined;
     /** Live order host after this step (tracker + event cursor), for host == pure-transform checks. */
     orderHostView: OrderHostView | undefined;
@@ -105,6 +107,7 @@ export function generatedCommandAnimationReplay(
           spriteInputHistoryKnown: r.liveMoveSpriteAllocatorInput?.historyKnown,
           retainedSpriteHistoryKnown: state.liveMoveSpriteAllocatorHost?.host.historyKnown,
           spriteOrderInput: r.liveMoveSpriteOrderInput?.free,
+          ...(r.liveMoveSpriteOrderInput?.deferred === undefined ? {} : { spriteOrderDeferred: true as const }),
           retainedSpriteOrderKnown: state.liveMoveSpriteAllocatorHost?.order.known,
           orderHostView: orderHostView(state.liveMoveSpriteAllocatorHost?.orderHost),
         });

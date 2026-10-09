@@ -315,3 +315,55 @@ export function rainDanceAtAge(age: number, profile: RainDanceProfile): RainDanc
     soundTaskCount: 0,
   };
 }
+
+/**
+ * The drops of one age as `SortSprites` keys (software OAM: attr, subpriority 4, oam.y = attr0 & 0xff). A drop that
+ * AnimTask_CreateRaindrops created THIS frame is not in that frame's sort (BattleMainCB2 runs BuildOamBuffer before
+ * RunTasks, battle_main.c:1863-1869), so only drops with sourcePass >= 1 are keyed; Rain Dance's age-18 pair is already
+ * one pass ahead (dropAtAge). ROM-checked per frame with RAM-read words (docs/next-adapters-prep46.md s1).
+ */
+export function rainDropSortKeys(
+  drops: readonly Pick<RainDanceDrop, "slot" | "attr" | "subpriority" | "sourcePass">[],
+): readonly Readonly<{ slot: number; attr: readonly [number, number, number]; subpriority: number; oamY: number }>[] {
+  return drops.filter((drop) => drop.sourcePass >= 1)
+    .map((drop) => ({ slot: drop.slot, attr: drop.attr, subpriority: drop.subpriority, oamY: drop.attr[0] & 0xff }));
+}
+
+/**
+ * General_Rain (B_ANIM_RAIN_CONTINUES; battle_anim_scripts.s General_Rain): two AnimTask_CreateRaindrops tasks with
+ * args (0, 3, 60) spawn a pair whenever the task timer % 3 == 1, x = Random2() % 240, y = Random2() % 80 per task in
+ * creation order (battle_anim_water.c:482-501): 20 spawns x 4 words, at ages 17 + 3k from the general animation's
+ * activation edge (RAM-measured, docs/next-adapters-prep46.md s1). Its script runs in the task phase, so the first pair
+ * gets no extra sprite pass (the measured gap 17 -> 20 is 3, Move_RAIN_DANCE's 18 -> 20 is 2).
+ */
+export const GENERAL_RAIN_SPAWN_AGES: readonly number[] = Object.freeze(Array.from({ length: 20 }, (_, k) => 17 + 3 * k));
+/** The last age with a live General_Rain drop (the last spawn + 19 passes). */
+export const GENERAL_RAIN_LAST_DROP_AGE = 17 + 3 * 19 + 19;
+
+/**
+ * General_Rain's drops alive at `age` from the body's four-word draw rows (plan order: x0, y0, x1, y1 per spawn), with
+ * the AnimRainDrop program of Move_RAIN_DANCE (dropAtAge) and CreateSprite's lowest free slot over `occupiedSpriteSlots`
+ * and the live drops (as simulate). Presentation only: the words are the general animation's own presentation words.
+ */
+export function generalRainDropsAtAge(
+  age: number, draws: readonly (readonly number[])[], occupiedSpriteSlots: readonly number[],
+): readonly RainDanceDrop[] {
+  const births: DropBirth[] = [];
+  GENERAL_RAIN_SPAWN_AGES.forEach((spawn, k) => {
+    if (spawn > age) return;
+    const words = draws[k];
+    if (words === undefined || words.length !== 4) throw new Error(`General_Rain spawn ${k} needs 4 words`);
+    const occupied = new Set(occupiedSpriteSlots);
+    for (const birth of births) if (dropAtAge(birth, spawn) !== null) occupied.add(birth.slot);
+    for (let task = 0; task < 2; task += 1) {
+      let slot = 0;
+      while (occupied.has(slot)) slot += 1;
+      occupied.add(slot);
+      births.push({ age: spawn, slot, x: words[2 * task]! % 240, y: words[2 * task + 1]! % 80 });
+    }
+  });
+  return births.flatMap((birth) => {
+    const drop = dropAtAge(birth, age);
+    return drop === null ? [] : [drop];
+  }).sort((a, b) => a.slot - b.slot);
+}

@@ -94,6 +94,38 @@ All functions are pure and return frozen values (`presentationRngHost.ts`):
   the ROM would interleave them. The surrogate does not. That is acceptable for faithful
   random, and pinned proofs use single bodies.
 
+## General_Rain sub-stream (S10A words46, supervisor decision 2026-10-09)
+
+`RAIN_CONTINUES` (General_Rain, `battle_anim_scripts.s`) draws 80 Random2 words: 20 spawns at ages 17 + 3k, 4 words each
+(`GENERAL_RAIN_RANDOM2_PLAN`, `liveMovePresentationRng.ts`; RAM-measured in docs/next-adapters-prep46.md §1). No live adapter
+renders it; only the sprite-order carry after it reads the words (`liveWordsUnitPostFree`, `liveMoveAnimation.ts`).
+
+- **Non-consuming per-event read.** `recordPresentationRngSubStream(host, key, plan)` (`presentationRngHost.ts`) records
+  `presentationRngPlanWords(host.state, plan)` under `general:<request>:<segment>:<event sequence>` and schedules nothing.
+  The words follow the source law inside the animation (per-frame step, then the draws in source order) from the stream state
+  at its activation.
+- **Anchor.** The general animation has no presentation command. The tick seam (`tickLiveMovePresentationRngSession`) records
+  it when the first command at or after its event starts presenting (phase `presenting`, `phaseElapsed` 0). Exactly once per key;
+  re-ticks and repaints never draw.
+- **Documented deviation (D3 "draw order/count").** The shared stream is **not** advanced by those 80 draws, so after every rain
+  continue the stream is 80 steps short of the ROM's step count. Surrogate activation values are not oracle-synchronized anyway
+  (`random2-trackability.md` §0). Every existing faithful-random output and every legacy session export is byte-identical
+  (`tests/wordsOrderDeferredLend.test.ts`: 40/40 schedules, 320 move bodies, every stream state identical). The law-faithful
+  consuming read would move 240 of those 320 bodies and needs a policy version bump; it is out of scope.
+- **No policy bump.** `PRESENTATION_RNG_POLICY_V1` is unchanged.
+
+## Words-order history accounting (D3)
+
+A consumer whose sprite-order lend resolved through a Random2-words unit's deferred marker (Sand-Attack 28, Mud-Slap 189,
+Rain Dance 240, RAIN_CONTINUES; docs/next-adapters-prep46.md) has an order that depends on that unit's **surrogate** words. That
+command is a **faithful-random** claim, even when its adapter is scoped exact:
+
+- `liveMoveAnimationPresentation` returns `faithfulRandomHistory: true` when the adapter read the resolved lend. An adapter that
+  never reads the lend (for example Slam) keeps its scoped-exact claim.
+- Adapter counts (245 + 13 + 18) do not change. The claim is per command. `tools/integration/liveShareCensus.ts` counts these
+  commands and frames as `overall.faithfulRandomHistory` (docs/live-share-census.md).
+- Pinned-word proofs (`tools/integration/fixtures/words46-live-receipt.json`) establish the controlled consumer windows only.
+
 ## Session export, replay and reset
 
 - `SessionTrace.presentationRng = { seed: "<8 hex digits>", policy: "<policy id>" }` is
