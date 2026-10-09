@@ -9,7 +9,7 @@ import { advanceLiveSpriteOrderHost, createLiveSpriteOrderHost, lendLiveSpriteOr
 import {
   applySpriteOrderPresentationEvent, createSpriteOrderTracker, decodeSpriteOrderPlan, type SpriteOrderPresentationEvent,
 } from "../src/engine/spriteOrderEventTransform.ts";
-import { gigaDrainSpriteOrderPlanForGeometry } from "../src/engine/spriteOrderGigaDrainPlan.ts";
+import { gigaDrainSpriteOrderPlanForGeometry, megaDrainSpriteOrderPlanForGeometry } from "../src/engine/spriteOrderGigaDrainPlan.ts";
 import { applySpriteOrderUnitPlan, createSpriteOrderPlanCursor, knownEntrySpriteOrderState } from "../src/engine/spriteOrderProvider.ts";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
 
@@ -164,4 +164,53 @@ describe("Giga Drain (202) geometry-keyed sprite-order plan", () => {
     expect(labels).toEqual(["202oL", "225pL", "225pL", "202oL", "225pL", "202oL", "225pL", "225pL", "202oL"]);
     expect(off.commands.every(row => row.spriteOrderInput === undefined)).toBe(true);
   }, 120000);
+
+  // Mega Drain (72): the same orb family (MegaDrainAbsorbEffect); its one same-frame orb pair is plan n5 / n6 (end age 95).
+  const MD_OLDER = "Cf;D0;Cf;D1;Cff;Cff;Cff;Cff;Cff;D2;Cff;D4;D3;Cff;D7;Cff;D9;D5,6;D10;D8;D12;D11;D15;D13;D16;D14;D17;Cf;Cf;Cf;D18;Cf;D19;"
+    + "D20;D21;Cf;D22";
+  const MD_NEWER = MD_OLDER.replace("D5,6", "D6,5");
+  const mdInstances = Object.entries(read("tools/integration/fixtures/gdgeo/md-units.json")).flatMap(([name, job]) => job.units
+    .filter(unit => unit.kind === "body" && !unit.truncated && unit.label.startsWith("body 72:"))
+    .map(unit => ({ name, job, unit, side: unit.label.endsWith(":player") ? "player" as const : "opponent" as const })));
+
+  it("Mega Drain: reproduces every ROM grid plan (14 instances, both sides, A == B), both pair orders, all predictions", () => {
+    expect(mdInstances).toHaveLength(14);
+    for (const { name, job, unit, side } of mdInstances) {
+      expect(job.identicalAB, name).toBe(true);
+      expect([MD_OLDER, MD_NEWER], name).toContain(unit.plan);
+      expect(megaDrainSpriteOrderPlanForGeometry(side, species(job)), name).toBe(unit.plan);
+      expect(job.predicted, name).toBe(unit.plan === MD_OLDER ? "older-first (D5,6)" : "newer-first (D6,5)");
+    }
+    for (const side of ["player", "opponent"] as const) {
+      const plans = mdInstances.filter(row => row.side === side).map(row => row.unit.plan);
+      expect(new Set(plans.map(String)).size, side).toBe(2); // both orders observed on each side
+      expect(plans.length).toBeGreaterThanOrEqual(6);
+    }
+    // the transform: no geometry -> invalidates as before; the two orders free the pair's slots in opposite order
+    const tracker = createSpriteOrderTracker(knownEntrySpriteOrderState("ordinary-factory"));
+    const body = (geometry?: { playerSpecies: number; opponentSpecies: number }): SpriteOrderPresentationEvent =>
+      ({ kind: "move-animation", moveId: 72, attackerSide: "opponent", ...(geometry ? { geometry } : {}) });
+    expect(applySpriteOrderPresentationEvent(tracker, body()).invalidReason).toBe("no EXACT plan: body 72:opponent");
+    const newer = applySpriteOrderPresentationEvent(tracker, body({ playerSpecies: ONIX, opponentSpecies: DIGLETT }));
+    const older = applySpriteOrderPresentationEvent(tracker, body({ playerSpecies: ONIX, opponentSpecies: ROSELIA }));
+    expect([newer.cursor.order.known, older.cursor.order.known]).toEqual([true, true]);
+    expect(newer.cursor.order.free).not.toEqual(older.cursor.order.free);
+  });
+
+  it("Mega Drain: per-frame cursor vs ROM F; geometry sweep differs from either order only in its same-frame pair", () => {
+    for (const { name, job, unit, side } of mdInstances) {
+      const plan = decodeSpriteOrderPlan(megaDrainSpriteOrderPlanForGeometry(side, species(job))!);
+      const start = createSpriteOrderPlanCursor({ known: true, free: unit.F0, pendingDestroyed: [] });
+      expect(plan, name).toHaveLength(unit.windows.length);
+      unit.windows.forEach((rom, k) => expect(applySpriteOrderUnitPlan(start, plan.slice(0, k + 1)).order.free, `${name} ${k}`).toEqual(rom.F));
+    }
+    const classes = new Set<string>();
+    for (let player = 1; player <= 411; player += 7) for (let opponent = 1; opponent <= 411; opponent += 5) {
+      for (const side of ["player", "opponent"] as const) {
+        const plan = megaDrainSpriteOrderPlanForGeometry(side, { playerSpecies: player, opponentSpecies: opponent });
+        if (plan !== null) classes.add(plan);
+      }
+    }
+    expect([...classes].sort()).toEqual([MD_OLDER, MD_NEWER].sort());
+  });
 });
