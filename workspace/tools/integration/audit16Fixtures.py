@@ -24,13 +24,13 @@ SPECIES = {113: "CHANSEY", 143: "SNORLAX", 24: "ARBOK", 10: "CATERPIE"}
 MOVES = {"Move_CONFUSE_RAY": 109, "Move_SPORE": 147, "Move_THUNDER_WAVE": 86, "Move_SLUDGE_BOMB": 188, "Move_WILL_O_WISP": 261,
          "Move_SEISMIC_TOSS": 69, "Move_ICE_BALL": 301, "Move_FUTURE_SIGHT": 248, "Move_PURSUIT": 228, "Move_PERISH_SONG": 195,
          "Move_OUTRAGE": 200, "Move_LIGHT_SCREEN": 113, "Move_REFLECT": 115, "Move_PROTECT": 182, "Move_THUNDERBOLT": 85,
-         "Move_ICE_BEAM": 58, "Move_DOUBLE_TEAM": 104, "Move_SWIFT": 129, "Move_TACKLE": 33, "Move_ICE_BEAM": 58}
+         "Move_ICE_BEAM": 58, "Move_DOUBLE_TEAM": 104, "Move_SWIFT": 129, "Move_TACKLE": 33, "Move_BLIZZARD": 59}
 POWER = {109: 0, 147: 0, 86: 0, 188: 90, 261: 0, 69: 1, 301: 30, 248: 80, 228: 40, 195: 0, 200: 90, 113: 0, 115: 0, 182: 0, 85: 95,
-         58: 95, 104: 0, 129: 60, 33: 35}
-CONSUMERS = {113: "LIGHT_SCREEN", 115: "REFLECT", 182: "PROTECT", 85: "THUNDERBOLT", 58: "ICE_BEAM", 104: "DOUBLE_TEAM", 129: "SWIFT"}
+         58: 95, 104: 0, 129: 60, 33: 35, 59: 120}
+CONSUMERS = {113: "LIGHT_SCREEN", 115: "REFLECT", 182: "PROTECT", 85: "THUNDERBOLT", 58: "ICE_BEAM", 104: "DOUBLE_TEAM", 129: "SWIFT", 59: "BLIZZARD"}
 STATUS1 = {"Status_Sleep": (0x1, "SLP"), "Status_Poison": (0x8, "PSN"), "Status_Burn": (0x10, "BRN"), "Status_Freeze": (0x20, "FRZ"),
            "Status_Paralysis": (0x40, "PRZ")}
-AGE_OFFSET: dict[int, int] = {}
+AGE_OFFSET: dict[int, int] = {}  # every consumer here is framed at its ROM activation (the controls are 0 px there; Double Team: see the audit doc)
 
 
 def anim_name(status: int) -> str | None:

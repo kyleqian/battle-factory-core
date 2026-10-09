@@ -25,6 +25,7 @@ ctl-thunderbolt-ply-c1.json              THUNDERBOLT  player   units=2   live=1 
 future-sight-light-screen-opp-c0.json    LIGHT_SCREEN opponent units=1   live=1 order=1 alloc=1 harnessAlloc=True  rows=86 exact=86 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
 future-sight-light-screen-ply-c0.json    LIGHT_SCREEN player   units=1   live=1 order=1 alloc=1 harnessAlloc=True  rows=86 exact=85 px=2473 r1==r2=1 ages=59..59 | entry live=1 px=2473 r1==r2=1 win=1
 future-sight-reflect-ply-c0.json         REFLECT      player   units=1   live=1 order=1 alloc=1 harnessAlloc=True  rows=79 exact=79 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+i152-arbok-blizzard-c0.json              BLIZZARD     opponent units=0   live=1 order=1 alloc=0 harnessAlloc=False rows=362 exact=362 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
 i152-arbok-double-team-c0.json           DOUBLE_TEAM  opponent units=0   live=1 order=1 alloc=0 harnessAlloc=False rows=159 exact=33 px=393765 r1==r2=1 ages=2..44 | entry live=1 px=393765 r1==r2=1 win=1
 i152-arbok-swift-c0.json                 SWIFT        opponent units=0   live=1 order=1 alloc=0 harnessAlloc=False rows=80 exact=80 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
 i152-arbok-thunderbolt-c0.json           THUNDERBOLT  opponent units=0   live=1 order=1 alloc=0 harnessAlloc=False rows=237 exact=237 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1

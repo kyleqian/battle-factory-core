@@ -16,7 +16,7 @@ BASE = json.loads(Path("tools/battle-lab/prep18-return-altopp-snorlax-golem.json
 OUT = Path(sys.argv[1]); OUT.mkdir(parents=True, exist_ok=True)
 MOVES = {"CONFUSE_RAY": 109, "SPORE": 147, "THUNDER_WAVE": 86, "SLUDGE_BOMB": 188, "WILL_O_WISP": 261, "SEISMIC_TOSS": 69, "ICE_BALL": 301,
          "FUTURE_SIGHT": 248, "PURSUIT": 228, "PERISH_SONG": 195, "OUTRAGE": 200, "COUNTER": 68, "LIGHT_SCREEN": 113, "REFLECT": 115,
-         "PROTECT": 182, "THUNDERBOLT": 85, "ICE_BEAM": 58, "DOUBLE_TEAM": 104, "SWIFT": 129}
+         "PROTECT": 182, "THUNDERBOLT": 85, "ICE_BEAM": 58, "DOUBLE_TEAM": 104, "SWIFT": 129, "BLIZZARD": 59}
 # name: (unit move, consumer move, consumer side, prompt cycles)
 CHAINS = {
     # priority 1: a status animation (infliction and / or the afflicted battler's move attempt) -> allocator consumer
@@ -102,10 +102,11 @@ for name, (unit, consumer, side, cycles) in CHAINS.items():
 # ISSUES #152: the ARBOK -> CATERPIE geoice control field (tools/integration/fixtures/geoice/controls/scenarios/, lab seed 305419897) with
 # ARBOK's Blizzard x4 replaced by another first-body live adapter; CATERPIE (Tackle, speed 0) moves second, so ARBOK's body is the first.
 G = json.loads(Path("tools/integration/fixtures/geoice/controls/scenarios/blizzard-opponent-arbok-caterpie.json").read_text())
-for name, move in (("i152-arbok-double-team", "DOUBLE_TEAM"), ("i152-arbok-thunderbolt", "THUNDERBOLT"), ("i152-arbok-swift", "SWIFT")):
+for name, move in (("i152-arbok-double-team", "DOUBLE_TEAM"), ("i152-arbok-thunderbolt", "THUNDERBOLT"), ("i152-arbok-swift", "SWIFT"),
+                   ("i152-arbok-blizzard", "BLIZZARD")):  # Blizzard itself through this audit's fixture path (ROM personality / HP)
     s = json.loads(json.dumps(G))
     s["overrides"]["parties"]["opponent"][0]["moves"] = [MOVES[move]] * 4
-    s["trace"] = trace(1)
+    s["trace"] = trace(1) if move != "BLIZZARD" else G["trace"]
     assert s["seed"] == 305419897
     (OUT / f"{name}.json").write_text(json.dumps(s, indent=1) + "\n")
 print("\n".join(sorted(p.name for p in OUT.glob("*.json"))))
