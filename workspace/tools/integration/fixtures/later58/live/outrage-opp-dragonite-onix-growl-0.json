@@ -1,0 +1,39 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "OUTRAGE",
+ "bodyIndex": 0,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later58/scenarios/outrage-opp-dragonite-onix-growl.json",
+ "denseWindow": {
+  "startFrame": 80,
+  "endFrame": 198
+ },
+ "attacker": {
+  "species": "DRAGONITE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793700231,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 110,
+  "playerMaxHp": 110,
+  "opponentHp": 166,
+  "opponentMaxHp": 166,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ }
+}

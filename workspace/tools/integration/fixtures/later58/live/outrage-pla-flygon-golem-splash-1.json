@@ -1,0 +1,49 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "OUTRAGE",
+ "bodyIndex": 1,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later58/scenarios/outrage-pla-flygon-golem-splash.json",
+ "denseWindow": {
+  "startFrame": 605,
+  "endFrame": 723
+ },
+ "attacker": {
+  "species": "FLYGON",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349018756,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 155,
+  "playerMaxHp": 155,
+  "opponentHp": 84,
+  "opponentMaxHp": 155,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "precedingBodies": [
+  {
+   "moveId": 200,
+   "side": "player"
+  },
+  {
+   "moveId": 150,
+   "side": "opponent"
+  }
+ ]
+}

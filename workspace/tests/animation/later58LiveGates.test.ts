@@ -121,3 +121,15 @@ describe("later58 Bonemerang 155: later hits", () => {
     expect(presentation({ ...later, target: { ...later.target, species: "ONIX" } })).toBeNull();
   });
 });
+
+describe("later58 Outrage 200 at a later body", () => {
+  it.each(pinnedOf("OUTRAGE"))("%s: live, every pinned row equals the ROM frame", expectPinnedRows, 180000);
+
+  it("later bodies after Quick Attack / Growl / Splash / its own turn are live on rest-free battlers; an opponent ONIX later body declines", () => {
+    for (const name of ["outrage-opp-flygon-golem-qa-0", "outrage-opp-flygon-golem-splash-1", "outrage-pla-flygon-golem-qa-2"]) {
+      expect(presentation(fixture(name))?.config.move).toBe("OUTRAGE");
+    }
+    expect(presentation(fixture("outrage-pla-dragonite-onix-splash-0"))?.config.move).toBe("OUTRAGE");
+    for (const name of ["outrage-pla-dragonite-onix-splash-1", "outrage-pla-dragonite-onix-qa-0"]) expect(presentation(fixture(name))).toBeNull();
+  });
+});

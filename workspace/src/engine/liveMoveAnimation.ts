@@ -3101,8 +3101,10 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 200: {
-      // prep29 R1 / B.6: Outrage, first body only (the S0 registers; a later body declines).
-      if (spriteOrderInput?.known !== true || spriteOrderInput.firstBody !== true) return null;
+      // prep29 R1 / B.6: Outrage (the S0 registers). later58 (docs/next-adapters-later58.md): a LATER body (after Quick Attack / Growl / Splash /
+      // its own rampage turn) starts from history WIN0 / BGnCNT / DISPCNT / BG1VOFS that no pixel reads, with the first body's allocator; the
+      // battler x2 rests are read, so a later body needs both species rests {0,0}.
+      if (spriteOrderInput?.known !== true || (spriteOrderInput.firstBody !== true && !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       const lentOrder = spriteOrderWithOccupiedPrefix(
