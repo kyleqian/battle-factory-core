@@ -42,6 +42,8 @@ import { DOUBLE_EDGE_FRAME_COUNT } from "../animation/doubleEdge.ts";
 import { speciesFrontIdleRestOffsetOrZero } from "../animation/speciesIdleAnim.ts";
 import { liveTrackedFrontIdleRest, type LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import { digAtAge } from "../animation/dig.ts";
+import { gigaDrainSpriteOrderPlanText } from "../animation/gigaDrain.ts";
+import { megaDrainSpriteOrderPlanText } from "../animation/megaDrain.ts";
 import { FAINT_ATTACK_ANIMATION_PROFILE } from "../animation/faintAttack.ts";
 import { RAZOR_LEAF_BODY_LAST_AGE } from "../animation/razorLeaf.ts";
 import { THUNDER_PUNCH_MOVE_BODY_LAST_AGE } from "../animation/thunderPunch.ts";
@@ -619,6 +621,43 @@ export function liveBattlerAnchors(
       ? liveTrackedFrontIdleRest(battler, speciesFrontIdleRestOffsetOrZero(art[battler].speciesSymbol), x2Input)
       : { x2: 0, y2: 0 },
   };
+}
+
+/** The species shown on each side at a body (a Substitute doll still anchors on its species: GetBattlerSpriteCoord). */
+export interface LiveMoveBodySpecies {
+  readonly playerSpecies: number;
+  readonly opponentSpecies: number;
+}
+
+/**
+ * S10A gdgeo (docs/giga-drain-geometry-order.md): the absorption orbs' arc end points at the displayed species, exactly as the
+ * Giga Drain / Mega Drain adapters below (`case 202` / `case 72`): the target's animationCenter (= its picOffsetPoint) and the
+ * attacker's picOffsetPoint (absorptionCenter / healingCenter). Null when a species has no battle picture.
+ */
+export function liveMoveAbsorptionOrbCenters(
+  attackerSide: "player" | "opponent", species: LiveMoveBodySpecies,
+): Readonly<{ attacker: Readonly<{ x: number; y: number }>; target: Readonly<{ x: number; y: number }> }> | null {
+  let art: ReturnType<typeof createBattleCommandFieldArtView>;
+  try {
+    art = createBattleCommandFieldArtView({ player: { species: species.playerSpecies }, opponent: { species: species.opponentSpecies } } as never);
+  } catch {
+    return null;
+  }
+  return { attacker: liveBattlerAnchors(attackerSide, art).picOffsetPoint,
+    target: liveBattlerAnchors(attackerSide === "player" ? "opponent" : "player", art).picOffsetPoint };
+}
+
+/**
+ * S10A gdgeo: the sprite-order plan text (spriteOrderEventTransform.ts encoding) of a geometry-keyed body at the displayed species:
+ * Giga Drain (202) / Mega Drain (72), from the renderers' own timelines (gigaDrain.ts / megaDrain.ts through
+ * absorptionOrbSpriteOrderPlan.ts). Null for any other move or a species without a battle picture.
+ */
+export function liveMoveGeometrySpriteOrderPlanText(
+  moveId: number, attackerSide: "player" | "opponent", species: LiveMoveBodySpecies,
+): string | null {
+  const planText = moveId === 202 ? gigaDrainSpriteOrderPlanText : moveId === 72 ? megaDrainSpriteOrderPlanText : null;
+  const centers = planText === null ? null : liveMoveAbsorptionOrbCenters(attackerSide, species);
+  return centers === null ? null : planText!(centers.target, centers.attacker, attackerSide, centers.attacker);
 }
 
 /**

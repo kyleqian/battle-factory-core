@@ -852,7 +852,7 @@ function applyCompletedCommand(
 /**
  * The displayed field at the segment's move-animation command of `eventSequence` (the segment's field after the commands before it,
  * as currentCommandField builds the presented command's field), or null when the segment has no such command. S10A gdgeo: the
- * sprite-order host keys the Giga Drain body plan by these species (spriteOrderGigaDrainPlan.ts).
+ * sprite-order host keys the Giga Drain / Mega Drain body plans by these species (liveMoveAnimation.ts liveMoveGeometrySpriteOrderPlanText).
  */
 export function battleResolutionMoveAnimationField(
   segment: Readonly<{ field: BattleResolutionDisplayedField; commands: readonly BattleResolutionPresentationCommand[] }>,

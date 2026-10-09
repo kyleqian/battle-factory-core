@@ -6,7 +6,10 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { decodeSpriteOrderPlan } from "../../src/engine/spriteOrderEventTransform.ts";
 import { applySpriteOrderUnitPlan, createSpriteOrderPlanCursor } from "../../src/engine/spriteOrderProvider.ts";
-import { gigaDrainSpriteOrderPlanForGeometry, megaDrainSpriteOrderPlanForGeometry } from "../../src/engine/spriteOrderGigaDrainPlan.ts";
+import { liveMoveGeometrySpriteOrderPlanText } from "../../src/engine/liveMoveAnimation.ts";
+type Species = { playerSpecies: number; opponentSpecies: number };
+const gdPlan = (side: "player" | "opponent", species: Species) => liveMoveGeometrySpriteOrderPlanText(202, side, species);
+const mdPlan = (side: "player" | "opponent", species: Species) => liveMoveGeometrySpriteOrderPlanText(72, side, species);
 
 interface Win { f: number; C: [number, string][]; D: number[]; F: number[] }
 interface Unit { kind: string; label: string; frame: number; F0: number[]; truncated: boolean; strayFChanges: number; plan: string; windows: Win[] }
@@ -55,7 +58,7 @@ for (const file of process.argv.slice(3)) {
       if (unit.kind !== "body" || unit.truncated || !/^body (202|72):/.test(unit.label)) continue;
       const side = unit.label.endsWith(":player") ? "player" : "opponent", move = unit.label.startsWith("body 72:") ? 72 : 202;
       const [player, opponent] = species(job);
-      const text = (move === 72 ? megaDrainSpriteOrderPlanForGeometry : gigaDrainSpriteOrderPlanForGeometry)(side, { playerSpecies: player, opponentSpecies: opponent })!;
+      const text = (move === 72 ? mdPlan : gdPlan)(side, { playerSpecies: player, opponentSpecies: opponent })!;
       const { problems, frames } = checkUnit(unit, text);
       if (!job.identicalAB) problems.push("A != B");
       rows.push({ job: name, move, side, player, opponent, frames, problems });

@@ -36,17 +36,21 @@ timeline (`gigaDrainAtAge` / `megaDrainAtAge`, the accepted renderers' arithmeti
 one allocation window per frame whose sprite set changes (the palette-blend controller sprite of each `simple_palette_blend`,
 the hitsplat, the orbs, the healing stars; created first-free in script order), the live sprites kept in a stable sort on
 `oam.y` (8-bit, read as negative from 160), a new sprite entering behind the live ones, and each destroy group listed in that
-order. `gigaDrainSpriteOrderPlanText` / `megaDrainSpriteOrderPlanText` feed it; `src/engine/spriteOrderGigaDrainPlan.ts` supplies
-the centres from the displayed species exactly as the live adapter does (`liveMoveAnimation.ts` `case 202` / `case 72`: target
-`animationCenter`, attacker `picOffsetPoint`; a Substitute doll anchors on its species). No species table, no capture rows.
+order. `gigaDrainSpriteOrderPlanText` / `megaDrainSpriteOrderPlanText` feed it; `liveMoveAnimation.ts`
+`liveMoveGeometrySpriteOrderPlanText(moveId, side, species)` (the pinned live seam: the only engine module besides battleScene /
+core / palette / field art that may import `src/animation`, `tests/animation/animationBoundaryRatchet.test.ts`) supplies the
+centres from the displayed species with the adapter's own `liveBattlerAnchors(...).picOffsetPoint` (`case 202` / `case 72`:
+target `animationCenter`, attacker `absorptionCenter`; a Substitute doll anchors on its species). No species table, no capture
+rows.
 Independent control: the same generator on `absorbAtAge` reproduces Absorb's ROM-captured production plan (table index 44)
 exactly at every sampled geometry (pinned by test).
 
-Host: `SPRITE_ORDER_GEOMETRY_KEYED_BODIES` = {202, 72} (`spriteOrderEventTransform.ts`). `advanceLiveSpriteOrderHost` takes a
-`bodyGeometryAt(segment, sequence)` resolver and attaches `geometry` to those bodies' `move-animation` events; the orchestrator
-resolves it with `battleResolutionMoveAnimationField` (the segment's field after the commands before the body's own command —
-the field the live renderer draws that body on). Without geometry (no resolver, no command) the transform invalidates exactly
-as before (`no EXACT plan: body 202:<side>`). The generated table `spriteOrderProductionPlans.ts` is untouched.
+Host: `SPRITE_ORDER_GEOMETRY_KEYED_BODIES` = {202, 72} (`spriteOrderEventTransform.ts`; it only decodes). `advanceLiveSpriteOrderHost`
+takes a `bodyPlanAt(segment, sequence, moveId, side)` resolver and attaches the plan text as `geometryPlan` to those bodies'
+`move-animation` events; the orchestrator (`liveSpriteOrderBodyPlanAt`) resolves it with `battleResolutionMoveAnimationField` (the
+segment's field after the commands before the body's own command — the field the live renderer draws that body on). Without a
+plan (no resolver, no command) the transform invalidates exactly as before (`no EXACT plan: body 202:<side>`). The generated
+table `spriteOrderProductionPlans.ts` is untouched; no import cycle and no boundary-ratchet entry was added.
 
 ## Grid (direct mGBA, every job twice fresh, A == B 38 / 38; prediction committed before the probes ran)
 

@@ -1,4 +1,5 @@
-// S10A gdgeo (docs/giga-drain-geometry-order.md): the Giga Drain body's (202) sprite-order plan is keyed by the battlers' geometry.
+// S10A gdgeo (docs/giga-drain-geometry-order.md): the Giga Drain (202) / Mega Drain (72) sprite-order plans are keyed by the battlers'
+// geometry (liveMoveAnimation.ts liveMoveGeometrySpriteOrderPlanText).
 // ROM receipts: tools/integration/fixtures/gdgeo/units.json (24-pair grid, twice fresh) + fixtures/prep43/units.json (10 jobs).
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
@@ -9,13 +10,16 @@ import { advanceLiveSpriteOrderHost, createLiveSpriteOrderHost, lendLiveSpriteOr
 import {
   applySpriteOrderPresentationEvent, createSpriteOrderTracker, decodeSpriteOrderPlan, type SpriteOrderPresentationEvent,
 } from "../src/engine/spriteOrderEventTransform.ts";
-import { gigaDrainSpriteOrderPlanForGeometry, megaDrainSpriteOrderPlanForGeometry } from "../src/engine/spriteOrderGigaDrainPlan.ts";
 import { applySpriteOrderUnitPlan, createSpriteOrderPlanCursor, knownEntrySpriteOrderState } from "../src/engine/spriteOrderProvider.ts";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
 import { ABSORB_BODY_LAST_AGE, absorbAtAge } from "../src/animation/absorb.ts";
 import { absorptionBodySpriteOrderPlanText } from "../src/animation/absorptionOrbSpriteOrderPlan.ts";
-import { gigaDrainOrderCenters } from "../src/engine/spriteOrderGigaDrainPlan.ts";
+import { liveMoveAbsorptionOrbCenters, liveMoveGeometrySpriteOrderPlanText } from "../src/engine/liveMoveAnimation.ts";
 import { SPRITE_ORDER_PRODUCTION_BODIES, SPRITE_ORDER_PRODUCTION_PLANS } from "../src/engine/spriteOrderProductionPlans.ts";
+
+type Species = { playerSpecies: number; opponentSpecies: number };
+const gdPlan = (side: "player" | "opponent", species: Species) => liveMoveGeometrySpriteOrderPlanText(202, side, species);
+const mdPlan = (side: "player" | "opponent", species: Species) => liveMoveGeometrySpriteOrderPlanText(72, side, species);
 
 /** The plan of 9 / 10 prep43 probes (prep43Check.ts PREP43_PLANS "body 202"). */
 const MAJORITY = "Cf;D0;Cf;D1;Cfff;Cfff;Cfff;Cfff;Cfff;D2;Cfff;D5,6;D3;Cfff;D8,10;D4;Cfff;D12,13;D7,9;D16;D11;D17,19;D14;D15;D21;D18;"
@@ -51,7 +55,7 @@ describe("Giga Drain (202) geometry-keyed sprite-order plan", () => {
     for (const { name, job, unit, side } of instances) {
       expect(job.identicalAB, name).toBe(true);
       expect([MAJORITY, FLIP_18], name).toContain(unit.plan);
-      expect(gigaDrainSpriteOrderPlanForGeometry(side, species(job)), name).toBe(unit.plan);
+      expect(gdPlan(side, species(job)), name).toBe(unit.plan);
       if (job.predicted !== undefined) expect(job.predicted, name).toBe(unit.plan === MAJORITY ? "majority" : "flip window 18 (D9,7)");
       if (unit.plan === FLIP_18) flips += 1;
     }
@@ -63,9 +67,9 @@ describe("Giga Drain (202) geometry-keyed sprite-order plan", () => {
   });
 
   it("the DIGLETT opponent attacker flips the window-18 orb pair (prep43's one non-majority probe)", () => {
-    expect(gigaDrainSpriteOrderPlanForGeometry("opponent", { playerSpecies: ONIX, opponentSpecies: DIGLETT })).toBe(FLIP_18);
-    expect(gigaDrainSpriteOrderPlanForGeometry("opponent", { playerSpecies: ONIX, opponentSpecies: ROSELIA })).toBe(MAJORITY);
-    expect(gigaDrainSpriteOrderPlanForGeometry("player", { playerSpecies: ROSELIA, opponentSpecies: ONIX })).toBe(MAJORITY);
+    expect(gdPlan("opponent", { playerSpecies: ONIX, opponentSpecies: DIGLETT })).toBe(FLIP_18);
+    expect(gdPlan("opponent", { playerSpecies: ONIX, opponentSpecies: ROSELIA })).toBe(MAJORITY);
+    expect(gdPlan("player", { playerSpecies: ROSELIA, opponentSpecies: ONIX })).toBe(MAJORITY);
   });
 
   it("per-frame: the production cursor with the geometry plan matches every ROM allocation window; the majority plan does not for the flips", () => {
@@ -78,7 +82,7 @@ describe("Giga Drain (202) geometry-keyed sprite-order plan", () => {
       });
     };
     for (const { name, job, unit, side } of instances) {
-      expect(run(unit, gigaDrainSpriteOrderPlanForGeometry(side, species(job))!), name).toBe(true);
+      expect(run(unit, gdPlan(side, species(job))!), name).toBe(true);
       expect(run(unit, MAJORITY), name).toBe(unit.plan === MAJORITY);
     }
   });
@@ -99,7 +103,7 @@ describe("Giga Drain (202) geometry-keyed sprite-order plan", () => {
         const key = `${centre(player, "player")}|${centre(opponent, "opponent")}`;
         if (seen.has(key)) continue;
         seen.add(key);
-        const plan = gigaDrainSpriteOrderPlanForGeometry(side, { playerSpecies: player, opponentSpecies: opponent })!;
+        const plan = gdPlan(side, { playerSpecies: player, opponentSpecies: opponent })!;
         classes.add(plan);
         const windows = plan.split(";");
         expect(windows).toHaveLength(majority.length);
@@ -116,10 +120,10 @@ describe("Giga Drain (202) geometry-keyed sprite-order plan", () => {
     }
   });
 
-  it("the transform applies the geometry plan to a body event that carries geometry; without geometry it invalidates as before", () => {
+  it("the transform applies the geometry plan a body event carries; without one it invalidates as before", () => {
     const tracker = createSpriteOrderTracker(knownEntrySpriteOrderState("ordinary-factory"));
     const body = (geometry?: { playerSpecies: number; opponentSpecies: number }): SpriteOrderPresentationEvent =>
-      ({ kind: "move-animation", moveId: 202, attackerSide: "opponent", ...(geometry ? { geometry } : {}) });
+      ({ kind: "move-animation", moveId: 202, attackerSide: "opponent", ...(geometry ? { geometryPlan: gdPlan("opponent", geometry)! } : {}) });
     expect(applySpriteOrderPresentationEvent(tracker, body()).invalidReason).toBe("no EXACT plan: body 202:opponent");
     const diglett = applySpriteOrderPresentationEvent(tracker, body({ playerSpecies: ONIX, opponentSpecies: DIGLETT }));
     const roselia = applySpriteOrderPresentationEvent(tracker, body({ playerSpecies: ONIX, opponentSpecies: ROSELIA }));
@@ -129,7 +133,7 @@ describe("Giga Drain (202) geometry-keyed sprite-order plan", () => {
     expect([...diglett.cursor.order.free].sort((l, r) => l - r)).toEqual([...roselia.cursor.order.free].sort((l, r) => l - r));
   });
 
-  it("the host attaches the displayed species of the body's own command (battleResolutionMoveAnimationField) and keeps lending", () => {
+  it("the host attaches the plan at the displayed species of the body's own command (battleResolutionMoveAnimationField) and keeps lending", () => {
     const ev = (sequence: number, kind: string, extra: object = {}) =>
       Object.freeze({ sequence, payload: { kind, ...extra }, provenance: undefined }) as unknown as BattleKernelSemanticEvent;
     const host = Object.freeze({ ...createLiveSpriteOrderHost(knownEntrySpriteOrderState("ordinary-factory")), promptRequestId: 2 });
@@ -138,12 +142,12 @@ describe("Giga Drain (202) geometry-keyed sprite-order plan", () => {
     const without = advanceLiveSpriteOrderHost(host, resolution, Number.POSITIVE_INFINITY);
     expect(without.tracker.invalidReason).toBe("no EXACT plan: body 202:opponent");
     expect(lendLiveSpriteOrder(without, 288)).toBeUndefined();
-    const asked: [number, number][] = [];
-    const withGeometry = advanceLiveSpriteOrderHost(host, resolution, Number.POSITIVE_INFINITY, false, (segment, sequence) => {
-      asked.push([segment, sequence]);
-      return { playerSpecies: ONIX, opponentSpecies: DIGLETT };
+    const asked: [number, number, number, string][] = [];
+    const withGeometry = advanceLiveSpriteOrderHost(host, resolution, Number.POSITIVE_INFINITY, false, (segment, sequence, moveId, side) => {
+      asked.push([segment, sequence, moveId, side]);
+      return liveMoveGeometrySpriteOrderPlanText(moveId, side, { playerSpecies: ONIX, opponentSpecies: DIGLETT })!;
     });
-    expect(asked).toEqual([[0, 1]]);
+    expect(asked).toEqual([[0, 1, 202, "opponent"]]);
     expect(withGeometry.tracker.invalidReason).toBeNull();
     expect(lendLiveSpriteOrder(withGeometry, 288)?.known).toBe(true);
     // the field at a move-animation command: the segment's field after the commands before it (a switch-in replaces the species)
@@ -182,7 +186,7 @@ describe("Giga Drain (202) geometry-keyed sprite-order plan", () => {
     for (const { name, job, unit, side } of mdInstances) {
       expect(job.identicalAB, name).toBe(true);
       expect([MD_OLDER, MD_NEWER], name).toContain(unit.plan);
-      expect(megaDrainSpriteOrderPlanForGeometry(side, species(job)), name).toBe(unit.plan);
+      expect(mdPlan(side, species(job)), name).toBe(unit.plan);
       expect(job.predicted, name).toBe(unit.plan === MD_OLDER ? "older-first (D5,6)" : "newer-first (D6,5)");
     }
     for (const side of ["player", "opponent"] as const) {
@@ -193,7 +197,7 @@ describe("Giga Drain (202) geometry-keyed sprite-order plan", () => {
     // the transform: no geometry -> invalidates as before; the two orders free the pair's slots in opposite order
     const tracker = createSpriteOrderTracker(knownEntrySpriteOrderState("ordinary-factory"));
     const body = (geometry?: { playerSpecies: number; opponentSpecies: number }): SpriteOrderPresentationEvent =>
-      ({ kind: "move-animation", moveId: 72, attackerSide: "opponent", ...(geometry ? { geometry } : {}) });
+      ({ kind: "move-animation", moveId: 72, attackerSide: "opponent", ...(geometry ? { geometryPlan: mdPlan("opponent", geometry)! } : {}) });
     expect(applySpriteOrderPresentationEvent(tracker, body()).invalidReason).toBe("no EXACT plan: body 72:opponent");
     const newer = applySpriteOrderPresentationEvent(tracker, body({ playerSpecies: ONIX, opponentSpecies: DIGLETT }));
     const older = applySpriteOrderPresentationEvent(tracker, body({ playerSpecies: ONIX, opponentSpecies: ROSELIA }));
@@ -203,7 +207,7 @@ describe("Giga Drain (202) geometry-keyed sprite-order plan", () => {
 
   it("Mega Drain: per-frame cursor vs ROM F; geometry sweep differs from either order only in its same-frame pair", () => {
     for (const { name, job, unit, side } of mdInstances) {
-      const plan = decodeSpriteOrderPlan(megaDrainSpriteOrderPlanForGeometry(side, species(job))!);
+      const plan = decodeSpriteOrderPlan(mdPlan(side, species(job))!);
       const start = createSpriteOrderPlanCursor({ known: true, free: unit.F0, pendingDestroyed: [] });
       expect(plan, name).toHaveLength(unit.windows.length);
       unit.windows.forEach((rom, k) => expect(applySpriteOrderUnitPlan(start, plan.slice(0, k + 1)).order.free, `${name} ${k}`).toEqual(rom.F));
@@ -211,7 +215,7 @@ describe("Giga Drain (202) geometry-keyed sprite-order plan", () => {
     const classes = new Set<string>();
     for (let player = 1; player <= 411; player += 7) for (let opponent = 1; opponent <= 411; opponent += 5) {
       for (const side of ["player", "opponent"] as const) {
-        const plan = megaDrainSpriteOrderPlanForGeometry(side, { playerSpecies: player, opponentSpecies: opponent });
+        const plan = mdPlan(side, { playerSpecies: player, opponentSpecies: opponent });
         if (plan !== null) classes.add(plan);
       }
     }
@@ -223,7 +227,7 @@ describe("Giga Drain (202) geometry-keyed sprite-order plan", () => {
     expect(SPRITE_ORDER_PRODUCTION_PLANS[SPRITE_ORDER_PRODUCTION_BODIES["71:opponent"]!]).toBe(rom);
     for (const [player, opponent] of [[ROSELIA, ONIX], [ONIX, DIGLETT], [DIGLETT, ROSELIA], [1, 334], [42, 42]] as const) {
       for (const side of ["player", "opponent"] as const) {
-        const c = gigaDrainOrderCenters(side, { playerSpecies: player, opponentSpecies: opponent })!;
+        const c = liveMoveAbsorptionOrbCenters(side, { playerSpecies: player, opponentSpecies: opponent })!;
         expect(absorptionBodySpriteOrderPlanText(ABSORB_BODY_LAST_AGE, age => absorbAtAge(age, c.target, c.attacker, side, c.attacker)))
           .toBe(rom);
       }

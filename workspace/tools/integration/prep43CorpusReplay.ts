@@ -9,9 +9,9 @@
 //      bodies mapped to the order event the host emits for them in that job (status CONFUSION / PRZ, general LEECH_SEED_DRAIN, the
 //      sandstorm job's WEATHER_VAR with argument 12 = SANDSTORM_CONTINUES, hail 13, rain RAIN_CONTINUES); a ROM carry (the first gap
 //      window destroying a unit's single survivor) is the transform's own immediate carry and is not replayed again as a gap window.
-//  gdgeo (docs/giga-drain-geometry-order.md): every Giga Drain (202) / Mega Drain (72) move-animation event carries the scenario's lead species as its
-//      `geometry` (the production host attaches the displayed species at the body's command); a src without the geometry-keyed plan
-//      ignores the field, so the same tool measures before / after. (c) / (d) the gdgeo Giga Drain / Mega Drain probe grids
+//  gdgeo (docs/giga-drain-geometry-order.md): every Giga Drain (202) / Mega Drain (72) move-animation event carries its plan at the
+//      scenario's lead species as `geometryPlan` (the production host attaches the plan at the displayed species of the body's
+//      command); on a src without liveMoveGeometrySpriteOrderPlanText no plan is attached, so the same tool measures before / after. (c) / (d) the gdgeo Giga Drain / Mega Drain probe grids
 //      (fixtures/gdgeo/units.json, md-units.json), as (b).
 // usage: node --experimental-strip-types tools/integration/prep43CorpusReplay.ts <out.json>
 import { readFileSync, writeFileSync } from "node:fs";
@@ -19,6 +19,11 @@ import {
   applySpriteOrderPresentationEvent, createSpriteOrderTracker, type SpriteOrderPresentationEvent, type SpriteOrderTracker,
 } from "../../src/engine/spriteOrderEventTransform.ts";
 import { KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, knownEntrySpriteOrderState } from "../../src/engine/spriteOrderProvider.ts";
+import * as live from "../../src/engine/liveMoveAnimation.ts";
+
+/** gdgeo: the production plan text of a geometry-keyed body (absent on a src without it: the event then carries none). */
+const geometryPlanText = (live as unknown as { liveMoveGeometrySpriteOrderPlanText?: (moveId: number, side: "player" | "opponent",
+  species: { playerSpecies: number; opponentSpecies: number }) => string | null }).liveMoveGeometrySpriteOrderPlanText;
 
 interface Window { f: number; C?: [number, string][]; D?: number[] }
 interface CorpusUnit { kind: "gap" | "body"; windows: Window[]; mv?: number; observedFreeAtEdge?: number[]; truncated?: boolean }
@@ -77,8 +82,8 @@ function leadSpecies(base: string, variant: unknown): { playerSpecies: number; o
 
 /** The production body event, with the Giga Drain geometry when the species are known. */
 function bodyEvent(moveId: number, attackerSide: Side, geometry: ReturnType<typeof leadSpecies>): SpriteOrderPresentationEvent {
-  return (moveId === 202 || moveId === 72) && geometry !== null
-    ? { kind: "move-animation", moveId, attackerSide, geometry } as SpriteOrderPresentationEvent
+  const geometryPlan = geometry === null ? null : geometryPlanText?.(moveId, attackerSide, geometry) ?? null;
+  return geometryPlan !== null ? { kind: "move-animation", moveId, attackerSide, geometryPlan } as SpriteOrderPresentationEvent
     : { kind: "move-animation", moveId, attackerSide };
 }
 

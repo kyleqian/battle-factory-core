@@ -6,7 +6,10 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { GIGA_DRAIN_ORB_FIRST_AGE, GIGA_DRAIN_ORB_GROUPS, GIGA_DRAIN_ORB_GROUP_SPAWN_PERIOD, gigaDrainAtAge } from "../../src/animation/gigaDrain.ts";
 import { MEGA_DRAIN_ORB_FIRST_AGE, MEGA_DRAIN_ORB_PAIRS, MEGA_DRAIN_ORB_PAIR_SPAWN_PERIOD, megaDrainAtAge } from "../../src/animation/megaDrain.ts";
-import { gigaDrainOrderCenters, gigaDrainSpriteOrderPlanForGeometry, megaDrainSpriteOrderPlanForGeometry } from "../../src/engine/spriteOrderGigaDrainPlan.ts";
+import { liveMoveAbsorptionOrbCenters, liveMoveGeometrySpriteOrderPlanText } from "../../src/engine/liveMoveAnimation.ts";
+type Species = { playerSpecies: number; opponentSpecies: number };
+const gdPlan = (side: "player" | "opponent", species: Species) => liveMoveGeometrySpriteOrderPlanText(202, side, species);
+const mdPlan = (side: "player" | "opponent", species: Species) => liveMoveGeometrySpriteOrderPlanText(72, side, species);
 
 interface Unit { kind: string; label: string; plan: string; truncated: boolean }
 interface Job { base: string; variant: unknown; units: Unit[]; identicalAB: boolean; predicted?: string }
@@ -16,7 +19,7 @@ const mechanism = process.argv[4] ? (JSON.parse(readFileSync(process.argv[4], "u
 let yChecked = 0, yBad = 0;
 /** Model oam.y of plan sprite n (0 controller, 1 hitsplat, 2.. orbs) at its last live age. */
 function modelOrbY(move: number, side: "player" | "opponent", player: number, opponent: number, n: number): number | null {
-  const centers = gigaDrainOrderCenters(side, { playerSpecies: player, opponentSpecies: opponent })!;
+  const centers = liveMoveAbsorptionOrbCenters(side, { playerSpecies: player, opponentSpecies: opponent })!;
   const groups: readonly (readonly { wavePeriod: number }[])[] = move === 72 ? MEGA_DRAIN_ORB_PAIRS : GIGA_DRAIN_ORB_GROUPS;
   const size = groups[0]!.length, orb = n - 2, args = groups[Math.floor(orb / size)]?.[orb % size];
   if (args === undefined) return null;
@@ -44,7 +47,7 @@ for (const [name, job] of Object.entries(input.jobs)) {
   }
   for (const unit of units) {
     const side = unit.label.endsWith(":player") ? "player" : "opponent", move = unit.label.startsWith("body 72:") ? 72 : 202;
-    const model = (move === 72 ? megaDrainSpriteOrderPlanForGeometry : gigaDrainSpriteOrderPlanForGeometry)(side, { playerSpecies: player, opponentSpecies: opponent });
+    const model = (move === 72 ? mdPlan : gdPlan)(side, { playerSpecies: player, opponentSpecies: opponent });
     const ok = model === unit.plan;
     if (!ok) bad += 1;
     const observedClass = move === 72 ? (unit.plan.includes("D5,6") ? "older-first (D5,6)" : unit.plan.includes("D6,5") ? "newer-first (D6,5)" : "other")

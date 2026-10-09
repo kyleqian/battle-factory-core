@@ -8,8 +8,8 @@
  *   actions committed            D[the pair, FDERIVED = F order at creation] (EndBounceEffect)
  *   move menu / cancel / cursor  no-op
  *   move-animation body          EXACT plan of (moveId, attacker side) from SPRITE_ORDER_PRODUCTION_BODIES, else invalidate;
- *                                Giga Drain (202) / Mega Drain (72): the geometry-keyed plan of the event's species
- *                                (spriteOrderGigaDrainPlan.ts)
+ *                                Giga Drain (202) / Mega Drain (72): the event's geometry plan (the displayed species,
+ *                                liveMoveAnimation.ts liveMoveGeometrySpriteOrderPlanText), else invalidate
  *   hit-animation, target shown  blip: C[f]; D[n0] (DoHitAnimHealthboxEffect); a hidden target is unproven -> invalidate
  *   stat animation               +-1 / multiple: C[f]; D[n0]; +-2: C[f] and the carried D at the next boundary
  *   status animation             PSN / PRZ / SLP / INFATUATION plans; any other status -> invalidate
@@ -52,9 +52,6 @@
  * until a fresh known entry or a party-menu reset; it never guesses.
  */
 import {
-  gigaDrainSpriteOrderPlanForGeometry, megaDrainSpriteOrderPlanForGeometry, type SpriteOrderBodyGeometry,
-} from "./spriteOrderGigaDrainPlan.ts";
-import {
   KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, applySpriteOrderUnitPlan, createSpriteOrderPlanCursor,
   initSpriteOrderState,
   type SpriteOrderPlan, type SpriteOrderPlanCursor, type SpriteOrderPlanToken, type SpriteOrderPlanWindow,
@@ -68,7 +65,7 @@ export type SpriteOrderPresentationEvent =
   | Readonly<{ kind: "action-prompt" }>
   | Readonly<{ kind: "actions-committed" }>
   | Readonly<{ kind: "move-menu" }>
-  | Readonly<{ kind: "move-animation"; moveId: number; attackerSide: "player" | "opponent"; geometry?: SpriteOrderBodyGeometry }>
+  | Readonly<{ kind: "move-animation"; moveId: number; attackerSide: "player" | "opponent"; geometryPlan?: string }>
   | Readonly<{ kind: "hit-animation"; targetVisible: boolean }>
   | Readonly<{ kind: "stat-animation"; argument: number }>
   | Readonly<{ kind: "status-animation"; status: string }>
@@ -192,24 +189,15 @@ function planAt(index: number | undefined): SpriteOrderPlan | null {
 }
 
 /** EXACT body plan of `(moveId, attacker side)`, or null (NEEDS-KEYS / not observed / substitute / transform). */
-/** Geometry-keyed move bodies (Giga Drain 202, Mega Drain 72: same-frame orb destroys order by the battlers' geometry,
- * spriteOrderGigaDrainPlan.ts): the host attaches `geometry` to their move-animation event. */
-const GEOMETRY_PLAN_TEXT: ReadonlyMap<number, typeof gigaDrainSpriteOrderPlanForGeometry> = new Map([
-  [202, gigaDrainSpriteOrderPlanForGeometry], [72, megaDrainSpriteOrderPlanForGeometry],
-]);
-export const SPRITE_ORDER_GEOMETRY_KEYED_BODIES: ReadonlySet<number> = new Set(GEOMETRY_PLAN_TEXT.keys());
-const geometryPlans = new Map<string, SpriteOrderPlan | null>();
-/** A geometry-keyed body's decoded plan (memoised per move, side and species pair); null when a species has no battle picture. */
-export function spriteOrderGeometryBodyPlan(
-  moveId: number, side: "player" | "opponent", geometry: SpriteOrderBodyGeometry,
-): SpriteOrderPlan | null {
-  const key = `${moveId}:${side}:${geometry.playerSpecies}:${geometry.opponentSpecies}`;
-  if (!geometryPlans.has(key)) {
-    const text = GEOMETRY_PLAN_TEXT.get(moveId)?.(side, geometry) ?? null;
-    geometryPlans.set(key, text === null ? null : decodeSpriteOrderPlan(text));
-  }
-  return geometryPlans.get(key)!;
-}
+/** Geometry-keyed move bodies (Giga Drain 202, Mega Drain 72: same-frame orb destroys order by the battlers' geometry): the host
+ * attaches the body's plan text computed at the displayed species (`geometryPlan`, liveMoveAnimation.ts
+ * liveMoveGeometrySpriteOrderPlanText) to their move-animation event. */
+export const SPRITE_ORDER_GEOMETRY_KEYED_BODIES: ReadonlySet<number> = new Set([202, 72]);
+const geometryPlans = new Map<string, SpriteOrderPlan>();
+const decodeGeometryPlan = (text: string): SpriteOrderPlan => {
+  if (!geometryPlans.has(text)) geometryPlans.set(text, decodeSpriteOrderPlan(text));
+  return geometryPlans.get(text)!;
+};
 
 export function spriteOrderProductionBodyPlan(moveId: number, side: "player" | "opponent"): SpriteOrderPlan | null {
   if (OWNERSHIP_CHANGING_MOVES.has(moveId)) return null;
@@ -424,9 +412,9 @@ export function applySpriteOrderPresentationEvent(
     }
     case "move-animation":
       if (tracker.promptPair !== null) return invalidateSpriteOrderTracker(tracker, "body while the prompt pair lives");
-      // Giga Drain / Mega Drain: same-frame orb destroys order by the battlers' geometry (spriteOrderGigaDrainPlan.ts); no geometry -> no plan.
+      // Giga Drain / Mega Drain: same-frame orb destroys order by the battlers' geometry; no geometry plan -> no plan (invalidates).
       return applyPlan(tracker, SPRITE_ORDER_GEOMETRY_KEYED_BODIES.has(event.moveId)
-        ? event.geometry === undefined ? null : spriteOrderGeometryBodyPlan(event.moveId, event.attackerSide, event.geometry)
+        ? event.geometryPlan === undefined ? null : decodeGeometryPlan(event.geometryPlan)
         : spriteOrderProductionBodyPlan(event.moveId, event.attackerSide),
       `body ${event.moveId}:${event.attackerSide}`, "body");
     case "hit-animation":
