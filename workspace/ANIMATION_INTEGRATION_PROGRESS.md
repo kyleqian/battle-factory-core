@@ -117,6 +117,10 @@
   the Sky Attack strike measured 181 rows in 14 / 24 probes vs production 180 (possible D4 case). Worker gates 1,590 files / 13,117 tests,
   build, differential 624/624. Supervisor: later58Check rerun fresh for Signal Beam / Bonemerang / Outrage — 94/94 rows identical to the
   receipts; census rerun +32 / +4,013, 0 regressions, digest identical.
+- Supervisor union gates on `b986bb5b2` (src `64e91f1d`; + later58): typecheck, full suite 1,591 files / 13,121 tests, build, differential
+  624/624 vs `ccc4774c4`, census seeds 0..299 94.82 % by count / 96.03 % by frames (+172 / +22,277 vs `ccc4774c4`; one command more than
+  the sum of the folds: a later58 body after a words57-resolved chain; 0 regressions, command sequence identical; faithful-random history
+  175 / 29,514).
 
 ## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
 
