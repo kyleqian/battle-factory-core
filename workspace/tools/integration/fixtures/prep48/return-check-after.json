@@ -120,7 +120,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -175,7 +186,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -230,7 +252,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -282,7 +315,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -334,7 +382,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -386,7 +449,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -434,7 +512,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -486,7 +575,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -538,7 +638,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -586,7 +697,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -641,7 +763,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -696,7 +829,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -748,7 +892,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -800,7 +959,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -852,7 +1026,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -900,7 +1089,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -952,7 +1152,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -1004,7 +1215,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -1052,7 +1274,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      1,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -1106,7 +1339,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -1160,7 +1404,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -1212,7 +1467,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
    }
   },
   {
@@ -1264,7 +1534,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
    }
   },
   {
@@ -1316,7 +1601,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
    }
   },
   {
@@ -1364,7 +1664,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      1,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -1416,7 +1727,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -1468,7 +1790,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -1516,7 +1849,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -1570,7 +1914,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -1624,7 +1979,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -1676,7 +2042,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
    }
   },
   {
@@ -1728,7 +2109,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
    }
   },
   {
@@ -1780,7 +2176,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
    }
   },
   {
@@ -1828,7 +2239,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -1880,7 +2302,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -1932,7 +2365,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   }
  ]

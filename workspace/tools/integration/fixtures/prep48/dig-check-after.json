@@ -3,50 +3,50 @@
  "probeDeterminism": [
   {
    "scenario": "dig-opp-flygon-golem-first4.json",
-   "r1": "757c447337fb1642",
-   "r2": "757c447337fb1642",
+   "r1": "5b189cc964ec483d",
+   "r2": "5b189cc964ec483d",
    "same": true
   },
   {
    "scenario": "dig-opp-flygon-golem-qa4.json",
-   "r1": "38b75fedeaf67529",
-   "r2": "38b75fedeaf67529",
+   "r1": "dbc67b6ff9508ea6",
+   "r2": "dbc67b6ff9508ea6",
    "same": true
   },
   {
    "scenario": "dig-opp-vibrava-chansey-first4.json",
-   "r1": "8211e0605a6cbad3",
-   "r2": "8211e0605a6cbad3",
+   "r1": "4e0f515caebd851b",
+   "r2": "4e0f515caebd851b",
    "same": true
   },
   {
    "scenario": "dig-opp-vibrava-chansey-qa4.json",
-   "r1": "efe29fe2421e8e0f",
-   "r2": "efe29fe2421e8e0f",
+   "r1": "4c3530453658ed1a",
+   "r2": "4c3530453658ed1a",
    "same": true
   },
   {
    "scenario": "dig-ply-flygon-golem-first4.json",
-   "r1": "1f215389ec3a1aed",
-   "r2": "1f215389ec3a1aed",
+   "r1": "9cbc96cb2ae1a60c",
+   "r2": "9cbc96cb2ae1a60c",
    "same": true
   },
   {
    "scenario": "dig-ply-flygon-golem-qa4.json",
-   "r1": "862176c4c7675dc4",
-   "r2": "862176c4c7675dc4",
+   "r1": "a86623a1c9c9158e",
+   "r2": "a86623a1c9c9158e",
    "same": true
   },
   {
    "scenario": "dig-ply-vibrava-chansey-first4.json",
-   "r1": "bb3b62db09c05416",
-   "r2": "bb3b62db09c05416",
+   "r1": "02cfff71a0a6ce52",
+   "r2": "02cfff71a0a6ce52",
    "same": true
   },
   {
    "scenario": "dig-ply-vibrava-chansey-qa4.json",
-   "r1": "bbbf6adda3727185",
-   "r2": "bbbf6adda3727185",
+   "r1": "cb692c7163626e4d",
+   "r2": "cb692c7163626e4d",
    "same": true
   }
  ],
@@ -84,6 +84,7 @@
     "monbgCntIsS0": true,
     "otherCnt": 24064,
     "dispcnt": 48960,
+    "registersNotS0": {},
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -95,7 +96,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -131,6 +143,11 @@
     "monbgCntIsS0": false,
     "otherCnt": 24064,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -142,7 +159,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
    }
   },
   {
@@ -178,6 +210,13 @@
     "monbgCntIsS0": false,
     "otherCnt": 24064,
     "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 7168,
+     "bg1vofs": 509,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -189,7 +228,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -225,6 +275,12 @@
     "monbgCntIsS0": false,
     "otherCnt": 24064,
     "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -236,7 +292,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
    }
   },
   {
@@ -272,6 +343,11 @@
     "monbgCntIsS0": true,
     "otherCnt": 24066,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -283,7 +359,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -319,6 +410,12 @@
     "monbgCntIsS0": false,
     "otherCnt": 24066,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -330,7 +427,23 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player",
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -366,6 +479,12 @@
     "monbgCntIsS0": false,
     "otherCnt": 24066,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -377,7 +496,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -413,6 +547,12 @@
     "monbgCntIsS0": false,
     "otherCnt": 24066,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -424,7 +564,23 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player",
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -460,6 +616,7 @@
     "monbgCntIsS0": true,
     "otherCnt": 24064,
     "dispcnt": 48960,
+    "registersNotS0": {},
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -471,7 +628,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -507,6 +675,11 @@
     "monbgCntIsS0": false,
     "otherCnt": 24064,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -518,7 +691,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
    }
   },
   {
@@ -554,6 +742,13 @@
     "monbgCntIsS0": false,
     "otherCnt": 24064,
     "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 7168,
+     "bg1vofs": 509,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -565,7 +760,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -601,6 +807,12 @@
     "monbgCntIsS0": false,
     "otherCnt": 24064,
     "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -612,7 +824,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
    }
   },
   {
@@ -648,6 +875,11 @@
     "monbgCntIsS0": true,
     "otherCnt": 24066,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -659,7 +891,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -695,6 +942,12 @@
     "monbgCntIsS0": false,
     "otherCnt": 24066,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -706,7 +959,23 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player",
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -742,6 +1011,12 @@
     "monbgCntIsS0": false,
     "otherCnt": 24066,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -753,7 +1028,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -789,6 +1079,12 @@
     "monbgCntIsS0": false,
     "otherCnt": 24066,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -800,7 +1096,23 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player",
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -836,6 +1148,7 @@
     "monbgCntIsS0": true,
     "otherCnt": 39936,
     "dispcnt": 48960,
+    "registersNotS0": {},
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -847,7 +1160,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -883,6 +1207,11 @@
     "monbgCntIsS0": false,
     "otherCnt": 39936,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -894,7 +1223,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -930,6 +1274,14 @@
     "monbgCntIsS0": false,
     "otherCnt": 7168,
     "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 7168,
+     "bg2cnt": 24066,
+     "bg1vofs": 509,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -941,7 +1293,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -977,6 +1340,14 @@
     "monbgCntIsS0": false,
     "otherCnt": 7168,
     "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 7168,
+     "bg2cnt": 24066,
+     "bg1vofs": 509,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -988,7 +1359,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -1024,6 +1410,14 @@
     "monbgCntIsS0": false,
     "otherCnt": 7168,
     "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 7168,
+     "bg2cnt": 24066,
+     "bg1vofs": 509,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -1035,7 +1429,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -1071,6 +1476,14 @@
     "monbgCntIsS0": false,
     "otherCnt": 7168,
     "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 7168,
+     "bg2cnt": 24066,
+     "bg1vofs": 509,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -1082,7 +1495,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -1118,6 +1546,14 @@
     "monbgCntIsS0": false,
     "otherCnt": 7168,
     "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 7168,
+     "bg2cnt": 24066,
+     "bg1vofs": 509,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -1129,7 +1565,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -1165,6 +1612,14 @@
     "monbgCntIsS0": false,
     "otherCnt": 7168,
     "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 7168,
+     "bg2cnt": 24066,
+     "bg1vofs": 509,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -1176,7 +1631,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -1212,6 +1682,11 @@
     "monbgCntIsS0": true,
     "otherCnt": 23554,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -1223,7 +1698,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
    }
   },
   {
@@ -1259,6 +1749,12 @@
     "monbgCntIsS0": false,
     "otherCnt": 23554,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -1270,7 +1766,23 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player",
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -1306,6 +1818,12 @@
     "monbgCntIsS0": false,
     "otherCnt": 23554,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -1317,7 +1835,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
    }
   },
   {
@@ -1353,6 +1886,12 @@
     "monbgCntIsS0": false,
     "otherCnt": 23554,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -1364,7 +1903,23 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player",
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -1400,6 +1955,12 @@
     "monbgCntIsS0": false,
     "otherCnt": 23554,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -1411,7 +1972,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
    }
   },
   {
@@ -1447,6 +2023,12 @@
     "monbgCntIsS0": false,
     "otherCnt": 23554,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -1458,7 +2040,23 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player",
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -1494,6 +2092,7 @@
     "monbgCntIsS0": true,
     "otherCnt": 39936,
     "dispcnt": 48960,
+    "registersNotS0": {},
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -1505,7 +2104,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -1541,6 +2151,11 @@
     "monbgCntIsS0": false,
     "otherCnt": 39936,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -1552,7 +2167,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -1588,6 +2218,14 @@
     "monbgCntIsS0": false,
     "otherCnt": 7168,
     "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 7168,
+     "bg2cnt": 24066,
+     "bg1vofs": 509,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -1599,7 +2237,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -1635,6 +2284,14 @@
     "monbgCntIsS0": false,
     "otherCnt": 7168,
     "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 7168,
+     "bg2cnt": 24066,
+     "bg1vofs": 509,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -1646,7 +2303,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -1682,6 +2354,14 @@
     "monbgCntIsS0": false,
     "otherCnt": 7168,
     "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 7168,
+     "bg2cnt": 24066,
+     "bg1vofs": 509,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -1693,7 +2373,18 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": false
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
    }
   },
   {
@@ -1729,6 +2420,14 @@
     "monbgCntIsS0": false,
     "otherCnt": 7168,
     "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 7168,
+     "bg2cnt": 24066,
+     "bg1vofs": 509,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -1740,7 +2439,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -1776,6 +2490,11 @@
     "monbgCntIsS0": true,
     "otherCnt": 23554,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -1787,7 +2506,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": true,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
    }
   },
   {
@@ -1823,6 +2557,12 @@
     "monbgCntIsS0": false,
     "otherCnt": 23554,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -1834,7 +2574,23 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player",
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -1870,6 +2626,12 @@
     "monbgCntIsS0": false,
     "otherCnt": 23554,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -1881,7 +2643,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
    }
   },
   {
@@ -1917,6 +2694,12 @@
     "monbgCntIsS0": false,
     "otherCnt": 23554,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -1928,7 +2711,23 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player",
+      "opponent"
+     ]
+    }
    }
   },
   {
@@ -1964,6 +2763,12 @@
     "monbgCntIsS0": false,
     "otherCnt": 23554,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 1,
@@ -1975,7 +2780,22 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
    }
   },
   {
@@ -2011,6 +2831,12 @@
     "monbgCntIsS0": false,
     "otherCnt": 23554,
     "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
     "scanline": {
      "state": 0,
      "srcBuffer": 0,
@@ -2022,7 +2848,23 @@
     "matrixBitmap": 6,
     "allocatorAsFirstDig": false,
     "bgMapsAsFirstDig": true,
-    "lentOrderEqualsRom": true
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player",
+      "opponent"
+     ]
+    }
    }
   }
  ]
