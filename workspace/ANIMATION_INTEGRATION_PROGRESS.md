@@ -67,6 +67,13 @@
   regressions, identical command sequence + battle digest; ON/OFF parity seed 84 (FRZ crossing). Worker gates 1,588 files / 13,070
   tests, build, differential 624/624. Supervisor: liveShareCensus rerun +60 / +6,012, 0 regressions, digest identical; union src ==
   the worker's tested tree (master had docs only since its base) -> touched tests 65/65, smoke 448.
+- gates53 (integration, `52ea2a926`, tools + docs only; merged `843f6bafd`): an instrumented copy of `liveMoveAnimationPresentation`
+  records which `return null` disjunct fired (0 null mismatches vs production over 3.94 M calls on seeds 0..999). The census's
+  "case-local" bucket is mostly NOT case-local: 77.4 % (247 commands / 41,104 frames on 0..999) is the words-deferred lend that
+  cannot replay past a faint (35,457), switch-out (3,749) or forced switch-out (1,898) after Sand-Attack / Mud-Slap / Rain Dance /
+  RAIN_CONTINUES (`DEFERRED_REPLAY_UNITS`); 9.0 % the same resolution leaving an unlendable order; Flatter `firstBody` 6.6 % (not
+  proven: needs later-body register + allocator evidence); Flatter plain unknown lend 4.5 %; Ice Ball's own carried lend 2.5 %. No
+  gate lifted. Supervisor: the 0..299 instrument report rerun byte-identical.
 
 ## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
 

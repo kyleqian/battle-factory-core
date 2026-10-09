@@ -8,6 +8,21 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Census / probe tooling gaps hit on 2026-10-09 (S10A day)
+
+- **What / cost:** (1) `liveShareCensusGates.ts` checks the RAW order-lend input, so a words-deferred lend that fails to resolve
+  is labelled "unclassified (case-local gate)" — it misled the supervisor's triage of a whole step (gates53 found 93 % of that
+  bucket is order-host; ~10 min + a mis-aimed brief). Fix: resolve the lend first, as `gates53GateCensus.ts`'s `deferredSubReason`
+  does. (2) The census `battleDigest` includes the presented-frame total and `commandDigest` includes live flags + gate file:line
+  cites, so any corrected duration or line shift breaks "identical digest" and needs field-by-field diffing (~4 min each time);
+  compare the command key sequence (battle, kind, moveId, side, attacker, target) instead. (3) Probe stagings without an explicit
+  "seed" op replayed different trajectories across batches (ISSUES #154; ~25 min supervisor time). (4) Probe receipts that embed
+  the scenario PATH change with the output dir (prep52 regenerated once, ~3 min). (5) `d4aRegressionAll.sh` over 286 fixtures takes
+  ~11 min, past the 10-min foreground limit (~2 min). (6) Probe rows carry no battle state (HP, substitute HP, script cursor), so a
+  staging that never reaches its unit cannot be diagnosed (plans51 SUBSTITUTE_FADE, ~10 min). (7) The strict-tsc recipe for
+  `tools/` in docs/live-share-census.md needs `typeRoots` + `types: ["node"]` in the temp tsconfig (~3 min).
+- **Hits:** 7 (2026-10-09 day).
+
 ## Sprite-order / census tooling gaps hit on 2026-10-09 (S10A overnight)
 
 - **What / cost:** (1) the 300-seed `liveShareCensus.ts` run takes ~110-120 s — exactly the Bash tool's default timeout, so
