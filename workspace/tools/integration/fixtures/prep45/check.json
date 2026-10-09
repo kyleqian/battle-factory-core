@@ -1,0 +1,282 @@
+{
+ "schema": "prep45-check/v1",
+ "jobs": 108,
+ "notIdenticalAB": 0,
+ "plans": {
+  "status BRN": "Cf;Cf;Cf;D0;D1",
+  "general TURN_TRAP FIRE_SPIN": "Cf;Cf;Cf;Cf;Cf;Cf;Cf;D1;Cf;D2;D0;Cf;Cf;D3;Cf;D4;Cf;D7;D5;D8;D6;D9;D10",
+  "general TURN_TRAP WHIRLPOOL": "Cff;Cf;Cf;Cf;Cf;Cf;D0;Cf;Cf;Cf;Cf;Cf;Cf;D2;D3;D1;D4;Cf/D5;D8;D6;D9;D7;D10;D13;D11;D12",
+  "general TURN_TRAP SAND_TOMB": "Cff;Cf;Cf;Cf;Cf;Cf;D0;Cf;D2;Cf;D3;D1;Cf;Cf;D4;Cf;D5;Cf;D8;D6;D9;D7;D10;D11;Cf;D12",
+  "general INGRAIN_HEAL": "Cf;D0;Cf;Cf;Cf;Cf;Cf;D1;Cf;D2;Cf;Cf;D3;D5;D4;D6;D7;D8;Cf;Cf;Cf;D9;Cf;D10;D11;D12",
+  "general HELD_ITEM_EFFECT (existing)": "Cf;Cf;D0;Cf;D2;D1",
+  "body 56": "Cff;Cff;Cff;Cff;Cff;Cff;Cffff;Cff;Cff;Cff;D12,13;D1,0;Cffff;D3,2;Cff;D5,4;Cff;D7,6;Cff;D22,23;D9,8;Cffff;D11,10;Cff;D15,14;Cff;D17,16;Cff;D32,33;D18,19;Cffff;D20,21;Cff;D24,25;Cff;D26,27;Cff;D42,43;D28,29;Cff;D30,31;D34,35;Cff;D36,37;D52,53;D38,39;D40,41;D54,55;D44,45;D46,47;D48,49;D50,51",
+  "body 179": "Cf;D0;Cffffff;D3,2,1,4,5,6;Cf;Cfff;D7;D8;D10;D9",
+  "body 345": "Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;D0;D2;Cff;D1;D3;D4;D5;D7;D6;D8;D9;Cff;D13,12;D11,10",
+  "body 76 turn 0 (setup)": "Cf;Cf;Cf;Cf;Cf;D0;Cf;D1;Cf;D2;Cf;D3;Cf;D4;Cf;D5;Cf;D6;Cf;D7;Cf;D8;Cf;D9;D10;D11;D12;D13",
+  "body 76 turn 1 (unleash)": "Cff;Cff;Cf;Cf;Cf;Cf;D1;Cf;Cf;D4;Cf;Cf;D6;Cf;Cf;D8;Cff;D9;Cf;Cf;D11;Cf;Cf;D13;Cf;Cf;D16;Cf;Cf;D0;D18;Cf;Cf;D3;D20;Cff;D21,5;Cf;Cf;D23;D7;Cf;D25;D2;Cf;D26;Cf/D10;D28;Cf;D12;D30;D15;D31;D32,17;D33;D19;D14;D22;D24;D27;D29",
+  "body 135": "Cff;Cff;Cf;D3,2;D4;D1,0;Cf;Cf;Cf;D5;Cf;D6;D7;D8",
+  "body 315": "Cf;D0;Cf;D1;Cffffffff;Cffffffff;Cffffffff;D4,3,5,2,6,9,7,8;D12,13,11,14,10,17,15,16;D20,19,21,18,22,23,25,24;Cf;Cf;D26;D27;Cf;D28;Cf;Cf;D29;D30;Cf;D31;Cf;D32",
+  "body 195": "Cffffffffffffff;Cfff;Cf;D17;D14,13,15,12,11,10,0,9,1,8,2,7,3,4,6,5;D16;Cf;D18",
+  "body 349:player": "Cfffff;Cf;D2,5,1,3,0,4",
+  "body 349:opponent": "Cfffff;Cf;D0,4,2,5,1,3",
+  "general WISH_HEAL": "Cf;Cf;D0;D1;Cf;Cf;Cf;D2;Cf;D3;D4",
+  "general TURN_TRAP BIND": "Cf;Cf;D0,1",
+  "general FUTURE_SIGHT_HIT": "",
+  "body 236": "Cf;D0;Cf;Cf;Cf;Cf;Cf;Cf;D2,3,4,5,6,1;Cf;Cf;Cf;D7;Cf;D8;D9;D10"
+ },
+ "results": {
+  "body 195": {
+   "instances": 5,
+   "matched": 5,
+   "framesChecked": 40,
+   "jobs": [
+    "ais-c2",
+    "ps-opp",
+    "ps-opp-golbat",
+    "ps-ply",
+    "ps-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "status BRN": {
+   "instances": 8,
+   "matched": 8,
+   "framesChecked": 48,
+   "jobs": [
+    "brn-opp-shuckle",
+    "brn-opp-snorlax",
+    "brn-ply-golbat",
+    "brn-ply-shuckle"
+   ],
+   "mismatches": [],
+   "carries": 8
+  },
+  "body 349:opponent": {
+   "instances": 2,
+   "matched": 2,
+   "framesChecked": 6,
+   "jobs": [
+    "dd-opp",
+    "dd-opp-golbat"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 349:player": {
+   "instances": 2,
+   "matched": 2,
+   "framesChecked": 6,
+   "jobs": [
+    "dd-ply",
+    "dd-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "general FUTURE_SIGHT_HIT": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 0,
+   "jobs": [
+    "fs-opp",
+    "fs-opp-golbat",
+    "fs-ply",
+    "fs-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 56": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 208,
+   "jobs": [
+    "hp-opp-golbat",
+    "hp-opp-onix",
+    "hp-ply-onix",
+    "hp-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "general INGRAIN_HEAL": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 104,
+   "jobs": [
+    "ih-opp",
+    "ih-opp-golbat",
+    "ih-ply",
+    "ih-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 345": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 96,
+   "jobs": [
+    "ml-opp-golbat",
+    "ml-opp-onix",
+    "ml-ply-onix",
+    "ml-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 236": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 68,
+   "jobs": [
+    "ml2-opp",
+    "ml2-opp-snorlax",
+    "ml2-ply",
+    "ml2-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 315": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 96,
+   "jobs": [
+    "oh-opp",
+    "oh-opp-golbat",
+    "oh-ply",
+    "oh-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 179": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 40,
+   "jobs": [
+    "rv-a",
+    "rv-a-snorlax",
+    "rv-b",
+    "rv-b-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 76 turn 0 (setup)": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 112,
+   "jobs": [
+    "sb-opp-chansey",
+    "sb-opp-golbat",
+    "sb-ply-chansey",
+    "sb-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 76 turn 1 (unleash)": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 244,
+   "jobs": [
+    "sb-opp-chansey",
+    "sb-opp-golbat",
+    "sb-ply-chansey",
+    "sb-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 135": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 56,
+   "jobs": [
+    "sbo-opp",
+    "sbo-opp-snorlax",
+    "sbo-ply",
+    "sbo-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "general TURN_TRAP BIND": {
+   "instances": 6,
+   "matched": 6,
+   "framesChecked": 18,
+   "jobs": [
+    "tt-bd-opp",
+    "tt-bd-ply",
+    "tt-wr-opp",
+    "tt-wr-opp-golbat",
+    "tt-wr-ply",
+    "tt-wr-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "general TURN_TRAP FIRE_SPIN": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 96,
+   "jobs": [
+    "tt-fs-opp",
+    "tt-fs-opp-golbat",
+    "tt-fs-ply",
+    "tt-fs-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 4
+  },
+  "general HELD_ITEM_EFFECT (existing)": {
+   "instances": 2,
+   "matched": 2,
+   "framesChecked": 12,
+   "jobs": [
+    "tt-st-opp",
+    "tt-st-ply"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "general TURN_TRAP SAND_TOMB": {
+   "instances": 2,
+   "matched": 2,
+   "framesChecked": 54,
+   "jobs": [
+    "tt-st-opp",
+    "tt-st-ply"
+   ],
+   "mismatches": [],
+   "carries": 2
+  },
+  "general TURN_TRAP WHIRLPOOL": {
+   "instances": 2,
+   "matched": 2,
+   "framesChecked": 52,
+   "jobs": [
+    "tt-wp-opp",
+    "tt-wp-ply"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "general WISH_HEAL": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 48,
+   "jobs": [
+    "wh2-opp",
+    "wh2-opp-golbat",
+    "wh2-ply",
+    "wh2-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 4
+  }
+ }
+}
