@@ -161,20 +161,47 @@ describe("net-zero move history persistence", () => {
     const union = new Set<number>([...receipt.summary.netZeroIds, ...ext.summary.netZeroIds]);
     expect([...union].sort((a, b) => a - b)).toEqual(ext.combined.netZeroIds);
     const auditedLive = (ext.combined.netZeroIds as number[]).filter(id => union.has(id));
-    expect([...LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS]).toEqual(auditedLive);
+    // prep44 receipt (schema prep44-allocator-net-zero/v1): summary["NET-ZERO"] ids, minus Future Sight.
+    const prep44 = read("prep44/net-zero-audit.json");
+    expect(prep44.summary["NOT-NET-ZERO"]).toEqual([]);
+    expect(prep44.summary.notAudited).toEqual({});
+    // 248 (Future Sight) stays OUT: only its setup body was measured, not the delayed hit.
+    const prep44Ids = (prep44.summary["NET-ZERO"] as number[]).filter(id => id !== 248);
+    expect(prep44Ids).toHaveLength(50);
+    expect(prep44.summary["NET-ZERO"]).toContain(248);
+    expect(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS).not.toContain(248);
+    const expected = [...new Set<number>([...auditedLive, ...prep44Ids])].sort((a, b) => a - b);
+    expect([...LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS]).toEqual(expected);
+    for (const id of prep44Ids) {
+      const scenarios = prep44.moves[String(id)]?.scenarios ?? [];
+      expect(scenarios.length).toBeGreaterThan(0);
+      // This schema has no per-scenario netZero on a "window-incomplete" row (225's truncated
+      // opponent trace, re-run lengthened as fixtures/prep44/scenarios/dragon-breath-opponent-long):
+      // every row must be audited netZero, or incomplete with an audited netZero row of the same orientation.
+      type Row = { netZero?: boolean; status: string; orientation: string };
+      for (const row of scenarios as Row[]) {
+        if (row.netZero === true) continue;
+        expect(row.status).toBe("window-incomplete");
+        expect((scenarios as Row[]).some(o => o.netZero === true && o.orientation === row.orientation)).toBe(true);
+      }
+      for (const orientation of ["player", "opponent"]) {
+        expect((scenarios as Row[]).some(o => o.orientation === orientation && o.netZero === true)).toBe(true);
+      }
+    }
     expect(ext.combined.liveIdsNotCovered).toEqual([]);
-    for (const id of LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS) {
+    for (const id of auditedLive) {
       // The extension supersedes the original's "move-never-active" rows.
       const scenarios = (ext.moves[String(id)] ?? receipt.moves[String(id)])?.scenarios ?? [];
       expect(scenarios.length).toBeGreaterThan(0);
       expect(scenarios.every((s: { netZero: boolean }) => s.netZero)).toBe(true);
     }
     const status = JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8"));
-    // Live = scoped exact + faithful timing (Crunch / Psychic / Extreme Speed were reclassified by a13fix; still the same live bodies).
-    const live = new Set<number>([...status.implementedAdapters, ...status.faithfulTimingAdapters].map((a: { id: number }) => a.id));
+    // Live = scoped exact + faithful timing + faithful random (prep44 ids 24, 28, 142, 189, 240, 273, 352 are faithful-random adapters) (Crunch / Psychic / Extreme Speed were reclassified by a13fix; still the same live bodies).
+    const live = new Set<number>([...status.implementedAdapters, ...status.faithfulTimingAdapters, ...status.faithfulRandomAdapters].map((a: { id: number }) => a.id));
     // Every audited id is a live adapter; later (unaudited) adapters stay out.
     for (const id of LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS) expect(live.has(id)).toBe(true);
-    for (const id of [203, 116, 263, 107, 87, 86, 207, 339]) {
+    // (203, 263, 86 moved IN with the prep44 receipt.)
+    for (const id of [116, 107, 87, 207, 339, 248]) {
       expect(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS).not.toContain(id);
     }
   });
@@ -186,7 +213,7 @@ describe("net-zero move history persistence", () => {
   });
 
   it("invalidates for non-audited moves and keeps unknown unknown", () => {
-    for (const id of [203, 116, 999]) {
+    for (const id of [116, 999]) {
       expect(prepareLiveMoveSpriteAllocator(firstMove, req(id)).next.historyKnown).toBe(false);
     }
     const unknown = invalidateLiveSpriteAllocatorHost(firstMove);
