@@ -41,6 +41,14 @@ JOBS += [
     for side, base in (("player", OU_O), ("opponent", OU_P)) for sp in (129, 10) for seed in FB_SEEDS
 ]
 
+# Eruption 284 (Move_ERUPTION: two AnimTask_EruptionLaunchRocks bursts from the attacker, six fixed falling rocks). (attacker, defender)
+ER_P, ER_O = "mechanic-eruption-player-camerupt-opponent-onix", "mechanic-eruption-opponent-camerupt-player-onix"
+ER_PAIRS = [(323, 95), (323, 143), (42, 95), (143, 42)]
+JOBS += [("BODY284", f"er-ply-{a}-{d}", 284, ER_P, (("species", "player", a), ("species", "opponent", d), ("moves", "player", 284)))
+         for a, d in ER_PAIRS]
+JOBS += [("BODY284", f"er-opp-{a}-{d}", 284, ER_O, (("species", "opponent", a), ("species", "player", d), ("moves", "opponent", 284)))
+         for a, d in ER_PAIRS]
+
 if __name__ == "__main__":
     argv = sys.argv[1:]
     out = Path(argv[0])

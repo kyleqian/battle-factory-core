@@ -107,4 +107,19 @@ describe("plans51 sprite-order plans (ROM receipts -> production table)", () => 
       { kind: "general-animation", animation: "FOCUS_BAND" } as SpriteOrderPresentationEvent);
     expect(tracker.cursor.order.known).toBe(true);
   });
+
+  it("not landed: Eruption 284 is geometry-keyed (2 ROM plans per side over 4 attacker / defender pairs); SUBSTITUTE_FADE never reached", () => {
+    for (const side of sides) {
+      const plans = new Set(romInstances(284).filter(instance => instance.side === side).map(instance => instance.unit.plan));
+      expect(plans.size, side).toBe(2);
+    }
+    // the player side stays unplanned (the census stop "no EXACT plan: body 284:player"); the base table's 284:opponent plan is
+    // per-frame exact on 3 of the 4 opponent instances, not on the elevated Golbat attacker (docs/next-adapters-plans51.md finding)
+    expect(spriteOrderProductionBodyPlan(284, "player")).toBeNull();
+    // the SUBSTITUTE_FADE stagings (sf-*) show the Substitute body and the breaking hit, but no General_SubstituteFade body
+    const stagings = Object.entries(units.jobs).filter(([job]) => job.startsWith("sf-"));
+    expect(stagings).toHaveLength(4);
+    for (const [, entry] of stagings) expect(entry.units.some(unit => unit.kind === "body" && unit.label === "general SUBSTITUTE_FADE")).toBe(false);
+    expect(SPRITE_ORDER_PRODUCTION_ANIMS.SUBSTITUTE_FADE).toBeUndefined();
+  });
 });
