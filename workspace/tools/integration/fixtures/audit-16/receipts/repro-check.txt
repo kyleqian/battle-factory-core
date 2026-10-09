@@ -1,1 +1,2 @@
-audit16Run.sh from scratch at e2c..657bb19d7 tree (stage == committed, derive == committed): 220 windows, chain + entry digests and px identical to the earlier batch for every window (4 fresh runs per window agree); r1 == r2 in 220 / 220
+audit16Run.sh from scratch, twice (2026-10-09 16:20 on 220 windows; 16:30 on all 236 windows): stage == committed, derive == committed;
+every window's chain + entry digests and px identical to the committed receipts/main (so 4 fresh probe runs agree per window); r1 == r2 in 236 / 236.
