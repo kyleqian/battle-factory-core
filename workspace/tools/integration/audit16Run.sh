@@ -15,7 +15,7 @@ sh tools/integration/audit16Probes.sh "$T/probe" > /dev/null
 python3 tools/integration/audit16Fixtures.py "$T/probe" "$T/fx" > "$T/derive.txt"
 diff -rq "$T/fx" $W/fixtures || echo "WARNING: derived fixtures differ from the committed ones"
 export REC T W
-ls $W/fixtures/*.json | sed 's/-c[0-9]*\.json$//' | sort -u | xargs -n 1 -P "${AUDIT16_JOBS:-8}" sh -c '
+ls $W/fixtures/*.json | sed 's/-cu*[0-9]*\.json$//' | sort -u | xargs -n 1 -P "${AUDIT16_JOBS:-8}" sh -c '
   n=$(basename "$0")
   node --experimental-strip-types --no-warnings tools/integration/audit16Check.ts $W/fixtures "$n" "$REC/check-$n.json" > "$T/check-$n.log" 2>&1 \
     || echo "FAILED $n (see $T/check-$n.log)"'
