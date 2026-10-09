@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""prep48: Dig later-body lab scenarios (Scene ON, mechanicLab parties; written to tools/integration/fixtures/prep48/scenarios/).
+"""prep48: Dig + Return later-body lab scenarios (Scene ON, mechanicLab parties; written to tools/integration/fixtures/prep48/scenarios/).
 
 Bases = the accepted prep18 Dig scenarios (both attacker sides, VIBRAVA/CHANSEY and FLYGON/GOLEM). Each runs four turns of Dig x4
 (setup, unleash, setup, unleash) so the second setup / unleash are LATER bodies after real preceding units:
@@ -31,4 +31,26 @@ for name, (path, foe) in BASES.items():
                     {"frames": 1400 if turn == 3 else 1100, "buttons": []}]
         s["trace"] = {"segments": seg}
         (OUT / f"dig-{name}-{variant}.json").write_text(json.dumps(s, indent=1) + "\n")
-print(sorted(p.name for p in OUT.glob("dig-*.json")))
+# Return (216, strongest branch, friendship 255): the accepted DRAGONAIR/ONIX and SNORLAX/GOLEM scenarios (both attacker sides), three
+# turns of Return x4. The foe's lead moves: x3 = the accepted Splash x4 (Return 1 is the battle's first body; Returns 2-3 follow the foe's
+# Splash and the own Return), growl3 = Growl x4 (Return 2-3 follow a Growl body + its stat-down body), qa3 = Quick Attack x4 (every
+# Return follows the foe's damaging body + hit).
+RETURN_BASES = {
+    "opp-dragonair-onix": ("tools/battle-lab/mechanic-return-opponent-dragonair-player-onix.json", "player"),
+    "ply-dragonair-onix": ("tools/battle-lab/mechanic-return-player-dragonair-opponent-onix.json", "opponent"),
+    "opp-snorlax-golem": ("tools/battle-lab/prep18-return-altopp-snorlax-golem.json", "player"),
+    "ply-snorlax-golem": ("tools/battle-lab/prep18-return-alt-snorlax-golem.json", "opponent"),
+}
+for name, (path, foe) in RETURN_BASES.items():
+    base = json.loads(Path(path).read_text())
+    for variant, moves in (("x3", None), ("growl3", [45, 45, 45, 45]), ("qa3", [98, 98, 98, 98])):
+        s = json.loads(json.dumps(base))
+        if moves:
+            s["overrides"]["parties"][foe][0]["moves"] = moves
+        seg = []
+        for turn in range(3):
+            seg += [{"frames": 2, "buttons": ["A"]}, {"frames": 30, "buttons": []}, {"frames": 2, "buttons": ["A"]},
+                    {"frames": 1200 if turn == 2 else 1000, "buttons": []}]
+        s["trace"] = {"segments": seg}
+        (OUT / f"return-{name}-{variant}.json").write_text(json.dumps(s, indent=1) + "\n")
+print(sorted(p.name for p in OUT.glob("*.json")))

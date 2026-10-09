@@ -1,0 +1,61 @@
+{
+ "schema": "prep48-live-adapter-fixture/v1",
+ "move": "RETURN",
+ "bodyIndex": 2,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/prep48/scenarios/return-ply-snorlax-golem-qa3.json",
+ "denseWindow": {
+  "startFrame": 2294,
+  "endFrame": 2575
+ },
+ "attacker": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015428,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 161,
+  "playerMaxHp": 267,
+  "opponentHp": 140,
+  "opponentMaxHp": 187,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "precedingBodies": [
+  {
+   "moveId": 98,
+   "side": "opponent"
+  },
+  {
+   "moveId": 216,
+   "side": "player"
+  },
+  {
+   "moveId": 98,
+   "side": "opponent"
+  },
+  {
+   "moveId": 216,
+   "side": "player"
+  },
+  {
+   "moveId": 98,
+   "side": "opponent"
+  }
+ ]
+}

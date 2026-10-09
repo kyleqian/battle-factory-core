@@ -1,0 +1,1939 @@
+{
+ "schema": "prep48-dig-check/v1",
+ "probeDeterminism": [
+  {
+   "scenario": "return-opp-dragonair-onix-growl3.json",
+   "r1": "76b08c12bfbe597a",
+   "r2": "76b08c12bfbe597a",
+   "same": true
+  },
+  {
+   "scenario": "return-opp-dragonair-onix-qa3.json",
+   "r1": "2cb194c49b2e4e6e",
+   "r2": "2cb194c49b2e4e6e",
+   "same": true
+  },
+  {
+   "scenario": "return-opp-dragonair-onix-x3.json",
+   "r1": "240ed9dae0ac7381",
+   "r2": "240ed9dae0ac7381",
+   "same": true
+  },
+  {
+   "scenario": "return-opp-snorlax-golem-growl3.json",
+   "r1": "f9135199eae1f39d",
+   "r2": "f9135199eae1f39d",
+   "same": true
+  },
+  {
+   "scenario": "return-opp-snorlax-golem-qa3.json",
+   "r1": "eb9047748bc90b7f",
+   "r2": "eb9047748bc90b7f",
+   "same": true
+  },
+  {
+   "scenario": "return-opp-snorlax-golem-x3.json",
+   "r1": "2ca7784d43928149",
+   "r2": "2ca7784d43928149",
+   "same": true
+  },
+  {
+   "scenario": "return-ply-dragonair-onix-growl3.json",
+   "r1": "fdd767297ccdd8a4",
+   "r2": "fdd767297ccdd8a4",
+   "same": true
+  },
+  {
+   "scenario": "return-ply-dragonair-onix-qa3.json",
+   "r1": "93dfed04de27fe44",
+   "r2": "93dfed04de27fe44",
+   "same": true
+  },
+  {
+   "scenario": "return-ply-dragonair-onix-x3.json",
+   "r1": "e84099a0a16da124",
+   "r2": "e84099a0a16da124",
+   "same": true
+  },
+  {
+   "scenario": "return-ply-snorlax-golem-growl3.json",
+   "r1": "fab3ed06e9cd5510",
+   "r2": "fab3ed06e9cd5510",
+   "same": true
+  },
+  {
+   "scenario": "return-ply-snorlax-golem-qa3.json",
+   "r1": "4c52e75b02cf29a7",
+   "r2": "4c52e75b02cf29a7",
+   "same": true
+  },
+  {
+   "scenario": "return-ply-snorlax-golem-x3.json",
+   "r1": "cdbc2032e0af66fd",
+   "r2": "cdbc2032e0af66fd",
+   "same": true
+  }
+ ],
+ "rows": [
+  {
+   "fixture": "return-opp-dragonair-onix-growl3-return0.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "DRAGONAIR",
+   "target": "ONIX",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    78,
+    359
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "39f3641e1a340bf2"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "39f3641e1a340bf2"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24064,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": true,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {},
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "return-opp-dragonair-onix-growl3-return1.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "DRAGONAIR",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B216o B45p S22",
+   "window": [
+    1112,
+    1393
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "4528a52f1229fb0f"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "4528a52f1229fb0f"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 7168,
+    "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 7168,
+     "bg2cnt": 24066,
+     "bg1vofs": 509,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-opp-dragonair-onix-growl3-return2.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "DRAGONAIR",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B216o B45p S22 B216o B45p S22",
+   "window": [
+    2146,
+    2427
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "ea8da423b4dad0f5"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "ea8da423b4dad0f5"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 7168,
+    "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 7168,
+     "bg2cnt": 24066,
+     "bg1vofs": 509,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-opp-dragonair-onix-qa3-return0.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "DRAGONAIR",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B98p",
+   "window": [
+    212,
+    493
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "53295f40499939f7"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "53295f40499939f7"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "return-opp-dragonair-onix-qa3-return1.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "DRAGONAIR",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B98p B216o B98p",
+   "window": [
+    1247,
+    1528
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "3f2df43171bb36b5"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "3f2df43171bb36b5"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-opp-dragonair-onix-qa3-return2.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "DRAGONAIR",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B98p B216o B98p B216o B98p",
+   "window": [
+    2282,
+    2563
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "3d62bd1c029569cf"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "3d62bd1c029569cf"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-opp-dragonair-onix-x3-return0.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "DRAGONAIR",
+   "target": "ONIX",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    78,
+    359
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "39f3641e1a340bf2"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "39f3641e1a340bf2"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24064,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": true,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {},
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "return-opp-dragonair-onix-x3-return1.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "DRAGONAIR",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B216o B150p",
+   "window": [
+    1112,
+    1393
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "4528a52f1229fb0f"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "4528a52f1229fb0f"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-opp-dragonair-onix-x3-return2.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "DRAGONAIR",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B216o B150p B216o B150p",
+   "window": [
+    2146,
+    2427
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "e5218d8fbdae4a4e"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "e5218d8fbdae4a4e"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-opp-snorlax-golem-growl3-return0.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "SNORLAX",
+   "target": "GOLEM",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    76,
+    357
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "f1b470e716098b23"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "f1b470e716098b23"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24064,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": true,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {},
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "return-opp-snorlax-golem-growl3-return1.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "SNORLAX",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B216o B45p S22",
+   "window": [
+    1110,
+    1391
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "14993ebd2cfbc6c6"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "14993ebd2cfbc6c6"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 7168,
+    "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 7168,
+     "bg2cnt": 24066,
+     "bg1vofs": 509,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-opp-snorlax-golem-growl3-return2.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "SNORLAX",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B216o B45p S22 B216o B45p S22",
+   "window": [
+    2144,
+    2425
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "87f0a21ee2680142"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "87f0a21ee2680142"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 7168,
+    "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 7168,
+     "bg2cnt": 24066,
+     "bg1vofs": 509,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-opp-snorlax-golem-qa3-return0.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "SNORLAX",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B98p",
+   "window": [
+    223,
+    504
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "73a1f2c03fed62a8"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "73a1f2c03fed62a8"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "return-opp-snorlax-golem-qa3-return1.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "SNORLAX",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B98p B216o B98p",
+   "window": [
+    1257,
+    1538
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "ac797282c04a0f4b"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "ac797282c04a0f4b"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-opp-snorlax-golem-qa3-return2.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "SNORLAX",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B98p B216o B98p B216o B98p",
+   "window": [
+    2294,
+    2575
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "cfdb1ebec34652a4"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "cfdb1ebec34652a4"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-opp-snorlax-golem-x3-return0.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "SNORLAX",
+   "target": "GOLEM",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    76,
+    357
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "f1b470e716098b23"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "f1b470e716098b23"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24064,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": true,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {},
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "return-opp-snorlax-golem-x3-return1.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "SNORLAX",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B216o B150p",
+   "window": [
+    1110,
+    1391
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "14993ebd2cfbc6c6"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "14993ebd2cfbc6c6"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-opp-snorlax-golem-x3-return2.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "SNORLAX",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B216o B150p B216o B150p",
+   "window": [
+    2144,
+    2425
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "6cd7a5f67234b60f"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "6cd7a5f67234b60f"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-ply-dragonair-onix-growl3-return0.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "ONIX",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    74,
+    355
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "9abf346681fbc325"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "9abf346681fbc325"
+    }
+   ],
+   "state": {
+    "monbgCnt": 39936,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": true,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {},
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "return-ply-dragonair-onix-growl3-return1.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B216p B45o S22",
+   "window": [
+    1108,
+    1389
+   ],
+   "live": false,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 25,
+     "residualPixels": 4830548,
+     "digest": "5ec965987da850aa"
+    },
+    {
+     "rows": 282,
+     "exactRows": 25,
+     "residualPixels": 4830548,
+     "digest": "5ec965987da850aa"
+    }
+   ],
+   "state": {
+    "monbgCnt": 7168,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 7168,
+     "bg1vofs": 509,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-ply-dragonair-onix-growl3-return2.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B216p B45o S22 B216p B45o S22",
+   "window": [
+    2142,
+    2423
+   ],
+   "live": false,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 25,
+     "residualPixels": 4830548,
+     "digest": "8cbf5dce6cddd944"
+    },
+    {
+     "rows": 282,
+     "exactRows": 25,
+     "residualPixels": 4830548,
+     "digest": "8cbf5dce6cddd944"
+    }
+   ],
+   "state": {
+    "monbgCnt": 7168,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 7168,
+     "bg1vofs": 509,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-ply-dragonair-onix-qa3-return0.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B98o",
+   "window": [
+    213,
+    494
+   ],
+   "live": false,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 25,
+     "residualPixels": 4830548,
+     "digest": "c8d44246f33602d6"
+    },
+    {
+     "rows": 282,
+     "exactRows": 25,
+     "residualPixels": 4830548,
+     "digest": "c8d44246f33602d6"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "return-ply-dragonair-onix-qa3-return1.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B98o B216p B98o",
+   "window": [
+    1248,
+    1529
+   ],
+   "live": false,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 25,
+     "residualPixels": 4830548,
+     "digest": "d9bfc50326ac53ce"
+    },
+    {
+     "rows": 282,
+     "exactRows": 25,
+     "residualPixels": 4830548,
+     "digest": "d9bfc50326ac53ce"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-ply-dragonair-onix-qa3-return2.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B98o B216p B98o B216p B98o",
+   "window": [
+    2377,
+    2658
+   ],
+   "live": false,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 25,
+     "residualPixels": 4830548,
+     "digest": "60dd4cec29896250"
+    },
+    {
+     "rows": 282,
+     "exactRows": 25,
+     "residualPixels": 4830548,
+     "digest": "60dd4cec29896250"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-ply-dragonair-onix-x3-return0.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "ONIX",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    74,
+    355
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "9abf346681fbc325"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "9abf346681fbc325"
+    }
+   ],
+   "state": {
+    "monbgCnt": 39936,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": true,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {},
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "return-ply-dragonair-onix-x3-return1.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B216p B150o",
+   "window": [
+    1108,
+    1389
+   ],
+   "live": false,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 25,
+     "residualPixels": 4830548,
+     "digest": "5ec965987da850aa"
+    },
+    {
+     "rows": 282,
+     "exactRows": 25,
+     "residualPixels": 4830548,
+     "digest": "5ec965987da850aa"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-ply-dragonair-onix-x3-return2.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B216p B150o B216p B150o",
+   "window": [
+    2142,
+    2423
+   ],
+   "live": false,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 25,
+     "residualPixels": 4830548,
+     "digest": "fab3dff5ca57ae66"
+    },
+    {
+     "rows": 282,
+     "exactRows": 25,
+     "residualPixels": 4830548,
+     "digest": "fab3dff5ca57ae66"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-ply-snorlax-golem-growl3-return0.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "SNORLAX",
+   "target": "GOLEM",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    72,
+    353
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "8a5643fbd250c532"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "8a5643fbd250c532"
+    }
+   ],
+   "state": {
+    "monbgCnt": 39936,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": true,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {},
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "return-ply-snorlax-golem-growl3-return1.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "SNORLAX",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B216p B45o S22",
+   "window": [
+    1106,
+    1387
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "d7730f2340b93f58"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "d7730f2340b93f58"
+    }
+   ],
+   "state": {
+    "monbgCnt": 7168,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 7168,
+     "bg1vofs": 509,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-ply-snorlax-golem-growl3-return2.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "SNORLAX",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B216p B45o S22 B216p B45o S22",
+   "window": [
+    2140,
+    2421
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "b70bdb7b7c9dbae1"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "b70bdb7b7c9dbae1"
+    }
+   ],
+   "state": {
+    "monbgCnt": 7168,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 16192,
+    "registersNotS0": {
+     "dispcnt": 16192,
+     "bg1cnt": 7168,
+     "bg1vofs": 509,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-ply-snorlax-golem-qa3-return0.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "SNORLAX",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B98o",
+   "window": [
+    222,
+    503
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "0ead16b7130ee4b8"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "0ead16b7130ee4b8"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "return-ply-snorlax-golem-qa3-return1.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "SNORLAX",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B98o B216p B98o",
+   "window": [
+    1368,
+    1649
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "4d43e167924913d5"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "4d43e167924913d5"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-ply-snorlax-golem-qa3-return2.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "SNORLAX",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B98o B216p B98o B216p B98o",
+   "window": [
+    2294,
+    2575
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "44f6dc4c4ecb8308"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "44f6dc4c4ecb8308"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-ply-snorlax-golem-x3-return0.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "SNORLAX",
+   "target": "GOLEM",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    72,
+    353
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "8a5643fbd250c532"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "8a5643fbd250c532"
+    }
+   ],
+   "state": {
+    "monbgCnt": 39936,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": true,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {},
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "return-ply-snorlax-golem-x3-return1.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "SNORLAX",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B216p B150o",
+   "window": [
+    1106,
+    1387
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "d7730f2340b93f58"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "d7730f2340b93f58"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "return-ply-snorlax-golem-x3-return2.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "SNORLAX",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B216p B150o B216p B150o",
+   "window": [
+    2140,
+    2421
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "0db1d3cf464fe249"
+    },
+    {
+     "rows": 282,
+     "exactRows": 282,
+     "residualPixels": 0,
+     "digest": "0db1d3cf464fe249"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  }
+ ]
+}

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """prep48: liveAdapterFramebuffer.ts fixtures for every Dig body of the prep48 Dig scenarios (from a prep48Probe.py output).
 
-usage: prep48DigFixtures.py <probe-dir> <fixture-dir>
+usage: prep48DigFixtures.py <probe-dir> <fixture-dir> [dig|return]
+Return (prefix "return"): every Return body, the default "X used RETURN!" text box, turn 0, the same precedingBodies rule.
 Per Dig body: denseWindow = [activation, first inactive frame] (setup 195 rows, unleash 68), fieldProfile HP / maxHP from the ROM's
 gBattleMons at activation, genders from the scenario, precedingBodies = every earlier animation body of the battle (move bodies by move
 id and attacker side, the Dig unleash as its second-branch key 10091, the Growl stat-down body as statAnimation 22 = B_ANIM_STATS_CHANGE
@@ -13,11 +14,12 @@ from pathlib import Path
 
 probe_dir, out_dir = Path(sys.argv[1]), Path(sys.argv[2])
 out_dir.mkdir(parents=True, exist_ok=True)
-SPECIES = {333: "VIBRAVA", 334: "FLYGON", 113: "CHANSEY", 76: "GOLEM"}
-MOVES = {"Move_QUICK_ATTACK": 98, "Move_GROWL": 45, "Move_DIG": 91}
+SPECIES = {333: "VIBRAVA", 334: "FLYGON", 113: "CHANSEY", 76: "GOLEM", 148: "DRAGONAIR", 95: "ONIX", 143: "SNORLAX"}
+MOVES = {"Move_QUICK_ATTACK": 98, "Move_GROWL": 45, "Move_DIG": 91, "Move_SPLASH": 150, "Move_RETURN": 216}
 SCEN = Path("tools/integration/fixtures/prep48/scenarios")
 written = []
-for probe in sorted(probe_dir.glob("dig-*.json")):
+PREFIX = sys.argv[3] if len(sys.argv) > 3 else "dig"
+for probe in sorted(probe_dir.glob(f"{PREFIX}-*.json")):
     d = json.loads(probe.read_text())
     scen = json.loads((SCEN / d["scenario"]).read_text())
     genders = {side: scen["overrides"]["parties"][side][0]["gender"] for side in ("player", "opponent")}
@@ -26,7 +28,28 @@ for probe in sorted(probe_dir.glob("dig-*.json")):
     for b in d["bodies"]:
         side = "player" if b["attacker"] == 0 else "opponent"
         label = b["label"]
-        if label == "Move_DIG":
+        if label == "Move_RETURN" and PREFIX == "return":
+            k = dig_seen.get(side, 0); dig_seen[side] = k + 1
+            at = b["at"]["battlers"]
+            atk, tgt = b["attacker"], 1 - b["attacker"]
+            fx = {
+                "schema": "prep48-live-adapter-fixture/v1", "move": "RETURN", "bodyIndex": k,
+                "probe": "tools/integration/prep48Probe.py", "scenario": str(SCEN / d["scenario"]),
+                "denseWindow": {"startFrame": b["startFrame"], "endFrame": b["endFrame"]},
+                "attacker": {"species": SPECIES[at[atk]["species"]], "geometry": {"side": side}},
+                "target": {"species": SPECIES[at[tgt]["species"]], "geometry": {"side": "opponent" if side == "player" else "player"}},
+                "attackerPersonality": at[atk]["personality"], "displayedStatus": {"player": "none", "opponent": "none"},
+                "fieldProfile": {"playerHp": at[0]["hp"], "playerMaxHp": at[0]["maxHP"], "opponentHp": at[1]["hp"], "opponentMaxHp": at[1]["maxHP"],
+                                 "playerGender": genders["player"], "opponentGender": genders["opponent"]},
+                "requestFields": {"turn": 0},
+            }
+            if units:
+                fx["precedingBodies"] = list(units)
+            name = f"{probe.stem}-return{k}.json"
+            (out_dir / name).write_text(json.dumps(fx, indent=1) + "\n")
+            written.append(name)
+            units.append({"moveId": 216, "side": side})
+        elif label == "Move_DIG":
             k = dig_seen.get(side, 0); dig_seen[side] = k + 1
             unleash = k % 2 == 1
             if not unleash:

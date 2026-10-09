@@ -7,7 +7,8 @@ Move_/General_/Status_/Special_ symbol of the script pointer at activation), att
 first-body gates protect, read from RAM on the frame before activation (`pre`: registers, BG scroll, scanline header, matrix bitmap) and in full on the
 activation frame (`at`): the IO BG / window /
 blend registers, gBattle_BG*_X/Y, gScanlineEffect + both 320-word gScanlineEffectRegBuffers banks, sSpriteOrder, gOamMatrixAllocBitmap,
-the sprite palette / tile tags + tile bitmap, live task callbacks, BG map screenblock digests, both battlers' HP / personality.
+the sprite palette / tile tags + tile bitmap, live task callbacks, BG map screenblock digests, both battler sprites' x / y / x2 / y2 / invisible, both battlers' HP /
+personality.
 Raw RGB888 frames (`%05d.rgb`) are written for every active frame plus 3 after each body (the dense windows), with their sha256 in
 `frames` (the liveAdapterFramebuffer.ts probe contract). Frame 0 = after BattleLab.prepare, frame n = after n trace frames.
 """
@@ -80,6 +81,10 @@ def main() -> None:
             "tileTagsSha": sha(raw(names["sSpriteTileRangeTags"], 256)), "tileBitmapSha": sha(raw(names["sSpriteTileAllocBitmap"], 128)),
             "tasks": [by_address.get(u32(tasks + s * 0x28) & ~1, hex(u32(tasks + s * 0x28))) for s in range(16) if u8(tasks + s * 0x28 + 4)],
             "bgMapSha": {str(sb): sha(raw(0x06000000 + sb * 0x800, 0x800)) for sb in (26, 27, 28, 29, 30, 31)},
+            "battlerSprites": [{"slot": (sid := u8(names["gBattlerSpriteIds"] + b)), "x": s16(sy["gSprites"] + sid * 0x44 + 0x20),
+                                "y": s16(sy["gSprites"] + sid * 0x44 + 0x22), "x2": s16(sy["gSprites"] + sid * 0x44 + 0x24),
+                                "y2": s16(sy["gSprites"] + sid * 0x44 + 0x26), "invisible": bool(u8(sy["gSprites"] + sid * 0x44 + 0x3E) & 4)}
+                               for b in range(2)],
             "battlers": [{"species": u16(mons + b * 0x58), "hp": u16(mons + b * 0x58 + 0x28), "maxHP": u16(mons + b * 0x58 + 0x2C),
                           "personality": u32(mons + b * 0x58 + 0x48), "status1": u32(mons + b * 0x58 + 0x4C)} for b in range(2)],
         }
