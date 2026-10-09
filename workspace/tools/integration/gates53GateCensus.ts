@@ -21,7 +21,9 @@ import { createBattleResolutionPresentationRenderView, liveMoveRandom2PlanContex
 import { createPresentationRngSession } from "../../src/engine/presentationRngHost.ts";
 import { tickLiveMovePresentationRngSession } from "../../src/engine/liveMovePresentationRng.ts";
 import { liveBattlerAnchors, liveMoveAnimationPresentation, liveWordsUnitPostFree } from "../../src/engine/liveMoveAnimation.ts";
-import { resolveSpriteOrderDeferredLend, type SpriteOrderDeferredLend } from "../../src/engine/spriteOrderEventTransform.ts";
+import {
+  applySpriteOrderPresentationEvent, createSpriteOrderTracker, resolveSpriteOrderDeferredLend, spriteOrderTrackerLend, type SpriteOrderDeferredLend,
+} from "../../src/engine/spriteOrderEventTransform.ts";
 import { isWordsOrderDeferredUnit } from "../../src/engine/wordsOrderUnits.ts";
 import { liveMovePresentationRngWords } from "../../src/engine/liveMovePresentationRng.ts";
 import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";
@@ -138,7 +140,11 @@ function deferredSubReason(deferred: SpriteOrderDeferredLend, host: Parameters<t
     if ("deferred" in d.activation) { const inner = walk(d.activation.deferred, depth + 1); if (inner !== null) return inner; }
     const activationFree = "deferred" in d.activation ? resolveSpriteOrderDeferredLend(d.activation.deferred, carry) : d.activation.free;
     if (activationFree === null) return `depth ${depth}: activation free unresolved`;
-    if (!isWordsOrderDeferredUnit(d)) return `depth ${depth} ${d.moveId}: not a words unit (carryBody null)`;
+    if (!isWordsOrderDeferredUnit(d)) {
+      // Ice Ball's own deferred body (liveMoveAnimation.ts case 301 carries it with its own case-local carry): name its inputs.
+      const words = liveMovePresentationRngWords({ host, key: d.key } as never);
+      return `depth ${depth} ${d.moveId}/${d.attackerSide}: own (non-words) deferred body, case carry ${words === null ? "has no recorded words for the earlier body" : "null with words recorded (counter / prefix / postBodyFree)"}`;
+    }
     const words = liveMovePresentationRngWords({ host, key: d.key } as never);
     if (words === null) return `depth ${depth} ${d.generalAnimation ?? d.moveId}/${d.attackerSide}: no recorded presentation words for the unit key`;
     const post = liveWordsUnitPostFree(d, activationFree, words, anchors);
@@ -153,12 +159,34 @@ function deferredSubReason(deferred: SpriteOrderDeferredLend, host: Parameters<t
   return walk(deferred, 0) ?? "resolves (not the cause)";
 }
 
+/**
+ * UNPROVEN PREDICTOR (host-lane lever size, never a production input): resolveSpriteOrderDeferredLend with the replay allow-list removed
+ * (every recorded unit replayed with the production plans; an unplanned unit still invalidates the tracker -> null). Returns the lend the
+ * consumer would see, or null.
+ */
+function resolveWithoutAllowList(d: SpriteOrderDeferredLend, host: unknown, field: Parameters<typeof createBattleCommandFieldArtView>[0]): readonly number[] | null {
+  const art = createBattleCommandFieldArtView(field);
+  const anchors = { player: liveBattlerAnchors("player", art).picOffsetPoint, opponent: liveBattlerAnchors("opponent", art).picOffsetPoint };
+  const walk = (x: SpriteOrderDeferredLend): readonly number[] | null => {
+    const activationFree = "deferred" in x.activation ? walk(x.activation.deferred) : x.activation.free;
+    if (activationFree === null || !isWordsOrderDeferredUnit(x)) return null;
+    const post = liveWordsUnitPostFree(x, activationFree, liveMovePresentationRngWords({ host, key: x.key } as never), anchors);
+    if (post === null) return null;
+    let tracker = createSpriteOrderTracker({ known: true, free: post, pendingDestroyed: [] });
+    for (const unit of x.units) tracker = applySpriteOrderPresentationEvent(tracker, unit);
+    return spriteOrderTrackerLend(tracker);
+  };
+  return walk(d);
+}
+
 // ---- census driver (liveShareCensus.ts's battle loop) -------------------------------------------------------------------------
 const nameOf = new Map((movesJson as unknown as { moves: { id: number; name: string }[] }).moves.map((m) => [m.id, m.name]));
 interface CommandRecord {
   battle: number; seed: number; streak: number; command: string; moveId: number; move: string; side: "player" | "opponent";
   attacker: string; target: string; frames: number; fallbackFrames: number; censusReason: string | null; censusGate: string | null;
   firstFallbackAge: number | null; exact: string | null; exactHits: Record<string, number>; deferredSubReason?: string;
+  /** UNPROVEN predictor (resolveWithoutAllowList), words-deferred declines only. */
+  predictorWithoutAllowList?: string;
 }
 const commands: CommandRecord[] = [];
 const fidelity = { calls: 0, nullMismatches: 0, mismatchExamples: [] as string[] };
@@ -212,9 +240,17 @@ function playBattle(battle: number, seed: number, streak: number): void {
     rec.fallbackFrames++;
     // The pre-switch words-deferred resolution (prep46) can replace the lend with undefined: name it, it is not the raw input.
     const raw = (e.spriteOrderInput as { deferred?: SpriteOrderDeferredLend } | undefined)?.deferred;
-    const deferred = raw !== undefined ? " [words-deferred lend]" : "";
+    const deferred = raw === undefined ? "" : isWordsOrderDeferredUnit(raw) ? " [words-deferred lend]" : ` [own deferred lend ${raw.moveId}]`;
     const k = keyOf(g53.hits.at(-1)) + deferred;
-    if (raw !== undefined && rec.deferredSubReason === undefined) rec.deferredSubReason = deferredSubReason(raw, e.presentationRng?.host ?? null, v.field);
+    if (raw !== undefined && rec.deferredSubReason === undefined) {
+      rec.deferredSubReason = deferredSubReason(raw, e.presentationRng?.host ?? null, v.field);
+      if (isWordsOrderDeferredUnit(raw)) {
+        const lend = resolveWithoutAllowList(raw, e.presentationRng?.host ?? null, v.field);
+        rec.predictorWithoutAllowList = lend === null ? "lend still null"
+          : liveMoveAnimationPresentation(e.request, v.field, e.age, e.paletteInput, e.spriteAllocatorInput, Object.freeze({ known: true as const, free: lend }) as never,
+            e.presentationRng, e.battlerX2Input) === null ? "lend resolves, consumer still declines" : "lend resolves, consumer draws";
+      }
+    }
     rec.exactHits[k] = (rec.exactHits[k] ?? 0) + 1;
     if (rec.censusReason === null) {
       const d = classifyPresentationDecline({ request: e.request, field: v.field, age: e.age, paletteInput: e.paletteInput,
@@ -285,7 +321,8 @@ const describe = (k: string) => {
   const [lineText, rest] = k.split("#"), d = rest?.split(" ")[0];
   const g = gateInfo.get(Number(lineText));
   if (!g) return { line: null, condition: k, disjunct: null };
-  const note = k.includes("[words-deferred lend]") ? " [words-deferred lend]" : "";
+  const noteMatch = /\[(words-deferred lend|own deferred lend \d+)\]/.exec(k)?.[0];
+  const note = noteMatch ? ` ${noteMatch}` : "";
   return { line: Number(lineText), condition: g.cond ?? "(unconditional return null)", disjunct: (d === "ret" ? "(return null)" : g.disjuncts[Number(d)] ?? "?") + note };
 };
 type Row = { move: string; moveId: number; side: string; exact: string; line: number | null; condition: string; disjunct: string | null; deferredSubReason: string | null;
@@ -308,9 +345,14 @@ const caseLocal = rank((c) => c.censusReason === CASE_LOCAL);
 const genericSub = (s: string | null) => s?.replace(/^depth \d+ /, "").replace(/\(activation free \d+ slots\)/, "").replace(/\(units [^)]*\)/, "") ?? null;
 const byCondition = new Map<string, { exact: string; line: number | null; disjunct: string | null; deferredSubReason: string | null; count: number; fallbackFrames: number; moves: Set<string> }>();
 for (const r of caseLocal) {
-  const sub = r.disjunct?.includes("[words-deferred lend]") ? genericSub(r.deferredSubReason) : null;
-  const k = `${r.disjunct?.includes("[words-deferred lend]") && r.disjunct.includes("spriteOrderInput") ? "words-deferred" : r.line}|${r.disjunct}|${sub}`;
-  const b = byCondition.get(k) ?? { exact: r.exact, line: r.line, disjunct: r.disjunct, deferredSubReason: sub, count: 0, fallbackFrames: 0, moves: new Set<string>() };
+  const sub = r.disjunct?.includes("deferred lend") ? genericSub(r.deferredSubReason) : null;
+  // A consumer's `!spriteOrderInput?.known` after the pre-switch words resolution (resolveWordsOrderLend) returned null is one condition
+  // whatever the case's line: grouped as such (line null, the per-move lines are in rankingByExactCondition).
+  const words = r.disjunct?.includes("[words-deferred lend]") === true && /^!spriteOrderInput\?\.known /.test(r.disjunct);
+  const k = `${words ? "words-deferred" : r.line}|${words ? "words" : r.disjunct}|${sub}`;
+  const b = byCondition.get(k) ?? { exact: words ? "pre-switch resolveWordsOrderLend null -> consumer !spriteOrderInput?.known" : r.exact,
+    line: words ? null : r.line, disjunct: words ? "!spriteOrderInput?.known [words-deferred lend unresolved]" : r.disjunct,
+    deferredSubReason: sub, count: 0, fallbackFrames: 0, moves: new Set<string>() };
   b.count += r.count; b.fallbackFrames += r.fallbackFrames; b.moves.add(`${r.move}/${r.side}`);
   byCondition.set(k, b);
 }
@@ -327,6 +369,14 @@ const report = {
   rankingByConditionLine: [...byCondition.values()].sort((a, b) => b.fallbackFrames - a.fallbackFrames)
     .map((b) => ({ ...b, moves: [...b.moves].sort() })),
   allPresentationDeclinesByExactCondition: rank((c) => c.censusReason !== null).slice(0, 80),
+  unprovenPredictorWithoutDeferredReplayAllowList: (() => {
+    const m = new Map<string, { outcome: string; count: number; fallbackFrames: number }>();
+    for (const c of commands) if (c.censusReason === CASE_LOCAL && c.predictorWithoutAllowList !== undefined) {
+      const b = m.get(c.predictorWithoutAllowList) ?? { outcome: c.predictorWithoutAllowList, count: 0, fallbackFrames: 0 };
+      b.count++; b.fallbackFrames += c.fallbackFrames; m.set(b.outcome, b);
+    }
+    return [...m.values()].sort((a, b) => b.fallbackFrames - a.fallbackFrames);
+  })(),
 };
 const text = JSON.stringify(report, null, 1) + "\n";
 const out = arg("out");

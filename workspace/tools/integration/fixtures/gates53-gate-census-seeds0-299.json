@@ -526,10 +526,10 @@
    "move": "ICE BALL",
    "moveId": 301,
    "side": "player",
-   "exact": "3821#0 [words-deferred lend]",
+   "exact": "3821#0 [own deferred lend 301]",
    "line": 3821,
    "condition": "activationOrder === null",
-   "disjunct": "activationOrder === null [words-deferred lend]",
+   "disjunct": "activationOrder === null [own deferred lend 301]",
    "deferredSubReason": "depth 0 301: non-replay unit after the words body (first: faint) (units faint,party-summary-next,party-summary-hide,next-mon-send-out)",
    "censusGate": "liveMoveAnimation.ts:3797",
    "count": 2,
@@ -913,11 +913,11 @@
    "move": "ICE BALL",
    "moveId": 301,
    "side": "player",
-   "exact": "3821#0 [words-deferred lend]",
+   "exact": "3821#0 [own deferred lend 301]",
    "line": 3821,
    "condition": "activationOrder === null",
-   "disjunct": "activationOrder === null [words-deferred lend]",
-   "deferredSubReason": "depth 0 301: not a words unit (carryBody null)",
+   "disjunct": "activationOrder === null [own deferred lend 301]",
+   "deferredSubReason": "depth 0 301/player: own (non-words) deferred body, case carry null with words recorded (counter / prefix / postBodyFree)",
    "censusGate": "liveMoveAnimation.ts:3797",
    "count": 2,
    "fallbackFrames": 152,
@@ -930,11 +930,11 @@
    "move": "ICE BALL",
    "moveId": 301,
    "side": "player",
-   "exact": "3821#0 [words-deferred lend]",
+   "exact": "3821#0 [own deferred lend 301]",
    "line": 3821,
    "condition": "activationOrder === null",
-   "disjunct": "activationOrder === null [words-deferred lend]",
-   "deferredSubReason": "depth 1 301: not a words unit (carryBody null)",
+   "disjunct": "activationOrder === null [own deferred lend 301]",
+   "deferredSubReason": "depth 1 301/player: own (non-words) deferred body, case carry null with words recorded (counter / prefix / postBodyFree)",
    "censusGate": "liveMoveAnimation.ts:3797",
    "count": 2,
    "fallbackFrames": 152,
@@ -1046,10 +1046,10 @@
    "move": "ICE BALL",
    "moveId": 301,
    "side": "player",
-   "exact": "3821#0 [words-deferred lend]",
+   "exact": "3821#0 [own deferred lend 301]",
    "line": 3821,
    "condition": "activationOrder === null",
-   "disjunct": "activationOrder === null [words-deferred lend]",
+   "disjunct": "activationOrder === null [own deferred lend 301]",
    "deferredSubReason": "depth 1 301: non-replay unit after the words body (first: faint) (units faint,party-summary-next,party-summary-hide,next-mon-send-out)",
    "censusGate": "liveMoveAnimation.ts:3797",
    "count": 1,
@@ -1062,10 +1062,10 @@
    "move": "ICE BALL",
    "moveId": 301,
    "side": "player",
-   "exact": "3821#0 [words-deferred lend]",
+   "exact": "3821#0 [own deferred lend 301]",
    "line": 3821,
    "condition": "activationOrder === null",
-   "disjunct": "activationOrder === null [words-deferred lend]",
+   "disjunct": "activationOrder === null [own deferred lend 301]",
    "deferredSubReason": "depth 2 301: non-replay unit after the words body (first: faint) (units faint,party-summary-next,party-summary-hide,next-mon-send-out)",
    "censusGate": "liveMoveAnimation.ts:3797",
    "count": 1,
@@ -1205,9 +1205,9 @@
  ],
  "rankingByConditionLine": [
   {
-   "exact": "2785#0 [words-deferred lend]",
-   "line": 2785,
-   "disjunct": "!spriteOrderInput?.known [words-deferred lend]",
+   "exact": "pre-switch resolveWordsOrderLend null -> consumer !spriteOrderInput?.known",
+   "line": null,
+   "disjunct": "!spriteOrderInput?.known [words-deferred lend unresolved]",
    "deferredSubReason": "RAIN_CONTINUES: non-replay unit after the words body (first: faint) ",
    "count": 28,
    "fallbackFrames": 5661,
@@ -1228,9 +1228,9 @@
    ]
   },
   {
-   "exact": "3289#1 [words-deferred lend]",
-   "line": 3289,
-   "disjunct": "!spriteOrderInput?.known [words-deferred lend]",
+   "exact": "pre-switch resolveWordsOrderLend null -> consumer !spriteOrderInput?.known",
+   "line": null,
+   "disjunct": "!spriteOrderInput?.known [words-deferred lend unresolved]",
    "deferredSubReason": "189: non-replay unit after the words body (first: faint) ",
    "count": 16,
    "fallbackFrames": 2516,
@@ -1247,9 +1247,9 @@
    ]
   },
   {
-   "exact": "3191#0 [words-deferred lend]",
-   "line": 3191,
-   "disjunct": "!spriteOrderInput?.known [words-deferred lend]",
+   "exact": "pre-switch resolveWordsOrderLend null -> consumer !spriteOrderInput?.known",
+   "line": null,
+   "disjunct": "!spriteOrderInput?.known [words-deferred lend unresolved]",
    "deferredSubReason": "28: non-replay unit after the words body (first: faint) ",
    "count": 15,
    "fallbackFrames": 2289,
@@ -1262,9 +1262,9 @@
    ]
   },
   {
-   "exact": "2936#0 [words-deferred lend]",
-   "line": 2936,
-   "disjunct": "!spriteOrderInput?.known [words-deferred lend]",
+   "exact": "pre-switch resolveWordsOrderLend null -> consumer !spriteOrderInput?.known",
+   "line": null,
+   "disjunct": "!spriteOrderInput?.known [words-deferred lend unresolved]",
    "deferredSubReason": "240/opponent: post-unit replay lend null ",
    "count": 6,
    "fallbackFrames": 1218,
@@ -1274,9 +1274,9 @@
    ]
   },
   {
-   "exact": "3346#0 [words-deferred lend]",
-   "line": 3346,
-   "disjunct": "!spriteOrderInput?.known [words-deferred lend]",
+   "exact": "pre-switch resolveWordsOrderLend null -> consumer !spriteOrderInput?.known",
+   "line": null,
+   "disjunct": "!spriteOrderInput?.known [words-deferred lend unresolved]",
    "deferredSubReason": "189: non-replay unit after the words body (first: forced-switch-out) ",
    "count": 8,
    "fallbackFrames": 1065,
@@ -1299,9 +1299,9 @@
    ]
   },
   {
-   "exact": "3557#0 [words-deferred lend]",
-   "line": 3557,
-   "disjunct": "!spriteOrderInput?.known [words-deferred lend]",
+   "exact": "pre-switch resolveWordsOrderLend null -> consumer !spriteOrderInput?.known",
+   "line": null,
+   "disjunct": "!spriteOrderInput?.known [words-deferred lend unresolved]",
    "deferredSubReason": "28/player: post-unit replay lend null ",
    "count": 4,
    "fallbackFrames": 642,
@@ -1322,9 +1322,9 @@
    ]
   },
   {
-   "exact": "2265#0 [words-deferred lend]",
-   "line": 2265,
-   "disjunct": "!spriteOrderInput?.known [words-deferred lend]",
+   "exact": "pre-switch resolveWordsOrderLend null -> consumer !spriteOrderInput?.known",
+   "line": null,
+   "disjunct": "!spriteOrderInput?.known [words-deferred lend unresolved]",
    "deferredSubReason": "189: non-replay unit after the words body (first: switch-out) ",
    "count": 4,
    "fallbackFrames": 435,
@@ -1334,9 +1334,9 @@
    ]
   },
   {
-   "exact": "3821#0 [words-deferred lend]",
+   "exact": "3821#0 [own deferred lend 301]",
    "line": 3821,
-   "disjunct": "activationOrder === null [words-deferred lend]",
+   "disjunct": "activationOrder === null [own deferred lend 301]",
    "deferredSubReason": "301: non-replay unit after the words body (first: faint) ",
    "count": 4,
    "fallbackFrames": 361,
@@ -1345,9 +1345,9 @@
    ]
   },
   {
-   "exact": "2624#0 [words-deferred lend]",
-   "line": 2624,
-   "disjunct": "!spriteOrderInput?.known [words-deferred lend]",
+   "exact": "pre-switch resolveWordsOrderLend null -> consumer !spriteOrderInput?.known",
+   "line": null,
+   "disjunct": "!spriteOrderInput?.known [words-deferred lend unresolved]",
    "deferredSubReason": "28: non-replay unit after the words body (first: forced-switch-out) ",
    "count": 3,
    "fallbackFrames": 353,
@@ -1357,10 +1357,10 @@
    ]
   },
   {
-   "exact": "3821#0 [words-deferred lend]",
+   "exact": "3821#0 [own deferred lend 301]",
    "line": 3821,
-   "disjunct": "activationOrder === null [words-deferred lend]",
-   "deferredSubReason": "301: not a words unit (carryBody null)",
+   "disjunct": "activationOrder === null [own deferred lend 301]",
+   "deferredSubReason": "301/player: own (non-words) deferred body, case carry null with words recorded (counter / prefix / postBodyFree)",
    "count": 4,
    "fallbackFrames": 304,
    "moves": [
@@ -1379,9 +1379,9 @@
    ]
   },
   {
-   "exact": "3289#1 [words-deferred lend]",
-   "line": 3289,
-   "disjunct": "!spriteOrderInput?.known [words-deferred lend]",
+   "exact": "pre-switch resolveWordsOrderLend null -> consumer !spriteOrderInput?.known",
+   "line": null,
+   "disjunct": "!spriteOrderInput?.known [words-deferred lend unresolved]",
    "deferredSubReason": "189/player: post-unit replay lend null ",
    "count": 2,
    "fallbackFrames": 211,
@@ -1391,9 +1391,9 @@
    ]
   },
   {
-   "exact": "2936#0 [words-deferred lend]",
-   "line": 2936,
-   "disjunct": "!spriteOrderInput?.known [words-deferred lend]",
+   "exact": "pre-switch resolveWordsOrderLend null -> consumer !spriteOrderInput?.known",
+   "line": null,
+   "disjunct": "!spriteOrderInput?.known [words-deferred lend unresolved]",
    "deferredSubReason": "RAIN_CONTINUES: non-replay unit after the words body (first: switch-out) ",
    "count": 1,
    "fallbackFrames": 203,
@@ -1402,9 +1402,9 @@
    ]
   },
   {
-   "exact": "3254#1 [words-deferred lend]",
-   "line": 3254,
-   "disjunct": "!spriteOrderInput?.known [words-deferred lend]",
+   "exact": "pre-switch resolveWordsOrderLend null -> consumer !spriteOrderInput?.known",
+   "line": null,
+   "disjunct": "!spriteOrderInput?.known [words-deferred lend unresolved]",
    "deferredSubReason": "RAIN_CONTINUES: non-replay unit after the words body (first: forced-switch-out) ",
    "count": 1,
    "fallbackFrames": 58,
@@ -2866,6 +2866,23 @@
    "examples": [
     "seed 241 streak 5 15:0:2 NIDORINA->LILEEP age0 0 frames 219"
    ]
+  }
+ ],
+ "unprovenPredictorWithoutDeferredReplayAllowList": [
+  {
+   "outcome": "lend resolves, consumer draws",
+   "count": 53,
+   "fallbackFrames": 8695
+  },
+  {
+   "outcome": "lend still null",
+   "count": 35,
+   "fallbackFrames": 5956
+  },
+  {
+   "outcome": "lend resolves, consumer still declines",
+   "count": 2,
+   "fallbackFrames": 438
   }
  ]
 }
