@@ -12,6 +12,10 @@ import {
 import { gigaDrainSpriteOrderPlanForGeometry, megaDrainSpriteOrderPlanForGeometry } from "../src/engine/spriteOrderGigaDrainPlan.ts";
 import { applySpriteOrderUnitPlan, createSpriteOrderPlanCursor, knownEntrySpriteOrderState } from "../src/engine/spriteOrderProvider.ts";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
+import { ABSORB_BODY_LAST_AGE, absorbAtAge } from "../src/animation/absorb.ts";
+import { absorptionBodySpriteOrderPlanText } from "../src/animation/absorptionOrbSpriteOrderPlan.ts";
+import { gigaDrainOrderCenters } from "../src/engine/spriteOrderGigaDrainPlan.ts";
+import { SPRITE_ORDER_PRODUCTION_BODIES, SPRITE_ORDER_PRODUCTION_PLANS } from "../src/engine/spriteOrderProductionPlans.ts";
 
 /** The plan of 9 / 10 prep43 probes (prep43Check.ts PREP43_PLANS "body 202"). */
 const MAJORITY = "Cf;D0;Cf;D1;Cfff;Cfff;Cfff;Cfff;Cfff;D2;Cfff;D5,6;D3;Cfff;D8,10;D4;Cfff;D12,13;D7,9;D16;D11;D17,19;D14;D15;D21;D18;"
@@ -212,5 +216,17 @@ describe("Giga Drain (202) geometry-keyed sprite-order plan", () => {
       }
     }
     expect([...classes].sort()).toEqual([MD_OLDER, MD_NEWER].sort());
+  });
+
+  it("control: the shared generator reproduces Absorb's ROM-captured production plan (no same-frame orb group) at every geometry", () => {
+    const rom = SPRITE_ORDER_PRODUCTION_PLANS[SPRITE_ORDER_PRODUCTION_BODIES["71:player"]!]!;
+    expect(SPRITE_ORDER_PRODUCTION_PLANS[SPRITE_ORDER_PRODUCTION_BODIES["71:opponent"]!]).toBe(rom);
+    for (const [player, opponent] of [[ROSELIA, ONIX], [ONIX, DIGLETT], [DIGLETT, ROSELIA], [1, 334], [42, 42]] as const) {
+      for (const side of ["player", "opponent"] as const) {
+        const c = gigaDrainOrderCenters(side, { playerSpecies: player, opponentSpecies: opponent })!;
+        expect(absorptionBodySpriteOrderPlanText(ABSORB_BODY_LAST_AGE, age => absorbAtAge(age, c.target, c.attacker, side, c.attacker)))
+          .toBe(rom);
+      }
+    }
   });
 });
