@@ -194,9 +194,9 @@ export function openLiveSpriteOrderHostPartyMenu(host: LiveSpriteOrderHost): Liv
 }
 
 /**
- * Return from a party menu to the battle: the exit ResetSpriteData, then the battle reshow (both battlers, or the
- * opponent alone when the player battler sprite is gone). A hidden battler or a missing opponent battler is an
- * unobserved reshow shape: invalidate.
+ * Return from a party menu to the battle: the exit ResetSpriteData, then the battle reshow (both battlers, the opponent
+ * alone when the player battler sprite is gone, or neither after a double KO: reshowNeither, docs/next-adapters-prep49.md X1).
+ * A hidden battler or the player battler without the opponent's is an unobserved reshow shape: invalidate.
  */
 export function returnLiveSpriteOrderHostFromPartyMenu(
   host: LiveSpriteOrderHost, battlers: Readonly<{ player: boolean; opponent: boolean }>,
@@ -256,8 +256,8 @@ export function beginLiveSpriteOrderTurn(
 
 /**
  * Roar/Whirlwind's forced `returntoball` (skipAnim; docs/forced-switch-continuation.md §1.1): a RETURNTOBALL hide of the
- * battler the segment's latest MOVE_ANIMATION targeted (not its attacker: Baton Pass's `returntoball BS_ATTACKER` is not
- * modelled and keeps invalidating).
+ * battler the segment's latest MOVE_ANIMATION targeted; or Baton Pass's `returntoball BS_ATTACKER`, identified by its
+ * interpreter receipt's script label (docs/next-adapters-prep49.md R1 / R2: the same `D o<battler slot>` unit, 2 x 2 exact).
  */
 function isForcedSwitchOut(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
   const event = events[index]!;
