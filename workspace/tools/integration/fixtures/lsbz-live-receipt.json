@@ -1595,5 +1595,164 @@
   "python3 -I tools/integration/lsbzWindows.py",
   "OUT=SCRATCH/checkA P=10 sh tools/integration/lsbzTimingCheck.sh; OUT=SCRATCH/checkB P=10 sh tools/integration/lsbzTimingCheck.sh",
   "python3 -I tools/integration/lsbzReceipt.py SCRATCH/checkA SCRATCH/checkB $(git rev-parse HEAD:workspace/src) [key=file.json ...]"
- ]
+ ],
+ "liveShareCensus": {
+  "seeds": "0..299",
+  "streak": "i * 11 % 49",
+  "base": "0a74c111a (src cc1fcc8a)",
+  "final": "src e7a2c279 (f19cb383b; the route-test commit changes no src)",
+  "command": "node --experimental-strip-types --no-warnings tools/integration/liveShareCensus.ts --seeds=0..299 --out=<r>.json --commands=<r>.jsonl (base from `git archive 0a74c111a:workspace src tools/integration/liveShareCensus*.ts tools/lib package.json tsconfig.json`); python3 -I tools/integration/prep43CensusDelta.py <base>.json <base>.jsonl <final>.json <final>.jsonl <delta>.json",
+  "sha256": {
+   "base.json": "2b8af20df61e6a8cb5a1beda4ae644b538e6b3ff6d3020cd7878e2231e80e2ba",
+   "base.jsonl": "7b4e3608e5d92027204a5780690ce4e168a1bec0fa389b8655d3c02fcf7d59f6",
+   "final.json": "6b2ce0fbc6c868b9ad281e9b5ea1c9295210fcd731f4732d698466ba2584625d",
+   "final.jsonl": "87e6ff136d5eb5d75e3f46cca83e883a08d5300580535000b944d39ca28618d2",
+   "delta.json": "c39cf4b981ef69441932389fc2671a1e2fc588079b2b1a1bd612d7bb92e05b13"
+  },
+  "commands": 7970,
+  "liveCount": [
+   7440,
+   7445
+  ],
+  "liveCountPct": [
+   93.35,
+   93.41
+  ],
+  "liveFrames": [
+   1105852,
+   1107662
+  ],
+  "liveFramePct": [
+   94.66,
+   94.82
+  ],
+  "regressions": 0,
+  "changedCommands": [
+   {
+    "battle": 87,
+    "move": "BLIZZARD",
+    "side": "opponent",
+    "pair": "WALREIN -> JYNX",
+    "before": [
+     "fallback",
+     361
+    ],
+    "after": [
+     "live",
+     362
+    ]
+   },
+   {
+    "battle": 87,
+    "move": "BLIZZARD",
+    "side": "opponent",
+    "pair": "WALREIN -> JYNX",
+    "before": [
+     "fallback",
+     361
+    ],
+    "after": [
+     "live",
+     362
+    ]
+   },
+   {
+    "battle": 87,
+    "move": "BLIZZARD",
+    "side": "opponent",
+    "pair": "WALREIN -> JYNX",
+    "before": [
+     "fallback",
+     361
+    ],
+    "after": [
+     "live",
+     362
+    ]
+   },
+   {
+    "battle": 87,
+    "move": "BLIZZARD",
+    "side": "opponent",
+    "pair": "WALREIN -> JYNX",
+    "before": [
+     "fallback",
+     361
+    ],
+    "after": [
+     "live",
+     362
+    ]
+   },
+   {
+    "battle": 87,
+    "move": "BLIZZARD",
+    "side": "opponent",
+    "pair": "WALREIN -> JYNX",
+    "before": [
+     "fallback",
+     361
+    ],
+    "after": [
+     "live",
+     362
+    ]
+   }
+  ],
+  "commandSequenceSha256": {
+   "base": "4151a0efc04650318e43c50d8c61690f8674d793c0ef34843310b39c1486f414",
+   "final": "4151a0efc04650318e43c50d8c61690f8674d793c0ef34843310b39c1486f414",
+   "identical": true
+  },
+  "battleDigest": {
+   "base": "069618f1095e9d975b768c4c1b316969f4ca84fcf84683f9bf4427a46833afe0",
+   "final": "0fd00eae207814985372c1a3cd6433d10485bdf1379b558c56395db3f5579137",
+   "identical": false,
+   "note": "the battle record differs ONLY in the presented-frame total (frames 4093168 -> 4093172: the 5 Blizzard bodies now run their geometry-derived 362-row live window); played / terminal / stalled / errors / playerTurns identical",
+   "gameplayFieldsIdentical": true
+  },
+  "commandDigestNote": "commandDigest differs: the 5 changed commands plus decline `gate` file:line cites shifted by the liveMoveAnimation.ts insertions (510 records differ only in that cite)",
+  "pairingMismatches": 5,
+  "pairingMismatchNote": "prep43CensusDelta pairs (battle, kind, move, side, frames): the 5 Blizzard commands' presented frames 361 -> 362"
+ },
+ "d4aRegressionAll": {
+  "fixtures": 286,
+  "policyPhase": 218,
+  "otherPhase": 68,
+  "violations": 0,
+  "nonzeroExit": 0,
+  "testedSrcTree": "e7a2c279bd07de67bd58c9342e000168640f59d5",
+  "command": "OUT=SCRATCH/d4a-all P=12 sh tools/integration/d4aRegressionAll.sh"
+ },
+ "routes": {
+  "test": "tests/animation/liveLsbzTiming.test.ts 'lsbz ordinary routes'",
+  "routes": [
+   {
+    "move": "LIGHT_SCREEN",
+    "seed": 81,
+    "streak": 9,
+    "slots": [
+     0
+    ],
+    "attacker": "opponent PILOSWINE",
+    "rows": 88,
+    "adapterActive": "88/88",
+    "followingPrompt": "action-menu",
+    "sceneOnOffParity": "rules (minus the scene hitMarker bit) / RNG / boundary / facility equal"
+   },
+   {
+    "move": "BLIZZARD",
+    "seed": 87,
+    "streak": 26,
+    "slots": [
+     0
+    ],
+    "attacker": "opponent WALREIN -> JYNX (impact 198)",
+    "rows": 362,
+    "adapterActive": "362/362 (fallback 361 on 0a74c111a)",
+    "followingPrompt": "action-menu",
+    "sceneOnOffParity": "rules (minus the scene hitMarker bit) / RNG / boundary / facility equal"
+   }
+  ]
+ }
 }
