@@ -121,6 +121,19 @@
   624/624 vs `ccc4774c4`, census seeds 0..299 94.82 % by count / 96.03 % by frames (+172 / +22,277 vs `ccc4774c4`; one command more than
   the sum of the folds: a later58 body after a words57-resolved chain; 0 regressions, command sequence identical; faithful-random history
   175 / 29,514).
+- Folded Opus worker `33b85e64e` as `4bd9f68d4` (src tree `503eb721`): words59 — (1) `SpriteOrderDeferredLend.bodySpecies` (species ids
+  only) recorded for Sand-Attack 28 / Mud-Slap 189 markers at the orchestrator call site from the field the renderer draws the body on;
+  the dirt carry takes its anchors from them, so the words57 replay now passes faint / send-out / switch units for dirt markers too
+  (species-free markers keep declining); all 79 words57 ROM vectors + 16 new words59 vectors resolve to the ROM order, three species-swap
+  vectors fail without it. (2) A RAIN_CONTINUES that is the LAST event of its resolution had no command at or after it, so the tick seam
+  never recorded its words; now recorded at the resolution's last command (non-consuming; rain trailing an earlier segment keeps its
+  timing): "words null" declines 15 / 2,737 -> 0 on 0..299. Census seeds 0..299 vs `108aae871`: 94.40 -> 95.12 % by count, 95.68 ->
+  96.42 % by frames (+57 / +8,698: +42 marker, +15 rain), faithful-random history 172 / 29,188 -> 237 / 38,898, 0 regressions, identical
+  commands + digest; gates53 row A (0..999) 208 / 32,186 -> 46 / 6,841. Dense windows (Water Pulse / Silver Wind after dirt + KO +
+  send-out) 0 px twice fresh — order-independent consumers (entry-lend control also exact), so they prove the live path, not the lend;
+  the lend is proven by the ROM chains + vectors. Parity: census battles 183 and 264 (Scene ON seed A x2, a second seed, Scene OFF).
+  Worker gates 1,592 files / 13,101 tests, build, differential 624/624. Supervisor: `words59Run.sh` into fresh dirs — 3/3 A == B, 5/5
+  chains exact, receipts byte-identical; census rerun +57 / +8,698, 0 regressions, digest identical.
 
 ## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
 
