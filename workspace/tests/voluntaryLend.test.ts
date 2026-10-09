@@ -125,11 +125,20 @@ describe("voluntary recall mapping in the live host (recorded opcodes)", () => {
     expect(liveSpriteAllocatorReseedable(host)).toBe(true);
   });
 
-  it("opponent recall, B_SCR_OP_VARIOUS, a recall after a body (Pursuit), Baton Pass's RETURNTOBALL of the attacker keep invalidating", () => {
+  it("B_SCR_OP_RETURNATKTOBALL of battler 1 before any body (the Factory AI's switch, prep47 (C)) -> switch-out {side: opponent}", () => {
+    const host = resolve([hide(1, "B_SCR_OP_RETURNATKTOBALL")]);
+    expect(host.tracker.invalidReason).toBeNull();
+    expect(host.tracker.lastUnit).toBe("recall");
+    expect(host.tracker.battlerSlots.opponent).toBeNull();
+  });
+
+  it("B_SCR_OP_VARIOUS, a recall after a body (Pursuit), Baton Pass's RETURNTOBALL of the attacker keep invalidating", () => {
     const body = ev(0, { kind: "animation", animationId: "MOVE_ANIMATION", battler: 1, target: 0, arguments: ["129", "0", "0", "0", "0", "0"] });
     const atkBody = ev(0, { kind: "animation", animationId: "MOVE_ANIMATION", battler: 0, target: 1, arguments: ["241", "0", "0", "0", "0", "0"] });
-    for (const events of [[hide(1, "B_SCR_OP_RETURNATKTOBALL")], [hide(0, "B_SCR_OP_VARIOUS")],
-      [body, { ...hide(0, "B_SCR_OP_RETURNATKTOBALL"), sequence: 1 }], [atkBody, { ...hide(0, "B_SCR_OP_RETURNTOBALL"), sequence: 1 }]]) {
+    const oppBody = ev(0, { kind: "animation", animationId: "MOVE_ANIMATION", battler: 0, target: 1, arguments: ["129", "0", "0", "0", "0", "0"] });
+    for (const events of [[hide(0, "B_SCR_OP_VARIOUS")], [hide(1, "B_SCR_OP_VARIOUS")],
+      [body, { ...hide(0, "B_SCR_OP_RETURNATKTOBALL"), sequence: 1 }], [oppBody, { ...hide(1, "B_SCR_OP_RETURNATKTOBALL"), sequence: 1 }],
+      [atkBody, { ...hide(0, "B_SCR_OP_RETURNTOBALL"), sequence: 1 }]]) {
       const host = resolve(events);
       expect(host.tracker.cursor.order.known).toBe(false);
       expect(host.tracker.invalidReason).toBe("return to ball");
