@@ -59,6 +59,14 @@
   animations and no receipt covers that assumption (six seen by chance are net-zero; rain / sandstorm / hail continuing, Leech Seed
   drain, Focus Band, Knock Off, Wish heal, Substitute fade, traps unproven). Supervisor: `prep52Run.sh` into fresh dirs — 9 / 9 receipts
   byte-identical, src reverted.
+- Folded Sonnet worker `4a0c22fa0` (SIDE lane, narrow production grant) as `a860ded6a` (src tree `93d0f033`): prep52 live — 40 ids
+  appended to `LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS` (incl. Future Sight 248; Gust 16 / Transform 144 left out: not live adapters)
+  and FRZ / INFATUATION / CURSED / NIGHTMARE in the status set (9 labels; WRAPPED has no script). Pins moved only where a newly audited
+  predecessor precedes the body: wall seeds 20 / 64 / 231, playable Light Screen seed 2 [0,3], Double Slap 3 in the multihit list. Census
+  seeds 0..299 vs `33ab9c588`: 93.48 -> 94.23 % by count, 94.91 -> 95.42 % by frames (+60 / +6,012 = prep52 = the chain predictor), 0
+  regressions, identical command sequence + battle digest; ON/OFF parity seed 84 (FRZ crossing). Worker gates 1,588 files / 13,070
+  tests, build, differential 624/624. Supervisor: liveShareCensus rerun +60 / +6,012, 0 regressions, digest identical; union src ==
+  the worker's tested tree (master had docs only since its base) -> touched tests 65/65, smoke 448.
 
 ## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
 
