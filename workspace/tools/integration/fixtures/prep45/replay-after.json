@@ -9,16 +9,32 @@
   "skipped": 19
  },
  "probes": {
-  "edges": 282,
-  "known": 236,
-  "exact": 236,
+  "edges": 291,
+  "known": 241,
+  "exact": 241,
   "mismatched": 0,
   "mismatches": [],
-  "jobs": 104,
+  "jobs": 108,
   "perLabel": {
+   "body 129": {
+    "edgesAfter": 1,
+    "knownAfter": 0
+   },
+   "body 182": {
+    "edgesAfter": 1,
+    "knownAfter": 0
+   },
    "body 33": {
-    "edgesAfter": 63,
+    "edgesAfter": 64,
     "knownAfter": 60
+   },
+   "body 147": {
+    "edgesAfter": 1,
+    "knownAfter": 0
+   },
+   "body 195": {
+    "edgesAfter": 4,
+    "knownAfter": 4
    },
    "body 213": {
     "edgesAfter": 2,
@@ -87,10 +103,6 @@
    "body 315": {
     "edgesAfter": 4,
     "knownAfter": 4
-   },
-   "body 195": {
-    "edgesAfter": 3,
-    "knownAfter": 3
    },
    "body 85": {
     "edgesAfter": 1,

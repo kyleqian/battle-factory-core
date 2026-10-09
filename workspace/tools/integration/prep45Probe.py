@@ -141,6 +141,11 @@ JOBS = [
     # second opponent-side species for Moonlight / Softboiled (the Golbat variants above did not use the move)
     ("BODY236", "ml2-opp-snorlax", 236, "mechanic-moonlight-opponent-gloom-player-onix", ("opponent", 143)),
     ("BODY135", "sbo-opp-snorlax", 135, "mechanic-soft-boiled-opponent-chansey-player-onix", ("opponent", 143)),
+    # "return to ball": the Factory AI's voluntary switch (Scene-OFF receipts re-profiled to Scene ON, first FIGHT turn only + idle frames)
+    ("AI_SWITCH", "ais-a", 150, "mechanic-factory-ai-switch-receipt-a-off", ("sceneon", 1500)),
+    ("AI_SWITCH", "ais-b", 150, "mechanic-factory-ai-switch-receipt-b-off", ("sceneon", 1500)),
+    ("AI_SWITCH", "ais-c", 150, "mechanic-factory-ai-switch-receipt-c-natural-off", ("sceneon", 1500)),
+    ("AI_SWITCH", "ais-c2", 150, "mechanic-factory-ai-switch-receipt-c2-perish-off", ("sceneon", 1500)),
     # FUTURE_SIGHT_HIT: the hit lands at the end of the turn two turns later -> two more FIGHT turns
     ("FUTURE_SIGHT_HIT", "fs-ply", 248, "mechanic-future-sight-kadabra-onix", ("turns", 2)),
     ("FUTURE_SIGHT_HIT", "fs-ply-snorlax", 248, "mechanic-future-sight-kadabra-onix", ("turns", 2, "opponent", 143)),
@@ -158,6 +163,13 @@ def scenario(out: Path, job) -> Path:
     data = json.loads(path.read_text())
     if variant[0] == "extend":
         data["trace"]["segments"].append({"frames": variant[1], "buttons": []})
+        variant = variant[2:]
+    elif variant[0] == "sceneon":  # Scene ON profile; keep the segments up to the first long idle (the first submitted turn), then idle
+        data["profile"] = "battle-scene-on"
+        segs = data["trace"]["segments"]
+        first_idle = next((i for i, seg in enumerate(segs) if seg["frames"] >= 100), len(segs))
+        data["trace"]["segments"] = segs[:first_idle] + [{"frames": variant[1], "buttons": []}]
+        data["trace"].pop("captureFrames", None)
         variant = variant[2:]
     elif variant[0] == "turns":  # N more FIGHT -> first move turns (A, wait, A, idle)
         data["trace"]["segments"] += [dict(seg) for _ in range(variant[1]) for seg in TURN]

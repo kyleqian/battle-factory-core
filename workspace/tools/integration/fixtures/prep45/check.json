@@ -1,6 +1,6 @@
 {
  "schema": "prep45-check/v1",
- "jobs": 104,
+ "jobs": 108,
  "notIdenticalAB": 0,
  "plans": {
   "status BRN": "Cf;Cf;Cf;D0;D1",
@@ -25,6 +25,20 @@
   "body 236": "Cf;D0;Cf;Cf;Cf;Cf;Cf;Cf;D2,3,4,5,6,1;Cf;Cf;Cf;D7;Cf;D8;D9;D10"
  },
  "results": {
+  "body 195": {
+   "instances": 5,
+   "matched": 5,
+   "framesChecked": 40,
+   "jobs": [
+    "ais-c2",
+    "ps-opp",
+    "ps-opp-golbat",
+    "ps-ply",
+    "ps-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
   "status BRN": {
    "instances": 8,
    "matched": 8,
@@ -134,19 +148,6 @@
     "oh-opp-golbat",
     "oh-ply",
     "oh-ply-snorlax"
-   ],
-   "mismatches": [],
-   "carries": 0
-  },
-  "body 195": {
-   "instances": 4,
-   "matched": 4,
-   "framesChecked": 32,
-   "jobs": [
-    "ps-opp",
-    "ps-opp-golbat",
-    "ps-ply",
-    "ps-ply-snorlax"
    ],
    "mismatches": [],
    "carries": 0
