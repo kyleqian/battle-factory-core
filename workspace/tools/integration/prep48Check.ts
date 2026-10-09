@@ -24,6 +24,9 @@ export const PREP48_PLANS: Readonly<Record<string, string>> = Object.freeze({
   "general ITEM_KNOCKOFF": "Cf",
   "body 75": "Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;D0;D2;Cff;D1;D3;D4;D5;D7;D6;D8;D9;D11,10",
   "body 173": "Cffff;D0;D1,3,2;Cffff;D4;D5,7,6",
+  "body 165": "Cff;D0,1/P540,540;Cf;D2",
+  "body 217 damage": "Cf;D0;Cf;Cf;Cf;D1;Cf;D2;Cf;D3;D4;D5",
+  "body 20217 heal": "Cf;D0;Cf;Cf;Cf;Cf;D1;Cf;D2;Cf;D3;Cf;D4;Cf;D5;Cf;D6;D7;D8;D9;Cf;Cf;Cf;D10;Cf;D11;D12;D13",
   "body 288:player": "Cffffff;D3,4,5,2,0,1",
   "body 288:opponent": "Cffffff;D3,2,1,4,5,0",
   "body 13 turn 0 (setup)": "Cfff;D0,2,1",
@@ -43,7 +46,10 @@ function planLabel(job: Job, unit: Unit, seen: Map<string, number>): string | nu
   const m = /^body (\d+):(\w+)$/.exec(unit.label);
   if (!m) return null;
   const mv = Number(m[1]);
-  if ([8, 75, 173].includes(mv)) return `body ${mv}`;
+  if ([8, 75, 165, 173].includes(mv)) return `body ${mv}`;
+  // Present: the two branches allocate differently (PresentDamage's explosions / PresentHeal's sparkles); each instance is checked
+  // against the branch its allocation count shows (the ROM's gAnimMoveDmg is not in the probe rows)
+  if (mv === 217) return unit.windows.reduce((n, w) => n + w.C.length, 0) === 6 ? "body 217 damage" : "body 20217 heal";
   if (mv === 213) return "body 213";
   if (mv === 138 && job.unit === "BODY138") return "body 138 (predicted)";
   if (mv === 288) return `body 288:${m[2]}`;

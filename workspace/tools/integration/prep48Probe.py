@@ -129,6 +129,24 @@ DE_GRID = {"player": [(40, 95), (50, 42), (172, 131), (208, 50)],
 JOBS += [("BODY138", f"de-ply-{a}-{d}", 138, DE_P, (("species", "player", a), ("species", "opponent", d))) for a, d in DE_GRID["player"]]
 JOBS += [("BODY138", f"de-opp-{a}-{d}", 138, DE_O, (("species", "opponent", a), ("species", "player", d))) for a, d in DE_GRID["opponent"]]
 
+# Present 217 (Move_PRESENT branches on gAnimMoveDmg > 0: PresentDamage / PresentHeal), Struggle 165 (Mega Punch scenarios, moves set
+# to Struggle). (A FOCUS_BAND lab-seed sweep — Focus Band 196 on a Pichu / Magikarp taking Mega Punch — never activated it in 160 seeds:
+# the mv-0 units it showed were Pichu's Static PRZ; removed.)
+PR = "mechanic-present-{}-delibird-{}-onix{}"
+JOBS += [("BODY217", f"pr-{s[:3]}-{k}{'-' + str(sp) if sp else ''}", 217, PR.format(s, o, "-heal" if k == "heal" else ""),
+          (("species", o, sp),) if sp else None)
+         for s, o in (("player", "opponent"), ("opponent", "player")) for k in ("dmg", "heal") for sp in (0, 143)]
+JOBS += [
+    ("BODY165", "st-ply-onix", 165, MP_P, (("moves", "player", 165),)),
+    ("BODY165", "st-ply-snorlax", 165, MP_P, (("moves", "player", 165), ("species", "opponent", 143))),
+    ("BODY165", "st-opp-onix", 165, MP_O, (("moves", "opponent", 165),)),
+    ("BODY165", "st-opp-golbat", 165, MP_O, (("moves", "opponent", 165), ("species", "player", 42))),
+]
+
+# more species: Present's heal branch on the player side (Snorlax / Golbat defender, lab-seed sweep: Present's Random() & 0xFF outcome)
+JOBS += [("BODY217", f"pr-pla-heal-{sp}-s{seed}", 217, PR.format("player", "opponent", "-heal"), (("species", "opponent", sp), ("seed", seed)))
+         for sp in (143, 42) for seed in range(1, 9)]
+
 
 def scenario(out: Path, job) -> Path:
     unit, ident, move, base, ops = job

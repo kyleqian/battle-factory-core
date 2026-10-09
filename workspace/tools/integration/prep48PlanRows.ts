@@ -18,6 +18,9 @@ const both = (move: number, label: string, rule: string) => { for (const side of
 both(8, "body 8", "Ice Punch, both sides identical");
 bodies["75:opponent"] = row("body 75", "Razor Leaf: the base table's 75:player plan, identical on the opponent side");
 both(173, "body 173", "Snore, both sides identical");
+bodies["165:opponent"] = row("body 165", "Struggle: the base table's 165:player plan, identical on the opponent side");
+both(217, "body 217 damage", "Present, PresentDamage branch (gAnimMoveDmg > 0), both sides identical");
+both(20217, "body 20217 heal", "Present, PresentHeal branch (gAnimMoveDmg <= 0; liveSpriteOrderHost maps Present with damage <= 0 to 20217), both sides identical");
 bodies["288:player"] = row("body 288:player", "Grudge, player attacker (side-keyed: AnimTask_GrudgeFlames orbit; the opponent plan is already in the base table)");
 both(213, "body 213", "Attract, both sides: the ROM shows plan A or B (one rising heart of the single-script-frame burst before / after the probe's frame boundary, no species key); A == B at the unit boundary from every start order (check.json attract)");
 both(13, "body 13 turn 0 (setup)", "Razor Wind charge (choosetwoturnanim turn 0)");
@@ -29,6 +32,6 @@ const anims: Record<string, unknown> = {
   "General:B_ANIM_ITEM_KNOCKOFF": row("general ITEM_KNOCKOFF", "General_ItemKnockoff: one gKnockOffItemSpriteTemplate sprite; it survives the unit (carry)"),
 };
 writeFileSync(process.argv[3]!, JSON.stringify({ schema: "sprite-order-body-plans/rows-v1",
-  note: "plans48 EXACT plans (docs/next-adapters-plans48.md; receipts units.json / check.json in this directory). 10013 = Razor Wind's odd choosetwoturnanim turn (liveSpriteOrderHost TWO_TURN_ANIM_MOVE_IDS + 13).",
+  note: "plans48 EXACT plans (docs/next-adapters-plans48.md; receipts units.json / check.json in this directory). 10013 = Razor Wind's odd choosetwoturnanim turn (liveSpriteOrderHost TWO_TURN_ANIM_MOVE_IDS + 13). 20217 = Present's PresentHeal branch (the host keys Present by the MOVE_ANIMATION damage argument <= 0).",
   bodies, anims }) + "\n");
 console.log(`${Object.keys(bodies).length} bodies, ${Object.keys(anims).length} anims`);

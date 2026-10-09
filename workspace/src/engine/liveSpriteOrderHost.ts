@@ -5,7 +5,8 @@
  *
  *   player command submitted from the action menu   action-prompt + actions-committed (bounce pair)
  *   animation MOVE_ANIMATION                         move-animation (moveId, attacker side; an odd request turn of
- *                                                    Razor Wind / Solar Beam / Sky Attack / Dig / Brick Break is 10000 + moveId: choosetwoturnanim)
+ *                                                    Razor Wind / Solar Beam / Sky Attack / Dig / Brick Break is 10000 + moveId: choosetwoturnanim;
+ *                                                    Present with damage <= 0, the PresentHeal branch, is 20217)
  *   animation HIT_ANIMATION                          hit-animation (target visibility from the toggles below)
  *   animation STATS_CHANGE                           stat-animation (B_ANIM_STATS_CHANGE argument)
  *   animation WEATHER_VAR argument 12 / 13           general-animation SANDSTORM_CONTINUES / HAIL_CONTINUES
@@ -333,7 +334,10 @@ function orderEventOf(
         const request = battleMoveAnimationRequest(battler, payload.target, payload.arguments);
         // choosetwoturnanim (gAnimMoveTurn & 1) branches: Sky Attack's strike, Dig's unleash, Brick Break's shattered screen.
         const secondBranch = (request.turn & 1) === 1 && TWO_TURN_ANIM_MOVE_IDS.has(request.moveId);
-        return { event: { kind: "move-animation", moveId: secondBranch ? 10000 + request.moveId : request.moveId, attackerSide: battler === 0 ? "player" : "opponent" } };
+        // Move_PRESENT branches on gAnimMoveDmg > 0 (AnimTask_IsHealingMove, battle_anim_effects_3.c:1531): PresentHeal is 20000 + 217.
+        const presentHeal = request.moveId === 217 && !(request.damage > 0);
+        return { event: { kind: "move-animation", moveId: presentHeal ? 20217 : secondBranch ? 10000 + request.moveId : request.moveId,
+          attackerSide: battler === 0 ? "player" : "opponent" } };
       }
       case "HIT_ANIMATION":
         return { event: { kind: "hit-animation", targetVisible: !hidden[battler] } };

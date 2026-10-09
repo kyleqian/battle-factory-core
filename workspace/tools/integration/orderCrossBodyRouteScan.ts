@@ -33,7 +33,9 @@ function mapEvent(event: SemanticEvent, hidden: boolean[], units = true, forced?
       const request = battleMoveAnimationRequest(battler, p.target as number | undefined, p.arguments as string[]);
       // The host's choosetwoturnanim key (liveSpriteOrderHost.ts TWO_TURN_ANIM_MOVE_IDS): an odd turn is 10000 + move id.
       const secondBranch = (request.turn & 1) === 1 && [13, 76, 91, 143, 280].includes(request.moveId);
-      return [{ kind: "move-animation", moveId: secondBranch ? 10000 + request.moveId : request.moveId,
+      // The host's Present key: the PresentHeal branch (gAnimMoveDmg <= 0) is 20217.
+      const presentHeal = request.moveId === 217 && !(request.damage > 0);
+      return [{ kind: "move-animation", moveId: presentHeal ? 20217 : secondBranch ? 10000 + request.moveId : request.moveId,
         attackerSide: battler === 0 ? "player" : "opponent" }];
     }
     if (p.animationId === "HIT_ANIMATION") return [{ kind: "hit-animation", targetVisible: !hidden[battler] }];
