@@ -5,19 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-09 (overnight) — S10A: allocator ids, order chains + 18 plans, Giga / Mega Drain geometry order (checkpoint)
+## 2026-10-09 (overnight) — S10A: order-host chains closed tier by tier; live share 81.5 -> 89.1 % (checkpoint)
 
-- **State:** local master `5e0b86a42`, production src tree `21729666` (union of three folds). Supervisor union gates on that
-  code: typecheck, 1,575 files / 12,958 -> 12,973 tests, build, differential 624/624 (`union-gates-45a5832f7.json`). Census
-  seeds 0..299: **85.71 % live by count / 85.41 % by frames** (session start 81.54 / 80.19 on `2d29f058e`); gameplay command
-  sequence and battle digest identical at every fold. Counts unchanged 245 + 13 + 18 (host-history widening, no new adapters).
-- **Did:** folded allocland (prep44's 50 audited allocator NET-ZERO ids), prep45 (order invalidator chains; 18 units EXACT per frame)
-  + order45 (those plans live: BRN, TURN_TRAP by wrapped move, WISH / INGRAIN heal, Hydro Pump, Reversal, Solar Beam by turn, ...),
-  gdgeo (geometry-keyed Giga Drain / Mega Drain order from the renderer's orb timeline; 48/48 ROM plans incl. 9 predicted flips).
-  Every fold re-proved by the supervisor (evidence scripts into fresh dirs byte-identical, census reruns byte-identical).
-- **Running:** integration `geoice` (Icy Wind / Blizzard at arbitrary geometry), side `prep46` (Random2-word order units +
-  generalized deferred lend). Queued: side `audit15` (chain routes that became live tonight vs the ROM).
-- **Next:** ROADMAP S10A list; ledger detail in ANIMATION_INTEGRATION_PROGRESS.md.
+- **State:** local master `56fad3ec3`, production src tree `1fb74f37`. Supervisor union gates on that code: typecheck, 1,579 files /
+  13,002 tests, build, differential 624/624 (`union-gates-0209f0d22.json`). Census seeds 0..299: **89.10 % live by count / 89.76 %
+  by frames** (session start 81.54 / 80.19 on `2d29f058e`), of which 1.62 % / 1.83 % is the new faithful-random-history bucket;
+  gameplay command sequence and battle digest identical at every fold. Adapter counts unchanged 245 + 13 + 18.
+- **Did (production folds, each re-proved by the supervisor):** allocland (prep44 allocator NET-ZERO ids), order45 (18 order
+  plans), gdgeo (Giga / Mega Drain geometry-keyed order), geoice (Icy Wind / Blizzard at any species geometry), order47 (retained
+  locked-action prompt cycle, battle-start seeds, opponent recall), words46 (deferred lend after Random2-words units + RAIN_CONTINUES
+  non-consuming sub-stream, per-command faithful-random-history accounting). Evidence: prep45, prep46, prep47.
+- **Decisions (reversible, in D3 scope):** RAIN_CONTINUES words are a non-consuming per-event read (no presentation-RNG policy bump;
+  existing words and legacy exports unchanged; the 80-draw step shortfall is documented in docs/presentation-rng.md). A consumer whose
+  order comes through a words marker counts as faithful random per command.
+- **Running:** integration `plans48` (tail order plans), side `prep48` (later-body gates: Dig, Return). Queued: D4 tails
+  (ISSUES #152 short-body class), audit15 (tonight's chain routes vs the ROM).
 - **Notes:** no DEFERRED entries. Soak gates superseded for S10A (ANIMATION_VERIFICATION scoped policy).
 
 ---
