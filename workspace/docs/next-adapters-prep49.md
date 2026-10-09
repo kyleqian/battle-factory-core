@@ -76,8 +76,8 @@ Player, from the party-menu exit (F0 = identity):
 
 **Root cause.** The kernel's `Cmd_returnatktoball` handler (`factoryBattleScriptFullTurnDecision.ts:1793-1800`) only advances; it
 emits no `set-battler-sprite-visibility` receipt. The player's voluntary switch synthesizes one in presentation
-(`battleResolutionPresentation.ts:~3893`); the AI's `BattleScript_DoSwitchOut` does not.
-- So prep47 (C)'s production mapping (`isVoluntarySwitchOut(…, 1)`, `liveSpriteOrderHost.ts:~279`) **never fires on real routes**,
+(`battleResolutionPresentation.ts:3893-3908`); the AI's `BattleScript_DoSwitchOut` does not.
+- So prep47 (C)'s production mapping (`isVoluntarySwitchOut(…, 1)`, `liveSpriteOrderHost.ts:292`) **never fires on real routes**,
   which is why it measured census +0.
 - The tracker meets `drawpartystatussummary` 1 with the opponent battler still tracked.
 - In all 15 census cases the summary carries `sourceLabel = BattleScript_DoSwitchOut`, with no earlier move body or faint in the
@@ -207,9 +207,10 @@ No RGB dumps and no mGBA logs.
 - **The AI DoSwitchOut probes are Perish Song-driven** (prep47's), not the census's own switch reasons. The script and controller path
   are identical. Both opponent leads are prep47's; no new lead was added.
 - **A Pursuit-intercepted switch** (DoSwitchOut with a move body before the summary) is unprobed and keeps invalidating.
-- **The Baton Pass identification uses `provenance.sourceLabel`.** Production so far keys on `opcodeName` only. A structural
-  alternative is "a RETURNTOBALL not of the latest move's target": Cmd_returntoball's only two script uses are Baton Pass and Roar /
-  Whirlwind.
+- **The Baton Pass and DoSwitchOut identification uses `provenance.sourceLabel`.** Production so far keys on `opcodeName` only, but
+  the provenance contract (`battleDecisionBoundary.ts:122-128`) is the immutable interpreter receipt, kept "instead of asking
+  presentation to infer a label from event order". A structural alternative for Baton Pass is "a RETURNTOBALL not of the latest
+  move's target": Cmd_returntoball's only two script uses are Baton Pass and Roar / Whirlwind. This alternative was not measured.
 - **Per-window exactness of `switchInParticles` / `nextSendOut` is partial** (13/34, 16/37). The ROM merges plan windows; both are
   existing production plans whose claims are edge-level. Every unit edge and every next-body edge is exact.
 - **The census measured seeds 0..299 only.** The 1000-seed final census was not re-run with the patch.
