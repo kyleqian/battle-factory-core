@@ -190,9 +190,10 @@ function planAt(index: number | undefined): SpriteOrderPlan | null {
 
 /** EXACT body plan of `(moveId, attacker side)`, or null (NEEDS-KEYS / not observed / substitute / transform). */
 /** Geometry-keyed move bodies (Giga Drain 202, Mega Drain 72, Dream Eater 138: same-frame orb destroys order by the battlers'
- * geometry): the host attaches the body's plan text computed at the displayed species (`geometryPlan`, liveMoveAnimation.ts
- * liveMoveGeometrySpriteOrderPlanText) to their move-animation event. */
-export const SPRITE_ORDER_GEOMETRY_KEYED_BODIES: ReadonlySet<number> = new Set([202, 72, 138]);
+ * geometry; Eruption 284, plans54: the launch rocks' destroy groups follow the attacker's geometry, ISSUES #155): the host attaches the
+ * body's plan text computed at the displayed species (`geometryPlan`, liveMoveAnimation.ts liveMoveGeometrySpriteOrderPlanText) to their
+ * move-animation event; no plan text invalidates (the base table's `284:*` rows are not used). */
+export const SPRITE_ORDER_GEOMETRY_KEYED_BODIES: ReadonlySet<number> = new Set([202, 72, 138, 284]);
 const geometryPlans = new Map<string, SpriteOrderPlan>();
 const decodeGeometryPlan = (text: string): SpriteOrderPlan => {
   if (!geometryPlans.has(text)) geometryPlans.set(text, decodeSpriteOrderPlan(text));

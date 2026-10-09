@@ -1,0 +1,201 @@
+{
+ "schema": "plans54-check/v1",
+ "jobs": 16,
+ "notIdenticalAB": 0,
+ "plans": {
+  "body 210": "Cf;D0",
+  "body 10210": "Cff;D1;D0",
+  "body 20210": "Cff;D1;D0",
+  "body 30210": "Cff;D1;D0"
+ },
+ "results": {
+  "body 284 opponent 143": {
+   "instances": 1,
+   "matched": 1,
+   "unproven": 0,
+   "framesChecked": 25,
+   "sides": [
+    "opponent"
+   ],
+   "jobs": [
+    "er-opp-143-42"
+   ],
+   "plan": "Cf;D0;Cfffffff;D5;D7;D3;D1,6;D2;D4;Cfffffff;D12;D14;D10;D8,13;D9;D11;Cffffff;D15;D16;D17;D18;D19;Cf;D20;D21",
+   "mismatches": []
+  },
+  "body 284 opponent 323": {
+   "instances": 2,
+   "matched": 2,
+   "unproven": 0,
+   "framesChecked": 50,
+   "sides": [
+    "opponent"
+   ],
+   "jobs": [
+    "er-opp-323-143",
+    "er-opp-323-95"
+   ],
+   "plan": "Cf;D0;Cfffffff;D5;D7;D3;D1,6;D2;D4;Cfffffff;D12;D14;D10;D8,13;D9;D11;Cffffff;D15;D16;D17;D18;D19;Cf;D20;D21",
+   "mismatches": []
+  },
+  "body 284 opponent 42": {
+   "instances": 1,
+   "matched": 1,
+   "unproven": 0,
+   "framesChecked": 23,
+   "sides": [
+    "opponent"
+   ],
+   "jobs": [
+    "er-opp-42-95"
+   ],
+   "plan": "Cf;D0;Cfffffff;D5;D3,7;D1,6;D2;D4;Cfffffff;D12;D10,14;D8,13;D9;D11;Cffffff;D15;D16;D17;D18;D19;Cf;D20;D21",
+   "mismatches": []
+  },
+  "body 284 player 143": {
+   "instances": 1,
+   "matched": 1,
+   "unproven": 0,
+   "framesChecked": 27,
+   "sides": [
+    "player"
+   ],
+   "jobs": [
+    "er-ply-143-42"
+   ],
+   "plan": "Cf;D0;Cfffffff;D6;D5;D7;D3;D1;D2;D4;Cfffffff;D13;D12;D14;D10;D8;D9;D11;Cffffff;D15;D16;D17;D18;D19;Cf;D20;D21",
+   "mismatches": []
+  },
+  "body 284 player 323": {
+   "instances": 2,
+   "matched": 2,
+   "unproven": 0,
+   "framesChecked": 50,
+   "sides": [
+    "player"
+   ],
+   "jobs": [
+    "er-ply-323-143",
+    "er-ply-323-95"
+   ],
+   "plan": "Cf;D0;Cfffffff;D6,5;D7;D3;D1;D2;D4;Cfffffff;D13,12;D14;D10;D8;D9;D11;Cffffff;D15;D16;D17;D18;D19;Cf;D20;D21",
+   "mismatches": []
+  },
+  "body 284 player 42": {
+   "instances": 1,
+   "matched": 1,
+   "unproven": 0,
+   "framesChecked": 25,
+   "sides": [
+    "player"
+   ],
+   "jobs": [
+    "er-ply-42-95"
+   ],
+   "plan": "Cf;D0;Cfffffff;D6,5;D7;D3;D1;D2;D4;Cfffffff;D13,12;D14;D10;D8;D9;D11;Cffffff;D15;D16;D17;D18;D19;Cf;D20;D21",
+   "mismatches": []
+  },
+  "body 284 opponent 340": {
+   "instances": 2,
+   "matched": 2,
+   "unproven": 0,
+   "framesChecked": 50,
+   "sides": [
+    "opponent"
+   ],
+   "jobs": [
+    "er-opp-340-143",
+    "er-opp-340-95"
+   ],
+   "plan": "Cf;D0;Cfffffff;D5;D7;D3;D1,6;D2;D4;Cfffffff;D12;D14;D10;D8,13;D9;D11;Cffffff;D15;D16;D17;D18;D19;Cf;D20;D21",
+   "mismatches": []
+  },
+  "body 284 player 340": {
+   "instances": 2,
+   "matched": 2,
+   "unproven": 0,
+   "framesChecked": 54,
+   "sides": [
+    "player"
+   ],
+   "jobs": [
+    "er-ply-340-143",
+    "er-ply-340-95"
+   ],
+   "plan": "Cf;D0;Cfffffff;D6;D5;D7;D3;D2;D1;D4;Cfffffff;D13;D12;D14;D10;D9;D8;D11;Cffffff;D15;D16;D17;D18;D19;Cf;D20;D21",
+   "mismatches": []
+  },
+  "body 210": {
+   "instances": 4,
+   "matched": 4,
+   "unproven": 0,
+   "framesChecked": 8,
+   "sides": [
+    "opponent",
+    "player"
+   ],
+   "jobs": [
+    "fc-opp-123",
+    "fc-opp-278",
+    "fc-ply-123",
+    "fc-ply-278"
+   ],
+   "plan": "Cf;D0",
+   "mismatches": []
+  },
+  "body 10210": {
+   "instances": 4,
+   "matched": 4,
+   "unproven": 0,
+   "framesChecked": 12,
+   "sides": [
+    "opponent",
+    "player"
+   ],
+   "jobs": [
+    "fc-opp-123",
+    "fc-opp-278",
+    "fc-ply-123",
+    "fc-ply-278"
+   ],
+   "plan": "Cff;D1;D0",
+   "mismatches": []
+  },
+  "body 20210": {
+   "instances": 4,
+   "matched": 4,
+   "unproven": 0,
+   "framesChecked": 12,
+   "sides": [
+    "opponent",
+    "player"
+   ],
+   "jobs": [
+    "fc-opp-123",
+    "fc-opp-278",
+    "fc-ply-123",
+    "fc-ply-278"
+   ],
+   "plan": "Cff;D1;D0",
+   "mismatches": []
+  },
+  "body 30210": {
+   "instances": 13,
+   "matched": 13,
+   "unproven": 0,
+   "framesChecked": 39,
+   "sides": [
+    "opponent",
+    "player"
+   ],
+   "jobs": [
+    "fc-opp-123",
+    "fc-opp-278",
+    "fc-ply-123",
+    "fc-ply-278"
+   ],
+   "plan": "Cff;D1;D0",
+   "mismatches": []
+  }
+ }
+}

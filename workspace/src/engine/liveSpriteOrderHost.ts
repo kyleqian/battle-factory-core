@@ -6,7 +6,8 @@
  *   player command submitted from the action menu   action-prompt + actions-committed (bounce pair)
  *   animation MOVE_ANIMATION                         move-animation (moveId, attacker side; an odd request turn of
  *                                                    Razor Wind / Solar Beam / Sky Attack / Dig / Brick Break is 10000 + moveId: choosetwoturnanim;
- *                                                    Present with damage <= 0, the PresentHeal branch, is 20217)
+ *                                                    Present with damage <= 0, the PresentHeal branch, is 20217; Fury Cutter
+ *                                                    by the payload's furyCutterCounter 1 / 2 / 3 / 4+: 210 / 10210 / 20210 / 30210)
  *   animation HIT_ANIMATION                          hit-animation (target visibility from the toggles below)
  *   animation STATS_CHANGE                           stat-animation (B_ANIM_STATS_CHANGE argument)
  *   animation WEATHER_VAR argument 12 / 13           general-animation SANDSTORM_CONTINUES / HAIL_CONTINUES
@@ -318,6 +319,9 @@ function isAiSwitchOutSummary(events: readonly BattleKernelSemanticEvent[], inde
     || (earlier.kind === "set-battler-sprite-visibility" && earlier.battler === 1 && earlier.invisible));
 }
 
+/** Fury Cutter's order keys by furyCutterCounter 1 / 2 / 3 / 4+ (Move_FURY_CUTTER's FuryCutterContinue2 / Medium / Strong / Strongest). */
+const FURY_CUTTER_ORDER_KEYS: readonly number[] = Object.freeze([210, 10210, 20210, 30210]);
+
 function orderEventOf(
   events: readonly BattleKernelSemanticEvent[], index: number, hidden: readonly [boolean, boolean],
 ): { event?: SpriteOrderPresentationEvent; then?: SpriteOrderPresentationEvent; hidden?: readonly [boolean, boolean] } {
@@ -361,6 +365,14 @@ function orderEventOf(
         const secondBranch = (request.turn & 1) === 1 && TWO_TURN_ANIM_MOVE_IDS.has(request.moveId);
         // Move_PRESENT branches on gAnimMoveDmg > 0 (AnimTask_IsHealingMove, battle_anim_effects_3.c:1531): PresentHeal is 20000 + 217.
         const presentHeal = request.moveId === 217 && !(request.damage > 0);
+        // Move_FURY_CUTTER branches on furyCutterCounter (AnimTask_GetFuryCutterHitCount: 1 / 2 Medium / 3 Strong / 4+ Strongest; plans54):
+        // the payload's 7th argument keys 210 / 10210 / 20210 / 30210; without it the body has no plan (invalidates).
+        if (request.moveId === 210) {
+          const counter = Number(payload.arguments[6]);
+          return { event: Number.isInteger(counter) && counter >= 1 && counter <= 5
+            ? { kind: "move-animation", moveId: FURY_CUTTER_ORDER_KEYS[Math.min(counter, 4) - 1]!, attackerSide: battler === 0 ? "player" : "opponent" }
+            : { kind: "invalidate", reason: "Fury Cutter body without furyCutterCounter" } };
+        }
         return { event: { kind: "move-animation", moveId: presentHeal ? 20217 : secondBranch ? 10000 + request.moveId : request.moveId,
           attackerSide: battler === 0 ? "player" : "opponent" } };
       }

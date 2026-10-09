@@ -2308,7 +2308,9 @@ function createAttackanimationOpcodeHandler(
               // AnimTask_GetIceBallCounter = start - timer - 1, battle_anim_ice.c:1609) carry it.
               ...(move === 205 || move === 301
                 ? [String((rulesContext.rolloutTimerStartValues[attacker] ?? 0) - attackerBattler.rolloutTimer)]
-                : []),
+                // Presentation-only furyCutterCounter 1..5 after Cmd_furycuttercalc (Move_FURY_CUTTER's AnimTask_GetFuryCutterHitCount /
+                // AnimTask_IsFuryCutterHitRight read gDisableStructs[attacker]; the sprite-order host keys its plan by it, plans54).
+                : move === 210 ? [String(attackerBattler.furyCutterCounter)] : []),
             ]),
           }),
         ]),

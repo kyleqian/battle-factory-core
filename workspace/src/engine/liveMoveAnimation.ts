@@ -44,6 +44,7 @@ import { liveTrackedFrontIdleRest, type LiveMoveBattlerX2Input } from "./liveBat
 import { digAtAge } from "../animation/dig.ts";
 import { dreamEaterSpriteOrderPlanText } from "../animation/dreamEater.ts";
 import { gigaDrainSpriteOrderPlanText } from "../animation/gigaDrain.ts";
+import { eruptionSpriteOrderPlanText } from "../animation/eruptionSpriteOrderPlan.ts";
 import { megaDrainSpriteOrderPlanText } from "../animation/megaDrain.ts";
 import { faintAttackRestoreProfile } from "../animation/faintAttack.ts";
 import { RAZOR_LEAF_BODY_LAST_AGE } from "../animation/razorLeaf.ts";
@@ -672,11 +673,16 @@ export function liveMoveAbsorptionOrbCenters(
 /**
  * S10A gdgeo: the sprite-order plan text (spriteOrderEventTransform.ts encoding) of a geometry-keyed body at the displayed species:
  * Giga Drain (202) / Mega Drain (72) / Dream Eater (138, plans48), from the renderers' own timelines (gigaDrain.ts / megaDrain.ts /
- * dreamEater.ts through absorptionOrbSpriteOrderPlan.ts). Null for any other move or a species without a battle picture.
+ * dreamEater.ts through absorptionOrbSpriteOrderPlan.ts); Eruption (284, plans54) at its ROM-proven attacker species only
+ * (eruptionSpriteOrderPlan.ts). Null for any other move or a species without a battle picture / proof.
  */
 export function liveMoveGeometrySpriteOrderPlanText(
   moveId: number, attackerSide: "player" | "opponent", species: LiveMoveBodySpecies,
 ): string | null {
+  // plans54 (ISSUES #155): Eruption's launch rocks start at the attacker; only the ROM-proven attacker geometries carry a plan.
+  if (moveId === 284) {
+    return eruptionSpriteOrderPlanText(attackerSide, attackerSide === "player" ? species.playerSpecies : species.opponentSpecies);
+  }
   const planText = moveId === 202 ? gigaDrainSpriteOrderPlanText : moveId === 72 ? megaDrainSpriteOrderPlanText
     : moveId === 138 ? dreamEaterSpriteOrderPlanText : null;
   const centers = planText === null ? null : liveMoveAbsorptionOrbCenters(attackerSide, species);
