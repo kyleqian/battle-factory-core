@@ -1,0 +1,244 @@
+{
+ "schema": "prep48-check/v1",
+ "jobs": 225,
+ "notIdenticalAB": 0,
+ "plans": {
+  "body 8": "Cf;D0;Cffff;Cffff;Cff;D1,4,2,3;D9;D10;D5,8,6,7;Cf;Cf;Cf;Cf;Cf;Cf;Cf;D11;D12;D13;D14;D15;D16;D17;Cf;D18",
+  "status NIGHTMARE": "Cf;D0",
+  "status SLP (existing)": "Cf;Cf;D0",
+  "status CURSED": "Cf;D0",
+  "status FRZ": "Cf;D0",
+  "general ITEM_KNOCKOFF": "Cf",
+  "body 75": "Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;D0;D2;Cff;D1;D3;D4;D5;D7;D6;D8;D9;D11,10",
+  "body 173": "Cffff;D0;D1,3,2;Cffff;D4;D5,7,6",
+  "body 288:player": "Cffffff;D3,4,5,2,0,1",
+  "body 288:opponent": "Cffffff;D3,2,1,4,5,0",
+  "body 13 turn 0 (setup)": "Cfff;D0,2,1",
+  "body 13 turn 1 (unleash)": "Cf;Cf;Cf;D0;D1;D2",
+  "body 19 turn 0 (setup)": "Cf;D0",
+  "body 19 turn 1 (unleash)": "Cf;Cf;D0;D1"
+ },
+ "results": {
+  "status CURSED": {
+   "instances": 6,
+   "matched": 6,
+   "framesChecked": 12,
+   "jobs": [
+    "cu-opp",
+    "cu-opp-golbat",
+    "cu-opp-snorlax",
+    "cu-ply",
+    "cu-ply-golbat",
+    "cu-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 19 turn 0 (setup)": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 8,
+   "jobs": [
+    "fl-opp",
+    "fl-opp-lickitung",
+    "fl-ply",
+    "fl-ply-nosepass"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 19 turn 1 (unleash)": {
+   "instances": 4,
+   "matched": 4,
+   "framesChecked": 16,
+   "jobs": [
+    "fl-opp",
+    "fl-opp-lickitung",
+    "fl-ply",
+    "fl-ply-nosepass"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "status FRZ": {
+   "instances": 23,
+   "matched": 23,
+   "framesChecked": 46,
+   "jobs": [
+    "fz-opp-golbat-s17",
+    "fz-opp-golbat-s19",
+    "fz-opp-golbat-s22",
+    "fz-opp-golbat-s27",
+    "fz-opp-s1",
+    "fz-opp-s29",
+    "fz-opp-s30",
+    "fz-opp-s4",
+    "fz-opp-s7",
+    "fz-ply-s12",
+    "fz-ply-s2",
+    "fz-ply-s21",
+    "fz-ply-s26",
+    "fz-ply-s36",
+    "fz-ply-s39",
+    "fz-ply-s8",
+    "fz-ply-snorlax-s12",
+    "fz-ply-snorlax-s2",
+    "fz-ply-snorlax-s21",
+    "fz-ply-snorlax-s26",
+    "fz-ply-snorlax-s36",
+    "fz-ply-snorlax-s39",
+    "fz-ply-snorlax-s8"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 288:opponent": {
+   "instances": 8,
+   "matched": 8,
+   "framesChecked": 16,
+   "jobs": [
+    "gr-opp",
+    "gr-opp-golbat",
+    "gr-opp-onix",
+    "gr-opp-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 288:player": {
+   "instances": 8,
+   "matched": 8,
+   "framesChecked": 16,
+   "jobs": [
+    "gr-ply",
+    "gr-ply-golbat",
+    "gr-ply-pichu",
+    "gr-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 8": {
+   "instances": 8,
+   "matched": 8,
+   "framesChecked": 200,
+   "jobs": [
+    "ip-opp-atk-golbat",
+    "ip-opp-golbat",
+    "ip-opp-onix",
+    "ip-opp-snorlax",
+    "ip-ply-atk-pichu",
+    "ip-ply-golbat",
+    "ip-ply-onix",
+    "ip-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "general ITEM_KNOCKOFF": {
+   "instances": 6,
+   "matched": 6,
+   "framesChecked": 12,
+   "jobs": [
+    "ko-opp",
+    "ko-opp-golbat",
+    "ko-opp-snorlax",
+    "ko-ply",
+    "ko-ply-golbat",
+    "ko-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 6
+  },
+  "status SLP (existing)": {
+   "instances": 15,
+   "matched": 15,
+   "framesChecked": 60,
+   "jobs": [
+    "nm-opp",
+    "nm-opp-golbat",
+    "nm-opp-snorlax",
+    "nm-ply",
+    "nm-ply-golbat",
+    "nm-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 15
+  },
+  "status NIGHTMARE": {
+   "instances": 6,
+   "matched": 6,
+   "framesChecked": 12,
+   "jobs": [
+    "nm-opp",
+    "nm-opp-golbat",
+    "nm-opp-snorlax",
+    "nm-ply",
+    "nm-ply-golbat",
+    "nm-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 75": {
+   "instances": 6,
+   "matched": 6,
+   "framesChecked": 132,
+   "jobs": [
+    "rl-opp",
+    "rl-opp-golbat",
+    "rl-opp-snorlax",
+    "rl-ply",
+    "rl-ply-golbat",
+    "rl-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 13 turn 0 (setup)": {
+   "instances": 6,
+   "matched": 6,
+   "framesChecked": 12,
+   "jobs": [
+    "rw-opp",
+    "rw-opp-golbat",
+    "rw-opp-snorlax",
+    "rw-ply",
+    "rw-ply-golbat",
+    "rw-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 13 turn 1 (unleash)": {
+   "instances": 6,
+   "matched": 6,
+   "framesChecked": 36,
+   "jobs": [
+    "rw-opp",
+    "rw-opp-golbat",
+    "rw-opp-snorlax",
+    "rw-ply",
+    "rw-ply-golbat",
+    "rw-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  },
+  "body 173": {
+   "instances": 6,
+   "matched": 6,
+   "framesChecked": 36,
+   "jobs": [
+    "sn-opp",
+    "sn-opp-golbat",
+    "sn-opp-snorlax",
+    "sn-ply",
+    "sn-ply-golbat",
+    "sn-ply-snorlax"
+   ],
+   "mismatches": [],
+   "carries": 0
+  }
+ }
+}
