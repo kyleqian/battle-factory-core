@@ -41,7 +41,7 @@ function advanceWith(where: 'crossed' | 'trailing', [isStatus2, status]: readonl
  const event = {...base, sequence, payload: {...base.payload, isStatus2, status}} as typeof base;
  const commands = where === 'trailing' ? seg.commands.slice(0, r.commandIndex + 1) : seg.commands;
  if (where === 'crossed') assert.ok(r.commandIndex < seg.commands.length - 1, 'a later body must follow the crossed event');
- let state = {...snapshot, liveMovePaletteHost: {...snapshot.liveMovePaletteHost!, commandKey: '', eventCursor: undefined}, battleResolutionPresentation: {...r, liveMovePaletteInput: undefined, segments: r.segments.map((s, i) => i === r.segmentIndex ? {...s, events: [event], commands} : s)}};
+ let state = {...snapshot, liveMovePaletteHost: {...snapshot.liveMovePaletteHost!, commandKey: '', eventCursor: undefined}, battleResolutionPresentation: {...r, liveMovePaletteInput: undefined, segments: r.segments.map((s, i) => i === r.segmentIndex ? {...s, events: [event], commands} : s)}} as typeof snapshot;
  const before = state.battle;
  state = advanceFactoryRoundBattleResolution(state);
  assert.equal(state.battle, before);
