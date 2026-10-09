@@ -162,17 +162,33 @@ describe("net-zero move history persistence", () => {
     const union = new Set<number>([...receipt.summary.netZeroIds, ...ext.summary.netZeroIds]);
     expect([...union].sort((a, b) => a - b)).toEqual(ext.combined.netZeroIds);
     const auditedLive = (ext.combined.netZeroIds as number[]).filter(id => union.has(id));
-    // prep44 receipt (schema prep44-allocator-net-zero/v1): summary["NET-ZERO"] ids, minus Future Sight.
+    // prep44 receipt (schema prep44-allocator-net-zero/v1): summary["NET-ZERO"] ids, minus Future Sight (248 is audited by the prep52 receipt below).
     const prep44 = read("prep44/net-zero-audit.json");
     expect(prep44.summary["NOT-NET-ZERO"]).toEqual([]);
     expect(prep44.summary.notAudited).toEqual({});
-    // 248 (Future Sight) stays OUT: only its setup body was measured, not the delayed hit.
     const prep44Ids = (prep44.summary["NET-ZERO"] as number[]).filter(id => id !== 248);
     expect(prep44Ids).toHaveLength(50);
     expect(prep44.summary["NET-ZERO"]).toContain(248);
-    expect(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS).not.toContain(248);
-    const expected = [...new Set<number>([...auditedLive, ...prep44Ids])].sort((a, b) => a - b);
-    expect([...LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS]).toEqual(expected);
+    // prep52 receipt (schema prep52-net-zero-audit/v1): numeric-keyed NET-ZERO units; Gust 16 / Transform 144 are net-zero
+    // but not live adapters, so they are not listed. Future Sight 248 (setup body) + General_FutureSightHit (label) are both NET-ZERO.
+    const prep52 = read("prep52/net-zero-audit.json");
+    expect(prep52.schema).toBe("prep52-net-zero-audit/v1");
+    type Unit = { unit: string; key: number | string; verdict: string; bodiesFromKnownEntry: { player: number; opponent: number }; rows: { identicalAB: boolean }[] };
+    const units = prep52.units as Unit[];
+    expect(units.filter(u => u.verdict !== "NET-ZERO")).toEqual([]);
+    expect(units.find(u => u.key === "General_FutureSightHit")?.verdict).toBe("NET-ZERO");
+    const prep52Ids = units.filter(u => typeof u.key === "number").map(u => u.key as number).filter(id => id !== 16 && id !== 144);
+    expect(prep52Ids).toHaveLength(40);
+    for (const unit of units) {
+      expect(unit.bodiesFromKnownEntry.player).toBeGreaterThanOrEqual(1);
+      expect(unit.bodiesFromKnownEntry.opponent).toBeGreaterThanOrEqual(1);
+      expect(unit.rows.length).toBeGreaterThan(0);
+      for (const row of unit.rows) expect(row.identicalAB).toBe(true);
+    }
+    expect(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS).toContain(248);
+    for (const id of [16, 144]) expect(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS).not.toContain(id);
+    const expected = [...new Set<number>([...auditedLive, ...prep44Ids, ...prep52Ids])].sort((a, b) => a - b);
+    expect([...LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS].sort((a, b) => a - b)).toEqual(expected);
     for (const id of prep44Ids) {
       const scenarios = prep44.moves[String(id)]?.scenarios ?? [];
       expect(scenarios.length).toBeGreaterThan(0);
@@ -202,7 +218,7 @@ describe("net-zero move history persistence", () => {
     // Every audited id is a live adapter; later (unaudited) adapters stay out.
     for (const id of LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS) expect(live.has(id)).toBe(true);
     // (203, 263, 86 moved IN with the prep44 receipt.)
-    for (const id of [116, 107, 87, 207, 339, 248]) {
+    for (const id of [116, 339, 16, 144]) {
       expect(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS).not.toContain(id);
     }
   });
@@ -223,15 +239,25 @@ describe("net-zero move history persistence", () => {
 });
 
 describe("net-zero status animations", () => {
-  it("pins the set to the prep50 receipt's NET-ZERO labels", () => {
+  it("pins the set to the prep50 + prep52 receipts' NET-ZERO labels", () => {
     const receipt = JSON.parse(readFileSync("tools/integration/fixtures/prep50/status-net-zero-audit.json", "utf8"));
     const names: Record<string, string> = {
       Status_Sleep: "SLP", Status_Confusion: "CONFUSION", Status_Poison: "PSN",
       Status_Paralysis: "PRZ", Status_Burn: "BRN",
     };
-    const audited = (receipt.summary as { label: string; verdict: string }[])
+    const audited50 = (receipt.summary as { label: string; verdict: string }[])
       .filter(row => row.verdict === "NET-ZERO").map(row => names[row.label]);
-    expect(audited).toHaveLength(5);
+    expect(audited50).toHaveLength(5);
+    const prep52 = JSON.parse(readFileSync("tools/integration/fixtures/prep52/net-zero-audit.json", "utf8"));
+    const names52: Record<string, string> = {
+      Status_Freeze: "FRZ", Status_Infatuation: "INFATUATION", Status_Curse: "CURSED", Status_Nightmare: "NIGHTMARE",
+    };
+    const audited52 = (prep52.units as { key: number | string; verdict: string }[])
+      .filter(u => typeof u.key === "string" && u.key in names52 && u.verdict === "NET-ZERO").map(u => names52[u.key as string]);
+    expect(audited52).toHaveLength(4);
+    const audited = [...audited50, ...audited52];
+    expect(audited).toHaveLength(9);
+    expect(LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS.has("WRAPPED")).toBe(false);
     expect([...LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS].sort()).toEqual([...audited].sort());
   });
 });
