@@ -131,25 +131,34 @@ export function createLiveSpriteOrderHost(order: SpriteOrderState): LiveSpriteOr
 }
 
 /**
- * Order seed from the battle-start script events (docs/sprite-order-policy-gaps.md §2, proposal C). No events: the
- * known entry. Exactly one Intimidate triple (stat-stage-change, one STATS_CHANGE animation with a modelled stat
- * argument, message): the pre-prompt entry state plus the stat-animation plan; the first prompt cycle then applies as
- * usual. Anything else is unknown history.
+ * Order seed from the battle-start script events (docs/sprite-order-policy-gaps.md §2, proposal C; docs/next-adapters-prep47.md (B)).
+ * The events must be a sequence of Intimidate triples (stat-stage-change, one STATS_CHANGE animation with a modelled stat argument,
+ * message) and ROM-checked message-only units (Trace's STRINGID_PKMNTRACED, a prevented Intimidate's STRINGID_PREVENTEDFROMWORKING:
+ * no sprite allocation). Without a triple: the known entry (also no events). With triples: the pre-prompt entry state plus one
+ * stat-animation plan per triple, in order; the first prompt cycle then applies as usual. Anything else is unknown history.
  */
+const BATTLE_START_SEED_MESSAGES: ReadonlySet<string> = new Set(["STRINGID_PKMNTRACED", "STRINGID_PREVENTEDFROMWORKING"]);
 export function seedLiveSpriteOrderHostFromBattleStart(events: readonly BattleKernelSemanticEvent[]): LiveSpriteOrderHost {
   const known = knownEntrySpriteOrderState("ordinary-factory");
-  if (events.length === 0) return createLiveSpriteOrderHost(known);
   const invalid = () => createLiveSpriteOrderHost(invalidateSpriteOrderState(known));
-  if (events.length !== 3) return invalid();
-  const [stat, animation, message] = events as [BattleKernelSemanticEvent, BattleKernelSemanticEvent, BattleKernelSemanticEvent];
-  const payload = animation.payload;
-  if (stat.payload.kind !== "stat-stage-change" || message.payload.kind !== "message"
-    || payload.kind !== "animation" || payload.animationId !== "STATS_CHANGE" || payload.arguments.length !== 1
-    || Number(payload.arguments[0]) !== 22) return invalid();
+  const stats: number[] = [];
+  for (let index = 0; index < events.length;) {
+    const [stat, animation, message] = events.slice(index, index + 3);
+    const payload = animation?.payload;
+    if (stat?.payload.kind === "stat-stage-change" && message?.payload.kind === "message" && payload?.kind === "animation"
+      && payload.animationId === "STATS_CHANGE" && payload.arguments.length === 1 && Number(payload.arguments[0]) === 22) {
+      stats.push(22);
+      index += 3;
+      continue;
+    }
+    const lone = events[index]!.payload;
+    if (lone.kind !== "message" || !BATTLE_START_SEED_MESSAGES.has(lone.messageId)) return invalid();
+    index += 1;
+  }
+  if (stats.length === 0) return createLiveSpriteOrderHost(known);
   const host = createLiveSpriteOrderHost(knownEntryPrePromptSpriteOrderState("ordinary-factory"));
-  return Object.freeze({
-    ...host, tracker: applySpriteOrderPresentationEvent(host.tracker, { kind: "stat-animation", argument: 22 }), bodies: 1,
-  });
+  const tracker = stats.reduce((t, argument) => applySpriteOrderPresentationEvent(t, { kind: "stat-animation", argument }), host.tracker);
+  return Object.freeze({ ...host, tracker, bodies: stats.length });
 }
 
 export function invalidateLiveSpriteOrderHost(host: LiveSpriteOrderHost, reason: string): LiveSpriteOrderHost {

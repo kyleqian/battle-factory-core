@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
 import { prepareLiveMoveSpriteOrder } from "../src/engine/liveMoveSpriteAllocator.ts";
 import {
-  KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, invalidateSpriteOrderState, knownEntrySpriteOrderState,
+  KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, invalidateSpriteOrderState, knownEntryPrePromptSpriteOrderState, knownEntrySpriteOrderState,
 } from "../src/engine/spriteOrderProvider.ts";
 import {
   advanceLiveSpriteOrderHost, beginLiveSpriteOrderTurn, createLiveSpriteOrderHost, lendLiveSpriteOrder, liveSpriteOrderBattlersPresent,
@@ -294,31 +294,52 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
     }
   }, 120000);
 
-  it("battle-start events: none = known entry, exactly one Intimidate triple = pre-prompt + stat plan (lends after the prompt), anything else refuses", () => {
-    let intimidate = 0, other = 0, without = 0;
-    for (const seed of [26, 34, 53, 83, 116, 3]) {
-      const run = generatedCommandAnimationReplay(seed, "on", []);
+  it("battle-start events: Intimidate triples (pre-prompt + one stat plan each) and Trace / prevented-Intimidate messages seed; anything else refuses", () => {
+    // prep47 (B) (docs/next-adapters-prep47.md): ROM 17/17 seed windows, 56/56 stat-copy + prompt windows, 17/17 first-move
+    // edges exact. Trace and the prevented Intimidate allocate nothing (byte-identical to the no-event entry).
+    const statPlans = (count: number) => {
+      let tracker = createSpriteOrderTracker(knownEntryPrePromptSpriteOrderState("ordinary-factory"));
+      for (let at = 0; at < count; at += 1) tracker = applySpriteOrderPresentationEvent(tracker, { kind: "stat-animation", argument: 22 });
+      return tracker.cursor.order;
+    };
+    // Generated seeds by battle-start events (n = events): none; Trace (1); Intimidate (3); Intimidate + Trace (4); Intimidate on
+    // each side (6); Intimidate + a held-item status cure (6, unlisted units: unknown).
+    const classes: Record<number, number | "none" | "unknown"> = {
+      3: "none", 26: 0, 83: 0, 34: 1, 53: 1, 116: 1, 1457: 1, 3114: 1, 2959: 2, 905: "unknown",
+    };
+    const events: Record<number, number> = { 3: 0, 26: 1, 83: 1, 34: 3, 53: 3, 116: 3, 1457: 4, 3114: 4, 2959: 6, 905: 6 };
+    for (const [seed, expected] of Object.entries(classes)) {
+      const run = generatedCommandAnimationReplay(Number(seed), "on", []);
       const host = run.state.liveMoveSpriteAllocatorHost!;
       expect(host.host.historyKnown).toBe(true);
-      const n = run.state.battle!.nextEventSequence;
-      if (n === 3) {
-        intimidate += 1;
-        expect(host.order.known).toBe(true);
-        expect(host.order.free.slice(0, 4)).toEqual([3, 4, 21, 20]); // pre-prompt + stat plan, before the prompt cycle
-      } else if (n > 0) {
-        other += 1;
-        expect(host.order.known).toBe(false);
-      } else {
-        without += 1;
-        expect(host.order.free).toEqual(KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER);
-      }
+      expect(run.state.battle!.nextEventSequence, `seed ${seed}`).toBe(events[Number(seed)]);
+      if (expected === "unknown") expect(host.order.known, `seed ${seed}`).toBe(false);
+      else if (expected === "none" || expected === 0) expect(host.order.free, `seed ${seed}`).toEqual(KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER);
+      else expect(host.order, `seed ${seed}`).toEqual(statPlans(expected)); // before the prompt cycle
     }
-    expect([intimidate > 0, other > 0, without > 0]).toEqual([true, true, true]);
+    expect(statPlans(1).free.slice(0, 4)).toEqual([3, 4, 21, 20]);
     const ev = (kind: string, extra: object = {}) => ({ sequence: 0, payload: { kind, ...extra }, provenance: undefined }) as any;
     const triple = [ev("stat-stage-change"), ev("animation", { animationId: "STATS_CHANGE", battler: 1, target: 0, arguments: ["22"] }), ev("message")];
-    expect(seedLiveSpriteOrderHostFromBattleStart([]).tracker.cursor.order).toEqual(knownEntrySpriteOrderState("ordinary-factory"));
-    expect(seedLiveSpriteOrderHostFromBattleStart([...triple, ...triple]).tracker.cursor.order.known).toBe(false);
-    expect(seedLiveSpriteOrderHostFromBattleStart(triple.slice(0, 2)).tracker.cursor.order.known).toBe(false);
+    const traced = ev("message", { messageId: "STRINGID_PKMNTRACED" });
+    const prevented = ev("message", { messageId: "STRINGID_PREVENTEDFROMWORKING" });
+    const seeded = (list: readonly unknown[]) => seedLiveSpriteOrderHostFromBattleStart(list as BattleKernelSemanticEvent[]);
+    expect(seeded([]).tracker.cursor.order).toEqual(knownEntrySpriteOrderState("ordinary-factory"));
+    expect(seeded([traced]).tracker.cursor.order).toEqual(knownEntrySpriteOrderState("ordinary-factory"));
+    expect(seeded([prevented]).tracker.cursor.order).toEqual(knownEntrySpriteOrderState("ordinary-factory"));
+    expect(seeded([traced]).bodies ?? 0).toBe(0);
+    expect(seeded(triple).tracker.cursor.order).toEqual(statPlans(1));
+    expect(seeded([...triple, traced]).tracker.cursor.order).toEqual(statPlans(1));
+    expect(seeded([traced, ...triple]).tracker.cursor.order).toEqual(statPlans(1));
+    const double = seeded([...triple, ...triple]);
+    expect(double.tracker.cursor.order).toEqual(statPlans(2));
+    expect(double.bodies).toBe(2);
+    expect(statPlans(2).known).toBe(true);
+    // Unlisted units and truncated triples stay unknown history.
+    expect(seeded([ev("message", { messageId: "STRINGID_PKMNSITEMRESTOREDSTATUS" })]).tracker.cursor.order.known).toBe(false);
+    expect(seeded([...triple, ev("message", { messageId: "STRINGID_PKMNSITEMRESTOREDSTATUS" })]).tracker.cursor.order.known).toBe(false);
+    expect(seeded(triple.slice(0, 2)).tracker.cursor.order.known).toBe(false);
+    expect(seeded([...triple, ...triple.slice(0, 2)]).tracker.cursor.order.known).toBe(false);
+    expect(seeded([ev("animation", { animationId: "HELD_ITEM_EFFECT", battler: 0, arguments: [] })]).tracker.cursor.order.known).toBe(false);
   }, 120000);
 
   it("a generated battle with an Intimidate lead (seed 53) lends a known order to its first body; adapter active every age; ON/OFF parity", () => {

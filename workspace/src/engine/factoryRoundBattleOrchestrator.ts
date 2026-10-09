@@ -1132,8 +1132,9 @@ function startCurrentBattle(
           battleCallStart: callStart,
           commandKey: "",
           host: createKnownEntrySpriteAllocatorProvider("ordinary-factory").firstMove,
-          // Battle-start script events: none = the known entry, exactly one Intimidate = pre-prompt state + stat
-          // animation, anything else is unknown history (liveSpriteOrderHost.ts seedLiveSpriteOrderHostFromBattleStart).
+          // Battle-start script events: Intimidate triples (pre-prompt state + one stat animation each) and Trace /
+          // prevented-Intimidate messages (no allocation), none = the known entry; anything else is unknown history
+          // (liveSpriteOrderHost.ts seedLiveSpriteOrderHostFromBattleStart).
           order: liveSpriteOrderHostOrder(battleStartOrderHost),
           orderHost: battleStartOrderHost,
         })
