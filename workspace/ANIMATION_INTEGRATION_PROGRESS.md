@@ -74,6 +74,18 @@
   RAIN_CONTINUES (`DEFERRED_REPLAY_UNITS`); 9.0 % the same resolution leaving an unlendable order; Flatter `firstBody` 6.6 % (not
   proven: needs later-body register + allocator evidence); Flatter plain unknown lend 4.5 %; Ice Ball's own carried lend 2.5 %. No
   gate lifted. Supervisor: the 0..299 instrument report rerun byte-identical.
+- Folded Opus worker `9e3c7d0ad` (SIDE lane, narrow production grant) as `ad247cc0d` (src tree `db20b3ec`): aud56 — ISSUES #156
+  closed. Every animation id the kernel emits besides MOVE_ANIMATION enumerated (HIT_ANIMATION, STATS_CHANGE, the playanimation table,
+  WEATHER_VAR 12 / 13, CASTFORM_CHANGE, SCENE_OFF_ATTACK_PAUSE) and ranked by exposure (live allocator consumers carried across:
+  HIT 193, STATS_CHANGE 105, HELD_ITEM_EFFECT 69, HAIL / SANDSTORM / RAIN_CONTINUES 19 / 13 / 10, ...). Script-keyed net-zero audit (OBJ
+  slots + tiles + palette tags + matrices; 93 jobs x2 fresh in one batch, explicit lab seeds, all A == B): 20 units NET-ZERO (the hit
+  sprite holds slot 3 for 20 frames and is released before the next script; ITEM_KNOCKOFF / FOCUS_BAND survivors are destroyed on the
+  cleanup frame — order carries, not allocator survivors); none NOT net-zero. Production now fails closed: SUBSTITUTE_FADE, SNATCH_MOVE,
+  DOOM_DESIRE_HIT, TURN_TRAP for Clamp / unknown wrapped moves, other WEATHER_VAR arguments, SCENE_OFF_ATTACK_PAUSE and any future id
+  invalidate the allocator. Census seeds 0..299 identical to `a860ded6a` (0 / 0; the new rule fires once, no live consumer follows).
+  Worker gates 1,589 files / 13,092 tests, build, differential 624/624. Supervisor: aud56Probe full rerun (186 runs) + extract —
+  every audit field byte-identical to the committed receipt; union src == the worker's tested tree -> touched tests 61/61, smoke 448.
+  Finding -> ISSUES #157 (weather-continuing event battler vs the ROM's battler 0).
 
 ## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
 

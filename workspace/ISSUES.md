@@ -17,17 +17,14 @@ backlog.
 
 # Open
 
-## #156 — General / hit / stat animations are assumed allocator net-zero without receipts (S10A, found 2026-10-09 by prep52)
+## #157 — Weather-continuing animations: kernel event battler is the last attacker, the ROM plays them on battler 0 (S10A, found 2026-10-09 by aud56)
 
-`prepareResolutionPalette` (`src/engine/factoryRoundBattleOrchestrator.ts`, `scanThrough`) invalidates the live sprite ALLOCATOR host
-only for status animations outside `LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS`; general, hit and stat animations never
-invalidate it. prep52's scan (`tools/integration/fixtures/prep52/general-animation-scan.json`) saw six general animations by chance,
-all net-zero; the others were never probed: RAIN / SANDSTORM / HAIL continuing, LEECH_SEED_DRAIN, FOCUS_BAND, ITEM_KNOCKOFF, WISH_HEAL,
-SUBSTITUTE_FADE, the TURN_TRAP family (Fire Spin / Whirlpool / Sand Tomb / Clamp), hit and stat animations. FOCUS_BAND and
-ITEM_KNOCKOFF are known to leave a sprite alive past the script `end` (plans48 / plans51 order carries), so a live body right after
-them may start from a non-entry allocator. No defect is demonstrated yet. Resume: a prep50-style script-keyed net-zero audit of
-every general / hit / stat animation reachable in Factory play (both sides, two species, twice fresh); invalidate the allocator after
-any unit that is not net-zero (or model its known delta), with a census delta and a dense window after each carried unit.
+The kernel's MOVE / general-animation event for RAIN / HAIL / SANDSTORM_CONTINUES carries the last attacker as its battler; the ROM
+plays them on battler 0 in every Factory battle (end-of-turn effects use the first non-absent battler; in singles battler 0 is
+never absent there; 32 / 32 probed instances, `tools/integration/fixtures/aud56-net-zero-audit.json`). Harmless for the allocator
+(aud56 dropped the side key; a side-keyed draft cost 35 live commands), but a Scene ON renderer that reads the event battler
+(pan / position) may draw or pan these on the wrong side. Resume: check the RAIN_CONTINUES / weather renderers' use of the event
+battler; if any reads it, take battler 0 at the seam (presentation only) with a dense window on an opponent-set weather.
 
 ## #155 — Eruption (284) opponent sprite-order plan is wrong for an elevated attacker (S10A, found 2026-10-09 by plans51)
 
