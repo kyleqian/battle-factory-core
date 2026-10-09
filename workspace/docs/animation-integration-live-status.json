@@ -1912,13 +1912,15 @@
       ],
       "liveEvidence": [
         "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep2-icy-wind-*.json)",
-        "alternate-species dense proof twice fresh, zero residual (altspecies3-icy-wind-opponent-poliwhirl-player-onix.json, window 81..367)"
+        "alternate-species dense proof twice fresh, zero residual (altspecies3-icy-wind-opponent-poliwhirl-player-onix.json, window 81..367)",
+        "geoice: OAM slots / order derived from the CreateSprite / SortSprites replay at any species geometry; 8 previously declined pairs (4 per side) twice fresh, 6 zero residual on every row, 2 one row shorter in the ROM (restorebg lag phase, ages 263..285 only); ROM gSprites / sSpriteOrder equal on every row (../tools/integration/fixtures/geoice-live-receipt.json)"
       ],
       "palettePlan": "no plan, history invalidates",
       "remaining": [
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness",
-        "scene-off fallback where the retained particle slot table is unproven (provableEffectOrder)"
+        "species-dependent restorebg lag phase: some pairs' ROM body is one row shorter (fade-in tail one frame early; also at previously live pairs), not predicted",
+        "scene-off fallback only when the replay's slot pool is exhausted (provableEffectOrder)"
       ]
     },
     {
@@ -1928,13 +1930,16 @@
         "../tools/integration/fixtures/prep2-live-adapter-receipt.json"
       ],
       "liveEvidence": [
-        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep2-blizzard-*.json)"
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep2-blizzard-*.json)",
+        "geoice: OAM slots / order derived from the CreateSprite / SortSprites replay at any species geometry, player attacker after every particle (subpriority 30 vs 3); 7 previously declined pairs (4 player, 3 opponent) twice fresh, 6 zero residual on every row, 1 one row shorter in the ROM (restorebg lag phase, ages 338..353 only); ROM gSprites / sSpriteOrder equal on every row (../tools/integration/fixtures/geoice-live-receipt.json)"
       ],
       "palettePlan": "no plan, history invalidates",
       "remaining": [
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness",
-        "scene-off fallback where the retained particle slot table is unproven (provableEffectOrder)"
+        "species-dependent restorebg lag phase: some pairs' ROM body is one row shorter (fade-in tail one frame early), not predicted",
+        "scene-off fallback where the geometry's impact start + 164 != the fixed live window (opponent impact start 194..206) or the slot pool is exhausted (provableEffectOrder)",
+        "order-host body plan (opponent side, geometry-keyed) not derived"
       ]
     },
     {

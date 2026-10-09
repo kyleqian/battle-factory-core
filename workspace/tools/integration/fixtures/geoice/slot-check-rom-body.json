@@ -1,0 +1,470 @@
+{
+ "schema": "geoice-slot-check/v1",
+ "evidenceDir": ".integration/validation/geoice-live-final/short",
+ "cases": [
+  {
+   "fixture": "/tmp/geoice/short/icy-wind-player-bulbasaur-metapod.json",
+   "move": "ICY_WIND",
+   "side": "player",
+   "attacker": "BULBASAUR",
+   "target": "METAPOD",
+   "geometry": {
+    "attackerCenter": {
+     "x": 72,
+     "y": 104
+    },
+    "targetCenter": {
+     "x": 176,
+     "y": 60
+    },
+    "spikeTargetCenter": {
+     "x": 176,
+     "y": 40
+    }
+   },
+   "rows": 286,
+   "slotRows": 286,
+   "orderRows": 286,
+   "divergentRows": 41,
+   "divergentSlotRows": 41,
+   "divergentOrderRows": 41,
+   "divergentSample": [
+    {
+     "age": 186,
+     "frame": 263,
+     "derived": [
+      "spike6:15 (retained 11)"
+     ],
+     "romOrder": [
+      14,
+      12,
+      13,
+      11,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ],
+     "order": [
+      14,
+      12,
+      13,
+      11,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ]
+    },
+    {
+     "age": 187,
+     "frame": 264,
+     "derived": [
+      "spike6:15 (retained 11)"
+     ],
+     "romOrder": [
+      14,
+      12,
+      13,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ],
+     "order": [
+      14,
+      12,
+      13,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ]
+    },
+    {
+     "age": 188,
+     "frame": 265,
+     "derived": [
+      "spike6:15 (retained 11)"
+     ],
+     "romOrder": [
+      14,
+      12,
+      13,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ],
+     "order": [
+      14,
+      12,
+      13,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ]
+    }
+   ],
+   "firstFailures": []
+  },
+  {
+   "fixture": "/tmp/geoice/short/icy-wind-opponent-zubat-butterfree.json",
+   "move": "ICY_WIND",
+   "side": "opponent",
+   "attacker": "ZUBAT",
+   "target": "BUTTERFREE",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 38
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 94
+    },
+    "spikeTargetCenter": {
+     "x": 72,
+     "y": 80
+    }
+   },
+   "rows": 286,
+   "slotRows": 286,
+   "orderRows": 286,
+   "divergentRows": 41,
+   "divergentSlotRows": 41,
+   "divergentOrderRows": 41,
+   "divergentSample": [
+    {
+     "age": 192,
+     "frame": 269,
+     "derived": [
+      "spike7:12 (retained 15)",
+      "spike8:15 (retained 16)"
+     ],
+     "romOrder": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ],
+     "order": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ]
+    },
+    {
+     "age": 193,
+     "frame": 270,
+     "derived": [
+      "spike7:12 (retained 15)",
+      "spike8:15 (retained 16)"
+     ],
+     "romOrder": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ],
+     "order": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ]
+    },
+    {
+     "age": 194,
+     "frame": 271,
+     "derived": [
+      "spike7:12 (retained 15)",
+      "spike8:15 (retained 16)"
+     ],
+     "romOrder": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ],
+     "order": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ]
+    }
+   ],
+   "firstFailures": []
+  },
+  {
+   "fixture": "/tmp/geoice/short/blizzard-opponent-blastoise-blastoise.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "attacker": "BLASTOISE",
+   "target": "BLASTOISE",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 40
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 96
+    },
+    "spikeTargetCenter": {
+     "x": 72,
+     "y": 80
+    }
+   },
+   "rows": 360,
+   "slotRows": 360,
+   "orderRows": 360,
+   "divergentRows": 53,
+   "divergentSlotRows": 53,
+   "divergentOrderRows": 53,
+   "divergentSample": [
+    {
+     "age": 110,
+     "frame": 191,
+     "derived": [
+      "traveling13:29 (retained 12)"
+     ],
+     "romOrder": [
+      14,
+      3,
+      13,
+      11,
+      5,
+      18,
+      9,
+      17,
+      15,
+      16,
+      20,
+      19,
+      21,
+      24,
+      22,
+      23,
+      27,
+      25,
+      26,
+      4,
+      29,
+      7,
+      28,
+      10
+     ],
+     "order": [
+      14,
+      3,
+      13,
+      11,
+      5,
+      18,
+      9,
+      17,
+      15,
+      16,
+      20,
+      19,
+      21,
+      24,
+      22,
+      23,
+      27,
+      25,
+      26,
+      4,
+      29,
+      7,
+      28,
+      10
+     ]
+    },
+    {
+     "age": 111,
+     "frame": 192,
+     "derived": [
+      "traveling13:29 (retained 12)"
+     ],
+     "romOrder": [
+      14,
+      5,
+      3,
+      13,
+      11,
+      18,
+      17,
+      15,
+      9,
+      16,
+      20,
+      19,
+      21,
+      24,
+      22,
+      23,
+      27,
+      25,
+      26,
+      4,
+      29,
+      7,
+      28,
+      10
+     ],
+     "order": [
+      14,
+      5,
+      3,
+      13,
+      11,
+      18,
+      17,
+      15,
+      9,
+      16,
+      20,
+      19,
+      21,
+      24,
+      22,
+      23,
+      27,
+      25,
+      26,
+      4,
+      29,
+      7,
+      28,
+      10
+     ]
+    },
+    {
+     "age": 112,
+     "frame": 193,
+     "derived": [
+      "traveling13:29 (retained 12)"
+     ],
+     "romOrder": [
+      14,
+      5,
+      3,
+      18,
+      13,
+      11,
+      17,
+      15,
+      9,
+      16,
+      20,
+      19,
+      21,
+      24,
+      22,
+      23,
+      27,
+      25,
+      26,
+      4,
+      29,
+      7,
+      28,
+      10
+     ],
+     "order": [
+      14,
+      5,
+      3,
+      18,
+      13,
+      11,
+      17,
+      15,
+      9,
+      16,
+      20,
+      19,
+      21,
+      24,
+      22,
+      23,
+      27,
+      25,
+      26,
+      4,
+      29,
+      7,
+      28,
+      10
+     ]
+    }
+   ],
+   "firstFailures": []
+  }
+ ]
+}

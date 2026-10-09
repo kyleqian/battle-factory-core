@@ -1,0 +1,2017 @@
+{
+ "schema": "geoice-slot-check/v1",
+ "evidenceDir": ".integration/validation/geoice-live-final",
+ "cases": [
+  {
+   "fixture": "tools/integration/fixtures/geoice/blizzard-opponent-blastoise-ivysaur.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "attacker": "BLASTOISE",
+   "target": "IVYSAUR",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 40
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 97
+    },
+    "spikeTargetCenter": {
+     "x": 72,
+     "y": 80
+    }
+   },
+   "rows": 361,
+   "slotRows": 361,
+   "orderRows": 361,
+   "divergentRows": 53,
+   "divergentSlotRows": 53,
+   "divergentOrderRows": 53,
+   "divergentSample": [
+    {
+     "age": 110,
+     "frame": 191,
+     "derived": [
+      "traveling13:29 (retained 12)"
+     ],
+     "romOrder": [
+      14,
+      3,
+      13,
+      5,
+      11,
+      18,
+      9,
+      15,
+      17,
+      16,
+      20,
+      19,
+      21,
+      24,
+      22,
+      23,
+      27,
+      25,
+      26,
+      4,
+      29,
+      7,
+      28,
+      10
+     ],
+     "order": [
+      14,
+      3,
+      13,
+      5,
+      11,
+      18,
+      9,
+      15,
+      17,
+      16,
+      20,
+      19,
+      21,
+      24,
+      22,
+      23,
+      27,
+      25,
+      26,
+      4,
+      29,
+      7,
+      28,
+      10
+     ]
+    },
+    {
+     "age": 111,
+     "frame": 192,
+     "derived": [
+      "traveling13:29 (retained 12)"
+     ],
+     "romOrder": [
+      14,
+      5,
+      3,
+      13,
+      11,
+      18,
+      15,
+      17,
+      9,
+      16,
+      20,
+      19,
+      21,
+      24,
+      22,
+      23,
+      27,
+      25,
+      26,
+      4,
+      29,
+      7,
+      28,
+      10
+     ],
+     "order": [
+      14,
+      5,
+      3,
+      13,
+      11,
+      18,
+      15,
+      17,
+      9,
+      16,
+      20,
+      19,
+      21,
+      24,
+      22,
+      23,
+      27,
+      25,
+      26,
+      4,
+      29,
+      7,
+      28,
+      10
+     ]
+    },
+    {
+     "age": 112,
+     "frame": 193,
+     "derived": [
+      "traveling13:29 (retained 12)"
+     ],
+     "romOrder": [
+      14,
+      5,
+      3,
+      18,
+      13,
+      15,
+      11,
+      17,
+      9,
+      16,
+      20,
+      19,
+      21,
+      24,
+      22,
+      23,
+      27,
+      25,
+      26,
+      4,
+      29,
+      7,
+      28,
+      10
+     ],
+     "order": [
+      14,
+      5,
+      3,
+      18,
+      13,
+      15,
+      11,
+      17,
+      9,
+      16,
+      20,
+      19,
+      21,
+      24,
+      22,
+      23,
+      27,
+      25,
+      26,
+      4,
+      29,
+      7,
+      28,
+      10
+     ]
+    }
+   ],
+   "firstFailures": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/geoice/blizzard-opponent-zubat-nidoking.json",
+   "move": "BLIZZARD",
+   "side": "opponent",
+   "attacker": "ZUBAT",
+   "target": "NIDOKING",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 38
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 91
+    },
+    "spikeTargetCenter": {
+     "x": 72,
+     "y": 80
+    }
+   },
+   "rows": 361,
+   "slotRows": 361,
+   "orderRows": 361,
+   "divergentRows": 53,
+   "divergentSlotRows": 53,
+   "divergentOrderRows": 53,
+   "divergentSample": [
+    {
+     "age": 110,
+     "frame": 187,
+     "derived": [
+      "traveling13:29 (retained 12)"
+     ],
+     "romOrder": [
+      14,
+      3,
+      11,
+      13,
+      5,
+      18,
+      9,
+      17,
+      15,
+      16,
+      20,
+      19,
+      21,
+      24,
+      22,
+      23,
+      27,
+      25,
+      26,
+      4,
+      29,
+      7,
+      28,
+      10
+     ],
+     "order": [
+      14,
+      3,
+      11,
+      13,
+      5,
+      18,
+      9,
+      17,
+      15,
+      16,
+      20,
+      19,
+      21,
+      24,
+      22,
+      23,
+      27,
+      25,
+      26,
+      4,
+      29,
+      7,
+      28,
+      10
+     ]
+    },
+    {
+     "age": 111,
+     "frame": 188,
+     "derived": [
+      "traveling13:29 (retained 12)"
+     ],
+     "romOrder": [
+      14,
+      3,
+      5,
+      11,
+      13,
+      18,
+      17,
+      15,
+      9,
+      16,
+      20,
+      19,
+      21,
+      24,
+      22,
+      23,
+      27,
+      25,
+      26,
+      4,
+      29,
+      7,
+      28,
+      10
+     ],
+     "order": [
+      14,
+      3,
+      5,
+      11,
+      13,
+      18,
+      17,
+      15,
+      9,
+      16,
+      20,
+      19,
+      21,
+      24,
+      22,
+      23,
+      27,
+      25,
+      26,
+      4,
+      29,
+      7,
+      28,
+      10
+     ]
+    },
+    {
+     "age": 112,
+     "frame": 189,
+     "derived": [
+      "traveling13:29 (retained 12)"
+     ],
+     "romOrder": [
+      14,
+      5,
+      3,
+      18,
+      11,
+      17,
+      13,
+      15,
+      9,
+      16,
+      20,
+      19,
+      21,
+      24,
+      22,
+      23,
+      27,
+      25,
+      26,
+      4,
+      29,
+      7,
+      28,
+      10
+     ],
+     "order": [
+      14,
+      5,
+      3,
+      18,
+      11,
+      17,
+      13,
+      15,
+      9,
+      16,
+      20,
+      19,
+      21,
+      24,
+      22,
+      23,
+      27,
+      25,
+      26,
+      4,
+      29,
+      7,
+      28,
+      10
+     ]
+    }
+   ],
+   "firstFailures": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/geoice/blizzard-player-bulbasaur-hoppip.json",
+   "move": "BLIZZARD",
+   "side": "player",
+   "attacker": "BULBASAUR",
+   "target": "HOPPIP",
+   "geometry": {
+    "attackerCenter": {
+     "x": 72,
+     "y": 104
+    },
+    "targetCenter": {
+     "x": 176,
+     "y": 39
+    },
+    "spikeTargetCenter": {
+     "x": 176,
+     "y": 40
+    }
+   },
+   "rows": 372,
+   "slotRows": 372,
+   "orderRows": 372,
+   "divergentRows": 48,
+   "divergentSlotRows": 48,
+   "divergentOrderRows": 48,
+   "divergentSample": [
+    {
+     "age": 110,
+     "frame": 187,
+     "derived": [
+      "traveling13:12 (retained 29)"
+     ],
+     "romOrder": [
+      12,
+      27,
+      28,
+      7,
+      10,
+      25,
+      4,
+      23,
+      24,
+      26,
+      21,
+      19,
+      11,
+      22,
+      3,
+      9,
+      20,
+      17,
+      15,
+      18,
+      13,
+      5,
+      14,
+      16
+     ],
+     "order": [
+      12,
+      27,
+      28,
+      7,
+      10,
+      25,
+      4,
+      23,
+      24,
+      26,
+      21,
+      19,
+      11,
+      22,
+      3,
+      9,
+      20,
+      17,
+      15,
+      18,
+      13,
+      5,
+      14,
+      16
+     ]
+    },
+    {
+     "age": 111,
+     "frame": 188,
+     "derived": [
+      "traveling13:12 (retained 29)"
+     ],
+     "romOrder": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      4,
+      23,
+      24,
+      26,
+      21,
+      11,
+      19,
+      3,
+      22,
+      9,
+      20,
+      17,
+      13,
+      15,
+      5,
+      18,
+      14,
+      16
+     ],
+     "order": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      4,
+      23,
+      24,
+      26,
+      21,
+      11,
+      19,
+      3,
+      22,
+      9,
+      20,
+      17,
+      13,
+      15,
+      5,
+      18,
+      14,
+      16
+     ]
+    },
+    {
+     "age": 112,
+     "frame": 189,
+     "derived": [
+      "traveling13:12 (retained 29)"
+     ],
+     "romOrder": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      4,
+      23,
+      24,
+      26,
+      11,
+      21,
+      3,
+      19,
+      22,
+      20,
+      9,
+      17,
+      13,
+      5,
+      15,
+      18,
+      14,
+      16
+     ],
+     "order": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      4,
+      23,
+      24,
+      26,
+      11,
+      21,
+      3,
+      19,
+      22,
+      20,
+      9,
+      17,
+      13,
+      5,
+      15,
+      18,
+      14,
+      16
+     ]
+    }
+   ],
+   "firstFailures": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/geoice/blizzard-player-charizard-golbat.json",
+   "move": "BLIZZARD",
+   "side": "player",
+   "attacker": "CHARIZARD",
+   "target": "GOLBAT",
+   "geometry": {
+    "attackerCenter": {
+     "x": 72,
+     "y": 92
+    },
+    "targetCenter": {
+     "x": 176,
+     "y": 35
+    },
+    "spikeTargetCenter": {
+     "x": 176,
+     "y": 40
+    }
+   },
+   "rows": 372,
+   "slotRows": 372,
+   "orderRows": 372,
+   "divergentRows": 54,
+   "divergentSlotRows": 54,
+   "divergentOrderRows": 54,
+   "divergentSample": [
+    {
+     "age": 110,
+     "frame": 187,
+     "derived": [
+      "traveling13:12 (retained 29)"
+     ],
+     "romOrder": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      24,
+      4,
+      23,
+      26,
+      21,
+      19,
+      11,
+      18,
+      22,
+      3,
+      9,
+      20,
+      17,
+      15,
+      13,
+      5,
+      14,
+      16
+     ],
+     "order": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      24,
+      4,
+      23,
+      26,
+      21,
+      19,
+      11,
+      18,
+      22,
+      3,
+      9,
+      20,
+      17,
+      15,
+      13,
+      5,
+      14,
+      16
+     ]
+    },
+    {
+     "age": 111,
+     "frame": 188,
+     "derived": [
+      "traveling13:12 (retained 29)"
+     ],
+     "romOrder": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      24,
+      4,
+      23,
+      26,
+      21,
+      11,
+      3,
+      19,
+      18,
+      22,
+      9,
+      20,
+      17,
+      13,
+      15,
+      5,
+      14,
+      16
+     ],
+     "order": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      24,
+      4,
+      23,
+      26,
+      21,
+      11,
+      3,
+      19,
+      18,
+      22,
+      9,
+      20,
+      17,
+      13,
+      15,
+      5,
+      14,
+      16
+     ]
+    },
+    {
+     "age": 112,
+     "frame": 189,
+     "derived": [
+      "traveling13:12 (retained 29)"
+     ],
+     "romOrder": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      24,
+      4,
+      23,
+      26,
+      11,
+      21,
+      3,
+      19,
+      18,
+      22,
+      20,
+      17,
+      13,
+      9,
+      5,
+      15,
+      14,
+      16
+     ],
+     "order": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      24,
+      4,
+      23,
+      26,
+      11,
+      21,
+      3,
+      19,
+      18,
+      22,
+      20,
+      17,
+      13,
+      9,
+      5,
+      15,
+      14,
+      16
+     ]
+    }
+   ],
+   "firstFailures": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/geoice/blizzard-player-onix-masquerain.json",
+   "move": "BLIZZARD",
+   "side": "player",
+   "attacker": "ONIX",
+   "target": "MASQUERAIN",
+   "geometry": {
+    "attackerCenter": {
+     "x": 72,
+     "y": 88
+    },
+    "targetCenter": {
+     "x": 176,
+     "y": 31
+    },
+    "spikeTargetCenter": {
+     "x": 176,
+     "y": 40
+    }
+   },
+   "rows": 372,
+   "slotRows": 372,
+   "orderRows": 372,
+   "divergentRows": 54,
+   "divergentSlotRows": 54,
+   "divergentOrderRows": 54,
+   "divergentSample": [
+    {
+     "age": 110,
+     "frame": 182,
+     "derived": [
+      "traveling13:12 (retained 29)"
+     ],
+     "romOrder": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      24,
+      4,
+      23,
+      26,
+      21,
+      19,
+      11,
+      18,
+      22,
+      3,
+      9,
+      20,
+      17,
+      15,
+      13,
+      5,
+      14,
+      16
+     ],
+     "order": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      24,
+      4,
+      23,
+      26,
+      21,
+      19,
+      11,
+      18,
+      22,
+      3,
+      9,
+      20,
+      17,
+      15,
+      13,
+      5,
+      14,
+      16
+     ]
+    },
+    {
+     "age": 111,
+     "frame": 183,
+     "derived": [
+      "traveling13:12 (retained 29)"
+     ],
+     "romOrder": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      24,
+      4,
+      23,
+      26,
+      21,
+      11,
+      3,
+      19,
+      18,
+      22,
+      9,
+      20,
+      17,
+      13,
+      15,
+      5,
+      14,
+      16
+     ],
+     "order": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      24,
+      4,
+      23,
+      26,
+      21,
+      11,
+      3,
+      19,
+      18,
+      22,
+      9,
+      20,
+      17,
+      13,
+      15,
+      5,
+      14,
+      16
+     ]
+    },
+    {
+     "age": 112,
+     "frame": 184,
+     "derived": [
+      "traveling13:12 (retained 29)"
+     ],
+     "romOrder": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      24,
+      4,
+      23,
+      26,
+      11,
+      21,
+      3,
+      19,
+      18,
+      22,
+      20,
+      17,
+      13,
+      9,
+      5,
+      15,
+      14,
+      16
+     ],
+     "order": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      24,
+      4,
+      23,
+      26,
+      11,
+      21,
+      3,
+      19,
+      18,
+      22,
+      20,
+      17,
+      13,
+      9,
+      5,
+      15,
+      14,
+      16
+     ]
+    }
+   ],
+   "firstFailures": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/geoice/blizzard-player-wartortle-hoppip.json",
+   "move": "BLIZZARD",
+   "side": "player",
+   "attacker": "WARTORTLE",
+   "target": "HOPPIP",
+   "geometry": {
+    "attackerCenter": {
+     "x": 72,
+     "y": 98
+    },
+    "targetCenter": {
+     "x": 176,
+     "y": 39
+    },
+    "spikeTargetCenter": {
+     "x": 176,
+     "y": 40
+    }
+   },
+   "rows": 372,
+   "slotRows": 372,
+   "orderRows": 372,
+   "divergentRows": 51,
+   "divergentSlotRows": 51,
+   "divergentOrderRows": 51,
+   "divergentSample": [
+    {
+     "age": 110,
+     "frame": 187,
+     "derived": [
+      "traveling13:12 (retained 29)"
+     ],
+     "romOrder": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      24,
+      4,
+      23,
+      26,
+      21,
+      19,
+      11,
+      3,
+      9,
+      22,
+      20,
+      18,
+      17,
+      15,
+      13,
+      5,
+      14,
+      16
+     ],
+     "order": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      24,
+      4,
+      23,
+      26,
+      21,
+      19,
+      11,
+      3,
+      9,
+      22,
+      20,
+      18,
+      17,
+      15,
+      13,
+      5,
+      14,
+      16
+     ]
+    },
+    {
+     "age": 111,
+     "frame": 188,
+     "derived": [
+      "traveling13:12 (retained 29)"
+     ],
+     "romOrder": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      24,
+      4,
+      23,
+      26,
+      11,
+      21,
+      3,
+      19,
+      22,
+      9,
+      20,
+      18,
+      17,
+      13,
+      15,
+      5,
+      14,
+      16
+     ],
+     "order": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      24,
+      4,
+      23,
+      26,
+      11,
+      21,
+      3,
+      19,
+      22,
+      9,
+      20,
+      18,
+      17,
+      13,
+      15,
+      5,
+      14,
+      16
+     ]
+    },
+    {
+     "age": 112,
+     "frame": 189,
+     "derived": [
+      "traveling13:12 (retained 29)"
+     ],
+     "romOrder": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      4,
+      24,
+      23,
+      26,
+      11,
+      3,
+      21,
+      19,
+      22,
+      20,
+      9,
+      13,
+      18,
+      17,
+      5,
+      15,
+      14,
+      16
+     ],
+     "order": [
+      12,
+      27,
+      7,
+      28,
+      10,
+      25,
+      4,
+      24,
+      23,
+      26,
+      11,
+      3,
+      21,
+      19,
+      22,
+      20,
+      9,
+      13,
+      18,
+      17,
+      5,
+      15,
+      14,
+      16
+     ]
+    }
+   ],
+   "firstFailures": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/geoice/icy-wind-opponent-fearow-weedle.json",
+   "move": "ICY_WIND",
+   "side": "opponent",
+   "attacker": "FEAROW",
+   "target": "WEEDLE",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 34
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 99
+    },
+    "spikeTargetCenter": {
+     "x": 72,
+     "y": 80
+    }
+   },
+   "rows": 287,
+   "slotRows": 287,
+   "orderRows": 287,
+   "divergentRows": 41,
+   "divergentSlotRows": 41,
+   "divergentOrderRows": 41,
+   "divergentSample": [
+    {
+     "age": 192,
+     "frame": 270,
+     "derived": [
+      "spike7:12 (retained 15)",
+      "spike8:15 (retained 16)"
+     ],
+     "romOrder": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ],
+     "order": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ]
+    },
+    {
+     "age": 193,
+     "frame": 271,
+     "derived": [
+      "spike7:12 (retained 15)",
+      "spike8:15 (retained 16)"
+     ],
+     "romOrder": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ],
+     "order": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ]
+    },
+    {
+     "age": 194,
+     "frame": 272,
+     "derived": [
+      "spike7:12 (retained 15)",
+      "spike8:15 (retained 16)"
+     ],
+     "romOrder": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ],
+     "order": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ]
+    }
+   ],
+   "firstFailures": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/geoice/icy-wind-opponent-kadabra-bulbasaur.json",
+   "move": "ICY_WIND",
+   "side": "opponent",
+   "attacker": "KADABRA",
+   "target": "BULBASAUR",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 45
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 104
+    },
+    "spikeTargetCenter": {
+     "x": 72,
+     "y": 80
+    }
+   },
+   "rows": 287,
+   "slotRows": 287,
+   "orderRows": 287,
+   "divergentRows": 41,
+   "divergentSlotRows": 41,
+   "divergentOrderRows": 41,
+   "divergentSample": [
+    {
+     "age": 192,
+     "frame": 271,
+     "derived": [
+      "spike7:12 (retained 15)",
+      "spike8:15 (retained 16)"
+     ],
+     "romOrder": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ],
+     "order": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ]
+    },
+    {
+     "age": 193,
+     "frame": 272,
+     "derived": [
+      "spike7:12 (retained 15)",
+      "spike8:15 (retained 16)"
+     ],
+     "romOrder": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ],
+     "order": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ]
+    },
+    {
+     "age": 194,
+     "frame": 273,
+     "derived": [
+      "spike7:12 (retained 15)",
+      "spike8:15 (retained 16)"
+     ],
+     "romOrder": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ],
+     "order": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ]
+    }
+   ],
+   "firstFailures": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/geoice/icy-wind-opponent-masquerain-onix.json",
+   "move": "ICY_WIND",
+   "side": "opponent",
+   "attacker": "MASQUERAIN",
+   "target": "ONIX",
+   "geometry": {
+    "attackerCenter": {
+     "x": 176,
+     "y": 31
+    },
+    "targetCenter": {
+     "x": 72,
+     "y": 88
+    },
+    "spikeTargetCenter": {
+     "x": 72,
+     "y": 80
+    }
+   },
+   "rows": 287,
+   "slotRows": 287,
+   "orderRows": 287,
+   "divergentRows": 41,
+   "divergentSlotRows": 41,
+   "divergentOrderRows": 41,
+   "divergentSample": [
+    {
+     "age": 192,
+     "frame": 274,
+     "derived": [
+      "spike7:12 (retained 15)",
+      "spike8:15 (retained 16)"
+     ],
+     "romOrder": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ],
+     "order": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ]
+    },
+    {
+     "age": 193,
+     "frame": 275,
+     "derived": [
+      "spike7:12 (retained 15)",
+      "spike8:15 (retained 16)"
+     ],
+     "romOrder": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ],
+     "order": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ]
+    },
+    {
+     "age": 194,
+     "frame": 276,
+     "derived": [
+      "spike7:12 (retained 15)",
+      "spike8:15 (retained 16)"
+     ],
+     "romOrder": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ],
+     "order": [
+      13,
+      14,
+      3,
+      5,
+      4,
+      9,
+      7,
+      11,
+      10,
+      12,
+      15
+     ]
+    }
+   ],
+   "firstFailures": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/geoice/icy-wind-player-fearow-charizard.json",
+   "move": "ICY_WIND",
+   "side": "player",
+   "attacker": "FEAROW",
+   "target": "CHARIZARD",
+   "geometry": {
+    "attackerCenter": {
+     "x": 72,
+     "y": 93
+    },
+    "targetCenter": {
+     "x": 176,
+     "y": 41
+    },
+    "spikeTargetCenter": {
+     "x": 176,
+     "y": 40
+    }
+   },
+   "rows": 287,
+   "slotRows": 287,
+   "orderRows": 287,
+   "divergentRows": 53,
+   "divergentSlotRows": 53,
+   "divergentOrderRows": 53,
+   "divergentSample": [
+    {
+     "age": 186,
+     "frame": 260,
+     "derived": [
+      "spike6:15 (retained 11)"
+     ],
+     "romOrder": [
+      14,
+      13,
+      12,
+      11,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ],
+     "order": [
+      14,
+      13,
+      12,
+      11,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ]
+    },
+    {
+     "age": 187,
+     "frame": 261,
+     "derived": [
+      "spike6:15 (retained 11)"
+     ],
+     "romOrder": [
+      14,
+      13,
+      12,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ],
+     "order": [
+      14,
+      13,
+      12,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ]
+    },
+    {
+     "age": 188,
+     "frame": 262,
+     "derived": [
+      "spike6:15 (retained 11)"
+     ],
+     "romOrder": [
+      14,
+      12,
+      13,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ],
+     "order": [
+      14,
+      12,
+      13,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ]
+    }
+   ],
+   "firstFailures": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/geoice/icy-wind-player-onix-golbat.json",
+   "move": "ICY_WIND",
+   "side": "player",
+   "attacker": "ONIX",
+   "target": "GOLBAT",
+   "geometry": {
+    "attackerCenter": {
+     "x": 72,
+     "y": 88
+    },
+    "targetCenter": {
+     "x": 176,
+     "y": 35
+    },
+    "spikeTargetCenter": {
+     "x": 176,
+     "y": 40
+    }
+   },
+   "rows": 287,
+   "slotRows": 287,
+   "orderRows": 287,
+   "divergentRows": 53,
+   "divergentSlotRows": 53,
+   "divergentOrderRows": 53,
+   "divergentSample": [
+    {
+     "age": 186,
+     "frame": 258,
+     "derived": [
+      "spike6:15 (retained 11)"
+     ],
+     "romOrder": [
+      14,
+      13,
+      12,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ],
+     "order": [
+      14,
+      13,
+      12,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ]
+    },
+    {
+     "age": 187,
+     "frame": 259,
+     "derived": [
+      "spike6:15 (retained 11)"
+     ],
+     "romOrder": [
+      14,
+      13,
+      12,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ],
+     "order": [
+      14,
+      13,
+      12,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ]
+    },
+    {
+     "age": 188,
+     "frame": 260,
+     "derived": [
+      "spike6:15 (retained 11)"
+     ],
+     "romOrder": [
+      14,
+      13,
+      12,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ],
+     "order": [
+      14,
+      13,
+      12,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ]
+    }
+   ],
+   "firstFailures": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/geoice/icy-wind-player-venusaur-luvdisc.json",
+   "move": "ICY_WIND",
+   "side": "player",
+   "attacker": "VENUSAUR",
+   "target": "LUVDISC",
+   "geometry": {
+    "attackerCenter": {
+     "x": 72,
+     "y": 95
+    },
+    "targetCenter": {
+     "x": 176,
+     "y": 64
+    },
+    "spikeTargetCenter": {
+     "x": 176,
+     "y": 40
+    }
+   },
+   "rows": 287,
+   "slotRows": 287,
+   "orderRows": 287,
+   "divergentRows": 53,
+   "divergentSlotRows": 53,
+   "divergentOrderRows": 53,
+   "divergentSample": [
+    {
+     "age": 186,
+     "frame": 262,
+     "derived": [
+      "spike6:15 (retained 11)"
+     ],
+     "romOrder": [
+      14,
+      13,
+      12,
+      11,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ],
+     "order": [
+      14,
+      13,
+      12,
+      11,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ]
+    },
+    {
+     "age": 187,
+     "frame": 263,
+     "derived": [
+      "spike6:15 (retained 11)"
+     ],
+     "romOrder": [
+      14,
+      12,
+      13,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ],
+     "order": [
+      14,
+      12,
+      13,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ]
+    },
+    {
+     "age": 188,
+     "frame": 264,
+     "derived": [
+      "spike6:15 (retained 11)"
+     ],
+     "romOrder": [
+      14,
+      12,
+      13,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ],
+     "order": [
+      14,
+      12,
+      13,
+      3,
+      5,
+      4,
+      9,
+      7,
+      10,
+      15
+     ]
+    }
+   ],
+   "firstFailures": []
+  }
+ ]
+}
