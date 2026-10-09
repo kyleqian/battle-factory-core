@@ -12,7 +12,8 @@ is the battle's semantic event history up to and including that body, one turn p
   Status_FireSpin      -> animation TURN_TRAP [83] on the trapped battler (General_TurnTrap's Fire Spin branch);
   General_StatsChange  -> animation STATS_CHANGE [21] (Double Team: STAT_ANIM_PLUS1 14 + STAT_EVASION 7).
 Any other label is UNMODELLED: no fixture is written after it (reported on stdout). Window = [activation, first inactive frame]; HP / status /
-personality from the ROM's gBattleMons at activation; genders from the scenario.
+personality from the ROM's gBattleMons at activation; genders from the scenario. Flamethrower rows carry ageOffset -15 (row 0 = the ROM
+activation = production age -15, the accepted order-consumer fixtures' framing).
 """
 import json, sys
 from pathlib import Path
@@ -28,6 +29,8 @@ MOVES = {"Move_WILL_O_WISP": 261, "Move_FLAMETHROWER": 53, "Move_HYDRO_PUMP": 56
 POWER = {261: 0, 53: 95, 56: 120, 83: 15, 80: 70, 91: 60, 104: 0, 113: 0, 58: 95, 115: 0, 185: 60, 129: 60, 85: 95}
 CONSUMERS = {53: "FLAMETHROWER", 113: "LIGHT_SCREEN", 115: "REFLECT", 85: "THUNDERBOLT"}
 STATUS1 = {"Status_Burn": 0x10, "Status_Paralysis": 0x40}
+# production age 0 relative to the ROM activation row (the accepted fixtures' framing: Flamethrower denseWindow activation+4 / ageOffset -11)
+AGE_OFFSET = {53: -15}
 
 
 def shown(status1: int) -> str:
@@ -64,7 +67,7 @@ for probe in sorted(probe_dir.glob("*.json")):
                 fx = {
                     "schema": "audit15-chain-fixture/v1", "move": CONSUMERS[move], "bodyIndex": k,
                     "probe": "tools/integration/prep48Probe.py", "scenario": str(SCEN / d["scenario"]),
-                    "denseWindow": {"startFrame": b["startFrame"], "endFrame": b["endFrame"]},
+                    "denseWindow": {"startFrame": b["startFrame"], "endFrame": b["endFrame"], **({"ageOffset": AGE_OFFSET[move]} if move in AGE_OFFSET else {})},
                     "attacker": {"species": SPECIES[at[atk]["species"]], "geometry": {"side": consumer_side}},
                     "target": {"species": SPECIES[at[1 - atk]["species"]], "geometry": {"side": "opponent" if consumer_side == "player" else "player"}},
                     "attackerPersonality": at[atk]["personality"],

@@ -6,7 +6,8 @@
  "scenario": "tools/integration/fixtures/audit-15/scenarios/fire-spin-flamethrower-ply.json",
  "denseWindow": {
   "startFrame": 2952,
-  "endFrame": 3161
+  "endFrame": 3161,
+  "ageOffset": -15
  },
  "attacker": {
   "species": "CHANSEY",

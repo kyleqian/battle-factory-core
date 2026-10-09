@@ -6,7 +6,8 @@
  "scenario": "tools/integration/fixtures/audit-15/scenarios/dig-flamethrower-ply.json",
  "denseWindow": {
   "startFrame": 1630,
-  "endFrame": 1839
+  "endFrame": 1839,
+  "ageOffset": -15
  },
  "attacker": {
   "species": "CHANSEY",

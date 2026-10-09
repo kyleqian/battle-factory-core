@@ -6,7 +6,8 @@
  "scenario": "tools/integration/fixtures/audit-15/scenarios/petal-dance-flamethrower-ply.json",
  "denseWindow": {
   "startFrame": 438,
-  "endFrame": 647
+  "endFrame": 647,
+  "ageOffset": -15
  },
  "attacker": {
   "species": "CHANSEY",

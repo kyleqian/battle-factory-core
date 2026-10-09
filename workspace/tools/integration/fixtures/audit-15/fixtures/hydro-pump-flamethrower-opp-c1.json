@@ -6,7 +6,8 @@
  "scenario": "tools/integration/fixtures/audit-15/scenarios/hydro-pump-flamethrower-opp.json",
  "denseWindow": {
   "startFrame": 1577,
-  "endFrame": 1786
+  "endFrame": 1786,
+  "ageOffset": -15
  },
  "attacker": {
   "species": "CHANSEY",

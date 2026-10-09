@@ -6,7 +6,8 @@
  "scenario": "tools/integration/fixtures/audit-15/scenarios/brn-flamethrower-ply.json",
  "denseWindow": {
   "startFrame": 476,
-  "endFrame": 685
+  "endFrame": 685,
+  "ageOffset": -15
  },
  "attacker": {
   "species": "CHANSEY",
