@@ -2438,26 +2438,6 @@
       ]
     },
     {
-      "move": "MOVE_FAINT_ATTACK",
-      "id": 185,
-      "sourceFieldEvidence": [
-        "../tools/integration/fixtures/prep6-live-adapter-receipt.json"
-      ],
-      "liveEvidence": [
-        "dense source framebuffer, PLAYER attacker only, twice fresh, zero residual, 221 rows (prep6-faint-attack-player.json via the staged probe wrapper tools/integration/prep6FaintAttackProbe.py); live BG_DARK background via the CRUNCH recipe",
-        "S10A sides: OPPONENT attacker added (liveMoveAnimationDuration(185) = 221 both sides; battleScene.ts FAINT_ATTACK live gate either side: roles by attacker / target, the opponent-side battler drawn first, an opponent-side attacker at its front idle rest until the elliptical task's first absolute x2/y2 write, ShakeMon2 on the target). Dense windows activation + 4 .. + 224 (row -4, no #142 activation row) from fresh direct-mGBA prep22Probe runs of tools/battle-lab/s10aside-faint-attack-*.json through the production live renderer, two invocations x two fresh runs: accepted-style GROVYLE -> ONIX 0 px and alternate elevated GOLBAT -> GOLEM 0 px; DELCATTY -> GOLEM differs only on ages 203..218 (its body is one frame shorter, the battle-lab restore-fade tail phase also seen on the player-side MURKROW alternate); the prep6 player fixture re-run (tools/integration/fixtures/s10a-live/faint-attack-*.json, receipt tools/integration/fixtures/sides-live-receipt.json; tests/animation/liveFaintAttackSides.test.ts)",
-        "ordinary route seed 186 / streak 0 / slots [0,0,0]: the opponent's Faint Attack (3rd body) adapter active 221/221, action-menu, ON/OFF rules/RNG/facility equal",
-        "ordinary route seed 0 / streak 7 / move index 1 (DELCATTY): adapter active 221/221, action-menu, ON/OFF rules/RNG equal",
-        "alternate species MURKROW player attacker dense proof (window start derived from the alternate scenario's source activation + the accepted offset; altSpecies9.py): 205/221 exact, 16 tail rows (286,928 px, ages 203..218) = the restore-fade phase; the control with the ACCEPTED pair in the same battle-lab context shows the same rows (281,024 px), so it is a lab-vs-staged-probe one-frame difference of the script, not a species effect"
-      ],
-      "palettePlan": "no plan, history invalidates",
-      "remaining": [
-                "restore-fade tail in a battle-lab context differs by one frame from the accepted staged evidence (either attacker side: a body one frame shorter shifts ages 203..218)",
-        "unknown entry/status/switch/summary/substitute/transform histories",
-        "whole-playable arbitrary-history framebuffer exactness"
-      ]
-    },
-    {
       "move": "MOVE_AERIAL_ACE",
       "id": 332,
       "sourceFieldEvidence": [
@@ -3704,7 +3684,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 242,
+  "implementedCount": 241,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 13,
@@ -3881,7 +3861,7 @@
     },
     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
   },
-  "faithfulTimingCount": 21,
+  "faithfulTimingCount": 22,
   "faithfulTimingAdapters": [
     {
       "id": 183,
@@ -5803,6 +5783,111 @@
         "OUT=SCRATCH/probe SC=<d4w-cr + audit-14 Confuse Ray scenario dir with list.tsv> sh tools/integration/speciesAudit14SwapProbes.sh && sh tools/integration/speciesAudit14SwapRun.sh SCRATCH/probe <scenario dir> SCRATCH/receipts",
         "OUT=SCRATCH/check P=10 sh tools/integration/d4tailsTimingCheck.sh (confuse-ray-*-chinchou-* windows)",
         "npx vitest run tests/animation/liveD4tailsTiming.test.ts tests/animation/liveSpeciesAudit14Fixes.test.ts"
+      ]
+    },
+    {
+      "id": 185,
+      "move": "MOVE_FAINT_ATTACK",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 205,
+          "fixedLagAges": [
+            80,
+            81,
+            108,
+            109,
+            182,
+            183
+          ],
+          "iterations": 219,
+          "side": "player",
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 226,
+              "measured": 1
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 225,
+              "measured": 6
+            }
+          ],
+          "chosen": "no-event",
+          "tieRuleUsed": false
+        },
+        {
+          "kind": "optional-lag-age",
+          "age": 205,
+          "fixedLagAges": [
+            80,
+            81,
+            108,
+            109,
+            182,
+            183
+          ],
+          "iterations": 219,
+          "side": "opponent",
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 226,
+              "measured": 2
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 225,
+              "measured": 1
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212,
+          213,
+          214,
+          215,
+          216,
+          217,
+          218
+        ],
+        "rows": 16,
+        "maxPixelsPerRow": 18620,
+        "cause": "the other side's phase of the optional lag at 205 (restorebg Task_FadeToBg state 2, battle_anim.c:1163-1175: LoadDefaultBg's VRAM decompress overrunning VBlank under the black screen): the default-BG swap, the 16-step fade-in and the release one frame apart on ages 203..218; every other row exact. Opponent no-lag DELCATTY -> GOLEM (220 rows) 297,920 px; player lag = the accepted staged prep6 body (221 rows) 281,024 px (max 17,564 / row)"
+      },
+      "d3": false,
+      "evidence": [
+        "reclassified from scoped exact (S10A fa185, #151 precedent: the adapter gained a measured CPU-phase parameter, per side; the player side renders the no-lag phase, faintAttack.ts faintAttackRestoreProfile = defaultBgSwapAge / doneAge minus one, liveMoveAnimationDuration(185) = 220 player / 221 opponent); the existing exact fixture proofs stay valid in their proved scope (opponent; the accepted prep6 player body is now the documented other phase)",
+        "tools/integration/fixtures/d4tails/counters.json (d4tailsCounters.sh, two fresh direct-mGBA runs each, r0 == r1): fixed lags 80, 81, 108, 109, 182, 183 in all 9 Faint Attack bodies; the optional lag at 205 in GOLBAT -> GOLEM / GROVYLE -> ONIX opponent, absent in DELCATTY -> GOLEM opponent and in all 6 player bodies (altspecies3 MURKROW -> ONIX, ONIX -> GROVYLE; prep11 GOLEM, species-audit GOLBAT / GOLEM / SHUCKLE prep6-alt-base)",
+        "tools/integration/fixtures/fa185/windows/*.json through the production live renderer (d4aTimingCheck.ts, one process per fixture, twice fresh): 8 policy-phase windows 0 px (6 player at 220 rows, 2 opponent at 221), 2 other-phase windows only on the documented ages; receipt tools/integration/fixtures/fa185-live-receipt.json",
+        "scoped-exact liveEvidence: dense source framebuffer, PLAYER attacker only, twice fresh, zero residual, 221 rows (prep6-faint-attack-player.json via the staged probe wrapper tools/integration/prep6FaintAttackProbe.py); live BG_DARK background via the CRUNCH recipe",
+        "scoped-exact liveEvidence: S10A sides: OPPONENT attacker added (liveMoveAnimationDuration(185) = 221 both sides; battleScene.ts FAINT_ATTACK live gate either side: roles by attacker / target, the opponent-side battler drawn first, an opponent-side attacker at its front idle rest until the elliptical task's first absolute x2/y2 write, ShakeMon2 on the target). Dense windows activation + 4 .. + 224 (row -4, no #142 activation row) from fresh direct-mGBA prep22Probe runs of tools/battle-lab/s10aside-faint-attack-*.json through the production live renderer, two invocations x two fresh runs: accepted-style GROVYLE -> ONIX 0 px and alternate elevated GOLBAT -> GOLEM 0 px; DELCATTY -> GOLEM differs only on ages 203..218 (its body is one frame shorter, the battle-lab restore-fade tail phase also seen on the player-side MURKROW alternate); the prep6 player fixture re-run (tools/integration/fixtures/s10a-live/faint-attack-*.json, receipt tools/integration/fixtures/sides-live-receipt.json; tests/animation/liveFaintAttackSides.test.ts)",
+        "scoped-exact liveEvidence: ordinary route seed 186 / streak 0 / slots [0,0,0]: the opponent's Faint Attack (3rd body) adapter active 221/221, action-menu, ON/OFF rules/RNG/facility equal",
+        "scoped-exact liveEvidence: ordinary route seed 0 / streak 7 / move index 1 (DELCATTY): adapter active 221/221, action-menu, ON/OFF rules/RNG equal",
+        "scoped-exact liveEvidence: alternate species MURKROW player attacker dense proof (window start derived from the alternate scenario's source activation + the accepted offset; altSpecies9.py): 205/221 exact, 16 tail rows (286,928 px, ages 203..218) = the restore-fade phase; the control with the ACCEPTED pair in the same battle-lab context shows the same rows (281,024 px), so it is a lab-vs-staged-probe one-frame difference of the script, not a species effect",
+        "scoped-exact remaining (kept): unknown entry/status/switch/summary/substitute/transform histories",
+        "scoped-exact remaining (kept): whole-playable arbitrary-history framebuffer exactness",
+        "sourceFieldEvidence: ../tools/integration/fixtures/prep6-live-adapter-receipt.json"
+      ],
+      "proofCommands": [
+        "python3 tools/integration/fa185Windows.py",
+        "OUT=SCRATCH/check P=6 sh tools/integration/fa185TimingCheck.sh",
+        "npx vitest run tests/animation/liveFa185Timing.test.ts tests/animation/liveFaintAttackSides.test.ts tests/animation/faintAttack.test.ts tests/animation/livePrep6MoveAdapters.test.ts"
       ]
     }
   ],

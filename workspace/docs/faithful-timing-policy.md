@@ -116,3 +116,16 @@ windows 11 long 0 px, 3 short only body ages 251..266), `tests/animation/liveD4t
 Faint Attack (185) is the same class (fixed lags 80, 81, 108, 109, 182, 183; optional 205: 226 / 225 rows) but is NOT landed: its
 player-side dominant phase is no lag (6 counted short bodies : the accepted prep6 body, long by pixels), while the live adapter renders the
 long body on both sides; a faithful player-side policy needs the restore fade one row earlier there (a presentation change). Opponent 2 : 1.
+
+## fa185: Faint Attack per-side restore lag (S10A, ISSUES #152 "Faint Attack (185) short bodies")
+
+Faint Attack (185) moved from scoped exact to faithful timing with a side-keyed `optional-lag-age` 205 entry (fixed lags 80, 81, 108, 109,
+182, 183; d4tails counters): player no lag (1 : 6, the accepted staged prep6 body counted long by pixels), opponent lag (2 : 1). The
+optional lag is the restorebg `Task_FadeToBg` state-2 frame (battle_anim.c:1163-1175: `LoadDefaultBg` -> `DrawMainBattleBackground`'s VRAM
+decompress and the fade-in `BeginHardwarePaletteFade(0xE8, 0, 16, 0, 1)` in the same task step) overrunning VBlank under the black screen;
+without it the default-BG swap, the 16-step fade-in, the task destroy (:1178-1182), `waitbgfadein` and `end` all run one frame earlier. The
+renderer derives the player phase from that (`faintAttackRestoreProfile(false)`: `defaultBgSwapAge` 204 -> 203, `doneAge` 219 -> 218; every
+earlier age unchanged), and `liveMoveAnimationDuration(185)` = 220 player / 221 opponent. Census: 241 scoped exact + 13 faithful random + 22
+faithful timing = 276. Proof: `tools/integration/fixtures/fa185-live-receipt.json` (10 windows `tools/integration/fixtures/fa185/windows`,
+d4aTimingCheck twice fresh: 8 policy-phase 0 px (6 player at 220 rows, 2 opponent at 221); DELCATTY -> GOLEM opponent (no lag) and the
+accepted prep6 player body (lag) only on ages 203..218), `tests/animation/liveFa185Timing.test.ts`.

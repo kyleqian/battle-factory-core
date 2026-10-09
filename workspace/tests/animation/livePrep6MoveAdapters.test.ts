@@ -9,6 +9,7 @@ import {
   LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveBattlerAnchors,
   liveMoveAnimationDuration, liveMoveAnimationPresentation,
 } from "../../src/engine/liveMoveAnimation.ts";
+import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS } from "../../src/engine/liveMoveTimingPolicy.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 
@@ -22,7 +23,8 @@ const cases = [
   { id: 230, move: "SWEET_SCENT", duration: [175, 175], shadow: 0, alt: ["VICTREEBEL", "ONIX"], route: { seed: 31, move: 3 as const, streak: 0 } },
   { id: 120, move: "SELF_DESTRUCT", duration: [113, 113], shadow: undefined, alt: ["FORRETRESS", "ONIX"], route: { seed: 56, move: 3 as const, streak: 14 } },
   { id: 282, move: "KNOCK_OFF", duration: [48, 48], shadow: undefined, alt: ["SABLEYE", "ONIX"], route: { seed: 15, move: 2 as const, streak: 7 } },
-  { id: 185, move: "FAINT_ATTACK", duration: [221, 221], shadow: undefined, alt: ["MURKROW", "ONIX"], route: { seed: 0, move: 1 as const, streak: 7 } },
+  // Faint Attack: faithful timing (fa185, liveMoveTimingPolicy.ts 185): the player side renders the no-restore-lag phase (220 rows).
+  { id: 185, move: "FAINT_ATTACK", duration: [220, 221], shadow: undefined, alt: ["MURKROW", "ONIX"], route: { seed: 0, move: 1 as const, streak: 7 } },
 ];
 
 function displayed(player: string, opponent: string): BattleResolutionDisplayedField {
@@ -62,7 +64,7 @@ const rulesWithoutSceneMarker = (v: { rules: any }) => {
 describe("live prep6 move adapters", () => {
   it("registers the seven moves with the accepted durations and shadow rows", () => {
     for (const c of [...cases, { id: 256, move: "SWALLOW", duration: [163, 161], shadow: 0 }]) {
-      expect(LIVE_MOVE_ANIMATION_IDS).toContain(c.id);
+      expect(c.id === 185 ? LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS : LIVE_MOVE_ANIMATION_IDS).toContain(c.id);
       expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[c.id]).toBe(c.shadow);
     }
     for (const c of cases) for (const a of [0, 1] as const) expect(liveMoveAnimationDuration(request(c.id, a)), `${c.move} ${a}`).toBe(c.duration[a]);

@@ -45,7 +45,7 @@ import { digAtAge } from "../animation/dig.ts";
 import { dreamEaterSpriteOrderPlanText } from "../animation/dreamEater.ts";
 import { gigaDrainSpriteOrderPlanText } from "../animation/gigaDrain.ts";
 import { megaDrainSpriteOrderPlanText } from "../animation/megaDrain.ts";
-import { FAINT_ATTACK_ANIMATION_PROFILE } from "../animation/faintAttack.ts";
+import { faintAttackRestoreProfile } from "../animation/faintAttack.ts";
 import { RAZOR_LEAF_BODY_LAST_AGE } from "../animation/razorLeaf.ts";
 import { THUNDER_PUNCH_MOVE_BODY_LAST_AGE } from "../animation/thunderPunch.ts";
 import { NEEDLE_ARM_FRAME_COUNT } from "../animation/needleArm.ts";
@@ -94,7 +94,7 @@ import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "j
 import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
 import spitUpRedOrbAsset from "../animation/assets/spit-up-red-orb.json" with { type: "json" };
 import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
-import { liveMoveBgWriteRow, liveMoveCounterTimingParameter, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveTimingBodyRows, liveMoveTimingParameter } from "./liveMoveTimingPolicy.ts";
+import { liveMoveBgWriteRow, liveMoveCounterTimingParameter, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveTimingBodyRows, liveMoveTimingParameter, liveMoveTimingSidePhase } from "./liveMoveTimingPolicy.ts";
 import { resolveSpriteOrderDeferredLend, type SpriteOrderDeferredLend } from "./spriteOrderEventTransform.ts";
 import type { PresentationRngHost, PresentationRngWords } from "./presentationRngHost.ts";
 import { isWordsOrderDeferredUnit, WORDS_ORDER_GENERAL_ANIMATION } from "./wordsOrderUnits.ts";
@@ -288,8 +288,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   212, 265, 111, 275, 35, 20, 225,
   // prep5 (docs/next-adapters-prep5.md): Mist Ball, Aromatherapy, Follow Me, Metronome (body), Taunt, Belly Drum.
   296, 312, 266, 118, 269, 187,
-  // prep6 (docs/next-adapters-prep6.md): Rock Tomb, Safeguard, Sweet Scent, Self-Destruct, Swallow, Knock Off, Faint Attack (player attacker only).
-  317, 219, 230, 120, 256, 282, 185,
+  // prep6 (docs/next-adapters-prep6.md): Rock Tomb, Safeguard, Sweet Scent, Self-Destruct, Swallow, Knock Off; Faint Attack 185 reclassified to
+  // faithful timing (fa185, liveMoveTimingPolicy.ts 185, per-side restore lag); its exact fixtures stay valid in scope.
+  317, 219, 230, 120, 256, 282,
   // prep7 (docs/next-adapters-prep7.md): Aerial Ace, Quick Attack, Ice Punch, Fake Tears, Sleep Talk, Rock Slide (opponent attacker only),
   // Fire Blast (known-order gate), Dragon Dance (allocationOrder derived from the provider order).
   332, 98, 8, 313, 214, 157, 126, 349,
@@ -1120,10 +1121,12 @@ export function liveMoveAnimationDuration(
     // activation + 6 (prep6 s2.4), so live age 0 is the reducer's age 0 and the activation is live age -6 (no #142 row).
     // The window ends 4 frames after the script end (124/128); duration = rows + ageOffset (the Dragon Breath convention).
     case 282: return 48;
-    // Faint Attack: 221 rows (2344..2564 player attacker), reducer ages 0..220 (faintAttack.ts LAST_ANIMATION_OWNED_AGE);
-    // the window starts 4 frames after the script activation (row -4, no #142 shadow row). Both attacker sides (prep6 s0 player;
-    // S10A sides opponent).
-    case 185: return 221;
+    // Faint Attack: 221 rows with the restore lag (2344..2564 accepted player attacker), reducer ages 0..220 (faintAttack.ts
+    // LAST_ANIMATION_OWNED_AGE); the window starts 4 frames after the script activation (row -4, no #142 shadow row). Both attacker sides
+    // (prep6 s0 player; S10A sides opponent). Faithful timing (fa185): the policy's per-side restore lag (player none: 220 rows, the
+    // restore fade-in one row earlier, faintAttackRestoreProfile; opponent lag: 221).
+    case 185:
+      return 220 + (liveMoveTimingSidePhase(185, "optional-lag-age", request.attacker === 0 ? "player" : "opponent") === "event" ? 1 : 0);
     // Swallow: per stockpile branch (request.turn = gBattleScripting.animTurn = stockpileCounter, prep6 s2.1) and side:
     // player 163/178/193 (1247..1409 ...), opponent 161/176/191 (= 148 + 15 turn / 146 + 15 turn), every window end = script end.
     case 256:
@@ -2385,7 +2388,9 @@ export function liveMoveAnimationPresentation(
       // Either attacker side (S10A sides: the opponent attacker's dense windows, tools/integration/fixtures/s10a-live/faint-attack-*.json).
       // The canonical ONIX_TO_GROVYLE profile = the source-age constants (prep6 s2.1: spriteCorners and the target's
       // hit-splat centre derive exactly); the move text and HP chrome come from the live view under liveField.
-      config = { move: "FAINT_ATTACK", attacker, target, animationProfile: FAINT_ATTACK_ANIMATION_PROFILE,
+      // Faithful timing (fa185): the per-side restore-lag phase picks the profile (player: the fade-in one row earlier).
+      config = { move: "FAINT_ATTACK", attacker, target,
+        animationProfile: faintAttackRestoreProfile(liveMoveTimingSidePhase(185, "optional-lag-age", attacker.geometry.side) === "event"),
         fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" },
         moveTextStartAge: -24 };
       break;

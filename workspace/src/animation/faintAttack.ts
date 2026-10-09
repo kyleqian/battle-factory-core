@@ -94,6 +94,21 @@ export const FAINT_ATTACK_ANIMATION_PROFILE: Readonly<FaintAttackAnimationProfil
     ellipseAngleStep: 8,
   });
 
+/**
+ * The restore fade's CPU phase (D4, liveMoveTimingPolicy.ts 185). `restorebg` runs Task_FadeToBg (battle_anim.c:1148): state 0 fades BG3 to
+ * black (ages 184..199), state 2 (:1163-1175) calls LoadDefaultBg -> DrawMainBattleBackground (the VRAM decompress) and starts the fade-in
+ * BeginHardwarePaletteFade(0xE8, 0, 16, 0, 1) in the same step, state 3 (:1178-1182) destroys the task, then waitbgfadein (:1243) and `end`
+ * release the script. The decompress frame may overrun VBlank under the black screen (the optional lag at body age 205); the canonical profile
+ * is that phase. Without it the default-BG swap, the 16-step fade-in and the release all run one frame earlier: defaultBgSwapAge and doneAge
+ * minus one (every earlier age unchanged), so the window is one row shorter.
+ */
+export function faintAttackRestoreProfile(
+  restoreLag: boolean,
+  profile: Readonly<FaintAttackAnimationProfile> = FAINT_ATTACK_ANIMATION_PROFILE,
+): Readonly<FaintAttackAnimationProfile> {
+  return restoreLag ? profile : Object.freeze({ ...profile, defaultBgSwapAge: profile.defaultBgSwapAge - 1, doneAge: profile.doneAge - 1 });
+}
+
 export interface FaintAttackResolutionState {
   /** The healthbox display controller drains independently of battle HP RAM. */
   displayedHp: number;

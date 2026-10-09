@@ -1,0 +1,11 @@
+{
+ "sourceFixture": "tools/integration/fixtures/s10a-live/faint-attack-alt-opponent-golbat-player-golem.json",
+ "move": "FAINT_ATTACK",
+ "denseWindow": {
+  "startFrame": 84,
+  "endFrame": 304,
+  "ageOffset": 0
+ },
+ "timingPhase": "event",
+ "timingEvidence": "d4tails counters tools/battle-lab/s10aside-faint-attack-opponent-golbat-player-golem.json: body 226 rows, lag ages [80, 81, 108, 109, 182, 183, 205], r0 == r1"
+}
