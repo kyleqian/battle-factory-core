@@ -17,8 +17,8 @@
   build, differential 624/624 vs `ccc4774c4`. Supervisor: liveShareCensus.ts before / after rerun independently (prep43CensusDelta:
   0 pairing mismatches, 0 regressions, +55 / +6,302, battle digest identical); clean merge on unchanged master -> touched tests 47/47,
   smoke 448.
-- Folded Opus worker  (SIDE lane, narrow production grant) as  (src tree ): plans51 — EXACT order
-  plans for Outrage 200 (both sides identical, 147/147 ROM instances / 6,468 allocation frames) and FOCUS_BAND ( +
+- Folded Opus worker `05d8e1689` (SIDE lane, narrow production grant) as `b8b169745` (src tree `dae0a8b9`): plans51 — EXACT order
+  plans for Outrage 200 (both sides identical, 147/147 ROM instances / 6,468 allocation frames) and FOCUS_BAND (`Cf;D0;Cf;D1;Cf` +
   carry, 14/14; staged by a 120-seed sweep with the holder taking an Outrage KO). Table 525 -> 527 bodies / 219 -> 221 plans / 24 -> 25
   anims. Census seeds 0..299: +5 / +1,062 (predictor 7 / 1,342: the other 2 stop at the later-body consumer gate), 0 regressions.
   NOT landed, each with its exact blocker (docs/next-adapters-plans51.md): Dive / Fly / Bounce (the host invalidates on every
@@ -30,9 +30,9 @@
   plans51Check on the committed units byte-identical; census rerun +5 / +1,062, 0 regressions, digest identical; fresh probes of 2
   Outrage + 4 FOCUS_BAND jobs all EXACT under the plan (10/10, 4/4) — but the Outrage stagings replay a different trajectory than the
   worker's batch (A == B inside each batch; ISSUES #154).
-- Supervisor union gates on  (src ; alloc50 + plans51): typecheck, full suite 1,585 files / 13,052 tests, build,
-  differential 624/624 vs , census seeds 0..299 93.41 % by count / 94.75 % by frames (+60 / +7,364 vs  = the sum
-  of both folds; 0 regressions, identical commands + digest) ().
+- Supervisor union gates on `b8b169745` (src `dae0a8b9`; alloc50 + plans51): typecheck, full suite 1,585 files / 13,052 tests, build,
+  differential 624/624 vs `ccc4774c4`, census seeds 0..299 93.41 % by count / 94.75 % by frames (+60 / +7,364 vs `ccc4774c4` = the sum
+  of both folds; 0 regressions, identical commands + digest) (`tools/integration/fixtures/union-gates-b8b169745.json`).
 
 ## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
 
