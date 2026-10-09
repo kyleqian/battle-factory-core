@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-09 (overnight) — S10A: allocator ids, order chains + 18 plans, Giga / Mega Drain geometry order (checkpoint)
+
+- **State:** local master `5e0b86a42`, production src tree `21729666` (union of three folds). Supervisor union gates on that
+  code: typecheck, 1,575 files / 12,958 -> 12,973 tests, build, differential 624/624 (`union-gates-45a5832f7.json`). Census
+  seeds 0..299: **85.71 % live by count / 85.41 % by frames** (session start 81.54 / 80.19 on `2d29f058e`); gameplay command
+  sequence and battle digest identical at every fold. Counts unchanged 245 + 13 + 18 (host-history widening, no new adapters).
+- **Did:** folded allocland (prep44's 50 audited allocator NET-ZERO ids), prep45 (order invalidator chains; 18 units EXACT per frame)
+  + order45 (those plans live: BRN, TURN_TRAP by wrapped move, WISH / INGRAIN heal, Hydro Pump, Reversal, Solar Beam by turn, ...),
+  gdgeo (geometry-keyed Giga Drain / Mega Drain order from the renderer's orb timeline; 48/48 ROM plans incl. 9 predicted flips).
+  Every fold re-proved by the supervisor (evidence scripts into fresh dirs byte-identical, census reruns byte-identical).
+- **Running:** integration `geoice` (Icy Wind / Blizzard at arbitrary geometry), side `prep46` (Random2-word order units +
+  generalized deferred lend). Queued: side `audit15` (chain routes that became live tonight vs the ROM).
+- **Next:** ROADMAP S10A list; ledger detail in ANIMATION_INTEGRATION_PROGRESS.md.
+- **Notes:** no DEFERRED entries. Soak gates superseded for S10A (ANIMATION_VERIFICATION scoped policy).
+
+---
+
 ## 2026-10-08 (overnight) — S10A: Substitute presentation, deferred order lend, live-share census, order plans; 245 + 13 + 18
 
 - **State:** local master, production src tree `e3fc2240` (`65dec33c2`): 245 scoped-exact + 13 faithful-random +
@@ -55,26 +72,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (presentation only). New ISSUES #153 (Scene OFF skips the Substitute body; kernel-owned). Soak gates superseded for
   S10A (ANIMATION_VERIFICATION scoped policy). All worker branches merged, worktrees removed; logs
   `.integration/validation/*-20261007*/`.
-
----
-
-## 2026-10-07 — D4 approved; unblock and finish S10A
-
-- **State:** local master; D4 option (b) approved. Production unchanged at src
-  tree `1efb1872`: 246 scoped-exact + 12 faithful-random, 18 accepted bodies
-  remaining. Implementation/accounting of faithful timing is next-run work.
-- **Did:** recorded the user's direction to unblock and finish; removed D4's
-  open launch heading and aligned roadmap, worker/supervisor instructions,
-  verification and #151's resume condition. `docs/faithful-timing.md` authorizes
-  deterministic dominant measured CPU phases with separate, disjoint claims;
-  further evidenced cases of this same class do not need another decision.
-- **Next:** launch the normal Opus 5.5 / Sonnet 5.5 supervisor, implement timing
-  accounting and banked adapters, finish remaining providers/continuations,
-  and verify the final census and playable preview. Batch shared mechanisms,
-  reuse valid receipts, and avoid re-probing settled CPU-phase limitations.
-- **Checks:** docs-only diff/ledger checks, no open deferred headings, resolved
-  Opus/Sonnet headless launch profile. Reuse the unchanged production receipt
-  `final-supervisor-gates-20261007.json`: typecheck, 12,665 tests, build 862.
-- **Notes:** gameplay/RNG and Factory acceptance stay unchanged. Exact fixture
-  scopes remain distinct from faithful timing; D3+D4 consumers count once.
-  This checkpoint records approval; the actual supervisor launch follows it.

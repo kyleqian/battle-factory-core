@@ -1,3 +1,26 @@
+## 2026-10-07 — D4 approved; unblock and finish S10A
+
+- **State:** local master; D4 option (b) approved. Production unchanged at src
+  tree `1efb1872`: 246 scoped-exact + 12 faithful-random, 18 accepted bodies
+  remaining. Implementation/accounting of faithful timing is next-run work.
+- **Did:** recorded the user's direction to unblock and finish; removed D4's
+  open launch heading and aligned roadmap, worker/supervisor instructions,
+  verification and #151's resume condition. `docs/faithful-timing.md` authorizes
+  deterministic dominant measured CPU phases with separate, disjoint claims;
+  further evidenced cases of this same class do not need another decision.
+- **Next:** launch the normal Opus 5.5 / Sonnet 5.5 supervisor, implement timing
+  accounting and banked adapters, finish remaining providers/continuations,
+  and verify the final census and playable preview. Batch shared mechanisms,
+  reuse valid receipts, and avoid re-probing settled CPU-phase limitations.
+- **Checks:** docs-only diff/ledger checks, no open deferred headings, resolved
+  Opus/Sonnet headless launch profile. Reuse the unchanged production receipt
+  `final-supervisor-gates-20261007.json`: typecheck, 12,665 tests, build 862.
+- **Notes:** gameplay/RNG and Factory acceptance stay unchanged. Exact fixture
+  scopes remain distinct from faithful timing; D3+D4 consumers count once.
+  This checkpoint records approval; the actual supervisor launch follows it.
+
+---
+
 ## 2026-10-06 (night) — S10A wind-down: 226 -> 246 scoped-exact, 10 -> 12 faithful-random; D4 OPEN
 
 - **State:** S10A, local master; production src tree `1efb1872` (prep29 R1 merge): 246 scoped-exact + 12
