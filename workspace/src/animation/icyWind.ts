@@ -237,13 +237,15 @@ const icyWindOamReplayCache = new Map<string, IcyWindOamReplay>();
  * snowballs; CreateSprite takes the lowest free slot of the pool. Throws only
  * when the pool is exhausted (no source-faithful slot in the projection).
  */
-function icyWindOamReplay(age: number, side: IcyWindSide, geometry: IcyWindGeometry): IcyWindOamReplay {
-  const key = `${side}:${geometry.attackerCenter.x},${geometry.attackerCenter.y}:${geometry.targetCenter.x},${geometry.targetCenter.y}`
+function icyWindOamReplay(
+  age: number, side: IcyWindSide, geometry: IcyWindGeometry, orderSeed: readonly number[] = ICY_WIND_EFFECT_SPRITE_ORDER_SEED,
+): IcyWindOamReplay {
+  const key = `${orderSeed.join(",")}:${side}:${geometry.attackerCenter.x},${geometry.attackerCenter.y}:${geometry.targetCenter.x},${geometry.targetCenter.y}`
     + `:${geometry.spikeTargetCenter.x},${geometry.spikeTargetCenter.y}`;
   let replay = icyWindOamReplayCache.get(key);
   if (!replay) {
     replay = {
-      scheduler: createSpriteOrderState(ICY_WIND_EFFECT_SPRITE_ORDER_SEED, ICY_WIND_EFFECT_SPRITE_ORDER_SEED),
+      scheduler: createSpriteOrderState(ICY_WIND_EFFECT_SPRITE_ORDER_SEED, orderSeed),
       nextAge: 0, orders: new Map(), slots: new Map(),
     };
     icyWindOamReplayCache.set(key, replay);
@@ -278,15 +280,19 @@ function icyWindOamReplay(age: number, side: IcyWindSide, geometry: IcyWindGeome
   return replay;
 }
 
-/** The software-OAM order consumed by `BuildOamBuffer` at `age`, with each sprite's derived slot. */
+/**
+ * The software-OAM order consumed by `BuildOamBuffer` at `age`, with each sprite's derived slot. `orderSeed` (a permutation of
+ * the pool) only exists for the history experiment (tests/icyWindBlizzardGeometry.test.ts): slots never depend on it.
+ */
 export function icyWindEffectOamOrderAtAge(
   age: number,
   side: IcyWindSide,
   geometry: IcyWindGeometry,
+  orderSeed: readonly number[] = ICY_WIND_EFFECT_SPRITE_ORDER_SEED,
 ): readonly IcyWindEffectOamEntry[] {
   if (!Number.isInteger(age)) throw new RangeError(`Icy Wind age must be an integer, got ${age}`);
   if (age < 0) return [];
-  return icyWindOamReplay(age, side, geometry).orders.get(age)!;
+  return icyWindOamReplay(age, side, geometry, orderSeed).orders.get(age)!;
 }
 
 interface MutableSnowball {

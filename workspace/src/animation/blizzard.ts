@@ -529,16 +529,14 @@ function blizzardOamReplay(
   age: number,
   side: BlizzardAttackerSide,
   geometry: BlizzardGeometry,
+  orderSeed: readonly number[] = BLIZZARD_EFFECT_SPRITE_ORDER_SEED,
 ): BlizzardOamOrderCache {
-  const cacheKey = `${side}:${geometry.attackerCenter.x},${geometry.attackerCenter.y}`
+  const cacheKey = `${orderSeed.join(",")}:${side}:${geometry.attackerCenter.x},${geometry.attackerCenter.y}`
     + `:${geometry.targetCenter.x},${geometry.targetCenter.y}`;
   let cache = blizzardOamOrderCache.get(cacheKey);
   if (!cache) {
     cache = {
-      scheduler: createSpriteOrderState(
-        BLIZZARD_EFFECT_SPRITE_ORDER_SEED,
-        BLIZZARD_EFFECT_SPRITE_ORDER_SEED,
-      ),
+      scheduler: createSpriteOrderState(BLIZZARD_EFFECT_SPRITE_ORDER_SEED, orderSeed),
       nextAge: 0,
       orders: new Map(),
       slots: new Map(),
@@ -583,15 +581,19 @@ function blizzardOamReplay(
   return cache;
 }
 
-/** The software-OAM order at `age`, each entry carrying its derived slot. */
+/**
+ * The software-OAM order at `age`, each entry carrying its derived slot. `orderSeed` (a permutation of the pool) only exists for
+ * the history experiment (tests/icyWindBlizzardGeometry.test.ts): slots never depend on it.
+ */
 export function blizzardEffectOamOrderAtAge(
   age: number,
   side: BlizzardAttackerSide,
   geometry: BlizzardGeometry,
+  orderSeed: readonly number[] = BLIZZARD_EFFECT_SPRITE_ORDER_SEED,
 ): readonly BlizzardEffectOamEntry[] {
   if (!Number.isInteger(age)) throw new RangeError(`Blizzard age must be an integer, got ${age}`);
   if (age < 0) return [];
-  return blizzardOamReplay(age, side, geometry).orders.get(age)!;
+  return blizzardOamReplay(age, side, geometry, orderSeed).orders.get(age)!;
 }
 
 interface BlizzardOamOrderCache {
