@@ -8,8 +8,9 @@ import {
 } from '../src/engine/factoryRoundBattleOrchestrator.ts';
 
 // A crossed / trailing status animation invalidates the PALETTE host always, but the sprite ALLOCATOR host only when the
-// status animation is not audited net-zero (tools/integration/fixtures/prep50/status-net-zero-audit.json).
-const STATUS = {slp: [0, 2], psn: [0, 0x8], frz: [0, 0x20], infatuation: [1, 0x10000]} as const;
+// status animation is not audited net-zero (tools/integration/fixtures/prep50/status-net-zero-audit.json; prep52 adds
+// FRZ / INFATUATION / CURSED / NIGHTMARE, tools/integration/fixtures/prep52/net-zero-audit.json: see tests/alloc52StatusAllocator.test.ts).
+const STATUS = {slp: [0, 2], psn: [0, 0x8], wrapped: [1, 0x2000]} as const;
 
 function routeToMoveBody() {
  let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({id: 'status-tail', rngValue: 549, battleScene: 'on', factoryWinStreak: 0, playerTrainerId: 416049562, battleTowerLevel50WinStreak: 0, facilityState: {rentsCount: 0}, rentals: {type: 'generateInitial', selectedRentalIndexes: [0, 1, 2]}}));
@@ -57,7 +58,8 @@ describe('status-animation allocator net-zero set', () => {
     expect(state.liveMoveSpriteAllocatorHost?.host.historyKnown).toBe(true);
    }, 60000);
   }
-  for (const name of ['frz', 'infatuation'] as const) {
+  for (const name of ['wrapped'] as const) {
+   // frz / infatuation moved to alloc52 (now audited net-zero); WRAPPED is the unaudited status that still invalidates.
    it(`${where} ${name}: allocator host still goes unknown`, () => {
     const state = advanceWith(where, STATUS[name]);
     expect(state.liveMovePaletteHost?.host.historyKnown).toBe(false);
