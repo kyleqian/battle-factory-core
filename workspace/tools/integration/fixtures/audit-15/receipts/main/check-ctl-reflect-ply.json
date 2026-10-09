@@ -1,0 +1,30 @@
+{
+ "schema": "audit15-chain-check/v1",
+ "rows": [
+  {
+   "fixture": "ctl-reflect-ply-c0.json",
+   "move": "REFLECT",
+   "side": "player",
+   "units": 0,
+   "window": {
+    "startFrame": 67,
+    "endFrame": 145
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": true,
+   "firstBody": true,
+   "x2": null,
+   "rows": 79,
+   "expectedDuration": 79,
+   "exactRows": 79,
+   "residualPixels": 0,
+   "digests": [
+    "260b473ae3873092cbbf10e241c61a744b9d830a91aab52d3d894809ae02cda8",
+    "260b473ae3873092cbbf10e241c61a744b9d830a91aab52d3d894809ae02cda8"
+   ],
+   "residualRows": []
+  }
+ ]
+}

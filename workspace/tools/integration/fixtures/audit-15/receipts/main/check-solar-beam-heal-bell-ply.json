@@ -1,0 +1,88 @@
+{
+ "schema": "audit15-chain-check/v1",
+ "rows": [
+  {
+   "fixture": "solar-beam-heal-bell-ply-c0.json",
+   "move": "HEAL_BELL",
+   "side": "player",
+   "units": 1,
+   "window": {
+    "startFrame": 301,
+    "endFrame": 561
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": false,
+   "x2": null,
+   "rows": 261,
+   "expectedDuration": 261,
+   "exactRows": 261,
+   "residualPixels": 0,
+   "digests": [
+    "a2e66c79502123ddfbfcba7298333b943902ecad7bc7edca5fd7306a61a173fc",
+    "a2e66c79502123ddfbfcba7298333b943902ecad7bc7edca5fd7306a61a173fc"
+   ],
+   "residualRows": []
+  },
+  {
+   "fixture": "solar-beam-heal-bell-ply-c1.json",
+   "move": "HEAL_BELL",
+   "side": "player",
+   "units": 4,
+   "window": {
+    "startFrame": 1773,
+    "endFrame": 2033
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": false,
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "rows": 261,
+   "expectedDuration": 261,
+   "exactRows": 261,
+   "residualPixels": 0,
+   "digests": [
+    "2dccf21bc50c587f79bda7257f6aec7c36a25840ff021ea2985de7c5bd6f8393",
+    "2dccf21bc50c587f79bda7257f6aec7c36a25840ff021ea2985de7c5bd6f8393"
+   ],
+   "residualRows": []
+  },
+  {
+   "fixture": "solar-beam-heal-bell-ply-c2.json",
+   "move": "HEAL_BELL",
+   "side": "player",
+   "units": 6,
+   "window": {
+    "startFrame": 2969,
+    "endFrame": 3229
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": false,
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "rows": 261,
+   "expectedDuration": 261,
+   "exactRows": 261,
+   "residualPixels": 0,
+   "digests": [
+    "d7b3e57f67431a2726801d4760b6d39983d9ff24dc06240dd47f103154bae3f4",
+    "d7b3e57f67431a2726801d4760b6d39983d9ff24dc06240dd47f103154bae3f4"
+   ],
+   "residualRows": []
+  }
+ ]
+}

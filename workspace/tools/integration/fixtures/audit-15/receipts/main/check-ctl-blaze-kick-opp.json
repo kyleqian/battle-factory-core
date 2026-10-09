@@ -1,0 +1,91 @@
+{
+ "schema": "audit15-chain-check/v1",
+ "rows": [
+  {
+   "fixture": "ctl-blaze-kick-opp-c0.json",
+   "move": "BLAZE_KICK",
+   "side": "opponent",
+   "units": 0,
+   "window": {
+    "startFrame": 81,
+    "endFrame": 177,
+    "ageOffset": -10
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": true,
+   "x2": null,
+   "rows": 97,
+   "expectedDuration": 78,
+   "exactRows": 97,
+   "residualPixels": 0,
+   "digests": [
+    "af3332b24e5de34d7a8466c3df2029bb18269bb063ebe539fc86d6000c7b3b7b",
+    "af3332b24e5de34d7a8466c3df2029bb18269bb063ebe539fc86d6000c7b3b7b"
+   ],
+   "residualRows": []
+  },
+  {
+   "fixture": "ctl-blaze-kick-opp-c1.json",
+   "move": "BLAZE_KICK",
+   "side": "opponent",
+   "units": 2,
+   "window": {
+    "startFrame": 1415,
+    "endFrame": 1511,
+    "ageOffset": -10
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": false,
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "rows": 97,
+   "expectedDuration": 78,
+   "exactRows": 97,
+   "residualPixels": 0,
+   "digests": [
+    "39cbe0a45c9411c5a4067efd406c4875131c5bcffb1a940ac42fc3af7c72a458",
+    "39cbe0a45c9411c5a4067efd406c4875131c5bcffb1a940ac42fc3af7c72a458"
+   ],
+   "residualRows": []
+  },
+  {
+   "fixture": "ctl-blaze-kick-opp-c2.json",
+   "move": "BLAZE_KICK",
+   "side": "opponent",
+   "units": 4,
+   "window": {
+    "startFrame": 2749,
+    "endFrame": 2845,
+    "ageOffset": -10
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": false,
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "rows": 97,
+   "expectedDuration": 78,
+   "exactRows": 97,
+   "residualPixels": 0,
+   "digests": [
+    "31a2d1d976b1d2e33288bc117a5d8888430348f18da1449a2c718db35e92a4c1",
+    "31a2d1d976b1d2e33288bc117a5d8888430348f18da1449a2c718db35e92a4c1"
+   ],
+   "residualRows": []
+  }
+ ]
+}

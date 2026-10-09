@@ -1,0 +1,35 @@
+{
+ "schema": "audit15-chain-check/v1",
+ "rows": [
+  {
+   "fixture": "dig-blaze-kick-ply-c0.json",
+   "move": "BLAZE_KICK",
+   "side": "player",
+   "units": 3,
+   "window": {
+    "startFrame": 1628,
+    "endFrame": 1724,
+    "ageOffset": -10
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": false,
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "rows": 97,
+   "expectedDuration": 78,
+   "exactRows": 97,
+   "residualPixels": 0,
+   "digests": [
+    "e0bbd47a09ff540a5841a35c4d180df1d0f0c42cb43b3a4ed062fbb5290d772b",
+    "e0bbd47a09ff540a5841a35c4d180df1d0f0c42cb43b3a4ed062fbb5290d772b"
+   ],
+   "residualRows": []
+  }
+ ]
+}

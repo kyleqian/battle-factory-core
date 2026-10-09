@@ -1,0 +1,91 @@
+{
+ "schema": "audit15-chain-check/v1",
+ "rows": [
+  {
+   "fixture": "fire-spin-blaze-kick-ply-c0.json",
+   "move": "BLAZE_KICK",
+   "side": "player",
+   "units": 0,
+   "window": {
+    "startFrame": 247,
+    "endFrame": 343,
+    "ageOffset": -10
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": true,
+   "x2": null,
+   "rows": 97,
+   "expectedDuration": 78,
+   "exactRows": 97,
+   "residualPixels": 0,
+   "digests": [
+    "a00305c25a1bf54eee1df012f45a87971e84724613d8adf7f0f18182e9bcc829",
+    "a00305c25a1bf54eee1df012f45a87971e84724613d8adf7f0f18182e9bcc829"
+   ],
+   "residualRows": []
+  },
+  {
+   "fixture": "fire-spin-blaze-kick-ply-c1.json",
+   "move": "BLAZE_KICK",
+   "side": "player",
+   "units": 6,
+   "window": {
+    "startFrame": 1717,
+    "endFrame": 1813,
+    "ageOffset": -10
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": false,
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "rows": 97,
+   "expectedDuration": 78,
+   "exactRows": 97,
+   "residualPixels": 0,
+   "digests": [
+    "8207b81c37e0064b7dc5d1db8819d2f55ae8d5a5db87bb0749d8c3468e2be064",
+    "8207b81c37e0064b7dc5d1db8819d2f55ae8d5a5db87bb0749d8c3468e2be064"
+   ],
+   "residualRows": []
+  },
+  {
+   "fixture": "fire-spin-blaze-kick-ply-c2.json",
+   "move": "BLAZE_KICK",
+   "side": "player",
+   "units": 12,
+   "window": {
+    "startFrame": 2950,
+    "endFrame": 3046,
+    "ageOffset": -10
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": false,
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "rows": 97,
+   "expectedDuration": 78,
+   "exactRows": 97,
+   "residualPixels": 0,
+   "digests": [
+    "abb98a5cfdc7af2af43e838722b5204281ec488ee6f71d21d2c9fe26bb40e504",
+    "abb98a5cfdc7af2af43e838722b5204281ec488ee6f71d21d2c9fe26bb40e504"
+   ],
+   "residualRows": []
+  }
+ ]
+}

@@ -4,8 +4,11 @@
 // (verifyLiveAdapterFramebuffer, POKEBENCH_LIVE_PROBE_SHARE=1; the harness throws unless both runs give identical per-row digests).
 // First reports whether the production host lends KNOWN at the consumer and whether the adapter is live at age 0 (a declined /
 // fallback row is recorded, not pixel-claimed).
+// AUDIT15_ENTRY_LEND=1: sensitivity control — the same window with the history cut to the consumer body alone (production's first-body
+// order / allocator / x2 lends instead of the chain's); a chain row whose entry-lend control is also 0 px does not discriminate the lend.
 //   POKEBENCH_LIVE_PROBE_SHARE=1 node --experimental-strip-types --no-warnings tools/integration/audit15Check.ts <fixture-dir> <out.json> [name-filter]
-import { readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { liveView, verifyLiveAdapterFramebuffer, type Fixture } from "./liveAdapterFramebuffer.ts";
 import { replayPostKoTurnsThroughHost } from "./postkoHostReplay.ts";
@@ -15,8 +18,13 @@ type Json = Record<string, any>;
 const [dir, out, filter] = process.argv.slice(2) as [string, string, string | undefined];
 const rows: Json[] = [];
 for (const name of readdirSync(dir).filter((n) => n.endsWith(".json") && (!filter || n.startsWith(filter))).sort()) {
-  const path = join(dir, name);
+  let path = join(dir, name);
   const f = JSON.parse(readFileSync(path, "utf8")) as Fixture & Json;
+  if (process.env.AUDIT15_ENTRY_LEND === "1") {
+    f.precedingTurns = [{ events: [f.precedingTurns.at(-1).events.at(-1)] }];
+    path = join(mkdtempSync(join(tmpdir(), "audit15-entry-")), name);
+    writeFileSync(path, JSON.stringify(f));
+  }
   const lend = replayPostKoTurnsThroughHost(f.precedingTurns);
   const view = liveView(f, 0), e = view.effect as Json;
   const live = liveMoveAnimationPresentation(e.request, view.field, 0, e.paletteInput, e.spriteAllocatorInput, e.spriteOrderInput,

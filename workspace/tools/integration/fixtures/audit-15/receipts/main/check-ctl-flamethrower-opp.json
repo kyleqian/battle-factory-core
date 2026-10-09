@@ -1,0 +1,91 @@
+{
+ "schema": "audit15-chain-check/v1",
+ "rows": [
+  {
+   "fixture": "ctl-flamethrower-opp-c0.json",
+   "move": "FLAMETHROWER",
+   "side": "opponent",
+   "units": 0,
+   "window": {
+    "startFrame": 83,
+    "endFrame": 292,
+    "ageOffset": -15
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": true,
+   "x2": null,
+   "rows": 210,
+   "expectedDuration": 115,
+   "exactRows": 210,
+   "residualPixels": 0,
+   "digests": [
+    "ab36928b83993696b8beab9bcd69adceefe2443658c64476143ca5138958e14e",
+    "ab36928b83993696b8beab9bcd69adceefe2443658c64476143ca5138958e14e"
+   ],
+   "residualRows": []
+  },
+  {
+   "fixture": "ctl-flamethrower-opp-c1.json",
+   "move": "FLAMETHROWER",
+   "side": "opponent",
+   "units": 2,
+   "window": {
+    "startFrame": 1417,
+    "endFrame": 1626,
+    "ageOffset": -15
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": false,
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "rows": 210,
+   "expectedDuration": 115,
+   "exactRows": 210,
+   "residualPixels": 0,
+   "digests": [
+    "e3ff33d6fb42ffd80289ef2d96dd6c4fb22829defb869d0a497fc921f9d58560",
+    "e3ff33d6fb42ffd80289ef2d96dd6c4fb22829defb869d0a497fc921f9d58560"
+   ],
+   "residualRows": []
+  },
+  {
+   "fixture": "ctl-flamethrower-opp-c2.json",
+   "move": "FLAMETHROWER",
+   "side": "opponent",
+   "units": 4,
+   "window": {
+    "startFrame": 2751,
+    "endFrame": 2960,
+    "ageOffset": -15
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": false,
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "rows": 210,
+   "expectedDuration": 115,
+   "exactRows": 210,
+   "residualPixels": 0,
+   "digests": [
+    "469ce9b617e4a4aad8a392df9a87c7db7e43d2ceb7d7859ed587a09ee51bb464",
+    "469ce9b617e4a4aad8a392df9a87c7db7e43d2ceb7d7859ed587a09ee51bb464"
+   ],
+   "residualRows": []
+  }
+ ]
+}
