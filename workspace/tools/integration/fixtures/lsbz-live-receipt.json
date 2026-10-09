@@ -1,0 +1,608 @@
+{
+ "schema": "lsbz-live-receipt/v1",
+ "step": "S10A lsbz: ISSUES #152 timing items: (A) Light Screen (113) opponent row-59 BLDALPHA write phase -> faithful timing; (B) Blizzard (59) opponent geometry-derived duration",
+ "testedSrcTree": "cc1fcc8af9e401f037515648a6e85f87b2eb5176+wip",
+ "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+ "lightScreen": {
+  "policy": {
+   "opponent": {
+    "kind": "bg-write-row",
+    "age": 60,
+    "hold": 2,
+    "direct": 9,
+    "chosen": "no-event",
+    "bodyRows": 88
+   },
+   "player": "no parameter (direct in 3 of 3)"
+  },
+  "mechanism": "Move_LIGHT_SCREEN's AnimDefensiveWall alpha fade: an OPPONENT attacker's BLDALPHA step written at body row 59 (reducer age 52; eva 9 -> 8) reaches the I/O register at once (no-event, the dominant phase) or is buffered by SetGpuReg (VCOUNT outside VBlank, sGpuRegWaitingList [0x52]) and lost under the row-60 write (event: row 59 repeats 9/7). Lag ages [68, 69] in both phases (audit-15 receipts/vblank/lag-counters.txt); the body is 88 rows either way. lightScreen.ts specialScreenAtAge opponentBlendHold (default true = the accepted corpus); liveMoveAnimation.ts case 113 passes the policy phase (false).",
+  "summary": {
+   "fixtures": 19,
+   "policyPhase": 17,
+   "policyPhaseZeroPx": 17,
+   "otherPhase": 2,
+   "otherPhaseOnlyDocumented": 2,
+   "violations": 0,
+   "digestsIdentical": true
+  },
+  "perSide": {
+   "player": {
+    "fixtures": 8,
+    "policyPhase": 8,
+    "policyPhaseZeroPx": 8,
+    "otherPhase": 0,
+    "otherPhaseOnlyDocumented": 0,
+    "violations": 0,
+    "digestsIdentical": true
+   },
+   "opponent": {
+    "fixtures": 11,
+    "policyPhase": 9,
+    "policyPhaseZeroPx": 9,
+    "otherPhase": 2,
+    "otherPhaseOnlyDocumented": 2,
+    "violations": 0,
+    "digestsIdentical": true
+   }
+  },
+  "declined": [
+   "audit-15 acc-tackle / tackle / brn light-screen-opp: production decline (allocator host unknown after Tackle / Status_Burn), fallback, no live claim"
+  ]
+ },
+ "windows": [
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-acc-ctl-light-screen-opp.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/acc-ctl-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "EXEGGCUTE -> ONIX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 79,
+    "endFrame": 166,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "audit-15 receipts/main: production hold 2658 px (ages 59..59), r1 == r2; vblank row 59 no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-acc-double-team-light-screen-opp.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/acc-double-team-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "EXEGGCUTE -> ONIX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 445,
+    "endFrame": 532,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "audit-15 receipts/main: production hold 2658 px (ages 59..59), r1 == r2; vblank row 59 no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-acc-faint-attack-light-screen-opp.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/acc-faint-attack-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "EXEGGCUTE -> ONIX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 519,
+    "endFrame": 606,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "audit-15 receipts/main: production hold 2658 px (ages 59..59), r1 == r2"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-acc-swift-light-screen-opp.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/acc-swift-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "EXEGGCUTE -> ONIX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 254,
+    "endFrame": 341,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "audit-15 receipts/main: production hold 2658 px (ages 59..59), r1 == r2"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-ctl-light-screen-opp.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/ctl-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "CHANSEY -> SNORLAX",
+   "measuredPhase": "event",
+   "selectedPhase": false,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 77,
+    "endFrame": 164,
+    "ageOffset": 0
+   },
+   "px": [
+    2658,
+    2658,
+    2658,
+    2658
+   ],
+   "affectedAges": [
+    59
+   ],
+   "maxPixelsPerRow": 2658,
+   "digestsIdentical": true,
+   "documentedAges": [
+    59
+   ],
+   "violations": [],
+   "timingEvidence": "audit-15 receipts/main: production hold 0 px (ages -), r1 == r2; vblank row 59 event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-ctl-light-screen-ply.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/ctl-light-screen-ply-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "pair": "CHANSEY -> SNORLAX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 73,
+    "endFrame": 160,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "player attacker (no timing parameter): audit-15 receipts/main 0 px, r1 == r2; vblank row 59 direct"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-double-team-light-screen-opp.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/double-team-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "CHANSEY -> SNORLAX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 449,
+    "endFrame": 536,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "audit-15 receipts/main: production hold 2658 px (ages 59..59), r1 == r2; vblank row 59 no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-double-team-light-screen-ply.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/double-team-light-screen-ply-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "pair": "CHANSEY -> SNORLAX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 453,
+    "endFrame": 540,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "player attacker (no timing parameter): audit-15 receipts/main 0 px, r1 == r2; vblank row 59 direct"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-faint-attack-light-screen-opp.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/faint-attack-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "CHANSEY -> SNORLAX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 407,
+    "endFrame": 494,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "audit-15 receipts/main: production hold 2658 px (ages 59..59), r1 == r2; vblank row 59 no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-faint-attack-light-screen-ply.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/faint-attack-light-screen-ply-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "pair": "CHANSEY -> SNORLAX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 410,
+    "endFrame": 497,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "player attacker (no timing parameter): audit-15 receipts/main 0 px, r1 == r2; vblank row 59 direct"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-hydro-pump-light-screen-opp.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/hydro-pump-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "CHANSEY -> SNORLAX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 334,
+    "endFrame": 421,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "audit-15 receipts/main: production hold 2658 px (ages 59..59), r1 == r2"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-ice-beam-light-screen-opp.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/ice-beam-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "CHANSEY -> SNORLAX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 391,
+    "endFrame": 478,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "audit-15 receipts/main: production hold 2658 px (ages 59..59), r1 == r2"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-a15-swift-light-screen-opp.json",
+   "sourceFixture": "tools/integration/fixtures/audit-15/fixtures/swift-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "CHANSEY -> SNORLAX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 432,
+    "endFrame": 519,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "audit-15 receipts/main: production hold 2658 px (ages 59..59), r1 == r2; vblank row 59 no-event"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-accepted-opponent.json",
+   "sourceFixture": "tools/compare/fixtures/light-screen-opponent-exeggcute-player-onix.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "pair": "EXEGGCUTE -> ONIX",
+   "measuredPhase": "event",
+   "selectedPhase": false,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 213,
+    "endFrame": 300,
+    "ageOffset": 0
+   },
+   "px": [
+    2658,
+    2658,
+    2658,
+    2658
+   ],
+   "affectedAges": [
+    59
+   ],
+   "maxPixelsPerRow": 2658,
+   "digestsIdentical": true,
+   "documentedAges": [
+    59
+   ],
+   "violations": [],
+   "timingEvidence": "accepted EXEGGCUTE / ONIX after Tackle: 0 px under the hold (88 rows); audit-15 patch-ls-nohold 0 -> 2,658 px on row 59; vblank acc-tackle row 59 buffered [0x52]"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-derived-golbat-live-slowpoke-player.json",
+   "sourceFixture": "tools/integration/fixtures/species-audit/derived-golbat/light-screen-live-slowpoke-player.json",
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "pair": "SLOWPOKE -> GOLBAT",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 322,
+    "endFrame": 409,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "player attacker (no timing parameter): accepted / species-audit window, 0 px"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-derived-live-slowpoke-player.json",
+   "sourceFixture": "tools/integration/fixtures/species-audit/derived/light-screen-live-slowpoke-player.json",
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "pair": "SLOWPOKE -> GOLEM",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 334,
+    "endFrame": 421,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "player attacker (no timing parameter): accepted / species-audit window, 0 px"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-derived-shuckle-live-slowpoke-player.json",
+   "sourceFixture": "tools/integration/fixtures/species-audit/derived-shuckle/light-screen-live-slowpoke-player.json",
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "pair": "SLOWPOKE -> SHUCKLE",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 74,
+    "endFrame": 161,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "player attacker (no timing parameter): accepted / species-audit window, 0 px"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-live-player.json",
+   "sourceFixture": "tools/compare/fixtures/light-screen-player-exeggcute-opponent-onix.json",
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "pair": "EXEGGCUTE -> ONIX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 303,
+    "endFrame": 390,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "player attacker (no timing parameter): accepted / species-audit window, 0 px"
+  },
+  {
+   "fixture": "tools/integration/fixtures/lsbz/windows/light-screen-live-slowpoke-player.json",
+   "sourceFixture": "tools/integration/fixtures/light-screen-live-slowpoke-player.json",
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "pair": "SLOWPOKE -> ONIX",
+   "measuredPhase": "no-event",
+   "selectedPhase": true,
+   "rows": 88,
+   "expectedDuration": 88,
+   "denseWindow": {
+    "startFrame": 306,
+    "endFrame": 393,
+    "ageOffset": 0
+   },
+   "px": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "affectedAges": [],
+   "maxPixelsPerRow": 0,
+   "digestsIdentical": true,
+   "documentedAges": null,
+   "violations": [],
+   "timingEvidence": "player attacker (no timing parameter): accepted / species-audit window, 0 px"
+  }
+ ],
+ "summary": {
+  "fixtures": 19,
+  "policyPhase": 17,
+  "policyPhaseZeroPx": 17,
+  "otherPhase": 2,
+  "otherPhaseOnlyDocumented": 2,
+  "violations": 0,
+  "digestsIdentical": true
+ },
+ "commands": [
+  "python3 -I tools/integration/lsbzWindows.py",
+  "OUT=SCRATCH/checkA P=10 sh tools/integration/lsbzTimingCheck.sh; OUT=SCRATCH/checkB P=10 sh tools/integration/lsbzTimingCheck.sh",
+  "python3 -I tools/integration/lsbzReceipt.py SCRATCH/checkA SCRATCH/checkB $(git rev-parse HEAD:workspace/src) [key=file.json ...]"
+ ]
+}

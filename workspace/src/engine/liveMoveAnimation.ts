@@ -212,7 +212,9 @@ const liveIceBallCounter = (rolloutCounter: number | undefined): 0 | 1 | 2 | 3 |
 
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   2, 5, 9, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 42, 43, 44, 47, 48, 49, 50,
-  51, 55, 65, 66, 67, 68, 74, 75, 78, 79, 83, 92, 93, 95, 97, 101, 103, 105, 106, 108, 112, 113,
+  51, 55, 65, 66, 67, 68, 74, 75, 78, 79, 83, 92, 93, 95, 97, 101, 103, 105, 106, 108, 112,
+  // Light Screen 113 reclassified to faithful timing (lsbz, liveMoveTimingPolicy.ts 113, the opponent's row-59 BLDALPHA write phase);
+  // its exact fixtures stay valid in scope.
   114, 115, 122, 124, 131, 136, 147, 148, 151, 154, 156, 158, 162, 163, 172, 178, 180, 182, 186, 188, 201, 204,
   208, 211, 213, 223, 227, 231, 232, 235, 243, 246, 247, 257, 264, 272, 277, 280, 281, 287, 290, 302,
   305, 306, 319, 320, 321, 325, 334, 335, 336, 337, 342, 343, 347,
@@ -1615,6 +1617,8 @@ export function liveMoveAnimationPresentation(
           wall: spriteAllocatorInput.wall,
           sparkles: spriteAllocatorInput.sparkles,
         },
+        // lsbz (D4, liveMoveTimingPolicy.ts 113): the opponent's age-52 BLDALPHA write phase; the dominant phase lands it at once (no hold).
+        opponentBlendHold: liveMoveTimingSidePhase(113, "bg-write-row", attacker.geometry.side) === "event",
       };
       break;
     case 112: case 115: case 182: case 243: case 277: {

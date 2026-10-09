@@ -481,6 +481,27 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
     }],
   },
   /**
+   * S10A lsbz (ISSUES #152 "Light Screen (113) opponent attacker, row 59"; docs/live-audit-15-chains.md s1 TIMING-PHASE): an OPPONENT
+   * attacker's BLDALPHA step written at body row 59 (reducer age 52, wall anchor + 7; eva 9 -> 8) either reaches the I/O register at once
+   * ("no-event": row 59 shows 8/8) or is buffered by SetGpuReg (VCOUNT outside VBlank; sGpuRegWaitingList [0x52]) and lands one frame late,
+   * under the row-60 write ("event": row 59 repeats 9/7). Lag ages [68, 69] are identical in both phases (issue151Counters), so it is a
+   * VBlank-write CPU phase, not a lag frame; the body is 88 rows either way. Measured windows (audit 15, two fresh runs each): no-event 9
+   * (SNORLAX / CHANSEY after Double Team, Faint Attack, Hydro Pump, Ice Beam, Swift; EXEGGCUTE / ONIX first body and after Double Team,
+   * Faint Attack, Swift), event 2 (the SNORLAX / CHANSEY first body; the accepted EXEGGCUTE / ONIX after-Tackle fixture). Player attacker:
+   * direct in all 3 measured windows (no parameter). Wrong phase: row 59 only (2,658 px).
+   */
+  113: {
+    move: "MOVE_LIGHT_SCREEN",
+    parameters: [{
+      kind: "bg-write-row", age: 60, fixedLagAges: [68, 69], iterations: 86, side: "opponent",
+      alternatives: [{ phase: "event", bodyRows: 88, measured: 2 }, { phase: "no-event", bodyRows: 88, measured: 9 }],
+      chosen: "no-event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/audit-15/receipts/vblank/table.txt (BLDALPHA I/O vs buffer at row 59: hold [0x52] in ctl / acc-tackle, direct in 5)",
+        "tools/integration/fixtures/audit-15/receipts/main (9 live opponent windows 2,658 px on row 59 only under the hold; patch-ls-nohold 12 / 13 live windows 0 px)",
+        "tools/integration/fixtures/audit-15/receipts/vblank/lag-counters.txt (lag ages [68, 69] in both phases)", "tools/integration/fixtures/lsbz-live-receipt.json light-screen"],
+    }],
+  },
+  /**
    * S10A Ice Ball (docs/next-adapters-prep26.md s1.4 H / s4 item 6; tools/integration/fixtures/prep26/iceball-check.json lagRows): 0-step lag rows
    * (an animationRng stall: VBlank overrun), measured PER COUNTER BODY (request.rolloutCounter 1..5; 18 bodies): none in any counter 0..2 body
    * (accepted SPHEAL player / opponent + GLALIE -> GOLEM player / opponent: 4 each), counter 3 (body 4) row 38 in 1 of 3 (accepted player; not
@@ -600,6 +621,9 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   // S10A fa185 (reclassified from scoped exact): Faint Attack, per-side optional lag at 205 (player no lag: the restore fade-in one row earlier,
   // faintAttack.ts faintAttackRestoreProfile; opponent lag); fixtures tools/integration/fixtures/fa185/windows/*.
   185,
+  // S10A lsbz (reclassified from scoped exact): Light Screen, the opponent's row-59 BLDALPHA write phase (no hold; lightScreen.ts
+  // opponentBlendHold); fixtures tools/integration/fixtures/lsbz/windows/light-screen-*.
+  113,
 ]);
 
 /**

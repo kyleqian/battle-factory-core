@@ -427,25 +427,6 @@
       ]
     },
     {
-      "move": "MOVE_LIGHT_SCREEN",
-      "id": 113,
-      "sourceFieldEvidence": [
-        "../tools/integration/fixtures/light-screen-live-adapter-receipt.json",
-        "../tools/integration/fixtures/light-screen-live-player.json",
-        "../tools/integration/fixtures/light-screen-live-opponent.json",
-        "../tools/integration/fixtures/light-screen-live-slowpoke-player.json"
-      ],
-      "liveEvidence": [
-        "dense script activation through inactive cleanup/following controller display, both Exeggcute orientations twice and complete Slowpoke twice",
-        "generated command seeds 2/27/45/59/84/114: success then already-active failure, self target, complete text/body and next prompt",
-        "species targets (#145b, elevated-opponent shadow returns on the last 2 rows, LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS): GOLBAT 88/88 twice fresh zero residual (was 86/88); accepted fixtures unchanged. Ordinary route seed 2 / slot 3: active 88/88, ON/OFF parity"
-      ],
-      "remaining": [
-        "unknown entry/status/switch/summary/substitute/transform histories",
-        "whole-playable arbitrary-history framebuffer exactness"
-      ]
-    },
-    {
       "move": "MOVE_HAZE",
       "id": 114,
       "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
@@ -3684,7 +3665,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 241,
+  "implementedCount": 240,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 13,
@@ -3861,7 +3842,7 @@
     },
     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
   },
-  "faithfulTimingCount": 22,
+  "faithfulTimingCount": 23,
   "faithfulTimingAdapters": [
     {
       "id": 183,
@@ -5888,6 +5869,62 @@
         "python3 tools/integration/fa185Windows.py",
         "OUT=SCRATCH/check P=6 sh tools/integration/fa185TimingCheck.sh",
         "npx vitest run tests/animation/liveFa185Timing.test.ts tests/animation/liveFaintAttackSides.test.ts tests/animation/faintAttack.test.ts tests/animation/livePrep6MoveAdapters.test.ts"
+      ]
+    },
+    {
+      "id": 113,
+      "move": "MOVE_LIGHT_SCREEN",
+      "timingParameters": [
+        {
+          "kind": "bg-write-row",
+          "age": 60,
+          "fixedLagAges": [
+            68,
+            69
+          ],
+          "iterations": 86,
+          "side": "opponent",
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 88,
+              "measured": 2
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 88,
+              "measured": 9
+            }
+          ],
+          "chosen": "no-event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          59
+        ],
+        "rows": 1,
+        "maxPixelsPerRow": 2658,
+        "cause": "opponent attacker, the BLDALPHA step written at body row 59 (reducer age 52, eva 9 -> 8) buffered by SetGpuReg (VCOUNT outside VBlank, sGpuRegWaitingList [0x52]) and lost under the row-60 write, so the ROM repeats eva 9 / evb 7 on row 59 (lightScreen.ts opponentBlendHold): the SNORLAX / CHANSEY first body and the accepted EXEGGCUTE / ONIX after-Tackle fixture, 2,658 px on row 59 only; lag ages [68, 69] identical in both phases; every other row exact"
+      },
+      "d3": false,
+      "evidence": [
+        "reclassified from scoped exact (S10A lsbz, #151 precedent: the adapter gained a measured VBlank-write CPU-phase parameter, opponent attacker only; the live adapter renders the dominant phase, liveMoveAnimation.ts case 113 opponentBlendHold = the policy phase, no hold); the existing exact fixture proofs stay valid in their proved scope (player side; the accepted after-Tackle opponent body is now the documented other phase)",
+        "docs/live-audit-15-chains.md s1 TIMING-PHASE (two fresh runs each): BLDALPHA I/O vs buffer at row 59 (receipts/vblank/table.txt) buffered in the SNORLAX / CHANSEY first body and the EXEGGCUTE / ONIX after-Tackle route, direct in 5 more; 9 of 11 opponent windows direct (no hold) by pixels",
+        "tools/integration/fixtures/lsbz/windows/light-screen-*.json through the production live renderer (d4aTimingCheck.ts, one process per fixture, twice fresh, full 88-row windows): opponent policy-phase windows 0 px, the 2 other-phase windows only on row 59; player windows 0 px; receipt tools/integration/fixtures/lsbz-live-receipt.json",
+        "scoped-exact liveEvidence: dense script activation through inactive cleanup/following controller display, both Exeggcute orientations twice and complete Slowpoke twice",
+        "scoped-exact liveEvidence: generated command seeds 2/27/45/59/84/114: success then already-active failure, self target, complete text/body and next prompt",
+        "scoped-exact liveEvidence: species targets (#145b, elevated-opponent shadow returns on the last 2 rows, LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS): GOLBAT 88/88 twice fresh zero residual (was 86/88); accepted fixtures unchanged. Ordinary route seed 2 / slot 3: active 88/88, ON/OFF parity",
+        "scoped-exact remaining (kept): unknown entry/status/switch/summary/substitute/transform histories",
+        "scoped-exact remaining (kept): whole-playable arbitrary-history framebuffer exactness",
+        "sourceFieldEvidence: ../tools/integration/fixtures/light-screen-live-adapter-receipt.json, ../tools/integration/fixtures/light-screen-live-player.json, ../tools/integration/fixtures/light-screen-live-opponent.json, ../tools/integration/fixtures/light-screen-live-slowpoke-player.json"
+      ],
+      "proofCommands": [
+        "python3 tools/integration/lsbzWindows.py",
+        "OUT=SCRATCH/check P=8 sh tools/integration/lsbzTimingCheck.sh light-screen",
+        "npx vitest run tests/animation/liveLsbzTiming.test.ts tests/animation/lightScreen.test.ts"
       ]
     }
   ],
