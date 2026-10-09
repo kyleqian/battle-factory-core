@@ -3013,9 +3013,12 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 324: {
-      // prep22 P3 (docs/next-adapters-prep22.md s B.5): Signal Beam, first body only (WIN0 (240, 161) is the battle's first-body reset and the
-      // painter order is the lent known-entry order); a later body declines. Non-shiny, the assets-only composite palette.
-      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      // prep22 P3 (docs/next-adapters-prep22.md s B.5): Signal Beam. Non-shiny, the assets-only composite palette, the lent order. later58
+      // (docs/next-adapters-later58.md): at a LATER body the ROM's WIN0 is (0, 0), not the first-body (240, 161) the inputs carry at age 0,
+      // and BGnCNT / DISPCNT / BG1VOFS are history, but no pixel reads them (WININ = WINOUT); the allocator (tile bitmap, palette tags,
+      // matrices, tasks) is the first body's at every later activation. The one history the pixels read besides the order is the battler
+      // x2 rest, so a later body declines unless both species rests are {0,0} (an opponent ONIX after its Quick Attack: 40,367 px).
+      if (!spriteOrderInput?.known || (!spriteOrderInput.firstBody && !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       const lentOrder = spriteOrderWithOccupiedPrefix(

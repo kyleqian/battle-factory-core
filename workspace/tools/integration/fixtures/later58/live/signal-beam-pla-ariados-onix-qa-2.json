@@ -1,0 +1,61 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "SIGNAL_BEAM",
+ "bodyIndex": 2,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later58/scenarios/signal-beam-pla-ariados-onix-qa.json",
+ "denseWindow": {
+  "startFrame": 2485,
+  "endFrame": 2629
+ },
+ "attacker": {
+  "species": "ARIADOS",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019090,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 109,
+  "playerMaxHp": 146,
+  "opponentHp": 88,
+  "opponentMaxHp": 142,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "precedingBodies": [
+  {
+   "moveId": 98,
+   "side": "opponent"
+  },
+  {
+   "moveId": 324,
+   "side": "player"
+  },
+  {
+   "moveId": 98,
+   "side": "opponent"
+  },
+  {
+   "moveId": 324,
+   "side": "player"
+  },
+  {
+   "moveId": 98,
+   "side": "opponent"
+  }
+ ]
+}

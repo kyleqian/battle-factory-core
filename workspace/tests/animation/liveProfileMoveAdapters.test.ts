@@ -337,12 +337,18 @@ describe("live r3 Signal Beam (exact, first body)", () => {
     for (const row of Object.values(check)) { expect(row.lowestFreePairsEqualRom).toBe(true); expect(row.helperSlotRom).toBe(helperSlot); }
   });
 
-  it("declines a later body, an unknown order and a shiny battler (first-body gate)", () => {
+  // later58 moved this pin: a later body (no firstBody) is live while both species rests are {0,0} and declines with an opponent ONIX
+  // (docs/next-adapters-later58.md; tools/integration/fixtures/later58-live-receipt.json).
+  it("declines an unknown order and a shiny battler; a later body only on rest-free battlers (later58)", () => {
     const f = fixtureAt("signal-beam-player-ariados-opponent-chansey");
     const { view, effect } = viewOf(f, 0);
     const call = (order: unknown, field = view.field) => liveMoveAnimationPresentation(effect.request, field, 0, undefined, undefined, order as never);
     expect(call(effect.spriteOrderInput)).not.toBeNull();
-    expect(call({ ...(effect.spriteOrderInput as object), firstBody: undefined })).toBeNull();
+    expect(call({ ...(effect.spriteOrderInput as object), firstBody: undefined })).not.toBeNull();
+    const onix = viewOf({ ...f, target: { ...f.target, species: "ONIX" } }, 0);
+    expect(liveMoveAnimationPresentation(onix.effect.request, onix.view.field, 0, undefined, undefined, onix.effect.spriteOrderInput as never)).not.toBeNull();
+    expect(liveMoveAnimationPresentation(onix.effect.request, onix.view.field, 0, undefined, undefined,
+      { ...(onix.effect.spriteOrderInput as object), firstBody: undefined } as never)).toBeNull();
     expect(call(undefined)).toBeNull();
     expect(call({ known: false })).toBeNull();
     const ot = 416049562, shiny = ((ot >>> 16) ^ (ot & 0xffff)) >>> 0;
