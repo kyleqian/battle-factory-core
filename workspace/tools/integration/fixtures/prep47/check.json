@@ -1,0 +1,797 @@
+{
+ "schema": "prep47-check/v1",
+ "totals": {
+  "jobs": 26,
+  "identicalAB": 26,
+  "gaps": 141,
+  "promptPairs": 37,
+  "promptPairsExact": 37,
+  "hitBlips": 97,
+  "hitBlipsExact": 97,
+  "otherWindows": 21,
+  "edgesChecked": 114,
+  "edgesExact": 114,
+  "spans": 36,
+  "spansAsExpected": 36,
+  "hostBoundaries": 36,
+  "hostExactPromptShown": 36,
+  "hostKnownPromptHidden": 0
+ },
+ "jobs": {
+  "dig-opp": {
+   "class": "OPP_DIG",
+   "move": 91,
+   "variant": null,
+   "identicalAB": true,
+   "rowsSha256A": "a759236e4fe3e3039b41c1e0afb42f93c4f72cd05fd4c935d95ad26788c1f7ba",
+   "sequence": "B91o [P] B91o [H] B45p [] mv-0 [?(f3181 C[3,4] D[])]",
+   "spans": [
+    {
+     "from": 0,
+     "to": 2,
+     "promptPairs": 1,
+     "between": "[P]"
+    }
+   ],
+   "spansExpected": [
+    1
+   ],
+   "spansAsExpected": [
+    true
+   ],
+   "problems": []
+  },
+  "dig-opp-snorlax": {
+   "class": "OPP_DIG",
+   "move": 91,
+   "variant": [
+    "player",
+    143
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "e1ac4d0fc930f75929e3aa135db296af3a3fd850baff8b5e1b8e0e54f8ca11ff",
+   "sequence": "B91o [P] B91o [H] B45p [] mv-0 [?(f3059 C[3,4] D[])]",
+   "spans": [
+    {
+     "from": 0,
+     "to": 2,
+     "promptPairs": 1,
+     "between": "[P]"
+    }
+   ],
+   "spansExpected": [
+    1
+   ],
+   "spansAsExpected": [
+    true
+   ],
+   "problems": []
+  },
+  "dig-ply": {
+   "class": "PLY_DIG",
+   "move": 91,
+   "variant": null,
+   "identicalAB": true,
+   "rowsSha256A": "a30c0ac492f21eb535ce260ef827af933134415c9c4dd2b4d21674a2fbb53b6c",
+   "sequence": "B91p [] B91p [H] B45o [] mv-0 [?(f3142 C[3,4] D[])]",
+   "spans": [
+    {
+     "from": 0,
+     "to": 2,
+     "promptPairs": 0,
+     "between": "[]"
+    }
+   ],
+   "spansExpected": [
+    0
+   ],
+   "spansAsExpected": [
+    true
+   ],
+   "problems": []
+  },
+  "dig-ply-snorlax": {
+   "class": "PLY_DIG",
+   "move": 91,
+   "variant": [
+    "opponent",
+    143
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "9c6a1b184c6f11101ffa88b960af8e1d3d7e25e51c38422c80631562568f2ecf",
+   "sequence": "B91p [] B91p [H] B45o [] mv-0 [?(f3010 C[3,4] D[])]",
+   "spans": [
+    {
+     "from": 0,
+     "to": 2,
+     "promptPairs": 0,
+     "between": "[]"
+    }
+   ],
+   "spansExpected": [
+    0
+   ],
+   "spansAsExpected": [
+    true
+   ],
+   "problems": []
+  },
+  "dv-opp": {
+   "class": "OPP_DIVE",
+   "move": 291,
+   "variant": null,
+   "identicalAB": true,
+   "rowsSha256A": "f6c030d21a3bfc147b77b4a37fc9429cbe099180cafd48339f54781c1cf23900",
+   "sequence": "B33p [H] B291o [P] B291o [H?(f3207 C[] D[6])]",
+   "spans": [
+    {
+     "from": 2,
+     "to": 4,
+     "promptPairs": 1,
+     "between": "[P]"
+    }
+   ],
+   "spansExpected": [
+    1
+   ],
+   "spansAsExpected": [
+    true
+   ],
+   "problems": []
+  },
+  "dv-opp-snorlax": {
+   "class": "OPP_DIVE",
+   "move": 291,
+   "variant": [
+    "player",
+    143
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "821bfe49bc586af419c522b8657f35cadebccf102caea6b7ef64517acfd4503a",
+   "sequence": "B291o [P] B291o [H] B33p [H] mv-0 [?(f3326 C[3,4] D[])]",
+   "spans": [
+    {
+     "from": 0,
+     "to": 2,
+     "promptPairs": 1,
+     "between": "[P]"
+    }
+   ],
+   "spansExpected": [
+    1
+   ],
+   "spansAsExpected": [
+    true
+   ],
+   "problems": []
+  },
+  "hb-opp": {
+   "class": "OPP_HYPER_BEAM",
+   "move": 63,
+   "variant": [
+    "turns",
+    2
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "4cdd75bb2801690026095e8db88f972cb4414d8ebe15cc55da8fa0b0c5d2a969",
+   "sequence": "B63o [HP] B33p [HP] B63o [H] B33p [H] mv-0(truncated) []",
+   "spans": [
+    {
+     "from": 0,
+     "to": 4,
+     "promptPairs": 2,
+     "between": "[HP] B33p [HP]"
+    }
+   ],
+   "spansExpected": [
+    2
+   ],
+   "spansAsExpected": [
+    true
+   ],
+   "problems": []
+  },
+  "hb-opp-snorlax": {
+   "class": "OPP_HYPER_BEAM",
+   "move": 63,
+   "variant": [
+    "turns",
+    2,
+    "player",
+    143
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "2c42ae6123d238ad9186f28c5c69d2d44be3cc1801169588a8bed3921cd98e29",
+   "sequence": "B63o [H] mv-0 [P] B33p [H?(f4264 C[3,4] D[])]",
+   "spans": [],
+   "spansExpected": [],
+   "spansAsExpected": [],
+   "problems": []
+  },
+  "ib-opp": {
+   "class": "OPP_ICE_BALL",
+   "move": 301,
+   "variant": [
+    "first",
+    3
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "9a69111f761e942bd98aa2e288c1e9e222b8e2763e88e1b74d39c94a9aa7b566",
+   "sequence": "B33p [H] B301o [HP] B33p [H] B301o [HP] B301o [H?(f4363 C[3,4] D[])]",
+   "spans": [
+    {
+     "from": 2,
+     "to": 6,
+     "promptPairs": 1,
+     "between": "[HP] B33p [H]"
+    },
+    {
+     "from": 6,
+     "to": 8,
+     "promptPairs": 1,
+     "between": "[HP]"
+    }
+   ],
+   "spansExpected": [
+    1,
+    1
+   ],
+   "spansAsExpected": [
+    true,
+    true
+   ],
+   "problems": []
+  },
+  "ib-opp-magnemite": {
+   "class": "OPP_ICE_BALL",
+   "move": 301,
+   "variant": [
+    "first",
+    3,
+    "player",
+    81
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "e0d4ac408a9ef55bfa1882761d830a78ae071e751d3e56d1e5a60e31976e1fca",
+   "sequence": "B33p [H] B301o [HP] B33p [H] B301o [HP] B301o [H?(f4394 C[3,4] D[])]",
+   "spans": [
+    {
+     "from": 2,
+     "to": 6,
+     "promptPairs": 1,
+     "between": "[HP] B33p [H]"
+    },
+    {
+     "from": 6,
+     "to": 8,
+     "promptPairs": 1,
+     "between": "[HP]"
+    }
+   ],
+   "spansExpected": [
+    1,
+    1
+   ],
+   "spansAsExpected": [
+    true,
+    true
+   ],
+   "problems": []
+  },
+  "ou-opp-skarmory": {
+   "class": "OPP_OUTRAGE",
+   "move": 200,
+   "variant": [
+    "turns",
+    2,
+    "player",
+    227
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "e4d8cc8fa15abc178c621e779fa3203fbfa907314a97e3eceb19967c28ba42d1",
+   "sequence": "B200o [H] B33p [HP] B200o [H] B33p [H] mv-0 [] mv-0 [?(f4339 C[3,4] D[])]",
+   "spans": [
+    {
+     "from": 0,
+     "to": 4,
+     "promptPairs": 1,
+     "between": "[H] B33p [HP]"
+    }
+   ],
+   "spansExpected": [
+    1
+   ],
+   "spansAsExpected": [
+    true
+   ],
+   "problems": []
+  },
+  "ou-opp-snorlax": {
+   "class": "OPP_OUTRAGE",
+   "move": 200,
+   "variant": [
+    "turns",
+    2,
+    "player",
+    143
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "5c56725512f9633594c0c00886fad9b6c597ab81e194151244f4e5f88e84174b",
+   "sequence": "B200o [H] B33p [HP] B200o [H] B33p [H] mv-0 [] mv-0 [?(f4272 C[3,4] D[])]",
+   "spans": [
+    {
+     "from": 0,
+     "to": 4,
+     "promptPairs": 1,
+     "between": "[H] B33p [HP]"
+    }
+   ],
+   "spansExpected": [
+    1
+   ],
+   "spansAsExpected": [
+    true
+   ],
+   "problems": []
+  },
+  "pd-opp-golbat": {
+   "class": "OPP_PETAL_DANCE",
+   "move": 80,
+   "variant": [
+    "turns",
+    2,
+    "player",
+    42
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "927e864246f0f48b363d574ef566d06d449ef018018d3881dac9a0809d4e7b86",
+   "sequence": "B33p [H] B80o [HP] B33p [H] B80o [HP] B33p [H] B80o [H] mv-0 [] mv-0(truncated) []",
+   "spans": [
+    {
+     "from": 2,
+     "to": 6,
+     "promptPairs": 1,
+     "between": "[HP] B33p [H]"
+    },
+    {
+     "from": 6,
+     "to": 10,
+     "promptPairs": 1,
+     "between": "[HP] B33p [H]"
+    }
+   ],
+   "spansExpected": [
+    1,
+    1
+   ],
+   "spansAsExpected": [
+    true,
+    true
+   ],
+   "problems": []
+  },
+  "pd-opp-snorlax": {
+   "class": "OPP_PETAL_DANCE",
+   "move": 80,
+   "variant": [
+    "turns",
+    2,
+    "player",
+    143
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "80d070a9744ed8c678a549ffc91709d47cb9a75084939628c53f45f104131a81",
+   "sequence": "B80o [H] B33p [HP] B80o [H] B33p [H] mv-0 [] mv-0 [?(f4187 C[3,4] D[])]",
+   "spans": [
+    {
+     "from": 0,
+     "to": 4,
+     "promptPairs": 1,
+     "between": "[H] B33p [HP]"
+    }
+   ],
+   "spansExpected": [
+    1
+   ],
+   "spansAsExpected": [
+    true
+   ],
+   "problems": []
+  },
+  "pd-ply": {
+   "class": "PLY_PETAL_DANCE",
+   "move": 80,
+   "variant": [
+    "turns",
+    2
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "325aa6e41e7caf1aeb825d60cfcbd0eaf14bb43891fd8405390ab71584653176",
+   "sequence": "B33o [H] B80p [H?(f2798 C[] D[8])] B80p [H] B80p [H] mv-0 [] mv-0(truncated) []",
+   "spans": [
+    {
+     "from": 2,
+     "to": 4,
+     "promptPairs": 0,
+     "between": "[H?(f2798 C[] D[8])]"
+    },
+    {
+     "from": 4,
+     "to": 6,
+     "promptPairs": 0,
+     "between": "[H]"
+    }
+   ],
+   "spansExpected": [
+    0
+   ],
+   "spansAsExpected": [
+    true
+   ],
+   "problems": []
+  },
+  "pd-ply-snorlax": {
+   "class": "PLY_PETAL_DANCE",
+   "move": 80,
+   "variant": [
+    "turns",
+    2,
+    "opponent",
+    143
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "696836c320369a138702ffc6b14b42f14a1844b21033afd575d0d87bb2d5d8ef",
+   "sequence": "B80p [H] B33o [H] B80p [H] B33o [H] mv-0 [] mv-0 [P] B80p [H] B33o [H] mv-0 []",
+   "spans": [
+    {
+     "from": 0,
+     "to": 4,
+     "promptPairs": 0,
+     "between": "[H] B33o [H]"
+    },
+    {
+     "from": 4,
+     "to": 12,
+     "promptPairs": 1,
+     "between": "[H] B33o [H] mv-0 [] mv-0 [P]"
+    }
+   ],
+   "spansExpected": [
+    0
+   ],
+   "spansAsExpected": [
+    true
+   ],
+   "problems": []
+  },
+  "ro-opp": {
+   "class": "OPP_ROLLOUT",
+   "move": 205,
+   "variant": [
+    "turns",
+    2
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "e30f1449cd5c658e11c195041dfefc678eaa77188a213feab29134fb0014b082",
+   "sequence": "B205o [H] B33p [HP] B205o [HP] B205o [H] B33p [H?(f4408 C[3,4] D[])]",
+   "spans": [
+    {
+     "from": 0,
+     "to": 4,
+     "promptPairs": 1,
+     "between": "[H] B33p [HP]"
+    },
+    {
+     "from": 4,
+     "to": 6,
+     "promptPairs": 1,
+     "between": "[HP]"
+    }
+   ],
+   "spansExpected": [
+    1,
+    1
+   ],
+   "spansAsExpected": [
+    true,
+    true
+   ],
+   "problems": []
+  },
+  "ro-opp-snorlax": {
+   "class": "OPP_ROLLOUT",
+   "move": 205,
+   "variant": [
+    "turns",
+    2,
+    "player",
+    143
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "f37aebbe4be2dc97efdbd52fb6e26bc87050bfb15e5eb4c8738dd76cb3e90ddc",
+   "sequence": "B205o [H] B33p [HP] B205o [HP] B205o [H] B33p [H?(f4366 C[3,4] D[])]",
+   "spans": [
+    {
+     "from": 0,
+     "to": 4,
+     "promptPairs": 1,
+     "between": "[H] B33p [HP]"
+    },
+    {
+     "from": 4,
+     "to": 6,
+     "promptPairs": 1,
+     "between": "[HP]"
+    }
+   ],
+   "spansExpected": [
+    1,
+    1
+   ],
+   "spansAsExpected": [
+    true,
+    true
+   ],
+   "problems": []
+  },
+  "rw-opp": {
+   "class": "OPP_RAZOR_WIND",
+   "move": 13,
+   "variant": [
+    "turns",
+    1
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "59a2ae89d2c7f72692fdd4ac9d916cbe559fdd3e4ba6a33650d22fc39239d47d",
+   "sequence": "B33p [H] B13o [P] B33p [H] B13o [H] mv-0 [P] B33p [H] B13o [?(f4236 C[3,4] D[])]",
+   "spans": [
+    {
+     "from": 2,
+     "to": 6,
+     "promptPairs": 1,
+     "between": "[P] B33p [H]"
+    },
+    {
+     "from": 6,
+     "to": 12,
+     "promptPairs": 1,
+     "between": "[H] mv-0 [P] B33p [H]"
+    }
+   ],
+   "spansExpected": [
+    1,
+    1
+   ],
+   "spansAsExpected": [
+    true,
+    true
+   ],
+   "problems": []
+  },
+  "rw-opp-snorlax": {
+   "class": "OPP_RAZOR_WIND",
+   "move": 13,
+   "variant": [
+    "turns",
+    1,
+    "player",
+    143
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "1d517881a3c22cc4e4c166796c2248fd09d9389844824d9d2b267fa2dace47d7",
+   "sequence": "B13o [] B33p [HP] B13o [H] mv-0 [P] B13o [] B33p [H] mv-0 [] mv-0(truncated) []",
+   "spans": [
+    {
+     "from": 0,
+     "to": 4,
+     "promptPairs": 1,
+     "between": "[] B33p [HP]"
+    },
+    {
+     "from": 4,
+     "to": 8,
+     "promptPairs": 1,
+     "between": "[H] mv-0 [P]"
+    }
+   ],
+   "spansExpected": [
+    1,
+    1
+   ],
+   "spansAsExpected": [
+    true,
+    true
+   ],
+   "problems": []
+  },
+  "sb-opp": {
+   "class": "OPP_SOLAR_BEAM",
+   "move": 76,
+   "variant": null,
+   "identicalAB": true,
+   "rowsSha256A": "56d9005c2f5304f89ff8bf1eff321dbf703cc4657c604fa478ce3f36a9b86b8b",
+   "sequence": "B33p [H] B76o [P] B33p [H] B76o [H?(f3130 C[3,4] D[])]",
+   "spans": [
+    {
+     "from": 2,
+     "to": 6,
+     "promptPairs": 1,
+     "between": "[P] B33p [H]"
+    }
+   ],
+   "spansExpected": [
+    1
+   ],
+   "spansAsExpected": [
+    true
+   ],
+   "problems": []
+  },
+  "sb-opp-snorlax": {
+   "class": "OPP_SOLAR_BEAM",
+   "move": 76,
+   "variant": [
+    "player",
+    143
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "07c737138aa87501f3fa0a56da66f3f9cbc4cf9250015d0e34e564c394a11a22",
+   "sequence": "B76o [] B33p [HP] B76o [H?(f3149 C[3,4] D[])]",
+   "spans": [
+    {
+     "from": 0,
+     "to": 4,
+     "promptPairs": 1,
+     "between": "[] B33p [HP]"
+    }
+   ],
+   "spansExpected": [
+    1
+   ],
+   "spansAsExpected": [
+    true
+   ],
+   "problems": []
+  },
+  "th-opp": {
+   "class": "OPP_THRASH",
+   "move": 37,
+   "variant": [
+    "turns",
+    2
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "0d14f47e1f2d6ab534fa31e8ce3a8ed146e38008c9db3c52fd6c423565c44278",
+   "sequence": "mv-0 [P] B37o [H] B33p [HP] B37o [H] B33p [HP] B37o [H] B33p [H] mv-0 [] mv-0 []",
+   "spans": [
+    {
+     "from": 2,
+     "to": 6,
+     "promptPairs": 1,
+     "between": "[H] B33p [HP]"
+    },
+    {
+     "from": 6,
+     "to": 10,
+     "promptPairs": 1,
+     "between": "[H] B33p [HP]"
+    }
+   ],
+   "spansExpected": [
+    1,
+    1
+   ],
+   "spansAsExpected": [
+    true,
+    true
+   ],
+   "problems": []
+  },
+  "th-opp-snorlax": {
+   "class": "OPP_THRASH",
+   "move": 37,
+   "variant": [
+    "turns",
+    2,
+    "player",
+    143
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "6e9447c265379cc669a34128418f3b23b4414cd2f657e0846dbfaa7fa9f13c3c",
+   "sequence": "mv-0 [P] B37o [H] B33p [HP] B37o [H] B33p [HP] B37o [H?(f4392 C[] D[6])]",
+   "spans": [
+    {
+     "from": 2,
+     "to": 6,
+     "promptPairs": 1,
+     "between": "[H] B33p [HP]"
+    },
+    {
+     "from": 6,
+     "to": 10,
+     "promptPairs": 1,
+     "between": "[H] B33p [HP]"
+    }
+   ],
+   "spansExpected": [
+    1,
+    1
+   ],
+   "spansAsExpected": [
+    true,
+    true
+   ],
+   "problems": []
+  },
+  "up-opp": {
+   "class": "OPP_UPROAR",
+   "move": 253,
+   "variant": [
+    "turns",
+    2
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "7a8c615d9f845f227eab619ab730826e1fc1e2f3dd8bb8a6ef7eafdc8ce74913",
+   "sequence": "B253o [H] B33p [HP] B253o [H] B33p [HP] B253o [H] B33p [H?(f4509 C[3,4] D[])]",
+   "spans": [
+    {
+     "from": 0,
+     "to": 4,
+     "promptPairs": 1,
+     "between": "[H] B33p [HP]"
+    },
+    {
+     "from": 4,
+     "to": 8,
+     "promptPairs": 1,
+     "between": "[H] B33p [HP]"
+    }
+   ],
+   "spansExpected": [
+    1,
+    1
+   ],
+   "spansAsExpected": [
+    true,
+    true
+   ],
+   "problems": []
+  },
+  "up-opp-snorlax": {
+   "class": "OPP_UPROAR",
+   "move": 253,
+   "variant": [
+    "turns",
+    2,
+    "player",
+    143
+   ],
+   "identicalAB": true,
+   "rowsSha256A": "22a388279dde622fcc85302fd942c4e21fe19d5ae76cf2aa7fc2669216e072ea",
+   "sequence": "B253o [H] B33p [HP] B253o [H] B33p [HP] B253o [H] B33p [H?(f4505 C[3,4] D[])]",
+   "spans": [
+    {
+     "from": 0,
+     "to": 4,
+     "promptPairs": 1,
+     "between": "[H] B33p [HP]"
+    },
+    {
+     "from": 4,
+     "to": 8,
+     "promptPairs": 1,
+     "between": "[H] B33p [HP]"
+    }
+   ],
+   "spansExpected": [
+    1,
+    1
+   ],
+   "spansAsExpected": [
+    true,
+    true
+   ],
+   "problems": []
+  }
+ }
+}
