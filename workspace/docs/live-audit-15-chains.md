@@ -36,13 +36,15 @@ non-physical consumer, so the consumer is the battle's first body. A second pass
 control is non-zero **discriminates** the chain's lend.
 
 **Totals.**
-- 65 scenarios and **142 consumer windows**: 136 live, 6 declined.
+- 65 scenarios and **142 consumer windows**: 139 live, 3 declined.
+  - This counts the 3 Thunderbolt-after-Giga-Drain windows as live. `receipts/main` shows them declined: the replay helper has no
+    geometry callback. `audit15GdCheck.ts` replays the same history WITH the orchestrator's callback and finds them live and 0 px.
 - Every window's two fresh runs give identical per-row digests.
 - The full reproduction (`audit15Run.sh`: stage == committed, derive == committed) was run twice from scratch. The second pass is
   byte-identical to the committed receipts (see §4).
 
 Results:
-- **127 of 136 live windows are 0 px on every row.** That covers all of these consumers after these units:
+- **130 of 139 live windows are 0 px on every row.** That covers all of these consumers after these units:
   - consumers: Flamethrower, Thunderbolt, Blaze Kick, Heal Bell, Reflect, Protect, and Light Screen (player side);
   - units: BRN, Hydro Pump, TURN_TRAP Fire Spin, Icy Wind, Ice Beam, Swift, Double Team, Faint Attack, Giga Drain, and the Petal Dance /
     Dig / Solar Beam retained continuations.
@@ -120,9 +122,9 @@ The 0-px windows hold:
 <td valign="top"><code>live=0</code>, allocator input undefined: Tackle (+hit) is not an allocator net-zero unit. Note that the accepted live fixture's own ROM route is therefore a decline in production</td>
 <td valign="top"><strong>DECLINE</strong></td></tr>
 <tr><td valign="top">Thunderbolt after <strong>Giga Drain</strong> (opponent attacker SNORLAX)</td>
-<td valign="top">3,845,762 px (fallback)</td>
-<td valign="top">The order host reports <code>no EXACT plan: body 202:opponent</code>. <code>postkoHostReplay.ts</code> passes <strong>no geometry-plan callback</strong> (<code>SpriteOrderBodyPlanAt</code>), which production's orchestrator supplies for the gdgeo plans (<code>45a5832f7</code>). Flamethrower after Giga Drain (the opponent side consumer) is live with an unknown order (ascending flame slots) and 0 px</td>
-<td valign="top"><strong>NOT ESTABLISHED</strong> (harness gap, not a production verdict)</td></tr>
+<td valign="top">0 px (237 / 237 rows x 3 windows, r1 == r2, <code>receipts/gd/</code>)</td>
+<td valign="top">In <code>receipts/main</code> the order host reports <code>no EXACT plan: body 202:opponent</code> and the adapter declines (3,845,762 px fallback). <code>postkoHostReplay.ts</code> passes <strong>no geometry-plan callback</strong>, which production's orchestrator supplies (<code>liveSpriteOrderBodyPlanAt</code>, <code>45a5832f7</code>). <code>liveMoveGeometrySpriteOrderPlanText(202, side, SNORLAX/CHANSEY)</code> is defined on both sides. <code>audit15GdCheck.ts</code> replays the same history with the callback: the order is KNOWN, Thunderbolt is live and exact, and Flamethrower (opponent side) is exact</td>
+<td valign="top"><strong>EXACT</strong> (lend-neutral consumer). <strong>Harness note:</strong> <code>replayPostKoTurnsThroughHost</code> lacks <code>bodyPlanAt</code></td></tr>
 <tr><td valign="top">Flamethrower / Thunderbolt / Reflect / Protect / Light Screen (player side) chains</td>
 <td valign="top">0 px</td>
 <td valign="top">The entry-lend control is also 0 px on every one (Flamethrower is documented pixel-neutral, order-consumer-prep 0/130 ages). These rows prove the post-unit render is exact (x2 / palettes / healthbox / message box / BG, and the allocator host for the walls and Protect), not the lend's value</td>
@@ -148,14 +150,14 @@ The unit side is SNORLAX (faster, one move x4) and the consumer side is CHANSEY,
 | Double Team + stat (net-zero) | Protect ply 2/2 and opp 2/2, Reflect opp 1/1, Light Screen ply 1/1, Thunderbolt ply 3/3; Light Screen opp 0/1 (PHASE), EXEGGCUTE/ONIX 0/1 (PHASE) |
 | Faint Attack (net-zero) | Light Screen ply 1/1; Light Screen opp 0/1 (PHASE), EXEGGCUTE/ONIX 0/1 (PHASE) |
 | Swift (net-zero) | Thunderbolt ply 3/3, Protect ply 2/2 (Protect after Protect); Light Screen opp 0/1 (PHASE), EXEGGCUTE/ONIX 0/1 (PHASE) |
-| Giga Drain | Flamethrower opp 3/3; Thunderbolt ply **not established** (harness gap) |
+| Giga Drain (`45a5832f7`) | Flamethrower opp 3/3; Thunderbolt ply 3/3 **via `audit15GdCheck.ts`** (with the geometry callback; the grid script reads `main/`, where these 3 show "declined") |
 | Tackle | Light Screen opp **declined** (both pairs) |
 | controls (first body; c1 / c2 = after the consumer's own earlier body) | Blaze Kick 5/5, Heal Bell 6/6, Flamethrower 6/6, Thunderbolt 3/3, Reflect 2/2, Light Screen ply 1/1, opp SNORLAX/CHANSEY 1/1, opp EXEGGCUTE/ONIX 0/1 (PHASE) |
 
 ### Not reached (time-boxed)
 
-- **Giga Drain at a predicted-flip species pair -> Double Team / Thunderbolt.** The replay helper cannot supply the geometry-keyed plan.
-  It needs a `bodyPlanAt` argument in `replayPostKoTurnsThroughHost`, an existing file this audit could not edit.
+- **Giga Drain -> Double Team, and a known predicted-flip species pair.** SNORLAX/CHANSEY Giga Drain -> Thunderbolt / Flamethrower was
+  reached (`audit15GdCheck.ts`). Whether SNORLAX/CHANSEY is a flip pair was not checked.
 - **Trace / double-Intimidate battle-start seeds.** The replay helper begins every turn with a prompt cycle, so it has no pre-prompt
   battle-start segment.
 - **The deferred lend after Sand-Attack / Mud-Slap / Rain Dance.** This needs the pinned Random2 words. The `wordsChain` fixture mode
@@ -171,6 +173,7 @@ The unit side is SNORLAX (faster, one move x4) and the consumer side is CHANSEY,
 ```
 sh tools/integration/audit15Run.sh <receipt-dir> [scratch-dir]   # ~3 min: stage (== committed) -> probe -> derive (== committed) -> main + entry passes
 python3 tools/integration/audit15Coverage.py <receipt-dir>        # coverage grid + totals
+node --experimental-strip-types --no-warnings tools/integration/audit15GdCheck.ts <out.json> tools/integration/fixtures/audit-15/fixtures/giga-drain-*-c?.json   # with the geometry callback
 sh tools/integration/audit15Vblank.sh <dir> && python3 tools/integration/audit15VblankTable.py <dir>   # BLDALPHA IO vs buffer, 2 runs each
 sh tools/integration/issue151Counters.sh <dir> 8 tools/integration/fixtures/audit-15/fixtures/{ctl,double-team,swift}-light-screen-opp-c0.json   # lag ages
 node --experimental-strip-types --no-warnings tools/integration/audit15Diag.ts <fixture> <rgb-dir> 58 59 60   # bbox + shift -1/+1 (rgb kept by a manual prep48Probe run)
@@ -186,6 +189,7 @@ git checkout -- src
 - `main/` and `entry/`: per-scenario check JSON with per-row residual rows and r1 / r2 digests, plus `summary.txt`;
 - `patch-ls-hold/`, `patch-ls-hold-acc/` and `patch-ls-nohold/`;
 - `vblank/table.txt`, `run-digests.txt` and `lag-counters.txt`;
+- `gd/check-gd.json` (the Giga Drain windows with the geometry callback);
 - `coverage-grid.md`.
 
 `patches/` holds the two env-gated diffs (`.gitattributes` `*.diff -whitespace`). No RGB dumps and no mGBA logs are committed.
