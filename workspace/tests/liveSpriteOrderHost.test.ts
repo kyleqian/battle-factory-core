@@ -365,4 +365,24 @@ describe("order host event keys (prep43)", () => {
     expect(weather(["13"]).invalidReason).toContain("HAIL_CONTINUES");
     expect(weather([]).cursor.order.known).toBe(false);
   });
+
+  it("TURN_TRAP is keyed by the trapped battler's wrapped move (prep45); Clamp and an unknown argument stay unplanned", () => {
+    const trap = (args: readonly string[], battler: 0 | 1) => after([ev(10, "animation", { animationId: "TURN_TRAP", battler, target: battler, arguments: args })]);
+    for (const [move, animation] of [[83, "TURN_TRAP_FIRE_SPIN"], [250, "TURN_TRAP_WHIRLPOOL"], [328, "TURN_TRAP_SAND_TOMB"],
+      [20, "TURN_TRAP_BIND"], [35, "TURN_TRAP_BIND"]] as const) {
+      for (const battler of [0, 1] as const) {
+        const tracker = trap([`${move}`], battler);
+        expect(tracker.cursor.order.known, `${move}/${battler}`).toBe(true);
+        expect(tracker.cursor.order.free, `${move}/${battler}`).toEqual(expected({ kind: "general-animation", animation }).cursor.order.free);
+      }
+    }
+    // The four branches allocate differently (Fire Spin vs Bind): the key is load-bearing.
+    expect(trap(["83"], 0).cursor.order.free).not.toEqual(trap(["35"], 0).cursor.order.free);
+    for (const args of [["128"], ["0"], []]) {
+      const tracker = trap(args, 1);
+      expect(tracker.cursor.order.known, JSON.stringify(args)).toBe(false);
+      expect(tracker.invalidReason, JSON.stringify(args)).toContain("TURN_TRAP");
+      expect(tracker.invalidReason, JSON.stringify(args)).not.toContain("TURN_TRAP_");
+    }
+  });
 });
