@@ -21,12 +21,20 @@ GATES = {
     "MACH_PUNCH": ("machPunch183", "known lend AND (firstBody OR both species front-idle rests {0,0}) AND non-shiny AND zero target rest (unchanged)"),
     "SHEER_COLD": ("sheerCold329", "known lend AND (firstBody OR both species front-idle rests {0,0}) AND non-shiny"),
     "EXTRASENSORY": ("extrasensory326", "known lend AND (firstBody OR (OPPONENT attacker AND both species front-idle rests {0,0})) AND non-shiny"),
+    "SKY_ATTACK": ("skyAttack143", "charge: known lend AND (firstBody OR both species front-idle rests {0,0}) AND non-shiny (later charge: WIN0 (0,0)); strike unchanged"),
+    "BONEMERANG": ("bonemerang155", "known lend AND (firstBody OR afterBonemerangHit1 OR both species front-idle rests {0,0}) AND non-shiny"),
+    "OUTRAGE": ("outrage200", "known lend AND (firstBody OR both species front-idle rests {0,0}) AND non-shiny"),
+    "MEMENTO": ("memento262", "UNCHANGED (first body only): the scanline entry is read and a scanline predecessor (Psywave) changes it; no production scanline-history input"),
 }
 PINS = {
     "SIGNAL_BEAM": ["signal-beam-pla-venomoth-golem-growl-2.json", "signal-beam-opp-ariados-chansey-qa-1.json"],
     "MACH_PUNCH": ["mach-punch-pla-hitmonchan-chansey-splash-1.json", "mach-punch-opp-machamp-golem-growl-2.json"],
     "SHEER_COLD": ["sheer-cold-pla-dewgong-chansey-qa-0.json", "sheer-cold-opp-dewgong-chansey-splash-s1-0.json"],
     "EXTRASENSORY": ["extrasensory-opp-nuzleaf-shuckle-splash-2.json", "extrasensory-opp-alakazam-golem-qa-1.json"],
+    "SKY_ATTACK": ["sky-attack-opp-pidgeot-golem-qa-2.json", "sky-attack-pla-fearow-shuckle-splash-2.json"],
+    "BONEMERANG": ["bonemerang-opp-rhydon-golem-splash-2.json", "bonemerang-pla-rhydon-golem-growl-1.json"],
+    "OUTRAGE": ["outrage-opp-flygon-golem-qa-1.json", "outrage-pla-flygon-golem-growl-2.json"],
+    "MEMENTO": [],
 }
 def alloc_components(later):
     """Per allocator component (from the r1 probe at activation): later activations equal to the same scenario's first body of the move."""

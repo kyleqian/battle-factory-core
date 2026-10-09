@@ -82,3 +82,42 @@ for variant, moves in (("qa", [98, 98, 98, 98]), ("splash", [150, 150, 150, 150]
     s["trace"] = {"segments": seg}
     (OUT / f"signal-beam-pla-ariados-onix-{variant}.json").write_text(json.dumps(s, indent=1) + "\n")
 print(len(list(OUT.glob("*.json"))))
+# Second batch: Sky Attack 143 (charge / strike, 4 turns), Bonemerang 155 (two hits per use), Memento 262 (self-KO: one body per attacker),
+# Outrage 200 (2-3 turn rampage, 4 turns). Same foe-lead variants; the mechanic-* Memento / Outrage bases keep their ONIX foe (a non-zero
+# opponent rest for the player-attacker side).
+BASES2 = {
+    "sky-attack": ([("tools/battle-lab/mechanic-sky-attack-player-fearow-opponent-shuckle.json", "opponent"),
+                    ("tools/battle-lab/mechanic-sky-attack-opponent-fearow-player-shuckle.json", "player"),
+                    ("tools/battle-lab/prep25-sky-attack-alt-player-pidgeot-golem.json", "opponent"),
+                    ("tools/battle-lab/prep25-sky-attack-alt-opponent-pidgeot-golem.json", "player")], 4),
+    "bonemerang": ([("tools/battle-lab/mechanic-bonemerang-player-marowak-opponent-chansey.json", "opponent"),
+                    ("tools/battle-lab/mechanic-bonemerang-opponent-marowak-player-chansey.json", "player"),
+                    ("tools/battle-lab/prep29-bonemerang-alt-player-rhydon-golem.json", "opponent"),
+                    ("tools/battle-lab/prep29-bonemerang-alt-opponent-rhydon-golem.json", "player")], 3),
+    "memento": ([("tools/battle-lab/prep34-memento-alt-player-weezing-golem.json", "opponent"),
+                 ("tools/battle-lab/prep34-memento-alt-opponent-weezing-golem.json", "player"),
+                 ("tools/battle-lab/mechanic-memento-player-weezing-opponent-onix.json", "opponent"),
+                 ("tools/battle-lab/mechanic-memento-opponent-weezing-player-onix.json", "player")], 2),
+    "outrage": ([("tools/battle-lab/mechanic-outrage-player-dragonite-opponent-onix.json", "opponent"),
+                 ("tools/battle-lab/mechanic-outrage-opponent-dragonite-player-onix.json", "player"),
+                 ("tools/battle-lab/prep29-outrage-alt-player-flygon-golem.json", "opponent"),
+                 ("tools/battle-lab/prep29-outrage-alt-opponent-flygon-golem.json", "player")], 4),
+}
+for move, (bases, turns) in BASES2.items():
+    for path, foe in bases:
+        base = json.loads(Path(path).read_text())
+        assert "seed" in base, path
+        atk = "player" if foe == "opponent" else "opponent"
+        parts = Path(path).stem.split("-")
+        tag = f"{atk[:3]}-{parts[-3]}-{parts[-1]}" if Path(path).stem.startswith("mechanic-") else f"{atk[:3]}-{parts[-2]}-{parts[-1]}"
+        for variant, moves in VARIANTS:
+            s = json.loads(json.dumps(base))
+            s["seed"] = base["seed"]  # explicit lab seed (ISSUES #154)
+            s["overrides"]["parties"][foe][0]["moves"] = moves
+            seg = []
+            for turn in range(turns):
+                seg += [{"frames": 2, "buttons": ["A"]}, {"frames": 30, "buttons": []}, {"frames": 2, "buttons": ["A"]},
+                        {"frames": 1300 if turn == turns - 1 else 1100, "buttons": []}]
+            s["trace"] = {"segments": seg}
+            (OUT / f"{move}-{tag}-{variant}.json").write_text(json.dumps(s, indent=1) + "\n")
+print(len(list(OUT.glob("*.json"))))

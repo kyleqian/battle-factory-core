@@ -141,13 +141,19 @@ describe("live Q2 gates", () => {
     for (const side of ["player", "opponent"] as const) expect(call(effect.spriteOrderInput, { ...view.field, [side]: { ...view.field[side], personality: shiny } })).toBeNull();
   });
 
-  it("Sky Attack: the charge needs the first body (a later-body charge declines); the strike (turn bit 1) needs a known lend and starts with WIN0 (0, 0)", () => {
+  // later58 moved this pin: a later charge is live (WIN0 (0, 0), like the strike) while both species rests are {0,0}; with an opponent ONIX it
+  // declines (docs/next-adapters-later58.md).
+  it("Sky Attack: a later charge needs rest-free battlers and starts with WIN0 (0, 0); the strike (turn bit 1) needs a known lend and starts with WIN0 (0, 0)", () => {
     const f = fixtureAt("sky-attack-alt-player-pidgeot-golem-charge");
     const { view, effect } = effectOf(f);
     const first = effect.spriteOrderInput as { known: true; free: number[]; firstBody?: true };
     const { firstBody: _drop, ...later } = first;
     expect(liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, first as never)).not.toBeNull();
-    expect(liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, later as never)).toBeNull();
+    const laterCharge = liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, later as never);
+    expect((laterCharge!.config as any).animationInputs.background.registers).toMatchObject({ win0h: 0, win0v: 0 });
+    const onix = effectOf({ ...f, target: { ...f.target, species: "ONIX" } });
+    expect(liveMoveAnimationPresentation(onix.effect.request, onix.view.field, 0, undefined, undefined, onix.effect.spriteOrderInput as never)).not.toBeNull();
+    expect(liveMoveAnimationPresentation(onix.effect.request, onix.view.field, 0, undefined, undefined, later as never)).toBeNull();
     expect(liveMoveAnimationPresentation({ ...effect.request, turn: 1 }, view.field, 0, undefined, undefined, undefined)).toBeNull();
     expect(liveMoveAnimationPresentation({ ...effect.request, turn: 1 }, view.field, 0, undefined, undefined, { known: false } as never)).toBeNull();
     const strike = liveMoveAnimationPresentation({ ...effect.request, turn: 1 }, view.field, 0, undefined, undefined, later as never);

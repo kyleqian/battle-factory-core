@@ -1,0 +1,49 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "SKY_ATTACK",
+ "bodyIndex": 0,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later58/scenarios/sky-attack-opp-fearow-shuckle-qa.json",
+ "denseWindow": {
+  "startFrame": 187,
+  "endFrame": 334
+ },
+ "attacker": {
+  "species": "FEAROW",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SHUCKLE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703675,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 127,
+  "playerMaxHp": 127,
+  "opponentHp": 133,
+  "opponentMaxHp": 140,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "messageLines": [
+  "",
+  ""
+ ],
+ "precedingBodies": [
+  {
+   "moveId": 98,
+   "side": "player"
+  }
+ ]
+}

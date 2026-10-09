@@ -96,3 +96,17 @@ describe("later58 Extrasensory 326 at a later body (D4c: opponent attacker only)
     expect(presentation(fixture("extrasensory-pla-nuzleaf-shuckle-splash-0"))?.config.move).toBe("EXTRASENSORY");
   });
 });
+
+describe("later58 Sky Attack 143: a later charge", () => {
+  it.each(pinnedOf("SKY_ATTACK"))("%s: live, every pinned row equals the ROM frame", expectPinnedRows, 180000);
+
+  it("later charges after Quick Attack / Growl / Splash / its own charge + strike are live on rest-free battlers; an ONIX later charge declines", () => {
+    for (const name of ["sky-attack-pla-pidgeot-golem-qa-0", "sky-attack-opp-fearow-shuckle-growl-2", "sky-attack-pla-fearow-shuckle-splash-4"]) {
+      const p = presentation(fixture(name));
+      expect(p?.config.move).toBe("SKY_ATTACK");
+      expect((p!.config as any).animationInputs.background.registers).toMatchObject({ win0h: 0, win0v: 0 });
+    }
+    const later = fixture("sky-attack-pla-pidgeot-golem-qa-0");
+    expect(presentation({ ...later, target: { ...later.target, species: "ONIX" } })).toBeNull();
+  });
+});

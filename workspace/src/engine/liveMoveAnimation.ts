@@ -3050,8 +3050,10 @@ export function liveMoveAnimationPresentation(
     case 143: {
       // prep25 Q2 / prep28: Sky Attack charge (first body: WIN0 (240, 161) is the battle's first-body reset) and strike (turn bit 1, 180 rows,
       // WIN0 (0, 0) after the charge). The order host keys the strike 10143 (request.turn), so the tracker lends the strike its own free order.
+      // later58 (docs/next-adapters-later58.md): a LATER charge starts with WIN0 (0, 0) like the strike; its BGnCNT / DISPCNT / BG1VOFS history
+      // is unread and the allocator is the first body's. The battler x2 rests are read: a later charge needs both species rests {0,0}.
       const strike = (request.turn & 1) === 1;
-      if (!spriteOrderInput?.known || (!strike && !spriteOrderInput.firstBody)) return null;
+      if (!spriteOrderInput?.known || (!strike && !spriteOrderInput.firstBody && !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       const lentOrder = spriteOrderWithOccupiedPrefix(
@@ -3059,8 +3061,8 @@ export function liveMoveAnimationPresentation(
       if (palettes === null || lentOrder === null) return null;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       config = { move: "SKY_ATTACK", body: strike ? "unleash" : "setup", attacker, target, fieldProfile, animationInputs: liveSkyAttackInputs({
-        attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes, spriteOrder: lentOrder, firstBody: !strike,
-        impactPalette: (paletteResources.resources as Record<string, { colors: readonly number[] }>).ANIM_TAG_IMPACT!.colors,
+        attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes, spriteOrder: lentOrder,
+        firstBody: !strike && spriteOrderInput.firstBody === true, impactPalette: (paletteResources.resources as Record<string, { colors: readonly number[] }>).ANIM_TAG_IMPACT!.colors,
         birdPalette: skyAttackAsset.bird.palette.map((c) => (c.r >> 3) | (c.g >> 3) << 5 | (c.b >> 3) << 10) }) as never };
       break;
     }
