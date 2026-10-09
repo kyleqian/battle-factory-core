@@ -15,7 +15,7 @@ import prep43Extract as X
 import plans51Probe as J
 
 X.J = J
-X.MV0_LABEL = {"NIGHTMARE": "status NIGHTMARE", "CURSED": "status CURSED", "ITEM_KNOCKOFF": "general ITEM_KNOCKOFF", "FRZ": "status FRZ", "SUBSTITUTE_FADE": "general SUBSTITUTE_FADE"}
+X.MV0_LABEL = {"SUBSTITUTE_FADE": "general SUBSTITUTE_FADE", "FOCUS_BAND": "general FOCUS_BAND"}
 
 if __name__ == "__main__":
     OUT = Path(sys.argv[1])

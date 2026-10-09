@@ -1,9 +1,10 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
-  applySpriteOrderPresentationEvent, createSpriteOrderTracker, spriteOrderProductionBodyPlan, type SpriteOrderPresentationEvent,
+  applySpriteOrderPresentationEvent, createSpriteOrderTracker, decodeSpriteOrderPlan, spriteOrderProductionBodyPlan, type SpriteOrderPresentationEvent,
 } from "../src/engine/spriteOrderEventTransform.ts";
 import { applySpriteOrderUnitPlan, createSpriteOrderPlanCursor, knownEntrySpriteOrderState } from "../src/engine/spriteOrderProvider.ts";
+import { SPRITE_ORDER_PRODUCTION_ANIMS, SPRITE_ORDER_PRODUCTION_PLANS } from "../src/engine/spriteOrderProductionPlans.ts";
 import { encodeSpriteOrderPlan } from "../tools/integration/spriteOrderProductionTable.ts";
 
 // S10A plans51 (docs/next-adapters-plans51.md): the next tail of sprite-order host stops. ROM receipts are direct-mGBA probes
@@ -28,7 +29,7 @@ function romInstances(move: number) {
   }
   return out;
 }
-function perFrameExact(unit: Unit, plan: NonNullable<ReturnType<typeof spriteOrderProductionBodyPlan>>): boolean {
+function perFrameExact(unit: Unit, plan: NonNullable<ReturnType<typeof spriteOrderProductionBodyPlan>>, next?: Unit): boolean {
   const start = createSpriteOrderPlanCursor({ known: true, free: unit.F0, pendingDestroyed: [] });
   if (unit.windows.length !== plan.length || unit.strayFChanges !== 0) return false;
   let cursor = start;
@@ -42,7 +43,12 @@ function perFrameExact(unit: Unit, plan: NonNullable<ReturnType<typeof spriteOrd
     if (!same(created, rom.C.map(([slot]) => slot).sort((l, r) => l - r)) || !same(destroyed, [...rom.D].sort((l, r) => l - r))
       || !same(cursor.order.free, rom.F)) return false;
   }
-  return cursor.occupied.filter(slot => !start.occupied.includes(slot)).length === 0;
+  const survivors = cursor.occupied.filter(slot => !start.occupied.includes(slot));
+  if (survivors.length === 0) return next === undefined;
+  // a single survivor (carry) must be the only destroy of the very next allocation window, leaving the ROM's free order
+  const first = next?.windows[0];
+  const carried = applySpriteOrderUnitPlan(cursor, [{ D: [["o", survivors[0]!]] }]);
+  return survivors.length === 1 && first !== undefined && first.C.length === 0 && same(first.D, survivors) && same(carried.order.free, first.F);
 }
 
 describe("plans51 sprite-order plans (ROM receipts -> production table)", () => {
@@ -55,9 +61,9 @@ describe("plans51 sprite-order plans (ROM receipts -> production table)", () => 
     }
   });
 
-  it("Outrage 200: one EXACT plan on both sides over 4 species pairs per side (14 ROM instances), lent through the order host", () => {
+  it("Outrage 200: one EXACT plan on both sides over 4 species pairs per side (+ the FOCUS_BAND / SUBSTITUTE_FADE stagings), lent through the order host", () => {
     const instances = romInstances(200);
-    expect(instances).toHaveLength(14);
+    expect(instances).toHaveLength(147);
     for (const side of sides) {
       const plan = spriteOrderProductionBodyPlan(200, side);
       expect(plan, side).not.toBeNull();
@@ -77,5 +83,28 @@ describe("plans51 sprite-order plans (ROM receipts -> production table)", () => 
         { kind: "move-animation", moveId: 200, attackerSide: side } as SpriteOrderPresentationEvent);
       expect(tracker.cursor.order.known, side).toBe(true);
     }
+  });
+
+  it("FOCUS_BAND: one EXACT plan with a carry, holders Magikarp / Caterpie on both sides (14 ROM instances of a 120-seed sweep)", () => {
+    const text = SPRITE_ORDER_PRODUCTION_PLANS[SPRITE_ORDER_PRODUCTION_ANIMS.FOCUS_BAND!];
+    expect(text).toBe("Cf;D0;Cf;D1;Cf");
+    let instances = 0;
+    const holders = new Set<string>();
+    for (const [job, entry] of Object.entries(units.jobs)) {
+      entry.units.forEach((unit, index) => {
+        if (unit.label !== "general FOCUS_BAND") return;
+        instances += 1;
+        holders.add(job.split("-").slice(1, 3).join("-"));
+        expect(unit.plan, job).toBe(text);
+        const next = entry.units.slice(index + 1).find(u => u.windows.length > 0);
+        expect(perFrameExact(unit, decodeSpriteOrderPlan(text!), next), job).toBe(true);
+      });
+    }
+    expect(instances).toBe(14);
+    expect([...holders].sort()).toEqual(["opp-10", "opp-129", "pla-10", "pla-129"]);
+    // the slide sprite survives the unit: the order stays known (it invalidated with "no EXACT plan: general animation FOCUS_BAND")
+    const tracker = applySpriteOrderPresentationEvent(createSpriteOrderTracker(knownEntrySpriteOrderState("ordinary-factory")),
+      { kind: "general-animation", animation: "FOCUS_BAND" } as SpriteOrderPresentationEvent);
+    expect(tracker.cursor.order.known).toBe(true);
   });
 });

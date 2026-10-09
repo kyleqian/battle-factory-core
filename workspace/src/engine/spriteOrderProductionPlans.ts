@@ -224,6 +224,7 @@ export const SPRITE_ORDER_PRODUCTION_PLANS: readonly string[] = Object.freeze([
   "Cffffff;D3,4,5,2,0,1",
   "Cf;D0;Cf;Cf;Cf;Cf;D1;Cf;D2;Cf;D3;Cf;D4;Cf;D5;Cf;D6;D7;D8;D9;Cf;Cf;Cf;D10;Cf;D11;D12;D13",
   "Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf/D0;Cf/D1;D2;D3;Cf;D4;Cf;D5;Cf;D6;Cf;D7;Cf;D8;Cf;Cf;D9;D10;D11;D12;D13;D14;D15;D16;D17;D18;D19;D20;D21;D22",
+  "Cf;D0;Cf;D1;Cf",
 ]);
 
 /** `<moveId>:<attacker side>` -> plan index; EXACT-PLAN bodies only (NEEDS-KEYS / NOT-OBSERVED are absent = invalidate). */
@@ -300,6 +301,7 @@ export const SPRITE_ORDER_PRODUCTION_BODIES: Readonly<Record<string, number>> = 
 /** Mid-battle (non-move) animations -> plan index. STATS_CHANGE_CLASS_1 = args 15..28 (+-1) and 55/57 (multiple +1/-1),
   * STATS_CHANGE_CLASS_2 = args 39..52 (+-2: the copy sprite survives the unit; its destroy is carried). */
 export const SPRITE_ORDER_PRODUCTION_ANIMS: Readonly<Record<string, number>> = Object.freeze({
+  FOCUS_BAND: 220,
   FOCUS_PUNCH_SETUP: 190,
   FUTURE_SIGHT_HIT: 9,
   HELD_ITEM_EFFECT: 191,

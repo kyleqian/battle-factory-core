@@ -25,6 +25,22 @@ JOBS = [("BODY200", f"ou-ply-{a}-{d}", 200, OU_P, (("species", "player", a), ("s
 JOBS += [("BODY200", f"ou-opp-{a}-{d}", 200, OU_O, (("species", "opponent", a), ("species", "player", d), ("moves", "opponent", 200)))
          for a, d in OU_PAIRS]
 
+# SUBSTITUTE_FADE (General_SubstituteFade: monbg + tasks + AnimTask_SwapMonSpriteToFromSubstitute, no createsprite). plans48's staging
+# (fixtures/plans48/units.json sf-*: Golbat / Crobat Substitute, then Rhydon's Rock Slide) never showed the fade, even with 1800 more
+# idle frames here. Staged instead on the Outrage scenarios: the defender (Crobat 169 / Golbat 42) uses Substitute, Dragonite's
+# Outrage (locked for 2-3 turns, no further input) breaks it on the same or the next turn.
+JOBS += [
+    ("SUBSTITUTE_FADE", f"sf-{side[:3]}-{sp}", 164, base, (("species", side, sp), ("moves", side, 164), ("extend", 1200)))
+    for side, base in (("player", OU_O), ("opponent", OU_P)) for sp in (169, 42)
+]
+# FOCUS_BAND (General_FocusBand: two simple_palette_blend controller sprites + gSlideMonToOriginalPosSpriteTemplate): the holder
+# (Magikarp 129 / Caterpie 10, Focus Band 196) takes Dragonite's Outrage (an OHKO); the band's 10 % roll staged by a lab-seed sweep.
+FB_SEEDS = range(1, 31)
+JOBS += [
+    ("FOCUS_BAND", f"fb-{side[:3]}-{sp}-s{seed}", 200, base, (("species", side, sp), ("item", side, 196), ("seed", seed)))
+    for side, base in (("player", OU_O), ("opponent", OU_P)) for sp in (129, 10) for seed in FB_SEEDS
+]
+
 if __name__ == "__main__":
     argv = sys.argv[1:]
     out = Path(argv[0])

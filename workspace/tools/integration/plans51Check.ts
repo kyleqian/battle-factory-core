@@ -16,10 +16,14 @@ interface Job { unit: string; base: string; units: Unit[]; identicalAB: boolean 
 export const PLANS51_PLANS: Readonly<Record<string, string>> = Object.freeze({
   // Move_OUTRAGE: 23 flames (9 + 7 + 7 via OutrageFlames), each TranslateSpriteLinearAndFlicker for 30 frames, destroyed in creation order
   "body 200": "Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf/D0;Cf/D1;D2;D3;Cf;D4;Cf;D5;Cf;D6;Cf;D7;Cf;D8;Cf;Cf;D9;D10;D11;D12;D13;D14;D15;D16;D17;D18;D19;D20;D21;D22",
+  // General_FocusBand: two simple_palette_blend controller sprites, then gSlideMonToOriginalPosSpriteTemplate, which survives the
+  // script's `end` (carry: destroyed by the next allocation window)
+  "general FOCUS_BAND": "Cf;D0;Cf;D1;Cf",
 });
 
 /** Which proposed plan a probed unit is checked against (null = not a plans51 plan unit). */
 function planLabel(_job: Job, unit: Unit): string | null {
+  if (unit.label === "general FOCUS_BAND") return unit.label;
   const m = /^body (\d+):(\w+)$/.exec(unit.label);
   if (!m) return null;
   const mv = Number(m[1]);
@@ -74,7 +78,8 @@ for (const [name, job] of Object.entries(input.jobs)) {
     const entry = results[label] ??= { instances: 0, matched: 0, framesChecked: 0, sides: [], jobs: [], mismatches: [], carries: 0 };
     const next = job.units.slice(index + 1).find(u => u.windows.length > 0);
     const checked = checkUnit(unit, next, PLANS51_PLANS[label]!);
-    const side = unit.label.split(":")[1]!;
+    // a general animation's side: the holder's side (the job id's fb-pla / fb-opp)
+    const side = unit.label.includes(":") ? unit.label.split(":")[1]! : name.split("-")[1] === "pla" ? "player" : "opponent";
     entry.instances += 1;
     entry.framesChecked += checked.frames;
     if (checked.carry) entry.carries += 1;
