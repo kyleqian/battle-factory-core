@@ -1,0 +1,2029 @@
+{
+ "schema": "prep48-dig-check/v1",
+ "probeDeterminism": [
+  {
+   "scenario": "dig-opp-flygon-golem-first4.json",
+   "r1": "757c447337fb1642",
+   "r2": "757c447337fb1642",
+   "same": true
+  },
+  {
+   "scenario": "dig-opp-flygon-golem-qa4.json",
+   "r1": "38b75fedeaf67529",
+   "r2": "38b75fedeaf67529",
+   "same": true
+  },
+  {
+   "scenario": "dig-opp-vibrava-chansey-first4.json",
+   "r1": "8211e0605a6cbad3",
+   "r2": "8211e0605a6cbad3",
+   "same": true
+  },
+  {
+   "scenario": "dig-opp-vibrava-chansey-qa4.json",
+   "r1": "efe29fe2421e8e0f",
+   "r2": "efe29fe2421e8e0f",
+   "same": true
+  },
+  {
+   "scenario": "dig-ply-flygon-golem-first4.json",
+   "r1": "1f215389ec3a1aed",
+   "r2": "1f215389ec3a1aed",
+   "same": true
+  },
+  {
+   "scenario": "dig-ply-flygon-golem-qa4.json",
+   "r1": "862176c4c7675dc4",
+   "r2": "862176c4c7675dc4",
+   "same": true
+  },
+  {
+   "scenario": "dig-ply-vibrava-chansey-first4.json",
+   "r1": "bb3b62db09c05416",
+   "r2": "bb3b62db09c05416",
+   "same": true
+  },
+  {
+   "scenario": "dig-ply-vibrava-chansey-qa4.json",
+   "r1": "bbbf6adda3727185",
+   "r2": "bbbf6adda3727185",
+   "same": true
+  }
+ ],
+ "rows": [
+  {
+   "fixture": "dig-opp-flygon-golem-first4-dig0-setup.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    54,
+    248
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "b73f8c9540383144"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "b73f8c9540383144"
+    }
+   ],
+   "state": {
+    "monbgCnt": 39936,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": true,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-first4-dig1-unleash.json",
+   "body": "unleash",
+   "side": "opponent",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91o",
+   "window": [
+    1212,
+    1279
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "2dc8a519c43cd33d"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "2dc8a519c43cd33d"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 159,
+     "bank1LinesNotS0": 159
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-first4-dig2-setup.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91o B10091o B45p S22",
+   "window": [
+    2322,
+    2516
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "8b226f04d14c25e3"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "8b226f04d14c25e3"
+    }
+   ],
+   "state": {
+    "monbgCnt": 7168,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 16192,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-first4-dig3-unleash.json",
+   "body": "unleash",
+   "side": "opponent",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91o B10091o B45p S22 B91o",
+   "window": [
+    3480,
+    3547
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "25ccba9f0106c951"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "25ccba9f0106c951"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 16192,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-qa4-dig0-setup.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B98p",
+   "window": [
+    203,
+    397
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "94025094df626c03"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "94025094df626c03"
+    }
+   ],
+   "state": {
+    "monbgCnt": 39936,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": true,
+    "otherCnt": 24066,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-qa4-dig1-unleash.json",
+   "body": "unleash",
+   "side": "opponent",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B98p B91o",
+   "window": [
+    1369,
+    1436
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "2206781d3c646d40"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "2206781d3c646d40"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24066,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 159,
+     "bank1LinesNotS0": 159
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-qa4-dig2-setup.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B98p B91o B10091o B98p",
+   "window": [
+    2468,
+    2662
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "2b1236d3f1f99be3"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "2b1236d3f1f99be3"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24066,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-qa4-dig3-unleash.json",
+   "body": "unleash",
+   "side": "opponent",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B98p B91o B10091o B98p B91o",
+   "window": [
+    3637,
+    3704
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "aa8465e4656cd530"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "aa8465e4656cd530"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24066,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-first4-dig0-setup.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    54,
+    248
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "7faabbc77fe0232c"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "7faabbc77fe0232c"
+    }
+   ],
+   "state": {
+    "monbgCnt": 39936,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": true,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-first4-dig1-unleash.json",
+   "body": "unleash",
+   "side": "opponent",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B91o",
+   "window": [
+    1213,
+    1280
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "cb6935eb5ef267c4"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "cb6935eb5ef267c4"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 152,
+     "bank1LinesNotS0": 152
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-first4-dig2-setup.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B91o B10091o B45p S22",
+   "window": [
+    2322,
+    2516
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "47ebc51d1aa38ee4"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "47ebc51d1aa38ee4"
+    }
+   ],
+   "state": {
+    "monbgCnt": 7168,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 16192,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-first4-dig3-unleash.json",
+   "body": "unleash",
+   "side": "opponent",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B91o B10091o B45p S22 B91o",
+   "window": [
+    3481,
+    3548
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "b075eb29b38bdacb"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "b075eb29b38bdacb"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 16192,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-qa4-dig0-setup.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B98p",
+   "window": [
+    190,
+    384
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "161fcf5b1192fb1b"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "161fcf5b1192fb1b"
+    }
+   ],
+   "state": {
+    "monbgCnt": 39936,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": true,
+    "otherCnt": 24066,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-qa4-dig1-unleash.json",
+   "body": "unleash",
+   "side": "opponent",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B98p B91o",
+   "window": [
+    1374,
+    1441
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "0689026af8ede568"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "0689026af8ede568"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24066,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 152,
+     "bank1LinesNotS0": 152
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-qa4-dig2-setup.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B98p B91o B10091o B98p",
+   "window": [
+    2459,
+    2653
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "ddb64f12f35d11ff"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "ddb64f12f35d11ff"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24066,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-qa4-dig3-unleash.json",
+   "body": "unleash",
+   "side": "opponent",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B98p B91o B10091o B98p B91o",
+   "window": [
+    3642,
+    3709
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "4f041991088a8d7b"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "4f041991088a8d7b"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24066,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-first4-dig0-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    54,
+    248
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "d1b850da7f9056bb"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "d1b850da7f9056bb"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24064,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": true,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-first4-dig1-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91p",
+   "window": [
+    555,
+    622
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "4ebf1ad7e5c3b39b"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "4ebf1ad7e5c3b39b"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 112,
+     "bank1LinesNotS0": 112
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-first4-dig2-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91p B10091p B45o S22",
+   "window": [
+    1188,
+    1382
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "d711fdbaa9a7ae7a"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "d711fdbaa9a7ae7a"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 7168,
+    "dispcnt": 16192,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-first4-dig3-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91p B10091p B45o S22 B91p",
+   "window": [
+    1689,
+    1756
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "9097a607b272219b"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "9097a607b272219b"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 7168,
+    "dispcnt": 16192,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-first4-dig4-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91p B10091p B45o S22 B91p B10091p B45o S22",
+   "window": [
+    2322,
+    2516
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "b93040a827696bf5"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "b93040a827696bf5"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 7168,
+    "dispcnt": 16192,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-first4-dig5-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91p B10091p B45o S22 B91p B10091p B45o S22 B91p",
+   "window": [
+    2823,
+    2890
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "4fe1de51e871b66b"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "4fe1de51e871b66b"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 7168,
+    "dispcnt": 16192,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-first4-dig6-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91p B10091p B45o S22 B91p B10091p B45o S22 B91p B10091p B45o S22",
+   "window": [
+    3456,
+    3650
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "daddeb174574d179"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "daddeb174574d179"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 7168,
+    "dispcnt": 16192,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-first4-dig7-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91p B10091p B45o S22 B91p B10091p B45o S22 B91p B10091p B45o S22 B91p",
+   "window": [
+    3956,
+    4023
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "9a28c1e0f5ca2fc1"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "9a28c1e0f5ca2fc1"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 7168,
+    "dispcnt": 16192,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-qa4-dig0-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B98o",
+   "window": [
+    204,
+    398
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "9eee681f56a0a06c"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "9eee681f56a0a06c"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24064,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": true,
+    "otherCnt": 23554,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-qa4-dig1-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B98o B91p",
+   "window": [
+    711,
+    778
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "216456e7d3f7dc5b"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "216456e7d3f7dc5b"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 23554,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 112,
+     "bank1LinesNotS0": 112
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-qa4-dig2-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B98o B91p B10091p B98o",
+   "window": [
+    1341,
+    1535
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "bd467a8d94e077c3"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "bd467a8d94e077c3"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 23554,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-qa4-dig3-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B98o B91p B10091p B98o B91p",
+   "window": [
+    1848,
+    1915
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "ee136a138d49d852"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "ee136a138d49d852"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 23554,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-qa4-dig4-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B98o B91p B10091p B98o B91p B10091p B98o",
+   "window": [
+    2474,
+    2668
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "112a79861282b7f0"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "112a79861282b7f0"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 23554,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-qa4-dig5-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B98o B91p B10091p B98o B91p B10091p B98o B91p",
+   "window": [
+    2981,
+    3048
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "447d831460773678"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "447d831460773678"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 23554,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-first4-dig0-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    54,
+    248
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "47a7b899a03a485a"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "47a7b899a03a485a"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24064,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": true,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-first4-dig1-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B91p",
+   "window": [
+    561,
+    628
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "e8a1213ed3b1cb81"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "e8a1213ed3b1cb81"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 112,
+     "bank1LinesNotS0": 112
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-first4-dig2-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B91p B10091p B45o S22",
+   "window": [
+    2290,
+    2484
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "33e04d4e041822c4"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "33e04d4e041822c4"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 7168,
+    "dispcnt": 16192,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-first4-dig3-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B91p B10091p B45o S22 B91p",
+   "window": [
+    2797,
+    2864
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "df769080e92fc16b"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "df769080e92fc16b"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 7168,
+    "dispcnt": 16192,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-first4-dig4-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B91p B10091p B45o S22 B91p B10091p B45o S22",
+   "window": [
+    3456,
+    3650
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "71ed2943a0e893d6"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "71ed2943a0e893d6"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 7168,
+    "dispcnt": 16192,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false
+   }
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-first4-dig5-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B91p B10091p B45o S22 B91p B10091p B45o S22 B91p",
+   "window": [
+    3963,
+    4030
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "8fb21c0a5b82cea5"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "8fb21c0a5b82cea5"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 7168,
+    "dispcnt": 16192,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-qa4-dig0-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B98o",
+   "window": [
+    194,
+    388
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "e83cd3aa158b7b8d"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "e83cd3aa158b7b8d"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24064,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": true,
+    "otherCnt": 23554,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-qa4-dig1-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B98o B91p",
+   "window": [
+    707,
+    774
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "38a88742305fd26c"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "38a88742305fd26c"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 23554,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 112,
+     "bank1LinesNotS0": 112
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-qa4-dig2-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B98o B91p B10091p B98o",
+   "window": [
+    1329,
+    1523
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "234f3e9cb9a1e884"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "234f3e9cb9a1e884"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 23554,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-qa4-dig3-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B98o B91p B10091p B98o B91p",
+   "window": [
+    1842,
+    1909
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "31f9d22b2408d87d"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "31f9d22b2408d87d"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 23554,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-qa4-dig4-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B98o B91p B10091p B98o B91p B10091p B98o",
+   "window": [
+    2462,
+    2656
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "82351ff0e86200e3"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "82351ff0e86200e3"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 23554,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-qa4-dig5-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B98o B91p B10091p B98o B91p B10091p B98o B91p",
+   "window": [
+    2975,
+    3042
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "953a61c701c024bf"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "953a61c701c024bf"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 23554,
+    "dispcnt": 48960,
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true
+   }
+  }
+ ]
+}

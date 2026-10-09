@@ -1,0 +1,15 @@
+diff --git a/workspace/src/engine/liveMoveAnimation.ts b/workspace/src/engine/liveMoveAnimation.ts
+index 086d92b97..a273fc8b6 100644
+--- a/workspace/src/engine/liveMoveAnimation.ts
++++ b/workspace/src/engine/liveMoveAnimation.ts
+@@ -3102,7 +3102,9 @@ export function liveMoveAnimationPresentation(
+       // from the setup reducer's end state). Anything else declines. Geometry from the anchors, every allocator/task/matrix field is the
+       // measured constant shared by both corpora and the FLYGON/GOLEM alternates (both attacker sides).
+       const unleash = (request.turn & 1) === 1;
+-      if (!spriteOrderInput || (unleash ? !spriteOrderInput.afterDigSetup : !spriteOrderInput.firstBody)) return null;
++      // prep48 (temporary): any known lend. The setup's history inputs (monbg layer BGxCNT `inactiveCnt`, the retained scanline lines
++      // 0..startY-1 / srcBuffer) are not read by the renderer's pixels; the unleash takes the tracker's lend after a later setup.
++      if (!spriteOrderInput?.known) return null;
+       const lentOrder = spriteOrderWithOccupiedPrefix(
+         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+       if (lentOrder === null) return null;

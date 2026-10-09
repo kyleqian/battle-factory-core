@@ -1,0 +1,49 @@
+{
+ "schema": "prep48-live-adapter-fixture/v1",
+ "move": "DIG",
+ "bodyIndex": 0,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/prep48/scenarios/dig-opp-flygon-golem-qa4.json",
+ "denseWindow": {
+  "startFrame": 203,
+  "endFrame": 397
+ },
+ "attacker": {
+  "species": "FLYGON",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703599,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 187,
+  "playerMaxHp": 187,
+  "opponentHp": 148,
+  "opponentMaxHp": 174,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "messageLines": [
+  "",
+  ""
+ ],
+ "precedingBodies": [
+  {
+   "moveId": 98,
+   "side": "player"
+  }
+ ]
+}
