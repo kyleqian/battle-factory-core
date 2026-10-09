@@ -11,7 +11,7 @@
   62,
   63
  ],
- "probeSha256": "2bd4f6c85674b43c",
+ "probeSha256": "69c01e818667e82b",
  "summary": {
   "NET-ZERO": [
    "FUTURE SIGHT",
@@ -85,7 +85,7 @@
       "turns",
       2
      ],
-     "sha256": "db42c04e30accecd",
+     "sha256": "7d027a56ebc637be",
      "identicalAB": true,
      "bodies": [
       {
@@ -133,7 +133,7 @@
       "opponent",
       143
      ],
-     "sha256": "d49c3e653e39b8ce",
+     "sha256": "53a0bd5f6c7538b6",
      "identicalAB": true,
      "bodies": [
       {
@@ -179,7 +179,7 @@
       "turns",
       2
      ],
-     "sha256": "0f76a6f6b457ed11",
+     "sha256": "2adbc4ee8e778a26",
      "identicalAB": true,
      "bodies": [
       {
@@ -227,7 +227,7 @@
       "player",
       42
      ],
-     "sha256": "e53f590fa22bb7c3",
+     "sha256": "b3b679fd1e9f8805",
      "identicalAB": true,
      "bodies": [
       {
@@ -291,7 +291,7 @@
       "turns",
       2
      ],
-     "sha256": "db42c04e30accecd",
+     "sha256": "7d027a56ebc637be",
      "identicalAB": true,
      "bodies": [
       {
@@ -351,7 +351,7 @@
       "opponent",
       143
      ],
-     "sha256": "d49c3e653e39b8ce",
+     "sha256": "53a0bd5f6c7538b6",
      "identicalAB": true,
      "bodies": [
       {
@@ -409,7 +409,7 @@
       "turns",
       2
      ],
-     "sha256": "0f76a6f6b457ed11",
+     "sha256": "2adbc4ee8e778a26",
      "identicalAB": true,
      "bodies": [
       {
@@ -469,7 +469,7 @@
       "player",
       42
      ],
-     "sha256": "e53f590fa22bb7c3",
+     "sha256": "b3b679fd1e9f8805",
      "identicalAB": true,
      "bodies": [
       {
@@ -542,7 +542,7 @@
      "scenario": "seismic-toss-ply",
      "base": "mechanic-seismic-toss-player-kecleon-opponent-onix",
      "variant": null,
-     "sha256": "4a616f0dc4122870",
+     "sha256": "e95801df30e8c572",
      "identicalAB": true,
      "bodies": [
       {
@@ -597,7 +597,7 @@
      "scenario": "seismic-toss-opp",
      "base": "mechanic-seismic-toss-opponent-kecleon-player-onix",
      "variant": null,
-     "sha256": "8ff9504c0b1a0893",
+     "sha256": "03d7c367a22bedd8",
      "identicalAB": true,
      "bodies": [
       {
@@ -652,7 +652,7 @@
      "scenario": "st-ply-golbat",
      "base": "species-audit-golbat-prep8-seismic-toss-player",
      "variant": null,
-     "sha256": "f9ed60ee3455d9a0",
+     "sha256": "19a2fa457d44e71d",
      "identicalAB": true,
      "bodies": [
       {
@@ -707,7 +707,7 @@
      "scenario": "st-opp-pgolem",
      "base": "species-audit-pgolem-prep8-seismic-toss-opponent",
      "variant": null,
-     "sha256": "d46f2e58c579ca07",
+     "sha256": "3e44c63a8c1ee710",
      "identicalAB": true,
      "bodies": [
       {
@@ -783,7 +783,7 @@
      "scenario": "ice-ball-ply",
      "base": "mechanic-ice-ball-player-spheal-opponent-onix",
      "variant": null,
-     "sha256": "639ba2a5f4fdf389",
+     "sha256": "af635fd385de87a3",
      "identicalAB": true,
      "bodies": [
       {
@@ -1022,7 +1022,7 @@
      "scenario": "ice-ball-opp",
      "base": "mechanic-ice-ball-opponent-spheal-player-onix",
      "variant": null,
-     "sha256": "13179caedeeddc55",
+     "sha256": "040ee2dce59fd900",
      "identicalAB": true,
      "bodies": [
       {
@@ -1307,7 +1307,7 @@
      "scenario": "ib-ply-glalie",
      "base": "prep25-ice-ball-alt-player-glalie-golem",
      "variant": null,
-     "sha256": "3b858b5d58138ef4",
+     "sha256": "ca3623abcbf9e7b0",
      "identicalAB": true,
      "bodies": [
       {
@@ -1454,7 +1454,7 @@
      "scenario": "ib-opp-glalie",
      "base": "prep25-ice-ball-alt-opponent-glalie-golem",
      "variant": null,
-     "sha256": "5b59a09152ee8e6e",
+     "sha256": "984b7ad7f36e04e6",
      "identicalAB": true,
      "bodies": [
       {
@@ -1622,7 +1622,7 @@
       "turns",
       3
      ],
-     "sha256": "7a238a72a60ee070",
+     "sha256": "c896433a34422a32",
      "identicalAB": true,
      "bodies": [
       {
@@ -1738,7 +1738,7 @@
       "turns",
       3
      ],
-     "sha256": "634b8237fc258c45",
+     "sha256": "550fa48b77abecb1",
      "identicalAB": true,
      "bodies": [
       {
@@ -1890,7 +1890,7 @@
       "opponent",
       143
      ],
-     "sha256": "65f7e065153cd54b",
+     "sha256": "edb7fee5a62211c4",
      "identicalAB": true,
      "bodies": [
       {
@@ -2008,7 +2008,7 @@
       "player",
       143
      ],
-     "sha256": "59243a82d2fbbcd4",
+     "sha256": "c6561db5e5453aa0",
      "identicalAB": true,
      "bodies": [
       {
@@ -2171,7 +2171,7 @@
      "scenario": "pursuit-ply",
      "base": "mechanic-pursuit-player-beedrill-opponent-shuckle",
      "variant": null,
-     "sha256": "a1481c3cda0988c5",
+     "sha256": "1c7c14d8fb2f03f9",
      "identicalAB": true,
      "bodies": [
       {
@@ -2226,7 +2226,7 @@
      "scenario": "pursuit-opp",
      "base": "mechanic-pursuit-opponent-beedrill-player-shuckle",
      "variant": null,
-     "sha256": "b321f08d98a7fe31",
+     "sha256": "1ed90d933adbb700",
      "identicalAB": true,
      "bodies": [
       {
@@ -2281,7 +2281,7 @@
      "scenario": "pu-ply-umbreon",
      "base": "prep18-pursuit-alt-umbreon-golem",
      "variant": null,
-     "sha256": "71486053419b388a",
+     "sha256": "be64fe8473c3c69a",
      "identicalAB": true,
      "bodies": [
       {
@@ -2336,7 +2336,7 @@
      "scenario": "pu-opp-umbreon",
      "base": "prep18-pursuit-altopp-umbreon-golem",
      "variant": null,
-     "sha256": "462ad4eb4351d091",
+     "sha256": "2dda878d8a41c859",
      "identicalAB": true,
      "bodies": [
       {
@@ -2407,7 +2407,7 @@
      "scenario": "perish-song-ply",
      "base": "mechanic-perish-song-player-murkrow-opponent-onix",
      "variant": null,
-     "sha256": "841bcada4e1dadde",
+     "sha256": "00876f2ed6d16686",
      "identicalAB": true,
      "bodies": [
       {
@@ -2450,7 +2450,7 @@
      "scenario": "perish-song-opp",
      "base": "mechanic-perish-song-opponent-murkrow-player-onix",
      "variant": null,
-     "sha256": "dc526747a17ca30a",
+     "sha256": "a3920f467490a4dd",
      "identicalAB": true,
      "bodies": [
       {
@@ -2493,7 +2493,7 @@
      "scenario": "ps-ply-golem",
      "base": "prep11-audit-golem-prep5-perish-song-player",
      "variant": null,
-     "sha256": "be038af3630a406a",
+     "sha256": "ccffcc40e37b557b",
      "identicalAB": true,
      "bodies": [
       {
@@ -2554,7 +2554,7 @@
      "scenario": "leaf-blade-ply",
      "base": "mechanic-leaf-blade-player-sceptile-opponent-onix",
      "variant": null,
-     "sha256": "23431a86a6669fbd",
+     "sha256": "a553302dc72fc03c",
      "identicalAB": true,
      "bodies": [
       {
@@ -2609,7 +2609,7 @@
      "scenario": "leaf-blade-opp",
      "base": "mechanic-leaf-blade-opponent-sceptile-player-onix",
      "variant": null,
-     "sha256": "24e49e1aaf769e2f",
+     "sha256": "1ac4fd968d7f6ce1",
      "identicalAB": true,
      "bodies": [
       {
@@ -2664,7 +2664,7 @@
      "scenario": "lb-ply-ninetales",
      "base": "prep11-leaf-blade-player-ninetales-opponent-golem",
      "variant": null,
-     "sha256": "3d900312acb6355f",
+     "sha256": "106f20af46d1ab79",
      "identicalAB": true,
      "bodies": [
       {
@@ -2737,7 +2737,7 @@
      "scenario": "ip-ply-golbat",
      "base": "species-audit-golbat-prep7-ice-punch-lab-player",
      "variant": null,
-     "sha256": "187d8754124a9d1a",
+     "sha256": "1a94f45cac0c68b3",
      "identicalAB": true,
      "bodies": [
       {
@@ -2792,7 +2792,7 @@
      "scenario": "ip-opp-pgolem",
      "base": "species-audit-pgolem-prep7-ice-punch-lab-opponent",
      "variant": null,
-     "sha256": "b39db346bb46e20d",
+     "sha256": "fd535dd9f4a3e3da",
      "identicalAB": true,
      "bodies": [
       {
@@ -2847,7 +2847,7 @@
      "scenario": "ip-opp-pidgeot",
      "base": "elevated-postbody-pidgeot-prep7-ice-punch-lab-opponent",
      "variant": null,
-     "sha256": "f4340df5b0ef8c2c",
+     "sha256": "78ddf3ac0ad9becb",
      "identicalAB": true,
      "bodies": [
       {
@@ -2920,7 +2920,7 @@
      "scenario": "frustration-ply",
      "base": "mechanic-frustration-player-furret-opponent-onix",
      "variant": null,
-     "sha256": "c5be60d1aec523c4",
+     "sha256": "c09415a12cf7db35",
      "identicalAB": true,
      "bodies": [
       {
@@ -2975,7 +2975,7 @@
      "scenario": "frustration-opp",
      "base": "mechanic-frustration-opponent-furret-player-onix",
      "variant": null,
-     "sha256": "93d6ccc081b6ed9d",
+     "sha256": "9543fc9a97459f86",
      "identicalAB": true,
      "bodies": [
       {
@@ -3030,7 +3030,7 @@
      "scenario": "fr-ply-golem",
      "base": "prep11-audit-golem-prep8-frustration-player",
      "variant": null,
-     "sha256": "4a7fa414d1b570d0",
+     "sha256": "8ddd89cf1e31803b",
      "identicalAB": true,
      "bodies": [
       {
@@ -3101,7 +3101,7 @@
      "scenario": "foresight-ply",
      "base": "mechanic-foresight-player-machoke-opponent-onix",
      "variant": null,
-     "sha256": "62f1bd8cddab8b53",
+     "sha256": "cce8d07c63a52896",
      "identicalAB": true,
      "bodies": [
       {
@@ -3144,7 +3144,7 @@
      "scenario": "foresight-opp",
      "base": "mechanic-foresight-opponent-machoke-player-onix",
      "variant": null,
-     "sha256": "3b3ff7a35249d5c6",
+     "sha256": "87caedd1d6c0bcb4",
      "identicalAB": true,
      "bodies": [
       {
@@ -3187,7 +3187,7 @@
      "scenario": "fo-ply-hitmonlee",
      "base": "prep11-foresight-alt-hitmonlee",
      "variant": null,
-     "sha256": "5049d851843a2d49",
+     "sha256": "00cea2d25a8f4d61",
      "identicalAB": true,
      "bodies": [
       {
@@ -3250,7 +3250,7 @@
       "player",
       207
      ],
-     "sha256": "776ca78d99e8dd3a",
+     "sha256": "0d1c2b10f05bd1dc",
      "identicalAB": true,
      "bodies": [
       {
@@ -3297,7 +3297,7 @@
       "opponent",
       207
      ],
-     "sha256": "1b002f79dc507fe1",
+     "sha256": "acb0d434add227ae",
      "identicalAB": true,
      "bodies": [
       {
@@ -3346,7 +3346,7 @@
       "opponent",
       143
      ],
-     "sha256": "a61061933c05f308",
+     "sha256": "30f813c977b39c55",
      "identicalAB": true,
      "bodies": [
       {
@@ -3407,7 +3407,7 @@
      "scenario": "minimize-ply",
      "base": "mechanic-minimize-player-grimer-opponent-onix",
      "variant": null,
-     "sha256": "c14d0e1112240fa7",
+     "sha256": "c752dcf5996171a4",
      "identicalAB": true,
      "bodies": [
       {
@@ -3462,7 +3462,7 @@
      "scenario": "minimize-opp",
      "base": "mechanic-minimize-opponent-grimer-player-onix",
      "variant": null,
-     "sha256": "fa2461ffa1d768a0",
+     "sha256": "44cfe1dbc3a34f44",
      "identicalAB": true,
      "bodies": [
       {
@@ -3520,7 +3520,7 @@
       "opponent",
       143
      ],
-     "sha256": "2cf57a6163f7a427",
+     "sha256": "e98ba5eb4a85e55c",
      "identicalAB": true,
      "bodies": [
       {
@@ -3593,7 +3593,7 @@
      "scenario": "fake-out-ply",
      "base": "mechanic-fake-out-player-makuhita-opponent-shuckle",
      "variant": null,
-     "sha256": "ae5d1f9a7f406e18",
+     "sha256": "a14ad2f6a321f293",
      "identicalAB": true,
      "bodies": [
       {
@@ -3648,7 +3648,7 @@
      "scenario": "fake-out-opp",
      "base": "mechanic-fake-out-opponent-makuhita-player-shuckle",
      "variant": null,
-     "sha256": "d9518536eb45318f",
+     "sha256": "1f28427884ff9efe",
      "identicalAB": true,
      "bodies": [
       {
@@ -3706,7 +3706,7 @@
       "opponent",
       143
      ],
-     "sha256": "cb11d4113a93d44b",
+     "sha256": "b46a42725a9a9799",
      "identicalAB": true,
      "bodies": [
       {
@@ -3779,7 +3779,7 @@
      "scenario": "mega-drain-ply",
      "base": "mechanic-mega-drain-player-skiploom-opponent-onix",
      "variant": null,
-     "sha256": "8104fb12c79f58b0",
+     "sha256": "3c5c8b770702b29e",
      "identicalAB": true,
      "bodies": [
       {
@@ -3834,7 +3834,7 @@
      "scenario": "mega-drain-opp",
      "base": "mechanic-mega-drain-opponent-skiploom-player-onix",
      "variant": null,
-     "sha256": "92d4ca6a77414fe0",
+     "sha256": "a6820ed55c670a38",
      "identicalAB": true,
      "bodies": [
       {
@@ -3889,7 +3889,7 @@
      "scenario": "md-ply-golbat",
      "base": "species-audit-golbat-prep9-mega-drain-player",
      "variant": null,
-     "sha256": "4387633b8135c72d",
+     "sha256": "e8591aae8143a4fd",
      "identicalAB": true,
      "bodies": [
       {
@@ -3962,7 +3962,7 @@
      "scenario": "bind-ply",
      "base": "mechanic-bind-player-onix-opponent-murkrow",
      "variant": null,
-     "sha256": "483508c81eb900ca",
+     "sha256": "3d7c0c314ed3d460",
      "identicalAB": true,
      "bodies": [
       {
@@ -4017,7 +4017,7 @@
      "scenario": "bind-opp",
      "base": "mechanic-bind-opponent-onix-player-murkrow",
      "variant": null,
-     "sha256": "3bacee330fd377a2",
+     "sha256": "d452bfd1a93fffd3",
      "identicalAB": true,
      "bodies": [
       {
@@ -4076,7 +4076,7 @@
       "player",
       20
      ],
-     "sha256": "87e9f9cfa0b8d66a",
+     "sha256": "e841ca7fef77d447",
      "identicalAB": true,
      "bodies": [
       {
@@ -4135,7 +4135,7 @@
       "opponent",
       20
      ],
-     "sha256": "c168d7fa831718a1",
+     "sha256": "4b14b794d1c1b687",
      "identicalAB": true,
      "bodies": [
       {
@@ -4208,7 +4208,7 @@
      "scenario": "rapid-spin-ply",
      "base": "mechanic-rapid-spin-player-wartortle-opponent-onix",
      "variant": null,
-     "sha256": "cfc2610a11e17ea2",
+     "sha256": "a1c5bed06de210bd",
      "identicalAB": true,
      "bodies": [
       {
@@ -4263,7 +4263,7 @@
      "scenario": "rapid-spin-opp",
      "base": "mechanic-rapid-spin-opponent-wartortle-player-onix",
      "variant": null,
-     "sha256": "ff82f7b4f730e39e",
+     "sha256": "5c9203ca040562c8",
      "identicalAB": true,
      "bodies": [
       {
@@ -4318,7 +4318,7 @@
      "scenario": "rs-ply-starmie",
      "base": "prep29-rapid-spin-alt-player-starmie-golem",
      "variant": null,
-     "sha256": "0e4f7d5f5e1a5c66",
+     "sha256": "0a5bb631d290f5c1",
      "identicalAB": true,
      "bodies": [
       {
@@ -4389,7 +4389,7 @@
      "scenario": "rc-ply",
      "base": "mechanic-recycle-player-porygon-opponent-gyarados",
      "variant": null,
-     "sha256": "5ef44a3dc5d74760",
+     "sha256": "9821fc641934fd6f",
      "identicalAB": true,
      "bodies": [
       {
@@ -4432,7 +4432,7 @@
      "scenario": "rc-opp",
      "base": "mechanic-recycle-opponent-porygon-player-gyarados",
      "variant": null,
-     "sha256": "b47b8b3494583848",
+     "sha256": "0365b75ddf6bb0ed",
      "identicalAB": true,
      "bodies": [
       {
@@ -4475,7 +4475,7 @@
      "scenario": "rc-ply-tauros",
      "base": "prep11-recycle-alt-tauros-player",
      "variant": null,
-     "sha256": "a80d2d299a379549",
+     "sha256": "5c5cd7380221a493",
      "identicalAB": true,
      "bodies": []
     }
@@ -4501,7 +4501,7 @@
      "scenario": "aurora-beam-ply",
      "base": "mechanic-aurora-beam-player-seadra-opponent-onix",
      "variant": null,
-     "sha256": "abd36105002e2a94",
+     "sha256": "73595ed51aa4bcd1",
      "identicalAB": true,
      "bodies": [
       {
@@ -4556,7 +4556,7 @@
      "scenario": "aurora-beam-opp",
      "base": "mechanic-aurora-beam-opponent-seadra-player-onix",
      "variant": null,
-     "sha256": "0ef5e6fc58dedd68",
+     "sha256": "3cd2ca0916f062cc",
      "identicalAB": true,
      "bodies": [
       {
@@ -4611,7 +4611,7 @@
      "scenario": "ab-ply-golbat",
      "base": "species-audit-golbat2b-prep8-aurora-beam-player",
      "variant": null,
-     "sha256": "3a3f169bc54ab5dc",
+     "sha256": "5edb2817a80f836a",
      "identicalAB": true,
      "bodies": [
       {
@@ -4685,7 +4685,7 @@
      "scenario": "sb-ply",
      "base": "mechanic-solar-beam-player-gloom-opponent-chansey",
      "variant": null,
-     "sha256": "28ba4f0bfba7ba5b",
+     "sha256": "016c72a43b7cd1dc",
      "identicalAB": true,
      "bodies": [
       {
@@ -4774,7 +4774,7 @@
      "scenario": "sb-opp",
      "base": "mechanic-solar-beam-opponent-gloom-player-chansey",
      "variant": null,
-     "sha256": "f8e75e5ab71462fa",
+     "sha256": "c389f70b7bee9b5d",
      "identicalAB": true,
      "bodies": [
       {
@@ -4866,7 +4866,7 @@
       "opponent",
       143
      ],
-     "sha256": "0074c43824fdfc7b",
+     "sha256": "621571a8362fcce4",
      "identicalAB": true,
      "bodies": [
       {
@@ -4971,7 +4971,7 @@
      "scenario": "sunny-day-ply",
      "base": "mechanic-sunny-day-player-bellossom-opponent-onix",
      "variant": null,
-     "sha256": "6757d2a1c88e7857",
+     "sha256": "91a50c2fd9e02e2c",
      "identicalAB": true,
      "bodies": [
       {
@@ -5014,7 +5014,7 @@
      "scenario": "sunny-day-opp",
      "base": "mechanic-sunny-day-opponent-bellossom-player-onix",
      "variant": null,
-     "sha256": "b39c6041646b2670",
+     "sha256": "4d909a04e7bb434c",
      "identicalAB": true,
      "bodies": [
       {
@@ -5057,7 +5057,7 @@
      "scenario": "sd-ply-golbat",
      "base": "species-audit-golbat2b-prep9-sunny-day-player",
      "variant": null,
-     "sha256": "61d7a657b592e0ea",
+     "sha256": "10798ded4efc469c",
      "identicalAB": true,
      "bodies": [
       {
@@ -5118,7 +5118,7 @@
      "scenario": "dream-eater-ply",
      "base": "mechanic-dream-eater-player-wigglytuff-opponent-onix",
      "variant": null,
-     "sha256": "32cdfd9262d5c4cc",
+     "sha256": "519c42b3a22e531d",
      "identicalAB": true,
      "bodies": [
       {
@@ -5173,7 +5173,7 @@
      "scenario": "dream-eater-opp",
      "base": "mechanic-dream-eater-opponent-wigglytuff-player-onix",
      "variant": null,
-     "sha256": "793b4a96014ddb38",
+     "sha256": "6bc612b9c9d4f903",
      "identicalAB": true,
      "bodies": [
       {
@@ -5228,7 +5228,7 @@
      "scenario": "de-ply-golbat",
      "base": "species-audit-golbat2b-prep9-dream-eater-player",
      "variant": null,
-     "sha256": "874aae9460dd7030",
+     "sha256": "72a97b7b9bb6cb0f",
      "identicalAB": true,
      "bodies": [
       {
@@ -5302,7 +5302,7 @@
      "scenario": "spark-ply",
      "base": "mechanic-spark-player-minun-opponent-shuckle",
      "variant": null,
-     "sha256": "2e60dc4932b50f9b",
+     "sha256": "7f7df5a1011a5662",
      "identicalAB": true,
      "bodies": [
       {
@@ -5357,7 +5357,7 @@
      "scenario": "spark-opp",
      "base": "mechanic-spark-opponent-minun-player-shuckle",
      "variant": null,
-     "sha256": "493cba81ada3ac8c",
+     "sha256": "2935eb2220ca62ac",
      "identicalAB": true,
      "bodies": [
       {
@@ -5415,7 +5415,7 @@
       "opponent",
       143
      ],
-     "sha256": "ba95f03eb253b8a4",
+     "sha256": "44699e33ab226066",
      "identicalAB": true,
      "bodies": [
       {
@@ -5488,7 +5488,7 @@
      "scenario": "rollout-ply",
      "base": "mechanic-rollout-player-voltorb-opponent-onix",
      "variant": null,
-     "sha256": "1d0c3586ad0e2bd7",
+     "sha256": "22fdba0240983fee",
      "identicalAB": true,
      "bodies": [
       {
@@ -5589,7 +5589,7 @@
      "scenario": "rollout-opp",
      "base": "mechanic-rollout-opponent-voltorb-player-onix",
      "variant": null,
-     "sha256": "d7d3fc99aae0e904",
+     "sha256": "cddc125066708c80",
      "identicalAB": true,
      "bodies": [
       {
@@ -5644,7 +5644,7 @@
      "scenario": "ro-ply-wailmer",
      "base": "prep11-rollout-alt-wailmer",
      "variant": null,
-     "sha256": "14342d8f5304ca76",
+     "sha256": "f0891dc4b0c654d6",
      "identicalAB": true,
      "bodies": [
       {
@@ -5763,7 +5763,7 @@
      "scenario": "defense-curl-ply",
      "base": "mechanic-defense-curl-player-phanpy-opponent-onix",
      "variant": null,
-     "sha256": "6dd0004dbc0aaf84",
+     "sha256": "9c363fcc1eb3cb3a",
      "identicalAB": true,
      "bodies": [
       {
@@ -5818,7 +5818,7 @@
      "scenario": "defense-curl-opp",
      "base": "mechanic-defense-curl-opponent-phanpy-player-onix",
      "variant": null,
-     "sha256": "01a4c071d2da00e5",
+     "sha256": "f6e504071dc6a67e",
      "identicalAB": true,
      "bodies": [
       {
@@ -5873,7 +5873,7 @@
      "scenario": "dc-ply-golbat",
      "base": "species-audit-golbat-prep4-defense-curl-player",
      "variant": null,
-     "sha256": "029cf14da9eff176",
+     "sha256": "c7bc4e24ab66905f",
      "identicalAB": true,
      "bodies": [
       {
@@ -5946,7 +5946,7 @@
      "scenario": "th-ply",
      "base": "mechanic-thunder-player-magneton-opponent-shuckle",
      "variant": null,
-     "sha256": "2739d3273553e031",
+     "sha256": "12d36b322ec27b73",
      "identicalAB": true,
      "bodies": [
       {
@@ -6001,7 +6001,7 @@
      "scenario": "th-opp",
      "base": "mechanic-thunder-opponent-magneton-player-shuckle",
      "variant": null,
-     "sha256": "30440ce89f06a1ea",
+     "sha256": "3c5ed9f1fa53aa05",
      "identicalAB": true,
      "bodies": [
       {
@@ -6059,7 +6059,7 @@
       "opponent",
       143
      ],
-     "sha256": "ad702c667ccc1f48",
+     "sha256": "3ccc98636c0cd1aa",
      "identicalAB": true,
      "bodies": [
       {
@@ -6132,7 +6132,7 @@
      "scenario": "fire-blast-ply",
      "base": "mechanic-fire-blast-player-octillery-opponent-onix",
      "variant": null,
-     "sha256": "dd336272edd67e8d",
+     "sha256": "f83e33344709d6f0",
      "identicalAB": true,
      "bodies": [
       {
@@ -6187,7 +6187,7 @@
      "scenario": "fire-blast-opp",
      "base": "mechanic-fire-blast-opponent-octillery-player-onix",
      "variant": null,
-     "sha256": "f860047c166b066e",
+     "sha256": "c78248a80b221d39",
      "identicalAB": true,
      "bodies": []
     },
@@ -6195,7 +6195,7 @@
      "scenario": "fb-ply-golbat",
      "base": "species-audit-golbat-prep7-fire-blast-player",
      "variant": null,
-     "sha256": "f93ab9956a6e2f58",
+     "sha256": "704bb36f6ba36885",
      "identicalAB": true,
      "bodies": [
       {
@@ -6250,7 +6250,7 @@
      "scenario": "fb-opp-pgolem",
      "base": "species-audit-pgolem-prep7-fire-blast-opponent",
      "variant": null,
-     "sha256": "e03b64b524f3b3e3",
+     "sha256": "47c2f34454a0c2bd",
      "identicalAB": true,
      "bodies": []
     },
@@ -6262,7 +6262,7 @@
       "opponent",
       126
      ],
-     "sha256": "a3c3b69be48ece6d",
+     "sha256": "4519ce2dbcea80a5",
      "identicalAB": true,
      "bodies": [
       {
@@ -6321,7 +6321,7 @@
       "opponent",
       126
      ],
-     "sha256": "16ef517e3e17aab7",
+     "sha256": "a3500db3c7ab1f14",
      "identicalAB": true,
      "bodies": [
       {
@@ -6394,7 +6394,7 @@
      "scenario": "double-slap-ply",
      "base": "mechanic-double-slap-player-poliwhirl-opponent-onix",
      "variant": null,
-     "sha256": "58ef49e060e4a55a",
+     "sha256": "70e221634be006b9",
      "identicalAB": true,
      "bodies": [
       {
@@ -6541,7 +6541,7 @@
      "scenario": "double-slap-opp",
      "base": "mechanic-double-slap-opponent-poliwhirl-player-onix",
      "variant": null,
-     "sha256": "ecda0c58a0ebcf80",
+     "sha256": "20f8acb73bd19e2b",
      "identicalAB": true,
      "bodies": [
       {
@@ -6688,7 +6688,7 @@
      "scenario": "ds-ply-golbat",
      "base": "species-audit-golbat-multihit-double-slap-player-hit2",
      "variant": null,
-     "sha256": "b67594b4c6f33560",
+     "sha256": "ae36b900101141e7",
      "identicalAB": true,
      "bodies": [
       {
@@ -6853,7 +6853,7 @@
      "scenario": "absorb-ply",
      "base": "mechanic-absorb-player-lombre-opponent-onix",
      "variant": null,
-     "sha256": "5517fb40642766b5",
+     "sha256": "1ee4793c0737b189",
      "identicalAB": true,
      "bodies": [
       {
@@ -6908,7 +6908,7 @@
      "scenario": "absorb-opp",
      "base": "mechanic-absorb-opponent-lombre-player-onix",
      "variant": null,
-     "sha256": "c0cd62617e343a19",
+     "sha256": "eb5aacb3a0c491f2",
      "identicalAB": true,
      "bodies": [
       {
@@ -6963,7 +6963,7 @@
      "scenario": "as-ply-golbat",
      "base": "species-audit-golbat2b-prep9-absorb-player",
      "variant": null,
-     "sha256": "4861bf729d1e727f",
+     "sha256": "6684c82d842e774c",
      "identicalAB": true,
      "bodies": [
       {
@@ -7036,7 +7036,7 @@
      "scenario": "megahorn-ply",
      "base": "mechanic-megahorn-player-seaking-opponent-onix",
      "variant": null,
-     "sha256": "96197907efacd81b",
+     "sha256": "08f31add2f6e5dfe",
      "identicalAB": true,
      "bodies": [
       {
@@ -7091,7 +7091,7 @@
      "scenario": "megahorn-opp",
      "base": "mechanic-megahorn-opponent-seaking-player-onix",
      "variant": null,
-     "sha256": "d6644dc52352c222",
+     "sha256": "5e60ea89d3761734",
      "identicalAB": true,
      "bodies": [
       {
@@ -7146,7 +7146,7 @@
      "scenario": "mh-ply-heracross",
      "base": "prep18-megahorn-alt-heracross-golem",
      "variant": null,
-     "sha256": "1bb53dfdac6b5684",
+     "sha256": "78d67bd5b0647fd5",
      "identicalAB": true,
      "bodies": [
       {
@@ -7219,7 +7219,7 @@
      "scenario": "fp-ply",
      "base": "prep22-fire-punch-player-seed1",
      "variant": null,
-     "sha256": "5ae4577818e374f5",
+     "sha256": "5e80ce60d6be2b41",
      "identicalAB": true,
      "bodies": [
       {
@@ -7274,7 +7274,7 @@
      "scenario": "fp-opp",
      "base": "prep22-fire-punch-opponent-seed1",
      "variant": null,
-     "sha256": "64e87b35c9041a14",
+     "sha256": "f4bb2ff295f6083e",
      "identicalAB": true,
      "bodies": [
       {
@@ -7329,7 +7329,7 @@
      "scenario": "fp-ply-11",
      "base": "prep22-fire-punch-player-seed11",
      "variant": null,
-     "sha256": "bf42cc3692749e14",
+     "sha256": "076d1579fd3c1394",
      "identicalAB": true,
      "bodies": [
       {
@@ -7400,7 +7400,7 @@
      "scenario": "sk-ply",
      "base": "mechanic-swallow-player-pelipper-one-stockpile",
      "variant": null,
-     "sha256": "25f5362bb53f398d",
+     "sha256": "f3739c23cebacef0",
      "identicalAB": true,
      "bodies": [
       {
@@ -7443,7 +7443,7 @@
      "scenario": "sk-opp",
      "base": "mechanic-swallow-opponent-pelipper-one-stockpile",
      "variant": null,
-     "sha256": "5ac936092b6b87d0",
+     "sha256": "6ebc322f935af2a3",
      "identicalAB": true,
      "bodies": [
       {
@@ -7554,7 +7554,7 @@
      "scenario": "sk-opp-delcatty",
      "base": "mechanic-stockpile-opponent-pelipper-player-delcatty",
      "variant": null,
-     "sha256": "9d8c6307d8904bcf",
+     "sha256": "7109d3eaf440ede5",
      "identicalAB": true,
      "bodies": [
       {
@@ -7597,7 +7597,7 @@
      "scenario": "sk-ply-swalot",
      "base": "mechanic-spit-up-player-swalot-one-stockpile",
      "variant": null,
-     "sha256": "700c91234873e2e7",
+     "sha256": "a8e1a76d66bf4f66",
      "identicalAB": true,
      "bodies": [
       {
@@ -7657,7 +7657,7 @@
      "scenario": "sk-ply",
      "base": "mechanic-swallow-player-pelipper-one-stockpile",
      "variant": null,
-     "sha256": "25f5362bb53f398d",
+     "sha256": "f3739c23cebacef0",
      "identicalAB": true,
      "bodies": [
       {
@@ -7700,7 +7700,7 @@
      "scenario": "sk-opp",
      "base": "mechanic-swallow-opponent-pelipper-one-stockpile",
      "variant": null,
-     "sha256": "5ac936092b6b87d0",
+     "sha256": "6ebc322f935af2a3",
      "identicalAB": true,
      "bodies": [
       {
@@ -7743,7 +7743,7 @@
      "scenario": "sw3-ply",
      "base": "mechanic-swallow-player-pelipper-three-stockpile",
      "variant": null,
-     "sha256": "60c6e54ad8ef70c5",
+     "sha256": "2b833365a1752eae",
      "identicalAB": true,
      "bodies": [
       {
@@ -7786,7 +7786,7 @@
      "scenario": "sw3-opp",
      "base": "mechanic-swallow-opponent-pelipper-three-stockpile",
      "variant": null,
-     "sha256": "d24c02e9ad794451",
+     "sha256": "f7967f9fdc860abe",
      "identicalAB": true,
      "bodies": [
       {
@@ -7845,7 +7845,7 @@
      "scenario": "taunt-ply",
      "base": "mechanic-taunt-player-murkrow-opponent-shuckle",
      "variant": null,
-     "sha256": "5d7ab2201c79e678",
+     "sha256": "0cd034484aaeb316",
      "identicalAB": true,
      "bodies": [
       {
@@ -7888,7 +7888,7 @@
      "scenario": "taunt-opp",
      "base": "mechanic-taunt-opponent-murkrow-player-shuckle",
      "variant": null,
-     "sha256": "a1e9238a306bdd63",
+     "sha256": "fe25946f9e1473c9",
      "identicalAB": true,
      "bodies": [
       {
@@ -7934,7 +7934,7 @@
       "opponent",
       143
      ],
-     "sha256": "53a44c009c42cf62",
+     "sha256": "834d56f806c66fd8",
      "identicalAB": true,
      "bodies": [
       {
@@ -7993,7 +7993,7 @@
      "scenario": "metronome-ply",
      "base": "mechanic-metronome-player-chansey-opponent-onix",
      "variant": null,
-     "sha256": "22120fb3d45ed36e",
+     "sha256": "0363e236edcdd0cd",
      "identicalAB": true,
      "bodies": [
       {
@@ -8036,7 +8036,7 @@
      "scenario": "metronome-opp",
      "base": "mechanic-metronome-opponent-chansey-player-onix",
      "variant": null,
-     "sha256": "0387d887bf84d259",
+     "sha256": "0616397870c675fb",
      "identicalAB": true,
      "bodies": [
       {
@@ -8079,7 +8079,7 @@
      "scenario": "me-ply-golbat",
      "base": "species-audit-golbat-prep5-metronome-player",
      "variant": null,
-     "sha256": "ba4785050d0df65a",
+     "sha256": "5b084a15af6d8658",
      "identicalAB": true,
      "bodies": [
       {
@@ -8138,7 +8138,7 @@
      "scenario": "ingrain-ply",
      "base": "mechanic-ingrain-player-lileep-opponent-onix",
      "variant": null,
-     "sha256": "0f06ab56f3001ccf",
+     "sha256": "2bf4c97811b3108d",
      "identicalAB": true,
      "bodies": [
       {
@@ -8181,7 +8181,7 @@
      "scenario": "ingrain-opp",
      "base": "mechanic-ingrain-opponent-lileep-player-onix",
      "variant": null,
-     "sha256": "4e52b6fe13354914",
+     "sha256": "3cc5321ce731cec7",
      "identicalAB": true,
      "bodies": [
       {
@@ -8224,7 +8224,7 @@
      "scenario": "ig-ply-golbat",
      "base": "species-audit-golbat-prep4-ingrain-player",
      "variant": null,
-     "sha256": "70df89782aae7e9f",
+     "sha256": "1fef0b5c263baed0",
      "identicalAB": true,
      "bodies": [
       {
@@ -8285,7 +8285,7 @@
      "scenario": "razor-wind-ply",
      "base": "mechanic-razor-wind-player-nuzleaf-opponent-onix",
      "variant": null,
-     "sha256": "7b5df3445820390b",
+     "sha256": "948cc8f79382e00f",
      "identicalAB": true,
      "bodies": [
       {
@@ -8374,7 +8374,7 @@
      "scenario": "razor-wind-opp",
      "base": "mechanic-razor-wind-opponent-nuzleaf-player-onix",
      "variant": null,
-     "sha256": "0607fac9fab375c1",
+     "sha256": "73fec9093653fa5f",
      "identicalAB": true,
      "bodies": [
       {
@@ -8463,7 +8463,7 @@
      "scenario": "rw-ply-absol",
      "base": "species-audit-golbat2-razor-wind-player-razor-wind-player-absol-opponent-onix-b1",
      "variant": null,
-     "sha256": "9765c01fe0ac436c",
+     "sha256": "82ae7d05a7512ef7",
      "identicalAB": true,
      "bodies": [
       {
@@ -8574,7 +8574,7 @@
       "player",
       16
      ],
-     "sha256": "783aa4ee7bc26990",
+     "sha256": "8f8008e404f842d9",
      "identicalAB": true,
      "bodies": [
       {
@@ -8633,7 +8633,7 @@
       "opponent",
       16
      ],
-     "sha256": "680334fb428e437f",
+     "sha256": "b88c315861a99768",
      "identicalAB": true,
      "bodies": [
       {
@@ -8692,7 +8692,7 @@
       "player",
       16
      ],
-     "sha256": "47a7881a3aae69a5",
+     "sha256": "52c89dcf82344025",
      "identicalAB": true,
      "bodies": [
       {
@@ -8767,7 +8767,7 @@
       "player",
       144
      ],
-     "sha256": "565b2b8ef62c73e8",
+     "sha256": "6f0da2880674689b",
      "identicalAB": true,
      "bodies": [
       {
@@ -8814,7 +8814,7 @@
       "opponent",
       144
      ],
-     "sha256": "59f164ea36d525d4",
+     "sha256": "0268f32d40e6ab8a",
      "identicalAB": true,
      "bodies": [
       {
@@ -8861,7 +8861,7 @@
       "player",
       144
      ],
-     "sha256": "c74940d3e11233e4",
+     "sha256": "c079db353e19d548",
      "identicalAB": true,
      "bodies": [
       {
@@ -8922,7 +8922,7 @@
      "scenario": "mach-punch-ply",
      "base": "mechanic-mach-punch-player-hitmonchan-opponent-chansey",
      "variant": null,
-     "sha256": "a952046ca7464380",
+     "sha256": "6cd2a3b9513d65e6",
      "identicalAB": true,
      "bodies": [
       {
@@ -8977,7 +8977,7 @@
      "scenario": "mach-punch-opp",
      "base": "mechanic-mach-punch-opponent-hitmonchan-player-chansey",
      "variant": null,
-     "sha256": "e7c074b00c997b30",
+     "sha256": "f72c34f616b2989a",
      "identicalAB": true,
      "bodies": [
       {
@@ -9032,7 +9032,7 @@
      "scenario": "mp-ply-breloom",
      "base": "d4a-mach-punch-extra-player-breloom-golbat",
      "variant": null,
-     "sha256": "9428b1d4d14ab45b",
+     "sha256": "1f3e151d587f80b0",
      "identicalAB": true,
      "bodies": [
       {
@@ -9107,7 +9107,7 @@
      "scenario": "shock-wave-ply",
      "base": "mechanic-shock-wave-player-flaaffy-opponent-corsola",
      "variant": null,
-     "sha256": "868f7d5d31fa96ca",
+     "sha256": "34b40c134cf1c0b5",
      "identicalAB": true,
      "bodies": [
       {
@@ -9162,7 +9162,7 @@
      "scenario": "shock-wave-opp",
      "base": "mechanic-shock-wave-opponent-flaaffy-player-corsola",
      "variant": null,
-     "sha256": "0d2626009dbee107",
+     "sha256": "28ddfa1e7ba52699",
      "identicalAB": true,
      "bodies": [
       {
@@ -9217,7 +9217,7 @@
      "scenario": "sh-ply-manectric",
      "base": "prep22-shock-wave-alt-player-manectric-wailmer",
      "variant": null,
-     "sha256": "0cb3b30042b12c88",
+     "sha256": "2b2fc18783d50fc8",
      "identicalAB": true,
      "bodies": [
       {
@@ -9290,7 +9290,7 @@
      "scenario": "will-o-wisp-ply",
      "base": "mechanic-will-o-wisp-player-shuppet-opponent-shuckle",
      "variant": null,
-     "sha256": "39ff47729c28f4e5",
+     "sha256": "b07fb18cf656fe37",
      "identicalAB": true,
      "bodies": [
       {
@@ -9345,7 +9345,7 @@
      "scenario": "will-o-wisp-opp",
      "base": "mechanic-will-o-wisp-opponent-shuppet-player-shuckle",
      "variant": null,
-     "sha256": "62c93231ace87592",
+     "sha256": "93a4edb6c8c6e495",
      "identicalAB": true,
      "bodies": [
       {
@@ -9400,7 +9400,7 @@
      "scenario": "wo-ply-banette",
      "base": "prep18-will-o-wisp-alt-banette-golem",
      "variant": null,
-     "sha256": "0038c1d5c9e3b31e",
+     "sha256": "506f94fdbbcd6e55",
      "identicalAB": true,
      "bodies": [
       {
@@ -9473,7 +9473,7 @@
      "scenario": "es-ply",
      "base": "mechanic-extreme-speed-player-arcanine-dugtrio",
      "variant": null,
-     "sha256": "bf499c1b67c37103",
+     "sha256": "f47605885e0455d3",
      "identicalAB": true,
      "bodies": [
       {
@@ -9528,7 +9528,7 @@
      "scenario": "es-opp",
      "base": "mechanic-extreme-speed-arcanine-dugtrio",
      "variant": null,
-     "sha256": "c077be0f4cd45539",
+     "sha256": "c3d83f70a909607c",
      "identicalAB": true,
      "bodies": [
       {
@@ -9583,7 +9583,7 @@
      "scenario": "es-opp-smeargle",
      "base": "prep34-extreme-speed-alt-opponent-smeargle-golem",
      "variant": null,
-     "sha256": "cb6588c46360db1c",
+     "sha256": "13bfeff8bfb990a6",
      "identicalAB": true,
      "bodies": [
       {
@@ -9656,7 +9656,7 @@
      "scenario": "outrage-ply",
      "base": "mechanic-outrage-player-dragonite-opponent-onix",
      "variant": null,
-     "sha256": "f5ec3434ef33aa8f",
+     "sha256": "b5fe191ba6d85721",
      "identicalAB": true,
      "bodies": [
       {
@@ -9711,7 +9711,7 @@
      "scenario": "outrage-opp",
      "base": "mechanic-outrage-opponent-dragonite-player-onix",
      "variant": null,
-     "sha256": "b46c1f521d2a3e62",
+     "sha256": "fd4bcc830b28aecd",
      "identicalAB": true,
      "bodies": [
       {
@@ -9766,7 +9766,7 @@
      "scenario": "ou-ply-flygon",
      "base": "prep29-outrage-alt-player-flygon-golem",
      "variant": null,
-     "sha256": "1f1e458aec012453",
+     "sha256": "8a92619a1d6ceca9",
      "identicalAB": true,
      "bodies": [
       {
@@ -9886,7 +9886,7 @@
       "turns",
       2
      ],
-     "sha256": "886f5a3dfc3a9e26",
+     "sha256": "f804c4f46ef744c3",
      "identicalAB": true,
      "bodies": [
       {
@@ -9966,7 +9966,7 @@
       "turns",
       2
      ],
-     "sha256": "a7042242b06865b9",
+     "sha256": "1f66d75bb87b0300",
      "identicalAB": true,
      "bodies": [
       {
@@ -10048,7 +10048,7 @@
       "opponent",
       143
      ],
-     "sha256": "2fb3c973823a23ed",
+     "sha256": "36b1a01f091cbb8f",
      "identicalAB": true,
      "bodies": [
       {
@@ -10130,7 +10130,7 @@
       "player",
       143
      ],
-     "sha256": "8248d811303941e3",
+     "sha256": "68d1d166c0fac5ba",
      "identicalAB": true,
      "bodies": [
       {
@@ -10226,7 +10226,7 @@
       "turns",
       1
      ],
-     "sha256": "b80fcef73d6f3bf2",
+     "sha256": "7e3485be9f36041d",
      "identicalAB": true,
      "bodies": [
       {
@@ -10272,7 +10272,7 @@
       "turns",
       1
      ],
-     "sha256": "c4160fd753c61956",
+     "sha256": "347b4db24468b2ff",
      "identicalAB": true,
      "bodies": [
       {
@@ -10318,7 +10318,7 @@
       "turns",
       1
      ],
-     "sha256": "7b05acf2cf787fad",
+     "sha256": "86cfa1a7c8d733ea",
      "identicalAB": true,
      "bodies": [
       {
@@ -10364,7 +10364,7 @@
       "turns",
       1
      ],
-     "sha256": "88cfd7b2010b6155",
+     "sha256": "51a56c0675dab97c",
      "identicalAB": true,
      "bodies": [
       {
@@ -10426,7 +10426,7 @@
       "turns",
       1
      ],
-     "sha256": "04df560223a738a3",
+     "sha256": "d839d0268d16c920",
      "identicalAB": true,
      "bodies": [
       {
@@ -10506,7 +10506,7 @@
       "turns",
       1
      ],
-     "sha256": "61df5bdcafee35da",
+     "sha256": "8cb7a15eefc2824a",
      "identicalAB": true,
      "bodies": [
       {
@@ -10552,7 +10552,7 @@
       "turns",
       1
      ],
-     "sha256": "536f7be8530b937f",
+     "sha256": "96f123ff47fb29d2",
      "identicalAB": true,
      "bodies": [
       {
@@ -10632,7 +10632,7 @@
       "turns",
       1
      ],
-     "sha256": "cb915d2655601909",
+     "sha256": "87d17fc8b4e7fc83",
      "identicalAB": true,
      "bodies": [
       {

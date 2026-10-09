@@ -144,7 +144,7 @@ def main() -> None:
                      "netZero": sorted(base) == sorted(end) and created == destroyed and not late})
         bodies.append(body)
     payload = {
-        "schema": "prep52-net-zero-raw/v1", "scenario": str(SCENARIO), "scenarioSha256": hashlib.sha256(SCENARIO.read_bytes()).hexdigest(),
+        "schema": "prep52-net-zero-raw/v1", "scenario": SCENARIO.name, "scenarioSha256": hashlib.sha256(SCENARIO.read_bytes()).hexdigest(),
         "profile": PROFILE, "toolSha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), "framesRun": frame,
         "bodies": bodies,
     }
