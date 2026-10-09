@@ -1340,18 +1340,35 @@ export const LIVE_WORDS_ORDER_DEFERRED_REPLAY = Object.freeze({ replayBattleUnit
 
 /**
  * words57: the words-lend carry (liveWordsUnitPostFree with the unit's words by key). Sand-Attack / Mud-Slap aim the dirt at both battlers'
- * pic points (liveDirtScatterProfile), which `anchors` take from the CONSUMER's displayed field: after a send-out / switch-in showed another
- * mon on a battler, that field is not the body's and the species-free marker cannot restore it (the post-body order depends on it,
- * tools/integration/words57Chain.ts species sweep), so the carry declines. Rain Dance / General_Rain drops are species-free.
+ * pic points (liveDirtScatterProfile). words59: a marker that recorded the body's displayed species (`bodySpecies`,
+ * markLiveSpriteOrderDeferredBody) takes the anchors from them, also past a send-out / switch-in. Without them `anchors` are the
+ * CONSUMER's displayed field: after a send-out / switch-in showed another mon on a battler, that field is not the body's (the post-body
+ * order depends on it, tools/integration/words57SpeciesSweep.ts), so the carry declines. Rain Dance / General_Rain drops are species-free.
  */
 export function liveWordsOrderDeferredCarry(
   wordsOf: (key: string) => PresentationRngWords | null, anchors: Readonly<Record<WordsSide, WordsPoint>>,
 ): SpriteOrderDeferredCarry {
   return (unit, activationFree, battlerReplacedSince) => {
     if (!isWordsOrderDeferredUnit(unit)) return null;
-    if (battlerReplacedSince && unit.generalAnimation === undefined && unit.moveId !== 240) return null;
+    const dirt = unit.generalAnimation === undefined && unit.moveId !== 240;
+    if (dirt && unit.bodySpecies !== undefined) {
+      const bodyAnchors = liveWordsBodyAnchors(unit.bodySpecies);
+      return bodyAnchors === null ? null : liveWordsUnitPostFree(unit, activationFree, wordsOf(unit.key), bodyAnchors);
+    }
+    if (battlerReplacedSince && dirt) return null;
     return liveWordsUnitPostFree(unit, activationFree, wordsOf(unit.key), anchors);
   };
+}
+
+/** words59: the Y_PIC_OFFSET points of a words body's displayed species (liveBattlerAnchors; null for a species without a battle picture). */
+function liveWordsBodyAnchors(species: Readonly<Record<WordsSide, number>>): Readonly<Record<WordsSide, WordsPoint>> | null {
+  let art: ReturnType<typeof createBattleCommandFieldArtView>;
+  try {
+    art = createBattleCommandFieldArtView({ player: { species: species.player }, opponent: { species: species.opponent } } as never);
+  } catch {
+    return null;
+  }
+  return { player: liveBattlerAnchors("player", art).picOffsetPoint, opponent: liveBattlerAnchors("opponent", art).picOffsetPoint };
 }
 
 /**

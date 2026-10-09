@@ -1,0 +1,322 @@
+{
+ "schema": "words57-chain/v1",
+ "summary": {
+  "chains": 5,
+  "exact": 5,
+  "chainsThroughBattleUnits": 3,
+  "exactThroughBattleUnits": 3,
+  "framesChecked": 30381,
+  "windowsChecked": 514,
+  "consumersAfterBattleUnit": 11,
+  "consumersAfterBattleUnitExact": 11,
+  "jobsIdenticalAB": 3,
+  "jobs": 3
+ },
+ "chains": [
+  {
+   "job": "sw-ms-opp-pidgeotto",
+   "words": "189 f2085",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "body 318:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 32,
+   "windowMismatch": [],
+   "frames": 2341,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "318",
+     "frame": 2426,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "sw-ms-opp-pidgeotto",
+   "words": "189 f4519",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "body 318:player",
+    "hit-animation",
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "body 318:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "body 318:player",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 145,
+   "windowMismatch": [],
+   "frames": 10132,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "318",
+     "frame": 4860,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "33",
+     "frame": 9385,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "33",
+     "frame": 11819,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "318",
+     "frame": 11976,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "33",
+     "frame": 14253,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "318",
+     "frame": 14407,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "wp-ms-opp-pidgeotto",
+   "words": "189 f2085",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "body 352:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 34,
+   "windowMismatch": [],
+   "frames": 2341,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "352",
+     "frame": 2428,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "wp-ms-opp-pidgeotto",
+   "words": "189 f4519",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "body 352:player",
+    "hit-animation",
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "body 352:player",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 115,
+   "windowMismatch": [],
+   "frames": 7660,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "352",
+     "frame": 4862,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "33",
+     "frame": 9385,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "33",
+     "frame": 11819,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "352",
+     "frame": 11977,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "wp-sa-opp-pidgeotto",
+   "words": "28 f2086",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 28",
+    "stat-animation 20",
+    "body 352:player",
+    "hit-animation",
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "body 352:player",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 113,
+   "windowMismatch": [],
+   "frames": 7645,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "352",
+     "frame": 2363,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "33",
+     "frame": 6951,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "33",
+     "frame": 9385,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "352",
+     "frame": 9540,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 58,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  }
+ ]
+}

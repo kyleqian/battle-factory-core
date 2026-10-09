@@ -2398,8 +2398,11 @@ function prepareResolutionPalette(
       if (orderHost) {
         spriteOrderInput = lendLiveSpriteOrder(orderHost, command.animation.moveId);
         // Multi-body Random2 move (Ice Ball): record the word-free deferred-lend marker (body key + its lend) for its later bodies.
+        // words59: with the species displayed at the body (the field the live renderer draws it on; read by the dirt carry only).
+        const bodyField = battleResolutionMoveAnimationField(segment, command.eventSequence);
         orderHost = markLiveSpriteOrderDeferredBody(orderHost, spriteOrderInput, command.animation,
-          liveMovePresentationRngBodyKey(resolution));
+          liveMovePresentationRngBodyKey(resolution),
+          bodyField === null ? undefined : { player: bodyField.player.species, opponent: bodyField.opponent.species });
       }
     } else if (retainedSprites?.commandKey === commandKey) {
       spriteInput = resolution.liveMoveSpriteAllocatorInput;
