@@ -63,11 +63,13 @@ const multihit = [
 ] as const;
 
 describe("multi-hit live adapters: one MOVE_ANIMATION per hit", () => {
-  it("registers 3, 4, 167 with the opponent shadow row 0 and keeps them out of the net-zero allocator list", () => {
+  it("registers 3, 4, 167 with the opponent shadow row 0 and keeps 4 and 167 out of the net-zero allocator list", () => {
     expect(LIVE_MOVE_ANIMATION_IDS).toEqual(expect.arrayContaining([3, 4, 167]));
     for (const id of [3, 4, 167]) {
       expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[id]).toBe(0);
-      expect(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS).not.toContain(id);
+      // alloc52: Double Slap 3 moved IN (audited net-zero by the prep52 receipt); 4 and 167 stay unaudited.
+      if (id === 3) expect(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS).toContain(id);
+      else expect(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS).not.toContain(id);
     }
   });
 
