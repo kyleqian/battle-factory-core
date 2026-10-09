@@ -1,5 +1,23 @@
 # Animation integration progress
 
+## 2026-10-09 (day) — S10A: host histories, continued
+
+- Session-start census on `ccc4774c4` (src `dde58985`), seeds 0..999: **87.95 % of move-animation commands / 92.09 % of frames live**
+  (`tools/integration/fixtures/live-share-census/report-seeds0-999-start-20261009-day.json`, sha256 `5e4507ca`; battle digest
+  `f8c6617d`). Remaining fallback frames: sprite-order lend unknown 118,478 (758 cmds), case-local gates 64,308 (351), allocator
+  history unknown 58,159 (563), Struggle (no adapter, not a rental move) 33,792, later-body 20,467 (173). Largest order-host stops:
+  Fury Cutter 210 both sides (17.3k), Shock Wave 351 (13.4k), SUBSTITUTE_FADE (9.3k), Bounce 340 (9.6k), Dive 291 (12.1k), Fly 19
+  (9.7k), Blizzard 59 (6.4k), FOCUS_BAND (6.2k), hail 258 (11.0k) + HAIL_CONTINUES (3.2k), Ice Ball 301 (5.6k).
+- Folded Sonnet worker `f49db2c15` as `0a74c111a` (src tree `cc1fcc8a`): prep50 live — `LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS`
+  (SLP, CONFUSION, PSN, PRZ, BRN); `prepareResolutionPalette` invalidates the allocator only for a crossed / trailing status animation
+  outside the set (FRZ, INFATUATION, ... still invalidate); palette invalidation unchanged. Pins moved only where an audited status now
+  precedes the body: playable Light Screen seeds 50 / 62, wall route seed 58 (Reflect) -> exact adapter. Census seeds 0..299:
+  92.66 -> 93.35 % by count, 94.12 -> 94.66 % by frames (+55 / +6,302 = prep50's measurement = the chain predictor), 0 regressions,
+  identical command sequence + battle digest; ON/OFF parity on seed 41 (SLP crossing). Worker gates 1,584 files / 13,048 tests,
+  build, differential 624/624 vs `ccc4774c4`. Supervisor: liveShareCensus.ts before / after rerun independently (prep43CensusDelta:
+  0 pairing mismatches, 0 regressions, +55 / +6,302, battle digest identical); clean merge on unchanged master -> touched tests 47/47,
+  smoke 448.
+
 ## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
 
 - Folded Sonnet worker `a56a4baaf` as `3092cf05f` (src tree `df965113`): prep44's 50 audited allocator NET-ZERO bodies appended
