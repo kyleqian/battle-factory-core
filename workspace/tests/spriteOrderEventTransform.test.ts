@@ -22,8 +22,9 @@ describe("production sprite-order plan table (generated, pinned)", () => {
     const committed = readFileSync(new URL("../src/engine/spriteOrderProductionPlans.ts", import.meta.url), "utf8");
     expect(renderSpriteOrderProductionTableFromFixtures()).toBe(committed);
     // + prep43 (fixtures/prep43/plan-rows.json, appended): Dig 91 / 10091, Brick Break 280 / 10280 bodies, 5 plans.
-    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(493);
-    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(201);
+    // + prep45 (fixtures/prep45/plan-rows.json, appended): 15 bodies, 11 plans (BRN's text = STATUS_INFATUATION's, deduped).
+    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(508);
+    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(212);
   });
 
   it("decodes every EXACT-PLAN (move, side) body of the ext table to the fixture plan", () => {
@@ -32,7 +33,7 @@ describe("production sprite-order plan table (generated, pinned)", () => {
     const extra: Record<string, { verdict: string; plan: unknown; tier?: string }> = {
       ...fixture("sprite-order-policy-gaps/relative-y-plans.json").bodies, ...fixture("sprite-order-body-plans-rely.json").bodies,
       ...fixture("prep28/plan-rows.json").bodies, ...fixture("prep28/plan-rows-sky-attack.json").bodies,
-      ...fixture("prep43/plan-rows.json").bodies,
+      ...fixture("prep43/plan-rows.json").bodies, ...fixture("prep45/plan-rows.json").bodies,
     };
     let exact = 0;
     for (const [key, row] of Object.entries(bodies)) {
@@ -97,7 +98,7 @@ describe("sprite-order presentation-event transform", () => {
       { kind: "move-animation", moveId: 288, attackerSide: "player" },
       { kind: "move-animation", moveId: 144, attackerSide: "player" },
       { kind: "status-animation", status: "CURSED" },
-      { kind: "status-animation", status: "BRN" },
+      { kind: "status-animation", status: "FRZ" },
       { kind: "general-animation", animation: "HAIL_CONTINUES" },
       { kind: "general-animation", animation: "STATUS_SLP" },
       { kind: "invalidate", reason: "faint" },
@@ -151,6 +152,43 @@ describe("sprite-order presentation-event transform", () => {
     }
     // STATUS_PRZ (re-taken spark slots) keeps the order known: one survivor, carried.
     expect(run([{ kind: "status-animation", status: "PRZ" }]).cursor.order.known).toBe(true);
+  });
+
+  it("prep45 EXACT plans: BRN, TURN_TRAP per trap move, WISH / INGRAIN / FUTURE_SIGHT, Solar Beam per choosetwoturnanim branch", () => {
+    const rows = fixture("prep45/plan-rows.json") as { bodies: Record<string, { plan: unknown }>; anims: Record<string, { plan: unknown }> };
+    const text = (plan: unknown) => encodeSpriteOrderPlan(plan as never);
+    const at = (name: string) => SPRITE_ORDER_PRODUCTION_PLANS[SPRITE_ORDER_PRODUCTION_ANIMS[name]!];
+    // BRN's plan text is STATUS_INFATUATION's (the generator dedupes it); INGRAIN_HEAL is LEECH_SEED_DRAIN's orb core; FUTURE_SIGHT_HIT is empty.
+    expect(SPRITE_ORDER_PRODUCTION_ANIMS.STATUS_BRN).toBe(SPRITE_ORDER_PRODUCTION_ANIMS.STATUS_INFATUATION);
+    expect(at("STATUS_BRN")).toBe("Cf;Cf;Cf;D0;D1");
+    expect(SPRITE_ORDER_PRODUCTION_ANIMS.INGRAIN_HEAL).toBe(SPRITE_ORDER_PRODUCTION_ANIMS.LEECH_SEED_DRAIN);
+    expect(at("FUTURE_SIGHT_HIT")).toBe("");
+    expect(at("TURN_TRAP_FIRE_SPIN")).toBe("Cf;Cf;Cf;Cf;Cf;Cf;Cf;D1;Cf;D2;D0;Cf;Cf;D3;Cf;D4;Cf;D7;D5;D8;D6;D9;D10");
+    expect(at("TURN_TRAP_WHIRLPOOL")).toBe("Cff;Cf;Cf;Cf;Cf;Cf;D0;Cf;Cf;Cf;Cf;Cf;Cf;D2;D3;D1;D4;Cf/D5;D8;D6;D9;D7;D10;D13;D11;D12");
+    expect(at("TURN_TRAP_SAND_TOMB")).toBe("Cff;Cf;Cf;Cf;Cf;Cf;D0;Cf;D2;Cf;D3;D1;Cf;Cf;D4;Cf;D5;Cf;D8;D6;D9;D7;D10;D11;Cf;D12");
+    expect(at("TURN_TRAP_BIND")).toBe("Cf;Cf;D0,1");
+    expect(at("WISH_HEAL")).toBe("Cf;Cf;D0;D1;Cf;Cf;Cf;D2;Cf;D3;D4");
+    // Clamp's own Status_Clamp branch is not probed: the bare TURN_TRAP stays unplanned (invalidates).
+    expect(SPRITE_ORDER_PRODUCTION_ANIMS.TURN_TRAP).toBeUndefined();
+    for (const [key, row] of Object.entries(rows.anims)) {
+      const name = key.replace(/^(Status|General):B_ANIM_/, "");
+      expect(at(name), key).toBe(text(row.plan));
+    }
+    for (const [key, row] of Object.entries(rows.bodies)) {
+      const [move, side] = key.split(":") as [string, "player" | "opponent"];
+      expect(spriteOrderProductionBodyPlan(Number(move), side), key).toEqual(row.plan);
+    }
+    // Five one-sided plans gain the other side with the identical text; Dragon Dance stays side-keyed.
+    for (const move of [135, 236, 315, 345]) expect(text(spriteOrderProductionBodyPlan(move, "opponent")), `${move}`).toBe(text(spriteOrderProductionBodyPlan(move, "player")));
+    expect(text(spriteOrderProductionBodyPlan(349, "player"))).toBe("Cfffff;Cf;D2,5,1,3,0,4");
+    expect(text(spriteOrderProductionBodyPlan(349, "opponent"))).toBe("Cfffff;Cf;D0,4,2,5,1,3");
+    // Solar Beam's two choosetwoturnanim branches allocate differently: the 10076 key is load-bearing.
+    expect(text(spriteOrderProductionBodyPlan(10076, "player"))).not.toBe(text(spriteOrderProductionBodyPlan(76, "player")));
+    for (const event of [
+      { kind: "status-animation", status: "BRN" }, { kind: "general-animation", animation: "TURN_TRAP_BIND" },
+      { kind: "general-animation", animation: "WISH_HEAL" }, { kind: "move-animation", moveId: 10076, attackerSide: "opponent" },
+    ] as const) expect(run([event as SpriteOrderPresentationEvent]).cursor.order.known, JSON.stringify(event)).toBe(true);
+    expect(run([{ kind: "general-animation", animation: "TURN_TRAP" }]).cursor.order.known).toBe(false);
   });
 
   it("maps status animations as InitAndLaunchChosenStatusAnimation does", () => {
@@ -216,15 +254,16 @@ describe("strict real-route replay (docs/sprite-order-real-route.md events; no r
 
   it("BattleLab corpus (committed + ext event tables): every edge the transform knows is exact", () => {
     // Turn-keyed like the host (Dig / Brick Break choosetwoturnanim branch, prep43): known 1130 -> 1136, all exact.
+    // prep45 plans (+ Solar Beam keyed like Dig): known 1136 -> 1143 (7 later edges), all exact.
     const corpus = replayCrossBodyCorpus({ turnKeyed: true });
     expect({ scenarios: corpus.scenarios, skipped: corpus.skipped, edges: corpus.edges, mismatched: corpus.mismatched })
       .toEqual({ scenarios: 573, skipped: 19, edges: 1366, mismatched: 0 });
     expect(corpus.exact).toBe(corpus.known);
-    expect(corpus.known).toBe(1136);
-    expect(corpus.laterKnown).toBe(582);
+    expect(corpus.known).toBe(1143);
+    expect(corpus.laterKnown).toBe(589);
     // Without the turn key the Dig unleash body is fed the setup plan: exactly the edge after it (unit 5) in the two Dig scenarios.
     const unkeyed = replayCrossBodyCorpus();
-    expect({ known: unkeyed.known, exact: unkeyed.exact, mismatched: unkeyed.mismatched }).toEqual({ known: 1136, exact: 1134, mismatched: 2 });
+    expect({ known: unkeyed.known, exact: unkeyed.exact, mismatched: unkeyed.mismatched }).toEqual({ known: 1143, exact: 1141, mismatched: 2 });
     expect(unkeyed.mismatches).toEqual([
       { file: "91-mechanic-dig-opponent-vibrava-player-chansey-0.json", unit: 5, mv: 45 },
       { file: "91-mechanic-dig-player-vibrava-opponent-chansey-0.json", unit: 5, mv: 45 },

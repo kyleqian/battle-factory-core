@@ -205,6 +205,17 @@ export const SPRITE_ORDER_PRODUCTION_PLANS: readonly string[] = Object.freeze([
   "Cf;Cf;Cf/D0;D2;Cf;Cf;D3;D4;Cf;D5;Cff;D1;D6;D7;Cffff;D10,11,8,9;Cf;D12",
   "Cf;D0;Cf;Cf;Cf;Cf;Cf;D1;Cf;D2;Cf;Cf;D3;D5;D4;D6;D7;D8;Cf;Cf;Cf;D9;Cf;D10;D11;D12",
   "Cfffff;D1,2,0,3,4",
+  "Cff;Cff;Cff;Cff;Cff;Cff;Cffff;Cff;Cff;Cff;D12,13;D1,0;Cffff;D3,2;Cff;D5,4;Cff;D7,6;Cff;D22,23;D9,8;Cffff;D11,10;Cff;D15,14;Cff;D17,16;Cff;D32,33;D18,19;Cffff;D20,21;Cff;D24,25;Cff;D26,27;Cff;D42,43;D28,29;Cff;D30,31;D34,35;Cff;D36,37;D52,53;D38,39;D40,41;D54,55;D44,45;D46,47;D48,49;D50,51",
+  "Cf;Cf;Cf;Cf;Cf;D0;Cf;D1;Cf;D2;Cf;D3;Cf;D4;Cf;D5;Cf;D6;Cf;D7;Cf;D8;Cf;D9;D10;D11;D12;D13",
+  "Cf;D0;Cffffff;D3,2,1,4,5,6;Cf;Cfff;D7;D8;D10;D9",
+  "Cffffffffffffff;Cfff;Cf;D17;D14,13,15,12,11,10,0,9,1,8,2,7,3,4,6,5;D16;Cf;D18",
+  "Cfffff;Cf;D0,4,2,5,1,3",
+  "Cff;Cff;Cf;Cf;Cf;Cf;D1;Cf;Cf;D4;Cf;Cf;D6;Cf;Cf;D8;Cff;D9;Cf;Cf;D11;Cf;Cf;D13;Cf;Cf;D16;Cf;Cf;D0;D18;Cf;Cf;D3;D20;Cff;D21,5;Cf;Cf;D23;D7;Cf;D25;D2;Cf;D26;Cf/D10;D28;Cf;D12;D30;D15;D31;D32,17;D33;D19;D14;D22;D24;D27;D29",
+  "Cf;Cf;D0,1",
+  "Cf;Cf;Cf;Cf;Cf;Cf;Cf;D1;Cf;D2;D0;Cf;Cf;D3;Cf;D4;Cf;D7;D5;D8;D6;D9;D10",
+  "Cff;Cf;Cf;Cf;Cf;Cf;D0;Cf;D2;Cf;D3;D1;Cf;Cf;D4;Cf;D5;Cf;D8;D6;D9;D7;D10;D11;Cf;D12",
+  "Cff;Cf;Cf;Cf;Cf;Cf;D0;Cf;Cf;Cf;Cf;Cf;Cf;D2;D3;D1;D4;Cf/D5;D8;D6;D9;D7;D10;D13;D11;D12",
+  "Cf;Cf;D0;D1;Cf;Cf;Cf;D2;Cf;D3;D4",
 ]);
 
 /** `<moveId>:<attacker side>` -> plan index; EXACT-PLAN bodies only (NEEDS-KEYS / NOT-OBSERVED are absent = invalidate). */
@@ -271,21 +282,31 @@ export const SPRITE_ORDER_PRODUCTION_BODIES: Readonly<Record<string, number>> = 
   "343:player": 45, "345:player": 182, "347:opponent": 183, "347:player": 183, "348:opponent": 184, "348:player": 185, "349:player": 186, "350:opponent": 187,
   "350:player": 187, "352:opponent": 188, "352:player": 189, "10143:opponent": 1, "10143:player": 1,
   "91:opponent": 196, "91:player": 196, "280:opponent": 197, "280:player": 197, "10091:opponent": 6, "10091:player": 6, "10280:opponent": 198, "10280:player": 198,
+  "56:opponent": 201, "56:player": 201, "76:opponent": 202, "76:player": 202, "135:opponent": 79, "179:opponent": 203, "179:player": 203, "195:opponent": 204,
+  "195:player": 204, "236:opponent": 128, "315:player": 171, "345:opponent": 182, "349:opponent": 205, "10076:opponent": 206, "10076:player": 206,
 });
 
 /** Mid-battle (non-move) animations -> plan index. STATS_CHANGE_CLASS_1 = args 15..28 (+-1) and 55/57 (multiple +1/-1),
   * STATS_CHANGE_CLASS_2 = args 39..52 (+-2: the copy sprite survives the unit; its destroy is carried). */
 export const SPRITE_ORDER_PRODUCTION_ANIMS: Readonly<Record<string, number>> = Object.freeze({
   FOCUS_PUNCH_SETUP: 190,
+  FUTURE_SIGHT_HIT: 9,
   HELD_ITEM_EFFECT: 191,
+  INGRAIN_HEAL: 199,
   LEECH_SEED_DRAIN: 199,
   SANDSTORM_CONTINUES: 107,
   STATS_CHANGE_CLASS_1: 1,
   STATS_CHANGE_CLASS_2: 195,
+  STATUS_BRN: 192,
   STATUS_CONFUSION: 200,
   STATUS_INFATUATION: 192,
   STATUS_PRZ: 193,
   STATUS_PSN: 9,
   STATUS_SLP: 194,
   SUN_CONTINUES: 131,
+  TURN_TRAP_BIND: 207,
+  TURN_TRAP_FIRE_SPIN: 208,
+  TURN_TRAP_SAND_TOMB: 209,
+  TURN_TRAP_WHIRLPOOL: 210,
+  WISH_HEAL: 211,
 });
