@@ -194,17 +194,19 @@ export function openLiveSpriteOrderHostPartyMenu(host: LiveSpriteOrderHost): Liv
 }
 
 /**
- * Return from a party menu to the battle: the exit ResetSpriteData, then the battle reshow (both battlers, or the
- * opponent alone when the player battler sprite is gone). A hidden battler or a missing opponent battler is an
- * unobserved reshow shape: invalidate.
+ * Return from a party menu to the battle: the exit ResetSpriteData, then the battle reshow (both battlers, the opponent
+ * alone when the player battler sprite is gone, or neither after a double KO: reshowNeither, docs/next-adapters-prep49.md X1).
+ * A hidden battler or the player battler without the opponent's is an unobserved reshow shape: invalidate.
  */
 export function returnLiveSpriteOrderHostFromPartyMenu(
   host: LiveSpriteOrderHost, battlers: Readonly<{ player: boolean; opponent: boolean }>,
 ): LiveSpriteOrderHost {
   const reset = applySpriteOrderPresentationEvent(host.tracker, { kind: "party-menu-reset" });
-  const tracker = !battlers.opponent ? invalidateSpriteOrderTracker(reset, "reshow without the opponent battler")
+  // prep49: neither battler (a double KO's forced party menu) is the reshowNeither shape; the opponent alone missing stays unobserved.
+  const tracker = !battlers.opponent && battlers.player ? invalidateSpriteOrderTracker(reset, "reshow without the opponent battler")
     : host.hidden[0] || host.hidden[1] ? invalidateSpriteOrderTracker(reset, "reshow with a hidden battler")
-      : applySpriteOrderPresentationEvent(reset, { kind: "battle-reshow", playerBattlerPresent: battlers.player });
+      : applySpriteOrderPresentationEvent(reset, { kind: "battle-reshow", playerBattlerPresent: battlers.player,
+        ...(battlers.opponent ? {} : { opponentBattlerPresent: false }) });
   return Object.freeze({ ...withoutDeferred(host), tracker, bodies: (host.bodies ?? 0) + 1 });
 }
 
@@ -254,14 +256,17 @@ export function beginLiveSpriteOrderTurn(
 
 /**
  * Roar/Whirlwind's forced `returntoball` (skipAnim; docs/forced-switch-continuation.md §1.1): a RETURNTOBALL hide of the
- * battler the segment's latest MOVE_ANIMATION targeted (not its attacker: Baton Pass's `returntoball BS_ATTACKER` is not
- * modelled and keeps invalidating).
+ * battler the segment's latest MOVE_ANIMATION targeted; or Baton Pass's `returntoball BS_ATTACKER`, identified by its
+ * interpreter receipt's script label (docs/next-adapters-prep49.md R1 / R2: the same `D o<battler slot>` unit, 2 x 2 exact).
  */
 function isForcedSwitchOut(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
   const event = events[index]!;
   const payload = event.payload;
   if (payload.kind !== "set-battler-sprite-visibility" || !payload.invisible
     || event.provenance?.opcodeName !== "B_SCR_OP_RETURNTOBALL") return false;
+  // prep49: Cmd_returntoball is always skipAnim (EmitReturnMonToBall TRUE); its other script use is Baton Pass's
+  // `returntoball BS_ATTACKER` (after the player's party menu / the AI's choice): the same `D o<battler slot>` unit.
+  if (event.provenance?.sourceLabel === "BattleScript_EffectBatonPass") return payload.battler === 0 || payload.battler === 1;
   for (let at = index - 1; at >= 0; at--) {
     const earlier = events[at]!.payload;
     if (earlier.kind === "animation" && earlier.animationId === "MOVE_ANIMATION") {
@@ -284,10 +289,11 @@ function followsForcedSwitchOut(events: readonly BattleKernelSemanticEvent[], in
 
 /**
  * A voluntary switch-out of `battler`: a RETURNATKTOBALL hide of it before any move body of the segment. Battler 0 is the
- * player's (BattleScript_ActionSwitch `returnatktoball`, docs/voluntary-switch-lend-audit.md §2.3), battler 1 the Factory
- * AI's (BattleScript_DoSwitchOut `returnatktoball`, docs/next-adapters-prep47.md (C): the same recall plan with the opponent
- * battler, 3/3 exact at the next body edge). A recall after a body (Pursuit's switch-out damage) is unprobed and keeps
- * invalidating.
+ * player's (BattleScript_ActionSwitch `returnatktoball`, docs/voluntary-switch-lend-audit.md §2.3; presentation synthesizes
+ * its receipt). For battler 1 the kernel emits no receipt (its Cmd_returnatktoball handler only advances), so on real routes
+ * the Factory AI's recall (docs/next-adapters-prep47.md (C): the same recall plan with the opponent battler) is applied at its
+ * BattleScript_DoSwitchOut summary instead (isAiSwitchOutSummary, docs/next-adapters-prep49.md S1). A recall after a body
+ * (Pursuit's switch-out damage) is unprobed and keeps invalidating.
  */
 function isVoluntarySwitchOut(events: readonly BattleKernelSemanticEvent[], index: number, battler: 0 | 1): boolean {
   const event = events[index]!;
@@ -296,6 +302,14 @@ function isVoluntarySwitchOut(events: readonly BattleKernelSemanticEvent[], inde
     || event.provenance?.opcodeName !== "B_SCR_OP_RETURNATKTOBALL") return false;
   return !events.slice(0, index).some(({ payload: earlier }) =>
     earlier.kind === "animation" && earlier.animationId === "MOVE_ANIMATION");
+}
+
+/** BattleScript_DoSwitchOut's summary with no recall receipt and no move body (Pursuit) before it in the segment. */
+function isAiSwitchOutSummary(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
+  if (events[index]!.provenance?.sourceLabel !== "BattleScript_DoSwitchOut") return false;
+  return !events.slice(0, index).some(({ payload: earlier }) =>
+    (earlier.kind === "animation" && earlier.animationId === "MOVE_ANIMATION")
+    || (earlier.kind === "set-battler-sprite-visibility" && earlier.battler === 1 && earlier.invisible));
 }
 
 function orderEventOf(
@@ -311,6 +325,11 @@ function orderEventOf(
       case "faint-animation":
         return { event: { kind: "faint", side: battler === 0 ? "player" : "opponent" } };
       case "draw-party-status-summary":
+        // prep49: BattleScript_DoSwitchOut's `returnatktoball` emits no visibility receipt (the kernel handler only advances), so
+        // the AI's voluntary recall (prep47 (C): the recall plan with the opponent battler) is applied at its summary.
+        if (battler === 1 && isAiSwitchOutSummary(events, index)) {
+          return { event: { kind: "switch-out", side: "opponent" }, then: { kind: "party-summary-next" } };
+        }
         // The player-side summary allocates nothing (forced and voluntary: 0 allocator calls).
         return battler === 1 ? { event: { kind: "party-summary-next" } } : {};
       case "hide-party-status-summary":

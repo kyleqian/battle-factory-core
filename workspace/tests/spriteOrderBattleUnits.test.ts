@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   KNOWN_ENTRY_BATTLER_SLOTS, SPRITE_ORDER_UNIT_PLAN_TEXTS, applySpriteOrderPresentationEvent, createSpriteOrderTracker,
   invalidateSpriteOrderTracker, spriteOrderRecallPlanText, spriteOrderTrackerLend, spriteOrderTrackerPostUnitView,
-  type SpriteOrderPresentationEvent, type SpriteOrderTracker,
+  decodeSpriteOrderPlan, type SpriteOrderPresentationEvent, type SpriteOrderTracker,
 } from "../src/engine/spriteOrderEventTransform.ts";
 import { productionReplay } from "../tools/integration/spriteOrderBattleUnitsReplay.ts";
-import { knownEntrySpriteOrderState } from "../src/engine/spriteOrderProvider.ts";
+import { applySpriteOrderUnitPlan, knownEntrySpriteOrderState } from "../src/engine/spriteOrderProvider.ts";
 import { LAB_TRACES, ROUTE_TRACES, UNIT_PLANS, replay } from "../tools/integration/spriteOrderUncoveredReplay.ts";
 
 // The PRODUCTION transform driven by the ROM evidence event streams (tools/integration/spriteOrderBattleUnitsReplay.ts)
@@ -92,6 +92,26 @@ describe("production sprite-order battle units (faint / summary / send-out / swi
     expect(tracker.occupantRoles).toEqual({ healthboxMain: { player: 1, opponent: 2 }, shadow: 3 });
     const rho = new Map([[0, 8], [1, 0], [2, 1], [3, 2], [5, 6], [4, 3], [6, 4], [7, 5], [8, 7]]);
     expect(spriteOrderTrackerLend(tracker)).toEqual(spriteOrderTrackerPostUnitView(tracker)!.free.map(slot => rho.get(slot) ?? slot));
+  });
+
+  it("reshowNeither (prep49 double KO: neither battler sprite) is the plan Cfee;Cfee;Cf: both healthboxes, then the shadow; slots null", () => {
+    const entry = createSpriteOrderTracker(knownEntrySpriteOrderState("ordinary-factory"));
+    const run = (tracker: SpriteOrderTracker, ...events: SpriteOrderPresentationEvent[]) => events.reduce(applySpriteOrderPresentationEvent, tracker);
+    const reset = run(entry, { kind: "faint", side: "opponent" }, { kind: "faint", side: "player" }, { kind: "party-menu-reset" });
+    const neither = run(reset, { kind: "battle-reshow", playerBattlerPresent: false, opponentBattlerPresent: false });
+    // docs/next-adapters-prep49.md X1 (ROM 4/4 x 2 runs): Cf0e63e62 Cf1e61e60 Cf2 from the reset's identity order.
+    expect(neither.cursor.order.known).toBe(true);
+    expect(neither.cursor.occupied).toEqual([0, 1, 2, 60, 61, 62, 63]);
+    expect(neither.cursor.order.free).toEqual(applySpriteOrderUnitPlan(reset.cursor, decodeSpriteOrderPlan("Cfee;Cfee;Cf")).order.free);
+    expect(neither.battlerSlots).toEqual({ player: null, opponent: null });
+    expect(neither.occupantRoles).toEqual({ healthboxMain: { player: 0, opponent: 1 }, shadow: 2 });
+    expect(neither.lastUnit).toBe("reshow");
+    // Not reshowPlayerGone (the shape the transform used before): the plans differ.
+    expect(neither.cursor.order.free).not.toEqual(run(reset, { kind: "battle-reshow", playerBattlerPresent: false }).cursor.order.free);
+    // The player battler without the opponent's is unobserved; the reset guard still applies.
+    expect(run(reset, { kind: "battle-reshow", playerBattlerPresent: true, opponentBattlerPresent: false }).invalidReason)
+      .toBe("reshow without the opponent battler");
+    expect(run(entry, { kind: "battle-reshow", playerBattlerPresent: false, opponentBattlerPresent: false }).cursor.order.known).toBe(false);
   });
 
   it("adjacency guard: send-out without the summary, faint with an unknown battler slot, and unguarded units invalidate; a reset revives", () => {

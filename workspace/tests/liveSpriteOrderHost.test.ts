@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
 import { prepareLiveMoveSpriteOrder } from "../src/engine/liveMoveSpriteAllocator.ts";
@@ -211,10 +212,11 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
     expect(host.tracker.cursor.order.free).toEqual(at(20389).obsF);
     expect(host.tracker.cursor.occupied).toEqual(maskSlotsOf(at(20389).obsMask as string));
     expect(host.tracker.battlerSlots).toEqual({ player: 5, opponent: 0 });
-    // A hidden battler or a missing opponent battler at the reshow is unobserved: invalidate.
+    // A hidden battler or the opponent battler alone missing at the reshow is unobserved: invalidate (neither battler is
+    // reshowNeither since prep49: see "order host prep49 stops" below).
     expect(returnLiveSpriteOrderHostFromPartyMenu(Object.freeze({ ...host, hidden: [false, true] as const }), { player: true, opponent: true })
       .tracker.cursor.order.known).toBe(false);
-    expect(returnLiveSpriteOrderHostFromPartyMenu(host, { player: false, opponent: false }).tracker.cursor.order.known).toBe(false);
+    expect(returnLiveSpriteOrderHostFromPartyMenu(host, { player: true, opponent: false }).tracker.cursor.order.known).toBe(false);
   });
 
   it("voluntary party menu: open resets (revives), choose = reset + reshow without the prompt cycle (issue135 Pursuit edge 2467)", () => {
@@ -434,5 +436,141 @@ describe("order host event keys (prep43)", () => {
       expect(tracker.invalidReason, JSON.stringify(args)).toContain("TURN_TRAP");
       expect(tracker.invalidReason, JSON.stringify(args)).not.toContain("TURN_TRAP_");
     }
+  });
+});
+
+// docs/next-adapters-prep49.md: the three order-host stops it folds, against its ROM receipts (tools/integration/fixtures/prep49/units.json,
+// prep49Probe.py BP_PLY / BP_OPP / EXP_*: every job twice fresh, A == B; the prep49Check.ts sequences).
+describe("order host prep49 stops: Baton Pass recall, the AI's DoSwitchOut summary, the double-KO reshow", () => {
+  interface Win { f: number; F: number[]; C: [number, string][]; D: number[]; act: number }
+  interface Job { class: string; identicalAB: boolean; F0: number[]; windows: Win[]; edges: { f: number; mv: number; F: number[] }[] }
+  const jobs = (JSON.parse(readFileSync(new URL("../tools/integration/fixtures/prep49/units.json", import.meta.url), "utf8")) as
+    { jobs: Record<string, Job> }).jobs;
+  const ev = (sequence: number, kind: string, extra: object = {}, provenance?: object) =>
+    Object.freeze({ sequence, payload: { kind, ...extra }, provenance }) as unknown as BattleKernelSemanticEvent;
+  const batonPassRecall = (sequence: number, battler: 0 | 1) => ev(sequence, "set-battler-sprite-visibility", { battler, invisible: true },
+    { opcodeName: "B_SCR_OP_RETURNTOBALL", sourceLabel: "BattleScript_EffectBatonPass" });
+  const hostAt = (free: readonly number[]): LiveSpriteOrderHost =>
+    Object.freeze({ ...createLiveSpriteOrderHost({ known: true, free, pendingDestroyed: [] }), promptRequestId: 3 });
+  const segmentsOf = (...segments: BattleKernelSemanticEvent[][]) => segments.map(events => ({ events }));
+  const pure = (tracker: ReturnType<typeof createSpriteOrderTracker>, events: readonly SpriteOrderPresentationEvent[]) =>
+    events.reduce(applySpriteOrderPresentationEvent, tracker);
+
+  it("player Baton Pass: party-menu exit (reset + reshowBoth), returntoball = forced-switch-out D o<slot>, switch-in; next body edge = ROM", () => {
+    for (const id of ["bp-ply-aipom-onix", "bp-ply-jolteon-onix"]) {
+      const job = jobs[id]!;
+      expect(job.identicalAB).toBe(true);
+      const segments = segmentsOf([ev(10, "animation", { animationId: "MOVE_ANIMATION", battler: 0, target: 1, arguments: ["226", "0", "0", "0", "0", "0"] })],
+        [batonPassRecall(20, 0), ev(21, "switch-in-animation", { battler: 0, partyIndex: 1 }), ev(22, "message")]);
+      const resolution = { resolutionId: { requestId: 3 }, segmentIndex: 1, segments };
+      // The menu runs between the body's segment and the recall's (the orchestrator's forced switch-in return).
+      let host = advanceLiveSpriteOrderHost(hostAt(job.F0), resolution, Number.NEGATIVE_INFINITY, true);
+      expect(liveSpriteOrderBattlersPresent(resolution, 1)).toEqual({ player: true, opponent: true });
+      host = returnLiveSpriteOrderHostFromPartyMenu(host, liveSpriteOrderBattlersPresent(resolution, 1));
+      const reshown = host.tracker;
+      expect(reshown.cursor.order.known).toBe(true);
+      host = advanceLiveSpriteOrderHost(host, resolution, Number.POSITIVE_INFINITY);
+      const want = pure(reshown, [{ kind: "forced-switch-out", side: "player" }, { kind: "switch-in-start", side: "player" },
+        { kind: "switch-in-finish", side: "player" }]);
+      expect(host.tracker.cursor.order.known, id).toBe(true);
+      expect(host.tracker.cursor.order.free, id).toEqual(want.cursor.order.free);
+      expect(host.tracker.cursor.occupied, id).toEqual(want.cursor.occupied);
+      // ROM: the free order at the next body (Onix Tackle) edge.
+      expect(job.edges[0]!.mv).toBe(33);
+      expect(host.tracker.cursor.order.free, id).toEqual(job.edges[0]!.F);
+    }
+  });
+
+  it("opponent Baton Pass: returntoball after its own body = forced-switch-out {opponent}, switch-in {opponent}; next body edge = ROM", () => {
+    for (const id of ["bp-opp-aipom-onix", "bp-opp-jolteon-onix"]) {
+      const job = jobs[id]!;
+      const body = job.edges[0]!;
+      expect(body.mv).toBe(226);
+      const after = job.windows.findIndex(w => w.f > body.f && !w.act);
+      const host = advanceLiveSpriteOrderHost(hostAt(job.windows[after - 1]!.F), { resolutionId: { requestId: 3 }, segmentIndex: 0,
+        segments: segmentsOf([batonPassRecall(20, 1), ev(21, "switch-in-animation", { battler: 1, partyIndex: 1 }), ev(22, "message")]) },
+      Number.POSITIVE_INFINITY);
+      expect(host.tracker.cursor.order.known, id).toBe(true);
+      expect(host.tracker.cursor.order.free, id).toEqual(job.edges[1]!.F);
+    }
+  });
+
+  it("a RETURNTOBALL without the Baton Pass label and without a targeting body still invalidates (return to ball)", () => {
+    const host = advanceLiveSpriteOrderHost(hostAt(KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER), { resolutionId: { requestId: 3 }, segmentIndex: 0,
+      segments: segmentsOf([ev(20, "set-battler-sprite-visibility", { battler: 0, invisible: true }, { opcodeName: "B_SCR_OP_RETURNTOBALL" })]) },
+    Number.POSITIVE_INFINITY);
+    expect(host.tracker.cursor.order.known).toBe(false);
+    expect(host.tracker.invalidReason).toBe("return to ball");
+  });
+
+  it("the AI's DoSwitchOut summary (no recall receipt) applies switch-out {opponent} before it; a move body before it still invalidates", () => {
+    const summary = (sequence: number) => ev(sequence, "draw-party-status-summary", { battler: 1 },
+      { opcodeName: "B_SCR_OP_DRAWPARTYSTATUSSUMMARY", sourceLabel: "BattleScript_DoSwitchOut" });
+    const tail = [ev(31, "hide-party-status-summary", { battler: 1 }), ev(32, "switch-in-animation", { battler: 1, partyIndex: 2 }), ev(33, "message")];
+    const run = (events: BattleKernelSemanticEvent[]) => advanceLiveSpriteOrderHost(
+      Object.freeze({ ...createLiveSpriteOrderHost(knownEntrySpriteOrderState("ordinary-factory")), promptRequestId: 3 }),
+      { resolutionId: { requestId: 3 }, segmentIndex: 0, segments: segmentsOf(events) }, Number.POSITIVE_INFINITY).tracker;
+    const tracker = run([summary(30), ...tail]);
+    const want = pure(createSpriteOrderTracker(knownEntrySpriteOrderState("ordinary-factory")), [{ kind: "switch-out", side: "opponent" },
+      { kind: "party-summary-next" }, { kind: "party-summary-hide" }, { kind: "next-mon-send-out" }]);
+    expect(tracker.cursor.order.known).toBe(true);
+    expect(want.cursor.order.known).toBe(true);
+    expect(tracker.cursor.order.free).toEqual(want.cursor.order.free);
+    expect(tracker.cursor.occupied).toEqual(want.cursor.occupied);
+    expect(tracker.battlerSlots).toEqual(want.battlerSlots);
+    // Pursuit-intercepted (a move body before the summary) is unprobed: still the summary stop.
+    const pursuit = run([ev(20, "animation", { animationId: "MOVE_ANIMATION", battler: 0, target: 1, arguments: ["33", "0", "0", "0", "0", "0"] }),
+      summary(30), ...tail]);
+    expect(pursuit.cursor.order.known).toBe(false);
+    expect(pursuit.invalidReason).toBe("next-mon summary while the opponent battler is tracked");
+    // Another label (a forced send-out's summary while the opponent battler is tracked) is unchanged.
+    const unlabelled = run([ev(30, "draw-party-status-summary", { battler: 1 }), ...tail]);
+    expect(unlabelled.invalidReason).toBe("next-mon summary while the opponent battler is tracked");
+  });
+
+  it("double KO: the forced party menu's reshow with neither battler is reshowNeither (Cfee;Cfee;Cf) = ROM; slots null, roles n0 / n3 / n6", () => {
+    for (const id of ["exp-opp-electrode-abra", "exp-opp-glalie-abra", "exp-ply-electrode-abra", "exp-ply-glalie-abra"]) {
+      const job = jobs[id]!;
+      const host = returnLiveSpriteOrderHostFromPartyMenu(hostAt(job.F0), { player: false, opponent: false });
+      const tracker = host.tracker;
+      expect(tracker.cursor.order.known, id).toBe(true);
+      // The plan's three windows are the ROM's first three after the menu exit (created / destroyed / free order).
+      expect(tracker.cursor.order.free, id).toEqual(job.windows[2]!.F);
+      const created = job.windows.slice(0, 3).flatMap(w => w.C.map(([slot]) => slot));
+      const destroyed = job.windows.slice(0, 3).flatMap(w => w.D);
+      expect([...tracker.cursor.occupied].sort((l, r) => l - r), id).toEqual(created.filter(s => !destroyed.includes(s)).sort((l, r) => l - r));
+      expect(tracker.battlerSlots).toEqual({ player: null, opponent: null });
+      expect(tracker.occupantRoles?.healthboxMain).toEqual({ player: job.windows[0]!.C[0]![0], opponent: job.windows[1]!.C[0]![0] });
+      expect(tracker.occupantRoles?.shadow).toBe(job.windows[2]!.C[0]![0]);
+      // Then the census order: the player's forced switch-in, the opponent's summary / send-out (the existing units) stay known.
+      const next = advanceLiveSpriteOrderHost(host, { resolutionId: { requestId: 3 }, segmentIndex: 0, segments: segmentsOf([
+        ev(40, "switch-in-animation", { battler: 0, partyIndex: 1 }), ev(41, "draw-party-status-summary", { battler: 1 }), ev(42, "message"),
+        ev(43, "hide-party-status-summary", { battler: 1 }), ev(44, "switch-in-animation", { battler: 1, partyIndex: 1 }), ev(45, "message")]) },
+      Number.POSITIVE_INFINITY);
+      const want = pure(tracker, [{ kind: "switch-in-start" }, { kind: "switch-in-finish" }, { kind: "party-summary-next" },
+        { kind: "party-summary-hide" }, { kind: "next-mon-send-out" }]);
+      expect(next.tracker.cursor.order.known, id).toBe(true);
+      expect(next.tracker.cursor.order.free, id).toEqual(want.cursor.order.free);
+    }
+  });
+
+  it("route seed 71 (Aipom Baton Pass, party screen answered): the next body (Mega Drain) lends a known order, adapter active; ON/OFF parity", () => {
+    const on = generatedCommandAnimationReplay(71, "on", [2, 0], 0, false, true);
+    const off = generatedCommandAnimationReplay(71, "off", [2, 0], 0, false, true);
+    expectRulesEqual(on, off);
+    expect(on.state.round.rules.rngValue).toBe(off.state.round.rules.rngValue);
+    expect(JSON.stringify(on.state.facilityState)).toBe(JSON.stringify(off.state.facilityState));
+    // Before prep49 the Baton Pass returntoball invalidated the order host and Mega Drain fell back.
+    expect(on.animations.map(row => [row.moveId, row.attacker, row.adapterActive.length > 0 && row.adapterActive.every(Boolean)]))
+      .toEqual([[226, 0, true], [72, 0, true]]);
+    expect(bodies(on).map(row => row.spriteOrderInput !== undefined)).toEqual([true, true]);
+    expect(off.commands.every(row => row.spriteOrderInput === undefined)).toBe(true);
+    expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+  }, 120000);
+
+  it("a reshow with the player battler but not the opponent's stays unobserved: invalidate", () => {
+    const host = returnLiveSpriteOrderHostFromPartyMenu(hostAt(KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER), { player: true, opponent: false });
+    expect(host.tracker.cursor.order.known).toBe(false);
+    expect(host.tracker.invalidReason).toBe("reshow without the opponent battler");
   });
 });
