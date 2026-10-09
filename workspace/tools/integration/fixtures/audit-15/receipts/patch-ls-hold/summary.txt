@@ -1,0 +1,10 @@
+brn-light-screen-opp-c0.json                 LIGHT_SCREEN  opponent units=2   live=0 order=1 alloc=0 rows=86 exp=88 exact=13 px=155164 r1==r2=1 ages=9..81 
+ctl-light-screen-opp-c0.json                 LIGHT_SCREEN  opponent units=0   live=1 order=1 alloc=1 rows=86 exp=88 exact=86 px=0 r1==r2=1 ages=- 
+ctl-light-screen-ply-c0.json                 LIGHT_SCREEN  player   units=0   live=1 order=1 alloc=1 rows=86 exp=88 exact=86 px=0 r1==r2=1 ages=- 
+double-team-light-screen-opp-c0.json         LIGHT_SCREEN  opponent units=2   live=1 order=1 alloc=1 rows=86 exp=88 exact=86 px=0 r1==r2=1 ages=- 
+double-team-light-screen-ply-c0.json         LIGHT_SCREEN  player   units=2   live=1 order=1 alloc=1 rows=86 exp=88 exact=86 px=0 r1==r2=1 ages=- 
+faint-attack-light-screen-opp-c0.json        LIGHT_SCREEN  opponent units=2   live=1 order=1 alloc=1 rows=86 exp=88 exact=86 px=0 r1==r2=1 ages=- 
+faint-attack-light-screen-ply-c0.json        LIGHT_SCREEN  player   units=2   live=1 order=1 alloc=1 rows=86 exp=88 exact=86 px=0 r1==r2=1 ages=- 
+hydro-pump-light-screen-opp-c0.json          LIGHT_SCREEN  opponent units=2   live=1 order=1 alloc=1 rows=86 exp=88 exact=86 px=0 r1==r2=1 ages=- 
+ice-beam-light-screen-opp-c0.json            LIGHT_SCREEN  opponent units=2   live=1 order=1 alloc=1 rows=86 exp=88 exact=86 px=0 r1==r2=1 ages=- 
+swift-light-screen-opp-c0.json               LIGHT_SCREEN  opponent units=2   live=1 order=1 alloc=1 rows=86 exp=88 exact=86 px=0 r1==r2=1 ages=- 

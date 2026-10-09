@@ -1,0 +1,366 @@
+{
+"schema": "audit15-vblank-probe/v1",
+"scenario": "ctl-light-screen-ply.json",
+"rows": [
+{
+"frame": 123,
+"io": {
+"bldcnt": 16192,
+"bldalpha": 781,
+"dispcnt": 48960
+},
+"buffer": {
+"bldcnt": 16192,
+"bldalpha": 781,
+"dispcnt": 48960
+},
+"waiting": [
+255,
+255,
+255,
+255
+],
+"vblank1": 9086,
+"vblank2": 9086,
+"animScriptActive": 1,
+"visualTasks": 3,
+"screen": "2bf2a52706d53a12"
+},
+{
+"frame": 124,
+"io": {
+"bldcnt": 16192,
+"bldalpha": 781,
+"dispcnt": 48960
+},
+"buffer": {
+"bldcnt": 16192,
+"bldalpha": 781,
+"dispcnt": 48960
+},
+"waiting": [
+255,
+255,
+255,
+255
+],
+"vblank1": 9087,
+"vblank2": 9087,
+"animScriptActive": 1,
+"visualTasks": 4,
+"screen": "2bf2a52706d53a12"
+},
+{
+"frame": 125,
+"io": {
+"bldcnt": 16192,
+"bldalpha": 781,
+"dispcnt": 48960
+},
+"buffer": {
+"bldcnt": 16192,
+"bldalpha": 781,
+"dispcnt": 48960
+},
+"waiting": [
+255,
+255,
+255,
+255
+],
+"vblank1": 9088,
+"vblank2": 9088,
+"animScriptActive": 1,
+"visualTasks": 4,
+"screen": "e648b80f88c38983"
+},
+{
+"frame": 126,
+"io": {
+"bldcnt": 16192,
+"bldalpha": 781,
+"dispcnt": 48960
+},
+"buffer": {
+"bldcnt": 16192,
+"bldalpha": 781,
+"dispcnt": 48960
+},
+"waiting": [
+255,
+255,
+255,
+255
+],
+"vblank1": 9089,
+"vblank2": 9089,
+"animScriptActive": 1,
+"visualTasks": 4,
+"screen": "0725b356e9b8a5d2"
+},
+{
+"frame": 127,
+"io": {
+"bldcnt": 16192,
+"bldalpha": 781,
+"dispcnt": 48960
+},
+"buffer": {
+"bldcnt": 16192,
+"bldalpha": 781,
+"dispcnt": 48960
+},
+"waiting": [
+255,
+255,
+255,
+255
+],
+"vblank1": 9090,
+"vblank2": 9090,
+"animScriptActive": 1,
+"visualTasks": 3,
+"screen": "2f5cc3ba3d3cd094"
+},
+{
+"frame": 128,
+"io": {
+"bldcnt": 16192,
+"bldalpha": 1036,
+"dispcnt": 48960
+},
+"buffer": {
+"bldcnt": 16192,
+"bldalpha": 1036,
+"dispcnt": 48960
+},
+"waiting": [
+255,
+255,
+255,
+255
+],
+"vblank1": 9091,
+"vblank2": 9091,
+"animScriptActive": 1,
+"visualTasks": 3,
+"screen": "1dddd0c04bb49cc0"
+},
+{
+"frame": 129,
+"io": {
+"bldcnt": 16192,
+"bldalpha": 1291,
+"dispcnt": 48960
+},
+"buffer": {
+"bldcnt": 16192,
+"bldalpha": 1291,
+"dispcnt": 48960
+},
+"waiting": [
+255,
+255,
+255,
+255
+],
+"vblank1": 9092,
+"vblank2": 9092,
+"animScriptActive": 1,
+"visualTasks": 3,
+"screen": "a5671c20dbdef59b"
+},
+{
+"frame": 130,
+"io": {
+"bldcnt": 16192,
+"bldalpha": 1546,
+"dispcnt": 48960
+},
+"buffer": {
+"bldcnt": 16192,
+"bldalpha": 1546,
+"dispcnt": 48960
+},
+"waiting": [
+255,
+255,
+255,
+255
+],
+"vblank1": 9093,
+"vblank2": 9093,
+"animScriptActive": 1,
+"visualTasks": 3,
+"screen": "19368d321ce89cb2"
+},
+{
+"frame": 131,
+"io": {
+"bldcnt": 16192,
+"bldalpha": 1801,
+"dispcnt": 48960
+},
+"buffer": {
+"bldcnt": 16192,
+"bldalpha": 1801,
+"dispcnt": 48960
+},
+"waiting": [
+255,
+255,
+255,
+255
+],
+"vblank1": 9094,
+"vblank2": 9094,
+"animScriptActive": 1,
+"visualTasks": 3,
+"screen": "ea89bef7e154e2d5"
+},
+{
+"frame": 132,
+"io": {
+"bldcnt": 16192,
+"bldalpha": 2056,
+"dispcnt": 48960
+},
+"buffer": {
+"bldcnt": 16192,
+"bldalpha": 2056,
+"dispcnt": 48960
+},
+"waiting": [
+255,
+255,
+255,
+255
+],
+"vblank1": 9095,
+"vblank2": 9095,
+"animScriptActive": 1,
+"visualTasks": 4,
+"screen": "096faab4007ba051"
+},
+{
+"frame": 133,
+"io": {
+"bldcnt": 16192,
+"bldalpha": 2311,
+"dispcnt": 48960
+},
+"buffer": {
+"bldcnt": 16192,
+"bldalpha": 2311,
+"dispcnt": 48960
+},
+"waiting": [
+255,
+255,
+255,
+255
+],
+"vblank1": 9096,
+"vblank2": 9096,
+"animScriptActive": 1,
+"visualTasks": 4,
+"screen": "c3966b56de7bd6db"
+},
+{
+"frame": 134,
+"io": {
+"bldcnt": 16192,
+"bldalpha": 2566,
+"dispcnt": 48960
+},
+"buffer": {
+"bldcnt": 16192,
+"bldalpha": 2566,
+"dispcnt": 48960
+},
+"waiting": [
+255,
+255,
+255,
+255
+],
+"vblank1": 9097,
+"vblank2": 9097,
+"animScriptActive": 1,
+"visualTasks": 4,
+"screen": "7f3ca9934edaaafa"
+},
+{
+"frame": 135,
+"io": {
+"bldcnt": 16192,
+"bldalpha": 2821,
+"dispcnt": 48960
+},
+"buffer": {
+"bldcnt": 16192,
+"bldalpha": 2821,
+"dispcnt": 48960
+},
+"waiting": [
+255,
+255,
+255,
+255
+],
+"vblank1": 9098,
+"vblank2": 9098,
+"animScriptActive": 1,
+"visualTasks": 4,
+"screen": "606f4d189c742dcd"
+},
+{
+"frame": 136,
+"io": {
+"bldcnt": 16192,
+"bldalpha": 3076,
+"dispcnt": 48960
+},
+"buffer": {
+"bldcnt": 16192,
+"bldalpha": 3076,
+"dispcnt": 48960
+},
+"waiting": [
+255,
+255,
+255,
+255
+],
+"vblank1": 9099,
+"vblank2": 9099,
+"animScriptActive": 1,
+"visualTasks": 3,
+"screen": "6bfdb9923386aacf"
+},
+{
+"frame": 137,
+"io": {
+"bldcnt": 16192,
+"bldalpha": 3331,
+"dispcnt": 48960
+},
+"buffer": {
+"bldcnt": 16192,
+"bldalpha": 3331,
+"dispcnt": 48960
+},
+"waiting": [
+255,
+255,
+255,
+255
+],
+"vblank1": 9100,
+"vblank2": 9100,
+"animScriptActive": 1,
+"visualTasks": 3,
+"screen": "9da802319b1b373a"
+}
+]
+}
