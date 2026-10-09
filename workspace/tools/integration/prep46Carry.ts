@@ -26,7 +26,7 @@ import { mudSlapMudAtAge, MUD_SLAP_MUD_FIRST_DISPLAY_AGE, MUD_SLAP_MUD_HALF_SIZE
 import { rainDanceAtAge } from "../../src/animation/rainDance.ts";
 import { carryLiveSpriteOrder } from "../../src/engine/liveMoveOamAssembler.ts";
 import { sortGbaSpriteOrder } from "../../src/animation/gbaObjCompositor.ts";
-// (General_Rain model: prep46GeneralRain.ts)
+import { GENERAL_RAIN_SPAWN_AGES, generalRainDropsAtAge } from "./prep46GeneralRain.ts";
 
 type Side = "player" | "opponent";
 interface Win { f: number; C: [number, string][]; D: number[]; F: number[] }
@@ -165,6 +165,21 @@ export function rainDanceModel(unit: Unit, activationOrder: readonly number[], l
   return { orders, occupied, notes: { latch, wordsAgree: same(births, romXY), words: romXY.length } };
 }
 
+/** General_Rain (RAIN_CONTINUES) through the body: prep46GeneralRain.ts drops from the RAM-read rows, carried like Rain Dance. */
+export function generalRainModel(unit: Unit, activationOrder: readonly number[]): BodyModel {
+  const rows = unit.draws!.map((row) => row.slice(1));
+  const orders: number[][] = [], occupied: number[][] = [];
+  let order = activationOrder.slice();
+  for (let age = 0; age < unit.length; age += 1) {
+    const drops = generalRainDropsAtAge(age, rows, ENTRY_IN_USE);
+    order = carryLiveSpriteOrder(order, dropKeys(drops), sortGbaSpriteOrder);
+    orders.push(order.slice());
+    occupied.push(drops.map((d) => d.slot));
+  }
+  const planAges = unit.draws!.map((row) => row[0]);
+  return { orders, occupied, notes: { drawAgesMatchPlan: same(planAges as number[], GENERAL_RAIN_SPAWN_AGES), words: rows.flat().length } };
+}
+
 const order0 = (free: readonly number[]) =>
   spriteOrderWithOccupiedPrefix({ known: true as const, free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
 
@@ -198,10 +213,10 @@ if (process.argv[1]?.endsWith("prep46Carry.ts")) {
   const out: Record<string, unknown>[] = [];
   for (const [name, job] of Object.entries(jobs)) {
     job.units.forEach((unit, index) => {
-      if (unit.kind !== "body" || unit.dense === undefined || unit.mv === 0) return;
+      if (unit.kind !== "body" || unit.dense === undefined) return;
       const activation = order0(unit.F0);
       if (activation === null) { out.push({ job: name, mv: unit.mv, frame: unit.frame, error: "activation order not entry-prefixed" }); return; }
-      const model = unit.mv === 240 ? rainDanceModel(unit, activation, latch) : dirtModel(job, unit, activation);
+      const model = unit.mv === 240 ? rainDanceModel(unit, activation, latch) : unit.mv === 0 ? generalRainModel(unit, activation) : dirtModel(job, unit, activation);
       const cmp = compareBody(unit, model);
       const romPost = job.units[index + 1]!.F0;
       const row = { job: name, mv: unit.mv, frame: unit.frame, identicalAB: job.identicalAB, ...model.notes, frames: cmp.frames,
