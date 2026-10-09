@@ -239,6 +239,53 @@ describe("words46: production marker / lend / resolver against the prep46 chains
   });
 });
 
+describe("words46: Ice Beam after Rain Dance + RAIN_CONTINUES (rdib-ply-onix probe, A == B)", () => {
+  it("the production host + seam resolution reproduce the ROM order at General_Rain's end and at the next turn's Ice Beam", () => {
+    const rdib = JSON.parse(readFileSync("tools/integration/fixtures/words46/rdib-ply-onix-units.json", "utf8")) as { job: Omit<Job, "units">; units: Unit[] };
+    const job: Job = { ...rdib.job, units: rdib.units } as Job;
+    expect(job.identicalAB).toBe(true);
+    // carry: Rain Dance and both General_Rain bodies to the ROM order at the next unit
+    let carried = 0;
+    job.units.forEach((unit, index) => {
+      if (!isWordsBody(unit)) return;
+      expect(wordsOf(unit).draws.map((row, k) => [planOf(unit)[k]!.ageOffset, ...row])).toEqual(unit.draws);
+      expect(liveWordsUnitPostFree(unitOf(unit, "player"), unit.F0, wordsOf(unit), anchorsOf(job)), `f${unit.frame}`).toEqual(job.units[index + 1]!.F0);
+      carried += 1;
+    });
+    expect(carried).toBe(3);
+    // marker / lend / resolver: Ice Beam (planned) + blip, Rain Dance (marker), end-turn RAIN_CONTINUES (nested marker), prompt, Ice Beam
+    const bodies = job.units.filter((u) => u.kind === "body");
+    let host: LiveSpriteOrderHost = createLiveSpriteOrderHost(knownEntrySpriteOrderState("battle-lab-ordinary-singles"));
+    host = beginLiveSpriteOrderTurn(host, 1, true);
+    const t1 = [ev(10, "animation", { animationId: "MOVE_ANIMATION", battler: 1, target: 0, arguments: ["58", "0", "95", "10", "70", "0"] }),
+      ev(11, "animation", { animationId: "HIT_ANIMATION", battler: 0, target: 0, arguments: [] }),
+      ev(12, "animation", { animationId: "MOVE_ANIMATION", battler: 0, target: 1, arguments: ["240", "0", "0", "10", "70", "0"] }),
+      ev(13, "animation", { animationId: "RAIN_CONTINUES", battler: 0, target: 0, arguments: [] })];
+    const r1 = { resolutionId: { requestId: 1 }, segmentIndex: 0, segments: [{ events: t1 }] };
+    host = advanceLiveSpriteOrderHost(host, r1, 10, true);
+    expect(lendLiveSpriteOrder(host, 58)?.free).toEqual(bodies[0]!.F0);
+    host = advanceLiveSpriteOrderHost(host, r1, 12, true);
+    const rainDanceLend = lendLiveSpriteOrder(host, 240)!;
+    expect(rainDanceLend.free).toEqual(bodies[1]!.F0);
+    host = markLiveSpriteOrderDeferredBody(host, rainDanceLend, { moveId: 240, attacker: 0 }, "move:1:0:2");
+    host = advanceLiveSpriteOrderHost(host, r1, Number.POSITIVE_INFINITY);
+    expect(host.deferred).toMatchObject({ key: generalAnimationPresentationRngKey(1, 0, 13), generalAnimation: "RAIN_CONTINUES", units: [],
+      activation: { deferred: { key: "move:1:0:2", moveId: 240, units: [] } } });
+    host = beginLiveSpriteOrderTurn(host, 2, true);
+    const r2 = { resolutionId: { requestId: 2 }, segmentIndex: 0, segments: [{ events: [
+      ev(20, "animation", { animationId: "MOVE_ANIMATION", battler: 1, target: 0, arguments: ["58", "0", "95", "10", "70", "0"] })] }] };
+    host = advanceLiveSpriteOrderHost(host, r2, 20, true);
+    const lend = lendLiveSpriteOrder(host, 58)!;
+    const wordsByKey = new Map([["move:1:0:2", wordsOf(bodies[1]!)], [generalAnimationPresentationRngKey(1, 0, 13), wordsOf(bodies[2]!)]]);
+    const resolved = resolveSpriteOrderDeferredLend(lend.deferred!, (unit, free) => liveWordsUnitPostFree(unit, free, wordsByKey.get(unit.key) ?? null, anchorsOf(job)));
+    expect(bodies[3]!.mv).toBe(58);
+    expect(resolved).toEqual(bodies[3]!.F0);
+    // the General_Rain words are needed: without them the lend declines
+    wordsByKey.delete(generalAnimationPresentationRngKey(1, 0, 13));
+    expect(resolveSpriteOrderDeferredLend(lend.deferred!, (unit, free) => liveWordsUnitPostFree(unit, free, wordsByKey.get(unit.key) ?? null, anchorsOf(job)))).toBeNull();
+  });
+});
+
 describe("words46: KO + send-in (entry-label carry)", () => {
   it("a words unit after an opponent KO + send-in records its marker in entry labels (Ice Ball does not) and any consumer resolves it", () => {
     // opponent KO + summary + send-out (docs/postko-consumer-audit.md s4.3: role-isomorphic occupancy, entry-label lend)
