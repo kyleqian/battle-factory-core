@@ -1,0 +1,92 @@
+{
+ "schema": "audit15-chain-check/v1",
+ "rows": [
+  {
+   "fixture": "hydro-pump-heal-bell-opp-c0.json",
+   "move": "HEAL_BELL",
+   "side": "opponent",
+   "units": 2,
+   "window": {
+    "startFrame": 331,
+    "endFrame": 591
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": false,
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "rows": 261,
+   "expectedDuration": 261,
+   "exactRows": 261,
+   "residualPixels": 0,
+   "digests": [
+    "e2bfa534b709f5d7703c94e903cf9f4a05fcd302388b6e95d4ba3b537cfa0409",
+    "e2bfa534b709f5d7703c94e903cf9f4a05fcd302388b6e95d4ba3b537cfa0409"
+   ],
+   "residualRows": []
+  },
+  {
+   "fixture": "hydro-pump-heal-bell-opp-c1.json",
+   "move": "HEAL_BELL",
+   "side": "opponent",
+   "units": 5,
+   "window": {
+    "startFrame": 1662,
+    "endFrame": 1922
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": false,
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "rows": 261,
+   "expectedDuration": 261,
+   "exactRows": 261,
+   "residualPixels": 0,
+   "digests": [
+    "1367eda1d342a7f5e6e322abdfe2a0329d03f9802e28f4d93dd3268e253fda4b",
+    "1367eda1d342a7f5e6e322abdfe2a0329d03f9802e28f4d93dd3268e253fda4b"
+   ],
+   "residualRows": []
+  },
+  {
+   "fixture": "hydro-pump-heal-bell-opp-c2.json",
+   "move": "HEAL_BELL",
+   "side": "opponent",
+   "units": 8,
+   "window": {
+    "startFrame": 2997,
+    "endFrame": 3257
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": false,
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "rows": 261,
+   "expectedDuration": 261,
+   "exactRows": 261,
+   "residualPixels": 0,
+   "digests": [
+    "034cbfe6b3d91ca90d04baf42bf1d051ea7bc32a1dc68205ea6e9ecd1ea87501",
+    "034cbfe6b3d91ca90d04baf42bf1d051ea7bc32a1dc68205ea6e9ecd1ea87501"
+   ],
+   "residualRows": []
+  }
+ ]
+}

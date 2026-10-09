@@ -1,0 +1,61 @@
+{
+ "schema": "audit15-chain-check/v1",
+ "rows": [
+  {
+   "fixture": "ctl-blaze-kick-ply-c0.json",
+   "move": "BLAZE_KICK",
+   "side": "player",
+   "units": 0,
+   "window": {
+    "startFrame": 77,
+    "endFrame": 173,
+    "ageOffset": -10
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": true,
+   "x2": null,
+   "rows": 97,
+   "expectedDuration": 78,
+   "exactRows": 97,
+   "residualPixels": 0,
+   "digests": [
+    "0bdb08a6f24fe9b840ed49b0e54c445752f8eb7699a35a6997dbd99037f7bd3f",
+    "0bdb08a6f24fe9b840ed49b0e54c445752f8eb7699a35a6997dbd99037f7bd3f"
+   ],
+   "residualRows": []
+  },
+  {
+   "fixture": "ctl-blaze-kick-ply-c1.json",
+   "move": "BLAZE_KICK",
+   "side": "player",
+   "units": 2,
+   "window": {
+    "startFrame": 2745,
+    "endFrame": 2841,
+    "ageOffset": -10
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": false,
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "rows": 97,
+   "expectedDuration": 78,
+   "exactRows": 97,
+   "residualPixels": 0,
+   "digests": [
+    "7fdcd55a4c5e3d8c62242e61b61f142c7e77a09950b9397f4a0fe5838e7b17bf",
+    "7fdcd55a4c5e3d8c62242e61b61f142c7e77a09950b9397f4a0fe5838e7b17bf"
+   ],
+   "residualRows": []
+  }
+ ]
+}

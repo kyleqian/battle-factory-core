@@ -1,0 +1,13 @@
+diff --git a/workspace/src/animation/lightScreen.ts b/workspace/src/animation/lightScreen.ts
+index 73c749f6a..46047a6f0 100644
+--- a/workspace/src/animation/lightScreen.ts
++++ b/workspace/src/animation/lightScreen.ts
+@@ -76,7 +76,7 @@ export function specialScreenAtAge(
+     const eva = age <= 1 ? 0
+       : age <= 14 ? age - 1
+         : age <= 47 ? 13
+-          : kind === "light-screen" && side === "opponent" && age === 52 ? 9
++          : kind === "light-screen" && side === "opponent" && age === 52 && process.env.AUDIT15_LS_NOHOLD !== "1" ? 9
+             : age <= 60 ? 60 - age : 0;
+     alpha = { eva, evb: 16 - eva };
+   }

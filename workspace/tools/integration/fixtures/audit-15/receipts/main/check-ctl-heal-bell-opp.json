@@ -1,0 +1,80 @@
+{
+ "schema": "audit15-chain-check/v1",
+ "rows": [
+  {
+   "fixture": "ctl-heal-bell-opp-c0.json",
+   "move": "HEAL_BELL",
+   "side": "opponent",
+   "units": 0,
+   "window": {
+    "startFrame": 74,
+    "endFrame": 334
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": true,
+   "x2": null,
+   "rows": 261,
+   "expectedDuration": 261,
+   "exactRows": 261,
+   "residualPixels": 0,
+   "digests": [
+    "a79ca9b24b695f38c426504d2eb6d548fed7dd9271837f01d288103f98392a98",
+    "a79ca9b24b695f38c426504d2eb6d548fed7dd9271837f01d288103f98392a98"
+   ],
+   "residualRows": []
+  },
+  {
+   "fixture": "ctl-heal-bell-opp-c1.json",
+   "move": "HEAL_BELL",
+   "side": "opponent",
+   "units": 1,
+   "window": {
+    "startFrame": 1408,
+    "endFrame": 1668
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": false,
+   "x2": null,
+   "rows": 261,
+   "expectedDuration": 261,
+   "exactRows": 261,
+   "residualPixels": 0,
+   "digests": [
+    "e41f60d2c7de75f8045f53acf8a0d589643dbbc2f82e813c087befba80484b7a",
+    "e41f60d2c7de75f8045f53acf8a0d589643dbbc2f82e813c087befba80484b7a"
+   ],
+   "residualRows": []
+  },
+  {
+   "fixture": "ctl-heal-bell-opp-c2.json",
+   "move": "HEAL_BELL",
+   "side": "opponent",
+   "units": 2,
+   "window": {
+    "startFrame": 2742,
+    "endFrame": 3002
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": false,
+   "x2": null,
+   "rows": 261,
+   "expectedDuration": 261,
+   "exactRows": 261,
+   "residualPixels": 0,
+   "digests": [
+    "e4fd8bff2407c48fac4faece4649a548325d0625291b81fc01ea95f4dc012624",
+    "e4fd8bff2407c48fac4faece4649a548325d0625291b81fc01ea95f4dc012624"
+   ],
+   "residualRows": []
+  }
+ ]
+}

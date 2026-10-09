@@ -1,0 +1,93 @@
+{
+ "schema": "audit15-chain-check/v1",
+ "rows": [
+  {
+   "fixture": "solar-beam-blaze-kick-ply-c0.json",
+   "move": "BLAZE_KICK",
+   "side": "player",
+   "units": 1,
+   "window": {
+    "startFrame": 308,
+    "endFrame": 404,
+    "ageOffset": -10
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": false,
+   "x2": null,
+   "rows": 97,
+   "expectedDuration": 78,
+   "exactRows": 97,
+   "residualPixels": 0,
+   "digests": [
+    "e20130d2aa20c4040f00d89ae4a923c80d77c773c7583d4ad64008b1babd28e1",
+    "e20130d2aa20c4040f00d89ae4a923c80d77c773c7583d4ad64008b1babd28e1"
+   ],
+   "residualRows": []
+  },
+  {
+   "fixture": "solar-beam-blaze-kick-ply-c1.json",
+   "move": "BLAZE_KICK",
+   "side": "player",
+   "units": 5,
+   "window": {
+    "startFrame": 1780,
+    "endFrame": 1876,
+    "ageOffset": -10
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": false,
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "rows": 97,
+   "expectedDuration": 78,
+   "exactRows": 97,
+   "residualPixels": 0,
+   "digests": [
+    "d8e3540a100fa7cbae3861929c7e8f8b6c8117a6176cd2c7886d965cd4c88eff",
+    "d8e3540a100fa7cbae3861929c7e8f8b6c8117a6176cd2c7886d965cd4c88eff"
+   ],
+   "residualRows": []
+  },
+  {
+   "fixture": "solar-beam-blaze-kick-ply-c2.json",
+   "move": "BLAZE_KICK",
+   "side": "player",
+   "units": 8,
+   "window": {
+    "startFrame": 2976,
+    "endFrame": 3072,
+    "ageOffset": -10
+   },
+   "live": true,
+   "orderKnown": true,
+   "orderInvalid": null,
+   "allocatorInput": false,
+   "firstBody": false,
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "rows": 97,
+   "expectedDuration": 78,
+   "exactRows": 97,
+   "residualPixels": 0,
+   "digests": [
+    "064ba0e6e538c26758169e2acf1f12aa8e01407b883e66c9d50668196e57a7db",
+    "064ba0e6e538c26758169e2acf1f12aa8e01407b883e66c9d50668196e57a7db"
+   ],
+   "residualRows": []
+  }
+ ]
+}

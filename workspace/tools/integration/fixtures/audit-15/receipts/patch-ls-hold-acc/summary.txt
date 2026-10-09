@@ -1,0 +1,6 @@
+acc-ctl-light-screen-opp-c0.json             LIGHT_SCREEN  opponent units=0   live=1 order=1 alloc=1 rows=86 exp=88 exact=85 px=2658 r1==r2=1 ages=59..59
+acc-double-team-light-screen-opp-c0.json     LIGHT_SCREEN  opponent units=2   live=1 order=1 alloc=1 rows=86 exp=88 exact=86 px=0 r1==r2=1 ages=-
+acc-faint-attack-light-screen-opp-c0.json    LIGHT_SCREEN  opponent units=2   live=1 order=1 alloc=1 rows=86 exp=88 exact=86 px=0 r1==r2=1 ages=-
+acc-swift-light-screen-opp-c0.json           LIGHT_SCREEN  opponent units=2   live=1 order=1 alloc=1 rows=86 exp=88 exact=86 px=0 r1==r2=1 ages=-
+acc-tackle-light-screen-opp-c0.json          LIGHT_SCREEN  opponent units=2   live=0 order=1 alloc=0 rows=86 exp=88 exact=13 px=155248 r1==r2=1 ages=9..81
+tackle-light-screen-opp-c0.json              LIGHT_SCREEN  opponent units=2   live=0 order=1 alloc=0 rows=86 exp=88 exact=13 px=155164 r1==r2=1 ages=9..81

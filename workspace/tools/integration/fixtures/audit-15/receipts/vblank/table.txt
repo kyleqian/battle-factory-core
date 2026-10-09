@@ -1,0 +1,160 @@
+== double-team-light-screen-opp (activation 449) r1==r2 True
+  row  50 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9462 visualTasks 3 screen 8c54ccffc87864aa
+  row  51 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9463 visualTasks 4 screen 8c54ccffc87864aa
+  row  52 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9464 visualTasks 4 screen 8e40160cecc583d8
+  row  53 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9465 visualTasks 4 screen 8e62c1143440f242
+  row  54 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9466 visualTasks 3 screen 7e73b9b69b26b0d7
+  row  55 io eva/evb 12/ 4 buffer 12/ 4 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9467 visualTasks 3 screen 1e001eee5ba6d106
+  row  56 io eva/evb 11/ 5 buffer 11/ 5 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9468 visualTasks 3 screen 997b433c11d67832
+  row  57 io eva/evb 10/ 6 buffer 10/ 6 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9469 visualTasks 3 screen cae422b6a9e54132
+  row  58 io eva/evb  9/ 7 buffer  9/ 7 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9470 visualTasks 3 screen 79d9d99dc3f77973
+  row  59 io eva/evb  8/ 8 buffer  8/ 8 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9471 visualTasks 4 screen 2c702e401d777720
+  row  60 io eva/evb  7/ 9 buffer  7/ 9 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9472 visualTasks 4 screen b86d0d818748951c
+  row  61 io eva/evb  6/10 buffer  6/10 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9473 visualTasks 4 screen dca272ff0670786d
+  row  62 io eva/evb  5/11 buffer  5/11 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9474 visualTasks 4 screen af248deae75f8e7c
+  row  63 io eva/evb  4/12 buffer  4/12 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9475 visualTasks 3 screen f26895cd6206ced4
+  row  64 io eva/evb  3/13 buffer  3/13 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9476 visualTasks 3 screen fb371c58ca6ee8dd
+== ctl-light-screen-opp (activation 77) r1==r2 True
+  row  50 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9090 visualTasks 3 screen 8c54ccffc87864aa
+  row  51 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9091 visualTasks 4 screen 8c54ccffc87864aa
+  row  52 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9092 visualTasks 4 screen 8e40160cecc583d8
+  row  53 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9093 visualTasks 4 screen 8e62c1143440f242
+  row  54 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9094 visualTasks 3 screen 7e73b9b69b26b0d7
+  row  55 io eva/evb 12/ 4 buffer 12/ 4 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9095 visualTasks 3 screen 1e001eee5ba6d106
+  row  56 io eva/evb 11/ 5 buffer 11/ 5 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9096 visualTasks 3 screen 997b433c11d67832
+  row  57 io eva/evb 10/ 6 buffer 10/ 6 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9097 visualTasks 3 screen cae422b6a9e54132
+  row  58 io eva/evb  9/ 7 buffer  9/ 7 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9098 visualTasks 3 screen 79d9d99dc3f77973
+  row  59 io eva/evb  9/ 7 buffer  8/ 8 bldcnt 0x3f40 dispcnt 0xbf40 waiting [82, 255, 255, 255] vblank1 9099 visualTasks 4 screen 79d9d99dc3f77973
+  row  60 io eva/evb  7/ 9 buffer  7/ 9 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9100 visualTasks 4 screen b86d0d818748951c
+  row  61 io eva/evb  6/10 buffer  6/10 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9101 visualTasks 4 screen dca272ff0670786d
+  row  62 io eva/evb  5/11 buffer  5/11 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9102 visualTasks 4 screen af248deae75f8e7c
+  row  63 io eva/evb  4/12 buffer  4/12 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9103 visualTasks 3 screen f26895cd6206ced4
+  row  64 io eva/evb  3/13 buffer  3/13 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9104 visualTasks 3 screen fb371c58ca6ee8dd
+== double-team-light-screen-ply (activation 453) r1==r2 True
+  row  50 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9466 visualTasks 3 screen 2bf2a52706d53a12
+  row  51 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9467 visualTasks 4 screen 2bf2a52706d53a12
+  row  52 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9468 visualTasks 4 screen e648b80f88c38983
+  row  53 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9469 visualTasks 4 screen 0725b356e9b8a5d2
+  row  54 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9470 visualTasks 3 screen 2f5cc3ba3d3cd094
+  row  55 io eva/evb 12/ 4 buffer 12/ 4 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9471 visualTasks 3 screen 1dddd0c04bb49cc0
+  row  56 io eva/evb 11/ 5 buffer 11/ 5 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9472 visualTasks 3 screen a5671c20dbdef59b
+  row  57 io eva/evb 10/ 6 buffer 10/ 6 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9473 visualTasks 3 screen 19368d321ce89cb2
+  row  58 io eva/evb  9/ 7 buffer  9/ 7 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9474 visualTasks 3 screen ea89bef7e154e2d5
+  row  59 io eva/evb  8/ 8 buffer  8/ 8 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9475 visualTasks 4 screen 096faab4007ba051
+  row  60 io eva/evb  7/ 9 buffer  7/ 9 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9476 visualTasks 4 screen c3966b56de7bd6db
+  row  61 io eva/evb  6/10 buffer  6/10 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9477 visualTasks 4 screen 7f3ca9934edaaafa
+  row  62 io eva/evb  5/11 buffer  5/11 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9478 visualTasks 4 screen 606f4d189c742dcd
+  row  63 io eva/evb  4/12 buffer  4/12 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9479 visualTasks 3 screen 6bfdb9923386aacf
+  row  64 io eva/evb  3/13 buffer  3/13 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9480 visualTasks 3 screen 9da802319b1b373a
+== ctl-light-screen-ply (activation 73) r1==r2 True
+  row  50 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9086 visualTasks 3 screen 2bf2a52706d53a12
+  row  51 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9087 visualTasks 4 screen 2bf2a52706d53a12
+  row  52 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9088 visualTasks 4 screen e648b80f88c38983
+  row  53 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9089 visualTasks 4 screen 0725b356e9b8a5d2
+  row  54 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9090 visualTasks 3 screen 2f5cc3ba3d3cd094
+  row  55 io eva/evb 12/ 4 buffer 12/ 4 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9091 visualTasks 3 screen 1dddd0c04bb49cc0
+  row  56 io eva/evb 11/ 5 buffer 11/ 5 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9092 visualTasks 3 screen a5671c20dbdef59b
+  row  57 io eva/evb 10/ 6 buffer 10/ 6 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9093 visualTasks 3 screen 19368d321ce89cb2
+  row  58 io eva/evb  9/ 7 buffer  9/ 7 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9094 visualTasks 3 screen ea89bef7e154e2d5
+  row  59 io eva/evb  8/ 8 buffer  8/ 8 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9095 visualTasks 4 screen 096faab4007ba051
+  row  60 io eva/evb  7/ 9 buffer  7/ 9 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9096 visualTasks 4 screen c3966b56de7bd6db
+  row  61 io eva/evb  6/10 buffer  6/10 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9097 visualTasks 4 screen 7f3ca9934edaaafa
+  row  62 io eva/evb  5/11 buffer  5/11 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9098 visualTasks 4 screen 606f4d189c742dcd
+  row  63 io eva/evb  4/12 buffer  4/12 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9099 visualTasks 3 screen 6bfdb9923386aacf
+  row  64 io eva/evb  3/13 buffer  3/13 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9100 visualTasks 3 screen 9da802319b1b373a
+== faint-attack-light-screen-ply (activation 410) r1==r2 True
+  row  50 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9423 visualTasks 3 screen 497a80342c5c5718
+  row  51 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9424 visualTasks 4 screen 497a80342c5c5718
+  row  52 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9425 visualTasks 4 screen b3f15e0fc3361e96
+  row  53 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9426 visualTasks 4 screen 7fa6058756202a6a
+  row  54 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9427 visualTasks 3 screen 81943a12d3223518
+  row  55 io eva/evb 12/ 4 buffer 12/ 4 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9428 visualTasks 3 screen 951d0fb6185cb545
+  row  56 io eva/evb 11/ 5 buffer 11/ 5 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9429 visualTasks 3 screen ec313baeb5615e8b
+  row  57 io eva/evb 10/ 6 buffer 10/ 6 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9430 visualTasks 3 screen d03f9373b285f916
+  row  58 io eva/evb  9/ 7 buffer  9/ 7 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9431 visualTasks 3 screen 3d9df5e31170171a
+  row  59 io eva/evb  8/ 8 buffer  8/ 8 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9432 visualTasks 4 screen 470c02af8fcaf1db
+  row  60 io eva/evb  7/ 9 buffer  7/ 9 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9433 visualTasks 4 screen 749d9b6f922210de
+  row  61 io eva/evb  6/10 buffer  6/10 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9434 visualTasks 4 screen 7fea986e21514c3f
+  row  62 io eva/evb  5/11 buffer  5/11 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9435 visualTasks 4 screen 39abde3c6b426d1c
+  row  63 io eva/evb  4/12 buffer  4/12 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9436 visualTasks 3 screen efb49d061f229e7a
+  row  64 io eva/evb  3/13 buffer  3/13 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9437 visualTasks 3 screen 0c3185b7a8622780
+== acc-ctl-light-screen-opp (activation 79) r1==r2 True
+  row  50 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9092 visualTasks 3 screen 7cd81e895ef7cc00
+  row  51 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9093 visualTasks 4 screen 7cd81e895ef7cc00
+  row  52 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9094 visualTasks 4 screen db17085730e0163e
+  row  53 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9095 visualTasks 4 screen 2627ee3c9d0ab4d8
+  row  54 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9096 visualTasks 3 screen 329217ae611cbaed
+  row  55 io eva/evb 12/ 4 buffer 12/ 4 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9097 visualTasks 3 screen f4a2db6f747fd9bf
+  row  56 io eva/evb 11/ 5 buffer 11/ 5 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9098 visualTasks 3 screen 3975718ac1bd4cbe
+  row  57 io eva/evb 10/ 6 buffer 10/ 6 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9099 visualTasks 3 screen 2e0fd812dbf50645
+  row  58 io eva/evb  9/ 7 buffer  9/ 7 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9100 visualTasks 3 screen 955b34530dc39a92
+  row  59 io eva/evb  8/ 8 buffer  8/ 8 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9101 visualTasks 4 screen 1adbeeab1d9fe891
+  row  60 io eva/evb  7/ 9 buffer  7/ 9 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9102 visualTasks 4 screen 4659d908d58c2a52
+  row  61 io eva/evb  6/10 buffer  6/10 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9103 visualTasks 4 screen e22e624757109126
+  row  62 io eva/evb  5/11 buffer  5/11 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9104 visualTasks 4 screen 9b7ad063a438cd48
+  row  63 io eva/evb  4/12 buffer  4/12 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9105 visualTasks 3 screen 9b58789b6aaed2e3
+  row  64 io eva/evb  3/13 buffer  3/13 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9106 visualTasks 3 screen ea273a83d2345cda
+== acc-tackle-light-screen-opp (activation 213) r1==r2 True
+  row  50 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9226 visualTasks 3 screen 7caee88e95e7f82d
+  row  51 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9227 visualTasks 4 screen 7caee88e95e7f82d
+  row  52 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9228 visualTasks 4 screen 0691791cf5311e0b
+  row  53 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9229 visualTasks 4 screen 36f76a3782f6e380
+  row  54 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9230 visualTasks 3 screen 964c79723136e106
+  row  55 io eva/evb 12/ 4 buffer 12/ 4 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9231 visualTasks 3 screen bd40221fbc3aa7f0
+  row  56 io eva/evb 11/ 5 buffer 11/ 5 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9232 visualTasks 3 screen fbb14fe9bb29b918
+  row  57 io eva/evb 10/ 6 buffer 10/ 6 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9233 visualTasks 3 screen 95fe9570d3b1254d
+  row  58 io eva/evb  9/ 7 buffer  9/ 7 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9234 visualTasks 3 screen e9b4aba579fe5d7b
+  row  59 io eva/evb  9/ 7 buffer  8/ 8 bldcnt 0x3f40 dispcnt 0xbf40 waiting [82, 255, 255, 255] vblank1 9235 visualTasks 4 screen e9b4aba579fe5d7b
+  row  60 io eva/evb  7/ 9 buffer  7/ 9 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9236 visualTasks 4 screen 59dff13311cee8f5
+  row  61 io eva/evb  6/10 buffer  6/10 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9237 visualTasks 4 screen 8e7023422b740e6a
+  row  62 io eva/evb  5/11 buffer  5/11 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9238 visualTasks 4 screen d791ad99fd517be5
+  row  63 io eva/evb  4/12 buffer  4/12 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9239 visualTasks 3 screen c652a59f55324a0b
+  row  64 io eva/evb  3/13 buffer  3/13 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9240 visualTasks 3 screen 1fd6486c9aab6894
+== acc-double-team-light-screen-opp (activation 445) r1==r2 True
+  row  50 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9458 visualTasks 3 screen 7cd81e895ef7cc00
+  row  51 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9459 visualTasks 4 screen 7cd81e895ef7cc00
+  row  52 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9460 visualTasks 4 screen db17085730e0163e
+  row  53 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9461 visualTasks 4 screen 2627ee3c9d0ab4d8
+  row  54 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9462 visualTasks 3 screen 329217ae611cbaed
+  row  55 io eva/evb 12/ 4 buffer 12/ 4 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9463 visualTasks 3 screen f4a2db6f747fd9bf
+  row  56 io eva/evb 11/ 5 buffer 11/ 5 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9464 visualTasks 3 screen 3975718ac1bd4cbe
+  row  57 io eva/evb 10/ 6 buffer 10/ 6 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9465 visualTasks 3 screen 2e0fd812dbf50645
+  row  58 io eva/evb  9/ 7 buffer  9/ 7 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9466 visualTasks 3 screen 955b34530dc39a92
+  row  59 io eva/evb  8/ 8 buffer  8/ 8 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9467 visualTasks 4 screen 1adbeeab1d9fe891
+  row  60 io eva/evb  7/ 9 buffer  7/ 9 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9468 visualTasks 4 screen 4659d908d58c2a52
+  row  61 io eva/evb  6/10 buffer  6/10 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9469 visualTasks 4 screen e22e624757109126
+  row  62 io eva/evb  5/11 buffer  5/11 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9470 visualTasks 4 screen 9b7ad063a438cd48
+  row  63 io eva/evb  4/12 buffer  4/12 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9471 visualTasks 3 screen 9b58789b6aaed2e3
+  row  64 io eva/evb  3/13 buffer  3/13 bldcnt 0x3f40 dispcnt 0x3f40 waiting [255, 255, 255, 255] vblank1 9472 visualTasks 3 screen ea273a83d2345cda
+== faint-attack-light-screen-opp (activation 407) r1==r2 True
+  row  50 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9420 visualTasks 3 screen 4e01b3a94a9bdf5a
+  row  51 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9421 visualTasks 4 screen 4e01b3a94a9bdf5a
+  row  52 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9422 visualTasks 4 screen c97b20873e41f2c6
+  row  53 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9423 visualTasks 4 screen cb82c730504dc95a
+  row  54 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9424 visualTasks 3 screen 21616d005bc6d994
+  row  55 io eva/evb 12/ 4 buffer 12/ 4 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9425 visualTasks 3 screen 922a034348e19b53
+  row  56 io eva/evb 11/ 5 buffer 11/ 5 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9426 visualTasks 3 screen 95f65b064fb01d07
+  row  57 io eva/evb 10/ 6 buffer 10/ 6 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9427 visualTasks 3 screen 0e62fb7ec1c8b135
+  row  58 io eva/evb  9/ 7 buffer  9/ 7 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9428 visualTasks 3 screen f8f9fc7e65bdb3ac
+  row  59 io eva/evb  8/ 8 buffer  8/ 8 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9429 visualTasks 4 screen 84c511fcb1c513e6
+  row  60 io eva/evb  7/ 9 buffer  7/ 9 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9430 visualTasks 4 screen 74965e537e3ead75
+  row  61 io eva/evb  6/10 buffer  6/10 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9431 visualTasks 4 screen 67227213d1413701
+  row  62 io eva/evb  5/11 buffer  5/11 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9432 visualTasks 4 screen d6ad6f73e0e03f36
+  row  63 io eva/evb  4/12 buffer  4/12 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9433 visualTasks 3 screen 3cb3603aa7f07302
+  row  64 io eva/evb  3/13 buffer  3/13 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9434 visualTasks 3 screen faec289adc5abe05
+== swift-light-screen-opp (activation 432) r1==r2 True
+  row  50 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9445 visualTasks 3 screen f6248f55656615c6
+  row  51 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9446 visualTasks 4 screen f6248f55656615c6
+  row  52 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9447 visualTasks 4 screen a42b3651fef1a3a6
+  row  53 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9448 visualTasks 4 screen ea9d42fc3ae9c08a
+  row  54 io eva/evb 13/ 3 buffer 13/ 3 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9449 visualTasks 3 screen c07c37e6715ee18b
+  row  55 io eva/evb 12/ 4 buffer 12/ 4 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9450 visualTasks 3 screen 92ea4f62e0059b71
+  row  56 io eva/evb 11/ 5 buffer 11/ 5 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9451 visualTasks 3 screen c2fbf142cdeb7f4d
+  row  57 io eva/evb 10/ 6 buffer 10/ 6 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9452 visualTasks 3 screen 5d49b551b488079d
+  row  58 io eva/evb  9/ 7 buffer  9/ 7 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9453 visualTasks 3 screen 11a7569ff43c4df5
+  row  59 io eva/evb  8/ 8 buffer  8/ 8 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9454 visualTasks 4 screen 4ea3398422c15999
+  row  60 io eva/evb  7/ 9 buffer  7/ 9 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9455 visualTasks 4 screen 69b665da04c6729a
+  row  61 io eva/evb  6/10 buffer  6/10 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9456 visualTasks 4 screen 4e7fa07a1e3706e6
+  row  62 io eva/evb  5/11 buffer  5/11 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9457 visualTasks 4 screen 57fea013daf4951d
+  row  63 io eva/evb  4/12 buffer  4/12 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9458 visualTasks 3 screen 512262519f769c2f
+  row  64 io eva/evb  3/13 buffer  3/13 bldcnt 0x3f40 dispcnt 0xbf40 waiting [255, 255, 255, 255] vblank1 9459 visualTasks 3 screen 893bbfeb1b571584
