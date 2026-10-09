@@ -1,0 +1,43 @@
+{
+ "schema": "prep48-live-adapter-fixture/v1",
+ "move": "DIG",
+ "bodyIndex": 0,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later48/scenarios/dig-opp-vibrava-chansey-wisp.json",
+ "denseWindow": {
+  "startFrame": 54,
+  "endFrame": 248
+ },
+ "attacker": {
+  "species": "VIBRAVA",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "CHANSEY",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703599,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 357,
+  "playerMaxHp": 357,
+  "opponentHp": 144,
+  "opponentMaxHp": 144,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "messageLines": [
+  "",
+  ""
+ ]
+}

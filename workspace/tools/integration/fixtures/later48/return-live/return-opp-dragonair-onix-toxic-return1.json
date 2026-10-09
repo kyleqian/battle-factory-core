@@ -1,0 +1,54 @@
+{
+ "schema": "prep48-live-adapter-fixture/v1",
+ "move": "RETURN",
+ "bodyIndex": 1,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later48/scenarios/return-opp-dragonair-onix-toxic.json",
+ "denseWindow": {
+  "startFrame": 2146,
+  "endFrame": 2427
+ },
+ "attacker": {
+  "species": "DRAGONAIR",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703703,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 133,
+  "playerMaxHp": 142,
+  "opponentHp": 168,
+  "opponentMaxHp": 168,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "precedingBodies": [
+  {
+   "moveId": 216,
+   "side": "opponent"
+  },
+  {
+   "moveId": 92,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statusAnimation": "PSN"
+  }
+ ]
+}

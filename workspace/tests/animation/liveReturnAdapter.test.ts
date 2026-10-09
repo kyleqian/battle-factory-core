@@ -73,13 +73,17 @@ describe("return-live: MOVE_RETURN strongest branch", () => {
     }
   });
 
-  it("is gated on a first-body known order and non-shiny battlers; any Factory attacker/target species is accepted", () => {
+  it("is gated on a known order (a later body only with both species rests {0,0}) and non-shiny battlers; any Factory species", () => {
     const field = displayed("SNORLAX", "PIDGEOT");
     expect(liveMoveAnimationPresentation(request(0), field, 50, undefined, undefined, firstBodyOrder())?.config.move).toBe("RETURN");
     expect(liveMoveAnimationPresentation(request(1), displayed("SCYTHER", "GOLBAT"), 50, undefined, undefined, firstBodyOrder())?.config.move).toBe("RETURN");
     expect(liveMoveAnimationPresentation(request(0), field, 50)).toBeNull();
     const later = prepareLiveMoveSpriteOrder(knownEntrySpriteOrderState("ordinary-factory"), request(0)).input!;
-    expect(liveMoveAnimationPresentation(request(0), field, 50, undefined, undefined, later)).toBeNull();
+    // later48 (docs/next-adapters-prep48.md): a later body with rest-free battlers is live; an opponent ONIX (rest x2 1, zeroed by the
+    // ROM after Quick Attack / Return but read as the rest by the x2 tracker) declines at a later body only.
+    expect(liveMoveAnimationPresentation(request(0), field, 50, undefined, undefined, later)?.config.move).toBe("RETURN");
+    expect(liveMoveAnimationPresentation(request(0), displayed("DRAGONAIR", "ONIX"), 50, undefined, undefined, later)).toBeNull();
+    expect(liveMoveAnimationPresentation(request(0), displayed("DRAGONAIR", "ONIX"), 50, undefined, undefined, firstBodyOrder())?.config.move).toBe("RETURN");
     const shiny = ((416_049_562 >>> 16) ^ (416_049_562 & 0xffff)) << 16 >>> 0;
     expect(liveMoveAnimationPresentation(request(0), displayed("SNORLAX", "PIDGEOT", shiny), 50, undefined, undefined, firstBodyOrder())).toBeNull();
   });

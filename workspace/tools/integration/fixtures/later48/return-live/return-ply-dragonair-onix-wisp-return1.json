@@ -1,0 +1,59 @@
+{
+ "schema": "prep48-live-adapter-fixture/v1",
+ "move": "RETURN",
+ "bodyIndex": 1,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later48/scenarios/return-ply-dragonair-onix-wisp.json",
+ "denseWindow": {
+  "startFrame": 2142,
+  "endFrame": 2423
+ },
+ "attacker": {
+  "species": "DRAGONAIR",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015553,
+ "displayedStatus": {
+  "player": "burn",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 147,
+  "playerMaxHp": 168,
+  "opponentHp": 133,
+  "opponentMaxHp": 142,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "precedingBodies": [
+  {
+   "moveId": 216,
+   "side": "player"
+  },
+  {
+   "moveId": 261,
+   "side": "opponent"
+  },
+  {
+   "moveId": 0,
+   "side": "player",
+   "statusAnimation": "BRN"
+  },
+  {
+   "moveId": 0,
+   "side": "player",
+   "statusAnimation": "BRN"
+  }
+ ]
+}

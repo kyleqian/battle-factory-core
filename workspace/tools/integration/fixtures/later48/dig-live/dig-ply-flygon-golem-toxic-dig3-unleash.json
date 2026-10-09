@@ -1,0 +1,67 @@
+{
+ "schema": "prep48-live-adapter-fixture/v1",
+ "move": "DIG",
+ "bodyIndex": 3,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later48/scenarios/dig-ply-flygon-golem-toxic.json",
+ "denseWindow": {
+  "startFrame": 2975,
+  "endFrame": 3042
+ },
+ "attacker": {
+  "species": "FLYGON",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015549,
+ "displayedStatus": {
+  "player": "poison",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 144,
+  "playerMaxHp": 174,
+  "opponentHp": 113,
+  "opponentMaxHp": 187,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 1
+ },
+ "precedingBodies": [
+  {
+   "moveId": 91,
+   "side": "player"
+  },
+  {
+   "moveId": 10091,
+   "side": "player"
+  },
+  {
+   "moveId": 92,
+   "side": "opponent"
+  },
+  {
+   "moveId": 0,
+   "side": "player",
+   "statusAnimation": "PSN"
+  },
+  {
+   "moveId": 0,
+   "side": "player",
+   "statusAnimation": "PSN"
+  },
+  {
+   "moveId": 91,
+   "side": "player"
+  }
+ ]
+}

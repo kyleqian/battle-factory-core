@@ -51,18 +51,24 @@ describe("live Dig registration", () => {
     expect((status.faithfulRandomAdapters as { id: number }[]).map((e) => e.id)).not.toContain(91);
   });
 
-  it("gates: setup needs the first-body lend, unleash needs the after-setup lend; anything else declines to the scene-off view", () => {
+  it("gates: a known lend; a later body (no first-body / after-setup lend) only while both species rests are {0,0}", () => {
     const f0 = fixtureAt(ACCEPTED.player + "-body0"), f1 = fixtureAt(ACCEPTED.player + "-body1");
     expect(configOf(f0)).not.toBeNull();
     expect(configOf(f1)).not.toBeNull();
-    for (const [f, input] of [
-      [f0, undefined], [f0, { known: true as const, free: [4, 3] }], [f0, digUnleashLend()],
-      [f1, undefined], [f1, { known: true as const, free: [4, 3], firstBody: true as const }],
-    ] as const) {
-      const view = liveView(f, 0);
+    const at = (f: Fixture, input: unknown, opponent?: string) => {
+      const view = liveView(opponent ? { ...f, target: { ...f.target, species: opponent } } : f, 0);
       const effect = view.effect as unknown as { request: BattleMoveAnimationRequest };
-      expect(liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, input as never)).toBeNull();
+      return liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, input as never);
+    };
+    const later = { known: true as const, free: digUnleashLend().free };
+    for (const f of [f0, f1]) {
+      expect(at(f, undefined)).toBeNull();
+      // later48 (docs/next-adapters-prep48.md): VIBRAVA / CHANSEY are rest-free, an opponent ONIX (rest x2 1) is not.
+      expect(at(f, later)?.config.move).toBe("DIG");
+      expect(at(f, later, "ONIX")).toBeNull();
     }
+    expect(at(f0, { ...later, firstBody: true as const }, "ONIX")?.config.move).toBe("DIG");
+    expect(at(f1, digUnleashLend(), "ONIX")?.config.move).toBe("DIG");
   });
 
   it("host lend: the post-setup order only for a Dig after a first-unit Dig setup with nothing since (hide invalidate allowed)", () => {
@@ -132,12 +138,22 @@ describe("live Dig ordinary route", () => {
     expect(on.state.round.rules.rngValue).toBe(off.state.round.rules.rngValue);
   }, 240000);
 
-  it("seed 9 / streak 7 / slot 1 POLITOED: a later Dig setup (not the battle's first body) declines to the scene-off view", () => {
+  it("seed 9 / streak 7 / slot 1 POLITOED: a later Dig setup (not the battle's first body) is live every age (later48); ON/OFF parity", () => {
     const r = generatedCommandAnimationReplay(9, "on", [1, 1], 7);
+    const off = generatedCommandAnimationReplay(9, "off", [1, 1], 7);
     const digs = r.animations.filter((a) => a.moveId === 91 && a.attacker === 0);
     expect(digs[0]!.adapterActive.every(Boolean)).toBe(true);
     const later = digs.slice(1).filter((b) => b.ages.length === 195);
     expect(later.length).toBeGreaterThan(0);
-    expect(later.every((b) => b.adapterActive.every((active) => !active))).toBe(true);
+    expect(later.every((b) => b.adapterActive.every(Boolean))).toBe(true);
+    expect(r.stalled).toBe(off.stalled);
+    expect(off.boundaries).toHaveLength(r.boundaries.length);
+    for (let i = 0; i < r.boundaries.length; i += 1) {
+      expect(rulesWithoutSceneMarker(r.boundaries[i]!)).toEqual(rulesWithoutSceneMarker(off.boundaries[i]!));
+      expect(r.boundaries[i]!.rng).toEqual(off.boundaries[i]!.rng);
+      expect(r.boundaries[i]!.boundary).toEqual(off.boundaries[i]!.boundary);
+    }
+    expect(r.state.facilityState).toEqual(off.state.facilityState);
+    expect(r.state.round.rules.rngValue).toBe(off.state.round.rules.rngValue);
   }, 240000);
 });

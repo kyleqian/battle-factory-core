@@ -594,6 +594,18 @@ export interface LiveBattlerAnchors {
 }
 
 /**
+ * Both battlers' species front-idle rest is {0, 0} (docs/next-adapters-prep48.md): at a later body the battler x2 history is then
+ * immaterial. The x2 tracker reads an attacker Quick Attack (keep) and a Return target (mixed) as the species rest, while the ROM
+ * zeroes a non-zero rest (opponent ONIX / RATTATA 1 -> 0), so a later-body consumer that reads the rest declines on those species.
+ */
+function liveBattlersRestFree(art: ReturnType<typeof createBattleCommandFieldArtView>): boolean {
+  return (["player", "opponent"] as const).every((side) => {
+    const rest = liveBattlerAnchors(side, art).frontIdleRest;
+    return rest.x2 === 0 && rest.y2 === 0;
+  });
+}
+
+/**
  * Raw source anchors for one live battler. Per-move side corrections (Disable
  * -8, Rest -16, ...) stay in each adapter. Sources, pokeemerald:
  * - battle_anim_mons.c:112-165 GetBattlerSpriteCoord: X/X_2 read sBattlerCoords;
@@ -3140,12 +3152,16 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 91: {
-      // prep18 s1.1 (exact, no RNG). Setup is the battle's first body (the BG registers / scanline are the measured constant S0);
-      // unleash follows a Dig setup with no unit since (host lend `afterDigSetup`: the post-setup order and BG state, scanline chained
-      // from the setup reducer's end state). Anything else declines. Geometry from the anchors, every allocator/task/matrix field is the
-      // measured constant shared by both corpora and the FLYGON/GOLEM alternates (both attacker sides).
+      // prep18 s1.1 (exact, no RNG); prep48 / later48: any known lend. The first setup and the unleash right after it (host lend
+      // `afterDigSetup`, DIG_POST_SETUP_FREE) as before; a later setup, or an unleash after one, takes the tracker's lend. A later body's
+      // history (the monbg layer BGxCNT, the retained scanline lines above the attacker's band, srcBuffer) never reaches the renderer's
+      // pixels (SetDigScanlineEffect rewrites the band and below in both banks), and the ROM allocator / task / matrix state at activation
+      // is the measured constant after every probed predecessor, audited net-zero or not (later48-live-receipt.json). The one history the
+      // pixels read besides the order is the battler x2 rest, so a later body declines unless both species rests are {0,0}.
+      // Geometry from the anchors, every allocator/task/matrix field is the measured constant (both corpora, FLYGON/GOLEM, both sides).
       const unleash = (request.turn & 1) === 1;
-      if (!spriteOrderInput || (unleash ? !spriteOrderInput.afterDigSetup : !spriteOrderInput.firstBody)) return null;
+      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput.firstBody && !spriteOrderInput.afterDigSetup && !liveBattlersRestFree(art)) return null;
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (lentOrder === null) return null;
@@ -3427,10 +3443,14 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 216: {
-      // Return (prep24 s2): the strongest branch only (every Factory mon has friendship 255, so no request plumbing). First body (known-entry
-      // allocator: IMPACT slot 3.., matrices free from 0; S0 BG state), non-shiny; the oam1 idle-rest convention (the model handles the
-      // target's non-zero idle rest, proven on ONIX / GOLEM; the attacker's rest is replaced by the dip y2 and proven zero-or-handled).
-      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      // Return (prep24 s2): the strongest branch only (every Factory mon has friendship 255, so no request plumbing). Any known lend
+      // (prep48 / later48: the known-entry allocator IMPACT slot 3.. / matrices free from 0 is the ROM state at every probed activation,
+      // after audited net-zero predecessors or not; the S0 register base stays, the renderer reads only the registers the body writes),
+      // non-shiny; the oam1 idle-rest convention (the model handles the target's non-zero idle rest, proven on ONIX / GOLEM at a first
+      // body; the attacker's rest is replaced by the dip y2). A later body declines unless both species rests are {0,0}: the ROM zeroes
+      // ONIX / RATTATA after Quick Attack / Return, which the x2 tracker reads as keep / unknown = the rest.
+      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       const activationOrder = spriteOrderWithOccupiedPrefix(
