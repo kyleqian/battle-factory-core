@@ -1,0 +1,84 @@
+{
+ "schema": "prep47-ai-switch-check/v1",
+ "candidates": {
+  "recall(o8)+summary+send-in": "Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;D0;D1;D2,o8;D3;Cfeeeeee/D4;D5;D6;D7;D8;D9;D10;D11;D12;D13;D14;D15;Cff;Cf;D22,21,20,19,18,17,16;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;D23;D26;D27;D28;D29;D30;D31;D32;D33;D34;D35;D36;D37;D38;D25;D39;D40",
+  "recall(o8)+summary+nextSendOut": "Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;D0;D1;D2,o8;D3;Cfeeeeee/D4;D5;D6;D7;D8;D9;D10;D11;D12;D13;D14;D15;Cff;Cf;D22,21,20,19,18,17,16;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;D25;Cf;Cf;Cf;D23;D26;D27;D28;D29;D30;D31;D32;D33;D34;D35;D36;D37;D38;D39;D40;D41"
+ },
+ "totals": {
+  "recall(o8)+summary+send-in": {
+   "jobs": 3,
+   "allWindowsExact": 3,
+   "edgeExact": 3
+  },
+  "recall(o8)+summary+nextSendOut": {
+   "jobs": 3,
+   "allWindowsExact": 0,
+   "edgeExact": 0
+  }
+ },
+ "jobs": {
+  "aisw-electrode-misdreavus": {
+   "reached": true,
+   "identicalAB": true,
+   "observedEqualsCandidate": true,
+   "checks": {
+    "recall(o8)+summary+send-in": {
+     "windows": 67,
+     "planWindows": 67,
+     "exact": 67,
+     "firstMismatch": null,
+     "nextBodyEdgeExact": true
+    },
+    "recall(o8)+summary+nextSendOut": {
+     "windows": 67,
+     "planWindows": 69,
+     "exact": 48,
+     "firstMismatch": 48,
+     "nextBodyEdgeExact": false
+    }
+   }
+  },
+  "aisw-voltorb-lapras": {
+   "reached": true,
+   "identicalAB": true,
+   "observedEqualsCandidate": true,
+   "checks": {
+    "recall(o8)+summary+send-in": {
+     "windows": 67,
+     "planWindows": 67,
+     "exact": 67,
+     "firstMismatch": null,
+     "nextBodyEdgeExact": true
+    },
+    "recall(o8)+summary+nextSendOut": {
+     "windows": 67,
+     "planWindows": 69,
+     "exact": 48,
+     "firstMismatch": 48,
+     "nextBodyEdgeExact": false
+    }
+   }
+  },
+  "aisw-voltorb-misdreavus": {
+   "reached": true,
+   "identicalAB": true,
+   "observedEqualsCandidate": true,
+   "checks": {
+    "recall(o8)+summary+send-in": {
+     "windows": 67,
+     "planWindows": 67,
+     "exact": 67,
+     "firstMismatch": null,
+     "nextBodyEdgeExact": true
+    },
+    "recall(o8)+summary+nextSendOut": {
+     "windows": 67,
+     "planWindows": 69,
+     "exact": 48,
+     "firstMismatch": 48,
+     "nextBodyEdgeExact": false
+    }
+   }
+  }
+ }
+}
