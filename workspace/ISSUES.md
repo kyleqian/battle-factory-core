@@ -17,6 +17,18 @@ backlog.
 
 # Open
 
+## #158 — Double Team (104) first body is one frame off for some species (CHANSEY, ARBOK) while production renders it live (S10A, found 2026-10-09 by audit 16)
+
+`docs/live-audit-16-session-chains.md` (receipts `tools/integration/fixtures/audit-16/receipts/{main,onix-dt,dt-offset-1}/`): at the
+accepted framing (prep7: production age 0 = ROM activation + 1) the accepted ONIX -> GROVYLE route is 0 px, but Double Team on CHANSEY
+(both sides; no-unit controls and 9 Outrage chains) is 188,618 / 236,200 px on rows 5..57 and on ARBOK (opponent, first body) 49,405 px
+on ages 6..45. CHANSEY's clone motion runs one frame AHEAD of production: framed at activation it is exact except row 2. Lag ages
+[133, 134] and the row-1 monbg BG-write buffering are identical for CHANSEY, ARBOK and ONIX, so no lag-frame / BLDALPHA counter explains
+it. Production renders Double Team live with no side / species gate (`liveMoveAnimation.ts` case 104), so this is a live claim that is
+wrong for these species — Double Team is one of the most common Factory moves. Resume: RAM-probe the clone sprites' callbacks and the
+task list (CreateTask slot vs RunTasks traversal: the FLY same-frame-task precedent) for ONIX vs CHANSEY vs ARBOK at activation; derive
+the species-dependent start phase from source; fix the renderer or gate the unproven species.
+
 ## #157 — Weather-continuing animations: kernel event battler is the last attacker, the ROM plays them on battler 0 (S10A, found 2026-10-09 by aud56)
 
 The kernel's MOVE / general-animation event for RAIN / HAIL / SANDSTORM_CONTINUES carries the last attacker as its battler; the ROM
@@ -99,13 +111,15 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 - **Audit 14 (`docs/live-species-audit-14.md`, 2026-10-08):** FIXED in `2ba4da4a3`: fade row-0 shadow, Confuse Ray / Bite
   idle-rest opponent attacker; the Confuse Ray CPU phase is a D4 policy entry since `7993b02fd` (d4tails). Open: Double-Edge row 33
   with an idle-rest opponent attacker (410 / 1,091 px), Attract GOLBAT one full-field row.
-- **Blizzard (59) opponent impact-start ages 194..206: FIXED in `bb0415c82` (lsbz)** — geometry-derived live window. Open: the geoice
-  control ARBOK -> CATERPIE (impact 198) is live at 362 rows but every row 0..361 carries the same static 133-px residual (bbox x
-  98..221 y 33..103; ROM 4a425a / 526b5a vs live 5ad684 / 73ffad), a battler-palette region identical at every age, outside the
-  Blizzard program (`tools/integration/fixtures/lsbz-live-receipt.json` "excluded"). Resume: render another live move on the same
-  ARBOK / CATERPIE field; if the residual recurs it is a field-composite (palette) defect, not Blizzard.
+- **Blizzard (59) opponent impact-start ages 194..206: FIXED in `bb0415c82` (lsbz).** The ARBOK -> CATERPIE static 133-px residual
+  was a FIXTURE artifact (audit 16): the geoice control fixture's `fieldProfile` says full HP, the ROM has CATERPIE 24/120 and ARBOK
+  161/167 at activation; at the ROM's HP Blizzard / Swift / Thunderbolt are 0 px. Fix: take the HP from the ROM in
+  `tools/integration/fixtures/geoice/controls/blizzard-opponent-arbok-caterpie.json` (fixture only).
 - **Light Screen (113) opponent row 59: FIXED in `bb0415c82` (lsbz)** — D4 entry with the dominant no-hold phase; the hold windows
-  (SNORLAX / CHANSEY first body, EXEGGCUTE / ONIX after Tackle) are the documented other phase (row 59, 2,658 px).
+  (SNORLAX / CHANSEY first body, EXEGGCUTE / ONIX after Tackle) are the documented other phase (row 59, 2,658 px). Open (audit 16): the
+  PLAYER side also shows the hold phase (5 of 20 windows, 2,473 / 2,571 px on row 59) and a second buffered step at row 19 (after PRZ;
+  after CONFUSION + a held-item animation on the opponent side, rows 19 + 59, 5,343 px); dominant direct on both sides (15/20, 10/14), so
+  the policy renders the right phase, but the player-side and row-19 alternates are not yet documented in the D4 entry.
 - Harness limit: the verifier passes only the attacker's personality, so shiny TARGET declines are unverified.
 
 ## #148 — Battler x2 history: unknown-history remainder (main bug FIXED 2026-10-06)

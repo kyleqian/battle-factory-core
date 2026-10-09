@@ -134,6 +134,21 @@
   the lend is proven by the ROM chains + vectors. Parity: census battles 183 and 264 (Scene ON seed A x2, a second seed, Scene OFF).
   Worker gates 1,592 files / 13,101 tests, build, differential 624/624. Supervisor: `words59Run.sh` into fresh dirs — 3/3 A == B, 5/5
   chains exact, receipts byte-identical; census rerun +57 / +8,698, 0 regressions, digest identical.
+- Supervisor union gates on `4bd9f68d4` (src `503eb721`; + words59): typecheck, full suite 1,593 files / 13,127 tests, build, differential
+  624/624 vs `ccc4774c4`, census seeds 0..299 95.57 % by count / 96.81 % by frames (+232 / +31,375 vs `ccc4774c4`; 0 regressions; command
+  sequence identical; faithful-random history 243 / 39,624).
+- Live audit 16 (side, `3e8d07481`, new files only; merged `54cc50272`): CHAIN routes made live this session, 122 scenarios / 239 consumer
+  windows, every window twice fresh with identical per-row digests (a from-scratch rerun matched 236). NO species / history defect.
+  Status animation -> Light Screen / Reflect / Protect 27 / 31 exact + 4 Light Screen phase (SLP, CONFUSION, PSN, PRZ, BRN, FRZ,
+  INFATUATION; two species pairs; opponent Light Screen after BRN, a decline in audit 15, is now live and exact); newly net-zero bodies
+  29 / 32 (+3 phase); Outrage -> Thunderbolt / Ice Beam / Blaze Kick / Heal Bell 39 / 39 (Heal Bell discriminates the lend in 5);
+  FOCUS_BAND carry -> Swift / Thunderbolt / Heal Bell exact (2 Blaze Kick rows = age -10 framing artifact); later58 moves after
+  predecessors OUTSIDE later58's probe set (Thunder Wave + PRZ, Double Team + stat, Sunny Day, Thunderbolt, confusion) 50 / 50. #152
+  ARBOK -> CATERPIE = fixture HP artifact. New: the Light Screen PLAYER side also has the hold phase (5 / 20) + a row-19 step (#152);
+  Double Team first body is one frame off on CHANSEY / ARBOK (188-236k / 49k px) while rendered live -> ISSUES #158. The audit-15 harness
+  (`postkoHostReplay.ts`) does not follow the alloc50 / alloc52 rules (audit16Check.ts replays the hosts as the orchestrator does today).
+  Supervisor: audit16Check rerun fresh on 6 scenarios (Light Screen after CONFUSION / BRN, Outrage -> Heal Bell / Double Team, later
+  Signal Beam / Bonemerang) — all byte-identical to the receipts.
 
 ## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
 
