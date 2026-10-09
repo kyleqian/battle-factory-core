@@ -152,6 +152,17 @@ for holder, base in (("opponent", "mechanic-outrage-player-dragonite-opponent-on
             m.update({"species": 10, "item": 196, "moves": [MOVES[move]] * 4})
             s["seed"] = seed
             (OUT / f"fb-{tag}-{holder[:3]}-s{seed}.json").write_text(json.dumps(s, indent=1) + "\n")
+# second species pair for priority 1 / 2: the ACCEPTED Light Screen pairs (EXEGGCUTE uses Light Screen, ONIX is faster and plays the unit;
+# only ONIX's move changes; the accepted lab seed is kept). Counter = the no-unit control.
+for side, base in (("opponent", "mechanic-light-screen-opponent-exeggcute-player-onix"), ("player", "mechanic-light-screen-player-exeggcute-opponent-onix")):
+    for unit, tag, cycles in (("CONFUSE_RAY", "conf", 3), ("THUNDER_WAVE", "prz", 3), ("WILL_O_WISP", "brn", 3), ("SPORE", "slp", 6),
+                              ("SEISMIC_TOSS", "seismic-toss", 3), ("FUTURE_SIGHT", "future-sight", 3), ("PERISH_SONG", "perish-song", 3),
+                              ("COUNTER", "ctl", 2)):
+        s = json.loads(Path(f"tools/battle-lab/{base}.json").read_text())
+        other = "player" if side == "opponent" else "opponent"
+        s["overrides"]["parties"][other][0]["moves"] = [MOVES[unit]] * 4
+        s["trace"] = trace(cycles)
+        (OUT / f"pair2-{tag}-light-screen-{side[:3]}.json").write_text(json.dumps(s, indent=1) + "\n")
 # ISSUES #152: the ARBOK -> CATERPIE geoice control field (tools/integration/fixtures/geoice/controls/scenarios/, lab seed 305419897) with
 # ARBOK's Blizzard x4 replaced by another first-body live adapter; CATERPIE (Tackle, speed 0) moves second, so ARBOK's body is the first.
 G = json.loads(Path("tools/integration/fixtures/geoice/controls/scenarios/blizzard-opponent-arbok-caterpie.json").read_text())

@@ -7,7 +7,7 @@ feeds the production hosts), extended to today's units:
                           when it names the same animation, else 0x1 / 0x8 / 0x10 / 0x20 / 0x40);
   Status_Confusion     -> status-animation isStatus2 (1); + HIT_ANIMATION on the afflicted battler when its HP drops before the next body
                           (the confusion self-hit's hitanimation BS_ATTACKER; no animation script, so the probe records no body);
-  General_FocusBand    -> animation FOCUS_BAND on the holder;
+  General_FocusBand    -> animation FOCUS_BAND on the holder; General_HeldItemEffect -> HELD_ITEM_EFFECT (a berry curing the status);
   General_FutureSightHit -> animation FUTURE_SIGHT_HIT (battler = the probe's attacker, target = its target);
   General_StatsChange  -> STATS_CHANGE: Double Team [21] (STAT_ANIM_PLUS1 14 + STAT_EVASION 7);
   Move_SUNNY_DAY after the scenario's first Sunny Day -> animation SUN_CONTINUES (General_SunlightContinues shares the script).
@@ -23,7 +23,7 @@ probe_dir, out_dir = Path(sys.argv[1]), Path(sys.argv[2])
 out_dir.mkdir(parents=True, exist_ok=True)
 SCEN = Path("tools/integration/fixtures/audit-16/scenarios")
 TURN = 1334
-SPECIES = {113: "CHANSEY", 143: "SNORLAX", 24: "ARBOK", 10: "CATERPIE", 149: "DRAGONITE"}
+SPECIES = {113: "CHANSEY", 143: "SNORLAX", 24: "ARBOK", 10: "CATERPIE", 149: "DRAGONITE", 102: "EXEGGCUTE", 95: "ONIX"}
 MOVES = {"Move_CONFUSE_RAY": 109, "Move_SPORE": 147, "Move_THUNDER_WAVE": 86, "Move_SLUDGE_BOMB": 188, "Move_WILL_O_WISP": 261,
          "Move_SEISMIC_TOSS": 69, "Move_ICE_BALL": 301, "Move_FUTURE_SIGHT": 248, "Move_PURSUIT": 228, "Move_PERISH_SONG": 195,
          "Move_OUTRAGE": 200, "Move_LIGHT_SCREEN": 113, "Move_REFLECT": 115, "Move_PROTECT": 182, "Move_THUNDERBOLT": 85,
@@ -120,6 +120,8 @@ for probe in sorted(probe_dir.glob("*.json")):
                 turns[t].append({"kind": "animation", "animationId": "HIT_ANIMATION", "battler": atk, "target": atk, "arguments": []})
         elif label == "General_FutureSightHit":
             turns[t].append({"kind": "animation", "animationId": "FUTURE_SIGHT_HIT", "battler": atk, "target": b["target"], "arguments": []})
+        elif label == "General_HeldItemEffect":
+            turns[t].append({"kind": "animation", "animationId": "HELD_ITEM_EFFECT", "battler": atk, "target": atk, "arguments": []})
         elif label == "General_FocusBand":
             turns[t].append({"kind": "animation", "animationId": "FOCUS_BAND", "battler": atk, "target": atk, "arguments": []})
         elif label == "General_StatsChange":

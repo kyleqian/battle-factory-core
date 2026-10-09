@@ -73,6 +73,22 @@
 | outrage-thunderbolt-opp | THUNDERBOLT | opponent | CHANSEY/SNORLAX | 5/5 | 0 | - |
 | outrage-thunderbolt-ply | OUTRAGE | opponent | SNORLAX/CHANSEY | 4/4 | 0 | - |
 | outrage-thunderbolt-ply | THUNDERBOLT | player | CHANSEY/SNORLAX | 4/4 | 0 | - |
+| pair2-brn-light-screen-opp | LIGHT_SCREEN | opponent | EXEGGCUTE/ONIX | 1/1 | 0 | - |
+| pair2-brn-light-screen-pla | LIGHT_SCREEN | player | EXEGGCUTE/ONIX | 1/1 | 0 | - |
+| pair2-conf-light-screen-opp | LIGHT_SCREEN | opponent | EXEGGCUTE/ONIX | 0/1 | 0 | 5343 |
+| pair2-conf-light-screen-pla | LIGHT_SCREEN | player | EXEGGCUTE/ONIX | 1/1 | 0 | - |
+| pair2-ctl-light-screen-opp | LIGHT_SCREEN | opponent | EXEGGCUTE/ONIX | 1/1 | 0 | - |
+| pair2-ctl-light-screen-pla | LIGHT_SCREEN | player | EXEGGCUTE/ONIX | 0/1 | 0 | 2571 |
+| pair2-future-sight-light-screen-opp | LIGHT_SCREEN | opponent | EXEGGCUTE/ONIX | 0/1 | 0 | 2658 |
+| pair2-future-sight-light-screen-pla | LIGHT_SCREEN | player | EXEGGCUTE/ONIX | 1/1 | 0 | - |
+| pair2-perish-song-light-screen-opp | LIGHT_SCREEN | opponent | EXEGGCUTE/ONIX | 1/1 | 0 | - |
+| pair2-perish-song-light-screen-pla | LIGHT_SCREEN | player | EXEGGCUTE/ONIX | 1/1 | 0 | - |
+| pair2-prz-light-screen-opp | LIGHT_SCREEN | opponent | EXEGGCUTE/ONIX | 1/1 | 0 | - |
+| pair2-prz-light-screen-pla | LIGHT_SCREEN | player | EXEGGCUTE/ONIX | 1/1 | 0 | - |
+| pair2-seismic-toss-light-screen-opp | LIGHT_SCREEN | opponent | EXEGGCUTE/ONIX | 0/1 | 0 | 2658 |
+| pair2-seismic-toss-light-screen-pla | LIGHT_SCREEN | player | EXEGGCUTE/ONIX | 1/1 | 0 | - |
+| pair2-slp-light-screen-opp | LIGHT_SCREEN | opponent | EXEGGCUTE/ONIX | 1/1 | 0 | - |
+| pair2-slp-light-screen-pla | LIGHT_SCREEN | player | EXEGGCUTE/ONIX | 0/1 | 0 | 2571 |
 | perish-song-light-screen-ply | LIGHT_SCREEN | player | CHANSEY/SNORLAX | 1/1 | 0 | - |
 | perish-song-reflect-ply | REFLECT | player | CHANSEY/SNORLAX | 1/1 | 0 | - |
 | prz-light-screen-opp | LIGHT_SCREEN | opponent | CHANSEY/SNORLAX | 1/1 | 0 | - |
@@ -92,4 +108,4 @@
 | slp-protect-ply | PROTECT | player | CHANSEY/SNORLAX | 2/2 | 0 | - |
 | slp-reflect-ply | REFLECT | player | CHANSEY/SNORLAX | 1/1 | 0 | - |
 
-TOTAL windows 220: 0 px 200 (discr 13), declined 0, non-zero 20; chain and entry r1 == r2 in 220 / 220
+TOTAL windows 236: 0 px 211 (discr 13), declined 0, non-zero 25; chain and entry r1 == r2 in 236 / 236

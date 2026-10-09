@@ -31,7 +31,7 @@ import { liveView, type Fixture } from "./liveAdapterFramebuffer.ts";
 import { replayPostKoTurnsThroughHost } from "./postkoHostReplay.ts";
 
 type Json = Record<string, any>;
-const SPECIES: Record<string, number> = { CHANSEY: 113, SNORLAX: 143, ARBOK: 24, CATERPIE: 10, ONIX: 95, GROVYLE: 278, DRAGONITE: 149 };
+const SPECIES: Record<string, number> = { CHANSEY: 113, SNORLAX: 143, ARBOK: 24, CATERPIE: 10, ONIX: 95, GROVYLE: 278, DRAGONITE: 149, EXEGGCUTE: 102 };
 const [dir, scenario, out] = process.argv.slice(2) as [string, string, string];
 const fixtures = readdirSync(dir).filter((n) => n.startsWith(`${scenario}-c`) && n.endsWith(".json")).sort()
   .map((n) => ({ name: n, f: JSON.parse(readFileSync(join(dir, n), "utf8")) as Fixture & Json }));

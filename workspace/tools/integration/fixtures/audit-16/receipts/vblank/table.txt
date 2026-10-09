@@ -86,6 +86,78 @@ mechanic-double-team-onix-grovyle-firstbody-row2 (activation 70) r1==r2=1
   row   3  io bldcnt 3f40 alpha 080c  buf bldcnt 3f40 alpha 080c  waiting [255, 255, 255, 255]  vbl1 9036 vbl2 9036 tasks 1
   row   4  io bldcnt 3f40 alpha 080c  buf bldcnt 3f40 alpha 080c  waiting [255, 255, 255, 255]  vbl1 9037 vbl2 9037 tasks 1
   row   5  io bldcnt 3f40 alpha 080c  buf bldcnt 3f40 alpha 080c  waiting [255, 255, 255, 255]  vbl1 9038 vbl2 9038 tasks 1
+pair2-conf-light-screen-opp-row19 (activation 931) r1==r2=1
+  row  16  io bldcnt 3f40 alpha 0808  buf bldcnt 3f40 alpha 0808  waiting [255, 255, 255, 255]  vbl1 9910 vbl2 9910 tasks 1
+  row  17  io bldcnt 3f40 alpha 0709  buf bldcnt 3f40 alpha 0709  waiting [255, 255, 255, 255]  vbl1 9911 vbl2 9911 tasks 1
+  row  18  io bldcnt 3f40 alpha 060a  buf bldcnt 3f40 alpha 060a  waiting [255, 255, 255, 255]  vbl1 9912 vbl2 9912 tasks 1
+  row  19  io bldcnt 3f40 alpha 060a  buf bldcnt 3f40 alpha 050b  waiting [82, 255, 255, 255]  vbl1 9913 vbl2 9913 tasks 2
+  row  20  io bldcnt 3f40 alpha 040c  buf bldcnt 3f40 alpha 040c  waiting [255, 255, 255, 255]  vbl1 9914 vbl2 9914 tasks 2
+  row  21  io bldcnt 3f40 alpha 030d  buf bldcnt 3f40 alpha 030d  waiting [255, 255, 255, 255]  vbl1 9915 vbl2 9915 tasks 2
+  row  22  io bldcnt 3f40 alpha 030d  buf bldcnt 3f40 alpha 030d  waiting [255, 255, 255, 255]  vbl1 9916 vbl2 9916 tasks 2
+pair2-conf-light-screen-opp-row59 (activation 931) r1==r2=1
+  row  56  io bldcnt 3f40 alpha 050b  buf bldcnt 3f40 alpha 050b  waiting [255, 255, 255, 255]  vbl1 9950 vbl2 9950 tasks 3
+  row  57  io bldcnt 3f40 alpha 060a  buf bldcnt 3f40 alpha 060a  waiting [255, 255, 255, 255]  vbl1 9951 vbl2 9951 tasks 3
+  row  58  io bldcnt 3f40 alpha 0709  buf bldcnt 3f40 alpha 0709  waiting [255, 255, 255, 255]  vbl1 9952 vbl2 9952 tasks 3
+  row  59  io bldcnt 3f40 alpha 0709  buf bldcnt 3f40 alpha 0808  waiting [82, 255, 255, 255]  vbl1 9953 vbl2 9953 tasks 4
+  row  60  io bldcnt 3f40 alpha 0907  buf bldcnt 3f40 alpha 0907  waiting [255, 255, 255, 255]  vbl1 9954 vbl2 9954 tasks 4
+  row  61  io bldcnt 3f40 alpha 0a06  buf bldcnt 3f40 alpha 0a06  waiting [255, 255, 255, 255]  vbl1 9955 vbl2 9955 tasks 4
+  row  62  io bldcnt 3f40 alpha 0b05  buf bldcnt 3f40 alpha 0b05  waiting [255, 255, 255, 255]  vbl1 9956 vbl2 9956 tasks 4
+pair2-ctl-light-screen-opp-row19 (activation 79) r1==r2=1
+  row  16  io bldcnt 3f40 alpha 0808  buf bldcnt 3f40 alpha 0808  waiting [255, 255, 255, 255]  vbl1 9058 vbl2 9058 tasks 1
+  row  17  io bldcnt 3f40 alpha 0709  buf bldcnt 3f40 alpha 0709  waiting [255, 255, 255, 255]  vbl1 9059 vbl2 9059 tasks 1
+  row  18  io bldcnt 3f40 alpha 060a  buf bldcnt 3f40 alpha 060a  waiting [255, 255, 255, 255]  vbl1 9060 vbl2 9060 tasks 1
+  row  19  io bldcnt 3f40 alpha 050b  buf bldcnt 3f40 alpha 050b  waiting [255, 255, 255, 255]  vbl1 9061 vbl2 9061 tasks 2
+  row  20  io bldcnt 3f40 alpha 040c  buf bldcnt 3f40 alpha 040c  waiting [255, 255, 255, 255]  vbl1 9062 vbl2 9062 tasks 2
+  row  21  io bldcnt 3f40 alpha 030d  buf bldcnt 3f40 alpha 030d  waiting [255, 255, 255, 255]  vbl1 9063 vbl2 9063 tasks 2
+  row  22  io bldcnt 3f40 alpha 030d  buf bldcnt 3f40 alpha 030d  waiting [255, 255, 255, 255]  vbl1 9064 vbl2 9064 tasks 2
+pair2-ctl-light-screen-opp-row59 (activation 79) r1==r2=1
+  row  56  io bldcnt 3f40 alpha 050b  buf bldcnt 3f40 alpha 050b  waiting [255, 255, 255, 255]  vbl1 9098 vbl2 9098 tasks 3
+  row  57  io bldcnt 3f40 alpha 060a  buf bldcnt 3f40 alpha 060a  waiting [255, 255, 255, 255]  vbl1 9099 vbl2 9099 tasks 3
+  row  58  io bldcnt 3f40 alpha 0709  buf bldcnt 3f40 alpha 0709  waiting [255, 255, 255, 255]  vbl1 9100 vbl2 9100 tasks 3
+  row  59  io bldcnt 3f40 alpha 0808  buf bldcnt 3f40 alpha 0808  waiting [255, 255, 255, 255]  vbl1 9101 vbl2 9101 tasks 4
+  row  60  io bldcnt 3f40 alpha 0907  buf bldcnt 3f40 alpha 0907  waiting [255, 255, 255, 255]  vbl1 9102 vbl2 9102 tasks 4
+  row  61  io bldcnt 3f40 alpha 0a06  buf bldcnt 3f40 alpha 0a06  waiting [255, 255, 255, 255]  vbl1 9103 vbl2 9103 tasks 4
+  row  62  io bldcnt 3f40 alpha 0b05  buf bldcnt 3f40 alpha 0b05  waiting [255, 255, 255, 255]  vbl1 9104 vbl2 9104 tasks 4
+pair2-ctl-light-screen-pla-row59 (activation 75) r1==r2=1
+  row  56  io bldcnt 3f40 alpha 050b  buf bldcnt 3f40 alpha 050b  waiting [255, 255, 255, 255]  vbl1 9094 vbl2 9094 tasks 3
+  row  57  io bldcnt 3f40 alpha 060a  buf bldcnt 3f40 alpha 060a  waiting [255, 255, 255, 255]  vbl1 9095 vbl2 9095 tasks 3
+  row  58  io bldcnt 3f40 alpha 0709  buf bldcnt 3f40 alpha 0709  waiting [255, 255, 255, 255]  vbl1 9096 vbl2 9096 tasks 3
+  row  59  io bldcnt 3f40 alpha 0709  buf bldcnt 3f40 alpha 0808  waiting [82, 255, 255, 255]  vbl1 9097 vbl2 9097 tasks 4
+  row  60  io bldcnt 3f40 alpha 0907  buf bldcnt 3f40 alpha 0907  waiting [255, 255, 255, 255]  vbl1 9098 vbl2 9098 tasks 4
+  row  61  io bldcnt 3f40 alpha 0a06  buf bldcnt 3f40 alpha 0a06  waiting [255, 255, 255, 255]  vbl1 9099 vbl2 9099 tasks 4
+  row  62  io bldcnt 3f40 alpha 0b05  buf bldcnt 3f40 alpha 0b05  waiting [255, 255, 255, 255]  vbl1 9100 vbl2 9100 tasks 4
+pair2-future-sight-light-screen-opp-row59 (activation 324) r1==r2=1
+  row  56  io bldcnt 3f40 alpha 050b  buf bldcnt 3f40 alpha 050b  waiting [255, 255, 255, 255]  vbl1 9343 vbl2 9343 tasks 3
+  row  57  io bldcnt 3f40 alpha 060a  buf bldcnt 3f40 alpha 060a  waiting [255, 255, 255, 255]  vbl1 9344 vbl2 9344 tasks 3
+  row  58  io bldcnt 3f40 alpha 0709  buf bldcnt 3f40 alpha 0709  waiting [255, 255, 255, 255]  vbl1 9345 vbl2 9345 tasks 3
+  row  59  io bldcnt 3f40 alpha 0709  buf bldcnt 3f40 alpha 0808  waiting [82, 255, 255, 255]  vbl1 9346 vbl2 9346 tasks 4
+  row  60  io bldcnt 3f40 alpha 0907  buf bldcnt 3f40 alpha 0907  waiting [255, 255, 255, 255]  vbl1 9347 vbl2 9347 tasks 4
+  row  61  io bldcnt 3f40 alpha 0a06  buf bldcnt 3f40 alpha 0a06  waiting [255, 255, 255, 255]  vbl1 9348 vbl2 9348 tasks 4
+  row  62  io bldcnt 3f40 alpha 0b05  buf bldcnt 3f40 alpha 0b05  waiting [255, 255, 255, 255]  vbl1 9349 vbl2 9349 tasks 4
+pair2-prz-light-screen-pla-row59 (activation 1582) r1==r2=1
+  row  56  io bldcnt 3f40 alpha 050b  buf bldcnt 3f40 alpha 050b  waiting [255, 255, 255, 255]  vbl1 10601 vbl2 10601 tasks 3
+  row  57  io bldcnt 3f40 alpha 060a  buf bldcnt 3f40 alpha 060a  waiting [255, 255, 255, 255]  vbl1 10602 vbl2 10602 tasks 3
+  row  58  io bldcnt 3f40 alpha 0709  buf bldcnt 3f40 alpha 0709  waiting [255, 255, 255, 255]  vbl1 10603 vbl2 10603 tasks 3
+  row  59  io bldcnt 3f40 alpha 0808  buf bldcnt 3f40 alpha 0808  waiting [255, 255, 255, 255]  vbl1 10604 vbl2 10604 tasks 4
+  row  60  io bldcnt 3f40 alpha 0907  buf bldcnt 3f40 alpha 0907  waiting [255, 255, 255, 255]  vbl1 10605 vbl2 10605 tasks 4
+  row  61  io bldcnt 3f40 alpha 0a06  buf bldcnt 3f40 alpha 0a06  waiting [255, 255, 255, 255]  vbl1 10606 vbl2 10606 tasks 4
+  row  62  io bldcnt 3f40 alpha 0b05  buf bldcnt 3f40 alpha 0b05  waiting [255, 255, 255, 255]  vbl1 10607 vbl2 10607 tasks 4
+pair2-seismic-toss-light-screen-opp-row59 (activation 446) r1==r2=1
+  row  56  io bldcnt 3f40 alpha 050b  buf bldcnt 3f40 alpha 050b  waiting [255, 255, 255, 255]  vbl1 9465 vbl2 9465 tasks 3
+  row  57  io bldcnt 3f40 alpha 060a  buf bldcnt 3f40 alpha 060a  waiting [255, 255, 255, 255]  vbl1 9466 vbl2 9466 tasks 3
+  row  58  io bldcnt 3f40 alpha 0709  buf bldcnt 3f40 alpha 0709  waiting [255, 255, 255, 255]  vbl1 9467 vbl2 9467 tasks 3
+  row  59  io bldcnt 3f40 alpha 0709  buf bldcnt 3f40 alpha 0808  waiting [82, 255, 255, 255]  vbl1 9468 vbl2 9468 tasks 4
+  row  60  io bldcnt 3f40 alpha 0907  buf bldcnt 3f40 alpha 0907  waiting [255, 255, 255, 255]  vbl1 9469 vbl2 9469 tasks 4
+  row  61  io bldcnt 3f40 alpha 0a06  buf bldcnt 3f40 alpha 0a06  waiting [255, 255, 255, 255]  vbl1 9470 vbl2 9470 tasks 4
+  row  62  io bldcnt 3f40 alpha 0b05  buf bldcnt 3f40 alpha 0b05  waiting [255, 255, 255, 255]  vbl1 9471 vbl2 9471 tasks 4
+pair2-slp-light-screen-pla-row59 (activation 1658) r1==r2=1
+  row  56  io bldcnt 3f40 alpha 050b  buf bldcnt 3f40 alpha 050b  waiting [255, 255, 255, 255]  vbl1 10677 vbl2 10677 tasks 3
+  row  57  io bldcnt 3f40 alpha 060a  buf bldcnt 3f40 alpha 060a  waiting [255, 255, 255, 255]  vbl1 10678 vbl2 10678 tasks 3
+  row  58  io bldcnt 3f40 alpha 0709  buf bldcnt 3f40 alpha 0709  waiting [255, 255, 255, 255]  vbl1 10679 vbl2 10679 tasks 3
+  row  59  io bldcnt 3f40 alpha 0709  buf bldcnt 3f40 alpha 0808  waiting [82, 255, 255, 255]  vbl1 10680 vbl2 10680 tasks 4
+  row  60  io bldcnt 3f40 alpha 0907  buf bldcnt 3f40 alpha 0907  waiting [255, 255, 255, 255]  vbl1 10681 vbl2 10681 tasks 4
+  row  61  io bldcnt 3f40 alpha 0a06  buf bldcnt 3f40 alpha 0a06  waiting [255, 255, 255, 255]  vbl1 10682 vbl2 10682 tasks 4
+  row  62  io bldcnt 3f40 alpha 0b05  buf bldcnt 3f40 alpha 0b05  waiting [255, 255, 255, 255]  vbl1 10683 vbl2 10683 tasks 4
 prz-light-screen-ply-row19 (activation 1581) r1==r2=1
   row  16  io bldcnt 3f40 alpha 0808  buf bldcnt 3f40 alpha 0808  waiting [255, 255, 255, 255]  vbl1 10560 vbl2 10560 tasks 1
   row  17  io bldcnt 3f40 alpha 0709  buf bldcnt 3f40 alpha 0709  waiting [255, 255, 255, 255]  vbl1 10561 vbl2 10561 tasks 1
