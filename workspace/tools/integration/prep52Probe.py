@@ -86,6 +86,36 @@ UNITS = [
     ("MEGAHORN", 224, mech("megahorn", "seaking", "onix") + [("mh-ply-heracross", "prep18-megahorn-alt-heracross-golem", None)]),
     ("FIRE PUNCH", 7, [("fp-ply", "prep22-fire-punch-player-seed1", None), ("fp-opp", "prep22-fire-punch-opponent-seed1", None),
                        ("fp-ply-11", "prep22-fire-punch-player-seed11", None)]),
+    # Tail: bodies whose chains also hold an order-host unit (command party-summary / switch-in), so they never unlock alone.
+    ("STOCKPILE", 254, [("sk-ply", "mechanic-swallow-player-pelipper-one-stockpile", None),
+                        ("sk-opp", "mechanic-swallow-opponent-pelipper-one-stockpile", None),
+                        ("sk-opp-delcatty", "mechanic-stockpile-opponent-pelipper-player-delcatty", None),
+                        ("sk-ply-swalot", "mechanic-spit-up-player-swalot-one-stockpile", None)]),
+    ("SWALLOW", 256, [("sk-ply", "mechanic-swallow-player-pelipper-one-stockpile", None),
+                      ("sk-opp", "mechanic-swallow-opponent-pelipper-one-stockpile", None),
+                      ("sw3-ply", "mechanic-swallow-player-pelipper-three-stockpile", None),
+                      ("sw3-opp", "mechanic-swallow-opponent-pelipper-three-stockpile", None)]),
+    ("TAUNT", 269, mech("taunt", "murkrow", "shuckle") + [
+        ("ta-ply-snorlax", "mechanic-taunt-player-murkrow-opponent-shuckle", ("opponent", SNORLAX))]),
+    ("METRONOME", 118, mech("metronome", "chansey", "onix") + [("me-ply-golbat", "species-audit-golbat-prep5-metronome-player", None)]),
+    ("INGRAIN", 275, mech("ingrain", "lileep", "onix") + [("ig-ply-golbat", "species-audit-golbat-prep4-ingrain-player", None)]),
+    ("RAZOR WIND", 13, mech("razor-wind", "nuzleaf", "onix") + [
+        ("rw-ply-absol", "species-audit-golbat2-razor-wind-player-razor-wind-player-absol-opponent-onix-b1", None)]),
+    ("GUST", 16, [("gu-ply", "mechanic-perish-song-player-murkrow-opponent-onix", ("moves", "player", 16)),
+                  ("gu-opp", "mechanic-perish-song-opponent-murkrow-player-onix", ("moves", "opponent", 16)),
+                  ("gu-ply-eevee", "mechanic-attract-player-eevee-opponent-onix", ("moves", "player", 16))]),
+    ("TRANSFORM", 144, [("tf-ply", "mechanic-perish-song-player-murkrow-opponent-onix", ("moves", "player", 144)),
+                        ("tf-opp", "mechanic-perish-song-opponent-murkrow-player-onix", ("moves", "opponent", 144)),
+                        ("tf-ply-eevee", "mechanic-attract-player-eevee-opponent-onix", ("moves", "player", 144))]),
+    ("MACH PUNCH", 183, mech("mach-punch", "hitmonchan", "chansey") + [
+        ("mp-ply-breloom", "d4a-mach-punch-extra-player-breloom-golbat", None)]),
+    ("SHOCK WAVE", 351, mech("shock-wave", "flaaffy", "corsola") + [
+        ("sh-ply-manectric", "prep22-shock-wave-alt-player-manectric-wailmer", None)]),
+    ("WILL-O-WISP", 261, mech("will-o-wisp", "shuppet", "shuckle") + [("wo-ply-banette", "prep18-will-o-wisp-alt-banette-golem", None)]),
+    ("EXTREMESPEED", 245, [("es-ply", "mechanic-extreme-speed-player-arcanine-dugtrio", None),
+                           ("es-opp", "mechanic-extreme-speed-arcanine-dugtrio", None),
+                           ("es-opp-smeargle", "prep34-extreme-speed-alt-opponent-smeargle-golem", None)]),
+    ("OUTRAGE", 200, mech("outrage", "dragonite", "onix") + [("ou-ply-flygon", "prep29-outrage-alt-player-flygon-golem", None)]),
     # status2 animations never in the census chains (0 involvement on seeds 0..299), audited for completeness. WRAPPED has no
     # script (battle_gfx_sfx_util.c ~:450 "this animation doesn't actually exist"; no battle script emits status2animation WRAPPED).
     ("INFATUATION", "Status_Infatuation", [
