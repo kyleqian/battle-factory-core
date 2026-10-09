@@ -167,10 +167,26 @@
   EXACT at the next body edge); "reshow without the opponent battler" = double KO (new reshow plan `Cfee;Cfee;Cf`, EXACT). 8 jobs x2
   fresh. Temp patch census seeds 0..299 on `239618051`: 92.01 -> 92.66 % by count, 93.38 -> 94.12 % by frames (+52 / +8,685), 0
   regressions. Supervisor: `prep49Run.sh` into fresh dirs — all 10 receipts byte-identical.
-- Supervisor FINAL gates on `8c2a210fc` (src `f1f2de08`): typecheck, full suite 1,583 files / 13,031 tests, build, differential
-  624/624 vs `239618051`, census seeds 0..299 92.01 % / 93.38 % (`final-supervisor-gates-20261009.json`). Preview
-  <http://127.0.0.1:5191/> serves `478f735bb` (4 samples hash-equal, session export + ON->OFF restart, no errors;
-  `playable-preview-478f735bb-receipt.json`).
+- Supervisor gates on `8c2a210fc` (src `f1f2de08`): typecheck, full suite 1,583 files / 13,031 tests, build, differential 624/624 vs
+  `239618051`, census seeds 0..299 92.01 % / 93.38 %. Preview `478f735bb` served in between.
+- Folded Opus worker `4ab9ba834` as `c99a40a0a` (src tree `dde58985`): prep49 live — Baton Pass recall (both sides; `returntoball`
+  labelled BattleScript_EffectBatonPass, the Roar / Whirlwind skip path), the AI voluntary switch's next-mon summary under
+  BattleScript_DoSwitchOut (opponent recall first; a Pursuit-intercepted switch still invalidates), the double-KO reshow with neither
+  battler (`Cfee;Cfee;Cf`). prep49 checks byte-identical; corpus 0 mismatches. Census seeds 0..299 on `3fbe30cf7`: 92.01 -> 92.66 % by
+  count, 93.38 -> 94.12 % by frames (+52 / +8,685), 0 regressions, identical commands + digest; ON/OFF parity on a Baton Pass route.
+  Worker gates 1,583 files / 13,039 tests, build, differential 624/624. Supervisor: census rerun byte-identical (`6b12ede3`), prep49
+  check byte-identical.
+- Supervisor FINAL gates on `c99a40a0a` (src `dde58985`): typecheck, full suite 1,583 files / 13,039 tests, build,
+  differential 624/624 vs `3fbe30cf7`, census seeds 0..299 92.66 % / 94.12 % (`final-supervisor-gates-20261009.json`). Preview
+  <http://127.0.0.1:5191/> serves `96aaaebbe` (4 samples hash-equal, session export + ON->OFF restart, no errors;
+  `playable-preview-96aaaebbe-receipt.json`).
+- prep50 (side, `fe39924ac`, new files only; banked for the next session): allocator history after STATUS animations. Chain census on
+  `3fbe30cf7` (seeds 0..299): 147 allocator declines / 15,787 frames, greedy SLP -> CONFUSION -> PSN -> FUTURE SIGHT hit -> PRZ -> BRN.
+  A status-script-keyed net-zero probe (sAnimMoveIndex is 0 for status animations): SLP, CONFUSION, PSN, PRZ, BRN NET-ZERO (35
+  scenarios x2 fresh, both sides, two afflicted species each); FRZ and the status2 animations not audited. Temp patch (status set +
+  a separate crossedAllocatorUnknown flag; palette invalidation unchanged) census 92.01 -> 92.70 % by count, 93.38 -> 93.92 % by
+  frames (+55 / +6,302), predictor exact, 0 regressions. The post-KO reseed is blocked by the ORDER host (all 159 non-reseeding
+  switch-ins have an invalid order host). Supervisor: `prep50Run.sh` into fresh dirs — all 7 receipts byte-identical.
 
 ## 2026-10-08 (overnight) — S10A: Substitute presentation live, deferred order lend, live-share census, sprite-order plans; 245 + 13 + 18
 

@@ -2228,13 +2228,14 @@ non-consuming sub-stream) with per-command faithful-random-history accounting; D
 (`tools/integration/fixtures/live-share-census/report-seeds0-999-final-20261009.json`, src `f7cf9a74`): **87.23 % of
 move-animation commands / 91.13 % of frames live** (session start 77.68 / 78.76), of which faithful-random history 1.54 % / 1.81 %;
 seeds 50000..: 88.38 / 90.47; gameplay command sequence and battle digest identical at every fold. Resume points, by census frames:
-1. Sprite-order host stops (157k frames on seeds 0..999). FIRST land prep49 (`docs/next-adapters-prep49.md`, banked and
-   supervisor-reproduced: Baton Pass recalls, the AI voluntary switch's next-mon summary, the double-KO reshow; +52 commands /
-   +8,685 frames on seeds 0..299; the end-of-battle loss return needs no change). Then Shock Wave
+1. Sprite-order host stops (157k frames on seeds 0..999 before prep49 landed: Baton Pass recalls, the AI voluntary switch's
+   next-mon summary and the double-KO reshow are live since `c99a40a0a`, +52 / +8,685 on seeds 0..299; the end-of-battle loss
+   return needs no change; a Pursuit-intercepted switch still invalidates). Then Shock Wave
    (opponent geometry), SUBSTITUTE_FADE and FOCUS_BAND (not reached in probes), Fury Cutter (needs the hit count on the event),
    Bounce / Fly / Dive later units, hail + HAIL_CONTINUES and Blizzard bodies (geometry), Water Spout (needs attacker HP).
-2. Allocator history (59k): Protect / Light Screen after status animations (SLP / CONFUSION / PSN: the crossedUnknownGraphics path)
-   and the post-KO reseed; FUTURE_SIGHT's hit.
+2. Allocator history (59k): FIRST land prep50 (`docs/next-adapters-prep50.md`, banked and supervisor-reproduced: SLP / CONFUSION /
+   PSN / PRZ / BRN status animations allocator-NET-ZERO; +55 / +6,302 on seeds 0..299); then FRZ / status2 animations,
+   FUTURE_SIGHT's hit; the post-KO reseed is blocked by the order host (prep50 diagnostics).
 3. Case-local gates (63k): Blizzard opponent pairs whose impact age is not 197 (geometry-derived duration), Flatter words, Water
    Pulse, Double Team's slot gate after a deferred lend, Dig.
 4. Later bodies (20k): the x2-tracker rows (Quick Attack attacker, Return target "unknown") that keep ONIX / RATTATA later Dig /
