@@ -1,0 +1,46 @@
+diff --git a/workspace/src/engine/liveMoveAnimation.ts b/workspace/src/engine/liveMoveAnimation.ts
+index 086d92b97..f320cce59 100644
+--- a/workspace/src/engine/liveMoveAnimation.ts
++++ b/workspace/src/engine/liveMoveAnimation.ts
+@@ -600,6 +600,14 @@ export interface LiveBattlerAnchors {
+  *   placed at the sBattlerCoords x with the species yOffset, so the OBJ
+  *   center is spriteCorner + 32 (opponent corner includes the elevation).
+  */
++/** prep48 (temporary): both battlers' species front-idle rest is {0, 0} (x2 history immaterial at a later body). */
++function liveBattlersRestFree(art: Parameters<typeof liveBattlerAnchors>[1]): boolean {
++  return (["player", "opponent"] as const).every((side) => {
++    const rest = liveBattlerAnchors(side, art).frontIdleRest;
++    return rest.x2 === 0 && rest.y2 === 0;
++  });
++}
++
+ export function liveBattlerAnchors(
+   battler: "player" | "opponent",
+   art: ReturnType<typeof createBattleCommandFieldArtView>,
+@@ -3102,7 +3110,12 @@ export function liveMoveAnimationPresentation(
+       // from the setup reducer's end state). Anything else declines. Geometry from the anchors, every allocator/task/matrix field is the
+       // measured constant shared by both corpora and the FLYGON/GOLEM alternates (both attacker sides).
+       const unleash = (request.turn & 1) === 1;
+-      if (!spriteOrderInput || (unleash ? !spriteOrderInput.afterDigSetup : !spriteOrderInput.firstBody)) return null;
++      // prep48 (temporary): any known lend. A later body's history inputs (the monbg layer BGxCNT `inactiveCnt`, the retained scanline
++      // lines above the attacker band / srcBuffer) never reach the renderer's pixels; the only history the pixels read is the lent order
++      // and the battler x2 rests, so a later body declines while either battler has a non-zero species rest (ONIX / RATTATA: the x2
++      // tracker collapses "unknown" to the rest).
++      if (!spriteOrderInput?.known) return null;
++      if (!spriteOrderInput.firstBody && !spriteOrderInput.afterDigSetup && !liveBattlersRestFree(art)) return null;
+       const lentOrder = spriteOrderWithOccupiedPrefix(
+         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+       if (lentOrder === null) return null;
+@@ -3397,7 +3410,11 @@ export function liveMoveAnimationPresentation(
+       // Return (prep24 s2): the strongest branch only (every Factory mon has friendship 255, so no request plumbing). First body (known-entry
+       // allocator: IMPACT slot 3.., matrices free from 0; S0 BG state), non-shiny; the oam1 idle-rest convention (the model handles the
+       // target's non-zero idle rest, proven on ONIX / GOLEM; the attacker's rest is replaced by the dip y2 and proven zero-or-handled).
+-      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
++      // prep48 (temporary): any known lend; the S0 register base is kept (the renderer reads only the registers the body writes) and the
++      // known-entry allocator holds at a later body (net-zero history). A later body declines while either battler has a non-zero species
++      // rest (ONIX / RATTATA: ROM x2 1 -> 0 after Quick Attack / Return, which the x2 tracker reads as keep / unknown = the rest).
++      if (!spriteOrderInput?.known) return null;
++      if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return null;
+       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+       const activationOrder = spriteOrderWithOccupiedPrefix(

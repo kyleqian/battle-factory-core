@@ -1,0 +1,73 @@
+{
+ "schema": "prep48-live-adapter-fixture/v1",
+ "move": "DIG",
+ "bodyIndex": 5,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/prep48/scenarios/dig-ply-vibrava-chansey-qa4.json",
+ "denseWindow": {
+  "startFrame": 2975,
+  "endFrame": 3042
+ },
+ "attacker": {
+  "species": "VIBRAVA",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "CHANSEY",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015549,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 110,
+  "playerMaxHp": 144,
+  "opponentHp": 34,
+  "opponentMaxHp": 357,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 1
+ },
+ "precedingBodies": [
+  {
+   "moveId": 98,
+   "side": "opponent"
+  },
+  {
+   "moveId": 91,
+   "side": "player"
+  },
+  {
+   "moveId": 10091,
+   "side": "player"
+  },
+  {
+   "moveId": 98,
+   "side": "opponent"
+  },
+  {
+   "moveId": 91,
+   "side": "player"
+  },
+  {
+   "moveId": 10091,
+   "side": "player"
+  },
+  {
+   "moveId": 98,
+   "side": "opponent"
+  },
+  {
+   "moveId": 91,
+   "side": "player"
+  }
+ ]
+}

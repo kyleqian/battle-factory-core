@@ -1,0 +1,216 @@
+{
+ "schema": "prep48-dig-check/v1",
+ "probeDeterminism": [],
+ "rows": [
+  {
+   "fixture": "dig-opp-flygon-golem-first4-dig0-setup.json",
+   "firstBody": true,
+   "live": true
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-first4-dig1-unleash.json",
+   "firstBody": false,
+   "live": true
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-first4-dig2-setup.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-first4-dig3-unleash.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-qa4-dig0-setup.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-qa4-dig1-unleash.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-qa4-dig2-setup.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-qa4-dig3-unleash.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-first4-dig0-setup.json",
+   "firstBody": true,
+   "live": true
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-first4-dig1-unleash.json",
+   "firstBody": false,
+   "live": true
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-first4-dig2-setup.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-first4-dig3-unleash.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-qa4-dig0-setup.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-qa4-dig1-unleash.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-qa4-dig2-setup.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-qa4-dig3-unleash.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-first4-dig0-setup.json",
+   "firstBody": true,
+   "live": true
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-first4-dig1-unleash.json",
+   "firstBody": false,
+   "live": true
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-first4-dig2-setup.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-first4-dig3-unleash.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-first4-dig4-setup.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-first4-dig5-unleash.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-first4-dig6-setup.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-first4-dig7-unleash.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-qa4-dig0-setup.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-qa4-dig1-unleash.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-qa4-dig2-setup.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-qa4-dig3-unleash.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-qa4-dig4-setup.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-qa4-dig5-unleash.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-first4-dig0-setup.json",
+   "firstBody": true,
+   "live": true
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-first4-dig1-unleash.json",
+   "firstBody": false,
+   "live": true
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-first4-dig2-setup.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-first4-dig3-unleash.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-first4-dig4-setup.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-first4-dig5-unleash.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-qa4-dig0-setup.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-qa4-dig1-unleash.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-qa4-dig2-setup.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-qa4-dig3-unleash.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-qa4-dig4-setup.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-qa4-dig5-unleash.json",
+   "firstBody": false,
+   "live": false
+  }
+ ]
+}

@@ -1,0 +1,186 @@
+{
+ "schema": "prep48-dig-check/v1",
+ "probeDeterminism": [],
+ "rows": [
+  {
+   "fixture": "return-opp-dragonair-onix-growl3-return0.json",
+   "firstBody": true,
+   "live": true
+  },
+  {
+   "fixture": "return-opp-dragonair-onix-growl3-return1.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-opp-dragonair-onix-growl3-return2.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-opp-dragonair-onix-qa3-return0.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-opp-dragonair-onix-qa3-return1.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-opp-dragonair-onix-qa3-return2.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-opp-dragonair-onix-x3-return0.json",
+   "firstBody": true,
+   "live": true
+  },
+  {
+   "fixture": "return-opp-dragonair-onix-x3-return1.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-opp-dragonair-onix-x3-return2.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-opp-snorlax-golem-growl3-return0.json",
+   "firstBody": true,
+   "live": true
+  },
+  {
+   "fixture": "return-opp-snorlax-golem-growl3-return1.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-opp-snorlax-golem-growl3-return2.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-opp-snorlax-golem-qa3-return0.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-opp-snorlax-golem-qa3-return1.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-opp-snorlax-golem-qa3-return2.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-opp-snorlax-golem-x3-return0.json",
+   "firstBody": true,
+   "live": true
+  },
+  {
+   "fixture": "return-opp-snorlax-golem-x3-return1.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-opp-snorlax-golem-x3-return2.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-ply-dragonair-onix-growl3-return0.json",
+   "firstBody": true,
+   "live": true
+  },
+  {
+   "fixture": "return-ply-dragonair-onix-growl3-return1.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-ply-dragonair-onix-growl3-return2.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-ply-dragonair-onix-qa3-return0.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-ply-dragonair-onix-qa3-return1.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-ply-dragonair-onix-qa3-return2.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-ply-dragonair-onix-x3-return0.json",
+   "firstBody": true,
+   "live": true
+  },
+  {
+   "fixture": "return-ply-dragonair-onix-x3-return1.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-ply-dragonair-onix-x3-return2.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-ply-snorlax-golem-growl3-return0.json",
+   "firstBody": true,
+   "live": true
+  },
+  {
+   "fixture": "return-ply-snorlax-golem-growl3-return1.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-ply-snorlax-golem-growl3-return2.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-ply-snorlax-golem-qa3-return0.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-ply-snorlax-golem-qa3-return1.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-ply-snorlax-golem-qa3-return2.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-ply-snorlax-golem-x3-return0.json",
+   "firstBody": true,
+   "live": true
+  },
+  {
+   "fixture": "return-ply-snorlax-golem-x3-return1.json",
+   "firstBody": false,
+   "live": false
+  },
+  {
+   "fixture": "return-ply-snorlax-golem-x3-return2.json",
+   "firstBody": false,
+   "live": false
+  }
+ ]
+}
