@@ -93,41 +93,79 @@
   }
  },
  "gates53Rerun": {
-  "seeds": "0..299",
-  "rowA": {
-   "before": [
-    80,
-    12941
-   ],
-   "after": [
-    67,
-    10051
+  "seeds0..299": {
+   "seeds": "0..299",
+   "rowA": {
+    "before": [
+     80,
+     12941
+    ],
+    "after": [
+     67,
+     10051
+    ]
+   },
+   "rowB": {
+    "before": [
+     12,
+     2071
+    ],
+    "after": [
+     12,
+     2071
+    ]
+   },
+   "caseLocal": {
+    "before": [
+     102,
+     16630
+    ],
+    "after": [
+     89,
+     13740
+    ]
+   },
+   "fidelityMismatches": [
+    0,
+    0
    ]
   },
-  "rowB": {
-   "before": [
-    12,
-    2071
-   ],
-   "after": [
-    12,
-    2071
+  "seeds0..999": {
+   "rowA": {
+    "before": [
+     258,
+     42054
+    ],
+    "after": [
+     208,
+     32186
+    ]
+   },
+   "rowB": {
+    "before": [
+     30,
+     4770
+    ],
+    "after": [
+     30,
+     4770
+    ]
+   },
+   "caseLocal": {
+    "before": [
+     320,
+     53117
+    ],
+    "after": [
+     270,
+     43249
+    ]
+   },
+   "fidelityMismatches": [
+    0,
+    0
    ]
-  },
-  "caseLocal": {
-   "before": [
-    102,
-    16630
-   ],
-   "after": [
-    89,
-    13740
-   ]
-  },
-  "fidelityMismatches": [
-   0,
-   0
-  ]
+  }
  },
  "denseWindows": {
   "windows": [

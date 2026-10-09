@@ -27,7 +27,9 @@ which the word-free marker does not hold: below), so the measured gain on the ce
   their claim class moves to faithful random).
 - **gates53 instrument rerun (seeds 0..299):** row A **80 / 12,941 → 67 / 10,051 (−13 commands / −2,890 frames)**, the same 2,890 frames
   the census delta reports for the case-local bucket; row B unchanged (12 / 2,071); case-local bucket 102 / 16,630 → 89 / 13,740;
-  fidelity 1,167,283 calls / 0 mismatches both runs.
+  fidelity 1,167,283 calls / 0 mismatches both runs. **Seeds 0..999: row A 258 / 42,054 → 208 / 32,186 (−50 / −9,868)**, row B unchanged
+  (30 / 4,770), case-local 320 / 53,117 → 270 / 43,249, fidelity 3,937,417 calls / 0 mismatches both runs (843f6bafd's row A is larger
+  than gates53's 247 / 41,104 on `d71d9924`: alloc52 landed in between).
 - **Dense production windows (twice fresh, RAM words pinned, 0 px):** Swift after Rain Dance + RAIN_CONTINUES + an opponent KO + summary +
   send-out (+ SUN_CONTINUES), two species pairs (Snorlax → Lickitung, Slowpoke → Onix), and Swift after RAIN_CONTINUES + the Factory AI's
   recall + summary + send-out (Mr. Mime → Lickitung): **3/3 windows 78/78 rows, 0 residual pixels, both runs identical digests.**
@@ -115,7 +117,7 @@ rerun with the new rules on seeds 24 / 52 / 243 / 291 named the actual step:
 OUT=/tmp/w57 REC=/tmp/w57-rec sh tools/integration/words57Run.sh        # ~1 min: 24 jobs x 2 fresh, extract, chain; prints same/DIFF
 node --experimental-strip-types --no-warnings tools/integration/liveShareCensus.ts --seeds=0..299 --out=<a.json> --commands=<a.jsonl>
 python3 tools/integration/prep43CensusDelta.py <before.json> <before.jsonl> <after.json> <after.jsonl> <delta.json>
-node --experimental-strip-types --no-warnings tools/integration/gates53GateCensus.ts --seeds=0..299 --out=<g.json> --scratch=<dir>
+node --experimental-strip-types --no-warnings tools/integration/gates53GateCensus.ts --seeds=0..299 --out=<g.json> --scratch=<dir>   # also 0..999
 python3 tools/integration/words57Fixtures.py <probe-out> <rgb-dir> <lend-vectors.json> tools/integration/fixtures/words57/live
   # rgb-dir: tools/run-mgba-probe.py <rgb>/<job>.json -- python tools/probe/run-battle-lab-rgb.py <scenario> <rgb>/<job>.json <rgb>/<job>-rgb
 node --experimental-strip-types --no-warnings tools/integration/words57Windows.ts <out.json> tools/integration/fixtures/words57/live/*.json
