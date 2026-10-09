@@ -11,8 +11,8 @@
   62,
   63
  ],
- "jobs": 87,
- "runs": 174,
+ "jobs": 93,
+ "runs": 186,
  "allIdenticalAB": true,
  "notIdenticalAB": [],
  "probeSha256": "18895a0068dd876d643f63207f2b82b3835437e50175599b14d96235d48a2e00",
@@ -1192,7 +1192,7 @@
   {
    "unit": "HAIL_CONTINUES",
    "key": "Move_HAIL",
-   "verdict": "NET-ZERO (player battler only)",
+   "verdict": "NET-ZERO",
    "completeInstances": 8,
    "incompleteInstances": 0,
    "fromKnownEntry": {
@@ -1211,6 +1211,7 @@
    ],
    "lifetimes": null,
    "lateOwners": [],
+   "sourceBattlerRule": "battler 0 only: DoFieldEndTurnEffects (battle_util.c:1186) sets gBattlerAttacker to the first non-absent battler and BattleScript_RainContinuesOrEnds / BattleScript_DamagingWeatherContinues play on BS_ATTACKER (Drizzle / Sand Stream: BS_BATTLER_0); gAbsentBattlerFlags is set only by Cmd_openpartyscreen when no replacement exists, which ends a singles battle before another end turn, so every Factory instance is on battler 0 whichever side set the weather (ply / opp setter jobs here: all on battler 0). The kernel's event battler may say 1 (the last attacker): a field divergence.",
    "notNetZero": [],
    "jobs": [
     "hail-opp",
@@ -1512,7 +1513,7 @@
   {
    "unit": "SANDSTORM_CONTINUES",
    "key": "Move_SANDSTORM",
-   "verdict": "NET-ZERO (player battler only)",
+   "verdict": "NET-ZERO",
    "completeInstances": 8,
    "incompleteInstances": 0,
    "fromKnownEntry": {
@@ -1529,6 +1530,7 @@
    ],
    "lifetimes": null,
    "lateOwners": [],
+   "sourceBattlerRule": "battler 0 only: DoFieldEndTurnEffects (battle_util.c:1186) sets gBattlerAttacker to the first non-absent battler and BattleScript_RainContinuesOrEnds / BattleScript_DamagingWeatherContinues play on BS_ATTACKER (Drizzle / Sand Stream: BS_BATTLER_0); gAbsentBattlerFlags is set only by Cmd_openpartyscreen when no replacement exists, which ends a singles battle before another end turn, so every Factory instance is on battler 0 whichever side set the weather (ply / opp setter jobs here: all on battler 0). The kernel's event battler may say 1 (the last attacker): a field divergence.",
    "notNetZero": [],
    "jobs": [
     "sand-opp",
@@ -1830,7 +1832,7 @@
   {
    "unit": "RAIN_CONTINUES",
    "key": "General_Rain",
-   "verdict": "NET-ZERO (player battler only)",
+   "verdict": "NET-ZERO",
    "completeInstances": 16,
    "incompleteInstances": 0,
    "fromKnownEntry": {
@@ -1848,6 +1850,7 @@
    ],
    "lifetimes": null,
    "lateOwners": [],
+   "sourceBattlerRule": "battler 0 only: DoFieldEndTurnEffects (battle_util.c:1186) sets gBattlerAttacker to the first non-absent battler and BattleScript_RainContinuesOrEnds / BattleScript_DamagingWeatherContinues play on BS_ATTACKER (Drizzle / Sand Stream: BS_BATTLER_0); gAbsentBattlerFlags is set only by Cmd_openpartyscreen when no replacement exists, which ends a singles battle before another end turn, so every Factory instance is on battler 0 whichever side set the weather (ply / opp setter jobs here: all on battler 0). The kernel's event battler may say 1 (the last attacker): a field divergence.",
    "notNetZero": [],
    "jobs": [
     "cf-rain-opp",
@@ -7289,11 +7292,11 @@
    "unit": "HIT_ANIMATION",
    "key": "SpriteCB_HitAnimHealthoxEffect window",
    "verdict": "NET-ZERO",
-   "completeInstances": 272,
+   "completeInstances": 278,
    "incompleteInstances": 1,
    "fromKnownEntry": {
     "player": 135,
-    "opponent": 136
+    "opponent": 142
    },
    "species": [
     5,
@@ -7315,6 +7318,7 @@
     194,
     213,
     225,
+    227,
     231,
     289,
     313,
@@ -7364,6 +7368,8 @@
     "fsh-ply-user-snorlax",
     "hail-opp",
     "hail-opp-golbat",
+    "hail-opp-sd-143",
+    "hail-opp-sd-227",
     "hail-ply",
     "hail-ply-snorlax",
     "ig-opp",
@@ -7380,10 +7386,14 @@
     "ls-ply-snorlax",
     "rain-opp",
     "rain-opp-golbat",
+    "rain-opp-sd-143",
+    "rain-opp-sd-227",
     "rain-ply",
     "rain-ply-snorlax",
     "sand-opp",
     "sand-opp-golbat",
+    "sand-opp-sd-143",
+    "sand-opp-sd-227",
     "sand-ply",
     "sand-ply-snorlax",
     "st-leer-opp",
@@ -9828,6 +9838,228 @@
      "created": 1,
      "destroyed": 1,
      "nextScriptActivation": 1455,
+     "releasedBeforeNextScript": true,
+     "gfxNetZero": true,
+     "netZero": true
+    },
+    {
+     "job": "hail-opp-sd-143",
+     "activation": 209,
+     "side": "opponent",
+     "species": 143,
+     "cleanup": 229,
+     "lifetime": 20,
+     "slot": 3,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 1,
+     "destroyed": 1,
+     "nextScriptActivation": null,
+     "releasedBeforeNextScript": true,
+     "gfxNetZero": true,
+     "netZero": true
+    },
+    {
+     "job": "hail-opp-sd-227",
+     "activation": 501,
+     "side": "opponent",
+     "species": 227,
+     "cleanup": 521,
+     "lifetime": 20,
+     "slot": 3,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 1,
+     "destroyed": 1,
+     "nextScriptActivation": null,
+     "releasedBeforeNextScript": true,
+     "gfxNetZero": true,
+     "netZero": true
+    },
+    {
+     "job": "sand-opp-sd-143",
+     "activation": 209,
+     "side": "opponent",
+     "species": 143,
+     "cleanup": 229,
+     "lifetime": 20,
+     "slot": 3,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 1,
+     "destroyed": 1,
+     "nextScriptActivation": null,
+     "releasedBeforeNextScript": true,
+     "gfxNetZero": true,
+     "netZero": true
+    },
+    {
+     "job": "sand-opp-sd-227",
+     "activation": 516,
+     "side": "opponent",
+     "species": 227,
+     "cleanup": 536,
+     "lifetime": 20,
+     "slot": 3,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 1,
+     "destroyed": 1,
+     "nextScriptActivation": null,
+     "releasedBeforeNextScript": true,
+     "gfxNetZero": true,
+     "netZero": true
+    },
+    {
+     "job": "rain-opp-sd-143",
+     "activation": 209,
+     "side": "opponent",
+     "species": 143,
+     "cleanup": 229,
+     "lifetime": 20,
+     "slot": 3,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 1,
+     "destroyed": 1,
+     "nextScriptActivation": null,
+     "releasedBeforeNextScript": true,
+     "gfxNetZero": true,
+     "netZero": true
+    },
+    {
+     "job": "rain-opp-sd-227",
+     "activation": 209,
+     "side": "opponent",
+     "species": 227,
+     "cleanup": 229,
+     "lifetime": 20,
+     "slot": 3,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 1,
+     "destroyed": 1,
+     "nextScriptActivation": null,
      "releasedBeforeNextScript": true,
      "gfxNetZero": true,
      "netZero": true
@@ -18010,6 +18242,204 @@
    },
    "identicalAB": true,
    "rawSha256": "3fabf0b2810aed9cafaa9f10305fca2fe04e3b93838fefa6c0a2609ca86496e7"
+  },
+  {
+   "job": "hail-opp-sd-143",
+   "purpose": "HAIL_CONTINUES",
+   "base": "mechanic-hail-opponent-delibird-player-onix",
+   "ops": [
+    [
+     "species",
+     "opponent",
+     143
+    ],
+    [
+     "moves",
+     "opponent",
+     258
+    ],
+    [
+     "moves",
+     "player",
+     120
+    ],
+    [
+     "extend",
+     900
+    ]
+   ],
+   "seed": 305420260,
+   "leads": {
+    "player": 95,
+    "opponent": 143
+   },
+   "identicalAB": true,
+   "rawSha256": "2303d9c97ed57aa2d667eafe695cb9bdd20d154bc24d10071e4522a4c98d12b9"
+  },
+  {
+   "job": "hail-opp-sd-227",
+   "purpose": "HAIL_CONTINUES",
+   "base": "mechanic-hail-opponent-delibird-player-onix",
+   "ops": [
+    [
+     "species",
+     "opponent",
+     227
+    ],
+    [
+     "moves",
+     "opponent",
+     258
+    ],
+    [
+     "moves",
+     "player",
+     120
+    ],
+    [
+     "extend",
+     900
+    ]
+   ],
+   "seed": 305420260,
+   "leads": {
+    "player": 95,
+    "opponent": 227
+   },
+   "identicalAB": true,
+   "rawSha256": "d8cbca53ffaf4450dbcf0218600616d190023d93b430d1f07c63adedb8a0d318"
+  },
+  {
+   "job": "sand-opp-sd-143",
+   "purpose": "SANDSTORM_CONTINUES",
+   "base": "mechanic-sandstorm-opponent-phanpy-player-onix",
+   "ops": [
+    [
+     "species",
+     "opponent",
+     143
+    ],
+    [
+     "moves",
+     "opponent",
+     201
+    ],
+    [
+     "moves",
+     "player",
+     120
+    ],
+    [
+     "extend",
+     900
+    ]
+   ],
+   "seed": 305419896,
+   "leads": {
+    "player": 95,
+    "opponent": 143
+   },
+   "identicalAB": true,
+   "rawSha256": "75ae5bdb1294160b0368e40aa3a1926ae37dfcd401640b7b40d1603c5a762bbb"
+  },
+  {
+   "job": "sand-opp-sd-227",
+   "purpose": "SANDSTORM_CONTINUES",
+   "base": "mechanic-sandstorm-opponent-phanpy-player-onix",
+   "ops": [
+    [
+     "species",
+     "opponent",
+     227
+    ],
+    [
+     "moves",
+     "opponent",
+     201
+    ],
+    [
+     "moves",
+     "player",
+     120
+    ],
+    [
+     "extend",
+     900
+    ]
+   ],
+   "seed": 305419896,
+   "leads": {
+    "player": 95,
+    "opponent": 227
+   },
+   "identicalAB": true,
+   "rawSha256": "c5f0e4a800634a9cde43f9533d9d8679a3c8530ca2c6d6172d5c5b4640cb75fe"
+  },
+  {
+   "job": "rain-opp-sd-143",
+   "purpose": "RAIN_CONTINUES",
+   "base": "mechanic-rain-dance-opponent-wooper-player-onix",
+   "ops": [
+    [
+     "species",
+     "opponent",
+     143
+    ],
+    [
+     "moves",
+     "opponent",
+     240
+    ],
+    [
+     "moves",
+     "player",
+     120
+    ],
+    [
+     "extend",
+     900
+    ]
+   ],
+   "seed": 305420209,
+   "leads": {
+    "player": 95,
+    "opponent": 143
+   },
+   "identicalAB": true,
+   "rawSha256": "9a1629ba4a51dad201b43548a9de9aa91c3f5290c403caf12a1b14029b69e34d"
+  },
+  {
+   "job": "rain-opp-sd-227",
+   "purpose": "RAIN_CONTINUES",
+   "base": "mechanic-rain-dance-opponent-wooper-player-onix",
+   "ops": [
+    [
+     "species",
+     "opponent",
+     227
+    ],
+    [
+     "moves",
+     "opponent",
+     240
+    ],
+    [
+     "moves",
+     "player",
+     120
+    ],
+    [
+     "extend",
+     900
+    ]
+   ],
+   "seed": 305420209,
+   "leads": {
+    "player": 95,
+    "opponent": 227
+   },
+   "identicalAB": true,
+   "rawSha256": "f27804e77dd287e8b66f5985a48ee50a70bbd3a2c93b06a39eb4c8eae039ab33"
   },
   {
    "job": "ls-ply",

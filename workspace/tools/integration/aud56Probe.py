@@ -48,6 +48,13 @@ JOBS = (
     + mech("SANDSTORM_CONTINUES", "sand", "sandstorm", "phanpy", "onix", 201)
     + mech("RAIN_CONTINUES", "rain", "rain-dance", "wooper", "onix", 240)
     + mech("SUN_CONTINUES", "sun", "sunny-day", "bellossom", "onix", 241)
+    # Weather continuing on the OPPONENT battler: DoFieldEndTurnEffects plays it on the first non-absent battler, so the player's lead
+    # (Onix) uses Selfdestruct 120 first and faints; the opponent setter (Snorlax / Skarmory 227) survives and sets the weather.
+    + [(unit, f"{slug}-opp-sd-{sp}", base, (("species", "opponent", sp), ("moves", "opponent", mv), ("moves", "player", 120), ("extend", 900)))
+       for unit, slug, base, mv in (("HAIL_CONTINUES", "hail", "mechanic-hail-opponent-delibird-player-onix", 258),
+                                    ("SANDSTORM_CONTINUES", "sand", "mechanic-sandstorm-opponent-phanpy-player-onix", 201),
+                                    ("RAIN_CONTINUES", "rain", "mechanic-rain-dance-opponent-wooper-player-onix", 240))
+       for sp in (SNORLAX, 227)]
     # LEECH_SEED_DRAIN (General_LeechSeedDrain -> goto Move_ABSORB), WISH_HEAL, INGRAIN_HEAL
     + mech("LEECH_SEED_DRAIN", "ls", "leech-seed", "exeggcute", "onix", 73)
     + mech("WISH_HEAL", "wish", "wish", "illumise", "onix", 273)

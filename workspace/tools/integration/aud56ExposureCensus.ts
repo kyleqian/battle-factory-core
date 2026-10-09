@@ -66,6 +66,9 @@ const ALLOCATOR_NET_ZERO = new Set(liveMoveSpriteAllocator.LIVE_SPRITE_ALLOCATOR
 // prep50 status set (production since 0a74c111a); a prep52 temporary patch may widen it.
 const ALLOCATOR_NET_ZERO_STATUS: ReadonlySet<string> = (liveMoveSpriteAllocator as { LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS?: ReadonlySet<string> })
   .LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS ?? new Set<string>();
+// aud56: the production general / hit / stat predicate (absent on a860ded6a: nothing invalidates there).
+const animationNetZero = (liveMoveSpriteAllocator as { liveSpriteAllocatorAnimationNetZero?: (e: { animationId: string; battler: number | null; arguments: readonly string[] }) => boolean })
+  .liveSpriteAllocatorAnimationNetZero ?? (() => true);
 const statusInvalidates = (p: { isStatus2: number; status: number }) =>
   !ALLOCATOR_NET_ZERO_STATUS.has(spriteOrderStatusAnimationName(p.isStatus2 !== 0, p.status) ?? "");
 type OrchestratorState = ReturnType<typeof createFactoryRoundBattleOrchestrator>;
@@ -114,6 +117,7 @@ function shadowUnits(after: OrchestratorState, cursor: ShadowCursor): string[] {
   while (cursor.nextEventIndex < segment.events.length && segment.events[cursor.nextEventIndex]!.sequence <= through) {
     const p = segment.events[cursor.nextEventIndex++]!.payload;
     if (p.kind === "status-animation" && statusInvalidates(p)) units.push(`status animation ${spriteOrderStatusAnimationName(p.isStatus2 !== 0, p.status) ?? `status ${p.isStatus2}/${p.status}`}`);
+    if (p.kind === "animation" && !animationNetZero(p)) units.push(`general animation ${aud56Unit(p)}@${p.battler}`);
   }
   return units;
 }
@@ -142,6 +146,9 @@ function allocatorInvalidatingUnit(before: OrchestratorState, after: Orchestrato
   const names = segment.events.slice(from).filter((e) => e.sequence <= through && e.payload.kind === "status-animation" && statusInvalidates(e.payload))
     .map((e) => e.payload.kind === "status-animation" ? spriteOrderStatusAnimationName(e.payload.isStatus2 !== 0, e.payload.status) ?? `status ${e.payload.isStatus2}/${e.payload.status}` : "");
   if (names.length) return `status animation ${[...new Set(names)].join("+")}`;
+  const generals = segment.events.slice(from).filter((e) => e.sequence <= through && e.payload.kind === "animation" && !animationNetZero(e.payload))
+    .map((e) => e.payload.kind === "animation" ? `${aud56Unit(e.payload)}@${e.payload.battler}` : "");
+  if (generals.length) return `general animation ${[...new Set(generals)].join("+")}`;
   return `unattributed at ${command?.type ?? "segment end"}`;
 }
 

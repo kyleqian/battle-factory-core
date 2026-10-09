@@ -39,6 +39,16 @@ KEYS = {
     "CASTFORM_CHANGE": "CastformChangeContinue",  # General_CastformChange: ... goto CastformChangeContinue
     "FOCUS_PUNCH_SETUP": "General_FocusPunchSetUp",
 }
+# Units whose ROM animation battler is fixed by source, so one side is the only reachable one (verdict NET-ZERO when every
+# complete instance is on that battler and net-zero).
+SOURCE_BATTLER_RULE = {
+    unit: ("battler 0 only: DoFieldEndTurnEffects (battle_util.c:1186) sets gBattlerAttacker to the first non-absent battler and "
+           "BattleScript_RainContinuesOrEnds / BattleScript_DamagingWeatherContinues play on BS_ATTACKER (Drizzle / Sand Stream: "
+           "BS_BATTLER_0); gAbsentBattlerFlags is set only by Cmd_openpartyscreen when no replacement exists, which ends a singles "
+           "battle before another end turn, so every Factory instance is on battler 0 whichever side set the weather (ply / opp "
+           "setter jobs here: all on battler 0). The kernel's event battler may say 1 (the last attacker): a field divergence.")
+    for unit in ("HAIL_CONTINUES", "SANDSTORM_CONTINUES", "RAIN_CONTINUES")
+}
 # Emitted by the kernel but never reached / not stageable here: they stay unaudited (production invalidates).
 UNREACHED = {
     "SUBSTITUTE_FADE": "plans51: no staging shows General_SubstituteFade (sf-* jobs); not re-staged",
@@ -114,6 +124,7 @@ for unit, rows in instances.items():
     bad = [r for r in complete if not r["netZero"]]
     verdict = ("NOT REACHED" if not complete else "NOT NET-ZERO" if bad
                else "NET-ZERO" if known["player"] and known["opponent"]
+               else "NET-ZERO" if unit in SOURCE_BATTLER_RULE and known["player"] and all(r["side"] == "player" for r in complete)
                else f"NET-ZERO ({'player' if known['player'] else 'opponent'} battler only)")
     units.append({"unit": unit, "key": "SpriteCB_HitAnimHealthoxEffect window" if unit == "HIT_ANIMATION" else KEYS[unit], "verdict": verdict,
                   "completeInstances": len(complete), "incompleteInstances": len(rows) - len(complete), "fromKnownEntry": known,
@@ -121,6 +132,7 @@ for unit, rows in instances.items():
                   "createdPerInstance": sorted({r["created"] for r in complete}),
                   "lifetimes": sorted({r["lifetime"] for r in complete}) if unit == "HIT_ANIMATION" else None,
                   "lateOwners": sorted({c["owner"] for r in complete for c in r.get("late", [])}),
+                  **({"sourceBattlerRule": SOURCE_BATTLER_RULE[unit]} if unit in SOURCE_BATTLER_RULE else {}),
                   "notNetZero": bad, "jobs": sorted({r["job"] for r in rows}), "instances": rows})
 for unit, why in UNREACHED.items():
     units.append({"unit": unit, "verdict": "UNAUDITED", "reason": why})
