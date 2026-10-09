@@ -1904,5 +1904,16 @@
   "allZeroResidual": true,
   "r1EqualsR2": true,
   "digestsEqualPrep2Receipt": true
+ },
+ "gates": {
+  "testedCommit": "ca3cd5af9",
+  "srcTree": "df4b263e43934fd4fb732d178e9826df13ebe233",
+  "targeted": "23 files / 228 tests (1 pin moved: livePrep2MoveAdapters PORYGON -> TOGETIC now live; rerun alone 13/13)",
+  "typecheck": "clean",
+  "smoke": "8 files / 448 tests",
+  "fullSuite": "1576 files passed (44 skipped) / 12981 tests passed (223 skipped), 4 workers",
+  "build": "875 modules, built",
+  "differential": "PASS 624/624 byte-identical vs 5e0b86a42 (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on)",
+  "diffCheck": "clean"
  }
 }
