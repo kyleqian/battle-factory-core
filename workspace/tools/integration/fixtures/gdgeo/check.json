@@ -1,0 +1,280 @@
+{
+ "schema": "gdgeo-check/v1",
+ "instances": 34,
+ "exact": 34,
+ "framesChecked": 1360,
+ "rows": [
+  {
+   "job": "gdg-opp-bulbasaur-bulbasaur",
+   "side": "opponent",
+   "player": 1,
+   "opponent": 1,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-opp-diglett-golbat",
+   "side": "opponent",
+   "player": 42,
+   "opponent": 50,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-opp-diglett-onix",
+   "side": "opponent",
+   "player": 95,
+   "opponent": 50,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-opp-flygon-bulbasaur",
+   "side": "opponent",
+   "player": 1,
+   "opponent": 334,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-opp-flygon-onix",
+   "side": "opponent",
+   "player": 95,
+   "opponent": 334,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-opp-golbat-onix",
+   "side": "opponent",
+   "player": 95,
+   "opponent": 42,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-opp-onix-diglett",
+   "side": "opponent",
+   "player": 50,
+   "opponent": 95,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-opp-roselia-onix",
+   "side": "opponent",
+   "player": 95,
+   "opponent": 363,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-opp-roselia-snorlax",
+   "side": "opponent",
+   "player": 143,
+   "opponent": 363,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-opp-roselia-wobbuffet",
+   "side": "opponent",
+   "player": 202,
+   "opponent": 363,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-opp-shuckle-golbat",
+   "side": "opponent",
+   "player": 42,
+   "opponent": 213,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-opp-snorlax-zangoose",
+   "side": "opponent",
+   "player": 380,
+   "opponent": 143,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-ply-bulbasaur-flygon",
+   "side": "player",
+   "player": 1,
+   "opponent": 334,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-ply-diglett-diglett",
+   "side": "player",
+   "player": 50,
+   "opponent": 50,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-ply-golbat-wobbuffet",
+   "side": "player",
+   "player": 42,
+   "opponent": 202,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-ply-magikarp-gyarados",
+   "side": "player",
+   "player": 129,
+   "opponent": 130,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-ply-magikarp-shuckle",
+   "side": "player",
+   "player": 129,
+   "opponent": 213,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-ply-onix-diglett",
+   "side": "player",
+   "player": 95,
+   "opponent": 50,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-ply-onix-flygon",
+   "side": "player",
+   "player": 95,
+   "opponent": 334,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-ply-onix-golbat",
+   "side": "player",
+   "player": 95,
+   "opponent": 42,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-ply-roselia-gyarados",
+   "side": "player",
+   "player": 363,
+   "opponent": 130,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-ply-roselia-onix",
+   "side": "player",
+   "player": 363,
+   "opponent": 95,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-ply-roselia-shuckle",
+   "side": "player",
+   "player": 363,
+   "opponent": 213,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gdg-ply-snorlax-diglett",
+   "side": "player",
+   "player": 143,
+   "opponent": 50,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gd-opp-atk-diglett",
+   "side": "opponent",
+   "player": 95,
+   "opponent": 50,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gd-opp-atk-golbat",
+   "side": "opponent",
+   "player": 95,
+   "opponent": 42,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gd-opp-golbat",
+   "side": "opponent",
+   "player": 42,
+   "opponent": 363,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gd-opp-onix",
+   "side": "opponent",
+   "player": 95,
+   "opponent": 363,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gd-opp-snorlax",
+   "side": "opponent",
+   "player": 143,
+   "opponent": 363,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gd-ply-atk-diglett",
+   "side": "player",
+   "player": 50,
+   "opponent": 95,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gd-ply-atk-golbat",
+   "side": "player",
+   "player": 42,
+   "opponent": 95,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gd-ply-golbat",
+   "side": "player",
+   "player": 363,
+   "opponent": 42,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gd-ply-onix",
+   "side": "player",
+   "player": 363,
+   "opponent": 95,
+   "frames": 40,
+   "problems": []
+  },
+  {
+   "job": "gd-ply-snorlax",
+   "side": "player",
+   "player": 363,
+   "opponent": 143,
+   "frames": 40,
+   "problems": []
+  }
+ ]
+}

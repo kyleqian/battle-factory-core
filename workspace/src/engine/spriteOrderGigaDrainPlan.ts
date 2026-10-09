@@ -17,17 +17,23 @@ function picOffsetPoint(art: ReturnType<typeof createBattleCommandFieldArtView>,
   return { x: corner.x + 32, y: Math.min(104, corner.y + 32 + (side === "player" ? 8 : 0)) };
 }
 
-/** Body 202's plan text for the attacker side and the two species, or null when a species has no battle picture. */
-export function gigaDrainSpriteOrderPlanForGeometry(
+/** The orb arc's end points (target start, attacker = absorption / healing centre) for the species, or null without a battle picture. */
+export function gigaDrainOrderCenters(
   attackerSide: "player" | "opponent", geometry: SpriteOrderBodyGeometry,
-): string | null {
+): Readonly<{ attacker: Readonly<{ x: number; y: number }>; target: Readonly<{ x: number; y: number }> }> | null {
   let art: ReturnType<typeof createBattleCommandFieldArtView>;
   try {
     art = createBattleCommandFieldArtView({ player: { species: geometry.playerSpecies }, opponent: { species: geometry.opponentSpecies } } as never);
   } catch {
     return null;
   }
-  const attacker = picOffsetPoint(art, attackerSide);
-  const target = picOffsetPoint(art, attackerSide === "player" ? "opponent" : "player");
-  return gigaDrainSpriteOrderPlanText(target, attacker, attackerSide, attacker);
+  return { attacker: picOffsetPoint(art, attackerSide), target: picOffsetPoint(art, attackerSide === "player" ? "opponent" : "player") };
+}
+
+/** Body 202's plan text for the attacker side and the two species, or null when a species has no battle picture. */
+export function gigaDrainSpriteOrderPlanForGeometry(
+  attackerSide: "player" | "opponent", geometry: SpriteOrderBodyGeometry,
+): string | null {
+  const centers = gigaDrainOrderCenters(attackerSide, geometry);
+  return centers === null ? null : gigaDrainSpriteOrderPlanText(centers.target, centers.attacker, attackerSide, centers.attacker);
 }
