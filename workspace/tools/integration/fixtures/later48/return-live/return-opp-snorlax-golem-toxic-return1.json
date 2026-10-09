@@ -1,0 +1,45 @@
+{
+ "schema": "prep48-live-adapter-fixture/v1",
+ "move": "RETURN",
+ "bodyIndex": 1,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later48/scenarios/return-opp-snorlax-golem-toxic.json",
+ "denseWindow": {
+  "startFrame": 1110,
+  "endFrame": 1391
+ },
+ "attacker": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703653,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 166,
+  "playerMaxHp": 187,
+  "opponentHp": 267,
+  "opponentMaxHp": 267,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "precedingBodies": [
+  {
+   "moveId": 216,
+   "side": "opponent"
+  }
+ ]
+}

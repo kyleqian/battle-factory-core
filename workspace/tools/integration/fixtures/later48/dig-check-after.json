@@ -1,0 +1,2109 @@
+{
+ "schema": "prep48-dig-check/v1",
+ "probeDeterminism": [
+  {
+   "scenario": "dig-opp-flygon-golem-toxic.json",
+   "r1": "e2f60dc218b07185",
+   "r2": "e2f60dc218b07185",
+   "same": true
+  },
+  {
+   "scenario": "dig-opp-flygon-golem-wisp.json",
+   "r1": "1af19eb8fb61bba6",
+   "r2": "1af19eb8fb61bba6",
+   "same": true
+  },
+  {
+   "scenario": "dig-opp-vibrava-chansey-toxic.json",
+   "r1": "19a24cd3eb104163",
+   "r2": "19a24cd3eb104163",
+   "same": true
+  },
+  {
+   "scenario": "dig-opp-vibrava-chansey-wisp.json",
+   "r1": "67b06702f81297ae",
+   "r2": "67b06702f81297ae",
+   "same": true
+  },
+  {
+   "scenario": "dig-ply-flygon-golem-toxic.json",
+   "r1": "50a81b1d63d004de",
+   "r2": "50a81b1d63d004de",
+   "same": true
+  },
+  {
+   "scenario": "dig-ply-flygon-golem-wisp.json",
+   "r1": "365043bd37307ed2",
+   "r2": "365043bd37307ed2",
+   "same": true
+  },
+  {
+   "scenario": "dig-ply-vibrava-chansey-toxic.json",
+   "r1": "dc5c21bf7d2392ae",
+   "r2": "dc5c21bf7d2392ae",
+   "same": true
+  },
+  {
+   "scenario": "dig-ply-vibrava-chansey-wisp.json",
+   "r1": "2ed24ac36001b9e9",
+   "r2": "2ed24ac36001b9e9",
+   "same": true
+  }
+ ],
+ "rows": [
+  {
+   "fixture": "dig-opp-flygon-golem-toxic-dig0-setup.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    54,
+    248
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "b73f8c9540383144"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "b73f8c9540383144"
+    }
+   ],
+   "state": {
+    "monbgCnt": 39936,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": true,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {},
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
+   }
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-toxic-dig1-unleash.json",
+   "body": "unleash",
+   "side": "opponent",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91o",
+   "window": [
+    1212,
+    1279
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "2dc8a519c43cd33d"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "2dc8a519c43cd33d"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 159,
+     "bank1LinesNotS0": 159
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
+   }
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-toxic-dig2-setup.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91o B10091o B92p B0o B0o",
+   "window": [
+    2322,
+    2516
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "57fa6f83aa925d2a"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "57fa6f83aa925d2a"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
+   }
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-toxic-dig3-unleash.json",
+   "body": "unleash",
+   "side": "opponent",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91o B10091o B92p B0o B0o B91o",
+   "window": [
+    3480,
+    3547
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "ea16cec22032d9ee"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "ea16cec22032d9ee"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
+   }
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-wisp-dig0-setup.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    54,
+    248
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "b73f8c9540383144"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "b73f8c9540383144"
+    }
+   ],
+   "state": {
+    "monbgCnt": 39936,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": true,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {},
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
+   }
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-wisp-dig1-unleash.json",
+   "body": "unleash",
+   "side": "opponent",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91o",
+   "window": [
+    1212,
+    1279
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "2dc8a519c43cd33d"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "2dc8a519c43cd33d"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 159,
+     "bank1LinesNotS0": 159
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
+   }
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-wisp-dig2-setup.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91o B10091o B261p B0o B0o",
+   "window": [
+    2322,
+    2516
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "34cc8d34467f7d62"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "34cc8d34467f7d62"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23553,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24066,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23553,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
+   }
+  },
+  {
+   "fixture": "dig-opp-flygon-golem-wisp-dig3-unleash.json",
+   "body": "unleash",
+   "side": "opponent",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91o B10091o B261p B0o B0o B91o",
+   "window": [
+    3480,
+    3547
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "8ff393811ce13630"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "8ff393811ce13630"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24066,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
+   }
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-toxic-dig0-setup.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    54,
+    248
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "7faabbc77fe0232c"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "7faabbc77fe0232c"
+    }
+   ],
+   "state": {
+    "monbgCnt": 39936,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": true,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {},
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
+   }
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-toxic-dig1-unleash.json",
+   "body": "unleash",
+   "side": "opponent",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B91o",
+   "window": [
+    1213,
+    1280
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "cb6935eb5ef267c4"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "cb6935eb5ef267c4"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 152,
+     "bank1LinesNotS0": 152
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
+   }
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-toxic-dig2-setup.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B91o B10091o B92p B0o B0o",
+   "window": [
+    2322,
+    2516
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "ce4ea12ba4233206"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "ce4ea12ba4233206"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
+   }
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-toxic-dig3-unleash.json",
+   "body": "unleash",
+   "side": "opponent",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B91o B10091o B92p B0o B0o B91o",
+   "window": [
+    3481,
+    3548
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "de722c30779cf08b"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "de722c30779cf08b"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
+   }
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-wisp-dig0-setup.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    54,
+    248
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "7faabbc77fe0232c"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "7faabbc77fe0232c"
+    }
+   ],
+   "state": {
+    "monbgCnt": 39936,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": true,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {},
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
+   }
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-wisp-dig1-unleash.json",
+   "body": "unleash",
+   "side": "opponent",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B91o",
+   "window": [
+    1213,
+    1280
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "cb6935eb5ef267c4"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "cb6935eb5ef267c4"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 152,
+     "bank1LinesNotS0": 152
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
+   }
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-wisp-dig2-setup.json",
+   "body": "setup",
+   "side": "opponent",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B91o B10091o",
+   "window": [
+    2322,
+    2516
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "47ebc51d1aa38ee4"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "47ebc51d1aa38ee4"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
+   }
+  },
+  {
+   "fixture": "dig-opp-vibrava-chansey-wisp-dig3-unleash.json",
+   "body": "unleash",
+   "side": "opponent",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B91o B10091o B91o",
+   "window": [
+    3481,
+    3548
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "b075eb29b38bdacb"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "b075eb29b38bdacb"
+    }
+   ],
+   "state": {
+    "monbgCnt": 23554,
+    "monbgCntS0": 39936,
+    "monbgCntIsS0": false,
+    "otherCnt": 24064,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 23554,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108884,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "player"
+     ]
+    }
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-toxic-dig0-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    54,
+    248
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "d1b850da7f9056bb"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "d1b850da7f9056bb"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24064,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": true,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {},
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-toxic-dig1-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91p",
+   "window": [
+    559,
+    626
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "d8b6caf2725a9afc"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "d8b6caf2725a9afc"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 112,
+     "bank1LinesNotS0": 112
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-toxic-dig2-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91p B10091p B92o B0p B0p",
+   "window": [
+    2322,
+    2516
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "7216b4f12ce99515"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "7216b4f12ce99515"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-toxic-dig3-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91p B10091p B92o B0p B0p B91p",
+   "window": [
+    2975,
+    3042
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "8c3fa8933ba81ed1"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "8c3fa8933ba81ed1"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-wisp-dig0-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    54,
+    248
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "d1b850da7f9056bb"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "d1b850da7f9056bb"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24064,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": true,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {},
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-wisp-dig1-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91p",
+   "window": [
+    563,
+    630
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "0bb44714ca37e96e"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "0bb44714ca37e96e"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 112,
+     "bank1LinesNotS0": 112
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-wisp-dig2-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91p B10091p B261o B0p B0p",
+   "window": [
+    2322,
+    2516
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "8ed18283184a2eba"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "8ed18283184a2eba"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39937,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 39937,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
+   }
+  },
+  {
+   "fixture": "dig-ply-flygon-golem-wisp-dig3-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "FLYGON",
+   "target": "GOLEM",
+   "firstBody": false,
+   "preceding": "B91p B10091p B261o B0p B0p B91p",
+   "window": [
+    2950,
+    3017
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "771055f71be87a96"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "771055f71be87a96"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39937,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 39937,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
+   }
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-toxic-dig0-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    54,
+    248
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "47a7b899a03a485a"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "47a7b899a03a485a"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24064,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": true,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {},
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
+   }
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-toxic-dig1-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B91p",
+   "window": [
+    565,
+    632
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "eaeadd452920a72d"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "eaeadd452920a72d"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 112,
+     "bank1LinesNotS0": 112
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
+   }
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-toxic-dig2-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B91p B10091p B92o B0p B0p",
+   "window": [
+    2322,
+    2516
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "b28db5d6fa181418"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "b28db5d6fa181418"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
+   }
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-toxic-dig3-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B91p B10091p B92o B0p B0p B91p",
+   "window": [
+    2979,
+    3046
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "c37b1b7bb3577f26"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "c37b1b7bb3577f26"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
+   }
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-wisp-dig0-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    54,
+    248
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "47a7b899a03a485a"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "47a7b899a03a485a"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24064,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": true,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {},
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108892,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 0,
+     "bank1LinesNotS0": 0
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": true,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
+   }
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-wisp-dig1-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B91p",
+   "window": [
+    569,
+    636
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "5d16b691e4b86de8"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "5d16b691e4b86de8"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39936,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 112,
+     "bank1LinesNotS0": 112
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": true,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
+   }
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-wisp-dig2-setup.json",
+   "body": "setup",
+   "side": "player",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B91p B10091p B261o B0p B0p",
+   "window": [
+    2322,
+    2516
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "6be68be9d98cb1cb"
+    },
+    {
+     "rows": 195,
+     "exactRows": 195,
+     "residualPixels": 0,
+     "digest": "6be68be9d98cb1cb"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39937,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 39937,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": null
+   }
+  },
+  {
+   "fixture": "dig-ply-vibrava-chansey-wisp-dig3-unleash.json",
+   "body": "unleash",
+   "side": "player",
+   "attacker": "VIBRAVA",
+   "target": "CHANSEY",
+   "firstBody": false,
+   "preceding": "B91p B10091p B261o B0p B0p B91p",
+   "window": [
+    2953,
+    3020
+   ],
+   "live": true,
+   "runs": [
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "a47ee00389a0b722"
+    },
+    {
+     "rows": 68,
+     "exactRows": 68,
+     "residualPixels": 0,
+     "digest": "a47ee00389a0b722"
+    }
+   ],
+   "state": {
+    "monbgCnt": 24066,
+    "monbgCntS0": 24064,
+    "monbgCntIsS0": false,
+    "otherCnt": 39937,
+    "dispcnt": 48960,
+    "registersNotS0": {
+     "bg1cnt": 39937,
+     "bg2cnt": 24066,
+     "win0h": 0,
+     "win0v": 0
+    },
+    "scanline": {
+     "state": 0,
+     "srcBuffer": 0,
+     "dmaDest": 67108888,
+     "dmaControl": 2724200449,
+     "bank0LinesNotS0": 160,
+     "bank1LinesNotS0": 160
+    },
+    "matrixBitmap": 6,
+    "allocatorAsFirstDig": false,
+    "bgMapsAsFirstDig": true,
+    "lentOrderEqualsRom": false,
+    "romX2": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "trackedX2": {
+     "zeroed": [
+      "opponent"
+     ]
+    }
+   }
+  }
+ ]
+}

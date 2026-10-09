@@ -1,0 +1,67 @@
+{
+ "schema": "prep48-live-adapter-fixture/v1",
+ "move": "DIG",
+ "bodyIndex": 3,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later48/scenarios/dig-opp-vibrava-chansey-toxic.json",
+ "denseWindow": {
+  "startFrame": 3481,
+  "endFrame": 3548
+ },
+ "attacker": {
+  "species": "VIBRAVA",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "CHANSEY",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703599,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "poison"
+ },
+ "fieldProfile": {
+  "playerHp": 202,
+  "playerMaxHp": 357,
+  "opponentHp": 117,
+  "opponentMaxHp": 144,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 1
+ },
+ "precedingBodies": [
+  {
+   "moveId": 91,
+   "side": "opponent"
+  },
+  {
+   "moveId": 10091,
+   "side": "opponent"
+  },
+  {
+   "moveId": 92,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statusAnimation": "PSN"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statusAnimation": "PSN"
+  },
+  {
+   "moveId": 91,
+   "side": "opponent"
+  }
+ ]
+}
