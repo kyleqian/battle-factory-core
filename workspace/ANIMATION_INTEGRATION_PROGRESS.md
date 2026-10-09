@@ -53,6 +53,16 @@
   `04187aeb7`: 84.73 -> 85.17 % by count, 83.97 -> 84.36 % by frames (+35 / +4,550), 0 regressions; with RAIN_CONTINUES predicted
   +162 / +26,931. CLAIM: such consumers are faithful random (their order depends on surrogate words) — a fold needs per-command
   accounting. Dive not reached. Supervisor: `prep46Run.sh` into fresh dirs — all 13 receipts byte-identical.
+- Folded Opus worker `82f81ce7b` as `553cef6b5` (src tree `df4b263e`): Icy Wind (196) / Blizzard (59) at ARBITRARY species
+  geometry — OAM slots + order derived from the reducers' own allocator replay (CreateSprite / SortSprites with the subpriority at
+  Sprite+0x43; the retained table is reproduced at the accepted geometry) instead of the captured-table gate; history
+  experiment (40 random pre-move orders x 11 geometries): pixel-neutral, no lend gate needed. 15 new pairs through the production
+  renderer twice fresh: 12 exact 0 px; 3 short ROM bodies (early Task_FadeToBg restore, 16-18 tail rows; also in 2 pairs live
+  before) recorded in ISSUES #152 as a D4 candidate. Blizzard opponent pairs with impact age != 197 now DECLINE (the old gate
+  had accepted 50 such geometries at the wrong age; none in the census). Census seeds 0..299: 85.71 -> 86.37 % by count, 85.41 ->
+  86.73 % by frames (+53 / +15,466), 0 regressions, identical commands + digest. Worker gates 1,576 files / 12,981 tests, build,
+  differential 624/624. Supervisor: 4 new pairs rerun fresh through liveAdapterFramebuffer.ts — 0 px, digests identical to the
+  receipt; clean merge on unchanged master src -> touched tests 28/28, smoke 448.
 
 ## 2026-10-08 (overnight) — S10A: Substitute presentation live, deferred order lend, live-share census, sprite-order plans; 245 + 13 + 18
 

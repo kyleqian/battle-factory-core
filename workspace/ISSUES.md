@@ -69,6 +69,13 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 - **Faint Attack (185) alternate tails (2026-10-08, `sides-live-receipt.json`):** DELCATTY -> GOLEM opponent body is one frame
   shorter (225 vs 226), so the restore fade lands one row early (297,920 px on ages 203..218; the player-side MURKROW
   alternate shows the same) — a D4 CPU-phase candidate (count the phases, then a policy entry).
+- **Icy Wind (196) / Blizzard (59) short bodies (2026-10-09, `geoice-live-receipt.json`):** at arbitrary geometry 3 of 15 new
+  pairs (Icy Wind BULBASAUR -> METAPOD player, ZUBAT -> BUTTERFREE opponent; Blizzard BLASTOISE -> BLASTOISE opponent) and 2 pairs
+  that were already live (Icy Wind ONIX -> MASQUERAIN, ZUBAT -> ONIX) run a one-frame-shorter ROM body: `Task_FadeToBg` restores
+  the background one frame early, so the 16-18 fade-in rows differ (ages 263..285 / 338..353). Same class as the Faint Attack
+  tails above; species-dependent, no predictor yet. Resume: counter evidence (issue151Counters-style) for the lag frame, then a
+  D4 policy entry — the adapters then move scoped exact -> faithful timing. Blizzard opponent pairs whose impact-start age is not
+  197 (194..206 by geometry) DECLINE (fixed live duration 361; ARBOK -> CATERPIE runs 361 rows where age-197 pairs run 360).
 - Harness limit: the verifier passes only the attacker's personality, so shiny TARGET declines are unverified.
 
 ## #148 — Battler x2 history: unknown-history remainder (main bug FIXED 2026-10-06)
