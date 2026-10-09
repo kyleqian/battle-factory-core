@@ -88,6 +88,56 @@ export const LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS: ReadonlySet<strin
 ]);
 
 /**
+ * General / hit / stat animation units (kernel `animation` events other than MOVE_ANIMATION, named as liveSpriteOrderHost.ts names
+ * them) audited net-zero for the sprite allocator (ISSUES #156): every complete script body (keyed on the script label with
+ * sAnimMoveIndex 0; HIT_ANIMATION on the SpriteCB_HitAnimHealthoxEffect sprite, released after 20 frames and before the next
+ * animation script) has baseline == end == the known entry, created == destroyed, no unowned late change and the same tile /
+ * palette-tag / matrix allocation (tools/integration/fixtures/aud56-net-zero-audit.json, verdict NET-ZERO; 87 jobs, two fresh
+ * direct-mGBA runs each, all A == B). Weather continuing (HAIL / SANDSTORM / RAIN) is keyed on the unit alone: the ROM plays it on
+ * the first non-absent battler (DoFieldEndTurnEffects), which in Factory singles is always battler 0 whatever the event's battler
+ * says (the receipt's sourceBattlerRule). Every other id (SUBSTITUTE_FADE, SNATCH_MOVE,
+ * DOOM_DESIRE_HIT, Clamp's TURN_TRAP, other WEATHER_VAR arguments, SCENE_OFF_ATTACK_PAUSE, anything new) is unaudited and
+ * invalidates the allocator host. Membership is pinned to the receipt by tests/aud56GeneralAnimationAllocator.test.ts.
+ */
+export const LIVE_SPRITE_ALLOCATOR_NET_ZERO_GENERAL_ANIMATIONS: ReadonlySet<string> = new Set([
+  "HIT_ANIMATION", "STATS_CHANGE", "HELD_ITEM_EFFECT", "SUN_CONTINUES", "LEECH_SEED_DRAIN", "WISH_HEAL", "INGRAIN_HEAL",
+  "TURN_TRAP_WHIRLPOOL", "TURN_TRAP_FIRE_SPIN", "TURN_TRAP_SAND_TOMB", "TURN_TRAP_BIND", "ITEM_KNOCKOFF", "FOCUS_BAND", "ITEM_STEAL",
+  "FUTURE_SIGHT_HIT", "CASTFORM_CHANGE", "FOCUS_PUNCH_SETUP", "HAIL_CONTINUES", "SANDSTORM_CONTINUES", "RAIN_CONTINUES",
+]);
+
+/** A kernel `animation` event payload (battleScriptEvents.ts). */
+export interface LiveSpriteAllocatorAnimationEvent {
+  readonly animationId: string;
+  readonly battler: number | null;
+  readonly arguments: readonly string[];
+}
+
+/** The general / hit / stat unit name of an `animation` event (liveSpriteOrderHost.ts's naming); null for a move body. */
+export function liveSpriteAllocatorAnimationUnit(event: LiveSpriteAllocatorAnimationEvent): string | null {
+  switch (event.animationId) {
+    case "MOVE_ANIMATION": return null;
+    case "TURN_TRAP": {
+      // General_TurnTrap -> AnimTask_GetTrappedMoveAnimId: the trapped battler's wrapped move picks the branch.
+      const move = Number(event.arguments[0]);
+      return move === 83 ? "TURN_TRAP_FIRE_SPIN" : move === 250 ? "TURN_TRAP_WHIRLPOOL" : move === 328 ? "TURN_TRAP_SAND_TOMB"
+        : move === 20 || move === 35 ? "TURN_TRAP_BIND" : "TURN_TRAP";
+    }
+    case "WEATHER_VAR": {
+      // BattleScript_DamagingWeatherContinues' playanimation_var: B_ANIM_SANDSTORM_CONTINUES 12 / B_ANIM_HAIL_CONTINUES 13.
+      const argument = event.arguments[0];
+      return argument === "12" ? "SANDSTORM_CONTINUES" : argument === "13" ? "HAIL_CONTINUES" : "WEATHER_VAR";
+    }
+    default: return event.animationId;
+  }
+}
+
+/** True only for an `animation` event whose unit is audited allocator net-zero (MOVE_ANIMATION: the move-body seam decides). */
+export function liveSpriteAllocatorAnimationNetZero(event: LiveSpriteAllocatorAnimationEvent): boolean {
+  const unit = liveSpriteAllocatorAnimationUnit(event);
+  return unit === null || LIVE_SPRITE_ALLOCATOR_NET_ZERO_GENERAL_ANIMATIONS.has(unit);
+}
+
+/**
  * Applies the source `createsprite`/callback destruction order for an audited
  * wall-family move. Computes allocation slots and the complete-boundary host;
  * it is not a full per-frame allocator clock. An audited net-zero move without

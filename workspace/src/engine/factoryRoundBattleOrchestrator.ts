@@ -6,7 +6,7 @@ import {
 import { createKnownEntrySpriteAllocatorProvider } from "./knownEntrySpriteAllocator.ts";
 import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
 import {
-  LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS,
+  LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS, liveSpriteAllocatorAnimationNetZero,
   prepareLiveMoveSpriteAllocator,
   type LiveMoveSpriteAllocatorInput,
   type LiveMoveSpriteOrderInput,
@@ -2314,7 +2314,8 @@ function prepareResolutionPalette(
     ? command.eventSequence
     : Number.POSITIVE_INFINITY;
   let scannedEventIndex = nextEventIndex;
-  // Status animations not audited allocator net-zero (the palette host still invalidates on every one).
+  // Status animations and general / hit / stat animations (ISSUES #156, aud56) not audited allocator net-zero (the palette host
+  // still invalidates on every status animation). MOVE_ANIMATION events are the move-animation commands' own seam.
   let crossedAllocatorUnknown = false;
   const scanThrough = (throughSequence: number): boolean => {
     let crossedUnknownGraphics = false;
@@ -2328,6 +2329,8 @@ function prepareResolutionPalette(
         if (!LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS.has(
           spriteOrderStatusAnimationName(payload.isStatus2 !== 0, payload.status) ?? "",
         )) crossedAllocatorUnknown = true;
+      } else if (payload.kind === "animation" && !liveSpriteAllocatorAnimationNetZero(payload)) {
+        crossedAllocatorUnknown = true;
       }
       scannedEventIndex += 1;
     }
