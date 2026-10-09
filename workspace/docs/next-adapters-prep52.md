@@ -238,8 +238,8 @@ are switch-in commands with `iso=false` and an invalid ORDER host, `no EXACT pla
 Those are prep46's WORDS-DEPENDENT units (28 / 189 / 240), the two-turn order units (Bounce / Fly) and Hail. Closing them is
 order-host work, after which this allocator tail is empty.
 
-Also new since prep50: 7 forced switch-ins fail to reseed with a VALID order host and `iso=false` (`allocatorReseeds` in the
-after-report: 6 `false -> false`, 1 `true -> false`). prep50 saw none. None of them precedes a remaining decline, but the order
+Also new since prep50: 7 forced switch-ins fail to reseed with a VALID order host and `iso=false` (`allocatorReseeds` in both
+reports, so the cause is already on master: 6 `false -> false`, 1 `true -> false`). prep50 saw none. None of them precedes a remaining decline, but the order
 lane should look at why role-isomorphism fails there.
 
 ## Instrument
@@ -262,7 +262,9 @@ lane should look at why role-isomorphism fails there.
     # prints "same <file>" for all 9 receipts in tools/integration/fixtures/prep52/; src is applied from the .diff and reverted
 
 Verified on this branch:
-- one full run: probes plus census before / after; all census, chain and scan receipts were `same`. The audit receipt was then
-  regenerated once, after the probe stopped embedding the scratch path.
-- a second fresh probe pass: `net-zero-audit.json` and `general-animation-scan.json` were `same`.
-- the census before / after reproduced byte-identically in an independent second run.
+- final full run into fresh directories at the head of this work: all 9 receipts `same`, `src reverted`;
+- earlier passes: another full run (census, chain and scan receipts `same`; the audit receipt was regenerated once, after the probe
+  stopped embedding the scratch path) and a further fresh probe pass (both probe receipts `same`).
+
+The census before / after has therefore been reproduced byte-identically in 3 independent runs, and the probes in 3 independent
+300-run passes, all A == B.
