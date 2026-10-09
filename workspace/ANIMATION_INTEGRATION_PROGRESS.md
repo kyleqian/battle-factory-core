@@ -129,6 +129,21 @@
   89.76 -> 91.82 % by frames (+139 / +24,047; Dig 107, Return 32), 0 regressions, identical commands + digest; ON/OFF parity on a later
   Dig route. Worker gates 1,580 files / 13,013 tests, build, differential 624/624. Supervisor: both later48 pixel checks rerun fresh —
   byte-identical to the committed receipts -> fresh union gates (with plans48) below.
+- Supervisor union gates on `cf722638f` (src `da34a188`; plans48 + later48): census seeds 0..299 92.01 % live by count / 93.38 % by
+  frames, typecheck, full suite 1,581 files / 13,019 tests, build, differential 624/624 vs `3d409c3a9`.
+- Folded Opus worker `fe95188c1` as `7993b02fd` (src tree `f7cf9a74`): D4 accounting for the short-body / early-fade class. Fresh
+  counters (46 scenarios x2): the short body has the same fixed lags and lacks exactly one optional lag — Icy Wind optional 261 (11
+  present : 4 absent), Blizzard player 347 (7 : 0) / opponent 336 (3 : 1), Confuse Ray 249 or 250 (no visible difference; counted
+  from uninstrumented window lengths because the counter instrument can itself add the borderline lag), Faint Attack 205 (opponent
+  2 : 1, player 0 : 6 + the accepted long body). Policy entries pick the long body (today's renderer) for Icy Wind / Blizzard /
+  Confuse Ray; 28 windows through d4aTimingCheck x3 passes, other phase only on documented ages, 0 violations; d4a regression 232
+  fixtures 0 violations. ACCOUNTING: Icy Wind, Blizzard, Confuse Ray scoped exact -> faithful timing (census 245+13+18 ->
+  242+13+21; LIVE_MOVE_ANIMATION_IDS list edit outside the grant, accounting-only, d4w precedent). Faint Attack stays scoped exact:
+  its player-side dominant phase is the short body, which needs a renderer change (ISSUES #152). Worker gates 1,581 files / 13,016
+  tests, build, differential 624/624. Supervisor: d4tailsTimingCheck rerun fresh — all 28 windows match the receipt (px, rows,
+  affected ages), 0 violations; a stale main-tree `.git/index.lock` (no holder) blocked the first merge attempt and was removed.
+- Supervisor union gates on `7993b02fd` (src `f7cf9a74`): census seeds 0..299 92.01 % / 93.38 % (accounting-only change), typecheck,
+  full suite 1,582 files / 13,027 tests, build, differential 624/624 vs `c7c909657` (`union-gates-7993b02fd.json`).
 
 ## 2026-10-08 (overnight) — S10A: Substitute presentation live, deferred order lend, live-share census, sprite-order plans; 245 + 13 + 18
 
