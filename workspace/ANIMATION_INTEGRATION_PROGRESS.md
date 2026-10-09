@@ -73,6 +73,14 @@
   on `e5c6a32ec`: 85.71 -> 86.65 % by count, 85.41 -> 86.59 % by frames (+75 / +13,882), 0 regressions, identical commands +
   digest; next stop the Dig unleash later-body gate (59 commands / 7,314 frames). Supervisor: `prep47Run.sh` into fresh dirs —
   all 22 receipts byte-identical.
+- Folded Opus worker `f24af49bf` (SIDE lane, narrow production grant) as `bef14a1ee` (src tree `0ee75849`): prep47 live — (A) a
+  retained locked-action continuation applies the player's prompt cycle (`promptShown = !playerLocked`); (B) battle-start seeds
+  accept Intimidate-triple sequences + Trace / prevented-Intimidate messages; (C) the opponent's voluntary switch-out recalls slot 8
+  (`switch-out {side: "opponent"}`; a recall after a body still invalidates). Census seeds 0..299: 86.37 -> 87.31 % by count, 86.73
+  -> 87.92 % by frames (+75 / +13,882, exactly prep47's), 0 regressions, identical commands + digest; ON/OFF parity on the retained
+  Dig route. prep47 checks byte-identical to its receipts. Pins moved: route sweep hostKnown 646 -> 709 (declines 63 -> 0),
+  voluntaryLend opponent recall. Worker gates 1,578 files / 12,988 tests, build, differential 624/624. Supervisor: census rerun
+  byte-identical (`06803fca`); clean merge -> touched tests 36/36, smoke 448.
 
 ## 2026-10-08 (overnight) — S10A: Substitute presentation live, deferred order lend, live-share census, sprite-order plans; 245 + 13 + 18
 
