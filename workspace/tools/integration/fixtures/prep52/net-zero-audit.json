@@ -1,0 +1,8181 @@
+{
+ "schema": "prep52-net-zero-audit/v1",
+ "knownEntry": [
+  0,
+  1,
+  2,
+  6,
+  8,
+  60,
+  61,
+  62,
+  63
+ ],
+ "probeSha256": "2bd4f6c85674b43c",
+ "summary": {
+  "NET-ZERO": [
+   "FUTURE SIGHT",
+   "FUTURE SIGHT hit",
+   "SEISMIC TOSS",
+   "ICE BALL",
+   "FRZ",
+   "PURSUIT",
+   "PERISH SONG",
+   "LEAF BLADE",
+   "ICE PUNCH",
+   "FRUSTRATION",
+   "FORESIGHT",
+   "SWAGGER",
+   "MINIMIZE",
+   "FAKE OUT",
+   "MEGA DRAIN",
+   "BIND",
+   "RAPID SPIN",
+   "RECYCLE",
+   "AURORA BEAM",
+   "SOLARBEAM",
+   "SUNNY DAY",
+   "DREAM EATER",
+   "SPARK",
+   "ROLLOUT",
+   "DEFENSE CURL",
+   "THUNDER",
+   "FIRE BLAST",
+   "DOUBLESLAP",
+   "ABSORB",
+   "MEGAHORN",
+   "FIRE PUNCH",
+   "INFATUATION",
+   "CURSED",
+   "NIGHTMARE"
+  ]
+ },
+ "units": [
+  {
+   "unit": "FUTURE SIGHT",
+   "key": 248,
+   "verdict": "NET-ZERO",
+   "completeBodies": 4,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 2
+   },
+   "createdPerBody": [
+    0
+   ],
+   "lateOwners": [],
+   "rows": [
+    {
+     "scenario": "fs-ply",
+     "base": "mechanic-future-sight-kadabra-onix",
+     "variant": [
+      "turns",
+      2
+     ],
+     "sha256": "db42c04e30accecd",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 72,
+       "cleanup": 188,
+       "script": "Move_FUTURE_SIGHT",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 0,
+       "destroyed": 0,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "fs-ply-snorlax",
+     "base": "mechanic-future-sight-kadabra-onix",
+     "variant": [
+      "turns",
+      2,
+      "opponent",
+      143
+     ],
+     "sha256": "d49c3e653e39b8ce",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 72,
+       "cleanup": 188,
+       "script": "Move_FUTURE_SIGHT",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 0,
+       "destroyed": 0,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "fs-opp",
+     "base": "mechanic-future-sight-opponent-kadabra-player-onix",
+     "variant": [
+      "turns",
+      2
+     ],
+     "sha256": "0f76a6f6b457ed11",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 76,
+       "cleanup": 192,
+       "script": "Move_FUTURE_SIGHT",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 0,
+       "destroyed": 0,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "fs-opp-golbat",
+     "base": "mechanic-future-sight-opponent-kadabra-player-onix",
+     "variant": [
+      "turns",
+      2,
+      "player",
+      42
+     ],
+     "sha256": "e53f590fa22bb7c3",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 76,
+       "cleanup": 192,
+       "script": "Move_FUTURE_SIGHT",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 0,
+       "destroyed": 0,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "FUTURE SIGHT hit",
+   "key": "General_FutureSightHit",
+   "verdict": "NET-ZERO",
+   "completeBodies": 4,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 2
+   },
+   "createdPerBody": [
+    0
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "fs-ply",
+     "base": "mechanic-future-sight-kadabra-onix",
+     "variant": [
+      "turns",
+      2
+     ],
+     "sha256": "db42c04e30accecd",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 2127,
+       "cleanup": 2288,
+       "script": "General_FutureSightHit",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 0,
+       "destroyed": 0,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 2292,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "fs-ply-snorlax",
+     "base": "mechanic-future-sight-kadabra-onix",
+     "variant": [
+      "turns",
+      2,
+      "opponent",
+      143
+     ],
+     "sha256": "d49c3e653e39b8ce",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 2136,
+       "cleanup": 2298,
+       "script": "General_FutureSightHit",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 0,
+       "destroyed": 0,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 2302,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "fs-opp",
+     "base": "mechanic-future-sight-opponent-kadabra-player-onix",
+     "variant": [
+      "turns",
+      2
+     ],
+     "sha256": "0f76a6f6b457ed11",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 2119,
+       "cleanup": 2281,
+       "script": "General_FutureSightHit",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 0,
+       "destroyed": 0,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 2285,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "fs-opp-golbat",
+     "base": "mechanic-future-sight-opponent-kadabra-player-onix",
+     "variant": [
+      "turns",
+      2,
+      "player",
+      42
+     ],
+     "sha256": "e53f590fa22bb7c3",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 2128,
+       "cleanup": 2290,
+       "script": "General_FutureSightHit",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 0,
+       "destroyed": 0,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 2294,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "SEISMIC TOSS",
+   "key": 69,
+   "verdict": "NET-ZERO",
+   "completeBodies": 4,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 2
+   },
+   "createdPerBody": [
+    18
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "seismic-toss-ply",
+     "base": "mechanic-seismic-toss-player-kecleon-opponent-onix",
+     "variant": null,
+     "sha256": "4a616f0dc4122870",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 77,
+       "cleanup": 304,
+       "script": "Move_SEISMIC_TOSS",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 18,
+       "destroyed": 18,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 308,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "seismic-toss-opp",
+     "base": "mechanic-seismic-toss-opponent-kecleon-player-onix",
+     "variant": null,
+     "sha256": "8ff9504c0b1a0893",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 81,
+       "cleanup": 308,
+       "script": "Move_SEISMIC_TOSS",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 18,
+       "destroyed": 18,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 312,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "st-ply-golbat",
+     "base": "species-audit-golbat-prep8-seismic-toss-player",
+     "variant": null,
+     "sha256": "f9ed60ee3455d9a0",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 77,
+       "cleanup": 304,
+       "script": "Move_SEISMIC_TOSS",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 18,
+       "destroyed": 18,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 308,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "st-opp-pgolem",
+     "base": "species-audit-pgolem-prep8-seismic-toss-opponent",
+     "variant": null,
+     "sha256": "d46f2e58c579ca07",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 81,
+       "cleanup": 308,
+       "script": "Move_SEISMIC_TOSS",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 18,
+       "destroyed": 18,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 312,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "ICE BALL",
+   "key": 301,
+   "verdict": "NET-ZERO",
+   "completeBodies": 17,
+   "bodiesFromKnownEntry": {
+    "player": 8,
+    "opponent": 9
+   },
+   "createdPerBody": [
+    8,
+    10,
+    12,
+    13
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "ice-ball-ply",
+     "base": "mechanic-ice-ball-player-spheal-opponent-onix",
+     "variant": null,
+     "sha256": "639ba2a5f4fdf389",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 228,
+       "cleanup": 303,
+       "script": "Move_ICE_BALL",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 8,
+       "destroyed": 8,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 307,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 654,
+       "cleanup": 729,
+       "script": "Move_ICE_BALL",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 10,
+       "destroyed": 10,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 733,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 1187,
+       "cleanup": 1262,
+       "script": "Move_ICE_BALL",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 12,
+       "destroyed": 12,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 1266,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 1629,
+       "cleanup": 1704,
+       "script": "Move_ICE_BALL",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 13,
+       "destroyed": 13,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 1708,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 2099,
+       "cleanup": 2230,
+       "script": "Move_ICE_BALL",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 13,
+       "destroyed": 13,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 2234,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "ice-ball-opp",
+     "base": "mechanic-ice-ball-opponent-spheal-player-onix",
+     "variant": null,
+     "sha256": "13179caedeeddc55",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 229,
+       "cleanup": 304,
+       "script": "Move_ICE_BALL",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 8,
+       "destroyed": 8,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 308,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 1161,
+       "cleanup": 1236,
+       "script": "Move_ICE_BALL",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 10,
+       "destroyed": 10,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 1240,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 2106,
+       "cleanup": 2181,
+       "script": "Move_ICE_BALL",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 12,
+       "destroyed": 12,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 2185,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 3040,
+       "cleanup": 3115,
+       "script": "Move_ICE_BALL",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 13,
+       "destroyed": 13,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 3119,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 3964,
+       "cleanup": 4095,
+       "script": "Move_ICE_BALL",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 13,
+       "destroyed": 13,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 4099,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 4900,
+       "cleanup": 4975,
+       "script": "Move_ICE_BALL",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 8,
+       "destroyed": 8,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 4979,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "ib-ply-glalie",
+     "base": "prep25-ice-ball-alt-player-glalie-golem",
+     "variant": null,
+     "sha256": "3b858b5d58138ef4",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 75,
+       "cleanup": 150,
+       "script": "Move_ICE_BALL",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 8,
+       "destroyed": 8,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 154,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 544,
+       "cleanup": 619,
+       "script": "Move_ICE_BALL",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 10,
+       "destroyed": 10,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 623,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 1072,
+       "cleanup": 1147,
+       "script": "Move_ICE_BALL",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 12,
+       "destroyed": 12,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 1151,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "ib-opp-glalie",
+     "base": "prep25-ice-ball-alt-opponent-glalie-golem",
+     "variant": null,
+     "sha256": "5b59a09152ee8e6e",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 79,
+       "cleanup": 154,
+       "script": "Move_ICE_BALL",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 8,
+       "destroyed": 8,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 158,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 1012,
+       "cleanup": 1087,
+       "script": "Move_ICE_BALL",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 10,
+       "destroyed": 10,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 1091,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 1946,
+       "cleanup": 2021,
+       "script": "Move_ICE_BALL",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 12,
+       "destroyed": 12,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 2025,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "FRZ",
+   "key": "Status_Freeze",
+   "verdict": "NET-ZERO",
+   "completeBodies": 14,
+   "bodiesFromKnownEntry": {
+    "player": 8,
+    "opponent": 6
+   },
+   "createdPerBody": [
+    1
+   ],
+   "lateOwners": [],
+   "rows": [
+    {
+     "scenario": "frz-ply-shuckle",
+     "base": "mechanic-ice-beam-player-delcatty-opponent-shuckle",
+     "variant": [
+      "seed",
+      12,
+      "turns",
+      3
+     ],
+     "sha256": "7a238a72a60ee070",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 353,
+       "cleanup": 468,
+       "script": "Status_Freeze",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      },
+      {
+       "activation": 673,
+       "cleanup": 789,
+       "script": "Status_Freeze",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      },
+      {
+       "activation": 2008,
+       "cleanup": 2124,
+       "script": "Status_Freeze",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "frz-opp-shuckle",
+     "base": "mechanic-ice-beam-opponent-delcatty-player-shuckle",
+     "variant": [
+      "seed",
+      1,
+      "turns",
+      3
+     ],
+     "sha256": "634b8237fc258c45",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 357,
+       "cleanup": 473,
+       "script": "Status_Freeze",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      },
+      {
+       "activation": 670,
+       "cleanup": 786,
+       "script": "Status_Freeze",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      },
+      {
+       "activation": 2009,
+       "cleanup": 2124,
+       "script": "Status_Freeze",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      },
+      {
+       "activation": 2943,
+       "cleanup": 3058,
+       "script": "Status_Freeze",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "frz-ply-snorlax",
+     "base": "mechanic-ice-beam-player-delcatty-opponent-shuckle",
+     "variant": [
+      "seed",
+      8,
+      "turns",
+      3,
+      "opponent",
+      143
+     ],
+     "sha256": "65f7e065153cd54b",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 353,
+       "cleanup": 468,
+       "script": "Status_Freeze",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      },
+      {
+       "activation": 673,
+       "cleanup": 789,
+       "script": "Status_Freeze",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      },
+      {
+       "activation": 2018,
+       "cleanup": 2134,
+       "script": "Status_Freeze",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "frz-opp-snorlax",
+     "base": "mechanic-ice-beam-opponent-delcatty-player-shuckle",
+     "variant": [
+      "seed",
+      13,
+      "turns",
+      3,
+      "player",
+      143
+     ],
+     "sha256": "59243a82d2fbbcd4",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 991,
+       "cleanup": 1106,
+       "script": "Status_Freeze",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      },
+      {
+       "activation": 1303,
+       "cleanup": 1419,
+       "script": "Status_Freeze",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      },
+      {
+       "activation": 2018,
+       "cleanup": 2133,
+       "script": "Status_Freeze",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      },
+      {
+       "activation": 2951,
+       "cleanup": 3066,
+       "script": "Status_Freeze",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "PURSUIT",
+   "key": 228,
+   "verdict": "NET-ZERO",
+   "completeBodies": 4,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 2
+   },
+   "createdPerBody": [
+    2
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "pursuit-ply",
+     "base": "mechanic-pursuit-player-beedrill-opponent-shuckle",
+     "variant": null,
+     "sha256": "a1481c3cda0988c5",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 73,
+       "cleanup": 175,
+       "script": "Move_PURSUIT",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 179,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "pursuit-opp",
+     "base": "mechanic-pursuit-opponent-beedrill-player-shuckle",
+     "variant": null,
+     "sha256": "b321f08d98a7fe31",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 77,
+       "cleanup": 179,
+       "script": "Move_PURSUIT",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 183,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "pu-ply-umbreon",
+     "base": "prep18-pursuit-alt-umbreon-golem",
+     "variant": null,
+     "sha256": "71486053419b388a",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 72,
+       "cleanup": 174,
+       "script": "Move_PURSUIT",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 178,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "pu-opp-umbreon",
+     "base": "prep18-pursuit-altopp-umbreon-golem",
+     "variant": null,
+     "sha256": "462ad4eb4351d091",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 76,
+       "cleanup": 178,
+       "script": "Move_PURSUIT",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 182,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "PERISH SONG",
+   "key": 195,
+   "verdict": "NET-ZERO",
+   "completeBodies": 3,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 1
+   },
+   "createdPerBody": [
+    51
+   ],
+   "lateOwners": [],
+   "rows": [
+    {
+     "scenario": "perish-song-ply",
+     "base": "mechanic-perish-song-player-murkrow-opponent-onix",
+     "variant": null,
+     "sha256": "841bcada4e1dadde",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 71,
+       "cleanup": 329,
+       "script": "Move_PERISH_SONG",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 51,
+       "destroyed": 51,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "perish-song-opp",
+     "base": "mechanic-perish-song-opponent-murkrow-player-onix",
+     "variant": null,
+     "sha256": "dc526747a17ca30a",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 75,
+       "cleanup": 333,
+       "script": "Move_PERISH_SONG",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 51,
+       "destroyed": 51,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "ps-ply-golem",
+     "base": "prep11-audit-golem-prep5-perish-song-player",
+     "variant": null,
+     "sha256": "be038af3630a406a",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 71,
+       "cleanup": 329,
+       "script": "Move_PERISH_SONG",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 51,
+       "destroyed": 51,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "LEAF BLADE",
+   "key": 348,
+   "verdict": "NET-ZERO",
+   "completeBodies": 3,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 1
+   },
+   "createdPerBody": [
+    47
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "leaf-blade-ply",
+     "base": "mechanic-leaf-blade-player-sceptile-opponent-onix",
+     "variant": null,
+     "sha256": "23431a86a6669fbd",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 76,
+       "cleanup": 299,
+       "script": "Move_LEAF_BLADE",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 47,
+       "destroyed": 47,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 303,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "leaf-blade-opp",
+     "base": "mechanic-leaf-blade-opponent-sceptile-player-onix",
+     "variant": null,
+     "sha256": "24e49e1aaf769e2f",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 80,
+       "cleanup": 303,
+       "script": "Move_LEAF_BLADE",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 47,
+       "destroyed": 47,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 307,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "lb-ply-ninetales",
+     "base": "prep11-leaf-blade-player-ninetales-opponent-golem",
+     "variant": null,
+     "sha256": "3d900312acb6355f",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 77,
+       "cleanup": 300,
+       "script": "Move_LEAF_BLADE",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 47,
+       "destroyed": 47,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 304,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "ICE PUNCH",
+   "key": 8,
+   "verdict": "NET-ZERO",
+   "completeBodies": 3,
+   "bodiesFromKnownEntry": {
+    "player": 1,
+    "opponent": 2
+   },
+   "createdPerBody": [
+    36
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "ip-ply-golbat",
+     "base": "species-audit-golbat-prep7-ice-punch-lab-player",
+     "variant": null,
+     "sha256": "187d8754124a9d1a",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 78,
+       "cleanup": 261,
+       "script": "Move_ICE_PUNCH",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 36,
+       "destroyed": 36,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 265,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "ip-opp-pgolem",
+     "base": "species-audit-pgolem-prep7-ice-punch-lab-opponent",
+     "variant": null,
+     "sha256": "b39db346bb46e20d",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 82,
+       "cleanup": 265,
+       "script": "Move_ICE_PUNCH",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 36,
+       "destroyed": 36,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 269,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "ip-opp-pidgeot",
+     "base": "elevated-postbody-pidgeot-prep7-ice-punch-lab-opponent",
+     "variant": null,
+     "sha256": "f4340df5b0ef8c2c",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 80,
+       "cleanup": 263,
+       "script": "Move_ICE_PUNCH",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 36,
+       "destroyed": 36,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 267,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "FRUSTRATION",
+   "key": 218,
+   "verdict": "NET-ZERO",
+   "completeBodies": 3,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 1
+   },
+   "createdPerBody": [
+    16
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "frustration-ply",
+     "base": "mechanic-frustration-player-furret-opponent-onix",
+     "variant": null,
+     "sha256": "c5be60d1aec523c4",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 76,
+       "cleanup": 304,
+       "script": "Move_FRUSTRATION",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 16,
+       "destroyed": 16,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 308,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "frustration-opp",
+     "base": "mechanic-frustration-opponent-furret-player-onix",
+     "variant": null,
+     "sha256": "93d6ccc081b6ed9d",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 80,
+       "cleanup": 308,
+       "script": "Move_FRUSTRATION",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 16,
+       "destroyed": 16,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 312,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "fr-ply-golem",
+     "base": "prep11-audit-golem-prep8-frustration-player",
+     "variant": null,
+     "sha256": "4a7fa414d1b570d0",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 76,
+       "cleanup": 304,
+       "script": "Move_FRUSTRATION",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 16,
+       "destroyed": 16,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 308,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "FORESIGHT",
+   "key": 193,
+   "verdict": "NET-ZERO",
+   "completeBodies": 3,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 1
+   },
+   "createdPerBody": [
+    1
+   ],
+   "lateOwners": [],
+   "rows": [
+    {
+     "scenario": "foresight-ply",
+     "base": "mechanic-foresight-player-machoke-opponent-onix",
+     "variant": null,
+     "sha256": "62f1bd8cddab8b53",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 211,
+       "cleanup": 377,
+       "script": "Move_FORESIGHT",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "foresight-opp",
+     "base": "mechanic-foresight-opponent-machoke-player-onix",
+     "variant": null,
+     "sha256": "3b3ff7a35249d5c6",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 210,
+       "cleanup": 376,
+       "script": "Move_FORESIGHT",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "fo-ply-hitmonlee",
+     "base": "prep11-foresight-alt-hitmonlee",
+     "variant": null,
+     "sha256": "5049d851843a2d49",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 72,
+       "cleanup": 238,
+       "script": "Move_FORESIGHT",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "SWAGGER",
+   "key": 207,
+   "verdict": "NET-ZERO",
+   "completeBodies": 3,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 1
+   },
+   "createdPerBody": [
+    6
+   ],
+   "lateOwners": [],
+   "rows": [
+    {
+     "scenario": "sw-ply",
+     "base": "mechanic-perish-song-player-murkrow-opponent-onix",
+     "variant": [
+      "moves",
+      "player",
+      207
+     ],
+     "sha256": "776ca78d99e8dd3a",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 69,
+       "cleanup": 237,
+       "script": "Move_SWAGGER",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 6,
+       "destroyed": 6,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "sw-opp",
+     "base": "mechanic-perish-song-opponent-murkrow-player-onix",
+     "variant": [
+      "moves",
+      "opponent",
+      207
+     ],
+     "sha256": "1b002f79dc507fe1",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 73,
+       "cleanup": 241,
+       "script": "Move_SWAGGER",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 6,
+       "destroyed": 6,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "sw-ply-snorlax",
+     "base": "mechanic-perish-song-player-murkrow-opponent-onix",
+     "variant": [
+      "moves",
+      "player",
+      207,
+      "opponent",
+      143
+     ],
+     "sha256": "a61061933c05f308",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 69,
+       "cleanup": 237,
+       "script": "Move_SWAGGER",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 6,
+       "destroyed": 6,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "MINIMIZE",
+   "key": 107,
+   "verdict": "NET-ZERO",
+   "completeBodies": 3,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 1
+   },
+   "createdPerBody": [
+    9
+   ],
+   "lateOwners": [
+    "next action: next animation script"
+   ],
+   "rows": [
+    {
+     "scenario": "minimize-ply",
+     "base": "mechanic-minimize-player-grimer-opponent-onix",
+     "variant": null,
+     "sha256": "c14d0e1112240fa7",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 210,
+       "cleanup": 362,
+       "script": "Move_MINIMIZE",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 9,
+       "destroyed": 9,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 368,
+         "added": {
+          "3": [
+           "0x202499c",
+           "SpriteCallbackDummy"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: next animation script"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "minimize-opp",
+     "base": "mechanic-minimize-opponent-grimer-player-onix",
+     "variant": null,
+     "sha256": "fa2461ffa1d768a0",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 210,
+       "cleanup": 362,
+       "script": "Move_MINIMIZE",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 9,
+       "destroyed": 9,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 368,
+         "added": {
+          "3": [
+           "0x202499c",
+           "SpriteCallbackDummy"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: next animation script"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "mi-ply-snorlax",
+     "base": "mechanic-minimize-player-grimer-opponent-onix",
+     "variant": [
+      "opponent",
+      143
+     ],
+     "sha256": "2cf57a6163f7a427",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 233,
+       "cleanup": 385,
+       "script": "Move_MINIMIZE",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 9,
+       "destroyed": 9,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 391,
+         "added": {
+          "3": [
+           "0x202499c",
+           "SpriteCallbackDummy"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: next animation script"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "FAKE OUT",
+   "key": 252,
+   "verdict": "NET-ZERO",
+   "completeBodies": 3,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 1
+   },
+   "createdPerBody": [
+    1
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "fake-out-ply",
+     "base": "mechanic-fake-out-player-makuhita-opponent-shuckle",
+     "variant": null,
+     "sha256": "ae5d1f9a7f406e18",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 78,
+       "cleanup": 163,
+       "script": "Move_FAKE_OUT",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 167,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "fake-out-opp",
+     "base": "mechanic-fake-out-opponent-makuhita-player-shuckle",
+     "variant": null,
+     "sha256": "d9518536eb45318f",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 82,
+       "cleanup": 167,
+       "script": "Move_FAKE_OUT",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 171,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "fo2-ply-snorlax",
+     "base": "mechanic-fake-out-player-makuhita-opponent-shuckle",
+     "variant": [
+      "opponent",
+      143
+     ],
+     "sha256": "cb11d4113a93d44b",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 78,
+       "cleanup": 163,
+       "script": "Move_FAKE_OUT",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 167,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "MEGA DRAIN",
+   "key": 72,
+   "verdict": "NET-ZERO",
+   "completeBodies": 3,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 1
+   },
+   "createdPerBody": [
+    24
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "mega-drain-ply",
+     "base": "mechanic-mega-drain-player-skiploom-opponent-onix",
+     "variant": null,
+     "sha256": "8104fb12c79f58b0",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 75,
+       "cleanup": 292,
+       "script": "Move_MEGA_DRAIN",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 24,
+       "destroyed": 24,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 296,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "mega-drain-opp",
+     "base": "mechanic-mega-drain-opponent-skiploom-player-onix",
+     "variant": null,
+     "sha256": "92d4ca6a77414fe0",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 79,
+       "cleanup": 296,
+       "script": "Move_MEGA_DRAIN",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 24,
+       "destroyed": 24,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 300,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "md-ply-golbat",
+     "base": "species-audit-golbat-prep9-mega-drain-player",
+     "variant": null,
+     "sha256": "4387633b8135c72d",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 228,
+       "cleanup": 445,
+       "script": "Move_MEGA_DRAIN",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 24,
+       "destroyed": 24,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 449,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "BIND",
+   "key": 20,
+   "verdict": "NET-ZERO",
+   "completeBodies": 4,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 2
+   },
+   "createdPerBody": [
+    0
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "bind-ply",
+     "base": "mechanic-bind-player-onix-opponent-murkrow",
+     "variant": null,
+     "sha256": "483508c81eb900ca",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 384,
+       "cleanup": 425,
+       "script": "Move_BIND",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 0,
+       "destroyed": 0,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 429,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "bind-opp",
+     "base": "mechanic-bind-opponent-onix-player-murkrow",
+     "variant": null,
+     "sha256": "3bacee330fd377a2",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 438,
+       "cleanup": 479,
+       "script": "Move_BIND",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 0,
+       "destroyed": 0,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 483,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "bi-ply-murkrow",
+     "base": "mechanic-perish-song-player-murkrow-opponent-onix",
+     "variant": [
+      "moves",
+      "player",
+      20
+     ],
+     "sha256": "87e9f9cfa0b8d66a",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 72,
+       "cleanup": 113,
+       "script": "Move_BIND",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 0,
+       "destroyed": 0,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 117,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "bi-opp-murkrow",
+     "base": "mechanic-perish-song-opponent-murkrow-player-onix",
+     "variant": [
+      "moves",
+      "opponent",
+      20
+     ],
+     "sha256": "c168d7fa831718a1",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 76,
+       "cleanup": 117,
+       "script": "Move_BIND",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 0,
+       "destroyed": 0,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 121,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "RAPID SPIN",
+   "key": 229,
+   "verdict": "NET-ZERO",
+   "completeBodies": 3,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 1
+   },
+   "createdPerBody": [
+    3
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "rapid-spin-ply",
+     "base": "mechanic-rapid-spin-player-wartortle-opponent-onix",
+     "variant": null,
+     "sha256": "cfc2610a11e17ea2",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 310,
+       "cleanup": 440,
+       "script": "Move_RAPID_SPIN",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 3,
+       "destroyed": 3,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 444,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "rapid-spin-opp",
+     "base": "mechanic-rapid-spin-opponent-wartortle-player-onix",
+     "variant": null,
+     "sha256": "ff82f7b4f730e39e",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 218,
+       "cleanup": 348,
+       "script": "Move_RAPID_SPIN",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 3,
+       "destroyed": 3,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 352,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "rs-ply-starmie",
+     "base": "prep29-rapid-spin-alt-player-starmie-golem",
+     "variant": null,
+     "sha256": "0e4f7d5f5e1a5c66",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 77,
+       "cleanup": 207,
+       "script": "Move_RAPID_SPIN",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 3,
+       "destroyed": 3,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 211,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "RECYCLE",
+   "key": 278,
+   "verdict": "NET-ZERO",
+   "completeBodies": 2,
+   "bodiesFromKnownEntry": {
+    "player": 1,
+    "opponent": 1
+   },
+   "createdPerBody": [
+    1
+   ],
+   "lateOwners": [],
+   "rows": [
+    {
+     "scenario": "rc-ply",
+     "base": "mechanic-recycle-player-porygon-opponent-gyarados",
+     "variant": null,
+     "sha256": "5ef44a3dc5d74760",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 2589,
+       "cleanup": 2791,
+       "script": "Move_RECYCLE",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "rc-opp",
+     "base": "mechanic-recycle-opponent-porygon-player-gyarados",
+     "variant": null,
+     "sha256": "b47b8b3494583848",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 2193,
+       "cleanup": 2395,
+       "script": "Move_RECYCLE",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "rc-ply-tauros",
+     "base": "prep11-recycle-alt-tauros-player",
+     "variant": null,
+     "sha256": "a80d2d299a379549",
+     "identicalAB": true,
+     "bodies": []
+    }
+   ]
+  },
+  {
+   "unit": "AURORA BEAM",
+   "key": 62,
+   "verdict": "NET-ZERO",
+   "completeBodies": 3,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 1
+   },
+   "createdPerBody": [
+    40
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "aurora-beam-ply",
+     "base": "mechanic-aurora-beam-player-seadra-opponent-onix",
+     "variant": null,
+     "sha256": "abd36105002e2a94",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 215,
+       "cleanup": 430,
+       "script": "Move_AURORA_BEAM",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 40,
+       "destroyed": 40,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 434,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "aurora-beam-opp",
+     "base": "mechanic-aurora-beam-opponent-seadra-player-onix",
+     "variant": null,
+     "sha256": "0ef5e6fc58dedd68",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 216,
+       "cleanup": 431,
+       "script": "Move_AURORA_BEAM",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 40,
+       "destroyed": 40,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 435,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "ab-ply-golbat",
+     "base": "species-audit-golbat2b-prep8-aurora-beam-player",
+     "variant": null,
+     "sha256": "3a3f169bc54ab5dc",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 222,
+       "cleanup": 436,
+       "script": "Move_AURORA_BEAM",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 40,
+       "destroyed": 40,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 440,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "SOLARBEAM",
+   "key": 76,
+   "verdict": "NET-ZERO",
+   "completeBodies": 6,
+   "bodiesFromKnownEntry": {
+    "player": 4,
+    "opponent": 2
+   },
+   "createdPerBody": [
+    28,
+    57
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "sb-ply",
+     "base": "mechanic-solar-beam-player-gloom-opponent-chansey",
+     "variant": null,
+     "sha256": "28ba4f0bfba7ba5b",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 194,
+       "cleanup": 301,
+       "script": "Move_SOLAR_BEAM",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 28,
+       "destroyed": 28,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      },
+      {
+       "activation": 599,
+       "cleanup": 836,
+       "script": "Move_SOLAR_BEAM",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 57,
+       "destroyed": 57,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 840,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "sb-opp",
+     "base": "mechanic-solar-beam-opponent-gloom-player-chansey",
+     "variant": null,
+     "sha256": "f8e75e5ab71462fa",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 190,
+       "cleanup": 297,
+       "script": "Move_SOLAR_BEAM",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 28,
+       "destroyed": 28,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      },
+      {
+       "activation": 754,
+       "cleanup": 991,
+       "script": "Move_SOLAR_BEAM",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 57,
+       "destroyed": 57,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 995,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "sb-ply-snorlax",
+     "base": "mechanic-solar-beam-player-gloom-opponent-chansey",
+     "variant": [
+      "opponent",
+      143
+     ],
+     "sha256": "0074c43824fdfc7b",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 53,
+       "cleanup": 160,
+       "script": "Move_SOLAR_BEAM",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 28,
+       "destroyed": 28,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      },
+      {
+       "activation": 480,
+       "cleanup": 717,
+       "script": "Move_SOLAR_BEAM",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 57,
+       "destroyed": 57,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 721,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "SUNNY DAY",
+   "key": 241,
+   "verdict": "NET-ZERO",
+   "completeBodies": 3,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 1
+   },
+   "createdPerBody": [
+    8
+   ],
+   "lateOwners": [],
+   "rows": [
+    {
+     "scenario": "sunny-day-ply",
+     "base": "mechanic-sunny-day-player-bellossom-opponent-onix",
+     "variant": null,
+     "sha256": "6757d2a1c88e7857",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 211,
+       "cleanup": 368,
+       "script": "Move_SUNNY_DAY",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 8,
+       "destroyed": 8,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "sunny-day-opp",
+     "base": "mechanic-sunny-day-opponent-bellossom-player-onix",
+     "variant": null,
+     "sha256": "b39c6041646b2670",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 211,
+       "cleanup": 368,
+       "script": "Move_SUNNY_DAY",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 8,
+       "destroyed": 8,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "sd-ply-golbat",
+     "base": "species-audit-golbat2b-prep9-sunny-day-player",
+     "variant": null,
+     "sha256": "61d7a657b592e0ea",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 218,
+       "cleanup": 375,
+       "script": "Move_SUNNY_DAY",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 8,
+       "destroyed": 8,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "DREAM EATER",
+   "key": 138,
+   "verdict": "NET-ZERO",
+   "completeBodies": 3,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 1
+   },
+   "createdPerBody": [
+    28
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "dream-eater-ply",
+     "base": "mechanic-dream-eater-player-wigglytuff-opponent-onix",
+     "variant": null,
+     "sha256": "32cdfd9262d5c4cc",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 1308,
+       "cleanup": 1573,
+       "script": "Move_DREAM_EATER",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 28,
+       "destroyed": 28,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 1577,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "dream-eater-opp",
+     "base": "mechanic-dream-eater-opponent-wigglytuff-player-onix",
+     "variant": null,
+     "sha256": "793b4a96014ddb38",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 2146,
+       "cleanup": 2412,
+       "script": "Move_DREAM_EATER",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 28,
+       "destroyed": 28,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 2416,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "de-ply-golbat",
+     "base": "species-audit-golbat2b-prep9-dream-eater-player",
+     "variant": null,
+     "sha256": "874aae9460dd7030",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 1310,
+       "cleanup": 1576,
+       "script": "Move_DREAM_EATER",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 28,
+       "destroyed": 28,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 1580,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "SPARK",
+   "key": 209,
+   "verdict": "NET-ZERO",
+   "completeBodies": 3,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 1
+   },
+   "createdPerBody": [
+    36,
+    37
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "spark-ply",
+     "base": "mechanic-spark-player-minun-opponent-shuckle",
+     "variant": null,
+     "sha256": "2e60dc4932b50f9b",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 70,
+       "cleanup": 195,
+       "script": "Move_SPARK",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 36,
+       "destroyed": 36,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 199,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "spark-opp",
+     "base": "mechanic-spark-opponent-minun-player-shuckle",
+     "variant": null,
+     "sha256": "493cba81ada3ac8c",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 74,
+       "cleanup": 199,
+       "script": "Move_SPARK",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 36,
+       "destroyed": 36,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 203,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "sp-ply-snorlax",
+     "base": "mechanic-spark-player-minun-opponent-shuckle",
+     "variant": [
+      "opponent",
+      143
+     ],
+     "sha256": "ba95f03eb253b8a4",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 70,
+       "cleanup": 195,
+       "script": "Move_SPARK",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 37,
+       "destroyed": 37,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 199,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "ROLLOUT",
+   "key": 205,
+   "verdict": "NET-ZERO",
+   "completeBodies": 5,
+   "bodiesFromKnownEntry": {
+    "player": 4,
+    "opponent": 1
+   },
+   "createdPerBody": [
+    12
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "rollout-ply",
+     "base": "mechanic-rollout-player-voltorb-opponent-onix",
+     "variant": null,
+     "sha256": "1d0c3586ad0e2bd7",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 75,
+       "cleanup": 241,
+       "script": "Move_ROLLOUT",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 12,
+       "destroyed": 12,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 245,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 575,
+       "cleanup": 741,
+       "script": "Move_ROLLOUT",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 12,
+       "destroyed": 12,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 745,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "rollout-opp",
+     "base": "mechanic-rollout-opponent-voltorb-player-onix",
+     "variant": null,
+     "sha256": "d7d3fc99aae0e904",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 79,
+       "cleanup": 245,
+       "script": "Move_ROLLOUT",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 12,
+       "destroyed": 12,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 249,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "ro-ply-wailmer",
+     "base": "prep11-rollout-alt-wailmer",
+     "variant": null,
+     "sha256": "14342d8f5304ca76",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 224,
+       "cleanup": 390,
+       "script": "Move_ROLLOUT",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 12,
+       "destroyed": 12,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 394,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 730,
+       "cleanup": 896,
+       "script": "Move_ROLLOUT",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 12,
+       "destroyed": 12,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 900,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "DEFENSE CURL",
+   "key": 111,
+   "verdict": "NET-ZERO",
+   "completeBodies": 3,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 1
+   },
+   "createdPerBody": [
+    1
+   ],
+   "lateOwners": [
+    "next action: next animation script"
+   ],
+   "rows": [
+    {
+     "scenario": "defense-curl-ply",
+     "base": "mechanic-defense-curl-player-phanpy-opponent-onix",
+     "variant": null,
+     "sha256": "6dd0004dbc0aaf84",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 214,
+       "cleanup": 313,
+       "script": "Move_DEFENSE_CURL",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 320,
+         "added": {
+          "3": [
+           "0x202499c",
+           "SpriteCallbackDummy"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: next animation script"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "defense-curl-opp",
+     "base": "mechanic-defense-curl-opponent-phanpy-player-onix",
+     "variant": null,
+     "sha256": "01a4c071d2da00e5",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 215,
+       "cleanup": 314,
+       "script": "Move_DEFENSE_CURL",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 321,
+         "added": {
+          "3": [
+           "0x202499c",
+           "SpriteCallbackDummy"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: next animation script"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "dc-ply-golbat",
+     "base": "species-audit-golbat-prep4-defense-curl-player",
+     "variant": null,
+     "sha256": "029cf14da9eff176",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 223,
+       "cleanup": 322,
+       "script": "Move_DEFENSE_CURL",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 329,
+         "added": {
+          "3": [
+           "0x202499c",
+           "SpriteCallbackDummy"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: next animation script"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "THUNDER",
+   "key": 87,
+   "verdict": "NET-ZERO",
+   "completeBodies": 3,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 1
+   },
+   "createdPerBody": [
+    14
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "th-ply",
+     "base": "mechanic-thunder-player-magneton-opponent-shuckle",
+     "variant": null,
+     "sha256": "2739d3273553e031",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 76,
+       "cleanup": 337,
+       "script": "Move_THUNDER",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 14,
+       "destroyed": 14,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 341,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "th-opp",
+     "base": "mechanic-thunder-opponent-magneton-player-shuckle",
+     "variant": null,
+     "sha256": "30440ce89f06a1ea",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 80,
+       "cleanup": 341,
+       "script": "Move_THUNDER",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 14,
+       "destroyed": 14,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 345,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "th-ply-snorlax",
+     "base": "mechanic-thunder-player-magneton-opponent-shuckle",
+     "variant": [
+      "opponent",
+      143
+     ],
+     "sha256": "ad702c667ccc1f48",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 76,
+       "cleanup": 337,
+       "script": "Move_THUNDER",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 14,
+       "destroyed": 14,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 341,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "FIRE BLAST",
+   "key": 126,
+   "verdict": "NET-ZERO",
+   "completeBodies": 4,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 2
+   },
+   "createdPerBody": [
+    135
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "fire-blast-ply",
+     "base": "mechanic-fire-blast-player-octillery-opponent-onix",
+     "variant": null,
+     "sha256": "dd336272edd67e8d",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 215,
+       "cleanup": 411,
+       "script": "Move_FIRE_BLAST",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 135,
+       "destroyed": 135,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 415,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "fire-blast-opp",
+     "base": "mechanic-fire-blast-opponent-octillery-player-onix",
+     "variant": null,
+     "sha256": "f860047c166b066e",
+     "identicalAB": true,
+     "bodies": []
+    },
+    {
+     "scenario": "fb-ply-golbat",
+     "base": "species-audit-golbat-prep7-fire-blast-player",
+     "variant": null,
+     "sha256": "f93ab9956a6e2f58",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 222,
+       "cleanup": 418,
+       "script": "Move_FIRE_BLAST",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 135,
+       "destroyed": 135,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 422,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "fb-opp-pgolem",
+     "base": "species-audit-pgolem-prep7-fire-blast-opponent",
+     "variant": null,
+     "sha256": "e03b64b524f3b3e3",
+     "identicalAB": true,
+     "bodies": []
+    },
+    {
+     "scenario": "fb-opp-murkrow",
+     "base": "mechanic-perish-song-opponent-murkrow-player-onix",
+     "variant": [
+      "moves",
+      "opponent",
+      126
+     ],
+     "sha256": "a3c3b69be48ece6d",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 81,
+       "cleanup": 277,
+       "script": "Move_FIRE_BLAST",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 135,
+       "destroyed": 135,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 281,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "fb-opp-eevee",
+     "base": "mechanic-attract-opponent-eevee-player-onix",
+     "variant": [
+      "moves",
+      "opponent",
+      126
+     ],
+     "sha256": "16ef517e3e17aab7",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 79,
+       "cleanup": 275,
+       "script": "Move_FIRE_BLAST",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 135,
+       "destroyed": 135,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 279,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "DOUBLESLAP",
+   "key": 3,
+   "verdict": "NET-ZERO",
+   "completeBodies": 9,
+   "bodiesFromKnownEntry": {
+    "player": 6,
+    "opponent": 3
+   },
+   "createdPerBody": [
+    2
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "double-slap-ply",
+     "base": "mechanic-double-slap-player-poliwhirl-opponent-onix",
+     "variant": null,
+     "sha256": "58ef49e060e4a55a",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 86,
+       "cleanup": 119,
+       "script": "Move_DOUBLE_SLAP",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 123,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 187,
+       "cleanup": 220,
+       "script": "Move_DOUBLE_SLAP",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 224,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 288,
+       "cleanup": 321,
+       "script": "Move_DOUBLE_SLAP",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 325,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "double-slap-opp",
+     "base": "mechanic-double-slap-opponent-poliwhirl-player-onix",
+     "variant": null,
+     "sha256": "ecda0c58a0ebcf80",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 90,
+       "cleanup": 123,
+       "script": "Move_DOUBLE_SLAP",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 127,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 191,
+       "cleanup": 224,
+       "script": "Move_DOUBLE_SLAP",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 228,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 292,
+       "cleanup": 325,
+       "script": "Move_DOUBLE_SLAP",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 329,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "ds-ply-golbat",
+     "base": "species-audit-golbat-multihit-double-slap-player-hit2",
+     "variant": null,
+     "sha256": "b67594b4c6f33560",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 236,
+       "cleanup": 269,
+       "script": "Move_DOUBLE_SLAP",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 273,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 430,
+       "cleanup": 463,
+       "script": "Move_DOUBLE_SLAP",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 467,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      },
+      {
+       "activation": 541,
+       "cleanup": 574,
+       "script": "Move_DOUBLE_SLAP",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 578,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "ABSORB",
+   "key": 71,
+   "verdict": "NET-ZERO",
+   "completeBodies": 3,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 1
+   },
+   "createdPerBody": [
+    16
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "absorb-ply",
+     "base": "mechanic-absorb-player-lombre-opponent-onix",
+     "variant": null,
+     "sha256": "5517fb40642766b5",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 213,
+       "cleanup": 418,
+       "script": "Move_ABSORB",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 16,
+       "destroyed": 16,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 422,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "absorb-opp",
+     "base": "mechanic-absorb-opponent-lombre-player-onix",
+     "variant": null,
+     "sha256": "c0cd62617e343a19",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 213,
+       "cleanup": 418,
+       "script": "Move_ABSORB",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 16,
+       "destroyed": 16,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 422,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "as-ply-golbat",
+     "base": "species-audit-golbat2b-prep9-absorb-player",
+     "variant": null,
+     "sha256": "4861bf729d1e727f",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 223,
+       "cleanup": 428,
+       "script": "Move_ABSORB",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 16,
+       "destroyed": 16,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 432,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "MEGAHORN",
+   "key": 224,
+   "verdict": "NET-ZERO",
+   "completeBodies": 3,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 1
+   },
+   "createdPerBody": [
+    12
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "megahorn-ply",
+     "base": "mechanic-megahorn-player-seaking-opponent-onix",
+     "variant": null,
+     "sha256": "96197907efacd81b",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 211,
+       "cleanup": 387,
+       "script": "Move_MEGAHORN",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 12,
+       "destroyed": 12,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 391,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "megahorn-opp",
+     "base": "mechanic-megahorn-opponent-seaking-player-onix",
+     "variant": null,
+     "sha256": "d6644dc52352c222",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 212,
+       "cleanup": 387,
+       "script": "Move_MEGAHORN",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 12,
+       "destroyed": 12,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 391,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "mh-ply-heracross",
+     "base": "prep18-megahorn-alt-heracross-golem",
+     "variant": null,
+     "sha256": "1bb53dfdac6b5684",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 221,
+       "cleanup": 397,
+       "script": "Move_MEGAHORN",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 12,
+       "destroyed": 12,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 401,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "FIRE PUNCH",
+   "key": 7,
+   "verdict": "NET-ZERO",
+   "completeBodies": 3,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 1
+   },
+   "createdPerBody": [
+    26
+   ],
+   "lateOwners": [
+    "next action: healthbox hit effect"
+   ],
+   "rows": [
+    {
+     "scenario": "fp-ply",
+     "base": "prep22-fire-punch-player-seed1",
+     "variant": null,
+     "sha256": "5ae4577818e374f5",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 219,
+       "cleanup": 320,
+       "script": "Move_FIRE_PUNCH",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 26,
+       "destroyed": 26,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 324,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "fp-opp",
+     "base": "prep22-fire-punch-opponent-seed1",
+     "variant": null,
+     "sha256": "64e87b35c9041a14",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 218,
+       "cleanup": 319,
+       "script": "Move_FIRE_PUNCH",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 26,
+       "destroyed": 26,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 323,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "fp-ply-11",
+     "base": "prep22-fire-punch-player-seed11",
+     "variant": null,
+     "sha256": "bf42cc3692749e14",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 235,
+       "cleanup": 336,
+       "script": "Move_FIRE_PUNCH",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 26,
+       "destroyed": 26,
+       "survivors": {},
+       "freed": {},
+       "late": [
+        {
+         "frame": 340,
+         "added": {
+          "3": [
+           "sInvisibleSpriteTemplate",
+           "SpriteCB_HitAnimHealthoxEffect"
+          ]
+         },
+         "removed": {},
+         "owner": "next action: healthbox hit effect"
+        }
+       ],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "INFATUATION",
+   "key": "Status_Infatuation",
+   "verdict": "NET-ZERO",
+   "completeBodies": 8,
+   "bodiesFromKnownEntry": {
+    "player": 4,
+    "opponent": 4
+   },
+   "createdPerBody": [
+    3
+   ],
+   "lateOwners": [],
+   "rows": [
+    {
+     "scenario": "in-ply",
+     "base": "mechanic-attract-player-eevee-opponent-onix",
+     "variant": [
+      "turns",
+      2
+     ],
+     "sha256": "886f5a3dfc3a9e26",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 697,
+       "cleanup": 793,
+       "script": "Status_Infatuation",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 3,
+       "destroyed": 3,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      },
+      {
+       "activation": 2120,
+       "cleanup": 2216,
+       "script": "Status_Infatuation",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 3,
+       "destroyed": 3,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "in-opp",
+     "base": "mechanic-attract-opponent-eevee-player-onix",
+     "variant": [
+      "turns",
+      2
+     ],
+     "sha256": "a7042242b06865b9",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 697,
+       "cleanup": 793,
+       "script": "Status_Infatuation",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 3,
+       "destroyed": 3,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      },
+      {
+       "activation": 2124,
+       "cleanup": 2220,
+       "script": "Status_Infatuation",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 3,
+       "destroyed": 3,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "in-ply-snorlax",
+     "base": "mechanic-attract-player-eevee-opponent-onix",
+     "variant": [
+      "turns",
+      2,
+      "opponent",
+      143
+     ],
+     "sha256": "2fb3c973823a23ed",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 703,
+       "cleanup": 799,
+       "script": "Status_Infatuation",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 3,
+       "destroyed": 3,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      },
+      {
+       "activation": 2155,
+       "cleanup": 2251,
+       "script": "Status_Infatuation",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 3,
+       "destroyed": 3,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "in-opp-snorlax",
+     "base": "mechanic-attract-opponent-eevee-player-onix",
+     "variant": [
+      "turns",
+      2,
+      "player",
+      143
+     ],
+     "sha256": "8248d811303941e3",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 703,
+       "cleanup": 799,
+       "script": "Status_Infatuation",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 3,
+       "destroyed": 3,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      },
+      {
+       "activation": 2159,
+       "cleanup": 2255,
+       "script": "Status_Infatuation",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 3,
+       "destroyed": 3,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "CURSED",
+   "key": "Status_Curse",
+   "verdict": "NET-ZERO",
+   "completeBodies": 4,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 2
+   },
+   "createdPerBody": [
+    2
+   ],
+   "lateOwners": [],
+   "rows": [
+    {
+     "scenario": "cu-ply",
+     "base": "mechanic-curse-ghost-player-haunter-opponent-magikarp",
+     "variant": [
+      "turns",
+      1
+     ],
+     "sha256": "b80fcef73d6f3bf2",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 989,
+       "cleanup": 1063,
+       "script": "Status_Curse",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "cu-opp",
+     "base": "mechanic-curse-ghost-opponent-haunter-player-magikarp",
+     "variant": [
+      "turns",
+      1
+     ],
+     "sha256": "c4160fd753c61956",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 985,
+       "cleanup": 1059,
+       "script": "Status_Curse",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "cu-ply-gengar",
+     "base": "prep14-curse-ghost-alt-gengar-golem",
+     "variant": [
+      "turns",
+      1
+     ],
+     "sha256": "7b05acf2cf787fad",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 985,
+       "cleanup": 1059,
+       "script": "Status_Curse",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "cu-opp-gengar",
+     "base": "prep23-curse-ghost-altopp-gengar-golem",
+     "variant": [
+      "turns",
+      1
+     ],
+     "sha256": "88cfd7b2010b6155",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 981,
+       "cleanup": 1055,
+       "script": "Status_Curse",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "unit": "NIGHTMARE",
+   "key": "Status_Nightmare",
+   "verdict": "NET-ZERO",
+   "completeBodies": 6,
+   "bodiesFromKnownEntry": {
+    "player": 2,
+    "opponent": 4
+   },
+   "createdPerBody": [
+    2
+   ],
+   "lateOwners": [],
+   "rows": [
+    {
+     "scenario": "nm-ply",
+     "base": "mechanic-nightmare-player-haunter-opponent-shuckle",
+     "variant": [
+      "turns",
+      1
+     ],
+     "sha256": "04df560223a738a3",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 1570,
+       "cleanup": 1644,
+       "script": "Status_Nightmare",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      },
+      {
+       "activation": 2392,
+       "cleanup": 2466,
+       "script": "Status_Nightmare",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "nm-opp",
+     "base": "mechanic-nightmare-opponent-haunter-player-shuckle",
+     "variant": [
+      "turns",
+      1
+     ],
+     "sha256": "61df5bdcafee35da",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 1539,
+       "cleanup": 1613,
+       "script": "Status_Nightmare",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "nm-ply-gengar",
+     "base": "d4a-nightmare-extra-player-gengar-golbat",
+     "variant": [
+      "turns",
+      1
+     ],
+     "sha256": "536f7be8530b937f",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 1565,
+       "cleanup": 1639,
+       "script": "Status_Nightmare",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      },
+      {
+       "activation": 2389,
+       "cleanup": 2463,
+       "script": "Status_Nightmare",
+       "attacker": 1,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    },
+    {
+     "scenario": "nm-opp-haunter",
+     "base": "d4a-nightmare-extra-opponent-haunter-snorlax",
+     "variant": [
+      "turns",
+      1
+     ],
+     "sha256": "cb915d2655601909",
+     "identicalAB": true,
+     "bodies": [
+      {
+       "activation": 1530,
+       "cleanup": 1604,
+       "script": "Status_Nightmare",
+       "attacker": 0,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 2,
+       "destroyed": 2,
+       "survivors": {},
+       "freed": {},
+       "late": [],
+       "netZero": true
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
