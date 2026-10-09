@@ -20,6 +20,16 @@
   Temp patch census seeds 0..299 (base `2d29f058e`): 81.54 -> 83.73 % by count, 80.19 -> 83.23 % by frames (+174 / +35,614),
   0 regressions, identical commands + digest; predictor 0 unpredicted live; corpus 1136 -> 1143 / 213 -> 241, 0 mismatches.
   Supervisor: `prep45Run.sh` into fresh dirs — all 12 receipts byte-identical (216 probe runs, 0 A/B differ).
+- Folded Opus worker `cf1083988` (SIDE lane, narrow production grant) as `04187aeb7` (src tree `76bb0125`): the prep45 plans —
+  plan-rows appended after prep43's in the generator, table regenerated (508 bodies / 212 plans / 20 anims; BRN's text equals
+  STATUS_INFATUATION's and dedupes), Solar Beam in TWO_TURN_ANIM_MOVE_IDS (odd turn -> 10076), TURN_TRAP keyed by the trapped
+  battler's wrappedMove (Fire Spin / Whirlpool / Sand Tomb / Bind-Wrap; Clamp and others stay unplanned), the B_ANIM_TURN_TRAP
+  event argument = wrappedMove (presentation payload; ON/OFF parity on Fire Spin seed 36 / Wrap seed 139). Census seeds 0..299:
+  82.48 -> 84.73 % live by count, 80.87 -> 83.97 % by frames (+179 / +36,229; 5 more Protects than prep45 measured = the prep44
+  interaction), 0 regressions, command sequence + battle digest identical. Pins moved only where a newly planned unit lends (route
+  scans, Sky Attack seed 244 strike after Dragon Dance opponent). Worker gates 1,574 files / 12,963 tests, build, differential
+  624/624 vs `26a6e5d5c`. Supervisor: census rerun byte-identical (`672f2df1`), corpus replay + per-frame check byte-identical to the
+  prep45 receipts; union typecheck, smoke 448, 8 targeted files 80/80.
 
 ## 2026-10-08 (overnight) — S10A: Substitute presentation live, deferred order lend, live-share census, sprite-order plans; 245 + 13 + 18
 
