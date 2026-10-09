@@ -23,8 +23,10 @@ describe("production sprite-order plan table (generated, pinned)", () => {
     expect(renderSpriteOrderProductionTableFromFixtures()).toBe(committed);
     // + prep43 (fixtures/prep43/plan-rows.json, appended): Dig 91 / 10091, Brick Break 280 / 10280 bodies, 5 plans.
     // + prep45 (fixtures/prep45/plan-rows.json, appended): 15 bodies, 11 plans (BRN's text = STATUS_INFATUATION's, deduped).
-    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(508);
-    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(212);
+    // + plans48 (fixtures/plans48/plan-rows.json, appended): 17 bodies, 7 plans (FRZ / NIGHTMARE / CURSED = "Cf;D0", ITEM_KNOCKOFF = "Cf",
+    //   Razor Leaf / Struggle opponent = the 75:player / 165:player texts, Razor Wind's unleash = Leech Seed's text: deduped).
+    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(525);
+    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(219);
   });
 
   it("decodes every EXACT-PLAN (move, side) body of the ext table to the fixture plan", () => {
@@ -33,7 +35,7 @@ describe("production sprite-order plan table (generated, pinned)", () => {
     const extra: Record<string, { verdict: string; plan: unknown; tier?: string }> = {
       ...fixture("sprite-order-policy-gaps/relative-y-plans.json").bodies, ...fixture("sprite-order-body-plans-rely.json").bodies,
       ...fixture("prep28/plan-rows.json").bodies, ...fixture("prep28/plan-rows-sky-attack.json").bodies,
-      ...fixture("prep43/plan-rows.json").bodies, ...fixture("prep45/plan-rows.json").bodies,
+      ...fixture("prep43/plan-rows.json").bodies, ...fixture("prep45/plan-rows.json").bodies, ...fixture("plans48/plan-rows.json").bodies,
     };
     let exact = 0;
     for (const [key, row] of Object.entries(bodies)) {
@@ -95,10 +97,10 @@ describe("sprite-order presentation-event transform", () => {
   it("refuses everything the evidence does not model", () => {
     for (const event of [
       { kind: "hit-animation", targetVisible: false },
-      { kind: "move-animation", moveId: 288, attackerSide: "player" },
+      { kind: "move-animation", moveId: 351, attackerSide: "player" },
       { kind: "move-animation", moveId: 144, attackerSide: "player" },
-      { kind: "status-animation", status: "CURSED" },
-      { kind: "status-animation", status: "FRZ" },
+      { kind: "status-animation", status: "WRAPPED" },
+      { kind: "general-animation", animation: "SUBSTITUTE_FADE" },
       { kind: "general-animation", animation: "HAIL_CONTINUES" },
       { kind: "general-animation", animation: "STATUS_SLP" },
       { kind: "invalidate", reason: "faint" },
@@ -191,6 +193,77 @@ describe("sprite-order presentation-event transform", () => {
     expect(run([{ kind: "general-animation", animation: "TURN_TRAP" }]).cursor.order.known).toBe(false);
   });
 
+  it("plans48 EXACT plans: FRZ / NIGHTMARE / CURSED / ITEM_KNOCKOFF, Ice Punch, Razor Leaf, Snore, Struggle, Grudge, Razor Wind / Present per branch, Attract", () => {
+    // ROM receipts (fixtures/plans48/units.json: direct mGBA, every job twice fresh, A == B): every probed instance of a landed unit
+    // has the production plan text, per side; check.json is the per-frame check of the same plans (plans48Check.ts).
+    const rows = fixture("plans48/plan-rows.json") as { bodies: Record<string, { plan: unknown }>; anims: Record<string, { plan: unknown }> };
+    const units = fixture("plans48/units.json") as { jobs: Record<string, { unit: string; identicalAB: boolean; units: { kind: string; label: string; plan: string; truncated: boolean }[] }> };
+    const check = fixture("plans48/check.json") as { notIdenticalAB: number; results: Record<string, { instances: number; matched: number }>;
+      attract: { instances: { split: string; endStateEqualsA: boolean }[]; boundaryEquivalence: { starts: number; equivalent: number } } };
+    const text = (plan: unknown) => encodeSpriteOrderPlan(plan as never);
+    const at = (name: string) => SPRITE_ORDER_PRODUCTION_PLANS[SPRITE_ORDER_PRODUCTION_ANIMS[name]!];
+    expect(check.notIdenticalAB).toBe(0);
+    for (const [label, result] of Object.entries(check.results)) expect(result.matched, label).toBe(result.instances);
+    const observed = new Map<string, Set<string>>();
+    const seen = (key: string, plan: string) => (observed.get(key) ?? observed.set(key, new Set()).get(key)!).add(plan);
+    for (const job of Object.values(units.jobs)) {
+      expect(job.identicalAB).toBe(true);
+      let razorWind = 0;
+      for (const unit of job.units) {
+        if (unit.kind !== "body" || unit.truncated) continue;
+        const body = /^body (\d+):(\w+)$/.exec(unit.label);
+        if (unit.label === "status NIGHTMARE" && unit.plan === at("STATUS_SLP")) continue; // the sleep units of the Nightmare jobs
+        if (["status FRZ", "status NIGHTMARE", "status CURSED"].includes(unit.label)) seen(`STATUS_${unit.label.slice(7)}`, unit.plan);
+        else if (unit.label === "general ITEM_KNOCKOFF") seen("ITEM_KNOCKOFF", unit.plan);
+        else if (body && [8, 75, 173, 288].includes(Number(body[1]))) seen(`${body[1]}:${body[2]}`, unit.plan);
+        else if (body && Number(body[1]) === 165) seen("165", unit.plan);
+        // Present: PresentDamage allocates 6 sprites, PresentHeal 14 (the ROM's gAnimMoveDmg is not in the probe rows)
+        else if (body && Number(body[1]) === 217) seen(`${(unit.plan.match(/C/g) ?? []).length === 6 ? 217 : 20217}:${body[2]}`, unit.plan);
+        else if (body && Number(body[1]) === 13) seen(`${razorWind++ === 0 ? 13 : 10013}:${body[2]}`, unit.plan);
+        else if (body && Number(body[1]) === 213) seen("213", unit.plan);
+      }
+    }
+    for (const name of ["STATUS_FRZ", "STATUS_NIGHTMARE", "STATUS_CURSED", "ITEM_KNOCKOFF"]) expect([...observed.get(name)!], name).toEqual([at(name)]);
+    for (const key of ["8:player", "8:opponent", "75:player", "75:opponent", "173:player", "173:opponent", "288:player", "288:opponent",
+      "13:player", "13:opponent", "10013:player", "10013:opponent", "217:player", "217:opponent", "20217:player", "20217:opponent"]) {
+      const [move, side] = key.split(":") as [string, "player" | "opponent"];
+      expect([...observed.get(key)!], key).toEqual([text(spriteOrderProductionBodyPlan(Number(move), side))]);
+    }
+    for (const [key, row] of Object.entries(rows.anims)) expect(at(key.replace(/^(Status|General):B_ANIM_/, "")), key).toBe(text(row.plan));
+    for (const [key, row] of Object.entries(rows.bodies)) {
+      const [move, side] = key.split(":") as [string, "player" | "opponent"];
+      expect(spriteOrderProductionBodyPlan(Number(move), side), key).toEqual(row.plan);
+    }
+    // Attract (18 instances, 9 species pairs per side): the ROM shows the production plan A or B = one rising heart fewer before the
+    // frame boundary (the 8 createsprite commands run in one script frame); A and B leave the same order after the unit from any start.
+    const attractA = text(spriteOrderProductionBodyPlan(213, "player"));
+    expect(text(spriteOrderProductionBodyPlan(213, "opponent"))).toBe(attractA);
+    expect([...observed.get("213")!].sort()).toEqual([attractA, attractA.replace(";Cff;Cffffff;", ";Cf;Cfffffff;")].sort());
+    expect(check.attract.instances).toHaveLength(18);
+    expect(check.attract.instances.every(instance => instance.endStateEqualsA && instance.split !== "none")).toBe(true);
+    expect(check.attract.boundaryEquivalence.equivalent).toBe(check.attract.boundaryEquivalence.starts);
+    // Struggle (both sides, 4 instances): the extract's text; the opponent side takes the base table's 165:player text (its
+    // P-annotated destroy pair resolves to the same order: check.json "body 165" is per-frame exact with that text).
+    expect([...observed.get("165")!]).toEqual(["Cff;D1,0;Cf;D2"]);
+    expect(text(spriteOrderProductionBodyPlan(165, "opponent"))).toBe(text(spriteOrderProductionBodyPlan(165, "player")));
+    expect(check.results["body 165"]!.instances).toBe(4);
+    // Grudge stays side-keyed (4 attacker species per side, one plan each); Razor Wind's branches allocate differently.
+    expect(text(spriteOrderProductionBodyPlan(288, "player"))).not.toBe(text(spriteOrderProductionBodyPlan(288, "opponent")));
+    expect(text(spriteOrderProductionBodyPlan(10013, "player"))).not.toBe(text(spriteOrderProductionBodyPlan(13, "player")));
+    expect(text(spriteOrderProductionBodyPlan(20217, "opponent"))).not.toBe(text(spriteOrderProductionBodyPlan(217, "opponent")));
+    // Knock Off's item bag survives General_ItemKnockoff: carried, the order stays known.
+    for (const event of [
+      { kind: "status-animation", status: "FRZ" }, { kind: "status-animation", status: "NIGHTMARE" }, { kind: "status-animation", status: "CURSED" },
+      { kind: "general-animation", animation: "ITEM_KNOCKOFF" }, { kind: "move-animation", moveId: 8, attackerSide: "player" },
+      { kind: "move-animation", moveId: 173, attackerSide: "opponent" }, { kind: "move-animation", moveId: 10013, attackerSide: "opponent" },
+      { kind: "move-animation", moveId: 213, attackerSide: "player" }, { kind: "move-animation", moveId: 20217, attackerSide: "player" },
+      { kind: "move-animation", moveId: 165, attackerSide: "opponent" },
+    ] as const) expect(run([event as SpriteOrderPresentationEvent]).cursor.order.known, JSON.stringify(event)).toBe(true);
+    // Not landed (docs/next-adapters-plans48.md): Shock Wave (2 opponent-side plans over 4 species), Fly (hidden attacker), Clamp.
+    expect(spriteOrderProductionBodyPlan(351, "opponent")).toBeNull();
+    expect(spriteOrderProductionBodyPlan(19, "player")).toBeNull();
+  });
+
   it("maps status animations as InitAndLaunchChosenStatusAnimation does", () => {
     expect(spriteOrderStatusAnimationName(false, 0x8)).toBe("PSN");
     expect(spriteOrderStatusAnimationName(false, 0x80 | 0x100)).toBe("PSN");
@@ -255,16 +328,19 @@ describe("strict real-route replay (docs/sprite-order-real-route.md events; no r
   it("BattleLab corpus (committed + ext event tables): every edge the transform knows is exact", () => {
     // Turn-keyed like the host (Dig / Brick Break choosetwoturnanim branch, prep43): known 1130 -> 1136, all exact.
     // prep45 plans (+ Solar Beam keyed like Dig): known 1136 -> 1143 (7 later edges), all exact.
+    // plans48 plans (+ Razor Wind keyed like Dig, Present by its branch): known 1143 -> 1159 (16 later edges), all exact.
     const corpus = replayCrossBodyCorpus({ turnKeyed: true });
     expect({ scenarios: corpus.scenarios, skipped: corpus.skipped, edges: corpus.edges, mismatched: corpus.mismatched })
       .toEqual({ scenarios: 573, skipped: 19, edges: 1366, mismatched: 0 });
     expect(corpus.exact).toBe(corpus.known);
-    expect(corpus.known).toBe(1143);
-    expect(corpus.laterKnown).toBe(589);
+    expect(corpus.known).toBe(1159);
+    expect(corpus.laterKnown).toBe(605);
     // Without the turn key the Dig unleash body is fed the setup plan: exactly the edge after it (unit 5) in the two Dig scenarios.
     const unkeyed = replayCrossBodyCorpus();
-    expect({ known: unkeyed.known, exact: unkeyed.exact, mismatched: unkeyed.mismatched }).toEqual({ known: 1143, exact: 1141, mismatched: 2 });
+    expect({ known: unkeyed.known, exact: unkeyed.exact, mismatched: unkeyed.mismatched }).toEqual({ known: 1159, exact: 1156, mismatched: 3 });
+    // ... and without the Present key the PresentHeal body is fed the PresentDamage plan (plans48).
     expect(unkeyed.mismatches).toEqual([
+      { file: "217-mechanic-present-opponent-delibird-player-onix-0.json", unit: 7, mv: 33 },
       { file: "91-mechanic-dig-opponent-vibrava-player-chansey-0.json", unit: 5, mv: 45 },
       { file: "91-mechanic-dig-player-vibrava-opponent-chansey-0.json", unit: 5, mv: 45 },
     ]);

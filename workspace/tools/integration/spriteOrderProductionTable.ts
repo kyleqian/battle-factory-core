@@ -155,7 +155,7 @@ export function renderSpriteOrderProductionTableFromFixtures(): string {
   return renderSpriteOrderProductionTable(fixture("sprite-order-body-plans-ext.json"), fixture("sprite-order-gap-causes.json"), [
     fixture("sprite-order-policy-gaps/relative-y-plans.json").bodies, fixture("sprite-order-body-plans-rely.json").bodies,
     fixture("prep28/plan-rows.json").bodies, fixture("prep28/plan-rows-sky-attack.json").bodies,
-  ], [fixture("prep43/plan-rows.json"), fixture("prep45/plan-rows.json")]);
+  ], [fixture("prep43/plan-rows.json"), fixture("prep45/plan-rows.json"), fixture("plans48/plan-rows.json")]);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

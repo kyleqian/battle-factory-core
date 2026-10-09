@@ -216,6 +216,13 @@ export const SPRITE_ORDER_PRODUCTION_PLANS: readonly string[] = Object.freeze([
   "Cff;Cf;Cf;Cf;Cf;Cf;D0;Cf;D2;Cf;D3;D1;Cf;Cf;D4;Cf;D5;Cf;D8;D6;D9;D7;D10;D11;Cf;D12",
   "Cff;Cf;Cf;Cf;Cf;Cf;D0;Cf;Cf;Cf;Cf;Cf;Cf;D2;D3;D1;D4;Cf/D5;D8;D6;D9;D7;D10;D13;D11;D12",
   "Cf;Cf;D0;D1;Cf;Cf;Cf;D2;Cf;D3;D4",
+  "Cf;D0;Cffff;Cffff;Cff;D1,4,2,3;D9;D10;D5,8,6,7;Cf;Cf;Cf;Cf;Cf;Cf;Cf;D11;D12;D13;D14;D15;D16;D17;Cf;D18",
+  "Cfff;D0,2,1",
+  "Cffff;D0;D1,3,2;Cffff;D4;D5,7,6",
+  "Cf;D0;Cffffff;D3,5,6,1,4,2;Cff;Cffffff;D7;D8;D9;D11;D10;D12;D14;D13",
+  "Cf;D0;Cf;Cf;Cf;D1;Cf;D2;Cf;D3;D4;D5",
+  "Cffffff;D3,4,5,2,0,1",
+  "Cf;D0;Cf;Cf;Cf;Cf;D1;Cf;D2;Cf;D3;Cf;D4;Cf;D5;Cf;D6;D7;D8;D9;Cf;Cf;Cf;D10;Cf;D11;D12;D13",
 ]);
 
 /** `<moveId>:<attacker side>` -> plan index; EXACT-PLAN bodies only (NEEDS-KEYS / NOT-OBSERVED are absent = invalidate). */
@@ -283,7 +290,9 @@ export const SPRITE_ORDER_PRODUCTION_BODIES: Readonly<Record<string, number>> = 
   "350:player": 187, "352:opponent": 188, "352:player": 189, "10143:opponent": 1, "10143:player": 1,
   "91:opponent": 196, "91:player": 196, "280:opponent": 197, "280:player": 197, "10091:opponent": 6, "10091:player": 6, "10280:opponent": 198, "10280:player": 198,
   "56:opponent": 201, "56:player": 201, "76:opponent": 202, "76:player": 202, "135:opponent": 79, "179:opponent": 203, "179:player": 203, "195:opponent": 204,
-  "195:player": 204, "236:opponent": 128, "315:player": 171, "345:opponent": 182, "349:opponent": 205, "10076:opponent": 206, "10076:player": 206,
+  "195:player": 204, "236:opponent": 128, "315:player": 171, "345:opponent": 182, "349:opponent": 205, "10076:opponent": 206, "10076:player": 206, "8:opponent": 212,
+  "8:player": 212, "13:opponent": 213, "13:player": 213, "75:opponent": 46, "165:opponent": 94, "173:opponent": 214, "173:player": 214, "213:opponent": 215,
+  "213:player": 215, "217:opponent": 216, "217:player": 216, "288:player": 217, "10013:opponent": 45, "10013:player": 45, "20217:opponent": 218, "20217:player": 218,
 });
 
 /** Mid-battle (non-move) animations -> plan index. STATS_CHANGE_CLASS_1 = args 15..28 (+-1) and 55/57 (multiple +1/-1),
@@ -293,13 +302,17 @@ export const SPRITE_ORDER_PRODUCTION_ANIMS: Readonly<Record<string, number>> = O
   FUTURE_SIGHT_HIT: 9,
   HELD_ITEM_EFFECT: 191,
   INGRAIN_HEAL: 199,
+  ITEM_KNOCKOFF: 195,
   LEECH_SEED_DRAIN: 199,
   SANDSTORM_CONTINUES: 107,
   STATS_CHANGE_CLASS_1: 1,
   STATS_CHANGE_CLASS_2: 195,
   STATUS_BRN: 192,
   STATUS_CONFUSION: 200,
+  STATUS_CURSED: 1,
+  STATUS_FRZ: 1,
   STATUS_INFATUATION: 192,
+  STATUS_NIGHTMARE: 1,
   STATUS_PRZ: 193,
   STATUS_PSN: 9,
   STATUS_SLP: 194,
