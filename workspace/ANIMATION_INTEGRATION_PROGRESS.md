@@ -30,6 +30,20 @@
   scans, Sky Attack seed 244 strike after Dragon Dance opponent). Worker gates 1,574 files / 12,963 tests, build, differential
   624/624 vs `26a6e5d5c`. Supervisor: census rerun byte-identical (`672f2df1`), corpus replay + per-frame check byte-identical to the
   prep45 receipts; union typecheck, smoke 448, 8 targeted files 80/80.
+- Folded Opus worker `38235b9be` as `45a5832f7` (union src tree `21729666`): GEOMETRY-KEYED order plans for Giga Drain (202) and Mega
+  Drain (72). Mechanism proven: same-period absorption orbs are destroyed on one frame and their freed slots keep the last
+  SortSprites y order (orb oam.y 288/288 + 28/28 == model), so the same-frame destroy pairs flip with the attacker / target
+  picture coordinates. One generator (`src/animation/absorptionOrbSpriteOrderPlan.ts`) walks the renderers' own orb timelines;
+  the seam (`liveMoveGeometrySpriteOrderPlanText`, displayed species via liveBattlerAnchors) passes the plan text on the
+  move-animation event; no geometry -> invalidates as before; Absorb control == ROM plan 44. ROM grids (predictions recorded before
+  the probes): Giga Drain 24 pairs + prep43's 10 = 34/34 plans, 1,360 allocation frames per-frame exact, 9/9 predicted flips; Mega
+  Drain 14/14, 518 frames. Census seeds 0..299 vs `3092cf05f`: 82.48 -> 83.10 % by count, 80.87 -> 81.76 % by frames (+49 / +10,319),
+  0 regressions, identical commands + digest. Worker gates 1,574 files / 12,968 tests, build, differential 624/624. Supervisor:
+  `gdgeoRun.sh` into fresh dirs — all 8 receipts byte-identical; clean auto-merge with order45 (both touch liveSpriteOrderHost.ts)
+  -> fresh union gates below.
+- Supervisor union gates on `45a5832f7` (src `21729666`): census seeds 0..299 85.71 % live by count / 85.41 % by frames (session
+  start 81.54 / 80.19), typecheck, full suite 1,575 files / 12,973 tests, build, differential 624/624 vs `8095eb86c`
+  (`tools/integration/fixtures/union-gates-45a5832f7.json`).
 
 ## 2026-10-08 (overnight) — S10A: Substitute presentation live, deferred order lend, live-share census, sprite-order plans; 245 + 13 + 18
 
