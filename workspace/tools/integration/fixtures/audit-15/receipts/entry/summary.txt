@@ -20,6 +20,10 @@ dig-flamethrower-ply-c0.json                 FLAMETHROWER  player   units=0   li
 dig-thunderbolt-ply-c0.json                  THUNDERBOLT   player   units=0   live=1 order=1 alloc=0 rows=237 exp=237 exact=237 px=0 r1==r2=1 ages=- 
 double-team-light-screen-opp-c0.json         LIGHT_SCREEN  opponent units=0   live=1 order=1 alloc=1 rows=86 exp=88 exact=85 px=2658 r1==r2=1 ages=59..59 
 double-team-light-screen-ply-c0.json         LIGHT_SCREEN  player   units=0   live=1 order=1 alloc=1 rows=86 exp=88 exact=86 px=0 r1==r2=1 ages=- 
+double-team-protect-opp-c0.json              PROTECT       opponent units=0   live=1 order=1 alloc=1 rows=123 exp=123 exact=123 px=0 r1==r2=1 ages=- 
+double-team-protect-opp-c1.json              PROTECT       opponent units=0   live=1 order=1 alloc=1 rows=123 exp=123 exact=123 px=0 r1==r2=1 ages=- 
+double-team-protect-ply-c0.json              PROTECT       player   units=0   live=1 order=1 alloc=1 rows=123 exp=123 exact=123 px=0 r1==r2=1 ages=- 
+double-team-protect-ply-c1.json              PROTECT       player   units=0   live=1 order=1 alloc=1 rows=123 exp=123 exact=123 px=0 r1==r2=1 ages=- 
 double-team-reflect-opp-c0.json              REFLECT       opponent units=0   live=1 order=1 alloc=1 rows=79 exp=79 exact=79 px=0 r1==r2=1 ages=- 
 double-team-thunderbolt-ply-c0.json          THUNDERBOLT   player   units=0   live=1 order=1 alloc=0 rows=237 exp=237 exact=237 px=0 r1==r2=1 ages=- 
 double-team-thunderbolt-ply-c1.json          THUNDERBOLT   player   units=0   live=1 order=1 alloc=0 rows=237 exp=237 exact=237 px=0 r1==r2=1 ages=- 
@@ -67,6 +71,8 @@ ice-beam-heal-bell-ply-c0.json               HEAL_BELL     player   units=0   li
 ice-beam-heal-bell-ply-c1.json               HEAL_BELL     player   units=0   live=1 order=1 alloc=0 rows=261 exp=261 exact=256 px=66 r1==r2=1 ages=35..39 
 ice-beam-heal-bell-ply-c2.json               HEAL_BELL     player   units=0   live=1 order=1 alloc=0 rows=261 exp=261 exact=256 px=66 r1==r2=1 ages=35..39 
 ice-beam-light-screen-opp-c0.json            LIGHT_SCREEN  opponent units=0   live=1 order=1 alloc=1 rows=86 exp=88 exact=85 px=2658 r1==r2=1 ages=59..59 
+ice-beam-protect-ply-c0.json                 PROTECT       player   units=0   live=1 order=1 alloc=1 rows=123 exp=123 exact=123 px=0 r1==r2=1 ages=- 
+ice-beam-protect-ply-c1.json                 PROTECT       player   units=0   live=1 order=1 alloc=1 rows=123 exp=123 exact=123 px=0 r1==r2=1 ages=- 
 ice-beam-reflect-opp-c0.json                 REFLECT       opponent units=0   live=1 order=1 alloc=1 rows=79 exp=79 exact=79 px=0 r1==r2=1 ages=- 
 ice-beam-reflect-ply-c0.json                 REFLECT       player   units=0   live=1 order=1 alloc=1 rows=79 exp=79 exact=79 px=0 r1==r2=1 ages=- 
 icy-wind-blaze-kick-ply-c0.json              BLAZE_KICK    player   units=0   live=1 order=1 alloc=0 rows=97 exp=78 exact=97 px=0 r1==r2=1 ages=- 
@@ -103,6 +109,8 @@ solar-beam-thunderbolt-ply-c0.json           THUNDERBOLT   player   units=0   li
 solar-beam-thunderbolt-ply-c1.json           THUNDERBOLT   player   units=0   live=1 order=1 alloc=0 rows=237 exp=237 exact=237 px=0 r1==r2=1 ages=- 
 solar-beam-thunderbolt-ply-c2.json           THUNDERBOLT   player   units=0   live=1 order=1 alloc=0 rows=237 exp=237 exact=237 px=0 r1==r2=1 ages=- 
 swift-light-screen-opp-c0.json               LIGHT_SCREEN  opponent units=0   live=1 order=1 alloc=1 rows=86 exp=88 exact=85 px=2658 r1==r2=1 ages=59..59 
+swift-protect-ply-c0.json                    PROTECT       player   units=0   live=1 order=1 alloc=1 rows=123 exp=123 exact=123 px=0 r1==r2=1 ages=- 
+swift-protect-ply-c1.json                    PROTECT       player   units=0   live=1 order=1 alloc=1 rows=123 exp=123 exact=123 px=0 r1==r2=1 ages=- 
 swift-thunderbolt-ply-c0.json                THUNDERBOLT   player   units=0   live=1 order=1 alloc=0 rows=237 exp=237 exact=237 px=0 r1==r2=1 ages=- 
 swift-thunderbolt-ply-c1.json                THUNDERBOLT   player   units=0   live=1 order=1 alloc=0 rows=237 exp=237 exact=237 px=0 r1==r2=1 ages=- 
 swift-thunderbolt-ply-c2.json                THUNDERBOLT   player   units=0   live=1 order=1 alloc=0 rows=237 exp=237 exact=237 px=0 r1==r2=1 ages=- 

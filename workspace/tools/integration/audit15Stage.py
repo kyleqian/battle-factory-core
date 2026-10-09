@@ -14,7 +14,7 @@ from pathlib import Path
 BASE = json.loads(Path("tools/battle-lab/prep18-return-altopp-snorlax-golem.json").read_text())
 OUT = Path(sys.argv[1]); OUT.mkdir(parents=True, exist_ok=True)
 MOVES = {"WILL_O_WISP": 261, "FLAMETHROWER": 53, "HYDRO_PUMP": 56, "FIRE_SPIN": 83, "PETAL_DANCE": 80, "DIG": 91, "DOUBLE_TEAM": 104,
-         "LIGHT_SCREEN": 113, "ICE_BEAM": 58, "REFLECT": 115, "FAINT_ATTACK": 185, "COUNTER": 68, "SWIFT": 129, "THUNDERBOLT": 85, "ICY_WIND": 196, "TACKLE": 33, "SOLAR_BEAM": 76, "GIGA_DRAIN": 202, "BLAZE_KICK": 299, "HEAL_BELL": 215}
+         "LIGHT_SCREEN": 113, "ICE_BEAM": 58, "REFLECT": 115, "FAINT_ATTACK": 185, "COUNTER": 68, "SWIFT": 129, "THUNDERBOLT": 85, "ICY_WIND": 196, "TACKLE": 33, "SOLAR_BEAM": 76, "GIGA_DRAIN": 202, "BLAZE_KICK": 299, "HEAL_BELL": 215, "PROTECT": 182}
 # name: (unit move, consumer move, consumer side)
 CHAINS = {
     "brn-flamethrower-ply": ("WILL_O_WISP", "FLAMETHROWER", "player"),
@@ -69,6 +69,11 @@ CHAINS = {
     "ctl-blaze-kick-opp": ("COUNTER", "BLAZE_KICK", "opponent"),
     "ctl-heal-bell-ply": ("COUNTER", "HEAL_BELL", "player"),
     "ctl-heal-bell-opp": ("COUNTER", "HEAL_BELL", "opponent"),
+    # fifth batch: Protect (+3 priority: turn 1 Protect is the first body, a later Protect follows [Protect, unit] when the ROM's 1/2 succeeds)
+    "double-team-protect-ply": ("DOUBLE_TEAM", "PROTECT", "player"),
+    "double-team-protect-opp": ("DOUBLE_TEAM", "PROTECT", "opponent"),
+    "ice-beam-protect-ply": ("ICE_BEAM", "PROTECT", "player"),
+    "swift-protect-ply": ("SWIFT", "PROTECT", "player"),
     # controls: the consumer is the battle's first body (Counter fails: no body)
     "ctl-reflect-opp": ("COUNTER", "REFLECT", "opponent"),
     "ctl-flamethrower-ply": ("COUNTER", "FLAMETHROWER", "player"),

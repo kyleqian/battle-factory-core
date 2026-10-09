@@ -26,9 +26,9 @@ TURN = 1334
 SPECIES = {113: "CHANSEY", 143: "SNORLAX", 102: "EXEGGCUTE", 95: "ONIX"}
 MOVES = {"Move_WILL_O_WISP": 261, "Move_FLAMETHROWER": 53, "Move_HYDRO_PUMP": 56, "Move_FIRE_SPIN": 83, "Move_PETAL_DANCE": 80, "Move_DIG": 91,
          "Move_DOUBLE_TEAM": 104, "Move_LIGHT_SCREEN": 113, "Move_ICE_BEAM": 58, "Move_REFLECT": 115, "Move_FAINT_ATTACK": 185,
-         "Move_SWIFT": 129, "Move_THUNDERBOLT": 85, "Move_ICY_WIND": 196, "Move_TACKLE": 33, "Move_SOLAR_BEAM": 76, "Move_GIGA_DRAIN": 202, "Move_BLAZE_KICK": 299, "Move_HEAL_BELL": 215}
-POWER = {261: 0, 53: 95, 56: 120, 83: 15, 80: 70, 91: 60, 104: 0, 113: 0, 58: 95, 115: 0, 185: 60, 129: 60, 85: 95, 196: 55, 33: 35, 76: 120, 202: 60, 299: 85, 215: 0}
-CONSUMERS = {53: "FLAMETHROWER", 113: "LIGHT_SCREEN", 115: "REFLECT", 85: "THUNDERBOLT", 299: "BLAZE_KICK", 215: "HEAL_BELL"}
+         "Move_SWIFT": 129, "Move_THUNDERBOLT": 85, "Move_ICY_WIND": 196, "Move_TACKLE": 33, "Move_SOLAR_BEAM": 76, "Move_GIGA_DRAIN": 202, "Move_BLAZE_KICK": 299, "Move_HEAL_BELL": 215, "Move_PROTECT": 182}
+POWER = {261: 0, 53: 95, 56: 120, 83: 15, 80: 70, 91: 60, 104: 0, 113: 0, 58: 95, 115: 0, 185: 60, 129: 60, 85: 95, 196: 55, 33: 35, 76: 120, 202: 60, 299: 85, 215: 0, 182: 0}
+CONSUMERS = {53: "FLAMETHROWER", 113: "LIGHT_SCREEN", 115: "REFLECT", 85: "THUNDERBOLT", 299: "BLAZE_KICK", 215: "HEAL_BELL", 182: "PROTECT"}
 STATUS1 = {"Status_Burn": 0x10, "Status_Paralysis": 0x40}
 # production age 0 relative to the ROM activation row (the accepted fixtures' framing: Flamethrower denseWindow activation+4 / ageOffset -11)
 AGE_OFFSET = {53: -15, 299: -10}  # Blaze Kick: the accepted window starts at activation + 10 with ageOffset 0
