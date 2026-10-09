@@ -33,6 +33,32 @@
 - Supervisor union gates on `b8b169745` (src `dae0a8b9`; alloc50 + plans51): typecheck, full suite 1,585 files / 13,052 tests, build,
   differential 624/624 vs `ccc4774c4`, census seeds 0..299 93.41 % by count / 94.75 % by frames (+60 / +7,364 vs `ccc4774c4` = the sum
   of both folds; 0 regressions, identical commands + digest) (`tools/integration/fixtures/union-gates-b8b169745.json`).
+- Folded Opus worker `114e02af2` as `bb0415c82` (union src tree `d71d9924`): lsbz — (A) Light Screen (113) opponent: D4 entry
+  (`liveMoveTimingPolicy.ts`, `bg-write-row`) renders the dominant row-59 BLDALPHA phase (no hold; audit-15 counters 9 direct : 2 hold);
+  `lightScreen.ts` reducer keeps the hold as its default for the acceptance fixtures; Light Screen scoped exact -> faithful timing
+  (census `240+13+23+0+0=276`). (B) Blizzard (59): the case-59 gate read the fixed 361 because it omitted the field — the live window is
+  now `blizzardImpactStartAge(side, geometry) + 164` from the geoice particle replay (opponent impact 194..206 -> 358..370 rows; player
+  always 208). Predictions for a 25-pair grid committed before the probes; 24 staged pairs matched the predicted lag shape (16 lag : 8
+  none); 17 policy-phase windows 0 px, 8 other-phase windows only on documented ages I+141..I+156. ARBOK -> CATERPIE (geoice control) is
+  now live at 362 rows but every row carries the same static 133-px battler-palette residual (bbox x 98..221 y 33..103; outside the
+  Blizzard program) — excluded, unexplained (ISSUES #152). Census seeds 0..299 vs `0a74c111a`: +5 / +1,810 (battle 87 WALREIN -> JYNX
+  Blizzard, 361 fallback -> 362 live), 0 regressions, command sequence identical (battle frames +4: the corrected Blizzard length).
+  d4a regression 286 fixtures 0 violations; ON/OFF parity on a Light Screen and a Blizzard route. Worker gates 1,586 files / 13,058
+  tests, build, differential 624/624. Supervisor: lsbzTimingCheck rerun fresh — 44/44 windows == receipt (rows, px, A == B), 0
+  violations; census rerun +5 / +1,810, sequence identical.
+- Supervisor union gates on `bb0415c82` (src `d71d9924`; alloc50 + plans51 + lsbz): typecheck, full suite 1,587 files / 13,062 tests,
+  build, differential 624/624 vs `ccc4774c4`, census seeds 0..299 93.48 % / 94.91 % (+65 / +9,174 vs `ccc4774c4` = the sum of the three
+  folds; 0 regressions; command sequence identical) (`tools/integration/fixtures/union-gates-bb0415c82.json`).
+- prep52 (side, `426f54132`, new files only; merged `33ab9c588`): the allocator TAIL. Chain census on `b8b169745`: 89 declines / 9,153
+  frames (greedy Future Sight, Seismic Toss, Ice Ball, FRZ, Pursuit, Perish Song, then ~24 two-command bodies). 47 / 47 units NET-ZERO
+  (150 scenarios x2 fresh, all A == B): 42 bodies by move id (incl. Future Sight 248's setup), the delayed hit `General_FutureSightHit`
+  (sAnimMoveIndex 0; no sprites), FRZ / INFATUATION / CURSED / NIGHTMARE by script label; WRAPPED never plays (source comment). Temp
+  patch census seeds 0..299: 93.41 -> 94.17 % by count, 94.75 -> 95.27 % by frames (+60 / +6,012), 0 regressions, predictor exact.
+  Residual after the patch: 29 / 3,141, all post-KO send-outs whose ORDER host has no EXACT plan (hail, Sand-Attack, Bounce, Rain Dance,
+  Fly, Mud-Slap, HAIL_CONTINUES, Shock Wave). FINDING (open): production never invalidates the allocator on general / hit / stat
+  animations and no receipt covers that assumption (six seen by chance are net-zero; rain / sandstorm / hail continuing, Leech Seed
+  drain, Focus Band, Knock Off, Wish heal, Substitute fade, traps unproven). Supervisor: `prep52Run.sh` into fresh dirs — 9 / 9 receipts
+  byte-identical, src reverted.
 
 ## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
 
