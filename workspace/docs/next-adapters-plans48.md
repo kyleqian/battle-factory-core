@@ -186,3 +186,15 @@ New tests:
 Caveats:
 - `fz-opp-s27` lost its run A (teardown), so it is not in the receipts. The FRZ sweep counts 159 jobs.
 - The receipts come from one probe directory whose jobs were re-run as batches were added. Each job's A/B pair is from one batch.
+
+## Gates (tested commit `0344cf6ff`, src tree `f34f016f`; serialized, 4 Vitest workers)
+
+| gate | result |
+|---|---|
+| targeted: `tests/spriteOrder*.test.ts` (incl. the new Dream Eater file), `liveSpriteOrderHost`, `liveSpriteAllocator*`, `factoryAnimationInventory`, `animationBoundaryRatchet`, `playableAnimationIntegration`, `wordsOrderDeferredLend`, `liveOrderConsumerMoveAdapters` | 18 files / 156 tests passed |
+| `npm run typecheck` | pass |
+| `npm run test:smoke` | 448 / 448 |
+| full `npm test -- --maxWorkers=4` | 1580 files passed (44 skipped), 13008 tests passed (223 skipped), first run, no reruns |
+| `npm run build` | pass |
+| `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 2dcdd5883` | PASS, 624 / 624 byte-identical |
+| `git diff --check` | clean |
