@@ -133,3 +133,22 @@ describe("later58 Outrage 200 at a later body", () => {
     for (const name of ["outrage-pla-dragonite-onix-splash-1", "outrage-pla-dragonite-onix-qa-0"]) expect(presentation(fixture(name))).toBeNull();
   });
 });
+
+describe("later58 Fury Cutter 210: a later counter-1 body (request power 10 / 15)", () => {
+  it.each(pinnedOf("FURY_CUTTER"))("%s: live, every pinned row equals the ROM frame", expectPinnedRows, 180000);
+
+  it("the first Fury Cutter after Quick Attack / Growl / Splash is live on rest-free battlers; counter 2+ power and an ONIX decline", () => {
+    for (const name of ["fury-cutter-pla-grovyle-blissey-qa-0", "fury-cutter-opp-scyther-golem-splashslow-0", "fury-cutter-pla-scyther-golem-growlslow-0"]) {
+      expect(presentation(fixture(name))?.config.move).toBe("FURY_CUTTER");
+    }
+    const later = fixture("fury-cutter-pla-grovyle-blissey-qa-0");
+    expect(later.requestFields?.power).toBe(10);
+    expect(presentation({ ...later, requestFields: { ...later.requestFields, power: 15 } })?.config.move).toBe("FURY_CUTTER"); // SWARM
+    for (const power of [20, 30, 40, 160]) expect(presentation({ ...later, requestFields: { ...later.requestFields, power } })).toBeNull();
+    expect(presentation({ ...later, target: { ...later.target, species: "ONIX" } })).toBeNull();
+    // A first body stays live whatever the power (counter 1 is implied).
+    const first = fixture("fury-cutter-pla-grovyle-blissey-growl-0");
+    expect(first.precedingBodies).toBeUndefined();
+    expect(presentation({ ...first, requestFields: { ...first.requestFields, power: 20 } })?.config.move).toBe("FURY_CUTTER");
+  });
+});

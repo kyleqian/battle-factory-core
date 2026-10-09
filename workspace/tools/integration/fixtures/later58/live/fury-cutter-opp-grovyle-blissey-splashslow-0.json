@@ -1,0 +1,46 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "FURY_CUTTER",
+ "bodyIndex": 0,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later58/scenarios/fury-cutter-opp-grovyle-blissey-splashslow.json",
+ "denseWindow": {
+  "startFrame": 321,
+  "endFrame": 363
+ },
+ "attacker": {
+  "species": "GROVYLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "BLISSEY",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 2027808502,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 330,
+  "playerMaxHp": 330,
+  "opponentHp": 157,
+  "opponentMaxHp": 157,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 10
+ },
+ "precedingBodies": [
+  {
+   "moveId": 150,
+   "side": "player"
+  }
+ ]
+}

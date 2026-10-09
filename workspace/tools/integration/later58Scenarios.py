@@ -121,3 +121,48 @@ for move, (bases, turns) in BASES2.items():
             s["trace"] = {"segments": seg}
             (OUT / f"{move}-{tag}-{variant}.json").write_text(json.dumps(s, indent=1) + "\n")
 print(len(list(OUT.glob("*.json"))))
+# Third batch: Fury Cutter 210 (the counter-1 body is the only live one; a later counter-1 body is the first Fury Cutter after other units).
+BASES3 = [("tools/battle-lab/mechanic-fury-cutter-player-grovyle-opponent-blissey.json", "opponent"),
+          ("tools/battle-lab/mechanic-fury-cutter-opponent-grovyle-player-blissey.json", "player"),
+          ("tools/battle-lab/prep18-fury-cutter-alt-scyther-golem.json", "opponent"),
+          ("tools/battle-lab/prep18-fury-cutter-altopp-scyther-golem.json", "player")]
+for path, foe in BASES3:
+    base = json.loads(Path(path).read_text())
+    assert "seed" in base, path
+    atk = "player" if foe == "opponent" else "opponent"
+    parts = Path(path).stem.split("-")
+    tag = f"{atk[:3]}-{parts[-3]}-{parts[-1]}" if Path(path).stem.startswith("mechanic-") else f"{atk[:3]}-{parts[-2]}-{parts[-1]}"
+    for variant, moves in VARIANTS:
+        s = json.loads(json.dumps(base))
+        s["seed"] = base["seed"]  # explicit lab seed (ISSUES #154)
+        s["overrides"]["parties"][foe][0]["moves"] = moves
+        seg = []
+        for turn in range(3):
+            seg += [{"frames": 2, "buttons": ["A"]}, {"frames": 30, "buttons": []}, {"frames": 2, "buttons": ["A"]},
+                    {"frames": 1300 if turn == 2 else 1100, "buttons": []}]
+        s["trace"] = {"segments": seg}
+        (OUT / f"fury-cutter-{tag}-{variant}.json").write_text(json.dumps(s, indent=1) + "\n")
+print(len(list(OUT.glob("*.json"))))
+# Fury Cutter "slow" variants: the Fury Cutter user is made slower than the foe (speed IV / EV 0, Brave nature; the foe speed IV 31 /
+# EV 252, Timid nature), so its FIRST Fury Cutter (counter 1) is a later body after the foe's Growl + stat / Splash body.
+for path, foe in BASES3:
+    base = json.loads(Path(path).read_text())
+    atk = "player" if foe == "opponent" else "opponent"
+    parts = Path(path).stem.split("-")
+    tag = f"{atk[:3]}-{parts[-3]}-{parts[-1]}" if Path(path).stem.startswith("mechanic-") else f"{atk[:3]}-{parts[-2]}-{parts[-1]}"
+    for variant, moves in VARIANTS[1:]:
+        s = json.loads(json.dumps(base))
+        s["seed"] = base["seed"]  # explicit lab seed (ISSUES #154)
+        lead, foe_lead = s["overrides"]["parties"][atk][0], s["overrides"]["parties"][foe][0]
+        foe_lead["moves"] = moves
+        lead["ivs"]["speed"], lead["evs"]["speed"], lead["nature"] = 0, 0, 2
+        spare = next(k for k in ("hp", "attack", "defense", "spAttack", "spDefense") if foe_lead["evs"][k] >= 252)
+        foe_lead["evs"][spare], foe_lead["evs"]["speed"] = foe_lead["evs"]["speed"], 252
+        foe_lead["ivs"]["speed"], foe_lead["nature"] = 31, 10
+        seg = []
+        for turn in range(3):
+            seg += [{"frames": 2, "buttons": ["A"]}, {"frames": 30, "buttons": []}, {"frames": 2, "buttons": ["A"]},
+                    {"frames": 1300 if turn == 2 else 1100, "buttons": []}]
+        s["trace"] = {"segments": seg}
+        (OUT / f"fury-cutter-{tag}-{variant}slow.json").write_text(json.dumps(s, indent=1) + "\n")
+print(len(list(OUT.glob("*.json"))))

@@ -24,6 +24,7 @@ GATES = {
     "SKY_ATTACK": ("skyAttack143", "charge: known lend AND (firstBody OR both species front-idle rests {0,0}) AND non-shiny (later charge: WIN0 (0,0)); strike unchanged"),
     "BONEMERANG": ("bonemerang155", "known lend AND (firstBody OR afterBonemerangHit1 OR both species front-idle rests {0,0}) AND non-shiny"),
     "OUTRAGE": ("outrage200", "known lend AND (firstBody OR both species front-idle rests {0,0}) AND non-shiny"),
+    "FURY_CUTTER": ("furyCutter210", "known lend AND (firstBody OR (both species front-idle rests {0,0} AND request power 10 / 15 = counter 1)) AND non-shiny"),
     "MEMENTO": ("memento262", "UNCHANGED (first body only): the scanline entry is read and a scanline predecessor (Psywave) changes it; no production scanline-history input"),
 }
 PINS = {
@@ -34,6 +35,7 @@ PINS = {
     "SKY_ATTACK": ["sky-attack-opp-pidgeot-golem-qa-2.json", "sky-attack-pla-fearow-shuckle-splash-2.json"],
     "BONEMERANG": ["bonemerang-opp-rhydon-golem-splash-2.json", "bonemerang-pla-rhydon-golem-growl-1.json"],
     "OUTRAGE": ["outrage-opp-flygon-golem-qa-1.json", "outrage-pla-flygon-golem-growl-2.json"],
+    "FURY_CUTTER": ["fury-cutter-pla-scyther-golem-growlslow-0.json", "fury-cutter-opp-grovyle-blissey-qa-0.json"],
     "MEMENTO": [],
 }
 def alloc_components(later):

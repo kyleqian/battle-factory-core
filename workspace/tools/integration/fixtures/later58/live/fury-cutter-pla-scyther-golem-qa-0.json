@@ -1,0 +1,46 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "FURY_CUTTER",
+ "bodyIndex": 0,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/later58/scenarios/fury-cutter-pla-scyther-golem-qa.json",
+ "denseWindow": {
+  "startFrame": 324,
+  "endFrame": 366
+ },
+ "attacker": {
+  "species": "SCYTHER",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2654435782,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 137,
+  "playerMaxHp": 177,
+  "opponentHp": 187,
+  "opponentMaxHp": 187,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 10
+ },
+ "precedingBodies": [
+  {
+   "moveId": 98,
+   "side": "opponent"
+  }
+ ]
+}

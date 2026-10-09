@@ -3472,8 +3472,12 @@ export function liveMoveAnimationPresentation(
       // oam1 (prep20 s1.3): counter-1 body only. No counter reaches the request (MOVE_ANIMATION carries none for 210), but a
       // first body implies it: furyCutterCounter starts at 0 for a sent-in battler, a successful Fury Cutter always plays its
       // body (so none ran before) and a miss resets it; Cmd_furycuttercalc then sets 1. Counters 2..5 are never first bodies
-      // and also need the gComplexPaletteBlend palette provider: they decline. Non-shiny, zero idle rests.
-      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      // and also need the gComplexPaletteBlend palette provider: they decline. Non-shiny, zero idle rests. later58
+      // (docs/next-adapters-later58.md): at a LATER body the counter is read from the request's power (gBattleMovePower after
+      // damagecalc = 10 << (counter - 1), x 1.5 under SWARM): 10 / 15 is counter 1, whose body is exact after Quick Attack / Growl /
+      // Splash (the history it starts from is unread); both species rests must be {0,0}. After its own body the order lend is unknown.
+      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput.firstBody && (!liveBattlersRestFree(art) || (request.power !== 10 && request.power !== 15))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       const activationOrder = spriteOrderWithOccupiedPrefix(

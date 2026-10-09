@@ -5,12 +5,12 @@ usage: later58Fixtures.py <probe-dir> <fixture-dir>
 Per body of Signal Beam 324 / Sheer Cold 329 / Mach Punch 183 / Extrasensory 326 / Sky Attack 143 / Bonemerang 155 / Memento 262 / Outrage 200
 (the prep48DigFixtures.py recipe):
   denseWindow = [activation, activation + rows - 1] of the probed body (the scenario's own activation and length). rows = the probe's
-  first-inactive frame - activation (+1 for Extrasensory, whose live duration includes the first inactive row; the d4aFixtures.py
+  first-inactive frame - activation (+1 for Extrasensory / Fury Cutter, whose live duration includes the first inactive row; the d4aFixtures.py
   convention). fieldProfile HP / maxHP from the ROM gBattleMons at activation; species / personality from the probe; precedingBodies = every
   earlier animation unit of the battle (move bodies by move id + attacker side, General_StatsChange = statAnimation 22 (Growl, Attack -1),
   Status_Confusion = statusAnimation CONFUSION). Bodies after a faint + send-in (a lead species changed) or after a unit precedingBodies cannot
   carry (Special_ switch, General_ held-item animations) are not fixtured. Sky Attack: the charge bodies only (the strike is a 10143 unit), empty text box.
-  Bonemerang: hit 2 = the side's odd hit body (turn 1, empty text box). D4 moves carry the measured phase(s) for d4aTimingCheck.ts: Mach Punch / Sheer Cold /
+  Bonemerang: hit 2 = the side's odd hit body (turn 1, empty text box). Fury Cutter: request power = 10 << own-body index (SWARM x 1.5). D4 moves carry the measured phase(s) for d4aTimingCheck.ts: Mach Punch / Sheer Cold /
   Extrasensory optional-lag-age from the window length; Extrasensory scanline-split-line = the first-body label of the same species pair /
   side (PREP30_SPLIT in d4aFixtures.py: "event" for the player-attacker ALAKAZAM -> GOLEM pair, else "no-event").
 """
@@ -23,7 +23,7 @@ NAMES = [s["species"].removeprefix("SPECIES_") for s in json.loads(Path("src/dat
 TARGETS = {"Move_SIGNAL_BEAM": ("SIGNAL_BEAM", 324, 0), "Move_SHEER_COLD": ("SHEER_COLD", 329, 0),
            "Move_MACH_PUNCH": ("MACH_PUNCH", 183, 0), "Move_EXTRASENSORY": ("EXTRASENSORY", 326, 1),
            "Move_SKY_ATTACK": ("SKY_ATTACK", 143, 0), "Move_BONEMERANG": ("BONEMERANG", 155, 0), "Move_MEMENTO": ("MEMENTO", 262, 0),
-           "Move_OUTRAGE": ("OUTRAGE", 200, 0)}
+           "Move_OUTRAGE": ("OUTRAGE", 200, 0), "Move_FURY_CUTTER": ("FURY_CUTTER", 210, 1)}
 # D4 optional-lag-age: rows with the lag ("event") / without (liveMoveTimingPolicy.ts bodyRows).
 LAG_ROWS = {"MACH_PUNCH": (110, 109), "SHEER_COLD": (191, 190), "EXTRASENSORY": (162, 161)}
 MOVES = {"Move_QUICK_ATTACK": 98, "Move_GROWL": 45, "Move_SPLASH": 150, "Move_ROCK_SLIDE": 157, "Move_TACKLE": 33, "Move_SANDSTORM": 201,
@@ -68,6 +68,16 @@ for probe in sorted(probe_dir.glob("*.json")):
             if move == "BONEMERANG" and k % 2 == 1:
                 fx["requestFields"] = {"turn": 1}  # hit 2 (the prep29-live hit2 fixtures)
                 fx["messageLines"] = ["", ""]
+            if move == "FURY_CUTTER" and k > 0:
+                # After its own Fury Cutter body the order host has no plan (census: "order host: no EXACT plan: body 210"): production's
+                # lend is unknown there, so no later counter-2+ body is fixtured.
+                break
+            if move == "FURY_CUTTER":
+                # gBattleMovePower = 10 << (counter - 1) (x 1.5 under SWARM at <= 1/3 HP): the MOVE_ANIMATION power argument. Every body of the
+                # side is a successful Fury Cutter of the same battler (no switch), so counter = own body index + 1 unless a miss intervened.
+                hp, max_hp = at[atk]["hp"], at[atk]["maxHP"]
+                power = 10 << min(k, 4)
+                fx["requestFields"] = {"turn": 0, "power": power * 3 // 2 if at[atk]["species"] == 123 and hp * 3 <= max_hp else power}
             if move in LAG_ROWS:
                 lag, nolag = LAG_ROWS[move]
                 fx["timingPhase"] = "event" if rows == lag else "no-event" if rows == nolag else f"unclassified rows {rows}"
