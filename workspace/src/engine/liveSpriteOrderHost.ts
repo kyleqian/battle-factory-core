@@ -102,10 +102,12 @@ function withoutDeferred(host: LiveSpriteOrderHost): LiveSpriteOrderHost {
  * Record the deferred-lend marker at a DEFERRED_LEND_MOVE_IDS body's activation edge (orchestrator, right after lendLiveSpriteOrder): its
  * presentation body key, request fields and its own lend, which must be a known-entry-occupancy free order (battler slots and occupant
  * roles the entry ones: the lend is the raw free order) or itself deferred. Anything else records nothing (later bodies decline).
+ * `bodySpecies` (words59): the species displayed on each side at the body, recorded for Sand-Attack / Mud-Slap only.
  */
 export function markLiveSpriteOrderDeferredBody(
   host: LiveSpriteOrderHost, lend: LiveMoveSpriteOrderInput | undefined,
   body: Readonly<{ moveId: number; attacker: number; rolloutCounter?: number; turn?: number }>, key: string,
+  bodySpecies?: Readonly<{ player: number; opponent: number }>,
 ): LiveSpriteOrderHost {
   if (!DEFERRED_LEND_MOVE_IDS.includes(body.moveId) || lend === undefined || (body.attacker !== 0 && body.attacker !== 1)) return host;
   let activation: SpriteOrderDeferredLend["activation"];
@@ -122,7 +124,11 @@ export function markLiveSpriteOrderDeferredBody(
   return Object.freeze({ ...host, deferredBody: Object.freeze({
     key, moveId: body.moveId, attackerSide: body.attacker === 0 ? "player" as const : "opponent" as const,
     ...(body.rolloutCounter === undefined ? {} : { rolloutCounter: body.rolloutCounter }),
-    ...(body.turn === undefined ? {} : { turn: body.turn }), activation }) });
+    ...(body.turn === undefined ? {} : { turn: body.turn }),
+    // words59: the dirt units' carry reads the body's displayed species (the consumer's field may show a replacement)
+    ...(bodySpecies === undefined || (body.moveId !== 28 && body.moveId !== 189) ? {}
+      : { bodySpecies: Object.freeze({ player: bodySpecies.player, opponent: bodySpecies.opponent }) }),
+    activation }) });
 }
 
 /** Moves whose script branches with choosetwoturnanim on `gAnimMoveTurn & 1` (Razor Wind / Solar Beam unleash, Sky Attack strike, Dig unleash, Brick Break screen broken). */

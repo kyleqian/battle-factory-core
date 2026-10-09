@@ -551,6 +551,12 @@ export interface SpriteOrderDeferredLend {
    * `moveId` is 0 (no move body).
    */
   readonly generalAnimation?: string;
+  /**
+   * words59 (docs/next-adapters-words59.md): Sand-Attack / Mud-Slap: the species ids displayed on each side at the body (the field the live
+   * renderer drew it on). Their dirt carry aims at both battlers' pic points, which a later send-out / switch-in changes on the consumer's
+   * field; the carry reads these instead (species ids only: word-free, render-pure).
+   */
+  readonly bodySpecies?: Readonly<Record<SpriteOrderSide, number>>;
   readonly activation: Readonly<{ free: readonly number[] }> | Readonly<{ deferred: SpriteOrderDeferredLend }>;
   readonly units: readonly SpriteOrderPresentationEvent[];
 }
@@ -587,7 +593,7 @@ const replacesBattler = (unit: SpriteOrderPresentationEvent) => unit.kind === "n
 /**
  * Carry of a deferred body (resolveSpriteOrderDeferredLend): the free order after the body from its activation free order, or null.
  * `battlerReplacedSince`: a replayed unit after this body showed another mon on a battler (send-out / switch-in), so the consumer's
- * displayed field is not the body's (a carry that reads battler geometry must decline: the marker is species-free).
+ * displayed field is not the body's (a carry that reads battler geometry must take it from the marker's `bodySpecies`, or decline).
  */
 export type SpriteOrderDeferredCarry = (
   body: SpriteOrderDeferredLend, activationFree: readonly number[], battlerReplacedSince: boolean,
