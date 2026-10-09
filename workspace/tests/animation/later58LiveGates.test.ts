@@ -80,3 +80,19 @@ describe("later58 Sheer Cold 329 at a later body (D4: the per-side age-171 polic
     expect(presentation({ ...first, target: { ...first.target, species: "ONIX" } })?.config.move).toBe("SHEER_COLD");
   });
 });
+
+describe("later58 Extrasensory 326 at a later body (D4c: opponent attacker only)", () => {
+  it.each(pinnedOf("EXTRASENSORY"))("%s: live, every pinned row equals the ROM frame", expectPinnedRows, 180000);
+
+  it("an opponent attacker's later bodies are live on rest-free battlers; a player attacker's later body declines (scanout split)", () => {
+    for (const name of ["extrasensory-opp-nuzleaf-shuckle-qa-0", "extrasensory-opp-nuzleaf-shuckle-growl-2", "extrasensory-opp-alakazam-golem-splash-1"]) {
+      expect(presentation(fixture(name))?.config.move).toBe("EXTRASENSORY");
+    }
+    const opp = fixture("extrasensory-opp-nuzleaf-shuckle-qa-0");
+    expect(presentation({ ...opp, attacker: { ...opp.attacker, species: "ONIX" } })).toBeNull();
+    for (const name of ["extrasensory-pla-nuzleaf-shuckle-qa-0", "extrasensory-pla-nuzleaf-shuckle-splash-1", "extrasensory-pla-alakazam-golem-growl-1"]) {
+      expect(presentation(fixture(name))).toBeNull();
+    }
+    expect(presentation(fixture("extrasensory-pla-nuzleaf-shuckle-splash-0"))?.config.move).toBe("EXTRASENSORY");
+  });
+});

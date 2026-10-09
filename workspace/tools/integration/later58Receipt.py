@@ -38,6 +38,13 @@ def alloc_components(later):
         for k in ("tileBitmapSha", "paletteTags", "matrixBitmap", "tasks", "tileTagsSha"):
             n[k] += body["at"][k] == first["at"][k]
     return {k: f"{v}/{len(later)}" for k, v in n.items()}
+# A first-body Extrasensory window of the accepted ALAKAZAM -> GOLEM player pair reproduces that window's documented per-window scanout-split
+# residual (docs/animation-integration-live-status.json alternatePhaseResidual.windows["extrasensory-alt-player-alakazam-golem"]).
+status = json.loads(Path("docs/animation-integration-live-status.json").read_text())
+split = next(e for e in status["faithfulTimingAdapters"] if e["id"] == 326)["alternatePhaseResidual"]["windows"]["extrasensory-alt-player-alakazam-golem"]["ages"]
+for r in rows.values():
+    if r["move"] == "EXTRASENSORY" and r["firstBody"] and r["verdict"] == "FAIL" and r["affectedAges"] == f"{split[0]}..{split[-1]} ({len(split)})":
+        r["verdict"] = "documented-window extrasensory-alt-player-alakazam-golem"
 moves = sorted({r["move"] for r in rows.values()}, key=list(GATES).index)
 receipt = {"schema": "later58-live-receipt/v1", "gates": {GATES[m][0]: GATES[m][1] for m in moves}, "windows": {}, "pinned": {}}
 for m in moves:

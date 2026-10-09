@@ -3703,9 +3703,13 @@ export function liveMoveAnimationPresentation(
     }
     case 326: {
       // D4c faithful timing: Extrasensory (prep30 s1 / s3; liveOamMoves.ts liveExtrasensoryInputs). The scanline buffers at activation are history
-      // (the battle intro's residue): only the battle's FIRST animation unit is proven to start from them (every measured window is a first body),
-      // so a later body declines (an earlier scanline body may have left other buffers). Known-entry allocator, non-shiny, zero target idle rest.
-      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      // (the battle intro's residue). Known-entry allocator, non-shiny, zero target idle rest. later58 (docs/next-adapters-later58.md): an
+      // OPPONENT attacker's later body (player target: the distortion write lands before the target's lines) is exact on rows 0..142 after
+      // Quick Attack / Growl / Splash / its own body (65 displayed scanline lines then differ from the residue, unread) and differs only on
+      // the documented lag rows 143..158; it needs both species rests {0,0}. A PLAYER attacker's later body (opponent target) declines: the
+      // scanout split moved by the history (18 px after a Quick Attack alone, 54..298k px after other predecessors) is not modelled.
+      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput.firstBody && (attacker.geometry.side !== "opponent" || !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       const activationOrder = spriteOrderWithOccupiedPrefix(
