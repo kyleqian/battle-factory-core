@@ -17,6 +17,18 @@ backlog.
 
 # Open
 
+## #156 — General / hit / stat animations are assumed allocator net-zero without receipts (S10A, found 2026-10-09 by prep52)
+
+`prepareResolutionPalette` (`src/engine/factoryRoundBattleOrchestrator.ts`, `scanThrough`) invalidates the live sprite ALLOCATOR host
+only for status animations outside `LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS`; general, hit and stat animations never
+invalidate it. prep52's scan (`tools/integration/fixtures/prep52/general-animation-scan.json`) saw six general animations by chance,
+all net-zero; the others were never probed: RAIN / SANDSTORM / HAIL continuing, LEECH_SEED_DRAIN, FOCUS_BAND, ITEM_KNOCKOFF, WISH_HEAL,
+SUBSTITUTE_FADE, the TURN_TRAP family (Fire Spin / Whirlpool / Sand Tomb / Clamp), hit and stat animations. FOCUS_BAND and
+ITEM_KNOCKOFF are known to leave a sprite alive past the script `end` (plans48 / plans51 order carries), so a live body right after
+them may start from a non-entry allocator. No defect is demonstrated yet. Resume: a prep50-style script-keyed net-zero audit of
+every general / hit / stat animation reachable in Factory play (both sides, two species, twice fresh); invalidate the allocator after
+any unit that is not net-zero (or model its known delta), with a census delta and a dense window after each carried unit.
+
 ## #155 — Eruption (284) opponent sprite-order plan is wrong for an elevated attacker (S10A, found 2026-10-09 by plans51)
 
 The production order table's `284:opponent` EXACT plan (base table, prep-era) matched 3 of 4 fresh ROM opponent instances in
@@ -90,17 +102,13 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 - **Audit 14 (`docs/live-species-audit-14.md`, 2026-10-08):** FIXED in `2ba4da4a3`: fade row-0 shadow, Confuse Ray / Bite
   idle-rest opponent attacker; the Confuse Ray CPU phase is a D4 policy entry since `7993b02fd` (d4tails). Open: Double-Edge row 33
   with an idle-rest opponent attacker (410 / 1,091 px), Attract GOLBAT one full-field row.
-- **Blizzard (59) opponent pairs whose impact-start age is not 197** (194..206 by geometry) DECLINE (fixed live duration 361;
-  ARBOK -> CATERPIE runs 361 rows where age-197 pairs run 360; their lags shift by one row). Resume: a geometry-derived duration.
-  (The Icy Wind / Blizzard / Confuse Ray short-body CPU phase is a D4 policy entry since `7993b02fd`; Faint Attack per side since
-  `8c2a210fc`.)
-- **Light Screen (113) opponent attacker, row 59 (audit 15, 2026-10-09, `docs/live-audit-15-chains.md`):** production hard-codes a
-  one-row BLDALPHA hold (`src/animation/lightScreen.ts:79`, reducer age 52) that the ROM shows only when the blend write stays
-  buffered (SNORLAX / CHANSEY first body; the accepted EXEGGCUTE / ONIX after-Tackle route); in 9 of 10 live opponent windows the
-  write lands at once (2,658 px on row 59). Lag frames [68, 69] identical in both phases: a species- and history-dependent
-  VBlank-write CPU phase. Resume: D4 policy entry with the dominant phase (no hold; patch `fixtures/audit-15/patches/
-  light-screen-opp-no-hold-env.diff`: 12/13 live windows 0 px) and the accepted fixture as the documented other phase -> Light Screen
-  moves scoped exact -> faithful timing.
+- **Blizzard (59) opponent impact-start ages 194..206: FIXED in `bb0415c82` (lsbz)** — geometry-derived live window. Open: the geoice
+  control ARBOK -> CATERPIE (impact 198) is live at 362 rows but every row 0..361 carries the same static 133-px residual (bbox x
+  98..221 y 33..103; ROM 4a425a / 526b5a vs live 5ad684 / 73ffad), a battler-palette region identical at every age, outside the
+  Blizzard program (`tools/integration/fixtures/lsbz-live-receipt.json` "excluded"). Resume: render another live move on the same
+  ARBOK / CATERPIE field; if the residual recurs it is a field-composite (palette) defect, not Blizzard.
+- **Light Screen (113) opponent row 59: FIXED in `bb0415c82` (lsbz)** — D4 entry with the dominant no-hold phase; the hold windows
+  (SNORLAX / CHANSEY first body, EXEGGCUTE / ONIX after Tackle) are the documented other phase (row 59, 2,658 px).
 - Harness limit: the verifier passes only the attacker's personality, so shiny TARGET declines are unverified.
 
 ## #148 — Battler x2 history: unknown-history remainder (main bug FIXED 2026-10-06)
