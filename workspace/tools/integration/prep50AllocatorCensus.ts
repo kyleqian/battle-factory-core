@@ -43,12 +43,17 @@ import movesJson from "../../src/data/gen/moves.json" with { type: "json" };
 import monsJson from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import policyJson from "../../src/data/gen/factory-round-policy.json" with { type: "json" };
 import { classifyDurationDecline, classifyPresentationDecline, type Decline } from "./liveShareCensusGates.ts";
-import { LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS } from "../../src/engine/liveMoveSpriteAllocator.ts";
+import * as liveMoveSpriteAllocator from "../../src/engine/liveMoveSpriteAllocator.ts";
 import { spriteOrderStatusAnimationName, spriteOrderTrackerRoleIsomorphic } from "../../src/engine/spriteOrderEventTransform.ts";
 
 // liveMoveSpriteAllocator.ts PLANS keys (not exported): the six audited wall-family plans.
 const ALLOCATOR_PLAN_IDS = new Set([112, 113, 115, 182, 243, 277]);
-const ALLOCATOR_NET_ZERO = new Set(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS);
+const ALLOCATOR_NET_ZERO = new Set(liveMoveSpriteAllocator.LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS);
+// prep50: status animations audited net-zero (the temporary patch's export; absent on master, so empty there).
+const ALLOCATOR_NET_ZERO_STATUS: ReadonlySet<string> = (liveMoveSpriteAllocator as { LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS?: ReadonlySet<string> })
+  .LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS ?? new Set<string>();
+const statusInvalidates = (p: { isStatus2: number; status: number }) =>
+  !ALLOCATOR_NET_ZERO_STATUS.has(spriteOrderStatusAnimationName(p.isStatus2 !== 0, p.status) ?? "");
 type OrchestratorState = ReturnType<typeof createFactoryRoundBattleOrchestrator>;
 const allocatorKnown = (s: OrchestratorState) => s.liveMoveSpriteAllocatorHost === undefined ? "absent"
   : s.liveMoveSpriteAllocatorHost.battleCallStart !== s.activeBattleCallStart ? "stale" : s.liveMoveSpriteAllocatorHost.host.historyKnown;
@@ -75,7 +80,7 @@ function shadowUnits(after: OrchestratorState, cursor: ShadowCursor): string[] {
   const through = isFinal ? Number.POSITIVE_INFINITY : command !== undefined && "eventSequence" in command ? command.eventSequence : Number.POSITIVE_INFINITY;
   while (cursor.nextEventIndex < segment.events.length && segment.events[cursor.nextEventIndex]!.sequence <= through) {
     const p = segment.events[cursor.nextEventIndex++]!.payload;
-    if (p.kind === "status-animation") units.push(`status animation ${spriteOrderStatusAnimationName(p.isStatus2 !== 0, p.status) ?? `status ${p.isStatus2}/${p.status}`}`);
+    if (p.kind === "status-animation" && statusInvalidates(p)) units.push(`status animation ${spriteOrderStatusAnimationName(p.isStatus2 !== 0, p.status) ?? `status ${p.isStatus2}/${p.status}`}`);
   }
   return units;
 }
@@ -101,7 +106,7 @@ function allocatorInvalidatingUnit(before: OrchestratorState, after: Orchestrato
   const from = cursor?.requestId === r.resolutionId.requestId && cursor.segmentIndex === r.segmentIndex ? cursor.nextEventIndex : 0;
   const isFinal = command === undefined || r.commandIndex === segment.commands.length - 1;
   const through = isFinal ? Number.POSITIVE_INFINITY : command !== undefined && "eventSequence" in command ? command.eventSequence : Number.POSITIVE_INFINITY;
-  const names = segment.events.slice(from).filter((e) => e.sequence <= through && e.payload.kind === "status-animation")
+  const names = segment.events.slice(from).filter((e) => e.sequence <= through && e.payload.kind === "status-animation" && statusInvalidates(e.payload))
     .map((e) => e.payload.kind === "status-animation" ? spriteOrderStatusAnimationName(e.payload.isStatus2 !== 0, e.payload.status) ?? `status ${e.payload.isStatus2}/${e.payload.status}` : "");
   if (names.length) return `status animation ${[...new Set(names)].join("+")}`;
   return `unattributed at ${command?.type ?? "segment end"}`;

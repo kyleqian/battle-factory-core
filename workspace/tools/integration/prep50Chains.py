@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """prep50 (copy of prep44Chains.py; schema renamed): allocator invalidator CHAINS -> which units must be cleared together (docs/next-adapters-prep50.md).
 
-usage: prep50Chains.py <before.jsonl> <out.json> [--cleared 24,57,...]
+usage: prep50Chains.py <before.jsonl> <out.json> [--cleared 24,57,...] [--cleared-status SLP,CONFUSION,...]
 Input: prep50AllocatorCensus.ts --commands output (master src). An allocator-history-unknown decline can only become live when
 EVERY unit of its chain (all invalidating units since the host was last known) stops invalidating. Reports per unit: solo
 (chain is only this unit), involvement (unit in chain), and a greedy order by unlocked fallback frames (each step adds the unit
@@ -14,7 +14,8 @@ from collections import defaultdict
 src, out = sys.argv[1], sys.argv[2]
 moves = {m["id"]: m["name"] for m in json.load(open("src/data/gen/moves.json"))["moves"]}
 cleared_ids = [int(x) for x in sys.argv[sys.argv.index("--cleared") + 1].split(",")] if "--cleared" in sys.argv else []
-cleared = {f"body {moves[i]} (no plan, not net-zero)" for i in cleared_ids}
+cleared_status = sys.argv[sys.argv.index("--cleared-status") + 1].split(",") if "--cleared-status" in sys.argv else []
+cleared = {f"body {moves[i]} (no plan, not net-zero)" for i in cleared_ids} | {f"status animation {n}" for n in cleared_status}
 rows = [c for c in (json.loads(l) for l in open(src) if l.strip()) if c.get("allocatorChain") is not None]
 fb = lambda c: c["frames"] - c["liveFrames"]
 total = sum(fb(c) for c in rows)
@@ -43,12 +44,12 @@ result = {
     "units": sorted(({"unit": u, "involvedCommands": v[0], "involvedFrames": v[1], "soloCommands": solo[u][0], "soloFrames": solo[u][1]}
                      for u, v in inv.items()), key=lambda r: (-r["involvedFrames"], r["unit"])),
     "greedy": greedy,
-    **({"clearedIds": cleared_ids, "predictedUnlockCommands": len(pred), "predictedUnlockFrames": sum(fb(c) for c in pred)} if cleared else {}),
+    **({"clearedIds": cleared_ids, "clearedStatus": cleared_status, "predictedUnlockCommands": len(pred), "predictedUnlockFrames": sum(fb(c) for c in pred)} if cleared else {}),
 }
 open(out, "w").write(json.dumps(result, indent=1) + "\n")
 print(f'{len(rows)} declines / {total} frames; chain lengths {result["chainLength"]}')
 if cleared:
-    print(f'predicted unlock for {len(cleared_ids)} cleared ids: {len(pred)} commands / {result["predictedUnlockFrames"]} frames')
+    print(f'predicted unlock for {len(cleared_ids)} cleared ids + status {cleared_status}: {len(pred)} commands / {result["predictedUnlockFrames"]} frames')
 for g in greedy[:25]:
     print(f'  +{g["add"]:<55} -> {g["cumulativeCommands"]:>4} cmds / {g["cumulativeFrames"]:>6} frames')
 print("top involvement:")
