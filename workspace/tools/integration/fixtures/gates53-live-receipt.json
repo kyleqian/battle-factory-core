@@ -141,5 +141,16 @@
  },
  "livePinsMoved": [],
  "sceneOnOffParity": "not applicable (no gate lifted)",
- "gates": "filled after the final gate run"
+ "gates": {
+  "testedCommit": "d61a5192e",
+  "testedSrcTree": "d71d9924025422019f036cd941938fa069c041cc",
+  "toolStrictTsc": "gates53GateCensus.ts under a temp tsconfig extending the workspace tsconfig (typeRoots node): exit 0, no diagnostics",
+  "touchedTests": "tests/animation/factoryAnimationInventory.test.ts + tests/animation/animationBoundaryRatchet.test.ts + tests/playableAnimationIntegration.test.ts: 3 files / 15 tests passed (no new tests: no landed gate)",
+  "typecheck": "exit 0",
+  "smoke": "8 files / 448 tests passed",
+  "fullSuite": "1,587 files passed / 44 skipped (1,631); 13,062 tests passed / 223 skipped (13,285); 468 s, --maxWorkers=4",
+  "build": "exit 0",
+  "differential": "fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base bb0415c82: PASS, 624 captures byte-identical across 3 traces",
+  "diffCheck": "git diff --check clean"
+ }
 }
