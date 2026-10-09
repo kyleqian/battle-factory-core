@@ -14,7 +14,7 @@ from pathlib import Path
 BASE = json.loads(Path("tools/battle-lab/prep18-return-altopp-snorlax-golem.json").read_text())
 OUT = Path(sys.argv[1]); OUT.mkdir(parents=True, exist_ok=True)
 MOVES = {"WILL_O_WISP": 261, "FLAMETHROWER": 53, "HYDRO_PUMP": 56, "FIRE_SPIN": 83, "PETAL_DANCE": 80, "DIG": 91, "DOUBLE_TEAM": 104,
-         "LIGHT_SCREEN": 113, "ICE_BEAM": 58, "REFLECT": 115, "FAINT_ATTACK": 185, "COUNTER": 68, "SWIFT": 129, "THUNDERBOLT": 85}
+         "LIGHT_SCREEN": 113, "ICE_BEAM": 58, "REFLECT": 115, "FAINT_ATTACK": 185, "COUNTER": 68, "SWIFT": 129, "THUNDERBOLT": 85, "ICY_WIND": 196}
 # name: (unit move, consumer move, consumer side)
 CHAINS = {
     "brn-flamethrower-ply": ("WILL_O_WISP", "FLAMETHROWER", "player"),
@@ -29,7 +29,23 @@ CHAINS = {
     "ice-beam-reflect-ply": ("ICE_BEAM", "REFLECT", "player"),
     "faint-attack-light-screen-ply": ("FAINT_ATTACK", "LIGHT_SCREEN", "player"),
     "swift-thunderbolt-ply": ("SWIFT", "THUNDERBOLT", "player"),
+    # second batch: the opponent-side Light Screen / Reflect after several units (the row-59 BLDALPHA phase), Icy Wind (SNORLAX / CHANSEY)
+    "faint-attack-light-screen-opp": ("FAINT_ATTACK", "LIGHT_SCREEN", "opponent"),
+    "ice-beam-light-screen-opp": ("ICE_BEAM", "LIGHT_SCREEN", "opponent"),
+    "swift-light-screen-opp": ("SWIFT", "LIGHT_SCREEN", "opponent"),
+    "hydro-pump-light-screen-opp": ("HYDRO_PUMP", "LIGHT_SCREEN", "opponent"),
+    "brn-light-screen-opp": ("WILL_O_WISP", "LIGHT_SCREEN", "opponent"),
+    "double-team-reflect-opp": ("DOUBLE_TEAM", "REFLECT", "opponent"),
+    "ice-beam-reflect-opp": ("ICE_BEAM", "REFLECT", "opponent"),
+    "icy-wind-flamethrower-ply": ("ICY_WIND", "FLAMETHROWER", "player"),
+    "icy-wind-flamethrower-opp": ("ICY_WIND", "FLAMETHROWER", "opponent"),
+    "petal-dance-thunderbolt-ply": ("PETAL_DANCE", "THUNDERBOLT", "player"),
+    "dig-thunderbolt-ply": ("DIG", "THUNDERBOLT", "player"),
+    "fire-spin-thunderbolt-ply": ("FIRE_SPIN", "THUNDERBOLT", "player"),
+    "brn-thunderbolt-ply": ("WILL_O_WISP", "THUNDERBOLT", "player"),
+    "double-team-thunderbolt-ply": ("DOUBLE_TEAM", "THUNDERBOLT", "player"),
     # controls: the consumer is the battle's first body (Counter fails: no body)
+    "ctl-reflect-opp": ("COUNTER", "REFLECT", "opponent"),
     "ctl-flamethrower-ply": ("COUNTER", "FLAMETHROWER", "player"),
     "ctl-flamethrower-opp": ("COUNTER", "FLAMETHROWER", "opponent"),
     "ctl-light-screen-ply": ("COUNTER", "LIGHT_SCREEN", "player"),

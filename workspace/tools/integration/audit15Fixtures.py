@@ -10,7 +10,8 @@ is the battle's semantic event history up to and including that body, one turn p
                           target when the target's HP drops by the next recorded activation (the visible damage blink);
   Status_Burn / _Paralysis -> status-animation (status1 0x10 / 0x40); Status_Confusion -> status-animation isStatus2 (1);
   Status_FireSpin      -> animation TURN_TRAP [83] on the trapped battler (General_TurnTrap's Fire Spin branch);
-  General_StatsChange  -> animation STATS_CHANGE [21] (Double Team: STAT_ANIM_PLUS1 14 + STAT_EVASION 7).
+  General_StatsChange  -> animation STATS_CHANGE on the changed battler: Double Team [21] (STAT_ANIM_PLUS1 14 + STAT_EVASION 7), Icy Wind [24]
+                          (STAT_ANIM_MINUS1 21 + STAT_SPEED 3), keyed by the latest move body.
 Any other label is UNMODELLED: no fixture is written after it (reported on stdout). Window = [activation, first inactive frame]; HP / status /
 personality from the ROM's gBattleMons at activation; genders from the scenario. Flamethrower rows carry ageOffset -15 (row 0 = the ROM
 activation = production age -15, the accepted order-consumer fixtures' framing).
@@ -25,8 +26,8 @@ TURN = 1334
 SPECIES = {113: "CHANSEY", 143: "SNORLAX"}
 MOVES = {"Move_WILL_O_WISP": 261, "Move_FLAMETHROWER": 53, "Move_HYDRO_PUMP": 56, "Move_FIRE_SPIN": 83, "Move_PETAL_DANCE": 80, "Move_DIG": 91,
          "Move_DOUBLE_TEAM": 104, "Move_LIGHT_SCREEN": 113, "Move_ICE_BEAM": 58, "Move_REFLECT": 115, "Move_FAINT_ATTACK": 185,
-         "Move_SWIFT": 129, "Move_THUNDERBOLT": 85}
-POWER = {261: 0, 53: 95, 56: 120, 83: 15, 80: 70, 91: 60, 104: 0, 113: 0, 58: 95, 115: 0, 185: 60, 129: 60, 85: 95}
+         "Move_SWIFT": 129, "Move_THUNDERBOLT": 85, "Move_ICY_WIND": 196}
+POWER = {261: 0, 53: 95, 56: 120, 83: 15, 80: 70, 91: 60, 104: 0, 113: 0, 58: 95, 115: 0, 185: 60, 129: 60, 85: 95, 196: 55}
 CONSUMERS = {53: "FLAMETHROWER", 113: "LIGHT_SCREEN", 115: "REFLECT", 85: "THUNDERBOLT"}
 STATUS1 = {"Status_Burn": 0x10, "Status_Paralysis": 0x40}
 # production age 0 relative to the ROM activation row (the accepted fixtures' framing: Flamethrower denseWindow activation+4 / ageOffset -11)
@@ -50,6 +51,7 @@ for probe in sorted(probe_dir.glob("*.json")):
     turns: list[list[dict]] = []
     hidden_unmodelled = None
     k = 0
+    last_move = None
     for i, b in enumerate(bodies):
         t = b["startFrame"] // TURN
         while len(turns) <= t:
@@ -58,6 +60,7 @@ for probe in sorted(probe_dir.glob("*.json")):
         nxt = bodies[i + 1]["at"]["battlers"] if i + 1 < len(bodies) else None
         if label in MOVES:
             move = MOVES[label]
+            last_move = move
             tgt = b["target"]
             hit = POWER[move] > 0 and nxt is not None and nxt[tgt]["hp"] < b["at"]["battlers"][tgt]["hp"]
             body = {"kind": "animation", "animationId": "MOVE_ANIMATION", "battler": atk, "target": tgt,
@@ -92,7 +95,8 @@ for probe in sorted(probe_dir.glob("*.json")):
         elif label == "Status_FireSpin":
             turns[t].append({"kind": "animation", "animationId": "TURN_TRAP", "battler": atk, "target": atk, "arguments": ["83"]})
         elif label == "General_StatsChange":
-            turns[t].append({"kind": "animation", "animationId": "STATS_CHANGE", "battler": atk, "target": atk, "arguments": ["21"]})
+            turns[t].append({"kind": "animation", "animationId": "STATS_CHANGE", "battler": atk, "target": atk,
+                             "arguments": [{104: "21", 196: "24"}[last_move]]})
         else:
             hidden_unmodelled = label
             print(name, "UNMODELLED", label, "at", b["startFrame"])
