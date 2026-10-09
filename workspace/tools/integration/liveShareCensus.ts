@@ -56,6 +56,11 @@ interface CommandRecord {
   battle: number; kind: "move" | "substitute-fade"; moveId: number; move: string; side: "player" | "opponent";
   attacker: string; target: string; status: "live" | "fallback" | "partial"; frames: number; liveFrames: number;
   swapFrames: number; duration: number | null; decline: (Decline & { detail?: string }) | null;
+  /**
+   * words46: live frames whose presentation reports `faithfulRandomHistory` (the order lend resolved through a Random2-words unit's
+   * deferred marker: ANIMATION_VERIFICATION.md D3, a per-command faithful-random claim even for a scoped-exact adapter). Absent = 0.
+   */
+  faithfulRandomHistoryFrames?: number;
 }
 interface BattleRecord { battle: number; seed: number; streak: number; frames: number; end: "terminal" | "stalled" | "error"; error?: string; turns: number;
   stalledAt?: string }
@@ -121,8 +126,10 @@ function playBattle(battle: number, seed: number, streak: number): void {
       else {
         const v = swap ? swap.view : view, e = v.effect;
         if (e?.type === "move") {
-          live = liveMoveAnimationPresentation(e.request, v.field, e.age, e.paletteInput, e.spriteAllocatorInput, e.spriteOrderInput,
-            e.presentationRng, e.battlerX2Input) !== null;
+          const presentation = liveMoveAnimationPresentation(e.request, v.field, e.age, e.paletteInput, e.spriteAllocatorInput, e.spriteOrderInput,
+            e.presentationRng, e.battlerX2Input);
+          live = presentation !== null;
+          if (presentation?.faithfulRandomHistory) rec.faithfulRandomHistoryFrames = (rec.faithfulRandomHistoryFrames ?? 0) + 1;
           if (!live && !rec.decline) {
             rec.decline = classifyPresentationDecline({ request: e.request, field: v.field, age: e.age, paletteInput: e.paletteInput,
               spriteAllocatorInput: e.spriteAllocatorInput, spriteOrderInput: e.spriteOrderInput, presentationRngInput: e.presentationRng,
@@ -267,6 +274,16 @@ const report = {
     liveSharePctByCount: pct(commands.filter((c) => c.status === "live").length, commands.length),
     liveSharePctByFrames: pct(sum(commands, (c) => c.liveFrames), sum(commands, (c) => c.frames)),
     moveAnimation: kinds("move"), substituteFade: kinds("substitute-fade"),
+    // words46 (docs/live-share-census.md "Faithful-random history"): live commands whose order lend resolved through a Random2-words unit's
+    // deferred marker are a separate faithful-random claim (D3), counted beside live (they are included in `live` / `liveFrames`).
+    faithfulRandomHistory: (() => {
+      const xs = commands.filter((c) => c.status === "live" && (c.faithfulRandomHistoryFrames ?? 0) > 0);
+      const frames = sum(commands, (c) => c.faithfulRandomHistoryFrames ?? 0);
+      return { commands: xs.length, frames, partialOrOther: commands.filter((c) => c.status !== "live" && (c.faithfulRandomHistoryFrames ?? 0) > 0).length,
+        pctOfAllByCount: pct(xs.length, commands.length), pctOfAllByFrames: pct(frames, sum(commands, (c) => c.frames)),
+        liveExcludingItByCount: pct(commands.filter((c) => c.status === "live").length - xs.length, commands.length),
+        liveExcludingItByFrames: pct(sum(commands, (c) => c.liveFrames) - frames, sum(commands, (c) => c.frames)) };
+    })(),
   },
   perReason: [...reasonMap.values()].sort((a, b) => b.frames - a.frames || a.reason.localeCompare(b.reason))
     .map((r) => ({ reason: r.reason, count: r.count, frames: r.frames, distinctMoves: r.moves.size })),

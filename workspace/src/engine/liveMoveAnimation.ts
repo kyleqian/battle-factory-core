@@ -1327,11 +1327,15 @@ export function liveMoveAnimationPresentation(
   // word-free deferred marker; resolve it here, render-pure: carry the unit's activation order through the unit with ITS recorded
   // presentation words (read by key), then replay the units since with the production plans. Null leaves no lend (the consumer declines
   // as before). A resolved lend makes this command's order history faithful random (D3): `faithfulRandomHistory` on the result.
+  // The claim is per command and only when the adapter reads the resolved lend (an order-independent adapter, e.g. Slam, keeps its scoped
+  // exact claim): the resolved input records the read in this call's local flag (render-pure).
   let faithfulRandomHistory = false;
   if (spriteOrderInput?.deferred !== undefined && isWordsOrderDeferredUnit(spriteOrderInput.deferred)) {
     const resolved = resolveWordsOrderLend(spriteOrderInput.deferred, presentationRngInput?.host ?? null, art);
-    spriteOrderInput = resolved === null ? undefined : Object.freeze({ known: true as const, free: resolved });
-    faithfulRandomHistory = resolved !== null;
+    spriteOrderInput = resolved === null ? undefined : Object.freeze({
+      get known() { faithfulRandomHistory = true; return true as const; },
+      get free() { faithfulRandomHistory = true; return resolved; },
+    });
   }
   const battler = (side: "player" | "opponent"): SceneOnPresentationBattler => {
     const origin = battleCommandFieldSpriteOrigin(art[side], side);
