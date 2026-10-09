@@ -4,9 +4,9 @@
  "presentedFrames": 1168273,
  "pairingMismatches": 0,
  "liveFramesBefore": 944805,
- "liveFramesAfter": 953254,
+ "liveFramesAfter": 955124,
  "liveCountBefore": 6574,
- "liveCountAfter": 6613,
+ "liveCountAfter": 6623,
  "regressions": [],
  "regressionCount": 0,
  "units": [
@@ -49,6 +49,40 @@
     [
      "order host: no EXACT plan: general animation INGRAIN_HEAL",
      2
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "order host: no EXACT plan: body 72:opponent",
+   "commands": 18,
+   "frames": 2662,
+   "liveAfterCommands": 8,
+   "liveAfterFrames": 1478,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: later-body (order lend not a first body)",
+     4
+    ],
+    [
+     "order host: no EXACT plan: body 28:opponent",
+     3
+    ],
+    [
+     "order host: next-mon summary while the opponent battler is tracked",
+     2
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "order host: no EXACT plan: body 72:player",
+   "commands": 8,
+   "frames": 1606,
+   "liveAfterCommands": 2,
+   "liveAfterFrames": 392,
+   "stillFallbackAfterTop": [
+    [
+     "order host: no EXACT plan: general animation WISH_HEAL",
+     6
     ]
    ]
   },
@@ -443,19 +477,6 @@
    ]
   },
   {
-   "beforeDetail": "order host: no EXACT plan: body 72:opponent",
-   "commands": 18,
-   "frames": 2662,
-   "liveAfterCommands": 0,
-   "liveAfterFrames": 0,
-   "stillFallbackAfterTop": [
-    [
-     "order host: no EXACT plan: body 72:opponent",
-     18
-    ]
-   ]
-  },
-  {
    "beforeDetail": "order host: no EXACT plan: body 8:player",
    "commands": 8,
    "frames": 2052,
@@ -556,19 +577,6 @@
     [
      "order host: no EXACT plan: body 210:player",
      17
-    ]
-   ]
-  },
-  {
-   "beforeDetail": "order host: no EXACT plan: body 72:player",
-   "commands": 8,
-   "frames": 1606,
-   "liveAfterCommands": 0,
-   "liveAfterFrames": 0,
-   "stillFallbackAfterTop": [
-    [
-     "order host: no EXACT plan: body 72:player",
-     8
     ]
    ]
   },
@@ -1016,7 +1024,7 @@
   }
  ],
  "liveFramePctBefore": 80.87,
- "liveFramePctAfter": 81.6,
+ "liveFramePctAfter": 81.76,
  "liveCountPctBefore": 82.48,
- "liveCountPctAfter": 82.97
+ "liveCountPctAfter": 83.1
 }

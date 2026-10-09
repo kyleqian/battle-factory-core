@@ -9,9 +9,10 @@
 //      bodies mapped to the order event the host emits for them in that job (status CONFUSION / PRZ, general LEECH_SEED_DRAIN, the
 //      sandstorm job's WEATHER_VAR with argument 12 = SANDSTORM_CONTINUES, hail 13, rain RAIN_CONTINUES); a ROM carry (the first gap
 //      window destroying a unit's single survivor) is the transform's own immediate carry and is not replayed again as a gap window.
-//  gdgeo (docs/giga-drain-geometry-order.md): every Giga Drain (202) move-animation event carries the scenario's lead species as its
+//  gdgeo (docs/giga-drain-geometry-order.md): every Giga Drain (202) / Mega Drain (72) move-animation event carries the scenario's lead species as its
 //      `geometry` (the production host attaches the displayed species at the body's command); a src without the geometry-keyed plan
-//      ignores the field, so the same tool measures before / after. (c) the gdgeo probe grid (fixtures/gdgeo/units.json), as (b).
+//      ignores the field, so the same tool measures before / after. (c) / (d) the gdgeo Giga Drain / Mega Drain probe grids
+//      (fixtures/gdgeo/units.json, md-units.json), as (b).
 // usage: node --experimental-strip-types tools/integration/prep43CorpusReplay.ts <out.json>
 import { readFileSync, writeFileSync } from "node:fs";
 import {
@@ -76,7 +77,8 @@ function leadSpecies(base: string, variant: unknown): { playerSpecies: number; o
 
 /** The production body event, with the Giga Drain geometry when the species are known. */
 function bodyEvent(moveId: number, attackerSide: Side, geometry: ReturnType<typeof leadSpecies>): SpriteOrderPresentationEvent {
-  return moveId === 202 && geometry !== null ? { kind: "move-animation", moveId, attackerSide, geometry } as SpriteOrderPresentationEvent
+  return (moveId === 202 || moveId === 72) && geometry !== null
+    ? { kind: "move-animation", moveId, attackerSide, geometry } as SpriteOrderPresentationEvent
     : { kind: "move-animation", moveId, attackerSide };
 }
 
@@ -171,10 +173,12 @@ function replayProbes(file = "prep43/units.json"): Tally & { jobs: number; perLa
 const corpus = replayCorpus();
 const probes = replayProbes();
 const gdgeo = replayProbes("gdgeo/units.json");
-const out = { schema: "prep43-corpus-replay/v1", corpus, probes, gdgeo };
+const mdgeo = replayProbes("gdgeo/md-units.json");
+const out = { schema: "prep43-corpus-replay/v1", corpus, probes, gdgeo, mdgeo };
 writeFileSync(process.argv[2]!, JSON.stringify(out, null, 1) + "\n");
 const line = (name: string, r: Tally) => `${name}: edges ${r.edges} known ${r.known} exact ${r.exact} mismatched ${r.mismatched}${r.mismatches.length ? " " + JSON.stringify(r.mismatches.slice(0, 6)) : ""}`;
 console.log(line("corpus (turn-keyed)", corpus));
 console.log(line("prep43 probes", probes));
 console.log(line("gdgeo probes", gdgeo));
+console.log(line("mdgeo probes", mdgeo));
 console.log(JSON.stringify(probes.perLabel));

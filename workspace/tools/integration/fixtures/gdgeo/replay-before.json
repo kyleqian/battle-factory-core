@@ -107,5 +107,23 @@
     "knownAfter": 10
    }
   }
+ },
+ "mdgeo": {
+  "edges": 23,
+  "known": 17,
+  "exact": 17,
+  "mismatched": 0,
+  "mismatches": [],
+  "jobs": 14,
+  "perLabel": {
+   "body 72": {
+    "edgesAfter": 6,
+    "knownAfter": 0
+   },
+   "body 33": {
+    "edgesAfter": 4,
+    "knownAfter": 4
+   }
+  }
  }
 }
