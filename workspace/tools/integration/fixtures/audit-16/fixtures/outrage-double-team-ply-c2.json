@@ -6,7 +6,8 @@
  "scenario": "tools/integration/fixtures/audit-16/scenarios/outrage-double-team-ply.json",
  "denseWindow": {
   "startFrame": 2905,
-  "endFrame": 3063
+  "endFrame": 3063,
+  "ageOffset": -1
  },
  "attacker": {
   "species": "CHANSEY",

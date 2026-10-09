@@ -16,7 +16,7 @@ BASE = json.loads(Path("tools/battle-lab/prep18-return-altopp-snorlax-golem.json
 OUT = Path(sys.argv[1]); OUT.mkdir(parents=True, exist_ok=True)
 MOVES = {"CONFUSE_RAY": 109, "SPORE": 147, "THUNDER_WAVE": 86, "SLUDGE_BOMB": 188, "WILL_O_WISP": 261, "SEISMIC_TOSS": 69, "ICE_BALL": 301,
          "FUTURE_SIGHT": 248, "PURSUIT": 228, "PERISH_SONG": 195, "OUTRAGE": 200, "COUNTER": 68, "LIGHT_SCREEN": 113, "REFLECT": 115,
-         "PROTECT": 182, "THUNDERBOLT": 85, "ICE_BEAM": 58, "DOUBLE_TEAM": 104, "SWIFT": 129, "BLIZZARD": 59}
+         "PROTECT": 182, "THUNDERBOLT": 85, "ICE_BEAM": 58, "DOUBLE_TEAM": 104, "SWIFT": 129, "BLIZZARD": 59, "SIGNAL_BEAM": 324, "BONEMERANG": 155, "SUNNY_DAY": 241}
 # name: (unit move, consumer move, consumer side, prompt cycles)
 CHAINS = {
     # priority 1: a status animation (infliction and / or the afflicted battler's move attempt) -> allocator consumer
@@ -47,6 +47,10 @@ CHAINS = {
     "future-sight-light-screen-ply": ("FUTURE_SIGHT", "LIGHT_SCREEN", "player", 5),
     "future-sight-reflect-ply": ("FUTURE_SIGHT", "REFLECT", "player", 5),
     "future-sight-light-screen-opp": ("FUTURE_SIGHT", "LIGHT_SCREEN", "opponent", 5),
+    # the delayed hit General_FutureSightHit (end of turn 3) -> a consumer that repeats every turn
+    "future-sight-protect-ply": ("FUTURE_SIGHT", "PROTECT", "player", 5),
+    "future-sight-thunderbolt-ply": ("FUTURE_SIGHT", "THUNDERBOLT", "player", 5),
+    "future-sight-thunderbolt-opp": ("FUTURE_SIGHT", "THUNDERBOLT", "opponent", 5),
     "pursuit-light-screen-ply": ("PURSUIT", "LIGHT_SCREEN", "player", 3),
     "pursuit-reflect-ply": ("PURSUIT", "REFLECT", "player", 3),
     "perish-song-light-screen-ply": ("PERISH_SONG", "LIGHT_SCREEN", "player", 3),
@@ -97,6 +101,26 @@ for name, (unit, consumer, side, cycles) in CHAINS.items():
         for m in parties[p][1:]:
             m["item"] = 0
     s["trace"] = trace(cycles)
+    assert s["seed"] == 305420349
+    (OUT / f"{name}.json").write_text(json.dumps(s, indent=1) + "\n")
+# priority 4 (later58): Signal Beam / Bonemerang (SNORLAX, faster) at LATER bodies after a CHANSEY predecessor OUTSIDE later58's probe set
+# (Quick Attack / Growl / Splash / own body): Thunder Wave + its PRZ animation (a status move), Double Team + stat (a stat boost), Sunny Day
+# (a weather move). Here the SNORLAX move is the consumer (audit16Fixtures.py LATER); "side" = SNORLAX's side.
+LATER = {}
+for move, tag in (("SIGNAL_BEAM", "signal-beam"), ("BONEMERANG", "bonemerang")):
+    for pred, ptag in (("THUNDER_WAVE", "prz"), ("DOUBLE_TEAM", "dt"), ("SUNNY_DAY", "sunny")):
+        for side, stag in (("player", "ply"), ("opponent", "opp")):
+            LATER[f"later-{tag}-{ptag}-{stag}"] = (move, pred, side)
+for name, (move, pred, side) in LATER.items():
+    s = json.loads(json.dumps(BASE))
+    other = "opponent" if side == "player" else "player"
+    parties = s["overrides"]["parties"]
+    parties[side][0] = lead(parties[side][0], 143, MOVES[move], True)    # SNORLAX: the later-body move, faster
+    parties[other][0] = lead(parties[other][0], 113, MOVES[pred], False)  # CHANSEY: the predecessor
+    for p in ("player", "opponent"):
+        for m in parties[p][1:]:
+            m["item"] = 0
+    s["trace"] = trace(3)
     assert s["seed"] == 305420349
     (OUT / f"{name}.json").write_text(json.dumps(s, indent=1) + "\n")
 # ISSUES #152: the ARBOK -> CATERPIE geoice control field (tools/integration/fixtures/geoice/controls/scenarios/, lab seed 305419897) with

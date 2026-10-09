@@ -8,7 +8,9 @@ feeds the production hosts), extended to today's units:
   Status_Confusion     -> status-animation isStatus2 (1); + HIT_ANIMATION on the afflicted battler when its HP drops before the next body
                           (the confusion self-hit's hitanimation BS_ATTACKER; no animation script, so the probe records no body);
   General_FutureSightHit -> animation FUTURE_SIGHT_HIT (battler = the probe's attacker, target = its target);
-  General_StatsChange  -> STATS_CHANGE: Double Team [21] (STAT_ANIM_PLUS1 14 + STAT_EVASION 7).
+  General_StatsChange  -> STATS_CHANGE: Double Team [21] (STAT_ANIM_PLUS1 14 + STAT_EVASION 7);
+  Move_SUNNY_DAY after the scenario's first Sunny Day -> animation SUN_CONTINUES (General_SunlightContinues shares the script).
+LATER moves (Outrage, Signal Beam, Bonemerang) are also written as consumers at every body, whichever battler: <name>-cu<k>.
 Any other label (Special_SwitchOutOpponentMon, Move_RETURN after a switch, ...) is UNMODELLED: no fixture after it. Window = [activation,
 first inactive frame], ageOffset per move as the accepted fixtures frame it; HP / status / personality from gBattleMons at activation.
 usage: audit16Fixtures.py <probe-dir> <fixture-dir>
@@ -24,13 +26,16 @@ SPECIES = {113: "CHANSEY", 143: "SNORLAX", 24: "ARBOK", 10: "CATERPIE"}
 MOVES = {"Move_CONFUSE_RAY": 109, "Move_SPORE": 147, "Move_THUNDER_WAVE": 86, "Move_SLUDGE_BOMB": 188, "Move_WILL_O_WISP": 261,
          "Move_SEISMIC_TOSS": 69, "Move_ICE_BALL": 301, "Move_FUTURE_SIGHT": 248, "Move_PURSUIT": 228, "Move_PERISH_SONG": 195,
          "Move_OUTRAGE": 200, "Move_LIGHT_SCREEN": 113, "Move_REFLECT": 115, "Move_PROTECT": 182, "Move_THUNDERBOLT": 85,
-         "Move_ICE_BEAM": 58, "Move_DOUBLE_TEAM": 104, "Move_SWIFT": 129, "Move_TACKLE": 33, "Move_BLIZZARD": 59}
+         "Move_ICE_BEAM": 58, "Move_DOUBLE_TEAM": 104, "Move_SWIFT": 129, "Move_TACKLE": 33, "Move_BLIZZARD": 59, "Move_SIGNAL_BEAM": 324,
+         "Move_BONEMERANG": 155, "Move_SUNNY_DAY": 241}
 POWER = {109: 0, 147: 0, 86: 0, 188: 90, 261: 0, 69: 1, 301: 30, 248: 80, 228: 40, 195: 0, 200: 90, 113: 0, 115: 0, 182: 0, 85: 95,
-         58: 95, 104: 0, 129: 60, 33: 35, 59: 120}
+         58: 95, 104: 0, 129: 60, 33: 35, 59: 120, 324: 75, 155: 50, 241: 0}
 CONSUMERS = {113: "LIGHT_SCREEN", 115: "REFLECT", 182: "PROTECT", 85: "THUNDERBOLT", 58: "ICE_BEAM", 104: "DOUBLE_TEAM", 129: "SWIFT", 59: "BLIZZARD"}
 STATUS1 = {"Status_Sleep": (0x1, "SLP"), "Status_Poison": (0x8, "PSN"), "Status_Burn": (0x10, "BRN"), "Status_Freeze": (0x20, "FRZ"),
            "Status_Paralysis": (0x40, "PRZ")}
-AGE_OFFSET: dict[int, int] = {}  # every consumer here is framed at its ROM activation (the controls are 0 px there; Double Team: see the audit doc)
+# later58 moves rendered at their own (first and LATER) bodies, whichever battler uses them: fixtures <name>-cu<k>, request turn = gAnimMoveTurn
+LATER = {200: "OUTRAGE", 324: "SIGNAL_BEAM", 155: "BONEMERANG"}
+AGE_OFFSET: dict[int, int] = {104: -1}  # Double Team: production age 0 = ROM activation + 1 (the accepted prep7 framing; the ONIX route is 0 px only there)
 
 
 def anim_name(status: int) -> str | None:
@@ -54,7 +59,9 @@ for probe in sorted(probe_dir.glob("*.json")):
     bodies = d["bodies"]
     turns: list[list[dict]] = []
     hidden_unmodelled = None
-    k = 0
+    k = ku = 0
+    seen_sunny = False
+    later_scenario = name.startswith("later-")
     for i, b in enumerate(bodies):
         t = b["startFrame"] // TURN
         while len(turns) <= t:
@@ -62,30 +69,41 @@ for probe in sorted(probe_dir.glob("*.json")):
         label, atk = b["label"], b["attacker"]
         at = b["at"]["battlers"]
         nxt = bodies[i + 1]["at"]["battlers"] if i + 1 < len(bodies) else None
-        if label in MOVES:
+        if label == "Move_SUNNY_DAY" and seen_sunny:
+            # General_SunlightContinues shares Move_SUNNY_DAY's script (the probe's nearest symbol); the move itself fails while the sun is up
+            turns[t].append({"kind": "animation", "animationId": "SUN_CONTINUES", "battler": atk, "target": atk, "arguments": []})
+        elif label in MOVES:
             move = MOVES[label]
+            seen_sunny = seen_sunny or move == 241
             tgt = b["target"]
             hit = POWER[move] > 0 and nxt is not None and nxt[tgt]["hp"] < at[tgt]["hp"]
             body = {"kind": "animation", "animationId": "MOVE_ANIMATION", "battler": atk, "target": tgt,
                     "arguments": [str(move), str(b["moveTurn"]), str(POWER[move]), "1" if hit else "0", "70", "0"]}
-            if move in CONSUMERS and atk == consumer_battler and hidden_unmodelled is None and "endFrame" in b:
+            as_later = move in LATER and hidden_unmodelled is None and "endFrame" in b
+            if as_later or (move in CONSUMERS and atk == consumer_battler and hidden_unmodelled is None and "endFrame" in b and not later_scenario):
+                side = "player" if atk == 0 else "opponent"
                 fx = {
-                    "schema": "audit16-chain-fixture/v1", "move": CONSUMERS[move], "bodyIndex": k,
+                    "schema": "audit16-chain-fixture/v1", "move": LATER[move] if as_later else CONSUMERS[move], "bodyIndex": ku if as_later else k,
                     "probe": "tools/integration/prep48Probe.py", "scenario": str(SCEN / d["scenario"]),
                     "denseWindow": {"startFrame": b["startFrame"], "endFrame": b["endFrame"], **({"ageOffset": AGE_OFFSET[move]} if move in AGE_OFFSET else {})},
-                    "attacker": {"species": SPECIES[at[atk]["species"]], "geometry": {"side": consumer_side}},
-                    "target": {"species": SPECIES[at[1 - atk]["species"]], "geometry": {"side": "opponent" if consumer_side == "player" else "player"}},
+                    "attacker": {"species": SPECIES[at[atk]["species"]], "geometry": {"side": side}},
+                    "target": {"species": SPECIES[at[1 - atk]["species"]], "geometry": {"side": "opponent" if side == "player" else "player"}},
                     "attackerPersonality": at[atk]["personality"],
                     "displayedStatus": {"player": shown(at[0]["status1"]), "opponent": shown(at[1]["status1"])},
                     "fieldProfile": {"playerHp": at[0]["hp"], "playerMaxHp": at[0]["maxHP"], "opponentHp": at[1]["hp"], "opponentMaxHp": at[1]["maxHP"],
                                      "playerGender": genders["player"], "opponentGender": genders["opponent"]},
-                    "requestFields": {"turn": 0},
+                    "requestFields": {"turn": b["moveTurn"] if as_later else 0},
+                    # Bonemerang hit 2: the message box is blank (later58's fixtures carry messageLines ["", ""])
+                    **({"messageLines": ["", ""]} if move == 155 and b["moveTurn"] == 1 else {}),
                     "precedingTurns": [{"events": list(ev)} for ev in turns[:-1]] + [{"events": turns[-1] + [body]}],
                 }
-                out = f"{name}-c{k}.json"
+                out = f"{name}-cu{ku}.json" if as_later else f"{name}-c{k}.json"
                 (out_dir / out).write_text(json.dumps(fx, indent=1) + "\n")
                 print(out, "units", sum(len(x["events"]) for x in fx["precedingTurns"]) - 1)
-                k += 1
+                if as_later:
+                    ku += 1
+                else:
+                    k += 1
             turns[t].append(body)
             if hit:
                 turns[t].append({"kind": "animation", "animationId": "HIT_ANIMATION", "battler": tgt, "target": tgt, "arguments": []})

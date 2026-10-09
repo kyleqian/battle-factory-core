@@ -6,7 +6,8 @@
  "scenario": "tools/integration/fixtures/audit-16/scenarios/ctl-double-team-opp.json",
  "denseWindow": {
   "startFrame": 77,
-  "endFrame": 235
+  "endFrame": 235,
+  "ageOffset": -1
  },
  "attacker": {
   "species": "CHANSEY",

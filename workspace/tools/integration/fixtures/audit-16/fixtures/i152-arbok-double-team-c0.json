@@ -6,7 +6,8 @@
  "scenario": "tools/integration/fixtures/audit-16/scenarios/i152-arbok-double-team.json",
  "denseWindow": {
   "startFrame": 75,
-  "endFrame": 233
+  "endFrame": 233,
+  "ageOffset": -1
  },
  "attacker": {
   "species": "ARBOK",
