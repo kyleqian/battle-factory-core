@@ -12,11 +12,15 @@
 //     PREDICTED before the probes (fixtures/plans54/hail-predictions.json) -> `predictedExact`.
 //   Blizzard 59: the PRODUCTION seam text liveMoveGeometrySpriteOrderPlanText(59, side, species) and the PREDICTED plan
 //     (fixtures/plans54/blizzard-predictions.json).
+//   Water Spout 323: the PRODUCTION seam text at the body's HP tier (read from the ROM's launch window) and the ROM's own start order (F0 =
+//     the lent order); a body starting at the known-entry order is also checked against fixtures/plans54/water-spout-predictions.json.
 // usage: node --experimental-strip-types tools/integration/plans54Check.ts <out.json> <units.json>...
 import { readFileSync, writeFileSync } from "node:fs";
 import { decodeSpriteOrderPlan } from "../../src/engine/spriteOrderEventTransform.ts";
 import { applySpriteOrderUnitPlan, createSpriteOrderPlanCursor } from "../../src/engine/spriteOrderProvider.ts";
 import { liveMoveGeometrySpriteOrderPlanText } from "../../src/engine/liveMoveAnimation.ts";
+import { KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER } from "../../src/engine/spriteOrderProvider.ts";
+import { predictedWaterSpoutPlan } from "./plans54WaterSpoutPredict.ts";
 
 interface Win { f: number; C: [number, string][]; D: number[]; F: number[] }
 interface Unit { kind: string; label: string; frame: number; F0: number[]; truncated: boolean; strayFChanges: number; plan: string; windows: Win[] }
@@ -79,6 +83,10 @@ function speciesOf(job: Job): { player?: number; opponent?: number } {
 const [outPath, ...inputs] = process.argv.slice(2);
 const predictions = (JSON.parse(readFileSync(new URL("./fixtures/plans54/hail-predictions.json", import.meta.url), "utf8")) as
   { predictions: Record<string, string> }).predictions;
+const waterSpoutPredictions = (JSON.parse(readFileSync(new URL("./fixtures/plans54/water-spout-predictions.json", import.meta.url), "utf8")) as
+  { predictions: Record<string, string | null> }).predictions;
+/** The Water Spout tier scenarios' lead when a job sets no species op: NOSEPASS 320 (the "wailmer" scenarios). */
+const WATER_SPOUT_DEFAULT_ATTACKER = 320;
 const blizzardPredictions = (JSON.parse(readFileSync(new URL("./fixtures/plans54/blizzard-predictions.json", import.meta.url), "utf8")) as
   { predictions: Record<string, string> }).predictions;
 type Entry = { instances: number; matched: number; unproven: number; framesChecked: number; sides: string[]; jobs: string[]; plan: string | null;
@@ -89,7 +97,7 @@ let jobs = 0, notIdentical = 0;
 for (const path of inputs) {
   const input = JSON.parse(readFileSync(path, "utf8")) as { jobs: Record<string, Job> };
   for (const [name, job] of Object.entries(input.jobs)) {
-    if (job.unit !== "BODY210" && job.unit !== "BODY284" && job.unit !== "BODY258" && job.unit !== "BODY59") continue;
+    if (job.unit !== "BODY210" && job.unit !== "BODY284" && job.unit !== "BODY258" && job.unit !== "BODY59" && job.unit !== "BODY323") continue;
     jobs += 1;
     if (!job.identicalAB) notIdentical += 1;
     const chain = { player: 0, opponent: 0 };
@@ -100,7 +108,7 @@ for (const path of inputs) {
       previousBody = unit.label;
       const hailContinues = job.unit === "BODY258" && unit.label === "general HAIL_CONTINUES" && !afterHail;
       const m = hailContinues ? ["", "258", "player"] : /^body (\d+):(player|opponent)$/.exec(unit.label);
-      if (unit.truncated || !m || (m[1] !== "210" && m[1] !== "284" && m[1] !== "258" && m[1] !== "59")) return;
+      if (unit.truncated || !m || (m[1] !== "210" && m[1] !== "284" && m[1] !== "258" && m[1] !== "59" && m[1] !== "323")) return;
       const side = m[2] as "player" | "opponent";
       let label: string, text: string | null, predicted: string | undefined;
       if (m[1] === "258") {
@@ -108,6 +116,16 @@ for (const path of inputs) {
         label = `${hailContinues ? "general HAIL_CONTINUES" : `body 258 ${side}`} ${species.player}-${species.opponent}`;
         text = liveMoveGeometrySpriteOrderPlanText(258, side, { playerSpecies: species.player!, opponentSpecies: species.opponent! });
         predicted = predictions[`${species.player}-${species.opponent}`];
+      } else if (m[1] === "323") {
+        // the HP tier from the ROM's own launch window (CreateWaterSpoutLaunchDroplets: 20 / 10 / 7 / 5 orbs for tiers 3 / 2 / 1 / 0)
+        const orbs = unit.windows[0]?.C.length ?? 0;
+        const tier = ({ 20: 3, 10: 2, 7: 1, 5: 0 } as Record<number, 0 | 1 | 2 | 3>)[orbs];
+        const species = speciesOf(job);
+        const attacker = (side === "player" ? species.player : species.opponent) ?? WATER_SPOUT_DEFAULT_ATTACKER;
+        label = `body 323 ${side} ${attacker} t${tier}`;
+        text = tier === undefined ? null : predictedWaterSpoutPlan(side, attacker, tier, unit.F0);
+        const atEntry = unit.F0.length === KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER.length && unit.F0.every((slot, at) => slot === KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER[at]);
+        predicted = atEntry && tier !== undefined ? waterSpoutPredictions[`${side}-${attacker}-t${tier}`] ?? undefined : undefined;
       } else if (m[1] === "59") {
         const species = speciesOf(job);
         const attacker = side === "player" ? species.player : species.opponent, target = side === "player" ? species.opponent : species.player;

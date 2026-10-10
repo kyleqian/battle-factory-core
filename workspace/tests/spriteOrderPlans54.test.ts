@@ -4,7 +4,9 @@ import {
   applySpriteOrderPresentationEvent, createSpriteOrderTracker, decodeSpriteOrderPlan, spriteOrderProductionBodyPlan,
   SPRITE_ORDER_GEOMETRY_KEYED_BODIES,
 } from "../src/engine/spriteOrderEventTransform.ts";
-import { applySpriteOrderUnitPlan, createSpriteOrderPlanCursor, knownEntrySpriteOrderState } from "../src/engine/spriteOrderProvider.ts";
+import {
+  applySpriteOrderUnitPlan, createSpriteOrderPlanCursor, KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, knownEntrySpriteOrderState,
+} from "../src/engine/spriteOrderProvider.ts";
 import { advanceLiveSpriteOrderHost, createLiveSpriteOrderHost, type LiveSpriteOrderHost } from "../src/engine/liveSpriteOrderHost.ts";
 import { liveMoveGeometrySpriteOrderPlanText } from "../src/engine/liveMoveAnimation.ts";
 import { ERUPTION_PROVEN_SPRITE_ORDER_PLANS } from "../src/animation/eruptionSpriteOrderPlan.ts";
@@ -242,5 +244,55 @@ describe("Blizzard 59 geometry-keyed from blizzard.ts's allocator replay (plans5
     expect(applySpriteOrderPresentationEvent(known, { kind: "move-animation", moveId: 59, attackerSide: "opponent" }).cursor.order.known).toBe(false);
     expect(applySpriteOrderPresentationEvent(known, { kind: "move-animation", moveId: 59, attackerSide: "opponent",
       geometryPlan: liveMoveGeometrySpriteOrderPlanText(59, "opponent", { playerSpecies: 95, opponentSpecies: 310 })! }).cursor.order.known).toBe(true);
+  });
+});
+
+describe("Water Spout 323 keyed by the attacker's HP tier, picture and lent order (plans54)", () => {
+  const predictions = (fixture("plans54/water-spout-predictions.json") as { predictions: Record<string, string | null> }).predictions;
+  const TIER_OF_ORBS: Record<number, 0 | 1 | 2 | 3> = { 20: 3, 10: 2, 7: 1, 5: 0 };
+  const TIER_HP = [20, 70, 120, 200] as const;
+  const fieldAt = (side: "player" | "opponent", attacker: number, tier: 0 | 1 | 2 | 3) => {
+    const mon = (species: number, hp: number) => ({ species, level: 50, hp, maxHP: 200, gender: "male", status: "none" });
+    return (side === "player" ? { player: mon(attacker, TIER_HP[tier]), opponent: mon(213, 200) }
+      : { player: mon(213, 200), opponent: mon(attacker, TIER_HP[tier]) }) as unknown as Parameters<typeof liveMoveGeometrySpriteOrderPlanText>[3];
+  };
+  it("every ROM body (4 tiers, NOSEPASS / MAGIKARP, both sides) is per-frame exact under the production text at its tier and lent order", () => {
+    const all = bodies(units54, 323);
+    const tiers = { player: new Set<number>(), opponent: new Set<number>() };
+    let predictedFirst = 0;
+    for (const { job, side, ops, unit } of all) {
+      const tier = TIER_OF_ORBS[unit.windows[0]!.C.length]!;
+      const attacker = ops.some(op => op[0] === "species" && op[1] === side) ? speciesOf(ops, side) : 320;
+      const species = side === "player" ? { playerSpecies: attacker, opponentSpecies: 213 } : { playerSpecies: 213, opponentSpecies: attacker };
+      const text = liveMoveGeometrySpriteOrderPlanText(323, side, species, fieldAt(side, attacker, tier), unit.F0);
+      expect(text, job).not.toBeNull();
+      expect(perFrameExact(unit, decodeSpriteOrderPlan(text!)), `${job} t${tier} @${unit.frame}`).toBe(true);
+      if (attacker === 320) tiers[side].add(tier);
+      if (same(unit.F0, KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER)) {
+        expect(text, job).toBe(predictions[`${side}-${attacker}-t${tier}`]);
+        predictedFirst += 1;
+      }
+    }
+    expect(all).toHaveLength(23);
+    expect(predictedFirst).toBe(4);
+    for (const side of sides) expect([...tiers[side]].sort(), side).toEqual([0, 1, 2, 3]);
+    // without the displayed field (HP) or the lent order there is no plan
+    expect(liveMoveGeometrySpriteOrderPlanText(323, "player", { playerSpecies: 320, opponentSpecies: 213 })).toBeNull();
+    expect(liveMoveGeometrySpriteOrderPlanText(323, "player", { playerSpecies: 320, opponentSpecies: 213 }, fieldAt("player", 320, 3))).toBeNull();
+    expect(SPRITE_ORDER_GEOMETRY_KEYED_BODIES.has(323)).toBe(true);
+  });
+
+  it("the host hands the geometry seam its lent free order", () => {
+    const seen: (readonly number[] | undefined)[] = [];
+    const host: LiveSpriteOrderHost = Object.freeze({ ...createLiveSpriteOrderHost(knownEntrySpriteOrderState("ordinary-factory")), promptRequestId: 3 });
+    const body = Object.freeze({ sequence: 10, payload: { kind: "animation", animationId: "MOVE_ANIMATION", battler: 0, target: 1,
+      arguments: ["323", "0", "150", "10", "70", "0"] }, provenance: undefined }) as unknown as BattleKernelSemanticEvent;
+    const tracker = advanceLiveSpriteOrderHost(host, { resolutionId: { requestId: 3 }, segmentIndex: 0, segments: [{ events: [body] }] },
+      Number.POSITIVE_INFINITY, false, (_segment, _sequence, moveId, side, lentFree) => {
+        seen.push(lentFree);
+        return liveMoveGeometrySpriteOrderPlanText(moveId, side, { playerSpecies: 320, opponentSpecies: 213 }, fieldAt("player", 320, 3), lentFree) ?? undefined;
+      }).tracker;
+    expect(seen).toEqual([KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER]);
+    expect(tracker.cursor.order.known).toBe(true);
   });
 });

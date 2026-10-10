@@ -52,6 +52,12 @@ JOBS += [("BODY59", f"bz-ply-{a}-{t}", 59, BZ_P, (SEED, ("species", "player", a)
           ("turns", 1))) for a, t in BZ_PAIRS]
 JOBS += [("BODY59", f"bz-opp-{a}-{t}", 59, BZ_O, (SEED, ("species", "opponent", a), ("species", "player", t), ("moves", "opponent", 59),
           ("turns", 1))) for a, t in BZ_PAIRS]
+# Water Spout 323: HP-tiered (GetWaterSpoutPowerForAnim) and geometry / lend dependent. The Toxic tier stagings play six bodies per side at
+# tiers 3, 3, 3, 2, 1, 0 (prep13); attacker NOSEPASS 320 (the "wailmer" scenarios' lead) and MAGIKARP 129 (KINGDRA KOs the SHUCKLE); the scenarios' own lab seed,
+# pinned explicitly. Predictions (plans54WaterSpoutPredict.ts) committed before these probes ran.
+WS_P, WS_O = "mechanic-water-spout-tiers-player-wailmer-opponent-shuckle-toxic", "mechanic-water-spout-tiers-opponent-wailmer-player-shuckle-toxic"
+JOBS += [("BODY323", f"ws-ply-{a}", 323, WS_P, (("seed", 305419897), ("species", "player", a))) for a in (320, 129)]
+JOBS += [("BODY323", f"ws-opp-{a}", 323, WS_O, (("seed", 305419897), ("species", "opponent", a))) for a in (320, 129)]
 
 if __name__ == "__main__":
     argv = sys.argv[1:]
