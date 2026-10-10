@@ -30,9 +30,11 @@ const field = (() => {
 // alloc50: seed 58 (streak 14) flipped to exact; it crosses a status animation now audited allocator net-zero (prep50).
 // alloc52: seeds 20 (Ice Ball 301 after 242), 64 (Rollout 205, Mega Drain 72 first) and 231 (Mega Drain 72 first) flipped to exact;
 // those bodies are audited allocator net-zero by the prep52 receipt (tools/integration/fixtures/prep52/net-zero-audit.json).
+// land75: seeds 10 (Barrier) and 260 (Magic Coat) flipped to exact; the bodies before them are audited allocator net-zero by the
+// hist73 receipt (tools/integration/fixtures/hist73/net-zero-audit.json); dense ROM check: tools/integration/fixtures/land75/.
 const routes: ReadonlyArray<readonly [number, 0 | 1 | 2 | 3, number, number, boolean]> = [
-  [21, 3, 0, 112, true], [82, 0, 0, 112, true], [10, 0, 0, 112, false], [67, 2, 0, 112, true],
-  [87, 2, 0, 277, true], [447, 0, 0, 277, true], [260, 0, 0, 277, false],
+  [21, 3, 0, 112, true], [82, 0, 0, 112, true], [10, 0, 0, 112, true], [67, 2, 0, 112, true],
+  [87, 2, 0, 277, true], [447, 0, 0, 277, true], [260, 0, 0, 277, true],
   [38, 3, 0, 182, true], [118, 0, 0, 182, true], [20, 0, 0, 182, true], [64, 2, 0, 182, true],
   [17, 3, 14, 115, true], [58, 3, 14, 115, true],
   [231, 1, 0, 243, true],
@@ -72,7 +74,8 @@ describe("wall-family live adapters", () => {
     expect(command.spriteInputHistoryKnown === true).toBe(exact);
     const firstIndex = on.requests.findIndex(request => request.moveId === moveId);
     // Exact routes either start the battle's body list or follow audited net-zero bodies.
-    if (exact && seed !== 345 && seed !== 67 && seed !== 58 && seed !== 20 && seed !== 64 && seed !== 231) expect(firstIndex).toBe(0);
+    if (exact && seed !== 345 && seed !== 67 && seed !== 58 && seed !== 20 && seed !== 64 && seed !== 231
+      && seed !== 10 && seed !== 260) expect(firstIndex).toBe(0);
     else expect(firstIndex).toBeGreaterThan(0);
     if (seed === 345) expect(on.requests[0]!.moveId).toBe(61);
     if (seed === 67) expect(on.requests.map(request => request.moveId)).toEqual([98, 112]);

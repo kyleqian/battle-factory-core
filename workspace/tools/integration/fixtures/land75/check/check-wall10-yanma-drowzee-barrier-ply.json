@@ -1,0 +1,178 @@
+{
+ "schema": "audit18-chain-check/v1",
+ "scenario": "wall10-yanma-drowzee-barrier-ply",
+ "rows": [
+  {
+   "fixture": "wall10-yanma-drowzee-barrier-ply-c0.json",
+   "move": "BARRIER",
+   "side": "player",
+   "species": "DROWZEE/YANMA",
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "324@1 HIT_ANIMATION@0 112@0"
+   ],
+   "window": {
+    "startFrame": 475,
+    "endFrame": 550
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "wall10-yanma-drowzee-barrier-ply-c1.json",
+   "move": "BARRIER",
+   "side": "player",
+   "species": "DROWZEE/YANMA",
+   "units": 7,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "324@1 HIT_ANIMATION@0 112@0 STATS_CHANGE(40)@0 STATS_CHANGE(17)@1",
+    "324@1 HIT_ANIMATION@0 112@0"
+   ],
+   "window": {
+    "startFrame": 1770,
+    "endFrame": 1845
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

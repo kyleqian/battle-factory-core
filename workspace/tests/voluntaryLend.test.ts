@@ -163,7 +163,7 @@ describe("voluntary recall mapping in the live host (recorded opcodes)", () => {
 });
 
 describe("voluntary drafts through the production harness replay (postkoHostReplay.ts, voluntary-party-menu markers)", () => {
-  it("all 15 drafts: lend defined and == roleLend; Light Screen @325 gets the re-seeded allocator, the later Light Screens decline it", () => {
+  it("all 15 drafts: lend defined and == roleLend; every Light Screen keeps allocator history (@325 by the re-seed)", () => {
     const allocator: Record<string, boolean> = {};
     for (const path of VOLUNTARY_FIXTURES) {
       const fixture = JSON.parse(readFileSync(path, "utf8")) as { move: string; modelCheck: string; edgeRiseFrame: number;
@@ -175,9 +175,10 @@ describe("voluntary drafts through the production harness replay (postkoHostRepl
       expect(lend.spriteOrderInput?.free, path).toEqual(edge.roleLend);
       if (fixture.move === "LIGHT_SCREEN") allocator[`${path.split("voluntary-")[1]}@${fixture.edgeRiseFrame}`] = lend.spriteAllocatorInput !== undefined;
     }
-    // allocator history is lost after non-net-zero bodies (Sunny Day 241) before the later Light Screens (§3.1 caveat);
+    // allocator history was lost after then-unaudited bodies before the later Light Screens (§3.1 caveat);
     // s10a: Swift 129 is audited net-zero by the prep44 receipt, so slot2@2432 is no longer blocked by Swift and keeps its history
-    expect(allocator).toEqual({ "light-screen-player-cancel.json@325": true, "light-screen-player.json@3153": false,
+    // land75: the bodies before light-screen-player.json@3153 are audited net-zero by the hist73 receipt, so it keeps its history too
+    expect(allocator).toEqual({ "light-screen-player-cancel.json@325": true, "light-screen-player.json@3153": true,
       "light-screen-player-slot2.json@2432": true });
   });
 });

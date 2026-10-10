@@ -1,0 +1,91 @@
+{
+ "schema": "audit18-chain-check/v1",
+ "scenario": "wall10-yanma-drowzee-barrier-opp",
+ "rows": [
+  {
+   "fixture": "wall10-yanma-drowzee-barrier-opp-c0.json",
+   "move": "BARRIER",
+   "side": "opponent",
+   "species": "DROWZEE/YANMA",
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "324@0 HIT_ANIMATION@1 112@1"
+   ],
+   "window": {
+    "startFrame": 528,
+    "endFrame": 603
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

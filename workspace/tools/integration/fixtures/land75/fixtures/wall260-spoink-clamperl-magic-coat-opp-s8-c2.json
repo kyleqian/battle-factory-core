@@ -1,0 +1,263 @@
+{
+ "schema": "land75-wall-route-fixture/v1",
+ "move": "MAGIC_COAT",
+ "bodyIndex": 2,
+ "probe": "tools/integration/audit18Probe.py",
+ "scenario": "tools/integration/fixtures/land75/scenarios/wall260-spoink-clamperl-magic-coat-opp-s8.json",
+ "denseWindow": {
+  "startFrame": 2022,
+  "endFrame": 2097
+ },
+ "attacker": {
+  "species": "SPOINK",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "CLAMPERL",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 2027808503,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 72,
+  "playerMaxHp": 142,
+  "opponentHp": 140,
+  "opponentMaxHp": 167,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "target": 1
+ },
+ "rom": {
+  "invisible": [
+   true,
+   false
+  ],
+  "turn": 3,
+  "spriteOrder": [
+   62,
+   60,
+   0,
+   63,
+   1,
+   61,
+   6,
+   8,
+   2,
+   5,
+   14,
+   12,
+   9,
+   7,
+   13,
+   10,
+   11,
+   15,
+   4,
+   3,
+   26,
+   27,
+   25,
+   16,
+   23,
+   24,
+   19,
+   20,
+   21,
+   17,
+   18,
+   22,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47
+  ]
+ },
+ "pinnedRng2": [
+  [
+   1,
+   3059631875
+  ],
+  [
+   3,
+   2609853349
+  ],
+  [
+   7,
+   3190628273
+  ]
+ ],
+ "promptShown": [
+  true,
+  false,
+  true,
+  false
+ ],
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": [
+      "277",
+      "0",
+      "0",
+      "0",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "291",
+      "0",
+      "60",
+      "0",
+      "70",
+      "0"
+     ]
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": [
+      "277",
+      "0",
+      "0",
+      "0",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "291",
+      "1",
+      "60",
+      "1",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": []
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "149",
+      "0",
+      "1",
+      "1",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "291",
+      "0",
+      "60",
+      "0",
+      "70",
+      "0"
+     ]
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": [
+      "277",
+      "0",
+      "0",
+      "0",
+      "70",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
+}
