@@ -5,6 +5,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-10 (day, IN PROGRESS) — S10A: ISSUES #159 sprite fix, fly63 re-landed, Shock Wave order plan
+
+- **State:** local master `e42feaed4`, production src `10884465` (sw67 + hide66 folded). Supervisor union gates on `f3efec8bf`:
+  typecheck, 1,600 files / 13,169 tests, build, differential 624 / 624 vs `b50c4dabd`, census seeds 0..299 97.15 % / 98.16 % (+14 /
+  +1,984, 0 regressions, gameplay command sequence identical). Preview <http://127.0.0.1:5191/> serves `31f11ed70` (receipt committed).
+- **Did:** hide66 — live bodies no longer draw a hidden Fly / Bounce / Dig / Dive charger (90 live commands / 12,744 frames on seeds
+  0..999 had drawn it); fly63 re-landed; Sky Uppercut at a hidden target fails closed. sw67 — Shock Wave 351 geometry-keyed order plan
+  (18 / 18 new ROM pairs exact). Details: ANIMATION_INTEGRATION_PROGRESS.md top entry.
+- **In flight / next:** land68 (prep65 Dive words unit + prep64 SUBSTITUTE_FADE), plans69 (evidence for the remaining order-host stops),
+  then live audit 18 (hidden-span bodies, Shock Wave consumers, census battle 713), the Dive attack adapter.
+- **Notes:** no DEFERRED entries. ISSUES #159 trimmed to its open remainder (ROM checks of other hidden-span bodies; Sky Uppercut lag phase).
+
+---
+
 ## 2026-10-09 (day) — S10A: histories + live-claim fixes; ordinary-play live share 87.95 -> 91.89 % of commands (92.09 -> 95.82 % of frames); 239 + 13 + 24
 
 - **State:** local master, production src tree `06b791ff` (fly63 REVERTED in `1a0f6e214` after live audit 17 found live bodies drawing the
@@ -60,29 +74,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   FRZ / status2 allocator units, case-local gates (Blizzard impact age), x2-tracker rows, ISSUES #152 remainder.
 - **Notes:** no DEFERRED entries. Soak gates superseded for S10A (ANIMATION_VERIFICATION scoped policy). All worker branches
   merged, worktrees removed; briefs + logs under `.integration/validation/*-20261009/`, worker transcripts `.codex-logs/workers/`.
-
----
-
-## 2026-10-08 (overnight) — S10A: Substitute presentation, deferred order lend, live-share census, order plans; 245 + 13 + 18
-
-- **State:** local master, production src tree `e3fc2240` (`65dec33c2`): 245 scoped-exact + 13 faithful-random +
-  18 faithful-timing (census `245+13+18+0+0=276`; exact fell from 250 only by honest D4 reclassification of Crunch,
-  Psychic, Extreme Speed, Pursuit, Hidden Power). Supervisor final gates on that code: typecheck, 1,573 files / 12,958
-  tests, build 874, differential 624/624 (`final-supervisor-gates-20261008.json`). Preview <http://127.0.0.1:5191/>
-  serves `a7896ad37` (4 samples hash-equal, export + restart, no errors; `playable-preview-a7896ad37-receipt.json`).
-  Ordinary-play live share (new census, 1000 battles): 77.7 % of move animations by count, 78.8 % by frames
-  (72.6 / 75.2 % at src `d15bc413` mid-session); gameplay command sequence identical (200 battles, 5,334 commands).
-- **Did (production, 9 folds, each re-proved from fresh probes):** Substitute swaps live around 53 subbed-attacker
-  cells (+ tail latch, shiny decline); 37 defender-doll cells; the fade (cursor footprint excluded); Substitute body
-  order-neutral; seam-resolved deferred sprite-order lend -> Ice Ball counters 1..4; audit-13/14 fixes (idle-rest
-  opponent attacker in Ice Beam / Thunderbolt / Sludge (Bomb) / Confuse Ray / Bite, fade row-0 shadow); D4 entries
-  (Crunch, Psychic, Extreme Speed, Dive CLAMPERL, Pursuit later bodies, Hidden Power); Flatter / Skill Swap gates;
-  NIDORAN healthbox symbol; missing sides (Double Team opp, Faint Attack opp, Rock Slide player); prep43 order plans
-  (CONFUSION, PRZ survivor fix, Leech Seed drain, sandstorm, Dig / Brick Break turn-keyed).
-- **Did (evidence, 9 merges):** prep38 / prep39 / prep40 / prep41 / prep43 / prep44 (50 allocator NET-ZERO bodies ready,
-  +0.9 pp), species audits 13 / 14, live-share census (`tools/integration/liveShareCensus.ts`, `docs/live-share-census.md`).
-- **Next:** ROADMAP S10A "Next (2026-10-08 morning)": rerun the census, then the remaining order-host stops (Giga Drain,
-  hail, rain, locked turns, opponent return to ball), land prep44's allocator NET-ZERO ids, ISSUES #152 remainder,
-  Substitute remainder, Ghost Curse provider / Dive attack.
-- **Notes:** no DEFERRED entries. Soak gates superseded for S10A (ANIMATION_VERIFICATION scoped policy). All worker
-  branches merged, worktrees removed; logs `.integration/validation/*-20261008/` (raw probe dumps pruned).
