@@ -11,6 +11,7 @@
 //   node --experimental-strip-types --no-warnings tools/integration/audit19Check.ts <fixture-dir> <scenario-name> <out.json>
 // AUDIT19_LENDS_ONLY=1: no probes; per window the CHAIN lend's free order (a deferred lend resolved as the render seam resolves it) vs the
 // ROM's free order at the activation frame. AUDIT19_NO_HIDE=1: render with no hide. AUDIT19_MASK: see below.
+// AUDIT19_MISS_RULE_ALL_TURNS=1: audit 18's missed-strike rule also in the consumer's own (truncated) turn (the ablation).
 import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -143,7 +144,7 @@ const variants = fixtures.map(({ name, f }) => {
       const t = firstOfTurn.get(i);
       // audit 19: not in the consumer's own turn — the fixture truncates it at the consumer, so a strike AFTER the consumer is absent
       // (audit 18's rule then un-hid a diver the ROM still hides: wp160-opp-s1-c1, the Whirlpool before the Dive attack in one turn)
-      if (t !== undefined && t > 0 && t < turnsOf.length - 1) {
+      if (t !== undefined && t > 0 && (t < turnsOf.length - 1 || process.env.AUDIT19_MISS_RULE_ALL_TURNS === "1")) {
         for (const b of [0, 1]) {
           if (hidden[b] && bodyOf(t - 1, b, true) && !bodyOf(t, b, false)) {
             hidden = applyLiveSemiInvulnerableCommand(hidden, { type: "sprite-visibility", battler: b } as never);

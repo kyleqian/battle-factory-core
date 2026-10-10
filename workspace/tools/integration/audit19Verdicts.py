@@ -42,7 +42,7 @@ for r in rows:
     cls = "" if not pw else (" [>99]" if pw[-1] > 99 else " [<=99]")
     if pw:
         count[(fam + cls.strip(), tag, v.split(" ")[0])] += 1
-    print(f"{r['fixture'][:-5]:<36} {r['move']:<12} {tag}{cls} {v}")
+    print(f"{r['fixture'][:-5]:<36} {r['move']:<12} {tag}{cls} {v}{'' if r['hideAgree'] else ' HIDE-DISAGREES'}")
 print()
 for k in sorted(count):
     print(*k, count[k])

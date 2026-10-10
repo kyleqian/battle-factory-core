@@ -9,6 +9,7 @@
 # 4. lends.txt: every window's production lend (a deferred lend resolved as the render seam resolves it) vs the ROM free order at
 #    activation (AUDIT19_LENDS_ONLY);
 # 5. wp160/: ISSUES #160 (audit19Wp160.sh: the dive70 fixture's own lend vs the ROM, the ROM-turn history, and the patched copy);
+#    ablation/: Castform sprite boxes masked, the Dive setup banner text, audit 18's all-turn missed-strike rule;
 # 6. compares <receipt-dir> with the committed receipts (audit19Compare.py).
 set -e
 [ $# -ge 2 ] || { echo "usage: audit19Run.sh <receipt-dir> <scratch-dir>"; exit 2; }
@@ -31,5 +32,22 @@ python3 tools/integration/audit19Verdicts.py "$REC/check" > "$REC/verdicts.txt"
 for n in $(ls $W/fixtures/*.json | sed 's/-c[0-9]*\.json$//' | sort -u); do
   AUDIT19_LENDS_ONLY=1 node --experimental-strip-types --no-warnings tools/integration/audit19Check.ts $W/fixtures "$(basename "$n")" /dev/null
 done > "$REC/lends.txt"
-[ -f tools/integration/audit19Wp160.sh ] && sh tools/integration/audit19Wp160.sh "$REC/wp160" "$T/wp160"
+sh tools/integration/audit19Wp160.sh "$REC/wp160" "$T/wp160"
+# ablations: Castform's sprite boxes masked (ISSUES #143: the residual is the weather form only); the Dive setup window with the move banner
+# instead of BattleScriptFirstChargingTurn's empty string; audit 18's missed-strike rule in the consumer's own turn (wp160-opp-s1-c1)
+mkdir -p "$REC/ablation" "$T/abl"
+for n in cast-sun-swift-ply cast-sun-swift-opp cast-rain-swift-ply cast-rain-swift-opp; do
+  AUDIT19_MASK=47:94:67:111,157:194:11:58 node --experimental-strip-types --no-warnings tools/integration/audit19Check.ts $W/fixtures "$n" "$REC/ablation/check-$n-mask-castform.json" > /dev/null 2>&1
+done
+python3 - $W/fixtures "$T/abl" <<'PY'
+import json, sys
+from pathlib import Path
+src, dst = Path(sys.argv[1]), Path(sys.argv[2])
+for p in sorted(src.glob("dive-clamperl-swift-ply-c*.json")):
+    f = json.loads(p.read_text()); f.pop("messageLines", None)
+    (dst / p.name.replace("dive-clamperl-swift-ply", "dive-clamperl-swift-ply-banner")).write_text(json.dumps(f, indent=1) + "\n")
+PY
+node --experimental-strip-types --no-warnings tools/integration/audit19Check.ts "$T/abl" dive-clamperl-swift-ply-banner "$REC/ablation/check-dive-clamperl-swift-ply-banner.json" > /dev/null 2>&1
+AUDIT19_MISS_RULE_ALL_TURNS=1 node --experimental-strip-types --no-warnings tools/integration/audit19Check.ts $W/fixtures wp160-opp-s1 "$REC/ablation/check-wp160-opp-s1-miss-rule-all-turns.json" > /dev/null 2>&1
+python3 tools/integration/audit19Summary.py "$REC/ablation" > "$REC/ablation/summary.txt"
 [ -d $W/receipts/check ] && python3 tools/integration/audit19Compare.py "$REC" $W/receipts | tee "$T/receipts-vs-committed.txt" | tail -14 || true

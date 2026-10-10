@@ -9,6 +9,7 @@ user, SLOW lead CHANSEY = the consumer) with these families (both sides each):
   sb      NINJASK 302 (Speed Boost) using SNORE 173 (fails awake: no body): the end-turn STATS_CHANGE (argument 17) is the only unit;
   ice     ICE_BALL 301 (SEALEO 342 / WALREIN 343): counters 1..5 (the user is locked), consumers between the bodies;
   dive    DIVE 291 (CHINCHOU 170 / CLAMPERL 373): every body is a window (the attack body and the next body of either battler);
+  magx    Magnitude > 99 explicitly by lab seed (below);
   ctl     no-unit controls: SNORLAX SNORE (no body) before every consumer;
   wp160   ISSUES #160: dive70's whirlpool-opp-s1 (copied, its own lab seed 305420548) + a variant whose player picks SWIFT 129 (move slot 2,
           RIGHT in the move menu) in turn 2 (an order-dependent consumer after the Whirlpool-at-the-hidden-diver history);
@@ -92,6 +93,19 @@ assert [g["frames"] for g in seg[4:8]] == [2, 30, 2, 1400]
 v["trace"]["segments"] = seg[:6] + [{"frames": 2, "buttons": ["RIGHT"]}, {"frames": 10, "buttons": []}, {"frames": 2, "buttons": ["A"]},
                                     {"frames": 1388, "buttons": []}] + seg[8:]
 (OUT / "wp160-opp-swift.json").write_text(json.dumps(v, indent=1) + "\n")
+# magx: Magnitude > 99 EXPLICITLY by lab seed (305420349 + k, picked from a 12-seed sweep of mag-golem-swift-*: k10 / k4 roll 150 at the
+# first / second use against the player's CHANSEY, k5 / k2 at the first / second use against the opponent's). CHANSEY's HP / Def EVs are
+# maxed so it survives a > 99 roll (the opponent CHANSEY of mag-* faints to it -> an unmodelled switch); EVs do not move the power rolls.
+for side, stag, ks in (("player", "ply", (10, 4)), ("opponent", "opp", (5, 2))):
+    for c in ("SWIFT", "WATER_PULSE"):  # Electric consumers are immune-blocked by GOLEM (no body)
+        for k in ks:
+            name = f"magx-golem-{tag(c)}-{stag}-k{k}"
+            stage(name, "GOLEM", "MAGNITUDE", "CHANSEY", c, side, 3)
+            v = json.loads((OUT / f"{name}.json").read_text())
+            v["seed"] = 305420349 + k
+            v["overrides"]["parties"][side][0]["evs"].update({"hp": 255, "defense": 255, "spDefense": 0})  # 510 EV cap
+            (OUT / f"{name}.json").write_text(json.dumps(v, indent=1) + "\n")
+
 # ISSUES #160 as described (the Whirlpool hits the hidden diver at the END of turn 0, right before the turn-1 prompt): CHINCHOU (fast)
 # DIVE vs CHANSEY (slow) WHIRLPOOL; the player's CHANSEY then picks SWIFT (slot 2: RIGHT in the move menu) from turn 1 on (an
 # order-dependent consumer after the Dive attack); the opponent's CHANSEY keeps WHIRLPOOL (the AI's only move: the consumer after the attack
