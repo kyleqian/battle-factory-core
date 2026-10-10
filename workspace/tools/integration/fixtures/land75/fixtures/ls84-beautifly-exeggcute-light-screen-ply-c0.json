@@ -1,0 +1,158 @@
+{
+ "schema": "land75-wall-route-fixture/v1",
+ "move": "LIGHT_SCREEN",
+ "bodyIndex": 0,
+ "probe": "tools/integration/audit18Probe.py",
+ "scenario": "tools/integration/fixtures/land75/scenarios/ls84-beautifly-exeggcute-light-screen-ply.json",
+ "denseWindow": {
+  "startFrame": 561,
+  "endFrame": 646
+ },
+ "attacker": {
+  "species": "EXEGGCUTE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "BEAUTIFLY",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015557,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 61,
+  "playerMaxHp": 167,
+  "opponentHp": 167,
+  "opponentMaxHp": 167,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "target": 0
+ },
+ "rom": {
+  "invisible": [
+   false,
+   false
+  ],
+  "turn": 0,
+  "spriteOrder": [
+   62,
+   60,
+   0,
+   63,
+   1,
+   61,
+   6,
+   8,
+   2,
+   3,
+   14,
+   10,
+   4,
+   16,
+   22,
+   12,
+   20,
+   7,
+   18,
+   21,
+   19,
+   15,
+   17,
+   11,
+   5,
+   13,
+   9,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   23,
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47
+  ]
+ },
+ "pinnedRng2": [],
+ "promptShown": [
+  true
+ ],
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "318",
+      "0",
+      "60",
+      "1",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": [
+      "113",
+      "0",
+      "0",
+      "0",
+      "70",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
+}

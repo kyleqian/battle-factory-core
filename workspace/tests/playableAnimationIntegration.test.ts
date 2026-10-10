@@ -78,10 +78,11 @@ describe("ordinary playable animation queue", () => {
     // fallback renders; 2/45/59/114 ([3,3]) have Light Screen as the first move
     // body with known entry history (exact adapter). s10a: seed 27 plays Faint Attack 185 first, which the
     // prep44 receipt audited net-zero, so it now renders with the exact adapter (was fallback); 84 (318) and
-    // 2 [0,3] (209) stay fallback. alloc52: 2 [0,3] flipped to exact (Spark 209 is audited net-zero by the prep52 receipt); 84 (318) stays fallback.
+    // 2 [0,3] (209) stay fallback. alloc52: 2 [0,3] flipped to exact (Spark 209 is audited net-zero by the prep52 receipt).
+    // land75: 84 flipped to exact (Silver Wind 318 is audited net-zero by the hist73 receipt; dense ROM check tools/integration/fixtures/land75/).
     const routes: ReadonlyArray<readonly [number, readonly (0 | 1 | 2 | 3)[], boolean]> = [
       [2, [3, 3], true], [27, [3, 3], true], [45, [3, 3], true],
-      [59, [3, 3], true], [84, [3, 3], false], [114, [3, 3], true],
+      [59, [3, 3], true], [84, [3, 3], true], [114, [3, 3], true],
       [2, [0, 3], true],
     ];
     for (const [seed, slots, exact] of routes) {

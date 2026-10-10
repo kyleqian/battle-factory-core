@@ -1,3 +1,4 @@
+ls84-beautifly-exeggcute-light-screen-ply-c0.json units 2 otherInvisible 0
 wall10-yanma-drowzee-barrier-opp-c0.json units 2 otherInvisible 0
 wall10-yanma-drowzee-barrier-ply-c0.json units 2 otherInvisible 0
 wall10-yanma-drowzee-barrier-ply-c1.json units 7 otherInvisible 0

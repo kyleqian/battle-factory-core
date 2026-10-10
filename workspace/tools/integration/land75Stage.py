@@ -6,6 +6,8 @@ streak 0, slot 0), reproducing each route's body history before the wall body wi
   wall260-*  route seed 260: foe SPOINK Psywave 149, player CLAMPERL Dive 291 (setup), next turn foe SPOINK Magic Coat 277 (priority +4)
              at the hidden diver. SPOINK knows [PSYWAVE, MAGIC_COAT, MAGIC_COAT, MAGIC_COAT]: the Factory AI picks with the pinned lab
              seed; `-s<seed>` variants are the sweep (land75Fixtures.py keeps the ones whose ROM history equals the route's).
+  ls84-*     tests/playableAnimationIntegration.test.ts Light Screen route seed 84 [3, 3]: foe BEAUTIFLY Silver Wind 318 -> player EXEGGCUTE
+             Light Screen 113 (the route orientation; the opponent's Light Screen is the D4 faithful-timing body, not this route).
 audit18Stage.py's lead() / trace() / base (tools/battle-lab/prep18-return-altopp-snorlax-golem.json); every scenario pins an explicit
 lab seed (ISSUES #154).
 usage: land75Stage.py <out-dir>
@@ -15,8 +17,8 @@ from pathlib import Path
 
 OUT = Path(sys.argv[1]); OUT.mkdir(parents=True, exist_ok=True)
 BASE = json.loads(Path("tools/battle-lab/prep18-return-altopp-snorlax-golem.json").read_text())
-SP = {"YANMA": 193, "DROWZEE": 96, "SPOINK": 351, "CLAMPERL": 373}
-SIGNAL_BEAM, BARRIER, PSYWAVE, MAGIC_COAT, DIVE = 324, 112, 149, 277, 291
+SP = {"YANMA": 193, "DROWZEE": 96, "SPOINK": 351, "CLAMPERL": 373, "BEAUTIFLY": 292, "EXEGGCUTE": 102}
+SIGNAL_BEAM, BARRIER, PSYWAVE, MAGIC_COAT, DIVE, SILVER_WIND, LIGHT_SCREEN = 324, 112, 149, 277, 291, 318, 113
 SEEDS_260 = [305420349, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
 
@@ -55,4 +57,5 @@ stage("wall10-yanma-drowzee-barrier-ply", ("YANMA", [SIGNAL_BEAM] * 4), ("DROWZE
 for seed in SEEDS_260:
     stage(f"wall260-spoink-clamperl-magic-coat-opp-s{seed}", ("SPOINK", [PSYWAVE, MAGIC_COAT, MAGIC_COAT, MAGIC_COAT]),
           ("CLAMPERL", [DIVE] * 4), "player", 2, seed)
+stage("ls84-beautifly-exeggcute-light-screen-ply", ("BEAUTIFLY", [SILVER_WIND] * 4), ("EXEGGCUTE", [LIGHT_SCREEN] * 4), "player", 2, 305420349)
 print("\n".join(sorted(p.name for p in OUT.glob("*.json"))))

@@ -57,6 +57,34 @@
      "live": true
     }
    ]
+  },
+  {
+   "seed": 84,
+   "moveId": 113,
+   "history": [
+    "318@1",
+    "113@0"
+   ],
+   "field": {
+    "player": "EXEGGCUTE",
+    "opponent": "BEAUTIFLY"
+   },
+   "rows": 88,
+   "ages": [
+    0,
+    87
+   ],
+   "distinct": [
+    {
+     "hidden": {
+      "player": false,
+      "opponent": false
+     },
+     "allocatorKnown": true,
+     "orderInput": true,
+     "live": true
+    }
+   ]
   }
  ]
 }

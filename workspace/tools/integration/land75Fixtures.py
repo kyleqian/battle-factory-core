@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""land75: chain fixtures for every wall body (Barrier 112 / Magic Coat 277) of the land75 wall-route scenarios (land75Stage.py, probed
+"""land75: chain fixtures for every wall body (Barrier 112 / Magic Coat 277 / Light Screen 113) of the land75 wall-route scenarios (land75Stage.py, probed
 by audit18Probe.py). audit18Fixtures.py's derivation verbatim (one turn per ROM battleTurnCounter, the kernel payload forms the
 orchestrator feeds the production hosts, promptShown false on a PLAYER-locked Dive strike turn, Dive words pinned at the RAM gRng2Value),
-with this step's moves added (Signal Beam 324, Psywave 149, Barrier 112 + its STATS_CHANGE 40, Magic Coat 277) and the consumers = every
+with this step's moves added (Signal Beam 324, Psywave 149, Barrier 112 + its STATS_CHANGE 40, Magic Coat 277, Silver Wind 318
++ its all-stats STATS_CHANGE 55, Light Screen 113) and the consumers = every
 wall body of either side. The fixtures are read by audit18Check.ts (two fresh direct-mGBA probe processes, CHAIN + ENTRY lends).
 usage: land75Fixtures.py <probe-dir> <fixture-dir> <scenario-dir>
 """
@@ -14,15 +15,15 @@ out_dir.mkdir(parents=True, exist_ok=True)
 SCEN = Path(sys.argv[3])
 SPECIES = {s["id"]: s["name"].removeprefix("SPECIES_") for s in json.loads(Path("src/data/gen/species-stats.json").read_text())["species"]}
 POWER = {19: 70, 340: 85, 91: 60, 291: 60, 68: 1, 33: 35, 219: 0, 273: 0, 339: 0, 156: 0, 334: 0, 201: 0, 89: 100, 113: 0, 58: 95, 104: 0,
-         351: 60, 352: 60, 85: 95, 164: 0, 324: 75, 112: 0, 149: 1, 277: 0}
+         351: 60, 352: 60, 85: 95, 164: 0, 324: 75, 112: 0, 149: 1, 277: 0, 318: 60, 113: 0}
 NAMES = {19: "FLY", 340: "BOUNCE", 91: "DIG", 291: "DIVE", 68: "COUNTER", 33: "TACKLE", 219: "SAFEGUARD", 273: "WISH", 339: "BULK_UP",
          156: "REST", 334: "IRON_DEFENSE", 201: "SANDSTORM", 89: "EARTHQUAKE", 113: "LIGHT_SCREEN", 58: "ICE_BEAM", 104: "DOUBLE_TEAM",
          351: "SHOCK_WAVE", 352: "WATER_PULSE", 85: "THUNDERBOLT", 164: "SUBSTITUTE", 324: "SIGNAL_BEAM", 112: "BARRIER", 149: "PSYWAVE",
-         277: "MAGIC_COAT"}
+         277: "MAGIC_COAT", 318: "SILVER_WIND", 113: "LIGHT_SCREEN"}
 MOVES = {f"Move_{v}": k for k, v in NAMES.items()}
 UNITS = {19, 340, 91, 291, 351, 68, 33}  # the fast lead's moves (Dig / Shock Wave are also consumers when the slow lead uses them)
 RANDOM2 = {273, 352}
-STAT_ARG = {104: "21", 334: "40", 339: "55", 112: "40"}  # Barrier: STAT_ANIM_PLUS2 38 + DEF 2
+STAT_ARG = {104: "21", 334: "40", 339: "55", 112: "40", 318: "55"}  # Barrier: STAT_ANIM_PLUS2 38 + DEF 2; Silver Wind: MULTIPLE_PLUS1
 STATUS1 = {"Status_Sleep": (0x1, "SLP"), "Status_Poison": (0x8, "PSN"), "Status_Burn": (0x10, "BRN"), "Status_Freeze": (0x20, "FRZ"),
            "Status_Paralysis": (0x40, "PRZ")}
 # production age 0 = ROM activation + 1: Double Team (audit 17 / prep7 framing); Iron Defense (the accepted 101-frame window
@@ -102,7 +103,7 @@ for probe in sorted(probe_dir.glob("*.json")):
                     "arguments": [str(move), str(b["moveTurn"]), str(POWER[move]), "1" if hit else "0", "70", "0"]}
             if move == 291:
                 pinned.append([flat, b["at"]["rng2"]])
-            consumer = move in (112, 277)  # land75: every wall body
+            consumer = move in (112, 277, 113)  # land75: every wall body (Barrier / Magic Coat / Light Screen)
             if consumer and stopped is None and "endFrame" in b:
                 side = "player" if atk == 0 else "opponent"
                 other = 1 - atk
