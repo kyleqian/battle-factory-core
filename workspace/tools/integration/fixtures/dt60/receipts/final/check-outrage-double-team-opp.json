@@ -1,0 +1,2775 @@
+{
+ "schema": "dt60-check/v1",
+ "variant": null,
+ "scenario": "outrage-double-team-opp",
+ "probeExit": [
+  0,
+  0
+ ],
+ "rows": [
+  {
+   "fixture": "outrage-double-team-opp-c0.json",
+   "move": "DOUBLE_TEAM",
+   "side": "opponent",
+   "species": "CHANSEY/SNORLAX",
+   "units": 2,
+   "history": [
+    "200@0 HIT_ANIMATION@1 104@1"
+   ],
+   "window": {
+    "startFrame": 307,
+    "endFrame": 465,
+    "ageOffset": -1
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "harnessAllocator": false,
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": false,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "invalidatedBy": [],
+    "rows": 159,
+    "exactRows": 32,
+    "px": 375605,
+    "digests": [
+     "70ba81d172880ad1",
+     "70ba81d172880ad1"
+    ],
+    "residualRows": [
+     [
+      2,
+      1566
+     ],
+     [
+      3,
+      1566
+     ],
+     [
+      4,
+      1566
+     ],
+     [
+      5,
+      1618
+     ],
+     [
+      6,
+      1618
+     ],
+     [
+      7,
+      1618
+     ],
+     [
+      8,
+      1618
+     ],
+     [
+      9,
+      1618
+     ],
+     [
+      10,
+      1618
+     ],
+     [
+      11,
+      1719
+     ],
+     [
+      12,
+      1719
+     ],
+     [
+      13,
+      1817
+     ],
+     [
+      14,
+      1817
+     ],
+     [
+      15,
+      1914
+     ],
+     [
+      16,
+      2007
+     ],
+     [
+      17,
+      2099
+     ],
+     [
+      18,
+      2188
+     ],
+     [
+      19,
+      2275
+     ],
+     [
+      20,
+      2357
+     ],
+     [
+      21,
+      2433
+     ],
+     [
+      22,
+      2510
+     ],
+     [
+      23,
+      2592
+     ],
+     [
+      24,
+      2592
+     ],
+     [
+      25,
+      2675
+     ],
+     [
+      26,
+      2675
+     ],
+     [
+      27,
+      2758
+     ],
+     [
+      28,
+      2675
+     ],
+     [
+      29,
+      2592
+     ],
+     [
+      30,
+      2510
+     ],
+     [
+      31,
+      2357
+     ],
+     [
+      32,
+      2188
+     ],
+     [
+      33,
+      1914
+     ],
+     [
+      34,
+      1618
+     ],
+     [
+      35,
+      1817
+     ],
+     [
+      36,
+      2188
+     ],
+     [
+      37,
+      2433
+     ],
+     [
+      38,
+      2675
+     ],
+     [
+      39,
+      2985
+     ],
+     [
+      40,
+      3127
+     ],
+     [
+      41,
+      3270
+     ]
+    ],
+    "detail": [
+     {
+      "age": 2,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 3,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 4,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 5,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     },
+     {
+      "age": 6,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     },
+     {
+      "age": 7,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     }
+    ]
+   },
+   "entry": {
+    "live": false,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "invalidatedBy": [],
+    "rows": 159,
+    "exactRows": 32,
+    "px": 375605,
+    "digests": [
+     "70ba81d172880ad1",
+     "70ba81d172880ad1"
+    ],
+    "residualRows": [
+     [
+      2,
+      1566
+     ],
+     [
+      3,
+      1566
+     ],
+     [
+      4,
+      1566
+     ],
+     [
+      5,
+      1618
+     ],
+     [
+      6,
+      1618
+     ],
+     [
+      7,
+      1618
+     ],
+     [
+      8,
+      1618
+     ],
+     [
+      9,
+      1618
+     ],
+     [
+      10,
+      1618
+     ],
+     [
+      11,
+      1719
+     ],
+     [
+      12,
+      1719
+     ],
+     [
+      13,
+      1817
+     ],
+     [
+      14,
+      1817
+     ],
+     [
+      15,
+      1914
+     ],
+     [
+      16,
+      2007
+     ],
+     [
+      17,
+      2099
+     ],
+     [
+      18,
+      2188
+     ],
+     [
+      19,
+      2275
+     ],
+     [
+      20,
+      2357
+     ],
+     [
+      21,
+      2433
+     ],
+     [
+      22,
+      2510
+     ],
+     [
+      23,
+      2592
+     ],
+     [
+      24,
+      2592
+     ],
+     [
+      25,
+      2675
+     ],
+     [
+      26,
+      2675
+     ],
+     [
+      27,
+      2758
+     ],
+     [
+      28,
+      2675
+     ],
+     [
+      29,
+      2592
+     ],
+     [
+      30,
+      2510
+     ],
+     [
+      31,
+      2357
+     ],
+     [
+      32,
+      2188
+     ],
+     [
+      33,
+      1914
+     ],
+     [
+      34,
+      1618
+     ],
+     [
+      35,
+      1817
+     ],
+     [
+      36,
+      2188
+     ],
+     [
+      37,
+      2433
+     ],
+     [
+      38,
+      2675
+     ],
+     [
+      39,
+      2985
+     ],
+     [
+      40,
+      3127
+     ],
+     [
+      41,
+      3270
+     ]
+    ],
+    "detail": [
+     {
+      "age": 2,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 3,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 4,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 5,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     },
+     {
+      "age": 6,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     },
+     {
+      "age": 7,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "outrage-double-team-opp-c1.json",
+   "move": "DOUBLE_TEAM",
+   "side": "opponent",
+   "species": "CHANSEY/SNORLAX",
+   "units": 4,
+   "history": [
+    "200@0 HIT_ANIMATION@1 104@1 STATS_CHANGE@1 104@1"
+   ],
+   "window": {
+    "startFrame": 855,
+    "endFrame": 1013,
+    "ageOffset": -1
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "harnessAllocator": false,
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": false,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "invalidatedBy": [],
+    "rows": 159,
+    "exactRows": 32,
+    "px": 375605,
+    "digests": [
+     "70ba81d172880ad1",
+     "70ba81d172880ad1"
+    ],
+    "residualRows": [
+     [
+      2,
+      1566
+     ],
+     [
+      3,
+      1566
+     ],
+     [
+      4,
+      1566
+     ],
+     [
+      5,
+      1618
+     ],
+     [
+      6,
+      1618
+     ],
+     [
+      7,
+      1618
+     ],
+     [
+      8,
+      1618
+     ],
+     [
+      9,
+      1618
+     ],
+     [
+      10,
+      1618
+     ],
+     [
+      11,
+      1719
+     ],
+     [
+      12,
+      1719
+     ],
+     [
+      13,
+      1817
+     ],
+     [
+      14,
+      1817
+     ],
+     [
+      15,
+      1914
+     ],
+     [
+      16,
+      2007
+     ],
+     [
+      17,
+      2099
+     ],
+     [
+      18,
+      2188
+     ],
+     [
+      19,
+      2275
+     ],
+     [
+      20,
+      2357
+     ],
+     [
+      21,
+      2433
+     ],
+     [
+      22,
+      2510
+     ],
+     [
+      23,
+      2592
+     ],
+     [
+      24,
+      2592
+     ],
+     [
+      25,
+      2675
+     ],
+     [
+      26,
+      2675
+     ],
+     [
+      27,
+      2758
+     ],
+     [
+      28,
+      2675
+     ],
+     [
+      29,
+      2592
+     ],
+     [
+      30,
+      2510
+     ],
+     [
+      31,
+      2357
+     ],
+     [
+      32,
+      2188
+     ],
+     [
+      33,
+      1914
+     ],
+     [
+      34,
+      1618
+     ],
+     [
+      35,
+      1817
+     ],
+     [
+      36,
+      2188
+     ],
+     [
+      37,
+      2433
+     ],
+     [
+      38,
+      2675
+     ],
+     [
+      39,
+      2985
+     ],
+     [
+      40,
+      3127
+     ],
+     [
+      41,
+      3270
+     ]
+    ],
+    "detail": [
+     {
+      "age": 2,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 3,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 4,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 5,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     },
+     {
+      "age": 6,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     },
+     {
+      "age": 7,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     }
+    ]
+   },
+   "entry": {
+    "live": false,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "invalidatedBy": [],
+    "rows": 159,
+    "exactRows": 32,
+    "px": 375605,
+    "digests": [
+     "70ba81d172880ad1",
+     "70ba81d172880ad1"
+    ],
+    "residualRows": [
+     [
+      2,
+      1566
+     ],
+     [
+      3,
+      1566
+     ],
+     [
+      4,
+      1566
+     ],
+     [
+      5,
+      1618
+     ],
+     [
+      6,
+      1618
+     ],
+     [
+      7,
+      1618
+     ],
+     [
+      8,
+      1618
+     ],
+     [
+      9,
+      1618
+     ],
+     [
+      10,
+      1618
+     ],
+     [
+      11,
+      1719
+     ],
+     [
+      12,
+      1719
+     ],
+     [
+      13,
+      1817
+     ],
+     [
+      14,
+      1817
+     ],
+     [
+      15,
+      1914
+     ],
+     [
+      16,
+      2007
+     ],
+     [
+      17,
+      2099
+     ],
+     [
+      18,
+      2188
+     ],
+     [
+      19,
+      2275
+     ],
+     [
+      20,
+      2357
+     ],
+     [
+      21,
+      2433
+     ],
+     [
+      22,
+      2510
+     ],
+     [
+      23,
+      2592
+     ],
+     [
+      24,
+      2592
+     ],
+     [
+      25,
+      2675
+     ],
+     [
+      26,
+      2675
+     ],
+     [
+      27,
+      2758
+     ],
+     [
+      28,
+      2675
+     ],
+     [
+      29,
+      2592
+     ],
+     [
+      30,
+      2510
+     ],
+     [
+      31,
+      2357
+     ],
+     [
+      32,
+      2188
+     ],
+     [
+      33,
+      1914
+     ],
+     [
+      34,
+      1618
+     ],
+     [
+      35,
+      1817
+     ],
+     [
+      36,
+      2188
+     ],
+     [
+      37,
+      2433
+     ],
+     [
+      38,
+      2675
+     ],
+     [
+      39,
+      2985
+     ],
+     [
+      40,
+      3127
+     ],
+     [
+      41,
+      3270
+     ]
+    ],
+    "detail": [
+     {
+      "age": 2,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 3,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 4,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 5,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     },
+     {
+      "age": 6,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     },
+     {
+      "age": 7,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "outrage-double-team-opp-c2.json",
+   "move": "DOUBLE_TEAM",
+   "side": "opponent",
+   "species": "CHANSEY/SNORLAX",
+   "units": 9,
+   "history": [
+    "200@0 HIT_ANIMATION@1 104@1 STATS_CHANGE@1 104@1 STATS_CHANGE@1 status:CONFUSION@0",
+    "",
+    "status:CONFUSION@0 HIT_ANIMATION@0 104@1"
+   ],
+   "window": {
+    "startFrame": 3103,
+    "endFrame": 3261,
+    "ageOffset": -1
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "harnessAllocator": false,
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": false,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "invalidatedBy": [],
+    "rows": 159,
+    "exactRows": 32,
+    "px": 375605,
+    "digests": [
+     "70ba81d172880ad1",
+     "70ba81d172880ad1"
+    ],
+    "residualRows": [
+     [
+      2,
+      1566
+     ],
+     [
+      3,
+      1566
+     ],
+     [
+      4,
+      1566
+     ],
+     [
+      5,
+      1618
+     ],
+     [
+      6,
+      1618
+     ],
+     [
+      7,
+      1618
+     ],
+     [
+      8,
+      1618
+     ],
+     [
+      9,
+      1618
+     ],
+     [
+      10,
+      1618
+     ],
+     [
+      11,
+      1719
+     ],
+     [
+      12,
+      1719
+     ],
+     [
+      13,
+      1817
+     ],
+     [
+      14,
+      1817
+     ],
+     [
+      15,
+      1914
+     ],
+     [
+      16,
+      2007
+     ],
+     [
+      17,
+      2099
+     ],
+     [
+      18,
+      2188
+     ],
+     [
+      19,
+      2275
+     ],
+     [
+      20,
+      2357
+     ],
+     [
+      21,
+      2433
+     ],
+     [
+      22,
+      2510
+     ],
+     [
+      23,
+      2592
+     ],
+     [
+      24,
+      2592
+     ],
+     [
+      25,
+      2675
+     ],
+     [
+      26,
+      2675
+     ],
+     [
+      27,
+      2758
+     ],
+     [
+      28,
+      2675
+     ],
+     [
+      29,
+      2592
+     ],
+     [
+      30,
+      2510
+     ],
+     [
+      31,
+      2357
+     ],
+     [
+      32,
+      2188
+     ],
+     [
+      33,
+      1914
+     ],
+     [
+      34,
+      1618
+     ],
+     [
+      35,
+      1817
+     ],
+     [
+      36,
+      2188
+     ],
+     [
+      37,
+      2433
+     ],
+     [
+      38,
+      2675
+     ],
+     [
+      39,
+      2985
+     ],
+     [
+      40,
+      3127
+     ],
+     [
+      41,
+      3270
+     ]
+    ],
+    "detail": [
+     {
+      "age": 2,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 3,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 4,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 5,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     },
+     {
+      "age": 6,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     },
+     {
+      "age": 7,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     }
+    ]
+   },
+   "entry": {
+    "live": false,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "invalidatedBy": [],
+    "rows": 159,
+    "exactRows": 32,
+    "px": 375605,
+    "digests": [
+     "70ba81d172880ad1",
+     "70ba81d172880ad1"
+    ],
+    "residualRows": [
+     [
+      2,
+      1566
+     ],
+     [
+      3,
+      1566
+     ],
+     [
+      4,
+      1566
+     ],
+     [
+      5,
+      1618
+     ],
+     [
+      6,
+      1618
+     ],
+     [
+      7,
+      1618
+     ],
+     [
+      8,
+      1618
+     ],
+     [
+      9,
+      1618
+     ],
+     [
+      10,
+      1618
+     ],
+     [
+      11,
+      1719
+     ],
+     [
+      12,
+      1719
+     ],
+     [
+      13,
+      1817
+     ],
+     [
+      14,
+      1817
+     ],
+     [
+      15,
+      1914
+     ],
+     [
+      16,
+      2007
+     ],
+     [
+      17,
+      2099
+     ],
+     [
+      18,
+      2188
+     ],
+     [
+      19,
+      2275
+     ],
+     [
+      20,
+      2357
+     ],
+     [
+      21,
+      2433
+     ],
+     [
+      22,
+      2510
+     ],
+     [
+      23,
+      2592
+     ],
+     [
+      24,
+      2592
+     ],
+     [
+      25,
+      2675
+     ],
+     [
+      26,
+      2675
+     ],
+     [
+      27,
+      2758
+     ],
+     [
+      28,
+      2675
+     ],
+     [
+      29,
+      2592
+     ],
+     [
+      30,
+      2510
+     ],
+     [
+      31,
+      2357
+     ],
+     [
+      32,
+      2188
+     ],
+     [
+      33,
+      1914
+     ],
+     [
+      34,
+      1618
+     ],
+     [
+      35,
+      1817
+     ],
+     [
+      36,
+      2188
+     ],
+     [
+      37,
+      2433
+     ],
+     [
+      38,
+      2675
+     ],
+     [
+      39,
+      2985
+     ],
+     [
+      40,
+      3127
+     ],
+     [
+      41,
+      3270
+     ]
+    ],
+    "detail": [
+     {
+      "age": 2,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 3,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 4,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 5,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     },
+     {
+      "age": 6,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     },
+     {
+      "age": 7,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "outrage-double-team-opp-c3.json",
+   "move": "DOUBLE_TEAM",
+   "side": "opponent",
+   "species": "CHANSEY/SNORLAX",
+   "units": 13,
+   "history": [
+    "200@0 HIT_ANIMATION@1 104@1 STATS_CHANGE@1 104@1 STATS_CHANGE@1 status:CONFUSION@0",
+    "",
+    "status:CONFUSION@0 HIT_ANIMATION@0 104@1 STATS_CHANGE@1",
+    "200@0 HIT_ANIMATION@1 104@1"
+   ],
+   "window": {
+    "startFrame": 4408,
+    "endFrame": 4566,
+    "ageOffset": -1
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "harnessAllocator": false,
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": false,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "invalidatedBy": [],
+    "rows": 159,
+    "exactRows": 32,
+    "px": 375605,
+    "digests": [
+     "70ba81d172880ad1",
+     "70ba81d172880ad1"
+    ],
+    "residualRows": [
+     [
+      2,
+      1566
+     ],
+     [
+      3,
+      1566
+     ],
+     [
+      4,
+      1566
+     ],
+     [
+      5,
+      1618
+     ],
+     [
+      6,
+      1618
+     ],
+     [
+      7,
+      1618
+     ],
+     [
+      8,
+      1618
+     ],
+     [
+      9,
+      1618
+     ],
+     [
+      10,
+      1618
+     ],
+     [
+      11,
+      1719
+     ],
+     [
+      12,
+      1719
+     ],
+     [
+      13,
+      1817
+     ],
+     [
+      14,
+      1817
+     ],
+     [
+      15,
+      1914
+     ],
+     [
+      16,
+      2007
+     ],
+     [
+      17,
+      2099
+     ],
+     [
+      18,
+      2188
+     ],
+     [
+      19,
+      2275
+     ],
+     [
+      20,
+      2357
+     ],
+     [
+      21,
+      2433
+     ],
+     [
+      22,
+      2510
+     ],
+     [
+      23,
+      2592
+     ],
+     [
+      24,
+      2592
+     ],
+     [
+      25,
+      2675
+     ],
+     [
+      26,
+      2675
+     ],
+     [
+      27,
+      2758
+     ],
+     [
+      28,
+      2675
+     ],
+     [
+      29,
+      2592
+     ],
+     [
+      30,
+      2510
+     ],
+     [
+      31,
+      2357
+     ],
+     [
+      32,
+      2188
+     ],
+     [
+      33,
+      1914
+     ],
+     [
+      34,
+      1618
+     ],
+     [
+      35,
+      1817
+     ],
+     [
+      36,
+      2188
+     ],
+     [
+      37,
+      2433
+     ],
+     [
+      38,
+      2675
+     ],
+     [
+      39,
+      2985
+     ],
+     [
+      40,
+      3127
+     ],
+     [
+      41,
+      3270
+     ]
+    ],
+    "detail": [
+     {
+      "age": 2,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 3,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 4,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 5,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     },
+     {
+      "age": 6,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     },
+     {
+      "age": 7,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     }
+    ]
+   },
+   "entry": {
+    "live": false,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "invalidatedBy": [],
+    "rows": 159,
+    "exactRows": 32,
+    "px": 375605,
+    "digests": [
+     "70ba81d172880ad1",
+     "70ba81d172880ad1"
+    ],
+    "residualRows": [
+     [
+      2,
+      1566
+     ],
+     [
+      3,
+      1566
+     ],
+     [
+      4,
+      1566
+     ],
+     [
+      5,
+      1618
+     ],
+     [
+      6,
+      1618
+     ],
+     [
+      7,
+      1618
+     ],
+     [
+      8,
+      1618
+     ],
+     [
+      9,
+      1618
+     ],
+     [
+      10,
+      1618
+     ],
+     [
+      11,
+      1719
+     ],
+     [
+      12,
+      1719
+     ],
+     [
+      13,
+      1817
+     ],
+     [
+      14,
+      1817
+     ],
+     [
+      15,
+      1914
+     ],
+     [
+      16,
+      2007
+     ],
+     [
+      17,
+      2099
+     ],
+     [
+      18,
+      2188
+     ],
+     [
+      19,
+      2275
+     ],
+     [
+      20,
+      2357
+     ],
+     [
+      21,
+      2433
+     ],
+     [
+      22,
+      2510
+     ],
+     [
+      23,
+      2592
+     ],
+     [
+      24,
+      2592
+     ],
+     [
+      25,
+      2675
+     ],
+     [
+      26,
+      2675
+     ],
+     [
+      27,
+      2758
+     ],
+     [
+      28,
+      2675
+     ],
+     [
+      29,
+      2592
+     ],
+     [
+      30,
+      2510
+     ],
+     [
+      31,
+      2357
+     ],
+     [
+      32,
+      2188
+     ],
+     [
+      33,
+      1914
+     ],
+     [
+      34,
+      1618
+     ],
+     [
+      35,
+      1817
+     ],
+     [
+      36,
+      2188
+     ],
+     [
+      37,
+      2433
+     ],
+     [
+      38,
+      2675
+     ],
+     [
+      39,
+      2985
+     ],
+     [
+      40,
+      3127
+     ],
+     [
+      41,
+      3270
+     ]
+    ],
+    "detail": [
+     {
+      "age": 2,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 3,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 4,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 5,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     },
+     {
+      "age": 6,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     },
+     {
+      "age": 7,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "outrage-double-team-opp-c4.json",
+   "move": "DOUBLE_TEAM",
+   "side": "opponent",
+   "species": "CHANSEY/SNORLAX",
+   "units": 17,
+   "history": [
+    "200@0 HIT_ANIMATION@1 104@1 STATS_CHANGE@1 104@1 STATS_CHANGE@1 status:CONFUSION@0",
+    "",
+    "status:CONFUSION@0 HIT_ANIMATION@0 104@1 STATS_CHANGE@1",
+    "200@0 HIT_ANIMATION@1 104@1 STATS_CHANGE@1 200@0 HIT_ANIMATION@1 104@1"
+   ],
+   "window": {
+    "startFrame": 5025,
+    "endFrame": 5183,
+    "ageOffset": -1
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "harnessAllocator": false,
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": false,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "invalidatedBy": [],
+    "rows": 159,
+    "exactRows": 32,
+    "px": 375605,
+    "digests": [
+     "70ba81d172880ad1",
+     "70ba81d172880ad1"
+    ],
+    "residualRows": [
+     [
+      2,
+      1566
+     ],
+     [
+      3,
+      1566
+     ],
+     [
+      4,
+      1566
+     ],
+     [
+      5,
+      1618
+     ],
+     [
+      6,
+      1618
+     ],
+     [
+      7,
+      1618
+     ],
+     [
+      8,
+      1618
+     ],
+     [
+      9,
+      1618
+     ],
+     [
+      10,
+      1618
+     ],
+     [
+      11,
+      1719
+     ],
+     [
+      12,
+      1719
+     ],
+     [
+      13,
+      1817
+     ],
+     [
+      14,
+      1817
+     ],
+     [
+      15,
+      1914
+     ],
+     [
+      16,
+      2007
+     ],
+     [
+      17,
+      2099
+     ],
+     [
+      18,
+      2188
+     ],
+     [
+      19,
+      2275
+     ],
+     [
+      20,
+      2357
+     ],
+     [
+      21,
+      2433
+     ],
+     [
+      22,
+      2510
+     ],
+     [
+      23,
+      2592
+     ],
+     [
+      24,
+      2592
+     ],
+     [
+      25,
+      2675
+     ],
+     [
+      26,
+      2675
+     ],
+     [
+      27,
+      2758
+     ],
+     [
+      28,
+      2675
+     ],
+     [
+      29,
+      2592
+     ],
+     [
+      30,
+      2510
+     ],
+     [
+      31,
+      2357
+     ],
+     [
+      32,
+      2188
+     ],
+     [
+      33,
+      1914
+     ],
+     [
+      34,
+      1618
+     ],
+     [
+      35,
+      1817
+     ],
+     [
+      36,
+      2188
+     ],
+     [
+      37,
+      2433
+     ],
+     [
+      38,
+      2675
+     ],
+     [
+      39,
+      2985
+     ],
+     [
+      40,
+      3127
+     ],
+     [
+      41,
+      3270
+     ]
+    ],
+    "detail": [
+     {
+      "age": 2,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 3,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 4,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 5,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     },
+     {
+      "age": 6,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     },
+     {
+      "age": 7,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     }
+    ]
+   },
+   "entry": {
+    "live": false,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "invalidatedBy": [],
+    "rows": 159,
+    "exactRows": 32,
+    "px": 375605,
+    "digests": [
+     "70ba81d172880ad1",
+     "70ba81d172880ad1"
+    ],
+    "residualRows": [
+     [
+      2,
+      1566
+     ],
+     [
+      3,
+      1566
+     ],
+     [
+      4,
+      1566
+     ],
+     [
+      5,
+      1618
+     ],
+     [
+      6,
+      1618
+     ],
+     [
+      7,
+      1618
+     ],
+     [
+      8,
+      1618
+     ],
+     [
+      9,
+      1618
+     ],
+     [
+      10,
+      1618
+     ],
+     [
+      11,
+      1719
+     ],
+     [
+      12,
+      1719
+     ],
+     [
+      13,
+      1817
+     ],
+     [
+      14,
+      1817
+     ],
+     [
+      15,
+      1914
+     ],
+     [
+      16,
+      2007
+     ],
+     [
+      17,
+      2099
+     ],
+     [
+      18,
+      2188
+     ],
+     [
+      19,
+      2275
+     ],
+     [
+      20,
+      2357
+     ],
+     [
+      21,
+      2433
+     ],
+     [
+      22,
+      2510
+     ],
+     [
+      23,
+      2592
+     ],
+     [
+      24,
+      2592
+     ],
+     [
+      25,
+      2675
+     ],
+     [
+      26,
+      2675
+     ],
+     [
+      27,
+      2758
+     ],
+     [
+      28,
+      2675
+     ],
+     [
+      29,
+      2592
+     ],
+     [
+      30,
+      2510
+     ],
+     [
+      31,
+      2357
+     ],
+     [
+      32,
+      2188
+     ],
+     [
+      33,
+      1914
+     ],
+     [
+      34,
+      1618
+     ],
+     [
+      35,
+      1817
+     ],
+     [
+      36,
+      2188
+     ],
+     [
+      37,
+      2433
+     ],
+     [
+      38,
+      2675
+     ],
+     [
+      39,
+      2985
+     ],
+     [
+      40,
+      3127
+     ],
+     [
+      41,
+      3270
+     ]
+    ],
+    "detail": [
+     {
+      "age": 2,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 3,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 4,
+      "px": 1566,
+      "bbox": [
+       150,
+       202,
+       26,
+       71
+      ],
+      "sample": "171,26 rom b39498 live f77373"
+     },
+     {
+      "age": 5,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     },
+     {
+      "age": 6,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     },
+     {
+      "age": 7,
+      "px": 1618,
+      "bbox": [
+       149,
+       202,
+       26,
+       71
+      ],
+      "sample": "170,26 rom b39498 live f7f7ff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "outrage-double-team-opp-cu0.json",
+   "move": "OUTRAGE",
+   "side": "player",
+   "species": "SNORLAX/CHANSEY",
+   "units": 0,
+   "history": [
+    "200@0"
+   ],
+   "window": {
+    "startFrame": 74,
+    "endFrame": 193
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "harnessAllocator": false,
+   "x2": null,
+   "chain": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "invalidatedBy": [],
+    "rows": 120,
+    "exactRows": 120,
+    "px": 0,
+    "digests": [
+     "2eba613b7396a590",
+     "2eba613b7396a590"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "invalidatedBy": [],
+    "rows": 120,
+    "exactRows": 120,
+    "px": 0,
+    "digests": [
+     "2eba613b7396a590",
+     "2eba613b7396a590"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "outrage-double-team-opp-cu1.json",
+   "move": "OUTRAGE",
+   "side": "player",
+   "species": "SNORLAX/CHANSEY",
+   "units": 11,
+   "history": [
+    "200@0 HIT_ANIMATION@1 104@1 STATS_CHANGE@1 104@1 STATS_CHANGE@1 status:CONFUSION@0",
+    "",
+    "status:CONFUSION@0 HIT_ANIMATION@0 104@1 STATS_CHANGE@1",
+    "200@0"
+   ],
+   "window": {
+    "startFrame": 4176,
+    "endFrame": 4295
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "harnessAllocator": false,
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "invalidatedBy": [],
+    "rows": 120,
+    "exactRows": 120,
+    "px": 0,
+    "digests": [
+     "2eba613b7396a590",
+     "2eba613b7396a590"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "invalidatedBy": [],
+    "rows": 120,
+    "exactRows": 120,
+    "px": 0,
+    "digests": [
+     "2eba613b7396a590",
+     "2eba613b7396a590"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "outrage-double-team-opp-cu2.json",
+   "move": "OUTRAGE",
+   "side": "player",
+   "species": "SNORLAX/CHANSEY",
+   "units": 15,
+   "history": [
+    "200@0 HIT_ANIMATION@1 104@1 STATS_CHANGE@1 104@1 STATS_CHANGE@1 status:CONFUSION@0",
+    "",
+    "status:CONFUSION@0 HIT_ANIMATION@0 104@1 STATS_CHANGE@1",
+    "200@0 HIT_ANIMATION@1 104@1 STATS_CHANGE@1 200@0"
+   ],
+   "window": {
+    "startFrame": 4796,
+    "endFrame": 4915
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "harnessAllocator": false,
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "invalidatedBy": [],
+    "rows": 120,
+    "exactRows": 120,
+    "px": 0,
+    "digests": [
+     "2eba613b7396a590",
+     "2eba613b7396a590"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "orderKnown": true,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "invalidatedBy": [],
+    "rows": 120,
+    "exactRows": 120,
+    "px": 0,
+    "digests": [
+     "2eba613b7396a590",
+     "2eba613b7396a590"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

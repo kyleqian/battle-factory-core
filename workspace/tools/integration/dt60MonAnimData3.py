@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """dt60: which Pokemon (send-out) animations can leave the battler sprite's data[3] non-zero (static source analysis).
 
-usage: dt60MonAnimData3.py [--check] <output.json>
+usage: dt60MonAnimData3.py [--check] src/data/gen/dt60-mon-anim-data3.json
 AnimTask_DoubleTeam's clones are struct copies of the attacker's battler sprite (CloneBattlerSpriteWithBlend,
 battle_anim_mons.c:1626-1645), so AnimDoubleTeam's 2-frame step counter data[3] (battle_anim_effects_1.c:5223-5243) starts at the
 battler sprite's data[3]. In battle that field is last written by the send-out mon animation: Task_HandleMonAnimation zeroes
