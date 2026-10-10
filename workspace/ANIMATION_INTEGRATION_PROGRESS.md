@@ -161,6 +161,22 @@
   build, differential 624/624. Supervisor: d4aTimingCheck rerun fresh on the 11 Sky Attack windows + 32 later58 Sheer Cold / Extrasensory
   opponent windows — rows / px / A == B as in the receipt, 0 violations; census rerun identical delta; union src == the worker's tested
   tree -> touched tests 88/88, smoke 448.
+- Folded Opus worker `9188d4ffb` (SIDE lane, narrow production grant) as `be45be555` (src tree `b13260d0`): plans54 — order-host units
+  that needed a presentation input. Fury Cutter 210: MOVE_ANIMATION carries the counter as a 7th argument (read after the counter calc,
+  the Rollout / Ice Ball pattern; no gameplay change) -> keys 210 / 10210 / 20210 / 30210 (25/25 ROM, counters 1..5 both sides; the
+  right / left branch does not change allocation). Hail 258 + HAIL_CONTINUES (new seam lookup of the displayed species at a
+  general-animation event), Blizzard 59 (blizzard.ts allocator replay) and Water Spout 323 (attacker HP tier + picture + lent order from
+  waterSpout.ts) GEOMETRY-KEYED from the renderers' own timelines, every prediction committed before its probes (8/8, 16/16, 11/11,
+  23/23 ROM instances exact). Eruption 284 (ISSUES #155, now closed): FAIL-CLOSED — plans only at ROM-proven attacker species (incl.
+  CAMERUPT, the only Factory Eruption user, probed both sides; plans51's "camerupt" scenarios actually staged BARBOACH), invalidates
+  elsewhere. Table 527 -> 535 bodies; corpus replays 0 mismatches. Census seeds 0..299 vs `54cc50272`: 95.57 -> 96.74 % by count, 96.81
+  -> 97.96 % by frames (+93 / +13,427; predictor 56 / 8,469, +19 / 2,184 unpredicted later Fury Cutter-chain bodies), 0 regressions,
+  identical commands + digest. Parity on census battles 45 / 14 / 153 / 48 (Scene ON / OFF / second seed). Worker gates 1,594 files /
+  13,139 tests, build, differential 624/624. Supervisor: generator regen no diff; plans54Check byte-identical; a full fresh probe batch
+  (28 jobs x2) gave a byte-equal units.json; census rerun +93 / +13,427, 0 regressions, digest identical.
+- Supervisor union gates on `be45be555` (src `b13260d0`; + d4later + plans54): typecheck, full suite 1,595 files / 13,143 tests, build,
+  differential 624/624 vs `ccc4774c4`, census seeds 0..299 96.74 % by count / 97.96 % by frames (+325 / +44,802 vs `ccc4774c4`, 0
+  regressions, command key sequence identical; battle frames +6 from the corrected Blizzard / Sheer Cold / Extrasensory lengths).
 
 ## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
 

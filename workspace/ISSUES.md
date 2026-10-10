@@ -38,17 +38,6 @@ never absent there; 32 / 32 probed instances, `tools/integration/fixtures/aud56-
 (pan / position) may draw or pan these on the wrong side. Resume: check the RAIN_CONTINUES / weather renderers' use of the event
 battler; if any reads it, take battler 0 at the seam (presentation only) with a dense window on an opponent-set weather.
 
-## #155 — Eruption (284) opponent sprite-order plan is wrong for an elevated attacker (S10A, found 2026-10-09 by plans51)
-
-The production order table's `284:opponent` EXACT plan (base table, prep-era) matched 3 of 4 fresh ROM opponent instances in
-plans51's grid but not GOLBAT -> ONIX: the ROM has 23 allocation windows, the plan 25 (`AnimTask_EruptionLaunchRocks` destroy
-groups split / merge with the attacker geometry; the player side also has 2 ROM plans over 4 pairs). Production lends the
-post-Eruption order from that plan, so a later live body after an elevated opponent's Eruption could draw with a wrong tie order.
-No census command mis-carried on seeds 0..299 (Eruption is rare), but the EXACT claim is wrong in that geometry.
-Evidence: `docs/next-adapters-plans51.md` (Eruption), `tools/integration/fixtures/plans51/units.json` `er-*` jobs.
-Resume: make 284 GEOMETRY-KEYED from the renderer's own rock timeline (the absorption-orb / gdgeo precedent) or invalidate the
-order host after Eruption when the attacker's geometry is not one of the proven plan's; prove on the plans51 er-* grid.
-
 ## #154 — Staged lab probe trajectories differ between batches run at different times (S10A, found 2026-10-09)
 
 plans51's Outrage jobs (`tools/integration/plans51Probe.py`, BODY200; base scenarios `tools/battle-lab/mechanic-outrage-*.json`,
