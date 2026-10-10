@@ -1,0 +1,176 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "DIVE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/species-audit-11/scenarios/clamperlA-dive-player-chinchou-opponent-onix.json",
+ "denseWindow": {
+  "startFrame": 622,
+  "endFrame": 714
+ },
+ "windowSource": "dive70: window = [activation, activation + 92] of the scenario's Dive ATTACK body (prep22Probe.py, fresh direct mGBA)",
+ "attacker": {
+  "species": "CLAMPERL",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015300,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 89,
+  "playerMaxHp": 98,
+  "opponentHp": 129,
+  "opponentMaxHp": 129,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 1
+ },
+ "wordsChain": {
+  "turns": [
+   [
+    [
+     "body",
+     33,
+     "opponent"
+    ],
+    [
+     "hit",
+     "player"
+    ],
+    [
+     "body",
+     291,
+     "player",
+     {
+      "player": 373,
+      "opponent": 95
+     },
+     0
+    ],
+    [
+     "body",
+     291,
+     "player",
+     {
+      "player": 373,
+      "opponent": 95
+     },
+     1
+    ]
+   ]
+  ],
+  "words": [
+   {
+    "value": 2329994605,
+    "source": "PINNED: prep22Probe.py atActivation.rng2 of the Dive setup body (activation frame 191)"
+   }
+  ]
+ },
+ "presentationRngActivation": {
+  "value": 3487352930,
+  "source": "PINNED: prep22Probe.py atActivation.rng2 of the Dive attack body (activation frame 622) == rng2Series[623] stepped back once"
+ },
+ "dive70": {
+  "romSpriteOrderAtActivation": [
+   62,
+   60,
+   0,
+   63,
+   1,
+   61,
+   6,
+   8,
+   2,
+   12,
+   9,
+   14,
+   11,
+   13,
+   4,
+   15,
+   7,
+   5,
+   10,
+   3,
+   21,
+   20,
+   19,
+   18,
+   17,
+   16,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   23,
+   22,
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47
+  ],
+  "setupWindow": [
+   191,
+   309
+  ],
+  "bodies": [
+   [
+    33,
+    72,
+    113,
+    1
+   ],
+   [
+    291,
+    191,
+    309,
+    0
+   ],
+   [
+    291,
+    622,
+    714,
+    0
+   ]
+  ]
+ }
+}

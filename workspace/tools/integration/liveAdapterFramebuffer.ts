@@ -280,7 +280,8 @@ export function fixtureWordsChain(f: Fixture): { spriteOrderInput: LiveMoveSprit
       const seq = 10 * requestId + i;
       if (step[0] === "body") {
         const b = who(step[2]);
-        return ev(seq, "animation", { animationId: "MOVE_ANIMATION", battler: b, target: 1 - b, arguments: [String(step[1]), "0", "40", "10", "70", "0"] });
+        // dive70: an optional 5th element is the body's gAnimMoveTurn (Dive setup 0 / attack 1)
+        return ev(seq, "animation", { animationId: "MOVE_ANIMATION", battler: b, target: 1 - b, arguments: [String(step[1]), String(step[4] ?? 0), "40", "10", "70", "0"] });
       }
       if (step[0] === "hit") return ev(seq, "animation", { animationId: "HIT_ANIMATION", battler: who(step[1]), target: who(step[1]), arguments: [] });
       if (step[0] === "stat") return ev(seq, "animation", { animationId: "STATS_CHANGE", battler: who(step[1]), target: who(step[1]), arguments: [String(step[2] ?? 20)] });
@@ -323,6 +324,14 @@ export function fixtureWordsChain(f: Fixture): { spriteOrderInput: LiveMoveSprit
       const bodySpecies = step[3] as { player: number; opponent: number } | undefined;
       order = markLiveSpriteOrderDeferredBody(order, bodyLend, req, bodyKey, bodySpecies);
       if ([28, 189, 240].includes(req.moveId)) bodies.push(...activateLiveMovePresentationRng(pinned(words.shift()!.value), req, bodyKey).bodies);
+      // dive70: an earlier Dive body (the setup before the fixture's attack body) records its words under its key with the production
+      // plan context (the setup splash birth from the body's displayed species, liveDiveSetupSplashBirth)
+      if (req.moveId === 291) {
+        if (bodySpecies === undefined) throw new Error("wordsChain: a Dive body step needs its displayed species");
+        const field = { player: { species: bodySpecies.player }, opponent: { species: bodySpecies.opponent } } as unknown as BattleResolutionDisplayedField;
+        const context = (req.turn & 1) === 0 ? { diveSetupSplashBirth: liveDiveSetupSplashBirth(field, req.attacker === 0 ? "player" : "opponent") } : undefined;
+        bodies.push(...activateLiveMovePresentationRng(pinned(words.shift()!.value), req, bodyKey, context).bodies);
+      }
     });
     if (t < lastTurn) order = advanceLiveSpriteOrderHost(order, resolution, Number.POSITIVE_INFINITY);
   });
