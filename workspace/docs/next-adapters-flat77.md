@@ -38,6 +38,21 @@ Receipts: `tools/integration/fixtures/flat77/`. Runner: `tools/integration/flat7
     boundaries, RNG / rules / boundary equal.
   - Battle 437 (seed 437, streak 5): the opponent NIDORINA's Flatter after Aerial Ace + Shock Wave. 29 boundaries, equal.
 
+- **Not proven here.**
+  - The 17 census-lifted commands face targets I did not stage at a later body (FLAAFFY, SKIPLOOM, ...). Their target / attacker
+    anchors and idle rests come from the same production inputs as the first-body adapter, which species audit 12 (ISSUES #152) proved
+    across idle-rest species. The later-body proof is the 20 staged windows (2 consumers x 2 foes, 9 predecessors, both sides).
+  - A Flatter after a KO + send-in cannot be lifted: the orchestrator invalidates the allocator host at party-summary / switch-in.
+
+- **Gates (this evidence step).**
+  - Every new check passes.
+  - `git diff --check` is clean, and `git status` shows no modified tracked file at any commit (new files only).
+  - Typecheck is not needed: no TypeScript under `tests/`, and `tools/` is outside `tsc -b`.
+  - Checkout `npm test`: CHECKOUT_TESTS. `npm run build`: passed.
+  - Differential (`differential.txt`): **624 / 624 captures byte-identical** for both the checkout and a scratch repo holding the temp
+    patch, each vs `dd00bdd6e`.
+  - Runner (`flat77Run.sh` into a fresh dir): RUNNER_RESULT.
+
 ### Windows (`check/`, `summary.txt`: 64 windows, 34 live, 34 / 34 live windows 0 px and r1 == r2; chain lend = the production hosts fed as the orchestrator feeds them)
 
 | window(s) | consumer side | consumer / foe | predecessor | live (patched) | rows | px | r1 == r2 | D3 registers (ROM / live) | order == ROM | allocator rows |
