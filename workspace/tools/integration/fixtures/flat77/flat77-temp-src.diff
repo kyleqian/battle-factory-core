@@ -1,0 +1,94 @@
+diff --git a/src/engine/liveMoveAnimation.ts b/src/engine/liveMoveAnimation.ts
+index 95e325d..184db5c 100644
+--- a/src/engine/liveMoveAnimation.ts
++++ b/src/engine/liveMoveAnimation.ts
+@@ -3945,12 +3945,13 @@ export function liveMoveAnimationPresentation(
+     }
+     case 260: {
+       // S10A faithful random: Flatter (prep35 s2 / s3 item 2; liveOamMoves.ts liveFlatterInputs). The 114 confetti words from the presentation
+-      // host only (null = not activated -> scene-off fallback). First body (the activation registers are S0, WIN0 240 / 161), known lend,
+-      // known-entry allocator (spotlight 305 / confetti 433, palette slots 7 / 8), non-shiny. An elevated opponent's row-0 shadow (the
++      // host only (null = not activated -> scene-off fallback). Known lend; a first body (S0 registers, WIN0 240 / 161 on row 0) or a later
++      // body whose allocator history is known (flat77: the known-entry spotlight 305 / confetti 433, palette slots 7 / 8 hold after audited
++      // net-zero history; row 0 is S0 with WIN0 0 / 0, liveQ2Moves.ts registersFor); non-shiny. An elevated opponent's row-0 shadow (the
+       // pre-activation latch) is drawn by the #142 hook (LIVE_MOVE_OPPONENT_SHADOW_ROW[260] = 0; species audit 12, ISSUES #152).
+       const rng = liveMovePresentationRngWords(presentationRngInput);
+       if (rng === null || rng.words.length !== 114) return null;
+-      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
++      if (!spriteOrderInput?.known || (!spriteOrderInput.firstBody && !spriteAllocatorInput?.historyKnown)) return null;
+       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+       const activationOrder = spriteOrderWithOccupiedPrefix(
+@@ -3960,7 +3961,7 @@ export function liveMoveAnimationPresentation(
+       const attackerSide = attacker.geometry.side, targetSide = target.geometry.side;
+       const asset = flatterAsset as unknown as Record<"spotlight" | "confetti", { palette: { r: number; g: number; b: number }[] }>;
+       const inputs = liveFlatterInputs({ attackerSide, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
+-        sort: sortGbaSpriteOrder, words: rng.words, animationRng: rng.activationValue,
++        sort: sortGbaSpriteOrder, words: rng.words, animationRng: rng.activationValue, firstBody: spriteOrderInput.firstBody === true,
+         spotlightPalette: asset.spotlight.palette, confettiPalette: asset.confetti.palette,
+         stateAt: (state, programInput) => {
+           const st = flatterAtAge(state, { ...(programInput as unknown as FlatterLiveInputs), attackerSide, targetSide,
+diff --git a/src/engine/liveMoveSpriteAllocator.ts b/src/engine/liveMoveSpriteAllocator.ts
+index 7859354..12d33c8 100644
+--- a/src/engine/liveMoveSpriteAllocator.ts
++++ b/src/engine/liveMoveSpriteAllocator.ts
+@@ -82,6 +82,12 @@ export const LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS: readonly number[] = Object
+   298, 309, 310, 318, 323, 324, 326, 327, 330, 339, 349, 350,
+ ]);
+ const NET_ZERO_MOVES: ReadonlySet<number> = new Set(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS);
++/**
++ * flat77: planless net-zero consumers whose adapter claims the known-entry tile / palette allocation at a LATER body (Flatter 260: spotlight
++ * tile slot 6 [305, 64] / palette 7, confetti tile slot 7 [433, 12] / palette 8). With a known host they receive a history-only input
++ * (no wall: wall -1, no sparkles); with an unknown host none, as every other move. docs/next-adapters-flat77.md.
++ */
++export const LIVE_SPRITE_ALLOCATOR_HISTORY_CLAIM_MOVE_IDS: ReadonlySet<number> = new Set([260]);
+ /**
+  * Status animations (spriteOrderStatusAnimationName) audited net-zero for the sprite allocator: every complete script body
+  * (keyed on the status script, both sides, >= 2 afflicted species, two fresh direct-mGBA runs) has baseline == end == the
+@@ -161,7 +167,8 @@ export function prepareLiveMoveSpriteAllocator(
+ }> {
+   const plan = PLANS[request.moveId];
+   if (host.historyKnown && !plan && NET_ZERO_MOVES.has(request.moveId)) {
+-    return Object.freeze({ next: host });
++    return Object.freeze(LIVE_SPRITE_ALLOCATOR_HISTORY_CLAIM_MOVE_IDS.has(request.moveId)
++      ? { next: host, input: Object.freeze({ historyKnown: true as const, wall: -1, sparkles: Object.freeze([]) }) } : { next: host });
+   }
+   if (!host.historyKnown || !plan) {
+     return Object.freeze({ next: invalidateLiveSpriteAllocatorHost(host) });
+diff --git a/src/engine/liveOamMoves.ts b/src/engine/liveOamMoves.ts
+index 800c0ca..6dee67d 100644
+--- a/src/engine/liveOamMoves.ts
++++ b/src/engine/liveOamMoves.ts
+@@ -1149,6 +1149,12 @@ export interface LiveFlatterInputArgs {
+   /** The body's 114 presentation-host words (plan LIVE_MOVE_RANDOM2_PLANS[260]) and the host state at activation. */
+   readonly words: readonly number[];
+   readonly animationRng: number;
++  /**
++   * flat77: the activation register base. A first body latches the intro's WIN0 240 / 161 on row 0 (S0); at a later body
++   * LaunchBattleAnimation (battle_anim.c:260) has already zeroed gBattle_WIN0H / V at the previous launch, so row 0 is S0 with WIN0 0 / 0
++   * (liveQ2Moves.ts registersFor). Rows >= 1 are the same file (every launch zeroes WIN0 before row 1).
++   */
++  readonly firstBody: boolean;
+   /** flatter.json spotlight / confetti palettes (src/animation/assets/flatter.json, passed in by the seam). */
+   readonly spotlightPalette: readonly Rgb[];
+   readonly confettiPalette: readonly Rgb[];
+@@ -1166,8 +1172,8 @@ const lowestFreeSlot = (occupied: Iterable<number>) => { const used = new Set(oc
+  * (DISPCNT | OBJWIN, WININ); AnimTask_HardwarePaletteFade BLDY 1..10 every 4 rows from 8 (BLDCNT 0xf8 8..216); spotlight init 49 (WINOUT);
+  * spotlight destroy 175 (WINOUT, DISPCNT ^ WIN0); fade-out BLDY 9..0 every 4 rows from 177; RemoveSpotlight 218.
+  */
+-function liveFlatterRegisters(row: number): Record<string, number> {
+-  const r0 = S0_REGISTERS, reg: Record<string, number> = { ...r0 };
++function liveFlatterRegisters(row: number, firstBody: boolean): Record<string, number> {
++  const r0 = S0_REGISTERS, reg: Record<string, number> = firstBody ? { ...r0 } : { ...r0, win0h: 0, win0v: 0 };
+   if (row >= 1) { reg.win0h = 0; reg.win0v = 0; }
+   if (row >= 7 && row < 218) { reg.dispcnt = r0.dispcnt! | 0x4000; reg.winin = 0x1f3f; }
+   if (row >= 8 && row < 217) reg.bldcnt = 0xf8;
+@@ -1248,7 +1254,7 @@ export function liveFlatterInputs(args: LiveFlatterInputArgs): { duration: numbe
+         buffers: { softwareOam: rows.oam[row]!, hardwareOam: rows.oam[row]!, softwareMatrices: rows.matrices[row]!, hardwareMatrices: rows.matrices[row]! },
+         palette: { unfaded: loaded(row, args.palettes.unfaded), faded: loaded(row, args.palettes.faded),
+           hardware: row === 0 ? [...args.palettes.hardware] : loaded(row - 1, args.palettes.faded) },
+-        registers: liveFlatterRegisters(row),
++        registers: liveFlatterRegisters(row, args.firstBody),
+       };
+     },
+   };

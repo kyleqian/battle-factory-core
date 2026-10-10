@@ -4,7 +4,7 @@ unchanged (turns from the ROM's gBattleResults.battleTurnCounter, the kernel pay
 STATS_CHANGE with the ROM's animArg1, Status_Confusion + its self-hit HIT_ANIMATION, promptShown, pinnedRng2 per history body), with:
   units  FLATTER 260 (power 0, never a hit), TACKLE 33 (35), QUICK_ATTACK 98 (40);
   windows EVERY Flatter body of either battler (the ff-* fast lead's turn-0 body is the first-body control);
-  rom    + `rows` (the probe's per-row registers + Flatter allocator slots) and `at` (activation registers / allocator tags) for flat77Check.ts.
+  rom    + `at` (activation registers / allocator tags; flat77Check.ts reads the per-row registers from its own fresh probes).
 --predict: no probe; one fixture per scenario for the consumer's TURN-0 body from the PREDICTED history (qa / tk: the fast lead's
   move hits the consumer [+ HIT_ANIMATION]; ff: the fast lead's first-body Flatter + STATS_CHANGE on the consumer), so the production
   hosts' lend / first-body / allocator claim can be recorded before any probe (flat77Check.ts FLAT77_PREDICT=1).
@@ -119,7 +119,7 @@ for name, d in SOURCES:
                     "rom": {"invisible": [s["invisible"] for s in b["at"]["battlerSprites"]], "turn": t, "spriteOrder": b["at"]["spriteOrder"],
                             "power": b["power"], "at": {"registers": b["at"]["registers"], "paletteTags": b["at"]["paletteTags"],
                             "tileBitmapSha": b["at"]["tileBitmapSha"], "tileTagsSha": b["at"]["tileTagsSha"], "matrixBitmap": b["at"]["matrixBitmap"],
-                            "pre": b["pre"]["registers"]}, "rows": b.get("rows", [])},
+                            "pre": b["pre"]["registers"]}},
                     "presentationRngActivation": {"value": b["at"]["rng2"], "source": f"flat77Probe.py at.rng2 (RAM gRng2Value, activation frame {b['startFrame']})"},
                     "pinnedRng2": [list(x) for x in pinned if x[0] < flat],
                     "pinnedGeneral": [list(x) for x in pinned_general if x[0] < flat],

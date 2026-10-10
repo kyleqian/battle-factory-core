@@ -1,0 +1,12 @@
+same ff-nidorina-nidorino-opp
+same ff-nidorina-nidorino-ply
+same ff-nidorino-nidorina-opp
+same ff-nidorino-nidorina-ply
+same qa-nidorina-golem-opp
+same qa-nidorina-golem-ply
+same qa-nidorino-snorlax-opp
+same qa-nidorino-snorlax-ply
+same tk-nidorina-golem-opp
+same tk-nidorina-golem-ply
+same tk-nidorino-snorlax-opp
+same tk-nidorino-snorlax-ply

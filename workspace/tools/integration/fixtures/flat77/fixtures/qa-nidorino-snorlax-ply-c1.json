@@ -1,0 +1,298 @@
+{
+ "schema": "flat77-chain-fixture/v1",
+ "move": "FLATTER",
+ "bodyIndex": 1,
+ "probe": "tools/integration/flat77Probe.py",
+ "scenario": "tools/integration/fixtures/flat77/scenarios/qa-nidorino-snorlax-ply.json",
+ "denseWindow": {
+  "startFrame": 1755,
+  "endFrame": 1973
+ },
+ "attacker": {
+  "species": "NIDORINO",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015432,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 107,
+  "playerMaxHp": 168,
+  "opponentHp": 267,
+  "opponentMaxHp": 267,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "target": 1,
+  "power": 0
+ },
+ "rom": {
+  "invisible": [
+   false,
+   false
+  ],
+  "turn": 1,
+  "spriteOrder": [
+   62,
+   60,
+   0,
+   63,
+   1,
+   61,
+   6,
+   8,
+   2,
+   3,
+   5,
+   4,
+   7,
+   9,
+   10,
+   38,
+   30,
+   37,
+   12,
+   23,
+   29,
+   31,
+   20,
+   36,
+   21,
+   43,
+   18,
+   42,
+   14,
+   13,
+   32,
+   33,
+   35,
+   22,
+   27,
+   40,
+   16,
+   24,
+   41,
+   25,
+   44,
+   11,
+   39,
+   19,
+   26,
+   34,
+   17,
+   28,
+   15,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   45,
+   46,
+   47
+  ],
+  "power": 40,
+  "at": {
+   "registers": {
+    "dispcnt": 16192,
+    "bg0cnt": 38912,
+    "bg1cnt": 23554,
+    "bg2cnt": 24064,
+    "bg3cnt": 23051,
+    "bg1hofs": 0,
+    "bg1vofs": 0,
+    "bg2hofs": 0,
+    "bg2vofs": 0,
+    "win0h": 0,
+    "win0v": 0,
+    "winin": 16191,
+    "winout": 16191,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "paletteTags": [
+    65535,
+    65535,
+    65535,
+    65535,
+    54322,
+    55039,
+    55044,
+    65535,
+    65535,
+    65535,
+    65535,
+    65535,
+    65535,
+    65535,
+    65535,
+    65535
+   ],
+   "tileBitmapSha": "e7e5d2118d9322f0",
+   "tileTagsSha": "ef1f972fb5860fb0",
+   "matrixBitmap": 6,
+   "pre": {
+    "dispcnt": 16192,
+    "bg0cnt": 38912,
+    "bg1cnt": 23554,
+    "bg2cnt": 24064,
+    "bg3cnt": 23051,
+    "bg1hofs": 0,
+    "bg1vofs": 0,
+    "bg2hofs": 0,
+    "bg2vofs": 0,
+    "win0h": 0,
+    "win0v": 0,
+    "winin": 16191,
+    "winout": 16191,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   }
+  }
+ },
+ "presentationRngActivation": {
+  "value": 1689075668,
+  "source": "flat77Probe.py at.rng2 (RAM gRng2Value, activation frame 1755)"
+ },
+ "pinnedRng2": [
+  [
+   0,
+   469952876
+  ],
+  [
+   2,
+   2354516896
+  ],
+  [
+   6,
+   307137909
+  ]
+ ],
+ "pinnedGeneral": [],
+ "promptShown": [
+  true,
+  true
+ ],
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "98",
+      "0",
+      "40",
+      "1",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "260",
+      "0",
+      "0",
+      "0",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "STATS_CHANGE",
+     "battler": 1,
+     "target": 1,
+     "arguments": [
+      "18"
+     ]
+    },
+    {
+     "kind": "status-animation",
+     "battler": 1,
+     "isStatus2": 1,
+     "status": 1
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "status-animation",
+     "battler": 1,
+     "isStatus2": 1,
+     "status": 1
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "98",
+      "0",
+      "40",
+      "1",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "260",
+      "0",
+      "0",
+      "0",
+      "70",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
+}
