@@ -196,6 +196,21 @@
 - Supervisor union gates on `d78b936f3` (src `d16bac8c`; + dt60): typecheck, full suite 1,596 files / 13,147 tests, build, differential
   624/624 vs `ccc4774c4`, census seeds 0..299 96.74 % / 97.96 % (+325 / +44,806 vs `ccc4774c4`, 0 regressions, command key sequence
   identical).
+- Census seeds 0..999 on `d78b936f3` (src `d16bac8c`; two runs byte-identical, sha256 `514554f7`): 91.73 % of move-animation commands /
+  95.79 % of frames live (session start 87.95 / 92.09); faithful-random history 762 / 123,772 (2.77 % / 3.14 %); remaining fallback
+  frames: order lend unknown 75,118 (463), Struggle (no adapter, not a rental move) 33,792 (1,056), allocator history 20,516 (200),
+  case-local 17,267 (130), later-body 4,416 (27), Substitute doll cells ~6k, Dive attack body (unsupported turn 1) 2,048. Seeds
+  50000..50999: 92.96 % / 95.46 % (session start 88.38 / 90.47 at the overnight final).
+- prep61 (side, `5c59763d6`, new files only; merged `c46abb437`): SEMI-INVULNERABLE two-turn units. With Battle Scene ON the ROM never
+  sends the attacker-hide toggle (`MOVEEND_ATTACKER_INVISIBLE` is Scene-OFF only; the setup animation hides the attacker itself): 0 hide
+  events in 300 census battles, so the host's "semi-invulnerable battler hidden" invalidation never fires; the real stop is that setup
+  and unleash share one key with no plan. Fly 19 setup `Cf;D0` 14/14 + unleash `Cf;Cf;D0;D1` 12/12, Bounce 340 setup `Cf;D0` 15/15 +
+  unleash per side 12/12 (EXACT, per frame); Dive 291 setup / unleash orders are functions of the RAM-read words through dive.ts (8/8, 7/7,
+  70/70 destroy groups; another body's words fail 8/8); Dive's lend through the hidden turn == ROM 7/7. Hidden-battler rules: table
+  animations skipped (kernel already ports it), status animations suppressed, misses emit nothing, hits on the hidden battler play their
+  body, the hit animation allocates nothing (controllers return for an invisible sprite). Temp patch census seeds 0..299 on `be45be555`:
+  +11 / +1,391 (incl. 7 Protects whose allocator now re-seeds), 0 regressions, predictor 3 / 427 + 1 / 103 chain-naming artefact.
+  Supervisor: `prep61Run.sh` into fresh dirs — all 16 receipts byte-identical, src reverted.
 
 ## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
 
