@@ -101,6 +101,8 @@ with each resolution's event list):
 | battle 713 (seed 713, streak 3), turn 5 | player Dive 291 charge; opponent Bounce 340 charge; the player's Dive strike misses; end of turn: Toxic KOs the player → forced party menu → reshow while the opponent is ON_AIR | `reshow with a hidden battler` (:228) | 4 / 616: Psywave ×2, Pursuit ×2; plus 5 / 380 allocator declines (the forced switch-in cannot reseed) |
 
 Other paths (a move hitting the semi-invulnerable battler, Perish Song, weather, Leech Seed) do not occur in seeds 0..999.
+`partB-cases.json` (`hist73PartBCases.py`) lists both stops' kernel event paths from the charge body on and the 30 declined bodies
+with their status after the Part B patch (all 30 live).
 
 Predictions were committed BEFORE any Part B probe (`partB-predictions.md`, commit `7fc8f5104`). ROM probes
 (`hist73HiddenProbe.py` → `hist73EventProbe.py`, every frame's 64-byte `sSpriteOrder`, inUse mask, per-slot keys, battler-sprite
