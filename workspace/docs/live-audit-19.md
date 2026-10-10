@@ -23,7 +23,8 @@ No shared oracle was touched. No tracked file outside the audit19 set was edited
 
 ## 1. Results first
 
-**599 consumer windows from 122 of 130 scenarios, both sides.** The other 8 are mag-* with Electric consumers, which GOLEM / SWAMPERT's Ground typing blocks: no body. Of these, 404 are live: **360 are 0 px**, and the other 44 are Castform form-art windows (ISSUES #143). The other 195 windows fall
+**599 consumer windows from 122 of 130 scenarios, both sides.** The other 8 scenarios are mag-* with Electric consumers, which GOLEM /
+SWAMPERT's Ground typing blocks (no body). 404 of the 599 windows are live: **360 are 0 px**, and the other 44 are Castform form-art windows (ISSUES #143). The other 195 windows fall
 back, all through production's own decline. **r1 == r2 on 599 / 599.** Production's hide equals the ROM's on **599 / 599**,
 including 9 windows where the other battler is hidden by Dive.
 
