@@ -11,7 +11,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   scoped exact -> faithful timing by counter-evidenced D4 accounting). Supervisor FINAL gates on that code: typecheck, full suite 1,598
   files / 13,159 tests, build, differential 624/624 vs `ccc4774c4`, census seeds 0..299 97.11 % / 98.11 % (start 92.66 / 94.12), seeds
   0..999 **92.26 % of move animations live by count / 96.23 % by frames** (two runs byte-identical; start 87.95 / 92.09), seeds 50000..
-  93.52 / 96.02 (`final-supervisor-gates-20261009-day.json`). Gameplay command key sequence identical at every fold. Preview: see below.
+  93.52 / 96.02 (`final-supervisor-gates-20261009-day.json`). Gameplay command key sequence identical at every fold. Preview <http://127.0.0.1:5191/> serves `9e2dac58f` (4 samples
+  hash-equal, session export + ON->OFF restart, no errors; `playable-preview-9e2dac58f-receipt.json`).
 - **Did (12 production folds, each re-proved by the supervisor from fresh probes / check reruns / census reruns; 5 union-gate runs):**
   allocator carries across audited status animations (alloc50, alloc52: SLP / CONFUSION / PSN / PRZ / BRN / FRZ / INFATUATION / CURSED /
   NIGHTMARE + 40 bodies); general / hit / stat animations audited net-zero or fail closed (aud56, #156); order plans Outrage / FOCUS_BAND
