@@ -211,6 +211,18 @@
   body, the hit animation allocates nothing (controllers return for an invisible sprite). Temp patch census seeds 0..299 on `be45be555`:
   +11 / +1,391 (incl. 7 Protects whose allocator now re-seeds), 0 regressions, predictor 3 / 427 + 1 / 103 chain-naming artefact.
   Supervisor: `prep61Run.sh` into fresh dirs — all 16 receipts byte-identical, src reverted.
+- Folded Opus worker `ddfb8eb1e` as `a6402a306` (src tree `06b791ff`): spark62 — Spark (209) OPPONENT attacker live (duration 115 for
+  both attackers). prep10's unexplained "initial callback advance [1,1,0,...]" is not a side rule: the 8 flashing sprites are created from
+  CB1 (`BattleMainCB1 -> ...DoMoveAnimation -> Cmd_createsprite -> CreateSpriteAndAnimate`, instruction-stepped), that iteration
+  overruns and the VBlank lands INSIDE AnimateSprites, so slots stepped before it show one extra step in the end-of-frame RAM sample
+  (species-dependent CPU timing) — and that frame is a lag frame whose screen equals the previous one on all 8 rows, so the first sprite
+  age is never displayed: all-zero advances are pixel-neutral (any {0,1} vector renders identically on all 115 rows; an advance of 2
+  changes row 44 — the check is not vacuous). Tie order kept as the accepted constant behind the known-order lend gate (as the player
+  side). 11 / 11 windows 0 px twice fresh (opponent MINUN / CHINCHOU / VOLTORB -> SHUCKLE / SNORLAX; player MINUN / PLUSLE / CHINCHOU).
+  Census seeds 0..299 vs `d78b936f3`: 96.74 -> 96.98 % by count (+19), live frames +2,185, 0 regressions, command key sequence identical;
+  battle frames +1,826 = 22 opponent Sparks x (115 - 32): those bodies now present the 115-frame body instead of the 32-frame fallback (3
+  still decline at the order gate). Parity battle 85. Worker gates 1,597 files / 13,153 tests, build, differential 624/624. Supervisor:
+  liveFixtureBatch rerun fresh — 11 / 11 windows 0 px both runs; census rerun +19 / +2,185, 22 changed records all opponent Spark.
 
 ## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
 
