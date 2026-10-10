@@ -43,12 +43,21 @@ describe("production sprite-order plan table (generated, pinned)", () => {
       ...fixture("prep43/plan-rows.json").bodies, ...fixture("prep45/plan-rows.json").bodies, ...fixture("plans48/plan-rows.json").bodies,
       ...fixture("plans51/plan-rows.json").bodies, ...fixture("plans54/plan-rows.json").bodies, ...fixture("prep61/plan-rows.json").bodies, ...fixture("plans69/plan-rows.json").bodies,
     };
+    // cf78: in-place overrides (Needle Arm 302's SortSprites tie): the fixture plan with an FDERIVED last destroy group (priority words only).
+    const overrides = fixture("cf78/plan-overrides.json").bodies as Record<string, { verdict: string; plan: readonly { pw?: unknown }[] }>;
     let exact = 0;
     for (const [key, row] of Object.entries(bodies)) {
       const [move, side] = key.split(":");
       if (side !== "player" && side !== "opponent") continue;
       const plan = spriteOrderProductionBodyPlan(Number(move), side);
       const merged = extra[key] !== undefined && ((extra[key]!.tier ?? "confirmed") === "confirmed" || SOURCE_CONFIRMED_ABS_INVARIANT.has(key)) ? extra[key]! : undefined;
+      const override = overrides[key];
+      if (override !== undefined) {
+        expect(plan, key).toEqual(override.plan);
+        expect(override.plan.map(({ pw: _pw, ...window }) => window), key).toEqual(row.verdict === "EXACT-PLAN" ? row.plan : merged!.plan);
+        if (row.verdict === "EXACT-PLAN") exact += 1;
+        continue;
+      }
       if (row.verdict !== "EXACT-PLAN" && merged) {
         expect(plan, key).toEqual(merged.plan);
         continue;

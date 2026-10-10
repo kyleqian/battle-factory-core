@@ -31,7 +31,14 @@ describe("plans69 receipts and production plans", () => {
 
   it("Conversion 2 176 and Needle Arm 302:opponent decode to the ROM plans on both sides", () => {
     for (const side of sides) expect(spriteOrderProductionBodyPlan(176, side)).toEqual(decodeSpriteOrderPlan(check.plans["body 176"]!));
-    for (const side of sides) expect(spriteOrderProductionBodyPlan(302, side)).toEqual(decodeSpriteOrderPlan(check.plans["body 302"]!));
+    // cf78 (fixtures/cf78/plan-overrides.json): production's 302 is this ROM plan with its final destroy group FDERIVED (the n17 / n19
+    // SortSprites tie keeps the start order); from the probes' entry-like starts both give the same order (tests/cf78NeedleArmTie.test.ts).
+    const rom302 = decodeSpriteOrderPlan(check.plans["body 302"]!);
+    for (const side of sides) {
+      const plan = spriteOrderProductionBodyPlan(302, side)!;
+      expect(plan.map(({ pw: _pw, ...window }) => window)).toEqual(rom302);
+      expect(plan[plan.length - 1]!.pw).toEqual([1, 2, 3, 3, 4, 5, 6, 7, 8]);
+    }
   });
 
   it("Magnitude: 222 is the empty plan, 20222 is Cf;D0;Cf;D1", () => {

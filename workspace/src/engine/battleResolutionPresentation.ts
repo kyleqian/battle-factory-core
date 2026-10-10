@@ -413,6 +413,11 @@ export type BattleResolutionPresentationState = Readonly<{
    * applyLiveSemiInvulnerableCommand). Absent = nothing hidden.
    */
   liveSemiInvulnerableHidden?: readonly [boolean, boolean];
+  /**
+   * cf78: presentation-only ROM `gBattleMonForms` per battler slot carried in from the display ledger at this resolution's start
+   * (battleResolutionPresentationRender.ts applyLiveCastformFormEvents). Absent = both slots in the normal form.
+   */
+  liveCastformForms?: readonly [number, number];
   liveMovePaletteInput?: LiveMovePaletteInput;
   liveMoveSpriteAllocatorInput?: LiveMoveSpriteAllocatorInput;
   liveMoveSpriteOrderInput?: LiveMoveSpriteOrderInput;
