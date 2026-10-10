@@ -59,6 +59,15 @@ JOBS += [("DIVE", "dive-ply-170", 291, "mechanic-dive-player-chinchou-opponent-o
          ("DIVE", "dive-opp-171", 291, "prep25-dive-alt-opponent-lanturn-golem", (SD,)),
          ("DIVE", "dive-ply-170-surf", 291, "mechanic-dive-player-chinchou-opponent-onix", (SD, ("moves", "opponent", 57))),
          ("DIVE", "dive-opp-170-surf", 291, "mechanic-dive-opponent-chinchou-player-onix", (SD, ("moves", "player", 57)))]
+# HIDDENHIT: the moves that hit a semi-invulnerable target with an existing production plan (the census's Sky Uppercut on a hidden Fly user,
+# battle 81), so the table plan of the other battler's body is checked with the target invisible: Sky Uppercut 327 vs Fly, Twister 239
+# vs Bounce, Whirlpool 250 vs Dive (the defender's moves; the opponent side by "swap" / the opponent-Dive scenario).
+JOBS += [("HIDDENHIT", "fly-ply-305-skyup", 19, FL, (SF, ("moves", "opponent", 327), ("turns", 1))),
+         ("HIDDENHIT", "fly-opp-305-skyup", 19, FL, (SF, ("moves", "opponent", 327), ("turns", 1), ("swap",))),
+         ("HIDDENHIT", "bounce-ply-77-twister", 340, BO, (SB, ("moves", "opponent", 239), ("turns", 1))),
+         ("HIDDENHIT", "bounce-opp-77-twister", 340, BO, (SB, ("moves", "opponent", 239), ("turns", 1), ("swap",))),
+         ("HIDDENHIT", "dive-ply-170-whirlpool", 291, "mechanic-dive-player-chinchou-opponent-onix", (SD, ("moves", "opponent", 250))),
+         ("HIDDENHIT", "dive-opp-170-whirlpool", 291, "mechanic-dive-opponent-chinchou-player-onix", (SD, ("moves", "player", 250)))]
 P43.JOBS = JOBS  # prep43Extract.units_of looks the job up in prep43Probe.JOBS
 
 

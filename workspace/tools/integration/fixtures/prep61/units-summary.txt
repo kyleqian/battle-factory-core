@@ -1,4 +1,4 @@
-18 jobs; 0 A/B differ
+24 jobs; 0 A/B differ
 BOUNCE  body 10340:opponent    1 plan(s): 3x [Cf;Cf;D1;D0] bounce-opp-77,bounce-opp-78,bounce-opp-77-gust
 BOUNCE  body 10340:player      1 plan(s): 6x [Cf;Cf;D0;D1] bounce-ply-77,bounce-ply-77,bounce-ply-78,bounce-ply-78,bounce-ply-77-gust,bounce-ply-77-gust
 BOUNCE  body 16:opponent       1 plan(s): 4x [Cf;D0;Cf;D1] bounce-ply-77-gust,bounce-ply-77-gust,bounce-ply-77-gust,bounce-ply-77-gust
@@ -25,3 +25,21 @@ FLY     body 19:opponent       1 plan(s): 5x [Cf;D0] fly-opp-305,fly-opp-305,fly
 FLY     body 19:player         1 plan(s): 5x [Cf;D0] fly-ply-305,fly-ply-305,fly-ply-18,fly-ply-18,fly-ply-305-gust
 FLY     body 33:opponent       1 plan(s): 4x [Cf;Cf;D0;D1] fly-ply-305,fly-ply-305,fly-ply-18,fly-ply-18
 FLY     body 33:player         1 plan(s): 2x [Cf;Cf;D0;D1] fly-opp-305,fly-opp-18
+HIDDENHIT body 10019:opponent    1 plan(s): 1x [Cf;Cf;D0;D1] fly-opp-305-skyup
+HIDDENHIT body 10019:player      1 plan(s): 1x [Cf;Cf;D0;D1] fly-ply-305-skyup
+HIDDENHIT body 10291:opponent    1 plan(s): 1x [Cfffffffffff;Cfff;Cfff;Cfff;D0;D11;Cfff;D14;Cfff/D8,10,1,9,3,4,5,2,6,7;D17;Cfff/D13,12;D20...] dive-opp-170-whirlpool
+HIDDENHIT body 10291:player      1 plan(s): 1x [Cfffffffffff;Cfff;Cfff;Cfff;D0;D11;Cfff;D14;Cfff/D9,7,3,8,6,4,5,2,10,1;D17;Cfff/D13,12;D20...] dive-ply-170-whirlpool
+HIDDENHIT body 10340:opponent    1 plan(s): 1x [Cf;Cf;D1;D0] bounce-opp-77-twister
+HIDDENHIT body 10340:player      1 plan(s): 2x [Cf;Cf;D0;D1] bounce-ply-77-twister,bounce-ply-77-twister
+HIDDENHIT body 19:opponent       1 plan(s): 1x [Cf;D0] fly-opp-305-skyup
+HIDDENHIT body 19:player         1 plan(s): 1x [Cf;D0] fly-ply-305-skyup
+HIDDENHIT body 239:opponent      1 plan(s): 3x [Cf;Cf;Cff;Cf;Cf;Cf;Cff;Cf;Cff;D10;D4;D1;D5;D0;D3,2;D9,6;D8;D7,11;Cf;Cf;D12;Cf;D13;Cf;D14;D...] bounce-ply-77-twister,bounce-ply-77-twister,bounce-ply-77-twister
+HIDDENHIT body 239:player        2 plan(s): 1x [Cf;Cf;Cff;Cf;Cf;Cf;Cff;Cf;Cff;D10;D4;D1;D5;D0;D3,2;D6,9;D8;D11,7;Cf;Cf;D12;Cf;D13;Cf;D14;D...] bounce-opp-77-twister || 1x [Cf;Cf;Cff;Cf;Cf;Cf;Cff;Cf;Cff;D10;D4;D1;D5;D0;D3,2;D9,6;D8;D7,11;Cf;Cf;D12;Cf;D13;Cf;D14;D...] bounce-opp-77-twister
+HIDDENHIT body 250:opponent      1 plan(s): 1x [Cff;Cf;Cf;Cf;Cf;Cf;D0;Cf;Cf;Cf;Cf;Cf;Cf/D2;Cf/D3;D1;Cf;Cf;D4;Cf;D5;Cf;Cf/D8;D6;D9;D7;D10;D...] dive-ply-170-whirlpool
+HIDDENHIT body 291:opponent      1 plan(s): 1x [Cf;D0;Cfffffffffff;D1;D2,4,6,9,11,3,10,7,5,8] dive-opp-170-whirlpool
+HIDDENHIT body 291:player        1 plan(s): 1x [Cf;D0;Cfffffffffff;D1;D10,9,5,7,4,3,6,2,11,8] dive-ply-170-whirlpool
+HIDDENHIT body 327:opponent      1 plan(s): 2x [Cf;Cf/D0;Cf;Cf;Cf;D1;Cff;D2;D3;D6;D4;D5;Cf;Cf/D7;D8] fly-ply-305-skyup,fly-ply-305-skyup
+HIDDENHIT body 327:player        1 plan(s): 1x [Cf;Cf/D0;Cf;Cf;Cf;D1;Cff;D2;D3;D6;D4;D5;Cf;Cf/D7;D8] fly-opp-305-skyup
+HIDDENHIT body 340:opponent      1 plan(s): 1x [Cf;D0] bounce-opp-77-twister
+HIDDENHIT body 340:player        1 plan(s): 2x [Cf;D0] bounce-ply-77-twister,bounce-ply-77-twister
+HIDDENHIT mv-0                   1 plan(s): 1x [Cf;Cf;D0;Cf;D1;Cf;D2;Cf;D3;Cf;D4;Cf;D5;Cf;D6] bounce-opp-77-twister

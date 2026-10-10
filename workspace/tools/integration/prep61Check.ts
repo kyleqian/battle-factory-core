@@ -132,7 +132,9 @@ for (const [label, r] of Object.entries(tableBodies).sort()) {
   console.log(`hidden-window body ${label.padEnd(18)} table plan ${JSON.stringify(r.plan)}: ${r.exact}/${r.instances} exact${r.problems.length ? `  ${r.problems.join(" | ")}` : ""}`);
 }
 for (const [name, h] of Object.entries(hidden)) {
-  console.log(`hidden window ${name.padEnd(20)} ${h.other < 0 ? "no setup/unleash pair" : `${h.windows.length} windows (${h.windows.map(w => `${w.unit === "gap" ? w.attribution : w.unit}${w.hiddenInvisible ? "" : " (VISIBLE)"}`).join(", ") || "none"}); other ${h.other}`}`);
+  const counts = new Map<string, number>();
+  for (const w of h.windows) { const k = `${w.unit === "gap" ? w.attribution : w.unit}${w.hiddenInvisible ? "" : " (VISIBLE)"}`; counts.set(k, (counts.get(k) ?? 0) + 1); }
+  console.log(`hidden window ${name.padEnd(22)} ${h.other < 0 ? "no setup/unleash pair" : `${h.windows.length} windows (${[...counts].map(([k, n]) => `${k} x${n}`).join(", ") || "none"}); other ${h.other}`}`);
 }
 const distinct = new Set(words.map(w => `${w.label} ${w.plan}`)).size;
 console.log(`Dive: ${words.length} bodies, ${distinct} distinct (label, plan), ${new Set(words.map(w => w.rng2)).size} distinct gRng2Value at the body start`);
