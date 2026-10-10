@@ -424,9 +424,10 @@ function orderEventOf(
 }
 
 /** A geometry-keyed body's plan text at the displayed species of its move-animation command (segment, event sequence); undefined
- * when unknown. HAIL_CONTINUES asks for Move_HAIL's (moveId 258) at its own (general-animation) event sequence. */
+ * when unknown. HAIL_CONTINUES asks for Move_HAIL's (moveId 258) at its own (general-animation) event sequence. `lentFree`: the tracker's
+ * free order before the body (Water Spout's plan ties in it, plans54). */
 export type SpriteOrderBodyPlanAt = (
-  segmentIndex: number, sequence: number, moveId: number, attackerSide: "player" | "opponent",
+  segmentIndex: number, sequence: number, moveId: number, attackerSide: "player" | "opponent", lentFree?: readonly number[],
 ) => string | undefined;
 
 interface ResolutionView {
@@ -477,7 +478,8 @@ export function advanceLiveSpriteOrderHost(
       const bothBattlersShown = tracker.battlerSlots.player !== null && tracker.battlerSlots.opponent !== null && !hidden[0] && !hidden[1];
       if (mapped.event?.kind === "move-animation" && SPRITE_ORDER_GEOMETRY_KEYED_BODIES.has(mapped.event.moveId)
         && (mapped.event.moveId !== 258 || bothBattlersShown)) {
-        const geometryPlan = bodyPlanAt?.(segmentIndex, events[index]!.sequence, mapped.event.moveId, mapped.event.attackerSide);
+        const geometryPlan = bodyPlanAt?.(segmentIndex, events[index]!.sequence, mapped.event.moveId, mapped.event.attackerSide,
+          tracker.cursor.order.known ? tracker.cursor.order.free : undefined);
         if (geometryPlan !== undefined) mapped = { ...mapped, event: Object.freeze({ ...mapped.event, geometryPlan }) };
       }
       if (mapped.event?.kind === "general-animation" && SPRITE_ORDER_GEOMETRY_KEYED_ANIMS.has(mapped.event.animation) && bothBattlersShown) {

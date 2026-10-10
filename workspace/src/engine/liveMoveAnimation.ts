@@ -47,6 +47,7 @@ import { gigaDrainSpriteOrderPlanText } from "../animation/gigaDrain.ts";
 import { eruptionSpriteOrderPlanText } from "../animation/eruptionSpriteOrderPlan.ts";
 import { hailSpriteOrderPlanText } from "../animation/hailSpriteOrderPlan.ts";
 import { blizzardSpriteOrderPlanText } from "../animation/blizzardSpriteOrderPlan.ts";
+import { waterSpoutSpriteOrderPlanText } from "../animation/waterSpoutSpriteOrderPlan.ts";
 import { megaDrainSpriteOrderPlanText } from "../animation/megaDrain.ts";
 import { faintAttackRestoreProfile } from "../animation/faintAttack.ts";
 import { RAZOR_LEAF_BODY_LAST_AGE } from "../animation/razorLeaf.ts";
@@ -677,10 +678,12 @@ export function liveMoveAbsorptionOrbCenters(
  * Giga Drain (202) / Mega Drain (72) / Dream Eater (138, plans48), from the renderers' own timelines (gigaDrain.ts / megaDrain.ts /
  * dreamEater.ts through absorptionOrbSpriteOrderPlan.ts); Eruption (284, plans54) at its ROM-proven attacker species only
  * (eruptionSpriteOrderPlan.ts); Hail (258, plans54; also HAIL_CONTINUES) from hail.ts's timeline (hailSpriteOrderPlan.ts); Blizzard (59,
- * plans54) from blizzard.ts's allocator replay (blizzardSpriteOrderPlan.ts). Null for any other move or a species without a battle picture / proof.
+ * plans54) from blizzard.ts's allocator replay (blizzardSpriteOrderPlan.ts); Water Spout (323, plans54) from waterSpout.ts's timeline at the
+ * displayed field's attacker HP (`field`) and the body's lent free order (`lentFree`; waterSpoutSpriteOrderPlan.ts). Null for any other move or a species without a battle picture / proof.
  */
 export function liveMoveGeometrySpriteOrderPlanText(
-  moveId: number, attackerSide: "player" | "opponent", species: LiveMoveBodySpecies,
+  moveId: number, attackerSide: "player" | "opponent", species: LiveMoveBodySpecies, field?: BattleResolutionDisplayedField,
+  lentFree?: readonly number[],
 ): string | null {
   // plans54 (ISSUES #155): Eruption's launch rocks start at the attacker; only the ROM-proven attacker geometries carry a plan.
   if (moveId === 284) {
@@ -690,6 +693,14 @@ export function liveMoveGeometrySpriteOrderPlanText(
   if (moveId === 258) return liveHailSpriteOrderPlanText(species);
   // plans54: Blizzard's snowballs / crystals travel from the attacker's to the target's picture: blizzard.ts's allocator replay there.
   if (moveId === 59) return liveBlizzardSpriteOrderPlanText(attackerSide, species);
+  // plans54: Water Spout's droplet counts follow the attacker's HP tier (GetWaterSpoutPowerForAnim), its orbs start at the attacker's picture
+  // and tie in the lent order: the plan of waterSpout.ts's own timeline at the displayed field and the lent order (the case-323 inputs).
+  if (moveId === 323) {
+    const order = field === undefined || lentFree === undefined ? null
+      : spriteOrderWithOccupiedPrefix({ known: true as const, free: lentFree, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+    const inputs = order === null ? null : waterSpoutLiveInputs(field!, attackerSide, order);
+    return inputs === null ? null : waterSpoutSpriteOrderPlanText(inputs);
+  }
   const planText = moveId === 202 ? gigaDrainSpriteOrderPlanText : moveId === 72 ? megaDrainSpriteOrderPlanText
     : moveId === 138 ? dreamEaterSpriteOrderPlanText : null;
   const centers = planText === null ? null : liveMoveAbsorptionOrbCenters(attackerSide, species);

@@ -195,8 +195,8 @@ function planAt(index: number | undefined): SpriteOrderPlan | null {
  * body's plan text computed at the displayed species (`geometryPlan`, liveMoveAnimation.ts liveMoveGeometrySpriteOrderPlanText) to their
  * move-animation event; no plan text invalidates (the base table's `284:*` rows are not used). Hail 258 (plans54): the particles target both
  * battlers' coordinates. Blizzard 59 (plans54): same-frame destroy groups follow the attacker / target geometry (the base table's
- * `59:player` row is the plan at its one probed geometry). */
-export const SPRITE_ORDER_GEOMETRY_KEYED_BODIES: ReadonlySet<number> = new Set([202, 72, 138, 284, 258, 59]);
+ * `59:player` row is the plan at its one probed geometry). Water Spout 323 (plans54): the attacker's HP tier, its picture and the lent order. */
+export const SPRITE_ORDER_GEOMETRY_KEYED_BODIES: ReadonlySet<number> = new Set([202, 72, 138, 284, 258, 59, 323]);
 /** Geometry-keyed general animations (plans54): HAIL_CONTINUES (General_Hail: `goto Move_HAIL`) carries Move_HAIL's plan at the displayed
  * species (`geometryPlan`); without it the animation invalidates. */
 export const SPRITE_ORDER_GEOMETRY_KEYED_ANIMS: ReadonlySet<string> = new Set(["HAIL_CONTINUES"]);
