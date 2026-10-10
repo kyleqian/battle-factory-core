@@ -10,6 +10,18 @@ cast-sun-swift-opp-c2.json             SWIFT        opponent .. agree=1 prompts=
 cast-sun-swift-ply-c0.json             SWIFT        player   .. agree=1 prompts=p       units=2   live=1 order=1 alloc=0 rows=78 exact=18 px=29307 r1==r2=1 ages=13..52 | entry live=1 px=29307 r1==r2=1 win=1
 cast-sun-swift-ply-c1.json             SWIFT        player   .. agree=1 prompts=pp      units=5   live=1 order=1 alloc=0 rows=78 exact=18 px=29307 r1==r2=1 ages=13..52 | entry live=1 px=29307 r1==r2=1 win=1
 cast-sun-swift-ply-c2.json             SWIFT        player   .. agree=1 prompts=ppp     units=8   live=1 order=1 alloc=0 rows=78 exact=18 px=29307 r1==r2=1 ages=13..52 | entry live=1 px=29307 r1==r2=1 win=1
+dive-clamperl-swift-opp-c0.json        DIVE         player   .. agree=1 prompts=p       units=0   live=1 order=1 alloc=0 rows=119 exact=89 px=10567 r1==r2=1 ages=70..99 | entry live=1 px=10567 r1==r2=1 win=1
+dive-clamperl-swift-opp-c1.json        DIVE         player   .. agree=1 prompts=pL      units=1   live=0 order=1d alloc=0 rows=93 exact=18 px=89419 r1==r2=1 ages=17..56 | entry live=1 px=67 r1==r2=1 win=1 decline=unclassified (branch-local gate)
+dive-clamperl-swift-opp-c2.json        SWIFT        opponent .. agree=1 prompts=pL      units=3   live=0 order=1d alloc=0 rows=80 exact=20 px=45659 r1==r2=1 ages=11..50 | entry live=1 px=0 r1==r2=1 win=1 decline=unclassified (no source gate fired)
+dive-clamperl-swift-opp-c3.json        DIVE         player   .. agree=1 prompts=pLp     units=5   live=0 order=1d alloc=0 rows=119 exact=11 px=201867 r1==r2=1 ages=11..50 | entry live=1 px=20418 r1==r2=1 win=1 decline=unclassified (branch-local gate)
+dive-clamperl-swift-opp-c4.json        DIVE         player   .. agree=1 prompts=pLpL    units=6   live=0 order=1d alloc=0 rows=93 exact=18 px=88179 r1==r2=1 ages=17..56 | entry live=1 px=97 r1==r2=1 win=1 decline=unclassified (branch-local gate)
+dive-clamperl-swift-opp-c5.json        SWIFT        opponent .. agree=1 prompts=pLpL    units=8   live=0 order=1d alloc=0 rows=80 exact=20 px=45659 r1==r2=1 ages=11..50 | entry live=1 px=0 r1==r2=1 win=1 decline=unclassified (no source gate fired)
+dive-clamperl-swift-opp-c6.json        DIVE         player   .. agree=1 prompts=pLpLp   units=10  live=0 order=1d alloc=0 rows=119 exact=11 px=201119 r1==r2=1 ages=11..50 | entry live=1 px=19515 r1==r2=1 win=1 decline=unclassified (branch-local gate)
+dive-clamperl-swift-opp-c7.json        DIVE         player   .. agree=1 prompts=pLpLpL  units=11  live=0 order=1d alloc=0 rows=93 exact=18 px=89909 r1==r2=1 ages=17..56 | entry live=1 px=114 r1==r2=1 win=1 decline=unclassified (branch-local gate)
+dive-clamperl-swift-opp-c8.json        SWIFT        opponent .. agree=1 prompts=pLpLpL  units=13  live=0 order=1d alloc=0 rows=80 exact=20 px=45659 r1==r2=1 ages=11..50 | entry live=1 px=0 r1==r2=1 win=1 decline=unclassified (no source gate fired)
+dive-clamperl-swift-opp-c9.json        DIVE         player   .. agree=1 prompts=pLpLpLp units=15  live=0 order=1d alloc=0 rows=119 exact=11 px=200757 r1==r2=1 ages=11..50 | entry live=1 px=20351 r1==r2=1 win=1 decline=unclassified (branch-local gate)
+dive-clamperl-swift-opp-c10.json       DIVE         player   .. agree=1 prompts=pLpLpLpL units=16  live=0 order=1d alloc=0 rows=93 exact=18 px=89160 r1==r2=1 ages=17..56 | entry live=1 px=101 r1==r2=1 win=1 decline=unclassified (branch-local gate)
+dive-clamperl-swift-opp-c11.json       SWIFT        opponent .. agree=1 prompts=pLpLpLpL units=18  live=0 order=1d alloc=0 rows=80 exact=20 px=45659 r1==r2=1 ages=11..50 | entry live=1 px=0 r1==r2=1 win=1 decline=unclassified (no source gate fired)
 dive-clamperl-swift-ply-banner-c0.json DIVE         opponent .. agree=1 prompts=p       units=0   live=1 order=1 alloc=0 rows=115 exact=0 px=84870 r1==r2=1 ages=0..39 | entry live=1 px=84870 r1==r2=1 win=1
 dive-clamperl-swift-ply-banner-c1.json DIVE         opponent .. agree=1 prompts=pp      units=1   live=1 order=1d alloc=0 rows=93 exact=93 px=0 r1==r2=1 ages=- | entry live=1 px=53 r1==r2=1 win=1
 dive-clamperl-swift-ply-banner-c2.json SWIFT        player   .. agree=1 prompts=pp      units=3   live=1 order=1d alloc=0 rows=78 exact=78 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
@@ -20,5 +32,5 @@ wp160-opp-s1-c0.json                   DIVE         opponent .. agree=1 prompts=
 wp160-opp-s1-c1.json                   WHIRLPOOL    player   H. agree=0 prompts=pp      units=1   live=1 order=1d alloc=0 rows=132 exact=0 px=100452 r1==r2=1 ages=0..39 | entry live=1 px=100452 r1==r2=1 win=1
 wp160-opp-s1-c2.json                   DIVE         opponent .. agree=1 prompts=pp      units=3   live=1 order=1d alloc=0 rows=93 exact=93 px=0 r1==r2=1 ages=- | entry live=1 px=47 r1==r2=1 win=1
 cast windows=12 live=12 0px=3 hidden=0 hiddenLive0px=0 agree=12 r1==r2=12
-dive windows=6 live=6 0px=4 hidden=0 hiddenLive0px=0 agree=6 r1==r2=6
+dive windows=18 live=7 0px=4 hidden=0 hiddenLive0px=0 agree=18 r1==r2=18
 wp160 windows=3 live=3 0px=2 hidden=1 hiddenLive0px=0 agree=2 r1==r2=3

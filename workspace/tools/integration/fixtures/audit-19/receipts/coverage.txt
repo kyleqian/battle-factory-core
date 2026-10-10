@@ -23,7 +23,7 @@ MAGNITUDE:ply >99                  windows=1    ZERO=1    DIFF=0   FALLBACK=0   
 NEEDLE_ARM:opp                     windows=22   ZERO=22   DIFF=0   FALLBACK=0    consumers: SHOCK_WAVE ZERO 6, SWIFT ZERO 6, THUNDERBOLT ZERO 4, WATER_PULSE ZERO 6
 NEEDLE_ARM:ply                     windows=16   ZERO=16   DIFF=0   FALLBACK=0    consumers: SHOCK_WAVE ZERO 4, SWIFT ZERO 4, THUNDERBOLT ZERO 4, WATER_PULSE ZERO 4
 WHIRLPOOL:ply                      windows=1    ZERO=1    DIFF=0   FALLBACK=0    consumers: DIVE ZERO 1
-battle start                       windows=68   ZERO=64   DIFF=4   FALLBACK=0    consumers: DIVE DIFF 4, DIVE ZERO 14, ICE_BALL ZERO 16, MUD_SLAP ZERO 2, SHOCK_WAVE ZERO 8, SWIFT ZERO 8, THUNDERBOLT ZERO 8, WATER_PULSE ZERO 8
+battle start                       windows=68   ZERO=68   DIFF=0   FALLBACK=0    consumers: DIVE ZERO 18, ICE_BALL ZERO 16, MUD_SLAP ZERO 2, SHOCK_WAVE ZERO 8, SWIFT ZERO 8, THUNDERBOLT ZERO 8, WATER_PULSE ZERO 8
 locked turn after DIVE:ply setup   windows=30   ZERO=0    DIFF=0   FALLBACK=30   consumers: DIVE FALLBACK 30
 locked turn after SHOCK_WAVE:opp   windows=8    ZERO=0    DIFF=0   FALLBACK=8    consumers: ICE_BALL FALLBACK 8
 locked turn after STATS_CHANGE(27):ply windows=6    ZERO=0    DIFF=0   FALLBACK=6    consumers: ICE_BALL FALLBACK 4, MUD_SLAP FALLBACK 2

@@ -205,7 +205,7 @@ dive-chinchou-water-pulse-ply-c2     WATER_PULSE  . ZERO
 dive-chinchou-water-pulse-ply-c3     DIVE         . ZERO
 dive-chinchou-water-pulse-ply-c4     DIVE         . ZERO
 dive-chinchou-water-pulse-ply-c5     WATER_PULSE  . ZERO
-dive-clamperl-shock-wave-opp-c0      DIVE         . DIFF px=11282 rows 30 ages 70..99 bbox [64, 79, 105, 111] 65,105 rom 399cff live 216bff
+dive-clamperl-shock-wave-opp-c0      DIVE         . ZERO
 dive-clamperl-shock-wave-opp-c1      DIVE         . FALLBACK (unclassified (branch-local gate))
 dive-clamperl-shock-wave-opp-c2      SHOCK_WAVE   . FALLBACK (unclassified (case-local gate))
 dive-clamperl-shock-wave-opp-c3      DIVE         . FALLBACK (unclassified (branch-local gate))
@@ -223,7 +223,7 @@ dive-clamperl-shock-wave-ply-c2      SHOCK_WAVE   . ZERO
 dive-clamperl-shock-wave-ply-c3      DIVE         . FALLBACK (unclassified (branch-local gate))
 dive-clamperl-shock-wave-ply-c4      DIVE         . FALLBACK (unclassified (branch-local gate))
 dive-clamperl-shock-wave-ply-c5      SHOCK_WAVE   . FALLBACK (unclassified (case-local gate))
-dive-clamperl-swift-opp-c0           DIVE         . DIFF px=10567 rows 30 ages 70..99 bbox [64, 79, 105, 111] 65,105 rom 399cff live 216bff
+dive-clamperl-swift-opp-c0           DIVE         . ZERO
 dive-clamperl-swift-opp-c1           DIVE         . FALLBACK (unclassified (branch-local gate))
 dive-clamperl-swift-opp-c2           SWIFT        . FALLBACK (unclassified (no source gate fired))
 dive-clamperl-swift-opp-c3           DIVE         . FALLBACK (unclassified (branch-local gate))
@@ -241,7 +241,7 @@ dive-clamperl-swift-ply-c2           SWIFT        . ZERO
 dive-clamperl-swift-ply-c3           DIVE         . ZERO
 dive-clamperl-swift-ply-c4           DIVE         . ZERO
 dive-clamperl-swift-ply-c5           SWIFT        . ZERO
-dive-clamperl-thunderbolt-opp-c0     DIVE         . DIFF px=11282 rows 30 ages 70..99 bbox [64, 79, 105, 111] 65,105 rom 399cff live 216bff
+dive-clamperl-thunderbolt-opp-c0     DIVE         . ZERO
 dive-clamperl-thunderbolt-opp-c1     DIVE         . FALLBACK (unclassified (branch-local gate))
 dive-clamperl-thunderbolt-opp-c2     THUNDERBOLT  . FALLBACK (unclassified (case-local gate))
 dive-clamperl-thunderbolt-opp-c3     DIVE         . FALLBACK (unclassified (branch-local gate))
@@ -256,7 +256,7 @@ dive-clamperl-thunderbolt-ply-c2     THUNDERBOLT  . ZERO
 dive-clamperl-thunderbolt-ply-c3     DIVE         . ZERO
 dive-clamperl-thunderbolt-ply-c4     DIVE         . ZERO
 dive-clamperl-thunderbolt-ply-c5     THUNDERBOLT  . ZERO
-dive-clamperl-water-pulse-opp-c0     DIVE         . DIFF px=11123 rows 30 ages 70..99 bbox [64, 79, 105, 111] 65,105 rom 216bff live 399cff
+dive-clamperl-water-pulse-opp-c0     DIVE         . ZERO
 dive-clamperl-water-pulse-opp-c1     DIVE         . FALLBACK (unclassified (branch-local gate))
 dive-clamperl-water-pulse-opp-c2     WATER_PULSE  . FALLBACK (unclassified (case-local gate))
 dive-clamperl-water-pulse-opp-c3     DIVE         . FALLBACK (unclassified (branch-local gate))
@@ -602,9 +602,8 @@ cast . DIFF 44
 cast . FALLBACK 4
 conv . ZERO 59
 ctl . ZERO 40
-dive . DIFF 4
 dive . FALLBACK 77
-dive . ZERO 45
+dive . ZERO 49
 ice . FALLBACK 114
 ice . ZERO 76
 mag . ZERO 18

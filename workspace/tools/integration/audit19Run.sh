@@ -9,7 +9,7 @@
 # 4. lends.txt: every window's production lend (a deferred lend resolved as the render seam resolves it) vs the ROM free order at
 #    activation (AUDIT19_LENDS_ONLY);
 # 5. wp160/: ISSUES #160 (audit19Wp160.sh: the dive70 fixture's own lend vs the ROM, the ROM-turn history, and the patched copy);
-#    ablation/: Castform sprite boxes masked, the Dive setup banner text, audit 18's all-turn missed-strike rule; coverage.txt
+#    ablation/: Castform sprite boxes masked, the Dive setup banner text, audit 18's all-turn missed-strike rule, a Dive setup consumer without its splash-birth context; coverage.txt
 #    (audit19Coverage.py); needle/: the Needle Arm 302 per-frame order receipt (audit19NeedleFrames.py, r1 == r2);
 # 6. compares <receipt-dir> with the committed receipts (audit19Compare.py).
 set -e
@@ -50,6 +50,7 @@ for p in sorted(src.glob("dive-clamperl-swift-ply-c*.json")):
     (dst / p.name.replace("dive-clamperl-swift-ply", "dive-clamperl-swift-ply-banner")).write_text(json.dumps(f, indent=1) + "\n")
 PY
 node --experimental-strip-types --no-warnings tools/integration/audit19Check.ts "$T/abl" dive-clamperl-swift-ply-banner "$REC/ablation/check-dive-clamperl-swift-ply-banner.json" > /dev/null 2>&1
+AUDIT19_NO_SPLASH_CONTEXT=1 node --experimental-strip-types --no-warnings tools/integration/audit19Check.ts $W/fixtures dive-clamperl-swift-opp "$REC/ablation/check-dive-clamperl-swift-opp-no-splash-context.json" > /dev/null 2>&1
 AUDIT19_MISS_RULE_ALL_TURNS=1 node --experimental-strip-types --no-warnings tools/integration/audit19Check.ts $W/fixtures wp160-opp-s1 "$REC/ablation/check-wp160-opp-s1-miss-rule-all-turns.json" > /dev/null 2>&1
 python3 tools/integration/audit19Summary.py "$REC/ablation" > "$REC/ablation/summary.txt"
 # the Needle Arm 302 latent defect: sSpriteOrder per frame through both Needle Arm bodies (two fresh runs; receipt only when r1 == r2)

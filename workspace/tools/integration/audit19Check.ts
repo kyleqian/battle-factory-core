@@ -95,7 +95,11 @@ function lendOf(f: Fixture & Json, turns: Json[], field: Json) {
         lend = { spriteOrderInput: lendLiveSpriteOrder(host, req!.moveId), spriteAllocatorInput: prepareLiveMoveSpriteAllocator(allocator, req!).input };
         consumerKey = key;
         if (liveMoveRandom2Plan(req!) !== null && f.presentationRngActivation !== undefined) {
-          rngBodies.push(...activateLiveMovePresentationRng(pinnedHost(f.presentationRngActivation.value), req!, key).bodies);
+          // audit 19: a Dive SETUP consumer needs the production plan context (the setup splash birth from its displayed species), as the
+          // history Dive bodies get it (audit 18 never had a Dive consumer); AUDIT19_NO_SPLASH_CONTEXT=1 is the ablation
+          const context = req!.moveId === 291 && (req!.turn & 1) === 0 && process.env.AUDIT19_NO_SPLASH_CONTEXT !== "1"
+            ? { diveSetupSplashBirth: liveDiveSetupSplashBirth(field as never, req!.attacker === 0 ? "player" : "opponent") } : undefined;
+          rngBodies.push(...activateLiveMovePresentationRng(pinnedHost(f.presentationRngActivation.value), req!, key, context).bodies);
         }
         return;
       }
