@@ -1,0 +1,252 @@
+{
+ "schema": "audit20-chain-fixture/v1",
+ "move": "LIGHT_SCREEN",
+ "bodyIndex": 0,
+ "probe": "tools/integration/audit20Probe.py",
+ "scenario": "tools/integration/fixtures/audit-20/scenarios/pa-ss-victreebel-light-screen-ply.json",
+ "denseWindow": {
+  "startFrame": 471,
+  "endFrame": 556
+ },
+ "attacker": {
+  "species": "CHANSEY",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "VICTREEBEL",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015432,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 357,
+  "playerMaxHp": 357,
+  "opponentHp": 187,
+  "opponentMaxHp": 187,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "target": 0,
+  "power": 0
+ },
+ "rom": {
+  "invisible": [
+   false,
+   false
+  ],
+  "turn": 0,
+  "spriteOrder": [
+   62,
+   60,
+   0,
+   63,
+   1,
+   61,
+   6,
+   8,
+   2,
+   3,
+   14,
+   13,
+   12,
+   11,
+   10,
+   9,
+   7,
+   5,
+   4,
+   17,
+   16,
+   15,
+   21,
+   20,
+   19,
+   18,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   23,
+   22,
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47
+  ],
+  "power": 0,
+  "alloc": {
+   "pre": {
+    "inUse": "f000000000000147",
+    "matrixBitmap": 6,
+    "paletteTags": [
+     65535,
+     65535,
+     65535,
+     65535,
+     54322,
+     55039,
+     55044,
+     65535,
+     65535,
+     65535,
+     65535,
+     65535,
+     65535,
+     65535,
+     65535,
+     65535
+    ],
+    "tileTagsSha": "2e16e64a249914fc",
+    "tileBitmapSha": "e7e5d2118d9322f0"
+   },
+   "entry": {
+    "inUse": "f000000000000147",
+    "matrixBitmap": 6,
+    "paletteTags": [
+     65535,
+     65535,
+     65535,
+     65535,
+     54322,
+     55039,
+     55044,
+     65535,
+     65535,
+     65535,
+     65535,
+     65535,
+     65535,
+     65535,
+     65535,
+     65535
+    ],
+    "tileTagsSha": "2e16e64a249914fc",
+    "tileBitmapSha": "e7e5d2118d9322f0"
+   },
+   "creates": [
+    [
+     7,
+     3
+    ],
+    [
+     19,
+     4
+    ],
+    [
+     27,
+     5
+    ],
+    [
+     34,
+     7
+    ],
+    [
+     43,
+     4
+    ],
+    [
+     51,
+     5
+    ],
+    [
+     59,
+     7
+    ]
+   ]
+  }
+ },
+ "presentationRngActivation": {
+  "value": 410579313,
+  "source": "audit20Probe.py at.rng2 (RAM gRng2Value, activation frame 471)"
+ },
+ "pinnedRng2": [
+  [
+   0,
+   3044225206
+  ]
+ ],
+ "pinnedGeneral": [],
+ "promptShown": [
+  true
+ ],
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "230",
+      "0",
+      "0",
+      "0",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "STATS_CHANGE",
+     "battler": 0,
+     "target": 0,
+     "arguments": [
+      "28"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": [
+      "113",
+      "0",
+      "0",
+      "0",
+      "70",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
+}
