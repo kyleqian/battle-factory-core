@@ -92,7 +92,9 @@ touched.
 - `npm run typecheck` 0 errors; `npm run test:smoke` 8 / 448; `npm run build` OK.
 - `compare:differential` (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on) vs `f3efec8bf`:
   **624 / 624 byte-identical**.
-- Full suite: see the final report for this branch.
+- Full suite on `47c5b6177` (code == `3ab463e5f`), 4 workers, two foreground shards (`npm test -- --maxWorkers=4 --shard=1/2` and `2/2`):
+  **1,602 files / 13,180 tests passed, 0 failed** (44 files / 223 tests skipped).
+- `git diff --check` clean.
 
 ## 4. Open points
 
