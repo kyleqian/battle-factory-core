@@ -57,7 +57,7 @@ function edge(t: Tally, tracker: SpriteOrderTracker, observed: number[] | undefi
 /** Host move id (liveSpriteOrderHost.ts MOVE_ANIMATION mapping) from the move, side and the scenario's turn evidence. */
 function hostMoveId(mv: number, turn: number): number {
   if (mv === 143 && turn === 1) return 10143;
-  if ((mv === 13 || mv === 76 || mv === 91 || mv === 280) && (turn & 1) === 1) return 10000 + mv;
+  if ((mv === 13 || mv === 19 || mv === 76 || mv === 91 || mv === 280 || mv === 340) && (turn & 1) === 1) return 10000 + mv;
   return mv;
 }
 
@@ -80,7 +80,7 @@ function replayCorpus(): Tally & { skipped: number } {
       edge(t, tracker, unit.observedFreeAtEdge, scenario.file, index, mv);
       const side: Side | null = scenario.side === null ? null : mv === scenario.move ? scenario.side : scenario.side === "opponent" ? "player" : "opponent";
       let turn = 0;
-      if (side !== null && (mv === 13 || mv === 76 || mv === 91)) { const key = `${mv}:${side}`; turn = occurrences.get(key) ?? 0; occurrences.set(key, turn + 1); }
+      if (side !== null && (mv === 13 || mv === 19 || mv === 76 || mv === 91 || mv === 340)) { const key = `${mv}:${side}`; turn = occurrences.get(key) ?? 0; occurrences.set(key, turn + 1); }
       if (mv === 280) turn = scenario.file.includes("-normal-") ? 0 : 1;
       tracker = applySpriteOrderPresentationEvent(tracker, mv === 0 || side === null
         ? { kind: "invalidate", reason: "mv-0 / unattributed body" }
@@ -142,7 +142,7 @@ function replayProbes(): Tally & { jobs: number; perLabel: Record<string, { edge
       if (body) {
         const mv = Number(body[1]), side = body[2] as Side;
         let turn = 0;
-        if (mv === 13 || mv === 76 || mv === 91) { turn = occurrences.get(unit.label) ?? 0; occurrences.set(unit.label, turn + 1); }
+        if (mv === 13 || mv === 19 || mv === 76 || mv === 91 || mv === 340) { turn = occurrences.get(unit.label) ?? 0; occurrences.set(unit.label, turn + 1); }
         if (mv === 280) turn = job.base.includes("-normal-") ? 0 : 1;
         event = { kind: "move-animation", moveId: presentKey(mv, unit.windows) ?? hostMoveId(mv, turn), attackerSide: side };
       } else event = mv0Event(job, unit);
