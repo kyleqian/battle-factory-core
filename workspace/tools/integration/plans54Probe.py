@@ -33,6 +33,16 @@ JOBS += [("BODY210", f"fc-ply-{a}", 210, FC_P, (SEED, ("species", "player", a), 
 # probe (the first fc-opp batch against Blissey kept only its tail).
 JOBS += [("BODY210", f"fc-opp-{a}", 210, FC_O, (SEED, ("species", "opponent", a), ("species", "player", 227), ("turns", 3), ("extend", 300)))
          for a in (278, 123)]
+# Hail 258 + HAIL_CONTINUES (General_Hail: goto Move_HAIL, the end-turn WEATHER_VAR 13 animation, mv-0 bodies): both battlers are the
+# targets (GenerateHailParticle), so the grid is (player, opponent) species pairs, each with the hail user on both sides; 2 more turns
+# (the user's Hail fails while it hails; the end-turn animation plays every turn). Pairs = plans54HailPredict.ts PLANS54_HAIL_PAIRS
+# (predictions committed before these probes ran).
+HA_P, HA_O = "mechanic-hail-player-delibird-opponent-onix", "mechanic-hail-opponent-delibird-player-onix"
+HA_PAIRS = [(225, 95), (143, 42), (42, 143), (347, 76)]
+JOBS += [("BODY258", f"ha-ply-{p}-{o}", 258, HA_P, (SEED, ("species", "player", p), ("species", "opponent", o), ("moves", "player", 258),
+          ("turns", 2))) for p, o in HA_PAIRS]
+JOBS += [("BODY258", f"ha-opp-{p}-{o}", 258, HA_O, (SEED, ("species", "player", p), ("species", "opponent", o), ("moves", "opponent", 258),
+          ("turns", 2))) for p, o in HA_PAIRS]
 
 if __name__ == "__main__":
     argv = sys.argv[1:]

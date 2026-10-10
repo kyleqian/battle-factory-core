@@ -45,6 +45,7 @@ import { digAtAge } from "../animation/dig.ts";
 import { dreamEaterSpriteOrderPlanText } from "../animation/dreamEater.ts";
 import { gigaDrainSpriteOrderPlanText } from "../animation/gigaDrain.ts";
 import { eruptionSpriteOrderPlanText } from "../animation/eruptionSpriteOrderPlan.ts";
+import { hailSpriteOrderPlanText } from "../animation/hailSpriteOrderPlan.ts";
 import { megaDrainSpriteOrderPlanText } from "../animation/megaDrain.ts";
 import { faintAttackRestoreProfile } from "../animation/faintAttack.ts";
 import { RAZOR_LEAF_BODY_LAST_AGE } from "../animation/razorLeaf.ts";
@@ -674,7 +675,7 @@ export function liveMoveAbsorptionOrbCenters(
  * S10A gdgeo: the sprite-order plan text (spriteOrderEventTransform.ts encoding) of a geometry-keyed body at the displayed species:
  * Giga Drain (202) / Mega Drain (72) / Dream Eater (138, plans48), from the renderers' own timelines (gigaDrain.ts / megaDrain.ts /
  * dreamEater.ts through absorptionOrbSpriteOrderPlan.ts); Eruption (284, plans54) at its ROM-proven attacker species only
- * (eruptionSpriteOrderPlan.ts). Null for any other move or a species without a battle picture / proof.
+ * (eruptionSpriteOrderPlan.ts); Hail (258, plans54; also HAIL_CONTINUES) from hail.ts's timeline (hailSpriteOrderPlan.ts). Null for any other move or a species without a battle picture / proof.
  */
 export function liveMoveGeometrySpriteOrderPlanText(
   moveId: number, attackerSide: "player" | "opponent", species: LiveMoveBodySpecies,
@@ -683,10 +684,47 @@ export function liveMoveGeometrySpriteOrderPlanText(
   if (moveId === 284) {
     return eruptionSpriteOrderPlanText(attackerSide, attackerSide === "player" ? species.playerSpecies : species.opponentSpecies);
   }
+  // plans54: Move_HAIL (and General_Hail = HAIL_CONTINUES, which the host requests under 258) targets both battlers, never the attacker.
+  if (moveId === 258) return liveHailSpriteOrderPlanText(species);
   const planText = moveId === 202 ? gigaDrainSpriteOrderPlanText : moveId === 72 ? megaDrainSpriteOrderPlanText
     : moveId === 138 ? dreamEaterSpriteOrderPlanText : null;
   const centers = planText === null ? null : liveMoveAbsorptionOrbCenters(attackerSide, species);
   return centers === null ? null : planText!(centers.target, centers.attacker, attackerSide, centers.attacker);
+}
+
+const hailSpriteOrderPlans = new Map<string, string | null>();
+/**
+ * plans54: Move_HAIL's sprite-order plan (hailSpriteOrderPlan.ts over hail.ts's own timeline) at the displayed species, with the case-258
+ * profile's sHailCoordData targets (both battlers visible: X_2 / Y_PIC_OFFSET -+ width / height / 6) and known-entry occupancy. Cached per
+ * species pair; null for a species without a battle picture.
+ */
+function liveHailSpriteOrderPlanText(species: LiveMoveBodySpecies): string | null {
+  const key = `${species.playerSpecies}/${species.opponentSpecies}`;
+  if (hailSpriteOrderPlans.has(key)) return hailSpriteOrderPlans.get(key)!;
+  let plan: string | null = null;
+  try {
+    const art = createBattleCommandFieldArtView({ player: { species: species.playerSpecies }, opponent: { species: species.opponentSpecies } } as never);
+    const targets = HAIL_COORD_DATA.map(([x, y, position, type]) => {
+      let targetX: number = x, targetY: number = y, impact = false;
+      const side = position === 0 ? "player" as const : position === 1 ? "opponent" as const : null;
+      if (type !== 0 && side !== null) {
+        impact = true;
+        const anchors = liveBattlerAnchors(side, art), attrs = liveBattlerCoordAttrs(side, art);
+        targetX = anchors.picOffsetPoint.x; targetY = anchors.picOffsetPoint.y;
+        const dx = Math.trunc(attrs.width / 6), dy = Math.trunc(attrs.height / 6);
+        if (type === 1) { targetX -= dx; targetY -= dy; } else { targetX += dx; targetY += dy; }
+      }
+      return { targetX, targetY, initialX: targetX - Math.trunc((targetY + 8) / 2), initialY: -8 as const, impact };
+    }) as unknown as HailProfile["targets"];
+    plan = hailSpriteOrderPlanText({ animationRngAtAge0: 0, occupiedSpriteSlots: KNOWN_ENTRY_IN_USE_SPRITE_SLOTS,
+      occupiedAffineMatrixSlots: [1, 2], targets, unfadedPaletteBeforeLoad: UNCONSUMED_PALETTE, fadedPaletteBeforeLoad: UNCONSUMED_PALETTE,
+      hardwarePaletteAtAge0: UNCONSUMED_PALETTE, unfadedPaletteAfterHailLoad: UNCONSUMED_PALETTE, fadedPaletteAfterHailLoad: UNCONSUMED_PALETTE,
+      unfadedPaletteAfterCrystalLoad: UNCONSUMED_PALETTE, fadedPaletteAfterCrystalLoad: UNCONSUMED_PALETTE });
+  } catch {
+    plan = null;
+  }
+  hailSpriteOrderPlans.set(key, plan);
+  return plan;
 }
 
 /**

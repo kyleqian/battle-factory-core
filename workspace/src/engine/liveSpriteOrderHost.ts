@@ -46,7 +46,7 @@ import { generalAnimationPresentationRngKey, isWordsOrderDeferredUnit, WORDS_ORD
 import {
   KNOWN_ENTRY_BATTLER_SLOTS, KNOWN_ENTRY_OCCUPANT_ROLES, applySpriteOrderPresentationEvent, createSpriteOrderTracker,
   invalidateSpriteOrderTracker, spriteOrderStatusAnimationName, spriteOrderTrackerLend, spriteOrderTrackerRoleIsomorphic,
-  SPRITE_ORDER_GEOMETRY_KEYED_BODIES, type SpriteOrderDeferredLend, type SpriteOrderPresentationEvent, type SpriteOrderTracker,
+  SPRITE_ORDER_GEOMETRY_KEYED_ANIMS, SPRITE_ORDER_GEOMETRY_KEYED_BODIES, type SpriteOrderDeferredLend, type SpriteOrderPresentationEvent, type SpriteOrderTracker,
 } from "./spriteOrderEventTransform.ts";
 import {
   invalidateSpriteOrderState, knownEntryPrePromptSpriteOrderState, knownEntrySpriteOrderState, type SpriteOrderState,
@@ -424,7 +424,7 @@ function orderEventOf(
 }
 
 /** A geometry-keyed body's plan text at the displayed species of its move-animation command (segment, event sequence); undefined
- * when unknown. */
+ * when unknown. HAIL_CONTINUES asks for Move_HAIL's (moveId 258) at its own (general-animation) event sequence. */
 export type SpriteOrderBodyPlanAt = (
   segmentIndex: number, sequence: number, moveId: number, attackerSide: "player" | "opponent",
 ) => string | undefined;
@@ -472,8 +472,16 @@ export function advanceLiveSpriteOrderHost(
       let mapped = orderEventOf(events, index, hidden);
       // gdgeo: a geometry-keyed body (Giga Drain / Mega Drain) carries its plan at the displayed species of its own command;
       // unknown -> no plan (invalidates).
-      if (mapped.event?.kind === "move-animation" && SPRITE_ORDER_GEOMETRY_KEYED_BODIES.has(mapped.event.moveId)) {
+      // plans54: Move_HAIL / General_Hail (HAIL_CONTINUES, requested under 258) target both battlers through IsBattlerSpriteVisible; the plan
+      // assumes both battler sprites are shown (a fainted / hidden battler moves its targets to the fixed coordinates): otherwise no plan.
+      const bothBattlersShown = tracker.battlerSlots.player !== null && tracker.battlerSlots.opponent !== null && !hidden[0] && !hidden[1];
+      if (mapped.event?.kind === "move-animation" && SPRITE_ORDER_GEOMETRY_KEYED_BODIES.has(mapped.event.moveId)
+        && (mapped.event.moveId !== 258 || bothBattlersShown)) {
         const geometryPlan = bodyPlanAt?.(segmentIndex, events[index]!.sequence, mapped.event.moveId, mapped.event.attackerSide);
+        if (geometryPlan !== undefined) mapped = { ...mapped, event: Object.freeze({ ...mapped.event, geometryPlan }) };
+      }
+      if (mapped.event?.kind === "general-animation" && SPRITE_ORDER_GEOMETRY_KEYED_ANIMS.has(mapped.event.animation) && bothBattlersShown) {
+        const geometryPlan = bodyPlanAt?.(segmentIndex, events[index]!.sequence, 258, "player");
         if (geometryPlan !== undefined) mapped = { ...mapped, event: Object.freeze({ ...mapped.event, geometryPlan }) };
       }
       if (mapped.hidden) hidden = mapped.hidden;

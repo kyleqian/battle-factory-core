@@ -149,3 +149,67 @@ describe("Eruption 284 fail-closed by attacker geometry (plans54, ISSUES #155)",
       .toBe(liveMoveGeometrySpriteOrderPlanText(284, "player", { playerSpecies: 340, opponentSpecies: 143 }));
   });
 });
+
+describe("Hail 258 + HAIL_CONTINUES geometry-keyed from hail.ts's timeline (plans54)", () => {
+  const predictions = (fixture("plans54/hail-predictions.json") as { predictions: Record<string, string> }).predictions;
+  const instances = () => {
+    const out: { job: string; pair: string; label: string; unit: Unit }[] = [];
+    for (const [job, entry] of Object.entries(units54.jobs)) {
+      if (entry.unit !== "BODY258") continue;
+      const pair = `${speciesOf(entry.ops, "player")}-${speciesOf(entry.ops, "opponent")}`;
+      let previous = "";
+      for (const unit of entry.units) {
+        if (unit.kind !== "body") continue;
+        const afterHail = previous === "general HAIL_CONTINUES";
+        previous = unit.label;
+        if (unit.truncated) continue;
+        if (/^body 258:/.test(unit.label) || (unit.label === "general HAIL_CONTINUES" && !afterHail)) out.push({ job, pair, label: unit.label, unit });
+      }
+    }
+    return out;
+  };
+
+  it("every ROM body and end-turn HAIL_CONTINUES is per-frame exact under the production seam text, which is the plan predicted before the probes", () => {
+    const all = instances();
+    expect(all.filter(instance => instance.label.startsWith("body 258:player"))).toHaveLength(4);
+    expect(all.filter(instance => instance.label.startsWith("body 258:opponent"))).toHaveLength(4);
+    expect(all.filter(instance => instance.label === "general HAIL_CONTINUES")).toHaveLength(16);
+    for (const { job, pair, unit } of all) {
+      const [player, opponent] = pair.split("-").map(Number) as [number, number];
+      const text = liveMoveGeometrySpriteOrderPlanText(258, "player", { playerSpecies: player, opponentSpecies: opponent });
+      expect(text, job).toBe(predictions[pair]);
+      // the attacker never enters Move_HAIL's geometry
+      expect(liveMoveGeometrySpriteOrderPlanText(258, "opponent", { playerSpecies: player, opponentSpecies: opponent }), job).toBe(text);
+      expect(perFrameExact(unit, decodeSpriteOrderPlan(text!)), `${job} ${unit.label} @${unit.frame}`).toBe(true);
+    }
+    // the four pairs give four distinct plans (the species geometry is load-bearing)
+    expect(new Set(Object.values(predictions)).size).toBe(4);
+  });
+
+  const ev = (sequence: number, kind: string, extra: object = {}) =>
+    Object.freeze({ sequence, payload: { kind, ...extra }, provenance: undefined }) as unknown as BattleKernelSemanticEvent;
+  const hailContinues = ev(10, "animation", { animationId: "WEATHER_VAR", battler: 0, target: 0, arguments: ["13"] });
+  const run = (events: readonly BattleKernelSemanticEvent[], withPlan: boolean) => {
+    const host: LiveSpriteOrderHost = Object.freeze({ ...createLiveSpriteOrderHost(knownEntrySpriteOrderState("ordinary-factory")), promptRequestId: 3 });
+    const plan = liveMoveGeometrySpriteOrderPlanText(258, "player", { playerSpecies: 225, opponentSpecies: 95 })!;
+    return advanceLiveSpriteOrderHost(host, { resolutionId: { requestId: 3 }, segmentIndex: 0, segments: [{ events }] }, Number.POSITIVE_INFINITY,
+      false, withPlan ? (_segment, _sequence, moveId) => moveId === 258 ? plan : undefined : undefined).tracker;
+  };
+
+  it("the host applies HAIL_CONTINUES's geometry plan; without it, or with a battler not shown, the order invalidates", () => {
+    const known = run([hailContinues], true);
+    expect(known.cursor.order.known).toBe(true);
+    const want = applySpriteOrderPresentationEvent(createSpriteOrderTracker(knownEntrySpriteOrderState("ordinary-factory")),
+      { kind: "general-animation", animation: "HAIL_CONTINUES", geometryPlan: liveMoveGeometrySpriteOrderPlanText(258, "player", { playerSpecies: 225, opponentSpecies: 95 })! });
+    expect(known.cursor.order.free).toEqual(want.cursor.order.free);
+    expect(run([hailContinues], false).cursor.order.known).toBe(false);
+    expect(run([hailContinues], false).invalidReason).toContain("HAIL_CONTINUES");
+    // a hidden (semi-invulnerable) battler: GenerateHailParticle falls back to the fixed coordinates -> no plan
+    const hide = ev(5, "set-battler-sprite-visibility", { battler: 1, invisible: true });
+    expect(run([hide, hailContinues], true).cursor.order.known).toBe(false);
+    // the hail body itself (move 258) without a geometry plan has no plan
+    const body = ev(10, "animation", { animationId: "MOVE_ANIMATION", battler: 0, target: 1, arguments: ["258", "0", "0", "0", "70", "0"] });
+    expect(run([body], false).cursor.order.known).toBe(false);
+    expect(run([body], true).cursor.order.known).toBe(true);
+  });
+});

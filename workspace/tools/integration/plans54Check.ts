@@ -7,6 +7,9 @@
 //     proposed plan of its order key (PLANS54_PLANS; liveSpriteOrderHost.ts FURY_CUTTER_ORDER_KEYS).
 //   Eruption 284: checked against the PRODUCTION seam text liveMoveGeometrySpriteOrderPlanText(284, side, species) at the job's species
 //     (a null text = fail closed: counted as `unproven`, never as exact).
+//   Hail 258 and HAIL_CONTINUES (the first mv-0 body of each end turn in a hail job; a second one in the same end turn is Leftovers'
+//     HELD_ITEM_EFFECT): the PRODUCTION seam text liveMoveGeometrySpriteOrderPlanText(258, side, species), and separately the plan
+//     PREDICTED before the probes (fixtures/plans54/hail-predictions.json) -> `predictedExact`.
 // usage: node --experimental-strip-types tools/integration/plans54Check.ts <out.json> <units.json>...
 import { readFileSync, writeFileSync } from "node:fs";
 import { decodeSpriteOrderPlan } from "../../src/engine/spriteOrderEventTransform.ts";
@@ -72,23 +75,36 @@ function speciesOf(job: Job): { player?: number; opponent?: number } {
 }
 
 const [outPath, ...inputs] = process.argv.slice(2);
+const predictions = (JSON.parse(readFileSync(new URL("./fixtures/plans54/hail-predictions.json", import.meta.url), "utf8")) as
+  { predictions: Record<string, string> }).predictions;
 type Entry = { instances: number; matched: number; unproven: number; framesChecked: number; sides: string[]; jobs: string[]; plan: string | null;
+  predictedExact?: number;
   mismatches: { job: string; frame: number; observedPlan: string; problems: string[] }[] };
 const results: Record<string, Entry> = {};
 let jobs = 0, notIdentical = 0;
 for (const path of inputs) {
   const input = JSON.parse(readFileSync(path, "utf8")) as { jobs: Record<string, Job> };
   for (const [name, job] of Object.entries(input.jobs)) {
-    if (job.unit !== "BODY210" && job.unit !== "BODY284") continue;
+    if (job.unit !== "BODY210" && job.unit !== "BODY284" && job.unit !== "BODY258") continue;
     jobs += 1;
     if (!job.identicalAB) notIdentical += 1;
     const chain = { player: 0, opponent: 0 };
+    let previousBody = "";
     job.units.forEach((unit, index) => {
-      const m = /^body (\d+):(player|opponent)$/.exec(unit.label);
-      if (unit.kind !== "body" || unit.truncated || !m || (m[1] !== "210" && m[1] !== "284")) return;
+      if (unit.kind !== "body") return;
+      const afterHail = previousBody === "general HAIL_CONTINUES";
+      previousBody = unit.label;
+      const hailContinues = job.unit === "BODY258" && unit.label === "general HAIL_CONTINUES" && !afterHail;
+      const m = hailContinues ? ["", "258", "player"] : /^body (\d+):(player|opponent)$/.exec(unit.label);
+      if (unit.truncated || !m || (m[1] !== "210" && m[1] !== "284" && m[1] !== "258")) return;
       const side = m[2] as "player" | "opponent";
-      let label: string, text: string | null;
-      if (m[1] === "210") {
+      let label: string, text: string | null, predicted: string | undefined;
+      if (m[1] === "258") {
+        const species = speciesOf(job);
+        label = `${hailContinues ? "general HAIL_CONTINUES" : `body 258 ${side}`} ${species.player}-${species.opponent}`;
+        text = liveMoveGeometrySpriteOrderPlanText(258, side, { playerSpecies: species.player!, opponentSpecies: species.opponent! });
+        predicted = predictions[`${species.player}-${species.opponent}`];
+      } else if (m[1] === "210") {
         const counter = Math.min(++chain[side], 5);
         label = `body ${FURY_CUTTER_KEYS[Math.min(counter, 4) - 1]}`;
         text = PLANS54_PLANS[label]!;
@@ -104,6 +120,7 @@ for (const path of inputs) {
       if (!entry.jobs.includes(name)) entry.jobs.push(name);
       if (text === null) { entry.unproven += 1; return; }
       const next = job.units.slice(index + 1).find(u => u.windows.length > 0);
+      if (predicted !== undefined && checkUnit(unit, next, predicted).problems.length === 0) entry.predictedExact = (entry.predictedExact ?? 0) + 1;
       const checked = checkUnit(unit, next, text);
       entry.framesChecked += checked.frames;
       if (checked.problems.length === 0) entry.matched += 1;
@@ -115,6 +132,6 @@ const out = { schema: "plans54-check/v1", jobs, notIdenticalAB: notIdentical, pl
 writeFileSync(outPath!, JSON.stringify(out, null, 1) + "\n");
 console.log(`${jobs} jobs, ${notIdentical} A/B differ`);
 for (const [label, r] of Object.entries(results).sort(([l], [r]) => l.localeCompare(r))) {
-  console.log(`${label}: ${r.matched}/${r.instances} instances exact${r.unproven ? ` (${r.unproven} unproven: no plan)` : ""}, ${r.framesChecked} allocation frames, sides ${r.sides.join("+")}, jobs ${r.jobs.length}`);
+  console.log(`${label}: ${r.matched}/${r.instances} instances exact${r.unproven ? ` (${r.unproven} unproven: no plan)` : ""}${r.predictedExact !== undefined ? ` (predicted plan exact ${r.predictedExact})` : ""}, ${r.framesChecked} allocation frames, sides ${r.sides.join("+")}, jobs ${r.jobs.length}`);
   for (const m of r.mismatches) console.log(`   MISMATCH ${m.job} @${m.frame}: ${m.problems.join(" | ")}`);
 }

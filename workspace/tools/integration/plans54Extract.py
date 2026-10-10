@@ -15,7 +15,7 @@ import prep43Extract as X
 import plans54Probe as J
 
 X.J = J
-X.MV0_LABEL = {"SUBSTITUTE_FADE": "general SUBSTITUTE_FADE", "FOCUS_BAND": "general FOCUS_BAND"}
+X.MV0_LABEL = {"BODY258": "general HAIL_CONTINUES"}  # the hail jobs' mv-0 bodies are the end-turn General_Hail animations
 
 if __name__ == "__main__":
     OUT = Path(sys.argv[1])
