@@ -8,8 +8,9 @@ import { liveMoveGeometrySpriteOrderPlanText } from "../../src/engine/liveMoveAn
 import { KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER } from "../../src/engine/spriteOrderProvider.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 
-/** Attackers: NOSEPASS 320 (the "wailmer" lab scenarios' lead) and KINGDRA 230; defender SHUCKLE 213. Tier HP over max 200. */
-export const PLANS54_WATER_SPOUT_ATTACKERS = [320, 230] as const;
+/** Attackers: NOSEPASS 320 (the "wailmer" lab scenarios' lead), KINGDRA 230 (its tier stagings KO the SHUCKLE: never probed) and MAGIKARP
+ * 129 (added before its probes); defender SHUCKLE 213. Tier HP over max 200. */
+export const PLANS54_WATER_SPOUT_ATTACKERS = [320, 230, 129] as const;
 const TIER_HP = [20, 70, 120, 200] as const;
 
 /** The prediction at the known-entry lend; a later body is predicted by the same committed function at its own start order (`lentFree`). */
