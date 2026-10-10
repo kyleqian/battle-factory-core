@@ -132,7 +132,13 @@ A Dive setup consumer now gets its production splash-birth context.
 
 ### Run C: a full run of the final runner
 
-Run C (fresh dirs, the final runner and checker, started 14:18 after the build): result pending at the time of this commit.
+Run C used fresh dirs, the final runner and checker, and was started at 14:18 after the build. It is the third independent batch.
+- It re-staged and re-probed; derived fixtures == committed.
+- `audit19Compare.py` against the committed receipts: **identical = 599, ROM-drift = 0, DIFFERS = 0 windows. All 122 check receipts
+  and all 19 other receipt files are byte-identical**, including `needle/`, the no-splash-context ablation and `coverage.txt`. It finished
+  at 14:34.
+- Every audit19 receipt therefore reproduced byte for byte across two batches of the final code (run C vs committed). The checks were
+  also reproduced across three batches (A, B, C; the 18 re-checked scenarios also in C1 / C2).
 
 ## 3. ISSUES #160 diagnosis
 
