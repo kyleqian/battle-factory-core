@@ -9,7 +9,8 @@
 # 4. lends.txt: every window's production lend (a deferred lend resolved as the render seam resolves it) vs the ROM free order at
 #    activation (AUDIT19_LENDS_ONLY);
 # 5. wp160/: ISSUES #160 (audit19Wp160.sh: the dive70 fixture's own lend vs the ROM, the ROM-turn history, and the patched copy);
-#    ablation/: Castform sprite boxes masked, the Dive setup banner text, audit 18's all-turn missed-strike rule;
+#    ablation/: Castform sprite boxes masked, the Dive setup banner text, audit 18's all-turn missed-strike rule; coverage.txt
+#    (audit19Coverage.py); needle/: the Needle Arm 302 per-frame order receipt (audit19NeedleFrames.py, r1 == r2);
 # 6. compares <receipt-dir> with the committed receipts (audit19Compare.py).
 set -e
 [ $# -ge 2 ] || { echo "usage: audit19Run.sh <receipt-dir> <scratch-dir>"; exit 2; }
@@ -29,6 +30,7 @@ ls $W/fixtures/*.json | sed 's/-c[0-9]*\.json$//' | sort -u | xargs -n 1 -P "$J"
     || echo "FAILED $n (see $T/check-$n.log)"'
 python3 tools/integration/audit19Summary.py "$REC/check" > "$REC/summary.txt"
 python3 tools/integration/audit19Verdicts.py "$REC/check" > "$REC/verdicts.txt"
+python3 tools/integration/audit19Coverage.py "$REC" $W/fixtures > "$REC/coverage.txt"
 for n in $(ls $W/fixtures/*.json | sed 's/-c[0-9]*\.json$//' | sort -u); do
   AUDIT19_LENDS_ONLY=1 node --experimental-strip-types --no-warnings tools/integration/audit19Check.ts $W/fixtures "$(basename "$n")" /dev/null
 done > "$REC/lends.txt"
@@ -50,4 +52,12 @@ PY
 node --experimental-strip-types --no-warnings tools/integration/audit19Check.ts "$T/abl" dive-clamperl-swift-ply-banner "$REC/ablation/check-dive-clamperl-swift-ply-banner.json" > /dev/null 2>&1
 AUDIT19_MISS_RULE_ALL_TURNS=1 node --experimental-strip-types --no-warnings tools/integration/audit19Check.ts $W/fixtures wp160-opp-s1 "$REC/ablation/check-wp160-opp-s1-miss-rule-all-turns.json" > /dev/null 2>&1
 python3 tools/integration/audit19Summary.py "$REC/ablation" > "$REC/ablation/summary.txt"
+# the Needle Arm 302 latent defect: sSpriteOrder per frame through both Needle Arm bodies (two fresh runs; receipt only when r1 == r2)
+mkdir -p "$REC/needle"
+for k in 1 2; do
+  python3 tools/run-mgba-probe.py "$T/naf$k.json" -- "${PY:-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python}" tools/integration/audit19NeedleFrames.py \
+    $W/scenarios/needle-cacnea-water-pulse-opp.json "$T/naf$k.json" > /dev/null 2>&1 || true
+  python3 tools/integration/audit19NeedleFrames.py --summary "$T/naf$k.json" > "$T/naf$k.txt"
+done
+cmp -s "$T/naf1.txt" "$T/naf2.txt" && cp "$T/naf1.txt" "$REC/needle/needle-cacnea-water-pulse-opp-frames.txt" || echo "WARNING: Needle Arm frame runs differ"
 [ -d $W/receipts/check ] && python3 tools/integration/audit19Compare.py "$REC" $W/receipts | tee "$T/receipts-vs-committed.txt" | tail -14 || true
