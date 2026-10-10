@@ -58,7 +58,7 @@ export interface LiveSpriteOrderHost {
   readonly promptRequestId: number | null;
   /** Next unapplied semantic event of the presented resolution; `drained` once its last segment is applied. */
   readonly cursor: Readonly<{ requestId: number; segmentIndex: number; nextEventIndex: number; drained: boolean }> | null;
-  /** Battler sprites hidden by the semi-invulnerable `moveend`/`makevisible` toggles. */
+  /** Battler sprites hidden by the semi-invulnerable `moveend`/`makevisible` toggles, or from a Fly / Bounce setup body to its unleash body (prep61). */
   readonly hidden: readonly [boolean, boolean];
   /** Presentation units (animation bodies, faints, switches, party-menu resets) applied since the battle began (prep16 s0.3 first-body gate). */
   readonly bodies?: number;
@@ -132,8 +132,16 @@ export function markLiveSpriteOrderDeferredBody(
     activation }) });
 }
 
-/** Moves whose script branches with choosetwoturnanim on `gAnimMoveTurn & 1` (Razor Wind / Solar Beam unleash, Sky Attack strike, Dig unleash, Brick Break screen broken). */
-const TWO_TURN_ANIM_MOVE_IDS: ReadonlySet<number> = new Set([13, 76, 91, 143, 280]);
+/**
+ * Moves whose script branches with choosetwoturnanim on `gAnimMoveTurn & 1` (Razor Wind / Solar Beam unleash, Fly / Bounce unleash, Sky
+ * Attack strike, Dig unleash, Brick Break screen broken). Dive 291 is words-keyed (prep61) and keeps its single unplanned key.
+ */
+const TWO_TURN_ANIM_MOVE_IDS: ReadonlySet<number> = new Set([13, 19, 76, 91, 143, 280, 340]);
+/**
+ * prep61: Fly / Bounce setup bodies hide the attacker's sprite themselves (FlySetUp / BounceSetUp; Scene ON emits no
+ * MOVEEND_ATTACKER_INVISIBLE toggle, which needs HITMARKER_NO_ANIMATIONS): the battler is hidden from the setup body to its unleash body.
+ */
+const SEMI_INVULNERABLE_SETUP_MOVE_IDS: ReadonlySet<number> = new Set([19, 340]);
 const RECALL_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_VARIOUS", "B_SCR_OP_RETURNATKTOBALL", "B_SCR_OP_RETURNTOBALL"]);
 /** Order events that count as a presentation unit for the first-body gate (every body, faint, switch and recall). */
 const BODY_UNIT_EVENTS: ReadonlySet<string> = new Set([
@@ -331,6 +339,10 @@ function orderEventOf(
     || payload.kind === "hide-party-status-summary" || payload.kind === "switch-in-animation") {
     const battler = payload.battler;
     if (battler !== 0 && battler !== 1) return { event: { kind: "invalidate", reason: `${payload.kind} battler ${battler}` } };
+    // prep61: a hidden (semi-invulnerable) battler's faint / switch is unprobed.
+    if ((payload.kind === "faint-animation" || payload.kind === "switch-in-animation") && hidden[battler]) {
+      return { event: { kind: "invalidate", reason: `${payload.kind} of a hidden battler` } };
+    }
     switch (payload.kind) {
       case "faint-animation":
         return { event: { kind: "faint", side: battler === 0 ? "player" : "opponent" } };
@@ -373,8 +385,12 @@ function orderEventOf(
             ? { kind: "move-animation", moveId: FURY_CUTTER_ORDER_KEYS[Math.min(counter, 4) - 1]!, attackerSide: battler === 0 ? "player" : "opponent" }
             : { kind: "invalidate", reason: "Fury Cutter body without furyCutterCounter" } };
         }
-        return { event: { kind: "move-animation", moveId: presentHeal ? 20217 : secondBranch ? 10000 + request.moveId : request.moveId,
-          attackerSide: battler === 0 ? "player" : "opponent" } };
+        const event = { kind: "move-animation", moveId: presentHeal ? 20217 : secondBranch ? 10000 + request.moveId : request.moveId,
+          attackerSide: battler === 0 ? "player" : "opponent" } as const;
+        if (!SEMI_INVULNERABLE_SETUP_MOVE_IDS.has(request.moveId)) return { event };
+        const next: [boolean, boolean] = [hidden[0], hidden[1]];
+        next[battler] = (request.turn & 1) === 0;
+        return { event, hidden: Object.freeze(next) as readonly [boolean, boolean] };
       }
       case "HIT_ANIMATION":
         return { event: { kind: "hit-animation", targetVisible: !hidden[battler] } };
