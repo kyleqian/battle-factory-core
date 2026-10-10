@@ -58,7 +58,7 @@ export interface LiveSpriteOrderHost {
   readonly promptRequestId: number | null;
   /** Next unapplied semantic event of the presented resolution; `drained` once its last segment is applied. */
   readonly cursor: Readonly<{ requestId: number; segmentIndex: number; nextEventIndex: number; drained: boolean }> | null;
-  /** Battler sprites hidden by the semi-invulnerable `moveend`/`makevisible` toggles. */
+  /** Battler sprites hidden by the semi-invulnerable `moveend`/`makevisible` toggles, or from a Fly / Bounce setup body to its unleash body (prep61). */
   readonly hidden: readonly [boolean, boolean];
   /** Presentation units (animation bodies, faints, switches, party-menu resets) applied since the battle began (prep16 s0.3 first-body gate). */
   readonly bodies?: number;
