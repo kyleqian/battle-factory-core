@@ -1588,10 +1588,14 @@ export function liveMoveHiddenSides(
  * age-148 / 149 lag frames when the target is invisible and runs 1..2 frames ahead from age 150 (audit 17 counters:
  * fixtures/audit-17/receipts/sky-uppercut-lag-counters.txt, [166] or none vs the visible target's [148, 149]); no D4 phase policy
  * covers that profile, so the body declines (docs/hide66-hidden-battler.md).
+ * fix74: Light Screen 113 by the PLAYER while the opponent is hidden (any of Fly / Bounce / Dig / Dive: the hide, not the move, is the
+ * CPU-load input) is the same class: the ROM drops the age-68 / 69 lag frames and the sparkle runs 2 frames ahead from age 70 (audit 18
+ * lag receipts, 148 px over ages 69..81); the opponent's Light Screen with the player hidden keeps [68, 69] and stays live
+ * (docs/fix74-bulk-up-light-screen.md).
  */
 export function liveMoveHiddenTargetDeclines(request: BattleMoveAnimationRequest, hiddenSides: LiveMoveHiddenSides): boolean {
-  const targetHidden = request.attacker === 0 ? hiddenSides.opponent : hiddenSides.player;
-  return targetHidden && request.moveId === 327;
+  const otherHidden = request.attacker === 0 ? hiddenSides.opponent : hiddenSides.player;
+  return otherHidden && (request.moveId === 327 || (request.moveId === 113 && request.attacker === 0));
 }
 
 export function liveMoveAnimationPresentation(
