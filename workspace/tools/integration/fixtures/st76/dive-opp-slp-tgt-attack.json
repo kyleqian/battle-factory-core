@@ -1,0 +1,250 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "DIVE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/st76/scenarios/dive-opp-slp-tgt.json",
+ "denseWindow": {
+  "startFrame": 3078,
+  "endFrame": 3170
+ },
+ "windowSource": "st76: the scenario's DIVE body (prep22Probe.py, two fresh direct-mGBA runs, identical bodies)",
+ "attacker": {
+  "species": "CHINCHOU",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703950,
+ "displayedStatus": {
+  "player": "sleep",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 254,
+  "playerMaxHp": 254,
+  "opponentHp": 138,
+  "opponentMaxHp": 138,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 1
+ },
+ "wordsChain": {
+  "turns": [
+   [
+    [
+     "body",
+     291,
+     "opponent",
+     {
+      "player": 143,
+      "opponent": 170
+     },
+     0
+    ]
+   ],
+   [
+    [
+     "body",
+     291,
+     "opponent",
+     {
+      "player": 143,
+      "opponent": 170
+     },
+     1
+    ],
+    [
+     "hit",
+     "player"
+    ],
+    [
+     "general",
+     "HELD_ITEM_EFFECT",
+     "player"
+    ]
+   ],
+   [
+    [
+     "body",
+     156,
+     "player"
+    ],
+    [
+     "body",
+     291,
+     "opponent",
+     {
+      "player": 143,
+      "opponent": 170
+     },
+     0
+    ]
+   ],
+   [
+    [
+     "status",
+     "player",
+     2
+    ],
+    [
+     "body",
+     291,
+     "opponent",
+     {
+      "player": 143,
+      "opponent": 170
+     },
+     1
+    ]
+   ]
+  ],
+  "words": [
+   {
+    "value": 2964439559,
+    "source": "PINNED: prep22Probe.py atActivation.rng2 of the earlier Dive body (activation frame 203)"
+   },
+   {
+    "value": 2604322711,
+    "source": "PINNED: prep22Probe.py atActivation.rng2 of the earlier Dive body (activation frame 1165)"
+   },
+   {
+    "value": 3689323171,
+    "source": "PINNED: prep22Probe.py atActivation.rng2 of the earlier Dive body (activation frame 2296)"
+   }
+  ]
+ },
+ "presentationRngActivation": {
+  "value": 685284534,
+  "source": "PINNED: prep22Probe.py atActivation.rng2 of this Dive body (activation frame 3078)"
+ },
+ "st76": {
+  "status1": [
+   2,
+   0
+  ],
+  "bodies": [
+   [
+    291,
+    203,
+    317,
+    1
+   ],
+   [
+    291,
+    1165,
+    1257,
+    1
+   ],
+   [
+    0,
+    1343,
+    1554,
+    0
+   ],
+   [
+    156,
+    2057,
+    2166,
+    0
+   ],
+   [
+    291,
+    2296,
+    2410,
+    1
+   ],
+   [
+    0,
+    2931,
+    3027,
+    0
+   ],
+   [
+    291,
+    3078,
+    3170,
+    1
+   ],
+   [
+    0,
+    3256,
+    3467,
+    0
+   ]
+  ],
+  "romSpriteOrderAtActivation": [
+   62,
+   60,
+   0,
+   63,
+   1,
+   61,
+   6,
+   8,
+   2,
+   4,
+   3,
+   5,
+   9,
+   11,
+   15,
+   10,
+   7,
+   14,
+   13,
+   12,
+   26,
+   27,
+   25,
+   16,
+   23,
+   24,
+   19,
+   20,
+   21,
+   17,
+   18,
+   22,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47
+  ]
+ }
+}

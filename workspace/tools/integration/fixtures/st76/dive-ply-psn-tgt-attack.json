@@ -1,0 +1,233 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "DIVE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/st76/scenarios/dive-ply-psn-tgt.json",
+ "denseWindow": {
+  "startFrame": 1965,
+  "endFrame": 2057
+ },
+ "windowSource": "st76: the scenario's DIVE body (prep22Probe.py, two fresh direct-mGBA runs, identical bodies)",
+ "attacker": {
+  "species": "LANTURN",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015300,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "poison"
+ },
+ "fieldProfile": {
+  "playerHp": 162,
+  "playerMaxHp": 188,
+  "opponentHp": 154,
+  "opponentMaxHp": 174,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 1
+ },
+ "wordsChain": {
+  "turns": [
+   [
+    [
+     "body",
+     92,
+     "player"
+    ],
+    [
+     "status",
+     "opponent",
+     128
+    ],
+    [
+     "body",
+     33,
+     "opponent"
+    ],
+    [
+     "hit",
+     "player"
+    ],
+    [
+     "status",
+     "opponent",
+     384
+    ]
+   ],
+   [
+    [
+     "body",
+     291,
+     "player",
+     {
+      "player": 171,
+      "opponent": 76
+     },
+     0
+    ],
+    [
+     "general",
+     "HELD_ITEM_EFFECT",
+     "opponent"
+    ],
+    [
+     "status",
+     "opponent",
+     640
+    ],
+    [
+     "body",
+     291,
+     "player",
+     {
+      "player": 171,
+      "opponent": 76
+     },
+     1
+    ]
+   ]
+  ],
+  "words": [
+   {
+    "value": 1362005702,
+    "source": "PINNED: prep22Probe.py atActivation.rng2 of the earlier Dive body (activation frame 999)"
+   }
+  ]
+ },
+ "presentationRngActivation": {
+  "value": 4207437278,
+  "source": "PINNED: prep22Probe.py atActivation.rng2 of this Dive body (activation frame 1965)"
+ },
+ "st76": {
+  "status1": [
+   0,
+   640
+  ],
+  "bodies": [
+   [
+    92,
+    73,
+    303,
+    0
+   ],
+   [
+    0,
+    308,
+    378,
+    0
+   ],
+   [
+    33,
+    522,
+    563,
+    1
+   ],
+   [
+    0,
+    739,
+    809,
+    1
+   ],
+   [
+    291,
+    999,
+    1116,
+    0
+   ],
+   [
+    0,
+    1382,
+    1593,
+    1
+   ],
+   [
+    0,
+    1818,
+    1888,
+    1
+   ],
+   [
+    291,
+    1965,
+    2057,
+    0
+   ]
+  ],
+  "romSpriteOrderAtActivation": [
+   62,
+   60,
+   0,
+   63,
+   1,
+   61,
+   6,
+   8,
+   2,
+   4,
+   3,
+   10,
+   15,
+   12,
+   5,
+   9,
+   14,
+   7,
+   13,
+   11,
+   21,
+   20,
+   19,
+   18,
+   17,
+   16,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   23,
+   22,
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47
+  ]
+ }
+}

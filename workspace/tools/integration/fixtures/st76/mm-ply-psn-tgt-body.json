@@ -1,0 +1,91 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "METEOR_MASH",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/st76/scenarios/mm-ply-psn-tgt.json",
+ "denseWindow": {
+  "startFrame": 1026,
+  "endFrame": 1240
+ },
+ "windowSource": "st76: the scenario's METEOR_MASH body (prep22Probe.py, two fresh direct-mGBA runs, identical bodies)",
+ "attacker": {
+  "species": "METAGROSS",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015250,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "poison"
+ },
+ "fieldProfile": {
+  "playerHp": 149,
+  "playerMaxHp": 155,
+  "opponentHp": 146,
+  "opponentMaxHp": 155,
+  "playerGender": "none",
+  "opponentGender": "male"
+ },
+ "timingPhase": "no-event",
+ "presentationRngActivation": {
+  "value": 1282191288,
+  "source": "PINNED: prep22Probe.py atActivation.rng2 of the Meteor Mash body (activation frame 1026)"
+ },
+ "st76": {
+  "status1": [
+   0,
+   384
+  ],
+  "bodies": [
+   [
+    92,
+    75,
+    305,
+    0
+   ],
+   [
+    0,
+    310,
+    380,
+    0
+   ],
+   [
+    33,
+    524,
+    565,
+    1
+   ],
+   [
+    0,
+    809,
+    879,
+    1
+   ],
+   [
+    309,
+    1026,
+    1240,
+    0
+   ],
+   [
+    33,
+    1542,
+    1583,
+    1
+   ],
+   [
+    0,
+    1827,
+    1897,
+    1
+   ]
+  ]
+ }
+}

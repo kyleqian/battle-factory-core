@@ -307,7 +307,13 @@ export function fixtureWordsChain(f: Fixture): { spriteOrderInput: LiveMoveSprit
       }
       if (step[0] === "hide") return ev(seq, "hide-party-status-summary", { battler: 1 });
       if (step[0] === "sendout") return ev(seq, "switch-in-animation", { battler: 1, partyIndex: Number(step[1] ?? 1) });
-      if (step[0] === "general") return ev(seq, "animation", { animationId: String(step[1]), battler: 0, target: 0, arguments: [] });
+      // st76: an optional 3rd element is the general animation's battler side (HELD_ITEM_EFFECT on the holder; default 0)
+      if (step[0] === "general") {
+        const b = step[2] === undefined ? 0 : who(step[2]);
+        return ev(seq, "animation", { animationId: String(step[1]), battler: b, target: b, arguments: [] });
+      }
+      // st76: a status1 animation (InitAndLaunchChosenStatusAnimation): ["status", side, status1 bits]
+      if (step[0] === "status") return ev(seq, "status-animation", { battler: who(step[1]), isStatus2: 0, status: Number(step[2]) });
       throw new Error(`wordsChain step ${JSON.stringify(step)}`);
     });
     const resolution = { resolutionId: { requestId }, segmentIndex: 0, segments: [{ events }] };
@@ -327,7 +333,12 @@ export function fixtureWordsChain(f: Fixture): { spriteOrderInput: LiveMoveSprit
       const bodyKey = liveMovePresentationRngBodyKey({ resolutionId: { requestId }, segmentIndex: 0, commandIndex });
       if (t === lastTurn && commandIndex === lastBody) {
         lend = bodyLend; key = bodyKey;
-        if (liveMoveRandom2Plan(req) !== null) bodies.push(...activateLiveMovePresentationRng(pinned(f.presentationRngActivation!.value), req, bodyKey).bodies);
+        // st76: a Dive SETUP fixture body records its words with the production plan context (liveDiveSetupSplashBirth), as below
+        const lastSpecies = step[3] as { player: number; opponent: number } | undefined;
+        const lastContext = req.moveId === 291 && (req.turn & 1) === 0 && lastSpecies !== undefined
+          ? { diveSetupSplashBirth: liveDiveSetupSplashBirth({ player: { species: lastSpecies.player }, opponent: { species: lastSpecies.opponent } } as unknown as BattleResolutionDisplayedField,
+            req.attacker === 0 ? "player" : "opponent") } : undefined;
+        if (liveMoveRandom2Plan(req) !== null) bodies.push(...activateLiveMovePresentationRng(pinned(f.presentationRngActivation!.value), req, bodyKey, lastContext).bodies);
         return;
       }
       // words59: a body step may carry the species displayed at the body (["body", move, side, { player, opponent }]), recorded in the

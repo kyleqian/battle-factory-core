@@ -1,0 +1,73 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "METEOR_MASH",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/st76/scenarios/mm-opp-brn-atk.json",
+ "denseWindow": {
+  "startFrame": 475,
+  "endFrame": 689
+ },
+ "windowSource": "st76: the scenario's METEOR_MASH body (prep22Probe.py, two fresh direct-mGBA runs, identical bodies)",
+ "attacker": {
+  "species": "METANG",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703925,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "burn"
+ },
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 135,
+  "opponentMaxHp": 135,
+  "playerGender": "male",
+  "opponentGender": "none"
+ },
+ "timingPhase": "no-event",
+ "presentationRngActivation": {
+  "value": 4195132020,
+  "source": "PINNED: prep22Probe.py atActivation.rng2 of the Meteor Mash body (activation frame 475)"
+ },
+ "st76": {
+  "status1": [
+   0,
+   16
+  ],
+  "bodies": [
+   [
+    261,
+    74,
+    287,
+    0
+   ],
+   [
+    0,
+    292,
+    330,
+    0
+   ],
+   [
+    309,
+    475,
+    689,
+    1
+   ],
+   [
+    0,
+    966,
+    1004,
+    1
+   ]
+  ]
+ }
+}

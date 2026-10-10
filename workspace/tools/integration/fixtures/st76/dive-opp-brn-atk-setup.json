@@ -1,0 +1,172 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "DIVE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/st76/scenarios/dive-opp-brn-atk.json",
+ "denseWindow": {
+  "startFrame": 449,
+  "endFrame": 563
+ },
+ "windowSource": "st76: the scenario's DIVE body (prep22Probe.py, two fresh direct-mGBA runs, identical bodies)",
+ "attacker": {
+  "species": "CHINCHOU",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703950,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "burn"
+ },
+ "fieldProfile": {
+  "playerHp": 129,
+  "playerMaxHp": 129,
+  "opponentHp": 138,
+  "opponentMaxHp": 138,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "messageLines": [
+  "",
+  ""
+ ],
+ "wordsChain": {
+  "turns": [
+   [
+    [
+     "body",
+     261,
+     "player"
+    ],
+    [
+     "status",
+     "opponent",
+     16
+    ],
+    [
+     "body",
+     291,
+     "opponent",
+     {
+      "player": 95,
+      "opponent": 170
+     },
+     0
+    ]
+   ]
+  ],
+  "words": []
+ },
+ "presentationRngActivation": {
+  "value": 2234214776,
+  "source": "PINNED: prep22Probe.py atActivation.rng2 of this Dive body (activation frame 449)"
+ },
+ "st76": {
+  "status1": [
+   0,
+   16
+  ],
+  "bodies": [
+   [
+    261,
+    74,
+    287,
+    0
+   ],
+   [
+    0,
+    292,
+    330,
+    0
+   ],
+   [
+    291,
+    449,
+    563,
+    1
+   ],
+   [
+    291,
+    1180,
+    1272,
+    1
+   ]
+  ],
+  "romSpriteOrderAtActivation": [
+   62,
+   60,
+   0,
+   63,
+   1,
+   61,
+   6,
+   8,
+   2,
+   5,
+   4,
+   3,
+   7,
+   9,
+   10,
+   21,
+   20,
+   19,
+   18,
+   17,
+   16,
+   15,
+   14,
+   13,
+   12,
+   11,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   23,
+   22,
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47
+  ]
+ }
+}

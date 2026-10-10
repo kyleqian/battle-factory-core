@@ -1,0 +1,284 @@
+{
+ "battleNum": 0,
+ "challengeNum": 0,
+ "level": 50,
+ "mode": "mechanicLab",
+ "opponentSetIds": [
+  135,
+  188,
+  184
+ ],
+ "overrides": {
+  "parties": {
+   "opponent": [
+    {
+     "abilitySlot": 0,
+     "evs": {
+      "attack": 0,
+      "defense": 0,
+      "hp": 255,
+      "spAttack": 0,
+      "spDefense": 0,
+      "speed": 252
+     },
+     "friendship": 70,
+     "gender": "male",
+     "item": 200,
+     "ivs": {
+      "attack": 6,
+      "defense": 6,
+      "hp": 6,
+      "spAttack": 6,
+      "spDefense": 6,
+      "speed": 31
+     },
+     "level": 50,
+     "moves": [
+      92,
+      92,
+      92,
+      92
+     ],
+     "nature": 23,
+     "ppUps": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "shiny": false,
+     "species": 95
+    },
+    {
+     "abilitySlot": 0,
+     "evs": {
+      "attack": 0,
+      "defense": 0,
+      "hp": 255,
+      "spAttack": 0,
+      "spDefense": 255,
+      "speed": 0
+     },
+     "friendship": 70,
+     "gender": "female",
+     "item": 185,
+     "ivs": {
+      "attack": 6,
+      "defense": 6,
+      "hp": 6,
+      "spAttack": 6,
+      "spDefense": 6,
+      "speed": 6
+     },
+     "level": 50,
+     "moves": [
+      33,
+      33,
+      33,
+      33
+     ],
+     "nature": 6,
+     "ppUps": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "shiny": false,
+     "species": 292
+    },
+    {
+     "abilitySlot": 0,
+     "evs": {
+      "attack": 0,
+      "defense": 170,
+      "hp": 170,
+      "spAttack": 0,
+      "spDefense": 170,
+      "speed": 0
+     },
+     "friendship": 70,
+     "gender": "male",
+     "item": 196,
+     "ivs": {
+      "attack": 6,
+      "defense": 6,
+      "hp": 6,
+      "spAttack": 6,
+      "spDefense": 6,
+      "speed": 6
+     },
+     "level": 50,
+     "moves": [
+      33,
+      33,
+      33,
+      33
+     ],
+     "nature": 23,
+     "ppUps": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "shiny": false,
+     "species": 202
+    }
+   ],
+   "player": [
+    {
+     "abilitySlot": 0,
+     "evs": {
+      "attack": 255,
+      "defense": 0,
+      "hp": 0,
+      "spAttack": 255,
+      "spDefense": 0,
+      "speed": 0
+     },
+     "friendship": 70,
+     "gender": "female",
+     "item": 221,
+     "ivs": {
+      "attack": 6,
+      "defense": 6,
+      "hp": 6,
+      "spAttack": 6,
+      "spDefense": 6,
+      "speed": 6
+     },
+     "level": 50,
+     "moves": [
+      291,
+      291,
+      291,
+      291
+     ],
+     "nature": 0,
+     "ppUps": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "shiny": false,
+     "species": 170
+    },
+    {
+     "abilitySlot": 0,
+     "evs": {
+      "attack": 0,
+      "defense": 0,
+      "hp": 255,
+      "spAttack": 0,
+      "spDefense": 255,
+      "speed": 0
+     },
+     "friendship": 70,
+     "gender": "male",
+     "item": 187,
+     "ivs": {
+      "attack": 6,
+      "defense": 6,
+      "hp": 6,
+      "spAttack": 6,
+      "spDefense": 6,
+      "speed": 6
+     },
+     "level": 50,
+     "moves": [
+      33,
+      33,
+      33,
+      33
+     ],
+     "nature": 3,
+     "ppUps": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "shiny": false,
+     "species": 305
+    },
+    {
+     "abilitySlot": 0,
+     "evs": {
+      "attack": 0,
+      "defense": 0,
+      "hp": 255,
+      "spAttack": 0,
+      "spDefense": 255,
+      "speed": 0
+     },
+     "friendship": 70,
+     "gender": "male",
+     "item": 199,
+     "ivs": {
+      "attack": 6,
+      "defense": 6,
+      "hp": 6,
+      "spAttack": 6,
+      "spDefense": 6,
+      "speed": 6
+     },
+     "level": 50,
+     "moves": [
+      33,
+      33,
+      33,
+      33
+     ],
+     "nature": 22,
+     "ppUps": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "shiny": false,
+     "species": 383
+    }
+   ]
+  }
+ },
+ "playerSetIds": [
+  116,
+  156,
+  180
+ ],
+ "profile": "battle-scene-on",
+ "schemaVersion": 1,
+ "seed": 305420549,
+ "trace": {
+  "segments": [
+   {
+    "buttons": [
+     "A"
+    ],
+    "frames": 2
+   },
+   {
+    "buttons": [],
+    "frames": 30
+   },
+   {
+    "buttons": [
+     "A"
+    ],
+    "frames": 2
+   },
+   {
+    "buttons": [],
+    "frames": 900
+   },
+   {
+    "buttons": [],
+    "frames": 1500
+   }
+  ]
+ },
+ "trainerId": 50
+}
