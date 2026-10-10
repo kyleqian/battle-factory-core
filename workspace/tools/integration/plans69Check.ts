@@ -27,10 +27,13 @@ export const PLANS69_PLANS: Readonly<Record<string, string>> = Object.freeze({
   // Move_MAGNITUDE: AnimTask_IsPowerOver99 -> MagnitudeRegular (tasks only) / MagnitudeIntense (two complex_palette_blend controllers)
   "body 222 power<=99": "",
   "body 222 power>99": "Cf;D0;Cf;D1",
+  // B_ANIM_STATS_CHANGE +1 (STAT_ANIM_PLUS1 + STAT_SPEED = 17, Speed Boost; also with the Ninjask underground): the production table's
+  // existing STATS_CHANGE_CLASS_1 plan -- checked, not a new row (the kernel's Speed Boost tick emits argument 0: temp-patch-speed-boost.diff)
+  "general STATS_CHANGE (Speed Boost)": "Cf;D0",
 });
 
 function planLabel(unit: Unit): string | null {
-  if (unit.label === "general CASTFORM_CHANGE") return unit.label;
+  if (unit.label === "general CASTFORM_CHANGE" || unit.label === "general STATS_CHANGE (Speed Boost)") return unit.label;
   const m = /^body (\d+):(\w+)( power(?:>99|<=99))?$/.exec(unit.label);
   if (!m) return null;
   if (m[1] === "176" || m[1] === "302") return `body ${m[1]}`;
@@ -38,7 +41,7 @@ function planLabel(unit: Unit): string | null {
   return null;
 }
 /** Labels whose instances are classified (distinct observed plans), not checked against a proposal. */
-const CLASSIFIED = /^body (260|310|316):/;
+const CLASSIFIED = /^body (63|260|310|316):/;
 
 const same = (l: readonly number[], r: readonly number[]) => l.length === r.length && l.every((v, i) => v === r[i]);
 
@@ -113,8 +116,8 @@ for (const [name, job] of Object.entries(input.jobs)) {
     const next = job.units.slice(index + 1).find(u => u.windows.length > 0);
     const strict = checkUnit(unit, next, PLANS69_PLANS[label]!, false);
     const merged = strict.problems.length === 0 ? strict : checkUnit(unit, next, PLANS69_PLANS[label]!, true);
-    // side: the move body's attacker side; CASTFORM_CHANGE: the Castform's side (the job id's ply / opp)
-    const side = unit.label.startsWith("body ") ? unit.label.split(":")[1]!.split(" ")[0]! : name.split("-")[1] === "ply" ? "player" : "opponent";
+    // side: the move body's attacker side; a general animation: the job id's ply / opp (Castform's / Ninjask's side)
+    const side = unit.label.startsWith("body ") ? unit.label.split(":")[1]!.split(" ")[0]! : /-ply-/.test(name) ? "player" : "opponent";
     const species = name.replace(/^[a-z0-9-]*?-(ply|opp)-/, "$1-");
     entry.instances += 1;
     entry.framesChecked += strict.frames;

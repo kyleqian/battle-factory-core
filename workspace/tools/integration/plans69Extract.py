@@ -6,7 +6,8 @@ prep43Extract's unit split and plan encoding driven by plans69Probe.JOBS (run A 
 Move bodies are `body <mv>:<attacker side>`. In the CASTFORM_CHANGE jobs the first mv-0 unit after the weather move's body is labelled
 `general CASTFORM_CHANGE` (BattleScript_CastformChange follows the weather message; the end-turn *_CONTINUES units come later), every
 other mv-0 unit `general mv-0`. Magnitude bodies carry the ROM gAnimMovePower (plans69PowerProbe.py) and are labelled
-`body 222:<side> power>99` / `power<=99` (Move_MAGNITUDE's AnimTask_IsPowerOver99 branch). Prints, per label, the distinct observed plans and their instance counts.
+`body 222:<side> power>99` / `power<=99` (Move_MAGNITUDE's AnimTask_IsPowerOver99 branch). The SPEED_BOOST jobs' mv-0 units are
+`general STATS_CHANGE (Speed Boost)`. Prints, per label, the distinct observed plans and their instance counts.
 """
 import hashlib, json, sys
 from collections import defaultdict
@@ -40,6 +41,10 @@ if __name__ == "__main__":
                 elif u["label"] == "mv-0":
                     u["label"] = "general CASTFORM_CHANGE" if seen_weather else "general mv-0"
                     seen_weather = False
+        if unit == "SPEED_BOOST":  # the only general animation of these jobs: BattleScript_SpeedBoostActivates' B_ANIM_STATS_CHANGE
+            for u in entry["units"]:
+                if u["kind"] == "body" and u["label"] == "mv-0":
+                    u["label"] = "general STATS_CHANGE (Speed Boost)"
         if unit == "MAGNITUDE":  # gAnimMovePower per body start (plans69PowerProbe.py; A == B required), joined on the frame counter
             pa, pb = OUT / "power" / f"{job}-A.json", OUT / "power" / f"{job}-B.json"
             power = {b["n"]: b["power"] for b in json.loads(pa.read_text())["bodies"]} if pa.exists() else {}

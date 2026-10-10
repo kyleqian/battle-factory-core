@@ -67,6 +67,35 @@ for side, other, tag in SIDES:
                      (("seed", seed), ("turns", 2))))
 
 
+# ---- batch 2 (negatives; no plan derived from them) ----
+# Hyper Beam 63 (AnimHyperBeamOrb: Random2 speed -> lifetime, attacker -> target distance): 2 (attacker, defender) pairs per side, plus a
+# lab-seed sweep at the scenario's own pair
+for side, other, tag in SIDES:
+    for a, d in ((142, 95), (143, 42)):
+        JOBS.append(("HYPER_BEAM", f"hyper-beam-{tag}-{a}-{d}", 63, base("hyper-beam", side, "aerodactyl"),
+                     (("species", side, a), ("species", other, d), ("moves", side, 63))))
+    for seed in (1, 2, 3):
+        JOBS.append(("HYPER_BEAM", f"hyper-beam-{tag}-142-95-s{seed}", 63, base("hyper-beam", side, "aerodactyl"), (("seed", seed),)))
+# Random2 vs geometry: lab-seed sweeps at a FIXED (attacker, defender) pair (Astonish droplets / Flatter confetti draw Random2; Odor Sleuth's
+# clones do not), and an Odor Sleuth target sweep (player attacker Cacturne 345)
+SWEEPS = [("ASTONISH", 310, "astonish", "loudred", (371, 95), (1, 2, 3, 4, 5)), ("FLATTER", 260, "flatter", "nidorina", (30, 95), (1, 2, 3)),
+          ("ODOR_SLEUTH", 316, "mega-punch", "cacturne", (345, 95), (1, 2, 3))]
+for unit, move, slug, atk, (a, d), seeds in SWEEPS:
+    for side, other, tag in SIDES:
+        for seed in seeds:
+            JOBS.append((unit, f"{unit.lower().replace('_', '-')}-{tag}-{a}-{d}-s{seed}", move, base(slug, side, atk),
+                         (("species", side, a), ("species", other, d), ("moves", side, move), ("seed", seed))))
+for d in (169, 202, 213, 80, 149, 131):
+    JOBS.append(("ODOR_SLEUTH", f"odor-sleuth-ply-345-{d}", 316, base("mega-punch", "player", "cacturne"),
+                 (("species", "player", 345), ("species", "opponent", d), ("moves", "player", 316))))
+# Speed Boost (BattleScript_SpeedBoostActivates: playanimation B_ANIM_STATS_CHANGE sB_ANIM_ARG1 = STAT_ANIM_PLUS1 + STAT_SPEED,
+# battle_util.c:2646): Ninjask 302 (ability slot 0) leading with Dig 91 (underground at the end of turn 1) or Mega Punch 5, both sides
+for side, other, tag in SIDES:
+    for move in (91, 5):
+        JOBS.append(("SPEED_BOOST", f"speed-boost-{tag}-302-{move}", move, base("mega-punch", side, "cacturne"),
+                     (("species", side, 302), ("moves", side, move), ("turns", 1))))
+
+
 def scenario(out: Path, job) -> Path:
     _, ident, _, base_name, ops = job
     data = json.loads((LAB / f"{base_name}.json").read_text())
