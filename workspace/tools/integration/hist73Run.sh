@@ -59,6 +59,8 @@ if [ -z "$SKIP_CENSUS" ]; then
     python3 $T/prep43CensusDelta.py "$REC/census-before-seeds0-999.json" "$OUT/census-before.jsonl" \
       "$REC/census$P-after-seeds0-999.json" "$OUT/census$P-after.jsonl" "$REC/census$P-delta-seeds0-999.json" | sed -n 2p
   done
+  python3 $T/hist73PartBCases.py "$REC/chains-census-before-seeds0-999.json" "$OUT/census-before.jsonl" "$OUT/censusB-after.jsonl" \
+    "$REC/partB-cases.json" > /dev/null
   shards "$OUT/copyA" hist73AllocatorCensus.ts "$OUT/chains-after"
   python3 $T/hist73Merge.py "$OUT/chains-after" "$REC/chains-census-after-seeds0-999.json" "$OUT/chains-after.jsonl"
   python3 $T/hist73Chains.py "$OUT/chains-after.jsonl" "$REC/chains-after-seeds0-999.json" > /dev/null
