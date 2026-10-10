@@ -213,3 +213,34 @@ describe("Hail 258 + HAIL_CONTINUES geometry-keyed from hail.ts's timeline (plan
     expect(run([body], true).cursor.order.known).toBe(true);
   });
 });
+
+describe("Blizzard 59 geometry-keyed from blizzard.ts's allocator replay (plans54)", () => {
+  const predictions = (fixture("plans54/blizzard-predictions.json") as { predictions: Record<string, string> }).predictions;
+  it("every ROM body is per-frame exact under the production seam text, which is the plan predicted before the probes", () => {
+    const all = bodies(units54, 59);
+    expect(all.filter(instance => instance.side === "player")).toHaveLength(7);
+    expect(all.filter(instance => instance.side === "opponent")).toHaveLength(4);
+    const cells = new Set<string>();
+    for (const { job, side, ops, unit } of all) {
+      const player = speciesOf(ops, "player"), opponent = speciesOf(ops, "opponent");
+      const text = liveMoveGeometrySpriteOrderPlanText(59, side, { playerSpecies: player, opponentSpecies: opponent });
+      const [attacker, target] = side === "player" ? [player, opponent] : [opponent, player];
+      expect(text, job).toBe(predictions[`${side}-${attacker}-${target}`]);
+      expect(perFrameExact(unit, decodeSpriteOrderPlan(text!)), `${job} @${unit.frame}`).toBe(true);
+      cells.add(`${side}-${attacker}-${target}`);
+    }
+    expect(cells.size).toBe(8);
+    // the geometry is load-bearing: the opponent side's four probed pairs give four plans
+    expect(new Set([...cells].filter(cell => cell.startsWith("opponent")).map(cell => predictions[cell])).size).toBe(4);
+  });
+
+  it("the base table's 59:player row (its one probed geometry, PELIPPER -> ONIX) is the geometry plan there; no plan text invalidates", () => {
+    const pelipper = liveMoveGeometrySpriteOrderPlanText(59, "player", { playerSpecies: 310, opponentSpecies: 95 })!;
+    expect(decodeSpriteOrderPlan(pelipper)).toEqual(spriteOrderProductionBodyPlan(59, "player"));
+    expect(SPRITE_ORDER_GEOMETRY_KEYED_BODIES.has(59)).toBe(true);
+    const known = createSpriteOrderTracker(knownEntrySpriteOrderState("ordinary-factory"));
+    expect(applySpriteOrderPresentationEvent(known, { kind: "move-animation", moveId: 59, attackerSide: "opponent" }).cursor.order.known).toBe(false);
+    expect(applySpriteOrderPresentationEvent(known, { kind: "move-animation", moveId: 59, attackerSide: "opponent",
+      geometryPlan: liveMoveGeometrySpriteOrderPlanText(59, "opponent", { playerSpecies: 95, opponentSpecies: 310 })! }).cursor.order.known).toBe(true);
+  });
+});

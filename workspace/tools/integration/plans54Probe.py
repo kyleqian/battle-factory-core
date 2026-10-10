@@ -43,6 +43,15 @@ JOBS += [("BODY258", f"ha-ply-{p}-{o}", 258, HA_P, (SEED, ("species", "player", 
           ("turns", 2))) for p, o in HA_PAIRS]
 JOBS += [("BODY258", f"ha-opp-{p}-{o}", 258, HA_O, (SEED, ("species", "player", p), ("species", "opponent", o), ("moves", "opponent", 258),
           ("turns", 2))) for p, o in HA_PAIRS]
+# Blizzard 59: geometry-keyed (attacker / target picOffsetPoint); (attacker, target) pairs = plans54BlizzardPredict.ts PLANS54_BLIZZARD_PAIRS
+# (predictions committed before these probes ran); Ice-resisting / bulky targets (a KO'd player lead's party menu truncates the probe);
+# one more turn (Blizzard's 70 % accuracy).
+BZ_P, BZ_O = "mechanic-blizzard-player-pelipper-opponent-onix", "mechanic-blizzard-opponent-pelipper-player-onix"
+BZ_PAIRS = [(310, 208), (87, 91), (131, 143), (215, 131)]  # JYNX 124 / ARTICUNO 144 leads: rejected by the lab (gender)
+JOBS += [("BODY59", f"bz-ply-{a}-{t}", 59, BZ_P, (SEED, ("species", "player", a), ("species", "opponent", t), ("moves", "player", 59),
+          ("turns", 1))) for a, t in BZ_PAIRS]
+JOBS += [("BODY59", f"bz-opp-{a}-{t}", 59, BZ_O, (SEED, ("species", "opponent", a), ("species", "player", t), ("moves", "opponent", 59),
+          ("turns", 1))) for a, t in BZ_PAIRS]
 
 if __name__ == "__main__":
     argv = sys.argv[1:]

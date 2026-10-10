@@ -46,6 +46,7 @@ import { dreamEaterSpriteOrderPlanText } from "../animation/dreamEater.ts";
 import { gigaDrainSpriteOrderPlanText } from "../animation/gigaDrain.ts";
 import { eruptionSpriteOrderPlanText } from "../animation/eruptionSpriteOrderPlan.ts";
 import { hailSpriteOrderPlanText } from "../animation/hailSpriteOrderPlan.ts";
+import { blizzardSpriteOrderPlanText } from "../animation/blizzardSpriteOrderPlan.ts";
 import { megaDrainSpriteOrderPlanText } from "../animation/megaDrain.ts";
 import { faintAttackRestoreProfile } from "../animation/faintAttack.ts";
 import { RAZOR_LEAF_BODY_LAST_AGE } from "../animation/razorLeaf.ts";
@@ -675,7 +676,8 @@ export function liveMoveAbsorptionOrbCenters(
  * S10A gdgeo: the sprite-order plan text (spriteOrderEventTransform.ts encoding) of a geometry-keyed body at the displayed species:
  * Giga Drain (202) / Mega Drain (72) / Dream Eater (138, plans48), from the renderers' own timelines (gigaDrain.ts / megaDrain.ts /
  * dreamEater.ts through absorptionOrbSpriteOrderPlan.ts); Eruption (284, plans54) at its ROM-proven attacker species only
- * (eruptionSpriteOrderPlan.ts); Hail (258, plans54; also HAIL_CONTINUES) from hail.ts's timeline (hailSpriteOrderPlan.ts). Null for any other move or a species without a battle picture / proof.
+ * (eruptionSpriteOrderPlan.ts); Hail (258, plans54; also HAIL_CONTINUES) from hail.ts's timeline (hailSpriteOrderPlan.ts); Blizzard (59,
+ * plans54) from blizzard.ts's allocator replay (blizzardSpriteOrderPlan.ts). Null for any other move or a species without a battle picture / proof.
  */
 export function liveMoveGeometrySpriteOrderPlanText(
   moveId: number, attackerSide: "player" | "opponent", species: LiveMoveBodySpecies,
@@ -686,10 +688,30 @@ export function liveMoveGeometrySpriteOrderPlanText(
   }
   // plans54: Move_HAIL (and General_Hail = HAIL_CONTINUES, which the host requests under 258) targets both battlers, never the attacker.
   if (moveId === 258) return liveHailSpriteOrderPlanText(species);
+  // plans54: Blizzard's snowballs / crystals travel from the attacker's to the target's picture: blizzard.ts's allocator replay there.
+  if (moveId === 59) return liveBlizzardSpriteOrderPlanText(attackerSide, species);
   const planText = moveId === 202 ? gigaDrainSpriteOrderPlanText : moveId === 72 ? megaDrainSpriteOrderPlanText
     : moveId === 138 ? dreamEaterSpriteOrderPlanText : null;
   const centers = planText === null ? null : liveMoveAbsorptionOrbCenters(attackerSide, species);
   return centers === null ? null : planText!(centers.target, centers.attacker, attackerSide, centers.attacker);
+}
+
+const blizzardSpriteOrderPlans = new Map<string, string | null>();
+/** plans54: Move_BLIZZARD's sprite-order plan (blizzardSpriteOrderPlan.ts) at the case-59 geometry of the displayed species (attacker /
+ * target picOffsetPoint, as liveBlizzardDuration); null for a species without a battle picture or an exhausted replay pool. */
+function liveBlizzardSpriteOrderPlanText(attackerSide: "player" | "opponent", species: LiveMoveBodySpecies): string | null {
+  const key = `${attackerSide}/${species.playerSpecies}/${species.opponentSpecies}`;
+  if (blizzardSpriteOrderPlans.has(key)) return blizzardSpriteOrderPlans.get(key)!;
+  let plan: string | null = null;
+  try {
+    const art = createBattleCommandFieldArtView({ player: { species: species.playerSpecies }, opponent: { species: species.opponentSpecies } } as never);
+    plan = blizzardSpriteOrderPlanText(attackerSide, { attackerCenter: liveBattlerAnchors(attackerSide, art).picOffsetPoint,
+      targetCenter: liveBattlerAnchors(attackerSide === "player" ? "opponent" : "player", art).picOffsetPoint });
+  } catch {
+    plan = null;
+  }
+  blizzardSpriteOrderPlans.set(key, plan);
+  return plan;
 }
 
 const hailSpriteOrderPlans = new Map<string, string | null>();

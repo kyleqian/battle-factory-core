@@ -10,6 +10,8 @@
 //   Hail 258 and HAIL_CONTINUES (the first mv-0 body of each end turn in a hail job; a second one in the same end turn is Leftovers'
 //     HELD_ITEM_EFFECT): the PRODUCTION seam text liveMoveGeometrySpriteOrderPlanText(258, side, species), and separately the plan
 //     PREDICTED before the probes (fixtures/plans54/hail-predictions.json) -> `predictedExact`.
+//   Blizzard 59: the PRODUCTION seam text liveMoveGeometrySpriteOrderPlanText(59, side, species) and the PREDICTED plan
+//     (fixtures/plans54/blizzard-predictions.json).
 // usage: node --experimental-strip-types tools/integration/plans54Check.ts <out.json> <units.json>...
 import { readFileSync, writeFileSync } from "node:fs";
 import { decodeSpriteOrderPlan } from "../../src/engine/spriteOrderEventTransform.ts";
@@ -77,6 +79,8 @@ function speciesOf(job: Job): { player?: number; opponent?: number } {
 const [outPath, ...inputs] = process.argv.slice(2);
 const predictions = (JSON.parse(readFileSync(new URL("./fixtures/plans54/hail-predictions.json", import.meta.url), "utf8")) as
   { predictions: Record<string, string> }).predictions;
+const blizzardPredictions = (JSON.parse(readFileSync(new URL("./fixtures/plans54/blizzard-predictions.json", import.meta.url), "utf8")) as
+  { predictions: Record<string, string> }).predictions;
 type Entry = { instances: number; matched: number; unproven: number; framesChecked: number; sides: string[]; jobs: string[]; plan: string | null;
   predictedExact?: number;
   mismatches: { job: string; frame: number; observedPlan: string; problems: string[] }[] };
@@ -85,7 +89,7 @@ let jobs = 0, notIdentical = 0;
 for (const path of inputs) {
   const input = JSON.parse(readFileSync(path, "utf8")) as { jobs: Record<string, Job> };
   for (const [name, job] of Object.entries(input.jobs)) {
-    if (job.unit !== "BODY210" && job.unit !== "BODY284" && job.unit !== "BODY258") continue;
+    if (job.unit !== "BODY210" && job.unit !== "BODY284" && job.unit !== "BODY258" && job.unit !== "BODY59") continue;
     jobs += 1;
     if (!job.identicalAB) notIdentical += 1;
     const chain = { player: 0, opponent: 0 };
@@ -96,7 +100,7 @@ for (const path of inputs) {
       previousBody = unit.label;
       const hailContinues = job.unit === "BODY258" && unit.label === "general HAIL_CONTINUES" && !afterHail;
       const m = hailContinues ? ["", "258", "player"] : /^body (\d+):(player|opponent)$/.exec(unit.label);
-      if (unit.truncated || !m || (m[1] !== "210" && m[1] !== "284" && m[1] !== "258")) return;
+      if (unit.truncated || !m || (m[1] !== "210" && m[1] !== "284" && m[1] !== "258" && m[1] !== "59")) return;
       const side = m[2] as "player" | "opponent";
       let label: string, text: string | null, predicted: string | undefined;
       if (m[1] === "258") {
@@ -104,6 +108,12 @@ for (const path of inputs) {
         label = `${hailContinues ? "general HAIL_CONTINUES" : `body 258 ${side}`} ${species.player}-${species.opponent}`;
         text = liveMoveGeometrySpriteOrderPlanText(258, side, { playerSpecies: species.player!, opponentSpecies: species.opponent! });
         predicted = predictions[`${species.player}-${species.opponent}`];
+      } else if (m[1] === "59") {
+        const species = speciesOf(job);
+        const attacker = side === "player" ? species.player : species.opponent, target = side === "player" ? species.opponent : species.player;
+        label = `body 59 ${side} ${attacker}-${target}`;
+        text = liveMoveGeometrySpriteOrderPlanText(59, side, { playerSpecies: species.player!, opponentSpecies: species.opponent! });
+        predicted = blizzardPredictions[`${side}-${attacker}-${target}`];
       } else if (m[1] === "210") {
         const counter = Math.min(++chain[side], 5);
         label = `body ${FURY_CUTTER_KEYS[Math.min(counter, 4) - 1]}`;
