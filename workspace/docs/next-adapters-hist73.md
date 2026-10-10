@@ -185,6 +185,12 @@ The runner refuses a non-empty out dir, never removes anything outside it, check
 after, applies the two `.diff`s only to `git archive` copies inside the out dir, and prints `same` / `DIFF` for every receipt vs
 `tools/integration/fixtures/hist73/`.
 
+Verified in this session: a full `hist73Run.sh` pass (fresh dir, ~17 min) reproduced every census / chain / key-check / probe
+receipt byte-for-byte except `hidden-battler-audit.json`, whose raw-run hashes then still embedded the out-dir path (fixed in
+`a80ab31d3`; the fixed extractor on that pass's raw runs gives the committed file); a second fresh `SKIP_CENSUS=1` pass on the final
+code reproduced `net-zero-audit.json` and `hidden-battler-audit.json` byte-for-byte. The checkout's `src/` stayed unchanged
+throughout.
+
 Individual steps: `hist73AllocatorCensus.ts` / `hist73LiveShareCensus.ts --seeds=A..B --index-from=A` (10 shards) → `hist73Merge.py`
 → `hist73Chains.py [--cleared ids]` / `hist73ReseedBlockers.py` / `hist73KeyCheck.py` / `prep43CensusDelta.py`;
 `hist73Probe.py` → `hist73Extract.py`; `hist73HiddenProbe.py` → `hist73HiddenExtract.py` (mGBA venv python, `PYTHONPATH` =
