@@ -1,0 +1,234 @@
+{
+ "schema": "audit18-chain-fixture/v1",
+ "move": "WISH",
+ "bodyIndex": 1,
+ "probe": "tools/integration/audit18Probe.py",
+ "scenario": "tools/integration/fixtures/audit-18/scenarios/dive-snorlax-wish-opp.json",
+ "denseWindow": {
+  "startFrame": 2939,
+  "endFrame": 3209
+ },
+ "attacker": {
+  "species": "CHANSEY",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703657,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 267,
+  "playerMaxHp": 267,
+  "opponentHp": 357,
+  "opponentMaxHp": 357,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0,
+  "target": 1
+ },
+ "rom": {
+  "invisible": [
+   true,
+   false
+  ],
+  "turn": 2,
+  "spriteOrder": [
+   62,
+   60,
+   0,
+   63,
+   1,
+   61,
+   6,
+   8,
+   2,
+   14,
+   7,
+   15,
+   9,
+   4,
+   5,
+   13,
+   12,
+   10,
+   11,
+   3,
+   26,
+   27,
+   16,
+   25,
+   24,
+   23,
+   19,
+   20,
+   21,
+   17,
+   18,
+   22,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47
+  ]
+ },
+ "presentationRngActivation": {
+  "value": 2985637816,
+  "source": "audit18Probe.py at.rng2 (RAM gRng2Value, activation frame 2939)"
+ },
+ "pinnedRng2": [
+  [
+   0,
+   3990907205
+  ],
+  [
+   2,
+   3864469027
+  ],
+  [
+   5,
+   3471601490
+  ]
+ ],
+ "promptShown": [
+  true,
+  false,
+  true
+ ],
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "291",
+      "0",
+      "60",
+      "0",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": [
+      "273",
+      "0",
+      "0",
+      "0",
+      "70",
+      "0"
+     ]
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "291",
+      "1",
+      "60",
+      "1",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": []
+    },
+    {
+     "kind": "animation",
+     "animationId": "WISH_HEAL",
+     "battler": 1,
+     "target": 1,
+     "arguments": []
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "291",
+      "0",
+      "60",
+      "0",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": [
+      "273",
+      "0",
+      "0",
+      "0",
+      "70",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
+}

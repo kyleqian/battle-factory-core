@@ -1,0 +1,242 @@
+{
+ "schema": "audit18-chain-fixture/v1",
+ "move": "BULK_UP",
+ "bodyIndex": 2,
+ "probe": "tools/integration/audit18Probe.py",
+ "scenario": "tools/integration/fixtures/audit-18/scenarios/fly-golem-bulk-up-opp.json",
+ "denseWindow": {
+  "startFrame": 1559,
+  "endFrame": 1666
+ },
+ "attacker": {
+  "species": "CHANSEY",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703657,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 187,
+  "playerMaxHp": 187,
+  "opponentHp": 261,
+  "opponentMaxHp": 357,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0,
+  "target": 1
+ },
+ "rom": {
+  "invisible": [
+   true,
+   false
+  ],
+  "turn": 2,
+  "spriteOrder": [
+   62,
+   60,
+   0,
+   63,
+   1,
+   61,
+   6,
+   8,
+   2,
+   3,
+   4,
+   21,
+   20,
+   5,
+   19,
+   18,
+   17,
+   16,
+   15,
+   14,
+   13,
+   12,
+   11,
+   10,
+   9,
+   7,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   23,
+   22,
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47
+  ]
+ },
+ "pinnedRng2": [],
+ "promptShown": [
+  true,
+  false,
+  true
+ ],
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "19",
+      "0",
+      "70",
+      "0",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": [
+      "339",
+      "0",
+      "0",
+      "0",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "STATS_CHANGE",
+     "battler": 1,
+     "target": 1,
+     "arguments": [
+      "55"
+     ]
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "19",
+      "1",
+      "70",
+      "1",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": []
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": [
+      "339",
+      "0",
+      "0",
+      "0",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "STATS_CHANGE",
+     "battler": 1,
+     "target": 1,
+     "arguments": [
+      "55"
+     ]
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "19",
+      "0",
+      "70",
+      "0",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": [
+      "339",
+      "0",
+      "0",
+      "0",
+      "70",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
+}

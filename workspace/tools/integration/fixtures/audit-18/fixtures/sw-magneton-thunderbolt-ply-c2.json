@@ -1,0 +1,252 @@
+{
+ "schema": "audit18-chain-fixture/v1",
+ "move": "THUNDERBOLT",
+ "bodyIndex": 2,
+ "probe": "tools/integration/audit18Probe.py",
+ "scenario": "tools/integration/fixtures/audit-18/scenarios/sw-magneton-thunderbolt-ply.json",
+ "denseWindow": {
+  "startFrame": 3141,
+  "endFrame": 3377
+ },
+ "attacker": {
+  "species": "CHANSEY",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "MAGNETON",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015432,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 208,
+  "playerMaxHp": 357,
+  "opponentHp": 140,
+  "opponentMaxHp": 157,
+  "playerGender": "female",
+  "opponentGender": "genderless"
+ },
+ "requestFields": {
+  "turn": 0,
+  "target": 1
+ },
+ "rom": {
+  "invisible": [
+   false,
+   false
+  ],
+  "turn": 2,
+  "spriteOrder": [
+   62,
+   60,
+   0,
+   63,
+   1,
+   61,
+   6,
+   8,
+   2,
+   3,
+   7,
+   5,
+   4,
+   13,
+   12,
+   11,
+   10,
+   9,
+   19,
+   25,
+   14,
+   24,
+   23,
+   16,
+   22,
+   21,
+   15,
+   20,
+   18,
+   17,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47
+  ]
+ },
+ "pinnedRng2": [],
+ "promptShown": [
+  true,
+  true,
+  true
+ ],
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "351",
+      "0",
+      "60",
+      "1",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "85",
+      "0",
+      "95",
+      "1",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": []
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "351",
+      "0",
+      "60",
+      "1",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "85",
+      "0",
+      "95",
+      "1",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": []
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "351",
+      "0",
+      "60",
+      "1",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "85",
+      "0",
+      "95",
+      "1",
+      "70",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
+}

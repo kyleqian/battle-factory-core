@@ -1,0 +1,137 @@
+{
+ "schema": "audit18-chain-fixture/v1",
+ "move": "ICE_BEAM",
+ "bodyIndex": 0,
+ "probe": "tools/integration/audit18Probe.py",
+ "scenario": "tools/integration/fixtures/audit-18/scenarios/sub-snorlax-opp.json",
+ "denseWindow": {
+  "startFrame": 76,
+  "endFrame": 278
+ },
+ "attacker": {
+  "species": "ALAKAZAM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015428,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 162,
+  "playerMaxHp": 162,
+  "opponentHp": 267,
+  "opponentMaxHp": 267,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0,
+  "target": 1
+ },
+ "rom": {
+  "invisible": [
+   false,
+   false
+  ],
+  "turn": 0,
+  "spriteOrder": [
+   62,
+   60,
+   0,
+   63,
+   1,
+   61,
+   6,
+   8,
+   2,
+   4,
+   3,
+   21,
+   20,
+   5,
+   19,
+   18,
+   17,
+   16,
+   15,
+   14,
+   13,
+   12,
+   11,
+   10,
+   9,
+   7,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   23,
+   22,
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47
+  ]
+ },
+ "pinnedRng2": [],
+ "promptShown": [
+  true
+ ],
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "58",
+      "0",
+      "95",
+      "1",
+      "70",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
+}

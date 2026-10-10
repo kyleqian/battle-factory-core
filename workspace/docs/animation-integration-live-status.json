@@ -1511,9 +1511,11 @@
       "sourceFieldEvidence": [
         "../tools/integration/fixtures/anchor3-live-adapter-receipt.json",
         "../tools/integration/fixtures/anchor3-bulk-up-player.json",
-        "../tools/integration/fixtures/anchor3-bulk-up-opponent.json"
+        "../tools/integration/fixtures/anchor3-bulk-up-opponent.json",
+        "../tools/integration/fixtures/fix74-live-receipt.json"
       ],
       "liveEvidence": [
+        "scope: every Factory Bulk Up user (fix74): PRIMEAPE, SLAKING, HERACROSS, MACHAMP, URSARING, both sides, targets SNORLAX and SHUCKLE, plus CHANSEY both sides (audit 18's control): 22 dense windows 104 / 104 rows, 0 px, r1 == r2 twice fresh (tools/integration/fixtures/fix74-live-receipt.json); species inputs (y_offset -> SetBattlerSpriteYOffsetFromYScale height, OBJ corner, picture, breath origin) are source-derived and the ROM's per-frame y2 equals the reducer's on all 22; duration is species-independent (accepted window = first grown frame .. first inactive = 104; the ROM body activation .. first inactive is 108 for every species, 4 lead rows)",
         "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
         "generated command seed 5 slot 3 streak 14: complete body with attacker 0, ON/OFF rules/RNG equal"
       ],
