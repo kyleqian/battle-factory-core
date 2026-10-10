@@ -1,0 +1,2083 @@
+{
+ "schema": "ret80-live-receipt/v1",
+ "doc": "docs/ret80-return-order.md",
+ "census": "tools/integration/liveShareCensus.ts --seeds=0..999, one process per arm (tools/integration/ret80Census.sh); delta prep43CensusDelta.py",
+ "base": {
+  "commit": "b2ed6f8c2",
+  "src": "cdae97b8b173ce7f264123efce5d45ac54ad84cc"
+ },
+ "final": {
+  "commit": "9d1636263 (production src final; later commits are tools / fixtures / docs)",
+  "src": "0e582e4a6d7db99e47a7d590f0b9d9f08e4f73a6"
+ },
+ "commands": 27518,
+ "pairingMismatches": 0,
+ "commandKeySequenceIdentical": true,
+ "battleDigestExcludingFramesIdentical": true,
+ "battleDigestExcludingFrames": "48b2d42bacd93479ff7377d9383e6f773d26ed5b0a5584acdde633101e93461a",
+ "battleDigestIdentical": true,
+ "renderThrows": [
+  0,
+  0
+ ],
+ "liveCount": [
+  25915,
+  25792
+ ],
+ "liveCountPct": [
+  94.17,
+  93.73
+ ],
+ "liveFrames": [
+  3870725,
+  3844789
+ ],
+ "liveFramePct": [
+  97.94,
+  97.28
+ ],
+ "liveToFallback": 123,
+ "fallbackToLive": 0,
+ "liveToFallbackByMoveAndDecline": [
+  {
+   "move": "RETURN",
+   "decline": "order host: Return power level 0 body",
+   "commands": 34
+  },
+  {
+   "move": "DRAGON DANCE",
+   "decline": "order host: Return power level 0 body",
+   "commands": 20
+  },
+  {
+   "move": "RETURN",
+   "decline": "unclassified (case-local gate)",
+   "commands": 13
+  },
+  {
+   "move": "CURSE",
+   "decline": "order host: Return power level 0 body",
+   "commands": 13
+  },
+  {
+   "move": "DRAGON DANCE",
+   "decline": "unclassified (case-local gate)",
+   "commands": 8
+  },
+  {
+   "move": "DOUBLE TEAM",
+   "decline": "order host: Return power level 0 body",
+   "commands": 6
+  },
+  {
+   "move": "ICE BEAM",
+   "decline": "order host: Return power level 0 body",
+   "commands": 5
+  },
+  {
+   "move": "AIR CUTTER",
+   "decline": "order host: Return power level 0 body",
+   "commands": 4
+  },
+  {
+   "move": "MUD-SLAP",
+   "decline": "order host: Return power level 0 body",
+   "commands": 3
+  },
+  {
+   "move": "THUNDERBOLT",
+   "decline": "order host: Return power level 0 body",
+   "commands": 3
+  },
+  {
+   "move": "FRUSTRATION",
+   "decline": "order host: Return power level 0 body",
+   "commands": 3
+  },
+  {
+   "move": "MEGAHORN",
+   "decline": "order host: Return power level 0 body",
+   "commands": 2
+  },
+  {
+   "move": "MUD-SLAP",
+   "decline": "unclassified (case-local gate)",
+   "commands": 2
+  },
+  {
+   "move": "SEISMIC TOSS",
+   "decline": "unclassified (case-local gate)",
+   "commands": 2
+  },
+  {
+   "move": "SEISMIC TOSS",
+   "decline": "order host: Return power level 0 body",
+   "commands": 1
+  },
+  {
+   "move": "FIRE BLAST",
+   "decline": "order host: Return power level 0 body",
+   "commands": 1
+  },
+  {
+   "move": "HORN DRILL",
+   "decline": "order host: Return power level 0 body",
+   "commands": 1
+  },
+  {
+   "move": "FRUSTRATION",
+   "decline": "unclassified (case-local gate)",
+   "commands": 1
+  },
+  {
+   "move": "DREAM EATER",
+   "decline": "order host: Return power level 0 body",
+   "commands": 1
+  }
+ ],
+ "liveToFallbackCommands": [
+  {
+   "battle": 17,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "opponent",
+   "attacker": "FEAROW",
+   "target": "RHYDON",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 17,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "opponent",
+   "attacker": "FEAROW",
+   "target": "RHYDON",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 17,
+   "kind": "move",
+   "moveId": 224,
+   "move": "MEGAHORN",
+   "side": "player",
+   "attacker": "RHYDON",
+   "target": "FEAROW",
+   "frames": 177,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3865",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 22,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "FORRETRESS",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2806",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 24,
+   "kind": "move",
+   "moveId": 189,
+   "move": "MUD-SLAP",
+   "side": "player",
+   "attacker": "PIDGEOT",
+   "target": "HUNTAIL",
+   "frames": 51,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3578",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 24,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "PIDGEOT",
+   "target": "HUNTAIL",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 29,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "SALAMENCE",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2806",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 40,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "opponent",
+   "attacker": "GYARADOS",
+   "target": "LUDICOLO",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:3809"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 174,
+   "move": "CURSE",
+   "side": "opponent",
+   "attacker": "QUAGSIRE",
+   "target": "EXEGGUTOR",
+   "frames": 176,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3736",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 174,
+   "move": "CURSE",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 176,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3736",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 174,
+   "move": "CURSE",
+   "side": "opponent",
+   "attacker": "QUAGSIRE",
+   "target": "EXEGGUTOR",
+   "frames": 176,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3736",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 174,
+   "move": "CURSE",
+   "side": "opponent",
+   "attacker": "QUAGSIRE",
+   "target": "EXEGGUTOR",
+   "frames": 176,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3736",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 174,
+   "move": "CURSE",
+   "side": "opponent",
+   "attacker": "QUAGSIRE",
+   "target": "EXEGGUTOR",
+   "frames": 176,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3736",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 174,
+   "move": "CURSE",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 176,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3736",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 174,
+   "move": "CURSE",
+   "side": "opponent",
+   "attacker": "QUAGSIRE",
+   "target": "EXEGGUTOR",
+   "frames": 176,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3736",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 174,
+   "move": "CURSE",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 176,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3736",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 174,
+   "move": "CURSE",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 176,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3736",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 174,
+   "move": "CURSE",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 176,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3736",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 174,
+   "move": "CURSE",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 176,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3736",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 174,
+   "move": "CURSE",
+   "side": "opponent",
+   "attacker": "QUAGSIRE",
+   "target": "EXEGGUTOR",
+   "frames": 176,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3736",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 52,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "QUAGSIRE",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 171,
+   "kind": "move",
+   "moveId": 189,
+   "move": "MUD-SLAP",
+   "side": "opponent",
+   "attacker": "PIDGEOT",
+   "target": "PILOSWINE",
+   "frames": 51,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:3578"
+   }
+  },
+  {
+   "battle": 171,
+   "kind": "move",
+   "moveId": 189,
+   "move": "MUD-SLAP",
+   "side": "opponent",
+   "attacker": "PIDGEOT",
+   "target": "GIRAFARIG",
+   "frames": 51,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3578",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 202,
+   "kind": "move",
+   "moveId": 69,
+   "move": "SEISMIC TOSS",
+   "side": "player",
+   "attacker": "HITMONTOP",
+   "target": "TOGETIC",
+   "frames": 228,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2924",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 202,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "opponent",
+   "attacker": "TOGETIC",
+   "target": "HITMONTOP",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 218,
+   "kind": "move",
+   "moveId": 126,
+   "move": "FIRE BLAST",
+   "side": "player",
+   "attacker": "AERODACTYL",
+   "target": "GYARADOS",
+   "frames": 197,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2794",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 218,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "opponent",
+   "attacker": "GYARADOS",
+   "target": "AERODACTYL",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2806",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 227,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "STEELIX",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2806",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 227,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "STEELIX",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 227,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "GARDEVOIR",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2806",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 227,
+   "kind": "move",
+   "moveId": 85,
+   "move": "THUNDERBOLT",
+   "side": "opponent",
+   "attacker": "GARDEVOIR",
+   "target": "GYARADOS",
+   "frames": 237,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2924",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 242,
+   "kind": "move",
+   "moveId": 218,
+   "move": "FRUSTRATION",
+   "side": "opponent",
+   "attacker": "PERSIAN",
+   "target": "PIDGEOT",
+   "frames": 229,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2924",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 242,
+   "kind": "move",
+   "moveId": 218,
+   "move": "FRUSTRATION",
+   "side": "opponent",
+   "attacker": "PERSIAN",
+   "target": "PIDGEOT",
+   "frames": 229,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2924",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 242,
+   "kind": "move",
+   "moveId": 218,
+   "move": "FRUSTRATION",
+   "side": "opponent",
+   "attacker": "PERSIAN",
+   "target": "PIDGEOT",
+   "frames": 229,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2924",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 243,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "FERALIGATR",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:2809"
+   }
+  },
+  {
+   "battle": 243,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "FERALIGATR",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:3809"
+   }
+  },
+  {
+   "battle": 243,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "FERALIGATR",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:2809"
+   }
+  },
+  {
+   "battle": 243,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "FERALIGATR",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:3809"
+   }
+  },
+  {
+   "battle": 273,
+   "kind": "move",
+   "moveId": 58,
+   "move": "ICE BEAM",
+   "side": "opponent",
+   "attacker": "LUNATONE",
+   "target": "PIDGEOT",
+   "frames": 203,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3243",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 278,
+   "kind": "move",
+   "moveId": 189,
+   "move": "MUD-SLAP",
+   "side": "player",
+   "attacker": "PIDGEOT",
+   "target": "SUDOWOODO",
+   "frames": 51,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:3578"
+   }
+  },
+  {
+   "battle": 316,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "FLYGON",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2806",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 316,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "FLYGON",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 316,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "FLYGON",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2806",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 403,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "SKARMORY",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2806",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 403,
+   "kind": "move",
+   "moveId": 314,
+   "move": "AIR CUTTER",
+   "side": "opponent",
+   "attacker": "SKARMORY",
+   "target": "GYARADOS",
+   "frames": 112,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2373",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 403,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "SKARMORY",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 403,
+   "kind": "move",
+   "moveId": 314,
+   "move": "AIR CUTTER",
+   "side": "opponent",
+   "attacker": "SKARMORY",
+   "target": "GYARADOS",
+   "frames": 112,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2373",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 403,
+   "kind": "move",
+   "moveId": 314,
+   "move": "AIR CUTTER",
+   "side": "opponent",
+   "attacker": "SKARMORY",
+   "target": "GYARADOS",
+   "frames": 112,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2373",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 403,
+   "kind": "move",
+   "moveId": 314,
+   "move": "AIR CUTTER",
+   "side": "opponent",
+   "attacker": "SKARMORY",
+   "target": "GYARADOS",
+   "frames": 112,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2373",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 487,
+   "kind": "move",
+   "moveId": 69,
+   "move": "SEISMIC TOSS",
+   "side": "player",
+   "attacker": "CHANSEY",
+   "target": "PIDGEOT",
+   "frames": 228,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:2927"
+   }
+  },
+  {
+   "battle": 487,
+   "kind": "move",
+   "moveId": 69,
+   "move": "SEISMIC TOSS",
+   "side": "player",
+   "attacker": "CHANSEY",
+   "target": "PIDGEOT",
+   "frames": 228,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:2927"
+   }
+  },
+  {
+   "battle": 487,
+   "kind": "move",
+   "moveId": 104,
+   "move": "DOUBLE TEAM",
+   "side": "player",
+   "attacker": "PONYTA",
+   "target": "PIDGEOT",
+   "frames": 230,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3085",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 487,
+   "kind": "move",
+   "moveId": 104,
+   "move": "DOUBLE TEAM",
+   "side": "player",
+   "attacker": "PONYTA",
+   "target": "DUNSPARCE",
+   "frames": 230,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3085",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 487,
+   "kind": "move",
+   "moveId": 58,
+   "move": "ICE BEAM",
+   "side": "opponent",
+   "attacker": "DUNSPARCE",
+   "target": "PONYTA",
+   "frames": 203,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3243",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 528,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "opponent",
+   "attacker": "GYARADOS",
+   "target": "ARCANINE",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:2809"
+   }
+  },
+  {
+   "battle": 528,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "opponent",
+   "attacker": "GYARADOS",
+   "target": "ARCANINE",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:3809"
+   }
+  },
+  {
+   "battle": 554,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "opponent",
+   "attacker": "DRAGONAIR",
+   "target": "SNEASEL",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 554,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "opponent",
+   "attacker": "DRAGONAIR",
+   "target": "SNEASEL",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 554,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "opponent",
+   "attacker": "DRAGONAIR",
+   "target": "SNEASEL",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2806",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 554,
+   "kind": "move",
+   "moveId": 224,
+   "move": "MEGAHORN",
+   "side": "opponent",
+   "attacker": "SEAKING",
+   "target": "SNEASEL",
+   "frames": 177,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3865",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 554,
+   "kind": "move",
+   "moveId": 32,
+   "move": "HORN DRILL",
+   "side": "opponent",
+   "attacker": "SEAKING",
+   "target": "SNEASEL",
+   "frames": 192,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2924",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 635,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "opponent",
+   "attacker": "GYARADOS",
+   "target": "FLYGON",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2806",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 635,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "opponent",
+   "attacker": "GYARADOS",
+   "target": "FLYGON",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 635,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "opponent",
+   "attacker": "GYARADOS",
+   "target": "FLYGON",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 635,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "opponent",
+   "attacker": "GYARADOS",
+   "target": "FLYGON",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2806",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 635,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "opponent",
+   "attacker": "GYARADOS",
+   "target": "FLYGON",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2806",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 671,
+   "kind": "move",
+   "moveId": 174,
+   "move": "CURSE",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "MACHAMP",
+   "frames": 176,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3736",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 671,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "EXEGGUTOR",
+   "target": "MACHAMP",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 741,
+   "kind": "move",
+   "moveId": 218,
+   "move": "FRUSTRATION",
+   "side": "player",
+   "attacker": "MIGHTYENA",
+   "target": "PIDGEOT",
+   "frames": 229,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:2927"
+   }
+  },
+  {
+   "battle": 741,
+   "kind": "move",
+   "moveId": 58,
+   "move": "ICE BEAM",
+   "side": "player",
+   "attacker": "MANTINE",
+   "target": "PIDGEOT",
+   "frames": 203,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3243",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 775,
+   "kind": "move",
+   "moveId": 58,
+   "move": "ICE BEAM",
+   "side": "opponent",
+   "attacker": "WHISCASH",
+   "target": "GYARADOS",
+   "frames": 203,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3243",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 775,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "BLAZIKEN",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2806",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 790,
+   "kind": "move",
+   "moveId": 85,
+   "move": "THUNDERBOLT",
+   "side": "opponent",
+   "attacker": "MINUN",
+   "target": "PIDGEOT",
+   "frames": 237,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2924",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 812,
+   "kind": "move",
+   "moveId": 189,
+   "move": "MUD-SLAP",
+   "side": "player",
+   "attacker": "PIDGEOT",
+   "target": "AZUMARILL",
+   "frames": 51,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3578",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 812,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "PIDGEOT",
+   "target": "AZUMARILL",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 830,
+   "kind": "move",
+   "moveId": 58,
+   "move": "ICE BEAM",
+   "side": "player",
+   "attacker": "MASQUERAIN",
+   "target": "TOGETIC",
+   "frames": 203,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3243",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 846,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "MACHAMP",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2806",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 846,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "MACHAMP",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 846,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "LANTURN",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2806",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 846,
+   "kind": "move",
+   "moveId": 85,
+   "move": "THUNDERBOLT",
+   "side": "opponent",
+   "attacker": "LANTURN",
+   "target": "GYARADOS",
+   "frames": 237,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2924",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 879,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "GOREBYSS",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:2809"
+   }
+  },
+  {
+   "battle": 879,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "GOREBYSS",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:3809"
+   }
+  },
+  {
+   "battle": 879,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "GOREBYSS",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:3809"
+   }
+  },
+  {
+   "battle": 879,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "GOREBYSS",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:3809"
+   }
+  },
+  {
+   "battle": 879,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "GOREBYSS",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:2809"
+   }
+  },
+  {
+   "battle": 879,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "GOREBYSS",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:3809"
+   }
+  },
+  {
+   "battle": 879,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "GOREBYSS",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:3809"
+   }
+  },
+  {
+   "battle": 879,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "GOREBYSS",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:2809"
+   }
+  },
+  {
+   "battle": 879,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "GOREBYSS",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:3809"
+   }
+  },
+  {
+   "battle": 879,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "GOREBYSS",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:3809"
+   }
+  },
+  {
+   "battle": 879,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "GOREBYSS",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:2809"
+   }
+  },
+  {
+   "battle": 879,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "GOREBYSS",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:3809"
+   }
+  },
+  {
+   "battle": 879,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "GOREBYSS",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:2809"
+   }
+  },
+  {
+   "battle": 879,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "DRAGONAIR",
+   "target": "GOREBYSS",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "unclassified (case-local gate)",
+    "gate": "liveMoveAnimation.ts:3809"
+   }
+  },
+  {
+   "battle": 978,
+   "kind": "move",
+   "moveId": 104,
+   "move": "DOUBLE TEAM",
+   "side": "opponent",
+   "attacker": "BLISSEY",
+   "target": "GYARADOS",
+   "frames": 230,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3085",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 978,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "BLISSEY",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2806",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 978,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "BLISSEY",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 978,
+   "kind": "move",
+   "moveId": 104,
+   "move": "DOUBLE TEAM",
+   "side": "opponent",
+   "attacker": "BLISSEY",
+   "target": "GYARADOS",
+   "frames": 230,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3085",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 978,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "BLISSEY",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2806",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 978,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "BLISSEY",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2806",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 978,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "BLISSEY",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 978,
+   "kind": "move",
+   "moveId": 104,
+   "move": "DOUBLE TEAM",
+   "side": "opponent",
+   "attacker": "BLISSEY",
+   "target": "GYARADOS",
+   "frames": 230,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3085",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 978,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "player",
+   "attacker": "GYARADOS",
+   "target": "BLISSEY",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2806",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 978,
+   "kind": "move",
+   "moveId": 104,
+   "move": "DOUBLE TEAM",
+   "side": "opponent",
+   "attacker": "BLISSEY",
+   "target": "GYARADOS",
+   "frames": 230,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3085",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 986,
+   "kind": "move",
+   "moveId": 349,
+   "move": "DRAGON DANCE",
+   "side": "opponent",
+   "attacker": "DRAGONAIR",
+   "target": "WIGGLYTUFF",
+   "frames": 142,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:2806",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 986,
+   "kind": "move",
+   "moveId": 216,
+   "move": "RETURN",
+   "side": "opponent",
+   "attacker": "DRAGONAIR",
+   "target": "WIGGLYTUFF",
+   "frames": 282,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3808",
+    "detail": "order host: Return power level 0 body"
+   }
+  },
+  {
+   "battle": 986,
+   "kind": "move",
+   "moveId": 138,
+   "move": "DREAM EATER",
+   "side": "player",
+   "attacker": "WIGGLYTUFF",
+   "target": "DRAGONAIR",
+   "frames": 266,
+   "declineAfter": {
+    "stage": "presentation",
+    "reason": "sprite-order lend unknown",
+    "gate": "liveMoveAnimation.ts:3038",
+    "detail": "order host: Return power level 0 body"
+   }
+  }
+ ],
+ "fallbackToLiveCommands": []
+}
