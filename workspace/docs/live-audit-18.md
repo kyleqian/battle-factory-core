@@ -115,7 +115,7 @@ but a later batch can stage a different ROM trajectory for the same scenario + l
 apart were identical on all 164 scenarios (frames + `gRng2Value` at every activation), so the drift is sporadic per process, not a fixed
 wall-clock offset. One run-A probe (`bounce-snorlax-rest-ply`) diverged so far that its window frames were not dumped; the check now
 records such a run as `diverged` (px -1) instead of crashing, and that scenario was re-checked once for the committed receipts.
-Byte-identical receipts across batches are therefore NOT achievable for these stagings; the comparer separates drift from real
+Every TEXT receipt of run B is byte-identical to the committed one (derive.txt, derive-vs-committed.txt, lag.txt, lends.txt, c713/master.jsonl, c713/b50c4dabd.jsonl, c713/diff.txt, all 6 ablation receipts). Byte-identical per-window receipts across batches are therefore NOT achievable for these stagings; the comparer separates drift from real
 reproduction failures (0 here).
 
 ## 3. Not reached
@@ -126,6 +126,9 @@ reproduction failures (0 here).
 - The Fly+GOLEM Sandstorm row and the Bulk Up-on-CHANSEY baseline (both = OPEN, outside the chain question).
 
 ## 4. Reproduction (from workspace/; direct mGBA only; production src is never patched)
+
+Gates on the final tree: `npm test` 1,602 files / 13,180 tests passed (44 files / 223 tests skipped), 0 failed; `npm run build` green;
+`npm run test:smoke` 8 / 448; `git diff --check` clean; no tracked file outside the audit18 set was modified (no TypeScript under tests/).
 
 ```
 sh tools/integration/audit18Run.sh <fresh-receipt-dir> <fresh-scratch-dir>   # ~13 min: stage == committed -> probe -> derive == committed
