@@ -1,0 +1,89 @@
+att	doll81-att-dream-eater-opponent-golbat	DREAM_EATER	opponent	t0	3475	348	body 266	D 267	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 5057392
+att	doll81-att-dream-eater-opponent-golbat	DREAM_EATER	opponent	t0	5173	347	body 265	D 267	order none	presented true	px 4628727/4628727	identical true	bad 42..326,333..346	base presented false px 5037966
+att	doll81-att-dream-eater-opponent-golbat	DREAM_EATER	opponent	t0	6871	347	body 265	D 267	order none	presented true	px 4628727/4628727	identical true	bad 42..326,333..346	base presented false px 5037966
+att	doll81-att-dream-eater-opponent	DREAM_EATER	opponent	t0	3476	348	body 266	D 267	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 4922777
+att	doll81-att-dream-eater-opponent	DREAM_EATER	opponent	t0	5174	348	body 266	D 267	order none	presented true	px 4482355/4482355	identical true	bad 53..304	base presented false px 4922777
+att	doll81-att-dream-eater-opponent	DREAM_EATER	opponent	t0	6872	347	body 265	D 267	order none	presented true	px 4492065/4492065	identical true	bad 53..303,308..325,333..346	base presented false px 4903904
+att	doll81-att-dream-eater-player-gengar	SPORE	player	t0	1766	292	body 206	D 207	order fixture	presented false	px 606126/606126	identical true	bad 1..291	base presented false px 606126
+att	doll81-att-dream-eater-player-gengar	DREAM_EATER	player	t0	3471	351	body 265	D 266	order fixture	presented false	px 5124580/5124580	identical true	bad 1..350	base presented false px 5124580
+att	doll81-att-dream-eater-player	SPORE	player	t0	1767	292	body 206	D 207	order fixture	presented false	px 561794/561794	identical true	bad 2..291	base presented false px 561794
+att	doll81-att-dream-eater-player	DREAM_EATER	player	t0	3472	352	body 266	D 266	order fixture	presented false	px 4971903/4971903	identical true	bad 2..351	base presented false px 4971903
+att	doll81-att-focus-punch-opponent-golbat	FOCUS_PUNCH	opponent	t0	2657	236	body 154	D 154	order fixture	presented false	px 2801845/2801845	identical true	bad 2..235	base presented false px 2801845
+att	doll81-att-focus-punch-opponent	FOCUS_PUNCH	opponent	t0	2011	236	body 154	D 154	order fixture	presented false	px 2738979/2738979	identical true	bad 2..235	base presented false px 2738979
+att	doll81-att-focus-punch-opponent	FOCUS_PUNCH	opponent	t0	4324	236	body 154	D 154	order fixture	presented false	px 2738979/2738979	identical true	bad 2..235	base presented false px 2738979
+att	doll81-att-focus-punch-player-gengar	FOCUS_PUNCH	player	t0	2051	240	body 154	D 155	order fixture	presented false	px 2859687/2859687	identical true	bad 1..239	base presented false px 2859687
+att	doll81-att-focus-punch-player-gengar	FOCUS_PUNCH	player	t0	3749	239	body 153	D 155	order fixture	presented false	px 2840097/2840097	identical true	bad 1..238	base presented false px 2840097
+att	doll81-att-focus-punch-player-gengar	FOCUS_PUNCH	player	t0	5447	240	body 154	D 155	order fixture	presented false	px 2859687/2859687	identical true	bad 1..239	base presented false px 2859687
+att	doll81-att-focus-punch-player-gengar	FOCUS_PUNCH	player	t0	7145	240	body 154	D 155	order fixture	presented false	px 2859687/2859687	identical true	bad 1..239	base presented false px 2859687
+att	doll81-att-focus-punch-player	FOCUS_PUNCH	player	t0	2686	240	body 154	D 155	order fixture	presented false	px 2754253/2754253	identical true	bad 2..239	base presented false px 2754253
+att	doll81-att-grass-whistle-opponent-golbat	GRASS_WHISTLE	opponent	t0	3411	302	body 220	D 225	order fixture	presented false	px 3402723/3402723	identical true	bad 2..301	base presented false px 3402723
+att	doll81-att-grass-whistle-opponent	GRASS_WHISTLE	opponent	t0	3412	302	body 220	D 225	order fixture	presented false	px 3276141/3276141	identical true	bad 2..301	base presented false px 3276141
+att	doll81-att-grass-whistle-player-gengar	GRASS_WHISTLE	player	t0	1773	306	body 220	D 225	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 3518916
+att	doll81-att-grass-whistle-player-gengar	GRASS_WHISTLE	player	t0	5169	306	body 220	D 225	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 3518916
+att	doll81-att-grass-whistle-player	GRASS_WHISTLE	player	t0	1774	306	body 220	D 225	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 3374420
+att	doll81-att-grass-whistle-player	GRASS_WHISTLE	player	t0	5170	306	body 220	D 225	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 3374420
+att	doll81-att-lovely-kiss-opponent-golbat	LOVELY_KISS	opponent	t0	3410	234	body 152	D 152	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 413094
+att	doll81-att-lovely-kiss-opponent	LOVELY_KISS	opponent	t0	3411	234	body 152	D 152	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 394373
+att	doll81-att-lovely-kiss-player-gengar	LOVELY_KISS	player	t0	1772	238	body 152	D 152	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 495715
+att	doll81-att-lovely-kiss-player-gengar	LOVELY_KISS	player	t0	5168	238	body 152	D 152	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 495715
+att	doll81-att-lovely-kiss-player	LOVELY_KISS	player	t0	1773	238	body 152	D 152	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 468046
+att	doll81-att-lovely-kiss-player	LOVELY_KISS	player	t0	5169	238	body 152	D 152	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 468046
+att	doll81-att-sing-opponent-golbat	SING	opponent	t0	3403	325	body 243	D 248	order fixture	presented false	px 549870/549870	identical true	bad 2..324	base presented false px 549870
+att	doll81-att-sing-opponent	SING	opponent	t0	3404	323	body 241	D 248	order fixture	presented false	px 510428/510428	identical true	bad 2..322	base presented false px 510428
+att	doll81-att-sing-player-gengar	SING	player	t0	1765	331	body 245	D 245	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 680094
+att	doll81-att-sing-player-gengar	SING	player	t0	5161	331	body 245	D 245	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 680094
+att	doll81-att-sing-player	SING	player	t0	1766	331	body 245	D 245	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 637568
+att	doll81-att-sing-player	SING	player	t0	5162	331	body 245	D 245	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 637568
+att	doll81-att-solar-beam-opponent-golbat	SOLAR_BEAM	opponent	t0	1718	189	body 107	D 108	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 280215
+att	doll81-att-solar-beam-opponent	SOLAR_BEAM	opponent	t0	1718	189	body 107	D 108	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 265579
+att	doll81-att-solar-beam-player-gengar	SOLAR_BEAM	player	t0	1750	193	body 107	D 108	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 350165
+att	doll81-att-solar-beam-player-gengar	SOLAR_BEAM	player	t1	2277	323	body 237	D 160	order fixture	presented false	px 4663599/4663599	identical true	bad 1..322	base presented false px 4663599
+att	doll81-att-solar-beam-player-gengar	SOLAR_BEAM	player	t0	3448	193	body 107	D 108	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 350165
+att	doll81-att-solar-beam-player-gengar	SOLAR_BEAM	player	t1	3975	323	body 237	D 160	order fixture	presented false	px 4663599/4663599	identical true	bad 1..322	base presented false px 4663599
+att	doll81-att-solar-beam-player-gengar	SOLAR_BEAM	player	t0	5146	193	body 107	D 108	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 350165
+att	doll81-att-solar-beam-player-gengar	SOLAR_BEAM	player	t1	5673	323	body 237	D 160	order fixture	presented false	px 4663599/4663599	identical true	bad 1..322	base presented false px 4663599
+att	doll81-att-solar-beam-player-gengar	SOLAR_BEAM	player	t0	6844	193	body 107	D 108	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 350165
+att	doll81-att-solar-beam-player-gengar	SOLAR_BEAM	player	t1	7371	323	body 237	D 160	order fixture	presented false	px 4663599/4663599	identical true	bad 1..322	base presented false px 4663599
+att	doll81-att-solar-beam-player	SOLAR_BEAM	player	t0	1750	193	body 107	D 108	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 321378
+att	doll81-att-solar-beam-player	SOLAR_BEAM	player	t1	2709	323	body 237	D 160	order fixture	presented false	px 4587489/4587489	identical true	bad 2..322	base presented false px 4587489
+att	doll81-self-double-team-opponent-golbat	DOUBLE_TEAM	opponent	t0	3407	240	body 158	D 230	order fixture	presented false	px 492426/492426	identical true	bad 2..239	base presented false px 492426
+att	doll81-self-double-team-opponent-golbat	DOUBLE_TEAM	opponent	t0	5073	240	body 158	D 230	order fixture	presented false	px 492426/492426	identical true	bad 2..239	base presented false px 492426
+att	doll81-self-double-team-opponent	DOUBLE_TEAM	opponent	t0	3408	240	body 158	D 230	order fixture	presented false	px 468730/468730	identical true	bad 2..239	base presented false px 468730
+att	doll81-self-double-team-opponent	DOUBLE_TEAM	opponent	t0	5074	240	body 158	D 230	order fixture	presented false	px 468730/468730	identical true	bad 2..239	base presented false px 468730
+att	doll81-self-double-team-player-gengar	DOUBLE_TEAM	player	t0	1769	244	body 158	D 230	order fixture	presented false	px 610966/610966	identical true	bad 1..243	base presented false px 610966
+att	doll81-self-double-team-player-gengar	DOUBLE_TEAM	player	t0	3467	244	body 158	D 230	order fixture	presented false	px 610966/610966	identical true	bad 1..243	base presented false px 610966
+att	doll81-self-double-team-player-gengar	DOUBLE_TEAM	player	t0	5165	244	body 158	D 230	order fixture	presented false	px 610966/610966	identical true	bad 1..243	base presented false px 610966
+att	doll81-self-double-team-player	DOUBLE_TEAM	player	t0	1770	244	body 158	D 230	order fixture	presented false	px 589259/589259	identical true	bad 2..243	base presented false px 589259
+att	doll81-self-double-team-player	DOUBLE_TEAM	player	t0	3468	244	body 158	D 230	order fixture	presented false	px 589259/589259	identical true	bad 2..243	base presented false px 589259
+att	doll81-self-recover-opponent-golbat	RECOVER	opponent	t0	1735	265	body 183	D 169	order fixture	presented false	px 414959/414959	identical true	bad 2..264	base presented false px 414959
+att	doll81-self-recover-opponent	RECOVER	opponent	t0	1736	265	body 183	D 169	order fixture	presented false	px 387231/387231	identical true	bad 2..264	base presented false px 387231
+att	doll81-self-recover-player-gengar	RECOVER	player	t0	1763	269	body 183	D 169	order fixture	presented false	px 506155/506155	identical true	bad 1..268	base presented false px 506155
+att	doll81-self-recover-player	RECOVER	player	t0	1764	269	body 183	D 169	order fixture	presented false	px 469798/469798	identical true	bad 2..268	base presented false px 469798
+att	doll81-self-sunny-day-opponent-golbat	SUNNY_DAY	opponent	t0	1738	239	body 157	D 158	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 1027916
+att	doll81-self-sunny-day-opponent	SUNNY_DAY	opponent	t0	1739	239	body 157	D 158	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 1050404
+att	doll81-self-sunny-day-player-gengar	SUNNY_DAY	player	t0	1766	243	body 157	D 158	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 1111580
+att	doll81-self-sunny-day-player	SUNNY_DAY	player	t0	1767	243	body 157	D 158	order fixture	presented true	px 0/0	identical true	bad -	base presented false px 1090722
+def	doll81-def-dig-opponent-golbat	DIG	opponent	-	1744	68	shift 0	D None	order fixture	live false	px 78144/78144	identical true	bad 0..67	control px 121095/121095 bad 0..194	base live false px 78144
+def	doll81-def-dig-opponent	DIG	opponent	-	1745	68	shift 0	D None	order fixture	live false	px 58470/58470	identical true	bad 0..62	control px 133770/133770 bad 0..194	base live false px 58470
+def	doll81-def-dig-player-gengar	DIG	player	-	1720	195	shift 0	D None	order fixture	live false	px 427583/427583	identical true	bad 0..194	control px 107445/107445 bad 0..194	base live false px 427583
+def	doll81-def-dig-player	DIG	player	-	680	68	shift 0	D None	order fixture	live false	px 66274/66274	identical true	bad 0..62	control px 114075/114075 bad 0..194	base live false px 66274
+def	doll81-def-double-edge-opponent-golbat	DOUBLE_EDGE	opponent	-	1747	141	shift 0	D 141	order fixture	live true	px 0/0	identical true	bad -	control px 0/0 bad -	base live true px 0
+def	doll81-def-double-edge-opponent	DOUBLE_EDGE	opponent	-	1748	141	shift 0	D 141	order fixture	live true	px 0/0	identical true	bad -	control px 0/0 bad -	base live true px 0
+def	doll81-def-double-edge-player-gengar	DOUBLE_EDGE	player	-	1743	141	shift 0	D None	order fixture	live false	px 691564/691564	identical true	bad 5..8,14..19,34..48,50..138	control px 0/0 bad -	base live false px 691564
+def	doll81-def-double-edge-player	DOUBLE_EDGE	player	-	1744	141	shift 0	D None	order fixture	live false	px 737262/737262	identical true	bad 5..8,14..19,34..48,50..138	control px 0/0 bad -	base live false px 737262
+def	doll81-def-iron-tail-opponent-golbat	IRON_TAIL	opponent	-	1745	135	shift 0	D None	order fixture	live false	px 157396/157396	identical true	bad 1..134	control px 162/162 bad 9..12,41..44	base live false px 157396
+def	doll81-def-iron-tail-opponent	IRON_TAIL	opponent	-	1746	135	shift 0	D None	order fixture	live false	px 140553/140553	identical true	bad 7..126	control px 38/38 bad 11..12,43..44	base live false px 140553
+def	doll81-def-iron-tail-player-gengar	IRON_TAIL	player	-	1741	135	shift 0	D None	order fixture	live false	px 217889/217889	identical true	bad 7..126	control px 8/8 bad 12,44	base live false px 217889
+def	doll81-def-iron-tail-player	IRON_TAIL	player	-	1742	135	shift 0	D None	order fixture	live false	px 210053/210053	identical true	bad 7..126	control px 244/244 bad 10..12,42..44	base live false px 210053
+def	doll81-def-leaf-blade-opponent-golbat	LEAF_BLADE	opponent	-	1744	224	shift 0	D 224	order fixture	live true	px 0/0	identical true	bad -	control px 0/0 bad -	base live false px 109040
+def	doll81-def-leaf-blade-opponent	LEAF_BLADE	opponent	-	1745	224	shift 0	D 224	order fixture	live true	px 0/0	identical true	bad -	control px 0/0 bad -	base live false px 63093
+def	doll81-def-leaf-blade-player-gengar	LEAF_BLADE	player	-	1740	224	shift 0	D 224	order fixture	live true	px 0/0	identical true	bad -	control px 0/0 bad -	base live false px 75899
+def	doll81-def-leaf-blade-player	LEAF_BLADE	player	-	1741	224	shift 0	D 224	order fixture	live true	px 0/0	identical true	bad -	control px 0/0 bad -	base live false px 70179
+def	doll81-def-psych-up-opponent-golbat	PSYCH_UP	opponent	-	1737	179	shift 0	D None	order fixture	live false	px 3073936/3073936	identical true	bad 1..178	control px 0/0 bad -	base live false px 3073936
+def	doll81-def-psych-up-opponent	PSYCH_UP	opponent	-	1738	179	shift 0	D None	order fixture	live false	px 3076059/3076059	identical true	bad 8..173	control px 0/0 bad -	base live false px 3076059
+def	doll81-def-psych-up-player-gengar	PSYCH_UP	player	-	1733	179	shift 0	D None	order fixture	live false	px 3019511/3019511	identical true	bad 8..173	control px 0/0 bad -	base live false px 3019511
+def	doll81-def-psych-up-player	PSYCH_UP	player	-	1734	179	shift 0	D None	order fixture	live false	px 3020373/3020373	identical true	bad 8..173	control px 0/0 bad -	base live false px 3020373
+def	doll81-def-thunder-punch-opponent-golbat	THUNDER_PUNCH	opponent	-	1748	136	shift -10	D 104	order fixture	live true	px 200/200	identical true	bad 0	control px 200/200 bad 0	base live false px 1686504
+def	doll81-def-thunder-punch-opponent	THUNDER_PUNCH	opponent	-	1749	136	shift -10	D 104	order fixture	live true	px 0/0	identical true	bad -	control px 0/0 bad -	base live false px 1675934
+def	doll81-def-thunder-punch-player-gengar	THUNDER_PUNCH	player	-	1744	136	shift -10	D 104	order fixture	live true	px 0/0	identical true	bad -	control px 200/200 bad 0	base live false px 1638506
+def	doll81-def-thunder-punch-player	THUNDER_PUNCH	player	-	1745	136	shift -10	D 104	order fixture	live true	px 0/0	identical true	bad -	control px 0/0 bad -	base live false px 1638140

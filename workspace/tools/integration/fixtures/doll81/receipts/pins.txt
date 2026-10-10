@@ -1,0 +1,4 @@
+ FAIL  tests/substituteDollAdapterDecline.test.ts > live adapters decline while the Substitute doll is shown > route CRADILY 144/35 player attacker: the live body declines to the fallback unless it is a proven defender cell, the battle reaches the next prompt, Scene ON/OFF parity
+ FAIL  tests/substituteDollDefenderLive.test.ts > defender shown as the Substitute doll: proven cells live, everything else declines > the proven-cell allowlist is exactly the prep38 v1 batch (27 cells)
+ FAIL  tests/substituteSwapAttdollCells.test.ts > attacker-doll swap cells (prep40) > rung b: framed bodies end at the ROM body's first inactive row and show adapter age row + shift
+      Tests  3 failed | 74 passed (77)
