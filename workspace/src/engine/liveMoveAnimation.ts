@@ -172,6 +172,12 @@ function liveDiveSetupFirstInactive(side: "player" | "opponent", ballY?: number)
   return 10 + callback + 1 + 50;
 }
 
+/**
+ * dive70: the Dive ATTACK body's rows, activation .. first inactive age 92 (prep25's "attack 92" is that age, as its "setup 117 / 114" are
+ * the setup's first inactive ages): 93 rows in every attack window of prep25 and dive70, no species or side dependence.
+ */
+const DIVE_ATTACK_ROWS = 93;
+
 /** Dive setup splash birth (the droplets' Random2 draw age) from the displayed field (audit-11 patch proof). */
 export function liveDiveSetupSplashBirth(field: BattleResolutionDisplayedField, side: "player" | "opponent"): number {
   return liveDiveSetupFirstInactive(side, liveBattlerAnchors(side, createBattleCommandFieldArtView(field)).picOffsetPoint.y) - 50;
@@ -587,6 +593,9 @@ export function liveMoveOpponentShadowRow(request: BattleMoveAnimationRequest): 
   // Dig unleash: the attacker is still hidden (semi-invulnerable) on its activation frame, so the shadow is not shown (prep18 dense,
   // elevated FLYGON opponent attacker: 200 px at age 0 otherwise); only the setup body shows it.
   if (request.moveId === 91 && (request.turn & 1) === 1) return null;
+  // dive70: the Dive attack's opponent diver is still invisible on its activation frame (an elevated opponent diver declines; a player
+  // diver's elevated opponent target keeps the setup's row-0 shadow).
+  if (request.moveId === 291 && (request.turn & 1) === 1 && request.attacker === 1) return null;
   return LIVE_MOVE_OPPONENT_SHADOW_ROW[request.moveId] ?? null;
 }
 
@@ -1259,12 +1268,13 @@ export function liveMoveAnimationDuration(
     // Fly / Bounce (prep11 s0.2): charge 51..93 (43 rows) / strike 408..475 (68); Bounce charge 254..317 (64) /
     // strike 771..825 (55). request.turn = gAnimMoveTurn (0 charge, 1 strike).
     case 19: return (request.turn & 1) === 0 ? 43 : 68;
-    // Dive (S10A, faithful timing with D3; prep25 s0.2 / B.1): SETUP body only (request.turn bit 0 = 0): the first inactive age from the
-    // attacker's ball rule on the displayed field (species audit 11; without the field the side defaults 117 / 114), + the first inactive row. The attack body (turn 1) declines: its activation order is the setup
-    // body's words-dependent droplet sort (docs/s10a-random2-order-lend-blocker.md).
+    // Dive (S10A, faithful timing with D3; prep25 s0.2 / B.1): SETUP body (request.turn bit 0 = 0): the first inactive age from the
+    // attacker's ball rule on the displayed field (species audit 11; without the field the side defaults 117 / 114), + the first inactive row.
+    // dive70: the ATTACK body (turn 1) is 93 rows (activation .. first inactive, DIVE_ATTACK_ROWS; prep25's 4 windows and dive70's grid, no
+    // species dependence); its lend is the setup marker resolved through the hidden turn (land68).
     case 291: { const side = request.attacker === 0 ? "player" : "opponent";
       return (request.turn & 1) === 0 ? liveDiveSetupFirstInactive(side, field === undefined ? undefined
-        : liveBattlerAnchors(side, createBattleCommandFieldArtView(field)).picOffsetPoint.y) + 1 : null; }
+        : liveBattlerAnchors(side, createBattleCommandFieldArtView(field)).picOffsetPoint.y) + 1 : DIVE_ATTACK_ROWS; }
     case 340: return (request.turn & 1) === 0 ? 64 : 55;
     // Rollout bodies by request.rolloutCounter (accepted corpus rows 167, 167, 161, 153, 145; prep11 s0.2).
     case 205: {
@@ -4030,23 +4040,39 @@ export function liveMoveAnimationPresentation(
     }
     case 291: {
       // Faithful timing with D3 (S10A; docs/next-adapters-prep25.md s0.2 / B.1 / B.1a / C): the Dive SETUP body (turn bit 0 = 0) after any known
-      // lend with the known-entry occupancy; the attack body declines (its activation order is the setup droplets' words-dependent sort,
-      // docs/s10a-random2-order-lend-blocker.md). The attacker stays hidden from setup age 10 across the turn gap (liveSemiInvulnerableHideBattler,
+      // lend with the known-entry occupancy. The attacker stays hidden from setup age 10 across the turn gap (liveSemiInvulnerableHideBattler,
       // as Dig). Anchors (B.1a, 8/8): splash / droplets at battlePositionCenter, the ball at the attacker's Y_PIC_OFFSET point (reducer + 16).
       // Words from the presentation host only. The DIVE branch draws status-free healthboxes and unshaded battler art: a displayed status
       // or a shiny battler declines.
-      if ((request.turn & 1) !== 0 || !spriteOrderInput?.known) return null;
+      // dive70 (docs/dive70-dive-attack.md): the ATTACK body (turn bit 0 = 1, DiveAttack + RisingWaterHitEffect) on the resolved lend (the setup
+      // marker carried through the hidden turn, land68): 56 host words (20 droplet words at +16, then 9 x 4 bubble words at +30 + 4k), the
+      // body's real-slot profile from liveDiveWordsPlan (the order carry's own allocation), the target impact anchor (B.1a). The diver
+      // reveals itself (dive.ts attackerInvisible < 83; the hide ends with this body, applyLiveSemiInvulnerableCommand); an elevated
+      // opponent diver declines (its enemy shadow's return is unmeasured).
+      if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       if ((field.player.status ?? "none") !== "none" || (field.opponent.status ?? "none") !== "none") return null;
-      const words = liveMovePresentationRngWords(presentationRngInput)?.words;
-      const activationOrder = spriteOrderWithOccupiedPrefix(
-        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
-      if (words === undefined || words.length !== 20 || activationOrder === null) return null;
       const side = attacker.geometry.side;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const a = attackerAnchors, t = targetAnchors;
       const withCenter = (battler: SceneOnPresentationBattler, center: { x: number; y: number }): SceneOnPresentationBattler => ({
         ...battler, geometry: { ...battler.geometry, animationCenter: center } });
+      if ((request.turn & 1) === 1) {
+        if (side === "opponent" && art.opponent.origin.y !== battleCommandFieldSpriteOrigin(art.opponent, "opponent").y) return null;
+        const rng = liveMovePresentationRngWords(presentationRngInput);
+        if (rng === null || rng.words.length !== 56) return null;
+        const geometry = liveDiveGeometry(a, t, target.geometry.side);
+        const plan = liveDiveWordsPlan(1, side, spriteOrderInput.free, rng, geometry, a.picOffsetPoint.y);
+        if (plan === null) return null;
+        config = { move: "DIVE", body: "attack", attacker: withCenter(attacker, a.spriteCenter), target: withCenter(target, t.spriteCenter),
+          fieldProfile: { ...fieldProfile, playerStatus: "none" }, animationGeometry: geometry,
+          animationProfile: { ...plan.profile, firstInactiveAge: DIVE_ATTACK_ROWS - 1 } };
+        break;
+      }
+      const words = liveMovePresentationRngWords(presentationRngInput)?.words;
+      const activationOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (words === undefined || words.length !== 20 || activationOrder === null) return null;
       config = { move: "DIVE", body: "setup", setupRow68ReusedAffine: liveMoveTimingParameter(291, "oam-transfer-row")?.chosen === "event", attacker: withCenter(attacker, a.spriteCenter), target: withCenter(target, t.spriteCenter),
         fieldProfile: { ...fieldProfile, playerStatus: "none" },
         animationGeometry: { attackerCenter: a.spriteCenter, targetCenter: t.spriteCenter,
@@ -4302,8 +4328,6 @@ export function liveDiveWordsPlanText(
   turn: number, side: WordsSide, activationFree: readonly number[], words: PresentationRngWords | null,
   bodySpecies: Readonly<Record<WordsSide, number>>,
 ): string | null {
-  const start = wordsPrefixed(activationFree);
-  if (start === null || words === null) return null;
   let art: ReturnType<typeof createBattleCommandFieldArtView>;
   try {
     art = createBattleCommandFieldArtView({ player: { species: bodySpecies.player }, opponent: { species: bodySpecies.opponent } } as never);
@@ -4312,16 +4336,32 @@ export function liveDiveWordsPlanText(
   }
   const foe: WordsSide = side === "player" ? "opponent" : "player";
   const a = liveBattlerAnchors(side, art), t = liveBattlerAnchors(foe, art);
-  const geometry: DiveGeometry = { attackerCenter: a.spriteCenter, targetCenter: t.spriteCenter, attackerPictureOffset: a.battlePositionCenter,
+  return liveDiveWordsPlan(turn, side, activationFree, words, liveDiveGeometry(a, t, foe), a.picOffsetPoint.y)?.text ?? null;
+}
+
+/** Dive geometry from the attacker / target anchors (prep25 s B.1a anchor split: the ball and impact anchors). */
+function liveDiveGeometry(a: LiveBattlerAnchors, t: LiveBattlerAnchors, targetSide: WordsSide): DiveGeometry {
+  return { attackerCenter: a.spriteCenter, targetCenter: t.spriteCenter, attackerPictureOffset: a.battlePositionCenter,
     targetPictureOffset: t.battlePositionCenter, attackerRestOffset: a.frontIdleRest, targetRestOffset: t.frontIdleRest,
     attackerBallOffset: { x: a.battlePositionCenter.x, y: a.picOffsetPoint.y - 16 },
-    targetImpactOffset: { x: t.battlePositionCenter.x, y: t.picOffsetPoint.y - (foe === "player" ? 8 : 2) } };
+    targetImpactOffset: { x: t.battlePositionCenter.x, y: t.picOffsetPoint.y - (targetSide === "player" ? 8 : 2) } };
+}
+
+/**
+ * The Dive body's order plan text and its real-slot profile (liveDiveWordsPlanText; dive70: the live ATTACK adapter renders this profile, so
+ * the body's pixels and its order carry read one allocation). Null when the words are unavailable or misshapen.
+ */
+function liveDiveWordsPlan(
+  turn: number, side: WordsSide, activationFree: readonly number[], words: PresentationRngWords | null, geometry: DiveGeometry, ballY: number,
+): { text: string; profile: DiveProfile } | null {
+  const start = wordsPrefixed(activationFree);
+  if (start === null || words === null) return null;
   const setup = (turn & 1) === 0, body = setup ? "setup" as const : "attack" as const;
   let profileOf: (slots: readonly number[]) => DiveProfile;
   let count: number, lastAge: number;
   if (setup) {
     if (words.words.length !== 20) return null;
-    const base = liveDiveSetupProfile(side, words.words, start, a.picOffsetPoint.y);
+    const base = liveDiveSetupProfile(side, words.words, start, ballY);
     count = 12; lastAge = base.firstInactiveAge;
     profileOf = (slots) => ({ ...base, ball: { ...base.ball, slot: slots[0]! }, splash: { ...base.splash, slot: slots[1]! },
       droplets: base.droplets.map((d, i) => ({ ...d, slot: slots[2 + i]! })), spriteOrderSeed: start.filter((s) => slots.includes(s)) });
@@ -4377,11 +4417,12 @@ export function liveDiveWordsPlanText(
     if (births.length > 0 || deaths.length > 0) windows.push({ age, births, deaths });
   }
   const real = profileOf(slots);
-  return windows.map(({ age, births, deaths }) => {
+  const text = windows.map(({ age, births, deaths }) => {
     const group = deaths.length < 2 ? deaths
       : diveAtAge(age - 1, body, side, geometry, real).hardwareOrder.filter((slot) => deaths.some((i) => slots[i] === slot)).map((slot) => deaths.find((i) => slots[i] === slot)!);
     return `${births.length > 0 ? `C${"f".repeat(births.length)}` : ""}${births.length > 0 && group.length > 0 ? "/" : ""}${group.length > 0 ? `D${group.join(",")}` : ""}`;
   }).join(";");
+  return { text, profile: real };
 }
 
 /** land68 (prep65): the free order after a Dive body (liveDiveWordsPlanText applied with the production plan cursor), or null. */

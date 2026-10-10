@@ -49,17 +49,18 @@ describe("S10A Dive (291) setup body: faithful timing with D3", () => {
     expect((status.faithfulRandomAdapters as { id: number }[]).some((e) => e.id === 291)).toBe(false);
   });
 
-  it("setup 118 rows (player attacker) / 115 (opponent); the attack body declines (no duration, no presentation, no hide)", () => {
+  it("setup 118 rows (player attacker) / 115 (opponent); the attack body (dive70: 93 rows) never hides; a setup's 20 words never draw an attack", () => {
     expect(liveMoveAnimationDuration(request(0, 0))).toBe(118);
     expect(liveMoveAnimationDuration(request(1, 0))).toBe(115);
-    expect(liveMoveAnimationDuration(request(0, 1))).toBeNull();
-    expect(liveMoveAnimationDuration(request(1, 1))).toBeNull();
+    expect(liveMoveAnimationDuration(request(0, 1))).toBe(93);
+    expect(liveMoveAnimationDuration(request(1, 1))).toBe(93);
     expect(liveSemiInvulnerableHideBattler(request(0, 0))).toBe(0);
     expect(liveSemiInvulnerableHideBattler(request(1, 0))).toBe(1);
     expect(liveSemiInvulnerableHideBattler(request(0, 1))).toBeNull();
     const f = fixtureAt("dive-alt-player-lanturn-golem");
     const view = liveView(f, 30);
     const e = view.effect as unknown as { spriteAllocatorInput: never; spriteOrderInput: never; presentationRng: never };
+    // the setup fixture's host holds the setup's 20 words under this key: the attack body (56 words) declines on them
     expect(liveMoveAnimationPresentation(request(0, 1), view.field, 30, undefined, e.spriteAllocatorInput, e.spriteOrderInput, e.presentationRng)).toBeNull();
     expect(liveMoveAnimationPresentation(request(0, 0), view.field, 30, undefined, e.spriteAllocatorInput, e.spriteOrderInput, e.presentationRng)?.config.move)
       .toBe("DIVE");
@@ -163,7 +164,7 @@ describe("S10A Dive (291) setup body: faithful timing with D3", () => {
     expect(rows.filter((r) => r.selectedPhase)).toHaveLength(7);
   });
 
-  it("ordinary route seed 111 slot 0: setup live every age, attacker hidden across the gap, attack falls back; seeds / Scene OFF keep gameplay", () => {
+  it("ordinary route seed 111 slot 0: setup live every age, attacker hidden across the gap, attack live (dive70); seeds / Scene OFF keep gameplay", () => {
     const SEED_A = 0x1234abcd, SEED_B = 0xfeed0042;
     const a = random2Route(111, "on", [0, 0], 0, SEED_A), a2 = random2Route(111, "on", [0, 0], 0, SEED_A);
     const b = random2Route(111, "on", [0, 0], 0, SEED_B), off = random2Route(111, "off", [0, 0], 0, SEED_A);
@@ -175,7 +176,10 @@ describe("S10A Dive (291) setup body: faithful timing with D3", () => {
     expect(setup.active.every(Boolean)).toBe(true);
     expect(setup.provenance).toBe("surrogate");
     expect(setup.words).toHaveLength(20);
-    expect(attack.active.some(Boolean)).toBe(false);
+    // dive70: the attack body plays live at every age (93 rows) on 56 surrogate words (tests/animation/liveDiveAttackAdapter.test.ts)
+    expect(attack.ages).toEqual(Array.from({ length: 93 }, (_, age) => age));
+    expect(attack.active.every(Boolean)).toBe(true);
+    expect(attack.words).toHaveLength(56);
     expect(a.run.stalled).toBe(false);
     expect(a.run.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(a2.bodies).toEqual(a.bodies);

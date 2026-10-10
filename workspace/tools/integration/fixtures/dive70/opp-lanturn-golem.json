@@ -1,0 +1,175 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "DIVE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep25-dive-alt-opponent-lanturn-golem.json",
+ "denseWindow": {
+  "startFrame": 614,
+  "endFrame": 706
+ },
+ "windowSource": "dive70: window = [activation, activation + 92] of the scenario's Dive ATTACK body (prep22Probe.py, fresh direct mGBA)",
+ "attacker": {
+  "species": "LANTURN",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703925,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 174,
+  "playerMaxHp": 174,
+  "opponentHp": 188,
+  "opponentMaxHp": 188,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 1
+ },
+ "wordsChain": {
+  "turns": [
+   [
+    [
+     "body",
+     291,
+     "opponent",
+     {
+      "player": 76,
+      "opponent": 171
+     },
+     0
+    ]
+   ],
+   [
+    [
+     "body",
+     291,
+     "opponent",
+     {
+      "player": 76,
+      "opponent": 171
+     },
+     1
+    ]
+   ]
+  ],
+  "words": [
+   {
+    "value": 1508501329,
+    "source": "PINNED: prep22Probe.py atActivation.rng2 of the Dive setup body (activation frame 53)"
+   }
+  ]
+ },
+ "presentationRngActivation": {
+  "value": 545076881,
+  "source": "PINNED: prep22Probe.py atActivation.rng2 of the Dive attack body (activation frame 614) == rng2Series[615] stepped back once"
+ },
+ "dive70": {
+  "romSpriteOrderAtActivation": [
+   62,
+   60,
+   0,
+   63,
+   1,
+   61,
+   6,
+   8,
+   2,
+   4,
+   3,
+   13,
+   12,
+   5,
+   7,
+   15,
+   11,
+   9,
+   14,
+   10,
+   21,
+   20,
+   19,
+   18,
+   17,
+   16,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   23,
+   22,
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47
+  ],
+  "setupWindow": [
+   53,
+   167
+  ],
+  "bodies": [
+   [
+    291,
+    53,
+    167,
+    1
+   ],
+   [
+    291,
+    614,
+    706,
+    1
+   ],
+   [
+    33,
+    1032,
+    1073,
+    0
+   ],
+   [
+    0,
+    1157,
+    1368,
+    0
+   ]
+  ]
+ }
+}
