@@ -4059,9 +4059,9 @@ export function liveMoveAnimationPresentation(
       // D4b faithful timing + D3: Meteor Mash (prep17 s0.1). 48 mini twinkling stars, two presentation-host words each in spawn order
       // (miniTwinklingStarFromWords); the row-195 restore lag L from the timing policy. Non-shiny. Centres: the attacker's sprite centre, the
       // target's Y_PIC_OFFSET point (the accepted seam: opponent target = its sprite centre, player target = centre + 8).
-      // The METEOR_MASH branch draws status-free healthboxes: a displayed status declines.
+      // The METEOR_MASH branch draws status-free healthboxes; the live view redraws both healthboxes (status icon included) over them,
+      // and BG_COSMIC's fade targets BG3 + backdrop only, so a displayed status is exact (st76: docs/st76-status-gates.md, 8 windows 0 px).
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      if ((field.player.status ?? "none") !== "none" || (field.opponent.status ?? "none") !== "none") return null;
       const words = liveMovePresentationRngWords(presentationRngInput)?.words;
       if (words === undefined || words.length !== 96) return null;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
@@ -4079,8 +4079,8 @@ export function liveMoveAnimationPresentation(
       // Faithful timing with D3 (S10A; docs/next-adapters-prep25.md s0.2 / B.1 / B.1a / C): the Dive SETUP body (turn bit 0 = 0) after any known
       // lend with the known-entry occupancy. The attacker stays hidden from setup age 10 across the turn gap (liveSemiInvulnerableHideBattler,
       // as Dig). Anchors (B.1a, 8/8): splash / droplets at battlePositionCenter, the ball at the attacker's Y_PIC_OFFSET point (reducer + 16).
-      // Words from the presentation host only. The DIVE branch draws status-free healthboxes and unshaded battler art: a displayed status
-      // or a shiny battler declines.
+      // Words from the presentation host only. The DIVE branch draws unshaded battler art: a shiny battler declines. Its status-free
+      // healthboxes are redrawn by the live view (status icon included): a displayed status is exact (st76: docs/st76-status-gates.md).
       // dive70 (docs/dive70-dive-attack.md): the ATTACK body (turn bit 0 = 1, DiveAttack + RisingWaterHitEffect) on the resolved lend (the setup
       // marker carried through the hidden turn, land68): 56 host words (20 droplet words at +16, then 9 x 4 bubble words at +30 + 4k), the
       // body's real-slot profile from liveDiveWordsPlan (the order carry's own allocation), the target impact anchor (B.1a). The diver
@@ -4088,7 +4088,6 @@ export function liveMoveAnimationPresentation(
       // opponent diver declines (its enemy shadow's return is unmeasured).
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      if ((field.player.status ?? "none") !== "none" || (field.opponent.status ?? "none") !== "none") return null;
       const side = attacker.geometry.side;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const a = attackerAnchors, t = targetAnchors;

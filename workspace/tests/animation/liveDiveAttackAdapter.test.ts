@@ -79,7 +79,7 @@ describe("dive70: Dive 291 attack body live adapter", () => {
     }
   }, 240000);
 
-  it("93 rows both sides, no hide; the attack reads the resolved lend + 56 host words; status / shiny / missing words / elevated opponent diver decline", () => {
+  it("93 rows both sides, no hide; the attack reads the resolved lend + 56 host words; shiny / missing words / elevated opponent diver decline", () => {
     expect(liveMoveAnimationDuration(request(0, 1))).toBe(93);
     expect(liveMoveAnimationDuration(request(1, 1))).toBe(93);
     expect(liveSemiInvulnerableHideBattler(request(0, 1))).toBeNull();
@@ -99,9 +99,9 @@ describe("dive70: Dive 291 attack body live adapter", () => {
     // no lend / no host words -> declines
     expect(liveMoveAnimationPresentation(e.request, view.field, 40, undefined, e.spriteAllocatorInput, undefined, e.presentationRng)).toBeNull();
     expect(liveMoveAnimationPresentation(e.request, view.field, 40, undefined, e.spriteAllocatorInput, e.spriteOrderInput, undefined)).toBeNull();
-    // a displayed status or a shiny battler declines
+    // st76 (docs/st76-status-gates.md): a displayed status plays live (the live view redraws the healthboxes, status icon included)
     const sick = { ...view.field, opponent: { ...view.field.opponent, status: "poison" as const } };
-    expect(liveMoveAnimationPresentation(e.request, sick, 40, undefined, e.spriteAllocatorInput, e.spriteOrderInput, e.presentationRng)).toBeNull();
+    expect(liveMoveAnimationPresentation(e.request, sick, 40, undefined, e.spriteAllocatorInput, e.spriteOrderInput, e.presentationRng)).not.toBeNull();
     // an elevated opponent diver (GOLBAT stands in for one) declines
     const g = fixtureAt("tools/integration/fixtures/dive70/opp-chinchou-onix.json");
     const elevated = presentationOf({ ...g, attacker: { ...g.attacker, species: "GOLBAT" } }, 40);

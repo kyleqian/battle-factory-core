@@ -32,7 +32,9 @@ for f in sorted(FX.glob("*.json")):
                     "digest": runs[0]["digest"][:12], "r1EqualsR2": runs[0]["digest"] == runs[1]["digest"],
                     "residualAges": sorted({m["age"] for m in runs[0]["firstMismatches"]}) if runs[0]["residualPixels"] else [],
                     "productionDuration": runs[0]["expectedDuration"], "lagAges": lags, "lagRunsIdentical": lag_same,
-                    "lendEqualsRom": check[tag]["lendEqualsRom"], "liveAges": check[tag]["liveAges"]})
+                    "lendEqualsRom": check[tag]["lendEqualsRom"], "liveAges": check[tag]["liveAges"],
+                    # the ROM row hashes (RGB888 sha256, run 0; run 1 is digest-identical) for the Tier-1 vectors
+                    "romRgbSha256": [c["source"] for c in json.loads((S / "evidence" / f"{tag}-run0" / "live-comparison.json").read_text())["comparisons"]]})
 def sweep(*patterns):
     out = {}
     for p1 in sorted(f for pattern in patterns for f in glob.glob(pattern)):
