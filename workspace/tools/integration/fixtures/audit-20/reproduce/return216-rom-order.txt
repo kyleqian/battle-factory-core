@@ -1,0 +1,10 @@
+Return 216 (strongest branch, friendship 255) at the battle-lab entry state: the ROM body vs production plan 117 'Cf;D0;Cf;D1;Cf;Cf;D2;D3'
+source: audit20Probe.py of the pb-ret-* controls (audit20Extra.sh's ctlsc/, regenerated from partb/scenarios); fresh direct-mGBA runs
+pb-ret-fly-wingull-opp-s2 Return body frames 76 .. 357
+  sSpriteOrder at activation  [62, 60, 0, 63, 1, 61, 6, 8, 2, 4, 3, 21, 20, 5, 19, 18]
+  sSpriteOrder at first inactive frame [62, 60, 0, 63, 1, 61, 6, 8, 2, 3, 4, 5, 7, 21, 20, 19]
+  sprite creates [age, slot]: 31 [[11, 3], [24, 3], [34, 4], [60, 3], [67, 4], [94, 3], [101, 4], [120, 3], [120, 4], [120, 5], [120, 7], [135, 3], [142, 4], [142, 5], [157, 3], [157, 4], [157, 5], [172, 3], [172, 4], [172, 5], [187, 3], [187, 4], [187, 5], [202, 3], [202, 4], [202, 5], [217, 3], [225, 4], [233, 3], [241, 4], [264, 3]]
+pb-ret-dig-jolteon-opp-s0 Return body frames 76 .. 357
+  sSpriteOrder at activation  [62, 60, 0, 63, 1, 61, 6, 8, 2, 4, 3, 21, 20, 5, 19, 18]
+  sSpriteOrder at first inactive frame [62, 60, 0, 63, 1, 61, 6, 8, 2, 3, 4, 5, 7, 21, 20, 19]
+  sprite creates [age, slot]: 31 [[11, 3], [24, 3], [34, 4], [60, 3], [67, 4], [94, 3], [101, 4], [120, 3], [120, 4], [120, 5], [120, 7], [135, 3], [142, 4], [142, 5], [157, 3], [157, 4], [157, 5], [172, 3], [172, 4], [172, 5], [187, 3], [187, 4], [187, 5], [202, 3], [202, 4], [202, 5], [217, 3], [225, 4], [233, 3], [241, 4], [264, 3]]

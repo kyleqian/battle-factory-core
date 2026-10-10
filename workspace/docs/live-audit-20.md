@@ -70,9 +70,15 @@ The entry controls (`pb-ret-*`, the 255-friendship replacement as the lead, so R
 - production lends the start order unchanged, `[4, 3, 21, 20, 5, ...]`;
 - the ROM has `[4, 3, 5, 7, 21, 20, ...]`: the 4 slots Return creates (3, 4, 5, 7) come back ahead of 21 / 20.
 
-The mechanism (unverified): the Return strongest-branch plan 117 is `Cf;D0;Cf;D1;Cf;Cf;D2;D3`
-(`src/engine/spriteOrderProductionPlans.ts:270` `"216:*": 117`). It leaves 5 / 7 at their start positions, where the ROM's sort does
-not. This does not touch land75's claims, because the hidden route and the visible route give identical lends. No temp patch was
+**The ROM side is measured.** `reproduce/return216-rom-order.txt` comes from the run-2 probes of the entry controls:
+- the ROM's Return body (282 frames) creates **31 sprites** into slots 3 / 4 / 5 / 7;
+- it ends with `sSpriteOrder` `[..., 2, 3, 4, 5, 7, 21, 20, ...]`;
+- it started from `[..., 2, 4, 3, 21, 20, 5, ...]`.
+
+The mechanism on the production side is unverified: the table entry `"216:*": 117` points at plan `Cf;D0;Cf;D1;Cf;Cf;D2;D3`
+(`src/engine/spriteOrderProductionPlans.ts:270`). That plan has 4 creates, not the strongest branch's 31, and it leaves 5 / 7 at
+their start positions. The checker passes friendship 70 (audit 19's fixture convention) where the Factory kernel passes 255. Production
+keys Return's plan on the move id only, so this does not change the lend. This does not touch land75's claims, because the hidden route and the visible route give identical lends. No temp patch was
 tested in the time box. The fix shape: re-measure plan 117 from the entry start, or invalidate after 216 as a fail-closed alternative.
 It is 0 px in all 15 windows here. An order-dependent consumer (Shock Wave, Water Pulse, Swift ...) after a Return would expose it.
 
