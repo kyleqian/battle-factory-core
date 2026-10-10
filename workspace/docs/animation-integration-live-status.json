@@ -4836,7 +4836,6 @@
         "cause": "oam-transfer-row (player setup only): in a no-event window the ROM's row 68 shows the ordinary age-67 sprite state, the policy renders the reused-affine age-66 state (battleScene.ts DIVE setupRow68ReusedAffine): the splash / ball differ on row 68 only (CHINCHOU -> GOLBAT, CHINCHOU -> GOLEM after a Tackle: 284 px each)"
       },
       "d3": true,
-      "bodies": ["setup", "attack"],
       "evidence": [
         "scope: BOTH bodies (dive70, docs/dive70-dive-attack.md). SETUP (request.turn bit 0 = 0): any known lend with the known-entry occupancy, non-shiny, no displayed status; the attacker stays hidden from setup age 10 across the turn gap (liveSemiInvulnerableHideBattler, as Dig). ATTACK (turn 1, dive70): 93 rows (activation .. first inactive age 92), on the setup's word-free deferred marker resolved through the hidden turn (land68), 56 presentation-host words (20 droplet words at +16, 9 x 4 bubble words at +30 + 4k: faithful random, D3; no CPU-phase parameter), the body's real-slot profile from liveDiveWordsPlan, non-shiny, no displayed status, an elevated opponent diver declines; the diver reveals itself (dive.ts attackerInvisible < 83) and the hide ends with the body. Counted once here (d3: true)",
         "tools/integration/fixtures/d4d2-live-receipt.json",

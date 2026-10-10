@@ -82,9 +82,9 @@ describe("live inventory claim buckets", () => {
     expect(timing.filter((entry) => implemented.has(entry.id) || faithful.includes(entry.id))).toEqual([]);
     expect(timing.filter((entry) => (LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS as readonly number[]).includes(entry.id))).toEqual([]);
     // dive70: Dive's provider covers both bodies (the attack body's 56 Random2 words: d3), still counted once, in faithful timing
-    const dive = timing.find((entry) => entry.id === 291) as { d3: boolean; bodies?: string[]; evidence: string[] } | undefined;
+    const dive = timing.find((entry) => entry.id === 291) as { d3: boolean; evidence: string[] } | undefined;
     expect(dive?.d3).toBe(true);
-    expect(dive?.bodies).toEqual(["setup", "attack"]);
+    expect(dive?.evidence[0]).toMatch(/^scope: BOTH bodies \(dive70/);
     expect(dive?.evidence.some((line) => line.startsWith("tools/integration/fixtures/dive70-live-receipt.json"))).toBe(true);
     // every accepted move is in exactly one of exact / faithful random / faithful timing / remaining (276)
     const census = JSON.parse(readFileSync(join(import.meta.dirname, "../../tools/integration/fixtures/remaining-adapters-census.json"), "utf8")).summary;
