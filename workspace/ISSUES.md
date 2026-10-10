@@ -17,16 +17,23 @@ backlog.
 
 # Open
 
-## #160 — Order-host lend after a Whirlpool hit on a hidden Dive user differs from the ROM (S10A, found 2026-10-10 by dive70)
+## #163 — Needle Arm 302 order plan ignores a SortSprites tie (S10A, found 2026-10-10 by live audit 19; fix in flight: cf78)
 
-docs/dive70-dive-attack.md s3: in `var-whirlpool-opp` (fixtures/dive70/scenarios/whirlpool-opp-s1.json) the player's Whirlpool hits the
-hidden (UNDERWATER) opponent diver at the end of turn 1, right before the turn-2 action prompt. The production lend at the next body places
-the prompt's slots 3 / 4 ahead of the Whirlpool's freed slots; the ROM interleaves them (`…2,17,10,3,9,5,7,16,4,…` vs production
-`…2,3,4,17,10,9,5,7,16,…`). The Dive attack window itself is 0 px (its own sprites do not depend on that part of the order), but a later
-ORDER-DEPENDENT consumer could render wrongly. The other 14 dive70 lends and land68's 7 / 7 routes equal the ROM; Surf at the hidden diver is
-exact. Resume: probe Whirlpool (and TURN_TRAP_WHIRLPOOL) bodies at a hidden target, both sides, find which unit's plan misorders the free
-list (Whirlpool's own body plan at a hidden target, or the prompt's re-allocation), then fix the plan or invalidate the host after a
-hidden-target Whirlpool.
+Plan 162 (`spriteOrderProductionPlans.ts`, rows 302:player / 302:opponent) hard-codes one placement of the two sprites created into slots
+10 and 12, which tie in SortSprites (the ROM keeps their start order): 6 / 44 lends != ROM when the start order is reversed (0 px so far).
+
+## #162 — Castform weather forms drawn as the normal form in live bodies (S10A, found 2026-10-10 by live audit 19; fix in flight: cf78)
+
+docs/live-audit-19.md: fold71's CASTFORM_CHANGE order plan made bodies after a form change LIVE; while Castform is in its sun / rain form
+production draws the NORMAL-form Castform (44 live windows, 998..2,312 px per row in its sprite box; order 44 / 44 == ROM). Root cause is
+ISSUES #143's open remainder (no `gBattleMonForms` in the field view). cf78 makes live bodies decline while a transformed Castform is shown.
+
+## #161 — Dive attack: an extra lag frame at age 17 on poisoned player-diver routes (S10A, found 2026-10-10 by st76)
+
+docs/st76-status-gates.md: 5 of 34 PSN player-attacker windows run 94 rows (lags [17, 85, 86] instead of [84, 85]); 0 / 73 unstatused,
+0 / 29 BRN opponent-attacker. Every displayed image is correct (with the repeated ROM row skipped, 93 / 93 rows 0 px); production presents
+the dominant 93-row phase (29 / 34). Mechanism unknown (RAM at activation identical). Resume: name the age-17 lag source from counters,
+then record it as a third Dive D4 parameter (docs/faithful-timing-policy.md) or gate the shape.
 
 ## #157 — Weather-continuing animations: kernel event battler is the last attacker, the ROM plays them on battler 0 (S10A, found 2026-10-09 by aud56)
 

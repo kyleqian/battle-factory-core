@@ -1121,6 +1121,92 @@ export function applyLiveSemiInvulnerableCommand(
   return Object.freeze(battler === 0 ? [next, hidden[1]] as const : [hidden[0], next] as const);
 }
 
+/**
+ * cf78 (ISSUES #143 remainder, live audit 19): the ROM's per-slot `gBattleMonForms`, presentation-only. The CASTFORM_CHANGE launch
+ * writes `argument & ~CASTFORM_SUBSTITUTE` into the slot (battle_gfx_sfx_util.c:465 behind a Substitute, :948 via
+ * AnimTask_CastformGfxDataChange / HandleSpeciesGfxDataChange otherwise); nothing resets it within a battle (ClearBattleMonForms,
+ * pokemon.c:6418, runs at battle setup), so the form stays with the SLOT across faints and switches, and a CASTFORM the slot
+ * displays later is drawn in it (BattleLoadOpponentMonSpriteGfx / BattleLoadPlayerMonSpriteGfx, battle_gfx_sfx_util.c:619 / :682).
+ * Derived only from the kernel's CASTFORM_CHANGE animation events (battleScriptTryCastformDataChangeOpcode.ts); never read by
+ * rules, RNG or the queue. A non-numeric argument is an unknown form (255): it declines like a non-normal one.
+ */
+export type LiveCastformForms = readonly [number, number];
+export const LIVE_CASTFORM_FORMS_NORMAL: LiveCastformForms = Object.freeze([0, 0] as const);
+const LIVE_CASTFORM_SPECIES = 385;
+const LIVE_CASTFORM_SUBSTITUTE = 1 << 7;
+const LIVE_CASTFORM_UNKNOWN_FORM = 0xff;
+
+/** Applies the CASTFORM_CHANGE events of one segment up to `throughSequence` (strictly before it when `strict`). */
+export function applyLiveCastformFormEvents(
+  forms: LiveCastformForms,
+  events: readonly Readonly<{ sequence: number; payload: unknown }>[],
+  throughSequence: number,
+  strict: boolean,
+): LiveCastformForms {
+  let next = forms;
+  for (const event of events) {
+    if (strict ? event.sequence >= throughSequence : event.sequence > throughSequence) continue;
+    const payload = event.payload as Readonly<{ kind?: string; animationId?: string; battler?: number; arguments?: readonly string[] }>;
+    if (payload.kind !== "animation" || payload.animationId !== "CASTFORM_CHANGE") continue;
+    const battler = payload.battler;
+    if (battler !== 0 && battler !== 1) continue;
+    const argument = Number(payload.arguments?.[0]);
+    const form = Number.isInteger(argument) ? (argument & ~LIVE_CASTFORM_SUBSTITUTE) >>> 0 : LIVE_CASTFORM_UNKNOWN_FORM;
+    if (next[battler] === form) continue;
+    next = Object.freeze(battler === 0 ? [form, next[1]] as const : [next[0], form] as const);
+  }
+  return next;
+}
+
+/** The slot forms at a resolution command: every earlier segment, then this segment's events strictly before the command. */
+function liveCastformFormsAt(
+  state: BattleResolutionPresentationState,
+  command: BattleResolutionPresentationCommand | null,
+): LiveCastformForms {
+  let forms = state.liveCastformForms ?? LIVE_CASTFORM_FORMS_NORMAL;
+  for (let segmentIndex = 0; segmentIndex < state.segmentIndex; segmentIndex += 1) {
+    forms = applyLiveCastformFormEvents(forms, state.segments[segmentIndex]!.events, Number.POSITIVE_INFINITY, false);
+  }
+  const limit = command !== null && "eventSequence" in command ? command.eventSequence : Number.POSITIVE_INFINITY;
+  return applyLiveCastformFormEvents(forms, state.segments[state.segmentIndex]?.events ?? [], limit, true);
+}
+
+/**
+ * The slot forms once `command` has completed (the display ledger's carry): every segment before the command's own, then that
+ * segment's events through the command, or all of them when it is the segment's last command (trailing events included).
+ */
+export function liveCastformFormsThroughCommand(
+  state: BattleResolutionPresentationState,
+  command: BattleResolutionPresentationCommand,
+): LiveCastformForms {
+  const segmentIndex = state.segments.findIndex((segment) => segment.commands.includes(command));
+  if (segmentIndex < 0) return state.liveCastformForms ?? LIVE_CASTFORM_FORMS_NORMAL;
+  let forms = state.liveCastformForms ?? LIVE_CASTFORM_FORMS_NORMAL;
+  for (let index = 0; index < segmentIndex; index += 1) {
+    forms = applyLiveCastformFormEvents(forms, state.segments[index]!.events, Number.POSITIVE_INFINITY, false);
+  }
+  const commands = state.segments[segmentIndex]!.commands;
+  const last = commands[commands.length - 1] === command;
+  const limit = !last && "eventSequence" in command ? command.eventSequence : Number.POSITIVE_INFINITY;
+  return applyLiveCastformFormEvents(forms, state.segments[segmentIndex]!.events, limit, false);
+}
+
+/** The displayed field with `castformForm` on each CASTFORM whose slot form is not the normal one (removed otherwise). */
+export function withLiveCastformForms(
+  field: BattleResolutionDisplayedField,
+  forms: LiveCastformForms,
+): BattleResolutionDisplayedField {
+  let next = field;
+  for (const battler of [0, 1] as const) {
+    const current = fieldBattler(next, battler);
+    const form = current.species === LIVE_CASTFORM_SPECIES && forms[battler] !== 0 ? forms[battler] : undefined;
+    if (current.castformForm === form) continue;
+    const { castformForm: _form, ...mon } = current;
+    next = replaceFieldBattler(next, battler, Object.freeze(form === undefined ? mon : { ...mon, castformForm: form }));
+  }
+  return next;
+}
+
 export function createBattleResolutionPresentationRenderView(
   state: BattleResolutionPresentationState,
   /** Read-only presentation Random2 host (EngineState.presentationRng.host); render never draws from it. */
@@ -1493,6 +1579,8 @@ export function createBattleResolutionPresentationRenderView(
   const opponentFaint = effect?.type === "faint" && effect.battler === 1
     ? effect
     : null;
+  // cf78: a displayed CASTFORM in a weather form (its slot's gBattleMonForms at this command) declines every live body.
+  field = withLiveCastformForms(field, liveCastformFormsAt(state, command));
   const tailSide = substituteSwapTailSideAt(state, segment, field);
   const fieldArt = tailSide === null
     ? createBattleCommandFieldArtView(field)

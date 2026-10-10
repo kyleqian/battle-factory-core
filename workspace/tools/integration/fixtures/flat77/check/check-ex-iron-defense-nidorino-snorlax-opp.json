@@ -1,0 +1,109 @@
+{
+ "schema": "flat77-chain-check/v1",
+ "scenario": "ex-iron-defense-nidorino-snorlax-opp",
+ "rows": [
+  {
+   "fixture": "ex-iron-defense-nidorino-snorlax-opp-c0.json",
+   "move": "FLATTER",
+   "side": "opponent",
+   "species": "NIDORINO/SNORLAX",
+   "units": 0,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "260@1"
+   ],
+   "romPower": 0,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 74,
+    "endFrame": 292
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 219,
+    "px": 0,
+    "digests": [
+     "3a18c77f509e4e8e",
+     "3a18c77f509e4e8e"
+    ],
+    "residualRows": [],
+    "detail": [],
+    "allocatorKnown": true,
+    "d3": {
+     "registers": {
+      "exact": 218,
+      "rows": 218,
+      "mismatch": []
+     },
+     "activationOrder": true,
+     "allocator": {
+      "exact": 431,
+      "rows": 431,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 219,
+    "px": 0,
+    "digests": [
+     "3a18c77f509e4e8e",
+     "3a18c77f509e4e8e"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

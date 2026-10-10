@@ -166,7 +166,7 @@ export const SPRITE_ORDER_PRODUCTION_PLANS: readonly string[] = Object.freeze([
   "Cf;Cff;Cff;Cff;Cf;D0;D2;D1;D4;D3;D5,6/P552,552;D7",
   "Cf;Cf;D0;Cf;D1;Cf;D2;Cf;D3;D4",
   "Cf;Cfffffffff;D2;D1;D0;D4,3,7,8,6,9,5",
-  "Cf;Cf;Cf;Cf;Cf/D0;Cf/D1;Cf/D2;Cf/D3;Cf/D4;Cf/D5;Cf/D6;Cf/D7;D8;D9;D10;D11;Cfffffffff;Cf;D13;D12,18,19,17,16,20,15,21,14",
+  "Cf;Cf;Cf;Cf;Cf/D0;Cf/D1;Cf/D2;Cf/D3;Cf/D4;Cf/D5;Cf/D6;Cf/D7;D8;D9;D10;D11;Cfffffffff;Cf;D13;D12,18,19,17,16,20,15,21,14/P1,2,3,3,4,5,6,7,8",
   "Cff;D0;D1;Cff;D2;D3",
   "Cf;Cff;D0;Cff;D2,1;D4,3",
   "Cff;Cf;Cf;Cf;Cf;Cf;Cfff;Cff;Cff;Cff;Cff;Cff;Cff;Cff;Cff;Cf;Cf;Cf;Cf;Cf;Cf;Cf/D7;Cfff;Cf;Cf;Cf;D1;Cf;D2;Cf;D3;Cf;D4;Cf;D5;Cf;D6;Cf;D8,9;Cf;D10,11;Cff;D12,13;Cf;D14,15;Cf;D16,17;Cf;D18,19;Cf/D34;D20,21;D46;D22,23;D24,25;D26;D0;D27;D28;D29;D30;D31;D32;D33;D35;D36;D37;D38;D39;D40;D41;D42;D43;D44;D45;D47;D48;D49;D50;D51",

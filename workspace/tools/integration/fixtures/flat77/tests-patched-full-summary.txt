@@ -1,0 +1,14 @@
+# full npm test in the PATCHED git-archive copy of dd00bdd6e (+ flat77-temp-src.diff), 2026-10-10
+Test Files  7 failed | 1598 passed | 49 skipped (1654)
+Tests  20 failed | 12350 passed | 1088 skipped (13458)
+# failing files (all environmental: the archive copy has no core-rs wasm artifact and no git history)
+1 FAIL  tests/appDifferential.test.ts
+3 FAIL  tests/factoryAiBattleHistoryParity.test.ts
+3 FAIL  tests/factoryAiLiveDecisionParity.test.ts
+3 FAIL  tests/factoryAiLivePlannerParity.test.ts
+4 FAIL  tests/factoryAiLiveViewParity.test.ts
+3 FAIL  tests/factoryAiSwitchPolicyParity.test.ts
+3 FAIL  tests/factoryTrainerScheduleParity.test.ts
+# failure causes
+1 AssertionError: expected 'fatal: Needed a single revision
+21 Error: factory-wasm artifact not found at <patched>/artifacts/wasm/factory_wasm.wasm. Build it with: core-rs/build-wasm.sh
