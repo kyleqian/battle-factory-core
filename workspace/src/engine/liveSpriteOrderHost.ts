@@ -340,6 +340,12 @@ function isAiSwitchOutSummary(events: readonly BattleKernelSemanticEvent[], inde
 /** Fury Cutter's order keys by furyCutterCounter 1 / 2 / 3 / 4+ (Move_FURY_CUTTER's FuryCutterContinue2 / Medium / Strong / Strongest). */
 const FURY_CUTTER_ORDER_KEYS: readonly number[] = Object.freeze([210, 10210, 20210, 30210]);
 
+/** AnimTask_GetReturnPowerLevel: 0 Weak (< 61: friendship 60 matches no range and keeps 0), 1 Medium (61..91), 2 Strong (92..200),
+ * 3 Strongest (> 200). */
+export function returnPowerLevel(friendship: number): 0 | 1 | 2 | 3 {
+  return friendship > 200 ? 3 : friendship > 91 ? 2 : friendship > 60 ? 1 : 0;
+}
+
 function orderEventOf(
   events: readonly BattleKernelSemanticEvent[], index: number, hidden: readonly [boolean, boolean],
 ): { event?: SpriteOrderPresentationEvent; then?: SpriteOrderPresentationEvent; hidden?: readonly [boolean, boolean] } {
@@ -403,6 +409,12 @@ function orderEventOf(
           return { event: Number.isInteger(counter) && counter >= 1 && counter <= 5
             ? { kind: "move-animation", moveId: FURY_CUTTER_ORDER_KEYS[Math.min(counter, 4) - 1]!, attackerSide: battler === 0 ? "player" : "opponent" }
             : { kind: "invalidate", reason: "Fury Cutter body without furyCutterCounter" } };
+        }
+        // Move_RETURN branches on gAnimFriendship (AnimTask_GetReturnPowerLevel, battle_anim_effects_3.c:5060-5073; ret80): 216's plan 117
+        // is ReturnMedium's (61..91; dip, dip, lunge, hitsplat). Weak / Strong / Strongest (the Factory's 255) have no plan (invalidates).
+        if (request.moveId === 216) {
+          const level = returnPowerLevel(request.friendship);
+          if (level !== 1) return { event: { kind: "invalidate", reason: `Return power level ${level} body` } };
         }
         const event = { kind: "move-animation", moveId: presentHeal ? 20217 : magnitudeIntense ? 20222 : secondBranch ? 10000 + request.moveId : request.moveId,
           attackerSide: battler === 0 ? "player" : "opponent" } as const;
