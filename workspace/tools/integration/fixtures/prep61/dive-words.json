@@ -329,5 +329,1022 @@
     "exact": false
    }
   }
+ ],
+ "attack": [
+  {
+   "job": "dive-opp-170",
+   "side": "opponent",
+   "frame": 2770,
+   "groups": 10,
+   "exactGroups": 10,
+   "detail": [
+    {
+     "age": 46,
+     "rom": [
+      7,
+      10,
+      5,
+      11,
+      13,
+      4,
+      14,
+      9,
+      15,
+      12
+     ],
+     "predicted": [
+      7,
+      10,
+      5,
+      11,
+      13,
+      4,
+      14,
+      9,
+      15,
+      12
+     ],
+     "exact": true
+    },
+    {
+     "age": 50,
+     "rom": [
+      17,
+      18
+     ],
+     "predicted": [
+      17,
+      18
+     ],
+     "exact": true
+    },
+    {
+     "age": 54,
+     "rom": [
+      20,
+      21
+     ],
+     "predicted": [
+      20,
+      21
+     ],
+     "exact": true
+    },
+    {
+     "age": 58,
+     "rom": [
+      23,
+      24
+     ],
+     "predicted": [
+      23,
+      24
+     ],
+     "exact": true
+    },
+    {
+     "age": 62,
+     "rom": [
+      16,
+      25
+     ],
+     "predicted": [
+      16,
+      25
+     ],
+     "exact": true
+    },
+    {
+     "age": 66,
+     "rom": [
+      26,
+      27
+     ],
+     "predicted": [
+      26,
+      27
+     ],
+     "exact": true
+    },
+    {
+     "age": 70,
+     "rom": [
+      7,
+      5
+     ],
+     "predicted": [
+      7,
+      5
+     ],
+     "exact": true
+    },
+    {
+     "age": 74,
+     "rom": [
+      9,
+      10
+     ],
+     "predicted": [
+      9,
+      10
+     ],
+     "exact": true
+    },
+    {
+     "age": 78,
+     "rom": [
+      12,
+      13
+     ],
+     "predicted": [
+      12,
+      13
+     ],
+     "exact": true
+    },
+    {
+     "age": 82,
+     "rom": [
+      15,
+      14
+     ],
+     "predicted": [
+      15,
+      14
+     ],
+     "exact": true
+    }
+   ]
+  },
+  {
+   "job": "dive-opp-170-whirlpool",
+   "side": "opponent",
+   "frame": 2779,
+   "groups": 10,
+   "exactGroups": 10,
+   "detail": [
+    {
+     "age": 46,
+     "rom": [
+      13,
+      15,
+      4,
+      14,
+      7,
+      9,
+      10,
+      5,
+      11,
+      12
+     ],
+     "predicted": [
+      13,
+      15,
+      4,
+      14,
+      7,
+      9,
+      10,
+      5,
+      11,
+      12
+     ],
+     "exact": true
+    },
+    {
+     "age": 50,
+     "rom": [
+      18,
+      17
+     ],
+     "predicted": [
+      18,
+      17
+     ],
+     "exact": true
+    },
+    {
+     "age": 54,
+     "rom": [
+      21,
+      20
+     ],
+     "predicted": [
+      21,
+      20
+     ],
+     "exact": true
+    },
+    {
+     "age": 58,
+     "rom": [
+      24,
+      23
+     ],
+     "predicted": [
+      24,
+      23
+     ],
+     "exact": true
+    },
+    {
+     "age": 62,
+     "rom": [
+      16,
+      25
+     ],
+     "predicted": [
+      16,
+      25
+     ],
+     "exact": true
+    },
+    {
+     "age": 66,
+     "rom": [
+      26,
+      27
+     ],
+     "predicted": [
+      26,
+      27
+     ],
+     "exact": true
+    },
+    {
+     "age": 70,
+     "rom": [
+      5,
+      7
+     ],
+     "predicted": [
+      5,
+      7
+     ],
+     "exact": true
+    },
+    {
+     "age": 74,
+     "rom": [
+      10,
+      9
+     ],
+     "predicted": [
+      10,
+      9
+     ],
+     "exact": true
+    },
+    {
+     "age": 78,
+     "rom": [
+      12,
+      13
+     ],
+     "predicted": [
+      12,
+      13
+     ],
+     "exact": true
+    },
+    {
+     "age": 82,
+     "rom": [
+      15,
+      14
+     ],
+     "predicted": [
+      15,
+      14
+     ],
+     "exact": true
+    }
+   ]
+  },
+  {
+   "job": "dive-opp-171",
+   "side": "opponent",
+   "frame": 2620,
+   "groups": 10,
+   "exactGroups": 10,
+   "detail": [
+    {
+     "age": 46,
+     "rom": [
+      7,
+      12,
+      13,
+      15,
+      14,
+      4,
+      5,
+      10,
+      11,
+      9
+     ],
+     "predicted": [
+      7,
+      12,
+      13,
+      15,
+      14,
+      4,
+      5,
+      10,
+      11,
+      9
+     ],
+     "exact": true
+    },
+    {
+     "age": 50,
+     "rom": [
+      17,
+      18
+     ],
+     "predicted": [
+      17,
+      18
+     ],
+     "exact": true
+    },
+    {
+     "age": 54,
+     "rom": [
+      20,
+      21
+     ],
+     "predicted": [
+      20,
+      21
+     ],
+     "exact": true
+    },
+    {
+     "age": 58,
+     "rom": [
+      24,
+      23
+     ],
+     "predicted": [
+      24,
+      23
+     ],
+     "exact": true
+    },
+    {
+     "age": 62,
+     "rom": [
+      25,
+      16
+     ],
+     "predicted": [
+      25,
+      16
+     ],
+     "exact": true
+    },
+    {
+     "age": 66,
+     "rom": [
+      26,
+      27
+     ],
+     "predicted": [
+      26,
+      27
+     ],
+     "exact": true
+    },
+    {
+     "age": 70,
+     "rom": [
+      7,
+      5
+     ],
+     "predicted": [
+      7,
+      5
+     ],
+     "exact": true
+    },
+    {
+     "age": 74,
+     "rom": [
+      10,
+      9
+     ],
+     "predicted": [
+      10,
+      9
+     ],
+     "exact": true
+    },
+    {
+     "age": 78,
+     "rom": [
+      12,
+      13
+     ],
+     "predicted": [
+      12,
+      13
+     ],
+     "exact": true
+    },
+    {
+     "age": 82,
+     "rom": [
+      15,
+      14
+     ],
+     "predicted": [
+      15,
+      14
+     ],
+     "exact": true
+    }
+   ]
+  },
+  {
+   "job": "dive-ply-170",
+   "side": "player",
+   "frame": 2635,
+   "groups": 10,
+   "exactGroups": 10,
+   "detail": [
+    {
+     "age": 46,
+     "rom": [
+      15,
+      13,
+      5,
+      7,
+      11,
+      4,
+      14,
+      10,
+      12,
+      9
+     ],
+     "predicted": [
+      15,
+      13,
+      5,
+      7,
+      11,
+      4,
+      14,
+      10,
+      12,
+      9
+     ],
+     "exact": true
+    },
+    {
+     "age": 50,
+     "rom": [
+      17,
+      18
+     ],
+     "predicted": [
+      17,
+      18
+     ],
+     "exact": true
+    },
+    {
+     "age": 54,
+     "rom": [
+      20,
+      21
+     ],
+     "predicted": [
+      20,
+      21
+     ],
+     "exact": true
+    },
+    {
+     "age": 58,
+     "rom": [
+      24,
+      23
+     ],
+     "predicted": [
+      24,
+      23
+     ],
+     "exact": true
+    },
+    {
+     "age": 62,
+     "rom": [
+      16,
+      25
+     ],
+     "predicted": [
+      16,
+      25
+     ],
+     "exact": true
+    },
+    {
+     "age": 66,
+     "rom": [
+      26,
+      27
+     ],
+     "predicted": [
+      26,
+      27
+     ],
+     "exact": true
+    },
+    {
+     "age": 70,
+     "rom": [
+      5,
+      7
+     ],
+     "predicted": [
+      5,
+      7
+     ],
+     "exact": true
+    },
+    {
+     "age": 74,
+     "rom": [
+      9,
+      10
+     ],
+     "predicted": [
+      9,
+      10
+     ],
+     "exact": true
+    },
+    {
+     "age": 78,
+     "rom": [
+      12,
+      13
+     ],
+     "predicted": [
+      12,
+      13
+     ],
+     "exact": true
+    },
+    {
+     "age": 82,
+     "rom": [
+      15,
+      14
+     ],
+     "predicted": [
+      15,
+      14
+     ],
+     "exact": true
+    }
+   ]
+  },
+  {
+   "job": "dive-ply-170-surf",
+   "side": "player",
+   "frame": 2966,
+   "groups": 10,
+   "exactGroups": 10,
+   "detail": [
+    {
+     "age": 46,
+     "rom": [
+      13,
+      7,
+      15,
+      11,
+      4,
+      12,
+      14,
+      9,
+      5,
+      10
+     ],
+     "predicted": [
+      13,
+      7,
+      15,
+      11,
+      4,
+      12,
+      14,
+      9,
+      5,
+      10
+     ],
+     "exact": true
+    },
+    {
+     "age": 50,
+     "rom": [
+      17,
+      18
+     ],
+     "predicted": [
+      17,
+      18
+     ],
+     "exact": true
+    },
+    {
+     "age": 54,
+     "rom": [
+      20,
+      21
+     ],
+     "predicted": [
+      20,
+      21
+     ],
+     "exact": true
+    },
+    {
+     "age": 58,
+     "rom": [
+      24,
+      23
+     ],
+     "predicted": [
+      24,
+      23
+     ],
+     "exact": true
+    },
+    {
+     "age": 62,
+     "rom": [
+      16,
+      25
+     ],
+     "predicted": [
+      16,
+      25
+     ],
+     "exact": true
+    },
+    {
+     "age": 66,
+     "rom": [
+      27,
+      26
+     ],
+     "predicted": [
+      27,
+      26
+     ],
+     "exact": true
+    },
+    {
+     "age": 70,
+     "rom": [
+      7,
+      5
+     ],
+     "predicted": [
+      7,
+      5
+     ],
+     "exact": true
+    },
+    {
+     "age": 74,
+     "rom": [
+      9,
+      10
+     ],
+     "predicted": [
+      9,
+      10
+     ],
+     "exact": true
+    },
+    {
+     "age": 78,
+     "rom": [
+      12,
+      13
+     ],
+     "predicted": [
+      12,
+      13
+     ],
+     "exact": true
+    },
+    {
+     "age": 82,
+     "rom": [
+      14,
+      15
+     ],
+     "predicted": [
+      14,
+      15
+     ],
+     "exact": true
+    }
+   ]
+  },
+  {
+   "job": "dive-ply-170-whirlpool",
+   "side": "player",
+   "frame": 2884,
+   "groups": 10,
+   "exactGroups": 10,
+   "detail": [
+    {
+     "age": 46,
+     "rom": [
+      14,
+      12,
+      7,
+      13,
+      11,
+      9,
+      10,
+      5,
+      15,
+      4
+     ],
+     "predicted": [
+      14,
+      12,
+      7,
+      13,
+      11,
+      9,
+      10,
+      5,
+      15,
+      4
+     ],
+     "exact": true
+    },
+    {
+     "age": 50,
+     "rom": [
+      18,
+      17
+     ],
+     "predicted": [
+      18,
+      17
+     ],
+     "exact": true
+    },
+    {
+     "age": 54,
+     "rom": [
+      20,
+      21
+     ],
+     "predicted": [
+      20,
+      21
+     ],
+     "exact": true
+    },
+    {
+     "age": 58,
+     "rom": [
+      24,
+      23
+     ],
+     "predicted": [
+      24,
+      23
+     ],
+     "exact": true
+    },
+    {
+     "age": 62,
+     "rom": [
+      25,
+      16
+     ],
+     "predicted": [
+      25,
+      16
+     ],
+     "exact": true
+    },
+    {
+     "age": 66,
+     "rom": [
+      26,
+      27
+     ],
+     "predicted": [
+      26,
+      27
+     ],
+     "exact": true
+    },
+    {
+     "age": 70,
+     "rom": [
+      7,
+      5
+     ],
+     "predicted": [
+      7,
+      5
+     ],
+     "exact": true
+    },
+    {
+     "age": 74,
+     "rom": [
+      9,
+      10
+     ],
+     "predicted": [
+      9,
+      10
+     ],
+     "exact": true
+    },
+    {
+     "age": 78,
+     "rom": [
+      13,
+      12
+     ],
+     "predicted": [
+      13,
+      12
+     ],
+     "exact": true
+    },
+    {
+     "age": 82,
+     "rom": [
+      15,
+      14
+     ],
+     "predicted": [
+      15,
+      14
+     ],
+     "exact": true
+    }
+   ]
+  },
+  {
+   "job": "dive-ply-171",
+   "side": "player",
+   "frame": 2488,
+   "groups": 10,
+   "exactGroups": 10,
+   "detail": [
+    {
+     "age": 46,
+     "rom": [
+      10,
+      7,
+      4,
+      9,
+      13,
+      15,
+      12,
+      11,
+      14,
+      5
+     ],
+     "predicted": [
+      10,
+      7,
+      4,
+      9,
+      13,
+      15,
+      12,
+      11,
+      14,
+      5
+     ],
+     "exact": true
+    },
+    {
+     "age": 50,
+     "rom": [
+      18,
+      17
+     ],
+     "predicted": [
+      18,
+      17
+     ],
+     "exact": true
+    },
+    {
+     "age": 54,
+     "rom": [
+      21,
+      20
+     ],
+     "predicted": [
+      21,
+      20
+     ],
+     "exact": true
+    },
+    {
+     "age": 58,
+     "rom": [
+      23,
+      24
+     ],
+     "predicted": [
+      23,
+      24
+     ],
+     "exact": true
+    },
+    {
+     "age": 62,
+     "rom": [
+      25,
+      16
+     ],
+     "predicted": [
+      25,
+      16
+     ],
+     "exact": true
+    },
+    {
+     "age": 66,
+     "rom": [
+      26,
+      27
+     ],
+     "predicted": [
+      26,
+      27
+     ],
+     "exact": true
+    },
+    {
+     "age": 70,
+     "rom": [
+      5,
+      7
+     ],
+     "predicted": [
+      5,
+      7
+     ],
+     "exact": true
+    },
+    {
+     "age": 74,
+     "rom": [
+      10,
+      9
+     ],
+     "predicted": [
+      10,
+      9
+     ],
+     "exact": true
+    },
+    {
+     "age": 78,
+     "rom": [
+      12,
+      13
+     ],
+     "predicted": [
+      12,
+      13
+     ],
+     "exact": true
+    },
+    {
+     "age": 82,
+     "rom": [
+      14,
+      15
+     ],
+     "predicted": [
+      14,
+      15
+     ],
+     "exact": true
+    }
+   ]
+  }
  ]
 }

@@ -111,3 +111,54 @@ for (const r of results) {
   console.log(`${r.job.padEnd(24)} f${r.frame} ${r.side.padEnd(8)} words@birth ${r.wordsOnBirthFrame} ROM D[${r.romDestroy}] last20 ${r.exactLast20 ? "EXACT" : `MISS ${JSON.stringify(r.predictedLast20)}`} fits ${JSON.stringify(r.fittingOffsets)} control ${r.controlOtherBodyWords.exact ? "MATCHES" : "differs"}`);
 }
 console.log(`${results.filter(r => r.exactLast20).length}/${results.length} Dive setup bodies: droplet destroy order == reducer(RAM words); whole plan text == ROM: ${results.filter(r => r.planExact).length}/${results.length}`);
+
+// ---- the Dive ATTACK (unleash, `body 10291:<side>`) body: splash + 10 droplets at age 16 (the last 20 words of that frame), then 9
+// impact + bubble-pair triples at ages 30 + 4k (bubble i: words 2i / 2i+1 of the last 4 drawn that frame; prep25DiveReducerCheck.ts's
+// velocity rule), ROM slots, the ROM lend one row before age 16, the impact anchor y = target Y_PIC_OFFSET y - 8 (player target) / - 2
+// (opponent target; dive.ts DiveGeometry.targetImpactOffset). Every ROM window that destroys >= 2 slots is compared with the reducer's
+// hardwareOrder at the age before it, restricted to those slots.
+const attack = Object.entries(jobs).flatMap(([name, job]) => {
+  const species = SPECIES[job.base];
+  if (species === undefined) return [];
+  const raw = JSON.parse(readFileSync(join(probeDir!, "raw", `${name}-A.json`), "utf8")) as { rows: unknown[][]; extra: number[][] };
+  return job.units.flatMap((u, i) => {
+    if (u.kind !== "body" || !/^body 10291:/.test(u.label) || u.truncated) return [];
+    const A = u.frame, len = (job.units[i + 1]?.frame ?? A) - A, w = u.windows;
+    const creates = w.filter((x) => x.C.length > 0);
+    if (creates.length !== 10 || creates[0]!.C.length !== 11 || creates.slice(1).some((x) => x.C.length !== 3)) return [{ job: name, skipped: "window shape" }];
+    if (creates[0]!.f - A !== 16 || creates.slice(1).some((x, k) => x.f - A !== 30 + 4 * k)) return [{ job: name, skipped: "creation ages" }];
+    const side = job.attackerSide, foe = side === "player" ? "opponent" as const : "player" as const;
+    const dropWords = wordsOnFrame(raw.extra, A + 16)?.slice(-20);
+    const splashSlot = creates[0]!.C[0]![0], dropSlots = creates[0]!.C.slice(1).map(([s]) => s);
+    const impacts = creates.slice(1).map((x) => {
+      const ws = wordsOnFrame(raw.extra, x.f)?.slice(-4) ?? [];
+      const bub = (slot: number, k: number) => { const rr = ws[2 * k + 1]! & 0x1ff;
+        return { slot, matrixNum: 0, persistentOrder: 0, velocityX: (ws[2 * k]! & 0xff) | 256, velocityY: rr > 255 ? 256 - rr : rr }; };
+      return { slot: x.C[0]![0], matrixNum: 0, persistentOrder: 0, bubbles: [bub(x.C[1]![0], 0), bub(x.C[2]![0], 1)] as const };
+    });
+    if (dropWords === undefined || dropWords.length !== 20) return [{ job: name, skipped: "words" }];
+    const slots = [splashSlot, ...dropSlots, ...impacts.flatMap((m) => [m.slot, ...m.bubbles.map((b) => b.slot)])];
+    const seed = orderAt(raw.rows, A + 15).filter((s) => slots.includes(s));
+    const art = createBattleCommandFieldArtView({ player: { species: species.player }, opponent: { species: species.opponent } } as never);
+    const aa = liveBattlerAnchors(side, art), ta = liveBattlerAnchors(foe, art);
+    const profile: DiveProfile = { firstInactiveAge: len, attackerSubpriority: side === "player" ? 30 : 40, targetSubpriority: side === "player" ? 40 : 30,
+      ball: { slot: splashSlot, matrixNum: 0, persistentOrder: 0 }, splash: { slot: splashSlot, matrixNum: 0, persistentOrder: 0 },
+      droplets: dropSlots.map((slot, k) => { const v1 = dropWords[2 * k]! & 0x1ff, v2 = dropWords[2 * k + 1]! & 0x7f;
+        return { slot, matrixNum: 0, persistentOrder: 0, velocityX: v1 % 2 ? 736 + v1 : 736 - v1, velocityY: v2 % 2 ? 896 + v2 : 896 - v2, direction: (k % 2) as 0 | 1 }; }),
+      impacts, spriteOrderSeed: seed };
+    const geometry = { attackerCenter: aa.spriteCenter, targetCenter: ta.spriteCenter, attackerPictureOffset: aa.battlePositionCenter,
+      targetPictureOffset: ta.battlePositionCenter, attackerRestOffset: aa.frontIdleRest, targetRestOffset: ta.frontIdleRest,
+      targetImpactOffset: { x: ta.battlePositionCenter.x, y: ta.picOffsetPoint.y - (foe === "player" ? 8 : 2) } };
+    const groups = w.filter((x) => x.D.length >= 2).map((x) => {
+      try {
+        const predicted = diveAtAge(x.f - A - 1, "attack", side, geometry, profile).hardwareOrder.filter((s) => x.D.includes(s));
+        return { age: x.f - A, rom: x.D, predicted, exact: JSON.stringify(predicted) === JSON.stringify(x.D) };
+      } catch (error) { return { age: x.f - A, rom: x.D, predicted: String(error), exact: false }; }
+    });
+    return [{ job: name, side, frame: A, groups: groups.length, exactGroups: groups.filter((g) => g.exact).length, detail: groups }];
+  });
+});
+const prior = JSON.parse(readFileSync(outPath!, "utf8"));
+writeFileSync(outPath!, JSON.stringify({ ...prior, attack }, null, 1) + "\n");
+for (const r of attack) console.log("attack", JSON.stringify("skipped" in r ? r : { job: r.job, side: r.side, frame: r.frame, exactGroups: `${r.exactGroups}/${r.groups}`,
+  misses: r.detail.filter((g) => !g.exact).map((g) => `age ${g.age} ROM ${g.rom} pred ${g.predicted}`) }));
