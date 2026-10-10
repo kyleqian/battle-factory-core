@@ -1,0 +1,24 @@
+cast-rain-swift-opp-c0.json            SWIFT        opponent .. agree=1 prompts=p       units=2   live=1 order=1d alloc=0 rows=80 exact=80 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+cast-rain-swift-opp-c1.json            SWIFT        opponent .. agree=1 prompts=pp      units=5   live=1 order=1d alloc=0 rows=80 exact=80 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+cast-rain-swift-opp-c2.json            SWIFT        opponent .. agree=1 prompts=ppp     units=8   live=1 order=1d alloc=0 rows=80 exact=80 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+cast-rain-swift-ply-c0.json            SWIFT        player   .. agree=1 prompts=p       units=2   live=1 order=1d alloc=0 rows=78 exact=18 px=27890 r1==r2=1 ages=13..52 | entry live=1 px=27890 r1==r2=1 win=1
+cast-rain-swift-ply-c1.json            SWIFT        player   .. agree=1 prompts=pp      units=5   live=1 order=1d alloc=0 rows=78 exact=18 px=27890 r1==r2=1 ages=13..52 | entry live=1 px=27890 r1==r2=1 win=1
+cast-rain-swift-ply-c2.json            SWIFT        player   .. agree=1 prompts=ppp     units=8   live=1 order=1d alloc=0 rows=78 exact=18 px=27890 r1==r2=1 ages=13..52 | entry live=1 px=27890 r1==r2=1 win=1
+cast-sun-swift-opp-c0.json             SWIFT        opponent .. agree=1 prompts=p       units=2   live=1 order=1 alloc=0 rows=80 exact=46 px=428 r1==r2=1 ages=25..58 | entry live=1 px=428 r1==r2=1 win=1
+cast-sun-swift-opp-c1.json             SWIFT        opponent .. agree=1 prompts=pp      units=5   live=1 order=1 alloc=0 rows=80 exact=46 px=428 r1==r2=1 ages=25..58 | entry live=1 px=428 r1==r2=1 win=1
+cast-sun-swift-opp-c2.json             SWIFT        opponent .. agree=1 prompts=ppp     units=8   live=1 order=1 alloc=0 rows=80 exact=46 px=428 r1==r2=1 ages=25..58 | entry live=1 px=428 r1==r2=1 win=1
+cast-sun-swift-ply-c0.json             SWIFT        player   .. agree=1 prompts=p       units=2   live=1 order=1 alloc=0 rows=78 exact=18 px=29307 r1==r2=1 ages=13..52 | entry live=1 px=29307 r1==r2=1 win=1
+cast-sun-swift-ply-c1.json             SWIFT        player   .. agree=1 prompts=pp      units=5   live=1 order=1 alloc=0 rows=78 exact=18 px=29307 r1==r2=1 ages=13..52 | entry live=1 px=29307 r1==r2=1 win=1
+cast-sun-swift-ply-c2.json             SWIFT        player   .. agree=1 prompts=ppp     units=8   live=1 order=1 alloc=0 rows=78 exact=18 px=29307 r1==r2=1 ages=13..52 | entry live=1 px=29307 r1==r2=1 win=1
+dive-clamperl-swift-ply-banner-c0.json DIVE         opponent .. agree=1 prompts=p       units=0   live=1 order=1 alloc=0 rows=115 exact=0 px=84870 r1==r2=1 ages=0..39 | entry live=1 px=84870 r1==r2=1 win=1
+dive-clamperl-swift-ply-banner-c1.json DIVE         opponent .. agree=1 prompts=pp      units=1   live=1 order=1d alloc=0 rows=93 exact=93 px=0 r1==r2=1 ages=- | entry live=1 px=53 r1==r2=1 win=1
+dive-clamperl-swift-ply-banner-c2.json SWIFT        player   .. agree=1 prompts=pp      units=3   live=1 order=1d alloc=0 rows=78 exact=78 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+dive-clamperl-swift-ply-banner-c3.json DIVE         opponent .. agree=1 prompts=ppp     units=5   live=1 order=1d alloc=0 rows=115 exact=0 px=84870 r1==r2=1 ages=0..39 | entry live=1 px=84895 r1==r2=1 win=1
+dive-clamperl-swift-ply-banner-c4.json DIVE         opponent .. agree=1 prompts=pppp    units=6   live=1 order=1d alloc=0 rows=93 exact=93 px=0 r1==r2=1 ages=- | entry live=1 px=23 r1==r2=1 win=1
+dive-clamperl-swift-ply-banner-c5.json SWIFT        player   .. agree=1 prompts=pppp    units=8   live=1 order=1d alloc=0 rows=78 exact=78 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+wp160-opp-s1-c0.json                   DIVE         opponent .. agree=1 prompts=p       units=0   live=1 order=1 alloc=0 rows=115 exact=115 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+wp160-opp-s1-c1.json                   WHIRLPOOL    player   H. agree=0 prompts=pp      units=1   live=1 order=1d alloc=0 rows=132 exact=0 px=100452 r1==r2=1 ages=0..39 | entry live=1 px=100452 r1==r2=1 win=1
+wp160-opp-s1-c2.json                   DIVE         opponent .. agree=1 prompts=pp      units=3   live=1 order=1d alloc=0 rows=93 exact=93 px=0 r1==r2=1 ages=- | entry live=1 px=47 r1==r2=1 win=1
+cast windows=12 live=12 0px=3 hidden=0 hiddenLive0px=0 agree=12 r1==r2=12
+dive windows=6 live=6 0px=4 hidden=0 hiddenLive0px=0 agree=6 r1==r2=6
+wp160 windows=3 live=3 0px=2 hidden=1 hiddenLive0px=0 agree=2 r1==r2=3

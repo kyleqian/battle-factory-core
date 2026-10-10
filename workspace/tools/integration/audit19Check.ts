@@ -11,7 +11,7 @@
 //   node --experimental-strip-types --no-warnings tools/integration/audit19Check.ts <fixture-dir> <scenario-name> <out.json>
 // AUDIT19_LENDS_ONLY=1: no probes; per window the CHAIN lend's free order (a deferred lend resolved as the render seam resolves it) vs the
 // ROM's free order at the activation frame. AUDIT19_NO_HIDE=1: render with no hide. AUDIT19_MASK: see below.
-// AUDIT19_MISS_RULE_ALL_TURNS=1: audit 18's missed-strike rule also in the consumer's own (truncated) turn (the ablation).
+// AUDIT19_TRACE=1: the host's free order after every history event on stderr. AUDIT19_MISS_RULE_ALL_TURNS=1: audit 18's missed-strike rule also in the consumer's own (truncated) turn (the ablation).
 import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -37,7 +37,8 @@ import {
 } from "../../src/engine/liveMoveSpriteAllocator.ts";
 import { invalidateLiveSpriteAllocatorHost } from "../../src/engine/liveSpriteAllocator.ts";
 import {
-  advanceLiveSpriteOrderHost, beginLiveSpriteOrderTurn, createLiveSpriteOrderHost, lendLiveSpriteOrder, markLiveSpriteOrderDeferredBody,
+  advanceLiveSpriteOrderHost, beginLiveSpriteOrderTurn, createLiveSpriteOrderHost, lendLiveSpriteOrder, liveSpriteOrderHostOrder,
+  markLiveSpriteOrderDeferredBody,
 } from "../../src/engine/liveSpriteOrderHost.ts";
 import { createPresentationRngHostAt, recordPresentationRngSubStream } from "../../src/engine/presentationRngHost.ts";
 import { generalAnimationPresentationRngKey } from "../../src/engine/wordsOrderUnits.ts";
@@ -79,6 +80,10 @@ function lendOf(f: Fixture & Json, turns: Json[], field: Json) {
     const events = (turn.events as Json[]).map((payload) => Object.freeze({ sequence: sequence++, payload, provenance: undefined }) as unknown as BattleKernelSemanticEvent);
     const resolution = { resolutionId: { requestId: t + 1 }, segmentIndex: 0, segments: [{ events }] };
     host = beginLiveSpriteOrderTurn(host, t + 1, prompts?.[t] ?? true);
+    if (process.env.AUDIT19_TRACE === "1") {
+      const o = liveSpriteOrderHostOrder(host);
+      console.error(JSON.stringify({ turn: t, event: "begin-turn", prompt: prompts?.[t] ?? true, known: o.known, free: o.free }));
+    }
     events.forEach((event, i) => {
       const p = event.payload as unknown as Json;
       const last = t === turns.length - 1 && i === events.length - 1;
@@ -115,6 +120,12 @@ function lendOf(f: Fixture & Json, turns: Json[], field: Json) {
         allocator = invalidateLiveSpriteAllocatorHost(allocator); invalidatedBy.push(p.animationId);
       }
       host = advanceLiveSpriteOrderHost(host, resolution, event.sequence, false, planAt);
+      // AUDIT19_TRACE=1 (stderr): the host's free order after every history event (the #160 / Needle Arm diagnosis vs the probe's endOrder)
+      if (process.env.AUDIT19_TRACE === "1") {
+        const o = liveSpriteOrderHostOrder(host);
+        console.error(JSON.stringify({ turn: t, event: p.animationId ?? p.kind, battler: p.battler, move: p.arguments?.[0], known: o.known,
+          free: o.free }));
+      }
     });
     if (t < turns.length - 1) host = advanceLiveSpriteOrderHost(host, resolution, Number.POSITIVE_INFINITY, false, planAt);
   });
