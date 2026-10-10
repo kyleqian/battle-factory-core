@@ -8,7 +8,7 @@ from pathlib import Path
 pi, fx = Path(sys.argv[1]), Path(sys.argv[2])
 count = Counter()
 for line in pi.read_text().splitlines():
-    if " pi-same=" not in line or not line.split()[0].endswith(".json"):
+    if " live=" not in line or " pi-same=" not in line or not line.split()[0].endswith(".json"):  # detail lines only (not the tallies)
         continue
     name = line.split()[0]
     f = json.loads((fx / name).read_text())
