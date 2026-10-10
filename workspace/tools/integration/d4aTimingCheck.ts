@@ -10,7 +10,7 @@ import { join } from "node:path";
 import { verifyLiveAdapterFramebuffer } from "./liveAdapterFramebuffer.ts";
 import { LIVE_MOVE_TIMING_POLICY, type LiveMoveTimingParameterKind, type LiveMoveTimingPhase } from "../../src/engine/liveMoveTimingPolicy.ts";
 
-const IDS: Record<string, number> = { MACH_PUNCH: 183, NIGHTMARE: 171, MEGAHORN: 224, REVENGE: 279, METEOR_MASH: 309, PSYWAVE: 149, EXTRASENSORY: 326, SUPERPOWER: 276, SHOCK_WAVE: 351, ICE_BALL: 301, DIVE: 291, SHEER_COLD: 329, HYPER_VOICE: 304, EXTREME_SPEED: 245, MEMENTO: 262, SKILL_SWAP: 285, FLATTER: 260, PURSUIT: 228, HIDDEN_POWER: 237, CONFUSE_RAY: 109, ICY_WIND: 196, BLIZZARD: 59, FAINT_ATTACK: 185, LIGHT_SCREEN: 113 };
+const IDS: Record<string, number> = { MACH_PUNCH: 183, NIGHTMARE: 171, MEGAHORN: 224, REVENGE: 279, METEOR_MASH: 309, PSYWAVE: 149, EXTRASENSORY: 326, SUPERPOWER: 276, SHOCK_WAVE: 351, ICE_BALL: 301, DIVE: 291, SHEER_COLD: 329, HYPER_VOICE: 304, EXTREME_SPEED: 245, MEMENTO: 262, SKILL_SWAP: 285, FLATTER: 260, PURSUIT: 228, HIDDEN_POWER: 237, CONFUSE_RAY: 109, ICY_WIND: 196, BLIZZARD: 59, FAINT_ATTACK: 185, LIGHT_SCREEN: 113, SKY_ATTACK: 143 };
 const [outPath, ...paths] = process.argv.slice(2);
 const status = JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8"));
 // A move whose other-phase residual differs per window (D4c Extrasensory: the scanout split) documents it per fixture
@@ -28,7 +28,7 @@ for (const path of paths) {
   const raw = JSON.parse(readFileSync(path, "utf8")) as { sourceFixture?: string };
   const fixture = { ...(raw.sourceFixture ? JSON.parse(readFileSync(raw.sourceFixture, "utf8")) : {}), ...raw } as { move: string; timingPhase: LiveMoveTimingPhase;
     timingPhases?: Partial<Record<LiveMoveTimingParameterKind, LiveMoveTimingPhase>>; attacker: { geometry: { side: "player" | "opponent" } };
-    requestFields?: { rolloutCounter?: number } };
+    requestFields?: { rolloutCounter?: number }; precedingBodies?: unknown[]; precedingTurns?: unknown; precedingX2Events?: unknown };
   const id = IDS[fixture.move]!;
   // Every policy parameter of the move: the window is in the selected phase iff each measured phase equals the policy's choice
   // (a fixture without timingPhases measured only the optional lag).
@@ -36,8 +36,13 @@ for (const path of paths) {
   // A per-side parameter (Superpower's monbg write row) applies to the fixture's attacker side only.
   // A scoped-exact move (no policy entry, e.g. Shock Wave) has no CPU-phase parameter: every window is in the "selected" phase (zero residual, duration).
   // A per-counter parameter (Ice Ball's lag rows per rollout-counter body) applies to the fixture's request.rolloutCounter only.
-  const parameters = (LIVE_MOVE_TIMING_POLICY[id]?.parameters ?? []).filter((p) => (p.side === undefined || p.side === fixture.attacker.geometry.side)
-    && (p.rolloutCounter === undefined || p.rolloutCounter === fixture.requestFields?.rolloutCounter));
+  // A body-keyed parameter (d4later: Sheer Cold / Extrasensory opponent later bodies) applies to the fixture's body class (liveAdapterFramebuffer.ts
+  // withFirstBody: a later body declares preceding units) and replaces the unkeyed parameter of its kind (liveMoveTimingPolicy.ts precedence).
+  const body = process.env.POKEBENCH_LIVE_ORDER_INPUT !== "first-body"
+    && (fixture.precedingBodies?.length || fixture.precedingTurns || fixture.precedingX2Events) ? "later" : "first";
+  const matching = (LIVE_MOVE_TIMING_POLICY[id]?.parameters ?? []).filter((p) => (p.side === undefined || p.side === fixture.attacker.geometry.side)
+    && (p.rolloutCounter === undefined || p.rolloutCounter === fixture.requestFields?.rolloutCounter) && (p.body === undefined || p.body === body));
+  const parameters = matching.filter((p) => p.body !== undefined || !matching.some((q) => q.kind === p.kind && q.body !== undefined));
   const policyPhases = Object.fromEntries(parameters.map((p) => [p.kind, p.chosen]));
   const results = verifyLiveAdapterFramebuffer(path);
   const runs = results.map((r) => {
@@ -62,7 +67,7 @@ for (const path of paths) {
     if (outside.length) violations.push(`other-phase residual outside the documented rows: ages ${outside.join(",")}`);
   }
   failed ||= violations.length > 0;
-  const entry = { fixture: path, move: fixture.move, measuredPhase: fixture.timingPhase, policyPhase: policyPhases["optional-lag-age"],
+  const entry = { fixture: path, move: fixture.move, body, measuredPhase: fixture.timingPhase, policyPhase: policyPhases["optional-lag-age"],
     ...(fixture.timingPhases ? { measuredPhases: measured, policyPhases } : {}), selectedPhase: selected,
     window: run0.rows, expectedDuration: results[0]!.expectedDuration, runs, documentedAges: selected ? null : doc, violations };
   out.push(entry);

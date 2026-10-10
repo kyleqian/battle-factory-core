@@ -14,6 +14,7 @@ import speciesStats from "../../src/data/gen/species-stats.json" with { type: "j
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";
 import { liveDiveSetupSplashBirth, liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";
+import { liveMoveTimingBodyOf } from "../../src/engine/liveMoveTimingPolicy.ts";
 import { createKnownEntrySpriteAllocatorProvider } from "../../src/engine/knownEntrySpriteAllocator.ts";
 import { prepareLiveMoveSpriteAllocator, prepareLiveMoveSpriteOrder } from "../../src/engine/liveMoveSpriteAllocator.ts";
 import {
@@ -547,7 +548,9 @@ export function verifyLiveAdapterFramebuffer(path: string, freshRuns = 2) {
       return { age, frame: frame.frame, residualPixels, regions, source: hash(rgb), live: hash(rgba) };
     });
     const view0 = liveView(fixture, 0);
-    const expectedDuration = liveMoveAnimationDuration((view0.effect as { request: BattleMoveAnimationRequest }).request, view0.field);
+    // d4later: the duration of the lend's body class (body-keyed D4 phases), exactly as battleResolutionPresentationRender.ts passes it.
+    const effect0 = view0.effect as { request: BattleMoveAnimationRequest; spriteOrderInput?: LiveMoveSpriteOrderInput };
+    const expectedDuration = liveMoveAnimationDuration(effect0.request, view0.field, liveMoveTimingBodyOf(effect0.spriteOrderInput));
     const receipt = {
       fixture: path, run, scratch, expectedDuration, ageOffset, rows: rows.length,
       exactRows: rows.filter(r => r.residualPixels === 0).length,

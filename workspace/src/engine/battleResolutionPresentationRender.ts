@@ -9,6 +9,7 @@ import { liveSubstituteSwapApplies, substituteSwapTailFieldArt } from "./liveSub
 import {
   liveDiveSetupSplashBirth, liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows, liveSemiInvulnerableHideBattler,
 } from "./liveMoveAnimation.ts";
+import { liveMoveTimingBodyOf, type LiveMoveTimingBody } from "./liveMoveTimingPolicy.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import {
   BATTLE_COMMAND_ACTION_ENTER_DELAY,
@@ -910,6 +911,8 @@ function currentSegment(state: BattleResolutionPresentationState) {
 export function battleResolutionCommandDuration(
   command: BattleResolutionPresentationCommand,
   field: BattleResolutionDisplayedField,
+  // The presented move body's order-host body class (liveMoveTimingBodyOf; d4later body-keyed D4 phases); default the first body.
+  bodyClass: LiveMoveTimingBody = "first",
 ): number {
   switch (command.type) {
     case "message":
@@ -922,7 +925,7 @@ export function battleResolutionCommandDuration(
       ) + command.timing.holdFrames;
     case "move-animation":
       return command.animation
-        ? liveMoveAnimationDuration(command.animation, field) ?? command.timing.minimumFrames
+        ? liveMoveAnimationDuration(command.animation, field, bodyClass) ?? command.timing.minimumFrames
         : command.timing.minimumFrames;
     case "hit-animation":
       return command.timing.minimumFrames;
@@ -985,7 +988,7 @@ export function isBattleResolutionCommandComplete(
     field = applyCompletedCommand(field, segment.commands[index]!);
   }
   return state.lifecycle.phaseElapsed + 1
-    >= battleResolutionCommandDuration(command, field);
+    >= battleResolutionCommandDuration(command, field, liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput));
 }
 
 export function isBattleResolutionButtonMessageReady(

@@ -6,7 +6,7 @@
  * (composeLivePalettes) with the move's own asset palette written into the measured OBJ bank. No capture row is read.
  * Lovely Kiss alone consumes Random2 (4 words at age +120); its activation value comes from the presentation host.
  */
-import { liveMoveTimingSidePhase } from "./liveMoveTimingPolicy.ts";
+import { liveMoveTimingSidePhase, type LiveMoveTimingBody } from "./liveMoveTimingPolicy.ts";
 import type { LivePaletteComposite } from "./liveMovePaletteComposite.ts";
 
 // src/engine may not import src/animation (animationBoundaryRatchet): the move assets' palettes are passed in by liveMoveAnimation.ts.
@@ -174,6 +174,8 @@ export function liveSignalBeamInputs(input: {
  */
 export function liveSheerColdInputs(input: {
   attackerSide: "player" | "opponent"; attacker: Anchors; target: Anchors; spriteOrder: readonly number[];
+  /** The order host's body class (d4later: an opponent attacker's later body takes the age-171 lag); default the first body. */
+  body?: LiveMoveTimingBody;
 }) {
   const { attackerSide, attacker, target } = input;
   const targetSide = attackerSide === "player" ? "opponent" : "player";
@@ -194,13 +196,13 @@ export function liveSheerColdInputs(input: {
     monbg: { layer: targetSide === "player" ? "bg2" as const : "bg1" as const, scroll: { x: 32 - tx, y: 32 - ty } },
     animationRng: 0, gameplayRng: null,
     // D4 (#151): the restorebg fade end from the faithful-timing policy's per-side age-171 lag (189 with the lag, 188 without).
-    restoreFadeEndAge: liveSheerColdRestoreFadeEndAge(attackerSide),
+    restoreFadeEndAge: liveSheerColdRestoreFadeEndAge(attackerSide, input.body),
   };
 }
 
-/** Sheer Cold's restore fade end (D4, liveMoveTimingPolicy.ts 329): 188 + the chosen age-171 lag of the attacker's side. */
-export function liveSheerColdRestoreFadeEndAge(attackerSide: "player" | "opponent"): number {
-  return 188 + (liveMoveTimingSidePhase(329, "optional-lag-age", attackerSide) === "event" ? 1 : 0);
+/** Sheer Cold's restore fade end (D4, liveMoveTimingPolicy.ts 329): 188 + the chosen age-171 lag of the attacker's side and body class. */
+export function liveSheerColdRestoreFadeEndAge(attackerSide: "player" | "opponent", body: LiveMoveTimingBody = "first"): number {
+  return 188 + (liveMoveTimingSidePhase(329, "optional-lag-age", attackerSide, body) === "event" ? 1 : 0);
 }
 
 type EruptionSide = "player" | "opponent";

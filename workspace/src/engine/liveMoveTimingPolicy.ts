@@ -56,7 +56,15 @@ export type LiveMoveTimingParameter = Readonly<{
   side?: "player" | "opponent";
   /** Rollout-counter body this parameter applies to (absent = every body): Ice Ball's lag rows are measured per counter body. */
   rolloutCounter?: number;
+  /**
+   * Body class this parameter applies to (absent = every body the keyed parameters do not cover): "later" = a body after the battle's first
+   * presentation unit (the order host's lend without `firstBody`), measured per class (d4later: Sheer Cold / Extrasensory opponent attacker).
+   */
+  body?: LiveMoveTimingBody;
 }>;
+
+/** The order host's body class: "first" = the battle's first presentation unit (lend `firstBody`), "later" = any known lend after it. */
+export type LiveMoveTimingBody = "first" | "later";
 
 export type LiveMoveTimingEntry = Readonly<{ move: string; parameters: readonly LiveMoveTimingParameter[] }>;
 
@@ -259,6 +267,14 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
       chosen: "no-event", tieRuleUsed: false,
       evidence: ["tools/integration/fixtures/prep30/extrasensory-split.json (S = 0..36 sweep)", "tools/integration/fixtures/prep30/extrasensory-pixels.json",
         "docs/next-adapters-prep30.md s1.4"],
+    }, {
+      // d4later (docs/next-adapters-d4later.md): an OPPONENT attacker's LATER body lags at task row 142 in all 11 measured later bodies (later58
+      // scenarios, counters twice fresh); the first bodies keep the parameter above (d4later re-measure: opponent first 4 no lag : 3 lag).
+      kind: "optional-lag-age", age: 142, fixedLagAges: [122, 123], iterations: 161, side: "opponent", body: "later",
+      alternatives: [{ phase: "event", bodyRows: 162, measured: 11 }, { phase: "no-event", bodyRows: 161, measured: 0 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/d4later/counters.json (opponent later bodies: counter lag age 141 = task row 142, 11 of 11)",
+        "tools/integration/fixtures/later58/check-extrasensory.json (11 of 11 opponent later windows in the lag phase)", "docs/next-adapters-d4later.md"],
     }],
   },
   /**
@@ -312,6 +328,32 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
       alternatives: [{ phase: "event", bodyRows: 191, measured: 5 }, { phase: "no-event", bodyRows: 190, measured: 11 }],
       chosen: "no-event", tieRuleUsed: false,
       evidence: ["tools/integration/fixtures/issue151/sheer-cold-counters.txt (opponent attacker: age-171 lag 5 of 16)", "docs/issue151-diagnosis.md s1 table 2"],
+    }, {
+      // d4later (docs/next-adapters-d4later.md): an OPPONENT attacker's LATER body lags at 171 in all 5 measured later bodies (later58 scenarios,
+      // counters twice fresh); its first bodies keep the parameter above (issue151's 16 are all first bodies; d4later re-measure: 12 of 12 no lag).
+      kind: "optional-lag-age", age: 171, fixedLagAges: [151, 152], iterations: 188, side: "opponent", body: "later",
+      alternatives: [{ phase: "event", bodyRows: 191, measured: 5 }, { phase: "no-event", bodyRows: 190, measured: 0 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/d4later/counters.json (opponent later bodies: age-171 lag 5 of 5)",
+        "tools/integration/fixtures/later58/check-sheer-cold.json (5 of 5 opponent later windows in the lag phase)", "docs/next-adapters-d4later.md"],
+    }],
+  },
+  /**
+   * S10A d4later Sky Attack STRIKE body (gAnimMoveTurn 1; docs/next-adapters-d4later.md; tools/integration/fixtures/d4later/counters.json, main-loop
+   * pass counters twice fresh): fixed lag frames at ages 141, 142 in every strike and an optional lag at age 161 (activation .. last active: 181
+   * rows with it, 180 without). Measured 18 : 18 over 36 strikes (8 accepted q2-live / prep25 first strikes: none; 28 later58 strikes: 18 with
+   * it, the battle's first strike 5 of 12, a later strike 13 of 16; both sides, FEAROW / PIDGEOT): a tie -> the source iteration count (no
+   * lag, 180 rows: the accepted strike). The charge body (148 rows, lags 126, 127) has no optional lag.
+   */
+  143: {
+    move: "MOVE_SKY_ATTACK",
+    parameters: [{
+      kind: "optional-lag-age", age: 161, fixedLagAges: [141, 142], iterations: 178,
+      alternatives: [{ phase: "event", bodyRows: 181, measured: 18 }, { phase: "no-event", bodyRows: 180, measured: 18 }],
+      chosen: "no-event", tieRuleUsed: true,
+      evidence: ["tools/integration/fixtures/d4later/counters.json (strikes: age-161 lag 18 of 36)",
+        "tools/integration/fixtures/d4later/d4-timing-sky-attack.json (policy-phase strikes 0 px, other-phase strikes on the documented rows)",
+        "docs/next-adapters-d4later.md"],
     }],
   },
   /**
@@ -542,6 +584,22 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
   },
 });
 
+/**
+ * The parameter of a move for a body: kind, attacker side (absent = any) and body class (default "first"); a body-keyed parameter wins over
+ * an unkeyed one of the same kind / side.
+ */
+function liveMoveTimingParameterFor(moveId: number, kind: LiveMoveTimingParameterKind, side?: "player" | "opponent",
+  body: LiveMoveTimingBody = "first"): LiveMoveTimingParameter | null {
+  const matches = (LIVE_MOVE_TIMING_POLICY[moveId]?.parameters ?? []).filter((p) => p.kind === kind
+    && (side === undefined || p.side === undefined || p.side === side) && (p.body === undefined || p.body === body));
+  return matches.find((p) => p.body !== undefined) ?? matches[0] ?? null;
+}
+
+/** The order host lend's body class: "later" for a known lend without `firstBody`, else "first" (no lend / unknown: the status quo). */
+export function liveMoveTimingBodyOf(lend: Readonly<{ known: boolean; firstBody?: boolean }> | undefined): LiveMoveTimingBody {
+  return lend?.known === true && lend.firstBody !== true ? "later" : "first";
+}
+
 /** The chosen write row of a move's bg-write-row parameter (`age` for "event", `age - 1` for "no-event"), or null without one. */
 export function liveMoveBgWriteRow(moveId: number, side?: "player" | "opponent"): number | null {
   const p = LIVE_MOVE_TIMING_POLICY[moveId]?.parameters.find((q) => q.kind === "bg-write-row" && (q.side === undefined || q.side === side)) ?? null;
@@ -554,18 +612,22 @@ export function liveMovePaletteTransferRow(moveId: number): number | null {
   return p === null ? null : p.chosen === "event" ? p.age : p.age - 1;
 }
 /** The chosen phase of a move's per-side parameter (a parameter without `side` applies to both), or null without one. */
-export function liveMoveTimingSidePhase(moveId: number, kind: LiveMoveTimingParameterKind, side: "player" | "opponent"): LiveMoveTimingPhase | null {
-  return LIVE_MOVE_TIMING_POLICY[moveId]?.parameters.find((p) => p.kind === kind && (p.side === undefined || p.side === side))?.chosen ?? null;
+export function liveMoveTimingSidePhase(moveId: number, kind: LiveMoveTimingParameterKind, side: "player" | "opponent",
+  body: LiveMoveTimingBody = "first"): LiveMoveTimingPhase | null {
+  return liveMoveTimingParameterFor(moveId, kind, side, body)?.chosen ?? null;
 }
 
 /** The policy parameter of a move, or null when the move has no D4 timing parameter of that kind. */
 export function liveMoveTimingParameter(moveId: number, kind: LiveMoveTimingParameterKind): LiveMoveTimingParameter | null {
-  return LIVE_MOVE_TIMING_POLICY[moveId]?.parameters.find((p) => p.kind === kind) ?? null;
+  return liveMoveTimingParameterFor(moveId, kind);
 }
 
-/** The chosen optional lag age (the lag is rendered), or null when the chosen phase has no optional lag / the move has none. */
-export function liveMoveOptionalLagAge(moveId: number): number | null {
-  const p = liveMoveTimingParameter(moveId, "optional-lag-age");
+/**
+ * The chosen optional lag age (the lag is rendered), or null when the chosen phase has no optional lag / the move has none. `side` / `body`
+ * select a side- or body-keyed parameter (default: the first-body parameter of either side).
+ */
+export function liveMoveOptionalLagAge(moveId: number, side?: "player" | "opponent", body: LiveMoveTimingBody = "first"): number | null {
+  const p = liveMoveTimingParameterFor(moveId, "optional-lag-age", side, body);
   return p !== null && p.chosen === "event" ? p.age : null;
 }
 
@@ -575,8 +637,8 @@ export function liveMoveCounterTimingParameter(moveId: number, kind: LiveMoveTim
 }
 
 /** Body rows in the chosen phase of the move's optional-lag parameter (null without one). */
-export function liveMoveTimingBodyRows(moveId: number): number | null {
-  const p = liveMoveTimingParameter(moveId, "optional-lag-age");
+export function liveMoveTimingBodyRows(moveId: number, side?: "player" | "opponent", body: LiveMoveTimingBody = "first"): number | null {
+  const p = liveMoveTimingParameterFor(moveId, "optional-lag-age", side, body);
   return p === null ? null : p.alternatives.find((a) => a.phase === p.chosen)!.bodyRows;
 }
 
@@ -632,6 +694,10 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   // S10A lsbz (reclassified from scoped exact): Light Screen, the opponent's row-59 BLDALPHA write phase (no hold; lightScreen.ts
   // opponentBlendHold); fixtures tools/integration/fixtures/lsbz/windows/light-screen-*.
   113,
+  // S10A d4later (reclassified from scoped exact, #151 precedent; no adapter / renderer change): Sky Attack, the strike's optional lag at 161
+  // (18 : 18 tie -> no lag, 180 rows); exact fixtures tools/integration/fixtures/q2-live/sky-attack-*, other-phase strikes
+  // tools/integration/fixtures/d4later/windows/sky-attack-strike-*.
+  143,
 ]);
 
 /**

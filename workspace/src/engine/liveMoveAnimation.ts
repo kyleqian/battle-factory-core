@@ -94,7 +94,7 @@ import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "j
 import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
 import spitUpRedOrbAsset from "../animation/assets/spit-up-red-orb.json" with { type: "json" };
 import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
-import { liveMoveBgWriteRow, liveMoveCounterTimingParameter, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveTimingBodyRows, liveMoveTimingParameter, liveMoveTimingSidePhase } from "./liveMoveTimingPolicy.ts";
+import { liveMoveBgWriteRow, liveMoveCounterTimingParameter, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveTimingBodyOf, liveMoveTimingBodyRows, liveMoveTimingParameter, liveMoveTimingSidePhase, type LiveMoveTimingBody } from "./liveMoveTimingPolicy.ts";
 import { resolveSpriteOrderDeferredLend, type SpriteOrderDeferredCarry, type SpriteOrderDeferredLend } from "./spriteOrderEventTransform.ts";
 import type { PresentationRngHost, PresentationRngWords } from "./presentationRngHost.ts";
 import { isWordsOrderDeferredUnit, WORDS_ORDER_GENERAL_ANIMATION } from "./wordsOrderUnits.ts";
@@ -237,9 +237,10 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // prep22 P3: Sheer Cold first body: reclassified to faithful timing (#151, liveMoveTimingPolicy.ts 329); its exact fixtures stay valid in scope.
   // Psychic (94) and Crunch (242): reclassified to faithful timing (a13fix, species audit 13 optional lags at 124 / 121, liveMoveTimingPolicy.ts);
   // their exact fixtures stay valid in scope.
-  // Q2 (docs/next-adapters-prep25.md s0.2 / C): zero-Random2 bodies through liveQ2Moves.ts: Smog, Sand Tomb, Sky Attack
-  // (charge + strike); Hyper Voice reclassified to faithful timing (#151, liveMoveTimingPolicy.ts 304). Snore (prep28: a known lend after Sleep Powder + its sleep status animations; any unknown lend declines).
-  123, 328, 143, 173,
+  // Q2 (docs/next-adapters-prep25.md s0.2 / C): zero-Random2 bodies through liveQ2Moves.ts: Smog, Sand Tomb; Sky Attack 143 (charge + strike)
+  // reclassified to faithful timing (d4later, liveMoveTimingPolicy.ts 143, the strike's optional lag at 161); its exact fixtures stay valid in
+  // scope; Hyper Voice reclassified to faithful timing (#151, liveMoveTimingPolicy.ts 304). Snore (prep28: a known lend after Sleep Powder + its sleep status animations; any unknown lend declines).
+  123, 328, 173,
   // prep29 R1 (docs/next-adapters-prep29.md B.1): Bonemerang, both hit bodies (hit 1 first body, hit 2 after hit 1 through the lent order).
   155,
   // prep29 R1 (B.3): Rapid Spin (any known lend; the entry scanline is the constant S0 banks).
@@ -887,11 +888,15 @@ export function liveMoveSubstituteDollDeclines(
     || !(LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS.get(request.moveId) ?? []).includes(request.attacker === 0 ? "player" : "opponent");
 }
 
+/**
+ * The presented body rows of a live move body (null: no live duration). `bodyClass` is the order host lend's body class
+ * (liveMoveTimingBodyOf; default "first"): d4later's body-keyed D4 parameters (Sheer Cold 329 / Extrasensory 326 opponent later bodies).
+ */
 export function liveMoveAnimationDuration(
-  request: BattleMoveAnimationRequest, field?: BattleResolutionDisplayedField,
+  request: BattleMoveAnimationRequest, field?: BattleResolutionDisplayedField, bodyClass: LiveMoveTimingBody = "first",
 ): number | null {
   if (field !== undefined && liveSubstituteSwapApplies(request, field) === true) {
-    const body = liveMoveAnimationDuration(request, substituteSwapBodyField(field, request.attacker === 0 ? 0 : 1));
+    const body = liveMoveAnimationDuration(request, substituteSwapBodyField(field, request.attacker === 0 ? 0 : 1), bodyClass);
     return body === null ? null
       : substituteSwapCompositeDuration(request.attacker === 0 ? "player" : "opponent", substituteSwapBodyFraming(request.moveId, body).rows);
   }
@@ -1218,7 +1223,7 @@ export function liveMoveAnimationDuration(
     // Signal Beam first body: signalBeamFirstInactiveAge = 18 + |pan target - initial| = 145 (player attacker) / 144 (opponent), prep22 s0.2.
     case 324: return request.attacker === 0 ? 145 : 144;
     // Sheer Cold first body (faithful timing, #151): restore fade end (policy: per-side age-171 lag) + 2 = 191 rows (player attacker) / 190 (opponent).
-    case 329: return liveSheerColdRestoreFadeEndAge(request.attacker === 0 ? "player" : "opponent") + 2;
+    case 329: return liveSheerColdRestoreFadeEndAge(request.attacker === 0 ? "player" : "opponent", bodyClass) + 2;
     // Sky Attack (prep25): charge 148 rows / strike 180 rows, selected by gAnimMoveTurn bit 0 like Razor Wind / Solar Beam.
     // Faithful timing (D4, liveMoveTimingPolicy.ts; not LIVE_MOVE_ANIMATION_IDS): Mach Punch 107 iterations + fixed lags 71, 72 + the policy's
     // optional late lag at 91 (dominant measured phase, 110 rows; the other phase is 109 rows).
@@ -1238,8 +1243,9 @@ export function liveMoveAnimationDuration(
     case 260: return FLATTER_ROWS;
     // Faithful timing (S10A, prep35): Skill Swap 195 rows (activation .. first inactive) + the policy's optional lag at row 176 (196 rows both sides).
     case 285: return liveMoveTimingBodyRows(285);
-    // Faithful timing (D4c): Extrasensory 161 rows (activation .. first inactive) without the optional lag at task row 142 (policy: no lag, 4 of 6).
-    case 326: return liveMoveTimingBodyRows(326);
+    // Faithful timing (D4c): Extrasensory 161 rows (activation .. first inactive) without the optional lag at task row 142 (policy: no lag, 4 of 6);
+    // d4later: an opponent attacker's later body takes the lag (162 rows, 11 of 11).
+    case 326: return liveMoveTimingBodyRows(326, request.attacker === 0 ? "player" : "opponent", bodyClass);
     // Faithful timing (D4b, + D3 Random2): Meteor Mash 213 + the policy's restore lag L (row 195) + the first inactive row = 215 both sides.
     case 309: return liveMoveTimingBodyRows(309);
     // Faithful timing (S10A, + D3 Random2): Ice Ball counter c = request.rolloutCounter - 1 (AnimTask_GetIceBallCounter): the counter's steps +
@@ -1254,7 +1260,9 @@ export function liveMoveAnimationDuration(
     case 229: return 130; // Rapid Spin (prep29 B.3: 130 rows, constant in all four scenarios).
     case 155: return 71; // Bonemerang (prep29 B.1: 71 rows per hit body, constant in all 8 bodies).
     case 173: return 69; // Snore (prep25: 69 rows, constant across the scenarios; no Random2).
-    case 143: return (request.turn & 1) === 0 ? 148 : 180; // charge 148 rows, strike 180 (the strike needs the 10143 order-plan lend, see case 143)
+    // charge 148 rows; strike: faithful timing (d4later, liveMoveTimingPolicy.ts 143): 180 rows without the optional lag at 161 (18 : 18 tie ->
+    // the source iteration count). The strike needs the 10143 order-plan lend, see case 143.
+    case 143: return (request.turn & 1) === 0 ? 148 : liveMoveTimingBodyRows(143);
     case 328: return 123; // Sand Tomb (prep25: constant across the four scenarios).
     case 123: return 305; // Smog (prep25: constant across the four scenarios).
     case 304: return 104; // Hyper Voice (prep25: constant across the four scenarios).
@@ -3081,7 +3089,7 @@ export function liveMoveAnimationPresentation(
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       config = { move: "SHEER_COLD", attacker, target, fieldProfile,
         animationInputs: liveSheerColdInputs({ attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors,
-          spriteOrder: lentOrder }) as never,
+          spriteOrder: lentOrder, body: liveMoveTimingBodyOf(spriteOrderInput) }) as never,
         idleRest: { attacker: attackerAnchors.frontIdleRest, target: targetAnchors.frontIdleRest } };
       break;
     }
@@ -3769,7 +3777,7 @@ export function liveMoveAnimationPresentation(
       const inputs = liveExtrasensoryInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
         targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors,
         attackerPictureHeight: pictureHeight(attacker.geometry.side), palettes, activationOrder, sort: sortGbaSpriteOrder,
-        lateLag: liveMoveOptionalLagAge(326) !== null });
+        lateLag: liveMoveOptionalLagAge(326, attacker.geometry.side, liveMoveTimingBodyOf(spriteOrderInput)) !== null });
       if (inputs === null) return null;
       // The EXTRASENSORY seam centres are the battler sprite centres (gSprites x / y).
       const withCenter = (battler: SceneOnPresentationBattler, center: { x: number; y: number }): SceneOnPresentationBattler => ({

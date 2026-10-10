@@ -36,13 +36,16 @@ const configOf = (f: Fixture, age = 0, mutate?: (r: BattleMoveAnimationRequest) 
 };
 
 describe("live Q2 registration", () => {
-  it("Smog, Sand Tomb, Snore and the Sky Attack charge + strike are scoped-exact (Hyper Voice: faithful timing, #151); durations are the prep25 constants", () => {
+  // d4later: Sky Attack (143) moved to faithful timing (the strike's optional lag at 161, an 18 : 18 tie -> 180 rows, unchanged).
+  it("Smog, Sand Tomb, Snore are scoped-exact (Hyper Voice: faithful timing, #151; Sky Attack: faithful timing, d4later); durations are the prep25 constants", () => {
     for (const id of [304, 123, 328, 143, 173]) {
-      expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).toContain(id === 304 ? 123 : id);
+      expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).toContain(id === 304 || id === 143 ? 123 : id);
       expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[id]).toBe(0);
     }
-    expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).not.toContain(304);
-    expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).toContain(304);
+    for (const id of [304, 143]) {
+      expect(LIVE_MOVE_ANIMATION_IDS as readonly number[]).not.toContain(id);
+      expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).toContain(id);
+    }
     for (const attacker of [0, 1] as const) {
       const base = { attacker, target: (1 - attacker) as 0 | 1, power: 0, damage: 0, friendship: 70, multihit: 0 };
       expect(liveMoveAnimationDuration({ ...base, moveId: 304, turn: 0 })).toBe(104);
@@ -53,8 +56,9 @@ describe("live Q2 registration", () => {
       expect(liveMoveAnimationDuration({ ...base, moveId: 173, turn: 0 })).toBe(69);
     }
     const exact = (JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8")).implementedAdapters as { id: number }[]).map((e) => e.id);
-    expect(exact).toEqual(expect.arrayContaining([123, 328, 143, 173]));
+    expect(exact).toEqual(expect.arrayContaining([123, 328, 173]));
     expect(exact).not.toContain(304);
+    expect(exact).not.toContain(143);
   });
 
   it("covers 45 dense fixtures (accepted, prep25 alternate, GOLBAT-elevated / SNORLAX-large extras) x both orientations; windows start at activation", () => {
