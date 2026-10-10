@@ -111,9 +111,11 @@ export function replayCrossBodyCorpus(options: Readonly<{ turnKeyed?: boolean }>
       // plans48: the host keys Present's PresentHeal branch (MOVE_ANIMATION damage <= 0) as 20217; the corpus has no damage argument,
       // so the branch is read from the body's own allocation count (PresentDamage creates 6 sprites).
       const presentHeal = options.turnKeyed && mv === 217 && unit.windows.reduce((n, w) => n + (w.C?.length ?? 0), 0) !== 6;
+      // plans69: Magnitude's gAnimMovePower > 99 branch is 20222; the intense body creates sprites, the normal one is the empty plan.
+      const magnitudeIntense = options.turnKeyed && mv === 222 && unit.windows.reduce((n, w) => n + (w.C?.length ?? 0), 0) > 0;
       tracker = applySpriteOrderPresentationEvent(tracker, mv === 0 || side === null
         ? { kind: "invalidate", reason: "mv-0 / unattributed body" }
-        : { kind: "move-animation", moveId: presentHeal ? 20217 : hostMoveId(mv, turn), attackerSide: side });
+        : { kind: "move-animation", moveId: presentHeal ? 20217 : magnitudeIntense ? 20222 : hostMoveId(mv, turn), attackerSide: side });
     });
   }
   return { scenarios: scenarios.length, skipped, edges, firstEdges, known, laterKnown, exact, mismatched, mismatches, gapShapes, otherSamples };

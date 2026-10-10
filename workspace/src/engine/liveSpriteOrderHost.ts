@@ -383,6 +383,8 @@ function orderEventOf(
         const secondBranch = (request.turn & 1) === 1 && TWO_TURN_ANIM_MOVE_IDS.has(request.moveId);
         // Move_PRESENT branches on gAnimMoveDmg > 0 (AnimTask_IsHealingMove, battle_anim_effects_3.c:1531): PresentHeal is 20000 + 217.
         const presentHeal = request.moveId === 217 && !(request.damage > 0);
+        // Move_MAGNITUDE branches on gAnimMovePower > 99 (AnimTask_IsPowerOver99; request.power): MagnitudeIntense is 20000 + 222 (plans69).
+        const magnitudeIntense = request.moveId === 222 && request.power > 99;
         // Move_FURY_CUTTER branches on furyCutterCounter (AnimTask_GetFuryCutterHitCount: 1 / 2 Medium / 3 Strong / 4+ Strongest; plans54):
         // the payload's 7th argument keys 210 / 10210 / 20210 / 30210; without it the body has no plan (invalidates).
         if (request.moveId === 210) {
@@ -391,7 +393,7 @@ function orderEventOf(
             ? { kind: "move-animation", moveId: FURY_CUTTER_ORDER_KEYS[Math.min(counter, 4) - 1]!, attackerSide: battler === 0 ? "player" : "opponent" }
             : { kind: "invalidate", reason: "Fury Cutter body without furyCutterCounter" } };
         }
-        const event = { kind: "move-animation", moveId: presentHeal ? 20217 : secondBranch ? 10000 + request.moveId : request.moveId,
+        const event = { kind: "move-animation", moveId: presentHeal ? 20217 : magnitudeIntense ? 20222 : secondBranch ? 10000 + request.moveId : request.moveId,
           attackerSide: battler === 0 ? "player" : "opponent" } as const;
         if (!SEMI_INVULNERABLE_SETUP_MOVE_IDS.has(request.moveId)) return { event };
         const next: [boolean, boolean] = [hidden[0], hidden[1]];

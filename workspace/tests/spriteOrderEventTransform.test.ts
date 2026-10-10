@@ -30,8 +30,8 @@ describe("production sprite-order plan table (generated, pinned)", () => {
     //   0 plans ("Cf;D0" / "Cff;D1;D0" deduped; docs/next-adapters-plans54.md).
     // + prep61 (fixtures/prep61/plan-rows.json, appended; fly63): Fly 19 / 10019 and Bounce 340 / 10340 both sides, 8 bodies, 0 plans
     //   (all four texts already in the table; docs/next-adapters-prep61.md).
-    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(543);
-    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(221);
+    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(550);
+    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(222);
   });
 
   it("decodes every EXACT-PLAN (move, side) body of the ext table to the fixture plan", () => {
@@ -41,7 +41,7 @@ describe("production sprite-order plan table (generated, pinned)", () => {
       ...fixture("sprite-order-policy-gaps/relative-y-plans.json").bodies, ...fixture("sprite-order-body-plans-rely.json").bodies,
       ...fixture("prep28/plan-rows.json").bodies, ...fixture("prep28/plan-rows-sky-attack.json").bodies,
       ...fixture("prep43/plan-rows.json").bodies, ...fixture("prep45/plan-rows.json").bodies, ...fixture("plans48/plan-rows.json").bodies,
-      ...fixture("plans51/plan-rows.json").bodies, ...fixture("plans54/plan-rows.json").bodies, ...fixture("prep61/plan-rows.json").bodies,
+      ...fixture("plans51/plan-rows.json").bodies, ...fixture("plans54/plan-rows.json").bodies, ...fixture("prep61/plan-rows.json").bodies, ...fixture("plans69/plan-rows.json").bodies,
     };
     let exact = 0;
     for (const [key, row] of Object.entries(bodies)) {
@@ -347,12 +347,12 @@ describe("strict real-route replay (docs/sprite-order-real-route.md events; no r
     expect({ scenarios: corpus.scenarios, skipped: corpus.skipped, edges: corpus.edges, mismatched: corpus.mismatched })
       .toEqual({ scenarios: 573, skipped: 19, edges: 1366, mismatched: 0 });
     expect(corpus.exact).toBe(corpus.known);
-    expect(corpus.known).toBe(1181);
-    expect(corpus.laterKnown).toBe(627);
+    expect(corpus.known).toBe(1183);
+    expect(corpus.laterKnown).toBe(629);
     // Without the turn key the Dig unleash body is fed the setup plan: exactly the edge after it (unit 5) in the two Dig scenarios; the
     // Bounce unleash body likewise gets the setup plan (prep61: unit 9 of the player-side Spoink scenario).
     const unkeyed = replayCrossBodyCorpus();
-    expect({ known: unkeyed.known, exact: unkeyed.exact, mismatched: unkeyed.mismatched }).toEqual({ known: 1181, exact: 1177, mismatched: 4 });
+    expect({ known: unkeyed.known, exact: unkeyed.exact, mismatched: unkeyed.mismatched }).toEqual({ known: 1183, exact: 1179, mismatched: 4 });
     // ... and without the Present key the PresentHeal body is fed the PresentDamage plan (plans48).
     expect(unkeyed.mismatches).toEqual([
       { file: "217-mechanic-present-opponent-delibird-player-onix-0.json", unit: 7, mv: 33 },

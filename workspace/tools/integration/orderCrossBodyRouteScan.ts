@@ -35,7 +35,9 @@ function mapEvent(event: SemanticEvent, hidden: boolean[], units = true, forced?
       const secondBranch = (request.turn & 1) === 1 && [13, 76, 91, 143, 280].includes(request.moveId);
       // The host's Present key: the PresentHeal branch (gAnimMoveDmg <= 0) is 20217.
       const presentHeal = request.moveId === 217 && !(request.damage > 0);
-      return [{ kind: "move-animation", moveId: presentHeal ? 20217 : secondBranch ? 10000 + request.moveId : request.moveId,
+      // And Magnitude's intense branch (gAnimMovePower > 99) is 20222 (plans69).
+      const magnitudeIntense = request.moveId === 222 && request.power > 99;
+      return [{ kind: "move-animation", moveId: presentHeal ? 20217 : magnitudeIntense ? 20222 : secondBranch ? 10000 + request.moveId : request.moveId,
         attackerSide: battler === 0 ? "player" : "opponent" }];
     }
     if (p.animationId === "HIT_ANIMATION") return [{ kind: "hit-animation", targetVisible: !hidden[battler] }];
