@@ -149,6 +149,18 @@
   (`postkoHostReplay.ts`) does not follow the alloc50 / alloc52 rules (audit16Check.ts replays the hosts as the orchestrator does today).
   Supervisor: audit16Check rerun fresh on 6 scenarios (Light Screen after CONFUSION / BRN, Outrage -> Heal Bell / Double Team, later
   Signal Beam / Bonemerang) — all byte-identical to the receipts.
+- Folded Opus worker `2330879e6` as `3d3b1459a` (src tree `1af9db01`): d4later — D4 parameters can be keyed `body: "later"` (a known
+  order-host lend without firstBody; wins over the unkeyed parameter of the same kind / side). Fresh counters (98 scenarios x2, explicit
+  lab seeds, 98/98 r0 == r1): Sheer Cold opponent first 0 : 12 lag, later 5 : 0; Extrasensory opponent first 3 : 4, later 11 : 0 -> 329 /
+  326 `{side: opponent, body: later}` take the lag (191 / 162 rows); all 16 later windows now 0 px (were the other phase on 16 tail rows).
+  Sky Attack strike: CPU-phase class (fixed lags 141 / 142, optional lag at 161 -> 181 rows), 18 : 18 over 36 strikes (accepted 0 / 8,
+  battle-first 5 / 12, later 13 / 16; a per-move strike-count key does not exist) -> tie rule keeps 180 rows (rendering unchanged), the
+  181-row windows documented (ages 163..178); Sky Attack scoped exact -> faithful timing (census `239+13+24+0+0=276`). d4a regression 329
+  fixtures 0 violations. Census seeds 0..299 vs `4bd9f68d4`: 0 live-count change, +4 live frames (2 opponent later Sheer Cold 190 -> 191,
+  2 opponent later Extrasensory 161 -> 162), command key sequence identical, battle frames +2. Worker gates 1,594 files / 13,131 tests,
+  build, differential 624/624. Supervisor: d4aTimingCheck rerun fresh on the 11 Sky Attack windows + 32 later58 Sheer Cold / Extrasensory
+  opponent windows — rows / px / A == B as in the receipt, 0 violations; census rerun identical delta; union src == the worker's tested
+  tree -> touched tests 88/88, smoke 448.
 
 ## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
 
