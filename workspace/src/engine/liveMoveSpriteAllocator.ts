@@ -95,7 +95,8 @@ export const LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS: ReadonlySet<strin
  * palette-tag / matrix allocation (tools/integration/fixtures/aud56-net-zero-audit.json, verdict NET-ZERO; 87 jobs, two fresh
  * direct-mGBA runs each, all A == B). Weather continuing (HAIL / SANDSTORM / RAIN) is keyed on the unit alone: the ROM plays it on
  * the first non-absent battler (DoFieldEndTurnEffects), which in Factory singles is always battler 0 whatever the event's battler
- * says (the receipt's sourceBattlerRule). Every other id (SUBSTITUTE_FADE, SNATCH_MOVE,
+ * says (the receipt's sourceBattlerRule). SUBSTITUTE_FADE: General_SubstituteFade NET-ZERO on both sides, Scene ON and OFF
+ * (tools/integration/fixtures/prep64/netzero.json; 11 instances, two fresh runs each). Every other id (SNATCH_MOVE,
  * DOOM_DESIRE_HIT, Clamp's TURN_TRAP, other WEATHER_VAR arguments, SCENE_OFF_ATTACK_PAUSE, anything new) is unaudited and
  * invalidates the allocator host. Membership is pinned to the receipt by tests/aud56GeneralAnimationAllocator.test.ts.
  */
@@ -103,6 +104,7 @@ export const LIVE_SPRITE_ALLOCATOR_NET_ZERO_GENERAL_ANIMATIONS: ReadonlySet<stri
   "HIT_ANIMATION", "STATS_CHANGE", "HELD_ITEM_EFFECT", "SUN_CONTINUES", "LEECH_SEED_DRAIN", "WISH_HEAL", "INGRAIN_HEAL",
   "TURN_TRAP_WHIRLPOOL", "TURN_TRAP_FIRE_SPIN", "TURN_TRAP_SAND_TOMB", "TURN_TRAP_BIND", "ITEM_KNOCKOFF", "FOCUS_BAND", "ITEM_STEAL",
   "FUTURE_SIGHT_HIT", "CASTFORM_CHANGE", "FOCUS_PUNCH_SETUP", "HAIL_CONTINUES", "SANDSTORM_CONTINUES", "RAIN_CONTINUES",
+  "SUBSTITUTE_FADE",
 ]);
 
 /** A kernel `animation` event payload (battleScriptEvents.ts). */

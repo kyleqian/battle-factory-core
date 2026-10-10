@@ -20,8 +20,13 @@ interface AuditUnit {
 const receipt = JSON.parse(readFileSync(new URL('../tools/integration/fixtures/aud56-net-zero-audit.json', import.meta.url), 'utf8')) as {
  allIdenticalAB: boolean; knownEntry: number[]; units: AuditUnit[]; scenarios: {job: string; seed: number; identicalAB: boolean}[];
 };
+// land68: SUBSTITUTE_FADE is NET-ZERO by prep64's audit (General_SubstituteFade, both sides, Scene ON and OFF; aud56's rule).
+const prep64 = JSON.parse(readFileSync(new URL('../tools/integration/fixtures/prep64/netzero.json', import.meta.url), 'utf8')) as {
+ allIdenticalAB: boolean; knownEntry: number[];
+ verdicts: Record<string, {unit: string; verdict: string; createdPerInstance: number[]; lateOwners: unknown[]; fromKnownEntry: {player: number; opponent: number}}>;
+};
 // Kernel animation ids audited UNREACHABLE / unstaged: they must invalidate.
-const UNAUDITED_IDS = ['SUBSTITUTE_FADE', 'SNATCH_MOVE', 'DOOM_DESIRE_HIT', 'SCENE_OFF_ATTACK_PAUSE'];
+const UNAUDITED_IDS = ['SNATCH_MOVE', 'DOOM_DESIRE_HIT', 'SCENE_OFF_ATTACK_PAUSE'];
 
 /** Every `animationId: "X"` literal the kernel can emit (src/engine), plus the playanimation table's ids. */
 function emittedAnimationIds(): string[] {
@@ -43,9 +48,19 @@ describe('aud56 general / hit / stat allocator net-zero set', () => {
    expect(s.identicalAB, s.job).toBe(true);
    expect(Number.isInteger(s.seed), `${s.job} explicit lab seed`).toBe(true);
   }
-  const netZero = receipt.units.filter(u => u.verdict === 'NET-ZERO').map(u => u.unit).sort();
+  // land68: prep64's receipt adds SUBSTITUTE_FADE (NET-ZERO on both scene profiles, from the same known entry, nothing created).
+  expect(prep64.allIdenticalAB).toBe(true);
+  expect(prep64.knownEntry).toEqual(receipt.knownEntry);
+  expect(Object.keys(prep64.verdicts).sort()).toEqual(['battle-scene-off', 'battle-scene-on']);
+  for (const [profile, v] of Object.entries(prep64.verdicts)) {
+   expect({profile, unit: v.unit, verdict: v.verdict, created: v.createdPerInstance, late: v.lateOwners})
+    .toEqual({profile, unit: 'SUBSTITUTE_FADE', verdict: 'NET-ZERO', created: [0], late: []});
+   expect(v.fromKnownEntry.player, profile).toBeGreaterThan(0);
+   expect(v.fromKnownEntry.opponent, profile).toBeGreaterThan(0);
+  }
+  const netZero = [...receipt.units.filter(u => u.verdict === 'NET-ZERO').map(u => u.unit), 'SUBSTITUTE_FADE'].sort();
   expect([...LIVE_SPRITE_ALLOCATOR_NET_ZERO_GENERAL_ANIMATIONS].sort()).toEqual(netZero);
-  expect(netZero).toHaveLength(20);
+  expect(netZero).toHaveLength(21);
   for (const u of receipt.units.filter(x => x.verdict === 'NET-ZERO')) {
    const complete = u.instances!.filter(i => i.incomplete === undefined);
    expect(complete.length, u.unit).toBeGreaterThan(0);
@@ -79,6 +94,9 @@ describe('aud56 general / hit / stat allocator net-zero set', () => {
   expect(liveSpriteAllocatorAnimationNetZero({animationId: 'WEATHER_VAR', battler: 0, arguments: ['13']})).toBe(true);
   expect(liveSpriteAllocatorAnimationNetZero({animationId: 'WEATHER_VAR', battler: 0, arguments: ['5']})).toBe(false);
   expect(liveSpriteAllocatorAnimationNetZero({animationId: 'SOMETHING_NEW', battler: 0, arguments: []})).toBe(false);
+  // land68: SUBSTITUTE_FADE (aud56: UNAUDITED; prep64: NET-ZERO) passes on both battlers.
+  expect(receipt.units.find(u => u.unit === 'SUBSTITUTE_FADE')?.verdict).toBe('UNAUDITED');
+  for (const battler of [0, 1]) expect(liveSpriteAllocatorAnimationNetZero({animationId: 'SUBSTITUTE_FADE', battler, arguments: []})).toBe(true);
   expect(liveSpriteAllocatorAnimationNetZero({animationId: 'MOVE_ANIMATION', battler: 0, arguments: []})).toBe(true);
   // Weather continuing is keyed on the unit alone (ROM battler is always 0, the receipt's sourceBattlerRule).
   expect(liveSpriteAllocatorAnimationNetZero({animationId: 'RAIN_CONTINUES', battler: 1, arguments: []})).toBe(true);
@@ -122,12 +140,12 @@ function advanceWith(where: 'crossed' | 'trailing', animationId: string, battler
 
 describe('aud56 orchestrator: crossed / trailing general / hit / stat animation events', () => {
  for (const where of ['crossed', 'trailing'] as const) {
-  for (const [id, battler, args] of [['HIT_ANIMATION', 1, []], ['STATS_CHANGE', 0, ['17']], ['HELD_ITEM_EFFECT', 1, []], ['WEATHER_VAR', 1, ['13']], ['TURN_TRAP', 1, ['250']]] as const) {
+  for (const [id, battler, args] of [['HIT_ANIMATION', 1, []], ['STATS_CHANGE', 0, ['17']], ['HELD_ITEM_EFFECT', 1, []], ['WEATHER_VAR', 1, ['13']], ['TURN_TRAP', 1, ['250']], ['SUBSTITUTE_FADE', 1, []]] as const) {
    it(`${where} ${id}${args.length ? `(${args[0]})` : ''}: allocator host stays known`, () => {
     expect(advanceWith(where, id, battler, args).liveMoveSpriteAllocatorHost?.host.historyKnown).toBe(true);
    }, 60000);
   }
-  for (const [id, battler, args] of [['SUBSTITUTE_FADE', 1, []], ['SNATCH_MOVE', 0, []], ['TURN_TRAP', 0, ['128']], ['WEATHER_VAR', 0, ['5']], ['SOMETHING_NEW', 0, []]] as const) {
+  for (const [id, battler, args] of [['SNATCH_MOVE', 0, []], ['TURN_TRAP', 0, ['128']], ['WEATHER_VAR', 0, ['5']], ['SOMETHING_NEW', 0, []]] as const) {
    it(`${where} ${id}${args.length ? `(${args[0]})` : ''}: allocator host goes unknown (fail closed)`, () => {
     expect(advanceWith(where, id, battler, args).liveMoveSpriteAllocatorHost?.host.historyKnown).toBe(false);
    }, 60000);
