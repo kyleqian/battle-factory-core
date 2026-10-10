@@ -1,0 +1,304 @@
+{
+ "schema": "hist73-hidden-battler-audit/v1",
+ "toolSha256": "c0c16a908779dd63",
+ "scenarios": {
+  "hf-opp-pidgeot": {
+   "identicalAB": true,
+   "sha256": "e4c1676dc828f6ec",
+   "frames": 9828
+  },
+  "hf-opp-swellow": {
+   "identicalAB": true,
+   "sha256": "474b081ea260684f",
+   "frames": 9828
+  },
+  "hf-ply-pidgeot": {
+   "identicalAB": true,
+   "sha256": "b6d9da7812d5d06a",
+   "frames": 10440
+  },
+  "hf-ply-swellow": {
+   "identicalAB": true,
+   "sha256": "0e538ebc25456785",
+   "frames": 10440
+  },
+  "rs-opp-pidgeot": {
+   "identicalAB": true,
+   "sha256": "2ebba7c0df377338",
+   "frames": 4547
+  },
+  "rs-opp-swellow": {
+   "identicalAB": true,
+   "sha256": "61e543519c4399e8",
+   "frames": 4547
+  },
+  "vf-opp-pidgeot": {
+   "identicalAB": true,
+   "sha256": "99d5c76eb998f1ba",
+   "frames": 8894
+  },
+  "vf-opp-swellow": {
+   "identicalAB": true,
+   "sha256": "4406df56d01747ad",
+   "frames": 8894
+  },
+  "vf-ply-pidgeot": {
+   "identicalAB": true,
+   "sha256": "e650bc9eaeabe7d1",
+   "frames": 9506
+  },
+  "vf-ply-swellow": {
+   "identicalAB": true,
+   "sha256": "ab56400c76e7e61b",
+   "frames": 9506
+  }
+ },
+ "pairs": [
+  {
+   "hidden": "hf-opp-swellow",
+   "control": "vf-opp-swellow",
+   "window": "faint",
+   "verdict": "SAME",
+   "hiddenInfo": {
+    "startFrame": 8194,
+    "endFrame": 9553,
+    "events": 39,
+    "flagsBefore": {
+     "invisibleBits": 2,
+     "semiInvulnerableBits": 2
+    }
+   },
+   "controlInfo": {
+    "startFrame": 7430,
+    "endFrame": 8619,
+    "events": 39,
+    "flagsBefore": {
+     "invisibleBits": 0,
+     "semiInvulnerableBits": 0
+    }
+   },
+   "firstDifference": null,
+   "windowSha256": "fb26d6b4abaec8c7"
+  },
+  {
+   "hidden": "hf-opp-pidgeot",
+   "control": "vf-opp-pidgeot",
+   "window": "faint",
+   "verdict": "SAME",
+   "hiddenInfo": {
+    "startFrame": 8194,
+    "endFrame": 9553,
+    "events": 39,
+    "flagsBefore": {
+     "invisibleBits": 2,
+     "semiInvulnerableBits": 2
+    }
+   },
+   "controlInfo": {
+    "startFrame": 7429,
+    "endFrame": 8619,
+    "events": 39,
+    "flagsBefore": {
+     "invisibleBits": 0,
+     "semiInvulnerableBits": 0
+    }
+   },
+   "firstDifference": null,
+   "windowSha256": "fb26d6b4abaec8c7"
+  },
+  {
+   "hidden": "hf-ply-swellow",
+   "control": "vf-ply-swellow",
+   "window": "faint",
+   "verdict": "SAME",
+   "hiddenInfo": {
+    "startFrame": 8184,
+    "endFrame": 9230,
+    "events": 46,
+    "flagsBefore": {
+     "invisibleBits": 1,
+     "semiInvulnerableBits": 1
+    }
+   },
+   "controlInfo": {
+    "startFrame": 6961,
+    "endFrame": 8296,
+    "events": 46,
+    "flagsBefore": {
+     "invisibleBits": 0,
+     "semiInvulnerableBits": 0
+    }
+   },
+   "firstDifference": null,
+   "windowSha256": "4666270f48a8277b"
+  },
+  {
+   "hidden": "hf-ply-pidgeot",
+   "control": "vf-ply-pidgeot",
+   "window": "faint",
+   "verdict": "SAME",
+   "hiddenInfo": {
+    "startFrame": 8185,
+    "endFrame": 9230,
+    "events": 46,
+    "flagsBefore": {
+     "invisibleBits": 1,
+     "semiInvulnerableBits": 1
+    }
+   },
+   "controlInfo": {
+    "startFrame": 6962,
+    "endFrame": 8296,
+    "events": 46,
+    "flagsBefore": {
+     "invisibleBits": 0,
+     "semiInvulnerableBits": 0
+    }
+   },
+   "firstDifference": null,
+   "windowSha256": "4666270f48a8277b"
+  },
+  {
+   "hidden": "rs-opp-swellow",
+   "control": "vf-ply-swellow",
+   "window": "reshow",
+   "verdict": "SAME",
+   "hiddenInfo": {
+    "startFrame": 2689,
+    "endFrame": 3342,
+    "events": 45,
+    "flagsBefore": {
+     "invisibleBits": 2,
+     "semiInvulnerableBits": 2
+    },
+    "flagsAfterReshow": [
+     {
+      "n": 3038,
+      "invisibleBits": 2,
+      "semiInvulnerableBits": 2
+     },
+     {
+      "n": 3041,
+      "invisibleBits": 2,
+      "semiInvulnerableBits": 2
+     },
+     {
+      "n": 3043,
+      "invisibleBits": 2,
+      "semiInvulnerableBits": 2
+     },
+     {
+      "n": 3046,
+      "invisibleBits": 2,
+      "semiInvulnerableBits": 2
+     }
+    ]
+   },
+   "controlInfo": {
+    "startFrame": 7651,
+    "endFrame": 8296,
+    "events": 45,
+    "flagsBefore": {
+     "invisibleBits": 0,
+     "semiInvulnerableBits": 0
+    },
+    "flagsAfterReshow": [
+     {
+      "n": 7997,
+      "invisibleBits": 0,
+      "semiInvulnerableBits": 0
+     },
+     {
+      "n": 8000,
+      "invisibleBits": 0,
+      "semiInvulnerableBits": 0
+     },
+     {
+      "n": 8002,
+      "invisibleBits": 0,
+      "semiInvulnerableBits": 0
+     },
+     {
+      "n": 8005,
+      "invisibleBits": 0,
+      "semiInvulnerableBits": 0
+     }
+    ]
+   },
+   "firstDifference": null,
+   "windowSha256": "e3d5370b58d928dc"
+  },
+  {
+   "hidden": "rs-opp-pidgeot",
+   "control": "vf-ply-swellow",
+   "window": "reshow",
+   "verdict": "SAME",
+   "hiddenInfo": {
+    "startFrame": 2689,
+    "endFrame": 3342,
+    "events": 45,
+    "flagsBefore": {
+     "invisibleBits": 2,
+     "semiInvulnerableBits": 2
+    },
+    "flagsAfterReshow": [
+     {
+      "n": 3038,
+      "invisibleBits": 2,
+      "semiInvulnerableBits": 2
+     },
+     {
+      "n": 3041,
+      "invisibleBits": 2,
+      "semiInvulnerableBits": 2
+     },
+     {
+      "n": 3043,
+      "invisibleBits": 2,
+      "semiInvulnerableBits": 2
+     },
+     {
+      "n": 3046,
+      "invisibleBits": 2,
+      "semiInvulnerableBits": 2
+     }
+    ]
+   },
+   "controlInfo": {
+    "startFrame": 7651,
+    "endFrame": 8296,
+    "events": 45,
+    "flagsBefore": {
+     "invisibleBits": 0,
+     "semiInvulnerableBits": 0
+    },
+    "flagsAfterReshow": [
+     {
+      "n": 7997,
+      "invisibleBits": 0,
+      "semiInvulnerableBits": 0
+     },
+     {
+      "n": 8000,
+      "invisibleBits": 0,
+      "semiInvulnerableBits": 0
+     },
+     {
+      "n": 8002,
+      "invisibleBits": 0,
+      "semiInvulnerableBits": 0
+     },
+     {
+      "n": 8005,
+      "invisibleBits": 0,
+      "semiInvulnerableBits": 0
+     }
+    ]
+   },
+   "firstDifference": null,
+   "windowSha256": "e3d5370b58d928dc"
+  }
+ ],
+ "allIdenticalAB": true,
+ "allSame": true
+}
