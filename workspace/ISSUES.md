@@ -28,16 +28,6 @@ exact. Resume: probe Whirlpool (and TURN_TRAP_WHIRLPOOL) bodies at a hidden targ
 list (Whirlpool's own body plan at a hidden target, or the prompt's re-allocation), then fix the plan or invalidate the host after a
 hidden-target Whirlpool.
 
-## #159 — Hidden-span live bodies: sprite fixed, ROM frame checks + lag phase open (S10A, found 2026-10-09 by live audit 17; sprite fix 2026-10-10)
-
-The sprite half is FIXED (hide66, merged `f3efec8bf`; docs/hide66-hidden-battler.md): live bodies leave a hidden Fly / Bounce / Dig /
-Dive charger (and its shadow / doll) out; on census seeds 0..999 90 live commands / 12,744 frames had drawn it, now 0. fly63 is re-landed.
-Open remainder: (1) only Heal Bell and Double Team hidden-span windows are ROM-checked; the other live hidden-span bodies (98 commands /
-14,252 frames on 0..999: Safeguard, Wish, Bulk Up, Dig of the other battler, Rest, Iron Defense, Sandstorm, Earthquake at a hidden Dig user)
-are correct for the sprite per source but unchecked, and an invisible battler can change the lag-frame phase (Sky Uppercut: the ROM skips
-its 148 / 149 lag frames) — live audit 18's target. (2) Sky Uppercut 327 at a hidden target fails closed (`liveMoveHiddenTargetDeclines`;
-profiles [166] 187 rows / none 186 rows vs the visible [148, 149]); a D4 key would need the hidden state in the body duration.
-
 ## #157 — Weather-continuing animations: kernel event battler is the last attacker, the ROM plays them on battler 0 (S10A, found 2026-10-09 by aud56)
 
 The kernel's MOVE / general-animation event for RAIN / HAIL / SANDSTORM_CONTINUES carries the last attacker as its battler; the ROM

@@ -5,17 +5,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-10 (day, IN PROGRESS) — S10A: ISSUES #159 sprite fix, fly63 re-landed, Shock Wave order plan
+## 2026-10-10 (day, IN PROGRESS) — S10A: #159 fixed, nine folds; census 0..299 98.53 % / 99.28 %
 
-- **State:** local master `e42feaed4`, production src `10884465` (sw67 + hide66 folded). Supervisor union gates on `f3efec8bf`:
-  typecheck, 1,600 files / 13,169 tests, build, differential 624 / 624 vs `b50c4dabd`, census seeds 0..299 97.15 % / 98.16 % (+14 /
-  +1,984, 0 regressions, gameplay command sequence identical). Preview <http://127.0.0.1:5191/> serves `31f11ed70` (receipt committed).
-- **Did:** hide66 — live bodies no longer draw a hidden Fly / Bounce / Dig / Dive charger (90 live commands / 12,744 frames on seeds
-  0..999 had drawn it); fly63 re-landed; Sky Uppercut at a hidden target fails closed. sw67 — Shock Wave 351 geometry-keyed order plan
-  (18 / 18 new ROM pairs exact). Details: ANIMATION_INTEGRATION_PROGRESS.md top entry.
-- **In flight / next:** land68 (prep65 Dive words unit + prep64 SUBSTITUTE_FADE), plans69 (evidence for the remaining order-host stops),
-  then live audit 18 (hidden-span bodies, Shock Wave consumers, census battle 713), the Dive attack adapter.
-- **Notes:** no DEFERRED entries. ISSUES #159 trimmed to its open remainder (ROM checks of other hidden-span bodies; Sky Uppercut lag phase).
+- **State:** local master, production src `e6f98bf9` (`dc173666b`). Supervisor union gates on it: typecheck, 1,607 files / 13,225 tests,
+  build, differential 624 / 624, census seeds 0..299 98.53 % / 99.28 % (session start 96.98 / 97.99; 0 regressions at every fold, gameplay
+  command sequence identical). Mid-session census 0..999 on src `a96642c9`: 93.13 % / 97.34 % (start 91.89 / 95.82).
+- **Did:** hide66 (#159: live bodies no longer draw a hidden charger; 90 wrong live commands on 0..999 -> 0), fly63 re-landed, sw67
+  (Shock Wave plan), land68 (Dive words unit + SUBSTITUTE_FADE), plans69 + fold71 (Magnitude / CASTFORM_CHANGE / Conversion 2 / Needle
+  Arm plans; kernel Speed Boost animArg1), dive70 (Dive attack body live), ice72 (Ice Ball words unit for any consumer), audit 18 (442
+  windows, no defect) + fix74 (player Light Screen at a hidden opponent fails closed; Bulk Up proven for all Factory users), hist73
+  evidence (+154 / +17,256 banked). Details: ANIMATION_INTEGRATION_PROGRESS.md top entry.
+- **In flight / next:** land75 (hist73 landing), live audit 19, then final gates + census + preview.
+- **Notes:** no DEFERRED entries. ISSUES #159 closed; #160 new (Whirlpool at a hidden diver: lend residual, 0 px so far).
 
 ---
 

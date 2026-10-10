@@ -77,8 +77,43 @@
 - Supervisor union gates on `702313ef1` (src `5cd1b684`; fold71 + dive70): typecheck, full suite 1,604 files / 13,191 tests, build,
   differential 624 / 624 vs `e5aac81a4`, census seeds 0..299 **97.98 % / 98.96 %** (by the census's own frame total; +15 / +1,395 vs land68's = dive70; fold71 changes
   nothing on 0..299), 0 regressions, key sequence identical (`tools/integration/fixtures/union-gates-702313ef1.json`).
-- In flight: live audit 18 (SIDE). Next: ice72 (Ice Ball words unit for any consumer), hist73 (evidence: allocator history + hidden-battler
-  faint), live audit 19 (fold71 / dive70 / ice72, ISSUES #160).
+- Live audit 18 (SIDE, Opus, `827557562`, new files only; merged with fix74 as `dc173666b`): 442 windows (Fly / Bounce / Dig / Dive hidden
+  spans x Safeguard / Wish / Bulk Up / Rest / Iron Defense / Double Team / Sandstorm / Earthquake / Light Screen, Shock Wave chains 40,
+  SUBSTITUTE_FADE 17, 85 no-unit controls), explicit lab seeds. **No production DEFECT**; production's hide == the ROM's invisible flags
+  442 / 442; hidden-span consumers 0 px or = control. TIMING-PHASE: the player's Light Screen with the opponent Dive-hidden (the ROM drops
+  the age-68 / 69 lag frames, 148 px over 8 rows). OPEN, Factory-unreachable: Sandstorm with GOLEM hidden by Fly (1 row; fix74 found
+  SKARMORY / SWELLOW 0 px). Method corrections: a player-locked strike turn has no prompt (production invalidates -> fallback, safe);
+  missed strikes; Shock Wave consumers need the field + lent order. Battle 713 explained (hidden-battler reshow; master's fallback is the
+  safe direction). Supervisor: `audit18Run.sh` into fresh dirs on master — the same 4 DIFF windows, no new verdict class; text receipts
+  byte-identical (c713 differs only by dive70's live Dive attack).
+- Folded Opus worker `98cfb3283` (SIDE, narrow grant, stacked on audit 18) in `dc173666b` (src `e6f98bf9`): fix74 — `liveMoveHiddenTargetDeclines`
+  also declines a PLAYER Light Screen 113 while the opponent is hidden (any of Fly / Bounce / Dig / Dive; the opponent's Light Screen stays
+  live). Bulk Up 339: the brief's premise (species-dependent) was REFUTED from source + ROM — `Move_BULK_UP` frame counts are
+  species-free; the species inputs (y_offset height, corner, scaled picture, breath origin) are already source-derived; audit 18's
+  CHANSEY residual was its own framing (production's accepted window starts 4 rows after activation, at the first grown frame). 22 windows
+  (PRIMEAPE / SLAKING / HERACROSS / MACHAMP / URSARING both sides x SNORLAX / SHUCKLE + CHANSEY) 0 px, predictions committed first;
+  inventory scope line updated. Flagged, not changed: adapters whose accepted window starts after activation present a body 4 idle frames
+  shorter than the ROM (Bulk Up, Swagger, Scary Face, Taunt, Iron Defense, ...) — a shared convention. Census 0..999: 0 changes. Worker
+  gates 1,606 files / 13,219 tests, build, differential. Supervisor: `fix74Verify.ts` on all 22 fixtures with fresh probes — 22 / 22 0 px.
+- Folded Opus worker `667a91b4b` (INTEGRATION) as `3ebdcc896` (src `9ec2aba1`): ice72 — Ice Ball 301 is a words-order unit for ANY consumer
+  (`WORDS_ORDER_UNIT_MOVE_IDS` + 301, `DEFERRED_LEND_MOVE_IDS` = the words units, the marker at a role-isomorphic occupancy with the body
+  species, the carry `liveIceBallWordsPostFree` at the body's words / counter / species). 32 ROM Ice Ball bodies (both sides, counters
+  1..5, 10 at a non-entry occupancy): plan == ROM 31 / 31 + 1 fail-closed (Onix idle-rest x2), consumer lends 27 / 27, nested 42 / 42,
+  chains 46 / 47; predictions committed before comparison. Census 0..999 (3 ranges) +76 / +7,295 (chain predictor +32 / +3,523; the
+  rest are later Ice Ball bodies and Mud-Slap chains), 0 regressions; ON/OFF parity battle 19 (63 boundaries); presentation-seed replay.
+  Six tests that encoded the old "Ice Ball lends only to Ice Ball" rule updated (all fail in the revert experiment). Supervisor:
+  `ice72Run.sh` into a fresh dir — r1 == r2, every receipt == committed.
+- prep hist73 (MAIN lane, Opus, `21e9de585`, new files only): Part A — the allocator bucket's top stops are 37 live bodies no allocator
+  audit covered; all 37 NET-ZERO (154 run pairs A == B); temp patch census 0..999 +119 / +12,250 == predictor (67 % of the bucket; residual
+  = post-KO reseeds blocked by words-unit order plans). Part B — a hidden battler's faint frees its slot like a visible faint; a reshow
+  with the opponent hidden allocates like a normal reshow and re-creates it INVISIBLE (CopyAllBattleSpritesInvisibilities, so hide66's
+  render hide is right and its doc sentence about Scene ON is wrong); temp patch +33 / +4,854. Both +154 / +17,256. Supervisor:
+  `hist73Run.sh SKIP_CENSUS=1` into a fresh dir — 308 + 20 probe runs A == B, both audit receipts == committed.
+- Supervisor union gates on `dc173666b` (src `e6f98bf9`; ice72 + fix74): typecheck, full suite 1,607 files / 13,225 tests, build,
+  differential 624 / 624 vs `ff4baec48`, census seeds 0..299 **98.53 % / 99.28 %** (+44 / +3,730 = ice72; 0 regressions, key sequence +
+  digests identical) (`tools/integration/fixtures/union-gates-dc173666b.json`). ISSUES #159 closed (hidden-span bodies ROM-checked by audit
+  18; Sky Uppercut / player Light Screen at a hidden battler fail closed by design).
+- In flight: land75 (INTEGRATION: hist73 Part A + B), live audit 19 (SIDE: fold71 / ice72 / dive70 consumers, ISSUES #160).
 
 ## 2026-10-09 (day) — S10A: allocator / order / words-lend histories + live-claim fixes; ordinary-play live share 87.95 -> 91.89 % of commands (92.09 -> 95.82 % of frames); 239 + 13 + 24
 
