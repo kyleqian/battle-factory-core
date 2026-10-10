@@ -1,0 +1,491 @@
+{
+ "schema": "spark62-analysis/v1",
+ "rows": [
+  {
+   "scenario": "spark62-opponent-chinchou-player-shuckle.json",
+   "activation": 77,
+   "creationAge": 51,
+   "flashingSlots": [
+    3,
+    4,
+    5,
+    7,
+    9,
+    10,
+    11,
+    12
+   ],
+   "creatorCallers": [
+    "Cmd_createsprite+0xda"
+   ],
+   "creationContext": [
+    "BattleMainCB1"
+   ],
+   "createdInOrder": [
+    3,
+    4,
+    5,
+    7,
+    9,
+    10,
+    11,
+    12
+   ],
+   "animateSpritesTraversedBeforeVBlank": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "flashingStepsBeforeVBlank": {
+    "3": 2,
+    "4": 2,
+    "5": 1,
+    "7": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1
+   },
+   "initialCallbackAdvances": [
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lagFrame": {
+    "screen(c+1)==screen(c)": true,
+    "screen(c+2)!=screen(c+1)": true
+   }
+  },
+  {
+   "scenario": "spark62-opponent-chinchou-player-snorlax.json",
+   "activation": 77,
+   "creationAge": 51,
+   "flashingSlots": [
+    3,
+    4,
+    5,
+    7,
+    9,
+    10,
+    11,
+    12
+   ],
+   "creatorCallers": [
+    "Cmd_createsprite+0xda"
+   ],
+   "creationContext": [
+    "BattleMainCB1"
+   ],
+   "createdInOrder": [
+    3,
+    4,
+    5,
+    7,
+    9,
+    10,
+    11,
+    12
+   ],
+   "animateSpritesTraversedBeforeVBlank": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "flashingStepsBeforeVBlank": {
+    "3": 2,
+    "4": 2,
+    "5": 1,
+    "7": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1
+   },
+   "initialCallbackAdvances": [
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lagFrame": {
+    "screen(c+1)==screen(c)": true,
+    "screen(c+2)!=screen(c+1)": true
+   }
+  },
+  {
+   "scenario": "spark62-opponent-minun-player-shuckle.json",
+   "activation": 74,
+   "creationAge": 51,
+   "flashingSlots": [
+    3,
+    4,
+    5,
+    7,
+    9,
+    10,
+    11,
+    12
+   ],
+   "creatorCallers": [
+    "Cmd_createsprite+0xda"
+   ],
+   "creationContext": [
+    "BattleMainCB1"
+   ],
+   "createdInOrder": [
+    3,
+    4,
+    5,
+    7,
+    9,
+    10,
+    11,
+    12
+   ],
+   "animateSpritesTraversedBeforeVBlank": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "flashingStepsBeforeVBlank": {
+    "3": 2,
+    "4": 2,
+    "5": 1,
+    "7": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1
+   },
+   "initialCallbackAdvances": [
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lagFrame": {
+    "screen(c+1)==screen(c)": true,
+    "screen(c+2)!=screen(c+1)": true
+   }
+  },
+  {
+   "scenario": "spark62-opponent-minun-player-snorlax.json",
+   "activation": 74,
+   "creationAge": 51,
+   "flashingSlots": [
+    3,
+    4,
+    5,
+    7,
+    9,
+    10,
+    11,
+    12
+   ],
+   "creatorCallers": [
+    "Cmd_createsprite+0xda"
+   ],
+   "creationContext": [
+    "BattleMainCB1"
+   ],
+   "createdInOrder": [
+    3,
+    4,
+    5,
+    7,
+    9,
+    10,
+    11,
+    12
+   ],
+   "animateSpritesTraversedBeforeVBlank": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "flashingStepsBeforeVBlank": {
+    "3": 2,
+    "4": 2,
+    "5": 1,
+    "7": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1
+   },
+   "initialCallbackAdvances": [
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lagFrame": {
+    "screen(c+1)==screen(c)": true,
+    "screen(c+2)!=screen(c+1)": true
+   }
+  },
+  {
+   "scenario": "spark62-opponent-voltorb-player-shuckle.json",
+   "activation": 76,
+   "creationAge": 51,
+   "flashingSlots": [
+    3,
+    4,
+    5,
+    7,
+    9,
+    10,
+    11,
+    12
+   ],
+   "creatorCallers": [
+    "Cmd_createsprite+0xda"
+   ],
+   "creationContext": [
+    "BattleMainCB1"
+   ],
+   "createdInOrder": [
+    3,
+    4,
+    5,
+    7,
+    9,
+    10,
+    11,
+    12
+   ],
+   "animateSpritesTraversedBeforeVBlank": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "flashingStepsBeforeVBlank": {
+    "3": 2,
+    "4": 1,
+    "5": 1,
+    "7": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1
+   },
+   "initialCallbackAdvances": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lagFrame": {
+    "screen(c+1)==screen(c)": true,
+    "screen(c+2)!=screen(c+1)": true
+   }
+  },
+  {
+   "scenario": "spark62-opponent-voltorb-player-snorlax.json",
+   "activation": 76,
+   "creationAge": 51,
+   "flashingSlots": [
+    3,
+    4,
+    5,
+    7,
+    9,
+    10,
+    11,
+    12
+   ],
+   "creatorCallers": [
+    "Cmd_createsprite+0xda"
+   ],
+   "creationContext": [
+    "BattleMainCB1"
+   ],
+   "createdInOrder": [
+    3,
+    4,
+    5,
+    7,
+    9,
+    10,
+    11,
+    12
+   ],
+   "animateSpritesTraversedBeforeVBlank": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "flashingStepsBeforeVBlank": {
+    "3": 2,
+    "4": 1,
+    "5": 1,
+    "7": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1
+   },
+   "initialCallbackAdvances": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lagFrame": {
+    "screen(c+1)==screen(c)": true,
+    "screen(c+2)!=screen(c+1)": true
+   }
+  },
+  {
+   "scenario": "spark62-player-chinchou-opponent-shuckle.json",
+   "activation": 73,
+   "creationAge": 51,
+   "flashingSlots": [
+    3,
+    4,
+    5,
+    7,
+    9,
+    10,
+    11,
+    12
+   ],
+   "creatorCallers": [
+    "Cmd_createsprite+0xda"
+   ],
+   "creationContext": [
+    "BattleMainCB1"
+   ],
+   "createdInOrder": [
+    3,
+    4,
+    5,
+    7,
+    9,
+    10,
+    11,
+    12
+   ],
+   "animateSpritesTraversedBeforeVBlank": [
+    0
+   ],
+   "flashingStepsBeforeVBlank": {
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "7": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1
+   },
+   "initialCallbackAdvances": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lagFrame": {
+    "screen(c+1)==screen(c)": true,
+    "screen(c+2)!=screen(c+1)": true
+   }
+  },
+  {
+   "scenario": "spark62-player-minun-opponent-shuckle.json",
+   "activation": 70,
+   "creationAge": 51,
+   "flashingSlots": [
+    3,
+    4,
+    5,
+    7,
+    9,
+    10,
+    11,
+    12
+   ],
+   "creatorCallers": [
+    "Cmd_createsprite+0xda"
+   ],
+   "creationContext": [
+    "BattleMainCB1"
+   ],
+   "createdInOrder": [
+    3,
+    4,
+    5,
+    7,
+    9,
+    10,
+    11,
+    12
+   ],
+   "animateSpritesTraversedBeforeVBlank": [
+    0
+   ],
+   "flashingStepsBeforeVBlank": {
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "7": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1
+   },
+   "initialCallbackAdvances": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lagFrame": {
+    "screen(c+1)==screen(c)": true,
+    "screen(c+2)!=screen(c+1)": true
+   }
+  }
+ ]
+}

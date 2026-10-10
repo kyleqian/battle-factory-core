@@ -14,7 +14,8 @@ import { knownEntrySpriteOrderState } from "../../src/engine/spriteOrderProvider
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 
 // docs/next-adapters-prep10.md: Magnitude (222), Reversal (179), Pain Split (220), Rock Blast (350), Razor Wind (13),
-// Spark (209, player attacker only). The dense framebuffer proofs are tools/integration/fixtures/prep10-live/*.json.
+// Spark (209; both attackers since spark62). The dense framebuffer proofs are tools/integration/fixtures/prep10-live/*.json
+// (opponent attacker: tools/integration/fixtures/spark62-live/*.json).
 const request = (moveId: number, attacker: 0 | 1, extra: Partial<BattleMoveAnimationRequest> = {}): BattleMoveAnimationRequest => ({
   moveId, attacker, target: attacker === 0 ? 1 : 0, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0, ...extra,
 });
@@ -66,7 +67,7 @@ describe("live prep10 move adapters", () => {
       expect(liveMoveAnimationDuration(request(13, a, { turn: 1 }))).toBe(72);
     }
     expect(liveMoveAnimationDuration(request(209, 0))).toBe(115);
-    expect(liveMoveAnimationDuration(request(209, 1))).toBeNull();
+    expect(liveMoveAnimationDuration(request(209, 1))).toBe(115); // spark62
     // A Magnitude request that never saw a damagecalc carries the static table power 1: no adapter, no invented body.
     expect(liveMoveAnimationDuration(request(222, 0, { power: 1 }))).toBeNull();
   });
@@ -116,7 +117,7 @@ describe("live prep10 move adapters", () => {
     { id: 220, req: a => request(220, a), alt: ["DUSCLOPS", "GENGAR"], attackers: [0, 1] },
     { id: 350, req: a => request(350, a, { turn: 1, multihit: 2 }), alt: ["OCTILLERY", "SHUCKLE"], attackers: [0, 1] },
     { id: 13, req: a => request(13, a, { turn: 1 }), alt: ["ABSOL", "ONIX"], attackers: [0, 1] },
-    { id: 209, req: a => request(209, a), alt: ["CHINCHOU", "SHUCKLE"], attackers: [0] },
+    { id: 209, req: a => request(209, a), alt: ["CHINCHOU", "SHUCKLE"], attackers: [0, 1] },
   ];
   it.each(cases)("renders move $id with an alternate carrier in the evidenced orientations", c => {
     for (const a of c.attackers) {

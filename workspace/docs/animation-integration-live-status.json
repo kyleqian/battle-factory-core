@@ -2988,8 +2988,8 @@
       ],
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison",
-        "opponent attacker NOT live (unproven side constants, prep10 s3.5)",
-        "window ends 2 rows before the script end; hardwareTieSlotOrder is an accepted constant",
+        "opponent attacker live since spark62 (the flashing initial advance is a lag-frame RAM artifact, never displayed; dense 6/6 zero residual twice: MINUN / CHINCHOU / VOLTORB x SHUCKLE / SNORLAX, ../tools/integration/fixtures/spark62-live-receipt.json)",
+        "window ends 2 rows before the script end; hardwareTieSlotOrder is an accepted constant (SortSprites history, not derived): both attackers gated on the known-order lend",
         "ordinary command-input replay: see the receipt"
       ]
     },
