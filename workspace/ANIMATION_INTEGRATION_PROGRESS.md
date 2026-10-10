@@ -113,7 +113,33 @@
   differential 624 / 624 vs `ff4baec48`, census seeds 0..299 **98.53 % / 99.28 %** (+44 / +3,730 = ice72; 0 regressions, key sequence +
   digests identical) (`tools/integration/fixtures/union-gates-dc173666b.json`). ISSUES #159 closed (hidden-span bodies ROM-checked by audit
   18; Sky Uppercut / player Light Screen at a hidden battler fail closed by design).
-- In flight: land75 (INTEGRATION: hist73 Part A + B), live audit 19 (SIDE: fold71 / ice72 / dive70 consumers, ISSUES #160).
+- Folded Opus worker `346f3f4de` (INTEGRATION) as `f60c16622` (src `8e543d91` + st76): land75 — hist73 Part A (37 audited NET-ZERO bodies
+  in `LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS`; pins moved as hist73 listed + `playableAnimationIntegration`'s Light Screen seed 84) and
+  Part B (`liveSpriteOrderHost.ts`: a hidden battler's faint = the visible faint plan and un-hides; a reshow with a hidden opponent = the
+  normal reshow keeping `hidden`; a hidden player at a reshow / a hidden battler's switch-in still invalidate; the render hide already
+  clears on faint / switch commands). hide66's doc sentence corrected (the reshow re-creates the charger invisible:
+  CopyAllBattleSpritesInvisibilities). Dense route checks 0 px, r1 == r2: wall seeds 10 (Barrier) / 260 (Magic Coat after a Dive setup) /
+  Light Screen seed 84. Census 0..999 (10 `--index-from` shards): **+154 / +17,256, 93.70 -> 94.26 % / 97.64 -> 98.08 %**, key sequence
+  + digests identical, 0 regressions; ON/OFF parity battles 533 / 713. Supervisor: `land75Run.sh` into a fresh dir — every receipt same.
+- Folded Opus MAIN-lane worker (master `7f10a294e` .. `13b062bb2`, src `e7eec09f`): st76 — the "battler has a status condition" gates of
+  Dive 291 (both bodies) and Meteor Mash 309 removed: the live view redraws both healthboxes (status icon included) over every live body.
+  12 statused windows (PSN / BRN / PRZ / SLP on attacker or target, both sides), r1 == r2: 10 x 0 px, the 2 Dive setup windows show only the
+  documented D4 phases (player row 68, 284 px; opponent age-64 lag, 15,777 px). Census 0..999 +31 / +4,035, key sequence + digest
+  identical; ON/OFF parity seeds 428 / 518. Flagged: a Dive attack extra lag at age 17 on poisoned player divers (5 / 34; ISSUES #161).
+  Supervisor: the 12 fixtures through `liveAdapterFramebuffer.ts` with fresh probes == the worker's table.
+- Supervisor union gates on `f60c16622` (src `d73cf1af`; st76 + land75): typecheck, full suite 1,610 files / 13,235 tests, build,
+  differential 624 / 624 vs `dc173666b`, census seeds 0..299 **98.62 % / 99.34 %** (+7 / +740 = st76; land75's gains are all on seeds
+  300..999), 0 regressions, key sequence + digests identical (`tools/integration/fixtures/union-gates-f60c16622.json`).
+- Live audit 19 (SIDE, Opus, `e5ae45df2`, new files only; merged `c68111480`): 599 windows / 130 scenarios (Magnitude both power
+  classes 37, Conversion 2 59, Needle Arm 44, Speed Boost 31 (argument 17 in all 45 ROM events), Castform 48, Ice Ball 190, Dive 126, #160
+  24, controls 40); hide == ROM 599 / 599, r1 == r2 599 / 599, run B and run C byte-identical to run A. DEFECTs: **Castform in a weather
+  form drawn as the normal form in 44 live windows** (fold71's CASTFORM_CHANGE plan exposed ISSUES #143's remainder -> ISSUES #162) and a
+  latent **Needle Arm 302 SortSprites tie** (6 / 44 lends != ROM, 0 px so far -> ISSUES #163). ISSUES #160 is a dive70 FIXTURE artifact
+  (the ROM's action prompt precedes the Whirlpool; with the ROM turn split the lend == ROM; staged as described, 19 windows 0 px) —
+  closed. 195 fallbacks are production's own declines (174 after player-locked turns). ice72's player-side counter 2..5 lend evidence
+  assumed a prompt every turn (production never lends there; its census gain stands).
+- In flight: cf78 (INTEGRATION: Castform weather-form decline + Needle Arm tie), live audit 20 (SIDE: land75 allocator consumers + Part B
+  routes + st76 follow-ups).
 
 ## 2026-10-09 (day) — S10A: allocator / order / words-lend histories + live-claim fixes; ordinary-play live share 87.95 -> 91.89 % of commands (92.09 -> 95.82 % of frames); 239 + 13 + 24
 
