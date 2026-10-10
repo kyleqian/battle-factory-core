@@ -3,7 +3,10 @@
 // liveMoveGeometrySpriteOrderPlanText case 351 = shockWave.ts shockWaveSpriteOrderPlanText over the reducer's own allocation timeline),
 // at each receipt's own start order (F0 as the lent order). Per unit: the seam text equals the tool's direct reducer text; every window's
 // free order F equals the ROM's after the plan prefix; window count equal; every window's body age equals the ROM frame offset.
+// With --predictions=<predictions.json> (sw67Predict.ts, committed before the probes) each unit's committed predicted text and start order
+// must also equal the ROM's (prediction == plan == ROM).
 // usage: node --experimental-strip-types tools/integration/sw67ShockWaveFit.ts [out.json] [--units=<units.json>] [--prefix=sw-]
+//        [--predictions=<predictions.json>]
 import { readFileSync, writeFileSync } from "node:fs";
 import { shockWaveSpriteOrderPlanWindows, type ShockWaveLiveInputs } from "../../src/animation/shockWave.ts";
 import shockWaveAsset from "../../src/animation/assets/shock-wave.json" with { type: "json" };
@@ -63,7 +66,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const unitsPath = arg("units") ?? new URL("./fixtures/plans48/units.json", import.meta.url).pathname;
   const prefix = arg("prefix") ?? "sw-";
   const jobs = JSON.parse(readFileSync(unitsPath, "utf8")).jobs as Record<string, { base: string; ops?: [string, string, number][]; species?: { player: number; opponent: number }; units: RomUnit[] }>;
-  const rows: unknown[] = [];
+  const predictionsPath = arg("predictions");
+  const predicted = new Map<string, { plan: string; F0: number[] }>(predictionsPath === undefined ? []
+    : JSON.parse(readFileSync(predictionsPath, "utf8")).rows.map((row: { id: string; plan: string; F0: number[] }) => [row.id, row]));
+  const rows: { exact: boolean }[] = [];
   for (const [job, entry] of Object.entries(jobs)) {
     if (!job.startsWith(prefix)) continue;
     let species = entry.species;
@@ -76,13 +82,18 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     for (const unit of entry.units) {
       const m = /^body 351:(player|opponent)$/.exec(unit.label);
       if (!m) continue;
-      const row = { job, ...sw67CheckUnit(m[1] as Side, species.player, species.opponent, unit) };
+      const checked = sw67CheckUnit(m[1] as Side, species.player, species.opponent, unit);
+      const prediction = predictionsPath === undefined ? undefined : predicted.get(job);
+      const predictionEqual = prediction === undefined ? undefined : prediction.plan === checked.plan && same(prediction.F0, unit.F0);
+      const row = { job, ...checked, ...(predictionsPath === undefined ? {} : { predictionEqual }),
+        exact: checked.exact && (predictionsPath === undefined || predictionEqual === true) };
       rows.push(row);
       console.log(`${job} ${row.side} ${JSON.stringify(species)}: ROM ${row.romWindows} windows, model ${row.modelWindows}; ` +
-        (row.exact ? "PER-FRAME EXACT (F, count, ages, seam)" : `first divergence ${row.firstDivergence}, age mismatches ${row.frameMismatches}, seam ${row.seamEqual}`));
+        (row.exact ? `PER-FRAME EXACT (F, count, ages, seam${predictionsPath === undefined ? "" : ", committed prediction"})`
+          : `first divergence ${row.firstDivergence}, age mismatches ${row.frameMismatches}, seam ${row.seamEqual}, prediction ${predictionEqual}`));
     }
   }
-  const summary = { units: rows.length, exact: rows.filter(r => (r as { exact: boolean }).exact).length };
+  const summary = { units: rows.length, exact: rows.filter(r => r.exact).length };
   console.log(`exact ${summary.exact} / ${summary.units}`);
   if (out) writeFileSync(out, `${JSON.stringify({ schema: "sw67-fit-v1", unitsPath: unitsPath.replace(/^.*\/tools\//, "tools/"), prefix, summary, rows }, null, 1)}\n`);
   if (summary.exact !== summary.units || summary.units === 0) process.exitCode = 1;

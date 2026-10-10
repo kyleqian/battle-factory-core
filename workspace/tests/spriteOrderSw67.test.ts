@@ -77,6 +77,22 @@ describe("sw67: the geometry-keyed plan through the seam", () => {
     expect(new Set(rows.filter(row => row.side === "opponent").map(row => row.plan)).size).toBe(2);
     expect(new Set(rows.filter(row => row.side === "player").map(row => row.plan)).size).toBe(1);
   });
+  it("the 18-pair grid (predictions committed before the probes): A == B, prediction == seam plan == ROM per frame, every class", () => {
+    const grid = JSON.parse(readFileSync(new URL("../tools/integration/fixtures/sw67/units.json", import.meta.url), "utf8")).jobs;
+    const predictions = JSON.parse(readFileSync(new URL("../tools/integration/fixtures/sw67/predictions.json", import.meta.url), "utf8")).rows;
+    expect(predictions.length).toBe(18);
+    const windows = new Map<string, Set<number>>([["player", new Set()], ["opponent", new Set()]]);
+    for (const prediction of predictions) {
+      const entry = grid[prediction.id];
+      expect(entry.identicalAB).toBe(true);
+      const unit = entry.units.find((u: { label: string }) => u.label === `body 351:${prediction.side}`);
+      const row = sw67CheckUnit(prediction.side, entry.species.player, entry.species.opponent, unit);
+      expect([row.exact, row.plan === prediction.plan, row.romWindows]).toEqual([true, true, prediction.windows]);
+      windows.get(prediction.side)!.add(row.romWindows);
+    }
+    expect([...windows.get("player")!].sort()).toEqual([102, 104, 106]);
+    expect([...windows.get("opponent")!].sort()).toEqual([79, 86]);
+  });
   it("351 is geometry-keyed; no plan without the displayed field / a known-entry lend", () => {
     expect(SPRITE_ORDER_GEOMETRY_KEYED_BODIES.has(351)).toBe(true);
     const field = { player: { species: 222 }, opponent: { species: 180 } } as never;
