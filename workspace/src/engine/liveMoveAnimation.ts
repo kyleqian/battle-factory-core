@@ -114,7 +114,7 @@ import { liveEruptionProfile, liveLovelyKissProfile, liveOctazookaProfile, liveS
 import { KNOWN_ENTRY_NON_BATTLER_SPRITES, battlerSprite, liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
 import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs, liveShockWaveInputs, liveSkillSwapInputs, liveFlatterInputs, FIRST_BODY_SCANLINE } from "./liveOamMoves.ts";
 import shockWaveAsset from "../animation/assets/shock-wave.json" with { type: "json" };
-import { shockWaveTimingFor } from "../animation/shockWave.ts";
+import { shockWaveSpriteOrderPlanText, shockWaveTimingFor } from "../animation/shockWave.ts";
 import revengeScratchAsset from "../animation/assets/revenge-purple-scratch-swipe.json" with { type: "json" };
 import hornDrillAsset from "../animation/assets/horn-drill.json" with { type: "json" };
 import megaHornAsset from "../animation/assets/mega-horn-horn-hit-2.json" with { type: "json" };
@@ -712,7 +712,8 @@ export function liveMoveAbsorptionOrbCenters(
  * dreamEater.ts through absorptionOrbSpriteOrderPlan.ts); Eruption (284, plans54) at its ROM-proven attacker species only
  * (eruptionSpriteOrderPlan.ts); Hail (258, plans54; also HAIL_CONTINUES) from hail.ts's timeline (hailSpriteOrderPlan.ts); Blizzard (59,
  * plans54) from blizzard.ts's allocator replay (blizzardSpriteOrderPlan.ts); Water Spout (323, plans54) from waterSpout.ts's timeline at the
- * displayed field's attacker HP (`field`) and the body's lent free order (`lentFree`; waterSpoutSpriteOrderPlan.ts). Null for any other move or a species without a battle picture / proof.
+ * displayed field's attacker HP (`field`) and the body's lent free order (`lentFree`; waterSpoutSpriteOrderPlan.ts); Shock Wave (351, sw67) from
+ * shockWave.ts's allocation timeline at the displayed field and the lent order. Null for any other move or a species without a battle picture / proof.
  */
 export function liveMoveGeometrySpriteOrderPlanText(
   moveId: number, attackerSide: "player" | "opponent", species: LiveMoveBodySpecies, field?: BattleResolutionDisplayedField,
@@ -734,6 +735,9 @@ export function liveMoveGeometrySpriteOrderPlanText(
     const inputs = order === null ? null : waterSpoutLiveInputs(field!, attackerSide, order);
     return inputs === null ? null : waterSpoutSpriteOrderPlanText(inputs);
   }
+  // sw67: Shock Wave's bolts walk from the attacker's picture, its lightning count follows the target's BATTLER_COORD_Y and its destroy
+  // groups tie in the lent order: the plan of shockWave.ts's own allocation timeline at the displayed field and the lent order (case 351).
+  if (moveId === 351) return field === undefined || lentFree === undefined ? null : liveShockWaveSpriteOrderPlanText(field, attackerSide, lentFree);
   const planText = moveId === 202 ? gigaDrainSpriteOrderPlanText : moveId === 72 ? megaDrainSpriteOrderPlanText
     : moveId === 138 ? dreamEaterSpriteOrderPlanText : null;
   const centers = planText === null ? null : liveMoveAbsorptionOrbCenters(attackerSide, species);
@@ -913,6 +917,44 @@ function liveShockWaveTiming(field: BattleResolutionDisplayedField, attackerSide
   const attacker = liveBattlerAnchors(attackerSide, art), target = liveBattlerAnchors(attackerSide === "player" ? "opponent" : "player", art);
   return shockWaveTimingFor({ attackerSide, attackerPictureOrigin: attacker.picOffsetPoint, targetPictureOrigin: target.picOffsetPoint,
     targetBattlePosition: target.battlePositionCenter, derivedTiming: true });
+}
+
+const shockWaveSpriteOrderPlans = new Map<string, string | null>();
+/**
+ * sw67 (docs/next-adapters-sw67.md): MOVE_SHOCK_WAVE's sprite-order plan (shockWave.ts shockWaveSpriteOrderPlanText over the reducer's own
+ * allocation timeline) at the case-351 inputs of the displayed species and the lent order: the bolt walk starts at the attacker's
+ * Y_PIC_OFFSET, the lightning count follows the target's BATTLER_COORD_Y, the destroy groups tie in the lent painter order. Cached per
+ * (side, species, lend); null for a lend whose occupied set is not the known entry or a species without a battle picture.
+ */
+function liveShockWaveSpriteOrderPlanText(
+  field: BattleResolutionDisplayedField, attackerSide: "player" | "opponent", lentFree: readonly number[],
+): string | null {
+  const key = `${attackerSide}/${field.player.species}/${field.opponent.species}/${lentFree.join(",")}`;
+  if (shockWaveSpriteOrderPlans.has(key)) return shockWaveSpriteOrderPlans.get(key)!;
+  let plan: string | null = null;
+  try {
+    const activationOrder = spriteOrderWithOccupiedPrefix({ known: true as const, free: lentFree, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+    const art = createBattleCommandFieldArtView(field);
+    const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+    if (activationOrder !== null && palettes !== null) {
+      const targetSide = attackerSide === "player" ? "opponent" : "player";
+      const attacker = liveBattlerAnchors(attackerSide, art), target = liveBattlerAnchors(targetSide, art);
+      const rgb555 = (c: { r: number; g: number; b: number }) => (c.r >> 3) | (c.g >> 3) << 5 | (c.b >> 3) << 10;
+      const resourcePalette = (name: "circleOfLight" | "electricOrbs" | "spark" | "lightning") =>
+        (shockWaveAsset as unknown as { art: Record<string, { palette: { r: number; g: number; b: number }[] }> }).art[name]!.palette.map(rgb555);
+      const animationInputs = liveShockWaveInputs({ attackerSide, opponentSpecies: art.opponent.speciesSymbol, attacker, target, palettes, activationOrder,
+        resourcePalettes: { circleOfLight: resourcePalette("circleOfLight"), electricOrbs: resourcePalette("electricOrbs"),
+          spark: resourcePalette("spark"), lightning: resourcePalette("lightning") } });
+      // The SHOCK_WAVE seam fields, as the case-351 renderer config: picture origins and the target's plain BATTLER_COORD_Y.
+      plan = shockWaveSpriteOrderPlanText({ ...animationInputs, attackerSide, targetSide, attackerSpecies: art[attackerSide].speciesSymbol,
+        targetSpecies: art[targetSide].speciesSymbol, attackerPictureOrigin: attacker.picOffsetPoint, targetPictureOrigin: target.picOffsetPoint,
+        targetBattlePosition: { x: target.picOffsetPoint.x, y: target.battlePositionCenter.y } } as never);
+    }
+  } catch {
+    plan = null;
+  }
+  shockWaveSpriteOrderPlans.set(key, plan);
+  return plan;
 }
 
 const eruptionProfileCache = new Map<string, ReturnType<typeof liveEruptionProfile>>();

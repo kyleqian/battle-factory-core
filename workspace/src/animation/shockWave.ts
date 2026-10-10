@@ -720,3 +720,35 @@ export function shockWaveAtAge(age: number, input: Readonly<ShockWaveLiveInputs>
     cleanup: { firstInactive: age === timing.cleanupAge, visualTasks: Number(tasks.some((task) => task.role === "charging")) + Number(sprites.some((sprite) => sprite.kind === "orb")) + Number(tasks.some((task) => task.role === "progressing")) + Number(tasks.some((task) => task.role === "lightning")) + Number(sprites.some((sprite) => sprite.kind === "palette-blend")) + Number(tasks.some((task) => task.role === "shake")) + Number(tasks.some((task) => task.role === "blend")), soundTasks: 0, ownedSprites: sprites.length, resourcesReleased: age >= timing.cleanupAge },
   };
 }
+
+/**
+ * sw67 (docs/next-adapters-sw67.md): the body's sprite-order plan text (spriteOrderEventTransform.ts encoding) from this reducer's own
+ * allocation timeline (shockWaveAtAge's sprites and painter order per age). Identity is the occupied slot, as the per-frame ROM snapshot
+ * sees it: CreateSprite takes the lowest free index (sprite.c CreateSprite), and BattleMainCB2 runs AnimateSprites (the particles' /
+ * bolts' / lightning's DestroySprite) before RunTasks (the bolt / lightning tasks' CreateSprite), so a slot freed and taken again in one
+ * frame is one continuous occupancy (the duration-40 charging particles' slots pass to the bolts created on their destroy frame; a bolt
+ * lives 13 frames). Per window: the new slots in index order (`C`), then the freed ones in the previous age's painter order (`D`).
+ */
+export function shockWaveSpriteOrderPlanText(input: Readonly<ShockWaveLiveInputs>): string {
+  return shockWaveSpriteOrderPlanWindows(input).map((window) => window.text).join(";");
+}
+
+/** sw67: shockWaveSpriteOrderPlanText's windows with the body age of each (age 0 = the script's first frame). */
+export function shockWaveSpriteOrderPlanWindows(input: Readonly<ShockWaveLiveInputs>): readonly Readonly<{ age: number; text: string }>[] {
+  const instance = new Map<number, number>();
+  let made = 0, live = new Set<number>(), painter: readonly number[] = [];
+  const windows: { age: number; text: string }[] = [];
+  for (let age = 0, last = shockWaveTimingFor(input).cleanupAge; age <= last; age += 1) {
+    const state = shockWaveAtAge(age, input);
+    const now = new Set(state.sprites.map((sprite) => sprite.slot));
+    const created = [...now].filter((slot) => !live.has(slot)).sort((left, right) => left - right);
+    const destroyed = [...live].filter((slot) => !now.has(slot)).sort((left, right) => painter.indexOf(left) - painter.indexOf(right));
+    for (const slot of created) instance.set(slot, made++);
+    const parts: string[] = [];
+    if (created.length > 0) parts.push(`C${"f".repeat(created.length)}`);
+    if (destroyed.length > 0) parts.push(`D${destroyed.map((slot) => instance.get(slot)).join(",")}`);
+    if (parts.length > 0) windows.push({ age, text: parts.join("/") });
+    live = now; painter = state.painterOrder;
+  }
+  return windows;
+}
