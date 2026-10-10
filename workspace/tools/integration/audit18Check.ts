@@ -215,6 +215,13 @@ for (let run = 0; run < 2; run++) {
     const w = v.f.denseWindow!;
     const body = (probe.bodies as Json[]).find((b) => b.startFrame === w.startFrame && b.endFrame === w.endFrame);
     const res: Json = { sameWindow: body !== undefined };
+    // A fresh probe run whose ROM trajectory diverged (ISSUES #154 class: the window's body is not where the fixture says, its frames
+    // were not dumped) is recorded as diverged (digest "diverged", px -1), not rendered.
+    if (body === undefined) {
+      for (const kind of ["chain", "entry"] as const) res[kind] = { digest: "diverged", rows: 0, exactRows: 0, px: -1, residualRows: [], detail: [] };
+      perFixture[v.name] = res;
+      continue;
+    }
     for (const kind of ["chain", "entry"] as const) {
       const rows: number[][] = [];
       const detail: Json[] = [];

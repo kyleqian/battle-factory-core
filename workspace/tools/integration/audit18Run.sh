@@ -9,7 +9,8 @@
 # 5. the Dive lends vs the ROM free order (AUDIT18_LENDS_ONLY) -> lends.txt; ablations (Iron Defense offset 0, audit 17's missed-strike
 #    rule, audit 17's always-prompt turns, no hide) -> ablation/; battle 713 host census on this tree and on b50c4dabd (git archive into
 #    the scratch dir) -> c713/;
-# 6. compares <receipt-dir> with the committed receipts (tools/integration/fixtures/audit-18/receipts/): byte-identical or a list.
+# 6. compares <receipt-dir> with the committed receipts (tools/integration/fixtures/audit-18/receipts/; audit18Compare.py): windows
+#    identical / ROM-drift (a fresh probe run disagreeing with its pair: ISSUES #154 class) / DIFFERS, text receipts byte for byte.
 set -e
 [ $# -ge 2 ] || { echo "usage: audit18Run.sh <receipt-dir> <scratch-dir>"; exit 2; }
 REC=$1; T=$2; W=tools/integration/fixtures/audit-18
@@ -60,5 +61,4 @@ python3 tools/integration/audit18CensusPatch.py "$T/b50/tools/integration/liveSh
 B=$(cd "$REC/c713" && pwd)
 (cd "$T/b50" && node --experimental-strip-types --no-warnings tools/integration/audit18Census713.ts --seeds=713..713 --out=c713.json --commands="$B/b50c4dabd.jsonl" > /dev/null 2>&1)
 python3 tools/integration/audit18Battle713.py "$REC/c713/b50c4dabd.jsonl" "$REC/c713/master.jsonl" > "$REC/c713/diff.txt"
-diff -r "$REC" $W/receipts > "$T/receipts-vs-committed.txt" 2>&1 && echo "receipts byte-identical to the committed ones" \
-  || echo "receipts differ from the committed ones: $T/receipts-vs-committed.txt"
+[ -d $W/receipts/check ] && python3 tools/integration/audit18Compare.py "$REC" $W/receipts | tee "$T/receipts-vs-committed.txt" | tail -12 || true

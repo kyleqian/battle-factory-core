@@ -1,0 +1,22 @@
+bounce-golem-bulk-up-opp-c0.json       BULK_UP      opponent Hh agree=1 prompts=p       units=1   live=1 order=1 alloc=0 rows=108 exact=25 px=38812 r1==r2=1 ages=2..62 | entry live=1 px=168196 r1==r2=1 win=1
+bounce-golem-bulk-up-opp-c1.json       BULK_UP      opponent .. agree=1 prompts=pL      units=5   live=1 order=0 alloc=0 rows=108 exact=25 px=38812 r1==r2=1 ages=2..62 | entry live=1 px=38812 r1==r2=1 win=1
+bounce-golem-bulk-up-opp-c2.json       BULK_UP      opponent Hh agree=1 prompts=pLp     units=8   live=1 order=0 alloc=0 rows=108 exact=25 px=38812 r1==r2=1 ages=2..62 | entry live=1 px=168196 r1==r2=1 win=1
+bounce-golem-bulk-up-opp-c3.json       BULK_UP      opponent Hh agree=1 prompts=pLpLp   units=15  live=1 order=0 alloc=0 rows=108 exact=25 px=38812 r1==r2=1 ages=2..62 | entry live=1 px=168196 r1==r2=1 win=1
+bounce-golem-bulk-up-opp-c4.json       BULK_UP      opponent H. agree=0 prompts=pLpLpLp units=19  live=1 order=0 alloc=0 rows=108 exact=0 px=168196 r1==r2=1 ages=0..39 | entry live=1 px=168196 r1==r2=1 win=1
+bounce-golem-bulk-up-opp-c5.json       BULK_UP      opponent .. agree=1 prompts=pLpLpLpL units=23  live=1 order=0 alloc=0 rows=108 exact=25 px=38812 r1==r2=1 ages=2..62 | entry live=1 px=38812 r1==r2=1 win=1
+ctl-snorlax-iron-defense-opp-offset0-c0.json IRON_DEFENSE opponent .. agree=1 prompts=p       units=0   live=1 order=1 alloc=0 rows=102 exact=57 px=31990 r1==r2=1 ages=3..56 | entry live=1 px=31990 r1==r2=1 win=1
+ctl-snorlax-iron-defense-opp-offset0-c1.json IRON_DEFENSE opponent .. agree=1 prompts=pp      units=2   live=1 order=1 alloc=0 rows=102 exact=57 px=31990 r1==r2=1 ages=3..56 | entry live=1 px=31990 r1==r2=1 win=1
+ctl-snorlax-iron-defense-opp-offset0-c2.json IRON_DEFENSE opponent .. agree=1 prompts=ppp     units=4   live=1 order=1 alloc=0 rows=102 exact=57 px=31990 r1==r2=1 ages=3..56 | entry live=1 px=31990 r1==r2=1 win=1
+ctl-snorlax-iron-defense-ply-offset0-c0.json IRON_DEFENSE player   .. agree=1 prompts=p       units=0   live=1 order=1 alloc=0 rows=102 exact=55 px=33022 r1==r2=1 ages=3..55 | entry live=1 px=33022 r1==r2=1 win=1
+ctl-snorlax-iron-defense-ply-offset0-c1.json IRON_DEFENSE player   .. agree=1 prompts=pp      units=2   live=1 order=1 alloc=0 rows=102 exact=55 px=33022 r1==r2=1 ages=3..55 | entry live=1 px=33022 r1==r2=1 win=1
+ctl-snorlax-iron-defense-ply-offset0-c2.json IRON_DEFENSE player   .. agree=1 prompts=ppp     units=4   live=1 order=1 alloc=0 rows=102 exact=55 px=33022 r1==r2=1 ages=3..55 | entry live=1 px=33022 r1==r2=1 win=1
+dig-snorlax-safeguard-ply-c0.json      SAFEGUARD    player   H. agree=0 prompts=p       units=1   live=1 order=1 alloc=0 rows=71 exact=0 px=166140 r1==r2=1 ages=0..39 | entry live=1 px=166140 r1==r2=1 win=1
+fly-snorlax-bulk-up-opp-c0.json        BULK_UP      opponent Hh agree=1 prompts=p       units=1   live=1 order=1 alloc=0 rows=108 exact=25 px=38812 r1==r2=1 ages=2..62 | entry live=1 px=212800 r1==r2=1 win=1
+fly-snorlax-bulk-up-opp-c1.json        BULK_UP      opponent .. agree=1 prompts=pL      units=5   live=1 order=1 alloc=0 rows=108 exact=25 px=38812 r1==r2=1 ages=2..62 | entry live=1 px=38812 r1==r2=1 win=1
+fly-snorlax-bulk-up-opp-c2.json        BULK_UP      opponent Hh agree=1 prompts=pLp     units=8   live=1 order=1 alloc=0 rows=108 exact=25 px=38812 r1==r2=1 ages=2..62 | entry live=1 px=212800 r1==r2=1 win=1
+fly-snorlax-bulk-up-opp-c3.json        BULK_UP      opponent .. agree=1 prompts=pLpL    units=12  live=1 order=1 alloc=0 rows=108 exact=25 px=38812 r1==r2=1 ages=2..62 | entry live=1 px=38812 r1==r2=1 win=1
+fly-snorlax-bulk-up-opp-c4.json        BULK_UP      opponent Hh agree=1 prompts=pLpLp   units=15  live=1 order=1 alloc=0 rows=108 exact=25 px=38812 r1==r2=1 ages=2..62 | entry live=1 px=212800 r1==r2=1 win=1
+bounce windows=6 live=6 0px=0 hidden=4 hiddenLive0px=0 agree=5 r1==r2=6
+ctl windows=6 live=6 0px=0 hidden=0 hiddenLive0px=0 agree=6 r1==r2=6
+dig windows=1 live=1 0px=0 hidden=1 hiddenLive0px=0 agree=0 r1==r2=1
+fly windows=5 live=5 0px=0 hidden=3 hiddenLive0px=0 agree=5 r1==r2=5
