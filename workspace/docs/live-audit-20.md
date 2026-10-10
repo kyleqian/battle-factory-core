@@ -131,10 +131,18 @@ By the number of Part A bodies in the history:
     (`reproduce/runB-vs-committed.txt`).
   - The later checker / derivation edits (Part B hide clear, pb-only faint units, setup text for Fly / Dig / Bounce, the gender of the
     member on the field) leave the main fixtures byte-identical: re-derived and `diff -rq` clean. No main fixture has a faint unit.
-  - Run C of the final code: `reproduce/runC-vs-committed.txt`, if present.
-- **Extra runner** `audit20Extra.sh`: run 1 produced `receipts-extra/`; run 2 (fresh dirs) is compared in
-  `reproduce/extra-run2-vs-committed.txt`.
+  - **Run C of the final code** (fresh dirs, 15:40..15:49, concurrent with `npm test`): **identical = 392, ROM-drift = 0,
+    DIFFERS = 0**. The whole receipt dir is byte-identical (`reproduce/runC-vs-committed.txt`).
+- **Extra runner** `audit20Extra.sh`: run 1 produced `receipts-extra/`. Run 2 (fresh dirs, 15:40..15:44) gives **identical = 44**,
+  and the whole receipt dir is byte-identical: partb, ablations, `lag.txt`, the controls and π (`reproduce/extra-run2-vs-committed.txt`).
 - No ROM drift was seen between batches.
+
+Gates (evidence only):
+- `npm test`: 1,610 files / 13,235 tests passed, 44 files / 223 tests skipped, 0 failed;
+- `npm run build`: green;
+- `git diff --check c68111480..HEAD`: clean;
+- every change since `c68111480` is an added file in the audit20 set (755 files), with no existing tracked file modified.
+- No TypeScript was added under `tests/`; `tools/` is outside the `tsc` include.
 
 ## 3. Reproduction (from workspace/; direct mGBA only; production src is never patched)
 
