@@ -116,8 +116,8 @@ Fresh receipt and scratch dirs, a separate batch started at 13:55 while A was in
 - It re-staged the scenarios (== committed) and re-probed every scenario. **Its derived fixtures == the committed ones** and `derive.txt`
   is byte-identical: frames, `gRng2Value`, powers, counters and turns all reproduce.
 - `audit19Compare.py` against run A's receipts as committed in `0ee9bae04`: **identical = 599, ROM-drift = 0, DIFFERS = 0 windows. All
-  122 check receipts and all 17 other receipt files are byte-identical** (summary, verdicts, coverage, lends, derive, wp160 / ×4,
-  ablation / ×6).
+  122 check receipts and all 17 other receipt files are byte-identical** (summary, verdicts, coverage, lends, derive, derive-vs-committed,
+  wp160 / ×4, ablation / ×7 including its summary).
 - Unlike audit 18 (15 ROM-drift windows), no window drifted across these batches.
 
 ### The one later checker change: `416763b3a`
