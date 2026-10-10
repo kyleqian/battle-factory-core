@@ -45,7 +45,7 @@ function turn(host: LiveSpriteOrderHost, requestId: number, events: readonly Bat
 }
 
 describe("deferred sprite-order lend (multi-body Random2 moves)", () => {
-  it("records a word-free marker at an Ice Ball body and lends it, nested, to the next Ice Ball bodies only", () => {
+  it("records a word-free marker at an Ice Ball body and lends it, nested, to every later consumer (ice72: Ice Ball is a words unit)", () => {
     let host = createLiveSpriteOrderHost(knownEntrySpriteOrderState("ordinary-factory"));
     const t1 = turn(host, 1, [iceBall(10, 0, 1), hit(11, 1), tackle(12, 1), hit(13, 0)]);
     host = t1.host;
@@ -55,8 +55,9 @@ describe("deferred sprite-order lend (multi-body Random2 moves)", () => {
       activation: { free: KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER },
       units: [{ kind: "hit-animation", targetVisible: true }, { kind: "move-animation", moveId: 33, attackerSide: "opponent" },
         { kind: "hit-animation", targetVisible: true }] });
-    // The Tackle after the Ice Ball body sees an unknown order (unchanged), never the deferred lend.
-    expect(t1.lends[1]).toEqual({ moveId: 33, lend: undefined });
+    // ice72: the Tackle after the Ice Ball body takes the deferred lend (the marker with the units up to its activation).
+    expect(t1.lends[1]).toEqual({ moveId: 33, lend: { known: true, free: [], deferred: { ...host.deferred!,
+      units: [{ kind: "hit-animation", targetVisible: true }] } } });
     const t2 = turn(host, 2, [iceBall(20, 0, 2), hit(21, 1)]);
     const first = host.deferred!;
     expect(t2.lends[0]!.lend).toEqual({ known: true, free: [], deferred: { ...first, units: [...first.units,

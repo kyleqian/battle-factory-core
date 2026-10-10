@@ -42,6 +42,8 @@ type IceUnit = Unit & { bodySpecies?: [number, number]; shards?: number };
 const iceBallRolloutCounter = (unit: IceUnit): number | null =>
   unit.shards === 5 ? 1 : unit.shards === 7 ? 2 : unit.shards === 9 ? 3 : unit.shards === 10 ? (unit.length > 100 ? 5 : 4) : null;
 const predictions: Record<string, unknown>[] = [];
+/** Per Ice Ball body: the production carry's inputs and the ROM post-body free order in the same (entry) labels (tests/ice72*). */
+const bodyVectors: Record<string, unknown>[] = [];
 
 type Side = "player" | "opponent";
 interface Win { f: number; C: [number, string][]; D: number[]; F: number[] }
@@ -252,6 +254,8 @@ function checkJob(name: string, job: Job): ChainRow[] {
     const next = index + 1 < job.units.length ? job.units[index + 1]!.F0.map(toLabel) : null;
     row.carry = { frames: cmp.frames, frameMismatch: cmp.frameMismatchAges.length, windows: cmp.windows, windowMismatch: cmp.windowMismatch.length,
       postExact: next !== null && same(cmp.postFree, next) };
+    if (unit.mv === 301) bodyVectors.push({ job: name, body: `301 f${unit.frame}`, key, attackerSide: side, rolloutCounter, bodySpecies: species,
+      activation: nested ? "nested" : "rom-entry", entryLabels: identity, activationFree: [...activationFree], romPostFree: next });
     prod = createSpriteOrderTracker({ known: true, free: cmp.postFree, pendingDestroyed: [] });
     const realPost = rhoInverse === null ? cmp.postFree : cmp.postFree.map((label) => rhoInverse!.get(label) ?? label);
     tracker = rhoInverse === null ? prod : createSpriteOrderTracker({ known: true, free: realPost, pendingDestroyed: [] }, realSlots, realRoles);
@@ -405,8 +409,8 @@ const summary = {
 writeFileSync(process.argv[3]!, `${JSON.stringify({ schema: "ice72-chain/v1", summary, chains: rows }, null, 1)}\n`);
 if (process.argv[4]) {
   // test vectors: every consumer's production-shaped marker, the ROM consumer order / occupancy, and the RAM-read words per key
-  const used = new Set(vectors.flatMap((v) => JSON.stringify(v.marker).match(/ice72:[^"]+/g) ?? []));
-  writeFileSync(process.argv[4], `${JSON.stringify({ schema: "ice72-lend-vectors/v1", vectors,
+  const used = new Set([...vectors.flatMap((v) => JSON.stringify(v.marker).match(/ice72:[^"]+/g) ?? []), ...bodyVectors.map((b) => b.key as string)]);
+  writeFileSync(process.argv[4], `${JSON.stringify({ schema: "ice72-lend-vectors/v1", vectors, bodies: bodyVectors,
     words: Object.fromEntries(Object.entries(wordsByKey).filter(([k]) => used.has(k))) })}\n`);
 }
 for (const r of rows) {

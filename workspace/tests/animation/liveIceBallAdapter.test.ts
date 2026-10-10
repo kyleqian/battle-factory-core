@@ -237,7 +237,7 @@ describe("S10A Ice Ball (301): faithful timing with D3", () => {
     expect(off.run.state.round.rules.rngValue).toBe(a.run.state.round.rules.rngValue);
   }, 240000);
 
-  it("ordinary route seed 1 DELIBIRD slot 1: chain bodies 1..2 live every age; body 3 follows the opponent's KO + send-in and body 4 nests it: both fall back; two presentation seeds and Scene OFF keep gameplay / RNG / facility", () => {
+  it("ordinary route seed 1 DELIBIRD slot 1: chain bodies 1..4 live every age (ice72: body 3 follows the opponent's KO + send-in and body 4 nests it, the Ice Ball words unit replays the battle units); two presentation seeds and Scene OFF keep gameplay / RNG / facility", () => {
     const SEED_A = 0x1234abcd, SEED_B = 0xfeed0042;
     const a = random2Route(1, "on", [1, 1, 1], 0, SEED_A), a2 = random2Route(1, "on", [1, 1, 1], 0, SEED_A);
     const b = random2Route(1, "on", [1, 1, 1], 0, SEED_B), off = random2Route(1, "off", [1, 1, 1], 0, SEED_A);
@@ -246,11 +246,9 @@ describe("S10A Ice Ball (301): faithful timing with D3", () => {
     expect(chain[0]!.ages).toEqual(Array.from({ length: 76 }, (_, age) => age));
     expect(chain[0]!.provenance).toBe("surrogate");
     expect(chain[0]!.words).toHaveLength(10);
-    expect(chain.slice(0, 2).map((body) => body.active.every(Boolean))).toEqual([true, true]);
-    for (const later of chain.slice(2, 4)) {
-      expect(later.active.some(Boolean)).toBe(false);
-      expect(later.ages.length).toBeGreaterThan(0);
-    }
+    expect(chain.slice(0, 4).map((body) => body.active.every(Boolean))).toEqual([true, true, true, true]);
+    expect(b.bodies.filter((body) => body.moveId === 301 && body.attacker === 0).slice(0, 4).map((body) => body.active.every(Boolean)))
+      .toEqual([true, true, true, true]);
     expect(a.run.stalled).toBe(false);
     expect(a.run.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(a2.bodies).toEqual(a.bodies);

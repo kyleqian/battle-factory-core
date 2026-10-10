@@ -103,9 +103,10 @@ describe("words57: replay rules", () => {
     }
   });
 
-  it("only a marker that opts in replays battle units: an Ice Ball marker (and the option-free seam) still declines", () => {
+  it("only a marker that opts in replays battle units: an Ice Ball marker does (ice72: a words unit); the option-free seam still declines", () => {
     const ice = marker(ko, { moveId: 301, generalAnimation: undefined, rolloutCounter: 1 });
-    expect(resolveSpriteOrderDeferredLend(ice, identity, LIVE_WORDS_ORDER_DEFERRED_REPLAY)).toBeNull();
+    expect(resolveSpriteOrderDeferredLend(ice, identity, LIVE_WORDS_ORDER_DEFERRED_REPLAY)).not.toBeNull();
+    expect(resolveSpriteOrderDeferredLend(ice, identity)).toBeNull();
     expect(resolveSpriteOrderDeferredLend(marker(ko), identity)).toBeNull();
   });
 

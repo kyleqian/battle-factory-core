@@ -235,15 +235,15 @@ describe("words46: production marker / lend / resolver against the prep46 chains
     }
   });
 
-  it("an Ice Ball marker still lends only to Ice Ball; a words marker lends to any consumer", () => {
+  it("an Ice Ball marker is a words marker (ice72): it lends to any consumer", () => {
     let host = beginLiveSpriteOrderTurn(createLiveSpriteOrderHost(knownEntrySpriteOrderState("ordinary-factory")), 1, true);
     const ice = ev(10, "animation", { animationId: "MOVE_ANIMATION", battler: 0, target: 1, arguments: ["301", "0", "30", "10", "70", "0", "1"] });
     const resolution = { resolutionId: { requestId: 1 }, segmentIndex: 0, segments: [{ events: [ice] }] };
     host = advanceLiveSpriteOrderHost(host, resolution, 10, true);
     host = markLiveSpriteOrderDeferredBody(host, lendLiveSpriteOrder(host, 301), { moveId: 301, attacker: 0, rolloutCounter: 1 }, "move:1:0:0");
     host = advanceLiveSpriteOrderHost(host, resolution, Number.POSITIVE_INFINITY);
-    expect(isWordsOrderDeferredUnit(host.deferred!)).toBe(false);
-    expect(lendLiveSpriteOrder(host, 33)).toBeUndefined();
+    expect(isWordsOrderDeferredUnit(host.deferred!)).toBe(true);
+    expect(lendLiveSpriteOrder(host, 33)?.deferred).toBe(host.deferred);
     expect(lendLiveSpriteOrder(host, 301)?.deferred).toBe(host.deferred);
   });
 });
@@ -296,7 +296,7 @@ describe("words46: Ice Beam after Rain Dance + RAIN_CONTINUES (rdib-ply-onix pro
 });
 
 describe("words46: KO + send-in (entry-label carry)", () => {
-  it("a words unit after an opponent KO + send-in records its marker in entry labels (Ice Ball does not) and any consumer resolves it", () => {
+  it("a words unit after an opponent KO + send-in records its marker in entry labels (ice72: Ice Ball too) and any consumer resolves it", () => {
     // opponent KO + summary + send-out (docs/postko-consumer-audit.md s4.3: role-isomorphic occupancy, entry-label lend)
     const ko = [ev(10, "faint-animation", { battler: 1 }), ev(11, "message"), ev(12, "draw-party-status-summary", { battler: 1 }),
       ev(13, "switch", { side: "opponent", fromPartyIndex: 0, toPartyIndex: 1 }), ev(14, "message"), ev(15, "hide-party-status-summary", { battler: 1 }),
@@ -314,8 +314,9 @@ describe("words46: KO + send-in (entry-label carry)", () => {
     host = advanceLiveSpriteOrderHost(host, resolution, 20, true);
     const sandLend = lendLiveSpriteOrder(host, 28)!;
     expect(sandLend.free).toEqual(spriteOrderTrackerLend(host.tracker)); // entry labels (rho)
-    // Ice Ball keeps the entry-occupancy rule: no marker off the entry battler slots
-    expect(markLiveSpriteOrderDeferredBody(host, sandLend, { moveId: 301, attacker: 1, rolloutCounter: 1 }, "k")).toBe(host);
+    // ice72: an Ice Ball body off the entry battler slots records its marker in entry labels too
+    expect(markLiveSpriteOrderDeferredBody(host, sandLend, { moveId: 301, attacker: 1, rolloutCounter: 1 }, "k").deferredBody?.activation)
+      .toEqual({ free: sandLend.free });
     host = markLiveSpriteOrderDeferredBody(host, sandLend, { moveId: 28, attacker: 1 }, "move:2:0:0");
     expect(host.deferredBody?.activation).toEqual({ free: sandLend.free });
     host = advanceLiveSpriteOrderHost(host, resolution, 22, true);

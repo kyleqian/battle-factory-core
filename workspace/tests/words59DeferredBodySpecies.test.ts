@@ -104,12 +104,12 @@ describe("words59: the marker records the body species for the dirt units only",
   const host = createLiveSpriteOrderHost(knownEntrySpriteOrderState("ordinary-factory"));
   const lend = { known: true as const, free: KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER };
   const species = { player: 18, opponent: 95 };
-  it("Sand-Attack / Mud-Slap carry it; Rain Dance / Ice Ball and a call without species do not", () => {
-    for (const moveId of [28, 189]) {
-      expect(markLiveSpriteOrderDeferredBody(host, lend, { moveId, attacker: 0 }, "k", species).deferredBody?.bodySpecies).toEqual(species);
-      expect(markLiveSpriteOrderDeferredBody(host, lend, { moveId, attacker: 1 }, "k").deferredBody).not.toHaveProperty("bodySpecies");
+  it("Sand-Attack / Mud-Slap / Ice Ball (ice72) carry it; Rain Dance and a call without species do not", () => {
+    for (const body of [{ moveId: 28, attacker: 0 }, { moveId: 189, attacker: 0 }, { moveId: 301, attacker: 0, rolloutCounter: 1 }]) {
+      expect(markLiveSpriteOrderDeferredBody(host, lend, body, "k", species).deferredBody?.bodySpecies).toEqual(species);
+      expect(markLiveSpriteOrderDeferredBody(host, lend, { ...body, attacker: 1 }, "k").deferredBody).not.toHaveProperty("bodySpecies");
     }
-    for (const body of [{ moveId: 240, attacker: 0 }, { moveId: 301, attacker: 0, rolloutCounter: 1 }]) {
+    for (const body of [{ moveId: 240, attacker: 0 }]) {
       const marked = markLiveSpriteOrderDeferredBody(host, lend, body, "k", species);
       expect(marked.deferredBody, String(body.moveId)).toBeDefined();
       expect(marked.deferredBody, String(body.moveId)).not.toHaveProperty("bodySpecies");
