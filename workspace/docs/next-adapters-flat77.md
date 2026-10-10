@@ -26,8 +26,11 @@ Receipts: `tools/integration/fixtures/flat77/`. Runner: `tools/integration/flat7
     **98.27 %**.
   - **0 live -> fallback regressions**, 0 pairing mismatches. Command KEY sequence (battle, kind, moveId, side, attacker, target),
     frames per command, `battleDigest` `cc9e7604ea64a303` and `battleDigestExcludingFrames` `48b2d42bacd93479` are identical.
-  - Flatter (`census/flatter-commands.txt`): 34 commands before (all fallback). After: 17 / 3,723 live, 17 / 3,723 still fallback, all
-    after an earlier Flatter or with an unknown allocator / lend. The case-local gate bucket loses 17 commands / 3,723 frames.
+  - Flatter (`census/flatter-commands.txt`): 34 commands before (all fallback). After: 17 / 3,723 live, 17 / 3,723 still fallback.
+    - 15 of the 17 are after an earlier Flatter in the same battle (lend unknown).
+    - 2 are battle 446's, where the allocator host is unknown: an unaudited earlier body; `flat77Parity.ts --seed=446` reads
+      `allocatorKnown` false at both.
+    - The case-local gate bucket loses 17 commands / 3,723 frames.
   - 3 of the 17 are after a Mud-Slap (a words-deferred lend), so `faithfulRandomHistory` goes 1,079 -> 1,082. Flatter is D3 faithful
     random anyway.
 - **ON / OFF parity** (`parity-539.json`, `parity-437.json`; patched copy, `land75Parity.ts`'s comparison on the census controller):
