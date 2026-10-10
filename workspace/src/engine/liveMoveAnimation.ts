@@ -1517,10 +1517,12 @@ function resolveWordsOrderLend(
 export type LiveMoveHiddenSides = Readonly<{ player: boolean; opponent: boolean }>;
 export const LIVE_MOVE_NO_HIDDEN_SIDES: LiveMoveHiddenSides = Object.freeze({ player: false, opponent: false });
 export function liveMoveHiddenSides(
-  visibility: Readonly<{ player: Readonly<{ sprite: boolean }>; opponent: Readonly<{ sprite: boolean }> }>,
+  /** The render view's visibility; a view without one (fixture views built field-only) hides nothing. */
+  visibility: Readonly<{ player: Readonly<{ sprite: boolean }>; opponent: Readonly<{ sprite: boolean }> }> | undefined,
   request: BattleMoveAnimationRequest,
 ): LiveMoveHiddenSides {
-  const player = request.attacker !== 0 && !visibility.player.sprite, opponent = request.attacker !== 1 && !visibility.opponent.sprite;
+  const player = request.attacker !== 0 && visibility?.player.sprite === false;
+  const opponent = request.attacker !== 1 && visibility?.opponent.sprite === false;
   return player || opponent ? Object.freeze({ player, opponent }) : LIVE_MOVE_NO_HIDDEN_SIDES;
 }
 

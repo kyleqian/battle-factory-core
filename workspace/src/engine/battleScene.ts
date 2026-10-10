@@ -14901,7 +14901,8 @@ function liveSubstituteDollArt(side: "player" | "opponent"): { tileset: Tileset;
  * (gSprites[gBattlerSpriteIds[b]].invisible, liveMoveHiddenSides' source lines), so a live body draws the hidden battler's
  * sheet with every pixel transparent (index 0): its palette and geometry stay available to the body's effects.
  */
-function liveHiddenBattlerArt<T extends { tileset: Tileset; frame2?: Tileset }>(art: T): T {
+interface LiveHiddenBattlerSheet { tileset: Tileset; frame2?: Tileset }
+function liveHiddenBattlerArt<T extends LiveHiddenBattlerSheet>(art: T): T {
   const blank = (tileset: Tileset): Tileset => ({ ...tileset, tiles: tileset.tiles.map((tile) => tile.map(() => 0)) });
   return { ...art, tileset: blank(art.tileset), ...(art.frame2 ? { frame2: blank(art.frame2) } : {}) };
 }
@@ -14913,7 +14914,7 @@ function liveHiddenBattlerSheets<T extends object>(sheets: T): T {
   const blanked = new Map<string | symbol, unknown>();
   return new Proxy(sheets, {
     get(target, key) {
-      const art = Reflect.get(target, key) as { tileset: Tileset; frame2?: Tileset } | undefined;
+      const art = Reflect.get(target, key) as LiveHiddenBattlerSheet | undefined;
       if (typeof key !== "string" || art === undefined || typeof art !== "object" || !("tileset" in art)) return art;
       if (!blanked.has(key)) blanked.set(key, liveHiddenBattlerArt(art));
       return blanked.get(key);
