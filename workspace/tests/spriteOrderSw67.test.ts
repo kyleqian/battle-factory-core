@@ -5,6 +5,7 @@ import { shockWaveAtAge, shockWaveTimingFor } from "../src/animation/shockWave.t
 import { liveMoveGeometrySpriteOrderPlanText } from "../src/engine/liveMoveAnimation.ts";
 import { SPRITE_ORDER_GEOMETRY_KEYED_BODIES } from "../src/engine/spriteOrderEventTransform.ts";
 import { KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER } from "../src/engine/spriteOrderProvider.ts";
+import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
 import { sw67CheckUnit, sw67Inputs } from "../tools/integration/sw67ShockWaveFit.ts";
 
 const plans48 = JSON.parse(readFileSync(new URL("../tools/integration/fixtures/plans48/units.json", import.meta.url), "utf8")).jobs;
@@ -102,4 +103,24 @@ describe("sw67: the geometry-keyed plan through the seam", () => {
     expect(liveMoveGeometrySpriteOrderPlanText(351, "opponent", species, field, undefined)).toBeNull();
     expect(liveMoveGeometrySpriteOrderPlanText(351, "opponent", species, field, KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER.slice(1))).toBeNull();
   });
+});
+
+describe("sw67: live after a Shock Wave, Scene ON/OFF parity", () => {
+  it("route 7/7 CASTFORM Shock Wave twice: both bodies live (the second fell back on b50c4dabd), gameplay identical ON / OFF", () => {
+    const on = generatedCommandAnimationReplay(7, "on", [2, 2], 7, true, true);
+    const off = generatedCommandAnimationReplay(7, "off", [2, 2], 7, true, true);
+    const bodies = on.animations.filter((a) => a.moveId === 351 && a.attacker === 0);
+    expect(bodies).toHaveLength(2);
+    for (const body of bodies) expect(body.adapterActive.every(Boolean)).toBe(true);
+    expect(on.stalled).toBe(off.stalled);
+    expect(off.boundaries).toHaveLength(on.boundaries.length);
+    const strip = (v: { rules: any }) => ({ ...v.rules, rulesContext: { ...v.rules.rulesContext, hitMarker: v.rules.rulesContext.hitMarker & ~0x80 } });
+    for (let i = 0; i < on.boundaries.length; i += 1) {
+      expect(strip(on.boundaries[i]!)).toEqual(strip(off.boundaries[i]!));
+      expect(on.boundaries[i]!.rng).toEqual(off.boundaries[i]!.rng);
+      expect(on.boundaries[i]!.boundary).toEqual(off.boundaries[i]!.boundary);
+    }
+    expect(on.state.facilityState).toEqual(off.state.facilityState);
+    expect(on.state.round.rules.rngValue).toBe(off.state.round.rules.rngValue);
+  }, 240000);
 });
