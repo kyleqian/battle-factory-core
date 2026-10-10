@@ -4,52 +4,52 @@
  "scenarios": {
   "hf-opp-pidgeot": {
    "identicalAB": true,
-   "sha256": "e4c1676dc828f6ec",
+   "sha256": "b9312381da682f0b",
    "frames": 9828
   },
   "hf-opp-swellow": {
    "identicalAB": true,
-   "sha256": "474b081ea260684f",
+   "sha256": "5e2e0f890cb6f8ce",
    "frames": 9828
   },
   "hf-ply-pidgeot": {
    "identicalAB": true,
-   "sha256": "b6d9da7812d5d06a",
+   "sha256": "c76acf4e3a8911ac",
    "frames": 10440
   },
   "hf-ply-swellow": {
    "identicalAB": true,
-   "sha256": "0e538ebc25456785",
+   "sha256": "5d6d90df1b3d9ef8",
    "frames": 10440
   },
   "rs-opp-pidgeot": {
    "identicalAB": true,
-   "sha256": "2ebba7c0df377338",
+   "sha256": "53a8bed3a878d704",
    "frames": 4547
   },
   "rs-opp-swellow": {
    "identicalAB": true,
-   "sha256": "61e543519c4399e8",
+   "sha256": "f4acd944d1fbc506",
    "frames": 4547
   },
   "vf-opp-pidgeot": {
    "identicalAB": true,
-   "sha256": "99d5c76eb998f1ba",
+   "sha256": "8bbb9aeae610837a",
    "frames": 8894
   },
   "vf-opp-swellow": {
    "identicalAB": true,
-   "sha256": "4406df56d01747ad",
+   "sha256": "589785dd53c42ead",
    "frames": 8894
   },
   "vf-ply-pidgeot": {
    "identicalAB": true,
-   "sha256": "e650bc9eaeabe7d1",
+   "sha256": "4a6a30c849eff857",
    "frames": 9506
   },
   "vf-ply-swellow": {
    "identicalAB": true,
-   "sha256": "ab56400c76e7e61b",
+   "sha256": "20949b1ce13ea1b7",
    "frames": 9506
   }
  },

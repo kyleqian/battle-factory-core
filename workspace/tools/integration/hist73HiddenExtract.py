@@ -29,7 +29,10 @@ def bits(m):
 
 def load(ident):
     a, b = (out / "raw" / f"{ident}-A.json").read_bytes(), (out / "raw" / f"{ident}-B.json").read_bytes()
-    return json.loads(a), a == b, hashlib.sha256(a).hexdigest()[:16]
+    d = json.loads(a)
+    # the raw file embeds the scenario path (under the out dir): hash it with the path reduced to the file name
+    stable = json.dumps({**d, "scenario": Path(d["scenario"]).name}, separators=(",", ":")).encode()
+    return d, a == b, hashlib.sha256(stable).hexdigest()[:16]
 
 
 def events(d):
