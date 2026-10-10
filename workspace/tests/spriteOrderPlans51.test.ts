@@ -108,7 +108,7 @@ describe("plans51 sprite-order plans (ROM receipts -> production table)", () => 
     expect(tracker.cursor.order.known).toBe(true);
   });
 
-  it("not landed: Eruption 284 is geometry-keyed (2 ROM plans per side over 4 attacker / defender pairs); SUBSTITUTE_FADE never reached", () => {
+  it("not landed: Eruption 284 is geometry-keyed (2 ROM plans per side over 4 attacker / defender pairs); plans51 never reached SUBSTITUTE_FADE", () => {
     for (const side of sides) {
       const plans = new Set(romInstances(284).filter(instance => instance.side === side).map(instance => instance.unit.plan));
       expect(plans.size, side).toBe(2);
@@ -120,6 +120,11 @@ describe("plans51 sprite-order plans (ROM receipts -> production table)", () => 
     const stagings = Object.entries(units.jobs).filter(([job]) => job.startsWith("sf-"));
     expect(stagings).toHaveLength(4);
     for (const [, entry] of stagings) expect(entry.units.some(unit => unit.kind === "body" && unit.label === "general SUBSTITUTE_FADE")).toBe(false);
-    expect(SPRITE_ORDER_PRODUCTION_ANIMS.SUBSTITUTE_FADE).toBeUndefined();
+    // land68: prep64 reached it (the stall was the Substitute-damaged message's button wait) and its own receipts land the empty plan
+    // (fixtures/prep64/check.json 11 / 11; tests/spriteOrderPrep64.test.ts).
+    const prep64 = fixture("prep64/check.json") as { plans: Record<string, string>; result: { instances: number; matched: number } };
+    expect(prep64.plans["general SUBSTITUTE_FADE"]).toBe("");
+    expect([prep64.result.instances, prep64.result.matched]).toEqual([11, 11]);
+    expect(SPRITE_ORDER_PRODUCTION_PLANS[SPRITE_ORDER_PRODUCTION_ANIMS.SUBSTITUTE_FADE!]).toBe("");
   });
 });

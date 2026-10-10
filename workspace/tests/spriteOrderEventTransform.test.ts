@@ -110,7 +110,6 @@ describe("sprite-order presentation-event transform", () => {
       { kind: "move-animation", moveId: 351, attackerSide: "player" },
       { kind: "move-animation", moveId: 144, attackerSide: "player" },
       { kind: "status-animation", status: "WRAPPED" },
-      { kind: "general-animation", animation: "SUBSTITUTE_FADE" },
       { kind: "general-animation", animation: "HAIL_CONTINUES" },
       { kind: "general-animation", animation: "STATUS_SLP" },
       { kind: "invalidate", reason: "faint" },
