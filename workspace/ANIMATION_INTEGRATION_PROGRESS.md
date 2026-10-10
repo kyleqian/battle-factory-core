@@ -237,6 +237,23 @@
   `4ca4aaf8`; start 87.95 / 92.09), seeds 50000.. 93.52 % / 96.02 % (`final-supervisor-gates-20261009-day.json`).
 - Preview <http://127.0.0.1:5191/> serves `9e2dac58f` (src `d7f24b03`; adapters 239 + 13 + 24): 4 samples hash-equal (canvas == ABI ==
   screenshot), session export + ON -> OFF restart passed, no browser errors (`playable-preview-9e2dac58f-receipt.json`).
+- prep64 (side, `dda414c28`, new files only; merged `5bbf928a5`): SUBSTITUTE_FADE. Earlier stagings stalled at a MESSAGE, not the
+  break: a hit on the doll prints "The SUBSTITUTE took damage for X!" (`Cmd_healthbarupdate`), whose `\p` waits for a button — plans48 /
+  plans51 pressed nothing. Trigger: `Cmd_datahpupdate` damage >= substituteHP -> `BattleScript_SubstituteFade`; `Cmd_playanimation` sends
+  it before the no-animations check (Scene OFF too). Staged PERSIAN / GOLBAT both sides, both scenes, + CROBAT (10 jobs x2, explicit lab
+  seeds, all A == B; a separate batch byte-identical): EMPTY plan, exact per frame 11 / 11, hand-offs 11 / 11, next bodies 6 / 6; allocator
+  NET-ZERO both scenes. Temp patch (plan row + allocator entry) census seeds 0..299 on `a504d60d4`: +16 / +3,730 (97.11 -> 97.31 % / 98.11 ->
+  98.43 %), 0 regressions, identical commands + digest; plan row alone gives the identical record. Fold: 6 pins to move (doc lists them).
+  Supervisor: `prep64Run.sh` into fresh dirs — all 12 receipts byte-identical (incl. both censuses), src reverted.
+- prep65 (integration lane, evidence only, `a59d0a2c4`; merged `9b991c4b4`): DIVE as a words unit end to end. The tick seam already records
+  Dive's setup AND unleash words (`LIVE_DIVE_RANDOM2_PLANS`; 15 / 15 bodies == RAM). Temp patch (291 in WORDS_ORDER_UNIT_MOVE_IDS /
+  TWO_TURN_ANIM_MOVE_IDS / SEMI_INVULNERABLE_SETUP_MOVE_IDS, bodySpecies, `deferredBodyOrderKey` so the 10291 unleash arms the marker, a
+  dive.ts-derived plan + carry): plan == ROM 15 / 15, per frame exact (215 windows), another body's words 0 / 15, lend through the hidden
+  turn 7 / 7, species-free markers decline 7 / 7. Census seeds 0..299 on `a504d60d4`: +35 / +5,361 (97.11 -> 97.55 % / 98.11 -> 98.57 %),
+  faithful-random history 274 -> 309, 0 regressions, identical commands + digest. Fold: move one pin (`tests/spriteOrderFly63.test.ts`
+  "Dive keeps master's key"); run the full suite / build. Attack-body adapter design note in the doc (92-row body; dive.ts already ports
+  it). Supervisor: `prep65Run.sh` (SKIP_CENSUS) into fresh dirs — 12 jobs A == B, all four probe / check receipts byte-identical, src
+  reverted.
 
 ## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
 

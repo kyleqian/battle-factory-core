@@ -2228,9 +2228,9 @@ geometry windows; Double Team's clone phase from the send-out animation's data[3
 off). Ordinary-play census (`tools/integration/fixtures/live-share-census/report-seeds0-999-final-20261009-day.json`, src `d7f24b03`):
 **92.26 % of move-animation commands / 96.23 % of frames live** (session start 87.95 / 92.09), faithful-random history 2.82 % /
 3.18 %; seeds 50000..: 93.52 / 96.02; gameplay command key sequence identical at every fold. Resume points, by census frames:
-1. Sprite-order host stops (61,695 frames / 384 commands): SUBSTITUTE_FADE (three stagings never showed the fade — needs a probe
-   that reads substituteHP / the script cursor, or a census-route replay), Dive 291 (prep61: setup / unleash orders are functions of the
-   RAM-read words through dive.ts; land it as a words unit: 291 / 10291 in the words-deferred carry + the unleash words recorded), Ice Ball's
+1. Sprite-order host stops (61,695 frames / 384 commands): FIRST land the two BANKED patches — prep65 Dive as a words unit
+   (`docs/next-adapters-prep65.md`: +35 / +5,361 on seeds 0..299, 15 / 15 ROM bodies exact) and prep64 SUBSTITUTE_FADE (empty EXACT plan +
+   allocator NET-ZERO, `docs/next-adapters-prep64.md`: +16 / +3,730); then the Dive ATTACK body adapter (prep65 design note), Ice Ball's
    own carried lend, Shock Wave (shockWave.ts allocation timeline diverges at window 37 — a reducer fix), gates53 row B, Mud-Slap 189 opponent; a hidden battler's faint (fly63 fails closed there: 26 / 4,010, not probed).
 2. Allocator history (18,642 / 184): the post-KO send-out reseed (blocked by the order host at those units, prep52 residual).
 3. Case-local gates (17,267 / 130): Flatter `firstBody` (needs later-body register + allocator evidence), words-lend remainders.
