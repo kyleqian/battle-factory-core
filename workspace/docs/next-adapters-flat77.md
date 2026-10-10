@@ -48,7 +48,7 @@ Receipts: `tools/integration/fixtures/flat77/`. Runner: `tools/integration/flat7
   - Every new check passes.
   - `git diff --check` is clean, and `git status` shows no modified tracked file at any commit (new files only).
   - Typecheck is not needed: no TypeScript under `tests/`, and `tools/` is outside `tsc -b`.
-  - Checkout `npm test`: CHECKOUT_TESTS. `npm run build`: passed.
+  - Checkout `npm test` (HEAD `104156249`, src `d73cf1af`): **1,610 files passed / 44 skipped; 13,235 tests passed, 0 failed**. `npm run build`: passed.
   - Differential (`differential.txt`): **624 / 624 captures byte-identical** for both the checkout and a scratch repo holding the temp
     patch, each vs `dd00bdd6e`.
   - Runner (`flat77Run.sh` into a fresh dir): RUNNER_RESULT.
