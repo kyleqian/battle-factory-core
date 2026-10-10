@@ -11,7 +11,8 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import {
-  LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS, liveBattlerAnchors, liveMoveAnimationDuration, liveMoveSubstituteDollDeclines,
+  LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS, liveBattlerAnchors, liveMoveAnimationDuration, liveMoveHiddenTargetDeclines,
+  liveMoveSubstituteDollDeclines, type LiveMoveHiddenSides,
 } from "../../src/engine/liveMoveAnimation.ts";
 import { liveSubstituteSwapApplies, substituteSwapBodyField } from "../../src/engine/liveSubstituteSwap.ts";
 import { liveBattlerIsShiny } from "../../src/engine/liveMovePaletteComposite.ts";
@@ -80,6 +81,8 @@ function gateCondition(n: number): string | null {
 const DURATION = caseBlocks("export function liveMoveAnimationDuration(");
 const PRESENTATION = caseBlocks("export function liveMoveAnimationPresentation(");
 const PRESENT_DURATION_GATE = lineOf(lmaLines, "if (liveMoveAnimationDuration(request, field) === null) return null;", PRESENTATION.start - 80);
+// hide66: the hidden-target gate right after the duration gate (liveMoveHiddenTargetDeclines).
+const PRESENT_HIDDEN_TARGET_GATE = lineOf(lmaLines, "if (liveMoveHiddenTargetDeclines(request, hiddenSides)) return null;", PRESENTATION.start - 80);
 const SWAP_APPLIES = lineOf(swapLines, "export function liveSubstituteSwapApplies(");
 const SWAP_SELF = lineOf(swapLines, "return request.target !== request.attacker", SWAP_APPLIES);
 const SWAP_BOTH = lineOf(swapLines, "battlerOf(field, request.target).substituteDoll !== true", SWAP_APPLIES);
@@ -121,6 +124,8 @@ function label(d: string): string {
 export interface PresentationInputs {
   request: BattleMoveAnimationRequest; field: BattleResolutionDisplayedField; age: number;
   paletteInput?: unknown; spriteAllocatorInput?: unknown; spriteOrderInput?: unknown; presentationRngInput?: unknown; battlerX2Input?: unknown;
+  /** hide66: the live view's hidden sides (liveMoveHiddenSides). */
+  hiddenSides?: LiveMoveHiddenSides;
 }
 /** Evaluate one disjunct with only the presentation function's parameters / pre-switch consts in scope: true / false / "opaque". */
 const readsBattlerObject = (d: string) => /\b(attacker|target)\.(?!geometry\.side)/.test(d.replace(/request\.(attacker|target)/g, ""));
@@ -197,6 +202,10 @@ export function classifyDurationDecline(request: BattleMoveAnimationRequest, fie
 export function classifyPresentationDecline(x: PresentationInputs): Decline {
   if (liveMoveAnimationDuration(x.request, x.field) === null) {
     return { ...classifyDurationDecline(x.request, x.field), gate: cite(LMA, PRESENT_DURATION_GATE) };
+  }
+  if (x.hiddenSides !== undefined && liveMoveHiddenTargetDeclines(x.request, x.hiddenSides)) {
+    return { stage: "presentation", reason: "target hidden (semi-invulnerable): no D4 phase for its lag profile (hide66)",
+      gate: cite(LMA, PRESENT_HIDDEN_TARGET_GATE) };
   }
   const gates = PRESENTATION.gates.get(x.request.moveId);
   if (!gates) return { stage: "presentation", reason: "no presentation case (switch default)", gate: cite(LMA, PRESENTATION.end) };
