@@ -445,6 +445,10 @@
   "skyUppercutHiddenTarget": {
    "count": 10,
    "now": "fallback (branch b)"
+  },
+  "codeRuns": {
+   "6e9b98c52": "committed receipts (tools/integration/fixtures/hide66-audit17/)",
+   "af71b4546": "fresh rerun (audit17Run.sh, fresh dirs): 104 / 104 windows identical chain + entry digests and px to the committed receipts, r1 == r2 104 / 104"
   }
  },
  "parity": {

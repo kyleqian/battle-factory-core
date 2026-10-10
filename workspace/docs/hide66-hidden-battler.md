@@ -40,7 +40,8 @@ no shared oracle was touched.
 ## 2. Audit-17 windows, production (no patch), after the fly63 re-land
 
 `sh tools/integration/audit17Run.sh tools/integration/fixtures/hide66-audit17 <fresh scratch>`: stage == committed, derive ==
-committed, two fresh direct-mGBA runs per window; **104 / 104 r1 == r2** (chain and entry). The 67 windows that were 0 px stay 0 px;
+committed, two fresh direct-mGBA runs per window; **104 / 104 r1 == r2** (chain and entry). Receipts from `6e9b98c52`; a fresh
+rerun on the final `af71b4546` gave 104 / 104 identical digests and px. The 67 windows that were 0 px stay 0 px;
 **86 / 104 are 0 px now** (`hide66-windows.txt`).
 
 | Windows | Rows | Chain px before -> after (r1 == r2) |
