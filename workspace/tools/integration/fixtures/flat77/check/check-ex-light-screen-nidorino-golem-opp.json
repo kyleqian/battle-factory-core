@@ -1,0 +1,250 @@
+{
+ "schema": "flat77-chain-check/v1",
+ "scenario": "ex-light-screen-nidorino-golem-opp",
+ "rows": [
+  {
+   "fixture": "ex-light-screen-nidorino-golem-opp-c0.json",
+   "move": "FLATTER",
+   "side": "opponent",
+   "species": "NIDORINO/GOLEM",
+   "units": 1,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "113@0 260@1"
+   ],
+   "romPower": 0,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 301,
+    "endFrame": 519
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 219,
+    "px": 0,
+    "digests": [
+     "3a18c77f509e4e8e",
+     "3a18c77f509e4e8e"
+    ],
+    "residualRows": [],
+    "detail": [],
+    "allocatorKnown": true,
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 218,
+      "mismatch": [
+       {
+        "age": 0,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 1,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 2,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 3,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 4,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 5,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 6,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 7,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 8,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 9,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 10,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 11,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       }
+      ]
+     },
+     "activationOrder": true,
+     "allocator": {
+      "exact": 431,
+      "rows": 431,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 217,
+    "px": 3,
+    "digests": [
+     "75be6f68c0eebd7c",
+     "75be6f68c0eebd7c"
+    ],
+    "residualRows": [
+     [
+      71,
+      1
+     ],
+     [
+      72,
+      2
+     ]
+    ],
+    "detail": [
+     {
+      "age": 71,
+      "px": 1,
+      "bbox": [
+       233,
+       233,
+       91,
+       91
+      ],
+      "sample": "233,91 rom 605f4a live 600f00"
+     },
+     {
+      "age": 72,
+      "px": 2,
+      "bbox": [
+       228,
+       229,
+       87,
+       87
+      ],
+      "sample": "228,87 rom 605f4a live 600f00"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,269 @@
+{
+ "schema": "flat77-chain-check/v1",
+ "scenario": "ex-shock-wave-nidorina-golem-ply",
+ "rows": [
+  {
+   "fixture": "ex-shock-wave-nidorina-golem-ply-c0.json",
+   "move": "FLATTER",
+   "side": "player",
+   "species": "NIDORINA/GOLEM",
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "351@1 HIT_ANIMATION@0 260@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 449,
+    "endFrame": 667
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 219,
+    "px": 0,
+    "digests": [
+     "3a18c77f509e4e8e",
+     "3a18c77f509e4e8e"
+    ],
+    "residualRows": [],
+    "detail": [],
+    "allocatorKnown": true,
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 218,
+      "mismatch": [
+       {
+        "age": 0,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 1,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 2,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 3,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 4,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 5,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 6,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 7,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 8,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 9,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 10,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 11,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       }
+      ]
+     },
+     "activationOrder": true,
+     "allocator": {
+      "exact": 431,
+      "rows": 431,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 216,
+    "px": 26,
+    "digests": [
+     "56cba07f1f4558ee",
+     "56cba07f1f4558ee"
+    ],
+    "residualRows": [
+     [
+      70,
+      12
+     ],
+     [
+      71,
+      11
+     ],
+     [
+      72,
+      3
+     ]
+    ],
+    "detail": [
+     {
+      "age": 70,
+      "px": 12,
+      "bbox": [
+       1,
+       239,
+       93,
+       98
+      ],
+      "sample": "237,93 rom 5d2500 live 605f4a"
+     },
+     {
+      "age": 71,
+      "px": 11,
+      "bbox": [
+       10,
+       236,
+       93,
+       96
+      ],
+      "sample": "10,93 rom 600f00 live 603146"
+     },
+     {
+      "age": 72,
+      "px": 3,
+      "bbox": [
+       16,
+       230,
+       89,
+       91
+      ],
+      "sample": "16,89 rom 600f00 live 603146"
+     }
+    ]
+   }
+  }
+ ]
+}

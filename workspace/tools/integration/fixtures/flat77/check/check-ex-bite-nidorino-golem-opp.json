@@ -1,0 +1,222 @@
+{
+ "schema": "flat77-chain-check/v1",
+ "scenario": "ex-bite-nidorino-golem-opp",
+ "rows": [
+  {
+   "fixture": "ex-bite-nidorino-golem-opp-c0.json",
+   "move": "FLATTER",
+   "side": "opponent",
+   "species": "NIDORINO/GOLEM",
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "44@0 HIT_ANIMATION@1 260@1"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 214,
+    "endFrame": 432
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 219,
+    "px": 0,
+    "digests": [
+     "3a18c77f509e4e8e",
+     "3a18c77f509e4e8e"
+    ],
+    "residualRows": [],
+    "detail": [],
+    "allocatorKnown": true,
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 218,
+      "mismatch": [
+       {
+        "age": 0,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 1,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 2,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 3,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 4,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 5,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 6,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 7,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 8,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 9,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 10,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       },
+       {
+        "age": 11,
+        "diff": {
+         "bg1cnt": {
+          "rom": 23554,
+          "live": 39936
+         }
+        }
+       }
+      ]
+     },
+     "activationOrder": true,
+     "allocator": {
+      "exact": 431,
+      "rows": 431,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 219,
+    "px": 0,
+    "digests": [
+     "3a18c77f509e4e8e",
+     "3a18c77f509e4e8e"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}
