@@ -32,7 +32,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   fly63 reverted late (no time for the #159 fix + gates) rather than shipping a known wrong-pixel live claim.
 - **Next:** ROADMAP S10A "Next (2026-10-09 evening)": FIRST fix #159 (hide the semi-invulnerable battler in the live view; audit 17's
   patch shape), then re-land fly63 and the banked prep65 (Dive as a words unit, +35 / +5,361) and prep64 (SUBSTITUTE_FADE, +16 / +3,730); then the Dive attack body adapter, Shock Wave reducer timeline, the post-KO reseed, Flatter
-  later bodies, #152 / #154 / #157, live audit 17.
+  later bodies, #152 / #154 / #157, live audit 18.
 - **Notes:** no DEFERRED entries. Soak gates superseded for S10A (ANIMATION_VERIFICATION scoped policy). All worker branches merged,
   worktrees removed; briefs + logs + preserved worker scratch under `.integration/validation/*-20261009b/`, transcripts `.codex-logs/workers/`.
 
