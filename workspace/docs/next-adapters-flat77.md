@@ -51,7 +51,7 @@ Receipts: `tools/integration/fixtures/flat77/`. Runner: `tools/integration/flat7
   - Checkout `npm test` (HEAD `104156249`, src `d73cf1af`): **1,610 files passed / 44 skipped; 13,235 tests passed, 0 failed**. `npm run build`: passed.
   - Differential (`differential.txt`): **624 / 624 captures byte-identical** for both the checkout and a scratch repo holding the temp
     patch, each vs `dd00bdd6e`.
-  - Runner (`flat77Run.sh` into a fresh dir): RUNNER_RESULT.
+  - Runner (`flat77Run.sh` into a fresh dir, census included): **50 / 50 receipts byte-identical** (`runner-run1.txt`). It re-staged and re-probed (fresh mGBA), re-derived, re-checked in a fresh patched copy, re-ran parity and both censuses.
 
 ### Windows (`check/`, `summary.txt`: 64 windows, 34 live, 34 / 34 live windows 0 px and r1 == r2; chain lend = the production hosts fed as the orchestrator feeds them)
 
