@@ -14,6 +14,15 @@ no shared oracle was touched.
   under HITMARKER_NO_ANIMATIONS, `battle_script_commands.c:4341`), so `IsBattlerSpriteVisible` (`battle_anim.c:649`) stays TRUE: a `monbg`
   of the hidden battler would copy it into the BG and `clearmonbg` would clear its flag (`battle_anim.c:591 / :852`). No hidden-span body in
   the census does that (the hidden battler's own strike is excluded below; Sky Uppercut uses `monbg ANIM_DEF_PARTNER`, absent in singles).
+  - **Corrected (land75, 2026-10-10):** the sentence above is wrong. In Scene ON `battlerData[b].invisible` IS set for a
+    semi-invulnerable battler: every move-animation controller command ends with `CopyAllBattleSpritesInvisibilities()`
+    (`battle_controller_opponent.c:1513`, `battle_controller_player.c:2534`, `DoMoveAnimation` state 3), which copies the charge
+    animation's `gSprites[].invisible = TRUE` into `battlerData[].invisible`. So `IsBattlerSpriteVisible` (`battle_anim.c:662`) is FALSE
+    for the hidden battler after its charge command, and a party-menu reshow re-creates its sprite INVISIBLE
+    (`reshow_battle_screen.c:272`) — it does not un-hide it. Probed by hist73 (`docs/next-adapters-hist73.md` Part B;
+    `tools/integration/fixtures/hist73/hidden-battler-audit.json` `rs-*` `flagsAfterReshow`: invisible bit set from the reshow until the
+    strike, two species, A == B). The render hide (kept until the strike by `applyLiveSemiInvulnerableCommand`) therefore matches the
+    ROM through a reshow; no render change was needed.
 - **The fix (no module flag).** `renderBattleResolutionLiveView` derives `liveMoveHiddenSides(view.visibility, request)`, the hidden
   NON-attacker side (a hidden battler's own body is its strike, which reveals itself), and passes it through
   `liveMoveAnimationPresentation(..., hiddenSides)` and `renderSceneOnMovePresentation(fb, presentation, true, hiddenSides)`. Inside the

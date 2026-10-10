@@ -212,10 +212,19 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
     expect(host.tracker.cursor.order.free).toEqual(at(20389).obsF);
     expect(host.tracker.cursor.occupied).toEqual(maskSlotsOf(at(20389).obsMask as string));
     expect(host.tracker.battlerSlots).toEqual({ player: 5, opponent: 0 });
-    // A hidden battler or the opponent battler alone missing at the reshow is unobserved: invalidate (neither battler is
-    // reshowNeither since prep49: see "order host prep49 stops" below).
-    expect(returnLiveSpriteOrderHostFromPartyMenu(Object.freeze({ ...host, hidden: [false, true] as const }), { player: true, opponent: true })
-      .tracker.cursor.order.known).toBe(false);
+    // A hidden PLAYER battler or the opponent battler alone missing at the reshow is unobserved: invalidate (neither battler is
+    // reshowNeither since prep49: see "order host prep49 stops" below). hist73 / land75: a hidden OPPONENT at the reshow is the normal
+    // reshow (hidden-battler-audit.json rs-* == the shown reshow), `hidden` kept (the ROM re-creates it invisible).
+    const shownReshow = returnLiveSpriteOrderHostFromPartyMenu(host, { player: true, opponent: true });
+    const hiddenOpponent = returnLiveSpriteOrderHostFromPartyMenu(Object.freeze({ ...host, hidden: [false, true] as const }), { player: true, opponent: true });
+    expect(hiddenOpponent.tracker.invalidReason).toBeNull();
+    expect(hiddenOpponent.tracker.cursor.order.known).toBe(true);
+    expect(hiddenOpponent.tracker.cursor.order.free).toEqual(shownReshow.tracker.cursor.order.free);
+    expect(hiddenOpponent.tracker.cursor.occupied).toEqual(shownReshow.tracker.cursor.occupied);
+    expect(hiddenOpponent.hidden).toEqual([false, true]);
+    const hiddenPlayer = returnLiveSpriteOrderHostFromPartyMenu(Object.freeze({ ...host, hidden: [true, false] as const }), { player: true, opponent: true });
+    expect(hiddenPlayer.tracker.cursor.order.known).toBe(false);
+    expect(hiddenPlayer.tracker.invalidReason).toBe("reshow with a hidden battler");
     expect(returnLiveSpriteOrderHostFromPartyMenu(host, { player: true, opponent: false }).tracker.cursor.order.known).toBe(false);
   });
 

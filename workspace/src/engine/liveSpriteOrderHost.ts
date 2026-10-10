@@ -33,7 +33,7 @@
  *
  * Party menu (docs/sprite-order-uncovered-units.md §2 rule (d)): opening it is a ResetSpriteData (party-menu-reset,
  * which revives an invalid order); returning applies reset + battle-reshow (variant from whether the player battler
- * sprite exists; a hidden battler or a missing opponent battler invalidates). The orchestrator additionally
+ * sprite exists; a hidden player battler or a missing opponent battler invalidates). The orchestrator additionally
  * invalidates on a locked player action (no prompt) and any resolution whose events were not all applied; a retained
  * locked-action continuation applies the player's prompt cycle at its turn boundary (docs/next-adapters-prep47.md).
  */
@@ -217,15 +217,19 @@ export function openLiveSpriteOrderHostPartyMenu(host: LiveSpriteOrderHost): Liv
 /**
  * Return from a party menu to the battle: the exit ResetSpriteData, then the battle reshow (both battlers, the opponent
  * alone when the player battler sprite is gone, or neither after a double KO: reshowNeither, docs/next-adapters-prep49.md X1).
- * A hidden battler or the player battler without the opponent's is an unobserved reshow shape: invalidate.
+ * A hidden player battler or the player battler without the opponent's is an unobserved reshow shape: invalidate (a hidden
+ * opponent is the normal reshow: hist73).
  */
 export function returnLiveSpriteOrderHostFromPartyMenu(
   host: LiveSpriteOrderHost, battlers: Readonly<{ player: boolean; opponent: boolean }>,
 ): LiveSpriteOrderHost {
   const reset = applySpriteOrderPresentationEvent(host.tracker, { kind: "party-menu-reset" });
   // prep49: neither battler (a double KO's forced party menu) is the reshowNeither shape; the opponent alone missing stays unobserved.
+  // hist73: a hidden (semi-invulnerable) OPPONENT is re-created by the reshow in the same slot / order as a shown one, and stays
+  // invisible (reshow_battle_screen.c CreateBattlerSprite; tools/integration/fixtures/hist73/hidden-battler-audit.json rs-*): the
+  // normal reshow, `hidden` kept. A hidden player battler at a reshow stays unobserved.
   const tracker = !battlers.opponent && battlers.player ? invalidateSpriteOrderTracker(reset, "reshow without the opponent battler")
-    : host.hidden[0] || host.hidden[1] ? invalidateSpriteOrderTracker(reset, "reshow with a hidden battler")
+    : host.hidden[0] ? invalidateSpriteOrderTracker(reset, "reshow with a hidden battler")
       : applySpriteOrderPresentationEvent(reset, { kind: "battle-reshow", playerBattlerPresent: battlers.player,
         ...(battlers.opponent ? {} : { opponentBattlerPresent: false }) });
   return Object.freeze({ ...withoutDeferred(host), tracker, bodies: (host.bodies ?? 0) + 1 });
@@ -345,8 +349,15 @@ function orderEventOf(
     || payload.kind === "hide-party-status-summary" || payload.kind === "switch-in-animation") {
     const battler = payload.battler;
     if (battler !== 0 && battler !== 1) return { event: { kind: "invalidate", reason: `${payload.kind} battler ${battler}` } };
-    // prep61: a hidden (semi-invulnerable) battler's faint / switch is unprobed.
-    if ((payload.kind === "faint-animation" || payload.kind === "switch-in-animation") && hidden[battler]) {
+    // hist73: a hidden (semi-invulnerable) battler's faint frees and orders its slots exactly as a shown battler's (both sides, two
+    // species, the faint -> summary / party menu -> send-out window: tools/integration/fixtures/hist73/hidden-battler-audit.json hf-*
+    // vs vf-*); the side is no longer hidden. prep61: a hidden battler's switch-in is unprobed.
+    if (payload.kind === "faint-animation" && hidden[battler]) {
+      const next: [boolean, boolean] = [hidden[0], hidden[1]];
+      next[battler] = false;
+      return { event: { kind: "faint", side: battler === 0 ? "player" : "opponent" }, hidden: Object.freeze(next) as readonly [boolean, boolean] };
+    }
+    if (payload.kind === "switch-in-animation" && hidden[battler]) {
       return { event: { kind: "invalidate", reason: `${payload.kind} of a hidden battler` } };
     }
     switch (payload.kind) {
