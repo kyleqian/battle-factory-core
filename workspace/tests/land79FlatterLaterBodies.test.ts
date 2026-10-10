@@ -56,7 +56,7 @@ function chain(f: Fixture & Json, turns: Json[]) {
         lend = { spriteOrderInput: lendLiveSpriteOrder(host, req!.moveId), spriteAllocatorInput: prepareLiveMoveSpriteAllocator(allocator, req!).input };
         key = liveMovePresentationRngBodyKey({ resolutionId: { requestId: t + 1 }, segmentIndex: 0, commandIndex: i });
         if (liveMoveRandom2Plan(req!) !== null) {
-          bodies.push(...activateLiveMovePresentationRng(createPresentationRngHostAt(createPresentationRngState(f.presentationRngActivation.value, "pinned")), req!, key).bodies);
+          bodies.push(...activateLiveMovePresentationRng(createPresentationRngHostAt(createPresentationRngState(f.presentationRngActivation!.value, "pinned")), req!, key).bodies);
         }
         return;
       }
@@ -76,7 +76,7 @@ function windowAt(name: string, variant: "chain" | "entry") {
   const f = load(name);
   const fx = variant === "chain" ? f : { ...f, precedingTurns: [{ events: [f.precedingTurns!.at(-1)!.events.at(-1)!] }], pinnedRng2: [], promptShown: [true] } as Fixture & Json;
   const c = chain(fx, fx.precedingTurns as Json[]);
-  const view = (age: number) => {
+  const view = (age: number): Json => {
     const v = liveView(fx, age) as Json;
     return { ...v, effect: { ...v.effect, ...c.lend, presentationRng: c.presentationRng } };
   };
