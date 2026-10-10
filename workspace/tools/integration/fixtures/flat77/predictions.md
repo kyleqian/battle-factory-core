@@ -65,3 +65,11 @@ Mud-Slap and Acid. Each is staged as the fast lead's move before the consumer's 
 - **P8 allocator.** The host stays known for all 16 (all audited net-zero; Light Screen through its PLANS entry). The ROM shows the known
   entry (spotlight [305, 64] / 7, confetti [433, 12] / 8).
 - **P9.** All 16 windows are live under the temp patch: 0 px on every row, r1 == r2.
+
+## Batch 3 (`ex-*-nidorino-golem-opp`, committed BEFORE its probes; batches 1 + 2 already probed)
+
+Batch 2's probes showed a staging miss: NIDORINO (speed 63) outspeeds SNORLAX (50), so the 8 `ex-*-nidorino-snorlax-opp` Flatter bodies are
+FIRST bodies (0 units). They stay as first-body controls. Batch 3 re-stages the opponent side with GOLEM (65 > 63) as the fast lead.
+
+- P6 – P9 as batch 2, for these 8: lends known (`predict.txt`; Mud-Slap deferred), allocator known, row 0 = S0 with WIN0 0 / 0 plus
+  display-neutral BGnCNT priority only, all live and 0 px under the temp patch.

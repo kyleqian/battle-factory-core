@@ -11,7 +11,8 @@
   ex-*  (batch 2, predictions committed before its probes) the census's own immediate predecessors of the Flatter bodies the temp patch
         lifts (liveShareCensus seeds 0..999): FAST lead LIGHT_SCREEN 113 / MEGA_DRAIN 72 / AERIAL_ACE 332 / BITE 44 / SHOCK_WAVE 351 /
         IRON_DEFENSE 334 / MUD_SLAP 189 (a words order unit: the deferred lend) / ACID 51, one cycle (the consumer's turn-0 later body);
-        player side NIDORINA / GOLEM, opponent side NIDORINO / SNORLAX.
+        player side NIDORINA / GOLEM, opponent side NIDORINO / SNORLAX (staging miss: NIDORINO outspeeds SNORLAX, so those 8 are FIRST
+        bodies, kept as controls) and (batch 3) opponent side NIDORINO / GOLEM (GOLEM speed 65 > NIDORINO 63).
 Pairs (consumer / fast): NIDORINA 30 / GOLEM 76, NIDORINO 33 / SNORLAX 143 (tk, qa); NIDORINA / NIDORINO, NIDORINO / NIDORINA (ff).
 Genders: NIDORINA female-only, NIDORINO male-only.
 usage: flat77Stage.py <out-dir>   (the committed set is tools/integration/fixtures/flat77/scenarios/)
@@ -67,3 +68,5 @@ for side, stag in (("player", "ply"), ("opponent", "opp")):
 for x in ("LIGHT_SCREEN", "MEGA_DRAIN", "AERIAL_ACE", "BITE", "SHOCK_WAVE", "IRON_DEFENSE", "MUD_SLAP", "ACID"):
     stage(f"ex-{x.lower().replace('_', '-')}-nidorina-golem-ply", "GOLEM", x, "NIDORINA", "player", 1)
     stage(f"ex-{x.lower().replace('_', '-')}-nidorino-snorlax-opp", "SNORLAX", x, "NIDORINO", "opponent", 1)
+for x in ("LIGHT_SCREEN", "MEGA_DRAIN", "AERIAL_ACE", "BITE", "SHOCK_WAVE", "IRON_DEFENSE", "MUD_SLAP", "ACID"):  # batch 3
+    stage(f"ex-{x.lower().replace('_', '-')}-nidorino-golem-opp", "GOLEM", x, "NIDORINO", "opponent", 1)
