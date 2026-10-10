@@ -94,7 +94,7 @@ sequence and an identical battle digest.
    - `:146-147` new `deferredBodyOrderKey`: a marked turn-1 two-turn body matches its own `10000 + move` event in
      `advanceLiveSpriteOrderHost` (`:527`). Before, the marker compared `deferredBody.moveId` (291) with the event's 10291 and never
      armed.
-   - `:131` `bodySpecies` is recorded for 291 too (words59's field).
+   - `:130` `bodySpecies` is recorded for 291 too (words59's field).
 3. `src/engine/liveMoveAnimation.ts`
    - `liveWordsOrderDeferredCarry` (`:1470-1473`): a Dive marker carries only with `bodySpecies` (species-free → null);
      `liveDiveWordsPostFree`.
