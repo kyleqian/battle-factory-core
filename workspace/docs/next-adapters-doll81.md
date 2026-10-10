@@ -65,6 +65,9 @@ Apply `tools/integration/fixtures/doll81/doll81-cells.diff` (`patch -p1` from wo
 2. `src/engine/liveMoveAnimation.ts`: `LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS` += 348 Leaf Blade [both], 9 ThunderPunch [both].
 3. `tools/integration/liveShareCensusGates.ts`: the `SWAP_SELF` needle becomes `"return (request.target === request.attacker"`.
    Without it the census aborts at load.
+   With the patch, SolarBeam fire turns are classified under the generic `attacker doll: swap body cell unproven` reason, because
+   `classifyDurationDecline` has no turn branch. Self-target ids outside the set keep `self-target body`. A fold may add a
+   `SolarBeam fire turn` reason; census counts do not depend on it.
 
 Pins a fold must move (`receipts/pins.txt`; the four related files on the patched copy: 3 failed / 74 passed of 77). The other
 eight test files that mention the doll / swap / fade pass on the patched copy (429 / 429):
