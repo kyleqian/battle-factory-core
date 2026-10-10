@@ -19,7 +19,7 @@ import { createBattleResolutionPresentationRenderView, liveMoveRandom2PlanContex
 import { createPresentationRngSession } from "../../src/engine/presentationRngHost.ts";
 import { tickLiveMovePresentationRngSession } from "../../src/engine/liveMovePresentationRng.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
-import { liveMoveAnimationDuration, liveMoveAnimationPresentation } from "../../src/engine/liveMoveAnimation.ts";
+import { liveMoveAnimationDuration, liveMoveAnimationPresentation, liveMoveHiddenSides } from "../../src/engine/liveMoveAnimation.ts";
 import { liveSubstituteSwapView } from "../../src/engine/liveSubstituteSwap.ts";
 import { substituteFadeRenderView } from "../../src/engine/liveSubstituteFade.ts";
 import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
@@ -126,14 +126,15 @@ function playBattle(battle: number, seed: number, streak: number): void {
       else {
         const v = swap ? swap.view : view, e = v.effect;
         if (e?.type === "move") {
+          const hiddenSides = liveMoveHiddenSides(v.visibility, e.request);
           const presentation = liveMoveAnimationPresentation(e.request, v.field, e.age, e.paletteInput, e.spriteAllocatorInput, e.spriteOrderInput,
-            e.presentationRng, e.battlerX2Input);
+            e.presentationRng, e.battlerX2Input, hiddenSides);
           live = presentation !== null;
           if (presentation?.faithfulRandomHistory) rec.faithfulRandomHistoryFrames = (rec.faithfulRandomHistoryFrames ?? 0) + 1;
           if (!live && !rec.decline) {
             rec.decline = classifyPresentationDecline({ request: e.request, field: v.field, age: e.age, paletteInput: e.paletteInput,
               spriteAllocatorInput: e.spriteAllocatorInput, spriteOrderInput: e.spriteOrderInput, presentationRngInput: e.presentationRng,
-              battlerX2Input: e.battlerX2Input });
+              battlerX2Input: e.battlerX2Input, hiddenSides });
             // The lend is absent: name the production order host's own state (spriteOrderEventTransform.ts invalidReason).
             if (rec.decline.reason === "sprite-order lend unknown") {
               const host = state.liveMoveSpriteAllocatorHost?.orderHost;

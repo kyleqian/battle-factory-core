@@ -444,8 +444,9 @@ export function applySpriteOrderPresentationEvent(
         : spriteOrderProductionBodyPlan(event.moveId, event.attackerSide),
       `body ${event.moveId}:${event.attackerSide}`, "body");
     case "hit-animation":
-      return event.targetVisible ? applyPlan(tracker, BLIP, "hit-animation blip")
-        : invalidateSpriteOrderTracker(tracker, "hit-animation on a hidden target (unproven)");
+      // prep61: Player/OpponentHandleHitAnimation complete at once for an invisible battler sprite (no DoHitAnimHealthboxEffect): no
+      // allocation (ROM: Gust on an ON_AIR Fly / Bounce user, Surf on an UNDERWATER Dive user, both sides).
+      return event.targetVisible ? applyPlan(tracker, BLIP, "hit-animation blip") : tracker;
     case "stat-animation":
       return applyPlan(tracker, spriteOrderStatAnimationPlan(event.argument), `stat animation ${event.argument}`);
     case "status-animation":

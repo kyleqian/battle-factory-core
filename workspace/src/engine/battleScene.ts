@@ -1,4 +1,7 @@
-import { liveMoveAnimationPresentation, liveMoveOpponentShadowRow, liveMoveOpponentShadowReturn } from "./liveMoveAnimation.ts";
+import {
+  LIVE_MOVE_NO_HIDDEN_SIDES, liveMoveAnimationPresentation, liveMoveHiddenSides, liveMoveOpponentShadowRow, liveMoveOpponentShadowReturn,
+  type LiveMoveHiddenSides,
+} from "./liveMoveAnimation.ts";
 import { liveSubstituteSwapView } from "./liveSubstituteSwap.ts";
 import { substituteFadeRenderView, substituteFadeWhiteBgr555, type SubstituteFadeBgCopy } from "./liveSubstituteFade.ts";
 // S6 scene-assembly + send-out engine slices: the BATTLE-SCENE ASSEMBLY
@@ -14892,7 +14895,34 @@ function liveSubstituteDollArt(side: "player" | "opponent"): { tileset: Tileset;
   return { tileset: sheet, palette: substituteAsset.palette as unknown as RgbColor[], frame2: sheet };
 }
 
-function liveSceneOnBattlerArt(battler: { species: string; geometry: { side: "player" | "opponent" } }) {
+/**
+ * hide66 (ISSUES #159): the sides whose battler sprite is invisible during a live body (liveMoveHiddenSides: the view's
+ * semi-invulnerable / visibility hide of the NON-attacker battler). The ROM draws nothing for an OBJ with `invisible` set
+ * (gSprites[gBattlerSpriteIds[b]].invisible, liveMoveHiddenSides' source lines), so a live body draws the hidden battler's
+ * sheet with every pixel transparent (index 0): its palette and geometry stay available to the body's effects.
+ */
+interface LiveHiddenBattlerSheet { tileset: Tileset; frame2?: Tileset }
+function liveHiddenBattlerArt<T extends LiveHiddenBattlerSheet>(art: T): T {
+  const blank = (tileset: Tileset): Tileset => ({ ...tileset, tiles: tileset.tiles.map((tile) => tile.map(() => 0)) });
+  return { ...art, tileset: blank(art.tileset), ...(art.frame2 ? { frame2: blank(art.frame2) } : {}) };
+}
+
+/** The species sheet maps under names renderSceneOnMovePresentation does not shadow (its hide-aware local maps read these). */
+const battlerBackSheets = battleBackSpritesAsset, battlerFrontSheets = opponentFrontSpritesAsset;
+/** hide66: a species sheet map whose every entry is drawn transparent (liveHiddenBattlerArt), for the hidden side's own lookups. */
+function liveHiddenBattlerSheets<T extends object>(sheets: T): T {
+  const blanked = new Map<string | symbol, unknown>();
+  return new Proxy(sheets, {
+    get(target, key) {
+      const art = Reflect.get(target, key) as LiveHiddenBattlerSheet | undefined;
+      if (typeof key !== "string" || art === undefined || typeof art !== "object" || !("tileset" in art)) return art;
+      if (!blanked.has(key)) blanked.set(key, liveHiddenBattlerArt(art));
+      return blanked.get(key);
+    },
+  });
+}
+
+function liveSceneOnBattlerSheet(battler: { species: string; geometry: { side: "player" | "opponent" } }) {
   const doll = liveSubstituteDollArt(battler.geometry.side);
   if (doll) return doll;
   const source = battler.geometry.side === "player"
@@ -14909,7 +14939,17 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
   liveField = false,
+  /** hide66: the live view's hidden battler sides (renderBattleResolutionLiveView, liveMoveHiddenSides); default none. */
+  hiddenSides: LiveMoveHiddenSides = LIVE_MOVE_NO_HIDDEN_SIDES,
 ): void {
+  // Every live branch reads its battler sheets through this lookup or the two species maps (the player side draws only from the
+  // back sheets, the opponent side only from the front sheets), so a battler the view hides is drawn transparent either way.
+  const liveSceneOnBattlerArt = (battler: { species: string; geometry: { side: "player" | "opponent" } }) => {
+    const art = liveSceneOnBattlerSheet(battler);
+    return hiddenSides[battler.geometry.side] ? liveHiddenBattlerArt(art) : art;
+  };
+  const battleBackSpritesAsset = hiddenSides.player ? liveHiddenBattlerSheets(battlerBackSheets) : battlerBackSheets;
+  const opponentFrontSpritesAsset = hiddenSides.opponent ? liveHiddenBattlerSheets(battlerFrontSheets) : battlerFrontSheets;
   if (state.config.move === "WATER_SPOUT") {
     const waterSpoutState = state as SceneOnMovePresentationState<SceneOnWaterSpoutConfig>;
     const view = sceneOnWaterSpoutView(waterSpoutState);
@@ -55178,10 +55218,13 @@ export function renderBattleResolutionLiveView(
   const subbedOpponentAttacker = swap !== null && view.effect?.type === "move" && view.effect.request.attacker === 1;
   if (swap) view = swap.view;
   const effect = view.effect;
+  // hide66 (ISSUES #159): the non-attacker battler the view hides (a semi-invulnerable Fly / Bounce / Dig / Dive charger) is
+  // invisible in the ROM for the whole body; its own strike body (the attacker) reveals itself.
+  const hiddenSides = effect?.type === "move" ? liveMoveHiddenSides(view.visibility, effect.request) : LIVE_MOVE_NO_HIDDEN_SIDES;
   const presentation = effect?.type === "move"
     ? liveMoveAnimationPresentation(
         effect.request, view.field, effect.age, effect.paletteInput,
-        effect.spriteAllocatorInput, effect.spriteOrderInput, effect.presentationRng, effect.battlerX2Input,
+        effect.spriteAllocatorInput, effect.spriteOrderInput, effect.presentationRng, effect.battlerX2Input, hiddenSides,
       )
     : null;
   if (!presentation) {
@@ -55195,13 +55238,14 @@ export function renderBattleResolutionLiveView(
   // hides an elevated GOLBAT's row-0 shadow).
   liveSubstituteDollSides.player = view.field.player.substituteDoll === true;
   liveSubstituteDollSides.opponent = view.field.opponent.substituteDoll === true;
+  // SpriteCB_EnemyShadow (battle_gfx_sfx_util.c:1214) also hides the shadow of an `invisible` battler sprite (hide66).
   liveOpponentShadow.species = effect?.type === "move" && view.field.opponent.hp !== 0 && !subbedOpponentAttacker
-    && !liveSubstituteDollSides.opponent
+    && !liveSubstituteDollSides.opponent && !hiddenSides.opponent
     && (effect.age === shadowRow || liveMoveOpponentShadowReturn(effect.request, effect.age))
     ? view.fieldArt.opponent.speciesSymbol : null;
   liveOpponentShadow.suppressAdHoc = effect?.type === "move" && effect.age === 0;
   try {
-    renderSceneOnMovePresentation(fb, presentation, true);
+    renderSceneOnMovePresentation(fb, presentation, true, hiddenSides);
   } finally {
     liveOpponentShadow.species = null;
     liveOpponentShadow.suppressAdHoc = false;

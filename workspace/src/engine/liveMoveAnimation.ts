@@ -1549,6 +1549,37 @@ function resolveWordsOrderLend(
   return byBodies.get(host.bodies)!;
 }
 
+/**
+ * hide66 (ISSUES #159): the battler sides a live body must not draw. The ROM's semi-invulnerable charger is an `invisible` OBJ
+ * (battle_anim_flying.c:476 AnimFlyBallUp, :975 AnimBounceBallShrink, :1016 AnimDiveBall; battle_anim_ground.c:327 / :374 Dig set
+ * gSprites[..].invisible; SpriteCB_EnemyShadow hides its shadow too, battle_gfx_sfx_util.c:1214) for every other
+ * battler's body until its own strike reveals it; production keeps that hide in `view.visibility` (applyLiveSemiInvulnerableCommand).
+ * Only the NON-attacker side is hidden here: a hidden battler's own body is its strike, which restores the sprite itself.
+ */
+export type LiveMoveHiddenSides = Readonly<{ player: boolean; opponent: boolean }>;
+export const LIVE_MOVE_NO_HIDDEN_SIDES: LiveMoveHiddenSides = Object.freeze({ player: false, opponent: false });
+export function liveMoveHiddenSides(
+  /** The render view's visibility; a view without one (fixture views built field-only) hides nothing. */
+  visibility: Readonly<{ player: Readonly<{ sprite: boolean }>; opponent: Readonly<{ sprite: boolean }> }> | undefined,
+  request: BattleMoveAnimationRequest,
+): LiveMoveHiddenSides {
+  const player = request.attacker !== 0 && visibility?.player.sprite === false;
+  const opponent = request.attacker !== 1 && visibility?.opponent.sprite === false;
+  return player || opponent ? Object.freeze({ player, opponent }) : LIVE_MOVE_NO_HIDDEN_SIDES;
+}
+
+/**
+ * hide66: live bodies that fail closed while their target is hidden. Sky Uppercut 327 hitting a semi-invulnerable Fly / Bounce user
+ * (the only legal hit on it among the live adapters): with the target drawn transparent rows 0..149 are exact, but the ROM skips the
+ * age-148 / 149 lag frames when the target is invisible and runs 1..2 frames ahead from age 150 (audit 17 counters:
+ * fixtures/audit-17/receipts/sky-uppercut-lag-counters.txt, [166] or none vs the visible target's [148, 149]); no D4 phase policy
+ * covers that profile, so the body declines (docs/hide66-hidden-battler.md).
+ */
+export function liveMoveHiddenTargetDeclines(request: BattleMoveAnimationRequest, hiddenSides: LiveMoveHiddenSides): boolean {
+  const targetHidden = request.attacker === 0 ? hiddenSides.opponent : hiddenSides.player;
+  return targetHidden && request.moveId === 327;
+}
+
 export function liveMoveAnimationPresentation(
   request: BattleMoveAnimationRequest,
   field: BattleResolutionDisplayedField,
@@ -1558,8 +1589,11 @@ export function liveMoveAnimationPresentation(
   spriteOrderInput?: LiveMoveSpriteOrderInput,
   presentationRngInput?: LiveMovePresentationRngInput,
   battlerX2Input?: LiveMoveBattlerX2Input,
+  /** hide66: the live view's hidden sides (liveMoveHiddenSides); absent = none hidden. */
+  hiddenSides: LiveMoveHiddenSides = LIVE_MOVE_NO_HIDDEN_SIDES,
 ): SceneOnMovePresentationState | null {
   if (liveMoveAnimationDuration(request, field) === null) return null;
+  if (liveMoveHiddenTargetDeclines(request, hiddenSides)) return null;
   const art = createBattleCommandFieldArtView(field);
   // prep46: after a words-dependent order unit (Sand-Attack / Mud-Slap / Rain Dance / RAIN_CONTINUES) ANY consumer's lend is the
   // word-free deferred marker; resolve it here, render-pure: carry the unit's activation order through the unit with ITS recorded
