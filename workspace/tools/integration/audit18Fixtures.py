@@ -38,7 +38,9 @@ RANDOM2 = {273, 352}
 STAT_ARG = {104: "21", 334: "40", 339: "55"}
 STATUS1 = {"Status_Sleep": (0x1, "SLP"), "Status_Poison": (0x8, "PSN"), "Status_Burn": (0x10, "BRN"), "Status_Freeze": (0x20, "FRZ"),
            "Status_Paralysis": (0x40, "PRZ")}
-AGE_OFFSET: dict[int, int] = {104: -1}  # Double Team: production age 0 = ROM activation + 1 (audit 17 / prep7 framing)
+# production age 0 = ROM activation + 1: Double Team (audit 17 / prep7 framing); Iron Defense (the accepted 101-frame window
+# tools/compare/fixtures/iron-defense-*.json; audit 18's ablation: the no-unit controls 31,990 / 33,022 px at offset 0 -> 0 px at -1)
+AGE_OFFSET: dict[int, int] = {104: -1, 334: -1}
 
 
 def anim_name(status: int) -> str | None:
@@ -129,7 +131,7 @@ for probe in sorted(probe_dir.glob("*.json")):
                                      "playerGender": genders["player"], "opponentGender": genders["opponent"]},
                     "requestFields": {"turn": b["moveTurn"], "target": tgt},
                     **({"messageLines": message(move, b, side, at[atk])} if message(move, b, side, at[atk]) else {}),
-                    "rom": {"invisible": [s["invisible"] for s in b["at"]["battlerSprites"]], "turn": t},
+                    "rom": {"invisible": [s["invisible"] for s in b["at"]["battlerSprites"]], "turn": t, "spriteOrder": b["at"]["spriteOrder"]},
                     **({"presentationRngActivation": {"value": b["at"]["rng2"], "source": f"audit18Probe.py at.rng2 (RAM gRng2Value, activation frame {b['startFrame']})"}}
                        if move in RANDOM2 else {}),
                     "pinnedRng2": [list(x) for x in pinned if x[0] < flat],

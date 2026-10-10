@@ -24,8 +24,16 @@ import { battleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { applyLiveSemiInvulnerableCommand, LIVE_SEMI_INVULNERABLE_NONE } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { createKnownEntrySpriteAllocatorProvider } from "../../src/engine/knownEntrySpriteAllocator.ts";
-import { liveDiveSetupSplashBirth, liveMoveAnimationPresentation, liveMoveHiddenSides, liveMoveGeometrySpriteOrderPlanText } from "../../src/engine/liveMoveAnimation.ts";
-import { activateLiveMovePresentationRng, liveMovePresentationRngBodyKey, liveMoveRandom2Plan } from "../../src/engine/liveMovePresentationRng.ts";
+import {
+  LIVE_WORDS_ORDER_DEFERRED_REPLAY, liveBattlerAnchors, liveDiveSetupSplashBirth, liveMoveAnimationPresentation, liveMoveHiddenSides,
+  liveMoveGeometrySpriteOrderPlanText, liveWordsOrderDeferredCarry,
+} from "../../src/engine/liveMoveAnimation.ts";
+import {
+  activateLiveMovePresentationRng, liveMovePresentationRngBodyKey, liveMovePresentationRngWords, liveMoveRandom2Plan,
+} from "../../src/engine/liveMovePresentationRng.ts";
+import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";
+import { resolveSpriteOrderDeferredLend } from "../../src/engine/spriteOrderEventTransform.ts";
+import { KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER } from "../../src/engine/spriteOrderProvider.ts";
 import {
   LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS, liveSpriteAllocatorAnimationNetZero, prepareLiveMoveSpriteAllocator,
 } from "../../src/engine/liveMoveSpriteAllocator.ts";
@@ -176,6 +184,25 @@ const variants = fixtures.map(({ name, f }) => {
   return { name, f, chain: make(f), entry: make(entryFixture) };
 });
 
+// AUDIT18_LENDS_ONLY=1: no probes; per window the CHAIN lend's free order (a deferred lend resolved as the render seam resolves it) vs the
+// ROM's free order at the activation frame (sSpriteOrder without the known-entry occupied slots: fixture rom.spriteOrder).
+if (process.env.AUDIT18_LENDS_ONLY === "1") {
+  const occupied = new Set(KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+  for (const v of variants) {
+    const e0 = v.chain.view(0).effect as Json;
+    const input = e0.spriteOrderInput as Json | undefined;
+    const art = createBattleCommandFieldArtView(v.chain.view(0).field as never);
+    const anchors = { player: liveBattlerAnchors("player", art).picOffsetPoint, opponent: liveBattlerAnchors("opponent", art).picOffsetPoint };
+    const free = input === undefined ? null : input.deferred === undefined ? input.free : resolveSpriteOrderDeferredLend(input.deferred,
+      liveWordsOrderDeferredCarry((key) => liveMovePresentationRngWords({ host: (e0.presentationRng as Json | undefined)?.host ?? null, key }), anchors),
+      LIVE_WORDS_ORDER_DEFERRED_REPLAY);
+    const rom = ((v.f.rom as Json).spriteOrder as number[]).filter((s) => !occupied.has(s));
+    const same = free !== null && JSON.stringify(free) === JSON.stringify(rom);
+    console.log(JSON.stringify({ fixture: v.name, live: v.chain.live, deferred: input?.deferred !== undefined, same,
+      lend: free?.slice(0, 12) ?? null, rom: rom.slice(0, 12) }));
+  }
+  process.exit(0);
+}
 const runs: Json[] = [];
 for (let run = 0; run < 2; run++) {
   const tmp = mkdtempSync(join(tmpdir(), "audit18-"));
@@ -236,7 +263,9 @@ const rows = variants.map((v) => {
       ? `${e.arguments[0]}${e.arguments[1] === "1" ? "t1" : ""}@${e.battler}` : `${e.animationId}${e.arguments?.length ? `(${e.arguments.join(",")})` : ""}@${e.battler}`).join(" ")),
     window: v.f.denseWindow, sameWindow: [a!.sameWindow, b!.sameWindow], x2: v.chain.x2, chain: pick("chain"), entry: pick("entry") };
 });
-writeFileSync(out, `${JSON.stringify({ schema: "audit18-chain-check/v1", scenario, probeExit: runs.map((r) => r.exit), rows }, null, 1)}\n`);
+// probe exit codes (0 / 138 / 139 teardown) vary run to run: printed, not written, so the receipt is byte-reproducible.
+console.log("probe exits", runs.map((r) => r.exit).join(" "));
+writeFileSync(out, `${JSON.stringify({ schema: "audit18-chain-check/v1", scenario, rows }, null, 1)}\n`);
 for (const r of rows) {
   console.log(r.fixture, JSON.stringify({ live: r.chain.live, decline: r.chain.decline, order: r.chain.orderKnown, alloc: r.chain.allocatorInput,
     rows: r.chain.rows, px: r.chain.px, same: r.chain.digests[0] === r.chain.digests[1], hideAgree: r.hideAgree, entryLive: r.entry.live,
