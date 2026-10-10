@@ -7,8 +7,9 @@ import { blizzardSpriteOrderPlanText } from "../../src/animation/blizzardSpriteO
 import { liveBattlerAnchors } from "../../src/engine/liveMoveAnimation.ts";
 import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";
 
-/** (attacker, target): PELIPPER / STEELIX, JYNX / LAPRAS, DEWGONG / CLOYSTER, ARTICUNO / SNORLAX (Ice-resisting or bulky targets: no KO). */
-export const PLANS54_BLIZZARD_PAIRS: readonly (readonly [number, number])[] = [[310, 208], [124, 131], [87, 91], [144, 143]];
+/** (attacker, target): PELIPPER / STEELIX, DEWGONG / CLOYSTER, LAPRAS / SNORLAX, SNEASEL / LAPRAS (Ice-resisting or bulky targets: no KO;
+ * male-capable leads: the first grid's JYNX / ARTICUNO were rejected by the lab, their predictions are kept but never probed). */
+export const PLANS54_BLIZZARD_PAIRS: readonly (readonly [number, number])[] = [[310, 208], [124, 131], [87, 91], [144, 143], [131, 143], [215, 131]];
 
 export function predictedBlizzardPlan(side: "player" | "opponent", attacker: number, target: number): string {
   const species = side === "player" ? { player: { species: attacker }, opponent: { species: target } } : { player: { species: target }, opponent: { species: attacker } };
