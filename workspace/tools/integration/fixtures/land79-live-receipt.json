@@ -6,19 +6,54 @@
   "testedCode": "cd4c2a834",
   "testedSrcTree": "a91aa6852d040529a142e1056405cdc9a5eb4c91",
   "census": {
-    "seeds": "0..999", "oneProcessEach": true,
-    "gained": { "commands": 17, "liveFrames": 3723 },
-    "liveShare": { "byCountBefore": 94.17, "byCountAfter": 94.24, "byFramesBefore": 97.94, "byFramesAfter": 98.03 },
-    "regressions": 0, "sameKeySequence": true, "sameFramesPerCommand": true,
-    "battleDigest": "cc9e7604ea64a303", "battleDigestExcludingFrames": "48b2d42bacd93479",
-    "receipts": ["land79-census/delta.json", "land79-census/keycheck.txt"]
+    "seeds": "0..999",
+    "oneProcessEach": true,
+    "gained": {
+      "commands": 17,
+      "liveFrames": 3723
+    },
+    "liveShare": {
+      "byCountBefore": 94.17,
+      "byCountAfter": 94.24,
+      "byFramesBefore": 97.94,
+      "byFramesAfter": 98.03
+    },
+    "regressions": 0,
+    "sameKeySequence": true,
+    "sameFramesPerCommand": true,
+    "battleDigest": "cc9e7604ea64a303",
+    "battleDigestExcludingFrames": "48b2d42bacd93479",
+    "receipts": [
+      "land79-census/delta.json",
+      "land79-census/keycheck.txt"
+    ]
   },
   "windows": {
-    "dir": "land79-check/", "twoFreshProbeRuns": true, "identicalToFlat77Check": true,
-    "rows": 219, "px": 0,
-    "names": ["qa-nidorina-golem-opp", "qa-nidorina-golem-ply", "qa-nidorino-snorlax-opp", "qa-nidorino-snorlax-ply",
-      "ex-aerial-ace-nidorina-golem-ply", "ex-mega-drain-nidorino-golem-opp"],
-    "allocatorRows": "431/431", "orderEqualsRom": true
+    "dir": "land79-check/",
+    "twoFreshProbeRuns": true,
+    "identicalToFlat77Check": true,
+    "rows": 219,
+    "px": 0,
+    "names": [
+      "qa-nidorina-golem-opp",
+      "qa-nidorina-golem-ply",
+      "qa-nidorino-snorlax-opp",
+      "qa-nidorino-snorlax-ply",
+      "ex-aerial-ace-nidorina-golem-ply",
+      "ex-mega-drain-nidorino-golem-opp"
+    ],
+    "allocatorRows": "431/431",
+    "orderEqualsRom": true
   },
-  "gates": {}
+  "gates": {
+    "focused": "62 files / 1,827 tests passed",
+    "typecheck": "clean",
+    "smoke": "8 files / 448 passed",
+    "shard1": "807 files passed | 22 skipped; 6,918 passed | 119 skipped",
+    "shard2": "806 files passed | 22 skipped; 6,336 passed | 104 skipped",
+    "build": "passed",
+    "differential": "624/624 captures byte-identical vs c6f60846e",
+    "diffCheck": "clean",
+    "revertExperiment": "9/9 new tests fail with the src files at base, 9/9 pass with the patch"
+  }
 }
