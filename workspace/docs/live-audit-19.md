@@ -105,17 +105,33 @@ By the unit immediately before the consumer (`receipts/coverage.txt`):
 
 ## 2. Reproducibility
 
-- **Run A** (`audit19Run.sh`, 13:44..14:02) produced the committed receipts.
-- **Run B** used fresh receipt and scratch dirs and ran as a separate batch, started at 13:55 while A was in its check stage
-  (ISSUES #154). It re-staged the scenarios (== committed) and re-probed every scenario. **Its derived fixtures == the committed ones**,
-  and `derive.txt` is byte-identical: frames, `gRng2Value`, powers, counters and turns all reproduce.
-- Run B used the runner as of `0ee9bae04`. `coverage.txt` and the Needle Arm frame receipt were added later; for run B they were
-  produced with the same commands.
-- `audit19Compare.py` result:
+### Run A
 
-RUNB_RESULT
+`audit19Run.sh` at `0ee9bae04`, 13:44..14:02. It produced the receipts first committed in `0ee9bae04`.
 
-- Unlike audit 18 (15 ROM-drift windows), no window drifted across these two batches.
+### Run B: a second full run of the same runner and checker
+
+Fresh receipt and scratch dirs, a separate batch started at 13:55 while A was in its check stage (ISSUES #154).
+- It re-staged the scenarios (== committed) and re-probed every scenario. **Its derived fixtures == the committed ones** and `derive.txt`
+  is byte-identical: frames, `gRng2Value`, powers, counters and turns all reproduce.
+- `audit19Compare.py` against run A's receipts as committed in `0ee9bae04`: **identical = 599, ROM-drift = 0, DIFFERS = 0 windows. All
+  122 check receipts and all 17 other receipt files are byte-identical** (summary, verdicts, coverage, lends, derive, wp160 / ×4,
+  ablation / ×6).
+- Unlike audit 18 (15 ROM-drift windows), no window drifted across these batches.
+
+### The one later checker change: `416763b3a`
+
+A Dive setup consumer now gets its production splash-birth context.
+- It changes exactly the receipts of the 4 `dive-clamperl-*-opp` scenarios: the 4 setup windows 11,282 / 10,567 / 11,282 / 11,123 px
+  -> 0, plus the ENTRY-control px of their later fallback windows.
+- All 18 affected scenarios (dive-*, wp160-*) were re-checked twice in separate batches with the new checker (C1 == C2 byte-identical),
+  and the committed receipts were replaced with them.
+- `lends.txt` is unchanged with the new checker (byte-identical).
+- summary / verdicts / coverage were regenerated from the updated `check/`.
+
+### Run C: a full run of the final runner
+
+Run C (fresh dirs, the final runner and checker, started 14:18 after the build): result pending at the time of this commit.
 
 ## 3. ISSUES #160 diagnosis
 
@@ -144,9 +160,17 @@ RUNB_RESULT
 
 ## 4. Reproduction (from workspace/; direct mGBA only; production src is never patched)
 
+Gates on the final tree:
+- `npm test`: 1,607 files / 13,225 tests passed (44 files / 223 tests skipped), 0 failed, 835 s, run under load.
+- `npm run build`: green.
+- `git diff --check`: clean. The `.diff` fixtures carry `*.diff -whitespace`.
+- No tracked file outside the audit19 set was modified.
+- No TypeScript was added under `tests/`, so the typecheck gate does not apply. `tools/` is outside the `tsc` include.
+
 ```
-sh tools/integration/audit19Run.sh <fresh-receipt-dir> <fresh-scratch-dir>   # ~20 min: stage == committed -> probe -> derive == committed
+sh tools/integration/audit19Run.sh <fresh-receipt-dir> <fresh-scratch-dir>   # ~15-20 min: stage == committed -> probe -> derive == committed
     # -> check (2 fresh runs / scenario) -> summary / verdicts / coverage -> lends (all windows) -> wp160 (#160) -> ablations
+    # -> needle/ (Needle Arm per-frame order, 2 fresh runs, r1 == r2)
     # -> audit19Compare.py vs tools/integration/fixtures/audit-19/receipts
 sh tools/integration/audit19Wp160.sh <fresh-receipt-dir> <fresh-scratch-dir>  # #160 alone (~30 s)
 AUDIT19_LENDS_ONLY=1 node --experimental-strip-types --no-warnings tools/integration/audit19Check.ts tools/integration/fixtures/audit-19/fixtures wp160b-ply-s1 /dev/null
@@ -159,9 +183,10 @@ Tools:
 - `audit19Probe.py` (audit18Probe + `power` / `rollout` / `labelOffset` / `animArg1` / `endOrder` / `turns`) and `audit19Probes.py`;
 - `audit19Fixtures.py`, `audit19Check.ts`;
 - `audit19Summary.py`, `audit19Verdicts.py`, `audit19Coverage.py`, `audit19Compare.py`;
-- `audit19Wp160.sh`, `audit19Run.sh`.
+- `audit19Wp160.sh`, `audit19NeedleFrames.py` (the Needle Arm per-frame order probe + `--summary`), `audit19Run.sh`.
 
 Fixtures and receipts:
-- `scenarios/` (130), `fixtures/` (599), `patches/` (the #160 fixture `.diff`, with `.gitattributes` `*.diff -whitespace`);
-- `receipts/`: `check/`, `summary.txt`, `verdicts.txt`, `coverage.txt`, `lends.txt`, `wp160/`, `ablation/`, `derive.txt`.
+- `scenarios/` (130), `fixtures/` (599);
+- `patches/`: the #160 fixture `.diff` and the Needle Arm NEGATIVE `.diff`, with `.gitattributes` `*.diff -whitespace`;
+- `receipts/`: `check/`, `summary.txt`, `verdicts.txt`, `coverage.txt`, `lends.txt`, `wp160/`, `ablation/`, `needle/`, `derive.txt`.
 - No RGB dumps.
