@@ -729,5 +729,40 @@
    "rulesEqual": true,
    "boundaryEqual": true
   }
+ },
+ "gates": {
+  "testedCode": "f4b3859af",
+  "srcTree": "e7eec09f5ac81ccf86a3ca442abec9038c220caa",
+  "vitestWorkers": 4,
+  "targeted": {
+   "files": "144 (grep 291 / 309 / DIVE / METEOR_MASH + st76 + inventory + playableAnimationIntegration)",
+   "passedFiles": 136,
+   "skippedFiles": 8,
+   "passedTests": 2290,
+   "skippedTests": 45,
+   "failed": 0
+  },
+  "typecheck": "green",
+  "smoke": {
+   "files": 8,
+   "tests": 448
+  },
+  "shard1": {
+   "passedFiles": 804,
+   "skippedFiles": 22,
+   "passedTests": 6900,
+   "skippedTests": 119,
+   "failed": 0
+  },
+  "shard2": {
+   "passedFiles": 804,
+   "skippedFiles": 22,
+   "passedTests": 6329,
+   "skippedTests": 104,
+   "failed": 0
+  },
+  "build": "green",
+  "differential": "fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 76125b755: 624 / 624 captures byte-identical",
+  "diffCheck": "clean"
  }
 }

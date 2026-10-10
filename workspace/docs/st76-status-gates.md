@@ -87,6 +87,19 @@ equal at every turn boundary on both.
 
 Receipts: `fixtures/st76-parity-seed{428,518}.json`.
 
+**Gates** (final code, tested at `f4b3859af`, src tree in the receipt; four Vitest workers), 0 failed throughout:
+
+- Targeted: 144 files (every test matching 291 / 309 / DIVE / METEOR_MASH, plus st76, the inventory and playableAnimationIntegration):
+  136 passed / 8 skipped, 2,290 tests passed / 45 skipped.
+- `npm run typecheck`: green.
+- `npm run test:smoke`: 8 files / 448 tests.
+- `npm test` shard 1/2: 804 files passed / 22 skipped, 6,900 tests passed / 119 skipped.
+- `npm test` shard 2/2: 804 files passed / 22 skipped, 6,329 tests passed / 104 skipped.
+- `npm run build`: green.
+- `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base
+  76125b755`: 624 / 624 captures byte-identical.
+- `git diff --check`: clean.
+
 ## 2. What landed
 
 - `src/engine/liveMoveAnimation.ts`, cases 309 and 291: the `field.{player,opponent}.status` declines are removed and the comments are
