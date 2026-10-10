@@ -17,18 +17,15 @@ backlog.
 
 # Open
 
-## #159 — Live bodies draw a semi-invulnerable (hidden) battler; fly63 reverted (S10A, found 2026-10-09 by live audit 17)
+## #159 — Hidden-span live bodies: sprite fixed, ROM frame checks + lag phase open (S10A, found 2026-10-09 by live audit 17; sprite fix 2026-10-10)
 
-`docs/live-audit-17-late-session.md` (receipts `tools/integration/fixtures/audit-17/receipts/{main,patch-hidden,patch-hidden-sky-uppercut}/`):
-while a Fly / Bounce charger is hidden, a LIVE body of the other battler draws the hidden battler — production applies the
-semi-invulnerable hide only on the presentation / fallback path (`applyLiveSemiInvulnerableCommand`), never to live bodies. fly63
-(`a504d60d4`) planned the Fly / Bounce setup, so such bodies became live: Heal Bell 420k-610k px, Double Team 256k-372k px per window
-(20 windows -> 0 px with the audit's reverted in-place patch that applies the hide to the live view), Sky Uppercut hitting the hidden user
-830k-975k px (the patch fixes rows 0..149; ages 150..186 keep ~19k px/row, unresolved). fly63 was REVERTED in `1a0f6e214` (src back to
-`06b791ff`); prep61's Fly / Bounce plans stay banked. The same hazard applies to any live body during a Dig / Dive / Fly / Bounce hidden
-span (order-independent adapters can be live there even without fly63) and to prep65's Dive patch. Resume: apply the hide to the live
-view (the audit's patch shape) with a test, extend it to a body that TARGETS the hidden battler (Sky Uppercut / Surf / Whirlpool / weather
-damage) and settle Sky Uppercut's ages 150..186, then re-land fly63 (+11 / +1,391 on 0..299) and prep65.
+The sprite half is FIXED (hide66, merged `f3efec8bf`; docs/hide66-hidden-battler.md): live bodies leave a hidden Fly / Bounce / Dig /
+Dive charger (and its shadow / doll) out; on census seeds 0..999 90 live commands / 12,744 frames had drawn it, now 0. fly63 is re-landed.
+Open remainder: (1) only Heal Bell and Double Team hidden-span windows are ROM-checked; the other live hidden-span bodies (98 commands /
+14,252 frames on 0..999: Safeguard, Wish, Bulk Up, Dig of the other battler, Rest, Iron Defense, Sandstorm, Earthquake at a hidden Dig user)
+are correct for the sprite per source but unchecked, and an invisible battler can change the lag-frame phase (Sky Uppercut: the ROM skips
+its 148 / 149 lag frames) — live audit 18's target. (2) Sky Uppercut 327 at a hidden target fails closed (`liveMoveHiddenTargetDeclines`;
+profiles [166] 187 rows / none 186 rows vs the visible [148, 149]); a D4 key would need the hidden state in the body duration.
 
 ## #157 — Weather-continuing animations: kernel event battler is the last attacker, the ROM plays them on battler 0 (S10A, found 2026-10-09 by aud56)
 

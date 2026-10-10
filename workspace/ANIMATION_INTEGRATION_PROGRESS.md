@@ -1,5 +1,40 @@
 # Animation integration progress
 
+## 2026-10-10 (day) — S10A: ISSUES #159 sprite fix, fly63 re-landed, Shock Wave order plan (in progress)
+
+- Session start: master `b50c4dabd`, production src `06b791ff` == the 2026-10-09 final gates' tree (`final-supervisor-gates-20261009-day.json`)
+  -> baseline receipt reused, no fresh baseline run. Oracle services predate the HEAD commit time but no oracle/harness file changed since
+  2026-10-01 (`git log -- oracle run-oracle.sh`), so `check-oracle-freshness.sh`'s FAIL is the HEAD-time heuristic only; workers use
+  direct mGBA.
+- Folded Opus worker `b4ead444d` (SIDE, narrow grant) as `e58597082` (src `c3ab72f5`): sw67 — Shock Wave 351 geometry-keyed sprite-order
+  plan. shockWave.ts's lifetimes were already source-correct; plans51's "window 37" divergence was its generator tracking sprites by kind /
+  birth age instead of SLOT occupancy (CreateSprite lowest free, `sprite.c:502-511`; BattleMainCB2 runs AnimateSprites before RunTasks,
+  `battle_main.c:1863-1869`, so a charging particle's slot passes to the bolt created on its destroy frame). New
+  `shockWaveSpriteOrderPlanText` + `liveShockWaveSpriteOrderPlanText` (case 351 in `liveMoveGeometrySpriteOrderPlanText`), 351 in
+  `SPRITE_ORDER_GEOMETRY_KEYED_BODIES`. plans48's 8 ROM receipts 8 / 8 exact; geometry classes depend on the attacker species only (player
+  106 / 102 / 104 windows, opponent 79 / 86); predictions committed before an 18-pair grid -> 18 / 18 per-frame exact, r1 == r2. Census
+  0..299 +4 / +781, chain predictor 3 / 693 == measured, 0 regressions, key sequence + digest identical; ON/OFF parity (Castform route).
+  Worker gates 1,598 files / 13,159 tests, build, differential 624. Supervisor: `sw67Run.sh` into a fresh dir — every output == committed;
+  clean merge (src == worker's tested tree) -> smoke 448, the 16 Shock Wave test files 61 / 61.
+- Folded Opus worker `17bd73cf4` (INTEGRATION) as `f3efec8bf` (src `10884465`): hide66 — ISSUES #159 sprite half. The ROM's
+  semi-invulnerable charger is an invisible OBJ (`battle_anim_flying.c:476 / :975 / :1016`, `battle_anim_ground.c:327 / :366 / :374`), its
+  shadow follows (`battle_gfx_sfx_util.c:1214`), the doll is the same sprite. `liveMoveHiddenSides(view.visibility, request)` (non-attacker
+  side only) is passed through `liveMoveAnimationPresentation` and `renderSceneOnMovePresentation`, which draw the hidden side's sheets
+  transparent (both `liveSceneOnBattlerArt` and the per-move species maps) and skip its shadow; no module-global flag. Census 0..999 on
+  `b50c4dabd`: **90 live commands / 12,744 frames had drawn the hidden battler -> 0**. Sky Uppercut 327 at a hidden target fails closed
+  (`liveMoveHiddenTargetDeclines`: the ROM skips its 148 / 149 lag frames when the target is invisible; 1 command / 188 frames). fly63
+  re-landed by reverting the revert. Audit-17 windows through production (no patch): 104 / 104 r1 == r2, Heal Bell / Double Team hidden
+  span 20 windows -> 0 px, 67 / 67 earlier 0-px windows unchanged. Census 0..299 +10 / +1,203 (fly63 +11 / +1,391 minus the Sky Uppercut
+  body); on 0..999 two bodies of battle 713 (Barrier, Magic Coat after a Bounce) go live -> fallback "allocator history unknown" (from the
+  fly63 re-land; audit 18 explains). ON/OFF parity on a Fly and a Dig route. Worker gates 1,599 files / 13,163 tests, build, differential.
+  Supervisor: `audit17Run.sh` on the branch into fresh dirs — 38 / 38 check receipts byte-identical to `fixtures/hide66-audit17/`.
+- Supervisor union gates on `f3efec8bf` (src `10884465`; sw67 + hide66): typecheck, full suite 1,600 files / 13,169 tests, build,
+  differential 624 / 624 vs `b50c4dabd`, census seeds 0..299 **97.15 % / 98.16 %** (+14 / +1,984 vs `b50c4dabd` = the sum of both folds;
+  0 regressions, key sequence + digest identical) (`tools/integration/fixtures/union-gates-f3efec8bf.json`).
+- In flight: land68 (INTEGRATION: banked prep65 Dive words unit + prep64 SUBSTITUTE_FADE), plans69 (SIDE, evidence: the remaining
+  order-host stops Ice Ball / Mud-Slap / CASTFORM_CHANGE / Hyper Beam / Magnitude / Flatter / Needle Arm / Astonish / Odor Sleuth /
+  Conversion 2). Next: live audit 18 (hidden-span bodies, Shock Wave consumers, battle 713).
+
 ## 2026-10-09 (day) — S10A: allocator / order / words-lend histories + live-claim fixes; ordinary-play live share 87.95 -> 91.89 % of commands (92.09 -> 95.82 % of frames); 239 + 13 + 24
 
 - Session-start census on `ccc4774c4` (src `dde58985`), seeds 0..999: **87.95 % of move-animation commands / 92.09 % of frames live**
