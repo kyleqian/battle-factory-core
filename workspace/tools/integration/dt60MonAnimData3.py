@@ -8,13 +8,18 @@ battler sprite's data[3]. In battle that field is last written by the send-out m
 data[2..7] before the first anim callback and restores only data[0..2] at the end (pokemon_animation.c:911-939). An animation whose
 call graph (every function reachable from its sMonAnimFunctions entry through direct calls or `sprite->callback = F`) never writes
 `data[3]` therefore leaves data[3] == 0; any other animation is classified "writes" (its final value is not derived here).
-The output lists every ANIM_* id of sMonAnimFunctions with its entry function and that classification.
+The output lists every ANIM_* id of sMonAnimFunctions with its entry function and that classification, plus `finalData3`: the value the
+animation hands off with, from EXECUTING the source (dt60MonAnimData3Sim.c: a host clang build that #includes pokemon_animation.c and
+trig.c, stubs only the matrix / palette / task externals, and runs each sMonAnimFunctions entry from Task_HandleMonAnimation's initial
+state until the callback becomes WaitAnimEnd / SpriteCallbackDummy). Requires clang (dev time only).
 """
 from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -67,8 +72,22 @@ def main() -> None:
             stack.extend(edges[f] - seen)
         writers = sorted(seen & direct)
         result[anim] = {"entry": entry, "writesData3": bool(writers), "writers": writers}
-    out = {"schema": "dt60-mon-anim-data3/v1", "source": "reference/pokeemerald/src/pokemon_animation.c (sMonAnimFunctions; static call graph)",
-           "rule": "writesData3 false => the battler sprite's data[3] is 0 after this send-out animation (Task_HandleMonAnimation zeroes data[2..7])",
+    ids = {k: int(v) for k, v in re.findall(r"#define (ANIM_\w+)\s+(\d+)", (ROOT / "reference/pokeemerald/include/pokemon_animation.h").read_text())}
+    with tempfile.TemporaryDirectory() as tmp:
+        ref = ROOT / "reference/pokeemerald"
+        subprocess.run(["clang", "-w", "-std=gnu99", f"-I{ref / 'include'}", f"-I{ref / 'gflib'}", f"-I{ref}",
+                        str(ROOT / "tools/integration/dt60MonAnimData3Sim.c"), "-o", f"{tmp}/sim"], check=True)
+        sim = {int(i): (int(d3), int(n)) for i, d3, n in (line.split() for line in subprocess.run([f"{tmp}/sim"], check=True, capture_output=True,
+                                                                                                    text=True).stdout.splitlines())}
+    for anim, entry in result.items():
+        d3, frames = sim[ids[anim]]
+        assert frames < 100000, anim
+        entry["finalData3"] = d3
+        entry["frames"] = frames
+        assert entry["writesData3"] or d3 == 0, anim  # the static class and the execution agree
+    out = {"schema": "dt60-mon-anim-data3/v2", "source": "reference/pokeemerald/src/pokemon_animation.c (sMonAnimFunctions; static call graph)",
+           "rule": "writesData3 false => the battler sprite's data[3] is 0 after this send-out animation (Task_HandleMonAnimation zeroes data[2..7]); "
+                   "finalData3 = executed source value at hand-off (dt60MonAnimData3Sim.c)",
            "anims": result}
     rendered = json.dumps(out, indent=1, sort_keys=True) + "\n"
     target = Path(args[0])

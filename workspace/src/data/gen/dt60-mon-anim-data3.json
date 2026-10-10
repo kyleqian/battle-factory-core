@@ -2,6 +2,8 @@
  "anims": {
   "ANIM_BACK_AND_LUNGE": {
    "entry": "Anim_BackAndLunge",
+   "finalData3": 12,
+   "frames": 34,
    "writers": [
     "BackAndLunge_2",
     "BackAndLunge_3"
@@ -10,6 +12,8 @@
   },
   "ANIM_BACK_FLIP": {
    "entry": "Anim_BackFlip",
+   "finalData3": 0,
+   "frames": 60,
    "writers": [
     "Anim_BackFlip",
     "BackFlip_0",
@@ -20,11 +24,15 @@
   },
   "ANIM_BACK_FLIP_BIG": {
    "entry": "Anim_BackFlipBig",
+   "finalData3": 0,
+   "frames": 64,
    "writers": [],
    "writesData3": false
   },
   "ANIM_BOUNCE_ROTATE_TO_SIDES": {
    "entry": "Anim_BounceRotateToSides",
+   "finalData3": 0,
+   "frames": 88,
    "writers": [
     "BounceRotateToSides"
    ],
@@ -32,6 +40,8 @@
   },
   "ANIM_BOUNCE_ROTATE_TO_SIDES_SLOW": {
    "entry": "Anim_BounceRotateToSides_Slow",
+   "finalData3": 0,
+   "frames": 168,
    "writers": [
     "BounceRotateToSides"
    ],
@@ -39,6 +49,8 @@
   },
   "ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL": {
    "entry": "Anim_BounceRotateToSides_Small",
+   "finalData3": 0,
+   "frames": 88,
    "writers": [
     "BounceRotateToSides"
    ],
@@ -46,6 +58,8 @@
   },
   "ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW": {
    "entry": "Anim_BounceRotateToSides_SmallSlow",
+   "finalData3": 0,
+   "frames": 168,
    "writers": [
     "BounceRotateToSides"
    ],
@@ -53,36 +67,50 @@
   },
   "ANIM_CIRCLE_C_CLOCKWISE": {
    "entry": "Anim_CircleCounterclockwise",
+   "finalData3": 0,
+   "frames": 23,
    "writers": [],
    "writesData3": false
   },
   "ANIM_CIRCLE_C_CLOCKWISE_LONG": {
    "entry": "Anim_CircleCounterclockwise_Long",
+   "finalData3": 0,
+   "frames": 44,
    "writers": [],
    "writesData3": false
   },
   "ANIM_CIRCLE_C_CLOCKWISE_SLOW": {
    "entry": "Anim_CircleCounterclockwise_Slow",
+   "finalData3": 0,
+   "frames": 44,
    "writers": [],
    "writesData3": false
   },
   "ANIM_CIRCLE_INTO_BG": {
    "entry": "Anim_CircleIntoBackground",
+   "finalData3": 0,
+   "frames": 66,
    "writers": [],
    "writesData3": false
   },
   "ANIM_CIRCULAR_STRETCH_TWICE": {
    "entry": "Anim_CircularStretchTwice",
+   "finalData3": 0,
+   "frames": 42,
    "writers": [],
    "writesData3": false
   },
   "ANIM_CIRCULAR_VIBRATE": {
    "entry": "Anim_CircularVibrate",
+   "finalData3": 0,
+   "frames": 58,
    "writers": [],
    "writesData3": false
   },
   "ANIM_CONCAVE_ARC_LARGE": {
    "entry": "Anim_ConcaveArcLarge",
+   "finalData3": 6,
+   "frames": 44,
    "writers": [
     "Anim_ConcaveArcLarge"
    ],
@@ -90,6 +118,8 @@
   },
   "ANIM_CONCAVE_ARC_LARGE_SLOW": {
    "entry": "Anim_ConcaveArcLarge_Slow",
+   "finalData3": 4,
+   "frames": 65,
    "writers": [
     "Anim_ConcaveArcLarge_Slow"
    ],
@@ -97,6 +127,8 @@
   },
   "ANIM_CONCAVE_ARC_LARGE_TWICE": {
    "entry": "Anim_ConcaveArcLarge_Twice",
+   "finalData3": 8,
+   "frames": 66,
    "writers": [
     "Anim_ConcaveArcLarge_Twice"
    ],
@@ -104,6 +136,8 @@
   },
   "ANIM_CONCAVE_ARC_SMALL": {
    "entry": "Anim_ConcaveArcSmall",
+   "finalData3": 6,
+   "frames": 44,
    "writers": [
     "Anim_ConcaveArcSmall"
    ],
@@ -111,6 +145,8 @@
   },
   "ANIM_CONCAVE_ARC_SMALL_SLOW": {
    "entry": "Anim_ConcaveArcSmall_Slow",
+   "finalData3": 4,
+   "frames": 65,
    "writers": [
     "Anim_ConcaveArcSmall_Slow"
    ],
@@ -118,6 +154,8 @@
   },
   "ANIM_CONCAVE_ARC_SMALL_TWICE": {
    "entry": "Anim_ConcaveArcSmall_Twice",
+   "finalData3": 8,
+   "frames": 66,
    "writers": [
     "Anim_ConcaveArcSmall_Twice"
    ],
@@ -125,6 +163,8 @@
   },
   "ANIM_CONVEX_DOUBLE_ARC": {
    "entry": "Anim_ConvexDoubleArc",
+   "finalData3": 6,
+   "frames": 88,
    "writers": [
     "Anim_ConvexDoubleArc"
    ],
@@ -132,6 +172,8 @@
   },
   "ANIM_CONVEX_DOUBLE_ARC_SLOW": {
    "entry": "Anim_ConvexDoubleArc_Slow",
+   "finalData3": 4,
+   "frames": 132,
    "writers": [
     "Anim_ConvexDoubleArc_Slow"
    ],
@@ -139,6 +181,8 @@
   },
   "ANIM_CONVEX_DOUBLE_ARC_TWICE": {
    "entry": "Anim_ConvexDoubleArc_Twice",
+   "finalData3": 8,
+   "frames": 102,
    "writers": [
     "Anim_ConvexDoubleArc_Twice"
    ],
@@ -146,26 +190,36 @@
   },
   "ANIM_DEEP_V_SQUISH_AND_BOUNCE": {
    "entry": "Anim_DeepVerticalSquishBounce",
+   "finalData3": 0,
+   "frames": 65,
    "writers": [],
    "writesData3": false
   },
   "ANIM_DEEP_V_SQUISH_AND_BOUNCE_TWICE": {
    "entry": "Anim_DeepVerticalSquishBounce_Twice",
+   "finalData3": 0,
+   "frames": 139,
    "writers": [],
    "writesData3": false
   },
   "ANIM_FIGURE_8": {
    "entry": "Anim_Figure8",
+   "finalData3": 0,
+   "frames": 65,
    "writers": [],
    "writesData3": false
   },
   "ANIM_FLASH_YELLOW": {
    "entry": "Anim_FlashYellow",
+   "finalData3": 0,
+   "frames": 57,
    "writers": [],
    "writesData3": false
   },
   "ANIM_FLICKER": {
    "entry": "Anim_Flicker",
+   "finalData3": 2,
+   "frames": 58,
    "writers": [
     "Anim_Flicker"
    ],
@@ -173,61 +227,85 @@
   },
   "ANIM_FLICKER_INCREASING": {
    "entry": "Anim_FlickerIncreasing",
+   "finalData3": 0,
+   "frames": 66,
    "writers": [],
    "writesData3": false
   },
   "ANIM_FOUR_PETAL": {
    "entry": "Anim_FourPetal",
+   "finalData3": 0,
+   "frames": 64,
    "writers": [],
    "writesData3": false
   },
   "ANIM_FRONT_FLIP": {
    "entry": "Anim_FrontFlip",
+   "finalData3": 0,
+   "frames": 50,
    "writers": [],
    "writesData3": false
   },
   "ANIM_GLOW_BLACK": {
    "entry": "Anim_GlowBlack",
+   "finalData3": 0,
+   "frames": 130,
    "writers": [],
    "writesData3": false
   },
   "ANIM_GLOW_BLUE": {
    "entry": "Anim_GlowBlue",
+   "finalData3": 0,
+   "frames": 66,
    "writers": [],
    "writesData3": false
   },
   "ANIM_GLOW_ORANGE": {
    "entry": "Anim_GlowOrange",
+   "finalData3": 0,
+   "frames": 66,
    "writers": [],
    "writesData3": false
   },
   "ANIM_GLOW_PURPLE": {
    "entry": "Anim_GlowPurple",
+   "finalData3": 0,
+   "frames": 66,
    "writers": [],
    "writesData3": false
   },
   "ANIM_GLOW_RED": {
    "entry": "Anim_GlowRed",
+   "finalData3": 0,
+   "frames": 66,
    "writers": [],
    "writesData3": false
   },
   "ANIM_GLOW_YELLOW": {
    "entry": "Anim_GlowYellow",
+   "finalData3": 0,
+   "frames": 66,
    "writers": [],
    "writesData3": false
   },
   "ANIM_GROW": {
    "entry": "Anim_Grow",
+   "finalData3": 0,
+   "frames": 65,
    "writers": [],
    "writesData3": false
   },
   "ANIM_GROW_IN_STAGES": {
    "entry": "Anim_GrowInStages",
+   "finalData3": 0,
+   "frames": 115,
    "writers": [],
    "writesData3": false
   },
   "ANIM_GROW_STUTTER": {
    "entry": "Anim_GrowStutter",
+   "finalData3": 60,
+   "frames": 32,
    "writers": [
     "Anim_GrowStutter"
    ],
@@ -235,6 +313,8 @@
   },
   "ANIM_GROW_STUTTER_SLOW": {
    "entry": "Anim_GrowStutter_Slow",
+   "finalData3": 40,
+   "frames": 42,
    "writers": [
     "Anim_GrowStutter_Slow"
    ],
@@ -242,6 +322,8 @@
   },
   "ANIM_GROW_STUTTER_TWICE": {
    "entry": "Anim_GrowStutter_Twice",
+   "finalData3": 70,
+   "frames": 44,
    "writers": [
     "Anim_GrowStutter_Twice"
    ],
@@ -249,16 +331,22 @@
   },
   "ANIM_GROW_TWICE": {
    "entry": "Anim_Grow_Twice",
+   "finalData3": 0,
+   "frames": 66,
    "writers": [],
    "writesData3": false
   },
   "ANIM_GROW_VIBRATE": {
    "entry": "Anim_GrowVibrate",
+   "finalData3": 0,
+   "frames": 42,
    "writers": [],
    "writesData3": false
   },
   "ANIM_H_DIP": {
    "entry": "Anim_HorizontalDip",
+   "finalData3": 1,
+   "frames": 62,
    "writers": [
     "Anim_HorizontalDip"
    ],
@@ -266,6 +354,8 @@
   },
   "ANIM_H_DIP_FAST": {
    "entry": "Anim_HorizontalDip_Fast",
+   "finalData3": 1,
+   "frames": 92,
    "writers": [
     "Anim_HorizontalDip_Fast"
    ],
@@ -273,6 +363,8 @@
   },
   "ANIM_H_DIP_TWICE": {
    "entry": "Anim_HorizontalDip_Twice",
+   "finalData3": 2,
+   "frames": 63,
    "writers": [
     "Anim_HorizontalDip_Twice"
    ],
@@ -280,11 +372,15 @@
   },
   "ANIM_H_JUMPS": {
    "entry": "Anim_HorizontalJumps",
+   "finalData3": 0,
+   "frames": 44,
    "writers": [],
    "writesData3": false
   },
   "ANIM_H_JUMPS_V_STRETCH": {
    "entry": "Anim_HorizontalJumpsVerticalStretch",
+   "finalData3": 128,
+   "frames": 74,
    "writers": [
     "Anim_HorizontalJumpsVerticalStretch",
     "HorizontalJumpsVerticalStretch_1",
@@ -294,6 +390,8 @@
   },
   "ANIM_H_JUMPS_V_STRETCH_TWICE": {
    "entry": "Anim_HorizontalJumpsVerticalStretch_Twice",
+   "finalData3": 128,
+   "frames": 157,
    "writers": [
     "Anim_HorizontalJumpsVerticalStretch_Twice",
     "HorizontalJumpsVerticalStretch_1",
@@ -303,86 +401,120 @@
   },
   "ANIM_H_PIVOT": {
    "entry": "Anim_HorizontalPivot",
+   "finalData3": 0,
+   "frames": 102,
    "writers": [],
    "writesData3": false
   },
   "ANIM_H_REPEATED_SPRING": {
    "entry": "Anim_HorizontalRepeatedSpring",
+   "finalData3": 0,
+   "frames": 66,
    "writers": [],
    "writesData3": false
   },
   "ANIM_H_REPEATED_SPRING_FAST": {
    "entry": "Anim_HorizontalRepeatedSpring_Fast",
+   "finalData3": 0,
+   "frames": 66,
    "writers": [],
    "writesData3": false
   },
   "ANIM_H_REPEATED_SPRING_SLOW": {
    "entry": "Anim_HorizontalRepeatedSpring_Slow",
+   "finalData3": 0,
+   "frames": 66,
    "writers": [],
    "writesData3": false
   },
   "ANIM_H_SHAKE": {
    "entry": "Anim_HorizontalShake",
+   "finalData3": 0,
+   "frames": 40,
    "writers": [],
    "writesData3": false
   },
   "ANIM_H_SHAKE_FAST": {
    "entry": "Anim_HorizontalShake_Fast",
+   "finalData3": 0,
+   "frames": 34,
    "writers": [],
    "writesData3": false
   },
   "ANIM_H_SHAKE_SLOW": {
    "entry": "Anim_HorizontalShake_Slow",
+   "finalData3": 0,
+   "frames": 78,
    "writers": [],
    "writesData3": false
   },
   "ANIM_H_SLIDE": {
    "entry": "Anim_HorizontalSlide",
+   "finalData3": 0,
+   "frames": 42,
    "writers": [],
    "writesData3": false
   },
   "ANIM_H_SLIDE_FAST": {
    "entry": "Anim_HorizontalSlide_Fast",
+   "finalData3": 0,
+   "frames": 22,
    "writers": [],
    "writesData3": false
   },
   "ANIM_H_SLIDE_SHRINK": {
    "entry": "Anim_HorizontalSlideShrink",
+   "finalData3": 0,
+   "frames": 66,
    "writers": [],
    "writesData3": false
   },
   "ANIM_H_SLIDE_SLOW": {
    "entry": "Anim_HorizontalSlide_Slow",
+   "finalData3": 0,
+   "frames": 82,
    "writers": [],
    "writesData3": false
   },
   "ANIM_H_SLIDE_WOBBLE": {
    "entry": "Anim_HorizontalSlideWobble",
+   "finalData3": 0,
+   "frames": 102,
    "writers": [],
    "writesData3": false
   },
   "ANIM_H_SPRING": {
    "entry": "Anim_HorizontalSpring",
+   "finalData3": 0,
+   "frames": 66,
    "writers": [],
    "writesData3": false
   },
   "ANIM_H_SPRING_FAST": {
    "entry": "Anim_HorizontalSpring_Fast",
+   "finalData3": 0,
+   "frames": 66,
    "writers": [],
    "writesData3": false
   },
   "ANIM_H_SPRING_SLOW": {
    "entry": "Anim_HorizontalSpring_Slow",
+   "finalData3": 0,
+   "frames": 66,
    "writers": [],
    "writesData3": false
   },
   "ANIM_H_STRETCH": {
    "entry": "Anim_HorizontalStretch",
+   "finalData3": 0,
+   "frames": 42,
    "writers": [],
    "writesData3": false
   },
   "ANIM_H_STRETCH_FAR": {
    "entry": "Anim_HorizontalStretchFar",
+   "finalData3": 60,
+   "frames": 32,
    "writers": [
     "Anim_HorizontalStretchFar"
    ],
@@ -390,6 +522,8 @@
   },
   "ANIM_H_STRETCH_FAR_SLOW": {
    "entry": "Anim_HorizontalStretchFar_Slow",
+   "finalData3": 40,
+   "frames": 42,
    "writers": [
     "Anim_HorizontalStretchFar_Slow"
    ],
@@ -397,6 +531,8 @@
   },
   "ANIM_H_STRETCH_FAR_TWICE": {
    "entry": "Anim_HorizontalStretchFar_Twice",
+   "finalData3": 70,
+   "frames": 44,
    "writers": [
     "Anim_HorizontalStretchFar_Twice"
    ],
@@ -404,21 +540,29 @@
   },
   "ANIM_H_VIBRATE": {
    "entry": "Anim_HorizontalVibrate",
+   "finalData3": 0,
+   "frames": 42,
    "writers": [],
    "writesData3": false
   },
   "ANIM_H_VIBRATE_FAST": {
    "entry": "Anim_HorizontalVibrate_Fast",
+   "finalData3": 0,
+   "frames": 42,
    "writers": [],
    "writesData3": false
   },
   "ANIM_H_VIBRATE_FASTEST": {
    "entry": "Anim_HorizontalVibrate_Fastest",
+   "finalData3": 0,
+   "frames": 42,
    "writers": [],
    "writesData3": false
   },
   "ANIM_JOLT_RIGHT": {
    "entry": "Anim_JoltRight",
+   "finalData3": 12,
+   "frames": 31,
    "writers": [
     "Anim_JoltRight",
     "JoltRight_2"
@@ -427,6 +571,8 @@
   },
   "ANIM_JOLT_RIGHT_FAST": {
    "entry": "Anim_JoltRight_Fast",
+   "finalData3": 16,
+   "frames": 36,
    "writers": [
     "Anim_JoltRight_Fast",
     "JoltRight_2"
@@ -435,6 +581,8 @@
   },
   "ANIM_JOLT_RIGHT_SLOW": {
    "entry": "Anim_JoltRight_Slow",
+   "finalData3": 6,
+   "frames": 21,
    "writers": [
     "Anim_JoltRight_Slow",
     "JoltRight_2"
@@ -443,41 +591,57 @@
   },
   "ANIM_LUNGE_GROW": {
    "entry": "Anim_LungeGrow",
+   "finalData3": 0,
+   "frames": 66,
    "writers": [],
    "writesData3": false
   },
   "ANIM_PIVOT_SHAKE": {
    "entry": "Anim_PivotShake",
+   "finalData3": 0,
+   "frames": 17,
    "writers": [],
    "writesData3": false
   },
   "ANIM_RAPID_H_HOPS": {
    "entry": "Anim_RapidHorizontalHops",
+   "finalData3": 0,
+   "frames": 87,
    "writers": [],
    "writesData3": false
   },
   "ANIM_RISING_WOBBLE": {
    "entry": "Anim_RisingWobble",
+   "finalData3": 0,
+   "frames": 102,
    "writers": [],
    "writesData3": false
   },
   "ANIM_ROTATE_TO_SIDES": {
    "entry": "Anim_RotateToSides",
+   "finalData3": 0,
+   "frames": 129,
    "writers": [],
    "writesData3": false
   },
   "ANIM_ROTATE_TO_SIDES_FAST": {
    "entry": "Anim_RotateToSides_Fast",
+   "finalData3": 0,
+   "frames": 65,
    "writers": [],
    "writesData3": false
   },
   "ANIM_ROTATE_TO_SIDES_TWICE": {
    "entry": "Anim_RotateToSides_Twice",
+   "finalData3": 0,
+   "frames": 130,
    "writers": [],
    "writesData3": false
   },
   "ANIM_ROTATE_UP_SLAM_DOWN": {
    "entry": "Anim_RotateUpSlamDown",
+   "finalData3": 1,
+   "frames": 74,
    "writers": [
     "RotateUpSlamDown_0",
     "RotateUpSlamDown_1"
@@ -486,11 +650,15 @@
   },
   "ANIM_ROTATE_UP_TO_SIDES": {
    "entry": "Anim_RotateUpToSides",
+   "finalData3": 0,
+   "frames": 33,
    "writers": [],
    "writesData3": false
   },
   "ANIM_SHAKE_FLASH_YELLOW": {
    "entry": "Anim_ShakeFlashYellow",
+   "finalData3": 1,
+   "frames": 57,
    "writers": [
     "Anim_ShakeFlashYellow"
    ],
@@ -498,6 +666,8 @@
   },
   "ANIM_SHAKE_FLASH_YELLOW_FAST": {
    "entry": "Anim_ShakeFlashYellow_Fast",
+   "finalData3": 0,
+   "frames": 82,
    "writers": [
     "Anim_ShakeFlashYellow_Fast"
    ],
@@ -505,6 +675,8 @@
   },
   "ANIM_SHAKE_FLASH_YELLOW_SLOW": {
    "entry": "Anim_ShakeFlashYellow_Slow",
+   "finalData3": 2,
+   "frames": 76,
    "writers": [
     "Anim_ShakeFlashYellow_Slow"
    ],
@@ -512,6 +684,8 @@
   },
   "ANIM_SHAKE_GLOW_BLUE": {
    "entry": "Anim_ShakeGlowBlue",
+   "finalData3": 1,
+   "frames": 129,
    "writers": [
     "Anim_ShakeGlowBlue",
     "ShakeGlow_Move"
@@ -520,6 +694,8 @@
   },
   "ANIM_SHAKE_GLOW_BLUE_FAST": {
    "entry": "Anim_ShakeGlowBlue_Fast",
+   "finalData3": 2,
+   "frames": 129,
    "writers": [
     "Anim_ShakeGlowBlue_Fast",
     "ShakeGlow_Move"
@@ -528,6 +704,8 @@
   },
   "ANIM_SHAKE_GLOW_BLUE_SLOW": {
    "entry": "Anim_ShakeGlowBlue_Slow",
+   "finalData3": 1,
+   "frames": 129,
    "writers": [
     "Anim_ShakeGlowBlue_Slow",
     "ShakeGlow_Move"
@@ -536,6 +714,8 @@
   },
   "ANIM_SHAKE_GLOW_GREEN": {
    "entry": "Anim_ShakeGlowGreen",
+   "finalData3": 1,
+   "frames": 129,
    "writers": [
     "Anim_ShakeGlowGreen",
     "ShakeGlow_Move"
@@ -544,6 +724,8 @@
   },
   "ANIM_SHAKE_GLOW_GREEN_FAST": {
    "entry": "Anim_ShakeGlowGreen_Fast",
+   "finalData3": 2,
+   "frames": 129,
    "writers": [
     "Anim_ShakeGlowGreen_Fast",
     "ShakeGlow_Move"
@@ -552,6 +734,8 @@
   },
   "ANIM_SHAKE_GLOW_GREEN_SLOW": {
    "entry": "Anim_ShakeGlowGreen_Slow",
+   "finalData3": 1,
+   "frames": 129,
    "writers": [
     "Anim_ShakeGlowGreen_Slow",
     "ShakeGlow_Move"
@@ -560,6 +744,8 @@
   },
   "ANIM_SHAKE_GLOW_RED": {
    "entry": "Anim_ShakeGlowRed",
+   "finalData3": 1,
+   "frames": 129,
    "writers": [
     "Anim_ShakeGlowRed",
     "ShakeGlow_Move"
@@ -568,6 +754,8 @@
   },
   "ANIM_SHAKE_GLOW_RED_FAST": {
    "entry": "Anim_ShakeGlowRed_Fast",
+   "finalData3": 2,
+   "frames": 129,
    "writers": [
     "Anim_ShakeGlowRed_Fast",
     "ShakeGlow_Move"
@@ -576,6 +764,8 @@
   },
   "ANIM_SHAKE_GLOW_RED_SLOW": {
    "entry": "Anim_ShakeGlowRed_Slow",
+   "finalData3": 1,
+   "frames": 129,
    "writers": [
     "Anim_ShakeGlowRed_Slow",
     "ShakeGlow_Move"
@@ -584,96 +774,134 @@
   },
   "ANIM_SHRINK_GROW": {
    "entry": "Anim_ShrinkGrow",
+   "finalData3": 0,
+   "frames": 50,
    "writers": [],
    "writesData3": false
   },
   "ANIM_SHRINK_GROW_FAST": {
    "entry": "Anim_ShrinkGrow_Fast",
+   "finalData3": 0,
+   "frames": 82,
    "writers": [],
    "writesData3": false
   },
   "ANIM_SHRINK_GROW_SLOW": {
    "entry": "Anim_ShrinkGrow_Slow",
+   "finalData3": 0,
+   "frames": 98,
    "writers": [],
    "writesData3": false
   },
   "ANIM_SHRINK_GROW_VIBRATE": {
    "entry": "Anim_ShrinkGrowVibrate",
+   "finalData3": 0,
+   "frames": 42,
    "writers": [],
    "writesData3": false
   },
   "ANIM_SHRINK_GROW_VIBRATE_FAST": {
    "entry": "Anim_ShrinkGrowVibrate_Fast",
+   "finalData3": 0,
+   "frames": 82,
    "writers": [],
    "writesData3": false
   },
   "ANIM_SHRINK_GROW_VIBRATE_SLOW": {
    "entry": "Anim_ShrinkGrowVibrate_Slow",
+   "finalData3": 0,
+   "frames": 82,
    "writers": [],
    "writesData3": false
   },
   "ANIM_SPIN": {
    "entry": "Anim_Spin",
+   "finalData3": 0,
+   "frames": 62,
    "writers": [],
    "writesData3": false
   },
   "ANIM_SPIN_LONG": {
    "entry": "Anim_Spin_Long",
+   "finalData3": 0,
+   "frames": 62,
    "writers": [],
    "writesData3": false
   },
   "ANIM_SPRING_RISING": {
    "entry": "Anim_SpringRising",
+   "finalData3": 0,
+   "frames": 89,
    "writers": [],
    "writesData3": false
   },
   "ANIM_SWING_CONCAVE": {
    "entry": "Anim_SwingConcave",
+   "finalData3": 0,
+   "frames": 102,
    "writers": [],
    "writesData3": false
   },
   "ANIM_SWING_CONCAVE_FAST": {
    "entry": "Anim_SwingConcave_Fast",
+   "finalData3": 0,
+   "frames": 103,
    "writers": [],
    "writesData3": false
   },
   "ANIM_SWING_CONCAVE_FAST_SHORT": {
    "entry": "Anim_SwingConcave_FastShort",
+   "finalData3": 0,
+   "frames": 52,
    "writers": [],
    "writesData3": false
   },
   "ANIM_SWING_CONVEX": {
    "entry": "Anim_SwingConvex",
+   "finalData3": 0,
+   "frames": 102,
    "writers": [],
    "writesData3": false
   },
   "ANIM_SWING_CONVEX_FAST": {
    "entry": "Anim_SwingConvex_Fast",
+   "finalData3": 0,
+   "frames": 103,
    "writers": [],
    "writesData3": false
   },
   "ANIM_SWING_CONVEX_FAST_SHORT": {
    "entry": "Anim_SwingConvex_FastShort",
+   "finalData3": 0,
+   "frames": 52,
    "writers": [],
    "writesData3": false
   },
   "ANIM_TIP_AND_SHAKE": {
    "entry": "Anim_TipAndShake",
+   "finalData3": 0,
+   "frames": 70,
    "writers": [],
    "writesData3": false
   },
   "ANIM_TIP_HOP_FORWARD": {
    "entry": "Anim_TipHopForward",
+   "finalData3": 0,
+   "frames": 71,
    "writers": [],
    "writesData3": false
   },
   "ANIM_TIP_MOVE_FORWARD": {
    "entry": "Anim_TipMoveForward",
+   "finalData3": 0,
+   "frames": 37,
    "writers": [],
    "writesData3": false
   },
   "ANIM_TRIANGLE_DOWN": {
    "entry": "Anim_TriangleDown",
+   "finalData3": 3,
+   "frames": 19,
    "writers": [
     "TriangleDown"
    ],
@@ -681,6 +909,8 @@
   },
   "ANIM_TRIANGLE_DOWN_SLOW": {
    "entry": "Anim_TriangleDown_Slow",
+   "finalData3": 3,
+   "frames": 37,
    "writers": [
     "TriangleDown"
    ],
@@ -688,6 +918,8 @@
   },
   "ANIM_TRIANGLE_DOWN_TWICE": {
    "entry": "Anim_TriangleDown_Fast",
+   "finalData3": 3,
+   "frames": 38,
    "writers": [
     "TriangleDown"
    ],
@@ -695,6 +927,8 @@
   },
   "ANIM_TUMBLING_FRONT_FLIP": {
    "entry": "Anim_TumblingFrontFlip",
+   "finalData3": -1,
+   "frames": 32,
    "writers": [
     "TumblingFrontFlip"
    ],
@@ -702,6 +936,8 @@
   },
   "ANIM_TUMBLING_FRONT_FLIP_TWICE": {
    "entry": "Anim_TumblingFrontFlip_Twice",
+   "finalData3": -1,
+   "frames": 138,
    "writers": [
     "TumblingFrontFlip"
    ],
@@ -709,131 +945,183 @@
   },
   "ANIM_TWIST": {
    "entry": "Anim_Twist",
+   "finalData3": 0,
+   "frames": 34,
    "writers": [],
    "writesData3": false
   },
   "ANIM_TWIST_TWICE": {
    "entry": "Anim_Twist_Twice",
+   "finalData3": 0,
+   "frames": 141,
    "writers": [],
    "writesData3": false
   },
   "ANIM_VIBRATE_TO_CORNERS": {
    "entry": "Anim_VibrateToCorners",
+   "finalData3": 0,
+   "frames": 42,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_JUMPS_BIG": {
    "entry": "Anim_VerticalJumps_Big",
+   "finalData3": 0,
+   "frames": 34,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_JUMPS_H_JUMPS": {
    "entry": "Anim_VerticalJumpsHorizontalJumps",
+   "finalData3": 0,
+   "frames": 66,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_JUMPS_SMALL": {
    "entry": "Anim_VerticalJumps_Small",
+   "finalData3": 0,
+   "frames": 34,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_REPEATED_SPRING": {
    "entry": "Anim_VerticalRepeatedSpring",
+   "finalData3": 0,
+   "frames": 66,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_SHAKE": {
    "entry": "Anim_VerticalShake",
+   "finalData3": 0,
+   "frames": 40,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_SHAKE_BACK": {
    "entry": "Anim_VerticalShakeBack",
+   "finalData3": 0,
+   "frames": 40,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_SHAKE_BACK_FAST": {
    "entry": "Anim_VerticalShakeBack_Fast",
+   "finalData3": 0,
+   "frames": 34,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_SHAKE_BACK_SLOW": {
    "entry": "Anim_VerticalShakeBack_Slow",
+   "finalData3": 0,
+   "frames": 78,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_SHAKE_H_SLIDE": {
    "entry": "Anim_VerticalShakeHorizontalSlide",
+   "finalData3": 0,
+   "frames": 44,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_SHAKE_H_SLIDE_FAST": {
    "entry": "Anim_VerticalShakeHorizontalSlide_Fast",
+   "finalData3": 0,
+   "frames": 34,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_SHAKE_H_SLIDE_SLOW": {
    "entry": "Anim_VerticalShakeHorizontalSlide_Slow",
+   "finalData3": 0,
+   "frames": 87,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_SHAKE_LOW_TWICE": {
    "entry": "Anim_VerticalShakeLowTwice",
+   "finalData3": 0,
+   "frames": 79,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_SHAKE_LOW_TWICE_FAST": {
    "entry": "Anim_VerticalShakeLowTwice_Fast",
+   "finalData3": 0,
+   "frames": 79,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_SHAKE_LOW_TWICE_SLOW": {
    "entry": "Anim_VerticalShakeLowTwice_Slow",
+   "finalData3": 0,
+   "frames": 79,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_SHAKE_SLOW": {
    "entry": "Anim_VertialShake_Slow",
+   "finalData3": 0,
+   "frames": 78,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_SHAKE_TWICE": {
    "entry": "Anim_VerticalShakeTwice",
+   "finalData3": 0,
+   "frames": 79,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_SHAKE_TWICE_SLOW": {
    "entry": "Anim_VerticalShakeTwice_Slow",
+   "finalData3": 0,
+   "frames": 79,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_SLIDE": {
    "entry": "Anim_VerticalSlide",
+   "finalData3": 0,
+   "frames": 42,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_SLIDE_SLOW": {
    "entry": "Anim_VerticalSlide_Slow",
+   "finalData3": 0,
+   "frames": 82,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_SLIDE_WOBBLE": {
    "entry": "Anim_VerticalSlideWobble",
+   "finalData3": 0,
+   "frames": 102,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_SLIDE_WOBBLE_SMALL": {
    "entry": "Anim_VerticalSlideWobble_Small",
+   "finalData3": 0,
+   "frames": 102,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_SPRING": {
    "entry": "Anim_VerticalSpring",
+   "finalData3": 0,
+   "frames": 66,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_SQUISH_AND_BOUNCE": {
    "entry": "Anim_VerticalSquishBounce",
+   "finalData3": 120,
+   "frames": 50,
    "writers": [
     "VerticalSquishBounce"
    ],
@@ -841,6 +1129,8 @@
   },
   "ANIM_V_SQUISH_AND_BOUNCE_SLOW": {
    "entry": "Anim_VerticalSquishBounce_Slow",
+   "finalData3": 124,
+   "frames": 98,
    "writers": [
     "VerticalSquishBounce"
    ],
@@ -848,11 +1138,15 @@
   },
   "ANIM_V_STRETCH": {
    "entry": "Anim_VerticalStretch",
+   "finalData3": 0,
+   "frames": 42,
    "writers": [],
    "writesData3": false
   },
   "ANIM_V_STRETCH_BOTH_ENDS": {
    "entry": "Anim_VerticalStretchBothEnds",
+   "finalData3": 60,
+   "frames": 32,
    "writers": [
     "Anim_VerticalStretchBothEnds"
    ],
@@ -860,6 +1154,8 @@
   },
   "ANIM_V_STRETCH_BOTH_ENDS_SLOW": {
    "entry": "Anim_VerticalStretchBothEnds_Slow",
+   "finalData3": 40,
+   "frames": 42,
    "writers": [
     "Anim_VerticalStretchBothEnds_Slow"
    ],
@@ -867,6 +1163,8 @@
   },
   "ANIM_V_STRETCH_BOTH_ENDS_TWICE": {
    "entry": "Anim_VerticalStretchBothEnds_Twice",
+   "finalData3": 70,
+   "frames": 44,
    "writers": [
     "Anim_VerticalStretchBothEnds_Twice"
    ],
@@ -874,6 +1172,8 @@
   },
   "ANIM_ZIGZAG_FAST": {
    "entry": "Anim_ZigzagFast",
+   "finalData3": 9,
+   "frames": 55,
    "writers": [
     "Zigzag"
    ],
@@ -881,13 +1181,15 @@
   },
   "ANIM_ZIGZAG_SLOW": {
    "entry": "Anim_ZigzagSlow",
+   "finalData3": 9,
+   "frames": 109,
    "writers": [
     "Zigzag"
    ],
    "writesData3": true
   }
  },
- "rule": "writesData3 false => the battler sprite's data[3] is 0 after this send-out animation (Task_HandleMonAnimation zeroes data[2..7])",
- "schema": "dt60-mon-anim-data3/v1",
+ "rule": "writesData3 false => the battler sprite's data[3] is 0 after this send-out animation (Task_HandleMonAnimation zeroes data[2..7]); finalData3 = executed source value at hand-off (dt60MonAnimData3Sim.c)",
+ "schema": "dt60-mon-anim-data3/v2",
  "source": "reference/pokeemerald/src/pokemon_animation.c (sMonAnimFunctions; static call graph)"
 }
