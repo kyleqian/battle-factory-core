@@ -177,5 +177,10 @@ Steps:
 - `prep61OrderCensus.ts` / `liveShareCensus.ts --seeds=0..299`, base and patched
 - `prep43CensusDelta.py`, `prep45Chains.py --cleared "body 291 DIVE"`, `prep65CensusKeys.py`
 
-Two fresh SKIP_CENSUS batches (24 runs each, A == B 12 / 12) reproduced `check.json`, `host-words.json`, `units-summary.txt` and
-`units.sha256` byte-identically.
+Reproduction:
+- Two fresh SKIP_CENSUS batches (24 runs each, A == B 12 / 12) reproduced `check.json`, `host-words.json`, `units-summary.txt` and
+  `units.sha256` byte-identically.
+- A third, full run (fresh probes plus the four census runs, then delta / predictor / keys) reproduced **all 11 receipts
+  byte-identically**, exited 0, and left src reverted.
+- Note: the full run takes ~11 min, longer than a 600 s foreground tool call. Run it in a plain shell, or run `SKIP_CENSUS=1` and the
+  census steps separately.
