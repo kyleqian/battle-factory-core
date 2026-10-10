@@ -19,6 +19,12 @@ Light Screen is 81 live / 19 fallback in BOTH trees, and Bulk Up is 22 / 22 live
 **ON/OFF parity** (`hide66Parity.ts --moves=339`): seed 154 / streak 28 (HERACROSS, player Bulk Up x 3, 13 turns) and seed 211 / streak 23
 (SLAKING, opponent Bulk Up x 3, 30 turns). Battle RNG, rules context and boundary are equal at every turn boundary.
 
+**Gates (final code `d57c74158`, src `23c773400`, four Vitest workers):** targeted (every test file matching BULK_UP / LIGHT_SCREEN / hide66
+/ 339 / 113, plus the inventory, playableAnimationIntegration and the two fix74 tests) 201 files / 3,257 tests passed (10 / 39 skipped);
+`npm run typecheck` green; `npm run test:smoke` 8 / 448; `npm test` shard 1/2 803 files / 6,892 tests, shard 2/2 803 files / 6,327 tests,
+0 failed (44 files / 223 tests skipped); `npm run build` green; `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt
+presentation-rng-playable-live-bodies-seeded-on --base 1b59ee96e`: 624 / 624 captures byte-identical; `git diff --check` clean.
+
 ## 2. Bulk Up 339: the source mechanism
 
 `data/battle_anim_scripts.s:4390` Move_BULK_UP: `loadspritegfx ANIM_TAG_BREATH`; `createvisualtask AnimTask_GrowAndShrink, 2`;
