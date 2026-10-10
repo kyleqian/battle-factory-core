@@ -1,0 +1,36 @@
+battle  27 player   NIDORINA   -> ONIX       frames 219 fallback -> live     before: unclassified (case-local gate) | after: -
+battle  94 player   NIDORINO   -> LOMBRE     frames 219 fallback -> live     before: unclassified (case-local gate) | after: -
+battle  94 player   NIDORINO   -> CLAMPERL   frames 219 fallback -> fallback before: unclassified (case-local gate) | after: unclassified (case-local gate)
+battle  98 player   NIDORINO   -> MAWILE     frames 219 fallback -> live     before: unclassified (case-local gate) | after: -
+battle 201 opponent NIDORINA   -> ELEKID     frames 219 fallback -> live     before: unclassified (case-local gate) | after: -
+battle 241 player   NIDORINA   -> LILEEP     frames 219 fallback -> live     before: unclassified (case-local gate) | after: -
+battle 241 player   NIDORINA   -> LILEEP     frames 219 fallback -> fallback before: unclassified (case-local gate) | after: unclassified (case-local gate)
+battle 437 opponent NIDORINA   -> FLAAFFY    frames 219 fallback -> live     before: unclassified (case-local gate) | after: -
+battle 446 player   NIDORINO   -> SPOINK     frames 219 fallback -> fallback before: unclassified (case-local gate) | after: unclassified (case-local gate)
+battle 446 player   NIDORINO   -> SPOINK     frames 219 fallback -> fallback before: unclassified (case-local gate) | after: unclassified (case-local gate)
+battle 526 opponent NIDORINA   -> MINUN      frames 219 fallback -> live     before: unclassified (case-local gate) | after: -
+battle 526 opponent NIDORINA   -> ROSELIA    frames 219 fallback -> live     before: unclassified (case-local gate) | after: -
+battle 539 opponent NIDORINO   -> SKIPLOOM   frames 219 fallback -> live     before: unclassified (case-local gate) | after: -
+battle 539 opponent NIDORINO   -> SKIPLOOM   frames 219 fallback -> fallback before: unclassified (case-local gate) | after: unclassified (case-local gate)
+battle 584 opponent NIDORINA   -> ONIX       frames 219 fallback -> live     before: unclassified (case-local gate) | after: -
+battle 646 opponent NIDORINO   -> GROWLITHE  frames 219 fallback -> live     before: unclassified (case-local gate) | after: -
+battle 673 player   NIDORINA   -> LICKITUNG  frames 219 fallback -> live     before: unclassified (case-local gate) | after: -
+battle 673 player   NIDORINA   -> HAUNTER    frames 219 fallback -> fallback before: unclassified (case-local gate) | after: unclassified (case-local gate)
+battle 735 player   NIDORINO   -> WOBBUFFET  frames 219 fallback -> live     before: unclassified (case-local gate) | after: -
+battle 735 player   NIDORINO   -> WOBBUFFET  frames 219 fallback -> fallback before: unclassified (case-local gate) | after: unclassified (case-local gate)
+battle 735 player   NIDORINO   -> WOBBUFFET  frames 219 fallback -> fallback before: unclassified (case-local gate) | after: unclassified (case-local gate)
+battle 735 player   NIDORINO   -> WOBBUFFET  frames 219 fallback -> fallback before: unclassified (case-local gate) | after: unclassified (case-local gate)
+battle 735 player   NIDORINO   -> WOBBUFFET  frames 219 fallback -> fallback before: unclassified (case-local gate) | after: unclassified (case-local gate)
+battle 735 player   NIDORINO   -> WAILMER    frames 219 fallback -> fallback before: unclassified (case-local gate) | after: unclassified (case-local gate)
+battle 735 player   NIDORINO   -> WAILMER    frames 219 fallback -> fallback before: unclassified (case-local gate) | after: unclassified (case-local gate)
+battle 802 player   NIDORINA   -> SUDOWOODO  frames 219 fallback -> live     before: unclassified (case-local gate) | after: -
+battle 802 player   NIDORINA   -> TOGETIC    frames 219 fallback -> fallback before: unclassified (case-local gate) | after: unclassified (case-local gate)
+battle 802 player   NIDORINA   -> TOGETIC    frames 219 fallback -> fallback before: unclassified (case-local gate) | after: unclassified (case-local gate)
+battle 802 player   NIDORINA   -> GLOOM      frames 219 fallback -> fallback before: unclassified (case-local gate) | after: unclassified (case-local gate)
+battle 909 opponent NIDORINO   -> DUSTOX     frames 219 fallback -> live     before: unclassified (case-local gate) | after: -
+battle 909 opponent NIDORINO   -> DUSTOX     frames 219 fallback -> fallback before: unclassified (case-local gate) | after: unclassified (case-local gate)
+battle 936 opponent NIDORINO   -> TOGETIC    frames 219 fallback -> live     before: unclassified (case-local gate) | after: -
+battle 936 opponent NIDORINO   -> TOGETIC    frames 219 fallback -> fallback before: unclassified (case-local gate) | after: unclassified (case-local gate)
+battle 940 player   NIDORINA   -> BAYLEEF    frames 219 fallback -> live     before: unclassified (case-local gate) | after: -
+TOTAL fallback -> fallback: 17 commands / 3723 frames
+TOTAL fallback -> live: 17 commands / 3723 frames

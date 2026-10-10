@@ -11,7 +11,7 @@
 # 5. the base lends vs the ROM free order (FLAT77_LENDS_ONLY=1 in base, == lends-base.txt);
 # 6. flat77Check.ts per scenario in PATCHED on the committed fixtures (two more fresh probe processes each) (== check/, summary.txt);
 # 7. ON / OFF parity on the lifted census route (flat77Parity.ts in patched, == parity-*.json);
-# 8. census seeds 0..999 in base and patched (one process each), delta (prep43CensusDelta.py) and the identity gate (hist73KeyCheck.py)
+# 8. census seeds 0..999 in base and patched (one process each), delta (prep43CensusDelta.py) and the identity gate (flat77KeyCheck.py)
 #    (== census/);
 # 9. compares; 10. (FLAT77_TESTS=1) the fold pins: the related test files in patched (== tests-patched-summary.txt).
 set -e
@@ -61,7 +61,7 @@ if [ -z "$FLAT77_SKIP_CENSUS" ]; then
     --commands="$OUT/census-$d.jsonl" > "$OUT/census-$d.log" 2>&1) & done; wait
   python3 tools/integration/prep43CensusDelta.py "$OUT/census/census-base-seeds0-999.json" "$OUT/census-base.jsonl" \
     "$OUT/census/census-patched-seeds0-999.json" "$OUT/census-patched.jsonl" "$OUT/census/census-delta-seeds0-999.json" > /dev/null
-  python3 tools/integration/hist73KeyCheck.py "$OUT/census/census-base-seeds0-999.json" "$OUT/census-base.jsonl" \
+  python3 tools/integration/flat77KeyCheck.py "$OUT/census/census-base-seeds0-999.json" "$OUT/census-base.jsonl" \
     "$OUT/census/census-patched-seeds0-999.json" "$OUT/census-patched.jsonl" > "$OUT/census/keycheck.txt" || true
   python3 tools/integration/flat77CensusFlatter.py "$OUT/census-base.jsonl" "$OUT/census-patched.jsonl" > "$OUT/census/flatter-commands.txt"
   for f in $W/census/*; do same "$OUT/census/$(basename "$f")" "$f"; done
