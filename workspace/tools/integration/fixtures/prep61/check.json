@@ -60,49 +60,53 @@
    "problems": []
   },
   "body 19:opponent": {
-   "instances": 6,
-   "exact": 6,
-   "frames": 12,
+   "instances": 7,
+   "exact": 7,
+   "frames": 14,
    "jobs": [
     "fly-opp-18",
     "fly-opp-305",
     "fly-opp-305-gust",
+    "fly-opp-305-sandstorm",
     "fly-opp-305-skyup"
    ],
    "problems": []
   },
   "body 10019:opponent": {
-   "instances": 4,
-   "exact": 4,
-   "frames": 16,
+   "instances": 5,
+   "exact": 5,
+   "frames": 20,
    "jobs": [
     "fly-opp-18",
     "fly-opp-305",
     "fly-opp-305-gust",
+    "fly-opp-305-sandstorm",
     "fly-opp-305-skyup"
    ],
    "problems": []
   },
   "body 19:player": {
-   "instances": 6,
-   "exact": 6,
-   "frames": 12,
+   "instances": 7,
+   "exact": 7,
+   "frames": 14,
    "jobs": [
     "fly-ply-18",
     "fly-ply-305",
     "fly-ply-305-gust",
+    "fly-ply-305-sandstorm",
     "fly-ply-305-skyup"
    ],
    "problems": []
   },
   "body 10019:player": {
-   "instances": 6,
-   "exact": 6,
-   "frames": 24,
+   "instances": 7,
+   "exact": 7,
+   "frames": 28,
    "jobs": [
     "fly-ply-18",
     "fly-ply-305",
     "fly-ply-305-gust",
+    "fly-ply-305-sandstorm",
     "fly-ply-305-skyup"
    ],
    "problems": []
@@ -175,12 +179,40 @@
    ],
    "problems": []
   },
+  "body 201:player": {
+   "instances": 1,
+   "exact": 1,
+   "plan": "Cf;Cf;Cf;Cf;D0;Cf;D1;D2;Cf;Cf;D3;D5;D4;D6",
+   "jobs": [
+    "fly-opp-305-sandstorm"
+   ],
+   "problems": []
+  },
+  "general SANDSTORM_CONTINUES": {
+   "instances": 2,
+   "exact": 2,
+   "plan": "Cf;Cf;Cf;Cf;D0;Cf;D1;D2;Cf;Cf;D3;D5;D4;D6",
+   "jobs": [
+    "fly-opp-305-sandstorm",
+    "fly-ply-305-sandstorm"
+   ],
+   "problems": []
+  },
   "body 327:player": {
    "instances": 1,
    "exact": 1,
    "plan": "Cf;Cf/D0;Cf;Cf;Cf;D1;Cff;D2;D3;D6;D4;D5;Cf;Cf/D7;D8",
    "jobs": [
     "fly-opp-305-skyup"
+   ],
+   "problems": []
+  },
+  "body 201:opponent": {
+   "instances": 1,
+   "exact": 1,
+   "plan": "Cf;Cf;Cf;Cf;D0;Cf;D1;D2;Cf;Cf;D3;D5;D4;D6",
+   "jobs": [
+    "fly-ply-305-sandstorm"
    ],
    "problems": []
   },
@@ -1004,6 +1036,191 @@
    ],
    "other": 0
   },
+  "fly-opp-305-sandstorm": {
+   "windows": [
+    {
+     "f": 2257,
+     "unit": "body 201:player",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2269,
+     "unit": "body 201:player",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2281,
+     "unit": "body 201:player",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2293,
+     "unit": "body 201:player",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2295,
+     "unit": "body 201:player",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2305,
+     "unit": "body 201:player",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2312,
+     "unit": "body 201:player",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2315,
+     "unit": "body 201:player",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2317,
+     "unit": "body 201:player",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2329,
+     "unit": "body 201:player",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2331,
+     "unit": "body 201:player",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2348,
+     "unit": "body 201:player",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2349,
+     "unit": "body 201:player",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2363,
+     "unit": "body 201:player",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2615,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2627,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2639,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2651,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2654,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2663,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2671,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2674,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2675,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2687,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2690,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2707,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2708,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2722,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2904,
+     "unit": "gap",
+     "attribution": "action-prompt pair",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 3009,
+     "unit": "gap",
+     "attribution": "action-prompt pair",
+     "hiddenInvisible": true
+    }
+   ],
+   "other": 0
+  },
   "fly-opp-305-skyup": {
    "windows": [
     {
@@ -1142,6 +1359,179 @@
     {
      "f": 2326,
      "unit": "body 16:opponent",
+     "attribution": "body",
+     "hiddenInvisible": true
+    }
+   ],
+   "other": 0
+  },
+  "fly-ply-305-sandstorm": {
+   "windows": [
+    {
+     "f": 2257,
+     "unit": "body 201:opponent",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2269,
+     "unit": "body 201:opponent",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2281,
+     "unit": "body 201:opponent",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2293,
+     "unit": "body 201:opponent",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2295,
+     "unit": "body 201:opponent",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2305,
+     "unit": "body 201:opponent",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2312,
+     "unit": "body 201:opponent",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2315,
+     "unit": "body 201:opponent",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2317,
+     "unit": "body 201:opponent",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2329,
+     "unit": "body 201:opponent",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2331,
+     "unit": "body 201:opponent",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2348,
+     "unit": "body 201:opponent",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2349,
+     "unit": "body 201:opponent",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2363,
+     "unit": "body 201:opponent",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2615,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2627,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2639,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2651,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2654,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2663,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2671,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2674,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2675,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2687,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2690,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2707,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2708,
+     "unit": "general SANDSTORM_CONTINUES",
+     "attribution": "body",
+     "hiddenInvisible": true
+    },
+    {
+     "f": 2722,
+     "unit": "general SANDSTORM_CONTINUES",
      "attribution": "body",
      "hiddenInvisible": true
     }

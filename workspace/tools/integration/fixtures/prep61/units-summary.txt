@@ -1,4 +1,4 @@
-24 jobs; 0 A/B differ
+26 jobs; 0 A/B differ
 BOUNCE  body 10340:opponent    1 plan(s): 3x [Cf;Cf;D1;D0] bounce-opp-77,bounce-opp-78,bounce-opp-77-gust
 BOUNCE  body 10340:player      1 plan(s): 6x [Cf;Cf;D0;D1] bounce-ply-77,bounce-ply-77,bounce-ply-78,bounce-ply-78,bounce-ply-77-gust,bounce-ply-77-gust
 BOUNCE  body 16:opponent       1 plan(s): 4x [Cf;D0;Cf;D1] bounce-ply-77-gust,bounce-ply-77-gust,bounce-ply-77-gust,bounce-ply-77-gust
@@ -43,3 +43,10 @@ HIDDENHIT body 327:player        1 plan(s): 1x [Cf;Cf/D0;Cf;Cf;Cf;D1;Cff;D2;D3;D
 HIDDENHIT body 340:opponent      1 plan(s): 1x [Cf;D0] bounce-opp-77-twister
 HIDDENHIT body 340:player        1 plan(s): 2x [Cf;D0] bounce-ply-77-twister,bounce-ply-77-twister
 HIDDENHIT mv-0                   1 plan(s): 1x [Cf;Cf;D0;Cf;D1;Cf;D2;Cf;D3;Cf;D4;Cf;D5;Cf;D6] bounce-opp-77-twister
+WEATHERHIT body 10019:opponent    1 plan(s): 1x [Cf;Cf;D0;D1] fly-opp-305-sandstorm
+WEATHERHIT body 10019:player      1 plan(s): 1x [Cf;Cf;D0;D1] fly-ply-305-sandstorm
+WEATHERHIT body 19:opponent       1 plan(s): 1x [Cf;D0] fly-opp-305-sandstorm
+WEATHERHIT body 19:player         1 plan(s): 1x [Cf;D0] fly-ply-305-sandstorm
+WEATHERHIT body 201:opponent      1 plan(s): 1x [Cf;Cf;Cf;Cf;D0;Cf;D1;D2;Cf;Cf;D3;D5;D4;D6] fly-ply-305-sandstorm
+WEATHERHIT body 201:player        1 plan(s): 1x [Cf;Cf;Cf;Cf;D0;Cf;D1;D2;Cf;Cf;D3;D5;D4;D6] fly-opp-305-sandstorm
+WEATHERHIT general SANDSTORM_CONTINUES 1 plan(s): 4x [Cf;Cf;Cf;Cf;D0;Cf;D1;D2;Cf;Cf;D3;D5;D4;D6] fly-ply-305-sandstorm,fly-ply-305-sandstorm,fly-opp-305-sandstorm,fly-opp-305-sandstorm

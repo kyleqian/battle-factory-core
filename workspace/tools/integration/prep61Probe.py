@@ -68,6 +68,10 @@ JOBS += [("HIDDENHIT", "fly-ply-305-skyup", 19, FL, (SF, ("moves", "opponent", 3
          ("HIDDENHIT", "bounce-opp-77-twister", 340, BO, (SB, ("moves", "opponent", 239), ("turns", 1), ("swap",))),
          ("HIDDENHIT", "dive-ply-170-whirlpool", 291, "mechanic-dive-player-chinchou-opponent-onix", (SD, ("moves", "opponent", 250))),
          ("HIDDENHIT", "dive-opp-170-whirlpool", 291, "mechanic-dive-opponent-chinchou-player-onix", (SD, ("moves", "player", 250)))]
+# WEATHERHIT: end-turn sandstorm damage on the hidden Fly user (Cmd_playanimation branch 3 emits SANDSTORM_CONTINUES for any battler, then
+# HIT_ANIMATION on the invisible battler; census battle 179's shape): the defender's moves = Sandstorm 201 (ONIX is Rock: immune).
+JOBS += [("WEATHERHIT", "fly-ply-305-sandstorm", 19, FL, (SF, ("moves", "opponent", 201), ("turns", 1))),
+         ("WEATHERHIT", "fly-opp-305-sandstorm", 19, FL, (SF, ("moves", "opponent", 201), ("turns", 1), ("swap",)))]
 P43.JOBS = JOBS  # prep43Extract.units_of looks the job up in prep43Probe.JOBS
 
 

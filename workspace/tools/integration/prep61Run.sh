@@ -1,6 +1,6 @@
 #!/bin/sh
 # prep61 reproduction (run from workspace/ of a clean checkout; direct mGBA processes only, never the shared HTTP oracles).
-#   OUT=<fresh scratch dir> REC=<fresh receipt dir> sh tools/integration/prep61Run.sh   # ~7 min: probes (24 jobs x 2 fresh), census x2
+#   OUT=<fresh scratch dir> REC=<fresh receipt dir> sh tools/integration/prep61Run.sh   # ~7 min: probes (26 jobs x 2 fresh), census x2
 #   SKIP_PROBES=1 ...   reuse $OUT/probe/raw;   SKIP_CENSUS=1 ...   skip the two 300-battle census runs (and the chain / rank / delta receipts)
 # Writes receipts into $REC; compares them with tools/integration/fixtures/prep61/ (the loop at the end prints same/DIFF per file).
 # The src experiment is applied from the committed .diff, checked to regenerate byte-identically, and ALWAYS reverted (EXIT trap);
@@ -14,7 +14,7 @@ TABLE=$T/spriteOrderProductionTable.ts
 mkdir -p "$OUT" "$REC"
 test -z "$(git status --short src $TABLE)" || { echo "src / table generator not clean"; exit 1; }
 trap 'git checkout -- src $TABLE' EXIT
-# (2) ROM evidence: 24 jobs, each twice in fresh mGBA processes (raw A == B is required by the extractor's identicalAB).
+# (2) ROM evidence: 26 jobs, each twice in fresh mGBA processes (raw A == B is required by the extractor's identicalAB).
 if [ -z "$SKIP_PROBES" ]; then $PY $T/prep61Probe.py "$OUT/probe" --jobs 12; fi
 python3 $T/prep61Extract.py "$OUT/probe" "$REC/units.json" > "$REC/units-summary.txt"; head -1 "$REC/units-summary.txt"
 $N $T/prep61Check.ts "$REC/units.json" "$REC/check.json" > "$REC/check-summary.txt"; tail -1 "$REC/check-summary.txt"

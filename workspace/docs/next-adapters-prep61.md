@@ -25,8 +25,8 @@ allocation window, and created / destroyed / F must equal the ROM):
 
 | unit (host key) | verdict | plan | ROM instances (exact / total), allocation frames | species |
 |---|---|---|---|---|
-| Fly setup `19:*` | **EXACT**, both sides | `Cf;D0` | 12 / 12, 24 | SWELLOW 305, PIDGEOT 18 |
-| Fly unleash `10019:*` | **EXACT**, both sides | `Cf;Cf;D0;D1` | 10 / 10, 40 | SWELLOW, PIDGEOT |
+| Fly setup `19:*` | **EXACT**, both sides | `Cf;D0` | 14 / 14, 28 | SWELLOW 305, PIDGEOT 18 |
+| Fly unleash `10019:*` | **EXACT**, both sides | `Cf;Cf;D0;D1` | 12 / 12, 48 | SWELLOW, PIDGEOT |
 | Bounce setup `340:*` | **EXACT**, both sides | `Cf;D0` | 15 / 15, 30 | PONYTA 77, RAPIDASH 78 |
 | Bounce unleash `10340:*` | **EXACT per side (side-keyed)** | player `Cf;Cf;D0;D1`, opponent `Cf;Cf;D1;D0` | 12 / 12, 48 | PONYTA, RAPIDASH |
 | Dive setup `291:*` | **WORDS-KEYED**, reducer-computable | `Cf;D0;Cfffffffffff;D1;D<10 droplets in words order>` | 8 / 8 by `dive.ts` + RAM words, 15 distinct ROM plans in 15 bodies | CHINCHOU 170, LANTURN 171 |
@@ -108,8 +108,8 @@ the host state after its step. Its report is byte-identical to prep45's. `prep61
 ## (2) ROM evidence
 
 `prep61Probe.py`:
-- Direct mGBA. 24 jobs, each run twice in fresh processes with an explicit lab seed. **All 24 A == B.** A second full run
-  (`prep61Run.sh`, 48 more runs) reproduced every receipt byte-identically.
+- Direct mGBA. 26 jobs, each run twice in fresh processes with an explicit lab seed. **All 26 A == B.** A second full run
+  (`prep61Run.sh`, 52 more runs) reproduced every receipt byte-identically.
 - The probe is `prep61EventProbe.py`: spriteOrderEventProbe.py's rows (same schema) plus a per-frame `extra` list. It holds
   `gAnimMoveTurn`, the battler sprites' `invisible` bits, the `gStatuses3` semi-invulnerable bits and `gRng2Value`.
 - `prep61Extract.py` keys a body with `gAnimMoveTurn & 1` as `10000 + move`.
@@ -120,6 +120,7 @@ the host state after its step. Its report is byte-identical to prep45's. `prep61
 | BOUNCE (6) | `prep11-bounce-alt-ponyta` (seed 305419896): PONYTA and RAPIDASH; swap; Gust |
 | DIVE (6) | `mechanic-dive-*-chinchou-*-onix`, `prep25-dive-alt-*-lanturn-golem` (seed 305420547): both sides; Surf 57 from the defender |
 | HIDDENHIT (6) | moves that hit a semi-invulnerable target and have a production plan: Sky Uppercut 327 vs Fly, Twister 239 vs Bounce, Whirlpool 250 vs Dive, both sides |
+| WEATHERHIT (2) | Sandstorm 201 from the defender (ONIX, Rock: immune) vs the Fly user, both sides: the end-turn sandstorm damage hits the hidden Fly user |
 
 **What happens to the hidden battler (RAM).**
 - The attacker's `invisible` bit is set inside the setup body: for example, SWELLOW f2064 (setup body start f2057).
@@ -142,12 +143,14 @@ the host state after its step. Its report is byte-identical to prep45's. `prep61
   | body | result |
   |---|---|
   | Sky Uppercut `327:player` / `327:opponent` | production table plan, 1 / 1 exact per side |
+  | Sandstorm `201:*` and the end-turn `SANDSTORM_CONTINUES` | table plans, 1 / 1 per side and 2 / 2 exact |
   | Whirlpool `250:opponent` | table plan, 1 / 1 exact |
   | Surf `57:opponent` | table plan `""`, 1 / 1 exact |
   | Gust 16 | no table plan; ROM `Cf;D0;Cf;D1` on both sides |
   | Twister 239 | no table plan; 2 ROM plans on the player side, words-dependent |
 
-- **The hit animation on the invisible battler allocates nothing: 10 / 10 hits** (4 Gust, 2 Sky Uppercut, 2 Twister, 1 Whirlpool, 1 Surf), and
+- **The hit animation on the invisible battler allocates nothing: 12 / 12 hits** (4 Gust, 2 Sky Uppercut, 2 Twister, 1 Whirlpool, 1 Surf,
+  2 sandstorm end-turn damage), and
   the RAM `invisible` bit was set at every one of them.
   - Source: `PlayerHandleHitAnimation` / `OpponentHandleHitAnimation` complete at once when
     `gSprites[gBattlerSpriteIds[b]].invisible` is set (`battle_controller_player.c:2862-2866`, `battle_controller_opponent.c:1804-1808`),
@@ -175,8 +178,10 @@ the host state after its step. Its report is byte-identical to prep45's. `prep61
    **allocates nothing** (above).
    - The moves are Gust / Twister / Thunder / Sky Uppercut vs ON_AIR, Surf / Whirlpool vs UNDERWATER, Earthquake / Magnitude vs
      UNDERGROUND.
-   - The same rule covers end-turn sandstorm / hail damage on a hidden Fly / Bounce user: census battle 179 has `WEATHER_VAR` 12
-     (SANDSTORM_CONTINUES) then `HIT_ANIMATION` on the hidden player. This case was not probed.
+   - The same rule covers end-turn sandstorm / hail damage on a hidden Fly / Bounce user. `Cmd_weatherdamage` exempts only
+     UNDERGROUND / UNDERWATER (`battle_script_commands.c:7608-7631`), and `BattleScript_DamagingWeatherContinues` then runs
+     `hitanimation BS_ATTACKER` (`battle_scripts_1.s:3213`). Census battle 179 has `WEATHER_VAR` 12 (SANDSTORM_CONTINUES) then
+     `HIT_ANIMATION` on the hidden player. ROM (WEATHERHIT, both sides): no blip, and SANDSTORM_CONTINUES matches its table plan.
 5. **The setup hides and the unleash reveals.** Both happen inside the bodies, with no event of their own in Scene ON. In Scene OFF
    (`NO_ANIMATIONS`) `MOVEEND_ATTACKER_INVISIBLE` emits the hide; it is not a Scene ON concern. A failed or blocked unleash (Protect,
    paralysis) gets the `MOVEEND_ATTACKER_VISIBLE` show toggle (`:4353-4367`), which allocates nothing. The host already clears `hidden`
@@ -270,8 +275,9 @@ New tests to add (`tests/spriteOrderPrep61.test.ts`):
 
 - **Dive production**: the words-unit carry (above) and the attack-body words recording. The evidence and predictor are here; the fold is
   the integration lane's.
-- Not probed: weather damage on a hidden battler, Thunder / Earthquake on hidden targets, and a hidden battler fainting or being forced
-  out. The patch invalidates the last case.
+- Not probed: hail on a hidden battler (`General_Hail` targets visible battlers; the patched host keeps HAIL_CONTINUES / Hail
+  unplanned while a battler is hidden: `bothBattlersShown`), Thunder / Earthquake on hidden targets, and a hidden battler fainting or
+  being forced out. The patch invalidates the last case.
 - Gust 16 and Twister 239 have no production plan. Gust `Cf;D0;Cf;D1` is constant on both sides over 4 instances. Twister is
   words-dependent.
 

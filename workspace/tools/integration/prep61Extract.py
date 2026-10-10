@@ -18,6 +18,7 @@ import prep43Extract as X
 import prep61Probe as J  # installs JOBS / scenario on prep43Probe
 
 TWO_TURN = {19, 340, 291}
+X.MV0_LABEL = {"WEATHERHIT": "general SANDSTORM_CONTINUES"}  # the sandstorm jobs' mv-0 bodies are the end-turn General_Sandstorm animations
 
 
 def state_at(extra, n):

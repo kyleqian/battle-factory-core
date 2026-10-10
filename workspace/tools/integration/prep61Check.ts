@@ -15,7 +15,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { decodeSpriteOrderPlan } from "../../src/engine/spriteOrderEventTransform.ts";
 import { applySpriteOrderUnitPlan, createSpriteOrderPlanCursor } from "../../src/engine/spriteOrderProvider.ts";
-import { SPRITE_ORDER_PRODUCTION_BODIES, SPRITE_ORDER_PRODUCTION_PLANS } from "../../src/engine/spriteOrderProductionPlans.ts";
+import { SPRITE_ORDER_PRODUCTION_ANIMS, SPRITE_ORDER_PRODUCTION_BODIES, SPRITE_ORDER_PRODUCTION_PLANS } from "../../src/engine/spriteOrderProductionPlans.ts";
 
 interface Win { f: number; C: [number, string][]; D: number[]; F: number[] }
 interface Unit {
@@ -104,8 +104,10 @@ for (const [name, job] of Object.entries(jobs)) {
   for (let i = setup + 1; i < unleash; i++) {
     const u = us[i]!;
     if (u.kind === "body") {
-      const key = u.label.slice(5);
-      const index = (SPRITE_ORDER_PRODUCTION_BODIES as Record<string, number>)[key];
+      // `general <ANIM>` (the WEATHERHIT jobs' end-turn SANDSTORM_CONTINUES) -> the production anim table; `body <key>` -> the body table.
+      const general = u.label.startsWith("general ") ? u.label.slice(8) : null;
+      const index = general !== null ? (SPRITE_ORDER_PRODUCTION_ANIMS as Record<string, number>)[general]
+        : (SPRITE_ORDER_PRODUCTION_BODIES as Record<string, number>)[u.label.slice(5)];
       const text = index === undefined ? null : SPRITE_ORDER_PRODUCTION_PLANS[index]!;
       const row = tableBodies[u.label] ??= { instances: 0, exact: 0, plan: text, jobs: [], problems: [] };
       row.instances += 1;
