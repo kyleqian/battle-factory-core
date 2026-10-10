@@ -1,0 +1,204 @@
+{
+ "schema": "audit20-chain-fixture/v1",
+ "move": "FLY",
+ "bodyIndex": 0,
+ "probe": "tools/integration/audit20Probe.py",
+ "scenario": "tools/integration/fixtures/audit-20/partb/scenarios/pb-fly-wingull-opp-s0.json",
+ "denseWindow": {
+  "startFrame": 51,
+  "endFrame": 93
+ },
+ "attacker": {
+  "species": "WINGULL",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "AMPHAROS",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703653,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 197,
+  "playerMaxHp": 197,
+  "opponentHp": 115,
+  "opponentMaxHp": 115,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "messageLines": [
+  "",
+  ""
+ ],
+ "requestFields": {
+  "turn": 0,
+  "target": 0,
+  "power": 70
+ },
+ "rom": {
+  "invisible": [
+   false,
+   false
+  ],
+  "turn": 0,
+  "spriteOrder": [
+   62,
+   60,
+   0,
+   63,
+   1,
+   61,
+   6,
+   8,
+   2,
+   4,
+   3,
+   21,
+   20,
+   5,
+   19,
+   18,
+   17,
+   16,
+   15,
+   14,
+   13,
+   12,
+   11,
+   10,
+   9,
+   7,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   23,
+   22,
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47
+  ],
+  "power": 70,
+  "alloc": {
+   "pre": {
+    "inUse": "f000000000000147",
+    "matrixBitmap": 6,
+    "paletteTags": [
+     65535,
+     65535,
+     65535,
+     65535,
+     54322,
+     55039,
+     55044,
+     65535,
+     65535,
+     65535,
+     65535,
+     65535,
+     65535,
+     65535,
+     65535,
+     65535
+    ],
+    "tileTagsSha": "2e16e64a249914fc",
+    "tileBitmapSha": "e7e5d2118d9322f0"
+   },
+   "entry": {
+    "inUse": "f000000000000147",
+    "matrixBitmap": 6,
+    "paletteTags": [
+     65535,
+     65535,
+     65535,
+     65535,
+     54322,
+     55039,
+     55044,
+     65535,
+     65535,
+     65535,
+     65535,
+     65535,
+     65535,
+     65535,
+     65535,
+     65535
+    ],
+    "tileTagsSha": "2e16e64a249914fc",
+    "tileBitmapSha": "e7e5d2118d9322f0"
+   },
+   "creates": [
+    [
+     7,
+     3
+    ]
+   ]
+  }
+ },
+ "presentationRngActivation": {
+  "value": 2992504726,
+  "source": "audit20Probe.py at.rng2 (RAM gRng2Value, activation frame 51)"
+ },
+ "pinnedRng2": [],
+ "pinnedGeneral": [],
+ "promptShown": [
+  true
+ ],
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "19",
+      "0",
+      "70",
+      "0",
+      "70",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
+}

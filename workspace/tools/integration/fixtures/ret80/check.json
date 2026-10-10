@@ -1,0 +1,109 @@
+{
+ "schema": "ret80-check/v1",
+ "jobs": 18,
+ "notIdenticalAB": 0,
+ "plans": {
+  "body 216 medium": "Cf;D0;Cf;D1;Cf;Cf;D2;D3",
+  "body 216 strongest": "Cf;D0;Cf;Cf;D2;D1;Cf;Cf;D4;D3;Cf;Cf;D6;D5;Cffff;D9,10;D8;D7;Cf;Cff;D11;D13;D12;Cfff;D16;D15;D14;Cfff;D19;D18;D17;Cfff;D22;D21;D20;Cfff;D25;D24;D23;Cf;Cf;D26;Cf;D27;Cf;D28;D29;Cf;D30"
+ },
+ "results": {
+  "body 216 medium": {
+   "instances": 2,
+   "matched": 2,
+   "matchedCreateMerged": 2,
+   "framesChecked": 16,
+   "carries": 0,
+   "sides": [
+    "opponent",
+    "player"
+   ],
+   "species": [
+    "opp-148-95",
+    "ply-148-95"
+   ],
+   "jobs": [
+    "return-medium-opp-148-95",
+    "return-medium-ply-148-95"
+   ],
+   "mismatches": []
+  },
+  "body 216 strongest": {
+   "instances": 12,
+   "matched": 12,
+   "matchedCreateMerged": 12,
+   "framesChecked": 588,
+   "carries": 0,
+   "sides": [
+    "opponent",
+    "player"
+   ],
+   "species": [
+    "opp-143-42-s305420349",
+    "opp-143-42-s7",
+    "opp-148-95-s305420349",
+    "opp-148-95-s7",
+    "opp-42-143-s305420349",
+    "opp-42-143-s7",
+    "ply-143-42-s305420349",
+    "ply-143-42-s7",
+    "ply-148-95-s305420349",
+    "ply-148-95-s7",
+    "ply-42-143-s305420349",
+    "ply-42-143-s7"
+   ],
+   "jobs": [
+    "return-strongest-opp-143-42-s305420349",
+    "return-strongest-opp-143-42-s7",
+    "return-strongest-opp-148-95-s305420349",
+    "return-strongest-opp-148-95-s7",
+    "return-strongest-opp-42-143-s305420349",
+    "return-strongest-opp-42-143-s7",
+    "return-strongest-ply-143-42-s305420349",
+    "return-strongest-ply-143-42-s7",
+    "return-strongest-ply-148-95-s305420349",
+    "return-strongest-ply-148-95-s7",
+    "return-strongest-ply-42-143-s305420349",
+    "return-strongest-ply-42-143-s7"
+   ],
+   "mismatches": []
+  }
+ },
+ "classified": {
+  "body 216:opponent strong": [
+   {
+    "plan": "Cf;D0;Cf;D1;Cf;D2;Cf;D3;Cf;Cf/D4;Cf/D5;Cf/D6;D7",
+    "instances": 1,
+    "jobs": [
+     "return-strong-opp-148-95"
+    ]
+   }
+  ],
+  "body 216:opponent weak": [
+   {
+    "plan": "Cf;D0;Cf;Cf;D2;D1",
+    "instances": 1,
+    "jobs": [
+     "return-weak-opp-148-95"
+    ]
+   }
+  ],
+  "body 216:player strong": [
+   {
+    "plan": "Cf;D0;Cf;D1;Cf;D2;Cf;D3;Cf;Cf/D4;Cf/D5;Cf/D6;D7",
+    "instances": 1,
+    "jobs": [
+     "return-strong-ply-148-95"
+    ]
+   }
+  ],
+  "body 216:player weak": [
+   {
+    "plan": "Cf;D0;Cf;Cf;D2;D1",
+    "instances": 1,
+    "jobs": [
+     "return-weak-ply-148-95"
+    ]
+   }
+  ]
+ }
+}

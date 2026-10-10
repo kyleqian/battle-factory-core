@@ -30,8 +30,10 @@ describe("production sprite-order plan table (generated, pinned)", () => {
     //   0 plans ("Cf;D0" / "Cff;D1;D0" deduped; docs/next-adapters-plans54.md).
     // + prep61 (fixtures/prep61/plan-rows.json, appended; fly63): Fly 19 / 10019 and Bounce 340 / 10340 both sides, 8 bodies, 0 plans
     //   (all four texts already in the table; docs/next-adapters-prep61.md).
-    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(550);
-    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(222);
+    // + ret80 (fixtures/ret80/plan-rows.json, appended): Return's ReturnStrongest key 30216 both sides, 2 bodies, 1 plan
+    //   (docs/ret80-return-order.md).
+    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(552);
+    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(223);
   });
 
   it("decodes every EXACT-PLAN (move, side) body of the ext table to the fixture plan", () => {
@@ -42,6 +44,7 @@ describe("production sprite-order plan table (generated, pinned)", () => {
       ...fixture("prep28/plan-rows.json").bodies, ...fixture("prep28/plan-rows-sky-attack.json").bodies,
       ...fixture("prep43/plan-rows.json").bodies, ...fixture("prep45/plan-rows.json").bodies, ...fixture("plans48/plan-rows.json").bodies,
       ...fixture("plans51/plan-rows.json").bodies, ...fixture("plans54/plan-rows.json").bodies, ...fixture("prep61/plan-rows.json").bodies, ...fixture("plans69/plan-rows.json").bodies,
+      ...fixture("ret80/plan-rows.json").bodies,
     };
     // cf78: in-place overrides (Needle Arm 302's SortSprites tie): the fixture plan with an FDERIVED last destroy group (priority words only).
     const overrides = fixture("cf78/plan-overrides.json").bodies as Record<string, { verdict: string; plan: readonly { pw?: unknown }[] }>;

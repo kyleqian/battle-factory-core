@@ -1,0 +1,319 @@
+{
+ "schema": "audit20-chain-check/v1",
+ "scenario": "mm-clefable-light-screen-ply",
+ "rows": [
+  {
+   "fixture": "mm-clefable-light-screen-ply-c0.json",
+   "move": "THUNDER_WAVE",
+   "side": "player",
+   "species": "CHANSEY/CLEFABLE",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 0,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "86@0"
+   ],
+   "romPower": 100,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 79,
+    "endFrame": 198
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 120,
+    "exactRows": 120,
+    "px": 0,
+    "digests": [
+     "2eba613b7396a590",
+     "2eba613b7396a590"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 120,
+    "exactRows": 120,
+    "px": 0,
+    "digests": [
+     "2eba613b7396a590",
+     "2eba613b7396a590"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "mm-clefable-light-screen-ply-c1.json",
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "species": "CHANSEY/CLEFABLE",
+   "alloc": {
+    "input": [
+     3,
+     4,
+     5,
+     7,
+     4,
+     5,
+     7
+    ],
+    "rom": [
+     3,
+     4,
+     5,
+     7,
+     4,
+     5,
+     7
+    ],
+    "preEqEntry": true,
+    "equal": true,
+    "preDiff": []
+   },
+   "units": 3,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "86@0 status:PRZ@1 status:PRZ@1",
+    "113@0"
+   ],
+   "romPower": 100,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1419,
+    "endFrame": 1504
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 86,
+    "exactRows": 86,
+    "px": 0,
+    "digests": [
+     "43dc6770d7d00214",
+     "43dc6770d7d00214"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 86,
+    "exactRows": 86,
+    "px": 0,
+    "digests": [
+     "43dc6770d7d00214",
+     "43dc6770d7d00214"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "mm-clefable-light-screen-ply-c2.json",
+   "move": "METEOR_MASH",
+   "side": "opponent",
+   "species": "CLEFABLE/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 4,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "86@0 status:PRZ@1 status:PRZ@1",
+    "113@0 309@1"
+   ],
+   "romPower": 100,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 100
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1658,
+    "endFrame": 1872
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 215,
+    "exactRows": 215,
+    "px": 0,
+    "digests": [
+     "6ef454cc44d3040b",
+     "6ef454cc44d3040b"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 215,
+    "exactRows": 215,
+    "px": 0,
+    "digests": [
+     "6ef454cc44d3040b",
+     "6ef454cc44d3040b"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

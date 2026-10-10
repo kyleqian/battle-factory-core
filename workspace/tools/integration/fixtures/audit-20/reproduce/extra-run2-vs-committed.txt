@@ -1,0 +1,20 @@
+audit20Extra.sh run 2 (fresh dirs, separate batch, 15:40..15:44, concurrent with main run C and npm test) vs the committed run-1 receipts-extra:
+identical=44 ROM-drift=0 DIFFERS=0 missing=0 windows
+derive-vs-committed.txt: byte-identical
+derive.txt: byte-identical
+lends-pi.txt: byte-identical
+lends.txt: byte-identical
+summary.txt: byte-identical
+verdicts.txt: byte-identical
+lag.txt: byte-identical
+ablation/summary.txt: byte-identical
+controls-derive.txt: byte-identical
+controls-lends.txt: byte-identical
+controls-lends-pi.txt: byte-identical
+partb/lends-pi.txt: byte-identical
+ablation/check-dv-clamperl-barrier-opp-toxic-accepted-start.json: byte-identical
+ablation/check-dv-seel-barrier-ply-toxic-accepted-start.json: byte-identical
+ablation/check-pb-fly-wingull-opp-s2-banner.json: byte-identical
+ablation/check-pb-fly-wingull-opp-s2-lead-gender.json: byte-identical
+partb/check/: all 12 files byte-identical
+whole receipt dir: byte-identical

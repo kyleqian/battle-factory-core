@@ -1,0 +1,13 @@
+Part B before:
+Return earlier: 0 / 8 lend == ROM (pi)
+no Return earlier: 30 / 36 lend == ROM (pi)
+Part B after:
+Return earlier: 8 / 8 lend == ROM (pi)
+no Return earlier: 30 / 36 lend == ROM (pi)
+controls before:
+Return earlier: 0 / 7 lend == ROM (pi)
+no Return earlier: 8 / 8 lend == ROM (pi)
+controls after:
+Return earlier: 7 / 7 lend == ROM (pi)
+no Return earlier: 8 / 8 lend == ROM (pi)
+controls-derive.txt == audit 20's

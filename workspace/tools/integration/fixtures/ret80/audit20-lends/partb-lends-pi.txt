@@ -1,0 +1,61 @@
+pb-dig-arbok-opp-s0-c0.json              DIG         live=1 pre-KO  after=entry  raw-same=0 pi-same=0 lend=[4, 3, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-dig-arbok-opp-s0-c1.json              EARTHQUAKE  live=1 pre-KO  after=91     raw-same=0 pi-same=0 lend=[4, 3, 7, 5, 10, 9, 21, 20] pi(rom)=[3, 4, 7, 5, 10, 9, 21, 20]
+pb-dig-arbok-opp-s0-c2.json              RETURN      live=1 post-KO after=89     raw-same=0 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-dig-arbok-opp-s0-c3.json              EARTHQUAKE  live=1 post-KO after=216    raw-same=0 pi-same=1 lend=[3, 4, 5, 7, 21, 20, 19, 18] pi(rom)=[3, 4, 5, 7, 21, 20, 19, 18]
+pb-dig-arbok-opp-s1-c0.json              DIG         live=1 pre-KO  after=entry  raw-same=0 pi-same=0 lend=[4, 3, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-dig-arbok-opp-s1-c1.json              EARTHQUAKE  live=1 pre-KO  after=91     raw-same=0 pi-same=0 lend=[4, 3, 7, 5, 10, 9, 21, 20] pi(rom)=[3, 4, 7, 5, 10, 9, 21, 20]
+pb-dig-arbok-opp-s1-c2.json              RETURN      live=1 post-KO after=89     raw-same=0 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-dig-arbok-opp-s1-c3.json              EARTHQUAKE  live=1 post-KO after=216    raw-same=0 pi-same=1 lend=[3, 4, 5, 7, 21, 20, 19, 18] pi(rom)=[3, 4, 5, 7, 21, 20, 19, 18]
+pb-dig-arbok-opp-s2-c0.json              DIG         live=1 pre-KO  after=entry  raw-same=0 pi-same=0 lend=[4, 3, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-dig-arbok-opp-s2-c1.json              EARTHQUAKE  live=1 pre-KO  after=91     raw-same=0 pi-same=0 lend=[4, 3, 7, 5, 10, 9, 21, 20] pi(rom)=[3, 4, 7, 5, 10, 9, 21, 20]
+pb-dig-arbok-opp-s2-c2.json              RETURN      live=1 post-KO after=89     raw-same=0 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-dig-arbok-opp-s2-c3.json              EARTHQUAKE  live=1 post-KO after=216    raw-same=0 pi-same=1 lend=[3, 4, 5, 7, 21, 20, 19, 18] pi(rom)=[3, 4, 5, 7, 21, 20, 19, 18]
+pb-dig-jolteon-opp-s0-c0.json            DIG         live=1 pre-KO  after=entry  raw-same=1 pi-same=1 lend=[4, 3, 21, 20, 5, 19, 18, 17] pi(rom)=[4, 3, 21, 20, 5, 19, 18, 17]
+pb-dig-jolteon-opp-s0-c1.json            EARTHQUAKE  live=1 pre-KO  after=91     raw-same=1 pi-same=1 lend=[4, 3, 7, 5, 10, 9, 21, 20] pi(rom)=[4, 3, 7, 5, 10, 9, 21, 20]
+pb-dig-jolteon-opp-s0-c2.json            RETURN      live=1 post-KO after=89     raw-same=0 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-dig-jolteon-opp-s0-c3.json            EARTHQUAKE  live=1 post-KO after=216    raw-same=0 pi-same=1 lend=[3, 4, 5, 7, 21, 20, 19, 18] pi(rom)=[3, 4, 5, 7, 21, 20, 19, 18]
+pb-dig-jolteon-opp-s1-c0.json            DIG         live=1 pre-KO  after=entry  raw-same=1 pi-same=1 lend=[4, 3, 21, 20, 5, 19, 18, 17] pi(rom)=[4, 3, 21, 20, 5, 19, 18, 17]
+pb-dig-jolteon-opp-s1-c1.json            EARTHQUAKE  live=1 pre-KO  after=91     raw-same=1 pi-same=1 lend=[4, 3, 7, 5, 10, 9, 21, 20] pi(rom)=[4, 3, 7, 5, 10, 9, 21, 20]
+pb-dig-jolteon-opp-s1-c2.json            RETURN      live=1 post-KO after=89     raw-same=0 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-dig-jolteon-opp-s1-c3.json            EARTHQUAKE  live=1 post-KO after=216    raw-same=0 pi-same=1 lend=[3, 4, 5, 7, 21, 20, 19, 18] pi(rom)=[3, 4, 5, 7, 21, 20, 19, 18]
+pb-dig-jolteon-opp-s2-c0.json            DIG         live=1 pre-KO  after=entry  raw-same=1 pi-same=1 lend=[4, 3, 21, 20, 5, 19, 18, 17] pi(rom)=[4, 3, 21, 20, 5, 19, 18, 17]
+pb-dig-jolteon-opp-s2-c1.json            EARTHQUAKE  live=1 pre-KO  after=91     raw-same=1 pi-same=1 lend=[4, 3, 7, 5, 10, 9, 21, 20] pi(rom)=[4, 3, 7, 5, 10, 9, 21, 20]
+pb-dig-jolteon-opp-s2-c2.json            RETURN      live=1 post-KO after=89     raw-same=0 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-dig-jolteon-opp-s2-c3.json            EARTHQUAKE  live=1 post-KO after=216    raw-same=0 pi-same=1 lend=[3, 4, 5, 7, 21, 20, 19, 18] pi(rom)=[3, 4, 5, 7, 21, 20, 19, 18]
+pb-fly-taillow-opp-s0-c0.json            FLY         live=1 pre-KO  after=entry  raw-same=1 pi-same=1 lend=[4, 3, 21, 20, 5, 19, 18, 17] pi(rom)=[4, 3, 21, 20, 5, 19, 18, 17]
+pb-fly-taillow-opp-s0-c1.json            THUNDER     live=1 pre-KO  after=19     raw-same=1 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-fly-taillow-opp-s0-c2.json            RETURN      live=1 post-KO after=87     raw-same=0 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-fly-taillow-opp-s1-c0.json            FLY         live=1 pre-KO  after=entry  raw-same=1 pi-same=1 lend=[4, 3, 21, 20, 5, 19, 18, 17] pi(rom)=[4, 3, 21, 20, 5, 19, 18, 17]
+pb-fly-taillow-opp-s1-c1.json            THUNDER     live=1 pre-KO  after=19     raw-same=1 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-fly-taillow-opp-s1-c2.json            RETURN      live=1 post-KO after=87     raw-same=0 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-fly-taillow-opp-s2-c0.json            FLY         live=1 pre-KO  after=entry  raw-same=1 pi-same=1 lend=[4, 3, 21, 20, 5, 19, 18, 17] pi(rom)=[4, 3, 21, 20, 5, 19, 18, 17]
+pb-fly-taillow-opp-s2-c1.json            THUNDER     live=1 pre-KO  after=19     raw-same=1 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-fly-taillow-opp-s2-c2.json            RETURN      live=1 post-KO after=87     raw-same=0 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-fly-taillow-opp-s2-c3.json            THUNDER     live=1 post-KO after=216    raw-same=0 pi-same=1 lend=[3, 4, 5, 7, 21, 20, 19, 18] pi(rom)=[3, 4, 5, 7, 21, 20, 19, 18]
+pb-fly-wingull-opp-s0-c0.json            FLY         live=1 pre-KO  after=entry  raw-same=1 pi-same=1 lend=[4, 3, 21, 20, 5, 19, 18, 17] pi(rom)=[4, 3, 21, 20, 5, 19, 18, 17]
+pb-fly-wingull-opp-s0-c1.json            THUNDER     live=1 pre-KO  after=19     raw-same=1 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-fly-wingull-opp-s0-c2.json            RETURN      live=1 post-KO after=87     raw-same=0 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-fly-wingull-opp-s1-c0.json            FLY         live=1 pre-KO  after=entry  raw-same=1 pi-same=1 lend=[4, 3, 21, 20, 5, 19, 18, 17] pi(rom)=[4, 3, 21, 20, 5, 19, 18, 17]
+pb-fly-wingull-opp-s1-c1.json            THUNDER     live=1 pre-KO  after=19     raw-same=1 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-fly-wingull-opp-s1-c2.json            RETURN      live=1 post-KO after=87     raw-same=0 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-fly-wingull-opp-s2-c0.json            FLY         live=1 pre-KO  after=entry  raw-same=1 pi-same=1 lend=[4, 3, 21, 20, 5, 19, 18, 17] pi(rom)=[4, 3, 21, 20, 5, 19, 18, 17]
+pb-fly-wingull-opp-s2-c1.json            THUNDER     live=1 pre-KO  after=19     raw-same=1 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-fly-wingull-opp-s2-c2.json            RETURN      live=1 post-KO after=87     raw-same=0 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-fly-wingull-opp-s2-c3.json            THUNDER     live=1 post-KO after=216    raw-same=0 pi-same=1 lend=[3, 4, 5, 7, 21, 20, 19, 18] pi(rom)=[3, 4, 5, 7, 21, 20, 19, 18]
+
+pb-dig-arbok-opp post-KO after 216 pi-same=True 3
+pb-dig-arbok-opp post-KO after 89 pi-same=True 3
+pb-dig-arbok-opp pre-KO after 91 pi-same=False 3
+pb-dig-arbok-opp pre-KO after entry pi-same=False 3
+pb-dig-jolteon-opp post-KO after 216 pi-same=True 3
+pb-dig-jolteon-opp post-KO after 89 pi-same=True 3
+pb-dig-jolteon-opp pre-KO after 91 pi-same=True 3
+pb-dig-jolteon-opp pre-KO after entry pi-same=True 3
+pb-fly-taillow-opp post-KO after 216 pi-same=True 1
+pb-fly-taillow-opp post-KO after 87 pi-same=True 3
+pb-fly-taillow-opp pre-KO after 19 pi-same=True 3
+pb-fly-taillow-opp pre-KO after entry pi-same=True 3
+pb-fly-wingull-opp post-KO after 216 pi-same=True 1
+pb-fly-wingull-opp post-KO after 87 pi-same=True 3
+pb-fly-wingull-opp pre-KO after 19 pi-same=True 3
+pb-fly-wingull-opp pre-KO after entry pi-same=True 3

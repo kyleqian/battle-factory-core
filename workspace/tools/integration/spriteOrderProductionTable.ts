@@ -5,7 +5,8 @@
 //   anims:  tools/integration/fixtures/sprite-order-gap-causes.json midBattleAnimations (docs/sprite-order-gap-causes.md §1 Q3)
 //   appended (indexed after the base table): fixtures/prep43/plan-rows.json bodies + anims (docs/next-adapters-prep43.md),
 //     then fixtures/prep45/plan-rows.json bodies + anims (docs/next-adapters-prep45.md), plans48, plans51 (docs/next-adapters-plans51.md)
-//     and plans54 (docs/next-adapters-plans54.md), prep61, prep64 (docs/next-adapters-prep64.md; land68), plans69 (fold71)
+//     and plans54 (docs/next-adapters-plans54.md), prep61, prep64 (docs/next-adapters-prep64.md; land68), plans69 (fold71), ret80
+//     (Return 216 ReturnStrongest as 30216, docs/ret80-return-order.md)
 //   overrides (in place, same plan index): fixtures/cf78/plan-overrides.json (Needle Arm 302's SortSprites tie, docs/cf78-castform-needle-arm.md)
 //   run: node --experimental-strip-types tools/integration/spriteOrderProductionTable.ts   (rewrites the module)
 // tests/spriteOrderEventTransform.test.ts regenerates the module text from the JSON and pins it byte-for-byte.
@@ -173,7 +174,8 @@ export function renderSpriteOrderProductionTableFromFixtures(): string {
     fixture("sprite-order-policy-gaps/relative-y-plans.json").bodies, fixture("sprite-order-body-plans-rely.json").bodies,
     fixture("prep28/plan-rows.json").bodies, fixture("prep28/plan-rows-sky-attack.json").bodies,
   ], [fixture("prep43/plan-rows.json"), fixture("prep45/plan-rows.json"), fixture("plans48/plan-rows.json"), fixture("plans51/plan-rows.json"),
-    fixture("plans54/plan-rows.json"), fixture("prep61/plan-rows.json"), fixture("prep64/plan-rows.json"), fixture("plans69/plan-rows.json")],
+    fixture("plans54/plan-rows.json"), fixture("prep61/plan-rows.json"), fixture("prep64/plan-rows.json"), fixture("plans69/plan-rows.json"),
+    fixture("ret80/plan-rows.json")],
   fixture("cf78/plan-overrides.json").bodies);
 }
 

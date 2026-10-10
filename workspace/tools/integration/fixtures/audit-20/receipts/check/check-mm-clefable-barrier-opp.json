@@ -1,0 +1,1485 @@
+{
+ "schema": "audit20-chain-check/v1",
+ "scenario": "mm-clefable-barrier-opp",
+ "rows": [
+  {
+   "fixture": "mm-clefable-barrier-opp-c0.json",
+   "move": "BARRIER",
+   "side": "opponent",
+   "species": "CHANSEY/CLEFABLE",
+   "alloc": {
+    "input": [
+     3
+    ],
+    "rom": [
+     3
+    ],
+    "preEqEntry": true,
+    "equal": true,
+    "preDiff": []
+   },
+   "units": 0,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "112@1"
+   ],
+   "romPower": 0,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 74,
+    "endFrame": 149
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "mm-clefable-barrier-opp-c1.json",
+   "move": "METEOR_MASH",
+   "side": "player",
+   "species": "CLEFABLE/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 309@0"
+   ],
+   "romPower": 100,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 100
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 391,
+    "endFrame": 605
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 215,
+    "exactRows": 215,
+    "px": 0,
+    "digests": [
+     "6ef454cc44d3040b",
+     "6ef454cc44d3040b"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 215,
+    "exactRows": 215,
+    "px": 0,
+    "digests": [
+     "6ef454cc44d3040b",
+     "6ef454cc44d3040b"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "mm-clefable-barrier-opp-c2.json",
+   "move": "THUNDER_WAVE",
+   "side": "opponent",
+   "species": "CHANSEY/CLEFABLE",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 4,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 309@0 HIT_ANIMATION@1",
+    "86@1"
+   ],
+   "romPower": 100,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1417,
+    "endFrame": 1536
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 120,
+    "exactRows": 120,
+    "px": 0,
+    "digests": [
+     "2eba613b7396a590",
+     "2eba613b7396a590"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 120,
+    "exactRows": 120,
+    "px": 0,
+    "digests": [
+     "2eba613b7396a590",
+     "2eba613b7396a590"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "mm-clefable-barrier-opp-c3.json",
+   "move": "METEOR_MASH",
+   "side": "player",
+   "species": "CLEFABLE/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 6,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 309@0 HIT_ANIMATION@1",
+    "86@1 status:PRZ@0 309@0"
+   ],
+   "romPower": 100,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 100
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1749,
+    "endFrame": 1963
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 215,
+    "exactRows": 215,
+    "px": 0,
+    "digests": [
+     "6ef454cc44d3040b",
+     "6ef454cc44d3040b"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 215,
+    "exactRows": 215,
+    "px": 0,
+    "digests": [
+     "6ef454cc44d3040b",
+     "6ef454cc44d3040b"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "mm-clefable-barrier-opp-c4.json",
+   "move": "BARRIER",
+   "side": "opponent",
+   "species": "CHANSEY/CLEFABLE",
+   "alloc": {
+    "input": [
+     3
+    ],
+    "rom": [
+     3
+    ],
+    "preEqEntry": true,
+    "equal": true,
+    "preDiff": []
+   },
+   "units": 8,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 309@0 HIT_ANIMATION@1",
+    "86@1 status:PRZ@0 309@0 HIT_ANIMATION@1",
+    "112@1"
+   ],
+   "romPower": 100,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 2742,
+    "endFrame": 2817
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "mm-clefable-barrier-opp-c5.json",
+   "move": "METEOR_MASH",
+   "side": "player",
+   "species": "CLEFABLE/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 10,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 309@0 HIT_ANIMATION@1",
+    "86@1 status:PRZ@0 309@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 309@0"
+   ],
+   "romPower": 100,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 100
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 3059,
+    "endFrame": 3272
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 214,
+    "exactRows": 198,
+    "px": 282304,
+    "digests": [
+     "38c278266158e420",
+     "38c278266158e420"
+    ],
+    "residualRows": [
+     [
+      196,
+      17644
+     ],
+     [
+      197,
+      17644
+     ],
+     [
+      198,
+      17644
+     ],
+     [
+      199,
+      17644
+     ],
+     [
+      200,
+      17644
+     ],
+     [
+      201,
+      17644
+     ],
+     [
+      202,
+      17644
+     ],
+     [
+      203,
+      17644
+     ],
+     [
+      204,
+      17644
+     ],
+     [
+      205,
+      17644
+     ],
+     [
+      206,
+      17644
+     ],
+     [
+      207,
+      17644
+     ],
+     [
+      208,
+      17644
+     ],
+     [
+      209,
+      17644
+     ],
+     [
+      210,
+      17644
+     ],
+     [
+      211,
+      17644
+     ]
+    ],
+    "detail": [
+     {
+      "age": 196,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 100f0f live 000000"
+     },
+     {
+      "age": 197,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 201f1f live 100f0f"
+     },
+     {
+      "age": 198,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 302f2f live 201f1f"
+     },
+     {
+      "age": 199,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 403f3f live 302f2f"
+     },
+     {
+      "age": 200,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 504f4f live 403f3f"
+     },
+     {
+      "age": 201,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 605f5f live 504f4f"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 214,
+    "exactRows": 198,
+    "px": 282304,
+    "digests": [
+     "38c278266158e420",
+     "38c278266158e420"
+    ],
+    "residualRows": [
+     [
+      196,
+      17644
+     ],
+     [
+      197,
+      17644
+     ],
+     [
+      198,
+      17644
+     ],
+     [
+      199,
+      17644
+     ],
+     [
+      200,
+      17644
+     ],
+     [
+      201,
+      17644
+     ],
+     [
+      202,
+      17644
+     ],
+     [
+      203,
+      17644
+     ],
+     [
+      204,
+      17644
+     ],
+     [
+      205,
+      17644
+     ],
+     [
+      206,
+      17644
+     ],
+     [
+      207,
+      17644
+     ],
+     [
+      208,
+      17644
+     ],
+     [
+      209,
+      17644
+     ],
+     [
+      210,
+      17644
+     ],
+     [
+      211,
+      17644
+     ]
+    ],
+    "detail": [
+     {
+      "age": 196,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 100f0f live 000000"
+     },
+     {
+      "age": 197,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 201f1f live 100f0f"
+     },
+     {
+      "age": 198,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 302f2f live 201f1f"
+     },
+     {
+      "age": 199,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 403f3f live 302f2f"
+     },
+     {
+      "age": 200,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 504f4f live 403f3f"
+     },
+     {
+      "age": 201,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 605f5f live 504f4f"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "mm-clefable-barrier-opp-c6.json",
+   "move": "BARRIER",
+   "side": "opponent",
+   "species": "CHANSEY/CLEFABLE",
+   "alloc": {
+    "input": [
+     3
+    ],
+    "rom": [
+     3
+    ],
+    "preEqEntry": true,
+    "equal": true,
+    "preDiff": []
+   },
+   "units": 12,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 309@0 HIT_ANIMATION@1",
+    "86@1 status:PRZ@0 309@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 309@0 HIT_ANIMATION@1",
+    "112@1"
+   ],
+   "romPower": 100,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 4076,
+    "endFrame": 4151
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "mm-clefable-barrier-opp-c7.json",
+   "move": "METEOR_MASH",
+   "side": "player",
+   "species": "CLEFABLE/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 14,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 309@0 HIT_ANIMATION@1",
+    "86@1 status:PRZ@0 309@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 309@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 309@0"
+   ],
+   "romPower": 100,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 100
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 4393,
+    "endFrame": 4606
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 214,
+    "exactRows": 198,
+    "px": 282304,
+    "digests": [
+     "38c278266158e420",
+     "38c278266158e420"
+    ],
+    "residualRows": [
+     [
+      196,
+      17644
+     ],
+     [
+      197,
+      17644
+     ],
+     [
+      198,
+      17644
+     ],
+     [
+      199,
+      17644
+     ],
+     [
+      200,
+      17644
+     ],
+     [
+      201,
+      17644
+     ],
+     [
+      202,
+      17644
+     ],
+     [
+      203,
+      17644
+     ],
+     [
+      204,
+      17644
+     ],
+     [
+      205,
+      17644
+     ],
+     [
+      206,
+      17644
+     ],
+     [
+      207,
+      17644
+     ],
+     [
+      208,
+      17644
+     ],
+     [
+      209,
+      17644
+     ],
+     [
+      210,
+      17644
+     ],
+     [
+      211,
+      17644
+     ]
+    ],
+    "detail": [
+     {
+      "age": 196,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 100f0f live 000000"
+     },
+     {
+      "age": 197,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 201f1f live 100f0f"
+     },
+     {
+      "age": 198,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 302f2f live 201f1f"
+     },
+     {
+      "age": 199,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 403f3f live 302f2f"
+     },
+     {
+      "age": 200,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 504f4f live 403f3f"
+     },
+     {
+      "age": 201,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 605f5f live 504f4f"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 214,
+    "exactRows": 198,
+    "px": 282304,
+    "digests": [
+     "38c278266158e420",
+     "38c278266158e420"
+    ],
+    "residualRows": [
+     [
+      196,
+      17644
+     ],
+     [
+      197,
+      17644
+     ],
+     [
+      198,
+      17644
+     ],
+     [
+      199,
+      17644
+     ],
+     [
+      200,
+      17644
+     ],
+     [
+      201,
+      17644
+     ],
+     [
+      202,
+      17644
+     ],
+     [
+      203,
+      17644
+     ],
+     [
+      204,
+      17644
+     ],
+     [
+      205,
+      17644
+     ],
+     [
+      206,
+      17644
+     ],
+     [
+      207,
+      17644
+     ],
+     [
+      208,
+      17644
+     ],
+     [
+      209,
+      17644
+     ],
+     [
+      210,
+      17644
+     ],
+     [
+      211,
+      17644
+     ]
+    ],
+    "detail": [
+     {
+      "age": 196,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 100f0f live 000000"
+     },
+     {
+      "age": 197,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 201f1f live 100f0f"
+     },
+     {
+      "age": 198,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 302f2f live 201f1f"
+     },
+     {
+      "age": 199,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 403f3f live 302f2f"
+     },
+     {
+      "age": 200,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 504f4f live 403f3f"
+     },
+     {
+      "age": 201,
+      "px": 17644,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 605f5f live 504f4f"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "mm-clefable-barrier-opp-c8.json",
+   "move": "METEOR_MASH",
+   "side": "player",
+   "species": "CLEFABLE/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 17,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 309@0 HIT_ANIMATION@1",
+    "86@1 status:PRZ@0 309@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 309@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 309@0 HIT_ANIMATION@1 STATS_CHANGE(15)@0",
+    "309@0"
+   ],
+   "romPower": 100,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 100
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 5590,
+    "endFrame": 5804
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 215,
+    "exactRows": 215,
+    "px": 0,
+    "digests": [
+     "6ef454cc44d3040b",
+     "6ef454cc44d3040b"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 215,
+    "exactRows": 215,
+    "px": 0,
+    "digests": [
+     "6ef454cc44d3040b",
+     "6ef454cc44d3040b"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

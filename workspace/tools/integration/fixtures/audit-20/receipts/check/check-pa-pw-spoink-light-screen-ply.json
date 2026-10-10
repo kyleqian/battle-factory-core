@@ -1,0 +1,117 @@
+{
+ "schema": "audit20-chain-check/v1",
+ "scenario": "pa-pw-spoink-light-screen-ply",
+ "rows": [
+  {
+   "fixture": "pa-pw-spoink-light-screen-ply-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "species": "CHANSEY/SPOINK",
+   "alloc": {
+    "input": [
+     3,
+     4,
+     5,
+     7,
+     4,
+     5,
+     7
+    ],
+    "rom": [
+     3,
+     4,
+     5,
+     7,
+     4,
+     5,
+     7
+    ],
+    "preEqEntry": true,
+    "equal": true,
+    "preDiff": []
+   },
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "149@1 HIT_ANIMATION@0 113@0"
+   ],
+   "romPower": 0,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 398,
+    "endFrame": 483
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 86,
+    "exactRows": 86,
+    "px": 0,
+    "digests": [
+     "43dc6770d7d00214",
+     "43dc6770d7d00214"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 86,
+    "exactRows": 86,
+    "px": 0,
+    "digests": [
+     "43dc6770d7d00214",
+     "43dc6770d7d00214"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}
