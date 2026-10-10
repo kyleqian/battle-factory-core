@@ -17,18 +17,6 @@ backlog.
 
 # Open
 
-## #158 — Double Team (104) first body is one frame off for some species (CHANSEY, ARBOK) while production renders it live (S10A, found 2026-10-09 by audit 16)
-
-`docs/live-audit-16-session-chains.md` (receipts `tools/integration/fixtures/audit-16/receipts/{main,onix-dt,dt-offset-1}/`): at the
-accepted framing (prep7: production age 0 = ROM activation + 1) the accepted ONIX -> GROVYLE route is 0 px, but Double Team on CHANSEY
-(both sides; no-unit controls and 9 Outrage chains) is 188,618 / 236,200 px on rows 5..57 and on ARBOK (opponent, first body) 49,405 px
-on ages 6..45. CHANSEY's clone motion runs one frame AHEAD of production: framed at activation it is exact except row 2. Lag ages
-[133, 134] and the row-1 monbg BG-write buffering are identical for CHANSEY, ARBOK and ONIX, so no lag-frame / BLDALPHA counter explains
-it. Production renders Double Team live with no side / species gate (`liveMoveAnimation.ts` case 104), so this is a live claim that is
-wrong for these species — Double Team is one of the most common Factory moves. Resume: RAM-probe the clone sprites' callbacks and the
-task list (CreateTask slot vs RunTasks traversal: the FLY same-frame-task precedent) for ONIX vs CHANSEY vs ARBOK at activation; derive
-the species-dependent start phase from source; fix the renderer or gate the unproven species.
-
 ## #157 — Weather-continuing animations: kernel event battler is the last attacker, the ROM plays them on battler 0 (S10A, found 2026-10-09 by aud56)
 
 The kernel's MOVE / general-animation event for RAIN / HAIL / SANDSTORM_CONTINUES carries the last attacker as its battler; the ROM
