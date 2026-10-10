@@ -3958,12 +3958,13 @@ export function liveMoveAnimationPresentation(
     }
     case 260: {
       // S10A faithful random: Flatter (prep35 s2 / s3 item 2; liveOamMoves.ts liveFlatterInputs). The 114 confetti words from the presentation
-      // host only (null = not activated -> scene-off fallback). First body (the activation registers are S0, WIN0 240 / 161), known lend,
-      // known-entry allocator (spotlight 305 / confetti 433, palette slots 7 / 8), non-shiny. An elevated opponent's row-0 shadow (the
+      // host only (null = not activated -> scene-off fallback). Known lend; a first body (S0 registers, WIN0 240 / 161 on row 0) or a later
+      // body whose allocator history is known (flat77: the known-entry spotlight 305 / confetti 433, palette slots 7 / 8 hold after audited
+      // net-zero history; row 0 is S0 with WIN0 0 / 0, liveQ2Moves.ts registersFor); non-shiny. An elevated opponent's row-0 shadow (the
       // pre-activation latch) is drawn by the #142 hook (LIVE_MOVE_OPPONENT_SHADOW_ROW[260] = 0; species audit 12, ISSUES #152).
       const rng = liveMovePresentationRngWords(presentationRngInput);
       if (rng === null || rng.words.length !== 114) return null;
-      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      if (!spriteOrderInput?.known || (!spriteOrderInput.firstBody && !spriteAllocatorInput?.historyKnown)) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
       const activationOrder = spriteOrderWithOccupiedPrefix(
@@ -3973,7 +3974,7 @@ export function liveMoveAnimationPresentation(
       const attackerSide = attacker.geometry.side, targetSide = target.geometry.side;
       const asset = flatterAsset as unknown as Record<"spotlight" | "confetti", { palette: { r: number; g: number; b: number }[] }>;
       const inputs = liveFlatterInputs({ attackerSide, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
-        sort: sortGbaSpriteOrder, words: rng.words, animationRng: rng.activationValue,
+        sort: sortGbaSpriteOrder, words: rng.words, animationRng: rng.activationValue, firstBody: spriteOrderInput.firstBody === true,
         spotlightPalette: asset.spotlight.palette, confettiPalette: asset.confetti.palette,
         stateAt: (state, programInput) => {
           const st = flatterAtAge(state, { ...(programInput as unknown as FlatterLiveInputs), attackerSide, targetSide,

@@ -83,6 +83,12 @@ export const LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS: readonly number[] = Object
 ]);
 const NET_ZERO_MOVES: ReadonlySet<number> = new Set(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS);
 /**
+ * flat77: planless net-zero consumers whose adapter claims the known-entry tile / palette allocation at a LATER body (Flatter 260: spotlight
+ * tile slot 6 [305, 64] / palette 7, confetti tile slot 7 [433, 12] / palette 8). With a known host they receive a history-only input
+ * (no wall: wall -1, no sparkles); with an unknown host none, as every other move. docs/next-adapters-flat77.md.
+ */
+export const LIVE_SPRITE_ALLOCATOR_HISTORY_CLAIM_MOVE_IDS: ReadonlySet<number> = new Set([260]);
+/**
  * Status animations (spriteOrderStatusAnimationName) audited net-zero for the sprite allocator: every complete script body
  * (keyed on the status script, both sides, >= 2 afflicted species, two fresh direct-mGBA runs) has baseline == end == the
  * known entry and created == destroyed (tools/integration/fixtures/prep50/status-net-zero-audit.json; FRZ, INFATUATION, CURSED,
@@ -161,7 +167,8 @@ export function prepareLiveMoveSpriteAllocator(
 }> {
   const plan = PLANS[request.moveId];
   if (host.historyKnown && !plan && NET_ZERO_MOVES.has(request.moveId)) {
-    return Object.freeze({ next: host });
+    return Object.freeze(LIVE_SPRITE_ALLOCATOR_HISTORY_CLAIM_MOVE_IDS.has(request.moveId)
+      ? { next: host, input: Object.freeze({ historyKnown: true as const, wall: -1, sparkles: Object.freeze([]) }) } : { next: host });
   }
   if (!host.historyKnown || !plan) {
     return Object.freeze({ next: invalidateLiveSpriteAllocatorHost(host) });
