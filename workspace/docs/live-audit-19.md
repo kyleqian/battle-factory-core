@@ -32,11 +32,14 @@ including 9 windows where the other battler is hidden by Dive.
 - fold71's order plans give **0 px** for every live consumer behind them:
   - Magnitude ≤ 99: 31 windows; > 99: 6 windows, both sides, including explicit lab seeds;
   - Conversion 2: 43 windows;
-  - Needle Arm: 38 windows, 22 of them with the opponent as the user;
+  - Needle Arm: 38 windows, 22 of them with the opponent as the user. All are 0 px, but 6 Water Pulse windows lend != ROM (the latent DEFECT below);
   - the Speed Boost `STATS_CHANGE(17)`: 23 windows.
-- ice72: 76 / 76 live windows are 0 px, after Ice Ball counters 1..4 on the opponent side and in the following turns. Every live lend
-  equals the ROM's.
+- ice72: 76 / 76 live windows are 0 px, and every live lend equals the ROM's. They include the opponent's Ice Ball bodies at counters
+  1..5 (30 windows), the player's counter 1 (8), and consumers after each of them and in the following turns. The player's counters 2..5
+  fall back (locked turn, below).
 - dive70: every live consumer after a Dive **attack** is 0 px (22 windows).
+
+- **One latent DEFECT in a plan fold71 extended**: Needle Arm 302 from a non-entry start order (6 lends != ROM, 0 px).
 
 **#160 is a fixture artifact, not a production defect** (section 3).
 
@@ -44,7 +47,8 @@ including 9 windows where the other battler is hidden by Dive.
 
 | Unit -> consumer | Verdict | px (before -> after) | Evidence |
 |---|---|---|---|
-| **CASTFORM_CHANGE (Forecast, sun / rain) -> any consumer while Castform is transformed** (44 live windows, both sides, both weathers; 4 more fall back) | **DEFECT, known: ISSUES #143's open remainder**, now exercised live because fold71 made these consumers live. The **order is EXACT**: 44 / 44 lends == ROM (`lends.txt`). The residual is Castform's own sprite box only: the ROM draws the sun / rain form (palette 945a42 / 738cd6), production the normal form (f7f7ff). The production field art has no form input (`src/engine/battleCommandFieldArt.ts`, which builds the battler pic from `species` only). Every static frame has the same gap, so it is not specific to the live path. | 1,583 / 1,281 px **per row** (player / opponent Castform) on every row. **Masked to Castform's boxes: -> 0 px** (`receipts/ablation/check-cast-*-mask-castform.json`). | No temp patch. The fix is #143 itself: `gBattleMonForms` in the field view, with per-form palette, front coords and elevation. That is art and data, outside an evidence step. Declining the live path would not change the pixels, because the fallback draws the same field art. |
+| **CASTFORM_CHANGE (Forecast, sun / rain) -> any consumer while Castform is transformed** (44 live windows, both sides, both weathers; 4 more fall back) | **DEFECT, known: ISSUES #143's open remainder**, now exercised live because fold71 made these consumers live. The **order is EXACT**: 44 / 44 lends == ROM (`lends.txt`). The residual is Castform's own sprite box only: the ROM draws the sun / rain form (palette 945a42 / 738cd6), production the normal form (f7f7ff). The production field art has no form input (`src/engine/battleCommandFieldArt.ts`, which builds the battler pic from `species` only). Every static frame has the same gap, so it is not specific to the live path. | 998..2,312 px **per row** on every row, in Castform's sprite box: player x 47..94 / y 67..111, opponent x 157..194 / y 11..58. **With both boxes masked** (`receipts/ablation/check-cast-*-swift-*-mask-castform.json`): 0 px for Castform as the player in rain; 428 px in a 2-px column beside the player box (sun); 27,890 / 29,307 px of Swift's stars when Castform is the opponent target, at x 98..122 / y 82..98, where the ROM stars (ffad18) aim at the transformed form's coords. All of it is #143's per-form front coords / elevation. | No temp patch. The fix is #143 itself: `gBattleMonForms` in the field view, with per-form palette, front coords and elevation. That is art and data, outside an evidence step. Declining the live path would not change the pixels, because the fallback draws the same field art. |
+| **Needle Arm 302 (both sides) from a NON-entry start order -> Water Pulse** (`needle-{cacnea,cacturne}-water-pulse-{ply,opp}` c1 / c2: `[Needle Arm, Water Pulse]`, prompt, `[Needle Arm]`, then Water Pulse) | **DEFECT, latent** (lend != ROM, 0 px in every observed window). fold71 added the `302:opponent` row with the existing `302:player` text, plan 162 at `src/engine/spriteOrderProductionPlans.ts:169`. | 6 / 44 Needle Arm lends != ROM; 0 -> 0 px: Water Pulse's sprites do not reach the swapped slots. | `AUDIT19_TRACE=1`: the host's full 55-slot free list before the 2nd Needle Arm **equals** the ROM's (`[3,4,10,7,9,5,14,15,12,13,11,21,…]`, so the prompt model is right). After it, production has `[3,11,12,10,…]` and the ROM has `[3,11,10,12,…]`. From the entry-like start (`[4,3,21,20,5,…]`, the 1st Needle Arm) both give `[3,11,12,10,…]`. **Mechanism, measured per frame** (`audit19NeedleFrames.py`, two fresh runs r1 == r2, `receipts/needle/`): the burst's 9 + 1 creates are sorted at frame 148 / 1482. The sprites created into slots 10 and 12 tie in `SortSprites` (priority word 0x3ff, equal y), so its stable insertion sort keeps their relation from the START order: 12 before 10 at the entry-like start of the 1st Needle Arm, 10 before 12 at the post-Water-Pulse + prompt start of the 2nd. The plan encodes a fixed placement (`…;Cfffffffff;Cf;…`), so it is exact only from starts where 12 precedes 10 (every plans69 probe and 38 / 44 here). **Tested fix hypothesis, NEGATIVE:** `patches/needle-arm-302-merged-burst-NEGATIVE.diff` (plans69's merged 10-sprite burst `Cffffffffff`), applied to a git-archive copy, leaves 6 / 6 unchanged. **Fix shape (no verified patch in the time box):** model the tie in the 302 plan, i.e. the two tied creates keep their start-order relation (a plan-encoding extension). The fail-closed alternative is to invalidate after 302 when the two slots the tied creates receive (creation indices 17 and 19 here: slots 10 and 12) are in the opposite relation in the start free order. That keeps the 38 exact windows live. |
 | **Dive 291 SETUP by the PLAYER's CLAMPERL** (first body, no history) | **OPEN** (not a fold of today's; the setup body landed in land68). Not order: chain == entry, units 0. | ~11,000 px over 30 rows: ages 70..99, box x 64..79 / y 105..111, two water blues swapped (ROM 399cff vs 216bff); 4 / 4 windows. The player CHINCHOU's setup is 0 px (8 windows). | Not diagnosed in the time box. Likely the setup splash geometry for CLAMPERL's back pic. Flagged for a species audit; the census exposure was not measured. |
 
 ### Non-defect verdicts
@@ -66,13 +70,13 @@ including 9 windows where the other battler is hidden by Dive.
 | magx: Magnitude > 99 by lab seed (k10 / k4 player CHANSEY, k5 / k2 opponent CHANSEY) (8) | 19 | 19 (> 99: 4) | 0 | 0 | 19 / 19 |
 | cast: CASTFORM sun / rain, 4 consumers × 2 sides (16) | 48 | 0 | 44 (#143 form art; masked 0) | 4 (Shock Wave after Rain Dance) | 44 / 44 |
 | conv: Conversion 2, PORYGON2 / SNORLAX (16) | 59 | 59 | 0 | 0 | 59 / 59 |
-| needle: Needle Arm, CACTURNE / CACNEA, both sides (16) | 44 | 44 | 0 | 0 | 44 / 44 |
+| needle: Needle Arm, CACTURNE / CACNEA, both sides (16) | 44 | 44 | 0 | 0 | **38 / 44** (6 Water Pulse windows: the Needle Arm DEFECT row) |
 | sb: NINJASK Speed Boost (STATS_CHANGE 17), 4 consumers × 2 sides (8) | 31 | 31 | 0 | 0 | 31 / 31 |
 | ice: Ice Ball, SEALEO / WALREIN, Mud-Slap / Water Pulse / Shock Wave / Swift (16) | 190 | 76 | 0 | 114 | 76 / 76 |
 | dive: Dive, CHINCHOU / CLAMPERL, every body a window (16) | 126 | 45 | 4 (CLAMPERL setup, OPEN) | 77 | 49 / 49 |
 | ctl: no-unit controls (SNORLAX Snore), 5 consumers × 2 sides (10) | 40 | 40 | 0 | 0 | 40 / 40 |
 | wp160: dive70's `whirlpool-opp-s1` + a variant (2) | 5 | 5 (1 hidden) | 0 | 0 | 5 / 5 |
-| wp160b: #160 as described, 3 seeds × 2 sides (6) | 19 | 19 (8 hidden) | 0 | 0 | 19 / 19 (live lends; 11 opponent-side lends resolve only in the render seam) |
+| wp160b: #160 as described, 3 seeds × 2 sides (6) | 19 | 19 (8 hidden) | 0 | 0 | 10 / 10 resolved; 9 opponent-side Whirlpools after the player's locked attack turn have no resolvable lend and need none (live, 0 px) |
 | **total (130)** | **599** | **356** | **48** | **195** | |
 
 By the unit immediately before the consumer (`receipts/coverage.txt`):
