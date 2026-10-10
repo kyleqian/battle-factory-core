@@ -79,7 +79,8 @@ hide agrees and the window = control.
 | Light Screen, player (opponent hidden by Dive) | **[]** | [68, 69] | [68, 69] |
 | Light Screen, opponent (player hidden by Dive) | [68, 69] | [68, 69] | [68, 69] |
 | Safeguard [67, 68]; Sandstorm [4, 5, 163, 164]; Iron Defense [1, 2, 66, 67]; Double Team [133, 134]; Dig [190, 191] / strike [33, 34]; Bulk Up, Wish, Rest, Earthquake [] | same | same | same |
-| Shock Wave (sw67 chains) | — | [263, 264] or [264, 265] (opp [259, 260] / [260, 261]) | [264, 265] / [259, 260] | 
+| Shock Wave (sw67 chains) | — | [263, 264] or [264, 265] (opp [259, 260] / [260, 261]) | [264, 265] / [259, 260] |
+| Thunderbolt [105]; Water Pulse [156, 157]; Ice Beam [199, 200] (no hidden-span body: they miss a hidden target) | — | same | same |
 
 The only hidden-vs-visible phase change is the Light Screen one (named above); the Shock Wave variants are 0 px both ways.
 
@@ -102,13 +103,20 @@ The only hidden-vs-visible phase change is the Light Screen one (named above); t
 
 ## 2. Reproducibility
 
-`audit18Run.sh` run A produced the committed receipts; run B (fresh dirs) was compared by `audit18Compare.py`
-(`receipts-vs-committed.txt` in its scratch dir); result in §4. **ROM drift (ISSUES #154 class):** inside run A, 15 windows of 6
-scenarios (Wish, Water Pulse, later Ice Beam, Light Screen controls) had r1 != r2 — one fresh probe of three rendered a different
-Random2 trajectory; one more run (`bounce-snorlax-rest-ply`) diverged so far that its window frames were not dumped (the check now
-records such a run as `diverged` instead of crashing; that scenario was re-checked once). The derive probes of two sessions 34 minutes
-apart were identical on all 164 scenarios (frames + `gRng2Value` at every activation), so the drift is sporadic per process, not a
-wall-clock offset. The verdicts above never rest on a drifting window alone (each has a stable twin on the other species / side).
+`audit18Run.sh` run A produced the committed receipts; run B (fresh dirs, started 15 minutes after A) was compared by `audit18Compare.py`:
+**414 / 442 windows identical** (digests r1 / r2, px, rows, live, decline, order, chain and entry), **15 ROM-drift** (windows whose own
+receipt had r1 != r2: in run A one fresh probe of the pair rendered a different trajectory — Wish, Water Pulse, the later Ice Beams,
+a Light Screen control; all r1 == r2 in run B), **13 DIFFERS with r1 == r2 in both runs — every one a no-unit CONTROL window**
+(`ctl-snorlax-water-pulse-opp` 4: 964..1,154 px in A, 0 in B; `ctl-snorlax-earthquake` 3: 4,784 / 5,200 px in A, 0 in B;
+`ctl-snorlax-dig-ply` c2..c7 6: fallback windows, px differ). **No non-control window differs between the batches, and the verdicts are
+the same in both** (run B: the same 4 DIFF windows — the 2 Light Screen TIMING-PHASE + the 2 Fly+GOLEM Sandstorm rows; every hidden-span
+window 0 px or = control; the same fallbacks). This is ISSUES #154's cross-batch drift: both fresh probes inside one check process agree,
+but a later batch can stage a different ROM trajectory for the same scenario + lab seed. The derive probes of two sessions 34 minutes
+apart were identical on all 164 scenarios (frames + `gRng2Value` at every activation), so the drift is sporadic per process, not a fixed
+wall-clock offset. One run-A probe (`bounce-snorlax-rest-ply`) diverged so far that its window frames were not dumped; the check now
+records such a run as `diverged` (px -1) instead of crashing, and that scenario was re-checked once for the committed receipts.
+Byte-identical receipts across batches are therefore NOT achievable for these stagings; the comparer separates drift from real
+reproduction failures (0 here).
 
 ## 3. Not reached
 
