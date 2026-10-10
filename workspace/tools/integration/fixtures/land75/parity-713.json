@@ -1,0 +1,567 @@
+{
+ "schema": "land75-parity/v1",
+ "seed": 713,
+ "streak": 3,
+ "turnBoundariesCompared": 23,
+ "playerTurns": 23,
+ "framesOn": 14916,
+ "framesOff": 11458,
+ "logicalDigest": "f6fa7368267f542c6b9bec29e45890c43ccf0d92dae301bb4361156f607606a7",
+ "rngEqual": true,
+ "rulesEqual": true,
+ "boundaryEqual": true,
+ "bodiesOn": 42,
+ "orderKnownBodiesOn": 31,
+ "allocatorKnownBodiesOn": 42,
+ "orderStopsOn": [
+  "no EXACT plan: body 291:player"
+ ],
+ "bodies": [
+  {
+   "turn": 1,
+   "moveId": 149,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 1,
+   "moveId": 291,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 291:player",
+   "hidden": [
+    true,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 1,
+   "moveId": 277,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 291:player",
+   "hidden": [
+    true,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 1,
+   "moveId": 291,
+   "moveTurn": 1,
+   "side": 0,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 291:player",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 2,
+   "moveId": 277,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 291:player",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 2,
+   "moveId": 92,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 291:player",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 3,
+   "moveId": 340,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 291:player",
+   "hidden": [
+    false,
+    true
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 3,
+   "moveId": 334,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 291:player",
+   "hidden": [
+    false,
+    true
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 4,
+   "moveId": 340,
+   "moveTurn": 1,
+   "side": 1,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 291:player",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 4,
+   "moveId": 104,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 291:player",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 5,
+   "moveId": 291,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 291:player",
+   "hidden": [
+    true,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 5,
+   "moveId": 340,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 291:player",
+   "hidden": [
+    true,
+    true
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 6,
+   "moveId": 29,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 7,
+   "moveId": 340,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    true
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 8,
+   "moveId": 112,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 9,
+   "moveId": 277,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 9,
+   "moveId": 93,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 10,
+   "moveId": 149,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 10,
+   "moveId": 29,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 11,
+   "moveId": 277,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 11,
+   "moveId": 50,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 12,
+   "moveId": 149,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 12,
+   "moveId": 112,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 13,
+   "moveId": 340,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    true
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 14,
+   "moveId": 340,
+   "moveTurn": 1,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 14,
+   "moveId": 29,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 15,
+   "moveId": 98,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 15,
+   "moveId": 50,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 16,
+   "moveId": 228,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 16,
+   "moveId": 112,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 17,
+   "moveId": 228,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 18,
+   "moveId": 283,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 18,
+   "moveId": 210,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 19,
+   "moveId": 184,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 19,
+   "moveId": 246,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 20,
+   "moveId": 91,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 21,
+   "moveId": 91,
+   "moveTurn": 1,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 21,
+   "moveId": 232,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 22,
+   "moveId": 184,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 22,
+   "moveId": 210,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 23,
+   "moveId": 44,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 23,
+   "moveId": 246,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  }
+ ]
+}

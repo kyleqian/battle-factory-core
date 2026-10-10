@@ -132,13 +132,24 @@ describe("fly63: the host keys and hides the semi-invulnerable two-turn user", (
     }
   });
 
-  it("a hidden battler's faint or switch-in invalidates (unprobed); the failed-unleash show toggle clears hidden without invalidating", () => {
+  it("a hidden battler's faint is the shown faint (hist73 / land75) and un-hides it; its switch-in invalidates (unprobed); the failed-unleash show toggle clears hidden", () => {
     for (const battler of [0, 1] as const) {
-      for (const kind of ["faint-animation", "switch-in-animation"]) {
-        const after = host([body(10, 19, battler, 0), ev(20, kind, { battler })]);
-        expect(after.tracker.cursor.order.known, `${kind}/${battler}`).toBe(false);
-        expect(after.tracker.invalidReason).toBe(`${kind} of a hidden battler`);
+      for (const move of [19, 340]) {
+        // hist73 hidden-battler-audit.json hf-* == vf-*: the hidden battler's faint frees its slot exactly like a shown battler's.
+        const setup = host([body(10, move, battler, 0)]);
+        expect(setup.hidden[battler]).toBe(true);
+        const fainted = host([body(10, move, battler, 0), ev(20, "faint-animation", { battler })]);
+        expect(fainted.tracker.invalidReason, `${move}/${battler}`).toBeNull();
+        expect(fainted.tracker.cursor.order.known).toBe(true);
+        const shownFaint = applySpriteOrderPresentationEvent(setup.tracker, { kind: "faint", side: sides[battler] });
+        expect(fainted.tracker.cursor.order.free).toEqual(shownFaint.cursor.order.free);
+        expect(fainted.tracker.cursor.occupied).toEqual(shownFaint.cursor.occupied);
+        expect(fainted.tracker.battlerSlots).toEqual(shownFaint.battlerSlots);
+        expect(fainted.hidden).toEqual([false, false]);
       }
+      const after = host([body(10, 19, battler, 0), ev(20, "switch-in-animation", { battler })]);
+      expect(after.tracker.cursor.order.known, `switch-in-animation/${battler}`).toBe(false);
+      expect(after.tracker.invalidReason).toBe("switch-in-animation of a hidden battler");
       const shown = host([body(10, 340, battler, 0), ev(20, "set-battler-sprite-visibility", { battler, invisible: false })]);
       expect(shown.hidden).toEqual([false, false]);
       expect(shown.tracker.cursor.order.known).toBe(true);

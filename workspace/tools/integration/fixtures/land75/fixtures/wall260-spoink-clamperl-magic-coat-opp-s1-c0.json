@@ -1,0 +1,182 @@
+{
+ "schema": "land75-wall-route-fixture/v1",
+ "move": "MAGIC_COAT",
+ "bodyIndex": 0,
+ "probe": "tools/integration/audit18Probe.py",
+ "scenario": "tools/integration/fixtures/land75/scenarios/wall260-spoink-clamperl-magic-coat-opp-s1.json",
+ "denseWindow": {
+  "startFrame": 673,
+  "endFrame": 748
+ },
+ "attacker": {
+  "species": "SPOINK",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "CLAMPERL",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 2027808503,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 87,
+  "playerMaxHp": 142,
+  "opponentHp": 167,
+  "opponentMaxHp": 167,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "target": 1
+ },
+ "rom": {
+  "invisible": [
+   true,
+   false
+  ],
+  "turn": 1,
+  "spriteOrder": [
+   62,
+   60,
+   0,
+   63,
+   1,
+   61,
+   6,
+   8,
+   2,
+   5,
+   9,
+   14,
+   10,
+   15,
+   13,
+   7,
+   4,
+   12,
+   11,
+   3,
+   21,
+   20,
+   19,
+   18,
+   17,
+   16,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   23,
+   22,
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47
+  ]
+ },
+ "pinnedRng2": [
+  [
+   2,
+   568865594
+  ]
+ ],
+ "promptShown": [
+  true,
+  false
+ ],
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "149",
+      "0",
+      "1",
+      "1",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "291",
+      "0",
+      "60",
+      "0",
+      "70",
+      "0"
+     ]
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": [
+      "277",
+      "0",
+      "0",
+      "0",
+      "70",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
+}

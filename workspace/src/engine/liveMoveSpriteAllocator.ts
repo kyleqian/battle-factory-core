@@ -43,7 +43,7 @@ const PLANS: Readonly<Record<number, LiveMoveSpriteAllocatorPlan>> = Object.free
 
 /**
  * Live move ids whose scripts are audited OBJ-net-zero in both orientations,
- * twice fresh. Four receipts, all under tools/integration/fixtures/:
+ * twice fresh. Five receipts, all under tools/integration/fixtures/:
  *  - allocator-net-zero-audit.json (original) plus allocator-net-zero-audit-ext.json
  *    (extension; combined.netZeroIds): the first 110 live ids, including Fury
  *    Swipes 154 on the opponent side and the anchor/anchor2 ids;
@@ -52,7 +52,9 @@ const PLANS: Readonly<Record<number, LiveMoveSpriteAllocatorPlan>> = Object.free
  *    receipt's fold (only its setup body was measured); prep52 closes it;
  *  - prep52/net-zero-audit.json (move-id keys, verdict NET-ZERO): 40 further ids incl. Future Sight 248 (setup body by
  *    move id; its delayed hit is the general animation General_FutureSightHit, audited by script label in the same
- *    receipt). Gust 16 and Transform 144 are net-zero there but not live adapters, so they are not listed.
+ *    receipt). Gust 16 and Transform 144 are net-zero there but not live adapters, so they are not listed;
+ *  - hist73/net-zero-audit.json (move-id keys, verdict NET-ZERO, folded by land75): 37 live bodies no earlier receipt covered
+ *    (Fury Cutter counters 1..4, Curse stat + Ghost branches, Magnitude regular + intense, Focus Energy 116, Bulk Up 339, ...).
  * Moves added to the live set afterwards are NOT audited
  * and must not be added here until they are. Occupancy-net-zero does not preserve the free-slot sSpriteOrder,
  * but the six allocator consumers never share a sort key with another visible
@@ -75,6 +77,9 @@ export const LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS: readonly number[] = Object
   // prep52/net-zero-audit.json (move-id keys; Future Sight 248 = setup body + General_FutureSightHit hit).
   3, 7, 8, 13, 20, 62, 69, 71, 72, 76, 87, 107, 111, 118, 126, 138, 183, 193, 195, 200, 205, 207, 209, 218, 224, 228,
   229, 241, 245, 248, 252, 254, 256, 261, 269, 275, 278, 301, 348, 351,
+  // hist73/net-zero-audit.json (move-id keys, every unit NET-ZERO; Fury Cutter counters 1..4, Curse stat + Ghost, Magnitude both).
+  37, 116, 135, 137, 146, 149, 152, 161, 164, 174, 190, 194, 210, 214, 215, 216, 222, 230, 260, 271, 279, 283, 285, 288, 297,
+  298, 309, 310, 318, 323, 324, 326, 327, 330, 339, 349, 350,
 ]);
 const NET_ZERO_MOVES: ReadonlySet<number> = new Set(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS);
 /**

@@ -187,7 +187,22 @@ describe("net-zero move history persistence", () => {
     }
     expect(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS).toContain(248);
     for (const id of [16, 144]) expect(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS).not.toContain(id);
-    const expected = [...new Set<number>([...auditedLive, ...prep44Ids, ...prep52Ids])].sort((a, b) => a - b);
+    // hist73 receipt (schema hist73-net-zero-audit/v1, folded by land75): 37 numeric-keyed live move bodies, every unit NET-ZERO
+    // with >= 1 complete body per side from the known entry and every row identical across two fresh runs.
+    const hist73 = read("hist73/net-zero-audit.json");
+    expect(hist73.schema).toBe("hist73-net-zero-audit/v1");
+    const hist73Units = hist73.units as Unit[];
+    expect(hist73Units.filter(u => u.verdict !== "NET-ZERO")).toEqual([]);
+    expect(hist73Units.every(u => typeof u.key === "number")).toBe(true);
+    for (const unit of hist73Units) {
+      expect(unit.bodiesFromKnownEntry.player).toBeGreaterThanOrEqual(1);
+      expect(unit.bodiesFromKnownEntry.opponent).toBeGreaterThanOrEqual(1);
+      expect(unit.rows.length).toBeGreaterThan(0);
+      for (const row of unit.rows) expect(row.identicalAB).toBe(true);
+    }
+    const hist73Ids = hist73Units.map(u => u.key as number);
+    expect(hist73Ids).toHaveLength(37);
+    const expected = [...new Set<number>([...auditedLive, ...prep44Ids, ...prep52Ids, ...hist73Ids])].sort((a, b) => a - b);
     expect([...LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS].sort((a, b) => a - b)).toEqual(expected);
     for (const id of prep44Ids) {
       const scenarios = prep44.moves[String(id)]?.scenarios ?? [];
@@ -217,8 +232,8 @@ describe("net-zero move history persistence", () => {
     const live = new Set<number>([...status.implementedAdapters, ...status.faithfulTimingAdapters, ...status.faithfulRandomAdapters].map((a: { id: number }) => a.id));
     // Every audited id is a live adapter; later (unaudited) adapters stay out.
     for (const id of LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS) expect(live.has(id)).toBe(true);
-    // (203, 263, 86 moved IN with the prep44 receipt.)
-    for (const id of [116, 339, 16, 144]) {
+    // (203, 263, 86 moved IN with the prep44 receipt; Focus Energy 116 / Bulk Up 339 with the hist73 receipt.)
+    for (const id of [16, 144]) {
       expect(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS).not.toContain(id);
     }
   });
@@ -230,7 +245,8 @@ describe("net-zero move history persistence", () => {
   });
 
   it("invalidates for non-audited moves and keeps unknown unknown", () => {
-    for (const id of [116, 999]) {
+    // Karate Chop 4 is a live adapter no allocator receipt covers (116 is audited since hist73).
+    for (const id of [4, 999]) {
       expect(prepareLiveMoveSpriteAllocator(firstMove, req(id)).next.historyKnown).toBe(false);
     }
     const unknown = invalidateLiveSpriteAllocatorHost(firstMove);

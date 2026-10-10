@@ -1,0 +1,866 @@
+{
+ "schema": "land75-parity/v1",
+ "seed": 533,
+ "streak": 32,
+ "turnBoundariesCompared": 64,
+ "playerTurns": 64,
+ "framesOn": 40242,
+ "framesOff": 32918,
+ "logicalDigest": "4ba8d29ed846c33cc5ad7fcc9035c8bdd32cb495ba05f51a24da09782f6ac1c6",
+ "rngEqual": true,
+ "rulesEqual": true,
+ "boundaryEqual": true,
+ "bodiesOn": 65,
+ "orderKnownBodiesOn": 57,
+ "allocatorKnownBodiesOn": 55,
+ "orderStopsOn": [
+  "no EXACT plan: body 240:opponent"
+ ],
+ "bodies": [
+  {
+   "turn": 1,
+   "moveId": 179,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": false
+  },
+  {
+   "turn": 2,
+   "moveId": 203,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": false
+  },
+  {
+   "turn": 2,
+   "moveId": 240,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 240:opponent",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": false
+  },
+  {
+   "turn": 3,
+   "moveId": 207,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 240:opponent",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": false
+  },
+  {
+   "turn": 3,
+   "moveId": 94,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 240:opponent",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": false
+  },
+  {
+   "turn": 5,
+   "moveId": 179,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 240:opponent",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": false
+  },
+  {
+   "turn": 5,
+   "moveId": 92,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 240:opponent",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": false
+  },
+  {
+   "turn": 6,
+   "moveId": 203,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 240:opponent",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": false
+  },
+  {
+   "turn": 6,
+   "moveId": 19,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 240:opponent",
+   "hidden": [
+    false,
+    true
+   ],
+   "allocatorKnown": false
+  },
+  {
+   "turn": 7,
+   "moveId": 19,
+   "moveTurn": 1,
+   "side": 1,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 240:opponent",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": false
+  },
+  {
+   "turn": 8,
+   "moveId": 109,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 9,
+   "moveId": 19,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    true
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 10,
+   "moveId": 19,
+   "moveTurn": 1,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 11,
+   "moveId": 19,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    true
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 12,
+   "moveId": 19,
+   "moveTurn": 1,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 13,
+   "moveId": 19,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    true
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 14,
+   "moveId": 19,
+   "moveTurn": 1,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 15,
+   "moveId": 19,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    true
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 16,
+   "moveId": 19,
+   "moveTurn": 1,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 16,
+   "moveId": 157,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 17,
+   "moveId": 19,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    true
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 18,
+   "moveId": 19,
+   "moveTurn": 1,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 19,
+   "moveId": 19,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    true
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 19,
+   "moveId": 339,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    true
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 20,
+   "moveId": 104,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 21,
+   "moveId": 104,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 22,
+   "moveId": 91,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 23,
+   "moveId": 91,
+   "moveTurn": 1,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 23,
+   "moveId": 339,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 24,
+   "moveId": 104,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 24,
+   "moveId": 156,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 25,
+   "moveId": 104,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 26,
+   "moveId": 91,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 27,
+   "moveId": 91,
+   "moveTurn": 1,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 27,
+   "moveId": 339,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 28,
+   "moveId": 73,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 28,
+   "moveId": 156,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 29,
+   "moveId": 104,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 30,
+   "moveId": 104,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 31,
+   "moveId": 91,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 31,
+   "moveId": 339,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 32,
+   "moveId": 91,
+   "moveTurn": 1,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 32,
+   "moveId": 156,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 33,
+   "moveId": 91,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 34,
+   "moveId": 91,
+   "moveTurn": 1,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 35,
+   "moveId": 91,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 35,
+   "moveId": 339,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 36,
+   "moveId": 91,
+   "moveTurn": 1,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 36,
+   "moveId": 156,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 37,
+   "moveId": 91,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 38,
+   "moveId": 91,
+   "moveTurn": 1,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 39,
+   "moveId": 91,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 39,
+   "moveId": 339,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 40,
+   "moveId": 91,
+   "moveTurn": 1,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 40,
+   "moveId": 156,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 41,
+   "moveId": 91,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 42,
+   "moveId": 91,
+   "moveTurn": 1,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 43,
+   "moveId": 91,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 44,
+   "moveId": 91,
+   "moveTurn": 1,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 44,
+   "moveId": 156,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 45,
+   "moveId": 91,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 46,
+   "moveId": 91,
+   "moveTurn": 1,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 48,
+   "moveId": 156,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 52,
+   "moveId": 156,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 56,
+   "moveId": 156,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  }
+ ]
+}

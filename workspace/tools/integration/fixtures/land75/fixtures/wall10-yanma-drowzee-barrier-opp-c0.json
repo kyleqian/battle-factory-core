@@ -1,0 +1,158 @@
+{
+ "schema": "land75-wall-route-fixture/v1",
+ "move": "BARRIER",
+ "bodyIndex": 0,
+ "probe": "tools/integration/audit18Probe.py",
+ "scenario": "tools/integration/fixtures/land75/scenarios/wall10-yanma-drowzee-barrier-opp.json",
+ "denseWindow": {
+  "startFrame": 528,
+  "endFrame": 603
+ },
+ "attacker": {
+  "species": "DROWZEE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "YANMA",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703682,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 172,
+  "playerMaxHp": 172,
+  "opponentHp": 35,
+  "opponentMaxHp": 167,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0,
+  "target": 1
+ },
+ "rom": {
+  "invisible": [
+   false,
+   false
+  ],
+  "turn": 0,
+  "spriteOrder": [
+   62,
+   60,
+   0,
+   63,
+   1,
+   61,
+   6,
+   8,
+   2,
+   3,
+   10,
+   9,
+   5,
+   7,
+   4,
+   24,
+   25,
+   22,
+   23,
+   20,
+   21,
+   18,
+   19,
+   15,
+   16,
+   17,
+   13,
+   14,
+   11,
+   12,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47
+  ]
+ },
+ "pinnedRng2": [],
+ "promptShown": [
+  true
+ ],
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "324",
+      "0",
+      "75",
+      "1",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": []
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": [
+      "112",
+      "0",
+      "0",
+      "0",
+      "70",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
+}

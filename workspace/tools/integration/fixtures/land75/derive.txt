@@ -1,0 +1,9 @@
+ls84-beautifly-exeggcute-light-screen-ply-c0.json units 2 otherInvisible 0
+wall10-yanma-drowzee-barrier-opp-c0.json units 2 otherInvisible 0
+wall10-yanma-drowzee-barrier-ply-c0.json units 2 otherInvisible 0
+wall10-yanma-drowzee-barrier-ply-c1.json units 7 otherInvisible 0
+wall260-spoink-clamperl-magic-coat-opp-s1-c0.json units 3 otherInvisible 1
+wall260-spoink-clamperl-magic-coat-opp-s1-c1.json units 6 otherInvisible 0
+wall260-spoink-clamperl-magic-coat-opp-s8-c0.json units 0 otherInvisible 0
+wall260-spoink-clamperl-magic-coat-opp-s8-c1.json units 2 otherInvisible 1
+wall260-spoink-clamperl-magic-coat-opp-s8-c2.json units 8 otherInvisible 1
