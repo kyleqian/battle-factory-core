@@ -1545,6 +1545,35 @@ function liveWordsBodyAnchors(species: Readonly<Record<WordsSide, number>>): Rea
 }
 
 /**
+ * ice72: the free order after an Ice Ball 301 body (liveIceBallInputs(...).postBodyFree, the shards' SortSprites y-sort) from its activation
+ * free order (entry labels), its own recorded words and the species displayed at the body (the marker's `bodySpecies`; the shard y follow
+ * the target's Y_PIC_OFFSET point). The same arguments as the Ice Ball adapter's at species rest; null when a counter, words, palettes or
+ * a non-zero idle rest (liveIceBallInputs' decline) are missing (the lend declines).
+ */
+export function liveIceBallWordsPostFree(
+  unit: Readonly<{ attackerSide: WordsSide; rolloutCounter?: number }>, activationFree: readonly number[], words: PresentationRngWords | null,
+  bodySpecies: Readonly<Record<WordsSide, number>>,
+): readonly number[] | null {
+  const counter = liveIceBallCounter(unit.rolloutCounter);
+  if (counter === null || words === null) return null;
+  let art: ReturnType<typeof createBattleCommandFieldArtView>;
+  try {
+    art = createBattleCommandFieldArtView({ player: { species: bodySpecies.player }, opponent: { species: bodySpecies.opponent } } as never);
+  } catch {
+    return null;
+  }
+  const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+  const activationOrder = spriteOrderWithOccupiedPrefix({ known: true as const, free: activationFree, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+  if (palettes === null || activationOrder === null) return null;
+  const side = unit.attackerSide, foe = side === "player" ? "opponent" as const : "player" as const;
+  return liveIceBallInputs({ counter, attackerSide: side, attackerSpecies: art[side].speciesSymbol, targetSpecies: art[foe].speciesSymbol,
+    attacker: liveBattlerAnchors(side, art), target: liveBattlerAnchors(foe, art), palettes, activationOrder,
+    words: words.words, activationValue: words.activationValue, lagRows: liveIceBallLagRows(counter + 1), sort: sortGbaSpriteOrder,
+    linear: { deltaQ8: linearTranslationDeltaQ8, offsetAfterCallbacks: linearTranslationOffsetAfterCallbacks },
+    chunkPalette: iceBallAsset.chunk.palette, icePalette: icyWindAsset.background.palette })?.postBodyFree ?? null;
+}
+
+/**
  * prep46: render-seam resolution of a words-unit deferred lend, memoized per deferred-lend object and presentation-host body list (both
  * immutable; a body list changes only when a body / sub-stream is recorded, so a repaint never re-carries and a pinned host never reads
  * another host's result). Pure: the memo holds what resolveSpriteOrderDeferredLend returns for those inputs.
