@@ -411,9 +411,11 @@ function orderEventOf(
             : { kind: "invalidate", reason: "Fury Cutter body without furyCutterCounter" } };
         }
         // Move_RETURN branches on gAnimFriendship (AnimTask_GetReturnPowerLevel, battle_anim_effects_3.c:5060-5073; ret80): 216's plan 117
-        // is ReturnMedium's (61..91; dip, dip, lunge, hitsplat). Weak / Strong / Strongest (the Factory's 255) have no plan (invalidates).
+        // is ReturnMedium's (61..91; dip, dip, lunge, hitsplat); ReturnStrongest (> 200, the Factory's 255) is 30000 + 216 (31 creates).
+        // Weak / Strong have no plan (invalidates).
         if (request.moveId === 216) {
           const level = returnPowerLevel(request.friendship);
+          if (level === 3) return { event: { kind: "move-animation", moveId: 30216, attackerSide: battler === 0 ? "player" : "opponent" } };
           if (level !== 1) return { event: { kind: "invalidate", reason: `Return power level ${level} body` } };
         }
         const event = { kind: "move-animation", moveId: presentHeal ? 20217 : magnitudeIntense ? 20222 : secondBranch ? 10000 + request.moveId : request.moveId,
