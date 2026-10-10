@@ -45,8 +45,27 @@
   `fixtures/prep65/units.sha256`, host-words + check == committed (15 / 15 plan == ROM, 215 frames, 7 / 7 lends); `prep64Run.sh
   SKIP_CENSUS=1` all `same` (11 / 11); census rerun +51 / +9,091, key sequence + digest identical; clean merge (src == worker's
   tested tree) -> smoke 448, touched tests 68 / 68. Census seeds 0..299 now **97.79 % / 98.94 %**.
-- In flight: dive70 (INTEGRATION: the Dive attack body adapter), plans69 (SIDE, evidence: the remaining order-host stops). Next: live
-  audit 18 (hidden-span bodies, Shock Wave consumers, census battle 713, the Dive words unit).
+- Mid-session census, seeds 0..999, src `afcf8175` (after land68): **92.95 % of move-animation commands / 97.13 % of frames** live
+  (session start 91.89 / 95.82). New order-host stop from today's hidden rules: "faint-animation of a hidden battler" 4,010 / 26 (+ reshow
+  616 / 4). Allocator history unknown 18,554 / 183 (Protect 10.8k, Light Screen 3.3k, Magic Coat, Barrier).
+- prep plans69 (SIDE, Opus, `e72c1f8fe`, new files only; merged `eb1da8d90`): the remaining order-host stops, predictions committed
+  first, 104 direct-mGBA jobs x2 (0 A/B differ) + 24 Magnitude power runs. EXACT: CASTFORM_CHANGE (empty plan, 8 / 8), Conversion 2 176
+  (8 / 8), Needle Arm 302:opponent (6 / 6, a burst split 9 + 1 merged), Magnitude 222 keyed by `gAnimMovePower > 99` ("" 36 / 36,
+  `Cf;D0;Cf;D1` 8 / 8). Kernel payload gap: the Speed Boost tick never set `animArg1` (ROM `battle_util.c:2646` = 17) -> "stat
+  animation 0 / 3" stops. Negatives with resume conditions: Ice Ball 301 (marker only at entry occupancy, lends only to Ice Ball;
+  Mud-Slap's chains all meet an Ice Ball), Hyper Beam (Random2 + geometry), Flatter / Astonish (Random2), Odor Sleuth (geometry by
+  target). Supervisor: `plans69Run.sh` into a fresh dir — all 28 artefacts == committed (probes, check, rows, 3 x 3 census ranges, chains,
+  fold pins).
+- Folded Sonnet MAIN-lane worker (master `17767f6c0` .. `e5aac81a4`, src `a96642c9`): fold71 — plans69's rows (generator regenerated,
+  bodies 543 -> 550, plans 221 -> 222, `CASTFORM_CHANGE`), the `20222` Magnitude-intense host key (+ three tooling mirrors), the Speed Boost
+  tick's `animArg1 = STAT_ANIM_PLUS1 + STAT_SPEED` (only reader: `battleScriptStatbuffchangeOpcode.ts:334` readsAnimArg1 -> event
+  arguments) with a Tier-1 test (17 on the first and a later activation). Worker: 3 census ranges +43 / +5,594, digests + key
+  sequences identical; ON/OFF parity seed 927 (Ninjask); full suite (2 shards) 1,603 files, build, differential 624. Supervisor: census
+  seeds 0..999 (one run) `afcf8175` -> `a96642c9`: **+49 / +8,403, 93.13 % / 97.34 %**, 0 regressions, key sequence + digest identical, 0
+  render throws (range-split runs are a different battle set — liveShareCensus restarts ids per range — hence the different delta);
+  touched tests 41 / 41 (incl. the executable-frontier ratchet).
+- In flight: dive70 (INTEGRATION: the Dive attack body adapter), live audit 18 (SIDE). Next: ice72 (Ice Ball words unit for any consumer),
+  hist73 (evidence: allocator history + hidden-battler faint), live audit 19.
 
 ## 2026-10-09 (day) — S10A: allocator / order / words-lend histories + live-claim fixes; ordinary-play live share 87.95 -> 91.89 % of commands (92.09 -> 95.82 % of frames); 239 + 13 + 24
 
