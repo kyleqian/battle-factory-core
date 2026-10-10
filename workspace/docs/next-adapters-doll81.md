@@ -52,7 +52,11 @@ stalled-battle caveat, is in §3.
 
 ## 1. FOLD INSTRUCTIONS
 
-Apply `tools/integration/fixtures/doll81/doll81-cells.diff` (`patch -p1` from workspace/; base `1e2f48b8a`):
+Apply `tools/integration/fixtures/doll81/doll81-cells.diff` (`patch -p1` from workspace/; base `1e2f48b8a`). Master moved while this ran: land79 and ret80 were merged (`6105b8df1`, src `4c4fe4c7`). The patch
+dry-runs cleanly there (`patch --dry-run -p1`), but every measurement above is on `cdae97b8` only. A fold onto newer code reruns
+`doll81Run.sh` on its own base (change `BASE=` in the runner).
+
+The patch:
 
 1. `src/engine/liveSubstituteSwap.ts`
    - `LIVE_SUBSTITUTE_SWAP_BODY_CELLS` += 138 Dream Eater [opponent], 320 GrassWhistle [player], 76 SolarBeam [both], 142 Lovely Kiss
