@@ -1,0 +1,34 @@
+{
+ "schema": "fix74-bulk-up-live/v1",
+ "scenario": "tools/integration/fixtures/fix74/scenarios/fix74-heracross-opp-shuckle.json",
+ "probe": "tools/compare/bulkUpProbe.py",
+ "move": "BULK_UP",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 180
+ },
+ "attacker": {
+  "species": "HERACROSS",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SHUCKLE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 95,
+  "playerMaxHp": 95,
+  "opponentHp": 155,
+  "opponentMaxHp": 155,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "derive": {
+  "frameCount": 104,
+  "evidenceRows": 104
+ }
+}

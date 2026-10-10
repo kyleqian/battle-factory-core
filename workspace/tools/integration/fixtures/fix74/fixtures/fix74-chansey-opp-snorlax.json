@@ -1,0 +1,34 @@
+{
+ "schema": "fix74-bulk-up-live/v1",
+ "scenario": "tools/integration/fixtures/fix74/scenarios/fix74-chansey-opp-snorlax.json",
+ "probe": "tools/compare/bulkUpProbe.py",
+ "move": "BULK_UP",
+ "denseWindow": {
+  "startFrame": 75,
+  "endFrame": 178
+ },
+ "attacker": {
+  "species": "CHANSEY",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 267,
+  "playerMaxHp": 267,
+  "opponentHp": 357,
+  "opponentMaxHp": 357,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "derive": {
+  "frameCount": 104,
+  "evidenceRows": 104
+ }
+}

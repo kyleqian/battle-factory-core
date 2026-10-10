@@ -1,0 +1,34 @@
+{
+ "schema": "fix74-bulk-up-live/v1",
+ "scenario": "tools/integration/fixtures/fix74/scenarios/fix74-machamp-opp-snorlax.json",
+ "probe": "tools/compare/bulkUpProbe.py",
+ "move": "BULK_UP",
+ "denseWindow": {
+  "startFrame": 75,
+  "endFrame": 178
+ },
+ "attacker": {
+  "species": "MACHAMP",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 235,
+  "playerMaxHp": 235,
+  "opponentHp": 165,
+  "opponentMaxHp": 165,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "derive": {
+  "frameCount": 104,
+  "evidenceRows": 104
+ }
+}

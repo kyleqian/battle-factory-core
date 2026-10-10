@@ -1,0 +1,34 @@
+{
+ "schema": "fix74-bulk-up-live/v1",
+ "scenario": "tools/integration/fixtures/fix74/scenarios/fix74-slaking-ply-shuckle.json",
+ "probe": "tools/compare/bulkUpProbe.py",
+ "move": "BULK_UP",
+ "denseWindow": {
+  "startFrame": 71,
+  "endFrame": 174
+ },
+ "attacker": {
+  "species": "SLAKING",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SHUCKLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 225,
+  "playerMaxHp": 225,
+  "opponentHp": 95,
+  "opponentMaxHp": 95,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "derive": {
+  "frameCount": 104,
+  "evidenceRows": 104
+ }
+}

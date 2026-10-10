@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import inventory from "../../src/data/gen/factory-animation-inventory.json" with { type: "json" };
+import frontierMons from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import { LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS } from "../../src/engine/liveMovePresentationRng.ts";
 import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS } from "../../src/engine/liveMoveTimingPolicy.ts";
 import {
@@ -86,6 +87,15 @@ describe("live inventory claim buckets", () => {
     expect(dive?.d3).toBe(true);
     expect(dive?.evidence[0]).toMatch(/^scope: BOTH bodies \(dive70/);
     expect(dive?.evidence.some((line) => line.startsWith("tools/integration/fixtures/dive70-live-receipt.json"))).toBe(true);
+    // fix74: Bulk Up's scope names every Factory Bulk Up user (battle-frontier-mons.json) as proven, with the fix74 receipt.
+    const bulkUp = (status.implementedAdapters as { id: number; sourceFieldEvidence: string[]; liveEvidence: string[] }[])
+      .find((entry) => entry.id === 339)!;
+    const bulkUpUsers = [...new Set((frontierMons.entries as { species: string; moves: string[] }[])
+      .filter((mon) => mon.moves.includes("MOVE_BULK_UP")).map((mon) => mon.species.replace(/^SPECIES_/, "")))].sort();
+    expect(bulkUpUsers).toEqual(["HERACROSS", "MACHAMP", "PRIMEAPE", "SLAKING", "URSARING"]);
+    expect(bulkUp.liveEvidence[0]).toMatch(/^scope: every Factory Bulk Up user \(fix74\): /);
+    for (const species of bulkUpUsers) expect(bulkUp.liveEvidence[0]).toContain(species);
+    expect(bulkUp.sourceFieldEvidence).toContain("../tools/integration/fixtures/fix74-live-receipt.json");
     // every accepted move is in exactly one of exact / faithful random / faithful timing / remaining (276)
     const census = JSON.parse(readFileSync(join(import.meta.dirname, "../../tools/integration/fixtures/remaining-adapters-census.json"), "utf8")).summary;
     expect(status.implementedCount + status.faithfulRandomCount + status.faithfulTimingCount + census.remaining).toBe(276);
