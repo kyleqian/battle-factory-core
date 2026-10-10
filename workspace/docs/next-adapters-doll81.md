@@ -47,8 +47,8 @@ How to read the table:
 
 Struggle (165) is excluded: it is not a rental move.
 
-**Proven and in the patch: 13 (move, side) cells.** Census commands they cover (base): Dream Eater opp 17, Leaf Blade opp 15, ThunderPunch
-opp 13, SolarBeam opp 10 + player 8 (charge turns), Lovely Kiss opp 9, Sing player 7, Sunny Day 5 + 4. The census delta is in §3.
+**Proven and in the patch: 13 (move, side) cells.** On seeds 0..999 they make **77 commands live**. The census delta, with one
+stalled-battle caveat, is in §3.
 
 ## 1. FOLD INSTRUCTIONS
 
@@ -66,7 +66,12 @@ Apply `tools/integration/fixtures/doll81/doll81-cells.diff` (`patch -p1` from wo
 3. `tools/integration/liveShareCensusGates.ts`: the `SWAP_SELF` needle becomes `"return (request.target === request.attacker"`.
    Without it the census aborts at load.
 
-Pins a fold must move (`receipts/pins.txt`; the four related files on the patched copy: 3 failed / 74 passed of 77):
+Pins a fold must move (`receipts/pins.txt`; the four related files on the patched copy: 3 failed / 74 passed of 77). The other
+eight test files that mention the doll / swap / fade pass on the patched copy (429 / 429):
+- aud56GeneralAnimationAllocator, battleScriptHitChainOpcode, presentationStringIssue107, spriteOrderPlans51;
+- substituteDollFieldState, spriteOrderPrep64, substituteFadePresentation, executableFrontierRatchet.
+
+The three pins:
 - `tests/substituteDollDefenderLive.test.ts:35` — the defender proven-cell allowlist gains `9:player`, `9:opponent`, `348:player`,
   `348:opponent` (37 -> 41 entries).
 - `tests/substituteSwapAttdollCells.test.ts:64` — the framing keys gain 47, 142, 320 (add the three `[id, adapter, rows, shift, sides]`
@@ -101,7 +106,45 @@ whatever the target. Production declined only because `liveSubstituteSwapApplies
 
 ## 3. Census (seeds 0..999, one process each; base vs patched copy)
 
-CENSUS_PENDING
+Command: `liveShareCensus.ts --seeds=0..999`, one process per tree (base `1e2f48b8a` copy, and the copy patched with
+`doll81-cells.diff`). Checked with `doll81CensusCheck.py`, which wraps prep43CensusDelta.py. Receipts: `receipts/census-delta.json` and
+`receipts/census-check.txt`.
+
+- **Live: 25,915 -> 25,992 commands (+77).** By the census's own report: 94.17 % / 97.94 % -> **94.46 % / 98.01 %** (count / frames).
+  - Live frames: 3,870,725 -> 3,889,384 (+18,659).
+  - In base-frame terms that is 97.94 % -> 98.41 %.
+- **0 live -> non-live regressions; render throws 0 / 0.**
+- **Substitute-doll declines: 255 commands / 8,160 frames -> 178 / 5,696.**
+
+Newly live, per (move, side), commands / live frames gained:
+
+| move, side | commands | live frames |
+|---|---|---|
+| Dream Eater opponent | 17 | 5,916 |
+| Leaf Blade opponent | 15 | 3,360 |
+| Sing player | 7 | 2,317 |
+| Lovely Kiss opponent | 9 | 2,106 |
+| Lovely Kiss player | 2 | 476 |
+| ThunderPunch opponent | 13 | 1,352 |
+| Sunny Day opponent | 5 | 1,195 |
+| Sunny Day player | 4 | 972 |
+| SolarBeam player (charge turns) | 5 | 965 |
+
+The census's SolarBeam opponent 10 and player 3 are all fire turns, which stay declined. The SolarBeam player 7 have both dolls shown.
+
+Gameplay identity:
+- **Command KEY sequence (battle, kind, moveId, side, attacker, target): identical for every battle except one truncated tail.**
+  - Seed 881 (streak 38) is one of the three battles that STALL at the census's FRAME_BUDGET (200,000 frames) in BOTH runs (a
+    Struggle loop).
+  - The newly live doll bodies are longer than the 32-frame duration fallback they replace, so the budget runs out one turn earlier:
+    268 -> 267 turns, and its last two `165 SHUCKLE -> CRADILY` commands are cut.
+  - The other two stalls (434, 796) have identical turns. Played / terminal / stalled are 1,000 / 997 / 3 in both runs.
+- **`battleDigestExcludingFrames` therefore DIFFERS** (`48b2d42b...` vs `d0c983af...`). The record holds `turns`, and seed 881's
+  turns are the only differing battle field the census exposes. The digest itself is not recomputable without the per-battle records,
+  which the report does not export.
+- **A fold should re-confirm digest identity** with a census that exports per-battle records, or with a larger frame budget for seed 881.
+- prep43's `pairingMismatches` 77 = exactly the 77 newly live commands: their presented length changes from the fallback to the
+  composite.
 
 ## 4. Reproduce
 

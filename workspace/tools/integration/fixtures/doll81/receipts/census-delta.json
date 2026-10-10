@@ -1,0 +1,278 @@
+{
+ "schema": "prep43-census-delta/v1",
+ "commands": 27516,
+ "presentedFrames": 3952210,
+ "pairingMismatches": 77,
+ "liveFramesBefore": 3870725,
+ "liveFramesAfter": 3889384,
+ "liveCountBefore": 25915,
+ "liveCountAfter": 25992,
+ "regressions": [],
+ "regressionCount": 0,
+ "units": [
+  {
+   "beforeDetail": "duration: attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)",
+   "commands": 106,
+   "frames": 3392,
+   "liveAfterCommands": 40,
+   "liveAfterFrames": 11780,
+   "stillFallbackAfterTop": [
+    [
+     "duration: attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)",
+     66
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "duration: defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)",
+   "commands": 89,
+   "frames": 2848,
+   "liveAfterCommands": 28,
+   "liveAfterFrames": 4712,
+   "stillFallbackAfterTop": [
+    [
+     "duration: defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)",
+     61
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "duration: attacker doll: self-target body",
+   "commands": 48,
+   "frames": 1536,
+   "liveAfterCommands": 9,
+   "liveAfterFrames": 2167,
+   "stillFallbackAfterTop": [
+    [
+     "duration: attacker doll: self-target body",
+     39
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: later-body (order lend not a first body)",
+   "commands": 27,
+   "frames": 4416,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: later-body (order lend not a first body)",
+     27
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: sprite allocator history unknown",
+   "commands": 52,
+   "frames": 5145,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: sprite allocator history unknown",
+     52
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: unclassified (case-local gate)",
+   "commands": 100,
+   "frames": 12716,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: unclassified (case-local gate)",
+     100
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: target hidden (semi-invulnerable): no D4 phase for its lag profile (hide66)",
+   "commands": 2,
+   "frames": 276,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: target hidden (semi-invulnerable): no D4 phase for its lag profile (hide66)",
+     2
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "duration: no adapter (no liveMoveAnimationDuration case)",
+   "commands": 1054,
+   "frames": 33728,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "duration: no adapter (no liveMoveAnimationDuration case)",
+     1054
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: unclassified (branch-local gate)",
+   "commands": 2,
+   "frames": 208,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: unclassified (branch-local gate)",
+     2
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "duration: unsupported turn 0",
+   "commands": 7,
+   "frames": 224,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "duration: unsupported turn 0",
+     7
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "duration: defender doll: other-side body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)",
+   "commands": 4,
+   "frames": 128,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "duration: defender doll: other-side body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)",
+     4
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "order host: next-mon summary while the opponent battler is tracked",
+   "commands": 2,
+   "frames": 514,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "order host: next-mon summary while the opponent battler is tracked",
+     2
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "order host: no EXACT plan: body 310:player",
+   "commands": 5,
+   "frames": 897,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "order host: no EXACT plan: body 310:player",
+     5
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: stale move power unknown",
+   "commands": 12,
+   "frames": 816,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: stale move power unknown",
+     12
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "order host: no EXACT plan: body 260:opponent",
+   "commands": 10,
+   "frames": 1570,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "order host: no EXACT plan: body 260:opponent",
+     10
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: CASTFORM shown in a weather form: the field art has no form input (cf78, ISSUES #143)",
+   "commands": 58,
+   "frames": 10116,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: CASTFORM shown in a weather form: the field art has no form input (cf78, ISSUES #143)",
+     58
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "order host: no EXACT plan: body 63:player",
+   "commands": 7,
+   "frames": 1648,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "order host: no EXACT plan: body 63:player",
+     7
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "order host: no EXACT plan: body 260:player",
+   "commands": 3,
+   "frames": 556,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "order host: no EXACT plan: body 260:player",
+     3
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "order host: no EXACT plan: body 316:player",
+   "commands": 5,
+   "frames": 495,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "order host: no EXACT plan: body 316:player",
+     5
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "duration: attacker doll: both battlers shown as dolls",
+   "commands": 8,
+   "frames": 256,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "duration: attacker doll: both battlers shown as dolls",
+     8
+    ]
+   ]
+  }
+ ],
+ "liveFramePctBefore": 97.94,
+ "liveFramePctAfter": 98.41,
+ "liveCountPctBefore": 94.18,
+ "liveCountPctAfter": 94.46
+}
