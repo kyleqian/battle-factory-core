@@ -1,0 +1,287 @@
+{
+ "schema": "prep65-dive-patch-check/v1",
+ "summary": {
+  "bodies": 15,
+  "planEqualsRom": 15,
+  "perFrameExact": 15,
+  "allocationFrames": 215,
+  "controlOtherWordsEqual": 0,
+  "vectors": 7,
+  "unleashLendExact": 7,
+  "postUnleash": 7,
+  "postUnleashExact": 7,
+  "speciesFreeDeclines": 7
+ },
+ "perBody": [
+  {
+   "job": "dive-opp-170",
+   "label": "body 291:opponent",
+   "frame": 2202,
+   "planEqualsRom": true,
+   "perFrameExact": true,
+   "allocationFrames": 5,
+   "problems": [],
+   "controlOtherWords": {
+    "from": "dive-opp-170-surf@2385",
+    "planEqualsRom": false
+   }
+  },
+  {
+   "job": "dive-opp-170",
+   "label": "body 10291:opponent",
+   "frame": 2770,
+   "planEqualsRom": true,
+   "perFrameExact": true,
+   "allocationFrames": 25,
+   "problems": [],
+   "controlOtherWords": {
+    "from": "dive-opp-170-whirlpool@2779",
+    "planEqualsRom": false
+   }
+  },
+  {
+   "job": "dive-opp-170-surf",
+   "label": "body 291:opponent",
+   "frame": 2385,
+   "planEqualsRom": true,
+   "perFrameExact": true,
+   "allocationFrames": 5,
+   "problems": [],
+   "controlOtherWords": {
+    "from": "dive-opp-170-whirlpool@2216",
+    "planEqualsRom": false
+   }
+  },
+  {
+   "job": "dive-opp-170-whirlpool",
+   "label": "body 291:opponent",
+   "frame": 2216,
+   "planEqualsRom": true,
+   "perFrameExact": true,
+   "allocationFrames": 5,
+   "problems": [],
+   "controlOtherWords": {
+    "from": "dive-opp-171@2059",
+    "planEqualsRom": false
+   }
+  },
+  {
+   "job": "dive-opp-170-whirlpool",
+   "label": "body 10291:opponent",
+   "frame": 2779,
+   "planEqualsRom": true,
+   "perFrameExact": true,
+   "allocationFrames": 25,
+   "problems": [],
+   "controlOtherWords": {
+    "from": "dive-opp-171@2620",
+    "planEqualsRom": false
+   }
+  },
+  {
+   "job": "dive-opp-171",
+   "label": "body 291:opponent",
+   "frame": 2059,
+   "planEqualsRom": true,
+   "perFrameExact": true,
+   "allocationFrames": 5,
+   "problems": [],
+   "controlOtherWords": {
+    "from": "dive-opp-170@2202",
+    "planEqualsRom": false
+   }
+  },
+  {
+   "job": "dive-opp-171",
+   "label": "body 10291:opponent",
+   "frame": 2620,
+   "planEqualsRom": true,
+   "perFrameExact": true,
+   "allocationFrames": 25,
+   "problems": [],
+   "controlOtherWords": {
+    "from": "dive-opp-170@2770",
+    "planEqualsRom": false
+   }
+  },
+  {
+   "job": "dive-ply-170",
+   "label": "body 291:player",
+   "frame": 2205,
+   "planEqualsRom": true,
+   "perFrameExact": true,
+   "allocationFrames": 5,
+   "problems": [],
+   "controlOtherWords": {
+    "from": "dive-ply-170-surf@2387",
+    "planEqualsRom": false
+   }
+  },
+  {
+   "job": "dive-ply-170",
+   "label": "body 10291:player",
+   "frame": 2635,
+   "planEqualsRom": true,
+   "perFrameExact": true,
+   "allocationFrames": 25,
+   "problems": [],
+   "controlOtherWords": {
+    "from": "dive-ply-170-surf@2966",
+    "planEqualsRom": false
+   }
+  },
+  {
+   "job": "dive-ply-170-surf",
+   "label": "body 291:player",
+   "frame": 2387,
+   "planEqualsRom": true,
+   "perFrameExact": true,
+   "allocationFrames": 5,
+   "problems": [],
+   "controlOtherWords": {
+    "from": "dive-ply-170-whirlpool@2224",
+    "planEqualsRom": false
+   }
+  },
+  {
+   "job": "dive-ply-170-surf",
+   "label": "body 10291:player",
+   "frame": 2966,
+   "planEqualsRom": true,
+   "perFrameExact": true,
+   "allocationFrames": 25,
+   "problems": [],
+   "controlOtherWords": {
+    "from": "dive-ply-170-whirlpool@2884",
+    "planEqualsRom": false
+   }
+  },
+  {
+   "job": "dive-ply-170-whirlpool",
+   "label": "body 291:player",
+   "frame": 2224,
+   "planEqualsRom": true,
+   "perFrameExact": true,
+   "allocationFrames": 5,
+   "problems": [],
+   "controlOtherWords": {
+    "from": "dive-ply-171@2059",
+    "planEqualsRom": false
+   }
+  },
+  {
+   "job": "dive-ply-170-whirlpool",
+   "label": "body 10291:player",
+   "frame": 2884,
+   "planEqualsRom": true,
+   "perFrameExact": true,
+   "allocationFrames": 25,
+   "problems": [],
+   "controlOtherWords": {
+    "from": "dive-ply-171@2488",
+    "planEqualsRom": false
+   }
+  },
+  {
+   "job": "dive-ply-171",
+   "label": "body 291:player",
+   "frame": 2059,
+   "planEqualsRom": true,
+   "perFrameExact": true,
+   "allocationFrames": 5,
+   "problems": [],
+   "controlOtherWords": {
+    "from": "dive-ply-170@2205",
+    "planEqualsRom": false
+   }
+  },
+  {
+   "job": "dive-ply-171",
+   "label": "body 10291:player",
+   "frame": 2488,
+   "planEqualsRom": true,
+   "perFrameExact": true,
+   "allocationFrames": 25,
+   "problems": [],
+   "controlOtherWords": {
+    "from": "dive-ply-170@2635",
+    "planEqualsRom": false
+   }
+  }
+ ],
+ "vectors": [
+  {
+   "job": "dive-opp-170",
+   "side": "opponent",
+   "hiddenWindow": [
+    "prompt cycle"
+   ],
+   "unleashLendEqualsRom": true,
+   "postUnleashEqualsRom": true,
+   "postUnleashAgainst": "gap@f2862",
+   "controlSpeciesFreeDeclines": true
+  },
+  {
+   "job": "dive-opp-170-whirlpool",
+   "side": "opponent",
+   "hiddenWindow": [
+    "prompt cycle"
+   ],
+   "unleashLendEqualsRom": true,
+   "postUnleashEqualsRom": true,
+   "postUnleashAgainst": "gap@f2871",
+   "controlSpeciesFreeDeclines": true
+  },
+  {
+   "job": "dive-opp-171",
+   "side": "opponent",
+   "hiddenWindow": [
+    "prompt cycle"
+   ],
+   "unleashLendEqualsRom": true,
+   "postUnleashEqualsRom": true,
+   "postUnleashAgainst": "gap@f2712",
+   "controlSpeciesFreeDeclines": true
+  },
+  {
+   "job": "dive-ply-170",
+   "side": "player",
+   "hiddenWindow": [],
+   "unleashLendEqualsRom": true,
+   "postUnleashEqualsRom": true,
+   "postUnleashAgainst": "gap@f2727",
+   "controlSpeciesFreeDeclines": true
+  },
+  {
+   "job": "dive-ply-170-surf",
+   "side": "player",
+   "hiddenWindow": [
+    "body 57:opponent + hidden hit"
+   ],
+   "unleashLendEqualsRom": true,
+   "postUnleashEqualsRom": true,
+   "postUnleashAgainst": "gap@f3058",
+   "controlSpeciesFreeDeclines": true
+  },
+  {
+   "job": "dive-ply-170-whirlpool",
+   "side": "player",
+   "hiddenWindow": [
+    "body 250:opponent + hidden hit"
+   ],
+   "unleashLendEqualsRom": true,
+   "postUnleashEqualsRom": true,
+   "postUnleashAgainst": "gap@f2976",
+   "controlSpeciesFreeDeclines": true
+  },
+  {
+   "job": "dive-ply-171",
+   "side": "player",
+   "hiddenWindow": [],
+   "unleashLendEqualsRom": true,
+   "postUnleashEqualsRom": true,
+   "postUnleashAgainst": "gap@f2580",
+   "controlSpeciesFreeDeclines": true
+  }
+ ]
+}
