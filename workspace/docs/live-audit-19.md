@@ -23,7 +23,7 @@ No shared oracle was touched. No tracked file outside the audit19 set was edited
 
 ## 1. Results first
 
-**599 consumer windows, 130 scenarios, both sides.** Of these, 404 are live: **356 are 0 px**, and 48 have a residual. The 48 are 44
+**599 consumer windows from 122 of 130 scenarios, both sides.** The other 8 are mag-* with Electric consumers, which GOLEM / SWAMPERT's Ground typing blocks: no body. Of these, 404 are live: **356 are 0 px**, and 48 have a residual. The 48 are 44
 Castform form-art windows (ISSUES #143) and 4 player-CLAMPERL Dive *setup* windows (OPEN, outside today's folds). The other 195 windows
 fall back, all through production's own decline. **r1 == r2 on 599 / 599.** Production's hide equals the ROM's on **599 / 599**,
 including 9 windows where the other battler is hidden by Dive.
@@ -38,7 +38,6 @@ including 9 windows where the other battler is hidden by Dive.
   1..5 (30 windows), the player's counter 1 (8), and consumers after each of them and in the following turns. The player's counters 2..5
   fall back (locked turn, below).
 - dive70: every live consumer after a Dive **attack** is 0 px (22 windows).
-
 - **One latent DEFECT in a plan fold71 extended**: Needle Arm 302 from a non-entry start order (6 lends != ROM, 0 px).
 
 **#160 is a fixture artifact, not a production defect** (section 3).
@@ -47,7 +46,7 @@ including 9 windows where the other battler is hidden by Dive.
 
 | Unit -> consumer | Verdict | px (before -> after) | Evidence |
 |---|---|---|---|
-| **CASTFORM_CHANGE (Forecast, sun / rain) -> any consumer while Castform is transformed** (44 live windows, both sides, both weathers; 4 more fall back) | **DEFECT, known: ISSUES #143's open remainder**, now exercised live because fold71 made these consumers live. The **order is EXACT**: 44 / 44 lends == ROM (`lends.txt`). The residual is Castform's own sprite box only: the ROM draws the sun / rain form (palette 945a42 / 738cd6), production the normal form (f7f7ff). The production field art has no form input (`src/engine/battleCommandFieldArt.ts`, which builds the battler pic from `species` only). Every static frame has the same gap, so it is not specific to the live path. | 998..2,312 px **per row** on every row, in Castform's sprite box: player x 47..94 / y 67..111, opponent x 157..194 / y 11..58. **With both boxes masked** (`receipts/ablation/check-cast-*-swift-*-mask-castform.json`): 0 px for Castform as the player in rain; 428 px in a 2-px column beside the player box (sun); 27,890 / 29,307 px of Swift's stars when Castform is the opponent target, at x 98..122 / y 82..98, where the ROM stars (ffad18) aim at the transformed form's coords. All of it is #143's per-form front coords / elevation. | No temp patch. The fix is #143 itself: `gBattleMonForms` in the field view, with per-form palette, front coords and elevation. That is art and data, outside an evidence step. Declining the live path would not change the pixels, because the fallback draws the same field art. |
+| **CASTFORM_CHANGE (Forecast, sun / rain) -> any consumer while Castform is transformed** (44 live windows, both sides, both weathers; 4 more fall back) | **DEFECT, known: ISSUES #143's open remainder**, now exercised live because fold71 made these consumers live. The **order is EXACT**: 44 / 44 lends == ROM (`lends.txt`). The residual is Castform's sprite, plus the target geometry of a consumer aimed at the transformed Castform: the ROM draws the sun / rain form (palette 945a42 / 738cd6), production the normal form (f7f7ff). The production field art has no form input (`src/engine/battleCommandFieldArt.ts`, which builds the battler pic from `species` only). Every static frame has the same gap, so it is not specific to the live path. | 998..2,312 px **per row** on every row, in Castform's sprite box: player x 47..94 / y 67..111, opponent x 157..194 / y 11..58. **With both boxes masked** (`receipts/ablation/check-cast-*-swift-*-mask-castform.json`): 0 px for Castform as the player in rain; 428 px in a 2-px column beside the player box (sun); 27,890 / 29,307 px of Swift's stars when Castform is the opponent target, at x 98..122 / y 82..98, where the ROM stars (ffad18) aim at the transformed form's coords. All of it is #143's per-form front coords / elevation. | No temp patch. The fix is #143 itself: `gBattleMonForms` in the field view, with per-form palette, front coords and elevation. That is art and data, outside an evidence step. Declining the live path would not change the pixels, because the fallback draws the same field art. |
 | **Needle Arm 302 (both sides) from a NON-entry start order -> Water Pulse** (`needle-{cacnea,cacturne}-water-pulse-{ply,opp}` c1 / c2: `[Needle Arm, Water Pulse]`, prompt, `[Needle Arm]`, then Water Pulse) | **DEFECT, latent** (lend != ROM, 0 px in every observed window). fold71 added the `302:opponent` row with the existing `302:player` text, plan 162 at `src/engine/spriteOrderProductionPlans.ts:169`. | 6 / 44 Needle Arm lends != ROM; 0 -> 0 px: Water Pulse's sprites do not reach the swapped slots. | `AUDIT19_TRACE=1`: the host's full 55-slot free list before the 2nd Needle Arm **equals** the ROM's (`[3,4,10,7,9,5,14,15,12,13,11,21,…]`, so the prompt model is right). After it, production has `[3,11,12,10,…]` and the ROM has `[3,11,10,12,…]`. From the entry-like start (`[4,3,21,20,5,…]`, the 1st Needle Arm) both give `[3,11,12,10,…]`. **Mechanism, measured per frame** (`audit19NeedleFrames.py`, two fresh runs r1 == r2, `receipts/needle/`): the burst's 9 + 1 creates are sorted at frame 148 / 1482. The sprites created into slots 10 and 12 tie in `SortSprites` (priority word 0x3ff, equal y), so its stable insertion sort keeps their relation from the START order: 12 before 10 at the entry-like start of the 1st Needle Arm, 10 before 12 at the post-Water-Pulse + prompt start of the 2nd. The plan encodes a fixed placement (`…;Cfffffffff;Cf;…`), so it is exact only from starts where 12 precedes 10 (every plans69 probe and 38 / 44 here). **Tested fix hypothesis, NEGATIVE:** `patches/needle-arm-302-merged-burst-NEGATIVE.diff` (plans69's merged 10-sprite burst `Cffffffffff`), applied to a git-archive copy, leaves 6 / 6 unchanged. **Fix shape (no verified patch in the time box):** model the tie in the 302 plan, i.e. the two tied creates keep their start-order relation (a plan-encoding extension). The fail-closed alternative is to invalidate after 302 when the two slots the tied creates receive (creation indices 17 and 19 here: slots 10 and 12) are in the opposite relation in the start free order. That keeps the 38 exact windows live. |
 | **Dive 291 SETUP by the PLAYER's CLAMPERL** (first body, no history) | **OPEN** (not a fold of today's; the setup body landed in land68). Not order: chain == entry, units 0. | ~11,000 px over 30 rows: ages 70..99, box x 64..79 / y 105..111, two water blues swapped (ROM 399cff vs 216bff); 4 / 4 windows. The player CHINCHOU's setup is 0 px (8 windows). | Not diagnosed in the time box. Likely the setup splash geometry for CLAMPERL's back pic. Flagged for a species audit; the census exposure was not measured. |
 
@@ -68,7 +67,7 @@ including 9 windows where the other battler is hidden by Dive.
 |---|---|---|---|---|---|
 | mag: Magnitude 222, GOLEM / SWAMPERT, 4 consumers × 2 sides (16) | 18 | 18 (≤ 99: 16, > 99: 2) | 0 | 0 | 18 / 18 |
 | magx: Magnitude > 99 by lab seed (k10 / k4 player CHANSEY, k5 / k2 opponent CHANSEY) (8) | 19 | 19 (> 99: 4) | 0 | 0 | 19 / 19 |
-| cast: CASTFORM sun / rain, 4 consumers × 2 sides (16) | 48 | 0 | 44 (#143 form art; masked 0) | 4 (Shock Wave after Rain Dance) | 44 / 44 |
+| cast: CASTFORM sun / rain, 4 consumers × 2 sides (16) | 48 | 0 | 44 (#143 form art) | 4 (Shock Wave after Rain Dance) | 44 / 44 |
 | conv: Conversion 2, PORYGON2 / SNORLAX (16) | 59 | 59 | 0 | 0 | 59 / 59 |
 | needle: Needle Arm, CACTURNE / CACNEA, both sides (16) | 44 | 44 | 0 | 0 | **38 / 44** (6 Water Pulse windows: the Needle Arm DEFECT row) |
 | sb: NINJASK Speed Boost (STATS_CHANGE 17), 4 consumers × 2 sides (8) | 31 | 31 | 0 | 0 | 31 / 31 |
@@ -77,7 +76,7 @@ including 9 windows where the other battler is hidden by Dive.
 | ctl: no-unit controls (SNORLAX Snore), 5 consumers × 2 sides (10) | 40 | 40 | 0 | 0 | 40 / 40 |
 | wp160: dive70's `whirlpool-opp-s1` + a variant (2) | 5 | 5 (1 hidden) | 0 | 0 | 5 / 5 |
 | wp160b: #160 as described, 3 seeds × 2 sides (6) | 19 | 19 (8 hidden) | 0 | 0 | 10 / 10 resolved; 9 opponent-side Whirlpools after the player's locked attack turn have no resolvable lend and need none (live, 0 px) |
-| **total (130)** | **599** | **356** | **48** | **195** | |
+| **total (130 staged, 122 with windows)** | **599** | **356** | **48** | **195** | |
 
 By the unit immediately before the consumer (`receipts/coverage.txt`):
 
@@ -95,7 +94,7 @@ By the unit immediately before the consumer (`receipts/coverage.txt`):
 | CASTFORM_CHANGE | 16 #143 |
 
 **Consumers two or more units later:** every ice-* / conv-* / needle-* / sb-* chain runs 3 to 6 turns, and windows c2+ sit after
-2 to 44 history units. All of them are 0 px or a named fallback.
+2 to 44 history units. All of them are 0 px, #143 (cast-*) or a named fallback; the 6 Needle Arm lends (0 px) are the latent DEFECT.
 
 ### Not reached
 
@@ -107,8 +106,17 @@ By the unit immediately before the consumer (`receipts/coverage.txt`):
 
 ## 2. Reproducibility
 
-Run A produced the committed receipts. Run B used fresh dirs and was started while A was still running. It was compared by
-`audit19Compare.py`; see the run-B note in section 4.
+- **Run A** (`audit19Run.sh`, 13:44..14:02) produced the committed receipts.
+- **Run B** used fresh receipt and scratch dirs and ran as a separate batch, started at 13:55 while A was in its check stage
+  (ISSUES #154). It re-staged the scenarios (== committed) and re-probed every scenario. **Its derived fixtures == the committed ones**,
+  and `derive.txt` is byte-identical: frames, `gRng2Value`, powers, counters and turns all reproduce.
+- Run B used the runner as of `0ee9bae04`. `coverage.txt` and the Needle Arm frame receipt were added later; for run B they were
+  produced with the same commands.
+- `audit19Compare.py` result:
+
+RUNB_RESULT
+
+- Unlike audit 18 (15 ROM-drift windows), no window drifted across these two batches.
 
 ## 3. ISSUES #160 diagnosis
 
