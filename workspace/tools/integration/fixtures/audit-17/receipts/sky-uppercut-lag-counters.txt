@@ -1,0 +1,10 @@
+# sh tools/integration/issue151Counters.sh <dir> 12 <fixtures> (speciesAudit2Counters.py, 2 fresh runs each; lag = playTimeVBlanks pass delta 0, as window ages)
+ctl-sky-uppercut-opp-c0: window 83-270 rows 188 digests f2045f664794a6ee f2045f664794a6ee identical True lag ages [148, 149]
+ctl-sky-uppercut-ply-c0: window 79-267 rows 189 digests b23f5d322a4214ff b23f5d322a4214ff identical True lag ages [148, 149, 168]
+fly-sky-uppercut-opp-c0: window 239-425 rows 187 digests 492f3ae97fda1c5f 492f3ae97fda1c5f identical True lag ages [166]
+fly-sky-uppercut-opp-c1: window 767-954 rows 188 digests 492f3ae97fda1c5f 492f3ae97fda1c5f identical True lag ages [148, 149]
+fly-sky-uppercut-opp-c3: window 2249-2437 rows 189 digests 492f3ae97fda1c5f 492f3ae97fda1c5f identical True lag ages [148, 149, 168]
+fly-sky-uppercut-opp-c4: window 2907-3092 rows 186 digests 492f3ae97fda1c5f 492f3ae97fda1c5f identical True lag ages []
+fly-sky-uppercut-ply-c0: window 239-425 rows 187 digests 54aa2def6b789f05 54aa2def6b789f05 identical True lag ages [166]
+fly-sky-uppercut-ply-c1: window 1643-1831 rows 189 digests 54aa2def6b789f05 54aa2def6b789f05 identical True lag ages [148, 149, 168]
+ctl-thunderbolt-ply-c0: window 78-314 rows 237 digests a958c76cd5ed38b3 a958c76cd5ed38b3 identical True lag ages [105]

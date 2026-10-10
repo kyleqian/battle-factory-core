@@ -1,0 +1,60 @@
+{
+ "schema": "audit17-chain-fixture/v1",
+ "move": "DOUBLE_TEAM",
+ "bodyIndex": 0,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/audit-17/scenarios/dt-pla-ralts.json",
+ "denseWindow": {
+  "startFrame": 71,
+  "endFrame": 229,
+  "ageOffset": -1
+ },
+ "attacker": {
+  "species": "RALTS",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015431,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 135,
+  "playerMaxHp": 135,
+  "opponentHp": 267,
+  "opponentMaxHp": 267,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": [
+      "104",
+      "0",
+      "0",
+      "0",
+      "70",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
+}

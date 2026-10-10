@@ -1,0 +1,16 @@
+dt-opp-pikachu-c0.json                   DOUBLE_TEAM  opponent units=0   live=1 order=1 alloc=0 harnessAlloc=False rows=159 exact=159 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+dt-opp-pikachu-c1.json                   DOUBLE_TEAM  opponent units=2   live=1 order=1 alloc=0 harnessAlloc=False rows=159 exact=159 px=0 r1==r2=1 ages=- | entry live=1 px=20249 r1==r2=1 win=1
+dt-opp-ralts-c0.json                     DOUBLE_TEAM  opponent units=0   live=1 order=1 alloc=0 harnessAlloc=False rows=159 exact=159 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+dt-opp-ralts-c1.json                     DOUBLE_TEAM  opponent units=2   live=1 order=1 alloc=0 harnessAlloc=False rows=159 exact=159 px=0 r1==r2=1 ages=- | entry live=1 px=6201 r1==r2=1 win=1
+dt-opp-treecko-c0.json                   DOUBLE_TEAM  opponent units=0   live=1 order=1 alloc=0 harnessAlloc=False rows=159 exact=159 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+dt-opp-treecko-c1.json                   DOUBLE_TEAM  opponent units=2   live=1 order=1 alloc=0 harnessAlloc=False rows=159 exact=159 px=0 r1==r2=1 ages=- | entry live=1 px=18195 r1==r2=1 win=1
+dt-opp-tyrogue-c0.json                   DOUBLE_TEAM  opponent units=0   live=1 order=1 alloc=0 harnessAlloc=False rows=159 exact=159 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+dt-opp-tyrogue-c1.json                   DOUBLE_TEAM  opponent units=2   live=1 order=1 alloc=0 harnessAlloc=False rows=159 exact=159 px=0 r1==r2=1 ages=- | entry live=1 px=9450 r1==r2=1 win=1
+dt-pla-parasect-c0.json                  DOUBLE_TEAM  player   units=0   live=1 order=1 alloc=0 harnessAlloc=False rows=159 exact=159 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+dt-pla-parasect-c1.json                  DOUBLE_TEAM  player   units=2   live=1 order=1 alloc=0 harnessAlloc=False rows=159 exact=159 px=0 r1==r2=1 ages=- | entry live=1 px=38088 r1==r2=1 win=1
+dt-pla-pikachu-c0.json                   DOUBLE_TEAM  player   units=0   live=1 order=1 alloc=0 harnessAlloc=False rows=159 exact=159 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+dt-pla-pikachu-c1.json                   DOUBLE_TEAM  player   units=2   live=1 order=1 alloc=0 harnessAlloc=False rows=159 exact=159 px=0 r1==r2=1 ages=- | entry live=1 px=21843 r1==r2=1 win=1
+dt-pla-ralts-c0.json                     DOUBLE_TEAM  player   units=0   live=1 order=1 alloc=0 harnessAlloc=False rows=159 exact=159 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+dt-pla-ralts-c1.json                     DOUBLE_TEAM  player   units=2   live=1 order=1 alloc=0 harnessAlloc=False rows=159 exact=159 px=0 r1==r2=1 ages=- | entry live=1 px=9088 r1==r2=1 win=1
+dt-pla-tyrogue-c0.json                   DOUBLE_TEAM  player   units=0   live=1 order=1 alloc=0 harnessAlloc=False rows=159 exact=159 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+dt-pla-tyrogue-c1.json                   DOUBLE_TEAM  player   units=2   live=1 order=1 alloc=0 harnessAlloc=False rows=159 exact=159 px=0 r1==r2=1 ages=- | entry live=1 px=24242 r1==r2=1 win=1
