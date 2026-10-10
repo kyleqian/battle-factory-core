@@ -1,0 +1,247 @@
+{
+ "schema": "prep64-check/v1",
+ "jobs": 10,
+ "notIdenticalAB": 0,
+ "plans": {
+  "general SUBSTITUTE_FADE": ""
+ },
+ "result": {
+  "instances": 11,
+  "matched": 11,
+  "handoffsExact": 11,
+  "sides": [
+   "battle-scene-off:opponent",
+   "battle-scene-off:player",
+   "battle-scene-on:opponent",
+   "battle-scene-on:player"
+  ]
+ },
+ "nextConsumerResult": {
+  "bodies": 6,
+  "exact": 6
+ },
+ "instances": [
+  {
+   "job": "opp-golbat-off",
+   "profile": "battle-scene-off",
+   "holder": "opponent",
+   "frame": 5796,
+   "matched": true,
+   "framesChecked": 0,
+   "problems": [],
+   "nextAllocatingUnit": {
+    "label": "gap",
+    "frame": 5897,
+    "handoffExact": true
+   }
+  },
+  {
+   "job": "opp-golbat-off",
+   "profile": "battle-scene-off",
+   "holder": "opponent",
+   "frame": 10062,
+   "matched": true,
+   "framesChecked": 0,
+   "problems": [],
+   "nextAllocatingUnit": {
+    "label": "gap",
+    "frame": 10163,
+    "handoffExact": true
+   }
+  },
+  {
+   "job": "opp-golbat-on",
+   "profile": "battle-scene-on",
+   "holder": "opponent",
+   "frame": 5796,
+   "matched": true,
+   "framesChecked": 0,
+   "problems": [],
+   "nextAllocatingUnit": {
+    "label": "gap",
+    "frame": 5897,
+    "handoffExact": true
+   }
+  },
+  {
+   "job": "opp-golbat-on",
+   "profile": "battle-scene-on",
+   "holder": "opponent",
+   "frame": 10062,
+   "matched": true,
+   "framesChecked": 0,
+   "problems": [],
+   "nextAllocatingUnit": {
+    "label": "gap",
+    "frame": 10163,
+    "handoffExact": true
+   }
+  },
+  {
+   "job": "opp-persian-off",
+   "profile": "battle-scene-off",
+   "holder": "opponent",
+   "frame": 4374,
+   "matched": true,
+   "framesChecked": 0,
+   "problems": [],
+   "nextAllocatingUnit": {
+    "label": "gap",
+    "frame": 4475,
+    "handoffExact": true
+   }
+  },
+  {
+   "job": "opp-persian-on",
+   "profile": "battle-scene-on",
+   "holder": "opponent",
+   "frame": 4374,
+   "matched": true,
+   "framesChecked": 0,
+   "problems": [],
+   "nextAllocatingUnit": {
+    "label": "gap",
+    "frame": 4475,
+    "handoffExact": true
+   }
+  },
+  {
+   "job": "ply-golbat-off",
+   "profile": "battle-scene-off",
+   "holder": "player",
+   "frame": 4406,
+   "matched": true,
+   "framesChecked": 0,
+   "problems": [],
+   "nextAllocatingUnit": {
+    "label": "gap",
+    "frame": 4509,
+    "handoffExact": true
+   }
+  },
+  {
+   "job": "ply-golbat-on",
+   "profile": "battle-scene-on",
+   "holder": "player",
+   "frame": 4406,
+   "matched": true,
+   "framesChecked": 0,
+   "problems": [],
+   "nextAllocatingUnit": {
+    "label": "gap",
+    "frame": 4509,
+    "handoffExact": true
+   }
+  },
+  {
+   "job": "ply-persian-off",
+   "profile": "battle-scene-off",
+   "holder": "player",
+   "frame": 4406,
+   "matched": true,
+   "framesChecked": 0,
+   "problems": [],
+   "nextAllocatingUnit": {
+    "label": "gap",
+    "frame": 4509,
+    "handoffExact": true
+   }
+  },
+  {
+   "job": "ply-persian-on",
+   "profile": "battle-scene-on",
+   "holder": "player",
+   "frame": 4406,
+   "matched": true,
+   "framesChecked": 0,
+   "problems": [],
+   "nextAllocatingUnit": {
+    "label": "gap",
+    "frame": 4509,
+    "handoffExact": true
+   }
+  },
+  {
+   "job": "s51b-ply-169",
+   "profile": "battle-scene-on",
+   "holder": "player",
+   "frame": 3252,
+   "matched": true,
+   "framesChecked": 0,
+   "problems": [],
+   "nextAllocatingUnit": {
+    "label": "gap",
+    "frame": 3355,
+    "handoffExact": true
+   }
+  }
+ ],
+ "nextConsumers": [
+  {
+   "job": "opp-golbat-off",
+   "profile": "battle-scene-off",
+   "fadeFrame": 5796,
+   "body": "body 164:opponent",
+   "frame": 6348,
+   "observedPlan": "",
+   "productionRow": 9,
+   "exact": true,
+   "problems": []
+  },
+  {
+   "job": "opp-golbat-on",
+   "profile": "battle-scene-on",
+   "fadeFrame": 5796,
+   "body": "body 164:opponent",
+   "frame": 6348,
+   "observedPlan": "",
+   "productionRow": 9,
+   "exact": true,
+   "problems": []
+  },
+  {
+   "job": "opp-persian-off",
+   "profile": "battle-scene-off",
+   "fadeFrame": 4374,
+   "body": "body 164:opponent",
+   "frame": 7771,
+   "observedPlan": "",
+   "productionRow": 9,
+   "exact": true,
+   "problems": []
+  },
+  {
+   "job": "opp-persian-on",
+   "profile": "battle-scene-on",
+   "fadeFrame": 4374,
+   "body": "body 33:opponent",
+   "frame": 4925,
+   "observedPlan": "Cf;Cf;D0;D1",
+   "productionRow": 16,
+   "exact": true,
+   "problems": []
+  },
+  {
+   "job": "ply-golbat-on",
+   "profile": "battle-scene-on",
+   "fadeFrame": 4406,
+   "body": "body 33:player",
+   "frame": 4952,
+   "observedPlan": "Cf;Cf;D0;D1",
+   "productionRow": 16,
+   "exact": true,
+   "problems": []
+  },
+  {
+   "job": "ply-persian-on",
+   "profile": "battle-scene-on",
+   "fadeFrame": 4406,
+   "body": "body 33:player",
+   "frame": 4953,
+   "observedPlan": "Cf;Cf;D0;D1",
+   "productionRow": 16,
+   "exact": true,
+   "problems": []
+  }
+ ]
+}

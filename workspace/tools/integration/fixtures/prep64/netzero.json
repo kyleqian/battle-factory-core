@@ -1,0 +1,1187 @@
+{
+ "schema": "prep64-net-zero/v1",
+ "knownEntry": [
+  0,
+  1,
+  2,
+  6,
+  8,
+  60,
+  61,
+  62,
+  63
+ ],
+ "jobs": 10,
+ "runs": 20,
+ "allIdenticalAB": true,
+ "probeSha256": "f35ca98954a7807239ebfe2484efb62ee9c713e7292034a7d4499b27670edc3b",
+ "verdicts": {
+  "battle-scene-off": {
+   "unit": "SUBSTITUTE_FADE",
+   "key": "General_SubstituteFade",
+   "verdict": "NET-ZERO",
+   "completeInstances": 5,
+   "incompleteInstances": 0,
+   "fromKnownEntry": {
+    "player": 2,
+    "opponent": 3
+   },
+   "species": [
+    42,
+    53
+   ],
+   "createdPerInstance": [
+    0
+   ],
+   "lateOwners": [],
+   "notNetZero": [],
+   "instances": [
+    {
+     "job": "ply-persian-off",
+     "activation": 2400,
+     "side": "player",
+     "species": 53,
+     "cleanup": 2503,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "survivors": {},
+     "freed": {},
+     "late": [],
+     "gfx": {
+      "baseline": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      },
+      "end": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      }
+     },
+     "gfxNetZero": true,
+     "netZero": true
+    },
+    {
+     "job": "ply-golbat-off",
+     "activation": 2400,
+     "side": "player",
+     "species": 42,
+     "cleanup": 2503,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "survivors": {},
+     "freed": {},
+     "late": [],
+     "gfx": {
+      "baseline": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      },
+      "end": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      }
+     },
+     "gfxNetZero": true,
+     "netZero": true
+    },
+    {
+     "job": "opp-persian-off",
+     "activation": 2368,
+     "side": "opponent",
+     "species": 53,
+     "cleanup": 2469,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "survivors": {},
+     "freed": {},
+     "late": [],
+     "gfx": {
+      "baseline": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      },
+      "end": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      }
+     },
+     "gfxNetZero": true,
+     "netZero": true
+    },
+    {
+     "job": "opp-golbat-off",
+     "activation": 3790,
+     "side": "opponent",
+     "species": 42,
+     "cleanup": 3891,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "survivors": {},
+     "freed": {},
+     "late": [],
+     "gfx": {
+      "baseline": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      },
+      "end": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      }
+     },
+     "gfxNetZero": true,
+     "netZero": true
+    },
+    {
+     "job": "opp-golbat-off",
+     "activation": 8056,
+     "side": "opponent",
+     "species": 42,
+     "cleanup": 8157,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "survivors": {},
+     "freed": {},
+     "late": [],
+     "gfx": {
+      "baseline": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      },
+      "end": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      }
+     },
+     "gfxNetZero": true,
+     "netZero": true
+    }
+   ]
+  },
+  "battle-scene-on": {
+   "unit": "SUBSTITUTE_FADE",
+   "key": "General_SubstituteFade",
+   "verdict": "NET-ZERO",
+   "completeInstances": 6,
+   "incompleteInstances": 0,
+   "fromKnownEntry": {
+    "player": 3,
+    "opponent": 3
+   },
+   "species": [
+    42,
+    53,
+    169
+   ],
+   "createdPerInstance": [
+    0
+   ],
+   "lateOwners": [],
+   "notNetZero": [],
+   "instances": [
+    {
+     "job": "s51b-ply-169",
+     "activation": 1246,
+     "side": "player",
+     "species": 169,
+     "cleanup": 1349,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "survivors": {},
+     "freed": {},
+     "late": [],
+     "gfx": {
+      "baseline": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      },
+      "end": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      }
+     },
+     "gfxNetZero": true,
+     "netZero": true
+    },
+    {
+     "job": "ply-persian-on",
+     "activation": 2400,
+     "side": "player",
+     "species": 53,
+     "cleanup": 2503,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "survivors": {},
+     "freed": {},
+     "late": [],
+     "gfx": {
+      "baseline": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      },
+      "end": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      }
+     },
+     "gfxNetZero": true,
+     "netZero": true
+    },
+    {
+     "job": "ply-golbat-on",
+     "activation": 2400,
+     "side": "player",
+     "species": 42,
+     "cleanup": 2503,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "survivors": {},
+     "freed": {},
+     "late": [],
+     "gfx": {
+      "baseline": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      },
+      "end": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      }
+     },
+     "gfxNetZero": true,
+     "netZero": true
+    },
+    {
+     "job": "opp-persian-on",
+     "activation": 2368,
+     "side": "opponent",
+     "species": 53,
+     "cleanup": 2469,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "survivors": {},
+     "freed": {},
+     "late": [],
+     "gfx": {
+      "baseline": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      },
+      "end": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      }
+     },
+     "gfxNetZero": true,
+     "netZero": true
+    },
+    {
+     "job": "opp-golbat-on",
+     "activation": 3790,
+     "side": "opponent",
+     "species": 42,
+     "cleanup": 3891,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "survivors": {},
+     "freed": {},
+     "late": [],
+     "gfx": {
+      "baseline": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      },
+      "end": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      }
+     },
+     "gfxNetZero": true,
+     "netZero": true
+    },
+    {
+     "job": "opp-golbat-on",
+     "activation": 8056,
+     "side": "opponent",
+     "species": 42,
+     "cleanup": 8157,
+     "baseline": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "end": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "created": 0,
+     "destroyed": 0,
+     "survivors": {},
+     "freed": {},
+     "late": [],
+     "gfx": {
+      "baseline": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      },
+      "end": {
+       "tiles": "e7e5d2118d9322f0",
+       "paletteTags": [
+        65535,
+        65535,
+        65535,
+        65535,
+        54322,
+        55039,
+        55044,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+       ],
+       "matrices": 6
+      }
+     },
+     "gfxNetZero": true,
+     "netZero": true
+    }
+   ]
+  }
+ },
+ "scenarios": [
+  {
+   "job": "s51-ply-169",
+   "profile": "battle-scene-on",
+   "base": "mechanic-outrage-opponent-dragonite-player-onix",
+   "ops": [
+    [
+     "species",
+     "player",
+     169
+    ],
+    [
+     "moves",
+     "player",
+     164
+    ],
+    [
+     "seed",
+     305420202
+    ],
+    [
+     "extend",
+     1200
+    ]
+   ],
+   "seed": 305420202,
+   "leads": {
+    "player": 169,
+    "opponent": 149
+   },
+   "identicalAB": true,
+   "rawSha256": "9b01be2492183da2cd63e5f3f2339bdd4c077c51016cc86cf51ee1c27cfd098d"
+  },
+  {
+   "job": "s51b-ply-169",
+   "profile": "battle-scene-on",
+   "base": "mechanic-outrage-opponent-dragonite-player-onix",
+   "ops": [
+    [
+     "species",
+     "player",
+     169
+    ],
+    [
+     "moves",
+     "player",
+     164
+    ],
+    [
+     "seed",
+     305420202
+    ],
+    [
+     "presses",
+     16
+    ]
+   ],
+   "seed": 305420202,
+   "leads": {
+    "player": 169,
+    "opponent": 149
+   },
+   "identicalAB": true,
+   "rawSha256": "6ec5bae4f3cce4b74a6454920dc48ffd2973cbd2a806e6c7c89a7ee6bc518b83"
+  },
+  {
+   "job": "ply-persian-on",
+   "profile": "battle-scene-on",
+   "base": "prep37-on-player-persian-slowbro",
+   "ops": [
+    [
+     "seed",
+     305419897
+    ]
+   ],
+   "seed": 305419897,
+   "leads": {
+    "player": 53,
+    "opponent": 80
+   },
+   "identicalAB": true,
+   "rawSha256": "6cc65d8ecfd2bce2b909800fc239c651cc375a82d190d98bde403043ee5f997f"
+  },
+  {
+   "job": "ply-golbat-on",
+   "profile": "battle-scene-on",
+   "base": "prep37-on-player-persian-slowbro",
+   "ops": [
+    [
+     "species",
+     "player",
+     42
+    ],
+    [
+     "seed",
+     305419897
+    ]
+   ],
+   "seed": 305419897,
+   "leads": {
+    "player": 42,
+    "opponent": 80
+   },
+   "identicalAB": true,
+   "rawSha256": "62c6ada7172e1b4dbb4fad8c32763bf014840770ffc9a50c6ae4d425151a9b0b"
+  },
+  {
+   "job": "opp-persian-on",
+   "profile": "battle-scene-on",
+   "base": "prep37-on-opponent-persian-slowbro",
+   "ops": [
+    [
+     "seed",
+     305419897
+    ]
+   ],
+   "seed": 305419897,
+   "leads": {
+    "player": 80,
+    "opponent": 53
+   },
+   "identicalAB": true,
+   "rawSha256": "41cf87e7a61ecc9f93e526ade2e3b5378e46ecd2d680ef7e2cccc55604dabda1"
+  },
+  {
+   "job": "opp-golbat-on",
+   "profile": "battle-scene-on",
+   "base": "prep37-on-opponent-golbat-slowbro",
+   "ops": [
+    [
+     "seed",
+     305419897
+    ]
+   ],
+   "seed": 305419897,
+   "leads": {
+    "player": 80,
+    "opponent": 42
+   },
+   "identicalAB": true,
+   "rawSha256": "14f80b4db4d547c6cf089caacd3f081b4b3d0ae7b080ebe87981599d896e63db"
+  },
+  {
+   "job": "ply-persian-off",
+   "profile": "battle-scene-off",
+   "base": "prep37-on-player-persian-slowbro",
+   "ops": [
+    [
+     "seed",
+     305419897
+    ]
+   ],
+   "seed": 305419897,
+   "leads": {
+    "player": 53,
+    "opponent": 80
+   },
+   "identicalAB": true,
+   "rawSha256": "901402467d7f6b42d8dee545b9c77c04c8c8505c74d166e4911fd5e5e3b35d60"
+  },
+  {
+   "job": "ply-golbat-off",
+   "profile": "battle-scene-off",
+   "base": "prep37-on-player-persian-slowbro",
+   "ops": [
+    [
+     "species",
+     "player",
+     42
+    ],
+    [
+     "seed",
+     305419897
+    ]
+   ],
+   "seed": 305419897,
+   "leads": {
+    "player": 42,
+    "opponent": 80
+   },
+   "identicalAB": true,
+   "rawSha256": "680ead30ab5f537a0845bae7d3c225fc889ee8faa0fb0b8d3f13b666b3d462c0"
+  },
+  {
+   "job": "opp-persian-off",
+   "profile": "battle-scene-off",
+   "base": "prep37-on-opponent-persian-slowbro",
+   "ops": [
+    [
+     "seed",
+     305419897
+    ]
+   ],
+   "seed": 305419897,
+   "leads": {
+    "player": 80,
+    "opponent": 53
+   },
+   "identicalAB": true,
+   "rawSha256": "97f07494a3e3328adc6cf8b971ad8764250a29a7e8da8079ab027c9360643817"
+  },
+  {
+   "job": "opp-golbat-off",
+   "profile": "battle-scene-off",
+   "base": "prep37-on-opponent-golbat-slowbro",
+   "ops": [
+    [
+     "seed",
+     305419897
+    ]
+   ],
+   "seed": 305419897,
+   "leads": {
+    "player": 80,
+    "opponent": 42
+   },
+   "identicalAB": true,
+   "rawSha256": "3aa2c7ab52c0132b4bd9a8edd27bd79b513dc385a711495a9f8f2ac99ecd5d7b"
+  }
+ ]
+}
