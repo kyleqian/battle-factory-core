@@ -4836,17 +4836,24 @@
         "cause": "oam-transfer-row (player setup only): in a no-event window the ROM's row 68 shows the ordinary age-67 sprite state, the policy renders the reused-affine age-66 state (battleScene.ts DIVE setupRow68ReusedAffine): the splash / ball differ on row 68 only (CHINCHOU -> GOLBAT, CHINCHOU -> GOLEM after a Tackle: 284 px each)"
       },
       "d3": true,
+      "bodies": ["setup", "attack"],
       "evidence": [
-        "scope: the SETUP body only (request.turn bit 0 = 0), any known lend with the known-entry occupancy, non-shiny, no displayed status; the attacker stays hidden from setup age 10 across the turn gap (liveSemiInvulnerableHideBattler, as Dig). The ATTACK body (turn 1) DECLINES (fallback): its activation sprite order is the setup body's Random2-dependent droplet y-sort, which needs a words-dependent post-body lend production does not have (resume: docs/s10a-random2-order-lend-blocker.md, design 1 'seam-resolved deferred lend')",
+        "scope: BOTH bodies (dive70, docs/dive70-dive-attack.md). SETUP (request.turn bit 0 = 0): any known lend with the known-entry occupancy, non-shiny, no displayed status; the attacker stays hidden from setup age 10 across the turn gap (liveSemiInvulnerableHideBattler, as Dig). ATTACK (turn 1, dive70): 93 rows (activation .. first inactive age 92), on the setup's word-free deferred marker resolved through the hidden turn (land68), 56 presentation-host words (20 droplet words at +16, 9 x 4 bubble words at +30 + 4k: faithful random, D3; no CPU-phase parameter), the body's real-slot profile from liveDiveWordsPlan, non-shiny, no displayed status, an elevated opponent diver declines; the diver reveals itself (dive.ts attackerInvisible < 83) and the hide ends with the body. Counted once here (d3: true)",
         "tools/integration/fixtures/d4d2-live-receipt.json",
         "tools/integration/fixtures/s10a-live/dive-*.json (9 dense setup windows: accepted CHINCHOU <-> ONIX after a Tackle, prep25 LANTURN -> GOLEM first bodies, CHINCHOU -> GOLBAT (elevated target) / GOLEM / SHUCKLE / GOLEM (prep11) player, CHINCHOU (opponent) -> GOLEM player; host pinned at the probed activation gRng2Value)",
-        "docs/next-adapters-prep25.md s0.2 / B.1 / B.1a / C (anchor split: splash / droplets at battlePositionCenter, ball at the attacker's picOffsetPoint)"
+        "docs/next-adapters-prep25.md s0.2 / B.1 / B.1a / C (anchor split: splash / droplets at battlePositionCenter, ball at the attacker's picOffsetPoint)",
+        "tools/integration/fixtures/dive70-live-receipt.json (dive70: 15 dense ATTACK windows x 2 fresh direct-mGBA runs, 93 / 93 rows 0 px each, r1 == r2: player CHINCHOU -> ONIX / GOLBAT (elevated target), LANTURN -> GOLEM, CLAMPERL -> ONIX, SEEL -> ONIX; opponent CHINCHOU -> ONIX / WAILORD, LANTURN -> GOLEM, CLAMPERL -> ONIX, SEEL -> ONIX; Surf / Whirlpool hidden-hit and Protect-history variants; words PINNED (RAM gRng2Value at the setup / attack activation); order lend from the production host == ROM sSpriteOrder 14 / 15)"
       ],
       "proofCommands": [
         "sh tools/integration/prep22Probes.sh PROBEDIR 1 <the 9 scenarios of tools/integration/s10aDiveFixtures.py>",
         "python3 -I tools/integration/s10aDiveFixtures.py PROBEDIR",
         "node --experimental-strip-types tools/integration/d4aTimingCheck.ts <receipt.json> tools/integration/fixtures/s10a-live/dive-<window>.json",
-        "npx vitest run tests/animation/liveDiveSetupAdapter.test.ts"
+        "npx vitest run tests/animation/liveDiveSetupAdapter.test.ts",
+        "python3 tools/integration/dive70Scenarios.py; sh tools/integration/dive70Probes.sh PROBEDIR 1 <the dive70 scenarios, docs/dive70-dive-attack.md s5>",
+        "python3 tools/integration/dive70Fixtures.py PROBEDIR <tag=scenario[@splits] ...>",
+        "node --experimental-strip-types tools/integration/dive70Check.ts tools/integration/fixtures/dive70/*.json",
+        "node --experimental-strip-types tools/integration/liveAdapterFramebuffer.ts tools/integration/fixtures/dive70/<window>.json",
+        "npx vitest run tests/animation/liveDiveAttackAdapter.test.ts"
       ]
     },
     {

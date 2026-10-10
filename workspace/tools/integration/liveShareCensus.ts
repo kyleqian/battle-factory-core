@@ -295,6 +295,9 @@ const report = {
   bucketCount: buckets.length,
   sanity: { ...sanity, renderThrows: sanity.renderThrows.slice(0, 20), renderThrowCount: sanity.renderThrows.length },
   battleDigest: createHash("sha256").update(JSON.stringify(battles)).digest("hex"),
+  // dive70: the battle records without the presented-frame count (end, turns, seed, streak): equal whenever only body LENGTHS change
+  battleDigestExcludingFrames: createHash("sha256").update(JSON.stringify(battles.map(({ frames: _frames, ...rest }) => rest))).digest("hex"),
+  battleFrames: battles.map((b) => b.frames),
   commandDigest: createHash("sha256").update(JSON.stringify(commands)).digest("hex"),
 };
 const text = JSON.stringify(report, null, 1) + "\n";

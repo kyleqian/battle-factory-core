@@ -1,9 +1,19 @@
 #!/usr/bin/env python3
 """dive70: the live receipt from liveAdapterFramebuffer.ts outputs (two fresh direct-mGBA runs per window), dive70Check.ts lines and the
-Protect probes (prep22Probe.py bodies). usage: dive70Receipt.py FBDIR CHECK.jsonl PROBEDIR OUT.json"""
+Protect probes (prep22Probe.py bodies), and the per-row ROM RGB888 sha256 of each window (POKEBENCH_LIVE_EVIDENCE_DIR's
+live-comparison.json, run 0 == run 1 asserted) as the vector the Tier-1 test re-renders against.
+usage: dive70Receipt.py FBDIR CHECK.jsonl PROBEDIR OUT.json [EVIDENCEDIR]"""
 import json, sys
 from pathlib import Path
 fb, check, probes, out = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3]), Path(sys.argv[4])
+evidence = Path(sys.argv[5]) if len(sys.argv) > 5 else None
+def rom_rows(stem):
+    if evidence is None:
+        return None
+    r0, r1 = (json.loads((evidence / f"{stem}-run{k}" / "live-comparison.json").read_text())["comparisons"] for k in (0, 1))
+    assert [(r["age"], r["source"], r["live"]) for r in r0] == [(r["age"], r["source"], r["live"]) for r in r1], stem
+    assert all(r["residualPixels"] == 0 for r in r0), stem
+    return [r["source"] for r in r0]
 checks = {Path(d["fixture"]).name: d for d in map(json.loads, check.read_text().splitlines())}
 windows = []
 for name in sorted(checks):
@@ -16,7 +26,8 @@ for name in sorted(checks):
                     "runs": [{"run": r["run"], "exactRows": r["exactRows"], "residualPixels": r["residualPixels"], "digest": r["digest"]} for r in runs],
                     "r1EqualsR2": runs[0]["digest"] == runs[1]["digest"], "lendEqualsRom": c["lendEqualsRom"], "liveAges": c["liveAges"],
                     "words": c["words"], "wordsProvenance": "pinned (RAM gRng2Value at the setup / attack activation, fixture hook wordsChain)",
-                    "deferredUnits": c["deferredMarker"]["units"] if c["deferredMarker"] else None})
+                    "deferredUnits": c["deferredMarker"]["units"] if c["deferredMarker"] else None,
+                    **({} if evidence is None else {"romRgbSha256": rom_rows(Path(name).stem)})})
 protect = []
 for p in sorted(probes.glob("protect-*-r1.json")):
     d = json.loads(p.read_text())
