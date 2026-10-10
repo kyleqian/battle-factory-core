@@ -267,6 +267,9 @@
   vs `ccc4774c4`, census seeds 0..299 96.98 % by count / 97.99 % by frames (start 92.66 / 94.12; +344 commands, 0 regressions, command key
   sequence identical), seeds 0..999 91.89 % / 95.82 % (sha256 `eda0c77f`; start 87.95 / 92.09), seeds 50000.. 93.07 % / 95.47 %
   (`final-supervisor-gates-20261009-day.json`).
+- Preview <http://127.0.0.1:5191/> serves `897a18dd6` (src `06b791ff`, after the fly63 revert; the earlier `9e2dac58f` preview is
+  superseded): 4 samples hash-equal (canvas == ABI == screenshot), session export + ON -> OFF restart passed, no browser errors
+  (`playable-preview-897a18dd6-receipt.json`).
 
 ## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
 
