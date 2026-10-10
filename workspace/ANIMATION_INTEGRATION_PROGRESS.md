@@ -31,6 +31,8 @@
 - Supervisor union gates on `f3efec8bf` (src `10884465`; sw67 + hide66): typecheck, full suite 1,600 files / 13,169 tests, build,
   differential 624 / 624 vs `b50c4dabd`, census seeds 0..299 **97.15 % / 98.16 %** (+14 / +1,984 vs `b50c4dabd` = the sum of both folds;
   0 regressions, key sequence + digest identical) (`tools/integration/fixtures/union-gates-f3efec8bf.json`).
+- Preview <http://127.0.0.1:5191/> serves `31f11ed70` (src `10884465`): 4 samples hash-equal (canvas == ABI == screenshot), session
+  export + ON -> OFF restart passed, no browser errors (`playable-preview-31f11ed70-receipt.json`).
 - In flight: land68 (INTEGRATION: banked prep65 Dive words unit + prep64 SUBSTITUTE_FADE), plans69 (SIDE, evidence: the remaining
   order-host stops Ice Ball / Mud-Slap / CASTFORM_CHANGE / Hyper Beam / Magnitude / Flatter / Needle Arm / Astonish / Odor Sleuth /
   Conversion 2). Next: live audit 18 (hidden-span bodies, Shock Wave consumers, battle 713).
