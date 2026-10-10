@@ -421,7 +421,9 @@ describe("words46: ordinary rain route (generated rentals, production seams)", (
     const rainFrames = A.flagged.filter((f) => f.rain);
     expect(rainFrames.length).toBeGreaterThan(100);
     expect(new Set(rainFrames.map((f) => `${f.moveId}/${f.attacker}`))).toEqual(new Set(["291/1"]));
-    expect(rainFrames.map((f) => f.age)).toEqual(Array.from({ length: rainFrames.length }, (_, age) => age));
+    // dive70: the opponent's Dive setup (115 rows) and, since the attack body adapter, its attack body (93 rows), both through the marker
+    const ages = (n: number) => Array.from({ length: n }, (_, age) => age);
+    expect(rainFrames.map((f) => f.age)).toEqual([...ages(115), ...ages(93)]);
     // a different presentation seed: different words, the same logic
     expect(B.run.boundaries).toEqual(A.run.boundaries);
     expect(B.run.state.facilityState).toEqual(A.run.state.facilityState);

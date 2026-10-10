@@ -291,6 +291,29 @@ describe("runBattleEndTurnOrchestration -- ENDTURN_ABILITIES slice 1 (Speed Boos
     expect(result.state.rng.calls).toBe(initial.rng.calls); // zero Random() draws for either battler
   });
 
+  it("Speed Boost's STATS_CHANGE event carries STAT_ANIM_PLUS1 + STAT_SPEED (17) on the first AND a later activation (fold71)", () => {
+    // battle_util.c:2646-2647 stamps gBattleScripting.animArg1 before BattleScript_SpeedBoostActivates' `playanimation ... sB_ANIM_ARG1`.
+    const rc = context({
+      battlers: [
+        battler({ side: 0, ability: ABILITY_SPEED_BOOST }),
+        battler({ side: 1, ability: ABILITY_SPEED_BOOST, partyIndex: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+    const statsChanges = (state: ReturnType<typeof scratchState>) => state.events.filter((event) =>
+      event.kind === "animation" && event.animationId === "STATS_CHANGE");
+    const first = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 0));
+    if (first.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(statsChanges(first.state).map((event) => (event as { arguments?: readonly string[] }).arguments)).toEqual([["17"], ["17"]]);
+    // A later activation (second end-turn pass) with a stale animArg1 left behind by something else.
+    const stale = scratchState(Object.freeze({ ...first.state.rulesContext, animArg1: 40 }), 0);
+    const later = runBattleEndTurnOrchestration(program, handlers, stale);
+    if (later.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(statsChanges(later.state).map((event) => (event as { arguments?: readonly string[] }).arguments)).toEqual([["17"], ["17"]]);
+  });
+
   it("the empty-stack END3 mismatch surfaces explicitly (not silent garbage) via the same primitive production wiring relies on", () => {
     const popped = popEnd3(createEmptyCallbackStack());
     expect(popped.kind).toBe("underflow");

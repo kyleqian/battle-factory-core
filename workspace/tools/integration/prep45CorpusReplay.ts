@@ -63,7 +63,9 @@ function hostMoveId(mv: number, turn: number): number {
 
 /** plans48: the host keys Present's PresentHeal branch (damage <= 0) as 20217; replays read the branch from the body's allocation count. */
 const presentKey = (mv: number, windows: readonly { C?: readonly unknown[] }[]) =>
-  mv === 217 && windows.reduce((n, w) => n + (w.C?.length ?? 0), 0) !== 6 ? 20217 : null;
+  mv === 217 && windows.reduce((n, w) => n + (w.C?.length ?? 0), 0) !== 6 ? 20217
+    // plans69: Magnitude's gAnimMovePower > 99 branch is 20222 (the intense body creates sprites; the normal one is the empty plan).
+    : mv === 222 && windows.reduce((n, w) => n + (w.C?.length ?? 0), 0) > 0 ? 20222 : null;
 
 function replayCorpus(): Tally & { skipped: number } {
   const scenarios: Scenario[] = [...read("sprite-order-body-events.json").scenarios, ...read("sprite-order-body-events-ext.json").scenarios];
