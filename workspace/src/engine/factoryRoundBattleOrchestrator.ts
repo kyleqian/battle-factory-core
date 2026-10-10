@@ -103,6 +103,9 @@ import {
 } from "./battleResolutionPresentation.ts";
 import {
   applyLiveSemiInvulnerableCommand,
+  LIVE_CASTFORM_FORMS_NORMAL,
+  liveCastformFormsThroughCommand,
+  type LiveCastformForms,
   applySubstituteDollCommand,
   battleResolutionMoveAnimationField,
   BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES,
@@ -446,6 +449,12 @@ export type FactoryBattlePresentationBattlerBoundary = Readonly<{
    * Absent = false. Never read by rules, RNG or the queue.
    */
   liveSemiInvulnerableHidden?: boolean;
+  /**
+   * cf78: presentation-only ROM `gBattleMonForms` of this battler SLOT (non-zero = a non-normal Castform form), from the completed
+   * CASTFORM_CHANGE animation events (battleResolutionPresentationRender.ts liveCastformFormsThroughCommand). Kept across switches and
+   * faints like the ROM's per-slot array (cleared only at battle setup). Absent = 0. Never read by rules, RNG or the queue.
+   */
+  liveCastformForm?: number;
   idleEpoch: number;
   moveCursor: 0 | 1 | 2 | 3;
 }>;
@@ -1482,6 +1491,7 @@ function createBattlePresentationBoundaries(
       spriteVisible: prior === undefined || switched ? true : prior.spriteVisible,
       ...(prior !== undefined && !switched && prior.liveSemiInvulnerableHidden
         ? { liveSemiInvulnerableHidden: true } : {}),
+      ...(prior?.liveCastformForm ? { liveCastformForm: prior.liveCastformForm } : {}),
       idleEpoch: prior === undefined || switched ? 0 : prior.idleEpoch,
       moveCursor: switched ? 0 : cursors[battler]!,
     });
@@ -1869,6 +1879,11 @@ function beginCommandResolution(
   if (semiInvulnerableHidden !== LIVE_SEMI_INVULNERABLE_NONE) {
     resolution = Object.freeze({ ...resolution, liveSemiInvulnerableHidden: semiInvulnerableHidden });
   }
+  // cf78: the slots' Castform forms at this resolution's start (presentation-only display ledger state).
+  const castformForms = liveCastformFormsOf(state.battlePresentationBoundaries);
+  if (castformForms !== LIVE_CASTFORM_FORMS_NORMAL) {
+    resolution = Object.freeze({ ...resolution, liveCastformForms: castformForms });
+  }
   const playerLocked = (state.battle.rules.rulesContext.battlers[presentation.request.battler]!.status2 & (
     BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
     | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE
@@ -1978,11 +1993,23 @@ function commitCompletedResolutionCommand(
   ]) as unknown as FactoryBattlePresentationBoundaries;
   const before = liveSemiInvulnerableHiddenOf(committed);
   const after = applyLiveSemiInvulnerableCommand(before, command);
-  if (after === before) return committed;
-  return Object.freeze(committed.map((boundary) => {
+  const hidden = after === before ? committed : Object.freeze(committed.map((boundary) => {
     const { liveSemiInvulnerableHidden: _previous, ...rest } = boundary;
     return Object.freeze(after[boundary.battler] ? { ...rest, liveSemiInvulnerableHidden: true } : rest);
   })) as unknown as FactoryBattlePresentationBoundaries;
+  // cf78: the slots' Castform forms once this command has completed.
+  const forms = liveCastformFormsThroughCommand(resolution, command);
+  if (forms[0] === (hidden[0].liveCastformForm ?? 0) && forms[1] === (hidden[1].liveCastformForm ?? 0)) return hidden;
+  return Object.freeze(hidden.map((boundary) => {
+    const { liveCastformForm: _previous, ...rest } = boundary;
+    return Object.freeze(forms[boundary.battler] !== 0 ? { ...rest, liveCastformForm: forms[boundary.battler] } : rest);
+  })) as unknown as FactoryBattlePresentationBoundaries;
+}
+
+function liveCastformFormsOf(boundaries: FactoryBattlePresentationBoundaries): LiveCastformForms {
+  return boundaries[0].liveCastformForm || boundaries[1].liveCastformForm
+    ? Object.freeze([boundaries[0].liveCastformForm ?? 0, boundaries[1].liveCastformForm ?? 0] as const)
+    : LIVE_CASTFORM_FORMS_NORMAL;
 }
 
 function liveSemiInvulnerableHiddenOf(

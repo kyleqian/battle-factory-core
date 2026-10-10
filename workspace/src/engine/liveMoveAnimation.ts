@@ -1631,6 +1631,18 @@ export function liveMoveHiddenTargetDeclines(request: BattleMoveAnimationRequest
   return otherHidden && (request.moveId === 327 || (request.moveId === 113 && request.attacker === 0));
 }
 
+/**
+ * cf78 (ISSUES #143 remainder, live audit 19 DEFECT): every live body fails closed while the field displays a CASTFORM in a weather
+ * form (`castformForm`, the slot's presentation-only gBattleMonForms; battleResolutionPresentationRender.ts withLiveCastformForms).
+ * The field art has no form input (battleCommandFieldArt.ts builds the battler pic from the species only), but the ROM draws the
+ * per-form palette and front coords / elevation (battle_gfx_sfx_util.c:615-620, gCastformFrontSpriteCoords): audit 19 measured
+ * 998..2,312 px per row in 44 live windows. A live body must not claim pixels it draws wrong; the duration is unchanged (the scene-off
+ * fallback presents the same rows).
+ */
+export function liveCastformFormDeclines(field: BattleResolutionDisplayedField): boolean {
+  return field.player.castformForm !== undefined || field.opponent.castformForm !== undefined;
+}
+
 export function liveMoveAnimationPresentation(
   request: BattleMoveAnimationRequest,
   field: BattleResolutionDisplayedField,
@@ -1645,6 +1657,7 @@ export function liveMoveAnimationPresentation(
 ): SceneOnMovePresentationState | null {
   if (liveMoveAnimationDuration(request, field) === null) return null;
   if (liveMoveHiddenTargetDeclines(request, hiddenSides)) return null;
+  if (liveCastformFormDeclines(field)) return null;
   const art = createBattleCommandFieldArtView(field);
   // prep46: after a words-dependent order unit (Sand-Attack / Mud-Slap / Rain Dance / RAIN_CONTINUES) ANY consumer's lend is the
   // word-free deferred marker; resolve it here, render-pure: carry the unit's activation order through the unit with ITS recorded

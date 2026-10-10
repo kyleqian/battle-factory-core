@@ -21,7 +21,7 @@ import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "./battleResolutionPresentation.ts";
 import type { BattleResolutionPresentationRenderView } from "./battleResolutionPresentationRender.ts";
 import { applyLiveBattlerX2Event, liveMoveBattlerX2Input, type LiveBattlerX2History, type LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
-import { liveBattlerAnchors, liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
+import { liveBattlerAnchors, liveCastformFormDeclines, liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
 import { liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
 
 type Side = "player" | "opponent";
@@ -238,6 +238,8 @@ export type SubstituteSwapView =
 export function liveSubstituteSwapView(view: BattleResolutionPresentationRenderView): SubstituteSwapView | null {
   const effect = view.effect;
   if (effect?.type !== "move" || liveSubstituteSwapApplies(effect.request, view.field) !== true) return null;
+  // cf78: no swap composite while a CASTFORM is displayed in a weather form (the body declines too: scene-off fallback).
+  if (liveCastformFormDeclines(view.field)) return null;
   const attacker = effect.request.attacker === 0 ? 0 : 1, side: Side = attacker === 0 ? "player" : "opponent";
   const bodyField = substituteSwapBodyField(view.field, attacker);
   const adapterDuration = liveMoveAnimationDuration(effect.request, bodyField);

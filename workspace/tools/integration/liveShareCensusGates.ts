@@ -11,7 +11,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import {
-  LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS, liveBattlerAnchors, liveMoveAnimationDuration, liveMoveHiddenTargetDeclines,
+  LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS, liveBattlerAnchors, liveCastformFormDeclines, liveMoveAnimationDuration, liveMoveHiddenTargetDeclines,
   liveMoveSubstituteDollDeclines, type LiveMoveHiddenSides,
 } from "../../src/engine/liveMoveAnimation.ts";
 import { liveSubstituteSwapApplies, substituteSwapBodyField } from "../../src/engine/liveSubstituteSwap.ts";
@@ -83,6 +83,8 @@ const PRESENTATION = caseBlocks("export function liveMoveAnimationPresentation("
 const PRESENT_DURATION_GATE = lineOf(lmaLines, "if (liveMoveAnimationDuration(request, field) === null) return null;", PRESENTATION.start - 80);
 // hide66: the hidden-target gate right after the duration gate (liveMoveHiddenTargetDeclines).
 const PRESENT_HIDDEN_TARGET_GATE = lineOf(lmaLines, "if (liveMoveHiddenTargetDeclines(request, hiddenSides)) return null;", PRESENTATION.start - 80);
+// cf78: the Castform weather-form gate right after it (liveCastformFormDeclines).
+const PRESENT_CASTFORM_GATE = lineOf(lmaLines, "if (liveCastformFormDeclines(field)) return null;", PRESENTATION.start - 80);
 const SWAP_APPLIES = lineOf(swapLines, "export function liveSubstituteSwapApplies(");
 const SWAP_SELF = lineOf(swapLines, "return request.target !== request.attacker", SWAP_APPLIES);
 const SWAP_BOTH = lineOf(swapLines, "battlerOf(field, request.target).substituteDoll !== true", SWAP_APPLIES);
@@ -206,6 +208,10 @@ export function classifyPresentationDecline(x: PresentationInputs): Decline {
   if (x.hiddenSides !== undefined && liveMoveHiddenTargetDeclines(x.request, x.hiddenSides)) {
     return { stage: "presentation", reason: "target hidden (semi-invulnerable): no D4 phase for its lag profile (hide66)",
       gate: cite(LMA, PRESENT_HIDDEN_TARGET_GATE) };
+  }
+  if (liveCastformFormDeclines(x.field)) {
+    return { stage: "presentation", reason: "CASTFORM shown in a weather form: the field art has no form input (cf78, ISSUES #143)",
+      gate: cite(LMA, PRESENT_CASTFORM_GATE) };
   }
   const gates = PRESENTATION.gates.get(x.request.moveId);
   if (!gates) return { stage: "presentation", reason: "no presentation case (switch default)", gate: cite(LMA, PRESENTATION.end) };
