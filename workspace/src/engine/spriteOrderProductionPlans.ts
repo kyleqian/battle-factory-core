@@ -296,8 +296,7 @@ export const SPRITE_ORDER_PRODUCTION_BODIES: Readonly<Record<string, number>> = 
   "8:player": 212, "13:opponent": 213, "13:player": 213, "75:opponent": 46, "165:opponent": 94, "173:opponent": 214, "173:player": 214, "213:opponent": 215,
   "213:player": 215, "217:opponent": 216, "217:player": 216, "288:player": 217, "10013:opponent": 45, "10013:player": 45, "20217:opponent": 218, "20217:player": 218,
   "200:opponent": 219, "200:player": 219, "210:opponent": 1, "210:player": 1, "10210:opponent": 2, "10210:player": 2, "20210:opponent": 2, "20210:player": 2,
-  "30210:opponent": 2, "30210:player": 2, "19:opponent": 1, "19:player": 1, "340:opponent": 1, "340:player": 1, "10019:opponent": 16, "10019:player": 16,
-  "10340:opponent": 11, "10340:player": 16,
+  "30210:opponent": 2, "30210:player": 2,
 });
 
 /** Mid-battle (non-move) animations -> plan index. STATS_CHANGE_CLASS_1 = args 15..28 (+-1) and 55/57 (multiple +1/-1),

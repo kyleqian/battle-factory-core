@@ -28,9 +28,7 @@ describe("production sprite-order plan table (generated, pinned)", () => {
     // + plans51 (fixtures/plans51/plan-rows.json, appended): Outrage 200 both sides + FOCUS_BAND, 2 plans (docs/next-adapters-plans51.md).
     // + plans54 (fixtures/plans54/plan-rows.json, appended): Fury Cutter's counter keys 210 / 10210 / 20210 / 30210 both sides, 8 bodies,
     //   0 plans ("Cf;D0" / "Cff;D1;D0" deduped; docs/next-adapters-plans54.md).
-    // + prep61 (fixtures/prep61/plan-rows.json, appended; fly63): Fly 19 / 10019 and Bounce 340 / 10340 both sides, 8 bodies, 0 plans
-    //   (all four texts already in the table; docs/next-adapters-prep61.md).
-    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(543);
+    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(535);
     expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(221);
   });
 
@@ -41,7 +39,7 @@ describe("production sprite-order plan table (generated, pinned)", () => {
       ...fixture("sprite-order-policy-gaps/relative-y-plans.json").bodies, ...fixture("sprite-order-body-plans-rely.json").bodies,
       ...fixture("prep28/plan-rows.json").bodies, ...fixture("prep28/plan-rows-sky-attack.json").bodies,
       ...fixture("prep43/plan-rows.json").bodies, ...fixture("prep45/plan-rows.json").bodies, ...fixture("plans48/plan-rows.json").bodies,
-      ...fixture("plans51/plan-rows.json").bodies, ...fixture("plans54/plan-rows.json").bodies, ...fixture("prep61/plan-rows.json").bodies,
+      ...fixture("plans51/plan-rows.json").bodies, ...fixture("plans54/plan-rows.json").bodies,
     };
     let exact = 0;
     for (const [key, row] of Object.entries(bodies)) {
@@ -94,11 +92,6 @@ describe("sprite-order presentation-event transform", () => {
   it("blip and +-1 stat move the lowest free slot to the head; +-2 carries its destroy", () => {
     const head = [3, ...KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER.filter(slot => slot !== 3)];
     expect(run([{ kind: "hit-animation", targetVisible: true }]).cursor.order.free).toEqual(head);
-    // prep61 (fly63): the hit on a hidden (semi-invulnerable) battler completes at once (no DoHitAnimHealthboxEffect): known, no allocation.
-    const hiddenHit = run([{ kind: "hit-animation", targetVisible: false }]);
-    expect(hiddenHit.cursor.order.known).toBe(true);
-    expect(hiddenHit.cursor.order.free).toEqual(known().cursor.order.free);
-    expect(hiddenHit.cursor.occupied).toEqual(known().cursor.occupied);
     expect(run([{ kind: "stat-animation", argument: 22 }]).cursor.order.free).toEqual(head);
     const plus2 = run([{ kind: "stat-animation", argument: 39 }]);
     expect(plus2.cursor.order.free).toEqual(head);
@@ -107,6 +100,7 @@ describe("sprite-order presentation-event transform", () => {
 
   it("refuses everything the evidence does not model", () => {
     for (const event of [
+      { kind: "hit-animation", targetVisible: false },
       { kind: "move-animation", moveId: 351, attackerSide: "player" },
       { kind: "move-animation", moveId: 144, attackerSide: "player" },
       { kind: "status-animation", status: "WRAPPED" },
@@ -269,10 +263,9 @@ describe("sprite-order presentation-event transform", () => {
       { kind: "move-animation", moveId: 213, attackerSide: "player" }, { kind: "move-animation", moveId: 20217, attackerSide: "player" },
       { kind: "move-animation", moveId: 165, attackerSide: "opponent" },
     ] as const) expect(run([event as SpriteOrderPresentationEvent]).cursor.order.known, JSON.stringify(event)).toBe(true);
-    // Not landed (docs/next-adapters-plans48.md): Shock Wave (2 opponent-side plans over 4 species), Clamp. Fly (hidden attacker) landed
-    // with prep61's setup / unleash keys (fly63, tests/spriteOrderFly63.test.ts).
+    // Not landed (docs/next-adapters-plans48.md): Shock Wave (2 opponent-side plans over 4 species), Fly (hidden attacker), Clamp.
     expect(spriteOrderProductionBodyPlan(351, "opponent")).toBeNull();
-    expect(spriteOrderProductionBodyPlan(19, "player")).toEqual(decodeSpriteOrderPlan("Cf;D0"));
+    expect(spriteOrderProductionBodyPlan(19, "player")).toBeNull();
   });
 
   it("maps status animations as InitAndLaunchChosenStatusAnimation does", () => {
@@ -343,21 +336,18 @@ describe("strict real-route replay (docs/sprite-order-real-route.md events; no r
     // plans54 Fury Cutter rows (210 / 10210 / 20210 / 30210): known 1159 -> 1173 (14 later edges after Fury Cutter bodies), all exact. The
     // corpus has no furyCutterCounter, so every 210 body is fed the counter-1 "Cf;D0" plan; "Cff;D1;D0" (counters 2+) leaves the same
     // free order at the next edge, so the edge counts do not depend on the key (the per-frame windows do: tests/spriteOrderPlans54.test.ts).
-    // prep61 Fly / Bounce rows (+ 19 / 340 keyed like Dig; fly63): known 1173 -> 1181 (8 later edges), all exact.
     const corpus = replayCrossBodyCorpus({ turnKeyed: true });
     expect({ scenarios: corpus.scenarios, skipped: corpus.skipped, edges: corpus.edges, mismatched: corpus.mismatched })
       .toEqual({ scenarios: 573, skipped: 19, edges: 1366, mismatched: 0 });
     expect(corpus.exact).toBe(corpus.known);
-    expect(corpus.known).toBe(1181);
-    expect(corpus.laterKnown).toBe(627);
-    // Without the turn key the Dig unleash body is fed the setup plan: exactly the edge after it (unit 5) in the two Dig scenarios; the
-    // Bounce unleash body likewise gets the setup plan (prep61: unit 9 of the player-side Spoink scenario).
+    expect(corpus.known).toBe(1173);
+    expect(corpus.laterKnown).toBe(619);
+    // Without the turn key the Dig unleash body is fed the setup plan: exactly the edge after it (unit 5) in the two Dig scenarios.
     const unkeyed = replayCrossBodyCorpus();
-    expect({ known: unkeyed.known, exact: unkeyed.exact, mismatched: unkeyed.mismatched }).toEqual({ known: 1181, exact: 1177, mismatched: 4 });
+    expect({ known: unkeyed.known, exact: unkeyed.exact, mismatched: unkeyed.mismatched }).toEqual({ known: 1173, exact: 1170, mismatched: 3 });
     // ... and without the Present key the PresentHeal body is fed the PresentDamage plan (plans48).
     expect(unkeyed.mismatches).toEqual([
       { file: "217-mechanic-present-opponent-delibird-player-onix-0.json", unit: 7, mv: 33 },
-      { file: "340-mechanic-bounce-player-spoink-onix-0.json", unit: 9, mv: 0 },
       { file: "91-mechanic-dig-opponent-vibrava-player-chansey-0.json", unit: 5, mv: 45 },
       { file: "91-mechanic-dig-player-vibrava-opponent-chansey-0.json", unit: 5, mv: 45 },
     ]);
