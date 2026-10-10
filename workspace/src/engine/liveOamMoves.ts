@@ -1149,6 +1149,12 @@ export interface LiveFlatterInputArgs {
   /** The body's 114 presentation-host words (plan LIVE_MOVE_RANDOM2_PLANS[260]) and the host state at activation. */
   readonly words: readonly number[];
   readonly animationRng: number;
+  /**
+   * flat77: the activation register base. A first body latches the intro's WIN0 240 / 161 on row 0 (S0); at a later body
+   * LaunchBattleAnimation (battle_anim.c:260) has already zeroed gBattle_WIN0H / V at the previous launch, so row 0 is S0 with WIN0 0 / 0
+   * (liveQ2Moves.ts registersFor). Rows >= 1 are the same file (every launch zeroes WIN0 before row 1).
+   */
+  readonly firstBody: boolean;
   /** flatter.json spotlight / confetti palettes (src/animation/assets/flatter.json, passed in by the seam). */
   readonly spotlightPalette: readonly Rgb[];
   readonly confettiPalette: readonly Rgb[];
@@ -1166,8 +1172,8 @@ const lowestFreeSlot = (occupied: Iterable<number>) => { const used = new Set(oc
  * (DISPCNT | OBJWIN, WININ); AnimTask_HardwarePaletteFade BLDY 1..10 every 4 rows from 8 (BLDCNT 0xf8 8..216); spotlight init 49 (WINOUT);
  * spotlight destroy 175 (WINOUT, DISPCNT ^ WIN0); fade-out BLDY 9..0 every 4 rows from 177; RemoveSpotlight 218.
  */
-function liveFlatterRegisters(row: number): Record<string, number> {
-  const r0 = S0_REGISTERS, reg: Record<string, number> = { ...r0 };
+function liveFlatterRegisters(row: number, firstBody: boolean): Record<string, number> {
+  const r0 = S0_REGISTERS, reg: Record<string, number> = firstBody ? { ...r0 } : { ...r0, win0h: 0, win0v: 0 };
   if (row >= 1) { reg.win0h = 0; reg.win0v = 0; }
   if (row >= 7 && row < 218) { reg.dispcnt = r0.dispcnt! | 0x4000; reg.winin = 0x1f3f; }
   if (row >= 8 && row < 217) reg.bldcnt = 0xf8;
@@ -1248,7 +1254,7 @@ export function liveFlatterInputs(args: LiveFlatterInputArgs): { duration: numbe
         buffers: { softwareOam: rows.oam[row]!, hardwareOam: rows.oam[row]!, softwareMatrices: rows.matrices[row]!, hardwareMatrices: rows.matrices[row]! },
         palette: { unfaded: loaded(row, args.palettes.unfaded), faded: loaded(row, args.palettes.faded),
           hardware: row === 0 ? [...args.palettes.hardware] : loaded(row - 1, args.palettes.faded) },
-        registers: liveFlatterRegisters(row),
+        registers: liveFlatterRegisters(row, args.firstBody),
       };
     },
   };

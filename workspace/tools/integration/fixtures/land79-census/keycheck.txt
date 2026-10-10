@@ -1,0 +1,10 @@
+PASS same command count
+PASS same KEY sequence
+PASS same frames per command
+PASS same battleDigest
+PASS same battleDigestExcludingFrames
+PASS 0 live -> non-live regressions
+gained commands 17 / live frames 3723; regressions []
+before: {"commands": 27518, "faithfulRandomHistory": {"commands": 1064, "frames": 160363, "liveExcludingItByCount": 90.31, "liveExcludingItByFrames": 93.88, "partialOrOther": 0, "pctOfAllByCount": 3.87, "pctOfAllByFrames": 4.06}, "fallback": 1603, "frames": 3952274, "live": 25915, "liveFrames": 3870725, "liveSharePctByCount": 94.17, "liveSharePctByFrames": 97.94, "moveAnimation": {"commands": 27483, "fram
+after: {"commands": 27518, "faithfulRandomHistory": {"commands": 1067, "frames": 161020, "liveExcludingItByCount": 90.36, "liveExcludingItByFrames": 93.96, "partialOrOther": 0, "pctOfAllByCount": 3.88, "pctOfAllByFrames": 4.07}, "fallback": 1586, "frames": 3952274, "live": 25932, "liveFrames": 3874448, "liveSharePctByCount": 94.24, "liveSharePctByFrames": 98.03, "moveAnimation": {"commands": 27483, "fram
+battleDigest cc9e7604ea64a303 battleDigestExcludingFrames 48b2d42bacd93479
