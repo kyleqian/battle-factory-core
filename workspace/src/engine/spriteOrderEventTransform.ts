@@ -13,7 +13,8 @@
  *   hit-animation, target shown  blip: C[f]; D[n0] (DoHitAnimHealthboxEffect); a hidden target is unproven -> invalidate
  *   stat animation               +-1 / multiple: C[f]; D[n0]; +-2: C[f] and the carried D at the next boundary
  *   status animation             PSN / PRZ / SLP / INFATUATION plans; any other status -> invalidate
- *   general animation            HELD_ITEM_EFFECT / SUN_CONTINUES / FOCUS_PUNCH_SETUP plans; any other -> invalidate
+ *   general animation            HELD_ITEM_EFFECT / SUN_CONTINUES / FOCUS_PUNCH_SETUP plans; HAIL_CONTINUES: the event's geometry plan
+ *                                (Move_HAIL at the displayed species, plans54); any other -> invalidate
  *   anything else                invalidate (substitute, transform, mid-battle slide, hidden battlers, ...)
  *
  * A body/animation unit that leaves exactly one survivor (+-2 stat copy, SLP/PRZ/INFATUATION tails) gets its carried
@@ -69,7 +70,7 @@ export type SpriteOrderPresentationEvent =
   | Readonly<{ kind: "hit-animation"; targetVisible: boolean }>
   | Readonly<{ kind: "stat-animation"; argument: number }>
   | Readonly<{ kind: "status-animation"; status: string }>
-  | Readonly<{ kind: "general-animation"; animation: string }>
+  | Readonly<{ kind: "general-animation"; animation: string; geometryPlan?: string }>
   | Readonly<{ kind: "faint"; side: SpriteOrderSide }>
   | Readonly<{ kind: "party-summary-next" }>
   | Readonly<{ kind: "party-summary-hide" }>
@@ -190,9 +191,15 @@ function planAt(index: number | undefined): SpriteOrderPlan | null {
 
 /** EXACT body plan of `(moveId, attacker side)`, or null (NEEDS-KEYS / not observed / substitute / transform). */
 /** Geometry-keyed move bodies (Giga Drain 202, Mega Drain 72, Dream Eater 138: same-frame orb destroys order by the battlers'
- * geometry): the host attaches the body's plan text computed at the displayed species (`geometryPlan`, liveMoveAnimation.ts
- * liveMoveGeometrySpriteOrderPlanText) to their move-animation event. */
-export const SPRITE_ORDER_GEOMETRY_KEYED_BODIES: ReadonlySet<number> = new Set([202, 72, 138]);
+ * geometry; Eruption 284, plans54: the launch rocks' destroy groups follow the attacker's geometry, ISSUES #155): the host attaches the
+ * body's plan text computed at the displayed species (`geometryPlan`, liveMoveAnimation.ts liveMoveGeometrySpriteOrderPlanText) to their
+ * move-animation event; no plan text invalidates (the base table's `284:*` rows are not used). Hail 258 (plans54): the particles target both
+ * battlers' coordinates. Blizzard 59 (plans54): same-frame destroy groups follow the attacker / target geometry (the base table's
+ * `59:player` row is the plan at its one probed geometry). Water Spout 323 (plans54): the attacker's HP tier, its picture and the lent order. */
+export const SPRITE_ORDER_GEOMETRY_KEYED_BODIES: ReadonlySet<number> = new Set([202, 72, 138, 284, 258, 59, 323]);
+/** Geometry-keyed general animations (plans54): HAIL_CONTINUES (General_Hail: `goto Move_HAIL`) carries Move_HAIL's plan at the displayed
+ * species (`geometryPlan`); without it the animation invalidates. */
+export const SPRITE_ORDER_GEOMETRY_KEYED_ANIMS: ReadonlySet<string> = new Set(["HAIL_CONTINUES"]);
 const geometryPlans = new Map<string, SpriteOrderPlan>();
 const decodeGeometryPlan = (text: string): SpriteOrderPlan => {
   if (!geometryPlans.has(text)) geometryPlans.set(text, decodeSpriteOrderPlan(text));
@@ -445,8 +452,10 @@ export function applySpriteOrderPresentationEvent(
         `status animation ${event.status}`);
     case "general-animation":
       return applyPlan(tracker, event.animation.startsWith("STAT") || event.animation.startsWith("STATUS_") ? null
-        : planAt(Object.hasOwn(SPRITE_ORDER_PRODUCTION_ANIMS, event.animation)
-          ? SPRITE_ORDER_PRODUCTION_ANIMS[event.animation] : undefined),
+        : SPRITE_ORDER_GEOMETRY_KEYED_ANIMS.has(event.animation)
+          ? event.geometryPlan === undefined ? null : decodeGeometryPlan(event.geometryPlan)
+          : planAt(Object.hasOwn(SPRITE_ORDER_PRODUCTION_ANIMS, event.animation)
+            ? SPRITE_ORDER_PRODUCTION_ANIMS[event.animation] : undefined),
       `general animation ${event.animation}`);
     case "invalidate":
       return invalidateSpriteOrderTracker(tracker, event.reason);

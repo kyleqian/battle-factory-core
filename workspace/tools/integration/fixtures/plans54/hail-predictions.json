@@ -1,0 +1,10 @@
+{
+ "schema": "plans54-hail-predictions/v1",
+ "note": "Recorded before the plans54 hail probes ran: hail.ts timeline at the live case-258 profile, known-entry occupancy.",
+ "predictions": {
+  "225-95": "Cf;Cf;Cf;Cf;Cf;Cf;D4;Cf/D5;Cf;Cf;Cf;D2;D6;Cf/D3;Cf/D7;Cf/D8;Cf/D9;Cf/D11;D12;D13;Cf;Cf;Cf;Cf/D0;Cf/D1,14;Cf/D10;Cf;D15;D16;D17;D19;D18;D20;D21",
+  "143-42": "Cf;Cf;Cf;Cf;Cf;Cf;Cf/D3;Cf/D4,0;Cf;D5,1;Cf;D2;Cf;Cf;Cf;Cf;D6;D7;Cf/D11;Cf/D12;Cf/D13;D15;D14;Cf;Cf;Cf;Cf/D8,16;Cf;D9;Cf;D10;Cf;D17;D18;D19;D21;D22,20;D23",
+  "42-143": "Cf;Cf;Cf;Cf;Cf;Cf;D4;Cf/D5;Cf;Cf;Cf;D2;D6;Cf/D3;Cf/D7;Cf/D8;Cf/D9;Cf/D11;D12;D13;Cf;Cf;Cf;Cf/D0;Cf/D1;D14;Cf/D10;Cf;D15;D16;D17;D19;D18;D20;D21",
+  "347-76": "Cf;Cf;Cf;Cf;Cf;Cf;Cf/D3;D4;Cf;D5;Cf;Cf;Cf;D6;D7;Cf/D8;Cf/D9;Cf/D10;Cf/D11;D12;D13;Cf;Cf;Cf;Cf/D0;Cf;D1,14;Cf;D2;Cf;D15;D16;D17;D19;D20,18;D21"
+ }
+}

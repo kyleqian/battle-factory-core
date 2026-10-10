@@ -44,6 +44,10 @@ import { liveTrackedFrontIdleRest, type LiveMoveBattlerX2Input } from "./liveBat
 import { digAtAge } from "../animation/dig.ts";
 import { dreamEaterSpriteOrderPlanText } from "../animation/dreamEater.ts";
 import { gigaDrainSpriteOrderPlanText } from "../animation/gigaDrain.ts";
+import { eruptionSpriteOrderPlanText } from "../animation/eruptionSpriteOrderPlan.ts";
+import { hailSpriteOrderPlanText } from "../animation/hailSpriteOrderPlan.ts";
+import { blizzardSpriteOrderPlanText } from "../animation/blizzardSpriteOrderPlan.ts";
+import { waterSpoutSpriteOrderPlanText } from "../animation/waterSpoutSpriteOrderPlan.ts";
 import { megaDrainSpriteOrderPlanText } from "../animation/megaDrain.ts";
 import { faintAttackRestoreProfile } from "../animation/faintAttack.ts";
 import { RAZOR_LEAF_BODY_LAST_AGE } from "../animation/razorLeaf.ts";
@@ -673,15 +677,88 @@ export function liveMoveAbsorptionOrbCenters(
 /**
  * S10A gdgeo: the sprite-order plan text (spriteOrderEventTransform.ts encoding) of a geometry-keyed body at the displayed species:
  * Giga Drain (202) / Mega Drain (72) / Dream Eater (138, plans48), from the renderers' own timelines (gigaDrain.ts / megaDrain.ts /
- * dreamEater.ts through absorptionOrbSpriteOrderPlan.ts). Null for any other move or a species without a battle picture.
+ * dreamEater.ts through absorptionOrbSpriteOrderPlan.ts); Eruption (284, plans54) at its ROM-proven attacker species only
+ * (eruptionSpriteOrderPlan.ts); Hail (258, plans54; also HAIL_CONTINUES) from hail.ts's timeline (hailSpriteOrderPlan.ts); Blizzard (59,
+ * plans54) from blizzard.ts's allocator replay (blizzardSpriteOrderPlan.ts); Water Spout (323, plans54) from waterSpout.ts's timeline at the
+ * displayed field's attacker HP (`field`) and the body's lent free order (`lentFree`; waterSpoutSpriteOrderPlan.ts). Null for any other move or a species without a battle picture / proof.
  */
 export function liveMoveGeometrySpriteOrderPlanText(
-  moveId: number, attackerSide: "player" | "opponent", species: LiveMoveBodySpecies,
+  moveId: number, attackerSide: "player" | "opponent", species: LiveMoveBodySpecies, field?: BattleResolutionDisplayedField,
+  lentFree?: readonly number[],
 ): string | null {
+  // plans54 (ISSUES #155): Eruption's launch rocks start at the attacker; only the ROM-proven attacker geometries carry a plan.
+  if (moveId === 284) {
+    return eruptionSpriteOrderPlanText(attackerSide, attackerSide === "player" ? species.playerSpecies : species.opponentSpecies);
+  }
+  // plans54: Move_HAIL (and General_Hail = HAIL_CONTINUES, which the host requests under 258) targets both battlers, never the attacker.
+  if (moveId === 258) return liveHailSpriteOrderPlanText(species);
+  // plans54: Blizzard's snowballs / crystals travel from the attacker's to the target's picture: blizzard.ts's allocator replay there.
+  if (moveId === 59) return liveBlizzardSpriteOrderPlanText(attackerSide, species);
+  // plans54: Water Spout's droplet counts follow the attacker's HP tier (GetWaterSpoutPowerForAnim), its orbs start at the attacker's picture
+  // and tie in the lent order: the plan of waterSpout.ts's own timeline at the displayed field and the lent order (the case-323 inputs).
+  if (moveId === 323) {
+    const order = field === undefined || lentFree === undefined ? null
+      : spriteOrderWithOccupiedPrefix({ known: true as const, free: lentFree, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+    const inputs = order === null ? null : waterSpoutLiveInputs(field!, attackerSide, order);
+    return inputs === null ? null : waterSpoutSpriteOrderPlanText(inputs);
+  }
   const planText = moveId === 202 ? gigaDrainSpriteOrderPlanText : moveId === 72 ? megaDrainSpriteOrderPlanText
     : moveId === 138 ? dreamEaterSpriteOrderPlanText : null;
   const centers = planText === null ? null : liveMoveAbsorptionOrbCenters(attackerSide, species);
   return centers === null ? null : planText!(centers.target, centers.attacker, attackerSide, centers.attacker);
+}
+
+const blizzardSpriteOrderPlans = new Map<string, string | null>();
+/** plans54: Move_BLIZZARD's sprite-order plan (blizzardSpriteOrderPlan.ts) at the case-59 geometry of the displayed species (attacker /
+ * target picOffsetPoint, as liveBlizzardDuration); null for a species without a battle picture or an exhausted replay pool. */
+function liveBlizzardSpriteOrderPlanText(attackerSide: "player" | "opponent", species: LiveMoveBodySpecies): string | null {
+  const key = `${attackerSide}/${species.playerSpecies}/${species.opponentSpecies}`;
+  if (blizzardSpriteOrderPlans.has(key)) return blizzardSpriteOrderPlans.get(key)!;
+  let plan: string | null = null;
+  try {
+    const art = createBattleCommandFieldArtView({ player: { species: species.playerSpecies }, opponent: { species: species.opponentSpecies } } as never);
+    plan = blizzardSpriteOrderPlanText(attackerSide, { attackerCenter: liveBattlerAnchors(attackerSide, art).picOffsetPoint,
+      targetCenter: liveBattlerAnchors(attackerSide === "player" ? "opponent" : "player", art).picOffsetPoint });
+  } catch {
+    plan = null;
+  }
+  blizzardSpriteOrderPlans.set(key, plan);
+  return plan;
+}
+
+const hailSpriteOrderPlans = new Map<string, string | null>();
+/**
+ * plans54: Move_HAIL's sprite-order plan (hailSpriteOrderPlan.ts over hail.ts's own timeline) at the displayed species, with the case-258
+ * profile's sHailCoordData targets (both battlers visible: X_2 / Y_PIC_OFFSET -+ width / height / 6) and known-entry occupancy. Cached per
+ * species pair; null for a species without a battle picture.
+ */
+function liveHailSpriteOrderPlanText(species: LiveMoveBodySpecies): string | null {
+  const key = `${species.playerSpecies}/${species.opponentSpecies}`;
+  if (hailSpriteOrderPlans.has(key)) return hailSpriteOrderPlans.get(key)!;
+  let plan: string | null = null;
+  try {
+    const art = createBattleCommandFieldArtView({ player: { species: species.playerSpecies }, opponent: { species: species.opponentSpecies } } as never);
+    const targets = HAIL_COORD_DATA.map(([x, y, position, type]) => {
+      let targetX: number = x, targetY: number = y, impact = false;
+      const side = position === 0 ? "player" as const : position === 1 ? "opponent" as const : null;
+      if (type !== 0 && side !== null) {
+        impact = true;
+        const anchors = liveBattlerAnchors(side, art), attrs = liveBattlerCoordAttrs(side, art);
+        targetX = anchors.picOffsetPoint.x; targetY = anchors.picOffsetPoint.y;
+        const dx = Math.trunc(attrs.width / 6), dy = Math.trunc(attrs.height / 6);
+        if (type === 1) { targetX -= dx; targetY -= dy; } else { targetX += dx; targetY += dy; }
+      }
+      return { targetX, targetY, initialX: targetX - Math.trunc((targetY + 8) / 2), initialY: -8 as const, impact };
+    }) as unknown as HailProfile["targets"];
+    plan = hailSpriteOrderPlanText({ animationRngAtAge0: 0, occupiedSpriteSlots: KNOWN_ENTRY_IN_USE_SPRITE_SLOTS,
+      occupiedAffineMatrixSlots: [1, 2], targets, unfadedPaletteBeforeLoad: UNCONSUMED_PALETTE, fadedPaletteBeforeLoad: UNCONSUMED_PALETTE,
+      hardwarePaletteAtAge0: UNCONSUMED_PALETTE, unfadedPaletteAfterHailLoad: UNCONSUMED_PALETTE, fadedPaletteAfterHailLoad: UNCONSUMED_PALETTE,
+      unfadedPaletteAfterCrystalLoad: UNCONSUMED_PALETTE, fadedPaletteAfterCrystalLoad: UNCONSUMED_PALETTE });
+  } catch {
+    plan = null;
+  }
+  hailSpriteOrderPlans.set(key, plan);
+  return plan;
 }
 
 /**

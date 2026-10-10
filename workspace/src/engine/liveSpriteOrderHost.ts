@@ -6,7 +6,8 @@
  *   player command submitted from the action menu   action-prompt + actions-committed (bounce pair)
  *   animation MOVE_ANIMATION                         move-animation (moveId, attacker side; an odd request turn of
  *                                                    Razor Wind / Solar Beam / Sky Attack / Dig / Brick Break is 10000 + moveId: choosetwoturnanim;
- *                                                    Present with damage <= 0, the PresentHeal branch, is 20217)
+ *                                                    Present with damage <= 0, the PresentHeal branch, is 20217; Fury Cutter
+ *                                                    by the payload's furyCutterCounter 1 / 2 / 3 / 4+: 210 / 10210 / 20210 / 30210)
  *   animation HIT_ANIMATION                          hit-animation (target visibility from the toggles below)
  *   animation STATS_CHANGE                           stat-animation (B_ANIM_STATS_CHANGE argument)
  *   animation WEATHER_VAR argument 12 / 13           general-animation SANDSTORM_CONTINUES / HAIL_CONTINUES
@@ -45,7 +46,7 @@ import { generalAnimationPresentationRngKey, isWordsOrderDeferredUnit, WORDS_ORD
 import {
   KNOWN_ENTRY_BATTLER_SLOTS, KNOWN_ENTRY_OCCUPANT_ROLES, applySpriteOrderPresentationEvent, createSpriteOrderTracker,
   invalidateSpriteOrderTracker, spriteOrderStatusAnimationName, spriteOrderTrackerLend, spriteOrderTrackerRoleIsomorphic,
-  SPRITE_ORDER_GEOMETRY_KEYED_BODIES, type SpriteOrderDeferredLend, type SpriteOrderPresentationEvent, type SpriteOrderTracker,
+  SPRITE_ORDER_GEOMETRY_KEYED_ANIMS, SPRITE_ORDER_GEOMETRY_KEYED_BODIES, type SpriteOrderDeferredLend, type SpriteOrderPresentationEvent, type SpriteOrderTracker,
 } from "./spriteOrderEventTransform.ts";
 import {
   invalidateSpriteOrderState, knownEntryPrePromptSpriteOrderState, knownEntrySpriteOrderState, type SpriteOrderState,
@@ -318,6 +319,9 @@ function isAiSwitchOutSummary(events: readonly BattleKernelSemanticEvent[], inde
     || (earlier.kind === "set-battler-sprite-visibility" && earlier.battler === 1 && earlier.invisible));
 }
 
+/** Fury Cutter's order keys by furyCutterCounter 1 / 2 / 3 / 4+ (Move_FURY_CUTTER's FuryCutterContinue2 / Medium / Strong / Strongest). */
+const FURY_CUTTER_ORDER_KEYS: readonly number[] = Object.freeze([210, 10210, 20210, 30210]);
+
 function orderEventOf(
   events: readonly BattleKernelSemanticEvent[], index: number, hidden: readonly [boolean, boolean],
 ): { event?: SpriteOrderPresentationEvent; then?: SpriteOrderPresentationEvent; hidden?: readonly [boolean, boolean] } {
@@ -361,6 +365,14 @@ function orderEventOf(
         const secondBranch = (request.turn & 1) === 1 && TWO_TURN_ANIM_MOVE_IDS.has(request.moveId);
         // Move_PRESENT branches on gAnimMoveDmg > 0 (AnimTask_IsHealingMove, battle_anim_effects_3.c:1531): PresentHeal is 20000 + 217.
         const presentHeal = request.moveId === 217 && !(request.damage > 0);
+        // Move_FURY_CUTTER branches on furyCutterCounter (AnimTask_GetFuryCutterHitCount: 1 / 2 Medium / 3 Strong / 4+ Strongest; plans54):
+        // the payload's 7th argument keys 210 / 10210 / 20210 / 30210; without it the body has no plan (invalidates).
+        if (request.moveId === 210) {
+          const counter = Number(payload.arguments[6]);
+          return { event: Number.isInteger(counter) && counter >= 1 && counter <= 5
+            ? { kind: "move-animation", moveId: FURY_CUTTER_ORDER_KEYS[Math.min(counter, 4) - 1]!, attackerSide: battler === 0 ? "player" : "opponent" }
+            : { kind: "invalidate", reason: "Fury Cutter body without furyCutterCounter" } };
+        }
         return { event: { kind: "move-animation", moveId: presentHeal ? 20217 : secondBranch ? 10000 + request.moveId : request.moveId,
           attackerSide: battler === 0 ? "player" : "opponent" } };
       }
@@ -412,9 +424,10 @@ function orderEventOf(
 }
 
 /** A geometry-keyed body's plan text at the displayed species of its move-animation command (segment, event sequence); undefined
- * when unknown. */
+ * when unknown. HAIL_CONTINUES asks for Move_HAIL's (moveId 258) at its own (general-animation) event sequence. `lentFree`: the order the
+ * body is lent (spriteOrderTrackerLend: entry labels, as the live renderer gets it; Water Spout's plan ties in it, plans54). */
 export type SpriteOrderBodyPlanAt = (
-  segmentIndex: number, sequence: number, moveId: number, attackerSide: "player" | "opponent",
+  segmentIndex: number, sequence: number, moveId: number, attackerSide: "player" | "opponent", lentFree?: readonly number[],
 ) => string | undefined;
 
 interface ResolutionView {
@@ -460,8 +473,17 @@ export function advanceLiveSpriteOrderHost(
       let mapped = orderEventOf(events, index, hidden);
       // gdgeo: a geometry-keyed body (Giga Drain / Mega Drain) carries its plan at the displayed species of its own command;
       // unknown -> no plan (invalidates).
-      if (mapped.event?.kind === "move-animation" && SPRITE_ORDER_GEOMETRY_KEYED_BODIES.has(mapped.event.moveId)) {
-        const geometryPlan = bodyPlanAt?.(segmentIndex, events[index]!.sequence, mapped.event.moveId, mapped.event.attackerSide);
+      // plans54: Move_HAIL / General_Hail (HAIL_CONTINUES, requested under 258) target both battlers through IsBattlerSpriteVisible; the plan
+      // assumes both battler sprites are shown (a fainted / hidden battler moves its targets to the fixed coordinates): otherwise no plan.
+      const bothBattlersShown = tracker.battlerSlots.player !== null && tracker.battlerSlots.opponent !== null && !hidden[0] && !hidden[1];
+      if (mapped.event?.kind === "move-animation" && SPRITE_ORDER_GEOMETRY_KEYED_BODIES.has(mapped.event.moveId)
+        && (mapped.event.moveId !== 258 || bothBattlersShown)) {
+        const geometryPlan = bodyPlanAt?.(segmentIndex, events[index]!.sequence, mapped.event.moveId, mapped.event.attackerSide,
+          spriteOrderTrackerLend(tracker) ?? undefined);
+        if (geometryPlan !== undefined) mapped = { ...mapped, event: Object.freeze({ ...mapped.event, geometryPlan }) };
+      }
+      if (mapped.event?.kind === "general-animation" && SPRITE_ORDER_GEOMETRY_KEYED_ANIMS.has(mapped.event.animation) && bothBattlersShown) {
+        const geometryPlan = bodyPlanAt?.(segmentIndex, events[index]!.sequence, 258, "player");
         if (geometryPlan !== undefined) mapped = { ...mapped, event: Object.freeze({ ...mapped.event, geometryPlan }) };
       }
       if (mapped.hidden) hidden = mapped.hidden;

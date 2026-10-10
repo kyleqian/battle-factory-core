@@ -262,16 +262,35 @@ export type FactoryFacilityState = Readonly<{
 /**
  * S10A gdgeo: a geometry-keyed body's sprite-order plan at the displayed species of its own move-animation command (the field the
  * live renderer draws the body on; liveMoveAnimation.ts liveMoveGeometrySpriteOrderPlanText); undefined without such a command.
+ * plans54: Move_HAIL's plan (258) is also asked at HAIL_CONTINUES, a general animation with no command: its species are the segment
+ * field's after the switch-ins completed before that event (the only commands that change a displayed species). Water Spout (323) also
+ * gets the command's displayed field (the attacker's HP) and the host's lent free order.
  */
 function liveSpriteOrderBodyPlanAt(
   resolution: Readonly<{ segments: readonly Parameters<typeof battleResolutionMoveAnimationField>[0][] }>,
 ): SpriteOrderBodyPlanAt {
-  return (segmentIndex, sequence, moveId, attackerSide) => {
+  return (segmentIndex, sequence, moveId, attackerSide, lentFree) => {
     const segment = resolution.segments[segmentIndex];
-    const field = segment === undefined ? null : battleResolutionMoveAnimationField(segment, sequence);
-    return (field === null ? null : liveMoveGeometrySpriteOrderPlanText(moveId, attackerSide,
-      { playerSpecies: field.player.species, opponentSpecies: field.opponent.species })) ?? undefined;
+    if (segment === undefined) return undefined;
+    const field = battleResolutionMoveAnimationField(segment, sequence);
+    const species = field !== null ? { playerSpecies: field.player.species, opponentSpecies: field.opponent.species }
+      : moveId === 258 ? liveSpriteOrderSpeciesBefore(segment, sequence) : null;
+    // plans54: Water Spout also reads the displayed field (the attacker's HP tier) and the lent order.
+    return (species === null ? null : liveMoveGeometrySpriteOrderPlanText(moveId, attackerSide, species, field ?? undefined, lentFree))
+      ?? undefined;
   };
+}
+
+/** plans54: the displayed species at a non-command event of `sequence`: the segment field with the earlier switch-ins applied. */
+function liveSpriteOrderSpeciesBefore(
+  segment: Parameters<typeof battleResolutionMoveAnimationField>[0], sequence: number,
+): { playerSpecies: number; opponentSpecies: number } {
+  const species = { playerSpecies: segment.field.player.species, opponentSpecies: segment.field.opponent.species };
+  for (const command of segment.commands) {
+    if ("eventSequence" in command && command.eventSequence >= sequence) break;
+    if (command.type === "switch-in") species[command.battler === 0 ? "playerSpecies" : "opponentSpecies"] = command.incoming.species;
+  }
+  return species;
 }
 
 export function factoryHeardBrainSpeech(

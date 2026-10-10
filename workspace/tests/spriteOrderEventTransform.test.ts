@@ -26,7 +26,9 @@ describe("production sprite-order plan table (generated, pinned)", () => {
     // + plans48 (fixtures/plans48/plan-rows.json, appended): 17 bodies, 7 plans (FRZ / NIGHTMARE / CURSED = "Cf;D0", ITEM_KNOCKOFF = "Cf",
     //   Razor Leaf / Struggle opponent = the 75:player / 165:player texts, Razor Wind's unleash = Leech Seed's text: deduped).
     // + plans51 (fixtures/plans51/plan-rows.json, appended): Outrage 200 both sides + FOCUS_BAND, 2 plans (docs/next-adapters-plans51.md).
-    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(527);
+    // + plans54 (fixtures/plans54/plan-rows.json, appended): Fury Cutter's counter keys 210 / 10210 / 20210 / 30210 both sides, 8 bodies,
+    //   0 plans ("Cf;D0" / "Cff;D1;D0" deduped; docs/next-adapters-plans54.md).
+    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(535);
     expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(221);
   });
 
@@ -37,7 +39,7 @@ describe("production sprite-order plan table (generated, pinned)", () => {
       ...fixture("sprite-order-policy-gaps/relative-y-plans.json").bodies, ...fixture("sprite-order-body-plans-rely.json").bodies,
       ...fixture("prep28/plan-rows.json").bodies, ...fixture("prep28/plan-rows-sky-attack.json").bodies,
       ...fixture("prep43/plan-rows.json").bodies, ...fixture("prep45/plan-rows.json").bodies, ...fixture("plans48/plan-rows.json").bodies,
-      ...fixture("plans51/plan-rows.json").bodies,
+      ...fixture("plans51/plan-rows.json").bodies, ...fixture("plans54/plan-rows.json").bodies,
     };
     let exact = 0;
     for (const [key, row] of Object.entries(bodies)) {
@@ -331,15 +333,18 @@ describe("strict real-route replay (docs/sprite-order-real-route.md events; no r
     // Turn-keyed like the host (Dig / Brick Break choosetwoturnanim branch, prep43): known 1130 -> 1136, all exact.
     // prep45 plans (+ Solar Beam keyed like Dig): known 1136 -> 1143 (7 later edges), all exact.
     // plans48 plans (+ Razor Wind keyed like Dig, Present by its branch): known 1143 -> 1159 (16 later edges), all exact.
+    // plans54 Fury Cutter rows (210 / 10210 / 20210 / 30210): known 1159 -> 1173 (14 later edges after Fury Cutter bodies), all exact. The
+    // corpus has no furyCutterCounter, so every 210 body is fed the counter-1 "Cf;D0" plan; "Cff;D1;D0" (counters 2+) leaves the same
+    // free order at the next edge, so the edge counts do not depend on the key (the per-frame windows do: tests/spriteOrderPlans54.test.ts).
     const corpus = replayCrossBodyCorpus({ turnKeyed: true });
     expect({ scenarios: corpus.scenarios, skipped: corpus.skipped, edges: corpus.edges, mismatched: corpus.mismatched })
       .toEqual({ scenarios: 573, skipped: 19, edges: 1366, mismatched: 0 });
     expect(corpus.exact).toBe(corpus.known);
-    expect(corpus.known).toBe(1159);
-    expect(corpus.laterKnown).toBe(605);
+    expect(corpus.known).toBe(1173);
+    expect(corpus.laterKnown).toBe(619);
     // Without the turn key the Dig unleash body is fed the setup plan: exactly the edge after it (unit 5) in the two Dig scenarios.
     const unkeyed = replayCrossBodyCorpus();
-    expect({ known: unkeyed.known, exact: unkeyed.exact, mismatched: unkeyed.mismatched }).toEqual({ known: 1159, exact: 1156, mismatched: 3 });
+    expect({ known: unkeyed.known, exact: unkeyed.exact, mismatched: unkeyed.mismatched }).toEqual({ known: 1173, exact: 1170, mismatched: 3 });
     // ... and without the Present key the PresentHeal body is fed the PresentDamage plan (plans48).
     expect(unkeyed.mismatches).toEqual([
       { file: "217-mechanic-present-opponent-delibird-player-onix-0.json", unit: 7, mv: 33 },

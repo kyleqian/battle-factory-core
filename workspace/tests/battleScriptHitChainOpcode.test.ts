@@ -2137,6 +2137,20 @@ describe("production attackanimation (Cmd_attackanimation) dispatch", () => {
     expect(result.state.rulesContext.animTurn).toBe(1);
   });
 
+  it("Fury Cutter (plans54): MOVE_ANIMATION carries the presentation-only furyCutterCounter as a 7th argument", () => {
+    for (const counter of [1, 2, 3, 4, 5]) {
+      const rc = context(0, { furyCutterCounter: counter }, { battleMoveDamage: 2, multiHitCounter: 0, currentMove: 210 });
+      const { result } = stepAtOpcode("B_SCR_OP_ATTACKANIMATION", rc);
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      const event = result.state.events[0] as { arguments: readonly string[] };
+      expect(event.arguments).toHaveLength(7);
+      expect(event.arguments[0]).toBe("210");
+      expect(event.arguments[6]).toBe(String(counter));
+      // presentation data only: the rules context is the one without the argument
+      expect(result.state.rulesContext.battlers[0]!.furyCutterCounter).toBe(counter);
+    }
+  });
+
   it("MOVE_RESULT_NO_EFFECT: pauses via BattleScript_Pausex20 without emitting an animation", () => {
     const rc = context(0, {}, { moveResultFlags: 1 << 3 });
     const { result } = stepAtOpcode("B_SCR_OP_ATTACKANIMATION", rc);
