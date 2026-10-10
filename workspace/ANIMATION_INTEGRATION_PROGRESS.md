@@ -33,9 +33,20 @@
   0 regressions, key sequence + digest identical) (`tools/integration/fixtures/union-gates-f3efec8bf.json`).
 - Preview <http://127.0.0.1:5191/> serves `31f11ed70` (src `10884465`): 4 samples hash-equal (canvas == ABI == screenshot), session
   export + ON -> OFF restart passed, no browser errors (`playable-preview-31f11ed70-receipt.json`).
-- In flight: land68 (INTEGRATION: banked prep65 Dive words unit + prep64 SUBSTITUTE_FADE), plans69 (SIDE, evidence: the remaining
-  order-host stops Ice Ball / Mud-Slap / CASTFORM_CHANGE / Hyper Beam / Magnitude / Flatter / Needle Arm / Astonish / Odor Sleuth /
-  Conversion 2). Next: live audit 18 (hidden-span bodies, Shock Wave consumers, battle 713).
+- Folded Opus worker `009b4fbd4` (INTEGRATION) as `67a38e3f8` (src `afcf8175`): land68 — the two BANKED patches. prep65: Dive 291 joins
+  `WORDS_ORDER_UNIT_MOVE_IDS`, `TWO_TURN_ANIM_MOVE_IDS` / `SEMI_INVULNERABLE_SETUP_MOVE_IDS` gain 291 (the order host now hides the diver
+  like the render's hide66 span — a new agreement test failed on master's host), `deferredBodyOrderKey` arms the marker on the 10291
+  event, `liveDiveWordsPlanText` / `liveDiveWordsPostFree`; new tests/spriteOrderPrep65.test.ts (vectors via `land68DiveVectors.ts`,
+  fixtures/land68/dive-vectors.json; revert experiments fail). prep64: SUBSTITUTE_FADE -> the existing empty plan 9 (generator
+  regenerated, byte-identical to the banked diff) + allocator NET-ZERO; the 6 listed pins moved, tests/spriteOrderPrep64.test.ts added.
+  Census 0..299 vs `f3efec8bf`: **+51 / +9,091** (= prep65 +35 / +5,361 + prep64 +16 / +3,730 exactly), 0 regressions, key sequence +
+  digest identical; 0 frames draw a hidden battler; ON/OFF parity on a Dive and a Substitute-broken route. Worker gates 1,602 files /
+  13,180 tests, build, differential 624. Supervisor: fresh prep61 DIVE / HIDDENHIT probes (12 jobs x2, 0 A/B differ) -> units sha256 ==
+  `fixtures/prep65/units.sha256`, host-words + check == committed (15 / 15 plan == ROM, 215 frames, 7 / 7 lends); `prep64Run.sh
+  SKIP_CENSUS=1` all `same` (11 / 11); census rerun +51 / +9,091, key sequence + digest identical; clean merge (src == worker's
+  tested tree) -> smoke 448, touched tests 68 / 68. Census seeds 0..299 now **97.79 % / 98.94 %**.
+- In flight: dive70 (INTEGRATION: the Dive attack body adapter), plans69 (SIDE, evidence: the remaining order-host stops). Next: live
+  audit 18 (hidden-span bodies, Shock Wave consumers, census battle 713, the Dive words unit).
 
 ## 2026-10-09 (day) — S10A: allocator / order / words-lend histories + live-claim fixes; ordinary-play live share 87.95 -> 91.89 % of commands (92.09 -> 95.82 % of frames); 239 + 13 + 24
 
