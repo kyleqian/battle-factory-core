@@ -127,21 +127,27 @@ export function markLiveSpriteOrderDeferredBody(
     ...(body.rolloutCounter === undefined ? {} : { rolloutCounter: body.rolloutCounter }),
     ...(body.turn === undefined ? {} : { turn: body.turn }),
     // words59: the dirt units' carry reads the body's displayed species (the consumer's field may show a replacement)
-    ...(bodySpecies === undefined || (body.moveId !== 28 && body.moveId !== 189) ? {}
+    ...(bodySpecies === undefined || (body.moveId !== 28 && body.moveId !== 189 && body.moveId !== 291) ? {}
       : { bodySpecies: Object.freeze({ player: bodySpecies.player, opponent: bodySpecies.opponent }) }),
     activation }) });
 }
 
 /**
  * Moves whose script branches with choosetwoturnanim on `gAnimMoveTurn & 1` (Razor Wind / Solar Beam unleash, Fly / Bounce unleash, Sky
- * Attack strike, Dig unleash, Brick Break screen broken). Dive 291 is words-keyed (prep61) and keeps its single unplanned key.
+ * Attack strike, Dig unleash, Brick Break screen broken, Dive unleash). Dive 291 / 10291 stay words-keyed (no plan row; land68, prep65's
+ * liveDiveWordsPlanText carries them).
  */
-const TWO_TURN_ANIM_MOVE_IDS: ReadonlySet<number> = new Set([13, 19, 76, 91, 143, 280, 340]);
+const TWO_TURN_ANIM_MOVE_IDS: ReadonlySet<number> = new Set([13, 19, 76, 91, 143, 280, 291, 340]);
 /**
  * prep61: Fly / Bounce setup bodies hide the attacker's sprite themselves (FlySetUp / BounceSetUp; Scene ON emits no
  * MOVEEND_ATTACKER_INVISIBLE toggle, which needs HITMARKER_NO_ANIMATIONS): the battler is hidden from the setup body to its unleash body.
+ * land68 (prep65): Dive's setup hides the diver too (AnimDiveBall, battle_anim_flying.c:1016); the render's hide is the same span
+ * (liveSemiInvulnerableHideBattler / applyLiveSemiInvulnerableCommand, hide66).
  */
-const SEMI_INVULNERABLE_SETUP_MOVE_IDS: ReadonlySet<number> = new Set([19, 340]);
+const SEMI_INVULNERABLE_SETUP_MOVE_IDS: ReadonlySet<number> = new Set([19, 291, 340]);
+/** land68 (prep65): the order key of a marked body's own move-animation event (a two-turn unleash marker, Dive 291 turn 1, is keyed 10291). */
+const deferredBodyOrderKey = (body: Readonly<{ moveId: number; turn?: number }>): number =>
+  body.turn !== undefined && (body.turn & 1) === 1 && TWO_TURN_ANIM_MOVE_IDS.has(body.moveId) ? 10000 + body.moveId : body.moveId;
 const RECALL_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_VARIOUS", "B_SCR_OP_RETURNATKTOBALL", "B_SCR_OP_RETURNTOBALL"]);
 /** Order events that count as a presentation unit for the first-body gate (every body, faint, switch and recall). */
 const BODY_UNIT_EVENTS: ReadonlySet<string> = new Set([
@@ -521,7 +527,7 @@ export function advanceLiveSpriteOrderHost(
           key: generalAnimationPresentationRngKey(requestId, segmentIndex, events[index]!.sequence), moveId: 0,
           attackerSide: battler === 1 ? "opponent" as const : "player" as const, generalAnimation: WORDS_ORDER_GENERAL_ANIMATION,
           activation: rainActivation, units: Object.freeze([]) });
-      } else if (mapped.event?.kind === "move-animation" && deferredBody !== undefined && mapped.event.moveId === deferredBody.moveId
+      } else if (mapped.event?.kind === "move-animation" && deferredBody !== undefined && mapped.event.moveId === deferredBodyOrderKey(deferredBody)
         && mapped.event.attackerSide === deferredBody.attackerSide) {
         deferred = tracker.cursor.order.known ? undefined : Object.freeze({ ...deferredBody, units: Object.freeze([]) });
         deferredBody = undefined;

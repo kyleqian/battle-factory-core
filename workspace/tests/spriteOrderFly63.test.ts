@@ -11,7 +11,7 @@ import type { BattleKernelSemanticEvent } from "../src/engine/battleDecisionBoun
 // S10A fly63: prep61's Fly 19 / Bounce 340 two-turn order plans (docs/next-adapters-prep61.md). Setup and unleash are keyed apart
 // (choosetwoturnanim: 19 / 10019, 340 / 10340); the attacker is hidden from its setup body to its unleash body (FlySetUp / BounceSetUp hide
 // the sprite themselves in Scene ON); a hit on the hidden battler allocates nothing; a hidden battler's faint / switch-in invalidates.
-// Dive 291 is words-keyed (prep61) and keeps master's single unplanned key. ROM receipts: direct-mGBA probes (prep61Probe.py, every job
+// Dive 291 is words-keyed (prep61; land68 keys it 291 / 10291 and hides it, no plan row). ROM receipts: direct-mGBA probes (prep61Probe.py, every job
 // twice in fresh processes, A == B), extracted by prep61Extract.py and checked per frame by prep61Check.ts (check.json).
 const fixture = (name: string) => JSON.parse(readFileSync(new URL(`../tools/integration/fixtures/${name}`, import.meta.url), "utf8"));
 interface Win { f: number; C: [number, string][]; D: number[]; F: number[] }
@@ -145,13 +145,14 @@ describe("fly63: the host keys and hides the semi-invulnerable two-turn user", (
     }
   });
 
-  it("Dive 291 keeps master's single unplanned key and never hides (words-keyed, out of scope)", () => {
+  it("land68 (prep65): Dive 291 is keyed 291 / 10291 and hides setup -> unleash like Fly / Bounce; it has no plan row (words-keyed)", () => {
     for (const battler of [0, 1] as const) {
       for (const turn of [0, 1] as const) {
         const after = host([body(10, 291, battler, turn)]);
         expect(after.tracker.cursor.order.known).toBe(false);
-        expect(after.tracker.invalidReason).toContain(`body 291:${sides[battler]}`);
-        expect(after.hidden).toEqual([false, false]);
+        expect(after.tracker.invalidReason).toContain(`body ${turn === 1 ? 10291 : 291}:${sides[battler]}`);
+        expect(after.hidden[battler]).toBe(turn === 0);
+        expect(after.hidden[1 - battler]).toBe(false);
       }
     }
   });
