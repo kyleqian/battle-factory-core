@@ -17,6 +17,19 @@ backlog.
 
 # Open
 
+## #159 — Live bodies draw a semi-invulnerable (hidden) battler; fly63 reverted (S10A, found 2026-10-09 by live audit 17)
+
+`docs/live-audit-17-late-session.md` (receipts `tools/integration/fixtures/audit-17/receipts/{main,patch-hidden,patch-hidden-sky-uppercut}/`):
+while a Fly / Bounce charger is hidden, a LIVE body of the other battler draws the hidden battler — production applies the
+semi-invulnerable hide only on the presentation / fallback path (`applyLiveSemiInvulnerableCommand`), never to live bodies. fly63
+(`a504d60d4`) planned the Fly / Bounce setup, so such bodies became live: Heal Bell 420k-610k px, Double Team 256k-372k px per window
+(20 windows -> 0 px with the audit's reverted in-place patch that applies the hide to the live view), Sky Uppercut hitting the hidden user
+830k-975k px (the patch fixes rows 0..149; ages 150..186 keep ~19k px/row, unresolved). fly63 was REVERTED in `1a0f6e214` (src back to
+`06b791ff`); prep61's Fly / Bounce plans stay banked. The same hazard applies to any live body during a Dig / Dive / Fly / Bounce hidden
+span (order-independent adapters can be live there even without fly63) and to prep65's Dive patch. Resume: apply the hide to the live
+view (the audit's patch shape) with a test, extend it to a body that TARGETS the hidden battler (Sky Uppercut / Surf / Whirlpool / weather
+damage) and settle Sky Uppercut's ages 150..186, then re-land fly63 (+11 / +1,391 on 0..299) and prep65.
+
 ## #157 — Weather-continuing animations: kernel event battler is the last attacker, the ROM plays them on battler 0 (S10A, found 2026-10-09 by aud56)
 
 The kernel's MOVE / general-animation event for RAIN / HAIL / SANDSTORM_CONTINUES carries the last attacker as its battler; the ROM

@@ -1,12 +1,13 @@
 {
  "schema": "final-supervisor-gates/v1",
- "date": "2026-10-09 (day session)",
- "commit": "a504d60d4",
- "srcTree": "d7f24b036cd15eaeb7f5b161f0da6dd19de9b04a",
+ "date": "2026-10-09 (day session, after the fly63 revert)",
+ "commit": "1a0f6e214",
+ "srcTree": "06b791ffc785927bcb438be31de8c12c21d657cc",
+ "note": "fly63 (a504d60d4) reverted after live audit 17 (ISSUES #159); the earlier final gates on a504d60d4 (13,159 tests, census 0..999 92.26 / 96.23) are superseded",
  "typecheck": "pass",
  "suite": {
-  "files": "1598 passed | 44 skipped",
-  "tests": "13159 passed | 223 skipped"
+  "files": "1597 passed | 44 skipped",
+  "tests": "13153 passed | 223 skipped"
  },
  "build": "pass",
  "differential": {
@@ -19,11 +20,11 @@
   "result": "624 captures byte-identical"
  },
  "census0to299": {
-  "reportSha256": "994b4886132f1ada1e9f243528bd0e1c3b35f0b7be5864a73faecf712f7cb076",
-  "liveCount": 7740,
+  "reportSha256": "f9d03a32b08b024f3a982bf385de5f5db4c9b451a59af4e37b0ddf4c643b244c",
+  "liveCount": 7729,
   "commands": 7970,
-  "livePctCount": 97.11,
-  "livePctFrames": 98.11,
+  "livePctCount": 96.98,
+  "livePctFrames": 97.99,
   "vsSessionStart": {
    "base": "ccc4774c4",
    "liveCountBefore": 7385,
@@ -31,20 +32,18 @@
    "livePctFramesBefore": 94.12,
    "regressions": 0,
    "commandKeySequenceIdentical": true,
-   "playerTurns": "5756 both",
-   "battleFrames": "4,093,168 -> 4,095,000 (corrected live body lengths: Blizzard, Sheer Cold, Extrasensory, opponent Spark 115 vs 32-frame fallback)"
+   "playerTurns": "5756 both"
   }
  },
  "census0to999": {
-  "reportSha256": "4ca4aaf85f889ad111f1dccacd0b7c7778c71e81240599182c93040ce536be6d",
-  "twoRunsByteIdentical": true,
-  "livePctCount": 92.26,
-  "livePctFrames": 96.23,
-  "faithfulRandomHistory": "776 / 125,483",
+  "reportSha256": "eda0c77f01f83518c7cfd05efee57fb11987cd02334e45267c2fbb728491f53b",
+  "livePctCount": 91.89,
+  "livePctFrames": 95.82,
+  "faithfulRandomHistory": "769 / 124,577",
   "sessionStart": "87.95 / 92.09"
  },
  "census50000to50999": {
-  "livePctCount": 93.52,
-  "livePctFrames": 96.02
+  "livePctCount": 93.07,
+  "livePctFrames": 95.47
  }
 }

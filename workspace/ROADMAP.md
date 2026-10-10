@@ -2221,26 +2221,28 @@ Light Screen and Sky Attack moved to faithful timing by counter-evidenced D4 acc
 day session widened histories again and fixed live-claim defects: the allocator now carries across audited status animations (SLP,
 CONFUSION, PSN, PRZ, BRN, FRZ, INFATUATION, CURSED, NIGHTMARE) and 40 more net-zero bodies; every general / hit / stat animation is
 audited net-zero or fails closed (#156); Outrage / FOCUS_BAND / Fury Cutter (counter key) / hail / HAIL_CONTINUES / Blizzard / Water Spout /
-Fly / Bounce order plans (geometry-keyed from the renderers' own timelines where needed), Eruption fail-closed (#155); the words-deferred
+order plans (geometry-keyed from the renderers' own timelines where needed; Fly / Bounce landed then REVERTED — live audit 17
+found live bodies drawing the hidden charger, ISSUES #159), Eruption fail-closed (#155); the words-deferred
 lend replays past faint / send-out / switch units (rain, and Sand-Attack / Mud-Slap with the body's species in the marker); eight moves
 live at LATER bodies (rest-free guard); D4 body keys (Sheer Cold / Extrasensory opponent later bodies), Light Screen opponent and Blizzard
 geometry windows; Double Team's clone phase from the send-out animation's data[3] (#158: 86 / 214 live Double Teams had been one frame
-off). Ordinary-play census (`tools/integration/fixtures/live-share-census/report-seeds0-999-final-20261009-day.json`, src `d7f24b03`):
-**92.26 % of move-animation commands / 96.23 % of frames live** (session start 87.95 / 92.09), faithful-random history 2.82 % /
-3.18 %; seeds 50000..: 93.52 / 96.02; gameplay command key sequence identical at every fold. Resume points, by census frames:
-1. Sprite-order host stops (61,695 frames / 384 commands): FIRST land the two BANKED patches — prep65 Dive as a words unit
+off). Ordinary-play census (`tools/integration/fixtures/live-share-census/report-seeds0-999-final-20261009-day.json`, src `06b791ff`):
+**91.89 % of move-animation commands / 95.82 % of frames live** (session start 87.95 / 92.09), faithful-random history 2.79 % /
+3.16 %; seeds 50000..: 93.07 / 95.47; gameplay command key sequence identical at every fold. Resume points, by census frames:
+1. Sprite-order host stops (75,923 frames / 470 commands): FIRST fix ISSUES #159 (apply the semi-invulnerable hide to the live view —
+   audit 17's patch shape), then re-land fly63 (prep61 Fly / Bounce, +11 / +1,391) and the two BANKED patches — prep65 Dive as a words unit
    (`docs/next-adapters-prep65.md`: +35 / +5,361 on seeds 0..299, 15 / 15 ROM bodies exact) and prep64 SUBSTITUTE_FADE (empty EXACT plan +
    allocator NET-ZERO, `docs/next-adapters-prep64.md`: +16 / +3,730); then the Dive ATTACK body adapter (prep65 design note), Ice Ball's
-   own carried lend, Shock Wave (shockWave.ts allocation timeline diverges at window 37 — a reducer fix), gates53 row B, Mud-Slap 189 opponent; a hidden battler's faint (fly63 fails closed there: 26 / 4,010, not probed).
-2. Allocator history (18,642 / 184): the post-KO send-out reseed (blocked by the order host at those units, prep52 residual).
+   own carried lend, Shock Wave (shockWave.ts allocation timeline diverges at window 37 — a reducer fix), gates53 row B, Mud-Slap 189 opponent.
+2. Allocator history (20,516 / 200): the post-KO send-out reseed (blocked by the order host at those units, prep52 residual).
 3. Case-local gates (17,267 / 130): Flatter `firstBody` (needs later-body register + allocator evidence), words-lend remainders.
 4. The Dive ATTACK body has no adapter ("unsupported turn 1", 2,048 frames); Substitute doll cells (~6k); later bodies (4,416):
    Extrasensory player (undocumented residual), Memento (scanline entry), Fury Cutter counter 2+.
-5. ISSUES #152 remainder (Light Screen player-side hold / row-19 alternates to document in its D4 entry; TYRANITAR rows; Mach Punch
+5. ISSUES #159 (above), #152 remainder (Light Screen player-side hold / row-19 alternates to document in its D4 entry; TYRANITAR rows; Mach Punch
    target row 60; Extrasensory split rows), #154 (staged-probe cross-batch reproducibility), #157 (weather-continuing event battler).
 6. A live audit after the next batch — audit 16 (docs/live-audit-16-session-chains.md: 239 windows, no defect) did not reach an
    ORDER-DEPENDENT consumer after a words unit + KO / send-out chain (words57 / words59 windows were order-independent), later58 moves after
-   a switch-in, the d4later / dt60 / spark62 / fly63 changes.
+   a switch-in (audit 17 did fly63 + dt60: dt60 prediction == RAM 16 / 16, 0 px; the fly63 DEFECT -> #159).
 Struggle (1,056 commands / 33.8k frames in the census) is not a Factory rental move and stays outside the 276 accepted bodies.
 Validate new adapters with alternate-species dense proofs whose windows come from
 the source activation frame, not only the accepted fixture species.

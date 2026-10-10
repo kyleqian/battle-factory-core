@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-09 (day) — S10A: allocator / order / words-lend histories + live-claim fixes; ordinary-play live share 87.95 -> 92.26 % of commands (92.09 -> 96.23 % of frames); 239 + 13 + 24
+## 2026-10-09 (day) — S10A: allocator / order / words-lend histories + live-claim fixes; ordinary-play live share 87.95 -> 91.89 % of commands (92.09 -> 95.82 % of frames); 239 + 13 + 24
 
 - Session-start census on `ccc4774c4` (src `dde58985`), seeds 0..999: **87.95 % of move-animation commands / 92.09 % of frames live**
   (`tools/integration/fixtures/live-share-census/report-seeds0-999-start-20261009-day.json`, sha256 `5e4507ca`; battle digest
@@ -223,7 +223,7 @@
   battle frames +1,826 = 22 opponent Sparks x (115 - 32): those bodies now present the 115-frame body instead of the 32-frame fallback (3
   still decline at the order gate). Parity battle 85. Worker gates 1,597 files / 13,153 tests, build, differential 624/624. Supervisor:
   liveFixtureBatch rerun fresh — 11 / 11 windows 0 px both runs; census rerun +19 / +2,185, 22 changed records all opponent Spark.
-- Folded Opus worker `7a20759b0` (SIDE lane, narrow production grant) as `a504d60d4` (src tree `d7f24b03`): fly63 — prep61 landed minus
+- [REVERTED in `1a0f6e214` — live audit 17 DEFECT, ISSUES #159] Folded Opus worker `7a20759b0` (SIDE lane, narrow production grant) as `a504d60d4` (src tree `d7f24b03`): fly63 — prep61 landed minus
   Dive: `TWO_TURN_ANIM_MOVE_IDS` + 19 / 340 (unleash keys 10019 / 10340), `SEMI_INVULNERABLE_SETUP_MOVE_IDS` {19, 340} mark the attacker
   hidden from the setup body to the unleash body, a hit on a hidden battler leaves the tracker unchanged (allocates nothing), a hidden
   battler fainting / switching in invalidates; Dive 291 unchanged (one unplanned key; words carry next session). Table 535 -> 543 bodies,
@@ -231,7 +231,7 @@
   Fly user, 7 Protects whose allocator now re-seeds, Mud-Slap, Pursuit), 0 regressions, identical commands + digest; parity battle 81.
   Worker gates 1,597 files / 13,153 tests, build, differential 624/624. Supervisor: generator regen no diff; prep61Check on the committed
   units byte-identical.
-- Supervisor FINAL gates on `a504d60d4` (src `d7f24b03`): typecheck, full suite 1,598 files / 13,159 tests, build, differential 624/624
+- [SUPERSEDED by the post-revert final gates below] Supervisor gates on `a504d60d4` (src `d7f24b03`): typecheck, full suite 1,598 files / 13,159 tests, build, differential 624/624
   vs `ccc4774c4`, census seeds 0..299 97.11 % by count / 98.11 % by frames (session start 92.66 / 94.12; +355 commands live, 0
   regressions, command key sequence identical, player turns identical), seeds 0..999 92.26 % / 96.23 % (two runs byte-identical, sha256
   `4ca4aaf8`; start 87.95 / 92.09), seeds 50000.. 93.52 % / 96.02 % (`final-supervisor-gates-20261009-day.json`).
@@ -254,6 +254,19 @@
   "Dive keeps master's key"); run the full suite / build. Attack-body adapter design note in the doc (92-row body; dive.ts already ports
   it). Supervisor: `prep65Run.sh` (SKIP_CENSUS) into fresh dirs — 12 jobs A == B, all four probe / check receipts byte-identical, src
   reverted.
+- Live audit 17 (side, `96893bf32`, new files only; merged `023dd0a52`): routes made live late this session. 104 windows (88 fly63 + 16
+  dt60), all live with the order lend known, r1 == r2 everywhere, a from-scratch rerun 104 / 104 identical. dt60: prediction (committed
+  first) == RAM data[3] 16 / 16 for 8 Factory Double Team users outside dt60's grid, both classes / sides, 16 / 16 windows 0 px. fly63:
+  consumers right after a Fly / Bounce UNLEASH 0 px; but a live body of the OTHER battler while the charger is HIDDEN draws the hidden
+  battler (production hides it only through `view.visibility` on the fallback path; `battleScene.ts` liveSceneOnBattlerArt never reads it):
+  Heal Bell 420k-610k px, Double Team 256k-372k px per window -> 0 px with a reverted patch (20 windows); Sky Uppercut hitting the hidden
+  user 830k-975k px (patch fixes rows 0..149; ages 150..186 remain) -> ISSUES #159. Not reached: later58 after a switch-in.
+- REVERTED fly63 (`1a0f6e214`, src back to `06b791ff` = spark62's tested tree): too little session time for the #159 fix + full gates;
+  shipping a known wrong-pixel live claim was not acceptable. prep61's Fly / Bounce plans stay banked.
+- Supervisor FINAL gates on `1a0f6e214` (src `06b791ff`): typecheck, full suite 1,597 files / 13,153 tests, build, differential 624/624
+  vs `ccc4774c4`, census seeds 0..299 96.98 % by count / 97.99 % by frames (start 92.66 / 94.12; +344 commands, 0 regressions, command key
+  sequence identical), seeds 0..999 91.89 % / 95.82 % (sha256 `eda0c77f`; start 87.95 / 92.09), seeds 50000.. 93.07 % / 95.47 %
+  (`final-supervisor-gates-20261009-day.json`).
 
 ## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
 

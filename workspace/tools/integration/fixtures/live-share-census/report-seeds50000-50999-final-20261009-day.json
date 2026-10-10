@@ -29,22 +29,22 @@
  },
  "overall": {
   "commands": 27041,
-  "live": 25289,
+  "live": 25167,
   "partial": 7,
-  "fallback": 1745,
+  "fallback": 1867,
   "frames": 3959673,
-  "liveFrames": 3802271,
-  "liveSharePctByCount": 93.52,
-  "liveSharePctByFrames": 96.02,
+  "liveFrames": 3780437,
+  "liveSharePctByCount": 93.07,
+  "liveSharePctByFrames": 95.47,
   "moveAnimation": {
    "commands": 27016,
-   "live": 25264,
+   "live": 25142,
    "partial": 7,
    "frames": 3957033,
-   "liveFrames": 3799631,
+   "liveFrames": 3777797,
    "swapFrames": 2032,
-   "liveSharePctByCount": 93.51,
-   "liveSharePctByFrames": 96.02
+   "liveSharePctByCount": 93.06,
+   "liveSharePctByFrames": 95.47
   },
   "substituteFade": {
    "commands": 25,
@@ -57,26 +57,26 @@
    "liveSharePctByFrames": 100
   },
   "faithfulRandomHistory": {
-   "commands": 709,
-   "frames": 117663,
+   "commands": 702,
+   "frames": 116656,
    "partialOrOther": 0,
-   "pctOfAllByCount": 2.62,
-   "pctOfAllByFrames": 2.97,
-   "liveExcludingItByCount": 90.9,
-   "liveExcludingItByFrames": 93.05
+   "pctOfAllByCount": 2.6,
+   "pctOfAllByFrames": 2.95,
+   "liveExcludingItByCount": 90.47,
+   "liveExcludingItByFrames": 92.53
   }
  },
  "perReason": [
   {
    "reason": "presentation: sprite-order lend unknown",
-   "count": 491,
-   "frames": 81905,
-   "distinctMoves": 49
+   "count": 603,
+   "frames": 102351,
+   "distinctMoves": 54
   },
   {
    "reason": "presentation: sprite allocator history unknown",
-   "count": 228,
-   "frames": 24365,
+   "count": 234,
+   "frames": 24986,
    "distinctMoves": 6
   },
   {
@@ -87,8 +87,8 @@
   },
   {
    "reason": "presentation: unclassified (case-local gate)",
-   "count": 98,
-   "frames": 13502,
+   "count": 99,
+   "frames": 13678,
    "distinctMoves": 12
   },
   {
@@ -134,16 +134,16 @@
    "distinctMoves": 4
   },
   {
+   "reason": "presentation: unclassified (no source gate fired)",
+   "count": 6,
+   "frames": 862,
+   "distinctMoves": 3
+  },
+  {
    "reason": "duration: unsupported turn 0",
    "count": 9,
    "frames": 288,
    "distinctMoves": 1
-  },
-  {
-   "reason": "presentation: unclassified (no source gate fired)",
-   "count": 3,
-   "frames": 271,
-   "distinctMoves": 2
   },
   {
    "reason": "duration: defender doll: other-side body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)",
@@ -196,9 +196,32 @@
    ]
   },
   {
+   "detail": "order host: no EXACT plan: body 19:player",
+   "count": 57,
+   "frames": 10932,
+   "bodies": [
+    "AIR CUTTER/opponent",
+    "CURSE/player",
+    "DIG/opponent",
+    "DOUBLE TEAM/opponent",
+    "FORESIGHT/opponent",
+    "HEAL BELL/opponent",
+    "ICE BEAM/opponent",
+    "OVERHEAT/opponent",
+    "RETURN/opponent",
+    "ROCK BLAST/opponent",
+    "SILVER WIND/opponent",
+    "SPARK/opponent",
+    "SPIT UP/opponent",
+    "STOCKPILE/opponent",
+    "TRI ATTACK/opponent",
+    "WATER PULSE/opponent"
+   ]
+  },
+  {
    "detail": "order host: no EXACT plan: body 351:player",
-   "count": 49,
-   "frames": 10465,
+   "count": 48,
+   "frames": 10198,
    "bodies": [
     "DOUBLE TEAM/opponent",
     "FURY CUTTER/opponent",
@@ -234,6 +257,29 @@
    ]
   },
   {
+   "detail": "order host: no EXACT plan: body 340:opponent",
+   "count": 31,
+   "frames": 5418,
+   "bodies": [
+    "ABSORB/player",
+    "AURORA BEAM/player",
+    "DOUBLE TEAM/opponent",
+    "FIRE BLAST/opponent",
+    "FORESIGHT/player",
+    "ICE BEAM/player",
+    "MEGA DRAIN/player",
+    "MUD-SLAP/opponent",
+    "MUD-SLAP/player",
+    "PERISH SONG/opponent",
+    "PSYWAVE/opponent",
+    "ROCK BLAST/player",
+    "SHOCK WAVE/player",
+    "SIGNAL BEAM/opponent",
+    "SWIFT/player",
+    "WATER PULSE/player"
+   ]
+  },
+  {
    "detail": "order host: no EXACT plan: body 222:player",
    "count": 34,
    "frames": 4476,
@@ -260,6 +306,23 @@
     "FURY CUTTER/player",
     "MUD-SLAP/opponent",
     "SHOCK WAVE/opponent"
+   ]
+  },
+  {
+   "detail": "order host: no EXACT plan: body 19:opponent",
+   "count": 19,
+   "frames": 3472,
+   "bodies": [
+    "AURORA BEAM/player",
+    "DIG/opponent",
+    "DIG/player",
+    "DOUBLE TEAM/player",
+    "FIRE BLAST/player",
+    "HEAL BELL/player",
+    "MAGNITUDE/opponent",
+    "OCTAZOOKA/player",
+    "ROCK BLAST/player",
+    "SILVER WIND/player"
    ]
   },
   {
@@ -323,20 +386,6 @@
    ]
   },
   {
-   "detail": "order host: no EXACT plan: body 222:opponent",
-   "count": 10,
-   "frames": 1628,
-   "bodies": [
-    "AURORA BEAM/player",
-    "FURY CUTTER/player",
-    "MAGNITUDE/opponent",
-    "OCTAZOOKA/player",
-    "PETAL DANCE/player",
-    "ROCK THROW/opponent",
-    "SILVER WIND/player"
-   ]
-  },
-  {
    "detail": "order host: unknown entry",
    "count": 7,
    "frames": 1561,
@@ -368,6 +417,30 @@
     "MEGA DRAIN/player",
     "MUD-SLAP/opponent",
     "SHOCK WAVE/player",
+    "WATER PULSE/opponent"
+   ]
+  },
+  {
+   "detail": "order host: no EXACT plan: body 222:opponent",
+   "count": 8,
+   "frames": 1261,
+   "bodies": [
+    "AURORA BEAM/player",
+    "FURY CUTTER/player",
+    "MAGNITUDE/opponent",
+    "OCTAZOOKA/player",
+    "PETAL DANCE/player",
+    "ROCK THROW/opponent"
+   ]
+  },
+  {
+   "detail": "order host: no EXACT plan: body 340:player",
+   "count": 8,
+   "frames": 1258,
+   "bodies": [
+    "CURSE/opponent",
+    "MUD-SLAP/opponent",
+    "PSYWAVE/player",
     "WATER PULSE/opponent"
    ]
   },
@@ -450,8 +523,8 @@
    "side": "player",
    "reason": "sprite-order lend unknown",
    "gate": "liveMoveAnimation.ts:2945",
-   "count": 48,
-   "frames": 11040,
+   "count": 50,
+   "frames": 11500,
    "weightPct": 1.72,
    "details": [
     "25x order host: no EXACT plan: body 291:player",
@@ -465,8 +538,8 @@
    "side": "opponent",
    "reason": "sprite allocator history unknown",
    "gate": "liveMoveAnimation.ts:1799",
-   "count": 70,
-   "frames": 8610,
+   "count": 73,
+   "frames": 8979,
    "weightPct": 1.153,
    "details": []
   },
@@ -476,13 +549,28 @@
    "side": "player",
    "reason": "sprite-order lend unknown",
    "gate": "liveMoveAnimation.ts:3745",
-   "count": 32,
-   "frames": 8535,
+   "count": 33,
+   "frames": 8802,
    "weightPct": 0.147,
    "details": [
-    "27x order host: no EXACT plan: body 351:player",
+    "26x order host: no EXACT plan: body 351:player",
     "2x order host: no EXACT plan: body 260:opponent",
     "2x order host: no EXACT plan: body 302:opponent"
+   ]
+  },
+  {
+   "move": "DOUBLE TEAM",
+   "moveId": 104,
+   "side": "opponent",
+   "reason": "sprite-order lend unknown",
+   "gate": "liveMoveAnimation.ts:2945",
+   "count": 35,
+   "frames": 8050,
+   "weightPct": 1.72,
+   "details": [
+    "13x order host: no EXACT plan: body 291:opponent",
+    "7x order host: no EXACT plan: body 19:player",
+    "3x order host: no EXACT plan: body 295:opponent"
    ]
   },
   {
@@ -497,21 +585,6 @@
    "details": []
   },
   {
-   "move": "DOUBLE TEAM",
-   "moveId": 104,
-   "side": "opponent",
-   "reason": "sprite-order lend unknown",
-   "gate": "liveMoveAnimation.ts:2945",
-   "count": 25,
-   "frames": 5750,
-   "weightPct": 1.72,
-   "details": [
-    "13x order host: no EXACT plan: body 291:opponent",
-    "3x order host: no EXACT plan: body 295:opponent",
-    "3x order host: no EXACT plan: general animation SUBSTITUTE_FADE"
-   ]
-  },
-  {
    "move": "STRUGGLE",
    "moveId": 165,
    "side": "player",
@@ -521,6 +594,21 @@
    "frames": 5600,
    "weightPct": 0,
    "details": []
+  },
+  {
+   "move": "DIG",
+   "moveId": 91,
+   "side": "player",
+   "reason": "sprite-order lend unknown",
+   "gate": "liveMoveAnimation.ts:3375",
+   "count": 34,
+   "frames": 4852,
+   "weightPct": 0.75,
+   "details": [
+    "14x order host: no EXACT plan: body 291:opponent",
+    "11x order host: no EXACT plan: body 291:player",
+    "4x order host: no EXACT plan: body 255:opponent"
+   ]
   },
   {
    "move": "DIVE",
@@ -533,21 +621,6 @@
    "weightPct": 0.187,
    "details": [
     "41x order host: no EXACT plan: body 291:player"
-   ]
-  },
-  {
-   "move": "DIG",
-   "moveId": 91,
-   "side": "player",
-   "reason": "sprite-order lend unknown",
-   "gate": "liveMoveAnimation.ts:3375",
-   "count": 33,
-   "frames": 4657,
-   "weightPct": 0.75,
-   "details": [
-    "14x order host: no EXACT plan: body 291:opponent",
-    "11x order host: no EXACT plan: body 291:player",
-    "4x order host: no EXACT plan: body 255:opponent"
    ]
   },
   {
@@ -576,16 +649,45 @@
    ]
   },
   {
+   "move": "CURSE",
+   "moveId": 174,
+   "side": "player",
+   "reason": "sprite-order lend unknown",
+   "gate": "liveMoveAnimation.ts:3596",
+   "count": 20,
+   "frames": 3520,
+   "weightPct": 0.521,
+   "details": [
+    "20x order host: no EXACT plan: body 19:player"
+   ]
+  },
+  {
    "move": "RETURN",
    "moveId": 216,
    "side": "opponent",
    "reason": "sprite-order lend unknown",
    "gate": "liveMoveAnimation.ts:3668",
-   "count": 11,
-   "frames": 3102,
+   "count": 12,
+   "frames": 3384,
    "weightPct": 0.251,
    "details": [
-    "11x order host: no EXACT plan: body 291:player"
+    "11x order host: no EXACT plan: body 291:player",
+    "1x order host: no EXACT plan: body 19:player"
+   ]
+  },
+  {
+   "move": "DIG",
+   "moveId": 91,
+   "side": "opponent",
+   "reason": "sprite-order lend unknown",
+   "gate": "liveMoveAnimation.ts:3375",
+   "count": 23,
+   "frames": 3342,
+   "weightPct": 0.75,
+   "details": [
+    "5x order host: no EXACT plan: body 291:opponent",
+    "4x order host: no EXACT plan: body 19:opponent",
+    "4x order host: no EXACT plan: body 222:player"
    ]
   },
   {
@@ -600,6 +702,20 @@
    "details": [
     "9x order host: no EXACT plan: body 351:opponent",
     "2x order host: no EXACT plan: body 291:opponent"
+   ]
+  },
+  {
+   "move": "TRI ATTACK",
+   "moveId": 161,
+   "side": "opponent",
+   "reason": "sprite-order lend unknown",
+   "gate": "liveMoveAnimation.ts:2216",
+   "count": 10,
+   "frames": 2840,
+   "weightPct": 0.294,
+   "details": [
+    "8x order host: no EXACT plan: body 19:player",
+    "2x order host: no EXACT plan: general animation SUBSTITUTE_FADE"
    ]
   },
   {
@@ -641,25 +757,10 @@
    "side": "opponent",
    "reason": "sprite allocator history unknown",
    "gate": "liveMoveAnimation.ts:1787",
-   "count": 27,
-   "frames": 2376,
+   "count": 29,
+   "frames": 2552,
    "weightPct": 0.814,
    "details": []
-  },
-  {
-   "move": "DIG",
-   "moveId": 91,
-   "side": "opponent",
-   "reason": "sprite-order lend unknown",
-   "gate": "liveMoveAnimation.ts:3375",
-   "count": 16,
-   "frames": 2231,
-   "weightPct": 0.75,
-   "details": [
-    "5x order host: no EXACT plan: body 291:opponent",
-    "4x order host: no EXACT plan: body 222:player",
-    "4x order host: no EXACT plan: body 255:opponent"
-   ]
   },
   {
    "move": "LIGHT SCREEN",
@@ -671,6 +772,36 @@
    "frames": 1848,
    "weightPct": 0.814,
    "details": []
+  },
+  {
+   "move": "ICE BEAM",
+   "moveId": 58,
+   "side": "opponent",
+   "reason": "sprite-order lend unknown",
+   "gate": "liveMoveAnimation.ts:3103",
+   "count": 9,
+   "frames": 1827,
+   "weightPct": 1.98,
+   "details": [
+    "4x order host: no EXACT plan: body 291:player",
+    "3x order host: no EXACT plan: general animation SUBSTITUTE_FADE",
+    "2x order host: no EXACT plan: body 19:player"
+   ]
+  },
+  {
+   "move": "PSYWAVE",
+   "moveId": 149,
+   "side": "opponent",
+   "reason": "sprite-order lend unknown",
+   "gate": "liveMoveAnimation.ts:3802",
+   "count": 8,
+   "frames": 1640,
+   "weightPct": 0.074,
+   "details": [
+    "4x order host: no EXACT plan: body 351:player",
+    "3x order host: no EXACT plan: body 340:opponent",
+    "1x order host: no EXACT plan: body 222:player"
+   ]
   },
   {
    "move": "SEISMIC TOSS",
@@ -686,64 +817,17 @@
    ]
   },
   {
-   "move": "DIVE",
-   "moveId": 291,
-   "side": "opponent",
-   "reason": "unsupported turn 1",
-   "gate": "liveMoveAnimation.ts:1223",
-   "count": 48,
-   "frames": 1536,
-   "weightPct": 0.187,
-   "details": []
-  },
-  {
-   "move": "METEOR MASH",
-   "moveId": 309,
+   "move": "HEAL BELL",
+   "moveId": 215,
    "side": "player",
-   "reason": "battler has a status condition",
-   "gate": "liveMoveAnimation.ts:3937",
-   "count": 7,
-   "frames": 1505,
-   "weightPct": 0.22,
-   "details": []
-  },
-  {
-   "move": "DIVE",
-   "moveId": 291,
-   "side": "player",
-   "reason": "unsupported turn 1",
-   "gate": "liveMoveAnimation.ts:1223",
-   "count": 47,
-   "frames": 1504,
-   "weightPct": 0.187,
-   "details": []
-  },
-  {
-   "move": "PURSUIT",
-   "moveId": 228,
-   "side": "opponent",
    "reason": "sprite-order lend unknown",
-   "gate": "liveMoveAnimation.ts:3622",
-   "count": 14,
-   "frames": 1442,
-   "weightPct": 0.256,
+   "gate": "liveMoveAnimation.ts:2197",
+   "count": 6,
+   "frames": 1566,
+   "weightPct": 0.142,
    "details": [
-    "12x order host: no EXACT plan: body 301:player",
-    "2x order host: no EXACT plan: body 291:opponent"
-   ]
-  },
-  {
-   "move": "ICE BEAM",
-   "moveId": 58,
-   "side": "opponent",
-   "reason": "sprite-order lend unknown",
-   "gate": "liveMoveAnimation.ts:3103",
-   "count": 7,
-   "frames": 1421,
-   "weightPct": 1.98,
-   "details": [
-    "4x order host: no EXACT plan: body 291:player",
-    "3x order host: no EXACT plan: general animation SUBSTITUTE_FADE"
+    "3x order host: no EXACT plan: body 19:opponent",
+    "3x order host: no EXACT plan: body 291:opponent"
    ]
   }
  ],
@@ -776,8 +860,8 @@
    "side": "opponent",
    "reason": "sprite allocator history unknown",
    "gate": "liveMoveAnimation.ts:1799",
-   "count": 70,
-   "frames": 8610,
+   "count": 73,
+   "frames": 8979,
    "weightPct": 1.153,
    "details": []
   },
@@ -798,8 +882,8 @@
    "side": "player",
    "reason": "sprite-order lend unknown",
    "gate": "liveMoveAnimation.ts:2945",
-   "count": 48,
-   "frames": 11040,
+   "count": 50,
+   "frames": 11500,
    "weightPct": 1.72,
    "details": [
     "25x order host: no EXACT plan: body 291:player",
@@ -843,6 +927,36 @@
    ]
   },
   {
+   "move": "DOUBLE TEAM",
+   "moveId": 104,
+   "side": "opponent",
+   "reason": "sprite-order lend unknown",
+   "gate": "liveMoveAnimation.ts:2945",
+   "count": 35,
+   "frames": 8050,
+   "weightPct": 1.72,
+   "details": [
+    "13x order host: no EXACT plan: body 291:opponent",
+    "7x order host: no EXACT plan: body 19:player",
+    "3x order host: no EXACT plan: body 295:opponent"
+   ]
+  },
+  {
+   "move": "DIG",
+   "moveId": 91,
+   "side": "player",
+   "reason": "sprite-order lend unknown",
+   "gate": "liveMoveAnimation.ts:3375",
+   "count": 34,
+   "frames": 4852,
+   "weightPct": 0.75,
+   "details": [
+    "14x order host: no EXACT plan: body 291:opponent",
+    "11x order host: no EXACT plan: body 291:player",
+    "4x order host: no EXACT plan: body 255:opponent"
+   ]
+  },
+  {
    "move": "DIVE",
    "moveId": 291,
    "side": "opponent",
@@ -857,31 +971,16 @@
    ]
   },
   {
-   "move": "DIG",
-   "moveId": 91,
-   "side": "player",
-   "reason": "sprite-order lend unknown",
-   "gate": "liveMoveAnimation.ts:3375",
-   "count": 33,
-   "frames": 4657,
-   "weightPct": 0.75,
-   "details": [
-    "14x order host: no EXACT plan: body 291:opponent",
-    "11x order host: no EXACT plan: body 291:player",
-    "4x order host: no EXACT plan: body 255:opponent"
-   ]
-  },
-  {
    "move": "SHOCK WAVE",
    "moveId": 351,
    "side": "player",
    "reason": "sprite-order lend unknown",
    "gate": "liveMoveAnimation.ts:3745",
-   "count": 32,
-   "frames": 8535,
+   "count": 33,
+   "frames": 8802,
    "weightPct": 0.147,
    "details": [
-    "27x order host: no EXACT plan: body 351:player",
+    "26x order host: no EXACT plan: body 351:player",
     "2x order host: no EXACT plan: body 260:opponent",
     "2x order host: no EXACT plan: body 302:opponent"
    ]
@@ -892,24 +991,24 @@
    "side": "opponent",
    "reason": "sprite allocator history unknown",
    "gate": "liveMoveAnimation.ts:1787",
-   "count": 27,
-   "frames": 2376,
+   "count": 29,
+   "frames": 2552,
    "weightPct": 0.814,
    "details": []
   },
   {
-   "move": "DOUBLE TEAM",
-   "moveId": 104,
+   "move": "DIG",
+   "moveId": 91,
    "side": "opponent",
    "reason": "sprite-order lend unknown",
-   "gate": "liveMoveAnimation.ts:2945",
-   "count": 25,
-   "frames": 5750,
-   "weightPct": 1.72,
+   "gate": "liveMoveAnimation.ts:3375",
+   "count": 23,
+   "frames": 3342,
+   "weightPct": 0.75,
    "details": [
-    "13x order host: no EXACT plan: body 291:opponent",
-    "3x order host: no EXACT plan: body 295:opponent",
-    "3x order host: no EXACT plan: general animation SUBSTITUTE_FADE"
+    "5x order host: no EXACT plan: body 291:opponent",
+    "4x order host: no EXACT plan: body 19:opponent",
+    "4x order host: no EXACT plan: body 222:player"
    ]
   },
   {
@@ -933,6 +1032,19 @@
    "frames": 672,
    "weightPct": 0.182,
    "details": []
+  },
+  {
+   "move": "CURSE",
+   "moveId": 174,
+   "side": "player",
+   "reason": "sprite-order lend unknown",
+   "gate": "liveMoveAnimation.ts:3596",
+   "count": 20,
+   "frames": 3520,
+   "weightPct": 0.521,
+   "details": [
+    "20x order host: no EXACT plan: body 19:player"
+   ]
   },
   {
    "move": "FOCUS PUNCH",
@@ -1001,21 +1113,6 @@
    "details": []
   },
   {
-   "move": "DIG",
-   "moveId": 91,
-   "side": "opponent",
-   "reason": "sprite-order lend unknown",
-   "gate": "liveMoveAnimation.ts:3375",
-   "count": 16,
-   "frames": 2231,
-   "weightPct": 0.75,
-   "details": [
-    "5x order host: no EXACT plan: body 291:opponent",
-    "4x order host: no EXACT plan: body 222:player",
-    "4x order host: no EXACT plan: body 255:opponent"
-   ]
-  },
-  {
    "move": "FURY CUTTER",
    "moveId": 210,
    "side": "player",
@@ -1036,26 +1133,15 @@
    "frames": 1020,
    "weightPct": 0.221,
    "details": []
-  },
-  {
-   "move": "STRUGGLE",
-   "moveId": 165,
-   "side": "player",
-   "reason": "attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)",
-   "gate": "liveSubstituteSwap.ts:176",
-   "count": 15,
-   "frames": 480,
-   "weightPct": 0,
-   "details": []
   }
  ],
- "bucketCount": 157,
+ "bucketCount": 172,
  "sanity": {
-  "sampledLiveFrames": 39199,
-  "renderedOk": 39199,
+  "sampledLiveFrames": 38974,
+  "renderedOk": 38974,
   "renderThrows": [],
   "renderThrowCount": 0
  },
  "battleDigest": "2fa741360c620ee82dde068719f66bace994a3de9d50bc8c88023e3d7fb73f17",
- "commandDigest": "be51e89f916a469d7bcaae178558f965af7e085c5d096087947c34cc8b5099a9"
+ "commandDigest": "b13825454eb9eb8ab14b3cce72028931e763e74bc0336c797be0fbd1fdd2639a"
 }
