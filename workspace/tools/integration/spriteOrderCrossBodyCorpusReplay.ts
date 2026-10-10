@@ -51,9 +51,10 @@ function applyGap(tracker: SpriteOrderTracker, windows: readonly Window[]): { tr
   return { tracker: next, shape: shape.join("+") || "empty" };
 }
 
-/** liveSpriteOrderHost.ts's MOVE_ANIMATION key: an odd choosetwoturnanim turn of Razor Wind / Solar Beam / Sky Attack / Dig / Brick Break is 10000 + move id. */
+/** liveSpriteOrderHost.ts's MOVE_ANIMATION key: an odd choosetwoturnanim turn of Razor Wind / Fly / Solar Beam / Sky Attack / Dig / Brick Break /
+ * Bounce is 10000 + move id (Fly / Bounce: fly63, docs/next-adapters-prep61.md; Dive 291 keeps one key). */
 function hostMoveId(mv: number, turn: number): number {
-  return (turn & 1) === 1 && (mv === 13 || mv === 76 || mv === 91 || mv === 143 || mv === 280) ? 10000 + mv : mv;
+  return (turn & 1) === 1 && (mv === 13 || mv === 19 || mv === 76 || mv === 91 || mv === 143 || mv === 280 || mv === 340) ? 10000 + mv : mv;
 }
 
 /**
@@ -102,7 +103,7 @@ export function replayCrossBodyCorpus(options: Readonly<{ turnKeyed?: boolean }>
       firstEdge = false;
       const side = ownerSide(scenario, mv);
       let turn = 0;
-      if (options.turnKeyed && side !== null && (mv === 13 || mv === 76 || mv === 91)) {
+      if (options.turnKeyed && side !== null && (mv === 13 || mv === 19 || mv === 76 || mv === 91 || mv === 340)) {
         turn = occurrences.get(`${mv}:${side}`) ?? 0;
         occurrences.set(`${mv}:${side}`, turn + 1);
       }
