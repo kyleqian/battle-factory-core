@@ -1,0 +1,111 @@
+{
+ "schema": "audit20-chain-check/v1",
+ "scenario": "pa-hb-chimecho-reflect-ply",
+ "rows": [
+  {
+   "fixture": "pa-hb-chimecho-reflect-ply-c0.json",
+   "move": "REFLECT",
+   "side": "player",
+   "species": "CHANSEY/CHIMECHO",
+   "alloc": {
+    "input": [
+     3,
+     4,
+     5,
+     4
+    ],
+    "rom": [
+     3,
+     4,
+     5,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": true,
+    "preDiff": []
+   },
+   "units": 1,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "215@1 115@0"
+   ],
+   "romPower": 0,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 459,
+    "endFrame": 537
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 79,
+    "exactRows": 79,
+    "px": 0,
+    "digests": [
+     "131a00e1da38986b",
+     "131a00e1da38986b"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 79,
+    "exactRows": 79,
+    "px": 0,
+    "digests": [
+     "131a00e1da38986b",
+     "131a00e1da38986b"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

@@ -1,0 +1,5513 @@
+{
+ "schema": "audit20-chain-check/v1",
+ "scenario": "dv-seel-barrier-opp",
+ "rows": [
+  {
+   "fixture": "dv-seel-barrier-opp-c0.json",
+   "move": "BARRIER",
+   "side": "opponent",
+   "species": "CHANSEY/SEEL",
+   "alloc": {
+    "input": [
+     3
+    ],
+    "rom": [
+     3
+    ],
+    "preEqEntry": true,
+    "equal": true,
+    "preDiff": []
+   },
+   "units": 0,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "112@1"
+   ],
+   "romPower": 0,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 74,
+    "endFrame": 149
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "dv-seel-barrier-opp-c1.json",
+   "move": "DIVE",
+   "side": "player",
+   "species": "SEEL/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0"
+   ],
+   "romPower": 0,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 365,
+    "endFrame": 482
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 118,
+    "exactRows": 117,
+    "px": 284,
+    "digests": [
+     "bb12645a91868ed5",
+     "bb12645a91868ed5"
+    ],
+    "residualRows": [
+     [
+      68,
+      284
+     ]
+    ],
+    "detail": [
+     {
+      "age": 68,
+      "px": 284,
+      "bbox": [
+       49,
+       93,
+       80,
+       111
+      ],
+      "sample": "70,80 rom 6bffff live ffffff"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 118,
+    "exactRows": 117,
+    "px": 284,
+    "digests": [
+     "bb12645a91868ed5",
+     "bb12645a91868ed5"
+    ],
+    "residualRows": [
+     [
+      68,
+      284
+     ]
+    ],
+    "detail": [
+     {
+      "age": 68,
+      "px": 284,
+      "bbox": [
+       49,
+       93,
+       80,
+       111
+      ],
+      "sample": "70,80 rom 6bffff live ffffff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-seel-barrier-opp-c2.json",
+   "move": "BARRIER",
+   "side": "opponent",
+   "species": "CHANSEY/SEEL",
+   "alloc": {
+    "input": [
+     3
+    ],
+    "rom": [
+     3
+    ],
+    "preEqEntry": true,
+    "equal": true,
+    "preDiff": []
+   },
+   "units": 3,
+   "romInvisible": [
+    true,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1"
+   ],
+   "romPower": 0,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 631,
+    "endFrame": 706
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     true,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 0,
+    "px": 96900,
+    "digests": [
+     "d163e29b8b360771",
+     "d163e29b8b360771"
+    ],
+    "residualRows": [
+     [
+      0,
+      1275
+     ],
+     [
+      1,
+      1275
+     ],
+     [
+      2,
+      1275
+     ],
+     [
+      3,
+      1275
+     ],
+     [
+      4,
+      1275
+     ],
+     [
+      5,
+      1275
+     ],
+     [
+      6,
+      1275
+     ],
+     [
+      7,
+      1275
+     ],
+     [
+      8,
+      1275
+     ],
+     [
+      9,
+      1275
+     ],
+     [
+      10,
+      1275
+     ],
+     [
+      11,
+      1275
+     ],
+     [
+      12,
+      1275
+     ],
+     [
+      13,
+      1275
+     ],
+     [
+      14,
+      1275
+     ],
+     [
+      15,
+      1275
+     ],
+     [
+      16,
+      1275
+     ],
+     [
+      17,
+      1275
+     ],
+     [
+      18,
+      1275
+     ],
+     [
+      19,
+      1275
+     ],
+     [
+      20,
+      1275
+     ],
+     [
+      21,
+      1275
+     ],
+     [
+      22,
+      1275
+     ],
+     [
+      23,
+      1275
+     ],
+     [
+      24,
+      1275
+     ],
+     [
+      25,
+      1275
+     ],
+     [
+      26,
+      1275
+     ],
+     [
+      27,
+      1275
+     ],
+     [
+      28,
+      1275
+     ],
+     [
+      29,
+      1275
+     ],
+     [
+      30,
+      1275
+     ],
+     [
+      31,
+      1275
+     ],
+     [
+      32,
+      1275
+     ],
+     [
+      33,
+      1275
+     ],
+     [
+      34,
+      1275
+     ],
+     [
+      35,
+      1275
+     ],
+     [
+      36,
+      1275
+     ],
+     [
+      37,
+      1275
+     ],
+     [
+      38,
+      1275
+     ],
+     [
+      39,
+      1275
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 1275,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 1,
+      "px": 1275,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 2,
+      "px": 1275,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 3,
+      "px": 1275,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 4,
+      "px": 1275,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 5,
+      "px": 1275,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-seel-barrier-opp-c3.json",
+   "move": "DIVE",
+   "side": "player",
+   "species": "SEEL/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 5,
+   "romInvisible": [
+    true,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 1,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 942,
+    "endFrame": 1034
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (branch-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     true,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 93,
+    "exactRows": 18,
+    "px": 84089,
+    "digests": [
+     "21f37f9169e7d09f",
+     "21f37f9169e7d09f"
+    ],
+    "residualRows": [
+     [
+      17,
+      284
+     ],
+     [
+      18,
+      356
+     ],
+     [
+      19,
+      465
+     ],
+     [
+      20,
+      570
+     ],
+     [
+      21,
+      650
+     ],
+     [
+      22,
+      759
+     ],
+     [
+      23,
+      843
+     ],
+     [
+      24,
+      932
+     ],
+     [
+      25,
+      1063
+     ],
+     [
+      26,
+      1142
+     ],
+     [
+      27,
+      725
+     ],
+     [
+      28,
+      572
+     ],
+     [
+      29,
+      742
+     ],
+     [
+      30,
+      1171
+     ],
+     [
+      31,
+      1885
+     ],
+     [
+      32,
+      1806
+     ],
+     [
+      33,
+      1731
+     ],
+     [
+      34,
+      1692
+     ],
+     [
+      35,
+      1673
+     ],
+     [
+      36,
+      1694
+     ],
+     [
+      37,
+      1674
+     ],
+     [
+      38,
+      1629
+     ],
+     [
+      39,
+      1656
+     ],
+     [
+      40,
+      1603
+     ],
+     [
+      41,
+      1586
+     ],
+     [
+      42,
+      1592
+     ],
+     [
+      43,
+      1677
+     ],
+     [
+      44,
+      1683
+     ],
+     [
+      45,
+      1629
+     ],
+     [
+      46,
+      1635
+     ],
+     [
+      47,
+      1604
+     ],
+     [
+      48,
+      1622
+     ],
+     [
+      49,
+      1605
+     ],
+     [
+      50,
+      1608
+     ],
+     [
+      51,
+      1642
+     ],
+     [
+      52,
+      1641
+     ],
+     [
+      53,
+      1621
+     ],
+     [
+      54,
+      1620
+     ],
+     [
+      55,
+      1610
+     ],
+     [
+      56,
+      1612
+     ]
+    ],
+    "detail": [
+     {
+      "age": 17,
+      "px": 284,
+      "bbox": [
+       153,
+       197,
+       40,
+       71
+      ],
+      "sample": "174,40 rom 6bffff live ffd6d6"
+     },
+     {
+      "age": 18,
+      "px": 356,
+      "bbox": [
+       153,
+       197,
+       37,
+       71
+      ],
+      "sample": "173,37 rom 9cffff live ffffff"
+     },
+     {
+      "age": 19,
+      "px": 465,
+      "bbox": [
+       153,
+       197,
+       34,
+       72
+      ],
+      "sample": "174,34 rom 6bffff live ffd6d6"
+     },
+     {
+      "age": 20,
+      "px": 570,
+      "bbox": [
+       153,
+       197,
+       29,
+       71
+      ],
+      "sample": "174,29 rom 6bffff live ffdede"
+     },
+     {
+      "age": 21,
+      "px": 650,
+      "bbox": [
+       152,
+       199,
+       24,
+       71
+      ],
+      "sample": "173,24 rom 9cffff live ffffff"
+     },
+     {
+      "age": 22,
+      "px": 759,
+      "bbox": [
+       148,
+       203,
+       17,
+       72
+      ],
+      "sample": "174,17 rom 6bffff live f7f7ff"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 93,
+    "exactRows": 90,
+    "px": 28,
+    "digests": [
+     "76c058fd50ea8760",
+     "76c058fd50ea8760"
+    ],
+    "residualRows": [
+     [
+      17,
+      20
+     ],
+     [
+      19,
+      3
+     ],
+     [
+      20,
+      5
+     ]
+    ],
+    "detail": [
+     {
+      "age": 17,
+      "px": 20,
+      "bbox": [
+       170,
+       177,
+       66,
+       71
+      ],
+      "sample": "170,66 rom 216bff live 52ceff"
+     },
+     {
+      "age": 19,
+      "px": 3,
+      "bbox": [
+       166,
+       168,
+       60,
+       60
+      ],
+      "sample": "166,60 rom 216bff live ffffff"
+     },
+     {
+      "age": 20,
+      "px": 5,
+      "bbox": [
+       164,
+       166,
+       57,
+       59
+      ],
+      "sample": "164,57 rom 216bff live ffffff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-seel-barrier-opp-c4.json",
+   "move": "BARRIER",
+   "side": "opponent",
+   "species": "CHANSEY/SEEL",
+   "alloc": {
+    "input": [
+     3
+    ],
+    "rom": [
+     3
+    ],
+    "preEqEntry": true,
+    "equal": true,
+    "preDiff": []
+   },
+   "units": 7,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false,
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0 HIT_ANIMATION@1",
+    "112@1"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1408,
+    "endFrame": 1483
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "dv-seel-barrier-opp-c5.json",
+   "move": "DIVE",
+   "side": "player",
+   "species": "SEEL/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 9,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false,
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 291@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1699,
+    "endFrame": 1816
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (branch-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 118,
+    "exactRows": 11,
+    "px": 157072,
+    "digests": [
+     "a6608253cfc8143b",
+     "a6608253cfc8143b"
+    ],
+    "residualRows": [
+     [
+      11,
+      1369
+     ],
+     [
+      12,
+      1406
+     ],
+     [
+      13,
+      1447
+     ],
+     [
+      14,
+      1491
+     ],
+     [
+      15,
+      1579
+     ],
+     [
+      16,
+      1713
+     ],
+     [
+      17,
+      1668
+     ],
+     [
+      18,
+      1643
+     ],
+     [
+      19,
+      1607
+     ],
+     [
+      20,
+      1563
+     ],
+     [
+      21,
+      1469
+     ],
+     [
+      22,
+      1521
+     ],
+     [
+      23,
+      1523
+     ],
+     [
+      24,
+      1527
+     ],
+     [
+      25,
+      1519
+     ],
+     [
+      26,
+      1597
+     ],
+     [
+      27,
+      1739
+     ],
+     [
+      28,
+      1885
+     ],
+     [
+      29,
+      1917
+     ],
+     [
+      30,
+      1881
+     ],
+     [
+      31,
+      1829
+     ],
+     [
+      32,
+      1882
+     ],
+     [
+      33,
+      1847
+     ],
+     [
+      34,
+      1722
+     ],
+     [
+      35,
+      1549
+     ],
+     [
+      36,
+      1499
+     ],
+     [
+      37,
+      1404
+     ],
+     [
+      38,
+      1275
+     ],
+     [
+      39,
+      1275
+     ],
+     [
+      40,
+      1275
+     ],
+     [
+      41,
+      1275
+     ],
+     [
+      42,
+      1275
+     ],
+     [
+      43,
+      1275
+     ],
+     [
+      44,
+      1275
+     ],
+     [
+      45,
+      1275
+     ],
+     [
+      46,
+      1275
+     ],
+     [
+      47,
+      1275
+     ],
+     [
+      48,
+      1275
+     ],
+     [
+      49,
+      1275
+     ],
+     [
+      50,
+      1275
+     ]
+    ],
+    "detail": [
+     {
+      "age": 11,
+      "px": 1369,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 12,
+      "px": 1406,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 13,
+      "px": 1447,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 14,
+      "px": 1491,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 15,
+      "px": 1579,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 16,
+      "px": 1713,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 118,
+    "exactRows": 87,
+    "px": 17075,
+    "digests": [
+     "86ca7ec9dfa31d97",
+     "86ca7ec9dfa31d97"
+    ],
+    "residualRows": [
+     [
+      68,
+      284
+     ],
+     [
+      69,
+      325
+     ],
+     [
+      70,
+      371
+     ],
+     [
+      71,
+      510
+     ],
+     [
+      72,
+      548
+     ],
+     [
+      73,
+      594
+     ],
+     [
+      74,
+      748
+     ],
+     [
+      75,
+      759
+     ],
+     [
+      76,
+      714
+     ],
+     [
+      77,
+      874
+     ],
+     [
+      78,
+      1064
+     ],
+     [
+      79,
+      717
+     ],
+     [
+      80,
+      714
+     ],
+     [
+      81,
+      1076
+     ],
+     [
+      82,
+      888
+     ],
+     [
+      83,
+      720
+     ],
+     [
+      84,
+      718
+     ],
+     [
+      85,
+      683
+     ],
+     [
+      86,
+      514
+     ],
+     [
+      87,
+      492
+     ],
+     [
+      88,
+      548
+     ],
+     [
+      89,
+      422
+     ],
+     [
+      90,
+      486
+     ],
+     [
+      91,
+      523
+     ],
+     [
+      92,
+      240
+     ],
+     [
+      93,
+      249
+     ],
+     [
+      94,
+      258
+     ],
+     [
+      95,
+      265
+     ],
+     [
+      96,
+      280
+     ],
+     [
+      97,
+      277
+     ],
+     [
+      98,
+      214
+     ]
+    ],
+    "detail": [
+     {
+      "age": 68,
+      "px": 284,
+      "bbox": [
+       49,
+       93,
+       80,
+       111
+      ],
+      "sample": "70,80 rom 6bffff live ffffff"
+     },
+     {
+      "age": 69,
+      "px": 325,
+      "bbox": [
+       49,
+       93,
+       77,
+       111
+      ],
+      "sample": "69,77 rom 9cffff live f7f7ff"
+     },
+     {
+      "age": 70,
+      "px": 371,
+      "bbox": [
+       49,
+       93,
+       74,
+       111
+      ],
+      "sample": "70,74 rom 6bffff live f7f7ff"
+     },
+     {
+      "age": 71,
+      "px": 510,
+      "bbox": [
+       49,
+       93,
+       69,
+       111
+      ],
+      "sample": "70,69 rom 6bffff live f7f7ff"
+     },
+     {
+      "age": 72,
+      "px": 548,
+      "bbox": [
+       48,
+       95,
+       64,
+       110
+      ],
+      "sample": "69,64 rom 9cffff live ffffff"
+     },
+     {
+      "age": 73,
+      "px": 594,
+      "bbox": [
+       44,
+       99,
+       57,
+       111
+      ],
+      "sample": "70,57 rom 6bffff live f7f7ff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-seel-barrier-opp-c6.json",
+   "move": "DIVE",
+   "side": "player",
+   "species": "SEEL/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 10,
+   "romInvisible": [
+    true,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false,
+    true,
+    false
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "291t1@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 1,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 2131,
+    "endFrame": 2223
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (branch-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     true,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 93,
+    "exactRows": 18,
+    "px": 84934,
+    "digests": [
+     "86a1ee6be62f843c",
+     "86a1ee6be62f843c"
+    ],
+    "residualRows": [
+     [
+      17,
+      284
+     ],
+     [
+      18,
+      357
+     ],
+     [
+      19,
+      478
+     ],
+     [
+      20,
+      574
+     ],
+     [
+      21,
+      645
+     ],
+     [
+      22,
+      760
+     ],
+     [
+      23,
+      850
+     ],
+     [
+      24,
+      951
+     ],
+     [
+      25,
+      1085
+     ],
+     [
+      26,
+      1171
+     ],
+     [
+      27,
+      754
+     ],
+     [
+      28,
+      594
+     ],
+     [
+      29,
+      760
+     ],
+     [
+      30,
+      1188
+     ],
+     [
+      31,
+      1921
+     ],
+     [
+      32,
+      1826
+     ],
+     [
+      33,
+      1748
+     ],
+     [
+      34,
+      1701
+     ],
+     [
+      35,
+      1666
+     ],
+     [
+      36,
+      1679
+     ],
+     [
+      37,
+      1655
+     ],
+     [
+      38,
+      1629
+     ],
+     [
+      39,
+      1642
+     ],
+     [
+      40,
+      1590
+     ],
+     [
+      41,
+      1622
+     ],
+     [
+      42,
+      1632
+     ],
+     [
+      43,
+      1696
+     ],
+     [
+      44,
+      1704
+     ],
+     [
+      45,
+      1642
+     ],
+     [
+      46,
+      1634
+     ],
+     [
+      47,
+      1593
+     ],
+     [
+      48,
+      1606
+     ],
+     [
+      49,
+      1564
+     ],
+     [
+      50,
+      1583
+     ],
+     [
+      51,
+      1614
+     ],
+     [
+      52,
+      1636
+     ],
+     [
+      53,
+      1590
+     ],
+     [
+      54,
+      1612
+     ],
+     [
+      55,
+      1659
+     ],
+     [
+      56,
+      1674
+     ]
+    ],
+    "detail": [
+     {
+      "age": 17,
+      "px": 284,
+      "bbox": [
+       153,
+       197,
+       40,
+       71
+      ],
+      "sample": "174,40 rom 6bffff live ffd6d6"
+     },
+     {
+      "age": 18,
+      "px": 357,
+      "bbox": [
+       153,
+       197,
+       37,
+       71
+      ],
+      "sample": "173,37 rom 9cffff live ffffff"
+     },
+     {
+      "age": 19,
+      "px": 478,
+      "bbox": [
+       153,
+       197,
+       34,
+       72
+      ],
+      "sample": "174,34 rom 6bffff live ffd6d6"
+     },
+     {
+      "age": 20,
+      "px": 574,
+      "bbox": [
+       153,
+       197,
+       29,
+       71
+      ],
+      "sample": "174,29 rom 6bffff live ffdede"
+     },
+     {
+      "age": 21,
+      "px": 645,
+      "bbox": [
+       152,
+       199,
+       24,
+       71
+      ],
+      "sample": "173,24 rom 9cffff live ffffff"
+     },
+     {
+      "age": 22,
+      "px": 760,
+      "bbox": [
+       148,
+       203,
+       17,
+       72
+      ],
+      "sample": "174,17 rom 6bffff live f7f7ff"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 93,
+    "exactRows": 87,
+    "px": 50,
+    "digests": [
+     "9bbdabd52580d28a",
+     "9bbdabd52580d28a"
+    ],
+    "residualRows": [
+     [
+      17,
+      22
+     ],
+     [
+      18,
+      5
+     ],
+     [
+      19,
+      9
+     ],
+     [
+      20,
+      4
+     ],
+     [
+      21,
+      7
+     ],
+     [
+      22,
+      3
+     ]
+    ],
+    "detail": [
+     {
+      "age": 17,
+      "px": 22,
+      "bbox": [
+       169,
+       176,
+       66,
+       71
+      ],
+      "sample": "169,66 rom 216bff live 399cff"
+     },
+     {
+      "age": 18,
+      "px": 5,
+      "bbox": [
+       166,
+       182,
+       63,
+       66
+      ],
+      "sample": "166,63 rom 216bff live 52ceff"
+     },
+     {
+      "age": 19,
+      "px": 9,
+      "bbox": [
+       163,
+       186,
+       60,
+       63
+      ],
+      "sample": "163,60 rom 216bff live ffffff"
+     },
+     {
+      "age": 20,
+      "px": 4,
+      "bbox": [
+       188,
+       191,
+       57,
+       60
+      ],
+      "sample": "191,57 rom 216bff live ffffff"
+     },
+     {
+      "age": 21,
+      "px": 7,
+      "bbox": [
+       192,
+       194,
+       54,
+       57
+      ],
+      "sample": "194,54 rom 216bff live 399cff"
+     },
+     {
+      "age": 22,
+      "px": 3,
+      "bbox": [
+       196,
+       197,
+       52,
+       54
+      ],
+      "sample": "197,52 rom 0839ff live 216bff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-seel-barrier-opp-c7.json",
+   "move": "TOXIC",
+   "side": "opponent",
+   "species": "CHANSEY/SEEL",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4,
+     3
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 12,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false,
+    true,
+    false,
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "291t1@0 HIT_ANIMATION@1",
+    "92@1"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 2745,
+    "endFrame": 2975
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 231,
+    "exactRows": 17,
+    "px": 41446,
+    "digests": [
+     "8acfa5c97b87cee4",
+     "8acfa5c97b87cee4"
+    ],
+    "residualRows": [
+     [
+      1,
+      88
+     ],
+     [
+      2,
+      88
+     ],
+     [
+      3,
+      88
+     ],
+     [
+      4,
+      88
+     ],
+     [
+      5,
+      142
+     ],
+     [
+      6,
+      142
+     ],
+     [
+      7,
+      142
+     ],
+     [
+      8,
+      76
+     ],
+     [
+      9,
+      76
+     ],
+     [
+      10,
+      110
+     ],
+     [
+      11,
+      110
+     ],
+     [
+      12,
+      120
+     ],
+     [
+      13,
+      120
+     ],
+     [
+      14,
+      120
+     ],
+     [
+      15,
+      148
+     ],
+     [
+      16,
+      148
+     ],
+     [
+      17,
+      140
+     ],
+     [
+      18,
+      228
+     ],
+     [
+      19,
+      228
+     ],
+     [
+      20,
+      228
+     ],
+     [
+      21,
+      256
+     ],
+     [
+      22,
+      300
+     ],
+     [
+      23,
+      300
+     ],
+     [
+      24,
+      300
+     ],
+     [
+      25,
+      234
+     ],
+     [
+      26,
+      234
+     ],
+     [
+      27,
+      266
+     ],
+     [
+      28,
+      110
+     ],
+     [
+      29,
+      120
+     ],
+     [
+      30,
+      120
+     ],
+     [
+      31,
+      120
+     ],
+     [
+      32,
+      152
+     ],
+     [
+      33,
+      152
+     ],
+     [
+      34,
+      142
+     ],
+     [
+      35,
+      230
+     ],
+     [
+      36,
+      230
+     ],
+     [
+      37,
+      230
+     ],
+     [
+      38,
+      256
+     ],
+     [
+      39,
+      302
+     ],
+     [
+      40,
+      302
+     ]
+    ],
+    "detail": [
+     {
+      "age": 1,
+      "px": 88,
+      "bbox": [
+       88,
+       103,
+       104,
+       111
+      ],
+      "sample": "94,104 rom d6d6c6 live d600d6"
+     },
+     {
+      "age": 2,
+      "px": 88,
+      "bbox": [
+       88,
+       103,
+       104,
+       111
+      ],
+      "sample": "94,104 rom d6d6c6 live d600d6"
+     },
+     {
+      "age": 3,
+      "px": 88,
+      "bbox": [
+       88,
+       103,
+       104,
+       111
+      ],
+      "sample": "94,104 rom d6d6c6 live d600d6"
+     },
+     {
+      "age": 4,
+      "px": 88,
+      "bbox": [
+       88,
+       103,
+       104,
+       111
+      ],
+      "sample": "94,104 rom d6d6c6 live d600d6"
+     },
+     {
+      "age": 5,
+      "px": 142,
+      "bbox": [
+       88,
+       103,
+       98,
+       111
+      ],
+      "sample": "94,98 rom f7f7ff live d600d6"
+     },
+     {
+      "age": 6,
+      "px": 142,
+      "bbox": [
+       88,
+       103,
+       98,
+       111
+      ],
+      "sample": "94,98 rom f7f7ff live d600d6"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 231,
+    "exactRows": 17,
+    "px": 41446,
+    "digests": [
+     "8acfa5c97b87cee4",
+     "8acfa5c97b87cee4"
+    ],
+    "residualRows": [
+     [
+      1,
+      88
+     ],
+     [
+      2,
+      88
+     ],
+     [
+      3,
+      88
+     ],
+     [
+      4,
+      88
+     ],
+     [
+      5,
+      142
+     ],
+     [
+      6,
+      142
+     ],
+     [
+      7,
+      142
+     ],
+     [
+      8,
+      76
+     ],
+     [
+      9,
+      76
+     ],
+     [
+      10,
+      110
+     ],
+     [
+      11,
+      110
+     ],
+     [
+      12,
+      120
+     ],
+     [
+      13,
+      120
+     ],
+     [
+      14,
+      120
+     ],
+     [
+      15,
+      148
+     ],
+     [
+      16,
+      148
+     ],
+     [
+      17,
+      140
+     ],
+     [
+      18,
+      228
+     ],
+     [
+      19,
+      228
+     ],
+     [
+      20,
+      228
+     ],
+     [
+      21,
+      256
+     ],
+     [
+      22,
+      300
+     ],
+     [
+      23,
+      300
+     ],
+     [
+      24,
+      300
+     ],
+     [
+      25,
+      234
+     ],
+     [
+      26,
+      234
+     ],
+     [
+      27,
+      266
+     ],
+     [
+      28,
+      110
+     ],
+     [
+      29,
+      120
+     ],
+     [
+      30,
+      120
+     ],
+     [
+      31,
+      120
+     ],
+     [
+      32,
+      152
+     ],
+     [
+      33,
+      152
+     ],
+     [
+      34,
+      142
+     ],
+     [
+      35,
+      230
+     ],
+     [
+      36,
+      230
+     ],
+     [
+      37,
+      230
+     ],
+     [
+      38,
+      256
+     ],
+     [
+      39,
+      302
+     ],
+     [
+      40,
+      302
+     ]
+    ],
+    "detail": [
+     {
+      "age": 1,
+      "px": 88,
+      "bbox": [
+       88,
+       103,
+       104,
+       111
+      ],
+      "sample": "94,104 rom d6d6c6 live d600d6"
+     },
+     {
+      "age": 2,
+      "px": 88,
+      "bbox": [
+       88,
+       103,
+       104,
+       111
+      ],
+      "sample": "94,104 rom d6d6c6 live d600d6"
+     },
+     {
+      "age": 3,
+      "px": 88,
+      "bbox": [
+       88,
+       103,
+       104,
+       111
+      ],
+      "sample": "94,104 rom d6d6c6 live d600d6"
+     },
+     {
+      "age": 4,
+      "px": 88,
+      "bbox": [
+       88,
+       103,
+       104,
+       111
+      ],
+      "sample": "94,104 rom d6d6c6 live d600d6"
+     },
+     {
+      "age": 5,
+      "px": 142,
+      "bbox": [
+       88,
+       103,
+       98,
+       111
+      ],
+      "sample": "94,98 rom f7f7ff live d600d6"
+     },
+     {
+      "age": 6,
+      "px": 142,
+      "bbox": [
+       88,
+       103,
+       98,
+       111
+      ],
+      "sample": "94,98 rom f7f7ff live d600d6"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-seel-barrier-opp-c8.json",
+   "move": "DIVE",
+   "side": "player",
+   "species": "SEEL/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 14,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false,
+    true,
+    false,
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "291t1@0 HIT_ANIMATION@1",
+    "92@1 status:PSN@0 291@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 3169,
+    "endFrame": 3286
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (branch-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 118,
+    "exactRows": 11,
+    "px": 157109,
+    "digests": [
+     "296b936b17f73c99",
+     "296b936b17f73c99"
+    ],
+    "residualRows": [
+     [
+      11,
+      1369
+     ],
+     [
+      12,
+      1406
+     ],
+     [
+      13,
+      1447
+     ],
+     [
+      14,
+      1491
+     ],
+     [
+      15,
+      1579
+     ],
+     [
+      16,
+      1713
+     ],
+     [
+      17,
+      1668
+     ],
+     [
+      18,
+      1643
+     ],
+     [
+      19,
+      1607
+     ],
+     [
+      20,
+      1563
+     ],
+     [
+      21,
+      1469
+     ],
+     [
+      22,
+      1521
+     ],
+     [
+      23,
+      1523
+     ],
+     [
+      24,
+      1527
+     ],
+     [
+      25,
+      1519
+     ],
+     [
+      26,
+      1597
+     ],
+     [
+      27,
+      1739
+     ],
+     [
+      28,
+      1885
+     ],
+     [
+      29,
+      1917
+     ],
+     [
+      30,
+      1881
+     ],
+     [
+      31,
+      1829
+     ],
+     [
+      32,
+      1882
+     ],
+     [
+      33,
+      1847
+     ],
+     [
+      34,
+      1722
+     ],
+     [
+      35,
+      1549
+     ],
+     [
+      36,
+      1499
+     ],
+     [
+      37,
+      1404
+     ],
+     [
+      38,
+      1275
+     ],
+     [
+      39,
+      1275
+     ],
+     [
+      40,
+      1275
+     ],
+     [
+      41,
+      1275
+     ],
+     [
+      42,
+      1275
+     ],
+     [
+      43,
+      1275
+     ],
+     [
+      44,
+      1275
+     ],
+     [
+      45,
+      1275
+     ],
+     [
+      46,
+      1275
+     ],
+     [
+      47,
+      1275
+     ],
+     [
+      48,
+      1275
+     ],
+     [
+      49,
+      1275
+     ],
+     [
+      50,
+      1275
+     ]
+    ],
+    "detail": [
+     {
+      "age": 11,
+      "px": 1369,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 12,
+      "px": 1406,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 13,
+      "px": 1447,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 14,
+      "px": 1491,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 15,
+      "px": 1579,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 16,
+      "px": 1713,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 118,
+    "exactRows": 87,
+    "px": 16778,
+    "digests": [
+     "da2e285829823797",
+     "da2e285829823797"
+    ],
+    "residualRows": [
+     [
+      68,
+      284
+     ],
+     [
+      69,
+      306
+     ],
+     [
+      70,
+      352
+     ],
+     [
+      71,
+      486
+     ],
+     [
+      72,
+      527
+     ],
+     [
+      73,
+      566
+     ],
+     [
+      74,
+      723
+     ],
+     [
+      75,
+      756
+     ],
+     [
+      76,
+      722
+     ],
+     [
+      77,
+      889
+     ],
+     [
+      78,
+      1080
+     ],
+     [
+      79,
+      722
+     ],
+     [
+      80,
+      732
+     ],
+     [
+      81,
+      1104
+     ],
+     [
+      82,
+      933
+     ],
+     [
+      83,
+      784
+     ],
+     [
+      84,
+      786
+     ],
+     [
+      85,
+      752
+     ],
+     [
+      86,
+      561
+     ],
+     [
+      87,
+      518
+     ],
+     [
+      88,
+      551
+     ],
+     [
+      89,
+      417
+     ],
+     [
+      90,
+      461
+     ],
+     [
+      91,
+      480
+     ],
+     [
+      92,
+      181
+     ],
+     [
+      93,
+      178
+     ],
+     [
+      94,
+      182
+     ],
+     [
+      95,
+      190
+     ],
+     [
+      96,
+      193
+     ],
+     [
+      97,
+      190
+     ],
+     [
+      98,
+      172
+     ]
+    ],
+    "detail": [
+     {
+      "age": 68,
+      "px": 284,
+      "bbox": [
+       49,
+       93,
+       80,
+       111
+      ],
+      "sample": "70,80 rom 6bffff live ffffff"
+     },
+     {
+      "age": 69,
+      "px": 306,
+      "bbox": [
+       49,
+       93,
+       77,
+       111
+      ],
+      "sample": "69,77 rom 9cffff live f7f7ff"
+     },
+     {
+      "age": 70,
+      "px": 352,
+      "bbox": [
+       49,
+       93,
+       74,
+       111
+      ],
+      "sample": "70,74 rom 6bffff live f7f7ff"
+     },
+     {
+      "age": 71,
+      "px": 486,
+      "bbox": [
+       49,
+       93,
+       69,
+       111
+      ],
+      "sample": "70,69 rom 6bffff live f7f7ff"
+     },
+     {
+      "age": 72,
+      "px": 527,
+      "bbox": [
+       48,
+       93,
+       64,
+       110
+      ],
+      "sample": "69,64 rom 9cffff live ffffff"
+     },
+     {
+      "age": 73,
+      "px": 566,
+      "bbox": [
+       44,
+       93,
+       57,
+       111
+      ],
+      "sample": "70,57 rom 6bffff live f7f7ff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-seel-barrier-opp-c9.json",
+   "move": "DIVE",
+   "side": "player",
+   "species": "SEEL/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 15,
+   "romInvisible": [
+    true,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false,
+    true,
+    false,
+    true,
+    false
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "291t1@0 HIT_ANIMATION@1",
+    "92@1 status:PSN@0 291@0",
+    "291t1@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 1,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 3716,
+    "endFrame": 3808
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (branch-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     true,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 93,
+    "exactRows": 18,
+    "px": 84962,
+    "digests": [
+     "e4f1bd3057c357ba",
+     "e4f1bd3057c357ba"
+    ],
+    "residualRows": [
+     [
+      17,
+      284
+     ],
+     [
+      18,
+      343
+     ],
+     [
+      19,
+      455
+     ],
+     [
+      20,
+      562
+     ],
+     [
+      21,
+      646
+     ],
+     [
+      22,
+      766
+     ],
+     [
+      23,
+      848
+     ],
+     [
+      24,
+      940
+     ],
+     [
+      25,
+      1074
+     ],
+     [
+      26,
+      1155
+     ],
+     [
+      27,
+      729
+     ],
+     [
+      28,
+      573
+     ],
+     [
+      29,
+      733
+     ],
+     [
+      30,
+      1164
+     ],
+     [
+      31,
+      1870
+     ],
+     [
+      32,
+      1790
+     ],
+     [
+      33,
+      1732
+     ],
+     [
+      34,
+      1706
+     ],
+     [
+      35,
+      1681
+     ],
+     [
+      36,
+      1705
+     ],
+     [
+      37,
+      1710
+     ],
+     [
+      38,
+      1696
+     ],
+     [
+      39,
+      1728
+     ],
+     [
+      40,
+      1676
+     ],
+     [
+      41,
+      1649
+     ],
+     [
+      42,
+      1659
+     ],
+     [
+      43,
+      1759
+     ],
+     [
+      44,
+      1779
+     ],
+     [
+      45,
+      1681
+     ],
+     [
+      46,
+      1690
+     ],
+     [
+      47,
+      1584
+     ],
+     [
+      48,
+      1586
+     ],
+     [
+      49,
+      1572
+     ],
+     [
+      50,
+      1590
+     ],
+     [
+      51,
+      1671
+     ],
+     [
+      52,
+      1688
+     ],
+     [
+      53,
+      1646
+     ],
+     [
+      54,
+      1657
+     ],
+     [
+      55,
+      1667
+     ],
+     [
+      56,
+      1664
+     ]
+    ],
+    "detail": [
+     {
+      "age": 17,
+      "px": 284,
+      "bbox": [
+       153,
+       197,
+       40,
+       71
+      ],
+      "sample": "174,40 rom 6bffff live ffd6d6"
+     },
+     {
+      "age": 18,
+      "px": 343,
+      "bbox": [
+       153,
+       197,
+       37,
+       71
+      ],
+      "sample": "173,37 rom 9cffff live ffffff"
+     },
+     {
+      "age": 19,
+      "px": 455,
+      "bbox": [
+       153,
+       197,
+       34,
+       72
+      ],
+      "sample": "174,34 rom 6bffff live ffd6d6"
+     },
+     {
+      "age": 20,
+      "px": 562,
+      "bbox": [
+       153,
+       197,
+       29,
+       71
+      ],
+      "sample": "174,29 rom 6bffff live ffdede"
+     },
+     {
+      "age": 21,
+      "px": 646,
+      "bbox": [
+       157,
+       199,
+       24,
+       71
+      ],
+      "sample": "173,24 rom 9cffff live ffffff"
+     },
+     {
+      "age": 22,
+      "px": 766,
+      "bbox": [
+       153,
+       203,
+       17,
+       72
+      ],
+      "sample": "174,17 rom 6bffff live f7f7ff"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 93,
+    "exactRows": 73,
+    "px": 235,
+    "digests": [
+     "57eccda279876fa4",
+     "57eccda279876fa4"
+    ],
+    "residualRows": [
+     [
+      17,
+      15
+     ],
+     [
+      18,
+      13
+     ],
+     [
+      19,
+      14
+     ],
+     [
+      20,
+      9
+     ],
+     [
+      21,
+      7
+     ],
+     [
+      32,
+      19
+     ],
+     [
+      34,
+      19
+     ],
+     [
+      36,
+      19
+     ],
+     [
+      37,
+      19
+     ],
+     [
+      38,
+      15
+     ],
+     [
+      39,
+      15
+     ],
+     [
+      40,
+      12
+     ],
+     [
+      41,
+      12
+     ],
+     [
+      42,
+      9
+     ],
+     [
+      43,
+      9
+     ],
+     [
+      44,
+      9
+     ],
+     [
+      45,
+      6
+     ],
+     [
+      46,
+      6
+     ],
+     [
+      47,
+      4
+     ],
+     [
+      48,
+      4
+     ]
+    ],
+    "detail": [
+     {
+      "age": 17,
+      "px": 15,
+      "bbox": [
+       171,
+       177,
+       66,
+       71
+      ],
+      "sample": "171,66 rom 216bff live 52ceff"
+     },
+     {
+      "age": 18,
+      "px": 13,
+      "bbox": [
+       172,
+       176,
+       63,
+       68
+      ],
+      "sample": "172,63 rom 52ceff live ffffff"
+     },
+     {
+      "age": 19,
+      "px": 14,
+      "bbox": [
+       169,
+       173,
+       60,
+       64
+      ],
+      "sample": "169,60 rom 216bff live ffffff"
+     },
+     {
+      "age": 20,
+      "px": 9,
+      "bbox": [
+       168,
+       171,
+       57,
+       60
+      ],
+      "sample": "168,57 rom 216bff live ffffff"
+     },
+     {
+      "age": 21,
+      "px": 7,
+      "bbox": [
+       167,
+       169,
+       54,
+       57
+      ],
+      "sample": "167,54 rom 216bff live 399cff"
+     },
+     {
+      "age": 32,
+      "px": 19,
+      "bbox": [
+       175,
+       181,
+       66,
+       71
+      ],
+      "sample": "176,66 rom 8c84ff live ceceff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-seel-barrier-opp-c10.json",
+   "move": "DIVE",
+   "side": "player",
+   "species": "SEEL/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 18,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false,
+    true,
+    false,
+    true,
+    false,
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "291t1@0 HIT_ANIMATION@1",
+    "92@1 status:PSN@0 291@0",
+    "291t1@0 HIT_ANIMATION@1 status:PSN@0",
+    "291@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 5565,
+    "endFrame": 5682
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (branch-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 118,
+    "exactRows": 11,
+    "px": 157112,
+    "digests": [
+     "723eca46cad17bb3",
+     "723eca46cad17bb3"
+    ],
+    "residualRows": [
+     [
+      11,
+      1369
+     ],
+     [
+      12,
+      1406
+     ],
+     [
+      13,
+      1447
+     ],
+     [
+      14,
+      1491
+     ],
+     [
+      15,
+      1579
+     ],
+     [
+      16,
+      1713
+     ],
+     [
+      17,
+      1668
+     ],
+     [
+      18,
+      1643
+     ],
+     [
+      19,
+      1607
+     ],
+     [
+      20,
+      1563
+     ],
+     [
+      21,
+      1469
+     ],
+     [
+      22,
+      1521
+     ],
+     [
+      23,
+      1523
+     ],
+     [
+      24,
+      1527
+     ],
+     [
+      25,
+      1519
+     ],
+     [
+      26,
+      1597
+     ],
+     [
+      27,
+      1739
+     ],
+     [
+      28,
+      1885
+     ],
+     [
+      29,
+      1917
+     ],
+     [
+      30,
+      1881
+     ],
+     [
+      31,
+      1829
+     ],
+     [
+      32,
+      1882
+     ],
+     [
+      33,
+      1847
+     ],
+     [
+      34,
+      1722
+     ],
+     [
+      35,
+      1549
+     ],
+     [
+      36,
+      1499
+     ],
+     [
+      37,
+      1404
+     ],
+     [
+      38,
+      1275
+     ],
+     [
+      39,
+      1275
+     ],
+     [
+      40,
+      1275
+     ],
+     [
+      41,
+      1275
+     ],
+     [
+      42,
+      1275
+     ],
+     [
+      43,
+      1275
+     ],
+     [
+      44,
+      1275
+     ],
+     [
+      45,
+      1275
+     ],
+     [
+      46,
+      1275
+     ],
+     [
+      47,
+      1275
+     ],
+     [
+      48,
+      1275
+     ],
+     [
+      49,
+      1275
+     ],
+     [
+      50,
+      1275
+     ]
+    ],
+    "detail": [
+     {
+      "age": 11,
+      "px": 1369,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 12,
+      "px": 1406,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 13,
+      "px": 1447,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 14,
+      "px": 1491,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 15,
+      "px": 1579,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 16,
+      "px": 1713,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 118,
+    "exactRows": 87,
+    "px": 16574,
+    "digests": [
+     "3156769ae53f6a28",
+     "3156769ae53f6a28"
+    ],
+    "residualRows": [
+     [
+      68,
+      284
+     ],
+     [
+      69,
+      316
+     ],
+     [
+      70,
+      346
+     ],
+     [
+      71,
+      480
+     ],
+     [
+      72,
+      513
+     ],
+     [
+      73,
+      554
+     ],
+     [
+      74,
+      692
+     ],
+     [
+      75,
+      722
+     ],
+     [
+      76,
+      705
+     ],
+     [
+      77,
+      868
+     ],
+     [
+      78,
+      1026
+     ],
+     [
+      79,
+      685
+     ],
+     [
+      80,
+      676
+     ],
+     [
+      81,
+      998
+     ],
+     [
+      82,
+      851
+     ],
+     [
+      83,
+      703
+     ],
+     [
+      84,
+      734
+     ],
+     [
+      85,
+      721
+     ],
+     [
+      86,
+      579
+     ],
+     [
+      87,
+      552
+     ],
+     [
+      88,
+      535
+     ],
+     [
+      89,
+      420
+     ],
+     [
+      90,
+      478
+     ],
+     [
+      91,
+      503
+     ],
+     [
+      92,
+      218
+     ],
+     [
+      93,
+      217
+     ],
+     [
+      94,
+      213
+     ],
+     [
+      95,
+      213
+     ],
+     [
+      96,
+      268
+     ],
+     [
+      97,
+      286
+     ],
+     [
+      98,
+      218
+     ]
+    ],
+    "detail": [
+     {
+      "age": 68,
+      "px": 284,
+      "bbox": [
+       49,
+       93,
+       80,
+       111
+      ],
+      "sample": "70,80 rom 6bffff live ffffff"
+     },
+     {
+      "age": 69,
+      "px": 316,
+      "bbox": [
+       49,
+       93,
+       77,
+       111
+      ],
+      "sample": "69,77 rom 9cffff live f7f7ff"
+     },
+     {
+      "age": 70,
+      "px": 346,
+      "bbox": [
+       49,
+       93,
+       74,
+       111
+      ],
+      "sample": "70,74 rom 6bffff live f7f7ff"
+     },
+     {
+      "age": 71,
+      "px": 480,
+      "bbox": [
+       49,
+       93,
+       69,
+       111
+      ],
+      "sample": "70,69 rom 6bffff live f7f7ff"
+     },
+     {
+      "age": 72,
+      "px": 513,
+      "bbox": [
+       48,
+       93,
+       64,
+       110
+      ],
+      "sample": "69,64 rom 9cffff live ffffff"
+     },
+     {
+      "age": 73,
+      "px": 554,
+      "bbox": [
+       44,
+       93,
+       57,
+       111
+      ],
+      "sample": "70,57 rom 6bffff live f7f7ff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-seel-barrier-opp-c11.json",
+   "move": "DIVE",
+   "side": "player",
+   "species": "SEEL/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 19,
+   "romInvisible": [
+    true,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false,
+    true,
+    false,
+    true,
+    false,
+    true,
+    false
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "291t1@0 HIT_ANIMATION@1",
+    "92@1 status:PSN@0 291@0",
+    "291t1@0 HIT_ANIMATION@1 status:PSN@0",
+    "291@0",
+    "291t1@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 1,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 6132,
+    "endFrame": 6224
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (branch-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     true,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 93,
+    "exactRows": 18,
+    "px": 84357,
+    "digests": [
+     "869d8cfe7f2508ed",
+     "869d8cfe7f2508ed"
+    ],
+    "residualRows": [
+     [
+      17,
+      284
+     ],
+     [
+      18,
+      347
+     ],
+     [
+      19,
+      444
+     ],
+     [
+      20,
+      536
+     ],
+     [
+      21,
+      621
+     ],
+     [
+      22,
+      752
+     ],
+     [
+      23,
+      853
+     ],
+     [
+      24,
+      944
+     ],
+     [
+      25,
+      1081
+     ],
+     [
+      26,
+      1171
+     ],
+     [
+      27,
+      748
+     ],
+     [
+      28,
+      586
+     ],
+     [
+      29,
+      750
+     ],
+     [
+      30,
+      1179
+     ],
+     [
+      31,
+      1901
+     ],
+     [
+      32,
+      1830
+     ],
+     [
+      33,
+      1758
+     ],
+     [
+      34,
+      1736
+     ],
+     [
+      35,
+      1713
+     ],
+     [
+      36,
+      1732
+     ],
+     [
+      37,
+      1694
+     ],
+     [
+      38,
+      1667
+     ],
+     [
+      39,
+      1671
+     ],
+     [
+      40,
+      1608
+     ],
+     [
+      41,
+      1615
+     ],
+     [
+      42,
+      1629
+     ],
+     [
+      43,
+      1673
+     ],
+     [
+      44,
+      1709
+     ],
+     [
+      45,
+      1671
+     ],
+     [
+      46,
+      1685
+     ],
+     [
+      47,
+      1616
+     ],
+     [
+      48,
+      1625
+     ],
+     [
+      49,
+      1584
+     ],
+     [
+      50,
+      1592
+     ],
+     [
+      51,
+      1640
+     ],
+     [
+      52,
+      1658
+     ],
+     [
+      53,
+      1610
+     ],
+     [
+      54,
+      1617
+     ],
+     [
+      55,
+      1663
+     ],
+     [
+      56,
+      1664
+     ]
+    ],
+    "detail": [
+     {
+      "age": 17,
+      "px": 284,
+      "bbox": [
+       153,
+       197,
+       40,
+       71
+      ],
+      "sample": "174,40 rom 6bffff live ffd6d6"
+     },
+     {
+      "age": 18,
+      "px": 347,
+      "bbox": [
+       153,
+       197,
+       37,
+       71
+      ],
+      "sample": "173,37 rom 9cffff live ffffff"
+     },
+     {
+      "age": 19,
+      "px": 444,
+      "bbox": [
+       153,
+       197,
+       34,
+       72
+      ],
+      "sample": "174,34 rom 6bffff live ffd6d6"
+     },
+     {
+      "age": 20,
+      "px": 536,
+      "bbox": [
+       153,
+       197,
+       29,
+       71
+      ],
+      "sample": "174,29 rom 6bffff live ffdede"
+     },
+     {
+      "age": 21,
+      "px": 621,
+      "bbox": [
+       157,
+       199,
+       24,
+       71
+      ],
+      "sample": "173,24 rom 9cffff live ffffff"
+     },
+     {
+      "age": 22,
+      "px": 752,
+      "bbox": [
+       153,
+       203,
+       17,
+       72
+      ],
+      "sample": "174,17 rom 6bffff live f7f7ff"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 93,
+    "exactRows": 87,
+    "px": 154,
+    "digests": [
+     "bb435cb703265a4a",
+     "bb435cb703265a4a"
+    ],
+    "residualRows": [
+     [
+      17,
+      42
+     ],
+     [
+      18,
+      45
+     ],
+     [
+      19,
+      29
+     ],
+     [
+      20,
+      18
+     ],
+     [
+      21,
+      14
+     ],
+     [
+      22,
+      6
+     ]
+    ],
+    "detail": [
+     {
+      "age": 17,
+      "px": 42,
+      "bbox": [
+       170,
+       182,
+       66,
+       71
+      ],
+      "sample": "170,66 rom 399cff live 216bff"
+     },
+     {
+      "age": 18,
+      "px": 45,
+      "bbox": [
+       168,
+       185,
+       63,
+       68
+      ],
+      "sample": "168,63 rom 52ceff live 216bff"
+     },
+     {
+      "age": 19,
+      "px": 29,
+      "bbox": [
+       166,
+       188,
+       60,
+       66
+      ],
+      "sample": "166,60 rom ffffff live 216bff"
+     },
+     {
+      "age": 20,
+      "px": 18,
+      "bbox": [
+       164,
+       187,
+       57,
+       63
+      ],
+      "sample": "164,57 rom ffffff live 216bff"
+     },
+     {
+      "age": 21,
+      "px": 14,
+      "bbox": [
+       162,
+       189,
+       54,
+       61
+      ],
+      "sample": "162,54 rom 399cff live 216bff"
+     },
+     {
+      "age": 22,
+      "px": 6,
+      "bbox": [
+       160,
+       191,
+       52,
+       59
+      ],
+      "sample": "160,52 rom 216bff live 0839ff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-seel-barrier-opp-c12.json",
+   "move": "DIVE",
+   "side": "player",
+   "species": "SEEL/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 22,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false,
+    true,
+    false,
+    true,
+    false,
+    true,
+    false,
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "291t1@0 HIT_ANIMATION@1",
+    "92@1 status:PSN@0 291@0",
+    "291t1@0 HIT_ANIMATION@1 status:PSN@0",
+    "291@0",
+    "291t1@0 HIT_ANIMATION@1 status:PSN@0",
+    "291@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 6899,
+    "endFrame": 7016
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (branch-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 118,
+    "exactRows": 11,
+    "px": 157382,
+    "digests": [
+     "55340430862462aa",
+     "55340430862462aa"
+    ],
+    "residualRows": [
+     [
+      11,
+      1369
+     ],
+     [
+      12,
+      1406
+     ],
+     [
+      13,
+      1447
+     ],
+     [
+      14,
+      1491
+     ],
+     [
+      15,
+      1579
+     ],
+     [
+      16,
+      1713
+     ],
+     [
+      17,
+      1668
+     ],
+     [
+      18,
+      1643
+     ],
+     [
+      19,
+      1607
+     ],
+     [
+      20,
+      1563
+     ],
+     [
+      21,
+      1469
+     ],
+     [
+      22,
+      1521
+     ],
+     [
+      23,
+      1523
+     ],
+     [
+      24,
+      1527
+     ],
+     [
+      25,
+      1519
+     ],
+     [
+      26,
+      1597
+     ],
+     [
+      27,
+      1739
+     ],
+     [
+      28,
+      1885
+     ],
+     [
+      29,
+      1917
+     ],
+     [
+      30,
+      1881
+     ],
+     [
+      31,
+      1829
+     ],
+     [
+      32,
+      1882
+     ],
+     [
+      33,
+      1847
+     ],
+     [
+      34,
+      1722
+     ],
+     [
+      35,
+      1549
+     ],
+     [
+      36,
+      1499
+     ],
+     [
+      37,
+      1404
+     ],
+     [
+      38,
+      1275
+     ],
+     [
+      39,
+      1275
+     ],
+     [
+      40,
+      1275
+     ],
+     [
+      41,
+      1275
+     ],
+     [
+      42,
+      1275
+     ],
+     [
+      43,
+      1275
+     ],
+     [
+      44,
+      1275
+     ],
+     [
+      45,
+      1275
+     ],
+     [
+      46,
+      1275
+     ],
+     [
+      47,
+      1275
+     ],
+     [
+      48,
+      1275
+     ],
+     [
+      49,
+      1275
+     ],
+     [
+      50,
+      1275
+     ]
+    ],
+    "detail": [
+     {
+      "age": 11,
+      "px": 1369,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 12,
+      "px": 1406,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 13,
+      "px": 1447,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 14,
+      "px": 1491,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 15,
+      "px": 1579,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     },
+     {
+      "age": 16,
+      "px": 1713,
+      "bbox": [
+       48,
+       95,
+       68,
+       111
+      ],
+      "sample": "77,68 rom ffffff live 425284"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 118,
+    "exactRows": 87,
+    "px": 16680,
+    "digests": [
+     "76d643b41bed664d",
+     "76d643b41bed664d"
+    ],
+    "residualRows": [
+     [
+      68,
+      284
+     ],
+     [
+      69,
+      318
+     ],
+     [
+      70,
+      355
+     ],
+     [
+      71,
+      482
+     ],
+     [
+      72,
+      490
+     ],
+     [
+      73,
+      530
+     ],
+     [
+      74,
+      699
+     ],
+     [
+      75,
+      732
+     ],
+     [
+      76,
+      696
+     ],
+     [
+      77,
+      866
+     ],
+     [
+      78,
+      1045
+     ],
+     [
+      79,
+      697
+     ],
+     [
+      80,
+      698
+     ],
+     [
+      81,
+      1058
+     ],
+     [
+      82,
+      897
+     ],
+     [
+      83,
+      733
+     ],
+     [
+      84,
+      727
+     ],
+     [
+      85,
+      691
+     ],
+     [
+      86,
+      532
+     ],
+     [
+      87,
+      520
+     ],
+     [
+      88,
+      584
+     ],
+     [
+      89,
+      463
+     ],
+     [
+      90,
+      528
+     ],
+     [
+      91,
+      541
+     ],
+     [
+      92,
+      233
+     ],
+     [
+      93,
+      201
+     ],
+     [
+      94,
+      209
+     ],
+     [
+      95,
+      209
+     ],
+     [
+      96,
+      219
+     ],
+     [
+      97,
+      232
+     ],
+     [
+      98,
+      211
+     ]
+    ],
+    "detail": [
+     {
+      "age": 68,
+      "px": 284,
+      "bbox": [
+       49,
+       93,
+       80,
+       111
+      ],
+      "sample": "70,80 rom 6bffff live ffffff"
+     },
+     {
+      "age": 69,
+      "px": 318,
+      "bbox": [
+       49,
+       93,
+       77,
+       111
+      ],
+      "sample": "69,77 rom 9cffff live f7f7ff"
+     },
+     {
+      "age": 70,
+      "px": 355,
+      "bbox": [
+       49,
+       93,
+       74,
+       111
+      ],
+      "sample": "70,74 rom 6bffff live f7f7ff"
+     },
+     {
+      "age": 71,
+      "px": 482,
+      "bbox": [
+       49,
+       93,
+       69,
+       111
+      ],
+      "sample": "70,69 rom 6bffff live f7f7ff"
+     },
+     {
+      "age": 72,
+      "px": 490,
+      "bbox": [
+       48,
+       95,
+       64,
+       110
+      ],
+      "sample": "69,64 rom 9cffff live ffffff"
+     },
+     {
+      "age": 73,
+      "px": 530,
+      "bbox": [
+       44,
+       99,
+       57,
+       111
+      ],
+      "sample": "70,57 rom 6bffff live f7f7ff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-seel-barrier-opp-c13.json",
+   "move": "DIVE",
+   "side": "player",
+   "species": "SEEL/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 23,
+   "romInvisible": [
+    true,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false,
+    true,
+    false,
+    true,
+    false,
+    true,
+    false,
+    true,
+    false
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "291t1@0 HIT_ANIMATION@1",
+    "92@1 status:PSN@0 291@0",
+    "291t1@0 HIT_ANIMATION@1 status:PSN@0",
+    "291@0",
+    "291t1@0 HIT_ANIMATION@1 status:PSN@0",
+    "291@0",
+    "291t1@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 1,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 7486,
+    "endFrame": 7578
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (branch-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     true,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 93,
+    "exactRows": 18,
+    "px": 85615,
+    "digests": [
+     "b6fb238a0be942ca",
+     "b6fb238a0be942ca"
+    ],
+    "residualRows": [
+     [
+      17,
+      284
+     ],
+     [
+      18,
+      354
+     ],
+     [
+      19,
+      471
+     ],
+     [
+      20,
+      582
+     ],
+     [
+      21,
+      666
+     ],
+     [
+      22,
+      796
+     ],
+     [
+      23,
+      892
+     ],
+     [
+      24,
+      990
+     ],
+     [
+      25,
+      1126
+     ],
+     [
+      26,
+      1199
+     ],
+     [
+      27,
+      772
+     ],
+     [
+      28,
+      619
+     ],
+     [
+      29,
+      787
+     ],
+     [
+      30,
+      1224
+     ],
+     [
+      31,
+      1952
+     ],
+     [
+      32,
+      1880
+     ],
+     [
+      33,
+      1774
+     ],
+     [
+      34,
+      1738
+     ],
+     [
+      35,
+      1720
+     ],
+     [
+      36,
+      1735
+     ],
+     [
+      37,
+      1692
+     ],
+     [
+      38,
+      1653
+     ],
+     [
+      39,
+      1671
+     ],
+     [
+      40,
+      1635
+     ],
+     [
+      41,
+      1653
+     ],
+     [
+      42,
+      1690
+     ],
+     [
+      43,
+      1775
+     ],
+     [
+      44,
+      1808
+     ],
+     [
+      45,
+      1796
+     ],
+     [
+      46,
+      1804
+     ],
+     [
+      47,
+      1603
+     ],
+     [
+      48,
+      1608
+     ],
+     [
+      49,
+      1571
+     ],
+     [
+      50,
+      1577
+     ],
+     [
+      51,
+      1583
+     ],
+     [
+      52,
+      1607
+     ],
+     [
+      53,
+      1613
+     ],
+     [
+      54,
+      1620
+     ],
+     [
+      55,
+      1652
+     ],
+     [
+      56,
+      1664
+     ]
+    ],
+    "detail": [
+     {
+      "age": 17,
+      "px": 284,
+      "bbox": [
+       153,
+       197,
+       40,
+       71
+      ],
+      "sample": "174,40 rom 6bffff live ffd6d6"
+     },
+     {
+      "age": 18,
+      "px": 354,
+      "bbox": [
+       153,
+       197,
+       37,
+       71
+      ],
+      "sample": "173,37 rom 9cffff live ffffff"
+     },
+     {
+      "age": 19,
+      "px": 471,
+      "bbox": [
+       153,
+       197,
+       34,
+       72
+      ],
+      "sample": "174,34 rom 6bffff live ffd6d6"
+     },
+     {
+      "age": 20,
+      "px": 582,
+      "bbox": [
+       153,
+       197,
+       29,
+       71
+      ],
+      "sample": "174,29 rom 6bffff live ffdede"
+     },
+     {
+      "age": 21,
+      "px": 666,
+      "bbox": [
+       152,
+       199,
+       24,
+       71
+      ],
+      "sample": "173,24 rom 9cffff live ffffff"
+     },
+     {
+      "age": 22,
+      "px": 796,
+      "bbox": [
+       148,
+       203,
+       17,
+       72
+      ],
+      "sample": "174,17 rom 6bffff live f7f7ff"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 93,
+    "exactRows": 85,
+    "px": 100,
+    "digests": [
+     "955595a1f7f3f2bb",
+     "955595a1f7f3f2bb"
+    ],
+    "residualRows": [
+     [
+      17,
+      41
+     ],
+     [
+      18,
+      7
+     ],
+     [
+      19,
+      11
+     ],
+     [
+      20,
+      9
+     ],
+     [
+      21,
+      7
+     ],
+     [
+      22,
+      3
+     ],
+     [
+      47,
+      18
+     ],
+     [
+      48,
+      4
+     ]
+    ],
+    "detail": [
+     {
+      "age": 17,
+      "px": 41,
+      "bbox": [
+       169,
+       182,
+       66,
+       71
+      ],
+      "sample": "169,66 rom 399cff live 216bff"
+     },
+     {
+      "age": 18,
+      "px": 7,
+      "bbox": [
+       174,
+       179,
+       63,
+       68
+      ],
+      "sample": "178,63 rom 399cff live ffffff"
+     },
+     {
+      "age": 19,
+      "px": 11,
+      "bbox": [
+       178,
+       182,
+       60,
+       64
+      ],
+      "sample": "180,60 rom 399cff live 52ceff"
+     },
+     {
+      "age": 20,
+      "px": 9,
+      "bbox": [
+       180,
+       183,
+       57,
+       60
+      ],
+      "sample": "183,57 rom ffffff live 216bff"
+     },
+     {
+      "age": 21,
+      "px": 7,
+      "bbox": [
+       182,
+       184,
+       54,
+       57
+      ],
+      "sample": "184,54 rom 399cff live 216bff"
+     },
+     {
+      "age": 22,
+      "px": 3,
+      "bbox": [
+       184,
+       185,
+       52,
+       54
+      ],
+      "sample": "185,52 rom 216bff live 0839ff"
+     }
+    ]
+   }
+  }
+ ]
+}

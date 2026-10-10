@@ -1,0 +1,151 @@
+{
+ "schema": "audit20-chain-check/v1",
+ "scenario": "ctl-snorlax-light-screen-ply",
+ "rows": [
+  {
+   "fixture": "ctl-snorlax-light-screen-ply-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "species": "CHANSEY/SNORLAX",
+   "alloc": {
+    "input": [
+     3,
+     4,
+     5,
+     7,
+     4,
+     5,
+     7
+    ],
+    "rom": [
+     3,
+     4,
+     5,
+     7,
+     4,
+     5,
+     7
+    ],
+    "preEqEntry": true,
+    "equal": true,
+    "preDiff": []
+   },
+   "units": 0,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "113@0"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 223,
+    "endFrame": 308
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 86,
+    "exactRows": 85,
+    "px": 2473,
+    "digests": [
+     "f9ae1736e1b9ab2b",
+     "f9ae1736e1b9ab2b"
+    ],
+    "residualRows": [
+     [
+      59,
+      2473
+     ]
+    ],
+    "detail": [
+     {
+      "age": 59,
+      "px": 2473,
+      "bbox": [
+       91,
+       132,
+       48,
+       111
+      ],
+      "sample": "91,48 rom e3f1d5 live e6f3da"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 86,
+    "exactRows": 85,
+    "px": 2473,
+    "digests": [
+     "f9ae1736e1b9ab2b",
+     "f9ae1736e1b9ab2b"
+    ],
+    "residualRows": [
+     [
+      59,
+      2473
+     ]
+    ],
+    "detail": [
+     {
+      "age": 59,
+      "px": 2473,
+      "bbox": [
+       91,
+       132,
+       48,
+       111
+      ],
+      "sample": "91,48 rom e3f1d5 live e6f3da"
+     }
+    ]
+   }
+  }
+ ]
+}

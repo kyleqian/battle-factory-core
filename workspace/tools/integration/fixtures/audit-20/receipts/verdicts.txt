@@ -1,0 +1,406 @@
+ctl-snorlax-barrier-opp-c0               BARRIER      . alloc= ZERO
+ctl-snorlax-barrier-opp-c1               BARRIER      . alloc= ZERO
+ctl-snorlax-barrier-opp-c2               BARRIER      . alloc= ZERO
+ctl-snorlax-barrier-ply-c0               BARRIER      . alloc= ZERO
+ctl-snorlax-barrier-ply-c1               BARRIER      . alloc= ZERO
+ctl-snorlax-barrier-ply-c2               BARRIER      . alloc= ZERO
+ctl-snorlax-light-screen-opp-c0          LIGHT_SCREEN . alloc= =CONTROL (ctl-snorlax-light-screen-opp-c0 2658)
+ctl-snorlax-light-screen-ply-c0          LIGHT_SCREEN . alloc= =CONTROL (ctl-snorlax-light-screen-ply-c0 2473)
+ctl-snorlax-magic-coat-opp-c0            MAGIC_COAT   . alloc= ZERO
+ctl-snorlax-magic-coat-opp-c1            MAGIC_COAT   . alloc= ZERO
+ctl-snorlax-magic-coat-opp-c2            MAGIC_COAT   . alloc= ZERO
+ctl-snorlax-magic-coat-ply-c0            MAGIC_COAT   . alloc= ZERO
+ctl-snorlax-magic-coat-ply-c1            MAGIC_COAT   . alloc= ZERO
+ctl-snorlax-magic-coat-ply-c2            MAGIC_COAT   . alloc= ZERO
+ctl-snorlax-protect-opp-c0               PROTECT      . alloc= ZERO
+ctl-snorlax-protect-opp-c1               PROTECT      . alloc= ZERO
+ctl-snorlax-protect-ply-c0               PROTECT      . alloc= ZERO
+ctl-snorlax-protect-ply-c1               PROTECT      . alloc= ZERO
+ctl-snorlax-reflect-opp-c0               REFLECT      . alloc= ZERO
+ctl-snorlax-reflect-ply-c0               REFLECT      . alloc= ZERO
+dv-clamperl-barrier-opp-c0               BARRIER      . alloc= ZERO
+dv-clamperl-barrier-opp-c1               DIVE         . alloc- DIFF px=284 rows 1 ages 69..69 bbox [49, 93, 80, 111] 70,80 rom 6bffff live ffffff
+dv-clamperl-barrier-opp-c2               BARRIER      H alloc= ZERO
+dv-clamperl-barrier-opp-c3               DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-barrier-opp-c4               BARRIER      . alloc= ZERO
+dv-clamperl-barrier-opp-c5               DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-barrier-opp-c6               DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-barrier-opp-c7               TOXIC        . alloc- DIFF px=40313 rows 40+ ages 1..40 bbox [88, 103, 104, 111] 94,104 rom 315ace live d600d6
+dv-clamperl-barrier-opp-c8               DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-barrier-opp-c9               DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-barrier-opp-c10              DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-barrier-opp-c11              DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-barrier-opp-c12              DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-barrier-opp-c13              DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-barrier-ply-c0               TOXIC        . alloc- DIFF px=42626 rows 40+ ages 1..40 bbox [144, 159, 64, 71] 150,64 rom bdbd9c live d600d6
+dv-clamperl-barrier-ply-c1               DIVE         . alloc- ZERO
+dv-clamperl-barrier-ply-c2               BARRIER      H alloc= ZERO
+dv-clamperl-barrier-ply-c3               DIVE         . alloc- ZERO
+dv-clamperl-barrier-ply-c4               BARRIER      . alloc= ZERO
+dv-clamperl-barrier-ply-c5               DIVE         . alloc- ZERO
+dv-clamperl-barrier-ply-c6               BARRIER      H alloc= ZERO
+dv-clamperl-barrier-ply-c7               DIVE         . alloc- ZERO
+dv-clamperl-magic-coat-opp-c0            MAGIC_COAT   . alloc= ZERO
+dv-clamperl-magic-coat-opp-c1            DIVE         . alloc- DIFF px=17142 rows 31 ages 69..99 bbox [49, 93, 80, 111] 70,80 rom 6bffff live ffffff
+dv-clamperl-magic-coat-opp-c2            MAGIC_COAT   H alloc= ZERO
+dv-clamperl-magic-coat-opp-c3            DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-magic-coat-opp-c4            MAGIC_COAT   . alloc= ZERO
+dv-clamperl-magic-coat-opp-c5            DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-magic-coat-opp-c6            DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-magic-coat-opp-c7            MAGIC_COAT   . alloc= ZERO
+dv-clamperl-magic-coat-opp-c8            DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-magic-coat-opp-c9            MAGIC_COAT   H alloc= ZERO
+dv-clamperl-magic-coat-opp-c10           DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-magic-coat-opp-c11           MAGIC_COAT   . alloc= ZERO
+dv-clamperl-magic-coat-opp-c12           DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-magic-coat-opp-c13           MAGIC_COAT   H alloc= ZERO
+dv-clamperl-magic-coat-opp-c14           DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-magic-coat-opp-c15           DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-magic-coat-opp-c16           MAGIC_COAT   H alloc= ZERO
+dv-clamperl-magic-coat-opp-c17           DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-magic-coat-opp-c18           MAGIC_COAT   . alloc= ZERO
+dv-clamperl-magic-coat-opp-c19           DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-magic-coat-opp-c20           DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-magic-coat-opp-c21           MAGIC_COAT   . alloc= ZERO
+dv-clamperl-magic-coat-opp-c22           DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-magic-coat-opp-c23           MAGIC_COAT   H alloc= ZERO
+dv-clamperl-magic-coat-opp-c24           DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-clamperl-magic-coat-ply-c0            TOXIC        . alloc- DIFF px=42626 rows 40+ ages 1..40 bbox [144, 159, 64, 71] 150,64 rom bdbd9c live d600d6
+dv-clamperl-magic-coat-ply-c1            DIVE         . alloc- ZERO
+dv-clamperl-magic-coat-ply-c2            MAGIC_COAT   H alloc= ZERO
+dv-clamperl-magic-coat-ply-c3            DIVE         . alloc- ZERO
+dv-clamperl-magic-coat-ply-c4            MAGIC_COAT   . alloc= ZERO
+dv-clamperl-magic-coat-ply-c5            DIVE         . alloc- ZERO
+dv-clamperl-magic-coat-ply-c6            MAGIC_COAT   H alloc= ZERO
+dv-clamperl-magic-coat-ply-c7            DIVE         . alloc- ZERO
+dv-seel-barrier-opp-c0                   BARRIER      . alloc= ZERO
+dv-seel-barrier-opp-c1                   DIVE         . alloc- DIFF px=284 rows 1 ages 68..68 bbox [49, 93, 80, 111] 70,80 rom 6bffff live ffffff
+dv-seel-barrier-opp-c2                   BARRIER      H alloc= ZERO
+dv-seel-barrier-opp-c3                   DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-barrier-opp-c4                   BARRIER      . alloc= ZERO
+dv-seel-barrier-opp-c5                   DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-barrier-opp-c6                   DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-barrier-opp-c7                   TOXIC        . alloc- DIFF px=41446 rows 40+ ages 1..40 bbox [88, 103, 104, 111] 94,104 rom d6d6c6 live d600d6
+dv-seel-barrier-opp-c8                   DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-barrier-opp-c9                   DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-barrier-opp-c10                  DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-barrier-opp-c11                  DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-barrier-opp-c12                  DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-barrier-opp-c13                  DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-barrier-ply-c0                   TOXIC        . alloc- DIFF px=42701 rows 40+ ages 1..40 bbox [144, 159, 64, 71] 150,64 rom bdbd9c live d600d6
+dv-seel-barrier-ply-c1                   DIVE         . alloc- ZERO
+dv-seel-barrier-ply-c2                   BARRIER      H alloc= ZERO
+dv-seel-barrier-ply-c3                   DIVE         . alloc- ZERO
+dv-seel-barrier-ply-c4                   BARRIER      . alloc= ZERO
+dv-seel-barrier-ply-c5                   DIVE         . alloc- ZERO
+dv-seel-barrier-ply-c6                   BARRIER      H alloc= ZERO
+dv-seel-barrier-ply-c7                   DIVE         . alloc- ZERO
+dv-seel-magic-coat-opp-c0                MAGIC_COAT   . alloc= ZERO
+dv-seel-magic-coat-opp-c1                DIVE         . alloc- DIFF px=284 rows 1 ages 68..68 bbox [49, 93, 80, 111] 70,80 rom 6bffff live ffffff
+dv-seel-magic-coat-opp-c2                MAGIC_COAT   H alloc= ZERO
+dv-seel-magic-coat-opp-c3                DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-magic-coat-opp-c4                MAGIC_COAT   . alloc= ZERO
+dv-seel-magic-coat-opp-c5                DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-magic-coat-opp-c6                DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-magic-coat-opp-c7                MAGIC_COAT   . alloc= ZERO
+dv-seel-magic-coat-opp-c8                DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-magic-coat-opp-c9                MAGIC_COAT   H alloc= ZERO
+dv-seel-magic-coat-opp-c10               DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-magic-coat-opp-c11               MAGIC_COAT   . alloc= ZERO
+dv-seel-magic-coat-opp-c12               DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-magic-coat-opp-c13               MAGIC_COAT   H alloc= ZERO
+dv-seel-magic-coat-opp-c14               DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-magic-coat-opp-c15               DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-magic-coat-opp-c16               MAGIC_COAT   H alloc= ZERO
+dv-seel-magic-coat-opp-c17               DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-magic-coat-opp-c18               MAGIC_COAT   . alloc= ZERO
+dv-seel-magic-coat-opp-c19               DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-magic-coat-opp-c20               DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-magic-coat-opp-c21               MAGIC_COAT   . alloc= ZERO
+dv-seel-magic-coat-opp-c22               DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-magic-coat-opp-c23               MAGIC_COAT   H alloc= ZERO
+dv-seel-magic-coat-opp-c24               DIVE         . alloc- FALLBACK (unclassified (branch-local gate))
+dv-seel-magic-coat-ply-c0                TOXIC        . alloc- DIFF px=42701 rows 40+ ages 1..40 bbox [144, 159, 64, 71] 150,64 rom bdbd9c live d600d6
+dv-seel-magic-coat-ply-c1                DIVE         . alloc- ZERO
+dv-seel-magic-coat-ply-c2                MAGIC_COAT   H alloc= ZERO
+dv-seel-magic-coat-ply-c3                DIVE         . alloc- ZERO
+dv-seel-magic-coat-ply-c4                MAGIC_COAT   . alloc= ZERO
+dv-seel-magic-coat-ply-c5                DIVE         . alloc- ZERO
+dv-seel-magic-coat-ply-c6                MAGIC_COAT   H alloc= ZERO
+dv-seel-magic-coat-ply-c7                DIVE         . alloc- ZERO
+mm-clefable-barrier-opp-c0               BARRIER      . alloc= ZERO
+mm-clefable-barrier-opp-c1               METEOR_MASH  . alloc- ZERO
+mm-clefable-barrier-opp-c2               THUNDER_WAVE . alloc- ZERO
+mm-clefable-barrier-opp-c3               METEOR_MASH  . alloc- ZERO
+mm-clefable-barrier-opp-c4               BARRIER      . alloc= ZERO
+mm-clefable-barrier-opp-c5               METEOR_MASH  . alloc- DIFF px=282304 rows 16 ages 196..211 bbox [0, 239, 0, 111] 0,0 rom 100f0f live 000000
+mm-clefable-barrier-opp-c6               BARRIER      . alloc= ZERO
+mm-clefable-barrier-opp-c7               METEOR_MASH  . alloc- DIFF px=282304 rows 16 ages 196..211 bbox [0, 239, 0, 111] 0,0 rom 100f0f live 000000
+mm-clefable-barrier-opp-c8               METEOR_MASH  . alloc- ZERO
+mm-clefable-barrier-ply-c0               THUNDER_WAVE . alloc- ZERO
+mm-clefable-barrier-ply-c1               BARRIER      . alloc= ZERO
+mm-clefable-barrier-ply-c2               METEOR_MASH  . alloc- ZERO
+mm-clefable-barrier-ply-c3               BARRIER      . alloc= ZERO
+mm-clefable-light-screen-opp-c0          LIGHT_SCREEN . alloc= =CONTROL (ctl-snorlax-light-screen-opp-c0 2658)
+mm-clefable-light-screen-opp-c1          METEOR_MASH  . alloc- ZERO
+mm-clefable-light-screen-opp-c2          THUNDER_WAVE . alloc- ZERO
+mm-clefable-light-screen-opp-c3          METEOR_MASH  . alloc- ZERO
+mm-clefable-light-screen-opp-c4          METEOR_MASH  . alloc- ZERO
+mm-clefable-light-screen-opp-c5          METEOR_MASH  . alloc- ZERO
+mm-clefable-light-screen-opp-c6          METEOR_MASH  . alloc- ZERO
+mm-clefable-light-screen-ply-c0          THUNDER_WAVE . alloc- ZERO
+mm-clefable-light-screen-ply-c1          LIGHT_SCREEN . alloc= ZERO
+mm-clefable-light-screen-ply-c2          METEOR_MASH  . alloc- ZERO
+mm-metagross-barrier-opp-c0              BARRIER      . alloc= ZERO
+mm-metagross-barrier-opp-c1              METEOR_MASH  . alloc- ZERO
+mm-metagross-barrier-opp-c2              THUNDER_WAVE . alloc- ZERO
+mm-metagross-barrier-opp-c3              METEOR_MASH  . alloc- ZERO
+mm-metagross-barrier-opp-c4              BARRIER      . alloc= ZERO
+mm-metagross-barrier-opp-c5              METEOR_MASH  . alloc- ZERO
+mm-metagross-barrier-opp-c6              BARRIER      . alloc= ZERO
+mm-metagross-barrier-opp-c7              METEOR_MASH  . alloc- DIFF px=293584 rows 16 ages 196..211 bbox [0, 239, 0, 111] 0,0 rom 100f0f live 000000
+mm-metagross-barrier-opp-c8              METEOR_MASH  . alloc- ZERO
+mm-metagross-barrier-ply-c0              THUNDER_WAVE . alloc- ZERO
+mm-metagross-barrier-ply-c1              BARRIER      . alloc= ZERO
+mm-metagross-barrier-ply-c2              METEOR_MASH  . alloc- ZERO
+mm-metagross-barrier-ply-c3              BARRIER      . alloc= ZERO
+mm-metagross-light-screen-opp-c0         LIGHT_SCREEN . alloc= =CONTROL (ctl-snorlax-light-screen-opp-c0 2658)
+mm-metagross-light-screen-opp-c1         METEOR_MASH  . alloc- ZERO
+mm-metagross-light-screen-opp-c2         THUNDER_WAVE . alloc- ZERO
+mm-metagross-light-screen-opp-c3         METEOR_MASH  . alloc- ZERO
+mm-metagross-light-screen-opp-c4         METEOR_MASH  . alloc- DIFF px=293584 rows 16 ages 196..211 bbox [0, 239, 0, 111] 0,0 rom 100f0f live 000000
+mm-metagross-light-screen-ply-c0         THUNDER_WAVE . alloc- ZERO
+mm-metagross-light-screen-ply-c1         LIGHT_SCREEN . alloc= ZERO
+mm-metagross-light-screen-ply-c2         METEOR_MASH  . alloc- DIFF px=279376 rows 16 ages 196..211 bbox [0, 239, 0, 111] 0,0 rom 100f0f live 000000
+pa-cg-banette-magic-coat-opp-c0          MAGIC_COAT   . alloc= ZERO
+pa-cg-banette-magic-coat-opp-c1          MAGIC_COAT   . alloc= ZERO
+pa-cg-banette-magic-coat-opp-c2          MAGIC_COAT   . alloc= ZERO
+pa-cg-banette-magic-coat-ply-c0          MAGIC_COAT   . alloc= ZERO
+pa-cg-banette-magic-coat-ply-c1          MAGIC_COAT   . alloc= ZERO
+pa-cg-banette-magic-coat-ply-c2          MAGIC_COAT   . alloc= ZERO
+pa-cg-banette-protect-opp-c0             PROTECT      . alloc= ZERO
+pa-cg-banette-protect-opp-c1             PROTECT      . alloc= ZERO
+pa-cg-banette-protect-ply-c0             PROTECT      . alloc= ZERO
+pa-cg-banette-protect-ply-c1             PROTECT      . alloc= ZERO
+pa-cg-dusclops-barrier-opp-c0            BARRIER      . alloc= ZERO
+pa-cg-dusclops-barrier-opp-c1            BARRIER      . alloc= ZERO
+pa-cg-dusclops-barrier-opp-c2            BARRIER      . alloc= ZERO
+pa-cg-dusclops-barrier-ply-c0            BARRIER      . alloc= ZERO
+pa-cg-dusclops-barrier-ply-c1            BARRIER      . alloc= ZERO
+pa-cg-dusclops-barrier-ply-c2            BARRIER      . alloc= ZERO
+pa-cg-dusclops-light-screen-opp-c0       LIGHT_SCREEN . alloc= ZERO
+pa-cg-dusclops-light-screen-ply-c0       LIGHT_SCREEN . alloc= ZERO
+pa-cg-dusclops-reflect-opp-c0            REFLECT      . alloc= ZERO
+pa-cg-dusclops-reflect-ply-c0            REFLECT      . alloc= ZERO
+pa-cs-miltank-magic-coat-opp-c0          MAGIC_COAT   . alloc= ZERO
+pa-cs-miltank-magic-coat-opp-c1          MAGIC_COAT   . alloc= ZERO
+pa-cs-miltank-magic-coat-opp-c2          MAGIC_COAT   . alloc= ZERO
+pa-cs-miltank-magic-coat-ply-c0          MAGIC_COAT   . alloc= ZERO
+pa-cs-miltank-magic-coat-ply-c1          MAGIC_COAT   . alloc= ZERO
+pa-cs-miltank-magic-coat-ply-c2          MAGIC_COAT   . alloc= ZERO
+pa-cs-miltank-protect-opp-c0             PROTECT      . alloc= ZERO
+pa-cs-miltank-protect-opp-c1             PROTECT      . alloc= ZERO
+pa-cs-miltank-protect-ply-c0             PROTECT      . alloc= ZERO
+pa-cs-miltank-protect-ply-c1             PROTECT      . alloc= ZERO
+pa-cs-snorlax-barrier-opp-c0             BARRIER      . alloc= ZERO
+pa-cs-snorlax-barrier-opp-c1             BARRIER      . alloc= ZERO
+pa-cs-snorlax-barrier-opp-c2             BARRIER      . alloc= ZERO
+pa-cs-snorlax-barrier-ply-c0             BARRIER      . alloc= ZERO
+pa-cs-snorlax-barrier-ply-c1             BARRIER      . alloc= ZERO
+pa-cs-snorlax-barrier-ply-c2             BARRIER      . alloc= ZERO
+pa-cs-snorlax-light-screen-opp-c0        LIGHT_SCREEN . alloc= ZERO
+pa-cs-snorlax-light-screen-ply-c0        LIGHT_SCREEN . alloc= ZERO
+pa-cs-snorlax-reflect-opp-c0             REFLECT      . alloc= ZERO
+pa-cs-snorlax-reflect-ply-c0             REFLECT      . alloc= ZERO
+pa-fc-kabutops-magic-coat-opp-c0         MAGIC_COAT   . alloc= ZERO
+pa-fc-kabutops-magic-coat-opp-c1         MAGIC_COAT   . alloc= ZERO
+pa-fc-kabutops-magic-coat-opp-c2         MAGIC_COAT   . alloc= ZERO
+pa-fc-kabutops-magic-coat-ply-c0         MAGIC_COAT   . alloc= ZERO
+pa-fc-kabutops-magic-coat-ply-c1         MAGIC_COAT   . alloc= ZERO
+pa-fc-kabutops-magic-coat-ply-c2         MAGIC_COAT   . alloc= ZERO
+pa-fc-kabutops-protect-opp-c0            PROTECT      . alloc= ZERO
+pa-fc-kabutops-protect-opp-c1            PROTECT      . alloc= ZERO
+pa-fc-kabutops-protect-ply-c0            PROTECT      . alloc= ZERO
+pa-fc-kabutops-protect-ply-c1            PROTECT      . alloc= ZERO
+pa-fc-scyther-barrier-opp-c0             BARRIER      . alloc= ZERO
+pa-fc-scyther-barrier-opp-c1             BARRIER      . alloc= ZERO
+pa-fc-scyther-barrier-opp-c2             BARRIER      . alloc= ZERO
+pa-fc-scyther-barrier-ply-c0             BARRIER      . alloc= ZERO
+pa-fc-scyther-barrier-ply-c1             BARRIER      . alloc= ZERO
+pa-fc-scyther-barrier-ply-c2             BARRIER      . alloc= ZERO
+pa-fc-scyther-light-screen-opp-c0        LIGHT_SCREEN . alloc= =CONTROL (ctl-snorlax-light-screen-opp-c0 2658)
+pa-fc-scyther-light-screen-ply-c0        LIGHT_SCREEN . alloc= =CONTROL (ctl-snorlax-light-screen-ply-c0 2473)
+pa-fc-scyther-reflect-opp-c0             REFLECT      . alloc= ZERO
+pa-fc-scyther-reflect-ply-c0             REFLECT      . alloc= ZERO
+pa-fd-pidgeot-barrier-opp-c0             BARRIER      . alloc= ZERO
+pa-fd-pidgeot-barrier-opp-c1             BARRIER      . alloc= ZERO
+pa-fd-pidgeot-barrier-opp-c2             BARRIER      . alloc= ZERO
+pa-fd-pidgeot-barrier-ply-c0             BARRIER      . alloc= ZERO
+pa-fd-pidgeot-barrier-ply-c1             BARRIER      . alloc= ZERO
+pa-fd-pidgeot-barrier-ply-c2             BARRIER      . alloc= ZERO
+pa-fd-pidgeot-light-screen-opp-c0        LIGHT_SCREEN . alloc= ZERO
+pa-fd-pidgeot-light-screen-ply-c0        LIGHT_SCREEN . alloc= ZERO
+pa-fd-pidgeot-reflect-opp-c0             REFLECT      . alloc= ZERO
+pa-fd-pidgeot-reflect-ply-c0             REFLECT      . alloc= ZERO
+pa-fd-pidgeotto-magic-coat-opp-c0        MAGIC_COAT   . alloc= ZERO
+pa-fd-pidgeotto-magic-coat-opp-c1        MAGIC_COAT   . alloc= ZERO
+pa-fd-pidgeotto-magic-coat-opp-c2        MAGIC_COAT   . alloc= ZERO
+pa-fd-pidgeotto-magic-coat-ply-c0        MAGIC_COAT   . alloc= ZERO
+pa-fd-pidgeotto-magic-coat-ply-c1        MAGIC_COAT   . alloc= ZERO
+pa-fd-pidgeotto-magic-coat-ply-c2        MAGIC_COAT   . alloc= ZERO
+pa-fd-pidgeotto-protect-opp-c0           PROTECT      . alloc= ZERO
+pa-fd-pidgeotto-protect-opp-c1           PROTECT      . alloc= ZERO
+pa-fd-pidgeotto-protect-ply-c0           PROTECT      . alloc= ZERO
+pa-fd-pidgeotto-protect-ply-c1           PROTECT      . alloc= ZERO
+pa-hb-chimecho-barrier-opp-c0            BARRIER      . alloc= ZERO
+pa-hb-chimecho-barrier-opp-c1            BARRIER      . alloc= ZERO
+pa-hb-chimecho-barrier-opp-c2            BARRIER      . alloc= ZERO
+pa-hb-chimecho-barrier-ply-c0            BARRIER      . alloc= ZERO
+pa-hb-chimecho-barrier-ply-c1            BARRIER      . alloc= ZERO
+pa-hb-chimecho-barrier-ply-c2            BARRIER      . alloc= ZERO
+pa-hb-chimecho-light-screen-opp-c0       LIGHT_SCREEN . alloc= ZERO
+pa-hb-chimecho-light-screen-ply-c0       LIGHT_SCREEN . alloc= ZERO
+pa-hb-chimecho-reflect-opp-c0            REFLECT      . alloc= ZERO
+pa-hb-chimecho-reflect-ply-c0            REFLECT      . alloc= ZERO
+pa-hb-delcatty-magic-coat-opp-c0         MAGIC_COAT   . alloc= ZERO
+pa-hb-delcatty-magic-coat-opp-c1         MAGIC_COAT   . alloc= ZERO
+pa-hb-delcatty-magic-coat-opp-c2         MAGIC_COAT   . alloc= ZERO
+pa-hb-delcatty-magic-coat-ply-c0         MAGIC_COAT   . alloc= ZERO
+pa-hb-delcatty-magic-coat-ply-c1         MAGIC_COAT   . alloc= ZERO
+pa-hb-delcatty-magic-coat-ply-c2         MAGIC_COAT   . alloc= ZERO
+pa-hb-delcatty-protect-opp-c0            PROTECT      . alloc= ZERO
+pa-hb-delcatty-protect-opp-c1            PROTECT      . alloc= ZERO
+pa-hb-delcatty-protect-ply-c0            PROTECT      . alloc= ZERO
+pa-hb-delcatty-protect-ply-c1            PROTECT      . alloc= ZERO
+pa-mg-camerupt-magic-coat-opp-c0         MAGIC_COAT   . alloc= ZERO
+pa-mg-camerupt-magic-coat-opp-c1         MAGIC_COAT   . [<=99] alloc= ZERO
+pa-mg-camerupt-magic-coat-opp-c2         MAGIC_COAT   . [<=99] alloc= ZERO
+pa-mg-camerupt-magic-coat-ply-c0         MAGIC_COAT   . alloc= ZERO
+pa-mg-camerupt-magic-coat-ply-c1         MAGIC_COAT   . [<=99] alloc= ZERO
+pa-mg-camerupt-magic-coat-ply-c2         MAGIC_COAT   . [<=99] alloc= ZERO
+pa-mg-camerupt-protect-opp-c0            PROTECT      . alloc= ZERO
+pa-mg-camerupt-protect-opp-c1            PROTECT      . alloc= ZERO
+pa-mg-camerupt-protect-opp-c2            PROTECT      . alloc= ZERO
+pa-mg-camerupt-protect-ply-c0            PROTECT      . alloc= ZERO
+pa-mg-camerupt-protect-ply-c1            PROTECT      . [<=99] alloc= ZERO
+pa-mg-graveler-barrier-opp-c0            BARRIER      . [<=99] alloc= ZERO
+pa-mg-graveler-barrier-opp-c1            BARRIER      . [<=99] alloc= ZERO
+pa-mg-graveler-barrier-opp-c2            BARRIER      . [<=99] alloc= ZERO
+pa-mg-graveler-barrier-ply-c0            BARRIER      . [<=99] alloc= ZERO
+pa-mg-graveler-barrier-ply-c1            BARRIER      . [<=99] alloc= ZERO
+pa-mg-graveler-barrier-ply-c2            BARRIER      . [<=99] alloc= ZERO
+pa-mg-graveler-light-screen-opp-c0       LIGHT_SCREEN . [<=99] alloc= ZERO
+pa-mg-graveler-light-screen-ply-c0       LIGHT_SCREEN . [<=99] alloc= ZERO
+pa-mg-graveler-reflect-opp-c0            REFLECT      . [<=99] alloc= ZERO
+pa-mg-graveler-reflect-ply-c0            REFLECT      . [<=99] alloc= ZERO
+pa-pw-chimecho-magic-coat-opp-c0         MAGIC_COAT   . alloc= ZERO
+pa-pw-chimecho-magic-coat-opp-c1         MAGIC_COAT   . alloc= ZERO
+pa-pw-chimecho-magic-coat-opp-c2         MAGIC_COAT   . alloc= ZERO
+pa-pw-chimecho-magic-coat-ply-c0         MAGIC_COAT   . alloc= ZERO
+pa-pw-chimecho-magic-coat-ply-c1         MAGIC_COAT   . alloc= ZERO
+pa-pw-chimecho-magic-coat-ply-c2         MAGIC_COAT   . alloc= ZERO
+pa-pw-chimecho-mirror-coat-opp-c0        MIRROR_COAT  . alloc= ZERO
+pa-pw-chimecho-mirror-coat-opp-c1        MIRROR_COAT  . alloc= ZERO
+pa-pw-chimecho-mirror-coat-opp-c2        MIRROR_COAT  . alloc= ZERO
+pa-pw-chimecho-mirror-coat-ply-c0        MIRROR_COAT  . alloc= ZERO
+pa-pw-chimecho-mirror-coat-ply-c1        MIRROR_COAT  . alloc= ZERO
+pa-pw-chimecho-protect-opp-c0            PROTECT      . alloc= ZERO
+pa-pw-chimecho-protect-opp-c1            PROTECT      . alloc= ZERO
+pa-pw-chimecho-protect-ply-c0            PROTECT      . alloc= ZERO
+pa-pw-chimecho-protect-ply-c1            PROTECT      . alloc= ZERO
+pa-pw-spoink-barrier-opp-c0              BARRIER      . alloc= ZERO
+pa-pw-spoink-barrier-opp-c1              BARRIER      . alloc= ZERO
+pa-pw-spoink-barrier-opp-c2              BARRIER      . alloc= ZERO
+pa-pw-spoink-barrier-ply-c0              BARRIER      . alloc= ZERO
+pa-pw-spoink-barrier-ply-c1              BARRIER      . alloc= ZERO
+pa-pw-spoink-barrier-ply-c2              BARRIER      . alloc= ZERO
+pa-pw-spoink-light-screen-opp-c0         LIGHT_SCREEN . alloc= ZERO
+pa-pw-spoink-light-screen-ply-c0         LIGHT_SCREEN . alloc= ZERO
+pa-pw-spoink-mirror-coat-opp-c0          MIRROR_COAT  . alloc= ZERO
+pa-pw-spoink-mirror-coat-opp-c1          MIRROR_COAT  . alloc= ZERO
+pa-pw-spoink-mirror-coat-ply-c0          MIRROR_COAT  . alloc= ZERO
+pa-pw-spoink-mirror-coat-ply-c1          MIRROR_COAT  . alloc= ZERO
+pa-pw-spoink-reflect-opp-c0              REFLECT      . alloc= ZERO
+pa-pw-spoink-reflect-ply-c0              REFLECT      . alloc= ZERO
+pa-ss-oddish-magic-coat-opp-c0           MAGIC_COAT   . alloc= ZERO
+pa-ss-oddish-magic-coat-opp-c1           MAGIC_COAT   . alloc= ZERO
+pa-ss-oddish-magic-coat-opp-c2           MAGIC_COAT   . alloc= ZERO
+pa-ss-oddish-magic-coat-ply-c0           MAGIC_COAT   . alloc= ZERO
+pa-ss-oddish-magic-coat-ply-c1           MAGIC_COAT   . alloc= ZERO
+pa-ss-oddish-magic-coat-ply-c2           MAGIC_COAT   . alloc= ZERO
+pa-ss-oddish-protect-opp-c0              PROTECT      . alloc= ZERO
+pa-ss-oddish-protect-opp-c1              PROTECT      . alloc= ZERO
+pa-ss-oddish-protect-ply-c0              PROTECT      . alloc= ZERO
+pa-ss-oddish-protect-ply-c1              PROTECT      . alloc= ZERO
+pa-ss-victreebel-barrier-opp-c0          BARRIER      . alloc= ZERO
+pa-ss-victreebel-barrier-opp-c1          BARRIER      . alloc= ZERO
+pa-ss-victreebel-barrier-opp-c2          BARRIER      . alloc= ZERO
+pa-ss-victreebel-barrier-ply-c0          BARRIER      . alloc= ZERO
+pa-ss-victreebel-barrier-ply-c1          BARRIER      . alloc= ZERO
+pa-ss-victreebel-barrier-ply-c2          BARRIER      . alloc= ZERO
+pa-ss-victreebel-light-screen-opp-c0     LIGHT_SCREEN . alloc= ZERO
+pa-ss-victreebel-light-screen-ply-c0     LIGHT_SCREEN . alloc= ZERO
+pa-ss-victreebel-reflect-opp-c0          REFLECT      . alloc= ZERO
+pa-ss-victreebel-reflect-ply-c0          REFLECT      . alloc= ZERO
+pa-sw-beautifly-barrier-opp-c0           BARRIER      . alloc= ZERO
+pa-sw-beautifly-barrier-opp-c1           BARRIER      . alloc= ZERO
+pa-sw-beautifly-barrier-opp-c2           BARRIER      . alloc= ZERO
+pa-sw-beautifly-barrier-ply-c0           BARRIER      . alloc= ZERO
+pa-sw-beautifly-barrier-ply-c1           BARRIER      . alloc= ZERO
+pa-sw-beautifly-barrier-ply-c2           BARRIER      . alloc= ZERO
+pa-sw-beautifly-light-screen-opp-c0      LIGHT_SCREEN . alloc= ZERO
+pa-sw-beautifly-light-screen-ply-c0      LIGHT_SCREEN . alloc= ZERO
+pa-sw-beautifly-reflect-opp-c0           REFLECT      . alloc= ZERO
+pa-sw-beautifly-reflect-ply-c0           REFLECT      . alloc= ZERO
+pa-sw-venomoth-magic-coat-opp-c0         MAGIC_COAT   . alloc= ZERO
+pa-sw-venomoth-magic-coat-opp-c1         MAGIC_COAT   . alloc= ZERO
+pa-sw-venomoth-magic-coat-opp-c2         MAGIC_COAT   . alloc= ZERO
+pa-sw-venomoth-magic-coat-ply-c0         MAGIC_COAT   . alloc= ZERO
+pa-sw-venomoth-magic-coat-ply-c1         MAGIC_COAT   . alloc= ZERO
+pa-sw-venomoth-magic-coat-ply-c2         MAGIC_COAT   . alloc= ZERO
+pa-sw-venomoth-protect-opp-c0            PROTECT      . alloc= ZERO
+pa-sw-venomoth-protect-opp-c1            PROTECT      . alloc= ZERO
+pa-sw-venomoth-protect-ply-c0            PROTECT      . alloc= ZERO
+pa-sw-venomoth-protect-ply-c1            PROTECT      . alloc= ZERO
+pc-chimecho-barrier-opp-c0               BARRIER      . alloc= ZERO
+pc-chimecho-barrier-opp-c1               BARRIER      . alloc= ZERO
+pc-chimecho-barrier-opp-c2               BARRIER      . alloc= ZERO
+pc-chimecho-barrier-ply-c0               BARRIER      . alloc= ZERO
+pc-chimecho-barrier-ply-c1               BARRIER      . alloc= ZERO
+pc-chimecho-barrier-ply-c2               BARRIER      . alloc= ZERO
+pc-chimecho-magic-coat-opp-c0            MAGIC_COAT   . alloc= ZERO
+pc-chimecho-magic-coat-opp-c1            MAGIC_COAT   . alloc= ZERO
+pc-chimecho-magic-coat-opp-c2            MAGIC_COAT   . alloc= ZERO
+pc-chimecho-magic-coat-opp-c3            MAGIC_COAT   . alloc= ZERO
+pc-chimecho-magic-coat-ply-c0            MAGIC_COAT   . alloc= ZERO
+pc-chimecho-magic-coat-ply-c1            MAGIC_COAT   . alloc= ZERO
+pc-chimecho-magic-coat-ply-c2            MAGIC_COAT   . alloc= ZERO
+pc-chimecho-magic-coat-ply-c3            MAGIC_COAT   . alloc= ZERO
+pc-scyther-barrier-opp-c0                BARRIER      . alloc= ZERO
+pc-scyther-barrier-opp-c1                BARRIER      . alloc= ZERO
+pc-scyther-barrier-opp-c2                BARRIER      . alloc= ZERO
+pc-scyther-barrier-ply-c0                BARRIER      . alloc= ZERO
+pc-scyther-barrier-ply-c1                BARRIER      . alloc= ZERO
+pc-scyther-barrier-ply-c2                BARRIER      . alloc= ZERO
+pc-scyther-magic-coat-opp-c0             MAGIC_COAT   . alloc= ZERO
+pc-scyther-magic-coat-opp-c1             MAGIC_COAT   . alloc= ZERO
+pc-scyther-magic-coat-opp-c2             MAGIC_COAT   . alloc= ZERO
+pc-scyther-magic-coat-opp-c3             MAGIC_COAT   . alloc= ZERO
+pc-scyther-magic-coat-ply-c0             MAGIC_COAT   . alloc= ZERO
+pc-scyther-magic-coat-ply-c1             MAGIC_COAT   . alloc= ZERO
+pc-scyther-magic-coat-ply-c2             MAGIC_COAT   . alloc= ZERO
+pc-scyther-magic-coat-ply-c3             MAGIC_COAT   . alloc= ZERO
+
+ctl . =CONTROL 2
+ctl . ZERO 18
+dv . DIFF 10
+dv . FALLBACK 44
+dv . ZERO 36
+dv H ZERO 20
+mm . =CONTROL 2
+mm . DIFF 5
+mm . ZERO 37
+pa . =CONTROL 2
+pa . ZERO 188
+pa[<=99] . ZERO 15
+pc . ZERO 28

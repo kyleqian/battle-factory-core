@@ -1,0 +1,155 @@
+{
+ "schema": "audit20-chain-check/v1",
+ "scenario": "pa-fc-scyther-light-screen-opp",
+ "rows": [
+  {
+   "fixture": "pa-fc-scyther-light-screen-opp-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "species": "CHANSEY/SCYTHER",
+   "alloc": {
+    "input": [
+     3,
+     4,
+     5,
+     7,
+     4,
+     5,
+     7
+    ],
+    "rom": [
+     3,
+     4,
+     5,
+     7,
+     4,
+     5,
+     7
+    ],
+    "preEqEntry": true,
+    "equal": true,
+    "preDiff": []
+   },
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "210@0 HIT_ANIMATION@1 113@1"
+   ],
+   "romPower": 10,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 230,
+    "endFrame": 315
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 86,
+    "exactRows": 85,
+    "px": 2658,
+    "digests": [
+     "d01caf7c6f2a3ffc",
+     "d01caf7c6f2a3ffc"
+    ],
+    "residualRows": [
+     [
+      59,
+      2658
+     ]
+    ],
+    "detail": [
+     {
+      "age": 59,
+      "px": 2658,
+      "bbox": [
+       115,
+       156,
+       8,
+       71
+      ],
+      "sample": "115,8 rom e3f1d5 live e6f3da"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 86,
+    "exactRows": 85,
+    "px": 2658,
+    "digests": [
+     "d01caf7c6f2a3ffc",
+     "d01caf7c6f2a3ffc"
+    ],
+    "residualRows": [
+     [
+      59,
+      2658
+     ]
+    ],
+    "detail": [
+     {
+      "age": 59,
+      "px": 2658,
+      "bbox": [
+       115,
+       156,
+       8,
+       71
+      ],
+      "sample": "115,8 rom e3f1d5 live e6f3da"
+     }
+    ]
+   }
+  }
+ ]
+}

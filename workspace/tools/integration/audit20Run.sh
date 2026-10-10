@@ -26,11 +26,12 @@ ls $W/fixtures/*.json | sed 's/-c[0-9]*\.json$//' | sort -u | xargs -n 1 -P "$J"
     || echo "FAILED $n (see $T/check-$n.log)"'
 python3 tools/integration/audit20Summary.py "$REC/check" > "$REC/summary.txt"
 python3 tools/integration/audit20Verdicts.py "$REC/check" > "$REC/verdicts.txt"
-for n in $(ls $W/fixtures/*.json | sed 's/-c[0-9]*\.json$//' | sort -u); do
-  AUDIT20_ALLOC_ONLY=1 node --experimental-strip-types --no-warnings tools/integration/audit20Check.ts $W/fixtures "$(basename "$n")" /dev/null
-done > "$REC/alloc.txt"
-for n in $(ls $W/fixtures/*.json | sed 's/-c[0-9]*\.json$//' | sort -u); do
-  AUDIT20_LENDS_ONLY=1 node --experimental-strip-types --no-warnings tools/integration/audit20Check.ts $W/fixtures "$(basename "$n")" /dev/null
-done > "$REC/lends.txt"
+# alloc.txt / lends.txt: one file per scenario in parallel, concatenated in the sorted scenario order
+mkdir -p "$T/alloc" "$T/lends"
+ls $W/fixtures/*.json | sed 's/-c[0-9]*\.json$//' | sort -u | xargs -n 1 basename | xargs -n 1 -P "$J" sh -c '
+  AUDIT20_ALLOC_ONLY=1 node --experimental-strip-types --no-warnings tools/integration/audit20Check.ts $W/fixtures "$0" /dev/null > "$T/alloc/$0.txt"
+  AUDIT20_LENDS_ONLY=1 node --experimental-strip-types --no-warnings tools/integration/audit20Check.ts $W/fixtures "$0" /dev/null > "$T/lends/$0.txt"'
+for n in $(ls $W/fixtures/*.json | sed 's/-c[0-9]*\.json$//' | sort -u | xargs -n 1 basename); do cat "$T/alloc/$n.txt"; done > "$REC/alloc.txt"
+for n in $(ls $W/fixtures/*.json | sed 's/-c[0-9]*\.json$//' | sort -u | xargs -n 1 basename); do cat "$T/lends/$n.txt"; done > "$REC/lends.txt"
 python3 tools/integration/audit20Coverage.py "$REC" $W/fixtures > "$REC/coverage.txt"
 [ -d $W/receipts/check ] && python3 tools/integration/audit20Compare.py "$REC" $W/receipts | tee "$T/receipts-vs-committed.txt" | tail -14 || true
