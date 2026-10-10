@@ -142,7 +142,12 @@ Gameplay identity:
 - **`battleDigestExcludingFrames` therefore DIFFERS** (`48b2d42b...` vs `d0c983af...`). The record holds `turns`, and seed 881's
   turns are the only differing battle field the census exposes. The digest itself is not recomputable without the per-battle records,
   which the report does not export.
-- **A fold should re-confirm digest identity** with a census that exports per-battle records, or with a larger frame budget for seed 881.
+- **Seed 881 never terminates.** `doll81Stall881.sh` replays seed 881 / streak 38 on both trees with a 20,000,000-frame budget and
+  exports the per-battle records. Receipt: `receipts/stall881-check.txt`; it takes ~7 min.
+  - Both runs still stall: 25,546 vs 25,545 turns. Shuckle and Cradily Struggle forever.
+  - The patched command keys are an exact PREFIX of the base keys: 29,842 of 29,843.
+  - So the turn count of this battle is a function of where the frame budget cuts it, never of gameplay. Every other battle record has
+    identical command keys.
 - prep43's `pairingMismatches` 77 = exactly the 77 newly live commands: their presented length changes from the fallback to the
   composite.
 
@@ -152,6 +157,7 @@ Gameplay identity:
 sh tools/integration/doll81Run.sh <fresh-out-dir>            # archives + patch, fresh probes x2, checks, summary, pins (~6 min)
 sh tools/integration/doll81Run.sh <fresh-out-dir> --census   # + both 0..999 censuses (~16 min)
 PROBES=<existing probe dir> sh tools/integration/doll81Run.sh <fresh-out-dir>   # reuse a probe dir
+sh tools/integration/doll81Stall881.sh <doll81Run.sh out dir>   # seed 881 at a 20M-frame budget, both trees (~7 min)
 ```
 
 The runner prints `same` / `DIFF` per committed receipt:
