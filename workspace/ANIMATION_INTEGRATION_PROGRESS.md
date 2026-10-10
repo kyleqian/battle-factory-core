@@ -64,8 +64,21 @@
   seeds 0..999 (one run) `afcf8175` -> `a96642c9`: **+49 / +8,403, 93.13 % / 97.34 %**, 0 regressions, key sequence + digest identical, 0
   render throws (range-split runs are a different battle set — liveShareCensus restarts ids per range — hence the different delta);
   touched tests 41 / 41 (incl. the executable-frontier ratchet).
-- In flight: dive70 (INTEGRATION: the Dive attack body adapter), live audit 18 (SIDE). Next: ice72 (Ice Ball words unit for any consumer),
-  hist73 (evidence: allocator history + hidden-battler faint), live audit 19.
+- Folded Opus worker `0fc1f0eba` (INTEGRATION) as `702313ef1` (src `5cd1b684`): dive70 — the Dive 291 ATTACK body (turn 1) live
+  adapter: 93 rows (prep25's "92" is the first inactive age), the real-slot profile from `liveDiveWordsPlan` (the same allocation as
+  land68's order carry), 56 host words shaped 20 + 9 x 4, the resolved lend; declines on a shiny battler / displayed status / an elevated
+  opponent diver (no census Dive user is elevated); no row-0 shadow for the still-invisible opponent diver. Dive stays one faithful-timing
+  adapter with the D3 flag, scope now both bodies. 15 windows 0 px both sides (CHINCHOU / LANTURN / CLAMPERL / SEEL, elevated GOLBAT and
+  WAILORD targets, Surf / Whirlpool at the hidden diver, a Protect history; the ROM plays no attack body on a protected Dive), r1 == r2 x2
+  batches; ON/OFF parity battles 68 / 162; seed-111 ordinary route + export replay. Census 0..299 +15 / +1,395, 0 regressions, key
+  sequence identical; the 19 Dive attack bodies' length moves 32 -> 93 (live or fallback). Open: the Whirlpool-at-hidden-diver lend
+  residual (ISSUES #160, 0 px in its window). Worker gates 1,603 files / 13,185 tests, build, differential 624. Supervisor: the 15
+  committed fixtures through `liveAdapterFramebuffer.ts` with fresh probes — 15 / 15 93 rows 0 px, r1 == r2, digests == the receipt.
+- Supervisor union gates on `702313ef1` (src `5cd1b684`; fold71 + dive70): typecheck, full suite 1,604 files / 13,191 tests, build,
+  differential 624 / 624 vs `e5aac81a4`, census seeds 0..299 **97.98 % / 98.96 %** (by the census's own frame total; +15 / +1,395 vs land68's = dive70; fold71 changes
+  nothing on 0..299), 0 regressions, key sequence identical (`tools/integration/fixtures/union-gates-702313ef1.json`).
+- In flight: live audit 18 (SIDE). Next: ice72 (Ice Ball words unit for any consumer), hist73 (evidence: allocator history + hidden-battler
+  faint), live audit 19 (fold71 / dive70 / ice72, ISSUES #160).
 
 ## 2026-10-09 (day) — S10A: allocator / order / words-lend histories + live-claim fixes; ordinary-play live share 87.95 -> 91.89 % of commands (92.09 -> 95.82 % of frames); 239 + 13 + 24
 

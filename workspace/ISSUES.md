@@ -17,6 +17,17 @@ backlog.
 
 # Open
 
+## #160 — Order-host lend after a Whirlpool hit on a hidden Dive user differs from the ROM (S10A, found 2026-10-10 by dive70)
+
+docs/dive70-dive-attack.md s3: in `var-whirlpool-opp` (fixtures/dive70/scenarios/whirlpool-opp-s1.json) the player's Whirlpool hits the
+hidden (UNDERWATER) opponent diver at the end of turn 1, right before the turn-2 action prompt. The production lend at the next body places
+the prompt's slots 3 / 4 ahead of the Whirlpool's freed slots; the ROM interleaves them (`…2,17,10,3,9,5,7,16,4,…` vs production
+`…2,3,4,17,10,9,5,7,16,…`). The Dive attack window itself is 0 px (its own sprites do not depend on that part of the order), but a later
+ORDER-DEPENDENT consumer could render wrongly. The other 14 dive70 lends and land68's 7 / 7 routes equal the ROM; Surf at the hidden diver is
+exact. Resume: probe Whirlpool (and TURN_TRAP_WHIRLPOOL) bodies at a hidden target, both sides, find which unit's plan misorders the free
+list (Whirlpool's own body plan at a hidden target, or the prompt's re-allocation), then fix the plan or invalidate the host after a
+hidden-target Whirlpool.
+
 ## #159 — Hidden-span live bodies: sprite fixed, ROM frame checks + lag phase open (S10A, found 2026-10-09 by live audit 17; sprite fix 2026-10-10)
 
 The sprite half is FIXED (hide66, merged `f3efec8bf`; docs/hide66-hidden-battler.md): live bodies leave a hidden Fly / Bounce / Dig /
