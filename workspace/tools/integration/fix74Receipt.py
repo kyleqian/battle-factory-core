@@ -3,7 +3,7 @@
   python3 tools/integration/fix74Receipt.py <scratch-dir> [census-delta.json] [parity-339.json] [parity-113.json]
 <scratch-dir> holds verify/<name>.jsonl (fix74Verify.ts), derive/<name>.json (bulkUpProbe.py: RAM y2) and act/<name>.json
 (audit18Probe.py: activation .. first inactive)."""
-import json, sys
+import json, re, sys
 from pathlib import Path
 
 S = Path(sys.argv[1])
@@ -48,7 +48,7 @@ receipt = {
     "lightScreen": {
         "decline": "liveMoveHiddenTargetDeclines: moveId 113 && attacker 0 && opponent hidden (any Fly / Bounce / Dig / Dive)",
         "audit18LendsOnlyBefore": ls_before, "audit18LendsOnlyAfter": ls_after,
-        "changed": [b.split(",")[0] for b, a in zip(ls_before, ls_after) if b != a],
+        "changed": [re.search(r'"fixture":"([^"]+)"', b).group(1) for b, a in zip(ls_before, ls_after) if b != a],
     },
 }
 for path in extra:

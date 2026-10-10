@@ -1743,8 +1743,226 @@
    "{\"fixture\":\"sw-magneton-light-screen-ply-c0.json\",\"live\":true,\"deferred\":false,\"same\":true"
   ],
   "changed": [
-   "{\"fixture\":\"dive-snorlax-light-screen-ply-c0.json\"",
-   "{\"fixture\":\"dive-golem-light-screen-ply-c0.json\""
+   "dive-snorlax-light-screen-ply-c0.json",
+   "dive-golem-light-screen-ply-c0.json"
+  ]
+ },
+ "censusDelta": {
+  "ranges": [
+   {
+    "seeds": "0..199",
+    "commands": 5334,
+    "keysIdentical": true,
+    "digestIdentical": true,
+    "digestBase": "19dc425f48543ac6285312d223177600124ffe6cdc95d7d0864eb8cb91a4965a",
+    "digestFinal": "19dc425f48543ac6285312d223177600124ffe6cdc95d7d0864eb8cb91a4965a"
+   },
+   {
+    "seeds": "200..399",
+    "commands": 5306,
+    "keysIdentical": true,
+    "digestIdentical": true,
+    "digestBase": "cc10005b1387ad0697c8f6c76676f72ebd948d645feae24ac3a5463c188f0d23",
+    "digestFinal": "cc10005b1387ad0697c8f6c76676f72ebd948d645feae24ac3a5463c188f0d23"
+   },
+   {
+    "seeds": "400..599",
+    "commands": 5017,
+    "keysIdentical": true,
+    "digestIdentical": true,
+    "digestBase": "a01c0049428fc469faa3d604de63902f5b464eec2440dd3628b9d1904f30f270",
+    "digestFinal": "a01c0049428fc469faa3d604de63902f5b464eec2440dd3628b9d1904f30f270"
+   },
+   {
+    "seeds": "600..799",
+    "commands": 5274,
+    "keysIdentical": true,
+    "digestIdentical": true,
+    "digestBase": "27460071500e32af8b00ddc67dfa39fb6b6958c4fa31932b75e0d26e5896b0a3",
+    "digestFinal": "27460071500e32af8b00ddc67dfa39fb6b6958c4fa31932b75e0d26e5896b0a3"
+   },
+   {
+    "seeds": "800..999",
+    "commands": 5786,
+    "keysIdentical": true,
+    "digestIdentical": true,
+    "digestBase": "2859aa6ae651501a725adb4a0082e53f3fddb5d830cb90b347484fe371db71e5",
+    "digestFinal": "2859aa6ae651501a725adb4a0082e53f3fddb5d830cb90b347484fe371db71e5"
+   }
+  ],
+  "keySequenceIdentical": true,
+  "battleDigestExcludingFramesIdentical": true,
+  "commands": 26717,
+  "changes": [],
+  "liveCommands": {
+   "base": 25612,
+   "final": 25612
+  },
+  "liveFrames": {
+   "base": 3821357,
+   "final": 3821357
+  },
+  "frames": {
+   "base": 3903931,
+   "final": 3903931
+  }
+ },
+ "parityBulkUpPlayer": {
+  "schema": "hide66-parity/v1",
+  "moves": [
+   339
+  ],
+  "seed": 154,
+  "streak": 28,
+  "turnBoundariesCompared": 13,
+  "playerTurns": 13,
+  "framesOn": 10674,
+  "framesOff": 7608,
+  "logicalDigest": "23417d9cbd1b28380caa526dd29ddebdd2591b91dbbd3076b762aae12ecfd7e6",
+  "rngEqual": true,
+  "rulesEqual": true,
+  "boundaryEqual": true,
+  "flyBounceRouteBodiesOn": [
+   {
+    "turn": 4,
+    "moveId": 339,
+    "side": 0,
+    "orderKnown": true,
+    "hidden": [
+     false,
+     false
+    ]
+   },
+   {
+    "turn": 8,
+    "moveId": 339,
+    "side": 0,
+    "orderKnown": true,
+    "hidden": [
+     false,
+     false
+    ]
+   },
+   {
+    "turn": 12,
+    "moveId": 339,
+    "side": 0,
+    "orderKnown": true,
+    "hidden": [
+     false,
+     false
+    ]
+   }
+  ]
+ },
+ "parityBulkUpOpponent": {
+  "schema": "hide66-parity/v1",
+  "moves": [
+   339
+  ],
+  "seed": 211,
+  "streak": 23,
+  "turnBoundariesCompared": 30,
+  "playerTurns": 30,
+  "framesOn": 16530,
+  "framesOff": 12394,
+  "logicalDigest": "64de1d906543ce3a619dd6d5be88884132e32551a75a508863a866faa2d7882a",
+  "rngEqual": true,
+  "rulesEqual": true,
+  "boundaryEqual": true,
+  "flyBounceRouteBodiesOn": [
+   {
+    "turn": 3,
+    "moveId": 339,
+    "side": 1,
+    "orderKnown": true,
+    "hidden": [
+     false,
+     false
+    ]
+   },
+   {
+    "turn": 7,
+    "moveId": 339,
+    "side": 1,
+    "orderKnown": true,
+    "hidden": [
+     false,
+     false
+    ]
+   },
+   {
+    "turn": 9,
+    "moveId": 339,
+    "side": 1,
+    "orderKnown": true,
+    "hidden": [
+     false,
+     false
+    ]
+   }
+  ]
+ },
+ "sandstorm": {
+  "question": "audit 18 OPEN row (Sandstorm 201 in the Fly hidden span with GOLEM hidden: 1 row at age 162, 20,921 px): does a Factory Fly user reproduce it?",
+  "method": "audit 18's fly-golem-sandstorm-{ply,opp} scenarios with GOLEM (76) replaced by SKARMORY (227) / SWELLOW (305); audit18Probes.py -> fix74SandstormFixtures.py (audit18Fixtures.py, scenario dir swapped) -> audit18Check.ts (two fresh direct-mGBA probes, chain lend)",
+  "windows": [
+   {
+    "fixture": "fly-skarmory-sandstorm-opp-c0.json",
+    "species": "CHANSEY/SKARMORY",
+    "side": "opponent",
+    "romInvisible": [
+     true,
+     false
+    ],
+    "hideAgree": true,
+    "live": true,
+    "rows": 168,
+    "px": 0,
+    "r1EqR2": true
+   },
+   {
+    "fixture": "fly-skarmory-sandstorm-ply-c0.json",
+    "species": "CHANSEY/SKARMORY",
+    "side": "player",
+    "romInvisible": [
+     false,
+     true
+    ],
+    "hideAgree": true,
+    "live": true,
+    "rows": 168,
+    "px": 0,
+    "r1EqR2": true
+   },
+   {
+    "fixture": "fly-swellow-sandstorm-opp-c0.json",
+    "species": "CHANSEY/SWELLOW",
+    "side": "opponent",
+    "romInvisible": [
+     true,
+     false
+    ],
+    "hideAgree": true,
+    "live": true,
+    "rows": 168,
+    "px": 0,
+    "r1EqR2": true
+   },
+   {
+    "fixture": "fly-swellow-sandstorm-ply-c0.json",
+    "species": "CHANSEY/SWELLOW",
+    "side": "player",
+    "romInvisible": [
+     false,
+     true
+    ],
+    "hideAgree": true,
+    "live": true,
+    "rows": 168,
+    "px": 0,
+    "r1EqR2": true
+   }
   ]
  }
 }
