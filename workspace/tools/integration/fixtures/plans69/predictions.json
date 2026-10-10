@@ -1,0 +1,9 @@
+{
+ "schema": "plans69-predictions/v1",
+ "note": "Source-derived plan predictions, committed BEFORE any plans69 probe ran (docs/next-adapters-plans69.md). Plan text = spriteOrderEventTransform decodeSpriteOrderPlan format. Every other plans69 unit (Flatter / Needle Arm / Astonish / Odor Sleuth / Conversion 2) is a ROM-observed EXACT plan (plans48 / plans51 method: probe -> extract -> identical plan on every instance), not predicted.",
+ "predictions": {
+  "general CASTFORM_CHANGE": {"plan": "", "source": "data/battle_anim_scripts.s General_CastformChange (10305-10320): AnimTask_IsMonInvisible, monbg / clearmonbg, sound, AnimTask_TransformMon (or AnimTask_CastformGfxDataChange when invisible): tasks only, no createsprite; the battler's own OBJ is re-tiled in place"},
+  "body 222 (power <= 99, MagnitudeRegular)": {"plan": "", "source": "Move_MAGNITUDE (3318-3344): AnimTask_IsPowerOver99 (gAnimMovePower > 99) -> MagnitudeRegular: two AnimTask_HorizontalShake tasks + loopsewithpan, no sprite"},
+  "body 222 (power > 99, MagnitudeIntense)": {"plan": "Cf;D0;Cf;D1", "source": "MagnitudeIntense: delay 10, complex_palette_blend (delay 3, 1 blend: a short-lived controller sprite), delay 16, complex_palette_blend again; each controller is destroyed before the next is created"}
+ }
+}
