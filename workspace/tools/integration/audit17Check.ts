@@ -28,7 +28,7 @@ import { battleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { applyLiveSemiInvulnerableCommand, LIVE_SEMI_INVULNERABLE_NONE } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { createKnownEntrySpriteAllocatorProvider } from "../../src/engine/knownEntrySpriteAllocator.ts";
-import { liveMoveAnimationPresentation, liveMoveGeometrySpriteOrderPlanText } from "../../src/engine/liveMoveAnimation.ts";
+import { liveMoveAnimationPresentation, liveMoveHiddenSides, liveMoveGeometrySpriteOrderPlanText } from "../../src/engine/liveMoveAnimation.ts";
 import {
   LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS, liveSpriteAllocatorAnimationNetZero, prepareLiveMoveSpriteAllocator,
 } from "../../src/engine/liveMoveSpriteAllocator.ts";
@@ -115,8 +115,9 @@ const variants = fixtures.map(({ name, f }) => {
       return { ...v, visibility, effect: { ...v.effect, ...lend } };
     };
     const v0 = view(0).effect;
+    // hide66: renderBattleResolutionLiveView's own decision, incl. the hidden-target gate (liveMoveHiddenSides of the view).
     const live = liveMoveAnimationPresentation(v0.request, view(0).field, 0, v0.paletteInput, v0.spriteAllocatorInput, v0.spriteOrderInput,
-      v0.presentationRng, v0.battlerX2Input) !== null;
+      v0.presentationRng, v0.battlerX2Input, liveMoveHiddenSides(view(0).visibility, v0.request)) !== null;
     return { view, live, orderKnown: (lend.spriteOrderInput as Json | undefined)?.known === true,
       orderInvalid: host.tracker?.invalidReason ?? null, allocatorInput: lend.spriteAllocatorInput !== undefined,
       firstBody: (lend.spriteOrderInput as Json | undefined)?.firstBody === true, x2: v0.battlerX2Input ?? null, invalidatedBy, hidden: [...hidden] };
