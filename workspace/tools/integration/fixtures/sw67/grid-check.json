@@ -1,6 +1,6 @@
 {
  "schema": "sw67-fit-v1",
- "unitsPath": ".sw67-scratch/units.json",
+ "unitsSha256": "ed361296b2d7e602fe0e7e2e4dd10617d68185472426a329b5e94d4482a78edd",
  "prefix": "sw67-",
  "summary": {
   "units": 18,

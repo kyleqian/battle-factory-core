@@ -1,6 +1,6 @@
 {
  "schema": "sw67-fit-v1",
- "unitsPath": "tools/integration/fixtures/plans48/units.json",
+ "unitsSha256": "638fb5ab3d251d7b4c1ef52e7c16091801805b8c75b50474a98e456f340d1532",
  "prefix": "sw-",
  "summary": {
   "units": 8,

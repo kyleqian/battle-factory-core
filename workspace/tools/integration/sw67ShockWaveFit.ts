@@ -7,6 +7,7 @@
 // must also equal the ROM's (prediction == plan == ROM).
 // usage: node --experimental-strip-types tools/integration/sw67ShockWaveFit.ts [out.json] [--units=<units.json>] [--prefix=sw-]
 //        [--predictions=<predictions.json>]
+import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { shockWaveSpriteOrderPlanWindows, type ShockWaveLiveInputs } from "../../src/animation/shockWave.ts";
 import shockWaveAsset from "../../src/animation/assets/shock-wave.json" with { type: "json" };
@@ -95,6 +96,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
   const summary = { units: rows.length, exact: rows.filter(r => r.exact).length };
   console.log(`exact ${summary.exact} / ${summary.units}`);
-  if (out) writeFileSync(out, `${JSON.stringify({ schema: "sw67-fit-v1", unitsPath: unitsPath.replace(/^.*\/tools\//, "tools/"), prefix, summary, rows }, null, 1)}\n`);
+  const unitsSha256 = createHash("sha256").update(readFileSync(unitsPath)).digest("hex");
+  if (out) writeFileSync(out, `${JSON.stringify({ schema: "sw67-fit-v1", unitsSha256, prefix, summary, rows }, null, 1)}\n`);
   if (summary.exact !== summary.units || summary.units === 0) process.exitCode = 1;
 }
