@@ -24,14 +24,17 @@ orchestrator's beginOrderTurn(!playerLocked) input (Ice Ball / Dive / Petal Danc
 Windows (audit 19): every MOVE body of the slow lead (consumer side); every MOVE body of either battler in ice-*, dive-*, wp160-*.
 Every MOVE body of the history carries its activation gRng2Value (`pinnedRng2`, flat event index): the check records the words of any
 body with a production Random2 plan (Ice Ball, Mud-Slap, Rain Dance, Dive, Water Pulse, ...), prep65's method.
-usage: audit20Fixtures.py <probe-dir> <fixture-dir>
+pb-* (land75 Part B, audit20PartBStage.py): a species change of battler b is its faint + send-in: the postko fixtures' kernel units
+[faint-animation, draw-party-status-summary, hide-party-status-summary, switch-in-animation (partyIndex 1)] of b close the turn of the
+body before (the hidden user's KO), and the derivation continues with the replacement.
+usage: audit20Fixtures.py <probe-dir> <fixture-dir> [<scenario-dir>]
 """
 import json, sys
 from pathlib import Path
 
 probe_dir, out_dir = Path(sys.argv[1]), Path(sys.argv[2])
 out_dir.mkdir(parents=True, exist_ok=True)
-SCEN = Path("tools/integration/fixtures/audit-20/scenarios")
+SCEN = Path(sys.argv[3]) if len(sys.argv) > 3 else Path("tools/integration/fixtures/audit-20/scenarios")
 SPECIES = {s["id"]: s["name"].removeprefix("SPECIES_") for s in json.loads(Path("src/data/gen/species-stats.json").read_text())["species"]}
 _MOVES = json.loads(Path("src/data/gen/moves.json").read_text())["moves"]
 POWER = {m["id"]: m["power"] for m in _MOVES}
@@ -61,9 +64,12 @@ for probe in sorted(probe_dir.glob("*.json")):
     parties = scen["overrides"]["parties"]
     consumer_side = "player" if parties["player"][0]["species"] == 113 else "opponent"
     consumer_battler = 0 if consumer_side == "player" else 1
-    every_body = name.startswith(("mm-", "dv-"))
+    every_body = name.startswith(("mm-", "dv-", "pb-"))
+    species_now = [d["bodies"][0]["at"]["battlers"][x]["species"] for x in (0, 1)] if d["bodies"] else []
     entry = d["bodies"][0]["pre"] if d["bodies"] else None
     genders = {side: parties[side][0].get("gender", "genderless") for side in ("player", "opponent")}
+    # audit 20: the gender of the party member on the field (a pb-* replacement is member 2; the lead's otherwise)
+    gender_of = lambda side, species: next((m.get("gender", "genderless") for m in parties[side] if m["species"] == species), genders[side])
     locked_at = {t["turnCounter"]: bool(t["playerStatus2"] & LOCK) for t in d["turns"]}
     bodies = d["bodies"]
     turns: list[list[dict]] = []
@@ -83,7 +89,15 @@ for probe in sorted(probe_dir.glob("*.json")):
             continue
         # audit 20: a faint + send-in plays no anim script in the ROM (the faint is a sprite callback, the send-in a ball task), so the
         # history would silently miss its kernel units (faint-animation / switch-in-animation): stop at the first body after a species change
-        if any(at[x]["species"] != bodies[0]["at"]["battlers"][x]["species"] for x in (0, 1)):
+        if name.startswith("pb-") and any(at[x]["species"] != species_now[x] for x in (0, 1)):
+            prev_t = bodies[i - 1]["at"]["turnCounter"]
+            for x in (0, 1):
+                if at[x]["species"] != species_now[x]:
+                    turns[prev_t] += [{"kind": "faint-animation", "battler": x}, {"kind": "draw-party-status-summary", "battler": x},
+                                      {"kind": "hide-party-status-summary", "battler": x}, {"kind": "switch-in-animation", "battler": x, "partyIndex": 1}]
+                    species_now[x] = at[x]["species"]
+            flat = sum(len(x) for x in turns)
+        if any(at[x]["species"] != bodies[0]["at"]["battlers"][x]["species"] for x in (0, 1)) and not name.startswith("pb-"):
             print(name, "UNMODELLED faint/send-in (species change) at", b["startFrame"])
             stopped = "faint"
             continue
@@ -96,7 +110,8 @@ for probe in sorted(probe_dir.glob("*.json")):
             move = MOVES[label]
             tgt = b["target"]
             power = b["power"] if move in RAM_POWER else POWER[move]
-            hit = POWER[move] > 0 and tgt != atk and nxt is not None and nxt[tgt]["hp"] < at[tgt]["hp"]
+            hit = POWER[move] > 0 and tgt != atk and nxt is not None and (nxt[tgt]["hp"] < at[tgt]["hp"]
+                                                                          or (name.startswith("pb-") and nxt[tgt]["species"] != at[tgt]["species"]))
             args = [str(move), str(b["moveTurn"]), str(power), "1" if hit else "0", "70", "0"] + ([str(b["furyCutter"])] if move == 210 else [])
             body = {"kind": "animation", "animationId": "MOVE_ANIMATION", "battler": atk, "target": tgt, "arguments": args}
             consumer = every_body or (atk == consumer_battler and move in CONSUMERS)
@@ -112,10 +127,11 @@ for probe in sorted(probe_dir.glob("*.json")):
                     "attackerPersonality": at[atk]["personality"],
                     "displayedStatus": {"player": shown(at[0]["status1"]), "opponent": shown(at[1]["status1"])},
                     "fieldProfile": {"playerHp": at[0]["hp"], "playerMaxHp": at[0]["maxHP"], "opponentHp": at[1]["hp"], "opponentMaxHp": at[1]["maxHP"],
-                                     "playerGender": genders["player"], "opponentGender": genders["opponent"]},
+                                     "playerGender": gender_of("player", at[0]["species"]), "opponentGender": gender_of("opponent", at[1]["species"])},
                     # BattleScriptFirstChargingTurn prints STRINGID_EMPTYSTRING3 before the Dive setup's attackanimation (flybounce-live /
                     # a13fix charge fixtures: an empty box)
-                    **({"messageLines": ["", ""]} if move == 291 and b["moveTurn"] == 0 else {}),
+                    # audit 20: the same for every two-turn setup body (Fly 19, Dig 91, Bounce 340: BattleScriptFirstChargingTurn too)
+                    **({"messageLines": ["", ""]} if move in (291, 19, 91, 340) and b["moveTurn"] == 0 else {}),
                     "requestFields": {"turn": b["moveTurn"], "target": tgt, "power": power},
                     "rom": {"invisible": [s["invisible"] for s in b["at"]["battlerSprites"]], "turn": t, "spriteOrder": b["at"]["spriteOrder"],
                             "power": b["power"],

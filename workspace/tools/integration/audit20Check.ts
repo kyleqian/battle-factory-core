@@ -172,6 +172,12 @@ const variants = fixtures.map(({ name, f }) => {
           }
         }
       }
+      // audit 20 (land75 Part B): a faint / send-in shows the battler again (production's "faint" / "switch-in" commands clear the hide)
+      if ((p.kind === "faint-animation" || p.kind === "switch-in-animation") && i < all.length - 1) {
+        hidden = applyLiveSemiInvulnerableCommand(hidden, { type: p.kind === "faint-animation" ? "faint" : "switch-in", battler: p.battler } as never);
+        otherBodies[p.battler as 0 | 1] = 0;
+        return;
+      }
       if (p.animationId === "SUBSTITUTE_FADE" && i < all.length - 1) doll[p.battler] = false;
       if (p.animationId !== "MOVE_ANIMATION") return;
       const other = 1 - p.battler;

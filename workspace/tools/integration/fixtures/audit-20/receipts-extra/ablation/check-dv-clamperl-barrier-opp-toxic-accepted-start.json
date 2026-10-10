@@ -1,0 +1,5006 @@
+{
+ "schema": "audit20-chain-check/v1",
+ "scenario": "dv-clamperl-barrier-opp-toxic-accepted-start",
+ "rows": [
+  {
+   "fixture": "dv-clamperl-barrier-opp-toxic-accepted-start-c0.json",
+   "move": "BARRIER",
+   "side": "opponent",
+   "species": "CHANSEY/CLAMPERL",
+   "alloc": {
+    "input": [
+     3
+    ],
+    "rom": [
+     3
+    ],
+    "preEqEntry": true,
+    "equal": true,
+    "preDiff": []
+   },
+   "units": 0,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "112@1"
+   ],
+   "romPower": 0,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 74,
+    "endFrame": 149
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "dv-clamperl-barrier-opp-toxic-accepted-start-c1.json",
+   "move": "DIVE",
+   "side": "player",
+   "species": "CLAMPERL/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0"
+   ],
+   "romPower": 0,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 365,
+    "endFrame": 483
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 119,
+    "exactRows": 118,
+    "px": 284,
+    "digests": [
+     "28a60a9afcd7a2db",
+     "28a60a9afcd7a2db"
+    ],
+    "residualRows": [
+     [
+      69,
+      284
+     ]
+    ],
+    "detail": [
+     {
+      "age": 69,
+      "px": 284,
+      "bbox": [
+       49,
+       93,
+       80,
+       111
+      ],
+      "sample": "70,80 rom 6bffff live ffffff"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 119,
+    "exactRows": 118,
+    "px": 284,
+    "digests": [
+     "28a60a9afcd7a2db",
+     "28a60a9afcd7a2db"
+    ],
+    "residualRows": [
+     [
+      69,
+      284
+     ]
+    ],
+    "detail": [
+     {
+      "age": 69,
+      "px": 284,
+      "bbox": [
+       49,
+       93,
+       80,
+       111
+      ],
+      "sample": "70,80 rom 6bffff live ffffff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-clamperl-barrier-opp-toxic-accepted-start-c2.json",
+   "move": "BARRIER",
+   "side": "opponent",
+   "species": "CHANSEY/CLAMPERL",
+   "alloc": {
+    "input": [
+     3
+    ],
+    "rom": [
+     3
+    ],
+    "preEqEntry": true,
+    "equal": true,
+    "preDiff": []
+   },
+   "units": 3,
+   "romInvisible": [
+    true,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1"
+   ],
+   "romPower": 0,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 636,
+    "endFrame": 711
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     true,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 0,
+    "px": 130720,
+    "digests": [
+     "42de317ec1eff7ae",
+     "42de317ec1eff7ae"
+    ],
+    "residualRows": [
+     [
+      0,
+      1720
+     ],
+     [
+      1,
+      1720
+     ],
+     [
+      2,
+      1720
+     ],
+     [
+      3,
+      1720
+     ],
+     [
+      4,
+      1720
+     ],
+     [
+      5,
+      1720
+     ],
+     [
+      6,
+      1720
+     ],
+     [
+      7,
+      1720
+     ],
+     [
+      8,
+      1720
+     ],
+     [
+      9,
+      1720
+     ],
+     [
+      10,
+      1720
+     ],
+     [
+      11,
+      1720
+     ],
+     [
+      12,
+      1720
+     ],
+     [
+      13,
+      1720
+     ],
+     [
+      14,
+      1720
+     ],
+     [
+      15,
+      1720
+     ],
+     [
+      16,
+      1720
+     ],
+     [
+      17,
+      1720
+     ],
+     [
+      18,
+      1720
+     ],
+     [
+      19,
+      1720
+     ],
+     [
+      20,
+      1720
+     ],
+     [
+      21,
+      1720
+     ],
+     [
+      22,
+      1720
+     ],
+     [
+      23,
+      1720
+     ],
+     [
+      24,
+      1720
+     ],
+     [
+      25,
+      1720
+     ],
+     [
+      26,
+      1720
+     ],
+     [
+      27,
+      1720
+     ],
+     [
+      28,
+      1720
+     ],
+     [
+      29,
+      1720
+     ],
+     [
+      30,
+      1720
+     ],
+     [
+      31,
+      1720
+     ],
+     [
+      32,
+      1720
+     ],
+     [
+      33,
+      1720
+     ],
+     [
+      34,
+      1720
+     ],
+     [
+      35,
+      1720
+     ],
+     [
+      36,
+      1720
+     ],
+     [
+      37,
+      1720
+     ],
+     [
+      38,
+      1720
+     ],
+     [
+      39,
+      1720
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 1720,
+      "bbox": [
+       41,
+       97,
+       74,
+       111
+      ],
+      "sample": "60,74 rom f7f7ff live 315ace"
+     },
+     {
+      "age": 1,
+      "px": 1720,
+      "bbox": [
+       41,
+       97,
+       74,
+       111
+      ],
+      "sample": "60,74 rom f7f7ff live 315ace"
+     },
+     {
+      "age": 2,
+      "px": 1720,
+      "bbox": [
+       41,
+       97,
+       74,
+       111
+      ],
+      "sample": "60,74 rom f7f7ff live 315ace"
+     },
+     {
+      "age": 3,
+      "px": 1720,
+      "bbox": [
+       41,
+       97,
+       74,
+       111
+      ],
+      "sample": "60,74 rom f7f7ff live 315ace"
+     },
+     {
+      "age": 4,
+      "px": 1720,
+      "bbox": [
+       41,
+       97,
+       74,
+       111
+      ],
+      "sample": "60,74 rom f7f7ff live 315ace"
+     },
+     {
+      "age": 5,
+      "px": 1720,
+      "bbox": [
+       41,
+       97,
+       74,
+       111
+      ],
+      "sample": "60,74 rom f7f7ff live 315ace"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-clamperl-barrier-opp-toxic-accepted-start-c3.json",
+   "move": "DIVE",
+   "side": "player",
+   "species": "CLAMPERL/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 5,
+   "romInvisible": [
+    true,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 1,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 951,
+    "endFrame": 1043
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (branch-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     true,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 93,
+    "exactRows": 18,
+    "px": 90661,
+    "digests": [
+     "45e5531e0d5cb9a7",
+     "45e5531e0d5cb9a7"
+    ],
+    "residualRows": [
+     [
+      17,
+      284
+     ],
+     [
+      18,
+      331
+     ],
+     [
+      19,
+      414
+     ],
+     [
+      20,
+      509
+     ],
+     [
+      21,
+      605
+     ],
+     [
+      22,
+      753
+     ],
+     [
+      23,
+      846
+     ],
+     [
+      24,
+      938
+     ],
+     [
+      25,
+      1071
+     ],
+     [
+      26,
+      1144
+     ],
+     [
+      27,
+      733
+     ],
+     [
+      28,
+      584
+     ],
+     [
+      29,
+      756
+     ],
+     [
+      30,
+      1192
+     ],
+     [
+      31,
+      1900
+     ],
+     [
+      32,
+      1862
+     ],
+     [
+      33,
+      1804
+     ],
+     [
+      34,
+      1785
+     ],
+     [
+      35,
+      1778
+     ],
+     [
+      36,
+      1795
+     ],
+     [
+      37,
+      1769
+     ],
+     [
+      38,
+      1761
+     ],
+     [
+      39,
+      1767
+     ],
+     [
+      40,
+      1734
+     ],
+     [
+      41,
+      1777
+     ],
+     [
+      42,
+      1790
+     ],
+     [
+      43,
+      1855
+     ],
+     [
+      44,
+      1876
+     ],
+     [
+      45,
+      1823
+     ],
+     [
+      46,
+      1842
+     ],
+     [
+      47,
+      1647
+     ],
+     [
+      48,
+      1674
+     ],
+     [
+      49,
+      1626
+     ],
+     [
+      50,
+      1641
+     ],
+     [
+      51,
+      1663
+     ],
+     [
+      52,
+      1673
+     ],
+     [
+      53,
+      1636
+     ],
+     [
+      54,
+      1637
+     ],
+     [
+      55,
+      1625
+     ],
+     [
+      56,
+      1648
+     ]
+    ],
+    "detail": [
+     {
+      "age": 17,
+      "px": 284,
+      "bbox": [
+       153,
+       197,
+       40,
+       71
+      ],
+      "sample": "174,40 rom 6bffff live ffd6d6"
+     },
+     {
+      "age": 18,
+      "px": 331,
+      "bbox": [
+       153,
+       197,
+       37,
+       71
+      ],
+      "sample": "173,37 rom 9cffff live ffffff"
+     },
+     {
+      "age": 19,
+      "px": 414,
+      "bbox": [
+       153,
+       197,
+       34,
+       72
+      ],
+      "sample": "174,34 rom 6bffff live ffd6d6"
+     },
+     {
+      "age": 20,
+      "px": 509,
+      "bbox": [
+       153,
+       197,
+       29,
+       71
+      ],
+      "sample": "174,29 rom 6bffff live ffdede"
+     },
+     {
+      "age": 21,
+      "px": 605,
+      "bbox": [
+       157,
+       194,
+       24,
+       71
+      ],
+      "sample": "173,24 rom 9cffff live ffffff"
+     },
+     {
+      "age": 22,
+      "px": 753,
+      "bbox": [
+       153,
+       197,
+       17,
+       72
+      ],
+      "sample": "174,17 rom 6bffff live f7f7ff"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 93,
+    "exactRows": 87,
+    "px": 67,
+    "digests": [
+     "2b37c5548ac0d50e",
+     "2b37c5548ac0d50e"
+    ],
+    "residualRows": [
+     [
+      17,
+      19
+     ],
+     [
+      18,
+      23
+     ],
+     [
+      19,
+      4
+     ],
+     [
+      20,
+      6
+     ],
+     [
+      21,
+      12
+     ],
+     [
+      22,
+      3
+     ]
+    ],
+    "detail": [
+     {
+      "age": 17,
+      "px": 19,
+      "bbox": [
+       171,
+       178,
+       66,
+       71
+      ],
+      "sample": "171,66 rom 216bff live 399cff"
+     },
+     {
+      "age": 18,
+      "px": 23,
+      "bbox": [
+       170,
+       177,
+       63,
+       68
+      ],
+      "sample": "170,63 rom 216bff live 52ceff"
+     },
+     {
+      "age": 19,
+      "px": 4,
+      "bbox": [
+       171,
+       180,
+       60,
+       61
+      ],
+      "sample": "171,60 rom 52ceff live 399cff"
+     },
+     {
+      "age": 20,
+      "px": 6,
+      "bbox": [
+       170,
+       183,
+       57,
+       60
+      ],
+      "sample": "183,57 rom 216bff live ffffff"
+     },
+     {
+      "age": 21,
+      "px": 12,
+      "bbox": [
+       167,
+       184,
+       54,
+       57
+      ],
+      "sample": "167,54 rom 216bff live 399cff"
+     },
+     {
+      "age": 22,
+      "px": 3,
+      "bbox": [
+       184,
+       185,
+       52,
+       54
+      ],
+      "sample": "185,52 rom 0839ff live 216bff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-clamperl-barrier-opp-toxic-accepted-start-c4.json",
+   "move": "BARRIER",
+   "side": "opponent",
+   "species": "CHANSEY/CLAMPERL",
+   "alloc": {
+    "input": [
+     3
+    ],
+    "rom": [
+     3
+    ],
+    "preEqEntry": true,
+    "equal": true,
+    "preDiff": []
+   },
+   "units": 7,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false,
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0 HIT_ANIMATION@1",
+    "112@1"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1408,
+    "endFrame": 1483
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 76,
+    "exactRows": 76,
+    "px": 0,
+    "digests": [
+     "6bffefc76010dcbb",
+     "6bffefc76010dcbb"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "dv-clamperl-barrier-opp-toxic-accepted-start-c5.json",
+   "move": "DIVE",
+   "side": "player",
+   "species": "CLAMPERL/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 9,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false,
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 291@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1699,
+    "endFrame": 1817
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (branch-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 119,
+    "exactRows": 11,
+    "px": 201408,
+    "digests": [
+     "2c9eef567c82f03f",
+     "2c9eef567c82f03f"
+    ],
+    "residualRows": [
+     [
+      11,
+      1746
+     ],
+     [
+      12,
+      1760
+     ],
+     [
+      13,
+      1767
+     ],
+     [
+      14,
+      1777
+     ],
+     [
+      15,
+      1793
+     ],
+     [
+      16,
+      1816
+     ],
+     [
+      17,
+      1742
+     ],
+     [
+      18,
+      1720
+     ],
+     [
+      19,
+      1720
+     ],
+     [
+      20,
+      1720
+     ],
+     [
+      21,
+      1720
+     ],
+     [
+      22,
+      1720
+     ],
+     [
+      23,
+      1720
+     ],
+     [
+      24,
+      1722
+     ],
+     [
+      25,
+      1767
+     ],
+     [
+      26,
+      1895
+     ],
+     [
+      27,
+      2055
+     ],
+     [
+      28,
+      2228
+     ],
+     [
+      29,
+      2320
+     ],
+     [
+      30,
+      2304
+     ],
+     [
+      31,
+      2239
+     ],
+     [
+      32,
+      2344
+     ],
+     [
+      33,
+      2372
+     ],
+     [
+      34,
+      2206
+     ],
+     [
+      35,
+      2021
+     ],
+     [
+      36,
+      1950
+     ],
+     [
+      37,
+      1882
+     ],
+     [
+      38,
+      1720
+     ],
+     [
+      39,
+      1720
+     ],
+     [
+      40,
+      1720
+     ],
+     [
+      41,
+      1720
+     ],
+     [
+      42,
+      1720
+     ],
+     [
+      43,
+      1720
+     ],
+     [
+      44,
+      1720
+     ],
+     [
+      45,
+      1720
+     ],
+     [
+      46,
+      1720
+     ],
+     [
+      47,
+      1720
+     ],
+     [
+      48,
+      1720
+     ],
+     [
+      49,
+      1720
+     ],
+     [
+      50,
+      1720
+     ]
+    ],
+    "detail": [
+     {
+      "age": 11,
+      "px": 1746,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "72,72 rom 181052 live ffffff"
+     },
+     {
+      "age": 12,
+      "px": 1760,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "71,72 rom 181052 live ffffff"
+     },
+     {
+      "age": 13,
+      "px": 1767,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "70,72 rom 181052 live ffffff"
+     },
+     {
+      "age": 14,
+      "px": 1777,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "70,72 rom 181052 live ffffff"
+     },
+     {
+      "age": 15,
+      "px": 1793,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "69,72 rom 181052 live ffffff"
+     },
+     {
+      "age": 16,
+      "px": 1816,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "68,72 rom 181052 live ffffff"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 119,
+    "exactRows": 88,
+    "px": 17564,
+    "digests": [
+     "c551f4e0bce1a98b",
+     "c551f4e0bce1a98b"
+    ],
+    "residualRows": [
+     [
+      69,
+      284
+     ],
+     [
+      70,
+      312
+     ],
+     [
+      71,
+      338
+     ],
+     [
+      72,
+      461
+     ],
+     [
+      73,
+      484
+     ],
+     [
+      74,
+      528
+     ],
+     [
+      75,
+      685
+     ],
+     [
+      76,
+      703
+     ],
+     [
+      77,
+      676
+     ],
+     [
+      78,
+      823
+     ],
+     [
+      79,
+      988
+     ],
+     [
+      80,
+      638
+     ],
+     [
+      81,
+      632
+     ],
+     [
+      82,
+      996
+     ],
+     [
+      83,
+      837
+     ],
+     [
+      84,
+      675
+     ],
+     [
+      85,
+      692
+     ],
+     [
+      86,
+      695
+     ],
+     [
+      87,
+      566
+     ],
+     [
+      88,
+      585
+     ],
+     [
+      89,
+      657
+     ],
+     [
+      90,
+      555
+     ],
+     [
+      91,
+      627
+     ],
+     [
+      92,
+      655
+     ],
+     [
+      93,
+      354
+     ],
+     [
+      94,
+      347
+     ],
+     [
+      95,
+      356
+     ],
+     [
+      96,
+      362
+     ],
+     [
+      97,
+      374
+     ],
+     [
+      98,
+      390
+     ],
+     [
+      99,
+      289
+     ]
+    ],
+    "detail": [
+     {
+      "age": 69,
+      "px": 284,
+      "bbox": [
+       49,
+       93,
+       80,
+       111
+      ],
+      "sample": "70,80 rom 6bffff live ffffff"
+     },
+     {
+      "age": 70,
+      "px": 312,
+      "bbox": [
+       49,
+       93,
+       77,
+       111
+      ],
+      "sample": "69,77 rom 9cffff live f7f7ff"
+     },
+     {
+      "age": 71,
+      "px": 338,
+      "bbox": [
+       49,
+       93,
+       74,
+       111
+      ],
+      "sample": "70,74 rom 6bffff live f7f7ff"
+     },
+     {
+      "age": 72,
+      "px": 461,
+      "bbox": [
+       49,
+       93,
+       69,
+       111
+      ],
+      "sample": "70,69 rom 6bffff live f7f7ff"
+     },
+     {
+      "age": 73,
+      "px": 484,
+      "bbox": [
+       49,
+       95,
+       64,
+       110
+      ],
+      "sample": "69,64 rom 9cffff live ffffff"
+     },
+     {
+      "age": 74,
+      "px": 528,
+      "bbox": [
+       49,
+       99,
+       57,
+       111
+      ],
+      "sample": "70,57 rom 6bffff live f7f7ff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-clamperl-barrier-opp-toxic-accepted-start-c6.json",
+   "move": "DIVE",
+   "side": "player",
+   "species": "CLAMPERL/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 10,
+   "romInvisible": [
+    true,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false,
+    true,
+    false
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "291t1@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 1,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 2140,
+    "endFrame": 2232
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (branch-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     true,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 93,
+    "exactRows": 18,
+    "px": 88106,
+    "digests": [
+     "b9dad1d39e1e0d66",
+     "b9dad1d39e1e0d66"
+    ],
+    "residualRows": [
+     [
+      17,
+      284
+     ],
+     [
+      18,
+      356
+     ],
+     [
+      19,
+      464
+     ],
+     [
+      20,
+      554
+     ],
+     [
+      21,
+      614
+     ],
+     [
+      22,
+      723
+     ],
+     [
+      23,
+      814
+     ],
+     [
+      24,
+      905
+     ],
+     [
+      25,
+      1039
+     ],
+     [
+      26,
+      1109
+     ],
+     [
+      27,
+      697
+     ],
+     [
+      28,
+      548
+     ],
+     [
+      29,
+      700
+     ],
+     [
+      30,
+      1126
+     ],
+     [
+      31,
+      1859
+     ],
+     [
+      32,
+      1791
+     ],
+     [
+      33,
+      1734
+     ],
+     [
+      34,
+      1684
+     ],
+     [
+      35,
+      1660
+     ],
+     [
+      36,
+      1678
+     ],
+     [
+      37,
+      1649
+     ],
+     [
+      38,
+      1623
+     ],
+     [
+      39,
+      1625
+     ],
+     [
+      40,
+      1598
+     ],
+     [
+      41,
+      1608
+     ],
+     [
+      42,
+      1623
+     ],
+     [
+      43,
+      1689
+     ],
+     [
+      44,
+      1698
+     ],
+     [
+      45,
+      1620
+     ],
+     [
+      46,
+      1616
+     ],
+     [
+      47,
+      1632
+     ],
+     [
+      48,
+      1646
+     ],
+     [
+      49,
+      1590
+     ],
+     [
+      50,
+      1613
+     ],
+     [
+      51,
+      1639
+     ],
+     [
+      52,
+      1652
+     ],
+     [
+      53,
+      1589
+     ],
+     [
+      54,
+      1590
+     ],
+     [
+      55,
+      1666
+     ],
+     [
+      56,
+      1663
+     ]
+    ],
+    "detail": [
+     {
+      "age": 17,
+      "px": 284,
+      "bbox": [
+       153,
+       197,
+       40,
+       71
+      ],
+      "sample": "174,40 rom 6bffff live ffd6d6"
+     },
+     {
+      "age": 18,
+      "px": 356,
+      "bbox": [
+       153,
+       197,
+       37,
+       71
+      ],
+      "sample": "173,37 rom 9cffff live ffffff"
+     },
+     {
+      "age": 19,
+      "px": 464,
+      "bbox": [
+       153,
+       197,
+       34,
+       72
+      ],
+      "sample": "174,34 rom 6bffff live ffd6d6"
+     },
+     {
+      "age": 20,
+      "px": 554,
+      "bbox": [
+       153,
+       197,
+       29,
+       71
+      ],
+      "sample": "174,29 rom 6bffff live ffdede"
+     },
+     {
+      "age": 21,
+      "px": 614,
+      "bbox": [
+       152,
+       199,
+       24,
+       71
+      ],
+      "sample": "173,24 rom 9cffff live ffffff"
+     },
+     {
+      "age": 22,
+      "px": 723,
+      "bbox": [
+       148,
+       203,
+       17,
+       72
+      ],
+      "sample": "174,17 rom 6bffff live f7f7ff"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 93,
+    "exactRows": 86,
+    "px": 103,
+    "digests": [
+     "78611a2bdaf48d56",
+     "78611a2bdaf48d56"
+    ],
+    "residualRows": [
+     [
+      17,
+      19
+     ],
+     [
+      18,
+      32
+     ],
+     [
+      19,
+      14
+     ],
+     [
+      20,
+      9
+     ],
+     [
+      21,
+      7
+     ],
+     [
+      22,
+      3
+     ],
+     [
+      63,
+      19
+     ]
+    ],
+    "detail": [
+     {
+      "age": 17,
+      "px": 19,
+      "bbox": [
+       169,
+       179,
+       66,
+       71
+      ],
+      "sample": "169,66 rom 399cff live 216bff"
+     },
+     {
+      "age": 18,
+      "px": 32,
+      "bbox": [
+       166,
+       177,
+       63,
+       67
+      ],
+      "sample": "166,63 rom 52ceff live 216bff"
+     },
+     {
+      "age": 19,
+      "px": 14,
+      "bbox": [
+       163,
+       167,
+       60,
+       64
+      ],
+      "sample": "163,60 rom ffffff live 216bff"
+     },
+     {
+      "age": 20,
+      "px": 9,
+      "bbox": [
+       160,
+       163,
+       57,
+       60
+      ],
+      "sample": "160,57 rom ffffff live 216bff"
+     },
+     {
+      "age": 21,
+      "px": 7,
+      "bbox": [
+       157,
+       159,
+       54,
+       57
+      ],
+      "sample": "157,54 rom 399cff live 216bff"
+     },
+     {
+      "age": 22,
+      "px": 3,
+      "bbox": [
+       154,
+       155,
+       52,
+       54
+      ],
+      "sample": "154,52 rom 216bff live 0839ff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-clamperl-barrier-opp-toxic-accepted-start-c7.json",
+   "move": "TOXIC",
+   "side": "opponent",
+   "species": "CHANSEY/CLAMPERL",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4,
+     3
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 12,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false,
+    true,
+    false,
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "291t1@0 HIT_ANIMATION@1",
+    "92@1"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 2745,
+    "endFrame": 2975,
+    "ageOffset": -7
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 231,
+    "exactRows": 231,
+    "px": 0,
+    "digests": [
+     "ff126451bfd20e8d",
+     "ff126451bfd20e8d"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 231,
+    "exactRows": 231,
+    "px": 0,
+    "digests": [
+     "ff126451bfd20e8d",
+     "ff126451bfd20e8d"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "dv-clamperl-barrier-opp-toxic-accepted-start-c8.json",
+   "move": "DIVE",
+   "side": "player",
+   "species": "CLAMPERL/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 14,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false,
+    true,
+    false,
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "291t1@0 HIT_ANIMATION@1",
+    "92@1 status:PSN@0 291@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 3173,
+    "endFrame": 3291
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (branch-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 119,
+    "exactRows": 11,
+    "px": 201532,
+    "digests": [
+     "0f7777e4167d73b7",
+     "0f7777e4167d73b7"
+    ],
+    "residualRows": [
+     [
+      11,
+      1746
+     ],
+     [
+      12,
+      1760
+     ],
+     [
+      13,
+      1767
+     ],
+     [
+      14,
+      1777
+     ],
+     [
+      15,
+      1793
+     ],
+     [
+      16,
+      1816
+     ],
+     [
+      17,
+      1742
+     ],
+     [
+      18,
+      1720
+     ],
+     [
+      19,
+      1720
+     ],
+     [
+      20,
+      1720
+     ],
+     [
+      21,
+      1720
+     ],
+     [
+      22,
+      1720
+     ],
+     [
+      23,
+      1720
+     ],
+     [
+      24,
+      1722
+     ],
+     [
+      25,
+      1767
+     ],
+     [
+      26,
+      1895
+     ],
+     [
+      27,
+      2055
+     ],
+     [
+      28,
+      2228
+     ],
+     [
+      29,
+      2320
+     ],
+     [
+      30,
+      2304
+     ],
+     [
+      31,
+      2239
+     ],
+     [
+      32,
+      2344
+     ],
+     [
+      33,
+      2372
+     ],
+     [
+      34,
+      2206
+     ],
+     [
+      35,
+      2021
+     ],
+     [
+      36,
+      1950
+     ],
+     [
+      37,
+      1882
+     ],
+     [
+      38,
+      1720
+     ],
+     [
+      39,
+      1720
+     ],
+     [
+      40,
+      1720
+     ],
+     [
+      41,
+      1720
+     ],
+     [
+      42,
+      1720
+     ],
+     [
+      43,
+      1720
+     ],
+     [
+      44,
+      1720
+     ],
+     [
+      45,
+      1720
+     ],
+     [
+      46,
+      1720
+     ],
+     [
+      47,
+      1720
+     ],
+     [
+      48,
+      1720
+     ],
+     [
+      49,
+      1720
+     ],
+     [
+      50,
+      1720
+     ]
+    ],
+    "detail": [
+     {
+      "age": 11,
+      "px": 1746,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "72,72 rom 181052 live ffffff"
+     },
+     {
+      "age": 12,
+      "px": 1760,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "71,72 rom 181052 live ffffff"
+     },
+     {
+      "age": 13,
+      "px": 1767,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "70,72 rom 181052 live ffffff"
+     },
+     {
+      "age": 14,
+      "px": 1777,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "70,72 rom 181052 live ffffff"
+     },
+     {
+      "age": 15,
+      "px": 1793,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "69,72 rom 181052 live ffffff"
+     },
+     {
+      "age": 16,
+      "px": 1816,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "68,72 rom 181052 live ffffff"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 119,
+    "exactRows": 88,
+    "px": 17468,
+    "digests": [
+     "c6806f61408adc50",
+     "c6806f61408adc50"
+    ],
+    "residualRows": [
+     [
+      69,
+      284
+     ],
+     [
+      70,
+      320
+     ],
+     [
+      71,
+      362
+     ],
+     [
+      72,
+      505
+     ],
+     [
+      73,
+      520
+     ],
+     [
+      74,
+      558
+     ],
+     [
+      75,
+      703
+     ],
+     [
+      76,
+      727
+     ],
+     [
+      77,
+      726
+     ],
+     [
+      78,
+      892
+     ],
+     [
+      79,
+      1046
+     ],
+     [
+      80,
+      715
+     ],
+     [
+      81,
+      730
+     ],
+     [
+      82,
+      1062
+     ],
+     [
+      83,
+      907
+     ],
+     [
+      84,
+      772
+     ],
+     [
+      85,
+      810
+     ],
+     [
+      86,
+      777
+     ],
+     [
+      87,
+      588
+     ],
+     [
+      88,
+      539
+     ],
+     [
+      89,
+      617
+     ],
+     [
+      90,
+      521
+     ],
+     [
+      91,
+      586
+     ],
+     [
+      92,
+      554
+     ],
+     [
+      93,
+      251
+     ],
+     [
+      94,
+      236
+     ],
+     [
+      95,
+      229
+     ],
+     [
+      96,
+      229
+     ],
+     [
+      97,
+      230
+     ],
+     [
+      98,
+      254
+     ],
+     [
+      99,
+      218
+     ]
+    ],
+    "detail": [
+     {
+      "age": 69,
+      "px": 284,
+      "bbox": [
+       49,
+       93,
+       80,
+       111
+      ],
+      "sample": "70,80 rom 6bffff live ffffff"
+     },
+     {
+      "age": 70,
+      "px": 320,
+      "bbox": [
+       49,
+       93,
+       77,
+       111
+      ],
+      "sample": "69,77 rom 9cffff live f7f7ff"
+     },
+     {
+      "age": 71,
+      "px": 362,
+      "bbox": [
+       49,
+       93,
+       74,
+       111
+      ],
+      "sample": "70,74 rom 6bffff live f7f7ff"
+     },
+     {
+      "age": 72,
+      "px": 505,
+      "bbox": [
+       49,
+       93,
+       69,
+       111
+      ],
+      "sample": "70,69 rom 6bffff live f7f7ff"
+     },
+     {
+      "age": 73,
+      "px": 520,
+      "bbox": [
+       48,
+       95,
+       64,
+       110
+      ],
+      "sample": "69,64 rom 9cffff live ffffff"
+     },
+     {
+      "age": 74,
+      "px": 558,
+      "bbox": [
+       44,
+       99,
+       57,
+       111
+      ],
+      "sample": "70,57 rom 6bffff live f7f7ff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-clamperl-barrier-opp-toxic-accepted-start-c9.json",
+   "move": "DIVE",
+   "side": "player",
+   "species": "CLAMPERL/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 15,
+   "romInvisible": [
+    true,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false,
+    true,
+    false,
+    true,
+    false
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "291t1@0 HIT_ANIMATION@1",
+    "92@1 status:PSN@0 291@0",
+    "291t1@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 1,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 3731,
+    "endFrame": 3823
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (branch-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     true,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 93,
+    "exactRows": 18,
+    "px": 90463,
+    "digests": [
+     "e9ee28791e31ee2d",
+     "e9ee28791e31ee2d"
+    ],
+    "residualRows": [
+     [
+      17,
+      284
+     ],
+     [
+      18,
+      352
+     ],
+     [
+      19,
+      461
+     ],
+     [
+      20,
+      558
+     ],
+     [
+      21,
+      640
+     ],
+     [
+      22,
+      762
+     ],
+     [
+      23,
+      854
+     ],
+     [
+      24,
+      951
+     ],
+     [
+      25,
+      1088
+     ],
+     [
+      26,
+      1169
+     ],
+     [
+      27,
+      748
+     ],
+     [
+      28,
+      588
+     ],
+     [
+      29,
+      755
+     ],
+     [
+      30,
+      1193
+     ],
+     [
+      31,
+      1920
+     ],
+     [
+      32,
+      1845
+     ],
+     [
+      33,
+      1769
+     ],
+     [
+      34,
+      1749
+     ],
+     [
+      35,
+      1728
+     ],
+     [
+      36,
+      1743
+     ],
+     [
+      37,
+      1727
+     ],
+     [
+      38,
+      1706
+     ],
+     [
+      39,
+      1724
+     ],
+     [
+      40,
+      1683
+     ],
+     [
+      41,
+      1698
+     ],
+     [
+      42,
+      1732
+     ],
+     [
+      43,
+      1796
+     ],
+     [
+      44,
+      1825
+     ],
+     [
+      45,
+      1804
+     ],
+     [
+      46,
+      1809
+     ],
+     [
+      47,
+      1629
+     ],
+     [
+      48,
+      1634
+     ],
+     [
+      49,
+      1592
+     ],
+     [
+      50,
+      1606
+     ],
+     [
+      51,
+      1657
+     ],
+     [
+      52,
+      1684
+     ],
+     [
+      53,
+      1627
+     ],
+     [
+      54,
+      1662
+     ],
+     [
+      55,
+      1672
+     ],
+     [
+      56,
+      1688
+     ]
+    ],
+    "detail": [
+     {
+      "age": 17,
+      "px": 284,
+      "bbox": [
+       153,
+       197,
+       40,
+       71
+      ],
+      "sample": "174,40 rom 6bffff live ffd6d6"
+     },
+     {
+      "age": 18,
+      "px": 352,
+      "bbox": [
+       153,
+       197,
+       37,
+       71
+      ],
+      "sample": "173,37 rom 9cffff live ffffff"
+     },
+     {
+      "age": 19,
+      "px": 461,
+      "bbox": [
+       153,
+       197,
+       34,
+       72
+      ],
+      "sample": "174,34 rom 6bffff live ffd6d6"
+     },
+     {
+      "age": 20,
+      "px": 558,
+      "bbox": [
+       153,
+       197,
+       29,
+       71
+      ],
+      "sample": "174,29 rom 6bffff live ffdede"
+     },
+     {
+      "age": 21,
+      "px": 640,
+      "bbox": [
+       152,
+       199,
+       24,
+       71
+      ],
+      "sample": "173,24 rom 9cffff live ffffff"
+     },
+     {
+      "age": 22,
+      "px": 762,
+      "bbox": [
+       148,
+       203,
+       17,
+       72
+      ],
+      "sample": "174,17 rom 6bffff live f7f7ff"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 93,
+    "exactRows": 85,
+    "px": 143,
+    "digests": [
+     "fb863ffc760fb013",
+     "fb863ffc760fb013"
+    ],
+    "residualRows": [
+     [
+      17,
+      18
+     ],
+     [
+      35,
+      19
+     ],
+     [
+      48,
+      19
+     ],
+     [
+      49,
+      19
+     ],
+     [
+      50,
+      19
+     ],
+     [
+      51,
+      19
+     ],
+     [
+      52,
+      16
+     ],
+     [
+      53,
+      14
+     ]
+    ],
+    "detail": [
+     {
+      "age": 17,
+      "px": 18,
+      "bbox": [
+       170,
+       174,
+       66,
+       71
+      ],
+      "sample": "170,66 rom 52ceff live 216bff"
+     },
+     {
+      "age": 35,
+      "px": 19,
+      "bbox": [
+       173,
+       178,
+       60,
+       65
+      ],
+      "sample": "174,60 rom 8c84ff live e7e7ff"
+     },
+     {
+      "age": 48,
+      "px": 19,
+      "bbox": [
+       175,
+       181,
+       44,
+       49
+      ],
+      "sample": "176,44 rom ceceff live 8c84ff"
+     },
+     {
+      "age": 49,
+      "px": 19,
+      "bbox": [
+       177,
+       182,
+       43,
+       48
+      ],
+      "sample": "178,43 rom e7e7ff live 8c84ff"
+     },
+     {
+      "age": 50,
+      "px": 19,
+      "bbox": [
+       178,
+       183,
+       42,
+       47
+      ],
+      "sample": "179,42 rom e7e7ff live 8c84ff"
+     },
+     {
+      "age": 51,
+      "px": 19,
+      "bbox": [
+       180,
+       185,
+       41,
+       46
+      ],
+      "sample": "181,41 rom e7e7ff live 8c84ff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-clamperl-barrier-opp-toxic-accepted-start-c10.json",
+   "move": "DIVE",
+   "side": "player",
+   "species": "CLAMPERL/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 18,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false,
+    true,
+    false,
+    true,
+    false,
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "291t1@0 HIT_ANIMATION@1",
+    "92@1 status:PSN@0 291@0",
+    "291t1@0 HIT_ANIMATION@1 status:PSN@0",
+    "291@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 5565,
+    "endFrame": 5683
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (branch-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 119,
+    "exactRows": 11,
+    "px": 201056,
+    "digests": [
+     "7635ae1315f16b7b",
+     "7635ae1315f16b7b"
+    ],
+    "residualRows": [
+     [
+      11,
+      1746
+     ],
+     [
+      12,
+      1760
+     ],
+     [
+      13,
+      1767
+     ],
+     [
+      14,
+      1777
+     ],
+     [
+      15,
+      1793
+     ],
+     [
+      16,
+      1816
+     ],
+     [
+      17,
+      1742
+     ],
+     [
+      18,
+      1720
+     ],
+     [
+      19,
+      1720
+     ],
+     [
+      20,
+      1720
+     ],
+     [
+      21,
+      1720
+     ],
+     [
+      22,
+      1720
+     ],
+     [
+      23,
+      1720
+     ],
+     [
+      24,
+      1722
+     ],
+     [
+      25,
+      1767
+     ],
+     [
+      26,
+      1895
+     ],
+     [
+      27,
+      2055
+     ],
+     [
+      28,
+      2228
+     ],
+     [
+      29,
+      2320
+     ],
+     [
+      30,
+      2304
+     ],
+     [
+      31,
+      2239
+     ],
+     [
+      32,
+      2344
+     ],
+     [
+      33,
+      2372
+     ],
+     [
+      34,
+      2206
+     ],
+     [
+      35,
+      2021
+     ],
+     [
+      36,
+      1950
+     ],
+     [
+      37,
+      1882
+     ],
+     [
+      38,
+      1720
+     ],
+     [
+      39,
+      1720
+     ],
+     [
+      40,
+      1720
+     ],
+     [
+      41,
+      1720
+     ],
+     [
+      42,
+      1720
+     ],
+     [
+      43,
+      1720
+     ],
+     [
+      44,
+      1720
+     ],
+     [
+      45,
+      1720
+     ],
+     [
+      46,
+      1720
+     ],
+     [
+      47,
+      1720
+     ],
+     [
+      48,
+      1720
+     ],
+     [
+      49,
+      1720
+     ],
+     [
+      50,
+      1720
+     ]
+    ],
+    "detail": [
+     {
+      "age": 11,
+      "px": 1746,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "72,72 rom 181052 live ffffff"
+     },
+     {
+      "age": 12,
+      "px": 1760,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "71,72 rom 181052 live ffffff"
+     },
+     {
+      "age": 13,
+      "px": 1767,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "70,72 rom 181052 live ffffff"
+     },
+     {
+      "age": 14,
+      "px": 1777,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "70,72 rom 181052 live ffffff"
+     },
+     {
+      "age": 15,
+      "px": 1793,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "69,72 rom 181052 live ffffff"
+     },
+     {
+      "age": 16,
+      "px": 1816,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "68,72 rom 181052 live ffffff"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 119,
+    "exactRows": 88,
+    "px": 17409,
+    "digests": [
+     "9ef3e86b9778c6b1",
+     "9ef3e86b9778c6b1"
+    ],
+    "residualRows": [
+     [
+      69,
+      284
+     ],
+     [
+      70,
+      309
+     ],
+     [
+      71,
+      340
+     ],
+     [
+      72,
+      454
+     ],
+     [
+      73,
+      491
+     ],
+     [
+      74,
+      544
+     ],
+     [
+      75,
+      704
+     ],
+     [
+      76,
+      732
+     ],
+     [
+      77,
+      722
+     ],
+     [
+      78,
+      879
+     ],
+     [
+      79,
+      1044
+     ],
+     [
+      80,
+      686
+     ],
+     [
+      81,
+      683
+     ],
+     [
+      82,
+      1056
+     ],
+     [
+      83,
+      895
+     ],
+     [
+      84,
+      713
+     ],
+     [
+      85,
+      747
+     ],
+     [
+      86,
+      723
+     ],
+     [
+      87,
+      577
+     ],
+     [
+      88,
+      561
+     ],
+     [
+      89,
+      618
+     ],
+     [
+      90,
+      503
+     ],
+     [
+      91,
+      550
+     ],
+     [
+      92,
+      565
+     ],
+     [
+      93,
+      268
+     ],
+     [
+      94,
+      294
+     ],
+     [
+      95,
+      286
+     ],
+     [
+      96,
+      298
+     ],
+     [
+      97,
+      318
+     ],
+     [
+      98,
+      315
+     ],
+     [
+      99,
+      250
+     ]
+    ],
+    "detail": [
+     {
+      "age": 69,
+      "px": 284,
+      "bbox": [
+       49,
+       93,
+       80,
+       111
+      ],
+      "sample": "70,80 rom 6bffff live ffffff"
+     },
+     {
+      "age": 70,
+      "px": 309,
+      "bbox": [
+       49,
+       93,
+       77,
+       111
+      ],
+      "sample": "69,77 rom 9cffff live f7f7ff"
+     },
+     {
+      "age": 71,
+      "px": 340,
+      "bbox": [
+       49,
+       93,
+       74,
+       111
+      ],
+      "sample": "70,74 rom 6bffff live f7f7ff"
+     },
+     {
+      "age": 72,
+      "px": 454,
+      "bbox": [
+       49,
+       93,
+       69,
+       111
+      ],
+      "sample": "70,69 rom 6bffff live f7f7ff"
+     },
+     {
+      "age": 73,
+      "px": 491,
+      "bbox": [
+       48,
+       93,
+       64,
+       110
+      ],
+      "sample": "69,64 rom 9cffff live ffffff"
+     },
+     {
+      "age": 74,
+      "px": 544,
+      "bbox": [
+       44,
+       93,
+       57,
+       111
+      ],
+      "sample": "70,57 rom 6bffff live f7f7ff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-clamperl-barrier-opp-toxic-accepted-start-c11.json",
+   "move": "DIVE",
+   "side": "player",
+   "species": "CLAMPERL/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 19,
+   "romInvisible": [
+    true,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false,
+    true,
+    false,
+    true,
+    false,
+    true,
+    false
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "291t1@0 HIT_ANIMATION@1",
+    "92@1 status:PSN@0 291@0",
+    "291t1@0 HIT_ANIMATION@1 status:PSN@0",
+    "291@0",
+    "291t1@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 1,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 6139,
+    "endFrame": 6231
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (branch-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     true,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 93,
+    "exactRows": 18,
+    "px": 87426,
+    "digests": [
+     "334e1b2259a07c31",
+     "334e1b2259a07c31"
+    ],
+    "residualRows": [
+     [
+      17,
+      284
+     ],
+     [
+      18,
+      347
+     ],
+     [
+      19,
+      437
+     ],
+     [
+      20,
+      514
+     ],
+     [
+      21,
+      571
+     ],
+     [
+      22,
+      678
+     ],
+     [
+      23,
+      770
+     ],
+     [
+      24,
+      868
+     ],
+     [
+      25,
+      1004
+     ],
+     [
+      26,
+      1079
+     ],
+     [
+      27,
+      658
+     ],
+     [
+      28,
+      504
+     ],
+     [
+      29,
+      659
+     ],
+     [
+      30,
+      1090
+     ],
+     [
+      31,
+      1850
+     ],
+     [
+      32,
+      1775
+     ],
+     [
+      33,
+      1715
+     ],
+     [
+      34,
+      1688
+     ],
+     [
+      35,
+      1669
+     ],
+     [
+      36,
+      1690
+     ],
+     [
+      37,
+      1649
+     ],
+     [
+      38,
+      1600
+     ],
+     [
+      39,
+      1606
+     ],
+     [
+      40,
+      1574
+     ],
+     [
+      41,
+      1563
+     ],
+     [
+      42,
+      1575
+     ],
+     [
+      43,
+      1658
+     ],
+     [
+      44,
+      1658
+     ],
+     [
+      45,
+      1600
+     ],
+     [
+      46,
+      1602
+     ],
+     [
+      47,
+      1637
+     ],
+     [
+      48,
+      1642
+     ],
+     [
+      49,
+      1617
+     ],
+     [
+      50,
+      1626
+     ],
+     [
+      51,
+      1616
+     ],
+     [
+      52,
+      1619
+     ],
+     [
+      53,
+      1585
+     ],
+     [
+      54,
+      1602
+     ],
+     [
+      55,
+      1619
+     ],
+     [
+      56,
+      1631
+     ]
+    ],
+    "detail": [
+     {
+      "age": 17,
+      "px": 284,
+      "bbox": [
+       153,
+       197,
+       40,
+       71
+      ],
+      "sample": "174,40 rom 6bffff live ffd6d6"
+     },
+     {
+      "age": 18,
+      "px": 347,
+      "bbox": [
+       153,
+       197,
+       37,
+       71
+      ],
+      "sample": "173,37 rom 9cffff live ffffff"
+     },
+     {
+      "age": 19,
+      "px": 437,
+      "bbox": [
+       153,
+       197,
+       34,
+       72
+      ],
+      "sample": "174,34 rom 6bffff live ffd6d6"
+     },
+     {
+      "age": 20,
+      "px": 514,
+      "bbox": [
+       153,
+       197,
+       29,
+       71
+      ],
+      "sample": "174,29 rom 6bffff live ffdede"
+     },
+     {
+      "age": 21,
+      "px": 571,
+      "bbox": [
+       157,
+       199,
+       24,
+       71
+      ],
+      "sample": "173,24 rom 9cffff live ffffff"
+     },
+     {
+      "age": 22,
+      "px": 678,
+      "bbox": [
+       153,
+       203,
+       17,
+       72
+      ],
+      "sample": "174,17 rom 6bffff live f7f7ff"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 93,
+    "exactRows": 90,
+    "px": 47,
+    "digests": [
+     "387a52ed32c3b2eb",
+     "387a52ed32c3b2eb"
+    ],
+    "residualRows": [
+     [
+      17,
+      34
+     ],
+     [
+      18,
+      10
+     ],
+     [
+      19,
+      3
+     ]
+    ],
+    "detail": [
+     {
+      "age": 17,
+      "px": 34,
+      "bbox": [
+       171,
+       182,
+       66,
+       71
+      ],
+      "sample": "171,66 rom 52ceff live 216bff"
+     },
+     {
+      "age": 18,
+      "px": 10,
+      "bbox": [
+       170,
+       178,
+       63,
+       66
+      ],
+      "sample": "170,63 rom ffffff live 216bff"
+     },
+     {
+      "age": 19,
+      "px": 3,
+      "bbox": [
+       169,
+       170,
+       61,
+       63
+      ],
+      "sample": "169,61 rom 216bff live 0839ff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-clamperl-barrier-opp-toxic-accepted-start-c12.json",
+   "move": "DIVE",
+   "side": "player",
+   "species": "CLAMPERL/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 22,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false,
+    true,
+    false,
+    true,
+    false,
+    true,
+    false,
+    true
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "291t1@0 HIT_ANIMATION@1",
+    "92@1 status:PSN@0 291@0",
+    "291t1@0 HIT_ANIMATION@1 status:PSN@0",
+    "291@0",
+    "291t1@0 HIT_ANIMATION@1 status:PSN@0",
+    "291@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 6899,
+    "endFrame": 7017
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (branch-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 119,
+    "exactRows": 11,
+    "px": 200462,
+    "digests": [
+     "33046363c267c5f3",
+     "33046363c267c5f3"
+    ],
+    "residualRows": [
+     [
+      11,
+      1746
+     ],
+     [
+      12,
+      1760
+     ],
+     [
+      13,
+      1767
+     ],
+     [
+      14,
+      1777
+     ],
+     [
+      15,
+      1793
+     ],
+     [
+      16,
+      1816
+     ],
+     [
+      17,
+      1742
+     ],
+     [
+      18,
+      1720
+     ],
+     [
+      19,
+      1720
+     ],
+     [
+      20,
+      1720
+     ],
+     [
+      21,
+      1720
+     ],
+     [
+      22,
+      1720
+     ],
+     [
+      23,
+      1720
+     ],
+     [
+      24,
+      1722
+     ],
+     [
+      25,
+      1767
+     ],
+     [
+      26,
+      1895
+     ],
+     [
+      27,
+      2055
+     ],
+     [
+      28,
+      2228
+     ],
+     [
+      29,
+      2320
+     ],
+     [
+      30,
+      2304
+     ],
+     [
+      31,
+      2239
+     ],
+     [
+      32,
+      2344
+     ],
+     [
+      33,
+      2372
+     ],
+     [
+      34,
+      2206
+     ],
+     [
+      35,
+      2021
+     ],
+     [
+      36,
+      1950
+     ],
+     [
+      37,
+      1882
+     ],
+     [
+      38,
+      1720
+     ],
+     [
+      39,
+      1720
+     ],
+     [
+      40,
+      1720
+     ],
+     [
+      41,
+      1720
+     ],
+     [
+      42,
+      1720
+     ],
+     [
+      43,
+      1720
+     ],
+     [
+      44,
+      1720
+     ],
+     [
+      45,
+      1720
+     ],
+     [
+      46,
+      1720
+     ],
+     [
+      47,
+      1720
+     ],
+     [
+      48,
+      1720
+     ],
+     [
+      49,
+      1720
+     ],
+     [
+      50,
+      1720
+     ]
+    ],
+    "detail": [
+     {
+      "age": 11,
+      "px": 1746,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "72,72 rom 181052 live ffffff"
+     },
+     {
+      "age": 12,
+      "px": 1760,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "71,72 rom 181052 live ffffff"
+     },
+     {
+      "age": 13,
+      "px": 1767,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "70,72 rom 181052 live ffffff"
+     },
+     {
+      "age": 14,
+      "px": 1777,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "70,72 rom 181052 live ffffff"
+     },
+     {
+      "age": 15,
+      "px": 1793,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "69,72 rom 181052 live ffffff"
+     },
+     {
+      "age": 16,
+      "px": 1816,
+      "bbox": [
+       41,
+       97,
+       72,
+       111
+      ],
+      "sample": "68,72 rom 181052 live ffffff"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 119,
+    "exactRows": 88,
+    "px": 16473,
+    "digests": [
+     "0364e19134d40a56",
+     "0364e19134d40a56"
+    ],
+    "residualRows": [
+     [
+      69,
+      284
+     ],
+     [
+      70,
+      321
+     ],
+     [
+      71,
+      360
+     ],
+     [
+      72,
+      491
+     ],
+     [
+      73,
+      524
+     ],
+     [
+      74,
+      569
+     ],
+     [
+      75,
+      719
+     ],
+     [
+      76,
+      735
+     ],
+     [
+      77,
+      712
+     ],
+     [
+      78,
+      874
+     ],
+     [
+      79,
+      1061
+     ],
+     [
+      80,
+      709
+     ],
+     [
+      81,
+      705
+     ],
+     [
+      82,
+      1060
+     ],
+     [
+      83,
+      866
+     ],
+     [
+      84,
+      686
+     ],
+     [
+      85,
+      692
+     ],
+     [
+      86,
+      652
+     ],
+     [
+      87,
+      495
+     ],
+     [
+      88,
+      490
+     ],
+     [
+      89,
+      547
+     ],
+     [
+      90,
+      439
+     ],
+     [
+      91,
+      500
+     ],
+     [
+      92,
+      522
+     ],
+     [
+      93,
+      221
+     ],
+     [
+      94,
+      205
+     ],
+     [
+      95,
+      202
+     ],
+     [
+      96,
+      210
+     ],
+     [
+      97,
+      227
+     ],
+     [
+      98,
+      230
+     ],
+     [
+      99,
+      165
+     ]
+    ],
+    "detail": [
+     {
+      "age": 69,
+      "px": 284,
+      "bbox": [
+       49,
+       93,
+       80,
+       111
+      ],
+      "sample": "70,80 rom 6bffff live ffffff"
+     },
+     {
+      "age": 70,
+      "px": 321,
+      "bbox": [
+       49,
+       93,
+       77,
+       111
+      ],
+      "sample": "69,77 rom 9cffff live f7f7ff"
+     },
+     {
+      "age": 71,
+      "px": 360,
+      "bbox": [
+       49,
+       93,
+       74,
+       111
+      ],
+      "sample": "70,74 rom 6bffff live f7f7ff"
+     },
+     {
+      "age": 72,
+      "px": 491,
+      "bbox": [
+       49,
+       93,
+       69,
+       111
+      ],
+      "sample": "70,69 rom 6bffff live f7f7ff"
+     },
+     {
+      "age": 73,
+      "px": 524,
+      "bbox": [
+       48,
+       95,
+       64,
+       110
+      ],
+      "sample": "69,64 rom 9cffff live ffffff"
+     },
+     {
+      "age": 74,
+      "px": 569,
+      "bbox": [
+       44,
+       99,
+       57,
+       111
+      ],
+      "sample": "70,57 rom 6bffff live f7f7ff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "dv-clamperl-barrier-opp-toxic-accepted-start-c13.json",
+   "move": "DIVE",
+   "side": "player",
+   "species": "CLAMPERL/CHANSEY",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 23,
+   "romInvisible": [
+    true,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    false,
+    true,
+    false,
+    true,
+    false,
+    true,
+    false,
+    true,
+    false
+   ],
+   "history": [
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "112@1 STATS_CHANGE(40)@1 291t1@0 HIT_ANIMATION@1",
+    "112@1 STATS_CHANGE(40)@1 291@0",
+    "291t1@0 HIT_ANIMATION@1",
+    "92@1 status:PSN@0 291@0",
+    "291t1@0 HIT_ANIMATION@1 status:PSN@0",
+    "291@0",
+    "291t1@0 HIT_ANIMATION@1 status:PSN@0",
+    "291@0",
+    "291t1@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 1,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 7489,
+    "endFrame": 7581
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (branch-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 291:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     true,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 93,
+    "exactRows": 18,
+    "px": 89662,
+    "digests": [
+     "f454f01abe575497",
+     "f454f01abe575497"
+    ],
+    "residualRows": [
+     [
+      17,
+      284
+     ],
+     [
+      18,
+      356
+     ],
+     [
+      19,
+      463
+     ],
+     [
+      20,
+      560
+     ],
+     [
+      21,
+      650
+     ],
+     [
+      22,
+      785
+     ],
+     [
+      23,
+      874
+     ],
+     [
+      24,
+      963
+     ],
+     [
+      25,
+      1095
+     ],
+     [
+      26,
+      1172
+     ],
+     [
+      27,
+      752
+     ],
+     [
+      28,
+      603
+     ],
+     [
+      29,
+      760
+     ],
+     [
+      30,
+      1194
+     ],
+     [
+      31,
+      1931
+     ],
+     [
+      32,
+      1863
+     ],
+     [
+      33,
+      1769
+     ],
+     [
+      34,
+      1709
+     ],
+     [
+      35,
+      1675
+     ],
+     [
+      36,
+      1679
+     ],
+     [
+      37,
+      1654
+     ],
+     [
+      38,
+      1644
+     ],
+     [
+      39,
+      1687
+     ],
+     [
+      40,
+      1619
+     ],
+     [
+      41,
+      1629
+     ],
+     [
+      42,
+      1644
+     ],
+     [
+      43,
+      1721
+     ],
+     [
+      44,
+      1743
+     ],
+     [
+      45,
+      1720
+     ],
+     [
+      46,
+      1739
+     ],
+     [
+      47,
+      1662
+     ],
+     [
+      48,
+      1685
+     ],
+     [
+      49,
+      1690
+     ],
+     [
+      50,
+      1717
+     ],
+     [
+      51,
+      1703
+     ],
+     [
+      52,
+      1729
+     ],
+     [
+      53,
+      1715
+     ],
+     [
+      54,
+      1722
+     ],
+     [
+      55,
+      1693
+     ],
+     [
+      56,
+      1694
+     ]
+    ],
+    "detail": [
+     {
+      "age": 17,
+      "px": 284,
+      "bbox": [
+       153,
+       197,
+       40,
+       71
+      ],
+      "sample": "174,40 rom 6bffff live ffd6d6"
+     },
+     {
+      "age": 18,
+      "px": 356,
+      "bbox": [
+       153,
+       197,
+       37,
+       71
+      ],
+      "sample": "173,37 rom 9cffff live ffffff"
+     },
+     {
+      "age": 19,
+      "px": 463,
+      "bbox": [
+       153,
+       197,
+       34,
+       72
+      ],
+      "sample": "174,34 rom 6bffff live ffd6d6"
+     },
+     {
+      "age": 20,
+      "px": 560,
+      "bbox": [
+       153,
+       197,
+       29,
+       71
+      ],
+      "sample": "174,29 rom 6bffff live ffdede"
+     },
+     {
+      "age": 21,
+      "px": 650,
+      "bbox": [
+       152,
+       199,
+       24,
+       71
+      ],
+      "sample": "173,24 rom 9cffff live ffffff"
+     },
+     {
+      "age": 22,
+      "px": 785,
+      "bbox": [
+       148,
+       203,
+       17,
+       72
+      ],
+      "sample": "174,17 rom 6bffff live f7f7ff"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 93,
+    "exactRows": 87,
+    "px": 122,
+    "digests": [
+     "ca63ddec26f5f08e",
+     "ca63ddec26f5f08e"
+    ],
+    "residualRows": [
+     [
+      17,
+      31
+     ],
+     [
+      18,
+      32
+     ],
+     [
+      19,
+      25
+     ],
+     [
+      20,
+      18
+     ],
+     [
+      21,
+      10
+     ],
+     [
+      22,
+      6
+     ]
+    ],
+    "detail": [
+     {
+      "age": 17,
+      "px": 31,
+      "bbox": [
+       169,
+       182,
+       66,
+       71
+      ],
+      "sample": "169,66 rom 399cff live 216bff"
+     },
+     {
+      "age": 18,
+      "px": 32,
+      "bbox": [
+       166,
+       185,
+       63,
+       67
+      ],
+      "sample": "166,63 rom 52ceff live 216bff"
+     },
+     {
+      "age": 19,
+      "px": 25,
+      "bbox": [
+       163,
+       188,
+       60,
+       64
+      ],
+      "sample": "163,60 rom ffffff live 216bff"
+     },
+     {
+      "age": 20,
+      "px": 18,
+      "bbox": [
+       160,
+       191,
+       57,
+       62
+      ],
+      "sample": "160,57 rom ffffff live 216bff"
+     },
+     {
+      "age": 21,
+      "px": 10,
+      "bbox": [
+       157,
+       194,
+       54,
+       60
+      ],
+      "sample": "157,54 rom 399cff live 216bff"
+     },
+     {
+      "age": 22,
+      "px": 6,
+      "bbox": [
+       154,
+       197,
+       52,
+       58
+      ],
+      "sample": "154,52 rom 216bff live 0839ff"
+     }
+    ]
+   }
+  }
+ ]
+}
