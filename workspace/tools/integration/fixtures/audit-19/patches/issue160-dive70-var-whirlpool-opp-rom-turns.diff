@@ -1,0 +1,24 @@
+--- a/tools/integration/fixtures/dive70/var-whirlpool-opp.json
++++ b/tools/integration/fixtures/dive70/var-whirlpool-opp.json
+@@ -48,7 +48,9 @@
+       "opponent": 170
+      },
+      0
+-    ],
++    ]
++   ],
++   [
+     [
+      "body",
+      250,
+@@ -57,9 +59,7 @@
+     [
+      "hit",
+      "opponent"
+-    ]
+-   ],
+-   [
++    ],
+     [
+      "body",
+      291,
