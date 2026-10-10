@@ -21,7 +21,18 @@ history.
   ~11 min, past the 10-min foreground limit (~2 min). (6) Probe rows carry no battle state (HP, substitute HP, script cursor), so a
   staging that never reaches its unit cannot be diagnosed (plans51 SUBSTITUTE_FADE, ~10 min). (7) The strict-tsc recipe for
   `tools/` in docs/live-share-census.md needs `typeRoots` + `types: ["node"]` in the temp tsconfig (~3 min).
-- **Hits:** 7 (2026-10-09 day).
+  (8) `prep43CensusDelta.py` puts frame counts in its pairing key, so any adapter whose live body length differs from the fallback
+  (Spark 115 vs 32, Blizzard 362 vs 361) reports "pairing mismatches" that must be attributed by hand (~4 min, 3 workers). (9)
+  `words57Parity.ts` exits 1 on any battle without a Random2 consumer, so it cannot serve as a generic ON/OFF parity gate (~3-5 min, 3
+  workers; spark62 made a copy). (10) `prep45OrderCensus.ts` carries a stale copy of `orderEventOf` (no TURN_TRAP / Fury Cutter keys),
+  and `gates53GateCensus.ts` reads the replay allow-list by regex — both mislabel units production now handles (~4-15 min). (11)
+  Battle-lab scenario names disagree with the species they stage ("camerupt" = BARBOACH 323, "wailmer" = NOSEPASS 320 — internal
+  ids), and the lab rejects the default male lead for gender-locked species with no hint (~13 min). (12) multi-file `npx vitest run`
+  can run out of heap — use `npm test -- <files>` (~2 min). (13) The audit-15 host replay (`postkoHostReplay.ts`) does not follow the
+  alloc50 / alloc52 rules and has no geometry callback (audit 16 wrote a parallel replay, ~10 min). (14) Worker run scripts with
+  `rm -f "$VAR"/...` inside `xargs sh -c` trip the supervisor's removal safety check, so the supervisor cannot rerun them unattended —
+  write into fresh caller dirs instead of deleting.
+- **Hits:** 14 (2026-10-09 day).
 
 ## Sprite-order / census tooling gaps hit on 2026-10-09 (S10A overnight)
 
