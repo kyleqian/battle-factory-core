@@ -123,8 +123,11 @@ message timing differs). Verdicts vs predictions:
 - **P2 half wrong:** the reshow allocates exactly as the normal reshow, but the hidden opponent's sprite is re-created **INVISIBLE**
   (`gSprites[gBattlerSpriteIds[1]].invisible` = 1 from the reshow, frames 3038-3382, until its strike body) — so `battlerData.invisible`
   IS set for a semi-invulnerable battler in Scene ON, and production's render hide (kept until the strike by
-  `applyLiveSemiInvulnerableCommand`) matches the ROM. No render change is needed. (hide66 §1's "battlerData[b].invisible is never
-  set" is wrong for this path; the reshow evidence is `hidden-battler-audit.json` `flagsAfterReshow`.)
+  `applyLiveSemiInvulnerableCommand`) matches the ROM. No render change is needed. Source: every move-animation controller command
+  ends with `CopyAllBattleSpritesInvisibilities()` (`battle_controller_opponent.c:1513`, `battle_controller_player.c:2534`, the
+  `DoMoveAnimation` state 3), which copies the charge animation's `gSprites[].invisible = TRUE` into `battlerData[].invisible`;
+  `reshow_battle_screen.c:272` then re-creates the sprite with it. (hide66 §1's "battlerData[b].invisible is never set" in Scene ON
+  is therefore wrong; the reshow evidence is `hidden-battler-audit.json` `flagsAfterReshow`.)
 - A hidden PLAYER at a reshow cannot happen in singles (the player's party menu opens only after its own KO or at the action
   prompt, where it cannot be charging); it stays invalid. A hidden battler's switch-in stays invalid (unprobed, not in the census).
 
