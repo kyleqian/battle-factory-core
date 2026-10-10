@@ -12,9 +12,11 @@ import { join } from "node:path";
 import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";
 import { liveBattlerAnchors } from "../../src/engine/liveMoveAnimation.ts";
 import { diveAtAge, type DiveProfile } from "../../src/animation/dive.ts";
+import { applySpriteOrderPresentationEvent, createSpriteOrderTracker, decodeSpriteOrderPlan } from "../../src/engine/spriteOrderEventTransform.ts";
+import { applySpriteOrderUnitPlan, createSpriteOrderPlanCursor } from "../../src/engine/spriteOrderProvider.ts";
 
 interface Win { f: number; C: [number, string][]; D: number[]; F: number[] }
-interface Unit { kind: string; label: string; frame: number; windows: Win[]; truncated: boolean; ram: { rng2: string } }
+interface Unit { kind: string; label: string; frame: number; F0: number[]; plan: string; windows: Win[]; truncated: boolean; ram: { rng2: string } }
 interface Job { units: Unit[]; attackerSide: "player" | "opponent"; ops: (string | number)[][]; base: string }
 
 const [probeDir, unitsPath, outPath] = process.argv.slice(2);
@@ -162,3 +164,35 @@ const prior = JSON.parse(readFileSync(outPath!, "utf8"));
 writeFileSync(outPath!, JSON.stringify({ ...prior, attack }, null, 1) + "\n");
 for (const r of attack) console.log("attack", JSON.stringify("skipped" in r ? r : { job: r.job, side: r.side, frame: r.frame, exactGroups: `${r.exactGroups}/${r.groups}`,
   misses: r.detail.filter((g) => !g.exact).map((g) => `age ${g.age} ROM ${g.rom} pred ${g.predicted}`) }));
+
+// ---- the CARRY (what a words-unit fold must compute): from the setup body's ROM lend (its F0), apply the words-PREDICTED setup plan
+// (production cursor, applySpriteOrderUnitPlan), then the hidden window's units through the production transform: a gap prompt pair =
+// action-prompt + actions-committed; the other battler's attack body = its move-animation (production table plan); its hit on the hidden
+// battler = no allocation (the prep61 rule; skipped here). The result must equal the ROM free order at the unleash body's start (its lend).
+const carry = Object.entries(jobs).flatMap(([name, job]) => {
+  const us = job.units;
+  const s = us.findIndex((u) => u.kind === "body" && /^body 291:/.test(u.label)), e = us.findIndex((u) => u.kind === "body" && /^body 10291:/.test(u.label));
+  if (s < 0 || e < 0) return [];
+  const predicted = results.find((r) => r.job === name && r.frame === us[s]!.frame)?.predictedPlan;
+  if (!predicted) return [{ job: name, exact: false, note: "no predicted setup plan" }];
+  const afterSetup = applySpriteOrderUnitPlan(createSpriteOrderPlanCursor({ known: true, free: us[s]!.F0, pendingDestroyed: [] }), decodeSpriteOrderPlan(predicted));
+  let tracker = createSpriteOrderTracker({ known: true, free: afterSetup.order.free, pendingDestroyed: [] });
+  const applied: string[] = [];
+  for (const u of us.slice(s + 1, e)) {
+    if (u.kind === "body") {
+      const [mv, side] = u.label.slice(5).split(":");
+      tracker = applySpriteOrderPresentationEvent(tracker, { kind: "move-animation", moveId: Number(mv), attackerSide: side as "player" | "opponent" });
+      applied.push(u.label);
+    } else if (u.windows.length > 0) {
+      tracker = applySpriteOrderPresentationEvent(applySpriteOrderPresentationEvent(tracker, { kind: "action-prompt" }), { kind: "actions-committed" });
+      applied.push("prompt cycle");
+    }
+  }
+  const free = tracker.cursor.order.known ? tracker.cursor.order.free : null;
+  return [{ job: name, side: job.attackerSide, units: applied, exact: free !== null && JSON.stringify(free) === JSON.stringify(us[e]!.F0),
+    invalidReason: tracker.invalidReason ?? null }];
+});
+const prior2 = JSON.parse(readFileSync(outPath!, "utf8"));
+writeFileSync(outPath!, JSON.stringify({ ...prior2, carry }, null, 1) + "\n");
+for (const c of carry) console.log("carry", JSON.stringify(c));
+console.log(`carry setup lend -> predicted setup plan -> hidden-window units == ROM unleash lend: ${carry.filter((c) => c.exact).length}/${carry.length}`);

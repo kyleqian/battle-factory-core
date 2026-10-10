@@ -30,7 +30,7 @@ allocation window, and created / destroyed / F must equal the ROM):
 | Bounce setup `340:*` | **EXACT**, both sides | `Cf;D0` | 15 / 15, 30 | PONYTA 77, RAPIDASH 78 |
 | Bounce unleash `10340:*` | **EXACT per side (side-keyed)** | player `Cf;Cf;D0;D1`, opponent `Cf;Cf;D1;D0` | 12 / 12, 48 | PONYTA, RAPIDASH |
 | Dive setup `291:*` | **WORDS-KEYED**, reducer-computable | `Cf;D0;Cfffffffffff;D1;D<10 droplets in words order>` | 8 / 8 by `dive.ts` + RAM words, 15 distinct ROM plans in 15 bodies | CHINCHOU 170, LANTURN 171 |
-| Dive unleash `10291:*` | **WORDS-KEYED**, reducer-computable | 10 multi-sprite destroy groups | 7 / 7 bodies, 70 / 70 groups by `dive.ts` + RAM words | CHINCHOU, LANTURN |
+| Dive unleash `10291:*` | **WORDS-KEYED**, reducer-computable | 10 multi-sprite destroy groups | 7 / 7 bodies, 70 / 70 groups by `dive.ts` + RAM words; setup → unleash lend carry 7 / 7 | CHINCHOU, LANTURN |
 
 **Census, seeds 0..299** (temporary patch for Fly / Bounce plus the hidden-battler handling; Dive is still unplanned, see below).
 - Identical command sequence: 7970 commands, 0 pairing mismatches.
@@ -197,6 +197,9 @@ the host state after its step. Its report is byte-identical to prep45's. `prep61
 - **Setup: 8 / 8 bodies.** The droplet destroy group equals the reducer's hardware order at the age before it, and the whole plan text
   equals the ROM's. The control, another body's words, differs in 8 / 8.
 - **Attack: 7 / 7 bodies, 70 / 70 multi-destroy groups exact.**
+- **Carry: 7 / 7.** Start from the setup body's ROM lend and apply the words-predicted setup plan (production cursor). Then apply the
+  hidden window's units through the production transform: the prompt cycle (opponent side), Surf / Whirlpool bodies, and the hit on the
+  hidden battler as a no-op. The result **equals the ROM lend of the unleash body** on all 7 setup → unleash pairs.
 - So Dive's order is **WORDS-KEYED and computable by the existing reducer**. No new source model is needed.
 
 ### Dive and the deferred words lend (words57 / words59)

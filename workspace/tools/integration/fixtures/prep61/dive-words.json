@@ -1346,5 +1346,66 @@
     }
    ]
   }
+ ],
+ "carry": [
+  {
+   "job": "dive-opp-170",
+   "side": "opponent",
+   "units": [
+    "prompt cycle"
+   ],
+   "exact": true,
+   "invalidReason": null
+  },
+  {
+   "job": "dive-opp-170-whirlpool",
+   "side": "opponent",
+   "units": [
+    "prompt cycle"
+   ],
+   "exact": true,
+   "invalidReason": null
+  },
+  {
+   "job": "dive-opp-171",
+   "side": "opponent",
+   "units": [
+    "prompt cycle"
+   ],
+   "exact": true,
+   "invalidReason": null
+  },
+  {
+   "job": "dive-ply-170",
+   "side": "player",
+   "units": [],
+   "exact": true,
+   "invalidReason": null
+  },
+  {
+   "job": "dive-ply-170-surf",
+   "side": "player",
+   "units": [
+    "body 57:opponent"
+   ],
+   "exact": true,
+   "invalidReason": null
+  },
+  {
+   "job": "dive-ply-170-whirlpool",
+   "side": "player",
+   "units": [
+    "body 250:opponent"
+   ],
+   "exact": true,
+   "invalidReason": null
+  },
+  {
+   "job": "dive-ply-171",
+   "side": "player",
+   "units": [],
+   "exact": true,
+   "invalidReason": null
+  }
  ]
 }
