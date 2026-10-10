@@ -343,7 +343,7 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   350,
   // prep10: Razor Wind setup/unleash by request.turn (Cmd_choosetwoturnanim, like Solar Beam; lent order gate).
   13,
-  // prep10: Spark, PLAYER attacker only (accepted constants; no accepted opponent-attacker evidence).
+  // prep10: Spark, both attackers (spark62: the flashing initial advance is pixel-neutral; known-order lend gate).
   209,
   // prep13 (docs/next-adapters-prep13.md s1.1-1.2): Ice Beam (geometry from the anchors; lent-order gate), Water Spout
   // (party HP tier + picture height + per-side rain seed; lent-order gate).
@@ -1281,8 +1281,8 @@ export function liveMoveAnimationDuration(
     // Magnitude 411..585 (power 70, 174 frames) / 191..397 (power 110, 206 frames): the reducer's first inactive age.
     case 222: return request.power > 99 ? 206 : request.power >= 10 && request.power <= 99 ? 174 : null;
     // Razor Wind: setup 45 frames (195..240 / 192..237), unleash 72 (553..625 / 661..733); gAnimMoveTurn bit 0 selects the body.
-    // Spark 79..193 / 83..197 (activation + 9, row -9: no #142 shadow row): player attacker only; the script runs 2 rows past the window.
-    case 209: return request.attacker === 0 ? 115 : null;
+    // Spark 79..193 / 83..197 (activation + 9, row -9: no #142 shadow row), both attackers (spark62); the script runs 2 rows past the window.
+    case 209: return 115;
     case 13: return (request.turn & 1) === 0 ? 45 : 72;
     case 350: return 89; // Rock Blast per-hit body: activation..ROCK_BLAST_FIRST_INACTIVE_AGE (84/266/448 + 89 each).
     case 220: return 81; // Pain Split 445 / 446 .. +80 (81 accepted rows; the live window ends at the script's last active row).
@@ -2698,8 +2698,13 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 209: {
-      // prep10 s3.5, player attacker: flashing initial callback/affine advances are all 0 (Minun, Plusle, Chinchou); the
-      // tie order is the accepted artifact (not derived: unproven for other histories, so the lend gate applies).
+      // prep10 s3.5 + spark62 (docs/spark62-spark-opponent.md), both attackers. The flashing sprites are created in CB1
+      // (Cmd_createsprite -> CreateSpriteAndAnimate) and that iteration overruns the frame: the VBlank edge falls inside
+      // AnimateSprites, so the frame-boundary RAM shows one extra _Step for the flashing slots traversed before the edge
+      // (opponent MINUN / CHINCHOU [1,1,0..], VOLTORB [1,0..], player [0..]: CPU timing, not a side or species rule). That
+      // iteration is a lag frame (the renderer's age-43 view(-1)), so the spriteAge-0 state is never displayed and any
+      // advance in {0,1} renders identically: all-zero for both sides. The tie order is the accepted artifact (the
+      // SortSprites history of sSpriteOrder, not derived), so the known-order lend gate applies to both attackers.
       if (!spriteOrderInput?.known) return null;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       config = { move: "SPARK", attacker, target, fieldProfile,
