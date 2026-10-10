@@ -8,6 +8,10 @@
   qa-*  as tk-* with QUICK_ATTACK 98 (a non-window predecessor that IS audited net-zero: the allocator-known later-body shape);
   ff-*  FAST lead FLATTER, SLOW lead FLATTER: the fast lead's turn-0 body is the FIRST body (the control), every other Flatter body of
         either battler is a later body directly after a Flatter.
+  ex-*  (batch 2, predictions committed before its probes) the census's own immediate predecessors of the Flatter bodies the temp patch
+        lifts (liveShareCensus seeds 0..999): FAST lead LIGHT_SCREEN 113 / MEGA_DRAIN 72 / AERIAL_ACE 332 / BITE 44 / SHOCK_WAVE 351 /
+        IRON_DEFENSE 334 / MUD_SLAP 189 (a words order unit: the deferred lend) / ACID 51, one cycle (the consumer's turn-0 later body);
+        player side NIDORINA / GOLEM, opponent side NIDORINO / SNORLAX.
 Pairs (consumer / fast): NIDORINA 30 / GOLEM 76, NIDORINO 33 / SNORLAX 143 (tk, qa); NIDORINA / NIDORINO, NIDORINO / NIDORINA (ff).
 Genders: NIDORINA female-only, NIDORINO male-only.
 usage: flat77Stage.py <out-dir>   (the committed set is tools/integration/fixtures/flat77/scenarios/)
@@ -17,7 +21,8 @@ from pathlib import Path
 
 OUT = Path(sys.argv[1]); OUT.mkdir(parents=True, exist_ok=True)
 BASE = json.loads(Path("tools/battle-lab/prep18-return-altopp-snorlax-golem.json").read_text())
-M = {"FLATTER": 260, "TACKLE": 33, "QUICK_ATTACK": 98}
+M = {"FLATTER": 260, "TACKLE": 33, "QUICK_ATTACK": 98, "LIGHT_SCREEN": 113, "MEGA_DRAIN": 72, "AERIAL_ACE": 332, "BITE": 44,
+     "SHOCK_WAVE": 351, "IRON_DEFENSE": 334, "MUD_SLAP": 189, "ACID": 51}
 SP = {"NIDORINA": 30, "NIDORINO": 33, "GOLEM": 76, "SNORLAX": 143}
 GENDER = {"NIDORINA": "female", "NIDORINO": "male"}
 
@@ -59,3 +64,6 @@ for side, stag in (("player", "ply"), ("opponent", "opp")):
     stage(f"qa-nidorino-snorlax-{stag}", "SNORLAX", "QUICK_ATTACK", "NIDORINO", side, 3)
     stage(f"ff-nidorina-nidorino-{stag}", "NIDORINO", "FLATTER", "NIDORINA", side, 3)
     stage(f"ff-nidorino-nidorina-{stag}", "NIDORINA", "FLATTER", "NIDORINO", side, 3)
+for x in ("LIGHT_SCREEN", "MEGA_DRAIN", "AERIAL_ACE", "BITE", "SHOCK_WAVE", "IRON_DEFENSE", "MUD_SLAP", "ACID"):
+    stage(f"ex-{x.lower().replace('_', '-')}-nidorina-golem-ply", "GOLEM", x, "NIDORINA", "player", 1)
+    stage(f"ex-{x.lower().replace('_', '-')}-nidorino-snorlax-opp", "SNORLAX", x, "NIDORINO", "opponent", 1)

@@ -48,3 +48,20 @@ Flatter body leaves it OFF (`(S0 | WIN1) ^ OBJWIN & ~WIN1 = 0x3f40`). WININ / WI
     Flatter).
   - Expected still declined: tk-* (allocator unknown) and every window after a Flatter (order unknown).
 - **P5 pixels.** Every window that goes live under the patch: 0 px on every row, r1 == r2.
+
+## Batch 2 (`ex-*`, committed BEFORE its probes; batch 1 already probed)
+
+Source: under the temp patch, the patched census code (an index-offset copy of `liveShareCensus.ts`, scratch only) lifts 17 Flatter
+commands on seeds 0..999. Their immediate predecessors include Light Screen, Mega Drain, Aerial Ace, Bite, Shock Wave, Iron Defense,
+Mud-Slap and Acid. Each is staged as the fast lead's move before the consumer's turn-0 Flatter, both sides, 16 scenarios.
+
+- **P6 registers.** Row 0 = S0 with WIN0 0 / 0. Any other difference is a display-neutral BGnCNT priority left by a `monbg` / `clearmonbg`
+  predecessor (as Quick Attack). BLDCNT / BLDALPHA / BLDY / WININ / WINOUT / DISPCNT = S0: every one of these scripts ends with
+  `blendoff` / restores its window registers.
+- **P7 lends** (`predict.txt`, production chain lend).
+  - Known for all 16.
+  - Mud-Slap (a words order unit) gives the deferred lend, resolved from the pinned words.
+  - The predicted fixtures add a HIT after Light Screen / Iron Defense; that is a predictor artifact (no HP drop in the ROM), not a claim.
+- **P8 allocator.** The host stays known for all 16 (all audited net-zero; Light Screen through its PLANS entry). The ROM shows the known
+  entry (spotlight [305, 64] / 7, confetti [433, 12] / 8).
+- **P9.** All 16 windows are live under the temp patch: 0 px on every row, r1 == r2.

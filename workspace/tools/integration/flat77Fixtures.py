@@ -2,7 +2,8 @@
 """flat77: chain fixtures for the flat77 later-body FLATTER 260 scenarios (flat77Probe.py output). audit19Fixtures.py's derivation
 unchanged (turns from the ROM's gBattleResults.battleTurnCounter, the kernel payload forms the orchestrator feeds the production hosts,
 STATS_CHANGE with the ROM's animArg1, Status_Confusion + its self-hit HIT_ANIMATION, promptShown, pinnedRng2 per history body), with:
-  units  FLATTER 260 (power 0, never a hit), TACKLE 33 (35), QUICK_ATTACK 98 (40);
+  units  FLATTER 260 (power 0, never a hit), TACKLE 33 (35), QUICK_ATTACK 98 (40); batch 2: LIGHT_SCREEN 113, MEGA_DRAIN 72,
+         AERIAL_ACE 332, BITE 44, IRON_DEFENSE 334, ACID 51 (+ SHOCK_WAVE 351 / MUD_SLAP 189 from audit 19);
   windows EVERY Flatter body of either battler (the ff-* fast lead's turn-0 body is the first-body control);
   rom    + `at` (activation registers / allocator tags; flat77Check.ts reads the per-row registers from its own fresh probes).
 --predict: no probe; one fixture per scenario for the consumer's TURN-0 body from the PREDICTED history (qa / tk: the fast lead's
@@ -18,8 +19,9 @@ probe_dir, out_dir = (None, Path(sys.argv[2])) if PREDICT else (Path(sys.argv[1]
 out_dir.mkdir(parents=True, exist_ok=True)
 SCEN = Path("tools/integration/fixtures/flat77/scenarios")
 SPECIES = {s["id"]: s["name"].removeprefix("SPECIES_") for s in json.loads(Path("src/data/gen/species-stats.json").read_text())["species"]}
-POWER = {260: 0, 33: 35, 98: 40, 222: 0, 241: 0, 240: 0, 176: 0, 302: 60, 173: 40, 301: 30, 291: 60, 351: 60, 352: 60, 129: 60, 85: 95, 189: 20, 250: 15}
-NAMES = {260: "FLATTER", 33: "TACKLE", 98: "QUICK_ATTACK", 222: "MAGNITUDE", 241: "SUNNY_DAY", 240: "RAIN_DANCE", 176: "CONVERSION_2", 302: "NEEDLE_ARM", 173: "SNORE", 301: "ICE_BALL",
+POWER = {260: 0, 33: 35, 98: 40, 113: 0, 72: 20, 332: 60, 44: 60, 334: 0, 51: 40, 222: 0, 241: 0, 240: 0, 176: 0, 302: 60, 173: 40, 301: 30, 291: 60, 351: 60, 352: 60, 129: 60, 85: 95, 189: 20, 250: 15}
+NAMES = {260: "FLATTER", 33: "TACKLE", 98: "QUICK_ATTACK", 113: "LIGHT_SCREEN", 72: "MEGA_DRAIN", 332: "AERIAL_ACE", 44: "BITE",
+         334: "IRON_DEFENSE", 51: "ACID", 222: "MAGNITUDE", 241: "SUNNY_DAY", 240: "RAIN_DANCE", 176: "CONVERSION_2", 302: "NEEDLE_ARM", 173: "SNORE", 301: "ICE_BALL",
          291: "DIVE", 351: "SHOCK_WAVE", 352: "WATER_PULSE", 129: "SWIFT", 85: "THUNDERBOLT", 189: "MUD_SLAP", 250: "WHIRLPOOL"}
 MOVES = {f"Move_{v}": k for k, v in NAMES.items()}
 RAM_POWER = {222, 301}
