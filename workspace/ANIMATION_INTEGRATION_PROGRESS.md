@@ -175,7 +175,7 @@
   13,139 tests, build, differential 624/624. Supervisor: generator regen no diff; plans54Check byte-identical; a full fresh probe batch
   (28 jobs x2) gave a byte-equal units.json; census rerun +93 / +13,427, 0 regressions, digest identical.
 - Supervisor union gates on `be45be555` (src `b13260d0`; + d4later + plans54): typecheck, full suite 1,595 files / 13,143 tests, build,
-  differential 624/624 vs `ccc4774c4`, census seeds 0..299 96.74 % by count / 97.96 % by frames (+325 / +44,802 vs `ccc4774c4`, 0
+  differential 624/624 vs `ccc4774c4`, census seeds 0..299 96.74 % by count / 97.96 % by frames (+325 / +44,806 vs `ccc4774c4`, 0
   regressions, command key sequence identical; battle frames +6 from the corrected Blizzard / Sheer Cold / Extrasensory lengths).
 
 ## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
