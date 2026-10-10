@@ -13,11 +13,12 @@ to exactly one `--seeds=0..999` run).
 | master `ff4baec48` | 25,680 / 27,518 = **93.32 %** | 3,848,230 / 3,952,274 = **97.37 %** | 180 cmds / 18,232 frames | |
 | + PART A patch (37 bodies allocator net-zero) | 25,799 = **93.75 %** | 3,860,480 = **97.68 %** | 61 / 5,982 | **+119 / +12,250** |
 | + PART B patch (hidden battler faint / reshow) | 25,713 = **93.44 %** | 3,853,084 = **97.49 %** | 177 / 18,004 | **+33 / +4,854** |
-| + A + B | see §5 | | | |
+| + A + B (both diffs) | 25,834 = **93.88 %** | 3,865,486 = **97.80 %** | 56 / 5,602 | **+154 / +17,256** |
 
-Both deltas: command KEY sequence (battle, kind, moveId, side, attacker, target), presented frames per command, the 10 shard battle
+A + B gains 2 commands / 152 frames more than A and B measured separately (battle 713: the Part B reseed keeps the allocator known
+into bodies the Part A ids no longer invalidate). All three deltas: command KEY sequence (battle, kind, moveId, side, attacker, target), presented frames per command, the 10 shard battle
 digests (merged `11b30db7a344…`) and the KEY digest identical; **0 live → fallback regressions**
-(`keycheck-partA.txt`, `keycheck-partB.txt`). **Chain predictor (Part A): 119 commands / 12,250 frames = measured exactly**
+(`keycheck-partA.txt`, `keycheck-partB.txt`, `keycheck-partAB.txt`). **Chain predictor (Part A): 119 commands / 12,250 frames = measured exactly**
 (`chains-predict.json`; 67.2 % of the bucket's frames, the brief's ~60 % bar). Treating Ice Ball 301 as cleared (ice72) adds
 nothing to the Part A prediction: its 2 chains also hold an order-host reseed unit.
 
@@ -142,7 +143,7 @@ the reshow's allocation is the probed normal one). 0 regressions.
 **PART A** (`hist73-partA-temp-src.diff`: append the 37 ids to `LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS`,
 `src/engine/liveMoveSpriteAllocator.ts:77`, with a comment citing `tools/integration/fixtures/hist73/net-zero-audit.json`). 35 related
 files (every test naming the allocator constant / history / input, plus wall / Light Screen / Protect / census / real-route files):
-**5 failures in 3 files, all expected pin moves** (`copyA-related` run, 480 passed):
+**5 failures in 3 files, all expected pin moves** (480 passed; `related-tests-partA.txt`):
 1. `tests/liveSpriteAllocator.test.ts:154-224` "pins the constant exactly to the union of the net-zero receipts" (fails at :191):
    add the hist73 receipt (schema `hist73-net-zero-audit/v1`, numeric keys, every unit NET-ZERO, `bodiesFromKnownEntry` ≥ 1 per side,
    every row `identicalAB`) to the expected union; the stay-out loop at :221-223 `[116, 339, 16, 144]` must drop **116 (Focus
@@ -155,19 +156,24 @@ files (every test naming the allocator constant / history / input, plus wall / L
    (Barrier / Magic Coat after newly audited bodies); add 10 and 260 to the `firstIndex` exception list at :69-70 and a comment
    (as alloc50 / alloc52 did). A fold should dense-check those two routes against the ROM (the adapter turns exact there).
 
-**PART B** (`hist73-partB-temp-src.diff`): see §4 for the related-test run on the patched copy. Expected pin moves:
-`tests/spriteOrderFly63.test.ts:135-148` (a hidden battler's faint no longer invalidates: assert the shown faint's free order and
-`hidden[b] === false`; switch-in still invalidates) and `tests/liveSpriteOrderHost.test.ts:215-218` (`hidden: [false, true]` at the
-reshow is now a valid reshow; add `[true, false]` still invalidating). New pins: `hidden-battler-audit.json` `allSame` and
-`allIdenticalAB` true.
+**PART B** (`hist73-partB-temp-src.diff`). 63 related files (the Part A set plus every sprite-order / forced / post-KO /
+player-faint / Fly / Bounce / Dive / hidden test): **2 failures in 2 files, both the predicted pins** (693 passed;
+`related-tests-partB.txt`):
+1. `tests/spriteOrderFly63.test.ts:135-148` (fails at :139, `faint-animation/0`): a hidden battler's faint no longer invalidates —
+   assert the order equals the shown faint's (`applySpriteOrderPresentationEvent(window.tracker, { kind: "faint", side })`) and
+   `hidden[b] === false`; the `switch-in-animation` half stays as is.
+2. `tests/liveSpriteOrderHost.test.ts:215-218` (fails at :218): `hidden: [false, true]` at the reshow is now the normal reshow (assert
+   it equals the unhidden reshow's order with `hidden` kept); add `hidden: [true, false]` still invalidating.
+New pins: `hidden-battler-audit.json` `allSame` and `allIdenticalAB` true, and the two census battles (533, 713) as route pins.
 
-Production gates for a fold: the affected tests above, smoke, full `npm test`, `npm run build`, and the census (+119 / +12,250 and
-+33 / +4,854 on seeds 0..999 with this driver).
+Production gates for a fold: the affected tests above, smoke, full `npm test`, `npm run build`, and the census (+119 / +12,250,
++33 / +4,854, together +154 / +17,256 on seeds 0..999 with this driver). This worker did NOT run the full suite on the patched copies
+(evidence-only step; the related sets above are the measured pin list).
 
 ## 3. Reproduction (from workspace/)
 
 ```
-sh tools/integration/hist73Run.sh <fresh-out-dir>       # probes (A 154 + B 10 scenarios x 2) + 5 seeds-0..999 censuses; ~15 min
+sh tools/integration/hist73Run.sh <fresh-out-dir>       # probes (A 154 + B 10 scenarios x 2) + 6 seeds-0..999 censuses; ~20 min
 SKIP_PROBES=1 sh tools/integration/hist73Run.sh <dir>   # censuses only;   SKIP_CENSUS=1 ...  probes + extraction only
 ```
 The runner refuses a non-empty out dir, never removes anything outside it, checks `git status --short src` is empty before and

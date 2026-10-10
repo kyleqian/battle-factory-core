@@ -2,7 +2,7 @@
 # hist73 reproduction (docs/next-adapters-hist73.md). Run from workspace/ of a checkout whose src/ is clean; direct mGBA processes only
 # (never the shared HTTP oracles). Everything is written under the FRESH <out-dir> (refused if it exists and is non-empty); nothing is
 # removed outside it. The temporary src patches are applied ONLY to git-archive copies under <out-dir>; the checkout never changes.
-#   sh tools/integration/hist73Run.sh <fresh-out-dir>                 # ~15 min on 16 cores: probes (A 154 + B 10 scenarios x 2) + 5 censuses
+#   sh tools/integration/hist73Run.sh <fresh-out-dir>                 # ~20 min on 16 cores: probes (A 154 + B 10 scenarios x 2) + 6 censuses
 #   SKIP_PROBES=1 / SKIP_CENSUS=1 sh tools/integration/hist73Run.sh <dir>   # skip the mGBA probes / the seeds 0..999 censuses
 # Receipts land in <out-dir>/rec and are compared byte-for-byte with tools/integration/fixtures/hist73/ (same / DIFF per file).
 set -e
@@ -26,7 +26,7 @@ shards() {
 }
 copy() {  # copy <dir> <diff>: git-archive copy of HEAD + this checkout's hist73 tools + the temp patch
   mkdir -p "$1"; git archive HEAD | tar -x -C "$1"; cp $T/hist73* "$1/$T/"; ln -s "$WS/node_modules" "$1/node_modules"
-  [ -z "$2" ] || (cd "$1" && git apply "$WS/$2")
+  [ -z "$2" ] || (cd "$1" && patch -s -p1 < "$WS/$2")
 }
 
 if [ -z "$SKIP_PROBES" ]; then
@@ -45,14 +45,17 @@ if [ -z "$SKIP_CENSUS" ]; then
   python3 $T/hist73ReseedBlockers.py "$OUT/chains-before.jsonl" "$REC/reseed-blockers-before.json" > /dev/null
   copy "$OUT/copyA" "$F/hist73-partA-temp-src.diff"
   copy "$OUT/copyB" "$F/hist73-partB-temp-src.diff"
+  copy "$OUT/copyAB" "$F/hist73-partA-temp-src.diff"; (cd "$OUT/copyAB" && patch -s -p1 < "$WS/$F/hist73-partB-temp-src.diff")
   shards "$WS" hist73LiveShareCensus.ts "$OUT/census-before"
   shards "$OUT/copyA" hist73LiveShareCensus.ts "$OUT/censusA-after"
   shards "$OUT/copyB" hist73LiveShareCensus.ts "$OUT/censusB-after"
+  shards "$OUT/copyAB" hist73LiveShareCensus.ts "$OUT/censusAB-after"
   python3 $T/hist73Merge.py "$OUT/census-before" "$REC/census-before-seeds0-999.json" "$OUT/census-before.jsonl"
-  for P in A B; do
+  for P in A B AB; do
     python3 $T/hist73Merge.py "$OUT/census$P-after" "$REC/census$P-after-seeds0-999.json" "$OUT/census$P-after.jsonl"
     python3 $T/hist73KeyCheck.py "$REC/census-before-seeds0-999.json" "$OUT/census-before.jsonl" \
-      "$REC/census$P-after-seeds0-999.json" "$OUT/census$P-after.jsonl" | tee "$REC/keycheck-part$P.txt"
+      "$REC/census$P-after-seeds0-999.json" "$OUT/census$P-after.jsonl" > "$REC/keycheck-part$P.txt" || true
+    tail -1 "$REC/keycheck-part$P.txt"
     python3 $T/prep43CensusDelta.py "$REC/census-before-seeds0-999.json" "$OUT/census-before.jsonl" \
       "$REC/census$P-after-seeds0-999.json" "$OUT/census$P-after.jsonl" "$REC/census$P-delta-seeds0-999.json" | sed -n 2p
   done
