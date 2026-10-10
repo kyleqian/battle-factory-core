@@ -138,8 +138,35 @@
   (the ROM's action prompt precedes the Whirlpool; with the ROM turn split the lend == ROM; staged as described, 19 windows 0 px) —
   closed. 195 fallbacks are production's own declines (174 after player-locked turns). ice72's player-side counter 2..5 lend evidence
   assumed a prompt every turn (production never lends there; its census gain stands).
-- In flight: cf78 (INTEGRATION: Castform weather-form decline + Needle Arm tie), live audit 20 (SIDE: land75 allocator consumers + Part B
-  routes + st76 follow-ups).
+- Folded Opus worker `f04f07916` (INTEGRATION) as `c6f60846e` (src `cdae97b8`): cf78 — (1) ISSUES #162: a presentation-only per-slot
+  Castform form (the ROM's `gBattleMonForms`, set by every CASTFORM_CHANGE argument, persisting across switches / faints like the ROM's
+  per-slot array, reset by a change back to normal and at battle start; carried between resolutions by the orchestrator) gives the field
+  `castformForm`; `liveCastformFormDeclines` makes EVERY live body (and the Substitute swap view) fall back while a CASTFORM is shown in a
+  weather form — the fallback draws the same normal-form art (the pixel fix is #143's per-form art), but nothing claims those pixels live.
+  Census 0..999: **54 commands / 9,587 live frames -> fallback** (battles 950 hail 18, 651 16, 603 rain 13, 643 7; Icy Wind, Water Pulse,
+  Ice Beam, Ember, ...), 94.37 / 98.18 -> 94.17 / 97.94 %, key sequence + digests identical; audit-19 windows 404 -> 360 live (exactly the
+  44 Castform ones). (2) ISSUES #163: plan 162 (Needle Arm 302) models its SortSprites tie via `fixtures/cf78/plan-overrides.json` (the tied
+  pair shares a rank, so their order is the start order): 44 / 44 lends == ROM. ON/OFF parity battles 950 / 603. Worker gates 1,612 files /
+  13,245 tests, build, differential. Supervisor: `cf78Audit19Windows.ts` rerun == committed (360 / 599 live); clean merge (src == worker's
+  tested tree).
+- prep flat77 (MAIN lane, Opus, `f977b6a69`, new files only): Flatter 260 at LATER bodies. Source: LaunchBattleAnimation zeroes WIN0 at
+  every launch (a later body's row 0 is S0 with WIN0 0 / 0); spotlight tile slot 6 [305, 64] / palette 7, confetti slot 7 [433, 12] /
+  palette 8; earlier bodies' residue (OBJWIN off, BG priority / scroll bits) is invisible. 36 scenarios x2 fresh, predictions committed
+  per batch before probing: 20 / 20 later-body windows 0 px under the temp patch (`fixtures/flat77/flat77-temp-src.diff`: the gate
+  `!known || (!firstBody && !spriteAllocatorInput?.historyKnown)`, a history-only allocator input for 260, the later-body register base),
+  14 first-body controls 0 px; after a Flatter the lend is null (Flatter acts as a words-order unit) and after Tackle the allocator is
+  unknown — both still decline. Census 0..999 +17 / +3,723, 0 pins move; runner reproduces 50 / 50 receipts.
+- Live audit 20 (SIDE, Opus, `8b1dddda2`, new files only): 436 windows. **No DEFECT in land75 / st76**: Part A allocator consumers (Barrier
+  / Light Screen / Reflect / Protect / Magic Coat / Mirror Coat after the top-8 Part A bodies) allocator == ROM 190 / 190 + chains 28 / 28;
+  Part B (a hidden Fly / Dig user KO'd, then the replacement and the hitter) 44 / 44 0 px, hide == ROM. TIMING-PHASE: statused Meteor Mash
+  windows whose ROM body has no age-194 lag (5 windows, rows 196..211, history-independent — Meteor Mash's D4 restore-lag parameter);
+  the Dive setup's documented phase. Latent, outside the folds: **Return 216's order plan** (`"216:*": 117` is a weak-branch shape, Factory
+  friendship 255 plays ReturnStrongest: 31 creates in slots 3 / 4 / 5 / 7) — the lend after a Return != ROM 0 / 15 (0 px so far). Runs A /
+  B / C byte-identical. Supervisor: `audit20Extra.sh` into fresh dirs — every receipt byte-identical.
+- Supervisor union gates on `c6f60846e` (src `cdae97b8`): typecheck, full suite 1,612 files / 13,245 tests, build, differential 624 / 624
+  vs `c68111480`, census seeds 0..299 98.62 % / 99.34 % (no change: the Castform routes are on seeds 600..999)
+  (`tools/integration/fixtures/union-gates-c6f60846e.json`).
+- In flight: land79 (INTEGRATION, Sonnet: the flat77 patch), ret80 (SIDE, stacked on audit 20: Return 216 fail-closed / Strongest plan).
 
 ## 2026-10-09 (day) — S10A: allocator / order / words-lend histories + live-claim fixes; ordinary-play live share 87.95 -> 91.89 % of commands (92.09 -> 95.82 % of frames); 239 + 13 + 24
 

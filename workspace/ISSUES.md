@@ -17,16 +17,19 @@ backlog.
 
 # Open
 
-## #163 — Needle Arm 302 order plan ignores a SortSprites tie (S10A, found 2026-10-10 by live audit 19; fix in flight: cf78)
+## #164 — Return 216's order plan is the weak branch; Factory plays ReturnStrongest (S10A, found 2026-10-10 by live audit 20; fix in flight: ret80)
 
-Plan 162 (`spriteOrderProductionPlans.ts`, rows 302:player / 302:opponent) hard-codes one placement of the two sprites created into slots
-10 and 12, which tie in SortSprites (the ROM keeps their start order): 6 / 44 lends != ROM when the start order is reversed (0 px so far).
+docs/live-audit-20.md s1.3: `"216:*": 117` (`spriteOrderProductionPlans.ts`) is a 4-create weak-branch plan; Factory battlers send
+friendship 255 (ReturnStrongest: 31 creates in slots 3 / 4 / 5 / 7, post-body free order `[4, 3, 5, 7, 21, 20, ...]`), so the lend after
+every Return != ROM (0 / 15 windows; 0 px so far — an order-sensitive consumer would show it).
 
-## #162 — Castform weather forms drawn as the normal form in live bodies (S10A, found 2026-10-10 by live audit 19; fix in flight: cf78)
+## #162 — Castform weather forms drawn as the normal form in live bodies (S10A, found 2026-10-10 by live audit 19; live claim fixed by cf78, pixels open)
 
 docs/live-audit-19.md: fold71's CASTFORM_CHANGE order plan made bodies after a form change LIVE; while Castform is in its sun / rain form
 production draws the NORMAL-form Castform (44 live windows, 998..2,312 px per row in its sprite box; order 44 / 44 == ROM). Root cause is
-ISSUES #143's open remainder (no `gBattleMonForms` in the field view). cf78 makes live bodies decline while a transformed Castform is shown.
+ISSUES #143's open remainder (no `gBattleMonForms` in the field view). FIXED as a live claim by cf78 (`c6f60846e`: every live body
+declines while a Castform is shown in a weather form; 54 commands / 9,587 frames on 0..999 now fall back). Open: the pixels themselves
+(the fallback draws the same normal-form art) — #143's per-form palette / coords / elevation; then the decline can lift.
 
 ## #161 — Dive attack: an extra lag frame at age 17 on poisoned player-diver routes (S10A, found 2026-10-10 by st76)
 
