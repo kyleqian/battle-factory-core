@@ -13,7 +13,7 @@ entry). A from-scratch reproduction (`audit17Run.sh`: stage == committed, derive
 - **One DEFECT (HISTORY):** a live body of the OTHER battler while a Fly / Bounce charger is hidden draws the hidden battler.
   20 windows (Heal Bell 10, Double Team 10; Fly and Bounce; both sides) -> **0 px** with a reverted in-place patch.
 - Consumers right after a Fly / Bounce UNLEASH: **0 px, order KNOWN** (Thunderbolt 7, Ice Beam 7, Heal Bell / Double Team /
-  Sky Uppercut after the strike: every one 0 px except the Sky Uppercut +1 phase below, which the no-unit control has too).
+  Sky Uppercut after the strike: every one 0 px except the Sky Uppercut lag-frame phase below, which the no-unit control has too).
 - dt60: **prediction == RAM `data[3]` 16 / 16** (8 Factory Double Team users outside dt60's grid, both classes, both sides), 16 / 16 0 px.
 
 ## 1. Results first
@@ -30,12 +30,12 @@ orchestrator receives from MOVEEND_ATTACKER_VISIBLE; the fixture history has no 
 hidden battler's opponent plays a second body before the hidden battler's next body). Without that rule c3 would be wrongly hidden
 (256,149 px under the patch; 0 with it, and 0 in production, which never applies the hide to live bodies).
 
-### TIMING-PHASE / UNRESOLVED (no counter evidence collected this session)
+### TIMING-PHASE (counter evidence: `receipts/sky-uppercut-lag-counters.txt`, `issue151Counters.sh`, 2 fresh runs each, identical)
 
-| Consumer | Windows | Residual | Evidence | Verdict |
+| Consumer | Windows | Residual | Counter evidence | Verdict |
 |---|---|---|---|---|
-| **Sky Uppercut 327 at a HIDDEN Fly / Bounce user** (the hit lands on the semi-invulnerable target) | 10 (ply 3, opp 7; Fly 6, Bounce 4); ROM window **186 / 187 rows** (production duration 188) | Production: 832,606 / 975,284 px (848,739 / 989,702 for the 186-row ones). With the hidden-sprite patch extended to Sky Uppercut's own `artFor`: rows 0..149 exact; **ages 150..186 19,355 px each, bbox the whole BG (x 0..239 y 0..111): live at age n == ROM at age n − 1** (the end fade runs one frame EARLY in the ROM) | `receipts/patch-hidden-sky-uppercut/` (r1 == r2). The hidden part is the DEFECT above; the remaining part is a 1-frame end-phase shift present only with an invisible target. No lag / VBlank counters taken | **DEFECT (sprite part, proven) + UNRESOLVED (end-fade phase −1 frame on an invisible target)**; not provable 0 px in this session |
-| **Sky Uppercut 327, ROM window 189 rows** | 6: no-unit control `ctl-sky-uppercut-ply-c0`, `fly-sky-uppercut-ply-c1 / c3`, `fly-sky-uppercut-opp-c3 / c5`, `bounce-sky-uppercut-opp-c1` | 268,240 (ply) / 283,904 (opp) px on ages 170..185 only (BG fade, live one frame AHEAD of the ROM) | The no-unit control (first body, no unit) has the identical 268,240 px; the entry lend equals the chain lend in all 6 (lend not involved). 188-row windows on the same side are 0 px (ctl-opp-c0, fly-opp-c1, bounce-opp-c3 / c5). prep11 open point 1 already records a Sky Uppercut script that ends one frame later | **UNRESOLVED**, the consumer's own +1-frame end phase (not chain-related; not a fly63 regression) |
+| **Sky Uppercut 327 at a HIDDEN Fly / Bounce user** (the hit lands on the semi-invulnerable target) | 10 (ply 3, opp 7; Fly 6, Bounce 4); ROM window **187 / 186 rows** (production 188) | Production: 832,606 / 975,284 px (848,739 / 989,702 for the 186-row ones): the hidden-sprite DEFECT on every row + the end fade. With the hidden-sprite patch extended to Sky Uppercut's own `artFor` (`receipts/patch-hidden-sky-uppercut/`, r1 == r2): **rows 0..149 exact**; ages 150..186 19,355 px each, the whole BG (x 0..239 y 0..111) fade: **the ROM runs ahead** (live age 152 == ROM age 150) | The 0-px 188-row windows (no-unit control opp, chains after the strike) have lag frames at ages **[148, 149]**; the hidden-target 187-row windows have only **[166]** and the 186-row one **none**: the ROM skips the 148 / 149 lag frames when the target is invisible, so it runs 2 frames ahead from age 150 (1 after its lag at 166). | **TIMING-PHASE** (lag-frame class; load-dependent) on top of the sprite DEFECT. Production renders the dominant [148, 149] phase. Not patched (a hidden-target lag profile would be a new timing policy) |
+| **Sky Uppercut 327, ROM window 189 rows** | 6: no-unit control `ctl-sky-uppercut-ply-c0`, `fly-sky-uppercut-ply-c1 / c3`, `fly-sky-uppercut-opp-c3 / c5`, `bounce-sky-uppercut-opp-c1` | 268,240 (ply) / 283,904 (opp) px on ages 170..185 only (BG fade, live one frame AHEAD of the ROM) | Lag ages **[148, 149, 168]**: one extra lag frame at 168 (the 188-row windows: [148, 149]). The no-unit control (first body, no unit) has the identical 268,240 px; the entry lend equals the chain lend in all 6 (lend not involved). prep11 open point 1 already records a Sky Uppercut script that ends one frame later | **TIMING-PHASE** (lag frame at 168), the consumer's own phase (not chain-related; not a fly63 regression) |
 
 ### Non-defect table
 
@@ -83,7 +83,7 @@ battler `data[3]` on the frame before each activation (`receipts/dt60/prediction
   send-out unit modelling that `audit16Check.ts` lacks.
 - Fly / Bounce bodies themselves as consumers (their body-only profile has its own age offsets −8 / −11 / −7; not framed here).
 - Surf on a hidden Dive user (Dive is not landed: prep65 is evidence only).
-- Counter evidence (lag / VBlank) for both Sky Uppercut phases; the census impact of the hidden-sprite DEFECT.
+- VBlank (BLDALPHA IO vs buffer) counters for the Sky Uppercut fade; the census impact of the hidden-sprite DEFECT.
 - `bounce-ice-beam-opp` / `bounce-thunderbolt-opp` stop at an AI `Move_RETURN` switch (UNMODELLED) after their first consumer.
 
 ## 3. Method / scripts
@@ -106,4 +106,6 @@ node --experimental-strip-types --no-warnings tools/integration/audit17Check.ts 
 ```
 
 Receipts: `scenarios/` (38), `fixtures/` (104), `ablation/` (2), `dt60-grid.json`, `receipts/{main,patch-hidden,patch-hidden-sky-uppercut,
-ablation-heal-bell-icon,dt60,repro}/`, `receipts/derive.txt`. No RGB dumps, no mGBA logs.
+ablation-heal-bell-icon,dt60,repro}/`, `receipts/derive.txt`, `receipts/sky-uppercut-lag-counters.txt`. No RGB dumps, no mGBA logs.
+
+Lag counters: `sh tools/integration/issue151Counters.sh <fresh-dir> 12 tools/integration/fixtures/audit-17/fixtures/{ctl-sky-uppercut-opp-c0,ctl-sky-uppercut-ply-c0,fly-sky-uppercut-opp-c0,fly-sky-uppercut-opp-c1,fly-sky-uppercut-opp-c3,fly-sky-uppercut-opp-c4,fly-sky-uppercut-ply-c0,fly-sky-uppercut-ply-c1,ctl-thunderbolt-ply-c0}.json`
