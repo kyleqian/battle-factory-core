@@ -1,4 +1,6 @@
 import monPicCoordsData from "../data/gen/mon-pic-coords.json" with { type: "json" };
+import monAnimData3 from "../data/gen/dt60-mon-anim-data3.json" with { type: "json" };
+import sendOutAnimSelectorTables from "../data/gen/send-out-anim-selector-tables.json" with { type: "json" };
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import { liveSubstituteSwapApplies, substituteSwapBodyField, substituteSwapBodyFraming, substituteSwapCompositeDuration } from "./liveSubstituteSwap.ts";
@@ -648,6 +650,36 @@ export function liveBattlerAnchors(
       ? liveTrackedFrontIdleRest(battler, speciesFrontIdleRestOffsetOrZero(art[battler].speciesSymbol), x2Input)
       : { x2: 0, y2: 0 },
   };
+}
+
+/**
+ * dt60 (ISSUES #158, docs/dt60-double-team-phase.md): the attacker battler sprite's `data[3]` at a Double Team activation, or null when
+ * it is not known (a player attacker without a personality). AnimTask_DoubleTeam's clones are whole-struct copies of the battler sprite
+ * (CloneBattlerSpriteWithBlend, battle_anim_mons.c:1626-1645), so AnimDoubleTeam's 2-frame step counter starts there
+ * (battle_anim_effects_1.c:5223-5243): 0 is the accepted phase, >= 1 runs the clones one call ahead, < 0 |d| calls behind. The value
+ * is what the send-out mon animation left (Task_HandleMonAnimation zeroes data[2..7] only before it, pokemon_animation.c:911-939):
+ * the opponent's front anim (sMonFrontAnimIdsTable) or the player's back anim (3 * sSpeciesToBackAnimSet +
+ * sBackAnimNatureModTable[personality % 25], pokemon_animation.c:956-970); `finalData3` is that animation's hand-off value from the
+ * executed source (dt60MonAnimData3.py / dt60MonAnimData3Sim.c; 17 / 17 RAM-probed animations agree).
+ */
+export function liveDoubleTeamAttackerStepCounter(
+  side: "player" | "opponent", species: string, personality: number | undefined,
+): number | null {
+  const t = sendOutAnimSelectorTables;
+  let anim: string | undefined;
+  if (side === "opponent") {
+    anim = (t.frontAnimIds.species as Readonly<Record<string, string>>)[species] ?? t.frontAnimIds.absentDefault;
+  } else {
+    if (personality === undefined) return null;
+    const set = (t.speciesToBackAnimSet.species as Readonly<Record<string, string>>)[species] ?? t.speciesToBackAnimSet.absentDefault;
+    const sets = t.backAnimationIds.sets as Readonly<Record<string, readonly string[]>>;
+    // GetSpeciesBackAnimSet: BACK_ANIM_NONE -> set index 0 (the first declared set).
+    const triple = set === "BACK_ANIM_NONE" ? Object.values(sets)[0] : sets[set];
+    const nature = Object.keys(t.backAnimNatureMod.natures)[(personality >>> 0) % 25]!;
+    anim = triple?.[(t.backAnimNatureMod.natures as Readonly<Record<string, number>>)[nature]!];
+  }
+  const entry = anim === undefined ? undefined : (monAnimData3.anims as Readonly<Record<string, { finalData3: number }>>)[anim];
+  return entry?.finalData3 ?? null;
 }
 
 /** The species shown on each side at a body (a Substitute doll still anchors on its species: GetBattlerSpriteCoord). */
@@ -2906,13 +2938,20 @@ export function liveMoveAnimationPresentation(
     }
     case 104: {
       if (!spriteOrderInput?.known) return null;
+      // dt60: the clone step counter starts at the attacker sprite's data[3]. >= 1: one call ahead (table index age + 1) and destroyed one
+      // frame earlier; everything else unchanged (0 px, docs/dt60-double-team-phase.md). < 0 (TUMBLING_FRONT_FLIP*) is unproven: decline.
+      const side = attacker.geometry.side;
+      const stepCounter = liveDoubleTeamAttackerStepCounter(side, attacker.species, field[side].personality);
+      if (stepCounter === null || stepCounter < 0) return null;
+      const ahead = stepCounter >= 1;
       const clonePair = spriteOrderForSlots({ known: true, free: spriteOrderInput.free, pendingDestroyed: [] }, [3, 4]);
       if (clonePair === null) return null;
       // The two clone sprites take slots 3 and 4; the one earlier in the lent order is drawn in front ("b" on a first body).
       config = { move: "DOUBLE_TEAM", attacker, target,
         fieldProfile: { ...fieldProfile, playerStatus: "none" },
-        animationProfile: { cloneAnchorAge: 0, cloneVisibleStartAge: 2, cloneVisibleEndAge: 129, statsBannerStartAge: 163,
-          statsBannerEndAge: 229, statsBannerBg1YAnchorAge: 166, frontClone: clonePair.indexOf(4) < clonePair.indexOf(3) ? "b" : "a" },
+        animationProfile: { cloneAnchorAge: ahead ? -1 : 0, cloneVisibleStartAge: 2, cloneVisibleEndAge: ahead ? 128 : 129,
+          statsBannerStartAge: 163, statsBannerEndAge: 229, statsBannerBg1YAnchorAge: 166,
+          frontClone: clonePair.indexOf(4) < clonePair.indexOf(3) ? "b" : "a" },
         moveTextStartAge: -28 };
       break;
     }

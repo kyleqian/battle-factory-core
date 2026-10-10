@@ -32,6 +32,8 @@ function displayed(player: string, opponent: string, status: { player?: string; 
   const mon = (name: string, st = "none") => ({
     species: speciesStats.species.find(s => s.name === `SPECIES_${name}`)!.id, speciesSymbol: name, name, level: 50,
     hp: 100, maxHP: 100, gender: "male", status: st,
+    // Production fields carry the party personality (battleCommandPresentation.ts); Double Team reads the player's nature from it (dt60).
+    personality: 3,
   });
   return { player: mon(player, status.player), opponent: mon(opponent, status.opponent) } as unknown as BattleResolutionDisplayedField;
 }
