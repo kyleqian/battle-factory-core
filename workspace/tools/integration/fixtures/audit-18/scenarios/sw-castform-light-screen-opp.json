@@ -55,6 +55,7 @@
      "item": 0,
      "abilitySlot": 0,
      "friendship": 70,
+     "gender": "male",
      "shiny": false
     },
     {
@@ -136,7 +137,7 @@
    ],
    "opponent": [
     {
-     "species": 82,
+     "species": 113,
      "level": 50,
      "nature": 7,
      "ivs": {
@@ -156,10 +157,10 @@
       "spDefense": 255
      },
      "moves": [
-      351,
-      351,
-      351,
-      351
+      113,
+      113,
+      113,
+      113
      ],
      "ppUps": [
       0,
@@ -170,6 +171,7 @@
      "item": 0,
      "abilitySlot": 0,
      "friendship": 70,
+     "gender": "female",
      "shiny": false
     },
     {

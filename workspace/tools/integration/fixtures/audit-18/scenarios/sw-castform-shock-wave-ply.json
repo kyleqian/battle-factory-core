@@ -21,7 +21,7 @@
   "parties": {
    "player": [
     {
-     "species": 113,
+     "species": 82,
      "level": 50,
      "nature": 7,
      "ivs": {
@@ -41,10 +41,10 @@
       "spDefense": 0
      },
      "moves": [
-      352,
-      352,
-      352,
-      352
+      351,
+      351,
+      351,
+      351
      ],
      "ppUps": [
       0,
@@ -55,7 +55,6 @@
      "item": 0,
      "abilitySlot": 0,
      "friendship": 70,
-     "gender": "female",
      "shiny": false
     },
     {
@@ -171,6 +170,7 @@
      "item": 0,
      "abilitySlot": 0,
      "friendship": 70,
+     "gender": "male",
      "shiny": false
     },
     {

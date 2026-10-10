@@ -41,10 +41,10 @@
       "spDefense": 0
      },
      "moves": [
-      85,
-      85,
-      85,
-      85
+      113,
+      113,
+      113,
+      113
      ],
      "ppUps": [
       0,
@@ -171,6 +171,7 @@
      "item": 0,
      "abilitySlot": 0,
      "friendship": 70,
+     "gender": "male",
      "shiny": false
     },
     {

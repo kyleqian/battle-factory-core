@@ -5,7 +5,7 @@
      unit), Light Screen / Ice Beam / Double Team (Dive unit: order-dependent consumers in the hidden span and after the unleash).
      Turn 1 the hider charges (hidden), the consumer plays in the hidden span; turn 2 the strike, the consumer after it; and so on.
   C  no-unit controls: SNORLAX uses Counter (fails: no body) — Rest's control uses Tackle (Rest needs damage first).
-  S  Shock Wave 351 (sw67) on the FAST lead (MAGNETON 82 / JIRACHI 385: both sides' geometry classes), consumers on the slow lead: Water
+  S  Shock Wave 351 (sw67) on the FAST lead (MAGNETON 82 / CASTFORM 385: both sides' geometry classes), consumers on the slow lead: Water
      Pulse / Light Screen / Thunderbolt (CHANSEY) and a second Shock Wave (MAGNEMITE 81 / MAGNETON 82, Factory Shock Wave users).
   F  SUBSTITUTE_FADE (land68): ALAKAZAM (fast) Ice Beam breaks the slow lead's (PIKACHU / SNORLAX) Substitute; the next body of either
      battler after the fade is a window (PIKACHU is KOed right after: the census' KO + switch shape, UNMODELLED after the faint).
@@ -20,8 +20,8 @@ BASE = json.loads(Path("tools/battle-lab/prep18-return-altopp-snorlax-golem.json
 M = {"FLY": 19, "BOUNCE": 340, "DIG": 91, "DIVE": 291, "COUNTER": 68, "TACKLE": 33, "SAFEGUARD": 219, "WISH": 273, "BULK_UP": 339, "REST": 156,
      "IRON_DEFENSE": 334, "SANDSTORM": 201, "EARTHQUAKE": 89, "LIGHT_SCREEN": 113, "ICE_BEAM": 58, "DOUBLE_TEAM": 104, "SHOCK_WAVE": 351,
      "WATER_PULSE": 352, "THUNDERBOLT": 85, "SUBSTITUTE": 164}
-SP = {"SNORLAX": 143, "GOLEM": 76, "CHANSEY": 113, "MAGNETON": 82, "MAGNEMITE": 81, "JIRACHI": 385, "ALAKAZAM": 65, "PIKACHU": 25}
-GENDERLESS = {81, 82, 385}  # MON_GENDERLESS: the lab rejects a gender for MAGNEMITE / MAGNETON
+SP = {"SNORLAX": 143, "GOLEM": 76, "CHANSEY": 113, "MAGNETON": 82, "MAGNEMITE": 81, "CASTFORM": 385, "ALAKAZAM": 65, "PIKACHU": 25}
+GENDERLESS = {81, 82}  # MON_GENDERLESS: the lab rejects a gender for MAGNEMITE / MAGNETON
 tag = lambda s: s.lower().replace("_", "-")
 
 
@@ -67,7 +67,7 @@ for side, stag in (("player", "ply"), ("opponent", "opp")):
     for c in EVERY + ["DIG", "EARTHQUAKE", "LIGHT_SCREEN", "ICE_BEAM", "DOUBLE_TEAM", "WATER_PULSE", "THUNDERBOLT"]:
         stage(f"ctl-snorlax-{tag(c)}-{stag}", "SNORLAX", "TACKLE" if c == "REST" else "COUNTER", "CHANSEY", c, side, 6 if c == "REST" else 4)
     stage(f"ctl-snorlax-shock-wave-{stag}", "SNORLAX", "COUNTER", "MAGNEMITE", "SHOCK_WAVE", side, 3)
-    for user, second in (("MAGNETON", "MAGNEMITE"), ("JIRACHI", "MAGNETON")):
+    for user, second in (("MAGNETON", "MAGNEMITE"), ("CASTFORM", "MAGNETON")):
         for c in ("WATER_PULSE", "LIGHT_SCREEN", "THUNDERBOLT"):
             stage(f"sw-{tag(user)}-{tag(c)}-{stag}", user, "SHOCK_WAVE", "CHANSEY", c, side, 3)
         stage(f"sw-{tag(user)}-shock-wave-{stag}", user, "SHOCK_WAVE", second, "SHOCK_WAVE", side, 3)

@@ -21,14 +21,14 @@
   "parties": {
    "player": [
     {
-     "species": 113,
+     "species": 385,
      "level": 50,
-     "nature": 7,
+     "nature": 3,
      "ivs": {
       "hp": 31,
       "attack": 31,
       "defense": 31,
-      "speed": 0,
+      "speed": 31,
       "spAttack": 31,
       "spDefense": 31
      },
@@ -41,10 +41,10 @@
       "spDefense": 0
      },
      "moves": [
-      113,
-      113,
-      113,
-      113
+      351,
+      351,
+      351,
+      351
      ],
      "ppUps": [
       0,
@@ -55,7 +55,7 @@
      "item": 0,
      "abilitySlot": 0,
      "friendship": 70,
-     "gender": "female",
+     "gender": "male",
      "shiny": false
     },
     {
@@ -137,14 +137,14 @@
    ],
    "opponent": [
     {
-     "species": 385,
+     "species": 82,
      "level": 50,
-     "nature": 3,
+     "nature": 7,
      "ivs": {
       "hp": 31,
       "attack": 31,
       "defense": 31,
-      "speed": 31,
+      "speed": 0,
       "spAttack": 31,
       "spDefense": 31
      },
