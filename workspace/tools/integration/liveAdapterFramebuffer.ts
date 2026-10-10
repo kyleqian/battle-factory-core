@@ -213,6 +213,16 @@ export function fixturePostKoLend(f: Fixture, request: BattleMoveAnimationReques
   return lend;
 }
 
+/** ice72: the species ids the fixture's field displays on each side (liveView's battlers). */
+function fixtureFieldSpecies(f: Fixture): { player: number; opponent: number } {
+  const id = (side: "player" | "opponent") => {
+    const mon = f.attacker.geometry.side === side ? f.attacker : f.bystander ?? f.target;
+    const species = speciesStats.species.find(s => s.name === `SPECIES_${mon.species}`)?.id;
+    if (species === undefined) throw new Error(`Unknown species ${mon.species}`);
+    return species;
+  };
+  return { player: id("player"), opponent: id("opponent") };
+}
 const chainLends = new WeakMap<object, { spriteOrderInput: LiveMoveSpriteOrderInput | undefined; presentationRng: LiveMovePresentationRngInput }>();
 /** Production order host lend + pinned presentation host of an Ice Ball chain fixture body (iceBallChain). */
 export function fixtureIceBallChain(f: Fixture, request: BattleMoveAnimationRequest) {
@@ -243,7 +253,8 @@ export function fixtureIceBallChain(f: Fixture, request: BattleMoveAnimationRequ
     const req = battleMoveAnimationRequest(battler, foe, iceArgs);
     lend = lendLiveSpriteOrder(order, 301);
     key = liveMovePresentationRngBodyKey({ resolutionId: { requestId: k + 1 }, segmentIndex: 0, commandIndex });
-    order = markLiveSpriteOrderDeferredBody(order, lend, req, key);
+    // ice72: the species displayed at the body (the fixture's field), recorded in the marker as the orchestrator records it
+    order = markLiveSpriteOrderDeferredBody(order, lend, req, key, fixtureFieldSpecies(f));
     // Each chain body's words: the pinned activation value of that body (fixture provenance), activated through the production seam.
     const pinned = activateLiveMovePresentationRng(createPresentationRngHostAt(createPresentationRngState(value, "pinned")), req, key);
     bodies.push(...pinned.bodies);

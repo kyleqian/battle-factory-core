@@ -8,9 +8,10 @@ import type { SpriteOrderDeferredLend } from "./spriteOrderEventTransform.ts";
 
 /**
  * Move bodies whose post-body free order depends on their own words. land68 (prep65): Dive 291, setup and unleash (order key 10291):
- * its droplet / bubble destroy groups follow its own words (prep61).
+ * its droplet / bubble destroy groups follow its own words (prep61). ice72: Ice Ball 301 (its shards' SortSprites y-sort,
+ * liveIceBallInputs(...).postBodyFree at the body's words, rollout counter and displayed species; docs/ice72-ice-ball-words-unit.md).
  */
-export const WORDS_ORDER_UNIT_MOVE_IDS: readonly number[] = Object.freeze([28, 189, 240, 291]);
+export const WORDS_ORDER_UNIT_MOVE_IDS: readonly number[] = Object.freeze([28, 189, 240, 291, 301]);
 /** The general animation whose order unit is words-dependent (General_Rain); its marker is keyed per event. */
 export const WORDS_ORDER_GENERAL_ANIMATION = "RAIN_CONTINUES";
 

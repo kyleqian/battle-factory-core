@@ -80,12 +80,11 @@ export interface LiveSpriteOrderHost {
 }
 
 /**
- * Random2 move bodies that record a deferred-lend marker: Ice Ball 301 (its later bodies take the lend; Ice Ball markers lend only to
- * Ice Ball) and the words-dependent order units Sand-Attack 28, Mud-Slap 189, Rain Dance 240 (WORDS_ORDER_UNIT_MOVE_IDS; ANY later
- * consumer takes their lend, docs/next-adapters-prep46.md). The RAIN_CONTINUES general animation marks itself per event
- * (advanceLiveSpriteOrderHost).
+ * Random2 move bodies that record a deferred-lend marker: the words-dependent order units Sand-Attack 28, Mud-Slap 189, Rain Dance 240,
+ * Dive 291 and Ice Ball 301 (WORDS_ORDER_UNIT_MOVE_IDS; ANY later consumer takes their lend, docs/next-adapters-prep46.md; ice72: an Ice
+ * Ball marker too, docs/ice72-ice-ball-words-unit.md). The RAIN_CONTINUES general animation marks itself per event (advanceLiveSpriteOrderHost).
  */
-export const DEFERRED_LEND_MOVE_IDS: readonly number[] = Object.freeze([301, ...WORDS_ORDER_UNIT_MOVE_IDS]);
+export const DEFERRED_LEND_MOVE_IDS: readonly number[] = Object.freeze([...WORDS_ORDER_UNIT_MOVE_IDS]);
 
 /** Append order events to a pending deferred lend (no-op without one). */
 function withDeferredUnits(host: LiveSpriteOrderHost, units: readonly SpriteOrderPresentationEvent[]): LiveSpriteOrderHost {
@@ -103,7 +102,7 @@ function withoutDeferred(host: LiveSpriteOrderHost): LiveSpriteOrderHost {
  * Record the deferred-lend marker at a DEFERRED_LEND_MOVE_IDS body's activation edge (orchestrator, right after lendLiveSpriteOrder): its
  * presentation body key, request fields and its own lend, which must be a known-entry-occupancy free order (battler slots and occupant
  * roles the entry ones: the lend is the raw free order) or itself deferred. Anything else records nothing (later bodies decline).
- * `bodySpecies` (words59): the species displayed on each side at the body, recorded for Sand-Attack / Mud-Slap only.
+ * `bodySpecies` (words59): the species displayed on each side at the body, recorded for Sand-Attack / Mud-Slap / Dive / Ice Ball (ice72).
  */
 export function markLiveSpriteOrderDeferredBody(
   host: LiveSpriteOrderHost, lend: LiveMoveSpriteOrderInput | undefined,
@@ -118,7 +117,7 @@ export function markLiveSpriteOrderDeferredBody(
     const atEntry = battlerSlots.player === KNOWN_ENTRY_BATTLER_SLOTS.player && battlerSlots.opponent === KNOWN_ENTRY_BATTLER_SLOTS.opponent
       && occupantRoles !== null && JSON.stringify(occupantRoles) === JSON.stringify(KNOWN_ENTRY_OCCUPANT_ROLES);
     // A words unit's lend is already in entry labels (spriteOrderTrackerLend rho), so its carry and the replay run in entry labels
-    // also after a KO + send-in (role-isomorphic occupancy; prep46 s3); Ice Ball keeps the entry-occupancy rule.
+    // also after a KO + send-in (role-isomorphic occupancy; prep46 s3; ice72: Ice Ball too, 10 ROM bodies at a rho occupancy exact).
     if ((!atEntry && !WORDS_ORDER_UNIT_MOVE_IDS.includes(body.moveId)) || !host.tracker.cursor.order.known) return host;
     activation = Object.freeze({ free: lend.free });
   }
@@ -126,8 +125,9 @@ export function markLiveSpriteOrderDeferredBody(
     key, moveId: body.moveId, attackerSide: body.attacker === 0 ? "player" as const : "opponent" as const,
     ...(body.rolloutCounter === undefined ? {} : { rolloutCounter: body.rolloutCounter }),
     ...(body.turn === undefined ? {} : { turn: body.turn }),
-    // words59: the dirt units' carry reads the body's displayed species (the consumer's field may show a replacement)
-    ...(bodySpecies === undefined || (body.moveId !== 28 && body.moveId !== 189 && body.moveId !== 291) ? {}
+    // words59: the dirt units' carry reads the body's displayed species (the consumer's field may show a replacement); ice72: Ice Ball's
+    // shards sort on the target's Y_PIC_OFFSET point
+    ...(bodySpecies === undefined || (body.moveId !== 28 && body.moveId !== 189 && body.moveId !== 291 && body.moveId !== 301) ? {}
       : { bodySpecies: Object.freeze({ player: bodySpecies.player, opponent: bodySpecies.opponent }) }),
     activation }) });
 }
@@ -612,8 +612,8 @@ export function lendLiveSpriteOrder(host: LiveSpriteOrderHost, moveId?: number):
   }
   // A later body of a DEFERRED_LEND_MOVE_IDS move after an earlier one (unknown tracker): the word-free deferred lend; the render seam
   // resolves it (resolveSpriteOrderDeferredLend). `free` is empty so that no other consumer can read it as an order.
-  // After a words-dependent order unit (Sand-Attack / Mud-Slap / Rain Dance / RAIN_CONTINUES) ANY consumer takes it (prep46), honouring
-  // POSTKO_LEND_EXCLUDED_MOVE_IDS; an Ice Ball marker lends only to Ice Ball.
+  // After a words-dependent order unit (Sand-Attack / Mud-Slap / Rain Dance / RAIN_CONTINUES / Dive / Ice Ball) ANY consumer takes it
+  // (prep46; ice72), honouring POSTKO_LEND_EXCLUDED_MOVE_IDS.
   if (!host.tracker.cursor.order.known && host.deferred !== undefined
     && (moveId === host.deferred.moveId || isWordsOrderDeferredUnit(host.deferred))) {
     const { player, opponent } = host.tracker.battlerSlots;

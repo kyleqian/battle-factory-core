@@ -1523,6 +1523,10 @@ export function liveWordsOrderDeferredCarry(
     if (unit.generalAnimation === undefined && unit.moveId === 291) {
       return unit.bodySpecies === undefined ? null : liveDiveWordsPostFree(unit, activationFree, wordsOf(unit.key), unit.bodySpecies);
     }
+    // ice72: Ice Ball carries through liveIceBallInputs at the body's rollout counter and displayed species only.
+    if (unit.generalAnimation === undefined && unit.moveId === 301) {
+      return unit.bodySpecies === undefined ? null : liveIceBallWordsPostFree(unit, activationFree, wordsOf(unit.key), unit.bodySpecies);
+    }
     const dirt = unit.generalAnimation === undefined && unit.moveId !== 240;
     if (dirt && unit.bodySpecies !== undefined) {
       const bodyAnchors = liveWordsBodyAnchors(unit.bodySpecies);
@@ -1542,6 +1546,35 @@ function liveWordsBodyAnchors(species: Readonly<Record<WordsSide, number>>): Rea
     return null;
   }
   return { player: liveBattlerAnchors("player", art).picOffsetPoint, opponent: liveBattlerAnchors("opponent", art).picOffsetPoint };
+}
+
+/**
+ * ice72: the free order after an Ice Ball 301 body (liveIceBallInputs(...).postBodyFree, the shards' SortSprites y-sort) from its activation
+ * free order (entry labels), its own recorded words and the species displayed at the body (the marker's `bodySpecies`; the shard y follow
+ * the target's Y_PIC_OFFSET point). The same arguments as the Ice Ball adapter's at species rest; null when a counter, words, palettes or
+ * a non-zero idle rest (liveIceBallInputs' decline) are missing (the lend declines).
+ */
+export function liveIceBallWordsPostFree(
+  unit: Readonly<{ attackerSide: WordsSide; rolloutCounter?: number }>, activationFree: readonly number[], words: PresentationRngWords | null,
+  bodySpecies: Readonly<Record<WordsSide, number>>,
+): readonly number[] | null {
+  const counter = liveIceBallCounter(unit.rolloutCounter);
+  if (counter === null || words === null) return null;
+  let art: ReturnType<typeof createBattleCommandFieldArtView>;
+  try {
+    art = createBattleCommandFieldArtView({ player: { species: bodySpecies.player }, opponent: { species: bodySpecies.opponent } } as never);
+  } catch {
+    return null;
+  }
+  const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+  const activationOrder = spriteOrderWithOccupiedPrefix({ known: true as const, free: activationFree, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+  if (palettes === null || activationOrder === null) return null;
+  const side = unit.attackerSide, foe = side === "player" ? "opponent" as const : "player" as const;
+  return liveIceBallInputs({ counter, attackerSide: side, attackerSpecies: art[side].speciesSymbol, targetSpecies: art[foe].speciesSymbol,
+    attacker: liveBattlerAnchors(side, art), target: liveBattlerAnchors(foe, art), palettes, activationOrder,
+    words: words.words, activationValue: words.activationValue, lagRows: liveIceBallLagRows(counter + 1), sort: sortGbaSpriteOrder,
+    linear: { deltaQ8: linearTranslationDeltaQ8, offsetAfterCallbacks: linearTranslationOffsetAfterCallbacks },
+    chunkPalette: iceBallAsset.chunk.palette, icePalette: icyWindAsset.background.palette })?.postBodyFree ?? null;
 }
 
 /**
@@ -4087,10 +4120,9 @@ export function liveMoveAnimationPresentation(
       // follow an earlier Ice Ball body whose words-dependent shard sort is the activation order: docs/s10a-random2-order-lend-blocker.md,
       // they decline). Hardware OAM / matrices / palettes / registers / tasks from liveIceBallInputs.ts over the lent order (any known lend
       // with the known-entry occupancy), the presentation host's words (2 per shard at step 37) and the policy's lag rows. Non-shiny.
-      // Counters 1..4: the lend is the deferred marker of the earlier Ice Ball body (liveSpriteOrderHost markLiveSpriteOrderDeferredBody);
-      // resolved here, render-pure: carry the earlier body's activation order through it with ITS recorded words (this program, read-only
-      // host lookup by its body key), then replay the order units that followed with the production plans. A KO / send-in / switch /
-      // invalidation in between, or an earlier body that is not an Ice Ball of the same battlers, declines.
+      // Counters 1..4: the lend is the deferred marker of the earlier words unit (ice72: an Ice Ball body is a words unit, its marker
+      // resolved above by resolveWordsOrderLend with liveIceBallWordsPostFree at the body's words / counter / species, past the ROM-checked
+      // battle units, for any consumer); an unresolved marker leaves no lend and the body declines.
       const counter = liveIceBallCounter(request.rolloutCounter);
       if (counter === null || !spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
@@ -4105,17 +4137,9 @@ export function liveMoveAnimationPresentation(
           linear: { deltaQ8: linearTranslationDeltaQ8, offsetAfterCallbacks: linearTranslationOffsetAfterCallbacks },
           chunkPalette: iceBallAsset.chunk.palette, icePalette: icyWindAsset.background.palette });
       };
-      const withPrefix = (free: readonly number[]) =>
-        spriteOrderWithOccupiedPrefix({ known: true as const, free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
-      const lentFree = spriteOrderInput.deferred === undefined ? spriteOrderInput.free
-        : resolveSpriteOrderDeferredLend(spriteOrderInput.deferred, (body, activationFree) => {
-          const c = liveIceBallCounter(body.rolloutCounter);
-          const words = liveMovePresentationRngWords({ host: presentationRngInput?.host ?? null, key: body.key });
-          const order = withPrefix(activationFree);
-          if (body.moveId !== 301 || c === null || words === null || order === null) return null;
-          return iceBallArgs(body.attackerSide, c, words, order)?.postBodyFree ?? null;
-        });
-      const activationOrder = lentFree === null ? null : withPrefix(lentFree);
+      if (spriteOrderInput.deferred !== undefined) return null;
+      const activationOrder = spriteOrderWithOccupiedPrefix({ known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] },
+        KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (activationOrder === null) return null;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const inputs = iceBallArgs(attacker.geometry.side, counter, rng, activationOrder);

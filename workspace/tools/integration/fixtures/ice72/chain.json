@@ -1,0 +1,1489 @@
+{
+ "schema": "ice72-chain/v1",
+ "summary": {
+  "chains": 47,
+  "exact": 46,
+  "chainsThroughBattleUnits": 5,
+  "exactThroughBattleUnits": 5,
+  "framesChecked": 64319,
+  "windowsChecked": 851,
+  "consumersAfterBattleUnit": 2,
+  "consumersAfterBattleUnitExact": 2,
+  "jobsIdenticalAB": 5,
+  "jobs": 5
+ },
+ "chains": [
+  {
+   "job": "ko-opp-ms-sealeo",
+   "words": "189 f2085",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "body 129:player",
+    "hit-animation",
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 56,
+   "windowMismatch": [],
+   "frames": 4775,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 2418,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ko-opp-ms-sealeo",
+   "words": "301 f6953",
+   "activation": "nested",
+   "identityMap": false,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "body 129:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 16,
+   "windowMismatch": [],
+   "frames": 2317,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 7128,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ko-opp-ms-sealeo",
+   "words": "301 f9386",
+   "activation": "nested",
+   "identityMap": false,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "body 129:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 16,
+   "windowMismatch": [],
+   "frames": 2318,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 9575,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ko-opp-ms-sealeo",
+   "words": "301 f11820",
+   "activation": "nested",
+   "identityMap": false,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "body 129:player",
+    "hit-animation",
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 54,
+   "windowMismatch": [],
+   "frames": 4752,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 12036,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ko-opp-ms-sealeo",
+   "words": "301 f16689",
+   "activation": "nested",
+   "identityMap": false,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "body 129:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 16,
+   "windowMismatch": [],
+   "frames": 2317,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 16866,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ko-opp-ms-sealeo",
+   "words": "301 f19122",
+   "activation": "nested",
+   "identityMap": false,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "body 129:player",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 15,
+   "windowMismatch": [],
+   "frames": 307,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "129",
+     "frame": 19315,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "opp-glalie-wg",
+   "words": "301 f2085",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "body 55:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 15,
+   "windowMismatch": [],
+   "frames": 2317,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "55",
+     "frame": 2340,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "opp-glalie-wg",
+   "words": "301 f4518",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "body 55:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 15,
+   "windowMismatch": [],
+   "frames": 2318,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "55",
+     "frame": 4778,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "opp-glalie-wg",
+   "words": "301 f6952",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "body 55:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 15,
+   "windowMismatch": [],
+   "frames": 2318,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "55",
+     "frame": 7220,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "opp-glalie-wg",
+   "words": "301 f9386",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "body 55:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 15,
+   "windowMismatch": [],
+   "frames": 2318,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "55",
+     "frame": 9668,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "opp-glalie-wg",
+   "words": "301 f11820",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "body 55:player",
+    "hit-animation",
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "action-prompt",
+    "actions-committed",
+    "body 55:player",
+    "hit-animation",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 71,
+   "windowMismatch": [],
+   "frames": 5106,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "55",
+     "frame": 12190,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "55",
+     "frame": 16683,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "33",
+     "frame": 16932,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "opp-sealeo-wg",
+   "words": "301 f2405",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 55:player",
+    "hit-animation"
+   ],
+   "windows": 15,
+   "windowMismatch": [],
+   "frames": 2186,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "55",
+     "frame": 4514,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "opp-sealeo-wg",
+   "words": "301 f4839",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 55:player",
+    "hit-animation"
+   ],
+   "windows": 15,
+   "windowMismatch": [],
+   "frames": 2186,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "55",
+     "frame": 6948,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "opp-sealeo-wg",
+   "words": "301 f7274",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 55:player",
+    "hit-animation"
+   ],
+   "windows": 15,
+   "windowMismatch": [],
+   "frames": 2185,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "55",
+     "frame": 9382,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "opp-sealeo-wg",
+   "words": "301 f9707",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 55:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 55:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 55:player",
+    "hit-animation"
+   ],
+   "windows": 41,
+   "windowMismatch": [],
+   "frames": 7054,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "55",
+     "frame": 11816,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "55",
+     "frame": 14250,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "55",
+     "frame": 16684,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "opp-sealeo-wg",
+   "words": "301 f17011",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 3,
+   "windowMismatch": [],
+   "frames": 154,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "301 f2081",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation"
+   ],
+   "windows": 2,
+   "windowMismatch": [],
+   "frames": 26,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "189 f2342",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20"
+   ],
+   "windows": 4,
+   "windowMismatch": [],
+   "frames": 145,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "189 f2852",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 6,
+   "windowMismatch": [],
+   "frames": 1574,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "301 f4515",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation"
+   ],
+   "windows": 2,
+   "windowMismatch": [],
+   "frames": 26,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "189 f4775",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20"
+   ],
+   "windows": 4,
+   "windowMismatch": [],
+   "frames": 145,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "301 f5123",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation"
+   ],
+   "windows": 2,
+   "windowMismatch": [],
+   "frames": 26,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "189 f5386",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20"
+   ],
+   "windows": 4,
+   "windowMismatch": [],
+   "frames": 145,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "189 f5896",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 6,
+   "windowMismatch": [],
+   "frames": 964,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "189 f7111",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "stat-animation 20",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 6,
+   "windowMismatch": [],
+   "frames": 2183,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "189 f9545",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 4,
+   "windowMismatch": [],
+   "frames": 2183,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "301 f11817",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation"
+   ],
+   "windows": 2,
+   "windowMismatch": [],
+   "frames": 26,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "189 f12077",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation"
+   ],
+   "windows": 2,
+   "windowMismatch": [],
+   "frames": 26,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "301 f12327",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation"
+   ],
+   "windows": 2,
+   "windowMismatch": [],
+   "frames": 26,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "189 f12673",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation"
+   ],
+   "windows": 2,
+   "windowMismatch": [],
+   "frames": 26,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "301 f12835",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation"
+   ],
+   "windows": 2,
+   "windowMismatch": [],
+   "frames": 26,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "189 f13101",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation"
+   ],
+   "windows": 2,
+   "windowMismatch": [],
+   "frames": 26,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "301 f13264",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation"
+   ],
+   "windows": 2,
+   "windowMismatch": [],
+   "frames": 26,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "189 f13539",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation"
+   ],
+   "windows": 2,
+   "windowMismatch": [],
+   "frames": 26,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "189 f13950",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 4,
+   "windowMismatch": [],
+   "frames": 212,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "189 f14413",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 4,
+   "windowMismatch": [],
+   "frames": 2183,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-ms",
+   "words": "189 f16847",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 189",
+    "hit-animation",
+    "action-prompt"
+   ],
+   "windows": 3,
+   "windowMismatch": [],
+   "frames": 76,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 51,
+    "frameMismatch": 0,
+    "windows": 15,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-wg",
+   "words": "301 f2081",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "body 55:opponent",
+    "hit-animation"
+   ],
+   "windows": 13,
+   "windowMismatch": [],
+   "frames": 261,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "55",
+     "frame": 2265,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-wg",
+   "words": "301 f2507",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "body 55:opponent",
+    "hit-animation"
+   ],
+   "windows": 13,
+   "windowMismatch": [],
+   "frames": 278,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "55",
+     "frame": 2708,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-wg",
+   "words": "301 f2951",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "body 55:opponent",
+    "hit-animation"
+   ],
+   "windows": 13,
+   "windowMismatch": [],
+   "frames": 303,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "55",
+     "frame": 3177,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-wg",
+   "words": "301 f3420",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "body 55:opponent",
+    "hit-animation"
+   ],
+   "windows": 13,
+   "windowMismatch": [],
+   "frames": 362,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "55",
+     "frame": 3705,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-wg",
+   "words": "301 f3946",
+   "activation": "nested",
+   "identityMap": true,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 42,
+   "windowMismatch": [],
+   "frames": 2834,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-wg",
+   "words": "301 f6949",
+   "activation": "nested",
+   "identityMap": false,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "body 33:player",
+    "hit-animation",
+    "body 33:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed"
+   ],
+   "windows": 16,
+   "windowMismatch": [],
+   "frames": 2321,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "33",
+     "frame": 7139,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "33",
+     "frame": 7460,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-wg",
+   "words": "301 f9383",
+   "activation": "nested",
+   "identityMap": false,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "body 33:player",
+    "hit-animation"
+   ],
+   "windows": 8,
+   "windowMismatch": [],
+   "frames": 181,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "33",
+     "frame": 9572,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-wg",
+   "words": "301 f9733",
+   "activation": "nested",
+   "identityMap": false,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "body 33:player",
+    "hit-animation"
+   ],
+   "windows": 8,
+   "windowMismatch": [],
+   "frames": 200,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "33",
+     "frame": 9941,
+     "exact": true,
+     "afterBattleUnit": false
+    }
+   ],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-wg",
+   "words": "301 f10101",
+   "activation": "nested",
+   "identityMap": false,
+   "steps": [
+    "carry 301",
+    "hit-animation",
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "windows": 40,
+   "windowMismatch": [],
+   "frames": 1789,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out"
+   ],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  },
+  {
+   "job": "ply-glalie-wg",
+   "words": "301 f12131",
+   "activation": "nested",
+   "identityMap": false,
+   "steps": [
+    "carry 301"
+   ],
+   "windows": 0,
+   "windowMismatch": [
+    "Ice Ball f12131: carry declined",
+    "hit-animation window 0: plan did not resolve"
+   ],
+   "frames": 1,
+   "frameMismatch": 0,
+   "consumers": [],
+   "battleUnits": [],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": false
+   },
+   "verdict": "MISMATCH"
+  }
+ ]
+}
