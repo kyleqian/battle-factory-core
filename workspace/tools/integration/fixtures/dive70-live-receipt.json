@@ -1,0 +1,1209 @@
+{
+ "schema": "dive70-live-receipt/v1",
+ "summary": {
+  "windows": 15,
+  "exactWindows": 15,
+  "rows": 1395,
+  "r1EqualsR2": 15,
+  "lendEqualsRom": 14,
+  "protectedAttacksWithoutBody": 8
+ },
+ "windows": [
+  {
+   "fixture": "tools/integration/fixtures/dive70/opp-chinchou-onix.json",
+   "scenario": "tools/battle-lab/mechanic-dive-opponent-chinchou-player-onix.json",
+   "side": "opponent",
+   "attacker": "CHINCHOU",
+   "target": "ONIX",
+   "window": [
+    764,
+    856
+   ],
+   "rows": 93,
+   "expectedDuration": 93,
+   "runs": [
+    {
+     "run": 0,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "f8db9a74e8be7b418d4837bff91cada6b153cd58031bea9afbd26ba39deaab33"
+    },
+    {
+     "run": 1,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "f8db9a74e8be7b418d4837bff91cada6b153cd58031bea9afbd26ba39deaab33"
+    }
+   ],
+   "r1EqualsR2": true,
+   "lendEqualsRom": true,
+   "liveAges": 93,
+   "words": {
+    "count": 56,
+    "draws": [
+     20,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4
+    ]
+   },
+   "wordsProvenance": "pinned (RAM gRng2Value at the setup / attack activation, fixture hook wordsChain)",
+   "deferredUnits": [
+    {
+     "kind": "action-prompt"
+    },
+    {
+     "kind": "actions-committed"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/dive70/opp-chinchou-wailord.json",
+   "scenario": "tools/integration/fixtures/species-audit-11/scenarios/wailord-dive-opponent-chinchou-player-onix.json",
+   "side": "opponent",
+   "attacker": "CHINCHOU",
+   "target": "WAILORD",
+   "window": [
+    615,
+    707
+   ],
+   "rows": 93,
+   "expectedDuration": 93,
+   "runs": [
+    {
+     "run": 0,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "e7a086657dd6b5dc2b9f24d4180690eeb09d8271615cfa14d40309d1b8d0637c"
+    },
+    {
+     "run": 1,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "e7a086657dd6b5dc2b9f24d4180690eeb09d8271615cfa14d40309d1b8d0637c"
+    }
+   ],
+   "r1EqualsR2": true,
+   "lendEqualsRom": true,
+   "liveAges": 93,
+   "words": {
+    "count": 56,
+    "draws": [
+     20,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4
+    ]
+   },
+   "wordsProvenance": "pinned (RAM gRng2Value at the setup / attack activation, fixture hook wordsChain)",
+   "deferredUnits": [
+    {
+     "kind": "action-prompt"
+    },
+    {
+     "kind": "actions-committed"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/dive70/opp-clamperl-onix.json",
+   "scenario": "tools/integration/fixtures/species-audit-11/scenarios/clamperlA-dive-opponent-chinchou-player-onix.json",
+   "side": "opponent",
+   "attacker": "CLAMPERL",
+   "target": "ONIX",
+   "window": [
+    764,
+    856
+   ],
+   "rows": 93,
+   "expectedDuration": 93,
+   "runs": [
+    {
+     "run": 0,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "42e57de62f70d88c4bb1a89af085741d4e2b621fe100b7e3c4276e525f806408"
+    },
+    {
+     "run": 1,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "42e57de62f70d88c4bb1a89af085741d4e2b621fe100b7e3c4276e525f806408"
+    }
+   ],
+   "r1EqualsR2": true,
+   "lendEqualsRom": true,
+   "liveAges": 93,
+   "words": {
+    "count": 56,
+    "draws": [
+     20,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4
+    ]
+   },
+   "wordsProvenance": "pinned (RAM gRng2Value at the setup / attack activation, fixture hook wordsChain)",
+   "deferredUnits": [
+    {
+     "kind": "action-prompt"
+    },
+    {
+     "kind": "actions-committed"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/dive70/opp-lanturn-golem.json",
+   "scenario": "tools/battle-lab/prep25-dive-alt-opponent-lanturn-golem.json",
+   "side": "opponent",
+   "attacker": "LANTURN",
+   "target": "GOLEM",
+   "window": [
+    614,
+    706
+   ],
+   "rows": 93,
+   "expectedDuration": 93,
+   "runs": [
+    {
+     "run": 0,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "b562c4d56fb9419383fc26f794486cea30f83ae057f6fb0d879eba76bb2255d9"
+    },
+    {
+     "run": 1,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "b562c4d56fb9419383fc26f794486cea30f83ae057f6fb0d879eba76bb2255d9"
+    }
+   ],
+   "r1EqualsR2": true,
+   "lendEqualsRom": true,
+   "liveAges": 93,
+   "words": {
+    "count": 56,
+    "draws": [
+     20,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4
+    ]
+   },
+   "wordsProvenance": "pinned (RAM gRng2Value at the setup / attack activation, fixture hook wordsChain)",
+   "deferredUnits": [
+    {
+     "kind": "action-prompt"
+    },
+    {
+     "kind": "actions-committed"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/dive70/opp-seel-onix.json",
+   "scenario": "tools/integration/fixtures/species-audit-11/scenarios/seelA-dive-opponent-chinchou-player-onix.json",
+   "side": "opponent",
+   "attacker": "SEEL",
+   "target": "ONIX",
+   "window": [
+    611,
+    703
+   ],
+   "rows": 93,
+   "expectedDuration": 93,
+   "runs": [
+    {
+     "run": 0,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "8e4b370275a67c7105b0c6ff36be2ea44fde4de1ebe6d270afe82d74ed0d44aa"
+    },
+    {
+     "run": 1,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "8e4b370275a67c7105b0c6ff36be2ea44fde4de1ebe6d270afe82d74ed0d44aa"
+    }
+   ],
+   "r1EqualsR2": true,
+   "lendEqualsRom": true,
+   "liveAges": 93,
+   "words": {
+    "count": 56,
+    "draws": [
+     20,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4
+    ]
+   },
+   "wordsProvenance": "pinned (RAM gRng2Value at the setup / attack activation, fixture hook wordsChain)",
+   "deferredUnits": [
+    {
+     "kind": "action-prompt"
+    },
+    {
+     "kind": "actions-committed"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/dive70/ply-chinchou-golbat.json",
+   "scenario": "tools/integration/fixtures/species-audit-11/scenarios/golbat-dive-player-chinchou-opponent-onix.json",
+   "side": "player",
+   "attacker": "CHINCHOU",
+   "target": "GOLBAT",
+   "window": [
+    486,
+    578
+   ],
+   "rows": 93,
+   "expectedDuration": 93,
+   "runs": [
+    {
+     "run": 0,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "7e870b3f307732227421e720a4b86b769b93e6b9dab7e3a20ff2a19b69aa303e"
+    },
+    {
+     "run": 1,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "7e870b3f307732227421e720a4b86b769b93e6b9dab7e3a20ff2a19b69aa303e"
+    }
+   ],
+   "r1EqualsR2": true,
+   "lendEqualsRom": true,
+   "liveAges": 93,
+   "words": {
+    "count": 56,
+    "draws": [
+     20,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4
+    ]
+   },
+   "wordsProvenance": "pinned (RAM gRng2Value at the setup / attack activation, fixture hook wordsChain)",
+   "deferredUnits": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/dive70/ply-chinchou-onix.json",
+   "scenario": "tools/battle-lab/mechanic-dive-player-chinchou-opponent-onix.json",
+   "side": "player",
+   "attacker": "CHINCHOU",
+   "target": "ONIX",
+   "window": [
+    629,
+    721
+   ],
+   "rows": 93,
+   "expectedDuration": 93,
+   "runs": [
+    {
+     "run": 0,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "a5a154f2d67cb2da6c6d5b6e75d97ac1095d0d810a70630d35402d6d531c4481"
+    },
+    {
+     "run": 1,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "a5a154f2d67cb2da6c6d5b6e75d97ac1095d0d810a70630d35402d6d531c4481"
+    }
+   ],
+   "r1EqualsR2": true,
+   "lendEqualsRom": true,
+   "liveAges": 93,
+   "words": {
+    "count": 56,
+    "draws": [
+     20,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4
+    ]
+   },
+   "wordsProvenance": "pinned (RAM gRng2Value at the setup / attack activation, fixture hook wordsChain)",
+   "deferredUnits": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/dive70/ply-clamperl-onix.json",
+   "scenario": "tools/integration/fixtures/species-audit-11/scenarios/clamperlA-dive-player-chinchou-opponent-onix.json",
+   "side": "player",
+   "attacker": "CLAMPERL",
+   "target": "ONIX",
+   "window": [
+    622,
+    714
+   ],
+   "rows": 93,
+   "expectedDuration": 93,
+   "runs": [
+    {
+     "run": 0,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "b1f752face280d056d325735c31a042e1ea9f1f6673b9378272694bacc4fd29a"
+    },
+    {
+     "run": 1,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "b1f752face280d056d325735c31a042e1ea9f1f6673b9378272694bacc4fd29a"
+    }
+   ],
+   "r1EqualsR2": true,
+   "lendEqualsRom": true,
+   "liveAges": 93,
+   "words": {
+    "count": 56,
+    "draws": [
+     20,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4
+    ]
+   },
+   "wordsProvenance": "pinned (RAM gRng2Value at the setup / attack activation, fixture hook wordsChain)",
+   "deferredUnits": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/dive70/ply-lanturn-golem.json",
+   "scenario": "tools/battle-lab/prep25-dive-alt-player-lanturn-golem.json",
+   "side": "player",
+   "attacker": "LANTURN",
+   "target": "GOLEM",
+   "window": [
+    482,
+    574
+   ],
+   "rows": 93,
+   "expectedDuration": 93,
+   "runs": [
+    {
+     "run": 0,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "b59c6a070929dd463433c01ee3cbed6386aff10acc420561dcb4dc7601377085"
+    },
+    {
+     "run": 1,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "b59c6a070929dd463433c01ee3cbed6386aff10acc420561dcb4dc7601377085"
+    }
+   ],
+   "r1EqualsR2": true,
+   "lendEqualsRom": true,
+   "liveAges": 93,
+   "words": {
+    "count": 56,
+    "draws": [
+     20,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4
+    ]
+   },
+   "wordsProvenance": "pinned (RAM gRng2Value at the setup / attack activation, fixture hook wordsChain)",
+   "deferredUnits": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/dive70/ply-seel-onix.json",
+   "scenario": "tools/integration/fixtures/species-audit-11/scenarios/seelA-dive-player-chinchou-opponent-onix.json",
+   "side": "player",
+   "attacker": "SEEL",
+   "target": "ONIX",
+   "window": [
+    474,
+    566
+   ],
+   "rows": 93,
+   "expectedDuration": 93,
+   "runs": [
+    {
+     "run": 0,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "6f5ed440fa4007ececce13012878ac94416b827f35e22b66fb141a8bac8db6c9"
+    },
+    {
+     "run": 1,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "6f5ed440fa4007ececce13012878ac94416b827f35e22b66fb141a8bac8db6c9"
+    }
+   ],
+   "r1EqualsR2": true,
+   "lendEqualsRom": true,
+   "liveAges": 93,
+   "words": {
+    "count": 56,
+    "draws": [
+     20,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4
+    ]
+   },
+   "wordsProvenance": "pinned (RAM gRng2Value at the setup / attack activation, fixture hook wordsChain)",
+   "deferredUnits": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/dive70/var-protect-ply.json",
+   "scenario": "tools/integration/fixtures/dive70/scenarios/protect-ply-s2.json",
+   "side": "player",
+   "attacker": "CHINCHOU",
+   "target": "ONIX",
+   "window": [
+    2695,
+    2787
+   ],
+   "rows": 93,
+   "expectedDuration": 93,
+   "runs": [
+    {
+     "run": 0,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "9b3d3492ee65170211b1848adc535b1efa280a9ff104530a3e199117ddd9ba9a"
+    },
+    {
+     "run": 1,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "9b3d3492ee65170211b1848adc535b1efa280a9ff104530a3e199117ddd9ba9a"
+    }
+   ],
+   "r1EqualsR2": true,
+   "lendEqualsRom": true,
+   "liveAges": 93,
+   "words": {
+    "count": 56,
+    "draws": [
+     20,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4
+    ]
+   },
+   "wordsProvenance": "pinned (RAM gRng2Value at the setup / attack activation, fixture hook wordsChain)",
+   "deferredUnits": []
+  },
+  {
+   "fixture": "tools/integration/fixtures/dive70/var-surf-opp.json",
+   "scenario": "tools/integration/fixtures/dive70/scenarios/surf-opp.json",
+   "side": "opponent",
+   "attacker": "CHINCHOU",
+   "target": "ONIX",
+   "window": [
+    2353,
+    2445
+   ],
+   "rows": 93,
+   "expectedDuration": 93,
+   "runs": [
+    {
+     "run": 0,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "2156a187058c099be8b3cbbb96b9cadf532e24687389569f9f0a156aaed040c9"
+    },
+    {
+     "run": 1,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "2156a187058c099be8b3cbbb96b9cadf532e24687389569f9f0a156aaed040c9"
+    }
+   ],
+   "r1EqualsR2": true,
+   "lendEqualsRom": true,
+   "liveAges": 93,
+   "words": {
+    "count": 56,
+    "draws": [
+     20,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4
+    ]
+   },
+   "wordsProvenance": "pinned (RAM gRng2Value at the setup / attack activation, fixture hook wordsChain)",
+   "deferredUnits": [
+    {
+     "kind": "action-prompt"
+    },
+    {
+     "kind": "actions-committed"
+    },
+    {
+     "kind": "move-animation",
+     "moveId": 57,
+     "attackerSide": "player"
+    },
+    {
+     "kind": "hit-animation",
+     "targetVisible": false
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/dive70/var-surf-ply.json",
+   "scenario": "tools/integration/fixtures/dive70/scenarios/surf-ply.json",
+   "side": "player",
+   "attacker": "CHINCHOU",
+   "target": "ONIX",
+   "window": [
+    960,
+    1052
+   ],
+   "rows": 93,
+   "expectedDuration": 93,
+   "runs": [
+    {
+     "run": 0,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "9381df1895f2661a0112e0d4e5b5ffb19d35858b212b3274a262455dac0e47c1"
+    },
+    {
+     "run": 1,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "9381df1895f2661a0112e0d4e5b5ffb19d35858b212b3274a262455dac0e47c1"
+    }
+   ],
+   "r1EqualsR2": true,
+   "lendEqualsRom": true,
+   "liveAges": 93,
+   "words": {
+    "count": 56,
+    "draws": [
+     20,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4
+    ]
+   },
+   "wordsProvenance": "pinned (RAM gRng2Value at the setup / attack activation, fixture hook wordsChain)",
+   "deferredUnits": [
+    {
+     "kind": "move-animation",
+     "moveId": 57,
+     "attackerSide": "opponent"
+    },
+    {
+     "kind": "hit-animation",
+     "targetVisible": false
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/dive70/var-whirlpool-opp.json",
+   "scenario": "tools/integration/fixtures/dive70/scenarios/whirlpool-opp-s1.json",
+   "side": "opponent",
+   "attacker": "CHINCHOU",
+   "target": "ONIX",
+   "window": [
+    1087,
+    1179
+   ],
+   "rows": 93,
+   "expectedDuration": 93,
+   "runs": [
+    {
+     "run": 0,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "2dde1a72073e3f6f243d53df3dc43d70f15567ef86a12ccfeb94882840459398"
+    },
+    {
+     "run": 1,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "2dde1a72073e3f6f243d53df3dc43d70f15567ef86a12ccfeb94882840459398"
+    }
+   ],
+   "r1EqualsR2": true,
+   "lendEqualsRom": false,
+   "liveAges": 93,
+   "words": {
+    "count": 56,
+    "draws": [
+     20,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4
+    ]
+   },
+   "wordsProvenance": "pinned (RAM gRng2Value at the setup / attack activation, fixture hook wordsChain)",
+   "deferredUnits": [
+    {
+     "kind": "move-animation",
+     "moveId": 250,
+     "attackerSide": "player"
+    },
+    {
+     "kind": "hit-animation",
+     "targetVisible": false
+    },
+    {
+     "kind": "action-prompt"
+    },
+    {
+     "kind": "actions-committed"
+    }
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/dive70/var-whirlpool-ply.json",
+   "scenario": "tools/integration/fixtures/dive70/scenarios/whirlpool-ply.json",
+   "side": "player",
+   "attacker": "CHINCHOU",
+   "target": "ONIX",
+   "window": [
+    878,
+    970
+   ],
+   "rows": 93,
+   "expectedDuration": 93,
+   "runs": [
+    {
+     "run": 0,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "22a06710b004cb3c9d8a7c39b49edc40f47033d845c08b42a8961bc3b26ae84a"
+    },
+    {
+     "run": 1,
+     "exactRows": 93,
+     "residualPixels": 0,
+     "digest": "22a06710b004cb3c9d8a7c39b49edc40f47033d845c08b42a8961bc3b26ae84a"
+    }
+   ],
+   "r1EqualsR2": true,
+   "lendEqualsRom": true,
+   "liveAges": 93,
+   "words": {
+    "count": 56,
+    "draws": [
+     20,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4
+    ]
+   },
+   "wordsProvenance": "pinned (RAM gRng2Value at the setup / attack activation, fixture hook wordsChain)",
+   "deferredUnits": [
+    {
+     "kind": "move-animation",
+     "moveId": 250,
+     "attackerSide": "opponent"
+    },
+    {
+     "kind": "hit-animation",
+     "targetVisible": false
+    }
+   ]
+  }
+ ],
+ "protectMiss": [
+  {
+   "probe": "protect-opp-s1-r1.json",
+   "freshRunsAgree": true,
+   "bodies": [
+    [
+     182,
+     64,
+     123,
+     0
+    ],
+    [
+     291,
+     297,
+     115,
+     1
+    ],
+    [
+     182,
+     598,
+     123,
+     0
+    ],
+    [
+     182,
+     2032,
+     123,
+     0
+    ],
+    [
+     291,
+     2265,
+     115,
+     1
+    ]
+   ],
+   "turn2ProtectSucceeded": true,
+   "nextDiveBody": "new setup"
+  },
+  {
+   "probe": "protect-opp-s2-r1.json",
+   "freshRunsAgree": true,
+   "bodies": [
+    [
+     182,
+     64,
+     123,
+     0
+    ],
+    [
+     291,
+     297,
+     115,
+     1
+    ],
+    [
+     182,
+     598,
+     123,
+     0
+    ],
+    [
+     291,
+     2166,
+     115,
+     1
+    ]
+   ],
+   "turn2ProtectSucceeded": true,
+   "nextDiveBody": "new setup"
+  },
+  {
+   "probe": "protect-opp-s3-r1.json",
+   "freshRunsAgree": true,
+   "bodies": [
+    [
+     182,
+     64,
+     123,
+     0
+    ],
+    [
+     291,
+     297,
+     115,
+     1
+    ],
+    [
+     291,
+     760,
+     93,
+     1
+    ]
+   ],
+   "turn2ProtectSucceeded": false,
+   "nextDiveBody": null
+  },
+  {
+   "probe": "protect-opp-s4-r1.json",
+   "freshRunsAgree": true,
+   "bodies": [
+    [
+     182,
+     64,
+     123,
+     0
+    ],
+    [
+     291,
+     297,
+     115,
+     1
+    ],
+    [
+     291,
+     760,
+     93,
+     1
+    ]
+   ],
+   "turn2ProtectSucceeded": false,
+   "nextDiveBody": null
+  },
+  {
+   "probe": "protect-opp-s5-r1.json",
+   "freshRunsAgree": true,
+   "bodies": [
+    [
+     182,
+     64,
+     123,
+     0
+    ],
+    [
+     291,
+     297,
+     115,
+     1
+    ],
+    [
+     291,
+     760,
+     93,
+     1
+    ]
+   ],
+   "turn2ProtectSucceeded": false,
+   "nextDiveBody": null
+  },
+  {
+   "probe": "protect-opp-s6-r1.json",
+   "freshRunsAgree": true,
+   "bodies": [
+    [
+     182,
+     64,
+     123,
+     0
+    ],
+    [
+     291,
+     297,
+     115,
+     1
+    ],
+    [
+     182,
+     598,
+     123,
+     0
+    ],
+    [
+     291,
+     2166,
+     115,
+     1
+    ]
+   ],
+   "turn2ProtectSucceeded": true,
+   "nextDiveBody": "new setup"
+  },
+  {
+   "probe": "protect-ply-s1-r1.json",
+   "freshRunsAgree": true,
+   "bodies": [
+    [
+     182,
+     68,
+     123,
+     1
+    ],
+    [
+     291,
+     305,
+     118,
+     0
+    ],
+    [
+     182,
+     569,
+     123,
+     1
+    ],
+    [
+     291,
+     2170,
+     118,
+     0
+    ],
+    [
+     182,
+     2434,
+     123,
+     1
+    ]
+   ],
+   "turn2ProtectSucceeded": true,
+   "nextDiveBody": "new setup"
+  },
+  {
+   "probe": "protect-ply-s2-r1.json",
+   "freshRunsAgree": true,
+   "bodies": [
+    [
+     182,
+     68,
+     123,
+     1
+    ],
+    [
+     291,
+     305,
+     118,
+     0
+    ],
+    [
+     182,
+     569,
+     123,
+     1
+    ],
+    [
+     182,
+     2036,
+     123,
+     1
+    ],
+    [
+     291,
+     2273,
+     118,
+     0
+    ],
+    [
+     291,
+     2695,
+     93,
+     0
+    ]
+   ],
+   "turn2ProtectSucceeded": true,
+   "nextDiveBody": "new setup"
+  },
+  {
+   "probe": "protect-ply-s3-r1.json",
+   "freshRunsAgree": true,
+   "bodies": [
+    [
+     182,
+     68,
+     123,
+     1
+    ],
+    [
+     291,
+     305,
+     118,
+     0
+    ],
+    [
+     182,
+     569,
+     123,
+     1
+    ],
+    [
+     291,
+     2170,
+     118,
+     0
+    ],
+    [
+     182,
+     2434,
+     123,
+     1
+    ]
+   ],
+   "turn2ProtectSucceeded": true,
+   "nextDiveBody": "new setup"
+  },
+  {
+   "probe": "protect-ply-s4-r1.json",
+   "freshRunsAgree": true,
+   "bodies": [
+    [
+     182,
+     68,
+     123,
+     1
+    ],
+    [
+     291,
+     305,
+     118,
+     0
+    ],
+    [
+     182,
+     569,
+     123,
+     1
+    ],
+    [
+     291,
+     2170,
+     118,
+     0
+    ],
+    [
+     182,
+     2434,
+     123,
+     1
+    ]
+   ],
+   "turn2ProtectSucceeded": true,
+   "nextDiveBody": "new setup"
+  },
+  {
+   "probe": "protect-ply-s5-r1.json",
+   "freshRunsAgree": true,
+   "bodies": [
+    [
+     182,
+     68,
+     123,
+     1
+    ],
+    [
+     291,
+     305,
+     118,
+     0
+    ],
+    [
+     182,
+     569,
+     123,
+     1
+    ],
+    [
+     291,
+     2170,
+     118,
+     0
+    ],
+    [
+     182,
+     2434,
+     123,
+     1
+    ]
+   ],
+   "turn2ProtectSucceeded": true,
+   "nextDiveBody": "new setup"
+  },
+  {
+   "probe": "protect-ply-s6-r1.json",
+   "freshRunsAgree": true,
+   "bodies": [
+    [
+     182,
+     68,
+     123,
+     1
+    ],
+    [
+     291,
+     305,
+     118,
+     0
+    ],
+    [
+     291,
+     727,
+     93,
+     0
+    ]
+   ],
+   "turn2ProtectSucceeded": false,
+   "nextDiveBody": null
+  }
+ ]
+}
