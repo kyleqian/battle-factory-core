@@ -4,17 +4,24 @@ How often ordinary Battle Factory play (Scene ON) shows a **live adapter** for a
 which production gate made each fallback. Tooling + evidence only: `tools/integration/liveShareCensus.ts` (driver) and
 `tools/integration/liveShareCensusGates.ts` (classifier); no `src/` change, no oracle. Production tree as of master `4efff4321`.
 
-## Latest (2026-10-09, production src `f7cf9a74`)
+## Latest (2026-10-09 day, production src `d7f24b03`, master `a504d60d4`)
 
-| seeds | commands | live | partial | fallback | **live by count** | **live by frames** | faithful-random history (count / frames) |
-|---|---:|---:|---:|---:|---:|---:|---|
-| 0..999 (`report-seeds0-999-final-20261009.json`, two runs byte-identical, sha256 `d5c2fd39`) | 27518 | 24005 | 5 | 3508 | **87.23 %** | **91.13 %** | 423 / 71,311 (1.54 % / 1.81 %) |
-| 50000..50999 (`report-seeds50000-50999-final-20261009.json`) | 27041 | | | | 88.38 % | 90.47 % | 417 / 69,486 (1.54 % / 1.76 %) |
+| seeds | commands | live | **live by count** | **live by frames** | faithful-random history (count / frames) |
+|---|---:|---:|---:|---:|---|
+| 0..999 (`report-seeds0-999-final-20261009-day.json`, two runs byte-identical, sha256 `4ca4aaf8`) | 27518 | 25388 | **92.26 %** | **96.23 %** | 776 / 125,483 (2.82 % / 3.18 %) |
+| 50000..50999 (`report-seeds50000-50999-final-20261009-day.json`) | 27041 | | 93.52 % | 96.02 % | |
 
-Session start (src `e3fc2240`, 2026-10-08): 77.68 % / 78.76 % on seeds 0..999. Gameplay command sequence and battle digest were
-identical at every fold in between (per-fold census deltas on seeds 0..299 in each step's receipt). Remaining fallback frames on
-seeds 0..999 by reason: sprite-order lend unknown 157,046 (960 commands), case-local gates 63,043 (343), sprite allocator history
-unknown 59,150 (572), no adapter (Struggle, not a rental move) 33,792 (1,056), later-body 19,855 (167), Substitute cells ~6k.
+Session start (src `dde58985`, master `ccc4774c4`): 87.95 % / 92.09 % on seeds 0..999 (`report-seeds0-999-start-20261009-day.json`).
+Gameplay command key sequence identical at every fold (per-fold deltas on seeds 0..299 in each step's receipt; presented-frame totals
+move only where a corrected live body length replaces the fallback's). Remaining fallback frames on seeds 0..999 by reason: sprite-order
+lend unknown 61,695 (384 commands; SUBSTITUTE_FADE 10.6k, Shock Wave 13.4k, Dive 12.7k, Ice Ball 7.2k, a hidden battler's faint 4.0k),
+no adapter (Struggle, not a rental move) 33,792 (1,056), sprite allocator history unknown 18,642 (184), case-local gates 17,267 (130),
+later-body 4,416 (27), Substitute doll cells ~6.5k, Dive attack body (unsupported turn 1) 2,048. Note: the "unclassified (case-local
+gate)" label reads the RAW lend input, so a words-deferred lend that fails to resolve lands there — use
+`tools/integration/gates53GateCensus.ts` / `words59GateDiag.ts` for the exact condition.
+
+Previous (2026-10-09 overnight, src `f7cf9a74`): 87.23 % / 91.13 % on seeds 0..999 (`report-seeds0-999-final-20261009.json`).
+
 The sections below describe the instrument and the first (2026-10-08) results.
 
 ## Results (seeds 0..999, 1000 battles; receipts `tools/integration/fixtures/live-share-census/`)

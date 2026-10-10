@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-09 (day) — S10A: host histories, continued
+## 2026-10-09 (day) — S10A: allocator / order / words-lend histories + live-claim fixes; ordinary-play live share 87.95 -> 92.26 % of commands (92.09 -> 96.23 % of frames); 239 + 13 + 24
 
 - Session-start census on `ccc4774c4` (src `dde58985`), seeds 0..999: **87.95 % of move-animation commands / 92.09 % of frames live**
   (`tools/integration/fixtures/live-share-census/report-seeds0-999-start-20261009-day.json`, sha256 `5e4507ca`; battle digest
@@ -223,6 +223,18 @@
   battle frames +1,826 = 22 opponent Sparks x (115 - 32): those bodies now present the 115-frame body instead of the 32-frame fallback (3
   still decline at the order gate). Parity battle 85. Worker gates 1,597 files / 13,153 tests, build, differential 624/624. Supervisor:
   liveFixtureBatch rerun fresh — 11 / 11 windows 0 px both runs; census rerun +19 / +2,185, 22 changed records all opponent Spark.
+- Folded Opus worker `7a20759b0` (SIDE lane, narrow production grant) as `a504d60d4` (src tree `d7f24b03`): fly63 — prep61 landed minus
+  Dive: `TWO_TURN_ANIM_MOVE_IDS` + 19 / 340 (unleash keys 10019 / 10340), `SEMI_INVULNERABLE_SETUP_MOVE_IDS` {19, 340} mark the attacker
+  hidden from the setup body to the unleash body, a hit on a hidden battler leaves the tracker unchanged (allocates nothing), a hidden
+  battler fainting / switching in invalidates; Dive 291 unchanged (one unplanned key; words carry next session). Table 535 -> 543 bodies,
+  0 new plan texts; corpus replay 1,181 / 1,181 / 0. Census seeds 0..299 vs `c46abb437`: +11 / +1,391 (= prep61; Sky Uppercut on a hidden
+  Fly user, 7 Protects whose allocator now re-seeds, Mud-Slap, Pursuit), 0 regressions, identical commands + digest; parity battle 81.
+  Worker gates 1,597 files / 13,153 tests, build, differential 624/624. Supervisor: generator regen no diff; prep61Check on the committed
+  units byte-identical.
+- Supervisor FINAL gates on `a504d60d4` (src `d7f24b03`): typecheck, full suite 1,598 files / 13,159 tests, build, differential 624/624
+  vs `ccc4774c4`, census seeds 0..299 97.11 % by count / 98.11 % by frames (session start 92.66 / 94.12; +355 commands live, 0
+  regressions, command key sequence identical, player turns identical), seeds 0..999 92.26 % / 96.23 % (two runs byte-identical, sha256
+  `4ca4aaf8`; start 87.95 / 92.09), seeds 50000.. 93.52 % / 96.02 % (`final-supervisor-gates-20261009-day.json`).
 
 ## 2026-10-09 (overnight) — S10A: order / allocator host histories widened; ordinary-play live share 77.7 -> 87.2 % (91.1 % of frames); 241 + 13 + 22
 

@@ -2216,34 +2216,31 @@ fourteen-move physical batch is verified and folded. Helping Hand remains
 unaccepted pending legal doubles staging. No whole-playable arbitrary-history
 framebuffer exactness is claimed.
 
-Next (2026-10-09 morning): 241 scoped-exact + 13 faithful-random + 22 faithful-timing live adapters (census `241+13+22+0+0=276`;
-Icy Wind, Blizzard, Confuse Ray and Faint Attack moved to faithful timing by counter-evidenced D4 accounting). The 2026-10-09 overnight session
-widened the HISTORIES in which existing adapters play live (no new adapters): prep44's allocator NET-ZERO ids; sprite-order
-invalidator chains + 18 + 20 more EXACT / keyed order plans (BRN, TURN_TRAP by wrapped move, WISH / INGRAIN heal, FRZ, NIGHTMARE,
-ITEM_KNOCKOFF, Hydro Pump, Reversal, Solar Beam / Razor Wind by turn, Present by branch, Ice Punch, Attract, ...); GEOMETRY-KEYED
-order computed from the renderers' own timelines (Giga Drain, Mega Drain, Dream Eater); Icy Wind / Blizzard at any species geometry;
-the retained locked-action prompt cycle, battle-start seeds (Trace, double Intimidate) and the opponent's voluntary recall; a
-generalized seam-resolved deferred lend after Random2-words units (Sand-Attack, Mud-Slap, Rain Dance, RAIN_CONTINUES as a
-non-consuming sub-stream) with per-command faithful-random-history accounting; Dig / Return at later bodies. Ordinary-play census
-(`tools/integration/fixtures/live-share-census/report-seeds0-999-final-20261009.json`, src `f7cf9a74`): **87.23 % of
-move-animation commands / 91.13 % of frames live** (session start 77.68 / 78.76), of which faithful-random history 1.54 % / 1.81 %;
-seeds 50000..: 88.38 / 90.47; gameplay command sequence and battle digest identical at every fold. Resume points, by census frames:
-1. Sprite-order host stops (157k frames on seeds 0..999 before prep49 landed: Baton Pass recalls, the AI voluntary switch's
-   next-mon summary and the double-KO reshow are live since `c99a40a0a`, +52 / +8,685 on seeds 0..299; the end-of-battle loss
-   return needs no change; a Pursuit-intercepted switch still invalidates). Then Shock Wave
-   (opponent geometry), SUBSTITUTE_FADE and FOCUS_BAND (not reached in probes), Fury Cutter (needs the hit count on the event),
-   Bounce / Fly / Dive later units, hail + HAIL_CONTINUES and Blizzard bodies (geometry), Water Spout (needs attacker HP).
-2. Allocator history (59k): FIRST land prep50 (`docs/next-adapters-prep50.md`, banked and supervisor-reproduced: SLP / CONFUSION /
-   PSN / PRZ / BRN status animations allocator-NET-ZERO; +55 / +6,302 on seeds 0..299); then FRZ / status2 animations,
-   FUTURE_SIGHT's hit; the post-KO reseed is blocked by the order host (prep50 diagnostics).
-3. Case-local gates (63k): Blizzard opponent pairs whose impact age is not 197 (geometry-derived duration), Flatter words, Water
-   Pulse, Double Team's slot gate after a deferred lend, Dig.
-4. Later bodies (20k): the x2-tracker rows (Quick Attack attacker, Return target "unknown") that keep ONIX / RATTATA later Dig /
-   Return declining; Extrasensory, Signal Beam, Sheer Cold, Mach Punch, Memento, Sky Attack, Bonemerang, Fury Cutter.
-5. ISSUES #152 remainder: Light Screen opponent row-59 VBlank-write phase (D4 entry with the no-hold dominant phase; patch banked
-   by audit 15), Double-Edge / Attract rows, TYRANITAR rows; Substitute remainder; Ghost-type Curse provider; Dive attack body; Baton Pass flow; Endeavor W3.
-6. A live audit after every batch — audit 15 (docs/live-audit-15-chains.md: 142 chain windows, no species / history defect) did
-   not reach the deferred lend after words units, battle-start seeds or Giga Drain predicted-flip pairs.
+Next (2026-10-09 evening): 239 scoped-exact + 13 faithful-random + 24 faithful-timing live adapters (census `239+13+24+0+0=276`;
+Light Screen and Sky Attack moved to faithful timing by counter-evidenced D4 accounting; Spark's opponent side is live). The 2026-10-09
+day session widened histories again and fixed live-claim defects: the allocator now carries across audited status animations (SLP,
+CONFUSION, PSN, PRZ, BRN, FRZ, INFATUATION, CURSED, NIGHTMARE) and 40 more net-zero bodies; every general / hit / stat animation is
+audited net-zero or fails closed (#156); Outrage / FOCUS_BAND / Fury Cutter (counter key) / hail / HAIL_CONTINUES / Blizzard / Water Spout /
+Fly / Bounce order plans (geometry-keyed from the renderers' own timelines where needed), Eruption fail-closed (#155); the words-deferred
+lend replays past faint / send-out / switch units (rain, and Sand-Attack / Mud-Slap with the body's species in the marker); eight moves
+live at LATER bodies (rest-free guard); D4 body keys (Sheer Cold / Extrasensory opponent later bodies), Light Screen opponent and Blizzard
+geometry windows; Double Team's clone phase from the send-out animation's data[3] (#158: 86 / 214 live Double Teams had been one frame
+off). Ordinary-play census (`tools/integration/fixtures/live-share-census/report-seeds0-999-final-20261009-day.json`, src `d7f24b03`):
+**92.26 % of move-animation commands / 96.23 % of frames live** (session start 87.95 / 92.09), faithful-random history 2.82 % /
+3.18 %; seeds 50000..: 93.52 / 96.02; gameplay command key sequence identical at every fold. Resume points, by census frames:
+1. Sprite-order host stops (61,695 frames / 384 commands): SUBSTITUTE_FADE (three stagings never showed the fade — needs a probe
+   that reads substituteHP / the script cursor, or a census-route replay), Dive 291 (prep61: setup / unleash orders are functions of the
+   RAM-read words through dive.ts; land it as a words unit: 291 / 10291 in the words-deferred carry + the unleash words recorded), Ice Ball's
+   own carried lend, Shock Wave (shockWave.ts allocation timeline diverges at window 37 — a reducer fix), gates53 row B, Mud-Slap 189 opponent; a hidden battler's faint (fly63 fails closed there: 26 / 4,010, not probed).
+2. Allocator history (18,642 / 184): the post-KO send-out reseed (blocked by the order host at those units, prep52 residual).
+3. Case-local gates (17,267 / 130): Flatter `firstBody` (needs later-body register + allocator evidence), words-lend remainders.
+4. The Dive ATTACK body has no adapter ("unsupported turn 1", 2,048 frames); Substitute doll cells (~6k); later bodies (4,416):
+   Extrasensory player (undocumented residual), Memento (scanline entry), Fury Cutter counter 2+.
+5. ISSUES #152 remainder (Light Screen player-side hold / row-19 alternates to document in its D4 entry; TYRANITAR rows; Mach Punch
+   target row 60; Extrasensory split rows), #154 (staged-probe cross-batch reproducibility), #157 (weather-continuing event battler).
+6. A live audit after the next batch — audit 16 (docs/live-audit-16-session-chains.md: 239 windows, no defect) did not reach an
+   ORDER-DEPENDENT consumer after a words unit + KO / send-out chain (words57 / words59 windows were order-independent), later58 moves after
+   a switch-in, the d4later / dt60 / spark62 / fly63 changes.
 Struggle (1,056 commands / 33.8k frames in the census) is not a Factory rental move and stays outside the 276 accepted bodies.
 Validate new adapters with alternate-species dense proofs whose windows come from
 the source activation frame, not only the accepted fixture species.
