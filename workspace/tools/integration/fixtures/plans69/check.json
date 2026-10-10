@@ -1,0 +1,317 @@
+{
+ "schema": "plans69-check/v1",
+ "jobs": 62,
+ "notIdenticalAB": 0,
+ "plans": {
+  "body 176": "Cfffffffffffff;Cfff;D0;D1;D2;D3;D4;D5;D6;D7;D8;D9;D10;D11;D12;D13;D14;D15",
+  "body 302": "Cf;Cf;Cf;Cf;Cf/D0;Cf/D1;Cf/D2;Cf/D3;Cf/D4;Cf/D5;Cf/D6;Cf/D7;D8;D9;D10;D11;Cfffffffff;Cf;D13;D12,18,19,17,16,20,15,21,14",
+  "general CASTFORM_CHANGE": "",
+  "body 222 power<=99": "",
+  "body 222 power>99": "Cf;D0;Cf;D1"
+ },
+ "results": {
+  "general CASTFORM_CHANGE": {
+   "instances": 8,
+   "matched": 8,
+   "matchedCreateMerged": 8,
+   "framesChecked": 0,
+   "carries": 0,
+   "sides": [
+    "opponent",
+    "player"
+   ],
+   "species": [
+    "opp-rain-42",
+    "opp-rain-95",
+    "opp-sun-42",
+    "opp-sun-95",
+    "ply-rain-42",
+    "ply-rain-95",
+    "ply-sun-42",
+    "ply-sun-95"
+   ],
+   "jobs": [
+    "castform-opp-rain-42",
+    "castform-opp-rain-95",
+    "castform-opp-sun-42",
+    "castform-opp-sun-95",
+    "castform-ply-rain-42",
+    "castform-ply-rain-95",
+    "castform-ply-sun-42",
+    "castform-ply-sun-95"
+   ],
+   "mismatches": []
+  },
+  "body 176": {
+   "instances": 8,
+   "matched": 8,
+   "matchedCreateMerged": 8,
+   "framesChecked": 144,
+   "carries": 0,
+   "sides": [
+    "opponent",
+    "player"
+   ],
+   "species": [
+    "opp-143-42",
+    "opp-345-95",
+    "opp-42-143",
+    "ply-143-42",
+    "ply-345-95",
+    "ply-42-143"
+   ],
+   "jobs": [
+    "conversion-2-opp-143-42",
+    "conversion-2-opp-345-95",
+    "conversion-2-opp-42-143",
+    "conversion-2-ply-143-42",
+    "conversion-2-ply-345-95",
+    "conversion-2-ply-42-143"
+   ],
+   "mismatches": []
+  },
+  "body 222 power>99": {
+   "instances": 8,
+   "matched": 8,
+   "matchedCreateMerged": 8,
+   "framesChecked": 32,
+   "carries": 0,
+   "sides": [
+    "opponent",
+    "player"
+   ],
+   "species": [
+    "opp-intense-323-143",
+    "opp-sweep-s8",
+    "ply-intense-323-143",
+    "ply-intense-323-95",
+    "ply-sweep-s4",
+    "ply-sweep-s5",
+    "ply-sweep-s7",
+    "ply-sweep-s8"
+   ],
+   "jobs": [
+    "magnitude-opp-intense-323-143",
+    "magnitude-opp-sweep-s8",
+    "magnitude-ply-intense-323-143",
+    "magnitude-ply-intense-323-95",
+    "magnitude-ply-sweep-s4",
+    "magnitude-ply-sweep-s5",
+    "magnitude-ply-sweep-s7",
+    "magnitude-ply-sweep-s8"
+   ],
+   "mismatches": []
+  },
+  "body 222 power<=99": {
+   "instances": 36,
+   "matched": 36,
+   "matchedCreateMerged": 36,
+   "framesChecked": 0,
+   "carries": 0,
+   "sides": [
+    "opponent",
+    "player"
+   ],
+   "species": [
+    "opp-intense-323-95",
+    "opp-regular-75-143",
+    "opp-regular-75-95",
+    "opp-sweep-s2",
+    "opp-sweep-s3",
+    "opp-sweep-s7",
+    "opp-sweep-s8",
+    "opp-sweep-s9",
+    "ply-regular-75-143",
+    "ply-regular-75-95",
+    "ply-sweep-s2",
+    "ply-sweep-s3",
+    "ply-sweep-s4",
+    "ply-sweep-s5",
+    "ply-sweep-s6",
+    "ply-sweep-s7",
+    "ply-sweep-s8",
+    "ply-sweep-s9"
+   ],
+   "jobs": [
+    "magnitude-opp-intense-323-95",
+    "magnitude-opp-regular-75-143",
+    "magnitude-opp-regular-75-95",
+    "magnitude-opp-sweep-s2",
+    "magnitude-opp-sweep-s3",
+    "magnitude-opp-sweep-s7",
+    "magnitude-opp-sweep-s8",
+    "magnitude-opp-sweep-s9",
+    "magnitude-ply-regular-75-143",
+    "magnitude-ply-regular-75-95",
+    "magnitude-ply-sweep-s2",
+    "magnitude-ply-sweep-s3",
+    "magnitude-ply-sweep-s4",
+    "magnitude-ply-sweep-s5",
+    "magnitude-ply-sweep-s6",
+    "magnitude-ply-sweep-s7",
+    "magnitude-ply-sweep-s8",
+    "magnitude-ply-sweep-s9"
+   ],
+   "mismatches": []
+  },
+  "body 302": {
+   "instances": 6,
+   "matched": 4,
+   "matchedCreateMerged": 6,
+   "framesChecked": 118,
+   "carries": 0,
+   "sides": [
+    "opponent",
+    "player"
+   ],
+   "species": [
+    "opp-143-42",
+    "opp-344-95",
+    "opp-42-143",
+    "ply-143-42",
+    "ply-344-95",
+    "ply-42-143"
+   ],
+   "jobs": [
+    "needle-arm-opp-143-42",
+    "needle-arm-opp-344-95",
+    "needle-arm-opp-42-143",
+    "needle-arm-ply-143-42",
+    "needle-arm-ply-344-95",
+    "needle-arm-ply-42-143"
+   ],
+   "mismatches": [
+    {
+     "job": "needle-arm-opp-143-42",
+     "frame": 2233,
+     "observedPlan": "Cf;Cf;Cf;Cf;Cf/D0;Cf/D1;Cf/D2;Cf/D3;Cf/D4;Cf/D5;Cf/D6;Cf/D7;D8;D9;D10;D11;Cffffffffff;D13;D12,18,19,17,16,20,15,21,14",
+     "problems": [
+      "window count 19 != plan 20",
+      "window 16 f2304: created 3,4,5,7,9,10,11,12,13/3,4,5,7,9,10,11,12,13,14 destroyed / F !=",
+      "window 17 f2314: created 14/ destroyed /4 F !="
+     ]
+    },
+    {
+     "job": "needle-arm-opp-42-143",
+     "frame": 2087,
+     "observedPlan": "Cf;Cf;Cf;Cf;Cf/D0;Cf/D1;Cf/D2;Cf/D3;Cf/D4;Cf/D5;Cf/D6;Cf/D7;D8;D9;D10;D11;Cffffffffff;D13;D12,18,19,17,16,20,15,21,14",
+     "problems": [
+      "window count 19 != plan 20",
+      "window 16 f2158: created 3,4,5,7,9,10,11,12,13/3,4,5,7,9,10,11,12,13,14 destroyed / F !=",
+      "window 17 f2168: created 14/ destroyed /4 F !="
+     ]
+    }
+   ]
+  }
+ },
+ "classified": {
+  "body 260:opponent": [
+   {
+    "plan": "Cf;Cf;Cf;D1;Cfffffffffffffff;Cffffffffffffff;Cfffffffff;D2;D3,26,31,16,34,9,18,22,39,6,13,29,7,40,4,12,25,17,20,15,24,30,33,36,37,10,19,8,14,21,32,23,5,11,27,28,35,38;D0",
+    "instances": 1,
+    "jobs": [
+     "flatter-opp-143-42"
+    ]
+   },
+   {
+    "plan": "Cf;Cf;Cf;D1;Cfffffffffffffff;Cffffffffffffff;Cfffffffff;D2;D4,19,25,26,28,39,3,17,38,24,22,20,33,11,10,7,21,35,40,13,31,36,32,34,5,29,37,14,12,23,27,6,18,9,8,30,16,15;D0",
+    "instances": 1,
+    "jobs": [
+     "flatter-opp-30-95"
+    ]
+   },
+   {
+    "plan": "Cf;Cf;Cf;D1;Cfffffffffffffff;Cffffffffffffff;Cfffffffff;D2;D31,21,24,22,32,4,20,36,40,38,39,17,28,27,26,10,9,23,37,5,29,11,8,19,16,7,35,12,25,6,14,18,15,13,3,30,33,34;D0",
+    "instances": 1,
+    "jobs": [
+     "flatter-opp-42-143"
+    ]
+   }
+  ],
+  "body 260:player": [
+   {
+    "plan": "Cf;Cf;Cf;D1;Cffffffffffffff;Cffffffffffffff;Cffffffffff;D2;D13,12,15,5,25,29,35,4,24,33,37,17,31,3,10,20,9,19,18,36,40,21,7,28,8,27,11,6,32,39,14,22,30,23,34,16,26,38;D0",
+    "instances": 1,
+    "jobs": [
+     "flatter-ply-143-42"
+    ]
+   },
+   {
+    "plan": "Cf;Cf;Cf;D1;Cfffffffffffffff;Cffffffffffffff;Cfffffffff;D2;D4,19,25,26,28,39,3,17,38,24,22,20,33,11,10,7,21,35,40,13,31,36,32,34,5,29,37,14,12,23,27,6,18,9,8,30,16,15;D0",
+    "instances": 1,
+    "jobs": [
+     "flatter-ply-30-95"
+    ]
+   },
+   {
+    "plan": "Cf;Cf;Cf;D1;Cfffffffffffffff;Cffffffffffffff;Cfffffffff;D2;D3,5,20,26,27,29,40,4,18,39,25,23,21,34,12,11,8,22,36,14,32,37,33,35,6,30,38,15,13,24,28,7,19,10,9,31,17,16;D0",
+    "instances": 1,
+    "jobs": [
+     "flatter-ply-42-143"
+    ]
+   }
+  ],
+  "body 310:opponent": [
+   {
+    "plan": "Cf;D0;Cff;D1,2",
+    "instances": 3,
+    "jobs": [
+     "astonish-opp-143-42",
+     "astonish-opp-371-95",
+     "astonish-opp-42-95"
+    ]
+   }
+  ],
+  "body 310:player": [
+   {
+    "plan": "Cf;D0;Cff;D1,2",
+    "instances": 1,
+    "jobs": [
+     "astonish-ply-143-42"
+    ]
+   },
+   {
+    "plan": "Cf;D0;Cff;D2,1",
+    "instances": 2,
+    "jobs": [
+     "astonish-ply-371-95",
+     "astonish-ply-42-95"
+    ]
+   }
+  ],
+  "body 316:opponent": [
+   {
+    "plan": "Cff;Cf;Cf;D2;D3;D0,1;Cf;D4",
+    "instances": 1,
+    "jobs": [
+     "odor-sleuth-opp-143-42"
+    ]
+   },
+   {
+    "plan": "Cff;Cf;Cf;D2;D3;D1,0;Cf;D4",
+    "instances": 2,
+    "jobs": [
+     "odor-sleuth-opp-345-95",
+     "odor-sleuth-opp-42-143"
+    ]
+   }
+  ],
+  "body 316:player": [
+   {
+    "plan": "Cff;Cf;Cf;D2;D3;D0,1;Cf;D4",
+    "instances": 1,
+    "jobs": [
+     "odor-sleuth-ply-143-42"
+    ]
+   },
+   {
+    "plan": "Cff;Cf;Cf;D2;D3;D1,0;Cf;D4",
+    "instances": 2,
+    "jobs": [
+     "odor-sleuth-ply-345-95",
+     "odor-sleuth-ply-42-143"
+    ]
+   }
+  ]
+ }
+}

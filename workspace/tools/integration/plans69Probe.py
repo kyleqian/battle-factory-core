@@ -60,6 +60,11 @@ for side, other, tag in SIDES:
         for d in (95, 143):
             JOBS.append(("MAGNITUDE", f"magnitude-{tag}-{kind}-{sp}-{d}", 222, base(f"magnitude-{kind}", side, atk),
                          (("species", other, d),)))
+# more Magnitude instances: the regular scenarios over lab seeds 2..9 with two more turns (the magnitude roll varies with the seed)
+for side, other, tag in SIDES:
+    for seed in range(2, 10):
+        JOBS.append(("MAGNITUDE", f"magnitude-{tag}-sweep-s{seed}", 222, base("magnitude-regular", side, "graveler"),
+                     (("seed", seed), ("turns", 2))))
 
 
 def scenario(out: Path, job) -> Path:
