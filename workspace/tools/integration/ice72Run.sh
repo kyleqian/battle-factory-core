@@ -14,7 +14,7 @@ for r in r1 r2; do
   $PY $T/ice72Probe.py "$OUT/$r" | tee "$OUT/$r/probes.txt"
   python3 $T/ice72Extract.py "$OUT/$r" "$OUT/$r/units.json" > "$OUT/$r/units-summary.txt"
   ICE72_OUT="$OUT/$r" ICE72_PREDICT="$OUT/$r/predictions.json" $N $T/ice72Chain.ts "$OUT/$r/units.json" "$OUT/$r/chain.json"
-  ICE72_OUT="$OUT/$r" $N $T/ice72Chain.ts "$OUT/$r/units.json" "$OUT/$r/chain.json" "$OUT/$r/ice72-lend-vectors.json" > "$OUT/$r/chain.txt"
+  ICE72_OUT="$OUT/$r" $N $T/ice72Chain.ts "$OUT/$r/units.json" "$OUT/$r/chain.json" "$OUT/$r/ice72-lend-vectors.json" | sed 's/[[:space:]]*$//' > "$OUT/$r/chain.txt"
   shasum -a 256 "$OUT/$r"/raw/*.json | sed "s|$OUT/$r/||" > "$OUT/$r/raw.sha256"
 done
 for f in probes.txt units-summary.txt raw.sha256 units.json predictions.json chain.json chain.txt ice72-lend-vectors.json; do
