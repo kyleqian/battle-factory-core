@@ -2,7 +2,7 @@
  "schema": "land75-live-receipt/v1",
  "base": "dc173666b",
  "baseSrcTree": "e6f98bf94ce9812aa7c0090e58d82a44eed33526",
- "testedCommit": "eb7b4796f",
+ "testedCommit": "bcc550911",
  "testedSrcTree": "8e543d9143cb35ae946f950109260fe12c36626b",
  "partA": {
   "what": "hist73/net-zero-audit.json's 37 move ids appended to LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS",
@@ -360,5 +360,22 @@
     "no EXACT plan: body 291:player"
    ]
   }
+ },
+ "gates": {
+  "testedCommit": "bcc550911",
+  "note": "src unchanged since eb7b4796f (bcc550911 adds tests / tools / fixtures only)",
+  "relatedPartA": "hist73 related-tests-partA.txt set on 01497ab0e (Part A code): 35 files / 485 tests passed",
+  "relatedPartB": "hist73 related-tests-partB.txt set (63 files, superset of A) + tests/land75*.test.ts on eb7b4796f: 65 files / 701 tests passed",
+  "inventoryPlayable": "tests/animation/factoryAnimationInventory.test.ts + tests/playableAnimationIntegration.test.ts + tests/land75WallRoutes.test.ts on bcc550911: 3 files / 15 tests passed",
+  "typecheck": "npm run typecheck: pass",
+  "smoke": "npm run test:smoke: 8 files / 448 tests passed",
+  "fullSuite": {
+   "shard1": "805 passed | 22 skipped files; 6,901 passed | 119 skipped tests",
+   "shard2": "804 passed | 22 skipped files; 6,330 passed | 104 skipped tests",
+   "union": "1,609 files / 13,231 tests passed (POKEBENCH_VITEST_MAX_WORKERS=4, --maxWorkers=4)"
+  },
+  "build": "npm run build: pass",
+  "differential": "npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base dc173666b: 624 / 624 captures byte-identical",
+  "diffCheck": "git diff --check: clean"
  }
 }
