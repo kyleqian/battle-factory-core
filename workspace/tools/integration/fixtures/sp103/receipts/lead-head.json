@@ -1,0 +1,2928 @@
+{
+ "schema": "audit24-lead-check/v1",
+ "results": [
+  {
+   "stem": "sp103-player-haunter-steelix",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "player",
+   "body": 0,
+   "attacker": "HAUNTER",
+   "target": "STEELIX",
+   "activation": 77,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 8,
+   "duration": 106,
+   "rows": 114,
+   "window": [
+    77,
+    190
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    273536,
+    273536
+   ],
+   "identical": true,
+   "exactRows": 98,
+   "badRows": [
+    "91..106"
+   ],
+   "badPx": [
+    [
+     91,
+     17096
+    ],
+    [
+     92,
+     17096
+    ],
+    [
+     93,
+     17096
+    ],
+    [
+     94,
+     17096
+    ],
+    [
+     95,
+     17096
+    ],
+    [
+     96,
+     17096
+    ],
+    [
+     97,
+     17096
+    ],
+    [
+     98,
+     17096
+    ],
+    [
+     99,
+     17096
+    ],
+    [
+     100,
+     17096
+    ],
+    [
+     101,
+     17096
+    ],
+    [
+     102,
+     17096
+    ],
+    [
+     103,
+     17096
+    ],
+    [
+     104,
+     17096
+    ],
+    [
+     105,
+     17096
+    ],
+    [
+     106,
+     17096
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-steelix",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "player",
+   "body": 1,
+   "attacker": "HAUNTER",
+   "target": "STEELIX",
+   "activation": 1743,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 8,
+   "duration": 106,
+   "rows": 114,
+   "window": [
+    1743,
+    1856
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    273536,
+    273536
+   ],
+   "identical": true,
+   "exactRows": 98,
+   "badRows": [
+    "91..106"
+   ],
+   "badPx": [
+    [
+     91,
+     17096
+    ],
+    [
+     92,
+     17096
+    ],
+    [
+     93,
+     17096
+    ],
+    [
+     94,
+     17096
+    ],
+    [
+     95,
+     17096
+    ],
+    [
+     96,
+     17096
+    ],
+    [
+     97,
+     17096
+    ],
+    [
+     98,
+     17096
+    ],
+    [
+     99,
+     17096
+    ],
+    [
+     100,
+     17096
+    ],
+    [
+     101,
+     17096
+    ],
+    [
+     102,
+     17096
+    ],
+    [
+     103,
+     17096
+    ],
+    [
+     104,
+     17096
+    ],
+    [
+     105,
+     17096
+    ],
+    [
+     106,
+     17096
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-steelix",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "player",
+   "body": 2,
+   "attacker": "HAUNTER",
+   "target": "STEELIX",
+   "activation": 3409,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 8,
+   "duration": 106,
+   "rows": 114,
+   "window": [
+    3409,
+    3522
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    273536,
+    273536
+   ],
+   "identical": true,
+   "exactRows": 98,
+   "badRows": [
+    "91..106"
+   ],
+   "badPx": [
+    [
+     91,
+     17096
+    ],
+    [
+     92,
+     17096
+    ],
+    [
+     93,
+     17096
+    ],
+    [
+     94,
+     17096
+    ],
+    [
+     95,
+     17096
+    ],
+    [
+     96,
+     17096
+    ],
+    [
+     97,
+     17096
+    ],
+    [
+     98,
+     17096
+    ],
+    [
+     99,
+     17096
+    ],
+    [
+     100,
+     17096
+    ],
+    [
+     101,
+     17096
+    ],
+    [
+     102,
+     17096
+    ],
+    [
+     103,
+     17096
+    ],
+    [
+     104,
+     17096
+    ],
+    [
+     105,
+     17096
+    ],
+    [
+     106,
+     17096
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-steelix",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "player",
+   "body": 3,
+   "attacker": "HAUNTER",
+   "target": "STEELIX",
+   "activation": 5075,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 8,
+   "duration": 106,
+   "rows": 114,
+   "window": [
+    5075,
+    5188
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    273536,
+    273536
+   ],
+   "identical": true,
+   "exactRows": 98,
+   "badRows": [
+    "91..106"
+   ],
+   "badPx": [
+    [
+     91,
+     17096
+    ],
+    [
+     92,
+     17096
+    ],
+    [
+     93,
+     17096
+    ],
+    [
+     94,
+     17096
+    ],
+    [
+     95,
+     17096
+    ],
+    [
+     96,
+     17096
+    ],
+    [
+     97,
+     17096
+    ],
+    [
+     98,
+     17096
+    ],
+    [
+     99,
+     17096
+    ],
+    [
+     100,
+     17096
+    ],
+    [
+     101,
+     17096
+    ],
+    [
+     102,
+     17096
+    ],
+    [
+     103,
+     17096
+    ],
+    [
+     104,
+     17096
+    ],
+    [
+     105,
+     17096
+    ],
+    [
+     106,
+     17096
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-crobat",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "player",
+   "body": 0,
+   "attacker": "HAUNTER",
+   "target": "CROBAT",
+   "activation": 77,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 8,
+   "duration": 106,
+   "rows": 114,
+   "window": [
+    77,
+    190
+   ],
+   "romLeadStatic": false,
+   "romPreRowEqual": true,
+   "leadPx": [
+    200,
+    200
+   ],
+   "bodyPx": [
+    291616,
+    291616
+   ],
+   "identical": true,
+   "exactRows": 93,
+   "badRows": [
+    "0",
+    "91..106",
+    "110..113"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ],
+    [
+     91,
+     18176
+    ],
+    [
+     92,
+     18176
+    ],
+    [
+     93,
+     18176
+    ],
+    [
+     94,
+     18176
+    ],
+    [
+     95,
+     18176
+    ],
+    [
+     96,
+     18176
+    ],
+    [
+     97,
+     18176
+    ],
+    [
+     98,
+     18176
+    ],
+    [
+     99,
+     18176
+    ],
+    [
+     100,
+     18176
+    ],
+    [
+     101,
+     18176
+    ],
+    [
+     102,
+     18176
+    ],
+    [
+     103,
+     18176
+    ],
+    [
+     104,
+     18176
+    ],
+    [
+     105,
+     18176
+    ],
+    [
+     106,
+     18176
+    ],
+    [
+     110,
+     200
+    ],
+    [
+     111,
+     200
+    ],
+    [
+     112,
+     200
+    ],
+    [
+     113,
+     200
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-crobat",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "player",
+   "body": 1,
+   "attacker": "HAUNTER",
+   "target": "CROBAT",
+   "activation": 1743,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 8,
+   "duration": 106,
+   "rows": 114,
+   "window": [
+    1743,
+    1856
+   ],
+   "romLeadStatic": false,
+   "romPreRowEqual": true,
+   "leadPx": [
+    200,
+    200
+   ],
+   "bodyPx": [
+    291616,
+    291616
+   ],
+   "identical": true,
+   "exactRows": 93,
+   "badRows": [
+    "0",
+    "91..106",
+    "110..113"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ],
+    [
+     91,
+     18176
+    ],
+    [
+     92,
+     18176
+    ],
+    [
+     93,
+     18176
+    ],
+    [
+     94,
+     18176
+    ],
+    [
+     95,
+     18176
+    ],
+    [
+     96,
+     18176
+    ],
+    [
+     97,
+     18176
+    ],
+    [
+     98,
+     18176
+    ],
+    [
+     99,
+     18176
+    ],
+    [
+     100,
+     18176
+    ],
+    [
+     101,
+     18176
+    ],
+    [
+     102,
+     18176
+    ],
+    [
+     103,
+     18176
+    ],
+    [
+     104,
+     18176
+    ],
+    [
+     105,
+     18176
+    ],
+    [
+     106,
+     18176
+    ],
+    [
+     110,
+     200
+    ],
+    [
+     111,
+     200
+    ],
+    [
+     112,
+     200
+    ],
+    [
+     113,
+     200
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-crobat",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "player",
+   "body": 2,
+   "attacker": "HAUNTER",
+   "target": "CROBAT",
+   "activation": 3409,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 8,
+   "duration": 106,
+   "rows": 114,
+   "window": [
+    3409,
+    3522
+   ],
+   "romLeadStatic": false,
+   "romPreRowEqual": true,
+   "leadPx": [
+    200,
+    200
+   ],
+   "bodyPx": [
+    291616,
+    291616
+   ],
+   "identical": true,
+   "exactRows": 93,
+   "badRows": [
+    "0",
+    "91..106",
+    "110..113"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ],
+    [
+     91,
+     18176
+    ],
+    [
+     92,
+     18176
+    ],
+    [
+     93,
+     18176
+    ],
+    [
+     94,
+     18176
+    ],
+    [
+     95,
+     18176
+    ],
+    [
+     96,
+     18176
+    ],
+    [
+     97,
+     18176
+    ],
+    [
+     98,
+     18176
+    ],
+    [
+     99,
+     18176
+    ],
+    [
+     100,
+     18176
+    ],
+    [
+     101,
+     18176
+    ],
+    [
+     102,
+     18176
+    ],
+    [
+     103,
+     18176
+    ],
+    [
+     104,
+     18176
+    ],
+    [
+     105,
+     18176
+    ],
+    [
+     106,
+     18176
+    ],
+    [
+     110,
+     200
+    ],
+    [
+     111,
+     200
+    ],
+    [
+     112,
+     200
+    ],
+    [
+     113,
+     200
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-crobat",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "player",
+   "body": 3,
+   "attacker": "HAUNTER",
+   "target": "CROBAT",
+   "activation": 5075,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 8,
+   "duration": 106,
+   "rows": 114,
+   "window": [
+    5075,
+    5188
+   ],
+   "romLeadStatic": false,
+   "romPreRowEqual": true,
+   "leadPx": [
+    200,
+    200
+   ],
+   "bodyPx": [
+    291616,
+    291616
+   ],
+   "identical": true,
+   "exactRows": 93,
+   "badRows": [
+    "0",
+    "91..106",
+    "110..113"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ],
+    [
+     91,
+     18176
+    ],
+    [
+     92,
+     18176
+    ],
+    [
+     93,
+     18176
+    ],
+    [
+     94,
+     18176
+    ],
+    [
+     95,
+     18176
+    ],
+    [
+     96,
+     18176
+    ],
+    [
+     97,
+     18176
+    ],
+    [
+     98,
+     18176
+    ],
+    [
+     99,
+     18176
+    ],
+    [
+     100,
+     18176
+    ],
+    [
+     101,
+     18176
+    ],
+    [
+     102,
+     18176
+    ],
+    [
+     103,
+     18176
+    ],
+    [
+     104,
+     18176
+    ],
+    [
+     105,
+     18176
+    ],
+    [
+     106,
+     18176
+    ],
+    [
+     110,
+     200
+    ],
+    [
+     111,
+     200
+    ],
+    [
+     112,
+     200
+    ],
+    [
+     113,
+     200
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-opponent-haunter-quagsire",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "opponent",
+   "body": 0,
+   "attacker": "HAUNTER",
+   "target": "QUAGSIRE",
+   "activation": 81,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 0,
+   "duration": 105,
+   "rows": 105,
+   "window": [
+    81,
+    185
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    1590062,
+    1590062
+   ],
+   "identical": true,
+   "exactRows": 0,
+   "badRows": [
+    "0..104"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ],
+    [
+     1,
+     17513
+    ],
+    [
+     2,
+     17513
+    ],
+    [
+     3,
+     17513
+    ],
+    [
+     4,
+     17513
+    ],
+    [
+     5,
+     17513
+    ],
+    [
+     6,
+     17513
+    ],
+    [
+     7,
+     17513
+    ],
+    [
+     8,
+     17513
+    ],
+    [
+     9,
+     17513
+    ],
+    [
+     10,
+     17513
+    ],
+    [
+     11,
+     17513
+    ],
+    [
+     12,
+     17513
+    ],
+    [
+     13,
+     17513
+    ],
+    [
+     14,
+     17513
+    ],
+    [
+     15,
+     17513
+    ],
+    [
+     16,
+     17513
+    ],
+    [
+     17,
+     17513
+    ],
+    [
+     18,
+     17513
+    ],
+    [
+     19,
+     17513
+    ],
+    [
+     20,
+     17513
+    ],
+    [
+     21,
+     17513
+    ],
+    [
+     22,
+     17513
+    ],
+    [
+     23,
+     17513
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-opponent-haunter-quagsire",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "opponent",
+   "body": 1,
+   "attacker": "HAUNTER",
+   "target": "QUAGSIRE",
+   "activation": 1747,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 0,
+   "duration": 105,
+   "rows": 105,
+   "window": [
+    1747,
+    1851
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    1590062,
+    1590062
+   ],
+   "identical": true,
+   "exactRows": 0,
+   "badRows": [
+    "0..104"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ],
+    [
+     1,
+     17513
+    ],
+    [
+     2,
+     17513
+    ],
+    [
+     3,
+     17513
+    ],
+    [
+     4,
+     17513
+    ],
+    [
+     5,
+     17513
+    ],
+    [
+     6,
+     17513
+    ],
+    [
+     7,
+     17513
+    ],
+    [
+     8,
+     17513
+    ],
+    [
+     9,
+     17513
+    ],
+    [
+     10,
+     17513
+    ],
+    [
+     11,
+     17513
+    ],
+    [
+     12,
+     17513
+    ],
+    [
+     13,
+     17513
+    ],
+    [
+     14,
+     17513
+    ],
+    [
+     15,
+     17513
+    ],
+    [
+     16,
+     17513
+    ],
+    [
+     17,
+     17513
+    ],
+    [
+     18,
+     17513
+    ],
+    [
+     19,
+     17513
+    ],
+    [
+     20,
+     17513
+    ],
+    [
+     21,
+     17513
+    ],
+    [
+     22,
+     17513
+    ],
+    [
+     23,
+     17513
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-opponent-haunter-quagsire",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "opponent",
+   "body": 2,
+   "attacker": "HAUNTER",
+   "target": "QUAGSIRE",
+   "activation": 3413,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 0,
+   "duration": 105,
+   "rows": 105,
+   "window": [
+    3413,
+    3517
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    1590062,
+    1590062
+   ],
+   "identical": true,
+   "exactRows": 0,
+   "badRows": [
+    "0..104"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ],
+    [
+     1,
+     17513
+    ],
+    [
+     2,
+     17513
+    ],
+    [
+     3,
+     17513
+    ],
+    [
+     4,
+     17513
+    ],
+    [
+     5,
+     17513
+    ],
+    [
+     6,
+     17513
+    ],
+    [
+     7,
+     17513
+    ],
+    [
+     8,
+     17513
+    ],
+    [
+     9,
+     17513
+    ],
+    [
+     10,
+     17513
+    ],
+    [
+     11,
+     17513
+    ],
+    [
+     12,
+     17513
+    ],
+    [
+     13,
+     17513
+    ],
+    [
+     14,
+     17513
+    ],
+    [
+     15,
+     17513
+    ],
+    [
+     16,
+     17513
+    ],
+    [
+     17,
+     17513
+    ],
+    [
+     18,
+     17513
+    ],
+    [
+     19,
+     17513
+    ],
+    [
+     20,
+     17513
+    ],
+    [
+     21,
+     17513
+    ],
+    [
+     22,
+     17513
+    ],
+    [
+     23,
+     17513
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-opponent-haunter-quagsire",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "opponent",
+   "body": 3,
+   "attacker": "HAUNTER",
+   "target": "QUAGSIRE",
+   "activation": 5079,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 0,
+   "duration": 105,
+   "rows": 105,
+   "window": [
+    5079,
+    5183
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    1590062,
+    1590062
+   ],
+   "identical": true,
+   "exactRows": 0,
+   "badRows": [
+    "0..104"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ],
+    [
+     1,
+     17513
+    ],
+    [
+     2,
+     17513
+    ],
+    [
+     3,
+     17513
+    ],
+    [
+     4,
+     17513
+    ],
+    [
+     5,
+     17513
+    ],
+    [
+     6,
+     17513
+    ],
+    [
+     7,
+     17513
+    ],
+    [
+     8,
+     17513
+    ],
+    [
+     9,
+     17513
+    ],
+    [
+     10,
+     17513
+    ],
+    [
+     11,
+     17513
+    ],
+    [
+     12,
+     17513
+    ],
+    [
+     13,
+     17513
+    ],
+    [
+     14,
+     17513
+    ],
+    [
+     15,
+     17513
+    ],
+    [
+     16,
+     17513
+    ],
+    [
+     17,
+     17513
+    ],
+    [
+     18,
+     17513
+    ],
+    [
+     19,
+     17513
+    ],
+    [
+     20,
+     17513
+    ],
+    [
+     21,
+     17513
+    ],
+    [
+     22,
+     17513
+    ],
+    [
+     23,
+     17513
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-opponent-haunter-steelix",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "opponent",
+   "body": 0,
+   "attacker": "HAUNTER",
+   "target": "STEELIX",
+   "activation": 81,
+   "romBodyRows": 108,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 0,
+   "duration": 105,
+   "rows": 105,
+   "window": [
+    81,
+    185
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    1574459,
+    1574459
+   ],
+   "identical": true,
+   "exactRows": 0,
+   "badRows": [
+    "0..104"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ],
+    [
+     1,
+     17303
+    ],
+    [
+     2,
+     17303
+    ],
+    [
+     3,
+     17303
+    ],
+    [
+     4,
+     17303
+    ],
+    [
+     5,
+     17303
+    ],
+    [
+     6,
+     17303
+    ],
+    [
+     7,
+     17303
+    ],
+    [
+     8,
+     17303
+    ],
+    [
+     9,
+     17303
+    ],
+    [
+     10,
+     17303
+    ],
+    [
+     11,
+     17303
+    ],
+    [
+     12,
+     17303
+    ],
+    [
+     13,
+     17303
+    ],
+    [
+     14,
+     17303
+    ],
+    [
+     15,
+     17303
+    ],
+    [
+     16,
+     17303
+    ],
+    [
+     17,
+     17303
+    ],
+    [
+     18,
+     17303
+    ],
+    [
+     19,
+     17303
+    ],
+    [
+     20,
+     17303
+    ],
+    [
+     21,
+     17303
+    ],
+    [
+     22,
+     17303
+    ],
+    [
+     23,
+     17303
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-opponent-haunter-steelix",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "opponent",
+   "body": 1,
+   "attacker": "HAUNTER",
+   "target": "STEELIX",
+   "activation": 1747,
+   "romBodyRows": 108,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 0,
+   "duration": 105,
+   "rows": 105,
+   "window": [
+    1747,
+    1851
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    1574459,
+    1574459
+   ],
+   "identical": true,
+   "exactRows": 0,
+   "badRows": [
+    "0..104"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ],
+    [
+     1,
+     17303
+    ],
+    [
+     2,
+     17303
+    ],
+    [
+     3,
+     17303
+    ],
+    [
+     4,
+     17303
+    ],
+    [
+     5,
+     17303
+    ],
+    [
+     6,
+     17303
+    ],
+    [
+     7,
+     17303
+    ],
+    [
+     8,
+     17303
+    ],
+    [
+     9,
+     17303
+    ],
+    [
+     10,
+     17303
+    ],
+    [
+     11,
+     17303
+    ],
+    [
+     12,
+     17303
+    ],
+    [
+     13,
+     17303
+    ],
+    [
+     14,
+     17303
+    ],
+    [
+     15,
+     17303
+    ],
+    [
+     16,
+     17303
+    ],
+    [
+     17,
+     17303
+    ],
+    [
+     18,
+     17303
+    ],
+    [
+     19,
+     17303
+    ],
+    [
+     20,
+     17303
+    ],
+    [
+     21,
+     17303
+    ],
+    [
+     22,
+     17303
+    ],
+    [
+     23,
+     17303
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-opponent-haunter-steelix",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "opponent",
+   "body": 2,
+   "attacker": "HAUNTER",
+   "target": "STEELIX",
+   "activation": 3413,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 0,
+   "duration": 105,
+   "rows": 105,
+   "window": [
+    3413,
+    3517
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    1574459,
+    1574459
+   ],
+   "identical": true,
+   "exactRows": 0,
+   "badRows": [
+    "0..104"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ],
+    [
+     1,
+     17303
+    ],
+    [
+     2,
+     17303
+    ],
+    [
+     3,
+     17303
+    ],
+    [
+     4,
+     17303
+    ],
+    [
+     5,
+     17303
+    ],
+    [
+     6,
+     17303
+    ],
+    [
+     7,
+     17303
+    ],
+    [
+     8,
+     17303
+    ],
+    [
+     9,
+     17303
+    ],
+    [
+     10,
+     17303
+    ],
+    [
+     11,
+     17303
+    ],
+    [
+     12,
+     17303
+    ],
+    [
+     13,
+     17303
+    ],
+    [
+     14,
+     17303
+    ],
+    [
+     15,
+     17303
+    ],
+    [
+     16,
+     17303
+    ],
+    [
+     17,
+     17303
+    ],
+    [
+     18,
+     17303
+    ],
+    [
+     19,
+     17303
+    ],
+    [
+     20,
+     17303
+    ],
+    [
+     21,
+     17303
+    ],
+    [
+     22,
+     17303
+    ],
+    [
+     23,
+     17303
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-opponent-haunter-steelix",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "opponent",
+   "body": 3,
+   "attacker": "HAUNTER",
+   "target": "STEELIX",
+   "activation": 5079,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 0,
+   "duration": 105,
+   "rows": 105,
+   "window": [
+    5079,
+    5183
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    1574459,
+    1574459
+   ],
+   "identical": true,
+   "exactRows": 0,
+   "badRows": [
+    "0..104"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ],
+    [
+     1,
+     17303
+    ],
+    [
+     2,
+     17303
+    ],
+    [
+     3,
+     17303
+    ],
+    [
+     4,
+     17303
+    ],
+    [
+     5,
+     17303
+    ],
+    [
+     6,
+     17303
+    ],
+    [
+     7,
+     17303
+    ],
+    [
+     8,
+     17303
+    ],
+    [
+     9,
+     17303
+    ],
+    [
+     10,
+     17303
+    ],
+    [
+     11,
+     17303
+    ],
+    [
+     12,
+     17303
+    ],
+    [
+     13,
+     17303
+    ],
+    [
+     14,
+     17303
+    ],
+    [
+     15,
+     17303
+    ],
+    [
+     16,
+     17303
+    ],
+    [
+     17,
+     17303
+    ],
+    [
+     18,
+     17303
+    ],
+    [
+     19,
+     17303
+    ],
+    [
+     20,
+     17303
+    ],
+    [
+     21,
+     17303
+    ],
+    [
+     22,
+     17303
+    ],
+    [
+     23,
+     17303
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-crobat-slow",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "player",
+   "body": 0,
+   "attacker": "HAUNTER",
+   "target": "CROBAT",
+   "activation": 390,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 8,
+   "duration": 106,
+   "rows": 114,
+   "window": [
+    390,
+    503
+   ],
+   "romLeadStatic": false,
+   "romPreRowEqual": true,
+   "leadPx": [
+    200,
+    200
+   ],
+   "bodyPx": [
+    291616,
+    291616
+   ],
+   "identical": true,
+   "exactRows": 93,
+   "badRows": [
+    "0",
+    "91..106",
+    "110..113"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ],
+    [
+     91,
+     18176
+    ],
+    [
+     92,
+     18176
+    ],
+    [
+     93,
+     18176
+    ],
+    [
+     94,
+     18176
+    ],
+    [
+     95,
+     18176
+    ],
+    [
+     96,
+     18176
+    ],
+    [
+     97,
+     18176
+    ],
+    [
+     98,
+     18176
+    ],
+    [
+     99,
+     18176
+    ],
+    [
+     100,
+     18176
+    ],
+    [
+     101,
+     18176
+    ],
+    [
+     102,
+     18176
+    ],
+    [
+     103,
+     18176
+    ],
+    [
+     104,
+     18176
+    ],
+    [
+     105,
+     18176
+    ],
+    [
+     106,
+     18176
+    ],
+    [
+     110,
+     200
+    ],
+    [
+     111,
+     200
+    ],
+    [
+     112,
+     200
+    ],
+    [
+     113,
+     200
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-crobat-slow",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "player",
+   "body": 1,
+   "attacker": "HAUNTER",
+   "target": "CROBAT",
+   "activation": 2056,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 8,
+   "duration": 106,
+   "rows": 114,
+   "window": [
+    2056,
+    2169
+   ],
+   "romLeadStatic": false,
+   "romPreRowEqual": true,
+   "leadPx": [
+    200,
+    200
+   ],
+   "bodyPx": [
+    291616,
+    291616
+   ],
+   "identical": true,
+   "exactRows": 93,
+   "badRows": [
+    "0",
+    "91..106",
+    "110..113"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ],
+    [
+     91,
+     18176
+    ],
+    [
+     92,
+     18176
+    ],
+    [
+     93,
+     18176
+    ],
+    [
+     94,
+     18176
+    ],
+    [
+     95,
+     18176
+    ],
+    [
+     96,
+     18176
+    ],
+    [
+     97,
+     18176
+    ],
+    [
+     98,
+     18176
+    ],
+    [
+     99,
+     18176
+    ],
+    [
+     100,
+     18176
+    ],
+    [
+     101,
+     18176
+    ],
+    [
+     102,
+     18176
+    ],
+    [
+     103,
+     18176
+    ],
+    [
+     104,
+     18176
+    ],
+    [
+     105,
+     18176
+    ],
+    [
+     106,
+     18176
+    ],
+    [
+     110,
+     200
+    ],
+    [
+     111,
+     200
+    ],
+    [
+     112,
+     200
+    ],
+    [
+     113,
+     200
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-crobat-slow",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "player",
+   "body": 2,
+   "attacker": "HAUNTER",
+   "target": "CROBAT",
+   "activation": 3722,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 8,
+   "duration": 106,
+   "rows": 114,
+   "window": [
+    3722,
+    3835
+   ],
+   "romLeadStatic": false,
+   "romPreRowEqual": true,
+   "leadPx": [
+    200,
+    200
+   ],
+   "bodyPx": [
+    291616,
+    291616
+   ],
+   "identical": true,
+   "exactRows": 93,
+   "badRows": [
+    "0",
+    "91..106",
+    "110..113"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ],
+    [
+     91,
+     18176
+    ],
+    [
+     92,
+     18176
+    ],
+    [
+     93,
+     18176
+    ],
+    [
+     94,
+     18176
+    ],
+    [
+     95,
+     18176
+    ],
+    [
+     96,
+     18176
+    ],
+    [
+     97,
+     18176
+    ],
+    [
+     98,
+     18176
+    ],
+    [
+     99,
+     18176
+    ],
+    [
+     100,
+     18176
+    ],
+    [
+     101,
+     18176
+    ],
+    [
+     102,
+     18176
+    ],
+    [
+     103,
+     18176
+    ],
+    [
+     104,
+     18176
+    ],
+    [
+     105,
+     18176
+    ],
+    [
+     106,
+     18176
+    ],
+    [
+     110,
+     200
+    ],
+    [
+     111,
+     200
+    ],
+    [
+     112,
+     200
+    ],
+    [
+     113,
+     200
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-crobat-slow",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "player",
+   "body": 3,
+   "attacker": "HAUNTER",
+   "target": "CROBAT",
+   "activation": 5388,
+   "romBodyRows": 108,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 8,
+   "duration": 106,
+   "rows": 114,
+   "window": [
+    5388,
+    5501
+   ],
+   "romLeadStatic": false,
+   "romPreRowEqual": true,
+   "leadPx": [
+    200,
+    200
+   ],
+   "bodyPx": [
+    2409,
+    2409
+   ],
+   "identical": true,
+   "exactRows": 108,
+   "badRows": [
+    "0",
+    "109..113"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ],
+    [
+     109,
+     200
+    ],
+    [
+     110,
+     200
+    ],
+    [
+     111,
+     200
+    ],
+    [
+     112,
+     200
+    ],
+    [
+     113,
+     1609
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-opponent-haunter-aerodactyl-slow",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "opponent",
+   "body": 0,
+   "attacker": "HAUNTER",
+   "target": "AERODACTYL",
+   "activation": 394,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 0,
+   "duration": 105,
+   "rows": 105,
+   "window": [
+    394,
+    498
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    1641142,
+    1641142
+   ],
+   "identical": true,
+   "exactRows": 0,
+   "badRows": [
+    "0..104"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ],
+    [
+     1,
+     18123
+    ],
+    [
+     2,
+     18123
+    ],
+    [
+     3,
+     18123
+    ],
+    [
+     4,
+     18123
+    ],
+    [
+     5,
+     18123
+    ],
+    [
+     6,
+     18123
+    ],
+    [
+     7,
+     18123
+    ],
+    [
+     8,
+     18123
+    ],
+    [
+     9,
+     18123
+    ],
+    [
+     10,
+     18123
+    ],
+    [
+     11,
+     18123
+    ],
+    [
+     12,
+     18123
+    ],
+    [
+     13,
+     18123
+    ],
+    [
+     14,
+     18123
+    ],
+    [
+     15,
+     18123
+    ],
+    [
+     16,
+     18123
+    ],
+    [
+     17,
+     18123
+    ],
+    [
+     18,
+     18123
+    ],
+    [
+     19,
+     18123
+    ],
+    [
+     20,
+     18123
+    ],
+    [
+     21,
+     18123
+    ],
+    [
+     22,
+     18123
+    ],
+    [
+     23,
+     18123
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-opponent-haunter-aerodactyl-slow",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "opponent",
+   "body": 1,
+   "attacker": "HAUNTER",
+   "target": "AERODACTYL",
+   "activation": 2060,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 0,
+   "duration": 105,
+   "rows": 105,
+   "window": [
+    2060,
+    2164
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    1641142,
+    1641142
+   ],
+   "identical": true,
+   "exactRows": 0,
+   "badRows": [
+    "0..104"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ],
+    [
+     1,
+     18123
+    ],
+    [
+     2,
+     18123
+    ],
+    [
+     3,
+     18123
+    ],
+    [
+     4,
+     18123
+    ],
+    [
+     5,
+     18123
+    ],
+    [
+     6,
+     18123
+    ],
+    [
+     7,
+     18123
+    ],
+    [
+     8,
+     18123
+    ],
+    [
+     9,
+     18123
+    ],
+    [
+     10,
+     18123
+    ],
+    [
+     11,
+     18123
+    ],
+    [
+     12,
+     18123
+    ],
+    [
+     13,
+     18123
+    ],
+    [
+     14,
+     18123
+    ],
+    [
+     15,
+     18123
+    ],
+    [
+     16,
+     18123
+    ],
+    [
+     17,
+     18123
+    ],
+    [
+     18,
+     18123
+    ],
+    [
+     19,
+     18123
+    ],
+    [
+     20,
+     18123
+    ],
+    [
+     21,
+     18123
+    ],
+    [
+     22,
+     18123
+    ],
+    [
+     23,
+     18123
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-opponent-haunter-aerodactyl-slow",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "opponent",
+   "body": 2,
+   "attacker": "HAUNTER",
+   "target": "AERODACTYL",
+   "activation": 3726,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 0,
+   "duration": 105,
+   "rows": 105,
+   "window": [
+    3726,
+    3830
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    1641142,
+    1641142
+   ],
+   "identical": true,
+   "exactRows": 0,
+   "badRows": [
+    "0..104"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ],
+    [
+     1,
+     18123
+    ],
+    [
+     2,
+     18123
+    ],
+    [
+     3,
+     18123
+    ],
+    [
+     4,
+     18123
+    ],
+    [
+     5,
+     18123
+    ],
+    [
+     6,
+     18123
+    ],
+    [
+     7,
+     18123
+    ],
+    [
+     8,
+     18123
+    ],
+    [
+     9,
+     18123
+    ],
+    [
+     10,
+     18123
+    ],
+    [
+     11,
+     18123
+    ],
+    [
+     12,
+     18123
+    ],
+    [
+     13,
+     18123
+    ],
+    [
+     14,
+     18123
+    ],
+    [
+     15,
+     18123
+    ],
+    [
+     16,
+     18123
+    ],
+    [
+     17,
+     18123
+    ],
+    [
+     18,
+     18123
+    ],
+    [
+     19,
+     18123
+    ],
+    [
+     20,
+     18123
+    ],
+    [
+     21,
+     18123
+    ],
+    [
+     22,
+     18123
+    ],
+    [
+     23,
+     18123
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-opponent-haunter-aerodactyl-slow",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "opponent",
+   "body": 3,
+   "attacker": "HAUNTER",
+   "target": "AERODACTYL",
+   "activation": 5392,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 0,
+   "duration": 105,
+   "rows": 105,
+   "window": [
+    5392,
+    5496
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    1641142,
+    1641142
+   ],
+   "identical": true,
+   "exactRows": 0,
+   "badRows": [
+    "0..104"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ],
+    [
+     1,
+     18123
+    ],
+    [
+     2,
+     18123
+    ],
+    [
+     3,
+     18123
+    ],
+    [
+     4,
+     18123
+    ],
+    [
+     5,
+     18123
+    ],
+    [
+     6,
+     18123
+    ],
+    [
+     7,
+     18123
+    ],
+    [
+     8,
+     18123
+    ],
+    [
+     9,
+     18123
+    ],
+    [
+     10,
+     18123
+    ],
+    [
+     11,
+     18123
+    ],
+    [
+     12,
+     18123
+    ],
+    [
+     13,
+     18123
+    ],
+    [
+     14,
+     18123
+    ],
+    [
+     15,
+     18123
+    ],
+    [
+     16,
+     18123
+    ],
+    [
+     17,
+     18123
+    ],
+    [
+     18,
+     18123
+    ],
+    [
+     19,
+     18123
+    ],
+    [
+     20,
+     18123
+    ],
+    [
+     21,
+     18123
+    ],
+    [
+     22,
+     18123
+    ],
+    [
+     23,
+     18123
+    ]
+   ]
+  }
+ ]
+}

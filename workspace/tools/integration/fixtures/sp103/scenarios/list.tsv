@@ -1,0 +1,6 @@
+sp103-player-haunter-steelix	SHADOW_PUNCH	325	player	HAUNTER	STEELIX	fast	305419897
+sp103-player-haunter-crobat	SHADOW_PUNCH	325	player	HAUNTER	CROBAT	fast	38177486
+sp103-opponent-haunter-quagsire	SHADOW_PUNCH	325	opponent	HAUNTER	QUAGSIRE	fast	305419897
+sp103-opponent-haunter-steelix	SHADOW_PUNCH	325	opponent	HAUNTER	STEELIX	fast	38177486
+sp103-player-haunter-crobat-slow	SHADOW_PUNCH	325	player	HAUNTER	CROBAT	slow	305419897
+sp103-opponent-haunter-aerodactyl-slow	SHADOW_PUNCH	325	opponent	HAUNTER	AERODACTYL	slow	38177486
