@@ -21,8 +21,7 @@ import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "./battleResolutionPresentation.ts";
 import type { BattleResolutionPresentationRenderView } from "./battleResolutionPresentationRender.ts";
 import { applyLiveBattlerX2Event, liveMoveBattlerX2Input, type LiveBattlerX2History, type LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
-import { wavyMusicNotesGeometryAtAge } from "../animation/sing.ts";
-import { liveBattlerAnchors, liveCastformFormDeclines, liveMoveAnimationDuration, liveMoveAnimationPresentation } from "./liveMoveAnimation.ts";
+import { liveBattlerAnchors, liveCastformFormDeclines, liveMoveAnimationDuration, liveSingBodyRows } from "./liveMoveAnimation.ts";
 import { liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
 
 type Side = "player" | "opponent";
@@ -161,32 +160,6 @@ export const LIVE_SUBSTITUTE_SWAP_BODY_FRAMING: ReadonlyMap<number, SubstituteSw
   [47, { rows: 246, shift: 0 }], // Sing (player adapter 245; doll81; doll90: geometry-derived, liveSingBodyRows)
   [104, { rows: 159, shift: -1 }], // Double Team (adapter 230 = body + stats banner; doll90: every doll-free control 0 px at -1)
 ].map(([id, framing]) => [id as number, Object.freeze(framing as SubstituteSwapBodyFraming)]));
-
-/**
- * doll90: Sing (47)'s ROM body (activation .. first inactive row) follows its geometry. Each wavy note is destroyed once it leaves
- * x -16..256 / y -16..128 (AnimWavyMusicNotes_Step), the script's first waitforvisualfinish waits for the last one, and the rest
- * (clearmonbg, AnimTask_MusicNotesClearRainbowBlend, end) is geometry-independent: first inactive row = the last note's last
- * on-screen body age (sceneOnSingView: note age = body age - 7) + 97. Fresh direct-mGBA ROM bodies: player PERSIAN / GENGAR 246,
- * opponent PERSIAN 242, GOLBAT 244, and the predicted-then-probed CROBAT -> WAILORD 231 / WAILORD -> CROBAT 249 (docs/doll90-doll-cells.md).
- */
-const SING_BODY_TAIL_ROWS = 97;
-const singBodyRowsCache = new Map<string, number | null>();
-export function liveSingBodyRows(request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField): number | null {
-  const key = `${request.attacker}/${field.player.species}/${field.opponent.species}`;
-  if (singBodyRowsCache.has(key)) return singBodyRowsCache.get(key)!;
-  const state = liveMoveAnimationPresentation(request, field, 0);
-  let rows: number | null = null;
-  if (state !== null && state.config.move === "SING") {
-    const { attacker, target } = state.config as unknown as Record<"attacker" | "target", { geometry: { animationCenter: { x: number; y: number } } }>;
-    let last = -1;
-    for (let noteAge = 0; noteAge < 512; noteAge++) {
-      if (wavyMusicNotesGeometryAtAge(noteAge, attacker.geometry.animationCenter, target.geometry.animationCenter).length > 0) last = noteAge;
-    }
-    if (last >= 0) rows = last + 7 + SING_BODY_TAIL_ROWS;
-  }
-  singBodyRowsCache.set(key, rows);
-  return rows;
-}
 
 /** The composite's body framing for a request whose adapter duration is `adapterDuration` (`field`: the body field, Sing's geometry). */
 export function substituteSwapBodyFraming(

@@ -11,6 +11,7 @@ import type {
   SceneOnMovePresentationState, SceneOnMoveConfig, SceneOnPresentationBattler,
 } from "../animation/sceneOnPresentation.ts";
 import { GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE } from "../animation/sceneOnPresentation.ts";
+import { wavyMusicNotesGeometryAtAge } from "../animation/sing.ts";
 import { PRESENT_DAMAGE_FRAME_COUNT, PRESENT_HEAL_FRAME_COUNT } from "../animation/present.ts";
 import { SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE, SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE } from "../animation/solarBeam.ts";
 import { reduceMemento, type MementoBattlerConfig, type MementoConfig } from "../animation/memento.ts";
@@ -995,6 +996,32 @@ function liveEruptionProfileFor(field: BattleResolutionDisplayedField, attackerS
     eruptionProfileCache.set(key, profile);
   }
   return profile;
+}
+
+/**
+ * doll90: Sing (47)'s ROM body (activation .. first inactive row) follows its geometry. Each wavy note is destroyed once it leaves
+ * x -16..256 / y -16..128 (AnimWavyMusicNotes_Step), the script's first waitforvisualfinish waits for the last one, and the rest
+ * (clearmonbg, AnimTask_MusicNotesClearRainbowBlend, end) is geometry-independent: first inactive row = the last note's last
+ * on-screen body age (sceneOnSingView: note age = body age - 7) + 97. Fresh direct-mGBA ROM bodies: player PERSIAN / GENGAR 246,
+ * opponent PERSIAN 242, GOLBAT 244, and the predicted-then-probed CROBAT -> WAILORD 231 / WAILORD -> CROBAT 249 (docs/doll90-doll-cells.md).
+ */
+const SING_BODY_TAIL_ROWS = 97;
+const singBodyRowsCache = new Map<string, number | null>();
+export function liveSingBodyRows(request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField): number | null {
+  const key = `${request.attacker}/${field.player.species}/${field.opponent.species}`;
+  if (singBodyRowsCache.has(key)) return singBodyRowsCache.get(key)!;
+  const state = liveMoveAnimationPresentation(request, field, 0);
+  let rows: number | null = null;
+  if (state !== null && state.config.move === "SING") {
+    const { attacker, target } = state.config as unknown as Record<"attacker" | "target", { geometry: { animationCenter: { x: number; y: number } } }>;
+    let last = -1;
+    for (let noteAge = 0; noteAge < 512; noteAge++) {
+      if (wavyMusicNotesGeometryAtAge(noteAge, attacker.geometry.animationCenter, target.geometry.animationCenter).length > 0) last = noteAge;
+    }
+    if (last >= 0) rows = last + 7 + SING_BODY_TAIL_ROWS;
+  }
+  singBodyRowsCache.set(key, rows);
+  return rows;
 }
 
 /**

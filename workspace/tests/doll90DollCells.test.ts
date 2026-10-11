@@ -4,10 +4,12 @@ import type { BattleMoveAnimationRequest } from "../src/engine/battleMoveAnimati
 import type { BattleResolutionDisplayedField } from "../src/engine/battleResolutionPresentation.ts";
 import { createBattleCommandFieldArtView } from "../src/engine/battleCommandFieldArt.ts";
 import { renderBattleResolutionLiveView, renderBattleResolutionSceneOffView } from "../src/engine/battleScene.ts";
-import { LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS, liveMoveAnimationDuration, liveMoveSubstituteDollDeclines } from "../src/engine/liveMoveAnimation.ts";
 import {
-  LIVE_SUBSTITUTE_SWAP_BODY_CELLS, LIVE_SUBSTITUTE_SWAP_BODY_FRAMING, LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS, liveSingBodyRows,
-  liveSubstituteSwapApplies, liveSubstituteSwapView,
+  LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS, liveMoveAnimationDuration, liveMoveSubstituteDollDeclines, liveSingBodyRows,
+} from "../src/engine/liveMoveAnimation.ts";
+import {
+  LIVE_SUBSTITUTE_SWAP_BODY_CELLS, LIVE_SUBSTITUTE_SWAP_BODY_FRAMING, LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS, liveSubstituteSwapApplies,
+  liveSubstituteSwapView,
 } from "../src/engine/liveSubstituteSwap.ts";
 import { doll90AttRowSha, readDoll90AttFixture } from "../tools/integration/doll90AttFixture.ts";
 import { liveView, type Fixture } from "../tools/integration/liveAdapterFramebuffer.ts";
