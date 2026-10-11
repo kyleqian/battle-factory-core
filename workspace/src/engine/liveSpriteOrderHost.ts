@@ -77,6 +77,15 @@ export interface LiveSpriteOrderHost {
    */
   readonly deferredBody?: Omit<SpriteOrderDeferredLend, "units">;
   readonly deferred?: SpriteOrderDeferredLend;
+  /**
+   * reseed85: occupancy shadow of a pending WORDS marker (isWordsOrderDeferredUnit): the known tracker just before the words unit's own
+   * event, `lastUnit` that unit. A words unit is allocator-net-zero (LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS / _GENERAL_ANIMATIONS) and
+   * occupancy evolves without the free order (applySpriteOrderUnitPlan: creates take the lowest / highest open slot, destroys name slots;
+   * the order only breaks destroy-group ties), so its replay through `deferred.units` has the exact occupied set, battler slots and roles
+   * while its free ORDER is not the ROM's: read only by the allocator reseed (liveSpriteAllocatorReseedable), never lent.
+   * tools/integration/fixtures/reseed85/ (ROM: words unit -> KO -> summary -> send-out, inUse at the consumers == the control routes').
+   */
+  readonly deferredOccupancy?: SpriteOrderTracker;
 }
 
 /**
@@ -93,9 +102,16 @@ function withDeferredUnits(host: LiveSpriteOrderHost, units: readonly SpriteOrde
 }
 /** Drop the deferred marker (the tracker was revived by a party-menu reset, or a new known order replaces it). */
 function withoutDeferred(host: LiveSpriteOrderHost): LiveSpriteOrderHost {
-  if (host.deferred === undefined && host.deferredBody === undefined) return host;
-  const { deferred: _d, deferredBody: _b, ...rest } = host;
+  if (host.deferred === undefined && host.deferredBody === undefined && host.deferredOccupancy === undefined) return host;
+  const { deferred: _d, deferredBody: _b, deferredOccupancy: _o, ...rest } = host;
   return Object.freeze(rest);
+}
+/** reseed85: the occupancy shadow replayed through the pending marker's units (undefined without a words marker and its shadow). */
+function deferredOccupancyTracker(
+  deferred: SpriteOrderDeferredLend | undefined, occupancy: SpriteOrderTracker | undefined,
+): SpriteOrderTracker | undefined {
+  if (deferred === undefined || occupancy === undefined || !isWordsOrderDeferredUnit(deferred)) return undefined;
+  return deferred.units.reduce((tracker, unit) => applySpriteOrderPresentationEvent(tracker, unit), occupancy);
 }
 
 /**
@@ -502,6 +518,7 @@ export function advanceLiveSpriteOrderHost(
   let bonemerangHit1 = host.bonemerangHit1;
   let deferredBody = host.deferredBody;
   let deferred = host.deferred;
+  let deferredOccupancy = host.deferredOccupancy;
   const record = (event: SpriteOrderPresentationEvent | undefined) => {
     if (event !== undefined && deferred !== undefined) deferred = Object.freeze({ ...deferred, units: Object.freeze([...deferred.units, event]) });
   };
@@ -545,6 +562,10 @@ export function advanceLiveSpriteOrderHost(
         rainActivation = lend !== null ? Object.freeze({ free: lend })
           : deferred !== undefined && isWordsOrderDeferredUnit(deferred) ? Object.freeze({ deferred }) : undefined;
       }
+      // reseed85: the occupancy before this event (the known tracker, or a pending words marker's replayed shadow): a words unit's shadow start
+      const before = tracker.cursor.order.known ? tracker : deferredOccupancyTracker(deferred, deferredOccupancy);
+      const shadowStart = (unit: "body" | "animation"): SpriteOrderTracker | undefined =>
+        before !== undefined && before.cursor.order.known && before.promptPair === null ? Object.freeze({ ...before, lastUnit: unit }) : undefined;
       if (mapped.event) tracker = applySpriteOrderPresentationEvent(tracker, mapped.event);
       if (mapped.then) tracker = applySpriteOrderPresentationEvent(tracker, mapped.then);
       // Deferred lend: the marked body's own event starts it (the tracker invalidates there); later events are its units while the order is
@@ -555,12 +576,15 @@ export function advanceLiveSpriteOrderHost(
           key: generalAnimationPresentationRngKey(requestId, segmentIndex, events[index]!.sequence), moveId: 0,
           attackerSide: battler === 1 ? "opponent" as const : "player" as const, generalAnimation: WORDS_ORDER_GENERAL_ANIMATION,
           activation: rainActivation, units: Object.freeze([]) });
+        deferredOccupancy = shadowStart("animation");
       } else if (mapped.event?.kind === "move-animation" && deferredBody !== undefined && mapped.event.moveId === deferredBodyOrderKey(deferredBody)
         && mapped.event.attackerSide === deferredBody.attackerSide) {
         deferred = tracker.cursor.order.known ? undefined : Object.freeze({ ...deferredBody, units: Object.freeze([]) });
+        deferredOccupancy = deferred !== undefined && isWordsOrderDeferredUnit(deferred) ? shadowStart("body") : undefined;
         deferredBody = undefined;
       } else if (tracker.cursor.order.known) {
         deferred = undefined;
+        deferredOccupancy = undefined;
       } else {
         record(mapped.event);
         record(mapped.then);
@@ -587,12 +611,14 @@ export function advanceLiveSpriteOrderHost(
     };
   }
   if (tracker === host.tracker && bodies === (host.bodies ?? 0) && digSetup === host.digSetup && bonemerangHit1 === host.bonemerangHit1
-    && deferred === host.deferred && deferredBody === host.deferredBody && hidden === host.hidden && cursor.requestId === host.cursor?.requestId
+    && deferred === host.deferred && deferredBody === host.deferredBody && deferredOccupancy === host.deferredOccupancy && hidden === host.hidden
+    && cursor.requestId === host.cursor?.requestId
     && cursor.segmentIndex === host.cursor.segmentIndex && cursor.nextEventIndex === host.cursor.nextEventIndex
     && cursor.drained === host.cursor.drained) return host;
-  const { deferred: _d, deferredBody: _b, ...rest } = host;
+  const { deferred: _d, deferredBody: _b, deferredOccupancy: _o, ...rest } = host;
   return Object.freeze({ ...rest, tracker, hidden, bodies, ...(digSetup === undefined ? {} : { digSetup }), ...(bonemerangHit1 === undefined ? {} : { bonemerangHit1 }),
-    ...(deferredBody === undefined ? {} : { deferredBody }), ...(deferred === undefined ? {} : { deferred }), cursor: Object.freeze(cursor) });
+    ...(deferredBody === undefined ? {} : { deferredBody }), ...(deferred === undefined ? {} : { deferred }),
+    ...(deferred === undefined || deferredOccupancy === undefined ? {} : { deferredOccupancy }), cursor: Object.freeze(cursor) });
 }
 
 /**
@@ -668,9 +694,13 @@ export function lendLiveSpriteOrder(host: LiveSpriteOrderHost, moveId?: number):
  * menu (reshowBoth; docs/voluntary-switch-lend-audit.md §4.4). Occupant roles must be known.
  */
 export function liveSpriteAllocatorReseedable(host: LiveSpriteOrderHost): boolean {
-  const { lastUnit, occupantRoles } = host.tracker;
+  // reseed85: an unknown order whose only cause is a pending words marker reseeds from the marker's occupancy shadow (the reseed reads
+  // the occupancy, never the free order)
+  const tracker = host.tracker.cursor.order.known ? host.tracker : deferredOccupancyTracker(host.deferred, host.deferredOccupancy);
+  if (tracker === undefined) return false;
+  const { lastUnit, occupantRoles } = tracker;
   return (lastUnit === "send-out" || ((lastUnit === "switch-in" || lastUnit === "reshow") && occupantRoles !== null))
-    && spriteOrderTrackerRoleIsomorphic(host.tracker);
+    && spriteOrderTrackerRoleIsomorphic(tracker);
 }
 
 /**
