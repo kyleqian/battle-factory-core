@@ -54,3 +54,10 @@
 {"fixture": "ff-nidorino-nidorina-ply-c1.json", "move": "FLATTER", "live": true, "decline": null, "deferred": true, "lend": [4, 5, 3, 7, 9, 23, 29, 30, 32, 43, 21, 42, 28, 26, 24, 37]}
 {"fixture": "ff-nidorino-nidorina-ply-c2.json", "move": "FLATTER", "live": true, "decline": null, "deferred": true, "lend": [4, 5, 3, 7, 9, 32, 42, 35, 38, 17, 10, 36, 21, 28, 27, 12]}
 {"fixture": "ff-nidorino-nidorina-ply-c3.json", "move": "FLATTER", "live": true, "decline": null, "deferred": true, "lend": [4, 5, 3, 7, 9, 38, 42, 26, 19, 35, 20, 10, 16, 17, 21, 34]}
+{"fixture": "ko-water-pulse-opp-c0.json", "move": "FLATTER", "live": true, "decline": null, "deferred": false, "lend": [4, 3, 21, 20, 5, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9]}
+{"fixture": "ko-water-pulse-opp-c1.json", "move": "WATER_PULSE", "live": true, "decline": null, "deferred": true, "lend": [4, 5, 3, 7, 9, 43, 25, 22, 24, 32, 37, 41, 34, 20, 10, 16]}
+{"fixture": "ko-water-pulse-ply-c0.json", "move": "FLATTER", "live": true, "decline": null, "deferred": false, "lend": [4, 3, 21, 20, 5, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9]}
+{"fixture": "ko-water-pulse-ply-c1.json", "move": "FLATTER", "live": true, "decline": null, "deferred": true, "lend": [3, 4, 5, 7, 9, 23, 29, 30, 32, 43, 21, 42, 28, 26, 24, 37]}
+{"fixture": "ko-water-pulse-ply-c2.json", "move": "WATER_PULSE", "live": true, "decline": null, "deferred": true, "lend": [3, 28, 25, 32, 12, 19, 15, 37, 36, 18, 43, 4, 17, 44, 23, 24]}
+{"fixture": "ko-water-pulse-ply-c3.json", "move": "WATER_PULSE", "live": true, "decline": null, "deferred": true, "lend": [3, 4, 5, 7, 10, 9, 14, 15, 12, 13, 11, 28, 25, 32, 19, 37]}
+{"fixture": "ko-water-pulse-ply-c4.json", "move": "WATER_PULSE", "live": true, "decline": null, "deferred": true, "lend": [3, 4, 5, 7, 10, 9, 14, 15, 12, 13, 11, 28, 25, 32, 19, 37]}

@@ -54,3 +54,10 @@ ff-nidorino-nidorina-ply-c0.json FLATTER units 0 power 0 otherInvisible 0
 ff-nidorino-nidorina-ply-c1.json FLATTER units 4 power 0 otherInvisible 0
 ff-nidorino-nidorina-ply-c2.json FLATTER units 8 power 0 otherInvisible 0
 ff-nidorino-nidorina-ply-c3.json FLATTER units 11 power 0 otherInvisible 0
+ko-water-pulse-opp-c0.json FLATTER units 0 power 60 otherInvisible 0
+ko-water-pulse-opp-c1.json WATER_PULSE units 4 power 60 otherInvisible 0
+ko-water-pulse-ply-c0.json FLATTER units 0 power 0 otherInvisible 0
+ko-water-pulse-ply-c1.json FLATTER units 5 power 40 otherInvisible 0
+ko-water-pulse-ply-c2.json WATER_PULSE units 7 power 60 otherInvisible 0
+ko-water-pulse-ply-c3.json WATER_PULSE units 10 power 60 otherInvisible 0
+ko-water-pulse-ply-c4.json WATER_PULSE units 14 power 60 otherInvisible 0

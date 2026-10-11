@@ -48,3 +48,11 @@ processes r1 == r2, through the PATCHED production live renderer.
 Master: Flatter "unclassified (case-local gate)" 14 / 3,066 frames; consumers stopped at "no EXACT plan: body 260:opponent" 10 / 1,570
 and "body 260:player" 3 / 556. Prediction: the case-local Flatter bucket and both 260 stops shrink (to 0 where no other stop precedes),
 a gain of at most +27 commands / +5,192 frames, 0 live -> fallback, command key sequence + battleDigestExcludingFrames identical.
+
+## Batch 2 (staged after batch 1's comparison; predictions committed before batch 2's comparison)
+
+`ko-water-pulse-{ply,opp}` (flat84Stage.py): fast NIDORINO level 30 FLATTER vs slow SLOWBRO WATER_PULSE, 5 cycles. Probed twice fresh,
+r1 == r2 (the opp variant stops at the player's forced party menu after its KO: the probe trace has no menu input; its two bodies before
+that are kept). Rows appended to `predict-plan.txt` (47 bodies, 34 distinct plans) and `predict-lends.txt` (7 fixtures). Predictions:
+the 3 new Flatter bodies plan == ROM; every ko consumer lend == ROM, including `ko-water-pulse-ply-c3` / `-c4` (Water Pulse after the
+Flatter unit, the KO of NIDORINO, the opponent's summary + send-out of 372 and its Return 216: the words replay's battle units).

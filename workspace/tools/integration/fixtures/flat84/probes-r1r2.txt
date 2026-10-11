@@ -12,3 +12,5 @@ same ff-nidorina-nidorino-opp
 same ff-nidorina-nidorino-ply
 same ff-nidorino-nidorina-opp
 same ff-nidorino-nidorina-ply
+same ko-water-pulse-opp
+same ko-water-pulse-ply

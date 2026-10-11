@@ -2,7 +2,8 @@
 """flat84: chain fixtures for the flat84 scenarios (flat77Probe.py output). flat77Fixtures.py's derivation unchanged (turns from the ROM's
 gBattleResults.battleTurnCounter, the kernel payload forms the orchestrator feeds the production hosts, STATS_CHANGE with the ROM's
 animArg1, Status_Confusion + its self-hit HIT_ANIMATION, promptShown, pinnedRng2 per history body), with:
-  units   + SPARK 209 (power 65);
+  units   + SPARK 209 (power 65), RETURN 216 (power 102: the ko-* send-out mon's friendship 255; every payload carries the
+          attacker's party friendship, 70 for every lead);
   windows EVERY body of a consumer move (FLATTER 260, QUICK_ATTACK 98, WATER_PULSE 352, MEGA_DRAIN 72, SPARK 209; TACKLE 33 is history only) of either
           battler: a body after a Flatter consumes the Flatter words-order unit (the fast lead's turn-0 Flatter / a turn-0 Quick Attack
           are first-body controls).
@@ -17,10 +18,10 @@ probe_dir, out_dir = (None, Path(sys.argv[2])) if PREDICT else (Path(sys.argv[1]
 out_dir.mkdir(parents=True, exist_ok=True)
 SCEN = Path("tools/integration/fixtures/flat84/scenarios")
 SPECIES = {s["id"]: s["name"].removeprefix("SPECIES_") for s in json.loads(Path("src/data/gen/species-stats.json").read_text())["species"]}
-POWER = {260: 0, 33: 35, 98: 40, 113: 0, 72: 20, 332: 60, 44: 60, 334: 0, 51: 40, 222: 0, 241: 0, 240: 0, 176: 0, 302: 60, 173: 40, 301: 30, 291: 60, 351: 60, 352: 60, 129: 60, 85: 95, 189: 20, 250: 15, 209: 65}
+POWER = {260: 0, 33: 35, 98: 40, 113: 0, 72: 20, 332: 60, 44: 60, 334: 0, 51: 40, 222: 0, 241: 0, 240: 0, 176: 0, 302: 60, 173: 40, 301: 30, 291: 60, 351: 60, 352: 60, 129: 60, 85: 95, 189: 20, 250: 15, 209: 65, 216: 102}
 NAMES = {260: "FLATTER", 33: "TACKLE", 98: "QUICK_ATTACK", 113: "LIGHT_SCREEN", 72: "MEGA_DRAIN", 332: "AERIAL_ACE", 44: "BITE",
          334: "IRON_DEFENSE", 51: "ACID", 222: "MAGNITUDE", 241: "SUNNY_DAY", 240: "RAIN_DANCE", 176: "CONVERSION_2", 302: "NEEDLE_ARM", 173: "SNORE", 301: "ICE_BALL",
-         291: "DIVE", 351: "SHOCK_WAVE", 352: "WATER_PULSE", 129: "SWIFT", 85: "THUNDERBOLT", 189: "MUD_SLAP", 250: "WHIRLPOOL", 209: "SPARK"}
+         291: "DIVE", 351: "SHOCK_WAVE", 352: "WATER_PULSE", 129: "SWIFT", 85: "THUNDERBOLT", 189: "MUD_SLAP", 250: "WHIRLPOOL", 209: "SPARK", 216: "RETURN"}
 MOVES = {f"Move_{v}": k for k, v in NAMES.items()}
 RAM_POWER = {222, 301}
 CONSUMERS = {260, 98, 352, 72, 209}  # TACKLE 33 has no live adapter (liveView throws): history only
@@ -97,7 +98,9 @@ for name, d in SOURCES:
             power = b["power"] if move in RAM_POWER else POWER[move]
             hit = move not in (222, 241, 240, 176, 173, 260) or move == 222
             hit = hit and tgt != atk and nxt is not None and nxt[tgt]["hp"] < at[tgt]["hp"]
-            args = [str(move), str(b["moveTurn"]), str(power), "1" if hit else "0", "70", "0"] + ([str(b["rollout"])] if move == 301 else [])
+            # the attacker's friendship from the scenario party (the ko-* send-out mon 372 has 255: Return 216 power 102)
+            friend = next((m["friendship"] for m in parties["player" if atk == 0 else "opponent"] if m["species"] == at[atk]["species"]), 70)
+            args = [str(move), str(b["moveTurn"]), str(power), "1" if hit else "0", str(friend), "0"] + ([str(b["rollout"])] if move == 301 else [])
             body = {"kind": "animation", "animationId": "MOVE_ANIMATION", "battler": atk, "target": tgt, "arguments": args}
             consumer = move in CONSUMERS
             if consumer and "endFrame" in b:
