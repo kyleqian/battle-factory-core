@@ -86,7 +86,7 @@ const PRESENT_HIDDEN_TARGET_GATE = lineOf(lmaLines, "if (liveMoveHiddenTargetDec
 // cf78: the Castform weather-form gate right after it (liveCastformFormDeclines).
 const PRESENT_CASTFORM_GATE = lineOf(lmaLines, "if (liveCastformFormDeclines(field)) return null;", PRESENTATION.start - 80);
 const SWAP_APPLIES = lineOf(swapLines, "export function liveSubstituteSwapApplies(");
-const SWAP_SELF = lineOf(swapLines, "return request.target !== request.attacker", SWAP_APPLIES);
+const SWAP_SELF = lineOf(swapLines, "return (request.target === request.attacker", SWAP_APPLIES);
 const SWAP_BOTH = lineOf(swapLines, "battlerOf(field, request.target).substituteDoll !== true", SWAP_APPLIES);
 const SWAP_CELL = lineOf(swapLines, "LIVE_SUBSTITUTE_SWAP_BODY_CELLS.get(request.moveId)", SWAP_APPLIES);
 const SWAP_HIT = lineOf(swapLines, "request.multihit < 2", SWAP_APPLIES);

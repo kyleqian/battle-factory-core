@@ -30,7 +30,7 @@ const FIXTURES = "tools/integration/fixtures/dolldef-live";
 const fixture = (stem: string) => JSON.parse(readFileSync(`${FIXTURES}/${stem}.json`, "utf8")) as DolldefFixture;
 
 describe("defender shown as the Substitute doll: proven cells live, everything else declines", () => {
-  it("the proven-cell allowlist is exactly the prep38 v1 batch (27 cells)", () => {
+  it("the proven-cell allowlist is exactly the prep38 v1 batch (27 cells + doll81/land82 Leaf Blade, ThunderPunch)", () => {
     const cells = [...LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS].flatMap(([id, sides]) => sides.map((s) => `${id}:${s}`)).sort();
     expect(cells).toEqual([
       "157:opponent", "188:opponent", "188:player", "213:opponent", "213:player", "242:opponent", "242:player", "247:player",
@@ -41,6 +41,8 @@ describe("defender shown as the Substitute doll: proven cells live, everything e
       "189:opponent", "189:player", "202:opponent", "202:player",
       // Renderer-local art lookups routed to the doll (Ice Beam, Thunderbolt; Megahorn D4 + the doll palette bank).
       "58:opponent", "58:player", "85:opponent", "85:player", "224:opponent", "224:player",
+      // land82 (doll81): Leaf Blade, ThunderPunch, both sides.
+      "348:opponent", "348:player", "9:opponent", "9:player",
     ].sort());
   });
   it("a proven cell keeps its doll-free duration; unproven orientations / moves and both-doll bodies decline", () => {

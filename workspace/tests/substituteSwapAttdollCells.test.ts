@@ -60,6 +60,8 @@ describe("attacker-doll swap cells (prep40)", () => {
       [89, 198, 208, 0, ["player", "opponent"]], [94, 140, 145, -5, ["player"]], [188, 160, 169, -4, ["player", "opponent"]],
       [53, 115, 210, -15, ["player", "opponent"]], [92, 219, 231, -7, ["player", "opponent"]], [44, 26, 41, -10, ["player", "opponent"]],
       [7, 101, 102, 0, ["player", "opponent"]], [153, 212, 217, -4, ["player", "opponent"]],
+      // land82 (doll81)
+      [47, 245, 246, 0, ["player"]], [142, 152, 153, 0, ["player", "opponent"]], [320, 225, 221, 0, ["player"]],
     ];
     expect([...LIVE_SUBSTITUTE_SWAP_BODY_FRAMING.keys()].sort((a, b) => a - b)).toEqual(framed.map((f) => f[0]).sort((a, b) => a - b));
     for (const [moveId, adapter, rows, shift, sides] of framed) {
@@ -67,7 +69,8 @@ describe("attacker-doll swap cells (prep40)", () => {
       expect([...LIVE_SUBSTITUTE_SWAP_BODY_CELLS.get(moveId)!]).toEqual(sides);
       for (const side of ["player", "opponent"] as const) {
         const attacker = side === "player" ? 0 : 1;
-        expect(liveMoveAnimationDuration(req(moveId, attacker), field(false, false))).toBe(adapter);
+        // land82: the adapter figure is the framed side's (Sing opponent's doll-free body is 248; GrassWhistle's differs too).
+        if (sides.includes(side)) expect(liveMoveAnimationDuration(req(moveId, attacker), field(false, false))).toBe(adapter);
         const subbed = field(side === "player", side === "opponent");
         // prep40 window rows: swap-in 42 / 40 + idle + ROM body + swap-back + first inactive.
         expect(liveMoveAnimationDuration(req(moveId, attacker), subbed)).toBe(sides.includes(side) ? rows + SWAPS[side] : null);

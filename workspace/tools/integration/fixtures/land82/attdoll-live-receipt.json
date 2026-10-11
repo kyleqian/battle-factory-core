@@ -1,0 +1,2586 @@
+{
+ "schema": "land82-attdoll-live-receipt/v1",
+ "base": "b05d384ca",
+ "productionSrcTree": "4c4fe4c715bc405364fddc8c7ef511fa420590b4",
+ "patchSha256_16": "973c77fd4ff4852a",
+ "method": "tools/integration/land82Run.sh: fresh direct-mGBA, 60 scenarios twice (r1 == r2 byte-identical), patched copy of base; summary.tsv/summary-explore.tsv identical to doll81 receipts",
+ "results": [
+  {
+   "stem": "doll81-att-dream-eater-opponent-golbat",
+   "side": "player",
+   "move": "BELLY_DRUM",
+   "moveId": 187,
+   "turn": 0,
+   "frame": 345,
+   "window": [
+    345,
+    454
+   ],
+   "rows": 110,
+   "orderInput": "fixture",
+   "adapterDuration": 110,
+   "productionDuration": 110,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    183993,
+    183993
+   ],
+   "identical": true,
+   "badAges": [
+    "0..109"
+   ]
+  },
+  {
+   "stem": "doll81-att-dream-eater-opponent-golbat",
+   "side": "player",
+   "move": "REST",
+   "moveId": 156,
+   "turn": 0,
+   "frame": 2049,
+   "window": [
+    2049,
+    2158
+   ],
+   "rows": 110,
+   "orderInput": "fixture",
+   "adapterDuration": 110,
+   "productionDuration": 110,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    225683,
+    225683
+   ],
+   "identical": true,
+   "badAges": [
+    "0..109"
+   ]
+  },
+  {
+   "stem": "doll81-att-dream-eater-opponent-golbat",
+   "side": "opponent",
+   "move": "DREAM_EATER",
+   "moveId": 138,
+   "turn": 0,
+   "frame": 3475,
+   "window": [
+    3475,
+    3822
+   ],
+   "rows": 348,
+   "orderInput": "fixture",
+   "adapterDuration": 267,
+   "productionDuration": 348,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-dream-eater-opponent-golbat",
+   "side": "opponent",
+   "move": "DREAM_EATER",
+   "moveId": 138,
+   "turn": 0,
+   "frame": 5173,
+   "window": [
+    5173,
+    5519
+   ],
+   "rows": 347,
+   "orderInput": "none",
+   "adapterDuration": 267,
+   "productionDuration": 348,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "px": [
+    4628727,
+    4628727
+   ],
+   "identical": true,
+   "badAges": [
+    "42..326",
+    "333..346"
+   ]
+  },
+  {
+   "stem": "doll81-att-dream-eater-opponent-golbat",
+   "side": "opponent",
+   "move": "DREAM_EATER",
+   "moveId": 138,
+   "turn": 0,
+   "frame": 6871,
+   "window": [
+    6871,
+    7217
+   ],
+   "rows": 347,
+   "orderInput": "none",
+   "adapterDuration": 267,
+   "productionDuration": 348,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "px": [
+    4628727,
+    4628727
+   ],
+   "identical": true,
+   "badAges": [
+    "42..326",
+    "333..346"
+   ]
+  },
+  {
+   "stem": "doll81-att-dream-eater-opponent-golbat",
+   "side": "player",
+   "move": "REST",
+   "moveId": 156,
+   "turn": 0,
+   "frame": 7638,
+   "window": [
+    7638,
+    7747
+   ],
+   "rows": 110,
+   "orderInput": "none",
+   "adapterDuration": 110,
+   "productionDuration": 110,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    225683,
+    225683
+   ],
+   "identical": true,
+   "badAges": [
+    "0..109"
+   ]
+  },
+  {
+   "stem": "doll81-att-dream-eater-opponent",
+   "side": "player",
+   "move": "BELLY_DRUM",
+   "moveId": 187,
+   "turn": 0,
+   "frame": 346,
+   "window": [
+    346,
+    455
+   ],
+   "rows": 110,
+   "orderInput": "fixture",
+   "adapterDuration": 110,
+   "productionDuration": 110,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    170830,
+    170830
+   ],
+   "identical": true,
+   "badAges": [
+    "0..109"
+   ]
+  },
+  {
+   "stem": "doll81-att-dream-eater-opponent",
+   "side": "player",
+   "move": "REST",
+   "moveId": 156,
+   "turn": 0,
+   "frame": 2063,
+   "window": [
+    2063,
+    2172
+   ],
+   "rows": 110,
+   "orderInput": "fixture",
+   "adapterDuration": 110,
+   "productionDuration": 110,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    212520,
+    212520
+   ],
+   "identical": true,
+   "badAges": [
+    "0..109"
+   ]
+  },
+  {
+   "stem": "doll81-att-dream-eater-opponent",
+   "side": "opponent",
+   "move": "DREAM_EATER",
+   "moveId": 138,
+   "turn": 0,
+   "frame": 3476,
+   "window": [
+    3476,
+    3823
+   ],
+   "rows": 348,
+   "orderInput": "fixture",
+   "adapterDuration": 267,
+   "productionDuration": 348,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-dream-eater-opponent",
+   "side": "opponent",
+   "move": "DREAM_EATER",
+   "moveId": 138,
+   "turn": 0,
+   "frame": 5174,
+   "window": [
+    5174,
+    5521
+   ],
+   "rows": 348,
+   "orderInput": "none",
+   "adapterDuration": 267,
+   "productionDuration": 348,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "px": [
+    4482355,
+    4482355
+   ],
+   "identical": true,
+   "badAges": [
+    "53..304"
+   ]
+  },
+  {
+   "stem": "doll81-att-dream-eater-opponent",
+   "side": "opponent",
+   "move": "DREAM_EATER",
+   "moveId": 138,
+   "turn": 0,
+   "frame": 6872,
+   "window": [
+    6872,
+    7218
+   ],
+   "rows": 347,
+   "orderInput": "none",
+   "adapterDuration": 267,
+   "productionDuration": 348,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "px": [
+    4492065,
+    4492065
+   ],
+   "identical": true,
+   "badAges": [
+    "53..303",
+    "308..325",
+    "333..346"
+   ]
+  },
+  {
+   "stem": "doll81-att-dream-eater-opponent",
+   "side": "player",
+   "move": "REST",
+   "moveId": 156,
+   "turn": 0,
+   "frame": 7714,
+   "window": [
+    7714,
+    7823
+   ],
+   "rows": 110,
+   "orderInput": "none",
+   "adapterDuration": 110,
+   "productionDuration": 110,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    212520,
+    212520
+   ],
+   "identical": true,
+   "badAges": [
+    "0..109"
+   ]
+  },
+  {
+   "stem": "doll81-att-dream-eater-player-gengar",
+   "side": "player",
+   "move": "SPORE",
+   "moveId": 147,
+   "turn": 0,
+   "frame": 1766,
+   "window": [
+    1766,
+    2057
+   ],
+   "rows": 292,
+   "orderInput": "fixture",
+   "adapterDuration": 207,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    606126,
+    606126
+   ],
+   "identical": true,
+   "badAges": [
+    "1..291"
+   ]
+  },
+  {
+   "stem": "doll81-att-dream-eater-player-gengar",
+   "side": "player",
+   "move": "DREAM_EATER",
+   "moveId": 138,
+   "turn": 0,
+   "frame": 3471,
+   "window": [
+    3471,
+    3821
+   ],
+   "rows": 351,
+   "orderInput": "fixture",
+   "adapterDuration": 266,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    5124580,
+    5124580
+   ],
+   "identical": true,
+   "badAges": [
+    "1..350"
+   ]
+  },
+  {
+   "stem": "doll81-att-dream-eater-player",
+   "side": "player",
+   "move": "SPORE",
+   "moveId": 147,
+   "turn": 0,
+   "frame": 1767,
+   "window": [
+    1767,
+    2058
+   ],
+   "rows": 292,
+   "orderInput": "fixture",
+   "adapterDuration": 207,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    561794,
+    561794
+   ],
+   "identical": true,
+   "badAges": [
+    "2..291"
+   ]
+  },
+  {
+   "stem": "doll81-att-dream-eater-player",
+   "side": "player",
+   "move": "DREAM_EATER",
+   "moveId": 138,
+   "turn": 0,
+   "frame": 3472,
+   "window": [
+    3472,
+    3823
+   ],
+   "rows": 352,
+   "orderInput": "fixture",
+   "adapterDuration": 266,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    4971903,
+    4971903
+   ],
+   "identical": true,
+   "badAges": [
+    "2..351"
+   ]
+  },
+  {
+   "stem": "doll81-att-focus-punch-opponent-golbat",
+   "side": "opponent",
+   "move": "FOCUS_PUNCH",
+   "moveId": 264,
+   "turn": 0,
+   "frame": 2657,
+   "window": [
+    2657,
+    2892
+   ],
+   "rows": 236,
+   "orderInput": "fixture",
+   "adapterDuration": 154,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    2801845,
+    2801845
+   ],
+   "identical": true,
+   "badAges": [
+    "2..235"
+   ]
+  },
+  {
+   "stem": "doll81-att-focus-punch-opponent-golbat",
+   "side": "opponent",
+   "move": "FOCUS_PUNCH",
+   "moveId": 264,
+   "turn": 0,
+   "frame": 4631,
+   "window": [
+    4631,
+    4785
+   ],
+   "rows": 155,
+   "orderInput": "fixture",
+   "adapterDuration": 154,
+   "productionDuration": 154,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    289680,
+    289680
+   ],
+   "identical": true,
+   "badAges": [
+    "132..147"
+   ]
+  },
+  {
+   "stem": "doll81-att-focus-punch-opponent",
+   "side": "opponent",
+   "move": "FOCUS_PUNCH",
+   "moveId": 264,
+   "turn": 0,
+   "frame": 2011,
+   "window": [
+    2011,
+    2246
+   ],
+   "rows": 236,
+   "orderInput": "fixture",
+   "adapterDuration": 154,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    2738979,
+    2738979
+   ],
+   "identical": true,
+   "badAges": [
+    "2..235"
+   ]
+  },
+  {
+   "stem": "doll81-att-focus-punch-opponent",
+   "side": "opponent",
+   "move": "FOCUS_PUNCH",
+   "moveId": 264,
+   "turn": 0,
+   "frame": 4324,
+   "window": [
+    4324,
+    4559
+   ],
+   "rows": 236,
+   "orderInput": "fixture",
+   "adapterDuration": 154,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    2738979,
+    2738979
+   ],
+   "identical": true,
+   "badAges": [
+    "2..235"
+   ]
+  },
+  {
+   "stem": "doll81-att-focus-punch-opponent",
+   "side": "opponent",
+   "move": "FOCUS_PUNCH",
+   "moveId": 264,
+   "turn": 0,
+   "frame": 6298,
+   "window": [
+    6298,
+    6452
+   ],
+   "rows": 155,
+   "orderInput": "fixture",
+   "adapterDuration": 154,
+   "productionDuration": 154,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    280624,
+    280624
+   ],
+   "identical": true,
+   "badAges": [
+    "132..147"
+   ]
+  },
+  {
+   "stem": "doll81-att-focus-punch-player-gengar",
+   "side": "player",
+   "move": "FOCUS_PUNCH",
+   "moveId": 264,
+   "turn": 0,
+   "frame": 2051,
+   "window": [
+    2051,
+    2290
+   ],
+   "rows": 240,
+   "orderInput": "fixture",
+   "adapterDuration": 155,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    2859687,
+    2859687
+   ],
+   "identical": true,
+   "badAges": [
+    "1..239"
+   ]
+  },
+  {
+   "stem": "doll81-att-focus-punch-player-gengar",
+   "side": "player",
+   "move": "FOCUS_PUNCH",
+   "moveId": 264,
+   "turn": 0,
+   "frame": 3749,
+   "window": [
+    3749,
+    3987
+   ],
+   "rows": 239,
+   "orderInput": "fixture",
+   "adapterDuration": 155,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    2840097,
+    2840097
+   ],
+   "identical": true,
+   "badAges": [
+    "1..238"
+   ]
+  },
+  {
+   "stem": "doll81-att-focus-punch-player-gengar",
+   "side": "player",
+   "move": "FOCUS_PUNCH",
+   "moveId": 264,
+   "turn": 0,
+   "frame": 5447,
+   "window": [
+    5447,
+    5686
+   ],
+   "rows": 240,
+   "orderInput": "fixture",
+   "adapterDuration": 155,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    2859687,
+    2859687
+   ],
+   "identical": true,
+   "badAges": [
+    "1..239"
+   ]
+  },
+  {
+   "stem": "doll81-att-focus-punch-player-gengar",
+   "side": "player",
+   "move": "FOCUS_PUNCH",
+   "moveId": 264,
+   "turn": 0,
+   "frame": 7145,
+   "window": [
+    7145,
+    7384
+   ],
+   "rows": 240,
+   "orderInput": "fixture",
+   "adapterDuration": 155,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    2859687,
+    2859687
+   ],
+   "identical": true,
+   "badAges": [
+    "1..239"
+   ]
+  },
+  {
+   "stem": "doll81-att-focus-punch-player",
+   "side": "player",
+   "move": "FOCUS_PUNCH",
+   "moveId": 264,
+   "turn": 0,
+   "frame": 2686,
+   "window": [
+    2686,
+    2925
+   ],
+   "rows": 240,
+   "orderInput": "fixture",
+   "adapterDuration": 155,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    2754253,
+    2754253
+   ],
+   "identical": true,
+   "badAges": [
+    "2..239"
+   ]
+  },
+  {
+   "stem": "doll81-att-focus-punch-player",
+   "side": "player",
+   "move": "FOCUS_PUNCH",
+   "moveId": 264,
+   "turn": 0,
+   "frame": 4692,
+   "window": [
+    4692,
+    4846
+   ],
+   "rows": 155,
+   "orderInput": "fixture",
+   "adapterDuration": 155,
+   "productionDuration": 155,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-grass-whistle-opponent-golbat",
+   "side": "opponent",
+   "move": "GRASS_WHISTLE",
+   "moveId": 320,
+   "turn": 0,
+   "frame": 3411,
+   "window": [
+    3411,
+    3712
+   ],
+   "rows": 302,
+   "orderInput": "fixture",
+   "adapterDuration": 225,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": {
+    "rows": 221,
+    "shift": 0
+   },
+   "px": [
+    3402723,
+    3402723
+   ],
+   "identical": true,
+   "badAges": [
+    "2..301"
+   ]
+  },
+  {
+   "stem": "doll81-att-grass-whistle-opponent",
+   "side": "opponent",
+   "move": "GRASS_WHISTLE",
+   "moveId": 320,
+   "turn": 0,
+   "frame": 3412,
+   "window": [
+    3412,
+    3713
+   ],
+   "rows": 302,
+   "orderInput": "fixture",
+   "adapterDuration": 225,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": {
+    "rows": 221,
+    "shift": 0
+   },
+   "px": [
+    3276141,
+    3276141
+   ],
+   "identical": true,
+   "badAges": [
+    "2..301"
+   ]
+  },
+  {
+   "stem": "doll81-att-grass-whistle-player-gengar",
+   "side": "player",
+   "move": "GRASS_WHISTLE",
+   "moveId": 320,
+   "turn": 0,
+   "frame": 1773,
+   "window": [
+    1773,
+    2078
+   ],
+   "rows": 306,
+   "orderInput": "fixture",
+   "adapterDuration": 225,
+   "productionDuration": 306,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 221,
+    "shift": 0
+   },
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-grass-whistle-player-gengar",
+   "side": "player",
+   "move": "GRASS_WHISTLE",
+   "moveId": 320,
+   "turn": 0,
+   "frame": 5169,
+   "window": [
+    5169,
+    5474
+   ],
+   "rows": 306,
+   "orderInput": "fixture",
+   "adapterDuration": 225,
+   "productionDuration": 306,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 221,
+    "shift": 0
+   },
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-grass-whistle-player",
+   "side": "player",
+   "move": "GRASS_WHISTLE",
+   "moveId": 320,
+   "turn": 0,
+   "frame": 1774,
+   "window": [
+    1774,
+    2079
+   ],
+   "rows": 306,
+   "orderInput": "fixture",
+   "adapterDuration": 225,
+   "productionDuration": 306,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 221,
+    "shift": 0
+   },
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-grass-whistle-player",
+   "side": "player",
+   "move": "GRASS_WHISTLE",
+   "moveId": 320,
+   "turn": 0,
+   "frame": 5170,
+   "window": [
+    5170,
+    5475
+   ],
+   "rows": 306,
+   "orderInput": "fixture",
+   "adapterDuration": 225,
+   "productionDuration": 306,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 221,
+    "shift": 0
+   },
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-lovely-kiss-opponent-golbat",
+   "side": "opponent",
+   "move": "LOVELY_KISS",
+   "moveId": 142,
+   "turn": 0,
+   "frame": 3410,
+   "window": [
+    3410,
+    3643
+   ],
+   "rows": 234,
+   "orderInput": "fixture",
+   "adapterDuration": 152,
+   "productionDuration": 234,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 153,
+    "shift": 0
+   },
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-lovely-kiss-opponent",
+   "side": "opponent",
+   "move": "LOVELY_KISS",
+   "moveId": 142,
+   "turn": 0,
+   "frame": 3411,
+   "window": [
+    3411,
+    3644
+   ],
+   "rows": 234,
+   "orderInput": "fixture",
+   "adapterDuration": 152,
+   "productionDuration": 234,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 153,
+    "shift": 0
+   },
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-lovely-kiss-player-gengar",
+   "side": "player",
+   "move": "LOVELY_KISS",
+   "moveId": 142,
+   "turn": 0,
+   "frame": 1772,
+   "window": [
+    1772,
+    2009
+   ],
+   "rows": 238,
+   "orderInput": "fixture",
+   "adapterDuration": 152,
+   "productionDuration": 238,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 153,
+    "shift": 0
+   },
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-lovely-kiss-player-gengar",
+   "side": "player",
+   "move": "LOVELY_KISS",
+   "moveId": 142,
+   "turn": 0,
+   "frame": 5168,
+   "window": [
+    5168,
+    5405
+   ],
+   "rows": 238,
+   "orderInput": "fixture",
+   "adapterDuration": 152,
+   "productionDuration": 238,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 153,
+    "shift": 0
+   },
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-lovely-kiss-player",
+   "side": "player",
+   "move": "LOVELY_KISS",
+   "moveId": 142,
+   "turn": 0,
+   "frame": 1773,
+   "window": [
+    1773,
+    2010
+   ],
+   "rows": 238,
+   "orderInput": "fixture",
+   "adapterDuration": 152,
+   "productionDuration": 238,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 153,
+    "shift": 0
+   },
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-lovely-kiss-player",
+   "side": "player",
+   "move": "LOVELY_KISS",
+   "moveId": 142,
+   "turn": 0,
+   "frame": 5169,
+   "window": [
+    5169,
+    5406
+   ],
+   "rows": 238,
+   "orderInput": "fixture",
+   "adapterDuration": 152,
+   "productionDuration": 238,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 153,
+    "shift": 0
+   },
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-sing-opponent-golbat",
+   "side": "opponent",
+   "move": "SING",
+   "moveId": 47,
+   "turn": 0,
+   "frame": 3403,
+   "window": [
+    3403,
+    3727
+   ],
+   "rows": 325,
+   "orderInput": "fixture",
+   "adapterDuration": 248,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": {
+    "rows": 246,
+    "shift": 0
+   },
+   "px": [
+    549870,
+    549870
+   ],
+   "identical": true,
+   "badAges": [
+    "2..324"
+   ]
+  },
+  {
+   "stem": "doll81-att-sing-opponent",
+   "side": "opponent",
+   "move": "SING",
+   "moveId": 47,
+   "turn": 0,
+   "frame": 3404,
+   "window": [
+    3404,
+    3726
+   ],
+   "rows": 323,
+   "orderInput": "fixture",
+   "adapterDuration": 248,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": {
+    "rows": 246,
+    "shift": 0
+   },
+   "px": [
+    510428,
+    510428
+   ],
+   "identical": true,
+   "badAges": [
+    "2..322"
+   ]
+  },
+  {
+   "stem": "doll81-att-sing-player-gengar",
+   "side": "player",
+   "move": "SING",
+   "moveId": 47,
+   "turn": 0,
+   "frame": 1765,
+   "window": [
+    1765,
+    2095
+   ],
+   "rows": 331,
+   "orderInput": "fixture",
+   "adapterDuration": 245,
+   "productionDuration": 331,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 246,
+    "shift": 0
+   },
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-sing-player-gengar",
+   "side": "player",
+   "move": "SING",
+   "moveId": 47,
+   "turn": 0,
+   "frame": 5161,
+   "window": [
+    5161,
+    5491
+   ],
+   "rows": 331,
+   "orderInput": "fixture",
+   "adapterDuration": 245,
+   "productionDuration": 331,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 246,
+    "shift": 0
+   },
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-sing-player",
+   "side": "player",
+   "move": "SING",
+   "moveId": 47,
+   "turn": 0,
+   "frame": 1766,
+   "window": [
+    1766,
+    2096
+   ],
+   "rows": 331,
+   "orderInput": "fixture",
+   "adapterDuration": 245,
+   "productionDuration": 331,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 246,
+    "shift": 0
+   },
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-sing-player",
+   "side": "player",
+   "move": "SING",
+   "moveId": 47,
+   "turn": 0,
+   "frame": 5162,
+   "window": [
+    5162,
+    5492
+   ],
+   "rows": 331,
+   "orderInput": "fixture",
+   "adapterDuration": 245,
+   "productionDuration": 331,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 246,
+    "shift": 0
+   },
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-solar-beam-opponent-golbat",
+   "side": "opponent",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 0,
+   "frame": 1718,
+   "window": [
+    1718,
+    1906
+   ],
+   "rows": 189,
+   "orderInput": "fixture",
+   "adapterDuration": 108,
+   "productionDuration": 189,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-solar-beam-opponent-golbat",
+   "side": "opponent",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 1,
+   "frame": 3417,
+   "window": [
+    3417,
+    3654
+   ],
+   "rows": 238,
+   "orderInput": "fixture",
+   "adapterDuration": 160,
+   "productionDuration": 160,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    2309468,
+    2309468
+   ],
+   "identical": true,
+   "badAges": [
+    "4..226"
+   ]
+  },
+  {
+   "stem": "doll81-att-solar-beam-opponent-golbat",
+   "side": "opponent",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 0,
+   "frame": 5051,
+   "window": [
+    5051,
+    5158
+   ],
+   "rows": 108,
+   "orderInput": "fixture",
+   "adapterDuration": 108,
+   "productionDuration": 108,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-solar-beam-opponent-golbat",
+   "side": "opponent",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 1,
+   "frame": 6749,
+   "window": [
+    6749,
+    6986
+   ],
+   "rows": 238,
+   "orderInput": "fixture",
+   "adapterDuration": 160,
+   "productionDuration": 160,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    2309468,
+    2309468
+   ],
+   "identical": true,
+   "badAges": [
+    "4..226"
+   ]
+  },
+  {
+   "stem": "doll81-att-solar-beam-opponent",
+   "side": "opponent",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 0,
+   "frame": 1718,
+   "window": [
+    1718,
+    1906
+   ],
+   "rows": 189,
+   "orderInput": "fixture",
+   "adapterDuration": 108,
+   "productionDuration": 189,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-solar-beam-opponent",
+   "side": "opponent",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 1,
+   "frame": 3418,
+   "window": [
+    3418,
+    3655
+   ],
+   "rows": 238,
+   "orderInput": "fixture",
+   "adapterDuration": 160,
+   "productionDuration": 160,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    2314103,
+    2314103
+   ],
+   "identical": true,
+   "badAges": [
+    "4..226"
+   ]
+  },
+  {
+   "stem": "doll81-att-solar-beam-opponent",
+   "side": "opponent",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 0,
+   "frame": 5051,
+   "window": [
+    5051,
+    5158
+   ],
+   "rows": 108,
+   "orderInput": "fixture",
+   "adapterDuration": 108,
+   "productionDuration": 108,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-solar-beam-opponent",
+   "side": "opponent",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 1,
+   "frame": 6750,
+   "window": [
+    6750,
+    6987
+   ],
+   "rows": 238,
+   "orderInput": "fixture",
+   "adapterDuration": 160,
+   "productionDuration": 160,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    2314103,
+    2314103
+   ],
+   "identical": true,
+   "badAges": [
+    "4..226"
+   ]
+  },
+  {
+   "stem": "doll81-att-solar-beam-player-gengar",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 0,
+   "frame": 1750,
+   "window": [
+    1750,
+    1942
+   ],
+   "rows": 193,
+   "orderInput": "fixture",
+   "adapterDuration": 108,
+   "productionDuration": 193,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-solar-beam-player-gengar",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 1,
+   "frame": 2277,
+   "window": [
+    2277,
+    2599
+   ],
+   "rows": 323,
+   "orderInput": "fixture",
+   "adapterDuration": 160,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    4663599,
+    4663599
+   ],
+   "identical": true,
+   "badAges": [
+    "1..322"
+   ]
+  },
+  {
+   "stem": "doll81-att-solar-beam-player-gengar",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 0,
+   "frame": 3448,
+   "window": [
+    3448,
+    3640
+   ],
+   "rows": 193,
+   "orderInput": "fixture",
+   "adapterDuration": 108,
+   "productionDuration": 193,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-solar-beam-player-gengar",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 1,
+   "frame": 3975,
+   "window": [
+    3975,
+    4297
+   ],
+   "rows": 323,
+   "orderInput": "fixture",
+   "adapterDuration": 160,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    4663599,
+    4663599
+   ],
+   "identical": true,
+   "badAges": [
+    "1..322"
+   ]
+  },
+  {
+   "stem": "doll81-att-solar-beam-player-gengar",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 0,
+   "frame": 5146,
+   "window": [
+    5146,
+    5338
+   ],
+   "rows": 193,
+   "orderInput": "fixture",
+   "adapterDuration": 108,
+   "productionDuration": 193,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-solar-beam-player-gengar",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 1,
+   "frame": 5673,
+   "window": [
+    5673,
+    5995
+   ],
+   "rows": 323,
+   "orderInput": "fixture",
+   "adapterDuration": 160,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    4663599,
+    4663599
+   ],
+   "identical": true,
+   "badAges": [
+    "1..322"
+   ]
+  },
+  {
+   "stem": "doll81-att-solar-beam-player-gengar",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 0,
+   "frame": 6844,
+   "window": [
+    6844,
+    7036
+   ],
+   "rows": 193,
+   "orderInput": "fixture",
+   "adapterDuration": 108,
+   "productionDuration": 193,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-solar-beam-player-gengar",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 1,
+   "frame": 7371,
+   "window": [
+    7371,
+    7693
+   ],
+   "rows": 323,
+   "orderInput": "fixture",
+   "adapterDuration": 160,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    4663599,
+    4663599
+   ],
+   "identical": true,
+   "badAges": [
+    "1..322"
+   ]
+  },
+  {
+   "stem": "doll81-att-solar-beam-player",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 0,
+   "frame": 1750,
+   "window": [
+    1750,
+    1942
+   ],
+   "rows": 193,
+   "orderInput": "fixture",
+   "adapterDuration": 108,
+   "productionDuration": 193,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-solar-beam-player",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 1,
+   "frame": 2709,
+   "window": [
+    2709,
+    3031
+   ],
+   "rows": 323,
+   "orderInput": "fixture",
+   "adapterDuration": 160,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    4587489,
+    4587489
+   ],
+   "identical": true,
+   "badAges": [
+    "2..322"
+   ]
+  },
+  {
+   "stem": "doll81-att-solar-beam-player",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 0,
+   "frame": 5147,
+   "window": [
+    5147,
+    5254
+   ],
+   "rows": 108,
+   "orderInput": "fixture",
+   "adapterDuration": 108,
+   "productionDuration": 108,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-solar-beam-player",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 1,
+   "frame": 5567,
+   "window": [
+    5567,
+    5804
+   ],
+   "rows": 238,
+   "orderInput": "fixture",
+   "adapterDuration": 160,
+   "productionDuration": 160,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    2242811,
+    2242811
+   ],
+   "identical": true,
+   "badAges": [
+    "4..225"
+   ]
+  },
+  {
+   "stem": "doll81-att-solar-beam-player",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 0,
+   "frame": 6845,
+   "window": [
+    6845,
+    6952
+   ],
+   "rows": 108,
+   "orderInput": "fixture",
+   "adapterDuration": 108,
+   "productionDuration": 108,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-att-solar-beam-player",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 1,
+   "frame": 7266,
+   "window": [
+    7266,
+    7503
+   ],
+   "rows": 238,
+   "orderInput": "fixture",
+   "adapterDuration": 160,
+   "productionDuration": 160,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    2261878,
+    2261878
+   ],
+   "identical": true,
+   "badAges": [
+    "4..226"
+   ]
+  },
+  {
+   "stem": "doll81-self-double-team-opponent-golbat",
+   "side": "opponent",
+   "move": "DOUBLE_TEAM",
+   "moveId": 104,
+   "turn": 0,
+   "frame": 76,
+   "window": [
+    76,
+    234
+   ],
+   "rows": 159,
+   "orderInput": "fixture",
+   "adapterDuration": 230,
+   "productionDuration": 230,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    306106,
+    306106
+   ],
+   "identical": true,
+   "badAges": [
+    "0",
+    "2",
+    "6",
+    "12",
+    "14",
+    "16..24",
+    "26",
+    "28..42",
+    "45..54",
+    "57..130",
+    "158"
+   ]
+  },
+  {
+   "stem": "doll81-self-double-team-opponent-golbat",
+   "side": "opponent",
+   "move": "DOUBLE_TEAM",
+   "moveId": 104,
+   "turn": 0,
+   "frame": 3407,
+   "window": [
+    3407,
+    3646
+   ],
+   "rows": 240,
+   "orderInput": "fixture",
+   "adapterDuration": 230,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    492426,
+    492426
+   ],
+   "identical": true,
+   "badAges": [
+    "2..239"
+   ]
+  },
+  {
+   "stem": "doll81-self-double-team-opponent-golbat",
+   "side": "opponent",
+   "move": "DOUBLE_TEAM",
+   "moveId": 104,
+   "turn": 0,
+   "frame": 5073,
+   "window": [
+    5073,
+    5312
+   ],
+   "rows": 240,
+   "orderInput": "fixture",
+   "adapterDuration": 230,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    492426,
+    492426
+   ],
+   "identical": true,
+   "badAges": [
+    "2..239"
+   ]
+  },
+  {
+   "stem": "doll81-self-double-team-opponent",
+   "side": "opponent",
+   "move": "DOUBLE_TEAM",
+   "moveId": 104,
+   "turn": 0,
+   "frame": 77,
+   "window": [
+    77,
+    235
+   ],
+   "rows": 159,
+   "orderInput": "fixture",
+   "adapterDuration": 230,
+   "productionDuration": 230,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    275287,
+    275287
+   ],
+   "identical": true,
+   "badAges": [
+    "2",
+    "6",
+    "12",
+    "14",
+    "16..24",
+    "26",
+    "28..42",
+    "45..54",
+    "57..130"
+   ]
+  },
+  {
+   "stem": "doll81-self-double-team-opponent",
+   "side": "opponent",
+   "move": "DOUBLE_TEAM",
+   "moveId": 104,
+   "turn": 0,
+   "frame": 3408,
+   "window": [
+    3408,
+    3647
+   ],
+   "rows": 240,
+   "orderInput": "fixture",
+   "adapterDuration": 230,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    468730,
+    468730
+   ],
+   "identical": true,
+   "badAges": [
+    "2..239"
+   ]
+  },
+  {
+   "stem": "doll81-self-double-team-opponent",
+   "side": "opponent",
+   "move": "DOUBLE_TEAM",
+   "moveId": 104,
+   "turn": 0,
+   "frame": 5074,
+   "window": [
+    5074,
+    5313
+   ],
+   "rows": 240,
+   "orderInput": "fixture",
+   "adapterDuration": 230,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    468730,
+    468730
+   ],
+   "identical": true,
+   "badAges": [
+    "2..239"
+   ]
+  },
+  {
+   "stem": "doll81-self-double-team-player-gengar",
+   "side": "player",
+   "move": "DOUBLE_TEAM",
+   "moveId": 104,
+   "turn": 0,
+   "frame": 1769,
+   "window": [
+    1769,
+    2012
+   ],
+   "rows": 244,
+   "orderInput": "fixture",
+   "adapterDuration": 230,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    610966,
+    610966
+   ],
+   "identical": true,
+   "badAges": [
+    "1..243"
+   ]
+  },
+  {
+   "stem": "doll81-self-double-team-player-gengar",
+   "side": "player",
+   "move": "DOUBLE_TEAM",
+   "moveId": 104,
+   "turn": 0,
+   "frame": 3467,
+   "window": [
+    3467,
+    3710
+   ],
+   "rows": 244,
+   "orderInput": "fixture",
+   "adapterDuration": 230,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    610966,
+    610966
+   ],
+   "identical": true,
+   "badAges": [
+    "1..243"
+   ]
+  },
+  {
+   "stem": "doll81-self-double-team-player-gengar",
+   "side": "player",
+   "move": "DOUBLE_TEAM",
+   "moveId": 104,
+   "turn": 0,
+   "frame": 5165,
+   "window": [
+    5165,
+    5408
+   ],
+   "rows": 244,
+   "orderInput": "fixture",
+   "adapterDuration": 230,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    610966,
+    610966
+   ],
+   "identical": true,
+   "badAges": [
+    "1..243"
+   ]
+  },
+  {
+   "stem": "doll81-self-double-team-player",
+   "side": "player",
+   "move": "DOUBLE_TEAM",
+   "moveId": 104,
+   "turn": 0,
+   "frame": 1770,
+   "window": [
+    1770,
+    2013
+   ],
+   "rows": 244,
+   "orderInput": "fixture",
+   "adapterDuration": 230,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    589259,
+    589259
+   ],
+   "identical": true,
+   "badAges": [
+    "2..243"
+   ]
+  },
+  {
+   "stem": "doll81-self-double-team-player",
+   "side": "player",
+   "move": "DOUBLE_TEAM",
+   "moveId": 104,
+   "turn": 0,
+   "frame": 3468,
+   "window": [
+    3468,
+    3711
+   ],
+   "rows": 244,
+   "orderInput": "fixture",
+   "adapterDuration": 230,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    589259,
+    589259
+   ],
+   "identical": true,
+   "badAges": [
+    "2..243"
+   ]
+  },
+  {
+   "stem": "doll81-self-double-team-player",
+   "side": "player",
+   "move": "DOUBLE_TEAM",
+   "moveId": 104,
+   "turn": 0,
+   "frame": 5167,
+   "window": [
+    5167,
+    5325
+   ],
+   "rows": 159,
+   "orderInput": "fixture",
+   "adapterDuration": 230,
+   "productionDuration": 230,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    450691,
+    450691
+   ],
+   "identical": true,
+   "badAges": [
+    "3..129"
+   ]
+  },
+  {
+   "stem": "doll81-self-recover-opponent-golbat",
+   "side": "opponent",
+   "move": "RECOVER",
+   "moveId": 105,
+   "turn": 0,
+   "frame": 1735,
+   "window": [
+    1735,
+    1999
+   ],
+   "rows": 265,
+   "orderInput": "fixture",
+   "adapterDuration": 169,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    414959,
+    414959
+   ],
+   "identical": true,
+   "badAges": [
+    "2..264"
+   ]
+  },
+  {
+   "stem": "doll81-self-recover-opponent",
+   "side": "opponent",
+   "move": "RECOVER",
+   "moveId": 105,
+   "turn": 0,
+   "frame": 1736,
+   "window": [
+    1736,
+    2000
+   ],
+   "rows": 265,
+   "orderInput": "fixture",
+   "adapterDuration": 169,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    387231,
+    387231
+   ],
+   "identical": true,
+   "badAges": [
+    "2..264"
+   ]
+  },
+  {
+   "stem": "doll81-self-recover-player-gengar",
+   "side": "player",
+   "move": "RECOVER",
+   "moveId": 105,
+   "turn": 0,
+   "frame": 1763,
+   "window": [
+    1763,
+    2031
+   ],
+   "rows": 269,
+   "orderInput": "fixture",
+   "adapterDuration": 169,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    506155,
+    506155
+   ],
+   "identical": true,
+   "badAges": [
+    "1..268"
+   ]
+  },
+  {
+   "stem": "doll81-self-recover-player",
+   "side": "player",
+   "move": "RECOVER",
+   "moveId": 105,
+   "turn": 0,
+   "frame": 1764,
+   "window": [
+    1764,
+    2032
+   ],
+   "rows": 269,
+   "orderInput": "fixture",
+   "adapterDuration": 169,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "px": [
+    469798,
+    469798
+   ],
+   "identical": true,
+   "badAges": [
+    "2..268"
+   ]
+  },
+  {
+   "stem": "doll81-self-sunny-day-opponent-golbat",
+   "side": "opponent",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 1738,
+   "window": [
+    1738,
+    1976
+   ],
+   "rows": 239,
+   "orderInput": "fixture",
+   "adapterDuration": 158,
+   "productionDuration": 239,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-self-sunny-day-opponent-golbat",
+   "side": "player",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 2709,
+   "window": [
+    2709,
+    2865
+   ],
+   "rows": 157,
+   "orderInput": "fixture",
+   "adapterDuration": 158,
+   "productionDuration": 158,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    459709,
+    459709
+   ],
+   "identical": true,
+   "badAges": [
+    "0..156"
+   ]
+  },
+  {
+   "stem": "doll81-self-sunny-day-opponent-golbat",
+   "side": "player",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 4682,
+   "window": [
+    4682,
+    4838
+   ],
+   "rows": 157,
+   "orderInput": "fixture",
+   "adapterDuration": 158,
+   "productionDuration": 158,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    215235,
+    215235
+   ],
+   "identical": true,
+   "badAges": [
+    "0..156"
+   ]
+  },
+  {
+   "stem": "doll81-self-sunny-day-opponent-golbat",
+   "side": "player",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 6041,
+   "window": [
+    6041,
+    6197
+   ],
+   "rows": 157,
+   "orderInput": "fixture",
+   "adapterDuration": 158,
+   "productionDuration": 158,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    459709,
+    459709
+   ],
+   "identical": true,
+   "badAges": [
+    "0..156"
+   ]
+  },
+  {
+   "stem": "doll81-self-sunny-day-opponent",
+   "side": "opponent",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 1739,
+   "window": [
+    1739,
+    1977
+   ],
+   "rows": 239,
+   "orderInput": "fixture",
+   "adapterDuration": 158,
+   "productionDuration": 239,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-self-sunny-day-opponent",
+   "side": "player",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 2709,
+   "window": [
+    2709,
+    2865
+   ],
+   "rows": 157,
+   "orderInput": "fixture",
+   "adapterDuration": 158,
+   "productionDuration": 158,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    449699,
+    449699
+   ],
+   "identical": true,
+   "badAges": [
+    "0..156"
+   ]
+  },
+  {
+   "stem": "doll81-self-sunny-day-opponent",
+   "side": "player",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 4682,
+   "window": [
+    4682,
+    4838
+   ],
+   "rows": 157,
+   "orderInput": "fixture",
+   "adapterDuration": 158,
+   "productionDuration": 158,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    221128,
+    221128
+   ],
+   "identical": true,
+   "badAges": [
+    "0..156"
+   ]
+  },
+  {
+   "stem": "doll81-self-sunny-day-opponent",
+   "side": "player",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 6041,
+   "window": [
+    6041,
+    6197
+   ],
+   "rows": 157,
+   "orderInput": "fixture",
+   "adapterDuration": 158,
+   "productionDuration": 158,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    449699,
+    449699
+   ],
+   "identical": true,
+   "badAges": [
+    "0..156"
+   ]
+  },
+  {
+   "stem": "doll81-self-sunny-day-player-gengar",
+   "side": "player",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 1766,
+   "window": [
+    1766,
+    2008
+   ],
+   "rows": 243,
+   "orderInput": "fixture",
+   "adapterDuration": 158,
+   "productionDuration": 243,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-self-sunny-day-player",
+   "side": "player",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 1767,
+   "window": [
+    1767,
+    2009
+   ],
+   "rows": 243,
+   "orderInput": "fixture",
+   "adapterDuration": 158,
+   "productionDuration": 243,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "badAges": []
+  },
+  {
+   "stem": "doll81-self-sunny-day-player",
+   "side": "player",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 4746,
+   "window": [
+    4746,
+    4902
+   ],
+   "rows": 157,
+   "orderInput": "fixture",
+   "adapterDuration": 158,
+   "productionDuration": 158,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    227590,
+    227590
+   ],
+   "identical": true,
+   "badAges": [
+    "0..156"
+   ]
+  },
+  {
+   "stem": "doll81-self-sunny-day-player",
+   "side": "player",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 5531,
+   "window": [
+    5531,
+    5687
+   ],
+   "rows": 157,
+   "orderInput": "fixture",
+   "adapterDuration": 158,
+   "productionDuration": 158,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "px": [
+    227590,
+    227590
+   ],
+   "identical": true,
+   "badAges": [
+    "0..156"
+   ]
+  }
+ ]
+}

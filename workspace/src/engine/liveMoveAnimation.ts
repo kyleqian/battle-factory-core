@@ -1028,6 +1028,10 @@ export const LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS: ReadonlyMap<number, readonly (
   [58, ["player", "opponent"]], // Ice Beam
   [85, ["player", "opponent"]], // Thunderbolt
   [224, ["player", "opponent"]], // Megahorn (D4)
+  // doll81 (docs/next-adapters-doll81.md): PERSIAN -> SLOWBRO + GENGAR -> GOLBAT / elevated GOLBAT -> LAPRAS, 0 px on every row
+  // (ThunderPunch GOLBAT -> LAPRAS: row 0 = the doll-free control's own elevated-attacker shadow, 200 px).
+  [348, ["player", "opponent"]], // Leaf Blade
+  [9, ["player", "opponent"]], // ThunderPunch
 ].map(([id, sides]) => [id as number, Object.freeze(sides as ("player" | "opponent")[])]));
 
 /**
