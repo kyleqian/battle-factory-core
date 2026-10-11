@@ -1605,7 +1605,7 @@ export function liveFlatterWordsPostFree(
   } catch {
     return null;
   }
-  const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+  const palettes = composeLiveArtPalettes(art);
   const activationOrder = spriteOrderWithOccupiedPrefix({ known: true as const, free: activationFree, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
   if (palettes === null || activationOrder === null) return null;
   const attackerSide = unit.attackerSide, targetSide: WordsSide = attackerSide === "player" ? "opponent" : "player";
