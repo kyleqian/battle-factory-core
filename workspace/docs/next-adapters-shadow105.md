@@ -113,3 +113,11 @@ copies (node_modules, artifacts and reference symlinked). It then runs the lead 
 routes. `--census` adds the 0..999 census in both copies (+ `shadow105CensusDelta.py`); `--pins` adds `npm test` in the patched copy. Every
 receipt is cmp'd with `tools/integration/fixtures/shadow105/receipts/`. Without flags it takes about 1 minute; `--census` adds about
 4 minutes and `--pins` about 10.
+
+## 8. Gates
+
+- **Runner pass 2** (fresh dir, fresh probes): `shadow105Run: ALL SAME`, 10 / 10 receipts (`fixtures/shadow105/runner-pass2.log`).
+  **Pass 3 `--census`**: ALL SAME, 13 / 13 receipts; the census was reproduced byte for byte (`runner-pass3-census.log`).
+- This checkout (new files only; `git status` showed no modified tracked file at any commit):
+  - `npm test`: **1,627 files / 13,387 tests passed** (44 / 223 skipped), 598 s;
+  - `npm run build`: green.
