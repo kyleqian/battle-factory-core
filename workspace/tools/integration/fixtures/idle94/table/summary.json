@@ -1,0 +1,133 @@
+{
+ "adapters": 276,
+ "adapterSides": 552,
+ "noLedgerRow": [
+  [
+   104,
+   "DOUBLE_TEAM",
+   "opponent"
+  ],
+  [
+   157,
+   "ROCK_SLIDE",
+   "player"
+  ],
+  [
+   185,
+   "FAINT_ATTACK",
+   "opponent"
+  ]
+ ],
+ "leadKnown": {
+  "adapterSides": 549,
+  "moves": 276,
+  "censusCommands": 25379,
+  "censusLive": 25141,
+  "censusLiveFrames": 3693187,
+  "leadFramesInCensus": 29746
+ },
+ "leadZero": {
+  "adapterSides": 447,
+  "moves": 224,
+  "censusCommands": 20206,
+  "censusLive": 19991,
+  "censusLiveFrames": 2995507,
+  "leadFramesInCensus": 0
+ },
+ "leadPositive": {
+  "adapterSides": 100,
+  "moves": 51,
+  "censusCommands": 5147,
+  "censusLive": 5124,
+  "censusLiveFrames": 696510,
+  "leadFramesInCensus": 29798
+ },
+ "leadNegative": {
+  "adapterSides": 2,
+  "moves": 1,
+  "censusCommands": 26,
+  "censusLive": 26,
+  "censusLiveFrames": 1170,
+  "leadFramesInCensus": -52
+ },
+ "leadMixedVariants": [],
+ "trailKnown": {
+  "adapterSides": 353,
+  "moves": 181,
+  "censusCommands": 17352,
+  "censusLive": 17240,
+  "censusLiveFrames": 2374737,
+  "leadFramesInCensus": 26490
+ },
+ "trailZero": {
+  "adapterSides": 15,
+  "moves": 8,
+  "censusCommands": 734,
+  "censusLive": 731,
+  "censusLiveFrames": 79761,
+  "leadFramesInCensus": 1703
+ },
+ "trailNonZero": {
+  "adapterSides": 338,
+  "moves": 173,
+  "censusCommands": 16618,
+  "censusLive": 16509,
+  "censusLiveFrames": 2294976,
+  "leadFramesInCensus": 24787
+ },
+ "flagged": {
+  "adapterSides": 358,
+  "moves": 182,
+  "censusCommands": 17564,
+  "censusLive": 17453,
+  "censusLiveFrames": 2443815,
+  "leadFramesInCensus": 29746
+ },
+ "leadHistogram": {
+  "-2": 2,
+  "0": 447,
+  "1": 15,
+  "3": 2,
+  "4": 23,
+  "5": 8,
+  "6": 6,
+  "7": 16,
+  "8": 2,
+  "9": 2,
+  "10": 16,
+  "13": 6,
+  "15": 2,
+  "19": 2
+ },
+ "trailHistogram": {
+  "-73": 1,
+  "-53": 1,
+  "-52": 1,
+  "-5": 8,
+  "-3": 4,
+  "-2": 2,
+  "-1": 262,
+  "0": 15,
+  "1": 7,
+  "2": 2,
+  "3": 7,
+  "4": 10,
+  "5": 6,
+  "8": 2,
+  "9": 4,
+  "13": 4,
+  "14": 2,
+  "16": 2,
+  "19": 4,
+  "20": 3,
+  "21": 3,
+  "26": 2,
+  "29": 2,
+  "32": 2,
+  "50": 1,
+  "77": 1,
+  "79": 2,
+  "129": 1
+ },
+ "census": true
+}
