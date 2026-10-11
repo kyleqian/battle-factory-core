@@ -1,0 +1,21 @@
+{
+ "schema": "flat77-parity/v1",
+ "seed": null,
+ "streak": 0,
+ "turnBoundariesCompared": 29,
+ "playerTurns": 29,
+ "framesOn": 20366,
+ "framesOff": 16538,
+ "logicalDigest": "4fd538572adfad01d7be58bc93cf33968aa8f546e90c0db39d713f28808f9fe4",
+ "rngEqual": true,
+ "rulesEqual": true,
+ "boundaryEqual": true,
+ "bodiesOn": 47,
+ "orderKnownBodiesOn": 13,
+ "allocatorKnownBodiesOn": 40,
+ "orderStopsOn": [
+  "no EXACT plan: body 240:player",
+  "no EXACT plan: general animation RAIN_CONTINUES"
+ ],
+ "flatterBodiesOn": []
+}
