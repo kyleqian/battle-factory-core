@@ -1,0 +1,22 @@
+PASS same command count
+PASS same KEY sequence
+PASS same frames per command
+PASS same battleDigest (10 shards)
+PASS same battleDigestExcludingFrames (10 shards)
+PASS 0 render throws
+PASS 0 live -> non-live regressions
+gained commands 0 / live frames 0; regressions []
+before: {"commands": 27516, "frames": 3968405, "live": 25918, "liveFrames": 3873692, "liveSharePctByCount": 94.19, "liveSharePctByFrames": 97.61}
+after: {"commands": 27516, "frames": 3968405, "live": 25918, "liveFrames": 3873692, "liveSharePctByCount": 94.19, "liveSharePctByFrames": 97.61}
+battleDigest 5cc95d1eace69ad4  commandKeyDigest 907bc05914b3aebf / 907bc05914b3aebf
+gained by move: {}
+Flatter 260 before: 34 commands, status {'live': 17, 'fallback': 17}, live frames 3723 of 7446
+  Flatter before decline 'presentation: unclassified (case-local gate)': 17 / 3723; battles [94, 241, 446, 539, 673, 735, 802, 909, 936]
+  stops naming 260 before: 'order host: no EXACT plan: body 260:opponent': 10 / 1570
+  stops naming 260 before: 'order host: no EXACT plan: body 260:player': 3 / 556
+Flatter 260 after: 34 commands, status {'live': 17, 'fallback': 17}, live frames 3723 of 7446
+  Flatter after decline 'presentation: unclassified (case-local gate)': 17 / 3723; battles [94, 241, 446, 539, 673, 735, 802, 909, 936]
+  stops naming 260 after: 'order host: no EXACT plan: body 260:opponent': 10 / 1570
+  stops naming 260 after: 'order host: no EXACT plan: body 260:player': 3 / 556
+qa91: Quick Attack 98 commands 287 (player 144, opponent 143), all live before and after; player bodies whose target rests at x2 0 (pixels move -1 -> 0 from age 14): 144; vs ONIX / RATTATA: 0 (first body unchanged, later bodies 0)
+qa91: the lifted Castform keys 52:by:1 / 53:by:1 / 184:at:3 occur 0 times in seeds 0..999 (no gain); 196:by:2 / 196:at:2: 5 commands, reason text only
