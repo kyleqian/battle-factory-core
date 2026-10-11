@@ -12,6 +12,7 @@
 #    production columns of the patched pass);
 # 6. windows: flat84Check.ts per scenario in patched (two more fresh probe processes each; == check/*.json, summary.txt);
 # 6b. the KO chain: flat84KoProbe.py (A / B in one batch) + flat84KoExtract.py + flat84KoChain.ts in patched (== ko-chain/);
+# 6c. ON / OFF parity (flat77Parity.ts) on census battles 735 / 936 in patched (== parity-*.json);
 # 7. (FLAT84_CENSUS=1) flat84Census.sh (== census/census-check.txt, census-delta.json);
 # 8. (FLAT84_TESTS=1) the related test files in patched (== tests-patched-summary.txt).
 set -e
@@ -66,6 +67,12 @@ python3 tools/integration/flat84KoExtract.py "$OUT/ko" "$OUT/ko/units.json" > "$
   && ICE72_OUT="$OUT/ko" $N tools/integration/flat84KoChain.ts "$OUT/ko/units.json" "$OUT/ko/chain.json" "$OUT/ko/lend-vectors.json" | sed 's/[[:space:]]*$//' > "$OUT/ko/chain.txt")
 (cd "$OUT/ko" && shasum -a 256 raw/*.json) > "$OUT/ko/raw.sha256"
 for f in units-summary.txt predictions.json chain.json chain.txt lend-vectors.json raw.sha256; do same "$OUT/ko/$f" $W/ko-chain/$f; done
+# 6c. ON / OFF parity on two lifted census routes (battle 735 = seed 735 streak 0; battle 936 = seed 936 streak 6), patched copy
+for f in $W/parity-*.json; do
+  s=$(python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print(d['seed'], d['streak'])" "$f")
+  (cd "$OUT/patched" && $N tools/integration/flat77Parity.ts --seed=${s% *} --streak=${s#* } --out="$OUT/$(basename "$f")" > /dev/null)
+  same "$OUT/$(basename "$f")" "$f"
+done
 # 7. census 0..999 base vs patched
 if [ -n "$FLAT84_CENSUS" ]; then
   sh tools/integration/flat84Census.sh "$OUT/base" "$OUT/patched" "$OUT/census" > /dev/null
