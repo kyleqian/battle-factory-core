@@ -1032,6 +1032,8 @@ export const LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS: ReadonlyMap<number, readonly (
   // (ThunderPunch GOLBAT -> LAPRAS: row 0 = the doll-free control's own elevated-attacker shadow, 200 px).
   [348, ["player", "opponent"]], // Leaf Blade
   [9, ["player", "opponent"]], // ThunderPunch
+  // doll90 (docs/doll90-doll-cells.md): the doll's palette bank composed (composeLiveFieldPalettes), 0 px on every row.
+  [244, ["player", "opponent"]], // Psych Up
 ].map(([id, sides]) => [id as number, Object.freeze(sides as ("player" | "opponent")[])]));
 
 /**
@@ -3757,7 +3759,9 @@ export function liveMoveAnimationPresentation(
       // Everything else is the measured first-body constant set (liveBgSnapshotMoves.ts) + anchors + the assets-only composite.
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLiveArtPalettes(art);
+      // doll90: a Psych Up target shown as the Substitute doll has gSubstituteDollPal in its OBJ bank (as Megahorn's monbg reads it);
+      // identical to composeLiveArtPalettes when neither battler is the doll.
+      const palettes = request.moveId === 244 ? composeLiveFieldPalettes(art) : composeLiveArtPalettes(art);
       if (palettes === null) return null;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const args = { attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes };
