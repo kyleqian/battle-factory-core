@@ -386,6 +386,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS, drawn on the doll), and present the swaps around a proven body while only the attacker is
   // (liveMoveSubstituteDollDeclines, liveSubstituteSwap.ts).
   164,
+  // stl109 (docs/stl109-struggle-live.md): Struggle, the forced move (the ONE required body outside the historical 276; scoped exact, no
+  // D3 / D4 parameter). Tracked in docs/animation-integration-live-status.json additionalRequiredBodies.
+  165,
 ] as const);
 
 /** In-use OBJ slots at a first-body activation (prep14 s1: equal in all 24 probed scenarios). */
