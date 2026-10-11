@@ -150,7 +150,7 @@ see section 5.
   - Every exploratory pre-runner receipt also agrees.
 - `npm test` in a git-archive copy of HEAD `a46837da7` (master with this audit's files, inside the scratch dir; never the checkout):
   **1,620 files / 13,297 tests passed** (44 / 223 skipped).
-  - `npm run build`: see the final commit message.
+  - `npm run build` in the same copy: green (`tsc -b && vite build`, exit 0; only vite's usual chunk-size warning).
   - Only new tools / receipts / this doc changed (no src).
 - `git diff --check` clean. `tools/integration/fixtures/audit-22/.gitattributes` (copied from plans69) keeps `*.diff -whitespace`; there
   is no `.diff` here.
