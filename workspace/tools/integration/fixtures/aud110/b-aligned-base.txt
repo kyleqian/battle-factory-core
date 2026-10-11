@@ -24,6 +24,10 @@ pb-aud110-substitute-ply-99-169-c1 HARDEN     opponent CROBAT/KINGLER     live=1
 pb-aud110-substitute-ply-99-169-c2 HARDEN     opponent CROBAT/KINGLER     live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=196344
 pb-aud110-swagger-opp-169-99-c0    SWAGGER    opponent CROBAT/KINGLER     live=1 rows=161 exact=116 px=75383   r1==r2=1 ages=3..42(40) entry=75383
 pb-aud110-swagger-opp-169-99-c1    SWAGGER    opponent CROBAT/KINGLER     live=1 rows=161 exact=116 px=75383   r1==r2=1 ages=3..42(40) entry=75383
+pb-aud110-swagger-opp-19-95-c0     SWAGGER    opponent RATTATA/ONIX       live=1 rows=161 exact=161 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-swagger-opp-19-95-c1     SWAGGER    opponent RATTATA/ONIX       live=1 rows=161 exact=161 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-swagger-ply-19-95-c0     SWAGGER    player   RATTATA/ONIX       live=1 rows=161 exact=161 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-swagger-ply-19-95-c1     SWAGGER    player   RATTATA/ONIX       live=1 rows=161 exact=161 px=0       r1==r2=1 ages=- entry=0
 pb-aud110-swagger-ply-65-143-c0    SWAGGER    player   ALAKAZAM/SNORLAX   live=1 rows=161 exact=120 px=65847   r1==r2=1 ages=3..45(40) entry=65847
 pb-aud110-swagger-ply-65-143-c1    SWAGGER    player   ALAKAZAM/SNORLAX   live=1 rows=161 exact=120 px=65847   r1==r2=1 ages=3..45(40) entry=65847
 pb-aud110-taunt-opp-169-99-c0      TAUNT      opponent CROBAT/KINGLER     live=1 rows=125 exact=99  px=568     r1==r2=1 ages=75..117(26) entry=568
@@ -66,6 +70,6 @@ pb-stg107-ply-pp-95-362-c9         HARDEN     opponent DUSCLOPS/ONIX      live=1
 TOTAL HARDEN     windows=35 chain-0px=33 r1==r2=35
 TOTAL MEAN_LOOK  windows=4 chain-0px=4 r1==r2=4
 TOTAL SUBSTITUTE windows=3 chain-0px=3 r1==r2=3
-TOTAL SWAGGER    windows=4 chain-0px=0 r1==r2=4
+TOTAL SWAGGER    windows=8 chain-0px=4 r1==r2=8
 TOTAL TAUNT      windows=19 chain-0px=14 r1==r2=19
 not listed: STRUGGLE=25
