@@ -19,6 +19,18 @@
   fallback, keys identical except seed 881 (a Struggle stall cut 2 commands earlier by the 200,000-frame budget; prefix identical);
   land82Run.sh into a fresh dir: probes 60 / 60 r1 == r2, summary / explore / pins `same`; clean merge (src == worker's tested tree) ->
   smoke 448, touched tests 74 / 74.
+- Folded Opus worker `cc3b5c0b8` (SIDE, narrow grant) as `5af9bdb51` (src `e7a4775e` = land82 + cast83): cast83 — ISSUES #143 per-form
+  CASTFORM art: new catalog src/assets/gen/castform-forms.json (4 forms' front / back frames, castformPalette[form], the three source tables;
+  extractor tools/extract/cast83-extract-castform-forms.ts; form 0 == the existing entries), form-aware field art (battleCommandFieldArt.ts),
+  the live renderer's species sheets + `composeLiveArtPalettes` (27 calls); Scene OFF / fallback frames now draw the form too (the ROM
+  does). `liveCastformFormDeclines` lifts 29 ROM-proven (move, Castform role, form) keys: 181 windows (58 scenarios, all 3 forms, both
+  orientations, elevated CROBAT / GOLBAT / PELIPPER), 134 live all 0 px, r1 == r2. Still declining: unmeasured keys, an unknown form, the
+  Substitute swap composite, 5 measured residuals — Ember / Flamethrower BY and Scary Face AT Castform show the same residual with a
+  NORMAL-form Castform (live in production today: audit 21 checks), Icy Wind in rain (unexplained). Worker gates: full suite 1,615 files /
+  13,267 tests, build, differential 624. Supervisor: census 0..999 on the worker tree vs the baseline **+32 / +6,521**, 0 regressions, keys
+  + battle digest identical, 0 frame-length changes; cast83Run.sh into a fresh dir — staged / derived / both receipts == committed.
+- Supervisor reproduction of flat84: flat84Run.sh into a fresh dir under the repo (an out dir outside the repo cannot find ../oracle —
+  flat77Probe.py's harness lookup) — 35 / 35 non-census receipts `same`.
 
 ## 2026-10-10 (day) — S10A: #159 fixed, 12 production folds + 7 audit / evidence steps; honest corrections (Castform, Return); ordinary-play live share 0..999 91.89 -> 93.79 % of commands (95.82 -> 97.37 % of frames); 239 + 13 + 24
 
