@@ -91,6 +91,17 @@ describe("statsChangeParams (AnimTask_StatsChange switch)", () => {
       addedRows: 90,
     });
   });
+
+  it("hides an elevated opponent's shadow on rows 1 .. E+1 (stat102 pixel receipt)", () => {
+    // tools/integration/fixtures/stat102/proto-compare.json: GOLBAT opponent, full screen 0 px on rows A-1 .. E+2 with this rule.
+    for (const [animArg, endRel] of [[24, 75], [41, 89]] as const) {
+      const params = statsChangeParams(animArg)!;
+      const hidden = Array.from({ length: endRel + 5 }, (_, i) => i - 1).filter(
+        (rel) => statsChangeRow(params, rel).enemyShadowHidden,
+      );
+      expect(hidden).toEqual(Array.from({ length: endRel + 1 }, (_, i) => i + 1));
+    }
+  });
 });
 
 describe("statsChangeRow vs the stat101 ROM row tables", () => {

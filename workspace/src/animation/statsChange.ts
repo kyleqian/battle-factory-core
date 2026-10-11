@@ -58,6 +58,8 @@ export interface StatsChangeRow {
   readonly maskOamVisible: boolean;
   /** Banner pixels are drawn: mask displayed, window regs on, EVA > 0. */
   readonly bannerVisible: boolean;
+  /** SpriteCB_EnemyShadow hides an elevated opponent's shadow (gAnimScriptActive). */
+  readonly enemyShadowHidden: boolean;
 }
 
 export interface StatsChangeSpan {
@@ -107,6 +109,13 @@ const REGISTER_LAG_ROWS = 1;
 const OAM_LAG_ROWS = 2;
 /** The script `end` waits for SE_M_STAT_INCREASE / DECREASE (Cmd_end IsSEPlaying). */
 const SE_END_REL = 75;
+/**
+ * gAnimScriptActive rises in BattleMainCB1 (the controller's LaunchBattleAnimation), before CB2's AnimateSprites, so the shadow
+ * callback hides the shadow in the same row's OAM build (displayed one row later). It falls in Task_ClearBitWhenBattleTableAnimDone
+ * (CB2 RunTasks, after AnimateSprites), so the shadow is rebuilt one row later and displayed on E + 2 (stat102 pixel receipt).
+ */
+const SHADOW_HIDE_LAG_ROWS = 1;
+const SHADOW_RETURN_LAG_ROWS = 2;
 
 /** AnimTask_StatsChange's switch; null = the task is destroyed at once. */
 export function statsChangeParams(animArg: number): StatsChangeParams | null {
@@ -255,5 +264,6 @@ export function statsChangeRow(params: StatsChangeParams, rel: number): StatsCha
     copyAlive: rel >= STEP2_START_REL && rel < state3Rel,
     maskOamVisible,
     bannerVisible: maskOamVisible && windowRegsVisible && (eva ?? 0) > 0,
+    enemyShadowHidden: rel >= SHADOW_HIDE_LAG_ROWS && rel < endRel + SHADOW_RETURN_LAG_ROWS,
   };
 }
