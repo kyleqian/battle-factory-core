@@ -11,8 +11,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   histories and fixed live claims). Supervisor FINAL gates on that code: typecheck, full suite 1,614 files / 13,258 tests, build,
   differential 624 / 624 vs `b50c4dabd` (session start), census seeds 0..299 97.98 % / 98.40 % (start 96.98 / 97.99), seeds 0..999
   **93.79 % of move-animation commands / 97.37 % of frames live** (start 91.89 / 95.82; two runs byte-identical), seeds 50000.. 95.20 / 97.18
-  (start 93.07 / 95.47); gameplay command key sequence + battle digest identical at every fold; soak gates: see the follow-up wind-down commit. Preview
-  <http://127.0.0.1:5191/> serves the final build (receipt in the follow-up wind-down commit).
+  (start 93.07 / 95.47); gameplay command key sequence + battle digest identical at every fold; soak gates on `bf082c6e1` (a kernel file changed: Speed Boost animArg1): vanilla 0:20 20 / 20 OK, full 0:60 60 / 60, winning
+  0:60 60 / 60, winning-swap 0:60 60 / 60 (all budget-ended = OK; the varied-RNG fifth gate was not run). Preview
+  <http://127.0.0.1:5191/> serves `20023b861` (src `4c4fe4c7`; 4 samples
+  hash-equal, session export + ON -> OFF restart passed, no browser errors; `playable-preview-20023b861-receipt.json`).
 - **Did (production, each re-proved by the supervisor from fresh probes / reruns):** hide66 (ISSUES #159: live bodies drew a hidden
   Fly / Bounce / Dig / Dive charger — 90 wrong live commands on 0..999 -> 0) + fly63 re-landed; sw67 (Shock Wave geometry-keyed order plan);
   land68 (Dive words unit + SUBSTITUTE_FADE); fold71 (Magnitude / CASTFORM_CHANGE / Conversion 2 / Needle Arm plans + the kernel's Speed

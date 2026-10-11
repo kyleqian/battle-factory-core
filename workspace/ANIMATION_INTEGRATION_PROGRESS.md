@@ -193,7 +193,10 @@
 - Supervisor FINAL gates on `bf082c6e1` (src `4c4fe4c7`): typecheck, full suite **1,614 files / 13,258 tests**, build, differential
   **624 / 624 vs `b50c4dabd`** (session start), census seeds 0..299 **97.98 % / 98.40 %** (vs `c6f60846e`: 56 live -> fallback = ret80's
   Return chains, 5 fallback -> live = land79's Flatter; key sequence + digests identical), seeds 0..999 **93.79 % / 97.37 %** (two runs
-  byte-identical; session start 91.89 / 95.82), seeds 50000..50999 **95.20 % / 97.18 %** (start 93.07 / 95.47); soak gates: see the follow-up wind-down commit.
+  byte-identical; session start 91.89 / 95.82), seeds 50000..50999 **95.20 % / 97.18 %** (start 93.07 / 95.47); soak gates on `bf082c6e1` (a kernel file changed: Speed Boost animArg1): vanilla 0:20 20 / 20 OK, full 0:60 60 / 60, winning
+  0:60 60 / 60, winning-swap 0:60 60 / 60 (all budget-ended = OK; the varied-RNG fifth gate was not run).
+- Preview <http://127.0.0.1:5191/> serves `20023b861` (src `4c4fe4c7`): 4 samples hash-equal (canvas == ABI == screenshot), session
+  export + ON -> OFF restart passed, no browser errors (`playable-preview-20023b861-receipt.json`).
 
 ## 2026-10-09 (day) — S10A: allocator / order / words-lend histories + live-claim fixes; ordinary-play live share 87.95 -> 91.89 % of commands (92.09 -> 95.82 % of frames); 239 + 13 + 24
 

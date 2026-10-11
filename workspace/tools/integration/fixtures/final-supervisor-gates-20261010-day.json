@@ -57,5 +57,21 @@
    "livePctFramesBefore": 95.47
   }
  },
- "note": "per-fold proofs: gameplay command key sequence + battleDigestExcludingFrames identical at every fold (union-gates-*.json, worker receipts)"
+ "note": "per-fold proofs: gameplay command key sequence + battleDigestExcludingFrames identical at every fold (union-gates-*.json, worker receipts)",
+ "soak": {
+  "vanilla 0:20": "20/20 OK (budget 20)",
+  "full 0:60 --parallel 3": "60/60 OK (budget 60)",
+  "winning 0:60 --parallel 3": "60/60 OK (budget 60)",
+  "winning-swap 0:60 --parallel 3": "60/60 OK (budget 60)",
+  "varied-rng fifth gate": "not run (time; S10A scoped policy)",
+  "tree": "bf082c6e1 / src 4c4fe4c7"
+ },
+ "preview": {
+  "commit": "20023b861",
+  "receipt": "playable-preview-20023b861-receipt.json",
+  "samples": "4 hash-equal",
+  "sessionExport": "passed",
+  "modeControl": "passed",
+  "errors": 0
+ }
 }
