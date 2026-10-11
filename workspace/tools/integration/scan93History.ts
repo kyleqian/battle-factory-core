@@ -56,6 +56,15 @@ export function scan93AfterExtrasensory(entry: Scan93Scanline, attackerSide: Sca
     banks: [banks[0]!, banks[1]!] as const });
 }
 
+/**
+ * The display-neutral bank relabel: the intro leaves srcBuffer 1 with the +-2 bank in bank 0, or srcBuffer 0 with it in bank 1 (the intro's
+ * frame parity; measured both ways, r1 == r2). Every HBlank DMA reads banks[srcBuffer] then flips, and every modelled writer writes both
+ * banks or the srcBuffer bank, so (s, [b0, b1]) and (s ^ 1, [b1, b0]) display identically. Canonical form: srcBuffer 1.
+ */
+export function scan93Canonical(s: Scan93Scanline): Scan93Scanline {
+  return s.srcBuffer === 1 ? s : Object.freeze({ ...s, srcBuffer: 1, banks: [s.banks[1], s.banks[0]] as const });
+}
+
 /** Fold: the scanline effect at the activation of the body after `bodies` (null = invalidated by an unmodelled writer). */
 export function scan93Fold(bodies: readonly Scan93Body[], entry: Scan93Scanline | null = SCAN93_S0): Scan93Scanline | null {
   let h = entry;
@@ -73,6 +82,7 @@ const probeBodies = (probe: Json): Scan93Body[] => (probe.bodies as Json[]).map(
   const attackerSide: Scan93Side = b.attacker === 0 ? "player" : "opponent", t = b.attacker === 0 ? 1 : 0;
   return { label: b.label as string, attackerSide, targetSpecies: symbolOf(b.at.battlers[t].species), targetX2: b.at.battlerSprites[t].x2 };
 });
+const key = (s: Scan93Scanline) => JSON.stringify([s.state, s.srcBuffer, s.dmaDest, s.dmaControl, s.banks]);
 const diffLines = (a: readonly number[], b: readonly number[]) => a.reduce((n, v, i) => n + (v !== b[i] ? 1 : 0), 0);
 
 function main(): void {
@@ -112,22 +122,22 @@ function main(): void {
         const at = (probe.bodies as Json[])[k]!.at.scanline as Json;
         const ram: Scan93Scanline = { state: at.state, srcBuffer: at.srcBuffer, dmaDest: at.dmaDest, dmaControl: at.dmaControl, banks: at.banks };
         const pred = scan93Fold(bodies.slice(0, k));
-        const vsS0 = { bank0: diffLines(ram.banks[0], SCAN93_S0.banks[0]), bank1: diffLines(ram.banks[1], SCAN93_S0.banks[1]) };
+        const c = scan93Canonical(ram), vsS0 = { bank0: diffLines(c.banks[0], SCAN93_S0.banks[0]), bank1: diffLines(c.banks[1], SCAN93_S0.banks[1]) };
         rows.push({ scenario: name, body: k, frame: (probe.bodies as Json[])[k]!.startFrame, label: body.label, side: body.attackerSide,
           preceding: bodies.slice(0, k).map((x) => `${x.label.replace(/^(Move|General|Status|Special)_/, "")}:${x.attackerSide[0]}`).join(" "),
           r1EqualsR2: same, predicted: pred === null ? "invalidated" : "known",
-          equal: pred === null ? null : JSON.stringify([pred.state, pred.srcBuffer, pred.dmaDest, pred.dmaControl, pred.banks])
-            === JSON.stringify([ram.state, ram.srcBuffer, ram.dmaDest, ram.dmaControl, ram.banks]),
+          equalExact: pred === null ? null : key(pred) === key(ram),
+          equal: pred === null ? null : key(scan93Canonical(pred)) === key(scan93Canonical(ram)),
           ramLinesNotS0: vsS0, ram: summary(ram),
-          ...(pred === null ? {} : { predictedSummary: summary(pred), mismatchLines: { bank0: diffLines(ram.banks[0], pred.banks[0]), bank1: diffLines(ram.banks[1], pred.banks[1]) } }) });
+          ...(pred === null ? {} : { predictedSummary: summary(pred), mismatchLines: { bank0: diffLines(c.banks[0], scan93Canonical(pred).banks[0]), bank1: diffLines(c.banks[1], scan93Canonical(pred).banks[1]) } }) });
       });
     }
     const known = rows.filter((r) => r.predicted === "known");
     const result = { schema: "scan93-compare/v1", bodies: rows.length, scenarios: new Set(rows.map((r) => r.scenario)).size,
-      r1EqualsR2: rows.every((r) => r.r1EqualsR2), knownBodies: known.length, knownEqual: known.filter((r) => r.equal).length,
+      r1EqualsR2: rows.every((r) => r.r1EqualsR2), knownBodies: known.length, knownEqual: known.filter((r) => r.equal).length, knownEqualExact: known.filter((r) => r.equalExact).length,
       invalidatedBodies: rows.length - known.length, rows };
     writeFileSync(out!, JSON.stringify(result, null, 1) + "\n");
-    console.log(`${result.scenarios} scenarios, ${result.bodies} bodies, r1==r2 ${result.r1EqualsR2}, known ${result.knownEqual}/${result.knownBodies} equal, invalidated ${result.invalidatedBodies}`);
+    console.log(`${result.scenarios} scenarios, ${result.bodies} bodies, r1==r2 ${result.r1EqualsR2}, known ${result.knownEqual}/${result.knownBodies} equal (canonical; ${result.knownEqualExact} without the relabel), invalidated ${result.invalidatedBodies}`);
     if (!result.r1EqualsR2 || result.knownEqual !== result.knownBodies) process.exitCode = 1;
     return;
   }
