@@ -13,8 +13,8 @@ Scope: `docs/struggle-integration-scope.md` (the user's 2026-10-11 decision). Ev
   **Taunt** (deterministic, no RNG) and by **PP exhaustion** (a 5-PP move against Pressure).
 - **Rung 2 — ROM dense windows: done.** 19 Struggle windows on 11 routes, both orientations, 7 species pairs (elevated Golbat and
   big-picture Snorlax as attacker and as target), first + repeated Struggles in one battle (2 or 3 per battle), Struggle into a
-  Substitute doll, the attacker fainting from its own recoil (Shedinja), Struggle KO-ing the target (Shedinja). **Every window is 111
-  rows** (activation .. first inactive frame), the same event ages everywhere; two fresh batches give byte-identical receipts
+  Substitute doll, the attacker fainting from its own recoil (Shedinja), Struggle KO-ing the target (Shedinja). **Every body runs 111
+  frames** from the activation to the first inactive frame (production's window = 112 rows, through that first inactive row), the same event ages everywhere; two fresh batches give byte-identical receipts
   (r1 == r2). Scene OFF controls (same routes, OFF bootstrap): no body, identical gameplay; on the Taunt routes every Struggle body's
   turn is exactly 81 frames shorter OFF from the body on (HP / recoil / faint / turn-end frames), r1 == r2 (§2).
 - **Rung 3 — banked patch: done.** `tools/integration/fixtures/stg107/stg107-struggle.diff` (applied only to a git-archive copy of
@@ -33,11 +33,11 @@ measured identically on all 19 windows (§2).
 
 | Command | Component | Production today | What the land step adds |
 |---|---|---|---|
-| `loadspritegfx ANIM_TAG_IMPACT` | hitsplat tiles / palette | `src/assets/gen/battle-anim-hitsplat.json`; known-entry allocation tile 305 / palette slot 7 (Return, Pursuit) | nothing (the IMPACT load follows the waves here: its tile base / palette slot differ — see §3) |
+| `loadspritegfx ANIM_TAG_IMPACT` | hitsplat tiles / palette | `src/assets/gen/battle-anim-hitsplat.json`; known-entry allocation tile 305 / palette slot 7 (Return, Pursuit) | nothing: IMPACT still loads first (tile 305 / OBJ palette slot 7, bank 23); the waves take tile 321 / slot 8 (bank 24), confirmed by the ROM attr2 words |
 | `loadspritegfx ANIM_TAG_MOVEMENT_WAVES` | `gBattleAnimSpriteGfx_MovementWaves` (`graphics/battle_anims/sprites/movement_waves.png`, 32x96 4bpp = 3 frames of 32x32, 0x600 bytes) + its `.gbapal` | **not extracted** (no production file mentions it) | NEW asset `src/assets/gen/battle-anim-movement-waves.json` from `tools/extract/stg107-extract-movement-waves.ts` |
 | `monbg ANIM_TARGET` | MoveBattlerSpriteToBG + Task_UpdateMonBg | live (Thunder Punch 9, Pursuit 228, Return 216 = ANIM_DEF_PARTNER, same in singles) | reuse: target hidden from age 7, BG cnt write age 8 |
 | `setalpha 12, 8` | BLDCNT 0x3F40 / BLDALPHA 0x080C | live (same bodies) | reuse: rows 10..86 |
-| `createvisualtask AnimTask_ShakeMonInPlace, 2, ANIM_ATTACKER, 3, 0, 12, 4` | `src/animation/shakeMonInPlace.ts shakeMonInPlaceSequence` | ported; proven users (doubleEdge, takeDown, superFang, hiJumpKick, slam, skyUppercut, thrash) all run frameDelay 1 | first **frameDelay 4** user: attacker x2 -3 at 10, then ±3 every 5 rows from 14, 0 at 64 = `sequence[age - 10 + 1]` (the creating frame runs the task twice: its synchronous first step and RunTasks) |
+| `createvisualtask AnimTask_ShakeMonInPlace, 2, ANIM_ATTACKER, 3, 0, 12, 4` | `src/animation/shakeMonInPlace.ts shakeMonInPlaceSequence` | ported; proven users (doubleEdge, takeDown, superFang, hiJumpKick, slam, skyUppercut, thrash) all run frameDelay 1 | first **frameDelay 4** user: attacker x2 -3 at 10, then ±3 every 5 rows from 14, 0 at 64 = RAM `sequence[age - 10 + 1]` (the creating frame runs the task twice: its synchronous first step and RunTasks); the OAM carries `sequence[age - 10]` (built before RunTasks, §3.1) |
 | `createsprite gMovementWavesSpriteTemplate, ANIM_ATTACKER, 2, 0, 0, 2` / `…, 0, 1, 2` | `battle_anim_effects_2.c:1158` template (32x32 ObjNormal, affine off), `AnimMovementWaves` :3624 / `_Step` :3655, anims `gMovementWavesAnimCmds1` (frames 0, 16, 32, 16 x 8 ticks) / `Cmds2` (16, 32, 16, 0 hFlip) | NEW sprite program | 2 sprites created at age 10 (slots 3 / 4, lowest free), x = attacker X_2 + 32 / - 32, y = attacker Y_PIC_OFFSET, subpriority = attacker subpriority - 2 (player 28, opponent 38); anim command index rows 10 / 17 / 25 / 33, restart 42 / 50 / 58 / 66 (data[0] = 2 cycles), last visible row 74, destroyed at 75 |
 | `loopsewithpan SE_M_HEADBUTT, …, 12, 4` | Task_LoopAndPlaySE (sound only) | — | no visual |
 | `waitforvisualfinish` | — | — | ends at 75 |
