@@ -1,0 +1,2 @@
+a21-self-sunny-day-player-azurill swap player SUNNY_DAY t0 rows 243 body 157 D 158 prodDur 243 order fixture presented true prod 0/0 exact 243 tail {"rowK1":{"production":[200,200],"withoutLatch":[800,800]},"rowK2":{"production":[0,0]}}
+a21-self-sunny-day-player-azurill plain player SUNNY_DAY t0 rows 157 body 156 D 158 prodDur 158 order fixture presented false prod 225842/225842 exact 0 tail null

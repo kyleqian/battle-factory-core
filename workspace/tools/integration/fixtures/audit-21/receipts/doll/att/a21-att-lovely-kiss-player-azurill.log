@@ -1,0 +1,2 @@
+a21-att-lovely-kiss-player-azurill swap player LOVELY_KISS t0 rows 238 body 152 D 152 prodDur 238 order fixture presented true prod 0/0 exact 238 tail {"rowK1":{"production":[200,200],"withoutLatch":[800,800]},"rowK2":{"production":[0,0]}}
+a21-att-lovely-kiss-player-azurill plain player LOVELY_KISS t0 rows 153 body 152 D 152 prodDur 152 order fixture presented false prod 0/0 exact 153 tail null

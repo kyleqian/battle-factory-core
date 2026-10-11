@@ -1,0 +1,6 @@
+a21-att-dream-eater-opponent-crobat plain player BELLY_DRUM t0 rows 110 body 109 D 110 prodDur 110 order fixture presented false prod 178603/178603 exact 0 tail null
+a21-att-dream-eater-opponent-crobat plain player REST t0 rows 110 body 109 D 110 prodDur 110 order fixture presented false prod 220293/220293 exact 0 tail null
+a21-att-dream-eater-opponent-crobat swap opponent DREAM_EATER t0 rows 348 body 266 D 267 prodDur 348 order fixture presented true prod 0/0 exact 348 tail {"rowK1":{"production":[0,0],"withoutLatch":[679,679]},"rowK2":{"production":[0,0]}}
+a21-att-dream-eater-opponent-crobat swap opponent DREAM_EATER t0 rows 347 body 265 D 267 prodDur 348 order none presented true prod 4595760/4595760 exact 47 tail {"rowK1":{"production":[0,0],"withoutLatch":[679,679]},"rowK2":{"production":[0,0]}}
+a21-att-dream-eater-opponent-crobat swap opponent DREAM_EATER t0 rows 347 body 265 D 267 prodDur 348 order none presented true prod 4595760/4595760 exact 47 tail {"rowK1":{"production":[0,0],"withoutLatch":[679,679]},"rowK2":{"production":[0,0]}}
+a21-att-dream-eater-opponent-crobat plain player REST t0 rows 110 body 109 D 110 prodDur 110 order none presented false prod 220293/220293 exact 0 tail null

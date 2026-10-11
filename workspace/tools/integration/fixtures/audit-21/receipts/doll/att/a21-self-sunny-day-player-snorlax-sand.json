@@ -1,0 +1,567 @@
+{
+ "schema": "attdoll-check/v1",
+ "results": [
+  {
+   "stem": "a21-self-sunny-day-player-snorlax-sand",
+   "kind": "plain",
+   "side": "opponent",
+   "move": "SANDSTORM",
+   "moveId": 201,
+   "turn": 0,
+   "frame": 364,
+   "activation": 364,
+   "window": [
+    364,
+    531
+   ],
+   "rows": 168,
+   "swapInRows": -1,
+   "romBodyRows": 167,
+   "swapBackRows": 0,
+   "orderInput": "fixture",
+   "pinnedRng2": 1605994024,
+   "adapterDuration": 168,
+   "multihit": 0,
+   "productionDuration": 168,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "prod": {
+    "px": [
+     265928,
+     265928
+    ],
+    "exactRows": 0,
+    "digests": [
+     "e16730d0d54c9f14",
+     "e16730d0d54c9f14"
+    ],
+    "identical": true,
+    "badAges": [
+     "0..167"
+    ],
+    "maxPxRow": 1611,
+    "firstBad": [
+     [
+      0,
+      1611,
+      [
+       41,
+       71,
+       102,
+       111
+      ]
+     ],
+     [
+      1,
+      1611,
+      [
+       41,
+       71,
+       102,
+       111
+      ]
+     ],
+     [
+      2,
+      1611,
+      [
+       41,
+       71,
+       102,
+       111
+      ]
+     ],
+     [
+      3,
+      1611,
+      [
+       41,
+       71,
+       102,
+       111
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    0,
+    0,
+    0,
+    914,
+    0
+   ]
+  },
+  {
+   "stem": "a21-self-sunny-day-player-snorlax-sand",
+   "kind": "swap",
+   "side": "player",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 1767,
+   "activation": 1810,
+   "window": [
+    1767,
+    2009
+   ],
+   "rows": 243,
+   "swapInRows": 42,
+   "romBodyRows": 157,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 133734497,
+   "adapterDuration": 158,
+   "multihit": 0,
+   "productionDuration": 243,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 243,
+    "digests": [
+     "1bc79a801e5baff1",
+     "1bc79a801e5baff1"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    600,
+    600,
+    0,
+    796,
+    37
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      600,
+      600
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "a21-self-sunny-day-player-snorlax-sand",
+   "kind": "plain",
+   "side": "opponent",
+   "move": "SANDSTORM",
+   "moveId": 201,
+   "turn": 0,
+   "frame": 2153,
+   "activation": 2153,
+   "window": [
+    2153,
+    2320
+   ],
+   "rows": 168,
+   "swapInRows": -1,
+   "romBodyRows": 167,
+   "swapBackRows": 0,
+   "orderInput": "fixture",
+   "pinnedRng2": 935913716,
+   "adapterDuration": 168,
+   "multihit": 0,
+   "productionDuration": 168,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "prod": {
+    "px": [
+     265928,
+     265928
+    ],
+    "exactRows": 0,
+    "digests": [
+     "e16730d0d54c9f14",
+     "e16730d0d54c9f14"
+    ],
+    "identical": true,
+    "badAges": [
+     "0..167"
+    ],
+    "maxPxRow": 1611,
+    "firstBad": [
+     [
+      0,
+      1611,
+      [
+       41,
+       71,
+       102,
+       111
+      ]
+     ],
+     [
+      1,
+      1611,
+      [
+       41,
+       71,
+       102,
+       111
+      ]
+     ],
+     [
+      2,
+      1611,
+      [
+       41,
+       71,
+       102,
+       111
+      ]
+     ],
+     [
+      3,
+      1611,
+      [
+       41,
+       71,
+       102,
+       111
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    0,
+    0,
+    0,
+    914,
+    0
+   ]
+  },
+  {
+   "stem": "a21-self-sunny-day-player-snorlax-sand",
+   "kind": "swap",
+   "side": "player",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 3465,
+   "activation": 3508,
+   "window": [
+    3465,
+    3707
+   ],
+   "rows": 243,
+   "swapInRows": 42,
+   "romBodyRows": 157,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 1718825347,
+   "adapterDuration": 158,
+   "multihit": 0,
+   "productionDuration": 243,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 243,
+    "digests": [
+     "1bc79a801e5baff1",
+     "1bc79a801e5baff1"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    600,
+    600,
+    0,
+    796,
+    37
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      600,
+      600
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "a21-self-sunny-day-player-snorlax-sand",
+   "kind": "plain",
+   "side": "opponent",
+   "move": "SANDSTORM",
+   "moveId": 201,
+   "turn": 0,
+   "frame": 3851,
+   "activation": 3851,
+   "window": [
+    3851,
+    4018
+   ],
+   "rows": 168,
+   "swapInRows": -1,
+   "romBodyRows": 167,
+   "swapBackRows": 0,
+   "orderInput": "fixture",
+   "pinnedRng2": 2993445518,
+   "adapterDuration": 168,
+   "multihit": 0,
+   "productionDuration": 168,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "prod": {
+    "px": [
+     285238,
+     285238
+    ],
+    "exactRows": 0,
+    "digests": [
+     "6e00b01984f9fa06",
+     "6e00b01984f9fa06"
+    ],
+    "identical": true,
+    "badAges": [
+     "0..167"
+    ],
+    "maxPxRow": 20921,
+    "firstBad": [
+     [
+      0,
+      1611,
+      [
+       41,
+       71,
+       102,
+       111
+      ]
+     ],
+     [
+      1,
+      1611,
+      [
+       41,
+       71,
+       102,
+       111
+      ]
+     ],
+     [
+      2,
+      1611,
+      [
+       41,
+       71,
+       102,
+       111
+      ]
+     ],
+     [
+      3,
+      1611,
+      [
+       41,
+       71,
+       102,
+       111
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    0,
+    0,
+    0,
+    914,
+    0
+   ]
+  },
+  {
+   "stem": "a21-self-sunny-day-player-snorlax-sand",
+   "kind": "swap",
+   "side": "player",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 5163,
+   "activation": 5206,
+   "window": [
+    5163,
+    5405
+   ],
+   "rows": 243,
+   "swapInRows": 42,
+   "romBodyRows": 157,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 3920134389,
+   "adapterDuration": 158,
+   "multihit": 0,
+   "productionDuration": 243,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 243,
+    "digests": [
+     "1bc79a801e5baff1",
+     "1bc79a801e5baff1"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    600,
+    600,
+    0,
+    796,
+    37
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      600,
+      600
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "a21-self-sunny-day-player-snorlax-sand",
+   "kind": "plain",
+   "side": "opponent",
+   "move": "SANDSTORM",
+   "moveId": 201,
+   "turn": 0,
+   "frame": 5549,
+   "activation": 5549,
+   "window": [
+    5549,
+    5716
+   ],
+   "rows": 168,
+   "swapInRows": -1,
+   "romBodyRows": 167,
+   "swapBackRows": 0,
+   "orderInput": "fixture",
+   "pinnedRng2": 70244664,
+   "adapterDuration": 168,
+   "multihit": 0,
+   "productionDuration": 168,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "prod": {
+    "px": [
+     265928,
+     265928
+    ],
+    "exactRows": 0,
+    "digests": [
+     "e16730d0d54c9f14",
+     "e16730d0d54c9f14"
+    ],
+    "identical": true,
+    "badAges": [
+     "0..167"
+    ],
+    "maxPxRow": 1611,
+    "firstBad": [
+     [
+      0,
+      1611,
+      [
+       41,
+       71,
+       102,
+       111
+      ]
+     ],
+     [
+      1,
+      1611,
+      [
+       41,
+       71,
+       102,
+       111
+      ]
+     ],
+     [
+      2,
+      1611,
+      [
+       41,
+       71,
+       102,
+       111
+      ]
+     ],
+     [
+      3,
+      1611,
+      [
+       41,
+       71,
+       102,
+       111
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    0,
+    0,
+    0,
+    914,
+    0
+   ]
+  }
+ ]
+}

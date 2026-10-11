@@ -1,0 +1,1 @@
+a21-att-sing-player-snorlax swap player SING t0 rows 331 body 245 D 245 prodDur 331 order fixture presented true prod 0/0 exact 331 tail {"rowK1":{"production":[0,0],"withoutLatch":[600,600]},"rowK2":{"production":[0,0]}}

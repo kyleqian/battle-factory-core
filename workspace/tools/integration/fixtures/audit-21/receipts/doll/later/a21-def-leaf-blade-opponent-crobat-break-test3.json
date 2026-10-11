@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "a21-def-leaf-blade-opponent-crobat-break-test3.json",
+  "stem": "a21-def-leaf-blade-opponent-crobat-break",
+  "kind": "test3",
+  "move": "LEAF_BLADE",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   5076,
+   5299
+  ],
+  "rows": 224,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 224,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 224,
+    "digest": "dac31e2f83a5c54ff42229fea6993cc45b35a2c81cc8c75b4d6efe4f61d09b71"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 224,
+    "digest": "dac31e2f83a5c54ff42229fea6993cc45b35a2c81cc8c75b4d6efe4f61d09b71"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

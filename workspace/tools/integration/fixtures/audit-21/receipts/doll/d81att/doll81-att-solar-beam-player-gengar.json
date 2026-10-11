@@ -1,0 +1,633 @@
+{
+ "schema": "attdoll-check/v1",
+ "results": [
+  {
+   "stem": "doll81-att-solar-beam-player-gengar",
+   "kind": "swap",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 0,
+   "frame": 1750,
+   "activation": 1793,
+   "window": [
+    1750,
+    1942
+   ],
+   "rows": 193,
+   "swapInRows": 42,
+   "romBodyRows": 107,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 2897664355,
+   "adapterDuration": 108,
+   "multihit": 0,
+   "productionDuration": 193,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 193,
+    "digests": [
+     "195003daae7cc593",
+     "195003daae7cc593"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    600,
+    800,
+    0,
+    0,
+    0
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      200,
+      200
+     ],
+     "withoutLatch": [
+      800,
+      800
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "doll81-att-solar-beam-player-gengar",
+   "kind": "swap",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 1,
+   "frame": 2277,
+   "activation": 2320,
+   "window": [
+    2277,
+    2599
+   ],
+   "rows": 323,
+   "swapInRows": 42,
+   "romBodyRows": 237,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 2607182539,
+   "adapterDuration": 160,
+   "multihit": 0,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     4663599,
+     4663599
+    ],
+    "exactRows": 1,
+    "digests": [
+     "c6af5433d26d6950",
+     "c6af5433d26d6950"
+    ],
+    "identical": true,
+    "badAges": [
+     "1..322"
+    ],
+    "maxPxRow": 20916,
+    "firstBad": [
+     [
+      1,
+      200,
+      [
+       160,
+       65,
+       191,
+       72
+      ]
+     ],
+     [
+      2,
+      800,
+      [
+       51,
+       65,
+       191,
+       111
+      ]
+     ],
+     [
+      3,
+      1028,
+      [
+       46,
+       65,
+       191,
+       111
+      ]
+     ],
+     [
+      4,
+      1225,
+      [
+       41,
+       65,
+       191,
+       111
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    600,
+    800,
+    0,
+    0,
+    1402
+   ]
+  },
+  {
+   "stem": "doll81-att-solar-beam-player-gengar",
+   "kind": "swap",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 0,
+   "frame": 3448,
+   "activation": 3491,
+   "window": [
+    3448,
+    3640
+   ],
+   "rows": 193,
+   "swapInRows": 42,
+   "romBodyRows": 107,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 42420449,
+   "adapterDuration": 108,
+   "multihit": 0,
+   "productionDuration": 193,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 193,
+    "digests": [
+     "195003daae7cc593",
+     "195003daae7cc593"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    600,
+    800,
+    0,
+    0,
+    0
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      200,
+      200
+     ],
+     "withoutLatch": [
+      800,
+      800
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "doll81-att-solar-beam-player-gengar",
+   "kind": "swap",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 1,
+   "frame": 3975,
+   "activation": 4018,
+   "window": [
+    3975,
+    4297
+   ],
+   "rows": 323,
+   "swapInRows": 42,
+   "romBodyRows": 237,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 3129279497,
+   "adapterDuration": 160,
+   "multihit": 0,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     4663599,
+     4663599
+    ],
+    "exactRows": 1,
+    "digests": [
+     "c6af5433d26d6950",
+     "c6af5433d26d6950"
+    ],
+    "identical": true,
+    "badAges": [
+     "1..322"
+    ],
+    "maxPxRow": 20916,
+    "firstBad": [
+     [
+      1,
+      200,
+      [
+       160,
+       65,
+       191,
+       72
+      ]
+     ],
+     [
+      2,
+      800,
+      [
+       51,
+       65,
+       191,
+       111
+      ]
+     ],
+     [
+      3,
+      1028,
+      [
+       46,
+       65,
+       191,
+       111
+      ]
+     ],
+     [
+      4,
+      1225,
+      [
+       41,
+       65,
+       191,
+       111
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    600,
+    800,
+    0,
+    0,
+    1402
+   ]
+  },
+  {
+   "stem": "doll81-att-solar-beam-player-gengar",
+   "kind": "swap",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 0,
+   "frame": 5146,
+   "activation": 5189,
+   "window": [
+    5146,
+    5338
+   ],
+   "rows": 193,
+   "swapInRows": 42,
+   "romBodyRows": 107,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 3522329647,
+   "adapterDuration": 108,
+   "multihit": 0,
+   "productionDuration": 193,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 193,
+    "digests": [
+     "195003daae7cc593",
+     "195003daae7cc593"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    600,
+    800,
+    0,
+    0,
+    0
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      200,
+      200
+     ],
+     "withoutLatch": [
+      800,
+      800
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "doll81-att-solar-beam-player-gengar",
+   "kind": "swap",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 1,
+   "frame": 5673,
+   "activation": 5716,
+   "window": [
+    5673,
+    5995
+   ],
+   "rows": 323,
+   "swapInRows": 42,
+   "romBodyRows": 237,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 3502998295,
+   "adapterDuration": 160,
+   "multihit": 0,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     4663599,
+     4663599
+    ],
+    "exactRows": 1,
+    "digests": [
+     "c6af5433d26d6950",
+     "c6af5433d26d6950"
+    ],
+    "identical": true,
+    "badAges": [
+     "1..322"
+    ],
+    "maxPxRow": 20916,
+    "firstBad": [
+     [
+      1,
+      200,
+      [
+       160,
+       65,
+       191,
+       72
+      ]
+     ],
+     [
+      2,
+      800,
+      [
+       51,
+       65,
+       191,
+       111
+      ]
+     ],
+     [
+      3,
+      1028,
+      [
+       46,
+       65,
+       191,
+       111
+      ]
+     ],
+     [
+      4,
+      1225,
+      [
+       41,
+       65,
+       191,
+       111
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    600,
+    800,
+    0,
+    0,
+    1402
+   ]
+  },
+  {
+   "stem": "doll81-att-solar-beam-player-gengar",
+   "kind": "swap",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 0,
+   "frame": 6844,
+   "activation": 6887,
+   "window": [
+    6844,
+    7036
+   ],
+   "rows": 193,
+   "swapInRows": 42,
+   "romBodyRows": 107,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 3867299533,
+   "adapterDuration": 108,
+   "multihit": 0,
+   "productionDuration": 193,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 193,
+    "digests": [
+     "195003daae7cc593",
+     "195003daae7cc593"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    600,
+    800,
+    0,
+    0,
+    0
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      200,
+      200
+     ],
+     "withoutLatch": [
+      800,
+      800
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "doll81-att-solar-beam-player-gengar",
+   "kind": "swap",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 1,
+   "frame": 7371,
+   "activation": 7414,
+   "window": [
+    7371,
+    7693
+   ],
+   "rows": 323,
+   "swapInRows": 42,
+   "romBodyRows": 237,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 879737717,
+   "adapterDuration": 160,
+   "multihit": 0,
+   "productionDuration": null,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     4663599,
+     4663599
+    ],
+    "exactRows": 1,
+    "digests": [
+     "c6af5433d26d6950",
+     "c6af5433d26d6950"
+    ],
+    "identical": true,
+    "badAges": [
+     "1..322"
+    ],
+    "maxPxRow": 20916,
+    "firstBad": [
+     [
+      1,
+      200,
+      [
+       160,
+       65,
+       191,
+       72
+      ]
+     ],
+     [
+      2,
+      800,
+      [
+       51,
+       65,
+       191,
+       111
+      ]
+     ],
+     [
+      3,
+      1028,
+      [
+       46,
+       65,
+       191,
+       111
+      ]
+     ],
+     [
+      4,
+      1225,
+      [
+       41,
+       65,
+       191,
+       111
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    600,
+    800,
+    0,
+    0,
+    1402
+   ]
+  }
+ ]
+}

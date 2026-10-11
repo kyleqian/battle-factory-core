@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "a21-def-leaf-blade-player-azurill-test4.json",
+  "stem": "a21-def-leaf-blade-player-azurill",
+  "kind": "test4",
+  "move": "LEAF_BLADE",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   5247,
+   5470
+  ],
+  "rows": 224,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 224,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 224,
+    "digest": "03939a5c15a8efaa1311a6f8c70924b2ab17c92d1adf4f7f7e0d5f6620667080"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 224,
+    "digest": "03939a5c15a8efaa1311a6f8c70924b2ab17c92d1adf4f7f7e0d5f6620667080"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

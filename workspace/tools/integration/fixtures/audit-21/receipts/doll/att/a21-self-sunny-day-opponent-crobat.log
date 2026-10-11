@@ -1,0 +1,4 @@
+a21-self-sunny-day-opponent-crobat swap opponent SUNNY_DAY t0 rows 239 body 157 D 158 prodDur 239 order fixture presented true prod 0/0 exact 239 tail {"rowK1":{"production":[0,0],"withoutLatch":[679,679]},"rowK2":{"production":[0,0]}}
+a21-self-sunny-day-opponent-crobat plain player SUNNY_DAY t0 rows 157 body 156 D 158 prodDur 158 order fixture presented false prod 220069/220069 exact 0 tail null
+a21-self-sunny-day-opponent-crobat plain player SUNNY_DAY t0 rows 157 body 156 D 158 prodDur 158 order fixture presented false prod 457351/457351 exact 0 tail null
+a21-self-sunny-day-opponent-crobat plain player SUNNY_DAY t0 rows 157 body 156 D 158 prodDur 158 order fixture presented false prod 220069/220069 exact 0 tail null

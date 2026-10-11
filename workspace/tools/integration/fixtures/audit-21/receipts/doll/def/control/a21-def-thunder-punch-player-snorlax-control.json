@@ -1,0 +1,45 @@
+[
+ {
+  "fixture": "a21-def-thunder-punch-player-snorlax-control.json",
+  "stem": "a21-def-thunder-punch-player-snorlax",
+  "kind": "control",
+  "move": "THUNDER_PUNCH",
+  "attackerSide": "player",
+  "defenderDoll": false,
+  "window": [
+   79,
+   214
+  ],
+  "rows": 136,
+  "orderInput": "fixture",
+  "shift": -10,
+  "calibration": [
+   [
+    -10,
+    0
+   ]
+  ],
+  "liveDuration": 104,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 136,
+    "digest": "92a091d1cd4658c8e4a5dc70c280c59e7674b438a7a982698dcc8109073f4483"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 136,
+    "digest": "92a091d1cd4658c8e4a5dc70c280c59e7674b438a7a982698dcc8109073f4483"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

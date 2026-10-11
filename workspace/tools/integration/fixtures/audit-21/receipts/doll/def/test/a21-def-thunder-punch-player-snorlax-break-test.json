@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "a21-def-thunder-punch-player-snorlax-break-test.json",
+  "stem": "a21-def-thunder-punch-player-snorlax-break",
+  "kind": "test",
+  "move": "THUNDER_PUNCH",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   1745,
+   1880
+  ],
+  "rows": 136,
+  "orderInput": "fixture",
+  "shift": -10,
+  "liveDuration": 104,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 136,
+    "digest": "4187851d8cdbd14bb10cd11b62caad4d4f808338fa1c1ac52fd3269be5372ea4"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 136,
+    "digest": "4187851d8cdbd14bb10cd11b62caad4d4f808338fa1c1ac52fd3269be5372ea4"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

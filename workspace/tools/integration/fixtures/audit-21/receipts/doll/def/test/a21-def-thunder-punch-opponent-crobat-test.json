@@ -1,0 +1,55 @@
+[
+ {
+  "fixture": "a21-def-thunder-punch-opponent-crobat-test.json",
+  "stem": "a21-def-thunder-punch-opponent-crobat",
+  "kind": "test",
+  "move": "THUNDER_PUNCH",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   1748,
+   1883
+  ],
+  "rows": 136,
+  "orderInput": "fixture",
+  "shift": -10,
+  "liveDuration": 104,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 200,
+    "exactRows": 135,
+    "digest": "7cf191bcb6b644ffa4c24ed8cb3f0040e4b5b4a80902c8d720c8e33606420a14"
+   },
+   {
+    "run": 2,
+    "residualPixels": 200,
+    "exactRows": 135,
+    "digest": "7cf191bcb6b644ffa4c24ed8cb3f0040e4b5b4a80902c8d720c8e33606420a14"
+   }
+  ],
+  "affectedAges": "0",
+  "maxPxRow": 200,
+  "fieldPx": 200,
+  "bbox": [
+   160,
+   65,
+   191,
+   72
+  ],
+  "perRow": [
+   [
+    0,
+    200,
+    [
+     160,
+     65,
+     191,
+     72
+    ]
+   ]
+  ]
+ }
+]

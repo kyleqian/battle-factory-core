@@ -50,6 +50,31 @@ sh tools/integration/issue151Counters.sh "$T/lag" "$J" $W/aligned/a21-cn-scary-f
   $W/fixtures/a21-iw-normal-by-cfopp-mantine-c0.json $W/fixtures/a21-iw-normal-by-cfopp-mantine-c1.json \
   $W/fixtures/a21-iw-normal-by-cfply-golbat-c0.json $W/fixtures/a21-iw-normal-by-cfply-golbat-c1.json \
   $W/fixtures/a21-iw-rain-by-hpply-golbat-c2.json $W/fixtures/a21-iw-rain-by-hpply-golbat-c1.json > "$REC/lag.txt"
+# 5. land82 doll cells (audit21DollStage.py; doll81's harness on THIS tree's production code, land82 landed: no patch): probes twice
+#    (audit21DollProbes.sh, r1 == r2), attacker composites (speciesAudit14SwapCheck.ts -> attdollLiveCheck.ts), defender dolls
+#    (audit21DollDefFixtures.py + prep38Check.ts: control calibrated, test at its shift), every LATER doll body (audit21DollLater.py), and
+#    doll81's own GENGAR -> GOLBAT pair (the k+1 tail-row control) -> <receipt-dir>/doll/
+D=$W/doll; mkdir -p "$REC/doll/att" "$REC/doll/def/control" "$REC/doll/def/test" "$REC/doll/later" "$REC/doll/d81att"
+python3 tools/integration/audit21DollStage.py "$T/dollsc" > /dev/null
+diff -r "$T/dollsc" $D/scenarios > /dev/null && echo "doll scenarios == committed" || { echo "doll scenarios differ"; exit 1; }
+OUT="$T/dollprobe" JOBS=14 sh tools/integration/audit21DollProbes.sh > "$REC/doll/probes.txt"
+OUT="$T/d81probe" SC=tools/integration/fixtures/doll81/scenarios JOBS=6 sh tools/integration/audit21DollProbes.sh doll81-att-lovely-kiss-player-gengar \
+  doll81-self-sunny-day-player-gengar doll81-att-solar-beam-player-gengar >> "$REC/doll/probes.txt"
+awk -F'\t' '$7 != "def" {print $1}' $D/scenarios/list.tsv | S14_SCENARIOS=$D/scenarios xargs -P "$J" -n 1 sh -c 'node --experimental-strip-types \
+  --no-warnings tools/integration/speciesAudit14SwapCheck.ts --out="'"$REC"'/doll/att/$0.json" "'"$T"'/dollprobe" "$0" > /dev/null 2>&1 || echo "FAIL $0"'
+for st in doll81-att-lovely-kiss-player-gengar doll81-self-sunny-day-player-gengar doll81-att-solar-beam-player-gengar; do
+  S14_SCENARIOS=tools/integration/fixtures/doll81/scenarios node --experimental-strip-types --no-warnings tools/integration/speciesAudit14SwapCheck.ts \
+    --out="$REC/doll/d81att/$st.json" "$T/d81probe" $st > /dev/null 2>&1 || echo "FAIL $st"; done
+python3 tools/integration/audit21DollDefFixtures.py "$T/dollprobe" "$T/doll/def-derived" > "$REC/doll/def-fixtures.txt"
+python3 tools/integration/audit21DollLater.py "$T/dollprobe" "$T/doll/later-derived" > "$REC/doll/later-fixtures.txt"
+export PR="$T/dollprobe"
+ls "$T"/doll/def-derived/*-control.json | xargs -P "$J" -n 1 sh -c 'node --experimental-strip-types --no-warnings tools/integration/prep38Check.ts \
+  --probes="$PR" --out="'"$REC"'/doll/def/control/$(basename "$0")" --calibrate "$0" > /dev/null 2>&1 || echo "FAIL $0"'
+ls "$T"/doll/def-derived/*-test.json | xargs -P "$J" -n 1 sh -c 'node --experimental-strip-types --no-warnings tools/integration/prep38Check.ts \
+  --probes="$PR" --out="'"$REC"'/doll/def/test/$(basename "$0")" --shifts="'"$REC"'/doll/def/control" "$0" > /dev/null 2>&1 || echo "FAIL $0"'
+ls "$T"/doll/later-derived/*.json | xargs -P "$J" -n 1 sh -c 'node --experimental-strip-types --no-warnings tools/integration/prep38Check.ts \
+  --probes="$PR" --out="'"$REC"'/doll/later/$(basename "$0")" --shifts="'"$REC"'/doll/def/control" "$0" > /dev/null 2>&1 || echo "FAIL $0"'
+python3 tools/integration/audit21DollSummary.py "$REC/doll" > "$REC/doll/summary.tsv"
 if [ -d $W/receipts ]; then
   diff -r "$REC" $W/receipts > "$T/receipts-vs-committed.txt" && echo "receipts == committed (byte-identical)" \
     || { echo "receipts DIFFER from the committed ones:"; head -40 "$T/receipts-vs-committed.txt"; }

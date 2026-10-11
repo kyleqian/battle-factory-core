@@ -1,0 +1,349 @@
+{
+ "schema": "attdoll-check/v1",
+ "results": [
+  {
+   "stem": "a21-att-solar-beam-player-azurill",
+   "kind": "swap",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 0,
+   "frame": 2663,
+   "activation": 2706,
+   "window": [
+    2663,
+    2855
+   ],
+   "rows": 193,
+   "swapInRows": 42,
+   "romBodyRows": 107,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 947687522,
+   "adapterDuration": 108,
+   "multihit": 0,
+   "productionDuration": 193,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 193,
+    "digests": [
+     "195003daae7cc593",
+     "195003daae7cc593"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    600,
+    800,
+    0,
+    0,
+    0
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      200,
+      200
+     ],
+     "withoutLatch": [
+      800,
+      800
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "a21-att-solar-beam-player-azurill",
+   "kind": "plain",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 1,
+   "frame": 3552,
+   "activation": 3552,
+   "window": [
+    3552,
+    3789
+   ],
+   "rows": 238,
+   "swapInRows": -1,
+   "romBodyRows": 237,
+   "swapBackRows": 0,
+   "orderInput": "fixture",
+   "pinnedRng2": 744135074,
+   "adapterDuration": 160,
+   "multihit": 0,
+   "productionDuration": 160,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     2306265,
+     2306265
+    ],
+    "exactRows": 15,
+    "digests": [
+     "adec37dfb9d5c8a0",
+     "adec37dfb9d5c8a0"
+    ],
+    "identical": true,
+    "badAges": [
+     "4..226"
+    ],
+    "maxPxRow": 19459,
+    "firstBad": [
+     [
+      4,
+      17963,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      5,
+      17963,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      6,
+      18226,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      7,
+      18226,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    200,
+    0,
+    0,
+    0,
+    1409
+   ]
+  },
+  {
+   "stem": "a21-att-solar-beam-player-azurill",
+   "kind": "plain",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 0,
+   "frame": 5304,
+   "activation": 5304,
+   "window": [
+    5304,
+    5411
+   ],
+   "rows": 108,
+   "swapInRows": -1,
+   "romBodyRows": 107,
+   "swapBackRows": 0,
+   "orderInput": "fixture",
+   "pinnedRng2": 518016320,
+   "adapterDuration": 108,
+   "multihit": 0,
+   "productionDuration": 108,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 108,
+    "digests": [
+     "400f67f74b1250e5",
+     "400f67f74b1250e5"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    200,
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "stem": "a21-att-solar-beam-player-azurill",
+   "kind": "plain",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 1,
+   "frame": 5734,
+   "activation": 5734,
+   "window": [
+    5734,
+    5971
+   ],
+   "rows": 238,
+   "swapInRows": -1,
+   "romBodyRows": 237,
+   "swapBackRows": 0,
+   "orderInput": "fixture",
+   "pinnedRng2": 2676448074,
+   "adapterDuration": 160,
+   "multihit": 0,
+   "productionDuration": 160,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     2306265,
+     2306265
+    ],
+    "exactRows": 15,
+    "digests": [
+     "adec37dfb9d5c8a0",
+     "adec37dfb9d5c8a0"
+    ],
+    "identical": true,
+    "badAges": [
+     "4..226"
+    ],
+    "maxPxRow": 19459,
+    "firstBad": [
+     [
+      4,
+      17963,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      5,
+      17963,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      6,
+      18226,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      7,
+      18226,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    200,
+    0,
+    0,
+    0,
+    1409
+   ]
+  },
+  {
+   "stem": "a21-att-solar-beam-player-azurill",
+   "kind": "plain",
+   "side": "player",
+   "move": "SOLAR_BEAM",
+   "moveId": 76,
+   "turn": 0,
+   "frame": 6999,
+   "activation": 6999,
+   "window": [
+    6999,
+    7106
+   ],
+   "rows": 108,
+   "swapInRows": -1,
+   "romBodyRows": 107,
+   "swapBackRows": 0,
+   "orderInput": "fixture",
+   "pinnedRng2": 841343283,
+   "adapterDuration": 108,
+   "multihit": 0,
+   "productionDuration": 108,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 108,
+    "digests": [
+     "400f67f74b1250e5",
+     "400f67f74b1250e5"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    200,
+    0,
+    0,
+    0,
+    0
+   ]
+  }
+ ]
+}

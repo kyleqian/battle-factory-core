@@ -1,0 +1,2 @@
+a21-att-solar-beam-player-snorlax swap player SOLAR_BEAM t0 rows 193 body 107 D 108 prodDur 193 order fixture presented true prod 0/0 exact 193 tail {"rowK1":{"production":[0,0],"withoutLatch":[600,600]},"rowK2":{"production":[0,0]}}
+a21-att-solar-beam-player-snorlax swap player SOLAR_BEAM t1 rows 323 body 237 D 160 prodDur null order fixture presented false prod 4644451/4644451 exact 2 tail null

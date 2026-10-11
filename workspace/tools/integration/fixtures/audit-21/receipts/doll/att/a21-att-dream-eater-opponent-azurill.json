@@ -1,0 +1,564 @@
+{
+ "schema": "attdoll-check/v1",
+ "results": [
+  {
+   "stem": "a21-att-dream-eater-opponent-azurill",
+   "kind": "plain",
+   "side": "player",
+   "move": "BELLY_DRUM",
+   "moveId": 187,
+   "turn": 0,
+   "frame": 342,
+   "activation": 342,
+   "window": [
+    342,
+    451
+   ],
+   "rows": 110,
+   "swapInRows": -1,
+   "romBodyRows": 109,
+   "swapBackRows": 0,
+   "orderInput": "fixture",
+   "pinnedRng2": 4259364090,
+   "adapterDuration": 110,
+   "multihit": 0,
+   "productionDuration": 110,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "prod": {
+    "px": [
+     104830,
+     104830
+    ],
+    "exactRows": 0,
+    "digests": [
+     "22c8dd6bb251f618",
+     "22c8dd6bb251f618"
+    ],
+    "identical": true,
+    "badAges": [
+     "0..109"
+    ],
+    "maxPxRow": 953,
+    "firstBad": [
+     [
+      0,
+      953,
+      [
+       156,
+       35,
+       194,
+       71
+      ]
+     ],
+     [
+      1,
+      953,
+      [
+       156,
+       35,
+       194,
+       71
+      ]
+     ],
+     [
+      2,
+      953,
+      [
+       156,
+       35,
+       194,
+       71
+      ]
+     ],
+     [
+      3,
+      953,
+      [
+       156,
+       35,
+       194,
+       71
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    0,
+    0,
+    0,
+    27,
+    5
+   ]
+  },
+  {
+   "stem": "a21-att-dream-eater-opponent-azurill",
+   "kind": "plain",
+   "side": "player",
+   "move": "REST",
+   "moveId": 156,
+   "turn": 0,
+   "frame": 2053,
+   "activation": 2053,
+   "window": [
+    2053,
+    2162
+   ],
+   "rows": 110,
+   "swapInRows": -1,
+   "romBodyRows": 109,
+   "swapBackRows": 0,
+   "orderInput": "fixture",
+   "pinnedRng2": 3117037003,
+   "adapterDuration": 110,
+   "multihit": 0,
+   "productionDuration": 110,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "prod": {
+    "px": [
+     146520,
+     146520
+    ],
+    "exactRows": 0,
+    "digests": [
+     "5cad682dfad4e5c3",
+     "5cad682dfad4e5c3"
+    ],
+    "identical": true,
+    "badAges": [
+     "0..109"
+    ],
+    "maxPxRow": 1332,
+    "firstBad": [
+     [
+      0,
+      1332,
+      [
+       16,
+       35,
+       194,
+       151
+      ]
+     ],
+     [
+      1,
+      1332,
+      [
+       16,
+       35,
+       194,
+       151
+      ]
+     ],
+     [
+      2,
+      1332,
+      [
+       16,
+       35,
+       194,
+       151
+      ]
+     ],
+     [
+      3,
+      1332,
+      [
+       16,
+       35,
+       194,
+       151
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    0,
+    0,
+    0,
+    0,
+    22
+   ]
+  },
+  {
+   "stem": "a21-att-dream-eater-opponent-azurill",
+   "kind": "swap",
+   "side": "opponent",
+   "move": "DREAM_EATER",
+   "moveId": 138,
+   "turn": 0,
+   "frame": 3476,
+   "activation": 3517,
+   "window": [
+    3476,
+    3823
+   ],
+   "rows": 348,
+   "swapInRows": 40,
+   "romBodyRows": 266,
+   "swapBackRows": 40,
+   "orderInput": "fixture",
+   "pinnedRng2": 188541627,
+   "adapterDuration": 267,
+   "multihit": 0,
+   "productionDuration": 348,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 348,
+    "digests": [
+     "cff3ccdbde32881b",
+     "cff3ccdbde32881b"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    679,
+    679,
+    0,
+    0,
+    1756
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      679,
+      679
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "a21-att-dream-eater-opponent-azurill",
+   "kind": "swap",
+   "side": "opponent",
+   "move": "DREAM_EATER",
+   "moveId": 138,
+   "turn": 0,
+   "frame": 5174,
+   "activation": 5215,
+   "window": [
+    5174,
+    5521
+   ],
+   "rows": 348,
+   "swapInRows": 40,
+   "romBodyRows": 266,
+   "swapBackRows": 40,
+   "orderInput": "none",
+   "pinnedRng2": 803319155,
+   "adapterDuration": 267,
+   "multihit": 0,
+   "productionDuration": 348,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     4867493,
+     4867493
+    ],
+    "exactRows": 96,
+    "digests": [
+     "1632b6d4725b52a4",
+     "1632b6d4725b52a4"
+    ],
+    "identical": true,
+    "badAges": [
+     "53..304"
+    ],
+    "maxPxRow": 20058,
+    "firstBad": [
+     [
+      53,
+      19190,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      54,
+      19190,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      55,
+      19190,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      56,
+      19190,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    679,
+    679,
+    0,
+    0,
+    1767
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      679,
+      679
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "a21-att-dream-eater-opponent-azurill",
+   "kind": "swap",
+   "side": "opponent",
+   "move": "DREAM_EATER",
+   "moveId": 138,
+   "turn": 0,
+   "frame": 6872,
+   "activation": 6913,
+   "window": [
+    6872,
+    7218
+   ],
+   "rows": 347,
+   "swapInRows": 40,
+   "romBodyRows": 265,
+   "swapBackRows": 40,
+   "orderInput": "none",
+   "pinnedRng2": 2534628504,
+   "adapterDuration": 267,
+   "multihit": 0,
+   "productionDuration": 348,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     4868342,
+     4868342
+    ],
+    "exactRows": 65,
+    "digests": [
+     "4ca5490e1c8ca5ef",
+     "4ca5490e1c8ca5ef"
+    ],
+    "identical": true,
+    "badAges": [
+     "53..303",
+     "308..324",
+     "333..346"
+    ],
+    "maxPxRow": 20058,
+    "firstBad": [
+     [
+      53,
+      19190,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      54,
+      19190,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      55,
+      19190,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ],
+     [
+      56,
+      19190,
+      [
+       0,
+       0,
+       239,
+       111
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    679,
+    679,
+    0,
+    0,
+    1756
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      679,
+      679
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "a21-att-dream-eater-opponent-azurill",
+   "kind": "plain",
+   "side": "player",
+   "move": "REST",
+   "moveId": 156,
+   "turn": 0,
+   "frame": 7628,
+   "activation": 7628,
+   "window": [
+    7628,
+    7737
+   ],
+   "rows": 110,
+   "swapInRows": -1,
+   "romBodyRows": 109,
+   "swapBackRows": 0,
+   "orderInput": "none",
+   "pinnedRng2": 2990345555,
+   "adapterDuration": 110,
+   "multihit": 0,
+   "productionDuration": 110,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "prod": {
+    "px": [
+     146520,
+     146520
+    ],
+    "exactRows": 0,
+    "digests": [
+     "5cad682dfad4e5c3",
+     "5cad682dfad4e5c3"
+    ],
+    "identical": true,
+    "badAges": [
+     "0..109"
+    ],
+    "maxPxRow": 1332,
+    "firstBad": [
+     [
+      0,
+      1332,
+      [
+       16,
+       35,
+       194,
+       151
+      ]
+     ],
+     [
+      1,
+      1332,
+      [
+       16,
+       35,
+       194,
+       151
+      ]
+     ],
+     [
+      2,
+      1332,
+      [
+       16,
+       35,
+       194,
+       151
+      ]
+     ],
+     [
+      3,
+      1332,
+      [
+       16,
+       35,
+       194,
+       151
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    0,
+    0,
+    0,
+    0,
+    27
+   ]
+  }
+ ]
+}

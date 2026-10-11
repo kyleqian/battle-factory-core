@@ -1,0 +1,696 @@
+{
+ "schema": "attdoll-check/v1",
+ "results": [
+  {
+   "stem": "a21-self-sunny-day-opponent-crobat-rain",
+   "kind": "plain",
+   "side": "player",
+   "move": "RAIN_DANCE",
+   "moveId": 240,
+   "turn": 0,
+   "frame": 348,
+   "activation": 348,
+   "window": [
+    348,
+    534
+   ],
+   "rows": 187,
+   "swapInRows": -1,
+   "romBodyRows": 186,
+   "swapBackRows": 0,
+   "orderInput": "fixture",
+   "pinnedRng2": 2809490200,
+   "adapterDuration": 187,
+   "multihit": 0,
+   "productionDuration": 187,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "prod": {
+    "px": [
+     302612,
+     302612
+    ],
+    "exactRows": 0,
+    "digests": [
+     "05a3ca9f9f6247ec",
+     "05a3ca9f9f6247ec"
+    ],
+    "identical": true,
+    "badAges": [
+     "0..186"
+    ],
+    "maxPxRow": 1696,
+    "firstBad": [
+     [
+      0,
+      1696,
+      [
+       144,
+       3,
+       206,
+       72
+      ]
+     ],
+     [
+      1,
+      1623,
+      [
+       144,
+       3,
+       206,
+       71
+      ]
+     ],
+     [
+      2,
+      1623,
+      [
+       144,
+       3,
+       206,
+       71
+      ]
+     ],
+     [
+      3,
+      1623,
+      [
+       144,
+       3,
+       206,
+       71
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    0,
+    0,
+    0,
+    847,
+    29
+   ]
+  },
+  {
+   "stem": "a21-self-sunny-day-opponent-crobat-rain",
+   "kind": "swap",
+   "side": "opponent",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 1738,
+   "activation": 1779,
+   "window": [
+    1738,
+    1976
+   ],
+   "rows": 239,
+   "swapInRows": 40,
+   "romBodyRows": 157,
+   "swapBackRows": 40,
+   "orderInput": "none",
+   "pinnedRng2": 1481283992,
+   "adapterDuration": 158,
+   "multihit": 0,
+   "productionDuration": 239,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     851601,
+     851601
+    ],
+    "exactRows": 82,
+    "digests": [
+     "b725549eec3ea148",
+     "b725549eec3ea148"
+    ],
+    "identical": true,
+    "badAges": [
+     "42..198"
+    ],
+    "maxPxRow": 8767,
+    "firstBad": [
+     [
+      42,
+      200,
+      [
+       160,
+       65,
+       191,
+       72
+      ]
+     ],
+     [
+      43,
+      200,
+      [
+       160,
+       65,
+       191,
+       72
+      ]
+     ],
+     [
+      44,
+      200,
+      [
+       160,
+       65,
+       191,
+       72
+      ]
+     ],
+     [
+      45,
+      200,
+      [
+       160,
+       65,
+       191,
+       72
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    679,
+    679,
+    0,
+    853,
+    37
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      679,
+      679
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "a21-self-sunny-day-opponent-crobat-rain",
+   "kind": "plain",
+   "side": "player",
+   "move": "RAIN_DANCE",
+   "moveId": 240,
+   "turn": 0,
+   "frame": 2116,
+   "activation": 2116,
+   "window": [
+    2116,
+    2302
+   ],
+   "rows": 187,
+   "swapInRows": -1,
+   "romBodyRows": 186,
+   "swapBackRows": 0,
+   "orderInput": "none",
+   "pinnedRng2": 1426715177,
+   "adapterDuration": 187,
+   "multihit": 0,
+   "productionDuration": 187,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "prod": {
+    "px": [
+     302307,
+     302307
+    ],
+    "exactRows": 0,
+    "digests": [
+     "7d4f3c0cd807e4c1",
+     "7d4f3c0cd807e4c1"
+    ],
+    "identical": true,
+    "badAges": [
+     "0..186"
+    ],
+    "maxPxRow": 1696,
+    "firstBad": [
+     [
+      0,
+      1696,
+      [
+       144,
+       3,
+       206,
+       72
+      ]
+     ],
+     [
+      1,
+      1623,
+      [
+       144,
+       3,
+       206,
+       71
+      ]
+     ],
+     [
+      2,
+      1623,
+      [
+       144,
+       3,
+       206,
+       71
+      ]
+     ],
+     [
+      3,
+      1623,
+      [
+       144,
+       3,
+       206,
+       71
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    0,
+    0,
+    0,
+    847,
+    29
+   ]
+  },
+  {
+   "stem": "a21-self-sunny-day-opponent-crobat-rain",
+   "kind": "swap",
+   "side": "opponent",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 3404,
+   "activation": 3445,
+   "window": [
+    3404,
+    3642
+   ],
+   "rows": 239,
+   "swapInRows": 40,
+   "romBodyRows": 157,
+   "swapBackRows": 40,
+   "orderInput": "none",
+   "pinnedRng2": 2319604851,
+   "adapterDuration": 158,
+   "multihit": 0,
+   "productionDuration": 239,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     851601,
+     851601
+    ],
+    "exactRows": 82,
+    "digests": [
+     "b725549eec3ea148",
+     "b725549eec3ea148"
+    ],
+    "identical": true,
+    "badAges": [
+     "42..198"
+    ],
+    "maxPxRow": 8767,
+    "firstBad": [
+     [
+      42,
+      200,
+      [
+       160,
+       65,
+       191,
+       72
+      ]
+     ],
+     [
+      43,
+      200,
+      [
+       160,
+       65,
+       191,
+       72
+      ]
+     ],
+     [
+      44,
+      200,
+      [
+       160,
+       65,
+       191,
+       72
+      ]
+     ],
+     [
+      45,
+      200,
+      [
+       160,
+       65,
+       191,
+       72
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    679,
+    679,
+    0,
+    853,
+    37
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      679,
+      679
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "a21-self-sunny-day-opponent-crobat-rain",
+   "kind": "plain",
+   "side": "player",
+   "move": "RAIN_DANCE",
+   "moveId": 240,
+   "turn": 0,
+   "frame": 3782,
+   "activation": 3782,
+   "window": [
+    3782,
+    3968
+   ],
+   "rows": 187,
+   "swapInRows": -1,
+   "romBodyRows": 186,
+   "swapBackRows": 0,
+   "orderInput": "none",
+   "pinnedRng2": 1345027664,
+   "adapterDuration": 187,
+   "multihit": 0,
+   "productionDuration": 187,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "prod": {
+    "px": [
+     302636,
+     302636
+    ],
+    "exactRows": 0,
+    "digests": [
+     "6af89ad571682df0",
+     "6af89ad571682df0"
+    ],
+    "identical": true,
+    "badAges": [
+     "0..186"
+    ],
+    "maxPxRow": 1696,
+    "firstBad": [
+     [
+      0,
+      1696,
+      [
+       144,
+       3,
+       206,
+       72
+      ]
+     ],
+     [
+      1,
+      1623,
+      [
+       144,
+       3,
+       206,
+       71
+      ]
+     ],
+     [
+      2,
+      1623,
+      [
+       144,
+       3,
+       206,
+       71
+      ]
+     ],
+     [
+      3,
+      1623,
+      [
+       144,
+       3,
+       206,
+       71
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    0,
+    0,
+    0,
+    847,
+    29
+   ]
+  },
+  {
+   "stem": "a21-self-sunny-day-opponent-crobat-rain",
+   "kind": "swap",
+   "side": "opponent",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 5070,
+   "activation": 5111,
+   "window": [
+    5070,
+    5308
+   ],
+   "rows": 239,
+   "swapInRows": 40,
+   "romBodyRows": 157,
+   "swapBackRows": 40,
+   "orderInput": "none",
+   "pinnedRng2": 1454361874,
+   "adapterDuration": 158,
+   "multihit": 0,
+   "productionDuration": 239,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     851601,
+     851601
+    ],
+    "exactRows": 82,
+    "digests": [
+     "b725549eec3ea148",
+     "b725549eec3ea148"
+    ],
+    "identical": true,
+    "badAges": [
+     "42..198"
+    ],
+    "maxPxRow": 8767,
+    "firstBad": [
+     [
+      42,
+      200,
+      [
+       160,
+       65,
+       191,
+       72
+      ]
+     ],
+     [
+      43,
+      200,
+      [
+       160,
+       65,
+       191,
+       72
+      ]
+     ],
+     [
+      44,
+      200,
+      [
+       160,
+       65,
+       191,
+       72
+      ]
+     ],
+     [
+      45,
+      200,
+      [
+       160,
+       65,
+       191,
+       72
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    679,
+    679,
+    0,
+    853,
+    37
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      679,
+      679
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "a21-self-sunny-day-opponent-crobat-rain",
+   "kind": "plain",
+   "side": "player",
+   "move": "RAIN_DANCE",
+   "moveId": 240,
+   "turn": 0,
+   "frame": 5448,
+   "activation": 5448,
+   "window": [
+    5448,
+    5634
+   ],
+   "rows": 187,
+   "swapInRows": -1,
+   "romBodyRows": 186,
+   "swapBackRows": 0,
+   "orderInput": "none",
+   "pinnedRng2": 3438151115,
+   "adapterDuration": 187,
+   "multihit": 0,
+   "productionDuration": 187,
+   "swapPresented": false,
+   "cell": false,
+   "framing": null,
+   "prod": {
+    "px": [
+     302106,
+     302106
+    ],
+    "exactRows": 0,
+    "digests": [
+     "7fc6afad38d8b7f9",
+     "7fc6afad38d8b7f9"
+    ],
+    "identical": true,
+    "badAges": [
+     "0..186"
+    ],
+    "maxPxRow": 1696,
+    "firstBad": [
+     [
+      0,
+      1696,
+      [
+       144,
+       3,
+       206,
+       72
+      ]
+     ],
+     [
+      1,
+      1623,
+      [
+       144,
+       3,
+       206,
+       71
+      ]
+     ],
+     [
+      2,
+      1623,
+      [
+       144,
+       3,
+       206,
+       71
+      ]
+     ],
+     [
+      3,
+      1623,
+      [
+       144,
+       3,
+       206,
+       71
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    0,
+    0,
+    0,
+    847,
+    29
+   ]
+  }
+ ]
+}
