@@ -1,3 +1,8 @@
+a22rs-fl-opp-spearow-chansey-protect-c0.json         PROTECT      opponent CHANSEY/SLOWPOKE     live=1 rows=123 exact=123 px=0 ages=- r1==r2=1 reseeds=[True] | entry live=1 px=0
+a22rs-fl-ply-slowpoke-reflect-c0.json                REFLECT      player   SLOWPOKE/CHANSEY     live=1 rows=79 exact=79 px=0 ages=- r1==r2=1 reseeds=[True] | entry live=1 px=0
+a22rs-ko2-fl-ply-slowpoke-protect-c0.json            SWIFT        player   SLOWPOKE/PIDGEY      live=1 rows=78 exact=78 px=0 ages=- r1==r2=1 reseeds=[True] | entry live=1 px=0
+a22rs-ko2-fl-ply-slowpoke-protect-c1.json            PROTECT      player   SLOWPOKE/PSYDUCK     live=1 rows=123 exact=123 px=0 ages=- r1==r2=1 reseeds=[True, True] | entry live=1 px=0
+a22rs-ko2-fl-ply-slowpoke-protect-c2.json            PROTECT      player   SLOWPOKE/PSYDUCK     live=1 rows=123 exact=123 px=0 ages=- r1==r2=1 reseeds=[True, True] | entry live=1 px=0
 a22rs-ko2-ms-opp-spearow-chansey-protect-c0.json     PROTECT      opponent CHANSEY/SLOWPOKE     live=1 rows=123 exact=123 px=0 ages=- r1==r2=1 reseeds=[True] | entry live=1 px=0
 a22rs-ko2-ms-opp-spearow-chansey-protect-c1.json     PROTECT      opponent CHANSEY/SLOWPOKE     live=1 rows=123 exact=123 px=0 ages=- r1==r2=1 reseeds=[True] | entry live=1 px=0
 a22rs-ko2-ms-opp-spearow-chansey-protect-c2.json     SWIFT        player   SLOWPOKE/CHANSEY     live=1 rows=78 exact=78 px=0 ages=- r1==r2=1 reseeds=[True] | entry live=1 px=0
@@ -10,4 +15,4 @@ a22rs-ms-ply-slowpoke-lightscreen-c0.json            LIGHT_SCREEN player   SLOWP
 a22rs-rd-opp-psyduck-mrmime-reflect-c0.json          REFLECT      opponent MR_MIME/SLOWPOKE     live=1 rows=79 exact=79 px=0 ages=- r1==r2=1 reseeds=[True] | entry live=1 px=0
 a22rs-rd-opp-psyduck-mrmime-reflect-c1.json          SWIFT        player   SLOWPOKE/MR_MIME     live=1 rows=78 exact=78 px=0 ages=- r1==r2=1 reseeds=[True] | entry live=1 px=0
 a22rs-sa-opp-spearow-chansey-protect-c0.json         PROTECT      opponent CHANSEY/SLOWPOKE     live=1 rows=123 exact=123 px=0 ages=- r1==r2=1 reseeds=[True] | entry live=1 px=0
-windows=12 live=12 0px=12 r1==r2=12 declined=0
+windows=17 live=17 0px=17 r1==r2=17 declined=0

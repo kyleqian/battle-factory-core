@@ -1,0 +1,118 @@
+{
+ "schema": "reseed85-chain-check/v1",
+ "scenario": "a22rs-fl-ply-slowpoke-reflect",
+ "rows": [
+  {
+   "fixture": "a22rs-fl-ply-slowpoke-reflect-c0.json",
+   "move": "REFLECT",
+   "side": "player",
+   "species": "SLOWPOKE/CHANSEY",
+   "units": 10,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "260@1 STATS_CHANGE(18)@0 129@0 HIT_ANIMATION@1 undefined@1 undefined@1 undefined@1 undefined@1",
+    "43@1 STATS_CHANGE(23)@0 115@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 5239,
+    "endFrame": 5317
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 260:opponent",
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 79,
+    "exactRows": 79,
+    "px": 0,
+    "digests": [
+     "131a00e1da38986b",
+     "131a00e1da38986b"
+    ],
+    "residualRows": [],
+    "detail": [],
+    "allocatorKnown": true,
+    "reseeds": [
+     true
+    ],
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     },
+     "activationOrder": null,
+     "allocator": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 79,
+    "exactRows": 79,
+    "px": 0,
+    "digests": [
+     "131a00e1da38986b",
+     "131a00e1da38986b"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

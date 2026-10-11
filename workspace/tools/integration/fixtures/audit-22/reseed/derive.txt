@@ -1,3 +1,8 @@
+a22rs-fl-opp-spearow-chansey-protect-c0.json PROTECT units 8 power 60 otherInvisible 0
+a22rs-fl-ply-slowpoke-reflect-c0.json REFLECT units 10 power 60 otherInvisible 0
+a22rs-ko2-fl-ply-slowpoke-protect-c0.json SWIFT units 10 power 60 otherInvisible 0
+a22rs-ko2-fl-ply-slowpoke-protect-c1.json PROTECT units 16 power 60 otherInvisible 0
+a22rs-ko2-fl-ply-slowpoke-protect-c2.json PROTECT units 17 power 60 otherInvisible 0
 a22rs-ko2-ms-opp-spearow-chansey-protect-c0.json PROTECT units 9 power 60 otherInvisible 0
 a22rs-ko2-ms-opp-spearow-chansey-protect-c1.json PROTECT units 10 power 60 otherInvisible 0
 a22rs-ko2-ms-opp-spearow-chansey-protect-c2.json SWIFT units 11 power 60 otherInvisible 0

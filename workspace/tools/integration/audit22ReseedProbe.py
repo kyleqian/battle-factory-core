@@ -10,6 +10,7 @@ probes (flat77Probe.py: activation RAM + RGB frames), A and B in one batch in se
     (player Protect / Reflect, or the opponent's third mon's Protect if the Factory AI sends it last). The three opponent species are
     DISTINCT (PIDGEY 16 L15, PSYDUCK L12 / L15, SPEAROW L18): the fixture derivation detects a KO by the target's species change, so a
     same-species send-out hides the KO (a first run with 3x PSYDUCK did exactly that).
+  fl: land87's Flatter 260 route (Flatter -> KO -> send-out), one and two KOs; SLOWPOKE's ability slot 1 (Own Tempo) blocks the confusion.
 usage (from workspace/, PYTHONPATH = the libmgba-py checkout): audit22ReseedProbe.py <out-dir> [--jobs J=12]
 """
 import sys
@@ -22,12 +23,15 @@ import words57Probe as W
 from words57Probe import mon
 
 SLOWPOKE, SPEAROW, PSYDUCK, PIDGEY, CHANSEY, MR_MIME = 79, 21, 54, 16, 113, 122
-SA, MS, RD, SWIFT, LEER, PROTECT, REFLECT, LSCREEN = 28, 189, 240, 129, 43, 182, 115, 113
+SA, MS, RD, FLATTER, SWIFT, LEER, PROTECT, REFLECT, LSCREEN = 28, 189, 240, 260, 129, 43, 182, 115, 113
 BENCH_P = R.BENCH_P
 
 
-def ply(*moves):
-    return [mon(SLOWPOKE, moves=(SWIFT, *moves) if moves else (SWIFT,) * 4, speed_iv=0)] + BENCH_P
+def ply(*moves, own_tempo=False):
+    lead = mon(SLOWPOKE, moves=(SWIFT, *moves) if moves else (SWIFT,) * 4, speed_iv=0)
+    if own_tempo:  # SLOWPOKE ability slot 1 = OWN_TEMPO: a Flatter cannot confuse it (no self-hit replaces the KO Swift)
+        lead["abilitySlot"] = 1
+    return [lead] + BENCH_P
 
 
 ONE_KO_OPP, ONE_KO_PLY = [None, None], [None, None, "RIGHT"]
@@ -45,6 +49,13 @@ JOBS = [
      [mon(PSYDUCK, 15, (RD,) * 4), mon(PIDGEY, 15, (RD,) * 4), mon(SPEAROW, 18, (RD,) * 4)], TWO_KO_PLY),
     ("a22rs-ko2-ms-opp-spearow-chansey-protect", MS, "opponent", "ko", ply(),
      [mon(SPEAROW, 18, (MS,) * 4), mon(SPEAROW, 18, (MS,) * 4), mon(CHANSEY, moves=(PROTECT,) * 4)], TWO_KO_OPP),
+    # land87's Flatter 260 route (FLATTER -> KO -> send-out), SLOWPOKE with Own Tempo
+    ("a22rs-fl-opp-spearow-chansey-protect", FLATTER, "opponent", "ko", ply(own_tempo=True),
+     [mon(SPEAROW, 18, (FLATTER,) * 4), mon(CHANSEY, moves=(PROTECT,) * 4), mon(CHANSEY, moves=(PROTECT,) * 4)], ONE_KO_OPP),
+    ("a22rs-fl-ply-slowpoke-reflect", FLATTER, "opponent", "ko", ply(REFLECT, REFLECT, REFLECT, own_tempo=True),
+     [mon(SPEAROW, 18, (FLATTER,) * 4), mon(CHANSEY, moves=(LEER,) * 4), mon(CHANSEY, moves=(LEER,) * 4)], ONE_KO_PLY),
+    ("a22rs-ko2-fl-ply-slowpoke-protect", FLATTER, "opponent", "ko", ply(PROTECT, PROTECT, PROTECT, own_tempo=True),
+     [mon(SPEAROW, 18, (FLATTER,) * 4), mon(PIDGEY, 15, (FLATTER,) * 4), mon(PSYDUCK, 12, (FLATTER,) * 4)], TWO_KO_PLY),
 ]
 
 if __name__ == "__main__":
