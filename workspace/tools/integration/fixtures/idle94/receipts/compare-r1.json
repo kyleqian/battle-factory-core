@@ -1,0 +1,1939 @@
+{
+ "schema": "idle94-compare/v1",
+ "scenarios": {
+  "idle94-agility-opp-c-dodrio-onix": {
+   "move": 97,
+   "attackerSide": "opponent",
+   "attacker": "DODRIO",
+   "target": "ONIX",
+   "pair": "c",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "A": 73,
+   "E": 159,
+   "X": 137202877,
+   "F_att": 70,
+   "F_after": 161,
+   "pre": 3,
+   "post": 2,
+   "E_minus_A": 86,
+   "N": 0,
+   "D": 87,
+   "trail": -1,
+   "spanOn": 91,
+   "spanOff": 35,
+   "offAtt": 70,
+   "offAfter": 105,
+   "L": 4,
+   "leadRows": [],
+   "leadAllStatic": true,
+   "leadOamChanged": [],
+   "leadPalChanged": [],
+   "leadIoChanged": [],
+   "lastScreenChangeBeforeA": 66,
+   "firstScreenChangeAtOrAfterA": 78,
+   "staticRunBeforeFirstChange": 12,
+   "predicted": {
+    "L": 4,
+    "pre": 3,
+    "post": 2,
+    "E_minus_A": 86
+   },
+   "match": {
+    "L": true,
+    "pre": true,
+    "post": true,
+    "E_minus_A": true,
+    "leadStatic": true,
+    "off35": true
+   }
+  },
+  "idle94-agility-ply-c-dodrio-onix": {
+   "move": 97,
+   "attackerSide": "player",
+   "attacker": "DODRIO",
+   "target": "ONIX",
+   "pair": "c",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "A": 69,
+   "E": 155,
+   "X": 137202877,
+   "F_att": 66,
+   "F_after": 157,
+   "pre": 3,
+   "post": 2,
+   "E_minus_A": 86,
+   "N": 0,
+   "D": 87,
+   "trail": -1,
+   "spanOn": 91,
+   "spanOff": 35,
+   "offAtt": 66,
+   "offAfter": 101,
+   "L": 4,
+   "leadRows": [],
+   "leadAllStatic": true,
+   "leadOamChanged": [],
+   "leadPalChanged": [],
+   "leadIoChanged": [],
+   "lastScreenChangeBeforeA": 62,
+   "firstScreenChangeAtOrAfterA": 74,
+   "staticRunBeforeFirstChange": 12,
+   "predicted": {
+    "L": 4,
+    "pre": 3,
+    "post": 2,
+    "E_minus_A": 86
+   },
+   "match": {
+    "L": true,
+    "pre": true,
+    "post": true,
+    "E_minus_A": true,
+    "leadStatic": true,
+    "off35": true
+   }
+  },
+  "idle94-bulk-up-opp-a-primeape-onix": {
+   "move": 339,
+   "attackerSide": "opponent",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "pair": "a",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "A": 72,
+   "E": 179,
+   "X": 137209450,
+   "F_att": 69,
+   "F_after": 181,
+   "pre": 3,
+   "post": 2,
+   "E_minus_A": 107,
+   "N": 4,
+   "D": 104,
+   "trail": -1,
+   "spanOn": 112,
+   "spanOff": 35,
+   "offAtt": 69,
+   "offAfter": 104,
+   "L": 8,
+   "leadRows": [
+    {
+     "f": 72,
+     "screenEqualsAminus1": true,
+     "oamEquals": true,
+     "palEquals": true,
+     "ioEquals": true
+    },
+    {
+     "f": 73,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": true,
+     "ioEquals": false
+    },
+    {
+     "f": 74,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 75,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    }
+   ],
+   "leadAllStatic": true,
+   "leadOamChanged": [
+    73,
+    74,
+    75
+   ],
+   "leadPalChanged": [
+    74,
+    75
+   ],
+   "leadIoChanged": [
+    73,
+    74,
+    75
+   ],
+   "lastScreenChangeBeforeA": 66,
+   "firstScreenChangeAtOrAfterA": 78,
+   "staticRunBeforeFirstChange": 12,
+   "predicted": {
+    "L": 8,
+    "pre": 3,
+    "post": 2,
+    "E_minus_A": 107
+   },
+   "match": {
+    "L": true,
+    "pre": true,
+    "post": true,
+    "E_minus_A": true,
+    "leadStatic": true,
+    "off35": true
+   }
+  },
+  "idle94-bulk-up-opp-b-heracross-snorlax": {
+   "move": 339,
+   "attackerSide": "opponent",
+   "attacker": "HERACROSS",
+   "target": "SNORLAX",
+   "pair": "b",
+   "seed": 305420349,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "A": 73,
+   "E": 180,
+   "X": 137209450,
+   "F_att": 70,
+   "F_after": 182,
+   "pre": 3,
+   "post": 2,
+   "E_minus_A": 107,
+   "N": 4,
+   "D": 104,
+   "trail": -1,
+   "spanOn": 112,
+   "spanOff": 35,
+   "offAtt": 70,
+   "offAfter": 105,
+   "L": 8,
+   "leadRows": [
+    {
+     "f": 73,
+     "screenEqualsAminus1": true,
+     "oamEquals": true,
+     "palEquals": true,
+     "ioEquals": true
+    },
+    {
+     "f": 74,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": true,
+     "ioEquals": false
+    },
+    {
+     "f": 75,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 76,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    }
+   ],
+   "leadAllStatic": true,
+   "leadOamChanged": [
+    74,
+    75,
+    76
+   ],
+   "leadPalChanged": [
+    75,
+    76
+   ],
+   "leadIoChanged": [
+    74,
+    75,
+    76
+   ],
+   "lastScreenChangeBeforeA": 67,
+   "firstScreenChangeAtOrAfterA": 79,
+   "staticRunBeforeFirstChange": 12,
+   "predicted": {
+    "L": 8,
+    "pre": 3,
+    "post": 2,
+    "E_minus_A": 107
+   },
+   "match": {
+    "L": true,
+    "pre": true,
+    "post": true,
+    "E_minus_A": true,
+    "leadStatic": true,
+    "off35": true
+   }
+  },
+  "idle94-bulk-up-ply-a-primeape-onix": {
+   "move": 339,
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "pair": "a",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "A": 68,
+   "E": 175,
+   "X": 137209450,
+   "F_att": 65,
+   "F_after": 177,
+   "pre": 3,
+   "post": 2,
+   "E_minus_A": 107,
+   "N": 4,
+   "D": 104,
+   "trail": -1,
+   "spanOn": 112,
+   "spanOff": 35,
+   "offAtt": 65,
+   "offAfter": 100,
+   "L": 8,
+   "leadRows": [
+    {
+     "f": 68,
+     "screenEqualsAminus1": true,
+     "oamEquals": true,
+     "palEquals": true,
+     "ioEquals": true
+    },
+    {
+     "f": 69,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": true,
+     "ioEquals": false
+    },
+    {
+     "f": 70,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 71,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    }
+   ],
+   "leadAllStatic": true,
+   "leadOamChanged": [
+    69,
+    70,
+    71
+   ],
+   "leadPalChanged": [
+    70,
+    71
+   ],
+   "leadIoChanged": [
+    69,
+    70,
+    71
+   ],
+   "lastScreenChangeBeforeA": 62,
+   "firstScreenChangeAtOrAfterA": 74,
+   "staticRunBeforeFirstChange": 12,
+   "predicted": {
+    "L": 8,
+    "pre": 3,
+    "post": 2,
+    "E_minus_A": 107
+   },
+   "match": {
+    "L": true,
+    "pre": true,
+    "post": true,
+    "E_minus_A": true,
+    "leadStatic": true,
+    "off35": true
+   }
+  },
+  "idle94-bulk-up-ply-b-heracross-snorlax": {
+   "move": 339,
+   "attackerSide": "player",
+   "attacker": "HERACROSS",
+   "target": "SNORLAX",
+   "pair": "b",
+   "seed": 305420349,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "A": 69,
+   "E": 176,
+   "X": 137209450,
+   "F_att": 66,
+   "F_after": 178,
+   "pre": 3,
+   "post": 2,
+   "E_minus_A": 107,
+   "N": 4,
+   "D": 104,
+   "trail": -1,
+   "spanOn": 112,
+   "spanOff": 35,
+   "offAtt": 66,
+   "offAfter": 101,
+   "L": 8,
+   "leadRows": [
+    {
+     "f": 69,
+     "screenEqualsAminus1": true,
+     "oamEquals": true,
+     "palEquals": true,
+     "ioEquals": true
+    },
+    {
+     "f": 70,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": true,
+     "ioEquals": false
+    },
+    {
+     "f": 71,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 72,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    }
+   ],
+   "leadAllStatic": true,
+   "leadOamChanged": [
+    70,
+    71,
+    72
+   ],
+   "leadPalChanged": [
+    71,
+    72
+   ],
+   "leadIoChanged": [
+    70,
+    71,
+    72
+   ],
+   "lastScreenChangeBeforeA": 63,
+   "firstScreenChangeAtOrAfterA": 75,
+   "staticRunBeforeFirstChange": 12,
+   "predicted": {
+    "L": 8,
+    "pre": 3,
+    "post": 2,
+    "E_minus_A": 107
+   },
+   "match": {
+    "L": true,
+    "pre": true,
+    "post": true,
+    "E_minus_A": true,
+    "leadStatic": true,
+    "off35": true
+   }
+  },
+  "idle94-scary-face-opp-a-rhyhorn-shuckle": {
+   "move": 184,
+   "attackerSide": "opponent",
+   "attacker": "RHYHORN",
+   "target": "SHUCKLE",
+   "pair": "a",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "A": 79,
+   "E": 286,
+   "X": 137203022,
+   "F_att": 76,
+   "F_after": 288,
+   "pre": 3,
+   "post": 2,
+   "E_minus_A": 207,
+   "N": 4,
+   "D": 190,
+   "trail": 13,
+   "spanOn": 212,
+   "spanOff": 35,
+   "offAtt": 76,
+   "offAfter": 111,
+   "L": 22,
+   "leadRows": [
+    {
+     "f": 79,
+     "screenEqualsAminus1": true,
+     "oamEquals": true,
+     "palEquals": true,
+     "ioEquals": true
+    },
+    {
+     "f": 80,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": true,
+     "ioEquals": false
+    },
+    {
+     "f": 81,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 82,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    }
+   ],
+   "leadAllStatic": true,
+   "leadOamChanged": [
+    80,
+    81,
+    82
+   ],
+   "leadPalChanged": [
+    81,
+    82
+   ],
+   "leadIoChanged": [
+    80,
+    81,
+    82
+   ],
+   "lastScreenChangeBeforeA": 72,
+   "firstScreenChangeAtOrAfterA": 88,
+   "staticRunBeforeFirstChange": 16,
+   "predicted": {
+    "L": 8,
+    "pre": 3,
+    "post": 2,
+    "E_minus_A": 193
+   },
+   "match": {
+    "L": false,
+    "pre": true,
+    "post": true,
+    "E_minus_A": false,
+    "leadStatic": true,
+    "off35": true
+   }
+  },
+  "idle94-scary-face-opp-b-pupitar-snorlax": {
+   "move": 184,
+   "attackerSide": "opponent",
+   "attacker": "PUPITAR",
+   "target": "SNORLAX",
+   "pair": "b",
+   "seed": 305420349,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "A": 79,
+   "E": 286,
+   "X": 137203022,
+   "F_att": 76,
+   "F_after": 288,
+   "pre": 3,
+   "post": 2,
+   "E_minus_A": 207,
+   "N": 4,
+   "D": 190,
+   "trail": 13,
+   "spanOn": 212,
+   "spanOff": 35,
+   "offAtt": 76,
+   "offAfter": 111,
+   "L": 22,
+   "leadRows": [
+    {
+     "f": 79,
+     "screenEqualsAminus1": true,
+     "oamEquals": true,
+     "palEquals": true,
+     "ioEquals": true
+    },
+    {
+     "f": 80,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": true,
+     "ioEquals": false
+    },
+    {
+     "f": 81,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 82,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    }
+   ],
+   "leadAllStatic": true,
+   "leadOamChanged": [
+    80,
+    81,
+    82
+   ],
+   "leadPalChanged": [
+    81,
+    82
+   ],
+   "leadIoChanged": [
+    80,
+    81,
+    82
+   ],
+   "lastScreenChangeBeforeA": 72,
+   "firstScreenChangeAtOrAfterA": 88,
+   "staticRunBeforeFirstChange": 16,
+   "predicted": {
+    "L": 8,
+    "pre": 3,
+    "post": 2,
+    "E_minus_A": 193
+   },
+   "match": {
+    "L": false,
+    "pre": true,
+    "post": true,
+    "E_minus_A": false,
+    "leadStatic": true,
+    "off35": true
+   }
+  },
+  "idle94-scary-face-ply-a-rhyhorn-shuckle": {
+   "move": 184,
+   "attackerSide": "player",
+   "attacker": "RHYHORN",
+   "target": "SHUCKLE",
+   "pair": "a",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "A": 75,
+   "E": 282,
+   "X": 137203022,
+   "F_att": 72,
+   "F_after": 284,
+   "pre": 3,
+   "post": 2,
+   "E_minus_A": 207,
+   "N": 4,
+   "D": 190,
+   "trail": 13,
+   "spanOn": 212,
+   "spanOff": 35,
+   "offAtt": 72,
+   "offAfter": 107,
+   "L": 22,
+   "leadRows": [
+    {
+     "f": 75,
+     "screenEqualsAminus1": true,
+     "oamEquals": true,
+     "palEquals": true,
+     "ioEquals": true
+    },
+    {
+     "f": 76,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": true,
+     "ioEquals": false
+    },
+    {
+     "f": 77,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 78,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    }
+   ],
+   "leadAllStatic": true,
+   "leadOamChanged": [
+    76,
+    77,
+    78
+   ],
+   "leadPalChanged": [
+    77,
+    78
+   ],
+   "leadIoChanged": [
+    76,
+    77,
+    78
+   ],
+   "lastScreenChangeBeforeA": 68,
+   "firstScreenChangeAtOrAfterA": 84,
+   "staticRunBeforeFirstChange": 16,
+   "predicted": {
+    "L": 8,
+    "pre": 3,
+    "post": 2,
+    "E_minus_A": 193
+   },
+   "match": {
+    "L": false,
+    "pre": true,
+    "post": true,
+    "E_minus_A": false,
+    "leadStatic": true,
+    "off35": true
+   }
+  },
+  "idle94-scary-face-ply-b-pupitar-snorlax": {
+   "move": 184,
+   "attackerSide": "player",
+   "attacker": "PUPITAR",
+   "target": "SNORLAX",
+   "pair": "b",
+   "seed": 305420349,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "A": 75,
+   "E": 282,
+   "X": 137203022,
+   "F_att": 72,
+   "F_after": 284,
+   "pre": 3,
+   "post": 2,
+   "E_minus_A": 207,
+   "N": 4,
+   "D": 190,
+   "trail": 13,
+   "spanOn": 212,
+   "spanOff": 35,
+   "offAtt": 72,
+   "offAfter": 107,
+   "L": 22,
+   "leadRows": [
+    {
+     "f": 75,
+     "screenEqualsAminus1": true,
+     "oamEquals": true,
+     "palEquals": true,
+     "ioEquals": true
+    },
+    {
+     "f": 76,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": true,
+     "ioEquals": false
+    },
+    {
+     "f": 77,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 78,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    }
+   ],
+   "leadAllStatic": true,
+   "leadOamChanged": [
+    76,
+    77,
+    78
+   ],
+   "leadPalChanged": [
+    77,
+    78
+   ],
+   "leadIoChanged": [
+    76,
+    77,
+    78
+   ],
+   "lastScreenChangeBeforeA": 68,
+   "firstScreenChangeAtOrAfterA": 84,
+   "staticRunBeforeFirstChange": 16,
+   "predicted": {
+    "L": 8,
+    "pre": 3,
+    "post": 2,
+    "E_minus_A": 193
+   },
+   "match": {
+    "L": false,
+    "pre": true,
+    "post": true,
+    "E_minus_A": false,
+    "leadStatic": true,
+    "off35": true
+   }
+  },
+  "idle94-swagger-opp-a-hypno-onix": {
+   "move": 207,
+   "attackerSide": "opponent",
+   "attacker": "HYPNO",
+   "target": "ONIX",
+   "pair": "a",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "A": 208,
+   "E": 376,
+   "X": 137206261,
+   "F_att": 205,
+   "F_after": 378,
+   "pre": 3,
+   "post": 2,
+   "E_minus_A": 168,
+   "N": 7,
+   "D": 161,
+   "trail": 0,
+   "spanOn": 173,
+   "spanOff": 35,
+   "offAtt": 194,
+   "offAfter": 229,
+   "L": 12,
+   "leadRows": [
+    {
+     "f": 208,
+     "screenEqualsAminus1": true,
+     "oamEquals": true,
+     "palEquals": true,
+     "ioEquals": true
+    },
+    {
+     "f": 209,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": true,
+     "ioEquals": true
+    },
+    {
+     "f": 210,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": true
+    },
+    {
+     "f": 211,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": true
+    },
+    {
+     "f": 212,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": true
+    },
+    {
+     "f": 213,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": true
+    },
+    {
+     "f": 214,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": true
+    }
+   ],
+   "leadAllStatic": true,
+   "leadOamChanged": [
+    209,
+    210,
+    211,
+    212,
+    213,
+    214
+   ],
+   "leadPalChanged": [
+    210,
+    211,
+    212,
+    213,
+    214
+   ],
+   "leadIoChanged": [],
+   "lastScreenChangeBeforeA": 202,
+   "firstScreenChangeAtOrAfterA": 217,
+   "staticRunBeforeFirstChange": 15,
+   "predicted": {
+    "L": 12,
+    "pre": 3,
+    "post": 2,
+    "E_minus_A": 168
+   },
+   "match": {
+    "L": true,
+    "pre": true,
+    "post": true,
+    "E_minus_A": true,
+    "leadStatic": true,
+    "off35": true
+   }
+  },
+  "idle94-swagger-opp-b-persian-snorlax": {
+   "move": 207,
+   "attackerSide": "opponent",
+   "attacker": "PERSIAN",
+   "target": "SNORLAX",
+   "pair": "b",
+   "seed": 305420349,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "A": 73,
+   "E": 241,
+   "X": 137206261,
+   "F_att": 70,
+   "F_after": 243,
+   "pre": 3,
+   "post": 2,
+   "E_minus_A": 168,
+   "N": 7,
+   "D": 161,
+   "trail": 0,
+   "spanOn": 173,
+   "spanOff": 35,
+   "offAtt": 70,
+   "offAfter": 105,
+   "L": 12,
+   "leadRows": [
+    {
+     "f": 73,
+     "screenEqualsAminus1": true,
+     "oamEquals": true,
+     "palEquals": true,
+     "ioEquals": true
+    },
+    {
+     "f": 74,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": true,
+     "ioEquals": false
+    },
+    {
+     "f": 75,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 76,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 77,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 78,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 79,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    }
+   ],
+   "leadAllStatic": true,
+   "leadOamChanged": [
+    74,
+    75,
+    76,
+    77,
+    78,
+    79
+   ],
+   "leadPalChanged": [
+    75,
+    76,
+    77,
+    78,
+    79
+   ],
+   "leadIoChanged": [
+    74,
+    75,
+    76,
+    77,
+    78,
+    79
+   ],
+   "lastScreenChangeBeforeA": 67,
+   "firstScreenChangeAtOrAfterA": 82,
+   "staticRunBeforeFirstChange": 15,
+   "predicted": {
+    "L": 12,
+    "pre": 3,
+    "post": 2,
+    "E_minus_A": 168
+   },
+   "match": {
+    "L": true,
+    "pre": true,
+    "post": true,
+    "E_minus_A": true,
+    "leadStatic": true,
+    "off35": true
+   }
+  },
+  "idle94-swagger-ply-a-hypno-onix": {
+   "move": 207,
+   "attackerSide": "player",
+   "attacker": "HYPNO",
+   "target": "ONIX",
+   "pair": "a",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "A": 204,
+   "E": 372,
+   "X": 137206261,
+   "F_att": 201,
+   "F_after": 374,
+   "pre": 3,
+   "post": 2,
+   "E_minus_A": 168,
+   "N": 7,
+   "D": 161,
+   "trail": 0,
+   "spanOn": 173,
+   "spanOff": 35,
+   "offAtt": 190,
+   "offAfter": 225,
+   "L": 12,
+   "leadRows": [
+    {
+     "f": 204,
+     "screenEqualsAminus1": true,
+     "oamEquals": true,
+     "palEquals": true,
+     "ioEquals": true
+    },
+    {
+     "f": 205,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": true,
+     "ioEquals": true
+    },
+    {
+     "f": 206,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": true
+    },
+    {
+     "f": 207,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": true
+    },
+    {
+     "f": 208,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": true
+    },
+    {
+     "f": 209,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": true
+    },
+    {
+     "f": 210,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": true
+    }
+   ],
+   "leadAllStatic": true,
+   "leadOamChanged": [
+    205,
+    206,
+    207,
+    208,
+    209,
+    210
+   ],
+   "leadPalChanged": [
+    206,
+    207,
+    208,
+    209,
+    210
+   ],
+   "leadIoChanged": [],
+   "lastScreenChangeBeforeA": 198,
+   "firstScreenChangeAtOrAfterA": 213,
+   "staticRunBeforeFirstChange": 15,
+   "predicted": {
+    "L": 12,
+    "pre": 3,
+    "post": 2,
+    "E_minus_A": 168
+   },
+   "match": {
+    "L": true,
+    "pre": true,
+    "post": true,
+    "E_minus_A": true,
+    "leadStatic": true,
+    "off35": true
+   }
+  },
+  "idle94-swagger-ply-b-persian-snorlax": {
+   "move": 207,
+   "attackerSide": "player",
+   "attacker": "PERSIAN",
+   "target": "SNORLAX",
+   "pair": "b",
+   "seed": 305420349,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "A": 69,
+   "E": 237,
+   "X": 137206261,
+   "F_att": 66,
+   "F_after": 239,
+   "pre": 3,
+   "post": 2,
+   "E_minus_A": 168,
+   "N": 7,
+   "D": 161,
+   "trail": 0,
+   "spanOn": 173,
+   "spanOff": 35,
+   "offAtt": 66,
+   "offAfter": 101,
+   "L": 12,
+   "leadRows": [
+    {
+     "f": 69,
+     "screenEqualsAminus1": true,
+     "oamEquals": true,
+     "palEquals": true,
+     "ioEquals": true
+    },
+    {
+     "f": 70,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": true,
+     "ioEquals": false
+    },
+    {
+     "f": 71,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 72,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 73,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 74,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 75,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    }
+   ],
+   "leadAllStatic": true,
+   "leadOamChanged": [
+    70,
+    71,
+    72,
+    73,
+    74,
+    75
+   ],
+   "leadPalChanged": [
+    71,
+    72,
+    73,
+    74,
+    75
+   ],
+   "leadIoChanged": [
+    70,
+    71,
+    72,
+    73,
+    74,
+    75
+   ],
+   "lastScreenChangeBeforeA": 63,
+   "firstScreenChangeAtOrAfterA": 78,
+   "staticRunBeforeFirstChange": 15,
+   "predicted": {
+    "L": 12,
+    "pre": 3,
+    "post": 2,
+    "E_minus_A": 168
+   },
+   "match": {
+    "L": true,
+    "pre": true,
+    "post": true,
+    "E_minus_A": true,
+    "leadStatic": true,
+    "off35": true
+   }
+  },
+  "idle94-swords-dance-opp-c-scyther-onix": {
+   "move": 14,
+   "attackerSide": "opponent",
+   "attacker": "SCYTHER",
+   "target": "ONIX",
+   "pair": "c",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "A": 79,
+   "E": 148,
+   "X": 137202877,
+   "F_att": 76,
+   "F_after": 150,
+   "pre": 3,
+   "post": 2,
+   "E_minus_A": 69,
+   "N": 0,
+   "D": 70,
+   "trail": -1,
+   "spanOn": 74,
+   "spanOff": 35,
+   "offAtt": 76,
+   "offAfter": 111,
+   "L": 4,
+   "leadRows": [],
+   "leadAllStatic": true,
+   "leadOamChanged": [],
+   "leadPalChanged": [],
+   "leadIoChanged": [],
+   "lastScreenChangeBeforeA": 72,
+   "firstScreenChangeAtOrAfterA": 87,
+   "staticRunBeforeFirstChange": 15,
+   "predicted": {
+    "L": 4,
+    "pre": 3,
+    "post": 2,
+    "E_minus_A": 69
+   },
+   "match": {
+    "L": true,
+    "pre": true,
+    "post": true,
+    "E_minus_A": true,
+    "leadStatic": true,
+    "off35": true
+   }
+  },
+  "idle94-swords-dance-ply-c-scyther-onix": {
+   "move": 14,
+   "attackerSide": "player",
+   "attacker": "SCYTHER",
+   "target": "ONIX",
+   "pair": "c",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "A": 75,
+   "E": 144,
+   "X": 137202877,
+   "F_att": 72,
+   "F_after": 146,
+   "pre": 3,
+   "post": 2,
+   "E_minus_A": 69,
+   "N": 0,
+   "D": 70,
+   "trail": -1,
+   "spanOn": 74,
+   "spanOff": 35,
+   "offAtt": 72,
+   "offAfter": 107,
+   "L": 4,
+   "leadRows": [],
+   "leadAllStatic": true,
+   "leadOamChanged": [],
+   "leadPalChanged": [],
+   "leadIoChanged": [],
+   "lastScreenChangeBeforeA": 68,
+   "firstScreenChangeAtOrAfterA": 83,
+   "staticRunBeforeFirstChange": 15,
+   "predicted": {
+    "L": 4,
+    "pre": 3,
+    "post": 2,
+    "E_minus_A": 69
+   },
+   "match": {
+    "L": true,
+    "pre": true,
+    "post": true,
+    "E_minus_A": true,
+    "leadStatic": true,
+    "off35": true
+   }
+  },
+  "idle94-taunt-opp-a-murkrow-shuckle": {
+   "move": 269,
+   "attackerSide": "opponent",
+   "attacker": "MURKROW",
+   "target": "SHUCKLE",
+   "pair": "a",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "A": 70,
+   "E": 204,
+   "X": 137208323,
+   "F_att": 67,
+   "F_after": 206,
+   "pre": 3,
+   "post": 2,
+   "E_minus_A": 134,
+   "N": 10,
+   "D": 125,
+   "trail": -1,
+   "spanOn": 139,
+   "spanOff": 35,
+   "offAtt": 67,
+   "offAfter": 102,
+   "L": 14,
+   "leadRows": [
+    {
+     "f": 70,
+     "screenEqualsAminus1": true,
+     "oamEquals": true,
+     "palEquals": true,
+     "ioEquals": true
+    },
+    {
+     "f": 71,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": true,
+     "ioEquals": false
+    },
+    {
+     "f": 72,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 73,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 74,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 75,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 76,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 77,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 78,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 79,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    }
+   ],
+   "leadAllStatic": true,
+   "leadOamChanged": [
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79
+   ],
+   "leadPalChanged": [
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79
+   ],
+   "leadIoChanged": [
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79
+   ],
+   "lastScreenChangeBeforeA": 63,
+   "firstScreenChangeAtOrAfterA": 81,
+   "staticRunBeforeFirstChange": 18,
+   "predicted": {
+    "L": 14,
+    "pre": 3,
+    "post": 2,
+    "E_minus_A": 134
+   },
+   "match": {
+    "L": true,
+    "pre": true,
+    "post": true,
+    "E_minus_A": true,
+    "leadStatic": true,
+    "off35": true
+   }
+  },
+  "idle94-taunt-opp-b-murkrow-snorlax": {
+   "move": 269,
+   "attackerSide": "opponent",
+   "attacker": "MURKROW",
+   "target": "SNORLAX",
+   "pair": "b",
+   "seed": 305420349,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "A": 70,
+   "E": 204,
+   "X": 137208323,
+   "F_att": 67,
+   "F_after": 206,
+   "pre": 3,
+   "post": 2,
+   "E_minus_A": 134,
+   "N": 10,
+   "D": 125,
+   "trail": -1,
+   "spanOn": 139,
+   "spanOff": 35,
+   "offAtt": 67,
+   "offAfter": 102,
+   "L": 14,
+   "leadRows": [
+    {
+     "f": 70,
+     "screenEqualsAminus1": true,
+     "oamEquals": true,
+     "palEquals": true,
+     "ioEquals": true
+    },
+    {
+     "f": 71,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": true,
+     "ioEquals": false
+    },
+    {
+     "f": 72,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 73,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 74,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 75,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 76,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 77,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 78,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 79,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    }
+   ],
+   "leadAllStatic": true,
+   "leadOamChanged": [
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79
+   ],
+   "leadPalChanged": [
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79
+   ],
+   "leadIoChanged": [
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79
+   ],
+   "lastScreenChangeBeforeA": 63,
+   "firstScreenChangeAtOrAfterA": 81,
+   "staticRunBeforeFirstChange": 18,
+   "predicted": {
+    "L": 14,
+    "pre": 3,
+    "post": 2,
+    "E_minus_A": 134
+   },
+   "match": {
+    "L": true,
+    "pre": true,
+    "post": true,
+    "E_minus_A": true,
+    "leadStatic": true,
+    "off35": true
+   }
+  },
+  "idle94-taunt-ply-a-murkrow-shuckle": {
+   "move": 269,
+   "attackerSide": "player",
+   "attacker": "MURKROW",
+   "target": "SHUCKLE",
+   "pair": "a",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "A": 66,
+   "E": 200,
+   "X": 137208323,
+   "F_att": 63,
+   "F_after": 202,
+   "pre": 3,
+   "post": 2,
+   "E_minus_A": 134,
+   "N": 10,
+   "D": 125,
+   "trail": -1,
+   "spanOn": 139,
+   "spanOff": 35,
+   "offAtt": 63,
+   "offAfter": 98,
+   "L": 14,
+   "leadRows": [
+    {
+     "f": 66,
+     "screenEqualsAminus1": true,
+     "oamEquals": true,
+     "palEquals": true,
+     "ioEquals": true
+    },
+    {
+     "f": 67,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": true,
+     "ioEquals": false
+    },
+    {
+     "f": 68,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 69,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 70,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 71,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 72,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 73,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 74,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 75,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    }
+   ],
+   "leadAllStatic": true,
+   "leadOamChanged": [
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75
+   ],
+   "leadPalChanged": [
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75
+   ],
+   "leadIoChanged": [
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75
+   ],
+   "lastScreenChangeBeforeA": 59,
+   "firstScreenChangeAtOrAfterA": 77,
+   "staticRunBeforeFirstChange": 18,
+   "predicted": {
+    "L": 14,
+    "pre": 3,
+    "post": 2,
+    "E_minus_A": 134
+   },
+   "match": {
+    "L": true,
+    "pre": true,
+    "post": true,
+    "E_minus_A": true,
+    "leadStatic": true,
+    "off35": true
+   }
+  },
+  "idle94-taunt-ply-b-murkrow-snorlax": {
+   "move": 269,
+   "attackerSide": "player",
+   "attacker": "MURKROW",
+   "target": "SNORLAX",
+   "pair": "b",
+   "seed": 305420349,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "A": 66,
+   "E": 200,
+   "X": 137208323,
+   "F_att": 63,
+   "F_after": 202,
+   "pre": 3,
+   "post": 2,
+   "E_minus_A": 134,
+   "N": 10,
+   "D": 125,
+   "trail": -1,
+   "spanOn": 139,
+   "spanOff": 35,
+   "offAtt": 63,
+   "offAfter": 98,
+   "L": 14,
+   "leadRows": [
+    {
+     "f": 66,
+     "screenEqualsAminus1": true,
+     "oamEquals": true,
+     "palEquals": true,
+     "ioEquals": true
+    },
+    {
+     "f": 67,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": true,
+     "ioEquals": false
+    },
+    {
+     "f": 68,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 69,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 70,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 71,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 72,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 73,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 74,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    },
+    {
+     "f": 75,
+     "screenEqualsAminus1": true,
+     "oamEquals": false,
+     "palEquals": false,
+     "ioEquals": false
+    }
+   ],
+   "leadAllStatic": true,
+   "leadOamChanged": [
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75
+   ],
+   "leadPalChanged": [
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75
+   ],
+   "leadIoChanged": [
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75
+   ],
+   "lastScreenChangeBeforeA": 59,
+   "firstScreenChangeAtOrAfterA": 77,
+   "staticRunBeforeFirstChange": 18,
+   "predicted": {
+    "L": 14,
+    "pre": 3,
+    "post": 2,
+    "E_minus_A": 134
+   },
+   "match": {
+    "L": true,
+    "pre": true,
+    "post": true,
+    "E_minus_A": true,
+    "leadStatic": true,
+    "off35": true
+   }
+  }
+ },
+ "summary": {
+  "L": 16,
+  "pre": 20,
+  "post": 20,
+  "leadStatic": 20,
+  "off35": 20,
+  "n": 20
+ }
+}

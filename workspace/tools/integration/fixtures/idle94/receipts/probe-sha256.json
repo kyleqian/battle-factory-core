@@ -1,0 +1,558 @@
+{
+ "jobs": 138,
+ "r1EqualsR2": 138,
+ "sha256": {
+  "probes/idle94-agility-opp-c-dodrio-onix-off.json": {
+   "r1": "1f1138883d2c3290bba3732ff68c5ea577e8250e701bfd879fa692c5c59ccd84",
+   "r2": "1f1138883d2c3290bba3732ff68c5ea577e8250e701bfd879fa692c5c59ccd84"
+  },
+  "probes/idle94-agility-opp-c-dodrio-onix-on.json": {
+   "r1": "f9469fe1c204db707e66446f183ccecfa7dc5ec20dadbad674473400f99d8463",
+   "r2": "f9469fe1c204db707e66446f183ccecfa7dc5ec20dadbad674473400f99d8463"
+  },
+  "probes/idle94-agility-ply-c-dodrio-onix-off.json": {
+   "r1": "1ada88935bb50de4bc36f88b2ca307078d0590dd0d73503631930cb639e91af0",
+   "r2": "1ada88935bb50de4bc36f88b2ca307078d0590dd0d73503631930cb639e91af0"
+  },
+  "probes/idle94-agility-ply-c-dodrio-onix-on.json": {
+   "r1": "81daa2567bb4ac987212c3ea0002d2927d020314fcc9bff93dc3a202d9df7b6c",
+   "r2": "81daa2567bb4ac987212c3ea0002d2927d020314fcc9bff93dc3a202d9df7b6c"
+  },
+  "probes/idle94-bulk-up-opp-a-primeape-onix-off.json": {
+   "r1": "bf64bbfbff51bc12f79c25de95a4c0f5bd2cd8ba0a2d3324a62a3c23d15f6028",
+   "r2": "bf64bbfbff51bc12f79c25de95a4c0f5bd2cd8ba0a2d3324a62a3c23d15f6028"
+  },
+  "probes/idle94-bulk-up-opp-a-primeape-onix-on.json": {
+   "r1": "fad1421f672491f9b4f23057ff2eff609fb1c0df62b89e44b8b3684b9f0b811d",
+   "r2": "fad1421f672491f9b4f23057ff2eff609fb1c0df62b89e44b8b3684b9f0b811d"
+  },
+  "probes/idle94-bulk-up-opp-b-heracross-snorlax-off.json": {
+   "r1": "26210ed90de376716ec3cf311eca00e969dec54c5783c611e71e875306268929",
+   "r2": "26210ed90de376716ec3cf311eca00e969dec54c5783c611e71e875306268929"
+  },
+  "probes/idle94-bulk-up-opp-b-heracross-snorlax-on.json": {
+   "r1": "57ec81bd0a0f72f7cbe5d9a1ba483f84bc742f4a6871e90139a8145f52126401",
+   "r2": "57ec81bd0a0f72f7cbe5d9a1ba483f84bc742f4a6871e90139a8145f52126401"
+  },
+  "probes/idle94-bulk-up-ply-a-primeape-onix-off.json": {
+   "r1": "a3a893abc8865cbd09baa2d7aedf75e5a26410fc61965590f745cb156aac6d96",
+   "r2": "a3a893abc8865cbd09baa2d7aedf75e5a26410fc61965590f745cb156aac6d96"
+  },
+  "probes/idle94-bulk-up-ply-a-primeape-onix-on.json": {
+   "r1": "deccecf940798252771c2534a7a7030d955f5c726c8e0cff037a9565a4ecf201",
+   "r2": "deccecf940798252771c2534a7a7030d955f5c726c8e0cff037a9565a4ecf201"
+  },
+  "probes/idle94-bulk-up-ply-b-heracross-snorlax-off.json": {
+   "r1": "0ab270545537376720c5c907d92373cc65368704810af643145a78708801f555",
+   "r2": "0ab270545537376720c5c907d92373cc65368704810af643145a78708801f555"
+  },
+  "probes/idle94-bulk-up-ply-b-heracross-snorlax-on.json": {
+   "r1": "214a3b45b5b200fc1be09fc31507edcd21d6a091f66aef59cf1e02b05aecafce",
+   "r2": "214a3b45b5b200fc1be09fc31507edcd21d6a091f66aef59cf1e02b05aecafce"
+  },
+  "probes/idle94-scary-face-opp-a-rhyhorn-shuckle-off.json": {
+   "r1": "05d5d5c122999e328c8c3cc0d99a1a8f03558929f5074a2d24a2e738059388e4",
+   "r2": "05d5d5c122999e328c8c3cc0d99a1a8f03558929f5074a2d24a2e738059388e4"
+  },
+  "probes/idle94-scary-face-opp-a-rhyhorn-shuckle-on.json": {
+   "r1": "87aaecea4de3aefe085fb73c147bf40df964036423c88d2913afd137d12323cb",
+   "r2": "87aaecea4de3aefe085fb73c147bf40df964036423c88d2913afd137d12323cb"
+  },
+  "probes/idle94-scary-face-opp-b-pupitar-snorlax-off.json": {
+   "r1": "aeae8deccdd8eb3212b47635b9ef6aa796bfb49a7484319d7990281362bc5a24",
+   "r2": "aeae8deccdd8eb3212b47635b9ef6aa796bfb49a7484319d7990281362bc5a24"
+  },
+  "probes/idle94-scary-face-opp-b-pupitar-snorlax-on.json": {
+   "r1": "19e8366f57411f07cd3f260b8354d16bbc8a36ec8c09791517edbefedb8ffb3d",
+   "r2": "19e8366f57411f07cd3f260b8354d16bbc8a36ec8c09791517edbefedb8ffb3d"
+  },
+  "probes/idle94-scary-face-ply-a-rhyhorn-shuckle-off.json": {
+   "r1": "7dbb56705895c9b5e59106a78c9283ae409ffc17900bad453e5e3cec1169d98b",
+   "r2": "7dbb56705895c9b5e59106a78c9283ae409ffc17900bad453e5e3cec1169d98b"
+  },
+  "probes/idle94-scary-face-ply-a-rhyhorn-shuckle-on.json": {
+   "r1": "e7ac03967e71e11bb9dc2691aff77477ee2e6d684501abab1f7d313bf11d285a",
+   "r2": "e7ac03967e71e11bb9dc2691aff77477ee2e6d684501abab1f7d313bf11d285a"
+  },
+  "probes/idle94-scary-face-ply-b-pupitar-snorlax-off.json": {
+   "r1": "29445a89bf1cce6de220a952df79e24164cbbe72d79b9718819912b2cb10e346",
+   "r2": "29445a89bf1cce6de220a952df79e24164cbbe72d79b9718819912b2cb10e346"
+  },
+  "probes/idle94-scary-face-ply-b-pupitar-snorlax-on.json": {
+   "r1": "6dabe911aba96c9a277eb42de67e19e4b3cdcde42a2637daa27f99e7e3654478",
+   "r2": "6dabe911aba96c9a277eb42de67e19e4b3cdcde42a2637daa27f99e7e3654478"
+  },
+  "probes/idle94-swagger-opp-a-hypno-onix-off.json": {
+   "r1": "c2599a3caa09daa49e29650571ffab290a62f4aee889fcdffd21acae4710c170",
+   "r2": "c2599a3caa09daa49e29650571ffab290a62f4aee889fcdffd21acae4710c170"
+  },
+  "probes/idle94-swagger-opp-a-hypno-onix-on.json": {
+   "r1": "76dc2d698b691d529b040cf5fde020e52c7ddbacf19abf09b77e9e52c48cafba",
+   "r2": "76dc2d698b691d529b040cf5fde020e52c7ddbacf19abf09b77e9e52c48cafba"
+  },
+  "probes/idle94-swagger-opp-b-persian-snorlax-off.json": {
+   "r1": "acbfbee850ec7612c34c5f6630b1d5be70cf0f19f8a954ed116ec38a846e8805",
+   "r2": "acbfbee850ec7612c34c5f6630b1d5be70cf0f19f8a954ed116ec38a846e8805"
+  },
+  "probes/idle94-swagger-opp-b-persian-snorlax-on.json": {
+   "r1": "a56b205f0e92963c8f71b7bfe34f2859251578f0f4cfb0789f93840ed0a30bde",
+   "r2": "a56b205f0e92963c8f71b7bfe34f2859251578f0f4cfb0789f93840ed0a30bde"
+  },
+  "probes/idle94-swagger-ply-a-hypno-onix-off.json": {
+   "r1": "ce8b6a60664cca66485c4f42c9b1fef619f420da3c4008cfe303c66a1fa47955",
+   "r2": "ce8b6a60664cca66485c4f42c9b1fef619f420da3c4008cfe303c66a1fa47955"
+  },
+  "probes/idle94-swagger-ply-a-hypno-onix-on.json": {
+   "r1": "05ac4bb148ecd4995216d2e7d389ed8d240406dd55794ee030fa7fed34b6ce3f",
+   "r2": "05ac4bb148ecd4995216d2e7d389ed8d240406dd55794ee030fa7fed34b6ce3f"
+  },
+  "probes/idle94-swagger-ply-b-persian-snorlax-off.json": {
+   "r1": "1dbec912deeb9dfe61aa72266d9175094653eb8ffe9c35a5b329edf8093bc3f7",
+   "r2": "1dbec912deeb9dfe61aa72266d9175094653eb8ffe9c35a5b329edf8093bc3f7"
+  },
+  "probes/idle94-swagger-ply-b-persian-snorlax-on.json": {
+   "r1": "ccf198c8453953d53dded1d386b78fa261cc50f35220c9e9c97765d2a0f3d9fc",
+   "r2": "ccf198c8453953d53dded1d386b78fa261cc50f35220c9e9c97765d2a0f3d9fc"
+  },
+  "probes/idle94-swords-dance-opp-c-scyther-onix-off.json": {
+   "r1": "757d9fd096751f272af0721d4feaa1c817906b8cf371c3d2f4ed6eadc20e7eea",
+   "r2": "757d9fd096751f272af0721d4feaa1c817906b8cf371c3d2f4ed6eadc20e7eea"
+  },
+  "probes/idle94-swords-dance-opp-c-scyther-onix-on.json": {
+   "r1": "b3fc15e9e5ef358a93d79999d4c675d77045f637676a739d14d75dc8c355021a",
+   "r2": "b3fc15e9e5ef358a93d79999d4c675d77045f637676a739d14d75dc8c355021a"
+  },
+  "probes/idle94-swords-dance-ply-c-scyther-onix-off.json": {
+   "r1": "81e615182dd2a1755b0cc0346e3b4eb71f910846be02b8a5b3a3dc421da355ad",
+   "r2": "81e615182dd2a1755b0cc0346e3b4eb71f910846be02b8a5b3a3dc421da355ad"
+  },
+  "probes/idle94-swords-dance-ply-c-scyther-onix-on.json": {
+   "r1": "23051e96780dd9ca9c86bf346765333e9308f5396ea1ffb51dd541054232f172",
+   "r2": "23051e96780dd9ca9c86bf346765333e9308f5396ea1ffb51dd541054232f172"
+  },
+  "probes/idle94-taunt-opp-a-murkrow-shuckle-off.json": {
+   "r1": "8fc9bb515f38900fa73c315590045491c4224547b2e822f724c6e01a09d2fd1b",
+   "r2": "8fc9bb515f38900fa73c315590045491c4224547b2e822f724c6e01a09d2fd1b"
+  },
+  "probes/idle94-taunt-opp-a-murkrow-shuckle-on.json": {
+   "r1": "23c1bd868179c6535d1d8b2fa7872c1de1cf53e6e0b178a45db7ca23afac45b7",
+   "r2": "23c1bd868179c6535d1d8b2fa7872c1de1cf53e6e0b178a45db7ca23afac45b7"
+  },
+  "probes/idle94-taunt-opp-b-murkrow-snorlax-off.json": {
+   "r1": "36b53883597a26bfc98be843a2356d4d21db68cfdf0855bbd2b5e4f4665064f9",
+   "r2": "36b53883597a26bfc98be843a2356d4d21db68cfdf0855bbd2b5e4f4665064f9"
+  },
+  "probes/idle94-taunt-opp-b-murkrow-snorlax-on.json": {
+   "r1": "4f9abc9d9ce3d6d62d0bab08d002461277c061cdc4dc9e225cd65e107cee6428",
+   "r2": "4f9abc9d9ce3d6d62d0bab08d002461277c061cdc4dc9e225cd65e107cee6428"
+  },
+  "probes/idle94-taunt-ply-a-murkrow-shuckle-off.json": {
+   "r1": "d312950f32291d844d450c6116ecdcb6e6a25ed0ca366dcb502f4c2867f561f0",
+   "r2": "d312950f32291d844d450c6116ecdcb6e6a25ed0ca366dcb502f4c2867f561f0"
+  },
+  "probes/idle94-taunt-ply-a-murkrow-shuckle-on.json": {
+   "r1": "01ed27df3b8c61a030fddb743f2c33dd701ba5269c6e8331d72f18d9c3d59c07",
+   "r2": "01ed27df3b8c61a030fddb743f2c33dd701ba5269c6e8331d72f18d9c3d59c07"
+  },
+  "probes/idle94-taunt-ply-b-murkrow-snorlax-off.json": {
+   "r1": "d4b1b04c159763e136d4ac068db166cb519f9350e5abd37be780a3b32937c223",
+   "r2": "d4b1b04c159763e136d4ac068db166cb519f9350e5abd37be780a3b32937c223"
+  },
+  "probes/idle94-taunt-ply-b-murkrow-snorlax-on.json": {
+   "r1": "24287619838cfd7c0337e3c3935200873d304f8da528cce47cd7d981be0625f4",
+   "r2": "24287619838cfd7c0337e3c3935200873d304f8da528cce47cd7d981be0625f4"
+  },
+  "leadscan/idle94-lead-105-opp-on.json": {
+   "r1": "ec465408a731be8fefcfb5fcc86e6add985203a6fb43e30025e40d03cb3b3c57",
+   "r2": "ec465408a731be8fefcfb5fcc86e6add985203a6fb43e30025e40d03cb3b3c57"
+  },
+  "leadscan/idle94-lead-105-ply-on.json": {
+   "r1": "b1cd1d30a4bd68213bc2bc5e024721ed245dc268adc87bf768e96f822190ad05",
+   "r2": "b1cd1d30a4bd68213bc2bc5e024721ed245dc268adc87bf768e96f822190ad05"
+  },
+  "leadscan/idle94-lead-106-opp-on.json": {
+   "r1": "a4456f911070b6d6fe4e16d55fffe817715a5b4899df2aa0f3c1698c2382cd34",
+   "r2": "a4456f911070b6d6fe4e16d55fffe817715a5b4899df2aa0f3c1698c2382cd34"
+  },
+  "leadscan/idle94-lead-106-ply-on.json": {
+   "r1": "7ec5371c3d77200a5344194b586dc06a0b4524f1a21bad2cca0544f3c6543b17",
+   "r2": "7ec5371c3d77200a5344194b586dc06a0b4524f1a21bad2cca0544f3c6543b17"
+  },
+  "leadscan/idle94-lead-120-opp-on.json": {
+   "r1": "991e4010dac76bddf9a47eaffb16ac3d8502c66c21bbdb3cc7c6afa276b098f2",
+   "r2": "991e4010dac76bddf9a47eaffb16ac3d8502c66c21bbdb3cc7c6afa276b098f2"
+  },
+  "leadscan/idle94-lead-120-ply-on.json": {
+   "r1": "46aa4e4bac7161d6ba80e03e6eaea6c9d08b46b326040cfa52b22c62e7fcd29c",
+   "r2": "46aa4e4bac7161d6ba80e03e6eaea6c9d08b46b326040cfa52b22c62e7fcd29c"
+  },
+  "leadscan/idle94-lead-124-opp-on.json": {
+   "r1": "d0de7e760c842d890af537629433831bb2b2ac001df7522b0da80c327a6197d2",
+   "r2": "d0de7e760c842d890af537629433831bb2b2ac001df7522b0da80c327a6197d2"
+  },
+  "leadscan/idle94-lead-124-ply-on.json": {
+   "r1": "9e0b0200d94300f87d557d01083aa799c6f188073205c291827bec808d8883ab",
+   "r2": "9e0b0200d94300f87d557d01083aa799c6f188073205c291827bec808d8883ab"
+  },
+  "leadscan/idle94-lead-136-opp-on.json": {
+   "r1": "da223fb9de8d158f3439cb88431d8f56e239a9a3c634c1a0ba27e07e79af2392",
+   "r2": "da223fb9de8d158f3439cb88431d8f56e239a9a3c634c1a0ba27e07e79af2392"
+  },
+  "leadscan/idle94-lead-136-ply-on.json": {
+   "r1": "20bd4ea9ba8c97f138604d472403acdfb001ebcc5b117c9f289842901f0f0c32",
+   "r2": "20bd4ea9ba8c97f138604d472403acdfb001ebcc5b117c9f289842901f0f0c32"
+  },
+  "leadscan/idle94-lead-146-opp-on.json": {
+   "r1": "21e82510e21784aabb63579fb3f42afc739a2cfd69a55b94297c3e4828173fce",
+   "r2": "21e82510e21784aabb63579fb3f42afc739a2cfd69a55b94297c3e4828173fce"
+  },
+  "leadscan/idle94-lead-146-ply-on.json": {
+   "r1": "269bf4d2d26245e93efcb0329f73dcaa739ede79c4887752e7a7818f59ffac42",
+   "r2": "269bf4d2d26245e93efcb0329f73dcaa739ede79c4887752e7a7818f59ffac42"
+  },
+  "leadscan/idle94-lead-153-opp-on.json": {
+   "r1": "3b8c82b1ad1ec581214f6d0d050775d86bdac15c5853c0123fa0fc37206ee616",
+   "r2": "3b8c82b1ad1ec581214f6d0d050775d86bdac15c5853c0123fa0fc37206ee616"
+  },
+  "leadscan/idle94-lead-153-ply-on.json": {
+   "r1": "2462f481e2d004b86523b0742d6eba8e2a9ba14ac450bf23822f695e098ac710",
+   "r2": "2462f481e2d004b86523b0742d6eba8e2a9ba14ac450bf23822f695e098ac710"
+  },
+  "leadscan/idle94-lead-158-opp-on.json": {
+   "r1": "36628a231f6ff543d989aad6cf65c7d2c50af9f6964e75f821768ad4e02706da",
+   "r2": "36628a231f6ff543d989aad6cf65c7d2c50af9f6964e75f821768ad4e02706da"
+  },
+  "leadscan/idle94-lead-158-ply-on.json": {
+   "r1": "a8ca4697d25cc7d2467fde9b7491db395500ee3fc65d18c58740997d08ef3d64",
+   "r2": "a8ca4697d25cc7d2467fde9b7491db395500ee3fc65d18c58740997d08ef3d64"
+  },
+  "leadscan/idle94-lead-184-opp-on.json": {
+   "r1": "e6db53b3bb07cbe57c59da0c22e8028a9faf611dbde50b1e4675197598571177",
+   "r2": "e6db53b3bb07cbe57c59da0c22e8028a9faf611dbde50b1e4675197598571177"
+  },
+  "leadscan/idle94-lead-184-ply-on.json": {
+   "r1": "357a8c4ab6aaac965bfc8bca1ecad067125afac23b5cb54e95129593aaac2c6d",
+   "r2": "357a8c4ab6aaac965bfc8bca1ecad067125afac23b5cb54e95129593aaac2c6d"
+  },
+  "leadscan/idle94-lead-188-opp-on.json": {
+   "r1": "62f5f2f43e6c34b6b9f4157b6ecca387696351ca9ab75c5065df52d8c2af05c9",
+   "r2": "62f5f2f43e6c34b6b9f4157b6ecca387696351ca9ab75c5065df52d8c2af05c9"
+  },
+  "leadscan/idle94-lead-188-ply-on.json": {
+   "r1": "6afd8ec746b28483617df066a2cdfe969da01a6257506363ab772eb068262963",
+   "r2": "6afd8ec746b28483617df066a2cdfe969da01a6257506363ab772eb068262963"
+  },
+  "leadscan/idle94-lead-204-opp-on.json": {
+   "r1": "fdbecdc8827c7295d39329e0f3dd47e8076feb6b4e728a4bcf49eb1e4d2e0086",
+   "r2": "fdbecdc8827c7295d39329e0f3dd47e8076feb6b4e728a4bcf49eb1e4d2e0086"
+  },
+  "leadscan/idle94-lead-204-ply-on.json": {
+   "r1": "e05fd6c88053111fa5fa4def0d32694c9f9ba408aa61dcfa8c15d88a9268ce5d",
+   "r2": "e05fd6c88053111fa5fa4def0d32694c9f9ba408aa61dcfa8c15d88a9268ce5d"
+  },
+  "leadscan/idle94-lead-207-opp-on.json": {
+   "r1": "905b76f205fc7ea807cde3c780a95b8542cc716f3e1eeafc6537e19825081b1f",
+   "r2": "905b76f205fc7ea807cde3c780a95b8542cc716f3e1eeafc6537e19825081b1f"
+  },
+  "leadscan/idle94-lead-207-ply-on.json": {
+   "r1": "917423570b4898796fdc9a0470017208b7b44ed93d565fcf60966984c5a65277",
+   "r2": "917423570b4898796fdc9a0470017208b7b44ed93d565fcf60966984c5a65277"
+  },
+  "leadscan/idle94-lead-208-opp-on.json": {
+   "r1": "f16e5f43858f55127983f95cd418f50fa57933884e53cbc87a452c73e68d935d",
+   "r2": "f16e5f43858f55127983f95cd418f50fa57933884e53cbc87a452c73e68d935d"
+  },
+  "leadscan/idle94-lead-208-ply-on.json": {
+   "r1": "7ea948d2fd9109dd36fd19245fe0377c16d1e3643f14c1b489e325ece9c79886",
+   "r2": "7ea948d2fd9109dd36fd19245fe0377c16d1e3643f14c1b489e325ece9c79886"
+  },
+  "leadscan/idle94-lead-209-opp-on.json": {
+   "r1": "4b1f3aab6e46c87cb62cffc73a8e3f5c5f3d2e3efe61a6f355afa16d96d8e0cd",
+   "r2": "4b1f3aab6e46c87cb62cffc73a8e3f5c5f3d2e3efe61a6f355afa16d96d8e0cd"
+  },
+  "leadscan/idle94-lead-209-ply-on.json": {
+   "r1": "e8e585537bd8b48a5889a2ecfe44048361795574733bfaba37962cb166eda5f5",
+   "r2": "e8e585537bd8b48a5889a2ecfe44048361795574733bfaba37962cb166eda5f5"
+  },
+  "leadscan/idle94-lead-223-opp-on.json": {
+   "r1": "ab26dc6c07d769d98576675783140bafad5a4de5554121dc9dec7aef726bc1d2",
+   "r2": "ab26dc6c07d769d98576675783140bafad5a4de5554121dc9dec7aef726bc1d2"
+  },
+  "leadscan/idle94-lead-223-ply-on.json": {
+   "r1": "a39b283f46dbbcf2c4b205568c2b9c0c08ad0dda1644d03ed1c11401d78848da",
+   "r2": "a39b283f46dbbcf2c4b205568c2b9c0c08ad0dda1644d03ed1c11401d78848da"
+  },
+  "leadscan/idle94-lead-225-opp-on.json": {
+   "r1": "1070b1ff8daca372daf95dcecf92a415fc85a4c76a75fb19859e3bbfa7c9fcf5",
+   "r2": "1070b1ff8daca372daf95dcecf92a415fc85a4c76a75fb19859e3bbfa7c9fcf5"
+  },
+  "leadscan/idle94-lead-225-ply-on.json": {
+   "r1": "5d6f4203e2ac2dbb245edaaf47d392037c080fc06d75797fd0002537907c4fd1",
+   "r2": "5d6f4203e2ac2dbb245edaaf47d392037c080fc06d75797fd0002537907c4fd1"
+  },
+  "leadscan/idle94-lead-227-opp-on.json": {
+   "r1": "f38d2ddf73d28ff1af9913487547878a70d2cc6fa313da8a8a4beb909a406765",
+   "r2": "f38d2ddf73d28ff1af9913487547878a70d2cc6fa313da8a8a4beb909a406765"
+  },
+  "leadscan/idle94-lead-227-ply-on.json": {
+   "r1": "29cc8614f8c77028e87a793c3c3c6d4bfde6e87a2215515ee40818d0225fd016",
+   "r2": "29cc8614f8c77028e87a793c3c3c6d4bfde6e87a2215515ee40818d0225fd016"
+  },
+  "leadscan/idle94-lead-232-opp-on.json": {
+   "r1": "0f9f2da657bdfc870e1fa44d5a44c72c36da46b7785b9f8d166f1d98c3d8d4b2",
+   "r2": "0f9f2da657bdfc870e1fa44d5a44c72c36da46b7785b9f8d166f1d98c3d8d4b2"
+  },
+  "leadscan/idle94-lead-232-ply-on.json": {
+   "r1": "53cec6bc879a27325a11062ccf142a46b7ba3bb87df1e6fb30ba9a9117b99dee",
+   "r2": "53cec6bc879a27325a11062ccf142a46b7ba3bb87df1e6fb30ba9a9117b99dee"
+  },
+  "leadscan/idle94-lead-235-opp-on.json": {
+   "r1": "01140ea2227a0ba917ad623ede935a8b1d2e92a2d977bfbf9b91bb7176299af9",
+   "r2": "01140ea2227a0ba917ad623ede935a8b1d2e92a2d977bfbf9b91bb7176299af9"
+  },
+  "leadscan/idle94-lead-235-ply-on.json": {
+   "r1": "b94284ad4163202657e5f15510c25920f1d6e830152e14338452d89d0ce26ed1",
+   "r2": "b94284ad4163202657e5f15510c25920f1d6e830152e14338452d89d0ce26ed1"
+  },
+  "leadscan/idle94-lead-247-opp-on.json": {
+   "r1": "cb50cd3eeac0db071078bb4ae79750774c1d16a04aa9c374683a680a9672cdc2",
+   "r2": "cb50cd3eeac0db071078bb4ae79750774c1d16a04aa9c374683a680a9672cdc2"
+  },
+  "leadscan/idle94-lead-247-ply-on.json": {
+   "r1": "357e6c1a35c5203b4d971682585d182dcff2a525f3d6e237d70b36b2fe881ddb",
+   "r2": "357e6c1a35c5203b4d971682585d182dcff2a525f3d6e237d70b36b2fe881ddb"
+  },
+  "leadscan/idle94-lead-248-opp-on.json": {
+   "r1": "7882767ca4560d191b3d7950ef5e332b2e7e146987c303f61ae5aee1c7c1bff3",
+   "r2": "7882767ca4560d191b3d7950ef5e332b2e7e146987c303f61ae5aee1c7c1bff3"
+  },
+  "leadscan/idle94-lead-248-ply-on.json": {
+   "r1": "b60b36465431b2aa561c50f0f83c3e457703bb58b3bfb0160161e10e63bdf379",
+   "r2": "b60b36465431b2aa561c50f0f83c3e457703bb58b3bfb0160161e10e63bdf379"
+  },
+  "leadscan/idle94-lead-269-opp-on.json": {
+   "r1": "de4d35fe8caac17a6a8ab20235336645dc24d3327eb6cf437c2c1ec958bc3d43",
+   "r2": "de4d35fe8caac17a6a8ab20235336645dc24d3327eb6cf437c2c1ec958bc3d43"
+  },
+  "leadscan/idle94-lead-269-ply-on.json": {
+   "r1": "6c30bcf904372e1c74a27502379d545819fbdf7adf0608d5dae1b5cf78722e40",
+   "r2": "6c30bcf904372e1c74a27502379d545819fbdf7adf0608d5dae1b5cf78722e40"
+  },
+  "leadscan/idle94-lead-282-opp-on.json": {
+   "r1": "a55ce5721c6c0b837c0733adeea8903c64f80a8aa69cf05d928513991f96a713",
+   "r2": "a55ce5721c6c0b837c0733adeea8903c64f80a8aa69cf05d928513991f96a713"
+  },
+  "leadscan/idle94-lead-282-ply-on.json": {
+   "r1": "ae0952848510de26b29a6d5e500227c8cea33bb55e46c9a95ceb3044acbbbae2",
+   "r2": "ae0952848510de26b29a6d5e500227c8cea33bb55e46c9a95ceb3044acbbbae2"
+  },
+  "leadscan/idle94-lead-294-opp-on.json": {
+   "r1": "394fe5a57d4b916a4ca3512535ad9ba3241a4b7c0a8581db64c653e1626126be",
+   "r2": "394fe5a57d4b916a4ca3512535ad9ba3241a4b7c0a8581db64c653e1626126be"
+  },
+  "leadscan/idle94-lead-294-ply-on.json": {
+   "r1": "31d7225f2eb298f4b86d948c0ad9040283225684b41e42f7202d7de2451dc9eb",
+   "r2": "31d7225f2eb298f4b86d948c0ad9040283225684b41e42f7202d7de2451dc9eb"
+  },
+  "leadscan/idle94-lead-299-opp-on.json": {
+   "r1": "d93f28cfd1a083eb0d9b75eefa46b7e6d4ded0c1f822bf02efdff257b3aa068c",
+   "r2": "d93f28cfd1a083eb0d9b75eefa46b7e6d4ded0c1f822bf02efdff257b3aa068c"
+  },
+  "leadscan/idle94-lead-299-ply-on.json": {
+   "r1": "738a5d9552bef0880aca41d338c044c6580abcfe8163d5758181b12e5bb9a2c9",
+   "r2": "738a5d9552bef0880aca41d338c044c6580abcfe8163d5758181b12e5bb9a2c9"
+  },
+  "leadscan/idle94-lead-305-opp-on.json": {
+   "r1": "a076ff0caa7d8e425e81d9690f1983c57ab7bfdf0c790f85140f086ad001b6e1",
+   "r2": "a076ff0caa7d8e425e81d9690f1983c57ab7bfdf0c790f85140f086ad001b6e1"
+  },
+  "leadscan/idle94-lead-305-ply-on.json": {
+   "r1": "272f76e1f7677e50590f81c870d16925f435b293cb4fd40f7fdba08caf4be4f9",
+   "r2": "272f76e1f7677e50590f81c870d16925f435b293cb4fd40f7fdba08caf4be4f9"
+  },
+  "leadscan/idle94-lead-313-opp-on.json": {
+   "r1": "d4ba8e9485e4814ba66c37fbbece0fd6d9c001364cb444cda8123a9d93715015",
+   "r2": "d4ba8e9485e4814ba66c37fbbece0fd6d9c001364cb444cda8123a9d93715015"
+  },
+  "leadscan/idle94-lead-313-ply-on.json": {
+   "r1": "e6c3f6c9812149cfe380768afd7492698386853c993d997a843316c51a624466",
+   "r2": "e6c3f6c9812149cfe380768afd7492698386853c993d997a843316c51a624466"
+  },
+  "leadscan/idle94-lead-325-opp-on.json": {
+   "r1": "875871bc144a14898b889e5dd629003d47da0037e28ff87adec084c45fdcd9bb",
+   "r2": "875871bc144a14898b889e5dd629003d47da0037e28ff87adec084c45fdcd9bb"
+  },
+  "leadscan/idle94-lead-325-ply-on.json": {
+   "r1": "4818d665eadf68af322ee695ca87018e739867c5f077332a9db6cd7a02cd5c9c",
+   "r2": "4818d665eadf68af322ee695ca87018e739867c5f077332a9db6cd7a02cd5c9c"
+  },
+  "leadscan/idle94-lead-334-opp-on.json": {
+   "r1": "8ec0a8ee885fa8897224b8a7496b0e4a97992ebb30ad8bddce85659f73fbaed3",
+   "r2": "8ec0a8ee885fa8897224b8a7496b0e4a97992ebb30ad8bddce85659f73fbaed3"
+  },
+  "leadscan/idle94-lead-334-ply-on.json": {
+   "r1": "b043932f253394c1b84755ea2084b3d3ab25033f5a4216821e89085ae03af719",
+   "r2": "b043932f253394c1b84755ea2084b3d3ab25033f5a4216821e89085ae03af719"
+  },
+  "leadscan/idle94-lead-337-opp-on.json": {
+   "r1": "60900543c6a9910ac0ae893d4036dbb9e6c1293317e7001f9b4e3793e5911362",
+   "r2": "60900543c6a9910ac0ae893d4036dbb9e6c1293317e7001f9b4e3793e5911362"
+  },
+  "leadscan/idle94-lead-337-ply-on.json": {
+   "r1": "54bf1efd7b2907a03ac8122e9abfa6ada9c4d9da49cdc6e23d52f1c9e15e7158",
+   "r2": "54bf1efd7b2907a03ac8122e9abfa6ada9c4d9da49cdc6e23d52f1c9e15e7158"
+  },
+  "leadscan/idle94-lead-339-opp-on.json": {
+   "r1": "1bbda38941c665638bf85c02cc04da4cd1e40638f6f0efec2750a1bd70116baa",
+   "r2": "1bbda38941c665638bf85c02cc04da4cd1e40638f6f0efec2750a1bd70116baa"
+  },
+  "leadscan/idle94-lead-339-ply-on.json": {
+   "r1": "462280f1d52083d14d944daee8d685b04b030d00f53c094fbe26c2b50d9f7460",
+   "r2": "462280f1d52083d14d944daee8d685b04b030d00f53c094fbe26c2b50d9f7460"
+  },
+  "leadscan/idle94-lead-342-opp-on.json": {
+   "r1": "29424a4c2d35ea1a0340989117364492d07421605e454b9c3335acf7199fc75d",
+   "r2": "29424a4c2d35ea1a0340989117364492d07421605e454b9c3335acf7199fc75d"
+  },
+  "leadscan/idle94-lead-342-ply-on.json": {
+   "r1": "2cb61ebaa1cf4994fd1f34a2abbc2f5e2246228ef4d3495c89e3618e441c7ffc",
+   "r2": "2cb61ebaa1cf4994fd1f34a2abbc2f5e2246228ef4d3495c89e3618e441c7ffc"
+  },
+  "leadscan/idle94-lead-343-opp-on.json": {
+   "r1": "bd06d8bec1f8cf82117642f04678332e389104af8333a718ccada85f4483b708",
+   "r2": "bd06d8bec1f8cf82117642f04678332e389104af8333a718ccada85f4483b708"
+  },
+  "leadscan/idle94-lead-343-ply-on.json": {
+   "r1": "6763a1370dc72f086e563098c273e8ba870ad8a2c480c9cbb2a571c9ff6d0f6b",
+   "r2": "6763a1370dc72f086e563098c273e8ba870ad8a2c480c9cbb2a571c9ff6d0f6b"
+  },
+  "leadscan/idle94-lead-347-opp-on.json": {
+   "r1": "07afe65eb9c9537e8fc86ce22b6eb708af7699ac0384bce2ba29f9808cf30566",
+   "r2": "07afe65eb9c9537e8fc86ce22b6eb708af7699ac0384bce2ba29f9808cf30566"
+  },
+  "leadscan/idle94-lead-347-ply-on.json": {
+   "r1": "09950bbb5bb5dab6011e5e42356c0f7c70b4a7465d041bcd2cfefa60aeabdfca",
+   "r2": "09950bbb5bb5dab6011e5e42356c0f7c70b4a7465d041bcd2cfefa60aeabdfca"
+  },
+  "leadscan/idle94-lead-41-opp-on.json": {
+   "r1": "d7fbdb826fd5ff7141873b89a0ee854bb7e9d686605211b5d81fa78b14bafb2c",
+   "r2": "d7fbdb826fd5ff7141873b89a0ee854bb7e9d686605211b5d81fa78b14bafb2c"
+  },
+  "leadscan/idle94-lead-41-ply-on.json": {
+   "r1": "b9ab75f76e294b25d23fcb1bd5980400793bcefd652b204736f07cc7fbe3d538",
+   "r2": "b9ab75f76e294b25d23fcb1bd5980400793bcefd652b204736f07cc7fbe3d538"
+  },
+  "leadscan/idle94-lead-44-opp-on.json": {
+   "r1": "3d2b2ea26705211349338d346476c07e44974b08c7215a841cb1773a5d48fa42",
+   "r2": "3d2b2ea26705211349338d346476c07e44974b08c7215a841cb1773a5d48fa42"
+  },
+  "leadscan/idle94-lead-44-ply-on.json": {
+   "r1": "7577cffe854e2a4c860516968b96877ecb1dafa5c526d280feac43815ecc1a5a",
+   "r2": "7577cffe854e2a4c860516968b96877ecb1dafa5c526d280feac43815ecc1a5a"
+  },
+  "leadscan/idle94-lead-48-opp-on.json": {
+   "r1": "274879a65f11c73f5aa2b2d4bde2fc9b37a703446ffc8d16420b34e79ae7aea0",
+   "r2": "274879a65f11c73f5aa2b2d4bde2fc9b37a703446ffc8d16420b34e79ae7aea0"
+  },
+  "leadscan/idle94-lead-48-ply-on.json": {
+   "r1": "06a582976663fd3dd3cd10dd594156d68798f8fc131af10f9b47625b7da40f92",
+   "r2": "06a582976663fd3dd3cd10dd594156d68798f8fc131af10f9b47625b7da40f92"
+  },
+  "leadscan/idle94-lead-51-opp-on.json": {
+   "r1": "b461365631f17d2a6afb8cf7ecb69be1f0dae4f33df48486347bf365b52c1ecd",
+   "r2": "b461365631f17d2a6afb8cf7ecb69be1f0dae4f33df48486347bf365b52c1ecd"
+  },
+  "leadscan/idle94-lead-51-ply-on.json": {
+   "r1": "b81d314ec250929c91577814b2cf3483e1825c1ad9656817cdf41d7d75b81592",
+   "r2": "b81d314ec250929c91577814b2cf3483e1825c1ad9656817cdf41d7d75b81592"
+  },
+  "leadscan/idle94-lead-52-opp-on.json": {
+   "r1": "2ad24674af9a2ea611aa232a14b2fd5621562babfef6809c745e158ff270aada",
+   "r2": "2ad24674af9a2ea611aa232a14b2fd5621562babfef6809c745e158ff270aada"
+  },
+  "leadscan/idle94-lead-52-ply-on.json": {
+   "r1": "0aef0dd4a05975af3a8e4cc541f13fff53f9df918c08df6995ff445078a69077",
+   "r2": "0aef0dd4a05975af3a8e4cc541f13fff53f9df918c08df6995ff445078a69077"
+  },
+  "leadscan/idle94-lead-53-opp-on.json": {
+   "r1": "4f5ee1a803176ec7333b0b7292d2e6bd158cd782d3b386a7a4d32aa7a7aff1f0",
+   "r2": "4f5ee1a803176ec7333b0b7292d2e6bd158cd782d3b386a7a4d32aa7a7aff1f0"
+  },
+  "leadscan/idle94-lead-53-ply-on.json": {
+   "r1": "b3929cd1d0bcdacd7daa7ff9b185682858e797565f46dbe5b386d947d3f2021c",
+   "r2": "b3929cd1d0bcdacd7daa7ff9b185682858e797565f46dbe5b386d947d3f2021c"
+  },
+  "leadscan/idle94-lead-55-opp-on.json": {
+   "r1": "06d37f233bc40c508a3c8f5af4cb88f5346ea891981ee99b6126ecb85b72afa6",
+   "r2": "06d37f233bc40c508a3c8f5af4cb88f5346ea891981ee99b6126ecb85b72afa6"
+  },
+  "leadscan/idle94-lead-55-ply-on.json": {
+   "r1": "74aef12575dbf20f2521c5fcfd83cb24794b5a9b65792d82c3af3bf18dd18ea0",
+   "r2": "74aef12575dbf20f2521c5fcfd83cb24794b5a9b65792d82c3af3bf18dd18ea0"
+  },
+  "leadscan/idle94-lead-71-opp-on.json": {
+   "r1": "0e3c3750b42e2364a46da606ba7352847d1f454312836017a7fba6cd827872d1",
+   "r2": "0e3c3750b42e2364a46da606ba7352847d1f454312836017a7fba6cd827872d1"
+  },
+  "leadscan/idle94-lead-71-ply-on.json": {
+   "r1": "5cfd6b605f1e2a467f105f21db035f29ee3074f9f0453e81caaf5a60d224e727",
+   "r2": "5cfd6b605f1e2a467f105f21db035f29ee3074f9f0453e81caaf5a60d224e727"
+  },
+  "leadscan/idle94-lead-74-opp-on.json": {
+   "r1": "089d4ceea145efaec37062b4f4728990d9355a39a8b1433b76c5935c79a24c0e",
+   "r2": "089d4ceea145efaec37062b4f4728990d9355a39a8b1433b76c5935c79a24c0e"
+  },
+  "leadscan/idle94-lead-74-ply-on.json": {
+   "r1": "93e21d823953609cb57488de2c189fdcc857bfcaf921c0fe9133b45660eb4582",
+   "r2": "93e21d823953609cb57488de2c189fdcc857bfcaf921c0fe9133b45660eb4582"
+  },
+  "leadscan/idle94-lead-75-opp-on.json": {
+   "r1": "a4a13787dc55a1a67bbbe35b13930c1dbba4bc3f01f39a0837f3d7f59d4a1544",
+   "r2": "a4a13787dc55a1a67bbbe35b13930c1dbba4bc3f01f39a0837f3d7f59d4a1544"
+  },
+  "leadscan/idle94-lead-75-ply-on.json": {
+   "r1": "542abd9f80990e439af010cc7ee83a3105927288b8346ea9024eb9a2885b7aa6",
+   "r2": "542abd9f80990e439af010cc7ee83a3105927288b8346ea9024eb9a2885b7aa6"
+  },
+  "leadscan/idle94-lead-82-opp-on.json": {
+   "r1": "06ad64b54355e88bfe55b388df1cd2459a0c2d81837ce57b4642bb93627781e7",
+   "r2": "06ad64b54355e88bfe55b388df1cd2459a0c2d81837ce57b4642bb93627781e7"
+  },
+  "leadscan/idle94-lead-82-ply-on.json": {
+   "r1": "6851a6c0d777afc677dd0676ec8f6377e6fd252fc0499d34a3ff43684bac9523",
+   "r2": "6851a6c0d777afc677dd0676ec8f6377e6fd252fc0499d34a3ff43684bac9523"
+  },
+  "leadscan/idle94-lead-9-opp-on.json": {
+   "r1": "646c4298a57fdc9973552a7bc4ddfe424f10eb8b89bb34be81018b074c3f0f56",
+   "r2": "646c4298a57fdc9973552a7bc4ddfe424f10eb8b89bb34be81018b074c3f0f56"
+  },
+  "leadscan/idle94-lead-9-ply-on.json": {
+   "r1": "47cafc0e6f26684d756128adfedcfcfe296ba5bc27a89c0f893f1134083fec46",
+   "r2": "47cafc0e6f26684d756128adfedcfcfe296ba5bc27a89c0f893f1134083fec46"
+  },
+  "leadscan/idle94-lead-92-opp-on.json": {
+   "r1": "d0f1c50a283fce5fa79470ac64c8159e713a8fd8678938356fd5148f83ea0a49",
+   "r2": "d0f1c50a283fce5fa79470ac64c8159e713a8fd8678938356fd5148f83ea0a49"
+  },
+  "leadscan/idle94-lead-92-ply-on.json": {
+   "r1": "21e978cb787b7a856461badcecfdebbdd7e4ef7b57edb5ab9d4d08a58eb44237",
+   "r2": "21e978cb787b7a856461badcecfdebbdd7e4ef7b57edb5ab9d4d08a58eb44237"
+  },
+  "leadscan/idle94-lead-93-opp-on.json": {
+   "r1": "90c72895a5281cfcb5d00514f30a7954bd37262f16fd2d970795fe2de9866b77",
+   "r2": "90c72895a5281cfcb5d00514f30a7954bd37262f16fd2d970795fe2de9866b77"
+  },
+  "leadscan/idle94-lead-93-ply-on.json": {
+   "r1": "c7ca503337a455f62fe10414f60ca85530942d8984e10dce1b9b23a71f4e18d2",
+   "r2": "c7ca503337a455f62fe10414f60ca85530942d8984e10dce1b9b23a71f4e18d2"
+  },
+  "leadscan/idle94-lead-94-opp-on.json": {
+   "r1": "68ebfebc6f5c609fa7a3b52597c10141f3207ea2abae05d60f7e85dd90173ebb",
+   "r2": "68ebfebc6f5c609fa7a3b52597c10141f3207ea2abae05d60f7e85dd90173ebb"
+  },
+  "leadscan/idle94-lead-94-ply-on.json": {
+   "r1": "4ab41e73f0ac0d5257fbf135314346a0b0956bad363af47ee2f61ce048083961",
+   "r2": "4ab41e73f0ac0d5257fbf135314346a0b0956bad363af47ee2f61ce048083961"
+  }
+ }
+}
