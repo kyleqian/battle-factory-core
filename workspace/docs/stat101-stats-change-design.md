@@ -161,4 +161,7 @@ node --experimental-strip-types --no-warnings tools/integration/stat101ProtoComp
 ```
 
 Gates run: `sh tools/integration/stat101Run.sh <fresh> --census` ALL SAME twice (02:13 -> 02:15 without the prototype step, 02:17 -> 02:19
-with it). `git diff --check` clean and `git status --short` = only new stat101 files at every commit (explicit paths).
+with it). `git diff --check` clean and `git status --short` = only new stat101 files at every commit (explicit paths). `npm test` in a git-archive copy
+of `b9f874c14` (its own two-commit git repo): **1,624 files / 13,343 tests passed** (44 / 223 skipped), 0 failed (02:20 -> 02:31). `npm run build`
+in the same copy: **green** (exit 0). The new tools live under `tools/` (outside the tsconfig `src` / `tests` graph), so they cannot affect
+either gate. The later commits only touch this doc.
