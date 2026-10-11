@@ -7,7 +7,14 @@
     10426,
     10426
    ],
-   "timelineSame": false,
+   "timelineSame": true,
+   "firstRowLiveFlips": 12,
+   "flippedMoves": [
+    44,
+    184,
+    188,
+    247
+   ],
    "end": [
     "terminal",
     "terminal"
@@ -38,7 +45,13 @@
     6366,
     6366
    ],
-   "timelineSame": false,
+   "timelineSame": true,
+   "firstRowLiveFlips": 4,
+   "flippedMoves": [
+    94,
+    188,
+    247
+   ],
    "end": [
     "terminal",
     "terminal"
@@ -69,7 +82,11 @@
     10686,
     10686
    ],
-   "timelineSame": false,
+   "timelineSame": true,
+   "firstRowLiveFlips": 3,
+   "flippedMoves": [
+    339
+   ],
    "end": [
     "terminal",
     "terminal"
@@ -100,7 +117,12 @@
     11290,
     11290
    ],
-   "timelineSame": false,
+   "timelineSame": true,
+   "firstRowLiveFlips": 4,
+   "flippedMoves": [
+    94,
+    337
+   ],
    "end": [
     "terminal",
     "terminal"
