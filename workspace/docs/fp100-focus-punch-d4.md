@@ -117,6 +117,21 @@ Light Screen 113 precedent (lsbz) and the Faint Attack 185 restorebg-lag precede
   - R3, 264 back in `LIVE_MOVE_ANIMATION_IDS` and out of the faithful list: 5 fail (inventory 1, fp100 1, liveBasic 1, liveStatusImplementedCount 2);
   - R4, duration back to the per-side 155 / 154: 2 fail (fp100 1, liveBasic 1).
 
+## Gates (final code)
+
+Tested code `7eff6d899` (production `6bd25b1f0`, src tree `aaf3d215`). The receipt / doc commit after it changes no code. All gates ran serialized, with no census running.
+
+- **Targeted**: 64 files, 2,162 tests passed. The brief's grep (264 / Focus Punch / focusPunch / liveMoveTimingPolicy / faithfulTiming) plus `factoryAnimationInventory`, `playableAnimationIntegration`, `liveStatusImplementedCount`, `liveBasicMoveAdapters`, `ctl95DollFreeControls`, `substituteSwapAttdollCells`.
+- `npm run typecheck`: exit 0.
+- `npm run test:smoke`: 448 / 448.
+- **Full suite**, two foreground shards, four workers, 0 failed:
+  - shard 1: 812 files, 6,970 passed / 119 skipped;
+  - shard 2: 812 files, 6,380 passed / 104 skipped.
+- `npm run build`: exit 0.
+- `compare:differential fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 406bfc999`: **PASS, 624 / 624 captures byte-identical**.
+- `git diff --check`: clean.
+- **Runner** `fp100Run.sh`, run twice into fresh dirs on src `aaf3d215`. Each run: same scenarios, 13 / 13 r1 == r2, **same phase.tsv**, the accepted fixtures as above.
+
 ## Reproduce
 
 ```sh
