@@ -183,7 +183,8 @@ comparison is read.
   - The copy needs a git history: `tests/appDifferential.test.ts` resolves `HEAD` / `HEAD^`. With only `git init`, it failed 2 guard
     tests ("fatal: Needed a single revision"); after two scratch commits in the copy, it passes (shard 2 rerun in full).
   - `npm run build` in the same copy: green (exit 0; only vite's usual chunk-size warning).
-  - Final-HEAD rerun: pending (next commit).
+  - Final-HEAD rerun, a fresh git-archive copy of `5b502c2f9` (tools + receipts + this doc) with the same two scratch commits: **1,624 files /
+    13,343 tests passed** (44 / 223 skipped) in three foreground shards; `npm run build` exit 0.
 - `git diff --check 32eb03d65` is clean. `tools/integration/fixtures/audit-23/.gitattributes` (plans69's `*.diff -whitespace`) also keeps
   `d/dt-plain-shift*.txt -whitespace`: ctl95ControlCheck.ts prints `bad ` with a trailing space, and the receipt stays byte-for-byte. There is no
   `.diff` (no temp patch).
