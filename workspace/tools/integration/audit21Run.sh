@@ -19,7 +19,8 @@ REC=$(cd "$REC" && pwd); T=$(cd "$T" && pwd)
 J=${AUDIT21_JOBS:-12}
 C83="c83-sun-ember-by-cfply c83-sun-ember-by-cfopp c83-sun-flamethrower-by-cfply c83-sun-flamethrower-by-cfopp c83-hail-scary-face-at-cfply
  c83-hail-scary-face-at-cfopp c83-ctl-ember-by-cfply c83-ctl-ember-by-cfopp c83-ctl-flamethrower-by-cfply c83-ctl-flamethrower-by-cfopp
- c83-ctl-scary-face-at-cfply c83-ctl-scary-face-at-cfopp"
+ c83-ctl-scary-face-at-cfply c83-ctl-scary-face-at-cfopp c83-rain-icy-wind-by-cfply c83-rain-icy-wind-by-cfopp c83-rain-icy-wind-at-cfply
+ c83-rain-icy-wind-at-cfopp"
 python3 tools/integration/audit21Stage.py "$T/sc" > /dev/null
 diff -r "$T/sc" $W/scenarios > /dev/null && echo "staged scenarios == committed" || { echo "staged scenarios differ"; exit 1; }
 AUDIT19_JOBS=$J python3 tools/integration/audit19Probes.py "$T/probe" $W/scenarios/*.json > "$T/probes.txt"

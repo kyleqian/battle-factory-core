@@ -11,7 +11,8 @@ for p in sorted(Path(sys.argv[1]).glob("check-*.json")):
         ages = [a for a, _ in c["residualRows"]]
         span = f"{ages[0]}..{ages[-1]}({len(ages)}{'+' if len(ages) == 40 else ''})" if ages else "-"
         d = c["detail"][0] if c["detail"] else None
-        print(r["fixture"], r["move"], r["side"], r["species"], f"units={r['units']}", f"live={c['live']}",
-              f"decline={c['decline']!r}" if c["decline"] else "", f"rows={c['rows']}", f"px={c['px']}",
-              f"same={c['digests'][0] == c['digests'][1]}", f"entryLive={e['live']}", f"entryPx={e['px']}", f"ages={span}",
-              f"first={d['age']}:{d['bbox']}:{d['sample']}" if d else "")
+        fields = [r["fixture"], r["move"], r["side"], r["species"], f"units={r['units']}", f"live={c['live']}",
+                  f"decline={c['decline']!r}" if c["decline"] else "", f"rows={c['rows']}", f"px={c['px']}",
+                  f"same={c['digests'][0] == c['digests'][1]}", f"entryLive={e['live']}", f"entryPx={e['px']}", f"ages={span}",
+                  f"first={d['age']}:{d['bbox']}:{d['sample']}" if d else ""]
+        print(" ".join(f.replace(" ", "_") if i == 6 else f for i, f in enumerate(fields) if f))

@@ -1,0 +1,297 @@
+{
+ "schema": "audit19-chain-check/v1",
+ "scenario": "a21-cn-scary-face-at-cfply-snorlax",
+ "rows": [
+  {
+   "fixture": "a21-cn-scary-face-at-cfply-snorlax-c0.json",
+   "move": "SCARY_FACE",
+   "side": "opponent",
+   "species": "SNORLAX/CASTFORM",
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "351@0 HIT_ANIMATION@1 184@1"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 454,
+    "endFrame": 643,
+    "ageOffset": 0,
+    "bodyStartFrame": 450,
+    "bodyEndFrame": 657
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 190,
+    "exactRows": 190,
+    "px": 0,
+    "digests": [
+     "81b2342403002e07",
+     "81b2342403002e07"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 190,
+    "exactRows": 190,
+    "px": 0,
+    "digests": [
+     "81b2342403002e07",
+     "81b2342403002e07"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "a21-cn-scary-face-at-cfply-snorlax-c1.json",
+   "move": "SCARY_FACE",
+   "side": "opponent",
+   "species": "SNORLAX/CASTFORM",
+   "units": 6,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "351@0 HIT_ANIMATION@1 184@1 STATS_CHANGE(48)@0",
+    "351@0 HIT_ANIMATION@1 184@1"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1787,
+    "endFrame": 1976,
+    "ageOffset": 0,
+    "bodyStartFrame": 1783,
+    "bodyEndFrame": 1990
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 190,
+    "exactRows": 190,
+    "px": 0,
+    "digests": [
+     "81b2342403002e07",
+     "81b2342403002e07"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 190,
+    "exactRows": 190,
+    "px": 0,
+    "digests": [
+     "81b2342403002e07",
+     "81b2342403002e07"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "a21-cn-scary-face-at-cfply-snorlax-c2.json",
+   "move": "SCARY_FACE",
+   "side": "opponent",
+   "species": "SNORLAX/CASTFORM",
+   "units": 8,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "351@0 HIT_ANIMATION@1 184@1 STATS_CHANGE(48)@0",
+    "351@0 HIT_ANIMATION@1 184@1 STATS_CHANGE(48)@0",
+    "184@1"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 2751,
+    "endFrame": 2940,
+    "ageOffset": 0,
+    "bodyStartFrame": 2747,
+    "bodyEndFrame": 2954
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 190,
+    "exactRows": 190,
+    "px": 0,
+    "digests": [
+     "81b2342403002e07",
+     "81b2342403002e07"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 190,
+    "exactRows": 190,
+    "px": 0,
+    "digests": [
+     "81b2342403002e07",
+     "81b2342403002e07"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

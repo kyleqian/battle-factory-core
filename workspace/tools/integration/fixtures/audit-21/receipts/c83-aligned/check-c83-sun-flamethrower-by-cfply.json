@@ -1,0 +1,1661 @@
+{
+ "schema": "audit19-chain-check/v1",
+ "scenario": "c83-sun-flamethrower-by-cfply",
+ "rows": [
+  {
+   "fixture": "c83-sun-flamethrower-by-cfply-c0.json",
+   "move": "FLAMETHROWER",
+   "side": "player",
+   "species": "CASTFORM/GOLBAT",
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "241@1 CASTFORM_CHANGE(1)@0 53@0"
+   ],
+   "romPower": 95,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 95
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 585,
+    "endFrame": 710,
+    "ageOffset": -11,
+    "bodyStartFrame": 581,
+    "bodyEndFrame": 790
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "CASTFORM shown in a weather form: measured residual 53:by:1: Flamethrower's own residual (252,460 / 241,491 px; the normal-form control 231,701 / 208,281 px) (cast83, ISSUES #143)",
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 126,
+    "exactRows": 0,
+    "px": 201507,
+    "digests": [
+     "1172dc3845ceebcf",
+     "1172dc3845ceebcf"
+    ],
+    "residualRows": [
+     [
+      -11,
+      200
+     ],
+     [
+      -10,
+      200
+     ],
+     [
+      -9,
+      200
+     ],
+     [
+      -8,
+      200
+     ],
+     [
+      -7,
+      989
+     ],
+     [
+      -6,
+      200
+     ],
+     [
+      -5,
+      200
+     ],
+     [
+      -4,
+      989
+     ],
+     [
+      -3,
+      989
+     ],
+     [
+      -2,
+      200
+     ],
+     [
+      -1,
+      200
+     ],
+     [
+      0,
+      989
+     ],
+     [
+      1,
+      1037
+     ],
+     [
+      2,
+      396
+     ],
+     [
+      3,
+      395
+     ],
+     [
+      4,
+      1135
+     ],
+     [
+      5,
+      1191
+     ],
+     [
+      6,
+      467
+     ],
+     [
+      7,
+      472
+     ],
+     [
+      8,
+      1326
+     ],
+     [
+      9,
+      1367
+     ],
+     [
+      10,
+      635
+     ],
+     [
+      11,
+      637
+     ],
+     [
+      12,
+      1389
+     ],
+     [
+      13,
+      1428
+     ],
+     [
+      14,
+      782
+     ],
+     [
+      15,
+      802
+     ],
+     [
+      16,
+      1563
+     ],
+     [
+      17,
+      1597
+     ],
+     [
+      18,
+      871
+     ],
+     [
+      19,
+      901
+     ],
+     [
+      20,
+      1760
+     ],
+     [
+      21,
+      1789
+     ],
+     [
+      22,
+      1044
+     ],
+     [
+      23,
+      1078
+     ],
+     [
+      24,
+      1838
+     ],
+     [
+      25,
+      1867
+     ],
+     [
+      26,
+      1259
+     ],
+     [
+      27,
+      2437
+     ],
+     [
+      28,
+      3230
+     ]
+    ],
+    "detail": [
+     {
+      "age": -11,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -10,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -9,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -8,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -7,
+      "px": 989,
+      "bbox": [
+       47,
+       191,
+       65,
+       111
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -6,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     }
+    ]
+   },
+   "entry": {
+    "live": false,
+    "decline": "CASTFORM shown in a weather form: measured residual 53:by:1: Flamethrower's own residual (252,460 / 241,491 px; the normal-form control 231,701 / 208,281 px) (cast83, ISSUES #143)",
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 126,
+    "exactRows": 0,
+    "px": 201507,
+    "digests": [
+     "1172dc3845ceebcf",
+     "1172dc3845ceebcf"
+    ],
+    "residualRows": [
+     [
+      -11,
+      200
+     ],
+     [
+      -10,
+      200
+     ],
+     [
+      -9,
+      200
+     ],
+     [
+      -8,
+      200
+     ],
+     [
+      -7,
+      989
+     ],
+     [
+      -6,
+      200
+     ],
+     [
+      -5,
+      200
+     ],
+     [
+      -4,
+      989
+     ],
+     [
+      -3,
+      989
+     ],
+     [
+      -2,
+      200
+     ],
+     [
+      -1,
+      200
+     ],
+     [
+      0,
+      989
+     ],
+     [
+      1,
+      1037
+     ],
+     [
+      2,
+      396
+     ],
+     [
+      3,
+      395
+     ],
+     [
+      4,
+      1135
+     ],
+     [
+      5,
+      1191
+     ],
+     [
+      6,
+      467
+     ],
+     [
+      7,
+      472
+     ],
+     [
+      8,
+      1326
+     ],
+     [
+      9,
+      1367
+     ],
+     [
+      10,
+      635
+     ],
+     [
+      11,
+      637
+     ],
+     [
+      12,
+      1389
+     ],
+     [
+      13,
+      1428
+     ],
+     [
+      14,
+      782
+     ],
+     [
+      15,
+      802
+     ],
+     [
+      16,
+      1563
+     ],
+     [
+      17,
+      1597
+     ],
+     [
+      18,
+      871
+     ],
+     [
+      19,
+      901
+     ],
+     [
+      20,
+      1760
+     ],
+     [
+      21,
+      1789
+     ],
+     [
+      22,
+      1044
+     ],
+     [
+      23,
+      1078
+     ],
+     [
+      24,
+      1838
+     ],
+     [
+      25,
+      1867
+     ],
+     [
+      26,
+      1259
+     ],
+     [
+      27,
+      2437
+     ],
+     [
+      28,
+      3230
+     ]
+    ],
+    "detail": [
+     {
+      "age": -11,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -10,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -9,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -8,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -7,
+      "px": 989,
+      "bbox": [
+       47,
+       191,
+       65,
+       111
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -6,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "c83-sun-flamethrower-by-cfply-c1.json",
+   "move": "FLAMETHROWER",
+   "side": "player",
+   "species": "CASTFORM/GOLBAT",
+   "units": 5,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "241@1 CASTFORM_CHANGE(1)@0 53@0 HIT_ANIMATION@1 SUN_CONTINUES@0",
+    "53@0"
+   ],
+   "romPower": 95,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 95
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1581,
+    "endFrame": 1706,
+    "ageOffset": -11,
+    "bodyStartFrame": 1577,
+    "bodyEndFrame": 1786
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": false,
+    "decline": "CASTFORM shown in a weather form: measured residual 53:by:1: Flamethrower's own residual (252,460 / 241,491 px; the normal-form control 231,701 / 208,281 px) (cast83, ISSUES #143)",
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 126,
+    "exactRows": 0,
+    "px": 201507,
+    "digests": [
+     "1172dc3845ceebcf",
+     "1172dc3845ceebcf"
+    ],
+    "residualRows": [
+     [
+      -11,
+      200
+     ],
+     [
+      -10,
+      200
+     ],
+     [
+      -9,
+      200
+     ],
+     [
+      -8,
+      200
+     ],
+     [
+      -7,
+      989
+     ],
+     [
+      -6,
+      200
+     ],
+     [
+      -5,
+      200
+     ],
+     [
+      -4,
+      989
+     ],
+     [
+      -3,
+      989
+     ],
+     [
+      -2,
+      200
+     ],
+     [
+      -1,
+      200
+     ],
+     [
+      0,
+      989
+     ],
+     [
+      1,
+      1037
+     ],
+     [
+      2,
+      396
+     ],
+     [
+      3,
+      395
+     ],
+     [
+      4,
+      1135
+     ],
+     [
+      5,
+      1191
+     ],
+     [
+      6,
+      467
+     ],
+     [
+      7,
+      472
+     ],
+     [
+      8,
+      1326
+     ],
+     [
+      9,
+      1367
+     ],
+     [
+      10,
+      635
+     ],
+     [
+      11,
+      637
+     ],
+     [
+      12,
+      1389
+     ],
+     [
+      13,
+      1428
+     ],
+     [
+      14,
+      782
+     ],
+     [
+      15,
+      802
+     ],
+     [
+      16,
+      1563
+     ],
+     [
+      17,
+      1597
+     ],
+     [
+      18,
+      871
+     ],
+     [
+      19,
+      901
+     ],
+     [
+      20,
+      1760
+     ],
+     [
+      21,
+      1789
+     ],
+     [
+      22,
+      1044
+     ],
+     [
+      23,
+      1078
+     ],
+     [
+      24,
+      1838
+     ],
+     [
+      25,
+      1867
+     ],
+     [
+      26,
+      1259
+     ],
+     [
+      27,
+      2437
+     ],
+     [
+      28,
+      3230
+     ]
+    ],
+    "detail": [
+     {
+      "age": -11,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -10,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -9,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -8,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -7,
+      "px": 989,
+      "bbox": [
+       47,
+       191,
+       65,
+       111
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -6,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     }
+    ]
+   },
+   "entry": {
+    "live": false,
+    "decline": "CASTFORM shown in a weather form: measured residual 53:by:1: Flamethrower's own residual (252,460 / 241,491 px; the normal-form control 231,701 / 208,281 px) (cast83, ISSUES #143)",
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 126,
+    "exactRows": 0,
+    "px": 201507,
+    "digests": [
+     "1172dc3845ceebcf",
+     "1172dc3845ceebcf"
+    ],
+    "residualRows": [
+     [
+      -11,
+      200
+     ],
+     [
+      -10,
+      200
+     ],
+     [
+      -9,
+      200
+     ],
+     [
+      -8,
+      200
+     ],
+     [
+      -7,
+      989
+     ],
+     [
+      -6,
+      200
+     ],
+     [
+      -5,
+      200
+     ],
+     [
+      -4,
+      989
+     ],
+     [
+      -3,
+      989
+     ],
+     [
+      -2,
+      200
+     ],
+     [
+      -1,
+      200
+     ],
+     [
+      0,
+      989
+     ],
+     [
+      1,
+      1037
+     ],
+     [
+      2,
+      396
+     ],
+     [
+      3,
+      395
+     ],
+     [
+      4,
+      1135
+     ],
+     [
+      5,
+      1191
+     ],
+     [
+      6,
+      467
+     ],
+     [
+      7,
+      472
+     ],
+     [
+      8,
+      1326
+     ],
+     [
+      9,
+      1367
+     ],
+     [
+      10,
+      635
+     ],
+     [
+      11,
+      637
+     ],
+     [
+      12,
+      1389
+     ],
+     [
+      13,
+      1428
+     ],
+     [
+      14,
+      782
+     ],
+     [
+      15,
+      802
+     ],
+     [
+      16,
+      1563
+     ],
+     [
+      17,
+      1597
+     ],
+     [
+      18,
+      871
+     ],
+     [
+      19,
+      901
+     ],
+     [
+      20,
+      1760
+     ],
+     [
+      21,
+      1789
+     ],
+     [
+      22,
+      1044
+     ],
+     [
+      23,
+      1078
+     ],
+     [
+      24,
+      1838
+     ],
+     [
+      25,
+      1867
+     ],
+     [
+      26,
+      1259
+     ],
+     [
+      27,
+      2437
+     ],
+     [
+      28,
+      3230
+     ]
+    ],
+    "detail": [
+     {
+      "age": -11,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -10,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -9,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -8,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -7,
+      "px": 989,
+      "bbox": [
+       47,
+       191,
+       65,
+       111
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -6,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "c83-sun-flamethrower-by-cfply-c2.json",
+   "move": "FLAMETHROWER",
+   "side": "player",
+   "species": "CASTFORM/GOLBAT",
+   "units": 8,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "241@1 CASTFORM_CHANGE(1)@0 53@0 HIT_ANIMATION@1 SUN_CONTINUES@0",
+    "53@0 HIT_ANIMATION@1 SUN_CONTINUES@0",
+    "53@0"
+   ],
+   "romPower": 95,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 95
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 2915,
+    "endFrame": 3040,
+    "ageOffset": -11,
+    "bodyStartFrame": 2911,
+    "bodyEndFrame": 3120
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": false,
+    "decline": "CASTFORM shown in a weather form: measured residual 53:by:1: Flamethrower's own residual (252,460 / 241,491 px; the normal-form control 231,701 / 208,281 px) (cast83, ISSUES #143)",
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 126,
+    "exactRows": 0,
+    "px": 201507,
+    "digests": [
+     "1172dc3845ceebcf",
+     "1172dc3845ceebcf"
+    ],
+    "residualRows": [
+     [
+      -11,
+      200
+     ],
+     [
+      -10,
+      200
+     ],
+     [
+      -9,
+      200
+     ],
+     [
+      -8,
+      200
+     ],
+     [
+      -7,
+      989
+     ],
+     [
+      -6,
+      200
+     ],
+     [
+      -5,
+      200
+     ],
+     [
+      -4,
+      989
+     ],
+     [
+      -3,
+      989
+     ],
+     [
+      -2,
+      200
+     ],
+     [
+      -1,
+      200
+     ],
+     [
+      0,
+      989
+     ],
+     [
+      1,
+      1037
+     ],
+     [
+      2,
+      396
+     ],
+     [
+      3,
+      395
+     ],
+     [
+      4,
+      1135
+     ],
+     [
+      5,
+      1191
+     ],
+     [
+      6,
+      467
+     ],
+     [
+      7,
+      472
+     ],
+     [
+      8,
+      1326
+     ],
+     [
+      9,
+      1367
+     ],
+     [
+      10,
+      635
+     ],
+     [
+      11,
+      637
+     ],
+     [
+      12,
+      1389
+     ],
+     [
+      13,
+      1428
+     ],
+     [
+      14,
+      782
+     ],
+     [
+      15,
+      802
+     ],
+     [
+      16,
+      1563
+     ],
+     [
+      17,
+      1597
+     ],
+     [
+      18,
+      871
+     ],
+     [
+      19,
+      901
+     ],
+     [
+      20,
+      1760
+     ],
+     [
+      21,
+      1789
+     ],
+     [
+      22,
+      1044
+     ],
+     [
+      23,
+      1078
+     ],
+     [
+      24,
+      1838
+     ],
+     [
+      25,
+      1867
+     ],
+     [
+      26,
+      1259
+     ],
+     [
+      27,
+      2437
+     ],
+     [
+      28,
+      3230
+     ]
+    ],
+    "detail": [
+     {
+      "age": -11,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -10,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -9,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -8,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -7,
+      "px": 989,
+      "bbox": [
+       47,
+       191,
+       65,
+       111
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -6,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     }
+    ]
+   },
+   "entry": {
+    "live": false,
+    "decline": "CASTFORM shown in a weather form: measured residual 53:by:1: Flamethrower's own residual (252,460 / 241,491 px; the normal-form control 231,701 / 208,281 px) (cast83, ISSUES #143)",
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 126,
+    "exactRows": 0,
+    "px": 201507,
+    "digests": [
+     "1172dc3845ceebcf",
+     "1172dc3845ceebcf"
+    ],
+    "residualRows": [
+     [
+      -11,
+      200
+     ],
+     [
+      -10,
+      200
+     ],
+     [
+      -9,
+      200
+     ],
+     [
+      -8,
+      200
+     ],
+     [
+      -7,
+      989
+     ],
+     [
+      -6,
+      200
+     ],
+     [
+      -5,
+      200
+     ],
+     [
+      -4,
+      989
+     ],
+     [
+      -3,
+      989
+     ],
+     [
+      -2,
+      200
+     ],
+     [
+      -1,
+      200
+     ],
+     [
+      0,
+      989
+     ],
+     [
+      1,
+      1037
+     ],
+     [
+      2,
+      396
+     ],
+     [
+      3,
+      395
+     ],
+     [
+      4,
+      1135
+     ],
+     [
+      5,
+      1191
+     ],
+     [
+      6,
+      467
+     ],
+     [
+      7,
+      472
+     ],
+     [
+      8,
+      1326
+     ],
+     [
+      9,
+      1367
+     ],
+     [
+      10,
+      635
+     ],
+     [
+      11,
+      637
+     ],
+     [
+      12,
+      1389
+     ],
+     [
+      13,
+      1428
+     ],
+     [
+      14,
+      782
+     ],
+     [
+      15,
+      802
+     ],
+     [
+      16,
+      1563
+     ],
+     [
+      17,
+      1597
+     ],
+     [
+      18,
+      871
+     ],
+     [
+      19,
+      901
+     ],
+     [
+      20,
+      1760
+     ],
+     [
+      21,
+      1789
+     ],
+     [
+      22,
+      1044
+     ],
+     [
+      23,
+      1078
+     ],
+     [
+      24,
+      1838
+     ],
+     [
+      25,
+      1867
+     ],
+     [
+      26,
+      1259
+     ],
+     [
+      27,
+      2437
+     ],
+     [
+      28,
+      3230
+     ]
+    ],
+    "detail": [
+     {
+      "age": -11,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -10,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -9,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -8,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -7,
+      "px": 989,
+      "bbox": [
+       47,
+       191,
+       65,
+       111
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": -6,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     }
+    ]
+   }
+  }
+ ]
+}

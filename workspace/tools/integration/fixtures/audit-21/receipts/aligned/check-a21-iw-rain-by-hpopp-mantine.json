@@ -1,0 +1,276 @@
+{
+ "schema": "audit19-chain-check/v1",
+ "scenario": "a21-iw-rain-by-hpopp-mantine",
+ "rows": [
+  {
+   "fixture": "a21-iw-rain-by-hpopp-mantine-c0.json",
+   "move": "ICY_WIND",
+   "side": "opponent",
+   "species": "HOPPIP/MANTINE",
+   "units": 1,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "240@0 196@1"
+   ],
+   "romPower": 55,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 55
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 399,
+    "endFrame": 685
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 240:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 287,
+    "exactRows": 287,
+    "px": 0,
+    "digests": [
+     "86c8d5f4d156e929",
+     "86c8d5f4d156e929"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 287,
+    "exactRows": 287,
+    "px": 0,
+    "digests": [
+     "86c8d5f4d156e929",
+     "86c8d5f4d156e929"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "a21-iw-rain-by-hpopp-mantine-c1.json",
+   "move": "ICY_WIND",
+   "side": "opponent",
+   "species": "HOPPIP/MANTINE",
+   "units": 5,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "240@0 196@1 HIT_ANIMATION@0 STATS_CHANGE(24)@0 RAIN_CONTINUES@0",
+    "196@1"
+   ],
+   "romPower": 55,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 55
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1572,
+    "endFrame": 1858
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 240:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 287,
+    "exactRows": 287,
+    "px": 0,
+    "digests": [
+     "86c8d5f4d156e929",
+     "86c8d5f4d156e929"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 287,
+    "exactRows": 287,
+    "px": 0,
+    "digests": [
+     "86c8d5f4d156e929",
+     "86c8d5f4d156e929"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "a21-iw-rain-by-hpopp-mantine-c2.json",
+   "move": "ICY_WIND",
+   "side": "opponent",
+   "species": "HOPPIP/MANTINE",
+   "units": 9,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "240@0 196@1 HIT_ANIMATION@0 STATS_CHANGE(24)@0 RAIN_CONTINUES@0",
+    "196@1 HIT_ANIMATION@0 STATS_CHANGE(24)@0 RAIN_CONTINUES@0",
+    "196@1"
+   ],
+   "romPower": 55,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 55
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 2906,
+    "endFrame": 3192
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 240:player",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 287,
+    "exactRows": 287,
+    "px": 0,
+    "digests": [
+     "86c8d5f4d156e929",
+     "86c8d5f4d156e929"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 287,
+    "exactRows": 287,
+    "px": 0,
+    "digests": [
+     "86c8d5f4d156e929",
+     "86c8d5f4d156e929"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

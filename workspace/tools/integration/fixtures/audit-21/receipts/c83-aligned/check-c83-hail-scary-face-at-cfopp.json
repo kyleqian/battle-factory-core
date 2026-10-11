@@ -1,0 +1,553 @@
+{
+ "schema": "audit19-chain-check/v1",
+ "scenario": "c83-hail-scary-face-at-cfopp",
+ "rows": [
+  {
+   "fixture": "c83-hail-scary-face-at-cfopp-c0.json",
+   "move": "SCARY_FACE",
+   "side": "player",
+   "species": "LAPRAS/CASTFORM",
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "258@1 CASTFORM_CHANGE(3)@1 184@0"
+   ],
+   "romPower": 0,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 575,
+    "endFrame": 764,
+    "ageOffset": 0,
+    "bodyStartFrame": 571,
+    "bodyEndFrame": 778
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "CASTFORM shown in a weather form: measured residual 184:at:3: Scary Face's own residual (1,371,492 / 1,409,982 px; the normal-form control 1,422,030 / 1,461,108 px) (cast83, ISSUES #143)",
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 190,
+    "exactRows": 0,
+    "px": 3507803,
+    "digests": [
+     "a84b09603cd1634f",
+     "a84b09603cd1634f"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      1,
+      200
+     ],
+     [
+      2,
+      200
+     ],
+     [
+      3,
+      200
+     ],
+     [
+      4,
+      200
+     ],
+     [
+      5,
+      18034
+     ],
+     [
+      6,
+      19524
+     ],
+     [
+      7,
+      19524
+     ],
+     [
+      8,
+      19524
+     ],
+     [
+      9,
+      19524
+     ],
+     [
+      10,
+      19524
+     ],
+     [
+      11,
+      19524
+     ],
+     [
+      12,
+      19524
+     ],
+     [
+      13,
+      19524
+     ],
+     [
+      14,
+      19524
+     ],
+     [
+      15,
+      19524
+     ],
+     [
+      16,
+      19524
+     ],
+     [
+      17,
+      19524
+     ],
+     [
+      18,
+      19524
+     ],
+     [
+      19,
+      19524
+     ],
+     [
+      20,
+      19524
+     ],
+     [
+      21,
+      19524
+     ],
+     [
+      22,
+      19524
+     ],
+     [
+      23,
+      19524
+     ],
+     [
+      24,
+      19524
+     ],
+     [
+      25,
+      19524
+     ],
+     [
+      26,
+      19524
+     ],
+     [
+      27,
+      19524
+     ],
+     [
+      28,
+      19524
+     ],
+     [
+      29,
+      19524
+     ],
+     [
+      30,
+      19524
+     ],
+     [
+      31,
+      19524
+     ],
+     [
+      32,
+      19524
+     ],
+     [
+      33,
+      19524
+     ],
+     [
+      34,
+      19524
+     ],
+     [
+      35,
+      19524
+     ],
+     [
+      36,
+      19524
+     ],
+     [
+      37,
+      19524
+     ],
+     [
+      38,
+      19524
+     ],
+     [
+      39,
+      19524
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 1,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 2,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 3,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 4,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 5,
+      "px": 18034,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom dedede live ffffff"
+     }
+    ]
+   },
+   "entry": {
+    "live": false,
+    "decline": "CASTFORM shown in a weather form: measured residual 184:at:3: Scary Face's own residual (1,371,492 / 1,409,982 px; the normal-form control 1,422,030 / 1,461,108 px) (cast83, ISSUES #143)",
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 190,
+    "exactRows": 0,
+    "px": 3507803,
+    "digests": [
+     "a84b09603cd1634f",
+     "a84b09603cd1634f"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      1,
+      200
+     ],
+     [
+      2,
+      200
+     ],
+     [
+      3,
+      200
+     ],
+     [
+      4,
+      200
+     ],
+     [
+      5,
+      18034
+     ],
+     [
+      6,
+      19524
+     ],
+     [
+      7,
+      19524
+     ],
+     [
+      8,
+      19524
+     ],
+     [
+      9,
+      19524
+     ],
+     [
+      10,
+      19524
+     ],
+     [
+      11,
+      19524
+     ],
+     [
+      12,
+      19524
+     ],
+     [
+      13,
+      19524
+     ],
+     [
+      14,
+      19524
+     ],
+     [
+      15,
+      19524
+     ],
+     [
+      16,
+      19524
+     ],
+     [
+      17,
+      19524
+     ],
+     [
+      18,
+      19524
+     ],
+     [
+      19,
+      19524
+     ],
+     [
+      20,
+      19524
+     ],
+     [
+      21,
+      19524
+     ],
+     [
+      22,
+      19524
+     ],
+     [
+      23,
+      19524
+     ],
+     [
+      24,
+      19524
+     ],
+     [
+      25,
+      19524
+     ],
+     [
+      26,
+      19524
+     ],
+     [
+      27,
+      19524
+     ],
+     [
+      28,
+      19524
+     ],
+     [
+      29,
+      19524
+     ],
+     [
+      30,
+      19524
+     ],
+     [
+      31,
+      19524
+     ],
+     [
+      32,
+      19524
+     ],
+     [
+      33,
+      19524
+     ],
+     [
+      34,
+      19524
+     ],
+     [
+      35,
+      19524
+     ],
+     [
+      36,
+      19524
+     ],
+     [
+      37,
+      19524
+     ],
+     [
+      38,
+      19524
+     ],
+     [
+      39,
+      19524
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 1,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 2,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 3,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 4,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 5,
+      "px": 18034,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom dedede live ffffff"
+     }
+    ]
+   }
+  }
+ ]
+}
