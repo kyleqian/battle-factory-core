@@ -40,6 +40,8 @@ diff -rq "$OUT/fx" $W/fixtures > /dev/null && echo "same  $W/fixtures/" || echo 
 same "$OUT/predict-plan.txt" $W/predict-plan.txt
 (cd "$OUT/patched" && $N tools/integration/flat84Plan.ts "$OUT/probe/r1" > "$OUT/plan-check.txt")
 same "$OUT/plan-check.txt" $W/plan-check.txt
+python3 tools/integration/flat84Vectors.py "$OUT/probe/r1" "$OUT/flatter-vectors.json" > /dev/null
+same "$OUT/flatter-vectors.json" $W/flatter-vectors.json
 # 5. lends (chain = production hosts fed as the orchestrator feeds them; deferred lends resolved as the render seam resolves them)
 for d in base patched; do
   (cd "$OUT/$d" && for n in $(ls $W/fixtures | sed 's/-c[0-9]*\.json$//' | sort -u); do FLAT77_LENDS_ONLY=1 $N tools/integration/flat77Check.ts $W/fixtures "$n" /dev/null; done) > "$OUT/lends-$d.txt" 2>&1
