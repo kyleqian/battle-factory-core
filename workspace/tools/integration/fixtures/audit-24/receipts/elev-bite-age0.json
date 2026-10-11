@@ -1,0 +1,46 @@
+{
+ "schema": "audit24-lead-check/v1",
+ "results": [
+  {
+   "stem": "audit24-lead-bite-opponent-crobat-lapras",
+   "move": "BITE",
+   "moveId": 44,
+   "side": "opponent",
+   "body": 0,
+   "attacker": "CROBAT",
+   "target": "LAPRAS",
+   "activation": 74,
+   "romBodyRows": 40,
+   "kind": "plain",
+   "lead0": "age0",
+   "lead": 10,
+   "duration": 26,
+   "rows": 36,
+   "window": [
+    74,
+    109
+   ],
+   "romLeadStatic": false,
+   "romPreRowEqual": true,
+   "leadPx": [
+    200,
+    200
+   ],
+   "bodyPx": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 35,
+   "badRows": [
+    "0"
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ]
+   ]
+  }
+ ]
+}

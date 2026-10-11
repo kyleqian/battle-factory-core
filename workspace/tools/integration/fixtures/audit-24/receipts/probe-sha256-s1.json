@@ -21,6 +21,11 @@
    "r2": "e5ed529bab8c9b0cefee7134a4350c9565641607dd3b72c0e7f74e3f5d31cab8",
    "same": true
   },
+  "audit24-lead-bite-opponent-crobat-lapras": {
+   "r1": "3080a4eedba5159c597c7bc7b51b3f0475b8103ee7bffe623242b05b5b062a57",
+   "r2": "3080a4eedba5159c597c7bc7b51b3f0475b8103ee7bffe623242b05b5b062a57",
+   "same": true
+  },
   "audit24-lead-bite-opponent-raticate-skarmory": {
    "r1": "ed3f6127a0f059314e427af05a675e57ee7b21fb908a1c25839857a685a748f4",
    "r2": "ed3f6127a0f059314e427af05a675e57ee7b21fb908a1c25839857a685a748f4",
@@ -99,6 +104,11 @@
   "audit24-lead-shadow-punch-player-haunter-skarmory": {
    "r1": "8b7afeed66a1bd6d79f4751196f9c60551e176515483066e8f89da52cebf5e54",
    "r2": "8b7afeed66a1bd6d79f4751196f9c60551e176515483066e8f89da52cebf5e54",
+   "same": true
+  },
+  "audit24-lead-sludge-bomb-opponent-golbat-snorlax": {
+   "r1": "11b72e431d84bfb8a88054369cc35a874a40a49b5330fd30d778e72adcab06c6",
+   "r2": "11b72e431d84bfb8a88054369cc35a874a40a49b5330fd30d778e72adcab06c6",
    "same": true
   },
   "audit24-swap-bite-opponent-raticate": {

@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 out = Path(sys.argv[1]); out.mkdir(parents=True, exist_ok=True)
 load = lambda p: json.loads((ROOT / p).read_text())
 SP = {"GENGAR": 94, "LAPRAS": 131, "RATICATE": 20, "SKARMORY": 227, "VENUSAUR": 3, "QUAGSIRE": 195, "KANGASKHAN": 115,
-      "STEELIX": 208, "KINGLER": 99, "SNORLAX": 143, "NINETALES": 38, "HITMONLEE": 106, "POLIWRATH": 62, "PERSIAN": 53, "HAUNTER": 93}
+      "STEELIX": 208, "KINGLER": 99, "SNORLAX": 143, "NINETALES": 38, "HITMONLEE": 106, "POLIWRATH": 62, "PERSIAN": 53, "HAUNTER": 93, "CROBAT": 169, "GOLBAT": 42}
 FEMALE_ONLY = {"KANGASKHAN"}
 LEAD_TEMPLATE = {"player": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
                  "opponent": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"}
@@ -23,6 +23,8 @@ LEAD = [(325, "SHADOW_PUNCH", "GENGAR", "LAPRAS"), (44, "BITE", "RATICATE", "SKA
         (146, "DIZZY_PUNCH", "KANGASKHAN", "STEELIX"), (106, "HARDEN", "KINGLER", "SNORLAX"), (52, "EMBER", "NINETALES", "SNORLAX"),
         # HAUNTER is the only Factory frontier mon with Shadow Punch (GENGAR above is an off-Factory pair)
         (325, "SHADOW_PUNCH", "HAUNTER", "LAPRAS"), (325, "SHADOW_PUNCH", "HAUNTER", "SKARMORY")]
+# elevated opponent attackers (gEnemyMonElevation CROBAT 6, GOLBAT 8): opponent side only (no player-side shadow)
+ELEVATED = [(44, "BITE", "CROBAT", "LAPRAS"), (188, "SLUDGE_BOMB", "GOLBAT", "SNORLAX")]
 SEED_A, SEED_B = 305419897, 38177486
 rows = []
 
@@ -30,8 +32,8 @@ def mon(m, name):
     m["species"] = SP[name]
     m["gender"] = "female" if name in FEMALE_ONLY else m["gender"]
 
-for mid, move, att, foe in LEAD:
-    for side in ("player", "opponent"):
+for mid, move, att, foe, sides in [(*x, ("player", "opponent")) for x in LEAD] + [(*x, ("opponent",)) for x in ELEVATED]:
+    for side in sides:
         s = copy.deepcopy(load(LEAD_TEMPLATE[side]))
         other = "opponent" if side == "player" else "player"
         s["seed"] = SEED_A

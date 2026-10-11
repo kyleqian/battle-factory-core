@@ -9,8 +9,10 @@
  * A+N rows are one sha (the ROM's lead is static), and, for a SUBBED attacker body, production's lead for the Substitute-swap
  * composite (liveMoveIdleLeadRows on the doll field: must be 0; the composite itself is attdollLiveCheck.ts's).
  * Fixture inputs as ctl95ControlCheck.ts (HP, status1, genders, preceding bodies, the D3 activation value, request.damage).
+ * --lead0=field renders lead row 0 as the same view without the move effect (the ordinary field: audit24's temp patch,
+ * fixtures/audit-24/audit24-lead-row0.diff, presents no effect on the activation row of a lead > 0 command).
  * usage: node --experimental-strip-types --no-warnings tools/integration/audit24LeadCheck.ts --scenarios=<dir> --move=<MOVE>
- *          [--out=<json>] <probe dir> <stem>...
+ *          [--lead0=field] [--out=<json>] <probe dir> <stem>...
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
@@ -112,12 +114,17 @@ for (const stem of stems) {
       if (!cache.has(age)) { const fb = new Uint8Array(240 * 160 * 4); renderBattleResolutionLiveView(fb, liveView(fixture, age)); cache.set(age, fb); }
       return cache.get(age)!;
     };
-    const per = runs.map((run) => window.map((row, j) => diff(rgbOf(run.rgb, row), prodAt(ageOf(j)))));
+    let fieldRow: Uint8Array | null = null;
+    if (opt.lead0 === "field" && lead > 0) {
+      fieldRow = new Uint8Array(240 * 160 * 4);
+      renderBattleResolutionLiveView(fieldRow, { ...liveView(fixture, 0), effect: undefined } as never);
+    }
+    const per = runs.map((run) => window.map((row, j) => diff(rgbOf(run.rgb, row), j === 0 && fieldRow ? fieldRow : prodAt(ageOf(j)))));
     const leadPx = per.map((p) => p.slice(0, lead).reduce((s, x) => s + x, 0));
     const bodyPx = per.map((p) => p.slice(lead).reduce((s, x) => s + x, 0));
     const bad = per[0]!.map((x, j) => [j, x] as const).filter((x) => x[1] > 0);
     const leadShas = rows.slice(i - 1, i + lead + 1).map((x) => x.sha256);
-    const entry = { ...base, kind: "plain", lead, duration, rows: window.length, window: [window[0]!.frame, window.at(-1)!.frame],
+    const entry = { ...base, kind: "plain", lead0: fieldRow ? "field" : "age0", lead, duration, rows: window.length, window: [window[0]!.frame, window.at(-1)!.frame],
       romLeadStatic: new Set(leadShas.slice(1)).size === 1, romPreRowEqual: leadShas[0] === leadShas[1],
       leadPx, bodyPx, identical: per[0]!.join() === per[1]!.join(), exactRows: per[0]!.filter((x) => x === 0).length,
       badRows: ranges(bad.map((x) => x[0])), badPx: bad.slice(0, 24) };

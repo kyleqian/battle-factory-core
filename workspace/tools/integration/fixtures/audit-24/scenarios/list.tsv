@@ -14,6 +14,8 @@ audit24-lead-shadow-punch-player-haunter-lapras	lead	325	player	HAUNTER	LAPRAS	3
 audit24-lead-shadow-punch-opponent-haunter-lapras	lead	325	opponent	HAUNTER	LAPRAS	305419897
 audit24-lead-shadow-punch-player-haunter-skarmory	lead	325	player	HAUNTER	SKARMORY	305419897
 audit24-lead-shadow-punch-opponent-haunter-skarmory	lead	325	opponent	HAUNTER	SKARMORY	305419897
+audit24-lead-bite-opponent-crobat-lapras	lead	44	opponent	CROBAT	LAPRAS	305419897
+audit24-lead-sludge-bomb-opponent-golbat-snorlax	lead	188	opponent	GOLBAT	SNORLAX	305419897
 audit24-swap-bite-player-raticate	swap	44	player	RATICATE	SLOWBRO	305419897
 audit24-swap-bite-opponent-raticate	swap	44	opponent	RATICATE	SLOWBRO	305419897
 audit24-fp-opponent-hitmonlee-skarmory	fp	264	opponent	HITMONLEE	SKARMORY	305419897

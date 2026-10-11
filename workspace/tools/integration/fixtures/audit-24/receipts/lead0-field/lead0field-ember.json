@@ -1,0 +1,73 @@
+{
+ "schema": "audit24-lead-check/v1",
+ "results": [
+  {
+   "stem": "audit24-lead-ember-player-ninetales-snorlax",
+   "move": "EMBER",
+   "moveId": 52,
+   "side": "player",
+   "body": 0,
+   "attacker": "NINETALES",
+   "target": "SNORLAX",
+   "activation": 74,
+   "romBodyRows": 69,
+   "kind": "plain",
+   "lead0": "field",
+   "lead": 4,
+   "duration": 63,
+   "rows": 67,
+   "window": [
+    74,
+    140
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 67,
+   "badRows": [],
+   "badPx": []
+  },
+  {
+   "stem": "audit24-lead-ember-opponent-ninetales-snorlax",
+   "move": "EMBER",
+   "moveId": 52,
+   "side": "opponent",
+   "body": 0,
+   "attacker": "NINETALES",
+   "target": "SNORLAX",
+   "activation": 78,
+   "romBodyRows": 69,
+   "kind": "plain",
+   "lead0": "field",
+   "lead": 4,
+   "duration": 63,
+   "rows": 67,
+   "window": [
+    78,
+    144
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 67,
+   "badRows": [],
+   "badPx": []
+  }
+ ]
+}
