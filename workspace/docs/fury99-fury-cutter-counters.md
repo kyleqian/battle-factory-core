@@ -83,6 +83,19 @@ RAM shows this, and the model copies from the blended OBJ bank. Every other pred
 - counter 3 ≡ 5;
 - nothing inherited.
 
+**Gates** (final code, serialized, four Vitest workers):
+
+| gate | result |
+|---|---|
+| fury99 test + every Fury Cutter test + `factoryAnimationInventory` + `playableAnimationIntegration` | 19 files / 498 tests pass |
+| `npm run typecheck` | green |
+| `npm run test:smoke` | 8 files / 448 tests pass |
+| full suite, shard 1/2 | 812 files passed, 22 skipped; 6957 tests passed, 119 skipped |
+| full suite, shard 2/2 | 811 files passed, 22 skipped; 6366 tests passed, 104 skipped |
+| `npm run build` | green |
+| `compare:differential` (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on, `--base 46d64a860`) | PASS, 624 / 624 captures byte-identical |
+| `git diff --check` | clean |
+
 ## Not lifted
 
 - **The opponent idle-rest target at a counter-1 body.** Two cases: the first body (`liveFuryCutterInputs` declines on the target rest),
