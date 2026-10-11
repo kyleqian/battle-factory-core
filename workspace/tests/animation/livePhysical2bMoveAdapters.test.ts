@@ -16,6 +16,7 @@ import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnim
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
 import type { BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { land97Ages } from "../helpers/land97LeadAges.ts";
 
 const cases = [
   { id: 9, move: "THUNDER_PUNCH", duration: THUNDER_PUNCH_MOVE_BODY_LAST_AGE + 1, effectAge: 48 },
@@ -117,7 +118,7 @@ describe("live physical2b move adapters", () => {
     const bodies = on.animations.filter(animation => animation.moveId === row.id && animation.attacker === 0);
     expect(bodies, JSON.stringify(route)).toHaveLength(row.id === 42 ? 2 : 1);
     for (const body of bodies) {
-      expect(body.ages).toEqual(Array.from({ length: row.duration }, (_, age) => age));
+      expect(body.ages).toEqual(land97Ages(row.id, row.duration));
     }
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.boundaries).toHaveLength(2);

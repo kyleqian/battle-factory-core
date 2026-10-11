@@ -11,6 +11,7 @@ import {
 } from "../../src/engine/liveMoveAnimation.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { land97Ages } from "../helpers/land97LeadAges.ts";
 
 // docs/h-buffer-s1-prep.md: accepted dense windows (rows); shadow row 0 iff the window starts at activation
 // (Bind +2, the first non-zero row; Dragon Breath -6 has no row). alt = an alternate carrier pair for the render test.
@@ -111,7 +112,7 @@ describe("live H_BUFFER S1 move adapters", () => {
     const on = generatedCommandAnimationReplay(r.seed, "on", [r.move], r.streak);
     const off = generatedCommandAnimationReplay(r.seed, "off", [r.move], r.streak);
     const body = on.animations.find(a => a.moveId === c.id && a.attacker === 0);
-    expect(body?.ages).toEqual(Array.from({ length: c.duration }, (_, age) => age));
+    expect(body?.ages).toEqual(land97Ages(c.id, c.duration));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.boundaries).toHaveLength(2);

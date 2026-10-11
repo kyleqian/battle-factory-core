@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
+import { land97Ages } from "./helpers/land97LeadAges.ts";
 
 describe("ordinary contact animation command lifecycle", () => {
   it("renders each Twineedle hit, then KO/replacement before the next target's hits", () => {
     const replay = generatedCommandAnimationReplay(52, "on", [0, 0]);
     const hits = replay.animations.filter(a => a.moveId === 41);
     expect(hits.map(a => a.opponent)).toEqual(["CACNEA", "CACNEA", "PONYTA", "PONYTA"]);
-    expect(hits.every(a => a.ages.length === 37 && a.ages[0] === 0 && a.ages.at(-1) === 36)).toBe(true);
+    expect(hits.every(a => a.ages.length === 37 + 10 && a.ages[0] === 0 && a.ages.at(-1) === 36 + 10)).toBe(true);
     expect(replay.requests.filter(r => r.moveId === 41).map(r => [r.turn, r.multihit])).toEqual([
       [0, 2], [1, 1], [0, 2], [1, 1],
     ]);

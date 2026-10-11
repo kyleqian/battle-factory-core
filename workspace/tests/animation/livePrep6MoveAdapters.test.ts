@@ -12,6 +12,7 @@ import {
 import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS } from "../../src/engine/liveMoveTimingPolicy.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { land97Ages } from "../helpers/land97LeadAges.ts";
 
 // docs/next-adapters-prep6.md: accepted dense windows (rows). Shadow rows: 0 where the window starts at activation (Rock Tomb,
 // Safeguard, Sweet Scent, Swallow); Self-Destruct (-4), Knock Off (-6), Faint Attack (-4) start after it and have no row.
@@ -172,7 +173,7 @@ describe("live prep6 move adapters", () => {
     const on = generatedCommandAnimationReplay(r.seed, "on", [r.move], r.streak, stall);
     const off = generatedCommandAnimationReplay(r.seed, "off", [r.move], r.streak, stall);
     const body = on.animations.find(a => a.moveId === c.id && a.attacker === 0);
-    expect(body?.ages).toEqual(Array.from({ length: c.duration[0]! }, (_, age) => age));
+    expect(body?.ages).toEqual(land97Ages(c.id, c.duration[0]!));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
     if (stall) {
       // setatkhptozero precedes attackanimation: the displayed field already shows HP 0. The driver cannot answer the
