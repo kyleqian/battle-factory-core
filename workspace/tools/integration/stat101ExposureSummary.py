@@ -4,7 +4,8 @@
 usage: stat101ExposureSummary.py <exposure-dir> <out.json>
 animArg classes per AnimTask_StatsChange (battle_anim_status_effects.c:482): 15..21 up1, 22..28 down1, 39..45 up2, 46..52 down2,
 55 / 56 / 57 / 58 multiple up1 / up2 / down1 / down2; sharply = up2 / down2 / 56 / 58. ROM active frames 75 (non-sharp) / 89 (sharply)
-and script span (playanimation -> next instruction) 77 / 91 from fixtures/stat101/receipts/stat-anim.json. Behind a Substitute
+and script span (playanimation -> next instruction) 77 / 91 vs 1 row without the animation (the behind-Substitute baseline), so each
+played animation ADDS 76 / 90 frames; all from fixtures/stat101/receipts/stat-anim.json. Behind a Substitute
 (STATUS2_SUBSTITUTE before the segment, or the displayed doll) the ROM plays nothing (TryHandleLaunchBattleTableAnimation).
 Elevated = gEnemyMonElevation != 0 for an opponent-side battler (reference/pokeemerald enemy_mon_elevation.h).
 """
@@ -59,8 +60,8 @@ res = {
     "romActiveFramesPlayed": add_active,
     "romScriptSpanFramesPlayed": played["nonSharp"] * 77 + played["sharply"] * 91,
     "productionStatCommandFrames": stat_commands * 2,
-    "missingFramesLowerBound": add_active - stat_commands * 2,
-    "missingShareOfCensus": round((add_active - stat_commands * 2) / total_frames, 4),
+    "addedFramesPlayed": played["nonSharp"] * 76 + played["sharply"] * 90,
+    "addedShareOfCensusFrames": round((played["nonSharp"] * 76 + played["sharply"] * 90) / total_frames, 4),
 }
 json.dump(res, open(out, "w"), indent=1)
 open(out, "a").write("\n")
