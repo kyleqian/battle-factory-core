@@ -1,0 +1,12 @@
+{
+ "schema": "ret88-predictions/v1",
+ "committedBefore": "ret88Probe.py's first run (ROM comparison)",
+ "source": "data/battle_anim_scripts.s:8939-8948 ReturnWeak: createsprite gVerticalDipSpriteTemplate (dip 1) / waitforvisualfinish (dip 1 destroyed) / createsprite gVerticalDipSpriteTemplate (dip 2) / delay 5 / create_basic_hitsplat_sprite (hitsplat, AnimHitSplatBasic: destroyed when its affine anim ends, before dip 2's 34-frame program) / ReturnContinue waitforvisualfinish (dip 2 destroyed)",
+ "basis": "ret80 classified ReturnWeak on ONE pair per side (fixtures/ret80/check.json classified 'body 216:<side> weak'): Cf;D0;Cf;Cf;D2;D1",
+ "prediction": {
+  "body 216 weak": "Cf;D0;Cf;Cf;D2;D1",
+  "scope": "every ReturnWeak body (first AND later) of every ret88Probe.py job: both sides, Dragonair 148 / Onix 95, Snorlax 143 / Golbat 42, Golbat 42 / Snorlax 143, lab seeds 305420349 and 7; the attacker lead at friendship 0",
+  "instances": 24,
+  "survivors": 0
+ }
+}
