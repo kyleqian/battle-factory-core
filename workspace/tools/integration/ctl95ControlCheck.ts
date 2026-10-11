@@ -4,7 +4,9 @@
  *   --shift=<n>          the window starts n rows after the ROM activation (gAnimScriptActive's rising edge, the probe body start)
  *                        and runs the adapter's own duration (production's accepted window; attdollLiveCheck.ts uses 0 = activation);
  *   --personalities=<d>  the attacker's party personality from doll90Personality.py (<d>/<stem>-r1.json); absent = none (as doll90);
- *   --body=<n>           only the n-th plain body of the move in the trace (0-based; default all: first AND later bodies).
+ *   --body=<n>           only the n-th plain body of the move in the trace (0-based; default all: first AND later bodies);
+ *   --emit=<dir>         write each window as a compact Tier-1 fixture (<stem>-b<body>.json: the fixture, the shift and the ROM RGB
+ *                        sha256 of every window row, run 1; r1 == r2 is the entry's `identical`), re-rendered by ctl95ControlFixture.ts.
  * Fixture inputs are attdollLiveCheck.ts's (HP, status1, genders, preceding bodies, the D3 activation value, request.damage).
  * Both runs (r1, r2) of every window row are compared; px per row are printed for the bad rows.
  * usage: node --experimental-strip-types --no-warnings tools/integration/ctl95ControlCheck.ts --scenarios=<dir> --move=<MOVE> [--shift=n]
@@ -104,6 +106,10 @@ for (const stem of stems) {
       personality: fixture.attackerPersonality ?? null, px, identical: per[0]!.join() === per[1]!.join(),
       exactRows: per[0]!.filter((x) => x === 0).length, badAges: ranges(bad.map((x) => x[0])), badPx: bad.slice(0, 24) };
     results.push(entry);
+    if (opt.emit && entry.identical) {
+      writeFileSync(`${opt.emit}/${stem}-b${body}.json`, `${JSON.stringify({ schema: "ctl95-control-fixture/v1", stem, body, shift,
+        activation: r.frame, fixture, rows: window.map((row, age) => [age, row.frame, row.sha256]) })}\n`);
+    }
     console.log(`${stem} ${move} ${side} body${body} ${entry.attacker}->${entry.target} act ${r.frame} romBody ${entry.romBodyRows} shift ${shift} rows ${entry.rows} px ${px.join("/")} exact ${entry.exactRows}/${entry.rows} bad ${entry.badAges.slice(0, 8).join(",")}`);
     i = bodyEnd - 1;
   }
