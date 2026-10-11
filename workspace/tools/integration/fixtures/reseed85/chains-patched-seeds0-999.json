@@ -1,0 +1,74 @@
+{
+ "schema": "hist73-allocator-chains/v1",
+ "declines": 6,
+ "fallbackFrames": 530,
+ "chainLength": {
+  "1": 1,
+  "2": 3,
+  "4": 2
+ },
+ "units": [
+  {
+   "unit": "command party-summary",
+   "involvedCommands": 5,
+   "involvedFrames": 451,
+   "soloCommands": 0,
+   "soloFrames": 0
+  },
+  {
+   "unit": "command switch-in",
+   "involvedCommands": 5,
+   "involvedFrames": 451,
+   "soloCommands": 0,
+   "soloFrames": 0
+  },
+  {
+   "unit": "body GUST (no plan, not net-zero)",
+   "involvedCommands": 2,
+   "involvedFrames": 152,
+   "soloCommands": 0,
+   "soloFrames": 0
+  },
+  {
+   "unit": "body TRANSFORM (no plan, not net-zero)",
+   "involvedCommands": 2,
+   "involvedFrames": 152,
+   "soloCommands": 0,
+   "soloFrames": 0
+  },
+  {
+   "unit": "body STRUGGLE (no plan, not net-zero)",
+   "involvedCommands": 1,
+   "involvedFrames": 79,
+   "soloCommands": 1,
+   "soloFrames": 79
+  }
+ ],
+ "greedy": [
+  {
+   "add": "body STRUGGLE (no plan, not net-zero)",
+   "cumulativeCommands": 1,
+   "cumulativeFrames": 79
+  },
+  {
+   "add": "command switch-in",
+   "cumulativeCommands": 1,
+   "cumulativeFrames": 79
+  },
+  {
+   "add": "command party-summary",
+   "cumulativeCommands": 4,
+   "cumulativeFrames": 378
+  },
+  {
+   "add": "body TRANSFORM (no plan, not net-zero)",
+   "cumulativeCommands": 4,
+   "cumulativeFrames": 378
+  },
+  {
+   "add": "body GUST (no plan, not net-zero)",
+   "cumulativeCommands": 6,
+   "cumulativeFrames": 530
+  }
+ ]
+}

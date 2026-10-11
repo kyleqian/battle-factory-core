@@ -1,0 +1,177 @@
+{
+ "schema": "hist73-merged-census/v1",
+ "seeds": "0..999",
+ "shards": [
+  "0..99",
+  "100..199",
+  "200..299",
+  "300..399",
+  "400..499",
+  "500..599",
+  "600..699",
+  "700..799",
+  "800..899",
+  "900..999"
+ ],
+ "battles": {
+  "played": 1000,
+  "terminal": 997,
+  "stalled": 3,
+  "errors": 0,
+  "frames": 14635171,
+  "playerTurns": 20640
+ },
+ "overall": {
+  "commands": 27516,
+  "live": 25933,
+  "frames": 3968405,
+  "liveFrames": 3872005,
+  "liveSharePctByCount": 94.25,
+  "liveSharePctByFrames": 97.57
+ },
+ "perReason": [
+  {
+   "reason": "duration: no adapter (no liveMoveAnimationDuration case)",
+   "count": 1054,
+   "frames": 33728
+  },
+  {
+   "reason": "presentation: sprite-order lend unknown",
+   "count": 129,
+   "frames": 26027
+  },
+  {
+   "reason": "presentation: unclassified (case-local gate)",
+   "count": 108,
+   "frames": 14363
+  },
+  {
+   "reason": "presentation: CASTFORM shown in a weather form: the field art has no form input (cf78, ISSUES #143)",
+   "count": 58,
+   "frames": 10116
+  },
+  {
+   "reason": "presentation: later-body (order lend not a first body)",
+   "count": 27,
+   "frames": 4416
+  },
+  {
+   "reason": "duration: attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)",
+   "count": 66,
+   "frames": 2112
+  },
+  {
+   "reason": "duration: defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)",
+   "count": 61,
+   "frames": 1952
+  },
+  {
+   "reason": "duration: attacker doll: self-target body",
+   "count": 39,
+   "frames": 1248
+  },
+  {
+   "reason": "presentation: stale move power unknown",
+   "count": 12,
+   "frames": 816
+  },
+  {
+   "reason": "presentation: sprite allocator history unknown",
+   "count": 6,
+   "frames": 530
+  },
+  {
+   "reason": "presentation: target hidden (semi-invulnerable): no D4 phase for its lag profile (hide66)",
+   "count": 2,
+   "frames": 276
+  },
+  {
+   "reason": "duration: attacker doll: both battlers shown as dolls",
+   "count": 8,
+   "frames": 256
+  },
+  {
+   "reason": "duration: unsupported turn 0",
+   "count": 7,
+   "frames": 224
+  },
+  {
+   "reason": "presentation: unclassified (branch-local gate)",
+   "count": 2,
+   "frames": 208
+  },
+  {
+   "reason": "duration: defender doll: other-side body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)",
+   "count": 4,
+   "frames": 128
+  }
+ ],
+ "perDetail": [
+  {
+   "detail": "order host: Return power level 0 body",
+   "count": 97,
+   "frames": 20347
+  },
+  {
+   "detail": "order host: no EXACT plan: body 63:player",
+   "count": 7,
+   "frames": 1648
+  },
+  {
+   "detail": "order host: no EXACT plan: body 260:opponent",
+   "count": 10,
+   "frames": 1570
+  },
+  {
+   "detail": "order host: no EXACT plan: body 310:player",
+   "count": 5,
+   "frames": 897
+  },
+  {
+   "detail": "order host: no EXACT plan: body 260:player",
+   "count": 3,
+   "frames": 556
+  },
+  {
+   "detail": "order host: next-mon summary while the opponent battler is tracked",
+   "count": 2,
+   "frames": 514
+  },
+  {
+   "detail": "order host: no EXACT plan: body 316:player",
+   "count": 5,
+   "frames": 495
+  },
+  {
+   "detail": "allocator: command party-summary",
+   "count": 3,
+   "frames": 299
+  },
+  {
+   "detail": "allocator: body GUST (no plan, not net-zero)",
+   "count": 2,
+   "frames": 152
+  },
+  {
+   "detail": "allocator: body STRUGGLE (no plan, not net-zero)",
+   "count": 1,
+   "frames": 79
+  }
+ ],
+ "shardBattleDigests": [
+  "fdd5f71d3efd267d8eb538c06dfcb6b19a83d82a1004b90533c1e7812ac8a0f3",
+  "2beb32be2db8fe596c91a73c65f06ac38d6b7076c22b53828c6cca0774697254",
+  "24910a27c78f0d252767713eddd3c0ee310f4bcedb7904434353300d91451790",
+  "a397575138b3df5bcf30478c0a1b536ee99c8d767349cf747f3a83b5effebc50",
+  "2f807adf8d2de693d557a501fe454718c2a5d80f1c8484e97d2197e692c45b40",
+  "d238030454a8768407a31a371466b81233fb7e1b1112f4ebb0ec89b272df7b12",
+  "d430d4b6c4f039dbffdb2d4a2f0a880349a0e69e85d9fa3f3f64b31f6bc949fe",
+  "3743e4a8e75c4655b8ed4c4b2ca91e955a7e37a46a356e04dc690a8fb295b707",
+  "b2a0ce69cfad0607ef95619dcdef4d456ea7bed77629ce1295bc8c03df73e32f",
+  "3af7749704bdc9caf9a64c2732d1595972c7263d726df51856aed6fc54b28a7c"
+ ],
+ "battleDigest": "5cc95d1eace69ad41fe04afa4c404ad7bf027b40f6f68446aa5fbeebb9f3e156",
+ "commandKeyDigest": "907bc05914b3aebf1a8281e00c2ea9430f063efc44b513a030b189a2b32d2aca",
+ "renderThrows": 0,
+ "hiddenBattlerOrderStops": []
+}
