@@ -1748,3 +1748,21 @@ current app stage should be rejected before replay.
 - **Fix shape:** one line in AGENTS.md's Tests section next to the `tsc`
   warning ("same for bare `vitest`: use `npm test -- <files>`"), and/or a
   `.npmrc`/`vitest.config` `node-options` so bare invocations inherit it.
+
+## 2026-10-11 — S10A night supervisor: checker / copy pitfalls (worker-reported, supervisor-verified where noted)
+
+- **Checkers that start a window at the ROM activation instead of the production accepted window** (audit20Fixtures.py, cast83Check.ts)
+  produced two false "residuals" in one night (cast83 Ember / Flamethrower / Scary Face; ret88 Double Team), each costing an audit
+  slot. Use `tools/integration/audit21Align.py` (bodyStartFrame / startFrame / ageOffset) in every new checker. (audit 21, audit 22)
+- **A git-archive copy outside the repo cannot find ../oracle** (flat77Probe.py walks ROOT's parents for oracle/emerald_core.py): the
+  supervisor's flat84 rerun into the session scratchpad failed every window step. Put out dirs under `.integration/validation/`.
+  ~10 min. (supervisor)
+- **A git-archive copy INSIDE the repo without its own `git init`** resolves git commands to the live checkout (`npm test` there
+  touched it via codexLauncherProfiles); `git apply` run in such a copy silently skips the patch — use `patch -p1`. ~11 min. (idle94)
+- **attdoll fixtures carry no personality**: player Double Team silently fell back to the static field and looked like a doll residual;
+  doll90 added `attdollLiveCheck.ts --personalities`. ~10 min. (doll90)
+- **`pgrep -f <script>` matches worker command lines whose brief text names the script** (the supervisor's doll90Run.sh check matched
+  the ctl95 claude worker). Watch the PID you started, never a pattern. (supervisor)
+- **Two independently green production branches can break as a union** (land86 added a call to a function cast83 had renamed /
+  un-imported: clean textual merge, ReferenceError at runtime, 17 census battles aborted). Run the census (it records per-battle
+  `errors`) and typecheck on every union before launching a worker on it. (supervisor)
