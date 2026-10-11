@@ -1,0 +1,11 @@
+stem	body	side	pair	activation	romBodyRows	lagAges	phase	px_r1/r2	badAges
+audit24-fp-opponent-hitmonlee-skarmory	0	opponent	HITMONLEE->SKARMORY	545	153	30,151,152	no-event	291808/291808	132..147
+audit24-fp-opponent-hitmonlee-skarmory	1	opponent	HITMONLEE->SKARMORY	2136	154	30,131,152,153	event	0/0	-
+audit24-fp-opponent-hitmonlee-skarmory	2	opponent	HITMONLEE->SKARMORY	3802	153	30,151,152	no-event	291808/291808	132..147
+audit24-fp-opponent-poliwrath-quagsire	0	opponent	POLIWRATH->QUAGSIRE	545	153	30,151,152	no-event	281392/281392	132..147
+audit24-fp-opponent-poliwrath-quagsire	1	opponent	POLIWRATH->QUAGSIRE	2136	154	30,131,152,153	event	0/0	-
+audit24-fp-opponent-poliwrath-quagsire	2	opponent	POLIWRATH->QUAGSIRE	3802	153	30,151,152	no-event	281392/281392	132..147
+audit24-fp-player-hitmonlee-steelix	0	player	HITMONLEE->STEELIX	539	154	30,131,152,153	event	0/0	-
+audit24-fp-player-hitmonlee-steelix	1	player	HITMONLEE->STEELIX	2131	154	30,131,152,153	event	0/0	-
+audit24-fp-player-poliwrath-lapras	0	player	POLIWRATH->LAPRAS	538	154	30,131,152,153	event	0/0	-
+audit24-fp-player-poliwrath-lapras	1	player	POLIWRATH->LAPRAS	2130	153	30,151,152	no-event	282816/282816	132..147

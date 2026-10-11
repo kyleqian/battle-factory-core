@@ -1,0 +1,151 @@
+{
+ "schema": "audit24-route-check/v1",
+ "routes": [
+  {
+   "route": "38:44:opponent",
+   "frames": [
+    10426,
+    10426
+   ],
+   "timelineSame": true,
+   "firstRowLiveFlips": 12,
+   "flippedMoves": [
+    44,
+    184,
+    188,
+    247
+   ],
+   "end": [
+    "terminal",
+    "terminal"
+   ],
+   "rows": [
+    37,
+    37
+   ],
+   "rowsAfter0Same": true,
+   "baseRow0": {
+    "elapsed": 0,
+    "age": 0,
+    "live": true,
+    "sha": "dee6adfb305093ba"
+   },
+   "patchedRow0": {
+    "elapsed": 0,
+    "age": null,
+    "live": false,
+    "sha": "c24d9e53c359abd2"
+   },
+   "row0Same": false,
+   "baseRow0EqRow1": true
+  },
+  {
+   "route": "4:188:opponent",
+   "frames": [
+    6366,
+    6366
+   ],
+   "timelineSame": true,
+   "firstRowLiveFlips": 4,
+   "flippedMoves": [
+    94,
+    188,
+    247
+   ],
+   "end": [
+    "terminal",
+    "terminal"
+   ],
+   "rows": [
+    165,
+    165
+   ],
+   "rowsAfter0Same": true,
+   "baseRow0": {
+    "elapsed": 0,
+    "age": 0,
+    "live": true,
+    "sha": "2ec63ad71c534d47"
+   },
+   "patchedRow0": {
+    "elapsed": 0,
+    "age": null,
+    "live": false,
+    "sha": "befa65a71f8fe13d"
+   },
+   "row0Same": false,
+   "baseRow0EqRow1": true
+  },
+  {
+   "route": "154:339:player",
+   "frames": [
+    10686,
+    10686
+   ],
+   "timelineSame": true,
+   "firstRowLiveFlips": 3,
+   "flippedMoves": [
+    339
+   ],
+   "end": [
+    "terminal",
+    "terminal"
+   ],
+   "rows": [
+    109,
+    109
+   ],
+   "rowsAfter0Same": true,
+   "baseRow0": {
+    "elapsed": 0,
+    "age": 0,
+    "live": true,
+    "sha": "1f0663204064cdb7"
+   },
+   "patchedRow0": {
+    "elapsed": 0,
+    "age": null,
+    "live": false,
+    "sha": "1f0663204064cdb7"
+   },
+   "row0Same": true,
+   "baseRow0EqRow1": true
+  },
+  {
+   "route": "31:337:opponent",
+   "frames": [
+    11290,
+    11290
+   ],
+   "timelineSame": true,
+   "firstRowLiveFlips": 4,
+   "flippedMoves": [
+    94,
+    337
+   ],
+   "end": [
+    "terminal",
+    "terminal"
+   ],
+   "rows": [
+    144,
+    144
+   ],
+   "rowsAfter0Same": true,
+   "baseRow0": {
+    "elapsed": 0,
+    "age": 0,
+    "live": true,
+    "sha": "9b2918e12d378500"
+   },
+   "patchedRow0": {
+    "elapsed": 0,
+    "age": null,
+    "live": false,
+    "sha": "3b7519b99bc4c811"
+   },
+   "row0Same": false,
+   "baseRow0EqRow1": true
+  }
+ ]
+}
