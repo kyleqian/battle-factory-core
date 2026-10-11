@@ -96,6 +96,24 @@
   fallback, 0 errors, keys identical except seed 881's budget-cut tail: 95.15 % / 98.63 %** (start 93.79 / 97.37).
 - Supervisor union gates on `d46da5755` (src `081a0570`): typecheck, full suite 1,621 files / 13,308 tests (2 shards, 0 failed), build,
   differential 624 / 624 vs `b05d384ca` (`.integration/validation/union-d46da5755/`).
+- prep scan93 (SIDE, Opus, `3ecf932ef` .. `784c92264`, new files only; merged `f757fcd6c`): a presentation-only scanline-buffer history
+  (battle intro S0; Extrasensory modelled — its target window, both banks, no randomness; Memento / Dragon Dance / Rapid Spin / Acid
+  Armor / Dig / Surf / Spite invalidate; Psywave and every general / status script write nothing): prediction == RAM on 67 / 67
+  known-history activations (22 scenarios x2 fresh), and display-neutral (28 / 28 live renders identical with S0). Patch A: Memento
+  later bodies live (+4 / +713). Patch B (player Extrasensory later bodies) NOT taken: its dominant-phase windows keep 16..11,293 px
+  (the scanout-split line is per-row, `event` in 11 / 11 later windows) — D4 requires 0 px in the dominant phase.
+- Folded Sonnet worker `68c40bff2` (SIDE, narrow grant) as `46d64a860` (src `2e5b1d7c`): land96 — scan93 patch A
+  (src/engine/liveScanlineHistory.ts, the order host carries / lends it, the Memento later-body gate), 2 pins moved,
+  tests/land96ScanlineHistory.test.ts (103 scan93 receipt bodies; revert fails 3 / 7); 17 windows re-rendered 0 px == scan93's checks.
+  Worker gates: full suite 2 shards 0 failed, build, differential 624. Supervisor: census on the worker tree vs `d46da5755` **+4 / +713**
+  (the 4 player Memento later bodies), 0 regressions, keys + battle digest identical; clean merge (src == the worker's tested tree) ->
+  touched tests 18 / 18.
+- prep idle94 (MAIN lane, Opus, new files only): the accepted-window-after-activation convention quantified — ordinary play loses
+  L = pre (3) + N (lead) + trail + post (2) frames per live body (20 / 20 ROM scenarios ON / OFF); lead N > 0 on 100 of 552 adapter-sides
+  (5,124 census commands); for 40 moves the N lead rows == production's own age-0 frame -> BANKED patch (40 ids present D + N rows;
+  3,842 commands +N frames, 0 status changes, keys identical; 30 pins in 16 files) -> land97. Flagged: STATS_CHANGE (production's `stat`
+  command 2 frames vs the ROM's 75-frame General_StatsChange, Scene ON and OFF) and the Scene OFF status-move pause (35 frames, no
+  production command) -> idle98 measures them.
 - In flight: ctl95 (INTEGRATION: are the LIVE doll-free Recover / GrassWhistle / Focus Punch / Iron Tail bodies wrong, or the doll
   labs' controls mis-staged?), scan93 (SIDE: scanline-buffer history for Extrasensory player / Memento later bodies; census +16 / +2,657
   on its patch), idle94 (MAIN: the accepted-window-after-activation convention — bodies N frames shorter than the ROM).
