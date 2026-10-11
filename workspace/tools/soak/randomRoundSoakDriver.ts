@@ -19,6 +19,16 @@
 // Finding vs. cataloging: this tool NEVER fixes engine behavior. A throw
 // whose top frame is under tools/soak/ is a DRIVER bug; a throw from src/**
 // is an ENGINE bug and lands in docs/soak-crash-catalog.md.
+//
+// Two seeded streams (soak111, docs/soak111-decoupled-cooldown.md): every
+// DECISION draw (draft picks, menu/fight/switch/party intents, postwin and
+// swap answers, terminal buttons, ...) comes from `new Rng(seed)`; every
+// PRESS draw -- the idle cooldown gap after each press and the 6% B roll of
+// the message-advance mash -- comes from `new Rng(seed, SOAK_PRESS_RNG_SALT)`.
+// The count of press draws depends on how long each presentation runs, so
+// before the split a presentation-length change (e.g. a new stats-change
+// command or Scene OFF pause) shifted every later decision and replayed a
+// different random game; now it only moves frame numbers.
 
 import {
   createInitialState,
@@ -1174,12 +1184,28 @@ function mulberry32(seed: number): () => number {
   };
 }
 
+/**
+ * Salt for `RandomPlayer`'s press stream (soak111): the cooldown gap after
+ * every press and the message-advance mash's A/B roll are drawn from
+ * `new Rng(seed, SOAK_PRESS_RNG_SALT)`, never from the decision stream.
+ */
+export const SOAK_PRESS_RNG_SALT = 0x50ac_0111;
+
 export class Rng {
   private readonly next: () => number;
-  constructor(seed: number) {
-    // Spread nearby integer seeds apart.
-    this.next = mulberry32((seed ^ 0x9e3779b9) + seed * 0x85eb_ca6b);
+  readonly seed: number;
+  constructor(seed: number, salt = 0) {
+    this.seed = seed;
+    // Spread nearby integer seeds apart. `salt === 0` is the decision stream
+    // (bit-identical to the pre-soak111 single stream); a nonzero salt
+    // derives an independent stream from the same seed.
+    const spread = (seed ^ 0x9e3779b9) + seed * 0x85eb_ca6b;
+    this.next = mulberry32(salt === 0 ? spread : (spread ^ salt));
     for (let i = 0; i < 12; i += 1) this.next();
+  }
+  /** A fresh, independent stream seeded from this stream's seed and `salt` (does not draw from this stream). */
+  derive(salt: number): Rng {
+    return new Rng(this.seed, salt);
   }
   float(): number {
     return this.next();
@@ -1556,6 +1582,14 @@ export class RandomPlayer {
   public battle = 1;
   public turn = 0;
   private readonly rng: Rng;
+  /**
+   * soak111: the PRESS stream -- every `press()` cooldown gap and every
+   * `pressAdvance()` A/B mash roll. How many presses a presentation
+   * consumes depends on its length, so these draws live apart from `rng`
+   * (the DECISION stream); a presentation-length change then only shifts
+   * frames, never a later decision.
+   */
+  private readonly pressRng: Rng;
   private readonly log: ActionLog;
   private readonly policy: PlayerPolicy;
   /**
@@ -1591,8 +1625,10 @@ export class RandomPlayer {
     log: ActionLog,
     policy: PlayerPolicy,
     coverage: SoakCoverageCollector | null = null,
+    pressRng: Rng = rng.derive(SOAK_PRESS_RNG_SALT),
   ) {
     this.rng = rng;
+    this.pressRng = pressRng;
     this.log = log;
     this.policy = policy;
     this.coverage = coverage;
@@ -1612,7 +1648,7 @@ export class RandomPlayer {
   }
 
   private press(button: GbaButton, gapMax = 10): ReadonlySet<GbaButton> {
-    this.cooldown = this.rng.gap(gapMax);
+    this.cooldown = this.pressRng.gap(gapMax);
     return new Set([button]);
   }
 
@@ -1706,7 +1742,7 @@ export class RandomPlayer {
   private pressAdvance(state: EngineState, label: string): ReadonlySet<GbaButton> {
     // Message-advance mash with jittered gaps; occasionally B (harmless
     // everywhere A-advance surfaces live, and it exercises B paths).
-    const useB = this.explores && this.rng.chance(0.06);
+    const useB = this.explores && this.pressRng.chance(0.06);
     this.note(state, `${label}${useB ? " (B)" : ""}`);
     return this.press(useB ? "B" : "A", 22);
   }
