@@ -122,7 +122,9 @@ export const LIVE_SUBSTITUTE_SWAP_BODY_CELLS: ReadonlyMap<number, readonly Side[
   // doll81 (docs/next-adapters-doll81.md): fresh direct-mGBA PERSIAN<->SLOWBRO + GENGAR -> GOLBAT / elevated GOLBAT -> LAPRAS windows,
   // 0 px on every row of every window.
   [138, Object.freeze(["opponent"] as const)], // Dream Eater (player: PERSIAN's ROM body is one row longer than GENGAR's)
-  [320, Object.freeze(["player"] as const)], // GrassWhistle (opponent: 13 whole-field rows near the body's end)
+  // GrassWhistle: the opponent's 13 whole-field rows near the body's end were the doll-free adapter's own restore-blend phase (ctl95:
+  // grassWhistleRestoreBlendStartAge, last on-screen note + 2); fixed, both sides are 0 px.
+  [320, BOTH],
   [76, BOTH], // SolarBeam, the charge turn only (the fire turn is the doll-free control's own residual)
   [142, BOTH], // Lovely Kiss
   [47, BOTH], // Sing (doll90: the ROM body length follows the note geometry, substituteSwapBodyFraming)

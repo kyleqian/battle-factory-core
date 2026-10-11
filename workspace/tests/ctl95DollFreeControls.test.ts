@@ -10,7 +10,9 @@ import {
 } from "../src/engine/liveMoveAnimation.ts";
 import type { BattleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "../src/engine/battleResolutionPresentation.ts";
+import { LIVE_SUBSTITUTE_SWAP_BODY_CELLS } from "../src/engine/liveSubstituteSwap.ts";
 import { ctl95ControlRowSha, readCtl95ControlFixture } from "../tools/integration/ctl95ControlFixture.ts";
+import { doll90AttRowSha, readDoll90AttFixture } from "../tools/integration/doll90AttFixture.ts";
 
 // ctl95 (docs/ctl95-doll-free-controls.md): the doll labs' doll-free control residuals, classified. Recover 105 = ARTIFACT (the checker's
 // window alignment: production's age 0 is the first orb, activation + 10); GrassWhistle 320 = DEFECT fixed (restore blend after the last
@@ -72,6 +74,21 @@ describe("ctl95 doll-free control classification", () => {
     it(`${name}: every window row of the production live renderer equals the ROM row (sha256)`, () => {
       const f = readCtl95ControlFixture(`${dir}/${name}`);
       const bad = f.rows.filter(([age, , sha]) => ctl95ControlRowSha(f, age) !== sha).map(([age]) => age);
+      expect(bad).toEqual([]);
+    }, 120_000);
+  }
+
+  const attDir = "tools/integration/fixtures/ctl95/att";
+  const attWindows = readdirSync(attDir).filter((n) => n.endsWith(".json")).sort();
+  it("GrassWhistle 320 attacker-doll swap cell: both sides (opponent widened by ctl95), three opponent composites", () => {
+    expect([...LIVE_SUBSTITUTE_SWAP_BODY_CELLS.get(320)!]).toEqual(["player", "opponent"]);
+    expect(attWindows.map((n) => { const f = readDoll90AttFixture(`${attDir}/${n}`); return `${f.attacker}:${f.rows.length}`; }))
+      .toEqual(["1:302", "1:302", "1:302"]);
+  });
+  for (const name of attWindows) {
+    it(`${name}: the opponent GrassWhistle doll composite equals the ROM row on every row (sha256)`, () => {
+      const f = readDoll90AttFixture(`${attDir}/${name}`);
+      const bad = f.rows.filter(([age, , sha]) => doll90AttRowSha(f, age) !== sha).map(([age]) => age);
       expect(bad).toEqual([]);
     }, 120_000);
   }

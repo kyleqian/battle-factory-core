@@ -49,5 +49,10 @@ for name, move, side, user, foe, foe_move, user_fast in CELLS:
         assert sum(m["evs"].values()) <= 510, name
     (out / f"{name}.json").write_text(json.dumps(s) + "\n")
     rows.append(f"{name}\t{move}\t{MV[move]}\t{side}\t{user}\t{foe}\n")
+# Attacker-doll GrassWhistle lab: doll90's Sing CROBAT -> WAILORD doll lab (Substitute x3 + the move) with Sing 47 -> GrassWhistle 320.
+att = json.loads((ROOT / "tools/integration/fixtures/doll90/scenarios/doll90-att-sing-opponent-crobat-wailord.json").read_text())
+att["overrides"]["parties"]["opponent"][0]["moves"] = [320 if m == 47 else m for m in att["overrides"]["parties"]["opponent"][0]["moves"]]
+(out / "ctl95-att-gw-opponent-crobat-wailord.json").write_text(json.dumps(att) + "\n")
+rows.append("ctl95-att-gw-opponent-crobat-wailord\tGRASS_WHISTLE\t320\topponent\tCROBAT\tWAILORD\n")
 (out / "list.tsv").write_text("".join(rows))
 print(f"{len(rows)} scenarios -> {out}")
