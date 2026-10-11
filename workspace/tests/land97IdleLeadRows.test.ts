@@ -102,3 +102,16 @@ describe("land97 idle lead rows", () => {
     }
   }, 120000);
 });
+
+describe("live audit 24: elevated opponent attackers keep no idle lead rows", () => {
+  // HAUNTER (93) is elevated (src/data/gen/enemy-mon-elevations.json 4); SNORLAX (143) is grounded. The ROM's lead row 0 still shows
+  // an elevated opponent attacker's enemy shadow, which the age-0 frame hides (docs/live-audit-24.md: 200 px on row 0).
+  const pair = (player: number, opponent: number): BattleResolutionDisplayedField =>
+    ({ player: mon(player, 0, false), opponent: mon(opponent, 1, false) }) as unknown as BattleResolutionDisplayedField;
+  it("an elevated opponent attacker presents no lead rows; a grounded opponent attacker and a player attacker keep them", () => {
+    expect(liveMoveIdleLeadRows(req(325, 1), pair(143, 93))).toBe(0);
+    expect(liveMoveIdleLeadRows(req(44, 1), pair(143, 93))).toBe(0);
+    expect(liveMoveIdleLeadRows(req(44, 1), pair(93, 143))).toBe(10);
+    expect(liveMoveIdleLeadRows(req(44, 0), pair(143, 93))).toBe(10);
+  });
+});
