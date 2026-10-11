@@ -1,0 +1,47 @@
+{
+ "schema": "ret88-parity/v1",
+ "seed": 171,
+ "streak": 19,
+ "turnBoundariesCompared": 36,
+ "playerTurns": 36,
+ "framesOn": 24776,
+ "framesOff": 17792,
+ "logicalDigest": "74266653657b0ef27865e2c15e5c2bdd40475a55cda02a9b72d0d04b848c6134",
+ "rngEqual": true,
+ "rulesEqual": true,
+ "boundaryEqual": true,
+ "bodiesOn": 55,
+ "orderKnownBodiesOn": 40,
+ "allocatorKnownBodiesOn": 45,
+ "orderStopsOn": [
+  "no EXACT plan: body 189:opponent"
+ ],
+ "returnBodiesOn": [
+  {
+   "turn": 30,
+   "moveId": 216,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 189:opponent",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": false
+  },
+  {
+   "turn": 33,
+   "moveId": 216,
+   "moveTurn": 0,
+   "side": 1,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  }
+ ]
+}
