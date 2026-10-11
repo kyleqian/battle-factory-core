@@ -1,0 +1,63 @@
+{
+ "schema": "olnd113-pins/v1",
+ "tree": "worker/side-20261011-161823 @ 8aed73113 (production = bce86a4b0 + off108 diff + lead(STATS_CHANGE) = 1), full suite, two shards, 4 workers",
+ "totals": {
+  "shard1": [
+   "Test Files  1 failed | 813 passed | 22 skipped (836)",
+   "Tests  1 failed | 6991 passed | 119 skipped (7111)"
+  ],
+  "shard2": [
+   "Test Files  2 failed | 812 passed | 22 skipped (836)",
+   "Tests  6 failed | 6424 passed | 104 skipped (6534)"
+  ]
+ },
+ "pinCount": 7,
+ "files": 3,
+ "pins": [
+  {
+   "file": "tests/factoryRoundBattleOrchestrator.test.ts",
+   "test": "ISSUES #95: a non-damaging weather move's attack pause never pairs with the end-of-turn weather tick's hit animation",
+   "kind": "presence pin",
+   "move": "`no move-animation command` -> exactly two no-hit pause commands (MOVE_HAIL BattleScript_MoveWeatherChange 40, MOVE_HARDEN BattleScript_StatUpAttackAnim 39), each at its own SCENE_OFF_ATTACK_PAUSE receipt before the weather loop's execution restart, no live animation, not 140: the guarded invariant (no pairing with the weather loop's hit) kept"
+  },
+  {
+   "file": "tests/sc106StatsChangeCommand.test.ts",
+   "test": "status stat move, sharply (seed 0, slot 2: Acid Armor)",
+   "kind": "route frame total",
+   "move": "route.frames 6633 -> 6669 = + one STRINGID_BUTITFAILED used-move hold (36, frame 4752); the Acid Armor anchor (976 / +90) is before it and unmoved"
+  },
+  {
+   "file": "tests/sc106StatsChangeCommand.test.ts",
+   "test": "status stat move, non-sharp (seed 3, slot 3: Sand-Attack)",
+   "kind": "route anchor frames",
+   "move": "anchors +0 / +36 / +72 / +108 / +144 / +144 = the 36-frame holds crossed before each (ITDOESNTAFFECT 812, ATTACKMISSED 1257, ITDOESNTAFFECT 1705, ATTACKMISSED 2150; 3116 after the last anchor)"
+  },
+  {
+   "file": "tests/sc106StatsChangeCommand.test.ts",
+   "test": "playstatchangeanimation (seed 13, slot 3: Tickle)",
+   "kind": "route anchor + total",
+   "move": "stats-change 1929 -> 2008 and stat write 2005 -> 2084 = + two ATTACKMISSED holds (39 at 1140, 40 at 1625) = +79; route total 9013 -> 9091 = +79 - 1 (the replay presses A on even frames in awaiting-message-dismiss: after the odd 39 shift the button message at base 5218 / final 5297 is dismissed one frame earlier relative to the shifted timeline; per-command delta 79 -> 78 exactly there)"
+  },
+  {
+   "file": "tests/randomRoundSoak.test.ts",
+   "test": "earns all seven generated wins (seed 21, strong-route)",
+   "kind": "frame total",
+   "move": "frames 37,569 -> 38,358, renderCalls 2,679 -> 2,727; same battle 7, turn 3, seven wins, every other diagnostic identical"
+  },
+  {
+   "file": "tests/randomRoundSoak.test.ts",
+   "test": "Milestone M-B (c) 'full' seeds 0 / 1",
+   "kind": "frame total",
+   "move": "16,321 -> 17,591 and 25,321 -> 27,061; same battle / turn / endState; soak111Decoupling.ts decision + canonical logs SAME vs bce86a4b0 on both seeds"
+  },
+  {
+   "file": "tests/randomRoundSoak.test.ts",
+   "test": "Milestone M-B (c) 'vanilla' seeds 0 / 1",
+   "kind": "frame total",
+   "move": "8,683 -> 9,143 and 8,670 -> 9,205; same battle / turn / endState; decision + canonical logs SAME vs bce86a4b0 on both seeds"
+  }
+ ],
+ "notMoved": [
+  "tests/randomRoundSoak.test.ts ISSUES #89 (seed 226) still green: soak111's decoupled press stream keeps the trajectory"
+ ]
+}

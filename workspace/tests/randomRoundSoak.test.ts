@@ -382,8 +382,13 @@ describe("random round soak driver (green milestone pin)", () => {
       // them to 37_569 / 2_679: the driver's press cooldowns now come from
       // their own seeded stream and the forced party selector waits out its
       // input-dead entry fade instead of mashing into it, so only the frames
-      // between the same presses move. Same seven wins, turn 3.
-      frames: 37_569,
+      // between the same presses move. Same seven wins, turn 3. olnd113
+      // (ISSUES #167, docs/olnd113-scene-off-pauses-live.md) moved them to
+      // 38_358 / 2_727: Scene OFF no-hit bodies now present their
+      // BattleScript_Pausex20 span and misses / failed moves hold "X used Y!"
+      // over the source `pause B_WAIT_TIME_SHORT` (presentation only). Same
+      // battle 7, turn 3, seven wins and diagnostics.
+      frames: 38_358,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -395,7 +400,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: null,
-        renderCalls: 2_679,
+        renderCalls: 2_727,
       },
     });
     expect(second).toEqual(first);
@@ -766,9 +771,12 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     // decision stream -- and with it this exploring policy's whole random
     // game -- is a new (now presentation-length-independent) trajectory.
     // Before: seed 0 11955 / turn 20, seed 1 14345 / battle 1 turn 29 (sc106
-    // alone had already moved them to 14186 / 24 and 12272 / 23).
+    // alone had already moved them to 14186 / 24 and 12272 / 23). olnd113
+    // (ISSUES #167, the Scene OFF pause / miss hold) moved the frames only:
+    // 16321 -> 17591, 25321 -> 27061; decision and canonical logs identical
+    // to bce86a4b0's (soak111Decoupling.ts), same battle / turn.
     expect(runSeed(0, options)).toMatchObject({
-      frames: 16321,
+      frames: 17591,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -776,7 +784,7 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       turn: 30,
     });
     expect(runSeed(1, options)).toMatchObject({
-      frames: 25321,
+      frames: 27061,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
@@ -797,8 +805,10 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     // only: vanilla's decisions are fixed, and the driver's press cooldowns
     // now come from their own seeded stream (8499 -> 8683 here, 8550 -> 8670
     // for seed 1; sc106 alone had moved them to 8625 / 8661). Same turn 16.
+    // olnd113 (ISSUES #167, the Scene OFF pause / miss hold): frames only,
+    // 8683 -> 9143 and 8670 -> 9205; decision logs identical to bce86a4b0's.
     expect(runSeed(0, options)).toMatchObject({
-      frames: 8683,
+      frames: 9143,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -815,7 +825,7 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     // the round genuinely re-chains right after the answer is given, so the
     // frozen last-pre-chain snapshot lands much earlier, at the real frame.
     expect(runSeed(1, options)).toMatchObject({
-      frames: 8670,
+      frames: 9205,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,

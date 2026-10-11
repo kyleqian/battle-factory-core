@@ -47,8 +47,9 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // Base: the "GRIMER's DEFENSE sharply rose!" message (and its first glyph) started on frame 976.
     expect(a.statsChange).toEqual({ frame: 976, frames: 90 });
     expect(a.following).toMatchObject({ type: "message", frame: 976 + 90, glyph: 976 + 90 });
-    // Base 6045 frames; 7 played stats changes (4 x 90 + 3 x 76) = +588.
-    expect(route.frames).toBe(6045 + 588);
+    // Base 6045 frames; 7 played stats changes (4 x 90 + 3 x 76) = +588; olnd113 (ISSUES #167): + the one source-pause used-move
+    // hold this route crosses (STRINGID_BUTITFAILED, 36 at frame 4752; tools/integration/olnd113RouteHolds.ts).
+    expect(route.frames).toBe(6045 + 588 + 36);
   });
 
   it("status stat move, non-sharp (seed 3, slot 3: Sand-Attack on Foe MARSHTOMP, arg 27): message +76", () => {
@@ -58,7 +59,11 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     expect(a.before?.type).toBe("move-animation");
     expect(a.statsChange).toEqual({ frame: 641, frames: 76 });
     expect(a.following).toMatchObject({ type: "message", frame: 641 + 76, glyph: 641 + 76 });
-    expect(route.anchors.map((x) => x.following!.frame)).toEqual([641, 974, 1310, 1643, 1979, 2421].map((f, i) => f + 76 * (i + 1)));
+    // olnd113 (ISSUES #167): + the source-pause used-move holds crossed before each anchor (36 each: ITDOESNTAFFECT at 812, ATTACKMISSED
+    // at 1257, ITDOESNTAFFECT at 1705, ATTACKMISSED at 2150; the next one, 3116, is after the last anchor).
+    expect(route.anchors.map((x) => x.following!.frame)).toEqual(
+      [641, 974, 1310, 1643, 1979, 2421].map((f, i) => f + 76 * (i + 1) + [0, 36, 72, 108, 144, 144][i]!),
+    );
   });
 
   it("secondary effect (seed 3, slot 1: Icy Wind's SPEED -1 on the player, arg 24): after the stat write, message +76", () => {
@@ -84,10 +89,13 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     const a = anchor(route, 0);
     expect(a).toMatchObject({ path: "playstatchangeanimation", argument: 57, battler: 0, prevEvent: "animation:MOVE_ANIMATION:321,0,0,0,0,0" });
     expect(a.before?.type).toBe("move-animation");
-    expect(a.statsChange).toEqual({ frame: 1929, frames: 76 });
+    // olnd113 (ISSUES #167): + the two ATTACKMISSED used-move holds before it (39 at 1140, 40 at 1625) = +79.
+    expect(a.statsChange).toEqual({ frame: 1929 + 79, frames: 76 });
     // One animation for the group: the stat write that follows (ATK) starts 76 frames later; DEF's write has no second command.
-    expect(a.following).toMatchObject({ type: "stat", frame: 1929 + 76 });
-    expect(route.frames).toBe(8557 + 456);
+    expect(a.following).toMatchObject({ type: "stat", frame: 1929 + 79 + 76 });
+    // The route total: + the same 79, - 1 frame of dismissal parity (the replay presses A on even frames in awaiting-message-dismiss,
+    // so after the odd 39-frame hold a later dismissal lands one frame earlier relative to the shifted timeline).
+    expect(route.frames).toBe(8557 + 456 + 79 - 1);
   });
 
   it("live Double Team (seed 10, slot 2: YANMA, arg 21): no command, its 230-row window owns the banner; the message is unmoved", () => {

@@ -1088,10 +1088,30 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     // Neither move in this turn is damaging, so nothing may claim that hit:
     // pre-fix the scan walked from MOVE_HARDEN's own `BattleScript_
     // StatUpAttackAnim` pause into the weather loop and published a bogus
-    // 140-frame move-animation command from it.
-    expect(
-      resolution.segments[0]!.commands.some((command) => command.type === "move-animation"),
-    ).toBe(false);
+    // 140-frame move-animation command from it. olnd113 (ISSUES #167): Scene
+    // OFF now presents BattleScript_Pausex20 for each no-hit attack receipt,
+    // so the turn has exactly its two no-hit pause commands -- each keyed to
+    // its own SCENE_OFF_ATTACK_PAUSE receipt before the weather loop's
+    // execution restart, with no live animation and the no-hit P (never the
+    // hit path's 140): the scan still stops at the execution boundary.
+    const moveAnimations = resolution.segments[0]!.commands
+      .filter((command) => command.type === "move-animation")
+      .map((command) => {
+        const at = events.findIndex((event) => event.sequence === command.eventSequence);
+        return {
+          receipt: events[at]!.payload.kind === "animation" ? events[at]!.payload.animationId : events[at]!.payload.kind,
+          label: events[at]!.provenance?.sourceLabel,
+          beforeLoop: at < loopStart,
+          live: "animation" in command && command.animation !== undefined,
+          frames: command.timing.minimumFrames,
+        };
+      });
+    expect(moveAnimations).toEqual([
+      // MOVE_HAIL: Pausex20 -> the "hail" print (lead 1)
+      { receipt: "SCENE_OFF_ATTACK_PAUSE", label: "BattleScript_MoveWeatherChange", beforeLoop: true, live: false, frames: 40 },
+      // MOVE_HARDEN: Pausex20 -> STATS_CHANGE (lead 1), less its 2-frame `stat` command presented before the attack receipt
+      { receipt: "SCENE_OFF_ATTACK_PAUSE", label: "BattleScript_StatUpAttackAnim", beforeLoop: true, live: false, frames: 39 },
+    ]);
   });
   it.each([
     ["TORMENT", 2, "STRINGID_PKMNSUBJECTEDTOTORMENT"],
