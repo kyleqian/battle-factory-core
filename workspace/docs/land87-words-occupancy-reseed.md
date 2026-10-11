@@ -14,10 +14,13 @@
   flat77Probe runs):** sa-opp-pidgeotto-protect-c0, ms-opp-diglett-protect-c0, rd-opp-poliwag-reflect-c0 / -c1, sa-ply-snorlax-protect-c0 / -c1,
   rd-ply-snorlax-reflect-c0, ms-ply-snorlax-lightscreen-c0: all live, **0 px**, r1 == r2, 814 rows; the 6 check JSONs are **byte-identical** to
   `fixtures/reseed85/check-patched/`.
-- **Census (seeds 0..999, 10 `--index-from` shards, base c25af4253 vs final):** **+47 commands / +4,975 frames**, live 25,578 -> 25,625,
-  frames 3,836,389 -> 3,841,364; allocator-unknown 52 / 5,286 -> 6 / 530; 0 live -> fallback; command KEY sequence, frames per command and battle digest identical
-  (`prep43CensusDelta.py`, `hist73KeyCheck.py`, `land82CensusCheck.py`). reseed85's +4,834 = the same 46 allocator commands + 1 Flatter / 219 frames; the
-  extra 141 frames are the 52 allocator-unknown commands' frames on today's master (5,286 vs 5,145 on aeaa33dff), not new commands. Land86's Flatter did not add or remove chains.
+- **Census (seeds 0..999, 10 `--index-from` shards, base c25af4253 + the import fix below vs final):** **+58 commands / +6,955 frames**, live 25,962 -> 26,020,
+  frames 3,880,093 -> 3,887,048; allocator-unknown 55 / 5,514 -> 6 / 530; 0 live -> fallback; command KEY sequence, frames per command and battle digest (5cc95d1eace6)
+  identical (`prep43CensusDelta.py`, `hist73KeyCheck.py`). Gained: PROTECT 24, LIGHT SCREEN 9, REFLECT 8, BARRIER 5, MAGIC COAT 3, FLATTER 9 (unclassified case-local gate; 1,971 frames).
+  reseed85's +47 / +4,834 on aeaa33dff was 46 allocator commands + 1 Flatter; land86's Flatter words unit adds chains that now reach the shadow (3 Magic Coat, 8 more Flatter).
+- **Master defect found and fixed (separate commit, outside the grant, one word):** `src/engine/liveMoveAnimation.ts:1608` (land86's Flatter carry) calls `composeLivePalettes`,
+  which cast83's merge left un-imported: `npm run typecheck` fails TS2552 on c25af4253, and the census ran 27,137 commands instead of 27,516 (battles truncated by a ReferenceError).
+  Both census trees carry the fix. Drop that commit only if the supervisor fixes master differently.
 - **ON / OFF parity** (`flat77Parity.ts`, seeds 11 / 98 / 420, streak = (seed * 11) % 49): byte-identical to reseed85's `parity-*.json`.
 - Receipt: `tools/integration/fixtures/land87-live-receipt.json`.
 
