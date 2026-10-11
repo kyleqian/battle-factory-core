@@ -1,0 +1,39 @@
+pb-a22dc-opp-shock-wave-c0.json        RETURN       opponent .. agree=1 prompts=p       units=0   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dc-opp-shock-wave-c3.json        RETURN       opponent .. agree=1 prompts=pp      units=7   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dc-opp-swift-c0.json             RETURN       opponent .. agree=1 prompts=p       units=0   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dc-opp-swift-c3.json             RETURN       opponent .. agree=1 prompts=pp      units=7   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dc-opp-water-pulse-c0.json       RETURN       opponent .. agree=1 prompts=p       units=0   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dc-ply-shock-wave-c0.json        RETURN       player   .. agree=1 prompts=p       units=0   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dc-ply-shock-wave-c2.json        RETURN       player   .. agree=1 prompts=pp      units=4   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dc-ply-shock-wave-c4.json        RETURN       player   .. agree=1 prompts=ppp     units=8   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dc-ply-swift-c0.json             RETURN       player   .. agree=1 prompts=p       units=0   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dc-ply-swift-c2.json             RETURN       player   .. agree=1 prompts=pp      units=4   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dc-ply-swift-c4.json             RETURN       player   .. agree=1 prompts=ppp     units=8   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dc-ply-water-pulse-c0.json       RETURN       player   .. agree=1 prompts=p       units=0   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dc-ply-water-pulse-c2.json       RETURN       player   .. agree=1 prompts=pp      units=6   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dc-ply-water-pulse-c4.json       RETURN       player   .. agree=1 prompts=ppp     units=10  live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dt-opp-blissey-c1.json           RETURN       player   .. agree=1 prompts=p       units=2   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dt-opp-blissey-c3.json           RETURN       player   .. agree=1 prompts=pp      units=6   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dt-opp-ponyta-c1.json            RETURN       player   .. agree=1 prompts=p       units=2   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dt-opp-ponyta-c3.json            RETURN       player   .. agree=1 prompts=pp      units=6   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dt-opp-ponyta-c5.json            RETURN       player   .. agree=1 prompts=ppp     units=10  live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dt-ply-blissey-c0.json           RETURN       opponent .. agree=1 prompts=p       units=0   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dt-ply-blissey-c2.json           RETURN       opponent .. agree=1 prompts=pp      units=4   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dt-ply-ponyta-c0.json            RETURN       opponent .. agree=1 prompts=p       units=0   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22dt-ply-ponyta-c2.json            RETURN       opponent .. agree=1 prompts=pp      units=4   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22rw-opp-crobat-steelix-c0.json    RETURN       opponent .. agree=1 prompts=p       units=0   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22rw-opp-crobat-steelix-c2.json    RETURN       opponent .. agree=1 prompts=pp      units=3   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22rw-opp-crobat-steelix-c4.json    RETURN       opponent .. agree=1 prompts=ppp     units=6   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22rw-opp-pichu-snorlax-c0.json     RETURN       opponent .. agree=1 prompts=p       units=0   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22rw-opp-pichu-snorlax-c2.json     RETURN       opponent .. agree=1 prompts=pp      units=3   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22rw-opp-pichu-snorlax-c4.json     RETURN       opponent .. agree=1 prompts=ppp     units=6   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22rw-opp-rattata-pichu-c0.json     RETURN       opponent .. agree=1 prompts=p       units=0   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22rw-opp-rattata-pichu-c3.json     RETURN       opponent .. agree=1 prompts=pp      units=5   live=0 order=1 alloc=0- rows=88 exact=22 px=42092 r1==r2=1 ages=12..80 | entry live=1 px=30720 r1==r2=1 win=1 decline=unclassified (case-local gate)
+pb-a22rw-ply-pichu-rattata-c1.json     RETURN       player   .. agree=1 prompts=p       units=1   live=0 order=1 alloc=0- rows=88 exact=0 px=102352 r1==r2=1 ages=0..87 | entry live=1 px=0 r1==r2=1 win=1 decline=unclassified (case-local gate)
+pb-a22rw-ply-pichu-rattata-c3.json     RETURN       player   .. agree=1 prompts=pp      units=4   live=0 order=1 alloc=0- rows=88 exact=0 px=102352 r1==r2=1 ages=0..87 | entry live=1 px=0 r1==r2=1 win=1 decline=unclassified (case-local gate)
+pb-a22rw-ply-pichu-rattata-c5.json     RETURN       player   .. agree=1 prompts=ppp     units=7   live=0 order=1 alloc=0- rows=88 exact=0 px=102352 r1==r2=1 ages=0..87 | entry live=1 px=0 r1==r2=1 win=1 decline=unclassified (case-local gate)
+pb-a22rw-ply-snorlax-pichu-c1.json     RETURN       player   .. agree=1 prompts=p       units=1   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22rw-ply-steelix-crobat-c1.json    RETURN       player   .. agree=1 prompts=p       units=1   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22rw-ply-steelix-crobat-c3.json    RETURN       player   .. agree=1 prompts=pp      units=4   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb-a22rw-ply-steelix-crobat-c5.json    RETURN       player   .. agree=1 prompts=ppp     units=7   live=1 order=1 alloc=0- rows=88 exact=88 px=0 r1==r2=1 ages=- | entry live=1 px=0 r1==r2=1 win=1
+pb windows=38 live=34 0px=34 hidden=0 hiddenLive0px=0 agree=38 allocEq=0 allocNe=0 r1==r2=38

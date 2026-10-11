@@ -1,0 +1,5 @@
+{"scenario": "pb-ret88-opp-double-team.json", "activation": 1479, "attacker": 0, "species": [181, 372], "battlerData3": 1, "clonesRow1": [[3, 1, 0], [4, 1, 0]]}
+{"scenario": "pb-ret88-opp-double-team.json", "activation": 2742, "attacker": 0, "species": [181, 372], "battlerData3": 1, "clonesRow1": [[3, 1, 0], [4, 1, 0]]}
+{"scenario": "pb-ret88-ply-double-team.json", "activation": 255, "attacker": 1, "species": [372, 143], "battlerData3": 0, "clonesRow1": [[3, 0, 1], [4, 0, 1]]}
+{"scenario": "pb-ret88-ply-double-team.json", "activation": 1589, "attacker": 1, "species": [372, 143], "battlerData3": 0, "clonesRow1": [[3, 0, 1], [4, 0, 1]]}
+{"scenario": "pb-ret88-ply-double-team.json", "activation": 2923, "attacker": 1, "species": [372, 143], "battlerData3": 0, "clonesRow1": [[3, 0, 1], [4, 0, 1]]}

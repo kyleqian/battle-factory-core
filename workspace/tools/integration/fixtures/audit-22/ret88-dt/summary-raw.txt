@@ -1,0 +1,6 @@
+pb-ret88-opp-double-team-c1.json       DOUBLE_TEAM  player   .. agree=1 prompts=p       units=3   live=1 order=1 alloc=0- rows=159 exact=46 px=316986 r1==r2=1 ages=2..129 | entry live=1 px=316986 r1==r2=1 win=1
+pb-ret88-opp-double-team-c2.json       DOUBLE_TEAM  player   .. agree=1 prompts=pp      units=5   live=1 order=1 alloc=0- rows=159 exact=46 px=316702 r1==r2=1 ages=2..129 | entry live=1 px=325344 r1==r2=1 win=1
+pb-ret88-ply-double-team-c1.json       DOUBLE_TEAM  opponent .. agree=1 prompts=p       units=2   live=1 order=1 alloc=0- rows=159 exact=46 px=340691 r1==r2=1 ages=2..130 | entry live=1 px=364136 r1==r2=1 win=1
+pb-ret88-ply-double-team-c3.json       DOUBLE_TEAM  opponent .. agree=1 prompts=pp      units=6   live=1 order=1 alloc=0- rows=159 exact=46 px=340691 r1==r2=1 ages=2..130 | entry live=1 px=364136 r1==r2=1 win=1
+pb-ret88-ply-double-team-c5.json       DOUBLE_TEAM  opponent .. agree=1 prompts=ppp     units=10  live=1 order=1 alloc=0- rows=159 exact=46 px=340691 r1==r2=1 ages=2..130 | entry live=1 px=364136 r1==r2=1 win=1
+pb windows=5 live=5 0px=0 hidden=0 hiddenLive0px=0 agree=5 allocEq=0 allocNe=0 r1==r2=5

@@ -1,0 +1,13 @@
+pb-a22dt-opp-blissey-c0.json           DOUBLE_TEAM  opponent .. agree=1 prompts=p       units=0   live=1 order=1 alloc=0- rows=159 exact=46 px=302074 r1==r2=1 ages=2..129 | entry live=1 px=302074 r1==r2=1 win=1
+pb-a22dt-opp-blissey-c2.json           DOUBLE_TEAM  opponent .. agree=1 prompts=pp      units=4   live=1 order=1 alloc=0- rows=159 exact=46 px=301414 r1==r2=1 ages=2..129 | entry live=1 px=316882 r1==r2=1 win=1
+pb-a22dt-opp-blissey-c4.json           DOUBLE_TEAM  opponent .. agree=1 prompts=ppp     units=8   live=1 order=1 alloc=0- rows=159 exact=46 px=301414 r1==r2=1 ages=2..129 | entry live=1 px=316882 r1==r2=1 win=1
+pb-a22dt-opp-ponyta-c0.json            DOUBLE_TEAM  opponent .. agree=1 prompts=p       units=0   live=1 order=1 alloc=0- rows=159 exact=46 px=277078 r1==r2=1 ages=2..130 | entry live=1 px=277078 r1==r2=1 win=1
+pb-a22dt-opp-ponyta-c2.json            DOUBLE_TEAM  opponent .. agree=1 prompts=pp      units=4   live=1 order=1 alloc=0- rows=159 exact=46 px=276910 r1==r2=1 ages=2..130 | entry live=1 px=284732 r1==r2=1 win=1
+pb-a22dt-opp-ponyta-c4.json            DOUBLE_TEAM  opponent .. agree=1 prompts=ppp     units=8   live=1 order=1 alloc=0- rows=159 exact=46 px=276910 r1==r2=1 ages=2..130 | entry live=1 px=284732 r1==r2=1 win=1
+pb-a22dt-ply-blissey-c1.json           DOUBLE_TEAM  player   .. agree=1 prompts=p       units=2   live=1 order=1 alloc=0- rows=159 exact=46 px=199942 r1==r2=1 ages=2..129 | entry live=1 px=216966 r1==r2=1 win=1
+pb-a22dt-ply-blissey-c3.json           DOUBLE_TEAM  player   .. agree=1 prompts=pp      units=6   live=1 order=1 alloc=0- rows=159 exact=46 px=199942 r1==r2=1 ages=2..129 | entry live=1 px=216966 r1==r2=1 win=1
+pb-a22dt-ply-blissey-c4.json           DOUBLE_TEAM  player   .. agree=1 prompts=ppp     units=8   live=1 order=1 alloc=0- rows=159 exact=46 px=199942 r1==r2=1 ages=2..129 | entry live=1 px=216966 r1==r2=1 win=1
+pb-a22dt-ply-ponyta-c1.json            DOUBLE_TEAM  player   .. agree=1 prompts=p       units=2   live=1 order=1 alloc=0- rows=159 exact=44 px=245950 r1==r2=1 ages=0..158 | entry live=1 px=254845 r1==r2=1 win=1
+pb-a22dt-ply-ponyta-c3.json            DOUBLE_TEAM  player   .. agree=1 prompts=pp      units=6   live=1 order=1 alloc=0- rows=159 exact=44 px=245950 r1==r2=1 ages=0..158 | entry live=1 px=254845 r1==r2=1 win=1
+pb-a22dt-ply-ponyta-c4.json            DOUBLE_TEAM  player   .. agree=1 prompts=ppp     units=8   live=1 order=1 alloc=0- rows=159 exact=44 px=245950 r1==r2=1 ages=0..158 | entry live=1 px=254845 r1==r2=1 win=1
+pb windows=12 live=12 0px=0 hidden=0 hiddenLive0px=0 agree=12 allocEq=0 allocNe=0 r1==r2=12
