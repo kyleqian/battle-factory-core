@@ -134,7 +134,20 @@
   `idle98-universal-rows.diff` (23,814 commands +3 / +5 frames, keys identical; 273 timing pins in 65 files — next session). Filed ISSUES
   **#166** (General_StatsChange is MISSING in both scenes: 75 / 89-frame stat-arrow overlay vs a 2-frame `stat` command; 897 / 1,000
   battles, ~8.6 % of the timeline) and **#167** (Scene OFF no-hit pause, 36 % of move bodies; miss pause to anchor).
-- In flight: fp100 (INTEGRATION: Focus Punch D4), audit 23 (SIDE: ctl95 / doll90 / land96 / fury99), stat101 (MAIN: #166 prep pack).
+- Folded Opus worker `aaa096e77` (INTEGRATION) as `64f0ae997` (src `72e4e0ab`): fp100 — Focus Punch 264 under the standing D4 approval:
+  the age-131 lag is the dominant phase on both sides (opponent 14 : 3, player 9 : 5 measured bodies; fixed lags at 30 / 151 / 152), a
+  `liveMoveTimingPolicy.ts` entry (event), `focusPunch.ts` `restoreLag` (default reproduces the accepted bodies), 155-row duration both
+  sides; dominant-phase windows 22 / 22 0 px (the 14 opponent ones were 271k..292k px before); minority-phase residual = rows 132..147
+  only (16,972..18,267 px / row, the fade-back starting one row earlier) + the elevated GOLBAT's shadow on row 154 (200 px); the accepted
+  opponent fixture is now the documented minority. **Accounting: 239 + 13 + 24 -> 238 + 13 + 25 = 276** (264 scoped exact -> faithful
+  timing; Factory acceptance unchanged). +3 lines in sceneOnPresentation.ts (the lsbz precedent). Supervisor: census on the worker tree vs
+  `406bfc999`: exactly the 19 opponent Focus Punch commands 154 -> 155 frames, 0 status changes, keys identical, 0 errors.
+- prep stat101 (MAIN lane, Opus, new files only): the ISSUES #166 pack — source table (stat -> palette, direction -> scroll / BG X,
+  sharply -> fade / hold, battler -> OBJ-window mask), 20 ROM variants ON == OFF with per-row register tables, the production consumer map
+  (the kernel already emits STATS_CHANGE; the builder ignores it; ON and OFF share one renderer; the sprite-order host already consumes
+  it; the invisible copy takes slot 3), exposure (4,529 inserted commands, +363,860 frames) and six bounded slices (a)..(f) with
+  acceptance commands (docs/stat101-stats-change-design.md).
+- In flight: land97 (INTEGRATION: idle94 lead rows), audit 23 (SIDE), stat102 (MAIN: #166 slices (a) reducer + (b) comparator, unwired).
 - prep reseed85 (MAIN lane, Opus, `4f4828f3b` .. `d46cdfff1`, new files only): the post-KO send-out allocator reseed after a words-order
   unit. The reseed reads slot OCCUPANCY only and every words unit is allocator-net-zero, so the order host can keep a word-free
   occupancy shadow while the free order stays deferred. ROM: 13 routes x 2 probes x 2 runs A == B; 4 / 4 words-vs-control pairs SAME
