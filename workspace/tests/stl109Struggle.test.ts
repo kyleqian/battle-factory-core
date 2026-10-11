@@ -154,3 +154,61 @@ describe("stl109: Struggle gates", () => {
     }
   });
 });
+
+// Real routes: the ordinary rental battle census.ts plays (seed 60, streak 23: the move slots rotate 0..3 least-used first, so every
+// 4-PP move runs dry and the AI / the player is forced into Struggle through the kernel's CheckMoveLimitations -> BattleScript_NoMovesLeft
+// path; the explicit slot lists are the least-used policy's own picks up to the Struggle turn).
+const ROUTES = [
+  { name: "opponent (VENUSAUR, turn 45)", seed: 60, streak: 23, slots: [...Array.from({ length: 44 }, (_, i) => i % 4), 0], attackers: [1] },
+  { name: "opponent first, then the player (turn 58)", seed: 60, streak: 23,
+    slots: [...Array.from({ length: 48 }, (_, i) => i % 4), 1, 2, 1, 2, 1, 2, 1, 2, 1, 1], attackers: [1, 1, 0] },
+] as const;
+const rulesWithoutSceneMarker = (v: { rules: any }) => {
+  const rc = v.rules.rulesContext;
+  return { ...v.rules, rulesContext: { ...rc, hitMarker: rc.hitMarker & ~0x80 } };
+};
+
+describe("stl109: forced Struggle through the kernel (generated rental routes)", () => {
+  for (const route of ROUTES) {
+    it(`${route.name}: every Struggle body is live for all 112 rows, the turn reaches the next prompt, Scene ON / OFF logic, damage and RNG are identical`, async () => {
+      const { generatedCommandAnimationReplay } = await import("../tools/integration/generatedCommandAnimationReplay.ts");
+      const on = generatedCommandAnimationReplay(route.seed, "on", route.slots as never, route.streak, true, true);
+      const off = generatedCommandAnimationReplay(route.seed, "off", route.slots as never, route.streak, true, true);
+      expect(on.stalled).toBe(false);
+      expect(off.stalled).toBe(false);
+      const bodies = on.animations.filter((a) => a.moveId === 165);
+      expect(bodies.map((b) => [b.attacker, b.ages.length])).toEqual(route.attackers.map((a) => [a, 112]));
+      for (const body of bodies) {
+        expect(body.ages).toEqual(Array.from({ length: 112 }, (_, age) => age));
+        expect(body.adapterActive.every(Boolean)).toBe(true);
+      }
+      expect(on.requests.filter((r) => r.moveId === 165).map((r) => r.attacker)).toEqual([...route.attackers]);
+      expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+      expect(off.animations.filter((a) => a.moveId === 165)).toEqual([]); // Scene OFF presents no body (the kernel owns the rules)
+      expect(off.requests.filter((r) => r.moveId === 165)).toEqual([]);
+      // HP: the target's damage and the attacker's recoil events follow the MOVE_ANIMATION event, both with a real HP drop.
+      const events = on.semanticEvents.map((e) => e.event as any);
+      for (const requestId of new Set(on.semanticEvents.map((e) => e.requestId))) {
+        const mine = on.semanticEvents.filter((e) => e.requestId === requestId).map((e) => e.event as any);
+        const at = mine.findIndex((e) => e.payload?.kind === "animation" && e.payload.animationId === "MOVE_ANIMATION" && e.payload.arguments?.[0] === "165");
+        if (at < 0) continue;
+        const hp = mine.slice(at, at + 8).filter((e) => e.payload?.kind === "hp-change");
+        expect(new Set(hp.map((e) => e.payload.battler))).toEqual(new Set([0, 1]));
+        for (const e of hp) expect(e.payload.to).toBeLessThan(e.payload.from);
+      }
+      expect(events.length).toBeGreaterThan(0);
+      // Scene ON vs OFF: the same logical events (damage, recoil, HP bar values, PP), boundaries (rules, RNG) and the same final state.
+      // Sequence numbers and provenance count the presentation-only events Scene OFF drops, so compare payloads.
+      const strip = (e: any) => JSON.stringify(e.event.payload);
+      const ignorable = (e: any) => ["animation", "play-se", "status-animation", "set-battler-sprite-visibility"].includes(e.event.payload?.kind);
+      const logical = (r: typeof on) => r.semanticEvents.filter((e) => !ignorable(e)).map(strip);
+      expect(logical(on)).toEqual(logical(off));
+      expect(off.boundaries).toHaveLength(on.boundaries.length);
+      for (let i = 0; i < on.boundaries.length; i += 1) {
+        expect(rulesWithoutSceneMarker(on.boundaries[i]!)).toEqual(rulesWithoutSceneMarker(off.boundaries[i]!));
+        expect(on.boundaries[i]!.rng).toEqual(off.boundaries[i]!.rng);
+        expect(on.boundaries[i]!.boundary).toEqual(off.boundaries[i]!.boundary);
+      }
+    }, 240000);
+  }
+});
