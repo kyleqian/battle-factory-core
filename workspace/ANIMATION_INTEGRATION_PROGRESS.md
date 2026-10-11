@@ -41,6 +41,9 @@
   aborted (errors 0 -> 17), typecheck TS2552. Fix: `composeLiveArtPalettes(art)` (identical without a Castform form). Census on
   `302e39bdb` (src `8150be72`) vs the session baseline: **+153 commands / +31,581 live frames = land82 + cast83 + land86 exactly**,
   0 regressions, 0 errors, keys identical except seed 881's budget-cut tail: **94.35 % / 97.77 %** (start 93.79 / 97.37).
+- Supervisor union gates on `302e39bdb` (src `8150be72`; land82 + cast83 + land86 + the fix), in a detached worktree: typecheck, full
+  suite 1,617 files / 13,276 tests (2 shards, 0 failed), build, differential 624 / 624 byte-identical vs `b05d384ca`
+  (logs `.integration/validation/union-302e39bdb/`).
 - prep reseed85 (MAIN lane, Opus, `4f4828f3b` .. `d46cdfff1`, new files only): the post-KO send-out allocator reseed after a words-order
   unit. The reseed reads slot OCCUPANCY only and every words unit is allocator-net-zero, so the order host can keep a word-free
   occupancy shadow while the free order stays deferred. ROM: 13 routes x 2 probes x 2 runs A == B; 4 / 4 words-vs-control pairs SAME
