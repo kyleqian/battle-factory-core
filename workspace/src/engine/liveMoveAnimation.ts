@@ -1062,9 +1062,10 @@ export function liveMoveAnimationDuration(
   request: BattleMoveAnimationRequest, field?: BattleResolutionDisplayedField, bodyClass: LiveMoveTimingBody = "first",
 ): number | null {
   if (field !== undefined && liveSubstituteSwapApplies(request, field) === true) {
-    const body = liveMoveAnimationDuration(request, substituteSwapBodyField(field, request.attacker === 0 ? 0 : 1), bodyClass);
+    const bodyField = substituteSwapBodyField(field, request.attacker === 0 ? 0 : 1);
+    const body = liveMoveAnimationDuration(request, bodyField, bodyClass);
     return body === null ? null
-      : substituteSwapCompositeDuration(request.attacker === 0 ? "player" : "opponent", substituteSwapBodyFraming(request.moveId, body).rows);
+      : substituteSwapCompositeDuration(request.attacker === 0 ? "player" : "opponent", substituteSwapBodyFraming(request.moveId, body, request, bodyField).rows);
   }
   if (field !== undefined && liveMoveSubstituteDollDeclines(request, field)) return null;
   switch (request.moveId) {

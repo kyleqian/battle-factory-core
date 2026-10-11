@@ -23,7 +23,8 @@ const BOTH = ["player", "opponent"];
 
 describe("land82: doll81 Substitute-doll cells", () => {
   it("attacker-doll swap cells: sides per move", () => {
-    const cells: [number, string[]][] = [[138, ["opponent"]], [320, ["player"]], [76, BOTH], [142, BOTH], [47, ["player"]], [241, BOTH]];
+    // doll90 widened Sing 47 to both sides (tests/doll90DollCells.test.ts).
+    const cells: [number, string[]][] = [[138, ["opponent"]], [320, ["player"]], [76, BOTH], [142, BOTH], [47, BOTH], [241, BOTH]];
     for (const [id, sides] of cells) expect([...LIVE_SUBSTITUTE_SWAP_BODY_CELLS.get(id)!]).toEqual(sides);
     for (const [id, sides] of cells) for (const side of ["player", "opponent"] as const) {
       const a = side === "player" ? 0 : 1;

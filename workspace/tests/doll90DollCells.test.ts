@@ -6,8 +6,8 @@ import { createBattleCommandFieldArtView } from "../src/engine/battleCommandFiel
 import { renderBattleResolutionLiveView, renderBattleResolutionSceneOffView } from "../src/engine/battleScene.ts";
 import { LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS, liveMoveAnimationDuration, liveMoveSubstituteDollDeclines } from "../src/engine/liveMoveAnimation.ts";
 import {
-  LIVE_SUBSTITUTE_SWAP_BODY_CELLS, LIVE_SUBSTITUTE_SWAP_BODY_FRAMING, LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS, liveSubstituteSwapApplies,
-  liveSubstituteSwapView,
+  LIVE_SUBSTITUTE_SWAP_BODY_CELLS, LIVE_SUBSTITUTE_SWAP_BODY_FRAMING, LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS, liveSingBodyRows,
+  liveSubstituteSwapApplies, liveSubstituteSwapView,
 } from "../src/engine/liveSubstituteSwap.ts";
 import { doll90AttRowSha, readDoll90AttFixture } from "../tools/integration/doll90AttFixture.ts";
 import { liveView, type Fixture } from "../tools/integration/liveAdapterFramebuffer.ts";
@@ -102,4 +102,28 @@ describe("doll90: Substitute-doll residual cells", () => {
     expect(f.rows.length).toBe(f.attacker === 0 ? 244 : 240);
     expect(f.rows.filter(([age, , sha]) => doll90AttRowSha(f, age) !== sha).map(([age]) => age)).toEqual([]);
   }, 120000);
+  it("Sing 47: both sides; the composite's ROM body follows the note geometry (last on-screen note + 97 rows)", () => {
+    expect([...LIVE_SUBSTITUTE_SWAP_BODY_CELLS.get(47)!]).toEqual(BOTH);
+    const pair = (a: 0 | 1, att: number, def: number, doll: boolean) => {
+      const m = (species: number, battler: 0 | 1, d: boolean) => ({ ...mon(species, battler, d), personality: 2349019075 });
+      return ({ player: a === 0 ? m(att, 0, doll) : m(def, 0, false), opponent: a === 0 ? m(def, 1, false) : m(att, 1, doll) }) as unknown as BattleResolutionDisplayedField;
+    };
+    // Fresh direct-mGBA ROM bodies (activation .. first inactive row); CROBAT -> WAILORD / WAILORD -> CROBAT were predicted (230 / 248
+    // script rows) from this derivation before their probes ran.
+    const cases: [0 | 1, number, number, number][] = [
+      [0, 53, 80, 246], [0, 94, 42, 246], // player PERSIAN -> SLOWBRO, GENGAR -> GOLBAT
+      [1, 53, 80, 242], [1, 42, 131, 244], [1, 169, 314, 231], [1, 314, 169, 249], // opponent PERSIAN, GOLBAT, CROBAT, WAILORD
+    ];
+    for (const [a, att, def, rows] of cases) {
+      expect(liveSingBodyRows(req(47, a), pair(a, att, def, false))).toBe(rows);
+      expect(liveSubstituteSwapApplies(req(47, a), pair(a, att, def, true))).toBe(true);
+      expect(liveMoveAnimationDuration(req(47, a), pair(a, att, def, true))).toBe(rows + (a === 0 ? 85 : 81));
+    }
+    expect(LIVE_SUBSTITUTE_SWAP_BODY_FRAMING.get(47)).toEqual({ rows: 246, shift: 0 }); // the table value (player pairs) is the fallback
+  });
+  it.each(["doll90-sing-opponent-3404", "doll90-sing-opponent-golbat-3403", "doll90-sing-opponent-crobat-wailord-3403"])(
+    "%s: every composite row equals the ROM frame", (stem) => {
+      const f = readDoll90AttFixture(`tools/integration/fixtures/doll90/att/${stem}.json`);
+      expect(f.rows.filter(([age, , sha]) => doll90AttRowSha(f, age) !== sha).map(([age]) => age)).toEqual([]);
+    }, 120000);
 });

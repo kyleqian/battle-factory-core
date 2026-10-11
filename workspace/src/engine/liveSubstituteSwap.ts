@@ -21,7 +21,8 @@ import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "./battleResolutionPresentation.ts";
 import type { BattleResolutionPresentationRenderView } from "./battleResolutionPresentationRender.ts";
 import { applyLiveBattlerX2Event, liveMoveBattlerX2Input, type LiveBattlerX2History, type LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
-import { liveBattlerAnchors, liveCastformFormDeclines, liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
+import { wavyMusicNotesGeometryAtAge } from "../animation/sing.ts";
+import { liveBattlerAnchors, liveCastformFormDeclines, liveMoveAnimationDuration, liveMoveAnimationPresentation } from "./liveMoveAnimation.ts";
 import { liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
 
 type Side = "player" | "opponent";
@@ -125,7 +126,7 @@ export const LIVE_SUBSTITUTE_SWAP_BODY_CELLS: ReadonlyMap<number, readonly Side[
   [320, Object.freeze(["player"] as const)], // GrassWhistle (opponent: 13 whole-field rows near the body's end)
   [76, BOTH], // SolarBeam, the charge turn only (the fire turn is the doll-free control's own residual)
   [142, BOTH], // Lovely Kiss
-  [47, Object.freeze(["player"] as const)], // Sing (opponent: the ROM body length depends on the pair)
+  [47, BOTH], // Sing (doll90: the ROM body length follows the note geometry, substituteSwapBodyFraming)
   [241, BOTH], // Sunny Day (self-target: LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS)
   // doll90 (docs/doll90-doll-cells.md): PERSIAN / GENGAR player, PERSIAN / elevated GOLBAT opponent, 0 px on every row.
   [104, BOTH], // Double Team (self-target; the attacker's personality-derived clone phase, dt60)
@@ -157,12 +158,44 @@ export const LIVE_SUBSTITUTE_SWAP_BODY_FRAMING: ReadonlyMap<number, SubstituteSw
   [153, { rows: 217, shift: -4 }], // Explosion (adapter 212)
   [320, { rows: 221, shift: 0 }], // GrassWhistle (adapter 225; doll81)
   [142, { rows: 153, shift: 0 }], // Lovely Kiss (adapter 152; doll81)
-  [47, { rows: 246, shift: 0 }], // Sing (player adapter 245; doll81)
+  [47, { rows: 246, shift: 0 }], // Sing (player adapter 245; doll81; doll90: geometry-derived, liveSingBodyRows)
   [104, { rows: 159, shift: -1 }], // Double Team (adapter 230 = body + stats banner; doll90: every doll-free control 0 px at -1)
 ].map(([id, framing]) => [id as number, Object.freeze(framing as SubstituteSwapBodyFraming)]));
 
-/** The composite's body framing for a request whose adapter duration is `adapterDuration`. */
-export function substituteSwapBodyFraming(moveId: number, adapterDuration: number): SubstituteSwapBodyFraming {
+/**
+ * doll90: Sing (47)'s ROM body (activation .. first inactive row) follows its geometry. Each wavy note is destroyed once it leaves
+ * x -16..256 / y -16..128 (AnimWavyMusicNotes_Step), the script's first waitforvisualfinish waits for the last one, and the rest
+ * (clearmonbg, AnimTask_MusicNotesClearRainbowBlend, end) is geometry-independent: first inactive row = the last note's last
+ * on-screen body age (sceneOnSingView: note age = body age - 7) + 97. Fresh direct-mGBA ROM bodies: player PERSIAN / GENGAR 246,
+ * opponent PERSIAN 242, GOLBAT 244, and the predicted-then-probed CROBAT -> WAILORD 231 / WAILORD -> CROBAT 249 (docs/doll90-doll-cells.md).
+ */
+const SING_BODY_TAIL_ROWS = 97;
+const singBodyRowsCache = new Map<string, number | null>();
+export function liveSingBodyRows(request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField): number | null {
+  const key = `${request.attacker}/${field.player.species}/${field.opponent.species}`;
+  if (singBodyRowsCache.has(key)) return singBodyRowsCache.get(key)!;
+  const state = liveMoveAnimationPresentation(request, field, 0);
+  let rows: number | null = null;
+  if (state !== null && state.config.move === "SING") {
+    const { attacker, target } = state.config as unknown as Record<"attacker" | "target", { geometry: { animationCenter: { x: number; y: number } } }>;
+    let last = -1;
+    for (let noteAge = 0; noteAge < 512; noteAge++) {
+      if (wavyMusicNotesGeometryAtAge(noteAge, attacker.geometry.animationCenter, target.geometry.animationCenter).length > 0) last = noteAge;
+    }
+    if (last >= 0) rows = last + 7 + SING_BODY_TAIL_ROWS;
+  }
+  singBodyRowsCache.set(key, rows);
+  return rows;
+}
+
+/** The composite's body framing for a request whose adapter duration is `adapterDuration` (`field`: the body field, Sing's geometry). */
+export function substituteSwapBodyFraming(
+  moveId: number, adapterDuration: number, request?: BattleMoveAnimationRequest, field?: BattleResolutionDisplayedField,
+): SubstituteSwapBodyFraming {
+  if (moveId === 47 && request !== undefined && field !== undefined) {
+    const rows = liveSingBodyRows(request, field);
+    if (rows !== null) return Object.freeze({ rows, shift: 0 });
+  }
   return LIVE_SUBSTITUTE_SWAP_BODY_FRAMING.get(moveId) ?? Object.freeze({ rows: adapterDuration, shift: 0 });
 }
 
@@ -265,7 +298,7 @@ export function liveSubstituteSwapView(view: BattleResolutionPresentationRenderV
   const bodyField = substituteSwapBodyField(view.field, attacker);
   const adapterDuration = liveMoveAnimationDuration(effect.request, bodyField);
   if (adapterDuration === null) return null;
-  const framing = substituteSwapBodyFraming(effect.request.moveId, adapterDuration);
+  const framing = substituteSwapBodyFraming(effect.request.moveId, adapterDuration, effect.request, bodyField);
   const swapFrame = substituteSwapFrameAt(side, framing.rows, effect.age);
   const frame = swapFrame.kind === "body" ? Object.freeze({ kind: "body" as const, age: swapFrame.age + framing.shift }) : swapFrame;
   if (frame.kind === "body") {
