@@ -2,7 +2,8 @@
 import { decodeGbaHardwareOam, type GbaHardwareOamObject } from "./gbaObjCompositor.ts";
 
 export type FuryCutterSide = "player" | "opponent";
-export type FuryCutterCounter = 1 | 2 | 3 | 4;
+/** gDisableStructs[attacker].furyCutterCounter after Cmd_furycuttercalc (1..5; 4 and 5 both take FuryCutterStrongest). */
+export type FuryCutterCounter = 1 | 2 | 3 | 4 | 5;
 export type FuryCutterMatrix = readonly [number, number, number, number];
 export type FuryCutterOam = readonly [number, number, number];
 export interface FuryCutterArt { readonly displaySpecies: string; readonly slot: number;
@@ -31,7 +32,7 @@ export interface FuryCutterLiveInputs {
 }
 export interface FuryCutterSourceCursor { readonly owner: "Move_FURY_CUTTER";
   readonly pointer: number; readonly offset: number; readonly active: boolean;
-  readonly counter: FuryCutterCounter; readonly power: 10 | 20 | 40 | 80;
+  readonly counter: FuryCutterCounter; readonly power: 10 | 20 | 40 | 80 | 160;
   readonly direction: "left" | "right"; readonly paletteBlendRepeats: 0 | 1 | 3; }
 export interface FuryCutterState {
   readonly age: number; readonly active: boolean; readonly source: FuryCutterSourceCursor;
@@ -58,12 +59,12 @@ export interface FuryCutterDisplayPlan {
 export const FURY_CUTTER_ROOT = 0x082c_ad4a;
 const EDGES = [0, 1, 4, 7, 14, 33] as const;
 const OFFSETS = [0, 3, 5, 70, 87, 92] as const;
-const POWERS = [10, 20, 40, 80] as const;
+const POWERS = [10, 20, 40, 80, 160] as const;
 const IDENTITY: FuryCutterMatrix = [256, 0, 0, 256];
 
 export function furyCutterSourceAtAge(age: number, counter: FuryCutterCounter): FuryCutterSourceCursor {
   if (!Number.isInteger(age) || age < 0) throw new Error(`invalid Fury Cutter age ${age}`);
-  if (![1, 2, 3, 4].includes(counter)) throw new Error(`invalid Fury Cutter counter ${counter}`);
+  if (![1, 2, 3, 4, 5].includes(counter)) throw new Error(`invalid Fury Cutter counter ${counter}`);
   let edge = 0;
   for (let index = 0; index < EDGES.length; index += 1) if (age >= EDGES[index]!) edge = index;
   return { owner: "Move_FURY_CUTTER", pointer: FURY_CUTTER_ROOT + OFFSETS[edge]!,

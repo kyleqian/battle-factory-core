@@ -1,0 +1,2460 @@
+{
+ "schema": "fury99-live-receipt/v1",
+ "doc": "docs/fury99-fury-cutter-counters.md",
+ "gate": "case 210: counter = request.rolloutCounter (plans54 payload; else the later58 power rule) in 1..5; known lend; firstBody or both rests {0,0}; non-shiny",
+ "summary": {
+  "probesR1EqualsR2": "8/8",
+  "windows": 40,
+  "exactBothRuns": 40,
+  "digestsAgree": 40
+ },
+ "probes": {
+  "fury-cutter-opp-grovyle-blissey-growl": true,
+  "fury-cutter-opp-grovyle-blissey-splash": true,
+  "fury-cutter-opp-scyther-golem-growl": true,
+  "fury-cutter-opp-scyther-golem-splash": true,
+  "fury-cutter-pla-grovyle-blissey-growl": true,
+  "fury-cutter-pla-grovyle-blissey-splash": true,
+  "fury-cutter-pla-scyther-golem-growl": true,
+  "fury-cutter-pla-scyther-golem-splash": true
+ },
+ "blendRows": {
+  "1": [
+   {
+    "1": [],
+    "16": [],
+    "17": [],
+    "2": [],
+    "3": []
+   }
+  ],
+  "2": [
+   {
+    "1": [
+     8,
+     9,
+     10
+    ],
+    "16": [
+     8,
+     9,
+     10
+    ],
+    "17": [
+     8,
+     9,
+     10
+    ],
+    "2": [
+     8,
+     9,
+     10
+    ],
+    "3": [
+     8,
+     9,
+     10
+    ]
+   }
+  ],
+  "3": [
+   {
+    "1": [
+     8,
+     9,
+     10,
+     15,
+     16,
+     17,
+     18
+    ],
+    "16": [
+     8,
+     9,
+     10,
+     15,
+     16,
+     17,
+     18
+    ],
+    "17": [
+     8,
+     9,
+     10,
+     15,
+     16,
+     17,
+     18
+    ],
+    "2": [
+     8,
+     9,
+     10,
+     15,
+     16,
+     17,
+     18
+    ],
+    "3": [
+     8,
+     9,
+     10,
+     15,
+     16,
+     17,
+     18
+    ]
+   }
+  ],
+  "4": [
+   {
+    "1": [
+     8,
+     9,
+     10,
+     15,
+     16,
+     17,
+     18
+    ],
+    "16": [
+     8,
+     9,
+     10,
+     15,
+     16,
+     17,
+     18
+    ],
+    "17": [
+     8,
+     9,
+     10,
+     15,
+     16,
+     17,
+     18
+    ],
+    "2": [
+     8,
+     9,
+     10,
+     15,
+     16,
+     17,
+     18
+    ],
+    "3": [
+     8,
+     9,
+     10,
+     15,
+     16,
+     17,
+     18
+    ]
+   }
+  ],
+  "5": [
+   {
+    "1": [
+     8,
+     9,
+     10,
+     15,
+     16,
+     17,
+     18
+    ],
+    "16": [
+     8,
+     9,
+     10,
+     15,
+     16,
+     17,
+     18
+    ],
+    "17": [
+     8,
+     9,
+     10,
+     15,
+     16,
+     17,
+     18
+    ],
+    "2": [
+     8,
+     9,
+     10,
+     15,
+     16,
+     17,
+     18
+    ],
+    "3": [
+     8,
+     9,
+     10,
+     15,
+     16,
+     17,
+     18
+    ]
+   }
+  ]
+ },
+ "windows": [
+  {
+   "fixture": "fury-cutter-opp-grovyle-blissey-growl-0",
+   "side": "opponent",
+   "attacker": "GROVYLE",
+   "target": "BLISSEY",
+   "preceding": "",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "46e7ebf5dee31cca"
+    ],
+    [
+     43,
+     43,
+     0,
+     "46e7ebf5dee31cca"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-grovyle-blissey-growl-1",
+   "side": "opponent",
+   "attacker": "GROVYLE",
+   "target": "BLISSEY",
+   "preceding": "B210o B45p S22",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "c410002de54cb0e2"
+    ],
+    [
+     43,
+     43,
+     0,
+     "c410002de54cb0e2"
+    ]
+   ],
+   "lentOrderEqualsRom": false,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-grovyle-blissey-growl-2",
+   "side": "opponent",
+   "attacker": "GROVYLE",
+   "target": "BLISSEY",
+   "preceding": "B210o B45p S22 B10210o B45p S22",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "91c8d0223a4c7a1f"
+    ],
+    [
+     43,
+     43,
+     0,
+     "91c8d0223a4c7a1f"
+    ]
+   ],
+   "lentOrderEqualsRom": false,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-grovyle-blissey-growl-3",
+   "side": "opponent",
+   "attacker": "GROVYLE",
+   "target": "BLISSEY",
+   "preceding": "B210o B45p S22 B10210o B45p S22 B20210o B45p S22",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "c72cc8533c67d189"
+    ],
+    [
+     43,
+     43,
+     0,
+     "c72cc8533c67d189"
+    ]
+   ],
+   "lentOrderEqualsRom": false,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-grovyle-blissey-growl-4",
+   "side": "opponent",
+   "attacker": "GROVYLE",
+   "target": "BLISSEY",
+   "preceding": "B210o B45p S22 B10210o B45p S22 B20210o B45p S22 B30210o B45p S22",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "41359760ea8ece5e"
+    ],
+    [
+     43,
+     43,
+     0,
+     "41359760ea8ece5e"
+    ]
+   ],
+   "lentOrderEqualsRom": false,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-grovyle-blissey-splash-0",
+   "side": "opponent",
+   "attacker": "GROVYLE",
+   "target": "BLISSEY",
+   "preceding": "",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "46e7ebf5dee31cca"
+    ],
+    [
+     43,
+     43,
+     0,
+     "46e7ebf5dee31cca"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-grovyle-blissey-splash-1",
+   "side": "opponent",
+   "attacker": "GROVYLE",
+   "target": "BLISSEY",
+   "preceding": "B210o B150p",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "c410002de54cb0e2"
+    ],
+    [
+     43,
+     43,
+     0,
+     "c410002de54cb0e2"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-grovyle-blissey-splash-2",
+   "side": "opponent",
+   "attacker": "GROVYLE",
+   "target": "BLISSEY",
+   "preceding": "B210o B150p B10210o B150p",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "db809c3f39819f47"
+    ],
+    [
+     43,
+     43,
+     0,
+     "db809c3f39819f47"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-grovyle-blissey-splash-3",
+   "side": "opponent",
+   "attacker": "GROVYLE",
+   "target": "BLISSEY",
+   "preceding": "B210o B150p B10210o B150p B20210o B150p",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "4e0b9026fb643f1f"
+    ],
+    [
+     43,
+     43,
+     0,
+     "4e0b9026fb643f1f"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-grovyle-blissey-splash-4",
+   "side": "opponent",
+   "attacker": "GROVYLE",
+   "target": "BLISSEY",
+   "preceding": "B210o B150p B10210o B150p B20210o B150p B30210o B150p",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "3f7356187e6b3567"
+    ],
+    [
+     43,
+     43,
+     0,
+     "3f7356187e6b3567"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-scyther-golem-growl-0",
+   "side": "opponent",
+   "attacker": "SCYTHER",
+   "target": "GOLEM",
+   "preceding": "",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "3b57f1ca68731278"
+    ],
+    [
+     43,
+     43,
+     0,
+     "3b57f1ca68731278"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-scyther-golem-growl-1",
+   "side": "opponent",
+   "attacker": "SCYTHER",
+   "target": "GOLEM",
+   "preceding": "B210o B45p S22",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "e28f59428b8296dd"
+    ],
+    [
+     43,
+     43,
+     0,
+     "e28f59428b8296dd"
+    ]
+   ],
+   "lentOrderEqualsRom": false,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-scyther-golem-growl-2",
+   "side": "opponent",
+   "attacker": "SCYTHER",
+   "target": "GOLEM",
+   "preceding": "B210o B45p S22 B10210o B45p S22",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "cc05e53f869a7c16"
+    ],
+    [
+     43,
+     43,
+     0,
+     "cc05e53f869a7c16"
+    ]
+   ],
+   "lentOrderEqualsRom": false,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-scyther-golem-growl-3",
+   "side": "opponent",
+   "attacker": "SCYTHER",
+   "target": "GOLEM",
+   "preceding": "B210o B45p S22 B10210o B45p S22 B20210o B45p S22",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "41021b7a9f2d5cd4"
+    ],
+    [
+     43,
+     43,
+     0,
+     "41021b7a9f2d5cd4"
+    ]
+   ],
+   "lentOrderEqualsRom": false,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-scyther-golem-growl-4",
+   "side": "opponent",
+   "attacker": "SCYTHER",
+   "target": "GOLEM",
+   "preceding": "B210o B45p S22 B10210o B45p S22 B20210o B45p S22 B30210o B45p S22",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "cdfdc52f2969d245"
+    ],
+    [
+     43,
+     43,
+     0,
+     "cdfdc52f2969d245"
+    ]
+   ],
+   "lentOrderEqualsRom": false,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-scyther-golem-splash-0",
+   "side": "opponent",
+   "attacker": "SCYTHER",
+   "target": "GOLEM",
+   "preceding": "",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "3b57f1ca68731278"
+    ],
+    [
+     43,
+     43,
+     0,
+     "3b57f1ca68731278"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-scyther-golem-splash-1",
+   "side": "opponent",
+   "attacker": "SCYTHER",
+   "target": "GOLEM",
+   "preceding": "B210o B150p",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "e28f59428b8296dd"
+    ],
+    [
+     43,
+     43,
+     0,
+     "e28f59428b8296dd"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-scyther-golem-splash-2",
+   "side": "opponent",
+   "attacker": "SCYTHER",
+   "target": "GOLEM",
+   "preceding": "B210o B150p B10210o B150p",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "07c50ea2be1311d4"
+    ],
+    [
+     43,
+     43,
+     0,
+     "07c50ea2be1311d4"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-scyther-golem-splash-3",
+   "side": "opponent",
+   "attacker": "SCYTHER",
+   "target": "GOLEM",
+   "preceding": "B210o B150p B10210o B150p B20210o B150p",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "2ae071d00d6a6108"
+    ],
+    [
+     43,
+     43,
+     0,
+     "2ae071d00d6a6108"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-scyther-golem-splash-4",
+   "side": "opponent",
+   "attacker": "SCYTHER",
+   "target": "GOLEM",
+   "preceding": "B210o B150p B10210o B150p B20210o B150p B30210o B150p",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "96ab83f1c9e6188d"
+    ],
+    [
+     43,
+     43,
+     0,
+     "96ab83f1c9e6188d"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-grovyle-blissey-growl-0",
+   "side": "player",
+   "attacker": "GROVYLE",
+   "target": "BLISSEY",
+   "preceding": "",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "ff4ba5dd6a4041be"
+    ],
+    [
+     43,
+     43,
+     0,
+     "ff4ba5dd6a4041be"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-grovyle-blissey-growl-1",
+   "side": "player",
+   "attacker": "GROVYLE",
+   "target": "BLISSEY",
+   "preceding": "B210p B45o S22",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "d80175fed0b435b8"
+    ],
+    [
+     43,
+     43,
+     0,
+     "d80175fed0b435b8"
+    ]
+   ],
+   "lentOrderEqualsRom": false,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-grovyle-blissey-growl-2",
+   "side": "player",
+   "attacker": "GROVYLE",
+   "target": "BLISSEY",
+   "preceding": "B210p B45o S22 B10210p B45o S22",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "2af19776a6805584"
+    ],
+    [
+     43,
+     43,
+     0,
+     "2af19776a6805584"
+    ]
+   ],
+   "lentOrderEqualsRom": false,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-grovyle-blissey-growl-3",
+   "side": "player",
+   "attacker": "GROVYLE",
+   "target": "BLISSEY",
+   "preceding": "B210p B45o S22 B10210p B45o S22 B20210p B45o S22",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "fb00731ae497c8b2"
+    ],
+    [
+     43,
+     43,
+     0,
+     "fb00731ae497c8b2"
+    ]
+   ],
+   "lentOrderEqualsRom": false,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-grovyle-blissey-growl-4",
+   "side": "player",
+   "attacker": "GROVYLE",
+   "target": "BLISSEY",
+   "preceding": "B210p B45o S22 B10210p B45o S22 B20210p B45o S22 B30210p",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "4e7c9d87c061d832"
+    ],
+    [
+     43,
+     43,
+     0,
+     "4e7c9d87c061d832"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-grovyle-blissey-splash-0",
+   "side": "player",
+   "attacker": "GROVYLE",
+   "target": "BLISSEY",
+   "preceding": "",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "ff4ba5dd6a4041be"
+    ],
+    [
+     43,
+     43,
+     0,
+     "ff4ba5dd6a4041be"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-grovyle-blissey-splash-1",
+   "side": "player",
+   "attacker": "GROVYLE",
+   "target": "BLISSEY",
+   "preceding": "B210p B150o",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "d80175fed0b435b8"
+    ],
+    [
+     43,
+     43,
+     0,
+     "d80175fed0b435b8"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-grovyle-blissey-splash-2",
+   "side": "player",
+   "attacker": "GROVYLE",
+   "target": "BLISSEY",
+   "preceding": "B210p B150o B10210p B150o",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "d389504178056315"
+    ],
+    [
+     43,
+     43,
+     0,
+     "d389504178056315"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-grovyle-blissey-splash-3",
+   "side": "player",
+   "attacker": "GROVYLE",
+   "target": "BLISSEY",
+   "preceding": "B210p B150o B10210p B150o B20210p B150o",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "a6b18fd007c128d3"
+    ],
+    [
+     43,
+     43,
+     0,
+     "a6b18fd007c128d3"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-grovyle-blissey-splash-4",
+   "side": "player",
+   "attacker": "GROVYLE",
+   "target": "BLISSEY",
+   "preceding": "B210p B150o B10210p B150o B20210p B150o B30210p B150o",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "c6adff5e36ee37ec"
+    ],
+    [
+     43,
+     43,
+     0,
+     "c6adff5e36ee37ec"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-scyther-golem-growl-0",
+   "side": "player",
+   "attacker": "SCYTHER",
+   "target": "GOLEM",
+   "preceding": "",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "e44e5836a8c765ca"
+    ],
+    [
+     43,
+     43,
+     0,
+     "e44e5836a8c765ca"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-scyther-golem-growl-1",
+   "side": "player",
+   "attacker": "SCYTHER",
+   "target": "GOLEM",
+   "preceding": "B210p B45o S22",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "2f649a86c9482f3e"
+    ],
+    [
+     43,
+     43,
+     0,
+     "2f649a86c9482f3e"
+    ]
+   ],
+   "lentOrderEqualsRom": false,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-scyther-golem-growl-2",
+   "side": "player",
+   "attacker": "SCYTHER",
+   "target": "GOLEM",
+   "preceding": "B210p B45o S22 B10210p B45o S22",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "4edcadf862e69672"
+    ],
+    [
+     43,
+     43,
+     0,
+     "4edcadf862e69672"
+    ]
+   ],
+   "lentOrderEqualsRom": false,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-scyther-golem-growl-3",
+   "side": "player",
+   "attacker": "SCYTHER",
+   "target": "GOLEM",
+   "preceding": "B210p B45o S22 B10210p B45o S22 B20210p B45o S22",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "8f108f1e90e4d60c"
+    ],
+    [
+     43,
+     43,
+     0,
+     "8f108f1e90e4d60c"
+    ]
+   ],
+   "lentOrderEqualsRom": false,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-scyther-golem-growl-4",
+   "side": "player",
+   "attacker": "SCYTHER",
+   "target": "GOLEM",
+   "preceding": "B210p B45o S22 B10210p B45o S22 B20210p B45o S22 B30210p",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "0057cc00f701321d"
+    ],
+    [
+     43,
+     43,
+     0,
+     "0057cc00f701321d"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-scyther-golem-splash-0",
+   "side": "player",
+   "attacker": "SCYTHER",
+   "target": "GOLEM",
+   "preceding": "",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "e44e5836a8c765ca"
+    ],
+    [
+     43,
+     43,
+     0,
+     "e44e5836a8c765ca"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-scyther-golem-splash-1",
+   "side": "player",
+   "attacker": "SCYTHER",
+   "target": "GOLEM",
+   "preceding": "B210p B150o",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "2f649a86c9482f3e"
+    ],
+    [
+     43,
+     43,
+     0,
+     "2f649a86c9482f3e"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-scyther-golem-splash-2",
+   "side": "player",
+   "attacker": "SCYTHER",
+   "target": "GOLEM",
+   "preceding": "B210p B150o B10210p B150o",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "880a3f8abcca8ca6"
+    ],
+    [
+     43,
+     43,
+     0,
+     "880a3f8abcca8ca6"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-scyther-golem-splash-3",
+   "side": "player",
+   "attacker": "SCYTHER",
+   "target": "GOLEM",
+   "preceding": "B210p B150o B10210p B150o B20210p B150o",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "00147771b08b29ff"
+    ],
+    [
+     43,
+     43,
+     0,
+     "00147771b08b29ff"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-scyther-golem-splash-4",
+   "side": "player",
+   "attacker": "SCYTHER",
+   "target": "GOLEM",
+   "preceding": "B210p B150o B10210p B150o B20210p B150o B30210p B150o",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "07f67aeef99f5417"
+    ],
+    [
+     43,
+     43,
+     0,
+     "07f67aeef99f5417"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  }
+ ],
+ "pinned": {
+  "fury-cutter-opp-grovyle-blissey-splash-3": {
+   "fixture": "fury-cutter-opp-grovyle-blissey-splash-3",
+   "counter": 4,
+   "verdict": "exact",
+   "rows": [
+    [
+     0,
+     3484,
+     "f7e5f79bcd9b177d2d82842ef0761eb9f355aad6d201f6bb3327d2e12c4694f9"
+    ],
+    [
+     1,
+     3485,
+     "f7e5f79bcd9b177d2d82842ef0761eb9f355aad6d201f6bb3327d2e12c4694f9"
+    ],
+    [
+     2,
+     3486,
+     "f7e5f79bcd9b177d2d82842ef0761eb9f355aad6d201f6bb3327d2e12c4694f9"
+    ],
+    [
+     3,
+     3487,
+     "f7e5f79bcd9b177d2d82842ef0761eb9f355aad6d201f6bb3327d2e12c4694f9"
+    ],
+    [
+     4,
+     3488,
+     "f7e5f79bcd9b177d2d82842ef0761eb9f355aad6d201f6bb3327d2e12c4694f9"
+    ],
+    [
+     5,
+     3489,
+     "f7e5f79bcd9b177d2d82842ef0761eb9f355aad6d201f6bb3327d2e12c4694f9"
+    ],
+    [
+     6,
+     3490,
+     "f7e5f79bcd9b177d2d82842ef0761eb9f355aad6d201f6bb3327d2e12c4694f9"
+    ],
+    [
+     7,
+     3491,
+     "f7e5f79bcd9b177d2d82842ef0761eb9f355aad6d201f6bb3327d2e12c4694f9"
+    ],
+    [
+     8,
+     3492,
+     "089fe5f8d2c4c0e34803cdda2e0b12718fe1c8fcc5e76a9a5878979369ebc385"
+    ],
+    [
+     9,
+     3493,
+     "8b15564353340c0dbbb88eb2b77ba4ad90f2ecbc467b63490150a49b276ada6f"
+    ],
+    [
+     10,
+     3494,
+     "6f992d3f7097a0163ea17e0fd6fe499c64bce8abe1a51e2901e4b6ae78214db4"
+    ],
+    [
+     11,
+     3495,
+     "9557d2b65cfe1fb4286743e600dee2f5d6ecb4701b3700fc904ff543007384a8"
+    ],
+    [
+     12,
+     3496,
+     "c4ec5cec5170b353a03dc2748b85028f4f7a0a56aea86a195f52bb9ae14d6a18"
+    ],
+    [
+     13,
+     3497,
+     "7082f3f44d0ba1b7794d808ace381745775519b07bb1b0de5026feaa56ec9218"
+    ],
+    [
+     14,
+     3498,
+     "251f9c19830b2fc277a84eaddd715a0854e6e5c509b3a8cf983e4799cfc57078"
+    ],
+    [
+     15,
+     3499,
+     "64beec594fd5db1aae3a96252fe0adc9e65a3ee0e5a7992797d0db28d693050a"
+    ],
+    [
+     16,
+     3500,
+     "0548345d2de3a938cb3df6bcecb94169a7ba9056e12405e1d3389c9f045743fc"
+    ],
+    [
+     17,
+     3501,
+     "d08508d0cb8ab921f0d9f81f503a55e0f4d3c2a9c886856ca39e5be1be2661b7"
+    ],
+    [
+     18,
+     3502,
+     "253a39ed93b485ebf1dd0d581ffd5b5c8ec289790db58562f66d2f3d8af7509c"
+    ],
+    [
+     19,
+     3503,
+     "2bb7a07f5af2b6d88b8b9134e59c4254aa26bd22c07dac0bda61ed4990e6420b"
+    ],
+    [
+     20,
+     3504,
+     "811cfa4f692d8bc8dbd525f181bf128978a45f94819bd9e235173fe7a453bf8e"
+    ],
+    [
+     21,
+     3505,
+     "ff65a671d9c0e6b624d0caa5725b249dfe5fc761b7ef722da76c68d35794dd93"
+    ],
+    [
+     22,
+     3506,
+     "b2a32cf8c62a70d8f8d171f8cb3e963ff81a656d0ae6e63b8b7fa8d2ac292874"
+    ],
+    [
+     23,
+     3507,
+     "2e5902679f15ed8abc180e6925c211d28ca148a297a4e47789bfd2bf2cf8fba7"
+    ],
+    [
+     24,
+     3508,
+     "188206d2411721857e671c04a6348a9fc47a9523c7c2a4be5895c0f0ca2474ce"
+    ],
+    [
+     25,
+     3509,
+     "f5cdec8b8468a5940fef0b64001971f2e46fbeb66eff0ed096bb58d0a8d2202f"
+    ],
+    [
+     26,
+     3510,
+     "880e0e849be92e6c65bbde02c74420c0cc538245c82ec987d6479312eb4b0ae1"
+    ],
+    [
+     27,
+     3511,
+     "410551d9fe2060fb3b15503904350dcd1829b3d143ae5e46a2ae8eafe12ad23f"
+    ],
+    [
+     28,
+     3512,
+     "410551d9fe2060fb3b15503904350dcd1829b3d143ae5e46a2ae8eafe12ad23f"
+    ],
+    [
+     29,
+     3513,
+     "f857b48a6b6eae1baf985a0992f45228cead8db16db6c16f90c1ef952d91bcff"
+    ],
+    [
+     30,
+     3514,
+     "f857b48a6b6eae1baf985a0992f45228cead8db16db6c16f90c1ef952d91bcff"
+    ],
+    [
+     31,
+     3515,
+     "410551d9fe2060fb3b15503904350dcd1829b3d143ae5e46a2ae8eafe12ad23f"
+    ],
+    [
+     32,
+     3516,
+     "f7e5f79bcd9b177d2d82842ef0761eb9f355aad6d201f6bb3327d2e12c4694f9"
+    ],
+    [
+     33,
+     3517,
+     "f7e5f79bcd9b177d2d82842ef0761eb9f355aad6d201f6bb3327d2e12c4694f9"
+    ],
+    [
+     34,
+     3518,
+     "f7e5f79bcd9b177d2d82842ef0761eb9f355aad6d201f6bb3327d2e12c4694f9"
+    ],
+    [
+     35,
+     3519,
+     "f7e5f79bcd9b177d2d82842ef0761eb9f355aad6d201f6bb3327d2e12c4694f9"
+    ],
+    [
+     36,
+     3520,
+     "f7e5f79bcd9b177d2d82842ef0761eb9f355aad6d201f6bb3327d2e12c4694f9"
+    ],
+    [
+     37,
+     3521,
+     "f7e5f79bcd9b177d2d82842ef0761eb9f355aad6d201f6bb3327d2e12c4694f9"
+    ],
+    [
+     38,
+     3522,
+     "f7e5f79bcd9b177d2d82842ef0761eb9f355aad6d201f6bb3327d2e12c4694f9"
+    ],
+    [
+     39,
+     3523,
+     "f7e5f79bcd9b177d2d82842ef0761eb9f355aad6d201f6bb3327d2e12c4694f9"
+    ],
+    [
+     40,
+     3524,
+     "f7e5f79bcd9b177d2d82842ef0761eb9f355aad6d201f6bb3327d2e12c4694f9"
+    ],
+    [
+     41,
+     3525,
+     "f7e5f79bcd9b177d2d82842ef0761eb9f355aad6d201f6bb3327d2e12c4694f9"
+    ],
+    [
+     42,
+     3526,
+     "f7e5f79bcd9b177d2d82842ef0761eb9f355aad6d201f6bb3327d2e12c4694f9"
+    ]
+   ]
+  },
+  "fury-cutter-opp-scyther-golem-growl-2": {
+   "fixture": "fury-cutter-opp-scyther-golem-growl-2",
+   "counter": 3,
+   "verdict": "exact",
+   "rows": [
+    [
+     0,
+     2350,
+     "e74dc096ef7ef98adcac903b6978ab2a5018ad06c84463dff8bae9ef0c8dad18"
+    ],
+    [
+     1,
+     2351,
+     "e74dc096ef7ef98adcac903b6978ab2a5018ad06c84463dff8bae9ef0c8dad18"
+    ],
+    [
+     2,
+     2352,
+     "e74dc096ef7ef98adcac903b6978ab2a5018ad06c84463dff8bae9ef0c8dad18"
+    ],
+    [
+     3,
+     2353,
+     "e74dc096ef7ef98adcac903b6978ab2a5018ad06c84463dff8bae9ef0c8dad18"
+    ],
+    [
+     4,
+     2354,
+     "e74dc096ef7ef98adcac903b6978ab2a5018ad06c84463dff8bae9ef0c8dad18"
+    ],
+    [
+     5,
+     2355,
+     "e74dc096ef7ef98adcac903b6978ab2a5018ad06c84463dff8bae9ef0c8dad18"
+    ],
+    [
+     6,
+     2356,
+     "e74dc096ef7ef98adcac903b6978ab2a5018ad06c84463dff8bae9ef0c8dad18"
+    ],
+    [
+     7,
+     2357,
+     "e74dc096ef7ef98adcac903b6978ab2a5018ad06c84463dff8bae9ef0c8dad18"
+    ],
+    [
+     8,
+     2358,
+     "b1ea86c9c3cf19ab8d3eb601b0091fe74172a825593371d1852d33f0c797d678"
+    ],
+    [
+     9,
+     2359,
+     "b44688d066f6feee4da8cfeec7f1cad2f5bec2cda42a79b0e02ea1e81dd30007"
+    ],
+    [
+     10,
+     2360,
+     "3a0200b7e3f9de0f92e53935b209920c5c5102377eaab3ac4823fadf2bf54598"
+    ],
+    [
+     11,
+     2361,
+     "b6df0f564be617486a1753e331beaec7b96018fd253c0260218887a2910143d5"
+    ],
+    [
+     12,
+     2362,
+     "8e07ff2806bde0a2e41fe1863def8aaea45a436d9df830692493084f37eb6aa5"
+    ],
+    [
+     13,
+     2363,
+     "64369739dd4bb9d37bb942f509f0187a6e7a405aedb0baa9859c65cb867fef8a"
+    ],
+    [
+     14,
+     2364,
+     "05c85ab716d5c41c410b46c6ddfb0b01f74a8e6143503b56d272fff218c71c69"
+    ],
+    [
+     15,
+     2365,
+     "2a9089e08114ef4e1384c43cd0112fd3383c5c4afe70e4c11ff6eeb3f0aed177"
+    ],
+    [
+     16,
+     2366,
+     "9c26ddb299f8f607e7935113a4545b4689ae09bf024d2ed14387989f72ca2540"
+    ],
+    [
+     17,
+     2367,
+     "f5c4491b67ca815faa6373a3ff52c79ee216908fb39e550c9a31c2abf264e64c"
+    ],
+    [
+     18,
+     2368,
+     "0b9005664a894b8dccd5f89165cf4b77887674d3c0cd2b2f4bad3c6c5ff51ed9"
+    ],
+    [
+     19,
+     2369,
+     "b84e8e4fa8e0080f6356626cba25de1b49755f9c087b896b0ce06cd2cd55f5f7"
+    ],
+    [
+     20,
+     2370,
+     "1b02a2f016ee32ef84e5584d4ef1ddfb97ef232d6057262686fcee4a45142633"
+    ],
+    [
+     21,
+     2371,
+     "98388a8d4fcdb4764fd3e10d912ac00f894193caa534f8451769be9447261c82"
+    ],
+    [
+     22,
+     2372,
+     "be8ab31df28e946c2d65ced70255bf6be221536f8bcf7b0d58c8d0ad0ff61a55"
+    ],
+    [
+     23,
+     2373,
+     "f2a9f6778b91a9a1b2b04b6e00c889791471516d92e7b1a26f99840e8dd1139e"
+    ],
+    [
+     24,
+     2374,
+     "f12320dd44034a3d0ecf1cc911ccc3363baacd0eb808424508332bc8821043ae"
+    ],
+    [
+     25,
+     2375,
+     "61613da224a597de2266480bb8746fb89103a46da34a289f466c991d2c07cb78"
+    ],
+    [
+     26,
+     2376,
+     "2fd612d2e36860536454bd7b92b76e46c4669817b5443fd0d800e73551caa7c0"
+    ],
+    [
+     27,
+     2377,
+     "431811262627b5c8e171dcb3d414cd8cea477481b75471223e8d3c841142b212"
+    ],
+    [
+     28,
+     2378,
+     "431811262627b5c8e171dcb3d414cd8cea477481b75471223e8d3c841142b212"
+    ],
+    [
+     29,
+     2379,
+     "15692fb5a4f11a238812b53c3a01cd3dd895ce2e943541b1556680d39b6d17cb"
+    ],
+    [
+     30,
+     2380,
+     "15692fb5a4f11a238812b53c3a01cd3dd895ce2e943541b1556680d39b6d17cb"
+    ],
+    [
+     31,
+     2381,
+     "431811262627b5c8e171dcb3d414cd8cea477481b75471223e8d3c841142b212"
+    ],
+    [
+     32,
+     2382,
+     "e74dc096ef7ef98adcac903b6978ab2a5018ad06c84463dff8bae9ef0c8dad18"
+    ],
+    [
+     33,
+     2383,
+     "e74dc096ef7ef98adcac903b6978ab2a5018ad06c84463dff8bae9ef0c8dad18"
+    ],
+    [
+     34,
+     2384,
+     "e74dc096ef7ef98adcac903b6978ab2a5018ad06c84463dff8bae9ef0c8dad18"
+    ],
+    [
+     35,
+     2385,
+     "e74dc096ef7ef98adcac903b6978ab2a5018ad06c84463dff8bae9ef0c8dad18"
+    ],
+    [
+     36,
+     2386,
+     "e74dc096ef7ef98adcac903b6978ab2a5018ad06c84463dff8bae9ef0c8dad18"
+    ],
+    [
+     37,
+     2387,
+     "e74dc096ef7ef98adcac903b6978ab2a5018ad06c84463dff8bae9ef0c8dad18"
+    ],
+    [
+     38,
+     2388,
+     "e74dc096ef7ef98adcac903b6978ab2a5018ad06c84463dff8bae9ef0c8dad18"
+    ],
+    [
+     39,
+     2389,
+     "e74dc096ef7ef98adcac903b6978ab2a5018ad06c84463dff8bae9ef0c8dad18"
+    ],
+    [
+     40,
+     2390,
+     "e74dc096ef7ef98adcac903b6978ab2a5018ad06c84463dff8bae9ef0c8dad18"
+    ],
+    [
+     41,
+     2391,
+     "e74dc096ef7ef98adcac903b6978ab2a5018ad06c84463dff8bae9ef0c8dad18"
+    ],
+    [
+     42,
+     2392,
+     "e74dc096ef7ef98adcac903b6978ab2a5018ad06c84463dff8bae9ef0c8dad18"
+    ]
+   ]
+  },
+  "fury-cutter-pla-grovyle-blissey-splash-1": {
+   "fixture": "fury-cutter-pla-grovyle-blissey-splash-1",
+   "counter": 2,
+   "verdict": "exact",
+   "rows": [
+    [
+     0,
+     1212,
+     "4f2cd65c5b11649808b00f04eb6afb776102678fe9acb9b14880410efaf2bdfa"
+    ],
+    [
+     1,
+     1213,
+     "4f2cd65c5b11649808b00f04eb6afb776102678fe9acb9b14880410efaf2bdfa"
+    ],
+    [
+     2,
+     1214,
+     "4f2cd65c5b11649808b00f04eb6afb776102678fe9acb9b14880410efaf2bdfa"
+    ],
+    [
+     3,
+     1215,
+     "4f2cd65c5b11649808b00f04eb6afb776102678fe9acb9b14880410efaf2bdfa"
+    ],
+    [
+     4,
+     1216,
+     "4f2cd65c5b11649808b00f04eb6afb776102678fe9acb9b14880410efaf2bdfa"
+    ],
+    [
+     5,
+     1217,
+     "4f2cd65c5b11649808b00f04eb6afb776102678fe9acb9b14880410efaf2bdfa"
+    ],
+    [
+     6,
+     1218,
+     "4f2cd65c5b11649808b00f04eb6afb776102678fe9acb9b14880410efaf2bdfa"
+    ],
+    [
+     7,
+     1219,
+     "4f2cd65c5b11649808b00f04eb6afb776102678fe9acb9b14880410efaf2bdfa"
+    ],
+    [
+     8,
+     1220,
+     "535cd5ff8a2fb74983e65dad720c0f12d956f0fcc244a32c00e777d97289ef12"
+    ],
+    [
+     9,
+     1221,
+     "f052d0ae5a98bb2709d6335330646ef44d59091b30b14f631568da73d2929ab9"
+    ],
+    [
+     10,
+     1222,
+     "a856a6261abf32468b46cb99e8bbce7ba5f897063a02a4e8a4cf3948985cebdc"
+    ],
+    [
+     11,
+     1223,
+     "1a481bdd0394bdfa76b317a55fc1de7aac1bb665db1d4780df03d82c4bacd1bb"
+    ],
+    [
+     12,
+     1224,
+     "fa4bf775dc4869f151ff1d01a0bc0e5fd5d61cf4fa2e278678c39a39c4393528"
+    ],
+    [
+     13,
+     1225,
+     "b5ed9c8d2986c8864f0f7b9fac2f63cca2014f1044b4c67cfd854fb63b0bf1bd"
+    ],
+    [
+     14,
+     1226,
+     "6da9c89c1edf30f8e5647c675c631568126cf67372e64ceed64c8ab7b20c0cdb"
+    ],
+    [
+     15,
+     1227,
+     "b09e49cbb278a7535457ad02a6e1fbeafa533d707e554b7012a4ec968d8c7918"
+    ],
+    [
+     16,
+     1228,
+     "1030e519cd96ef29decf9e5514cf4655197a551d7cd7050fcdbb0a9056cca9e2"
+    ],
+    [
+     17,
+     1229,
+     "7c851d5aa5ff5658b1a1d92b19ad14b5d3d11747b0466957bfa4ae0131706a7a"
+    ],
+    [
+     18,
+     1230,
+     "25950e5b9a32f5730135891fdff57890f1d35184764e2f7efbf9f5309f37230b"
+    ],
+    [
+     19,
+     1231,
+     "3b9e7775db70b1ebf67965e799ee9708457cd8eefc5a5eb653c8d7447e89effb"
+    ],
+    [
+     20,
+     1232,
+     "4083731a185d96257b2468cd8c1b769ad33154661cfcd627bf7ecb122a9463b4"
+    ],
+    [
+     21,
+     1233,
+     "9e2c444b5a7104580360fcb30cbdfaba129b03f4a462e68c07d9aa2b3ad139ab"
+    ],
+    [
+     22,
+     1234,
+     "94824705f0d2fd4430a90c8e91892ebdb76ea2710976082db7e8f4ed1f6d9b54"
+    ],
+    [
+     23,
+     1235,
+     "aa5bf423ccf878bf32a955d48c458684c58ec1bae6d9e52984febd3741207eca"
+    ],
+    [
+     24,
+     1236,
+     "793c9341038a779c372c7fd587466173666c92c8df3102aafd042977ca18ec1c"
+    ],
+    [
+     25,
+     1237,
+     "9c1331ba9ddd86543c0819e1889eb7da7f4ebab02cf374b8bbe80a27a2d5c5ca"
+    ],
+    [
+     26,
+     1238,
+     "2da419fc8f1fd5aa4ac6cf127f0689dff2edbbfdcf8dc265271fff950f06d055"
+    ],
+    [
+     27,
+     1239,
+     "1cf0a367966dc1c16fb754516e9dcb39cd4e31a6aeb90583b28734bedc386ce0"
+    ],
+    [
+     28,
+     1240,
+     "1cf0a367966dc1c16fb754516e9dcb39cd4e31a6aeb90583b28734bedc386ce0"
+    ],
+    [
+     29,
+     1241,
+     "752f0cb94cfc0182668f2a72d35d3f6d16a25858bcdfb9c7c51a349f2b4fa437"
+    ],
+    [
+     30,
+     1242,
+     "752f0cb94cfc0182668f2a72d35d3f6d16a25858bcdfb9c7c51a349f2b4fa437"
+    ],
+    [
+     31,
+     1243,
+     "1cf0a367966dc1c16fb754516e9dcb39cd4e31a6aeb90583b28734bedc386ce0"
+    ],
+    [
+     32,
+     1244,
+     "4f2cd65c5b11649808b00f04eb6afb776102678fe9acb9b14880410efaf2bdfa"
+    ],
+    [
+     33,
+     1245,
+     "4f2cd65c5b11649808b00f04eb6afb776102678fe9acb9b14880410efaf2bdfa"
+    ],
+    [
+     34,
+     1246,
+     "4f2cd65c5b11649808b00f04eb6afb776102678fe9acb9b14880410efaf2bdfa"
+    ],
+    [
+     35,
+     1247,
+     "4f2cd65c5b11649808b00f04eb6afb776102678fe9acb9b14880410efaf2bdfa"
+    ],
+    [
+     36,
+     1248,
+     "4f2cd65c5b11649808b00f04eb6afb776102678fe9acb9b14880410efaf2bdfa"
+    ],
+    [
+     37,
+     1249,
+     "4f2cd65c5b11649808b00f04eb6afb776102678fe9acb9b14880410efaf2bdfa"
+    ],
+    [
+     38,
+     1250,
+     "4f2cd65c5b11649808b00f04eb6afb776102678fe9acb9b14880410efaf2bdfa"
+    ],
+    [
+     39,
+     1251,
+     "4f2cd65c5b11649808b00f04eb6afb776102678fe9acb9b14880410efaf2bdfa"
+    ],
+    [
+     40,
+     1252,
+     "4f2cd65c5b11649808b00f04eb6afb776102678fe9acb9b14880410efaf2bdfa"
+    ],
+    [
+     41,
+     1253,
+     "4f2cd65c5b11649808b00f04eb6afb776102678fe9acb9b14880410efaf2bdfa"
+    ],
+    [
+     42,
+     1254,
+     "4f2cd65c5b11649808b00f04eb6afb776102678fe9acb9b14880410efaf2bdfa"
+    ]
+   ]
+  },
+  "fury-cutter-pla-scyther-golem-growl-4": {
+   "fixture": "fury-cutter-pla-scyther-golem-growl-4",
+   "counter": 5,
+   "verdict": "exact",
+   "rows": [
+    [
+     0,
+     4614,
+     "d6027217883b150ad20f52c0d62b356d2c14959fef5e7c09af2dd9897ac79ecb"
+    ],
+    [
+     1,
+     4615,
+     "d6027217883b150ad20f52c0d62b356d2c14959fef5e7c09af2dd9897ac79ecb"
+    ],
+    [
+     2,
+     4616,
+     "d6027217883b150ad20f52c0d62b356d2c14959fef5e7c09af2dd9897ac79ecb"
+    ],
+    [
+     3,
+     4617,
+     "d6027217883b150ad20f52c0d62b356d2c14959fef5e7c09af2dd9897ac79ecb"
+    ],
+    [
+     4,
+     4618,
+     "d6027217883b150ad20f52c0d62b356d2c14959fef5e7c09af2dd9897ac79ecb"
+    ],
+    [
+     5,
+     4619,
+     "d6027217883b150ad20f52c0d62b356d2c14959fef5e7c09af2dd9897ac79ecb"
+    ],
+    [
+     6,
+     4620,
+     "d6027217883b150ad20f52c0d62b356d2c14959fef5e7c09af2dd9897ac79ecb"
+    ],
+    [
+     7,
+     4621,
+     "d6027217883b150ad20f52c0d62b356d2c14959fef5e7c09af2dd9897ac79ecb"
+    ],
+    [
+     8,
+     4622,
+     "9cb8f6556afcefa7d0c96e493d4f5983139af08f34230e412d9b3f0978556a07"
+    ],
+    [
+     9,
+     4623,
+     "6098615ac1e5a004efd3424eaac7e9ea112369d1988204f34be3956d7a38b70e"
+    ],
+    [
+     10,
+     4624,
+     "c36d398df4f36136974fe4d1bd8fc7a1b9a2b460ff3d46ef6df5c31c137c78a1"
+    ],
+    [
+     11,
+     4625,
+     "9b64bdd0b7a8cf1226ca1bc44c19abd5f9695cebebb477c81c76feed6890e820"
+    ],
+    [
+     12,
+     4626,
+     "da4c3710031557ba4208340790d93d617387d4e89e488073c8722e6e3d036160"
+    ],
+    [
+     13,
+     4627,
+     "ac8fdef33a123d5b4e7b3a30ed181d9708581032970baa55b5c54fdf88648242"
+    ],
+    [
+     14,
+     4628,
+     "1919a35735807c55097761f218dd30a7138d0ae0cc6eceeb9b75594a4ffe0c3e"
+    ],
+    [
+     15,
+     4629,
+     "81293d71fa5a460cc0c6f8871be7f5ee43d1134fba04e93618a4d69cf68e865f"
+    ],
+    [
+     16,
+     4630,
+     "ba99ef10d5ef6bfea5e8b65fc727afcee94f025aaa7b876a9ec4ee6665e0ccf5"
+    ],
+    [
+     17,
+     4631,
+     "09a62bb1afd548dc204e8004fc4137dbf25066c6b64b30efee00b1cde98d57d7"
+    ],
+    [
+     18,
+     4632,
+     "a5fcfd228d53bd7ed36220f1753d7410e49fb6bfccb11e0d1dfcb05063d21734"
+    ],
+    [
+     19,
+     4633,
+     "2a3ac7542a8e18395c376c2e9073c8514bcff96b54f822962328b6c512823e3e"
+    ],
+    [
+     20,
+     4634,
+     "61049cd898216052fa1233a4334a2fcead164fb9c691c4cb4c5904cdb3da2048"
+    ],
+    [
+     21,
+     4635,
+     "e67aacd00ef48f914964c55700394a519a2da36d99efa4912f76dfd72000a044"
+    ],
+    [
+     22,
+     4636,
+     "37f228e3bb49ebfd1efcedd72d4eddbde4daa3ab1d54b0515730524723b9b37a"
+    ],
+    [
+     23,
+     4637,
+     "25d8dd40f4bd9a8727c32de7ba9d697ee1e60169f40de0ce06bb730464c8886d"
+    ],
+    [
+     24,
+     4638,
+     "0b6c287d87e94cc9682b2d54ecaa0e9b535aea0523b4301305aaa72b2746fd30"
+    ],
+    [
+     25,
+     4639,
+     "3ddf14a0de00211385cba847694725f3f5a6f1749b5b03fc5be4000776711e91"
+    ],
+    [
+     26,
+     4640,
+     "da1cc28804a28bdbc605b96ac2fe8132da1f1dddd3898e01f25a0b7451235c3a"
+    ],
+    [
+     27,
+     4641,
+     "78cd46cbc6ec0c96189680661cf1a567bab3de00fc6a5a130b32c3d8e6674868"
+    ],
+    [
+     28,
+     4642,
+     "78cd46cbc6ec0c96189680661cf1a567bab3de00fc6a5a130b32c3d8e6674868"
+    ],
+    [
+     29,
+     4643,
+     "a4b7f86f52fc847ac119118142b383c505b27458dc6f7f2bede60f1bc2ba1403"
+    ],
+    [
+     30,
+     4644,
+     "a4b7f86f52fc847ac119118142b383c505b27458dc6f7f2bede60f1bc2ba1403"
+    ],
+    [
+     31,
+     4645,
+     "78cd46cbc6ec0c96189680661cf1a567bab3de00fc6a5a130b32c3d8e6674868"
+    ],
+    [
+     32,
+     4646,
+     "d6027217883b150ad20f52c0d62b356d2c14959fef5e7c09af2dd9897ac79ecb"
+    ],
+    [
+     33,
+     4647,
+     "d6027217883b150ad20f52c0d62b356d2c14959fef5e7c09af2dd9897ac79ecb"
+    ],
+    [
+     34,
+     4648,
+     "d6027217883b150ad20f52c0d62b356d2c14959fef5e7c09af2dd9897ac79ecb"
+    ],
+    [
+     35,
+     4649,
+     "d6027217883b150ad20f52c0d62b356d2c14959fef5e7c09af2dd9897ac79ecb"
+    ],
+    [
+     36,
+     4650,
+     "d6027217883b150ad20f52c0d62b356d2c14959fef5e7c09af2dd9897ac79ecb"
+    ],
+    [
+     37,
+     4651,
+     "d6027217883b150ad20f52c0d62b356d2c14959fef5e7c09af2dd9897ac79ecb"
+    ],
+    [
+     38,
+     4652,
+     "d6027217883b150ad20f52c0d62b356d2c14959fef5e7c09af2dd9897ac79ecb"
+    ],
+    [
+     39,
+     4653,
+     "d6027217883b150ad20f52c0d62b356d2c14959fef5e7c09af2dd9897ac79ecb"
+    ],
+    [
+     40,
+     4654,
+     "d6027217883b150ad20f52c0d62b356d2c14959fef5e7c09af2dd9897ac79ecb"
+    ],
+    [
+     41,
+     4655,
+     "d6027217883b150ad20f52c0d62b356d2c14959fef5e7c09af2dd9897ac79ecb"
+    ],
+    [
+     42,
+     4656,
+     "d6027217883b150ad20f52c0d62b356d2c14959fef5e7c09af2dd9897ac79ecb"
+    ]
+   ]
+  }
+ }
+}
