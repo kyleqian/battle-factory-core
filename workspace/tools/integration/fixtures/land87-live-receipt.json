@@ -1,0 +1,137 @@
+{
+ "schema": "land87-live-receipt/v1",
+ "base": "c25af4253",
+ "productionSrcBase": "d87bed5f",
+ "patch": "tools/integration/fixtures/reseed85/reseed85-temp-src.diff (patch -p1; one file, all hunks landed)",
+ "flatterPolicy": "260 is in LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS (hist73 audit group); WORDS_ORDER_UNIT_MOVE_IDS subset pinned by the test",
+ "windows": [
+  {
+   "window": "ms-opp-diglett-protect-c0.json",
+   "live": true,
+   "decline": null,
+   "reseeds": [
+    true
+   ],
+   "rows": 123,
+   "px": 0,
+   "same": true
+  },
+  {
+   "window": "ms-ply-snorlax-lightscreen-c0.json",
+   "live": true,
+   "decline": null,
+   "reseeds": [
+    true
+   ],
+   "rows": 86,
+   "px": 0,
+   "same": true
+  },
+  {
+   "window": "rd-opp-poliwag-reflect-c0.json",
+   "live": true,
+   "decline": null,
+   "reseeds": [
+    true
+   ],
+   "rows": 79,
+   "px": 0,
+   "same": true
+  },
+  {
+   "window": "rd-opp-poliwag-reflect-c1.json",
+   "live": true,
+   "decline": null,
+   "reseeds": [
+    true
+   ],
+   "rows": 78,
+   "px": 0,
+   "same": true
+  },
+  {
+   "window": "rd-ply-snorlax-reflect-c0.json",
+   "live": true,
+   "decline": null,
+   "reseeds": [
+    true
+   ],
+   "rows": 79,
+   "px": 0,
+   "same": true
+  },
+  {
+   "window": "sa-opp-pidgeotto-protect-c0.json",
+   "live": true,
+   "decline": null,
+   "reseeds": [
+    true
+   ],
+   "rows": 123,
+   "px": 0,
+   "same": true
+  },
+  {
+   "window": "sa-ply-snorlax-protect-c0.json",
+   "live": true,
+   "decline": null,
+   "reseeds": [
+    true
+   ],
+   "rows": 123,
+   "px": 0,
+   "same": true
+  },
+  {
+   "window": "sa-ply-snorlax-protect-c1.json",
+   "live": true,
+   "decline": null,
+   "reseeds": [
+    true
+   ],
+   "rows": 123,
+   "px": 0,
+   "same": true
+  }
+ ],
+ "windowsSummary": {
+  "count": 8,
+  "allLive": true,
+  "allZeroPx": true,
+  "allRunsEqual": true,
+  "rows": 814,
+  "probePairsAeqB": "12 of 12",
+  "byteIdenticalToReseed85CheckPatched": true
+ },
+ "census": {
+  "seeds": "0..999",
+  "shards": 10,
+  "commands": 27516,
+  "commandsGained": 58,
+  "framesGained": 6955,
+  "liveBase": 25962,
+  "liveFinal": 26020,
+  "liveFramesBase": 3880093,
+  "liveFramesFinal": 3887048,
+  "allocatorUnknownBase": "55 / 5514",
+  "allocatorUnknownFinal": "6 / 530",
+  "gainedByMove": {
+   "PROTECT": 24,
+   "LIGHT SCREEN": 9,
+   "REFLECT": 8,
+   "BARRIER": 5,
+   "MAGIC COAT": 3,
+   "FLATTER (unclassified case-local gate)": 9
+  },
+  "regressions": 0,
+  "keySequenceIdentical": true,
+  "battleDigest": "5cc95d1eace6",
+  "note": "vs reseed85 +47 / +4,834 on aeaa33dff: land86 Flatter words unit lets 3 more Magic Coat allocator consumers and 8 more Flatter windows (1,971 frames vs 219) reach the shadow; the other 46 allocator-unknown commands are reseed85's"
+ },
+ "parity": {
+  "11": "identical to reseed85 parity-11.json",
+  "98": "identical to reseed85 parity-98.json",
+  "420": "identical to reseed85 parity-420.json"
+ },
+ "masterTypecheckFix": "src/engine/liveMoveAnimation.ts imported composeLivePalettes (land86 use vs cast83 import: TS2552 and a ReferenceError that truncated census battles to 27,137 commands); the base census copy carries the same one-line fix"
+}
