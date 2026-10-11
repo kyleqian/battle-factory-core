@@ -141,6 +141,12 @@ Doll notes:
 - No ROM drift was seen. One probe process (`a21-qa-opp-nidorino-nidorina`) crashed with exit 139 and no output, twice; the scenario was
   dropped.
 
+Gates (evidence only):
+- `npm test`: 1,616 files / 13,272 tests passed, 44 files / 223 tests skipped, 0 failed (concurrent with run C);
+- `npm run build`: green;
+- `git diff --check 5af9bdb51..HEAD`: clean;
+- every change since `5af9bdb51` is an added file in the audit21 set; no existing tracked file is modified.
+
 ## 3. Reproduction (from workspace/; direct mGBA only; production src is never patched)
 
 ```
