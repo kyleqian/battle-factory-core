@@ -66,7 +66,23 @@ One file, `src/engine/battleResolutionPresentation.ts`:
 
 ## 4. Pins the patch moves
 
-PINS_PLACEHOLDER
+Patched copy (`git archive 52c181d54` + the diff, its own git repo), `npm test`: **3 files / 6 tests failed, 1,624 files / 13,381 tests passed**
+(44 / 223 skipped). One is the environment, not a pin: `tests/appDifferential.test.ts:131` needs `HEAD~` ("fatal: Needed a single revision" in a
+one-commit copy repo); with a second commit the file passes 10 / 10. **5 moved pins in 2 files** (`fixtures/off108/pins.json`):
+
+- `tests/factoryRoundBattleOrchestrator.test.ts:1094` (ISSUES #95): asserts a Scene OFF Harden + Sandstorm turn has NO `move-animation` command.
+  Its no-hit OFF attack pauses are now presented (that is the fix). The invariant the test guards (no pause pairs with the end-of-turn weather
+  loop's hit animation across the execution boundary) still holds: `sceneOffNoHitPauseFrames` stops at an instructionExecution drop. Re-pin as
+  "every move-animation command in that turn is a no-hit pause of P frames, none 140".
+- `tests/randomRoundSoak.test.ts:311` soak seed 21 (strong-route): frames 37,260 → 38,077, renderCalls 2,671 → 2,715, same battle / outcome / turn.
+- `tests/randomRoundSoak.test.ts:728` / `:754` Milestone M-B (c) seed 0: frames 11,955 → 13,889 ('full') and 8,499 → 9,003 ('vanilla'), same
+  battle / endState / turn.
+- `tests/randomRoundSoak.test.ts:495` (ISSUES #89) soak seed 27, random policy: **driver path, not gameplay.** The soak driver presses A during
+  resolution with `rng.gap` cooldowns drawn from its own policy RNG (`randomRoundSoakDriver.ts` `decide` → `onResolution` → `press`), so a
+  longer presentation consumes more policy draws and its later random move picks differ: the round is now lost at battle 1, turn 28
+  (20,755 frames) instead of battle 4, turn 26 (64,525), so `frames > 30,798` no longer reaches the old Baton Pass halt. The orchestrator
+  censuses (fixed least-used-slot policy) show identical gameplay (§1). Re-seed this pin in the land step (a seed whose patched path
+  still reaches the ISSUES #89 openpartyscreen halt).
 
 ## 5. FOLD INSTRUCTIONS (land step, AFTER the stats-change command — ISSUES #166 slice (c) — is on master)
 
