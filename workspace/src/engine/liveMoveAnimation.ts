@@ -91,7 +91,7 @@ import { waterSpoutTimeline, type WaterSpoutLiveInputs } from "../animation/wate
 import { hiddenPowerUnownFormIndex } from "../animation/hiddenPower.ts";
 import type { FlailPower } from "../animation/flail.ts";
 import type { HailProfile } from "../animation/hail.ts";
-import { composeLiveArtPalettes, composeLiveFieldPalettes, liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
+import { composeLiveArtPalettes, composeLiveFieldPalettes, composeLivePalettes,liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
 import lovelyKissAsset from "../animation/assets/lovely-kiss.json" with { type: "json" };
 import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
 import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
