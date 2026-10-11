@@ -75,7 +75,7 @@ describe("doll90: Substitute-doll residual cells", () => {
       expect(boxDiff(stem, 0)).toBe(0);
     }
   });
-  it("Double Team 104: self-target swap cell, both sides, framed {rows 159, shift -1}; Recover 105 still declines", () => {
+  it("Double Team 104: self-target swap cell, both sides, framed {rows 159, shift -1} (Recover 105: ctl95, both sides)", () => {
     expect([...LIVE_SUBSTITUTE_SWAP_BODY_CELLS.get(104)!]).toEqual(BOTH);
     expect(LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS.has(104)).toBe(true);
     // The ROM body: 158 script rows + the first inactive row (MON_TO_SUBSTITUTE starts there; no stats banner behind the doll).
@@ -92,8 +92,8 @@ describe("doll90: Substitute-doll residual cells", () => {
       expect(view(bodyStart + 1)!.view.effect).toMatchObject({ age: 0 });
       expect(view(bodyStart + 158)!.view.effect).toMatchObject({ age: 157 });
       expect(view(bodyStart + 159)!.kind).toBe("swap");
-      expect(liveSubstituteSwapApplies(self(105, a), attackerDoll(a))).toBe(false);
-      expect(liveMoveSubstituteDollDeclines(self(105, a), attackerDoll(a))).toBe(true);
+      expect(liveSubstituteSwapApplies(self(105, a), attackerDoll(a))).toBe(true);
+      expect(liveMoveSubstituteDollDeclines(self(105, a), attackerDoll(a))).toBe(false);
     }
   });
   // Committed ROM RGB sha256 per row of four doll81 composite windows (fresh direct mGBA, r1 == r2; the attacker's RAM-read personality):

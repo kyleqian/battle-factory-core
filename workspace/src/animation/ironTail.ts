@@ -74,11 +74,15 @@ export function ironTailAtAge(
     attackerCenter.y,
     true,
   );
-  // The band only renders once the scrolled metal strip enters the attacker's
-  // box (data10 28..124); the first seven callbacks of each sweep and the
-  // wrap frames (data10 0..24) produce no pixels, and sweep 3 (data11==2)
-  // is invisible because ClearBattleAnimBg already ran.
-  const bandVisible = metallic.maskSpriteActive && metallic.data10 >= 28;
+  // The band is the metal BG strip seen through the attacker's OBJ-window
+  // copy, so the attacker's own opaque pixels decide where (and whether) it
+  // shows: drawn masked from the first callback step through sweep 2.
+  // Sweep 3 (data11==2) is invisible because ClearBattleAnimBg already ran.
+  // ctl95 (docs/ctl95-doll-free-controls.md): the former `data10 >= 28`
+  // gate was AZUMARILL's shape (no opaque pixel under the strip earlier in a
+  // sweep); PERSIAN / GOLBAT / GENGAR show the strip from data10 16..24
+  // (8..244 px at ages 9..12 / 41..44 otherwise, fresh direct mGBA).
+  const bandVisible = metallic.maskSpriteActive && age >= METALLIC_SHINE_FIRST_STEP_AGE;
   return {
     metallic: {
       ...metallic,

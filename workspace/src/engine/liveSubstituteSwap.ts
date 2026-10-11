@@ -122,11 +122,14 @@ export const LIVE_SUBSTITUTE_SWAP_BODY_CELLS: ReadonlyMap<number, readonly Side[
   // doll81 (docs/next-adapters-doll81.md): fresh direct-mGBA PERSIAN<->SLOWBRO + GENGAR -> GOLBAT / elevated GOLBAT -> LAPRAS windows,
   // 0 px on every row of every window.
   [138, Object.freeze(["opponent"] as const)], // Dream Eater (player: PERSIAN's ROM body is one row longer than GENGAR's)
-  [320, Object.freeze(["player"] as const)], // GrassWhistle (opponent: 13 whole-field rows near the body's end)
+  // GrassWhistle: the opponent's 13 whole-field rows near the body's end were the doll-free adapter's own restore-blend phase (ctl95:
+  // grassWhistleRestoreBlendStartAge, last on-screen note + 2); fixed, both sides are 0 px.
+  [320, BOTH],
   [76, BOTH], // SolarBeam, the charge turn only (the fire turn is the doll-free control's own residual)
   [142, BOTH], // Lovely Kiss
   [47, BOTH], // Sing (doll90: the ROM body length follows the note geometry, substituteSwapBodyFraming)
   [241, BOTH], // Sunny Day (self-target: LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS)
+  [105, BOTH], // Recover (self-target; ctl95: the doll-free controls' accepted window is activation + 10)
   // doll90 (docs/doll90-doll-cells.md): PERSIAN / GENGAR player, PERSIAN / elevated GOLBAT opponent, 0 px on every row.
   [104, BOTH], // Double Team (self-target; the attacker's personality-derived clone phase, dt60)
 ]);
@@ -136,7 +139,7 @@ export const LIVE_SUBSTITUTE_SWAP_BODY_IDS: ReadonlySet<number> = new Set(LIVE_S
  * (doll90): the stats banner the doll-free adapter ends with never runs behind the doll (TryHandleLaunchBattleTableAnimation skips
  * B_ANIM_STATS_CHANGE while behindSubstitute), so the composite frames only the ROM body.
  */
-export const LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS: ReadonlySet<number> = new Set([241, 104]);
+export const LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS: ReadonlySet<number> = new Set([241, 104, 105]);
 
 export type SubstituteSwapBodyFraming = Readonly<{ rows: number; shift: number }>;
 /**
@@ -156,6 +159,7 @@ export const LIVE_SUBSTITUTE_SWAP_BODY_FRAMING: ReadonlyMap<number, SubstituteSw
   [7, { rows: 102, shift: 0 }], // Fire Punch (adapter 101: one row short of the first inactive row)
   [153, { rows: 217, shift: -4 }], // Explosion (adapter 212)
   [320, { rows: 221, shift: 0 }], // GrassWhistle (adapter 225; doll81)
+  [105, { rows: 184, shift: -10 }], // Recover (adapter 169; ctl95: age 0 = the first orb, activation + 10)
   [142, { rows: 153, shift: 0 }], // Lovely Kiss (adapter 152; doll81)
   [47, { rows: 246, shift: 0 }], // Sing (player adapter 245; doll81; doll90: geometry-derived, liveSingBodyRows)
   [104, { rows: 159, shift: -1 }], // Double Team (adapter 230 = body + stats banner; doll90: every doll-free control 0 px at -1)

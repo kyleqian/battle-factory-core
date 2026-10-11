@@ -61,9 +61,11 @@ describe("attacker-doll swap cells (prep40)", () => {
       [53, 115, 210, -15, ["player", "opponent"]], [92, 219, 231, -7, ["player", "opponent"]], [44, 26, 41, -10, ["player", "opponent"]],
       [7, 101, 102, 0, ["player", "opponent"]], [153, 212, 217, -4, ["player", "opponent"]],
       // land82 (doll81)
-      [142, 152, 153, 0, ["player", "opponent"]], [320, 225, 221, 0, ["player"]],
+      [142, 152, 153, 0, ["player", "opponent"]], [320, 225, 221, 0, ["player", "opponent"]], // ctl95: opponent widened
       // doll90: Double Team (self-target), the doll-free controls' calibrated shift -1
       [104, 230, 159, -1, ["player", "opponent"]],
+      // ctl95: Recover (self-target), the accepted window's age 0 = the first orb (activation + 10)
+      [105, 169, 184, -10, ["player", "opponent"]],
     ];
     // Sing (47): geometry-derived rows since doll90 (liveSingBodyRows; tests/doll90DollCells.test.ts), its table entry is the fallback.
     expect([...LIVE_SUBSTITUTE_SWAP_BODY_FRAMING.keys()].filter((id) => id !== 47).sort((a, b) => a - b)).toEqual(framed.map((f) => f[0]).sort((a, b) => a - b));

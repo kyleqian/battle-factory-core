@@ -62,6 +62,33 @@ export const GRASS_WHISTLE_BLEND_LAST_AGE = 17;
 /** Restore `simple_palette_blend` sprite creation age (probe: player frame 379, opponent 382). */
 export const GRASS_WHISTLE_RESTORE_BLEND_START_AGE = 163;
 export const GRASS_WHISTLE_RESTORE_BLEND_START_AGE_OPPONENT = 166;
+/**
+ * ctl95 (docs/ctl95-doll-free-controls.md): the restore blend follows the
+ * script's `waitforvisualfinish` on the LAST wavy note, so its creation age is
+ * geometry-derived, not per side. `AnimWavyMusicNotes_Step` destroys a note on
+ * the callback after it leaves x -16..256 / y -16..128 (last on-screen body
+ * age L + 1) and the script's next row creates the restore blend: L + 2. The
+ * two legal ROSELIA -> ONIX probes are the constants above (player L 161,
+ * opponent L 164); the doll-free opponent controls PERSIAN -> SLOWBRO (L 157)
+ * and GOLBAT -> LAPRAS (L 159) restore at 159 / 161 (fresh direct mGBA).
+ */
+export const GRASS_WHISTLE_RESTORE_AFTER_LAST_NOTE_ROWS = 2;
+const restoreStartCache = new Map<string, number>();
+export function grassWhistleRestoreBlendStartAge(
+  origin: SingPoint,
+  target: SingPoint,
+): number {
+  const key = `${origin.x},${origin.y},${target.x},${target.y}`;
+  const cached = restoreStartCache.get(key);
+  if (cached !== undefined) return cached;
+  let last = -1;
+  for (let noteAge = 0; noteAge < 512; noteAge++) {
+    if (wavyMusicNotesGeometryAtAge(noteAge, origin, target).length > 0) last = noteAge;
+  }
+  const start = last + GRASS_WHISTLE_FIRST_NOTE_AGE + GRASS_WHISTLE_RESTORE_AFTER_LAST_NOTE_ROWS;
+  restoreStartCache.set(key, start);
+  return start;
+}
 /** `AnimSimplePaletteBlend_Step` holds until `gPaletteFade.active` clears: 18 live frames. */
 export const GRASS_WHISTLE_RESTORE_BLEND_LIFE = 18;
 
@@ -143,9 +170,7 @@ export function grassWhistleAtAge(
   const notes = noteAge < 0
     ? []
     : grassWhistleNotesAtAge(noteAge, origin, target);
-  const restoreStartAge = side === "player"
-    ? GRASS_WHISTLE_RESTORE_BLEND_START_AGE
-    : GRASS_WHISTLE_RESTORE_BLEND_START_AGE_OPPONENT;
+  const restoreStartAge = grassWhistleRestoreBlendStartAge(origin, target);
   const initialBlendActive = age >= GRASS_WHISTLE_BLEND_START_AGE
     && age <= GRASS_WHISTLE_BLEND_LAST_AGE;
   const restoreBlendActive = age >= restoreStartAge

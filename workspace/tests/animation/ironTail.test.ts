@@ -18,8 +18,6 @@ describe("Move_IRON_TAIL source-relative reducer", () => {
     const beforeGray = ironTailAtAge(5, "player", PLAYER.attacker);
     expect(beforeGray.metallic.attackerGrayscale).toBe(true);
     expect(beforeGray.metallic.maskSpriteActive).toBe(false);
-    expect(ironTailAtAge(11, "player", PLAYER.attacker)
-      .metallic.maskSpriteActive).toBe(false);
   });
 
   it("shows the grayscale from the first step through set_original_pal", () => {
@@ -32,15 +30,18 @@ describe("Move_IRON_TAIL source-relative reducer", () => {
   });
 
   it("renders exactly the two visible metallic-shine band sweeps", () => {
-    // RAM truth: sweep 1 at ages 12..36 and sweep 2 at ages 44..68; the
-    // shared one-display latch moves them to displayed ages 13..37/45..69.
+    // The strip is masked by the attacker's OBJ-window copy from the first
+    // callback step (age 6) through sweep 2 (age 68). ctl95: the old
+    // data10 >= 28 gate (ages 12..36 / 44..68) was AZUMARILL's opaque extent;
+    // PERSIAN / GOLBAT / GENGAR show the strip at ages 9..12 / 41..44.
     const band = (age: number) => ironTailAtAge(age, "player", PLAYER.attacker)
       .metallic.maskSpriteActive;
-    expect(band(11)).toBe(false);
-    expect(band(12)).toBe(true);
+    expect(band(5)).toBe(false);
+    expect(band(6)).toBe(true);
+    expect(band(11)).toBe(true);
     expect(band(36)).toBe(true);
-    expect(band(37)).toBe(false);
-    expect(band(43)).toBe(false);
+    expect(band(37)).toBe(true);
+    expect(band(43)).toBe(true);
     expect(band(44)).toBe(true);
     expect(band(68)).toBe(true);
     // Sweep 3 and everything after is invisible (ClearBattleAnimBg ran).

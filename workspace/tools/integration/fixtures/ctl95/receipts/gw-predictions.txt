@@ -1,0 +1,7 @@
+# ctl95 GrassWhistle 320 predictions, written BEFORE the probes of these scenarios ran (code 0d32944b3 + the geometry restore,
+# grassWhistleRestoreBlendStartAge = last on-screen note body age + 2; BG(5,5) colour steps at restore + 6 and restore + 12).
+# The old per-side constants predicted opponent 166 (steps 172 / 178) and player 163 (169 / 175) for every pair.
+opponent GENGAR->SLOWBRO restore 157 BG steps at 163 / 169
+opponent CROBAT->WAILORD restore 148 BG steps at 154 / 160
+player PERSIAN->SLOWBRO restore 163 BG steps at 169 / 175
+player GENGAR->SLOWBRO restore 163 BG steps at 169 / 175
