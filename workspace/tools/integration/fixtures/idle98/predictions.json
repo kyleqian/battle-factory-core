@@ -1,0 +1,30 @@
+{
+ "schema": "idle98-predictions/v1",
+ "writtenBefore": "any idle98 probe (committed before the first probe job; the Dynamic Punch miss-seed search is staging, not a measurement)",
+ "base": "3dd2b74b9 (production src 2e5b1d7c)",
+ "definitions": {
+  "G": "ROM: last screen change before F_att (the final glyph of 'X used Y!' or, for a later multi-hit body, the last change of the previous hit)",
+  "F_att / A / E / F_after": "idle94Compare.py anchors: first frame on the attackanimation byte X, gAnimScriptActive rise, first inactive frame, first frame on X+2",
+  "F_hit": "ROM: first frame on X+3 (hitanimation, after effectivenesssound) for the hit path",
+  "pre / post": "A - F_att / F_after - E",
+  "span": "F_after - F_att"
+ },
+ "rom": {
+  "pre": "3 on EVERY Scene ON body: damaging (single hit, each multi-hit body, two-turn charge + strike, KO hit), both sides, and the Tackle bodies of the targets",
+  "post": "2 on every Scene ON body",
+  "preRows": "F_att .. A-1 are one static image equal to F_att-1 (first body: the printed 'X used Y!' text)",
+  "postRows": "E .. F_after-1 equal the ROM's first inactive row E (the row production shows last when trail = -1)",
+  "offSpan": "Scene OFF F_after - F_att = 35 on every damaging body (Cmd_attackanimation pushes BattleScript_Pausex20 in OFF)",
+  "modeIndependent": "F_att - G and F_hit - F_after are equal in ON and OFF (only the attackanimation .. waitanimation span depends on the scene)",
+  "miss": "a Dynamic Punch miss has NO attackanimation (accuracycheck jumps to BattleScript_MoveMissedPause: attackstring, ppreduce, pause B_WAIT_TIME_SHORT): no body, the same pause in ON and OFF"
+ },
+ "production": {
+  "hitOff": "production's OFF hit path (move-animation 1 + interveningInstructions + 32 = 42 on BattleScript_EffectHit moves) equals the ROM OFF G -> F_hit span up to one fixed message-anchor constant shared by every hit-path move: OFF loses 0",
+  "hitOn": "production's ON hit path loses L_hit = (span_ON - 35) - (D - 42) = 12 + N + trail frames per body (= the status class L + 7: the release -> F_att and F_after -> hitanimation frames production's OFF formula counts and its ON command does not). Karate Chop (N 0, trail -1): 11; Psychic (5, -1): 16; Bite (10, 4): 26; Earthquake (0, 9): 21",
+  "statusOn": "L = pre + N + trail + post (idle94); Bulk Up 8",
+  "statusOff": "35 (no command for the attackanimation -> Pausex20 -> waitanimation span when there is no hit receipt)",
+  "multiHit": "every multi-hit body (Double Kick hit 1 and 2) loses the same per-body L as a single hit with its own N / trail",
+  "twoTurnCharge": "the charge turn is a no-hit body: ON L = pre + N + trail + post, OFF 35 (like a status move)",
+  "rowsReproducible": "pre rows = production's age-0 frame's predecessor image (the printed message, already displayed by the message command); post rows = production's last row on lead-0 / trail -1 moves"
+ }
+}
