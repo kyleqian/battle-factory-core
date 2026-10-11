@@ -1,3 +1,4 @@
+import { struggleDisplayPlan, type StruggleDisplayPlan, type StruggleLiveInputs } from "./struggle.ts";
 import {
   ancientPowerAtAge,
   type AncientPowerState,
@@ -2871,6 +2872,15 @@ export interface SceneOnReturnConfig {
       | "attackerCenter" | "targetCenter">>;
 }
 
+/** stg107: narrow Scene-ON seam for MOVE_STRUGGLE (src/animation/struggle.ts; the live inputs are liveOamMoves.ts liveStruggleInputs). */
+export interface SceneOnStruggleConfig {
+  readonly move: "STRUGGLE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<StruggleLiveInputs>;
+}
+
 /**
  * Narrow Scene-ON seam for MOVE_FLATTER.  The caller owns all live sprite
  * allocation, transfer buffers, palette/register/audio snapshots, and the
@@ -4448,6 +4458,7 @@ export type SceneOnMoveConfig =
   | SceneOnIceBallConfig
   | SceneOnCurseConfig
   | SceneOnReturnConfig
+  | SceneOnStruggleConfig
   | SceneOnFlatterConfig
   | SceneOnRazorWindConfig
   | SceneOnHornDrillConfig
@@ -13618,3 +13629,9 @@ export const ONIX_TO_GROVYLE_ENDEAVOR_PRESENTATION = {
   SceneOnEndeavorConfig,
   "animationProfile" | "fieldProfile" | "moveTextStartAge"
 >;
+
+/** stg107: live, evidence-free scanout plan of one Struggle row. */
+export function sceneOnStruggleDisplayPlan(state: SceneOnMovePresentationState<SceneOnStruggleConfig>): StruggleDisplayPlan {
+  if (state.config.move !== "STRUGGLE") throw new Error(`expected STRUGGLE presentation, got ${state.config.move}`);
+  return struggleDisplayPlan(state.age, state.config.animationInputs);
+}

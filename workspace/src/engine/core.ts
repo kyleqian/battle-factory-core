@@ -208,6 +208,7 @@ import {
   type SceneOnCurseConfig,
   type SceneOnPursuitConfig,
   type SceneOnReturnConfig,
+  type SceneOnStruggleConfig,
   type SceneOnFlatterConfig,
   type SceneOnOverheatConfig,
   type SceneOnOutrageConfig,
@@ -444,6 +445,10 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "RETURN") {
     const returnPresentation = presentation as SceneOnMovePresentationState<SceneOnReturnConfig>;
     renderSceneOnMovePresentation(framebuffer, returnPresentation);
+    return;
+  }
+  if (presentation.config.move === "STRUGGLE") {
+    renderSceneOnMovePresentation(framebuffer, presentation as SceneOnMovePresentationState<SceneOnStruggleConfig>);
     return;
   }
   if (presentation.config.move === "FLATTER") {

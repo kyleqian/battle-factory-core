@@ -1,0 +1,10 @@
+{
+ "schema": "issue142-shadow-rows-extra/v1",
+ "generated": "stl109 (docs/stl109-struggle-live.md): Struggle 165 shadow rows, hand-pinned from the stg107 elevated-target ROM windows",
+ "rows": [
+  {"id": 165, "move": "STRUGGLE", "orientation": "player", "variant": "stg107-ply-95-42", "shadowRow": 0, "cleanupFrame": null, "tailFirstAge": null, "inWindow": true,
+   "sources": {"fixture": "tools/integration/fixtures/stg107/struggle-windows-on.jsonl", "body": "normal", "activation": "window start = activation (age 0); elevated Golbat target 0 px on all 112 rows (patched-windows-summary.txt)"}},
+  {"id": 165, "move": "STRUGGLE", "orientation": "opponent", "variant": "stg107-opp-42-135", "shadowRow": 0, "cleanupFrame": null, "tailFirstAge": null, "inWindow": true,
+   "sources": {"fixture": "tools/integration/fixtures/stg107/struggle-windows-on.jsonl", "body": "normal", "activation": "window start = activation (age 0); elevated Golbat attacker 0 px on all 112 rows (patched-windows-summary.txt)"}}
+ ]
+}

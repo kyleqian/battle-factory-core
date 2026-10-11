@@ -668,6 +668,7 @@ import battleAnimTablesAsset from "../data/gen/battle-anim-tables.json" with { t
 import battleAnimParticlesAsset from "../assets/gen/battle-anim-particles.json" with { type: "json" };
 import battleAnimSweatDropAsset from "../assets/gen/battle-anim-sweat-drop.json" with { type: "json" };
 import battleAnimHitsplatAsset from "../assets/gen/battle-anim-hitsplat.json" with { type: "json" };
+import movementWavesAsset from "../assets/gen/battle-anim-movement-waves.json" with { type: "json" };
 import battleAnimCuttingSliceAsset from "../assets/gen/battle-anim-cutting-slice.json" with { type: "json" };
 import battleAnimSlashSliceAsset from "../assets/gen/battle-anim-slash-slice.json" with { type: "json" };
 import battleAnimLickAsset from "../assets/gen/battle-anim-lick.json" with { type: "json" };
@@ -1029,6 +1030,7 @@ import {
   sceneOnPursuitDisplayPlan,
   sceneOnReturnView,
   sceneOnReturnDisplayPlan,
+  sceneOnStruggleDisplayPlan,
   sceneOnFlatterView,
   sceneOnFlatterDisplayPlan,
   sceneOnOverheatView,
@@ -1315,6 +1317,7 @@ import {
   type SceneOnCurseConfig,
   type SceneOnPursuitConfig,
   type SceneOnReturnConfig,
+  type SceneOnStruggleConfig,
   type SceneOnFlatterConfig,
   type SceneOnOverheatConfig,
   type SceneOnOutrageConfig,
@@ -25941,6 +25944,91 @@ export function renderSceneOnMovePresentation(
         ? `${view.battlers.attacker.art.displaySpecies} used`
         : `Foe ${view.battlers.attacker.art.displaySpecies} used`,
       "RETURN!", 99);
+    return;
+  }
+
+  if (state.config.move === "STRUGGLE") {
+    // stg107: Move_STRUGGLE (src/animation/struggle.ts): the RETURN branch's monbg / OAM / blended-hitsplat composition plus the two
+    // 32x32 ObjNormal gMovementWavesSpriteTemplate sprites (frame = tile offset / 16, hFlip from attr1).
+    const moveState = state as SceneOnMovePresentationState<SceneOnStruggleConfig>;
+    const { attacker, target, animationInputs } = moveState.config;
+    const plan = sceneOnStruggleDisplayPlan(moveState);
+    if (attacker.geometry.side === target.geometry.side) throw new Error("STRUGGLE presentation requires battlers on opposite sides");
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (side: "player" | "opponent", species: string): BattlerArt => {
+      const art = side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[species];
+      if (!art) throw new Error(`STRUGGLE missing live battler art ${species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset => side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const rgb555 = (word: number): RgbColor => {
+      const packed = mgbaColorFromBgr555(word);
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+    };
+    const paletteBank = (bank: number): RgbColor[] => plan.hardwarePalette.slice(bank * 16, bank * 16 + 16).map(rgb555);
+    drawExtractedTileBg(fb, { tileset: battleBg.static.tileset, tilemap: battleBg.static.tilemap, subpalettes: [2, 3, 4].map(paletteBank) });
+    const top = (attr: readonly [number, number, number]): { x: number; y: number } => {
+      const rawX = attr[1] & 0x1ff, rawY = attr[0] & 0xff;
+      return { x: rawX >= 240 ? rawX - 512 : rawX, y: rawY >= 160 ? rawY - 256 : rawY };
+    };
+    const attackerSpecies = animationInputs.attackerArt.displaySpecies, targetSpecies = animationInputs.targetArt.displaySpecies;
+    const attackerArt = artFor(attacker.geometry.side, attackerSpecies);
+    const targetArt = artFor(target.geometry.side, targetSpecies);
+    if (plan.targetOnBg) {
+      drawSpriteSheet(fb, tilesFor(targetArt, target.geometry.side), paletteBank(target.geometry.side === "opponent" ? 8 : 9),
+        -plan.targetBgScroll.x, -plan.targetBgScroll.y);
+    }
+    if (moveState.age === 0 && attacker.geometry.side === "opponent") {
+      drawSourceOpponentEnemyShadow(fb, attackerSpecies, { x: attacker.geometry.battlePositionCenter.x,
+        y: attacker.geometry.battlePositionCenter.y - ((plan.attacker.attr[0] & 0xff) - 8) });
+    }
+    if (moveState.age === 0 && target.geometry.side === "opponent" && plan.target) {
+      drawSourceOpponentEnemyShadow(fb, targetSpecies, { x: target.geometry.battlePositionCenter.x,
+        y: target.geometry.battlePositionCenter.y - ((plan.target.attr[0] & 0xff) - 8) });
+    }
+    const nonObjTarget2 = fb.slice();
+    const eva = animationInputs.registers.bldalpha! & 0x1f, evb = animationInputs.registers.bldalpha! >>> 8 & 0x1f;
+    const drawBattler = (side: "player" | "opponent", attr: readonly [number, number, number], art: BattlerArt): void => {
+      const corner = top(attr);
+      drawSpriteSheet(fb, tilesFor(art, side), paletteBank(16 + (attr[2] >>> 12 & 0xf)), corner.x, corner.y);
+    };
+    const entries: Array<{ oamIndex: number; draw: () => void }> = [
+      { oamIndex: plan.attacker.oamIndex, draw: () => drawBattler(attacker.geometry.side, plan.attacker.attr, attackerArt) },
+    ];
+    if (plan.target) {
+      const shown = plan.target;
+      entries.push({ oamIndex: shown.oamIndex, draw: () => drawBattler(target.geometry.side, shown.attr, targetArt) });
+    }
+    for (const wave of plan.waves) {
+      const corner = top(wave.attr);
+      const tiles = movementWavesAsset.frames.list[wave.frame]!;
+      entries.push({ oamIndex: wave.oamIndex, draw: () => drawSpriteSheetFlipped(fb,
+        { columns: movementWavesAsset.frames.columns, rows: movementWavesAsset.frames.rows, tiles } as Tileset,
+        paletteBank(16 + (wave.attr[2] >>> 12 & 0xf)), corner.x, corner.y, wave.hFlip, false) });
+    }
+    for (const impact of plan.impacts) {
+      const corner = top(impact.attr);
+      entries.push({ oamIndex: impact.oamIndex, draw: () =>
+        drawSpriteSheetAffineRotateBlendedOverFb(fb, nonObjTarget2, battleAnimHitsplat.tileset, paletteBank(16 + (impact.attr[2] >>> 12 & 0xf)),
+          corner.x + 16, corner.y + 16, impact.matrix[0], impact.matrix[1], impact.matrix[2], impact.matrix[3], eva, evb, false) });
+    }
+    for (const entry of entries.sort((left, right) => right.oamIndex - left.oamIndex)) entry.draw();
+    const playerSpecies = attacker.geometry.side === "player" ? attackerSpecies : targetSpecies;
+    const opponentSpecies = attacker.geometry.side === "opponent" ? attackerSpecies : targetSpecies;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: profile.playerStatus ?? "none", currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb, attacker.geometry.side === "player" ? `${attackerSpecies} used` : `Foe ${attackerSpecies} used`, "STRUGGLE!", 99);
     return;
   }
 
