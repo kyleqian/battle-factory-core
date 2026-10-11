@@ -6,7 +6,8 @@ Scene ON: liveShareCensus.ts shards r0..r9 (.json + .jsonl, --seeds=100k..100k+9
 command must keep its KEY (battle, kind, moveId, side, attacker, target), status and frames; battleDigestExcludingFrames must be equal per
 shard; the battle frame totals move only by the used-move holds of (c).
 Scene OFF: off108Route.ts --scene=off shards off-0..off-9 (same seeds). The uses (seed, move, attacker, u, receipt path) must be identical;
-every command list must be identical once the patch's own changes are removed: an inserted pause command (move-animation at a no-hit attack
+every command list must be identical once the patch's own changes are removed (a battle that hits the route's FRAME_BUDGET is compared
+on its common prefix): an inserted pause command (move-animation at a no-hit attack
 receipt's eventSequence) and the used-move message's holdFrames. Inserted commands / frames and widened holds are tallied per class
 (the next presented receipt N: message / STATS_CHANGE / status-data / HP bar; holds by the print's source label).
 """
@@ -16,19 +17,31 @@ on_b, on_p, off_b, off_p, out_path = sys.argv[1:6]
 res = {"schema": "off108-census-delta/v1"}
 
 # ---- Scene ON (liveShareCensus) ----
-on = {"shards": [], "commandKeyMismatch": 0, "statusChanges": 0, "frameChanges": 0, "commands": 0}
+# compared battle by battle: a battle that stalls at the census FRAME_BUDGET in both trees can stop at a different turn
+on = {"shards": [], "battlesKeyMismatch": [], "statusChanges": 0, "frameChanges": 0, "commands": 0, "stalls": []}
 tot_b = tot_p = 0
+key = lambda c: (c["kind"], c.get("moveId"), c["side"], c["attacker"], c["target"])
 for k in range(10):
     rb, rp = (json.load(open(os.path.join(d, f"r{k}.json"))) for d in (on_b, on_p))
-    cb = [json.loads(l) for l in open(os.path.join(on_b, f"r{k}.jsonl")) if l.strip()]
-    cp = [json.loads(l) for l in open(os.path.join(on_p, f"r{k}.jsonl")) if l.strip()]
-    key = lambda c: (c["battle"], c["kind"], c.get("moveId"), c["side"], c["attacker"], c["target"])
-    if [key(c) for c in cb] != [key(c) for c in cp]:
-        on["commandKeyMismatch"] += 1
-    for a, b in zip(cb, cp):
-        on["statusChanges"] += a["status"] != b["status"]
-        on["frameChanges"] += a["frames"] != b["frames"]
-    on["commands"] += len(cb)
+    gb, gp = collections.defaultdict(list), collections.defaultdict(list)
+    for d, g in ((on_b, gb), (on_p, gp)):
+        for l in open(os.path.join(d, f"r{k}.jsonl")):
+            if l.strip():
+                c = json.loads(l)
+                g[c["battle"]].append(c)
+    for battle in sorted(set(gb) | set(gp)):
+        x, y = gb[battle], gp[battle]
+        on["commands"] += len(x)
+        if [key(c) for c in x] != [key(c) for c in y]:
+            n = 0
+            while n < min(len(x), len(y)) and key(x[n]) == key(y[n]):
+                n += 1
+            on["battlesKeyMismatch"].append({"battle": battle, "commands": [len(x), len(y)], "commonPrefix": n})
+            x, y = x[:n], y[:n]
+        on["statusChanges"] += sum(a["status"] != b["status"] for a, b in zip(x, y))
+        on["frameChanges"] += sum(a["frames"] != b["frames"] for a, b in zip(x, y))
+    if rb["battles"]["stalls"] or rp["battles"]["stalls"]:
+        on["stalls"].append({"shard": k, "base": rb["battles"]["stalls"], "patched": rp["battles"]["stalls"]})
     tot_b += rb["battles"]["frames"]; tot_p += rp["battles"]["frames"]
     on["shards"].append({"shard": k, "battleDigestExcludingFramesSame": rb["battleDigestExcludingFrames"] == rp["battleDigestExcludingFrames"],
                          "live": [rb["overall"]["live"], rp["overall"]["live"]], "fallback": [rb["overall"]["fallback"], rp["overall"]["fallback"]],
@@ -84,7 +97,7 @@ for seed in sorted(set(sb) | set(sp)):
         if ins:
             off["inserted"] += len(ins); off["insertedFrames"] += sum(c[2] for c in ins)
             after = [r for r in y["follow"] if r[0] > att[0] and r[1] not in ("set-battler-pp-data", "play-se")]
-            nk = after[0][2] if after and after[0][1] == "animation" else (after[0][1] if after else "?")
+            nk = after[0][2] if after and after[0][1] == "animation" else (after[0][1] if after else "beyond the route's 14-receipt window")
             off["insertedByN"][nk] += 1; off["insertedFramesByN"][nk] += sum(c[2] for c in ins)
             off["insertedByMove"][x["move"]] += 1
         elif att is not None and not y["hit"] and att[2] == "SCENE_OFF_ATTACK_PAUSE":
@@ -95,5 +108,5 @@ for k in ("insertedByN", "insertedFramesByN", "holdsByLabel", "holdFramesByLabel
 off["insertedByMove"] = dict(off["insertedByMove"].most_common(25))
 res["sceneOff"] = off
 json.dump(res, open(out_path, "w"), indent=1)
-print(json.dumps({"on": {k: v for k, v in on.items() if k != "shards"},
+print(json.dumps({"on": {k: v for k, v in on.items() if k not in ("shards", "stalls")},
                   "off": {k: off[k] for k in ("uses", "useKeyMismatch", "commandMismatch", "inserted", "insertedFrames", "holds", "holdFrames")}}))

@@ -1,0 +1,432 @@
+{
+ "schema": "off108-census-delta/v1",
+ "sceneOn": {
+  "shards": [
+   {
+    "shard": 0,
+    "battleDigestExcludingFramesSame": true,
+    "live": [
+     2635,
+     2635
+    ],
+    "fallback": [
+     45,
+     45
+    ],
+    "frames": [
+     1416610,
+     1442910
+    ],
+    "battlesWithMovedFrames": 85
+   },
+   {
+    "shard": 1,
+    "battleDigestExcludingFramesSame": true,
+    "live": [
+     2637,
+     2637
+    ],
+    "fallback": [
+     17,
+     17
+    ],
+    "frames": [
+     1336592,
+     1355680
+    ],
+    "battlesWithMovedFrames": 83
+   },
+   {
+    "shard": 2,
+    "battleDigestExcludingFramesSame": true,
+    "live": [
+     2628,
+     2628
+    ],
+    "fallback": [
+     8,
+     8
+    ],
+    "frames": [
+     1344184,
+     1367104
+    ],
+    "battlesWithMovedFrames": 81
+   },
+   {
+    "shard": 3,
+    "battleDigestExcludingFramesSame": true,
+    "live": [
+     2617,
+     2617
+    ],
+    "fallback": [
+     26,
+     26
+    ],
+    "frames": [
+     1351588,
+     1371160
+    ],
+    "battlesWithMovedFrames": 76
+   },
+   {
+    "shard": 4,
+    "battleDigestExcludingFramesSame": false,
+    "live": [
+     2932,
+     2932
+    ],
+    "fallback": [
+     291,
+     275
+    ],
+    "frames": [
+     1761085,
+     1793553
+    ],
+    "battlesWithMovedFrames": 82
+   },
+   {
+    "shard": 5,
+    "battleDigestExcludingFramesSame": true,
+    "live": [
+     2701,
+     2701
+    ],
+    "fallback": [
+     100,
+     100
+    ],
+    "frames": [
+     1516402,
+     1547260
+    ],
+    "battlesWithMovedFrames": 89
+   },
+   {
+    "shard": 6,
+    "battleDigestExcludingFramesSame": true,
+    "live": [
+     2389,
+     2389
+    ],
+    "fallback": [
+     20,
+     20
+    ],
+    "frames": [
+     1291102,
+     1311316
+    ],
+    "battlesWithMovedFrames": 89
+   },
+   {
+    "shard": 7,
+    "battleDigestExcludingFramesSame": false,
+    "live": [
+     2487,
+     2487
+    ],
+    "fallback": [
+     320,
+     301
+    ],
+    "frames": [
+     1534239,
+     1557413
+    ],
+    "battlesWithMovedFrames": 87
+   },
+   {
+    "shard": 8,
+    "battleDigestExcludingFramesSame": false,
+    "live": [
+     2609,
+     2609
+    ],
+    "fallback": [
+     313,
+     307
+    ],
+    "frames": [
+     1594763,
+     1615357
+    ],
+    "battlesWithMovedFrames": 86
+   },
+   {
+    "shard": 9,
+    "battleDigestExcludingFramesSame": true,
+    "live": [
+     2610,
+     2610
+    ],
+    "fallback": [
+     130,
+     130
+    ],
+    "frames": [
+     1502824,
+     1528470
+    ],
+    "battlesWithMovedFrames": 84
+   }
+  ],
+  "battlesKeyMismatch": [
+   {
+    "battle": 434,
+    "commands": [
+     266,
+     250
+    ],
+    "commonPrefix": 250
+   },
+   {
+    "battle": 796,
+    "commands": [
+     214,
+     195
+    ],
+    "commonPrefix": 195
+   },
+   {
+    "battle": 881,
+    "commands": [
+     293,
+     287
+    ],
+    "commonPrefix": 287
+   }
+  ],
+  "statusChanges": 0,
+  "frameChanges": 0,
+  "commands": 27515,
+  "stalls": [
+   {
+    "shard": 4,
+    "base": [
+     {
+      "seed": 434,
+      "streak": 21,
+      "turns": 339,
+      "at": "resolution presenting"
+     }
+    ],
+    "patched": [
+     {
+      "seed": 434,
+      "streak": 21,
+      "turns": 317,
+      "at": "resolution presenting"
+     }
+    ]
+   },
+   {
+    "shard": 7,
+    "base": [
+     {
+      "seed": 796,
+      "streak": 34,
+      "turns": 365,
+      "at": "resolution presenting"
+     }
+    ],
+    "patched": [
+     {
+      "seed": 796,
+      "streak": 34,
+      "turns": 336,
+      "at": "resolution presenting"
+     }
+    ]
+   },
+   {
+    "shard": 8,
+    "base": [
+     {
+      "seed": 881,
+      "streak": 38,
+      "turns": 267,
+      "at": "resolution presenting"
+     }
+    ],
+    "patched": [
+     {
+      "seed": 881,
+      "streak": 38,
+      "turns": 261,
+      "at": "resolution presenting"
+     }
+    ]
+   }
+  ],
+  "framesBase": 14649389,
+  "framesPatched": 14890223,
+  "framesDelta": 240834,
+  "battleDigestExcludingFramesSame": 7
+ },
+ "sceneOff": {
+  "uses": [
+   38079,
+   37948
+  ],
+  "useKeyMismatch": 3,
+  "commandMismatch": 0,
+  "inserted": 9717,
+  "insertedFrames": 404165,
+  "holds": 7386,
+  "holdFrames": 275018,
+  "insertedByN": {
+   "message": 5153,
+   "STATS_CHANGE": 3084,
+   "set-battler-status-data": 805,
+   "health-bar-update": 621,
+   "beyond the route's 14-receipt window": 54
+  },
+  "insertedFramesByN": {
+   "message": 220475,
+   "STATS_CHANGE": 117695,
+   "set-battler-status-data": 37338,
+   "health-bar-update": 24821,
+   "beyond the route's 14-receipt window": 3836
+  },
+  "holdsByLabel": {
+   "BattleScript_MoveMissed": 3577,
+   "BattleScript_ButItFailed": 2488,
+   "BattleScript_AlreadyAtFullHp": 396,
+   "BattleScript_AlreadyParalyzed": 128,
+   "BattleScript_HitAllWithUndergroundBonusMissed": 102,
+   "BattleScript_AlreadyHasSubstitute": 97,
+   "BattleScript_AlreadyConfused": 95,
+   "BattleScript_AlreadyAsleep": 92,
+   "BattleScript_CantRaiseMultipleStats": 85,
+   "BattleScript_WasntAffected": 76,
+   "BattleScript_NotAffected": 58,
+   "BattleScript_EffectMagnitude": 26,
+   "BattleScript_MonMadeMoveUseless": 19,
+   "BattleScript_SwallowFail": 19,
+   "BattleScript_FlashFireBoost": 17,
+   "BattleScript_OwnTempoPrevents": 14,
+   "BattleScript_AbilityNoStatLoss": 14,
+   "BattleScript_ObliviousPreventsAttraction": 11,
+   "BattleScript_SpitUpFail": 11,
+   "BattleScript_SoundproofProtected": 9,
+   "BattleScript_AlreadyBurned": 7,
+   "BattleScript_AbilityNoSpecificStatLoss": 6,
+   "BattleScript_CantMakeAsleep": 5,
+   "BattleScript_MultiHitPrintStrings": 5,
+   "BattleScript_SturdyPreventsOHKO": 5,
+   "BattleScript_TeeterDanceAlreadyConfused": 4,
+   "BattleScript_SafeguardProtected": 4,
+   "BattleScript_MagicCoatBounce": 4,
+   "BattleScript_PRLZPrevention": 3,
+   "BattleScript_AbilityPreventsPhasingOut": 3,
+   "BattleScript_TripleKickPrintStrings": 2,
+   "BattleScript_RestIsAlreadyAsleep": 2,
+   "BattleScript_PSNPrevention": 1,
+   "BattleScript_PrintAbilityMadeIneffective": 1
+  },
+  "holdFramesByLabel": {
+   "BattleScript_MoveMissed": 129045,
+   "BattleScript_ButItFailed": 95387,
+   "BattleScript_AlreadyAtFullHp": 14587,
+   "BattleScript_AlreadyParalyzed": 5248,
+   "BattleScript_HitAllWithUndergroundBonusMissed": 4388,
+   "BattleScript_AlreadyConfused": 3705,
+   "BattleScript_AlreadyHasSubstitute": 3589,
+   "BattleScript_AlreadyAsleep": 3496,
+   "BattleScript_CantRaiseMultipleStats": 3230,
+   "BattleScript_WasntAffected": 2812,
+   "BattleScript_NotAffected": 2446,
+   "BattleScript_EffectMagnitude": 962,
+   "BattleScript_SwallowFail": 684,
+   "BattleScript_MonMadeMoveUseless": 646,
+   "BattleScript_FlashFireBoost": 586,
+   "BattleScript_OwnTempoPrevents": 504,
+   "BattleScript_AbilityNoStatLoss": 504,
+   "BattleScript_ObliviousPreventsAttraction": 407,
+   "BattleScript_SpitUpFail": 407,
+   "BattleScript_SoundproofProtected": 315,
+   "BattleScript_AlreadyBurned": 266,
+   "BattleScript_MultiHitPrintStrings": 245,
+   "BattleScript_AbilityNoSpecificStatLoss": 216,
+   "BattleScript_SturdyPreventsOHKO": 195,
+   "BattleScript_CantMakeAsleep": 190,
+   "BattleScript_TeeterDanceAlreadyConfused": 177,
+   "BattleScript_SafeguardProtected": 166,
+   "BattleScript_MagicCoatBounce": 140,
+   "BattleScript_PRLZPrevention": 117,
+   "BattleScript_AbilityPreventsPhasingOut": 108,
+   "BattleScript_TripleKickPrintStrings": 100,
+   "BattleScript_RestIsAlreadyAsleep": 74,
+   "BattleScript_PSNPrevention": 39,
+   "BattleScript_PrintAbilityMadeIneffective": 37
+  },
+  "insertedByMove": {
+   "104": 885,
+   "182": 605,
+   "109": 530,
+   "91": 376,
+   "240": 281,
+   "201": 252,
+   "113": 246,
+   "86": 226,
+   "266": 190,
+   "184": 182,
+   "73": 179,
+   "105": 178,
+   "219": 168,
+   "92": 162,
+   "203": 157,
+   "97": 145,
+   "28": 143,
+   "133": 142,
+   "108": 138,
+   "241": 122,
+   "347": 121,
+   "349": 119,
+   "14": 116,
+   "135": 105,
+   "204": 103
+  },
+  "noHitWithoutPause": {
+   "health-bar-update": 466,
+   "set-battler-sprite-visibility": 298,
+   "speed": 243,
+   "attack": 129,
+   "(none)": 36,
+   "special-attack": 34,
+   "STRINGID_ITDOESNTAFFECT": 3,
+   "STATS_CHANGE": 2,
+   "set-battler-status-data": 2
+  },
+  "mismatchExamples": [],
+  "seedsDiffering": [
+   {
+    "seed": 434,
+    "uses": [
+     718,
+     660
+    ],
+    "commonPrefix": 660
+   },
+   {
+    "seed": 796,
+    "uses": [
+     744,
+     682
+    ],
+    "commonPrefix": 682
+   },
+   {
+    "seed": 881,
+    "uses": [
+     432,
+     421
+    ],
+    "commonPrefix": 421
+   }
+  ]
+ }
+}
