@@ -15,7 +15,7 @@ lines = text.splitlines()
 # commit the file passes 10 / 10) — kept in the list, labelled, and excluded from pinCount.
 REVIEWED = {
     "appDifferential.test.ts:131": "ENVIRONMENT (one-commit copy repo: 'fatal: Needed a single revision'; passes 10 / 10 with a second commit)",
-    "factoryRoundBattleOrchestrator.test.ts:1094": "presence pin (Scene OFF Harden + Sandstorm turn: `no move-animation command` — its no-hit OFF attack pauses (Harden's, the weather move's) are now presented; the guarded invariant, no pairing with the weather loop's hit, still holds)",
+    "factoryRoundBattleOrchestrator.test.ts:1094": "presence pin (Scene OFF Harden + Sandstorm turn: `no move-animation command` — its no-hit OFF attack pause commands are now presented; the guarded invariant, no pairing with the weather loop's hit, still holds)",
     "randomRoundSoak.test.ts:311": "frame total (soak seed 21 strong-route: frames 37,260 -> 38,077, renderCalls 2,671 -> 2,715; same battle / outcome / turn)",
     "randomRoundSoak.test.ts:495": "driver path (soak seed 27, random policy: the driver presses A in resolution with rng.gap cooldowns, so longer presentation consumes more policy draws; the round is now lost at battle 1 turn 28 (20,755 frames) instead of battle 4 turn 26 (64,525), so `frames > 30,798` no longer reaches the ISSUES #89 point: re-seed)",
     "randomRoundSoak.test.ts:728": "frame total (Milestone M-B 'full' seed 0: frames 11,955 -> 13,889; same battle / endState / turn)",

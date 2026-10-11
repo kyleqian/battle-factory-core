@@ -104,7 +104,8 @@ one-commit copy repo); with a second commit the file passes 10 / 10. **5 moved p
 
 ## 6. Gates
 
-- `sh tools/integration/off108Run.sh <fresh>`: RUNNER_PLACEHOLDER
+- `sh tools/integration/off108Run.sh <fresh>` (no census), fresh dir inside the repo, after the patch / table commits: **ALL SAME** (14:55 -> 14:59): scenarios 15 + index, probes 30 / 30 r1 == r2, 60 / 60 outputs == the committed sha256, rom-r1 SAME and r2 == r1, routes 10 / 10 == the committed sha256, classes.json / .tsv SAME, verify-off / verify-on SAME.
+- `sh tools/integration/off108Run.sh <fresh> --census`: CENSUS_PLACEHOLDER
 - Patched copy (git archive 52c181d54 + the diff, its own git repo): `npm run typecheck` green. `npm test`: §4.
 - `git diff --check` clean at every commit; only new off108 files, staged by explicit path.
 

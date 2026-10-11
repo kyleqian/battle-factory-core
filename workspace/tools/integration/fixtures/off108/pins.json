@@ -9,7 +9,7 @@
  "files": 2,
  "byKind": {
   "ENVIRONMENT (one-commit copy repo: 'fatal: Needed a single revision'; passes 10 / 10 with a second commit)": 1,
-  "presence pin (Scene OFF Harden + Sandstorm turn: `no move-animation command` \u2014 its no-hit OFF attack pauses (Harden's, the weather move's) are now presented; the guarded invariant, no pairing with the weather loop's hit, still holds)": 1,
+  "presence pin (Scene OFF Harden + Sandstorm turn: `no move-animation command` \u2014 its no-hit OFF attack pause commands are now presented; the guarded invariant, no pairing with the weather loop's hit, still holds)": 1,
   "frame total (soak seed 21 strong-route: frames 37,260 -> 38,077, renderCalls 2,671 -> 2,715; same battle / outcome / turn)": 1,
   "driver path (soak seed 27, random policy: the driver presses A in resolution with rng.gap cooldowns, so longer presentation consumes more policy draws; the round is now lost at battle 1 turn 28 (20,755 frames) instead of battle 4 turn 26 (64,525), so `frames > 30,798` no longer reaches the ISSUES #89 point: re-seed)": 1,
   "frame total (Milestone M-B 'full' seed 0: frames 11,955 -> 13,889; same battle / endState / turn)": 1,
@@ -33,7 +33,7 @@
    "test": "generated Factory round battle orchestrator (Gate-5 rung 11) > ISSUES #95: a non-damaging weather move's attack pause never pairs with the end-of-turn weather tick's hit animation",
    "assertion": "AssertionError: expected true to be false // Object.is equality",
    "where": "\u276f tests/factoryRoundBattleOrchestrator.test.ts:1094:7",
-   "kind": "presence pin (Scene OFF Harden + Sandstorm turn: `no move-animation command` \u2014 its no-hit OFF attack pauses (Harden's, the weather move's) are now presented; the guarded invariant, no pairing with the weather loop's hit, still holds)"
+   "kind": "presence pin (Scene OFF Harden + Sandstorm turn: `no move-animation command` \u2014 its no-hit OFF attack pause commands are now presented; the guarded invariant, no pairing with the weather loop's hit, still holds)"
   },
   {
    "file": "tests/randomRoundSoak.test.ts",
