@@ -147,6 +147,10 @@
   (the kernel already emits STATS_CHANGE; the builder ignores it; ON and OFF share one renderer; the sprite-order host already consumes
   it; the invisible copy takes slot 3), exposure (4,529 inserted commands, +363,860 frames) and six bounded slices (a)..(f) with
   acceptance commands (docs/stat101-stats-change-design.md).
+- Live audit 23 (SIDE, Opus, `bd4c6f80f` .. `94abfdfdf`, new files only; merged): **no production DEFECT** — GrassWhistle (elevated
+  attacker / target, big / small; the elevated BUTTERFREE's fade-back starts 13 rows before the old constant) 10 / 10, Iron Tail 6 / 6, Fury
+  Cutter counters 1..5 with Extrasensory / Tackle / Growl in between and target switches 16 / 16 live (2 = a fixture-level ARTIFACT), Memento
+  later 4 / 4, Psych Up doll 8 / 8, Double Team swap 9 / 9, Sing opponent 4 / 4, Recover swap 8 / 8; runs A / B 142 receipts byte-identical.
 - In flight: land97 (INTEGRATION: idle94 lead rows), audit 23 (SIDE), stat102 (MAIN: #166 slices (a) reducer + (b) comparator, unwired).
 - prep reseed85 (MAIN lane, Opus, `4f4828f3b` .. `d46cdfff1`, new files only): the post-KO send-out allocator reseed after a words-order
   unit. The reseed reads slot OCCUPANCY only and every words unit is allocator-net-zero, so the order host can keep a word-free
