@@ -1639,13 +1639,13 @@ export function liveMoveHiddenTargetDeclines(request: BattleMoveAnimationRequest
  * r1 == r2, both orientations; tools/integration/fixtures/cast83/): role "by" = the CASTFORM is the attacker, "at" = the other battler
  * attacks (its target or a self-target body). Form 1 FIRE (sun), 2 WATER (rain), 3 ICE (hail).
  */
-const LIVE_CASTFORM_FORM_PROVEN: ReadonlySet<string> = new Set([
+export const LIVE_CASTFORM_FORM_PROVEN: ReadonlySet<string> = new Set([
   "196:by:3", "58:by:2", "58:by:3", "352:by:2", "352:by:3", "85:by:2", "351:by:2", "351:by:3",
   "351:at:1", "351:at:2", "351:at:3", "129:at:1", "129:at:2", "85:at:1", "85:at:2", "352:at:1", "352:at:2", "196:at:3", "58:at:2",
   "61:at:2", "332:at:1", "332:at:2", "57:at:1", "57:at:2", "162:at:1", "162:at:2", "86:at:2", "182:at:2", "38:at:2",
 ]);
 /** Measured, not proven (cast83 windows): these keep declining with the residual named. */
-const LIVE_CASTFORM_FORM_RESIDUAL: ReadonlyMap<string, string> = new Map([
+export const LIVE_CASTFORM_FORM_RESIDUAL: ReadonlyMap<string, string> = new Map([
   ["52:by:1", "Ember's own residual (11,651 / 12,314 px; the normal-form control 11,653 / 12,310 px)"],
   ["53:by:1", "Flamethrower's own residual (252,460 / 241,491 px; the normal-form control 231,701 / 208,281 px)"],
   ["184:at:3", "Scary Face's own residual (1,371,492 / 1,409,982 px; the normal-form control 1,422,030 / 1,461,108 px)"],
