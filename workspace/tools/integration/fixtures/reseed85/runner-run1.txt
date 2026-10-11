@@ -1,0 +1,30 @@
+# reseed85Run.sh verification (this session): RESEED85_CENSUS=1 sh tools/integration/reseed85Run.sh <fresh dir> (the runner before the
+# parity / digests steps were appended), output:
+52 probe runs; missing: none ; 26 of 26 probe pairs A == B
+{"scenarios": 13, "withConsumer": 13, "allAligned": true, "allRoleIsomorphic": true, "distinctConsumerOccupancy": ["[0, 1, 2, 5, 6, 60, 61, 62, 63]"], "pairsSame": 4, "pairs": 4, "pairsFreeOrderDiffers": 4}
+{"windows": 20, "wordsAllocatorConsumers": 10, "unchangedExpected": 10, "patchedLiveZeroPx": 20, "patchedRows": 1948, "baseAllocatorDeclines": 10, "unchanged": 10, "pass": true}
+1000 battles, 27516 commands, live 25886 (94.08 %) / frames 3867171 of 3968405 (97.45 %); battleDigest 5cc95d1eace6
+1000 battles, 27516 commands, live 25933 (94.25 %) / frames 3872005 of 3968405 (97.57 %); battleDigest 5cc95d1eace6
+gained commands 47 / frames 4834; regressions []
+live count 25886 -> 25933 (94.08 % -> 94.25 %), live frames 3867171 -> 3872005 (97.45 % -> 97.57 %)
+checkout src unchanged
+same  census-base-seeds0-999.json
+same  census-delta-seeds0-999.json
+same  census-patched-seeds0-999.json
+same  chains-base-seeds0-999.json
+same  chains-census-base-seeds0-999.json
+same  chains-census-patched-seeds0-999.json
+same  chains-patched-seeds0-999.json
+same  keycheck.txt
+same  occupancy-audit.json
+same  probes-r1r2.txt
+same  reseed-blockers-base.json
+same  reseed-blockers-patched.json
+same  windows.json
+# then the appended steps' exact commands on that pass's dirs (reseed85Digests.py on its census shards; flat77Parity.ts x5 in its patched copy):
+same  digests.txt
+same  parity-11.json
+same  parity-384.json
+same  parity-420.json
+same  parity-785.json
+same  parity-98.json

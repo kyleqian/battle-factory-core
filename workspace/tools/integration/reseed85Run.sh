@@ -3,7 +3,7 @@
 # (never the shared HTTP oracles). Everything is written under the FRESH <out-dir> (refused if it exists and is non-empty); nothing is
 # removed outside it. The temp src patch is applied ONLY to a git-archive copy of the FIXED base aeaa33dff under <out-dir>; the checkout never
 # changes. The copies get this checkout's reseed85 tools + scenarios and symlinks to node_modules / reference (the probes read the ROM there).
-#   sh tools/integration/reseed85Run.sh <fresh-out-dir>                 # probes (13 scenarios x 2 probes x 2 runs) + windows (base + patched)
+#   sh tools/integration/reseed85Run.sh <fresh-out-dir>                 # probes (13 x 2 probes x 2 runs) + windows (base + patched) + 5 parity routes
 #   RESEED85_CENSUS=1 sh tools/integration/reseed85Run.sh <dir>         # + the seeds 0..999 censuses (base / patched, allocator chains)
 # Receipts land in <out-dir>/rec and are compared byte-for-byte with tools/integration/fixtures/reseed85/ (same / DIFF per file).
 set -e
@@ -49,6 +49,11 @@ for W in base pat; do
 done
 wait
 python3 $T/reseed85Windows.py "$OUT/check-base" "$OUT/check-pat" "$REC/windows.json" | head -1
+# Scene ON vs OFF parity (flat77Parity.ts = land75Parity's controller) on 5 census routes whose consumers go live through the shadow
+for s in 11 98 420 384 785; do
+  (cd "$OUT/pat" && $N $T/flat77Parity.ts --seed=$s --streak=$(( (s * 11) % 49 )) --out="$REC/parity-$s.json" > "$OUT/parity-$s.log" 2>&1) &
+done
+wait
 
 if [ -n "$RESEED85_CENSUS" ]; then
   shards "$OUT/base" hist73LiveShareCensus.ts "$OUT/census-base"
@@ -58,6 +63,7 @@ if [ -n "$RESEED85_CENSUS" ]; then
   python3 $T/hist73KeyCheck.py "$REC/census-base-seeds0-999.json" "$OUT/census-base.jsonl" \
     "$REC/census-patched-seeds0-999.json" "$OUT/census-pat.jsonl" > "$REC/keycheck.txt" || true
   tail -1 "$REC/keycheck.txt"
+  python3 $T/reseed85Digests.py "$OUT/census-base" "$OUT/census-pat" > "$REC/digests.txt"; tail -1 "$REC/digests.txt"
   python3 $T/prep43CensusDelta.py "$REC/census-base-seeds0-999.json" "$OUT/census-base.jsonl" \
     "$REC/census-patched-seeds0-999.json" "$OUT/census-pat.jsonl" "$REC/census-delta-seeds0-999.json" | sed -n 2p
   shards "$OUT/base" hist73AllocatorCensus.ts "$OUT/chains-base"

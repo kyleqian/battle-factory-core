@@ -119,7 +119,10 @@ copies, as are the controls, so the patch changes neither.
 
 ## 5. FOLD INSTRUCTIONS
 
-1. **Patch:** `git apply tools/integration/fixtures/reseed85/reseed85-temp-src.diff` from `workspace/` (checked: applies to `aeaa33dff`).
+1. **Patch:** `patch -p1 < tools/integration/fixtures/reseed85/reseed85-temp-src.diff` from `workspace/`. Checked: it applies to `aeaa33dff`,
+   and also cleanly to master `c25af4253` (land86 merged during this session; `git apply --check` and `patch --dry-run` show no offsets or
+   fuzz). land86 makes Flatter 260 a words unit. 260 is allocator-net-zero (hist73 receipt), so the shadow covers Flatter markers too.
+   **Re-measure the census on the fold's base:** Flatter-marker reseeds may add gains not counted below.
    It adds `LiveSpriteOrderHost.deferredOccupancy` (set when a words marker starts: `shadowStart` of the pre-event tracker, or the replayed
    shadow for a nested words unit; dropped with the marker by `withoutDeferred` and when the tracker turns known) and
    `deferredOccupancyTracker()`. `liveSpriteAllocatorReseedable` falls back to the replayed shadow when the real tracker is unknown. No lend,
